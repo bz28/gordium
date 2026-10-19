@@ -6,14 +6,15 @@ build-backend = "setuptools.build_meta"
 name = "gordium"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["pyyaml>=6"]
+# pdfplumber and pdfminer.six are pinned exactly: a different version could extract text differently.
+dependencies = ["pyyaml>=6", "pdfplumber==0.11.10", "pdfminer.six==20260107"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
 
 [tool.setuptools.packages.find]
-where = ["packages/rule_format"]
-include = ["rule_format*"]
+where = ["packages/rule_format", "packages/document_extraction"]
+include = ["rule_format*", "document_extraction*"]
 
 [tool.setuptools.package-data]
 rule_format = ["*.yaml"]
