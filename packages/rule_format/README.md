@@ -19,7 +19,7 @@ The shape every rule must have, the formula language rules are written in, and t
       page: 3
       lines: [42, 43]                            # where on the page: first and last line of the quote
       quote: "Rear (minimum, % of depth or feet, 25%/ 25%/ 25%/ 25%/ 25%/ 20%/ 25%/ 20%/ 25% / whichever is less) 50 ft [fn16] 50 ft [fn16]"
-                                                 # exactly those lines (the whole chart row, as extracted)
+                                                 # exactly as extracted, starting on line 42 and ending on 43
   examples:                                      # need a pass and a fail; each must come out as stated
     - given: {use: one_family_detached, rear_yard: 25, lot_depth: 90}
       expect: pass
@@ -56,6 +56,6 @@ Validation checks: file shape; required fields; no duplicate YAML keys; known me
 
 The page text and the quote are both split into **tokens** with one rule (`rulebook.tokenize`): a footnote marker (`[fn11]`), a whole word or number (`rear`, `2.5`, `1,500`, `3/2`, `.5`), or a single other character (`%`, `(`, `§`). `.`, `,` and `/` join only digit to digit (`3/35`, `2.5`), and a leading `.` only starts a number (`.5`); so `minimum/maximum` is three tokens. A quote matches only as a run of **whole tokens**, so `5` can never match inside `25`, `2.5` or `1/2`, `R-1` never inside `R-1b`, and a quote may end on a number before a sentence's period. Spaces and line breaks between words don't matter; inside a number (`2.5`, `1,500`, `3/35`), or around a `.` before a digit (`A.5` is not `A .5`), the quote must match the page exactly. Case, curly quotes and dash styles are unified.
 
-A source gives the **exact position** of its quote: the page and the first and last line (`lines: [first, last]`, the line numbers in `2_extracted_text`). The quote must start on the first line and end on the last, so it can't be matched anywhere else on the page. One quote is one unbroken passage; cite separate passages as separate sources. To find the lines, run `python -m rule_format cite <state/place> <file> <page> "<quote>"`.
+A source gives the **exact position** of its quote: the page and the first and last line (`lines: [first, last]`, the line numbers in `2_extracted_text`). The quote must start on the first line and end on the last, so it can't be matched anywhere else on the page. (A quote can still occur more than once on the same lines, e.g. repeated chart values; `cite` warns about that.) One quote is one unbroken passage; cite separate passages as separate sources. To find the lines, run `python -m rule_format cite <state/place> <file> <page> "<quote>"`.
 
 Chart values: a quote pins the **row** (its line) but not yet the **column**. Until the chart reader (step 5, next PRs) cites table cells by row and column, a value read from the wrong district's column is caught by comparing the hand-written answer key with the chart reader's output, and by architect review.

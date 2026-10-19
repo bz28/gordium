@@ -10,6 +10,7 @@ every rule file in 5_zoning_rules/ and in its test_data/answer_keys/ folder.
 
 import argparse
 import sys
+from pathlib import Path
 
 import yaml
 
@@ -56,9 +57,17 @@ def cite(argv: list[str]) -> int:
     for name in ("place", "file", "page", "quote"):
         parser.add_argument(name, type=int if name == "page" else str)
     args = parser.parse_args(argv)
-    ctx = Context.for_jurisdiction(REPO / "regulations/jurisdictions" / args.place)
+    place = REPO / "regulations/jurisdictions" / args.place
+    if not (place / "1_source_documents/sources.yaml").exists():
+        print(f"no jurisdiction {args.place!r} (expected regulations/jurisdictions/<state>/<place>)")
+        return 1
+    ctx = Context.for_jurisdiction(place)
+    if args.file not in ctx.sources:
+        print(f"{args.file} is not in sources.yaml")
+        return 1
     if args.file not in ctx.pages:
-        print(f"no extracted text for {args.file}")
+        reasons = [p for p in ctx.problems if args.file in p or Path(args.file).stem in p]
+        print("\n".join(reasons) or f"no extracted text for {args.file}")
         return 1
     if args.page not in ctx.pages[args.file]:
         print(f"{args.file} has no page {args.page}")

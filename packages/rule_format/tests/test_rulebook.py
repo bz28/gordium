@@ -414,3 +414,27 @@ def _source_issue(page, quote, lines):
     ctx = copy.deepcopy(CTX)
     ctx.pages["charts.pdf"][3] = page
     return _source_problems([{"file": "charts.pdf", "page": 3, "lines": lines, "quote": quote}], ctx)
+
+
+def test_cite_helper(tmp_path, monkeypatch, capsys):
+    import rule_format.__main__ as cli
+    place = "ny/town"
+    _jurisdiction(tmp_path / "regulations/jurisdictions", rows=[
+        {"page": 2, "line": 1, "text": "Rear yard minimum twenty feet"},
+        {"page": 2, "line": 2, "text": "Side yard ten feet, side yard ten feet"}])
+    monkeypatch.setattr(cli, "REPO", tmp_path)
+    assert cli.cite([place, "doc.pdf", "2", "Rear yard minimum twenty feet"]) == 0
+    assert "lines: [1, 1]" in capsys.readouterr().out
+    assert cli.cite([place, "doc.pdf", "2", "side yard ten feet"]) == 1          # occurs twice on line 2
+    assert "more than once" in capsys.readouterr().out
+    assert cli.cite([place, "doc.pdf", "9", "x"]) == 1 and "no page 9" in capsys.readouterr().out
+    assert cli.cite([place, "typo.pdf", "2", "x"]) == 1 and "not in sources.yaml" in capsys.readouterr().out
+    assert cli.cite(["ny/nowhere", "doc.pdf", "2", "x"]) == 1 and "no jurisdiction" in capsys.readouterr().out
+
+
+def test_cite_reports_stale_extracted_text(tmp_path, monkeypatch, capsys):
+    import rule_format.__main__ as cli
+    _jurisdiction(tmp_path / "regulations/jurisdictions", header_sha="old", rows=[])
+    monkeypatch.setattr(cli, "REPO", tmp_path)
+    assert cli.cite(["ny/town", "doc.pdf", "2", "x"]) == 1
+    assert "different version" in capsys.readouterr().out

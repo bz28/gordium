@@ -113,8 +113,8 @@ class Context:
 
     def _load_extracted(self, name, sha, path):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
-        It's trusted only because CI re-extracts it from the PDF and requires an exact match
-        (`python -m document_extraction --check`); the header ties it to the PDF version."""
+        The header ties it to the PDF version. Once the text-extraction step is merged, CI also re-extracts
+        it from the PDF and requires an exact match; until then nothing here checks the text against the PDF."""
         rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
         if not rows or rows[0].get("sha256") != sha:
             self.problems.append(f"{path.name}: extracted from a different version of {name}; re-extract")
