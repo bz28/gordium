@@ -10,6 +10,7 @@ then checked against a strict whitelist. Anything not listed here is rejected.
 Allowed: numbers, quoted text, measure names, + - * / (numbers only), comparisons
 (< <= > >= between numbers; == != between anything), `in` / `not in` a [list],
 and / or / not, `a if condition else b`, min() and max() of two or more numbers.
+A yes/no measure is used on its own: `adu_separate_entrance`, `not accessory_in_front_yard`.
 """
 
 import ast
@@ -79,9 +80,17 @@ def parse(text: str) -> ast.Expression:
 
 
 def is_condition(text: str) -> bool:
-    """True if the formula can only produce true/false (a comparison, and/or, or not)."""
+    """True if the formula can only produce true/false (a comparison, and/or, or not), or is a
+    single measure name (true/false only if that measure is a yes/no one: see bare_name)."""
     body = parse(text).body
-    return isinstance(body, _CONDITIONS) or isinstance(body, ast.UnaryOp) and isinstance(body.op, ast.Not)
+    return (isinstance(body, _CONDITIONS) or isinstance(body, ast.UnaryOp) and isinstance(body.op, ast.Not)
+            or isinstance(body, ast.Name))
+
+
+def bare_name(text: str) -> str | None:
+    """The measure name if the whole formula is one measure (a yes/no test on its own), else None."""
+    body = parse(text).body
+    return body.id if isinstance(body, ast.Name) else None
 
 
 def names(text: str) -> set[str]:
@@ -96,11 +105,17 @@ def strings(text: str) -> set[str]:
     return {n.value for n in ast.walk(parse(text)) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
 
 
+def numbers(text: str) -> list[float]:
+    """Number constants written in a formula (each must come from the rule's sources)."""
+    return [n.value for n in ast.walk(parse(text)) if isinstance(n, ast.Constant) and type(n.value) in (int, float)]
+
+
 def evaluate(text: str, values: dict, kinds: dict):
     """Evaluate a formula. Raises MissingMeasure or EvaluationError when it can't.
 
     kinds describes every measure the formula may use: "number" (a non-negative number:
-    lengths, areas, counts) or the set of text values allowed (e.g. the city's use names).
+    lengths, areas, counts), "boolean" (a yes/no fact: True or False), or the set of text values
+    allowed (e.g. the city's use names).
     Fails closed: a measure with no description, or a value that doesn't fit, is unusable.
     """
     return _eval(parse(text).body, values, kinds)
@@ -130,6 +145,8 @@ def _measure(name, values, kinds):
     or one of the allowed text values. Anything else (including no description) is unusable."""
     v, kind = values.get(name), kinds.get(name)
     if kind == "number" and _kind(v) == "number" and _finite(v) and v >= 0:
+        return v
+    if kind == "boolean" and type(v) is bool:
         return v
     if isinstance(kind, (set, frozenset)) and _kind(v) == "text" and v in kind:
         return v

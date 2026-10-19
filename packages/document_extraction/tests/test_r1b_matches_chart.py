@@ -45,9 +45,15 @@ def cited_rows(rule, cells):
     """The chart data rows (R-1B cells) whose lines the rule's sources cite."""
     out = []
     for s in rule["sources"]:
-        if s["file"] == CHART:
+        if s["file"] != CHART:
+            continue
+        if "cell" in s:                                   # a cited cell: its own row (R-1B column checked below)
+            match = [c for c in cells if (c["page"], c["section"], c["row"].strip()) ==
+                     (s["page"], s["cell"]["section"], s["cell"]["row"].strip()) and s["cell"]["column"] == c["column"]]
+        else:
             cited = set(range(s["lines"][0], s["lines"][1] + 1))
-            out += [c for c in cells if c["page"] == s["page"] and cited & set(c["row_lines"]) and c not in out]
+            match = [c for c in cells if c["page"] == s["page"] and cited & set(c["row_lines"])]
+        out += [c for c in match if c not in out]
     return out
 
 
@@ -82,9 +88,11 @@ COUNTS = {"stories", "parking_spaces"}     # whole numbers: one more (or fewer) 
 
 
 def test_each_chart_value_is_exactly_where_the_rule_turns_from_pass_to_fail(rules, r1b_cells):
-    """Not just "the number appears in the formula": starting from the rule's own passing example,
-    the design passes at the chart's limit and fails just past it, so the number bounds the right
-    measurement, in the right direction, and nothing else in the formula overrides it."""
+    """Not just "the number appears in the formula": starting from a rule's own passing example, the
+    design passes at the chart's limit and fails just past it, so the number bounds the right measurement,
+    in the right direction. Every chart limit must be enforced that way by some rule. A rule may also cite
+    a row as an input that doesn't bind at its passing example (the height bonus cites the yard minimums
+    it enlarges): then it passes on both sides, never fails at the limit."""
     uses = {"use": set(load(ITHACA / "4_term_definitions/uses.yaml"))}
     tried = set()
     for rule in rules:
@@ -102,10 +110,11 @@ def test_each_chart_value_is_exactly_where_the_rule_turns_from_pass_to_fail(rule
                 past = bound + step if kind == "max" else bound - step
                 at = outcome(rule, base | fixed | {measure: bound}, uses)
                 beyond = outcome(rule, base | fixed | {measure: past}, uses)
-                assert (at, beyond) == ("pass", "fail"), \
+                assert (at, beyond) in {("pass", "fail"), ("pass", "pass")}, \
                     f"{rule['id']}: chart {c['value']!r} for {c['row']!r} → {measure} {kind} {bound}; got {at} at it, {beyond} past it"
-                tried.add(key)
-    assert tried == set(LIMITS)                                               # every stated limit was checked
+                if (at, beyond) == ("pass", "fail"):
+                    tried.add(key)
+    assert tried == set(LIMITS)                                  # every stated limit is enforced exactly by some rule
 
 
 def test_every_numbered_r1b_cell_is_cited_by_a_rule_and_has_a_meaning(rules, r1b_cells):

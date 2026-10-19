@@ -57,8 +57,10 @@ def main() -> int:
             for problem in problems:
                 print(f"    {problem}")
             failed += bool(problems)
+        # Every rulebook; the drafting script's own records (5_zoning_rules/drafted/records/) aren't rulebooks.
         files = sorted(p for folder in (jurisdiction / "5_zoning_rules", REPO / "test_data/answer_keys" / place)
-                       for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file())
+                       for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file()
+                       and "records" not in p.relative_to(folder).parts)
         for path in files:
             checked += 1
             try:

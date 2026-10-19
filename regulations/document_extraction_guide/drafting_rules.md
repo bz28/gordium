@@ -17,13 +17,13 @@ When the law leaves something unsettled (a word it doesn't define, a measurement
 
 ## 3. Every number comes from a quote
 
-Every number in a `check` formula (35 ft, 25%, 6,000 sf) must appear in a quoted source. Numbers we compute ourselves (like 38.5 ft = 35 ft + 10%) must show the arithmetic in `notes` and quote every input; the worked examples prove it (38.5 ft passes, 39 ft fails).
+Every number in a formula (`check`, `applies_when`, `review_when`: 35 ft, 25%, 6,000 sf) must be written in one of the rule's own sources: a quoted sentence, or a cited chart cell or its row label. The inspector checks this (0 needs no source; "25%" supports 0.25; number words count, "three" supports 3). A number we work out is written as the arithmetic, from cited inputs: `35 + 0.1 * 35`, not 38.5. The worked examples prove it (38.5 ft passes, 39 ft fails).
 
 ## 4. Quote the exact words, including footnote markers
 
 Copy quotes from the extracted text (`2_extracted_text/`), not from memory or the PDF viewer. Quote whole sentences: a sentence cut in the middle can drop the words that limit it ("except as hereinafter specified", "that are united by a common interest"). Chart rows are quoted from the row label to the value. Footnotes appear as `[fn11]` and are part of the words. When a chart value has a footnote, quote the footnote's text too.
 
-Each source gives `page`, `lines: [first, last]` and `quote`. The quote must be one unbroken passage (no `…`) that starts on the first line, ends on the last, and occurs only once on the page. A bare chart value like `35 ft` repeats across the row, so quote the row label with it. `python -m rule_format cite <place> <file> <page> "<quote>"` prints the lines.
+Each source gives `page`, `lines: [first, last]` and `quote`. The quote must be one unbroken passage (no `…`) that starts on the first line, ends on the last, and occurs only once on the page. A bare chart value like `35 ft` repeats across the row, so quote the row label with it, or better, cite the one chart cell: `{file, page, cell: {section, row, column}}` (checked against the chart reader's cells, and the only way to pin the district's column). `python -m rule_format cite <place> <file> <page> "<quote>"` prints the lines.
 
 ## 5. Say where each part of a rule comes from
 
