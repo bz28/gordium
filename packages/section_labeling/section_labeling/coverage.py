@@ -143,8 +143,9 @@ def provenance_problems(labels: dict, records: list[dict], pieces: dict, rows: l
                         ctx) -> list[str]:
     """Every AI-drafted label must be exactly what a recorded answer produces, or say how it differs. The
     answer's sources are rebuilt with the labeler's own code (labeler.answer_sources); the label (its
-    original, before any {from} revision) and its sources (page, lines and words) must equal one accepted
-    answer's, unless a {field: sources} revision explains the sources. Plain code over the run records."""
+    original, before any {from} revision), topic, reason (unless a {from} revision rewrote it) and sources
+    (page, lines and words) must equal one accepted answer's, unless a {field: sources} revision explains
+    the sources. Plain code over the run records."""
     from .labeler import answer_sources
     accepted: dict[str, list[dict]] = {}
     for r in records:
@@ -161,10 +162,14 @@ def provenance_problems(labels: dict, records: list[dict], pieces: dict, rows: l
         original = next((r["from"] for r in revised if "from" in r), e.get("label"))
         place = lambda s: (s.get("page"), tuple(s.get("lines") or ()), s.get("quote"))
         have = {place(s) for s in e.get("sources") or []}
-        rebuilt = [{place(s) for s in srcs} for a in accepted.get(pid, []) if a.get("label") == original
+        relabeled = any("from" in r for r in revised)        # a label change rewrites the reason too
+        candidates = [a for a in accepted.get(pid, []) if a.get("label") == original
+                      and a.get("topic") == e.get("topic")
+                      and (relabeled or str(a.get("reason", "")).strip() == str(e.get("reason", "")).strip())]
+        rebuilt = [{place(s) for s in srcs} for a in candidates
                    for srcs, _ in [answer_sources(a, pieces[pid], rows, file, ctx)] if srcs]
         if not rebuilt:
-            out.append(f"{pid}: no recorded answer has label {original!r}")
+            out.append(f"{pid}: no recorded answer has label {original!r} with this topic and reason")
         elif have not in rebuilt:
             if not any(r.get("field") == "sources" for r in revised):
                 out.append(f"{pid}: sources differ from what its recorded answer produces, with no sources revision")

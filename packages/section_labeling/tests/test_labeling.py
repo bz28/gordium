@@ -468,10 +468,13 @@ def test_every_label_matches_a_recorded_answer_or_says_how_it_differs(law):
     answer = GOOD                                                             # a rule citing L1-L2 of 325-16C
     records = [{"piece": "325-16C", "problem": None, "answer": json.dumps(answer)}]
     produced, _ = labeler.answer_sources(answer, pieces["325-16C"], rows, LAW, ctx)
-    base = {"label": "rule", "sources": produced, "drafted_by": "section_labeling/claude-haiku-5-5"}
+    base = {"label": "rule", "topic": GOOD["topic"], "reason": GOOD["reason"], "sources": produced,
+            "drafted_by": "section_labeling/claude-haiku-5-5"}
     assert check({"325-16C": base}, records) == []
     assert "no recorded answer has label 'flag'" in check({"325-16C": base | {"label": "flag"}}, records)[0]
-    flagged = base | {"label": "flag", "revised": [{"from": "rule", "by": "x", "date": "d", "why": "w"}]}
+    assert "with this topic and reason" in check({"325-16C": base | {"topic": "uses"}}, records)[0]
+    assert "with this topic and reason" in check({"325-16C": base | {"reason": "edited by hand"}}, records)[0]
+    flagged = base | {"label": "flag", "reason": "Rewritten for flag.", "revised": [{"from": "rule", "by": "x", "date": "d", "why": "w"}]}
     assert check({"325-16C": flagged}, records) == []
     extra = {"file": LAW, "page": 47, "lines": [8, 9], "quote": "(1) Each required front, side and rear yard"}
     added = base | {"sources": produced + [extra]}                            # an answer with requirements: still caught
