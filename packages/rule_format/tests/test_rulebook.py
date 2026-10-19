@@ -459,7 +459,9 @@ def test_cite_reports_only_the_asked_files_problems(tmp_path, monkeypatch, capsy
 
 def test_quote_must_be_unique_on_the_page():
     page = {n: tokenize(t) for n, t in PAGE_3.items()}
-    assert any("quote more words so it's unique" in p for p in _source_issue(page, "50 ft [fn16]", [43, 43]))
+    repeated = _source_issue(page, "50 ft [fn16]", [43, 43])
+    assert any("appears 2 times" in p and "unique" in p for p in repeated)
+    assert not any("isn't at lines" in p for p in repeated)
     assert _source_issue(page, QUOTE, [42, 43]) == []
 
 
@@ -469,8 +471,9 @@ def test_text_is_not_trusted_for_a_document_that_failed_its_checks(tmp_path):
 
 
 def test_document_listed_twice_is_reported(tmp_path):
-    j = _jurisdiction(tmp_path, rows=[])
+    j = _jurisdiction(tmp_path, rows=[{"page": 1, "line": 1, "text": "x"}])
     s = (j / "1_source_documents/sources.yaml").read_text()
     (j / "1_source_documents/sources.yaml").write_text(s + s.split("documents:\n", 1)[1])
     ctx = Context.for_jurisdiction(j)
     assert "listed more than once in sources.yaml" in ctx.file_problems["doc.pdf"]
+    assert "doc.pdf" not in ctx.pages                                         # its text isn't trusted

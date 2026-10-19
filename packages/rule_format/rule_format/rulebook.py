@@ -12,6 +12,7 @@ import datetime
 import hashlib
 import json
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -103,8 +104,10 @@ class Context:
                   topics=set(load(VOCABULARY_FILE)["topics"]),
                   reviewers=set(load(REVIEWERS_FILE) or ()),
                   sources=listed)
-        for name in {d["file"] for d in documents if [x["file"] for x in documents].count(d["file"]) > 1}:
-            ctx._problem(name, "listed more than once in sources.yaml")
+        counts = Counter(d["file"] for d in documents)
+        for name in listed:                                      # sources.yaml order, so output is stable
+            if counts[name] > 1:
+                ctx._problem(name, "listed more than once in sources.yaml")
         for name, entry in listed.items():
             pdf = j / "1_source_documents" / name
             sha = entry.get("sha256")
@@ -332,7 +335,11 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
             p.append(f"source {name}: page {page} does not exist")
         elif not quote_at(quote, ctx.pages[name][page], *lines):
             found = locate(quote, ctx.pages[name][page])
-            where = (f"; it is at lines {', '.join(f'{a}-{b}' for a, b in found)}"
-                     + ("; quote more words so it's unique" if len(found) > 1 else "")) if found else "; not on this page"
-            p.append(f"source {name} p.{page}: quote isn't at lines {lines[0]}-{lines[1]}{where}: {quote!r}")
+            at = ", ".join(f"{a}-{b}" for a, b in found)
+            if len(found) > 1:
+                p.append(f"source {name} p.{page}: quote appears {len(found)} times (lines {at}); "
+                         f"quote more words so it's unique: {quote!r}")
+            else:
+                p.append(f"source {name} p.{page}: quote isn't at lines {lines[0]}-{lines[1]}"
+                         f"{f'; it is at lines {at}' if found else '; not on this page'}: {quote!r}")
     return p
