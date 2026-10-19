@@ -5,7 +5,7 @@ Run the scoped task end to end without waiting at every step, while keeping Ben 
 1. Read `CLAUDE.md` and all relevant code and data first.
 2. Plan the PR stack: one PR per cohesive surface, each **independently reviewable and evaluable**.
 3. Work commit by commit (~150 lines, conventional prefixes). Use Graphite (`gt create` / `gt submit`) if the repo is synced; otherwise `git` + `gh pr create --base <parent branch>`.
-4. **Before every commit, stop** and tell Ben: what's being committed, what's done, what's next, why now, why it's the right approach. Wait for his OK. (Ben's standing rule; autopilot doesn't override it.)
+4. Commit and push freely (Ben approves at merge time). Large or design-level changes get a `/review` round with `uncommitted: true` before they're committed.
 5. After each change: self-review, run `pytest` and `python -m rule_format`, fix failures before moving on.
 6. **Run the `/review` loop on every PR before reporting done.** It is a loop, not a pass: cold reviewer + 2 skeptics per finding, fix every confirmed finding (any tier), pin each fix with a test that fails on revert, repeat until a round returns zero confirmed (cap 4). Push the fixes, re-monitor CI, and put the **"Review rounds"** section in the PR body. Step 5's self-review does not substitute for this: it is the biased pass; the loop is the independent one.
 7. Open the PR with a Test Plan holding real evidence (commands run, results, eval outcome). Watch CI until green. **Never merge**; Ben merges.
