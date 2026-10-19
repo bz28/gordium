@@ -46,6 +46,8 @@ def _example_value(text: str, values: dict[str, float]):
         return t.lower() == "true"
     if SLOT.search(t) or re.fullmatch(r"[\d.\s+\-*/()]+", t):
         n = formula.evaluate(_substitute(t, values), {}, {})
+        if type(n) not in (int, float):                    # "()" or "[]" is not a number
+            raise formula.EvaluationError(f"example value {text!r} isn't a number")
         return int(n) if float(n).is_integer() else round(n, 10)
     return t
 

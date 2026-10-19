@@ -39,6 +39,8 @@ PLACE = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 LEDGER = Path.home() / ".config/gordium/rule_drafting_ledger.json"   # outside the repo: shared by every checkout
 LAW_FILE = "chapter_325_zoning_2026-10.pdf"
 USES_UNIT = "chart-p2-primary_uses"
+ACCESSORY_UNIT = "chart-p2-accessory_uses"
+CODE_SECTIONS = {(2, USES_SECTION): USES_UNIT, (2, "Accessory Uses"): ACCESSORY_UNIT}   # built by code, not the AI
 DRAFTED_LABELS = ("rule", "flag")
 
 
@@ -66,17 +68,19 @@ class Inputs:
         self.labels = (load(labels_file) or {}).get("labels", {}) if labels_file.exists() else {}
         self.uses = load(j / "4_term_definitions/uses.yaml")
         self.definitions = load(j / "4_term_definitions/definitions.yaml")
-        self.chart_sections = chart_values.sections(cells, [p for p in (3, 14)])
+        # Every section of every chart page the reader read; the use lists are built by code, not the AI.
+        pages = sorted({t["page"] for t in self.tables})
+        self.chart_sections = [s for s in chart_values.sections(cells, pages) if s not in CODE_SECTIONS]
 
     def rows_of(self, page, section):
         return chart_values.section_rows(self.cells_list, page, section)
 
     def system(self) -> str:
         return drafter.system_prompt(self.ctx, self.uses, [district_name(c) for c in self.columns],
-                                     drafter.chart_table(self.chart_sections, self.rows_of))
+                                     drafter.chart_table(self.chart_sections, self.rows_of), self.notes)
 
     def units(self) -> list[dict]:
-        out = [{"id": USES_UNIT, "code": True}]
+        out = [{"id": unit_id, "code": True} for unit_id in CODE_SECTIONS.values()]
         for page, section in self.chart_sections:
             head = chart_values.heading(self.cells_list, page, section)
             rows = self.rows_of(page, section)
@@ -95,7 +99,9 @@ class Inputs:
                             "intro": (f"Piece {pid} of the zoning law (document \"law\", piece id {pid}): {piece['title']}. "
                                       f"It was labeled {label['label']}: {label['reason']} Draft the rules it sets for "
                                       "the residential districts."),
-                            "text": piece_text(self.law["rows"], piece)})
+                            "text": piece_text(self.law["rows"], piece),
+                            # the requirement lines the reviewed label cites: every one needs a rule or a person
+                            "requirements": [s for s in label.get("sources", []) if s.get("file") == self.law["file"]]})
         return out
 
 
@@ -129,7 +135,8 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
         taken = {r["id"] for r in book["rules"]}
         for rule in rules:
             if rule["id"] in taken:
-                result.setdefault("problems", []).append(f"{rule['id']}: id already drafted by another unit; not saved")
+                result.setdefault("unresolved", []).append(
+                    {"rule": rule["id"], "why": "the id is already drafted by another unit; not saved"})
                 continue
             book["rules"].append(rule)
             new_ids.append(rule["id"])
@@ -290,12 +297,14 @@ def cmd_draft(args) -> int:
             if owned_rules_approved(i, log, u["id"]):
                 print(f"  {u['id']}: skipped, an architect approved its rules")
                 continue
-            if u.get("code"):
+            if u["id"] == USES_UNIT:
                 result = draft_uses(i)
+            elif u["id"] == ACCESSORY_UNIT:
+                result = draft_accessory()
             else:
                 context = drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions)
-                result = drafter.draft_unit(client, u, context, system, i.law, i.ctx, i.columns, i.cells, record,
-                                            budget=budget)
+                result = drafter.draft_unit(client, u, context, system, i.law, i.ctx, i.columns, i.cells, i.notes,
+                                            record, budget=budget)
             save_result(i, log, u["id"], result)
             print(f"  {u['id']}: {sum(len(r) for r in result['rules'].values())} rules, "
                   f"{len(result.get('unresolved', []))} for a person"
@@ -309,6 +318,15 @@ def cmd_draft(args) -> int:
     log["complete"] = all(u["id"] in log["units"] for u in i.units())
     (i.records / "drafting_log.yaml").write_text(yaml.safe_dump(log, sort_keys=False, allow_unicode=True, width=110))
     return 0
+
+
+def draft_accessory() -> dict:
+    """Chart page 2's accessory uses (ADU, private garage, home occupation...): not drafted yet, on purpose.
+    The `use` measure is a lot's primary use; which accessory uses a design has needs a measure of its own,
+    which an engineer adds first. Recorded with the reason, so a complete run can't hide it."""
+    return {"rules": {}, "unresolved": [], "problems": [], "proposed": {},
+            "reason": ("Not drafted: accessory uses need a measure of which accessory uses a design has "
+                       "(the use measure is the primary use). An engineer adds it, then this unit is drafted.")}
 
 
 def draft_uses(i: Inputs) -> dict:

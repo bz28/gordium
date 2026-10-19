@@ -78,18 +78,24 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Why:** readable by architects, nothing hidden (no code execution), exact and repeatable. No plain-English retelling: retellings kept dropping or adding words; the quotes are the words and the examples show the meaning.
 - **Fail closed:** missing, non-numeric, negative or impossible values give "needs review", never "pass".
 - **Alternatives considered:** free-form code (unsafe, unreadable), a custom rule language (more to build and learn), JSON logic (hard to read).
-- **Weaknesses:** yes/no measurements (e.g. "has a separate entrance") are being added in PR 7b.
+- **Yes/no measurements:** a measure with unit `yes_no` (e.g. "the accessory dwelling unit has a separate entrance") is a test on its own in a formula (PR 7b). A measure a draft needs that isn't listed yet is proposed for an engineer and blocks approval until added.
 
 ## 9. The inspector (code, PR 1 onward)
 
 - **What:** checks every rule, definition and label: sources (listed, unchanged, quotable, exact and unique on cited lines), formula (allowed, true/false, known names), examples (a pass and a fail, each giving its stated result), a use decided by a rule cites its chart row, approvals (a listed architect, not the drafter, no open questions, nothing changed since: an approval fingerprint covers content, id and the cited documents).
 - **Weakness:** proves a rule is traceable and well formed, not that it means the right thing. Meaning comes from comparisons (§11) and architects.
 
-## 10. Drafting rules (AI: planned Sonnet; code checks; PR 7b, in progress)
+## 10. Drafting rules (AI: Sonnet by default; code checks; PR 7b, built, no real run yet)
 
-- **Plan:** chart rules get their numbers from cells, never typed by the AI; paragraph rules are drafted from each rule-labeled piece with its definitions and cross-referenced sections; every draft goes through the inspector with retries; every call recorded; hard cap ($5).
-- **Model choice to be decided by eval:** draft ~10 rules with Haiku and with Sonnet, grade both against R-1b and the architects' spreadsheet.
-- **Fairness:** the AI is never shown R-1b (the answer key).
+- **What:** `packages/rule_drafting` drafts rules for every residential district. A unit is one chart section (e.g. page 3 "Yard Dimensions"), one piece of the law labeled rule or flag, or the chart's page 2 use lists. One recorded AI call per unit; drafts go to `5_zoning_rules/drafted/<district>.yaml` and `general.yaml`, the script's records to `drafted/records/`.
+- **Inputs:** for a law piece, its text plus the **requirement lines its reviewed label cites** (each must end up with a rule, or it's listed for a person), the sections of the law it points to and the definitions it uses. For every unit, cached instructions: the drafting rules, the formula language, every measure, use and district, the chart's rows and the footnotes under each table.
+- **Chart numbers are never typed:** the AI writes a template whose chart numbers are slots (`front_yard >= {front}`); code fills each slot from each district's own cell and cites that cell. A cell of another shape (another count of numbers, other footnotes, "-") is never filled: that district goes to a person. Every footnote on a filled cell must be quoted and applied. A chart quote must be a footnote under a table, never a table row, and a template from a chart section with no slots may not contain numbers.
+- **The permitted uses** (chart p.2 marks •, SP, -) are built by plain code, not the AI; the accessory-use section is recorded as not drafted until a measure for accessory uses exists.
+- **Checks on every draft:** the inspector, including two checks added for this: every number in a formula is written in a cited quote or cell (the number trace), and a cited cell is the rule's own district's column. A rejected template is sent back with the reasons (up to 2 retries); then its unit keeps the templates that work and lists the rest for a person. A fact we don't measure yet is proposed (`records/proposed_measures.yaml`), never invented, and blocks approval until an engineer adds it.
+- **Fairness:** the AI is never shown R-1b (the answer key), and the drafting rules use neutral examples, not R-1b's.
+- **Cost and cap:** about $0.69 at most for a 10-unit test batch; the whole set (172 AI calls: 7 chart sections, 165 law pieces) has an upper bound of ~$15 (every answer at the full 8,192-token limit; real answers are far shorter). Hard cap $5 in its own ledger; a run whose estimate exceeds it is refused, so the full run waits for a measured average from the test batch.
+- **Graded by** (`tests/test_eval.py`, once drafts exist): the hand R-1b's worked examples; each cited R-1B chart value enforced exactly and every cited chart number actually used; the architects' spreadsheet (11 rows); each district citing only its own cells; every unit producing rules, a reason or a person entry.
+- **Weaknesses:** one AI call per unit can't see rules from other units, so an exception in one section of the law (the height bonus) and the limit it changes (the chart's height) may be drafted as separate rules; how such rules combine is decided when the checker is built. Model choice (Haiku vs Sonnet) is to be settled by the test batch.
 
 ## 11. Evaluation against independent sources
 

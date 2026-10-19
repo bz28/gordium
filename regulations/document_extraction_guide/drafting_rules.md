@@ -6,7 +6,7 @@ How to write a definition or a rule from a city's documents. They apply to every
 
 **Definitions have no paraphrase:** a definition is the city's own whole sentences in `sources`. (Restating definitions kept dropping limiting words, so we stopped.)
 
-**Rules have no paraphrase either:** a rule is its quotes (the city's words), its `check` (the formula) and its `examples`. Its `title` is a one-line label of at most 80 characters, e.g. "Rear yard minimum (chart p.3, note 16)". Explanations that help a reader (arithmetic like 35 ft + 10% = 38.5 ft) go in `notes`; they're never needed to decide a result.
+**Rules have no paraphrase either:** a rule is its quotes (the city's words), its `check` (the formula) and its `examples`. Its `title` is a one-line label of at most 80 characters, e.g. "Minimum lot width (chart p.3)". Explanations that help a reader (arithmetic like 40 ft + 10% = 44 ft) go in `notes`; they're never needed to decide a result.
 
 - ✗ a formula or note that measures height to the **midpoint** of a pitched roof (the code says "average height", not midpoint)
 - ✓ the height definition's open question about what "average height" means
@@ -17,17 +17,17 @@ When the law leaves something unsettled (a word it doesn't define, a measurement
 
 ## 3. Every number comes from a quote
 
-Every number in a formula (`check`, `applies_when`, `review_when`: 35 ft, 25%, 6,000 sf) must be written in one of the rule's own sources: a quoted sentence, or a cited chart cell or its row label. The inspector checks this (0 needs no source; "25%" supports 0.25; number words count, "three" supports 3). A number we work out is written as the arithmetic, from cited inputs: `35 + 0.1 * 35`, not 38.5. The worked examples prove it (38.5 ft passes, 39 ft fails).
+Every number in a formula (`check`, `applies_when`, `review_when`: 40 ft, 30%, 5,000 sf) must be written in one of the rule's own sources: a quoted sentence, or a cited chart cell or its row label. The inspector checks this (0 needs no source; "30%" supports 0.3; number words count, "three" supports 3). A number we work out is written as the arithmetic, from cited inputs: `40 + 0.1 * 40`, not 44. The worked examples prove it (44 ft passes, 45 ft fails).
 
 ## 4. Quote the exact words, including footnote markers
 
 Copy quotes from the extracted text (`2_extracted_text/`), not from memory or the PDF viewer. Quote whole sentences: a sentence cut in the middle can drop the words that limit it ("except as hereinafter specified", "that are united by a common interest"). Chart rows are quoted from the row label to the value. Footnotes appear as `[fn11]` and are part of the words. When a chart value has a footnote, quote the footnote's text too.
 
-Each source gives `page`, `lines: [first, last]` and `quote`. The quote must be one unbroken passage (no `…`) that starts on the first line, ends on the last, and occurs only once on the page. A bare chart value like `35 ft` repeats across the row, so quote the row label with it, or better, cite the one chart cell: `{file, page, cell: {section, row, column}}` (checked against the chart reader's cells, and the only way to pin the district's column). `python -m rule_format cite <place> <file> <page> "<quote>"` prints the lines.
+Each source gives `page`, `lines: [first, last]` and `quote`. The quote must be one unbroken passage (no `…`) that starts on the first line, ends on the last, and occurs only once on the page. A bare chart value like `40 ft` repeats across the row, so quote the row label with it, or better, cite the one chart cell: `{file, page, cell: {section, row, column}}` (checked against the chart reader's cells, and the only way to pin the district's column). `python -m rule_format cite <place> <file> <page> "<quote>"` prints the lines.
 
 ## 5. Say where each part of a rule comes from
 
-A rule can combine a chart value with conditions from the law (R-1b's height: 35 ft from the chart, the 10% bonus from §325-16C). Quote both. The chart reader's cells cover only the chart part, so this keeps the comparison honest.
+A rule can combine a chart value with conditions from the law (a district's limit from the chart, and an exception to it in a section of the law). Cite both. The chart reader's cells cover only the chart part, so this keeps the comparison honest.
 
 ## 6. Use the city's own scope words
 

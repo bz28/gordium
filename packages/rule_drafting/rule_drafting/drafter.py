@@ -60,10 +60,14 @@ it has slots) or one rule for every district (when it has none).
   must carry (["16"] for "50 ft [fn16]"). Code fills the slot from each district's own cell; a district
   whose cell doesn't have that shape gets no rule and goes to a person. Any other number must be written
   in one of your quotes (a percent like 10% is written 0.1; "three" counts as 3). Work numbers out in the
-  formula itself from quoted inputs (35 + 0.1 * 35), never as a result (38.5).
+  formula itself from quoted inputs (40 + 0.1 * 40), never as a result (44). A template drafted from a
+  chart section always takes its chart numbers from slots: a typed number there is rejected.
+- Footnotes: a chart cell's footnote marker ([fn16]) points to a note printed under that page's table
+  (listed below). Every footnote a slot's cell must carry has to be quoted, and applied in the rule.
 - quotes: the exact words that support the rule, as whole sentences, copied character for character
-  (footnote markers like [fn11] included). document "chart" for a footnote or line on the chart page given;
-  document "law" with the piece id for text from a piece of the law given here. A quote must occur once.
+  (footnote markers like [fn11] included). document "chart" only for a footnote under a chart table, with
+  its page; document "law" with the piece id for text from a piece of the law given here (page 0). A quote
+  must occur once.
 - examples: at least one that passes and one that fails (for a rule). Each given value is text: a number,
   arithmetic on slots ("{front} - 1"), true or false, a use id or a district name.
 - open_questions: anything the law leaves unclear, for the architects. Never settle it in the formula.
@@ -91,8 +95,9 @@ def output_schema(topics: list[str]) -> dict:
                         "type": "object", "additionalProperties": False, "required": ["when", "reason"],
                         "properties": {"when": text, "reason": text}}},
                     "quotes": {"type": "array", "items": {
-                        "type": "object", "additionalProperties": False, "required": ["document", "piece", "text"],
-                        "properties": {"document": {"type": "string", "enum": ["chart", "law"]}, "piece": text, "text": text}}},
+                        "type": "object", "additionalProperties": False, "required": ["document", "page", "piece", "text"],
+                        "properties": {"document": {"type": "string", "enum": ["chart", "law"]}, "page": {"type": "integer"},
+                                       "piece": text, "text": text}}},
                     "examples": {"type": "array", "items": {
                         "type": "object", "additionalProperties": False, "required": ["given", "expect"],
                         "properties": {"given": {"type": "array", "items": {
@@ -118,7 +123,13 @@ def chart_table(sections: list[tuple[int, str]], rows_of) -> str:
     return "\n".join(out)
 
 
-def system_prompt(ctx: Context, uses: dict, districts: list[str], table: str) -> str:
+def chart_notes(notes: dict[int, dict]) -> str:
+    """The footnotes printed under each chart table, by page."""
+    return "\n".join(f"- page {page}: {n['text']}" for page, by_number in sorted(notes.items())
+                     for n in by_number.values())
+
+
+def system_prompt(ctx: Context, uses: dict, districts: list[str], table: str, notes: dict[int, dict]) -> str:
     """The fixed instructions: identical for every unit, so they're cached after the first call."""
     measures = yaml.safe_load(MEASURES_FILE.read_text())
     topics = yaml.safe_load(VOCABULARY_FILE.read_text())["topics"]
@@ -128,7 +139,8 @@ def system_prompt(ctx: Context, uses: dict, districts: list[str], table: str) ->
             + "\n\n## Residential districts (for the district measure: write them like this)\n"
             + ", ".join(districts)
             + "\n\n## Topics\n" + "\n".join(f"- {k}: {' '.join(v.split())}" for k, v in topics.items())
-            + "\n\n## The zoning chart's rows (for slots)" + table + "\n")
+            + "\n\n## The zoning chart's rows (for slots)" + table
+            + "\n\n## Footnotes under the chart tables (document \"chart\", with the page)\n" + chart_notes(notes) + "\n")
 
 
 def _sentences(text: str) -> str:
@@ -136,8 +148,12 @@ def _sentences(text: str) -> str:
 
 
 def unit_message(unit: dict, context: dict) -> str:
-    """The unit's own text plus what it points to: footnotes, sections of the law, definitions."""
+    """The unit's own text plus what it points to: the requirements its label found, footnotes, sections
+    of the law, definitions."""
     parts = [unit["intro"], unit["text"]]
+    if unit.get("requirements"):
+        parts.append("The requirements in this text (from its reviewed label; draft a rule for each):\n" + "\n".join(
+            f"- page {s['page']}, lines {s['lines'][0]}-{s['lines'][1]}: {s['quote']}" for s in unit["requirements"]))
     if context["notes"]:
         parts.append("Footnotes under the chart (document \"chart\"):\n" + "\n".join(
             f"- page {n['page']}: {n['text']}" for n in context["notes"]))
@@ -174,20 +190,31 @@ def gather_context(unit: dict, law: dict, chart: dict, definitions: dict) -> dic
     return {"notes": notes, "pieces": pieces, "definitions": defs}
 
 
-def resolve_quotes(template: dict, unit: dict, context: dict, law: dict, ctx: Context) -> tuple[list[dict], list[str]]:
-    """Each quote as a source with its exact lines: a chart footnote on the unit's chart page, or text inside
-    the unit's own piece or a piece it points to."""
+def _within(lines: list[int], span: list[int]) -> bool:
+    return span[0] <= lines[0] and lines[1] <= span[1]
+
+
+def resolve_quotes(template: dict, unit: dict, context: dict, law: dict, ctx: Context,
+                   notes: dict[int, dict]) -> tuple[list[dict], list[str]]:
+    """Each quote as a source with its exact lines. A chart quote must be a footnote printed under a chart
+    table (never a table row: a row's numbers reach a rule only through a slot filled from the district's own
+    cell). A law quote must be inside the unit's own piece or a piece it points to."""
     sources, p = [], []
     allowed = {unit["piece"]} if unit.get("piece") else set()
     allowed |= {x["id"] for x in context["pieces"]}
     for q in template["quotes"]:
         if q["document"] == "chart":
-            page = unit.get("page")
+            page = q.get("page") or unit.get("page")
             found = locate(q["text"], ctx.pages.get(CHART_FILE, {}).get(page, {})) if page else []
             if len(found) != 1:
                 p.append(f"chart quote {q['text']!r} occurs {len(found)} times on chart page {page}; quote it exactly, once")
                 continue
-            source = {"file": CHART_FILE, "page": page, "lines": list(found[0]), "quote": q["text"]}
+            lines = list(found[0])
+            if not any(_within(lines, n["lines"]) for n in notes.get(page, {}).values()):
+                p.append(f"chart quote {q['text']!r} isn't a footnote under the table on page {page}; chart numbers "
+                         "come only from slots")
+                continue
+            source = {"file": CHART_FILE, "page": page, "lines": lines, "quote": q["text"]}
             if problems := _source_problems([source], ctx):
                 p += problems
                 continue
@@ -204,53 +231,102 @@ def resolve_quotes(template: dict, unit: dict, context: dict, law: dict, ctx: Co
     return sources, p
 
 
+def _footnote_problems(template: dict, sources: list[dict], notes: dict[int, dict]) -> list[str]:
+    """Every footnote a slot's cell must carry is quoted: the note changes what the number means
+    ("(16) But not less than 20 ft."), so a rule that fills the number must also apply the note."""
+    quoted = [(s["page"], s["lines"]) for s in sources if s.get("file") == CHART_FILE and "lines" in s]
+    p = []
+    for slot in template["slots"]:
+        for n in slot["footnotes"]:
+            note = notes.get(slot["page"], {}).get(n)
+            if note is None:
+                p.append(f"slot {slot['name']}: footnote {n} isn't under the table on page {slot['page']}")
+            elif not any(page == slot["page"] and _within(lines, note["lines"]) for page, lines in quoted):
+                p.append(f"slot {slot['name']}: footnote {n} of {slot['row']!r} isn't quoted: {note['text']!r}")
+    return p
+
+
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
-                 cells: dict, drafted_by: str) -> dict:
-    """Turn an answer into rules, every one checked by the inspector.
-    Returns {rules: {district: [rule]}, unresolved: [{rule, why}], proposed: {name: measure}, problems: [...]}."""
-    out = {"rules": {}, "unresolved": [], "proposed": {}, "problems": [], "templates": []}
+                 cells: dict, notes: dict[int, dict], drafted_by: str) -> dict:
+    """Turn an answer into rules, every one checked by the inspector. Returns {rules: {district: [rule]},
+    unresolved: [{rule, why}] (districts whose cells don't fit a working template), rejected: [{rule, why}]
+    (templates that work nowhere), proposed: {name: measure}, problems: [...] (the rejections, as text)}."""
+    out = {"rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}
     for t in answer["templates"]:
         t = t | {"id_suffix": unit.get("prefix", "") + t["id_suffix"]}   # a law piece's rules carry its id
         p = template_problems(t)
+        if unit["id"].startswith("chart-") and not t["slots"] and _typed_numbers(t):
+            p.append("a rule drafted from the chart takes its chart numbers from slots, not typed numbers")
+        proposed = {}
         for m in t["new_measures"]:
             if not re.fullmatch(r"[a-z][a-z0-9_]*", m["name"]):
                 p.append(f"new measure {m['name']!r} must be lowercase_with_underscores")
             elif m["name"] not in ctx.measures:
-                out["proposed"][m["name"]] = {"unit": m["unit"], "meaning": m["meaning"]}
-        sources, quote_problems = resolve_quotes(t, unit, context, law, ctx)
-        p += quote_problems
+                proposed[m["name"]] = {"unit": m["unit"], "meaning": m["meaning"]}
+        sources, quote_problems = resolve_quotes(t, unit, context, law, ctx, notes)
+        p += quote_problems + (_footnote_problems(t, sources, notes) if not quote_problems else [])
         if p:
-            out["problems"] += [f"{t['id_suffix']}: {x}" for x in p]
+            out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
             continue
-        saved, ctx.proposed = ctx.proposed, ctx.proposed | out["proposed"]
         good, gaps = [], []                     # filled and valid; or (where, why) for a person
-        for column in (columns if t["slots"] else [None]):
-            rule, why = fill_template(t, column, cells, sources, drafted_by)
-            if why is None and (problems := validate({"district": rule["id"].split(".")[0], "rules": [rule]}, ctx)):
-                why = "; ".join(problems[:3])
-            if why is None:
-                good.append(rule)
-            else:
-                gaps.append({"rule": f"{district_name(column) if column else 'general'}.{t['id_suffix']}", "why": why})
-        ctx.proposed = saved
+        saved, ctx.proposed = ctx.proposed, ctx.proposed | proposed
+        try:
+            for column in (columns if t["slots"] else [None]):
+                rule, why = fill_template(t, column, cells, sources, drafted_by)
+                if why is None and (problems := validate({"district": rule["id"].split(".")[0], "rules": [rule]}, ctx)):
+                    why = "; ".join(problems[:3])
+                if why is None:
+                    good.append(rule)
+                else:
+                    gaps.append({"rule": f"{district_name(column) if column else 'general'}.{t['id_suffix']}", "why": why})
+        finally:
+            ctx.proposed = saved
         if good:                                # the template works: districts that don't fit go to a person
             out["templates"].append(t)
+            out["proposed"] |= proposed
             for rule in good:
                 out["rules"].setdefault(rule["id"].split(".")[0], []).append(rule)
             out["unresolved"] += gaps
         else:                                   # it works nowhere: the drafter is told why and tries again
-            out["problems"] += [f"{g['rule']}: {g['why']}" for g in gaps[:3]]
+            out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}",
+                                    "why": "; ".join(f"{g['rule']}: {g['why']}" for g in gaps[:3])})
+    out["problems"] = [f"{r['rule']}: {r['why']}" for r in out["rejected"]]
     return out
 
 
+def _typed_numbers(template: dict) -> list[float]:
+    from rule_format import formula
+    texts = [template.get("check", ""), template.get("applies_when", "")] + [r["when"] for r in template["review_when"]]
+    found = []
+    for t in texts:
+        if t.strip():
+            try:
+                found += [n for n in formula.numbers(t) if n != 0]
+            except formula.FormulaError:
+                pass                                         # reported when the rule is checked
+    return found
+
+
+def requirement_gaps(unit: dict, result: dict) -> list[dict]:
+    """The requirements the unit's label found that no drafted rule cites: for a person."""
+    cited = {(s["page"], n) for rules in result["rules"].values() for r in rules for s in r["sources"]
+             if s.get("file") != CHART_FILE and "lines" in s for n in range(s["lines"][0], s["lines"][1] + 1)}
+    return [{"rule": f"{unit['id']}.requirement_p{s['page']}_l{s['lines'][0]}",
+             "why": f"no drafted rule cites this requirement: {s['quote']!r}"}
+            for s in unit.get("requirements", [])
+            if not any((s["page"], n) in cited for n in range(s["lines"][0], s["lines"][1] + 1))]
+
+
 def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: Context, columns: list[str],
-               cells: dict, record, settings: dict = SETTINGS, budget=None) -> dict:
-    """Draft one unit. Returns check_answer's result plus {"reason"} (no rules, and why) or
-    {"failed": why} when no usable answer came back."""
+               cells: dict, notes: dict[int, dict], record, settings: dict = SETTINGS, budget=None) -> dict:
+    """Draft one unit. Every template that works nowhere sends the answer back with the reasons (keeping
+    nothing from it) until max_attempts; after the last attempt, the rules that work are kept and every
+    rejected template and every requirement no rule cites goes to a person. Returns check_answer's result
+    plus "reason" (no rules, and why) or "failed" (no usable answer)."""
     topics = sorted(ctx.topics)
     drafted_by = f"rule_drafting/{settings['model']}"
     messages = [{"role": "user", "content": unit_message(unit, context)}]
-    why = "no answer"
+    why, last = "no answer", None
     for attempt in range(1, settings["max_attempts"] + 1):
         worst = worst_case(len(system) + len(json.dumps(messages, default=str)), settings, PRICES)
         if budget is not None:
@@ -272,12 +348,15 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
         else:
             try:
                 answer = json.loads(text)
-                result = check_answer(answer, unit, context, law, ctx, columns, cells, drafted_by)
-                if result["rules"] or (not answer["templates"] and answer["no_rule_reason"].strip()):
+                result = check_answer(answer, unit, context, law, ctx, columns, cells, notes, drafted_by)
+                if result["problems"]:
+                    why = "; ".join(result["problems"][:6])
+                    last = result if result["rules"] else last
+                elif result["rules"] or answer["no_rule_reason"].strip():
                     why = None
-                    result["reason"] = answer["no_rule_reason"].strip()
+                    result["reason"] = "" if result["rules"] else answer["no_rule_reason"].strip()
                 else:
-                    why = "; ".join(result["problems"][:6]) or "no template produced a valid rule"
+                    why = "no rules and no reason given"
             except (json.JSONDecodeError, KeyError, TypeError) as e:
                 why = f"unreadable answer ({type(e).__name__})"
         record({"unit": unit["id"], "attempt": attempt, "date": datetime.datetime.now(datetime.UTC).isoformat(),
@@ -287,10 +366,16 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
                 "answer": text, "problem": why, "usage": usage, "cost_usd": round(spent, 6),
                 "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None})
         if why is None:
+            result["unresolved"] += requirement_gaps(unit, result)
             return result
         if response.stop_reason == "refusal":
             break
         if response.stop_reason == "end_turn":
             messages += [{"role": "assistant", "content": response.content},
-                         {"role": "user", "content": f"That answer can't be used: {why}. Answer again for the same text."}]
-    return {"failed": why, "rules": {}, "unresolved": [], "proposed": {}, "problems": [], "templates": []}
+                         {"role": "user", "content": f"That answer can't be used: {why}. Answer again for the same "
+                                                     "text, with every template (the ones that worked too)."}]
+    if last is not None:                        # the last answer that had working rules: keep those
+        last["unresolved"] += last["rejected"] + requirement_gaps(unit, last)
+        last["problems"] = []
+        return last
+    return {"failed": why, "rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}

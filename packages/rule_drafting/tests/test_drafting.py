@@ -67,7 +67,7 @@ REAR_YARD = template(
     "rear_yard", "rear_yard >= max(min({pct} * lot_depth, {cap}), 20)",
     [slot("pct", REAR, 1, 2, True, ["16"]), slot("cap", REAR, 2, 2, False, ["16"])],
     [({"rear_yard": "50", "lot_depth": "100"}, "pass"), ({"rear_yard": "19", "lot_depth": "60"}, "fail")],
-    quotes=[{"document": "chart", "piece": "", "text": "(16) But not less than 20 ft."}])
+    quotes=[{"document": "chart", "page": 3, "piece": "", "text": "(16) But not less than 20 ft."}])
 
 
 def unit(inputs, uid):
@@ -78,7 +78,7 @@ def run(inputs, client, uid="chart-p3-yard_dimensions", budget=None):
     u, records = unit(inputs, uid), []
     context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
     result = drafter.draft_unit(client, u, context, "SYSTEM", inputs.law, inputs.ctx, inputs.columns, inputs.cells,
-                                records.append, budget=budget)
+                                inputs.notes, records.append, budget=budget)
     return result, records
 
 
@@ -116,13 +116,13 @@ def test_a_typed_chart_number_is_sent_back(inputs):
     typed = template("front_yard", "front_yard >= 25", [], [({"front_yard": "25"}, "pass"), ({"front_yard": "24"}, "fail")])
     client = FakeClient({"templates": [typed], "no_rule_reason": ""}, {"templates": [FRONT], "no_rule_reason": ""})
     result, records = run(inputs, client)
-    assert "number 25 in 'check' isn't written" in records[0]["problem"] and records[1]["problem"] is None
+    assert "takes its chart numbers from slots" in records[0]["problem"] and records[1]["problem"] is None
     assert "can't be used" in client.requests[1]["messages"][-1]["content"] and result["rules"]["R-1b"]
 
 
 def test_a_quote_not_in_the_text_is_sent_back(inputs):
     made_up = copy.deepcopy(REAR_YARD)
-    made_up["quotes"] = [{"document": "chart", "piece": "", "text": "(16) But never less than 20 ft."}]
+    made_up["quotes"] = [{"document": "chart", "page": 3, "piece": "", "text": "(16) But never less than 20 ft."}]
     client = FakeClient({"templates": [made_up], "no_rule_reason": ""}, {"templates": [REAR_YARD], "no_rule_reason": ""})
     result, records = run(inputs, client)
     assert "occurs 0 times" in records[0]["problem"] and result["rules"]["R-1b"]
@@ -143,7 +143,7 @@ def test_a_law_piece_with_no_residential_rule_records_why(inputs):
 def test_a_needed_fact_is_proposed_as_a_measure_not_invented(inputs):
     sheds = template("325_25a_not_in_front_yard", "not accessory_in_required_front_yard", [],
                      [({"accessory_in_required_front_yard": "false"}, "pass"), ({"accessory_in_required_front_yard": "true"}, "fail")],
-                     quotes=[{"document": "law", "piece": "325-25A", "text": (
+                     quotes=[{"document": "law", "page": 0, "piece": "325-25A", "text": (
                          "Accessory structures which are wholly or partially above finished grade are permitted in any side "
                          "or rear yard but not in a required front yard, except as permitted under the further provisions "
                          "of this section.")}],
@@ -213,3 +213,83 @@ def test_a_general_rule_is_filled_once_with_no_district(inputs):
     general = template("front_yard", "front_yard >= 0", [], [({"front_yard": "1"}, "pass")])
     rule, why = fill_template(general, None, inputs.cells, [], "x")
     assert why is None and rule["id"] == "general.front_yard" and not SLOT.search(json.dumps(rule))
+
+
+ROW_31 = "Height in feet 35 ft 35 ft 35 ft 35 ft 35 ft 40 ft 35 ft 40 ft 35 ft"
+
+
+def test_a_chart_row_quote_cannot_carry_a_typed_number(inputs):
+    """Quoting a whole chart row would let any district's number into a rule for every district."""
+    typed = template("max_height", "building_height <= 40", [],
+                     [({"building_height": "40"}, "pass"), ({"building_height": "41"}, "fail")],
+                     quotes=[{"document": "chart", "page": 3, "piece": "", "text": ROW_31}])
+    answer = {"templates": [typed], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid="chart-p3-maximum_building_height")
+    assert result["rules"] == {} and result["failed"]
+    assert "isn't a footnote under the table" in records[0]["problem"]
+    assert "takes its chart numbers from slots" in records[0]["problem"]
+    law = template("325_16c_height", "building_height <= 40", [], [({"building_height": "40"}, "pass"), ({"building_height": "41"}, "fail")],
+                   quotes=[{"document": "chart", "page": 3, "piece": "", "text": ROW_31}])
+    answer = {"templates": [law], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid="325-16C")   # not from a law piece either
+    assert result["rules"] == {} and "isn't a footnote under the table" in records[0]["problem"]
+
+
+def test_a_filled_cells_footnote_must_be_quoted(inputs):
+    """'25%/ 50 ft [fn16]' means nothing without note 16 ('But not less than 20 ft.')."""
+    loose = copy.deepcopy(REAR_YARD) | {"quotes": [], "check": "rear_yard >= min({pct} * lot_depth, {cap})"}
+    loose["examples"] = [{"given": [{"measure": "rear_yard", "value": "50"}, {"measure": "lot_depth", "value": "100"}],
+                          "expect": "pass"},
+                         {"given": [{"measure": "rear_yard", "value": "1"}, {"measure": "lot_depth", "value": "100"}],
+                          "expect": "fail"}]
+    result, records = run(inputs, FakeClient({"templates": [loose], "no_rule_reason": ""},
+                                             {"templates": [REAR_YARD], "no_rule_reason": ""}))
+    assert "footnote 16 of" in records[0]["problem"] and "isn't quoted" in records[0]["problem"]
+    assert records[1]["problem"] is None and result["rules"]["R-1b"]
+
+
+def test_a_template_that_works_nowhere_is_retried_then_listed_for_a_person(inputs):
+    typed = template("front_typed", "front_yard >= 25", [], [({"front_yard": "25"}, "pass"), ({"front_yard": "24"}, "fail")])
+    answer = {"templates": [FRONT, typed], "no_rule_reason": ""}
+    client = FakeClient(answer, answer, answer)
+    result, records = run(inputs, client)
+    assert len(records) == drafter.SETTINGS["max_attempts"]                # each answer sent back with the reason
+    assert "with every template" in client.requests[1]["messages"][-1]["content"]
+    assert result["rules"]["R-1b"][0]["id"] == "R-1b.front_yard"           # the working template is kept
+    assert any(g["rule"] == "chart-p3-yard_dimensions.front_typed" for g in result["unresolved"])
+
+
+def test_a_requirement_no_rule_cites_goes_to_a_person(inputs):
+    sentence = ("Accessory structures which are wholly or partially above finished grade are permitted in any side "
+                "or rear yard but not in a required front yard, except as permitted under the further provisions "
+                "of this section.")
+    sheds = template("not_in_front_yard", "not accessory_in_required_front_yard", [],
+                     [({"accessory_in_required_front_yard": "false"}, "pass"), ({"accessory_in_required_front_yard": "true"}, "fail")],
+                     quotes=[{"document": "law", "page": 0, "piece": "325-25A", "text": sentence}],
+                     new_measures=[{"name": "accessory_in_required_front_yard", "unit": "yes_no", "meaning": "m"}])
+    sheds["topic"] = "site_features"
+    u = unit(inputs, "325-25A")
+    u = u | {"requirements": u["requirements"] + [{"file": inputs.law["file"], "page": 67, "lines": [3, 4],
+                                                   "quote": "A later requirement of the same piece."}]}
+    context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
+    result = drafter.draft_unit(FakeClient({"templates": [sheds], "no_rule_reason": ""}), u, context, "S", inputs.law,
+                                inputs.ctx, inputs.columns, inputs.cells, inputs.notes, lambda r: None)
+    assert [g["rule"] for g in result["unresolved"]] == ["325-25A.requirement_p67_l3"]   # the cited one is covered
+
+
+def test_the_requirements_from_the_label_are_the_drafting_input(inputs):
+    u = unit(inputs, "325-16C")
+    message = drafter.unit_message(u, drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions))
+    assert u["requirements"] and "draft a rule for each" in message
+    assert all(s["quote"] in message for s in u["requirements"])
+
+
+def test_no_answer_key_arithmetic_reaches_the_drafter(inputs):
+    system = inputs.system()
+    assert not any(k in system for k in ("35 + 0.1 * 35", "38.5", "R-1b's"))
+
+
+def test_accessory_uses_are_recorded_as_not_drafted_with_a_reason(inputs):
+    assert {u["id"] for u in inputs.units() if u.get("code")} == {cli.USES_UNIT, cli.ACCESSORY_UNIT}
+    assert all(s[0] != 2 for s in inputs.chart_sections)                      # page 2 is built by code, not the AI
+    assert "Not drafted" in cli.draft_accessory()["reason"]

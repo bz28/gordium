@@ -255,13 +255,14 @@ NUMBER_WORDS = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
 
 
 def source_numbers(text: str) -> set[float]:
-    """Numbers written in a quote or a cell: digits ("6,000", "2.5", "3/2" gives 3 and 2) and number
-    words ("three"). Footnote markers ([fn16]) aren't numbers. Each also counts divided by 100, so
-    "25%" supports 0.25."""
+    """Numbers written in a quote or a cell: digits ("6,000", "2.5", "3/2" gives 3 and 2) and whole number
+    words ("three", not the "two" of "two-family"). Footnote markers ([fn16]) aren't numbers. A percent
+    also counts divided by 100: "25%" or "25 percent" supports 0.25 (and 25)."""
     text = re.sub(r"\[fn[^\]]*\]", " ", text.lower())
     found = {float(n.replace(",", "")) for n in re.findall(r"\d[\d,]*(?:\.\d+)?|(?<![\w.])\.\d+", text)}
-    found |= {float(NUMBER_WORDS[w]) for w in re.findall(r"[a-z]+", text) if w in NUMBER_WORDS}
-    return found | {n / 100 for n in found}
+    found |= {float(NUMBER_WORDS[w]) for w in re.findall(r"(?<![\w-])([a-z]+)(?![\w-])", text) if w in NUMBER_WORDS}
+    percents = re.findall(r"(\d[\d,]*(?:\.\d+)?)\s*(?:%|percent\b)", text)
+    return found | {float(n.replace(",", "")) / 100 for n in percents}
 
 
 def _number_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[str]:
@@ -285,10 +286,17 @@ def _number_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[st
     return p
 
 
-def _cell_source_problems(s: dict, ctx: "Context") -> list[str]:
+def _cell_source_problems(s: dict, ctx: "Context", district: str | None = None) -> list[str]:
     """A chart cell cited by its page, section, row and district column, exactly as the chart reader read
-    it (2_extracted_text/<chart>.cells.jsonl). The cell's value is what's cited; there is no quote."""
+    it (2_extracted_text/<chart>.cells.jsonl). The cell's value is what's cited; there is no quote. In a
+    district's rulebook the cell must be that district's own column; a rulebook for every district
+    (`general`) can't cite one district's cell."""
     name, c = s["file"], s.get("cell")
+    if district is not None and isinstance(c, dict) and isinstance(c.get("column"), str):
+        if district == "general":
+            return [f"source {name}: a rule for every district can't cite one district's cell ({c['column']})"]
+        if district_name(c["column"]) != district:
+            return [f"source {name}: cell column {c['column']} isn't district {district}"]
     if s.keys() != {"file", "page", "cell"}:
         return [f"source {name}: a cell source has exactly file, page and cell (no lines or quote)"]
     if not (isinstance(c, dict) and c.keys() == CELL_FIELDS and all(isinstance(c[k], str) for k in CELL_FIELDS)):
@@ -465,7 +473,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         except FormulaError as e:
             p.append(str(e))
 
-    p += _source_problems(sources, ctx) if sources is not None else []
+    p += _source_problems(sources, ctx, district) if sources is not None else []
     p += _use_row_problems(rule, sources or [], ctx)
     p += _number_problems(rule, sources or [], ctx)
 
@@ -605,7 +613,8 @@ def validate_terms(entries, ctx: Context, schema: str) -> list[str]:
     return problems
 
 
-def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
+def _source_problems(sources: list[dict], ctx: Context, district: str | None = None) -> list[str]:
+    """Problems with sources. district: the rulebook a rule is in, so a cited cell must be its own column."""
     if not sources:
         return ["needs at least one source"]
     p = []
@@ -618,7 +627,7 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
         elif name in ctx.file_problems:
             p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
         elif "cell" in s:
-            p += _cell_source_problems(s, ctx)
+            p += _cell_source_problems(s, ctx, district)
         elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and _is_line_range(lines)):
             p.append(f"source {name}: needs 'page' (number), 'lines' ([first, last]) and 'quote' (text)")
         elif "…" in quote or "..." in quote:

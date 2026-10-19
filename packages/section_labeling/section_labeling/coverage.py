@@ -68,7 +68,8 @@ def cited_by(j: Path, file: str, pieces: dict[str, dict]) -> dict[str, list[str]
     and the definitions and uses (4_term_definitions) that quotes this document."""
     owner = {k: pid for pid, p in pieces.items() for k in piece_keys(p)}
     citing: list[tuple[str, dict]] = []
-    for path in sorted((j / "5_zoning_rules").glob("*.yaml")):
+    rulebooks = j / "5_zoning_rules"          # the hand drafts and the script's drafted/ (not its records/)
+    for path in sorted(p for p in rulebooks.rglob("*.yaml") if "records" not in p.relative_to(rulebooks).parts):
         citing += [(r.get("id", "?"), s) for r in (load(path) or {}).get("rules", []) for s in r.get("sources", [])]
     for path in sorted((j / "4_term_definitions").glob("*.yaml")):
         citing += [(f"{path.stem}.{key}", s) for key, e in (load(path) or {}).items() for s in e.get("sources", [])]

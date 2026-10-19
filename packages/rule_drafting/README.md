@@ -10,6 +10,7 @@ every draft with code. Nothing it drafts is used to check a design until an arch
 | A chart section | `chart-p3-yard_dimensions` (front, side and rear yards) | AI: a template per requirement |
 | A piece of the law labeled rule or flag (`3_section_labels/`) | `325-16C` (the height bonus) | AI: a template per requirement |
 | The permitted uses (chart page 2) | `chart-p2-primary_uses` | Plain code, from the marks •, SP, - (free) |
+| The accessory uses (chart page 2) | `chart-p2-accessory_uses` | Not drafted yet: recorded with the reason (no measure of accessory uses yet) |
 
 ## Chart numbers are never typed
 
@@ -24,7 +25,10 @@ slots: [{name: front, page: 3, section: Yard Dimensions, row: Front (minimum),
 Code (`templates.py`, `chart_values.py`) fills each slot from each district's own cell and cites that
 cell (`{file, page, cell: {section, row, column}}`): R-1b gets `front_yard >= 25`, R-2b `front_yard >= 10`.
 A cell that doesn't have the shape the template expects (another count of numbers, other footnotes, a
-"-") is never filled: that district's rule goes to a person (the log's `unresolved`). Example: R-2C's lot
+"-") is never filled: that district's rule goes to a person (the log's `unresolved`). Every footnote a filled cell
+carries must be quoted (and applied): "25%/ 50 ft [fn16]" needs note 16, "But not less than 20 ft." A chart quote must
+be a footnote printed under a table, never a table row, and a chart-section template with no slots may not contain
+numbers, so a row's number can reach a rule only through a slot filled from that district's own cell. Example: R-2C's lot
 coverage "35%/40% /50% [fn12]" depends on the use, so a one-number template can't fill it.
 
 ## Every draft is checked
@@ -36,13 +40,18 @@ coverage "35%/40% /50% [fn12]" depends on the use, so a one-number template can'
 - A fact we don't measure yet (e.g. "the accessory dwelling unit has a separate entrance") is never
   invented: the draft lists it in `new_measures`, it goes to `records/proposed_measures.yaml` for an
   engineer, and the rule can't be approved until it's added to `measures.yaml`.
-- A rejected answer is sent back with the reason (up to 2 retries); after that the unit is listed for a person.
-- The hand-drafted `5_zoning_rules/R-1b.yaml` is never shown to the AI: it's the answer key.
+- A law piece is drafted from the **requirement lines its reviewed label cites** (`3_section_labels/`); a requirement
+  no drafted rule cites goes to a person.
+- A template that works for no district sends the whole answer back with the reasons (up to 2 retries); after the
+  last attempt the templates that work are kept and the rest go to a person. So does a rule id another unit took.
+- The hand-drafted `5_zoning_rules/R-1b.yaml` is never shown to the AI: it's the answer key. The drafting rules the
+  AI reads use neutral examples, not R-1b's.
 
 ## How the drafts are graded (`tests/test_eval.py`, once drafts exist)
 
 1. The drafted R-1b rules give the hand R-1b's outcome on every one of its worked examples.
-2. They pass at each R-1B chart value they cite and fail just past it.
+2. They pass at each R-1B chart value they cite and fail just past it, and every number of every cell they cite
+   is used in the formula and decides something (changing it changes an outcome).
 3. The architects' 106 Ithaca Rd spreadsheet still comes out the same on every row.
 4. Every district's chart rules cite only that district's cells.
 5. Every unit drafted produced rules, a reason, or an entry for a person; when the run is complete,

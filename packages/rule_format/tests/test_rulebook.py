@@ -670,7 +670,7 @@ def test_a_cited_chart_cell_supports_its_numbers(chart_ctx):
 
 
 @pytest.mark.parametrize("source, problem", [
-    (CELL_SOURCE | {"cell": CELL_SOURCE["cell"] | {"column": "R-1A"}}, "no cell"),
+    (CELL_SOURCE | {"cell": CELL_SOURCE["cell"] | {"row": "Rear yard"}}, "no cell"),
     (CELL_SOURCE | {"page": 2}, "isn't one of the chart pages"),
     (CELL_SOURCE | {"lines": [42, 43]}, "exactly file, page and cell"),
     (CELL_SOURCE | {"cell": {"row": "Rear"}}, "needs section, row and column"),
@@ -688,8 +688,19 @@ def test_a_number_not_written_in_any_source_is_rejected(ctx, check, number):
 def test_numbers_can_come_from_number_words_and_row_labels():
     from rule_format.rulebook import source_numbers
     assert {3.0, 4.0, 5.0} <= source_numbers("First three bed or sleeping rooms; 4-5 bed rooms")
-    assert source_numbers("50 ft [fn16]") == {50.0, 0.5}                      # the footnote marker isn't a number
-    assert {6000.0, 0.25} <= source_numbers("6,000 sf 25%")
+    assert source_numbers("50 ft [fn16]") == {50.0}                           # no footnote number, no 0.5
+    assert source_numbers("6,000 sf 25% and 10 percent") == {6000.0, 25.0, 0.25, 10.0, 0.1}  # only percents / 100
+    assert source_numbers("two-family dwelling") == set()                     # "two" in a compound isn't a count
+
+
+def test_a_cell_from_another_districts_column_is_rejected(chart_ctx):
+    other = {"page": 3, "section": "Yard Dimensions", "row": REAR_CELL["row"], "column": "R-2A",
+             "value": "25%/ 50 ft [fn16]", "row_lines": [42, 43]}
+    chart_ctx.cells["charts.pdf"][(3, "Yard Dimensions", REAR_CELL["row"], "R-2A")] = other
+    foreign = CELL_SOURCE | {"cell": CELL_SOURCE["cell"] | {"column": "R-2A"}}
+    assert any("cell column R-2A isn't district R-1b" in p for p in validate(rulebook(sources=[foreign, *NOTES]), chart_ctx))
+    general = {"district": "general", "rules": [copy.deepcopy(RULE) | {"id": "general.rear_yard", "sources": [CELL_SOURCE, *NOTES]}]}
+    assert any("can't cite one district's cell" in p for p in validate(general, chart_ctx))
 
 
 def test_a_yes_no_measure_can_be_a_test_on_its_own(ctx):

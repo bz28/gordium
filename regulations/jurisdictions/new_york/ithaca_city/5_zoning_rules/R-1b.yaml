@@ -234,6 +234,9 @@ rules:
         cell: {section: Yard Dimensions, row: Side (one side minimum), column: R-1B}
       - file: zoning_charts_2026-04.pdf
         page: 3
+        cell: {section: Yard Dimensions, row: Side (other side minimum), column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
         cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-1B}
       - file: zoning_charts_2026-04.pdf
         page: 3

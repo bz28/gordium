@@ -7,6 +7,8 @@ direction, every R-1B cell that holds a number, and every primary use marked •
 by some rule, so a rule the drafter missed is caught too.
 """
 
+import ast
+import copy
 import json
 import re
 from pathlib import Path
@@ -115,6 +117,59 @@ def test_each_chart_value_is_exactly_where_the_rule_turns_from_pass_to_fail(rule
                 if (at, beyond) == ("pass", "fail"):
                     tried.add(key)
     assert tried == set(LIMITS)                                  # every stated limit is enforced exactly by some rule
+
+
+def _with_number_changed(text: str, n: float, new: float) -> str:
+    """The formula with every number constant equal to n replaced by new."""
+    class Swap(ast.NodeTransformer):
+        def visit_Constant(self, node):
+            if type(node.value) in (int, float) and abs(node.value - n) < 1e-9:
+                return ast.copy_location(ast.Constant(new), node)
+            return node
+    return ast.unparse(Swap().visit(ast.parse(text, mode="eval")))
+
+
+def number_matters(rule, n, cells, allowed) -> bool:
+    """Does the number n (from a cell the rule cites) decide anything? Changed in the rule's formulas, some
+    outcome must change: on a worked example, or around a cited chart limit from each passing example
+    (that's where an input like the bonus's yard minimum binds: at bound + the extra height)."""
+    changed = copy.deepcopy(rule)
+    for key in ("applies_when", "check"):
+        if key in changed:
+            changed[key] = _with_number_changed(changed[key], n, n * 1.5 + 1)
+    for r in changed.get("review_when", []):
+        r["when"] = _with_number_changed(r["when"], n, n * 1.5 + 1)
+    probes = [ex["given"] for ex in rule["examples"]]
+    for base in (ex["given"] for ex in rule["examples"] if ex["expect"] == "pass"):
+        for c in cells:
+            for measure, _, fixed, limit in LIMITS.get((c["page"], c["section"], c["row"]), []):
+                probes += [base | fixed | {measure: limit(numbers(c["value"])) + k / 2} for k in range(-20, 21)]
+    return any(outcome(rule, p, allowed) != outcome(changed, p, allowed) for p in probes)
+
+
+def formula_numbers(rule) -> list[float]:
+    texts = [rule[k] for k in ("applies_when", "check") if k in rule] + [r["when"] for r in rule.get("review_when", [])]
+    return [n for t in texts for n in formula.numbers(t)]
+
+
+def test_every_cited_chart_number_in_a_formula_decides_something(rules, r1b_cells):
+    """A rule can cite a row as an input whose limit doesn't bind at its first passing example (the height
+    bonus cites the yard minimums), so the exact-limit test alone can't catch a wrong number there. Every
+    number a cited cell gives must appear in the rule's formula and change some outcome when changed."""
+    uses = {"use": set(load(ITHACA / "4_term_definitions/uses.yaml"))}
+    idle = []
+    for rule in rules:
+        if rule["kind"] != "rule":
+            continue
+        cells = [c for c in cited_rows(rule, r1b_cells) if c["page"] != 2]
+        used = formula_numbers(rule)
+        for c in cells:
+            for n in numbers(c["value"]):
+                if not any(abs(n - u) < 1e-9 for u in used):
+                    idle.append(f"{rule['id']}: cites {c['row']!r} ({c['value']}) but its formula doesn't use {n:g}")
+                elif not number_matters(rule, n, cells, uses):
+                    idle.append(f"{rule['id']}: {n:g} from {c['row']!r} changes nothing")
+    assert idle == []
 
 
 def test_every_numbered_r1b_cell_is_cited_by_a_rule_and_has_a_meaning(rules, r1b_cells):
