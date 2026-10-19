@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 from rule_format.rulebook import (Context, _canonical, approval_hash, load, locate, outcome, quote_at, tokenize,
-                                  validate)
+                                  validate, validate_terms)
 
 
 def quote_found(quote, tokens):
@@ -510,3 +510,47 @@ def test_source_entry_problems_reach_the_file(tmp_path):
     (j / "1_source_documents/sources.yaml").write_text(s + "    quoteable: false\n")
     ctx = Context.for_jurisdiction(j)
     assert any("unknown field 'quoteable'" in p for p in ctx.file_problems["doc.pdf"]) and "doc.pdf" not in ctx.pages
+
+
+DEFINITION = {
+    "term": "REAR YARD",
+    "measures": ["rear_yard"],
+    "says": "The open space between the back of the building and the rear lot line.",
+    "sources": [SOURCE],
+    "open_questions": ["Which line is the rear lot line on an irregular lot?"],
+    "drafted_by": "claude",
+    "status": "draft",
+}
+
+
+def test_valid_definitions_and_uses(ctx):
+    assert validate_terms({"rear_yard": DEFINITION}, ctx, "definitions") == []
+    use = {"name": "One-family dwelling, detached", "sources": DEFINITION["sources"],
+           "drafted_by": "claude", "status": "draft"}
+    assert validate_terms({"one_family_detached": use}, ctx, "uses") == []
+
+
+@pytest.mark.parametrize("entries, problem", [
+    ({}, "non-empty mapping"),
+    ({"Rear Yard": DEFINITION}, "lowercase_with_underscores"),
+    ({"rear_yard": DEFINITION | {"measures": ["rear_yrd"]}}, "unknown measure 'rear_yrd'"),
+    ({"rear_yard": DEFINITION | {"says": ""}}, "missing 'says'"),
+    ({"rear_yard": DEFINITION | {"term": ["REAR YARD"]}}, "'term' must be text"),
+    ({"rear_yard": DEFINITION | {"open_questions": "which line?"}}, "'open_questions' must be a list"),
+    ({"rear_yard": DEFINITION | {"colour": "red"}}, "unknown field 'colour'"),
+    ({"rear_yard": DEFINITION | {"sources": [SOURCE | {"quote": "Rear (minimum, % of depth or feet, 30%/"}]}},
+     "not on this page"),
+    ({"rear_yard": DEFINITION | {"status": "approved", "approved_by": "claude",
+                                 "approved_on": datetime.date(2026, 10, 19)}}, "approved_by must be a reviewer"),
+])
+def test_invalid_definitions_are_rejected(ctx, entries, problem):
+    assert any(problem in p for p in validate_terms(entries, ctx, "definitions"))
+
+
+def test_approved_definition_needs_reapproval_after_an_edit(ctx):
+    fields = ("term", "says", "measures", "sources")
+    approved = DEFINITION | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
+                             "approved_hash": approval_hash(DEFINITION, ctx, fields)}
+    assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
+    edited = approved | {"says": "Something else."}
+    assert any("changed since it was approved" in p for p in validate_terms({"rear_yard": edited}, ctx, "definitions"))

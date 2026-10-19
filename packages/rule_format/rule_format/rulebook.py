@@ -196,13 +196,13 @@ def quote_at(quote: str, page: dict[int, list[str]], first: int, last: int) -> b
     return locate(quote, page) == [(first, last)]
 
 
-def approval_hash(rule: dict, ctx: "Context") -> str:
-    """Fingerprint of what an architect approves: the rule's content and the exact versions of the
+def approval_hash(entry: dict, ctx: "Context", fields: tuple[str, ...] = APPROVED_FIELDS) -> str:
+    """Fingerprint of what an architect approves: the entry's content and the exact versions of the
     documents it cites. Any later edit, or a replaced source PDF, changes it."""
-    sources = rule.get("sources")
+    sources = entry.get("sources")
     cited = sorted({s["file"] for s in sources if isinstance(s, dict) and isinstance(s.get("file"), str)}
                    if isinstance(sources, list) else [])
-    approved = {k: rule.get(k) for k in APPROVED_FIELDS} | {
+    approved = {k: entry.get(k) for k in fields} | {
         "source_fingerprints": {f: ctx.sources.get(f, {}).get("sha256") for f in cited}}
     return hashlib.sha256(json.dumps(_canonical(approved)).encode()).hexdigest()
 
@@ -314,20 +314,23 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         elif not p and (got := outcome(rule, given, {"use": ctx.uses})) != ex["expect"]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
 
-    p += open_question_problems(rule)
+    return p + _approval_problems(rule, ctx, APPROVED_FIELDS)
 
-    if rule.get("status") not in STATUSES:
+
+def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> list[str]:
+    p = open_question_problems(entry)
+    if entry.get("status") not in STATUSES:
         p.append(f"status must be one of {STATUSES}")
-    if not rule.get("drafted_by"):
+    if not entry.get("drafted_by"):
         p.append("missing 'drafted_by'")
-    if rule.get("status") == "approved":
-        if rule.get("approved_by") not in ctx.reviewers:
+    if entry.get("status") == "approved":
+        if entry.get("approved_by") not in ctx.reviewers:
             p.append("approved_by must be a reviewer listed in regulations/reviewers.yaml")
-        elif rule["approved_by"].casefold().strip() == rule["drafted_by"].casefold().strip():
-            p.append("a rule can't be approved by the person who drafted it")
-        if not isinstance(rule.get("approved_on"), datetime.date):
+        elif entry["approved_by"].casefold().strip() == entry["drafted_by"].casefold().strip():
+            p.append("can't be approved by the person who drafted it")
+        if not isinstance(entry.get("approved_on"), datetime.date):
             p.append("approved_on must be a date (YYYY-MM-DD)")
-        if rule.get("approved_hash") != approval_hash(rule, ctx):
+        if entry.get("approved_hash") != approval_hash(entry, ctx, fields):
             p.append("changed since it was approved, or a cited document was replaced (approved_hash doesn't match); needs re-approval")
     return p
 
@@ -341,6 +344,51 @@ def open_question_problems(entry: dict) -> list[str]:
     if questions and entry.get("status") == "approved":
         return ["can't be approved while open_questions remain; record the architects' answers first"]
     return []
+
+
+# Definitions (4_term_definitions/definitions.yaml) and use names (uses.yaml): each entry is
+# keyed by its id and cites the city's exact words, like a rule does.
+TERM_SCHEMAS = {
+    "definitions": {"label": "term", "approved": ("term", "says", "measures", "sources"),
+                    "fields": {"term", "says", "measures", "sources", "open_questions", "notes"}},
+    "uses": {"label": "name", "approved": ("name", "sources"), "fields": {"name", "sources", "notes"}},
+}
+APPROVAL_FIELDS = {"drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
+
+
+def validate_terms(entries, ctx: Context, schema: str) -> list[str]:
+    """Problems with a definitions or uses file. An empty list means valid."""
+    s = TERM_SCHEMAS[schema]
+    if not isinstance(entries, dict) or not entries:
+        return ["file must be a non-empty mapping of id -> entry"]
+    problems = []
+    for key, entry in entries.items():
+        if not (isinstance(key, str) and re.fullmatch(r"[a-z][a-z0-9_]*", key)):
+            problems.append(f"{key!r}: ids are lowercase_with_underscores")
+            continue
+        if not isinstance(entry, dict):
+            problems.append(f"{key}: must be a mapping")
+            continue
+        p = [f"unknown field '{k}'" for k in entry.keys() - s["fields"] - APPROVAL_FIELDS]
+        p += [f"'{k}' must be text" for k in (s["label"], "says", "drafted_by", "status", "approved_by")
+              if k in entry and not isinstance(entry[k], str)]
+        if p:
+            problems += [f"{key}: {x}" for x in p]
+            continue
+        if not entry.get(s["label"]):
+            p.append(f"missing '{s['label']}'")
+        if schema == "definitions" and not entry.get("says"):
+            p.append("missing 'says' (plain-English meaning)")
+        measures = entry.get("measures", [])
+        if not (isinstance(measures, list) and all(isinstance(m, str) for m in measures)):
+            p.append("'measures' must be a list of measure names")
+        else:
+            p += [f"unknown measure '{m}'" for m in measures if m not in ctx.measures]
+        sources = _list_of_dicts(entry, "sources")
+        p += ["'sources' must be a list of mappings"] if sources is None else _source_problems(sources, ctx)
+        p += _approval_problems(entry, ctx, s["approved"])
+        problems += [f"{key}: {x}" for x in p]
+    return problems
 
 
 def _source_problems(sources: list[dict], ctx: Context) -> list[str]:

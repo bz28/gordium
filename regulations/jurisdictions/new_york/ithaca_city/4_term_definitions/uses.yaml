@@ -1,0 +1,184 @@
+# Primary uses in the City of Ithaca's residential districts, as named in the zoning charts (page 2).
+# These ids are the only values the `use` measurement may take in residential rules.
+# Each quote is the city's exact row label (verified by `python -m rule_format`).
+# Accessory uses (garages, ADUs, home occupations...) and non-residential districts' uses: later.
+
+one_family_detached:
+  name: "One-family dwelling, detached"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "One-family dwelling, detached ^4 • • •"
+  drafted_by: claude
+  status: draft
+
+one_family_detached_zero_lot_line:
+  name: "One-family dwelling, detached, zero lot line"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "One-family dwelling, detached, zero lot line ^4"
+  drafted_by: claude
+  status: draft
+
+one_family_semi_detached:
+  name: "One-family dwelling, semi-detached"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "One-family dwelling, semi-detached ^4"
+  drafted_by: claude
+  status: draft
+
+one_family_attached:
+  name: "One-family dwelling, attached"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "One-family dwelling, attached ^4"
+  drafted_by: claude
+  status: draft
+
+two_family:
+  name: "Two-family dwelling"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Two-family dwelling ^4 - - • •"
+  drafted_by: claude
+  status: draft
+
+multiple_family:
+  name: "Multiple family dwelling"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Multiple family dwelling ^4"
+  drafted_by: claude
+  status: draft
+
+fraternity_sorority_group_house:
+  name: "Fraternity, sorority, or group house"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Fraternity, sorority, or group house"
+  drafted_by: claude
+  status: draft
+
+dormitory:
+  name: "Dormitory"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Dormitory - - - - - • - • •^5"
+  drafted_by: claude
+  status: draft
+
+church:
+  name: "Church or related building"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Church or related building"
+  drafted_by: claude
+  status: draft
+
+public_park_or_playground:
+  name: "Public park or playground"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Public park or playground"
+  drafted_by: claude
+  status: draft
+
+library_or_fire_station:
+  name: "Library or fire station"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Library or fire station"
+  drafted_by: claude
+  status: draft
+
+cemetery:
+  name: "Cemetery or related building"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Cemetery or related building"
+  drafted_by: claude
+  status: draft
+
+public_utility_structure:
+  name: "Public utility structure except office"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Public utility structure except office"
+  drafted_by: claude
+  status: draft
+
+school:
+  name: "School and related buildings"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "School and related buildings"
+  drafted_by: claude
+  status: draft
+
+nursery_school_or_child_day_care:
+  name: "Nursery school, child day care center"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Nursery school, child day care center"
+  drafted_by: claude
+  status: draft
+
+adult_day_care_home:
+  name: "Adult day care home"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Adult day care home - - SP SP SP"
+  drafted_by: claude
+  status: draft
+
+neighborhood_commercial_facility:
+  name: "Neighborhood commercial facility"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Neighborhood commercial facility"
+  drafted_by: claude
+  status: draft
+
+nursing_home:
+  name: "Nursing, convalescent or rest home"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Nursing, convalescent or rest home"
+  drafted_by: claude
+  status: draft
+
+hospital_or_sanitarium:
+  name: "Hospital or sanitarium"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Hospital or sanitarium - - - - -"
+  drafted_by: claude
+  status: draft
+
+bed_and_breakfast_inn:
+  name: "Bed-and-breakfast inn"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 2
+      quote: "Bed-and-breakfast inn - - - - -"
+  drafted_by: claude
+  status: draft
