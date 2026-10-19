@@ -129,3 +129,4 @@ Every significant decision, in plain language: **what** we decided, **why**, wha
 
 - **Decision:** the AI commits and pushes to PR branches without stopping to ask. Ben approves at merge time: nothing reaches `main` until he merges.
 - **Why:** Ben's call. Per-commit stops slowed the work and filled the conversation, while the real safeguards (review loop before merge, review before commit for big changes, CI) are unchanged.
+- **Where it's written:** the project instructions (`CLAUDE.md`, `/autopilot`, `/implement`, `/review`) are updated in PR #2; until PR #2 is merged, `main`'s copy of `CLAUDE.md` still shows the old per-commit rule.
