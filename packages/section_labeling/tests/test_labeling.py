@@ -380,6 +380,6 @@ def test_a_run_whose_estimate_exceeds_what_is_left_is_refused(monkeypatch, tmp_p
     monkeypatch.setattr(cli, "LEDGER", ledger)
     client = FakeClient()
     monkeypatch.setattr(cli, "_client", lambda: client)
-    assert cli.main(["label", "--limit", "10", "--yes", "--place", "new_york/ithaca_city"]) == 1
+    assert cli.main(["label", "--only", "325-16C", "--yes", "--place", "new_york/ithaca_city"]) == 1   # independent of what is labeled
     out = capsys.readouterr().out
     assert "refused" in out and client.requests == [] and "$0.0000 left" in out
