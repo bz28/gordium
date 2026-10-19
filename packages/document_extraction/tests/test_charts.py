@@ -260,6 +260,39 @@ def test_an_outer_border_alone_does_not_merge_a_row(monkeypatch):
     assert not any(r.get("value") == "Rear 3 4" for r in out)
 
 
+def test_a_district_name_in_a_body_cell_is_not_taken_for_a_header(monkeypatch):
+    shaded = [(0, 20, 100, 40), (100, 20, 150, 40), (150, 20, 200, 40), (0, 60, 100, 80), (100, 60, 150, 80),
+              (150, 60, 200, 80)]
+    out = read(monkeypatch, shaded, [line(25, (5, "Front"), (110, "1"), (160, "2")),
+                                     line(65, (5, "Same"), (110, "3"), (160, "RU"))])
+    assert out == [{"page": 1, "unresolved": "district names at different heights; can't tell the header",
+                    "text": "R-1A, RU"}]
+
+
+def test_a_row_whose_values_are_all_unplaced_is_not_a_heading(monkeypatch):
+    shaded = [(0, 20, 100, 40), (100, 20, 150, 40), (150, 20, 200, 40), (0, 60, 100, 80), (100, 60, 150, 80),
+              (150, 60, 200, 80)]
+    out = read(monkeypatch, shaded, [line(25, (5, "Front"), (140, "25ft")),            # crosses 150
+                                     line(45, (5, "Side"), (110, "5"), (160, "6"))])
+    assert not any(r.get("row") == "Front" for r in out)                       # the whole row is unresolved
+    assert {r["section"] for r in out if r.get("row") == "Side"} == {None}     # and names no section
+
+
+def test_a_row_with_one_uncertain_cell_writes_none_of_its_values(monkeypatch):
+    out = read(monkeypatch, [(0, 20, 150, 40), (150, 20, 200, 40)], [line(25, (5, "Front"), (110, "25"), (160, "10"))])
+    assert any(r.get("unresolved") == "cell covers the label and a column" for r in out)
+    assert not any("value" in r for r in out)                                  # not even R-1B's "10"
+
+
+def test_a_header_column_left_of_the_districts_is_unresolved(monkeypatch):
+    page = Page([(0, 0, 50, 20), (50, 0, 100, 20), (100, 0, 150, 20), (0, 20, 50, 40), (50, 20, 100, 40),
+                 (100, 20, 150, 40)],
+                [line(5, (55, "B-1"), (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))])
+    monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
+    assert read_page(page, 1) == [{"page": 1, "unresolved": "a header column left of the district columns",
+                                   "text": "B-1"}]
+
+
 def test_a_table_without_drawn_body_rows_is_unresolved_not_a_crash(monkeypatch):
     out = read(monkeypatch, [], [line(25, (5, "Front"), (110, "1"))])
     assert out[1:] == [{"page": 1, "unresolved": "no body rows drawn under the header"}]

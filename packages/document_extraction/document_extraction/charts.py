@@ -20,8 +20,11 @@ How the table is found, using only what the PDF draws (plain code, no AI, no jud
   columns is one merged cell ("1 space per dwelling unit" for every district); elsewhere each column
   is its own cell. A row whose cells are all empty is a heading ("Yard Dimensions") for the rows below.
 - Each word is placed in the cell that contains it. A word that crosses a cell edge, a drawn cell
-  reaching from the label into the columns, a cell that covers part of a column, a row that looks
-  like two rows, and a table with no drawn body rows are recorded as unresolved, never guessed.
+  reaching from the label into the columns, a cell that covers part of a column, values with no row
+  label, and a row that looks like two rows make the whole row unresolved: none of its values are
+  written, and it can't become a heading. District names at different heights, a named header
+  column left of the districts, and a table with no drawn body rows make the page unresolved.
+  Nothing is guessed.
 Lines and footnote markers ([fn11]) come from the text extractor, so line numbers match
 2_extracted_text and a cited line can be traced to its cells.
 """
@@ -126,9 +129,20 @@ def read_page(page, page_number: int) -> list[dict]:
                                    for o, _ in labelled)], key=lambda rn: rn[0]["x0"])
     if not districts:
         return [{"page": page_number, "unresolved": "no district header found"}]
+    # The district headers are one header line: a district name lower down is a body cell's text, and
+    # choosing between them would be a guess.
+    if max(r["bottom"] for r, _ in districts) - min(r["bottom"] for r, _ in districts) > EDGE:
+        return [{"page": page_number, "unresolved": "district names at different heights; can't tell the header",
+                 "text": ", ".join(n for _, n in districts)}]
     header_bottom = max(r["bottom"] for r, _ in districts)
     left = min(r["x0"] for r in rects)
     label_x1 = min(r["x0"] for r, _ in districts)
+    # A named header column left of the districts would be read as part of the row label.
+    stray = [n for r, n in named if n and r["top"] < header_bottom - EDGE and r["x0"] > left + EDGE
+             and r["x1"] <= label_x1 + EDGE]
+    if stray:
+        return [{"page": page_number, "unresolved": "a header column left of the district columns",
+                 "text": ", ".join(stray)}]
     columns = [{"name": n, "x0": r["x0"], "x1": r["x1"]} for r, n in districts]
     for r, n in named:
         if (r["top"] < header_bottom - EDGE and n and r["x0"] >= label_x1 - EDGE
@@ -212,41 +226,45 @@ def read_page(page, page_number: int) -> list[dict]:
             continue
         cells = cells_for(band.top, band.bottom, band.rects)
         contents = {cell: [] for cell in cells}
+        problems = []   # anything uncertain makes the whole row unresolved: no partial row is written
+
+        def problem(why, toks):
+            toks = sorted(toks, key=lambda t: (t.line, t.x0))
+            problems.append({"page": page_number, "unresolved": why, "text": render(toks),
+                             "lines": sorted({t.line for t in toks}) or in_band})
+
         for n in in_band:
             for tok in tokens[n]:
                 home = [cell for cell in cells if _within(tok.x0, tok.x1, *cell)]
                 if len(home) == 1:
                     contents[home[0]].append(tok)
                 else:
-                    out.append({"page": page_number, "unresolved": "word crosses a cell edge", "text": tok.text,
-                                "lines": [n], "x0": round(tok.x0, 1), "x1": round(tok.x1, 1)})
-        # A drawn cell reaching from the label into the columns (a whole-row stripe, an outer border)
-        # can't say which words are the label and which are values.
-        crossing = [cell for cell in cells if cell[0] < label_x1 - EDGE and cell[1] > label_x1 + EDGE]
-        for cell in crossing:
-            out.append({"page": page_number, "unresolved": "cell covers the label and a column",
-                        "text": render(sorted(contents[cell], key=lambda t: (t.line, t.x0))),
-                        "lines": sorted({t.line for t in contents[cell]}) or in_band})
-        label_cells = [cell for cell in cells if _within(cell[0], cell[1], left, label_x1)]
-        row_tokens = sorted((t for cell in label_cells for t in contents[cell]), key=lambda t: (t.line, t.x0))
-        row = render(row_tokens)
-        values = {}
+                    problem("word crosses a cell edge", [tok])
+        label_cells, values = [], {}
         for cell in cells:
-            if cell in label_cells or cell in crossing:
-                continue
             covered = [c["name"] for c in columns if _within(c["x0"], c["x1"], *cell)]
-            if not covered:
+            if _within(cell[0], cell[1], left, label_x1):
+                label_cells.append(cell)
+            elif cell[0] < label_x1 - EDGE:
+                # A drawn cell reaching from the label into the columns (a whole-row stripe, an outer
+                # border) can't say which words are the label and which are values.
+                problem("cell covers the label and a column", contents[cell])
+            elif not covered:
                 if contents[cell]:
-                    out.append({"page": page_number, "unresolved": "cell under no column",
-                                "text": render(contents[cell]), "lines": sorted({t.line for t in contents[cell]})})
-                continue
-            if any(c["x0"] < cell[1] - EDGE and c["x1"] > cell[0] + EDGE and c["name"] not in covered for c in columns):
-                out.append({"page": page_number, "unresolved": "cell covers part of a column",
-                            "text": render(contents[cell]), "lines": sorted({t.line for t in contents[cell]})})
-                continue
-            toks = sorted(contents[cell], key=lambda t: (t.line, t.x0))
-            for name in covered:
-                values[name] = (render(toks), sorted({t.line for t in toks}), covered, cell)
+                    problem("cell under no column", contents[cell])
+            elif any(c["x0"] < cell[1] - EDGE and c["x1"] > cell[0] + EDGE and c["name"] not in covered
+                     for c in columns):
+                problem("cell covers part of a column", contents[cell])
+            else:
+                toks = sorted(contents[cell], key=lambda t: (t.line, t.x0))
+                for name in covered:
+                    values[name] = (render(toks), sorted({t.line for t in toks}), covered, cell)
+        row = render(sorted((t for cell in label_cells for t in contents[cell]), key=lambda t: (t.line, t.x0)))
+        if not row and any(v[0] for v in values.values()):
+            problem("values with no row label", [t for cell in cells for t in contents[cell]])
+        if problems:
+            out += problems
+            continue
         is_heading = row and not any(v[0] for v in values.values())
         if is_heading:
             section = row
