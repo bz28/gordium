@@ -23,7 +23,8 @@ How the table is found, using only what the PDF draws (plain code, no AI, no jud
   reaching from the label into the columns, a cell that covers part of a column, a label area that
   isn't exactly one cell, a column left without a cell, values with no row label, and a row that
   looks like two rows, or a column covered by two cells make the whole row unresolved: none of its
-  values are written, and it can't become a heading. District names at different heights, any drawn
+  values are written, it can't become a heading, and the rows below it get no section (it may have
+  been one). Two rows with the same label under one section are both reported unresolved. District names at different heights, any drawn
   rectangle or border dividing the label area (a column left of the districts, named or not), and a
   table with no drawn body rows make the page unresolved.
   Nothing is guessed.
@@ -215,27 +216,10 @@ def read_page(page, page_number: int) -> list[dict]:
                         "text": render([t for n in last for t in tokens[n]]), "lines": last})
     table_top, table_bottom = header_bottom, bands[-1].bottom if bands else header_bottom
 
-    section = None
-    placed = set()
-    for band in bands:
-        in_band = [n for n in sorted(tokens) if band.top - EDGE <= (lines[n - 1]["top"] + lines[n - 1]["bottom"]) / 2
-                   <= band.bottom + EDGE and n not in placed]
-        placed.update(in_band)
-        if not in_band:
-            continue
-        tops = [lines[n - 1]["top"] for n in in_band]
-        if any(b - a >= ROW_GAP * row_height for a, b in zip(tops, tops[1:])):
-            out.append({"page": page_number, "unresolved": "band looks like more than one row",
-                        "text": render([t for n in in_band for t in tokens[n]]), "lines": in_band})
-            continue
+    def read_row(band, in_band, problem, problems):
+        """The band's label and its value per column; reports anything uncertain through `problem`."""
         cells = cells_for(band.top, band.bottom, band.rects)
         contents = {cell: [] for cell in cells}
-        problems = []   # anything uncertain makes the whole row unresolved: no partial row is written
-
-        def problem(why, toks):
-            toks = sorted(toks, key=lambda t: (t.line, t.x0))
-            problems.append({"page": page_number, "unresolved": why, "text": render(toks),
-                             "lines": sorted({t.line for t in toks}) or in_band})
 
         for n in in_band:
             for tok in tokens[n]:
@@ -276,7 +260,29 @@ def read_page(page, page_number: int) -> list[dict]:
         row = render(sorted((t for cell in label_cells for t in contents[cell]), key=lambda t: (t.line, t.x0)))
         if not row and any(v[0] for v in values.values()):
             problem("values with no row label", [t for cell in cells for t in contents[cell]])
-        if problems:
+        return row, values
+
+    section = None
+    placed = set()
+    for band in bands:
+        in_band = [n for n in sorted(tokens) if band.top - EDGE <= (lines[n - 1]["top"] + lines[n - 1]["bottom"]) / 2
+                   <= band.bottom + EDGE and n not in placed]
+        placed.update(in_band)
+        if not in_band:
+            continue
+        problems = []   # anything uncertain makes the whole row unresolved: no partial row is written
+
+        def problem(why, toks):
+            toks = sorted(toks, key=lambda t: (t.line, t.x0))
+            problems.append({"page": page_number, "unresolved": why, "text": render(toks),
+                             "lines": sorted({t.line for t in toks}) or in_band})
+
+        tops = [lines[n - 1]["top"] for n in in_band]
+        if any(b - a >= ROW_GAP * row_height for a, b in zip(tops, tops[1:])):
+            problem("band looks like more than one row", [t for n in in_band for t in tokens[n]])
+        else:
+            row, values = read_row(band, in_band, problem, problems)
+        if problems:                # every unreadable row ends here, whatever made it unreadable
             out += problems
             section = None          # the unread row may have been a heading: rows below can't assume one
             continue

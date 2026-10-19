@@ -432,3 +432,13 @@ def test_a_row_after_an_unread_heading_names_no_section(monkeypatch):
     out = read(monkeypatch, rects, [line(25, (5, "LotSize")), line(65, (5, "Detached"), (110, "1"), (160, "2")),
                                     line(105, (5, "Height")), line(145, (5, "Stories"), (110, "3"), (160, "4"))])
     assert {r["section"] for r in out if r.get("row") == "Stories"} == {None}  # not the old "LotSize"
+
+
+def test_a_row_after_a_band_of_several_rows_names_no_section(monkeypatch):
+    row = lambda top: [(0, top, 100, top + 20), (100, top, 150, top + 20), (150, top, 200, top + 20)]
+    out = read(monkeypatch, row(20) + row(60) + row(140),                   # a tall white band at 80–140
+               [line(25, (5, "LotSize")), line(65, (5, "Detached"), (110, "1"), (160, "2")),
+                line(85, (5, "Height")), line(115, (5, "Stories"), (110, "3"), (160, "4")),
+                line(145, (5, "Width"), (110, "5"), (160, "6"))])
+    assert any(r.get("unresolved") == "band looks like more than one row" for r in out)
+    assert {r["section"] for r in out if r.get("row") == "Width"} == {None}   # not the old "LotSize"
