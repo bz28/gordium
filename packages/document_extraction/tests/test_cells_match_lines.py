@@ -69,6 +69,73 @@ def test_rows_that_cant_be_compared_are_exactly_the_listed_ones():
     report = cross_check()
     found = {(p, row) for p, r in report.items() for row in r["not_comparable"]}
     assert found == set(NOT_COMPARABLE)
+    assert found == set(BY_HAND)                     # and every one of them is asserted in full below
+
+
+# The rows the line method can't check, every column read by hand from the PDF: each word's x position
+# on the cited lines against the drawn column edges (p.2: R-1A 259–302 … RU 605–672, Additional
+# Regulations 672–756; p.3: R-1A 256–310 … RU 693–755; p.14: R-1A 236–285 … RU 596–756), top line first.
+REAR = "25%/ 50 ft [fn16]"
+BY_HAND = {
+    # p.2 lines 35-37: "SP" at x 275, 318, 361, 405, 448, 491, 534, 577, 632 on line 36; "§325-9B(1)(j)" at 680
+    (2, "Tower for the receipt or transmission of electronic signals or generation of electricity"):
+        dict.fromkeys(["R-1A", "R-1B", "R-2A", "R-2B", "R-2C", "R-3A", "R-3AA", "R-3B", "RU"], "SP")
+        | {"Additional Regulations": "§325-9B(1)(j)"},
+    # p.3 lines 33-35: line 34 has 20% @273, 25% @324, 30% @375, 35% @426, 35% @545, 35% @601, 40% @656,
+    # 25% [fn13] @710; R-2C (460-526) has "35%/40%" @470 on line 33 and "/50% [fn12]" @475 on line 35
+    (3, "Percent of lot area"): {"R-1A": "20%", "R-1B": "25%", "R-2A": "30%", "R-2B": "35%",
+                                 "R-2C": "35%/40% /50% [fn12]", "R-3A": "35%", "R-3AA": "35%", "R-3B": "40%",
+                                 "RU": "25% [fn13]"},
+    # p.3 lines 39-41: line 40 has 10 ft @274, @325, @375, 5 ft @429, @548, @604, @659, 10 ft @715;
+    # R-2C has "0 ft /5 ft /" @470 on line 39 and "10 ft [fn15]" @479 on line 41
+    (3, "Side (other side minimum)"): {"R-1A": "10 ft", "R-1B": "10 ft", "R-2A": "10 ft", "R-2B": "5 ft",
+                                       "R-2C": "0 ft /5 ft / 10 ft [fn15]", "R-3A": "5 ft", "R-3AA": "5 ft",
+                                       "R-3B": "5 ft", "RU": "10 ft"},
+    # p.3 lines 42-43: line 42 has "25%/" @270, 321, 372, 422, 480, "20%/" @541, "25%/" @598, "20%/" @653,
+    # "25% /" @710; line 43 has "50 ft [fn16]" under each, "50 ft [fn17]" @710
+    (3, "Rear (minimum, % of depth or feet, whichever is less)"):
+        {"R-1A": REAR, "R-1B": REAR, "R-2A": REAR, "R-2B": REAR, "R-2C": REAR, "R-3A": "20%/ 50 ft [fn16]",
+         "R-3AA": REAR, "R-3B": "20%/ 50 ft [fn16]", "RU": "25% / 50 ft [fn17]"},
+    # p.14 lines 9-11: "1 space per dwelling unit" @447-545 on line 10, in one drawn rectangle 236-756
+    (14, "First three bed or sleeping rooms per dwelling unit"):
+        dict.fromkeys(["R-1A", "R-1B", "R-2A", "R-2B", "R-2C", "R-3A", "R-3AA", "R-3B", "RU"], "1 space per dwelling unit"),
+    # p.14 lines 14-18: "-" @259, 314, 362, 396, 430 and @520 on line 16; R-3A (449-498) has "1 space" @457,
+    # "per 4" @463, "persons" @458, "housed" @459 on lines 14, 15, 17, 18; R-3B (546-596) the same @556-561;
+    # RU "1 space per 4 persons housed" @617 on line 16
+    (14, "Dormitory"): {"R-1A": "-", "R-1B": "-", "R-2A": "-", "R-2B": "-", "R-2C": "-",
+                        "R-3A": "1 space per 4 persons housed", "R-3AA": "-",
+                        "R-3B": "1 space per 4 persons housed", "RU": "1 space per 4 persons housed"},
+}
+
+
+def _cells():
+    return [json.loads(line) for line in (TEXT / "zoning_charts_2026-04.cells.jsonl").open(encoding="utf-8")][1:]
+
+
+def test_every_column_of_the_wrapped_rows_matches_the_pdf_read_by_hand():
+    cells = _cells()
+    for (page, row), expected in BY_HAND.items():
+        got = {c["column"]: c["value"] for c in cells if c.get("page") == page and c.get("row") == row}
+        assert got == expected, (page, row)
+
+
+def test_wrapped_rows_lose_and_invent_nothing():
+    """Order-free: the words on a wrapped row's lines, less its label, are exactly its cells' words
+    (a merged cell once), so nothing on those lines is lost and nothing in a cell comes from elsewhere."""
+    lines = {}
+    for line in (TEXT / "zoning_charts_2026-04.jsonl").open(encoding="utf-8"):
+        r = json.loads(line)
+        if "line" in r:
+            lines[(r["page"], r["line"])] = r["text"]
+    cells = _cells()
+    for page, row in BY_HAND:
+        mine = [c for c in cells if c.get("page") == page and c.get("row") == row]
+        on_lines = sorted(t for n in mine[0]["row_lines"] for t in tokenize(lines[(page, n)]))
+        label = tokenize(row)
+        for t in label:
+            on_lines.remove(t)
+        in_cells = sorted(t for v in {(c["x0"], c["x1"]): c["value"] for c in mine}.values() for t in tokenize(v))
+        assert in_cells == on_lines, (page, row)
 
 
 if __name__ == "__main__":   # the counts for the PR description
