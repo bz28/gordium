@@ -61,6 +61,7 @@ Planned but not created until their code is written: `packages/ai_designer`, `pa
 - Stack dependent work with Graphite: `gt c -m "msg"` to commit, `gt s` to submit. Each PR must be independently reviewable **and evaluable**: it states how we know it is right, and CI proves it.
 - No squash merges (`--merge`, keep history). Small cohesive commits with prefixes `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`.
 - Don't commit or open PRs unless Ben asks or invoked `/autopilot`. Even in autopilot, **before each commit** stop and tell Ben: what's being committed, what's done so far, what's next, why now, and why it's the right approach. Wait for his OK.
+- **PR descriptions are written so anyone can follow them** (an architect, a shareholder, someone who has never coded): follow `.github/pull_request_template.md`. Define every technical word, list what was built in everyday language, walk through one real example start to finish.
 - Every PR description has a **Test Plan with evidence**: each check run (pytest, rule validation, extraction reproducibility) with its result, plus the eval that proves the PR's output is correct.
 - After opening a PR, watch CI until green. If a check fails, say which, why, and the fix.
 - Repo slash commands live in `.claude/commands/` (`/plan`, `/implement`, `/autopilot`, `/review`, `/debug`, `/explain-simple`), tailored to Gordium.
