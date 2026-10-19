@@ -96,12 +96,15 @@ class Context:
     def for_jurisdiction(cls, jurisdiction_dir) -> "Context":
         j = Path(jurisdiction_dir)
         uses_file = j / "4_term_definitions/uses.yaml"
-        listed = {d["file"]: d for d in load(j / "1_source_documents/sources.yaml")["documents"]}
+        documents = load(j / "1_source_documents/sources.yaml")["documents"]
+        listed = {d["file"]: d for d in documents}
         ctx = cls(measures=set(load(MEASURES_FILE)),
                   uses=set(load(uses_file) or ()) if uses_file.exists() else set(),
                   topics=set(load(VOCABULARY_FILE)["topics"]),
                   reviewers=set(load(REVIEWERS_FILE) or ()),
                   sources=listed)
+        for name in {d["file"] for d in documents if [x["file"] for x in documents].count(d["file"]) > 1}:
+            ctx._problem(name, "listed more than once in sources.yaml")
         for name, entry in listed.items():
             pdf = j / "1_source_documents" / name
             sha = entry.get("sha256")
@@ -112,7 +115,8 @@ class Context:
             elif hashlib.sha256(pdf.read_bytes()).hexdigest() != sha:
                 ctx._problem(name, "fingerprint does not match sources.yaml")
             extracted = j / "2_extracted_text" / f"{Path(name).stem}.jsonl"
-            if extracted.exists():
+            # Text is only trusted for a document whose own checks all passed.
+            if extracted.exists() and name not in ctx.file_problems:
                 ctx._load_extracted(name, sha, extracted)
         return ctx
 
@@ -157,8 +161,9 @@ def locate(quote: str, page: dict[int, list[str]]) -> list[tuple[int, int]]:
 
 
 def quote_at(quote: str, page: dict[int, list[str]], first: int, last: int) -> bool:
-    """True if the quote occurs on the page starting on line `first` and ending on line `last`."""
-    return (first, last) in locate(quote, page)
+    """True if the quote occurs exactly once on the page, starting on line `first` and ending on line
+    `last`. Unique, so a citation points at one place (a bare "35 ft" on a chart row doesn't qualify)."""
+    return locate(quote, page) == [(first, last)]
 
 
 def approval_hash(rule: dict, ctx: "Context") -> str:
@@ -327,6 +332,7 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
             p.append(f"source {name}: page {page} does not exist")
         elif not quote_at(quote, ctx.pages[name][page], *lines):
             found = locate(quote, ctx.pages[name][page])
-            where = f"; it is at lines {', '.join(f'{a}-{b}' for a, b in found)}" if found else "; not on this page"
+            where = (f"; it is at lines {', '.join(f'{a}-{b}' for a, b in found)}"
+                     + ("; quote more words so it's unique" if len(found) > 1 else "")) if found else "; not on this page"
             p.append(f"source {name} p.{page}: quote isn't at lines {lines[0]}-{lines[1]}{where}: {quote!r}")
     return p

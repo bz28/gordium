@@ -322,11 +322,13 @@ def test_context_loads_extracted_text(tmp_path):
 
 
 def test_context_reports_changed_pdf_and_stale_text(tmp_path):
-    ctx = Context.for_jurisdiction(_jurisdiction(tmp_path, pdf_bytes=b"changed", header_sha="old"))
-    assert any("fingerprint does not match" in p for p in ctx.problems)
-    assert any("different version" in p for p in ctx.problems)
-    assert any("different version" in p for p in ctx.file_problems["doc.pdf"])
-    assert "doc.pdf" not in ctx.pages
+    changed = Context.for_jurisdiction(_jurisdiction(tmp_path / "a", pdf_bytes=b"changed"))
+    assert any("fingerprint does not match" in p for p in changed.problems)
+    assert "doc.pdf" not in changed.pages
+    stale = Context.for_jurisdiction(_jurisdiction(tmp_path / "b", header_sha="old"))
+    assert any("different version" in p for p in stale.problems)
+    assert any("different version" in p for p in stale.file_problems["doc.pdf"])
+    assert "doc.pdf" not in stale.pages
 
 
 def test_cli_reports_broken_folders_and_files_instead_of_crashing(tmp_path, monkeypatch, capsys):
@@ -453,3 +455,22 @@ def test_cite_reports_only_the_asked_files_problems(tmp_path, monkeypatch, capsy
     assert cli.cite(["ny/town", "d.pdf", "1", "x"]) == 1
     out = capsys.readouterr().out
     assert "d.pdf: no extracted text" in out and "doc" not in out
+
+
+def test_quote_must_be_unique_on_the_page():
+    page = {n: tokenize(t) for n, t in PAGE_3.items()}
+    assert any("quote more words so it's unique" in p for p in _source_issue(page, "50 ft [fn16]", [43, 43]))
+    assert _source_issue(page, QUOTE, [42, 43]) == []
+
+
+def test_text_is_not_trusted_for_a_document_that_failed_its_checks(tmp_path):
+    ctx = Context.for_jurisdiction(_jurisdiction(tmp_path, pdf_bytes=b"replaced", rows=[{"page": 1, "line": 1, "text": "x"}]))
+    assert "doc.pdf" not in ctx.pages and "fingerprint does not match sources.yaml" in ctx.file_problems["doc.pdf"]
+
+
+def test_document_listed_twice_is_reported(tmp_path):
+    j = _jurisdiction(tmp_path, rows=[])
+    s = (j / "1_source_documents/sources.yaml").read_text()
+    (j / "1_source_documents/sources.yaml").write_text(s + s.split("documents:\n", 1)[1])
+    ctx = Context.for_jurisdiction(j)
+    assert "listed more than once in sources.yaml" in ctx.file_problems["doc.pdf"]
