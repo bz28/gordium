@@ -24,6 +24,7 @@ The shape every rule must have, the formula language rules are written in, and t
     - given: {use: one_family_detached, rear_yard: 21, lot_depth: 90}
       expect: fail
   drafted_by: claude
+  open_questions: []                             # interpretations for the architects; none allowed once approved
   status: draft                                  # approved also needs approved_by, approved_on, approved_hash
 ```
 
@@ -51,4 +52,4 @@ Validation checks: file shape; required fields; no duplicate YAML keys; known me
 
 ## How quotes are matched
 
-The page text and the quote are both split into **tokens** with one rule (`rulebook.tokenize`): a footnote marker (`[fn11]`), a whole word or number (`rear`, `2.5`, `1,500`, `3/2`, `.5`), or a single other character (`%`, `(`, `§`). `.`, `,` and `/` belong to a token only between letters or digits. A quote matches only as a run of **whole tokens**, so `5` can never match inside `25`, `2.5` or `1/2`, `R-1` never inside `R-1b`, and a quote may end on a number before a sentence's period. Spacing and line breaks don't matter; case, curly quotes and dash styles are unified. `…` skips at most 60 tokens (about two lines).
+The page text and the quote are both split into **tokens** with one rule (`rulebook.tokenize`): a footnote marker (`[fn11]`), a whole word or number (`rear`, `2.5`, `1,500`, `3/2`, `.5`), or a single other character (`%`, `(`, `§`). `.`, `,` and `/` join only digit to digit (`3/35`, `2.5`), and a leading `.` only starts a number (`.5`); so `minimum/maximum` is three tokens. A quote matches only as a run of **whole tokens**, so `5` can never match inside `25`, `2.5` or `1/2`, `R-1` never inside `R-1b`, and a quote may end on a number before a sentence's period. Spacing and line breaks don't matter; case, curly quotes and dash styles are unified. `…` skips at most 60 tokens (words, numbers and single symbols: about two lines).

@@ -6,7 +6,7 @@ import math
 import pytest
 import yaml
 
-from rule_format.rulebook import Context, approval_hash, load, outcome, quote_found, tokenize, validate
+from rule_format.rulebook import Context, _canonical, approval_hash, load, outcome, quote_found, tokenize, validate
 
 PAGE_3 = "Rear (minimum, % of depth or feet, whichever is less)  25%/ 50 ft 16"
 QUOTE = "Rear (minimum, % of depth … whichever is less)  25%/ 50 ft"
@@ -279,9 +279,21 @@ def test_earlier_look_alike_does_not_hide_the_real_quote():
     ("R-1b and R-1", ["r", "-", "1b", "and", "r", "-", "1"]),
     ("stories: 3. Lot", ["stories", ":", "3", ".", "lot"]),
     ("“Quoted” — dash", ['"', "quoted", '"', "-", "dash"]),
+    ("maximum 3/35, minimum/maximum", ["maximum", "3/35", ",", "minimum", "/", "maximum"]),
+    ("(see above).The rear", ["(", "see", "above", ")", ".", "the", "rear"]),
 ])
 def test_tokenize(text, expected):
     assert tokenize(text) == expected
+
+
+@pytest.mark.parametrize("quote, page", [
+    ("Front setback, minimum/maximum 0 feet", "Front setback, minimum/maximum 0 feet/2 feet"),   # Ch. 325 p.157
+    ("Waterfront District regulations", "WE/WFD West End/Waterfront District regulations"),   # p.23
+    ("Maximum stories: 3", "Maximum stories: 3.Lot coverage 35%"),                          # no space after '.'
+    ("The rear yard shall be", "(see above).The rear yard shall be"),
+])
+def test_quote_may_start_or_end_at_word_punctuation(quote, page):
+    assert quote_found(quote, tokenize(page))
 
 
 def test_quote_cannot_cut_a_district_name():
@@ -357,3 +369,22 @@ def test_cli_keeps_going_when_validation_itself_fails(tmp_path, monkeypatch, cap
     assert cli.main() == 1
     out = capsys.readouterr().out
     assert out.count("validator error (TypeError: boom)") == 2
+
+
+def test_fingerprint_is_stable_for_any_yaml_value():
+    assert _canonical({3, 1, 2}) == {"set": [1, 2, 3]}                 # YAML !!set, any hash seed
+    assert _canonical(b"\x01") == {"bytes": "01"}                       # YAML !!binary
+    assert _canonical({1: "a"}) != _canonical({"1": "a"})                # 1 and "1" stay different
+
+
+def test_review_reason_must_be_text(ctx):
+    bad = rulebook(review_when=[{"when": "lot_depth > 500", "reason": {"a", "b"}}])
+    assert any("needs a 'reason' (text)" in p for p in validate(bad, ctx))
+
+
+def test_rule_with_open_questions_cannot_be_approved(ctx):
+    question = {"open_questions": ["Is the yard measured to the wall or the eave?"]}
+    assert validate(rulebook(**question), ctx) == []                    # fine as a draft
+    approved = APPROVED | question                                          # adding a question blocks approval
+    assert any("open_questions remain" in p for p in validate(rulebook(**approved), ctx))
+    assert any("'open_questions' must be a list" in p for p in validate(rulebook(open_questions="why?"), ctx))

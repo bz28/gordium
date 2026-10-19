@@ -110,3 +110,16 @@ Every significant decision, in plain language: **what** we decided, **why**, wha
 
 - **Decision:** no bandage fixes. When review findings keep appearing in the same area, stop and redesign (as in D8) instead of adding special cases. Problems with the process that affect accuracy or repeating it for other zones and cities are raised with Ben as soon as they're seen.
 - **Why:** the rulebook must stay correct for every zone and every city, not just the cases we've seen.
+
+## D16 · Large changes are reviewed before they're committed
+*PR 2 (process), 2026-10-19* · Status: active
+
+- **Decision:** a large or design-level change gets a review round (fresh reviewer + skeptics) on the uncommitted work *before* Ben is asked to commit it (`/review` with `uncommitted: true`). Small fixes from a round are committed first and re-checked by the next round. Nothing reaches `main` until a round comes back clean and Ben merges.
+- **Why:** Ben asked whether we should review before committing. Reviewing every small fix before committing would slow the loop without adding safety (the next round re-checks it); reviewing big changes first means Ben's OK on a big commit is an OK on independently reviewed code.
+
+## D17 · Rules get an `open_questions` box too
+*PR 1, review round 8* · Status: active
+
+- **Decision:** rules, like definitions, can list `open_questions`: interpretations the law leaves open (e.g. how R-1b's height bonus increases each yard). A rule with open questions can be drafted and used as "needs review" context, but can't be approved until the architects' answers are recorded.
+- **Why:** the drafting rules (D19, added with the definitions) say interpretations go to questions, never into the rule's plain-English text, and rules had nowhere to put them.
+- **Considered:** also putting the questions into the approval fingerprint. Not needed: approval is impossible while any question exists, so adding a question after approval is already caught, and a safeguard that no test can tell apart from its absence is dead code.

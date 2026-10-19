@@ -31,8 +31,8 @@ STATUSES = ("draft", "approved")
 MIN_QUOTE_LENGTH = 15     # non-space characters per quoted piece; short pieces match by accident
 MAX_QUOTE_PIECES = 3      # at most two '…' gaps in one quote
 MAX_QUOTE_GAP = 60        # tokens (words, numbers, symbols) a '…' may skip: about two lines of text
-RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources",
-               "examples", "notes", "drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
+RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources", "examples",
+               "notes", "open_questions", "drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
 TEXT_FIELDS = ("id", "kind", "topic", "says", "drafted_by", "status", "approved_by")
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "quote"},
                "examples": {"given", "expect", "note"}}
@@ -126,11 +126,12 @@ class Context:
         self.pages[name] = {p: tokenize(" ".join(t)) for p, t in pages.items()}
 
 
-# A token is a footnote marker ("[fn11]"), a whole word or number ("rear", "2.5", "1,500", "3/2", ".5"),
-# or a single other character ("%", "(", "§"). '.', ',' and '/' are part of a token only between letters
-# or digits. Quotes and pages are both split this way, and a quote must match whole tokens, so "5"
-# can never match inside "25", "2.5" or "1/2", and "ear" never inside "rear".
-TOKEN = re.compile(r"\[fn[^\]\s]*\]|\.?[^\W_]+(?:[.,/][^\W_]+)*|\S")
+# A token is a footnote marker ("[fn11]"), a whole word or number ("rear", "1b", "2.5", "1,500", "3/2",
+# ".5"), or a single other character ("%", "(", "/", "§"). '.', ',' and '/' join only digit to digit,
+# and a leading '.' only starts a number, so "minimum/maximum" is three tokens and "3/35" is one.
+# Quotes and pages are both split this way, and a quote must match whole tokens, so "5" can never
+# match inside "25", "2.5" or "1/2", and "ear" never inside "rear".
+TOKEN = re.compile(r"\[fn[^\]\s]*\]|(?:\.(?=\d))?[^\W_]+(?:(?<=\d)[.,/](?=\d)[^\W_]+)*|\S")
 _UNIFY = str.maketrans("‘’“”–—", "''\"\"--")
 
 
@@ -182,11 +183,15 @@ def _canonical(value):
         return {"map": sorted(items, key=lambda kv: json.dumps(kv[0]))}
     if isinstance(value, (list, tuple)):
         return [_canonical(v) for v in value]
+    if isinstance(value, bytes):  # YAML !!binary
+        return {"bytes": value.hex()}
+    if isinstance(value, (set, frozenset)):  # YAML !!set: order must not depend on Python's hashing
+        return {"set": sorted((_canonical(v) for v in value), key=json.dumps)}
     if isinstance(value, (datetime.date, datetime.datetime)):
         return {"date": value.isoformat()}
     if value is None or isinstance(value, (bool, int, float, str)):
         return value
-    return {type(value).__name__: str(value)}
+    raise TypeError(f"can't fingerprint a {type(value).__name__}: {value!r}")
 
 
 def validate(rulebook, ctx: Context) -> list[str]:
@@ -241,8 +246,8 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
 
     conditions = [rule[k] for k in ("applies_when", "check") if k in rule]
     for r in review_when or []:
-        if not r.get("reason"):
-            p.append("each review_when needs a 'reason'")
+        if not (isinstance(r.get("reason"), str) and r["reason"].strip()):
+            p.append("each review_when needs a 'reason' (text)")
         conditions.append(r.get("when"))
     for f in conditions:
         if not isinstance(f, str):
@@ -277,6 +282,8 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         elif not p and (got := outcome(rule, given, {"use": ctx.uses})) != ex["expect"]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
 
+    p += open_question_problems(rule)
+
     if rule.get("status") not in STATUSES:
         p.append(f"status must be one of {STATUSES}")
     if not rule.get("drafted_by"):
@@ -291,6 +298,17 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         if rule.get("approved_hash") != approval_hash(rule, ctx):
             p.append("changed since it was approved, or a cited document was replaced (approved_hash doesn't match); needs re-approval")
     return p
+
+
+def open_question_problems(entry: dict) -> list[str]:
+    """Interpretations the law leaves open (drafting_rules.md): a list of text, and nothing with open
+    questions can be approved until the architects' answers are recorded."""
+    questions = entry.get("open_questions", [])
+    if not (isinstance(questions, list) and all(isinstance(q, str) and q.strip() for q in questions)):
+        return ["'open_questions' must be a list of text"]
+    if questions and entry.get("status") == "approved":
+        return ["can't be approved while open_questions remain; record the architects' answers first"]
+    return []
 
 
 def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
