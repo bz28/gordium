@@ -63,4 +63,6 @@ A source gives the **exact position** of its quote: the page and the first and l
 
 Definitions (`4_term_definitions/definitions.yaml`) have `term`, `measures`, `sources` (the city's whole sentences, no paraphrase), `open_questions`, and once an architect answers a question, `answers`: `{question, answer, answered_by (a reviewer), answered_on}`. The answers are part of the approval fingerprint, so an answer can't change after approval. Use names (`uses.yaml`) have `name` and `sources`.
 
+Section labels (`3_section_labels/<document>.yaml`, see `rule_format/labels.py`) are checked the same way: a label from the vocabulary, a known topic, a reason, a quote that is the city's words **inside its piece**, a fingerprint of the piece as labeled (re-cut or new PDF → label again), and the usual draft/approval rules.
+
 Chart values: a quote pins the **row** (its line) but not yet the **column**. Until the chart reader (step 5, next PRs) cites table cells by row and column, a value read from the wrong district's column is caught by comparing the draft R-1b rulebook (an answer key once architects approve it) with the chart reader's output, and by architect review.

@@ -147,7 +147,8 @@ class Context:
 
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
-                 "adopted_on", "created_on", "quotable", "not_quotable_because"}
+                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout"}
+LAYOUTS = {"ecode360"}   # document layouts the section splitter knows (document_extraction/sections.py)
 
 
 def _use_rows(uses) -> dict[str, list[dict]]:
@@ -201,6 +202,8 @@ def _source_entry_problems(entry: dict) -> list[str]:
     if entry.get("quotable") is False and not (isinstance(entry.get("not_quotable_because"), str)
                                                and entry["not_quotable_because"].strip()):
         p.append("marked not quotable but 'not_quotable_because' is missing")
+    if "layout" in entry and entry["layout"] not in LAYOUTS:
+        p.append(f"'layout' must be one of {sorted(LAYOUTS)}")
     return p
 
 

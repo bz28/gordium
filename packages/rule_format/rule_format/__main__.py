@@ -4,8 +4,10 @@
     python -m rule_format cite new_york/ithaca_city zoning_charts_2026-04.pdf 3 "Height in feet 35 ft"
                                    # prints the lines to cite: lines: [31, 31]
 
-For each jurisdiction: its source documents (fingerprints, extracted text), then
-every rule file in 5_zoning_rules/ and in its test_data/answer_keys/ folder.
+For each jurisdiction: its source documents (fingerprints, extracted text), its definitions and
+uses (4_term_definitions/), its section labels (3_section_labels/<document>.yaml, against the pieces in
+2_extracted_text/<document>.sections.jsonl), then every rule file in 5_zoning_rules/ and in its
+test_data/answer_keys/ folder.
 """
 
 import argparse
@@ -14,6 +16,7 @@ from pathlib import Path
 
 import yaml
 
+from .labels import load_pieces, validate_labels
 from .rulebook import REPO, TERM_SCHEMAS, Context, load, locate, not_quotable, validate, validate_terms
 
 
@@ -42,6 +45,18 @@ def main() -> int:
                 for problem in problems:
                     print(f"    {problem}")
                 failed += bool(problems)
+        for path in sorted((jurisdiction / "3_section_labels").glob("*.yaml")):
+            checked += 1
+            pieces_file = jurisdiction / "2_extracted_text" / f"{path.stem}.sections.jsonl"
+            try:
+                problems = (validate_labels(load(path), ctx, *load_pieces(pieces_file)) if pieces_file.exists()
+                            else [f"no sections file {pieces_file.relative_to(REPO)} (set layout in sources.yaml)"])
+            except Exception as e:  # report and keep going: one broken file mustn't hide the rest
+                problems = [f"validator error ({type(e).__name__}: {e})"]
+            print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
+            for problem in problems:
+                print(f"    {problem}")
+            failed += bool(problems)
         files = sorted(p for folder in (jurisdiction / "5_zoning_rules", REPO / "test_data/answer_keys" / place)
                        for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file())
         for path in files:

@@ -19,5 +19,7 @@ jobs:
         run: pytest
       - name: Extracted text matches a fresh extraction (reproducible)
         run: python -m document_extraction --check
-      - name: Rule files are valid (sources, quotes, worked examples)
+      - name: Rule files are valid (sources, quotes, worked examples, section labels)
         run: python -m rule_format
+      - name: Every line of the law is in exactly one piece; coverage report is current (no AI)
+        run: python -m section_labeling coverage --check
