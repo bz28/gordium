@@ -66,8 +66,10 @@ def cite(argv: list[str]) -> int:
         print(f"{args.file} is not in sources.yaml")
         return 1
     if args.file not in ctx.pages:
-        reasons = [p for p in ctx.problems if args.file in p or Path(args.file).stem in p]
-        print("\n".join(reasons) or f"no extracted text for {args.file}")
+        reasons = ctx.file_problems.get(args.file, [])
+        if not (place / "2_extracted_text" / f"{Path(args.file).stem}.jsonl").exists():
+            reasons = [*reasons, "no extracted text"]
+        print("\n".join(f"{args.file}: {r}" for r in reasons))
         return 1
     if args.page not in ctx.pages[args.file]:
         print(f"{args.file} has no page {args.page}")

@@ -86,6 +86,11 @@ class Context:
     reviewers: set[str] = field(default_factory=set)                 # who may approve rules
     pages: dict[str, dict[int, dict[int, list[str]]]] = field(default_factory=dict)  # file -> page -> line -> tokens
     problems: list[str] = field(default_factory=list)                # problems with the sources themselves
+    file_problems: dict[str, list[str]] = field(default_factory=dict)  # the same, by source file
+
+    def _problem(self, name: str, message: str):
+        self.problems.append(f"{name}: {message}")
+        self.file_problems.setdefault(name, []).append(message)
 
     @classmethod
     def for_jurisdiction(cls, jurisdiction_dir) -> "Context":
@@ -101,11 +106,11 @@ class Context:
             pdf = j / "1_source_documents" / name
             sha = entry.get("sha256")
             if not sha:
-                ctx.problems.append(f"{name}: no sha256 in sources.yaml")
+                ctx._problem(name, "no sha256 in sources.yaml")
             elif not pdf.exists():
-                ctx.problems.append(f"{name}: listed in sources.yaml but missing")
+                ctx._problem(name, "listed in sources.yaml but missing")
             elif hashlib.sha256(pdf.read_bytes()).hexdigest() != sha:
-                ctx.problems.append(f"{name}: fingerprint does not match sources.yaml")
+                ctx._problem(name, "fingerprint does not match sources.yaml")
             extracted = j / "2_extracted_text" / f"{Path(name).stem}.jsonl"
             if extracted.exists():
                 ctx._load_extracted(name, sha, extracted)
@@ -117,7 +122,7 @@ class Context:
         it from the PDF and requires an exact match; until then nothing here checks the text against the PDF."""
         rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
         if not rows or rows[0].get("sha256") != sha:
-            self.problems.append(f"{path.name}: extracted from a different version of {name}; re-extract")
+            self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return
         pages: dict[int, dict[int, list[str]]] = {}
         for row in rows[1:]:

@@ -325,6 +325,7 @@ def test_context_reports_changed_pdf_and_stale_text(tmp_path):
     ctx = Context.for_jurisdiction(_jurisdiction(tmp_path, pdf_bytes=b"changed", header_sha="old"))
     assert any("fingerprint does not match" in p for p in ctx.problems)
     assert any("different version" in p for p in ctx.problems)
+    assert any("different version" in p for p in ctx.file_problems["doc.pdf"])
     assert "doc.pdf" not in ctx.pages
 
 
@@ -438,3 +439,17 @@ def test_cite_reports_stale_extracted_text(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(cli, "REPO", tmp_path)
     assert cli.cite(["ny/town", "doc.pdf", "2", "x"]) == 1
     assert "different version" in capsys.readouterr().out
+
+
+def test_cite_reports_only_the_asked_files_problems(tmp_path, monkeypatch, capsys):
+    import rule_format.__main__ as cli
+    import hashlib
+    j = _jurisdiction(tmp_path / "regulations/jurisdictions", header_sha="old", rows=[])   # doc.pdf: stale text
+    (j / "1_source_documents/d.pdf").write_bytes(b"other")                                 # d.pdf: no text at all
+    sha = hashlib.sha256(b"other").hexdigest()
+    with open(j / "1_source_documents/sources.yaml", "a") as f:
+        f.write(f"  - file: d.pdf\n    sha256: {sha}\n")
+    monkeypatch.setattr(cli, "REPO", tmp_path)
+    assert cli.cite(["ny/town", "d.pdf", "1", "x"]) == 1
+    out = capsys.readouterr().out
+    assert "d.pdf: no extracted text" in out and "doc" not in out
