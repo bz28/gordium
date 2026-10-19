@@ -114,8 +114,8 @@ Every significant decision, in plain language: **what** we decided, **why**, wha
 ## D16 · Large changes are reviewed before they're committed
 *PR 2 (process), 2026-10-19* · Status: active
 
-- **Decision:** a large or design-level change gets a review round (fresh reviewer + skeptics) on the uncommitted work *before* Ben is asked to commit it (`/review` with `uncommitted: true`). Small fixes from a round are committed first and re-checked by the next round. Nothing reaches `main` until a round comes back clean and Ben merges.
-- **Why:** Ben asked whether we should review before committing. Reviewing every small fix before committing would slow the loop without adding safety (the next round re-checks it); reviewing big changes first means Ben's OK on a big commit is an OK on independently reviewed code.
+- **Decision:** a large or design-level change gets a review round (fresh reviewer + skeptics) on the uncommitted work *before* it's committed (`/review` with `uncommitted: true`). Small fixes from a round are committed first and re-checked by the next round. Nothing reaches `main` until a round comes back clean and Ben merges.
+- **Why:** Ben asked whether we should review before committing. Reviewing every small fix before committing would slow the loop without adding safety (the next round re-checks it); reviewing big changes first means no large change enters a PR without an independent review.
 
 ## D17 · Rules get an `open_questions` box too
 *PR 1, review round 8* · Status: active

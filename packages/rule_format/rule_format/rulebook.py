@@ -128,7 +128,7 @@ class Context:
 
 # A token is a footnote marker ("[fn11]"), a whole word or number ("rear", "1b", "2.5", "1,500", "3/2",
 # ".5"), or a single other character ("%", "(", "/", "§"). '.', ',' and '/' join only digit to digit,
-# and a leading '.' starts a number only when no letter, digit or '.' comes right before it ("No.5" is
+# and a leading '.' starts a number only when no letter, digit, '_' or '.' comes right before it ("No.5" is
 # "no", ".", "5"), so "minimum/maximum" is three tokens and "3/35" is one.
 # Quotes and pages are both split this way, and a quote must match whole tokens, so "5" can never
 # match inside "25", "2.5" or "1/2", and "ear" never inside "rear".
@@ -137,7 +137,8 @@ _UNIFY = str.maketrans("‘’“”–—", "''\"\"--")
 
 
 def tokenize(text: str) -> list[str]:
-    """Lowercase, unify curly quotes and dashes, then split into tokens. Spacing doesn't matter."""
+    """Lowercase, unify curly quotes and dashes, then split into tokens. Spacing between words doesn't
+    matter; spacing inside a number, or around a '.' before a digit ("A.5" vs "A .5"), does."""
     return TOKEN.findall(text.lower().translate(_UNIFY))
 
 

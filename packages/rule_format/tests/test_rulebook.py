@@ -392,5 +392,6 @@ def test_rule_with_open_questions_cannot_be_approved(ctx):
 
 
 def test_decimal_point_needs_a_clean_start():
+    assert tokenize("A .5") == ["a", ".5"] and tokenize("A.5") == ["a", ".", "5"]   # documented spacing case
     assert not quote_found(".5 feet of depth here", tokenize("Section A.5 feet of depth here"))
     assert quote_found("5 feet of depth here", tokenize("Section A.5 feet of depth here"))
