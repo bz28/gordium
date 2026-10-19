@@ -351,8 +351,10 @@ def open_question_problems(entry: dict) -> list[str]:
 # keyed by its id and cites the city's exact words, like a rule does.
 TERM_SCHEMAS = {
     # "id" is the entry's key in the file: rules refer to terms by it, so renaming one needs re-approval.
-    "definitions": {"label": "term", "approved": ("id", "term", "says", "measures", "sources"),
-                    "fields": {"term", "says", "measures", "sources", "open_questions", "notes"}},
+    # A definition is the city's own words (whole sentences in `sources`), with no paraphrase: restating a
+    # definition kept dropping limiting words. Interpretations go in open_questions.
+    "definitions": {"label": "term", "approved": ("id", "term", "measures", "sources"),
+                    "fields": {"term", "measures", "sources", "open_questions", "notes"}},
     "uses": {"label": "name", "approved": ("id", "name", "sources"), "fields": {"name", "sources", "notes"}},
 }
 APPROVAL_FIELDS = {"drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
@@ -372,15 +374,13 @@ def validate_terms(entries, ctx: Context, schema: str) -> list[str]:
             problems.append(f"{key}: must be a mapping")
             continue
         p = [f"unknown field '{k}'" for k in entry.keys() - s["fields"] - APPROVAL_FIELDS]
-        p += [f"'{k}' must be text" for k in (s["label"], "says", "drafted_by", "status", "approved_by")
+        p += [f"'{k}' must be text" for k in (s["label"], "drafted_by", "status", "approved_by")
               if k in entry and not isinstance(entry[k], str)]
         if p:
             problems += [f"{key}: {x}" for x in p]
             continue
         if not entry.get(s["label"]):
             p.append(f"missing '{s['label']}'")
-        if schema == "definitions" and not entry.get("says"):
-            p.append("missing 'says' (plain-English meaning)")
         measures = entry.get("measures", [])
         if not (isinstance(measures, list) and all(isinstance(m, str) for m in measures)):
             p.append("'measures' must be a list of measure names")

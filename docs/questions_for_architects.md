@@ -11,7 +11,7 @@ Open questions. Remove each one once answered (and record the answer where it be
 4. **Lot area** isn't defined in Chapter 325. Should we use the area inside the lot lines from a survey? What if there's no survey (the tax map can differ)?
 5. **Lot width** is "frontage measured on a public right-of-way". On a curved street (like 106 Ithaca Rd), is that measured along the curve or straight between the corners?
 6. **Lot depth** for the rear yard is the average of "the two side lot lines". On a lot with a jog (106 Ithaca Rd's 10.47 ft segment), which lines are the side lot lines?
-7. Please read the plain-English meaning (`says`) and the open questions of each definition in `definitions.yaml`. Several are interpretation questions only you can answer (how "average height" of a pitched roof is taken, how the grade plane is averaged, whether garages and overhangs count toward coverage, whether yards are measured to the wall or the eave, which entrance is the main entrance).
+7. Please read the quoted city text and the open questions of each definition in `definitions.yaml`. Several are interpretation questions only you can answer (how "average height" of a pitched roof is taken, how the grade plane is averaged, whether garages and overhangs count toward coverage, whether yards are measured to the wall or the eave, which entrance is the main entrance).
 
 ## About scope
 8. Is the NYS Building Code (Chapter 5) needed in the first test, or only zoning?

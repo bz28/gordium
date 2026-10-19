@@ -4,10 +4,12 @@ How to write a definition or a rule from a city's documents. They apply to every
 
 ## 1. Say only what the quotes say
 
-Every statement in `says` (the plain-English meaning) must be backed by a quoted source in `sources`. If you can't point to the words, don't write the statement.
+**Definitions have no paraphrase:** a definition is the city's own whole sentences in `sources`. (Restating definitions kept dropping limiting words, so we stopped.)
 
-- ✗ "Height is measured to the **midpoint** of a pitched roof" (the code says "average height", not midpoint)
-- ✓ "Height is measured to the average height of a pitched roof" + an open question about what "average" means
+For **rules**, every statement in `says` (the plain-English rule) must be backed by a quoted source in `sources`, in the city's words where possible. If you can't point to the words, don't write the statement.
+
+- ✗ "At most 35 ft, measured to the **midpoint** of a pitched roof" (the code says "average height", not midpoint)
+- ✓ "At most 35 ft" + the height definition's open question about what "average height" means
 
 ## 2. Interpretations go to `open_questions`, never into `says`
 

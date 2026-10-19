@@ -70,7 +70,7 @@ Every document above is recorded in `regulations/jurisdictions/new_york/ithaca_c
 ## What people still decide
 
 - **Architects** approve every rule and definition, and answer the open questions in `docs/questions_for_architects.md`. AI drafts; it never approves.
-- **Ben** approves every commit and merges every PR.
+- **Ben** reviews and merges every PR (commits to PR branches don't need his approval; he approves at merge time).
 
 ## Related documents
 
