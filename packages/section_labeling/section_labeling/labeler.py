@@ -19,7 +19,7 @@ from pathlib import Path
 
 import yaml
 
-from document_extraction.sections import piece_keys, piece_text
+from document_extraction.sections import piece_keys
 from rule_format.labels import LABEL_KINDS, piece_fingerprint
 from rule_format.rulebook import REPO, VOCABULARY_FILE, Context, _source_problems, locate
 
@@ -42,17 +42,28 @@ def system_prompt() -> str:
 
 def output_schema(topics: list[str]) -> dict:
     return {"type": "json_schema", "schema": {
-        "type": "object", "additionalProperties": False, "required": ["label", "topic", "reason", "quote"],
-        "properties": {"label": {"type": "string", "enum": list(LABEL_KINDS)},
+        "type": "object", "additionalProperties": False,
+        "required": ["requirements", "label", "topic", "reason", "quote"],       # requirements first: find, then label
+        "properties": {"requirements": {"type": "array", "items": {         # line numbers, never copied text
+                           "type": "object", "additionalProperties": False, "required": ["first_line", "last_line"],
+                           "properties": {"first_line": {"type": "integer"}, "last_line": {"type": "integer"}}}},
+                       "label": {"type": "string", "enum": list(LABEL_KINDS)},
                        "topic": {"type": "string", "enum": topics},
                        "reason": {"type": "string"}, "quote": {"type": "string"}}}}
 
 
-def piece_message(piece: dict, text: str) -> str:
+def numbered_lines(rows: list[dict], piece: dict) -> list[tuple[int, int, str]]:
+    """The piece's lines in order as (page, line, text); the AI cites them as L1, L2, ..."""
+    text = {(r["page"], r["line"]): r["text"] for r in rows[1:]}
+    return [(page, line, text[page, line]) for page, line in piece_keys(piece)]
+
+
+def piece_message(piece: dict, rows: list[dict]) -> str:
     pages = sorted({p for p, _, _ in piece["lines"]})
     where = f"page {pages[0]}" if len(pages) == 1 else f"pages {pages[0]}-{pages[-1]}"
-    return (f"Piece {piece['id']}: {piece['title']} ({where}). A line \"[page N]\" marks a page break; "
-            f"it is not part of the city's text.\n\n{text}")
+    body = "\n".join(f"L{i}: {t}" for i, (_, _, t) in enumerate(numbered_lines(rows, piece), 1))
+    return (f"Piece {piece['id']}: {piece['title']} ({where}). Each line is numbered L1, L2, ...; the numbers are "
+            f"not part of the city's text. Cite requirements by these line numbers.\n\n{body}")
 
 
 def sha(text: str) -> str:
@@ -64,6 +75,28 @@ def cost(usage: dict, model: str) -> float:
     p = PRICES[model]
     return (usage["input_tokens"] * p["input"] + usage["cache_creation_input_tokens"] * p["cache_write"]
             + usage["cache_read_input_tokens"] * p["cache_read"] + usage["output_tokens"] * p["output"]) / 1e6
+
+
+def cited_lines(req: dict, lines: list[tuple[int, int, str]], piece: dict, file: str,
+                ctx: Context) -> tuple[dict | None, str | None]:
+    """A requirement cited as L<first>..L<last>: code takes the exact words from those lines (on one page)."""
+    first, last = req.get("first_line"), req.get("last_line")
+    if not (isinstance(first, int) and isinstance(last, int) and 1 <= first <= last <= len(lines)):
+        return None, f"cite lines between L1 and L{len(lines)}, first before last"
+    span = lines[first - 1:last]
+    if len({page for page, _, _ in span}) > 1:
+        return None, "a requirement that crosses a page break must be cited as two parts, one per page"
+    return find_quote(" ".join(t for _, _, t in span), piece, file, ctx)
+
+
+def consistency_problem(answer: dict) -> str | None:
+    """The label must agree with the requirements the answer itself listed."""
+    if answer["requirements"] and answer["label"] in ("reference", "not_for_checking"):
+        return (f"you listed {len(answer['requirements'])} requirement(s) but labeled it {answer['label']}; "
+                "a piece that limits a building, lot or use is rule or flag")
+    if not answer["requirements"] and answer["label"] in ("rule", "flag"):
+        return f"you labeled it {answer['label']} but listed no requirement; list the sentences that set it"
+    return None
 
 
 def find_quote(quote: str, piece: dict, file: str, ctx: Context) -> tuple[dict | None, str | None]:
@@ -92,7 +125,8 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
     a call that fails stays charged at its worst case."""
     system = system_prompt()
     topics = sorted(ctx.topics)
-    messages = [{"role": "user", "content": piece_message(piece, piece_text(rows, piece))}]
+    messages = [{"role": "user", "content": piece_message(piece, rows)}]
+    lines = numbered_lines(rows, piece)
     for attempt in range(1, settings["max_attempts"] + 1):
         worst = worst_case(len(system) + len(json.dumps(messages, default=str)), settings, PRICES)
         if budget is not None:
@@ -115,6 +149,14 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
             try:
                 answer = json.loads(text)
                 source, problem = find_quote(answer["quote"], piece, file, ctx)
+                if not problem:
+                    found = [cited_lines(r, lines, piece, file, ctx) for r in answer["requirements"]]
+                    problem = next((f"requirement {r}: {why}" for r, (_, why) in zip(answer["requirements"], found)
+                                    if why), None) or consistency_problem(answer)
+                    if not problem and answer["label"] in ("rule", "flag"):
+                        # A rule's sources are its requirement sentences: the drafting step turns each into a check.
+                        source = [s for s, _ in found] + ([source] if source["lines"] not in
+                                                          [s["lines"] for s, _ in found] else [])
             except (json.JSONDecodeError, KeyError, TypeError) as e:
                 problem = f"unreadable answer ({type(e).__name__})"
         record({"piece": piece["id"], "attempt": attempt, "date": datetime.datetime.now(datetime.UTC).isoformat(),
@@ -123,9 +165,9 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
                 "request_id": getattr(response, "_request_id", None), "stop_reason": response.stop_reason,
                 "answer": text, "problem": problem, "usage": usage, "cost_usd": round(spent, 6),
                 "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None})
-        if source:
+        if source and not problem:
             return {"label": answer["label"], "topic": answer["topic"], "reason": answer["reason"].strip(),
-                    "sources": [source], "piece_sha256": piece_fingerprint(piece, pdf_sha),
+                    "sources": source if isinstance(source, list) else [source], "piece_sha256": piece_fingerprint(piece, pdf_sha),
                     "drafted_by": f"section_labeling/{settings['model']}", "status": "draft"}
         if response.stop_reason == "refusal":
             return None            # declined: asking again won't help; recorded, and the piece stays unlabeled
@@ -133,6 +175,7 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
             # Tell the model why and ask again; earlier turns stay as they were (append-only).
             messages += [{"role": "assistant", "content": response.content},
                          {"role": "user", "content": f"That answer can't be used: {problem}. Answer again for the same "
-                                                     "piece, copying the quote exactly from the piece's text."}]
+                                                     "piece, citing requirements by line number and copying the quote "
+                                                     "exactly from the piece's text."}]
         # A cut-off answer (max_tokens) can't be sent back; the same question is simply asked again.
     return None

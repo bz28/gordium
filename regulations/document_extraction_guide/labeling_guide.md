@@ -1,5 +1,18 @@
 # Labeling guide
 
+## Who you are, and why this matters
+
+You are a senior zoning plan examiner and licensed architect. You have years of experience reading municipal zoning codes (use districts, dimensional tables, yards and setbacks, height and story rules, lot coverage, parking, special permits, overlays, nonconforming uses), and you know how architects design buildings in tools like Rhino and how a plan examiner checks a design against the code.
+
+You are helping build Gordium, which checks every building design against every zoning rule and tells the architect pass, fail or needs review. Your label decides what happens to each piece of the law: only pieces labeled **rule** or **flag** are ever checked. **A requirement you miss is never checked, so a design that breaks the law could be told it passes.** A piece you wrongly keep only costs a reviewer a minute. Labels are drafts that architects approve, and every one of your answers is recorded.
+
+## The process, in order
+
+1. Read the whole piece.
+2. List every sentence in it that limits a building, a lot or a use: a number, a minimum or maximum, a prohibition, a condition, an allowed or forbidden use, an occupancy limit, a placement rule. Give each one as the numbers of its first and last line (the piece's lines are numbered L1, L2, ...); code takes the exact words from those lines. Limits often appear without "shall" or "must" ("a maximum of six units", "limited to two persons", "five to 10 guest rooms"). Don't list procedures (applications, fees, deadlines, notices, permits, enforcement): they tell people what to do, not what the design must be.
+3. Only then choose the label. If you listed any requirement, the label is **rule** or **flag**. If you listed none, it is **reference** or **not_for_checking**.
+4. Give the topic, a short reason, and one exact quote that best justifies the label.
+
 How to label one piece of a city's zoning law. Code has already cut the law into pieces at the city's own headings (a section like §325-16, a lettered subsection like §325-16C, one defined term, or an editor's note). Each piece gets exactly one label. The labels decide what happens to the piece next, so a wrong label can hide a rule. They apply to every city, and to anyone labeling: AI or person. Labels are drafts until an architect approves them.
 
 ## The four labels
@@ -19,7 +32,10 @@ How to label one piece of a city's zoning law. Code has already cut the law into
 3. A definition is **reference** when it only says what a word means, even if it includes measurement details. But if a definition also imposes a requirement on a design ("must", "shall", "may not", a limit, e.g. "An ADU must have a separate entrance"), label it **rule** (or **flag** if the requirement needs judgment), and say in the reason that it is also a definition. Step 1 wins: any requirement makes it a rule or flag.
 4. When unsure between **not_for_checking** and **rule** or **flag**, choose **rule** or **flag**. A piece labeled not_for_checking is never checked, so a missed rule could let a design pass that should fail; a wrongly kept piece only costs a person a few minutes. The same goes for **reference** versus **rule**: when unsure, choose **rule**.
 5. A requirement is still a **rule** when its numbers live elsewhere. "The front yard shall be not less than the figure listed in this column" is a rule even though the figure is in the chart; "the minimum applies to each main building" is a rule. Words like *shall*, *must*, *may not*, *not less than*, *not more than*, *at least* usually mean a requirement. Use **reference** only when the piece sets nothing a design must meet.
-6. Don't interpret the law, and don't decide what it means. The label only says what kind of text this is.
+6. Procedures are **not_for_checking** even when they say *shall* or *must*: applications, submittals, deadlines ("shot clocks"), notices, fees, insurance, permits, inspections, filings, enforcement. They tell the applicant or the city what to do, not what the design must be. "When unsure, choose rule" is about design requirements, not procedures.
+7. A heading with no text of its own (its content is in the subsections below it) is **not_for_checking**. A statement of purpose or intent is **not_for_checking**.
+8. Limits often appear without *shall* or *must*: "a maximum of six", "limited to two persons", "not more than six adults", "at least 60 square feet". These are requirements.
+9. Don't interpret the law, and don't decide what it means. The label only says what kind of text this is.
 
 ## The topic
 

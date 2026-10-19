@@ -17,8 +17,11 @@ The law is cut into pieces by code (document_extraction/sections.py, saved as
 A label is a draft until an architect approves it; approval works exactly as for rules and definitions.
 A reviewer who doubts a label adds `open_questions` (which block approval); the architect records the
 `answers` (question, answer, answered_by, answered_on) and approves. Both are the same fields rules use.
+A reviewer who corrects a label records it in `revised`: [{from: <old label>, by, date, why}], so the
+AI's original answer stays visible (and in the run record) and every change is traceable.
 """
 
+import datetime
 import hashlib
 import json
 from pathlib import Path
@@ -27,8 +30,9 @@ from .rulebook import (APPROVAL_FIELDS, VOCABULARY_FILE, Context, _approval_prob
                        _source_problems, load)
 
 # A reviewer's doubt goes in open_questions (blocks approval); the architect's answer in answers, as for rules.
-LABEL_FIELDS = {"label", "topic", "reason", "sources", "piece_sha256", "run", "notes", "open_questions", "answers"}
-LABEL_APPROVED = ("id", "label", "topic", "reason", "sources", "piece_sha256", "answers")
+LABEL_FIELDS = {"label", "topic", "reason", "sources", "piece_sha256", "run", "notes", "open_questions", "answers",
+                "revised"}
+LABEL_APPROVED = ("id", "label", "topic", "reason", "sources", "piece_sha256", "answers", "revised")
 LABEL_KINDS = tuple(load(VOCABULARY_FILE)["label_kinds"])
 
 
@@ -91,4 +95,22 @@ def _label_problems(key, entry, ctx: Context, pieces: dict[str, dict], pdf_sha: 
             elif isinstance(lines, list) and len(lines) == 2 and all(type(n) is int for n in lines) \
                     and not {(page, lines[0]), (page, lines[1])} <= owned:
                 p.append(f"quote on p.{page} lines {lines} is outside this piece")
+    p += _revision_problems(entry.get("revised", []))
     return p + _approval_problems(entry | {"id": key}, ctx, LABEL_APPROVED)
+
+
+def _revision_problems(revised) -> list[str]:
+    """A reviewer's correction: [{from, by, date, why}], oldest first; the current label is the latest."""
+    if not (isinstance(revised, list) and all(isinstance(r, dict) for r in revised)):
+        return ["'revised' must be a list of {from, by, date, why}"]
+    p = []
+    for r in revised:
+        if r.keys() != {"from", "by", "date", "why"}:
+            p.append("each revision needs exactly from, by, date, why")
+        elif r["from"] not in LABEL_KINDS:
+            p.append(f"revised from {r['from']!r}: not a label")
+        elif not all(isinstance(r[k], str) and r[k].strip() for k in ("by", "why")):
+            p.append("a revision's by and why must be text")
+        elif not isinstance(r["date"], datetime.date):
+            p.append("a revision's date must be a date (YYYY-MM-DD)")
+    return p
