@@ -24,7 +24,7 @@ The city's documents go in on the left. A trusted, approved rulebook comes out o
 | 2. Extracted text | Every line of every PDF, with its page and position | So a computer can check that a quote is really on its page | Code (same result every time) | ✅ PR 3 |
 | 3. Section labels | Every paragraph of the law tagged: rule / flag / pointer / not relevant | Proves nothing in the law was skipped | Code, then AI for leftovers, then architects | Later |
 | 4. Definitions | What "height", "story", "lot depth"… mean in Ithaca, in the city's words; unclear points as questions | A rule's numbers mean nothing until the words are defined | Written from the law under the drafting rules; quotes checked by code | 🔨 PR 4 |
-| 5. Rules | One file per zone: each rule in plain English + a formula + its source | What designs are checked against | Hand-written for R-1b, then code reads the charts for every zone | Next |
+| 5. Rules | One file per zone: each rule in plain English + a formula + its source | What designs are checked against | Drafted by Claude for R-1b under the drafting rules (architects approve), then code reads the charts for every zone | In progress |
 | 6. Coverage report | List of every paragraph: handled or a gap | Proof for architects that we read everything | Code | Later |
 | 7. Approval + frozen rulebook | Architects approve; approved rules saved as a dated version that never changes | Only approved rules are used; same design = same answer | Architects; code freezes | Later |
 
@@ -64,7 +64,7 @@ Every document above is recorded in `regulations/jurisdictions/new_york/ithaca_c
 | 2 | Gordium's own instructions for the AI, the review loop, the plain-language PR template | How every later PR is built and reviewed |
 | 3 | Text extracted from the PDFs | The inspector needs it to verify quotes |
 | 4 | Ithaca's definitions and use names, this document | Rules depend on these words |
-| 5 (next) | R-1b rules written by hand, the first real rulebook | The "answer key" the automation must match |
+| 5 | R-1b rules drafted by Claude, compared with the architects' spreadsheet | A second, independent reading the chart reader must match; an answer key once architects approve it |
 | 6 (next) | Code that reads the chart tables → rules for all 9 residential zones; compared with PR 5 | Proves the automation is right, then scales it |
 
 ## What people still decide
