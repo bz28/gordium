@@ -147,7 +147,7 @@ class Context:
 
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
-                 "adopted_on", "created_on", "quotable", "not_quotable_because"}
+                 "adopted_on", "created_on", "quotable", "not_quotable_because", "chart_pages"}
 
 
 def _use_rows(uses) -> dict[str, list[dict]]:
@@ -201,6 +201,11 @@ def _source_entry_problems(entry: dict) -> list[str]:
     if entry.get("quotable") is False and not (isinstance(entry.get("not_quotable_because"), str)
                                                and entry["not_quotable_because"].strip()):
         p.append("marked not quotable but 'not_quotable_because' is missing")
+    chart_pages = entry.get("chart_pages", [])
+    if not (isinstance(chart_pages, list) and all(type(n) is int and n >= 1 for n in chart_pages)
+            and len(set(chart_pages)) == len(chart_pages)
+            and (type(entry.get("pages")) is not int or all(n <= entry["pages"] for n in chart_pages))):
+        p.append("'chart_pages' must be a list of distinct page numbers in the document")
     return p
 
 

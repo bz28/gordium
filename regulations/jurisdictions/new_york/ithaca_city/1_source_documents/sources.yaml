@@ -3,6 +3,7 @@
 # sha256 is the file's fingerprint: if a single byte changes, it changes.
 # To check: shasum -a 256 <file>
 # quotable: false means rules may not quote the document yet (the reason says why).
+# chart_pages: pages whose tables the chart reader turns into cells (row × district).
 
 documents:
 
@@ -21,6 +22,7 @@ documents:
     notes: >
       A summary of Chapter 325, not the law itself. Does NOT include the
       Southside form districts adopted Nov 2025 (see ordinance below).
+    chart_pages: [2, 3, 14]   # tables read into cells (2_extracted_text/*.cells.jsonl); residential only for now
 
   - file: ordinance_no_2025-12_southside_form_districts.pdf
     title: Ordinance No. 2025-12, adding §325-46 Southside Form Districts

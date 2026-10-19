@@ -29,4 +29,24 @@ One `.jsonl` file per PDF listed in `sources.yaml` (one JSON object per line):
 
 - **pdfplumber**, pinned to an exact version together with pdfminer.six, because a different version could read text differently and break reproducibility. Upgrading is a deliberate change: re-extract, review the diff.
 - **De-duplicated characters:** some PDFs draw text twice, slightly offset, to look bold. Without this, the charts read "RREESSIIDDEENNTTIIAALL" and "12 5 f t".
-- **Lines, not tables:** this step only records text and where it is. Reading tables (the zoning charts) is a later step that uses these positions.
+- **Tables from what the PDF draws:** the chart reader uses the cell rectangles and borders the PDF draws, not guesses from where text happens to sit. Where the drawing doesn't settle it, the cell is reported as unresolved.
+
+## Chart cells
+
+For a document with `chart_pages` in `sources.yaml` (the zoning charts: pp. 2, 3 and 14, the residential districts), the same command also writes `<pdf name>.cells.jsonl`: every value in each chart table, with its row, its district column and the lines it comes from. `--check` re-reads it too.
+
+```
+{"page": 3, "section": "Yard Dimensions", "row": "Front (minimum)", "heading": false, "row_lines": [37],
+ "column": "R-1B", "value": "25 ft", "lines": [37], "spans": ["R-1B"], "x0": 310.0, "top": 789.4, ...}
+```
+
+How it reads a table (`charts.py`), plain code with no judgment:
+
+1. **Columns:** the header rectangles whose text is a district name (R-1A … R-3B, RU) with no other district name under them ("R-1" is a group over R-1A and R-1B). Other header columns beside them ("Additional Regulations") are kept too. The row label is the space to their left.
+2. **Rows:** the chart shades every other row with drawn rectangles; a white row is the gap between two shaded rows. After the last shaded row, the next lines that are close together and fit the columns are the last row. Lines there that don't fit (the notes under a chart run across the columns) are reported as unresolved, not dropped.
+3. **Cells:** in each row, a drawn rectangle or the gap between drawn vertical borders is one cell. One that covers several columns is a merged cell and applies to each of them (`spans`): p.14's "1 space per dwelling unit" covers all nine districts. Elsewhere each column is its own cell.
+4. **Values:** each word goes in the cell that contains it, top line first, so multi-line cells read in order ("35%/40% /50% [fn12]"). Footnote markers are the extractor's (`[fn12]`), and line numbers are the extracted text's, so a cited line leads to its cells.
+5. **Headings:** a row whose cells are all empty ("Yard Dimensions") names the `section` of the rows below; it tells apart rows with the same label ("One-family dwelling, detached" under both lot size and lot width).
+6. **Never guessed:** a word across a cell edge, a drawn cell reaching from the label into the columns (a whole-row stripe, an outer border), a cell covering part of a column, a row that looks like two rows, or a table with no drawn body rows is written as `{"unresolved": why, ...}`. On the residential charts the only one is p.2's notes.
+
+How we know it's right: `tests/test_r1b_matches_chart.py` compares the reader's R-1B cells with the R-1b rules drafted by reading (two independent readings must agree): for every cited row, the rule passes exactly at the chart's value and fails just past it (starting from the rule's own passing example, so the number limits the right measurement in the right direction), every numbered R-1B cell is cited by a rule, and the allowed and special-permit uses match the chart's • and SP marks. `tests/test_charts.py` checks other districts' cells, that every line of a table lands in exactly one row and every word in its label or one cell, and each safeguard on small built pages.

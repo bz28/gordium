@@ -1,6 +1,7 @@
 """Extract the text of every source document listed in each jurisdiction's sources.yaml.
 
-    python -m document_extraction           # (re)write 2_extracted_text/<pdf name>.jsonl
+    python -m document_extraction           # (re)write 2_extracted_text/<pdf name>.jsonl, and
+                                            # <pdf name>.cells.jsonl for documents with chart_pages
     python -m document_extraction --check   # exit 1 if any saved file differs from a fresh extraction
 
 Refuses to extract a PDF whose fingerprint doesn't match sources.yaml.
@@ -12,6 +13,7 @@ from pathlib import Path
 
 import yaml
 
+from .charts import read_charts
 from .extract import extract, sha256, to_jsonl
 
 REPO = Path(__file__).resolve().parents[3]
@@ -27,20 +29,24 @@ def main(argv: list[str]) -> int:
         out_dir = jurisdiction / "2_extracted_text"
         for doc in yaml.safe_load((sources / "sources.yaml").read_text())["documents"]:
             pdf, out = sources / doc["file"], out_dir / f"{Path(doc['file']).stem}.jsonl"
-            label = out.relative_to(REPO)
             if sha256(pdf) != doc["sha256"]:
                 print(f"✗ {pdf.relative_to(REPO)}: fingerprint doesn't match sources.yaml; not extracted")
                 failed += 1
                 continue
-            fresh = to_jsonl(extract(pdf))
-            if check:
-                same = out.exists() and out.read_text(encoding="utf-8") == fresh
-                print(f"{'✓' if same else '✗'} {label}{'' if same else ': differs from a fresh extraction'}")
-                failed += not same
-            else:
-                out_dir.mkdir(exist_ok=True)
-                out.write_text(fresh, encoding="utf-8", newline="\n")
-                print(f"wrote {label} ({fresh.count(chr(10)) - 1} lines)")
+            outputs = [(out, to_jsonl(extract(pdf)))]
+            if doc.get("chart_pages"):   # tables read into cells, from the same lines
+                outputs.append((out_dir / f"{Path(doc['file']).stem}.cells.jsonl",
+                                to_jsonl(read_charts(pdf, doc["chart_pages"]))))
+            for path, fresh in outputs:
+                label = path.relative_to(REPO)
+                if check:
+                    same = path.exists() and path.read_text(encoding="utf-8") == fresh
+                    print(f"{'✓' if same else '✗'} {label}{'' if same else ': differs from a fresh extraction'}")
+                    failed += not same
+                else:
+                    out_dir.mkdir(exist_ok=True)
+                    path.write_text(fresh, encoding="utf-8", newline="\n")
+                    print(f"wrote {label} ({fresh.count(chr(10)) - 1} records)")
     return 1 if failed else 0
 
 
