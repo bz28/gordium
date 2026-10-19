@@ -553,6 +553,8 @@ ANSWER = {"question": "Which line is the rear lot line on an irregular lot?", "a
 @pytest.mark.parametrize("answers, problem", [
     ("the one opposite", "'answers' must be a list"),
     ([{"question": "q?", "answer": "a"}], "exactly question, answer, answered_by, answered_on"),
+    ([ANSWER | {"answer": "  "}], "must be text"),
+    ([ANSWER | {"question": 3}], "must be text"),
     ([ANSWER | {"answered_by": "claude"}], "answered_by must be a reviewer"),
     ([ANSWER | {"answered_on": "2026-10-20x"}], "answered_on must be a date"),
 ])
