@@ -77,7 +77,7 @@ The approval lines say *who* approved and *when*, and the fingerprint shows whet
 
 These are engineering judgment calls, not facts from the code:
 
-- Each quoted piece must be at least 15 characters (not counting spaces), with at most two "…" gaps of up to 300 characters, and must start and end on whole words and numbers (so quotes can't be stitched together, and "5 feet" never matches inside "2.5 feet" or "25 feet").
+- Quotes are matched as whole words and numbers ("tokens"), never parts of them: "5 feet" never matches inside "2.5 feet" or "25 feet", "R-1" never inside "R-1b". Each quoted piece must be at least 15 characters (not counting spaces), with at most two "…" gaps of up to 60 words.
 - Lengths are always in feet, areas in square feet.
 - The list of measurements rules may use (`packages/rule_format/rule_format/measures.yaml`).
 - The list of topics (`regulations/document_extraction_guide/vocabulary.yaml`).

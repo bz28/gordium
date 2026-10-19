@@ -6,7 +6,7 @@ import math
 import pytest
 import yaml
 
-from rule_format.rulebook import Context, approval_hash, load, normalize, outcome, quote_found, validate
+from rule_format.rulebook import Context, approval_hash, load, outcome, quote_found, tokenize, validate
 
 PAGE_3 = "Rear (minimum, % of depth or feet, whichever is less)  25%/ 50 ft 16"
 QUOTE = "Rear (minimum, % of depth … whichever is less)  25%/ 50 ft"
@@ -33,7 +33,7 @@ CTX = Context(
     topics={"dimensions"},
     sources={"charts.pdf": {"file": "charts.pdf", "sha256": "a" * 64}},
     reviewers={"jane"},
-    pages={"charts.pdf": {3: normalize(PAGE_3)}},
+    pages={"charts.pdf": {3: tokenize(PAGE_3)}},
 )
 APPROVED = {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
             "approved_hash": approval_hash(RULE, CTX)}
@@ -199,7 +199,7 @@ def test_duplicate_yaml_keys_are_rejected(tmp_path):
 
 
 def test_quote_parts_must_appear_in_order():
-    page = normalize("one two three four")
+    page = tokenize("one two three four")
     assert quote_found("one … three", page)
     assert quote_found("ONE  TWO", page)
     assert not quote_found("three … one", page)
@@ -207,10 +207,10 @@ def test_quote_parts_must_appear_in_order():
 
 
 def test_quote_number_must_not_match_inside_a_bigger_number():
-    page = normalize("Rear yard minimum 25 feet in depth for all lots; side yard 5 feet in depth for all lots")
+    page = tokenize("Rear yard minimum 25 feet in depth for all lots; side yard 5 feet in depth for all lots")
     assert quote_found("5 feet in depth for all lots", page)          # the real '5 feet', later on the page
-    assert not quote_found("5 feet in depth for all lots", normalize("Rear yard 25 feet in depth for all lots"))
-    assert not quote_found("yard 2", normalize("yard 25"))
+    assert not quote_found("5 feet in depth for all lots", tokenize("Rear yard 25 feet in depth for all lots"))
+    assert not quote_found("yard 2", tokenize("yard 25"))
 
 
 @pytest.mark.parametrize("page", [
@@ -218,8 +218,8 @@ def test_quote_number_must_not_match_inside_a_bigger_number():
     "rear yard 1,500 feet in depth for all lots",     # thousands separator
 ])
 def test_quote_number_must_be_the_whole_number(page):
-    assert not quote_found("5 feet in depth for all lots", normalize(page))
-    assert not quote_found("500 feet in depth for all lots", normalize(page))
+    assert not quote_found("5 feet in depth for all lots", tokenize(page))
+    assert not quote_found("500 feet in depth for all lots", tokenize(page))
 
 
 @pytest.mark.parametrize("quote, page", [
@@ -229,7 +229,7 @@ def test_quote_number_must_be_the_whole_number(page):
     ("5 acres minimum lot size", "a lot of .5 acres minimum lot size"),          # decimal without a leading 0
 ])
 def test_quote_edges_cannot_cut_a_number(quote, page):
-    assert not quote_found(quote, normalize(page))
+    assert not quote_found(quote, tokenize(page))
 
 
 @pytest.mark.parametrize("quote, page", [
@@ -237,7 +237,7 @@ def test_quote_edges_cannot_cut_a_number(quote, page):
     ("required stories are 3 4 3", "required stories are 3 4 3/2"),
 ])
 def test_quote_edges_cannot_cut_a_fraction(quote, page):
-    assert not quote_found(quote, normalize(page))
+    assert not quote_found(quote, tokenize(page))
 
 
 @pytest.mark.parametrize("quote, page", [
@@ -246,32 +246,51 @@ def test_quote_edges_cannot_cut_a_fraction(quote, page):
     ("designation of R-1 or R-2", "designation of R-1 or R-2, see §325-8(E)."),
 ])
 def test_quote_may_end_on_a_number_before_punctuation(quote, page):
-    assert quote_found(quote, normalize(page))
+    assert quote_found(quote, tokenize(page))
 
 
 def test_approval_check_survives_badly_shaped_sources(ctx):
     for bad in (["charts.pdf"], [{"file": ["charts.pdf"]}], "charts.pdf", 5, [{**RULE["sources"][0], 5: "x"}]):
         assert validate(rulebook(**APPROVED, sources=bad), ctx)   # must report problems, not crash
+    for odd in ({"check": {5: "x", "a": 1}},                                   # nested mixed key types
+                {"sources": [{**RULE["sources"][0], "quote": {5: "x", "a": 1}}]},
+                {"review_when": [{"when": {5: "x", "a": 1}, "reason": "r"}]}):
+        assert validate(rulebook(**APPROVED | odd), ctx)                       # reported, never a crash
     assert any("unknown field 3" in p for p in validate(
         rulebook(**APPROVED, review_when=[{"when": "lot_depth > 500", "reason": "x", 3: 1}]), ctx))
 
 
 def test_separate_table_cells_do_not_merge():
-    assert not quote_found("25 ft 50 ft 45 ft 35 ft", normalize("2 5 ft 50 ft 45 ft 35 ft"))
+    assert not quote_found("25 ft 50 ft 45 ft 35 ft", tokenize("2 5 ft 50 ft 45 ft 35 ft"))
 
 
 def test_quote_must_start_on_a_word_boundary():
-    assert not quote_found("ear yard minimum depth", normalize("Rear yard minimum depth"))
+    assert not quote_found("ear yard minimum depth", tokenize("Rear yard minimum depth"))
 
 
 def test_earlier_look_alike_does_not_hide_the_real_quote():
-    page = normalize("Rear yard minimum " + "x" * 400 + " Rear yard minimum twenty feet always")
+    page = tokenize("Rear yard minimum " + "x " * 100 + " Rear yard minimum twenty feet always")
     assert quote_found("Rear yard minimum … twenty feet always", page)
 
 
+@pytest.mark.parametrize("text, expected", [
+    ("Rear yard: 25%/ 50 ft [fn16]", ["rear", "yard", ":", "25", "%", "/", "50", "ft", "[fn16]"]),
+    ("2.5 feet, 1,500 sf, 3/2 stories, .5 acres", ["2.5", "feet", ",", "1,500", "sf", ",", "3/2", "stories", ",", ".5", "acres"]),
+    ("R-1b and R-1", ["r", "-", "1b", "and", "r", "-", "1"]),
+    ("stories: 3. Lot", ["stories", ":", "3", ".", "lot"]),
+    ("“Quoted” — dash", ['"', "quoted", '"', "-", "dash"]),
+])
+def test_tokenize(text, expected):
+    assert tokenize(text) == expected
+
+
+def test_quote_cannot_cut_a_district_name():
+    assert not quote_found("designation of R-1 or R-2", tokenize("designation of R-1b or R-2a"))
+
+
 def test_quote_pieces_must_be_near_each_other():
-    near = normalize("Rear yard minimum " + "x" * 100 + " twenty feet always")
-    far = normalize("Rear yard minimum " + "x" * 400 + " twenty feet always")
+    near = tokenize("Rear yard minimum " + "x " * 50 + " twenty feet always")    # 50 words apart
+    far = tokenize("Rear yard minimum " + "x " * 70 + " twenty feet always")     # 70 words apart
     assert quote_found("Rear yard minimum … twenty feet always", near)
     assert not quote_found("Rear yard minimum … twenty feet always", far)
 
@@ -292,7 +311,7 @@ def _jurisdiction(tmp_path, pdf_bytes=b"%PDF fake", header_sha=None, rows=()):
 def test_context_loads_extracted_text(tmp_path):
     ctx = Context.for_jurisdiction(_jurisdiction(tmp_path, rows=[{"page": "2", "text": "Hello  World"}]))
     assert ctx.problems == []
-    assert ctx.pages["doc.pdf"] == {2: "hello world"}
+    assert ctx.pages["doc.pdf"] == {2: ["hello", "world"]}
 
 
 def test_context_reports_changed_pdf_and_stale_text(tmp_path):

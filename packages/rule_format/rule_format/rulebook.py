@@ -28,9 +28,9 @@ REVIEWERS_FILE = REPO / "regulations/reviewers.yaml"
 OUTCOMES = ("pass", "fail", "needs_review", "not_applicable")
 KINDS = ("rule", "flag")  # rule: code checks it; flag: an architect must judge it
 STATUSES = ("draft", "approved")
-MIN_QUOTE_LENGTH = 15     # characters per quoted piece, after normalizing; short pieces match by accident
+MIN_QUOTE_LENGTH = 15     # non-space characters per quoted piece; short pieces match by accident
 MAX_QUOTE_PIECES = 3      # at most two '…' gaps in one quote
-MAX_QUOTE_GAP = 300       # characters a '…' may skip, so pieces can't be stitched from across a page
+MAX_QUOTE_GAP = 60        # tokens (words, numbers, symbols) a '…' may skip: about two lines of text
 RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources",
                "examples", "notes", "drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
 TEXT_FIELDS = ("id", "kind", "topic", "says", "drafted_by", "status", "approved_by")
@@ -87,7 +87,7 @@ class Context:
     topics: set[str]
     sources: dict[str, dict]                  # file name -> sources.yaml entry
     reviewers: set[str] = field(default_factory=set)                 # who may approve rules
-    pages: dict[str, dict[int, str]] = field(default_factory=dict)  # file -> page -> normalized text
+    pages: dict[str, dict[int, list[str]]] = field(default_factory=dict)  # file -> page -> tokens
     problems: list[str] = field(default_factory=list)                # problems with the sources themselves
 
     @classmethod
@@ -123,61 +123,43 @@ class Context:
         pages: dict[int, list[str]] = {}
         for row in rows[1:]:
             pages.setdefault(int(row["page"]), []).append(row["text"])
-        self.pages[name] = {p: normalize(" ".join(t)) for p, t in pages.items()}
+        self.pages[name] = {p: tokenize(" ".join(t)) for p, t in pages.items()}
 
 
-def normalize(text: str) -> str:
-    """Lowercase, unify quotes and dashes, and turn every run of whitespace (line breaks too)
-    into one space. Spaces are kept so separate words, numbers and table cells stay separate."""
-    text = text.lower().translate(str.maketrans("‘’“”–—", "''\"\"--"))
-    return re.sub(r"\s+", " ", text).strip()
+# A token is a footnote marker ("[fn11]"), a whole word or number ("rear", "2.5", "1,500", "3/2", ".5"),
+# or a single other character ("%", "(", "§"). '.', ',' and '/' are part of a token only between letters
+# or digits. Quotes and pages are both split this way, and a quote must match whole tokens, so "5"
+# can never match inside "25", "2.5" or "1/2", and "ear" never inside "rear".
+TOKEN = re.compile(r"\[fn[^\]\s]*\]|\.?[^\W_]+(?:[.,/][^\W_]+)*|\S")
+_UNIFY = str.maketrans("‘’“”–—", "''\"\"--")
 
 
-def quote_pieces(quote: str) -> list[str]:
-    return [p for p in map(normalize, quote.split("…")) if p]
+def tokenize(text: str) -> list[str]:
+    """Lowercase, unify curly quotes and dashes, then split into tokens. Spacing doesn't matter."""
+    return TOKEN.findall(text.lower().translate(_UNIFY))
 
 
-def quote_found(quote: str, page_text: str) -> bool:
-    """True if the quote's pieces (separated by '…') appear on the page in order, each whole
-    (not starting or ending inside a word or number) and within MAX_QUOTE_GAP characters of the last."""
+def quote_pieces(quote: str) -> list[list[str]]:
+    """The quote's pieces (separated by '…'), each as tokens."""
+    return [t for t in map(tokenize, quote.split("…")) if t]
+
+
+def quote_found(quote: str, page: list[str]) -> bool:
+    """True if the quote's pieces appear on the page as whole tokens, in order, each starting
+    within MAX_QUOTE_GAP tokens of where the previous piece ended."""
     pieces = quote_pieces(quote)
-    return bool(pieces) and _chain(pieces, page_text, None)
+    return bool(pieces) and _chain(pieces, page, None)
 
 
-def _chain(pieces: list[str], page_text: str, end: int | None) -> bool:
-    """Try every whole occurrence of the first piece, so an earlier look-alike can't hide a real match."""
+def _chain(pieces: list[list[str]], page: list[str], end: int | None) -> bool:
+    """Try every occurrence of the first piece, so an earlier look-alike can't hide a real match."""
     if not pieces:
         return True
-    at = page_text.find(pieces[0], 0 if end is None else end)
-    while at >= 0 and (end is None or at - end <= MAX_QUOTE_GAP):
-        if _whole(page_text, at, pieces[0]) and _chain(pieces[1:], page_text, at + len(pieces[0])):
+    first, n = pieces[0], len(pieces[0])
+    last_start = len(page) - n if end is None else min(len(page) - n, end + MAX_QUOTE_GAP)
+    for at in range(0 if end is None else end, last_start + 1):
+        if page[at:at + n] == first and _chain(pieces[1:], page, at + n):
             return True
-        at = page_text.find(pieces[0], at + 1)
-    return False
-
-
-NUMBER_JOINERS = ".,/"  # inside a number only when digits sit on both sides: 2.5, 1,500, 3/2
-
-
-def _whole(page_text: str, at: int, piece: str) -> bool:
-    """The match must not cut a word or number: '5 feet' not inside '25', '2.5', '1,500' or '1/2 feet';
-    '…be 2.' not inside '2.5'; 'ear' not inside 'rear'. A quote may end on a number before a
-    sentence's period or a list's comma ('…stories: 3.')."""
-    end = at + len(piece)
-    return not (at > 0 and _cut(page_text, at) or end < len(page_text) and _cut(page_text, end))
-
-
-def _cut(page_text: str, i: int) -> bool:
-    """Does the boundary just before position i fall inside a word or a number?"""
-    def char(j):
-        return page_text[j] if 0 <= j < len(page_text) else " "
-    before, after = char(i - 1), char(i)
-    if before.isalnum() and after.isalnum():
-        return True
-    if after in NUMBER_JOINERS:  # '2|.5': cut if the joiner continues the number
-        return before.isdigit() and char(i + 1).isdigit()
-    if before in NUMBER_JOINERS:  # '2.|5', and '.|5' (a decimal written without a leading zero)
-        return after.isdigit() and (char(i - 2).isdigit() or before == "." and char(i - 2) != ".")
     return False
 
 
@@ -189,7 +171,22 @@ def approval_hash(rule: dict, ctx: "Context") -> str:
                    if isinstance(sources, list) else [])
     approved = {k: rule.get(k) for k in APPROVED_FIELDS} | {
         "source_fingerprints": {f: ctx.sources.get(f, {}).get("sha256") for f in cited}}
-    return hashlib.sha256(json.dumps(approved, sort_keys=True, default=str).encode()).hexdigest()
+    return hashlib.sha256(json.dumps(_canonical(approved)).encode()).hexdigest()
+
+
+def _canonical(value):
+    """A fixed, JSON-safe form of any YAML value, so the fingerprint never depends on key order
+    and never fails on odd shapes (mixed key types, dates). 1 and "1" stay different."""
+    if isinstance(value, dict):
+        items = [[[type(k).__name__, str(k)], _canonical(v)] for k, v in value.items()]
+        return {"map": sorted(items, key=lambda kv: json.dumps(kv[0]))}
+    if isinstance(value, (list, tuple)):
+        return [_canonical(v) for v in value]
+    if isinstance(value, (datetime.date, datetime.datetime)):
+        return {"date": value.isoformat()}
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+    return {type(value).__name__: str(value)}
 
 
 def validate(rulebook, ctx: Context) -> list[str]:
@@ -306,7 +303,7 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
             p.append(f"source file {name!r} is not in sources.yaml")
         elif type(page) is not int or not isinstance(quote, str):
             p.append(f"source {name}: needs 'page' (number) and 'quote' (text)")
-        elif not (pieces := quote_pieces(quote)) or min(len(p.replace(" ", "")) for p in pieces) < MIN_QUOTE_LENGTH:
+        elif not (pieces := quote_pieces(quote)) or min(len("".join(p)) for p in pieces) < MIN_QUOTE_LENGTH:
             p.append(f"source {name}: each quoted piece needs {MIN_QUOTE_LENGTH}+ characters to be traceable")
         elif len(pieces) > MAX_QUOTE_PIECES:
             p.append(f"source {name}: at most {MAX_QUOTE_PIECES - 1} '…' gaps in a quote")
