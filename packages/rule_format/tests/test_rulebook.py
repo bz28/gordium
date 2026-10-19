@@ -231,6 +231,28 @@ def test_quote_edges_cannot_cut_a_number(quote, page):
     assert not quote_found(quote, normalize(page))
 
 
+@pytest.mark.parametrize("quote, page", [
+    ("2 the required yard depth", "1/2 the required yard depth"),                 # fraction
+    ("required stories are 3 4 3", "required stories are 3 4 3/2"),
+])
+def test_quote_edges_cannot_cut_a_fraction(quote, page):
+    assert not quote_found(quote, normalize(page))
+
+
+@pytest.mark.parametrize("quote, page", [
+    ("maximum number of stories: 3", "Maximum number of stories: 3. Lot coverage"),  # sentence period
+    ("minimum lot width of 50", "minimum lot width of 50, except corner lots"),      # list comma
+    ("designation of R-1 or R-2", "designation of R-1 or R-2, see §325-8(E)."),
+])
+def test_quote_may_end_on_a_number_before_punctuation(quote, page):
+    assert quote_found(quote, normalize(page))
+
+
+def test_approval_check_survives_badly_shaped_sources(ctx):
+    for bad in (["charts.pdf"], [{"file": ["charts.pdf"]}], "charts.pdf", 5):
+        validate(rulebook(**APPROVED, sources=bad), ctx)   # must report problems, not crash
+
+
 def test_separate_table_cells_do_not_merge():
     assert not quote_found("25 ft 50 ft 45 ft 35 ft", normalize("2 5 ft 50 ft 45 ft 35 ft"))
 

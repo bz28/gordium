@@ -114,7 +114,7 @@ class Context:
 
     def _load_extracted(self, name, sha, path):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "text", ...} per line."""
-        rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
         if not rows or rows[0].get("sha256") != sha:
             self.problems.append(f"{path.name}: extracted from a different version of {name}; re-extract")
             return
@@ -154,23 +154,37 @@ def _chain(pieces: list[str], page_text: str, end: int | None) -> bool:
     return False
 
 
+NUMBER_JOINERS = ".,/"  # inside a number only when digits sit on both sides: 2.5, 1,500, 3/2
+
+
 def _whole(page_text: str, at: int, piece: str) -> bool:
-    """The match must not cut a word or number: '5 feet' not inside '25', '2.5' or '1,500 feet';
-    '…be 2.' not inside '2.5'; 'ear' not inside 'rear'."""
+    """The match must not cut a word or number: '5 feet' not inside '25', '2.5', '1,500' or '1/2 feet';
+    '…be 2.' not inside '2.5'; 'ear' not inside 'rear'. A quote may end on a number before a
+    sentence's period or a list's comma ('…stories: 3.')."""
     end = at + len(piece)
-    return not (at > 0 and _glued(page_text[at - 1], piece[0])
-                or end < len(page_text) and _glued(piece[-1], page_text[end]))
+    return not (at > 0 and _cut(page_text, at) or end < len(page_text) and _cut(page_text, end))
 
 
-def _glued(a: str, b: str) -> bool:
-    """Do these two neighbouring characters belong to the same word or number?"""
-    return a.isalnum() and b.isalnum() or a.isdigit() and b in ".," or a in ".," and b.isdigit()
+def _cut(page_text: str, i: int) -> bool:
+    """Does the boundary just before position i fall inside a word or a number?"""
+    def char(j):
+        return page_text[j] if 0 <= j < len(page_text) else " "
+    before, after = char(i - 1), char(i)
+    if before.isalnum() and after.isalnum():
+        return True
+    if after in NUMBER_JOINERS:  # '2|.5': cut if the joiner continues the number
+        return before.isdigit() and char(i + 1).isdigit()
+    if before in NUMBER_JOINERS:  # '2.|5'
+        return char(i - 2).isdigit() and after.isdigit()
+    return False
 
 
 def approval_hash(rule: dict, ctx: "Context") -> str:
     """Fingerprint of what an architect approves: the rule's content and the exact versions of the
     documents it cites. Any later edit, or a replaced source PDF, changes it."""
-    cited = sorted({s.get("file") for s in rule.get("sources") or [] if isinstance(s, dict)} - {None}, key=str)
+    sources = rule.get("sources")
+    cited = sorted({s["file"] for s in sources if isinstance(s, dict) and isinstance(s.get("file"), str)}
+                   if isinstance(sources, list) else [])
     approved = {k: rule.get(k) for k in APPROVED_FIELDS} | {
         "source_fingerprints": {f: ctx.sources.get(f, {}).get("sha256") for f in cited}}
     return hashlib.sha256(json.dumps(approved, sort_keys=True, default=str).encode()).hexdigest()
