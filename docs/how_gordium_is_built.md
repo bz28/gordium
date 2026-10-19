@@ -23,7 +23,7 @@ The city's documents go in on the left. A trusted, approved rulebook comes out o
 | 1. Source documents | The city's original PDFs, never edited, each with a fingerprint | Everything traces back to these | Downloaded from official sites | ✅ PR 0 |
 | 2. Extracted text | Every line of every PDF, with its page and position | So a computer can check that a quote is really on its page | Code (same result every time) | ✅ PR 3 |
 | 3. Section labels | Every paragraph of the law tagged: rule / flag / pointer / not relevant | Proves nothing in the law was skipped | Code, then AI for leftovers, then architects | Later |
-| 4. Definitions | What "height", "story", "lot depth"… mean in Ithaca | A rule's numbers mean nothing until the words are defined | Written from the law, quotes checked by code | 🔨 PR 4 |
+| 4. Definitions | What "height", "story", "lot depth"… mean in Ithaca, in the city's words; unclear points as questions | A rule's numbers mean nothing until the words are defined | Written from the law under the drafting rules; quotes checked by code | 🔨 PR 4 |
 | 5. Rules | One file per zone: each rule in plain English + a formula + its source | What designs are checked against | Hand-written for R-1b, then code reads the charts for every zone | Next |
 | 6. Coverage report | List of every paragraph: handled or a gap | Proof for architects that we read everything | Code | Later |
 | 7. Approval + frozen rulebook | Architects approve; approved rules saved as a dated version that never changes | Only approved rules are used; same design = same answer | Architects; code freezes | Later |
@@ -53,7 +53,7 @@ The city's documents go in on the left. A trusted, approved rulebook comes out o
 | Height exceptions (chimneys, equipment…) | Chapter 325, §325-16 | pp. 46–48 | Later rules |
 | Southside rezoning (not yet in the charts or Chapter 325 online) | Ordinance No. 2025-12 | whole document | Southside residential zones (later) |
 
-Every row is recorded in `regulations/jurisdictions/new_york/ithaca_city/1_source_documents/sources.yaml` with its link, download date and fingerprint.
+Every document above is recorded in `regulations/jurisdictions/new_york/ithaca_city/1_source_documents/sources.yaml` with its link, download date and fingerprint. The one exception is the city's map data (GIS) lookup: it's a live database query, not a document, so it's recorded with its date and results in the test site's README instead. Zone confirmations will need a saved, fingerprinted record before they're used in checking.
 
 ## How the pull requests build on each other
 

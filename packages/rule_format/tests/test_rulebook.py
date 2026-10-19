@@ -549,8 +549,24 @@ def test_invalid_definitions_are_rejected(ctx, entries, problem):
 
 def test_approved_definition_needs_reapproval_after_an_edit(ctx):
     fields = ("term", "says", "measures", "sources")
-    approved = DEFINITION | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
-                             "approved_hash": approval_hash(DEFINITION, ctx, fields)}
+    answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"}
+    approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
+                           "approved_hash": approval_hash(answered, ctx, fields)}
     assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
-    edited = approved | {"says": "Something else."}
-    assert any("changed since it was approved" in p for p in validate_terms({"rear_yard": edited}, ctx, "definitions"))
+    for edit in ({"says": "Something else."}, {"measures": ["rear_yard", "lot_depth"]}):
+        assert any("changed since it was approved" in p
+                   for p in validate_terms({"rear_yard": approved | edit}, ctx, "definitions"))
+    reopened = approved | {"open_questions": ["new doubt?"]}                 # a new question blocks approval
+    assert any("open_questions remain" in p for p in validate_terms({"rear_yard": reopened}, ctx, "definitions"))
+
+
+def test_definition_with_open_questions_cannot_be_approved(ctx):
+    approved = DEFINITION | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
+    approved["approved_hash"] = approval_hash(approved, ctx, ("term", "says", "measures", "sources"))
+    assert any("open_questions remain" in p for p in validate_terms({"rear_yard": approved}, ctx, "definitions"))
+
+
+def test_approved_entry_without_drafter_is_reported_not_crashed(ctx):
+    entry = {k: v for k, v in DEFINITION.items() if k not in ("drafted_by", "open_questions")}
+    entry |= {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
+    assert any("missing 'drafted_by'" in p for p in validate_terms({"rear_yard": entry}, ctx, "definitions"))

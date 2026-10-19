@@ -8,7 +8,8 @@ one_family_detached:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
-      quote: "One-family dwelling, detached ^4 • • •"
+      lines: [9, 9]
+      quote: "One-family dwelling, detached [fn4] • • •"
   drafted_by: claude
   status: draft
 
@@ -17,7 +18,8 @@ one_family_detached_zero_lot_line:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
-      quote: "One-family dwelling, detached, zero lot line ^4"
+      lines: [10, 10]
+      quote: "One-family dwelling, detached, zero lot line [fn4]"
   drafted_by: claude
   status: draft
 
@@ -26,7 +28,8 @@ one_family_semi_detached:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
-      quote: "One-family dwelling, semi-detached ^4"
+      lines: [11, 11]
+      quote: "One-family dwelling, semi-detached [fn4]"
   drafted_by: claude
   status: draft
 
@@ -35,7 +38,8 @@ one_family_attached:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
-      quote: "One-family dwelling, attached ^4"
+      lines: [12, 12]
+      quote: "One-family dwelling, attached [fn4]"
   drafted_by: claude
   status: draft
 
@@ -44,7 +48,8 @@ two_family:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
-      quote: "Two-family dwelling ^4 - - • •"
+      lines: [13, 13]
+      quote: "Two-family dwelling [fn4] - - • •"
   drafted_by: claude
   status: draft
 
@@ -53,7 +58,8 @@ multiple_family:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
-      quote: "Multiple family dwelling ^4"
+      lines: [14, 14]
+      quote: "Multiple family dwelling [fn4]"
   drafted_by: claude
   status: draft
 
@@ -62,6 +68,7 @@ fraternity_sorority_group_house:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [15, 15]
       quote: "Fraternity, sorority, or group house"
   drafted_by: claude
   status: draft
@@ -71,7 +78,8 @@ dormitory:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
-      quote: "Dormitory - - - - - • - • •^5"
+      lines: [16, 16]
+      quote: "Dormitory - - - - - • - • •[fn5]"
   drafted_by: claude
   status: draft
 
@@ -80,6 +88,7 @@ church:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [17, 17]
       quote: "Church or related building"
   drafted_by: claude
   status: draft
@@ -89,6 +98,7 @@ public_park_or_playground:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [18, 18]
       quote: "Public park or playground"
   drafted_by: claude
   status: draft
@@ -98,6 +108,7 @@ library_or_fire_station:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [19, 19]
       quote: "Library or fire station"
   drafted_by: claude
   status: draft
@@ -107,6 +118,7 @@ cemetery:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [20, 20]
       quote: "Cemetery or related building"
   drafted_by: claude
   status: draft
@@ -116,6 +128,7 @@ public_utility_structure:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [21, 21]
       quote: "Public utility structure except office"
   drafted_by: claude
   status: draft
@@ -125,6 +138,7 @@ school:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [22, 22]
       quote: "School and related buildings"
   drafted_by: claude
   status: draft
@@ -134,6 +148,7 @@ nursery_school_or_child_day_care:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [23, 23]
       quote: "Nursery school, child day care center"
   drafted_by: claude
   status: draft
@@ -143,6 +158,7 @@ adult_day_care_home:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [24, 24]
       quote: "Adult day care home - - SP SP SP"
   drafted_by: claude
   status: draft
@@ -152,6 +168,7 @@ neighborhood_commercial_facility:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [25, 25]
       quote: "Neighborhood commercial facility"
   drafted_by: claude
   status: draft
@@ -161,6 +178,7 @@ nursing_home:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [26, 26]
       quote: "Nursing, convalescent or rest home"
   drafted_by: claude
   status: draft
@@ -170,6 +188,7 @@ hospital_or_sanitarium:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [27, 27]
       quote: "Hospital or sanitarium - - - - -"
   drafted_by: claude
   status: draft
@@ -179,6 +198,7 @@ bed_and_breakfast_inn:
   sources:
     - file: zoning_charts_2026-04.pdf
       page: 2
+      lines: [28, 28]
       quote: "Bed-and-breakfast inn - - - - -"
   drafted_by: claude
   status: draft

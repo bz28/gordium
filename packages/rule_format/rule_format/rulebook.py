@@ -326,7 +326,8 @@ def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> li
     if entry.get("status") == "approved":
         if entry.get("approved_by") not in ctx.reviewers:
             p.append("approved_by must be a reviewer listed in regulations/reviewers.yaml")
-        elif entry["approved_by"].casefold().strip() == entry["drafted_by"].casefold().strip():
+        elif isinstance(entry.get("drafted_by"), str) and \
+                entry["approved_by"].casefold().strip() == entry["drafted_by"].casefold().strip():
             p.append("can't be approved by the person who drafted it")
         if not isinstance(entry.get("approved_on"), datetime.date):
             p.append("approved_on must be a date (YYYY-MM-DD)")
