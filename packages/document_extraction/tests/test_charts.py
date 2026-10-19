@@ -399,3 +399,36 @@ def test_a_page_without_a_table_says_so(monkeypatch):
     assert read_page(Page([], [line(5, (5, "Notes"))]), 4) == [{"page": 4, "unresolved": "no table drawn on this page"}]
     no_districts = Page([(0, 0, 100, 20)], [line(5, (5, "Title"))])
     assert read_page(no_districts, 4) == [{"page": 4, "unresolved": "no district header found"}]
+
+
+def test_rows_after_an_unread_heading_name_no_section_and_duplicates_are_unresolved(monkeypatch):
+    row = lambda top: [(0, top, 100, top + 20), (100, top, 150, top + 20), (150, top, 200, top + 20)]
+    rects = row(20) + row(60) + [(0, 100, 200, 120)] + row(140)            # 3rd row: one stripe, unreadable
+    out = read(monkeypatch, rects, [line(25, (5, "LotSize")), line(65, (5, "Detached"), (110, "1"), (160, "2")),
+                                    line(105, (5, "LotWidth")), line(145, (5, "Detached"), (110, "5"), (160, "6"))])
+    assert not any(r.get("section") == "LotSize" and r.get("value") in ("5", "6") for r in out)
+    keys = [(r["page"], r["section"], r["row"], r["column"]) for r in out if "value" in r]
+    assert len(keys) == len(set(keys))                                         # no key holds two values
+
+
+def test_two_rows_with_one_label_under_one_section_are_unresolved(monkeypatch):
+    row = lambda top: [(0, top, 100, top + 20), (100, top, 150, top + 20), (150, top, 200, top + 20)]
+    out = read(monkeypatch, row(20) + row(60), [line(25, (5, "Detached"), (110, "1"), (160, "2")),
+                                                line(65, (5, "Detached"), (110, "5"), (160, "6"))])
+    assert any(r.get("unresolved") == "same row label twice under one section" for r in out)
+    assert not any(r.get("row") == "Detached" and "value" in r for r in out)
+
+
+def test_a_cell_drawn_twice_is_one_cell(monkeypatch):
+    out = read(monkeypatch, [(0, 20, 100, 40), (100, 20, 150, 40), (100, 20, 150, 40), (150, 20, 200, 40)],
+               [line(25, (5, "Front"), (110, "25"), (160, "10"))])
+    assert {r["column"]: r["value"] for r in out[1:]} == {"R-1A": "25", "R-1B": "10"}
+    assert not any("unresolved" in r for r in out)
+
+
+def test_a_row_after_an_unread_heading_names_no_section(monkeypatch):
+    row = lambda top: [(0, top, 100, top + 20), (100, top, 150, top + 20), (150, top, 200, top + 20)]
+    rects = row(20) + row(60) + [(0, 100, 200, 120)] + row(140)            # 3rd row: one stripe, unreadable
+    out = read(monkeypatch, rects, [line(25, (5, "LotSize")), line(65, (5, "Detached"), (110, "1"), (160, "2")),
+                                    line(105, (5, "Height")), line(145, (5, "Stories"), (110, "3"), (160, "4"))])
+    assert {r["section"] for r in out if r.get("row") == "Stories"} == {None}  # not the old "LotSize"

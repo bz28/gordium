@@ -31,6 +31,7 @@ Lines and footnote markers ([fn11]) come from the text extractor, so line number
 2_extracted_text and a cited line can be traced to its cells.
 """
 
+from collections import defaultdict
 import re
 import statistics
 from dataclasses import dataclass, field
@@ -277,6 +278,7 @@ def read_page(page, page_number: int) -> list[dict]:
             problem("values with no row label", [t for cell in cells for t in contents[cell]])
         if problems:
             out += problems
+            section = None          # the unread row may have been a heading: rows below can't assume one
             continue
         is_heading = row and not any(v[0] for v in values.values())
         if is_heading:
@@ -290,7 +292,22 @@ def read_page(page, page_number: int) -> list[dict]:
                         "lines": value_lines, "spans": spans, "x0": round(cell[0], 1), "top": round(band.top, 1),
                         "x1": round(cell[1], 1), "bottom": round(band.bottom, 1)})
     out[0] |= {"top": round(table_top, 1), "bottom": round(table_bottom, 1)}
-    return out
+    return _same_key_unresolved(out)
+
+
+def _same_key_unresolved(out: list[dict]) -> list[dict]:
+    """Two rows with the same label under the same section (e.g. after a heading that couldn't be read)
+    can't be told apart by a rule, so both are reported unresolved instead of written."""
+    rows = defaultdict(set)                                    # (section, row) -> the lines of each such row
+    for r in out:
+        if "value" in r and not r["heading"]:
+            rows[r["section"], r["row"]].add(tuple(r["row_lines"]))
+    twice = {key for key, found in rows.items() if len(found) > 1}
+    kept = [r for r in out if "value" not in r or r["heading"] or (r["section"], r["row"]) not in twice]
+    for section, row in sorted(twice, key=str):
+        kept.append({"page": out[0]["page"], "unresolved": "same row label twice under one section", "text": row,
+                     "lines": sorted({n for lines in rows[section, row] for n in lines})})
+    return kept
 
 
 def read_charts(pdf_path, pages: list[int]) -> list[dict]:
