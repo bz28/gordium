@@ -598,3 +598,16 @@ def test_approved_entry_without_drafter_is_reported_not_crashed(ctx):
     entry = {k: v for k, v in DEFINITION.items() if k not in ("drafted_by", "open_questions")}
     entry |= {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
     assert any("missing 'drafted_by'" in p for p in validate_terms({"rear_yard": entry}, ctx, "definitions"))
+
+
+def test_a_use_decided_by_a_rule_must_cite_its_row(ctx):
+    ctx.use_rows = {"one_family_detached": [SOURCE]}
+    decides = rulebook(check='use == "one_family_detached" and rear_yard >= 20', applies_when=None,
+                       examples=[{"given": {"use": "one_family_detached", "rear_yard": 25, "lot_depth": 90}, "expect": "pass"},
+                                 {"given": {"use": "one_family_detached", "rear_yard": 10, "lot_depth": 90}, "expect": "fail"}])
+    assert validate(decides, ctx) == []                                       # its row (lines 42-43) is cited
+    elsewhere = {**SOURCE, "lines": [41, 41], "quote": "10 ft [fn15]"}
+    ctx.use_rows = {"one_family_detached": [elsewhere]}
+    assert any("use 'one_family_detached' is decided here but its row isn't cited" in p
+               for p in validate(decides, ctx))
+    assert validate(rulebook(), ctx) == []                                    # applies_when only scopes the rule

@@ -88,6 +88,7 @@ class Context:
     pages: dict[str, dict[int, dict[int, list[str]]]] = field(default_factory=dict)  # file -> page -> line -> tokens
     problems: list[str] = field(default_factory=list)                # problems with the sources themselves
     file_problems: dict[str, list[str]] = field(default_factory=dict)  # the same, by source file
+    use_rows: dict[str, list[dict]] = field(default_factory=dict)    # use -> its sources in uses.yaml
 
     def _problem(self, name: str, message: str):
         self.problems.append(f"{name}: {message}")
@@ -100,7 +101,8 @@ class Context:
         documents = load(j / "1_source_documents/sources.yaml")["documents"]
         listed = {d["file"]: d for d in documents}
         ctx = cls(measures=set(load(MEASURES_FILE)),
-                  uses=set(load(uses_file) or ()) if uses_file.exists() else set(),
+                  uses=set(uses_list := (load(uses_file) or {}) if uses_file.exists() else {}),
+                  use_rows={k: v.get("sources") or [] for k, v in uses_list.items() if isinstance(v, dict)},
                   topics=set(load(VOCABULARY_FILE)["topics"]),
                   reviewers=set(load(REVIEWERS_FILE) or ()),
                   sources=listed)
@@ -142,6 +144,30 @@ class Context:
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
                  "adopted_on", "created_on", "quotable", "not_quotable_because"}
+
+
+def _is_line_range(lines) -> bool:
+    return isinstance(lines, list) and len(lines) == 2 and all(type(n) is int for n in lines)
+
+
+def _use_row_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[str]:
+    """A rule that decides about a use (in `check` or `review_when`) must cite that use's own row,
+    the one uses.yaml cites, so every allowed or flagged use is traceable. (`applies_when` only scopes
+    a rule; its own quotes cover that.)"""
+    decisions = [rule.get("check")] + [r.get("when") for r in _list_of_dicts(rule, "review_when") or []]
+    named = set()
+    for f in decisions:
+        try:
+            named |= formula.strings(f) if isinstance(f, str) else set()
+        except FormulaError:
+            pass                                                # reported with the formula
+    cited = {(s.get("file"), s.get("page"), n) for s in sources
+             if isinstance(s.get("file"), str) and type(s.get("page")) is int and _is_line_range(s.get("lines"))
+             for n in range(s["lines"][0], s["lines"][1] + 1)}
+    return [f"use '{u}' is decided here but its row isn't cited (cite {r['file']} p.{r['page']} lines {r['lines']})"
+            for u in sorted(named & set(ctx.use_rows)) for r in ctx.use_rows[u][:1]
+            if _is_line_range(r.get("lines")) and not any((r["file"], r["page"], n) in cited
+                                                          for n in range(r["lines"][0], r["lines"][1] + 1))]
 
 
 def not_quotable(entry: dict) -> str | None:
@@ -294,6 +320,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append(str(e))
 
     p += _source_problems(sources, ctx) if sources is not None else []
+    p += _use_row_problems(rule, sources or [], ctx)
 
     expects = {ex.get("expect") for ex in examples or [] if isinstance(ex.get("expect"), str)}
     if rule.get("kind") == "rule" and not {"pass", "fail"} <= expects:
@@ -426,8 +453,7 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
             p.append(f"source {name} {reason}")
         elif name in ctx.file_problems:
             p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
-        elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and isinstance(lines, list)
-                  and len(lines) == 2 and all(type(n) is int for n in lines)):
+        elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and _is_line_range(lines)):
             p.append(f"source {name}: needs 'page' (number), 'lines' ([first, last]) and 'quote' (text)")
         elif "…" in quote or "..." in quote:
             p.append(f"source {name}: a quote is one exact passage; cite separate passages as separate sources")
