@@ -462,23 +462,31 @@ def test_a_copy_on_another_page_outside_the_piece_is_not_a_duplicate(law):
     assert why is None and (source["page"], source["lines"]) == (48, [12, 12])
 
 
-def test_every_label_matches_a_recorded_answer_or_says_how_it_differs():
-    answer = {"label": "reference", "topic": "dimensions", "reason": "r", "quote": "Q"}
-    records = [{"piece": "325-1", "problem": None, "answer": json.dumps(answer)}]
-    base = {"label": "reference", "sources": [{"quote": "Q"}], "drafted_by": "section_labeling/claude-haiku-5-5"}
-    assert coverage.provenance_problems({"325-1": base}, records) == []
-    changed = base | {"label": "rule"}                                        # changed with no record
-    assert "no recorded answer has label 'rule'" in coverage.provenance_problems({"325-1": changed}, records)[0]
-    recorded = changed | {"revised": [{"from": "reference", "by": "x", "date": "d", "why": "w"}]}
-    assert coverage.provenance_problems({"325-1": recorded}, records) == []
-    added = base | {"sources": [{"quote": "Q"}, {"quote": "more"}]}           # a source the AI didn't produce
-    assert "1 source(s) the recorded answer didn't produce" in coverage.provenance_problems({"325-1": added}, records)[0]
+def test_every_label_matches_a_recorded_answer_or_says_how_it_differs(law):
+    ctx, header, pieces, rows = law
+    check = lambda labels, records: coverage.provenance_problems(labels, records, pieces, rows, LAW, ctx)
+    answer = GOOD                                                             # a rule citing L1-L2 of 325-16C
+    records = [{"piece": "325-16C", "problem": None, "answer": json.dumps(answer)}]
+    produced, _ = labeler.answer_sources(answer, pieces["325-16C"], rows, LAW, ctx)
+    base = {"label": "rule", "sources": produced, "drafted_by": "section_labeling/claude-haiku-5-5"}
+    assert check({"325-16C": base}, records) == []
+    assert "no recorded answer has label 'flag'" in check({"325-16C": base | {"label": "flag"}}, records)[0]
+    flagged = base | {"label": "flag", "revised": [{"from": "rule", "by": "x", "date": "d", "why": "w"}]}
+    assert check({"325-16C": flagged}, records) == []
+    extra = {"file": LAW, "page": 47, "lines": [8, 9], "quote": "(1) Each required front, side and rear yard"}
+    added = base | {"sources": produced + [extra]}                            # an answer with requirements: still caught
+    assert "sources differ" in check({"325-16C": added}, records)[0]
+    moved = base | {"sources": [produced[0] | {"lines": [6, 6]}, *produced[1:]]}   # same words, other lines
+    assert "sources differ" in check({"325-16C": moved}, records)[0]
     explained = added | {"revised": [{"field": "sources", "by": "x", "date": "d", "why": "w"}]}
-    assert coverage.provenance_problems({"325-1": explained}, records) == []
+    assert check({"325-16C": explained}, records) == []
+    dropped = base | {"sources": [extra], "revised": explained["revised"]}    # a revision must keep what the AI produced
+    assert "must keep what the recorded answer produced" in check({"325-16C": dropped}, records)[0]
 
 
-def test_the_committed_labels_all_match_their_recorded_answers():
+def test_the_committed_labels_all_match_their_recorded_answers(law):
+    ctx, header, pieces, rows = law
     labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
     runs = [json.loads(line) for f in sorted((ITHACA / "3_section_labels/runs").glob("*.jsonl"))
             for line in f.read_text().splitlines() if line.strip()]
-    assert coverage.provenance_problems(labels, runs) == []
+    assert coverage.provenance_problems(labels, runs, pieces, rows, LAW, ctx) == []

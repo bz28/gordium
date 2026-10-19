@@ -108,6 +108,29 @@ def cited_lines(req: dict, lines: list[tuple[int, int, str]], piece: dict, file:
     return find_quote(words, piece, file, ctx)
 
 
+def answer_sources(answer: dict, piece: dict, rows: list[dict], file: str,
+                   ctx: Context) -> tuple[list[dict] | None, str | None]:
+    """The one way an answer becomes a label's sources, used when labeling and when checking provenance:
+    the quote, plus for a rule or flag the requirement lines it cited, each place once (a requirement's full
+    lines win over a quote on the same lines). (sources, None), or (None, why the answer can't be used)."""
+    quote, problem = find_quote(answer["quote"], piece, file, ctx)
+    if problem:
+        return None, problem
+    lines = numbered_lines(rows, piece)
+    requirements = answer.get("requirements", [])
+    found = [cited_lines(r, lines, piece, file, ctx) if isinstance(r, dict) else find_quote(r, piece, file, ctx)
+             for r in requirements]                     # strings: answers recorded before line citations
+    problem = next((f"requirement {r}: {why}" for r, (_, why) in zip(requirements, found) if why), None)
+    if problem or (problem := consistency_problem(answer) if "requirements" in answer else None):
+        return None, problem
+    if answer["label"] not in ("rule", "flag"):
+        return [quote], None
+    unique = {}
+    for s in [*(s for s, _ in found), quote]:
+        unique.setdefault((s["page"], tuple(s["lines"])), s)
+    return list(unique.values()), None
+
+
 def consistency_problem(answer: dict) -> str | None:
     """The label must agree with the requirements the answer itself listed."""
     if answer["requirements"] and answer["label"] in ("reference", "not_for_checking"):
@@ -152,7 +175,6 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
     system = system_prompt()
     topics = sorted(ctx.topics)
     messages = [{"role": "user", "content": piece_message(piece, rows)}]
-    lines = numbered_lines(rows, piece)
     for attempt in range(1, settings["max_attempts"] + 1):
         worst = worst_case(len(system) + len(json.dumps(messages, default=str)), settings, PRICES)
         if budget is not None:
@@ -174,18 +196,7 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
         else:
             try:
                 answer = json.loads(text)
-                source, problem = find_quote(answer["quote"], piece, file, ctx)
-                if not problem:
-                    found = [cited_lines(r, lines, piece, file, ctx) for r in answer["requirements"]]
-                    problem = next((f"requirement {r}: {why}" for r, (_, why) in zip(answer["requirements"], found)
-                                    if why), None) or consistency_problem(answer)
-                    if not problem and answer["label"] in ("rule", "flag"):
-                        # A rule's or flag's sources justify its label: the requirement lines it found plus the
-                        # quote. They are hints for drafting, which always reads the whole piece.
-                        unique = {}
-                        for s in [*(s for s, _ in found), source]:   # a requirement's full lines win over the quote
-                            unique.setdefault((s["page"], tuple(s["lines"])), s)
-                        source = list(unique.values())
+                source, problem = answer_sources(answer, piece, rows, file, ctx)
             except (json.JSONDecodeError, KeyError, TypeError) as e:
                 problem = f"unreadable answer ({type(e).__name__})"
         record({"piece": piece["id"], "attempt": attempt, "date": datetime.datetime.now(datetime.UTC).isoformat(),
@@ -196,7 +207,7 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
                 "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None})
         if source and not problem:
             return {"label": answer["label"], "topic": answer["topic"], "reason": answer["reason"].strip(),
-                    "sources": source if isinstance(source, list) else [source], "piece_sha256": piece_fingerprint(piece, pdf_sha),
+                    "sources": source, "piece_sha256": piece_fingerprint(piece, pdf_sha),
                     "drafted_by": f"section_labeling/{settings['model']}", "status": "draft"}
         if response.stop_reason == "refusal":
             return None            # declined: asking again won't help; recorded, and the piece stays unlabeled

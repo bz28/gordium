@@ -24,11 +24,10 @@ AI's original answer stays visible (and in the run record) and every change is t
 import datetime
 import hashlib
 import json
-import re
 from pathlib import Path
 
 from .rulebook import (APPROVAL_FIELDS, VOCABULARY_FILE, Context, _approval_problems, _list_of_dicts,
-                       _source_problems, load, tokenize)
+                       _source_problems, load)
 
 # A reviewer's doubt goes in open_questions (blocks approval); the architect's answer in answers, as for rules.
 LABEL_FIELDS = {"label", "topic", "reason", "sources", "piece_sha256", "run", "notes", "open_questions", "answers",
@@ -97,24 +96,7 @@ def _label_problems(key, entry, ctx: Context, pieces: dict[str, dict], pdf_sha: 
                     and not {(page, lines[0]), (page, lines[1])} <= owned:
                 p.append(f"quote on p.{page} lines {lines} is outside this piece")
     p += _revision_problems(entry.get("revised", []), entry.get("label"))
-    p += _heading_only_problems(entry, pieces[key])
     return p + _approval_problems(entry | {"id": key}, ctx, LABEL_APPROVED)
-
-
-def _heading_only_problems(entry: dict, piece: dict) -> list[str]:
-    """A rule or flag must cite more than its piece's heading: the heading names the subject but can't
-    justify that the piece sets a requirement. A quote is only a heading when every word in it is a word
-    of the piece's title or a section marker ("C.", "§ 325-17", "(1)"). A one-line piece is exempt."""
-    if len(piece["lines"]) == 1 and piece["lines"][0][1] == piece["lines"][0][2]:
-        return []                                # a one-line piece: its heading is the whole provision
-    title = set(tokenize(piece.get("title", "")))                 # tokenize lower-cases
-    marker = re.compile(r"[a-z]|[ivxl]+|[\d.\-]+|§|[().:,–—]|\[fn\d+\]")
-    def heading_only(quote):
-        return all(t in title or marker.fullmatch(t) for t in tokenize(quote))
-    sources = _list_of_dicts(entry, "sources") or []
-    if entry.get("label") in ("rule", "flag") and sources and all(heading_only(s.get("quote", "")) for s in sources):
-        return ["a rule or flag must cite the words that set its requirement, not only the heading"]
-    return []
 
 
 def _revision_problems(revised, label) -> list[str]:

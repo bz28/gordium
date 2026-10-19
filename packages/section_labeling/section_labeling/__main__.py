@@ -61,7 +61,8 @@ def cmd_coverage(args) -> int:
         bad = coverage.line_problems(rows, header, pieces)
         runs = [json.loads(line) for f in sorted((j / "3_section_labels/runs").glob("*.jsonl"))
                 for line in f.read_text(encoding="utf-8").splitlines() if line.strip()]
-        for problem in coverage.provenance_problems(labels, runs):
+        ctx = Context.for_jurisdiction(j)
+        for problem in coverage.provenance_problems(labels, runs, pieces, rows, file, ctx):
             print(f"✗ provenance: {problem}")
             failed += 1
         outputs = {j / "6_coverage_report" / f"{Path(file).stem}.md": coverage.report(rows, header, pieces, labels),

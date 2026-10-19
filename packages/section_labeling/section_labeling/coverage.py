@@ -139,11 +139,13 @@ def review_list(header: dict, pieces: dict[str, dict], labels: dict, cited: dict
     return "\n".join(out) + "\n"
 
 
-def provenance_problems(labels: dict, records: list[dict]) -> list[str]:
-    """Every AI-drafted label must match a recorded answer, or say how it differs. The original label is the
-    first revision's `from` (else the current label); some accepted answer for the piece must have that
-    label and a quote among the label's sources. A source that answer didn't produce needs a
-    {field: sources} revision. Plain code over the committed run records."""
+def provenance_problems(labels: dict, records: list[dict], pieces: dict, rows: list[dict], file: str,
+                        ctx) -> list[str]:
+    """Every AI-drafted label must be exactly what a recorded answer produces, or say how it differs. The
+    answer's sources are rebuilt with the labeler's own code (labeler.answer_sources); the label (its
+    original, before any {from} revision) and its sources (page, lines and words) must equal one accepted
+    answer's, unless a {field: sources} revision explains the sources. Plain code over the run records."""
+    from .labeler import answer_sources
     accepted: dict[str, list[dict]] = {}
     for r in records:
         if r.get("problem") is None and r.get("answer"):
@@ -153,17 +155,19 @@ def provenance_problems(labels: dict, records: list[dict]) -> list[str]:
                 pass
     out = []
     for pid, e in labels.items():
-        if not str(e.get("drafted_by", "")).startswith("section_labeling/"):
+        if not str(e.get("drafted_by", "")).startswith("section_labeling/") or pid not in pieces:
             continue
         revised = e.get("revised") or []
         original = next((r["from"] for r in revised if "from" in r), e.get("label"))
-        quotes = [s.get("quote") for s in e.get("sources") or []]
-        match = [a for a in accepted.get(pid, []) if a.get("label") == original and a.get("quote") in quotes]
-        if not match:
-            out.append(f"{pid}: no recorded answer has label {original!r} and one of its quotes")
-            continue
-        produced_more = any(a.get("requirements") for a in match)       # line citations add their own sources
-        extra = [q for q in quotes if q not in {a.get("quote") for a in match}]
-        if extra and not produced_more and not any(r.get("field") == "sources" for r in revised):
-            out.append(f"{pid}: {len(extra)} source(s) the recorded answer didn't produce, with no sources revision")
+        place = lambda s: (s.get("page"), tuple(s.get("lines") or ()), s.get("quote"))
+        have = {place(s) for s in e.get("sources") or []}
+        rebuilt = [{place(s) for s in srcs} for a in accepted.get(pid, []) if a.get("label") == original
+                   for srcs, _ in [answer_sources(a, pieces[pid], rows, file, ctx)] if srcs]
+        if not rebuilt:
+            out.append(f"{pid}: no recorded answer has label {original!r}")
+        elif have not in rebuilt:
+            if not any(r.get("field") == "sources" for r in revised):
+                out.append(f"{pid}: sources differ from what its recorded answer produces, with no sources revision")
+            elif not any(s <= have for s in rebuilt):
+                out.append(f"{pid}: a sources revision must keep what the recorded answer produced")
     return out
