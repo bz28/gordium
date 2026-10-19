@@ -24,3 +24,11 @@ First city: **City of Ithaca, NY** (residential districts first).
 6. Measurement code is written and tested by engineers.
 
 Full design doc: https://claude.ai/code/artifact/d980dd22-6b2e-4090-bcc4-d02c871b8a7b
+
+## Running it
+
+```bash
+python3.12 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+.venv/bin/pytest                      # all tests
+.venv/bin/python -m rule_format       # check every rule file
+```
