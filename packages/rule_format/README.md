@@ -17,17 +17,19 @@ The shape every rule must have, the formula language rules are written in, and t
   sources:
     - file: zoning_charts_2026-04.pdf            # must be listed in sources.yaml
       page: 3
-      quote: "Rear (minimum … 25%/ 50 ft"        # must appear on that page ('…' skips text)
-  examples:                                      # each must produce its expected outcome
+      quote: "Rear (minimum, % of depth … whichever is less)"   # must appear on that page ('…' skips text)
+  examples:                                      # need a pass and a fail; each must come out as stated
     - given: {use: one_family_detached, rear_yard: 25, lot_depth: 90}
       expect: pass
+    - given: {use: one_family_detached, rear_yard: 21, lot_depth: 90}
+      expect: fail
   drafted_by: claude
-  status: draft                                  # approved also needs approved_by + approved_on
+  status: draft                                  # approved also needs approved_by, approved_on, approved_hash
 ```
 
 ## Formulas
 
-Everyday math notation, read by a strict parser that rejects anything else: numbers, quoted text, measure names (`measures.yaml`), `+ - * /` on numbers, comparisons (`< <= > >=` on numbers, `== !=`), `in` / `not in` a `[list]`, `and` `or` `not`, `a if condition else b`, `min()` / `max()` of two or more numbers. Max 500 characters. `check`, `applies_when` and `review_when` must be true/false tests. Units are fixed per measure (ft, sf, count).
+Everyday math notation, read by a strict parser that rejects anything else: numbers, quoted text, measure names (`measures.yaml`), `+ - * /` on numbers, comparisons (`< <= > >=` on numbers, `== !=`), `in` / `not in` a `[list]`, `and` `or` `not`, `a if condition else b`, `min()` / `max()` of two or more numbers. Max 500 characters. `check`, `applies_when` and `review_when` must be true/false tests. Units are fixed per measure (ft, sf, count, text) and enforced: a text value for a number measure (or the reverse) → needs review. `==`, `!=` and `in` only compare like with like.
 
 ## Outcomes (never a false pass)
 
@@ -36,7 +38,7 @@ Everyday math notation, read by a strict parser that rejects anything else: numb
 3. any `review_when` true → **needs review**
 4. `check` true / false → **pass** / **fail**
 
-A missing or unusable measurement (none, NaN, infinite), or a value the formula can't evaluate (text vs number, divide by zero), at any step → **needs review**.
+A missing or unusable measurement (none, NaN, infinite, wrong kind), or a value the formula can't evaluate (text vs number, divide by zero, a non-finite result), at any step → **needs review**.
 
 ## Checking rule files
 
@@ -45,4 +47,4 @@ python -m rule_format       # validates every jurisdiction's 5_zoning_rules/ and
 pytest packages/rule_format
 ```
 
-Validation checks: file shape; required fields; no duplicate YAML keys; known measures, uses and topics; formulas parse and are true/false tests; source files listed in `sources.yaml` with matching fingerprints; extracted text made from that exact PDF version; every quote at least 15 characters and found on its cited page; every worked example gives its expected outcome; approved rules approved by someone in `regulations/reviewers.yaml` (never the drafter, never AI) on a real date.
+Validation checks: file shape; required fields; no duplicate YAML keys; known measures, uses and topics; formulas parse and are true/false tests; source files listed in `sources.yaml` with matching fingerprints; extracted text made from that exact PDF version; every quote found on its cited page (each piece 15+ characters, at most two `…` gaps of up to 300 characters, numbers not matched inside bigger numbers); at least one passing and one failing worked example, each giving its expected outcome, with values of the right kind; approved rules approved by someone in `regulations/reviewers.yaml` (never the drafter, never AI) on a date, with `approved_hash` matching the rule's current content (`rulebook.approval_hash`), so any edit after approval needs re-approval.

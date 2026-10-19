@@ -26,6 +26,7 @@ def test_evaluate(text, values, expected):
     "max(lot_area, key=1)", "max(lot_area)", "min()", "True", "None", "x if", "a ** 2",
     "[i for i in x]", 'use in "one_family_detached"', "", "1" + "+1" * 300,
     "-" * 100_000 + "1", "not " * 5_000 + "x",
+    "rear_yard <= 1e999",                                       # infinity written as a number
 ])
 def test_rejects_anything_outside_the_language(text):
     with pytest.raises(FormulaError):
@@ -51,6 +52,9 @@ def test_missing_or_unusable_measure_is_never_hidden(text, bad):
     ("stories <= 3", {"stories": True}),                         # booleans aren't measurements
     ("not stories", {"stories": 3}),                             # 'not' of a number
     ("stories and lot_area > 1", {"stories": 3, "lot_area": 5}),  # 'and' of a number
+    ("lot_area * 1e308 * 10 > 1", {"lot_area": 5}),            # arithmetic overflows to infinity
+    ("stories != 4", {"stories": "4"}),                         # comparing text with a number
+    ('use in ["a", 1]', {"use": "a"}),                          # list mixes text and numbers
 ])
 def test_values_that_cannot_be_evaluated(text, values):
     with pytest.raises(EvaluationError):

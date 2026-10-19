@@ -28,9 +28,15 @@ REVIEWERS_FILE = REPO / "regulations/reviewers.yaml"
 OUTCOMES = ("pass", "fail", "needs_review", "not_applicable")
 KINDS = ("rule", "flag")  # rule: code checks it; flag: an architect must judge it
 STATUSES = ("draft", "approved")
-MIN_QUOTE_LENGTH = 15     # characters after normalizing; short quotes match by accident
-RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when",
-               "sources", "examples", "notes", "drafted_by", "status", "approved_by", "approved_on"}
+MIN_QUOTE_LENGTH = 15     # characters per quoted piece, after normalizing; short pieces match by accident
+MAX_QUOTE_PIECES = 3      # at most two '…' gaps in one quote
+MAX_QUOTE_GAP = 300       # characters a '…' may skip, so pieces can't be stitched from across a page
+RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources",
+               "examples", "notes", "drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
+TEXT_FIELDS = ("id", "kind", "topic", "says", "drafted_by", "status", "approved_by")
+APPROVED_FIELDS = ("kind", "topic", "says", "applies_when", "check", "review_when", "sources")
+MEASURE_KINDS = {name: "text" if m["unit"] == "text" else "number"
+                 for name, m in yaml.safe_load(MEASURES_FILE.read_text()).items()}
 
 
 def outcome(rule: dict, values: dict) -> str:
@@ -47,7 +53,7 @@ def outcome(rule: dict, values: dict) -> str:
 
 
 def _condition(text: str, values: dict) -> bool:
-    result = formula.evaluate(text, values)
+    result = formula.evaluate(text, values, MEASURE_KINDS)
     if type(result) is not bool:
         raise EvaluationError(f"{text!r} did not give true/false")
     return result
@@ -120,16 +126,35 @@ def normalize(text: str) -> str:
     return re.sub(r"\s+", "", text)
 
 
+def quote_pieces(quote: str) -> list[str]:
+    return [p for p in map(normalize, quote.split("…")) if p]
+
+
 def quote_found(quote: str, page_text: str) -> bool:
-    """True if every part of the quote (parts separated by '…') appears on the page, in order."""
-    parts = [p for p in map(normalize, quote.split("…")) if p]
-    pos = 0
-    for part in parts:
-        pos = page_text.find(part, pos)
-        if pos < 0:
+    """True if the quote's pieces (separated by '…') appear on the page in order, each within
+    MAX_QUOTE_GAP characters of the last, and no piece starts or ends in the middle of a number."""
+    pos = None
+    for piece in quote_pieces(quote):
+        start = 0 if pos is None else pos
+        while (at := page_text.find(piece, start)) >= 0 and not _clean_edges(page_text, at, piece):
+            start = at + 1
+        if at < 0 or pos is not None and at - pos > MAX_QUOTE_GAP:
             return False
-        pos += len(part)
-    return bool(parts)
+        pos = at + len(piece)
+    return pos is not None
+
+
+def _clean_edges(page_text: str, at: int, piece: str) -> bool:
+    """'5 feet' must not match inside '25 feet' (whitespace is gone, so digits are the risk)."""
+    before = page_text[at - 1] if at else ""
+    after = page_text[at + len(piece):at + len(piece) + 1]
+    return not (piece[0].isdigit() and before.isdigit() or piece[-1].isdigit() and after.isdigit())
+
+
+def approval_hash(rule: dict) -> str:
+    """Fingerprint of what an architect approves. Any later edit to these fields changes it."""
+    approved = {k: rule.get(k) for k in APPROVED_FIELDS}
+    return hashlib.sha256(json.dumps(approved, sort_keys=True, default=str).encode()).hexdigest()
 
 
 def validate(rulebook, ctx: Context) -> list[str]:
@@ -145,7 +170,7 @@ def validate(rulebook, ctx: Context) -> list[str]:
         if not isinstance(rule, dict):
             problems.append(f"rule #{i}: must be a mapping")
             continue
-        rid = rule.get("id", f"rule #{i}")
+        rid = rule["id"] if isinstance(rule.get("id"), str) else f"rule #{i}"
         problems += [f"{rid}: {p}" for p in _rule_problems(rule, district, ctx)]
         if rid in seen:
             problems.append(f"{rid}: duplicate id")
@@ -160,6 +185,9 @@ def _list_of_dicts(rule, key):
 
 def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     p = [f"unknown field '{k}'" for k in rule.keys() - RULE_FIELDS]
+    p += [f"'{k}' must be text" for k in TEXT_FIELDS if k in rule and not isinstance(rule[k], str)]
+    if p:
+        return p  # later checks rely on these fields being well-formed
     if not str(rule.get("id", "")).startswith(f"{district}."):
         p.append(f"id must start with '{district}.'")
     if rule.get("kind") not in KINDS:
@@ -194,14 +222,17 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
 
     p += _source_problems(sources, ctx) if sources is not None else []
 
-    if rule.get("kind") == "rule" and not examples:
-        p.append("a 'rule' needs at least one worked example")
+    if rule.get("kind") == "rule" and not {"pass", "fail"} <= {ex.get("expect") for ex in examples or []}:
+        p.append("a 'rule' needs worked examples that pass and that fail, so its check is really exercised")
     for n, ex in enumerate(examples or [], 1):
         given = ex.get("given")
         if not isinstance(given, dict):
             p.append(f"example {n}: 'given' must be a mapping of measurements")
         elif unknown := sorted(given.keys() - ctx.measures):
             p.append(f"example {n}: unknown measures {unknown}")
+        elif wrong := sorted(k for k, v in given.items() if MEASURE_KINDS.get(k) == "number"
+                             and type(v) not in (int, float) or MEASURE_KINDS.get(k) == "text" and type(v) is not str):
+            p.append(f"example {n}: wrong kind of value for {wrong} (see measures.yaml units)")
         elif ex.get("expect") not in OUTCOMES:
             p.append(f"example {n}: expect must be one of {OUTCOMES}")
         elif not p and (got := outcome(rule, given)) != ex["expect"]:
@@ -218,6 +249,8 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append("a rule can't be approved by the person who drafted it")
         if not isinstance(rule.get("approved_on"), datetime.date):
             p.append("approved_on must be a date (YYYY-MM-DD)")
+        if rule.get("approved_hash") != approval_hash(rule):
+            p.append("changed since it was approved (approved_hash doesn't match); needs re-approval")
     return p
 
 
@@ -227,12 +260,14 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
     p = []
     for s in sources:
         name, page, quote = s.get("file"), s.get("page"), s.get("quote")
-        if name not in ctx.sources:
+        if not isinstance(name, str) or name not in ctx.sources:
             p.append(f"source file {name!r} is not in sources.yaml")
         elif type(page) is not int or not isinstance(quote, str):
             p.append(f"source {name}: needs 'page' (number) and 'quote' (text)")
-        elif len(normalize(quote.replace("…", ""))) < MIN_QUOTE_LENGTH:
-            p.append(f"source {name}: quote too short to be traceable ({MIN_QUOTE_LENGTH}+ characters)")
+        elif not (pieces := quote_pieces(quote)) or min(map(len, pieces)) < MIN_QUOTE_LENGTH:
+            p.append(f"source {name}: each quoted piece needs {MIN_QUOTE_LENGTH}+ characters to be traceable")
+        elif len(pieces) > MAX_QUOTE_PIECES:
+            p.append(f"source {name}: at most {MAX_QUOTE_PIECES - 1} '…' gaps in a quote")
         elif name not in ctx.pages:
             p.append(f"source {name}: no extracted text, quote not verified")
         elif page not in ctx.pages[name]:

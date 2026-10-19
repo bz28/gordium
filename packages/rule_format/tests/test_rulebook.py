@@ -6,10 +6,10 @@ import math
 import pytest
 import yaml
 
-from rule_format.rulebook import Context, load, normalize, outcome, quote_found, validate
+from rule_format.rulebook import Context, approval_hash, load, normalize, outcome, quote_found, validate
 
 PAGE_3 = "Rear (minimum, % of depth or feet, whichever is less)  25%/ 50 ft 16"
-QUOTE = "Rear (minimum, % of depth … 25%/ 50 ft"
+QUOTE = "Rear (minimum, % of depth … whichever is less)  25%/ 50 ft"
 RULE = {
     "id": "R-1b.rear_yard",
     "kind": "rule",
@@ -26,7 +26,8 @@ RULE = {
     "drafted_by": "claude",
     "status": "draft",
 }
-APPROVED = {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
+APPROVED = {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
+            "approved_hash": approval_hash(RULE)}
 
 
 @pytest.fixture
@@ -58,6 +59,18 @@ def rulebook(**changes):
 ])
 def test_outcome(values, expected):
     assert outcome(RULE, values) == expected
+
+
+@pytest.mark.parametrize("check, values", [
+    ("stories != 4", {"stories": "4"}),                       # text where a number belongs
+    ('use not in ["church"]', {"use": 5}),                     # number where text belongs
+    ("not (rear_yard < 0 < use)", {"rear_yard": 5, "use": "x"}),  # bad link after a false one
+    ("not (rear_yard < 1e300 * 1e300 - 1e300 * 1e300)", {"rear_yard": 5}),  # arithmetic gives NaN
+    ("not (lot_area * 1e308 == 1)", {"lot_area": 5}),         # arithmetic overflows to infinity
+    ("stories == use", {"stories": "3", "use": "3"}),          # stories must be a number (measures.yaml)
+])
+def test_bad_values_never_pass(check, values):
+    assert outcome({"kind": "rule", "check": check}, values) == "needs_review"
 
 
 def test_non_boolean_check_never_passes():
@@ -95,12 +108,27 @@ def test_valid_rulebooks(ctx):
     ({"sources": [{"file": "other.pdf", "page": 3, "quote": QUOTE}]}, "not in sources.yaml"),
     ({"sources": [{"file": "charts.pdf", "page": "3", "quote": QUOTE}]}, "needs 'page' (number)"),
     ({"sources": [{"file": "charts.pdf", "page": 9, "quote": QUOTE}]}, "page 9 does not exist"),
-    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": "Rear (minimum, 30%/ 50 ft"}]}, "quote not found"),
-    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": "…"}]}, "quote too short"),
-    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": "50 ft"}]}, "quote too short"),
-    ({"examples": []}, "needs at least one worked example"),
-    ({"examples": [{"given": {"use": "one_family_detached", "rear_yard": 25, "lot_depth": 90},
-                    "expect": "fail"}]}, "expected fail, got pass"),
+    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": "Rear (minimum, % of depth … 30%/ 50 ft 16 xxxxxx"}]},
+     "quote not found"),
+    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": "…"}]}, "needs 15+ characters"),
+    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": "50 ft"}]}, "needs 15+ characters"),
+    ({"sources": [{"file": "charts.pdf", "page": 3,                       # stitched from single letters
+                   "quote": "r … e … a … r … m … i … n … i … m … u … m … 5 … 0 … f … t"}]}, "needs 15+ characters"),
+    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": " … ".join(["Rear (minimum, % of"] * 4)}]},
+     "at most 2 '…' gaps"),
+    ({"sources": [{"file": ["charts.pdf"], "page": 3, "quote": QUOTE}]}, "not in sources.yaml"),
+    ({"examples": []}, "worked examples that pass and that fail"),
+    ({"examples": [{"given": {}, "expect": "needs_review"}]}, "worked examples that pass and that fail"),
+    ({"examples": RULE["examples"] + [{"given": {"use": "one_family_detached", "rear_yard": 25, "lot_depth": 90},
+                                       "expect": "fail"}]}, "expected fail, got pass"),
+    ({"examples": RULE["examples"] + [{"given": {"use": "one_family_detached", "rear_yard": "25", "lot_depth": 90},
+                                       "expect": "needs_review"}]}, "wrong kind of value for ['rear_yard']"),
+    ({"topic": ["dimensions"]}, "'topic' must be text"),
+    ({"id": ["R-1b.x"]}, "'id' must be text"),
+    ({"drafted_by": ["claude", "jane"]} | APPROVED, "'drafted_by' must be text"),
+    (APPROVED | {"approved_by": ["jane"]}, "'approved_by' must be text"),
+    (APPROVED | {"check": "rear_yard >= 20"}, "changed since it was approved"),
+    (APPROVED | {"approved_hash": None}, "changed since it was approved"),
     ({"examples": [{"given": {"rear_yrd": 30}, "expect": "needs_review"}]}, "unknown measures ['rear_yrd']"),
     ({"examples": [{"given": "x", "expect": "pass"}]}, "'given' must be a mapping"),
     ({"status": "approved"}, "approved_by must be a reviewer"),
@@ -145,6 +173,20 @@ def test_quote_parts_must_appear_in_order():
     assert not quote_found("…", page)
 
 
+def test_quote_number_must_not_match_inside_a_bigger_number():
+    page = normalize("Rear yard minimum 25 feet in depth for all lots; side yard 5 feet in depth for all lots")
+    assert quote_found("5 feet in depth for all lots", page)          # the real '5 feet', later on the page
+    assert not quote_found("5 feet in depth for all lots", normalize("Rear yard 25 feet in depth for all lots"))
+    assert not quote_found("yard 2", normalize("yard 25"))
+
+
+def test_quote_pieces_must_be_near_each_other():
+    near = normalize("Rear yard minimum " + "x" * 100 + " twenty feet always")
+    far = normalize("Rear yard minimum " + "x" * 400 + " twenty feet always")
+    assert quote_found("Rear yard minimum … twenty feet always", near)
+    assert not quote_found("Rear yard minimum … twenty feet always", far)
+
+
 def _jurisdiction(tmp_path, pdf_bytes=b"%PDF fake", header_sha=None, rows=()):
     j = tmp_path / "ny" / "town"
     (j / "1_source_documents").mkdir(parents=True)
@@ -169,3 +211,16 @@ def test_context_reports_changed_pdf_and_stale_text(tmp_path):
     assert any("fingerprint does not match" in p for p in ctx.problems)
     assert any("different version" in p for p in ctx.problems)
     assert "doc.pdf" not in ctx.pages
+
+
+def test_cli_reports_broken_folders_and_files_instead_of_crashing(tmp_path, monkeypatch, capsys):
+    import rule_format.__main__ as cli
+    (tmp_path / "regulations/jurisdictions/ny/no_sources").mkdir(parents=True)  # no sources.yaml
+    j = _jurisdiction(tmp_path / "regulations/jurisdictions", rows=[])
+    (j / "5_zoning_rules/R-1b.yaml").mkdir(parents=True)                        # a folder named like a file
+    (j / "5_zoning_rules/R-2a.yaml").write_bytes(b"\xff\xfe not text")
+    monkeypatch.setattr(cli, "REPO", tmp_path)
+    assert cli.main() == 1
+    out = capsys.readouterr().out
+    assert "no_sources: can't load sources" in out
+    assert "R-2a.yaml" in out and "can't read file" in out

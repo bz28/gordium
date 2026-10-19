@@ -26,16 +26,16 @@ Every rule is written the same way. Here is R-1b's rear yard, with what each lin
 | `review_when` | lot depth unclear on an irregular lot | When the computer must hand it to an architect instead of deciding |
 | `sources` | zoning charts, page 3, "Rear (minimum, % of depth…" | Exactly where in the city's documents it comes from |
 | `examples` | rear yard 25 ft, lot 90 ft deep → **pass** | Worked examples, like the ones in a code commentary |
-| `status`, `approved_by`, `approved_on` | draft · (architect) · (date) | Who approved it and when |
+| `status`, `approved_by`, `approved_on`, `approved_hash` | draft · (architect) · (date) · (fingerprint) | Who approved it, when, and a fingerprint of exactly what they approved |
 
 ## The promises and their checks
 
 | Promise to architects | Why it matters | So the inspector rejects a rule that… | Example test |
 |---|---|---|---|
-| **Every rule shows where it came from** | You can always ask "says who?" and get the page and the words | has no source · cites a document we don't hold · cites a document that has changed since we recorded it · quotes words that aren't on that page · quotes so little (like "50 ft") that it could match anywhere | A rule quoting "30%" where page 3 says "25%" → rejected |
-| **Nothing is used until an architect approves it** | AI can draft, but only a licensed person decides | is marked approved by someone not on the architects list (`regulations/reviewers.yaml`) · is approved by the person who drafted it · has no real approval date | A rule "approved by claude" → rejected |
+| **Every rule shows where it came from** | You can always ask "says who?" and get the page and the words | has no source · cites a document we don't hold · cites a document that has changed since we recorded it · quotes words that aren't on that page · quotes so little (like "50 ft") that it could match anywhere · stitches a quote together from scattered bits of the page (each piece must be 15+ characters, close together, at most two "…" gaps) · quotes "5 feet" where the page says "25 feet" | A rule quoting "30%" where page 3 says "25%" → rejected |
+| **Nothing is used until an architect approves it** | AI can draft, but only a licensed person decides | is marked approved by someone not on the architects list (`regulations/reviewers.yaml`) · is approved by the person who drafted it · has no approval date · was **changed after it was approved** (its fingerprint no longer matches, so it needs approving again) | A rule "approved by claude" → rejected |
 | **Checking never uses AI; same design = same answer** | Results are predictable and repeatable, like a calculator | uses anything other than plain math in its formula | A formula that tries to run a program → rejected |
-| **Never a false pass** | A wrong "pass" could put an illegal building on paper; a "needs review" only costs a second look | has a formula that isn't a clear yes/no question · has worked examples that don't come out as stated | "rear yard minus 20" (a number, not a yes/no) → rejected |
+| **Never a false pass** | A wrong "pass" could put an illegal building on paper; a "needs review" only costs a second look | has a formula that isn't a clear yes/no question · has worked examples that don't come out as stated · doesn't have at least one example that passes and one that fails (so the formula is really tried both ways) | "rear yard minus 20" (a number, not a yes/no) → rejected |
 | **Rules are consistent** | Every rule reads the same way; a typo can't silently break one | uses a measurement, use or topic name that isn't on the official lists · has missing or unknown fields · repeats an id or a line | "rear_yrd" instead of "rear_yard" → rejected |
 
 ## How a design gets its result
@@ -47,15 +47,15 @@ For each rule, in this order:
 3. A reason for caution (e.g. irregular lot) → **needs review**
 4. Otherwise the yes/no question → **pass** or **fail**
 
-At any step, if a measurement is missing or unusable → **needs review**. Only a clean "yes" can ever become **pass**.
+At any step, if a measurement is missing or unusable (no value, not a real number, text where a number belongs), or the math can't be done (like dividing by zero) → **needs review**. Only a clean "yes" can ever become **pass**.
 
 ## How we know the checks themselves work
 
 | Method | What it shows | Status |
 |---|---|---|
-| **Tests**: one per check: take a good rule, break one thing, confirm it is rejected; and confirm good rules pass | Each check does its job | 104 tests, all passing |
-| **Independent review**: a second reviewer with no knowledge of how the code was written looks for holes | Catches what the author didn't think of | Found 15 gaps, all fixed with tests |
-| **Breaking the safeguards on purpose**: switch off each safeguard and confirm a test notices | No safeguard is untested | 12 of 12 noticed |
+| **Tests**: mostly "take a good rule, break one thing, confirm it is rejected", plus "confirm good rules pass" | The checks do their job | 128 tests, all passing |
+| **Repeated independent review**: a fresh reviewer who didn't write the code looks for holes, two skeptics try to disprove each one, survivors get fixed, and it repeats until a round finds nothing | Catches what the author didn't think of, including problems the fixes themselves created | Recorded per round in the PR |
+| **Breaking each fix on purpose** ("pins"): undo a fix and confirm a test notices | No fix is unguarded | Every fix pinned; recorded per review round in the PR |
 | **Planted mistakes in real rules**: wrong numbers, wrong pages, invented quotes in copies of the real R-1b | How many real-world mistakes get caught | Planned with R-1b |
 | **The architects' own mistakes** from their worked example | Real errors from practice are caught | Planned with R-1b |
 | **Every escape becomes a check**: any bad rule found later gets a new check and test | The inspector improves over time | Ongoing |
@@ -73,7 +73,7 @@ It can tell whether a rule is **well-formed and traceable**, not whether it **re
 
 These are engineering judgment calls, not facts from the code:
 
-- Quotes must be at least 15 characters (shorter ones match by accident).
+- Each quoted piece must be at least 15 characters, with at most two "…" gaps of up to 300 characters (so quotes can't be stitched together).
 - Lengths are always in feet, areas in square feet.
 - The list of measurements rules may use (`packages/rule_format/rule_format/measures.yaml`).
 - The list of topics (`regulations/document_extraction_guide/vocabulary.yaml`).

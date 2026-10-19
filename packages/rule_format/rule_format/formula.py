@@ -64,8 +64,9 @@ def parse(text: str) -> ast.Expression:
     for node in nodes:
         if not isinstance(node, _ALLOWED):
             raise FormulaError(f"{type(node).__name__} is not allowed in formulas: {text!r}")
-        if isinstance(node, ast.Constant) and type(node.value) not in (int, float, str):
-            raise FormulaError(f"only numbers and quoted text are allowed: {text!r}")
+        if isinstance(node, ast.Constant) and (type(node.value) not in (int, float, str)
+                                               or type(node.value) is float and not math.isfinite(node.value)):
+            raise FormulaError(f"only finite numbers and quoted text are allowed: {text!r}")
         if isinstance(node, ast.Call) and not (
                 isinstance(node.func, ast.Name) and node.func.id in FUNCTIONS
                 and len(node.args) >= 2 and not node.keywords):
@@ -95,63 +96,75 @@ def strings(text: str) -> set[str]:
     return {n.value for n in ast.walk(parse(text)) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
 
 
-def evaluate(text: str, values: dict):
-    """Evaluate a formula. Raises MissingMeasure or EvaluationError when it can't."""
-    return _eval(parse(text).body, values)
+def evaluate(text: str, values: dict, kinds: dict[str, str] | None = None):
+    """Evaluate a formula. Raises MissingMeasure or EvaluationError when it can't.
+
+    kinds maps a measure name to "text" or "number"; a value of the other kind can't be used.
+    """
+    return _eval(parse(text).body, values, kinds or {})
 
 
 def _number(x):
     if type(x) not in (int, float):
         raise EvaluationError(f"expected a number, got {x!r}")
+    if not math.isfinite(x):
+        raise EvaluationError(f"result is not a finite number: {x!r}")
     return x
 
 
-def _measure(name, values):
+def _kind(x):
+    return "text" if type(x) is str else "number" if type(x) in (int, float) else None
+
+
+def _measure(name, values, kinds):
     v = values.get(name)
     if v is None or type(v) is float and not math.isfinite(v):
         raise MissingMeasure(name)
-    if type(v) not in (int, float, str):
-        raise EvaluationError(f"{name} must be a number or text, got {v!r}")
+    if _kind(v) is None or kinds.get(name, _kind(v)) != _kind(v):
+        raise EvaluationError(f"{name} must be {kinds.get(name, 'a number or text')}, got {v!r}")
     return v
 
 
-def _eval(node, values):
+def _eval(node, values, kinds):
     match node:
         case ast.Constant(value=v):
             return v
         case ast.Name(id=name):
-            return _measure(name, values)
+            return _measure(name, values, kinds)
         case ast.List(elts=items) | ast.Tuple(elts=items):
-            return [_eval(i, values) for i in items]
+            return [_eval(i, values, kinds) for i in items]
         case ast.BinOp(left=l, op=op, right=r):
-            a, b = _number(_eval(l, values)), _number(_eval(r, values))
+            a, b = _number(_eval(l, values, kinds)), _number(_eval(r, values, kinds))
             if isinstance(op, ast.Div) and b == 0:
                 raise EvaluationError("division by zero")
-            return _ARITHMETIC[type(op)](a, b)
+            return _number(_ARITHMETIC[type(op)](a, b))
         case ast.UnaryOp(op=ast.USub(), operand=x):
-            return -_number(_eval(x, values))
+            return -_number(_eval(x, values, kinds))
         case ast.UnaryOp(op=ast.Not(), operand=x):
-            return not _boolean(_eval(x, values))
+            return not _boolean(_eval(x, values, kinds))
         case ast.BoolOp(op=op, values=parts):
             # Evaluate every part so a missing measure is never hidden by short-circuiting.
-            results = [_boolean(_eval(p, values)) for p in parts]
+            results = [_boolean(_eval(p, values, kinds)) for p in parts]
             return all(results) if isinstance(op, ast.And) else any(results)
         case ast.Compare(left=l, ops=ops, comparators=rights):
-            operands = [_eval(x, values) for x in (l, *rights)]
-            return all(_compare(op, a, b) for op, a, b in zip(ops, operands, operands[1:]))
+            operands = [_eval(x, values, kinds) for x in (l, *rights)]
+            # Check every link, so a bad value can't hide behind an earlier false one.
+            results = [_compare(op, a, b) for op, a, b in zip(ops, operands, operands[1:])]
+            return all(results)
         case ast.IfExp(test=t, body=a, orelse=b):
-            return _eval(a, values) if _boolean(_eval(t, values)) else _eval(b, values)
+            return _eval(a, values, kinds) if _boolean(_eval(t, values, kinds)) else _eval(b, values, kinds)
         case ast.Call(func=ast.Name(id=f), args=args):
-            return FUNCTIONS[f](*(_number(_eval(a, values)) for a in args))
+            return FUNCTIONS[f](*(_number(_eval(a, values, kinds)) for a in args))
     raise FormulaError(f"unsupported expression: {ast.dump(node)}")
 
 
 def _compare(op, a, b):
     if type(op) in _ORDERING:
         return _ORDERING[type(op)](_number(a), _number(b))
-    if type(op) in _EQUALITY:
-        return _EQUALITY[type(op)](a, b)
-    return _MEMBERSHIP[type(op)](a, b)
+    others = b if type(op) in _MEMBERSHIP else [b]
+    if _kind(a) is None or any(_kind(x) != _kind(a) for x in others):
+        raise EvaluationError(f"can't compare {a!r} with {b!r}: different kinds")
+    return (_EQUALITY | _MEMBERSHIP)[type(op)](a, b)
 
 
 def _boolean(x):
