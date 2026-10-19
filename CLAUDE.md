@@ -63,4 +63,5 @@ Planned but not created until their code is written: `packages/ai_designer`, `pa
 - Don't commit or open PRs unless Ben asks or invoked `/autopilot`. Even in autopilot, **before each commit** stop and tell Ben: what's being committed, what's done so far, what's next, why now, and why it's the right approach. Wait for his OK.
 - Every PR description has a **Test Plan with evidence**: each check run (pytest, rule validation, extraction reproducibility) with its result, plus the eval that proves the PR's output is correct.
 - After opening a PR, watch CI until green. If a check fails, say which, why, and the fix.
+- Repo slash commands live in `.claude/commands/` (`/plan`, `/implement`, `/autopilot`, `/review`, `/debug`, `/explain-simple`), tailored to Gordium.
 - Run `/review` before calling a PR ready. For bigger PRs also run an independent review agent with no conversation context. Reviews are two-pass; label findings **confirmed** or **suspected**.
