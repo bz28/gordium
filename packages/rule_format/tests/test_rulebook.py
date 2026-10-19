@@ -281,6 +281,7 @@ def test_earlier_look_alike_does_not_hide_the_real_quote():
     ("“Quoted” — dash", ['"', "quoted", '"', "-", "dash"]),
     ("maximum 3/35, minimum/maximum", ["maximum", "3/35", ",", "minimum", "/", "maximum"]),
     ("(see above).The rear", ["(", "see", "above", ")", ".", "the", "rear"]),
+    ("Sec. 4.A.5 feet, No.5, ...5", ["sec", ".", "4", ".", "a", ".", "5", "feet", ",", "no", ".", "5", ",", ".", ".", ".", "5"]),
 ])
 def test_tokenize(text, expected):
     assert tokenize(text) == expected
@@ -388,3 +389,8 @@ def test_rule_with_open_questions_cannot_be_approved(ctx):
     approved = APPROVED | question                                          # adding a question blocks approval
     assert any("open_questions remain" in p for p in validate(rulebook(**approved), ctx))
     assert any("'open_questions' must be a list" in p for p in validate(rulebook(open_questions="why?"), ctx))
+
+
+def test_decimal_point_needs_a_clean_start():
+    assert not quote_found(".5 feet of depth here", tokenize("Section A.5 feet of depth here"))
+    assert quote_found("5 feet of depth here", tokenize("Section A.5 feet of depth here"))

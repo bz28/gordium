@@ -88,7 +88,7 @@ Every significant decision, in plain language: **what** we decided, **why**, wha
 - **How we know it's right:** every round and its pins are recorded in the PR description.
 
 ## D12 · Ben approves every commit and merges every PR; PRs are stacked
-*Process* · Status: active
+*Process* · Status: partly superseded by D17b (below): commits no longer need approval
 
 - **Decision:** before each commit, the AI stops and explains what, why, what's next, and why it's the right approach. Ben merges. Work is split into stacked PRs (each builds on the one below), each with its own eval, and building continues upward while lower PRs are in review.
 - **Why:** Ben stays in control and understands every step; small PRs are easier to review and prove.
@@ -120,6 +120,12 @@ Every significant decision, in plain language: **what** we decided, **why**, wha
 ## D17 · Rules get an `open_questions` box too
 *PR 1, review round 8* · Status: active
 
-- **Decision:** rules, like definitions, can list `open_questions`: interpretations the law leaves open (e.g. how R-1b's height bonus increases each yard). A rule with open questions can be drafted and used as "needs review" context, but can't be approved until the architects' answers are recorded.
-- **Why:** the drafting rules (D19, added with the definitions) say interpretations go to questions, never into the rule's plain-English text, and rules had nowhere to put them.
+- **Decision:** rules can list `open_questions`: interpretations the law leaves open (e.g. how R-1b's height bonus increases each yard). A rule with open questions can be drafted, but can't be approved until the architects' answers are recorded, so the checker (which only uses approved rules) never relies on it.
+- **Why:** interpretations must go to the architects as questions, never into a rule's plain-English text (principle: flag, don't guess), and rules had nowhere to put them. The written drafting rules arrive with the definitions (PR 4).
 - **Considered:** also putting the questions into the approval fingerprint. Not needed: approval is impossible while any question exists, so adding a question after approval is already caught, and a safeguard that no test can tell apart from its absence is dead code.
+
+## D17b · Commits no longer need Ben's approval; merges do
+*Process, 2026-10-19* · Status: active · *Replaces the per-commit stop in D12*
+
+- **Decision:** the AI commits and pushes to PR branches without stopping to ask. Ben approves at merge time: nothing reaches `main` until he merges.
+- **Why:** Ben's call. Per-commit stops slowed the work and filled the conversation, while the real safeguards (review loop before merge, review before commit for big changes, CI) are unchanged.

@@ -128,10 +128,11 @@ class Context:
 
 # A token is a footnote marker ("[fn11]"), a whole word or number ("rear", "1b", "2.5", "1,500", "3/2",
 # ".5"), or a single other character ("%", "(", "/", "§"). '.', ',' and '/' join only digit to digit,
-# and a leading '.' only starts a number, so "minimum/maximum" is three tokens and "3/35" is one.
+# and a leading '.' starts a number only when no letter, digit or '.' comes right before it ("No.5" is
+# "no", ".", "5"), so "minimum/maximum" is three tokens and "3/35" is one.
 # Quotes and pages are both split this way, and a quote must match whole tokens, so "5" can never
 # match inside "25", "2.5" or "1/2", and "ear" never inside "rear".
-TOKEN = re.compile(r"\[fn[^\]\s]*\]|(?:\.(?=\d))?[^\W_]+(?:(?<=\d)[.,/](?=\d)[^\W_]+)*|\S")
+TOKEN = re.compile(r"\[fn[^\]\s]*\]|(?:(?<![\w.])\.(?=\d))?[^\W_]+(?:(?<=\d)[.,/](?=\d)[^\W_]+)*|\S")
 _UNIFY = str.maketrans("‘’“”–—", "''\"\"--")
 
 
@@ -301,8 +302,8 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
 
 
 def open_question_problems(entry: dict) -> list[str]:
-    """Interpretations the law leaves open (drafting_rules.md): a list of text, and nothing with open
-    questions can be approved until the architects' answers are recorded."""
+    """Interpretations the law leaves open, for the architects: a list of text. Nothing with open
+    questions can be approved (so the checker never uses it) until the answers are recorded."""
     questions = entry.get("open_questions", [])
     if not (isinstance(questions, list) and all(isinstance(q, str) and q.strip() for q in questions)):
         return ["'open_questions' must be a list of text"]
