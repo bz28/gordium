@@ -19,8 +19,10 @@ Pieces, in reading order:
 Guards against false headings (body text that happens to look like one):
   - a section or subsection heading starts at the headings' margin (the left edge every real heading
     shares, measured from the document). Text inside a subsection is indented further, so a wrapped
-    line there that starts "§ 325-45. ..." or "B. below ..." can't be a heading. (Text of a section with
-    no subsections sits at the margin too; the next two guards cover it.)
+    line there that starts "§ 325-45. ..." or "B. below ..." can't be a heading
+  - a subsection's own text is indented past the margin, while a section's own text keeps wrapping at
+    the margin: so a subsection heading must be followed by an indented line or another heading. A
+    margin line "A. ..." followed by more margin text is a section's wrapped sentence, and is reported
   - section numbers must increase, and subsection letters must come in order (A, then B, ...)
   - a line at the margin that looks like a heading but breaks that order is reported as a problem, never
     silently skipped: if a wrapped "A. ..." had opened a false subsection, the real "A." after it is
@@ -150,7 +152,11 @@ def split(rows: list[dict]) -> dict:
             pending = []
         elif (s := SUBSECTION.match(text)) and section and at_margin(r):
             expected = "A" if letter is None else chr(ord(letter) + 1)
-            if s[1] == expected:
+            nxt = body[i + 1] if i + 1 < len(body) else None
+            if nxt and at_margin(nxt) and not any(p.match(nxt["text"]) for p in (SECTION, SUBSECTION, ARTICLE, NOTE)):
+                problems.append(f"p.{r['page']} line {r['line']}: looks like subsection {s[1]} of {section} but the "
+                                "text after it isn't indented like a subsection's; check how this part was cut")
+            elif s[1] == expected:
                 letter = s[1]
                 open_piece(f"{section}{letter}", s[2].split(".")[0].strip(), "subsection")
             else:

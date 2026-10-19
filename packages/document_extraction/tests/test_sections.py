@@ -154,6 +154,17 @@ def test_a_false_subsection_at_the_margin_is_reported_through_the_real_one():
     assert split(rows)["problems"] == ["p.2 line 9: looks like subsection A of 9-2 but B was expected; check how this part was cut"]
 
 
+def test_a_wrapped_a_line_in_a_section_without_subsections_is_reported():
+    # A section's own text wraps at the margin; a wrapped line that happens to start "A. " isn't a subsection.
+    rows = doc(TOC, START + ["§ 9-2. Heights. No building may exceed the limit in Section 9-1,",
+                             ("or as permitted by Paragraph", 72), "A. of the Board rules, whichever is lower.",
+                             ("The Board may grant more.", 72)])
+    result = split(rows)
+    assert "9-2A" not in [p["id"] for p in result["pieces"]]
+    assert result["problems"] == ["p.2 line 9: looks like subsection A of 9-2 but the text after it isn't indented "
+                                  "like a subsection's; check how this part was cut"]
+
+
 def test_a_section_heading_out_of_order_is_reported():
     rows = doc(TOC, START + ["§ 9-2. Heights.", "§ 9-1. Title, again."])
     assert split(rows)["problems"][0] == "p.2 line 8: looks like a section heading but doesn't follow 9-2; check how this part was cut"

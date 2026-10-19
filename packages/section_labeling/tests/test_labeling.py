@@ -329,16 +329,30 @@ def test_the_sdk_does_not_retry_on_its_own_and_sends_the_workspace(monkeypatch):
     assert built["default_headers"] == {"anthropic-workspace-id": "wrkspc_test"}
 
 
+class FakeAPIError(Exception):
+    message = "This API key is not scoped to a workspace"
+
+
 class RefusingCounter(FakeClient):
     def count_tokens(self, **_):
-        raise ValueError("this API key is not scoped to a workspace")
+        raise FakeAPIError()
 
 
 def test_a_refused_token_count_stops_cleanly_before_any_call(monkeypatch, capsys):
+    monkeypatch.setitem(sys.modules, "anthropic", SimpleNamespace(APIError=FakeAPIError))
     client = RefusingCounter(GOOD)
     monkeypatch.setattr(cli, "_client", lambda: client)
     assert cli.main(["label", "--limit", "1", "--yes", "--place", "new_york/ithaca_city"]) == 1
-    assert client.requests == [] and "nothing was sent" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert client.requests == [] and "nothing was sent" in out and "not scoped to a workspace" in out
+
+
+def test_other_errors_while_estimating_are_not_blamed_on_the_api(monkeypatch):
+    monkeypatch.setitem(sys.modules, "anthropic", SimpleNamespace(APIError=FakeAPIError))
+    monkeypatch.setattr(cli, "estimate", lambda *a: (_ for _ in ()).throw(FileNotFoundError("no extracted text")))
+    monkeypatch.setattr(cli, "_client", lambda: FakeClient())
+    with pytest.raises(FileNotFoundError):
+        cli.main(["estimate", "--place", "new_york/ithaca_city"])
 
 
 def test_worst_case_is_never_below_a_measured_call():
