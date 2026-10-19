@@ -1,6 +1,8 @@
 # Gordium slash commands
 
-The commands in `commands/`, tailored to this repo (kept here, not in `commands/`, so this file doesn't become a `/README` command). If a personal command in `~/.claude/commands/` has the same name, use the project one.
+The commands in `commands/`, tailored to this repo (this index lives here, not in `commands/`, so it doesn't become a `/README` command).
+
+**Name clashes:** a personal command in `~/.claude/commands/` with the same name takes precedence over these. To use Gordium's versions, remove or rename the personal ones with the same names (`autopilot`, `debug`, `explain-simple`, `implement`, `plan`, `review`).
 
 | Command | When to use |
 |---|---|

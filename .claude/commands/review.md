@@ -43,7 +43,9 @@ cap: 4 rounds, then stop and surface what is still churning
 
 **"Not sure" is not a state to stop in.** Refuted but you think it's real, or confirmed but you think it's intended: read more code, trace callers, write the test, until it's confirmed or refuted. **Only when you genuinely can't resolve it**, usually because it's a zoning-interpretation or product question, bring it to Ben in plain English with the evidence. Zoning interpretations go to the architects (`docs/questions_for_architects.md`); they are never "fixed" in code.
 
-**Pin every fix.** A fix ships with a test that **fails when the fix is reverted**: actually revert it, run the test, watch it go red, restore it, record the result (`revert <fix> → 1 failed, 103 passed`). A fix without a pin is not done.
+**Pin every fix.** A fix ships with a test that **fails when the fix is reverted**: actually revert it, run the test, watch it go red, restore it, record the result (`revert <fix> → 1 failed, 103 passed`). A fix without a pin is not done. For instructions-only or workflow-script changes with no test runner, the pin is a named manual check recorded in the PR (what you ran or read, and what you saw).
+
+**Between rounds:** commit the fixes (after Ben's OK) and push, then run round N+1 with `sinceLastRound` = the commit round N reviewed. A `verify-only` result (`mode: "verify-only"`) never counts as a clean round.
 
 **Round N+1 reviews the full branch diff**, not just the fixes, with `priorConfirmed` + `sinceLastRound` so the reviewer re-checks each prior fix and reads the fix code hardest.
 

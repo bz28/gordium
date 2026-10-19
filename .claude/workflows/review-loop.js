@@ -169,13 +169,18 @@ if (VERIFY_ONLY) {
   log(`Round ${ROUND}: reviewing ${BASE}...${HEAD}; ${SKEPTICS} skeptics/finding, strict.${ROUND >= 2 ? ` Re-checking ${PRIOR.length} prior finding(s).` : ''}`)
   phase('Review')
   const review = await agent(reviewPrompt(), { label: `review:round${ROUND}`, phase: 'Review', schema: FINDINGS_SCHEMA })
-  findings = (review && review.findings) || []
-  priorStatus = (review && review.prior_status) || []
+  if (!review) throw new Error('review-loop: the reviewer returned no result, so this round did not run')
+  findings = review.findings || []
+  // Every prior finding must get a status; one the reviewer skipped is treated as unfixed, not as fixed.
+  const reported = new Set((review.prior_status || []).map(p => p.title))
+  priorStatus = [...(review.prior_status || []),
+    ...PRIOR.filter(p => !reported.has(p.title))
+            .map(p => ({ title: p.title, status: 'unfixed', reasoning: 'the reviewer gave no status for this prior finding' }))]
   log(`Reviewer returned ${findings.length} finding(s).`)
 }
 
 if (!findings.length) {
-  return { round: ROUND, confirmed: [], refuted: [], priorStatus, stats: { found: 0, confirmed: 0, refuted: 0 } }
+  return { round: ROUND, mode: VERIFY_ONLY ? 'verify-only' : 'review', confirmed: [], refuted: [], priorStatus, stats: { found: 0, confirmed: 0, refuted: 0 } }
 }
 
 phase('Verify')
@@ -200,6 +205,7 @@ log(`Round ${ROUND}: ${confirmed.length} confirmed, ${refuted.length} refuted.`)
 
 return {
   round: ROUND,
+  mode: VERIFY_ONLY ? 'verify-only' : 'review',
   confirmed,
   refuted,
   priorStatus,
