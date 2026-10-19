@@ -22,9 +22,10 @@ How the table is found, using only what the PDF draws (plain code, no AI, no jud
 - Each word is placed in the cell that contains it. A word that crosses a cell edge, a drawn cell
   reaching from the label into the columns, a cell that covers part of a column, a label area that
   isn't exactly one cell, a column left without a cell, values with no row label, and a row that
-  looks like two rows make the whole row unresolved: none of its values are
-  written, and it can't become a heading. District names at different heights, a named header
-  column left of the districts, and a table with no drawn body rows make the page unresolved.
+  looks like two rows, or a column covered by two cells make the whole row unresolved: none of its
+  values are written, and it can't become a heading. District names at different heights, any drawn
+  rectangle or border dividing the label area (a column left of the districts, named or not), and a
+  table with no drawn body rows make the page unresolved.
   Nothing is guessed.
 Lines and footnote markers ([fn11]) come from the text extractor, so line numbers match
 2_extracted_text and a cited line can be traced to its cells.
@@ -138,11 +139,12 @@ def read_page(page, page_number: int) -> list[dict]:
     header_bottom = max(r["bottom"] for r, _ in districts)
     left = min(r["x0"] for r in rects)
     label_x1 = min(r["x0"] for r, _ in districts)
-    # A named header column left of the districts would be read as part of the row label.
-    stray = [n for r, n in named if n and r["top"] < header_bottom - EDGE and r["x0"] > left + EDGE
-             and r["x1"] <= label_x1 + EDGE]
+    # The label area must be one undivided column on the whole page: any drawn rectangle or border
+    # inside it (named or not, header or body) could be a column whose values would be read as label.
+    stray = [n or "(unnamed)" for r, n in named if r["x0"] > left + EDGE and r["x1"] <= label_x1 + EDGE]
+    stray += ["(border)" for v in verticals if left + EDGE < v["x0"] < label_x1 - EDGE]
     if stray:
-        return [{"page": page_number, "unresolved": "a header column left of the district columns",
+        return [{"page": page_number, "unresolved": "the label area is divided: a column left of the districts?",
                  "text": ", ".join(stray)}]
     columns = [{"name": n, "x0": r["x0"], "x1": r["x1"]} for r, n in districts]
     for r, n in named:
@@ -165,7 +167,7 @@ def read_page(page, page_number: int) -> list[dict]:
             if not any(between[0] < x1 - EDGE and between[1] > x0 + EDGE for x0, x1 in cells):
                 cells.append(between)
         cells += [g for g in grid if not any(g[0] < x1 - EDGE and g[1] > x0 + EDGE for x0, x1 in cells)]
-        return sorted(cells)
+        return sorted(set(cells))   # a cell drawn twice is still one cell
 
     out = [{"page": page_number, "label": {"x0": round(left, 1), "x1": round(label_x1, 1)},
             "columns": [{k: (round(v, 1) if isinstance(v, float) else v) for k, v in c.items()} for c in columns]}]
@@ -256,10 +258,13 @@ def read_page(page, page_number: int) -> list[dict]:
             elif not covered:
                 if contents[cell]:
                     problem("cell under no column", contents[cell])
+            elif any(name in values for name in covered):
+                problem("column covered by more than one cell",
+                        contents[cell] + [t for name in covered if name in values for t in values[name][4]])
             else:
                 toks = sorted(contents[cell], key=lambda t: (t.line, t.x0))
                 for name in covered:
-                    values[name] = (render(toks), sorted({t.line for t in toks}), covered, cell)
+                    values[name] = (render(toks), sorted({t.line for t in toks}), covered, cell, toks)
         # Every row is one label cell and one cell per column, or it isn't read.
         if len(label_cells) != 1:
             problem("label area is split into cells" if label_cells else "row has no label cell",
@@ -279,7 +284,7 @@ def read_page(page, page_number: int) -> list[dict]:
         for c in columns:
             if c["name"] not in values:
                 continue
-            value, value_lines, spans, cell = values[c["name"]]
+            value, value_lines, spans, cell, _ = values[c["name"]]
             out.append({"page": page_number, "section": section if not is_heading else None, "row": row,
                         "heading": bool(is_heading), "row_lines": in_band, "column": c["name"], "value": value,
                         "lines": value_lines, "spans": spans, "x0": round(cell[0], 1), "top": round(band.top, 1),

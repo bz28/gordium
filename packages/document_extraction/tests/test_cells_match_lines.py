@@ -21,7 +21,7 @@ from rule_format.rulebook import tokenize
 
 REPO = Path(__file__).resolve().parents[3]
 TEXT = REPO / "regulations/jurisdictions/new_york/ithaca_city/2_extracted_text"
-NOT_COMPARABLE = {   # (page, row): why. Each is checked by hand against the PDF in test_charts.py.
+NOT_COMPARABLE = {   # (page, row): why. Each is read by hand from the PDF in BY_HAND below.
     (2, "Tower for the receipt or transmission of electronic signals or generation of electricity"):
         "label wraps onto 3 lines around its values",
     (3, "Percent of lot area"): "the R-2C value wraps onto the lines above and below",

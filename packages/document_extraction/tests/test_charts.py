@@ -299,8 +299,32 @@ def test_a_header_column_left_of_the_districts_is_unresolved(monkeypatch):
                  (100, 20, 150, 40)],
                 [line(5, (55, "B-1"), (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))])
     monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
-    assert read_page(page, 1) == [{"page": 1, "unresolved": "a header column left of the district columns",
-                                   "text": "B-1"}]
+    assert read_page(page, 1) == [{"page": 1, "unresolved": DIVIDED, "text": "B-1, 25"}]
+
+
+DIVIDED = "the label area is divided: a column left of the districts?"
+
+
+def test_an_unnamed_column_left_of_the_districts_is_caught_on_white_rows_too(monkeypatch):
+    rects = [(0, 0, 50, 20), (50, 0, 100, 20), (100, 0, 150, 20)]                # header: label | (unnamed) | R-1A
+    rects += [(0, t, 50, t + 20) for t in (20, 60)] + [(50, t, 100, t + 20) for t in (20, 60)] \
+        + [(100, t, 150, t + 20) for t in (20, 60)]                             # shaded rows; "Side" is white
+    page = Page(rects, [line(5, (105, "R-1A")), line(25, (5, "Front"), (110, "10")),
+                        line(45, (5, "Side"), (60, "5"), (110, "6")), line(65, (5, "Rear"), (110, "7"))])
+    monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
+    out = read_page(page, 1)
+    assert out[0]["unresolved"] == DIVIDED and not any("value" in r for r in out)   # no "Side 5" row
+    bordered = Page([(0, 0, 100, 20), (100, 0, 150, 20), (0, 20, 100, 40), (100, 20, 150, 40)],
+                    [line(5, (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))],
+                    verticals=[(50, 20, 40)])                                   # a border inside the label area
+    assert read_page(bordered, 1)[0]["unresolved"] == DIVIDED
+
+
+def test_a_column_covered_by_two_cells_is_unresolved(monkeypatch):
+    out = read(monkeypatch, [(0, 20, 100, 40), (100, 20, 200, 40), (100, 20, 150, 40)],   # merged + R-1A's own
+               [line(25, (5, "Front"), (160, "25"))])
+    assert any(r.get("unresolved") == "column covered by more than one cell" for r in out)
+    assert not any("value" in r for r in out)
 
 
 def test_a_label_area_split_into_cells_is_unresolved(monkeypatch):
@@ -309,8 +333,11 @@ def test_a_label_area_split_into_cells_is_unresolved(monkeypatch):
                 [line(5, (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))])
     monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
     out = read_page(page, 1)
-    assert any(r.get("unresolved") == "label area is split into cells" for r in out)
-    assert not any("value" in r for r in out)                                  # no "Front 25" row
+    assert out == [{"page": 1, "unresolved": DIVIDED, "text": "(unnamed), 25"}]   # no "Front 25" row
+    nested = read(monkeypatch, [(0, 20, 100, 40), (0, 20, 40, 40), (100, 20, 150, 40), (150, 20, 200, 40)],
+                  [line(25, (5, "Front"), (60, "25"), (110, "10"))])            # two label cells, both at the left
+    assert any(r.get("unresolved") == "label area is split into cells" for r in nested)
+    assert not any("value" in r for r in nested)
 
 
 def test_every_column_gets_a_cell_or_the_row_is_unresolved(monkeypatch):
