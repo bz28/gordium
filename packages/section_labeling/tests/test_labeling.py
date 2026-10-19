@@ -148,11 +148,13 @@ def test_estimate_without_a_key_is_rough_and_says_so(law, capsys):
 
 def test_estimate_with_a_key_counts_tokens_and_uses_measured_output(law, tmp_path, monkeypatch):
     ctx, header, pieces, _ = law
+    monkeypatch.setattr(cli, "_measured_output", lambda j, model: None)        # independent of real local runs
     e = cli.estimate(ITHACA, LAW, list(pieces.values())[:5], "claude-haiku-5-5", FakeClient())
     assert e["exact_input"] and e["usage"]["output_tokens"] == 5 * labeler.SETTINGS["max_tokens"]   # nothing measured yet
     runs = tmp_path / "3_section_labels/runs"
     runs.mkdir(parents=True)
     (runs / "x.jsonl").write_text(json.dumps({"model": "claude-haiku-5-5", "usage": USAGE}) + "\n")
+    monkeypatch.undo()
     assert cli._measured_output(tmp_path, "claude-haiku-5-5") == 80
 
 
@@ -241,12 +243,17 @@ def test_cited_pieces_are_found_from_the_rules_and_definitions(law):
 
 
 def test_review_list_shows_not_for_checking_and_cited_pieces(law):
-    _, header, pieces, _ = law
+    _, header, pieces, rows = law
     labels = {"325-1": {"label": "not_for_checking", "reason": "Just the title.", "status": "draft",
                         "sources": [{"quote": "This chapter shall be known"}]},
-              "325-16C": {"label": "rule", "reason": "Height bonus.", "status": "draft", "open_questions": ["?"]}}
-    text = coverage.review_list(header, pieces, labels, {"325-16C": ["R-1b.height"]})
-    nfc, cited = text.split("## Cited by")
+              "325-16C": {"label": "rule", "reason": "Height bonus.", "status": "draft", "open_questions": ["?"]},
+              "325-3B:building_area": {"label": "reference", "reason": "A definition.", "status": "draft"},
+              "325-3B:grade_plane": {"label": "reference", "reason": "A definition.", "status": "draft"}}
+    text = coverage.review_list(header, pieces, labels, {"325-16C": ["R-1b.height"]}, rows)
+    rest, cited = text.split("## Cited by")
+    nfc, worded = rest.split("## Labeled reference but using requirement words")
+    assert "| 325-3B:building_area |" in worded and "shall be located" not in nfc          # "neither ... shall be located"
+    assert "325-3B:grade_plane" not in worded                                # a definition with no requirement
     assert "| 325-1 |" in nfc and "This chapter shall be known" in nfc and "325-16C" not in nfc
     assert "| 325-16C |" in cited and "draft · open questions" in cited and "R-1b.height |" in cited
 

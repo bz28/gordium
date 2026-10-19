@@ -61,7 +61,7 @@ def cmd_coverage(args) -> int:
         bad = coverage.line_problems(rows, header, pieces)
         outputs = {j / "6_coverage_report" / f"{Path(file).stem}.md": coverage.report(rows, header, pieces, labels),
                    j / "3_section_labels" / f"{Path(file).stem}.review.md":
-                       coverage.review_list(header, pieces, labels, coverage.cited_by(j, file, pieces))}
+                       coverage.review_list(header, pieces, labels, coverage.cited_by(j, file, pieces), rows)}
         for out, text in outputs.items():
             if args.check:
                 same = out.exists() and out.read_text(encoding="utf-8") == text

@@ -8,7 +8,7 @@ How to label one piece of a city's zoning law. Code has already cut the law into
 
 **flag**: the piece sets a requirement a design must meet, but deciding it takes human judgment, not a measurement. Examples: "harmonious with the character of the neighborhood", "adequate screening", "no offensive odor, noise or glare", a requirement that depends on a board's discretion.
 
-**reference**: the piece doesn't set a requirement itself, but rules depend on it: it defines a word rules use (a definition such as "HEIGHT OF BUILDING — ..."), says how to read or measure something, or points to another section, chart or document that holds the requirement.
+**reference**: the piece doesn't set a requirement itself, but rules depend on it: it defines a word rules use (with no requirement inside the definition) (a definition such as "HEIGHT OF BUILDING — ..."), says how to read or measure something, or points to another section, chart or document that holds the requirement.
 
 **not_for_checking**: the piece has nothing to do with whether a design complies: procedures (applications, notices, hearings, fees, appeals), administration and enforcement, penalties, statutory authority, the table of contents, amendment history, an editor's note that only gives a date or a cross-reference to another chapter.
 
@@ -16,9 +16,10 @@ How to label one piece of a city's zoning law. Code has already cut the law into
 
 1. Read the whole piece. Label it by its strongest content: if any part sets a requirement for a design, it's **rule** or **flag**, even if the rest is procedure.
 2. If a requirement is partly measurable and partly judgment, choose **rule** and say in the reason which part needs judgment.
-3. Definitions are **reference**, even when they contain measurement details. They're used by rules, not checked on their own.
+3. A definition is **reference** when it only says what a word means, even if it includes measurement details. But if a definition also imposes a requirement on a design ("must", "shall", "may not", a limit, e.g. "An ADU must have a separate entrance"), label it **rule** (or **flag** if the requirement needs judgment), and say in the reason that it is also a definition. Step 1 wins: any requirement makes it a rule or flag.
 4. When unsure between **not_for_checking** and **rule** or **flag**, choose **rule** or **flag**. A piece labeled not_for_checking is never checked, so a missed rule could let a design pass that should fail; a wrongly kept piece only costs a person a few minutes. The same goes for **reference** versus **rule**: when unsure, choose **rule**.
-5. Don't interpret the law, and don't decide what it means. The label only says what kind of text this is.
+5. A requirement is still a **rule** when its numbers live elsewhere. "The front yard shall be not less than the figure listed in this column" is a rule even though the figure is in the chart; "the minimum applies to each main building" is a rule. Words like *shall*, *must*, *may not*, *not less than*, *not more than*, *at least* usually mean a requirement. Use **reference** only when the piece sets nothing a design must meet.
+6. Don't interpret the law, and don't decide what it means. The label only says what kind of text this is.
 
 ## The topic
 
