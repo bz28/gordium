@@ -34,26 +34,29 @@ MAX_QUOTE_GAP = 300       # characters a '…' may skip, so pieces can't be stit
 RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources",
                "examples", "notes", "drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
 TEXT_FIELDS = ("id", "kind", "topic", "says", "drafted_by", "status", "approved_by")
-APPROVED_FIELDS = ("kind", "topic", "says", "applies_when", "check", "review_when", "sources")
+APPROVED_FIELDS = ("id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources")
 MEASURE_KINDS = {name: "text" if m["unit"] == "text" else "number"
                  for name, m in yaml.safe_load(MEASURES_FILE.read_text()).items()}
 
 
-def outcome(rule: dict, values: dict) -> str:
+def outcome(rule: dict, values: dict, allowed: dict[str, set] | None = None) -> str:
+    """allowed: the values a text measure may take, e.g. {"use": the city's use names}.
+    A value outside that list is unrecognized, so the rule needs review."""
+    kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in (allowed or {}).items()}
     try:
-        if "applies_when" in rule and not _condition(rule["applies_when"], values):
+        if "applies_when" in rule and not _condition(rule["applies_when"], values, kinds):
             return "not_applicable"
         if rule["kind"] == "flag":
             return "needs_review"
-        if any(_condition(r["when"], values) for r in rule.get("review_when", [])):
+        if any(_condition(r["when"], values, kinds) for r in rule.get("review_when", [])):
             return "needs_review"
-        return "pass" if _condition(rule["check"], values) else "fail"
-    except (MissingMeasure, EvaluationError):
+        return "pass" if _condition(rule["check"], values, kinds) else "fail"
+    except (MissingMeasure, EvaluationError, ArithmeticError):
         return "needs_review"
 
 
-def _condition(text: str, values: dict) -> bool:
-    result = formula.evaluate(text, values, MEASURE_KINDS)
+def _condition(text: str, values: dict, kinds: dict) -> bool:
+    result = formula.evaluate(text, values, kinds)
     if type(result) is not bool:
         raise EvaluationError(f"{text!r} did not give true/false")
     return result
@@ -121,9 +124,10 @@ class Context:
 
 
 def normalize(text: str) -> str:
-    """Lowercase, unify quotes and dashes, drop all whitespace: PDF spacing is unreliable."""
+    """Lowercase, unify quotes and dashes, and turn every run of whitespace (line breaks too)
+    into one space. Spaces are kept so separate words, numbers and table cells stay separate."""
     text = text.lower().translate(str.maketrans("‘’“”–—", "''\"\"--"))
-    return re.sub(r"\s+", "", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def quote_pieces(quote: str) -> list[str]:
@@ -131,24 +135,33 @@ def quote_pieces(quote: str) -> list[str]:
 
 
 def quote_found(quote: str, page_text: str) -> bool:
-    """True if the quote's pieces (separated by '…') appear on the page in order, each within
-    MAX_QUOTE_GAP characters of the last, and no piece starts or ends in the middle of a number."""
-    pos = None
-    for piece in quote_pieces(quote):
-        start = 0 if pos is None else pos
-        while (at := page_text.find(piece, start)) >= 0 and not _clean_edges(page_text, at, piece):
-            start = at + 1
-        if at < 0 or pos is not None and at - pos > MAX_QUOTE_GAP:
+    """True if the quote's pieces (separated by '…') appear on the page in order, each whole
+    (not starting or ending inside a word or number) and within MAX_QUOTE_GAP characters of the last."""
+    pieces = quote_pieces(quote)
+    return bool(pieces) and _chain(pieces, page_text, None)
+
+
+def _chain(pieces: list[str], page_text: str, end: int | None) -> bool:
+    """Try every whole occurrence of the first piece, so an earlier look-alike can't hide a real match."""
+    if not pieces:
+        return True
+    at = page_text.find(pieces[0], 0 if end is None else end)
+    while at >= 0 and (end is None or at - end <= MAX_QUOTE_GAP):
+        if _whole(page_text, at, pieces[0]) and _chain(pieces[1:], page_text, at + len(pieces[0])):
+            return True
+        at = page_text.find(pieces[0], at + 1)
+    return False
+
+
+def _whole(page_text: str, at: int, piece: str) -> bool:
+    """'5 feet' must not match inside '25 feet', '2.5 feet' or '1,500 feet'; 'ear' not inside 'rear'."""
+    def joined(i, step):  # does the text continue a word or number past position i?
+        if not 0 <= i < len(page_text):
             return False
-        pos = at + len(piece)
-    return pos is not None
-
-
-def _clean_edges(page_text: str, at: int, piece: str) -> bool:
-    """'5 feet' must not match inside '25 feet' (whitespace is gone, so digits are the risk)."""
-    before = page_text[at - 1] if at else ""
-    after = page_text[at + len(piece):at + len(piece) + 1]
-    return not (piece[0].isdigit() and before.isdigit() or piece[-1].isdigit() and after.isdigit())
+        c = page_text[i]
+        return c.isalnum() or c in ".," and 0 <= i + step < len(page_text) and page_text[i + step].isdigit()
+    return not (piece[0].isalnum() and joined(at - 1, -1)
+                or piece[-1].isalnum() and joined(at + len(piece), 1))
 
 
 def approval_hash(rule: dict) -> str:
@@ -222,20 +235,23 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
 
     p += _source_problems(sources, ctx) if sources is not None else []
 
-    if rule.get("kind") == "rule" and not {"pass", "fail"} <= {ex.get("expect") for ex in examples or []}:
+    expects = {ex.get("expect") for ex in examples or [] if isinstance(ex.get("expect"), str)}
+    if rule.get("kind") == "rule" and not {"pass", "fail"} <= expects:
         p.append("a 'rule' needs worked examples that pass and that fail, so its check is really exercised")
     for n, ex in enumerate(examples or [], 1):
         given = ex.get("given")
-        if not isinstance(given, dict):
-            p.append(f"example {n}: 'given' must be a mapping of measurements")
+        if not isinstance(given, dict) or not all(isinstance(k, str) for k in given):
+            p.append(f"example {n}: 'given' must be a mapping of measurement names to values")
         elif unknown := sorted(given.keys() - ctx.measures):
             p.append(f"example {n}: unknown measures {unknown}")
         elif wrong := sorted(k for k, v in given.items() if MEASURE_KINDS.get(k) == "number"
                              and type(v) not in (int, float) or MEASURE_KINDS.get(k) == "text" and type(v) is not str):
             p.append(f"example {n}: wrong kind of value for {wrong} (see measures.yaml units)")
+        elif "use" in given and given["use"] not in ctx.uses:
+            p.append(f"example {n}: unknown use {given['use']!r}")
         elif ex.get("expect") not in OUTCOMES:
             p.append(f"example {n}: expect must be one of {OUTCOMES}")
-        elif not p and (got := outcome(rule, given)) != ex["expect"]:
+        elif not p and (got := outcome(rule, given, {"use": ctx.uses})) != ex["expect"]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
 
     if rule.get("status") not in STATUSES:
@@ -245,7 +261,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     if rule.get("status") == "approved":
         if rule.get("approved_by") not in ctx.reviewers:
             p.append("approved_by must be a reviewer listed in regulations/reviewers.yaml")
-        elif rule.get("approved_by") == rule.get("drafted_by"):
+        elif rule["approved_by"].casefold().strip() == rule["drafted_by"].casefold().strip():
             p.append("a rule can't be approved by the person who drafted it")
         if not isinstance(rule.get("approved_on"), datetime.date):
             p.append("approved_on must be a date (YYYY-MM-DD)")
@@ -264,7 +280,7 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
             p.append(f"source file {name!r} is not in sources.yaml")
         elif type(page) is not int or not isinstance(quote, str):
             p.append(f"source {name}: needs 'page' (number) and 'quote' (text)")
-        elif not (pieces := quote_pieces(quote)) or min(map(len, pieces)) < MIN_QUOTE_LENGTH:
+        elif not (pieces := quote_pieces(quote)) or min(len(p.replace(" ", "")) for p in pieces) < MIN_QUOTE_LENGTH:
             p.append(f"source {name}: each quoted piece needs {MIN_QUOTE_LENGTH}+ characters to be traceable")
         elif len(pieces) > MAX_QUOTE_PIECES:
             p.append(f"source {name}: at most {MAX_QUOTE_PIECES - 1} '…' gaps in a quote")

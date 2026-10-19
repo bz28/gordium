@@ -31,9 +31,14 @@ def main() -> int:
         for path in files:
             checked += 1
             try:
-                problems = validate(load(path), ctx)
+                book = load(path)
+                problems = validate(book, ctx)
+                if isinstance(book, dict) and book.get("district") != path.stem:
+                    problems.append(f"district {book.get('district')!r} doesn't match the file name {path.stem!r}")
             except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
                 problems = [f"can't read file ({type(e).__name__}: {e})"]
+            except Exception as e:  # report and keep going: one broken file mustn't hide the rest
+                problems = [f"validator error ({type(e).__name__}: {e})"]
             print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
             for problem in problems:
                 print(f"    {problem}")

@@ -78,6 +78,19 @@ def test_non_boolean_check_never_passes():
     assert outcome(rule, {"use": "one_family_detached", "rear_yard": 10, "lot_depth": 90}) == "needs_review"
 
 
+def test_unrecognized_use_needs_review():
+    allowed = {"use": {"one_family_detached"}}
+    assert outcome(RULE, {"use": "One-Family", "rear_yard": 1, "lot_depth": 90}, allowed) == "needs_review"
+    church_only = {"kind": "rule", "check": 'use not in ["church"]'}
+    assert outcome(church_only, {"use": "Church"}, {"use": {"church", "one_family_detached"}}) == "needs_review"
+
+
+def test_negative_or_huge_measurements_need_review():
+    values = {"use": "one_family_detached", "lot_depth": 90}
+    assert outcome(RULE, values | {"rear_yard": -30}) == "needs_review"
+    assert outcome(RULE, values | {"rear_yard": 10**400}) == "needs_review"
+
+
 def test_flag_always_needs_review():
     flag = {k: v for k, v in RULE.items() if k != "check"} | {"kind": "flag"}
     assert outcome(flag, {"use": "one_family_detached", "rear_yard": 99, "lot_depth": 90}) == "needs_review"
@@ -129,6 +142,11 @@ def test_valid_rulebooks(ctx):
     (APPROVED | {"approved_by": ["jane"]}, "'approved_by' must be text"),
     (APPROVED | {"check": "rear_yard >= 20"}, "changed since it was approved"),
     (APPROVED | {"approved_hash": None}, "changed since it was approved"),
+    (APPROVED | {"id": "R-1b.rear_yard_copy"}, "changed since it was approved"),
+    (APPROVED | {"drafted_by": "Jane "}, "can't be approved by the person who drafted it"),
+    ({"examples": RULE["examples"] + [{"given": {"use": "castle"}, "expect": "needs_review"}]}, "unknown use 'castle'"),
+    ({"examples": RULE["examples"] + [{"given": {1: 2}, "expect": "needs_review"}]}, "'given' must be a mapping"),
+    ({"examples": [{"given": {}, "expect": ["pass"]}]}, "worked examples that pass and that fail"),
     ({"examples": [{"given": {"rear_yrd": 30}, "expect": "needs_review"}]}, "unknown measures ['rear_yrd']"),
     ({"examples": [{"given": "x", "expect": "pass"}]}, "'given' must be a mapping"),
     ({"status": "approved"}, "approved_by must be a reviewer"),
@@ -180,6 +198,28 @@ def test_quote_number_must_not_match_inside_a_bigger_number():
     assert not quote_found("yard 2", normalize("yard 25"))
 
 
+@pytest.mark.parametrize("page", [
+    "rear yard 2.5 feet in depth for all lots",       # decimal
+    "rear yard 1,500 feet in depth for all lots",     # thousands separator
+])
+def test_quote_number_must_be_the_whole_number(page):
+    assert not quote_found("5 feet in depth for all lots", normalize(page))
+    assert not quote_found("500 feet in depth for all lots", normalize(page))
+
+
+def test_separate_table_cells_do_not_merge():
+    assert not quote_found("25 ft 50 ft 45 ft 35 ft", normalize("2 5 ft 50 ft 45 ft 35 ft"))
+
+
+def test_quote_must_start_on_a_word_boundary():
+    assert not quote_found("ear yard minimum depth", normalize("Rear yard minimum depth"))
+
+
+def test_earlier_look_alike_does_not_hide_the_real_quote():
+    page = normalize("Rear yard minimum " + "x" * 400 + " Rear yard minimum twenty feet always")
+    assert quote_found("Rear yard minimum … twenty feet always", page)
+
+
 def test_quote_pieces_must_be_near_each_other():
     near = normalize("Rear yard minimum " + "x" * 100 + " twenty feet always")
     far = normalize("Rear yard minimum " + "x" * 400 + " twenty feet always")
@@ -203,7 +243,7 @@ def _jurisdiction(tmp_path, pdf_bytes=b"%PDF fake", header_sha=None, rows=()):
 def test_context_loads_extracted_text(tmp_path):
     ctx = Context.for_jurisdiction(_jurisdiction(tmp_path, rows=[{"page": "2", "text": "Hello  World"}]))
     assert ctx.problems == []
-    assert ctx.pages["doc.pdf"] == {2: "helloworld"}
+    assert ctx.pages["doc.pdf"] == {2: "hello world"}
 
 
 def test_context_reports_changed_pdf_and_stale_text(tmp_path):
@@ -224,3 +264,28 @@ def test_cli_reports_broken_folders_and_files_instead_of_crashing(tmp_path, monk
     out = capsys.readouterr().out
     assert "no_sources: can't load sources" in out
     assert "R-2a.yaml" in out and "can't read file" in out
+
+
+def test_cli_reports_district_not_matching_file_name(tmp_path, monkeypatch, capsys):
+    import rule_format.__main__ as cli
+    j = _jurisdiction(tmp_path / "regulations/jurisdictions", rows=[])
+    (j / "5_zoning_rules").mkdir()
+    (j / "5_zoning_rules/R-1a.yaml").write_text("district: R-1b\nrules: []\n")
+    monkeypatch.setattr(cli, "REPO", tmp_path)
+    assert cli.main() == 1
+    assert "doesn't match the file name 'R-1a'" in capsys.readouterr().out
+
+
+def test_cli_keeps_going_when_validation_itself_fails(tmp_path, monkeypatch, capsys):
+    import rule_format.__main__ as cli
+    j = _jurisdiction(tmp_path / "regulations/jurisdictions", rows=[])
+    (j / "5_zoning_rules").mkdir()
+    for name in ("R-1a", "R-1b"):
+        (j / f"5_zoning_rules/{name}.yaml").write_text(f"district: {name}\nrules: []\n")
+    def broken(book, ctx):
+        raise TypeError("boom")
+    monkeypatch.setattr(cli, "validate", broken)
+    monkeypatch.setattr(cli, "REPO", tmp_path)
+    assert cli.main() == 1
+    out = capsys.readouterr().out
+    assert out.count("validator error (TypeError: boom)") == 2

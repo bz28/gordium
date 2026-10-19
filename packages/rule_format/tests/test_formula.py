@@ -27,6 +27,7 @@ def test_evaluate(text, values, expected):
     "[i for i in x]", 'use in "one_family_detached"', "", "1" + "+1" * 300,
     "-" * 100_000 + "1", "not " * 5_000 + "x",
     "rear_yard <= 1e999",                                       # infinity written as a number
+    "rear_yard <= 1" + "0" * 400,                               # integer too large to be real
 ])
 def test_rejects_anything_outside_the_language(text):
     with pytest.raises(FormulaError):
@@ -38,7 +39,7 @@ def test_rejects_anything_outside_the_language(text):
     "stories <= 0 and building_height <= 35",  # nor 'and'
     "0 > stories < building_height",           # nor a chained comparison
 ])
-@pytest.mark.parametrize("bad", [None, math.nan, math.inf, -math.inf])
+@pytest.mark.parametrize("bad", [None, math.nan, math.inf, -math.inf, True, 10**400])
 def test_missing_or_unusable_measure_is_never_hidden(text, bad):
     with pytest.raises(MissingMeasure) as e:
         evaluate(text, {"stories": 3, "building_height": bad})
@@ -49,7 +50,6 @@ def test_missing_or_unusable_measure_is_never_hidden(text, bad):
     ("use > 3", {"use": "church"}),                              # text vs number
     ("lot_area / lot_width > 1", {"lot_area": 1, "lot_width": 0}),  # division by zero
     ('use * 999999999999 == "x"', {"use": "ab"}),                # arithmetic on text
-    ("stories <= 3", {"stories": True}),                         # booleans aren't measurements
     ("not stories", {"stories": 3}),                             # 'not' of a number
     ("stories and lot_area > 1", {"stories": 3, "lot_area": 5}),  # 'and' of a number
     ("lot_area * 1e308 * 10 > 1", {"lot_area": 5}),            # arithmetic overflows to infinity
@@ -73,3 +73,15 @@ def test_names_and_strings():
     f = 'use in ["church"] and max(lot_area, 1) > 0'
     assert names(f) == {"use", "lot_area"}
     assert strings(f) == {"church"}
+
+
+@pytest.mark.parametrize("values, kinds", [
+    ({"rear_yard": -5}, {"rear_yard": "number"}),                 # negative length from a failed measurement
+    ({"rear_yard": "5"}, {"rear_yard": "number"}),                # text where a number belongs
+    ({"use": "castle"}, {"use": frozenset({"church"})}),          # not one of the city's use names
+    ({"use": 5}, {"use": "text"}),                                # number where text belongs
+])
+def test_unusable_measurements_are_missing(values, kinds):
+    name = next(iter(values))
+    with pytest.raises(MissingMeasure):
+        evaluate(f"{name} == {name}", values, kinds)

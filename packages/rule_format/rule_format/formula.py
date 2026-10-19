@@ -65,7 +65,7 @@ def parse(text: str) -> ast.Expression:
         if not isinstance(node, _ALLOWED):
             raise FormulaError(f"{type(node).__name__} is not allowed in formulas: {text!r}")
         if isinstance(node, ast.Constant) and (type(node.value) not in (int, float, str)
-                                               or type(node.value) is float and not math.isfinite(node.value)):
+                                               or type(node.value) is not str and not _finite(node.value)):
             raise FormulaError(f"only finite numbers and quoted text are allowed: {text!r}")
         if isinstance(node, ast.Call) and not (
                 isinstance(node.func, ast.Name) and node.func.id in FUNCTIONS
@@ -96,19 +96,28 @@ def strings(text: str) -> set[str]:
     return {n.value for n in ast.walk(parse(text)) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
 
 
-def evaluate(text: str, values: dict, kinds: dict[str, str] | None = None):
+def evaluate(text: str, values: dict, kinds: dict | None = None):
     """Evaluate a formula. Raises MissingMeasure or EvaluationError when it can't.
 
-    kinds maps a measure name to "text" or "number"; a value of the other kind can't be used.
+    kinds describes each measure: "number" (a non-negative number: lengths, areas, counts)
+    or a set of the text values allowed (e.g. the city's use names). A value that doesn't fit
+    is unusable, so the formula can't be evaluated.
     """
     return _eval(parse(text).body, values, kinds or {})
+
+
+def _finite(x) -> bool:
+    try:
+        return math.isfinite(x)
+    except OverflowError:  # an integer too large to be a real measurement
+        return False
 
 
 def _number(x):
     if type(x) not in (int, float):
         raise EvaluationError(f"expected a number, got {x!r}")
-    if not math.isfinite(x):
-        raise EvaluationError(f"result is not a finite number: {x!r}")
+    if not _finite(x):
+        raise EvaluationError(f"not a finite number: {x!r}")
     return x
 
 
@@ -117,11 +126,21 @@ def _kind(x):
 
 
 def _measure(name, values, kinds):
-    v = values.get(name)
-    if v is None or type(v) is float and not math.isfinite(v):
+    """A measurement that is absent, not a real number, negative, or not an allowed value is unusable."""
+    v, kind = values.get(name), kinds.get(name)
+    if v is None or _kind(v) is None:
         raise MissingMeasure(name)
-    if _kind(v) is None or kinds.get(name, _kind(v)) != _kind(v):
-        raise EvaluationError(f"{name} must be {kinds.get(name, 'a number or text')}, got {v!r}")
+    if kind == "number":
+        if _kind(v) != "number" or not _finite(v) or v < 0:
+            raise MissingMeasure(name)
+    elif isinstance(kind, (set, frozenset)):
+        if v not in kind:
+            raise MissingMeasure(name)
+    elif kind == "text":
+        if _kind(v) != "text":
+            raise MissingMeasure(name)
+    elif _kind(v) == "number" and not _finite(v):
+        raise MissingMeasure(name)
     return v
 
 

@@ -38,7 +38,7 @@ Everyday math notation, read by a strict parser that rejects anything else: numb
 3. any `review_when` true → **needs review**
 4. `check` true / false → **pass** / **fail**
 
-A missing or unusable measurement (none, NaN, infinite, wrong kind), or a value the formula can't evaluate (text vs number, divide by zero, a non-finite result), at any step → **needs review**.
+A missing or unusable measurement (none, NaN, infinite, negative, wrong kind, a `use` not in the city's `uses.yaml`), or a value the formula can't evaluate (text vs number, divide by zero, a non-finite result), at any step → **needs review**.
 
 ## Checking rule files
 
@@ -47,4 +47,4 @@ python -m rule_format       # validates every jurisdiction's 5_zoning_rules/ and
 pytest packages/rule_format
 ```
 
-Validation checks: file shape; required fields; no duplicate YAML keys; known measures, uses and topics; formulas parse and are true/false tests; source files listed in `sources.yaml` with matching fingerprints; extracted text made from that exact PDF version; every quote found on its cited page (each piece 15+ characters, at most two `…` gaps of up to 300 characters, numbers not matched inside bigger numbers); at least one passing and one failing worked example, each giving its expected outcome, with values of the right kind; approved rules approved by someone in `regulations/reviewers.yaml` (never the drafter, never AI) on a date, with `approved_hash` matching the rule's current content (`rulebook.approval_hash`), so any edit after approval needs re-approval.
+Validation checks: file shape; required fields; no duplicate YAML keys; known measures, uses and topics; formulas parse and are true/false tests; source files listed in `sources.yaml` with matching fingerprints; extracted text made from that exact PDF version; every quote found on its cited page (each piece 15+ characters not counting spaces, at most two `…` gaps of up to 300 characters, matched only on whole words and numbers); at least one passing and one failing worked example, each giving its expected outcome, with values of the right kind; approved rules approved by someone in `regulations/reviewers.yaml` (never the drafter, never AI) on a date, with `approved_hash` matching the rule's current content and id (`rulebook.approval_hash`), so any edit or move after approval needs re-approval. A file's `district` must match its file name. (The hash catches later edits; it doesn't prove who approved: see `docs/how_rules_are_checked.md`.)
