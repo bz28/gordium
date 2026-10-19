@@ -95,22 +95,32 @@ def _label_problems(key, entry, ctx: Context, pieces: dict[str, dict], pdf_sha: 
             elif isinstance(lines, list) and len(lines) == 2 and all(type(n) is int for n in lines) \
                     and not {(page, lines[0]), (page, lines[1])} <= owned:
                 p.append(f"quote on p.{page} lines {lines} is outside this piece")
-    p += _revision_problems(entry.get("revised", []))
+    p += _revision_problems(entry.get("revised", []), entry.get("label"))
     return p + _approval_problems(entry | {"id": key}, ctx, LABEL_APPROVED)
 
 
-def _revision_problems(revised) -> list[str]:
-    """A reviewer's correction: [{from, by, date, why}], oldest first; the current label is the latest."""
+def _revision_problems(revised, label) -> list[str]:
+    """Changes made after the AI's answer, oldest first. A label change is {from, by, date, why} (the current
+    label is the latest); a change to the sources is {field: sources, by, date, why}. The AI's own answer
+    stays in the run record, so every difference from it is explained here."""
     if not (isinstance(revised, list) and all(isinstance(r, dict) for r in revised)):
-        return ["'revised' must be a list of {from, by, date, why}"]
+        return ["'revised' must be a list of {from, by, date, why} or {field: sources, by, date, why}"]
     p = []
     for r in revised:
-        if r.keys() != {"from", "by", "date", "why"}:
-            p.append("each revision needs exactly from, by, date, why")
-        elif r["from"] not in LABEL_KINDS:
+        kind = {"from", "by", "date", "why"} if "from" in r else {"field", "by", "date", "why"}
+        if r.keys() != kind:
+            p.append("each revision needs exactly from, by, date, why (or field: sources, by, date, why)")
+        elif "from" in r and r["from"] not in LABEL_KINDS:
             p.append(f"revised from {r['from']!r}: not a label")
+        elif "field" in r and r["field"] != "sources":
+            p.append(f"a revision can change the label or the sources, not {r['field']!r}")
         elif not all(isinstance(r[k], str) and r[k].strip() for k in ("by", "why")):
             p.append("a revision's by and why must be text")
         elif not isinstance(r["date"], datetime.date):
             p.append("a revision's date must be a date (YYYY-MM-DD)")
+    if not p:                                    # each label change goes from[i] -> the next from, the last -> label
+        changes = [r for r in revised if "from" in r]
+        targets = [r["from"] for r in changes[1:]] + [label]
+        p += [f"revision {i + 1} is from {r['from']!r} to the same label: a revision must change it"
+              for i, (r, to) in enumerate(zip(changes, targets)) if r["from"] == to]
     return p

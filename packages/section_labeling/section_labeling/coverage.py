@@ -9,13 +9,15 @@ Plain code; the report is generated, never hand-edited.
 
 The review list: the labels a person must look at first. Every piece labeled not_for_checking (it is
 never checked, so a rule wrongly put there could let a design pass that should fail), and every piece a
-rule or definition already cites (if its label is wrong, a rule rests on a misread piece). And, found by
+rule or definition already cites (if its label is wrong, a rule rests on a misread piece), and every label
+with an open question for the architects. And, found by
 plain code whatever the AI said, every piece labeled reference that uses requirement words ("shall not",
 "must", "not less than"...): only rules become formulas, so a requirement filed as reference could be missed. A reviewer
 records a doubt as an open question on the label; an architect answers it and approves the label, the
 same way as for rules.
 """
 
+import json
 import re
 from collections import Counter
 from pathlib import Path
@@ -86,11 +88,11 @@ def cited_by(j: Path, file: str, pieces: dict[str, dict]) -> dict[str, list[str]
 
 # Words that put a requirement on a design. Deliberately broad: a false alarm costs a reviewer a minute,
 # a missed requirement could let a design pass that should fail.
-REQUIREMENT_WORDS = re.compile(r"\b(shall not|shall be not|shall have|shall be located|shall conform|"
-                               r"shall be in conformity|shall be deemed|shall be considered|must|may not|"
-                               r"not less than|not more than|no more than|no less than|not to exceed|exceeds?|"
-                               r"at least|at most|is required|are required|prohibited|maximum|minimum|"
-                               r"no(?:\s+[\w-]+){1,3}\s+shall)\b", re.I)    # "No structure shall ..."
+REQUIREMENT_WORDS = re.compile(
+    r"\b(shall not|shall be not|shall have|shall be located|shall conform|shall be in conformity|shall be deemed|"
+    r"shall be considered|must|may not|not to exceed|exceed(?:s|ed|ing)?|(?:more|less|fewer|greater) than|"
+    r"at least|at most|is required|are required|prohibited|maximum|minimum|(?<!not )limited to|"
+    r"no(?:\s+[\w/-]+){1,6}\s+shall)\b", re.I)    # patterns, not instances: "No structure shall", "less than 60"
 
 
 def requirement_words(rows: list[dict], piece: dict) -> list[str]:
@@ -112,6 +114,7 @@ def review_list(header: dict, pieces: dict[str, dict], labels: dict, cited: dict
                 f"{e.get('reason', '').replace('|', '/')} | {quote.replace('|', '/')} |{extra}")
     head = "| Piece | Title | Label | Status | Reason | Quote |"
     nfc = [pid for pid in pieces if labels.get(pid, {}).get("label") == "not_for_checking"]
+    asked = [pid for pid in pieces if labels.get(pid, {}).get("open_questions")]
     worded = {pid: words for pid in pieces if labels.get(pid, {}).get("label") == "reference"
               and (words := requirement_words(rows, pieces[pid]))}
     out = [f"# Labels to review: {header['file']}", "",
@@ -126,8 +129,51 @@ def review_list(header: dict, pieces: dict[str, dict], labels: dict, cited: dict
            "Only rules become formulas: check each is really only a definition or pointer, not a requirement.", "",
            head + " Words |", "|---|---|---|---|---|---|---|",
            *[row(pid, f" {', '.join(worded[pid])} |") for pid in worded], "",
+           f"## Open questions for the architects ({len(asked)})", "",
+           "A reviewer's doubt about the label. Approval is blocked until an architect answers.", "",
+           head + " Questions |", "|---|---|---|---|---|---|---|",
+           *[row(pid, f" {' / '.join(q.replace('|', '/') for q in labels[pid]['open_questions'])} |") for pid in asked], "",
            f"## Cited by rules or definitions ({len(cited)})", "",
            "A rule or definition already quotes these pieces, so each should be rule or reference.", "",
            head + " Cited by |", "|---|---|---|---|---|---|---|",
            *[row(pid, f" {', '.join(cited[pid])} |") for pid in pieces if pid in cited]]
     return "\n".join(out) + "\n"
+
+
+def provenance_problems(labels: dict, records: list[dict], pieces: dict, rows: list[dict], file: str,
+                        ctx) -> list[str]:
+    """Every AI-drafted label must be exactly what a recorded answer produces, or say how it differs. The
+    answer's sources are rebuilt with the labeler's own code (labeler.answer_sources); the label (its
+    original, before any {from} revision), topic, reason (unless a {from} revision rewrote it) and sources
+    (page, lines and words) must equal one accepted answer's, unless a {field: sources} revision explains
+    the sources. Plain code over the run records."""
+    from .labeler import answer_sources
+    accepted: dict[str, list[dict]] = {}
+    for r in records:
+        if r.get("problem") is None and r.get("answer"):
+            try:
+                accepted.setdefault(r["piece"], []).append(json.loads(r["answer"]))
+            except json.JSONDecodeError:
+                pass
+    out = []
+    for pid, e in labels.items():
+        if not str(e.get("drafted_by", "")).startswith("section_labeling/") or pid not in pieces:
+            continue
+        revised = e.get("revised") or []
+        original = next((r["from"] for r in revised if "from" in r), e.get("label"))
+        place = lambda s: (s.get("page"), tuple(s.get("lines") or ()), s.get("quote"))
+        have = {place(s) for s in e.get("sources") or []}
+        relabeled = any("from" in r for r in revised)        # a label change rewrites the reason too
+        candidates = [a for a in accepted.get(pid, []) if a.get("label") == original
+                      and a.get("topic") == e.get("topic")
+                      and (relabeled or str(a.get("reason", "")).strip() == str(e.get("reason", "")).strip())]
+        rebuilt = [{place(s) for s in srcs} for a in candidates
+                   for srcs, _ in [answer_sources(a, pieces[pid], rows, file, ctx)] if srcs]
+        if not rebuilt:
+            out.append(f"{pid}: no recorded answer has label {original!r} with this topic and reason")
+        elif have not in rebuilt:
+            if not any(r.get("field") == "sources" for r in revised):
+                out.append(f"{pid}: sources differ from what its recorded answer produces, with no sources revision")
+            elif not any(s <= have for s in rebuilt):
+                out.append(f"{pid}: a sources revision must keep what the recorded answer produced")
+    return out

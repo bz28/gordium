@@ -252,18 +252,25 @@ def test_review_list_shows_not_for_checking_and_cited_pieces(law):
                         "sources": [{"quote": "This chapter shall be known"}]},
               "325-16C": {"label": "rule", "reason": "Height bonus.", "status": "draft", "open_questions": ["?"]},
               "325-3B:building_area": {"label": "reference", "reason": "A definition.", "status": "draft"},
-              "325-3B:grade_plane": {"label": "reference", "reason": "A definition.", "status": "draft"}}
+              "325-3B:height_of_building": {"label": "reference", "reason": "A definition.", "status": "draft"}}
     text = coverage.review_list(header, pieces, labels, {"325-16C": ["R-1b.height"]}, rows)
     rest, cited = text.split("## Cited by")
     nfc, worded = rest.split("## Labeled reference but using requirement words")
+    assert "## Open questions for the architects (1)" in worded and "| 325-16C |" in worded.split("## Open questions")[1]
     assert "| 325-3B:building_area |" in worded and "shall be located" not in nfc          # "neither ... shall be located"
-    assert "325-3B:grade_plane" not in worded                                # a definition with no requirement
+    assert "325-3B:height_of_building" not in worded                         # a definition with no requirement
     more = {pid: {"label": "reference", "reason": "x", "status": "draft"}
             for pid in ("325-3B:one_family_attached_dwelling", "325-29.7A", "325-15B")}
     worded = coverage.review_list(header, pieces, labels | more, {}, rows).split("## Labeled reference but")[1]
     assert "| 325-3B:one_family_attached_dwelling |" in worded and "maximum" in worded   # "A maximum of six..."
     assert "| 325-29.7A |" in worded and "no pwsf shall" in worded                       # "No PWSF shall ..."
     assert "| 325-15B |" in worded and "shall be in conformity" in worded
+    pattern = {pid: {"label": "reference", "reason": "x", "status": "draft"}
+               for pid in ("325-3B:kitchenette", "325-3B:short_term_rental", "325-29.8", "325-29.7A")}
+    worded = coverage.review_list(header, pieces, labels | pattern, {}, rows).split("## Labeled reference but")[1]
+    for pid, words in [("325-3B:kitchenette", "less than"), ("325-3B:short_term_rental", "less than"),
+                       ("325-29.8", "exceeding")]:
+        assert f"| {pid} |" in worded and words in worded, pid             # patterns, not the listed instances
     assert "| 325-1 |" in nfc and "This chapter shall be known" in nfc and "325-16C" not in nfc
     assert "| 325-16C |" in cited and "draft · open questions" in cited and "R-1b.height |" in cited
 
@@ -404,3 +411,85 @@ def test_answers_must_agree_with_the_requirements_they_list(law, bad, why):
     client = FakeClient(bad, GOOD)
     entry, records = run(law, client)
     assert why in records[0]["problem"] and entry["label"] == "rule" and len(records) == 2
+
+
+def test_page_breaks_are_shown_and_a_citation_across_one_is_split(law):
+    ctx, header, pieces, rows = law
+    message = labeler.piece_message(pieces["325-29.18D"], rows)                 # L1 on p.107, L2 on p.108
+    assert "L1: " in message and "--- page 108 ---\nL2: " in message
+    first_line = labeler.numbered_lines(rows, pieces["325-29.18D"])[0][2]
+    across = GOOD | {"requirements": [{"first_line": 1, "last_line": 2}], "quote": first_line}
+    split = across | {"requirements": [{"first_line": 1, "last_line": 1}, {"first_line": 2, "last_line": 2}]}
+    entry, records = run(law, FakeClient(across, split), pid="325-29.18D")
+    assert "crosses a page break; cite it as one part per page: L1-L1, L2-L2" in records[0]["problem"]
+    assert {s["page"] for s in entry["sources"]} == {107, 108}                  # the split answer is accepted
+
+
+def test_a_repeated_cited_line_asks_for_more_lines_not_a_longer_quote(law):
+    ctx, header, pieces, rows = law
+    lines = labeler.numbered_lines(rows, pieces["325-3B:kitchen"])
+    _, why = labeler.cited_lines({"first_line": 2, "last_line": 2}, lines, pieces["325-3B:kitchen"], LAW, ctx)
+    assert "include one more line" in why and "quote more words" not in why   # repeated on the page, outside the piece
+
+
+def test_a_citation_over_several_page_breaks_is_split_one_part_per_page(law):
+    ctx, header, pieces, rows = law
+    lines = labeler.numbered_lines(rows, pieces["325-20D"])
+    pages = [p for p, _, _ in lines]
+    _, why = labeler.cited_lines({"first_line": 1, "last_line": len(lines)}, lines, pieces["325-20D"], LAW, ctx)
+    parts = why.split("one part per page: ")[1].split(", ")
+    assert len(parts) == len(set(pages)) >= 3                                 # one part for every page, not two
+
+
+def test_a_requirements_full_lines_win_over_a_quote_on_the_same_lines(law):
+    one = GOOD | {"requirements": [{"first_line": 1, "last_line": 1}]}       # the quote is part of L1
+    entry, _ = run(law, FakeClient(one))
+    assert [s["quote"] for s in entry["sources"]] == [
+        "C. Height and open space. In any district, any main building may be erected to a height in excess of that"]
+
+
+def test_a_rules_sources_list_each_place_once(law):
+    twice = GOOD | {"requirements": [{"first_line": 1, "last_line": 2}, {"first_line": 1, "last_line": 2}]}
+    entry, _ = run(law, FakeClient(twice))
+    places = [(s["page"], tuple(s["lines"])) for s in entry["sources"]]
+    assert len(places) == len(set(places)) == 2                               # L1-L2 once, plus the quote's line
+
+
+def test_a_copy_on_another_page_outside_the_piece_is_not_a_duplicate(law):
+    ctx, header, pieces, rows = law
+    lines = labeler.numbered_lines(rows, pieces["325-16F"])                   # L16 is p.48 l.12; a copy is on p.47 l.31
+    source, why = labeler.cited_lines({"first_line": 16, "last_line": 16}, lines, pieces["325-16F"], LAW, ctx)
+    assert why is None and (source["page"], source["lines"]) == (48, [12, 12])
+
+
+def test_every_label_matches_a_recorded_answer_or_says_how_it_differs(law):
+    ctx, header, pieces, rows = law
+    check = lambda labels, records: coverage.provenance_problems(labels, records, pieces, rows, LAW, ctx)
+    answer = GOOD                                                             # a rule citing L1-L2 of 325-16C
+    records = [{"piece": "325-16C", "problem": None, "answer": json.dumps(answer)}]
+    produced, _ = labeler.answer_sources(answer, pieces["325-16C"], rows, LAW, ctx)
+    base = {"label": "rule", "topic": GOOD["topic"], "reason": GOOD["reason"], "sources": produced,
+            "drafted_by": "section_labeling/claude-haiku-5-5"}
+    assert check({"325-16C": base}, records) == []
+    assert "no recorded answer has label 'flag'" in check({"325-16C": base | {"label": "flag"}}, records)[0]
+    assert "with this topic and reason" in check({"325-16C": base | {"topic": "uses"}}, records)[0]
+    assert "with this topic and reason" in check({"325-16C": base | {"reason": "edited by hand"}}, records)[0]
+    flagged = base | {"label": "flag", "reason": "Rewritten for flag.", "revised": [{"from": "rule", "by": "x", "date": "d", "why": "w"}]}
+    assert check({"325-16C": flagged}, records) == []
+    extra = {"file": LAW, "page": 47, "lines": [8, 9], "quote": "(1) Each required front, side and rear yard"}
+    added = base | {"sources": produced + [extra]}                            # an answer with requirements: still caught
+    assert "sources differ" in check({"325-16C": added}, records)[0]
+    moved = base | {"sources": [produced[0] | {"lines": [6, 6]}, *produced[1:]]}   # same words, other lines
+    assert "sources differ" in check({"325-16C": moved}, records)[0]
+    explained = added | {"revised": [{"field": "sources", "by": "x", "date": "d", "why": "w"}]}
+    assert check({"325-16C": explained}, records) == []
+    dropped = base | {"sources": [extra], "revised": explained["revised"]}    # a revision must keep what the AI produced
+    assert "must keep what the recorded answer produced" in check({"325-16C": dropped}, records)[0]
+
+
+def test_the_committed_labels_all_match_their_recorded_answers(law):
+    ctx, header, pieces, rows = law
+    labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
+    runs = [json.loads(line) for f in sorted((ITHACA / "3_section_labels/runs").glob("*.jsonl"))
+            for line in f.read_text().splitlines() if line.strip()]
+    assert coverage.provenance_problems(labels, runs, pieces, rows, LAW, ctx) == []

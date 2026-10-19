@@ -3,10 +3,15 @@
 For one piece:
   1. Send the fixed instructions (labeling_guide.md + the label kinds and topics; cached, so repeats
      are cheap) and the piece's text.
-  2. The model must answer {label, topic, reason, quote} (structured output: no other shape is possible).
-  3. Code finds the quote in the city's document with the same matcher the inspector uses: it must be
-     exactly the city's words, inside this piece, once on its page. If not, the model is told why and
-     asked again (up to max_attempts in settings.yaml); after that the piece stays unlabeled.
+  2. The model must answer {requirements, label, topic, reason, quote} (structured output: no other shape is
+     possible). Requirements come first and are line citations (L3-L5 of the numbered piece), never copied
+     text; page breaks are shown so a citation never has to cross one.
+  3. Code takes each requirement's exact words from its cited lines and finds the quote with the
+     inspector's own matcher (exactly the city's words, inside this piece, once on its page); the label
+     must agree with the requirements (any requirement: rule or flag; none: reference or
+     not_for_checking). A rule's or flag's sources are its requirement lines plus the quote. If anything
+     fails, the model is told why and asked again (up to max_attempts in settings.yaml); after that the
+     piece stays unlabeled.
   4. Every attempt is recorded: settings, prompt and input fingerprints, the raw answer, tokens, cost.
 
 The client is passed in, so tests use a fake one and never need a key or the network.
@@ -61,9 +66,16 @@ def numbered_lines(rows: list[dict], piece: dict) -> list[tuple[int, int, str]]:
 def piece_message(piece: dict, rows: list[dict]) -> str:
     pages = sorted({p for p, _, _ in piece["lines"]})
     where = f"page {pages[0]}" if len(pages) == 1 else f"pages {pages[0]}-{pages[-1]}"
-    body = "\n".join(f"L{i}: {t}" for i, (_, _, t) in enumerate(numbered_lines(rows, piece), 1))
+    out, page = [], None
+    for i, (p, _, t) in enumerate(numbered_lines(rows, piece), 1):
+        if page is not None and p != page:
+            out.append(f"--- page {p} ---")
+        page = p
+        out.append(f"L{i}: {t}")
     return (f"Piece {piece['id']}: {piece['title']} ({where}). Each line is numbered L1, L2, ...; the numbers are "
-            f"not part of the city's text. Cite requirements by these line numbers.\n\n{body}")
+            f"not part of the city's text. Cite requirements by these line numbers. A '--- page N ---' line marks "
+            f"a page break: cite a requirement that runs across one as one part per page.\n\n"
+            + "\n".join(out))
 
 
 def sha(text: str) -> str:
@@ -85,8 +97,38 @@ def cited_lines(req: dict, lines: list[tuple[int, int, str]], piece: dict, file:
         return None, f"cite lines between L1 and L{len(lines)}, first before last"
     span = lines[first - 1:last]
     if len({page for page, _, _ in span}) > 1:
-        return None, "a requirement that crosses a page break must be cited as two parts, one per page"
-    return find_quote(" ".join(t for _, _, t in span), piece, file, ctx)
+        starts = [first] + [i + 1 for i in range(first, last) if lines[i][0] != lines[i - 1][0]]
+        parts = [f"L{a}-L{b - 1}" for a, b in zip(starts, starts[1:] + [last + 1])]
+        return None, f"L{first}-L{last} crosses a page break; cite it as one part per page: {', '.join(parts)}"
+    words = " ".join(t for _, _, t in span)
+    inside, on_page = places(words, span[0][0], piece, file, ctx)
+    if len(inside) > 1 or on_page > 1:
+        return None, (f"the words on L{first}-L{last} also appear elsewhere on this page or in this piece; "
+                      "include one more line before or after so the citation points at one place")
+    return find_quote(words, piece, file, ctx)
+
+
+def answer_sources(answer: dict, piece: dict, rows: list[dict], file: str,
+                   ctx: Context) -> tuple[list[dict] | None, str | None]:
+    """The one way an answer becomes a label's sources, used when labeling and when checking provenance:
+    the quote, plus for a rule or flag the requirement lines it cited, each place once (a requirement's full
+    lines win over a quote on the same lines). (sources, None), or (None, why the answer can't be used)."""
+    quote, problem = find_quote(answer["quote"], piece, file, ctx)
+    if problem:
+        return None, problem
+    lines = numbered_lines(rows, piece)
+    requirements = answer.get("requirements", [])
+    found = [cited_lines(r, lines, piece, file, ctx) if isinstance(r, dict) else find_quote(r, piece, file, ctx)
+             for r in requirements]                     # strings: answers recorded before line citations
+    problem = next((f"requirement {r}: {why}" for r, (_, why) in zip(requirements, found) if why), None)
+    if problem or (problem := consistency_problem(answer) if "requirements" in answer else None):
+        return None, problem
+    if answer["label"] not in ("rule", "flag"):
+        return [quote], None
+    unique = {}
+    for s in [*(s for s, _ in found), quote]:
+        unique.setdefault((s["page"], tuple(s["lines"])), s)
+    return list(unique.values()), None
 
 
 def consistency_problem(answer: dict) -> str | None:
@@ -99,13 +141,20 @@ def consistency_problem(answer: dict) -> str | None:
     return None
 
 
+def places(words: str, page: int | None, piece: dict, file: str, ctx: Context) -> tuple[list, int]:
+    """The one definition of where words occur, used by every check here: (every place inside this piece,
+    how many times they occur on `page`). The inspector also needs a citation unique on its page."""
+    owned = set(piece_keys(piece))
+    pages = ctx.pages.get(file, {})
+    inside = [(p, a, b) for p in sorted({p for p, _ in owned}) for a, b in locate(words, pages.get(p, {}))
+              if (p, a) in owned and (p, b) in owned]
+    return inside, len(locate(words, pages.get(page, {}))) if page is not None else 0
+
+
 def find_quote(quote: str, piece: dict, file: str, ctx: Context) -> tuple[dict | None, str | None]:
     """(source, None) if the quote is exactly the city's words inside this piece, once on its page;
     otherwise (None, why). Uses the inspector's own matcher and source check."""
-    owned = set(piece_keys(piece))
-    pages = ctx.pages.get(file, {})
-    inside = [(page, a, b) for page in sorted({p for p, _ in owned}) for a, b in locate(quote, pages.get(page, {}))
-              if (page, a) in owned and (page, b) in owned]
+    inside, _ = places(quote, None, piece, file, ctx)
     if not inside:
         return None, "the quote isn't in this piece word for word"
     if len(inside) > 1:
@@ -126,7 +175,6 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
     system = system_prompt()
     topics = sorted(ctx.topics)
     messages = [{"role": "user", "content": piece_message(piece, rows)}]
-    lines = numbered_lines(rows, piece)
     for attempt in range(1, settings["max_attempts"] + 1):
         worst = worst_case(len(system) + len(json.dumps(messages, default=str)), settings, PRICES)
         if budget is not None:
@@ -148,15 +196,7 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
         else:
             try:
                 answer = json.loads(text)
-                source, problem = find_quote(answer["quote"], piece, file, ctx)
-                if not problem:
-                    found = [cited_lines(r, lines, piece, file, ctx) for r in answer["requirements"]]
-                    problem = next((f"requirement {r}: {why}" for r, (_, why) in zip(answer["requirements"], found)
-                                    if why), None) or consistency_problem(answer)
-                    if not problem and answer["label"] in ("rule", "flag"):
-                        # A rule's sources are its requirement sentences: the drafting step turns each into a check.
-                        source = [s for s, _ in found] + ([source] if source["lines"] not in
-                                                          [s["lines"] for s, _ in found] else [])
+                source, problem = answer_sources(answer, piece, rows, file, ctx)
             except (json.JSONDecodeError, KeyError, TypeError) as e:
                 problem = f"unreadable answer ({type(e).__name__})"
         record({"piece": piece["id"], "attempt": attempt, "date": datetime.datetime.now(datetime.UTC).isoformat(),
@@ -167,7 +207,7 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
                 "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None})
         if source and not problem:
             return {"label": answer["label"], "topic": answer["topic"], "reason": answer["reason"].strip(),
-                    "sources": source if isinstance(source, list) else [source], "piece_sha256": piece_fingerprint(piece, pdf_sha),
+                    "sources": source, "piece_sha256": piece_fingerprint(piece, pdf_sha),
                     "drafted_by": f"section_labeling/{settings['model']}", "status": "draft"}
         if response.stop_reason == "refusal":
             return None            # declined: asking again won't help; recorded, and the piece stays unlabeled
@@ -175,7 +215,7 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
             # Tell the model why and ask again; earlier turns stay as they were (append-only).
             messages += [{"role": "assistant", "content": response.content},
                          {"role": "user", "content": f"That answer can't be used: {problem}. Answer again for the same "
-                                                     "piece, citing requirements by line number and copying the quote "
-                                                     "exactly from the piece's text."}]
+                                                     "piece: cite requirements by their L line numbers, and copy the "
+                                                     "quote exactly from the piece's text."}]
         # A cut-off answer (max_tokens) can't be sent back; the same question is simply asked again.
     return None

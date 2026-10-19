@@ -42,7 +42,7 @@ class Budget:
             data = {"spent_usd": max(float(data.get("spent_usd", 0.0)), self.recorded), "calls": int(data.get("calls", 0))}
             yield data
             tmp = self.ledger.with_suffix(".tmp")
-            tmp.write_text(json.dumps({"spent_usd": round(data["spent_usd"], 6), "calls": data["calls"]}) + "\n")
+            tmp.write_text(json.dumps({"spent_usd": data["spent_usd"], "calls": data["calls"]}) + "\n")   # unrounded: no drift
             os.replace(tmp, self.ledger)
 
     @property
