@@ -102,7 +102,7 @@ class Context:
         listed = {d["file"]: d for d in documents}
         ctx = cls(measures=set(load(MEASURES_FILE)),
                   uses=set(uses_list := (load(uses_file) or {}) if uses_file.exists() else {}),
-                  use_rows={k: v.get("sources") or [] for k, v in uses_list.items() if isinstance(v, dict)},
+                  use_rows=_use_rows(uses_list),
                   topics=set(load(VOCABULARY_FILE)["topics"]),
                   reviewers=set(load(REVIEWERS_FILE) or ()),
                   sources=listed)
@@ -146,6 +146,16 @@ SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256",
                  "adopted_on", "created_on", "quotable", "not_quotable_because"}
 
 
+def _use_rows(uses) -> dict[str, list[dict]]:
+    """Each use's well-formed cited rows from uses.yaml. Malformed entries are left out here and
+    reported by validate_terms(uses), so a typo there can't crash rule validation."""
+    if not isinstance(uses, dict):
+        return {}
+    return {k: [r for r in v.get("sources") if isinstance(r, dict) and isinstance(r.get("file"), str)
+                and type(r.get("page")) is int and _is_line_range(r.get("lines"))]
+            for k, v in uses.items() if isinstance(v, dict) and isinstance(v.get("sources"), list)}
+
+
 def _is_line_range(lines) -> bool:
     return isinstance(lines, list) and len(lines) == 2 and all(type(n) is int for n in lines)
 
@@ -166,7 +176,7 @@ def _use_row_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[s
              for n in range(s["lines"][0], s["lines"][1] + 1)}
     return [f"use '{u}' is decided here but its row isn't cited (cite {r['file']} p.{r['page']} lines {r['lines']})"
             for u in sorted(named & set(ctx.use_rows)) for r in ctx.use_rows[u][:1]
-            if _is_line_range(r.get("lines")) and not any((r["file"], r["page"], n) in cited
+            if not any((r["file"], r["page"], n) in cited
                                                           for n in range(r["lines"][0], r["lines"][1] + 1))]
 
 

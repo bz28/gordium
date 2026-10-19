@@ -611,3 +611,12 @@ def test_a_use_decided_by_a_rule_must_cite_its_row(ctx):
     assert any("use 'one_family_detached' is decided here but its row isn't cited" in p
                for p in validate(decides, ctx))
     assert validate(rulebook(), ctx) == []                                    # applies_when only scopes the rule
+    flags = rulebook(review_when=[{"when": 'use == "one_family_detached"', "reason": "check by hand"}])
+    assert any("use 'one_family_detached' is decided here" in p for p in validate(flags, ctx))  # review_when decides too
+
+
+@pytest.mark.parametrize("uses", [["one_family_detached"], {"x": {"sources": "p.2"}},
+                                  {"x": {"sources": [{"page": 2, "lines": [9, 9]}]}}, {"x": "y"}])
+def test_malformed_uses_are_left_out_not_crashed(uses):
+    from rule_format.rulebook import _use_rows
+    assert _use_rows(uses) in ({}, {"x": []})

@@ -1,7 +1,8 @@
 # R-1b (City of Ithaca): rules drafted by Claude by reading the zoning charts (April 2026) and Chapter 325.
 # NOT yet an answer key: it becomes one only when the architects approve each rule (status: approved).
 # Until then it is a second, independent reading: the chart-reading code (next PR) must produce the same
-# chart values, and test_answer_keys.py compares these rules with the architects' own spreadsheet check.
+# chart values, and test_answer_keys.py compares these rules with the architects' own spreadsheet check
+# (test_data/answer_keys/, their hand check of 106 Ithaca Rd).
 # Every quote is verified against the PDF text by `python -m rule_format`. Written under
 # regulations/document_extraction_guide/drafting_rules.md: `says` restates only quoted words;
 # interpretations are open questions for the architects. Draft: architects approve.
@@ -18,8 +19,9 @@ rules:
     kind: rule
     topic: uses
     says: >-
-      Allowed main uses in R-1b: one-family detached house, church, public park or playground,
-      library or fire station (marked • for R-1B). A cemetery or related building, a public utility
+      Permitted primary uses in R-1b, subject to the further regulations of §325-8 and Article V: one-family
+      dwelling, detached; church or related building; public park or playground; library or fire station
+      (marked • for R-1B). A cemetery or related building, a public utility
       structure except office, or a school and related buildings are marked SP. Uses marked - for R-1B, such as a two-family dwelling, are not allowed.
     check: use in ["one_family_detached", "church", "public_park_or_playground", "library_or_fire_station"]
     review_when:
@@ -30,6 +32,10 @@ rules:
         page: 2
         lines: [7, 7]
         quote: "R-1A R-1B R-2A R-2B R-2C R-3A R-3AA R-3B"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [15, 16]
+        quote: "(2) Column 2: Permitted Primary Uses. Uses which are permitted in each use district are listed, subject to the further regulations in this section and of Article V."
       - file: zoning_charts_2026-04.pdf
         page: 2
         lines: [9, 9]
@@ -74,7 +80,8 @@ rules:
       - given: {use: school}
         expect: needs_review
     open_questions:
-      - "The chart doesn't spell out \"SP\". We read it as \"special permit\" (Chapter 325 Article III). Confirm, and which board grants it for each use."
+      - "The chart has no legend for its marks. We read • as permitted, - as not permitted, and SP as special permit (Chapter 325 Article III). Confirm, and which board grants each special permit."
+      - "\"Subject to the further regulations in this section and of Article V\": can a use marked • still need review because of those regulations (e.g. occupancy limits, chart p.2 notes)?"
     notes: The chart's columns are R-1A, R-1B, … so R-1b is the second mark in each row.
     drafted_by: claude
     status: draft
@@ -248,9 +255,10 @@ rules:
     kind: rule
     topic: dimensions
     says: >-
-      Buildings may cover at most 25% of the lot area. The area covered by main and accessory buildings
-      includes all porches, attached or freestanding decks, balconies projecting more than 2 ft, ramps
-      and landings; that sum divided by the total lot area must not exceed 25%.
+      On a lot hereafter used, principal and accessory buildings above ground may cover at most 25% of the
+      total lot area. The area covered includes all porches, attached or freestanding decks, balconies
+      projecting more than 2 ft from a building or structure, ramps and/or landings; that sum divided by
+      the total lot area must not exceed 25%.
     check: building_area <= 0.25 * lot_area
     sources:
       - file: zoning_charts_2026-04.pdf
@@ -259,14 +267,19 @@ rules:
         quote: "Percent of lot area 20% 25% 30%"
       - file: chapter_325_zoning_2026-10.pdf
         page: 25
+        lines: [5, 7]
+        quote: "On a lot hereafter used, no greater percentage of total lot area may be covered by principal and accessory buildings above ground."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
         lines: [7, 9]
-        quote: "the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
+        quote: "For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
       - file: chapter_325_zoning_2026-10.pdf
         page: 25
         lines: [9, 10]
         quote: "This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified in this column."
     open_questions:
       - "See the building_area and lot definitions: whether garages and overhangs count, and what lot area to use."
+      - "\"Above ground\": are parts of a building below grade (e.g. a buried garage under a deck) left out of building_area?"
     examples:
       - given: {building_area: 1500, lot_area: 6674.7}
         expect: pass

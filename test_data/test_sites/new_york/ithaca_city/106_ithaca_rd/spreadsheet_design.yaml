@@ -5,7 +5,7 @@
 # measurements, and requires our result to equal their PASS/FAIL on every Output row.
 
 spreadsheet: test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx
-rulebook: test_data/answer_keys/new_york/ithaca_city/R-1b.yaml
+rulebook: regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-1b.yaml
 
 measurements:
   use:               {value: one_family_detached, from: "Output!C3 (Detached one-family)"}
