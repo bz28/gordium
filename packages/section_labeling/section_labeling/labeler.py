@@ -3,10 +3,15 @@
 For one piece:
   1. Send the fixed instructions (labeling_guide.md + the label kinds and topics; cached, so repeats
      are cheap) and the piece's text.
-  2. The model must answer {label, topic, reason, quote} (structured output: no other shape is possible).
-  3. Code finds the quote in the city's document with the same matcher the inspector uses: it must be
-     exactly the city's words, inside this piece, once on its page. If not, the model is told why and
-     asked again (up to max_attempts in settings.yaml); after that the piece stays unlabeled.
+  2. The model must answer {requirements, label, topic, reason, quote} (structured output: no other shape is
+     possible). Requirements come first and are line citations (L3-L5 of the numbered piece), never copied
+     text; page breaks are shown so a citation never has to cross one.
+  3. Code takes each requirement's exact words from its cited lines and finds the quote with the
+     inspector's own matcher (exactly the city's words, inside this piece, once on its page); the label
+     must agree with the requirements (any requirement: rule or flag; none: reference or
+     not_for_checking). A rule's or flag's sources are its requirement lines plus the quote. If anything
+     fails, the model is told why and asked again (up to max_attempts in settings.yaml); after that the
+     piece stays unlabeled.
   4. Every attempt is recorded: settings, prompt and input fingerprints, the raw answer, tokens, cost.
 
 The client is passed in, so tests use a fake one and never need a key or the network.
@@ -61,9 +66,16 @@ def numbered_lines(rows: list[dict], piece: dict) -> list[tuple[int, int, str]]:
 def piece_message(piece: dict, rows: list[dict]) -> str:
     pages = sorted({p for p, _, _ in piece["lines"]})
     where = f"page {pages[0]}" if len(pages) == 1 else f"pages {pages[0]}-{pages[-1]}"
-    body = "\n".join(f"L{i}: {t}" for i, (_, _, t) in enumerate(numbered_lines(rows, piece), 1))
+    out, page = [], None
+    for i, (p, _, t) in enumerate(numbered_lines(rows, piece), 1):
+        if page is not None and p != page:
+            out.append(f"--- page {p} ---")
+        page = p
+        out.append(f"L{i}: {t}")
     return (f"Piece {piece['id']}: {piece['title']} ({where}). Each line is numbered L1, L2, ...; the numbers are "
-            f"not part of the city's text. Cite requirements by these line numbers.\n\n{body}")
+            f"not part of the city's text. Cite requirements by these line numbers. A '--- page N ---' line marks "
+            f"a page break: cite a requirement that runs across one as two parts, one on each page.\n\n"
+            + "\n".join(out))
 
 
 def sha(text: str) -> str:
@@ -85,8 +97,13 @@ def cited_lines(req: dict, lines: list[tuple[int, int, str]], piece: dict, file:
         return None, f"cite lines between L1 and L{len(lines)}, first before last"
     span = lines[first - 1:last]
     if len({page for page, _, _ in span}) > 1:
-        return None, "a requirement that crosses a page break must be cited as two parts, one per page"
-    return find_quote(" ".join(t for _, _, t in span), piece, file, ctx)
+        cut = next(i for i in range(first, last) if lines[i][0] != lines[i - 1][0])
+        return None, (f"L{first}-L{last} crosses the page break after L{cut}; cite it as two parts, "
+                      f"L{first}-L{cut} and L{cut + 1}-L{last}")
+    source, why = find_quote(" ".join(t for _, _, t in span), piece, file, ctx)
+    if why and "more than once" in why:
+        why = f"the words on L{first}-L{last} also appear elsewhere on the page; include one more line before or after"
+    return source, why
 
 
 def consistency_problem(answer: dict) -> str | None:
@@ -155,8 +172,8 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
                                     if why), None) or consistency_problem(answer)
                     if not problem and answer["label"] in ("rule", "flag"):
                         # A rule's sources are its requirement sentences: the drafting step turns each into a check.
-                        source = [s for s, _ in found] + ([source] if source["lines"] not in
-                                                          [s["lines"] for s, _ in found] else [])
+                        unique = {(s["page"], tuple(s["lines"])): s for s in [*(s for s, _ in found), source]}
+                        source = list(unique.values())          # each place once, requirements first
             except (json.JSONDecodeError, KeyError, TypeError) as e:
                 problem = f"unreadable answer ({type(e).__name__})"
         record({"piece": piece["id"], "attempt": attempt, "date": datetime.datetime.now(datetime.UTC).isoformat(),
@@ -175,7 +192,7 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
             # Tell the model why and ask again; earlier turns stay as they were (append-only).
             messages += [{"role": "assistant", "content": response.content},
                          {"role": "user", "content": f"That answer can't be used: {problem}. Answer again for the same "
-                                                     "piece, citing requirements by line number and copying the quote "
-                                                     "exactly from the piece's text."}]
+                                                     "piece: cite requirements by their L line numbers, and copy the "
+                                                     "quote exactly from the piece's text."}]
         # A cut-off answer (max_tokens) can't be sent back; the same question is simply asked again.
     return None

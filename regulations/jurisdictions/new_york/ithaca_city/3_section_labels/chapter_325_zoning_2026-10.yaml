@@ -294,11 +294,7 @@ labels:
   325-8A:
     label: rule
     topic: dimensions
-    reason: This piece is the opening of the section that incorporates the District Regulations Chart and explains
-      what each column means; the column explanations themselves set limits (rule), but the piece as a whole mainly
-      points to the chart and defines column heads, and the actual figures live in the chart. Because the column
-      explanations contain binding 'shall' language, it should be treated as a rule rather than reference per the
-      tie-break guidance.
+    reason: "Revised from reference by review: The column explanations impose requirements ('shall have frontage ... equal to or greater than', 'shall be not less than'); the figures are in the chart. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 24
@@ -662,7 +658,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:adult_day_care_home:
-    label: rule
+    label: reference
     topic: definitions
     reason: This piece only defines the term 'adult day-care home' and imposes no requirement on a design, so it
       is a definition used by other rules.
@@ -676,11 +672,6 @@ labels:
         of the dwelling.
     piece_sha256: 4a0ce7ec9f069ae79b4467da8d4884fbb4bace8a36967df6bef6468c3de3c2f1
     drafted_by: section_labeling/claude-haiku-5-5
-    revised:
-    - from: reference
-      by: Claude (review of all labels, 2026-10-19)
-      date: 2026-10-19
-      why: "sets a limit: not more than six adults at one time"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:agriculture:
@@ -768,7 +759,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:bed_and_breakfast_inn:
-    label: rule
+    label: reference
     topic: definitions
     reason: This is a definition of the term bed-and-breakfast inn; it describes what the term means and sets no
       requirement a design must meet on its own.
@@ -782,11 +773,6 @@ labels:
         or one family per guest room, used for lodging on an overnight basis.
     piece_sha256: 785b4ff62a2a20cd52345cfcc8b8b79d9cc657f749374855c7d7b94106c66273
     drafted_by: section_labeling/claude-haiku-5-5
-    revised:
-    - from: reference
-      by: Claude (review of all labels, 2026-10-19)
-      date: 2026-10-19
-      why: "sets limits: five to 10 guest rooms, two persons or one family per room"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:boardinghouse:
@@ -1145,10 +1131,7 @@ labels:
   325-3B:dwelling_one_family:
     label: rule
     topic: definitions
-    reason: This is a definition of a term used by rules; it says what a one-family dwelling is and who may occupy
-      it, but the occupancy limits describe the term rather than setting a design requirement a building must meet.
-      The piece ends by pointing to configurations listed elsewhere, which is a reference, not a requirement in
-      itself.
+    reason: "Revised from reference by review: Sets occupancy limits by zone. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 7
@@ -1219,9 +1202,7 @@ labels:
   325-3B:one_family_attached_dwelling:
     label: rule
     topic: definitions
-    reason: This is a definition of the term one-family attached dwelling. Its only numeric element, the six-unit
-      maximum, is phrased as a description of what forms a building rather than a requirement a design must meet;
-      the definition is meant to be used by rules elsewhere.
+    reason: "Revised from reference by review: Sets a limit: at most six attached units per building. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 8
@@ -1257,7 +1238,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:dwelling_unit:
-    label: rule
+    label: reference
     topic: definitions
     reason: This is a definition of a term that rules depend on; it sets no requirement a design must meet, only
       describes what a dwelling unit is.
@@ -1272,11 +1253,6 @@ labels:
         outside of the building or through a common hall.
     piece_sha256: 8cf80d140f90fa782857721b581766631209fbb720da9dfbbb0e04753eacd7ff
     drafted_by: section_labeling/claude-haiku-5-5
-    revised:
-    - from: reference
-      by: Claude (review of all labels, 2026-10-19)
-      date: 2026-10-19
-      why: "requires a separate entrance (same wording is labeled rule for rooming units)"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:enlargement:
@@ -1704,7 +1680,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:kitchen:
-    label: rule
+    label: reference
     topic: definitions
     reason: This is a definition of the word KITCHEN with no requirement a design must meet; the 60 square foot
       and five foot figures only describe what counts as a kitchen, and the piece does not impose a limit by itself.
@@ -1718,11 +1694,6 @@ labels:
         cooking or preparation of food.
     piece_sha256: 884fde18d6fe2d8725610280e83c60af1e794586c8775547aea7fe7b93058a4b
     drafted_by: section_labeling/claude-haiku-5-5
-    revised:
-    - from: reference
-      by: Claude (review of all labels, 2026-10-19)
-      date: 2026-10-19
-      why: "sets limits: at least 60 sq ft and a minimum width of 5 ft"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:kitchenette:
@@ -2973,9 +2944,7 @@ labels:
   325-4:
     label: reference
     topic: districts_and_map
-    reason: The section divides the entire city into the listed zoning districts, which determines which requirements
-      apply to each lot; it is a district-assignment rule that code must apply, though it contains no measurable
-      design limit itself.
+    reason: "Revised from rule by review: Sets nothing itself: a list or lead-in that points to the requirements. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 22
@@ -2996,8 +2965,7 @@ labels:
   325-5:
     label: not_for_checking
     topic: districts_and_map
-    reason: The section only establishes the Zoning Map as a document; it sets no measurable requirement and other
-      rules depend on it to identify districts.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 23
@@ -3066,9 +3034,7 @@ labels:
   325-6:
     label: reference
     topic: districts_and_map
-    reason: The piece sets rules that 'shall apply' for resolving district boundary uncertainty, which code must
-      follow in determining which district governs a lot; the actual rules follow in the subsections, so this is
-      a requirement on how district lines are applied.
+    reason: "Revised from rule by review: Sets nothing itself: a list or lead-in that points to the requirements. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 23
@@ -3224,8 +3190,7 @@ labels:
   325-8:
     label: not_for_checking
     topic: districts_and_map
-    reason: The piece is only a section heading with an amendment note; it sets no requirement itself and points
-      to the district regulations that follow.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 24
@@ -3317,8 +3282,7 @@ labels:
   325-9A:
     label: not_for_checking
     topic: uses
-    reason: The piece only states the purpose of the special-use section and sets no measurable requirement a design
-      must meet; it points to regulations elsewhere.
+    reason: "Revised from reference by review: A statement of purpose or intent, not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 30
@@ -3339,10 +3303,7 @@ labels:
   325-9F:
     label: not_for_checking
     topic: procedures
-    reason: The piece sets time limits on special permits, including that a home occupation permit expires unless
-      a certificate of compliance is obtained within three years, and that a neighborhood garden permit expires
-      if unused for one garden season. These are checkable durations, though the subject is permit validity rather
-      than building design.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 34
@@ -3415,8 +3376,7 @@ labels:
   325-10A:
     label: not_for_checking
     topic: uses
-    reason: The piece is a statement of intent that describes the purpose of the section and points to the district
-      regulations in §325-8 without itself setting a measurable requirement a design must meet.
+    reason: "Revised from reference by review: A statement of purpose or intent, not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 34
@@ -3540,8 +3500,7 @@ labels:
   325-12:
     label: not_for_checking
     topic: districts_and_map
-    reason: The piece is only a section heading with amendment history; it sets no requirement itself and does not
-      state a rule a design must meet.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 41
@@ -3629,8 +3588,7 @@ labels:
   325-12E:
     label: flag
     topic: procedures
-    reason: The piece makes building and use changes in a PUD depend on a site plan approved under another chapter,
-      pointing to a document that holds the review requirements rather than setting a measurable design limit itself.
+    reason: "Revised from reference by review: No structure in a PUD unless it follows an approved site plan: needs the city's site plan approval. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 42
@@ -3701,9 +3659,7 @@ labels:
   325-12I:
     label: not_for_checking
     topic: nonconforming
-    reason: 'The piece sets a time limit: construction must begin within 24 months or the PUD is automatically revoked
-      and the prior zoning returns. Whether construction has progressed in accordance with the approved plan is
-      measurable, so this is a rule even though it also involves Council extensions and Director discretion.'
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 44
@@ -3755,8 +3711,7 @@ labels:
   325-15:
     label: not_for_checking
     topic: uses
-    reason: The piece is only a section heading that introduces use regulations defined elsewhere; it sets no requirement
-      itself.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 45
@@ -3795,9 +3750,7 @@ labels:
   325-15B:
     label: rule
     topic: site_features
-    reason: The piece points to another chapter (Chapter 210, Housing Standards) where the requirements for mobile
-      homes and parks are held, rather than setting a measurable requirement itself. Its 'shall' only incorporates
-      the outside article by reference, so the rule text is elsewhere.
+    reason: "Revised from reference by review: A requirement whose details live in Chapter 210 (guide step 5). (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 45
@@ -3971,8 +3924,7 @@ labels:
   325-17:
     label: not_for_checking
     topic: dimensions
-    reason: The piece is only a section heading ('Area regulations') that introduces the area rules without setting
-      any requirement itself.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 48
@@ -4060,8 +4012,7 @@ labels:
   325-18:
     label: not_for_checking
     topic: dimensions
-    reason: The piece is only a section heading that introduces yard regulations; it sets no requirement itself
-      and points to the substantive yard rules that follow in other pieces.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 49
@@ -4100,8 +4051,7 @@ labels:
   325-19:
     label: not_for_checking
     topic: nonconforming
-    reason: The piece is only a section heading with no requirement text; it names a topic but sets no requirement
-      a design must meet.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 49
@@ -4383,8 +4333,7 @@ labels:
   325-21:
     label: not_for_checking
     topic: parking_and_loading
-    reason: The piece is only a section heading for off-street loading with no requirement stated; the substantive
-      loading rules would sit in its subsections, so it sets nothing a design must meet.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 63
@@ -4455,8 +4404,7 @@ labels:
   325-22:
     label: not_for_checking
     topic: uses
-    reason: The piece is only a section heading with no requirement text, so it sets nothing a design must meet
-      and points to no rule on its own.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 64
@@ -4612,8 +4560,7 @@ labels:
   325-23:
     label: not_for_checking
     topic: uses
-    reason: The piece is only a section heading stating the subject of the following standards; it sets no requirement
-      a design must meet.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 64
@@ -4651,9 +4598,7 @@ labels:
   325-24:
     label: not_for_checking
     topic: form_and_design_standards
-    reason: The heading announces special performance standards for the Industrial District, which would govern
-      how a use or building operates. The piece gives no text, so the actual standards cannot be judged here and
-      the piece is kept for human review rather than dropped.
+    reason: "Revised from flag by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 65
@@ -4990,8 +4935,7 @@ labels:
   325-27B:
     label: not_for_checking
     topic: uses
-    reason: This is a purpose statement that sets no requirement a design or use must meet; it explains the policy's
-      intent, which other rules may rely on for interpretation.
+    reason: "Revised from reference by review: A statement of purpose or intent, not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 68
@@ -5097,9 +5041,7 @@ labels:
   325-27H:
     label: not_for_checking
     topic: procedures
-    reason: Subsection H is mainly a renewal procedure, but paragraph (3) requires hosts to be current on occupancy
-      taxes before renewal, which code can check from records, and paragraph (2) requires a valid certificate of
-      compliance. The piece sets a checkable requirement, so it is kept as a rule.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 70
@@ -5136,10 +5078,7 @@ labels:
   325-27J:
     label: not_for_checking
     topic: administration
-    reason: The piece sets evidentiary presumptions about who caused advertising and what price was advertised;
-      these are enforcement presumptions rather than design requirements, but they are not measurable building or
-      lot requirements, and rebuttal depends on judgment. Labeling as flag to be safe rather than not_for_checking
-      since they set a rule-like standard for enforcement.
+    reason: "Revised from flag by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 71
@@ -5243,8 +5182,7 @@ labels:
   325-29:
     label: flag
     topic: procedures
-    reason: The section routes permit applications through the Landmarks Commission for review and states the permit-issuance
-      sequence; it sets no measurable design, lot, or use requirement itself.
+    reason: "Revised from not_for_checking by review: Landmark properties are governed by Chapter 228 for changes in appearance: needs the city's review. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 73
@@ -5401,8 +5339,7 @@ labels:
   325-29.2:
     label: not_for_checking
     topic: districts_and_map
-    reason: The piece is only a section heading identifying the Southwest District with an amendment note; it sets
-      no requirement and points to no content itself.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 77
@@ -5665,8 +5602,7 @@ labels:
   325-29.4C:
     label: not_for_checking
     topic: site_features
-    reason: This piece is a purpose and intent statement that lists goals for wireless facilities; it sets no measurable
-      requirement a design must meet, so it is a reference to the chapter's purpose rather than a rule or flag.
+    reason: "Revised from reference by review: A statement of purpose or intent, not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 81
@@ -5719,8 +5655,7 @@ labels:
   325-29.5A:
     label: not_for_checking
     topic: definitions
-    reason: The piece only lists abbreviations used elsewhere in the code and sets no requirement a design must
-      meet.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 82
@@ -5868,8 +5803,7 @@ labels:
   325-29.5B:
     label: not_for_checking
     topic: definitions
-    reason: The piece only introduces a definition-of-terms subsection and sets no requirement a design must meet;
-      the defined terms that follow hold any substance.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 82
@@ -6817,9 +6751,7 @@ labels:
   325-29.5B:type_i_applications:
     label: not_for_checking
     topic: procedures
-    reason: 'The piece sets which applications qualify as Type I by a test the design must meet: the completed facility
-      must still meet small wireless facility physical limits. It is mainly procedural, but it contains a measurable
-      requirement that code must check, so it is kept as a rule.'
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 86
@@ -6841,10 +6773,7 @@ labels:
   325-29.5B:type_ii_applications:
     label: not_for_checking
     topic: procedures
-    reason: The piece defines which applications qualify for Type II review, which is a procedural classification,
-      but it also limits eligible collocations to existing structures that do not meet the small wireless facility
-      definition, a limit a design could be checked against. Under the rule that any requirement wins, it is labeled
-      rule rather than not_for_checking.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 86
@@ -6865,9 +6794,7 @@ labels:
   325-29.5B:type_iii_applications:
     label: not_for_checking
     topic: procedures
-    reason: The piece limits which applications may be filed as Type III, which is a procedural scope rule rather
-      than a design requirement; however it restricts the kind of facility that may be applied for, so it is kept
-      as a rule for checking under the safe-default guidance.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 86
@@ -6888,10 +6815,7 @@ labels:
   325-29.5B:type_iv_applications:
     label: not_for_checking
     topic: procedures
-    reason: The piece classifies which applications fall under Type IV review for new towers and wireless facilities,
-      which is a procedural categorization rather than a design measurement; however, it defines the scope of a
-      review track, so it is a procedure-classification piece. Choosing rule per the guide's caution when unsure
-      between not_for_checking and rule is not appropriate here since it is purely procedural.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 87
@@ -7014,9 +6938,7 @@ labels:
   325-29.6B:
     label: not_for_checking
     topic: nonconforming
-    reason: 'Subsection B sets requirements a facility must meet: a separate permit is required for unpermitted
-      PWSFs and carriers with out-of-compliance facilities are ineligible for new approvals until brought into compliance.
-      These are checkable permit and status conditions, so the piece is a rule.'
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 88
@@ -7057,9 +6979,7 @@ labels:
   325-29.6D:
     label: not_for_checking
     topic: site_features
-    reason: Paragraph D(1) says no permit may be issued for collocation on a site or mount that has unpermitted
-      PWSFs or structures lacking required permits. That is a checkable condition on existing facilities, so it
-      is a rule, not a procedure.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 88
@@ -7186,8 +7106,7 @@ labels:
   325-29.8:
     label: reference
     topic: form_and_design_standards
-    reason: The piece states that PWSF approval is subject to meeting or exceeding standards, so it imposes a requirement
-      on the design; the listed standards that follow determine the measurable limits.
+    reason: "Revised from rule by review: Sets nothing itself: a list or lead-in that points to the requirements. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 90
@@ -7257,9 +7176,7 @@ labels:
   325-29.9:
     label: not_for_checking
     topic: dimensions
-    reason: The heading names fall zone and setback requirements for wireless facilities, which are measurable design
-      limits, so the piece is treated as a rule. Only the heading and amendment note appear here, so the operative
-      numbers are not visible in this piece.
+    reason: "Revised from rule by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 93
@@ -7348,10 +7265,7 @@ labels:
   325-29.10B:
     label: not_for_checking
     topic: procedures
-    reason: Lists mandatory information an applicant must submit, including measurable items such as a 1,000-foot
-      radius for zoning district designations and maps; this is a submission requirement that code can check for
-      presence, though it sits in an application section. Because it is an application content requirement with
-      measurable parts, it is labeled as a rule rather than not_for_checking.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 95
@@ -7457,9 +7371,7 @@ labels:
   325-29.10.1D:
     label: not_for_checking
     topic: procedures
-    reason: Sets a binding 150-day deadline for the Application Authority to issue a written decision on a Type
-      IV wireless application, which code can check against dates. Although it is a procedural timing rule, it is
-      a requirement rather than mere administration, so it is kept for checking.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 98
@@ -7549,9 +7461,7 @@ labels:
   325-29.11:
     label: not_for_checking
     topic: procedures
-    reason: The piece requires each application to contain at least two alternatives, a measurable submission requirement
-      that code can check by counting alternatives; it is not a design measurement, but it is an application content
-      requirement rather than pure administration, so it is kept as a rule to avoid missing it.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 101
@@ -7761,9 +7671,7 @@ labels:
   325-29.13D:
     label: not_for_checking
     topic: procedures
-    reason: 'The piece is a notice procedure, but it imposes measurable requirements on the applicant: mail or hand-deliver
-      notice to residences within 300 feet at least five days before installation and post a sign at least 30 days
-      before. Code can check these timing and distance requirements from the application record.'
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 104
@@ -7801,10 +7709,7 @@ labels:
   325-29.14A:
     label: not_for_checking
     topic: procedures
-    reason: The piece imposes a mandatory requirement that staff reports contain specified content, including determinations
-      of whether location, siting and design standards have been met; it is a procedural requirement but includes
-      determinations code cannot verify from measurements, so it is a process rule rather than a design measurement.
-      Labeled as rule to be conservative since it requires specific determinations that must be present in the record.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 104
@@ -7824,9 +7729,7 @@ labels:
   325-29.15:
     label: not_for_checking
     topic: procedures
-    reason: The piece introduces notice requirements for PWSF applications, which is procedural, but it states the
-      applicant must demonstrate compliance with listed requirements that are not shown here; it is not clear the
-      piece itself sets a measurable design requirement, so it is kept for review rather than dropped.
+    reason: "Revised from flag by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 105
@@ -7944,8 +7847,7 @@ labels:
   325-29.17:
     label: not_for_checking
     topic: site_features
-    reason: The piece is only a section heading with no requirement text, so it sets no requirement itself and simply
-      points to the substantive provisions that follow.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -7965,10 +7867,7 @@ labels:
   325-29.17A:
     label: not_for_checking
     topic: procedures
-    reason: The piece sets how applications must be reviewed, a 'shall' requirement on the city's review basis,
-      but it is a review procedure rather than a design measurement, so it is not a design rule code could check
-      directly; however, it requires the review to use worst-case cumulative conditions, which is a standard applied
-      to the design, so it is labeled rule to avoid hiding it.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -7989,9 +7888,7 @@ labels:
   325-29.17B:
     label: not_for_checking
     topic: site_features
-    reason: The piece states that collocation applications on pre-existing mounts require review of the existing
-      mount under this article, which imposes a review scope requirement on the facility that code can apply; it
-      is not purely procedural since it sets what the design must be reviewed against.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -8012,10 +7909,7 @@ labels:
   325-29.17C:
     label: not_for_checking
     topic: site_features
-    reason: The piece sets a requirement that collocation applications on certain mounts require review of the existing
-      mount under this article, which code can check as a procedural trigger tied to a design element. It is not
-      purely procedural since it imposes a review requirement on the mount; labeling as rule per the unsure-choose-rule
-      guidance.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -8089,10 +7983,7 @@ labels:
   325-29.18A:
     label: not_for_checking
     topic: site_features
-    reason: Requires each carrier to file annual registry information including height, hazardous materials list,
-      and a 24/7 emergency contact; these are checkable filing requirements tied to the facility, though the filing
-      is an administrative submission. Labeled rule because it sets concrete obligations a design/site must meet
-      and is checkable from documents.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -8131,9 +8022,7 @@ labels:
   325-29.18C:
     label: not_for_checking
     topic: site_features
-    reason: Subsection C requires the owner or operator to conduct and report inspections at fixed intervals (every
-      five years for mounts, annually for RF radiation) and to keep and provide maps and records, which code can
-      check for compliance with the stated schedule and submissions.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 107
@@ -8154,8 +8043,7 @@ labels:
   325-29.18D:
     label: not_for_checking
     topic: site_features
-    reason: 'The piece sets a measurable requirement: a PWSF out of service for 12 continuous months is deemed abandoned,
-      and its owner must remove it within 90 days of notice. Code can check these time periods against records.'
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 108
@@ -8175,9 +8063,7 @@ labels:
   325-29.18E:
     label: not_for_checking
     topic: site_features
-    reason: The piece says a PWSF shall be registered as a hazardous facility if petroleum products fuel power supplies
-      or toxins are contained in equipment, which is a requirement a design can be checked against (presence of
-      petroleum or toxins). It is not a judgment call, so it is a rule rather than a flag.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 108
@@ -8270,8 +8156,7 @@ labels:
   325-29.19C:
     label: not_for_checking
     topic: site_features
-    reason: The piece states a requirement that a PWSF meeting FCC Guidelines shall not be conditioned or denied
-      for RF impacts; compliance is checkable by whether the facility meets the FCC Guidelines, a measurable standard.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 108
@@ -8328,8 +8213,7 @@ labels:
   325-29.21:
     label: not_for_checking
     topic: site_features
-    reason: The piece is only a section heading with no requirement text, so it sets nothing a design must meet;
-      the substantive lighting rules would sit in the piece's subsections.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 109
@@ -8467,8 +8351,7 @@ labels:
   325-29.24:
     label: not_for_checking
     topic: parking_and_loading
-    reason: The piece is only a section heading with no requirement text, so it sets nothing a design must meet;
-      the substantive rules would sit in its subsections.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 110
@@ -8523,9 +8406,7 @@ labels:
   325-29.25:
     label: not_for_checking
     topic: site_features
-    reason: The piece requires liability insurance of at least $1,000,000 per occurrence and $3,000,000 aggregate
-      with no pollution exclusion, which code can check from the policy documentation. It is a measurable requirement
-      a tower facility must meet, not a procedure alone.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 110
@@ -8634,9 +8515,7 @@ labels:
   325-29.27D:
     label: not_for_checking
     topic: administration
-    reason: The piece creates a private right of action to remove a facility whose RF emissions exceed limits, which
-      is an enforcement remedy rather than a measurable design requirement. Because it ties removal to an emissions
-      finding that a person must make, it is kept for architect review rather than dropped.
+    reason: "Revised from flag by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 111
@@ -8708,8 +8587,7 @@ labels:
   325-32:
     label: not_for_checking
     topic: dimensions
-    reason: The piece is only a section heading with no requirement text; it sets no requirement a design must meet
-      by itself.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 112
@@ -8779,8 +8657,7 @@ labels:
   325-33:
     label: not_for_checking
     topic: nonconforming
-    reason: The piece is only a section heading with no requirement text; it points to nonconforming use rules that
-      would be labeled separately.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 112
@@ -8885,8 +8762,7 @@ labels:
   325-34:
     label: not_for_checking
     topic: nonconforming
-    reason: The piece is only a section heading with no requirement text; it names the subject but sets no requirement
-      a design must meet.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 112
@@ -9157,9 +9033,7 @@ labels:
   325-39B:
     label: not_for_checking
     topic: nonconforming
-    reason: The piece sets a requirement ('shall be renewed, changed or extended without a certificate of occupancy')
-      that code can check against whether a certificate of occupancy exists for the nonconforming use. It is a rule,
-      not a procedure, because it limits what a design or use may do.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 116
@@ -9230,9 +9104,7 @@ labels:
   325-40C:
     label: not_for_checking
     topic: dimensions
-    reason: Section C sets binding tests for variances, including required showings for use variances and a mandatory
-      minimum-variance standard for area variances. Some parts need judgment, such as neighborhood character, but
-      the piece also sets measurable requirements like the two-year construction deadline, so it is labeled rule.
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 122
@@ -9319,9 +9191,7 @@ labels:
   325-41E:
     label: not_for_checking
     topic: procedures
-    reason: 'The piece sets a time limit on zoning permits: a permit becomes void if no building permit is obtained
-      or construction is not substantially completed within two years, and it may be renewed only once. Code can
-      check the dates, so it is a rule even though it sits in a procedures section.'
+    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 124
@@ -9410,10 +9280,7 @@ labels:
   325-42B:
     label: not_for_checking
     topic: districts_and_map
-    reason: The piece states an intent about controlling residential-to-nonresidential transition and avoiding negative
-      effects, which is a purpose statement with no measurable requirement; deciding whether a design meets 'strictly
-      limited' and 'avoided' needs judgment. It also points to §325-44A, but the requirement itself is judged rather
-      than measured.
+    reason: "Revised from flag by review: A statement of purpose or intent, not a design requirement. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 126
@@ -9622,9 +9489,7 @@ labels:
   325-45.1F:
     label: reference
     topic: districts_and_map
-    reason: Although much of this piece is a list of cross-references, it sets a requirement a design must meet
-      by stating which Chapter 325 sections apply in the CR and MU districts and that unlisted sections do not apply
-      there, which code can check against the district.
+    reason: "Revised from rule by review: Sets nothing itself: a list or lead-in that points to the requirements. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 129
@@ -9694,8 +9559,7 @@ labels:
   325-45.2C:
     label: not_for_checking
     topic: districts_and_map
-    reason: The piece is only a heading naming the Collegetown Area Form Districts with a footnote marker; it sets
-      no requirement a design must meet and points to nothing substantive itself.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 133
@@ -9784,8 +9648,7 @@ labels:
   325-45.3:
     label: not_for_checking
     topic: uses
-    reason: The piece is only a section heading that names the subject of allowed uses and sets no requirement itself.
-      Rules that depend on it would sit in the section's body, so it is kept as a reference rather than dropped.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 160
@@ -9805,8 +9668,7 @@ labels:
   325-45.3A:
     label: not_for_checking
     topic: uses
-    reason: The piece is a heading that introduces the Use Table and points to a separate table holding the actual
-      use permissions, so it sets no requirement itself; the footnote and amendment note are not requirements.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 160
@@ -9875,8 +9737,7 @@ labels:
   325-45.5:
     label: not_for_checking
     topic: uses
-    reason: The piece is only a section heading with no requirement text; it names the subject of the following
-      provisions but sets no requirement a design must meet.
+    reason: "Revised from reference by review: A heading with no text of its own; its content is in its subsections. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 162

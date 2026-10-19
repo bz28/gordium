@@ -96,3 +96,31 @@ def test_the_file_must_name_its_document_and_match_the_pdf_version(base):
     old = copy.deepcopy(header) | {"sha256": "0" * 64}
     assert "different version" in validate_labels({"document": LAW, "labels": {}}, ctx, old, pieces)[0]
     assert "exactly 'document' and 'labels'" in validate_labels({"labels": {}}, ctx, header, pieces)[0]
+
+
+REV = {"from": "reference", "by": "Claude (review)", "date": datetime.date(2026, 10, 19), "why": "sets a limit"}
+
+
+@pytest.mark.parametrize("revised, problem", [
+    ("from reference", "'revised' must be a list"),
+    ([REV | {"extra": 1}], "each revision needs exactly from, by, date, why"),
+    ([{k: v for k, v in REV.items() if k != "date"}], "each revision needs exactly"),
+    ([REV | {"from": "maybe"}], "not a label"),
+    ([REV | {"why": " "}], "by and why must be text"),
+    ([REV | {"date": "2026-10-19x"}], "must be a date"),
+    ([REV | {"from": "rule"}], "a revision must change it"),                 # rule -> rule changes nothing
+])
+def test_bad_revisions_are_rejected(base, revised, problem):
+    assert any(problem in p for p in check(base, {"325-16C": entry(base, revised=revised)}))
+
+
+def test_a_revision_is_recorded_and_frozen_at_approval(base):
+    ctx, _, _ = base
+    assert check(base, {"325-16C": entry(base, revised=[REV])}) == []
+    there_and_back = [REV | {"from": "rule"}, REV]                             # rule -> reference -> rule is fine
+    assert check(base, {"325-16C": entry(base, revised=there_and_back)}) == []
+    approved = entry(base, revised=[REV], status="approved", approved_by="jane", approved_on=datetime.date(2026, 10, 20))
+    approved["approved_hash"] = approval_hash(approved | {"id": "325-16C"}, ctx, LABEL_APPROVED)
+    assert check(base, {"325-16C": approved}) == []
+    assert any("changed since it was approved" in p
+               for p in check(base, {"325-16C": approved | {"revised": [REV | {"why": "other"}]}}))

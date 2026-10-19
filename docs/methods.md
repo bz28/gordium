@@ -60,7 +60,8 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
   - First prompt, 28 pieces with an answer key: 25/28, then 26/28 after guide fixes.
   - Independent review of all 399 rule/flag/reference labels: 354 correct (89%); 4 dangerous misses (a limit hidden in a definition), 41 minor.
   - Improved prompt (role, purpose, process, line citations) on the 100 pieces with known answers (chosen because the first prompt failed them): 70/100; 2 dangerous misses left (kitchen, dwelling unit), the rest procedures over-labeled as rules (safe direction).
-- **The committed labels:** the AI's answers plus 73 reviewer corrections, each recorded in `revised: {from, by, date, why}`.
+- **The committed labels:** Haiku's answers plus 69 corrections made by an AI review (Claude, reading every rule, flag and reference label against the text), each recorded in `revised: {from, by, date, why}` with the reason rewritten for the new label. They are still drafts: architects approve. (Four further corrections were undone after the principle below showed the AI had been right.)
+- **Category vs limit:** a definition whose number sorts things into categories (a kitchen is 60 sq ft or more; an adult day-care home serves up to six adults) is reference: rules use it to classify. A definition that caps what a design may do ("a maximum of six units may be attached", "not more than two unrelated individuals is permitted") is a rule. The test: does it forbid or cap something, or only say what to call it?
 - **Weaknesses:** definitions with embedded limits remain the hardest case; procedures get over-labeled as rules.
 - **Improve:** a second, independent AI pass on every non-rule piece asking only "does this set a requirement?"; few-shot examples from another city's code (never from the answer key); compare models on the known-answer set.
 
@@ -69,7 +70,7 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Requirement-word net:** every piece labeled reference whose text uses requirement wording (shall not, must, maximum, minimum, not less than, "No … shall", in conformity, …) goes on the review list, whatever the AI said.
 - **Review list:** every not_for_checking label, every reference with requirement words, every piece a rule or definition cites.
 - **Coverage report:** every line of the law, its piece and its label.
-- **Weaknesses:** the word net only catches listed phrasings; it missed "limited to" and "a maximum of" until widened. It's a backstop, not the main defense.
+- **Weaknesses:** the word net only catches the phrasings it knows. It started with exact phrases and missed "a maximum of", "No … shall" and "less than"; it now matches patterns (any "more/less/fewer/greater than", "exceed/exceeding", "No" plus up to six words then "shall", "limited to" but not "not limited to"). It also flags category definitions (false alarms, by design). It's a backstop, not the main defense.
 - **Improve:** the second AI pass above; feed the net's misses back into the word list after each review.
 
 ## 8. Rule format and the formula language (code, PR 1)

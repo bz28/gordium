@@ -95,11 +95,11 @@ def _label_problems(key, entry, ctx: Context, pieces: dict[str, dict], pdf_sha: 
             elif isinstance(lines, list) and len(lines) == 2 and all(type(n) is int for n in lines) \
                     and not {(page, lines[0]), (page, lines[1])} <= owned:
                 p.append(f"quote on p.{page} lines {lines} is outside this piece")
-    p += _revision_problems(entry.get("revised", []))
+    p += _revision_problems(entry.get("revised", []), entry.get("label"))
     return p + _approval_problems(entry | {"id": key}, ctx, LABEL_APPROVED)
 
 
-def _revision_problems(revised) -> list[str]:
+def _revision_problems(revised, label) -> list[str]:
     """A reviewer's correction: [{from, by, date, why}], oldest first; the current label is the latest."""
     if not (isinstance(revised, list) and all(isinstance(r, dict) for r in revised)):
         return ["'revised' must be a list of {from, by, date, why}"]
@@ -113,4 +113,6 @@ def _revision_problems(revised) -> list[str]:
             p.append("a revision's by and why must be text")
         elif not isinstance(r["date"], datetime.date):
             p.append("a revision's date must be a date (YYYY-MM-DD)")
+    if not p and revised and revised[-1]["from"] == label:
+        p.append(f"the last revision is from {label!r} to the same label: a revision must change it")
     return p

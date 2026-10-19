@@ -85,11 +85,11 @@ def cited_by(j: Path, file: str, pieces: dict[str, dict]) -> dict[str, list[str]
 
 # Words that put a requirement on a design. Deliberately broad: a false alarm costs a reviewer a minute,
 # a missed requirement could let a design pass that should fail.
-REQUIREMENT_WORDS = re.compile(r"\b(shall not|shall be not|shall have|shall be located|shall conform|"
-                               r"shall be in conformity|shall be deemed|shall be considered|must|may not|"
-                               r"not less than|not more than|no more than|no less than|not to exceed|exceeds?|"
-                               r"at least|at most|is required|are required|prohibited|maximum|minimum|"
-                               r"no(?:\s+[\w-]+){1,3}\s+shall)\b", re.I)    # "No structure shall ..."
+REQUIREMENT_WORDS = re.compile(
+    r"\b(shall not|shall be not|shall have|shall be located|shall conform|shall be in conformity|shall be deemed|"
+    r"shall be considered|must|may not|not to exceed|exceed(?:s|ed|ing)?|(?:more|less|fewer|greater) than|"
+    r"at least|at most|is required|are required|prohibited|maximum|minimum|(?<!not )limited to|"
+    r"no(?:\s+[\w/-]+){1,6}\s+shall)\b", re.I)    # patterns, not instances: "No structure shall", "less than 60"
 
 
 def requirement_words(rows: list[dict], piece: dict) -> list[str]:

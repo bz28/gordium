@@ -252,18 +252,24 @@ def test_review_list_shows_not_for_checking_and_cited_pieces(law):
                         "sources": [{"quote": "This chapter shall be known"}]},
               "325-16C": {"label": "rule", "reason": "Height bonus.", "status": "draft", "open_questions": ["?"]},
               "325-3B:building_area": {"label": "reference", "reason": "A definition.", "status": "draft"},
-              "325-3B:grade_plane": {"label": "reference", "reason": "A definition.", "status": "draft"}}
+              "325-3B:height_of_building": {"label": "reference", "reason": "A definition.", "status": "draft"}}
     text = coverage.review_list(header, pieces, labels, {"325-16C": ["R-1b.height"]}, rows)
     rest, cited = text.split("## Cited by")
     nfc, worded = rest.split("## Labeled reference but using requirement words")
     assert "| 325-3B:building_area |" in worded and "shall be located" not in nfc          # "neither ... shall be located"
-    assert "325-3B:grade_plane" not in worded                                # a definition with no requirement
+    assert "325-3B:height_of_building" not in worded                         # a definition with no requirement
     more = {pid: {"label": "reference", "reason": "x", "status": "draft"}
             for pid in ("325-3B:one_family_attached_dwelling", "325-29.7A", "325-15B")}
     worded = coverage.review_list(header, pieces, labels | more, {}, rows).split("## Labeled reference but")[1]
     assert "| 325-3B:one_family_attached_dwelling |" in worded and "maximum" in worded   # "A maximum of six..."
     assert "| 325-29.7A |" in worded and "no pwsf shall" in worded                       # "No PWSF shall ..."
     assert "| 325-15B |" in worded and "shall be in conformity" in worded
+    pattern = {pid: {"label": "reference", "reason": "x", "status": "draft"}
+               for pid in ("325-3B:kitchenette", "325-3B:short_term_rental", "325-29.8", "325-29.7A")}
+    worded = coverage.review_list(header, pieces, labels | pattern, {}, rows).split("## Labeled reference but")[1]
+    for pid, words in [("325-3B:kitchenette", "less than"), ("325-3B:short_term_rental", "less than"),
+                       ("325-29.8", "exceeding")]:
+        assert f"| {pid} |" in worded and words in worded, pid             # patterns, not the listed instances
     assert "| 325-1 |" in nfc and "This chapter shall be known" in nfc and "325-16C" not in nfc
     assert "| 325-16C |" in cited and "draft · open questions" in cited and "R-1b.height |" in cited
 
@@ -404,3 +410,30 @@ def test_answers_must_agree_with_the_requirements_they_list(law, bad, why):
     client = FakeClient(bad, GOOD)
     entry, records = run(law, client)
     assert why in records[0]["problem"] and entry["label"] == "rule" and len(records) == 2
+
+
+def test_page_breaks_are_shown_and_a_citation_across_one_is_split(law):
+    ctx, header, pieces, rows = law
+    message = labeler.piece_message(pieces["325-29.18D"], rows)                 # L1 on p.107, L2 on p.108
+    assert "L1: " in message and "--- page 108 ---\nL2: " in message
+    first_line = labeler.numbered_lines(rows, pieces["325-29.18D"])[0][2]
+    across = GOOD | {"requirements": [{"first_line": 1, "last_line": 2}], "quote": first_line}
+    split = across | {"requirements": [{"first_line": 1, "last_line": 1}, {"first_line": 2, "last_line": 2}]}
+    entry, records = run(law, FakeClient(across, split), pid="325-29.18D")
+    assert "crosses the page break after L1; cite it as two parts, L1-L1 and L2-L2" in records[0]["problem"]
+    assert {s["page"] for s in entry["sources"]} == {107, 108}                  # the split answer is accepted
+
+
+def test_a_repeated_cited_line_asks_for_more_lines_not_a_longer_quote(law, monkeypatch):
+    ctx, header, pieces, rows = law
+    lines = labeler.numbered_lines(rows, pieces["325-16C"])
+    monkeypatch.setattr(labeler, "find_quote", lambda q, *a: (None, "the quote appears more than once in this piece"))
+    _, why = labeler.cited_lines({"first_line": 1, "last_line": 1}, lines, pieces["325-16C"], LAW, ctx)
+    assert "include one more line" in why and "quote more words" not in why
+
+
+def test_a_rules_sources_list_each_place_once(law):
+    twice = GOOD | {"requirements": [{"first_line": 1, "last_line": 2}, {"first_line": 1, "last_line": 2}]}
+    entry, _ = run(law, FakeClient(twice))
+    places = [(s["page"], tuple(s["lines"])) for s in entry["sources"]]
+    assert len(places) == len(set(places)) == 2                               # L1-L2 once, plus the quote's line
