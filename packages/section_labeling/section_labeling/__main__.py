@@ -140,13 +140,12 @@ def _client():
 
 def _estimate_or_say_why(j, file, todo, model, client) -> dict | None:
     """The estimate, or None after printing why the API refused to count (a bad key, a missing workspace).
-    Only the API's own errors are caught; anything else is a real problem and raises."""
-    if client is None:
-        return estimate(j, file, todo, model, client)
-    import anthropic
+    Only the API's own errors are caught; anything else is a real problem and raises. The error class is
+    taken from the SDK only if it's loaded (a real client exists only then); without it nothing is caught."""
+    api_error = getattr(sys.modules.get("anthropic"), "APIError", ())
     try:
         return estimate(j, file, todo, model, client)
-    except anthropic.APIError as e:              # the API's own message; it never contains the key
+    except api_error as e:                       # the API's own message; it never contains the key
         print(f"  the API refused to count tokens, so nothing was sent: {getattr(e, 'message', e)}")
         return None
 

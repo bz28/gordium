@@ -46,6 +46,12 @@ class FakeClient:
 
 
 @pytest.fixture(autouse=True)
+def no_sdk(monkeypatch):
+    """Run every test as CI does, without the Anthropic SDK installed; a test that needs it stubs it."""
+    monkeypatch.setitem(sys.modules, "anthropic", None)
+
+
+@pytest.fixture(autouse=True)
 def private_ledger(tmp_path, monkeypatch):
     """Every test spends against its own empty ledger, never the real one in the home folder."""
     monkeypatch.setattr(cli, "LEDGER", tmp_path / "ledger.json")
