@@ -432,6 +432,10 @@ def test_cite_helper(tmp_path, monkeypatch, capsys):
     assert "more than once" in capsys.readouterr().out
     assert cli.cite([place, "doc.pdf", "9", "x"]) == 1 and "no page 9" in capsys.readouterr().out
     assert cli.cite([place, "typo.pdf", "2", "x"]) == 1 and "not in sources.yaml" in capsys.readouterr().out
+    sources = tmp_path / "regulations/jurisdictions" / place / "1_source_documents/sources.yaml"
+    sources.write_text(sources.read_text() + "    quotable: false\n    not_quotable_because: two columns\n")
+    assert cli.cite([place, "doc.pdf", "2", "Rear yard minimum twenty feet"]) == 1   # same answer as validation
+    assert "isn't quotable yet: two columns" in capsys.readouterr().out
     assert cli.cite(["ny/nowhere", "doc.pdf", "2", "x"]) == 1 and "no jurisdiction" in capsys.readouterr().out
 
 

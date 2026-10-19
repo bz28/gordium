@@ -144,6 +144,14 @@ SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256",
                  "adopted_on", "created_on", "quotable", "not_quotable_because"}
 
 
+def not_quotable(entry: dict) -> str | None:
+    """Why a listed document can't be quoted, or None. Fails closed: only `quotable` true or unset
+    allows quotes. Shared by validation and the cite helper so they never disagree."""
+    if entry.get("quotable", True) is not True:
+        return f"isn't quotable yet: {entry.get('not_quotable_because') or 'see sources.yaml'}"
+    return None
+
+
 def _source_entry_problems(entry: dict) -> list[str]:
     """sources.yaml is edited by hand, so its gates must fail closed: no unknown keys (a typo could
     drop a gate), `quotable` is true or false, and a document marked not quotable says why."""
@@ -343,8 +351,8 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
         name, page, lines, quote = s.get("file"), s.get("page"), s.get("lines"), s.get("quote")
         if not isinstance(name, str) or name not in ctx.sources:
             p.append(f"source file {name!r} is not in sources.yaml")
-        elif ctx.sources[name].get("quotable", True) is not True:   # fail closed: only an explicit or default yes
-            p.append(f"source {name} isn't quotable yet: {ctx.sources[name].get('not_quotable_because') or 'see sources.yaml'}")
+        elif reason := not_quotable(ctx.sources[name]):
+            p.append(f"source {name} {reason}")
         elif name in ctx.file_problems:
             p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
         elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and isinstance(lines, list)
