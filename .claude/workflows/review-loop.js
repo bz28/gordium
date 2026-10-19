@@ -10,6 +10,8 @@ export const meta = {
 // args = {
 //   base: 'origin/main',            // what the branch is compared against (fetch first!)
 //   head: 'HEAD',                   // the branch tip under review
+//   uncommitted: false,             // true: review the working tree (committed + uncommitted changes),
+//                                   //   so a large change is reviewed before Ben is asked to commit it
 //   round: 1,                       // 1-based; round >= 2 re-checks priorConfirmed
 //   priorConfirmed: [...],          // findings confirmed in the previous round (now supposedly fixed)
 //   sinceLastRound: '<sha>',        // round >= 2: the commit the previous round reviewed, so the reviewer
@@ -30,6 +32,9 @@ cfg = cfg || {}
 
 const BASE = cfg.base || 'origin/main'
 const HEAD = cfg.head || 'HEAD'
+const UNCOMMITTED = cfg.uncommitted === true
+// The diff commands every agent runs. With uncommitted work, compare against the working tree (no HEAD).
+const WHOLE = UNCOMMITTED ? `${BASE}` : `${BASE}...${HEAD}`
 const ROUND = cfg.round || 1
 const PRIOR = cfg.priorConfirmed || []
 const SINCE = cfg.sinceLastRound || null
@@ -122,7 +127,7 @@ ${JSON.stringify(PRIOR, null, 2)}
 
 Two extra obligations this round:
 1. For EACH prior finding, verify it is actually fixed — not shallowly. Read the fix. A guard copied from a sibling's *shape* without its *substance*, an exception check on the wrong type, a fix that covers the reported instance but not the pattern — those are "shallow". Report every prior finding in prior_status.
-2. Fixes introduce bugs. Run \`git diff ${SINCE}..${HEAD}\` to see exactly what changed since the last round and read THAT code hardest. Two fixes that are each fine can combine into a new defect.
+2. Fixes introduce bugs. Run \`git diff ${UNCOMMITTED ? SINCE : `${SINCE}..${HEAD}`}\` to see exactly what changed since the last round and read THAT code hardest. Two fixes that are each fine can combine into a new defect.
 ` : `
 THIS IS ROUND 1. prior_status should be an empty array.
 `
@@ -132,10 +137,10 @@ WHAT THE BRANCH IS TRYING TO DO (author's intent, treat as a claim to check, not
 ${INTENT}
 
 HOW TO READ IT:
-- \`git diff ${BASE}...${HEAD}\` is the change. \`git diff --stat ${BASE}...${HEAD}\` lists touched files.
+- \`git diff ${WHOLE}\` is the change. \`git diff --stat ${WHOLE}\` lists touched files.${UNCOMMITTED ? ' It includes UNCOMMITTED work: read files from disk, and run `git status` for new untracked files (they are part of the change).' : ''}
 - After the diff, read EACH touched file end-to-end (for files > ~500 lines: the touched regions plus their direct callers/peers). Then grep for every caller of anything whose signature, return shape, or behavior changed, and check those callers still work.
 - Do not guess from names. Open the file.
-- Stay inside this branch: report only defects in code this branch (\`${BASE}...${HEAD}\`) adds or changes, or that its changes break. A problem in code it doesn't touch belongs to the branch that added it: mention it as pre-existing, don't report it as a finding.
+- Stay inside this branch: report only defects in code this branch (\`${WHOLE}\`) adds or changes, or that its changes break. A problem in code it doesn't touch belongs to the branch that added it: mention it as pre-existing, don't report it as a finding.
 ${priorBlock}
 ${CHECKLIST}
 
@@ -145,7 +150,7 @@ Two-pass rule: after your first sweep, re-verify every finding by re-reading the
 function verifyPrompt(f, i) {
   return `${WHERE}You are an independent skeptic (reviewer #${i + 1}). Your job is to REFUTE the finding below by reading the actual code — not to agree with it.
 
-BRANCH: compare \`${BASE}...${HEAD}\` (\`git diff ${BASE}...${HEAD} -- ${f.file}\` shows what changed in the cited file).
+BRANCH: compare \`${WHOLE}\` (\`git diff ${WHOLE} -- ${f.file}\` shows what changed in the cited file${UNCOMMITTED ? '; the change may be uncommitted or a new untracked file, so read it from disk' : ''}).
 
 FINDING
   file: ${f.file}${f.line ? ':' + f.line : ''}
@@ -166,7 +171,7 @@ if (VERIFY_ONLY) {
   findings = VERIFY_ONLY
   priorStatus = []
 } else {
-  log(`Round ${ROUND}: reviewing ${BASE}...${HEAD}; ${SKEPTICS} skeptics/finding, strict.${ROUND >= 2 ? ` Re-checking ${PRIOR.length} prior finding(s).` : ''}`)
+  log(`Round ${ROUND}: reviewing ${WHOLE}${UNCOMMITTED ? ' (including uncommitted work)' : ''}; ${SKEPTICS} skeptics/finding, strict.${ROUND >= 2 ? ` Re-checking ${PRIOR.length} prior finding(s).` : ''}`)
   phase('Review')
   const review = await agent(reviewPrompt(), { label: `review:round${ROUND}`, phase: 'Review', schema: FINDINGS_SCHEMA })
   if (!review) throw new Error('review-loop: the reviewer returned no result, so this round did not run')
@@ -206,6 +211,7 @@ log(`Round ${ROUND}: ${confirmed.length} confirmed, ${refuted.length} refuted.`)
 return {
   round: ROUND,
   mode: VERIFY_ONLY ? 'verify-only' : 'review',
+  uncommitted: UNCOMMITTED,
   confirmed,
   refuted,
   priorStatus,

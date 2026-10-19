@@ -19,7 +19,7 @@ Workflow({ scriptPath: ".claude/workflows/review-loop.js", args: {
 }})
 ```
 
-For a stacked PR, `base` is its parent branch, so only this PR's changes are reviewed. **Stay inside this PR:** a finding in code that a lower PR added is not fixed here; send it to that PR's own loop (run a `verifyOnly` round there), so each PR's history stays its own.
+**Large or design-level changes are reviewed before Ben is asked to commit them:** pass `uncommitted: true`, and the round reads the working tree (committed + uncommitted, including new files). Small fixes from a round are committed first and re-checked by the next round. For a stacked PR, `base` is its parent branch, so only this PR's changes are reviewed. **Stay inside this PR:** a finding in code that a lower PR added is not fixed here; send it to that PR's own loop (run a `verifyOnly` round there), so each PR's history stays its own.
 
 It returns `{ confirmed, refuted, priorStatus, stats }`. **Show both lists**, so nothing is quietly buried. Round ≥ 2 also returns `priorStatus` (`fixed` / `shallow` / `unfixed` per prior finding); `shallow` or `unfixed` counts as a confirmed finding this round.
 
