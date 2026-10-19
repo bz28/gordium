@@ -250,27 +250,38 @@ def _cited_lines(sources: list[dict], ctx: "Context") -> set[tuple]:
     return out
 
 
+_PARTS = r"(?:\s*\([0-9a-z]{1,4}\))*"                                    # (3)(b)
+_REF = (r"(?:(?:[a-z]-)?\d+[\d.\-]*[a-z]{0,2}(?![a-z])" + _PARTS +           # 325-20d(3)(b), 81-a, c-54
+        r"|[a-z]?\([0-9a-z]{1,4}\)" + _PARTS +                              # b(7), (2)
+        r"|[a-z](?![a-z]))")                                                # subsection c
+_REFS = rf"{_REF}(?:\s*(?:,|and|or|through|to|&)\s*(?:§+\s*)?{_REF})*"   # §§ 325-8 and 325-9; b(7) to b(10)
 NOT_A_LIMIT = re.compile(
-    r"\[fn[^\]]*\]"                                           # a footnote marker
-    r"|\[(?:amended|added|repealed)[^\]]*\]"                  # an amendment note
-    r"|(?:^|(?<=[.:;]))\s*(?:\(\s*(?:\d+|[a-z])\s*\)\s*)+"    # list markers opening the text or a sentence/clause
-    r"|§+\s*\d+[\d.\-]*(?:\s*\([0-9a-z]+\))*"                 # a section reference: §325-8(b)(1)
-    r"|\b(?:columns?|chapters?|articles?|ord\.\s*no\.|local law no\.)\s*[\d.\-]+(?:\s*(?:,|and|or)\s*[\d.\-]+)*")
+    r"\[fn[^\]]*\]"                                                    # a footnote marker
+    r"|\[(?:amended|added|repealed)[^\]]*\]"                           # an amendment note
+    r"|(?:^|(?<=[.:;]))\s*(?:\(\s*(?:\d+|[a-z])\s*\)\s*)+"             # list markers opening the text or a sentence/clause
+    rf"|\b(?:sections?\s+)?\d+\s*u\.\s*s\.\s*c\.\s*(?:§+\s*)?{_REFS}"  # a federal law: Section 47 U.S.C. 332(c)(7)
+    rf"|§+\s*{_REFS}"                                                  # a section reference: § 325-20D(3)(b)
+    rf"|\b(?:sub)?(?:sections?|paragraphs?|divisions?)\s+{_REFS}"      # Subsection B(7), Subsections (1), (2) and (3)
+    rf"|\b(?:columns?|chapters?|articles?|ord(?:inance)?\.?\s*nos?\.|local laws?\s*no\.)\s*{_REFS}")
 NUMBER_WORDS = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
                 "eight": 8, "nine": 9, "ten": 10, "twelve": 12, "twenty": 20, "fifty": 50, "hundred": 100}
 
 
-def source_numbers(text: str) -> set[float]:
+def source_numbers(text: str, percent_as_number: bool = True) -> set[float]:
     """Numbers written in a quote or a cell: digits ("6,000", "2.5", "3/2" gives 3 and 2) and whole number
     words ("three", not the "two" of "two-family"). Numbers that only label or point aren't limits and
     don't count: footnote markers ([fn16], and "(16)" opening a note), list numbers ("(3)" opening a sentence
     or clause), section, column, chapter and ordinance references (§325-16, Column 12, Chapter 228,
-    [Amended 6-5-2013 by Ord. No. 2013-15]). A percent also counts divided by 100: "25%" supports 0.25."""
+    [Amended 6-5-2013 by Ord. No. 2013-15]). A percent counts divided by 100: "25%" supports 0.25, and also
+    25 unless percent_as_number is False (a typed number in a draft must be the fraction)."""
     text = NOT_A_LIMIT.sub(" ", text.lower())
+    percent = r"(\d[\d,]*(?:\.\d+)?)\s*(?:%|percent\b)"
+    fractions = {float(n.replace(",", "")) / 100 for n in re.findall(percent, text)}
+    if not percent_as_number:
+        text = re.sub(percent, " ", text)
     found = {float(n.replace(",", "")) for n in re.findall(r"\d[\d,]*(?:\.\d+)?|(?<![\w.])\.\d+", text)}
     found |= {float(NUMBER_WORDS[w]) for w in re.findall(r"(?<![\w-])([a-z]+)(?![\w-])", text) if w in NUMBER_WORDS}
-    percents = re.findall(r"(\d[\d,]*(?:\.\d+)?)\s*(?:%|percent\b)", text)
-    return found | {float(n.replace(",", "")) / 100 for n in percents}
+    return found | fractions
 
 
 def _number_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[str]:

@@ -27,8 +27,8 @@ cell (`{file, page, cell: {section, row, column}}`): R-1b gets `front_yard >= 25
 A cell that doesn't have the shape the template expects (another count of numbers, other footnotes, a
 "-") is never filled: that district's rule goes to a person (the log's `unresolved`). Every footnote a filled cell
 carries must be quoted (and applied): "25%/ 50 ft [fn16]" needs note 16, "But not less than 20 ft." A chart quote must
-be a footnote printed under a table, never a table row, and a chart-section template with no slots may not contain
-numbers, so a row's number can reach a rule only through a slot filled from that district's own cell. Example: R-2C's lot
+be a footnote printed under a table, never a table row, so a cell's number can reach a rule only through a slot
+filled from that district's own cell. A number the AI types (not a slot) must be written in the template's own evidence: a quoted sentence of the law, a footnote of one of its slots, or a slot's row label ("First three bed or sleeping rooms"). A footnote of some other cell doesn't count, a number that only labels or points ("(3)", "§ 325-20D(1)", "Column 12") doesn't count, and a percent counts only as its fraction (25% is 0.25). Example: R-2C's lot
 coverage "35%/40% /50% [fn12]" depends on the use, so a one-number template can't fill it.
 
 ## Every draft is checked

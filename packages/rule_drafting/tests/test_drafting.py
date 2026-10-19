@@ -74,8 +74,8 @@ def unit(inputs, uid):
     return next(u for u in inputs.units() if u["id"] == uid)
 
 
-def run(inputs, client, uid="chart-p3-yard_dimensions", budget=None):
-    u, records = unit(inputs, uid), []
+def run(inputs, client, uid="chart-p3-yard_dimensions", budget=None, records=None):
+    u, records = unit(inputs, uid), [] if records is None else records
     context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
     result = drafter.draft_unit(client, u, context, "SYSTEM", inputs.law, inputs.ctx, inputs.columns, inputs.cells,
                                 inputs.notes, records.append, budget=budget)
@@ -331,3 +331,77 @@ def test_no_example_in_the_instructions_has_the_shape_of_a_graded_rule(inputs):
     """The drafter's instructions must not show the answer key's reading of the height bonus (X + 10% of X)."""
     import re
     assert not re.search(r"(\d+(?:\.\d+)?) \+ 0?\.1 \* \1\b", inputs.system())
+
+
+def chart_quote(text, page=3):
+    return {"document": "chart", "page": page, "piece": "", "text": text}
+
+
+@pytest.mark.parametrize("uid, measure, op, n, quote", [
+    # note 7 is about lot area per unit: its "1-3" says nothing about stories
+    ("chart-p3-maximum_building_height", "stories", "<=", 3,
+     "(7) For the first 1-3 units; +750 sf for each additional unit; +500 sf per room let for profit."),
+    # note 13's 50% is 0.5 of an area, not 50 ft of width
+    ("chart-p3-minimum_lot_width", "lot_width", ">=", 50, None),
+])
+def test_a_typed_number_backed_only_by_another_cells_footnote_is_rejected(inputs, uid, measure, op, n, quote):
+    if quote is None:
+        quote = next(note["text"] for note in inputs.notes[3].values() if note["text"].startswith("(13)"))
+    worse = n + 1 if op == "<=" else n - 1
+    bad = template("typed", f"{measure} {op} {n}", [], [({measure: str(n)}, "pass"), ({measure: str(worse)}, "fail")],
+                   quotes=[chart_quote(quote)])
+    answer = {"templates": [bad], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid=uid)
+    assert result["rules"] == {} and f"number {n} is typed" in records[0]["problem"]
+
+
+def test_a_typed_number_backed_only_by_a_subsection_reference_is_rejected(inputs):
+    """'§ 325-20D(1)' points to a subsection; its 1 isn't a parking minimum."""
+    bad = template("parking_min", "parking_spaces >= 1", [],
+                   [({"parking_spaces": "1"}, "pass"), ({"parking_spaces": "0"}, "fail")],
+                   quotes=[{"document": "law", "page": 0, "piece": "325-20F",
+                            "text": "No building permit shall be issued unless the requirements of § 325-20D(1) are met."}])
+    answer = {"templates": [bad], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid="325-20F")
+    assert result["rules"] == {} and "number 1 is typed" in records[0]["problem"]
+
+
+def test_a_number_in_a_slots_row_label_may_be_typed(inputs):
+    """'First three bed or sleeping rooms', '4-5 bed or sleeping rooms': the 3 and the 5 are the row labels' own."""
+    rows = ["First three bed or sleeping rooms per dwelling unit", "4-5 bed or sleeping rooms per dwelling unit",
+            "Each additional bed or sleeping room"]
+    parking = template(
+        "parking_one_family",
+        "parking_spaces >= ({first} if sleeping_rooms <= 3 else {mid} + {each} * max(sleeping_rooms - 5, 0))",
+        [slot(name, row, page=14, section="Residential") for name, row in zip(("first", "mid", "each"), rows)],
+        [({"use": "one_family_detached", "sleeping_rooms": "3", "parking_spaces": "{first}"}, "pass"),
+         ({"use": "one_family_detached", "sleeping_rooms": "4", "parking_spaces": "{first}"}, "fail")],
+        applies_when='use == "one_family_detached"')
+    result, records = run(inputs, FakeClient({"templates": [parking], "no_rule_reason": ""}), uid="chart-p14-residential")
+    assert records[0]["problem"] is None
+    assert result["rules"]["R-1b"][0]["check"] == \
+        "parking_spaces >= (1 if sleeping_rooms <= 3 else 2 + 1 * max(sleeping_rooms - 5, 0))"
+
+
+def test_a_footnote_that_isnt_a_number_is_sent_back_not_a_crash(inputs):
+    odd = copy.deepcopy(REAR_YARD)
+    for s in odd["slots"]:
+        s["footnotes"] = ["fn16"]
+    result, records = run(inputs, FakeClient(*[{"templates": [odd], "no_rule_reason": ""}] * 3))
+    assert "must be the note's number" in records[0]["problem"] and result["rules"] == {}
+
+
+def test_a_crash_while_checking_still_records_the_paid_attempt(inputs, monkeypatch):
+    monkeypatch.setattr(drafter, "check_answer", lambda *a, **k: 1 / 0)
+    records = []
+    with pytest.raises(ZeroDivisionError):
+        run(inputs, FakeClient({"templates": [FRONT], "no_rule_reason": ""}), records=records)
+    assert len(records) == 1 and "crashed" in records[0]["problem"] and records[0]["cost_usd"] > 0
+
+
+def test_the_docs_describe_the_typed_number_rule_the_code_enforces():
+    from pathlib import Path
+    root = Path(drafter.__file__).resolve().parents[3]
+    for doc in (root / "packages/rule_drafting/README.md", root / "docs/methods.md"):
+        text = doc.read_text()
+        assert "with no slots may not contain numbers" not in text and "a slot's row label" in text

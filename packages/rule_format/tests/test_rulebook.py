@@ -694,6 +694,27 @@ def test_numbers_can_come_from_number_words_and_row_labels():
     assert source_numbers("(10) See §325-16.") == set()                       # a note's marker and a section number
     assert 3.0 not in source_numbers("(3) In each district, the number of additional feet may not exceed 10% of the height")
     assert source_numbers("as specified in this column and Column 12 [Amended 10-1-2014 by Ord. No. 2014-12]") == set()
+    # references as Chapter 325 writes them (strings from its extracted text)
+    for ref in ("the requirements of § 325-20D(1) are met.", "See § 325-20D(3)(b).", "except as provided in Subsection B(7)",
+                "pursuant to Section 325-16 of this chapter", "in accordance with §§ 325-8 and 325-9",
+                "§ 81-a of the General City Law", "Article 78 of the Civil Practice", "Note: Former Subsection B(9)"):
+        assert source_numbers(ref) == set(), ref
+    assert source_numbers("50% of the lot", percent_as_number=False) == {0.5}   # a typed percent is its fraction
+
+
+def test_no_number_is_left_in_any_reference_in_the_citys_text():
+    """Every '§ ...', 'Section ...', 'Subsection ...' in Chapter 325, up to the next plain word: no number survives."""
+    import json, re
+    from rule_format.rulebook import REPO, source_numbers
+    path = REPO / "regulations/jurisdictions/new_york/ithaca_city/2_extracted_text/chapter_325_zoning_2026-10.jsonl"
+    left = set()
+    for line in path.read_text().splitlines():
+        text = json.loads(line).get("text", "")
+        for m in re.finditer(r"(?i)(?:§+|\bsub(?:section|paragraph)s?\b|\bsections?\b)\s*[\w.\-()§, ]*?(?=\s+[a-z]{3,}\b|$)", text):
+            ref = re.split(r"(?i)\s+(?:zoning|ithaca)\b", m.group(0))[0]           # page headers: "§ 325-16 ZONING § 325-16"
+            if source_numbers(ref) and not re.search(r"(?i)\((?:january|february|march|april|may|june|july|august|september|october|november|december) ", ref):
+                left.add(ref)
+    assert sorted(left) == []
 
 
 def test_a_cell_from_another_districts_column_is_rejected(chart_ctx):

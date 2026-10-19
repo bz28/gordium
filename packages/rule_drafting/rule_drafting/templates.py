@@ -29,6 +29,8 @@ def template_problems(template: dict) -> list[str]:
     defined = [s["name"] for s in template["slots"]]
     p = [f"slot {{{n}}} is used but not defined in 'slots'" for n in sorted(slot_names(template) - set(defined))]
     p += [f"slot {n!r} is defined twice" for n in sorted({n for n in defined if defined.count(n) > 1})]
+    p += [f"slot {s['name']!r}: footnote {f!r} must be the note's number, like \"16\""
+          for s in template["slots"] for f in s["footnotes"] if not re.fullmatch(r"\d+", f)]
     if not re.fullmatch(r"[a-z0-9][a-z0-9_]*", template["id_suffix"]):
         p.append(f"id_suffix {template['id_suffix']!r} must be lowercase_with_underscores")
     return p

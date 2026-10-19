@@ -63,7 +63,8 @@ it has slots) or one rule for every district (when it has none).
   whose cell doesn't have that shape gets no rule and goes to a person. Any other number must be written
   in one of your quotes (a percent like 10% is written 0.1; "three" counts as 3). Work numbers out in the
   formula itself from quoted inputs (0.02 * 1000), never as a result (20). A number you type must be
-  written in a sentence you quote; a number from a chart cell is always a slot, never typed.
+  written in a law sentence you quote, in a footnote of one of your slots, or in a slot's row label; a
+  number from a chart cell is always a slot, never typed. A percent is typed as its fraction (2% is 0.02).
 - Footnotes: a chart cell's footnote marker ([fn16]) points to a note printed under that page's table
   (listed below). Every footnote on a slot's cell, its row label or its section heading has to be quoted,
   and applied in the rule.
@@ -241,13 +242,35 @@ def _footnote_problems(template: dict, sources: list[dict], notes: dict[int, dic
     p = []
     for slot in template["slots"]:
         # the cell's own notes, and the notes on its row label and section heading ("Minimum Lot Size [fn3]")
-        for n in sorted(set(slot["footnotes"]) | footnotes(slot["row"]) | footnotes(slot["section"]), key=int):
+        for n in sorted(set(slot["footnotes"]) | footnotes(slot["row"]) | footnotes(slot["section"]),
+                        key=lambda n: (len(n), n)):
             note = notes.get(slot["page"], {}).get(n)
             if note is None:
                 p.append(f"slot {slot['name']}: footnote {n} isn't under the table on page {slot['page']}")
             elif not any(page == slot["page"] and _within(lines, note["lines"]) for page, lines in quoted):
                 p.append(f"slot {slot['name']}: footnote {n} of {slot['row']!r} isn't quoted: {note['text']!r}")
     return p
+
+
+def slot_notes(template: dict) -> set[tuple[int, str]]:
+    """(page, footnote) for every note on a slot's cell, row label or section heading ("Minimum Lot Size [fn3]")."""
+    return {(slot["page"], n) for slot in template["slots"]
+            for n in set(slot["footnotes"]) | footnotes(slot["row"]) | footnotes(slot["section"])}
+
+
+def _typed_number_problems(template: dict, sources: list[dict], notes: dict[int, dict]) -> list[str]:
+    """A number the drafter types must be written in the template's own evidence: a quoted sentence of the law,
+    a footnote of one of its slots, or a slot's row label ("First three bed or sleeping rooms"). A chart footnote
+    of some other cell proves nothing about this rule, chart cell values reach a rule only through slots, a
+    number that only labels or points ("(3)", "§ 325-20D(1)") doesn't count, and a percent counts only as the
+    fraction it is (25% is 0.25)."""
+    texts = [s["quote"] for s in sources if s.get("file") != CHART_FILE and "quote" in s]
+    texts += [notes[page][n]["text"] for page, n in slot_notes(template) if n in notes.get(page, {})]
+    texts += [slot["row"] for slot in template["slots"]]
+    backed = set().union(*(source_numbers(x, percent_as_number=False) for x in texts))
+    return [f"number {n:g} is typed but isn't written in a quoted law sentence, a footnote of one of its slots or "
+            "a slot's row label; a chart number must be a slot" for n in dict.fromkeys(_typed_numbers(template))
+            if not any(abs(n - b) < 1e-9 for b in backed)]
 
 
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
@@ -270,11 +293,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 proposed[m["name"]] = {"unit": m["unit"], "meaning": m["meaning"]}
         sources, quote_problems = resolve_quotes(t, unit, context, law, ctx, notes)
         p += quote_problems + (_footnote_problems(t, sources, notes) if not quote_problems else [])
-        # A number the drafter types must be written in a sentence it quotes (a footnote's or the law's),
-        # never only in a chart cell: chart numbers reach a rule only through slots filled per district.
-        quoted = set().union(*(source_numbers(s["quote"]) for s in sources if "quote" in s))
-        p += [f"number {n:g} is typed but isn't written in any quoted sentence; a chart number must be a slot"
-              for n in dict.fromkeys(_typed_numbers(t)) if not any(abs(n - q) < 1e-9 for q in quoted)]
+        p += _typed_number_problems(t, sources, notes)
         if p:
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
             continue
@@ -352,7 +371,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
         if budget is not None:
             budget.settle(worst, spent)
         text = next((b.text for b in response.content if b.type == "text"), "")
-        result = None
+        result, crash = None, None
         if response.stop_reason != "end_turn":
             why = f"stopped early ({response.stop_reason})"
         else:
@@ -367,14 +386,18 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
                     result["reason"] = "" if result["rules"] else answer["no_rule_reason"].strip()
                 else:
                     why = "no rules and no reason given"
-            except (json.JSONDecodeError, KeyError, TypeError) as e:
+            except (json.JSONDecodeError, KeyError, TypeError, ValueError) as e:
                 why = f"unreadable answer ({type(e).__name__})"
+            except Exception as e:                   # a bug of ours: record the paid attempt, then stop loudly
+                why, crash = f"crashed while checking the answer ({type(e).__name__}: {e})", e
         record({"unit": unit["id"], "attempt": attempt, "date": datetime.datetime.now(datetime.UTC).isoformat(),
                 "model": settings["model"], "effort": settings["effort"], "max_tokens": settings["max_tokens"],
                 "system_sha256": sha(system), "input_sha256": sha(json.dumps(messages, sort_keys=True, default=str)),
                 "request_id": getattr(response, "_request_id", None), "stop_reason": response.stop_reason,
                 "answer": text, "problem": why, "usage": usage, "cost_usd": round(spent, 6),
                 "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None})
+        if crash is not None:
+            raise crash
         if why is None:
             result["unresolved"] += requirement_gaps(unit, result)
             return result
