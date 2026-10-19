@@ -1,0 +1,4 @@
+# People allowed to approve rules (rule_format rejects any other approved_by).
+# Architects only. AI drafts rules but never approves them.
+# Add one line per reviewer, e.g.:  - jane_doe   # Jane Doe, <firm>
+[]

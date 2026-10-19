@@ -27,7 +27,7 @@ The shape every rule must have, the formula language rules are written in, and t
 
 ## Formulas
 
-Everyday math notation, read by a strict parser that rejects anything else: numbers, quoted text, lists, measure names (`measures.yaml`), `+ - * /`, comparisons (`< <= > >= == != in`, `not in`), `and` `or` `not`, `a if condition else b`, `min()`, `max()`. Units are fixed per measure (ft, sf, count).
+Everyday math notation, read by a strict parser that rejects anything else: numbers, quoted text, measure names (`measures.yaml`), `+ - * /` on numbers, comparisons (`< <= > >=` on numbers, `== !=`), `in` / `not in` a `[list]`, `and` `or` `not`, `a if condition else b`, `min()` / `max()` of two or more numbers. Max 500 characters. `check`, `applies_when` and `review_when` must be true/false tests. Units are fixed per measure (ft, sf, count).
 
 ## Outcomes (never a false pass)
 
@@ -36,7 +36,7 @@ Everyday math notation, read by a strict parser that rejects anything else: numb
 3. any `review_when` true → **needs review**
 4. `check` true / false → **pass** / **fail**
 
-Any missing measurement at any step → **needs review**.
+A missing or unusable measurement (none, NaN, infinite), or a value the formula can't evaluate (text vs number, divide by zero), at any step → **needs review**.
 
 ## Checking rule files
 
@@ -45,4 +45,4 @@ python -m rule_format       # validates every jurisdiction's 5_zoning_rules/ and
 pytest packages/rule_format
 ```
 
-Validation checks: required fields, known measures/uses/topics, formulas parse, source files listed in `sources.yaml` with matching fingerprints, every quote found on its cited page, every worked example gives its expected outcome, approval fields present.
+Validation checks: file shape; required fields; no duplicate YAML keys; known measures, uses and topics; formulas parse and are true/false tests; source files listed in `sources.yaml` with matching fingerprints; extracted text made from that exact PDF version; every quote at least 15 characters and found on its cited page; every worked example gives its expected outcome; approved rules approved by someone in `regulations/reviewers.yaml` (never the drafter, never AI) on a real date.
