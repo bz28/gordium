@@ -13,7 +13,7 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from document_extraction.sections import load_rows, piece_text
+from document_extraction.sections import load_rows
 from rule_format.labels import load_pieces, piece_fingerprint, validate_labels
 from rule_format.rulebook import Context, load
 from section_labeling import __main__ as cli
@@ -23,7 +23,8 @@ from section_labeling.budget import Budget, BudgetExceeded, worst_case
 REPO = Path(__file__).resolve().parents[3]
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 LAW = "chapter_325_zoning_2026-10.pdf"
-GOOD = {"label": "rule", "topic": "dimensions", "reason": "Allows extra height if yards grow.",
+GOOD = {"requirements": [{"first_line": 1, "last_line": 2}],
+        "label": "rule", "topic": "dimensions", "reason": "Allows extra height if yards grow.",
         "quote": "In any district, any main building may be erected to a height in excess of that"}
 USAGE = {"input_tokens": 300, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 1100, "output_tokens": 80}
 
@@ -75,7 +76,10 @@ def run(law, client, pid="325-16C"):
 def test_a_good_answer_becomes_a_valid_draft_label(law):
     ctx, header, pieces, _ = law
     entry, records = run(law, FakeClient(GOOD))
-    assert entry["sources"] == [{"file": LAW, "page": 47, "lines": [6, 6], "quote": GOOD["quote"]}]   # found by code
+    lines_6_7 = ("C. Height and open space. In any district, any main building may be erected to a height in excess of "
+                 "that specified for the district, provided that: [Amended 9-6-1989 by Ord. No. 89-13]")
+    assert entry["sources"] == [{"file": LAW, "page": 47, "lines": [6, 7], "quote": lines_6_7},   # L1-L2, words by code
+                                {"file": LAW, "page": 47, "lines": [6, 6], "quote": GOOD["quote"]}]
     assert entry["status"] == "draft" and entry["drafted_by"] == "section_labeling/claude-haiku-5-5"
     assert validate_labels({"document": LAW, "labels": {"325-16C": entry}}, ctx, header, pieces) == []
     assert len(records) == 1
@@ -89,7 +93,7 @@ def test_what_is_sent(law):
     assert req["system"][0]["cache_control"] == {"type": "ephemeral"}            # the fixed part is cached
     assert req["system"][0]["text"] == labeler.system_prompt()
     assert req["output_config"]["effort"] == labeler.SETTINGS["effort"]
-    assert req["output_config"]["format"]["schema"]["required"] == ["label", "topic", "reason", "quote"]
+    assert req["output_config"]["format"]["schema"]["required"] == ["requirements", "label", "topic", "reason", "quote"]
     assert "temperature" not in req                                              # current models reject it
     assert "C. Height and open space." in req["messages"][0]["content"]
 
@@ -308,7 +312,7 @@ def test_no_call_is_sent_that_could_cross_the_cap(law, tmp_path):
 def test_a_retry_is_checked_too(law, tmp_path):
     _, _, pieces, rows = law
     piece = pieces["325-16C"]
-    messages = [{"role": "user", "content": labeler.piece_message(piece, piece_text(rows, piece))}]
+    messages = [{"role": "user", "content": labeler.piece_message(piece, rows)}]
     first = worst_case(len(labeler.system_prompt()) + len(json.dumps(messages)), labeler.SETTINGS, labeler.PRICES)
     ledger = tmp_path / "ledger.json"
     ledger.write_text(json.dumps({"spent_usd": 1.00 - first - PRICE / 2, "calls": 0}))   # room for one call, not two
@@ -389,3 +393,14 @@ def test_a_run_whose_estimate_exceeds_what_is_left_is_refused(monkeypatch, tmp_p
     assert cli.main(["label", "--only", "325-16C", "--yes", "--place", "new_york/ithaca_city"]) == 1   # independent of what is labeled
     out = capsys.readouterr().out
     assert "refused" in out and client.requests == [] and "$0.0000 left" in out
+
+
+@pytest.mark.parametrize("bad, why", [
+    (GOOD | {"label": "reference"}, "labeled it reference"),                  # listed a requirement, then explained it away
+    (GOOD | {"requirements": []}, "listed no requirement"),                   # a rule must name the sentence that sets it
+    (GOOD | {"requirements": [{"first_line": 3, "last_line": 99}]}, "cite lines between"),   # lines must exist
+])
+def test_answers_must_agree_with_the_requirements_they_list(law, bad, why):
+    client = FakeClient(bad, GOOD)
+    entry, records = run(law, client)
+    assert why in records[0]["problem"] and entry["label"] == "rule" and len(records) == 2

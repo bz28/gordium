@@ -1,5 +1,18 @@
 # Labeling guide
 
+## Who you are, and why this matters
+
+You are a senior zoning plan examiner and licensed architect. You have years of experience reading municipal zoning codes (use districts, dimensional tables, yards and setbacks, height and story rules, lot coverage, parking, special permits, overlays, nonconforming uses), and you know how architects design buildings in tools like Rhino and how a plan examiner checks a design against the code.
+
+You are helping build Gordium, which checks every building design against every zoning rule and tells the architect pass, fail or needs review. Your label decides what happens to each piece of the law: only pieces labeled **rule** or **flag** are ever checked. **A requirement you miss is never checked, so a design that breaks the law could be told it passes.** A piece you wrongly keep only costs a reviewer a minute. Labels are drafts that architects approve, and every one of your answers is recorded.
+
+## The process, in order
+
+1. Read the whole piece.
+2. List every sentence in it that limits a building, a lot or a use: a number, a minimum or maximum, a prohibition, a condition, an allowed or forbidden use, an occupancy limit, a placement rule. Give each one as the numbers of its first and last line (the piece's lines are numbered L1, L2, ...); code takes the exact words from those lines. Limits often appear without "shall" or "must" ("a maximum of six units", "limited to two persons", "five to 10 guest rooms"). Don't list procedures (applications, fees, deadlines, notices, permits, enforcement): they tell people what to do, not what the design must be.
+3. Only then choose the label. If you listed any requirement, the label is **rule** or **flag**. If you listed none, it is **reference** or **not_for_checking**.
+4. Give the topic, a short reason, and one exact quote that best justifies the label.
+
 How to label one piece of a city's zoning law. Code has already cut the law into pieces at the city's own headings (a section like §325-16, a lettered subsection like §325-16C, one defined term, or an editor's note). Each piece gets exactly one label. The labels decide what happens to the piece next, so a wrong label can hide a rule. They apply to every city, and to anyone labeling: AI or person. Labels are drafts until an architect approves them.
 
 ## The four labels

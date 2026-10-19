@@ -23,7 +23,7 @@ from pathlib import Path
 
 import yaml
 
-from document_extraction.sections import load_rows, piece_text
+from document_extraction.sections import load_rows
 from rule_format.labels import load_pieces
 from rule_format.rulebook import REPO, Context, load
 
@@ -96,7 +96,7 @@ def estimate(j, file, todo, model, client=None) -> dict:
     With a client, input counts are exact (count_tokens, which is free); without, ~4 characters per token."""
     rows = load_rows(j / "2_extracted_text" / f"{Path(file).stem}.jsonl")
     system = labeler.system_prompt()
-    messages = [[{"role": "user", "content": labeler.piece_message(p, piece_text(rows, p))}] for p in todo]
+    messages = [[{"role": "user", "content": labeler.piece_message(p, rows)}] for p in todo]
     if client:
         fmt = {"effort": labeler.SETTINGS["effort"], "format": labeler.output_schema(sorted(Context.for_jurisdiction(j).topics))}
         count = lambda msgs: client.messages.count_tokens(model=model, system=system, messages=msgs,
