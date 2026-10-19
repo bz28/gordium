@@ -26,20 +26,22 @@ RULE = {
     "drafted_by": "claude",
     "status": "draft",
 }
+ALLOWED = {"use": {"one_family_detached", "church"}}
+CTX = Context(
+    measures={"use", "rear_yard", "lot_depth"},
+    uses={"one_family_detached"},
+    topics={"dimensions"},
+    sources={"charts.pdf": {"file": "charts.pdf", "sha256": "a" * 64}},
+    reviewers={"jane"},
+    pages={"charts.pdf": {3: normalize(PAGE_3)}},
+)
 APPROVED = {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
-            "approved_hash": approval_hash(RULE)}
+            "approved_hash": approval_hash(RULE, CTX)}
 
 
 @pytest.fixture
 def ctx():
-    return Context(
-        measures={"use", "rear_yard", "lot_depth"},
-        uses={"one_family_detached"},
-        topics={"dimensions"},
-        sources={"charts.pdf": {"file": "charts.pdf"}},
-        reviewers={"jane"},
-        pages={"charts.pdf": {3: normalize(PAGE_3)}},
-    )
+    return copy.deepcopy(CTX)
 
 
 def rulebook(**changes):
@@ -58,7 +60,7 @@ def rulebook(**changes):
     ({"rear_yard": 30, "lot_depth": 90}, "needs_review"),                            # use unknown
 ])
 def test_outcome(values, expected):
-    assert outcome(RULE, values) == expected
+    assert outcome(RULE, values, ALLOWED) == expected
 
 
 @pytest.mark.parametrize("check, values", [
@@ -70,12 +72,12 @@ def test_outcome(values, expected):
     ("stories == use", {"stories": "3", "use": "3"}),          # stories must be a number (measures.yaml)
 ])
 def test_bad_values_never_pass(check, values):
-    assert outcome({"kind": "rule", "check": check}, values) == "needs_review"
+    assert outcome({"kind": "rule", "check": check}, values, ALLOWED) == "needs_review"
 
 
 def test_non_boolean_check_never_passes():
     rule = RULE | {"check": "rear_yard - 20"}  # gives a number, not true/false
-    assert outcome(rule, {"use": "one_family_detached", "rear_yard": 10, "lot_depth": 90}) == "needs_review"
+    assert outcome(rule, {"use": "one_family_detached", "rear_yard": 10, "lot_depth": 90}, ALLOWED) == "needs_review"
 
 
 def test_unrecognized_use_needs_review():
@@ -85,15 +87,28 @@ def test_unrecognized_use_needs_review():
     assert outcome(church_only, {"use": "Church"}, {"use": {"church", "one_family_detached"}}) == "needs_review"
 
 
+def test_outcome_fails_closed():
+    church_only = {"kind": "rule", "check": 'use not in ["church"]'}
+    with pytest.raises(TypeError):
+        outcome(church_only, {"use": "castle"})                       # the use list is required
+    assert outcome(church_only, {"use": "castle"}, {}) == "needs_review"   # no list given = unrecognized
+
+
+def test_approval_needs_redoing_when_a_cited_document_is_replaced(ctx):
+    assert validate(rulebook(**APPROVED), ctx) == []
+    ctx.sources["charts.pdf"]["sha256"] = "b" * 64                    # a new version of the charts
+    assert any("cited document was replaced" in p for p in validate(rulebook(**APPROVED), ctx))
+
+
 def test_negative_or_huge_measurements_need_review():
     values = {"use": "one_family_detached", "lot_depth": 90}
-    assert outcome(RULE, values | {"rear_yard": -30}) == "needs_review"
-    assert outcome(RULE, values | {"rear_yard": 10**400}) == "needs_review"
+    assert outcome(RULE, values | {"rear_yard": -30}, ALLOWED) == "needs_review"
+    assert outcome(RULE, values | {"rear_yard": 10**400}, ALLOWED) == "needs_review"
 
 
 def test_flag_always_needs_review():
     flag = {k: v for k, v in RULE.items() if k != "check"} | {"kind": "flag"}
-    assert outcome(flag, {"use": "one_family_detached", "rear_yard": 99, "lot_depth": 90}) == "needs_review"
+    assert outcome(flag, {"use": "one_family_detached", "rear_yard": 99, "lot_depth": 90}, ALLOWED) == "needs_review"
 
 
 def test_valid_rulebooks(ctx):
@@ -205,6 +220,15 @@ def test_quote_number_must_not_match_inside_a_bigger_number():
 def test_quote_number_must_be_the_whole_number(page):
     assert not quote_found("5 feet in depth for all lots", normalize(page))
     assert not quote_found("500 feet in depth for all lots", normalize(page))
+
+
+@pytest.mark.parametrize("quote, page", [
+    ("rear yard minimum shall be 2.", "rear yard minimum shall be 2.5 feet"),   # ends on '.', page goes on
+    (".5 feet in depth for all lots", "rear yard 2.5 feet in depth for all lots"),
+    (",500 square feet of lot area", "lot of 1,500 square feet of lot area"),
+])
+def test_quote_edges_cannot_cut_a_number(quote, page):
+    assert not quote_found(quote, normalize(page))
 
 
 def test_separate_table_cells_do_not_merge():

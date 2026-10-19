@@ -4,6 +4,10 @@ import pytest
 
 from rule_format.formula import EvaluationError, FormulaError, MissingMeasure, evaluate, is_condition, names, strings
 
+NUMBERS = ["rear_yard", "lot_depth", "lot_area", "lot_width", "building_area", "building_height",
+           "stories", "front_yard", "parking_spaces", "sleeping_rooms", "a", "b", "x"]
+KINDS = {n: "number" for n in NUMBERS} | {"use": frozenset({"one_family_detached", "church", "a", "ab"})}
+
 
 @pytest.mark.parametrize("text, values, expected", [
     ("rear_yard >= max(min(0.25 * lot_depth, 50), 20)", {"rear_yard": 25, "lot_depth": 90}, True),
@@ -18,7 +22,7 @@ from rule_format.formula import EvaluationError, FormulaError, MissingMeasure, e
     ("0 < stories <= 3", {"stories": 3}, True),
 ])
 def test_evaluate(text, values, expected):
-    assert evaluate(text, values) is expected
+    assert evaluate(text, values, KINDS) is expected
 
 
 @pytest.mark.parametrize("text", [
@@ -31,7 +35,7 @@ def test_evaluate(text, values, expected):
 ])
 def test_rejects_anything_outside_the_language(text):
     with pytest.raises(FormulaError):
-        evaluate(text, {"lot_area": 1, "x": [], "a": 1, "use": "one_family_detached"})
+        evaluate(text, {"lot_area": 1, "x": 1, "a": 1, "use": "one_family_detached"}, KINDS)
 
 
 @pytest.mark.parametrize("text", [
@@ -39,10 +43,10 @@ def test_rejects_anything_outside_the_language(text):
     "stories <= 0 and building_height <= 35",  # nor 'and'
     "0 > stories < building_height",           # nor a chained comparison
 ])
-@pytest.mark.parametrize("bad", [None, math.nan, math.inf, -math.inf, True, 10**400])
+@pytest.mark.parametrize("bad", [None, math.nan, math.inf, -math.inf, True, 10**400, -5, "35"])
 def test_missing_or_unusable_measure_is_never_hidden(text, bad):
     with pytest.raises(MissingMeasure) as e:
-        evaluate(text, {"stories": 3, "building_height": bad})
+        evaluate(text, {"stories": 3, "building_height": bad}, KINDS)
     assert e.value.name == "building_height"
 
 
@@ -53,12 +57,11 @@ def test_missing_or_unusable_measure_is_never_hidden(text, bad):
     ("not stories", {"stories": 3}),                             # 'not' of a number
     ("stories and lot_area > 1", {"stories": 3, "lot_area": 5}),  # 'and' of a number
     ("lot_area * 1e308 * 10 > 1", {"lot_area": 5}),            # arithmetic overflows to infinity
-    ("stories != 4", {"stories": "4"}),                         # comparing text with a number
     ('use in ["a", 1]', {"use": "a"}),                          # list mixes text and numbers
 ])
 def test_values_that_cannot_be_evaluated(text, values):
     with pytest.raises(EvaluationError):
-        evaluate(text, values)
+        evaluate(text, values, KINDS)
 
 
 @pytest.mark.parametrize("text, expected", [
@@ -85,3 +88,12 @@ def test_unusable_measurements_are_missing(values, kinds):
     name = next(iter(values))
     with pytest.raises(MissingMeasure):
         evaluate(f"{name} == {name}", values, kinds)
+
+
+def test_fails_closed_without_measure_descriptions():
+    with pytest.raises(TypeError):
+        evaluate("rear_yard <= 50", {"rear_yard": 5})                  # descriptions are required
+    with pytest.raises(MissingMeasure):
+        evaluate("rear_yard <= 50", {"rear_yard": 5}, {})              # undescribed measure = unusable
+    with pytest.raises(MissingMeasure):
+        evaluate('use == "church"', {"use": "church"}, {"use": "text"})  # text with no allowed list

@@ -39,10 +39,11 @@ MEASURE_KINDS = {name: "text" if m["unit"] == "text" else "number"
                  for name, m in yaml.safe_load(MEASURES_FILE.read_text()).items()}
 
 
-def outcome(rule: dict, values: dict, allowed: dict[str, set] | None = None) -> str:
-    """allowed: the values a text measure may take, e.g. {"use": the city's use names}.
-    A value outside that list is unrecognized, so the rule needs review."""
-    kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in (allowed or {}).items()}
+def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
+    """allowed: the values each text measure may take, e.g. {"use": the city's use names}.
+    Required, so no caller can forget it. A value outside the list, or a text measure with
+    no list, is unrecognized, so the rule needs review."""
+    kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in allowed.items()}
     try:
         if "applies_when" in rule and not _condition(rule["applies_when"], values, kinds):
             return "not_applicable"
@@ -154,19 +155,24 @@ def _chain(pieces: list[str], page_text: str, end: int | None) -> bool:
 
 
 def _whole(page_text: str, at: int, piece: str) -> bool:
-    """'5 feet' must not match inside '25 feet', '2.5 feet' or '1,500 feet'; 'ear' not inside 'rear'."""
-    def joined(i, step):  # does the text continue a word or number past position i?
-        if not 0 <= i < len(page_text):
-            return False
-        c = page_text[i]
-        return c.isalnum() or c in ".," and 0 <= i + step < len(page_text) and page_text[i + step].isdigit()
-    return not (piece[0].isalnum() and joined(at - 1, -1)
-                or piece[-1].isalnum() and joined(at + len(piece), 1))
+    """The match must not cut a word or number: '5 feet' not inside '25', '2.5' or '1,500 feet';
+    '…be 2.' not inside '2.5'; 'ear' not inside 'rear'."""
+    end = at + len(piece)
+    return not (at > 0 and _glued(page_text[at - 1], piece[0])
+                or end < len(page_text) and _glued(piece[-1], page_text[end]))
 
 
-def approval_hash(rule: dict) -> str:
-    """Fingerprint of what an architect approves. Any later edit to these fields changes it."""
-    approved = {k: rule.get(k) for k in APPROVED_FIELDS}
+def _glued(a: str, b: str) -> bool:
+    """Do these two neighbouring characters belong to the same word or number?"""
+    return a.isalnum() and b.isalnum() or a.isdigit() and b in ".," or a in ".," and b.isdigit()
+
+
+def approval_hash(rule: dict, ctx: "Context") -> str:
+    """Fingerprint of what an architect approves: the rule's content and the exact versions of the
+    documents it cites. Any later edit, or a replaced source PDF, changes it."""
+    cited = sorted({s.get("file") for s in rule.get("sources") or [] if isinstance(s, dict)} - {None}, key=str)
+    approved = {k: rule.get(k) for k in APPROVED_FIELDS} | {
+        "source_fingerprints": {f: ctx.sources.get(f, {}).get("sha256") for f in cited}}
     return hashlib.sha256(json.dumps(approved, sort_keys=True, default=str).encode()).hexdigest()
 
 
@@ -265,8 +271,8 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append("a rule can't be approved by the person who drafted it")
         if not isinstance(rule.get("approved_on"), datetime.date):
             p.append("approved_on must be a date (YYYY-MM-DD)")
-        if rule.get("approved_hash") != approval_hash(rule):
-            p.append("changed since it was approved (approved_hash doesn't match); needs re-approval")
+        if rule.get("approved_hash") != approval_hash(rule, ctx):
+            p.append("changed since it was approved, or a cited document was replaced (approved_hash doesn't match); needs re-approval")
     return p
 
 

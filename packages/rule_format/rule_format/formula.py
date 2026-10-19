@@ -96,14 +96,14 @@ def strings(text: str) -> set[str]:
     return {n.value for n in ast.walk(parse(text)) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
 
 
-def evaluate(text: str, values: dict, kinds: dict | None = None):
+def evaluate(text: str, values: dict, kinds: dict):
     """Evaluate a formula. Raises MissingMeasure or EvaluationError when it can't.
 
-    kinds describes each measure: "number" (a non-negative number: lengths, areas, counts)
-    or a set of the text values allowed (e.g. the city's use names). A value that doesn't fit
-    is unusable, so the formula can't be evaluated.
+    kinds describes every measure the formula may use: "number" (a non-negative number:
+    lengths, areas, counts) or the set of text values allowed (e.g. the city's use names).
+    Fails closed: a measure with no description, or a value that doesn't fit, is unusable.
     """
-    return _eval(parse(text).body, values, kinds or {})
+    return _eval(parse(text).body, values, kinds)
 
 
 def _finite(x) -> bool:
@@ -126,22 +126,14 @@ def _kind(x):
 
 
 def _measure(name, values, kinds):
-    """A measurement that is absent, not a real number, negative, or not an allowed value is unusable."""
+    """Usable only if present and fitting its description: a finite, non-negative number,
+    or one of the allowed text values. Anything else (including no description) is unusable."""
     v, kind = values.get(name), kinds.get(name)
-    if v is None or _kind(v) is None:
-        raise MissingMeasure(name)
-    if kind == "number":
-        if _kind(v) != "number" or not _finite(v) or v < 0:
-            raise MissingMeasure(name)
-    elif isinstance(kind, (set, frozenset)):
-        if v not in kind:
-            raise MissingMeasure(name)
-    elif kind == "text":
-        if _kind(v) != "text":
-            raise MissingMeasure(name)
-    elif _kind(v) == "number" and not _finite(v):
-        raise MissingMeasure(name)
-    return v
+    if kind == "number" and _kind(v) == "number" and _finite(v) and v >= 0:
+        return v
+    if isinstance(kind, (set, frozenset)) and _kind(v) == "text" and v in kind:
+        return v
+    raise MissingMeasure(name)
 
 
 def _eval(node, values, kinds):
