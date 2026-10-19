@@ -32,4 +32,4 @@ Note: the lot in the architects' model is **6,674.7 sf**, about 5% smaller than 
 
 The model has several errors (building off the lot, rear setback too small, over coverage). They're useful as checker test cases. See `docs/discrepancies_with_architects.md` (sections 1 and 4).
 
-Expected results will be added once the answer key is agreed with the architects.
+`spreadsheet_design.yaml` is the architects' spreadsheet version of this house as our measurements; `packages/rule_format/tests/test_answer_keys.py` checks our draft R-1b gives their PASS/FAIL on every row. Expected results for the Rhino model itself come once models can be measured.
