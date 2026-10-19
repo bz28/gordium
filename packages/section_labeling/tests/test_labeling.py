@@ -318,11 +318,27 @@ def test_a_failed_call_stays_charged_at_its_worst_case(law, tmp_path):
     assert Budget(1.00, ledger).spent > 0                      # a timeout may still have been billed
 
 
-def test_the_sdk_does_not_retry_on_its_own(monkeypatch):
+def test_the_sdk_does_not_retry_on_its_own_and_sends_the_workspace(monkeypatch):
     built = {}
     monkeypatch.setitem(sys.modules, "anthropic", SimpleNamespace(Anthropic=lambda **kw: built.update(kw) or "client"))
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
-    assert cli._client() == "client" and built["max_retries"] == 0
+    monkeypatch.delenv("ANTHROPIC_WORKSPACE_ID", raising=False)
+    assert cli._client() == "client" and built["max_retries"] == 0 and built["default_headers"] is None
+    monkeypatch.setenv("ANTHROPIC_WORKSPACE_ID", "wrkspc_test")
+    cli._client()
+    assert built["default_headers"] == {"anthropic-workspace-id": "wrkspc_test"}
+
+
+class RefusingCounter(FakeClient):
+    def count_tokens(self, **_):
+        raise ValueError("this API key is not scoped to a workspace")
+
+
+def test_a_refused_token_count_stops_cleanly_before_any_call(monkeypatch, capsys):
+    client = RefusingCounter(GOOD)
+    monkeypatch.setattr(cli, "_client", lambda: client)
+    assert cli.main(["label", "--limit", "1", "--yes", "--place", "new_york/ithaca_city"]) == 1
+    assert client.requests == [] and "nothing was sent" in capsys.readouterr().out
 
 
 def test_worst_case_is_never_below_a_measured_call():

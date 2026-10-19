@@ -18,6 +18,7 @@ Labels every piece of a law with what the system should do with it, using one re
 pip install -e ".[labeling]"                        # the Anthropic SDK; only needed for real runs
 python -m section_labeling estimate                 # cost first; works without a key (rough), exact with one
 export ANTHROPIC_API_KEY=...                        # read from here only; never committed
+export ANTHROPIC_WORKSPACE_ID=...                   # only if the key isn't tied to one workspace (the API says so)
 python -m section_labeling label --limit 10         # shows the estimate for 10 pieces, sends nothing
 python -m section_labeling label --limit 10 --yes   # labels them; then `cost` shows what it really cost
 python -m section_labeling coverage                 # refresh the coverage report and the review list

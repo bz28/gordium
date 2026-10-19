@@ -10,7 +10,8 @@
     python -m section_labeling cost                 # what the recorded runs actually cost
 
 The model and its settings come from section_labeling/settings.yaml (one place; recorded in every run).
-The API key is read from ANTHROPIC_API_KEY only. Labeling never runs in CI; CI runs `coverage --check`.
+The API key is read from ANTHROPIC_API_KEY only; a key not tied to one workspace also needs
+ANTHROPIC_WORKSPACE_ID. Labeling never runs in CI; CI runs `coverage --check`.
 """
 
 import argparse
@@ -131,8 +132,19 @@ def _client():
     if not key:
         return None
     import anthropic   # optional dependency: pip install -e ".[labeling]"; never needed in CI
+    workspace = os.environ.get("ANTHROPIC_WORKSPACE_ID")   # needed when the key isn't tied to one workspace
     # No automatic retries: each request must pass the budget check itself (labeler.label_piece).
-    return anthropic.Anthropic(api_key=key, max_retries=0)
+    return anthropic.Anthropic(api_key=key, max_retries=0,
+                               default_headers={"anthropic-workspace-id": workspace} if workspace else None)
+
+
+def _estimate_or_say_why(j, file, todo, model, client) -> dict | None:
+    """The estimate, or None after printing why the API refused to count (a bad key, a missing workspace)."""
+    try:
+        return estimate(j, file, todo, model, client)
+    except Exception as e:                       # the API's own message; it never contains the key
+        print(f"  the API refused to count tokens, so nothing was sent: {getattr(e, 'message', e)}")
+        return None
 
 
 def cmd_estimate(args) -> int:
@@ -143,7 +155,10 @@ def cmd_estimate(args) -> int:
     client = _client()
     for j, file, path in documents(args.place):
         print(f"{file}:")
-        print_estimate(estimate(j, file, _todo(j, file, path, args.limit, args.only), model, client), model)
+        e = _estimate_or_say_why(j, file, _todo(j, file, path, args.limit, args.only), model, client)
+        if e is None:
+            return 1
+        print_estimate(e, model)
     return 0
 
 
@@ -160,7 +175,9 @@ def cmd_label(args) -> int:
     for j, file, path in documents(args.place):
         todo = _todo(j, file, path, args.limit, args.only)
         print(f"{file}:")
-        e = estimate(j, file, todo, model, client)
+        e = _estimate_or_say_why(j, file, todo, model, client)
+        if e is None:
+            return 1
         print_estimate(e, model)
         print(f"  budget ${budget.cap:.2f}: spent ${budget.spent:.4f}, ${budget.remaining:.4f} left")
         try:
