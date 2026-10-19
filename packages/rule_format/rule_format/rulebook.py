@@ -350,9 +350,10 @@ def open_question_problems(entry: dict) -> list[str]:
 # Definitions (4_term_definitions/definitions.yaml) and use names (uses.yaml): each entry is
 # keyed by its id and cites the city's exact words, like a rule does.
 TERM_SCHEMAS = {
-    "definitions": {"label": "term", "approved": ("term", "says", "measures", "sources"),
+    # "id" is the entry's key in the file: rules refer to terms by it, so renaming one needs re-approval.
+    "definitions": {"label": "term", "approved": ("id", "term", "says", "measures", "sources"),
                     "fields": {"term", "says", "measures", "sources", "open_questions", "notes"}},
-    "uses": {"label": "name", "approved": ("name", "sources"), "fields": {"name", "sources", "notes"}},
+    "uses": {"label": "name", "approved": ("id", "name", "sources"), "fields": {"name", "sources", "notes"}},
 }
 APPROVAL_FIELDS = {"drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
 
@@ -387,7 +388,7 @@ def validate_terms(entries, ctx: Context, schema: str) -> list[str]:
             p += [f"unknown measure '{m}'" for m in measures if m not in ctx.measures]
         sources = _list_of_dicts(entry, "sources")
         p += ["'sources' must be a list of mappings"] if sources is None else _source_problems(sources, ctx)
-        p += _approval_problems(entry, ctx, s["approved"])
+        p += _approval_problems(entry | {"id": key}, ctx, s["approved"])
         problems += [f"{key}: {x}" for x in p]
     return problems
 

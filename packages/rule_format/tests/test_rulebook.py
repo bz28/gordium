@@ -6,7 +6,7 @@ import math
 import pytest
 import yaml
 
-from rule_format.rulebook import (Context, _canonical, approval_hash, load, locate, outcome, quote_at, tokenize,
+from rule_format.rulebook import (TERM_SCHEMAS, Context, _canonical, approval_hash, load, locate, outcome, quote_at, tokenize,
                                   validate, validate_terms)
 
 
@@ -548,21 +548,23 @@ def test_invalid_definitions_are_rejected(ctx, entries, problem):
 
 
 def test_approved_definition_needs_reapproval_after_an_edit(ctx):
-    fields = ("term", "says", "measures", "sources")
+    fields = TERM_SCHEMAS["definitions"]["approved"]
     answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"}
     approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
-                           "approved_hash": approval_hash(answered, ctx, fields)}
+                           "approved_hash": approval_hash(answered | {"id": "rear_yard"}, ctx, fields)}
     assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
     for edit in ({"says": "Something else."}, {"measures": ["rear_yard", "lot_depth"]}):
         assert any("changed since it was approved" in p
                    for p in validate_terms({"rear_yard": approved | edit}, ctx, "definitions"))
+    assert any("changed since it was approved" in p                          # renamed: rules use the key
+               for p in validate_terms({"side_yard": approved}, ctx, "definitions"))
     reopened = approved | {"open_questions": ["new doubt?"]}                 # a new question blocks approval
     assert any("open_questions remain" in p for p in validate_terms({"rear_yard": reopened}, ctx, "definitions"))
 
 
 def test_definition_with_open_questions_cannot_be_approved(ctx):
     approved = DEFINITION | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
-    approved["approved_hash"] = approval_hash(approved, ctx, ("term", "says", "measures", "sources"))
+    approved["approved_hash"] = approval_hash(approved | {"id": "rear_yard"}, ctx, TERM_SCHEMAS["definitions"]["approved"])
     assert any("open_questions remain" in p for p in validate_terms({"rear_yard": approved}, ctx, "definitions"))
 
 

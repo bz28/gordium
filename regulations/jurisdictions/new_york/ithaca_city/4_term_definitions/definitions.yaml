@@ -93,23 +93,29 @@ story:
 
 basement:
   term: BASEMENT
-  says: Partly below ground, with more than half its floor-to-ceiling height above the finished ground at some point.
+  says: A space of a building that is partly below grade and has more than half of its floor-to-ceiling height above the finished ground level at any point.
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 5
       lines: [10, 11]
       quote: "BASEMENT — That space of a building that is partly below grade which has more than half of its height, measured from floor to ceiling, above the finished ground level at any point."
+  open_questions:
+    - "\"Above the finished ground level at any point\": at one point is enough (e.g. a walk-out side), or at every point around the building?"
+    - "On a sloped lot, a space can meet both this definition (more than half above ground at some point) and the cellar definition (more than half below the average curb level or adjoining ground). Is it then a basement (can count as a story) or a cellar (never a story)?"
   drafted_by: claude
   status: draft
 
 cellar:
   term: CELLAR
-  says: Partly or entirely below ground, with more than half its floor-to-ceiling height below the curb level or the ground next to the building.
+  says: A space of a building that is partly or entirely below grade and has more than half of its floor-to-ceiling height below the average established curb level or the finished grade of the ground adjoining the building.
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 6
       lines: [6, 8]
       quote: "CELLAR — That space of a building that is partly or entirely below grade which has more than half of its height, measured from floor to ceiling, below the average established curb level or finished grade of the ground adjoining the building."
+  open_questions:
+    - "\"Average established curb level or finished grade of the ground adjoining the building\": which applies when they differ, and is the adjoining grade averaged around the building?"
+    - "See the basement question about a space that meets both definitions."
   drafted_by: claude
   status: draft
 
@@ -117,10 +123,14 @@ building_area:
   term: BUILDING AREA (lot coverage)
   measures: [building_area]
   says: >
-    The total area, on a horizontal plane at the main grade level, of the main building and all accessory
-    buildings, including porches, decks (attached or free-standing), balconies projecting more than 2 ft,
-    ramps and landings. It doesn't include parking areas and parking spaces; pergolas, terraces and
-    patios are exempt from lot coverage. Lot coverage = this total divided by the total lot area.
+    The total area, taken on a horizontal plane at the main grade level, of the principal building and all
+    accessory buildings, including porches, attached or free-standing decks, balconies projecting more
+    than 2 ft from a building or structure, ramps and/or landings. It is used for required yards and for
+    maximum lot coverage, and doesn't include parking areas and parking spaces. Pergolas, terraces and
+    patios are exempt from lot coverage, but pergolas, and terraces and patios above grade, may not be in a
+    required yard. Column 10: the area covered by principal and accessory buildings above ground
+    (including the same porches, decks, balconies, ramps and landings), divided by the total lot area,
+    may not exceed the chart's maximum lot coverage percentage.
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 5
@@ -128,45 +138,46 @@ building_area:
       quote: "BUILDING AREA — The total area (taken on a horizontal plane at the main grade level) of the principal building and all accessory buildings, including porches, attached or free standing decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
     - file: chapter_325_zoning_2026-10.pdf
       page: 5
-      lines: [27, 28]
-      quote: "but shall not include parking areas and parking spaces. Pergolas and terraces and patios shall be exempt from total lot coverage requirements."
+      lines: [25, 29]
+      quote: "The total building area shall be used for determining required yards and maximum percentage of allowed lot coverage but shall not include parking areas and parking spaces. Pergolas and terraces and patios shall be exempt from total lot coverage requirements. However, neither pergolas or terraces and patios above grade shall be located in a required yard."
     - file: chapter_325_zoning_2026-10.pdf
       page: 25
-      lines: [9, 10]
-      quote: "This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified in this column."
+      lines: [5, 10]
+      quote: "Column 10: Maximum Percentage of Lot Coverage by Buildings. On a lot hereafter used, no greater percentage of total lot area may be covered by principal and accessory buildings above ground. For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings. This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified in this column."
   open_questions:
     - "Does the floor area of a garage (attached or detached) count as building area, or is it excluded as a \"parking space\"?"
-    - "\"Taken on a horizontal plane at the main grade level\": is coverage the footprint at grade, or the outline of everything above ground (upper floors that overhang, roof eaves)?"
+    - "\"Taken on a horizontal plane at the main grade level\" (§325-3) vs \"covered by principal and accessory buildings above ground\" (Column 10): is coverage the footprint at grade, or the outline of everything above ground (upper floors that overhang, roof eaves)?"
   drafted_by: claude
   status: draft
 
 lot:
   term: LOT
   measures: [lot_area]
-  says: A portion or parcel of land, considered as a unit, devoted to a use or occupied by a building or group of buildings. (Lot area itself isn't defined; see the open question.)
+  says: >
+    A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building
+    or group of buildings that are united by a common interest or use, together with the customary
+    accessories and open spaces belonging to them.
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 14
-      lines: [34, 35]
-      quote: "LOT — A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building or a group of buildings"
+      lines: [34, 36]
+      quote: "LOT — A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building or a group of buildings that are united by a common interest or use and the customary accessories and open spaces belonging to the same."
   open_questions:
-    - "\"Lot area\" itself isn't defined. We take it as the area inside the lot lines from a survey. Confirm, and say what to use when there's no survey (the tax parcel map can differ: 106 Ithaca Rd is ~7,034 sf on the tax map vs 6,674.7 sf in the architects' model)."
+    - "\"Lot area\" itself isn't defined. Is it the area inside the lot lines from a survey? What should be used when there's no survey (the tax parcel map can differ: 106 Ithaca Rd is ~7,034 sf on the tax map vs 6,674.7 sf in the architects' model)?"
   drafted_by: claude
   status: draft
 
 lot_width:
   term: LOT WIDTH (minimum lot size, width in feet at street line)
   measures: [lot_width]
-  says: The lot's frontage measured along the street (public right-of-way).
+  says: >
+    Lots used for a permitted use must have frontage, measured on a public right-of-way, at least the width
+    in the chart's Column 7, subject to Column 6 and Article V.
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 24
-      lines: [31, 31]
-      quote: "Column 7: Minimum Lot Size, Width in Feet at Street Line. Lots hereafter used for a permitted"
-    - file: chapter_325_zoning_2026-10.pdf
-      page: 24
-      lines: [32, 33]
-      quote: "shall have frontage measured on a public right-of-way equal to or greater than the width specified in this column"
+      lines: [31, 34]
+      quote: "Column 7: Minimum Lot Size, Width in Feet at Street Line. Lots hereafter used for a permitted use in each use district shall have frontage measured on a public right-of-way equal to or greater than the width specified in this column, subject to the further regulations of Column 6 of the District Regulations Chart and of Article V."
   open_questions:
     - "For a curved street line (like 106 Ithaca Rd), is frontage measured along the curve or as a straight line between the side lot corners?"
   drafted_by: claude
@@ -191,28 +202,30 @@ lot_depth:
 
 yard:
   term: YARD
-  says: The part of the lot not occupied by the main building, which must stay open from the ground up unless the code allows otherwise.
+  says: >
+    The part of a lot not occupied by the principal building or structure, which may not be occupied by
+    any other building or structure from the ground upward unless specifically authorized in Chapter 325
+    or other provisions of the City of Ithaca Code.
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 20
-      lines: [28, 29]
-      quote: "YARD — That part of a lot not occupied by the principal building or structure and which shall not be occupied by any other building or structure from the ground upward"
+      lines: [28, 30]
+      quote: "YARD — That part of a lot not occupied by the principal building or structure and which shall not be occupied by any other building or structure from the ground upward unless specifically authorized in this chapter or other provisions of the City of Ithaca Code."
   drafted_by: claude
   status: draft
 
 front_yard:
   term: FRONT YARD
   measures: [front_yard]
-  says: The open space across the full width of the lot between the main building and the front lot line. Its depth is the shortest distance from the front lot line to the front of the building.
+  says: >
+    An open space across the full width of the lot between a main building and the front lot line,
+    unoccupied and unobstructed by buildings or structures from the ground upward. Its depth is the least
+    distance between the front lot line and the front of the main building.
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 20
-      lines: [31, 32]
-      quote: "FRONT YARD — An open space extending the full width of the lot between a main building and the front lot line"
-    - file: chapter_325_zoning_2026-10.pdf
-      page: 20
-      lines: [33, 34]
-      quote: "the depth of which shall be the least distance between the front lot line and the front of such main building."
+      lines: [31, 34]
+      quote: "(1) FRONT YARD — An open space extending the full width of the lot between a main building and the front lot line, unoccupied and unobstructed by buildings or structures from the ground upward, the depth of which shall be the least distance between the front lot line and the front of such main building."
   drafted_by: claude
   status: draft
 
@@ -220,14 +233,16 @@ side_yard:
   term: SIDE YARD
   measures: [side_yard_smaller, side_yard_larger]
   says: >
-    The open space between the building and each side lot line, measured from the nearest point of the
-    lot line to the nearest part of any building. Every building needs two side yards: one at least the
-    "one side" figure, the other at least the "other side" figure.
+    An open space from the front yard to the rear yard between any building and the side lot line,
+    unoccupied and unobstructed by buildings or structures from the ground upward. Its width is measured
+    horizontally from the nearest point of the side lot line to the nearest part of any building. A lot
+    must have two side yards: one at least the chart's "one side" width (Column 11), the other at least
+    its "other side" width (Column 12).
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 20
-      lines: [37, 38]
-      quote: "The required width of side yards shall be measured horizontally from the nearest point of the side lot line to the nearest part of any building."
+      lines: [35, 38]
+      quote: "(2) SIDE YARD — An open space extending from the front yard to the rear yard between any building and the side lot line, unoccupied and unobstructed by buildings or structures from the ground upward. The required width of side yards shall be measured horizontally from the nearest point of the side lot line to the nearest part of any building."
     - file: chapter_325_zoning_2026-10.pdf
       page: 25
       lines: [19, 20]
@@ -239,19 +254,16 @@ rear_yard:
   term: REAR YARD
   measures: [rear_yard]
   says: >
-    The open space across the full width of the lot between the rearmost main building and the rear lot
-    line. Its depth is the shortest distance from the rear lot line to the back of the building. On a
-    corner lot or through-block lot, the rear yard is the yard on the side of the lot opposite the
-    street whose address the lot bears.
+    An open space across the full width of a lot between the rearmost main building and the rear lot line,
+    unoccupied and unobstructed by buildings or structures from the ground upward except as specified
+    later in Chapter 325. Its depth is the least distance between the rear lot line and the rear of the
+    main building. On a corner lot or through-block lot, the yard on the opposite side of the lot from the
+    street whose address the lot bears is the rear yard.
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 20
-      lines: [39, 40]
-      quote: "REAR YARD — An open space extending the full width of a lot between the rearmost main building and the rear lot line"
-    - file: chapter_325_zoning_2026-10.pdf
-      page: 20
-      lines: [41, 42]
-      quote: "the depth of which shall be the least distance between the rear lot line and the rear of such main building."
+      lines: [39, 42]
+      quote: "(3) REAR YARD — An open space extending the full width of a lot between the rearmost main building and the rear lot line, unoccupied and unobstructed by buildings or structures from the ground upward except as hereinafter specified, the depth of which shall be the least distance between the rear lot line and the rear of such main building."
     - file: chapter_325_zoning_2026-10.pdf
       page: 25
       lines: [34, 34]
@@ -260,6 +272,8 @@ rear_yard:
       page: 26
       lines: [3, 3]
       quote: "whose address the lot bears shall be designated as the rear yard."
+  open_questions:
+    - "\"Except as hereinafter specified\": which later sections allow something in the rear yard (e.g. accessory buildings)? Those will be rules of their own."
   drafted_by: claude
   status: draft
 
@@ -267,9 +281,11 @@ yard_projections:
   term: PORCHES AND PROJECTIONS IN YARDS
   measures: [front_yard, side_yard_smaller, side_yard_larger, rear_yard]
   says: >
-    Porches, decks, balconies sticking out more than 2 ft, ramps and landings count as part of the building
-    for yards and lot coverage. Window sills, cornices, eaves and similar features may stick into a
-    required yard by up to 2 ft.
+    All porches, attached or freestanding decks, balconies projecting more than 2 ft from a building or
+    structure, ramps and/or landings count as part of the building for required yards and lot coverage.
+    A required yard must be open and unobstructed except for ordinary projections of windowsills, belt
+    courses, cornices, eaves and other architectural features, which may not project more than 2 ft into
+    any required yard.
   sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 49
@@ -277,8 +293,8 @@ yard_projections:
       quote: "All porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings shall be considered a part of the building in both the determination of required yards and lot coverage."
     - file: chapter_325_zoning_2026-10.pdf
       page: 49
-      lines: [15, 16]
-      quote: "provided, however, that such features shall not project more than two feet into any required yard."
+      lines: [13, 16]
+      quote: "B. Projecting architectural features. The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that such features shall not project more than two feet into any required yard."
   open_questions:
     - "Is a yard's depth measured to the wall (ignoring sills, cornices and eaves that project up to 2 ft), or to the outermost eave? If an eave projects more than 2 ft, is the yard measured to the eave?"
   drafted_by: claude

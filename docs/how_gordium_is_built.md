@@ -35,7 +35,7 @@ The city's documents go in on the left. A trusted, approved rulebook comes out o
 | **The rule form** (`packages/rule_format`) | Every rule has the same boxes: plain English, formula, source quote, worked examples, who drafted/approved it | A permit application form |
 | **The calculator** (same package) | Turns a rule + a design's measurements into pass / fail / needs review. Missing or odd data is always "needs review", never "pass" | A calculator with only safe buttons |
 | **The inspector** (`python -m rule_format`) | Rejects any rule, definition or use name that has no source, a quote not on its page, a changed PDF, a typo, wrong examples, or an illegitimate approval | The plan examiner |
-| **The text extractor** (`packages/document_extraction`) | Copies text out of the PDFs with page and position; marks footnote numbers with `^` so they're never read as values | A searchable photocopy of the code book |
+| **The text extractor** (`packages/document_extraction`) | Copies text out of the PDFs with page and position; marks footnote numbers as `[fn11]` so they're never read as values | A searchable photocopy of the code book |
 | **Automatic checks (CI)** | On every change, GitHub re-runs all tests, re-extracts the text to prove it's unchanged, and runs the inspector | An inspection before anything is accepted |
 | **Review loop** (`/review`) | A fresh reviewer looks for mistakes, two skeptics try to disprove each one, the rest get fixed with a test, and it repeats until clean | Peer review with a second opinion |
 
