@@ -29,12 +29,16 @@ REVIEWERS_FILE = REPO / "regulations/reviewers.yaml"
 OUTCOMES = ("pass", "fail", "needs_review", "not_applicable")
 KINDS = ("rule", "flag")  # rule: code checks it; flag: an architect must judge it
 STATUSES = ("draft", "approved")
-RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources", "examples",
-               "notes", "open_questions", "drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
-TEXT_FIELDS = ("id", "kind", "topic", "says", "drafted_by", "status", "approved_by")
+# A rule has a short `title`, not a plain-English retelling: the city's words are in `sources`, the
+# meaning is the `check` and its `examples`. (Retellings kept dropping or adding words.)
+RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "examples",
+               "notes", "open_questions", "answers", "drafted_by", "status", "approved_by", "approved_on",
+               "approved_hash"}
+TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
+TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote"},
                "examples": {"given", "expect", "note"}}
-APPROVED_FIELDS = ("id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources")
+APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "answers")
 MEASURE_KINDS = {name: "text" if m["unit"] == "text" else "number"
                  for name, m in yaml.safe_load(MEASURES_FILE.read_text()).items()}
 
@@ -299,8 +303,10 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p.append(f"kind must be one of {KINDS}")
     if rule.get("topic") not in ctx.topics:
         p.append(f"unknown topic {rule.get('topic')!r}")
-    if not rule.get("says"):
-        p.append("missing 'says' (plain-English rule)")
+    if not rule.get("title"):
+        p.append("missing 'title' (a short label)")
+    elif isinstance(rule["title"], str) and (len(rule["title"]) > TITLE_MAX or "\n" in rule["title"].strip()):
+        p.append(f"'title' is a one-line label of at most {TITLE_MAX} characters; the rule is its quotes and check")
     if (rule.get("kind") == "rule") != ("check" in rule):
         p.append("a 'rule' needs a 'check'; a 'flag' must not have one")
     review_when, sources, examples = (_list_of_dicts(rule, k) for k in ("review_when", "sources", "examples"))
@@ -355,7 +361,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
 
 
 def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> list[str]:
-    p = open_question_problems(entry)
+    p = open_question_problems(entry) + _answer_problems(entry.get("answers", []), ctx)
     if entry.get("status") not in STATUSES:
         p.append(f"status must be one of {STATUSES}")
     if not entry.get("drafted_by"):
@@ -376,7 +382,7 @@ def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> li
 def open_question_problems(entry: dict) -> list[str]:
     """Interpretations the law leaves open, for the architects: a list of text. Nothing with open
     questions can be approved (so the checker never uses it) until the answers are recorded
-    (a definition's in `answers`; a rule's in its `says` and `check`)."""
+    in `answers` (question, answer, answered_by, answered_on), which is part of what's approved."""
     questions = entry.get("open_questions", [])
     if not (isinstance(questions, list) and all(isinstance(q, str) and q.strip() for q in questions)):
         return ["'open_questions' must be a list of text"]
@@ -444,8 +450,6 @@ def validate_terms(entries, ctx: Context, schema: str) -> list[str]:
             p += [f"unknown measure '{m}'" for m in measures if m not in ctx.measures]
         sources = _list_of_dicts(entry, "sources")
         p += ["'sources' must be a list of mappings"] if sources is None else _source_problems(sources, ctx)
-        if "answers" in s["fields"]:
-            p += _answer_problems(entry.get("answers", []), ctx)
         p += _approval_problems(entry | {"id": key}, ctx, s["approved"])
         problems += [f"{key}: {x}" for x in p]
     return problems

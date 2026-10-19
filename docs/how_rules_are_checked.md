@@ -20,7 +20,7 @@ Every rule is written the same way. Here is R-1b's rear yard, with what each lin
 
 | Line | Example | Meaning |
 |---|---|---|
-| `says` | Rear yard must be at least 25% of lot depth or 50 ft, whichever is less, but never under 20 ft. | The rule in plain English (what an architect reads and approves) |
+| `title` | Rear yard minimum (chart p.3, note 16) | A short label so you can tell rules apart. There's no retelling of the law: you read the city's own words in `sources`, and `examples` show what the rule does |
 | `check` | `rear_yard >= max(min(0.25 * lot_depth, 50), 20)` | The same rule as a yes/no question the computer can answer |
 | `applies_when` | `use == "one_family_detached"` | Which buildings it applies to (optional) |
 | `review_when` | lot depth unclear on an irregular lot | When the computer must hand it to an architect instead of deciding |

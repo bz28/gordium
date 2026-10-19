@@ -6,18 +6,18 @@ How to write a definition or a rule from a city's documents. They apply to every
 
 **Definitions have no paraphrase:** a definition is the city's own whole sentences in `sources`. (Restating definitions kept dropping limiting words, so we stopped.)
 
-For **rules**, every statement in `says` (the plain-English rule) must be backed by a quoted source in `sources`, in the city's words where possible. If you can't point to the words, don't write the statement.
+**Rules have no paraphrase either:** a rule is its quotes (the city's words), its `check` (the formula) and its `examples`. Its `title` is a one-line label of at most 80 characters, e.g. "Rear yard minimum (chart p.3, note 16)". Explanations that help a reader (arithmetic like 35 ft + 10% = 38.5 ft) go in `notes`; they're never needed to decide a result.
 
-- ✗ "At most 35 ft, measured to the **midpoint** of a pitched roof" (the code says "average height", not midpoint)
-- ✓ "At most 35 ft" + the height definition's open question about what "average height" means
+- ✗ a formula or note that measures height to the **midpoint** of a pitched roof (the code says "average height", not midpoint)
+- ✓ the height definition's open question about what "average height" means
 
-## 2. Interpretations go to `open_questions`, never into `says`
+## 2. Interpretations go to `open_questions`, never into a formula or note
 
-When the law leaves something unsettled (a word it doesn't define, a measurement it doesn't explain, a case it doesn't mention), write the question for the architects in `open_questions`. A definition or rule with open questions can't be approved until they're answered. A definition's answer is recorded in `answers` (question, answer, answered_by, answered_on); a rule's answer is written into its `says` and `check`. Either way it's part of what's approved, so it can't change afterwards without re-approval.
+When the law leaves something unsettled (a word it doesn't define, a measurement it doesn't explain, a case it doesn't mention), write the question for the architects in `open_questions`. A definition or rule with open questions can't be approved until they're answered. The answer is recorded in `answers` (question, answer, answered_by, answered_on), and the rule's `check` is updated to match. Both are part of what's approved, so they can't change afterwards without re-approval.
 
 ## 3. Every number comes from a quote
 
-Every number in a `check` formula (35 ft, 25%, 6,000 sf) must appear in a quoted source. Numbers we compute ourselves (like 38.5 ft = 35 ft + 10%) must show the arithmetic in `says` and quote every input.
+Every number in a `check` formula (35 ft, 25%, 6,000 sf) must appear in a quoted source. Numbers we compute ourselves (like 38.5 ft = 35 ft + 10%) must show the arithmetic in `notes` and quote every input; the worked examples prove it (38.5 ft passes, 39 ft fails).
 
 ## 4. Quote the exact words, including footnote markers
 

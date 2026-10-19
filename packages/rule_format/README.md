@@ -8,7 +8,7 @@ The shape every rule must have, the formula language rules are written in, and t
 - id: R-1b.rear_yard                 # district + short name
   kind: rule                         # rule: code checks it · flag: an architect must judge it
   topic: dimensions                  # from regulations/document_extraction_guide/vocabulary.yaml
-  says: Rear yard at least 25% of lot depth or 50 ft, whichever is less, never under 20 ft.
+  title: Rear yard minimum (chart p.3, note 16)   # a one-line label (≤ 80 chars), not a retelling
   applies_when: use == "one_family_detached"     # optional; otherwise applies to everything
   check: rear_yard >= max(min(0.25 * lot_depth, 50), 20)
   review_when:                                   # optional; true -> "needs review"
