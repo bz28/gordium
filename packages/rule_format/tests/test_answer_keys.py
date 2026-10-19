@@ -1,4 +1,4 @@
-"""Our hand-written R-1b against the architects' own spreadsheet check of 106 Ithaca Rd.
+"""Our draft R-1b (drafted by Claude, in 5_zoning_rules/) against the architects' own spreadsheet check of 106 Ithaca Rd.
 
 The spreadsheet is read as they sent it. Every measurement must equal the cells it names, and
 our result must equal their PASS/FAIL on every row. The other R-1b rules must not apply or pass.

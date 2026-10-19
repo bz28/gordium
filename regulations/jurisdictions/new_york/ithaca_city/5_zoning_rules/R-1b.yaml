@@ -19,10 +19,12 @@ rules:
     kind: rule
     topic: uses
     says: >-
-      Permitted primary uses in R-1b, subject to the further regulations of §325-8 and Article V: one-family
-      dwelling, detached; church or related building; public park or playground; library or fire station
-      (marked • for R-1B). A cemetery or related building, a public utility
-      structure except office, or a school and related buildings are marked SP. Uses marked - for R-1B, such as a two-family dwelling, are not allowed.
+      On the chart's Primary Uses list (§325-8A(2): permitted uses are listed, subject to the further
+      regulations of §325-8 and Article V), R-1B is marked • for: one-family dwelling, detached; church or
+      related building; public park or playground; library or fire station. It is marked SP for: cemetery
+      or related building; public utility structure except office; school and related buildings. Other
+      uses, such as two-family dwelling, are marked -. The check passes • uses, sends SP uses to review,
+      and fails the rest; what the marks mean is an open question below.
     check: use in ["one_family_detached", "church", "public_park_or_playground", "library_or_fire_station"]
     review_when:
       - when: use in ["cemetery", "public_utility_structure", "school"]
