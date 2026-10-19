@@ -1,0 +1,74 @@
+# Source documents for the City of Ithaca, NY (Chapter 325 Zoning).
+# Every file in this folder is listed here. Files are never edited.
+# sha256 is the file's fingerprint: if a single byte changes, it changes.
+# To check: shasum -a 256 <file>
+
+documents:
+
+  - file: zoning_charts_2026-04.pdf
+    title: City of Ithaca Zoning Charts (April 2026)
+    publisher: City of Ithaca
+    url: https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426
+    downloaded_on: 2026-10-19
+    sha256: 042a9a0fdbcc5734852e703f72a22c44e07e600d4757ceb604a1c13222601d9d
+    pages: 17
+    contents: >
+      Summary tables of district rules. p.2 residential uses; p.3 residential
+      dimensions (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU);
+      p.14 residential off-street parking; other pages cover commercial,
+      special purpose, West End, Southwest, Waterfront and Collegetown districts.
+    notes: >
+      A summary of Chapter 325, not the law itself. Does NOT include the
+      Southside form districts adopted Nov 2025 (see ordinance below).
+
+  - file: ordinance_no_2025-12_southside_form_districts.pdf
+    title: Ordinance No. 2025-12, adding §325-46 Southside Form Districts
+    publisher: City of Ithaca (via eCode360)
+    url: https://ecode360.com/IT1348/laws/LF2535379.pdf
+    downloaded_on: 2026-10-19
+    sha256: 147d0cebcfcb4959bcba1a14a04f7849787465381c5bbfdaefac8749f42cfc65
+    adopted_on: 2025-11-19   # "2025-12" in the name is the ordinance number, not a date
+    pages: 37
+    contents: >
+      Adds Southside form districts (TR, RT, MD-MU, UMU) and rezones parts of
+      R-2b, R-3a, R-3aa, R-3b, P-1, B-1a, B-2a, SW-2 and WEDZ-1b.
+    notes: Changes some residential lots; not reflected in the April 2026 charts.
+
+  - file: zoning_maps_2026-05.pdf
+    title: City of Ithaca Zoning Maps (2026)
+    publisher: City of Ithaca
+    url: https://ny-ithaca.civicplus.com/DocumentCenter/View/17038/COI-Zoning-Maps-2026
+    downloaded_on: 2026-10-19
+    sha256: 1a2a542c9004a123e91d24ea2b35ff05926f2bbee3feebc3080f5ec39b3c0d5f
+    pages: 9
+    created_on: 2026-05-28   # from the PDF's own metadata
+    contents: >
+      Maps of zoning districts and overlays (architects: pages 1-4 show zoning,
+      overlays, flood zones and historic districts). Page 8 covers Ithaca Road.
+    notes: >
+      The architects' workflow doc links an older version at the same address
+      (COI-Zoning-Maps-2024-1); this 2026 version is the one to use.
+
+  - file: chapter_325_zoning_2026-10.pdf
+    title: City of Ithaca Code, Chapter 325 Zoning (full text)
+    publisher: City of Ithaca (via eCode360)
+    url: https://ecode360.com/8393835
+    downloaded_on: 2026-10-19   # exported by hand by Ben (eCode360 blocks automated downloads)
+    sha256: 5ceb5a4573ff5db14b44b6f1bd1be11a4703d14febd8186115f61dbecd4719da
+    pages: 168
+    contents: >
+      The zoning law itself. Key parts for residential checks: §325-3 definitions
+      (height of building, grade plane, story, building area, yards); §325-8
+      district regulations (makes the District Regulations Chart part of the law);
+      §325-16 height; §325-17 area; §325-18 yards; §325-20 parking.
+    notes: >
+      Includes amendments through Ord. No. 2026-02 (May 6, 2026; PUDs only).
+      Does NOT yet include Ord. No. 2025-12 (Southside); eCode360 has not
+      codified it, so that ordinance PDF is kept alongside.
+
+# Needed but not in this folder yet.
+not_yet_downloaded:
+
+  - title: NYS Building Code 2025, Chapter 5 (Tables 504.3, 504.4, 506.2)
+    url: https://codes.iccsafe.org/content/NYSBC2025P1/chapter-5-general-building-heights-and-areas
+    why_missing: Copyrighted (ICC). Listed by the architects as needed; ask whether it is in the first test.
