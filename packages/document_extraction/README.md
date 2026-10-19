@@ -5,6 +5,7 @@ Step 2 of the pipeline: pulls every line of text out of each source PDF, with it
 ```bash
 python -m document_extraction           # (re)write regulations/jurisdictions/*/*/2_extracted_text/*.jsonl
 python -m document_extraction --check   # fail if any saved file differs from a fresh extraction (CI runs this)
+                                        # any other argument is rejected, so a typo can't overwrite files
 pytest packages/document_extraction
 ```
 
@@ -13,12 +14,14 @@ pytest packages/document_extraction
 One `.jsonl` file per PDF listed in `sources.yaml` (one JSON object per line):
 
 ```
-{"file": "zoning_charts_2026-04.pdf", "sha256": "042a…", "pages": 17, "extractor": "pdfplumber 0.11.10 (…)"}
-{"page": 3, "line": 42, "text": "Rear (minimum, % of depth or feet, 25%/ 25%/ …", "x0": 36.0, "top": 590.1, "x1": 571.2, "bottom": 600.3}
+{"file": "zoning_charts_2026-04.pdf", "sha256": "042a…", "pages": 17, "extractor": "pdfplumber 0.11.10 + pdfminer.six 20260107 (dedupe_chars, upright text only, extract_text_lines, superscripts marked '^')", "rotated_chars_skipped": 0}
+{"page": 3, "line": 42, "text": "Rear (minimum, % of depth or feet, 25%/ 25%/ 25% …", "x0": 106.4, "top": 877.2, "x1": 738.8, "bottom": 888.2}
 ```
 
 - The header names the exact PDF version (its fingerprint). `rule_format` rejects extracted text whose fingerprint doesn't match `sources.yaml`.
 - Positions are in PDF points (1/72 inch) from the page's top-left corner.
+- Footnote markers (characters much smaller than the rest of their line) get a `^` in front: `3/2 ^11` is the value 3/2 with footnote 11, never the value 11.
+- Sideways text (rotated labels on diagrams and maps) is left out; the header's `rotated_chars_skipped` says how many characters.
 - PDFs whose fingerprint doesn't match `sources.yaml` are refused, not extracted.
 
 ## Decisions

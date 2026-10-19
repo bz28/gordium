@@ -1,4 +1,4 @@
-{"file": "zoning_charts_2026-04.pdf", "sha256": "042a9a0fdbcc5734852e703f72a22c44e07e600d4757ceb604a1c13222601d9d", "pages": 17, "extractor": "pdfplumber 0.11.10 (dedupe_chars + extract_text_lines)"}
+{"file": "zoning_charts_2026-04.pdf", "sha256": "042a9a0fdbcc5734852e703f72a22c44e07e600d4757ceb604a1c13222601d9d", "pages": 17, "extractor": "pdfplumber 0.11.10 + pdfminer.six 20260107 (dedupe_chars, upright text only, extract_text_lines, superscripts marked '^')", "rotated_chars_skipped": 0}
 {"page": 1, "line": 1, "text": "C I T Y O F I T H ACA", "x0": 174.0, "top": 576.8, "x1": 618.0, "bottom": 636.8}
 {"page": 1, "line": 2, "text": "ZO N I N G C H A R TS", "x0": 144.2, "top": 650.0, "x1": 647.9, "bottom": 710.0}
 {"page": 1, "line": 3, "text": "APRIL 2026", "x0": 322.0, "top": 752.8, "x1": 470.2, "bottom": 782.8}
@@ -18,18 +18,18 @@
 {"page": 2, "line": 2, "text": "Single Family", "x0": 270.8, "top": 94.4, "x1": 334.0, "bottom": 106.4}
 {"page": 2, "line": 3, "text": "Two Family Residential Multi Family Residential Residential", "x0": 356.6, "top": 101.6, "x1": 664.0, "bottom": 113.6}
 {"page": 2, "line": 4, "text": "Residential", "x0": 276.5, "top": 108.8, "x1": 328.3, "bottom": 120.8}
-{"page": 2, "line": 5, "text": "R-1 1,2 R-2 1,2 R-3 Additional", "x0": 287.3, "top": 128.6, "x1": 738.8, "bottom": 141.0}
-{"page": 2, "line": 6, "text": "RU 3 Regulations", "x0": 627.2, "top": 140.1, "x1": 741.5, "bottom": 155.4}
+{"page": 2, "line": 5, "text": "R-1 ^1,2 R-2 ^1,2 R-3 Additional", "x0": 287.3, "top": 128.6, "x1": 738.8, "bottom": 141.0}
+{"page": 2, "line": 6, "text": "RU ^3 Regulations", "x0": 627.2, "top": 140.1, "x1": 741.5, "bottom": 155.4}
 {"page": 2, "line": 7, "text": "R-1A R-1B R-2A R-2B R-2C R-3A R-3AA R-3B", "x0": 268.8, "top": 151.7, "x1": 594.7, "bottom": 163.7}
 {"page": 2, "line": 8, "text": "Primary Uses", "x0": 187.3, "top": 175.0, "x1": 255.2, "bottom": 187.0}
-{"page": 2, "line": 9, "text": "One-family dwelling, detached 4 • • • • • • • • •", "x0": 104.1, "top": 197.5, "x1": 644.2, "bottom": 210.0}
-{"page": 2, "line": 10, "text": "One-family dwelling, detached, zero lot line 4 - - - - SP SP SP SP -", "x0": 44.5, "top": 220.6, "x1": 640.0, "bottom": 232.8}
-{"page": 2, "line": 11, "text": "One-family dwelling, semi-detached 4 - - • • • • • • •", "x0": 79.8, "top": 243.6, "x1": 644.2, "bottom": 256.1}
-{"page": 2, "line": 12, "text": "One-family dwelling, attached 4 - - - - SP • • • •", "x0": 107.1, "top": 266.7, "x1": 644.2, "bottom": 279.1}
-{"page": 2, "line": 13, "text": "Two-family dwelling 4 - - • • • • • • •", "x0": 155.5, "top": 289.7, "x1": 644.2, "bottom": 302.1}
-{"page": 2, "line": 14, "text": "Multiple family dwelling 4 - - - - - • • • •5", "x0": 137.1, "top": 312.7, "x1": 646.2, "bottom": 325.2}
-{"page": 2, "line": 15, "text": "Fraternity, sorority, or group house - - - - - • • • •5", "x0": 96.5, "top": 335.8, "x1": 646.2, "bottom": 348.2}
-{"page": 2, "line": 16, "text": "Dormitory - - - - - • - • •5", "x0": 208.8, "top": 358.8, "x1": 646.2, "bottom": 371.3}
+{"page": 2, "line": 9, "text": "One-family dwelling, detached ^4 • • • • • • • • •", "x0": 104.1, "top": 197.5, "x1": 644.2, "bottom": 210.0}
+{"page": 2, "line": 10, "text": "One-family dwelling, detached, zero lot line ^4 - - - - SP SP SP SP -", "x0": 44.5, "top": 220.6, "x1": 640.0, "bottom": 232.8}
+{"page": 2, "line": 11, "text": "One-family dwelling, semi-detached ^4 - - • • • • • • •", "x0": 79.8, "top": 243.6, "x1": 644.2, "bottom": 256.1}
+{"page": 2, "line": 12, "text": "One-family dwelling, attached ^4 - - - - SP • • • •", "x0": 107.1, "top": 266.7, "x1": 644.2, "bottom": 279.1}
+{"page": 2, "line": 13, "text": "Two-family dwelling ^4 - - • • • • • • •", "x0": 155.5, "top": 289.7, "x1": 644.2, "bottom": 302.1}
+{"page": 2, "line": 14, "text": "Multiple family dwelling ^4 - - - - - • • • •^5", "x0": 137.1, "top": 312.7, "x1": 646.2, "bottom": 325.2}
+{"page": 2, "line": 15, "text": "Fraternity, sorority, or group house - - - - - • • • •^5", "x0": 96.5, "top": 335.8, "x1": 646.2, "bottom": 348.2}
+{"page": 2, "line": 16, "text": "Dormitory - - - - - • - • •^5", "x0": 208.8, "top": 358.8, "x1": 646.2, "bottom": 371.3}
 {"page": 2, "line": 17, "text": "Church or related building • • • • • • • • •", "x0": 133.8, "top": 382.1, "x1": 644.2, "bottom": 394.3}
 {"page": 2, "line": 18, "text": "Public park or playground • • • • • • • • •", "x0": 134.1, "top": 405.1, "x1": 644.2, "bottom": 417.3}
 {"page": 2, "line": 19, "text": "Library or fire station • • • • • • • • •", "x0": 160.2, "top": 428.2, "x1": 644.2, "bottom": 440.4}
@@ -45,8 +45,8 @@
 {"page": 2, "line": 29, "text": "Accessory Uses", "x0": 176.6, "top": 658.8, "x1": 255.2, "bottom": 670.8}
 {"page": 2, "line": 30, "text": "Accessory Dwelling Unit • • • • • • • •", "x0": 142.2, "top": 681.6, "x1": 589.2, "bottom": 693.8}
 {"page": 2, "line": 31, "text": "Required off-street parking • • • • • • • • • §325-20", "x0": 132.6, "top": 704.7, "x1": 735.5, "bottom": 716.9}
-{"page": 2, "line": 32, "text": "Private garage •6 •6 •6 •6 •7 • • • •", "x0": 186.8, "top": 727.5, "x1": 644.2, "bottom": 739.9}
-{"page": 2, "line": 33, "text": "Structure for construction purposes 8 • • • • • • • • •", "x0": 89.3, "top": 750.5, "x1": 644.2, "bottom": 762.9}
+{"page": 2, "line": 32, "text": "Private garage •^6 •^6 •^6 •^6 •^7 • • • •", "x0": 186.8, "top": 727.5, "x1": 644.2, "bottom": 739.9}
+{"page": 2, "line": 33, "text": "Structure for construction purposes ^8 • • • • • • • • •", "x0": 89.3, "top": 750.5, "x1": 644.2, "bottom": 762.9}
 {"page": 2, "line": 34, "text": "Adult day care home • • • • • • • • •", "x0": 157.9, "top": 772.0, "x1": 644.2, "bottom": 784.3}
 {"page": 2, "line": 35, "text": "Tower for the receipt or transmission of", "x0": 77.9, "top": 796.1, "x1": 255.2, "bottom": 808.1}
 {"page": 2, "line": 36, "text": "SP SP SP SP SP SP SP SP SP §325-9B(1)(j)", "x0": 275.0, "top": 803.3, "x1": 747.1, "bottom": 815.3}
@@ -68,18 +68,18 @@
 {"page": 3, "line": 3, "text": "Single Family", "x0": 278.4, "top": 125.2, "x1": 336.4, "bottom": 136.2}
 {"page": 3, "line": 4, "text": "Two Family Residential Multi Family Residential Residential", "x0": 393.1, "top": 131.8, "x1": 748.0, "bottom": 142.8}
 {"page": 3, "line": 5, "text": "Residential", "x0": 283.7, "top": 138.4, "x1": 331.2, "bottom": 149.4}
-{"page": 3, "line": 6, "text": "R-1 R-2 R-3 1", "x0": 299.2, "top": 159.4, "x1": 621.3, "bottom": 170.7}
+{"page": 3, "line": 6, "text": "R-1 R-2 R-3 ^1", "x0": 299.2, "top": 159.4, "x1": 621.3, "bottom": 170.7}
 {"page": 3, "line": 7, "text": "RU", "x0": 717.3, "top": 170.4, "x1": 731.3, "bottom": 181.4}
-{"page": 3, "line": 8, "text": "R-1A R-1B R-2A R-2B R-2C R-3A R-3AA 2 R-3B", "x0": 272.4, "top": 181.1, "x1": 676.6, "bottom": 192.3}
-{"page": 3, "line": 9, "text": "Minimum Lot Size 3", "x0": 163.6, "top": 203.1, "x1": 252.3, "bottom": 214.4}
-{"page": 3, "line": 10, "text": "One-family dwelling, detached 10,000 sf 6,000 sf 5,000 sf 3,000 sf 2,500 sf 4 5,000 sf 5,000 sf 3,000 sf 10,000 sf", "x0": 120.0, "top": 225.2, "x1": 745.4, "bottom": 236.5}
-{"page": 3, "line": 11, "text": "One-family dwelling, detached, zero lot line - - - - 2,500 sf 4 - - - -", "x0": 65.4, "top": 247.6, "x1": 726.0, "bottom": 258.8}
-{"page": 3, "line": 12, "text": "One-family dwelling, semi-detached - - 5,000 sf 3,000 sf 2,000 sf 5 5,000 sf 5,000 sf 3,000 sf 15,000 sf", "x0": 97.7, "top": 269.9, "x1": 744.9, "bottom": 281.1}
-{"page": 3, "line": 13, "text": "One-family dwelling, attached, by conversion - - - - 1,500 sf 6 7,000 sf 7 7,000 sf 7 4,000 sf 8 16,500 sf 9", "x0": 58.3, "top": 292.2, "x1": 748.3, "bottom": 303.4}
-{"page": 3, "line": 14, "text": "One-family dwelling, attached, new construction - - - - 1,500 sf 6 6,000 sf 7 6,000 sf 7 3,500 sf 8 16,500 sf 9", "x0": 46.4, "top": 314.5, "x1": 748.3, "bottom": 325.7}
-{"page": 3, "line": 15, "text": "Two-family dwelling - - 5,000 sf 3,000 sf 2,000 sf 5 5,000 sf 5,000 sf 3,000 sf 15,000 sf", "x0": 167.1, "top": 336.8, "x1": 744.9, "bottom": 348.1}
-{"page": 3, "line": 16, "text": "Multiple family dwelling, by conversion - - - - - 7,000 sf 7 7,000 sf 7 4,000 sf 8 16,500 sf 9", "x0": 85.9, "top": 359.2, "x1": 748.3, "bottom": 370.4}
-{"page": 3, "line": 17, "text": "Multiple family dwelling, new construction - - - - - 6,000 sf 7 6,000 sf 7 3,500 sf 8 16,500 sf 9", "x0": 73.9, "top": 381.5, "x1": 748.3, "bottom": 392.7}
+{"page": 3, "line": 8, "text": "R-1A R-1B R-2A R-2B R-2C R-3A R-3AA ^2 R-3B", "x0": 272.4, "top": 181.1, "x1": 676.6, "bottom": 192.3}
+{"page": 3, "line": 9, "text": "Minimum Lot Size ^3", "x0": 163.6, "top": 203.1, "x1": 252.3, "bottom": 214.4}
+{"page": 3, "line": 10, "text": "One-family dwelling, detached 10,000 sf 6,000 sf 5,000 sf 3,000 sf 2,500 sf ^4 5,000 sf 5,000 sf 3,000 sf 10,000 sf", "x0": 120.0, "top": 225.2, "x1": 745.4, "bottom": 236.5}
+{"page": 3, "line": 11, "text": "One-family dwelling, detached, zero lot line - - - - 2,500 sf ^4 - - - -", "x0": 65.4, "top": 247.6, "x1": 726.0, "bottom": 258.8}
+{"page": 3, "line": 12, "text": "One-family dwelling, semi-detached - - 5,000 sf 3,000 sf 2,000 sf ^5 5,000 sf 5,000 sf 3,000 sf 15,000 sf", "x0": 97.7, "top": 269.9, "x1": 744.9, "bottom": 281.1}
+{"page": 3, "line": 13, "text": "One-family dwelling, attached, by conversion - - - - 1,500 sf ^6 7,000 sf ^7 7,000 sf ^7 4,000 sf ^8 16,500 sf ^9", "x0": 58.3, "top": 292.2, "x1": 748.3, "bottom": 303.4}
+{"page": 3, "line": 14, "text": "One-family dwelling, attached, new construction - - - - 1,500 sf ^6 6,000 sf ^7 6,000 sf ^7 3,500 sf ^8 16,500 sf ^9", "x0": 46.4, "top": 314.5, "x1": 748.3, "bottom": 325.7}
+{"page": 3, "line": 15, "text": "Two-family dwelling - - 5,000 sf 3,000 sf 2,000 sf ^5 5,000 sf 5,000 sf 3,000 sf 15,000 sf", "x0": 167.1, "top": 336.8, "x1": 744.9, "bottom": 348.1}
+{"page": 3, "line": 16, "text": "Multiple family dwelling, by conversion - - - - - 7,000 sf ^7 7,000 sf ^7 4,000 sf ^8 16,500 sf ^9", "x0": 85.9, "top": 359.2, "x1": 748.3, "bottom": 370.4}
+{"page": 3, "line": 17, "text": "Multiple family dwelling, new construction - - - - - 6,000 sf ^7 6,000 sf ^7 3,500 sf ^8 16,500 sf ^9", "x0": 73.9, "top": 381.5, "x1": 748.3, "bottom": 392.7}
 {"page": 3, "line": 18, "text": "Fraternity, sorority, or group house 25,000 sf 25,000 sf 25,000 sf 30,000 sf", "x0": 106.8, "top": 404.0, "x1": 745.7, "bottom": 415.0}
 {"page": 3, "line": 19, "text": "Other use 10,000 sf 7,500 sf 6,000 sf 4,000 sf 4,000 sf 6,000 sf 6,000 sf 4,000 sf 30,000 sf", "x0": 210.8, "top": 426.3, "x1": 745.7, "bottom": 437.3}
 {"page": 3, "line": 20, "text": "Minimum Lot Width", "x0": 160.7, "top": 448.9, "x1": 252.3, "bottom": 459.9}
@@ -91,21 +91,21 @@
 {"page": 3, "line": 26, "text": "Multiple family dwelling - - - - - 50 ft 50 ft 40 ft 125 ft", "x0": 150.3, "top": 582.6, "x1": 736.6, "bottom": 593.6}
 {"page": 3, "line": 27, "text": "Fraternity, sorority, or group house 100 ft 50 ft 100 ft 125 ft", "x0": 106.8, "top": 604.9, "x1": 736.6, "bottom": 615.9}
 {"page": 3, "line": 28, "text": "Other use 75 ft 60 ft 50 ft 40 ft 40 ft 50 ft 50 ft 40 ft 125 ft", "x0": 210.8, "top": 627.2, "x1": 736.6, "bottom": 638.2}
-{"page": 3, "line": 29, "text": "Maximum Building Height 10", "x0": 120.3, "top": 649.5, "x1": 252.3, "bottom": 660.8}
-{"page": 3, "line": 30, "text": "Number of stories 3 3 3 3 3 4 3/2 11 4 3", "x0": 176.7, "top": 671.6, "x1": 727.4, "bottom": 682.9}
+{"page": 3, "line": 29, "text": "Maximum Building Height ^10", "x0": 120.3, "top": 649.5, "x1": 252.3, "bottom": 660.8}
+{"page": 3, "line": 30, "text": "Number of stories 3 3 3 3 3 4 3/2 ^11 4 3", "x0": 176.7, "top": 671.6, "x1": 727.4, "bottom": 682.9}
 {"page": 3, "line": 31, "text": "Height in feet 35 ft 35 ft 35 ft 35 ft 35 ft 40 ft 35 ft 40 ft 35 ft", "x0": 196.0, "top": 694.2, "x1": 734.2, "bottom": 705.2}
 {"page": 3, "line": 32, "text": "Maximum lot coverage by buildings", "x0": 83.4, "top": 716.7, "x1": 252.3, "bottom": 727.7}
 {"page": 3, "line": 33, "text": "35%/40%", "x0": 469.8, "top": 738.8, "x1": 516.6, "bottom": 749.8}
-{"page": 3, "line": 34, "text": "Percent of lot area 20% 25% 30% 35% 35% 35% 40% 25% 13", "x0": 175.1, "top": 745.1, "x1": 738.8, "bottom": 756.4}
-{"page": 3, "line": 35, "text": "/50% 12", "x0": 475.3, "top": 751.7, "x1": 511.1, "bottom": 763.0}
+{"page": 3, "line": 34, "text": "Percent of lot area 20% 25% 30% 35% 35% 35% 40% 25% ^13", "x0": 175.1, "top": 745.1, "x1": 738.8, "bottom": 756.4}
+{"page": 3, "line": 35, "text": "/50% ^12", "x0": 475.3, "top": 751.7, "x1": 511.1, "bottom": 763.0}
 {"page": 3, "line": 36, "text": "Yard Dimensions", "x0": 173.8, "top": 774.4, "x1": 252.3, "bottom": 785.4}
 {"page": 3, "line": 37, "text": "Front (minimum) 25 ft 25 ft 25 ft 10 ft 10 ft 10 ft 10 ft 10 ft 25 ft", "x0": 185.0, "top": 796.5, "x1": 734.3, "bottom": 807.5}
-{"page": 3, "line": 38, "text": "Side (one side minimum) 10 ft 10 ft 10 ft 10 ft 10 ft /15 ft 14 10 ft 10 ft 10 ft 10 ft", "x0": 148.2, "top": 818.6, "x1": 734.1, "bottom": 829.9}
+{"page": 3, "line": 38, "text": "Side (one side minimum) 10 ft 10 ft 10 ft 10 ft 10 ft /15 ft ^14 10 ft 10 ft 10 ft 10 ft", "x0": 148.2, "top": 818.6, "x1": 734.1, "bottom": 829.9}
 {"page": 3, "line": 39, "text": "0 ft /5 ft /", "x0": 470.1, "top": 841.8, "x1": 516.3, "bottom": 852.8}
 {"page": 3, "line": 40, "text": "Side (other side minimum) 10 ft 10 ft 10 ft 5 ft 5 ft 5 ft 5 ft 10 ft", "x0": 142.7, "top": 848.4, "x1": 734.1, "bottom": 859.4}
-{"page": 3, "line": 41, "text": "10 ft 15", "x0": 478.9, "top": 854.8, "x1": 507.5, "bottom": 866.0}
+{"page": 3, "line": 41, "text": "10 ft ^15", "x0": 478.9, "top": 854.8, "x1": 507.5, "bottom": 866.0}
 {"page": 3, "line": 42, "text": "Rear (minimum, % of depth or feet, 25%/ 25%/ 25%/ 25%/ 25%/ 20%/ 25%/ 20%/ 25% /", "x0": 106.4, "top": 877.2, "x1": 738.8, "bottom": 888.2}
-{"page": 3, "line": 43, "text": "whichever is less) 50 ft 16 50 ft 16 50 ft 16 50 ft 16 50 ft 16 50 ft 16 50 ft 16 50 ft 16 50 ft 17", "x0": 179.1, "top": 890.1, "x1": 739.0, "bottom": 901.4}
+{"page": 3, "line": 43, "text": "whichever is less) 50 ft ^16 50 ft ^16 50 ft ^16 50 ft ^16 50 ft ^16 50 ft ^16 50 ft ^16 50 ft ^16 50 ft ^17", "x0": 179.1, "top": 890.1, "x1": 739.0, "bottom": 901.4}
 {"page": 3, "line": 44, "text": "NOTES: (1) For special conditions on development of property in R-3 that directly abuts R-1, see §325-9.", "x0": 36.0, "top": 914.4, "x1": 469.7, "bottom": 924.6}
 {"page": 3, "line": 45, "text": "(2) No new construction of a primary structure in the R-3aa zone shall contain a footprint that is larger than 120% of the average footprint of the existing buildings along the", "x0": 90.0, "top": 926.4, "x1": 745.0, "bottom": 936.4}
 {"page": 3, "line": 46, "text": "entire block front in which the building is located. If one or more such surrounding buildings have been demolished, then the calculation for maximum building footprint", "x0": 126.0, "top": 938.4, "x1": 741.1, "bottom": 948.4}
@@ -134,7 +134,7 @@
 {"page": 4, "line": 2, "text": "Restricted Service", "x0": 323.0, "top": 83.6, "x1": 563.8, "bottom": 94.6}
 {"page": 4, "line": 3, "text": "General Business Central Business", "x0": 411.3, "top": 90.2, "x1": 665.1, "bottom": 101.2}
 {"page": 4, "line": 4, "text": "Business Business", "x0": 326.1, "top": 96.8, "x1": 565.8, "bottom": 107.8}
-{"page": 4, "line": 5, "text": "B-1 B-2 CBD 1 Additional", "x0": 335.9, "top": 112.8, "x1": 738.5, "bottom": 126.7}
+{"page": 4, "line": 5, "text": "B-1 B-2 CBD ^1 Additional", "x0": 335.9, "top": 112.8, "x1": 738.5, "bottom": 126.7}
 {"page": 4, "line": 6, "text": "B-4 B-5 CBD-50, -60, -85, Regulations", "x0": 521.1, "top": 128.0, "x1": 741.0, "bottom": 140.3}
 {"page": 4, "line": 7, "text": "B-1A B-1B B-2A B-2C B-2D", "x0": 312.2, "top": 135.9, "x1": 501.5, "bottom": 146.9}
 {"page": 4, "line": 8, "text": "-100, -120, -140", "x0": 593.8, "top": 142.5, "x1": 666.0, "bottom": 153.5}
@@ -183,7 +183,7 @@
 {"page": 4, "line": 51, "text": "Accessory Dwelling Unit • • • • •", "x0": 194.9, "top": 848.6, "x1": 496.3, "bottom": 860.6}
 {"page": 4, "line": 52, "text": "Required off-street parking • • • • • • • • §325-20", "x0": 186.0, "top": 866.8, "x1": 735.5, "bottom": 877.8}
 {"page": 4, "line": 53, "text": "Private garage • • • • • • • •", "x0": 235.7, "top": 884.8, "x1": 635.4, "bottom": 895.8}
-{"page": 4, "line": 54, "text": "Structure for construction purposes 2 • • • • • • • •", "x0": 146.3, "top": 902.6, "x1": 635.4, "bottom": 913.8}
+{"page": 4, "line": 54, "text": "Structure for construction purposes ^2 • • • • • • • •", "x0": 146.3, "top": 902.6, "x1": 635.4, "bottom": 913.8}
 {"page": 4, "line": 55, "text": "Tower for the receipt or transmission of electronic signals or", "x0": 49.0, "top": 921.8, "x1": 298.4, "bottom": 932.8}
 {"page": 4, "line": 56, "text": "SP SP SP SP SP SP SP SP §325-9B(1)(j)", "x0": 317.9, "top": 928.4, "x1": 746.1, "bottom": 939.4}
 {"page": 4, "line": 57, "text": "generation of electricity", "x0": 198.5, "top": 935.0, "x1": 298.4, "bottom": 946.0}
@@ -197,37 +197,37 @@
 {"page": 5, "line": 1, "text": "COMMERCIAL DISTRICTS BULK +", "x0": 36.2, "top": 37.2, "x1": 597.0, "bottom": 73.2}
 {"page": 5, "line": 2, "text": "DIMENSIONAL STANDARDS", "x0": 36.2, "top": 80.4, "x1": 521.7, "bottom": 116.4}
 {"page": 5, "line": 3, "text": "Restricted Business General Business Service Business Central Business", "x0": 280.1, "top": 138.5, "x1": 717.0, "bottom": 150.5}
-{"page": 5, "line": 4, "text": "B-1 B-2 CBD 1", "x0": 315.3, "top": 166.0, "x1": 693.2, "bottom": 178.3}
+{"page": 5, "line": 4, "text": "B-1 B-2 CBD ^1", "x0": 315.3, "top": 166.0, "x1": 693.2, "bottom": 178.3}
 {"page": 5, "line": 5, "text": "B-4 B-5", "x0": 511.2, "top": 182.0, "x1": 583.2, "bottom": 194.0}
 {"page": 5, "line": 6, "text": "B-1A B-1B B-2A B-2D CBD-50, -60, -85, -100, -120, -140", "x0": 284.9, "top": 193.0, "x1": 741.7, "bottom": 205.0}
 {"page": 5, "line": 7, "text": "Minimum Lot Size", "x0": 175.2, "top": 220.1, "x1": 265.3, "bottom": 232.1}
 {"page": 5, "line": 8, "text": "One-family dwelling, detached 5,000 sf 5,000 sf 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 121.0, "top": 242.2, "x1": 680.4, "bottom": 254.2}
 {"page": 5, "line": 9, "text": "One-family dwelling, semi-detached 5,000 sf 5,000 sf 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 96.6, "top": 264.5, "x1": 680.4, "bottom": 276.5}
-{"page": 5, "line": 10, "text": "One-family dwelling, attached, by conversion 7,000 sf 2 7,000 sf 2 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 53.7, "top": 286.6, "x1": 680.4, "bottom": 298.8}
-{"page": 5, "line": 11, "text": "One-family dwelling, attached, new construction 6,000 sf 2 6,000 sf 2 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 40.6, "top": 308.9, "x1": 680.4, "bottom": 321.1}
+{"page": 5, "line": 10, "text": "One-family dwelling, attached, by conversion 7,000 sf ^2 7,000 sf ^2 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 53.7, "top": 286.6, "x1": 680.4, "bottom": 298.8}
+{"page": 5, "line": 11, "text": "One-family dwelling, attached, new construction 6,000 sf ^2 6,000 sf ^2 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 40.6, "top": 308.9, "x1": 680.4, "bottom": 321.1}
 {"page": 5, "line": 12, "text": "Two-family dwelling 5,000 sf 5,000 sf 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 172.3, "top": 331.5, "x1": 680.4, "bottom": 343.5}
-{"page": 5, "line": 13, "text": "Multiple family dwelling, by conversion 7,000 sf 2 7,000 sf 2 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 83.7, "top": 353.5, "x1": 680.4, "bottom": 365.8}
-{"page": 5, "line": 14, "text": "Multiple family dwelling, new construction 6,000 sf 2 6,000 sf 2 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 70.7, "top": 375.9, "x1": 680.4, "bottom": 388.1}
+{"page": 5, "line": 13, "text": "Multiple family dwelling, by conversion 7,000 sf ^2 7,000 sf ^2 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 83.7, "top": 353.5, "x1": 680.4, "bottom": 365.8}
+{"page": 5, "line": 14, "text": "Multiple family dwelling, new construction 6,000 sf ^2 6,000 sf ^2 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 70.7, "top": 375.9, "x1": 680.4, "bottom": 388.1}
 {"page": 5, "line": 15, "text": "Motel - - 20,000 sf 3,000 sf 3,000 sf 3,000 sf", "x0": 237.8, "top": 398.4, "x1": 594.0, "bottom": 410.4}
 {"page": 5, "line": 16, "text": "Other use 5,000 sf 3,000 sf 3,000 sf 3,000 sf 3,000 sf 3,000 sf -", "x0": 220.0, "top": 420.7, "x1": 680.4, "bottom": 432.7}
 {"page": 5, "line": 17, "text": "Minimum Lot Width", "x0": 165.4, "top": 443.3, "x1": 265.3, "bottom": 455.3}
 {"page": 5, "line": 18, "text": "Motel 40 ft 30 ft 100 ft 40 ft 40 ft 40 ft 10 ft", "x0": 237.8, "top": 465.4, "x1": 689.3, "bottom": 477.4}
 {"page": 5, "line": 19, "text": "Other use 40 ft 30 ft 40 ft 40 ft 40 ft 40 ft 10 ft", "x0": 220.0, "top": 487.7, "x1": 689.3, "bottom": 499.7}
-{"page": 5, "line": 20, "text": "Maximum Building Height 3", "x0": 124.8, "top": 509.9, "x1": 265.3, "bottom": 522.3}
-{"page": 5, "line": 21, "text": "Number of stories 4 6 4 - 4 4 - 4", "x0": 182.8, "top": 532.1, "x1": 683.8, "bottom": 544.3}
+{"page": 5, "line": 20, "text": "Maximum Building Height ^3", "x0": 124.8, "top": 509.9, "x1": 265.3, "bottom": 522.3}
+{"page": 5, "line": 21, "text": "Number of stories 4 6 4 - 4 4 - ^4", "x0": 182.8, "top": 532.1, "x1": 683.8, "bottom": 544.3}
 {"page": 5, "line": 22, "text": "Height in feet 40 ft 50 ft 40 ft 40 ft 40 ft 40 ft see note 5", "x0": 203.8, "top": 554.7, "x1": 702.9, "bottom": 566.7}
-{"page": 5, "line": 23, "text": "Minimum Building Height 3,6", "x0": 123.4, "top": 576.9, "x1": 265.3, "bottom": 589.2}
+{"page": 5, "line": 23, "text": "Minimum Building Height ^3,6", "x0": 123.4, "top": 576.9, "x1": 265.3, "bottom": 589.2}
 {"page": 5, "line": 24, "text": "Number of stories 2 2 - 2 - - 2", "x0": 182.8, "top": 599.3, "x1": 682.0, "bottom": 611.3}
 {"page": 5, "line": 25, "text": "Height in feet - 25 ft - 25 ft - - 25 ft", "x0": 203.8, "top": 621.6, "x1": 689.4, "bottom": 633.6}
 {"page": 5, "line": 26, "text": "Maximum Lot Coverage by Buildings", "x0": 76.5, "top": 644.2, "x1": 265.3, "bottom": 656.2}
-{"page": 5, "line": 27, "text": "Percent of lot area 50% 90% 50% 7 75% 50% 50% 100% 8", "x0": 181.1, "top": 672.6, "x1": 696.1, "bottom": 684.8}
+{"page": 5, "line": 27, "text": "Percent of lot area 50% 90% 50% ^7 75% 50% 50% 100% ^8", "x0": 181.1, "top": 672.6, "x1": 696.1, "bottom": 684.8}
 {"page": 5, "line": 28, "text": "Yard Dimensions", "x0": 40.0, "top": 701.9, "x1": 125.7, "bottom": 713.9}
 {"page": 5, "line": 29, "text": "Front (minimum) 5 ft 5 ft - 10 ft - 10 ft -", "x0": 191.8, "top": 724.0, "x1": 680.4, "bottom": 736.0}
 {"page": 5, "line": 30, "text": "Side (one side minimum) 10 ft 5 ft 10 ft 10 ft 10 ft 10 ft -", "x0": 151.7, "top": 746.3, "x1": 680.4, "bottom": 758.3}
 {"page": 5, "line": 31, "text": "Side (other side minimum) 5 ft 5 ft 5 ft 5 ft 5 ft 5 ft -", "x0": 145.7, "top": 769.6, "x1": 680.4, "bottom": 781.6}
 {"page": 5, "line": 32, "text": "Rear (minimum, % of depth or feet, 15%/ 10%/ 15%/ 15%/ 15%/ 15%/", "x0": 106.1, "top": 791.6, "x1": 588.1, "bottom": 803.6}
 {"page": 5, "line": 33, "text": "10 ft", "x0": 667.9, "top": 798.8, "x1": 689.3, "bottom": 810.8}
-{"page": 5, "line": 34, "text": "whichever is less) 20 ft 9 15 ft 9 20 ft 9 20 ft 9 20 ft 9 20 ft 9", "x0": 185.4, "top": 805.8, "x1": 588.5, "bottom": 818.0}
+{"page": 5, "line": 34, "text": "whichever is less) 20 ft ^9 15 ft ^9 20 ft ^9 20 ft ^9 20 ft ^9 20 ft ^9", "x0": 185.4, "top": 805.8, "x1": 588.5, "bottom": 818.0}
 {"page": 5, "line": 35, "text": "NOTES: (1) See §325-8(D).", "x0": 36.0, "top": 829.8, "x1": 186.6, "bottom": 840.0}
 {"page": 5, "line": 36, "text": "(2) For the first 1-3 units; +750 sf for each additional unit; +500 sf per room let for profit.", "x0": 90.0, "top": 841.8, "x1": 437.4, "bottom": 851.8}
 {"page": 5, "line": 37, "text": "(3) See §325-16.", "x0": 90.0, "top": 853.8, "x1": 179.1, "bottom": 863.8}
@@ -241,13 +241,13 @@
 {"page": 5, "line": 45, "text": "(9) But not less than 10 ft.", "x0": 90.0, "top": 949.8, "x1": 206.1, "bottom": 959.8}
 {"page": 6, "line": 1, "text": "SPECIAL PURPOSE DISTRICTS USE LIST", "x0": 36.2, "top": 27.1, "x1": 695.3, "bottom": 63.1}
 {"page": 6, "line": 2, "text": "Courthouse Special Use Additional Industrial Additional", "x0": 154.5, "top": 73.9, "x1": 740.2, "bottom": 86.9}
-{"page": 6, "line": 3, "text": "C-SU 1 I-1 7,8", "x0": 266.5, "top": 82.5, "x1": 670.7, "bottom": 92.7}
+{"page": 6, "line": 3, "text": "C-SU ^1 I-1 ^7,8", "x0": 266.5, "top": 82.5, "x1": 670.7, "bottom": 92.7}
 {"page": 6, "line": 4, "text": "Primary Uses Regulations Primary Uses Regulations", "x0": 40.0, "top": 88.9, "x1": 743.0, "bottom": 101.9}
-{"page": 6, "line": 5, "text": "One-family dwelling, detached 2 • Church or related buildings •", "x0": 123.0, "top": 109.5, "x1": 665.2, "bottom": 119.9}
-{"page": 6, "line": 6, "text": "One-family dwelling, semi-detached 2 • Public park or playground •", "x0": 102.8, "top": 127.5, "x1": 665.2, "bottom": 137.9}
-{"page": 6, "line": 7, "text": "One-family dwelling, attached 2 • Library or fire station •", "x0": 125.5, "top": 145.5, "x1": 665.2, "bottom": 155.9}
-{"page": 6, "line": 8, "text": "Two-family dwelling 2 • Cemetery and related buildings SP", "x0": 165.9, "top": 163.5, "x1": 665.1, "bottom": 173.9}
-{"page": 6, "line": 9, "text": "Multiple family dwelling 2 • Public utility structure except office SP", "x0": 150.5, "top": 181.5, "x1": 665.1, "bottom": 191.9}
+{"page": 6, "line": 5, "text": "One-family dwelling, detached ^2 • Church or related buildings •", "x0": 123.0, "top": 109.5, "x1": 665.2, "bottom": 119.9}
+{"page": 6, "line": 6, "text": "One-family dwelling, semi-detached ^2 • Public park or playground •", "x0": 102.8, "top": 127.5, "x1": 665.2, "bottom": 137.9}
+{"page": 6, "line": 7, "text": "One-family dwelling, attached ^2 • Library or fire station •", "x0": 125.5, "top": 145.5, "x1": 665.2, "bottom": 155.9}
+{"page": 6, "line": 8, "text": "Two-family dwelling ^2 • Cemetery and related buildings SP", "x0": 165.9, "top": 163.5, "x1": 665.1, "bottom": 173.9}
+{"page": 6, "line": 9, "text": "Multiple family dwelling ^2 • Public utility structure except office SP", "x0": 150.5, "top": 181.5, "x1": 665.1, "bottom": 191.9}
 {"page": 6, "line": 10, "text": "Dormitory • Nursery school, child day care center •", "x0": 210.2, "top": 199.7, "x1": 665.2, "bottom": 209.9}
 {"page": 6, "line": 11, "text": "Church or related buildings • Adult day care facility •", "x0": 144.3, "top": 217.7, "x1": 665.2, "bottom": 227.9}
 {"page": 6, "line": 12, "text": "Public park or playground • Neighborhood commercial facility SP", "x0": 148.0, "top": 235.7, "x1": 665.1, "bottom": 245.9}
@@ -261,7 +261,7 @@
 {"page": 6, "line": 20, "text": "Nursing, convalescent or rest home • School and related buildings •", "x0": 113.5, "top": 379.7, "x1": 665.2, "bottom": 389.9}
 {"page": 6, "line": 21, "text": "Hospital or sanitarium SP Retail store or service commercial facility •", "x0": 164.4, "top": 396.5, "x1": 665.2, "bottom": 407.9}
 {"page": 6, "line": 22, "text": "Bed-and-breakfast inn SP §325-10(C)(2) Restaurant, fast food establishment, tavern •", "x0": 162.6, "top": 414.5, "x1": 665.2, "bottom": 426.2}
-{"page": 6, "line": 23, "text": "Business or professional office •3 Club, lodge, or private social center •", "x0": 133.4, "top": 433.1, "x1": 665.2, "bottom": 444.5}
+{"page": 6, "line": 23, "text": "Business or professional office •^3 Club, lodge, or private social center •", "x0": 133.4, "top": 433.1, "x1": 665.2, "bottom": 444.5}
 {"page": 6, "line": 24, "text": "Medical or dental office • Confectionery, millinery, dressmaking and other activities", "x0": 155.7, "top": 451.1, "x1": 635.4, "bottom": 461.9}
 {"page": 6, "line": 25, "text": "•", "x0": 655.2, "top": 458.5, "x1": 665.2, "bottom": 468.5}
 {"page": 6, "line": 26, "text": "involving light hand fabrication as well as sales", "x0": 454.0, "top": 463.1, "x1": 635.4, "bottom": 473.1}
@@ -271,7 +271,7 @@
 {"page": 6, "line": 30, "text": "of public assembly", "x0": 563.4, "top": 493.1, "x1": 635.4, "bottom": 503.1}
 {"page": 6, "line": 31, "text": "Private garage •", "x0": 192.0, "top": 505.7, "x1": 284.9, "bottom": 515.9}
 {"page": 6, "line": 32, "text": "Hotel, motel • §325-22", "x0": 588.7, "top": 511.7, "x1": 735.9, "bottom": 523.1}
-{"page": 6, "line": 33, "text": "Structure for construction purposes 4 •", "x0": 110.7, "top": 523.5, "x1": 284.9, "bottom": 533.9}
+{"page": 6, "line": 33, "text": "Structure for construction purposes ^4 •", "x0": 110.7, "top": 523.5, "x1": 284.9, "bottom": 533.9}
 {"page": 6, "line": 34, "text": "Urban beverage producer •", "x0": 533.6, "top": 529.7, "x1": 665.2, "bottom": 541.1}
 {"page": 6, "line": 35, "text": "Tower for the receipt or transmission of electronic", "x0": 61.5, "top": 542.9, "x1": 248.9, "bottom": 552.9}
 {"page": 6, "line": 36, "text": "SP §325-9B(1)(j) Parking garage •", "x0": 275.1, "top": 547.7, "x1": 665.2, "bottom": 559.1}
@@ -286,24 +286,24 @@
 {"page": 6, "line": 45, "text": "Redemption center SP", "x0": 563.3, "top": 632.0, "x1": 665.1, "bottom": 643.2}
 {"page": 6, "line": 46, "text": "Industrial, warehousing, wholesaling, storage, and", "x0": 441.6, "top": 650.8, "x1": 635.4, "bottom": 660.8}
 {"page": 6, "line": 47, "text": "•", "x0": 655.2, "top": 657.0, "x1": 665.2, "bottom": 667.0}
-{"page": 6, "line": 48, "text": "Residential Mobile Home Additional handling of bulk goods 9, lumberyards, and agriculture 10", "x0": 149.7, "top": 662.6, "x1": 635.4, "bottom": 677.9}
+{"page": 6, "line": 48, "text": "Residential Mobile Home Additional handling of bulk goods ^9, lumberyards, and agriculture ^10", "x0": 149.7, "top": 662.6, "x1": 635.4, "bottom": 677.9}
 {"page": 6, "line": 49, "text": "MH-1", "x0": 268.0, "top": 673.7, "x1": 292.1, "bottom": 683.7}
 {"page": 6, "line": 50, "text": "Primary Uses Regulations Transfer station for recyclable materials •", "x0": 40.5, "top": 679.9, "x1": 665.2, "bottom": 692.9}
 {"page": 6, "line": 51, "text": "Mobile home park • Large beverage producer •", "x0": 177.5, "top": 698.4, "x1": 665.2, "bottom": 710.9}
-{"page": 6, "line": 52, "text": "Mobile home displays and sales 5 • Any use not permitted in any other zoning district SP 11", "x0": 119.1, "top": 716.2, "x1": 668.4, "bottom": 728.9}
+{"page": 6, "line": 52, "text": "Mobile home displays and sales ^5 • Any use not permitted in any other zoning district SP ^11", "x0": 119.1, "top": 716.2, "x1": 668.4, "bottom": 728.9}
 {"page": 6, "line": 53, "text": "Accessory Uses Accessory Uses", "x0": 40.5, "top": 734.6, "x1": 479.7, "bottom": 746.9}
 {"page": 6, "line": 54, "text": "Accessory uses and service buildings for residents of Required off-street parking • §325-20", "x0": 47.9, "top": 752.4, "x1": 735.9, "bottom": 764.5}
 {"page": 6, "line": 55, "text": "•", "x0": 275.1, "top": 760.7, "x1": 285.1, "bottom": 770.7}
 {"page": 6, "line": 56, "text": "mobile home parks only", "x0": 156.8, "top": 766.5, "x1": 249.4, "bottom": 776.5}
 {"page": 6, "line": 57, "text": "Private garage •", "x0": 578.4, "top": 770.4, "x1": 665.2, "bottom": 780.6}
-{"page": 6, "line": 58, "text": "Structure for construction purposes 4 •", "x0": 497.1, "top": 788.2, "x1": 665.2, "bottom": 798.6}
+{"page": 6, "line": 58, "text": "Structure for construction purposes ^4 •", "x0": 497.1, "top": 788.2, "x1": 665.2, "bottom": 798.6}
 {"page": 6, "line": 59, "text": "Tower for the receipt or transmission of electronic signals", "x0": 419.2, "top": 807.9, "x1": 635.4, "bottom": 817.9}
 {"page": 6, "line": 60, "text": "SP §325-9B(1)(j)", "x0": 655.4, "top": 813.9, "x1": 745.6, "bottom": 823.9}
 {"page": 6, "line": 61, "text": "University Additional or generation of electricity", "x0": 212.2, "top": 816.9, "x1": 635.4, "bottom": 829.9}
 {"page": 6, "line": 62, "text": "U-1", "x0": 274.4, "top": 825.7, "x1": 289.7, "bottom": 835.7}
 {"page": 6, "line": 63, "text": "Primary Uses Regulations", "x0": 40.5, "top": 831.9, "x1": 368.7, "bottom": 844.9}
 {"page": 6, "line": 64, "text": "Neighborhood parking area SP §325-20", "x0": 524.7, "top": 839.3, "x1": 735.9, "bottom": 849.3}
-{"page": 6, "line": 65, "text": "Post secondary educational institution 6 •", "x0": 101.0, "top": 852.5, "x1": 287.0, "bottom": 862.9}
+{"page": 6, "line": 65, "text": "Post secondary educational institution ^6 •", "x0": 101.0, "top": 852.5, "x1": 287.0, "bottom": 862.9}
 {"page": 6, "line": 66, "text": "Employee, customer, or public parking area • §325-20", "x0": 466.4, "top": 857.3, "x1": 735.9, "bottom": 867.5}
 {"page": 6, "line": 67, "text": "Accessory Uses", "x0": 40.5, "top": 870.9, "x1": 106.0, "bottom": 880.9}
 {"page": 6, "line": 68, "text": "Redemption Center SP", "x0": 561.2, "top": 875.3, "x1": 665.1, "bottom": 885.3}
@@ -312,7 +312,7 @@
 {"page": 6, "line": 71, "text": "Parking garage •", "x0": 191.6, "top": 906.7, "x1": 287.0, "bottom": 916.9}
 {"page": 6, "line": 72, "text": "Public and Institutional", "x0": 547.8, "top": 943.0, "x1": 636.8, "bottom": 953.0}
 {"page": 6, "line": 73, "text": "Additional", "x0": 694.8, "top": 947.8, "x1": 739.5, "bottom": 957.8}
-{"page": 6, "line": 74, "text": "NOTES: (1) See Article VIII. P-1 12", "x0": 36.0, "top": 953.3, "x1": 670.3, "bottom": 963.6}
+{"page": 6, "line": 74, "text": "NOTES: (1) See Article VIII. P-1 ^12", "x0": 36.0, "top": 953.3, "x1": 670.3, "bottom": 963.6}
 {"page": 6, "line": 75, "text": "(2) See §325-3 for occupancy requirements. Primary Uses Regulations", "x0": 90.0, "top": 959.8, "x1": 742.2, "bottom": 973.1}
 {"page": 6, "line": 76, "text": "(3) Including architects, engineers, lawyers, realtors, accounts, planning,", "x0": 90.0, "top": 974.9, "x1": 353.3, "bottom": 983.9}
 {"page": 6, "line": 77, "text": "Public recreation •", "x0": 572.6, "top": 982.5, "x1": 664.5, "bottom": 992.7}
@@ -344,11 +344,11 @@
 {"page": 7, "line": 7, "text": "Minimum Lot Size", "x0": 40.0, "top": 193.9, "x1": 130.0, "bottom": 205.9}
 {"page": 7, "line": 8, "text": "One-family dwelling, detached 3,000 sf - - - -", "x0": 157.9, "top": 218.9, "x1": 713.1, "bottom": 230.9}
 {"page": 7, "line": 9, "text": "One-family dwelling, semi-detached 3,000 sf - - - -", "x0": 133.6, "top": 244.1, "x1": 713.1, "bottom": 256.1}
-{"page": 7, "line": 10, "text": "One-family dwelling, attached, by conversion 4,000 sf 1 - - - -", "x0": 90.6, "top": 269.0, "x1": 713.1, "bottom": 281.3}
-{"page": 7, "line": 11, "text": "One-family dwelling, attached, new construction 3,500 sf 1 - - - -", "x0": 77.6, "top": 294.2, "x1": 713.1, "bottom": 306.5}
+{"page": 7, "line": 10, "text": "One-family dwelling, attached, by conversion 4,000 sf ^1 - - - -", "x0": 90.6, "top": 269.0, "x1": 713.1, "bottom": 281.3}
+{"page": 7, "line": 11, "text": "One-family dwelling, attached, new construction 3,500 sf ^1 - - - -", "x0": 77.6, "top": 294.2, "x1": 713.1, "bottom": 306.5}
 {"page": 7, "line": 12, "text": "Two-family dwelling 3,000 sf - - - -", "x0": 209.3, "top": 319.7, "x1": 713.1, "bottom": 331.7}
-{"page": 7, "line": 13, "text": "Multiple family dwelling, by conversion 4,000 sf 1 - - - -", "x0": 120.6, "top": 344.6, "x1": 713.1, "bottom": 356.9}
-{"page": 7, "line": 14, "text": "Multiple family dwelling, new construction 3,500 sf 1 - - - -", "x0": 107.6, "top": 369.8, "x1": 713.1, "bottom": 382.1}
+{"page": 7, "line": 13, "text": "Multiple family dwelling, by conversion 4,000 sf ^1 - - - -", "x0": 120.6, "top": 344.6, "x1": 713.1, "bottom": 356.9}
+{"page": 7, "line": 14, "text": "Multiple family dwelling, new construction 3,500 sf ^1 - - - -", "x0": 107.6, "top": 369.8, "x1": 713.1, "bottom": 382.1}
 {"page": 7, "line": 15, "text": "Other use 4,000 sf 5,000 sf 3,000 sf - -", "x0": 256.9, "top": 395.3, "x1": 713.1, "bottom": 407.3}
 {"page": 7, "line": 16, "text": "Mobile Home Park - - - - 5 acres", "x0": 214.5, "top": 420.5, "x1": 728.4, "bottom": 432.5}
 {"page": 7, "line": 17, "text": "Mobile Home Lot - - - - 5,000 sf", "x0": 221.5, "top": 445.7, "x1": 731.1, "bottom": 457.7}
@@ -359,19 +359,19 @@
 {"page": 7, "line": 22, "text": "Two-family dwelling 30 ft - - - -", "x0": 209.3, "top": 571.7, "x1": 713.1, "bottom": 583.7}
 {"page": 7, "line": 23, "text": "Multiple family dwelling 40 ft - - - -", "x0": 190.9, "top": 596.9, "x1": 713.1, "bottom": 608.9}
 {"page": 7, "line": 24, "text": "Other use 40 ft 50 ft 30 ft - 50 ft", "x0": 256.9, "top": 622.1, "x1": 722.3, "bottom": 634.1}
-{"page": 7, "line": 25, "text": "Maximum Building Height 2", "x0": 40.0, "top": 647.2, "x1": 181.0, "bottom": 659.5}
+{"page": 7, "line": 25, "text": "Maximum Building Height ^2", "x0": 40.0, "top": 647.2, "x1": 181.0, "bottom": 659.5}
 {"page": 7, "line": 26, "text": "Number of stories 2 4 - - 4", "x0": 219.7, "top": 672.5, "x1": 714.6, "bottom": 684.5}
-{"page": 7, "line": 27, "text": "Height in feet 30 ft 40 ft - 175 ft 3 40 ft", "x0": 240.8, "top": 697.4, "x1": 722.3, "bottom": 709.7}
-{"page": 7, "line": 28, "text": "Minimum Building Height 2", "x0": 40.0, "top": 722.8, "x1": 176.1, "bottom": 735.1}
-{"page": 7, "line": 29, "text": "Number of stories - 2 4 - - -", "x0": 219.7, "top": 747.8, "x1": 713.0, "bottom": 760.1}
+{"page": 7, "line": 27, "text": "Height in feet 30 ft 40 ft - 175 ft ^3 40 ft", "x0": 240.8, "top": 697.4, "x1": 722.3, "bottom": 709.7}
+{"page": 7, "line": 28, "text": "Minimum Building Height ^2", "x0": 40.0, "top": 722.8, "x1": 176.1, "bottom": 735.1}
+{"page": 7, "line": 29, "text": "Number of stories - 2 ^4 - - -", "x0": 219.7, "top": 747.8, "x1": 713.0, "bottom": 760.1}
 {"page": 7, "line": 30, "text": "Height in feet - - - - -", "x0": 240.8, "top": 773.3, "x1": 713.0, "bottom": 785.3}
 {"page": 7, "line": 31, "text": "Maximum Lot Coverage by Buildings", "x0": 40.0, "top": 798.7, "x1": 228.7, "bottom": 810.7}
 {"page": 7, "line": 32, "text": "Percent of lot area 40% 50% 35% 35% 35%", "x0": 218.0, "top": 823.7, "x1": 722.1, "bottom": 835.7}
 {"page": 7, "line": 33, "text": "Yard Dimensions", "x0": 40.0, "top": 849.1, "x1": 125.7, "bottom": 861.1}
-{"page": 7, "line": 34, "text": "Front (minimum) 10 ft 20 ft 25 ft 5 - 6 10 1", "x0": 228.8, "top": 873.8, "x1": 721.0, "bottom": 886.1}
-{"page": 7, "line": 35, "text": "Side (one side minimum) 10 ft 12 ft 10 ft 5 - 10 ft", "x0": 188.6, "top": 899.0, "x1": 721.9, "bottom": 911.3}
-{"page": 7, "line": 36, "text": "Side (other side minimum) 5 ft 6 ft 10 ft 5 - 5 ft", "x0": 182.6, "top": 924.2, "x1": 718.9, "bottom": 936.5}
-{"page": 7, "line": 37, "text": "Rear (minimum, % of depth or feet, whichever is less) 20%/ 25 ft 7 15% / 20 ft 8 10 ft 5 - 20%/ 25 ft 7", "x0": 60.4, "top": 949.4, "x1": 741.3, "bottom": 961.7}
+{"page": 7, "line": 34, "text": "Front (minimum) 10 ft 20 ft 25 ft ^5 - ^6 10 ^1", "x0": 228.8, "top": 873.8, "x1": 721.0, "bottom": 886.1}
+{"page": 7, "line": 35, "text": "Side (one side minimum) 10 ft 12 ft 10 ft ^5 - 10 ft", "x0": 188.6, "top": 899.0, "x1": 721.9, "bottom": 911.3}
+{"page": 7, "line": 36, "text": "Side (other side minimum) 5 ft 6 ft 10 ft ^5 - 5 ft", "x0": 182.6, "top": 924.2, "x1": 718.9, "bottom": 936.5}
+{"page": 7, "line": 37, "text": "Rear (minimum, % of depth or feet, whichever is less) 20%/ 25 ft ^7 15% / 20 ft ^8 10 ft ^5 - 20%/ 25 ft ^7", "x0": 60.4, "top": 949.4, "x1": 741.3, "bottom": 961.7}
 {"page": 7, "line": 38, "text": "NOTES: (1) For mobile home parks, no mobile home lot shall be located within 50 feet of any existing public way, nor within 30 feet of any other existing property line.", "x0": 36.0, "top": 975.7, "x1": 640.0, "bottom": 984.9}
 {"page": 7, "line": 39, "text": "(2) See §325-16.", "x0": 90.0, "top": 986.5, "x1": 173.8, "bottom": 995.5}
 {"page": 7, "line": 40, "text": "(3) Except than within 200 feet of any adjacent City residential district, the maximum height of any building shall be limited to 15 feet more than the maximum height permitted in the", "x0": 90.0, "top": 997.3, "x1": 709.7, "bottom": 1006.3}
@@ -389,14 +389,14 @@
 {"page": 8, "line": 5, "text": "WEDZ-1a WEDZ-1b", "x0": 223.0, "top": 153.3, "x1": 313.9, "bottom": 163.3}
 {"page": 8, "line": 6, "text": "Regulations", "x0": 332.3, "top": 159.3, "x1": 374.7, "bottom": 169.3}
 {"page": 8, "line": 7, "text": "Required off-street parking • •", "x0": 548.8, "top": 167.0, "x1": 733.6, "bottom": 177.0}
-{"page": 8, "line": 8, "text": "One-family dwelling, detached 1 • •", "x0": 85.4, "top": 175.9, "x1": 299.2, "bottom": 186.1}
+{"page": 8, "line": 8, "text": "One-family dwelling, detached ^1 • •", "x0": 85.4, "top": 175.9, "x1": 299.2, "bottom": 186.1}
 {"page": 8, "line": 9, "text": "Private garage • •", "x0": 594.2, "top": 185.1, "x1": 733.6, "bottom": 195.1}
-{"page": 8, "line": 10, "text": "One-family dwelling, semi-detached 1 • •", "x0": 64.9, "top": 193.9, "x1": 299.2, "bottom": 204.1}
-{"page": 8, "line": 11, "text": "Structure for construction purposes 1 • •", "x0": 513.0, "top": 202.9, "x1": 733.6, "bottom": 213.1}
-{"page": 8, "line": 12, "text": "One-family dwelling, attached 1 • •", "x0": 87.8, "top": 211.9, "x1": 299.2, "bottom": 222.1}
+{"page": 8, "line": 10, "text": "One-family dwelling, semi-detached ^1 • •", "x0": 64.9, "top": 193.9, "x1": 299.2, "bottom": 204.1}
+{"page": 8, "line": 11, "text": "Structure for construction purposes ^1 • •", "x0": 513.0, "top": 202.9, "x1": 733.6, "bottom": 213.1}
+{"page": 8, "line": 12, "text": "One-family dwelling, attached ^1 • •", "x0": 87.8, "top": 211.9, "x1": 299.2, "bottom": 222.1}
 {"page": 8, "line": 13, "text": "Tower for the receipt or transmission of electronic signals or", "x0": 424.5, "top": 221.1, "x1": 651.2, "bottom": 231.1}
-{"page": 8, "line": 14, "text": "Two-family dwelling 1 • • generation of electricity SP SP", "x0": 128.7, "top": 227.1, "x1": 733.5, "bottom": 243.1}
-{"page": 8, "line": 15, "text": "Multiple family dwelling 1 • •", "x0": 113.6, "top": 247.0, "x1": 299.2, "bottom": 257.2}
+{"page": 8, "line": 14, "text": "Two-family dwelling ^1 • • generation of electricity SP SP", "x0": 128.7, "top": 227.1, "x1": 733.5, "bottom": 243.1}
+{"page": 8, "line": 15, "text": "Multiple family dwelling ^1 • •", "x0": 113.6, "top": 247.0, "x1": 299.2, "bottom": 257.2}
 {"page": 8, "line": 16, "text": "Home occupation • •", "x0": 582.0, "top": 251.1, "x1": 733.6, "bottom": 261.1}
 {"page": 8, "line": 17, "text": "Dormitory • •", "x0": 173.3, "top": 264.3, "x1": 299.2, "bottom": 274.3}
 {"page": 8, "line": 18, "text": "Neighborhood parking area SP SP", "x0": 540.5, "top": 269.1, "x1": 733.5, "bottom": 279.1}
@@ -432,18 +432,18 @@
 {"page": 8, "line": 48, "text": "Club, lodge, or private social center • •", "x0": 73.4, "top": 605.5, "x1": 299.2, "bottom": 615.5}
 {"page": 8, "line": 49, "text": "Motel 30 ft 100 ft", "x0": 583.2, "top": 611.2, "x1": 729.8, "bottom": 621.2}
 {"page": 8, "line": 50, "text": "Confectionery, millinery, dressmaking", "x0": 67.6, "top": 623.5, "x1": 212.0, "bottom": 633.5}
-{"page": 8, "line": 51, "text": "Other use 30 ft 40 ft 1", "x0": 568.3, "top": 629.0, "x1": 730.1, "bottom": 639.2}
+{"page": 8, "line": 51, "text": "Other use 30 ft 40 ft ^1", "x0": 568.3, "top": 629.0, "x1": 730.1, "bottom": 639.2}
 {"page": 8, "line": 52, "text": "and other activities involving light hand • •", "x0": 61.9, "top": 635.5, "x1": 299.2, "bottom": 645.5}
-{"page": 8, "line": 53, "text": "fabrication as well as sales Maximum Building Height2", "x0": 108.4, "top": 647.1, "x1": 527.5, "bottom": 657.5}
+{"page": 8, "line": 53, "text": "fabrication as well as sales Maximum Building Height^2", "x0": 108.4, "top": 647.1, "x1": 527.5, "bottom": 657.5}
 {"page": 8, "line": 54, "text": "Number of stories 5 2", "x0": 537.3, "top": 665.2, "x1": 720.9, "bottom": 675.2}
 {"page": 8, "line": 55, "text": "Theater, bowling alley, auditorium, or other", "x0": 46.3, "top": 668.7, "x1": 212.0, "bottom": 678.7}
 {"page": 8, "line": 56, "text": "• •", "x0": 237.7, "top": 674.7, "x1": 299.2, "bottom": 684.7}
-{"page": 8, "line": 57, "text": "similar place of public assembly Height in feet 12 ft / story 3 12 ft / story 3,4", "x0": 88.8, "top": 680.7, "x1": 747.4, "bottom": 693.2}
-{"page": 8, "line": 58, "text": "Hotel, motel • • §325-22 Minimum Building Height 2", "x0": 165.4, "top": 701.1, "x1": 523.5, "bottom": 712.0}
+{"page": 8, "line": 57, "text": "similar place of public assembly Height in feet 12 ft / story ^3 12 ft / story ^3,4", "x0": 88.8, "top": 680.7, "x1": 747.4, "bottom": 693.2}
+{"page": 8, "line": 58, "text": "Hotel, motel • • §325-22 Minimum Building Height ^2", "x0": 165.4, "top": 701.1, "x1": 523.5, "bottom": 712.0}
 {"page": 8, "line": 59, "text": "Urban beverage producer • • Number of stories 2 1", "x0": 110.2, "top": 719.2, "x1": 720.9, "bottom": 730.0}
 {"page": 8, "line": 60, "text": "Parking garage • - Height in feet 24 ft 12 ft", "x0": 152.2, "top": 737.2, "x1": 726.5, "bottom": 748.0}
 {"page": 8, "line": 61, "text": "Gasoline station • - §325-15(F) Maximum Lot Coverage by Buildings", "x0": 149.3, "top": 755.4, "x1": 567.4, "bottom": 766.0}
-{"page": 8, "line": 62, "text": "Motor vehicle sales and service • - Percent of lot area 100%/90% 5,6 100%/90% 5,6", "x0": 90.0, "top": 773.0, "x1": 747.1, "bottom": 784.0}
+{"page": 8, "line": 62, "text": "Motor vehicle sales and service • - Percent of lot area 100%/90% ^5,6 100%/90% ^5,6", "x0": 90.0, "top": 773.0, "x1": 747.1, "bottom": 784.0}
 {"page": 8, "line": 63, "text": "Printing, heating, welding, air conditioning, Yard Dimensions", "x0": 47.3, "top": 791.4, "x1": 481.5, "bottom": 801.5}
 {"page": 8, "line": 64, "text": "• -", "x0": 237.7, "top": 797.5, "x1": 295.8, "bottom": 807.5}
 {"page": 8, "line": 65, "text": "plumbing, or similar shop", "x0": 115.0, "top": 803.5, "x1": 212.0, "bottom": 813.5}
@@ -452,10 +452,10 @@
 {"page": 8, "line": 68, "text": "Front (maximum) - -", "x0": 541.8, "top": 827.9, "x1": 719.7, "bottom": 837.9}
 {"page": 8, "line": 69, "text": "Parking lot • - §325-20", "x0": 171.4, "top": 839.7, "x1": 371.6, "bottom": 849.7}
 {"page": 8, "line": 70, "text": "Side (one side minimum) - -", "x0": 511.4, "top": 845.9, "x1": 719.7, "bottom": 855.9}
-{"page": 8, "line": 71, "text": "Recreational or cultural facility 2 • -", "x0": 89.5, "top": 859.0, "x1": 295.8, "bottom": 869.2}
+{"page": 8, "line": 71, "text": "Recreational or cultural facility ^2 • -", "x0": 89.5, "top": 859.0, "x1": 295.8, "bottom": 869.2}
 {"page": 8, "line": 72, "text": "Side (other side minimum) - -", "x0": 506.4, "top": 863.9, "x1": 719.7, "bottom": 873.9}
 {"page": 8, "line": 73, "text": "Boatel • - Rear (minimum, % of depth or feet,", "x0": 187.2, "top": 877.9, "x1": 606.1, "bottom": 890.7}
-{"page": 8, "line": 74, "text": "10 ft 10 ft 7", "x0": 637.2, "top": 886.5, "x1": 729.8, "bottom": 896.7}
+{"page": 8, "line": 74, "text": "10 ft 10 ft ^7", "x0": 637.2, "top": 886.5, "x1": 729.8, "bottom": 896.7}
 {"page": 8, "line": 75, "text": "whichever is less)", "x0": 539.5, "top": 892.7, "x1": 606.1, "bottom": 902.7}
 {"page": 8, "line": 76, "text": "Sales, rental, repairs or storage of marine", "x0": 52.9, "top": 895.9, "x1": 212.0, "bottom": 905.9}
 {"page": 8, "line": 77, "text": "related recreational equipment such", "x0": 73.9, "top": 907.9, "x1": 212.0, "bottom": 917.9}
@@ -482,15 +482,15 @@
 {"page": 9, "line": 5, "text": "PRIMARY USES SW-1 SW-2 SW-3", "x0": 36.1, "top": 146.0, "x1": 346.5, "bottom": 162.0}
 {"page": 9, "line": 6, "text": "Regulations", "x0": 367.4, "top": 155.6, "x1": 418.3, "bottom": 167.6}
 {"page": 9, "line": 7, "text": "Primary Uses", "x0": 454.5, "top": 162.4, "x1": 522.4, "bottom": 174.4}
-{"page": 9, "line": 8, "text": "One-family dwelling, detached 1 • • •", "x0": 84.5, "top": 172.9, "x1": 338.6, "bottom": 185.2}
+{"page": 9, "line": 8, "text": "One-family dwelling, detached ^1 • • •", "x0": 84.5, "top": 172.9, "x1": 338.6, "bottom": 185.2}
 {"page": 9, "line": 9, "text": "Required off-street parking • • •", "x0": 515.4, "top": 180.2, "x1": 743.1, "bottom": 192.2}
-{"page": 9, "line": 10, "text": "One-family dwelling, semi-detached 1 • • •", "x0": 60.0, "top": 190.9, "x1": 338.6, "bottom": 203.2}
+{"page": 9, "line": 10, "text": "One-family dwelling, semi-detached ^1 • • •", "x0": 60.0, "top": 190.9, "x1": 338.6, "bottom": 203.2}
 {"page": 9, "line": 11, "text": "Private garage • • •", "x0": 569.9, "top": 198.2, "x1": 743.1, "bottom": 210.2}
-{"page": 9, "line": 12, "text": "One-family dwelling, attached 1 • • •", "x0": 87.5, "top": 208.9, "x1": 338.6, "bottom": 221.2}
-{"page": 9, "line": 13, "text": "Structure for construction purposes 1 • • •", "x0": 472.3, "top": 216.0, "x1": 743.1, "bottom": 228.2}
-{"page": 9, "line": 14, "text": "Two-family dwelling 1 • • •", "x0": 136.5, "top": 226.9, "x1": 338.6, "bottom": 239.2}
+{"page": 9, "line": 12, "text": "One-family dwelling, attached ^1 • • •", "x0": 87.5, "top": 208.9, "x1": 338.6, "bottom": 221.2}
+{"page": 9, "line": 13, "text": "Structure for construction purposes ^1 • • •", "x0": 472.3, "top": 216.0, "x1": 743.1, "bottom": 228.2}
+{"page": 9, "line": 14, "text": "Two-family dwelling ^1 • • •", "x0": 136.5, "top": 226.9, "x1": 338.6, "bottom": 239.2}
 {"page": 9, "line": 15, "text": "Tower for the receipt or transmission", "x0": 472.9, "top": 239.3, "x1": 638.2, "bottom": 251.3}
-{"page": 9, "line": 16, "text": "Multiple family dwelling 1 • • •", "x0": 118.4, "top": 247.4, "x1": 338.6, "bottom": 259.6}
+{"page": 9, "line": 16, "text": "Multiple family dwelling ^1 • • •", "x0": 118.4, "top": 247.4, "x1": 338.6, "bottom": 259.6}
 {"page": 9, "line": 17, "text": "of electronic signals or generation of SP SP SP", "x0": 469.5, "top": 253.7, "x1": 742.9, "bottom": 265.7}
 {"page": 9, "line": 18, "text": "Dormitory • • • electricity", "x0": 190.0, "top": 268.1, "x1": 638.2, "bottom": 280.1}
 {"page": 9, "line": 19, "text": "Church or related buildings • • •", "x0": 110.9, "top": 286.1, "x1": 338.6, "bottom": 298.1}
@@ -515,7 +515,7 @@
 {"page": 9, "line": 38, "text": "BULK + DIMENSIONAL", "x0": 450.1, "top": 477.3, "x1": 632.0, "bottom": 493.3}
 {"page": 9, "line": 39, "text": "Funeral home or mortuary • • •", "x0": 116.2, "top": 483.2, "x1": 338.6, "bottom": 495.2}
 {"page": 9, "line": 40, "text": "REQUIREMENTS", "x0": 450.1, "top": 496.5, "x1": 578.0, "bottom": 512.5}
-{"page": 9, "line": 41, "text": "Business or professional office • 2 • • 2 SW-1 1 SW-2 1 SW-3 1", "x0": 97.8, "top": 501.0, "x1": 748.2, "bottom": 514.2}
+{"page": 9, "line": 41, "text": "Business or professional office • ^2 • • ^2 SW-1 ^1 SW-2 ^1 SW-3 ^1", "x0": 97.8, "top": 501.0, "x1": 748.2, "bottom": 514.2}
 {"page": 9, "line": 42, "text": "Medical or dental office • • •", "x0": 124.6, "top": 519.2, "x1": 340.0, "bottom": 531.2}
 {"page": 9, "line": 43, "text": "Minimum Lot Size", "x0": 454.0, "top": 523.5, "x1": 544.0, "bottom": 535.5}
 {"page": 9, "line": 44, "text": "Bank or monetary institution • • •", "x0": 108.1, "top": 537.2, "x1": 338.6, "bottom": 549.2}
@@ -551,9 +551,9 @@
 {"page": 9, "line": 74, "text": "conditioning, plumbing, or similar shop Side (other side minimum) - - -", "x0": 57.2, "top": 837.3, "x1": 732.9, "bottom": 851.8}
 {"page": 9, "line": 75, "text": "Redemption center - SP -", "x0": 150.0, "top": 857.3, "x1": 334.6, "bottom": 869.3}
 {"page": 9, "line": 76, "text": "Rear (minimum, % of depth 15%/ 15%/ 15%/", "x0": 466.2, "top": 870.6, "x1": 744.9, "bottom": 882.6}
-{"page": 9, "line": 77, "text": "Light industrial and manufacturing 3 • • •", "x0": 73.7, "top": 875.1, "x1": 338.6, "bottom": 887.4}
-{"page": 9, "line": 78, "text": "or feet, whichever is less) 20 ft 2 20 ft 2 20 ft 2", "x0": 475.2, "top": 884.8, "x1": 745.3, "bottom": 897.0}
-{"page": 9, "line": 79, "text": "Recreational or cultural facility 4 • • •", "x0": 89.5, "top": 893.9, "x1": 338.6, "bottom": 906.2}
+{"page": 9, "line": 77, "text": "Light industrial and manufacturing ^3 • • •", "x0": 73.7, "top": 875.1, "x1": 338.6, "bottom": 887.4}
+{"page": 9, "line": 78, "text": "or feet, whichever is less) 20 ft ^2 20 ft ^2 20 ft ^2", "x0": 475.2, "top": 884.8, "x1": 745.3, "bottom": 897.0}
+{"page": 9, "line": 79, "text": "Recreational or cultural facility ^4 • • •", "x0": 89.5, "top": 893.9, "x1": 338.6, "bottom": 906.2}
 {"page": 9, "line": 80, "text": "NOTES: (1) See §325-3 for occupancy requirements. NOTES: (1) See §325-29.2 for additional restrictions in this district.", "x0": 36.0, "top": 918.8, "x1": 721.9, "bottom": 928.3}
 {"page": 9, "line": 81, "text": "(2) Permitted if the office is minimum of 25,000 sf with a single tenant. (2) But not less than 10 feet.", "x0": 90.0, "top": 929.6, "x1": 620.6, "bottom": 938.9}
 {"page": 9, "line": 82, "text": "(3) Including wholesaling, warehousing, storage and handling of bulk goods, lumberyards,", "x0": 90.0, "top": 940.7, "x1": 417.0, "bottom": 949.7}
@@ -567,7 +567,7 @@
 {"page": 10, "line": 6, "text": "District", "x0": 566.2, "top": 87.4, "x1": 593.0, "bottom": 97.4}
 {"page": 10, "line": 7, "text": "WE/WF CSD ND MD", "x0": 515.2, "top": 103.5, "x1": 672.3, "bottom": 113.5}
 {"page": 10, "line": 8, "text": "Primary Uses", "x0": 40.5, "top": 120.0, "x1": 97.1, "bottom": 130.0}
-{"page": 10, "line": 9, "text": "Multiple family dwelling 1 • •2 • •", "x0": 404.5, "top": 136.2, "x1": 669.6, "bottom": 146.4}
+{"page": 10, "line": 9, "text": "Multiple family dwelling ^1 • •^2 • •", "x0": 404.5, "top": 136.2, "x1": 669.6, "bottom": 146.4}
 {"page": 10, "line": 10, "text": "Church or related buildings • • • •", "x0": 398.2, "top": 152.9, "x1": 669.6, "bottom": 162.9}
 {"page": 10, "line": 11, "text": "Public park or playground • • • •", "x0": 401.9, "top": 169.5, "x1": 669.6, "bottom": 179.5}
 {"page": 10, "line": 12, "text": "Library or fire station • • • •", "x0": 423.7, "top": 186.1, "x1": 669.6, "bottom": 196.1}
@@ -585,19 +585,19 @@
 {"page": 10, "line": 24, "text": "Bank or monetary institution • • • •", "x0": 395.9, "top": 384.8, "x1": 669.6, "bottom": 394.8}
 {"page": 10, "line": 25, "text": "Office of government • • • •", "x0": 420.7, "top": 401.3, "x1": 669.6, "bottom": 411.3}
 {"page": 10, "line": 26, "text": "Retail store or service commercial facility • • • •", "x0": 346.4, "top": 417.9, "x1": 669.6, "bottom": 427.9}
-{"page": 10, "line": 27, "text": "Restaurant, fast food establishment, tavern • • •3 •3", "x0": 341.5, "top": 434.3, "x1": 671.2, "bottom": 444.5}
+{"page": 10, "line": 27, "text": "Restaurant, fast food establishment, tavern • • •^3 •^3", "x0": 341.5, "top": 434.3, "x1": 671.2, "bottom": 444.5}
 {"page": 10, "line": 28, "text": "Club, lodge, or private social center • • • •", "x0": 364.3, "top": 451.0, "x1": 669.6, "bottom": 461.0}
 {"page": 10, "line": 29, "text": "Confectionery, millinery, dressmaking and other activities involving light hand fabrication as well as sales • • - •", "x0": 100.1, "top": 467.6, "x1": 669.6, "bottom": 477.6}
 {"page": 10, "line": 30, "text": "Theater, bowling alley, auditorium, or other similar place of public assembly • • • •", "x0": 211.7, "top": 484.1, "x1": 669.6, "bottom": 494.1}
 {"page": 10, "line": 31, "text": "Hotel, motel • • • • §325-22", "x0": 456.3, "top": 500.7, "x1": 738.0, "bottom": 510.7}
 {"page": 10, "line": 32, "text": "Parking garage SP - - -", "x0": 443.1, "top": 517.3, "x1": 666.2, "bottom": 527.3}
 {"page": 10, "line": 33, "text": "Redemption center SP SP - -", "x0": 430.8, "top": 533.8, "x1": 666.2, "bottom": 543.8}
-{"page": 10, "line": 34, "text": "Light industrial and manufacturing 4 - • - -", "x0": 367.2, "top": 550.2, "x1": 666.2, "bottom": 560.4}
+{"page": 10, "line": 34, "text": "Light industrial and manufacturing ^4 - • - -", "x0": 367.2, "top": 550.2, "x1": 666.2, "bottom": 560.4}
 {"page": 10, "line": 35, "text": "Urban beverage producer • • • •", "x0": 401.1, "top": 566.9, "x1": 669.6, "bottom": 576.9}
 {"page": 10, "line": 36, "text": "Large beverage producer - • - -", "x0": 404.1, "top": 583.5, "x1": 666.2, "bottom": 593.5}
 {"page": 10, "line": 37, "text": "Food production facility - • - •", "x0": 411.6, "top": 600.1, "x1": 669.6, "bottom": 610.1}
-{"page": 10, "line": 38, "text": "Multi-level storage facilities - •5 - -", "x0": 397.6, "top": 616.4, "x1": 666.2, "bottom": 626.6}
-{"page": 10, "line": 39, "text": "Recreational or cultural facility 6 - - • •", "x0": 380.4, "top": 633.0, "x1": 669.6, "bottom": 643.2}
+{"page": 10, "line": 38, "text": "Multi-level storage facilities - •^5 - -", "x0": 397.6, "top": 616.4, "x1": 666.2, "bottom": 626.6}
+{"page": 10, "line": 39, "text": "Recreational or cultural facility ^6 - - • •", "x0": 380.4, "top": 633.0, "x1": 669.6, "bottom": 643.2}
 {"page": 10, "line": 40, "text": "Boatel - - • •", "x0": 478.1, "top": 649.7, "x1": 669.6, "bottom": 659.7}
 {"page": 10, "line": 41, "text": "Sales, rental, repairs or storage of marine related recreational equipment such as boats, marine engines, sail cabins", "x0": 60.0, "top": 666.6, "x1": 502.9, "bottom": 676.6}
 {"page": 10, "line": 42, "text": "• • • •", "x0": 528.2, "top": 672.6, "x1": 669.6, "bottom": 682.6}
@@ -608,7 +608,7 @@
 {"page": 10, "line": 47, "text": "Required off-street parking • • • • §325-20", "x0": 400.5, "top": 745.1, "x1": 738.1, "bottom": 755.1}
 {"page": 10, "line": 48, "text": "Parking garage • • • •", "x0": 443.1, "top": 761.7, "x1": 669.6, "bottom": 771.7}
 {"page": 10, "line": 49, "text": "Private garage • • • •", "x0": 445.9, "top": 778.2, "x1": 669.6, "bottom": 788.2}
-{"page": 10, "line": 50, "text": "Structure for construction purposes 7 • • • •", "x0": 364.6, "top": 794.6, "x1": 669.6, "bottom": 804.8}
+{"page": 10, "line": 50, "text": "Structure for construction purposes ^7 • • • •", "x0": 364.6, "top": 794.6, "x1": 669.6, "bottom": 804.8}
 {"page": 10, "line": 51, "text": "Tower for the receipt or transmission of electronic signals or generation of electricity SP SP SP SP §325-9B(1)(j)", "x0": 183.0, "top": 811.4, "x1": 747.8, "bottom": 821.4}
 {"page": 10, "line": 52, "text": "Home occupation • • • •", "x0": 433.7, "top": 827.9, "x1": 669.6, "bottom": 837.9}
 {"page": 10, "line": 53, "text": "Neighborhood parking area SP SP SP SP §325-20", "x0": 392.2, "top": 844.5, "x1": 738.1, "bottom": 854.5}
@@ -620,7 +620,7 @@
 {"page": 10, "line": 59, "text": "Parking lot • • • • §325-20", "x0": 462.3, "top": 943.8, "x1": 738.1, "bottom": 953.8}
 {"page": 10, "line": 60, "text": "Dock • • • •", "x0": 482.7, "top": 960.4, "x1": 669.6, "bottom": 970.4}
 {"page": 10, "line": 61, "text": "Outdoor storage of materials • • • •", "x0": 390.9, "top": 977.0, "x1": 669.6, "bottom": 987.0}
-{"page": 10, "line": 62, "text": "Storage of marine related recreation equipment such as boats, marine engines, sails, cabin equipment 8 • • • •", "x0": 106.0, "top": 993.3, "x1": 669.6, "bottom": 1003.5}
+{"page": 10, "line": 62, "text": "Storage of marine related recreation equipment such as boats, marine engines, sails, cabin equipment ^8 • • • •", "x0": 106.0, "top": 993.3, "x1": 669.6, "bottom": 1003.5}
 {"page": 10, "line": 63, "text": "Confectionery, millinery, dressmaking and other activities involving light hand fabrication as well as sales - - • •", "x0": 100.1, "top": 1010.1, "x1": 669.6, "bottom": 1020.1}
 {"page": 10, "line": 64, "text": "Drive-thru banking services - - - •", "x0": 397.6, "top": 1026.6, "x1": 669.6, "bottom": 1036.6}
 {"page": 10, "line": 65, "text": "NOTES: (1) See §325-3 for occupancy requirements.", "x0": 36.0, "top": 1047.7, "x1": 265.4, "bottom": 1056.8}
@@ -634,8 +634,8 @@
 {"page": 11, "line": 1, "text": "WATERFRONT DISTRICTS BULK +", "x0": 36.2, "top": 37.2, "x1": 595.1, "bottom": 73.2}
 {"page": 11, "line": 2, "text": "DIMENSIONAL REQUIREMENTS", "x0": 36.2, "top": 80.4, "x1": 583.1, "bottom": 116.4}
 {"page": 11, "line": 3, "text": "Cherry Street Newman Market", "x0": 521.7, "top": 150.1, "x1": 735.7, "bottom": 162.1}
-{"page": 11, "line": 4, "text": "West End Waterfront 1", "x0": 366.9, "top": 156.9, "x1": 472.3, "bottom": 169.3}
-{"page": 11, "line": 5, "text": "District 1 District 1 District 1", "x0": 533.7, "top": 164.1, "x1": 738.0, "bottom": 176.5}
+{"page": 11, "line": 4, "text": "West End Waterfront ^1", "x0": 366.9, "top": 156.9, "x1": 472.3, "bottom": 169.3}
+{"page": 11, "line": 5, "text": "District ^1 District ^1 District ^1", "x0": 533.7, "top": 164.1, "x1": 738.0, "bottom": 176.5}
 {"page": 11, "line": 6, "text": "WE/WF CSD ND MDI-1", "x0": 398.0, "top": 182.1, "x1": 735.2, "bottom": 194.1}
 {"page": 11, "line": 7, "text": "Minimum Lot Size", "x0": 40.0, "top": 200.1, "x1": 130.0, "bottom": 212.1}
 {"page": 11, "line": 8, "text": "All uses - - - -", "x0": 296.0, "top": 217.8, "x1": 720.3, "bottom": 229.8}
@@ -643,21 +643,21 @@
 {"page": 11, "line": 10, "text": "All uses - - - -", "x0": 296.0, "top": 253.8, "x1": 720.3, "bottom": 265.8}
 {"page": 11, "line": 11, "text": "Minimum Building Frontage", "x0": 40.0, "top": 272.1, "x1": 181.4, "bottom": 284.1}
 {"page": 11, "line": 12, "text": "Percent of Street Frontage 60% - - -", "x0": 212.5, "top": 289.8, "x1": 720.3, "bottom": 301.8}
-{"page": 11, "line": 13, "text": "Maximum Building Height 2", "x0": 40.0, "top": 307.7, "x1": 181.0, "bottom": 320.1}
+{"page": 11, "line": 13, "text": "Maximum Building Height ^2", "x0": 40.0, "top": 307.7, "x1": 181.0, "bottom": 320.1}
 {"page": 11, "line": 14, "text": "Number of stories 5 5 5 5", "x0": 248.5, "top": 325.8, "x1": 721.9, "bottom": 337.8}
 {"page": 11, "line": 15, "text": "Height in feet 63 63 ft 63 ft 63 ft", "x0": 269.6, "top": 343.8, "x1": 729.6, "bottom": 355.8}
-{"page": 11, "line": 16, "text": "Minimum Building Height 2", "x0": 40.0, "top": 361.7, "x1": 176.1, "bottom": 374.1}
-{"page": 11, "line": 17, "text": "Number of stories 2 3,4,6 2 4,5,6 2 4,6 2 4,6", "x0": 248.5, "top": 379.6, "x1": 727.8, "bottom": 391.8}
+{"page": 11, "line": 16, "text": "Minimum Building Height ^2", "x0": 40.0, "top": 361.7, "x1": 176.1, "bottom": 374.1}
+{"page": 11, "line": 17, "text": "Number of stories 2 ^3,4,6 2 ^4,5,6 2 ^4,6 2 ^4,6", "x0": 248.5, "top": 379.6, "x1": 727.8, "bottom": 391.8}
 {"page": 11, "line": 18, "text": "Height in feet 25 ft - 25 ft 25 ft", "x0": 269.6, "top": 397.8, "x1": 729.4, "bottom": 409.8}
 {"page": 11, "line": 19, "text": "Maximum Lot Coverage by Buildings", "x0": 40.0, "top": 416.1, "x1": 228.7, "bottom": 428.1}
-{"page": 11, "line": 20, "text": "Percent of lot area 100% 7 70% 7 100% 7 100% 7", "x0": 246.8, "top": 433.6, "x1": 736.0, "bottom": 445.8}
+{"page": 11, "line": 20, "text": "Percent of lot area 100% ^7 70% ^7 100% ^7 100% ^7", "x0": 246.8, "top": 433.6, "x1": 736.0, "bottom": 445.8}
 {"page": 11, "line": 21, "text": "Minimum Lot Coverage by Green Space", "x0": 40.0, "top": 452.1, "x1": 243.9, "bottom": 464.1}
 {"page": 11, "line": 22, "text": "Percent of lot area - 15% - -", "x0": 246.8, "top": 469.8, "x1": 720.5, "bottom": 481.8}
 {"page": 11, "line": 23, "text": "Yard Dimensions", "x0": 40.0, "top": 488.1, "x1": 125.7, "bottom": 500.1}
-{"page": 11, "line": 24, "text": "Front (minimum) 15 8,9 15 9 15 9 15 9", "x0": 257.6, "top": 505.6, "x1": 728.0, "bottom": 517.8}
-{"page": 11, "line": 25, "text": "Side (one side minimum) 5 ft 10 10 ft 10 5 ft 10 5 ft 10", "x0": 217.4, "top": 523.6, "x1": 731.3, "bottom": 535.8}
-{"page": 11, "line": 26, "text": "Side (other side minimum) 5 ft 10 10 ft 10 5 ft 10 5 ft 10", "x0": 211.4, "top": 541.6, "x1": 731.3, "bottom": 553.8}
-{"page": 11, "line": 27, "text": "Rear (minimum, % of depth or feet, whichever is less) 10 ft / 20 ft 11 10 ft / 25 ft 11 10 ft / 20 ft 11 10 ft / 20 ft 11", "x0": 89.2, "top": 559.6, "x1": 751.0, "bottom": 571.8}
+{"page": 11, "line": 24, "text": "Front (minimum) 15 ^8,9 15 ^9 15 ^9 15 ^9", "x0": 257.6, "top": 505.6, "x1": 728.0, "bottom": 517.8}
+{"page": 11, "line": 25, "text": "Side (one side minimum) 5 ft ^10 10 ft ^10 5 ft ^10 5 ft ^10", "x0": 217.4, "top": 523.6, "x1": 731.3, "bottom": 535.8}
+{"page": 11, "line": 26, "text": "Side (other side minimum) 5 ft ^10 10 ft ^10 5 ft ^10 5 ft ^10", "x0": 211.4, "top": 541.6, "x1": 731.3, "bottom": 553.8}
+{"page": 11, "line": 27, "text": "Rear (minimum, % of depth or feet, whichever is less) 10 ft / 20 ft ^11 10 ft / 25 ft ^11 10 ft / 20 ft ^11 10 ft / 20 ft ^11", "x0": 89.2, "top": 559.6, "x1": 751.0, "bottom": 571.8}
 {"page": 11, "line": 28, "text": "NOTES: (1) See §325-8C for additional restrictions in this district.", "x0": 36.0, "top": 582.3, "x1": 302.7, "bottom": 591.5}
 {"page": 11, "line": 29, "text": "(2) See §325-16.", "x0": 90.0, "top": 593.1, "x1": 173.8, "bottom": 602.1}
 {"page": 11, "line": 30, "text": "(3) Only for non-water dependent uses.", "x0": 90.0, "top": 603.9, "x1": 247.3, "bottom": 612.9}
@@ -672,17 +672,17 @@
 {"page": 11, "line": 39, "text": "(11) The first number applies to properties not located directly adjacent to the water, the second number applies to properties located along the waterfront - and the distanced is measured", "x0": 90.0, "top": 701.1, "x1": 732.3, "bottom": 710.1}
 {"page": 11, "line": 40, "text": "from the top of the bank.", "x0": 126.0, "top": 711.9, "x1": 207.0, "bottom": 720.9}
 {"page": 12, "line": 1, "text": "COLLEGETOWN DISTRICTS USE LIST", "x0": 36.2, "top": 37.2, "x1": 653.6, "bottom": 73.2}
-{"page": 12, "line": 2, "text": "Collegetown Residential 1 Mixed Use 1", "x0": 385.6, "top": 95.3, "x1": 648.4, "bottom": 107.6}
+{"page": 12, "line": 2, "text": "Collegetown Residential ^1 Mixed Use ^1", "x0": 385.6, "top": 95.3, "x1": 648.4, "bottom": 107.6}
 {"page": 12, "line": 3, "text": "Additional", "x0": 692.1, "top": 109.5, "x1": 742.1, "bottom": 121.5}
 {"page": 12, "line": 4, "text": "CR MU", "x0": 439.3, "top": 116.7, "x1": 628.6, "bottom": 128.7}
 {"page": 12, "line": 5, "text": "Regulations", "x0": 689.4, "top": 123.9, "x1": 744.8, "bottom": 135.9}
 {"page": 12, "line": 6, "text": "CR-1 CR-2 CR-3 CR-4 MU-1 MU-2", "x0": 348.0, "top": 137.6, "x1": 662.3, "bottom": 149.6}
 {"page": 12, "line": 7, "text": "Permitted Uses", "x0": 40.0, "top": 159.2, "x1": 116.0, "bottom": 171.2}
-{"page": 12, "line": 8, "text": "One-family dwelling, detached 2 • • • • • •", "x0": 175.2, "top": 180.3, "x1": 654.5, "bottom": 193.4}
-{"page": 12, "line": 9, "text": "One-family dwelling, semi-detached 2 - • • • • •", "x0": 150.7, "top": 201.9, "x1": 654.5, "bottom": 215.0}
-{"page": 12, "line": 10, "text": "One-family dwelling, attached 2 - - • • • •", "x0": 178.2, "top": 223.5, "x1": 654.5, "bottom": 236.6}
-{"page": 12, "line": 11, "text": "Two-family dwelling 2 - • • • • •", "x0": 227.3, "top": 245.1, "x1": 654.5, "bottom": 258.2}
-{"page": 12, "line": 12, "text": "Multiple family dwelling 2 - - • • • •", "x0": 209.1, "top": 266.7, "x1": 654.5, "bottom": 279.8}
+{"page": 12, "line": 8, "text": "One-family dwelling, detached ^2 • • • • • •", "x0": 175.2, "top": 180.3, "x1": 654.5, "bottom": 193.4}
+{"page": 12, "line": 9, "text": "One-family dwelling, semi-detached ^2 - • • • • •", "x0": 150.7, "top": 201.9, "x1": 654.5, "bottom": 215.0}
+{"page": 12, "line": 10, "text": "One-family dwelling, attached ^2 - - • • • •", "x0": 178.2, "top": 223.5, "x1": 654.5, "bottom": 236.6}
+{"page": 12, "line": 11, "text": "Two-family dwelling ^2 - • • • • •", "x0": 227.3, "top": 245.1, "x1": 654.5, "bottom": 258.2}
+{"page": 12, "line": 12, "text": "Multiple family dwelling ^2 - - • • • •", "x0": 209.1, "top": 266.7, "x1": 654.5, "bottom": 279.8}
 {"page": 12, "line": 13, "text": "Church or related building • • • • • •", "x0": 205.8, "top": 288.4, "x1": 654.5, "bottom": 301.4}
 {"page": 12, "line": 14, "text": "Public park or playground • • • • • •", "x0": 206.1, "top": 310.0, "x1": 654.5, "bottom": 323.0}
 {"page": 12, "line": 15, "text": "Library or fire station • • • • • •", "x0": 232.2, "top": 331.6, "x1": 654.5, "bottom": 344.6}
@@ -714,13 +714,13 @@
 {"page": 12, "line": 41, "text": "Accessory Uses", "x0": 40.0, "top": 827.1, "x1": 118.6, "bottom": 839.1}
 {"page": 12, "line": 42, "text": "Accessory Dwelling Unit • • •", "x0": 214.2, "top": 848.3, "x1": 481.7, "bottom": 861.3}
 {"page": 12, "line": 43, "text": "Required off-street parking • • • • • • §325-20", "x0": 204.6, "top": 869.9, "x1": 738.8, "bottom": 882.9}
-{"page": 12, "line": 44, "text": "Private garage •3 •3 •4 •4 •4 •4", "x0": 258.8, "top": 891.0, "x1": 656.7, "bottom": 904.5}
-{"page": 12, "line": 45, "text": "Structures for construction purposes 5 • • • • • •", "x0": 157.1, "top": 913.0, "x1": 654.5, "bottom": 926.1}
+{"page": 12, "line": 44, "text": "Private garage •^3 •^3 •^4 •^4 •^4 •^4", "x0": 258.8, "top": 891.0, "x1": 656.7, "bottom": 904.5}
+{"page": 12, "line": 45, "text": "Structures for construction purposes ^5 • • • • • •", "x0": 157.1, "top": 913.0, "x1": 654.5, "bottom": 926.1}
 {"page": 12, "line": 46, "text": "Tower for the receipt or transmission of electronic signals or", "x0": 55.1, "top": 932.6, "x1": 327.2, "bottom": 944.6}
 {"page": 12, "line": 47, "text": "SP SP SP SP SP SP §325-9B(1)(j)", "x0": 354.2, "top": 939.8, "x1": 750.5, "bottom": 951.8}
 {"page": 12, "line": 48, "text": "generation of electricity", "x0": 218.2, "top": 947.0, "x1": 327.2, "bottom": 959.0}
 {"page": 12, "line": 49, "text": "Adult day care home • • • • • •", "x0": 229.9, "top": 966.3, "x1": 654.5, "bottom": 979.3}
-{"page": 12, "line": 50, "text": "Home occupations •6 •6 •6 •6 •6 •6 §325-9B(1)(i)", "x0": 240.0, "top": 987.4, "x1": 750.5, "bottom": 1000.9}
+{"page": 12, "line": 50, "text": "Home occupations •^6 •^6 •^6 •^6 •^6 •^6 §325-9B(1)(i)", "x0": 240.0, "top": 987.4, "x1": 750.5, "bottom": 1000.9}
 {"page": 12, "line": 51, "text": "Neighborhood parking area - - • • • • §325-20B", "x0": 194.4, "top": 1009.3, "x1": 742.0, "bottom": 1022.5}
 {"page": 12, "line": 52, "text": "Employee, customer, or public parking area - - - - - • §325-20", "x0": 124.5, "top": 1030.9, "x1": 738.8, "bottom": 1044.1}
 {"page": 12, "line": 53, "text": "NOTES: (1) See Article IX for specific restrictions, guidelines and other district regulations.", "x0": 36.0, "top": 1060.9, "x1": 381.6, "bottom": 1070.1}
@@ -732,7 +732,7 @@
 {"page": 13, "line": 1, "text": "COLLEGETOWN DISTRICTS BULK +", "x0": 36.2, "top": 37.2, "x1": 628.5, "bottom": 73.2}
 {"page": 13, "line": 2, "text": "DIMENSIONAL STANDARDS", "x0": 36.2, "top": 80.4, "x1": 521.7, "bottom": 116.4}
 {"page": 13, "line": 3, "text": "Collegetown Residential Mixed Use", "x0": 434.5, "top": 136.0, "x1": 722.7, "bottom": 148.0}
-{"page": 13, "line": 4, "text": "CR 1 MU 1", "x0": 481.5, "top": 156.7, "x1": 709.2, "bottom": 169.1}
+{"page": 13, "line": 4, "text": "CR ^1 MU ^1", "x0": 481.5, "top": 156.7, "x1": 709.2, "bottom": 169.1}
 {"page": 13, "line": 5, "text": "CR-1 CR-2 CR-3 CR-4 MU-1 MU-2", "x0": 372.0, "top": 177.9, "x1": 743.6, "bottom": 189.9}
 {"page": 13, "line": 6, "text": "Minimum Lot Size", "x0": 40.0, "top": 199.3, "x1": 130.0, "bottom": 211.3}
 {"page": 13, "line": 7, "text": "One-family dwelling 4,000 sf 4,000 sf 3,000 sf 3,000 sf 3,000 sf 2,500 sf", "x0": 246.1, "top": 220.1, "x1": 749.3, "bottom": 232.1}
@@ -742,14 +742,14 @@
 {"page": 13, "line": 11, "text": "Minimum Lot Width", "x0": 40.0, "top": 304.8, "x1": 139.9, "bottom": 316.8}
 {"page": 13, "line": 12, "text": "One-family or two-family dwelling 45 ft 45 ft 30 ft 30 ft 30 ft 25 ft", "x0": 180.7, "top": 325.6, "x1": 740.2, "bottom": 337.6}
 {"page": 13, "line": 13, "text": "Other use 50 ft 50 ft 40 ft 40 ft 40 ft 25 ft", "x0": 295.8, "top": 346.7, "x1": 740.2, "bottom": 358.7}
-{"page": 13, "line": 14, "text": "Maximum Building Height 2,3", "x0": 40.0, "top": 367.7, "x1": 186.7, "bottom": 380.1}
+{"page": 13, "line": 14, "text": "Maximum Building Height ^2,3", "x0": 40.0, "top": 367.7, "x1": 186.7, "bottom": 380.1}
 {"page": 13, "line": 15, "text": "Primary Use", "x0": 285.1, "top": 388.9, "x1": 341.1, "bottom": 400.9}
 {"page": 13, "line": 16, "text": "Number of stories 3 3 3 4 7 8", "x0": 258.6, "top": 410.0, "x1": 732.7, "bottom": 422.0}
 {"page": 13, "line": 17, "text": "Height in feet 35 35 35 45 75 85", "x0": 279.6, "top": 431.1, "x1": 735.9, "bottom": 443.1}
 {"page": 13, "line": 18, "text": "Accessory Use", "x0": 272.6, "top": 452.2, "x1": 341.1, "bottom": 464.2}
 {"page": 13, "line": 19, "text": "Number of stories 2 2 2 2 2 2", "x0": 258.6, "top": 473.3, "x1": 732.7, "bottom": 485.3}
 {"page": 13, "line": 20, "text": "Height in feet 20 20 20 20 20 20", "x0": 279.6, "top": 494.4, "x1": 736.0, "bottom": 506.4}
-{"page": 13, "line": 21, "text": "Minimum Building Height 2", "x0": 40.0, "top": 515.4, "x1": 176.1, "bottom": 527.8}
+{"page": 13, "line": 21, "text": "Minimum Building Height ^2", "x0": 40.0, "top": 515.4, "x1": 176.1, "bottom": 527.8}
 {"page": 13, "line": 22, "text": "Primary Use", "x0": 285.1, "top": 536.6, "x1": 341.1, "bottom": 548.6}
 {"page": 13, "line": 23, "text": "Number of stories 2 2 2 2 3 4", "x0": 258.6, "top": 557.7, "x1": 732.7, "bottom": 569.7}
 {"page": 13, "line": 24, "text": "Height in feet 20 20 20 20 30 45", "x0": 279.6, "top": 578.8, "x1": 736.1, "bottom": 590.8}
@@ -760,7 +760,7 @@
 {"page": 13, "line": 29, "text": "Yard Dimensions", "x0": 40.0, "top": 684.6, "x1": 125.7, "bottom": 696.6}
 {"page": 13, "line": 30, "text": "Front (minimum) 10 ft 10 ft 10 ft 10 ft 5 ft 0 ft", "x0": 267.6, "top": 705.4, "x1": 737.0, "bottom": 717.4}
 {"page": 13, "line": 31, "text": "Front (maximum) - - - - - 2 ft", "x0": 264.0, "top": 726.5, "x1": 737.0, "bottom": 738.5}
-{"page": 13, "line": 32, "text": "Side (minimum) 5 ft 5 ft 5 ft 0 ft / 5 ft 4 0 ft / 5 ft 4 0 ft", "x0": 269.6, "top": 747.4, "x1": 737.0, "bottom": 759.6}
+{"page": 13, "line": 32, "text": "Side (minimum) 5 ft 5 ft 5 ft 0 ft / 5 ft ^4 0 ft / 5 ft ^4 0 ft", "x0": 269.6, "top": 747.4, "x1": 737.0, "bottom": 759.6}
 {"page": 13, "line": 33, "text": "Rear (minimum, % of depth or feet, whichever is less) 20% / 20 ft 20% / 20 ft 20% / 20 ft 10 ft 10 ft 10 ft", "x0": 99.3, "top": 768.7, "x1": 740.0, "bottom": 780.7}
 {"page": 13, "line": 34, "text": "NOTES: (1) See §325.-45 for form and activation requirements, and for additional setbacks for accessory structures.", "x0": 36.0, "top": 798.1, "x1": 473.2, "bottom": 807.3}
 {"page": 13, "line": 35, "text": "(2) See §325-16.", "x0": 90.0, "top": 809.0, "x1": 173.8, "bottom": 818.0}
@@ -772,7 +772,7 @@
 {"page": 14, "line": 4, "text": "R-1 R-2 R-3", "x0": 283.7, "top": 169.0, "x1": 529.9, "bottom": 179.0}
 {"page": 14, "line": 5, "text": "RU", "x0": 669.5, "top": 179.6, "x1": 682.2, "bottom": 189.6}
 {"page": 14, "line": 6, "text": "R-1A R-1B R-2A R-2B R-2C R-3A R-3AA R-3B", "x0": 250.7, "top": 190.6, "x1": 580.9, "bottom": 200.6}
-{"page": 14, "line": 7, "text": "Minimum Parking Requirement 1", "x0": 40.5, "top": 212.4, "x1": 178.0, "bottom": 222.7}
+{"page": 14, "line": 7, "text": "Minimum Parking Requirement ^1", "x0": 40.5, "top": 212.4, "x1": 178.0, "bottom": 222.7}
 {"page": 14, "line": 8, "text": "Residential", "x0": 190.6, "top": 234.8, "x1": 232.2, "bottom": 244.8}
 {"page": 14, "line": 9, "text": "First three bed or sleeping rooms per dwelling", "x0": 56.0, "top": 254.3, "x1": 232.2, "bottom": 264.3}
 {"page": 14, "line": 10, "text": "1 space per dwelling unit", "x0": 446.9, "top": 260.3, "x1": 544.8, "bottom": 270.3}
@@ -785,9 +785,9 @@
 {"page": 14, "line": 17, "text": "persons persons", "x0": 458.1, "top": 351.3, "x1": 586.3, "bottom": 361.3}
 {"page": 14, "line": 18, "text": "housed housed", "x0": 459.0, "top": 363.3, "x1": 585.3, "bottom": 373.3}
 {"page": 14, "line": 19, "text": "Minimum Loading Requirement", "x0": 40.5, "top": 382.3, "x1": 174.0, "bottom": 392.3}
-{"page": 14, "line": 20, "text": "Nonresidential use Allowed by variance 2 Allowed by variance 2 Allowed by variance 2 Allowed by variance 2", "x0": 159.8, "top": 403.2, "x1": 719.0, "bottom": 413.4}
+{"page": 14, "line": 20, "text": "Nonresidential use Allowed by variance ^2 Allowed by variance ^2 Allowed by variance ^2 Allowed by variance ^2", "x0": 159.8, "top": 403.2, "x1": 719.0, "bottom": 413.4}
 {"page": 14, "line": 21, "text": "Neighborhood commercial facility - See §325-21 See §325-21 -", "x0": 99.3, "top": 424.7, "x1": 677.4, "bottom": 437.1}
-{"page": 14, "line": 22, "text": "Multiple dweling with 25 + units - - 1 space / 10,000 sf of floor space3 1 space / 10,000 sf of floor space3", "x0": 108.9, "top": 445.4, "x1": 745.5, "bottom": 458.0}
+{"page": 14, "line": 22, "text": "Multiple dweling with 25 + units - - 1 space / 10,000 sf of floor space^3 1 space / 10,000 sf of floor space^3", "x0": 108.9, "top": 445.4, "x1": 745.5, "bottom": 458.0}
 {"page": 14, "line": 23, "text": "Nursing home, hospital, or sanitarium - - 1 space -", "x0": 88.3, "top": 466.5, "x1": 677.4, "bottom": 478.8}
 {"page": 14, "line": 24, "text": "NOTES: (1) For all other uses see §325-20.", "x0": 36.0, "top": 490.5, "x1": 260.5, "bottom": 500.7}
 {"page": 14, "line": 25, "text": "(2) See §325-21.", "x0": 108.0, "top": 502.5, "x1": 196.3, "bottom": 512.5}
@@ -799,8 +799,8 @@
 {"page": 15, "line": 5, "text": "Business", "x0": 718.0, "top": 160.2, "x1": 750.8, "bottom": 170.2}
 {"page": 15, "line": 6, "text": "B-1 B-2", "x0": 253.9, "top": 182.0, "x1": 439.9, "bottom": 192.0}
 {"page": 15, "line": 7, "text": "B-4 B-5 CBD", "x0": 579.7, "top": 191.1, "x1": 743.7, "bottom": 201.1}
-{"page": 15, "line": 8, "text": "B-1A B-1B B-2A B-2D 1", "x0": 219.6, "top": 201.8, "x1": 499.0, "bottom": 212.0}
-{"page": 15, "line": 9, "text": "Minimum Parking Requirement (# spaces) 2", "x0": 40.5, "top": 221.8, "x1": 223.9, "bottom": 232.1}
+{"page": 15, "line": 8, "text": "B-1A B-1B B-2A B-2D ^1", "x0": 219.6, "top": 201.8, "x1": 499.0, "bottom": 212.0}
+{"page": 15, "line": 9, "text": "Minimum Parking Requirement (# spaces) ^2", "x0": 40.5, "top": 221.8, "x1": 223.9, "bottom": 232.1}
 {"page": 15, "line": 10, "text": "Residential", "x0": 151.7, "top": 243.5, "x1": 193.3, "bottom": 253.5}
 {"page": 15, "line": 11, "text": "First three bed or sleeping rooms per", "x0": 52.5, "top": 262.8, "x1": 193.3, "bottom": 272.8}
 {"page": 15, "line": 12, "text": "- - 1 space per dwelling unit - - - -", "x0": 228.1, "top": 268.8, "x1": 736.0, "bottom": 278.8}
@@ -835,8 +835,8 @@
 {"page": 15, "line": 41, "text": "1 space / 1 space / 1 space /", "x0": 209.9, "top": 705.7, "x1": 693.7, "bottom": 715.7}
 {"page": 15, "line": 42, "text": "1 space / 10,000 sf of 1 space / 10,000 sf of 1 space / 10,000 sf", "x0": 334.0, "top": 711.7, "x1": 627.2, "bottom": 721.7}
 {"page": 15, "line": 43, "text": "Multiple dwelling with 25 + units 10,000 sf of 10,000 sf of 10,000 sf of floor -", "x0": 68.0, "top": 717.7, "x1": 736.0, "bottom": 727.7}
-{"page": 15, "line": 44, "text": "floor space3 floor space3 of floor space3", "x0": 355.6, "top": 723.5, "x1": 615.6, "bottom": 733.7}
-{"page": 15, "line": 45, "text": "floor space3 floor space3 space3", "x0": 206.2, "top": 729.5, "x1": 687.2, "bottom": 739.7}
+{"page": 15, "line": 44, "text": "floor space^3 floor space^3 of floor space^3", "x0": 355.6, "top": 723.5, "x1": 615.6, "bottom": 733.7}
+{"page": 15, "line": 45, "text": "floor space^3 floor space^3 space^3", "x0": 206.2, "top": 729.5, "x1": 687.2, "bottom": 739.7}
 {"page": 15, "line": 46, "text": "Nursing home, hospital, or sanitarium 1 space 1 space 1 space 1 space 1 space 1 space -", "x0": 49.4, "top": 750.5, "x1": 736.0, "bottom": 760.5}
 {"page": 15, "line": 47, "text": "Office building 1 space 1 space 1 space 1 space 1 space 1 space -", "x0": 135.5, "top": 772.1, "x1": 736.0, "bottom": 782.1}
 {"page": 15, "line": 48, "text": "1 space for each", "x0": 641.1, "top": 798.2, "x1": 706.7, "bottom": 808.2}
@@ -844,8 +844,8 @@
 {"page": 15, "line": 50, "text": "use with 3,000 -", "x0": 642.1, "top": 810.2, "x1": 705.8, "bottom": 820.2}
 {"page": 15, "line": 51, "text": "Retail store - - with 3,000 - 10,000 sf of with 3,000 - 10,000 sf with 3,000 - 10,000 -", "x0": 151.3, "top": 816.2, "x1": 736.0, "bottom": 826.2}
 {"page": 15, "line": 52, "text": "10,000 sf of floor", "x0": 639.6, "top": 822.2, "x1": 708.2, "bottom": 832.2}
-{"page": 15, "line": 53, "text": "floor space3 of floor space3 sf of floor space3", "x0": 355.6, "top": 828.0, "x1": 619.7, "bottom": 838.2}
-{"page": 15, "line": 54, "text": "space3", "x0": 660.6, "top": 834.0, "x1": 687.2, "bottom": 844.2}
+{"page": 15, "line": 53, "text": "floor space^3 of floor space^3 sf of floor space^3", "x0": 355.6, "top": 828.0, "x1": 619.7, "bottom": 838.2}
+{"page": 15, "line": 54, "text": "space^3", "x0": 660.6, "top": 834.0, "x1": 687.2, "bottom": 844.2}
 {"page": 15, "line": 55, "text": "Other use See §325-21 See §325-21 See §325-21 See §325-21 See §325-21 See §325-21 -", "x0": 155.5, "top": 860.3, "x1": 736.0, "bottom": 870.3}
 {"page": 15, "line": 56, "text": "Maximum Loading Requirement", "x0": 40.5, "top": 882.1, "x1": 177.7, "bottom": 892.1}
 {"page": 15, "line": 57, "text": "4 spaces / any single 4 spaces / any single 4 spaces / any single 4 spaces / any", "x0": 336.7, "top": 906.1, "x1": 703.9, "bottom": 916.1}
@@ -859,7 +859,7 @@
 {"page": 16, "line": 3, "text": "Public and Residential", "x0": 530.0, "top": 136.3, "x1": 740.3, "bottom": 148.3}
 {"page": 16, "line": 4, "text": "Court House Special Use Industrial University", "x0": 255.3, "top": 143.5, "x1": 658.0, "bottom": 155.5}
 {"page": 16, "line": 5, "text": "Institutional Mobile Home", "x0": 527.6, "top": 150.7, "x1": 747.1, "bottom": 162.7}
-{"page": 16, "line": 6, "text": "C-SU I-1 P-1 U-1 1 MH-1", "x0": 301.2, "top": 170.5, "x1": 729.5, "bottom": 182.8}
+{"page": 16, "line": 6, "text": "C-SU I-1 P-1 U-1 ^1 MH-1", "x0": 301.2, "top": 170.5, "x1": 729.5, "bottom": 182.8}
 {"page": 16, "line": 7, "text": "Minimum Parking Requirement (# spaces)", "x0": 40.5, "top": 192.7, "x1": 253.8, "bottom": 204.7}
 {"page": 16, "line": 8, "text": "Residential", "x0": 190.9, "top": 214.8, "x1": 240.8, "bottom": 226.8}
 {"page": 16, "line": 9, "text": "First three bed or sleeping rooms per", "x0": 71.9, "top": 234.5, "x1": 240.8, "bottom": 246.5}
@@ -903,16 +903,16 @@
 {"page": 16, "line": 47, "text": "Minimum Loading Requirement", "x0": 40.5, "top": 825.9, "x1": 200.7, "bottom": 837.9}
 {"page": 16, "line": 48, "text": "1 space / 10,000 sf of", "x0": 394.2, "top": 846.8, "x1": 502.3, "bottom": 858.8}
 {"page": 16, "line": 49, "text": "Multiple dwelling with 25 + units - - - -", "x0": 90.4, "top": 854.0, "x1": 716.4, "bottom": 866.0}
-{"page": 16, "line": 50, "text": "floor space 2", "x0": 418.7, "top": 861.0, "x1": 477.8, "bottom": 873.2}
+{"page": 16, "line": 50, "text": "floor space ^2", "x0": 418.7, "top": 861.0, "x1": 477.8, "bottom": 873.2}
 {"page": 16, "line": 51, "text": "Nursing home, hospital, or sanitarium - 1 space - - -", "x0": 68.1, "top": 882.4, "x1": 716.4, "bottom": 894.4}
 {"page": 16, "line": 52, "text": "Office building - 1 space - - -", "x0": 171.5, "top": 907.6, "x1": 716.4, "bottom": 919.6}
 {"page": 16, "line": 53, "text": "1 space for each use", "x0": 399.7, "top": 928.8, "x1": 496.8, "bottom": 940.8}
 {"page": 16, "line": 54, "text": "Retail store - with 3,000 - 10,000 sf of - - -", "x0": 190.5, "top": 943.2, "x1": 716.4, "bottom": 955.2}
-{"page": 16, "line": 55, "text": "floor space 2", "x0": 418.7, "top": 957.4, "x1": 477.8, "bottom": 969.6}
+{"page": 16, "line": 55, "text": "floor space ^2", "x0": 418.7, "top": 957.4, "x1": 477.8, "bottom": 969.6}
 {"page": 16, "line": 56, "text": "1 space for each use", "x0": 399.7, "top": 974.7, "x1": 496.8, "bottom": 986.7}
 {"page": 16, "line": 57, "text": "Industrial Use - with 3,000 - 10,000 sf of - - -", "x0": 178.1, "top": 989.1, "x1": 716.4, "bottom": 1001.1}
-{"page": 16, "line": 58, "text": "floor space 2", "x0": 418.7, "top": 1003.3, "x1": 477.8, "bottom": 1015.5}
-{"page": 16, "line": 59, "text": "Other use - See §325-21 See §325-21 3 - -", "x0": 195.5, "top": 1024.5, "x1": 716.4, "bottom": 1036.7}
+{"page": 16, "line": 58, "text": "floor space ^2", "x0": 418.7, "top": 1003.3, "x1": 477.8, "bottom": 1015.5}
+{"page": 16, "line": 59, "text": "Other use - See §325-21 See §325-21 ^3 - -", "x0": 195.5, "top": 1024.5, "x1": 716.4, "bottom": 1036.7}
 {"page": 16, "line": 60, "text": "Maximum Loading Requirement", "x0": 40.5, "top": 1050.9, "x1": 177.7, "bottom": 1060.9}
 {"page": 16, "line": 61, "text": "4 spaces / any single", "x0": 397.4, "top": 1071.1, "x1": 499.0, "bottom": 1083.1}
 {"page": 16, "line": 62, "text": "- - - -", "x0": 312.5, "top": 1078.3, "x1": 716.4, "bottom": 1090.3}
@@ -950,12 +950,12 @@
 {"page": 17, "line": 28, "text": "Hotel, motel - 1 space per guest room - - - -", "x0": 187.0, "top": 566.2, "x1": 722.7, "bottom": 576.2}
 {"page": 17, "line": 29, "text": "Other Uses - See §325-20 - - - -", "x0": 190.6, "top": 586.7, "x1": 722.7, "bottom": 596.7}
 {"page": 17, "line": 30, "text": "Minimum Loading Requirement", "x0": 40.6, "top": 607.4, "x1": 174.1, "bottom": 617.4}
-{"page": 17, "line": 31, "text": "Multiple dwelling with 25 + units - 1 space / 10,000 sf of floor space1 - -", "x0": 108.4, "top": 627.5, "x1": 722.7, "bottom": 637.7}
+{"page": 17, "line": 31, "text": "Multiple dwelling with 25 + units - 1 space / 10,000 sf of floor space^1 - -", "x0": 108.4, "top": 627.5, "x1": 722.7, "bottom": 637.7}
 {"page": 17, "line": 32, "text": "Nursing home, hospital, or sanitarium - 1 space 1 space, unless an on - -", "x0": 89.8, "top": 648.3, "x1": 722.7, "bottom": 660.8}
 {"page": 17, "line": 33, "text": "street loading space is", "x0": 552.1, "top": 662.8, "x1": 637.9, "bottom": 672.8}
 {"page": 17, "line": 34, "text": "Office building - 1 space - -", "x0": 175.9, "top": 668.8, "x1": 722.7, "bottom": 678.8}
 {"page": 17, "line": 35, "text": "already provided for in the", "x0": 543.4, "top": 674.8, "x1": 646.6, "bottom": 684.8}
-{"page": 17, "line": 36, "text": "Retail store - 1 space for each use with 3,000 - 10,000 sf of floor space1 public right of way - -", "x0": 191.7, "top": 686.8, "x1": 722.7, "bottom": 699.3}
+{"page": 17, "line": 36, "text": "Retail store - 1 space for each use with 3,000 - 10,000 sf of floor space^1 public right of way - -", "x0": 191.7, "top": 686.8, "x1": 722.7, "bottom": 699.3}
 {"page": 17, "line": 37, "text": "Other use - See §325-21 - -", "x0": 195.9, "top": 709.8, "x1": 722.7, "bottom": 719.8}
 {"page": 17, "line": 38, "text": "Maximum Loading Requirement", "x0": 40.6, "top": 730.5, "x1": 177.7, "bottom": 740.5}
 {"page": 17, "line": 39, "text": "- 4 spaces / any single occupancy - - - -", "x0": 265.7, "top": 750.9, "x1": 722.7, "bottom": 760.9}
@@ -964,7 +964,7 @@
 {"page": 17, "line": 42, "text": "PARKING + LOADING REQUIREMENTS", "x0": 36.2, "top": 860.8, "x1": 699.4, "bottom": 896.8}
 {"page": 17, "line": 43, "text": "Collegetown Residential Mixed Use", "x0": 441.3, "top": 911.7, "x1": 745.8, "bottom": 923.7}
 {"page": 17, "line": 44, "text": "CR MU", "x0": 491.7, "top": 932.8, "x1": 729.4, "bottom": 944.8}
-{"page": 17, "line": 45, "text": "CR-1 CR-2 CR-3 CR-41 MU-1 MU-2", "x0": 357.9, "top": 953.4, "x1": 753.0, "bottom": 965.7}
+{"page": 17, "line": 45, "text": "CR-1 CR-2 CR-3 CR-4^1 MU-1 MU-2", "x0": 357.9, "top": 953.4, "x1": 753.0, "bottom": 965.7}
 {"page": 17, "line": 46, "text": "Minimum Parking Requirement (# of parking spaces)", "x0": 40.0, "top": 975.0, "x1": 309.5, "bottom": 987.0}
 {"page": 17, "line": 47, "text": "Residential", "x0": 261.1, "top": 995.9, "x1": 311.0, "bottom": 1007.9}
 {"page": 17, "line": 48, "text": "First three bed or sleeping rooms per dwelling unit 1 space 1 space 1 space - - -", "x0": 80.5, "top": 1017.0, "x1": 740.6, "bottom": 1029.0}

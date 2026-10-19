@@ -1,4 +1,4 @@
-{"file": "chapter_325_zoning_2026-10.pdf", "sha256": "5ceb5a4573ff5db14b44b6f1bd1be11a4703d14febd8186115f61dbecd4719da", "pages": 168, "extractor": "pdfplumber 0.11.10 (dedupe_chars + extract_text_lines)"}
+{"file": "chapter_325_zoning_2026-10.pdf", "sha256": "5ceb5a4573ff5db14b44b6f1bd1be11a4703d14febd8186115f61dbecd4719da", "pages": 168, "extractor": "pdfplumber 0.11.10 + pdfminer.six 20260107 (dedupe_chars, upright text only, extract_text_lines, superscripts marked '^')", "rotated_chars_skipped": 0}
 {"page": 1, "line": 1, "text": "City of Ithaca, NY", "x0": 54.0, "top": 32.4, "x1": 113.5, "bottom": 40.4}
 {"page": 1, "line": 2, "text": "Chapter 325", "x0": 274.2, "top": 73.1, "x1": 337.8, "bottom": 85.1}
 {"page": 1, "line": 3, "text": "ZONING", "x0": 281.7, "top": 99.1, "x1": 330.3, "bottom": 111.1}
@@ -164,7 +164,7 @@
 {"page": 3, "line": 39, "text": "B. Specific terms or words. For the purpose of this chapter, certain terms or words herein, unless the", "x0": 72.0, "top": 663.4, "x1": 540.0, "bottom": 674.4}
 {"page": 3, "line": 40, "text": "context or subject matter otherwise requires, shall be interpreted or defined as follows. These", "x0": 96.0, "top": 676.4, "x1": 540.0, "bottom": 687.4}
 {"page": 3, "line": 41, "text": "definitions apply to this chapter; and, in order to retain conformity, they are applied also to the", "x0": 96.0, "top": 689.4, "x1": 540.0, "bottom": 700.4}
-{"page": 3, "line": 42, "text": "Housing Code and Building Code of the City.1 Some of the definitions, therefore, will not appear in", "x0": 96.0, "top": 701.0, "x1": 540.0, "bottom": 713.4}
+{"page": 3, "line": 42, "text": "Housing Code and Building Code of the City.^1 Some of the definitions, therefore, will not appear in", "x0": 96.0, "top": 701.0, "x1": 540.0, "bottom": 713.4}
 {"page": 3, "line": 43, "text": "Downloaded from https://ecode360.com/IT1348 on 2026-10-19", "x0": 54.0, "top": 752.4, "x1": 258.2, "bottom": 760.4}
 {"page": 4, "line": 1, "text": "City of Ithaca, NY", "x0": 54.0, "top": 32.4, "x1": 113.5, "bottom": 40.4}
 {"page": 4, "line": 2, "text": "§ 325-3 ITHACA CODE § 325-3", "x0": 72.0, "top": 46.4, "x1": 540.0, "bottom": 57.4}
@@ -938,7 +938,7 @@
 {"page": 24, "line": 9, "text": "for the purposes of complying with the provisions of this chapter shall be included as a part of a yard", "x0": 96.0, "top": 178.6, "x1": 540.0, "bottom": 189.6}
 {"page": 24, "line": 10, "text": "or other open space similarly required for another building.", "x0": 96.0, "top": 191.6, "x1": 356.5, "bottom": 202.6}
 {"page": 24, "line": 11, "text": "§ 325-8. District regulations. [Amended 9-7-1988 by Ord. No. 88-7]", "x0": 72.0, "top": 218.3, "x1": 387.8, "bottom": 229.3}
-{"page": 24, "line": 12, "text": "A. The District Regulations Chart is hereby made a part of this chapter.2 Column heads on the District", "x0": 72.0, "top": 238.8, "x1": 540.0, "bottom": 251.3}
+{"page": 24, "line": 12, "text": "A. The District Regulations Chart is hereby made a part of this chapter.^2 Column heads on the District", "x0": 72.0, "top": 238.8, "x1": 540.0, "bottom": 251.3}
 {"page": 24, "line": 13, "text": "Regulations Chart are defined as follows:", "x0": 96.0, "top": 253.3, "x1": 278.3, "bottom": 264.3}
 {"page": 24, "line": 14, "text": "(1) Column 1: Use District. This column lists the use districts described in § 325-4.", "x0": 96.0, "top": 275.3, "x1": 470.4, "bottom": 286.3}
 {"page": 24, "line": 15, "text": "(2) Column 2: Permitted Primary Uses. Uses which are permitted in each use district are listed,", "x0": 96.0, "top": 297.3, "x1": 540.0, "bottom": 308.3}
@@ -1031,12 +1031,12 @@
 {"page": 26, "line": 25, "text": "the Board of Zoning Appeals.", "x0": 120.0, "top": 641.9, "x1": 251.0, "bottom": 652.9}
 {"page": 26, "line": 26, "text": "(5) All uses permitted or allowed in any district shall conform to the general performance standards", "x0": 96.0, "top": 663.9, "x1": 540.0, "bottom": 674.9}
 {"page": 26, "line": 27, "text": "as set forth in § 325-23.", "x0": 120.0, "top": 676.9, "x1": 224.5, "bottom": 687.9}
-{"page": 26, "line": 28, "text": "(6) 3In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall be", "x0": 96.0, "top": 697.5, "x1": 540.0, "bottom": 709.9}
+{"page": 26, "line": 28, "text": "(6) ^3In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall be", "x0": 96.0, "top": 697.5, "x1": 540.0, "bottom": 709.9}
 {"page": 26, "line": 29, "text": "Downloaded from https://ecode360.com/IT1348 on 2026-10-19", "x0": 54.0, "top": 752.4, "x1": 258.2, "bottom": 760.4}
 {"page": 27, "line": 1, "text": "City of Ithaca, NY", "x0": 54.0, "top": 32.4, "x1": 113.5, "bottom": 40.4}
 {"page": 27, "line": 2, "text": "§ 325-8 ZONING § 325-8", "x0": 72.0, "top": 46.4, "x1": 540.0, "bottom": 57.4}
 {"page": 27, "line": 3, "text": "excluded in determining the number of unrelated occupants in a dwelling unit.", "x0": 120.0, "top": 73.6, "x1": 464.5, "bottom": 84.6}
-{"page": 27, "line": 4, "text": "(7) 4In all districts, the New York State Uniform Fire Prevention and Building Code may impose", "x0": 96.0, "top": 94.1, "x1": 540.0, "bottom": 106.6}
+{"page": 27, "line": 4, "text": "(7) ^4In all districts, the New York State Uniform Fire Prevention and Building Code may impose", "x0": 96.0, "top": 94.1, "x1": 540.0, "bottom": 106.6}
 {"page": 27, "line": 5, "text": "additional requirements pertaining to the location of a structure on a parcel of property,", "x0": 120.0, "top": 108.6, "x1": 540.0, "bottom": 119.6}
 {"page": 27, "line": 6, "text": "including, for example, additional building setback requirements.", "x0": 120.0, "top": 121.6, "x1": 407.3, "bottom": 132.6}
 {"page": 27, "line": 7, "text": "(8) All columns established by this section are subject to the supplementary regulations stated in", "x0": 96.0, "top": 143.6, "x1": 540.0, "bottom": 154.6}
@@ -1083,7 +1083,7 @@
 {"page": 28, "line": 9, "text": "(5) Sidewalk and tree lawn requirements. All new construction located in the Cherry Street, the", "x0": 96.0, "top": 371.8, "x1": 540.0, "bottom": 382.8}
 {"page": 28, "line": 10, "text": "West End/Waterfront, the Market, or the Newman Districts must provide a eight-foot tree lawn", "x0": 120.0, "top": 384.8, "x1": 540.0, "bottom": 395.8}
 {"page": 28, "line": 11, "text": "and five-foot sidewalk along the street frontage of the property. The Planning Board may amend", "x0": 120.0, "top": 397.8, "x1": 540.0, "bottom": 408.8}
-{"page": 28, "line": 12, "text": "this requirement based on site conditions. [Added 6-3-2020 by Ord. No. 2020-045]", "x0": 120.0, "top": 409.3, "x1": 488.1, "bottom": 421.8}
+{"page": 28, "line": 12, "text": "this requirement based on site conditions. [Added 6-3-2020 by Ord. No. 2020-04^5]", "x0": 120.0, "top": 409.3, "x1": 488.1, "bottom": 421.8}
 {"page": 28, "line": 13, "text": "(6) Maximum building length. All new structures located within the West End/Waterfront District", "x0": 96.0, "top": 432.8, "x1": 540.0, "bottom": 443.8}
 {"page": 28, "line": 14, "text": "shall be constructed to be no more than 100 feet in length. In addition, there needs to be a", "x0": 120.0, "top": 445.8, "x1": 540.0, "bottom": 456.8}
 {"page": 28, "line": 15, "text": "minimum of twenty-foot break between buildings. Exceptions may be made to allow for a", "x0": 120.0, "top": 458.8, "x1": 540.0, "bottom": 469.8}
@@ -1153,7 +1153,7 @@
 {"page": 30, "line": 10, "text": "Ord. No. 97-1; 5-7-1997 by Ord. No. 97-6; 7-1-1998 by Ord. No. 98-11; 12-2-1998 by Ord. No.", "x0": 87.8, "top": 164.6, "x1": 524.1, "bottom": 175.6}
 {"page": 30, "line": 11, "text": "98-30; 12-6-2000 by Ord. No. 2000-12; 12-3-2003 by Ord. No. 2003-20; 5-4-2011 by Ord. No.", "x0": 90.6, "top": 177.6, "x1": 521.4, "bottom": 188.6}
 {"page": 30, "line": 12, "text": "2011-08; 7-6-2011 by Ord. No. 2011-11; 10-5-2011 by Ord. No. 2011-13; 12-7-2011 by Ord. No.", "x0": 85.1, "top": 190.6, "x1": 526.9, "bottom": 201.6}
-{"page": 30, "line": 13, "text": "2011-16; 6-6-2012 by Ord. No. 2012-03; 6-5-2013 by Ord. No. 2013-15;66-6-2018 by Ord. No.", "x0": 90.3, "top": 202.1, "x1": 521.7, "bottom": 214.6}
+{"page": 30, "line": 13, "text": "2011-16; 6-6-2012 by Ord. No. 2012-03; 6-5-2013 by Ord. No. 2013-15;^66-6-2018 by Ord. No.", "x0": 90.3, "top": 202.1, "x1": 521.7, "bottom": 214.6}
 {"page": 30, "line": 14, "text": "2018-06; 7-3-2019 by Ord. No. 2019-15]", "x0": 213.6, "top": 216.6, "x1": 398.4, "bottom": 227.6}
 {"page": 30, "line": 15, "text": "§ 325-9. Standards for special conditions and special permits. [Amended 2-7-2020 by Ord. No.", "x0": 72.0, "top": 247.6, "x1": 540.0, "bottom": 258.6}
 {"page": 30, "line": 16, "text": "2020-01; 6-18-2025 by Ord. No. 2025-06]", "x0": 72.0, "top": 260.6, "x1": 262.3, "bottom": 271.6}
@@ -1733,7 +1733,7 @@
 {"page": 44, "line": 8, "text": "approval. If the site plan changes significantly, said significance as determined by the Director of", "x0": 96.0, "top": 138.6, "x1": 540.0, "bottom": 149.6}
 {"page": 44, "line": 9, "text": "Planning and Development, it may require reconsideration by the Common Council. The Director of", "x0": 96.0, "top": 151.6, "x1": 540.0, "bottom": 162.6}
 {"page": 44, "line": 10, "text": "Planning and Development may determine that the changes are minor and do not require reapproval.", "x0": 96.0, "top": 164.6, "x1": 538.6, "bottom": 175.6}
-{"page": 44, "line": 11, "text": "§ 325-13. (Reserved)7", "x0": 72.0, "top": 189.8, "x1": 174.2, "bottom": 202.3}
+{"page": 44, "line": 11, "text": "§ 325-13. (Reserved)^7", "x0": 72.0, "top": 189.8, "x1": 174.2, "bottom": 202.3}
 {"page": 44, "line": 12, "text": "7. Editor’s Note: Former § 325-13, Temporary Mandatory Planned Unit Development (TMPUD) District, added 3-2-2016 by Ord. No.", "x0": 72.0, "top": 702.9, "x1": 534.8, "bottom": 710.9}
 {"page": 44, "line": 13, "text": "2016-07, as amended, was removed as its provisions expired 18 months after its effective date.", "x0": 86.4, "top": 711.9, "x1": 404.7, "bottom": 719.9}
 {"page": 44, "line": 14, "text": "Downloaded from https://ecode360.com/IT1348 on 2026-10-19", "x0": 54.0, "top": 752.4, "x1": 258.2, "bottom": 760.4}
@@ -1753,7 +1753,7 @@
 {"page": 45, "line": 14, "text": "without topsoil adequate for the establishment of vegetation typical to the area. Removal of", "x0": 120.0, "top": 270.8, "x1": 540.0, "bottom": 281.8}
 {"page": 45, "line": 15, "text": "topsoil in excess of the foregoing requirement shall be subject to approval and issuance of a", "x0": 120.0, "top": 283.8, "x1": 540.0, "bottom": 294.8}
 {"page": 45, "line": 16, "text": "permit therefor by the Director of Planning and Development or designee. [Amended 6-5-2013", "x0": 120.0, "top": 296.8, "x1": 540.0, "bottom": 307.8}
-{"page": 45, "line": 17, "text": "by Ord. No. 2013-158]", "x0": 120.0, "top": 308.3, "x1": 222.0, "bottom": 320.8}
+{"page": 45, "line": 17, "text": "by Ord. No. 2013-15^8]", "x0": 120.0, "top": 308.3, "x1": 222.0, "bottom": 320.8}
 {"page": 45, "line": 18, "text": "(2) No lot grading or tree removal in connection with the construction of a building shall be", "x0": 96.0, "top": 331.8, "x1": 540.0, "bottom": 342.8}
 {"page": 45, "line": 19, "text": "undertaken until a building permit for such construction shall have been obtained. No natural", "x0": 120.0, "top": 344.8, "x1": 540.0, "bottom": 355.8}
 {"page": 45, "line": 20, "text": "watercourse or drainageway shall be altered by filling, excavating, tree removal or in any other", "x0": 120.0, "top": 357.8, "x1": 540.0, "bottom": 368.8}
@@ -1790,7 +1790,7 @@
 {"page": 46, "line": 7, "text": "Police and the City Traffic Engineer for analysis of fire, traffic and other possible hazards. The", "x0": 96.0, "top": 134.6, "x1": 540.0, "bottom": 145.6}
 {"page": 46, "line": 8, "text": "Director of Planning and Development or designee shall review their comments on the proposed new", "x0": 96.0, "top": 147.6, "x1": 540.0, "bottom": 158.6}
 {"page": 46, "line": 9, "text": "or altered facility and may require modification of the site plan to lessen potential fire, traffic and", "x0": 96.0, "top": 160.6, "x1": 540.0, "bottom": 171.6}
-{"page": 46, "line": 10, "text": "other hazards. [Amended 6-5-2013 by Ord. No. 2013-159]", "x0": 96.0, "top": 172.1, "x1": 357.2, "bottom": 184.6}
+{"page": 46, "line": 10, "text": "other hazards. [Amended 6-5-2013 by Ord. No. 2013-15^9]", "x0": 96.0, "top": 172.1, "x1": 357.2, "bottom": 184.6}
 {"page": 46, "line": 11, "text": "§ 325-16. Height regulations.", "x0": 72.0, "top": 200.3, "x1": 209.9, "bottom": 211.3}
 {"page": 46, "line": 12, "text": "A. Exceptions. [Amended 4-1-1981 by Ord. No. 81-2]", "x0": 72.0, "top": 222.3, "x1": 327.3, "bottom": 233.3}
 {"page": 46, "line": 13, "text": "(1) The height limitations of this chapter shall not apply to:", "x0": 96.0, "top": 244.3, "x1": 364.7, "bottom": 255.3}
@@ -1855,7 +1855,7 @@
 {"page": 47, "line": 29, "text": "designated areas. Such existing buildings may be maintained and repaired, provided that their", "x0": 120.0, "top": 510.6, "x1": 540.0, "bottom": 521.6}
 {"page": 47, "line": 30, "text": "height and footprint are not enlarged so as to make the buildings noncompliant with the", "x0": 120.0, "top": 523.6, "x1": 540.0, "bottom": 534.6}
 {"page": 47, "line": 31, "text": "restrictions of this subsection.", "x0": 120.0, "top": 536.6, "x1": 251.3, "bottom": 547.6}
-{"page": 47, "line": 32, "text": "E. (Reserved)10", "x0": 72.0, "top": 557.1, "x1": 150.9, "bottom": 569.6}
+{"page": 47, "line": 32, "text": "E. (Reserved)^10", "x0": 72.0, "top": 557.1, "x1": 150.9, "bottom": 569.6}
 {"page": 47, "line": 33, "text": "F. Notwithstanding anything to the contrary contained herein, in the WEDZ-1 District: [Added", "x0": 72.0, "top": 580.6, "x1": 540.0, "bottom": 591.6}
 {"page": 47, "line": 34, "text": "3-1-2000 by Ord. No. 2000-2]", "x0": 96.0, "top": 593.6, "x1": 232.3, "bottom": 604.6}
 {"page": 47, "line": 35, "text": "(1) No building shall be erected that is less than two stories or greater than five stories in any of the", "x0": 96.0, "top": 615.6, "x1": 540.0, "bottom": 626.6}
@@ -1910,13 +1910,13 @@
 {"page": 49, "line": 14, "text": "except for ordinary projections of windowsills, belt courses, cornices, eaves and other architectural", "x0": 96.0, "top": 257.3, "x1": 539.9, "bottom": 268.3}
 {"page": 49, "line": 15, "text": "features; provided, however, that such features shall not project more than two feet into any required", "x0": 96.0, "top": 270.3, "x1": 540.0, "bottom": 281.3}
 {"page": 49, "line": 16, "text": "yard.", "x0": 96.0, "top": 283.3, "x1": 118.3, "bottom": 294.3}
-{"page": 49, "line": 17, "text": "C. 11Notwithstanding anything herein contained to the contrary, in the U-1 Zone, for any building which", "x0": 72.0, "top": 303.8, "x1": 540.0, "bottom": 316.3}
+{"page": 49, "line": 17, "text": "C. ^11Notwithstanding anything herein contained to the contrary, in the U-1 Zone, for any building which", "x0": 72.0, "top": 303.8, "x1": 540.0, "bottom": 316.3}
 {"page": 49, "line": 18, "text": "is constructed after the effective date of this subsection, if any part of said building is within 100 feet", "x0": 96.0, "top": 318.3, "x1": 540.0, "bottom": 329.3}
 {"page": 49, "line": 19, "text": "of a residential zone, said building shall be set back from any adjacent public road which separates", "x0": 96.0, "top": 331.3, "x1": 539.9, "bottom": 342.3}
 {"page": 49, "line": 20, "text": "the U-1 Zone from a residential zone, a distance equal to at least the required front yard setback", "x0": 96.0, "top": 344.3, "x1": 540.0, "bottom": 355.3}
 {"page": 49, "line": 21, "text": "established for buildings in such adjacent residential zone. [Added 6-3-1998 by Ord. No. 98-9]", "x0": 96.0, "top": 357.3, "x1": 518.2, "bottom": 368.3}
 {"page": 49, "line": 22, "text": "§ 325-19. Transition regulations.", "x0": 72.0, "top": 383.9, "x1": 227.6, "bottom": 394.9}
-{"page": 49, "line": 23, "text": "A. 12Side yard and rear yard transition. Where a lot in a business or industrial district abuts a lot in a", "x0": 72.0, "top": 404.5, "x1": 540.0, "bottom": 416.9}
+{"page": 49, "line": 23, "text": "A. ^12Side yard and rear yard transition. Where a lot in a business or industrial district abuts a lot in a", "x0": 72.0, "top": 404.5, "x1": 540.0, "bottom": 416.9}
 {"page": 49, "line": 24, "text": "residential district, there shall be provided along such abutting lines a yard equal in width or depth to", "x0": 96.0, "top": 418.9, "x1": 540.0, "bottom": 429.9}
 {"page": 49, "line": 25, "text": "that required in the residential district. (See illustration below.)", "x0": 96.0, "top": 431.9, "x1": 372.7, "bottom": 442.9}
 {"page": 49, "line": 26, "text": "11. Editor's Note: Former Subsection C, Reduction in rear yards, amended 4-1-1981 by Ord. No. 81-2 and 3-26-2004 by Ord. No. 2004-3,", "x0": 72.0, "top": 680.9, "x1": 539.9, "bottom": 688.9}
@@ -1961,7 +1961,7 @@
 {"page": 51, "line": 13, "text": "No. 2003-21; 3-26-2004 by Ord. No. 2004-3; 1-10-2007 by Ord. No. 2007-2; 11-5-2008 by Ord. No.", "x0": 72.0, "top": 226.3, "x1": 540.0, "bottom": 237.3}
 {"page": 51, "line": 14, "text": "2008-5; 2-4-2009 by Ord. No. 2009-03; 5-4-2011 by Ord. No. 2011-05; 7-6-2011 by Ord. No. 2011-10;", "x0": 72.0, "top": 239.3, "x1": 540.0, "bottom": 250.3}
 {"page": 51, "line": 15, "text": "10-5-2011 by Ord. No. 2011-13; 6-6-2012 by Ord. No. 2012-03; 5-1-2013 by Ord. No. 2013-02;", "x0": 72.0, "top": 252.3, "x1": 540.0, "bottom": 263.3}
-{"page": 51, "line": 16, "text": "6-5-2013 by Ord. No. 2013-15;13 4-1-2015 by Ord. No. 2015-05; 10-3-2018 by Ord. No. 2018-10.;", "x0": 72.0, "top": 263.8, "x1": 540.0, "bottom": 276.3}
+{"page": 51, "line": 16, "text": "6-5-2013 by Ord. No. 2013-15;^13 4-1-2015 by Ord. No. 2015-05; 10-3-2018 by Ord. No. 2018-10.;", "x0": 72.0, "top": 263.8, "x1": 540.0, "bottom": 276.3}
 {"page": 51, "line": 17, "text": "11-3-2021 by Ord. No. 2021-12; 6-18-2025 by Ord. No. 2025-06]", "x0": 72.0, "top": 278.3, "x1": 369.3, "bottom": 289.3}
 {"page": 51, "line": 18, "text": "A. Purpose and intent. The intent of this section is to regulate uniformly the development and", "x0": 72.0, "top": 300.3, "x1": 540.0, "bottom": 311.3}
 {"page": 51, "line": 19, "text": "maintenance of off-street parking for both public and private uses. The following regulations are", "x0": 96.0, "top": 313.3, "x1": 540.0, "bottom": 324.3}
@@ -2085,7 +2085,7 @@
 {"page": 54, "line": 2, "text": "§ 325-20 ITHACA CODE § 325-20", "x0": 72.0, "top": 46.4, "x1": 540.0, "bottom": 57.4}
 {"page": 54, "line": 3, "text": "building which is newly established, erected or enlarged after the effective date of this", "x0": 144.0, "top": 73.6, "x1": 540.0, "bottom": 84.6}
 {"page": 54, "line": 4, "text": "section (March 6, 1996), as specified in the chart below.", "x0": 144.0, "top": 86.6, "x1": 391.3, "bottom": 97.6}
-{"page": 54, "line": 5, "text": "Use1 Spaces Required2", "x0": 76.5, "top": 117.8, "x1": 358.6, "bottom": 129.4}
+{"page": 54, "line": 5, "text": "Use^1 Spaces Required^2", "x0": 76.5, "top": 117.8, "x1": 358.6, "bottom": 129.4}
 {"page": 54, "line": 6, "text": "Adult day-care home or group adult day- 1 for client use, plus 1 per 2 supervisory staff or", "x0": 76.5, "top": 137.4, "x1": 488.5, "bottom": 148.4}
 {"page": 54, "line": 7, "text": "care facility employees not residing on the premises", "x0": 76.5, "top": 150.4, "x1": 451.1, "bottom": 161.4}
 {"page": 54, "line": 8, "text": "Dormitory 1 per 4 persons housed", "x0": 76.5, "top": 169.4, "x1": 378.1, "bottom": 180.4}
@@ -2095,12 +2095,12 @@
 {"page": 54, "line": 12, "text": "rooms", "x0": 277.4, "top": 227.4, "x1": 304.9, "bottom": 238.4}
 {"page": 54, "line": 13, "text": "Auditorium or theater 1 per 5 seats", "x0": 76.5, "top": 246.4, "x1": 332.0, "bottom": 257.4}
 {"page": 54, "line": 14, "text": "Bar, tavern or restaurant 1 per 50 square feet of net floor area of the assembly space", "x0": 76.5, "top": 265.4, "x1": 536.3, "bottom": 276.4}
-{"page": 54, "line": 15, "text": "Bed-and-breakfast inn 1 per guest room1,3", "x0": 76.5, "top": 284.4, "x1": 358.5, "bottom": 298.4}
+{"page": 54, "line": 15, "text": "Bed-and-breakfast inn 1 per guest room^1,3", "x0": 76.5, "top": 284.4, "x1": 358.5, "bottom": 298.4}
 {"page": 54, "line": 16, "text": "Bowling alley 2 per bowling lane", "x0": 76.5, "top": 306.4, "x1": 359.5, "bottom": 317.4}
 {"page": 54, "line": 17, "text": "Church, funeral home or mortuary 1 per 10 seating spaces", "x0": 76.5, "top": 325.4, "x1": 378.7, "bottom": 336.4}
 {"page": 54, "line": 18, "text": "Fitness center or health club 1 per 5 persons allowed as determined by the maximum", "x0": 76.5, "top": 344.4, "x1": 523.2, "bottom": 355.4}
 {"page": 54, "line": 19, "text": "occupancy load", "x0": 277.4, "top": 357.4, "x1": 346.0, "bottom": 368.4}
-{"page": 54, "line": 20, "text": "Home occupation requiring special permit 1 space3", "x0": 76.5, "top": 376.4, "x1": 312.8, "bottom": 390.5}
+{"page": 54, "line": 20, "text": "Home occupation requiring special permit 1 space^3", "x0": 76.5, "top": 376.4, "x1": 312.8, "bottom": 390.5}
 {"page": 54, "line": 21, "text": "Hospital or nursing or convalescent home 1 per 5 patient beds", "x0": 76.5, "top": 398.5, "x1": 363.4, "bottom": 409.5}
 {"page": 54, "line": 22, "text": "Hotel or motel 1 per guest room", "x0": 76.5, "top": 417.5, "x1": 351.6, "bottom": 428.5}
 {"page": 54, "line": 23, "text": "Medical or dental office 1 per 250 square feet of net assignable floor area", "x0": 76.5, "top": 436.5, "x1": 491.4, "bottom": 447.5}
@@ -2110,7 +2110,7 @@
 {"page": 54, "line": 27, "text": "Retail store or neighborhood commercial 1 per 500 square feet of net assignable floor area", "x0": 76.5, "top": 506.5, "x1": 491.4, "bottom": 517.5}
 {"page": 54, "line": 28, "text": "facility", "x0": 76.5, "top": 519.5, "x1": 107.6, "bottom": 530.5}
 {"page": 54, "line": 29, "text": "Wholesale or industry 1 per 2 employees on maximum work shift", "x0": 76.5, "top": 538.5, "x1": 466.4, "bottom": 549.5}
-{"page": 54, "line": 30, "text": "Boat launch 8 per ramp4", "x0": 76.5, "top": 557.5, "x1": 327.8, "bottom": 571.5}
+{"page": 54, "line": 30, "text": "Boat launch 8 per ramp^4", "x0": 76.5, "top": 557.5, "x1": 327.8, "bottom": 571.5}
 {"page": 54, "line": 31, "text": "Boat storage or repair 1 per 2 employees on maximum shift", "x0": 76.5, "top": 579.5, "x1": 441.1, "bottom": 590.5}
 {"page": 54, "line": 32, "text": "Boatel 1 per 2 sleeping rooms", "x0": 76.5, "top": 598.5, "x1": 377.5, "bottom": 609.5}
 {"page": 54, "line": 33, "text": "Marina 1 per 4 berths", "x0": 76.5, "top": 617.5, "x1": 337.5, "bottom": 628.5}
@@ -2120,15 +2120,15 @@
 {"page": 55, "line": 1, "text": "City of Ithaca, NY", "x0": 54.0, "top": 32.4, "x1": 113.5, "bottom": 40.4}
 {"page": 55, "line": 2, "text": "§ 325-20 ZONING § 325-20", "x0": 72.0, "top": 46.4, "x1": 540.0, "bottom": 57.4}
 {"page": 55, "line": 3, "text": "NOTES:", "x0": 75.0, "top": 75.8, "x1": 115.9, "bottom": 86.8}
-{"page": 55, "line": 4, "text": "1 In the case of mixed use of a building or property, the space requirements shall be computed for", "x0": 75.0, "top": 94.1, "x1": 537.0, "bottom": 105.1}
+{"page": 55, "line": 4, "text": "^1 In the case of mixed use of a building or property, the space requirements shall be computed for", "x0": 75.0, "top": 94.1, "x1": 537.0, "bottom": 105.1}
 {"page": 55, "line": 5, "text": "each use, and the total requirements for all uses shall be provided in accordance with this section.", "x0": 107.8, "top": 107.1, "x1": 535.9, "bottom": 118.1}
-{"page": 55, "line": 6, "text": "2 See also the District Regulations Chart14 for districts in which off-street parking is not required.", "x0": 75.0, "top": 123.9, "x1": 527.7, "bottom": 136.3}
-{"page": 55, "line": 7, "text": "3 Unless the Zoning Board of Appeals, upon consideration of all relevant factors, including but", "x0": 75.0, "top": 146.6, "x1": 537.0, "bottom": 157.6}
+{"page": 55, "line": 6, "text": "^2 See also the District Regulations Chart^14 for districts in which off-street parking is not required.", "x0": 75.0, "top": 123.9, "x1": 527.7, "bottom": 136.3}
+{"page": 55, "line": 7, "text": "^3 Unless the Zoning Board of Appeals, upon consideration of all relevant factors, including but", "x0": 75.0, "top": 146.6, "x1": 537.0, "bottom": 157.6}
 {"page": 55, "line": 8, "text": "not limited to the easy availability of on-street parking or the expectation that a lesser parking", "x0": 107.8, "top": 159.6, "x1": 537.0, "bottom": 170.6}
 {"page": 55, "line": 9, "text": "requirement will meet the parking needs of the use, determines during consideration of the special", "x0": 107.8, "top": 172.6, "x1": 537.0, "bottom": 183.6}
 {"page": 55, "line": 10, "text": "permit that a lesser off-street parking requirement is appropriate and will not have a negative", "x0": 107.8, "top": 185.6, "x1": 537.0, "bottom": 196.6}
 {"page": 55, "line": 11, "text": "impact on the surrounding neighborhood.", "x0": 107.8, "top": 198.6, "x1": 290.1, "bottom": 209.6}
-{"page": 55, "line": 12, "text": "4 Boat-launching ramps shall maintain 75% of their parking spaces at a size of 10 feet by 40 feet", "x0": 75.0, "top": 216.9, "x1": 537.0, "bottom": 227.9}
+{"page": 55, "line": 12, "text": "^4 Boat-launching ramps shall maintain 75% of their parking spaces at a size of 10 feet by 40 feet", "x0": 75.0, "top": 216.9, "x1": 537.0, "bottom": 227.9}
 {"page": 55, "line": 13, "text": "to accommodate boat trailers. Consult the New York State Parks and Recreation Department on", "x0": 107.8, "top": 229.9, "x1": 537.0, "bottom": 240.9}
 {"page": 55, "line": 14, "text": "space requirements for maneuvering.", "x0": 107.8, "top": 242.9, "x1": 270.7, "bottom": 253.9}
 {"page": 55, "line": 15, "text": "(c) (Reserved)", "x0": 120.0, "top": 267.9, "x1": 192.2, "bottom": 278.9}
@@ -2234,7 +2234,7 @@
 {"page": 57, "line": 26, "text": "of more than 50 feet shall be restricted to an area not greater than 25% of the total area of the", "x0": 120.0, "top": 435.6, "x1": 540.0, "bottom": 446.6}
 {"page": 57, "line": 27, "text": "front yard, including turnaround and other vehicle maneuvering areas and driveways leading to", "x0": 120.0, "top": 448.6, "x1": 540.0, "bottom": 459.6}
 {"page": 57, "line": 28, "text": "garages and parking areas. The setback for any such parking area must meet the minimum front", "x0": 120.0, "top": 461.6, "x1": 540.0, "bottom": 472.6}
-{"page": 57, "line": 29, "text": "yard setback dimensions specified in § 325-8, District Regulations Chart,15 for the zoning", "x0": 120.0, "top": 473.1, "x1": 540.0, "bottom": 485.6}
+{"page": 57, "line": 29, "text": "yard setback dimensions specified in § 325-8, District Regulations Chart,^15 for the zoning", "x0": 120.0, "top": 473.1, "x1": 540.0, "bottom": 485.6}
 {"page": 57, "line": 30, "text": "district in which the parking area is to be constructed.", "x0": 120.0, "top": 487.6, "x1": 355.7, "bottom": 498.6}
 {"page": 57, "line": 31, "text": "(4) In all residential districts, on corner lots with more than one front yard as defined in this Code,", "x0": 96.0, "top": 509.6, "x1": 540.0, "bottom": 520.6}
 {"page": 57, "line": 32, "text": "front yard parking according to the above provisions shall only be permitted on one of the front", "x0": 120.0, "top": 522.6, "x1": 540.0, "bottom": 533.6}
@@ -2293,7 +2293,7 @@
 {"page": 58, "line": 41, "text": "landscaping compliance method described respectively in § 325-20F(3)(a) and (b) below.", "x0": 120.0, "top": 621.6, "x1": 540.0, "bottom": 632.6}
 {"page": 58, "line": 42, "text": "Before applying for a variance from this requirement, an applicant must show that neither", "x0": 120.0, "top": 634.6, "x1": 540.0, "bottom": 645.6}
 {"page": 58, "line": 43, "text": "method is feasible. Such plans must also comply with all other general and specific standards of", "x0": 120.0, "top": 647.6, "x1": 540.0, "bottom": 658.6}
-{"page": 58, "line": 44, "text": "§ 325-20 and with the District Regulations Chart.16 Where turnarounds or other maneuvering", "x0": 120.0, "top": 659.1, "x1": 540.0, "bottom": 671.6}
+{"page": 58, "line": 44, "text": "§ 325-20 and with the District Regulations Chart.^16 Where turnarounds or other maneuvering", "x0": 120.0, "top": 659.1, "x1": 540.0, "bottom": 671.6}
 {"page": 58, "line": 45, "text": "spaces not required for access to parking spaces are provided that meet minimum size for a", "x0": 120.0, "top": 673.6, "x1": 540.0, "bottom": 684.6}
 {"page": 58, "line": 46, "text": "16. Editor's Note: A copy of the District Regulations Chart is on file in the City Clerk's office.", "x0": 72.0, "top": 711.9, "x1": 392.2, "bottom": 719.9}
 {"page": 58, "line": 47, "text": "Downloaded from https://ecode360.com/IT1348 on 2026-10-19", "x0": 54.0, "top": 752.4, "x1": 258.2, "bottom": 760.4}
@@ -2557,7 +2557,7 @@
 {"page": 64, "line": 30, "text": "(1) Noise. Noise levels at any point along the lot line of any land use shall not exceed intensities", "x0": 96.0, "top": 559.9, "x1": 539.9, "bottom": 570.9}
 {"page": 64, "line": 31, "text": "considered acceptable by the American Standards Association. Sound or noise levels deemed", "x0": 120.0, "top": 572.9, "x1": 540.0, "bottom": 583.9}
 {"page": 64, "line": 32, "text": "by the ASA standards injurious or detrimental to adjacent land uses must be confined to the", "x0": 120.0, "top": 585.9, "x1": 540.0, "bottom": 596.9}
-{"page": 64, "line": 33, "text": "emitting land use.17", "x0": 120.0, "top": 597.5, "x1": 205.2, "bottom": 609.9}
+{"page": 64, "line": 33, "text": "emitting land use.^17", "x0": 120.0, "top": 597.5, "x1": 205.2, "bottom": 609.9}
 {"page": 64, "line": 34, "text": "(2) Smoke. No smoke shall be emitted in violation of any provisions of this Code.", "x0": 96.0, "top": 620.9, "x1": 464.9, "bottom": 631.9}
 {"page": 64, "line": 35, "text": "(3) Odor. No odor shall be emitted in violation of any provisions of this Code.", "x0": 96.0, "top": 642.9, "x1": 448.3, "bottom": 653.9}
 {"page": 64, "line": 36, "text": "(4) Ash, dust and dirt. No amount of soot, cinders, dust or dirt shall be emitted in violation of any", "x0": 96.0, "top": 664.9, "x1": 540.0, "bottom": 675.9}
@@ -2574,7 +2574,7 @@
 {"page": 65, "line": 8, "text": "conveyed to or allowed to flow in and through the sewer or appurtenance shall contain materials", "x0": 120.0, "top": 147.6, "x1": 539.9, "bottom": 158.6}
 {"page": 65, "line": 9, "text": "which contain or create deposits obstructing the flow in the sewer.", "x0": 120.0, "top": 160.6, "x1": 411.7, "bottom": 171.6}
 {"page": 65, "line": 10, "text": "(7) Vibration. No use shall be operated so that ground vibration is perceptible without instruments", "x0": 96.0, "top": 182.6, "x1": 540.0, "bottom": 193.6}
-{"page": 65, "line": 11, "text": "at any point along the lot lines of such uses.18", "x0": 120.0, "top": 194.1, "x1": 319.1, "bottom": 206.6}
+{"page": 65, "line": 11, "text": "at any point along the lot lines of such uses.^18", "x0": 120.0, "top": 194.1, "x1": 319.1, "bottom": 206.6}
 {"page": 65, "line": 12, "text": "§ 325-24. Special performance standards in Industrial District; penalties for offenses.", "x0": 72.0, "top": 222.3, "x1": 473.6, "bottom": 233.3}
 {"page": 65, "line": 13, "text": "A. Intent. The intent of this section is to permit a broad range of uses in certain Industrial Districts by", "x0": 72.0, "top": 244.3, "x1": 540.0, "bottom": 255.3}
 {"page": 65, "line": 14, "text": "establishing standards of performance to protect residential districts from adverse effects of industrial", "x0": 96.0, "top": 257.3, "x1": 540.0, "bottom": 268.3}
@@ -2614,7 +2614,7 @@
 {"page": 66, "line": 5, "text": "State Board of Health. No objectionable, noxious, toxic or corrosive fumes or gases shall be emitted.", "x0": 96.0, "top": 99.6, "x1": 539.9, "bottom": 110.6}
 {"page": 66, "line": 6, "text": "A noxious or objectionable odor concentrate shall be deemed to be present at the point at which it can", "x0": 96.0, "top": 112.6, "x1": 540.0, "bottom": 123.6}
 {"page": 66, "line": 7, "text": "be perceived by smell or otherwise affects the breathing process.", "x0": 96.0, "top": 125.6, "x1": 380.6, "bottom": 136.6}
-{"page": 66, "line": 8, "text": "G. Fire and safety. All uses must conform to Building Code19 standards and shall operate so as to", "x0": 72.0, "top": 146.1, "x1": 540.0, "bottom": 158.6}
+{"page": 66, "line": 8, "text": "G. Fire and safety. All uses must conform to Building Code^19 standards and shall operate so as to", "x0": 72.0, "top": 146.1, "x1": 540.0, "bottom": 158.6}
 {"page": 66, "line": 9, "text": "minimize the danger of fire or explosion by conforming to the requirements of the National Fire Code.", "x0": 96.0, "top": 160.6, "x1": 540.0, "bottom": 171.6}
 {"page": 66, "line": 10, "text": "H. Glare and heat. Glare or heat resulting from the day-to-day operation of the industry or from exterior", "x0": 72.0, "top": 182.6, "x1": 540.0, "bottom": 193.6}
 {"page": 66, "line": 11, "text": "signs, building materials or other objects situated on the lot shall not be detectable beyond the lot line", "x0": 96.0, "top": 195.6, "x1": 540.0, "bottom": 206.6}
@@ -2631,18 +2631,18 @@
 {"page": 66, "line": 22, "text": "agency or department of a need for performance measurement when he/she becomes aware of a", "x0": 96.0, "top": 356.6, "x1": 540.0, "bottom": 367.6}
 {"page": 66, "line": 23, "text": "possible infraction of the special performance standards. Enforcement of this section shall be under", "x0": 96.0, "top": 369.6, "x1": 540.0, "bottom": 380.6}
 {"page": 66, "line": 24, "text": "the jurisdiction of the Director of Zoning Administration and shall comply with Article VII of this", "x0": 96.0, "top": 382.6, "x1": 540.0, "bottom": 393.6}
-{"page": 66, "line": 25, "text": "chapter. [Amended 6-5-2013 by Ord. No. 2013-1520]", "x0": 96.0, "top": 394.1, "x1": 333.9, "bottom": 406.6}
+{"page": 66, "line": 25, "text": "chapter. [Amended 6-5-2013 by Ord. No. 2013-15^20]", "x0": 96.0, "top": 394.1, "x1": 333.9, "bottom": 406.6}
 {"page": 66, "line": 26, "text": "K. Penalties for violation. Any person who violates any provision of this section shall be guilty of an", "x0": 72.0, "top": 417.6, "x1": 540.0, "bottom": 428.6}
 {"page": 66, "line": 27, "text": "offense. Each week's continued violation will constitute a separate offense. Each offense shall be", "x0": 96.0, "top": 430.6, "x1": 540.0, "bottom": 441.6}
 {"page": 66, "line": 28, "text": "punishable by a fine not exceeding $1,000.", "x0": 96.0, "top": 443.6, "x1": 284.8, "bottom": 454.6}
 {"page": 66, "line": 29, "text": "L. Civil proceedings. In addition to other remedies, the Director of Planning and Development or", "x0": 72.0, "top": 465.6, "x1": 540.0, "bottom": 476.6}
 {"page": 66, "line": 30, "text": "designee may institute appropriate action or proceedings to prevent any unlawful conduct or", "x0": 96.0, "top": 478.6, "x1": 540.0, "bottom": 489.6}
 {"page": 66, "line": 31, "text": "emissions prohibited by this section or to compel compliance with the provisions of this section.", "x0": 96.0, "top": 491.6, "x1": 540.0, "bottom": 502.6}
-{"page": 66, "line": 32, "text": "[Amended 6-5-2013 by Ord. No. 2013-1521]", "x0": 96.0, "top": 503.1, "x1": 296.0, "bottom": 515.6}
+{"page": 66, "line": 32, "text": "[Amended 6-5-2013 by Ord. No. 2013-15^21]", "x0": 96.0, "top": 503.1, "x1": 296.0, "bottom": 515.6}
 {"page": 66, "line": 33, "text": "§ 325-25. Location of accessory structures.", "x0": 72.0, "top": 531.3, "x1": 274.0, "bottom": 542.3}
 {"page": 66, "line": 34, "text": "Accessory structures, including private garages, storage sheds, toolhouses, garden houses, playhouses or", "x0": 72.0, "top": 553.3, "x1": 540.0, "bottom": 564.3}
 {"page": 66, "line": 35, "text": "similar structures, shall be exempt from side yard requirements contained in the District Regulations Chart", "x0": 72.0, "top": 566.3, "x1": 540.0, "bottom": 577.3}
-{"page": 66, "line": 36, "text": "in § 325-822 and shall be governed by the requirements below:", "x0": 72.0, "top": 577.8, "x1": 345.6, "bottom": 590.3}
+{"page": 66, "line": 36, "text": "in § 325-8^22 and shall be governed by the requirements below:", "x0": 72.0, "top": 577.8, "x1": 345.6, "bottom": 590.3}
 {"page": 66, "line": 37, "text": "A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or", "x0": 72.0, "top": 601.3, "x1": 540.0, "bottom": 612.3}
 {"page": 66, "line": 38, "text": "partially above finished grade are permitted in any side or rear yard but not in a required front yard,", "x0": 96.0, "top": 614.3, "x1": 540.0, "bottom": 625.3}
 {"page": 66, "line": 39, "text": "except as permitted under the further provisions of this section. Corner lots shall be considered to", "x0": 96.0, "top": 627.3, "x1": 540.0, "bottom": 638.3}
@@ -2671,7 +2671,7 @@
 {"page": 67, "line": 17, "text": "public or commercial recreation activities. (See illustration below.) Properties located within the Cherry", "x0": 72.0, "top": 296.3, "x1": 540.0, "bottom": 307.3}
 {"page": 67, "line": 18, "text": "Street District, the Market District, the Newman District, and the West End/Waterfront District are exempt", "x0": 72.0, "top": 309.3, "x1": 540.0, "bottom": 320.3}
 {"page": 67, "line": 19, "text": "from this requirement.", "x0": 72.0, "top": 322.3, "x1": 170.6, "bottom": 333.3}
-{"page": 67, "line": 20, "text": "§ 325-27. Short-term rentals.23 [Added 5-1-2024 by Ord. No. 2024-01; amended 9-3-2025 by Ord.", "x0": 72.0, "top": 638.9, "x1": 540.0, "bottom": 651.4}
+{"page": 67, "line": 20, "text": "§ 325-27. Short-term rentals.^23 [Added 5-1-2024 by Ord. No. 2024-01; amended 9-3-2025 by Ord.", "x0": 72.0, "top": 638.9, "x1": 540.0, "bottom": 651.4}
 {"page": 67, "line": 21, "text": "No. 2025-07]", "x0": 72.0, "top": 653.4, "x1": 131.3, "bottom": 664.4}
 {"page": 67, "line": 22, "text": "23. Editor’s Note: Former § 325-27, Temporary moratorium, added 10-3-2007 by Ord. No. 2007-8, as amended, was removed as its", "x0": 72.0, "top": 702.9, "x1": 520.1, "bottom": 710.9}
 {"page": 67, "line": 23, "text": "provisions expired 18 months after its effective date.", "x0": 86.4, "top": 711.9, "x1": 264.1, "bottom": 719.9}
@@ -2825,7 +2825,7 @@
 {"page": 71, "line": 26, "text": "Municipal Code of the City of Ithaca. This appeals process shall not apply to prosecutions or", "x0": 120.0, "top": 426.6, "x1": 540.0, "bottom": 437.6}
 {"page": 71, "line": 27, "text": "other legal proceedings brought in the name of the City or the People to enforce the provisions", "x0": 120.0, "top": 439.6, "x1": 540.0, "bottom": 450.6}
 {"page": 71, "line": 28, "text": "of this section.", "x0": 120.0, "top": 452.6, "x1": 184.4, "bottom": 463.6}
-{"page": 71, "line": 29, "text": "§ 325-28. Accessory Dwelling Units (ADUs).24 [Added 5-7-2025 by Ord. No. 2025-04]", "x0": 72.0, "top": 477.8, "x1": 469.0, "bottom": 490.3}
+{"page": 71, "line": 29, "text": "§ 325-28. Accessory Dwelling Units (ADUs).^24 [Added 5-7-2025 by Ord. No. 2025-04]", "x0": 72.0, "top": 477.8, "x1": 469.0, "bottom": 490.3}
 {"page": 71, "line": 30, "text": "A. Purpose and intent. The intent of the policy is to facilitate the development of accessory dwelling", "x0": 72.0, "top": 501.3, "x1": 540.0, "bottom": 512.3}
 {"page": 71, "line": 31, "text": "units in the City of Ithaca in order to:", "x0": 96.0, "top": 514.3, "x1": 259.7, "bottom": 525.3}
 {"page": 71, "line": 32, "text": "(1) Create new housing units while respecting the look and scale of traditional residential", "x0": 96.0, "top": 536.3, "x1": 539.9, "bottom": 547.3}
@@ -2872,7 +2872,7 @@
 {"page": 72, "line": 32, "text": "Downloaded from https://ecode360.com/IT1348 on 2026-10-19", "x0": 54.0, "top": 752.4, "x1": 258.2, "bottom": 760.4}
 {"page": 73, "line": 1, "text": "City of Ithaca, NY", "x0": 54.0, "top": 32.4, "x1": 113.5, "bottom": 40.4}
 {"page": 73, "line": 2, "text": "§ 325-29 ZONING § 325-29.1", "x0": 72.0, "top": 46.4, "x1": 540.0, "bottom": 57.4}
-{"page": 73, "line": 3, "text": "§ 325-29. Landmarks. [Amended 6-5-2013 by Ord. No. 2013-1525]", "x0": 72.0, "top": 72.1, "x1": 380.7, "bottom": 84.6}
+{"page": 73, "line": 3, "text": "§ 325-29. Landmarks. [Amended 6-5-2013 by Ord. No. 2013-15^25]", "x0": 72.0, "top": 72.1, "x1": 380.7, "bottom": 84.6}
 {"page": 73, "line": 4, "text": "Officially designated landmarks or landmark districts of the City shall be governed by the provisions of", "x0": 72.0, "top": 95.6, "x1": 540.0, "bottom": 106.6}
 {"page": 73, "line": 5, "text": "Chapter 228, Landmarks Preservation, of this Code with respect to changes in appearance. The Director of", "x0": 72.0, "top": 108.6, "x1": 540.0, "bottom": 119.6}
 {"page": 73, "line": 6, "text": "Planning and Development or designee shall be responsible for informing applicants of building, grading,", "x0": 72.0, "top": 121.6, "x1": 540.0, "bottom": 132.6}
@@ -4219,7 +4219,7 @@
 {"page": 105, "line": 11, "text": "approval or denial, which shall include the following:", "x0": 120.0, "top": 231.6, "x1": 355.7, "bottom": 242.6}
 {"page": 105, "line": 12, "text": "(a) Findings of fact.", "x0": 120.0, "top": 253.6, "x1": 216.4, "bottom": 264.6}
 {"page": 105, "line": 13, "text": "(b) Approve or deny, with specific reasons included.", "x0": 120.0, "top": 275.6, "x1": 359.6, "bottom": 286.6}
-{"page": 105, "line": 14, "text": "§ 325-29.15. Notice. [Added 10-6-2021 by Ord. No. 2021-0726]", "x0": 72.0, "top": 300.8, "x1": 360.8, "bottom": 313.3}
+{"page": 105, "line": 14, "text": "§ 325-29.15. Notice. [Added 10-6-2021 by Ord. No. 2021-07^26]", "x0": 72.0, "top": 300.8, "x1": 360.8, "bottom": 313.3}
 {"page": 105, "line": 15, "text": "For all PWSF applications, the applicant is responsible for demonstrating compliance with the following:", "x0": 72.0, "top": 324.3, "x1": 535.1, "bottom": 335.3}
 {"page": 105, "line": 16, "text": "A. Upon submission of the application, the applicant shall, no less than 30 days prior to installation, post", "x0": 72.0, "top": 346.3, "x1": 540.0, "bottom": 357.3}
 {"page": 105, "line": 17, "text": "the location with a sign providing information as to where the application may be viewed and how", "x0": 96.0, "top": 359.3, "x1": 540.0, "bottom": 370.3}
@@ -4382,7 +4382,7 @@
 {"page": 109, "line": 10, "text": "penalties or other remedies specified in this article.", "x0": 120.0, "top": 182.6, "x1": 344.1, "bottom": 193.6}
 {"page": 109, "line": 11, "text": "§ 325-29.20. Noise.", "x0": 72.0, "top": 209.3, "x1": 162.3, "bottom": 220.3}
 {"page": 109, "line": 12, "text": "No equipment shall be operated at a PWSF so as to produce noise in excess of the applicable noise", "x0": 72.0, "top": 231.3, "x1": 540.0, "bottom": 242.3}
-{"page": 109, "line": 13, "text": "standards under the City of Ithaca Noise Ordinance.27", "x0": 72.0, "top": 242.8, "x1": 307.1, "bottom": 255.3}
+{"page": 109, "line": 13, "text": "standards under the City of Ithaca Noise Ordinance.^27", "x0": 72.0, "top": 242.8, "x1": 307.1, "bottom": 255.3}
 {"page": 109, "line": 14, "text": "§ 325-29.21. Lighting and security.", "x0": 72.0, "top": 270.9, "x1": 237.4, "bottom": 281.9}
 {"page": 109, "line": 15, "text": "A. A PWSF shall not be artificially lighted, except for:", "x0": 72.0, "top": 292.9, "x1": 323.5, "bottom": 303.9}
 {"page": 109, "line": 16, "text": "(1) Security and safety lighting of equipment buildings if such lighting is shielded and directed", "x0": 96.0, "top": 314.9, "x1": 540.0, "bottom": 325.9}
@@ -4454,7 +4454,7 @@
 {"page": 111, "line": 1, "text": "City of Ithaca, NY", "x0": 54.0, "top": 32.4, "x1": 113.5, "bottom": 40.4}
 {"page": 111, "line": 2, "text": "§ 325-29.25 ZONING § 325-29.29", "x0": 72.0, "top": 46.4, "x1": 540.0, "bottom": 57.4}
 {"page": 111, "line": 3, "text": "compliance.", "x0": 72.0, "top": 73.6, "x1": 125.4, "bottom": 84.6}
-{"page": 111, "line": 4, "text": "§ 325-29.26. Reasonable accommodations requests. [Added 10-6-2021 by Ord. No. 2021-0728]", "x0": 72.0, "top": 98.8, "x1": 508.1, "bottom": 111.3}
+{"page": 111, "line": 4, "text": "§ 325-29.26. Reasonable accommodations requests. [Added 10-6-2021 by Ord. No. 2021-07^28]", "x0": 72.0, "top": 98.8, "x1": 508.1, "bottom": 111.3}
 {"page": 111, "line": 5, "text": "A resident with a disability as defined by the Americans with Disabilities Act may petition the Board", "x0": 72.0, "top": 122.3, "x1": 540.0, "bottom": 133.3}
 {"page": 111, "line": 6, "text": "of Zoning Appeals to consider any requested reasonable accommodation and file a complaint for lack of", "x0": 72.0, "top": 135.3, "x1": 540.0, "bottom": 146.3}
 {"page": 111, "line": 7, "text": "accommodations with the City’s chief executive officer.", "x0": 72.0, "top": 148.3, "x1": 319.1, "bottom": 159.3}
@@ -4583,7 +4583,7 @@
 {"page": 115, "line": 10, "text": "prosecute violations of this chapter. No building permit or certificate of occupancy shall be issued by", "x0": 96.0, "top": 187.1, "x1": 540.0, "bottom": 198.1}
 {"page": 115, "line": 11, "text": "the Director of Planning and Development or designee except where all provisions of this chapter", "x0": 96.0, "top": 200.1, "x1": 540.0, "bottom": 211.1}
 {"page": 115, "line": 12, "text": "shall have been met and complied with or under specific written order of the Board of Appeals.", "x0": 96.0, "top": 213.1, "x1": 540.0, "bottom": 224.1}
-{"page": 115, "line": 13, "text": "[Amended 6-5-2013 by Ord. No. 2013-1529]", "x0": 96.0, "top": 224.6, "x1": 296.0, "bottom": 237.1}
+{"page": 115, "line": 13, "text": "[Amended 6-5-2013 by Ord. No. 2013-15^29]", "x0": 96.0, "top": 224.6, "x1": 296.0, "bottom": 237.1}
 {"page": 115, "line": 14, "text": "B. Any person ordered to comply with the provisions of this chapter, ordered to cease and desist any use", "x0": 72.0, "top": 248.1, "x1": 540.0, "bottom": 259.1}
 {"page": 115, "line": 15, "text": "prohibited by this chapter or who is otherwise in disagreement with the judgment of the Director of", "x0": 96.0, "top": 261.1, "x1": 540.0, "bottom": 272.1}
 {"page": 115, "line": 16, "text": "Planning and Development and/or designee with respect to the administration or enforcement of this", "x0": 96.0, "top": 274.1, "x1": 540.0, "bottom": 285.1}
@@ -4592,7 +4592,7 @@
 {"page": 115, "line": 19, "text": "pursuant to the provisions set forth in § 325-40 relating to procedures before the Board. In the case of", "x0": 96.0, "top": 313.1, "x1": 540.0, "bottom": 324.1}
 {"page": 115, "line": 20, "text": "an order to comply or to cease and desist, the Director of Planning and Development and/or designee", "x0": 96.0, "top": 326.1, "x1": 540.0, "bottom": 337.1}
 {"page": 115, "line": 21, "text": "shall notify such person of this right to appeal and of the time limitations for commencing an appeal.", "x0": 96.0, "top": 339.1, "x1": 540.0, "bottom": 350.1}
-{"page": 115, "line": 22, "text": "[Amended 6-5-2013 by Ord. No. 2013-1530]", "x0": 96.0, "top": 350.6, "x1": 296.0, "bottom": 363.1}
+{"page": 115, "line": 22, "text": "[Amended 6-5-2013 by Ord. No. 2013-15^30]", "x0": 96.0, "top": 350.6, "x1": 296.0, "bottom": 363.1}
 {"page": 115, "line": 23, "text": "C. Approvals. It shall be the duty of the Director of Planning and Development or designee to review", "x0": 72.0, "top": 374.1, "x1": 540.0, "bottom": 385.1}
 {"page": 115, "line": 24, "text": "any zoning compliance approvals requested for any property within the City by any property owner", "x0": 96.0, "top": 387.1, "x1": 540.0, "bottom": 398.1}
 {"page": 115, "line": 25, "text": "or his/her agent. When the Director of Planning and Development or designee has determined that a", "x0": 96.0, "top": 400.1, "x1": 540.0, "bottom": 411.1}
@@ -4601,7 +4601,7 @@
 {"page": 115, "line": 28, "text": "the fee for any zoning compliance approval for owner-occupied one- or two-family dwellings is $25.", "x0": 96.0, "top": 439.1, "x1": 540.0, "bottom": 450.1}
 {"page": 115, "line": 29, "text": "The zoning compliance fee does not apply to the issuance of a certificate of compliance or a certificate", "x0": 96.0, "top": 452.1, "x1": 539.9, "bottom": 463.1}
 {"page": 115, "line": 30, "text": "of occupancy where other fees are assessed by the Municipal Code. [Added 11-4-1998 by Ord. No.", "x0": 96.0, "top": 465.1, "x1": 540.0, "bottom": 476.1}
-{"page": 115, "line": 31, "text": "98-27; amended 6-5-2013 by Ord. No. 2013-1531]", "x0": 96.0, "top": 476.6, "x1": 322.0, "bottom": 489.1}
+{"page": 115, "line": 31, "text": "98-27; amended 6-5-2013 by Ord. No. 2013-15^31]", "x0": 96.0, "top": 476.6, "x1": 322.0, "bottom": 489.1}
 {"page": 115, "line": 32, "text": "D. Collection of fees. Upon the issuance of a zoning compliance approval, the property owner shall be", "x0": 72.0, "top": 500.1, "x1": 540.0, "bottom": 511.1}
 {"page": 115, "line": 33, "text": "billed for services rendered at the rates established pursuant to Subsection C. This fee shall be paid to", "x0": 96.0, "top": 513.1, "x1": 540.0, "bottom": 524.1}
 {"page": 115, "line": 34, "text": "the City Chamberlain within 30 days of the billing date. If the required fee is not paid within 30 days", "x0": 96.0, "top": 526.1, "x1": 540.0, "bottom": 537.1}
@@ -4631,8 +4631,8 @@
 {"page": 116, "line": 11, "text": "owner bears the burden of establishing that the accounting submitted by the Director of Planning", "x0": 96.0, "top": 177.6, "x1": 540.0, "bottom": 188.6}
 {"page": 116, "line": 12, "text": "and Development or designee is inaccurate. The Board of Zoning Appeals shall have the authority to", "x0": 96.0, "top": 190.6, "x1": 540.0, "bottom": 201.6}
 {"page": 116, "line": 13, "text": "approve or reject such appeal in whole or in part. [Added 11-4-1998 by Ord. No. 98-27; amended", "x0": 96.0, "top": 203.6, "x1": 540.0, "bottom": 214.6}
-{"page": 116, "line": 14, "text": "6-5-2013 by Ord. No. 2013-1532]", "x0": 96.0, "top": 215.1, "x1": 244.4, "bottom": 227.6}
-{"page": 116, "line": 15, "text": "§ 325-38. Building permits. [Amended 6-5-2013 by Ord. No. 2013-1533]", "x0": 72.0, "top": 241.8, "x1": 404.9, "bottom": 254.3}
+{"page": 116, "line": 14, "text": "6-5-2013 by Ord. No. 2013-15^32]", "x0": 96.0, "top": 215.1, "x1": 244.4, "bottom": 227.6}
+{"page": 116, "line": 15, "text": "§ 325-38. Building permits. [Amended 6-5-2013 by Ord. No. 2013-15^33]", "x0": 72.0, "top": 241.8, "x1": 404.9, "bottom": 254.3}
 {"page": 116, "line": 16, "text": "No building or structure shall be erected, added to or structurally altered until a building permit therefor has", "x0": 72.0, "top": 265.3, "x1": 540.0, "bottom": 276.3}
 {"page": 116, "line": 17, "text": "been issued by the Director of Planning and Development or designee. All applications for such permits", "x0": 72.0, "top": 278.3, "x1": 540.0, "bottom": 289.3}
 {"page": 116, "line": 18, "text": "shall be in accordance with the requirements of all applicable regulations. The Director of Planning and", "x0": 72.0, "top": 291.3, "x1": 540.0, "bottom": 302.3}
@@ -4641,7 +4641,7 @@
 {"page": 116, "line": 21, "text": "also Chapter 146, Building Construction.) No temporary, conditional or verbal building permits shall be", "x0": 72.0, "top": 330.3, "x1": 540.0, "bottom": 341.3}
 {"page": 116, "line": 22, "text": "issued to allow grading, construction or other work requiring such a permit. Fast-tracking will be permitted", "x0": 72.0, "top": 343.3, "x1": 539.9, "bottom": 354.3}
 {"page": 116, "line": 23, "text": "upon application to and approval of the Department of Planning, Building and Economic Development.", "x0": 72.0, "top": 356.3, "x1": 527.9, "bottom": 367.3}
-{"page": 116, "line": 24, "text": "§ 325-39. Certificates of occupancy.34 [Amended 6-5-2013 by Ord. No. 2013-1535]", "x0": 72.0, "top": 381.5, "x1": 450.9, "bottom": 393.9}
+{"page": 116, "line": 24, "text": "§ 325-39. Certificates of occupancy.^34 [Amended 6-5-2013 by Ord. No. 2013-15^35]", "x0": 72.0, "top": 381.5, "x1": 450.9, "bottom": 393.9}
 {"page": 116, "line": 25, "text": "A. Required. No land shall be occupied or used and no building hereafter erected, altered or extended", "x0": 72.0, "top": 404.9, "x1": 540.0, "bottom": 415.9}
 {"page": 116, "line": 26, "text": "shall be used or changed in use until a certificate of occupancy shall have been issued by the Director", "x0": 96.0, "top": 417.9, "x1": 540.0, "bottom": 428.9}
 {"page": 116, "line": 27, "text": "of Planning and Development or designee stating that the building or proposed use thereof complies", "x0": 96.0, "top": 430.9, "x1": 540.0, "bottom": 441.9}
@@ -4670,8 +4670,8 @@
 {"page": 117, "line": 5, "text": "or portions as have been completed may be occupied safely without endangering life or the public", "x0": 96.0, "top": 99.6, "x1": 540.0, "bottom": 110.6}
 {"page": 117, "line": 6, "text": "welfare.", "x0": 96.0, "top": 112.6, "x1": 131.7, "bottom": 123.6}
 {"page": 117, "line": 7, "text": "§ 325-40. Board of Appeals; variances. [Amended 3-18-1994 by L.L. No. 2-1994; 8-7-1996 by L.L.", "x0": 72.0, "top": 139.3, "x1": 540.0, "bottom": 150.3}
-{"page": 117, "line": 8, "text": "No. 10-1997;364-22-1997 by L.L. No. 2-1997;371-29-2003 by Ord. No. 2003-2; 6-5-2013 by L.L. No.", "x0": 72.0, "top": 150.8, "x1": 540.0, "bottom": 163.3}
-{"page": 117, "line": 9, "text": "7-2013;386-5-2013 by Ord. No. 2013-15;397-3-2019 by Ord. No. 2019-13; 6-18-2025 by Ord. No.", "x0": 72.0, "top": 163.8, "x1": 540.0, "bottom": 176.3}
+{"page": 117, "line": 8, "text": "No. 10-1997;^364-22-1997 by L.L. No. 2-1997;^371-29-2003 by Ord. No. 2003-2; 6-5-2013 by L.L. No.", "x0": 72.0, "top": 150.8, "x1": 540.0, "bottom": 163.3}
+{"page": 117, "line": 9, "text": "7-2013;^386-5-2013 by Ord. No. 2013-15;^397-3-2019 by Ord. No. 2019-13; 6-18-2025 by Ord. No.", "x0": 72.0, "top": 163.8, "x1": 540.0, "bottom": 176.3}
 {"page": 117, "line": 10, "text": "2025-06]", "x0": 72.0, "top": 178.3, "x1": 112.3, "bottom": 189.3}
 {"page": 117, "line": 11, "text": "A. Creation, appointment and organization.", "x0": 72.0, "top": 200.3, "x1": 273.4, "bottom": 211.3}
 {"page": 117, "line": 12, "text": "(1) Appointment of members. The Mayor, with the consent of the Common Council, shall appoint", "x0": 96.0, "top": 222.3, "x1": 540.0, "bottom": 233.3}
@@ -4960,7 +4960,7 @@
 {"page": 123, "line": 23, "text": "the variance shall become void.", "x0": 144.0, "top": 369.6, "x1": 283.0, "bottom": 380.6}
 {"page": 123, "line": 24, "text": "(6) Appeals. Appeals from decisions of the Board of Appeals shall be made under Article 78 of the", "x0": 96.0, "top": 391.6, "x1": 540.0, "bottom": 402.6}
 {"page": 123, "line": 25, "text": "Civil Practice Law and Rules and shall be governed by § 81-c of the General City Law.", "x0": 120.0, "top": 404.6, "x1": 504.5, "bottom": 415.6}
-{"page": 123, "line": 26, "text": "§ 325-41. Zoning permits.40 [Added 5-1-2024 by Ord. No. 2024-02]", "x0": 72.0, "top": 429.8, "x1": 384.1, "bottom": 442.3}
+{"page": 123, "line": 26, "text": "§ 325-41. Zoning permits.^40 [Added 5-1-2024 by Ord. No. 2024-02]", "x0": 72.0, "top": 429.8, "x1": 384.1, "bottom": 442.3}
 {"page": 123, "line": 27, "text": "A. Applicability. This section shall apply to specific area deficiencies on existing buildings, structures,", "x0": 72.0, "top": 453.3, "x1": 540.0, "bottom": 464.3}
 {"page": 123, "line": 28, "text": "and lots, as noted in § 325-35A. All other nonconformities are subject to a variance from the Board", "x0": 96.0, "top": 466.3, "x1": 540.0, "bottom": 477.3}
 {"page": 123, "line": 29, "text": "of Zoning Appeals, as described in § 325-40.", "x0": 96.0, "top": 479.3, "x1": 294.3, "bottom": 490.3}
@@ -5038,7 +5038,7 @@
 {"page": 126, "line": 3, "text": "ARTICLE VIII", "x0": 268.9, "top": 73.6, "x1": 337.0, "bottom": 84.6}
 {"page": 126, "line": 4, "text": "Courthouse Special Use Zone", "x0": 237.1, "top": 86.6, "x1": 374.8, "bottom": 97.6}
 {"page": 126, "line": 5, "text": "[Added 10-1-1980 by Ord. No. 80-11]", "x0": 219.1, "top": 99.6, "x1": 392.9, "bottom": 110.6}
-{"page": 126, "line": 6, "text": "§ 325-42. Purpose.41", "x0": 72.0, "top": 129.1, "x1": 168.1, "bottom": 141.6}
+{"page": 126, "line": 6, "text": "§ 325-42. Purpose.^41", "x0": 72.0, "top": 129.1, "x1": 168.1, "bottom": 141.6}
 {"page": 126, "line": 7, "text": "A. This article establishes land use and control measures that will permit certain nonresidential uses to", "x0": 72.0, "top": 152.6, "x1": 540.0, "bottom": 163.6}
 {"page": 126, "line": 8, "text": "be established as of right in an area of the City adjacent to the County Courthouse which was", "x0": 96.0, "top": 165.6, "x1": 540.0, "bottom": 176.6}
 {"page": 126, "line": 9, "text": "originally developed in residential use but which, through subsequent intensification of use and", "x0": 96.0, "top": 178.6, "x1": 540.0, "bottom": 189.6}
@@ -5051,7 +5051,7 @@
 {"page": 126, "line": 16, "text": "and adjacent residential areas are strictly limited and negative effects of nonresidential use are", "x0": 96.0, "top": 278.6, "x1": 540.0, "bottom": 289.6}
 {"page": 126, "line": 17, "text": "avoided. It is more specifically intended to minimize the amount of physical change resulting from", "x0": 96.0, "top": 291.6, "x1": 540.0, "bottom": 302.6}
 {"page": 126, "line": 18, "text": "transition in property use, as provided in § 325-44A below.", "x0": 96.0, "top": 304.6, "x1": 356.6, "bottom": 315.6}
-{"page": 126, "line": 19, "text": "§ 325-43. Zone described.42", "x0": 72.0, "top": 329.8, "x1": 201.4, "bottom": 342.3}
+{"page": 126, "line": 19, "text": "§ 325-43. Zone described.^42", "x0": 72.0, "top": 329.8, "x1": 201.4, "bottom": 342.3}
 {"page": 126, "line": 20, "text": "The Courthouse Special Use Zone consists of those parcels of land having street frontage on either side of", "x0": 72.0, "top": 353.3, "x1": 540.0, "bottom": 364.3}
 {"page": 126, "line": 21, "text": "the 400 Block of North Tioga Street between East Court Street on the south and Cascadilla Avenue on the", "x0": 72.0, "top": 366.3, "x1": 540.0, "bottom": 377.3}
 {"page": 126, "line": 22, "text": "north and bounded on the east and west by the rear property lines of such parcels or by a line 132 feet from", "x0": 72.0, "top": 379.3, "x1": 540.0, "bottom": 390.3}
@@ -5085,14 +5085,14 @@
 {"page": 127, "line": 4, "text": "alterations or new construction within the C-SU Zone by the Planning and Development Board", "x0": 96.0, "top": 86.6, "x1": 540.0, "bottom": 97.6}
 {"page": 127, "line": 5, "text": "or the Landmarks Preservation Commission, as applicable, shall be a prerequisite of approval of", "x0": 96.0, "top": 99.6, "x1": 540.0, "bottom": 110.6}
 {"page": 127, "line": 6, "text": "such proposals by the Director of Planning and Development or designee and the Board of Zoning", "x0": 96.0, "top": 112.6, "x1": 540.0, "bottom": 123.6}
-{"page": 127, "line": 7, "text": "Appeals, as appropriate. [Amended 6-5-2013 by Ord. No. 2013-1543]", "x0": 96.0, "top": 124.1, "x1": 405.1, "bottom": 136.6}
+{"page": 127, "line": 7, "text": "Appeals, as appropriate. [Amended 6-5-2013 by Ord. No. 2013-15^43]", "x0": 96.0, "top": 124.1, "x1": 405.1, "bottom": 136.6}
 {"page": 127, "line": 8, "text": "43. Editor's Note: This ordinance provided for an effective date of 1-1-2014.", "x0": 72.0, "top": 711.9, "x1": 332.3, "bottom": 719.9}
 {"page": 127, "line": 9, "text": "Downloaded from https://ecode360.com/IT1348 on 2026-10-19", "x0": 54.0, "top": 752.4, "x1": 258.2, "bottom": 760.4}
 {"page": 128, "line": 1, "text": "City of Ithaca, NY", "x0": 54.0, "top": 32.4, "x1": 113.5, "bottom": 40.4}
 {"page": 128, "line": 2, "text": "§ 325-45 ZONING § 325-45.1", "x0": 72.0, "top": 46.4, "x1": 540.0, "bottom": 57.4}
 {"page": 128, "line": 3, "text": "ARTICLE IX", "x0": 272.6, "top": 73.6, "x1": 333.3, "bottom": 84.6}
 {"page": 128, "line": 4, "text": "Collegetown Zoning", "x0": 258.8, "top": 86.6, "x1": 353.1, "bottom": 97.6}
-{"page": 128, "line": 5, "text": "[Added 3-5-2014 by Ord. No. 2014-0144]", "x0": 213.0, "top": 98.1, "x1": 399.0, "bottom": 110.6}
+{"page": 128, "line": 5, "text": "[Added 3-5-2014 by Ord. No. 2014-01^44]", "x0": 213.0, "top": 98.1, "x1": 399.0, "bottom": 110.6}
 {"page": 128, "line": 6, "text": "§ 325-45. Collegetown Area Form Districts.", "x0": 72.0, "top": 130.6, "x1": 278.3, "bottom": 141.6}
 {"page": 128, "line": 7, "text": "§ 325-45.1. General provisions.", "x0": 72.0, "top": 157.3, "x1": 220.0, "bottom": 168.3}
 {"page": 128, "line": 8, "text": "A. Short title. This section shall be known as the \"Collegetown Area Form Districts.\"", "x0": 72.0, "top": 179.3, "x1": 457.5, "bottom": 190.3}
@@ -5266,7 +5266,7 @@
 {"page": 133, "line": 23, "text": "(b) The mechanical equipment is architecturally integrated into the building; and", "x0": 120.0, "top": 429.6, "x1": 483.3, "bottom": 440.6}
 {"page": 133, "line": 24, "text": "(c) The mechanical equipment is less than 1/3 of the building footprint and does not exceed", "x0": 120.0, "top": 451.6, "x1": 540.0, "bottom": 462.6}
 {"page": 133, "line": 25, "text": "nine feet in height above the roof.", "x0": 144.0, "top": 464.6, "x1": 292.7, "bottom": 475.6}
-{"page": 133, "line": 26, "text": "C. Collegetown Area Form Districts.45", "x0": 72.0, "top": 485.1, "x1": 252.3, "bottom": 497.6}
+{"page": 133, "line": 26, "text": "C. Collegetown Area Form Districts.^45", "x0": 72.0, "top": 485.1, "x1": 252.3, "bottom": 497.6}
 {"page": 133, "line": 27, "text": "D. Maximum Height (in stories) Map.", "x0": 72.0, "top": 508.6, "x1": 250.3, "bottom": 519.6}
 {"page": 133, "line": 28, "text": "45. Editor's Note: The Collegetown Area Form Districts Map is included as an attachment to this chapter.", "x0": 72.0, "top": 711.9, "x1": 435.3, "bottom": 719.9}
 {"page": 133, "line": 29, "text": "Downloaded from https://ecode360.com/IT1348 on 2026-10-19", "x0": 54.0, "top": 752.4, "x1": 258.2, "bottom": 760.4}
@@ -5794,7 +5794,7 @@
 {"page": 160, "line": 6, "text": "any stories that are stepped back beyond that dimension.", "x0": 144.0, "top": 258.0, "x1": 392.3, "bottom": 269.0}
 {"page": 160, "line": 7, "text": "(c) All street-facing facades on corner lots shall be considered front facades.", "x0": 120.0, "top": 280.0, "x1": 464.3, "bottom": 291.0}
 {"page": 160, "line": 8, "text": "§ 325-45.3. Allowed uses.", "x0": 72.0, "top": 306.7, "x1": 191.9, "bottom": 317.7}
-{"page": 160, "line": 9, "text": "A. Use Table.46 [Amended 7-2-2014 by Ord. No. 2014-07]", "x0": 72.0, "top": 327.2, "x1": 346.4, "bottom": 339.7}
+{"page": 160, "line": 9, "text": "A. Use Table.^46 [Amended 7-2-2014 by Ord. No. 2014-07]", "x0": 72.0, "top": 327.2, "x1": 346.4, "bottom": 339.7}
 {"page": 160, "line": 10, "text": "B. Street-level active uses required. [Amended 7-2-2014 by Ord. No. 2014-07; 6-1-2016 by Ord. No.", "x0": 72.0, "top": 350.7, "x1": 540.0, "bottom": 361.7}
 {"page": 160, "line": 11, "text": "2016-12]", "x0": 96.0, "top": 363.7, "x1": 136.3, "bottom": 374.7}
 {"page": 160, "line": 12, "text": "(1) Within the MU-2 District, street-level active uses are required for the street-facing portions of", "x0": 96.0, "top": 385.7, "x1": 540.0, "bottom": 396.7}
@@ -5957,7 +5957,7 @@
 {"page": 166, "line": 16, "text": "Development Board, the four advisory commissions of the City, the City", "x0": 192.0, "top": 278.6, "x1": 540.0, "bottom": 289.6}
 {"page": 166, "line": 17, "text": "Attorney, the City Engineer, the Director of Planning and Development, and", "x0": 192.0, "top": 291.6, "x1": 540.0, "bottom": 302.6}
 {"page": 166, "line": 18, "text": "other relevant boards, commissions, or City departments, for review and", "x0": 192.0, "top": 304.6, "x1": 540.0, "bottom": 315.6}
-{"page": 166, "line": 19, "text": "comment. [Amended 6-5-2013 by Ord. No. 2013-1547; 7-5-2017 by L.L. No.", "x0": 192.0, "top": 316.1, "x1": 540.0, "bottom": 328.6}
+{"page": 166, "line": 19, "text": "comment. [Amended 6-5-2013 by Ord. No. 2013-15^47; 7-5-2017 by L.L. No.", "x0": 192.0, "top": 316.1, "x1": 540.0, "bottom": 328.6}
 {"page": 166, "line": 20, "text": "2017-15]", "x0": 192.0, "top": 330.6, "x1": 232.3, "bottom": 341.6}
 {"page": 166, "line": 21, "text": "[c] Comments received. The Planning and Development Department receives and", "x0": 168.0, "top": 352.6, "x1": 540.0, "bottom": 363.6}
 {"page": 166, "line": 22, "text": "compiles written comments for consideration by the Planning Committee. The", "x0": 192.0, "top": 365.6, "x1": 540.0, "bottom": 376.6}
@@ -5973,7 +5973,7 @@
 {"page": 166, "line": 32, "text": "Development, the Engineering Department, the Parks, Recreation, and Natural", "x0": 192.0, "top": 504.6, "x1": 540.0, "bottom": 515.6}
 {"page": 166, "line": 33, "text": "Resources Commission, the Planning and Development Board and other", "x0": 192.0, "top": 517.6, "x1": 540.0, "bottom": 528.6}
 {"page": 166, "line": 34, "text": "relevant boards, commissions or City departments. [Amended 6-5-2013 by", "x0": 192.0, "top": 530.6, "x1": 540.0, "bottom": 541.6}
-{"page": 166, "line": 35, "text": "Ord. No. 2013-1548; 7-5-2017 by L.L. No. 2017-15]", "x0": 192.0, "top": 542.1, "x1": 425.4, "bottom": 554.6}
+{"page": 166, "line": 35, "text": "Ord. No. 2013-15^48; 7-5-2017 by L.L. No. 2017-15]", "x0": 192.0, "top": 542.1, "x1": 425.4, "bottom": 554.6}
 {"page": 166, "line": 36, "text": "[e] Referral to the Common Council or to the committee of the whole (or a", "x0": 168.0, "top": 565.6, "x1": 540.0, "bottom": 576.6}
 {"page": 166, "line": 37, "text": "combined meeting of the affected committees or boards). The Planning", "x0": 192.0, "top": 578.6, "x1": 540.0, "bottom": 589.6}
 {"page": 166, "line": 38, "text": "Committee receives comments on the draft and directs the Planning and", "x0": 192.0, "top": 591.6, "x1": 540.0, "bottom": 602.6}
@@ -6019,7 +6019,7 @@
 {"page": 168, "line": 13, "text": "provided herein.", "x0": 96.0, "top": 235.1, "x1": 168.0, "bottom": 246.1}
 {"page": 168, "line": 14, "text": "C. Violations of § 325-29.3 shall be punishable in accordance with § 178-10 of this Code. [Added", "x0": 72.0, "top": 257.1, "x1": 540.0, "bottom": 268.1}
 {"page": 168, "line": 15, "text": "5-8-1996 by Ord. No. 96-8; amended 6-4-1997 by Ord. No. 97-8; 6-13-2001 by Ord. No. 2001-8]", "x0": 96.0, "top": 270.1, "x1": 539.3, "bottom": 281.1}
-{"page": 168, "line": 16, "text": "§ 325-48. Civil proceedings. [Amended 6-5-2013 by Ord. No. 2013-1549]", "x0": 72.0, "top": 295.3, "x1": 407.3, "bottom": 307.8}
+{"page": 168, "line": 16, "text": "§ 325-48. Civil proceedings. [Amended 6-5-2013 by Ord. No. 2013-15^49]", "x0": 72.0, "top": 295.3, "x1": 407.3, "bottom": 307.8}
 {"page": 168, "line": 17, "text": "In addition to other remedies, the Director of Planning and Development or designee may institute any", "x0": 72.0, "top": 318.8, "x1": 540.0, "bottom": 329.8}
 {"page": 168, "line": 18, "text": "appropriate action or proceedings to prevent any unlawful erection, construction, reconstruction, alteration,", "x0": 72.0, "top": 331.8, "x1": 539.9, "bottom": 342.8}
 {"page": 168, "line": 19, "text": "conduct, business or use prohibited by this chapter or to compel compliance with the provisions of this", "x0": 72.0, "top": 344.8, "x1": 540.0, "bottom": 355.8}

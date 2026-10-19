@@ -6,7 +6,7 @@ import pytest
 
 import document_extraction.__main__ as cli
 from document_extraction.extract import extract, sha256, to_jsonl
-from rule_format.rulebook import Context, quote_found
+from rule_format.rulebook import Context, normalize, quote_found
 
 REPO = Path(__file__).resolve().parents[3]
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
@@ -80,3 +80,25 @@ def test_refuses_a_pdf_whose_fingerprint_changed(tmp_path, monkeypatch, capsys):
     assert cli.main([]) == 1
     assert not out.exists()
     assert "fingerprint doesn't match" in capsys.readouterr().out
+
+
+def test_footnote_markers_are_marked_not_read_as_values(charts):
+    page_3 = [r["text"] for r in charts[1:] if r["page"] == 3]
+    stories = next(t for t in page_3 if t.startswith("Number of stories"))
+    assert "3/2 ^11 4" in stories                                    # R-3aa: 3/2 stories, footnote 11
+    assert not quote_found("3/2 11 4", normalize(" ".join(page_3)))  # can't be quoted as "11 stories"
+    assert any("2,500 sf ^4 5,000 sf" in t for t in page_3)
+
+
+def test_sideways_text_is_left_out_and_counted():
+    rows = extract(ITHACA / "1_source_documents/ordinance_no_2025-12_southside_form_districts.pdf")
+    assert rows[0]["rotated_chars_skipped"] == 21
+    assert not any(r["text"] == "kcabteS" for r in rows[1:])          # "Setback" read backwards
+
+
+def test_unknown_arguments_are_rejected_before_writing(tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, "REPO", tmp_path)
+    out = _jurisdiction(tmp_path)
+    with pytest.raises(SystemExit) as e:
+        cli.main(["--chek"])                                          # typo of --check
+    assert e.value.code == 2 and not out.exists()

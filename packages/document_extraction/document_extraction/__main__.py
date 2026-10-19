@@ -6,6 +6,7 @@
 Refuses to extract a PDF whose fingerprint doesn't match sources.yaml.
 """
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -17,7 +18,9 @@ REPO = Path(__file__).resolve().parents[3]
 
 
 def main(argv: list[str]) -> int:
-    check = "--check" in argv
+    parser = argparse.ArgumentParser(prog="python -m document_extraction")
+    parser.add_argument("--check", action="store_true", help="compare with a fresh extraction; write nothing")
+    check = parser.parse_args(argv).check  # unknown arguments stop here, so a typo can't overwrite files
     failed = 0
     for jurisdiction in sorted(p for p in (REPO / "regulations/jurisdictions").glob("*/*") if p.is_dir()):
         sources = jurisdiction / "1_source_documents"
@@ -31,12 +34,12 @@ def main(argv: list[str]) -> int:
                 continue
             fresh = to_jsonl(extract(pdf))
             if check:
-                same = out.exists() and out.read_text() == fresh
+                same = out.exists() and out.read_text(encoding="utf-8") == fresh
                 print(f"{'✓' if same else '✗'} {label}{'' if same else ': differs from a fresh extraction'}")
                 failed += not same
             else:
                 out_dir.mkdir(exist_ok=True)
-                out.write_text(fresh)
+                out.write_text(fresh, encoding="utf-8", newline="\n")
                 print(f"wrote {label} ({fresh.count(chr(10)) - 1} lines)")
     return 1 if failed else 0
 

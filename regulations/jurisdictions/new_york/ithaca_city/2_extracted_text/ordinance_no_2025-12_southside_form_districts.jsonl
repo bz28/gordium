@@ -1,4 +1,4 @@
-{"file": "ordinance_no_2025-12_southside_form_districts.pdf", "sha256": "147d0cebcfcb4959bcba1a14a04f7849787465381c5bbfdaefac8749f42cfc65", "pages": 37, "extractor": "pdfplumber 0.11.10 (dedupe_chars + extract_text_lines)"}
+{"file": "ordinance_no_2025-12_southside_form_districts.pdf", "sha256": "147d0cebcfcb4959bcba1a14a04f7849787465381c5bbfdaefac8749f42cfc65", "pages": 37, "extractor": "pdfplumber 0.11.10 + pdfminer.six 20260107 (dedupe_chars, upright text only, extract_text_lines, superscripts marked '^')", "rotated_chars_skipped": 21}
 {"page": 1, "line": 1, "text": "AUTHENTICATION OF ORDINANCE NO. 2025-12", "x0": 186.6, "top": 90.2, "x1": 458.8, "bottom": 102.2}
 {"page": 1, "line": 2, "text": "(COPY ATTACHED)", "x0": 251.5, "top": 117.8, "x1": 360.9, "bottom": 129.8}
 {"page": 1, "line": 3, "text": "An Ordinance Amending The Municipal Code Of The City Of Ithaca,", "x0": 72.0, "top": 156.0, "x1": 487.9, "bottom": 167.1}
@@ -193,9 +193,9 @@
 {"page": 6, "line": 7, "text": "to Rezone Portions of the R-2b, R-3a, R-3aa, P-1, B-2a, R-3b, SW-2, B-1a, B-2a, and WEDZ-1b to", "x0": 72.0, "top": 169.7, "x1": 502.8, "bottom": 180.7}
 {"page": 6, "line": 8, "text": "Traditional Residential (TR), Residential Transition (RT), Medium- Density Mixed-Use (MD-MU), and", "x0": 72.0, "top": 183.0, "x1": 525.7, "bottom": 194.1}
 {"page": 6, "line": 9, "text": "Urban Mixed-Use (UMU)”, duly adopted by the Common Council of said City of Ithaca at a Special", "x0": 72.0, "top": 196.5, "x1": 509.8, "bottom": 207.6}
-{"page": 6, "line": 10, "text": "Meeting of Common Council held on November 19th 2025", "x0": 72.0, "top": 208.6, "x1": 329.2, "bottom": 221.0}
+{"page": 6, "line": 10, "text": "Meeting of Common Council held on November 19^th 2025", "x0": 72.0, "top": 208.6, "x1": 329.2, "bottom": 221.0}
 {"page": 6, "line": 11, "text": "IN WITNESS WHEREOF, I have hereunto set my hand and the Corporate Seal of the City of Ithaca, New", "x0": 72.0, "top": 236.8, "x1": 529.6, "bottom": 248.3}
-{"page": 6, "line": 12, "text": "York, this 20th day of November 2025.", "x0": 72.0, "top": 249.1, "x1": 243.8, "bottom": 261.3}
+{"page": 6, "line": 12, "text": "York, this 20^th day of November 2025.", "x0": 72.0, "top": 249.1, "x1": 243.8, "bottom": 261.3}
 {"page": 6, "line": 13, "text": "Shaniqua Lewis, Deputy City Clerk", "x0": 288.2, "top": 317.4, "x1": 439.1, "bottom": 328.4}
 {"page": 6, "line": 14, "text": "City of Ithaca, New York", "x0": 288.0, "top": 330.8, "x1": 394.9, "bottom": 341.8}
 {"page": 6, "line": 15, "text": "(City Seal)", "x0": 72.0, "top": 357.2, "x1": 112.3, "bottom": 367.2}
@@ -335,7 +335,7 @@
 {"page": 14, "line": 3, "text": "street-facing entrance requirements. Additional entrances off another street, pedestrian area or internal", "x0": 126.0, "top": 96.8, "x1": 519.4, "bottom": 106.8}
 {"page": 14, "line": 4, "text": "parking area are permitted.", "x0": 126.0, "top": 108.8, "x1": 229.9, "bottom": 118.8}
 {"page": 14, "line": 5, "text": "(b) The entrance spacing requirements must be met for each building.", "x0": 108.0, "top": 120.8, "x1": 381.4, "bottom": 130.8}
-{"page": 14, "line": 6, "text": "requ s ir e e p m a E e r n a n t t r t i a o n n ce", "x0": 229.0, "top": 239.6, "x1": 266.7, "bottom": 260.7}
+{"page": 14, "line": 6, "text": "requ s ^ir e e p m a E e r n a n t t r t ^i a o n n ce", "x0": 229.0, "top": 239.6, "x1": 266.7, "bottom": 260.7}
 {"page": 14, "line": 7, "text": "(5) Front Porches", "x0": 92.4, "top": 266.9, "x1": 164.6, "bottom": 276.9}
 {"page": 14, "line": 8, "text": "(a) A front porch must be a minimum of 6 feet deep, not including steps.", "x0": 108.0, "top": 279.4, "x1": 395.9, "bottom": 289.4}
 {"page": 14, "line": 9, "text": "(b) A front porch must cover at least 33% of the street-level story facade width of the building.", "x0": 108.0, "top": 291.4, "x1": 477.0, "bottom": 301.4}
@@ -344,57 +344,54 @@
 {"page": 14, "line": 12, "text": "open.", "x0": 126.0, "top": 327.4, "x1": 147.6, "bottom": 337.4}
 {"page": 14, "line": 13, "text": "Min 33% 6’", "x0": 256.4, "top": 461.7, "x1": 384.5, "bottom": 469.2}
 {"page": 14, "line": 14, "text": "min", "x0": 377.1, "top": 468.8, "x1": 386.7, "bottom": 474.8}
-{"page": 14, "line": 15, "text": "4", "x0": 82.2, "top": 751.3, "x1": 87.3, "bottom": 760.3}
-{"page": 14, "line": 16, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
-{"page": 14, "line": 17, "text": "kcabteS", "x0": 365.3, "top": 342.7, "x1": 371.2, "bottom": 364.2}
-{"page": 14, "line": 18, "text": "(6) Front Stoops", "x0": 92.4, "top": 474.5, "x1": 160.4, "bottom": 484.5}
-{"page": 14, "line": 19, "text": "(a) A front stoop shall be a maximum of 5 feet deep, not including steps, and a maximum of 6 feet wide.", "x0": 108.0, "top": 487.1, "x1": 516.2, "bottom": 497.1}
-{"page": 14, "line": 20, "text": "(b) A front stoop may be roofed but not enclosed.", "x0": 108.0, "top": 499.1, "x1": 304.5, "bottom": 509.1}
-{"page": 14, "line": 21, "text": "6’ 5’", "x0": 262.0, "top": 651.6, "x1": 359.9, "bottom": 657.8}
-{"page": 14, "line": 22, "text": "max max", "x0": 257.9, "top": 659.4, "x1": 363.7, "bottom": 665.7}
-{"page": 14, "line": 23, "text": "kcabteS", "x0": 340.4, "top": 526.7, "x1": 346.6, "bottom": 549.2}
-{"page": 14, "line": 24, "text": "(7) Glazing", "x0": 92.4, "top": 671.5, "x1": 139.8, "bottom": 681.5}
-{"page": 14, "line": 25, "text": "(a) When required, glazing is the minimum percentage of transparent windows and doors that must cover a", "x0": 108.0, "top": 684.0, "x1": 527.2, "bottom": 694.0}
-{"page": 14, "line": 26, "text": "street-level story’s street-facing facade.", "x0": 126.0, "top": 696.0, "x1": 271.3, "bottom": 706.0}
-{"page": 14, "line": 27, "text": "(b) Glazing is considered transparent where it has a transparency higher than 80% and external reflectance of", "x0": 108.0, "top": 708.0, "x1": 531.6, "bottom": 718.0}
-{"page": 14, "line": 28, "text": "less than 15%.", "x0": 126.0, "top": 720.0, "x1": 182.3, "bottom": 730.0}
-{"page": 14, "line": 29, "text": "(c) Glazing is measured between 2 and 12 feet above the abutting sidewalk.", "x0": 108.0, "top": 732.0, "x1": 402.8, "bottom": 742.0}
-{"page": 15, "line": 1, "text": "5", "x0": 524.7, "top": 751.3, "x1": 529.8, "bottom": 760.3}
-{"page": 15, "line": 2, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
-{"page": 15, "line": 3, "text": "gnizalG", "x0": 213.3, "top": 166.7, "x1": 219.1, "bottom": 186.6}
-{"page": 15, "line": 4, "text": "12’", "x0": 395.6, "top": 162.8, "x1": 403.4, "bottom": 168.7}
-{"page": 15, "line": 5, "text": "2’", "x0": 395.6, "top": 187.2, "x1": 400.1, "bottom": 193.1}
-{"page": 15, "line": 6, "text": "(8) Infill Development in MU District", "x0": 92.4, "top": 206.8, "x1": 249.1, "bottom": 216.8}
-{"page": 15, "line": 7, "text": "(a) More than one principal structure is permitted on a parcel in the MU district provided that the first", "x0": 108.0, "top": 219.3, "x1": 510.2, "bottom": 229.3}
-{"page": 15, "line": 8, "text": "principal structure meets all requirements of §325-46.", "x0": 126.0, "top": 231.3, "x1": 334.5, "bottom": 241.3}
-{"page": 15, "line": 9, "text": "(b) Any additional principal structure placed behind a principal structure that abuts the street and sidewalk", "x0": 108.0, "top": 243.3, "x1": 524.4, "bottom": 253.3}
-{"page": 15, "line": 10, "text": "must meet all requirements of §325-46 except:", "x0": 126.0, "top": 255.3, "x1": 306.3, "bottom": 265.3}
-{"page": 15, "line": 11, "text": "(1) Front setback;", "x0": 126.0, "top": 267.3, "x1": 198.6, "bottom": 277.3}
-{"page": 15, "line": 12, "text": "(2) Distance between functioning entries;", "x0": 126.0, "top": 279.3, "x1": 290.2, "bottom": 289.3}
-{"page": 15, "line": 13, "text": "(3) Glazing; and", "x0": 126.0, "top": 291.3, "x1": 193.3, "bottom": 301.3}
-{"page": 15, "line": 14, "text": "(4) Street-level active uses required", "x0": 126.0, "top": 303.3, "x1": 263.3, "bottom": 313.3}
-{"page": 15, "line": 15, "text": "(c) If the above requirements are met, §325-8B(1) shall not apply to additional structures on a parcel in the", "x0": 108.0, "top": 315.3, "x1": 526.5, "bottom": 325.3}
-{"page": 15, "line": 16, "text": "MU district.", "x0": 126.0, "top": 327.3, "x1": 174.5, "bottom": 337.3}
-{"page": 15, "line": 17, "text": "(9) Parking Setback", "x0": 92.4, "top": 346.0, "x1": 174.1, "bottom": 356.0}
-{"page": 15, "line": 18, "text": "(a) Definition: A line which extends vertically and parallel to the street, in front of which parking on the site", "x0": 108.0, "top": 358.5, "x1": 532.3, "bottom": 368.5}
-{"page": 15, "line": 19, "text": "is not allowed.", "x0": 126.0, "top": 370.5, "x1": 181.8, "bottom": 380.5}
-{"page": 15, "line": 20, "text": "(b) All parking areas shall be located behind the parking setback line.", "x0": 108.0, "top": 382.5, "x1": 377.5, "bottom": 392.5}
-{"page": 15, "line": 21, "text": "(c) The parking setback line does not apply to on-street parking.", "x0": 108.0, "top": 394.5, "x1": 360.0, "bottom": 404.5}
-{"page": 15, "line": 22, "text": "(10) Recessed Entry", "x0": 87.2, "top": 413.2, "x1": 169.4, "bottom": 423.2}
-{"page": 15, "line": 23, "text": "(a) Definition: A functioning entry that is set back a minimum of 5’ from the front facade of the building.", "x0": 108.0, "top": 425.7, "x1": 525.1, "bottom": 435.7}
-{"page": 15, "line": 24, "text": "(11) Top Story Limitation", "x0": 87.2, "top": 444.4, "x1": 194.5, "bottom": 454.4}
-{"page": 15, "line": 25, "text": "A habitable 3rd story in the Traditional Residential district must be fully contained within a pitched roof. Pro-", "x0": 108.0, "top": 456.9, "x1": 532.5, "bottom": 466.9}
-{"page": 15, "line": 26, "text": "jecting eaves and dormers are permitted. The aggregate width of the dormers cannot exceed 50% of the width", "x0": 108.0, "top": 468.9, "x1": 530.4, "bottom": 478.9}
-{"page": 15, "line": 27, "text": "of the roof on the side where the dormer(s) are located, except as may be allowed by design review.", "x0": 108.0, "top": 480.9, "x1": 486.7, "bottom": 490.9}
-{"page": 15, "line": 28, "text": "(12) Utilities and Mechanical Equipment", "x0": 87.2, "top": 499.6, "x1": 255.9, "bottom": 509.6}
-{"page": 15, "line": 29, "text": "All utilities and mechanical equipment must be screened from public view.", "x0": 108.0, "top": 512.1, "x1": 395.7, "bottom": 522.1}
-{"page": 15, "line": 30, "text": "(a) Incorporation of mechanicals into stories with occupiable space is encouraged; if this is done, mechanicals", "x0": 108.0, "top": 524.1, "x1": 533.7, "bottom": 534.1}
-{"page": 15, "line": 31, "text": "will be calculated as part of building height.", "x0": 126.0, "top": 536.1, "x1": 294.8, "bottom": 546.1}
-{"page": 15, "line": 32, "text": "(b) Alternatively, mechanicals will not be measured as part of building height, provided that:", "x0": 108.0, "top": 548.1, "x1": 470.4, "bottom": 558.1}
-{"page": 15, "line": 33, "text": "(1) The mechanical equipment is not incorporated into stories with occupiable space;", "x0": 126.0, "top": 560.1, "x1": 458.5, "bottom": 570.1}
-{"page": 15, "line": 34, "text": "(2) The mechanical equipment is architecturally integrated into the building; and", "x0": 126.0, "top": 572.1, "x1": 443.1, "bottom": 582.1}
-{"page": 15, "line": 35, "text": "(3) The mechanical equipment is less than one-third of the building footprint and does not exceed 9 feet", "x0": 126.0, "top": 584.1, "x1": 532.5, "bottom": 594.1}
-{"page": 15, "line": 36, "text": "in height above the roof.", "x0": 144.0, "top": 596.1, "x1": 238.5, "bottom": 606.1}
+{"page": 14, "line": 15, "text": "(6) Front Stoops", "x0": 92.4, "top": 474.5, "x1": 160.4, "bottom": 484.5}
+{"page": 14, "line": 16, "text": "(a) A front stoop shall be a maximum of 5 feet deep, not including steps, and a maximum of 6 feet wide.", "x0": 108.0, "top": 487.1, "x1": 516.2, "bottom": 497.1}
+{"page": 14, "line": 17, "text": "(b) A front stoop may be roofed but not enclosed.", "x0": 108.0, "top": 499.1, "x1": 304.5, "bottom": 509.1}
+{"page": 14, "line": 18, "text": "6’ 5’", "x0": 262.0, "top": 651.6, "x1": 359.9, "bottom": 657.8}
+{"page": 14, "line": 19, "text": "max max", "x0": 257.9, "top": 659.4, "x1": 363.7, "bottom": 665.7}
+{"page": 14, "line": 20, "text": "(7) Glazing", "x0": 92.4, "top": 671.5, "x1": 139.8, "bottom": 681.5}
+{"page": 14, "line": 21, "text": "(a) When required, glazing is the minimum percentage of transparent windows and doors that must cover a", "x0": 108.0, "top": 684.0, "x1": 527.2, "bottom": 694.0}
+{"page": 14, "line": 22, "text": "street-level story’s street-facing facade.", "x0": 126.0, "top": 696.0, "x1": 271.3, "bottom": 706.0}
+{"page": 14, "line": 23, "text": "(b) Glazing is considered transparent where it has a transparency higher than 80% and external reflectance of", "x0": 108.0, "top": 708.0, "x1": 531.6, "bottom": 718.0}
+{"page": 14, "line": 24, "text": "less than 15%.", "x0": 126.0, "top": 720.0, "x1": 182.3, "bottom": 730.0}
+{"page": 14, "line": 25, "text": "(c) Glazing is measured between 2 and 12 feet above the abutting sidewalk.", "x0": 108.0, "top": 732.0, "x1": 402.8, "bottom": 742.0}
+{"page": 14, "line": 26, "text": "4", "x0": 82.2, "top": 751.3, "x1": 87.3, "bottom": 760.3}
+{"page": 14, "line": 27, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
+{"page": 15, "line": 1, "text": "12’", "x0": 395.6, "top": 162.8, "x1": 403.4, "bottom": 168.7}
+{"page": 15, "line": 2, "text": "2’", "x0": 395.6, "top": 187.2, "x1": 400.1, "bottom": 193.1}
+{"page": 15, "line": 3, "text": "(8) Infill Development in MU District", "x0": 92.4, "top": 206.8, "x1": 249.1, "bottom": 216.8}
+{"page": 15, "line": 4, "text": "(a) More than one principal structure is permitted on a parcel in the MU district provided that the first", "x0": 108.0, "top": 219.3, "x1": 510.2, "bottom": 229.3}
+{"page": 15, "line": 5, "text": "principal structure meets all requirements of §325-46.", "x0": 126.0, "top": 231.3, "x1": 334.5, "bottom": 241.3}
+{"page": 15, "line": 6, "text": "(b) Any additional principal structure placed behind a principal structure that abuts the street and sidewalk", "x0": 108.0, "top": 243.3, "x1": 524.4, "bottom": 253.3}
+{"page": 15, "line": 7, "text": "must meet all requirements of §325-46 except:", "x0": 126.0, "top": 255.3, "x1": 306.3, "bottom": 265.3}
+{"page": 15, "line": 8, "text": "(1) Front setback;", "x0": 126.0, "top": 267.3, "x1": 198.6, "bottom": 277.3}
+{"page": 15, "line": 9, "text": "(2) Distance between functioning entries;", "x0": 126.0, "top": 279.3, "x1": 290.2, "bottom": 289.3}
+{"page": 15, "line": 10, "text": "(3) Glazing; and", "x0": 126.0, "top": 291.3, "x1": 193.3, "bottom": 301.3}
+{"page": 15, "line": 11, "text": "(4) Street-level active uses required", "x0": 126.0, "top": 303.3, "x1": 263.3, "bottom": 313.3}
+{"page": 15, "line": 12, "text": "(c) If the above requirements are met, §325-8B(1) shall not apply to additional structures on a parcel in the", "x0": 108.0, "top": 315.3, "x1": 526.5, "bottom": 325.3}
+{"page": 15, "line": 13, "text": "MU district.", "x0": 126.0, "top": 327.3, "x1": 174.5, "bottom": 337.3}
+{"page": 15, "line": 14, "text": "(9) Parking Setback", "x0": 92.4, "top": 346.0, "x1": 174.1, "bottom": 356.0}
+{"page": 15, "line": 15, "text": "(a) Definition: A line which extends vertically and parallel to the street, in front of which parking on the site", "x0": 108.0, "top": 358.5, "x1": 532.3, "bottom": 368.5}
+{"page": 15, "line": 16, "text": "is not allowed.", "x0": 126.0, "top": 370.5, "x1": 181.8, "bottom": 380.5}
+{"page": 15, "line": 17, "text": "(b) All parking areas shall be located behind the parking setback line.", "x0": 108.0, "top": 382.5, "x1": 377.5, "bottom": 392.5}
+{"page": 15, "line": 18, "text": "(c) The parking setback line does not apply to on-street parking.", "x0": 108.0, "top": 394.5, "x1": 360.0, "bottom": 404.5}
+{"page": 15, "line": 19, "text": "(10) Recessed Entry", "x0": 87.2, "top": 413.2, "x1": 169.4, "bottom": 423.2}
+{"page": 15, "line": 20, "text": "(a) Definition: A functioning entry that is set back a minimum of 5’ from the front facade of the building.", "x0": 108.0, "top": 425.7, "x1": 525.1, "bottom": 435.7}
+{"page": 15, "line": 21, "text": "(11) Top Story Limitation", "x0": 87.2, "top": 444.4, "x1": 194.5, "bottom": 454.4}
+{"page": 15, "line": 22, "text": "A habitable 3rd story in the Traditional Residential district must be fully contained within a pitched roof. Pro-", "x0": 108.0, "top": 456.9, "x1": 532.5, "bottom": 466.9}
+{"page": 15, "line": 23, "text": "jecting eaves and dormers are permitted. The aggregate width of the dormers cannot exceed 50% of the width", "x0": 108.0, "top": 468.9, "x1": 530.4, "bottom": 478.9}
+{"page": 15, "line": 24, "text": "of the roof on the side where the dormer(s) are located, except as may be allowed by design review.", "x0": 108.0, "top": 480.9, "x1": 486.7, "bottom": 490.9}
+{"page": 15, "line": 25, "text": "(12) Utilities and Mechanical Equipment", "x0": 87.2, "top": 499.6, "x1": 255.9, "bottom": 509.6}
+{"page": 15, "line": 26, "text": "All utilities and mechanical equipment must be screened from public view.", "x0": 108.0, "top": 512.1, "x1": 395.7, "bottom": 522.1}
+{"page": 15, "line": 27, "text": "(a) Incorporation of mechanicals into stories with occupiable space is encouraged; if this is done, mechanicals", "x0": 108.0, "top": 524.1, "x1": 533.7, "bottom": 534.1}
+{"page": 15, "line": 28, "text": "will be calculated as part of building height.", "x0": 126.0, "top": 536.1, "x1": 294.8, "bottom": 546.1}
+{"page": 15, "line": 29, "text": "(b) Alternatively, mechanicals will not be measured as part of building height, provided that:", "x0": 108.0, "top": 548.1, "x1": 470.4, "bottom": 558.1}
+{"page": 15, "line": 30, "text": "(1) The mechanical equipment is not incorporated into stories with occupiable space;", "x0": 126.0, "top": 560.1, "x1": 458.5, "bottom": 570.1}
+{"page": 15, "line": 31, "text": "(2) The mechanical equipment is architecturally integrated into the building; and", "x0": 126.0, "top": 572.1, "x1": 443.1, "bottom": 582.1}
+{"page": 15, "line": 32, "text": "(3) The mechanical equipment is less than one-third of the building footprint and does not exceed 9 feet", "x0": 126.0, "top": 584.1, "x1": 532.5, "bottom": 594.1}
+{"page": 15, "line": 33, "text": "in height above the roof.", "x0": 144.0, "top": 596.1, "x1": 238.5, "bottom": 606.1}
+{"page": 15, "line": 34, "text": "5", "x0": 524.7, "top": 751.3, "x1": 529.8, "bottom": 760.3}
+{"page": 15, "line": 35, "text": "Adopted November 19, 2025 Southside Form Districts", "x0": 73.0, "top": 755.5, "x1": 509.3, "bottom": 764.5}
 {"page": 16, "line": 1, "text": "This Page Left Intentionally Blank", "x0": 230.0, "top": 393.2, "x1": 382.0, "bottom": 403.2}
 {"page": 16, "line": 2, "text": "6", "x0": 82.2, "top": 751.3, "x1": 87.3, "bottom": 760.3}
 {"page": 16, "line": 3, "text": "Southside Form Districts Adopted November 19, 2025", "x0": 102.0, "top": 755.5, "x1": 541.4, "bottom": 764.5}
