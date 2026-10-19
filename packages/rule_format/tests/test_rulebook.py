@@ -691,6 +691,9 @@ def test_numbers_can_come_from_number_words_and_row_labels():
     assert source_numbers("50 ft [fn16]") == {50.0}                           # no footnote number, no 0.5
     assert source_numbers("6,000 sf 25% and 10 percent") == {6000.0, 25.0, 0.25, 10.0, 0.1}  # only percents / 100
     assert source_numbers("two-family dwelling") == set()                     # "two" in a compound isn't a count
+    assert source_numbers("(10) See §325-16.") == set()                       # a note's marker and a section number
+    assert 3.0 not in source_numbers("(3) In each district, the number of additional feet may not exceed 10% of the height")
+    assert source_numbers("as specified in this column and Column 12 [Amended 10-1-2014 by Ord. No. 2014-12]") == set()
 
 
 def test_a_cell_from_another_districts_column_is_rejected(chart_ctx):

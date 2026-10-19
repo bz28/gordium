@@ -116,7 +116,7 @@ def test_a_typed_chart_number_is_sent_back(inputs):
     typed = template("front_yard", "front_yard >= 25", [], [({"front_yard": "25"}, "pass"), ({"front_yard": "24"}, "fail")])
     client = FakeClient({"templates": [typed], "no_rule_reason": ""}, {"templates": [FRONT], "no_rule_reason": ""})
     result, records = run(inputs, client)
-    assert "takes its chart numbers from slots" in records[0]["problem"] and records[1]["problem"] is None
+    assert "a chart number must be a slot" in records[0]["problem"] and records[1]["problem"] is None
     assert "can't be used" in client.requests[1]["messages"][-1]["content"] and result["rules"]["R-1b"]
 
 
@@ -227,7 +227,7 @@ def test_a_chart_row_quote_cannot_carry_a_typed_number(inputs):
     result, records = run(inputs, FakeClient(answer, answer, answer), uid="chart-p3-maximum_building_height")
     assert result["rules"] == {} and result["failed"]
     assert "isn't a footnote under the table" in records[0]["problem"]
-    assert "takes its chart numbers from slots" in records[0]["problem"]
+    assert "a chart number must be a slot" in records[0]["problem"]
     law = template("325_16c_height", "building_height <= 40", [], [({"building_height": "40"}, "pass"), ({"building_height": "41"}, "fail")],
                    quotes=[{"document": "chart", "page": 3, "piece": "", "text": ROW_31}])
     answer = {"templates": [law], "no_rule_reason": ""}
@@ -293,3 +293,41 @@ def test_accessory_uses_are_recorded_as_not_drafted_with_a_reason(inputs):
     assert {u["id"] for u in inputs.units() if u.get("code")} == {cli.USES_UNIT, cli.ACCESSORY_UNIT}
     assert all(s[0] != 2 for s in inputs.chart_sections)                      # page 2 is built by code, not the AI
     assert "Not drafted" in cli.draft_accessory()["reason"]
+
+
+def test_a_typed_number_backed_only_by_a_footnote_marker_is_rejected(inputs):
+    """'(5) For the first occupant...' is note 5: its 5 labels the note, it isn't a 5 ft side yard."""
+    sneaky = template("front_and_side", "front_yard >= {front} and side_yard_smaller >= 5",
+                      [slot("front", "Front (minimum)")],
+                      [({"front_yard": "{front}", "side_yard_smaller": "5"}, "pass"),
+                       ({"front_yard": "{front} - 1", "side_yard_smaller": "5"}, "fail")],
+                      quotes=[{"document": "chart", "page": 3, "piece": "", "text": (
+                          "(5) For the first occupant in each dwelling unit; +400 sf for each additional occupant "
+                          "in each dwelling unit.")}])
+    answer = {"templates": [sneaky], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer))
+    assert result["rules"] == {} and "number 5 is typed" in records[0]["problem"]
+
+
+def test_two_templates_with_one_id_in_an_answer_are_rejected(inputs):
+    client = FakeClient({"templates": [FRONT, FRONT], "no_rule_reason": ""}, {"templates": [FRONT], "no_rule_reason": ""})
+    result, records = run(inputs, client)
+    assert "used by more than one template" in records[0]["problem"] and len(result["rules"]["R-1b"]) == 1
+
+
+def test_a_section_headings_footnote_must_be_quoted(inputs):
+    """'Minimum Lot Size [fn3]': note 3 ('See §325-8(B)(1).') governs every row under the heading."""
+    section = "Minimum Lot Size [fn3]"
+    lot = template("lot_area_detached", 'lot_area >= {area}', [slot("area", "One-family dwelling, detached", section=section)],
+                   [({"lot_area": "{area}"}, "pass"), ({"lot_area": "{area} - 1"}, "fail")])
+    noted = copy.deepcopy(lot) | {"quotes": [{"document": "chart", "page": 3, "piece": "", "text": "(3) See §325-8(B)(1)."}]}
+    result, records = run(inputs, FakeClient({"templates": [lot], "no_rule_reason": ""},
+                                             {"templates": [noted], "no_rule_reason": ""}), uid="chart-p3-minimum_lot_size")
+    assert "footnote 3 of" in records[0]["problem"] and records[1]["problem"] is None
+    assert result["rules"]["R-1b"][0]["check"] == "lot_area >= 6000"
+
+
+def test_no_example_in_the_instructions_has_the_shape_of_a_graded_rule(inputs):
+    """The drafter's instructions must not show the answer key's reading of the height bonus (X + 10% of X)."""
+    import re
+    assert not re.search(r"(\d+(?:\.\d+)?) \+ 0?\.1 \* \1\b", inputs.system())

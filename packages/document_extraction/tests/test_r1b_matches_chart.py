@@ -119,26 +119,42 @@ def test_each_chart_value_is_exactly_where_the_rule_turns_from_pass_to_fail(rule
     assert tried == set(LIMITS)                                  # every stated limit is enforced exactly by some rule
 
 
-def _with_number_changed(text: str, n: float, new: float) -> str:
-    """The formula with every number constant equal to n replaced by new."""
+def _with_number_changed(text: str, n: float, new: float, which: int) -> tuple[str, int]:
+    """The formula with the which-th number constant equal to n (counting from 0) replaced by new, and how
+    many constants equal n it has."""
+    seen = [0]
+
     class Swap(ast.NodeTransformer):
         def visit_Constant(self, node):
             if type(node.value) in (int, float) and abs(node.value - n) < 1e-9:
-                return ast.copy_location(ast.Constant(new), node)
+                seen[0] += 1
+                if seen[0] - 1 == which:
+                    return ast.copy_location(ast.Constant(new), node)
             return node
-    return ast.unparse(Swap().visit(ast.parse(text, mode="eval")))
+    return ast.unparse(Swap().visit(ast.parse(text, mode="eval"))), seen[0]
 
 
-def number_matters(rule, n, cells, allowed) -> bool:
-    """Does the number n (from a cell the rule cites) decide anything? Changed in the rule's formulas, some
-    outcome must change: on a worked example, or around a cited chart limit from each passing example
+def _formulas(rule) -> list[tuple]:
+    """(where, text) for every formula: ("check", ...), ("applies_when", ...), ("review_when", i, ...)."""
+    out = [((k,), rule[k]) for k in ("applies_when", "check") if k in rule]
+    return out + [(("review_when", i), r["when"]) for i, r in enumerate(rule.get("review_when", []))]
+
+
+def occurrences(rule, n) -> list[tuple]:
+    """Each place the number n is written in the rule's formulas: (where, which)."""
+    return [(where, i) for where, text in _formulas(rule) for i in range(_with_number_changed(text, n, n, -1)[1])]
+
+
+def number_matters(rule, n, where, which, cells, allowed) -> bool:
+    """Does this one occurrence of the number n (from a cell the rule cites) decide anything? Changed alone,
+    some outcome must change: on a worked example, or around a cited chart limit from each passing example
     (that's where an input like the bonus's yard minimum binds: at bound + the extra height)."""
     changed = copy.deepcopy(rule)
-    for key in ("applies_when", "check"):
-        if key in changed:
-            changed[key] = _with_number_changed(changed[key], n, n * 1.5 + 1)
-    for r in changed.get("review_when", []):
-        r["when"] = _with_number_changed(r["when"], n, n * 1.5 + 1)
+    if where[0] == "review_when":
+        r = changed["review_when"][where[1]]
+        r["when"] = _with_number_changed(r["when"], n, n * 1.5 + 1, which)[0]
+    else:
+        changed[where[0]] = _with_number_changed(changed[where[0]], n, n * 1.5 + 1, which)[0]
     probes = [ex["given"] for ex in rule["examples"]]
     for base in (ex["given"] for ex in rule["examples"] if ex["expect"] == "pass"):
         for c in cells:
@@ -148,27 +164,34 @@ def number_matters(rule, n, cells, allowed) -> bool:
 
 
 def formula_numbers(rule) -> list[float]:
-    texts = [rule[k] for k in ("applies_when", "check") if k in rule] + [r["when"] for r in rule.get("review_when", [])]
-    return [n for t in texts for n in formula.numbers(t)]
+    return [n for _, text in _formulas(rule) for n in formula.numbers(text)]
+
+
+def idle_numbers(rule, cells, allowed) -> list[str]:
+    """Every number of every cited cell must be written in the formula at least as often as the cited cells
+    state it (two side yards of 10 ft need two 10s), and every place it's written must decide something."""
+    problems = []
+    stated = [n for c in cells for n in numbers(c["value"])]
+    for n in dict.fromkeys(stated):
+        places = occurrences(rule, n)
+        need = sum(abs(n - m) < 1e-9 for m in stated)
+        if len(places) < need:
+            rows = [c["row"] for c in cells if any(abs(n - m) < 1e-9 for m in numbers(c["value"]))]
+            problems.append(f"{rule['id']}: {n:g} is stated by {need} cited cells ({', '.join(rows)}) "
+                            f"but written {len(places)} times in its formula")
+        problems += [f"{rule['id']}: the {i + 1}th {n:g} in {where[0]} changes nothing"
+                     for where, i in places if not number_matters(rule, n, where, i, cells, allowed)]
+    return problems
 
 
 def test_every_cited_chart_number_in_a_formula_decides_something(rules, r1b_cells):
     """A rule can cite a row as an input whose limit doesn't bind at its first passing example (the height
-    bonus cites the yard minimums), so the exact-limit test alone can't catch a wrong number there. Every
-    number a cited cell gives must appear in the rule's formula and change some outcome when changed."""
+    bonus cites the yard minimums), so the exact-limit test alone can't catch a wrong number there."""
     uses = {"use": set(load(ITHACA / "4_term_definitions/uses.yaml"))}
     idle = []
     for rule in rules:
-        if rule["kind"] != "rule":
-            continue
-        cells = [c for c in cited_rows(rule, r1b_cells) if c["page"] != 2]
-        used = formula_numbers(rule)
-        for c in cells:
-            for n in numbers(c["value"]):
-                if not any(abs(n - u) < 1e-9 for u in used):
-                    idle.append(f"{rule['id']}: cites {c['row']!r} ({c['value']}) but its formula doesn't use {n:g}")
-                elif not number_matters(rule, n, cells, uses):
-                    idle.append(f"{rule['id']}: {n:g} from {c['row']!r} changes nothing")
+        if rule["kind"] == "rule":
+            idle += idle_numbers(rule, [c for c in cited_rows(rule, r1b_cells) if c["page"] != 2], uses)
     assert idle == []
 
 

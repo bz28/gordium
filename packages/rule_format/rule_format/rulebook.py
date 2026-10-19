@@ -250,15 +250,23 @@ def _cited_lines(sources: list[dict], ctx: "Context") -> set[tuple]:
     return out
 
 
+NOT_A_LIMIT = re.compile(
+    r"\[fn[^\]]*\]"                                           # a footnote marker
+    r"|\[(?:amended|added|repealed)[^\]]*\]"                  # an amendment note
+    r"|(?:^|(?<=[.:;]))\s*(?:\(\s*(?:\d+|[a-z])\s*\)\s*)+"    # list markers opening the text or a sentence/clause
+    r"|§+\s*\d+[\d.\-]*(?:\s*\([0-9a-z]+\))*"                 # a section reference: §325-8(b)(1)
+    r"|\b(?:columns?|chapters?|articles?|ord\.\s*no\.|local law no\.)\s*[\d.\-]+(?:\s*(?:,|and|or)\s*[\d.\-]+)*")
 NUMBER_WORDS = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
                 "eight": 8, "nine": 9, "ten": 10, "twelve": 12, "twenty": 20, "fifty": 50, "hundred": 100}
 
 
 def source_numbers(text: str) -> set[float]:
     """Numbers written in a quote or a cell: digits ("6,000", "2.5", "3/2" gives 3 and 2) and whole number
-    words ("three", not the "two" of "two-family"). Footnote markers ([fn16]) aren't numbers. A percent
-    also counts divided by 100: "25%" or "25 percent" supports 0.25 (and 25)."""
-    text = re.sub(r"\[fn[^\]]*\]", " ", text.lower())
+    words ("three", not the "two" of "two-family"). Numbers that only label or point aren't limits and
+    don't count: footnote markers ([fn16], and "(16)" opening a note), list numbers ("(3)" opening a sentence
+    or clause), section, column, chapter and ordinance references (§325-16, Column 12, Chapter 228,
+    [Amended 6-5-2013 by Ord. No. 2013-15]). A percent also counts divided by 100: "25%" supports 0.25."""
+    text = NOT_A_LIMIT.sub(" ", text.lower())
     found = {float(n.replace(",", "")) for n in re.findall(r"\d[\d,]*(?:\.\d+)?|(?<![\w.])\.\d+", text)}
     found |= {float(NUMBER_WORDS[w]) for w in re.findall(r"(?<![\w-])([a-z]+)(?![\w-])", text) if w in NUMBER_WORDS}
     percents = re.findall(r"(\d[\d,]*(?:\.\d+)?)\s*(?:%|percent\b)", text)

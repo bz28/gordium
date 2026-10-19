@@ -24,13 +24,15 @@ from pathlib import Path
 import yaml
 
 from document_extraction.sections import piece_text
+from rule_format import formula
 from rule_format.rulebook import (MEASURES_FILE, REPO, VOCABULARY_FILE, Context, _source_problems, district_name,
-                                  locate, validate)
+                                  locate, source_numbers, validate)
 from section_labeling.budget import worst_case
 from section_labeling.labeler import cost, find_quote, sha
 
 from .chart_values import section_refs
-from .templates import CHART_FILE, fill_template, template_problems
+from .chart_values import footnotes
+from .templates import CHART_FILE, SLOT, fill_template, template_problems
 
 HERE = Path(__file__).parent
 GUIDE_FILE = REPO / "regulations/document_extraction_guide/drafting_rules.md"
@@ -60,10 +62,11 @@ it has slots) or one rule for every district (when it has none).
   must carry (["16"] for "50 ft [fn16]"). Code fills the slot from each district's own cell; a district
   whose cell doesn't have that shape gets no rule and goes to a person. Any other number must be written
   in one of your quotes (a percent like 10% is written 0.1; "three" counts as 3). Work numbers out in the
-  formula itself from quoted inputs (40 + 0.1 * 40), never as a result (44). A template drafted from a
-  chart section always takes its chart numbers from slots: a typed number there is rejected.
+  formula itself from quoted inputs (0.02 * 1000), never as a result (20). A number you type must be
+  written in a sentence you quote; a number from a chart cell is always a slot, never typed.
 - Footnotes: a chart cell's footnote marker ([fn16]) points to a note printed under that page's table
-  (listed below). Every footnote a slot's cell must carry has to be quoted, and applied in the rule.
+  (listed below). Every footnote on a slot's cell, its row label or its section heading has to be quoted,
+  and applied in the rule.
 - quotes: the exact words that support the rule, as whole sentences, copied character for character
   (footnote markers like [fn11] included). document "chart" only for a footnote under a chart table, with
   its page; document "law" with the piece id for text from a piece of the law given here (page 0). A quote
@@ -232,12 +235,13 @@ def resolve_quotes(template: dict, unit: dict, context: dict, law: dict, ctx: Co
 
 
 def _footnote_problems(template: dict, sources: list[dict], notes: dict[int, dict]) -> list[str]:
-    """Every footnote a slot's cell must carry is quoted: the note changes what the number means
+    """Every footnote a slot's cell, row or section carries is quoted: the note changes what the number means
     ("(16) But not less than 20 ft."), so a rule that fills the number must also apply the note."""
     quoted = [(s["page"], s["lines"]) for s in sources if s.get("file") == CHART_FILE and "lines" in s]
     p = []
     for slot in template["slots"]:
-        for n in slot["footnotes"]:
+        # the cell's own notes, and the notes on its row label and section heading ("Minimum Lot Size [fn3]")
+        for n in sorted(set(slot["footnotes"]) | footnotes(slot["row"]) | footnotes(slot["section"]), key=int):
             note = notes.get(slot["page"], {}).get(n)
             if note is None:
                 p.append(f"slot {slot['name']}: footnote {n} isn't under the table on page {slot['page']}")
@@ -252,11 +256,12 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
     unresolved: [{rule, why}] (districts whose cells don't fit a working template), rejected: [{rule, why}]
     (templates that work nowhere), proposed: {name: measure}, problems: [...] (the rejections, as text)}."""
     out = {"rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}
+    suffixes = [unit.get("prefix", "") + t["id_suffix"] for t in answer["templates"]]
     for t in answer["templates"]:
         t = t | {"id_suffix": unit.get("prefix", "") + t["id_suffix"]}   # a law piece's rules carry its id
         p = template_problems(t)
-        if unit["id"].startswith("chart-") and not t["slots"] and _typed_numbers(t):
-            p.append("a rule drafted from the chart takes its chart numbers from slots, not typed numbers")
+        if suffixes.count(t["id_suffix"]) > 1:
+            p.append(f"id_suffix {t['id_suffix']!r} is used by more than one template in this answer")
         proposed = {}
         for m in t["new_measures"]:
             if not re.fullmatch(r"[a-z][a-z0-9_]*", m["name"]):
@@ -265,6 +270,11 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 proposed[m["name"]] = {"unit": m["unit"], "meaning": m["meaning"]}
         sources, quote_problems = resolve_quotes(t, unit, context, law, ctx, notes)
         p += quote_problems + (_footnote_problems(t, sources, notes) if not quote_problems else [])
+        # A number the drafter types must be written in a sentence it quotes (a footnote's or the law's),
+        # never only in a chart cell: chart numbers reach a rule only through slots filled per district.
+        quoted = set().union(*(source_numbers(s["quote"]) for s in sources if "quote" in s))
+        p += [f"number {n:g} is typed but isn't written in any quoted sentence; a chart number must be a slot"
+              for n in dict.fromkeys(_typed_numbers(t)) if not any(abs(n - q) < 1e-9 for q in quoted)]
         if p:
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
             continue
@@ -295,13 +305,13 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
 
 
 def _typed_numbers(template: dict) -> list[float]:
-    from rule_format import formula
+    """The numbers written in a template's formulas (not its slots, which code fills; not 0)."""
     texts = [template.get("check", ""), template.get("applies_when", "")] + [r["when"] for r in template["review_when"]]
     found = []
     for t in texts:
         if t.strip():
             try:
-                found += [n for n in formula.numbers(t) if n != 0]
+                found += [n for n in formula.numbers(SLOT.sub("slot_value", t)) if n != 0]
             except formula.FormulaError:
                 pass                                         # reported when the rule is checked
     return found

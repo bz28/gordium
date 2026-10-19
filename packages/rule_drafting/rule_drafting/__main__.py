@@ -139,6 +139,7 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
                     {"rule": rule["id"], "why": "the id is already drafted by another unit; not saved"})
                 continue
             book["rules"].append(rule)
+            taken.add(rule["id"])
             new_ids.append(rule["id"])
     i.drafted.mkdir(parents=True, exist_ok=True)
     for district, book in books.items():

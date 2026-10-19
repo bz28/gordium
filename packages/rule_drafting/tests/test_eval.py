@@ -121,16 +121,8 @@ def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted
     assert sorted(cited - enforced) == []                     # every chart value a draft cites is enforced exactly
     idle = []                                                 # and no cited number is ignored or idle
     for rule in drafted_r1b:
-        if rule["kind"] != "rule":
-            continue
-        rows = [c for c in chart.cited_rows(rule, cells) if c["page"] != 2]
-        used = chart.formula_numbers(rule)
-        for c in rows:
-            for n in chart.numbers(c["value"]):
-                if not any(abs(n - u) < 1e-9 for u in used):
-                    idle.append(f"{rule['id']}: cites {c['row']!r} but doesn't use {n:g}")
-                elif not chart.number_matters(rule, n, rows, ctx.allowed()):
-                    idle.append(f"{rule['id']}: {n:g} from {c['row']!r} changes nothing")
+        if rule["kind"] == "rule":
+            idle += chart.idle_numbers(rule, [c for c in chart.cited_rows(rule, cells) if c["page"] != 2], ctx.allowed())
     assert idle == []
 
 
