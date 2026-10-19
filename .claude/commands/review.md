@@ -19,7 +19,7 @@ Workflow({ scriptPath: ".claude/workflows/review-loop.js", args: {
 }})
 ```
 
-For a stacked PR, `base` is its parent branch, so only this PR's changes are reviewed.
+For a stacked PR, `base` is its parent branch, so only this PR's changes are reviewed. **Stay inside this PR:** a finding in code that a lower PR added is not fixed here; send it to that PR's own loop (run a `verifyOnly` round there), so each PR's history stays its own.
 
 It returns `{ confirmed, refuted, priorStatus, stats }`. **Show both lists**, so nothing is quietly buried. Round ≥ 2 also returns `priorStatus` (`fixed` / `shallow` / `unfixed` per prior finding); `shallow` or `unfixed` counts as a confirmed finding this round.
 
@@ -34,7 +34,7 @@ Tiers: **P0** breaks a core principle · **P1** correctness bug / crash · **P2*
 ## The loop
 
 ```
-round N  →  zero confirmed (any tier P0–P2, plus P3 you'd fix anyway)?  →  done
+round N  →  zero confirmed (any tier)?  →  done
          →  else: fix EVERY confirmed finding, pin each fix, round N+1
 cap: 4 rounds, then stop and surface what is still churning
 ```

@@ -21,9 +21,10 @@ export const meta = {
 //   cwd: '<abs path>',              // the checkout/worktree where `head` is checked out (default: the session's
 //                                   //   working directory). Agents read files from disk, so the tree must be at head.
 // }
+// Fail loudly on bad input: a review that silently ran with defaults could look clean when it wasn't.
 let cfg = args
 if (typeof cfg === 'string') {
-  try { cfg = JSON.parse(cfg) } catch (e) { cfg = {} }
+  try { cfg = JSON.parse(cfg) } catch (e) { throw new Error(`review-loop: args is not valid JSON: ${e.message}`) }
 }
 cfg = cfg || {}
 
@@ -36,6 +37,9 @@ const SKEPTICS = cfg.skeptics || 2
 const INTENT = cfg.intent || '(not provided)'
 const VERIFY_ONLY = cfg.verifyOnly || null
 const CWD = cfg.cwd || null
+if (ROUND >= 2 && !VERIFY_ONLY && (!SINCE || !PRIOR.length)) {
+  throw new Error('review-loop: round >= 2 needs sinceLastRound and priorConfirmed, so the prior fixes are re-checked')
+}
 const WHERE = CWD
   ? `WORKING DIRECTORY: run every command and read every file inside \`${CWD}\` (\`cd ${CWD}\` first — the branch under review is checked out THERE, not in the session's default directory).\n\n`
   : ''
@@ -131,6 +135,7 @@ HOW TO READ IT:
 - \`git diff ${BASE}...${HEAD}\` is the change. \`git diff --stat ${BASE}...${HEAD}\` lists touched files.
 - After the diff, read EACH touched file end-to-end (for files > ~500 lines: the touched regions plus their direct callers/peers). Then grep for every caller of anything whose signature, return shape, or behavior changed, and check those callers still work.
 - Do not guess from names. Open the file.
+- Stay inside this branch: report only defects in code this branch (\`${BASE}...${HEAD}\`) adds or changes, or that its changes break. A problem in code it doesn't touch belongs to the branch that added it: mention it as pre-existing, don't report it as a finding.
 ${priorBlock}
 ${CHECKLIST}
 
