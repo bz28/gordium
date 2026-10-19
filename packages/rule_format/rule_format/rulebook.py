@@ -338,7 +338,8 @@ def _approval_problems(entry: dict, ctx: Context, fields: tuple[str, ...]) -> li
 
 def open_question_problems(entry: dict) -> list[str]:
     """Interpretations the law leaves open, for the architects: a list of text. Nothing with open
-    questions can be approved (so the checker never uses it) until the answers are recorded."""
+    questions can be approved (so the checker never uses it) until the answers are recorded
+    (a definition's in `answers`; a rule's in its `says` and `check`)."""
     questions = entry.get("open_questions", [])
     if not (isinstance(questions, list) and all(isinstance(q, str) and q.strip() for q in questions)):
         return ["'open_questions' must be a list of text"]
@@ -352,12 +353,30 @@ def open_question_problems(entry: dict) -> list[str]:
 TERM_SCHEMAS = {
     # "id" is the entry's key in the file: rules refer to terms by it, so renaming one needs re-approval.
     # A definition is the city's own words (whole sentences in `sources`), with no paraphrase: restating a
-    # definition kept dropping limiting words. Interpretations go in open_questions.
-    "definitions": {"label": "term", "approved": ("id", "term", "measures", "sources"),
-                    "fields": {"term", "measures", "sources", "open_questions", "notes"}},
+    # definition kept dropping limiting words. Interpretations are open_questions until an architect
+    # answers; the answers are part of what's approved, so the measurement code follows a frozen record.
+    "definitions": {"label": "term", "approved": ("id", "term", "measures", "sources", "answers"),
+                    "fields": {"term", "measures", "sources", "open_questions", "answers", "notes"}},
     "uses": {"label": "name", "approved": ("id", "name", "sources"), "fields": {"name", "sources", "notes"}},
 }
 APPROVAL_FIELDS = {"drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
+
+
+def _answer_problems(answers, ctx: Context) -> list[str]:
+    """Architects' answers to open questions: [{question, answer, answered_by, answered_on}]."""
+    if not (isinstance(answers, list) and all(isinstance(a, dict) for a in answers)):
+        return ["'answers' must be a list of {question, answer, answered_by, answered_on}"]
+    p = []
+    for a in answers:
+        if a.keys() != {"question", "answer", "answered_by", "answered_on"}:
+            p.append("each answer needs exactly question, answer, answered_by, answered_on")
+        elif not all(isinstance(a[k], str) and a[k].strip() for k in ("question", "answer", "answered_by")):
+            p.append("an answer's question, answer and answered_by must be text")
+        elif a["answered_by"] not in ctx.reviewers:
+            p.append(f"answered_by must be a reviewer in regulations/reviewers.yaml, not {a['answered_by']!r}")
+        elif not isinstance(a["answered_on"], datetime.date):
+            p.append("answered_on must be a date (YYYY-MM-DD)")
+    return p
 
 
 def validate_terms(entries, ctx: Context, schema: str) -> list[str]:
@@ -388,6 +407,8 @@ def validate_terms(entries, ctx: Context, schema: str) -> list[str]:
             p += [f"unknown measure '{m}'" for m in measures if m not in ctx.measures]
         sources = _list_of_dicts(entry, "sources")
         p += ["'sources' must be a list of mappings"] if sources is None else _source_problems(sources, ctx)
+        if "answers" in s["fields"]:
+            p += _answer_problems(entry.get("answers", []), ctx)
         p += _approval_problems(entry | {"id": key}, ctx, s["approved"])
         problems += [f"{key}: {x}" for x in p]
     return problems

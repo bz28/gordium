@@ -177,6 +177,8 @@ front_yard:
       page: 20
       lines: [31, 34]
       quote: "(1) FRONT YARD — An open space extending the full width of the lot between a main building and the front lot line, unoccupied and unobstructed by buildings or structures from the ground upward, the depth of which shall be the least distance between the front lot line and the front of such main building."
+  open_questions:
+    - "§325-19C (p.50): on corner lots in residential districts, \"yards facing public streets shall conform to the minimum front yard requirements\" and the lot has \"two adjoining front yards\". So front_yard must be checked for each street-facing yard, and only the remaining yards are side or rear yards. Confirm. (This will be a rule of its own.)"
   drafted_by: claude
   status: draft
 
@@ -196,6 +198,8 @@ side_yard:
       page: 25
       lines: [18, 20]
       quote: "(13) Column 13: Yard Dimensions, Side, Other at Least. Buildings hereafter erected in each use district must have two side yards as specified in this column and Column 12. One side yard shall be at least as wide as specified in this column, subject to the further regulations of Column 12."
+  open_questions:
+    - "§325-25 (p.66): accessory structures (private garages, storage sheds, toolhouses, garden houses, playhouses or similar) \"shall be exempt from side yard requirements contained in the District Regulations Chart\" and follow §325-25's own rules. So the chart side yards are measured to the principal building only, not to a detached garage or shed. Confirm. (§325-25 will be rules of their own.)"
   drafted_by: claude
   status: draft
 

@@ -546,13 +546,37 @@ def test_invalid_definitions_are_rejected(ctx, entries, problem):
     assert any(problem in p for p in validate_terms(entries, ctx, "definitions"))
 
 
+ANSWER = {"question": "Which line is the rear lot line on an irregular lot?", "answer": "The one opposite the street.",
+          "answered_by": "jane", "answered_on": datetime.date(2026, 10, 20)}
+
+
+@pytest.mark.parametrize("answers, problem", [
+    ("the one opposite", "'answers' must be a list"),
+    ([{"question": "q?", "answer": "a"}], "exactly question, answer, answered_by, answered_on"),
+    ([ANSWER | {"answered_by": "claude"}], "answered_by must be a reviewer"),
+    ([ANSWER | {"answered_on": "2026-10-20x"}], "answered_on must be a date"),
+])
+def test_invalid_answers_are_rejected(ctx, answers, problem):
+    assert any(problem in p for p in validate_terms({"rear_yard": DEFINITION | {"answers": answers}}, ctx, "definitions"))
+
+
+def test_answered_definition_can_be_approved(ctx):
+    fields = TERM_SCHEMAS["definitions"]["approved"]
+    answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"} | {"answers": [ANSWER]}
+    approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 20),
+                           "approved_hash": approval_hash(answered | {"id": "rear_yard"}, ctx, fields)}
+    assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
+    reworded = approved | {"answers": [ANSWER | {"answer": "The one at the back."}]}  # an answer is frozen too
+    assert any("changed since it was approved" in p for p in validate_terms({"rear_yard": reworded}, ctx, "definitions"))
+
+
 def test_approved_definition_needs_reapproval_after_an_edit(ctx):
     fields = TERM_SCHEMAS["definitions"]["approved"]
     answered = {k: v for k, v in DEFINITION.items() if k != "open_questions"}
     approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
                            "approved_hash": approval_hash(answered | {"id": "rear_yard"}, ctx, fields)}
     assert validate_terms({"rear_yard": approved}, ctx, "definitions") == []
-    for edit in ({"term": "REAR YARDS"}, {"measures": ["rear_yard", "lot_depth"]},
+    for edit in ({"term": "REAR YARDS"}, {"measures": ["rear_yard", "lot_depth"]}, {"answers": [ANSWER]},
                  {"sources": [SOURCE | {"lines": [41, 43], "quote": "10 ft [fn15] " + QUOTE}]}):
         assert any("changed since it was approved" in p
                    for p in validate_terms({"rear_yard": approved | edit}, ctx, "definitions"))

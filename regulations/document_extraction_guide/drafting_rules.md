@@ -13,7 +13,7 @@ For **rules**, every statement in `says` (the plain-English rule) must be backed
 
 ## 2. Interpretations go to `open_questions`, never into `says`
 
-When the law leaves something unsettled (a word it doesn't define, a measurement it doesn't explain, a case it doesn't mention), write the question for the architects in `open_questions`. A definition or rule with open questions can't be approved until they're answered; the answer then becomes part of the approved text.
+When the law leaves something unsettled (a word it doesn't define, a measurement it doesn't explain, a case it doesn't mention), write the question for the architects in `open_questions`. A definition or rule with open questions can't be approved until they're answered. A definition's answer is recorded in `answers` (question, answer, answered_by, answered_on); a rule's answer is written into its `says` and `check`. Either way it's part of what's approved, so it can't change afterwards without re-approval.
 
 ## 3. Every number comes from a quote
 
