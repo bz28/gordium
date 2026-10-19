@@ -71,6 +71,16 @@ def test_every_line_inside_a_table_is_in_exactly_one_row(cells):
             assert sorted(taken) == sorted(inside) and len(taken) == len(set(taken))
 
 
+def test_every_row_has_one_value_for_every_column(cells):
+    columns = {r["page"]: [c["name"] for c in r["columns"]] for r in cells[1:] if "columns" in r}
+    rows = {}
+    for r in cells[1:]:
+        if "row" in r:
+            rows.setdefault((r["page"], r["top"]), []).append(r["column"])
+    assert all(names == columns[page] for (page, _), names in rows.items())
+    assert len(rows) == 72
+
+
 def test_every_word_of_a_row_is_in_its_label_or_one_cell(cells):
     """Joining a row's label and its distinct cells gives back exactly the words on its lines."""
     with pdfplumber.open(CHARTS) as pdf:
@@ -291,6 +301,28 @@ def test_a_header_column_left_of_the_districts_is_unresolved(monkeypatch):
     monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
     assert read_page(page, 1) == [{"page": 1, "unresolved": "a header column left of the district columns",
                                    "text": "B-1"}]
+
+
+def test_a_label_area_split_into_cells_is_unresolved(monkeypatch):
+    page = Page([(0, 0, 50, 20), (50, 0, 100, 20), (100, 0, 150, 20), (0, 20, 50, 40), (50, 20, 100, 40),
+                 (100, 20, 150, 40)],                                         # an unnamed column left of R-1A
+                [line(5, (105, "R-1A")), line(25, (5, "Front"), (60, "25"), (110, "10"))])
+    monkeypatch.setattr(chart_reader, "page_lines", lambda p: (p._lines, 10.0))
+    out = read_page(page, 1)
+    assert any(r.get("unresolved") == "label area is split into cells" for r in out)
+    assert not any("value" in r for r in out)                                  # no "Front 25" row
+
+
+def test_every_column_gets_a_cell_or_the_row_is_unresolved(monkeypatch):
+    shaded = [(0, 20, 100, 40), (100, 20, 150, 40), (160, 20, 200, 40),       # R-1B's cell drawn short, empty
+              (0, 60, 100, 80), (100, 60, 150, 80), (150, 60, 200, 80)]
+    out = read(monkeypatch, shaded, [line(25, (5, "Front"), (110, "25")), line(65, (5, "Side"), (110, "5"))])
+    assert any(r.get("unresolved") == "cell covers part of a column" and r["lines"] == [3] for r in out)
+    assert not any(r.get("row") == "Front" for r in out)                       # not written without R-1B
+    heading_only = read(monkeypatch, [(0, 20, 100, 40), (100, 20, 125, 40), (125, 20, 200, 40)],
+                        [line(25, (5, "Yard"), (30, "Dimensions"))])          # no column has a whole cell
+    assert not any(r.get("heading") for r in heading_only)
+    assert any("unresolved" in r for r in heading_only)
 
 
 def test_a_table_without_drawn_body_rows_is_unresolved_not_a_crash(monkeypatch):

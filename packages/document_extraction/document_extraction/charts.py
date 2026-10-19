@@ -20,8 +20,9 @@ How the table is found, using only what the PDF draws (plain code, no AI, no jud
   columns is one merged cell ("1 space per dwelling unit" for every district); elsewhere each column
   is its own cell. A row whose cells are all empty is a heading ("Yard Dimensions") for the rows below.
 - Each word is placed in the cell that contains it. A word that crosses a cell edge, a drawn cell
-  reaching from the label into the columns, a cell that covers part of a column, values with no row
-  label, and a row that looks like two rows make the whole row unresolved: none of its values are
+  reaching from the label into the columns, a cell that covers part of a column, a label area that
+  isn't exactly one cell, a column left without a cell, values with no row label, and a row that
+  looks like two rows make the whole row unresolved: none of its values are
   written, and it can't become a heading. District names at different heights, a named header
   column left of the districts, and a table with no drawn body rows make the page unresolved.
   Nothing is guessed.
@@ -249,16 +250,23 @@ def read_page(page, page_number: int) -> list[dict]:
                 # A drawn cell reaching from the label into the columns (a whole-row stripe, an outer
                 # border) can't say which words are the label and which are values.
                 problem("cell covers the label and a column", contents[cell])
-            elif not covered:
-                if contents[cell]:
-                    problem("cell under no column", contents[cell])
             elif any(c["x0"] < cell[1] - EDGE and c["x1"] > cell[0] + EDGE and c["name"] not in covered
                      for c in columns):
                 problem("cell covers part of a column", contents[cell])
+            elif not covered:
+                if contents[cell]:
+                    problem("cell under no column", contents[cell])
             else:
                 toks = sorted(contents[cell], key=lambda t: (t.line, t.x0))
                 for name in covered:
                     values[name] = (render(toks), sorted({t.line for t in toks}), covered, cell)
+        # Every row is one label cell and one cell per column, or it isn't read.
+        if len(label_cells) != 1:
+            problem("label area is split into cells" if label_cells else "row has no label cell",
+                    [t for cell in label_cells for t in contents[cell]])
+        missing = [c["name"] for c in columns if c["name"] not in values]
+        if missing and not problems:
+            problem(f"no cell for {', '.join(missing)}", [t for cell in cells for t in contents[cell]])
         row = render(sorted((t for cell in label_cells for t in contents[cell]), key=lambda t: (t.line, t.x0)))
         if not row and any(v[0] for v in values.values()):
             problem("values with no row label", [t for cell in cells for t in contents[cell]])
