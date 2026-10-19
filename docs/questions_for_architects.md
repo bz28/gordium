@@ -11,8 +11,10 @@ Open questions. Remove each one once answered (and record the answer where it be
 4. Is the NYS Building Code (Chapter 5) needed in the first test, or only zoning?
 5. What other documents do they check that aren't on their list?
 6. Can they hand-check the rules for 2–3 more districts (answer keys)?
+7. Do they have past Ithaca projects with known city decisions (permits, zoning board decisions) we can use to test our rules against real outcomes?
+8. Please review `how_rules_are_checked.md`, especially "Choices for the architects to confirm".
 
 ## About how they work
-7. How long does a zoning check take them today?
-8. Their setup: Rhino version, Mac or Windows, plugins.
-9. How far around the site should the model show neighbours? (Their model uses ~400 ft each way.)
+9. How long does a zoning check take them today?
+10. Their setup: Rhino version, Mac or Windows, plugins.
+11. How far around the site should the model show neighbours? (Their model uses ~400 ft each way.)

@@ -1,0 +1,80 @@
+# How Gordium keeps its rules trustworthy
+
+For architects, shareholders and new engineers. No coding knowledge needed.
+
+## The idea in one minute
+
+Gordium makes **promises** to architects (the core principles in `CLAUDE.md`). For each promise, the software runs a **check** on every rule, so a rule that would break the promise is rejected before anyone can use it. For each check, there is a **test** that proves the check works.
+
+```
+Promise to architects   →   Check on every rule   →   Test that proves the check works
+```
+
+Like a building department: the code (promise) says exits must be marked; the plan examiner (check) rejects drawings without exit signs; a training exam (test) proves the examiner catches the missing signs.
+
+The software that runs the checks is called the **inspector** (`python -m rule_format`). It runs automatically on every change to the project.
+
+## What a rule looks like
+
+Every rule is written the same way. Here is R-1b's rear yard, with what each line means:
+
+| Line | Example | Meaning |
+|---|---|---|
+| `says` | Rear yard must be at least 25% of lot depth or 50 ft, whichever is less, but never under 20 ft. | The rule in plain English (what an architect reads and approves) |
+| `check` | `rear_yard >= max(min(0.25 * lot_depth, 50), 20)` | The same rule as a yes/no question the computer can answer |
+| `applies_when` | `use == "one_family_detached"` | Which buildings it applies to (optional) |
+| `review_when` | lot depth unclear on an irregular lot | When the computer must hand it to an architect instead of deciding |
+| `sources` | zoning charts, page 3, "Rear (minimum, % of depth…" | Exactly where in the city's documents it comes from |
+| `examples` | rear yard 25 ft, lot 90 ft deep → **pass** | Worked examples, like the ones in a code commentary |
+| `status`, `approved_by`, `approved_on` | draft · (architect) · (date) | Who approved it and when |
+
+## The promises and their checks
+
+| Promise to architects | Why it matters | So the inspector rejects a rule that… | Example test |
+|---|---|---|---|
+| **Every rule shows where it came from** | You can always ask "says who?" and get the page and the words | has no source · cites a document we don't hold · cites a document that has changed since we recorded it · quotes words that aren't on that page · quotes so little (like "50 ft") that it could match anywhere | A rule quoting "30%" where page 3 says "25%" → rejected |
+| **Nothing is used until an architect approves it** | AI can draft, but only a licensed person decides | is marked approved by someone not on the architects list (`regulations/reviewers.yaml`) · is approved by the person who drafted it · has no real approval date | A rule "approved by claude" → rejected |
+| **Checking never uses AI; same design = same answer** | Results are predictable and repeatable, like a calculator | uses anything other than plain math in its formula | A formula that tries to run a program → rejected |
+| **Never a false pass** | A wrong "pass" could put an illegal building on paper; a "needs review" only costs a second look | has a formula that isn't a clear yes/no question · has worked examples that don't come out as stated | "rear yard minus 20" (a number, not a yes/no) → rejected |
+| **Rules are consistent** | Every rule reads the same way; a typo can't silently break one | uses a measurement, use or topic name that isn't on the official lists · has missing or unknown fields · repeats an id or a line | "rear_yrd" instead of "rear_yard" → rejected |
+
+## How a design gets its result
+
+For each rule, in this order:
+
+1. Doesn't apply to this building → **not applicable**
+2. Something only an architect can judge → **needs review**
+3. A reason for caution (e.g. irregular lot) → **needs review**
+4. Otherwise the yes/no question → **pass** or **fail**
+
+At any step, if a measurement is missing or unusable → **needs review**. Only a clean "yes" can ever become **pass**.
+
+## How we know the checks themselves work
+
+| Method | What it shows | Status |
+|---|---|---|
+| **Tests**: one per check: take a good rule, break one thing, confirm it is rejected; and confirm good rules pass | Each check does its job | 104 tests, all passing |
+| **Independent review**: a second reviewer with no knowledge of how the code was written looks for holes | Catches what the author didn't think of | Found 15 gaps, all fixed with tests |
+| **Breaking the safeguards on purpose**: switch off each safeguard and confirm a test notices | No safeguard is untested | 12 of 12 noticed |
+| **Planted mistakes in real rules**: wrong numbers, wrong pages, invented quotes in copies of the real R-1b | How many real-world mistakes get caught | Planned with R-1b |
+| **The architects' own mistakes** from their worked example | Real errors from practice are caught | Planned with R-1b |
+| **Every escape becomes a check**: any bad rule found later gets a new check and test | The inspector improves over time | Ongoing |
+
+## What the inspector can't do
+
+It can tell whether a rule is **well-formed and traceable**, not whether it **reads the law correctly**. That is confirmed separately:
+
+1. **The quote is real**: checked automatically against the document.
+2. **Two independent versions agree**: R-1b written by hand from reading must match R-1b produced by code from the chart tables.
+3. **An architect approves it.**
+4. **Real city decisions** (planned): run the rules on real Ithaca projects the city has already ruled on (permits, zoning board decisions). A mismatch means a rule or an exception is wrong.
+
+## Choices for the architects to confirm
+
+These are engineering judgment calls, not facts from the code:
+
+- Quotes must be at least 15 characters (shorter ones match by accident).
+- Lengths are always in feet, areas in square feet.
+- The list of measurements rules may use (`packages/rule_format/rule_format/measures.yaml`).
+- The list of topics (`regulations/document_extraction_guide/vocabulary.yaml`).
+- The order results are decided in (above).
