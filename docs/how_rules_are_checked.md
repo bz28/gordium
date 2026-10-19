@@ -64,8 +64,8 @@ At any step, if a measurement is missing or unusable (no value, not a real numbe
 
 It can tell whether a rule is **well-formed and traceable**, not whether it **reads the law correctly**. That is confirmed separately:
 
-1. **The quote is real and in the right place**: checked automatically against the exact lines of the document's extracted text. Once the text-extraction step is merged, the extracted text is re-made from the PDF on every change and must match exactly, so it can't be edited by hand. For chart values, the right *column* (district) is confirmed by step 2 and by architects, until the chart reader cites table cells.
-2. **Two independent versions agree**: R-1b drafted by Claude from reading (an answer key once architects approve it) must match R-1b produced by code from the chart tables, and agrees with the architects' own spreadsheet check (`test_answer_keys.py`).
+1. **The quote is real and in the right place**: checked automatically against the exact lines of the document's extracted text. Once the text-extraction step is merged, the extracted text is re-made from the PDF on every change and must match exactly, so it can't be edited by hand. A cited chart line pins the row; the right *column* (district) is confirmed by step 2 and by architects.
+2. **Two independent versions agree**: R-1b drafted by Claude from reading (an answer key once architects approve it) must match the chart reader's R-1B cells, read by code from the table the PDF draws (`test_r1b_matches_chart.py`): each rule passes exactly at the chart's value and fails just past it, every numbered R-1B cell is cited by a rule, and the use list matches the chart's marks. It also agrees with the architects' own spreadsheet check (`test_answer_keys.py`).
 3. **An architect approves it.**
 4. **Real city decisions** (planned): run the rules on real Ithaca projects the city has already ruled on (permits, zoning board decisions). A mismatch means a rule or an exception is wrong.
 

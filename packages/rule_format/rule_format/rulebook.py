@@ -147,7 +147,7 @@ class Context:
 
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
-                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout"}
+                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages"}
 LAYOUTS = {"ecode360"}   # document layouts the section splitter knows (document_extraction/sections.py)
 
 
@@ -204,6 +204,11 @@ def _source_entry_problems(entry: dict) -> list[str]:
         p.append("marked not quotable but 'not_quotable_because' is missing")
     if "layout" in entry and entry["layout"] not in LAYOUTS:
         p.append(f"'layout' must be one of {sorted(LAYOUTS)}")
+    chart_pages = entry.get("chart_pages", [])
+    if not (isinstance(chart_pages, list) and all(type(n) is int and n >= 1 for n in chart_pages)
+            and len(set(chart_pages)) == len(chart_pages)
+            and (type(entry.get("pages")) is not int or all(n <= entry["pages"] for n in chart_pages))):
+        p.append("'chart_pages' must be a list of distinct page numbers in the document")
     return p
 
 

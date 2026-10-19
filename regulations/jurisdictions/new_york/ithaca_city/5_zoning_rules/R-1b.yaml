@@ -1,7 +1,7 @@
 # R-1b (City of Ithaca): rules drafted by Claude by reading the zoning charts (April 2026) and Chapter 325.
 # NOT yet an answer key: it becomes one only when the architects approve each rule (status: approved).
-# Until then it is a second, independent reading: the chart-reading code (next PR) must produce the same
-# chart values, and test_answer_keys.py compares these rules with the architects' own spreadsheet check
+# Until then it is a second, independent reading: the chart reader's R-1B cells must give the same chart
+# values (test_r1b_matches_chart.py), and test_answer_keys.py compares these rules with the architects' own spreadsheet check
 # (test_data/answer_keys/, their hand check of 106 Ithaca Rd).
 # Every quote is verified against the PDF text by `python -m rule_format`. Written under
 # regulations/document_extraction_guide/drafting_rules.md: a short title, no retelling (the quotes are the words);

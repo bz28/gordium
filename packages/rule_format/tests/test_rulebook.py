@@ -500,6 +500,10 @@ def test_documents_marked_not_quotable_are_refused(ctx):
     ({"file": "a.pdf", "sha256": "x", "quoteable": False}, "unknown field 'quoteable'"),
     ({"file": "a.pdf", "sha256": "x", "quotable": "false"}, "'quotable' must be true or false"),
     ({"file": "a.pdf", "sha256": "x", "quotable": False}, "'not_quotable_because' is missing"),
+    ({"file": "a.pdf", "sha256": "x", "chart_pages": "2, 3"}, "'chart_pages' must be a list"),
+    ({"file": "a.pdf", "sha256": "x", "chart_pages": [2, 2]}, "'chart_pages' must be a list"),
+    ({"file": "a.pdf", "sha256": "x", "chart_pages": [0]}, "'chart_pages' must be a list"),
+    ({"file": "a.pdf", "sha256": "x", "pages": 17, "chart_pages": [18]}, "'chart_pages' must be a list"),
 ])
 def test_source_list_entries_fail_closed(entry, problem):
     from rule_format.rulebook import _source_entry_problems

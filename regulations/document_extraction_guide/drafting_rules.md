@@ -27,7 +27,7 @@ Each source gives `page`, `lines: [first, last]` and `quote`. The quote must be 
 
 ## 5. Say where each part of a rule comes from
 
-A rule can combine a chart value with conditions from the law (R-1b's height: 35 ft from the chart, the 10% bonus from §325-16C). Quote both. Later, the chart-reading code reproduces only the chart part, so this keeps the comparison honest.
+A rule can combine a chart value with conditions from the law (R-1b's height: 35 ft from the chart, the 10% bonus from §325-16C). Quote both. The chart reader's cells cover only the chart part, so this keeps the comparison honest.
 
 ## 6. Use the city's own scope words
 

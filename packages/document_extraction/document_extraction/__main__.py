@@ -1,6 +1,7 @@
 """Extract the text of every source document listed in each jurisdiction's sources.yaml.
 
-    python -m document_extraction           # (re)write 2_extracted_text/<pdf name>.jsonl
+    python -m document_extraction           # (re)write 2_extracted_text/<pdf name>.jsonl, and
+                                            # <pdf name>.cells.jsonl for documents with chart_pages
     python -m document_extraction --check   # exit 1 if any saved file differs from a fresh extraction
 
 Refuses to extract a PDF whose fingerprint doesn't match sources.yaml. A document with
@@ -14,6 +15,7 @@ from pathlib import Path
 import yaml
 
 from . import sections
+from .charts import read_charts
 from .extract import extract, sha256, to_jsonl
 
 REPO = Path(__file__).resolve().parents[3]
@@ -37,6 +39,8 @@ def main(argv: list[str]) -> int:
             outputs = {out: to_jsonl(rows)}
             if doc.get("layout") == "ecode360":
                 outputs[out_dir / f"{Path(doc['file']).stem}.sections.jsonl"] = sections.to_jsonl(sections.split(rows), rows[0])
+            if doc.get("chart_pages"):   # tables read into cells, from the same lines
+                outputs[out_dir / f"{Path(doc['file']).stem}.cells.jsonl"] = to_jsonl(read_charts(pdf, doc["chart_pages"]))
             for path, fresh in outputs.items():
                 failed += not _write_or_check(path, fresh, check)
     return 1 if failed else 0
