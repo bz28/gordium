@@ -113,6 +113,8 @@ def _revision_problems(revised, label) -> list[str]:
             p.append("a revision's by and why must be text")
         elif not isinstance(r["date"], datetime.date):
             p.append("a revision's date must be a date (YYYY-MM-DD)")
-    if not p and revised and revised[-1]["from"] == label:
-        p.append(f"the last revision is from {label!r} to the same label: a revision must change it")
+    if not p:                                    # each revision changes from[i] to the next from, the last to label
+        targets = [r["from"] for r in revised[1:]] + [label]
+        p += [f"revision {i + 1} is from {r['from']!r} to the same label: a revision must change it"
+              for i, (r, to) in enumerate(zip(revised, targets)) if r["from"] == to]
     return p

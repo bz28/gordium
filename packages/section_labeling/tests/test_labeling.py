@@ -256,6 +256,7 @@ def test_review_list_shows_not_for_checking_and_cited_pieces(law):
     text = coverage.review_list(header, pieces, labels, {"325-16C": ["R-1b.height"]}, rows)
     rest, cited = text.split("## Cited by")
     nfc, worded = rest.split("## Labeled reference but using requirement words")
+    assert "## Open questions for the architects (1)" in worded and "| 325-16C |" in worded.split("## Open questions")[1]
     assert "| 325-3B:building_area |" in worded and "shall be located" not in nfc          # "neither ... shall be located"
     assert "325-3B:height_of_building" not in worded                         # a definition with no requirement
     more = {pid: {"label": "reference", "reason": "x", "status": "draft"}
@@ -420,16 +421,31 @@ def test_page_breaks_are_shown_and_a_citation_across_one_is_split(law):
     across = GOOD | {"requirements": [{"first_line": 1, "last_line": 2}], "quote": first_line}
     split = across | {"requirements": [{"first_line": 1, "last_line": 1}, {"first_line": 2, "last_line": 2}]}
     entry, records = run(law, FakeClient(across, split), pid="325-29.18D")
-    assert "crosses the page break after L1; cite it as two parts, L1-L1 and L2-L2" in records[0]["problem"]
+    assert "crosses a page break; cite it as one part per page: L1-L1, L2-L2" in records[0]["problem"]
     assert {s["page"] for s in entry["sources"]} == {107, 108}                  # the split answer is accepted
 
 
-def test_a_repeated_cited_line_asks_for_more_lines_not_a_longer_quote(law, monkeypatch):
+def test_a_repeated_cited_line_asks_for_more_lines_not_a_longer_quote(law):
     ctx, header, pieces, rows = law
-    lines = labeler.numbered_lines(rows, pieces["325-16C"])
-    monkeypatch.setattr(labeler, "find_quote", lambda q, *a: (None, "the quote appears more than once in this piece"))
-    _, why = labeler.cited_lines({"first_line": 1, "last_line": 1}, lines, pieces["325-16C"], LAW, ctx)
-    assert "include one more line" in why and "quote more words" not in why
+    lines = labeler.numbered_lines(rows, pieces["325-3B:kitchen"])
+    _, why = labeler.cited_lines({"first_line": 2, "last_line": 2}, lines, pieces["325-3B:kitchen"], LAW, ctx)
+    assert "include one more line" in why and "quote more words" not in why   # repeated on the page, outside the piece
+
+
+def test_a_citation_over_several_page_breaks_is_split_one_part_per_page(law):
+    ctx, header, pieces, rows = law
+    lines = labeler.numbered_lines(rows, pieces["325-20D"])
+    pages = [p for p, _, _ in lines]
+    _, why = labeler.cited_lines({"first_line": 1, "last_line": len(lines)}, lines, pieces["325-20D"], LAW, ctx)
+    parts = why.split("one part per page: ")[1].split(", ")
+    assert len(parts) == len(set(pages)) >= 3                                 # one part for every page, not two
+
+
+def test_a_requirements_full_lines_win_over_a_quote_on_the_same_lines(law):
+    one = GOOD | {"requirements": [{"first_line": 1, "last_line": 1}]}       # the quote is part of L1
+    entry, _ = run(law, FakeClient(one))
+    assert [s["quote"] for s in entry["sources"]] == [
+        "C. Height and open space. In any district, any main building may be erected to a height in excess of that"]
 
 
 def test_a_rules_sources_list_each_place_once(law):

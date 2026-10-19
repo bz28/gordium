@@ -9,7 +9,8 @@ Plain code; the report is generated, never hand-edited.
 
 The review list: the labels a person must look at first. Every piece labeled not_for_checking (it is
 never checked, so a rule wrongly put there could let a design pass that should fail), and every piece a
-rule or definition already cites (if its label is wrong, a rule rests on a misread piece). And, found by
+rule or definition already cites (if its label is wrong, a rule rests on a misread piece), and every label
+with an open question for the architects. And, found by
 plain code whatever the AI said, every piece labeled reference that uses requirement words ("shall not",
 "must", "not less than"...): only rules become formulas, so a requirement filed as reference could be missed. A reviewer
 records a doubt as an open question on the label; an architect answers it and approves the label, the
@@ -111,6 +112,7 @@ def review_list(header: dict, pieces: dict[str, dict], labels: dict, cited: dict
                 f"{e.get('reason', '').replace('|', '/')} | {quote.replace('|', '/')} |{extra}")
     head = "| Piece | Title | Label | Status | Reason | Quote |"
     nfc = [pid for pid in pieces if labels.get(pid, {}).get("label") == "not_for_checking"]
+    asked = [pid for pid in pieces if labels.get(pid, {}).get("open_questions")]
     worded = {pid: words for pid in pieces if labels.get(pid, {}).get("label") == "reference"
               and (words := requirement_words(rows, pieces[pid]))}
     out = [f"# Labels to review: {header['file']}", "",
@@ -125,6 +127,10 @@ def review_list(header: dict, pieces: dict[str, dict], labels: dict, cited: dict
            "Only rules become formulas: check each is really only a definition or pointer, not a requirement.", "",
            head + " Words |", "|---|---|---|---|---|---|---|",
            *[row(pid, f" {', '.join(worded[pid])} |") for pid in worded], "",
+           f"## Open questions for the architects ({len(asked)})", "",
+           "A reviewer's doubt about the label. Approval is blocked until an architect answers.", "",
+           head + " Questions |", "|---|---|---|---|---|---|---|",
+           *[row(pid, f" {' / '.join(q.replace('|', '/') for q in labels[pid]['open_questions'])} |") for pid in asked], "",
            f"## Cited by rules or definitions ({len(cited)})", "",
            "A rule or definition already quotes these pieces, so each should be rule or reference.", "",
            head + " Cited by |", "|---|---|---|---|---|---|---|",

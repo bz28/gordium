@@ -109,6 +109,7 @@ REV = {"from": "reference", "by": "Claude (review)", "date": datetime.date(2026,
     ([REV | {"why": " "}], "by and why must be text"),
     ([REV | {"date": "2026-10-19x"}], "must be a date"),
     ([REV | {"from": "rule"}], "a revision must change it"),                 # rule -> rule changes nothing
+    ([REV, REV], "revision 1 is from 'reference' to the same label"),       # an earlier no-op in the chain
 ])
 def test_bad_revisions_are_rejected(base, revised, problem):
     assert any(problem in p for p in check(base, {"325-16C": entry(base, revised=revised)}))

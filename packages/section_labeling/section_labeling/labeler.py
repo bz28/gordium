@@ -74,7 +74,7 @@ def piece_message(piece: dict, rows: list[dict]) -> str:
         out.append(f"L{i}: {t}")
     return (f"Piece {piece['id']}: {piece['title']} ({where}). Each line is numbered L1, L2, ...; the numbers are "
             f"not part of the city's text. Cite requirements by these line numbers. A '--- page N ---' line marks "
-            f"a page break: cite a requirement that runs across one as two parts, one on each page.\n\n"
+            f"a page break: cite a requirement that runs across one as one part per page.\n\n"
             + "\n".join(out))
 
 
@@ -97,13 +97,19 @@ def cited_lines(req: dict, lines: list[tuple[int, int, str]], piece: dict, file:
         return None, f"cite lines between L1 and L{len(lines)}, first before last"
     span = lines[first - 1:last]
     if len({page for page, _, _ in span}) > 1:
-        cut = next(i for i in range(first, last) if lines[i][0] != lines[i - 1][0])
-        return None, (f"L{first}-L{last} crosses the page break after L{cut}; cite it as two parts, "
-                      f"L{first}-L{cut} and L{cut + 1}-L{last}")
-    source, why = find_quote(" ".join(t for _, _, t in span), piece, file, ctx)
-    if why and "more than once" in why:
-        why = f"the words on L{first}-L{last} also appear elsewhere on the page; include one more line before or after"
-    return source, why
+        starts = [first] + [i + 1 for i in range(first, last) if lines[i][0] != lines[i - 1][0]]
+        parts = [f"L{a}-L{b - 1}" for a, b in zip(starts, starts[1:] + [last + 1])]
+        return None, f"L{first}-L{last} crosses a page break; cite it as one part per page: {', '.join(parts)}"
+    words = " ".join(t for _, _, t in span)
+    page = span[0][0]
+    # Checked here, not read from a matcher's message: the words must occur once on their page and nowhere
+    # else in the piece, or the citation can't point at one place.
+    elsewhere = len(locate(words, ctx.pages.get(file, {}).get(page, {}))) - 1 + sum(
+        len(locate(words, ctx.pages.get(file, {}).get(p, {}))) for p in {p for p, _, _ in lines} - {page})
+    if elsewhere > 0:
+        return None, (f"the words on L{first}-L{last} also appear elsewhere on the page or in the piece; "
+                      "include one more line before or after so the citation points at one place")
+    return find_quote(words, piece, file, ctx)
 
 
 def consistency_problem(answer: dict) -> str | None:
@@ -172,8 +178,10 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
                                     if why), None) or consistency_problem(answer)
                     if not problem and answer["label"] in ("rule", "flag"):
                         # A rule's sources are its requirement sentences: the drafting step turns each into a check.
-                        unique = {(s["page"], tuple(s["lines"])): s for s in [*(s for s, _ in found), source]}
-                        source = list(unique.values())          # each place once, requirements first
+                        unique = {}
+                        for s in [*(s for s, _ in found), source]:   # a requirement's full lines win over the quote
+                            unique.setdefault((s["page"], tuple(s["lines"])), s)
+                        source = list(unique.values())
             except (json.JSONDecodeError, KeyError, TypeError) as e:
                 problem = f"unreadable answer ({type(e).__name__})"
         record({"piece": piece["id"], "attempt": attempt, "date": datetime.datetime.now(datetime.UTC).isoformat(),
