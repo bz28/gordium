@@ -292,7 +292,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-8A:
-    label: reference
+    label: rule
     topic: dimensions
     reason: This piece is the opening of the section that incorporates the District Regulations Chart and explains
       what each column means; the column explanations themselves set limits (rule), but the piece as a whole mainly
@@ -309,8 +309,11 @@ labels:
         the main entrance side.
     piece_sha256: 3c738a4d0e4328a89ff5eee93721a596c115c3aaa35724921fc58176fce2e9cb
     drafted_by: section_labeling/claude-haiku-5-5
-    open_questions:
-    - "Reviewer (Claude, 2026-10-19): should be rule, not reference. The column explanations impose requirements ('shall have frontage ... equal to or greater than', 'front yard shall be not less than the figure listed'); the figures are in the chart."
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "the column explanations impose requirements ('shall have frontage ... equal to or greater than', 'shall be not less than'); the figures are in the chart"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-8B:
@@ -659,7 +662,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:adult_day_care_home:
-    label: reference
+    label: rule
     topic: definitions
     reason: This piece only defines the term 'adult day-care home' and imposes no requirement on a design, so it
       is a definition used by other rules.
@@ -673,6 +676,11 @@ labels:
         of the dwelling.
     piece_sha256: 4a0ce7ec9f069ae79b4467da8d4884fbb4bace8a36967df6bef6468c3de3c2f1
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "sets a limit: not more than six adults at one time"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:agriculture:
@@ -760,7 +768,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:bed_and_breakfast_inn:
-    label: reference
+    label: rule
     topic: definitions
     reason: This is a definition of the term bed-and-breakfast inn; it describes what the term means and sets no
       requirement a design must meet on its own.
@@ -774,6 +782,11 @@ labels:
         or one family per guest room, used for lodging on an overnight basis.
     piece_sha256: 785b4ff62a2a20cd52345cfcc8b8b79d9cc657f749374855c7d7b94106c66273
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "sets limits: five to 10 guest rooms, two persons or one family per room"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:boardinghouse:
@@ -1130,7 +1143,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:dwelling_one_family:
-    label: reference
+    label: rule
     topic: definitions
     reason: This is a definition of a term used by rules; it says what a one-family dwelling is and who may occupy
       it, but the occupancy limits describe the term rather than setting a design requirement a building must meet.
@@ -1146,8 +1159,11 @@ labels:
         or family and not more than one unrelated individual or a functional family unit.
     piece_sha256: 77774528c12894e2e34435b4b35057154b39374c516a54f275de16464e1cd4fc
     drafted_by: section_labeling/claude-haiku-5-5
-    open_questions:
-    - "Reviewer (Claude, 2026-10-19): should be rule, not reference. The definition sets occupancy limits by zone ('not more than two unrelated individuals is permitted if the dwelling is owner-occupied' in R-1)."
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "sets occupancy limits by zone"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:one_family_detached_dwelling:
@@ -1201,7 +1217,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:one_family_attached_dwelling:
-    label: reference
+    label: rule
     topic: definitions
     reason: This is a definition of the term one-family attached dwelling. Its only numeric element, the six-unit
       maximum, is phrased as a description of what forms a building rather than a requirement a design must meet;
@@ -1212,9 +1228,14 @@ labels:
       lines:
       - 14
       - 14
-      quote: A maximum of six one-family dwelling units may be attached to form a single building.
+      quote: "A maximum of six one-family dwelling units may be attached to form a single building."
     piece_sha256: c6926030edcf55441450c07a9f64e50823b88b15ad4f0e43c8e3307a2a909f99
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "sets a limit: at most six attached units per building"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:dwelling_two_family:
@@ -1236,7 +1257,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:dwelling_unit:
-    label: reference
+    label: rule
     topic: definitions
     reason: This is a definition of a term that rules depend on; it sets no requirement a design must meet, only
       describes what a dwelling unit is.
@@ -1251,6 +1272,11 @@ labels:
         outside of the building or through a common hall.
     piece_sha256: 8cf80d140f90fa782857721b581766631209fbb720da9dfbbb0e04753eacd7ff
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "requires a separate entrance (same wording is labeled rule for rooming units)"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:enlargement:
@@ -1678,7 +1704,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:kitchen:
-    label: reference
+    label: rule
     topic: definitions
     reason: This is a definition of the word KITCHEN with no requirement a design must meet; the 60 square foot
       and five foot figures only describe what counts as a kitchen, and the piece does not impose a limit by itself.
@@ -1692,6 +1718,11 @@ labels:
         cooking or preparation of food.
     piece_sha256: 884fde18d6fe2d8725610280e83c60af1e794586c8775547aea7fe7b93058a4b
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "sets limits: at least 60 sq ft and a minimum width of 5 ft"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-3B:kitchenette:
@@ -2940,7 +2971,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-4:
-    label: rule
+    label: reference
     topic: districts_and_map
     reason: The section divides the entire city into the listed zoning districts, which determines which requirements
       apply to each lot; it is a district-assignment rule that code must apply, though it contains no measurable
@@ -2955,10 +2986,15 @@ labels:
         districts:'
     piece_sha256: 324e57340e8fc4b693491f405e8c4418c94d41e95db4d3ed8b63728dd298caf1
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "sets nothing itself: a list or lead-in that points to the requirements"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-5:
-    label: reference
+    label: not_for_checking
     topic: districts_and_map
     reason: The section only establishes the Zoning Map as a document; it sets no measurable requirement and other
       rules depend on it to identify districts.
@@ -2971,6 +3007,11 @@ labels:
       quote: § 325-5. Zoning Map.
     piece_sha256: 5fdfab83442736ce738d05bc9e204d64c6c86a879f82363b2fe50a3e795abaa1
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-5A:
@@ -3023,7 +3064,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-6:
-    label: rule
+    label: reference
     topic: districts_and_map
     reason: The piece sets rules that 'shall apply' for resolving district boundary uncertainty, which code must
       follow in determining which district governs a lot; the actual rules follow in the subsections, so this is
@@ -3038,6 +3079,11 @@ labels:
         Official Zoning Map, the following rules shall apply:'
     piece_sha256: 89172823b4930e71934aae2a27e1bea363ab67ea53a0ff511940955da1d0bd76
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "sets nothing itself: a list or lead-in that points to the requirements"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-6A:
@@ -3176,7 +3222,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-8:
-    label: reference
+    label: not_for_checking
     topic: districts_and_map
     reason: The piece is only a section heading with an amendment note; it sets no requirement itself and points
       to the district regulations that follow.
@@ -3189,6 +3235,11 @@ labels:
       quote: § 325-8. District regulations.
     piece_sha256: fdbf18a53223803ef88ddac9a6bcef9f07c88716e650c4f3c1e95b7dc02665ec
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-8C:
@@ -3264,7 +3315,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-9A:
-    label: reference
+    label: not_for_checking
     topic: uses
     reason: The piece only states the purpose of the special-use section and sets no measurable requirement a design
       must meet; it points to regulations elsewhere.
@@ -3278,10 +3329,15 @@ labels:
         land uses and activities which are incongruous or sufficiently unique
     piece_sha256: 002a40e91f615596fb485918b4caf834d4a6cf5debe35b8c4341ea59d9fe3cdb
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a statement of purpose or intent, not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-9F:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: The piece sets time limits on special permits, including that a home occupation permit expires unless
       a certificate of compliance is obtained within three years, and that a neighborhood garden permit expires
@@ -3297,6 +3353,11 @@ labels:
         the three-year period.
     piece_sha256: 8c7f2b1a006db6f93c8cf94b6aca70625124967c9b6a66de9d5a00e14c31ed72
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-9G:
@@ -3352,7 +3413,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-10A:
-    label: reference
+    label: not_for_checking
     topic: uses
     reason: The piece is a statement of intent that describes the purpose of the section and points to the district
       regulations in §325-8 without itself setting a measurable requirement a design must meet.
@@ -3366,6 +3427,11 @@ labels:
         to certain uses allowed by special permit under § 325-8, District regulations, of the City Municipal Code.
     piece_sha256: 7330329f9c1b365e4dfb05234a0c77bac7fb68cdc30521edc95bf8a51f8add3f
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a statement of purpose or intent, not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-10B:
@@ -3472,7 +3538,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-12:
-    label: reference
+    label: not_for_checking
     topic: districts_and_map
     reason: The piece is only a section heading with amendment history; it sets no requirement itself and does not
       state a rule a design must meet.
@@ -3485,6 +3551,11 @@ labels:
       quote: § 325-12. Planned unit developments (PUD).
     piece_sha256: f25b16f846ebd8a8bdbc52d6bb2f12a12237af0a45aca4fda90751ef4f04e7ae
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-12A:
@@ -3556,7 +3627,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-12E:
-    label: reference
+    label: flag
     topic: procedures
     reason: The piece makes building and use changes in a PUD depend on a site plan approved under another chapter,
       pointing to a document that holds the review requirements rather than setting a measurable design limit itself.
@@ -3570,6 +3641,11 @@ labels:
         provisions of Chapter 276 of the City of Ithaca Code.
     piece_sha256: 38e139202616e82378fb43658a882bb395e746e169a2132417b4a37b2a937021
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "no structure in a PUD unless it follows an approved site plan: needs the city's site plan approval"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-12F:
@@ -3623,7 +3699,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-12I:
-    label: rule
+    label: not_for_checking
     topic: nonconforming
     reason: 'The piece sets a time limit: construction must begin within 24 months or the PUD is automatically revoked
       and the prior zoning returns. Whether construction has progressed in accordance with the approved plan is
@@ -3637,6 +3713,11 @@ labels:
       quote: A developer who receives PUD approval will have 24 months to begin construction of their project.
     piece_sha256: a4df45a2203d8866a4b0b73cc5cd42d047ab5a22d14907f26cab31809ba33091
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-13:
@@ -3672,7 +3753,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-15:
-    label: reference
+    label: not_for_checking
     topic: uses
     reason: The piece is only a section heading that introduces use regulations defined elsewhere; it sets no requirement
       itself.
@@ -3685,6 +3766,11 @@ labels:
       quote: § 325-15. Use regulations.
     piece_sha256: 766a9c2e4ddd61f3fde68f339115d380dd46c42e628f9724a53815dc7ecc94ea
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-15A:
@@ -3707,7 +3793,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-15B:
-    label: reference
+    label: rule
     topic: site_features
     reason: The piece points to another chapter (Chapter 210, Housing Standards) where the requirements for mobile
       homes and parks are held, rather than setting a measurable requirement itself. Its 'shall' only incorporates
@@ -3722,6 +3808,11 @@ labels:
         of this Code.
     piece_sha256: 35f19f64b86eb6d698a55afbd6f3147f54275051d1e0602d19deb3c97124900c
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a requirement whose details live in Chapter 210 (guide step 5)"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-15C:
@@ -3878,7 +3969,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-17:
-    label: reference
+    label: not_for_checking
     topic: dimensions
     reason: The piece is only a section heading ('Area regulations') that introduces the area rules without setting
       any requirement itself.
@@ -3891,6 +3982,11 @@ labels:
       quote: § 325-17. Area regulations.
     piece_sha256: 39947a27c7ff78c2911cd46bbb635038fdcdea1f67bbe0093d91df9912021fb9
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-17A:
@@ -3962,7 +4058,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-18:
-    label: reference
+    label: not_for_checking
     topic: dimensions
     reason: The piece is only a section heading that introduces yard regulations; it sets no requirement itself
       and points to the substantive yard rules that follow in other pieces.
@@ -3975,6 +4071,11 @@ labels:
       quote: § 325-18. Yard regulations.
     piece_sha256: 2d9a4ce278d5eb0b17a40e4fd8b5c32c7b3c5621f9ec207bf4f749bf6fa3f686
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-18C:
@@ -3997,7 +4098,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-19:
-    label: reference
+    label: not_for_checking
     topic: nonconforming
     reason: The piece is only a section heading with no requirement text; it names a topic but sets no requirement
       a design must meet.
@@ -4010,6 +4111,11 @@ labels:
       quote: § 325-19. Transition regulations.
     piece_sha256: 4889153c8fb33dd49d26222dd2144533a4112c03091cc6457a3202a56db2f4a2
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-19A:
@@ -4275,7 +4381,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-21:
-    label: reference
+    label: not_for_checking
     topic: parking_and_loading
     reason: The piece is only a section heading for off-street loading with no requirement stated; the substantive
       loading rules would sit in its subsections, so it sets nothing a design must meet.
@@ -4288,6 +4394,11 @@ labels:
       quote: § 325-21. Off-street loading.
     piece_sha256: e4766df6414a1e7ccde66e3e68bd29a72182137700a0ae4f49d99e1c2b807d58
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-21A:
@@ -4342,7 +4453,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-22:
-    label: reference
+    label: not_for_checking
     topic: uses
     reason: The piece is only a section heading with no requirement text, so it sets nothing a design must meet
       and points to no rule on its own.
@@ -4355,6 +4466,11 @@ labels:
       quote: § 325-22. Motels.
     piece_sha256: 1f10e6e56fefe98d6a880fbb3f151823c49e342671e6091970da23d06f940b9e
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-22A:
@@ -4494,7 +4610,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-23:
-    label: reference
+    label: not_for_checking
     topic: uses
     reason: The piece is only a section heading stating the subject of the following standards; it sets no requirement
       a design must meet.
@@ -4507,6 +4623,11 @@ labels:
       quote: § 325-23. General standards applying to all land uses.
     piece_sha256: f613a5936b8597a654925e77fa099678f7f08219ce5fd402d8410805ed1941a3
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-23A:
@@ -4528,7 +4649,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-24:
-    label: flag
+    label: not_for_checking
     topic: form_and_design_standards
     reason: The heading announces special performance standards for the Industrial District, which would govern
       how a use or building operates. The piece gives no text, so the actual standards cannot be judged here and
@@ -4542,6 +4663,11 @@ labels:
       quote: Special performance standards in Industrial District; penalties for offenses.
     piece_sha256: 93d1310c84a47f4fe1a63671f091987e1af05a3061113a4794b6c0ba46d2b7ef
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: flag
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-24A:
@@ -4862,7 +4988,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-27B:
-    label: reference
+    label: not_for_checking
     topic: uses
     reason: This is a purpose statement that sets no requirement a design or use must meet; it explains the policy's
       intent, which other rules may rely on for interpretation.
@@ -4875,6 +5001,11 @@ labels:
       quote: 'The intent of the policy is to regulate short-term rentals in the City of Ithaca in order to:'
     piece_sha256: e467d629a9f0daee4ec53d566a1961c46045003451f7a0e8f1d38a88f5865dc8
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a statement of purpose or intent, not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-27C:
@@ -4964,7 +5095,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-27H:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: Subsection H is mainly a renewal procedure, but paragraph (3) requires hosts to be current on occupancy
       taxes before renewal, which code can check from records, and paragraph (2) requires a valid certificate of
@@ -4978,6 +5109,11 @@ labels:
       quote: Hosts must be current on all required occupancy taxes before their permits are renewed.
     piece_sha256: 6f4a7c83928fe24e58a50ca5e24104aa2fb6f2bd271253d195eed2e1b212b9a3
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-27I:
@@ -4998,7 +5134,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-27J:
-    label: flag
+    label: not_for_checking
     topic: administration
     reason: The piece sets evidentiary presumptions about who caused advertising and what price was advertised;
       these are enforcement presumptions rather than design requirements, but they are not measurable building or
@@ -5014,6 +5150,11 @@ labels:
         or performed on behalf of the property owner.
     piece_sha256: 95b73bb6de980dd08c1f1405f254c3f77ad9f8cfc1b5aff0fc740cc71b42cd46
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: flag
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-27K:
@@ -5100,7 +5241,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29:
-    label: not_for_checking
+    label: flag
     topic: procedures
     reason: The section routes permit applications through the Landmarks Commission for review and states the permit-issuance
       sequence; it sets no measurable design, lot, or use requirement itself.
@@ -5115,8 +5256,11 @@ labels:
         to the City Landmarks Preservation Commission for review and report prior to issuing any such permit.
     piece_sha256: 1c88af81b09f35f37966d766521eeb41c08f081c28b2f73c40da3141b439c259
     drafted_by: section_labeling/claude-haiku-5-5
-    open_questions:
-    - "Reviewer (Claude, 2026-10-19): should be flag, not not_for_checking. Landmark properties are governed by Chapter 228 'with respect to changes in appearance', so a design on a landmark needs city review: a needs-review item, not skipped."
+    revised:
+    - from: not_for_checking
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "landmark properties are governed by Chapter 228 for changes in appearance: needs the city's review"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.1:
@@ -5255,7 +5399,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.2:
-    label: reference
+    label: not_for_checking
     topic: districts_and_map
     reason: The piece is only a section heading identifying the Southwest District with an amendment note; it sets
       no requirement and points to no content itself.
@@ -5268,6 +5412,11 @@ labels:
       quote: § 325-29.2. Southwest District.
     piece_sha256: d142ed9ad76aa9a69f44ff5e7d26c287a04a4bc389f76b86738f2d9290d3a47d
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.2A:
@@ -5514,7 +5663,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.4C:
-    label: reference
+    label: not_for_checking
     topic: site_features
     reason: This piece is a purpose and intent statement that lists goals for wireless facilities; it sets no measurable
       requirement a design must meet, so it is a reference to the chapter's purpose rather than a rule or flag.
@@ -5528,6 +5677,11 @@ labels:
         of
     piece_sha256: b116ee74caf24d59c104601fdfc2f152b1328fa1d2caabb3e67c03bafd2f0e29
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a statement of purpose or intent, not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.4D:
@@ -5563,7 +5717,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.5A:
-    label: reference
+    label: not_for_checking
     topic: definitions
     reason: The piece only lists abbreviations used elsewhere in the code and sets no requirement a design must
       meet.
@@ -5576,6 +5730,11 @@ labels:
       quote: A. Abbreviations.
     piece_sha256: 124930f0e13baa3a8dce7519ecdec5ce50aadb56dcc50a2dcdd21b9a4ca6a6ed
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.5A:agl:
@@ -5707,7 +5866,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.5B:
-    label: reference
+    label: not_for_checking
     topic: definitions
     reason: The piece only introduces a definition-of-terms subsection and sets no requirement a design must meet;
       the defined terms that follow hold any substance.
@@ -5720,6 +5879,11 @@ labels:
       quote: B. Definition of terms.
     piece_sha256: 38ab76854d620eb196bd9ea6421caae0c2bfee3866e3df3c9b4c290e28807650
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.5B:agl:
@@ -6651,7 +6815,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.5B:type_i_applications:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: 'The piece sets which applications qualify as Type I by a test the design must meet: the completed facility
       must still meet small wireless facility physical limits. It is mainly procedural, but it contains a measurable
@@ -6667,10 +6831,15 @@ labels:
         such new equipment is a Type I application.
     piece_sha256: 10a46a3cac4733bfe42043dff79d9f72419701c7b01168c1bce5f761d18ebf0d
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.5B:type_ii_applications:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: The piece defines which applications qualify for Type II review, which is a procedural classification,
       but it also limits eligible collocations to existing structures that do not meet the small wireless facility
@@ -6686,10 +6855,15 @@ labels:
         new personal wireless service equipment
     piece_sha256: 6ad347421c35149145931a23360015a66834099c3e10eb8236d60e24ed74d148
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.5B:type_iii_applications:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: The piece limits which applications may be filed as Type III, which is a procedural scope rule rather
       than a design requirement; however it restricts the kind of facility that may be applied for, so it is kept
@@ -6704,10 +6878,15 @@ labels:
         wireless facility.
     piece_sha256: 248b235187c65ebe7c192a6a350a9030228f088518e17fc34d532b4d89d998df
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.5B:type_iv_applications:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: The piece classifies which applications fall under Type IV review for new towers and wireless facilities,
       which is a procedural categorization rather than a design measurement; however, it defines the scope of a
@@ -6724,6 +6903,11 @@ labels:
         Type II, or Type III applications.
     piece_sha256: 375be760392d334282b5fb34b91a0e104d73147c4d69f9afc9664f891b7c8866
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.5B:undergrounding_district:
@@ -6828,7 +7012,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.6B:
-    label: rule
+    label: not_for_checking
     topic: nonconforming
     reason: 'Subsection B sets requirements a facility must meet: a separate permit is required for unpermitted
       PWSFs and carriers with out-of-compliance facilities are ineligible for new approvals until brought into compliance.
@@ -6845,6 +7029,11 @@ labels:
         with this article.
     piece_sha256: 68580f947b7ea2b80a5dbd90bd4bf8063b5b10157bae48eceabebffa9540aacb
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.6C:
@@ -6866,7 +7055,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.6D:
-    label: rule
+    label: not_for_checking
     topic: site_features
     reason: Paragraph D(1) says no permit may be issued for collocation on a site or mount that has unpermitted
       PWSFs or structures lacking required permits. That is a checkable condition on existing facilities, so it
@@ -6883,6 +7072,11 @@ labels:
         permits or any other permits required by the City of Ithaca.
     piece_sha256: 74447a195c390d150daefc913ae87035d761699e859ade18518535780e3bc750
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.6E:
@@ -6990,7 +7184,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.8:
-    label: rule
+    label: reference
     topic: form_and_design_standards
     reason: The piece states that PWSF approval is subject to meeting or exceeding standards, so it imposes a requirement
       on the design; the listed standards that follow determine the measurable limits.
@@ -7003,6 +7197,11 @@ labels:
       quote: 'The approval of PWSFs shall be subject to meeting or exceeding the following standards:'
     piece_sha256: 4d67f5e830891f6dc0fc962a1cc53ac3f778be52cfb788669f4bceafe4cd8dd1
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "sets nothing itself: a list or lead-in that points to the requirements"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.8A:
@@ -7056,7 +7255,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.9:
-    label: rule
+    label: not_for_checking
     topic: dimensions
     reason: The heading names fall zone and setback requirements for wireless facilities, which are measurable design
       limits, so the piece is treated as a rule. Only the heading and amendment note appear here, so the operative
@@ -7070,6 +7269,11 @@ labels:
       quote: § 325-29.9. Fall zone and setback requirements for PWSF's.
     piece_sha256: 9dcd16e5fbe14c9ba7f4a68e562753d8bd6298d3e5ab7287651478fba8bc9d1d
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.9A:
@@ -7142,7 +7346,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.10B:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: Lists mandatory information an applicant must submit, including measurable items such as a 1,000-foot
       radius for zoning district designations and maps; this is a submission requirement that code can check for
@@ -7157,6 +7361,11 @@ labels:
       quote: 'The following information is required for all applications:'
     piece_sha256: aa9012fe85851a99ba283f134934c6792eee319a5f98720f4603b6d6ced83f8f
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.10C:
@@ -7246,7 +7455,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.10.1D:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: Sets a binding 150-day deadline for the Application Authority to issue a written decision on a Type
       IV wireless application, which code can check against dates. Although it is a procedural timing rule, it is
@@ -7261,6 +7470,11 @@ labels:
         from the date when the City receives a Type IV application.
     piece_sha256: e1bb82a4dafa8efbbda794f9f4e7e677924802916b52e088d75ea6b29e81149f
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.10.2:
@@ -7333,7 +7547,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.11:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: The piece requires each application to contain at least two alternatives, a measurable submission requirement
       that code can check by counting alternatives; it is not a design measurement, but it is an application content
@@ -7348,6 +7562,11 @@ labels:
         proposed in the application.
     piece_sha256: b9c5c8d1143398bc80858f11ce01d1a9309704df7f8b4dbd325b82252b9f3155
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.11A:
@@ -7540,7 +7759,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.13D:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: 'The piece is a notice procedure, but it imposes measurable requirements on the applicant: mail or hand-deliver
       notice to residences within 300 feet at least five days before installation and post a sign at least 30 days
@@ -7556,6 +7775,11 @@ labels:
         with a sign
     piece_sha256: dd947e8ccd995972f53b83b41452c7c8b3c2770bc8e6459749348d6be1a34054
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.14:
@@ -7575,7 +7799,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.14A:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: The piece imposes a mandatory requirement that staff reports contain specified content, including determinations
       of whether location, siting and design standards have been met; it is a procedural requirement but includes
@@ -7590,10 +7814,15 @@ labels:
       quote: 'The staff report shall contain the following:'
     piece_sha256: 571ae1e6d1b1336806094eb8845251c49a787b2f637b341c9fe8d18d3358066f
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.15:
-    label: flag
+    label: not_for_checking
     topic: procedures
     reason: The piece introduces notice requirements for PWSF applications, which is procedural, but it states the
       applicant must demonstrate compliance with listed requirements that are not shown here; it is not clear the
@@ -7607,6 +7836,11 @@ labels:
       quote: 'For all PWSF applications, the applicant is responsible for demonstrating compliance with the following:'
     piece_sha256: ba8f27a9e985d80dbe5294569d9cb7ee78d46c1cec16821bbeef717f6fffc79c
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: flag
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.15A:
@@ -7708,7 +7942,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17:
-    label: reference
+    label: not_for_checking
     topic: site_features
     reason: The piece is only a section heading with no requirement text, so it sets no requirement itself and simply
       points to the substantive provisions that follow.
@@ -7721,10 +7955,15 @@ labels:
       quote: § 325-29.17. Collocations/Public sites.
     piece_sha256: 4ae2d943cdb076ef12ed541943ce9d585be490c3cd50ca5471fe253337237849
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17A:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: The piece sets how applications must be reviewed, a 'shall' requirement on the city's review basis,
       but it is a review procedure rather than a design measurement, so it is not a design rule code could check
@@ -7740,10 +7979,15 @@ labels:
         mount, i.e., the cumulative, worst-case condition.
     piece_sha256: 7dbe38045dc3dc0901595e49adf9475fd68509b61251793b22af1883f3c8b7b3
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17B:
-    label: rule
+    label: not_for_checking
     topic: site_features
     reason: The piece states that collocation applications on pre-existing mounts require review of the existing
       mount under this article, which imposes a review scope requirement on the facility that code can apply; it
@@ -7758,10 +8002,15 @@ labels:
         article, require review of the existing mount as well as collocation under the requirements of this article.
     piece_sha256: 9ccd04e76a6e28b77dab294af3e920114d7ae8a14739726a9b759263f4db26ce
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17C:
-    label: rule
+    label: not_for_checking
     topic: site_features
     reason: The piece sets a requirement that collocation applications on certain mounts require review of the existing
       mount under this article, which code can check as a procedural trigger tied to a design element. It is not
@@ -7778,6 +8027,11 @@ labels:
         under the requirements of this article.
     piece_sha256: b57d0bd41e5e71608dea700fdc2139999b9b20ef91ec11c2265e3ce84eee8465
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17D:
@@ -7833,7 +8087,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.18A:
-    label: rule
+    label: not_for_checking
     topic: site_features
     reason: Requires each carrier to file annual registry information including height, hazardous materials list,
       and a 24/7 emergency contact; these are checkable filing requirements tied to the facility, though the filing
@@ -7849,6 +8103,11 @@ labels:
         the date of approval:'
     piece_sha256: e205a5a886c852ed1dfcf987da6f17c7d48c8450326a112609a6419d2853c992
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.18B:
@@ -7870,7 +8129,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.18C:
-    label: rule
+    label: not_for_checking
     topic: site_features
     reason: Subsection C requires the owner or operator to conduct and report inspections at fixed intervals (every
       five years for mounts, annually for RF radiation) and to keep and provide maps and records, which code can
@@ -7885,10 +8144,15 @@ labels:
         five years.
     piece_sha256: 9692a08e9382d228859d6078e288511ae706d9e0bb7a79f5a6dba1cf3ee1b852
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.18D:
-    label: rule
+    label: not_for_checking
     topic: site_features
     reason: 'The piece sets a measurable requirement: a PWSF out of service for 12 continuous months is deemed abandoned,
       and its owner must remove it within 90 days of notice. Code can check these time periods against records.'
@@ -7901,10 +8165,15 @@ labels:
       quote: the owner of such PWSF shall remove same within 90 days
     piece_sha256: 819bea29fd38679db351d36610ede50ffd4fe5fda95bc90d67e793d9610c4845
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.18E:
-    label: rule
+    label: not_for_checking
     topic: site_features
     reason: The piece says a PWSF shall be registered as a hazardous facility if petroleum products fuel power supplies
       or toxins are contained in equipment, which is a requirement a design can be checked against (presence of
@@ -7922,6 +8191,11 @@ labels:
         alternative power sources.'
     piece_sha256: 22a5275611ddd9b8ce1752daaa635cb6e3a3289846f24a42a05079ed24ae5f1a
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.18F:
@@ -7994,7 +8268,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.19C:
-    label: rule
+    label: not_for_checking
     topic: site_features
     reason: The piece states a requirement that a PWSF meeting FCC Guidelines shall not be conditioned or denied
       for RF impacts; compliance is checkable by whether the facility meets the FCC Guidelines, a measurable standard.
@@ -8008,6 +8282,11 @@ labels:
         impacts.
     piece_sha256: 84884aad6747682cdd750e9d0d60095e3deb1518e105df3d2c800792f525f725
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.19D:
@@ -8047,7 +8326,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.21:
-    label: reference
+    label: not_for_checking
     topic: site_features
     reason: The piece is only a section heading with no requirement text, so it sets nothing a design must meet;
       the substantive lighting rules would sit in the piece's subsections.
@@ -8060,6 +8339,11 @@ labels:
       quote: § 325-29.21. Lighting and security.
     piece_sha256: 8ede139257f7e0171967a4b9d4613fe78dfef4adaac6f2d6196cbae85ca58cfc
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.21A:
@@ -8181,7 +8465,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.24:
-    label: reference
+    label: not_for_checking
     topic: parking_and_loading
     reason: The piece is only a section heading with no requirement text, so it sets nothing a design must meet;
       the substantive rules would sit in its subsections.
@@ -8194,6 +8478,11 @@ labels:
       quote: § 325-29.24. Access and parking.
     piece_sha256: cf96b72b846d47da40515367dbbf03fce11663e9992cf6d3663ea35697df677b
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.24A:
@@ -8232,7 +8521,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.25:
-    label: rule
+    label: not_for_checking
     topic: site_features
     reason: The piece requires liability insurance of at least $1,000,000 per occurrence and $3,000,000 aggregate
       with no pollution exclusion, which code can check from the policy documentation. It is a measurable requirement
@@ -8248,6 +8537,11 @@ labels:
         and Development
     piece_sha256: 408a6f32abb2ca0721eca318201477015468fcbabb7ae4181501ccad005c0c75
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.26:
@@ -8338,7 +8632,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.27D:
-    label: flag
+    label: not_for_checking
     topic: administration
     reason: The piece creates a private right of action to remove a facility whose RF emissions exceed limits, which
       is an enforcement remedy rather than a measurable design requirement. Because it ties removal to an emissions
@@ -8352,6 +8646,11 @@ labels:
       quote: enables a private right of action by any City resident against the facility owner to secure its removal
     piece_sha256: f785a42e01634f9fc034450c61ffe54a01619a83abd08b6f3e6fb62795f93f2d
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: flag
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.28:
@@ -8407,7 +8706,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-32:
-    label: reference
+    label: not_for_checking
     topic: dimensions
     reason: The piece is only a section heading with no requirement text; it sets no requirement a design must meet
       by itself.
@@ -8420,6 +8719,11 @@ labels:
       quote: § 325-32. General requirements.
     piece_sha256: ec952c60f9426666d50b22c5a9cbab33bcbddc738597027f79a46ae3199dbb9d
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-32A:
@@ -8473,7 +8777,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-33:
-    label: reference
+    label: not_for_checking
     topic: nonconforming
     reason: The piece is only a section heading with no requirement text; it points to nonconforming use rules that
       would be labeled separately.
@@ -8486,6 +8790,11 @@ labels:
       quote: § 325-33. Nonconforming uses.
     piece_sha256: baee804499e807d6d547667993ae1f5ff697119a7b8b9d5e4b9e34d47e6f5847
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-33A:
@@ -8574,7 +8883,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-34:
-    label: reference
+    label: not_for_checking
     topic: nonconforming
     reason: The piece is only a section heading with no requirement text; it names the subject but sets no requirement
       a design must meet.
@@ -8587,6 +8896,11 @@ labels:
       quote: § 325-34. Nonconforming buildings and lots.
     piece_sha256: 7b9d871ce7fa53e82dbe9111ac8f00c6c6744111a18bbf4ef16cde60b0a2b615
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-34A:
@@ -8841,7 +9155,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-39B:
-    label: rule
+    label: not_for_checking
     topic: nonconforming
     reason: The piece sets a requirement ('shall be renewed, changed or extended without a certificate of occupancy')
       that code can check against whether a certificate of occupancy exists for the nonconforming use. It is a rule,
@@ -8855,6 +9169,11 @@ labels:
       quote: No nonconforming use shall be renewed, changed or extended without a certificate of occupancy.
     piece_sha256: 8300285617dac8de88bd2de8db3b33ca44f15139134e6828300ca9fbfb432a03
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-39D:
@@ -8909,7 +9228,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-40C:
-    label: rule
+    label: not_for_checking
     topic: dimensions
     reason: Section C sets binding tests for variances, including required showings for use variances and a mandatory
       minimum-variance standard for area variances. Some parts need judgment, such as neighborhood character, but
@@ -8925,6 +9244,11 @@ labels:
         and the health, safety and welfare of the community.
     piece_sha256: 6afc81421a3df3e30cc6f8248053693f04afaf04c6dbecb475259fd75534e6c5
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-41:
@@ -8993,7 +9317,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-41E:
-    label: rule
+    label: not_for_checking
     topic: procedures
     reason: 'The piece sets a time limit on zoning permits: a permit becomes void if no building permit is obtained
       or construction is not substantially completed within two years, and it may be renewed only once. Code can
@@ -9008,6 +9332,11 @@ labels:
         two years
     piece_sha256: c3d6b1a23d6df64cd075e33a19eede85fbee19825da29f665943a1ce59679020
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-41F:
@@ -9079,7 +9408,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-42B:
-    label: flag
+    label: not_for_checking
     topic: districts_and_map
     reason: The piece states an intent about controlling residential-to-nonresidential transition and avoiding negative
       effects, which is a purpose statement with no measurable requirement; deciding whether a design meets 'strictly
@@ -9095,6 +9424,11 @@ labels:
         and negative effects of nonresidential use are avoided
     piece_sha256: 538b91587ff90fbae69a4492549bf5503be8745dd729406bea91dddcfbf665d4
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: flag
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a statement of purpose or intent, not a design requirement"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-43:
@@ -9286,7 +9620,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-45.1F:
-    label: rule
+    label: reference
     topic: districts_and_map
     reason: Although much of this piece is a list of cross-references, it sets a requirement a design must meet
       by stating which Chapter 325 sections apply in the CR and MU districts and that unlisted sections do not apply
@@ -9300,6 +9634,11 @@ labels:
       quote: The following sections of Chapter 325 shall apply in the CR and MU districts.
     piece_sha256: 4bb551ca3fe27113b56f745c4275557ee42c102c7390efbe44a3f465449b8ac1
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: rule
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "sets nothing itself: a list or lead-in that points to the requirements"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-45.2:
@@ -9353,7 +9692,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-45.2C:
-    label: reference
+    label: not_for_checking
     topic: districts_and_map
     reason: The piece is only a heading naming the Collegetown Area Form Districts with a footnote marker; it sets
       no requirement a design must meet and points to nothing substantive itself.
@@ -9366,6 +9705,11 @@ labels:
       quote: C. Collegetown Area Form Districts.[fn45]
     piece_sha256: 84c88d8c33e80d11ebdba147b6a49512f771c5b4b9e07f058de905d7214d2513
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-45.2D:
@@ -9438,7 +9782,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-45.3:
-    label: reference
+    label: not_for_checking
     topic: uses
     reason: The piece is only a section heading that names the subject of allowed uses and sets no requirement itself.
       Rules that depend on it would sit in the section's body, so it is kept as a reference rather than dropped.
@@ -9451,10 +9795,15 @@ labels:
       quote: § 325-45.3. Allowed uses.
     piece_sha256: 262a65fbd679a1d1bcfe86e8ee9d18f24c19aa2b74214b27c23d374e4991aa2d
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-45.3A:
-    label: reference
+    label: not_for_checking
     topic: uses
     reason: The piece is a heading that introduces the Use Table and points to a separate table holding the actual
       use permissions, so it sets no requirement itself; the footnote and amendment note are not requirements.
@@ -9467,6 +9816,11 @@ labels:
       quote: A. Use Table.[fn46]
     piece_sha256: 7a6d8aba90832f64c9ccdc6aa239516e29ab9249a45a0b49678558b72b0f7ed9
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-45.3B:
@@ -9519,7 +9873,7 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-45.5:
-    label: reference
+    label: not_for_checking
     topic: uses
     reason: The piece is only a section heading with no requirement text; it names the subject of the following
       provisions but sets no requirement a design must meet.
@@ -9532,6 +9886,11 @@ labels:
       quote: § 325-45.5. Uses; requirements.
     piece_sha256: 7d20341685904086dfb2b6aea0bed0586892dabbd3d2af22dfc39836777742a8
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: reference
+      by: Claude (review of all labels, 2026-10-19)
+      date: 2026-10-19
+      why: "a heading with no text of its own; its content is in its subsections"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-45.5A:

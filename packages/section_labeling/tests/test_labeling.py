@@ -254,6 +254,12 @@ def test_review_list_shows_not_for_checking_and_cited_pieces(law):
     nfc, worded = rest.split("## Labeled reference but using requirement words")
     assert "| 325-3B:building_area |" in worded and "shall be located" not in nfc          # "neither ... shall be located"
     assert "325-3B:grade_plane" not in worded                                # a definition with no requirement
+    more = {pid: {"label": "reference", "reason": "x", "status": "draft"}
+            for pid in ("325-3B:one_family_attached_dwelling", "325-29.7A", "325-15B")}
+    worded = coverage.review_list(header, pieces, labels | more, {}, rows).split("## Labeled reference but")[1]
+    assert "| 325-3B:one_family_attached_dwelling |" in worded and "maximum" in worded   # "A maximum of six..."
+    assert "| 325-29.7A |" in worded and "no pwsf shall" in worded                       # "No PWSF shall ..."
+    assert "| 325-15B |" in worded and "shall be in conformity" in worded
     assert "| 325-1 |" in nfc and "This chapter shall be known" in nfc and "325-16C" not in nfc
     assert "| 325-16C |" in cited and "draft · open questions" in cited and "R-1b.height |" in cited
 

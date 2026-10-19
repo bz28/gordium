@@ -19,7 +19,10 @@ How to label one piece of a city's zoning law. Code has already cut the law into
 3. A definition is **reference** when it only says what a word means, even if it includes measurement details. But if a definition also imposes a requirement on a design ("must", "shall", "may not", a limit, e.g. "An ADU must have a separate entrance"), label it **rule** (or **flag** if the requirement needs judgment), and say in the reason that it is also a definition. Step 1 wins: any requirement makes it a rule or flag.
 4. When unsure between **not_for_checking** and **rule** or **flag**, choose **rule** or **flag**. A piece labeled not_for_checking is never checked, so a missed rule could let a design pass that should fail; a wrongly kept piece only costs a person a few minutes. The same goes for **reference** versus **rule**: when unsure, choose **rule**.
 5. A requirement is still a **rule** when its numbers live elsewhere. "The front yard shall be not less than the figure listed in this column" is a rule even though the figure is in the chart; "the minimum applies to each main building" is a rule. Words like *shall*, *must*, *may not*, *not less than*, *not more than*, *at least* usually mean a requirement. Use **reference** only when the piece sets nothing a design must meet.
-6. Don't interpret the law, and don't decide what it means. The label only says what kind of text this is.
+6. Procedures are **not_for_checking** even when they say *shall* or *must*: applications, submittals, deadlines ("shot clocks"), notices, fees, insurance, permits, inspections, filings, enforcement. They tell the applicant or the city what to do, not what the design must be. "When unsure, choose rule" is about design requirements, not procedures.
+7. A heading with no text of its own (its content is in the subsections below it) is **not_for_checking**. A statement of purpose or intent is **not_for_checking**.
+8. Limits often appear without *shall* or *must*: "a maximum of six", "limited to two persons", "not more than six adults", "at least 60 square feet". These are requirements.
+9. Don't interpret the law, and don't decide what it means. The label only says what kind of text this is.
 
 ## The topic
 
