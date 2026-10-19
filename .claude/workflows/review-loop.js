@@ -11,7 +11,7 @@ export const meta = {
 //   base: 'origin/main',            // what the branch is compared against (fetch first!)
 //   head: 'HEAD',                   // the branch tip under review
 //   uncommitted: false,             // true: review the working tree (committed + uncommitted changes),
-//                                   //   so a large change is reviewed before Ben is asked to commit it
+//                                   //   so a large change is reviewed before it is committed
 //   round: 1,                       // 1-based; round >= 2 re-checks priorConfirmed
 //   priorConfirmed: [...],          // findings confirmed in the previous round (now supposedly fixed)
 //   sinceLastRound: '<sha>',        // round >= 2: the commit the previous round reviewed, so the reviewer
@@ -33,8 +33,13 @@ cfg = cfg || {}
 const BASE = cfg.base || 'origin/main'
 const HEAD = cfg.head || 'HEAD'
 const UNCOMMITTED = cfg.uncommitted === true
-// The diff commands every agent runs. With uncommitted work, compare against the working tree (no HEAD).
-const WHOLE = UNCOMMITTED ? `${BASE}` : `${BASE}...${HEAD}`
+if (UNCOMMITTED && cfg.head && cfg.head !== 'HEAD') {
+  throw new Error('review-loop: uncommitted reviews the checked-out working tree; check out the branch (or pass cwd) instead of head')
+}
+// The diff commands every agent runs. Both modes start from where the branch split off the base (the
+// merge-base), so newer commits on the base never look like this branch reverted them. With uncommitted
+// work, that split point is compared with the working tree.
+const WHOLE = UNCOMMITTED ? `--merge-base ${BASE}` : `${BASE}...${HEAD}`
 const ROUND = cfg.round || 1
 const PRIOR = cfg.priorConfirmed || []
 const SINCE = cfg.sinceLastRound || null
