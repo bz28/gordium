@@ -109,6 +109,9 @@ class Context:
             if counts[name] > 1:
                 ctx._problem(name, "listed more than once in sources.yaml")
         for name, entry in listed.items():
+            for problem in _source_entry_problems(entry):
+                ctx._problem(name, problem)
+        for name, entry in listed.items():
             pdf = j / "1_source_documents" / name
             sha = entry.get("sha256")
             if not sha:
@@ -135,6 +138,22 @@ class Context:
         for row in rows[1:]:
             pages.setdefault(int(row["page"]), {})[int(row["line"])] = tokenize(row["text"])
         self.pages[name] = pages
+
+
+SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
+                 "adopted_on", "created_on", "quotable", "not_quotable_because"}
+
+
+def _source_entry_problems(entry: dict) -> list[str]:
+    """sources.yaml is edited by hand, so its gates must fail closed: no unknown keys (a typo could
+    drop a gate), `quotable` is true or false, and a document marked not quotable says why."""
+    p = [f"unknown field {k!r} in sources.yaml" for k in entry if k not in SOURCE_FIELDS]
+    if "quotable" in entry and not isinstance(entry["quotable"], bool):
+        p.append("'quotable' must be true or false")
+    if entry.get("quotable") is False and not (isinstance(entry.get("not_quotable_because"), str)
+                                               and entry["not_quotable_because"].strip()):
+        p.append("marked not quotable but 'not_quotable_because' is missing")
+    return p
 
 
 # A token is a footnote marker ("[fn11]"), a whole word or number ("rear", "1b", "2.5", "1,500", "3/2",
@@ -324,6 +343,10 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
         name, page, lines, quote = s.get("file"), s.get("page"), s.get("lines"), s.get("quote")
         if not isinstance(name, str) or name not in ctx.sources:
             p.append(f"source file {name!r} is not in sources.yaml")
+        elif ctx.sources[name].get("quotable", True) is not True:   # fail closed: only an explicit or default yes
+            p.append(f"source {name} isn't quotable yet: {ctx.sources[name].get('not_quotable_because') or 'see sources.yaml'}")
+        elif name in ctx.file_problems:
+            p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
         elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and isinstance(lines, list)
                   and len(lines) == 2 and all(type(n) is int for n in lines)):
             p.append(f"source {name}: needs 'page' (number), 'lines' ([first, last]) and 'quote' (text)")

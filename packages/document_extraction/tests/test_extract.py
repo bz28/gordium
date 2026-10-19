@@ -6,7 +6,12 @@ import pytest
 
 import document_extraction.__main__ as cli
 from document_extraction.extract import extract, sha256, to_jsonl
-from rule_format.rulebook import Context, normalize, quote_found
+from rule_format.rulebook import Context, locate, tokenize
+
+
+def quote_found(quote, page):
+    """Is the quote anywhere on the page ({line: tokens})?"""
+    return bool(locate(quote, page))
 
 REPO = Path(__file__).resolve().parents[3]
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
@@ -85,15 +90,26 @@ def test_refuses_a_pdf_whose_fingerprint_changed(tmp_path, monkeypatch, capsys):
 def test_footnote_markers_are_marked_not_read_as_values(charts):
     page_3 = [r["text"] for r in charts[1:] if r["page"] == 3]
     stories = next(t for t in page_3 if t.startswith("Number of stories"))
-    assert "3/2 ^11 4" in stories                                    # R-3aa: 3/2 stories, footnote 11
-    assert not quote_found("3/2 11 4", normalize(" ".join(page_3)))  # can't be quoted as "11 stories"
-    assert any("2,500 sf ^4 5,000 sf" in t for t in page_3)
+    assert "3/2 [fn11] 4" in stories                                 # R-3aa: 3/2 stories, footnote 11
+    page = {1: tokenize(" ".join(page_3))}
+    for misreading in ("3/2 11 4", "11 4 3 Height in feet", "4 5,000 sf 5,000 sf",
+                       "Number of stories 3 3 3 3 3 4 … 11 4 3"):     # footnote read as a value
+        assert not quote_found(misreading, page)
+    assert any("2,500 sf [fn4] 5,000 sf" in t for t in page_3)
 
 
 def test_sideways_text_is_left_out_and_counted():
     rows = extract(ITHACA / "1_source_documents/ordinance_no_2025-12_southside_form_districts.pdf")
-    assert rows[0]["rotated_chars_skipped"] == 21
-    assert not any(r["text"] == "kcabteS" for r in rows[1:])          # "Setback" read backwards
+    assert rows[0]["rotated_chars_skipped"] == 345                    # vertical and angled diagram labels
+    texts = [r["text"] for r in rows[1:]]
+    assert not any(t == "kcabteS" for t in texts)                       # "Setback" read backwards (vertical)
+    assert not any("requ s" in t for t in texts)                        # angled label read scrambled
+
+
+def test_almost_vertical_map_labels_are_left_out():
+    rows = extract(ITHACA / "1_source_documents/zoning_maps_2026-05.pdf")
+    assert rows[0]["rotated_chars_skipped"] > 7000                       # street labels at 1°-92°, 30°, 60°
+    assert not any("D V L B" in r["text"] for r in rows[1:])             # "BLVD" read backwards
 
 
 def test_unknown_arguments_are_rejected_before_writing(tmp_path, monkeypatch):
@@ -102,3 +118,31 @@ def test_unknown_arguments_are_rejected_before_writing(tmp_path, monkeypatch):
     with pytest.raises(SystemExit) as e:
         cli.main(["--chek"])                                          # typo of --check
     assert e.value.code == 2 and not out.exists()
+
+
+def _mark(text, sizes, bottoms, body=10):
+    chars = [{"size": z, "bottom": b} for z, b in zip(sizes, bottoms)]
+    from document_extraction.extract import _mark_superscripts
+    return _mark_superscripts({"text": text, "chars": chars}, body)
+
+
+@pytest.mark.parametrize("text, sizes, bottoms, expected", [
+    ("5 10", [10, 6, 6], [100, 95, 95], "5 [fn10]"),                       # footnotes are most of the line
+    ("Height 5 10", [10] * 7 + [6, 6], [100] * 7 + [95, 95], "Height 5 [fn10]"),
+    ("19th 2025", [10, 10, 7, 7, 10, 10, 10, 10], [100, 100, 95, 95, 100, 100, 100, 100], "19th 2025"),  # ordinal
+    ("R-1b", [6, 6, 6, 6], [100, 100, 100, 100], "R-1b"),                   # small but not raised: a label
+    ("x 3", [10, 6], [100, 100], "x 3"),                                     # small but level: not a footnote
+])
+def test_footnote_is_small_and_raised(text, sizes, bottoms, expected):
+    assert _mark(text, sizes, bottoms) == expected
+
+
+@pytest.mark.parametrize("file, page, quote", [
+    ("ordinance_no_2025-12_southside_form_districts.pdf", 21, "Height (stories), max 3 A Length of blank wall"),  # two columns mixed
+    ("zoning_maps_2026-05.pdf", 1, "City of Ithaca Zoning Map May 2026"),
+])
+def test_real_not_quotable_documents_are_refused(file, page, quote):
+    from rule_format.rulebook import _source_problems
+    ctx = Context.for_jurisdiction(ITHACA)
+    assert quote_found(quote, ctx.pages[file][page])                     # the words really are there…
+    assert any("isn't quotable yet" in p for p in _source_problems([{"file": file, "page": page, "quote": quote}], ctx))

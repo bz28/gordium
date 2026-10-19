@@ -1,1183 +1,491 @@
-{"file": "zoning_maps_2026-05.pdf", "sha256": "1a2a542c9004a123e91d24ea2b35ff05926f2bbee3feebc3080f5ec39b3c0d5f", "pages": 9, "extractor": "pdfplumber 0.11.10 + pdfminer.six 20260107 (dedupe_chars, upright text only, extract_text_lines, superscripts marked '^')", "rotated_chars_skipped": 62}
+{"file": "zoning_maps_2026-05.pdf", "sha256": "1a2a542c9004a123e91d24ea2b35ff05926f2bbee3feebc3080f5ec39b3c0d5f", "pages": 9, "extractor": "pdfplumber 0.11.10 + pdfminer.six 20260107 (dedupe_chars, level text only, extract_text_lines, footnotes as [fnN])", "rotated_chars_skipped": 7266}
 {"page": 1, "line": 1, "text": "City of Ithaca", "x0": 536.5, "top": 71.3, "x1": 724.3, "bottom": 101.3}
 {"page": 1, "line": 2, "text": "Zoning Map", "x0": 566.4, "top": 112.8, "x1": 724.4, "bottom": 142.8}
 {"page": 1, "line": 3, "text": "May 2026", "x0": 653.7, "top": 149.6, "x1": 724.4, "bottom": 165.4}
-{"page": 1, "line": 4, "text": "DR", "x0": 401.9, "top": 207.9, "x1": 412.2, "bottom": 218.1}
-{"page": 1, "line": 5, "text": "BS", "x0": 394.8, "top": 214.9, "x1": 404.6, "bottom": 224.7}
-{"page": 1, "line": 6, "text": "B", "x0": 393.6, "top": 221.8, "x1": 400.1, "bottom": 226.7}
-{"page": 1, "line": 7, "text": "G^I", "x0": 391.9, "top": 225.6, "x1": 399.8, "bottom": 233.5}
-{"page": 1, "line": 8, "text": "ESL", "x0": 381.2, "top": 232.1, "x1": 395.7, "bottom": 244.1}
-{"page": 1, "line": 9, "text": "M", "x0": 380.6, "top": 241.8, "x1": 386.9, "bottom": 247.1}
-{"page": 1, "line": 10, "text": "DA", "x0": 371.6, "top": 245.9, "x1": 386.6, "bottom": 251.2}
-{"page": 1, "line": 11, "text": "RJ", "x0": 371.6, "top": 250.2, "x1": 386.5, "bottom": 254.7}
-{"page": 1, "line": 12, "text": "STEWART", "x0": 329.9, "top": 265.1, "x1": 360.2, "bottom": 279.0}
-{"page": 1, "line": 13, "text": "PARK", "x0": 358.4, "top": 255.7, "x1": 375.5, "bottom": 269.3}
-{"page": 1, "line": 14, "text": "N", "x0": 377.4, "top": 283.3, "x1": 384.4, "bottom": 289.2}
-{"page": 1, "line": 15, "text": "Y 1 3 N B", "x0": 378.6, "top": 263.6, "x1": 390.3, "bottom": 285.0}
-{"page": 1, "line": 16, "text": "t o", "x0": 384.6, "top": 282.9, "x1": 391.8, "bottom": 289.5}
-{"page": 1, "line": 17, "text": "N Y 3 4", "x0": 386.4, "top": 267.1, "x1": 396.6, "bottom": 283.3}
-{"page": 1, "line": 18, "text": "T", "x0": 382.9, "top": 311.8, "x1": 389.0, "bottom": 315.7}
-{"page": 1, "line": 19, "text": "S", "x0": 382.9, "top": 315.6, "x1": 389.0, "bottom": 319.8}
-{"page": 1, "line": 20, "text": "A", "x0": 383.1, "top": 321.6, "x1": 389.2, "bottom": 325.8}
-{"page": 1, "line": 21, "text": "SU H ^D ^V ^D ^V ^L ^B ^R ^B ^L ^R ^E ^L ^L ^A ^A ^E ^L ^L ^H W ^A ^R ^R ^E ^N N P H O W ^A ^K ^O L E O R C R D T ^IC ^H O ^A ^R ^D ^P ^L L R N I S S T E W C R E ^T W ^S L ^E M ^A ^P ^B E ^C W O L S D I L O F T A O V ^L N D ^L ^K F E V H I P L O L A A R O K G R ^P ^L ^E K ^TA Y N L D W O W P ^S M ^A ^I ^IL ^L R E L S P ^L O ^A ^Y N R ^T ^E G ^L T P ^L M L O U N R T D R FL C H O E H S S R T A N U U O L T T N S A A T U P V R G V E ^I H N P A E I N G S N E A H O R ^IL E C R L K R C B D E L H R P V E C L L D ^I M R D F L F R S T C S Y A W T S T S ^T A S S P T B L A A C R A K E T R E U E R D C N P S S A ^R ^K R ^A ^A ^K ^P ^C C ^S T I C R S D L T E A H C S A S S P R A T M R ^B ^R R ^I ^N ^D ^L ^E ^Y ^S ^T D K A R A A L U ^O ^L ^D A A D N M G T N ^A R M L ^E H P ^A ^N ^N ^O ^C ^K O ^B ^L ^V ^D R D NE S R E D S C F ^T ^O ^N ^U ^N ^S ^F ^T ^L U N A LT E O S N C C S A S A T G T S D T S H R T I I I O T R L ^T ^S E W ^O ^D ^A ^E M ^N U D L C U S E S A T T A N L F H S V I O N E S U T R S T T T H O T M S - T N N O M ^T W ^S ^N ^R N ^O ^C F ^N E ^T ^S ^R ^I ^I ^A ^F R R A L L T S Y ^L ^P ^K ^R L ^A ^P N A M R I O D A T T 7 Y W N I I I D 9 R S S U 1 A E W H K V 3 A A O H A S E / S S W L A N W P M W N V R I Y Y N B T N I S P A E D E O E S C 3 Y / S C A E S 4 V ^T S ^S ^N S ^IA R ^L ^P ^S R O T T O O E T S R B E T C A C S D O R T U K T K N D S D W R S E S S S S ^T ^S T ^E ^T ^T ^E ^Y ^A ^F F W T T T D ^I W T T S L R W E T ^I S I L S Y T N T I L S T S O S T T C F ^T ^S ^Y ^N ^A ^B ^L ^A W U T E A O A S S V N P L E L E A ^S ^T E ^V ^A ^N ^E ^E ^G ^N L N N ^S ^T ^E ^V ^A ^N ^E ^T ^G ^S ^S ^N ^R ^U ^B ^U ^A V C S C E Y S E C R A S O S T A T T ^G ^U ^A ^Y S ^C ^N S R E W T C S K J E P E ^S ^T ^A F A ^G ^U ^Y ^C ^S ^A N A E S S A D N Y E L Y Y T H C L I A ^T ^I I ^S ^A ^C L ^IT ^U L E N M L L S Q 7 ^T ^S ^S ^R ^A ^E ^S T L T R F E S C 9 A T A R U E A S O T A R S S E R ^T ^S ^A ^G ^O ^IT E V L S T E M ^L ^P ^R ^E ^N ^R ^U ^T S E N H N T C S A S S O ^S S L ^A U T L H R A T A O T D ^T ^S ^A K ^R ^O ^R P ^U U ^A ^N L R I E R A D L L O S S S ^T R T I L T E A N P E T ^L V G ^I ^N ^N ^S S ^T R ^A R A N ^T ^T ^S ^N ^N ^IL R G ^R ^A ^C ^E ^P ^L D I K S E O T V L A W O C I S I E N N N O P W P T H E E S C B L R L E U ^C ^O ^R ^N S M U C R T U C ^E D ^T ^E E D N R D ^Y H T M T U E F T D E C S S O B N F E D X G P B L S S A ^T O D A T L S E I T W H A R N ^IL ^L ^A R D L D E A S W A P ^A A ^Y O S C C N R V K M T A R E S E S E W P D S C A T C E L N I L I ^E ^V ^A ^T A ^R ^A W ^E ^T ^S T L L L P L G L S L ^E ^I R ^F L A ^I P S E I T S A L S U P M T R O W O L ^T ^S N ^Y ^R ^R ^A I ^U D ^Q ^N E S D I G V C S ^B ^A ^R ^T E O ^N ^P ^L A D T R R T ^E ^D ^D ^Y ^S ^T S F H ^I T A Y C E A L O V R E R L N V G H A L ^I C H L E I C E A ^T ^S N ^R ^IA ^L N ^B R O L N T ^E ^V ^A ^E ^L ^V ^A E ^C ^E I ^- R N ^A R ^T ^D ^L N L ^L ^E E ^N E ^E ^E ^G ^E ^L ^L ^A ^O ^C ^V S M E - P B R T O L K I C O T K D W C A ^L D T A ^N ^E ^A ^V ^E ^L ^N ^D ^I E N D W E H A M H A R R T A E R B U I P Y R E R B O L I R T U Y D O R V L A A S R S E A S K I N ^E ^A ^V ^T ^A ^S ^E ^- N ^E ^L ^L ^R ^N ^O ^C T S N R T N V T R A O I G T D A E P V N D R E G V P L E L A B C V C E D E M L V R A O E O I D D W L H R C G A R L ^O E ^N ^EI ^D ^A ^P ^L N O O O L N E S E F E R Y Y E T O L O M N L R L D ^C ^O ^R R ^N ^E ^L R ^L ^- ^G ^A ^R ^D E R L N ^A E ^V I ^E A D W D D V T E ^E - L A C C L S E L R K H T - W S E A S M E ^I S T H A S D O ^N ^R L O ^D I A S D L O I L T ^T ^S ^L ^L ^E ^N R ^R ^O ^C T R T M L Y E W E S D E T F D E S T H R A O R N T R R O D S S D M T T A D V W ^T ^S ^L ^R ^A ^E ^P R E OODCRESTAVE", "x0": 60.3, "top": 325.7, "x1": 725.6, "bottom": 789.7}
-{"page": 1, "line": 22, "text": "D", "x0": 305.0, "top": 804.4, "x1": 312.4, "bottom": 811.6}
-{"page": 1, "line": 23, "text": "R", "x0": 302.4, "top": 807.6, "x1": 309.8, "bottom": 814.7}
-{"page": 1, "line": 24, "text": "Y", "x0": 299.3, "top": 812.4, "x1": 306.5, "bottom": 819.0}
-{"page": 1, "line": 25, "text": "R", "x0": 297.2, "top": 815.8, "x1": 304.6, "bottom": 822.5}
-{"page": 1, "line": 26, "text": "COMME", "x0": 154.4, "top": 852.3, "x1": 178.5, "bottom": 860.5}
-{"page": 1, "line": 27, "text": "P", "x0": 178.5, "top": 828.6, "x1": 185.3, "bottom": 835.8}
-{"page": 1, "line": 28, "text": "R", "x0": 178.5, "top": 853.8, "x1": 182.9, "bottom": 859.9}
-{"page": 1, "line": 29, "text": "S A O", "x0": 178.7, "top": 819.2, "x1": 189.1, "bottom": 837.9}
-{"page": 1, "line": 30, "text": "C", "x0": 182.9, "top": 854.1, "x1": 187.3, "bottom": 860.1}
-{"page": 1, "line": 31, "text": "R U", "x0": 184.9, "top": 824.5, "x1": 192.7, "bottom": 840.5}
-{"page": 1, "line": 32, "text": "IA", "x0": 186.9, "top": 853.9, "x1": 192.5, "bottom": 860.8}
-{"page": 1, "line": 33, "text": "K T", "x0": 188.1, "top": 827.1, "x1": 195.5, "bottom": 843.0}
-{"page": 1, "line": 34, "text": "L", "x0": 189.5, "top": 855.5, "x1": 195.8, "bottom": 862.3}
-{"page": 1, "line": 35, "text": "H R", "x0": 191.7, "top": 829.1, "x1": 199.1, "bottom": 846.6}
-{"page": 1, "line": 36, "text": "A", "x0": 193.3, "top": 858.4, "x1": 200.1, "bottom": 865.6}
-{"page": 1, "line": 37, "text": "W D", "x0": 194.5, "top": 831.8, "x1": 202.7, "bottom": 849.7}
-{"page": 1, "line": 38, "text": "V", "x0": 196.2, "top": 860.5, "x1": 203.0, "bottom": 867.7}
-{"page": 1, "line": 39, "text": "E", "x0": 198.1, "top": 836.2, "x1": 205.3, "bottom": 843.0}
-{"page": 1, "line": 40, "text": "E", "x0": 199.6, "top": 863.2, "x1": 206.4, "bottom": 870.4}
-{"page": 1, "line": 41, "text": "S T SPENCER RD", "x0": 201.2, "top": 829.9, "x1": 274.1, "bottom": 857.2}
-{"page": 1, "line": 42, "text": "S", "x0": 275.9, "top": 848.5, "x1": 283.1, "bottom": 854.9}
-{"page": 1, "line": 43, "text": "T O N E Q U A R", "x0": 278.1, "top": 819.4, "x1": 302.6, "bottom": 851.3}
-{"page": 1, "line": 44, "text": "D", "x0": 188.9, "top": 867.0, "x1": 196.3, "bottom": 874.3}
-{"page": 1, "line": 45, "text": "R", "x0": 186.0, "top": 870.2, "x1": 193.4, "bottom": 877.5}
-{"page": 1, "line": 46, "text": "RA", "x0": 179.3, "top": 874.5, "x1": 189.4, "bottom": 884.7}
-{"page": 1, "line": 47, "text": "MI", "x0": 174.7, "top": 880.6, "x1": 183.7, "bottom": 889.6}
-{"page": 1, "line": 48, "text": "EL", "x0": 169.8, "top": 885.5, "x1": 179.1, "bottom": 894.9}
-{"page": 1, "line": 49, "text": "Zoning Districts CBD-60 Medium-Density Mixed Use R-U", "x0": 231.6, "top": 899.3, "x1": 658.4, "bottom": 914.5}
-{"page": 1, "line": 50, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 229.2, "top": 915.0, "x1": 256.9, "bottom": 933.0}
-{"page": 1, "line": 51, "text": "B-1a", "x0": 259.2, "top": 921.4, "x1": 278.4, "bottom": 930.5}
-{"page": 1, "line": 52, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 349.2, "top": 912.9, "x1": 376.9, "bottom": 931.1}
-{"page": 1, "line": 53, "text": "CBD-85 Newman D Residential Transition", "x0": 379.5, "top": 919.0, "x1": 730.4, "bottom": 928.1}
-{"page": 1, "line": 54, "text": "B-1b CR-1 P-1 SW-1", "x0": 259.2, "top": 938.7, "x1": 664.8, "bottom": 950.2}
-{"page": 1, "line": 55, "text": "B-2a CR-2 PUD SW-2", "x0": 259.2, "top": 958.4, "x1": 664.8, "bottom": 969.9}
-{"page": 1, "line": 56, "text": "B-2d CR-3 R-1a SW-3", "x0": 259.2, "top": 978.0, "x1": 664.8, "bottom": 989.6}
-{"page": 1, "line": 57, "text": "B-4 CR-4 R-1b Traditional Residential", "x0": 259.2, "top": 997.7, "x1": 733.1, "bottom": 1009.2}
-{"page": 1, "line": 58, "text": "B-5 Cherry Street District R-2a U-1", "x0": 259.2, "top": 1017.4, "x1": 656.9, "bottom": 1028.9}
-{"page": 1, "line": 59, "text": "C-SU Urban Mixed Use R-2b WE/WF", "x0": 259.2, "top": 1037.1, "x1": 673.7, "bottom": 1048.6}
-{"page": 1, "line": 60, "text": "CBD-100 MH-1", "x0": 259.2, "top": 1056.8, "x1": 401.8, "bottom": 1068.3}
-{"page": 1, "line": 61, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 467.3, "top": 1050.9, "x1": 494.7, "bottom": 1067.2}
-{"page": 1, "line": 62, "text": "R-2c WEDZ-1a", "x0": 497.3, "top": 1056.8, "x1": 682.4, "bottom": 1065.9}
-{"page": 1, "line": 63, "text": "CBD-120 MU-1 R-3a WEDZ-1b", "x0": 259.2, "top": 1076.4, "x1": 682.4, "bottom": 1088.0}
-{"page": 1, "line": 64, "text": "I", "x0": 134.2, "top": 1102.5, "x1": 201.0, "bottom": 1189.3}
-{"page": 1, "line": 65, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 229.2, "top": 1092.9, "x1": 256.9, "bottom": 1109.2}
-{"page": 1, "line": 66, "text": "C", "x0": 259.2, "top": 1098.3, "x1": 265.8, "bottom": 1107.4}
-{"page": 1, "line": 67, "text": "C", "x0": 259.2, "top": 1118.0, "x1": 265.8, "bottom": 1127.1}
-{"page": 1, "line": 68, "text": "B", "x0": 265.7, "top": 1098.3, "x1": 271.8, "bottom": 1107.4}
-{"page": 1, "line": 69, "text": "B", "x0": 265.7, "top": 1118.0, "x1": 271.8, "bottom": 1127.1}
-{"page": 1, "line": 70, "text": "D", "x0": 271.9, "top": 1098.3, "x1": 278.5, "bottom": 1107.4}
-{"page": 1, "line": 71, "text": "D", "x0": 271.9, "top": 1118.0, "x1": 278.5, "bottom": 1127.1}
-{"page": 1, "line": 72, "text": "-", "x0": 278.4, "top": 1098.3, "x1": 281.4, "bottom": 1107.4}
-{"page": 1, "line": 73, "text": "-", "x0": 278.4, "top": 1118.0, "x1": 281.4, "bottom": 1127.1}
-{"page": 1, "line": 74, "text": "1", "x0": 281.5, "top": 1098.3, "x1": 286.6, "bottom": 1107.4}
-{"page": 1, "line": 75, "text": "5", "x0": 281.5, "top": 1118.0, "x1": 286.6, "bottom": 1127.1}
-{"page": 1, "line": 76, "text": "4", "x0": 286.6, "top": 1098.3, "x1": 291.6, "bottom": 1107.4}
-{"page": 1, "line": 77, "text": "0", "x0": 286.6, "top": 1118.0, "x1": 291.6, "bottom": 1127.1}
-{"page": 1, "line": 78, "text": "0 M", "x0": 291.8, "top": 1096.1, "x1": 387.0, "bottom": 1107.4}
-{"page": 1, "line": 79, "text": "M", "x0": 379.5, "top": 1115.8, "x1": 387.0, "bottom": 1124.9}
-{"page": 1, "line": 80, "text": "U", "x0": 386.9, "top": 1096.1, "x1": 393.5, "bottom": 1105.2}
-{"page": 1, "line": 81, "text": "ar", "x0": 386.9, "top": 1115.8, "x1": 395.2, "bottom": 1124.9}
-{"page": 1, "line": 82, "text": "-", "x0": 393.6, "top": 1096.1, "x1": 396.6, "bottom": 1105.2}
-{"page": 1, "line": 83, "text": "k", "x0": 395.3, "top": 1115.8, "x1": 399.8, "bottom": 1124.9}
-{"page": 1, "line": 84, "text": "2", "x0": 396.7, "top": 1096.1, "x1": 401.8, "bottom": 1105.2}
-{"page": 1, "line": 85, "text": "et District", "x0": 399.8, "top": 1115.8, "x1": 438.1, "bottom": 1124.9}
-{"page": 1, "line": 86, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 467.3, "top": 1108.9, "x1": 494.7, "bottom": 1127.2}
-{"page": 1, "line": 87, "text": "R", "x0": 497.3, "top": 1096.1, "x1": 503.9, "bottom": 1105.2}
-{"page": 1, "line": 88, "text": "R", "x0": 497.3, "top": 1115.8, "x1": 503.9, "bottom": 1124.9}
-{"page": 1, "line": 89, "text": "-", "x0": 503.8, "top": 1096.1, "x1": 506.8, "bottom": 1105.2}
-{"page": 1, "line": 90, "text": "-", "x0": 503.8, "top": 1115.8, "x1": 506.8, "bottom": 1124.9}
-{"page": 1, "line": 91, "text": "3", "x0": 506.9, "top": 1096.1, "x1": 512.0, "bottom": 1105.2}
-{"page": 1, "line": 92, "text": "3", "x0": 506.9, "top": 1115.8, "x1": 512.0, "bottom": 1124.9}
-{"page": 1, "line": 93, "text": "a", "x0": 511.9, "top": 1096.1, "x1": 517.0, "bottom": 1105.2}
-{"page": 1, "line": 94, "text": "b", "x0": 511.9, "top": 1115.8, "x1": 517.0, "bottom": 1124.9}
-{"page": 1, "line": 95, "text": "a", "x0": 517.2, "top": 1096.1, "x1": 522.3, "bottom": 1105.2}
-{"page": 1, "line": 96, "text": "0 0.25 0.5 1 1.5 2", "x0": 219.8, "top": 1150.6, "x1": 696.7, "bottom": 1166.5}
-{"page": 1, "line": 97, "text": "Miles", "x0": 696.0, "top": 1165.7, "x1": 733.0, "bottom": 1181.6}
+{"page": 1, "line": 4, "text": "STE", "x0": 329.9, "top": 272.6, "x1": 341.5, "bottom": 279.0}
+{"page": 1, "line": 5, "text": "RAM", "x0": 216.9, "top": 343.1, "x1": 230.5, "bottom": 349.6}
+{"page": 1, "line": 6, "text": "CORN", "x0": 608.5, "top": 362.6, "x1": 626.1, "bottom": 369.5}
+{"page": 1, "line": 7, "text": "AVE", "x0": 585.9, "top": 370.0, "x1": 598.2, "bottom": 377.0}
+{"page": 1, "line": 8, "text": "RRD", "x0": 333.6, "top": 376.4, "x1": 348.3, "bottom": 382.5}
+{"page": 1, "line": 9, "text": "YORK ST THURSTO", "x0": 375.8, "top": 386.1, "x1": 596.7, "bottom": 393.8}
+{"page": 1, "line": 10, "text": "W FALLS ST FALLS ST FALL", "x0": 351.8, "top": 397.5, "x1": 545.4, "bottom": 406.4}
+{"page": 1, "line": 11, "text": "DITFARMDR", "x0": 642.9, "top": 394.4, "x1": 680.4, "bottom": 400.8}
+{"page": 1, "line": 12, "text": "T E LINCOLN ST", "x0": 380.4, "top": 408.8, "x1": 432.7, "bottom": 416.8}
+{"page": 1, "line": 13, "text": "QUEEN ST", "x0": 403.1, "top": 420.3, "x1": 433.8, "bottom": 427.5}
+{"page": 1, "line": 14, "text": "E JAY ST FORESTHO", "x0": 384.9, "top": 430.8, "x1": 651.2, "bottom": 439.4}
+{"page": 1, "line": 15, "text": "D UNI", "x0": 223.7, "top": 455.8, "x1": 521.8, "bottom": 465.0}
+{"page": 1, "line": 16, "text": "E YATES ST", "x0": 390.9, "top": 486.3, "x1": 425.4, "bottom": 493.0}
+{"page": 1, "line": 17, "text": "E MARSHALL ST LLAVE", "x0": 396.8, "top": 504.0, "x1": 493.7, "bottom": 511.8}
+{"page": 1, "line": 18, "text": "FARM ST CAMPUSRD", "x0": 405.1, "top": 523.1, "x1": 600.1, "bottom": 529.9}
+{"page": 1, "line": 19, "text": "CASCADILLA ST", "x0": 250.6, "top": 531.3, "x1": 297.1, "bottom": 538.2}
+{"page": 1, "line": 20, "text": "SUNRISE RD", "x0": 60.3, "top": 535.9, "x1": 97.6, "bottom": 543.7}
+{"page": 1, "line": 21, "text": "ISERD", "x0": 160.1, "top": 540.4, "x1": 180.6, "bottom": 547.6}
+{"page": 1, "line": 22, "text": "ESTY ST DILLA", "x0": 318.7, "top": 547.8, "x1": 509.2, "bottom": 555.1}
+{"page": 1, "line": 23, "text": "W COURT ST", "x0": 323.8, "top": 562.6, "x1": 361.7, "bottom": 569.4}
+{"page": 1, "line": 24, "text": "LIFF WILLIAMS ST", "x0": 90.4, "top": 568.6, "x1": 530.0, "bottom": 574.9}
+{"page": 1, "line": 25, "text": "BUFFALO ST", "x0": 460.6, "top": 580.3, "x1": 497.8, "bottom": 587.1}
+{"page": 1, "line": 26, "text": "D", "x0": 600.7, "top": 589.6, "x1": 605.1, "bottom": 595.6}
+{"page": 1, "line": 27, "text": "SENECA ST WSENECASTNY79 SENECA ST CATHERINE ST", "x0": 245.2, "top": 594.8, "x1": 565.4, "bottom": 608.1}
+{"page": 1, "line": 28, "text": "W STATE ST D MILLER ST", "x0": 322.7, "top": 610.0, "x1": 670.8, "bottom": 619.0}
+{"page": 1, "line": 29, "text": "TABE", "x0": 184.5, "top": 618.9, "x1": 199.9, "bottom": 625.2}
+{"page": 1, "line": 30, "text": "GREEN ST - NY79 SB/EB RTHST", "x0": 269.7, "top": 625.8, "x1": 670.2, "bottom": 634.6}
+{"page": 1, "line": 31, "text": "PROSPECT ST I MITCHELL ST", "x0": 439.2, "top": 641.6, "x1": 660.0, "bottom": 649.7}
+{"page": 1, "line": 32, "text": "ST", "x0": 588.4, "top": 647.7, "x1": 596.5, "bottom": 654.0}
+{"page": 1, "line": 33, "text": "CECILAMALONERD LINTONSTW PLEASANT ST RD", "x0": 193.4, "top": 654.8, "x1": 630.8, "bottom": 665.0}
+{"page": 1, "line": 34, "text": "RD", "x0": 623.3, "top": 667.8, "x1": 631.7, "bottom": 673.8}
+{"page": 1, "line": 35, "text": "COLUMBIA", "x0": 451.9, "top": 671.4, "x1": 483.1, "bottom": 678.2}
+{"page": 1, "line": 36, "text": "HILLVIEW PL", "x0": 428.3, "top": 686.8, "x1": 465.4, "bottom": 693.8}
+{"page": 1, "line": 37, "text": "AVE", "x0": 328.6, "top": 694.0, "x1": 340.9, "bottom": 701.0}
+{"page": 1, "line": 38, "text": "SOUTH ST HYERS ST CR", "x0": 272.6, "top": 702.4, "x1": 493.0, "bottom": 714.8}
+{"page": 1, "line": 39, "text": "RESTAVE", "x0": 695.6, "top": 713.2, "x1": 725.6, "bottom": 720.0}
+{"page": 1, "line": 40, "text": "WOOD ST", "x0": 324.1, "top": 719.2, "x1": 352.8, "bottom": 725.7}
+{"page": 1, "line": 41, "text": "PARK ST VIEWCT", "x0": 328.4, "top": 735.4, "x1": 472.9, "bottom": 741.8}
+{"page": 1, "line": 42, "text": "TONRD", "x0": 447.8, "top": 773.6, "x1": 470.4, "bottom": 779.9}
+{"page": 1, "line": 43, "text": "MERCI", "x0": 169.2, "top": 853.8, "x1": 188.7, "bottom": 860.1}
+{"page": 1, "line": 44, "text": "Zoning Districts CBD-60 Medium-Density Mixed Use R-U", "x0": 231.6, "top": 899.3, "x1": 658.4, "bottom": 914.5}
+{"page": 1, "line": 45, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 229.2, "top": 915.0, "x1": 256.9, "bottom": 933.0}
+{"page": 1, "line": 46, "text": "B-1a", "x0": 259.2, "top": 921.4, "x1": 278.4, "bottom": 930.5}
+{"page": 1, "line": 47, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 349.2, "top": 912.9, "x1": 376.9, "bottom": 931.1}
+{"page": 1, "line": 48, "text": "CBD-85 Newman D Residential Transition", "x0": 379.5, "top": 919.0, "x1": 730.4, "bottom": 928.1}
+{"page": 1, "line": 49, "text": "B-1b CR-1 P-1 SW-1", "x0": 259.2, "top": 938.7, "x1": 664.8, "bottom": 950.2}
+{"page": 1, "line": 50, "text": "B-2a CR-2 PUD SW-2", "x0": 259.2, "top": 958.4, "x1": 664.8, "bottom": 969.9}
+{"page": 1, "line": 51, "text": "B-2d CR-3 R-1a SW-3", "x0": 259.2, "top": 978.0, "x1": 664.8, "bottom": 989.6}
+{"page": 1, "line": 52, "text": "B-4 CR-4 R-1b Traditional Residential", "x0": 259.2, "top": 997.7, "x1": 733.1, "bottom": 1009.2}
+{"page": 1, "line": 53, "text": "B-5 Cherry Street District R-2a U-1", "x0": 259.2, "top": 1017.4, "x1": 656.9, "bottom": 1028.9}
+{"page": 1, "line": 54, "text": "C-SU Urban Mixed Use R-2b WE/WF", "x0": 259.2, "top": 1037.1, "x1": 673.7, "bottom": 1048.6}
+{"page": 1, "line": 55, "text": "CBD-100 MH-1", "x0": 259.2, "top": 1056.8, "x1": 401.8, "bottom": 1068.3}
+{"page": 1, "line": 56, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 467.3, "top": 1050.9, "x1": 494.7, "bottom": 1067.2}
+{"page": 1, "line": 57, "text": "R-2c WEDZ-1a", "x0": 497.3, "top": 1056.8, "x1": 682.4, "bottom": 1065.9}
+{"page": 1, "line": 58, "text": "CBD-120 MU-1 R-3a WEDZ-1b", "x0": 259.2, "top": 1076.4, "x1": 682.4, "bottom": 1088.0}
+{"page": 1, "line": 59, "text": "I", "x0": 134.2, "top": 1102.5, "x1": 201.0, "bottom": 1189.3}
+{"page": 1, "line": 60, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 229.2, "top": 1092.9, "x1": 256.9, "bottom": 1109.2}
+{"page": 1, "line": 61, "text": "C", "x0": 259.2, "top": 1098.3, "x1": 265.8, "bottom": 1107.4}
+{"page": 1, "line": 62, "text": "C", "x0": 259.2, "top": 1118.0, "x1": 265.8, "bottom": 1127.1}
+{"page": 1, "line": 63, "text": "B", "x0": 265.7, "top": 1098.3, "x1": 271.8, "bottom": 1107.4}
+{"page": 1, "line": 64, "text": "B", "x0": 265.7, "top": 1118.0, "x1": 271.8, "bottom": 1127.1}
+{"page": 1, "line": 65, "text": "D", "x0": 271.9, "top": 1098.3, "x1": 278.5, "bottom": 1107.4}
+{"page": 1, "line": 66, "text": "D", "x0": 271.9, "top": 1118.0, "x1": 278.5, "bottom": 1127.1}
+{"page": 1, "line": 67, "text": "-", "x0": 278.4, "top": 1098.3, "x1": 281.4, "bottom": 1107.4}
+{"page": 1, "line": 68, "text": "-", "x0": 278.4, "top": 1118.0, "x1": 281.4, "bottom": 1127.1}
+{"page": 1, "line": 69, "text": "1", "x0": 281.5, "top": 1098.3, "x1": 286.6, "bottom": 1107.4}
+{"page": 1, "line": 70, "text": "5", "x0": 281.5, "top": 1118.0, "x1": 286.6, "bottom": 1127.1}
+{"page": 1, "line": 71, "text": "4", "x0": 286.6, "top": 1098.3, "x1": 291.6, "bottom": 1107.4}
+{"page": 1, "line": 72, "text": "0", "x0": 286.6, "top": 1118.0, "x1": 291.6, "bottom": 1127.1}
+{"page": 1, "line": 73, "text": "0 M", "x0": 291.8, "top": 1096.1, "x1": 387.0, "bottom": 1107.4}
+{"page": 1, "line": 74, "text": "M", "x0": 379.5, "top": 1115.8, "x1": 387.0, "bottom": 1124.9}
+{"page": 1, "line": 75, "text": "U", "x0": 386.9, "top": 1096.1, "x1": 393.5, "bottom": 1105.2}
+{"page": 1, "line": 76, "text": "ar", "x0": 386.9, "top": 1115.8, "x1": 395.2, "bottom": 1124.9}
+{"page": 1, "line": 77, "text": "-", "x0": 393.6, "top": 1096.1, "x1": 396.6, "bottom": 1105.2}
+{"page": 1, "line": 78, "text": "k", "x0": 395.3, "top": 1115.8, "x1": 399.8, "bottom": 1124.9}
+{"page": 1, "line": 79, "text": "2", "x0": 396.7, "top": 1096.1, "x1": 401.8, "bottom": 1105.2}
+{"page": 1, "line": 80, "text": "et District", "x0": 399.8, "top": 1115.8, "x1": 438.1, "bottom": 1124.9}
+{"page": 1, "line": 81, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 467.3, "top": 1108.9, "x1": 494.7, "bottom": 1127.2}
+{"page": 1, "line": 82, "text": "R", "x0": 497.3, "top": 1096.1, "x1": 503.9, "bottom": 1105.2}
+{"page": 1, "line": 83, "text": "R", "x0": 497.3, "top": 1115.8, "x1": 503.9, "bottom": 1124.9}
+{"page": 1, "line": 84, "text": "-", "x0": 503.8, "top": 1096.1, "x1": 506.8, "bottom": 1105.2}
+{"page": 1, "line": 85, "text": "-", "x0": 503.8, "top": 1115.8, "x1": 506.8, "bottom": 1124.9}
+{"page": 1, "line": 86, "text": "3", "x0": 506.9, "top": 1096.1, "x1": 512.0, "bottom": 1105.2}
+{"page": 1, "line": 87, "text": "3", "x0": 506.9, "top": 1115.8, "x1": 512.0, "bottom": 1124.9}
+{"page": 1, "line": 88, "text": "a", "x0": 511.9, "top": 1096.1, "x1": 517.0, "bottom": 1105.2}
+{"page": 1, "line": 89, "text": "b", "x0": 511.9, "top": 1115.8, "x1": 517.0, "bottom": 1124.9}
+{"page": 1, "line": 90, "text": "a", "x0": 517.2, "top": 1096.1, "x1": 522.3, "bottom": 1105.2}
+{"page": 1, "line": 91, "text": "0 0.25 0.5 1 1.5 2", "x0": 219.8, "top": 1150.6, "x1": 696.7, "bottom": 1166.5}
+{"page": 1, "line": 92, "text": "Miles", "x0": 696.0, "top": 1165.7, "x1": 733.0, "bottom": 1181.6}
 {"page": 2, "line": 1, "text": "City of Ithaca", "x0": 582.5, "top": 57.7, "x1": 732.6, "bottom": 81.7}
 {"page": 2, "line": 2, "text": "Overlay/Reference Map", "x0": 416.7, "top": 94.1, "x1": 732.6, "bottom": 124.1}
 {"page": 2, "line": 3, "text": "May 2026", "x0": 661.8, "top": 136.8, "x1": 732.5, "bottom": 152.7}
-{"page": 2, "line": 4, "text": "DR", "x0": 397.8, "top": 203.6, "x1": 408.2, "bottom": 213.8}
-{"page": 2, "line": 5, "text": "S", "x0": 393.7, "top": 210.5, "x1": 400.9, "bottom": 217.5}
-{"page": 2, "line": 6, "text": "B", "x0": 392.9, "top": 214.9, "x1": 399.4, "bottom": 219.7}
-{"page": 2, "line": 7, "text": "B", "x0": 391.7, "top": 218.9, "x1": 398.6, "bottom": 224.3}
-{"page": 2, "line": 8, "text": "G^I", "x0": 388.2, "top": 222.2, "x1": 397.4, "bottom": 231.2}
-{"page": 2, "line": 9, "text": "SL", "x0": 380.1, "top": 228.0, "x1": 390.3, "bottom": 237.2}
-{"page": 2, "line": 10, "text": "E", "x0": 379.4, "top": 234.6, "x1": 385.6, "bottom": 238.9}
-{"page": 2, "line": 11, "text": "DM", "x0": 370.2, "top": 238.9, "x1": 385.4, "bottom": 244.6}
-{"page": 2, "line": 12, "text": "RA", "x0": 370.2, "top": 244.0, "x1": 385.1, "bottom": 248.7}
-{"page": 2, "line": 13, "text": "STEWARTPARK", "x0": 328.2, "top": 249.7, "x1": 373.9, "bottom": 273.2}
-{"page": 2, "line": 14, "text": "N", "x0": 376.2, "top": 277.3, "x1": 383.2, "bottom": 283.2}
-{"page": 2, "line": 15, "text": "Y 1", "x0": 377.4, "top": 270.4, "x1": 385.2, "bottom": 279.0}
-{"page": 2, "line": 16, "text": "J", "x0": 378.9, "top": 247.9, "x1": 385.1, "bottom": 251.2}
-{"page": 2, "line": 17, "text": "3 N", "x0": 379.5, "top": 261.4, "x1": 388.0, "bottom": 272.1}
-{"page": 2, "line": 18, "text": "B", "x0": 382.2, "top": 257.6, "x1": 389.1, "bottom": 263.2}
-{"page": 2, "line": 19, "text": "t o", "x0": 383.4, "top": 276.9, "x1": 390.6, "bottom": 283.5}
-{"page": 2, "line": 20, "text": "N Y 3 4", "x0": 385.2, "top": 261.1, "x1": 395.4, "bottom": 277.3}
-{"page": 2, "line": 21, "text": "T", "x0": 381.0, "top": 287.4, "x1": 387.1, "bottom": 291.2}
-{"page": 2, "line": 22, "text": "S", "x0": 381.2, "top": 291.1, "x1": 387.3, "bottom": 295.3}
-{"page": 2, "line": 23, "text": "A", "x0": 381.4, "top": 297.1, "x1": 387.6, "bottom": 301.3}
-{"page": 2, "line": 24, "text": "G", "x0": 381.4, "top": 301.0, "x1": 387.5, "bottom": 305.8}
-{"page": 2, "line": 25, "text": "U", "x0": 381.7, "top": 305.6, "x1": 387.8, "bottom": 310.2}
-{"page": 2, "line": 26, "text": "Y", "x0": 381.7, "top": 310.1, "x1": 387.8, "bottom": 314.2}
-{"page": 2, "line": 27, "text": "A", "x0": 381.9, "top": 313.9, "x1": 388.0, "bottom": 318.1}
-{"page": 2, "line": 28, "text": "C", "x0": 381.9, "top": 317.7, "x1": 388.0, "bottom": 322.2}
-{"page": 2, "line": 29, "text": "W O ^A ^K ^O O D L N ^B E ^C ^P ^A M L L A V E F A L LV ^IE ^R W T E R G ^L ^E ^N W ^IL ^L ^IA M ^S TA U G H A N N O C K B LV D C A S S P A R K L R D AUN P A R C K A L R A D H N T R E R M A N A M P R D W ^ILLO W A V PIERRD W FALL N Y S 1 Y 3^/ N Y S O ^3 ^4 T ^N RK E F S A L T L IN L C S O S L T N ST K L ^S A ^T L K ^E ^T ^S INERD NEE W D ^IL H ^L AMPL D G ^IR E W O O D R ^B ^A D ^R ^T ^O ^N ^P ^L G H ^I L H A N R ^E ^V D ^A O W B Y E C ^P ^R ^L ^S ^T K O ^F ^F ^A K ^V ^E E LV IN P T L H W U A R C I J S T E T E V O A A O ^N V S R E C S N O U E R P L N L R E - D LL- S^I S S O ^N ^R ^D", "x0": 60.9, "top": 322.4, "x1": 656.4, "bottom": 419.6}
-{"page": 2, "line": 30, "text": "S ^D ^V ^L ^B ^R ^D ^V ^E ^L ^L ^B ^L ^A ^R ^H ^E ^L ^L U ^A ^H ^A W ^R ^E ^R ^N P N L R ^IC ^H ^A ^R ^D ^P ^L RIS W E C E W ^T O R ^S L S ^E W O T I D D F V ^L ^L O N ^K F I H L P L O A A R G O K E R ^L ^P K ^TA Y N L D O P R L P ^L O ^Y R ^AT P L ^L F H L C H O E S S R O T N A U U L T P N S A T V P R E V^I N E I E S G R A R H E ^IL L P R H D E E R C L T L O C R L M D ^S ^T ^IF F S S T T W C H T ^E R R S Y A S T T B AT C E E R E P S A ^K R ^R ^A ^A S ^P ^C ^K C C ^S R T S D E A T S I C L S S A R T ^B ^RI ^N ^D ^L ^E ^Y ^S ^T B A ^L V D D M U ^L ^O ^T ^D A U G G H A A N N H O C ^A ^O ^N ^N K ^B ^L ^K ^C L ^V ^D ONE S R E C S N ^T ^S ^N ^O ^T ^L D ^U ^F ^N F U A E LT S C O W C N A A S S S T T S G D H T S T I T I R R O L A I ^T ^S W ^O ^D ^A ^E M T ^N D E L U T U S S A C E E T T N A L F S H S O V I U T N E S T R S N T T T H T O T S M - T IT N ^T ^S ^N ^R ^O ^C ^N E U F N O ^T ^S ^R ^IA ^F R S S ^L ^P ^K ^R ^A ^P R S Y A T A R M 7 T N A D Y 9 I A K H S W V A D S L S A E M A W W E I I T N B N V S S P O C E / O C H S A S E ^T ^S ^N S ^IA ^L ^P ^S O O N T O Y R T B C T W D E S K U I K T T R R W S U S S S ^I ^T ^S ^E ^T ^T F ^E ^Y ^A ^F S L T T ^I D S T L T E R O E S S Y W S N T A S S A T T T E T ^T V ^S ^Y V ^N ^A ^B ^L ^A E C E LA K A E ^A ^U ^S ^T ^B ^U ^E ^V ^A ^R ^G ^N ^E ^N ^N ^S ^T S ^T ^S ^A A ^N ^V ^E ^T ^G ^E ^S ^N ^R ^S ^U ^B ^S ^V ^A ^T ^U ^A ^G ^N ^E ^E S V E T C N A E S Y B C J E 7 U ^A ^T ^G ^S ^U ^Y ^A ^S ^C A A E 9 S Y F D Y H M A F ^T I ^S ^A ^C ^IT ^U ^IL L S Q L A ^T ^S ^S ^R T ^A ^E ^S P A L T F T E U E L A R R R A O S E O A S R ^T ^S ^A ^G ^O ^IT V E S K H S S ^L ^P ^R ^E ^N ^R ^U ^T M E N P I A T T N E S L S G S S A C L U T R H T A O ^T ^S T ^A ^R ^O ^R ^U ^A ^N U R P S S I R A S L O S L T T ^T R T L T E A E ^LI ^N ^N V S R N ^T A C ^L ^E ^P ^C ^A ^R ^T D ^S ^N ^N ^IL IE S A V A W S I C E N C P O W P T A K C L O L R D N S U C E T M H I T U L D S O L N B L A ^S ^T L S IA ^R ^A D W E ^A ^Y A S C N V T R E E E W S C C E N A I ^E ^V ^A ^T ^R ^A W ^E ^T ^S E T L P D S L L ^I ^R S ^R ^E ^F P I G T ^L A E M M ^T ^S ^Y ^R ^R S ^A ^U ^Q ^N O S C O T A R ^E ^V ^A W ^T ^S ^E ^L ^E ^- ^L ^N ^R O C T ^T ^S ^Y ^D ^D ^E H LN E U R N V A L I E ^T ^S ^R I ^IA ^L ^B N N V T E I E N ^E E ^G ^E ^L ^E ^O ^C ^L ^A ^V R S P S T M L IT W IT ^N ^E ^D ^V ^A ^E D ^L ^N ^I Y C A R T A H G Y I B R E V R E D I O L R V Y E L E A E A I S ^E ^A ^V N L ^S ^T K N ^A ^E ^- N ^L ^L ^N ^R ^E S ^O ^C T R T G S A S R I ^- ^L ^L ^N ^E ^C ^R ^O A D V T P T V D G E C L E B ^R ^D ^E ^R ^A ^L ^T ^T ^S V E R O A I D D R H L G A ^A ^F M ^IR O L N U O E N L ^T E C A E V S E Y E Y T L O F L ^C ^O ^R ^N R R ^E ^L ^L ^G ^- ^A ^R ^D R E O R N ^A ^V ^E W D D N D R A E M E L E K S L W I S H T M T L T O A C O I - T L H M H ^T ^S ^L ^L ^E C ^N ^R R ^O ^C E O L M E E M A T E S D E A L S H R M R D T L P Y T R D P S E L S E S N W U E R T T A T O S D D A O V ^T ^S ^L ^R ^A ^E ^P R R D E D D CRESTAVE", "x0": 53.9, "top": 416.1, "x1": 721.2, "bottom": 752.6}
-{"page": 2, "line": 31, "text": "T", "x0": 278.6, "top": 791.1, "x1": 284.8, "bottom": 795.0}
-{"page": 2, "line": 32, "text": "ELMIRA RD", "x0": 303.6, "top": 763.2, "x1": 333.4, "bottom": 786.9}
-{"page": 2, "line": 33, "text": "CODDIN", "x0": 422.9, "top": 782.0, "x1": 446.2, "bottom": 797.2}
-{"page": 2, "line": 34, "text": "G R", "x0": 440.9, "top": 754.6, "x1": 448.1, "bottom": 764.2}
-{"page": 2, "line": 35, "text": "A", "x0": 442.1, "top": 750.8, "x1": 448.5, "bottom": 755.6}
-{"page": 2, "line": 36, "text": "GTON", "x0": 444.0, "top": 781.2, "x1": 461.2, "bottom": 787.8}
-{"page": 2, "line": 37, "text": "H S", "x0": 460.3, "top": 757.7, "x1": 466.9, "bottom": 772.3}
-{"page": 2, "line": 38, "text": "R", "x0": 462.6, "top": 781.0, "x1": 467.2, "bottom": 787.1}
-{"page": 2, "line": 39, "text": "U T", "x0": 464.3, "top": 758.6, "x1": 470.6, "bottom": 773.2}
-{"page": 2, "line": 40, "text": "D", "x0": 466.7, "top": 780.7, "x1": 471.2, "bottom": 786.9}
-{"page": 2, "line": 41, "text": "D E S X", "x0": 468.4, "top": 759.6, "x1": 479.6, "bottom": 775.2}
-{"page": 2, "line": 42, "text": "P", "x0": 475.1, "top": 749.3, "x1": 480.2, "bottom": 756.0}
-{"page": 2, "line": 43, "text": "O T", "x0": 476.6, "top": 761.3, "x1": 482.4, "bottom": 775.6}
-{"page": 2, "line": 44, "text": "E", "x0": 478.9, "top": 750.1, "x1": 484.0, "bottom": 756.7}
-{"page": 2, "line": 45, "text": "N", "x0": 481.1, "top": 762.2, "x1": 486.7, "bottom": 769.0}
-{"page": 2, "line": 46, "text": "ARSALL", "x0": 482.9, "top": 750.9, "x1": 506.6, "bottom": 761.5}
-{"page": 2, "line": 47, "text": "PL", "x0": 506.8, "top": 755.9, "x1": 515.3, "bottom": 763.3}
-{"page": 2, "line": 48, "text": "S", "x0": 278.8, "top": 794.8, "x1": 284.9, "bottom": 799.0}
-{"page": 2, "line": 49, "text": "W", "x0": 278.9, "top": 800.4, "x1": 285.1, "bottom": 806.2}
-{"page": 2, "line": 50, "text": "O", "x0": 279.1, "top": 805.9, "x1": 285.3, "bottom": 810.8}
-{"page": 2, "line": 51, "text": "^D ^A R D", "x0": 279.3, "top": 810.8, "x1": 309.3, "bottom": 822.9}
-{"page": 2, "line": 52, "text": "^E M R Y", "x0": 279.5, "top": 819.1, "x1": 303.4, "bottom": 830.6}
-{"page": 2, "line": 53, "text": "COMMER", "x0": 145.0, "top": 861.1, "x1": 173.6, "bottom": 870.1}
-{"page": 2, "line": 54, "text": "S P", "x0": 172.0, "top": 828.1, "x1": 178.8, "bottom": 844.4}
-{"page": 2, "line": 55, "text": "C", "x0": 173.3, "top": 863.4, "x1": 177.7, "bottom": 869.5}
-{"page": 2, "line": 56, "text": "A O", "x0": 174.9, "top": 830.5, "x1": 182.7, "bottom": 846.6}
-{"page": 2, "line": 57, "text": "I", "x0": 177.3, "top": 863.7, "x1": 179.1, "bottom": 869.7}
-{"page": 2, "line": 58, "text": "R", "x0": 178.2, "top": 842.0, "x1": 185.3, "bottom": 849.4}
-{"page": 2, "line": 59, "text": "A", "x0": 178.8, "top": 863.7, "x1": 182.8, "bottom": 869.7}
-{"page": 2, "line": 60, "text": "U", "x0": 179.2, "top": 833.4, "x1": 186.2, "bottom": 840.8}
-{"page": 2, "line": 61, "text": "L", "x0": 181.5, "top": 863.6, "x1": 186.7, "bottom": 870.4}
-{"page": 2, "line": 62, "text": "K T", "x0": 181.6, "top": 835.8, "x1": 189.1, "bottom": 851.6}
-{"page": 2, "line": 63, "text": "A", "x0": 184.5, "top": 865.8, "x1": 191.3, "bottom": 873.0}
-{"page": 2, "line": 64, "text": "H R", "x0": 185.2, "top": 837.7, "x1": 192.6, "bottom": 855.2}
-{"page": 2, "line": 65, "text": "V", "x0": 187.3, "top": 867.9, "x1": 194.1, "bottom": 875.1}
-{"page": 2, "line": 66, "text": "W D", "x0": 188.0, "top": 840.4, "x1": 196.3, "bottom": 858.4}
-{"page": 2, "line": 67, "text": "E", "x0": 190.7, "top": 870.6, "x1": 197.5, "bottom": 877.8}
-{"page": 2, "line": 68, "text": "E ST SPENCER RD", "x0": 191.9, "top": 839.3, "x1": 269.3, "bottom": 866.3}
-{"page": 2, "line": 69, "text": "S", "x0": 272.8, "top": 856.6, "x1": 280.0, "bottom": 863.1}
-{"page": 2, "line": 70, "text": "T O N ^S E Q U A R", "x0": 275.0, "top": 827.6, "x1": 299.5, "bottom": 859.5}
-{"page": 2, "line": 71, "text": "D", "x0": 182.5, "top": 877.4, "x1": 189.8, "bottom": 884.6}
-{"page": 2, "line": 72, "text": "R", "x0": 179.5, "top": 880.5, "x1": 186.9, "bottom": 887.8}
-{"page": 2, "line": 73, "text": "RA", "x0": 172.8, "top": 884.8, "x1": 182.9, "bottom": 895.0}
-{"page": 2, "line": 74, "text": "MI", "x0": 168.3, "top": 890.9, "x1": 177.2, "bottom": 899.9}
-{"page": 2, "line": 75, "text": "EL", "x0": 163.4, "top": 895.8, "x1": 172.6, "bottom": 905.2}
-{"page": 2, "line": 76, "text": "Overlay Districts Gorge Protection Zones", "x0": 194.9, "top": 1034.0, "x1": 730.2, "bottom": 1051.5}
-{"page": 2, "line": 77, "text": "Active street-level uses required GP-A", "x0": 228.7, "top": 1058.0, "x1": 605.9, "bottom": 1077.4}
-{"page": 2, "line": 78, "text": "Adult Use Overlay Zone GP-B", "x0": 228.7, "top": 1085.8, "x1": 605.9, "bottom": 1103.3}
-{"page": 2, "line": 79, "text": "I", "x0": 114.0, "top": 1103.2, "x1": 180.8, "bottom": 1190.1}
-{"page": 2, "line": 80, "text": "Street Level Active Use Overlay Zone GP-C", "x0": 228.7, "top": 1111.7, "x1": 606.9, "bottom": 1129.3}
-{"page": 2, "line": 81, "text": "0 0.25 0.5 1 1.5 2", "x0": 195.8, "top": 1148.8, "x1": 686.2, "bottom": 1167.0}
-{"page": 2, "line": 82, "text": "Miles", "x0": 685.7, "top": 1166.3, "x1": 728.4, "bottom": 1184.5}
+{"page": 2, "line": 4, "text": "STE", "x0": 328.2, "top": 266.8, "x1": 339.8, "bottom": 273.2}
+{"page": 2, "line": 5, "text": "HRA", "x0": 210.9, "top": 339.3, "x1": 224.9, "bottom": 345.8}
+{"page": 2, "line": 6, "text": "E D", "x0": 450.7, "top": 352.9, "x1": 464.8, "bottom": 361.1}
+{"page": 2, "line": 7, "text": "CORN", "x0": 614.5, "top": 359.0, "x1": 632.1, "bottom": 366.2}
+{"page": 2, "line": 8, "text": "W", "x0": 596.5, "top": 367.4, "x1": 602.5, "bottom": 373.7}
+{"page": 2, "line": 9, "text": "RRD", "x0": 331.2, "top": 373.3, "x1": 345.7, "bottom": 379.4}
+{"page": 2, "line": 10, "text": "YORK ST TH", "x0": 374.6, "top": 383.5, "x1": 600.9, "bottom": 390.0}
+{"page": 2, "line": 11, "text": "W FALLS ST FALLS ST", "x0": 350.6, "top": 394.8, "x1": 419.4, "bottom": 402.6}
+{"page": 2, "line": 12, "text": "E LINCOLN ST", "x0": 390.8, "top": 406.6, "x1": 432.0, "bottom": 413.8}
+{"page": 2, "line": 13, "text": "QUEEN ST IVERSITYAVE", "x0": 402.1, "top": 418.4, "x1": 591.9, "bottom": 428.9}
+{"page": 2, "line": 14, "text": "E JAY ST FORESTH", "x0": 383.4, "top": 429.4, "x1": 656.9, "bottom": 437.7}
+{"page": 2, "line": 15, "text": "KING ST", "x0": 415.9, "top": 436.5, "x1": 440.0, "bottom": 442.9}
+{"page": 2, "line": 16, "text": "E YATES ST", "x0": 389.9, "top": 486.1, "x1": 424.4, "bottom": 492.7}
+{"page": 2, "line": 17, "text": "E MARSHALL ST LLAVE", "x0": 392.9, "top": 504.5, "x1": 494.9, "bottom": 512.3}
+{"page": 2, "line": 18, "text": "FARM ST CORNELL - CAMPUS RD", "x0": 405.3, "top": 523.8, "x1": 690.1, "bottom": 530.9}
+{"page": 2, "line": 19, "text": "CASCADILLA ST", "x0": 247.3, "top": 532.5, "x1": 293.8, "bottom": 539.4}
+{"page": 2, "line": 20, "text": "SUNRISE RD", "x0": 53.9, "top": 537.2, "x1": 91.1, "bottom": 544.8}
+{"page": 2, "line": 21, "text": "ISERD EDGEMOOR LN", "x0": 152.9, "top": 541.8, "x1": 544.8, "bottom": 551.4}
+{"page": 2, "line": 22, "text": "ESTY ST", "x0": 302.8, "top": 550.0, "x1": 327.7, "bottom": 556.5}
+{"page": 2, "line": 23, "text": "W COURT ST", "x0": 322.0, "top": 564.5, "x1": 359.9, "bottom": 571.3}
+{"page": 2, "line": 24, "text": "LIF WILLIAMS ST", "x0": 82.5, "top": 570.4, "x1": 531.7, "bottom": 576.9}
+{"page": 2, "line": 25, "text": "BUFFALO ST", "x0": 387.2, "top": 584.4, "x1": 424.3, "bottom": 591.2}
+{"page": 2, "line": 26, "text": "MAPLE AVE", "x0": 655.1, "top": 590.8, "x1": 688.8, "bottom": 598.2}
+{"page": 2, "line": 27, "text": "SENECA ST WSENECASTNY79 SENECA ST CATHERINE ST", "x0": 240.0, "top": 597.4, "x1": 569.0, "bottom": 611.1}
+{"page": 2, "line": 28, "text": "W STATE ST MILLER ST", "x0": 259.1, "top": 613.8, "x1": 676.3, "bottom": 623.3}
+{"page": 2, "line": 29, "text": "TABE", "x0": 180.4, "top": 622.2, "x1": 195.9, "bottom": 628.7}
+{"page": 2, "line": 30, "text": "GREEN ST - NY79 SB/EB THST", "x0": 267.8, "top": 629.4, "x1": 675.7, "bottom": 638.2}
+{"page": 2, "line": 31, "text": "MITCHELL ST", "x0": 637.8, "top": 646.1, "x1": 677.0, "bottom": 654.2}
+{"page": 2, "line": 32, "text": "LS", "x0": 591.4, "top": 651.8, "x1": 600.9, "bottom": 658.0}
+{"page": 2, "line": 33, "text": "CECILAMALONERD LINTONSTW PLEASANT ST ERD", "x0": 191.2, "top": 658.9, "x1": 637.0, "bottom": 669.3}
+{"page": 2, "line": 34, "text": "RD", "x0": 630.0, "top": 672.4, "x1": 638.5, "bottom": 678.6}
+{"page": 2, "line": 35, "text": "COLUMBIA", "x0": 453.1, "top": 676.1, "x1": 484.1, "bottom": 683.0}
+{"page": 2, "line": 36, "text": "HILLVIEW PL", "x0": 428.8, "top": 691.8, "x1": 465.9, "bottom": 698.8}
+{"page": 2, "line": 37, "text": "SOUTH ST", "x0": 270.0, "top": 708.0, "x1": 300.3, "bottom": 714.3}
+{"page": 2, "line": 38, "text": "H", "x0": 329.6, "top": 714.2, "x1": 334.1, "bottom": 720.3}
+{"page": 2, "line": 39, "text": "S", "x0": 330.1, "top": 707.1, "x1": 334.3, "bottom": 713.2}
+{"page": 2, "line": 40, "text": "Y", "x0": 333.9, "top": 714.1, "x1": 338.0, "bottom": 720.2}
+{"page": 2, "line": 41, "text": "T", "x0": 336.1, "top": 706.8, "x1": 340.0, "bottom": 712.9}
+{"page": 2, "line": 42, "text": "ERS ST CR", "x0": 337.7, "top": 711.2, "x1": 494.2, "bottom": 720.1}
+{"page": 2, "line": 43, "text": "TAVE", "x0": 704.1, "top": 719.4, "x1": 721.2, "bottom": 725.8}
+{"page": 2, "line": 44, "text": "WOOD ST", "x0": 321.9, "top": 725.4, "x1": 350.6, "bottom": 731.9}
+{"page": 2, "line": 45, "text": "PARK ST VIEWCT", "x0": 326.2, "top": 741.8, "x1": 473.6, "bottom": 748.3}
+{"page": 2, "line": 46, "text": "GTONRD", "x0": 444.0, "top": 780.7, "x1": 471.2, "bottom": 787.8}
+{"page": 2, "line": 47, "text": "ERCIA", "x0": 164.9, "top": 863.4, "x1": 182.8, "bottom": 869.7}
+{"page": 2, "line": 48, "text": "Overlay Districts Gorge Protection Zones", "x0": 194.9, "top": 1034.0, "x1": 730.2, "bottom": 1051.5}
+{"page": 2, "line": 49, "text": "Active street-level uses required GP-A", "x0": 228.7, "top": 1058.0, "x1": 605.9, "bottom": 1077.4}
+{"page": 2, "line": 50, "text": "Adult Use Overlay Zone GP-B", "x0": 228.7, "top": 1085.8, "x1": 605.9, "bottom": 1103.3}
+{"page": 2, "line": 51, "text": "I", "x0": 114.0, "top": 1103.2, "x1": 180.8, "bottom": 1190.1}
+{"page": 2, "line": 52, "text": "Street Level Active Use Overlay Zone GP-C", "x0": 228.7, "top": 1111.7, "x1": 606.9, "bottom": 1129.3}
+{"page": 2, "line": 53, "text": "0 0.25 0.5 1 1.5 2", "x0": 195.8, "top": 1148.8, "x1": 686.2, "bottom": 1167.0}
+{"page": 2, "line": 54, "text": "Miles", "x0": 685.7, "top": 1166.3, "x1": 728.4, "bottom": 1184.5}
 {"page": 3, "line": 1, "text": "City of Ithaca", "x0": 582.5, "top": 57.7, "x1": 732.6, "bottom": 81.7}
 {"page": 3, "line": 2, "text": "Flood Zones Map", "x0": 499.7, "top": 97.2, "x1": 732.6, "bottom": 127.2}
 {"page": 3, "line": 3, "text": "May 2026", "x0": 661.8, "top": 136.8, "x1": 732.5, "bottom": 152.7}
-{"page": 3, "line": 4, "text": "DR", "x0": 397.8, "top": 203.6, "x1": 408.2, "bottom": 213.8}
-{"page": 3, "line": 5, "text": "S", "x0": 393.7, "top": 210.5, "x1": 400.9, "bottom": 217.5}
-{"page": 3, "line": 6, "text": "B", "x0": 392.9, "top": 214.9, "x1": 399.4, "bottom": 219.7}
-{"page": 3, "line": 7, "text": "B", "x0": 391.7, "top": 218.9, "x1": 398.6, "bottom": 224.3}
-{"page": 3, "line": 8, "text": "G^I", "x0": 388.2, "top": 222.2, "x1": 397.4, "bottom": 231.2}
-{"page": 3, "line": 9, "text": "SL", "x0": 380.1, "top": 228.0, "x1": 390.3, "bottom": 237.2}
-{"page": 3, "line": 10, "text": "E", "x0": 379.4, "top": 234.6, "x1": 385.6, "bottom": 238.9}
-{"page": 3, "line": 11, "text": "DM", "x0": 370.2, "top": 238.9, "x1": 385.4, "bottom": 244.6}
-{"page": 3, "line": 12, "text": "RA", "x0": 370.2, "top": 244.0, "x1": 385.1, "bottom": 248.7}
-{"page": 3, "line": 13, "text": "STEWARTPARK", "x0": 328.2, "top": 249.7, "x1": 373.9, "bottom": 273.2}
-{"page": 3, "line": 14, "text": "N", "x0": 376.2, "top": 277.3, "x1": 383.2, "bottom": 283.2}
-{"page": 3, "line": 15, "text": "Y 1", "x0": 377.4, "top": 270.4, "x1": 385.2, "bottom": 279.0}
-{"page": 3, "line": 16, "text": "J", "x0": 378.9, "top": 247.9, "x1": 385.1, "bottom": 251.2}
-{"page": 3, "line": 17, "text": "3 N", "x0": 379.5, "top": 261.4, "x1": 388.0, "bottom": 272.1}
-{"page": 3, "line": 18, "text": "B", "x0": 382.2, "top": 257.6, "x1": 389.1, "bottom": 263.2}
-{"page": 3, "line": 19, "text": "t o", "x0": 383.4, "top": 276.9, "x1": 390.6, "bottom": 283.5}
-{"page": 3, "line": 20, "text": "N Y 3 4", "x0": 385.2, "top": 261.1, "x1": 395.4, "bottom": 277.3}
-{"page": 3, "line": 21, "text": "T", "x0": 381.0, "top": 287.4, "x1": 387.1, "bottom": 291.2}
-{"page": 3, "line": 22, "text": "S", "x0": 381.2, "top": 291.1, "x1": 387.3, "bottom": 295.3}
-{"page": 3, "line": 23, "text": "A", "x0": 381.4, "top": 297.1, "x1": 387.6, "bottom": 301.3}
-{"page": 3, "line": 24, "text": "G", "x0": 381.4, "top": 301.0, "x1": 387.6, "bottom": 305.9}
-{"page": 3, "line": 25, "text": "U", "x0": 381.7, "top": 305.7, "x1": 387.8, "bottom": 310.2}
-{"page": 3, "line": 26, "text": "Y", "x0": 381.7, "top": 310.1, "x1": 387.8, "bottom": 314.3}
-{"page": 3, "line": 27, "text": "A", "x0": 381.9, "top": 313.9, "x1": 388.0, "bottom": 318.1}
-{"page": 3, "line": 28, "text": "C", "x0": 381.9, "top": 317.7, "x1": 388.0, "bottom": 322.2}
-{"page": 3, "line": 29, "text": "W O ^A ^K ^O O D L N ^B E ^C ^P ^A M L L A V E F A L LV ^IE ^R W T E R G ^L ^E ^N W ^IL ^L ^IA M ^S TA U G H A N N O C K B LV D C A S S P A R K L R D AUN P A R C K A L R A D H N T R E R M A N A M P R D W ^ILLO W A V PIERRD W FALL N Y S 1 Y 3^/ N Y S O ^3 ^4 T ^N RK E F S A L T L IN L C S O S L T N ST K L ^S A ^T L K ^E ^S ^T INERD NEE W D ^IL H ^L AMPL D G ^IR E W O O D R ^B ^A D ^R ^T ^O ^N ^P ^L G H ^I L H A N R ^E ^V D ^A O W B Y E C ^R ^T ^S ^P ^L K O ^F ^F ^A K ^V ^E E LV IN P T L H W U A R C I J S T E T E V O A A O ^N V S R E C S N O U E R P L N L R E - D LL- S^I S S O ^N ^R ^D", "x0": 60.9, "top": 322.4, "x1": 656.4, "bottom": 419.6}
-{"page": 3, "line": 30, "text": "S ^D ^V ^L ^B ^R ^D ^V ^E ^L ^L ^B ^L ^A ^R ^H ^E ^L ^L U ^A ^H W ^A ^R ^R ^E ^N P N L R ^IC ^H ^A ^R ^D ^P ^L RIS W E C E W ^T O R ^S L S ^E W O T I D D F V ^L ^L O N ^K F I H L P L O A A R G O K E R ^L ^P K ^TA Y N L D O P R L P ^L O ^Y R ^AT P L ^L F H L C H O E S S R O T N A U U L T P N S A T V P R E V^I N E I E S G R A R H E ^IL L P R H D E E R C L T L O C R L M D ^S ^T ^IF F S S T T W C H T ^E R R S Y A S T T B AT C E E R E P S A ^K R ^R ^A ^A S ^P ^C ^K C C ^S R T S D E A T S I C L S S A R T ^B ^RI ^N ^D ^L ^E ^Y ^S ^T B A ^L V D D M U ^O ^L ^T ^D A U G G H A A N N H O C ^A ^N ^N ^O K L ^C ^K ^B ^L ^V ^D ONE S R E C S N ^T ^S ^N ^O D ^T ^L ^U ^F ^N F U A E LT S C O W C N A A S S S T T S G D H T S T I T I R R O L A I ^T ^S W ^O ^D ^A ^E M T ^N D E L U T U S S A C E E T T N A L F S H S O V I U T N E S T R S N T T T H T O T S M - T IT N ^T ^S ^N ^R ^O ^C ^N E U F N O ^T ^S ^R ^IA ^F R S S ^L ^P ^K ^R ^A ^P R S Y A T A R M 7 T N A D Y 9 I A K H S W V A D S L S A E M A W W E I I T N B N V S S P O C E / O C H S A S E ^T ^S ^N S ^IA ^L ^P ^S O O N T O Y R T B C T W D E S K U I K T T R R W S U S S S ^I ^T ^S ^E ^T ^T F ^E ^Y ^A ^F S L T T ^I D S T L T E R O E S S Y W S N T A S S A T T T E T ^T V ^S ^Y V ^N ^A ^B ^L ^A E C E LA K A E ^A ^U ^S ^T ^B ^U ^E ^V ^A ^R ^G ^N ^E ^N ^N ^S ^T S ^T ^A ^S A ^N ^E ^V ^T ^G ^E ^S ^N ^R ^S ^U ^B ^V ^A ^S ^T ^U ^A ^G ^N ^E ^E S V E T C N A E Y S B C J E 7 U ^G ^C ^U ^S ^A ^Y ^A ^S ^T A A E 9 S Y F D Y H M A F ^T I ^S ^A ^C ^IT ^U ^IL L S Q L A ^T ^S ^S ^R T ^A ^E ^S P A L T F T E U E L A R R R A O S E O A S R ^T ^S ^A ^G ^O ^IT V E S K H S S ^L ^P ^R ^E ^N ^R ^U ^T M E N P I A T T N E S L S G S S A C L U T R H T A O ^T ^S T ^A ^R ^O ^R ^U ^A ^N U R P S S I R A S L O S L T T ^T R T L T E A E ^LI ^N ^N V S R N ^T A C ^R ^A ^C ^E ^P ^L ^T D ^S ^N ^N ^IL IE S A V A W S I C E N C P O W P T A K C L O L R D N S U C E T M H I T U L D S O L N B L A ^S ^T L S IA ^A ^R D W E ^A ^Y A S C N V T R E E E W S C C E N A I ^E ^V ^A ^T ^R ^A W ^E ^T ^S E T L P D S L L ^I ^R S ^R ^E ^F P I G T ^L A E M M ^T ^S ^Y ^R ^R S ^A ^U ^Q ^N O S C O T A R W ^R ^N ^E ^E ^S ^A ^V ^E ^T ^L ^L ^- O C T ^T ^S ^Y ^D ^D ^E H LN E U R N V A L I E ^T ^S ^R I ^IA ^L ^B N N V T E I E N ^E E ^G ^E ^L ^E ^O ^C ^L ^A ^V R S P S T M L IT W IT ^D ^N ^E ^A ^V ^E D ^L ^N ^I Y C A R T A H G Y I B R E V R E D I O L R V Y E L E A E A I S ^E ^A ^V N L ^S ^T K N ^E ^A ^- N ^L ^L ^R ^N ^E S ^O ^C T R T G S A S R I ^C ^O ^R ^N ^E ^L ^L ^- A D V T P T V D G E C L E B ^S ^T ^A ^T ^L ^E ^R ^D ^R V E R O A I D D R H L G A ^F ^A ^IR M O L N U O E N L ^T E C A E V S E Y E Y T L O F L ^C ^O ^R ^N R ^E ^L ^L R ^- ^G ^A ^R ^D R E O R N ^A ^V ^E W D D N D R A E M E L E K S L W I S H T M T L T O A C O I - T L H M H ^T ^S ^L ^L ^E C ^N ^R R ^O ^C E O L M E E M A T E S D E A L S H R M R D T L P Y T R D P S E L S E S N W U E R T T A T O S D D A O V ^T ^S ^L ^R ^A ^E ^P R R D E D D CRESTAVE", "x0": 53.9, "top": 416.1, "x1": 721.2, "bottom": 752.6}
-{"page": 3, "line": 31, "text": "T", "x0": 278.7, "top": 791.1, "x1": 284.8, "bottom": 795.0}
-{"page": 3, "line": 32, "text": "ELMIRA RD", "x0": 303.6, "top": 763.2, "x1": 333.4, "bottom": 786.9}
-{"page": 3, "line": 33, "text": "CODDIN", "x0": 422.9, "top": 782.0, "x1": 446.2, "bottom": 797.2}
-{"page": 3, "line": 34, "text": "G R", "x0": 440.9, "top": 754.6, "x1": 448.1, "bottom": 764.2}
-{"page": 3, "line": 35, "text": "A", "x0": 442.1, "top": 750.8, "x1": 448.6, "bottom": 755.6}
-{"page": 3, "line": 36, "text": "GTON", "x0": 444.0, "top": 781.2, "x1": 461.2, "bottom": 787.8}
-{"page": 3, "line": 37, "text": "H S", "x0": 460.3, "top": 757.7, "x1": 466.9, "bottom": 772.3}
-{"page": 3, "line": 38, "text": "R", "x0": 462.6, "top": 781.0, "x1": 467.2, "bottom": 787.1}
-{"page": 3, "line": 39, "text": "U T", "x0": 464.3, "top": 758.6, "x1": 470.6, "bottom": 773.2}
-{"page": 3, "line": 40, "text": "D", "x0": 466.7, "top": 780.7, "x1": 471.2, "bottom": 786.9}
-{"page": 3, "line": 41, "text": "D E S X", "x0": 468.4, "top": 759.6, "x1": 479.6, "bottom": 775.2}
-{"page": 3, "line": 42, "text": "P", "x0": 475.1, "top": 749.3, "x1": 480.2, "bottom": 756.0}
-{"page": 3, "line": 43, "text": "O T", "x0": 476.6, "top": 761.3, "x1": 482.4, "bottom": 775.6}
-{"page": 3, "line": 44, "text": "E", "x0": 478.9, "top": 750.1, "x1": 484.0, "bottom": 756.7}
-{"page": 3, "line": 45, "text": "N", "x0": 481.1, "top": 762.2, "x1": 486.7, "bottom": 769.0}
-{"page": 3, "line": 46, "text": "ARSALL", "x0": 482.9, "top": 750.9, "x1": 506.6, "bottom": 761.5}
-{"page": 3, "line": 47, "text": "PL", "x0": 506.8, "top": 755.9, "x1": 515.3, "bottom": 763.3}
-{"page": 3, "line": 48, "text": "S", "x0": 278.8, "top": 794.8, "x1": 284.9, "bottom": 799.0}
-{"page": 3, "line": 49, "text": "W", "x0": 278.9, "top": 800.4, "x1": 285.1, "bottom": 806.2}
-{"page": 3, "line": 50, "text": "O", "x0": 279.1, "top": 805.9, "x1": 285.3, "bottom": 810.8}
-{"page": 3, "line": 51, "text": "^D ^A R D", "x0": 279.3, "top": 810.8, "x1": 309.3, "bottom": 822.9}
-{"page": 3, "line": 52, "text": "^E M R Y", "x0": 279.5, "top": 819.1, "x1": 303.4, "bottom": 830.6}
-{"page": 3, "line": 53, "text": "COMMER", "x0": 145.0, "top": 861.1, "x1": 173.6, "bottom": 870.1}
-{"page": 3, "line": 54, "text": "S P", "x0": 172.0, "top": 828.1, "x1": 178.8, "bottom": 844.4}
-{"page": 3, "line": 55, "text": "C", "x0": 173.3, "top": 863.4, "x1": 177.7, "bottom": 869.5}
-{"page": 3, "line": 56, "text": "A O", "x0": 174.9, "top": 830.5, "x1": 182.7, "bottom": 846.6}
-{"page": 3, "line": 57, "text": "I", "x0": 177.3, "top": 863.7, "x1": 179.1, "bottom": 869.7}
-{"page": 3, "line": 58, "text": "R", "x0": 178.2, "top": 842.0, "x1": 185.3, "bottom": 849.4}
-{"page": 3, "line": 59, "text": "A", "x0": 178.8, "top": 863.7, "x1": 182.8, "bottom": 869.7}
-{"page": 3, "line": 60, "text": "U", "x0": 179.2, "top": 833.4, "x1": 186.2, "bottom": 840.8}
-{"page": 3, "line": 61, "text": "L", "x0": 181.5, "top": 863.6, "x1": 186.7, "bottom": 870.4}
-{"page": 3, "line": 62, "text": "K T", "x0": 181.6, "top": 835.8, "x1": 189.1, "bottom": 851.6}
-{"page": 3, "line": 63, "text": "A", "x0": 184.5, "top": 865.8, "x1": 191.3, "bottom": 873.0}
-{"page": 3, "line": 64, "text": "H R", "x0": 185.2, "top": 837.7, "x1": 192.6, "bottom": 855.2}
-{"page": 3, "line": 65, "text": "V", "x0": 187.3, "top": 867.9, "x1": 194.1, "bottom": 875.1}
-{"page": 3, "line": 66, "text": "W D", "x0": 188.0, "top": 840.4, "x1": 196.3, "bottom": 858.4}
-{"page": 3, "line": 67, "text": "E", "x0": 190.7, "top": 870.6, "x1": 197.5, "bottom": 877.8}
-{"page": 3, "line": 68, "text": "E ST SPENCER RD", "x0": 191.9, "top": 839.3, "x1": 269.3, "bottom": 866.3}
-{"page": 3, "line": 69, "text": "S", "x0": 272.8, "top": 856.6, "x1": 280.0, "bottom": 863.1}
-{"page": 3, "line": 70, "text": "T O N ^S E Q U A R", "x0": 275.0, "top": 827.6, "x1": 299.5, "bottom": 859.5}
-{"page": 3, "line": 71, "text": "D", "x0": 182.5, "top": 877.4, "x1": 189.8, "bottom": 884.6}
-{"page": 3, "line": 72, "text": "R", "x0": 179.5, "top": 880.5, "x1": 186.9, "bottom": 887.8}
-{"page": 3, "line": 73, "text": "RA", "x0": 172.8, "top": 884.8, "x1": 182.9, "bottom": 895.0}
-{"page": 3, "line": 74, "text": "MI", "x0": 168.3, "top": 890.9, "x1": 177.2, "bottom": 899.9}
-{"page": 3, "line": 75, "text": "EL", "x0": 163.4, "top": 895.8, "x1": 172.6, "bottom": 905.2}
-{"page": 3, "line": 76, "text": "FEMA Flood Zones", "x0": 458.2, "top": 1017.4, "x1": 728.6, "bottom": 1047.2}
-{"page": 3, "line": 77, "text": "I", "x0": 369.4, "top": 1044.1, "x1": 436.2, "bottom": 1131.0}
-{"page": 3, "line": 78, "text": "Zone AE", "x0": 514.1, "top": 1061.5, "x1": 585.7, "bottom": 1080.0}
-{"page": 3, "line": 79, "text": "Zone X", "x0": 514.1, "top": 1101.6, "x1": 574.4, "bottom": 1120.1}
-{"page": 3, "line": 80, "text": "0 0.25 0.5 1 1.5 2", "x0": 195.8, "top": 1148.8, "x1": 686.2, "bottom": 1167.0}
-{"page": 3, "line": 81, "text": "Miles", "x0": 685.7, "top": 1166.3, "x1": 728.4, "bottom": 1184.5}
+{"page": 3, "line": 4, "text": "STE", "x0": 328.2, "top": 266.8, "x1": 339.8, "bottom": 273.2}
+{"page": 3, "line": 5, "text": "HRA", "x0": 210.9, "top": 339.3, "x1": 224.9, "bottom": 345.8}
+{"page": 3, "line": 6, "text": "E D", "x0": 450.7, "top": 352.9, "x1": 464.8, "bottom": 361.1}
+{"page": 3, "line": 7, "text": "CORN", "x0": 614.5, "top": 359.0, "x1": 632.1, "bottom": 366.2}
+{"page": 3, "line": 8, "text": "W", "x0": 596.5, "top": 367.4, "x1": 602.5, "bottom": 373.7}
+{"page": 3, "line": 9, "text": "RRD", "x0": 331.2, "top": 373.3, "x1": 345.7, "bottom": 379.4}
+{"page": 3, "line": 10, "text": "YORK ST TH", "x0": 374.6, "top": 383.5, "x1": 600.9, "bottom": 390.0}
+{"page": 3, "line": 11, "text": "W FALLS ST FALLS ST", "x0": 350.6, "top": 394.8, "x1": 419.4, "bottom": 402.6}
+{"page": 3, "line": 12, "text": "E LINCOLN ST", "x0": 390.8, "top": 406.6, "x1": 432.0, "bottom": 413.8}
+{"page": 3, "line": 13, "text": "QUEEN ST IVERSITYAVE", "x0": 402.1, "top": 418.4, "x1": 592.0, "bottom": 428.9}
+{"page": 3, "line": 14, "text": "E JAY ST FORESTH", "x0": 383.4, "top": 429.4, "x1": 656.9, "bottom": 437.7}
+{"page": 3, "line": 15, "text": "KING ST", "x0": 415.9, "top": 436.5, "x1": 440.0, "bottom": 442.9}
+{"page": 3, "line": 16, "text": "E YATES ST", "x0": 389.9, "top": 486.1, "x1": 424.4, "bottom": 492.7}
+{"page": 3, "line": 17, "text": "E MARSHALL ST LLAVE", "x0": 392.9, "top": 504.5, "x1": 494.9, "bottom": 512.3}
+{"page": 3, "line": 18, "text": "FARM ST CORNELL - CAMPUS RD", "x0": 405.3, "top": 523.8, "x1": 690.1, "bottom": 530.9}
+{"page": 3, "line": 19, "text": "CASCADILLA ST", "x0": 247.3, "top": 532.5, "x1": 293.8, "bottom": 539.4}
+{"page": 3, "line": 20, "text": "SUNRISE RD", "x0": 53.9, "top": 537.2, "x1": 91.1, "bottom": 544.8}
+{"page": 3, "line": 21, "text": "ISERD EDGEMOOR LN", "x0": 152.9, "top": 541.8, "x1": 544.8, "bottom": 551.4}
+{"page": 3, "line": 22, "text": "ESTY ST", "x0": 302.8, "top": 550.0, "x1": 327.7, "bottom": 556.5}
+{"page": 3, "line": 23, "text": "W COURT ST", "x0": 322.0, "top": 564.5, "x1": 359.9, "bottom": 571.3}
+{"page": 3, "line": 24, "text": "LIF WILLIAMS ST", "x0": 82.5, "top": 570.4, "x1": 531.7, "bottom": 576.9}
+{"page": 3, "line": 25, "text": "BUFFALO ST", "x0": 387.2, "top": 584.4, "x1": 424.3, "bottom": 591.2}
+{"page": 3, "line": 26, "text": "MAPLE AVE", "x0": 655.1, "top": 590.8, "x1": 688.8, "bottom": 598.2}
+{"page": 3, "line": 27, "text": "SENECA ST WSENECASTNY79 SENECA ST CATHERINE ST", "x0": 240.0, "top": 597.4, "x1": 569.0, "bottom": 611.1}
+{"page": 3, "line": 28, "text": "W STATE ST MILLER ST", "x0": 259.1, "top": 613.8, "x1": 676.3, "bottom": 623.3}
+{"page": 3, "line": 29, "text": "TABE", "x0": 180.4, "top": 622.2, "x1": 195.9, "bottom": 628.7}
+{"page": 3, "line": 30, "text": "GREEN ST - NY79 SB/EB THST", "x0": 267.8, "top": 629.4, "x1": 675.7, "bottom": 638.2}
+{"page": 3, "line": 31, "text": "MITCHELL ST", "x0": 637.8, "top": 646.1, "x1": 677.0, "bottom": 654.2}
+{"page": 3, "line": 32, "text": "LS", "x0": 591.4, "top": 651.8, "x1": 600.9, "bottom": 658.0}
+{"page": 3, "line": 33, "text": "CECILAMALONERD LINTONSTW PLEASANT ST ERD", "x0": 191.2, "top": 658.9, "x1": 637.0, "bottom": 669.3}
+{"page": 3, "line": 34, "text": "RD", "x0": 630.0, "top": 672.4, "x1": 638.5, "bottom": 678.6}
+{"page": 3, "line": 35, "text": "COLUMBIA", "x0": 453.1, "top": 676.2, "x1": 484.1, "bottom": 683.0}
+{"page": 3, "line": 36, "text": "HILLVIEW PL", "x0": 428.8, "top": 691.8, "x1": 465.9, "bottom": 698.8}
+{"page": 3, "line": 37, "text": "SOUTH ST", "x0": 270.0, "top": 708.0, "x1": 300.3, "bottom": 714.3}
+{"page": 3, "line": 38, "text": "H", "x0": 329.6, "top": 714.2, "x1": 334.1, "bottom": 720.3}
+{"page": 3, "line": 39, "text": "S", "x0": 330.1, "top": 707.1, "x1": 334.3, "bottom": 713.2}
+{"page": 3, "line": 40, "text": "Y", "x0": 333.9, "top": 714.1, "x1": 338.0, "bottom": 720.2}
+{"page": 3, "line": 41, "text": "T", "x0": 336.1, "top": 706.8, "x1": 340.0, "bottom": 713.0}
+{"page": 3, "line": 42, "text": "ERS ST CR", "x0": 337.7, "top": 711.2, "x1": 494.2, "bottom": 720.1}
+{"page": 3, "line": 43, "text": "TAVE", "x0": 704.1, "top": 719.4, "x1": 721.2, "bottom": 725.8}
+{"page": 3, "line": 44, "text": "WOOD ST", "x0": 321.9, "top": 725.4, "x1": 350.6, "bottom": 731.9}
+{"page": 3, "line": 45, "text": "PARK ST VIEWCT", "x0": 326.2, "top": 741.8, "x1": 473.6, "bottom": 748.3}
+{"page": 3, "line": 46, "text": "GTONRD", "x0": 444.0, "top": 780.7, "x1": 471.2, "bottom": 787.8}
+{"page": 3, "line": 47, "text": "ERCIA", "x0": 164.9, "top": 863.4, "x1": 182.8, "bottom": 869.7}
+{"page": 3, "line": 48, "text": "FEMA Flood Zones", "x0": 458.2, "top": 1017.4, "x1": 728.6, "bottom": 1047.2}
+{"page": 3, "line": 49, "text": "I", "x0": 369.4, "top": 1044.1, "x1": 436.2, "bottom": 1131.0}
+{"page": 3, "line": 50, "text": "Zone AE", "x0": 514.1, "top": 1061.5, "x1": 585.7, "bottom": 1080.0}
+{"page": 3, "line": 51, "text": "Zone X", "x0": 514.1, "top": 1101.6, "x1": 574.4, "bottom": 1120.1}
+{"page": 3, "line": 52, "text": "0 0.25 0.5 1 1.5 2", "x0": 195.8, "top": 1148.8, "x1": 686.2, "bottom": 1167.0}
+{"page": 3, "line": 53, "text": "Miles", "x0": 685.7, "top": 1166.3, "x1": 728.4, "bottom": 1184.5}
 {"page": 4, "line": 1, "text": "City of Ithaca", "x0": 582.5, "top": 57.7, "x1": 732.6, "bottom": 81.7}
 {"page": 4, "line": 2, "text": "Historic Districts Map", "x0": 451.6, "top": 97.2, "x1": 732.5, "bottom": 127.2}
 {"page": 4, "line": 3, "text": "May 2026", "x0": 661.8, "top": 136.8, "x1": 732.5, "bottom": 152.7}
-{"page": 4, "line": 4, "text": "DR", "x0": 397.8, "top": 203.6, "x1": 408.2, "bottom": 213.8}
-{"page": 4, "line": 5, "text": "S", "x0": 393.7, "top": 210.5, "x1": 400.9, "bottom": 217.5}
-{"page": 4, "line": 6, "text": "B", "x0": 392.9, "top": 214.9, "x1": 399.4, "bottom": 219.7}
-{"page": 4, "line": 7, "text": "B", "x0": 391.7, "top": 218.9, "x1": 398.6, "bottom": 224.3}
-{"page": 4, "line": 8, "text": "G^I", "x0": 388.2, "top": 222.2, "x1": 397.4, "bottom": 231.2}
-{"page": 4, "line": 9, "text": "SL", "x0": 380.1, "top": 228.0, "x1": 390.3, "bottom": 237.2}
-{"page": 4, "line": 10, "text": "E", "x0": 379.4, "top": 234.6, "x1": 385.6, "bottom": 238.9}
-{"page": 4, "line": 11, "text": "DM", "x0": 370.2, "top": 238.9, "x1": 385.4, "bottom": 244.6}
-{"page": 4, "line": 12, "text": "RA", "x0": 370.2, "top": 244.0, "x1": 385.1, "bottom": 248.7}
-{"page": 4, "line": 13, "text": "STEWARTPARK", "x0": 328.2, "top": 249.7, "x1": 373.9, "bottom": 273.2}
-{"page": 4, "line": 14, "text": "N", "x0": 376.2, "top": 277.3, "x1": 383.2, "bottom": 283.2}
-{"page": 4, "line": 15, "text": "Y 1", "x0": 377.4, "top": 270.4, "x1": 385.2, "bottom": 279.0}
-{"page": 4, "line": 16, "text": "J", "x0": 378.9, "top": 247.9, "x1": 385.1, "bottom": 251.2}
-{"page": 4, "line": 17, "text": "3 N", "x0": 379.5, "top": 261.4, "x1": 388.0, "bottom": 272.1}
-{"page": 4, "line": 18, "text": "B", "x0": 382.2, "top": 257.6, "x1": 389.1, "bottom": 263.2}
-{"page": 4, "line": 19, "text": "t o", "x0": 383.4, "top": 276.9, "x1": 390.6, "bottom": 283.5}
-{"page": 4, "line": 20, "text": "N Y 3 4", "x0": 385.2, "top": 261.1, "x1": 395.4, "bottom": 277.3}
-{"page": 4, "line": 21, "text": "T", "x0": 381.0, "top": 287.4, "x1": 387.1, "bottom": 291.2}
-{"page": 4, "line": 22, "text": "S", "x0": 381.2, "top": 291.1, "x1": 387.3, "bottom": 295.3}
-{"page": 4, "line": 23, "text": "A", "x0": 381.4, "top": 297.1, "x1": 387.6, "bottom": 301.3}
-{"page": 4, "line": 24, "text": "G", "x0": 381.4, "top": 301.0, "x1": 387.5, "bottom": 305.8}
-{"page": 4, "line": 25, "text": "U", "x0": 381.7, "top": 305.6, "x1": 387.8, "bottom": 310.2}
-{"page": 4, "line": 26, "text": "Y", "x0": 381.7, "top": 310.1, "x1": 387.8, "bottom": 314.2}
-{"page": 4, "line": 27, "text": "A", "x0": 381.9, "top": 313.9, "x1": 388.0, "bottom": 318.1}
-{"page": 4, "line": 28, "text": "C", "x0": 381.9, "top": 317.7, "x1": 388.0, "bottom": 322.2}
-{"page": 4, "line": 29, "text": "W O ^A ^K ^O O D L N ^B E ^C ^P ^A M L L A V E F A L LV ^IE ^R W T E R G ^L ^E ^N W ^IL ^L ^IA M ^S TA U G H A N N O C K B LV D C A S S P A R K L R D AUN P A R C K A L R A D H N T R E R M A N A M P R D W ^ILLO W A V PIERRD W FALL N Y S 1 Y 3^/ N Y S O ^3 ^4 T ^N RK E F S A L T L IN L C S O S L T N ST K L ^S A ^T L K ^E ^T ^S INERD NEE W D ^IL H ^L AMPL D G ^IR E W O O D R ^B ^A D ^R ^T ^O ^N ^P ^L G H ^I L H A N R ^E ^V D ^A O W B Y E C ^P ^R ^L ^S ^T K O ^F ^F ^A K ^V ^E E LV IN P T L H W U A R C I J S T E T E V O A A O ^N V S R E C S N O U E R P L N L R E - D LL- S^I S S O ^N ^R ^D", "x0": 60.9, "top": 322.4, "x1": 656.4, "bottom": 419.6}
-{"page": 4, "line": 30, "text": "S ^D ^V ^L ^B ^R ^D ^V ^E ^L ^L ^B ^L ^A ^R ^H ^E ^L ^L U ^A ^H ^A W ^R ^E ^R ^N P N L R ^IC ^H ^A ^R ^D ^P ^L RIS W E C E W ^T O R ^S L S ^E W O T I D D F V ^L ^L O N ^K F I H L P L O A A R G O K E R ^L ^P K ^TA Y N L D O P R L P ^L O ^Y R ^AT P L ^L F H L C H O E S S R O T N A U U L T P N S A T V P R E V^I N E I E S G R A R H E ^IL L P R H D E E R C L T L O C R L M D ^S ^T ^IF F S S T T W C H T ^E R R S Y A S T T B AT C E E R E P S A ^K R ^R ^A ^A S ^P ^C ^K C C ^S R T S D E A T S I C L S S A R T ^B ^RI ^N ^D ^L ^E ^Y ^S ^T B A ^L V D D M U ^L ^O ^T ^D A U G G H A A N N H O C ^A ^O ^N ^N K ^B ^L ^K ^C L ^V ^D ONE S R E C S N ^T ^S ^N ^O ^T ^L D ^U ^F ^N F U A E LT S C O W C N A A S S S T T S G D H T S T I T I R R O L A I ^T ^S W ^O ^D ^A ^E M T ^N D E L U T U S S A C E E T T N A L F S H S O V I U T N E S T R S N T T T H T O T S M - T IT N ^T ^S ^N ^R ^O ^C ^N E U F N O ^T ^S ^R ^IA ^F R S S ^L ^P ^K ^R ^A ^P R S Y A T A R M 7 T N A D Y 9 I A K H S W V A D S L S A E M A W W E I I T N B N V S S P O C E / O C H S A S E ^T ^S ^N S ^IA ^L ^P ^S O O N T O Y R T B C T W D E S K U I K T T R R W S U S S S ^I ^T ^S ^E ^T ^T F ^E ^Y ^A ^F S L T T ^I D S T L T E R O E S S Y W S N T A S S A T T T E T ^T V ^S ^Y V ^N ^A ^B ^L ^A E C E LA K A E ^A ^U ^S ^T ^B ^U ^E ^V ^A ^R ^G ^N ^E ^N ^N ^S ^T S ^T ^S ^A A ^N ^V ^E ^T ^G ^E ^S ^N ^R ^S ^U ^B ^S ^V ^A ^T ^U ^A ^G ^N ^E ^E S V E T C N A E S Y B C J E 7 U ^A ^T ^G ^S ^U ^Y ^A ^S ^C A A E 9 S Y F D Y H M A F ^T I ^S ^A ^C ^IT ^U ^IL L S Q L A ^T ^S ^S ^R T ^A ^E ^S P A L T F T E U E L A R R R A O S E O A S R ^T ^S ^A ^G ^O ^IT V E S K H S S ^L ^P ^R ^E ^N ^R ^U ^T M E N P I A T T N E S L S G S S A C L U T R H T A O ^T ^S T ^A ^R ^O ^R ^U ^A ^N U R P S S I R A S L O S L T T ^T R T L T E A E ^LI ^N ^N V S R N ^T A C ^L ^E ^P ^C ^A ^R ^T D ^S ^N ^N ^IL IE S A V A W S I C E N C P O W P T A K C L O L R D N S U C E T M H I T U L D S O L N B L A ^S ^T L S IA ^R ^A D W E ^A ^Y A S C N V T R E E E W S C C E N A I ^E ^V ^A ^T ^R ^A W ^E ^T ^S E T L P D S L L ^I ^R S ^R ^E ^F P I G T ^L A E M M ^T ^S ^Y ^R ^R S ^A ^U ^Q ^N O S C O T A R ^E ^V ^A W ^T ^S ^E ^L ^E ^- ^L ^N ^R O C T ^T ^S ^Y ^D ^D ^E H LN E U R N V A L I E ^T ^S ^R I ^IA ^L ^B N N V T E I E N ^E E ^G ^E ^L ^E ^O ^C ^L ^A ^V R S P S T M L IT W IT ^N ^E ^D ^V ^A ^E D ^L ^N ^I Y C A R T A H G Y I B R E V R E D I O L R V Y E L E A E A I S ^E ^A ^V N L ^S ^T K N ^A ^E ^- N ^L ^L ^N ^R ^E S ^O ^C T R T G S A S R I ^- ^L ^L ^N ^E ^C ^R ^O A D V T P T V D G E C L E B ^R ^D ^E ^R ^A ^L ^T ^T ^S V E R O A I D D R H L G A ^A ^F M ^IR O L N U O E N L ^T E C A E V S E Y E Y T L O F L ^C ^O ^R ^N R R ^E ^L ^L ^G ^- ^A ^R ^D R E O R N ^A ^V ^E W D D N D R A E M E L E K S L W I S H T M T L T O A C O I - T L H M H ^T ^S ^L ^L ^E C ^N ^R R ^O ^C E O L M E E M A T E S D E A L S H R M R D T L P Y T R D P S E L S E S N W U E R T T A T O S D D A O V ^T ^S ^L ^R ^A ^E ^P R R D E D D CRESTAVE", "x0": 53.9, "top": 416.1, "x1": 721.2, "bottom": 752.6}
-{"page": 4, "line": 31, "text": "T", "x0": 278.6, "top": 791.1, "x1": 284.8, "bottom": 795.0}
-{"page": 4, "line": 32, "text": "ELMIRA RD", "x0": 303.6, "top": 763.2, "x1": 333.4, "bottom": 786.9}
-{"page": 4, "line": 33, "text": "CODDIN", "x0": 422.9, "top": 782.0, "x1": 446.2, "bottom": 797.2}
-{"page": 4, "line": 34, "text": "G R", "x0": 440.9, "top": 754.6, "x1": 448.1, "bottom": 764.2}
-{"page": 4, "line": 35, "text": "A", "x0": 442.1, "top": 750.8, "x1": 448.5, "bottom": 755.6}
-{"page": 4, "line": 36, "text": "GTON", "x0": 444.0, "top": 781.2, "x1": 461.2, "bottom": 787.8}
-{"page": 4, "line": 37, "text": "H S", "x0": 460.3, "top": 757.7, "x1": 466.9, "bottom": 772.3}
-{"page": 4, "line": 38, "text": "R", "x0": 462.6, "top": 781.0, "x1": 467.2, "bottom": 787.1}
-{"page": 4, "line": 39, "text": "U T", "x0": 464.3, "top": 758.6, "x1": 470.6, "bottom": 773.2}
-{"page": 4, "line": 40, "text": "D", "x0": 466.7, "top": 780.7, "x1": 471.2, "bottom": 786.9}
-{"page": 4, "line": 41, "text": "D E S X", "x0": 468.4, "top": 759.6, "x1": 479.6, "bottom": 775.2}
-{"page": 4, "line": 42, "text": "P", "x0": 475.1, "top": 749.3, "x1": 480.2, "bottom": 756.0}
-{"page": 4, "line": 43, "text": "O T", "x0": 476.6, "top": 761.3, "x1": 482.4, "bottom": 775.6}
-{"page": 4, "line": 44, "text": "E", "x0": 478.9, "top": 750.1, "x1": 484.0, "bottom": 756.7}
-{"page": 4, "line": 45, "text": "N", "x0": 481.1, "top": 762.2, "x1": 486.7, "bottom": 769.0}
-{"page": 4, "line": 46, "text": "ARSALL", "x0": 482.9, "top": 750.9, "x1": 506.6, "bottom": 761.5}
-{"page": 4, "line": 47, "text": "PL", "x0": 506.8, "top": 755.9, "x1": 515.3, "bottom": 763.3}
-{"page": 4, "line": 48, "text": "S", "x0": 278.8, "top": 794.8, "x1": 284.9, "bottom": 799.0}
-{"page": 4, "line": 49, "text": "W", "x0": 278.9, "top": 800.4, "x1": 285.1, "bottom": 806.2}
-{"page": 4, "line": 50, "text": "O", "x0": 279.1, "top": 805.9, "x1": 285.3, "bottom": 810.8}
-{"page": 4, "line": 51, "text": "^D ^A R D", "x0": 279.3, "top": 810.8, "x1": 309.3, "bottom": 822.9}
-{"page": 4, "line": 52, "text": "^E M R Y", "x0": 279.5, "top": 819.1, "x1": 303.4, "bottom": 830.6}
-{"page": 4, "line": 53, "text": "COMMER", "x0": 145.0, "top": 861.1, "x1": 173.6, "bottom": 870.1}
-{"page": 4, "line": 54, "text": "S P", "x0": 172.0, "top": 828.1, "x1": 178.8, "bottom": 844.4}
-{"page": 4, "line": 55, "text": "C", "x0": 173.3, "top": 863.4, "x1": 177.7, "bottom": 869.5}
-{"page": 4, "line": 56, "text": "A O", "x0": 174.9, "top": 830.5, "x1": 182.7, "bottom": 846.6}
-{"page": 4, "line": 57, "text": "I", "x0": 177.3, "top": 863.7, "x1": 179.1, "bottom": 869.7}
-{"page": 4, "line": 58, "text": "R", "x0": 178.2, "top": 842.0, "x1": 185.3, "bottom": 849.4}
-{"page": 4, "line": 59, "text": "A", "x0": 178.8, "top": 863.7, "x1": 182.8, "bottom": 869.7}
-{"page": 4, "line": 60, "text": "U", "x0": 179.2, "top": 833.4, "x1": 186.2, "bottom": 840.8}
-{"page": 4, "line": 61, "text": "L", "x0": 181.5, "top": 863.6, "x1": 186.7, "bottom": 870.4}
-{"page": 4, "line": 62, "text": "K T", "x0": 181.6, "top": 835.8, "x1": 189.1, "bottom": 851.6}
-{"page": 4, "line": 63, "text": "A", "x0": 184.5, "top": 865.8, "x1": 191.3, "bottom": 873.0}
-{"page": 4, "line": 64, "text": "H R", "x0": 185.2, "top": 837.7, "x1": 192.6, "bottom": 855.2}
-{"page": 4, "line": 65, "text": "V", "x0": 187.3, "top": 867.9, "x1": 194.1, "bottom": 875.1}
-{"page": 4, "line": 66, "text": "W D", "x0": 188.0, "top": 840.4, "x1": 196.3, "bottom": 858.4}
-{"page": 4, "line": 67, "text": "E", "x0": 190.7, "top": 870.6, "x1": 197.5, "bottom": 877.8}
-{"page": 4, "line": 68, "text": "E ST SPENCER RD", "x0": 191.9, "top": 839.3, "x1": 269.3, "bottom": 866.3}
-{"page": 4, "line": 69, "text": "S", "x0": 272.8, "top": 856.6, "x1": 280.0, "bottom": 863.1}
-{"page": 4, "line": 70, "text": "T O N ^S E Q U A R", "x0": 275.0, "top": 827.6, "x1": 299.5, "bottom": 859.5}
-{"page": 4, "line": 71, "text": "D", "x0": 182.5, "top": 877.4, "x1": 189.8, "bottom": 884.6}
-{"page": 4, "line": 72, "text": "R", "x0": 179.5, "top": 880.5, "x1": 186.9, "bottom": 887.8}
-{"page": 4, "line": 73, "text": "RA", "x0": 172.8, "top": 884.8, "x1": 182.9, "bottom": 895.0}
-{"page": 4, "line": 74, "text": "MI", "x0": 168.3, "top": 890.9, "x1": 177.2, "bottom": 899.9}
-{"page": 4, "line": 75, "text": "EL", "x0": 163.4, "top": 895.8, "x1": 172.6, "bottom": 905.2}
-{"page": 4, "line": 76, "text": "Historic Districts National Ithaca Downtown", "x0": 242.9, "top": 900.5, "x1": 727.7, "bottom": 925.1}
-{"page": 4, "line": 77, "text": "Clinton Block", "x0": 296.2, "top": 941.3, "x1": 404.3, "bottom": 959.8}
-{"page": 4, "line": 78, "text": "Local DeWitt Park", "x0": 512.4, "top": 944.4, "x1": 660.9, "bottom": 962.9}
-{"page": 4, "line": 79, "text": "Cornell Arts Quad", "x0": 296.2, "top": 981.5, "x1": 442.5, "bottom": 1000.0}
-{"page": 4, "line": 80, "text": "Local East Hill", "x0": 512.4, "top": 984.6, "x1": 630.1, "bottom": 1003.1}
-{"page": 4, "line": 81, "text": "Cornell Heights", "x0": 296.2, "top": 1021.6, "x1": 422.7, "bottom": 1040.1}
-{"page": 4, "line": 82, "text": "National DeWitt Park", "x0": 512.4, "top": 1024.7, "x1": 684.6, "bottom": 1043.2}
-{"page": 4, "line": 83, "text": "Downtown West", "x0": 296.2, "top": 1061.8, "x1": 430.0, "bottom": 1080.2}
-{"page": 4, "line": 84, "text": "National East Hill", "x0": 512.4, "top": 1064.8, "x1": 653.8, "bottom": 1083.3}
-{"page": 4, "line": 85, "text": "I Henry St. John University Hill", "x0": 112.6, "top": 1101.9, "x1": 624.6, "bottom": 1191.7}
-{"page": 4, "line": 86, "text": "0 0.25 0.5 1 1.5 2", "x0": 195.8, "top": 1148.8, "x1": 686.2, "bottom": 1167.0}
-{"page": 4, "line": 87, "text": "Miles", "x0": 685.7, "top": 1166.3, "x1": 728.4, "bottom": 1184.5}
-{"page": 5, "line": 1, "text": "T", "x0": 207.7, "top": 29.3, "x1": 219.9, "bottom": 36.9}
-{"page": 5, "line": 2, "text": "W COURT ST ^S ^L", "x0": 77.1, "top": 33.4, "x1": 939.8, "bottom": 47.0}
-{"page": 5, "line": 3, "text": "P", "x0": 927.8, "top": 40.8, "x1": 939.9, "bottom": 48.9}
-{"page": 5, "line": 4, "text": "City of Ithaca^N ^L ^E", "x0": 64.3, "top": 48.1, "x1": 939.9, "bottom": 73.3}
-{"page": 5, "line": 5, "text": "O", "x0": 208.4, "top": 56.8, "x1": 220.6, "bottom": 66.4}
-{"page": 5, "line": 6, "text": "P C", "x0": 265.4, "top": 60.1, "x1": 939.9, "bottom": 68.8}
-{"page": 5, "line": 7, "text": "^T ^G ^K ^A MUN PL", "x0": 208.6, "top": 66.0, "x1": 1185.1, "bottom": 88.4}
-{"page": 5, "line": 8, "text": "R", "x0": 928.0, "top": 76.9, "x1": 940.0, "bottom": 85.6}
-{"page": 5, "line": 9, "text": "N R T T R S", "x0": 209.0, "top": 80.3, "x1": 1150.2, "bottom": 94.2}
-{"page": 5, "line": 10, "text": "CBD Distric^It Ma^Ap ^S ^S ^O", "x0": 64.3, "top": 88.8, "x1": 1150.2, "bottom": 118.8}
-{"page": 5, "line": 11, "text": "May 20 ^T ^S ^W ^O 26", "x0": 64.4, "top": 108.1, "x1": 135.2, "bottom": 147.6}
-{"page": 5, "line": 12, "text": "H", "x0": 209.3, "top": 94.6, "x1": 221.5, "bottom": 103.6}
-{"page": 5, "line": 13, "text": "S A W", "x0": 209.5, "top": 103.5, "x1": 222.2, "bottom": 130.5}
-{"page": 5, "line": 14, "text": "P", "x0": 266.2, "top": 96.3, "x1": 278.3, "bottom": 104.5}
-{"page": 5, "line": 15, "text": "N ^I A L P N", "x0": 367.3, "top": 101.7, "x1": 380.2, "bottom": 148.8}
-{"page": 5, "line": 16, "text": "T", "x0": 552.4, "top": 97.4, "x1": 564.6, "bottom": 105.0}
-{"page": 5, "line": 17, "text": "S A E V N BUFFALO ST A G O ^I T T S A R O", "x0": 552.7, "top": 100.8, "x1": 862.5, "bottom": 149.7}
-{"page": 5, "line": 18, "text": "E", "x0": 928.0, "top": 94.3, "x1": 940.0, "bottom": 102.4}
-{"page": 5, "line": 19, "text": "T T S", "x0": 928.0, "top": 102.2, "x1": 950.2, "bottom": 144.1}
-{"page": 5, "line": 20, "text": "D E T R R", "x0": 110.7, "top": 145.9, "x1": 950.4, "bottom": 158.5}
-{"page": 5, "line": 21, "text": "A G S U E", "x0": 110.9, "top": 154.8, "x1": 950.5, "bottom": 167.4}
-{"page": 5, "line": 22, "text": "E A K", "x0": 111.0, "top": 163.4, "x1": 950.6, "bottom": 172.4}
-{"page": 5, "line": 23, "text": "M T N A N R", "x0": 111.2, "top": 170.5, "x1": 950.8, "bottom": 182.9}
-{"page": 5, "line": 24, "text": "S G A", "x0": 239.2, "top": 178.7, "x1": 950.9, "bottom": 189.4}
-{"page": 5, "line": 25, "text": "^N ^N ^U ^P SENECA ST", "x0": 111.4, "top": 185.5, "x1": 1034.9, "bottom": 199.1}
-{"page": 5, "line": 26, "text": "^R W SENECA STNY 79 ^Y S ^L", "x0": 239.5, "top": 196.3, "x1": 1069.9, "bottom": 213.0}
-{"page": 5, "line": 27, "text": "SENECA ST ^O", "x0": 52.3, "top": 207.5, "x1": 251.9, "bottom": 221.0}
-{"page": 5, "line": 28, "text": "C", "x0": 654.7, "top": 211.8, "x1": 666.8, "bottom": 220.6}
-{"page": 5, "line": 29, "text": "^A E N", "x0": 654.7, "top": 202.4, "x1": 920.6, "bottom": 222.2}
-{"page": 5, "line": 30, "text": "E", "x0": 912.7, "top": 212.9, "x1": 926.6, "bottom": 227.3}
-{"page": 5, "line": 31, "text": "P", "x0": 1057.9, "top": 205.5, "x1": 1070.0, "bottom": 213.7}
-{"page": 5, "line": 32, "text": "C C R", "x0": 239.9, "top": 216.8, "x1": 1070.1, "bottom": 233.2}
-{"page": 5, "line": 33, "text": "N A E", "x0": 654.9, "top": 224.1, "x1": 1070.2, "bottom": 237.8}
-{"page": 5, "line": 34, "text": "N", "x0": 240.1, "top": 228.8, "x1": 252.2, "bottom": 237.7}
-{"page": 5, "line": 35, "text": "W ^L", "x0": 929.4, "top": 233.7, "x1": 1070.3, "bottom": 250.9}
-{"page": 5, "line": 36, "text": "Y", "x0": 1058.3, "top": 240.3, "x1": 1070.3, "bottom": 248.5}
-{"page": 5, "line": 37, "text": "A", "x0": 935.9, "top": 245.2, "x1": 950.3, "bottom": 258.4}
-{"page": 5, "line": 38, "text": "Y ^U", "x0": 940.5, "top": 248.5, "x1": 1070.4, "bottom": 264.8}
-{"page": 5, "line": 39, "text": "H", "x0": 1058.4, "top": 257.2, "x1": 1070.5, "bottom": 266.0}
-{"page": 5, "line": 40, "text": "W STATE ST", "x0": 314.3, "top": 268.9, "x1": 386.5, "bottom": 282.8}
-{"page": 5, "line": 41, "text": "E STATE", "x0": 868.8, "top": 263.2, "x1": 919.3, "bottom": 280.6}
-{"page": 5, "line": 42, "text": "ST", "x0": 921.5, "top": 269.1, "x1": 938.2, "bottom": 282.8}
-{"page": 5, "line": 43, "text": "C", "x0": 1058.5, "top": 265.8, "x1": 1070.6, "bottom": 274.6}
-{"page": 5, "line": 44, "text": "S", "x0": 1058.6, "top": 274.4, "x1": 1070.7, "bottom": 282.5}
-{"page": 5, "line": 45, "text": "CONN", "x0": 947.6, "top": 279.2, "x1": 982.1, "bottom": 295.8}
-{"page": 5, "line": 46, "text": "T", "x0": 938.7, "top": 287.0, "x1": 951.2, "bottom": 301.1}
-{"page": 5, "line": 47, "text": "S E STATE ST", "x0": 931.5, "top": 291.0, "x1": 1152.2, "bottom": 305.4}
-{"page": 5, "line": 48, "text": "N", "x0": 921.2, "top": 296.9, "x1": 934.8, "bottom": 311.6}
-{"page": 5, "line": 49, "text": "E", "x0": 914.0, "top": 301.5, "x1": 927.0, "bottom": 315.9}
-{"page": 5, "line": 50, "text": "E", "x0": 906.8, "top": 305.8, "x1": 919.8, "bottom": 320.3}
-{"page": 5, "line": 51, "text": "R", "x0": 899.6, "top": 309.9, "x1": 912.4, "bottom": 324.4}
-{"page": 5, "line": 52, "text": "G", "x0": 890.9, "top": 313.4, "x1": 904.1, "bottom": 328.0}
-{"page": 5, "line": 53, "text": "S", "x0": 868.1, "top": 319.1, "x1": 882.3, "bottom": 331.2}
-{"page": 5, "line": 54, "text": "T", "x0": 242.3, "top": 326.3, "x1": 254.4, "bottom": 333.9}
-{"page": 5, "line": 55, "text": "A", "x0": 872.9, "top": 330.1, "x1": 887.1, "bottom": 342.3}
-{"page": 5, "line": 56, "text": "S", "x0": 242.4, "top": 333.5, "x1": 254.6, "bottom": 341.8}
-{"page": 5, "line": 57, "text": "GREEN ST - NY79 SB/EB U", "x0": 390.6, "top": 337.2, "x1": 890.7, "bottom": 352.4}
-{"page": 5, "line": 58, "text": "N R", "x0": 242.7, "top": 345.1, "x1": 894.1, "bottom": 358.2}
-{"page": 5, "line": 59, "text": "R O", "x0": 242.9, "top": 353.2, "x1": 897.7, "bottom": 366.5}
-{"page": 5, "line": 60, "text": "O ^T R", "x0": 243.1, "top": 361.8, "x1": 900.6, "bottom": 373.9}
-{"page": 5, "line": 61, "text": "C S A", "x0": 243.3, "top": 370.0, "x1": 902.1, "bottom": 380.6}
-{"page": 5, "line": 62, "text": "T", "x0": 444.1, "top": 376.2, "x1": 456.3, "bottom": 383.8}
-{"page": 5, "line": 63, "text": "S S Y S", "x0": 243.6, "top": 382.2, "x1": 903.1, "bottom": 391.9}
-{"page": 5, "line": 64, "text": "T N T", "x0": 373.2, "top": 388.8, "x1": 903.8, "bottom": 399.6}
-{"page": 5, "line": 65, "text": "S E", "x0": 373.3, "top": 395.2, "x1": 456.7, "bottom": 404.5}
-{"page": 5, "line": 66, "text": "A", "x0": 501.0, "top": 399.5, "x1": 513.2, "bottom": 407.7}
-{"page": 5, "line": 67, "text": "S N T B G", "x0": 47.7, "top": 403.5, "x1": 1112.9, "bottom": 420.3}
-{"page": 5, "line": 68, "text": "F U", "x0": 55.6, "top": 414.1, "x1": 75.1, "bottom": 434.2}
-{"page": 5, "line": 69, "text": "L T O N", "x0": 65.9, "top": 426.1, "x1": 94.6, "bottom": 456.7}
-{"page": 5, "line": 70, "text": "CLEVELAND AVE ^I ^A", "x0": 196.4, "top": 414.3, "x1": 385.9, "bottom": 428.8}
-{"page": 5, "line": 71, "text": "L P", "x0": 373.9, "top": 427.6, "x1": 386.2, "bottom": 442.7}
-{"page": 5, "line": 72, "text": "T", "x0": 444.8, "top": 411.0, "x1": 456.9, "bottom": 418.5}
-{"page": 5, "line": 73, "text": "E", "x0": 445.0, "top": 418.7, "x1": 457.1, "bottom": 426.9}
-{"page": 5, "line": 74, "text": "Y A F", "x0": 445.1, "top": 426.9, "x1": 457.5, "bottom": 449.3}
-{"page": 5, "line": 75, "text": "L A", "x0": 501.3, "top": 415.5, "x1": 513.6, "bottom": 430.3}
-{"page": 5, "line": 76, "text": "^T P E C T", "x0": 559.4, "top": 429.2, "x1": 869.3, "bottom": 457.0}
-{"page": 5, "line": 77, "text": "ST PROSPECT ST", "x0": 866.2, "top": 416.9, "x1": 1004.0, "bottom": 439.5}
-{"page": 5, "line": 78, "text": "IL", "x0": 1105.7, "top": 410.6, "x1": 1120.3, "bottom": 425.9}
-{"page": 5, "line": 79, "text": "E S", "x0": 1113.1, "top": 416.2, "x1": 1132.9, "bottom": 435.5}
-{"page": 5, "line": 80, "text": "S T", "x0": 1127.7, "top": 429.7, "x1": 1146.8, "bottom": 448.9}
-{"page": 5, "line": 81, "text": "S S S", "x0": 374.3, "top": 445.7, "x1": 841.8, "bottom": 461.3}
-{"page": 5, "line": 82, "text": "S O", "x0": 88.5, "top": 451.2, "x1": 835.0, "bottom": 466.3}
-{"page": 5, "line": 83, "text": "T ^A P R", "x0": 94.5, "top": 456.1, "x1": 827.5, "bottom": 475.5}
-{"page": 5, "line": 84, "text": "V", "x0": 559.9, "top": 466.6, "x1": 572.0, "bottom": 474.8}
-{"page": 5, "line": 85, "text": "CLINTON ST E", "x0": 686.3, "top": 470.6, "x1": 768.8, "bottom": 483.3}
-{"page": 5, "line": 86, "text": "CLINTON ST W ^E ^T T", "x0": 388.1, "top": 474.8, "x1": 1059.1, "bottom": 490.8}
-{"page": 5, "line": 87, "text": "N S", "x0": 560.1, "top": 482.5, "x1": 673.8, "bottom": 492.9}
-{"page": 5, "line": 88, "text": "^E PLEASANT ST ^S", "x0": 560.4, "top": 490.3, "x1": 1060.2, "bottom": 504.0}
-{"page": 5, "line": 89, "text": "G A N", "x0": 560.6, "top": 497.2, "x1": 1060.7, "bottom": 510.7}
-{"page": 5, "line": 90, "text": "G", "x0": 661.8, "top": 504.9, "x1": 673.8, "bottom": 514.3}
-{"page": 5, "line": 91, "text": "S U E T O", "x0": 560.6, "top": 510.5, "x1": 1060.7, "bottom": 525.7}
-{"page": 5, "line": 92, "text": "M A C L E O C N I E L R A D", "x0": 43.5, "top": 544.8, "x1": 116.2, "bottom": 583.5}
-{"page": 5, "line": 93, "text": "S", "x0": 157.0, "top": 583.8, "x1": 171.1, "bottom": 598.0}
-{"page": 5, "line": 94, "text": "CENTER ST S C A Y !!!!!!!!! !!!!!!!!! Z !!!!!!!!! !!!!!!!!! !!!!!!!!!S !!!!!!!!! o !!!!!!!!! P !!!!!!!!! !!!!!!!!! !!!!!!!!! E !!!!!!!!! n !!!!!!!!! !!!!!!!!! N !!!!!!!!! C i B n E -1 R g a S T Distric L P", "x0": 323.9, "top": 519.6, "x1": 796.4, "bottom": 589.1}
-{"page": 5, "line": 95, "text": "R", "x0": 784.5, "top": 588.1, "x1": 796.6, "bottom": 596.9}
-{"page": 5, "line": 96, "text": "ts !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! C C B B D D - - 1 5 4 0 0 S A R O R U A", "x0": 789.6, "top": 521.1, "x1": 917.1, "bottom": 584.5}
-{"page": 5, "line": 97, "text": "S", "x0": 905.2, "top": 585.8, "x1": 917.4, "bottom": 594.1}
-{"page": 5, "line": 98, "text": "COLUMB P R U I -1 AD a ST R SW H e U D S s - i 2 dential Transition", "x0": 935.2, "top": 520.1, "x1": 1125.3, "bottom": 584.5}
-{"page": 5, "line": 99, "text": "T IT B-1b E CBD-60 R-1b Street Level Active Use Overlay Zone", "x0": 165.6, "top": 592.2, "x1": 1190.1, "bottom": 612.4}
-{"page": 5, "line": 100, "text": "U ^N", "x0": 176.9, "top": 603.2, "x1": 796.8, "bottom": 617.9}
-{"page": 5, "line": 101, "text": "S", "x0": 182.9, "top": 609.0, "x1": 197.0, "bottom": 623.2}
-{"page": 5, "line": 102, "text": "A", "x0": 191.8, "top": 617.4, "x1": 205.9, "bottom": 631.6}
-{"page": 5, "line": 103, "text": "V", "x0": 197.0, "top": 622.4, "x1": 211.1, "bottom": 636.6}
-{"page": 5, "line": 104, "text": "B-2a R", "x0": 715.4, "top": 613.6, "x1": 796.9, "bottom": 626.0}
-{"page": 5, "line": 105, "text": "U", "x0": 784.9, "top": 622.2, "x1": 797.0, "bottom": 631.0}
-{"page": 5, "line": 106, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 805.2, "top": 609.0, "x1": 832.8, "bottom": 625.1}
-{"page": 5, "line": 107, "text": "CBD-85 R-2a Traditional Residential", "x0": 835.4, "top": 614.7, "x1": 1128.1, "bottom": 623.8}
-{"page": 5, "line": 108, "text": "E ^T", "x0": 203.0, "top": 628.4, "x1": 797.1, "bottom": 642.6}
-{"page": 5, "line": 109, "text": "B-2dR HILCLhVerIrEy SWtrePet LDistrict R-2b WE/WF", "x0": 715.4, "top": 634.4, "x1": 1068.7, "bottom": 648.6}
-{"page": 5, "line": 110, "text": "E", "x0": 731.1, "top": 643.4, "x1": 745.3, "bottom": 655.7}
-{"page": 5, "line": 111, "text": "T", "x0": 728.0, "top": 650.8, "x1": 741.9, "bottom": 662.5}
-{"page": 5, "line": 112, "text": "B-", "x0": 715.4, "top": 656.2, "x1": 724.5, "bottom": 665.3}
-{"page": 5, "line": 113, "text": "L", "x0": 724.1, "top": 659.9, "x1": 737.7, "bottom": 671.0}
-{"page": 5, "line": 114, "text": "4 Urban Mixed Use R-3a WEDZ-1a", "x0": 724.5, "top": 654.1, "x1": 1077.4, "bottom": 665.3}
-{"page": 5, "line": 115, "text": "NTITUS", "x0": 339.8, "top": 665.7, "x1": 385.1, "bottom": 682.8}
-{"page": 5, "line": 116, "text": "AVE ^T IT", "x0": 389.2, "top": 670.2, "x1": 666.5, "bottom": 763.3}
-{"page": 5, "line": 117, "text": "W", "x0": 643.6, "top": 665.2, "x1": 659.6, "bottom": 681.0}
-{"page": 5, "line": 118, "text": "CH I", "x0": 715.4, "top": 672.1, "x1": 732.1, "bottom": 688.0}
-{"page": 5, "line": 119, "text": "L", "x0": 721.3, "top": 666.0, "x1": 734.9, "bottom": 677.1}
-{"page": 5, "line": 120, "text": "BD-100 Medium-Density Mixed Use R-3aa WEDZ-1b", "x0": 721.9, "top": 673.7, "x1": 1077.4, "bottom": 685.0}
-{"page": 5, "line": 121, "text": "T", "x0": 251.0, "top": 696.5, "x1": 263.2, "bottom": 704.0}
-{"page": 5, "line": 122, "text": "S", "x0": 251.2, "top": 704.0, "x1": 263.3, "bottom": 712.1}
-{"page": 5, "line": 123, "text": "STITUSAVE", "x0": 431.3, "top": 684.9, "x1": 504.9, "bottom": 711.6}
-{"page": 5, "line": 124, "text": "S", "x0": 563.9, "top": 680.9, "x1": 576.1, "bottom": 689.1}
-{"page": 5, "line": 125, "text": "V", "x0": 564.2, "top": 700.3, "x1": 576.4, "bottom": 708.6}
-{"page": 5, "line": 126, "text": "A", "x0": 564.2, "top": 692.9, "x1": 576.4, "bottom": 701.1}
-{"page": 5, "line": 127, "text": "E", "x0": 624.0, "top": 701.7, "x1": 638.4, "bottom": 714.6}
-{"page": 5, "line": 128, "text": "R", "x0": 628.1, "top": 694.1, "x1": 642.8, "bottom": 707.6}
-{"page": 5, "line": 129, "text": "S S", "x0": 634.1, "top": 684.3, "x1": 725.8, "bottom": 698.2}
-{"page": 5, "line": 130, "text": "CBD-120 P-1", "x0": 715.4, "top": 693.4, "x1": 849.6, "bottom": 704.7}
-{"page": 5, "line": 131, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 951.3, "top": 687.0, "x1": 976.8, "bottom": 705.0}
-{"page": 5, "line": 132, "text": "R-3b", "x0": 980.1, "top": 693.4, "x1": 999.8, "bottom": 702.5}
-{"page": 5, "line": 133, "text": "SOUTH ST ^E C", "x0": 157.0, "top": 707.5, "x1": 634.4, "bottom": 722.1}
-{"page": 5, "line": 134, "text": "R N N", "x0": 251.3, "top": 715.5, "x1": 630.0, "bottom": 729.6}
-{"page": 5, "line": 135, "text": "^I ^A ^F HYERS ST ^G ^E S P E 0 0.05 0.1 0.2 0.3 CRESC0E.4N M T P iLles", "x0": 251.5, "top": 722.0, "x1": 1188.0, "bottom": 756.1}
-{"page": 5, "line": 136, "text": "S", "x0": 565.1, "top": 746.9, "x1": 577.3, "bottom": 755.1}
-{"page": 6, "line": 1, "text": "D", "x0": 104.7, "top": 36.4, "x1": 116.9, "bottom": 45.3}
-{"page": 6, "line": 2, "text": "D R W T", "x0": 68.5, "top": 40.7, "x1": 672.5, "bottom": 56.0}
-{"page": 6, "line": 3, "text": "^V ^L ^B Cit ^A ^H ^C y ^L ^Po ^A ^R ^R f Ith C P L A a IF R F cKa W S T A ^T A U ^S W ^O BUFFALO ST", "x0": 68.7, "top": 48.2, "x1": 752.2, "bottom": 88.2}
-{"page": 6, "line": 4, "text": "R L T", "x0": 69.1, "top": 75.5, "x1": 466.8, "bottom": 89.4}
-{"page": 6, "line": 5, "text": "E ^I R E N CI R P E S B G H D A T S", "x0": 69.3, "top": 78.8, "x1": 746.2, "bottom": 102.7}
-{"page": 6, "line": 6, "text": "^L ^L P R T L V A E N", "x0": 69.4, "top": 92.6, "x1": 746.5, "bottom": 109.9}
-{"page": 6, "line": 7, "text": "^A ^H South ^L west Dis", "x0": 69.7, "top": 104.4, "x1": 265.0, "bottom": 134.4}
-{"page": 6, "line": 8, "text": "Y", "x0": 252.4, "top": 120.3, "x1": 265.4, "bottom": 129.8}
-{"page": 6, "line": 9, "text": "^L Otrict S TMap S ENECA ST D N N", "x0": 253.6, "top": 104.0, "x1": 539.5, "bottom": 134.4}
-{"page": 6, "line": 10, "text": "O", "x0": 526.2, "top": 119.4, "x1": 539.6, "bottom": 130.5}
-{"page": 6, "line": 11, "text": "SENECA ST M", "x0": 569.5, "top": 105.0, "x1": 673.7, "bottom": 121.6}
-{"page": 6, "line": 12, "text": "N", "x0": 661.7, "top": 118.3, "x1": 673.9, "bottom": 127.2}
-{"page": 6, "line": 13, "text": "R", "x0": 734.5, "top": 109.1, "x1": 746.6, "bottom": 118.0}
-{"page": 6, "line": 14, "text": "O", "x0": 734.6, "top": 117.8, "x1": 746.8, "bottom": 127.3}
-{"page": 6, "line": 15, "text": "T", "x0": 313.5, "top": 123.7, "x1": 327.2, "bottom": 134.3}
-{"page": 6, "line": 16, "text": "HOOK", "x0": 172.2, "top": 128.7, "x1": 209.0, "bottom": 145.8}
-{"page": 6, "line": 17, "text": "PL ^T", "x0": 210.4, "top": 133.7, "x1": 263.6, "bottom": 148.5}
-{"page": 6, "line": 18, "text": "A U", "x0": 251.5, "top": 127.5, "x1": 325.0, "bottom": 142.6}
-{"page": 6, "line": 19, "text": "K", "x0": 522.2, "top": 135.7, "x1": 535.8, "bottom": 146.5}
-{"page": 6, "line": 20, "text": "C C", "x0": 524.2, "top": 127.1, "x1": 746.9, "bottom": 139.2}
-{"page": 6, "line": 21, "text": "N N", "x0": 308.3, "top": 138.9, "x1": 747.1, "bottom": 150.8}
-{"page": 6, "line": 22, "text": "May 2026 T W STATE ST", "x0": 73.8, "top": 144.8, "x1": 637.9, "bottom": 160.6}
-{"page": 6, "line": 23, "text": "D S", "x0": 68.8, "top": 154.4, "x1": 317.4, "bottom": 165.7}
-{"page": 6, "line": 24, "text": "^V ^L ^B C H E TA B E R ST", "x0": 68.9, "top": 160.4, "x1": 491.4, "bottom": 189.7}
-{"page": 6, "line": 25, "text": "R", "x0": 69.2, "top": 190.2, "x1": 81.3, "bottom": 199.0}
-{"page": 6, "line": 26, "text": "GREEN ST - NY79 SB/EB", "x0": 598.7, "top": 184.6, "x1": 739.9, "bottom": 200.1}
-{"page": 6, "line": 27, "text": "^E S T ^T", "x0": 69.3, "top": 197.7, "x1": 748.6, "bottom": 215.9}
-{"page": 6, "line": 28, "text": "L M S", "x0": 69.4, "top": 206.6, "x1": 748.8, "bottom": 222.9}
-{"page": 6, "line": 29, "text": "^L A E L N", "x0": 69.5, "top": 212.7, "x1": 749.1, "bottom": 230.6}
-{"page": 6, "line": 30, "text": "H R", "x0": 69.6, "top": 226.8, "x1": 749.3, "bottom": 237.7}
-{"page": 6, "line": 31, "text": "T O", "x0": 412.2, "top": 235.5, "x1": 749.5, "bottom": 248.2}
-{"page": 6, "line": 32, "text": "S C", "x0": 410.3, "top": 244.8, "x1": 749.7, "bottom": 256.3}
-{"page": 6, "line": 33, "text": "ELM ^L Y ^S", "x0": 57.2, "top": 255.7, "x1": 749.9, "bottom": 270.1}
-{"page": 6, "line": 34, "text": "P R", "x0": 197.6, "top": 262.8, "x1": 419.2, "bottom": 275.5}
-{"page": 6, "line": 35, "text": "ST ^E R CECIL A MALONE RD", "x0": 61.9, "top": 268.8, "x1": 594.6, "bottom": 283.8}
-{"page": 6, "line": 36, "text": "EXT G E", "x0": 57.9, "top": 282.5, "x1": 416.9, "bottom": 297.7}
-{"page": 6, "line": 37, "text": "A H N", "x0": 197.5, "top": 290.0, "x1": 696.2, "bottom": 307.6}
-{"page": 6, "line": 38, "text": "L E C T", "x0": 194.2, "top": 298.4, "x1": 704.1, "bottom": 315.0}
-{"page": 6, "line": 39, "text": "VI", "x0": 181.8, "top": 309.3, "x1": 198.5, "bottom": 326.0}
-{"page": 6, "line": 40, "text": "L", "x0": 189.7, "top": 305.1, "x1": 202.8, "bottom": 318.4}
-{"page": 6, "line": 41, "text": "A", "x0": 306.3, "top": 312.1, "x1": 320.7, "bottom": 325.1}
-{"page": 6, "line": 42, "text": "V", "x0": 310.0, "top": 305.7, "x1": 324.4, "bottom": 318.6}
-{"page": 6, "line": 43, "text": "S", "x0": 674.4, "top": 312.1, "x1": 688.5, "bottom": 326.3}
-{"page": 6, "line": 44, "text": "IT", "x0": 695.1, "top": 305.8, "x1": 710.8, "bottom": 321.5}
-{"page": 6, "line": 45, "text": "U", "x0": 702.0, "top": 312.3, "x1": 716.6, "bottom": 327.0}
-{"page": 6, "line": 46, "text": "T L T S", "x0": 174.3, "top": 318.1, "x1": 722.1, "bottom": 334.2}
-{"page": 6, "line": 47, "text": "S A ^IT A", "x0": 168.3, "top": 324.8, "x1": 730.8, "bottom": 340.7}
-{"page": 6, "line": 48, "text": "W E R U S V E", "x0": 153.7, "top": 330.6, "x1": 742.3, "bottom": 353.2}
-{"page": 6, "line": 49, "text": "O", "x0": 288.6, "top": 341.5, "x1": 303.7, "bottom": 355.6}
-{"page": 6, "line": 50, "text": "A", "x0": 709.2, "top": 345.7, "x1": 723.3, "bottom": 359.9}
-{"page": 6, "line": 51, "text": "L V", "x0": 285.3, "top": 349.6, "x1": 728.6, "bottom": 365.2}
-{"page": 6, "line": 52, "text": "F E", "x0": 281.6, "top": 355.5, "x1": 734.6, "bottom": 370.9}
-{"page": 6, "line": 53, "text": "SOUTH ST", "x0": 673.0, "top": 392.9, "x1": 734.0, "bottom": 405.6}
-{"page": 6, "line": 54, "text": "T", "x0": 741.1, "top": 397.1, "x1": 753.2, "bottom": 404.6}
-{"page": 6, "line": 55, "text": "S", "x0": 741.2, "top": 404.6, "x1": 753.4, "bottom": 412.8}
-{"page": 6, "line": 56, "text": "R", "x0": 741.4, "top": 416.1, "x1": 753.6, "bottom": 425.0}
-{"page": 6, "line": 57, "text": "I", "x0": 741.6, "top": 425.1, "x1": 753.7, "bottom": 428.6}
-{"page": 6, "line": 58, "text": "A", "x0": 741.7, "top": 428.6, "x1": 753.8, "bottom": 436.8}
-{"page": 6, "line": 59, "text": "F", "x0": 741.8, "top": 436.0, "x1": 753.9, "bottom": 443.5}
-{"page": 6, "line": 60, "text": "WOOD ST", "x0": 676.8, "top": 442.7, "x1": 734.5, "bottom": 455.6}
-{"page": 6, "line": 61, "text": "D", "x0": 731.9, "top": 592.7, "x1": 745.9, "bottom": 607.5}
-{"page": 6, "line": 62, "text": "R", "x0": 724.8, "top": 597.7, "x1": 738.8, "bottom": 612.5}
-{"page": 6, "line": 63, "text": "A", "x0": 716.0, "top": 604.3, "x1": 729.5, "bottom": 618.7}
-{"page": 6, "line": 64, "text": "R", "x0": 709.0, "top": 608.9, "x1": 722.9, "bottom": 623.7}
-{"page": 6, "line": 65, "text": "MI", "x0": 698.0, "top": 613.9, "x1": 715.9, "bottom": 631.5}
-{"page": 6, "line": 66, "text": "L", "x0": 692.5, "top": 621.7, "x1": 704.8, "bottom": 635.3}
-{"page": 6, "line": 67, "text": "E", "x0": 686.0, "top": 625.5, "x1": 699.5, "bottom": 639.9}
-{"page": 6, "line": 68, "text": "T", "x0": 670.6, "top": 641.0, "x1": 682.8, "bottom": 648.7}
-{"page": 6, "line": 69, "text": "S", "x0": 670.8, "top": 648.5, "x1": 683.1, "bottom": 656.8}
-{"page": 6, "line": 70, "text": "W", "x0": 671.2, "top": 659.5, "x1": 683.5, "bottom": 671.2}
-{"page": 6, "line": 71, "text": "O", "x0": 671.5, "top": 670.9, "x1": 683.8, "bottom": 680.6}
-{"page": 6, "line": 72, "text": "D", "x0": 736.2, "top": 676.3, "x1": 750.9, "bottom": 690.7}
-{"page": 6, "line": 73, "text": "^D R", "x0": 671.8, "top": 680.4, "x1": 745.7, "bottom": 696.9}
-{"page": 6, "line": 74, "text": "A", "x0": 672.1, "top": 689.0, "x1": 684.3, "bottom": 697.4}
-{"page": 6, "line": 75, "text": "Y", "x0": 723.0, "top": 692.4, "x1": 737.3, "bottom": 706.3}
-{"page": 6, "line": 76, "text": "^E R", "x0": 672.3, "top": 697.2, "x1": 733.0, "bottom": 712.3}
-{"page": 6, "line": 77, "text": "M R", "x0": 672.6, "top": 705.0, "x1": 728.9, "bottom": 718.8}
-{"page": 6, "line": 78, "text": "A", "x0": 710.1, "top": 713.5, "x1": 724.5, "bottom": 726.2}
-{"page": 6, "line": 79, "text": "^S U", "x0": 673.0, "top": 718.3, "x1": 721.0, "bottom": 733.4}
-{"page": 6, "line": 80, "text": "S Q", "x0": 417.4, "top": 727.0, "x1": 716.4, "bottom": 742.1}
-{"page": 6, "line": 81, "text": "O", "x0": 424.1, "top": 732.0, "x1": 438.8, "bottom": 747.2}
-{"page": 6, "line": 82, "text": "U E", "x0": 431.5, "top": 737.6, "x1": 707.8, "bottom": 752.3}
-{"page": 6, "line": 83, "text": "P A R T H W T O N", "x0": 417.1, "top": 742.6, "x1": 702.9, "bottom": 770.6}
-{"page": 6, "line": 84, "text": "K E S", "x0": 433.9, "top": 761.1, "x1": 688.4, "bottom": 777.1}
-{"page": 6, "line": 85, "text": "R S", "x0": 441.0, "top": 769.0, "x1": 474.9, "bottom": 784.2}
-{"page": 6, "line": 86, "text": "D T", "x0": 447.2, "top": 774.8, "x1": 480.4, "bottom": 790.9}
-{"page": 6, "line": 87, "text": "COMMERCIALAV", "x0": 325.3, "top": 813.7, "x1": 426.7, "bottom": 832.6}
-{"page": 6, "line": 88, "text": "D", "x0": 525.5, "top": 820.6, "x1": 539.7, "bottom": 835.4}
-{"page": 6, "line": 89, "text": "E R", "x0": 419.0, "top": 823.8, "x1": 533.0, "bottom": 840.7}
-{"page": 6, "line": 90, "text": "R", "x0": 509.5, "top": 833.4, "x1": 524.0, "bottom": 848.1}
-{"page": 6, "line": 91, "text": "E", "x0": 503.7, "top": 839.5, "x1": 517.9, "bottom": 853.7}
-{"page": 6, "line": 92, "text": "C", "x0": 497.7, "top": 845.1, "x1": 512.3, "bottom": 859.7}
-{"page": 6, "line": 93, "text": "N", "x0": 492.0, "top": 851.1, "x1": 506.6, "bottom": 865.7}
-{"page": 6, "line": 94, "text": "E", "x0": 486.0, "top": 857.5, "x1": 500.1, "bottom": 871.7}
-{"page": 6, "line": 95, "text": "D P", "x0": 402.6, "top": 861.0, "x1": 494.4, "bottom": 877.4}
-{"page": 6, "line": 96, "text": "R S", "x0": 396.7, "top": 867.3, "x1": 488.0, "bottom": 883.6}
-{"page": 6, "line": 97, "text": "A", "x0": 389.4, "top": 875.7, "x1": 403.6, "bottom": 889.8}
-{"page": 6, "line": 98, "text": "R", "x0": 383.5, "top": 881.6, "x1": 398.2, "bottom": 896.1}
-{"page": 6, "line": 99, "text": "MI", "x0": 374.4, "top": 887.9, "x1": 392.3, "bottom": 905.9}
-{"page": 6, "line": 100, "text": "L", "x0": 369.8, "top": 897.8, "x1": 383.1, "bottom": 910.8}
-{"page": 6, "line": 101, "text": "E Zoning Districts ^R-2b", "x0": 364.4, "top": 901.7, "x1": 680.7, "bottom": 917.9}
-{"page": 6, "line": 102, "text": "B-2a", "x0": 537.1, "top": 923.8, "x1": 552.8, "bottom": 931.2}
-{"page": 6, "line": 103, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 633.4, "top": 912.9, "x1": 660.8, "bottom": 929.2}
-{"page": 6, "line": 104, "text": "R-2c", "x0": 664.6, "top": 919.2, "x1": 680.3, "bottom": 926.7}
-{"page": 6, "line": 105, "text": "R-3a", "x0": 664.6, "top": 936.8, "x1": 680.7, "bottom": 944.2}
-{"page": 6, "line": 106, "text": "B-2d", "x0": 537.1, "top": 941.3, "x1": 552.8, "bottom": 948.8}
-{"page": 6, "line": 107, "text": "R-3aa", "x0": 664.6, "top": 954.5, "x1": 685.0, "bottom": 962.0}
-{"page": 6, "line": 108, "text": "B-5", "x0": 537.1, "top": 959.1, "x1": 548.7, "bottom": 966.5}
-{"page": 6, "line": 109, "text": "CBD-50", "x0": 537.1, "top": 976.6, "x1": 563.8, "bottom": 984.0}
-{"page": 6, "line": 110, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 633.4, "top": 964.9, "x1": 660.8, "bottom": 981.0}
-{"page": 6, "line": 111, "text": "R-3b", "x0": 664.6, "top": 972.0, "x1": 680.7, "bottom": 979.5}
-{"page": 6, "line": 112, "text": "Residential Transition", "x0": 664.6, "top": 989.8, "x1": 736.6, "bottom": 997.2}
-{"page": 6, "line": 113, "text": "Cherry Street District", "x0": 537.1, "top": 994.1, "x1": 607.1, "bottom": 1001.6}
-{"page": 6, "line": 114, "text": "SW-1", "x0": 664.6, "top": 1007.3, "x1": 683.1, "bottom": 1014.8}
-{"page": 6, "line": 115, "text": "Urban Mixed Use", "x0": 537.1, "top": 1011.9, "x1": 595.3, "bottom": 1019.3}
-{"page": 6, "line": 116, "text": "SW-2", "x0": 664.6, "top": 1024.8, "x1": 683.1, "bottom": 1032.3}
-{"page": 6, "line": 117, "text": "MH-1", "x0": 537.1, "top": 1029.4, "x1": 555.4, "bottom": 1036.8}
-{"page": 6, "line": 118, "text": "SW-3", "x0": 664.6, "top": 1042.6, "x1": 683.1, "bottom": 1050.0}
-{"page": 6, "line": 119, "text": "Medium-Density Mixed Use", "x0": 537.1, "top": 1047.2, "x1": 629.1, "bottom": 1054.6}
-{"page": 6, "line": 120, "text": "I", "x0": 426.7, "top": 1050.6, "x1": 493.5, "bottom": 1137.5}
-{"page": 6, "line": 121, "text": "Traditional Residential", "x0": 664.6, "top": 1060.1, "x1": 738.9, "bottom": 1067.6}
-{"page": 6, "line": 122, "text": "P-1", "x0": 537.1, "top": 1064.7, "x1": 548.7, "bottom": 1072.1}
-{"page": 6, "line": 123, "text": "WE/WF", "x0": 664.6, "top": 1077.6, "x1": 690.2, "bottom": 1085.1}
-{"page": 6, "line": 124, "text": "PUD", "x0": 537.1, "top": 1082.2, "x1": 552.8, "bottom": 1089.6}
-{"page": 6, "line": 125, "text": "WEDZ-1a", "x0": 664.6, "top": 1095.4, "x1": 697.5, "bottom": 1102.8}
-{"page": 6, "line": 126, "text": "R-1a", "x0": 537.1, "top": 1100.0, "x1": 553.3, "bottom": 1107.4}
-{"page": 6, "line": 127, "text": "WEDZ-1b", "x0": 664.6, "top": 1112.9, "x1": 697.5, "bottom": 1120.4}
-{"page": 6, "line": 128, "text": "R-2a", "x0": 537.1, "top": 1117.5, "x1": 553.3, "bottom": 1124.9}
-{"page": 6, "line": 129, "text": "0 0.050.1 0.2 0.3 0.4", "x0": 425.5, "top": 1148.8, "x1": 704.0, "bottom": 1167.0}
-{"page": 6, "line": 130, "text": "Miles", "x0": 696.0, "top": 1166.3, "x1": 738.7, "bottom": 1184.5}
+{"page": 4, "line": 4, "text": "STE", "x0": 328.2, "top": 266.8, "x1": 339.8, "bottom": 273.2}
+{"page": 4, "line": 5, "text": "HRA", "x0": 210.9, "top": 339.3, "x1": 224.9, "bottom": 345.8}
+{"page": 4, "line": 6, "text": "E D", "x0": 450.7, "top": 352.9, "x1": 464.8, "bottom": 361.1}
+{"page": 4, "line": 7, "text": "CORN", "x0": 614.5, "top": 359.0, "x1": 632.1, "bottom": 366.2}
+{"page": 4, "line": 8, "text": "W", "x0": 596.5, "top": 367.4, "x1": 602.5, "bottom": 373.7}
+{"page": 4, "line": 9, "text": "RRD", "x0": 331.2, "top": 373.3, "x1": 345.7, "bottom": 379.4}
+{"page": 4, "line": 10, "text": "YORK ST TH", "x0": 374.6, "top": 383.5, "x1": 600.9, "bottom": 390.0}
+{"page": 4, "line": 11, "text": "W FALLS ST FALLS ST", "x0": 350.6, "top": 394.8, "x1": 419.4, "bottom": 402.6}
+{"page": 4, "line": 12, "text": "E LINCOLN ST", "x0": 390.8, "top": 406.6, "x1": 432.0, "bottom": 413.8}
+{"page": 4, "line": 13, "text": "QUEEN ST IVERSITYAVE", "x0": 402.1, "top": 418.4, "x1": 591.9, "bottom": 428.9}
+{"page": 4, "line": 14, "text": "E JAY ST FORESTH", "x0": 383.4, "top": 429.4, "x1": 656.9, "bottom": 437.7}
+{"page": 4, "line": 15, "text": "KING ST", "x0": 415.9, "top": 436.5, "x1": 440.0, "bottom": 442.9}
+{"page": 4, "line": 16, "text": "E YATES ST", "x0": 389.9, "top": 486.1, "x1": 424.4, "bottom": 492.7}
+{"page": 4, "line": 17, "text": "E MARSHALL ST LLAVE", "x0": 392.9, "top": 504.5, "x1": 494.9, "bottom": 512.3}
+{"page": 4, "line": 18, "text": "FARM ST CORNELL - CAMPUS RD", "x0": 405.3, "top": 523.8, "x1": 690.1, "bottom": 530.9}
+{"page": 4, "line": 19, "text": "CASCADILLA ST", "x0": 247.3, "top": 532.5, "x1": 293.8, "bottom": 539.4}
+{"page": 4, "line": 20, "text": "SUNRISE RD", "x0": 53.9, "top": 537.2, "x1": 91.1, "bottom": 544.8}
+{"page": 4, "line": 21, "text": "ISERD EDGEMOOR LN", "x0": 152.9, "top": 541.8, "x1": 544.8, "bottom": 551.4}
+{"page": 4, "line": 22, "text": "ESTY ST", "x0": 302.8, "top": 550.0, "x1": 327.7, "bottom": 556.5}
+{"page": 4, "line": 23, "text": "W COURT ST", "x0": 322.0, "top": 564.5, "x1": 359.9, "bottom": 571.3}
+{"page": 4, "line": 24, "text": "LIF WILLIAMS ST", "x0": 82.5, "top": 570.4, "x1": 531.7, "bottom": 576.9}
+{"page": 4, "line": 25, "text": "BUFFALO ST", "x0": 387.2, "top": 584.4, "x1": 424.3, "bottom": 591.2}
+{"page": 4, "line": 26, "text": "MAPLE AVE", "x0": 655.1, "top": 590.8, "x1": 688.8, "bottom": 598.2}
+{"page": 4, "line": 27, "text": "SENECA ST WSENECASTNY79 SENECA ST CATHERINE ST", "x0": 240.0, "top": 597.4, "x1": 569.0, "bottom": 611.1}
+{"page": 4, "line": 28, "text": "W STATE ST MILLER ST", "x0": 259.1, "top": 613.8, "x1": 676.3, "bottom": 623.3}
+{"page": 4, "line": 29, "text": "TABE", "x0": 180.4, "top": 622.2, "x1": 195.9, "bottom": 628.7}
+{"page": 4, "line": 30, "text": "GREEN ST - NY79 SB/EB THST", "x0": 267.8, "top": 629.4, "x1": 675.7, "bottom": 638.2}
+{"page": 4, "line": 31, "text": "MITCHELL ST", "x0": 637.8, "top": 646.1, "x1": 677.0, "bottom": 654.2}
+{"page": 4, "line": 32, "text": "LS", "x0": 591.4, "top": 651.8, "x1": 600.9, "bottom": 658.0}
+{"page": 4, "line": 33, "text": "CECILAMALONERD LINTONSTW PLEASANT ST ERD", "x0": 191.2, "top": 658.9, "x1": 637.0, "bottom": 669.3}
+{"page": 4, "line": 34, "text": "RD", "x0": 630.0, "top": 672.4, "x1": 638.5, "bottom": 678.6}
+{"page": 4, "line": 35, "text": "COLUMBIA", "x0": 453.1, "top": 676.1, "x1": 484.1, "bottom": 683.0}
+{"page": 4, "line": 36, "text": "HILLVIEW PL", "x0": 428.8, "top": 691.8, "x1": 465.9, "bottom": 698.8}
+{"page": 4, "line": 37, "text": "SOUTH ST", "x0": 270.0, "top": 708.0, "x1": 300.3, "bottom": 714.3}
+{"page": 4, "line": 38, "text": "H", "x0": 329.6, "top": 714.2, "x1": 334.1, "bottom": 720.3}
+{"page": 4, "line": 39, "text": "S", "x0": 330.1, "top": 707.1, "x1": 334.3, "bottom": 713.2}
+{"page": 4, "line": 40, "text": "Y", "x0": 333.9, "top": 714.1, "x1": 338.0, "bottom": 720.2}
+{"page": 4, "line": 41, "text": "T", "x0": 336.1, "top": 706.8, "x1": 340.0, "bottom": 712.9}
+{"page": 4, "line": 42, "text": "ERS ST CR", "x0": 337.7, "top": 711.2, "x1": 494.2, "bottom": 720.1}
+{"page": 4, "line": 43, "text": "TAVE", "x0": 704.1, "top": 719.4, "x1": 721.2, "bottom": 725.8}
+{"page": 4, "line": 44, "text": "WOOD ST", "x0": 321.9, "top": 725.4, "x1": 350.6, "bottom": 731.9}
+{"page": 4, "line": 45, "text": "PARK ST VIEWCT", "x0": 326.2, "top": 741.8, "x1": 473.6, "bottom": 748.3}
+{"page": 4, "line": 46, "text": "GTONRD", "x0": 444.0, "top": 780.7, "x1": 471.2, "bottom": 787.8}
+{"page": 4, "line": 47, "text": "ERCIA", "x0": 164.9, "top": 863.4, "x1": 182.8, "bottom": 869.7}
+{"page": 4, "line": 48, "text": "Historic Districts National Ithaca Downtown", "x0": 242.9, "top": 900.5, "x1": 727.7, "bottom": 925.1}
+{"page": 4, "line": 49, "text": "Clinton Block", "x0": 296.2, "top": 941.3, "x1": 404.3, "bottom": 959.8}
+{"page": 4, "line": 50, "text": "Local DeWitt Park", "x0": 512.4, "top": 944.4, "x1": 660.9, "bottom": 962.9}
+{"page": 4, "line": 51, "text": "Cornell Arts Quad", "x0": 296.2, "top": 981.5, "x1": 442.5, "bottom": 1000.0}
+{"page": 4, "line": 52, "text": "Local East Hill", "x0": 512.4, "top": 984.6, "x1": 630.1, "bottom": 1003.1}
+{"page": 4, "line": 53, "text": "Cornell Heights", "x0": 296.2, "top": 1021.6, "x1": 422.7, "bottom": 1040.1}
+{"page": 4, "line": 54, "text": "National DeWitt Park", "x0": 512.4, "top": 1024.7, "x1": 684.6, "bottom": 1043.2}
+{"page": 4, "line": 55, "text": "Downtown West", "x0": 296.2, "top": 1061.8, "x1": 430.0, "bottom": 1080.2}
+{"page": 4, "line": 56, "text": "National East Hill", "x0": 512.4, "top": 1064.8, "x1": 653.8, "bottom": 1083.3}
+{"page": 4, "line": 57, "text": "I Henry St. John University Hill", "x0": 112.6, "top": 1101.9, "x1": 624.6, "bottom": 1191.7}
+{"page": 4, "line": 58, "text": "0 0.25 0.5 1 1.5 2", "x0": 195.8, "top": 1148.8, "x1": 686.2, "bottom": 1167.0}
+{"page": 4, "line": 59, "text": "Miles", "x0": 685.7, "top": 1166.3, "x1": 728.4, "bottom": 1184.5}
+{"page": 5, "line": 1, "text": "W COURT ST", "x0": 77.1, "top": 33.4, "x1": 153.1, "bottom": 47.0}
+{"page": 5, "line": 2, "text": "City of Ithaca", "x0": 64.3, "top": 49.3, "x1": 214.5, "bottom": 73.3}
+{"page": 5, "line": 3, "text": "UN PL", "x0": 1149.4, "top": 71.3, "x1": 1185.1, "bottom": 83.9}
+{"page": 5, "line": 4, "text": "CBD District Map", "x0": 64.3, "top": 88.8, "x1": 293.6, "bottom": 118.8}
+{"page": 5, "line": 5, "text": "BUFFALO ST", "x0": 621.0, "top": 121.7, "x1": 695.5, "bottom": 135.4}
+{"page": 5, "line": 6, "text": "May 2026", "x0": 64.4, "top": 128.2, "x1": 135.2, "bottom": 144.0}
+{"page": 5, "line": 7, "text": "SENECA ST", "x0": 967.2, "top": 186.6, "x1": 1034.9, "bottom": 199.1}
+{"page": 5, "line": 8, "text": "W SENECA STNY 79", "x0": 424.6, "top": 196.3, "x1": 547.0, "bottom": 211.6}
+{"page": 5, "line": 9, "text": "SENECA ST", "x0": 52.3, "top": 207.9, "x1": 120.1, "bottom": 221.0}
+{"page": 5, "line": 10, "text": "W STATE ST", "x0": 314.3, "top": 268.9, "x1": 386.5, "bottom": 282.8}
+{"page": 5, "line": 11, "text": "NN", "x0": 964.6, "top": 279.2, "x1": 982.1, "bottom": 291.8}
+{"page": 5, "line": 12, "text": "E STATE ST", "x0": 1083.7, "top": 291.1, "x1": 1152.2, "bottom": 303.4}
+{"page": 5, "line": 13, "text": "GREEN ST - NY79 SB/EB", "x0": 390.6, "top": 337.2, "x1": 531.8, "bottom": 352.4}
+{"page": 5, "line": 14, "text": "CLEVELAND AVE PROSPECT ST", "x0": 196.4, "top": 414.3, "x1": 1004.0, "bottom": 430.1}
+{"page": 5, "line": 15, "text": "CLINTON ST E", "x0": 686.3, "top": 470.6, "x1": 768.8, "bottom": 483.3}
+{"page": 5, "line": 16, "text": "CLINTON ST W", "x0": 388.1, "top": 476.6, "x1": 474.2, "bottom": 490.8}
+{"page": 5, "line": 17, "text": "PLEASANT ST", "x0": 876.7, "top": 490.3, "x1": 958.2, "bottom": 504.0}
+{"page": 5, "line": 18, "text": "A Zoning Districts", "x0": 98.7, "top": 556.0, "x1": 802.9, "bottom": 570.9}
+{"page": 5, "line": 19, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 805.2, "top": 549.0, "x1": 832.8, "bottom": 567.0}
+{"page": 5, "line": 20, "text": "CBD-140 COLUMB PU IAD ST Residential Transition", "x0": 835.4, "top": 555.7, "x1": 1125.3, "bottom": 571.9}
+{"page": 5, "line": 21, "text": "RD CENTER ST !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! B-1a CBD-50 R-1a SW-2", "x0": 98.5, "top": 570.8, "x1": 1059.8, "bottom": 589.1}
+{"page": 5, "line": 22, "text": "B-1b CBD-60 R-1b Street Level Active Use Overlay Zone", "x0": 715.4, "top": 595.0, "x1": 1190.1, "bottom": 606.3}
+{"page": 5, "line": 23, "text": "B-2a", "x0": 715.4, "top": 616.9, "x1": 734.6, "bottom": 626.0}
+{"page": 5, "line": 24, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 805.2, "top": 609.0, "x1": 832.8, "bottom": 625.1}
+{"page": 5, "line": 25, "text": "CBD-85 R-2a Traditional Residential", "x0": 835.4, "top": 614.7, "x1": 1128.1, "bottom": 623.8}
+{"page": 5, "line": 26, "text": "B-2d HILCLhVerIrEy SWtrePet LDistrict R-2b WE/WF", "x0": 715.4, "top": 634.4, "x1": 1068.7, "bottom": 648.6}
+{"page": 5, "line": 27, "text": "B-4 Urban Mixed Use R-3a WEDZ-1a", "x0": 715.4, "top": 654.1, "x1": 1077.4, "bottom": 665.3}
+{"page": 5, "line": 28, "text": "S AVE", "x0": 376.5, "top": 670.2, "x1": 413.8, "bottom": 682.9}
+{"page": 5, "line": 29, "text": "I CBD-100 Medium-Density Mixed Use R-3aa WEDZ-1b", "x0": 599.7, "top": 673.7, "x1": 1077.4, "bottom": 763.3}
+{"page": 5, "line": 30, "text": "CBD-120 P-1", "x0": 715.4, "top": 693.4, "x1": 849.6, "bottom": 704.7}
+{"page": 5, "line": 31, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 951.3, "top": 687.0, "x1": 976.8, "bottom": 705.0}
+{"page": 5, "line": 32, "text": "R-3b", "x0": 980.1, "top": 693.4, "x1": 999.8, "bottom": 702.5}
+{"page": 5, "line": 33, "text": "SOUTH ST", "x0": 157.0, "top": 707.5, "x1": 218.0, "bottom": 720.2}
+{"page": 5, "line": 34, "text": "0 0.05 0.1 0.2 0.3 CRESC0E.4", "x0": 686.6, "top": 722.0, "x1": 1158.2, "bottom": 740.7}
+{"page": 5, "line": 35, "text": "HYERS ST", "x0": 415.6, "top": 734.1, "x1": 476.0, "bottom": 747.8}
+{"page": 5, "line": 36, "text": "Miles", "x0": 1151.0, "top": 740.2, "x1": 1188.0, "bottom": 756.1}
+{"page": 6, "line": 1, "text": "City of Ithaca BUFFALO ST", "x0": 73.7, "top": 64.0, "x1": 752.2, "bottom": 88.2}
+{"page": 6, "line": 2, "text": "Southwest District Map", "x0": 73.8, "top": 104.4, "x1": 379.7, "bottom": 134.4}
+{"page": 6, "line": 3, "text": "ECA ST SENECA ST", "x0": 463.2, "top": 108.1, "x1": 637.3, "bottom": 123.2}
+{"page": 6, "line": 4, "text": "May 2026 W STATE ST", "x0": 73.8, "top": 144.8, "x1": 637.9, "bottom": 160.6}
+{"page": 6, "line": 5, "text": "T", "x0": 435.4, "top": 160.4, "x1": 443.2, "bottom": 172.7}
+{"page": 6, "line": 6, "text": "T", "x0": 483.7, "top": 176.0, "x1": 491.4, "bottom": 188.3}
+{"page": 6, "line": 7, "text": "GREEN ST - NY79 SB/EB", "x0": 598.7, "top": 184.6, "x1": 739.9, "bottom": 200.1}
+{"page": 6, "line": 8, "text": "ELM", "x0": 57.2, "top": 258.1, "x1": 81.9, "bottom": 270.1}
+{"page": 6, "line": 9, "text": "ST CECIL A MALONE RD", "x0": 61.9, "top": 268.8, "x1": 594.6, "bottom": 283.8}
+{"page": 6, "line": 10, "text": "EXT", "x0": 57.9, "top": 285.7, "x1": 81.1, "bottom": 297.7}
+{"page": 6, "line": 11, "text": "SOUTH ST", "x0": 673.0, "top": 392.9, "x1": 734.0, "bottom": 405.6}
+{"page": 6, "line": 12, "text": "WOOD ST", "x0": 676.8, "top": 442.7, "x1": 734.5, "bottom": 455.6}
+{"page": 6, "line": 13, "text": "MERCIAL", "x0": 355.4, "top": 814.9, "x1": 408.8, "bottom": 827.4}
+{"page": 6, "line": 14, "text": "Zoning Districts R-2b", "x0": 506.9, "top": 901.7, "x1": 680.7, "bottom": 917.9}
+{"page": 6, "line": 15, "text": "B-2a", "x0": 537.1, "top": 923.8, "x1": 552.8, "bottom": 931.2}
+{"page": 6, "line": 16, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 633.4, "top": 912.9, "x1": 660.8, "bottom": 929.2}
+{"page": 6, "line": 17, "text": "R-2c", "x0": 664.6, "top": 919.2, "x1": 680.3, "bottom": 926.7}
+{"page": 6, "line": 18, "text": "R-3a", "x0": 664.6, "top": 936.8, "x1": 680.7, "bottom": 944.2}
+{"page": 6, "line": 19, "text": "B-2d", "x0": 537.1, "top": 941.3, "x1": 552.8, "bottom": 948.8}
+{"page": 6, "line": 20, "text": "R-3aa", "x0": 664.6, "top": 954.5, "x1": 685.0, "bottom": 962.0}
+{"page": 6, "line": 21, "text": "B-5", "x0": 537.1, "top": 959.1, "x1": 548.7, "bottom": 966.5}
+{"page": 6, "line": 22, "text": "CBD-50", "x0": 537.1, "top": 976.6, "x1": 563.8, "bottom": 984.0}
+{"page": 6, "line": 23, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 633.4, "top": 964.9, "x1": 660.8, "bottom": 981.0}
+{"page": 6, "line": 24, "text": "R-3b", "x0": 664.6, "top": 972.0, "x1": 680.7, "bottom": 979.5}
+{"page": 6, "line": 25, "text": "Residential Transition", "x0": 664.6, "top": 989.8, "x1": 736.6, "bottom": 997.2}
+{"page": 6, "line": 26, "text": "Cherry Street District", "x0": 537.1, "top": 994.1, "x1": 607.1, "bottom": 1001.6}
+{"page": 6, "line": 27, "text": "SW-1", "x0": 664.6, "top": 1007.3, "x1": 683.1, "bottom": 1014.8}
+{"page": 6, "line": 28, "text": "Urban Mixed Use", "x0": 537.1, "top": 1011.9, "x1": 595.3, "bottom": 1019.3}
+{"page": 6, "line": 29, "text": "SW-2", "x0": 664.6, "top": 1024.8, "x1": 683.1, "bottom": 1032.3}
+{"page": 6, "line": 30, "text": "MH-1", "x0": 537.1, "top": 1029.4, "x1": 555.4, "bottom": 1036.8}
+{"page": 6, "line": 31, "text": "SW-3", "x0": 664.6, "top": 1042.6, "x1": 683.1, "bottom": 1050.0}
+{"page": 6, "line": 32, "text": "Medium-Density Mixed Use", "x0": 537.1, "top": 1047.2, "x1": 629.1, "bottom": 1054.6}
+{"page": 6, "line": 33, "text": "I", "x0": 426.7, "top": 1050.6, "x1": 493.5, "bottom": 1137.5}
+{"page": 6, "line": 34, "text": "Traditional Residential", "x0": 664.6, "top": 1060.1, "x1": 738.9, "bottom": 1067.6}
+{"page": 6, "line": 35, "text": "P-1", "x0": 537.1, "top": 1064.7, "x1": 548.7, "bottom": 1072.1}
+{"page": 6, "line": 36, "text": "WE/WF", "x0": 664.6, "top": 1077.6, "x1": 690.2, "bottom": 1085.1}
+{"page": 6, "line": 37, "text": "PUD", "x0": 537.1, "top": 1082.2, "x1": 552.8, "bottom": 1089.6}
+{"page": 6, "line": 38, "text": "WEDZ-1a", "x0": 664.6, "top": 1095.4, "x1": 697.5, "bottom": 1102.8}
+{"page": 6, "line": 39, "text": "R-1a", "x0": 537.1, "top": 1100.0, "x1": 553.3, "bottom": 1107.4}
+{"page": 6, "line": 40, "text": "WEDZ-1b", "x0": 664.6, "top": 1112.9, "x1": 697.5, "bottom": 1120.4}
+{"page": 6, "line": 41, "text": "R-2a", "x0": 537.1, "top": 1117.5, "x1": 553.3, "bottom": 1124.9}
+{"page": 6, "line": 42, "text": "0 0.050.1 0.2 0.3 0.4", "x0": 425.5, "top": 1148.8, "x1": 704.0, "bottom": 1167.0}
+{"page": 6, "line": 43, "text": "Miles", "x0": 696.0, "top": 1166.3, "x1": 738.7, "bottom": 1184.5}
 {"page": 7, "line": 1, "text": "City of Ithaca", "x0": 61.0, "top": 56.3, "x1": 211.1, "bottom": 80.3}
 {"page": 7, "line": 2, "text": "City of Ithaca", "x0": 73.7, "top": 64.2, "x1": 223.8, "bottom": 88.2}
-{"page": 7, "line": 3, "text": "CAS PIERRD", "x0": 282.3, "top": 85.4, "x1": 591.0, "bottom": 104.5}
-{"page": 7, "line": 4, "text": "^FWaterfront District^S Map", "x0": 49.7, "top": 94.4, "x1": 366.1, "bottom": 125.8}
-{"page": 7, "line": 5, "text": "A O T S P", "x0": 52.4, "top": 100.4, "x1": 318.0, "bottom": 119.8}
-{"page": 7, "line": 6, "text": "L ^L L E S A YORK ST", "x0": 55.3, "top": 108.9, "x1": 726.7, "bottom": 129.4}
-{"page": 7, "line": 7, "text": "V C C R", "x0": 58.4, "top": 118.8, "x1": 323.3, "bottom": 137.5}
-{"page": 7, "line": 8, "text": "^IE A K W", "x0": 60.5, "top": 126.7, "x1": 524.6, "bottom": 143.2}
-{"page": 7, "line": 9, "text": "T E M W ay 2026 D R ^I L W FALLS ST FALLS ST", "x0": 47.1, "top": 135.2, "x1": 750.0, "bottom": 156.7}
-{"page": 7, "line": 10, "text": "R L", "x0": 53.0, "top": 146.0, "x1": 533.0, "bottom": 162.0}
-{"page": 7, "line": 11, "text": "O", "x0": 522.8, "top": 152.0, "x1": 537.8, "bottom": 166.1}
-{"page": 7, "line": 12, "text": "W", "x0": 527.4, "top": 160.1, "x1": 543.5, "bottom": 175.9}
-{"page": 7, "line": 13, "text": "N O R", "x0": 66.2, "top": 192.6, "x1": 103.9, "bottom": 213.4}
-{"page": 7, "line": 14, "text": "A", "x0": 534.5, "top": 172.4, "x1": 548.9, "bottom": 185.3}
-{"page": 7, "line": 15, "text": "V", "x0": 538.0, "top": 178.7, "x1": 552.4, "bottom": 191.6}
-{"page": 7, "line": 16, "text": "E Y 3 4 W LI N C", "x0": 542.1, "top": 183.3, "x1": 636.0, "bottom": 214.5}
-{"page": 7, "line": 17, "text": "OLNST ELIN", "x0": 630.7, "top": 167.6, "x1": 716.6, "bottom": 195.0}
-{"page": 7, "line": 18, "text": "S", "x0": 710.7, "top": 182.3, "x1": 719.0, "bottom": 194.5}
-{"page": 7, "line": 19, "text": "C", "x0": 716.0, "top": 167.4, "x1": 725.0, "bottom": 179.6}
-{"page": 7, "line": 20, "text": "T", "x0": 718.9, "top": 182.1, "x1": 726.5, "bottom": 194.3}
-{"page": 7, "line": 21, "text": "OLN", "x0": 724.4, "top": 166.7, "x1": 749.2, "bottom": 179.4}
-{"page": 7, "line": 22, "text": "L N", "x0": 76.3, "top": 202.1, "x1": 581.5, "bottom": 217.3}
-{"page": 7, "line": 23, "text": "C", "x0": 41.9, "top": 229.7, "x1": 56.4, "bottom": 242.6}
-{"page": 7, "line": 24, "text": "T A Y P L", "x0": 57.7, "top": 207.6, "x1": 98.0, "bottom": 231.9}
-{"page": 7, "line": 25, "text": "N Y", "x0": 543.2, "top": 223.8, "x1": 563.1, "bottom": 244.3}
-{"page": 7, "line": 26, "text": "1 3/", "x0": 555.9, "top": 208.7, "x1": 575.9, "bottom": 229.3}
-{"page": 7, "line": 27, "text": "D", "x0": 609.6, "top": 227.7, "x1": 624.4, "bottom": 241.2}
-{"page": 7, "line": 28, "text": "T S", "x0": 659.1, "top": 207.5, "x1": 671.5, "bottom": 223.2}
-{"page": 7, "line": 29, "text": "N", "x0": 659.5, "top": 226.3, "x1": 671.7, "bottom": 235.2}
-{"page": 7, "line": 30, "text": "E JAY ST", "x0": 696.2, "top": 218.7, "x1": 748.3, "bottom": 232.3}
-{"page": 7, "line": 31, "text": "A R E ^R", "x0": 45.2, "top": 234.9, "x1": 671.9, "bottom": 252.3}
-{"page": 7, "line": 32, "text": "M A Y ^U", "x0": 48.8, "top": 242.0, "x1": 672.1, "bottom": 258.9}
-{"page": 7, "line": 33, "text": "A V E P B E L", "x0": 41.4, "top": 254.1, "x1": 77.4, "bottom": 290.2}
-{"page": 7, "line": 34, "text": "L", "x0": 66.4, "top": 282.7, "x1": 80.1, "bottom": 293.8}
-{"page": 7, "line": 35, "text": "V ^I N E G H^I L L R D C", "x0": 128.3, "top": 249.4, "x1": 184.5, "bottom": 293.7}
-{"page": 7, "line": 36, "text": "L", "x0": 173.0, "top": 284.7, "x1": 186.5, "bottom": 294.6}
-{"page": 7, "line": 37, "text": "^I F S S", "x0": 175.0, "top": 291.1, "x1": 280.7, "bottom": 311.9}
-{"page": 7, "line": 38, "text": "RD", "x0": 279.0, "top": 287.5, "x1": 298.3, "bottom": 302.9}
-{"page": 7, "line": 39, "text": "K", "x0": 304.7, "top": 294.8, "x1": 318.9, "bottom": 306.8}
-{"page": 7, "line": 40, "text": "B", "x0": 309.5, "top": 283.7, "x1": 323.7, "bottom": 295.7}
-{"page": 7, "line": 41, "text": "L V D", "x0": 312.7, "top": 262.5, "x1": 332.6, "bottom": 288.1}
-{"page": 7, "line": 42, "text": "R A", "x0": 511.3, "top": 292.3, "x1": 531.5, "bottom": 311.3}
-{"page": 7, "line": 43, "text": "N K", "x0": 525.5, "top": 283.6, "x1": 545.5, "bottom": 302.3}
-{"page": 7, "line": 44, "text": "LI N S T", "x0": 539.7, "top": 264.7, "x1": 578.0, "bottom": 293.7}
-{"page": 7, "line": 45, "text": "W", "x0": 609.2, "top": 296.9, "x1": 625.3, "bottom": 312.6}
-{"page": 7, "line": 46, "text": "S T ^B ^U ^A LEWIS ST", "x0": 623.6, "top": 251.8, "x1": 748.8, "bottom": 277.4}
-{"page": 7, "line": 47, "text": "H E C T", "x0": 151.7, "top": 319.5, "x1": 174.8, "bottom": 354.0}
-{"page": 7, "line": 48, "text": "F S", "x0": 178.2, "top": 301.2, "x1": 195.2, "bottom": 322.7}
-{"page": 7, "line": 49, "text": "T K A C", "x0": 183.8, "top": 319.3, "x1": 266.3, "bottom": 349.9}
-{"page": 7, "line": 50, "text": "C E", "x0": 254.6, "top": 303.9, "x1": 271.3, "bottom": 322.7}
-{"page": 7, "line": 51, "text": "H A N N", "x0": 289.0, "top": 318.4, "x1": 309.8, "bottom": 353.5}
-{"page": 7, "line": 52, "text": "O C", "x0": 298.4, "top": 301.8, "x1": 316.0, "bottom": 322.9}
-{"page": 7, "line": 53, "text": "T H ^I R", "x0": 492.2, "top": 324.2, "x1": 516.6, "bottom": 354.5}
-{"page": 7, "line": 54, "text": "F", "x0": 505.6, "top": 301.3, "x1": 518.9, "bottom": 315.2}
-{"page": 7, "line": 55, "text": "A D A M S", "x0": 532.1, "top": 315.7, "x1": 574.9, "bottom": 347.5}
-{"page": 7, "line": 56, "text": "S T", "x0": 572.0, "top": 306.3, "x1": 591.2, "bottom": 324.4}
-{"page": 7, "line": 57, "text": "F ^IR", "x0": 579.2, "top": 333.5, "x1": 599.1, "bottom": 356.1}
-{"page": 7, "line": 58, "text": "I L", "x0": 614.8, "top": 306.7, "x1": 630.3, "bottom": 321.5}
-{"page": 7, "line": 59, "text": "L O W A", "x0": 619.9, "top": 315.6, "x1": 649.4, "bottom": 355.0}
-{"page": 7, "line": 60, "text": "TOMP", "x0": 667.5, "top": 310.1, "x1": 702.1, "bottom": 322.7}
-{"page": 7, "line": 61, "text": "E", "x0": 699.7, "top": 340.3, "x1": 708.0, "bottom": 352.4}
-{"page": 7, "line": 62, "text": "KI", "x0": 701.8, "top": 309.9, "x1": 713.5, "bottom": 322.1}
-{"page": 7, "line": 63, "text": "Y", "x0": 711.0, "top": 340.1, "x1": 719.2, "bottom": 352.2}
-{"page": 7, "line": 64, "text": "N", "x0": 713.3, "top": 309.7, "x1": 722.2, "bottom": 321.9}
-{"page": 7, "line": 65, "text": "A", "x0": 718.5, "top": 340.1, "x1": 726.7, "bottom": 352.2}
-{"page": 7, "line": 66, "text": "S", "x0": 721.9, "top": 309.5, "x1": 730.2, "bottom": 321.7}
-{"page": 7, "line": 67, "text": "T E", "x0": 725.9, "top": 339.8, "x1": 740.6, "bottom": 352.0}
-{"page": 7, "line": 68, "text": "S", "x0": 733.4, "top": 309.3, "x1": 741.7, "bottom": 321.5}
-{"page": 7, "line": 69, "text": "S", "x0": 740.8, "top": 339.6, "x1": 749.0, "bottom": 351.7}
-{"page": 7, "line": 70, "text": "T", "x0": 741.4, "top": 309.2, "x1": 748.9, "bottom": 321.3}
-{"page": 7, "line": 71, "text": "O G D S V", "x0": 163.1, "top": 348.4, "x1": 652.9, "bottom": 363.0}
-{"page": 7, "line": 72, "text": "R", "x0": 166.2, "top": 357.8, "x1": 180.4, "bottom": 369.8}
-{"page": 7, "line": 73, "text": "S T", "x0": 170.1, "top": 369.3, "x1": 186.4, "bottom": 388.0}
-{"page": 7, "line": 74, "text": "A", "x0": 252.0, "top": 356.9, "x1": 264.6, "bottom": 365.8}
-{"page": 7, "line": 75, "text": "P S T A", "x0": 252.5, "top": 364.3, "x1": 297.5, "bottom": 385.3}
-{"page": 7, "line": 76, "text": "U S", "x0": 285.9, "top": 358.9, "x1": 526.6, "bottom": 371.8}
-{"page": 7, "line": 77, "text": "T C O C K", "x0": 516.2, "top": 366.0, "x1": 571.6, "bottom": 394.1}
-{"page": 7, "line": 78, "text": "S T T", "x0": 568.5, "top": 357.0, "x1": 606.8, "bottom": 375.1}
-{"page": 7, "line": 79, "text": "S T", "x0": 598.0, "top": 366.4, "x1": 616.0, "bottom": 385.6}
-{"page": 7, "line": 80, "text": "E ST", "x0": 642.6, "top": 354.7, "x1": 733.9, "bottom": 368.4}
-{"page": 7, "line": 81, "text": "S A C", "x0": 254.1, "top": 384.7, "x1": 271.7, "bottom": 410.1}
-{"page": 7, "line": 82, "text": "S", "x0": 263.2, "top": 405.8, "x1": 277.4, "bottom": 419.9}
-{"page": 7, "line": 83, "text": "B L V D", "x0": 316.0, "top": 421.5, "x1": 328.4, "bottom": 452.7}
-{"page": 7, "line": 84, "text": "F ^IF T", "x0": 453.8, "top": 401.1, "x1": 476.8, "bottom": 429.1}
-{"page": 7, "line": 85, "text": "H S T", "x0": 466.4, "top": 423.2, "x1": 490.3, "bottom": 452.8}
-{"page": 7, "line": 86, "text": "F", "x0": 502.2, "top": 413.7, "x1": 516.2, "bottom": 426.0}
-{"page": 7, "line": 87, "text": "O U", "x0": 505.7, "top": 420.0, "x1": 525.0, "bottom": 441.6}
-{"page": 7, "line": 88, "text": "H", "x0": 513.5, "top": 391.9, "x1": 527.0, "bottom": 406.6}
-{"page": 7, "line": 89, "text": "R T", "x0": 514.5, "top": 435.7, "x1": 532.8, "bottom": 455.5}
-{"page": 7, "line": 90, "text": "A N", "x0": 521.0, "top": 383.6, "x1": 541.4, "bottom": 402.3}
-{"page": 7, "line": 91, "text": "M A", "x0": 541.9, "top": 420.3, "x1": 563.3, "bottom": 439.6}
-{"page": 7, "line": 92, "text": "DI S O N", "x0": 557.4, "top": 401.2, "x1": 596.3, "bottom": 430.6}
-{"page": 7, "line": 93, "text": "M", "x0": 590.9, "top": 443.8, "x1": 605.5, "bottom": 459.1}
-{"page": 7, "line": 94, "text": "S", "x0": 593.4, "top": 395.4, "x1": 606.3, "bottom": 409.8}
-{"page": 7, "line": 95, "text": "O", "x0": 599.5, "top": 439.3, "x1": 613.5, "bottom": 454.3}
-{"page": 7, "line": 96, "text": "T", "x0": 600.3, "top": 391.8, "x1": 612.6, "bottom": 405.9}
-{"page": 7, "line": 97, "text": "N R O E", "x0": 607.6, "top": 422.1, "x1": 643.9, "bottom": 449.7}
-{"page": 7, "line": 98, "text": "S T", "x0": 640.9, "top": 412.9, "x1": 660.3, "bottom": 431.0}
-{"page": 7, "line": 99, "text": "L A", "x0": 652.2, "top": 390.9, "x1": 670.0, "bottom": 409.6}
-{"page": 7, "line": 100, "text": "K E", "x0": 659.6, "top": 403.8, "x1": 678.1, "bottom": 423.8}
-{"page": 7, "line": 101, "text": "A V E", "x0": 669.1, "top": 420.2, "x1": 691.3, "bottom": 446.7}
-{"page": 7, "line": 102, "text": "T S", "x0": 733.5, "top": 386.3, "x1": 745.9, "bottom": 402.2}
-{"page": 7, "line": 103, "text": "A C", "x0": 734.0, "top": 404.4, "x1": 746.6, "bottom": 421.6}
-{"page": 7, "line": 104, "text": "^I T U", "x0": 734.6, "top": 421.3, "x1": 747.2, "bottom": 440.8}
-{"page": 7, "line": 105, "text": "H", "x0": 522.3, "top": 449.5, "x1": 537.0, "bottom": 462.9}
-{"page": 7, "line": 106, "text": "HOPPER PL ^DC ^K CASCADILLA ST S", "x0": 122.6, "top": 455.0, "x1": 542.6, "bottom": 476.7}
-{"page": 7, "line": 107, "text": "T ^T", "x0": 532.2, "top": 467.0, "x1": 715.4, "bottom": 479.3}
-{"page": 7, "line": 108, "text": "LO", "x0": 300.6, "top": 472.0, "x1": 327.4, "bottom": 481.5}
-{"page": 7, "line": 109, "text": "S", "x0": 703.2, "top": 475.0, "x1": 715.4, "bottom": 483.2}
-{"page": 7, "line": 110, "text": "ON T", "x0": 300.4, "top": 480.0, "x1": 493.2, "bottom": 489.9}
-{"page": 7, "line": 111, "text": "ERD N S A T", "x0": 129.6, "top": 486.0, "x1": 748.5, "bottom": 503.8}
-{"page": 7, "line": 112, "text": "L", "x0": 72.8, "top": 500.7, "x1": 85.1, "bottom": 507.9}
-{"page": 7, "line": 113, "text": "P Y ^L R O S U N", "x0": 73.2, "top": 507.7, "x1": 123.2, "bottom": 552.9}
-{"page": 7, "line": 114, "text": "R^I S", "x0": 115.0, "top": 495.0, "x1": 137.3, "bottom": 516.7}
-{"page": 7, "line": 115, "text": "P A R K R", "x0": 248.9, "top": 505.3, "x1": 268.2, "bottom": 552.9}
-{"page": 7, "line": 116, "text": "D", "x0": 256.3, "top": 497.1, "x1": 269.4, "bottom": 507.3}
-{"page": 7, "line": 117, "text": "T A U G ^H", "x0": 293.2, "top": 506.0, "x1": 326.9, "bottom": 545.3}
-{"page": 7, "line": 118, "text": "A", "x0": 315.0, "top": 498.2, "x1": 327.2, "bottom": 506.5}
-{"page": 7, "line": 119, "text": "S N O", "x0": 367.3, "top": 508.7, "x1": 379.8, "bottom": 538.2}
-{"page": 7, "line": 120, "text": "T", "x0": 367.6, "top": 500.8, "x1": 380.6, "bottom": 509.7}
-{"page": 7, "line": 121, "text": "T L T S W O D", "x0": 367.9, "top": 505.6, "x1": 444.7, "bottom": 553.9}
-{"page": 7, "line": 122, "text": "N", "x0": 481.4, "top": 498.8, "x1": 493.6, "bottom": 507.7}
-{"page": 7, "line": 123, "text": "O ^T G N ^I H ES ^L P K TY ST", "x0": 481.6, "top": 505.0, "x1": 548.6, "bottom": 554.3}
-{"page": 7, "line": 124, "text": "T S", "x0": 560.1, "top": 492.8, "x1": 572.4, "bottom": 508.3}
-{"page": 7, "line": 125, "text": "N ^I A L P T S A V", "x0": 560.5, "top": 511.4, "x1": 666.1, "bottom": 552.8}
-{"page": 7, "line": 126, "text": "G", "x0": 703.7, "top": 495.0, "x1": 715.8, "bottom": 504.6}
-{"page": 7, "line": 127, "text": "U A Y N C", "x0": 703.7, "top": 504.1, "x1": 716.3, "bottom": 549.2}
-{"page": 7, "line": 128, "text": "S", "x0": 736.5, "top": 493.3, "x1": 748.6, "bottom": 501.4}
-{"page": 7, "line": 129, "text": "S R A E S", "x0": 736.6, "top": 504.8, "x1": 749.0, "bottom": 545.6}
-{"page": 7, "line": 130, "text": "A U A S R N E", "x0": 73.1, "top": 549.6, "x1": 666.4, "bottom": 562.4}
-{"page": 7, "line": 131, "text": "T F E A A N", "x0": 72.9, "top": 558.1, "x1": 666.4, "bottom": 570.3}
-{"page": 7, "line": 132, "text": "N M W P E", "x0": 368.4, "top": 569.3, "x1": 666.6, "bottom": 581.1}
-{"page": 7, "line": 133, "text": "W ^G", "x0": 228.4, "top": 577.6, "x1": 666.9, "bottom": 596.3}
-{"page": 7, "line": 134, "text": "N", "x0": 433.2, "top": 583.2, "x1": 445.4, "bottom": 592.0}
-{"page": 7, "line": 135, "text": "CLIFF S BUFFALO ST ^N", "x0": 59.5, "top": 588.8, "x1": 667.1, "bottom": 605.0}
-{"page": 7, "line": 136, "text": "PARK T A ^T", "x0": 59.5, "top": 596.6, "x1": 509.7, "bottom": 614.8}
-{"page": 7, "line": 137, "text": "T ^S", "x0": 254.8, "top": 605.9, "x1": 509.8, "bottom": 619.6}
-{"page": 7, "line": 138, "text": "E", "x0": 259.5, "top": 610.4, "x1": 273.6, "bottom": 624.6}
-{"page": 7, "line": 139, "text": "RD S ^N", "x0": 59.5, "top": 616.4, "x1": 510.0, "bottom": 632.7}
-{"page": 7, "line": 140, "text": "T ^R W SENECA STNY 79", "x0": 276.0, "top": 623.4, "x1": 657.4, "bottom": 640.4}
-{"page": 7, "line": 141, "text": "T", "x0": 131.6, "top": 638.1, "x1": 145.2, "bottom": 648.7}
-{"page": 7, "line": 142, "text": "SENECA ST", "x0": 330.2, "top": 631.6, "x1": 398.0, "bottom": 645.0}
-{"page": 7, "line": 143, "text": "O", "x0": 498.2, "top": 635.4, "x1": 510.4, "bottom": 645.0}
-{"page": 7, "line": 144, "text": "S C", "x0": 129.2, "top": 644.7, "x1": 510.5, "bottom": 656.3}
-{"page": 7, "line": 145, "text": "HOOK", "x0": 56.3, "top": 657.3, "x1": 93.0, "bottom": 674.2}
-{"page": 7, "line": 146, "text": "PL U", "x0": 94.5, "top": 662.7, "x1": 137.5, "bottom": 676.8}
-{"page": 7, "line": 147, "text": "T", "x0": 126.0, "top": 655.8, "x1": 139.7, "bottom": 666.4}
-{"page": 7, "line": 148, "text": "W STATE ST", "x0": 393.8, "top": 664.3, "x1": 465.6, "bottom": 676.7}
-{"page": 7, "line": 149, "text": "N", "x0": 498.6, "top": 656.7, "x1": 510.7, "bottom": 665.6}
-{"page": 7, "line": 150, "text": "N", "x0": 120.8, "top": 671.0, "x1": 134.9, "bottom": 682.8}
-{"page": 7, "line": 151, "text": "S T TABE R ST S ^T", "x0": 116.1, "top": 677.1, "x1": 640.2, "bottom": 702.5}
-{"page": 7, "line": 152, "text": "S", "x0": 628.2, "top": 690.9, "x1": 640.4, "bottom": 699.1}
-{"page": 7, "line": 153, "text": "H E F U GREEN ST - NY79 SB/EB ^Y", "x0": 111.1, "top": 694.0, "x1": 640.6, "bottom": 716.8}
-{"page": 7, "line": 154, "text": "C L ^N", "x0": 108.5, "top": 709.9, "x1": 640.8, "bottom": 723.6}
-{"page": 7, "line": 155, "text": "S T T O ^T ^A", "x0": 82.3, "top": 715.5, "x1": 640.9, "bottom": 737.1}
-{"page": 7, "line": 156, "text": "M N S B T", "x0": 70.6, "top": 725.7, "x1": 670.0, "bottom": 744.5}
-{"page": 7, "line": 157, "text": "E L A V E S T S T CLEVELAND AVE ^E ^T ^L ^A ^S ^A CLINTON", "x0": 57.6, "top": 732.7, "x1": 748.4, "bottom": 759.9}
-{"page": 7, "line": 158, "text": "L Y T V", "x0": 151.2, "top": 753.1, "x1": 670.7, "bottom": 768.6}
-{"page": 7, "line": 159, "text": "R A R R CECIL A MALONE RD CLINTON ST W ^E ^Y ^E ^N STE", "x0": 144.3, "top": 761.3, "x1": 736.0, "bottom": 786.1}
-{"page": 7, "line": 160, "text": "O ^A ^E R", "x0": 140.1, "top": 778.1, "x1": 746.4, "bottom": 793.6}
-{"page": 7, "line": 161, "text": "L E ^T ^F G E", "x0": 137.2, "top": 782.4, "x1": 740.7, "bottom": 800.1}
-{"page": 7, "line": 162, "text": "^F ^H Zoning District^Ss ^Newman ^D C", "x0": 133.6, "top": 790.1, "x1": 735.6, "bottom": 808.9}
-{"page": 7, "line": 163, "text": "^C S ^N ^S E N E", "x0": 206.6, "top": 798.3, "x1": 746.9, "bottom": 819.1}
-{"page": 7, "line": 164, "text": "T IT !!!!!!!! U!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! BC-1EaNTER ST I A", "x0": 446.7, "top": 809.0, "x1": 578.9, "bottom": 837.2}
-{"page": 7, "line": 165, "text": "L", "x0": 566.9, "top": 823.3, "x1": 579.0, "bottom": 830.3}
-{"page": 7, "line": 166, "text": "^P-1 S P S T", "x0": 616.8, "top": 809.3, "x1": 740.2, "bottom": 831.8}
-{"page": 7, "line": 167, "text": "S", "x0": 463.9, "top": 828.3, "x1": 478.0, "bottom": 842.5}
-{"page": 7, "line": 168, "text": "A", "x0": 472.8, "top": 836.7, "x1": 486.9, "bottom": 850.9}
-{"page": 7, "line": 169, "text": "B-N1b P PUD", "x0": 489.1, "top": 828.0, "x1": 632.5, "bottom": 849.7}
-{"page": 7, "line": 170, "text": "V EB-2a T ITU S R-1a", "x0": 478.1, "top": 841.5, "x1": 633.0, "bottom": 866.9}
-{"page": 7, "line": 171, "text": "T", "x0": 709.3, "top": 852.3, "x1": 721.4, "bottom": 859.7}
-{"page": 7, "line": 172, "text": "B-2dT", "x0": 489.1, "top": 867.3, "x1": 515.6, "bottom": 875.1}
-{"page": 7, "line": 173, "text": "SAVE", "x0": 529.9, "top": 855.8, "x1": 567.4, "bottom": 873.2}
-{"page": 7, "line": 174, "text": "R-", "x0": 616.8, "top": 863.1, "x1": 624.6, "bottom": 870.5}
-{"page": 7, "line": 175, "text": "A", "x0": 624.5, "top": 867.5, "x1": 636.2, "bottom": 881.5}
-{"page": 7, "line": 176, "text": "1bVE S", "x0": 624.7, "top": 860.0, "x1": 721.4, "bottom": 878.9}
-{"page": 7, "line": 177, "text": "B-4", "x0": 489.1, "top": 885.4, "x1": 500.7, "bottom": 892.8}
-{"page": 7, "line": 178, "text": "S", "x0": 503.6, "top": 874.8, "x1": 515.8, "bottom": 883.0}
-{"page": 7, "line": 179, "text": "R", "x0": 503.8, "top": 886.4, "x1": 516.0, "bottom": 895.3}
-{"page": 7, "line": 180, "text": "S TITUS ^R-2a", "x0": 577.5, "top": 871.6, "x1": 633.0, "bottom": 890.0}
-{"page": 7, "line": 181, "text": "T", "x0": 681.5, "top": 890.2, "x1": 695.5, "bottom": 902.6}
-{"page": 7, "line": 182, "text": "W ^G", "x0": 686.8, "top": 877.9, "x1": 721.4, "bottom": 893.7}
-{"page": 7, "line": 183, "text": "U", "x0": 709.3, "top": 889.1, "x1": 721.4, "bottom": 897.8}
-{"page": 7, "line": 184, "text": "A", "x0": 709.3, "top": 872.0, "x1": 721.4, "bottom": 880.0}
-{"page": 7, "line": 185, "text": "^I ^A HYERS ^R S ^-2 T ^b S ^Y", "x0": 504.0, "top": 893.5, "x1": 721.4, "bottom": 909.8}
-{"page": 7, "line": 186, "text": "B", "x0": 489.1, "top": 902.9, "x1": 494.1, "bottom": 910.4}
-{"page": 7, "line": 187, "text": "C", "x0": 489.1, "top": 920.7, "x1": 494.5, "bottom": 928.1}
-{"page": 7, "line": 188, "text": "-", "x0": 493.9, "top": 902.9, "x1": 496.4, "bottom": 910.4}
-{"page": 7, "line": 189, "text": "-", "x0": 494.4, "top": 920.7, "x1": 496.9, "bottom": 928.1}
-{"page": 7, "line": 190, "text": "5", "x0": 496.6, "top": 902.9, "x1": 500.7, "bottom": 910.4}
-{"page": 7, "line": 191, "text": "SU", "x0": 497.1, "top": 920.7, "x1": 507.5, "bottom": 928.1}
-{"page": 7, "line": 192, "text": "F", "x0": 504.2, "top": 906.2, "x1": 516.3, "bottom": 913.8}
-{"page": 7, "line": 193, "text": "WOOD ST", "x0": 521.5, "top": 922.1, "x1": 579.0, "bottom": 935.2}
-{"page": 7, "line": 194, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 585.4, "top": 909.0, "x1": 612.8, "bottom": 925.1}
-{"page": 7, "line": 195, "text": "R-2c", "x0": 616.8, "top": 916.1, "x1": 632.5, "bottom": 923.6}
-{"page": 7, "line": 196, "text": "C", "x0": 662.0, "top": 920.9, "x1": 676.8, "bottom": 934.7}
-{"page": 7, "line": 197, "text": "E", "x0": 666.6, "top": 914.5, "x1": 681.0, "bottom": 927.8}
-{"page": 7, "line": 198, "text": "R", "x0": 671.2, "top": 906.8, "x1": 686.0, "bottom": 920.4}
-{"page": 7, "line": 199, "text": "C", "x0": 709.3, "top": 913.4, "x1": 721.4, "bottom": 922.0}
-{"page": 7, "line": 200, "text": "A", "x0": 709.3, "top": 905.6, "x1": 721.4, "bottom": 913.6}
-{"page": 7, "line": 201, "text": "N ^S", "x0": 657.4, "top": 926.0, "x1": 721.4, "bottom": 941.7}
-{"page": 7, "line": 202, "text": "CBD-100 R-3a E", "x0": 489.1, "top": 933.6, "x1": 667.3, "bottom": 948.6}
-{"page": 7, "line": 203, "text": "P", "x0": 648.3, "top": 942.3, "x1": 662.7, "bottom": 955.6}
-{"page": 7, "line": 204, "text": "R-3aa S", "x0": 616.8, "top": 949.3, "x1": 658.2, "bottom": 962.6}
-{"page": 7, "line": 205, "text": "CBD-120", "x0": 489.1, "top": 955.7, "x1": 519.9, "bottom": 963.2}
-{"page": 7, "line": 206, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 966.9, "x1": 484.9, "bottom": 983.2}
-{"page": 7, "line": 207, "text": "CBD-140", "x0": 489.1, "top": 973.5, "x1": 519.9, "bottom": 980.9}
-{"page": 7, "line": 208, "text": "PA !!!!!!!! !!!!!!!! !!!!!!!!R !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!K !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!ST", "x0": 575.0, "top": 960.5, "x1": 627.3, "bottom": 979.1}
-{"page": 7, "line": 209, "text": "R-3b", "x0": 616.8, "top": 968.9, "x1": 633.0, "bottom": 976.4}
-{"page": 7, "line": 210, "text": "Residential Transition", "x0": 616.8, "top": 986.4, "x1": 688.9, "bottom": 993.9}
-{"page": 7, "line": 211, "text": "CBD-50", "x0": 489.1, "top": 991.0, "x1": 515.8, "bottom": 998.4}
-{"page": 7, "line": 212, "text": "SW-1", "x0": 616.8, "top": 1004.2, "x1": 635.4, "bottom": 1011.6}
-{"page": 7, "line": 213, "text": "CBD-60", "x0": 489.1, "top": 1008.5, "x1": 515.8, "bottom": 1016.0}
-{"page": 7, "line": 214, "text": "D", "x0": 550.8, "top": 1015.2, "x1": 564.9, "bottom": 1030.0}
-{"page": 7, "line": 215, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 1020.9, "x1": 484.9, "bottom": 1037.2}
-{"page": 7, "line": 216, "text": "CBD-85", "x0": 489.1, "top": 1026.3, "x1": 515.8, "bottom": 1033.7}
-{"page": 7, "line": 217, "text": "MI", "x0": 517.0, "top": 1036.6, "x1": 534.9, "bottom": 1054.2}
-{"page": 7, "line": 218, "text": "R", "x0": 528.0, "top": 1031.6, "x1": 542.0, "bottom": 1046.4}
-{"page": 7, "line": 219, "text": "A", "x0": 535.0, "top": 1026.9, "x1": 548.5, "bottom": 1041.3}
-{"page": 7, "line": 220, "text": "R", "x0": 543.8, "top": 1020.3, "x1": 557.8, "bottom": 1035.1}
-{"page": 7, "line": 221, "text": "R", "x0": 575.1, "top": 1038.3, "x1": 589.9, "bottom": 1052.7}
-{"page": 7, "line": 222, "text": "D", "x0": 580.7, "top": 1031.7, "x1": 595.5, "bottom": 1046.1}
-{"page": 7, "line": 223, "text": "S", "x0": 616.8, "top": 1021.7, "x1": 621.8, "bottom": 1029.2}
-{"page": 7, "line": 224, "text": "S", "x0": 616.8, "top": 1039.2, "x1": 621.8, "bottom": 1046.7}
-{"page": 7, "line": 225, "text": "W", "x0": 621.6, "top": 1021.7, "x1": 628.6, "bottom": 1029.2}
-{"page": 7, "line": 226, "text": "tre", "x0": 621.6, "top": 1039.2, "x1": 630.6, "bottom": 1046.7}
-{"page": 7, "line": 227, "text": "-", "x0": 628.6, "top": 1021.7, "x1": 631.1, "bottom": 1029.2}
-{"page": 7, "line": 228, "text": "e", "x0": 630.5, "top": 1039.2, "x1": 634.6, "bottom": 1046.7}
-{"page": 7, "line": 229, "text": "2", "x0": 631.2, "top": 1021.7, "x1": 635.4, "bottom": 1029.2}
-{"page": 7, "line": 230, "text": "t Level Active Use Overlay Zone", "x0": 634.8, "top": 1039.2, "x1": 742.1, "bottom": 1046.7}
-{"page": 7, "line": 231, "text": "Cher", "x0": 489.1, "top": 1043.8, "x1": 505.3, "bottom": 1051.2}
-{"page": 7, "line": 232, "text": "E", "x0": 505.1, "top": 1048.2, "x1": 518.6, "bottom": 1062.7}
-{"page": 7, "line": 233, "text": "ryL Street District", "x0": 505.5, "top": 1043.8, "x1": 559.1, "bottom": 1058.1}
-{"page": 7, "line": 234, "text": "R", "x0": 567.4, "top": 1047.5, "x1": 582.2, "bottom": 1061.9}
-{"page": 7, "line": 235, "text": "E Traditional Residential", "x0": 562.2, "top": 1054.3, "x1": 691.2, "bottom": 1068.1}
-{"page": 7, "line": 236, "text": "Urban Mixed Use C", "x0": 489.1, "top": 1060.4, "x1": 571.4, "bottom": 1074.7}
-{"page": 7, "line": 237, "text": "N", "x0": 551.1, "top": 1067.0, "x1": 565.8, "bottom": 1081.4}
-{"page": 7, "line": 238, "text": "E WE/WF", "x0": 545.8, "top": 1073.8, "x1": 642.5, "bottom": 1087.6}
-{"page": 7, "line": 239, "text": "MH-1 P", "x0": 489.1, "top": 1079.1, "x1": 555.1, "bottom": 1093.7}
-{"page": 7, "line": 240, "text": "^T S", "x0": 441.8, "top": 1085.9, "x1": 550.0, "bottom": 1099.7}
-{"page": 7, "line": 241, "text": "WEDZ-1a", "x0": 616.8, "top": 1092.0, "x1": 649.8, "bottom": 1099.5}
-{"page": 7, "line": 242, "text": "S Market District", "x0": 442.1, "top": 1096.0, "x1": 537.3, "bottom": 1104.4}
-{"page": 7, "line": 243, "text": "I", "x0": 377.3, "top": 1103.2, "x1": 444.1, "bottom": 1190.1}
-{"page": 7, "line": 244, "text": "W WEDZ-1b", "x0": 442.4, "top": 1107.4, "x1": 649.8, "bottom": 1119.1}
-{"page": 7, "line": 245, "text": "Medium-Density Mixed Use", "x0": 489.1, "top": 1114.4, "x1": 581.1, "bottom": 1121.8}
-{"page": 7, "line": 246, "text": "O", "x0": 442.8, "top": 1118.7, "x1": 455.1, "bottom": 1128.4}
-{"page": 7, "line": 247, "text": "E D", "x0": 482.6, "top": 1121.7, "x1": 518.3, "bottom": 1138.1}
-{"page": 7, "line": 248, "text": "^D N R", "x0": 443.1, "top": 1128.2, "x1": 513.0, "bottom": 1144.8}
-{"page": 7, "line": 249, "text": "^A O Y", "x0": 443.4, "top": 1136.8, "x1": 505.6, "bottom": 1151.9}
-{"page": 7, "line": 250, "text": "D ^E T R", "x0": 369.0, "top": 1143.6, "x1": 500.7, "bottom": 1160.5}
-{"page": 7, "line": 251, "text": "A", "x0": 353.1, "top": 1157.3, "x1": 366.6, "bottom": 1171.7}
-{"page": 7, "line": 252, "text": "R ^M 0S0", "x0": 362.0, "top": 1148.8, "x1": 486.6, "bottom": 1167.0}
-{"page": 7, "line": 253, "text": "A", "x0": 477.8, "top": 1158.2, "x1": 492.2, "bottom": 1170.9}
-{"page": 7, "line": 254, "text": "^R.050.1 0.2 0.3 0.4", "x0": 481.7, "top": 1148.8, "x1": 706.4, "bottom": 1167.0}
-{"page": 7, "line": 255, "text": "MI", "x0": 335.1, "top": 1166.9, "x1": 352.9, "bottom": 1184.4}
-{"page": 7, "line": 256, "text": "R", "x0": 346.1, "top": 1161.9, "x1": 360.1, "bottom": 1176.7}
-{"page": 7, "line": 257, "text": "^S ^U Miles", "x0": 444.3, "top": 1165.1, "x1": 741.1, "bottom": 1184.5}
-{"page": 7, "line": 258, "text": "L Q", "x0": 329.6, "top": 1172.5, "x1": 484.0, "bottom": 1188.3}
-{"page": 7, "line": 259, "text": "E", "x0": 323.1, "top": 1178.4, "x1": 336.5, "bottom": 1192.8}
-{"page": 8, "line": 1, "text": "Ci^Et^Dy^G ^Eo^MOf ^O I ^R t ^L h ^N aca", "x0": 64.3, "top": 46.6, "x1": 214.5, "bottom": 74.8}
+{"page": 7, "line": 3, "text": "RRD", "x0": 561.8, "top": 85.4, "x1": 591.0, "bottom": 98.0}
+{"page": 7, "line": 4, "text": "Waterfront District Map", "x0": 61.2, "top": 95.8, "x1": 366.1, "bottom": 125.8}
+{"page": 7, "line": 5, "text": "YORK ST", "x0": 673.8, "top": 110.2, "x1": 726.7, "bottom": 122.9}
+{"page": 7, "line": 6, "text": "May 2026 W FALLS ST FALLS ST", "x0": 60.8, "top": 135.2, "x1": 750.0, "bottom": 152.8}
+{"page": 7, "line": 7, "text": "ELINCOLN", "x0": 687.2, "top": 166.7, "x1": 749.2, "bottom": 180.4}
+{"page": 7, "line": 8, "text": "ST", "x0": 710.7, "top": 182.1, "x1": 726.5, "bottom": 194.5}
+{"page": 7, "line": 9, "text": "E JAY ST", "x0": 696.2, "top": 218.7, "x1": 748.3, "bottom": 232.3}
+{"page": 7, "line": 10, "text": "LEWIS ST", "x0": 692.5, "top": 264.3, "x1": 748.8, "bottom": 277.4}
+{"page": 7, "line": 11, "text": "TOMPKINS ST", "x0": 667.5, "top": 309.2, "x1": 748.9, "bottom": 322.7}
+{"page": 7, "line": 12, "text": "E YATES", "x0": 699.7, "top": 339.6, "x1": 749.0, "bottom": 352.4}
+{"page": 7, "line": 13, "text": "ST", "x0": 718.0, "top": 354.7, "x1": 733.9, "bottom": 366.8}
+{"page": 7, "line": 14, "text": "CASCADILLA ST", "x0": 415.4, "top": 462.9, "x1": 508.7, "bottom": 476.7}
+{"page": 7, "line": 15, "text": "RD", "x0": 141.0, "top": 487.6, "x1": 158.7, "bottom": 500.5}
+{"page": 7, "line": 16, "text": "ESTY ST", "x0": 498.6, "top": 505.0, "x1": 548.6, "bottom": 518.1}
+{"page": 7, "line": 17, "text": "CLIFF BUFFALO ST", "x0": 59.5, "top": 588.8, "x1": 633.1, "bottom": 603.6}
+{"page": 7, "line": 18, "text": "PARK", "x0": 59.5, "top": 602.5, "x1": 91.5, "bottom": 614.6}
+{"page": 7, "line": 19, "text": "RD", "x0": 59.5, "top": 616.4, "x1": 76.8, "bottom": 628.5}
+{"page": 7, "line": 20, "text": "W SENECA STNY 79", "x0": 535.1, "top": 625.4, "x1": 657.4, "bottom": 640.4}
+{"page": 7, "line": 21, "text": "SENECA ST", "x0": 330.2, "top": 631.6, "x1": 398.0, "bottom": 645.0}
+{"page": 7, "line": 22, "text": "W STATE ST", "x0": 393.8, "top": 664.3, "x1": 465.6, "bottom": 676.7}
+{"page": 7, "line": 23, "text": "TA", "x0": 223.8, "top": 677.1, "x1": 237.6, "bottom": 689.5}
+{"page": 7, "line": 24, "text": "GREEN ST - NY79 SB/EB", "x0": 435.5, "top": 696.7, "x1": 576.7, "bottom": 711.9}
+{"page": 7, "line": 25, "text": "CLEVELAND AVE", "x0": 452.3, "top": 733.2, "x1": 550.8, "bottom": 747.8}
+{"page": 7, "line": 26, "text": "CLINTON", "x0": 697.6, "top": 747.1, "x1": 748.4, "bottom": 759.9}
+{"page": 7, "line": 27, "text": "STE", "x0": 710.1, "top": 762.2, "x1": 736.0, "bottom": 774.6}
+{"page": 7, "line": 28, "text": "CECIL A MALONE RD", "x0": 254.3, "top": 771.8, "x1": 376.7, "bottom": 786.1}
+{"page": 7, "line": 29, "text": "CLINTON ST W", "x0": 486.0, "top": 766.7, "x1": 572.0, "bottom": 781.0}
+{"page": 7, "line": 30, "text": "Zoning Districts Newman D", "x0": 459.1, "top": 792.8, "x1": 653.9, "bottom": 808.9}
+{"page": 7, "line": 31, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 809.0, "x1": 484.9, "bottom": 825.0}
+{"page": 7, "line": 32, "text": "BC-1EaNTER ST", "x0": 489.1, "top": 813.9, "x1": 559.0, "bottom": 827.4}
+{"page": 7, "line": 33, "text": "P-1", "x0": 616.8, "top": 810.3, "x1": 628.4, "bottom": 817.7}
+{"page": 7, "line": 34, "text": "PUD", "x0": 616.8, "top": 828.0, "x1": 632.5, "bottom": 835.5}
+{"page": 7, "line": 35, "text": "B-1b", "x0": 489.1, "top": 832.6, "x1": 504.8, "bottom": 840.0}
+{"page": 7, "line": 36, "text": "R-1a", "x0": 616.8, "top": 845.6, "x1": 633.0, "bottom": 853.0}
+{"page": 7, "line": 37, "text": "B-2a", "x0": 489.1, "top": 850.1, "x1": 504.8, "bottom": 857.6}
+{"page": 7, "line": 38, "text": "E R-1b", "x0": 558.7, "top": 860.7, "x1": 633.0, "bottom": 873.2}
+{"page": 7, "line": 39, "text": "B-2d", "x0": 489.1, "top": 867.6, "x1": 504.8, "bottom": 875.1}
+{"page": 7, "line": 40, "text": "S", "x0": 577.5, "top": 877.8, "x1": 585.9, "bottom": 890.0}
+{"page": 7, "line": 41, "text": "R-2a", "x0": 616.8, "top": 880.8, "x1": 633.0, "bottom": 888.3}
+{"page": 7, "line": 42, "text": "B-4", "x0": 489.1, "top": 885.4, "x1": 500.7, "bottom": 892.8}
+{"page": 7, "line": 43, "text": "HYERS ST", "x0": 572.6, "top": 893.5, "x1": 633.0, "bottom": 907.2}
+{"page": 7, "line": 44, "text": "R-2b", "x0": 616.8, "top": 898.4, "x1": 633.0, "bottom": 905.8}
+{"page": 7, "line": 45, "text": "B-5", "x0": 489.1, "top": 902.9, "x1": 500.7, "bottom": 910.4}
+{"page": 7, "line": 46, "text": "C-SU WOOD ST", "x0": 489.1, "top": 920.7, "x1": 579.0, "bottom": 935.2}
+{"page": 7, "line": 47, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 585.4, "top": 909.0, "x1": 612.8, "bottom": 925.1}
+{"page": 7, "line": 48, "text": "R-2c", "x0": 616.8, "top": 916.1, "x1": 632.5, "bottom": 923.6}
+{"page": 7, "line": 49, "text": "R-3a", "x0": 616.8, "top": 933.6, "x1": 633.0, "bottom": 941.1}
+{"page": 7, "line": 50, "text": "CBD-100", "x0": 489.1, "top": 938.2, "x1": 519.9, "bottom": 945.6}
+{"page": 7, "line": 51, "text": "R-3aa", "x0": 616.8, "top": 951.2, "x1": 637.3, "bottom": 958.6}
+{"page": 7, "line": 52, "text": "CBD-120", "x0": 489.1, "top": 955.7, "x1": 519.9, "bottom": 963.2}
+{"page": 7, "line": 53, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 966.9, "x1": 484.9, "bottom": 983.2}
+{"page": 7, "line": 54, "text": "CBD-140", "x0": 489.1, "top": 973.5, "x1": 519.9, "bottom": 980.9}
+{"page": 7, "line": 55, "text": "PA !!!!!!!! !!!!!!!! !!!!!!!!R !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!K !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!S", "x0": 575.0, "top": 960.5, "x1": 619.6, "bottom": 979.1}
+{"page": 7, "line": 56, "text": "R-3b", "x0": 616.8, "top": 968.9, "x1": 633.0, "bottom": 976.4}
+{"page": 7, "line": 57, "text": "Residential Transition", "x0": 616.8, "top": 986.4, "x1": 688.9, "bottom": 993.9}
+{"page": 7, "line": 58, "text": "CBD-50", "x0": 489.1, "top": 991.0, "x1": 515.8, "bottom": 998.4}
+{"page": 7, "line": 59, "text": "SW-1", "x0": 616.8, "top": 1004.2, "x1": 635.4, "bottom": 1011.6}
+{"page": 7, "line": 60, "text": "CBD-60", "x0": 489.1, "top": 1008.5, "x1": 515.8, "bottom": 1016.0}
+{"page": 7, "line": 61, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 1020.9, "x1": 484.9, "bottom": 1037.2}
+{"page": 7, "line": 62, "text": "CBD-85", "x0": 489.1, "top": 1026.3, "x1": 515.8, "bottom": 1033.7}
+{"page": 7, "line": 63, "text": "SW-2", "x0": 616.8, "top": 1021.7, "x1": 635.4, "bottom": 1029.2}
+{"page": 7, "line": 64, "text": "Street Level Active Use Overlay Zone", "x0": 616.8, "top": 1039.2, "x1": 742.1, "bottom": 1046.7}
+{"page": 7, "line": 65, "text": "Cherry Street District", "x0": 489.1, "top": 1043.8, "x1": 559.1, "bottom": 1051.2}
+{"page": 7, "line": 66, "text": "Traditional Residential", "x0": 616.8, "top": 1057.0, "x1": 691.2, "bottom": 1064.4}
+{"page": 7, "line": 67, "text": "Urban Mixed Use", "x0": 489.1, "top": 1061.6, "x1": 547.3, "bottom": 1069.0}
+{"page": 7, "line": 68, "text": "WE/WF", "x0": 616.8, "top": 1074.5, "x1": 642.5, "bottom": 1082.0}
+{"page": 7, "line": 69, "text": "MH-1", "x0": 489.1, "top": 1079.1, "x1": 507.4, "bottom": 1086.5}
+{"page": 7, "line": 70, "text": "WEDZ-1a", "x0": 616.8, "top": 1092.0, "x1": 649.8, "bottom": 1099.5}
+{"page": 7, "line": 71, "text": "Market District", "x0": 489.1, "top": 1096.6, "x1": 537.3, "bottom": 1104.0}
+{"page": 7, "line": 72, "text": "I", "x0": 377.3, "top": 1103.2, "x1": 444.1, "bottom": 1190.1}
+{"page": 7, "line": 73, "text": "WEDZ-1b", "x0": 616.8, "top": 1109.8, "x1": 649.8, "bottom": 1117.2}
+{"page": 7, "line": 74, "text": "Medium-Density Mixed Use", "x0": 489.1, "top": 1114.4, "x1": 581.1, "bottom": 1121.8}
+{"page": 7, "line": 75, "text": "0 0.050.1 0.2 0.3 0.4", "x0": 460.8, "top": 1148.8, "x1": 706.4, "bottom": 1167.0}
+{"page": 7, "line": 76, "text": "Miles", "x0": 698.4, "top": 1166.3, "x1": 741.1, "bottom": 1184.5}
+{"page": 8, "line": 1, "text": "CiEtDyG EoMOf O I R t L h N aca", "x0": 64.3, "top": 46.6, "x1": 214.5, "bottom": 74.8}
 {"page": 8, "line": 2, "text": "Collegetown District Map", "x0": 64.4, "top": 90.2, "x1": 395.3, "bottom": 120.2}
 {"page": 8, "line": 3, "text": "May 2026", "x0": 64.4, "top": 129.6, "x1": 135.2, "bottom": 145.5}
-{"page": 8, "line": 4, "text": "HOYRD", "x0": 823.6, "top": 139.9, "x1": 868.8, "bottom": 162.3}
-{"page": 8, "line": 5, "text": "D", "x0": 1073.4, "top": 152.7, "x1": 1087.4, "bottom": 164.4}
-{"page": 8, "line": 6, "text": "H I", "x0": 110.4, "top": 161.6, "x1": 125.4, "bottom": 177.4}
-{"page": 8, "line": 7, "text": "GHL", "x0": 116.9, "top": 155.8, "x1": 142.5, "bottom": 171.7}
-{"page": 8, "line": 8, "text": "A N R", "x0": 135.8, "top": 159.0, "x1": 1085.2, "bottom": 179.3}
-{"page": 8, "line": 9, "text": "D PL N", "x0": 152.4, "top": 169.8, "x1": 1081.8, "bottom": 188.8}
-{"page": 8, "line": 10, "text": "E", "x0": 1065.7, "top": 180.2, "x1": 1079.5, "bottom": 191.3}
-{"page": 8, "line": 11, "text": "D", "x0": 1062.5, "top": 188.0, "x1": 1076.8, "bottom": 200.3}
-{"page": 8, "line": 12, "text": "Y", "x0": 1059.9, "top": 195.0, "x1": 1074.0, "bottom": 206.9}
-{"page": 8, "line": 13, "text": "R", "x0": 1057.1, "top": 202.1, "x1": 1071.4, "bottom": 214.5}
-{"page": 8, "line": 14, "text": "WILLIAMS ST D", "x0": 87.3, "top": 210.5, "x1": 1067.8, "bottom": 225.1}
-{"page": 8, "line": 15, "text": "O", "x0": 659.2, "top": 261.5, "x1": 672.6, "bottom": 276.2}
-{"page": 8, "line": 16, "text": "A", "x0": 667.8, "top": 265.2, "x1": 679.9, "bottom": 279.4}
-{"page": 8, "line": 17, "text": "K", "x0": 675.3, "top": 268.5, "x1": 687.4, "bottom": 282.7}
-{"page": 8, "line": 18, "text": "AV", "x0": 685.2, "top": 272.8, "x1": 704.2, "bottom": 290.0}
-{"page": 8, "line": 19, "text": "E", "x0": 699.5, "top": 279.0, "x1": 711.6, "bottom": 293.2}
-{"page": 8, "line": 20, "text": "BUFFALO ST", "x0": 88.3, "top": 285.8, "x1": 162.6, "bottom": 299.5}
-{"page": 8, "line": 21, "text": "L", "x0": 738.3, "top": 296.6, "x1": 750.4, "bottom": 303.4}
-{"page": 8, "line": 22, "text": "P", "x0": 738.3, "top": 303.2, "x1": 750.3, "bottom": 311.3}
-{"page": 8, "line": 23, "text": "E", "x0": 379.4, "top": 323.1, "x1": 391.5, "bottom": 331.3}
-{"page": 8, "line": 24, "text": "V", "x0": 379.5, "top": 331.3, "x1": 391.6, "bottom": 339.5}
-{"page": 8, "line": 25, "text": "DRYDEN", "x0": 539.1, "top": 311.6, "x1": 590.7, "bottom": 339.2}
-{"page": 8, "line": 26, "text": "RD ^E ^I", "x0": 590.0, "top": 328.9, "x1": 750.1, "bottom": 345.9}
-{"page": 8, "line": 27, "text": "D", "x0": 738.1, "top": 322.0, "x1": 750.2, "bottom": 330.7}
-{"page": 8, "line": 28, "text": "A", "x0": 738.2, "top": 314.0, "x1": 750.2, "bottom": 322.1}
-{"page": 8, "line": 29, "text": "A", "x0": 379.6, "top": 338.5, "x1": 391.8, "bottom": 346.7}
-{"page": 8, "line": 30, "text": "N", "x0": 737.9, "top": 342.1, "x1": 750.0, "bottom": 350.9}
-{"page": 8, "line": 31, "text": "^E ^O MAPLE AVE", "x0": 379.8, "top": 346.5, "x1": 1117.2, "bottom": 360.0}
-{"page": 8, "line": 32, "text": "G", "x0": 379.9, "top": 357.3, "x1": 392.1, "bottom": 366.8}
-{"page": 8, "line": 33, "text": "E", "x0": 380.1, "top": 366.8, "x1": 392.2, "bottom": 375.0}
-{"page": 8, "line": 34, "text": "L E", "x0": 380.2, "top": 374.8, "x1": 767.6, "bottom": 385.8}
-{"page": 8, "line": 35, "text": "SENECA ST ^L", "x0": 92.9, "top": 381.2, "x1": 392.4, "bottom": 394.2}
-{"page": 8, "line": 36, "text": "O V", "x0": 380.4, "top": 385.9, "x1": 767.4, "bottom": 398.0}
-{"page": 8, "line": 37, "text": "A", "x0": 754.9, "top": 393.3, "x1": 767.1, "bottom": 401.6}
-{"page": 8, "line": 38, "text": "^T ^C HARVARDPL ^T", "x0": 115.7, "top": 397.8, "x1": 766.9, "bottom": 416.2}
-{"page": 8, "line": 39, "text": "S", "x0": 115.8, "top": 409.4, "x1": 128.0, "bottom": 417.6}
-{"page": 8, "line": 40, "text": "Y", "x0": 116.1, "top": 420.6, "x1": 128.2, "bottom": 428.9}
-{"page": 8, "line": 41, "text": "T", "x0": 208.4, "top": 411.9, "x1": 220.5, "bottom": 419.3}
-{"page": 8, "line": 42, "text": "S", "x0": 208.5, "top": 419.1, "x1": 220.6, "bottom": 427.2}
-{"page": 8, "line": 43, "text": "E L", "x0": 657.3, "top": 408.9, "x1": 676.5, "bottom": 427.9}
-{"page": 8, "line": 44, "text": "M ^U", "x0": 668.1, "top": 419.1, "x1": 766.7, "bottom": 435.0}
-{"page": 8, "line": 45, "text": "N", "x0": 754.4, "top": 410.9, "x1": 766.7, "bottom": 419.9}
-{"page": 8, "line": 46, "text": "^R ^Y CATHERINE ST W O", "x0": 116.2, "top": 426.1, "x1": 767.1, "bottom": 442.6}
-{"page": 8, "line": 47, "text": "R D O O M", "x0": 116.4, "top": 434.0, "x1": 767.6, "bottom": 454.9}
-{"page": 8, "line": 48, "text": "A D D R", "x0": 116.6, "top": 445.8, "x1": 768.1, "bottom": 460.5}
-{"page": 8, "line": 49, "text": "^U ^E B R A V ^I ^A", "x0": 116.8, "top": 450.7, "x1": 768.6, "bottom": 472.7}
-{"page": 8, "line": 50, "text": "^Q Y A E ^F", "x0": 116.9, "top": 462.5, "x1": 769.1, "bottom": 481.0}
-{"page": 8, "line": 51, "text": "^N N T", "x0": 117.2, "top": 472.3, "x1": 619.8, "bottom": 491.9}
-{"page": 8, "line": 52, "text": "A MILLER ST", "x0": 613.5, "top": 484.8, "x1": 1089.9, "bottom": 499.0}
-{"page": 8, "line": 53, "text": "V", "x0": 619.0, "top": 489.8, "x1": 633.1, "bottom": 504.1}
-{"page": 8, "line": 54, "text": "E", "x0": 625.3, "top": 495.3, "x1": 639.3, "bottom": 509.6}
-{"page": 8, "line": 55, "text": "COOKST", "x0": 275.2, "top": 500.8, "x1": 331.0, "bottom": 517.1}
-{"page": 8, "line": 56, "text": "V", "x0": 460.4, "top": 507.0, "x1": 472.4, "bottom": 515.1}
-{"page": 8, "line": 57, "text": "E", "x0": 460.4, "top": 498.6, "x1": 472.4, "bottom": 506.7}
-{"page": 8, "line": 58, "text": "A E", "x0": 460.6, "top": 511.8, "x1": 548.1, "bottom": 522.5}
-{"page": 8, "line": 59, "text": "BOOL ST ^N", "x0": 398.4, "top": 525.0, "x1": 472.7, "bottom": 543.0}
-{"page": 8, "line": 60, "text": "E", "x0": 460.6, "top": 534.1, "x1": 472.7, "bottom": 542.2}
-{"page": 8, "line": 61, "text": "D E", "x0": 460.8, "top": 538.9, "x1": 547.8, "bottom": 551.3}
-{"page": 8, "line": 62, "text": "^A ^V OXFORDPL", "x0": 536.0, "top": 520.2, "x1": 630.9, "bottom": 553.5}
-{"page": 8, "line": 63, "text": "R D", "x0": 842.9, "top": 538.7, "x1": 863.7, "bottom": 558.3}
-{"page": 8, "line": 64, "text": "T S", "x0": 968.3, "top": 523.1, "x1": 980.5, "bottom": 538.5}
-{"page": 8, "line": 65, "text": "L", "x0": 968.5, "top": 541.3, "x1": 980.6, "bottom": 548.1}
-{"page": 8, "line": 66, "text": "^I N L W A R V R^I IT H A C A W ^L ^E N ^T", "x0": 460.8, "top": 546.6, "x1": 1159.3, "bottom": 582.5}
-{"page": 8, "line": 67, "text": "E", "x0": 533.6, "top": 588.7, "x1": 546.1, "bottom": 597.4}
-{"page": 8, "line": 68, "text": "L", "x0": 534.1, "top": 581.6, "x1": 546.5, "bottom": 589.0}
-{"page": 8, "line": 69, "text": "A", "x0": 534.4, "top": 573.6, "x1": 546.8, "bottom": 582.3}
-{"page": 8, "line": 70, "text": "G", "x0": 684.9, "top": 587.6, "x1": 697.5, "bottom": 597.7}
-{"page": 8, "line": 71, "text": "N^I O", "x0": 686.1, "top": 573.4, "x1": 894.0, "bottom": 589.4}
-{"page": 8, "line": 72, "text": "R", "x0": 886.0, "top": 579.4, "x1": 900.4, "bottom": 594.2}
-{"page": 8, "line": 73, "text": "T H", "x0": 893.3, "top": 584.7, "x1": 913.0, "bottom": 603.0}
-{"page": 8, "line": 74, "text": "R", "x0": 968.9, "top": 571.4, "x1": 980.9, "bottom": 580.2}
-{"page": 8, "line": 75, "text": "O", "x0": 968.9, "top": 580.1, "x1": 981.0, "bottom": 589.6}
-{"page": 8, "line": 76, "text": "C", "x0": 969.0, "top": 589.4, "x1": 981.1, "bottom": 598.2}
-{"page": 8, "line": 77, "text": "S", "x0": 1147.3, "top": 575.8, "x1": 1159.4, "bottom": 584.0}
-{"page": 8, "line": 78, "text": "L", "x0": 1147.4, "top": 586.8, "x1": 1159.5, "bottom": 593.6}
-{"page": 8, "line": 79, "text": "F", "x0": 52.3, "top": 628.4, "x1": 65.4, "bottom": 637.9}
-{"page": 8, "line": 80, "text": "E", "x0": 53.8, "top": 635.6, "x1": 67.5, "bottom": 646.5}
-{"page": 8, "line": 81, "text": "S Q", "x0": 113.4, "top": 614.0, "x1": 126.5, "bottom": 635.2}
-{"page": 8, "line": 82, "text": "U", "x0": 114.3, "top": 634.4, "x1": 126.7, "bottom": 643.7}
-{"page": 8, "line": 83, "text": "T S", "x0": 322.9, "top": 594.4, "x1": 335.1, "bottom": 609.7}
-{"page": 8, "line": 84, "text": "R ^I A", "x0": 323.1, "top": 613.0, "x1": 335.3, "bottom": 633.3}
-{"page": 8, "line": 85, "text": "L", "x0": 323.3, "top": 633.2, "x1": 335.3, "bottom": 640.0}
-{"page": 8, "line": 86, "text": "D", "x0": 533.2, "top": 596.9, "x1": 545.6, "bottom": 606.3}
-{"page": 8, "line": 87, "text": "IRVING PL", "x0": 587.6, "top": 617.4, "x1": 645.6, "bottom": 644.1}
-{"page": 8, "line": 88, "text": "P L", "x0": 685.2, "top": 599.3, "x1": 701.2, "bottom": 617.7}
-{"page": 8, "line": 89, "text": "L O O", "x0": 693.8, "top": 614.6, "x1": 719.5, "bottom": 641.6}
-{"page": 8, "line": 90, "text": "P", "x0": 710.3, "top": 633.4, "x1": 724.6, "bottom": 647.3}
-{"page": 8, "line": 91, "text": "Zoni", "x0": 847.9, "top": 610.6, "x1": 882.4, "bottom": 626.9}
-{"page": 8, "line": 92, "text": "A", "x0": 878.1, "top": 634.7, "x1": 884.7, "bottom": 644.5}
-{"page": 8, "line": 93, "text": "n", "x0": 882.7, "top": 610.6, "x1": 892.7, "bottom": 626.9}
-{"page": 8, "line": 94, "text": "cti", "x0": 884.6, "top": 634.7, "x1": 894.7, "bottom": 644.5}
-{"page": 8, "line": 95, "text": "g", "x0": 892.8, "top": 610.6, "x1": 902.7, "bottom": 626.9}
-{"page": 8, "line": 96, "text": "ve", "x0": 894.7, "top": 634.7, "x1": 905.2, "bottom": 644.5}
-{"page": 8, "line": 97, "text": "D", "x0": 907.4, "top": 610.6, "x1": 919.2, "bottom": 626.9}
-{"page": 8, "line": 98, "text": "s", "x0": 908.1, "top": 634.7, "x1": 913.0, "bottom": 644.5}
-{"page": 8, "line": 99, "text": "S", "x0": 912.3, "top": 592.8, "x1": 922.7, "bottom": 606.3}
-{"page": 8, "line": 100, "text": "tr", "x0": 913.2, "top": 634.7, "x1": 919.3, "bottom": 644.5}
-{"page": 8, "line": 101, "text": "i", "x0": 919.2, "top": 610.6, "x1": 923.7, "bottom": 626.9}
-{"page": 8, "line": 102, "text": "e", "x0": 919.4, "top": 634.7, "x1": 924.9, "bottom": 644.5}
-{"page": 8, "line": 103, "text": "T", "x0": 920.4, "top": 594.7, "x1": 930.2, "bottom": 608.1}
-{"page": 8, "line": 104, "text": "s", "x0": 924.0, "top": 610.6, "x1": 933.0, "bottom": 626.9}
-{"page": 8, "line": 105, "text": "et", "x0": 924.9, "top": 634.7, "x1": 933.2, "bottom": 644.5}
-{"page": 8, "line": 106, "text": "t", "x0": 933.1, "top": 610.6, "x1": 938.5, "bottom": 626.9}
-{"page": 8, "line": 107, "text": "-l", "x0": 933.3, "top": 634.7, "x1": 938.9, "bottom": 644.5}
-{"page": 8, "line": 108, "text": "r", "x0": 938.6, "top": 610.6, "x1": 945.0, "bottom": 626.9}
-{"page": 8, "line": 109, "text": "ev", "x0": 938.8, "top": 634.7, "x1": 949.5, "bottom": 644.5}
-{"page": 8, "line": 110, "text": "ic", "x0": 945.1, "top": 610.6, "x1": 958.7, "bottom": 626.9}
-{"page": 8, "line": 111, "text": "el", "x0": 949.6, "top": 634.7, "x1": 957.3, "bottom": 644.5}
-{"page": 8, "line": 112, "text": "t", "x0": 958.8, "top": 610.6, "x1": 964.2, "bottom": 626.9}
-{"page": 8, "line": 113, "text": "u", "x0": 960.2, "top": 634.7, "x1": 965.7, "bottom": 644.5}
-{"page": 8, "line": 114, "text": "s", "x0": 964.3, "top": 610.6, "x1": 973.4, "bottom": 626.9}
-{"page": 8, "line": 115, "text": "ses required", "x0": 965.7, "top": 634.7, "x1": 1020.9, "bottom": 644.5}
-{"page": 8, "line": 116, "text": "C", "x0": 1056.0, "top": 610.7, "x1": 1063.1, "bottom": 620.5}
-{"page": 8, "line": 117, "text": "C", "x0": 1056.0, "top": 632.0, "x1": 1063.1, "bottom": 641.9}
-{"page": 8, "line": 118, "text": "T S", "x0": 1058.8, "top": 597.9, "x1": 1070.9, "bottom": 613.2}
-{"page": 8, "line": 119, "text": "B B", "x0": 1058.9, "top": 616.6, "x1": 1071.0, "bottom": 632.7}
-{"page": 8, "line": 120, "text": "O", "x0": 1059.0, "top": 632.6, "x1": 1071.1, "bottom": 642.0}
-{"page": 8, "line": 121, "text": "R", "x0": 1063.2, "top": 610.7, "x1": 1070.3, "bottom": 620.5}
-{"page": 8, "line": 122, "text": "R", "x0": 1063.2, "top": 632.0, "x1": 1070.3, "bottom": 641.9}
-{"page": 8, "line": 123, "text": "-", "x0": 1070.4, "top": 610.7, "x1": 1073.6, "bottom": 620.5}
-{"page": 8, "line": 124, "text": "-", "x0": 1070.4, "top": 632.0, "x1": 1073.6, "bottom": 641.9}
-{"page": 8, "line": 125, "text": "1", "x0": 1073.7, "top": 610.7, "x1": 1079.2, "bottom": 620.5}
-{"page": 8, "line": 126, "text": "2", "x0": 1073.7, "top": 632.0, "x1": 1079.2, "bottom": 641.9}
-{"page": 8, "line": 127, "text": "M", "x0": 1114.0, "top": 610.7, "x1": 1122.2, "bottom": 620.5}
-{"page": 8, "line": 128, "text": "M", "x0": 1114.0, "top": 632.0, "x1": 1122.2, "bottom": 641.9}
-{"page": 8, "line": 129, "text": "U", "x0": 1122.2, "top": 610.7, "x1": 1129.3, "bottom": 620.5}
-{"page": 8, "line": 130, "text": "U", "x0": 1122.2, "top": 632.0, "x1": 1129.3, "bottom": 641.9}
-{"page": 8, "line": 131, "text": "-", "x0": 1129.4, "top": 610.7, "x1": 1132.7, "bottom": 620.5}
-{"page": 8, "line": 132, "text": "-", "x0": 1129.4, "top": 632.0, "x1": 1132.7, "bottom": 641.9}
-{"page": 8, "line": 133, "text": "1", "x0": 1132.8, "top": 610.7, "x1": 1138.2, "bottom": 620.5}
-{"page": 8, "line": 134, "text": "2", "x0": 1132.8, "top": 632.0, "x1": 1138.2, "bottom": 641.9}
-{"page": 8, "line": 135, "text": "R A", "x0": 1147.5, "top": 593.4, "x1": 1159.7, "bottom": 610.4}
-{"page": 8, "line": 136, "text": "E P R", "x0": 1147.7, "top": 610.1, "x1": 1180.4, "bottom": 626.2}
-{"page": 8, "line": 137, "text": "R", "x0": 1173.3, "top": 632.0, "x1": 1180.4, "bottom": 641.9}
-{"page": 8, "line": 138, "text": "-", "x0": 1180.5, "top": 610.7, "x1": 1183.8, "bottom": 620.5}
-{"page": 8, "line": 139, "text": "-", "x0": 1180.5, "top": 632.0, "x1": 1183.8, "bottom": 641.9}
-{"page": 8, "line": 140, "text": "2", "x0": 1183.9, "top": 610.7, "x1": 1189.3, "bottom": 620.5}
-{"page": 8, "line": 141, "text": "2", "x0": 1183.9, "top": 632.0, "x1": 1189.3, "bottom": 641.9}
-{"page": 8, "line": 142, "text": "a", "x0": 1189.4, "top": 610.7, "x1": 1194.9, "bottom": 620.5}
-{"page": 8, "line": 143, "text": "b", "x0": 1189.4, "top": 632.0, "x1": 1194.9, "bottom": 641.9}
-{"page": 8, "line": 144, "text": "R A E B C", "x0": 56.2, "top": 639.8, "x1": 1071.2, "bottom": 657.9}
-{"page": 8, "line": 145, "text": "R R S T B-2d CR-3 P-1 R-3a", "x0": 58.4, "top": 650.6, "x1": 1194.9, "bottom": 669.6}
-{"page": 8, "line": 146, "text": "^IS", "x0": 60.5, "top": 659.6, "x1": 74.7, "bottom": 672.9}
-{"page": 8, "line": 147, "text": "P", "x0": 64.1, "top": 672.8, "x1": 77.8, "bottom": 683.7}
-{"page": 8, "line": 148, "text": "L", "x0": 66.3, "top": 681.0, "x1": 79.6, "bottom": 690.6}
-{"page": 8, "line": 149, "text": "R", "x0": 115.5, "top": 659.2, "x1": 127.9, "bottom": 668.4}
-{"page": 8, "line": 150, "text": "Y", "x0": 116.0, "top": 667.6, "x1": 128.4, "bottom": 676.1}
-{"page": 8, "line": 151, "text": "S", "x0": 116.3, "top": 677.4, "x1": 128.6, "bottom": 686.0}
-{"page": 8, "line": 152, "text": "T", "x0": 116.8, "top": 685.5, "x1": 129.9, "bottom": 694.7}
-{"page": 8, "line": 153, "text": "A", "x0": 196.0, "top": 660.0, "x1": 209.8, "bottom": 674.4}
-{"page": 8, "line": 154, "text": "T E", "x0": 201.6, "top": 664.5, "x1": 221.4, "bottom": 683.7}
-{"page": 8, "line": 155, "text": "S", "x0": 216.6, "top": 676.5, "x1": 230.4, "bottom": 690.8}
-{"page": 8, "line": 156, "text": "T", "x0": 223.0, "top": 681.6, "x1": 236.2, "bottom": 695.5}
-{"page": 8, "line": 157, "text": "I B-4 CR-4 R-1b", "x0": 760.1, "top": 675.0, "x1": 1135.6, "bottom": 764.8}
-{"page": 8, "line": 158, "text": "!!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!!", "x0": 1141.2, "top": 666.9, "x1": 1168.8, "bottom": 687.0}
-{"page": 8, "line": 159, "text": "R-3b", "x0": 1173.3, "top": 675.0, "x1": 1194.9, "bottom": 684.8}
-{"page": 8, "line": 160, "text": "B", "x0": 376.0, "top": 698.4, "x1": 390.4, "bottom": 711.5}
-{"page": 8, "line": 161, "text": "MITCHELL", "x0": 879.1, "top": 690.8, "x1": 939.2, "bottom": 706.8}
-{"page": 8, "line": 162, "text": "ST U-1", "x0": 941.3, "top": 695.1, "x1": 1189.3, "bottom": 708.1}
-{"page": 8, "line": 163, "text": "R", "x0": 380.3, "top": 705.6, "x1": 395.0, "bottom": 719.2}
-{"page": 8, "line": 164, "text": "A", "x0": 384.6, "top": 712.6, "x1": 399.0, "bottom": 725.6}
-{"page": 8, "line": 165, "text": "MITCHELL", "x0": 450.7, "top": 702.4, "x1": 511.3, "bottom": 725.3}
-{"page": 8, "line": 166, "text": "ST", "x0": 512.0, "top": 714.0, "x1": 529.4, "bottom": 728.7}
-{"page": 8, "line": 167, "text": "N D ^I ^T ^H 0 0.0250.05 0.1 0.15 0.2", "x0": 388.9, "top": 719.1, "x1": 1165.0, "bottom": 740.7}
-{"page": 8, "line": 168, "text": "O R", "x0": 398.1, "top": 733.9, "x1": 633.4, "bottom": 748.6}
-{"page": 8, "line": 169, "text": "N ^D ^A Miles", "x0": 402.9, "top": 738.4, "x1": 1194.7, "bottom": 756.1}
-{"page": 8, "line": 170, "text": "C", "x0": 635.7, "top": 746.3, "x1": 648.6, "bottom": 756.2}
-{"page": 8, "line": 171, "text": "P", "x0": 409.9, "top": 751.2, "x1": 424.2, "bottom": 765.1}
-{"page": 8, "line": 172, "text": "L A", "x0": 415.4, "top": 754.9, "x1": 649.4, "bottom": 770.1}
-{"page": 9, "line": 1, "text": "BUFFALO ST ^T", "x0": 116.3, "top": 36.7, "x1": 380.2, "bottom": 50.4}
-{"page": 9, "line": 2, "text": "S", "x0": 368.3, "top": 44.3, "x1": 380.4, "bottom": 52.6}
-{"page": 9, "line": 3, "text": "N T", "x0": 368.5, "top": 55.7, "x1": 664.2, "bottom": 66.1}
-{"page": 9, "line": 4, "text": "CCiittyy ooff IItthhaaccaa ^I ^A ^S", "x0": 73.7, "top": 64.2, "x1": 664.2, "bottom": 89.9}
-{"page": 9, "line": 5, "text": "T", "x0": 113.1, "top": 83.9, "x1": 125.3, "bottom": 91.4}
-{"page": 9, "line": 6, "text": "S", "x0": 113.3, "top": 91.2, "x1": 125.4, "bottom": 99.4}
-{"page": 9, "line": 7, "text": "T S", "x0": 240.0, "top": 73.7, "x1": 252.3, "bottom": 89.4}
-{"page": 9, "line": 8, "text": "N", "x0": 240.4, "top": 92.5, "x1": 252.5, "bottom": 101.4}
-{"page": 9, "line": 9, "text": "L P", "x0": 368.9, "top": 75.9, "x1": 381.2, "bottom": 90.7}
-{"page": 9, "line": 10, "text": "N T", "x0": 369.3, "top": 93.8, "x1": 565.8, "bottom": 102.9}
-{"page": 9, "line": 11, "text": "A G", "x0": 652.3, "top": 78.5, "x1": 664.7, "bottom": 95.9}
-{"page": 9, "line": 12, "text": "U", "x0": 652.6, "top": 95.4, "x1": 664.7, "bottom": 104.3}
-{"page": 9, "line": 13, "text": "Sou ^Wthside Fo ^R rm District Ma ^W p ^SENECA ^STNY ^79 ^S ^Y", "x0": 74.0, "top": 98.8, "x1": 664.9, "bottom": 135.4}
-{"page": 9, "line": 14, "text": "O O A A", "x0": 113.7, "top": 109.8, "x1": 665.2, "bottom": 123.4}
-{"page": 9, "line": 15, "text": "D C V C", "x0": 113.8, "top": 119.2, "x1": 665.2, "bottom": 132.2}
-{"page": 9, "line": 16, "text": "A N E N", "x0": 114.0, "top": 130.8, "x1": 665.4, "bottom": 140.5}
-{"page": 9, "line": 17, "text": "E N", "x0": 114.1, "top": 138.6, "x1": 566.8, "bottom": 148.1}
-{"page": 9, "line": 18, "text": "May 2 ^M 026 ^E", "x0": 73.8, "top": 144.8, "x1": 567.0, "bottom": 160.6}
-{"page": 9, "line": 19, "text": "G", "x0": 554.8, "top": 155.4, "x1": 567.0, "bottom": 165.0}
-{"page": 9, "line": 20, "text": "N", "x0": 114.5, "top": 161.3, "x1": 126.6, "bottom": 170.1}
-{"page": 9, "line": 21, "text": "W STATE ST ^N", "x0": 313.6, "top": 168.3, "x1": 567.3, "bottom": 184.9}
-{"page": 9, "line": 22, "text": "T", "x0": 243.0, "top": 227.4, "x1": 255.2, "bottom": 235.0}
-{"page": 9, "line": 23, "text": "S", "x0": 243.2, "top": 234.6, "x1": 255.3, "bottom": 242.9}
-{"page": 9, "line": 24, "text": "N", "x0": 243.4, "top": 246.0, "x1": 255.6, "bottom": 254.9}
-{"page": 9, "line": 25, "text": "GREEN ST - NY79 SB/EB", "x0": 328.7, "top": 240.2, "x1": 469.9, "bottom": 255.4}
-{"page": 9, "line": 26, "text": "R", "x0": 243.6, "top": 254.8, "x1": 255.8, "bottom": 263.8}
-{"page": 9, "line": 27, "text": "O", "x0": 243.8, "top": 263.5, "x1": 256.0, "bottom": 273.1}
-{"page": 9, "line": 28, "text": "C", "x0": 244.0, "top": 272.8, "x1": 256.2, "bottom": 281.8}
-{"page": 9, "line": 29, "text": "S", "x0": 244.3, "top": 284.8, "x1": 256.5, "bottom": 293.1}
-{"page": 9, "line": 30, "text": "S", "x0": 48.4, "top": 304.7, "x1": 62.7, "bottom": 318.5}
-{"page": 9, "line": 31, "text": "F", "x0": 56.3, "top": 313.8, "x1": 70.2, "bottom": 327.2}
-{"page": 9, "line": 32, "text": "U", "x0": 61.1, "top": 319.5, "x1": 75.9, "bottom": 333.9}
-{"page": 9, "line": 33, "text": "CLEVELAND AVE", "x0": 197.1, "top": 315.2, "x1": 295.6, "bottom": 329.7}
-{"page": 9, "line": 34, "text": "L ^T", "x0": 66.6, "top": 323.4, "x1": 456.8, "bottom": 338.7}
-{"page": 9, "line": 35, "text": "T ^S", "x0": 70.2, "top": 330.1, "x1": 456.9, "bottom": 343.5}
-{"page": 9, "line": 36, "text": "O", "x0": 74.6, "top": 334.9, "x1": 89.7, "bottom": 349.8}
-{"page": 9, "line": 37, "text": "N E T", "x0": 80.6, "top": 340.1, "x1": 570.6, "bottom": 356.5}
-{"page": 9, "line": 38, "text": "S", "x0": 558.5, "top": 347.6, "x1": 570.6, "bottom": 355.8}
-{"page": 9, "line": 39, "text": "S ^T", "x0": 89.2, "top": 350.8, "x1": 457.3, "bottom": 365.0}
-{"page": 9, "line": 40, "text": "T T A", "x0": 95.2, "top": 356.9, "x1": 570.9, "bottom": 370.5}
-{"page": 9, "line": 41, "text": "E V", "x0": 445.5, "top": 365.9, "x1": 571.1, "bottom": 375.4}
-{"page": 9, "line": 42, "text": "CLINTON ST W ^Y ^A ^T ^S ^E ^N CLINTON ST E", "x0": 345.8, "top": 371.1, "x1": 749.2, "bottom": 392.7}
-{"page": 9, "line": 43, "text": "F Y E", "x0": 445.9, "top": 388.9, "x1": 571.6, "bottom": 400.4}
-{"page": 9, "line": 44, "text": "N G", "x0": 502.3, "top": 399.3, "x1": 571.6, "bottom": 409.8}
-{"page": 9, "line": 45, "text": "A", "x0": 502.5, "top": 408.2, "x1": 514.7, "bottom": 416.4}
-{"page": 9, "line": 46, "text": "B S", "x0": 502.7, "top": 413.8, "x1": 571.8, "bottom": 424.3}
-{"page": 9, "line": 47, "text": "L", "x0": 502.8, "top": 424.1, "x1": 514.9, "bottom": 431.0}
-{"page": 9, "line": 48, "text": "^A E", "x0": 502.9, "top": 428.1, "x1": 744.2, "bottom": 442.0}
-{"page": 9, "line": 49, "text": "T", "x0": 723.1, "top": 436.4, "x1": 737.0, "bottom": 449.8}
-{"page": 9, "line": 50, "text": "M A C E CILA ^T ^S E R S", "x0": 43.7, "top": 442.1, "x1": 732.1, "bottom": 471.9}
-{"page": 9, "line": 51, "text": "LO NERD ^N N C", "x0": 60.4, "top": 462.1, "x1": 713.8, "bottom": 484.4}
-{"page": 9, "line": 52, "text": "CENTER ST ^I ^A E", "x0": 290.5, "top": 474.6, "x1": 702.4, "bottom": 490.6}
-{"page": 9, "line": 53, "text": "S ^L S P", "x0": 158.2, "top": 482.7, "x1": 697.2, "bottom": 502.6}
-{"page": 9, "line": 54, "text": "T ^P", "x0": 166.8, "top": 492.1, "x1": 389.1, "bottom": 505.8}
-{"page": 9, "line": 55, "text": "IT", "x0": 171.4, "top": 496.4, "x1": 187.1, "bottom": 512.3}
-{"page": 9, "line": 56, "text": "U ^S", "x0": 178.1, "top": 503.1, "x1": 389.3, "bottom": 517.8}
-{"page": 9, "line": 57, "text": "S", "x0": 184.1, "top": 508.9, "x1": 198.2, "bottom": 523.1}
-{"page": 9, "line": 58, "text": "A", "x0": 193.0, "top": 517.3, "x1": 207.1, "bottom": 531.5}
-{"page": 9, "line": 59, "text": "V", "x0": 198.3, "top": 522.3, "x1": 212.3, "bottom": 536.5}
-{"page": 9, "line": 60, "text": "E", "x0": 204.3, "top": 528.3, "x1": 218.3, "bottom": 542.5}
-{"page": 9, "line": 61, "text": "T", "x0": 660.4, "top": 534.6, "x1": 672.4, "bottom": 541.9}
-{"page": 9, "line": 62, "text": "S", "x0": 660.4, "top": 542.3, "x1": 672.4, "bottom": 550.3}
-{"page": 9, "line": 63, "text": "^A R", "x0": 660.4, "top": 553.8, "x1": 738.3, "bottom": 566.7}
-{"page": 9, "line": 64, "text": "NTITUS", "x0": 339.8, "top": 565.1, "x1": 385.4, "bottom": 582.2}
-{"page": 9, "line": 65, "text": "AVE", "x0": 389.3, "top": 569.6, "x1": 414.1, "bottom": 582.4}
-{"page": 9, "line": 66, "text": "G", "x0": 660.4, "top": 562.3, "x1": 672.4, "bottom": 571.7}
-{"page": 9, "line": 67, "text": "U T", "x0": 660.4, "top": 569.2, "x1": 731.2, "bottom": 580.9}
-{"page": 9, "line": 68, "text": "E", "x0": 720.3, "top": 561.8, "x1": 734.6, "bottom": 574.1}
-{"page": 9, "line": 69, "text": "Y L", "x0": 660.4, "top": 578.3, "x1": 727.0, "bottom": 589.4}
-{"page": 9, "line": 70, "text": "STITUSAVE ^T ^S ^C ^A H ^I L", "x0": 430.8, "top": 584.4, "x1": 724.2, "bottom": 611.1}
-{"page": 9, "line": 71, "text": "SOUTH ST ^T ^A ^S S", "x0": 158.2, "top": 604.3, "x1": 715.0, "bottom": 619.4}
-{"page": 9, "line": 72, "text": "V", "x0": 563.5, "top": 612.3, "x1": 575.7, "bottom": 620.5}
-{"page": 9, "line": 73, "text": "S", "x0": 252.1, "top": 616.4, "x1": 264.2, "bottom": 624.6}
-{"page": 9, "line": 74, "text": "^E W", "x0": 563.7, "top": 620.7, "x1": 624.6, "bottom": 637.9}
-{"page": 9, "line": 75, "text": "R N", "x0": 252.3, "top": 627.9, "x1": 575.9, "bottom": 637.3}
-{"page": 9, "line": 76, "text": "^I HYERS ST ^E T", "x0": 252.5, "top": 633.3, "x1": 617.3, "bottom": 647.0}
-{"page": 9, "line": 77, "text": "^A S", "x0": 252.5, "top": 640.4, "x1": 613.6, "bottom": 654.2}
-{"page": 9, "line": 78, "text": "F G", "x0": 252.7, "top": 645.2, "x1": 576.4, "bottom": 655.3}
-{"page": 9, "line": 79, "text": "R", "x0": 592.9, "top": 651.0, "x1": 607.6, "bottom": 664.5}
-{"page": 9, "line": 80, "text": "^S E", "x0": 564.5, "top": 658.7, "x1": 603.2, "bottom": 671.7}
-{"page": 9, "line": 81, "text": "C", "x0": 584.4, "top": 665.3, "x1": 599.2, "bottom": 679.1}
-{"page": 9, "line": 82, "text": "N", "x0": 579.7, "top": 672.5, "x1": 594.5, "bottom": 686.4}
-{"page": 9, "line": 83, "text": "E", "x0": 574.9, "top": 679.7, "x1": 589.4, "bottom": 693.1}
-{"page": 9, "line": 84, "text": "P", "x0": 570.1, "top": 686.7, "x1": 584.6, "bottom": 700.1}
-{"page": 9, "line": 85, "text": "WOOD ST", "x0": 312.2, "top": 690.3, "x1": 369.7, "bottom": 703.4}
-{"page": 9, "line": 86, "text": "S", "x0": 565.6, "top": 693.7, "x1": 580.0, "bottom": 707.0}
-{"page": 9, "line": 87, "text": "PARK ST", "x0": 422.0, "top": 765.6, "x1": 473.4, "bottom": 778.3}
-{"page": 9, "line": 88, "text": "Zoning Districts ^P-1", "x0": 459.1, "top": 863.3, "x1": 628.4, "bottom": 879.5}
-{"page": 9, "line": 89, "text": "D", "x0": 325.2, "top": 892.9, "x1": 339.2, "bottom": 907.7}
-{"page": 9, "line": 90, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 879.0, "x1": 484.9, "bottom": 895.1}
-{"page": 9, "line": 91, "text": "B-1a", "x0": 489.1, "top": 885.4, "x1": 504.8, "bottom": 892.8}
-{"page": 9, "line": 92, "text": "PUD", "x0": 616.8, "top": 880.8, "x1": 632.5, "bottom": 888.3}
-{"page": 9, "line": 93, "text": "R R-1b", "x0": 318.2, "top": 897.9, "x1": 633.0, "bottom": 912.7}
-{"page": 9, "line": 94, "text": "A B-2a", "x0": 309.4, "top": 902.9, "x1": 504.8, "bottom": 918.9}
-{"page": 9, "line": 95, "text": "R", "x0": 302.4, "top": 909.2, "x1": 316.4, "bottom": 924.0}
-{"page": 9, "line": 96, "text": "MI D R-2a", "x0": 291.4, "top": 912.9, "x1": 633.0, "bottom": 931.8}
-{"page": 9, "line": 97, "text": "L R B-2d", "x0": 286.0, "top": 919.5, "x1": 504.8, "bottom": 935.7}
-{"page": 9, "line": 98, "text": "E R", "x0": 279.5, "top": 925.8, "x1": 405.4, "bottom": 942.9}
-{"page": 9, "line": 99, "text": "E B-4 R-2b", "x0": 385.4, "top": 933.6, "x1": 633.0, "bottom": 949.1}
-{"page": 9, "line": 100, "text": "C", "x0": 379.7, "top": 941.3, "x1": 394.5, "bottom": 955.7}
-{"page": 9, "line": 101, "text": "N", "x0": 374.1, "top": 947.9, "x1": 388.9, "bottom": 962.3}
-{"page": 9, "line": 102, "text": "R-3a", "x0": 616.8, "top": 951.4, "x1": 633.0, "bottom": 958.8}
-{"page": 9, "line": 103, "text": "E B-5", "x0": 368.8, "top": 954.6, "x1": 500.7, "bottom": 968.5}
-{"page": 9, "line": 104, "text": "P", "x0": 363.6, "top": 960.6, "x1": 378.0, "bottom": 974.5}
-{"page": 9, "line": 105, "text": "S R-3aa", "x0": 358.5, "top": 966.6, "x1": 637.3, "bottom": 980.5}
-{"page": 9, "line": 106, "text": "CBD-100", "x0": 489.1, "top": 973.5, "x1": 519.9, "bottom": 980.9}
-{"page": 9, "line": 107, "text": "CBD-120", "x0": 489.1, "top": 991.0, "x1": 519.9, "bottom": 998.4}
-{"page": 9, "line": 108, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 585.4, "top": 981.0, "x1": 612.8, "bottom": 997.1}
-{"page": 9, "line": 109, "text": "R-3b", "x0": 616.8, "top": 986.4, "x1": 633.0, "bottom": 993.9}
-{"page": 9, "line": 110, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 1002.9, "x1": 484.9, "bottom": 1019.2}
-{"page": 9, "line": 111, "text": "CBD-140", "x0": 489.1, "top": 1008.5, "x1": 519.9, "bottom": 1016.0}
-{"page": 9, "line": 112, "text": "Residential Transition", "x0": 616.8, "top": 1004.2, "x1": 688.9, "bottom": 1011.6}
-{"page": 9, "line": 113, "text": "SW-2", "x0": 616.8, "top": 1021.7, "x1": 635.4, "bottom": 1029.2}
-{"page": 9, "line": 114, "text": "CBD-50", "x0": 489.1, "top": 1026.3, "x1": 515.8, "bottom": 1033.7}
-{"page": 9, "line": 115, "text": "Street Level Active Use Overlay Zone", "x0": 616.8, "top": 1039.2, "x1": 742.1, "bottom": 1046.7}
-{"page": 9, "line": 116, "text": "CBD-60", "x0": 489.1, "top": 1043.8, "x1": 515.8, "bottom": 1051.2}
-{"page": 9, "line": 117, "text": "T", "x0": 130.1, "top": 1059.9, "x1": 142.3, "bottom": 1067.6}
-{"page": 9, "line": 118, "text": "S", "x0": 130.3, "top": 1067.4, "x1": 142.6, "bottom": 1075.7}
-{"page": 9, "line": 119, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! CBD-85 Traditional Residential", "x0": 457.2, "top": 1054.9, "x1": 691.2, "bottom": 1071.0}
-{"page": 9, "line": 120, "text": "WE/WF", "x0": 616.8, "top": 1074.5, "x1": 642.5, "bottom": 1082.0}
-{"page": 9, "line": 121, "text": "W Cherry Street District", "x0": 130.7, "top": 1078.7, "x1": 559.1, "bottom": 1090.4}
-{"page": 9, "line": 122, "text": "O D WEDZ-1a", "x0": 131.0, "top": 1090.0, "x1": 649.8, "bottom": 1105.7}
-{"page": 9, "line": 123, "text": "D R Urban Mixed Use", "x0": 131.3, "top": 1096.6, "x1": 547.3, "bottom": 1113.7}
-{"page": 9, "line": 124, "text": "I", "x0": 377.3, "top": 1103.2, "x1": 444.1, "bottom": 1190.1}
-{"page": 9, "line": 125, "text": "A Y WEDZ-1b", "x0": 131.6, "top": 1108.1, "x1": 649.8, "bottom": 1122.6}
-{"page": 9, "line": 126, "text": "E R Medium-Density Mixed Use", "x0": 131.8, "top": 1114.1, "x1": 581.1, "bottom": 1128.6}
-{"page": 9, "line": 127, "text": "R", "x0": 227.5, "top": 1120.3, "x1": 242.3, "bottom": 1134.6}
-{"page": 9, "line": 128, "text": "M", "x0": 132.1, "top": 1124.1, "x1": 144.4, "bottom": 1134.5}
-{"page": 9, "line": 129, "text": "A", "x0": 222.5, "top": 1127.5, "x1": 236.9, "bottom": 1141.1}
-{"page": 9, "line": 130, "text": "U", "x0": 217.5, "top": 1133.7, "x1": 232.3, "bottom": 1147.8}
-{"page": 9, "line": 131, "text": "S", "x0": 132.5, "top": 1137.4, "x1": 144.8, "bottom": 1145.8}
-{"page": 9, "line": 132, "text": "Q", "x0": 212.5, "top": 1140.7, "x1": 227.6, "bottom": 1154.8}
-{"page": 9, "line": 133, "text": "0 0.05 0.1 0.2", "x0": 460.8, "top": 1148.8, "x1": 705.0, "bottom": 1167.0}
-{"page": 9, "line": 134, "text": "E", "x0": 206.9, "top": 1152.5, "x1": 221.2, "bottom": 1165.2}
-{"page": 9, "line": 135, "text": "N", "x0": 203.0, "top": 1159.3, "x1": 217.7, "bottom": 1172.6}
-{"page": 9, "line": 136, "text": "^O Miles", "x0": 198.7, "top": 1166.3, "x1": 739.7, "bottom": 1184.5}
-{"page": 9, "line": 137, "text": "T", "x0": 195.6, "top": 1174.4, "x1": 209.6, "bottom": 1186.5}
-{"page": 9, "line": 138, "text": "S", "x0": 191.7, "top": 1181.3, "x1": 206.1, "bottom": 1194.0}
+{"page": 8, "line": 4, "text": "H", "x0": 126.4, "top": 155.8, "x1": 135.6, "bottom": 168.1}
+{"page": 8, "line": 5, "text": "WILLIAMS ST", "x0": 87.3, "top": 212.4, "x1": 163.6, "bottom": 225.1}
+{"page": 8, "line": 6, "text": "BUFFALO ST", "x0": 88.3, "top": 285.8, "x1": 162.6, "bottom": 299.5}
+{"page": 8, "line": 7, "text": "MAPLE AVE", "x0": 1049.7, "top": 346.5, "x1": 1117.2, "bottom": 359.8}
+{"page": 8, "line": 8, "text": "SENECA ST", "x0": 92.9, "top": 381.2, "x1": 160.6, "bottom": 394.2}
+{"page": 8, "line": 9, "text": "HARVAR", "x0": 564.4, "top": 399.5, "x1": 613.9, "bottom": 413.4}
+{"page": 8, "line": 10, "text": "CATHERINE ST", "x0": 252.0, "top": 427.7, "x1": 340.1, "bottom": 440.9}
+{"page": 8, "line": 11, "text": "MILLER ST", "x0": 1027.6, "top": 485.3, "x1": 1089.9, "bottom": 498.9}
+{"page": 8, "line": 12, "text": "COOK", "x0": 275.2, "top": 504.4, "x1": 310.7, "bottom": 517.1}
+{"page": 8, "line": 13, "text": "BOOL ST", "x0": 398.4, "top": 530.0, "x1": 450.3, "bottom": 543.0}
+{"page": 8, "line": 14, "text": "Zoning Districts CR-1 MU-1 R-2a", "x0": 847.9, "top": 610.6, "x1": 1194.9, "bottom": 626.9}
+{"page": 8, "line": 15, "text": "Active street-level uses required CR-2 MU-2 R-2b", "x0": 878.1, "top": 632.0, "x1": 1194.9, "bottom": 644.5}
+{"page": 8, "line": 16, "text": "B-2d CR-3 P-1 R-3a", "x0": 878.1, "top": 653.4, "x1": 1194.9, "bottom": 665.9}
+{"page": 8, "line": 17, "text": "I B-4 CR-4 R-1b", "x0": 760.1, "top": 675.0, "x1": 1135.6, "bottom": 764.8}
+{"page": 8, "line": 18, "text": "!!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!!", "x0": 1141.2, "top": 666.9, "x1": 1168.8, "bottom": 687.0}
+{"page": 8, "line": 19, "text": "R-3b", "x0": 1173.3, "top": 675.0, "x1": 1194.9, "bottom": 684.8}
+{"page": 8, "line": 20, "text": "MITCHELL", "x0": 879.1, "top": 690.8, "x1": 939.2, "bottom": 706.8}
+{"page": 8, "line": 21, "text": "ST U-1", "x0": 941.3, "top": 695.1, "x1": 1189.3, "bottom": 708.1}
+{"page": 8, "line": 22, "text": "0 0.0250.05 0.1 0.15 0.2", "x0": 845.5, "top": 724.9, "x1": 1165.0, "bottom": 740.7}
+{"page": 8, "line": 23, "text": "Miles", "x0": 1157.7, "top": 740.2, "x1": 1194.7, "bottom": 756.1}
+{"page": 9, "line": 1, "text": "BUFFALO ST", "x0": 116.3, "top": 36.7, "x1": 190.8, "bottom": 50.4}
+{"page": 9, "line": 2, "text": "CCiittyy ooff IItthhaaccaa", "x0": 73.7, "top": 64.2, "x1": 223.8, "bottom": 89.9}
+{"page": 9, "line": 3, "text": "W SENECA STNY 79", "x0": 419.1, "top": 98.8, "x1": 541.3, "bottom": 114.1}
+{"page": 9, "line": 4, "text": "Southside Form District Map", "x0": 74.0, "top": 105.4, "x1": 451.4, "bottom": 135.4}
+{"page": 9, "line": 5, "text": "May 2026", "x0": 73.8, "top": 144.8, "x1": 144.5, "bottom": 160.6}
+{"page": 9, "line": 6, "text": "W STATE ST", "x0": 313.6, "top": 171.0, "x1": 385.8, "bottom": 184.9}
+{"page": 9, "line": 7, "text": "GREEN ST - NY79 SB/EB", "x0": 328.7, "top": 240.2, "x1": 469.9, "bottom": 255.4}
+{"page": 9, "line": 8, "text": "CLEVELAND AVE", "x0": 197.1, "top": 315.2, "x1": 295.6, "bottom": 329.7}
+{"page": 9, "line": 9, "text": "CLINTON ST E", "x0": 666.6, "top": 371.1, "x1": 749.2, "bottom": 384.2}
+{"page": 9, "line": 10, "text": "CLINTON ST W", "x0": 345.8, "top": 378.4, "x1": 431.8, "bottom": 392.7}
+{"page": 9, "line": 11, "text": "A", "x0": 100.4, "top": 456.6, "x1": 109.1, "bottom": 469.1}
+{"page": 9, "line": 12, "text": "RD", "x0": 98.4, "top": 471.0, "x1": 116.0, "bottom": 483.7}
+{"page": 9, "line": 13, "text": "CENTER ST", "x0": 290.5, "top": 474.6, "x1": 358.8, "bottom": 488.0}
+{"page": 9, "line": 14, "text": "S AV", "x0": 376.8, "top": 569.9, "x1": 404.8, "bottom": 582.4}
+{"page": 9, "line": 15, "text": "SOUTH ST", "x0": 158.2, "top": 606.7, "x1": 219.2, "bottom": 619.4}
+{"page": 9, "line": 16, "text": "HYERS ST", "x0": 415.4, "top": 633.3, "x1": 475.8, "bottom": 647.0}
+{"page": 9, "line": 17, "text": "WOOD ST", "x0": 312.2, "top": 690.3, "x1": 369.7, "bottom": 703.4}
+{"page": 9, "line": 18, "text": "PARK ST", "x0": 422.0, "top": 765.6, "x1": 473.4, "bottom": 778.3}
+{"page": 9, "line": 19, "text": "Zoning Districts P-1", "x0": 459.1, "top": 863.3, "x1": 628.4, "bottom": 879.5}
+{"page": 9, "line": 20, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 879.0, "x1": 484.9, "bottom": 895.1}
+{"page": 9, "line": 21, "text": "B-1a", "x0": 489.1, "top": 885.4, "x1": 504.8, "bottom": 892.8}
+{"page": 9, "line": 22, "text": "PUD", "x0": 616.8, "top": 880.8, "x1": 632.5, "bottom": 888.3}
+{"page": 9, "line": 23, "text": "R-1b", "x0": 616.8, "top": 898.4, "x1": 633.0, "bottom": 905.8}
+{"page": 9, "line": 24, "text": "B-2a", "x0": 489.1, "top": 902.9, "x1": 504.8, "bottom": 910.4}
+{"page": 9, "line": 25, "text": "R-2a", "x0": 616.8, "top": 916.1, "x1": 633.0, "bottom": 923.6}
+{"page": 9, "line": 26, "text": "B-2d", "x0": 489.1, "top": 920.7, "x1": 504.8, "bottom": 928.1}
+{"page": 9, "line": 27, "text": "R-2b", "x0": 616.8, "top": 933.6, "x1": 633.0, "bottom": 941.1}
+{"page": 9, "line": 28, "text": "B-4", "x0": 489.1, "top": 938.2, "x1": 500.7, "bottom": 945.6}
+{"page": 9, "line": 29, "text": "R-3a", "x0": 616.8, "top": 951.4, "x1": 633.0, "bottom": 958.8}
+{"page": 9, "line": 30, "text": "B-5", "x0": 489.1, "top": 955.7, "x1": 500.7, "bottom": 963.2}
+{"page": 9, "line": 31, "text": "R-3aa", "x0": 616.8, "top": 968.9, "x1": 637.3, "bottom": 976.4}
+{"page": 9, "line": 32, "text": "CBD-100", "x0": 489.1, "top": 973.5, "x1": 519.9, "bottom": 980.9}
+{"page": 9, "line": 33, "text": "CBD-120", "x0": 489.1, "top": 991.0, "x1": 519.9, "bottom": 998.4}
+{"page": 9, "line": 34, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 585.4, "top": 981.0, "x1": 612.8, "bottom": 997.1}
+{"page": 9, "line": 35, "text": "R-3b", "x0": 616.8, "top": 986.4, "x1": 633.0, "bottom": 993.9}
+{"page": 9, "line": 36, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 1002.9, "x1": 484.9, "bottom": 1019.2}
+{"page": 9, "line": 37, "text": "CBD-140", "x0": 489.1, "top": 1008.5, "x1": 519.9, "bottom": 1016.0}
+{"page": 9, "line": 38, "text": "Residential Transition", "x0": 616.8, "top": 1004.2, "x1": 688.9, "bottom": 1011.6}
+{"page": 9, "line": 39, "text": "SW-2", "x0": 616.8, "top": 1021.7, "x1": 635.4, "bottom": 1029.2}
+{"page": 9, "line": 40, "text": "CBD-50", "x0": 489.1, "top": 1026.3, "x1": 515.8, "bottom": 1033.7}
+{"page": 9, "line": 41, "text": "Street Level Active Use Overlay Zone", "x0": 616.8, "top": 1039.2, "x1": 742.1, "bottom": 1046.7}
+{"page": 9, "line": 42, "text": "CBD-60", "x0": 489.1, "top": 1043.8, "x1": 515.8, "bottom": 1051.2}
+{"page": 9, "line": 43, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 1054.9, "x1": 484.9, "bottom": 1071.0}
+{"page": 9, "line": 44, "text": "CBD-85", "x0": 489.1, "top": 1061.6, "x1": 515.8, "bottom": 1069.0}
+{"page": 9, "line": 45, "text": "Traditional Residential", "x0": 616.8, "top": 1057.0, "x1": 691.2, "bottom": 1064.4}
+{"page": 9, "line": 46, "text": "WE/WF", "x0": 616.8, "top": 1074.5, "x1": 642.5, "bottom": 1082.0}
+{"page": 9, "line": 47, "text": "Cherry Street District", "x0": 489.1, "top": 1079.1, "x1": 559.1, "bottom": 1086.5}
+{"page": 9, "line": 48, "text": "WEDZ-1a", "x0": 616.8, "top": 1092.3, "x1": 649.8, "bottom": 1099.7}
+{"page": 9, "line": 49, "text": "Urban Mixed Use", "x0": 489.1, "top": 1096.6, "x1": 547.3, "bottom": 1104.0}
+{"page": 9, "line": 50, "text": "I", "x0": 377.3, "top": 1103.2, "x1": 444.1, "bottom": 1190.1}
+{"page": 9, "line": 51, "text": "WEDZ-1b", "x0": 616.8, "top": 1109.8, "x1": 649.8, "bottom": 1117.2}
+{"page": 9, "line": 52, "text": "Medium-Density Mixed Use", "x0": 489.1, "top": 1114.4, "x1": 581.1, "bottom": 1121.8}
+{"page": 9, "line": 53, "text": "0 0.05 0.1 0.2", "x0": 460.8, "top": 1148.8, "x1": 705.0, "bottom": 1167.0}
+{"page": 9, "line": 54, "text": "Miles", "x0": 697.0, "top": 1166.3, "x1": 739.7, "bottom": 1184.5}
