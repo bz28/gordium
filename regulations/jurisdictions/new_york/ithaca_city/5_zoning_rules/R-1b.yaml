@@ -66,10 +66,6 @@ rules:
         quote: "School and related buildings SP SP SP SP SP SP SP SP SP"
       - file: chapter_325_zoning_2026-10.pdf
         page: 30
-        lines: [4, 4]
-        quote: "Special Permits and Related Special Conditions"
-      - file: chapter_325_zoning_2026-10.pdf
-        page: 30
         lines: [22, 23]
         quote: "(1) The uses listed under the district regulations in § 325-8, District regulations, which require a special permit from the Planning and Development Board, are as follows:"
       - file: chapter_325_zoning_2026-10.pdf
