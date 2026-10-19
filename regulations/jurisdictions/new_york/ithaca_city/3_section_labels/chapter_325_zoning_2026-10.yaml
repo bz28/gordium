@@ -326,6 +326,12 @@ labels:
       - 14
       quote: each square-footage requirement applies separately to the initial permitted primary use and to each
         additional permitted primary use located in a separate building on the property in question
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 26
+      lines:
+      - 11
+      - 11
+      quote: "(1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential"
     piece_sha256: 7fdc5e9855654cccd698775ef937ca124eabe427bdbe798ac528916335793b53
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -344,6 +350,12 @@ labels:
       - 38
       quote: 'Home occupations in all residential districts, unless the home occupation meets all of the following
         criteria:'
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 30
+      lines:
+      - 35
+      - 35
+      quote: "residential district shall conform to the use and area regulation applying to the"
     piece_sha256: 7665750b1482f4dcab3f2874155165e223679eaadae448dd926f42a8c100a4cd
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -378,6 +390,12 @@ labels:
       quote: The location and size of the use, the size of the site in relation to it, and the location of the site
         with respect to the existing or future streets giving access to it shall be such that the use will be in
         harmony with the existing or intended character of the neighborhood
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 33
+      lines:
+      - 16
+      - 16
+      quote: "[2] Operations in connection with the use shall not be more objectionable to nearby"
     piece_sha256: cdcf3aa1a45281e83214eb7122a2626cb38cf4ca47e7de8f4953a99e6afb68b2
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -430,6 +448,12 @@ labels:
       - 4
       - 5
       quote: a parapet wall or cornice for ornament extending above such height five feet or less.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 47
+      lines:
+      - 3
+      - 3
+      quote: "B. Ornamental and architectural features. The provisions of this chapter shall not apply to prevent the"
     piece_sha256: b41ce9f324e87948d6ebbc398124c4d13f7be8d32986de54edaac12e013b52f3
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -448,6 +472,12 @@ labels:
       - 7
       quote: 'In any district, any main building may be erected to a height in excess of that specified for the
         district, provided that:'
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 47
+      lines:
+      - 10
+      - 10
+      quote: "(2) In all districts, the number of stories permitted may not be exceeded."
     piece_sha256: 13048cb18799bbded20ea4da9261d58a0bd5c497bebe4a66b57e2d9b49067f69
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -517,6 +547,12 @@ labels:
       - 39
       quote: Accessory structures which are wholly or partially above finished grade are permitted in any side or
         rear yard but not in a required front yard, except as permitted under the further provisions of this section.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 66
+      lines:
+      - 39
+      - 39
+      quote: "except as permitted under the further provisions of this section. Corner lots shall be considered to"
     piece_sha256: eed0c562f00dda9532fa84ceffe63a3e724833fb78075218bfcff6200454fba1
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -2118,6 +2154,12 @@ labels:
       - 17
       quote: The number of such occupants that are permitted to legally occupy a dwelling unit or building is based
         on the amount of habitable space in the dwelling unit or building and on the basis of lot size.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 16
+      lines:
+      - 17
+      - 17
+      quote: "size. The minimum amounts of habitable space that are required for occupancy by one or more"
     piece_sha256: b2446faa849a7aa0bbfc47f4f857dc5671966451efee41e83a904c24c9d44a58
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -2420,6 +2462,12 @@ labels:
       - 11
       - 11
       quote: ROOMING UNIT — One or more rooms designed or used for living quarters by one household,
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 18
+      lines:
+      - 11
+      - 12
+      quote: "ROOMING UNIT \u2014 One or more rooms designed or used for living quarters by one household, which may or may not include separate sanitary facilities and which must include either complete"
     piece_sha256: f09f0ed1cce8b79665697c66367961eb8871c962e9e5b6be055b19dd2b01ccc7
     drafted_by: section_labeling/claude-haiku-5-5
     open_questions:
@@ -2576,6 +2624,12 @@ labels:
       - 44
       quote: Such standard canopy may only project from the face of the structure upon which it is mounted four
         feet from the face of the structure and be no taller than four feet.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 18
+      lines:
+      - 44
+      - 45
+      quote: "mounted four feet from the face of the structure and be no taller than four feet. The standard canopy must be mounted on the face of the structure to provide for an unobstructed clearance below the rigid"
     piece_sha256: d6515acadd52b7630a4d63cc42f2bfe2c84249bbb0f1475c378b2c5e55f01faa
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -3507,6 +3561,12 @@ labels:
       - 31
       quote: That the development is found to be compatible in terms of appearance, character and overall density
         with both the existing and potential development in the surrounding area.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 40
+      lines:
+      - 25
+      - 25
+      quote: "for the affected area. No development shall occur on the site that is not in strict conformance"
     piece_sha256: 30936d938565666cc90c26c192bf8b5ceb71e415fc276c0e31dd11bc01178215
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -3611,6 +3671,12 @@ labels:
       - 12
       quote: unless the proposed building and/or use is in accordance with a site plan approved pursuant to the
         provisions of Chapter 276 of the City of Ithaca Code.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 42
+      lines:
+      - 9
+      - 9
+      quote: "E. Site plan approval. No structure shall be erected or placed within a PUD, no building permit shall be"
     piece_sha256: 38e139202616e82378fb43658a882bb395e746e169a2132417b4a37b2a937021
     drafted_by: section_labeling/claude-haiku-5-5
     revised:
@@ -3633,6 +3699,12 @@ labels:
       - 13
       - 14
       quote: The Common Council will consider an application for any PUD on the following criteria, among others
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 42
+      lines:
+      - 17
+      - 17
+      quote: "(3) Does the project create at least one long-term significant community benefit?"
     piece_sha256: a69443fa3e1092125b2d98fd7fc37b9e163beb4c90c6d917be4ade0b77ee8edc
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -4324,6 +4396,12 @@ labels:
       - 38
       - 39
       quote: Parking areas are not permitted in the first 100 feet measured from the nearest curb of a public street
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 61
+      lines:
+      - 39
+      - 39
+      quote: "the nearest curb of a public street, unless the minimum setback requirements for the Southwest Area"
     piece_sha256: c741b4e68ff176d10e061c146de99bfe6cc00e47dd6733d2e3bc221f0ac209cb
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -4340,6 +4418,12 @@ labels:
       - 7
       - 7
       quote: One parking space for each seven undergraduate students
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 62
+      lines:
+      - 24
+      - 24
+      quote: "per semester; \"full-time employees\" are defined as employees who are employed at least 35"
     piece_sha256: 160fa8d21c730a372fc9aa895d6d7053a7a859d5234dec4ce31550cad57d26e6
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -4395,6 +4479,12 @@ labels:
       quote: One space shall be made available for each use having 3,000 to 10,000 feet of floor space, plus one
         additional space for each additional 15,000 square feet or major fraction thereof of floor space in a single
         occupancy over and above 10,000 square feet.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 64
+      lines:
+      - 3
+      - 3
+      quote: "and industrial land uses and multiple dwelling structures having more than 25 units, except for"
     piece_sha256: d0d9137e4a879a6aded8a27b6d4cc99ced5992599c08ed4a6c38eb590f00b9e1
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -4731,6 +4821,12 @@ labels:
       - 5
       - 5
       quote: No objectionable, noxious, toxic or corrosive fumes or gases shall be emitted.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 66
+      lines:
+      - 4
+      - 4
+      quote: "other solid matter, odors or fumes in amounts which exceed the maximum standards of the New York"
     piece_sha256: e78744c6a44484284a81bf8dc8b25cac74eb9cf901b07a4d124173fa7b6c199a
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -4996,6 +5092,12 @@ labels:
       - 27
       - 27
       quote: 'Short-term rentals are only permitted in:'
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 68
+      lines:
+      - 24
+      - 24
+      quote: "rental. A host who is a long-term leaseholder must provide written authorization from the"
     piece_sha256: 277ce1f487a65cc62ea8ccbaa6b3a30f13038171958644b909d16d66c68c77f0
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -5295,6 +5397,12 @@ labels:
       - 9
       quote: Adult uses may only be located within the Adult Use Overlay Zone, as shown on the Official City Zoning
         Map.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 76
+      lines:
+      - 10
+      - 10
+      quote: "(2) Adult uses may not be located, when initially opened as, or converted to, an adult use:"
     piece_sha256: 8ca6c08c73713f8675eec0233dead1150c16993ff883ae23927586a59b3be421
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -5385,6 +5493,12 @@ labels:
       quote: Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3 shall be
         subject to the guidelines set forth in the Design Guidelines for the Southwest Area, Meadow Street, and
         Elmira Road Corridor.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 77
+      lines:
+      - 7
+      - 7
+      quote: "Planning Board during the site plan review (SPR) process. No building permits shall be issued until"
     piece_sha256: f513b528af22dbca8300568e7b45c420062ced9d965ec388989a3b9185230069
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -5486,6 +5600,12 @@ labels:
       - 4
       - 4
       quote: No dumpster may be placed or allowed to remain on any properties in the R-1 or R-2 Zoning
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 78
+      lines:
+      - 6
+      - 6
+      quote: "section. Dumpsters for which variances are granted must be out of the public view or meet all"
     piece_sha256: 249196bb92ea35ee1069291ee705ccd7ad0b93d10b52201c4c136f9432075b76
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -7097,6 +7217,12 @@ labels:
       - 9
       quote: (a) Place PWSFs on existing utility poles (telephone poles, utility distribution poles, streetlights,
         and traffic signal stanchions); or
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 89
+      lines:
+      - 7
+      - 7
+      quote: "(1) Tier One. This tier is limited to applications that:"
     piece_sha256: b9823207ac4031efa9a1445e0942c802b84484316fe5fd4273147bddcdd473e9
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -7183,6 +7309,12 @@ labels:
       - 5
       - 6
       quote: shall be no closer than 250 feet from any adjacent residence, school, or day care facility
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 92
+      lines:
+      - 31
+      - 31
+      quote: "C. Design standards. Each new or modified PWSF must be compatible in size, mass, and color to similar"
     piece_sha256: a5b38224f2def8e3f19367f664682c63b4e8e1ddc51ce88242fce87134b39ea5
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -7239,6 +7371,12 @@ labels:
       - 42
       - 42
       quote: No habitable structure or outdoor area where people congregate shall be within a fall zone
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 94
+      lines:
+      - 4
+      - 4
+      quote: "(b) No adjoining property line shall be within the fall zone of a radius equal to the height of"
     piece_sha256: 6e3bd42f3983e6c1aa446c3a2006e089199c750c3481b46c4fa772099ecca2ed
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -7611,6 +7749,12 @@ labels:
       - 12
       quote: '(b) Whether or not the proposed installation will, or will not, inflict a significant adverse aesthetic
         impact upon adjacent or nearby properties or surrounding neighborhood or community, specifically:'
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 102
+      lines:
+      - 38
+      - 38
+      quote: "(d) The proposed height proposed for the PWSF is the minimum height necessary to remedy"
     piece_sha256: 28d7e9dca067263e2ed90e19a8e43b293bb5cec8f501c398a1d5ef9805297a11
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -8734,6 +8878,12 @@ labels:
       - 26
       - 26
       quote: A nonconforming use may only be changed to a use permitted in the district in which it is located.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 112
+      lines:
+      - 27
+      - 27
+      quote: "Once changed to a conforming use, no building or lot shall be permitted to revert to a nonconforming"
     piece_sha256: e3cbb00c804a73f032cafb17f9d3929c7530ac28196d0999843bee4082302efd
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -8806,6 +8956,12 @@ labels:
       - 8
       quote: (3) The alteration conforms to the provisions of this chapter and does not exacerbate the existing
         deficiency or create a new nonconformity.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 113
+      lines:
+      - 3
+      - 3
+      quote: "(1) The alteration is required by law or is necessary to restore the structure to a safe condition upon"
     piece_sha256: 7df05502adfeb37108097c1697a558ac3c0a48a30e68cd769926676bd6188e0c
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -8857,6 +9013,12 @@ labels:
       - 20
       - 20
       quote: 'Zoning permits shall be available for the following area deficiencies:'
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 113
+      lines:
+      - 25
+      - 25
+      quote: "(4) New or exacerbated side or rear yard deficiencies where at least 50% of the yard is provided."
     piece_sha256: 4a6ec67873295d9957a2880ec589698ccc299a6668ff323130e0ed5052b66ddf
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -9165,6 +9327,12 @@ labels:
       - 37
       - 37
       quote: impactful to nearby property by reason of noise, fumes, increased vehicular traffic or parking
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 123
+      lines:
+      - 36
+      - 36
+      quote: "(2) Use of the structure or lot in connection with the proposal shall not be significantly more"
     piece_sha256: 7cdb85dd14d9c9de9963d0a6a57631bc1f619c3949f922ceec1b9b3930a7c37e
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -9377,6 +9545,12 @@ labels:
       - 37
       quote: shall pay particular attention to the visual effect of such work on the character of the area and adjacent
         residential zones
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 126
+      lines:
+      - 37
+      - 37
+      quote: "the character of the area and adjacent residential zones. In no case shall the Planning and"
     piece_sha256: 1c307f8859c8c9ffebc2acf36633c9f14d8f476cac91ecd241f7e4a31c5b8ab2
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -9479,6 +9653,12 @@ labels:
       - 31
       quote: All new construction (including parking lot construction or expansion) is subject to the design review
         process set forth in Chapter 160, Design Review, of the City Municipal Code.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 128
+      lines:
+      - 32
+      - 32
+      quote: "(2) No building permit shall be issued or structure or building shall be erected, and no exterior of"
     piece_sha256: 89d2054a2d710593d513b132f887573e770644a9f6e9285592fa609c7bd3d29d
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -9780,6 +9960,12 @@ labels:
       - 20
       - 20
       quote: A. Permitted uses.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 163
+      lines:
+      - 20
+      - 20
+      quote: "(b) Storage buildings not to exceed 200 square feet."
     piece_sha256: 37fca10fe0a90c209268d5d1489f4f248833610afbc527949d64f55203f809ae
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -9811,6 +9997,12 @@ labels:
       - 32
       - 32
       quote: '(1) Area in square feet: 4,000.'
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 163
+      lines:
+      - 31
+      - 31
+      quote: "C. Minimum lot size."
     piece_sha256: 95803db52f59bf7f0e39cbb03a6a1160f3a71a5dac2029e6b40b49657c0d8337
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft
@@ -9827,6 +10019,12 @@ labels:
       - 5
       - 5
       quote: Four stories and 40 feet.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 164
+      lines:
+      - 4
+      - 4
+      quote: "D. Maximum building height."
     piece_sha256: 23748b6796a26f3f2fc2807aacf8248148789f04708f3cb8ad6084091c2c5e6b
     drafted_by: section_labeling/claude-haiku-5-5
     status: draft

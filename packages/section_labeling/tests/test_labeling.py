@@ -453,3 +453,10 @@ def test_a_rules_sources_list_each_place_once(law):
     entry, _ = run(law, FakeClient(twice))
     places = [(s["page"], tuple(s["lines"])) for s in entry["sources"]]
     assert len(places) == len(set(places)) == 2                               # L1-L2 once, plus the quote's line
+
+
+def test_a_copy_on_another_page_outside_the_piece_is_not_a_duplicate(law):
+    ctx, header, pieces, rows = law
+    lines = labeler.numbered_lines(rows, pieces["325-16F"])                   # L16 is p.48 l.12; a copy is on p.47 l.31
+    source, why = labeler.cited_lines({"first_line": 16, "last_line": 16}, lines, pieces["325-16F"], LAW, ctx)
+    assert why is None and (source["page"], source["lines"]) == (48, [12, 12])

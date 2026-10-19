@@ -101,13 +101,9 @@ def cited_lines(req: dict, lines: list[tuple[int, int, str]], piece: dict, file:
         parts = [f"L{a}-L{b - 1}" for a, b in zip(starts, starts[1:] + [last + 1])]
         return None, f"L{first}-L{last} crosses a page break; cite it as one part per page: {', '.join(parts)}"
     words = " ".join(t for _, _, t in span)
-    page = span[0][0]
-    # Checked here, not read from a matcher's message: the words must occur once on their page and nowhere
-    # else in the piece, or the citation can't point at one place.
-    elsewhere = len(locate(words, ctx.pages.get(file, {}).get(page, {}))) - 1 + sum(
-        len(locate(words, ctx.pages.get(file, {}).get(p, {}))) for p in {p for p, _, _ in lines} - {page})
-    if elsewhere > 0:
-        return None, (f"the words on L{first}-L{last} also appear elsewhere on the page or in the piece; "
+    inside, on_page = places(words, span[0][0], piece, file, ctx)
+    if len(inside) > 1 or on_page > 1:
+        return None, (f"the words on L{first}-L{last} also appear elsewhere on this page or in this piece; "
                       "include one more line before or after so the citation points at one place")
     return find_quote(words, piece, file, ctx)
 
@@ -122,13 +118,20 @@ def consistency_problem(answer: dict) -> str | None:
     return None
 
 
+def places(words: str, page: int | None, piece: dict, file: str, ctx: Context) -> tuple[list, int]:
+    """The one definition of where words occur, used by every check here: (every place inside this piece,
+    how many times they occur on `page`). The inspector also needs a citation unique on its page."""
+    owned = set(piece_keys(piece))
+    pages = ctx.pages.get(file, {})
+    inside = [(p, a, b) for p in sorted({p for p, _ in owned}) for a, b in locate(words, pages.get(p, {}))
+              if (p, a) in owned and (p, b) in owned]
+    return inside, len(locate(words, pages.get(page, {}))) if page is not None else 0
+
+
 def find_quote(quote: str, piece: dict, file: str, ctx: Context) -> tuple[dict | None, str | None]:
     """(source, None) if the quote is exactly the city's words inside this piece, once on its page;
     otherwise (None, why). Uses the inspector's own matcher and source check."""
-    owned = set(piece_keys(piece))
-    pages = ctx.pages.get(file, {})
-    inside = [(page, a, b) for page in sorted({p for p, _ in owned}) for a, b in locate(quote, pages.get(page, {}))
-              if (page, a) in owned and (page, b) in owned]
+    inside, _ = places(quote, None, piece, file, ctx)
     if not inside:
         return None, "the quote isn't in this piece word for word"
     if len(inside) > 1:
