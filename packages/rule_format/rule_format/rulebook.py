@@ -303,9 +303,10 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p.append(f"kind must be one of {KINDS}")
     if rule.get("topic") not in ctx.topics:
         p.append(f"unknown topic {rule.get('topic')!r}")
-    if not rule.get("title"):
+    title = rule.get("title")
+    if not (isinstance(title, str) and title.strip()):
         p.append("missing 'title' (a short label)")
-    elif isinstance(rule["title"], str) and (len(rule["title"]) > TITLE_MAX or "\n" in rule["title"].strip()):
+    elif len(title) > TITLE_MAX or len(title.strip().splitlines()) > 1:
         p.append(f"'title' is a one-line label of at most {TITLE_MAX} characters; the rule is its quotes and check")
     if (rule.get("kind") == "rule") != ("check" in rule):
         p.append("a 'rule' needs a 'check'; a 'flag' must not have one")

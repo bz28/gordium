@@ -130,6 +130,9 @@ def test_valid_rulebooks(ctx):
     ({"kind": "maybe"}, "kind must be one of"),
     ({"topic": "vibes"}, "unknown topic"),
     ({"title": None}, "missing 'title'"),
+    ({"title": "   "}, "missing 'title'"),
+    ({"title": "Rear yard\nminimum"}, "one-line label"),
+    ({"title": "Rear yard\rminimum"}, "one-line label"),
     ({"title": "Rear yard at least 25% of lot depth or 50 ft, whichever is less, but never under 20 ft."},
      "one-line label"),                                                      # a retelling, not a label
     ({"says": "Rear yard at least 25% of lot depth."}, "unknown field 'says'"),
@@ -625,3 +628,14 @@ def test_a_use_decided_by_a_rule_must_cite_its_row(ctx):
 def test_malformed_uses_are_left_out_not_crashed(uses):
     from rule_format.rulebook import _use_rows
     assert _use_rows(uses) in ({}, {"x": []})
+
+
+@pytest.mark.parametrize("edit", [{"title": "Rear yard"}, {"answers": [ANSWER | {"answer": "The one at the back."}]},
+                                  {"answers": []}])
+def test_approved_rule_needs_reapproval_after_answer_or_title_edit(ctx, edit):
+    answered = copy.deepcopy(RULE) | {"answers": [ANSWER]}
+    approved = answered | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 20),
+                           "approved_hash": approval_hash(answered, ctx)}
+    assert validate({"district": "R-1b", "rules": [approved]}, ctx) == []
+    assert any("changed since it was approved" in p
+               for p in validate({"district": "R-1b", "rules": [approved | edit]}, ctx))

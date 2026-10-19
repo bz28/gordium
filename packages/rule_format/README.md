@@ -25,8 +25,10 @@ The shape every rule must have, the formula language rules are written in, and t
       expect: pass
     - given: {use: one_family_detached, rear_yard: 21, lot_depth: 90}
       expect: fail
+  notes: 106 Ithaca Rd needs 23.7 ft            # optional explanation; never used to decide a result
   drafted_by: claude
   open_questions: []                             # interpretations for the architects; none allowed once approved
+  answers: []                                    # architects' answers: {question, answer, answered_by, answered_on}
   status: draft                                  # approved also needs approved_by, approved_on, approved_hash
 ```
 
@@ -51,7 +53,7 @@ python -m rule_format       # validates every jurisdiction's sources, 4_term_def
 pytest packages/rule_format
 ```
 
-Validation checks: file shape; required fields; no duplicate YAML keys; known measures, uses and topics; formulas parse and are true/false tests; source files listed in `sources.yaml` with matching fingerprints; extracted text made from that exact PDF version (once the text-extraction step is merged, CI also re-extracts the text from the PDF and requires an exact match, so it can't be hand-edited); every quote found exactly on its cited lines as whole tokens (see below); at least one passing and one failing worked example, each giving its expected outcome, with values of the right kind; `open_questions` a list of text, and empty before approval; approved rules approved by someone in `regulations/reviewers.yaml` (never the drafter, never AI) on a date, with `approved_hash` matching the rule's current content, id and the fingerprints of the documents it cites (`rulebook.approval_hash`), so any edit, move, or replaced source document after approval needs re-approval. A file's `district` must match its file name. (The hash catches later edits; it doesn't prove who approved: see `docs/how_rules_are_checked.md`.)
+Validation checks: file shape; required fields; no duplicate YAML keys; known measures, uses and topics; formulas parse and are true/false tests; source files listed in `sources.yaml` with matching fingerprints; extracted text made from that exact PDF version (once the text-extraction step is merged, CI also re-extracts the text from the PDF and requires an exact match, so it can't be hand-edited); every quote found exactly on its cited lines as whole tokens (see below); at least one passing and one failing worked example, each giving its expected outcome, with values of the right kind; a `title` of one line and at most 80 characters (a label, not a retelling); `open_questions` a list of text, and empty before approval; `answers` each with question, answer, answered_by (a reviewer) and answered_on (a date), and part of the approval fingerprint; approved rules approved by someone in `regulations/reviewers.yaml` (never the drafter, never AI) on a date, with `approved_hash` matching the rule's current content, id and the fingerprints of the documents it cites (`rulebook.approval_hash`), so any edit, move, or replaced source document after approval needs re-approval. A file's `district` must match its file name. (The hash catches later edits; it doesn't prove who approved: see `docs/how_rules_are_checked.md`.)
 
 ## How quotes are matched
 
