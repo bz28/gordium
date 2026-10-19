@@ -108,7 +108,14 @@ def test_line_numbers_and_text_match_the_extracted_text():
     (3, "Minimum Lot Size [fn3]", "Fraternity, sorority, or group house", "R-1A", ""),                 # empty cell
     (2, "Primary Uses", "Multiple family dwelling [fn4]", "RU", "•[fn5]"),
     (2, "Primary Uses", "School and related buildings", "Additional Regulations", "§325-10(C)(4)"),
+    (2, "Accessory Uses", "Tower for the receipt or transmission of electronic signals or generation of electricity",
+     "R-2B", "SP"),                                                                            # label on 3 lines
+    (2, "Accessory Uses", "Tower for the receipt or transmission of electronic signals or generation of electricity",
+     "Additional Regulations", "§325-9B(1)(j)"),
+    (3, "Yard Dimensions", "Rear (minimum, % of depth or feet, whichever is less)", "R-3A", "20%/ 50 ft [fn16]"),
     (14, "Residential", "Dormitory", "R-3A", "1 space per 4 persons housed"),                       # 4 lines
+    (14, "Residential", "Dormitory", "R-3B", "1 space per 4 persons housed"),
+    (14, "Residential", "Dormitory", "RU", "1 space per 4 persons housed"),
     (14, "Residential", "Dormitory", "R-3AA", "-"),
     (14, "Minimum Loading Requirement", "Neighborhood commercial facility", "R-2B", "See §325-21"),
 ])
