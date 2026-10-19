@@ -34,6 +34,8 @@ MAX_QUOTE_GAP = 300       # characters a '…' may skip, so pieces can't be stit
 RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources",
                "examples", "notes", "drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
 TEXT_FIELDS = ("id", "kind", "topic", "says", "drafted_by", "status", "approved_by")
+ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "quote"},
+               "examples": {"given", "expect", "note"}}
 APPROVED_FIELDS = ("id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources")
 MEASURE_KINDS = {name: "text" if m["unit"] == "text" else "number"
                  for name, m in yaml.safe_load(MEASURES_FILE.read_text()).items()}
@@ -174,8 +176,8 @@ def _cut(page_text: str, i: int) -> bool:
         return True
     if after in NUMBER_JOINERS:  # '2|.5': cut if the joiner continues the number
         return before.isdigit() and char(i + 1).isdigit()
-    if before in NUMBER_JOINERS:  # '2.|5'
-        return char(i - 2).isdigit() and after.isdigit()
+    if before in NUMBER_JOINERS:  # '2.|5', and '.|5' (a decimal written without a leading zero)
+        return after.isdigit() and (char(i - 2).isdigit() or before == "." and char(i - 2) != ".")
     return False
 
 
@@ -235,6 +237,10 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     for key, value in (("review_when", review_when), ("sources", sources), ("examples", examples)):
         if value is None:
             p.append(f"'{key}' must be a list of mappings")
+        for item in value or []:
+            p += [f"{key}: unknown field {k!r}" for k in item if k not in ITEM_FIELDS[key]]
+    if any("unknown field" in x for x in p):
+        return p  # the approval fingerprint and other checks rely on well-formed items
 
     conditions = [rule[k] for k in ("applies_when", "check") if k in rule]
     for r in review_when or []:

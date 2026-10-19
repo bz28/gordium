@@ -226,6 +226,7 @@ def test_quote_number_must_be_the_whole_number(page):
     ("rear yard minimum shall be 2.", "rear yard minimum shall be 2.5 feet"),   # ends on '.', page goes on
     (".5 feet in depth for all lots", "rear yard 2.5 feet in depth for all lots"),
     (",500 square feet of lot area", "lot of 1,500 square feet of lot area"),
+    ("5 acres minimum lot size", "a lot of .5 acres minimum lot size"),          # decimal without a leading 0
 ])
 def test_quote_edges_cannot_cut_a_number(quote, page):
     assert not quote_found(quote, normalize(page))
@@ -249,8 +250,10 @@ def test_quote_may_end_on_a_number_before_punctuation(quote, page):
 
 
 def test_approval_check_survives_badly_shaped_sources(ctx):
-    for bad in (["charts.pdf"], [{"file": ["charts.pdf"]}], "charts.pdf", 5):
-        validate(rulebook(**APPROVED, sources=bad), ctx)   # must report problems, not crash
+    for bad in (["charts.pdf"], [{"file": ["charts.pdf"]}], "charts.pdf", 5, [{**RULE["sources"][0], 5: "x"}]):
+        assert validate(rulebook(**APPROVED, sources=bad), ctx)   # must report problems, not crash
+    assert any("unknown field 3" in p for p in validate(
+        rulebook(**APPROVED, review_when=[{"when": "lot_depth > 500", "reason": "x", 3: 1}]), ctx))
 
 
 def test_separate_table_cells_do_not_merge():
