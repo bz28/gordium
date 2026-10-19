@@ -6,10 +6,19 @@ import math
 import pytest
 import yaml
 
-from rule_format.rulebook import Context, _canonical, approval_hash, load, outcome, quote_found, tokenize, validate
+from rule_format.rulebook import (Context, _canonical, approval_hash, load, locate, outcome, quote_at, tokenize,
+                                  validate)
 
-PAGE_3 = "Rear (minimum, % of depth or feet, whichever is less)  25%/ 50 ft 16"
-QUOTE = "Rear (minimum, % of depth … whichever is less)  25%/ 50 ft"
+
+def quote_found(quote, tokens):
+    """Token-boundary tests: is the quote somewhere on a one-line page made of these tokens?"""
+    return bool(locate(quote, {1: tokens}))
+
+PAGE_3 = {41: "Side (other side minimum) 10 ft 10 ft",
+          42: "Rear (minimum, % of depth or feet, 25%/ 25%/",
+          43: "whichever is less) 50 ft [fn16] 50 ft [fn16]"}
+QUOTE = "Rear (minimum, % of depth or feet, 25%/ 25%/ whichever is less) 50 ft [fn16]"
+SOURCE = {"file": "charts.pdf", "page": 3, "lines": [42, 43], "quote": QUOTE}
 RULE = {
     "id": "R-1b.rear_yard",
     "kind": "rule",
@@ -18,7 +27,7 @@ RULE = {
     "applies_when": 'use == "one_family_detached"',
     "check": "rear_yard >= max(min(0.25 * lot_depth, 50), 20)",
     "review_when": [{"when": "lot_depth > 500", "reason": "unusually deep lot"}],
-    "sources": [{"file": "charts.pdf", "page": 3, "quote": QUOTE}],
+    "sources": [SOURCE],
     "examples": [
         {"given": {"use": "one_family_detached", "rear_yard": 25, "lot_depth": 90}, "expect": "pass"},
         {"given": {"use": "one_family_detached", "rear_yard": 21, "lot_depth": 90}, "expect": "fail"},
@@ -33,7 +42,7 @@ CTX = Context(
     topics={"dimensions"},
     sources={"charts.pdf": {"file": "charts.pdf", "sha256": "a" * 64}},
     reviewers={"jane"},
-    pages={"charts.pdf": {3: tokenize(PAGE_3)}},
+    pages={"charts.pdf": {3: {n: tokenize(t) for n, t in PAGE_3.items()}}},
 )
 APPROVED = {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19),
             "approved_hash": approval_hash(RULE, CTX)}
@@ -133,18 +142,17 @@ def test_valid_rulebooks(ctx):
     ({"review_when": {"when": "lot_depth > 1"}}, "'review_when' must be a list of mappings"),
     ({"sources": []}, "needs at least one source"),
     ({"sources": ["charts.pdf p3"]}, "'sources' must be a list of mappings"),
-    ({"sources": [{"file": "other.pdf", "page": 3, "quote": QUOTE}]}, "not in sources.yaml"),
-    ({"sources": [{"file": "charts.pdf", "page": "3", "quote": QUOTE}]}, "needs 'page' (number)"),
-    ({"sources": [{"file": "charts.pdf", "page": 9, "quote": QUOTE}]}, "page 9 does not exist"),
-    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": "Rear (minimum, % of depth … 30%/ 50 ft 16 xxxxxx"}]},
-     "quote not found"),
-    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": "…"}]}, "needs 15+ characters"),
-    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": "50 ft"}]}, "needs 15+ characters"),
-    ({"sources": [{"file": "charts.pdf", "page": 3,                       # stitched from single letters
-                   "quote": "r … e … a … r … m … i … n … i … m … u … m … 5 … 0 … f … t"}]}, "needs 15+ characters"),
-    ({"sources": [{"file": "charts.pdf", "page": 3, "quote": " … ".join(["Rear (minimum, % of"] * 4)}]},
-     "at most 2 '…' gaps"),
-    ({"sources": [{"file": ["charts.pdf"], "page": 3, "quote": QUOTE}]}, "not in sources.yaml"),
+    ({"sources": [SOURCE | {"file": "other.pdf"}]}, "not in sources.yaml"),
+    ({"sources": [SOURCE | {"page": "3"}]}, "needs 'page' (number), 'lines'"),
+    ({"sources": [{k: v for k, v in SOURCE.items() if k != "lines"}]}, "needs 'page' (number), 'lines'"),
+    ({"sources": [SOURCE | {"lines": [42]}]}, "needs 'page' (number), 'lines'"),
+    ({"sources": [SOURCE | {"page": 9}]}, "page 9 does not exist"),
+    ({"sources": [SOURCE | {"quote": "Rear (minimum, % of depth or feet, 30%/"}]}, "not on this page"),
+    ({"sources": [SOURCE | {"lines": [41, 43]}]}, "isn't at lines 41-43; it is at lines 42-43"),   # range too wide
+    ({"sources": [SOURCE | {"lines": [42, 42]}]}, "isn't at lines 42-42; it is at lines 42-43"),   # too narrow
+    ({"sources": [SOURCE | {"quote": "Rear (minimum … 50 ft"}]}, "one exact passage"),
+    ({"sources": [SOURCE | {"quote": "…"}]}, "one exact passage"),
+    ({"sources": [SOURCE | {"file": ["charts.pdf"]}]}, "not in sources.yaml"),
     ({"examples": []}, "worked examples that pass and that fail"),
     ({"examples": [{"given": {}, "expect": "needs_review"}]}, "worked examples that pass and that fail"),
     ({"examples": RULE["examples"] + [{"given": {"use": "one_family_detached", "rear_yard": 25, "lot_depth": 90},
@@ -198,12 +206,6 @@ def test_duplicate_yaml_keys_are_rejected(tmp_path):
         load(path)
 
 
-def test_quote_parts_must_appear_in_order():
-    page = tokenize("one two three four")
-    assert quote_found("one … three", page)
-    assert quote_found("ONE  TWO", page)
-    assert not quote_found("three … one", page)
-    assert not quote_found("…", page)
 
 
 def test_quote_number_must_not_match_inside_a_bigger_number():
@@ -268,9 +270,6 @@ def test_quote_must_start_on_a_word_boundary():
     assert not quote_found("ear yard minimum depth", tokenize("Rear yard minimum depth"))
 
 
-def test_earlier_look_alike_does_not_hide_the_real_quote():
-    page = tokenize("Rear yard minimum " + "x " * 100 + " Rear yard minimum twenty feet always")
-    assert quote_found("Rear yard minimum … twenty feet always", page)
 
 
 @pytest.mark.parametrize("text, expected", [
@@ -301,11 +300,6 @@ def test_quote_cannot_cut_a_district_name():
     assert not quote_found("designation of R-1 or R-2", tokenize("designation of R-1b or R-2a"))
 
 
-def test_quote_pieces_must_be_near_each_other():
-    near = tokenize("Rear yard minimum " + "x " * 50 + " twenty feet always")    # 50 words apart
-    far = tokenize("Rear yard minimum " + "x " * 70 + " twenty feet always")     # 70 words apart
-    assert quote_found("Rear yard minimum … twenty feet always", near)
-    assert not quote_found("Rear yard minimum … twenty feet always", far)
 
 
 def _jurisdiction(tmp_path, pdf_bytes=b"%PDF fake", header_sha=None, rows=()):
@@ -322,9 +316,9 @@ def _jurisdiction(tmp_path, pdf_bytes=b"%PDF fake", header_sha=None, rows=()):
 
 
 def test_context_loads_extracted_text(tmp_path):
-    ctx = Context.for_jurisdiction(_jurisdiction(tmp_path, rows=[{"page": "2", "text": "Hello  World"}]))
+    ctx = Context.for_jurisdiction(_jurisdiction(tmp_path, rows=[{"page": "2", "line": 1, "text": "Hello  World"}]))
     assert ctx.problems == []
-    assert ctx.pages["doc.pdf"] == {2: ["hello", "world"]}
+    assert ctx.pages["doc.pdf"] == {2: {1: ["hello", "world"]}}
 
 
 def test_context_reports_changed_pdf_and_stale_text(tmp_path):
@@ -395,3 +389,28 @@ def test_decimal_point_needs_a_clean_start():
     assert tokenize("A .5") == ["a", ".5"] and tokenize("A.5") == ["a", ".", "5"]   # documented spacing case
     assert not quote_found(".5 feet of depth here", tokenize("Section A.5 feet of depth here"))
     assert quote_found("5 feet of depth here", tokenize("Section A.5 feet of depth here"))
+
+
+def test_quote_must_sit_exactly_on_the_cited_lines():
+    page = {n: tokenize(t) for n, t in PAGE_3.items()}
+    assert quote_at(QUOTE, page, 42, 43)
+    assert quote_at("Rear (minimum, % of depth", page, 42, 42)            # part of one line
+    assert not quote_at("Rear (minimum, % of depth", page, 42, 43)        # doesn't reach line 43
+    assert not quote_at("Side (other side minimum) 10 ft", page, 42, 42)  # it's on line 41
+    assert not quote_at(QUOTE, page, 42, 44)                              # line 44 doesn't exist
+    assert locate("50 ft [fn16]", page) == [(43, 43), (43, 43)]                 # it appears twice on line 43
+
+
+def test_locate_finds_long_and_repeated_quotes():
+    page = {n: tokenize(f"word{n} filler") for n in range(1, 16)}
+    long = " ".join(f"word{n} filler" for n in range(1, 13))
+    assert locate(long, page) == [(1, 12)]                                  # no line cap
+    assert any("it is at lines 1-12" in p for p in _source_issue(page, long, [2, 13]))
+    assert locate("filler", page)[:2] == [(1, 1), (2, 2)]                    # one entry per occurrence
+
+
+def _source_issue(page, quote, lines):
+    from rule_format.rulebook import _source_problems
+    ctx = copy.deepcopy(CTX)
+    ctx.pages["charts.pdf"][3] = page
+    return _source_problems([{"file": "charts.pdf", "page": 3, "lines": lines, "quote": quote}], ctx)

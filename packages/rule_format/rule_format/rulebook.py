@@ -28,13 +28,10 @@ REVIEWERS_FILE = REPO / "regulations/reviewers.yaml"
 OUTCOMES = ("pass", "fail", "needs_review", "not_applicable")
 KINDS = ("rule", "flag")  # rule: code checks it; flag: an architect must judge it
 STATUSES = ("draft", "approved")
-MIN_QUOTE_LENGTH = 15     # non-space characters per quoted piece; short pieces match by accident
-MAX_QUOTE_PIECES = 3      # at most two '…' gaps in one quote
-MAX_QUOTE_GAP = 60        # tokens (words, numbers, symbols) a '…' may skip: about two lines of text
 RULE_FIELDS = {"id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources", "examples",
                "notes", "open_questions", "drafted_by", "status", "approved_by", "approved_on", "approved_hash"}
 TEXT_FIELDS = ("id", "kind", "topic", "says", "drafted_by", "status", "approved_by")
-ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "quote"},
+ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote"},
                "examples": {"given", "expect", "note"}}
 APPROVED_FIELDS = ("id", "kind", "topic", "says", "applies_when", "check", "review_when", "sources")
 MEASURE_KINDS = {name: "text" if m["unit"] == "text" else "number"
@@ -87,7 +84,7 @@ class Context:
     topics: set[str]
     sources: dict[str, dict]                  # file name -> sources.yaml entry
     reviewers: set[str] = field(default_factory=set)                 # who may approve rules
-    pages: dict[str, dict[int, list[str]]] = field(default_factory=dict)  # file -> page -> tokens
+    pages: dict[str, dict[int, dict[int, list[str]]]] = field(default_factory=dict)  # file -> page -> line -> tokens
     problems: list[str] = field(default_factory=list)                # problems with the sources themselves
 
     @classmethod
@@ -115,15 +112,17 @@ class Context:
         return ctx
 
     def _load_extracted(self, name, sha, path):
-        """Extracted text: a header line {"file", "sha256"}, then one {"page", "text", ...} per line."""
+        """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
+        It's trusted only because CI re-extracts it from the PDF and requires an exact match
+        (`python -m document_extraction --check`); the header ties it to the PDF version."""
         rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
         if not rows or rows[0].get("sha256") != sha:
             self.problems.append(f"{path.name}: extracted from a different version of {name}; re-extract")
             return
-        pages: dict[int, list[str]] = {}
+        pages: dict[int, dict[int, list[str]]] = {}
         for row in rows[1:]:
-            pages.setdefault(int(row["page"]), []).append(row["text"])
-        self.pages[name] = {p: tokenize(" ".join(t)) for p, t in pages.items()}
+            pages.setdefault(int(row["page"]), {})[int(row["line"])] = tokenize(row["text"])
+        self.pages[name] = pages
 
 
 # A token is a footnote marker ("[fn11]"), a whole word or number ("rear", "1b", "2.5", "1,500", "3/2",
@@ -142,28 +141,19 @@ def tokenize(text: str) -> list[str]:
     return TOKEN.findall(text.lower().translate(_UNIFY))
 
 
-def quote_pieces(quote: str) -> list[list[str]]:
-    """The quote's pieces (separated by '…'), each as tokens."""
-    return [t for t in map(tokenize, quote.split("…")) if t]
+def locate(quote: str, page: dict[int, list[str]]) -> list[tuple[int, int]]:
+    """Every place the quote occurs on the page, as (first line, last line), one entry per occurrence.
+    The quote must be an unbroken run of whole tokens; it may span any number of consecutive lines."""
+    q = tokenize(quote)
+    line_of = [n for n in sorted(page) for _ in page[n]]
+    tokens = [t for n in sorted(page) for t in page[n]]
+    return [(line_of[i], line_of[i + len(q) - 1]) for i in range(len(tokens) - len(q) + 1)
+            if q and tokens[i:i + len(q)] == q] if q else []
 
 
-def quote_found(quote: str, page: list[str]) -> bool:
-    """True if the quote's pieces appear on the page as whole tokens, in order, each starting
-    within MAX_QUOTE_GAP tokens of where the previous piece ended."""
-    pieces = quote_pieces(quote)
-    return bool(pieces) and _chain(pieces, page, None)
-
-
-def _chain(pieces: list[list[str]], page: list[str], end: int | None) -> bool:
-    """Try every occurrence of the first piece, so an earlier look-alike can't hide a real match."""
-    if not pieces:
-        return True
-    first, n = pieces[0], len(pieces[0])
-    last_start = len(page) - n if end is None else min(len(page) - n, end + MAX_QUOTE_GAP)
-    for at in range(0 if end is None else end, last_start + 1):
-        if page[at:at + n] == first and _chain(pieces[1:], page, at + n):
-            return True
-    return False
+def quote_at(quote: str, page: dict[int, list[str]], first: int, last: int) -> bool:
+    """True if the quote occurs on the page starting on line `first` and ending on line `last`."""
+    return (first, last) in locate(quote, page)
 
 
 def approval_hash(rule: dict, ctx: "Context") -> str:
@@ -318,19 +308,20 @@ def _source_problems(sources: list[dict], ctx: Context) -> list[str]:
         return ["needs at least one source"]
     p = []
     for s in sources:
-        name, page, quote = s.get("file"), s.get("page"), s.get("quote")
+        name, page, lines, quote = s.get("file"), s.get("page"), s.get("lines"), s.get("quote")
         if not isinstance(name, str) or name not in ctx.sources:
             p.append(f"source file {name!r} is not in sources.yaml")
-        elif type(page) is not int or not isinstance(quote, str):
-            p.append(f"source {name}: needs 'page' (number) and 'quote' (text)")
-        elif not (pieces := quote_pieces(quote)) or min(len("".join(p)) for p in pieces) < MIN_QUOTE_LENGTH:
-            p.append(f"source {name}: each quoted piece needs {MIN_QUOTE_LENGTH}+ characters to be traceable")
-        elif len(pieces) > MAX_QUOTE_PIECES:
-            p.append(f"source {name}: at most {MAX_QUOTE_PIECES - 1} '…' gaps in a quote")
+        elif not (type(page) is int and isinstance(quote, str) and tokenize(quote) and isinstance(lines, list)
+                  and len(lines) == 2 and all(type(n) is int for n in lines)):
+            p.append(f"source {name}: needs 'page' (number), 'lines' ([first, last]) and 'quote' (text)")
+        elif "…" in quote or "..." in quote:
+            p.append(f"source {name}: a quote is one exact passage; cite separate passages as separate sources")
         elif name not in ctx.pages:
             p.append(f"source {name}: no extracted text, quote not verified")
         elif page not in ctx.pages[name]:
             p.append(f"source {name}: page {page} does not exist")
-        elif not quote_found(quote, ctx.pages[name][page]):
-            p.append(f"source {name} p.{page}: quote not found: {quote!r}")
+        elif not quote_at(quote, ctx.pages[name][page], *lines):
+            found = locate(quote, ctx.pages[name][page])
+            where = f"; it is at lines {', '.join(f'{a}-{b}' for a, b in found)}" if found else "; not on this page"
+            p.append(f"source {name} p.{page}: quote isn't at lines {lines[0]}-{lines[1]}{where}: {quote!r}")
     return p

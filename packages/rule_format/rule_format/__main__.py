@@ -1,16 +1,19 @@
-"""Validate every rule file in the repo.
+"""Validate every rule file in the repo, or find where a quote is.
 
     python -m rule_format          # exit code 1 if anything has problems
+    python -m rule_format cite new_york/ithaca_city zoning_charts_2026-04.pdf 3 "Height in feet 35 ft"
+                                   # prints the lines to cite: lines: [31, 31]
 
 For each jurisdiction: its source documents (fingerprints, extracted text), then
 every rule file in 5_zoning_rules/ and in its test_data/answer_keys/ folder.
 """
 
+import argparse
 import sys
 
 import yaml
 
-from .rulebook import REPO, Context, load, validate
+from .rulebook import REPO, Context, load, locate, validate
 
 
 def main() -> int:
@@ -47,5 +50,26 @@ def main() -> int:
     return 1 if failed else 0
 
 
+def cite(argv: list[str]) -> int:
+    """Print the `lines` to cite for a quote, so drafters never count lines by hand."""
+    parser = argparse.ArgumentParser(prog="python -m rule_format cite")
+    for name in ("place", "file", "page", "quote"):
+        parser.add_argument(name, type=int if name == "page" else str)
+    args = parser.parse_args(argv)
+    ctx = Context.for_jurisdiction(REPO / "regulations/jurisdictions" / args.place)
+    if args.file not in ctx.pages:
+        print(f"no extracted text for {args.file}")
+        return 1
+    if args.page not in ctx.pages[args.file]:
+        print(f"{args.file} has no page {args.page}")
+        return 1
+    found = locate(args.quote, ctx.pages[args.file][args.page])
+    for first, last in found:
+        print(f"lines: [{first}, {last}]")
+    if len(found) != 1:
+        print("not found on this page" if not found else "appears more than once: quote more words so it's unique")
+    return 0 if len(found) == 1 else 1
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(cite(sys.argv[2:]) if sys.argv[1:2] == ["cite"] else main())

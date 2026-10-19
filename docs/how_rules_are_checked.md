@@ -24,7 +24,7 @@ Every rule is written the same way. Here is R-1b's rear yard, with what each lin
 | `check` | `rear_yard >= max(min(0.25 * lot_depth, 50), 20)` | The same rule as a yes/no question the computer can answer |
 | `applies_when` | `use == "one_family_detached"` | Which buildings it applies to (optional) |
 | `review_when` | lot depth unclear on an irregular lot | When the computer must hand it to an architect instead of deciding |
-| `sources` | zoning charts, page 3, "Rear (minimum, % of depth…" | Exactly where in the city's documents it comes from |
+| `sources` | zoning charts, page 3, lines 42–43, "Rear (minimum, % of depth or feet, 25%/ …" (the exact row) | Exactly where in the city's documents it comes from, down to the line |
 | `examples` | rear yard 25 ft, lot 90 ft deep → **pass** | Worked examples, like the ones in a code commentary |
 | `status`, `approved_by`, `approved_on`, `approved_hash` | draft · (architect) · (date) · (fingerprint) | Who approved it, when, and a fingerprint of the rule as approved (so any later edit shows) |
 
@@ -32,7 +32,7 @@ Every rule is written the same way. Here is R-1b's rear yard, with what each lin
 
 | Promise to architects | Why it matters | So the inspector rejects a rule that… | Example test |
 |---|---|---|---|
-| **Every rule shows where it came from** | You can always ask "says who?" and get the page and the words | has no source · cites a document we don't hold · cites a document that has changed since we recorded it · quotes words that aren't on that page · quotes so little (like "50 ft") that it could match anywhere · stitches a quote together from scattered bits of the page (each piece must be 15+ characters, close together, at most two "…" gaps) · quotes "5 feet" where the page says "25 feet" | A rule quoting "30%" where page 3 says "25%" → rejected |
+| **Every rule shows where it came from** | You can always ask "says who?" and get the page and the words | has no source · cites a document we don't hold · cites a document that has changed since we recorded it · doesn't say exactly where on the page its quote is (page and line numbers) · quotes words that aren't exactly on those lines · quotes "5 feet" where the page says "25 feet" | A rule quoting "30%" where page 3 says "25%" → rejected |
 | **Nothing is used until an architect approves it** | AI can draft, but only a licensed person decides | is marked approved by someone not on the architects list (`regulations/reviewers.yaml`) · is approved by the person who drafted it · still has open questions for the architects · has no approval date · was **changed or moved to another district after it was approved**, or **a document it cites was replaced by a new version** (its fingerprint no longer matches, so it needs approving again) | A rule "approved by claude" → rejected |
 | **Checking never uses AI; same design = same answer** | Results are predictable and repeatable, like a calculator | uses anything other than plain math in its formula | A formula that tries to run a program → rejected |
 | **Never a false pass** | A wrong "pass" could put an illegal building on paper; a "needs review" only costs a second look | has a formula that isn't a clear yes/no question · has worked examples that don't come out as stated · doesn't have at least one example that passes and one that fails (so the formula is really tried both ways) | "rear yard minus 20" (a number, not a yes/no) → rejected |
@@ -64,7 +64,7 @@ At any step, if a measurement is missing or unusable (no value, not a real numbe
 
 It can tell whether a rule is **well-formed and traceable**, not whether it **reads the law correctly**. That is confirmed separately:
 
-1. **The quote is real**: checked automatically against the document.
+1. **The quote is real and in the right place**: checked automatically against the exact lines of the document's extracted text. Once the text-extraction step is merged, the extracted text is re-made from the PDF on every change and must match exactly, so it can't be edited by hand. For chart values, the right *column* (district) is confirmed by step 2 and by architects, until the chart reader cites table cells.
 2. **Two independent versions agree**: R-1b written by hand from reading must match R-1b produced by code from the chart tables.
 3. **An architect approves it.**
 4. **Real city decisions** (planned): run the rules on real Ithaca projects the city has already ruled on (permits, zoning board decisions). A mismatch means a rule or an exception is wrong.
@@ -77,7 +77,7 @@ The approval lines say *who* approved and *when*, and the fingerprint shows whet
 
 These are engineering judgment calls, not facts from the code:
 
-- Quotes are matched as whole words and numbers ("tokens"), never parts of them: "5 feet" never matches inside "2.5 feet" or "25 feet", "R-1" never inside "R-1b". Each quoted piece must be at least 15 characters (not counting spaces), with at most two "…" gaps of up to 60 tokens (words, numbers and single symbols like % or /: about two lines of text).
+- A source cites the exact lines its quote sits on, and the quote must match those lines as whole words and numbers ("tokens"): "5 feet" never matches inside "2.5 feet" or "25 feet", "R-1" never inside "R-1b". One quote is one unbroken passage.
 - Lengths are always in feet, areas in square feet.
 - The list of measurements rules may use (`packages/rule_format/rule_format/measures.yaml`).
 - The list of topics (`regulations/document_extraction_guide/vocabulary.yaml`).
