@@ -104,6 +104,7 @@ REV = {"from": "reference", "by": "Claude (review)", "date": datetime.date(2026,
 @pytest.mark.parametrize("revised, problem", [
     ("from reference", "'revised' must be a list"),
     ([REV | {"extra": 1}], "each revision needs exactly from, by, date, why"),
+    ([{"field": "label", "by": "x", "date": datetime.date(2026, 10, 19), "why": "w"}], "the label or the sources"),
     ([{k: v for k, v in REV.items() if k != "date"}], "each revision needs exactly"),
     ([REV | {"from": "maybe"}], "not a label"),
     ([REV | {"why": " "}], "by and why must be text"),
@@ -125,3 +126,13 @@ def test_a_revision_is_recorded_and_frozen_at_approval(base):
     assert check(base, {"325-16C": approved}) == []
     assert any("changed since it was approved" in p
                for p in check(base, {"325-16C": approved | {"revised": [REV | {"why": "other"}]}}))
+
+
+def test_a_rule_must_cite_more_than_its_heading_line(base):
+    _, header, pieces = base
+    heading = [{"file": LAW, "page": 162, "lines": [20, 20], "quote": "A. Permitted uses."}]
+    fp = piece_fingerprint(pieces["325-45.5A"], header["sha256"])
+    only_heading = entry(base, sources=heading, piece_sha256=fp, topic="uses")
+    assert any("not only the heading" in p for p in check(base, {"325-45.5A": only_heading}))
+    assert check(base, {"325-45.5A": only_heading | {"label": "reference"}}) == []      # a reference may
+    assert check(base, {"325-16C": entry(base)}) == []        # a first line that holds the requirement is fine

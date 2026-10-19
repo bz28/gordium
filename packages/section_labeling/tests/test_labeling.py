@@ -460,3 +460,25 @@ def test_a_copy_on_another_page_outside_the_piece_is_not_a_duplicate(law):
     lines = labeler.numbered_lines(rows, pieces["325-16F"])                   # L16 is p.48 l.12; a copy is on p.47 l.31
     source, why = labeler.cited_lines({"first_line": 16, "last_line": 16}, lines, pieces["325-16F"], LAW, ctx)
     assert why is None and (source["page"], source["lines"]) == (48, [12, 12])
+
+
+def test_every_label_matches_a_recorded_answer_or_says_how_it_differs():
+    answer = {"label": "reference", "topic": "dimensions", "reason": "r", "quote": "Q"}
+    records = [{"piece": "325-1", "problem": None, "answer": json.dumps(answer)}]
+    base = {"label": "reference", "sources": [{"quote": "Q"}], "drafted_by": "section_labeling/claude-haiku-5-5"}
+    assert coverage.provenance_problems({"325-1": base}, records) == []
+    changed = base | {"label": "rule"}                                        # changed with no record
+    assert "no recorded answer has label 'rule'" in coverage.provenance_problems({"325-1": changed}, records)[0]
+    recorded = changed | {"revised": [{"from": "reference", "by": "x", "date": "d", "why": "w"}]}
+    assert coverage.provenance_problems({"325-1": recorded}, records) == []
+    added = base | {"sources": [{"quote": "Q"}, {"quote": "more"}]}           # a source the AI didn't produce
+    assert "1 source(s) the recorded answer didn't produce" in coverage.provenance_problems({"325-1": added}, records)[0]
+    explained = added | {"revised": [{"field": "sources", "by": "x", "date": "d", "why": "w"}]}
+    assert coverage.provenance_problems({"325-1": explained}, records) == []
+
+
+def test_the_committed_labels_all_match_their_recorded_answers():
+    labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
+    runs = [json.loads(line) for f in sorted((ITHACA / "3_section_labels/runs").glob("*.jsonl"))
+            for line in f.read_text().splitlines() if line.strip()]
+    assert coverage.provenance_problems(labels, runs) == []

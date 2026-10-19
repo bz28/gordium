@@ -17,6 +17,7 @@ records a doubt as an open question on the label; an architect answers it and ap
 same way as for rules.
 """
 
+import json
 import re
 from collections import Counter
 from pathlib import Path
@@ -136,3 +137,33 @@ def review_list(header: dict, pieces: dict[str, dict], labels: dict, cited: dict
            head + " Cited by |", "|---|---|---|---|---|---|---|",
            *[row(pid, f" {', '.join(cited[pid])} |") for pid in pieces if pid in cited]]
     return "\n".join(out) + "\n"
+
+
+def provenance_problems(labels: dict, records: list[dict]) -> list[str]:
+    """Every AI-drafted label must match a recorded answer, or say how it differs. The original label is the
+    first revision's `from` (else the current label); some accepted answer for the piece must have that
+    label and a quote among the label's sources. A source that answer didn't produce needs a
+    {field: sources} revision. Plain code over the committed run records."""
+    accepted: dict[str, list[dict]] = {}
+    for r in records:
+        if r.get("problem") is None and r.get("answer"):
+            try:
+                accepted.setdefault(r["piece"], []).append(json.loads(r["answer"]))
+            except json.JSONDecodeError:
+                pass
+    out = []
+    for pid, e in labels.items():
+        if not str(e.get("drafted_by", "")).startswith("section_labeling/"):
+            continue
+        revised = e.get("revised") or []
+        original = next((r["from"] for r in revised if "from" in r), e.get("label"))
+        quotes = [s.get("quote") for s in e.get("sources") or []]
+        match = [a for a in accepted.get(pid, []) if a.get("label") == original and a.get("quote") in quotes]
+        if not match:
+            out.append(f"{pid}: no recorded answer has label {original!r} and one of its quotes")
+            continue
+        produced_more = any(a.get("requirements") for a in match)       # line citations add their own sources
+        extra = [q for q in quotes if q not in {a.get("quote") for a in match}]
+        if extra and not produced_more and not any(r.get("field") == "sources" for r in revised):
+            out.append(f"{pid}: {len(extra)} source(s) the recorded answer didn't produce, with no sources revision")
+    return out

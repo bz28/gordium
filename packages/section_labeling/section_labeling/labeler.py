@@ -180,7 +180,8 @@ def label_piece(client, piece: dict, rows: list[dict], file: str, pdf_sha: str, 
                     problem = next((f"requirement {r}: {why}" for r, (_, why) in zip(answer["requirements"], found)
                                     if why), None) or consistency_problem(answer)
                     if not problem and answer["label"] in ("rule", "flag"):
-                        # A rule's sources are its requirement sentences: the drafting step turns each into a check.
+                        # A rule's or flag's sources justify its label: the requirement lines it found plus the
+                        # quote. They are hints for drafting, which always reads the whole piece.
                         unique = {}
                         for s in [*(s for s, _ in found), source]:   # a requirement's full lines win over the quote
                             unique.setdefault((s["page"], tuple(s["lines"])), s)
