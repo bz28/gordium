@@ -421,3 +421,24 @@ def test_the_docs_describe_the_typed_number_rule_the_code_enforces():
     for doc in (root / "packages/rule_drafting/README.md", root / "docs/methods.md"):
         text = doc.read_text()
         assert "with no slots may not contain numbers" not in text and "a slot's row label" in text
+        assert "requirement lines its reviewed label cites" not in text and "whole text" in text and "hints" in text
+
+
+def test_a_slot_no_formula_uses_cant_lend_its_footnote_to_a_typed_number(inputs):
+    """A decoy slot on a cell that carries note 7 ('For the first 1-3 units') must not back 'stories <= 3':
+    R-3A's chart says 4 stories."""
+    decoy = slot("x", "Multiple family dwelling, new construction", footnotes=["7"], section="Minimum Lot Size [fn3]")
+    notes = [chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")]
+    bad = template("stories", "stories <= 3", [decoy], [({"stories": "3"}, "pass"), ({"stories": "4"}, "fail")],
+                   quotes=notes)
+    answer = {"templates": [bad], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid="chart-p3-maximum_building_height")
+    assert result["rules"] == {} and "no formula uses it" in records[0]["problem"]
+
+
+def test_the_drafters_line_numbers_are_the_labelers(inputs):
+    """Both steps must call a line by the same number: the drafter's rendering equals the labeler's, every piece."""
+    from section_labeling.labeler import piece_message
+    for u in (u for u in inputs.units() if u.get("piece")):
+        labeler_lines = piece_message(inputs.law["pieces"][u["piece"]], inputs.law["rows"]).split("\n\n", 1)[1]
+        assert drafter.numbered_text(u["lines"]) == labeler_lines, u["id"]

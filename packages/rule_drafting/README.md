@@ -40,8 +40,9 @@ coverage "35%/40% /50% [fn12]" depends on the use, so a one-number template can'
 - A fact we don't measure yet (e.g. "the accessory dwelling unit has a separate entrance") is never
   invented: the draft lists it in `new_measures`, it goes to `records/proposed_measures.yaml` for an
   engineer, and the rule can't be approved until it's added to `measures.yaml`.
-- A law piece is drafted from the **requirement lines its reviewed label cites** (`3_section_labels/`); a requirement
-  no drafted rule cites goes to a person.
+- A law piece is drafted from its **whole text**: every line, numbered L1, L2, ... with page breaks marked (the
+  labeler's numbering). The lines its reviewed label cites (`3_section_labels/`) are shown only as hints, since an
+  older label may cite just a heading; any cited line no drafted rule cites goes to a person.
 - A template that works for no district sends the whole answer back with the reasons (up to 2 retries); after the
   last attempt the templates that work are kept and the rest go to a person. So does a rule id another unit took.
 - The hand-drafted `5_zoning_rules/R-1b.yaml` is never shown to the AI: it's the answer key. The drafting rules the

@@ -17,17 +17,27 @@ SLOT = re.compile(r"\{([a-z][a-z0-9_]*)\}")
 CHART_FILE = "zoning_charts_2026-04.pdf"
 
 
-def slot_names(template: dict) -> set[str]:
+def formula_slots(template: dict) -> set[str]:
+    """The slots the rule's formulas use (check, applies_when, review_when): the ones that decide something."""
     texts = [template.get("check", ""), template.get("applies_when", "")]
     texts += [r["when"] for r in template.get("review_when", [])]
-    texts += [g["value"] for ex in template.get("examples", []) for g in ex["given"]]
     return {n for t in texts for n in SLOT.findall(t)}
 
 
+def slot_names(template: dict) -> set[str]:
+    """Every slot the template refers to, its examples' values included."""
+    examples = [g["value"] for ex in template.get("examples", []) for g in ex["given"]]
+    return formula_slots(template) | {n for t in examples for n in SLOT.findall(t)}
+
+
 def template_problems(template: dict) -> list[str]:
-    """Shape problems a template has before any filling: slots used but not defined, or defined twice."""
+    """Shape problems a template has before any filling: slots used but not defined, defined twice, or defined
+    but used by no formula (a slot's footnotes and row label count as evidence for the rule's typed numbers, so a
+    slot that decides nothing could lend a cell's note to a number it has nothing to do with)."""
     defined = [s["name"] for s in template["slots"]]
     p = [f"slot {{{n}}} is used but not defined in 'slots'" for n in sorted(slot_names(template) - set(defined))]
+    p += [f"slot {n!r} is defined but no formula uses it (check, applies_when, review_when)"
+          for n in sorted(set(defined) - formula_slots(template))]
     p += [f"slot {n!r} is defined twice" for n in sorted({n for n in defined if defined.count(n) > 1})]
     p += [f"slot {s['name']!r}: footnote {f!r} must be the note's number, like \"16\""
           for s in template["slots"] for f in s["footnotes"] if not re.fullmatch(r"\d+", f)]
