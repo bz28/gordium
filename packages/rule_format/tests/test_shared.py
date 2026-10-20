@@ -109,7 +109,7 @@ ARCHITECT_REVIEW = re.compile(
     r"\barchitects?\s+(would\s+)?(confirm|review|check|approve|sign)s?\b"                  # architects confirm...
     r"|\b(confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{0,30}?\barchitects?\b"  # ...confirmed by architects
     r"|\bthen architects\b|\barchitect review\b", re.IGNORECASE)
-NOT_A_PROMISE = re.compile(r"defer|once (it is |approval is )?switched on|when approval is switched on|\bwould\b"
+NOT_A_PROMISE = re.compile(r"defer|\bonce\b|when approval is switched on|\bwould\b"
                            r"|their (own )?(site|design|project)|facts about|by hand|answers? (the |any )?open questions", re.IGNORECASE)
 
 
