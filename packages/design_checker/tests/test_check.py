@@ -21,13 +21,15 @@ def facts():
     return load_facts(SITE / "spreadsheet_design_model_facts.yaml")
 
 
-def test_the_spreadsheet_model_gives_nine_passes_and_the_coverage_fail(facts, tmp_path):
+def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp_path):
     result = check(MODEL, facts, tmp_path / "report.xlsx")
     assert (tmp_path / "report.xlsx").exists()
     errors = {r["Rule id"]: r["Error"] for r in result["rows"]}
-    assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 9
+    # their nine rows pass, and so does R-1b.yard_projections (a box: no eaves, the yards to the eaves are the yards)
+    assert errors["R-1b.lot_coverage"] == "FAIL" and list(errors.values()).count("PASS") == 10
+    assert errors["R-1b.yard_projections"] == "PASS"
     s = result["summary"]
-    assert s["state"] == "fail" and s["text"] == "9 pass · 1 fail"
+    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail"
     assert s["lines"] == ["Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"]
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
@@ -99,7 +101,7 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "9 pass · 1 fail"
+    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail"
     assert replies[3]["result"]["zones"] == ["R-1b"]
 
 
