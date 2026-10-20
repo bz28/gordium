@@ -302,3 +302,24 @@ def test_a_lot_that_breaks_a_lot_rule_itself_still_gets_its_building():
     assert start["floors"], start["notes"]
     got, _ = results(site, facts)
     assert [k for k, v in got.items() if v == "fail"] == ["R-1b.lot_width_one_family_detached"], got
+
+
+SLIVER = [(0, 0), (20.05, 0), (20.05, 100), (0, 100)]     # 10 ft side yards leave a strip 0.05 ft wide
+
+
+def test_a_buildable_strip_under_an_inch_gets_no_building(monkeypatch):
+    start, _ = generated(SLIVER, {**FACTS, "street_line": [[[0, 0], [20.05, 0]]]})
+    assert start["floors"] == [] and any(n.startswith(CANT) for n in start["notes"]), start
+    import envelope_builder.start as s                     # the size guard alone, without the proof behind it
+    monkeypatch.setattr(s, "_failing", lambda *a: [])
+    start, _ = generated(SLIVER, {**FACTS, "street_line": [[[0, 0], [20.05, 0]]]})
+    assert start["floors"] == [] and any(n.startswith(CANT) for n in start["notes"]), start
+
+
+def test_a_building_the_measuring_code_cant_read_is_never_proven():
+    """Its rules would only say "needs review", which proves nothing: it counts as failing."""
+    import envelope_builder.start as s
+    site = {"units": "ft", "lot": lot(RECTANGLE), "buildings": [], "problems": []}
+    facts = {**FACTS, "street_line": [[[0, 0], [73, 0]]]}
+    flat = [{"outline": [[30, 30], [30, 60], [30, 60]], "base": 0, "top": 35}]      # no width: no footprint
+    assert "building_area (not measurable)" in s._failing(site, facts, flat, RULES, None)

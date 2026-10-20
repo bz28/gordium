@@ -180,6 +180,9 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     x0, _, x1, y1b = best.bounds                 # whole inches, rounded down, centred where it was
     width = math.floor((x1 - x0) / INCH + 1e-6) * INCH
     depth = math.floor((y1b - y0) / INCH + 1e-6) * INCH
+    if width < INCH or depth < INCH:            # under an inch: no building to draw
+        notes.append(CANT)
+        return out
     x0 += ((x1 - x0) - width) / 2
     best = box(x0, y0, x0 + width, y0 + depth)
     outline = affinity.rotate(best, angle, origin=origin, use_radians=True)
@@ -212,16 +215,20 @@ def floor_solids(floors: list[dict]) -> list[dict]:
 
 def _failing(site: dict, facts: dict, floors: list[dict], rules: list[dict], uses) -> list[str]:
     """The ids of the rules the building breaks, measured and checked exactly as the checker does (measure, then
-    outcome). Only a FAIL counts: a rule that needs review (no survey yet, the bedrooms not drawn) is the
-    architect's to answer, and the check says so. A rule the lot itself already fails, with no building on it
-    (a frontage narrower than the lot-width rule), is the lot's, not the building's: the check still shows it."""
+    outcome). A FAIL counts, and so does a building the measuring code can't read (no footprint or no height):
+    its rules would only say "needs review", which proves nothing. Any other needs review (no survey yet, the
+    bedrooms not drawn) is the architect's to answer, and the check says so. A rule the lot itself already fails,
+    with no building on it (a frontage narrower than the lot-width rule), is the lot's, not the building's: the
+    check still shows it."""
     if uses is None:
         j = facts.get("jurisdiction")
         uses = Context.for_jurisdiction(REPO / j).uses if j and (REPO / j).is_dir() else set()
 
     def fails(buildings):
         values = {k: v["value"] for k, v in measure({**site, "buildings": buildings}, facts).items()}
-        return [r["id"] for r in rules if outcome(r, values, {"use": uses}) == "fail"]
+        return [r["id"] for r in rules if outcome(r, values, {"use": uses}) == "fail"], values
 
-    lot_own = set(fails([]))
-    return [i for i in fails(floor_solids(floors)) if i not in lot_own]
+    lot_own = set(fails([])[0])
+    failing, values = fails(floor_solids(floors))
+    unread = [k for k in ("building_area", "building_height") if not values.get(k)]
+    return [f"{k} (not measurable)" for k in unread] + [i for i in failing if i not in lot_own]

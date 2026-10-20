@@ -1059,13 +1059,17 @@ def _add_lot(doc, sample):
 
 def add_floors(doc, start):
     """The starting building: one solid per story, stacked, as one group on Gordium::Massing (so a Move moves the
-    house), named Floor 1, 2…"""
+    house), named Floor 1, 2… None, with nothing added, if a floor isn't a box Rhino can make."""
     k = 1.0 / _scale(doc)
+    breps = []
+    for floor in start["floors"]:
+        corners = [rg.Point3d(x * k, y * k, z * k) for z in (floor["base"], floor["top"]) for x, y in floor["outline"]]
+        breps.append(rg.Brep.CreateFromBox(corners) if len(corners) == 8 else None)
+    if not breps or any(b is None for b in breps):
+        return None                     # nothing added: the caller says so
     group = doc.Groups.Add("Gordium starting building")
     ids = []
-    for i, floor in enumerate(start["floors"]):
-        corners = [rg.Point3d(x * k, y * k, z * k) for z in (floor["base"], floor["top"]) for x, y in floor["outline"]]
-        brep = rg.Brep.CreateFromBox(corners)
+    for i, (floor, brep) in enumerate(zip(start["floors"], breps)):
         a = Rhino.DocObjects.ObjectAttributes()
         a.LayerIndex = _layer(doc, logic.MASSING)
         a.Name = "Floor " + str(i + 1)
@@ -1114,7 +1118,11 @@ def gordium_start():
         live(True)                   # the architect draws one; it is checked as they go
         documents(True)
         return None
-    add_floors(doc, start)
+    if add_floors(doc, start) is None:
+        Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; draw one and Gordium will check it")
+        live(True)
+        documents(True)
+        return None
     doc.Views.Redraw()
     result = run_check(doc, report=False)
     live(True)
