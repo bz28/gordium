@@ -8,7 +8,7 @@ An architect edits a design in Rhino, and Gordium says, for every zoning rule: *
 
 ## The assembly line
 
-The city's documents go in on the left. A trusted, approved rulebook comes out on the right. A design is then checked against that rulebook.
+The city's documents go in on the left. A traceable rulebook, checked by code, comes out on the right. A design is then checked against that rulebook.
 
 ```
  City PDFs ──► Text ──► Definitions ──► Rules ──► Architect ──► Frozen ──► Check a
@@ -26,7 +26,7 @@ The city's documents go in on the left. A trusted, approved rulebook comes out o
 | 4. Definitions | What "height", "story", "lot depth"… mean in Ithaca, in the city's words; unclear points as questions | A rule's numbers mean nothing until the words are defined | Written from the law under the drafting rules; quotes checked by code | 🔨 PR 4 |
 | 5. Rules | One file per zone: each rule is a short title + the city's exact quotes + a formula + worked examples | What designs are checked against | Drafted by Claude for R-1b under the drafting rules (architects approve), then code reads the charts for every zone | In progress |
 | 6. Coverage report | List of every paragraph: handled or a gap | Proof for architects that we read everything | Code | Later |
-| 7. Approval + frozen rulebook | Architects approve; approved rules saved as a dated version that never changes | Only approved rules are used; same design = same answer | Architects; code freezes | Later |
+| 7. Frozen rulebook | Rules that pass every code check are saved as a dated version that never changes. Architect approval is deferred for now (decided 2026-10-19); the approval fields wait unused | Same design = same answer | Code freezes | Later |
 
 ## The tools that keep it honest
 
@@ -69,7 +69,7 @@ Every document above is recorded in `regulations/jurisdictions/new_york/ithaca_c
 
 ## What people still decide
 
-- **Architects** approve every rule and definition, and answer the open questions in `docs/questions_for_architects.md`. AI drafts; it never approves.
+- **Architects** answer the open questions in `docs/questions_for_architects.md`. Approving each rule is deferred for now (decided 2026-10-19): AI drafts, code checks every draft, and people read the rules through a generated spreadsheet with links to the city's exact words. AI never approves.
 - **Ben** reviews and merges every PR (commits to PR branches don't need his approval; he approves at merge time).
 
 ## Related documents

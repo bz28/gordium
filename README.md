@@ -17,7 +17,7 @@ First city: **City of Ithaca, NY** (residential districts first).
 ## The ground rules
 
 1. Documents are turned into rules once per code version, then frozen.
-2. AI may draft rules; nothing is used until an architect approves it.
+2. AI drafts rules; code checks every draft (exact quotes, valid formulas, worked examples). Architect approval is deferred for now (decided 2026-10-19): rules stay marked draft, and the approval fields wait unused until it is switched on.
 3. The checker never uses AI. Same design + same rulebook = same answer.
 4. Never a false pass. Anything uncertain is "needs review".
 5. Every rule traces back to its exact source.
