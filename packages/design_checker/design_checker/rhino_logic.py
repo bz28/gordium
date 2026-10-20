@@ -127,5 +127,11 @@ def after_confirm(choice):
 def accepts_pick(object_id, candidate_ids):
     """Whether a clicked object can be saved as the lot or the main building: only one of the candidates the
     check reads (a closed outline on the Site layer, a solid on the Building layer); any other pick would be
-    saved and then dropped on the next check, so the prompt asks again."""
+    saved and then dropped on the next check, so the pick prompt lets only candidates be clicked."""
     return object_id in candidate_ids
+
+
+def option_names(kind, count):
+    """Command-line options naming each candidate ("Lot1", "Lot2"), so one that can't be clicked (locked or
+    hidden: Rhino won't select it) can still be chosen."""
+    return ["%s%d" % (kind, i + 1) for i in range(count)]

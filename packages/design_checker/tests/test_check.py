@@ -183,6 +183,11 @@ def test_only_a_candidate_can_be_picked_as_the_lot_or_main_building():
     assert accepts_pick("lot-1", {"lot-1", "lot-2"}) and not accepts_pick("a-sketch", {"lot-1"})
 
 
+def test_every_candidate_can_be_chosen_by_name():
+    from design_checker.rhino_logic import option_names
+    assert option_names("Lot", 3) == ["Lot1", "Lot2", "Lot3"]
+
+
 def test_closing_the_confirm_dialog_saves_nothing():
     from design_checker.rhino_logic import after_confirm
     assert (after_confirm("ok"), after_confirm("change"), after_confirm(None)) == ("keep", "change", "cancel")

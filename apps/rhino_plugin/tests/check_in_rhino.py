@@ -151,8 +151,18 @@ try:
         made = []
 
         def __init__(self):
-            self.preselect, self.filter = True, None
+            self.preselect, self.filter, self.nothing, self.options = True, None, False, []
             FakeGet.made.append(self)
+
+        def AcceptNothing(self, on):
+            self.nothing = on
+
+        def AddOption(self, name):
+            self.options.append(name)
+            return len(self.options)
+
+        def OptionIndex(self):
+            return 2
 
         def SetCommandPrompt(self, text):
             pass
@@ -163,8 +173,10 @@ try:
         def SetCustomGeometryFilter(self, f):
             self.filter = f
 
-        def Get(self):              # Rhino hands back a selected object at once when pre-selection is on
-            return g.Rhino.Input.GetResult.Object if self.preselect else g.Rhino.Input.GetResult.Nothing
+        def Get(self):              # Rhino hands back a selected object at once when pre-selection is on;
+            if self.preselect:          # Enter is Nothing only when it is accepted (else Rhino reports Cancel)
+                return g.Rhino.Input.GetResult.Object
+            return FakeGet.answer if self.nothing else g.Rhino.Input.GetResult.Cancel
 
         def Object(self, i):
             class Ref:
@@ -173,11 +185,19 @@ try:
     lot_curve = g._sorted_objects(doc)[0][0]
     doc.Objects.Select(lot_curve.Id)            # the lot left selected by the lot prompt
     real_new = g._new_get_object
+    buildings = g._sorted_objects(doc)[1]
     try:
         g._new_get_object = FakeGet
-        got = g._pick(doc, "Click the main building", g._sorted_objects(doc)[1])
+        FakeGet.answer = g.Rhino.Input.GetResult.Nothing                    # Enter: keep what is there
+        got = g._pick(doc, "Click the main building", buildings, "Building")
         expect(got is None and len(FakeGet.made) == 1 and not FakeGet.made[0].preselect
                and FakeGet.made[0].filter is not None, "a pick prompt took the selection or asked again")
+        FakeGet.answer = g.Rhino.Input.GetResult.Option                     # chosen by name (locked or hidden)
+        got = g._pick(doc, "Click the main building", buildings, "Building")
+        expect(got == str(buildings[1].Id) if len(buildings) > 1 else got is None,
+               "a candidate chosen by name wasn't taken")
+        expect(FakeGet.made[-1].options == ["Building%d" % (i + 1) for i in range(len(buildings))],
+               "the candidates aren't offered by name")
     finally:
         g._new_get_object = real_new
         doc.Objects.UnselectAll()

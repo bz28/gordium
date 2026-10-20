@@ -571,22 +571,28 @@ def _new_get_object():
     return Rhino.Input.Custom.GetObject()
 
 
-def _pick(doc, prompt, candidates, geometry=None):
-    """The id of a clicked object, one of the candidates (only they can be clicked), or None (Enter). Esc cancels
-    the edit. Nothing already selected is taken (it could be anything), and the pick is left unselected, so one
-    prompt never answers the next by itself."""
+def _pick(doc, prompt, candidates, kind, geometry=None):
+    """The id of a candidate, clicked (only they can be) or chosen by name from the options (Lot1, Lot2…, for one
+    that is locked or hidden and so can't be clicked), or None on Enter (keep what is there). Esc cancels the
+    edit. Nothing already selected is taken (it could be anything), and the pick is left unselected, so one prompt
+    never answers the next by itself."""
     ids = {str(o.Id) for o in candidates}
     doc.Objects.UnselectAll()
     go = _new_get_object()
     go.SetCommandPrompt(prompt)
+    go.AcceptNothing(True)
     go.EnablePreSelect(False, True)
+    by_option = {}
+    for name, o in zip(logic.option_names(kind, len(candidates)), candidates):
+        by_option[go.AddOption(name)] = str(o.Id)
     if geometry is not None:
         go.GeometryFilter = geometry
     go.SetCustomGeometryFilter(Rhino.Input.Custom.GetObjectGeometryFilter(
         lambda obj, geo, part: obj is not None and logic.accepts_pick(str(obj.Id), ids)))
     got = go.Get()
     _go_on(got)
-    picked = str(go.Object(0).ObjectId) if got == Rhino.Input.GetResult.Object else None
+    picked = (str(go.Object(0).ObjectId) if got == Rhino.Input.GetResult.Object else
+              by_option.get(go.OptionIndex()) if got == Rhino.Input.GetResult.Option else None)
     doc.Objects.UnselectAll()
     return picked if picked is not None and logic.accepts_pick(picked, ids) else None
 
@@ -610,12 +616,13 @@ def _change_facts(doc, facts, options):
         facts["use"] = next(k for k, n in names if n == use)
     lots, buildings, _ = _sorted_objects(doc)
     if len(lots) > 1:
-        picked = _pick(doc, "Click the lot outline (a closed curve on the Site layer)", lots,
-                       Rhino.DocObjects.ObjectType.Curve)
+        picked = _pick(doc, "Click the lot outline (a closed curve on the Site layer), or choose one; Enter keeps it",
+                       lots, "Lot", Rhino.DocObjects.ObjectType.Curve)
         if picked:
             facts["lot_id"] = picked
     if len(buildings) > 1:
-        picked = _pick(doc, "Click the main building (a solid on the Building layer)", buildings)
+        picked = _pick(doc, "Click the main building (a solid on the Building layer), or choose one; Enter keeps it",
+                       buildings, "Building")
         if picked:
             facts["main_building"] = picked
     facts["corner_lot"] = _yes_no("Corner lot (two streets meet at it)?", facts.get("corner_lot"))
