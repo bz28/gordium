@@ -776,13 +776,19 @@ APPROVAL_FIELDS = {"drafted_by", "status", "approved_by", "approved_on", "approv
 
 
 def _answer_problems(answers, ctx: Context) -> list[str]:
-    """Architects' answers to open questions: [{question, answer, answered_by, answered_on}]."""
+    """Architects' (or the City's) answers to open questions: [{question, answer, answered_by, answered_on,
+    reading?}]. `reading` is the id of the reading the answer picks (one of the question's research readings,
+    or a finding's id it confirms): the measuring code then measures only that reading
+    (model_measurement/interpretations.py). An answer outranks Gordium's reading."""
     if not (isinstance(answers, list) and all(isinstance(a, dict) for a in answers)):
         return ["'answers' must be a list of {question, answer, answered_by, answered_on}"]
     p = []
     for a in answers:
-        if a.keys() != {"question", "answer", "answered_by", "answered_on"}:
-            p.append("each answer needs exactly question, answer, answered_by, answered_on")
+        if a.keys() - {"reading"} != {"question", "answer", "answered_by", "answered_on"}:
+            p.append("each answer needs exactly question, answer, answered_by, answered_on (and reading, if any)")
+        elif "reading" in a and not (isinstance(a["reading"], str) and SLUG.fullmatch(a["reading"])):
+            p.append("an answer's 'reading' names the reading (or finding) it picks, by its id "
+                     "(lowercase_with_underscores), so the measuring code follows it")
         elif not all(isinstance(a[k], str) and a[k].strip() for k in ("question", "answer", "answered_by")):
             p.append("an answer's question, answer and answered_by must be text")
         elif a["answered_by"] not in ctx.reviewers:
