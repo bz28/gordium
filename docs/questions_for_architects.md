@@ -14,8 +14,8 @@ The tags in square brackets (for example lot_depth#1, the first question about l
 Links to Chapter 325 open our stored copy of the city's PDF (for people with access to the Gordium repository); links to the zoning charts open the city's own website.
 
 **The most important five** (answering these unblocks the most R-1b checks):
-1. Which lines are the side lot lines on an irregular lot (§1.1)
-2. What lot area to use without a survey (§1.2)
+1. Where your 106 Ithaca Rd lot outline came from, and whether there is a stamped survey (§1.1)
+2. How lot depth is measured on an irregular lot: which lines are the side lot lines (§1.2)
 3. What counts toward lot coverage: garages and overhangs (§3.1, §3.2)
 4. Where yards are measured to: the wall or the eave (§2.1)
 5. How building height is measured on a pitched roof (§4.1)
@@ -24,15 +24,40 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 ## 1. The lot: area, width and depth
 
-### 1.1 Which lines are the "side lot lines" on a lot with more than four sides? 🔴
+### 1.1 Where did your 106 Ithaca Rd lot outline come from? Is there a stamped survey? 🔴
+
+- **What we found:** we compared the lot in your Rhino model with the city's tax parcel map (City of Ithaca `Tax_Parcels`, the same outline as New York State's 2025 parcel layer, parcel 500700-84.-2-6) and Tompkins County's 2026 parcel layer, all accessed 2026-10-20.
+
+    | Edge | Your model | City / State GIS | County 2026 |
+    |---|---|---|---|
+    | Front (Ithaca Rd) | 73.00 ft, straight | 75.8 ft along a curve of 8 segments | 73.52 ft, straight |
+    | Side (toward #104) | 90.28 ft | 92.12 ft | 92.00 ft |
+    | Rear | 67.72 ft | 69.51 ft | 68.86 ft |
+    | Jog | 10.47 ft | 10.34 ft | 10.34 ft |
+    | Long side | 99.37 ft | 101.13 ft | 101.13 ft |
+    | **Area** | **6,674.5 sf** | **7,033.7 sf** | **6,900.4 sf** |
+
+    The shapes are the same lot: same jog, same angles. Fitting your five corners onto the city's, they match within 2.14 ft as drawn, and within 0.60 ft if your lot is enlarged by 2.48% (and turned 1.05°). So your lot looks like the city's parcel drawn **about 2.5% too small**: a scaling slip while tracing, or a survey that differs from the tax map. Even the two official maps disagree with each other, by about 133 sf.
+- **Why it matters:** lot area, lot depth (and so the rear yard, §1.2), and frontage all come from this outline. Coverage fails under every version (1,855 sf against 25% of 6,674, 6,900 or 7,034 sf), but the rear yard does not: see §1.2.
+- **Until you answer:** Gordium uses the lot area and depth it is given (yours). A GIS outline will only ever be a cross-check: it never turns a result into a PASS.
+- **Please tell us:** (a) where the model's lot outline came from (a survey, traced from the tax map, or something else); (b) whether a stamped survey exists, and if so, could we have a copy?
+
+### 1.2 Which lines are the "side lot lines" on a lot with more than four sides? 🔴
 `[lot_depth#1]` `[R-1b.rear_yard#1]`
 
 - **The city's words:** "Such percentage shall be taken of the lot depth. If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths." ([Chapter 325 §325-8A(14), p.25](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=25))
-- **Why it matters:** the R-1b rear yard is 25% of the lot depth (at most 50 ft, at least 20 ft). 106 Ithaca Rd has five sides, including a 10.47 ft jog. If the 90.28 ft and 99.37 ft lines are the side lot lines, the depth is 94.8 ft and the rear yard must be 23.7 ft. Other readings give at least 22.6 ft. The difference can decide PASS or FAIL for a house placed close to the rear.
+- **Why it matters:** the R-1b rear yard is 25% of the lot depth (at most 50 ft, at least 20 ft). 106 Ithaca Rd has five sides, including a 10.47 ft jog. If the 90.28 ft and 99.37 ft lines are the side lot lines, the depth is 94.8 ft and the rear yard must be 23.7 ft. Other readings give at least 22.6 ft. The difference can decide PASS or FAIL for a house placed close to the rear. With the city's GIS outline (§1.1), it decides 106 Ithaca Rd itself, whose design has a 25 ft rear yard:
+
+    | Lot depth used | Required rear yard | The 25 ft design |
+    |---|---|---|
+    | 90 ft (your spreadsheet) | 22.5 ft | PASS |
+    | 92 ft (assessor's depth; the short side in GIS) | 23.0 ft | PASS |
+    | 96.6 ft (average of the two GIS sides) | 24.2 ft | PASS |
+    | 101.13 ft (the long side in GIS) | 25.3 ft | **FAIL** |
 - **Until you answer:** the rear-yard rule uses whatever lot depth it is given. When measured from a model, a lot with more than two side lines gets NEEDS REVIEW on the rear yard.
 - **Options:** (a) the two longest lines that touch the street line; (b) the two lines that touch the street line, plus any jog added to the line it continues; (c) average every line that isn't the front or rear line; (d) another rule you use.
 
-### 1.2 What "lot area" should be used, especially without a survey? 🔴
+### 1.3 What "lot area" should be used, especially without a survey? 🔴
 `[lot#1]`
 
 - **The city's words:** "LOT — A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building or a group of buildings…" (§325-3, [p.14](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=14)). Chapter 325 never defines "lot area" itself.
@@ -40,18 +65,18 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Until you answer:** coverage uses the lot area it is given (for 106 Ithaca Rd, your 6,674 sf). When measured from a model, the area inside the drawn lot lines is used, with a reminder to check it against a survey.
 - **Options:** (a) always the survey, and NEEDS REVIEW if there isn't one; (b) the survey if there is one, else the tax map; (c) whatever is drawn in the model, with a warning to check it against a survey.
 
-### 1.3 Lot width on a curved street 🔴
+### 1.4 Lot width on a curved street 🔴
 `[lot_width#1]`
 
 - **The city's words:** "Lots hereafter used for a permitted use in each use district shall have frontage measured on a public right-of-way equal to or greater than the width specified in this column…" (Column 7, [§325-8A, p.24](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=24))
-- **Why it matters:** R-1b requires 50 ft of frontage for a one-family house. 106 Ithaca Rd's street edge is curved. A curve is longer than the straight line between its ends, so a lot just under 50 ft could pass one way and fail the other.
+- **Why it matters:** R-1b requires 50 ft of frontage for a one-family house. In the city's GIS, 106 Ithaca Rd's street edge is a curve of 8 segments, 75.8 ft along the curve (your model draws one straight 73 ft line). A curve is always longer than the straight line between its ends, so a lot just under 50 ft could pass one way and fail the other. (106 Ithaca Rd passes either way.)
 - **Until you answer:** a straight street line is simply measured; a curved one gets NEEDS REVIEW on lot width.
 - **Options:** (a) along the curve; (b) the straight line between the two side lot corners.
 
-### 1.4 Lot depth when the two side lot lines are equal
+### 1.5 Lot depth when the two side lot lines are equal
 `[lot_depth#2]`
 
-- **The city's words:** as in 1.1: "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
+- **The city's words:** as in 1.2: "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
 - **Why it matters:** the law only says what to do when the lines differ. We assume equal lines mean the depth is that length.
 - **Until you answer:** uses that length.
 - **Options:** (a) yes, the common length; (b) something else (please explain).
@@ -150,7 +175,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Options:** for the main entrance: (a) the entrance facing the street; (b) the one the architect names. For the 12 ft test: (a) every side; (b) only the main entrance side.
 
 ### 4.4 Basement or cellar, when a space fits both?
-`[basement#1]` `[basement#2]` `[cellar#1]` `[cellar#2]`
+`[basement#1]` `[basement#2]` `[cellar#1]`
 
 - **The city's words:** "BASEMENT — That space of a building that is partly below grade which has more than half of its height, measured from floor to ceiling, above the finished ground level at any point." (§325-3, [p.5](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=5)). "CELLAR — That space of a building that is partly or entirely below grade which has more than half of its height… below the average established curb level or finished grade of the ground adjoining the building." (§325-3, [p.6](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=6))
 - **Why it matters:** a basement can count as a story; a cellar never does. A walk-out lower level on a slope can be more than half above ground on one side and more than half below on average, so it fits both definitions.
@@ -219,7 +244,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 Some definitions contain numbers. Gordium needs to know whether the number only says **what to call** something (a category), or **caps a design** (a limit). Our rule of thumb: if it only sorts things into names, it's a category; if it forbids or caps something, it's a limit. Please confirm or correct each.
 
-| Definition | The city's words | Our reading today | `tag` |
+| Definition | The city's words | Our reading today | Tag |
 |---|---|---|---|
 | Adult day-care home ([p.4](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=4)) | "adult day care is provided to not more than six adults at one time" | Category: more than six makes it a different use | `[325-3B:adult_day_care_home#1]` |
 | Bed-and-breakfast inn ([p.5](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=5)) | "provides five to 10 guest rooms, limited to two persons or one family per guest room" | Category | `[325-3B:bed_and_breakfast_inn#1]` |
@@ -243,8 +268,7 @@ We checked your worked example against the city's documents. The full list is in
 - `[discrepancy 4.3]` **Rhino model:** the building fills the whole buildable area (2,169 sf, about 32.5% of the lot), over the 25% coverage limit.
 - `[discrepancy 5.6]` **Workflow document:** says "the current example is within all limits", but coverage fails.
 
-Also about the example:
-- Where did your lot outline come from, and is there a survey? Your lot is 6,674.7 sf; the city's tax parcel is about 7,034 sf with a curved street side. (Zone confirmed R-1b: no overlays, not historic, not in a flood zone.)
+Also about the example: where your lot outline came from, and whether there is a survey, is §1.1. (Zone confirmed R-1b: no overlays, not historic, not in a flood zone.)
 
 ---
 
