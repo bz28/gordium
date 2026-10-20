@@ -433,7 +433,11 @@ def test_the_docs_describe_the_typed_number_rule_the_code_enforces():
     root = Path(drafter.__file__).resolve().parents[3]
     for doc in (root / "packages/rule_drafting/README.md", root / "docs/methods.md"):
         text = doc.read_text()
-        assert "with no slots may not contain numbers" not in text and "a slot's row label" in text
+        assert "with no slots may not contain numbers" not in text
+        # Ben's policy B, as the code enforces it: only the rule's own evidence, anything else refused, no questions
+        assert "a footnote whose marker is on the slot's own cell" in text and "that slot's own row label" in text
+        assert "a sentence of the paragraph being drafted" in text and "is refused" in text
+        assert "open question for an architect" not in text and "footnote of one of the rule's slots" not in text
         assert "requirement lines its reviewed label cites" not in text and "whole text" in text and "hints" in text
 
 
