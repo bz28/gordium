@@ -63,16 +63,49 @@ listed, and the reason names the open question for the architects, so the checke
 | Something above the main roof (a parapet, chimney, bulkhead, or a higher part of the building) | leaving it out (the roof read as usual) / to its top; whether it counts is the question (§325-3 leaves out bulkheads and chimneys) | height_of_building |
 | More than one solid, for the height | the main building alone / with every other solid as part of it | §325-25 |
 
-Things that stop a measurement, with the reason given: no street side, a street line that isn't a lot line, a
-building outside the lot, no ground level, more than one building and none picked, a corner lot (§325-19C: which
-yards are front, side and rear, and which street's frontage is the lot width, are open questions), no corner-lot
-answer, every lot line on a street, a
-lot outline that isn't closed or crosses itself, a curved wall or edge (not measured yet), a solid that isn't
-closed, two candidate lot outlines, a mesh far from the origin whose points may be single precision, sloped or unstated
-ground, a lot outline not from a survey (lot area), and anything on the Building layer that isn't a solid or mesh (a block, a
-surface): it is reported, never left out, since leaving it out would undercount coverage. Sublayers count
-(`Building::Garage`); a block's own definition is never read as a building. Mistyped lot facts (a ground level
-that isn't a number) are refused with a plain message.
+Things that stop a measurement. The measurement has no value and gives NEEDS REVIEW, with this reason, word
+for word. Every reason is in one table, `model_measurement/stops.py`, and the code gives no other;
+`tests/test_stop_list.py` checks each is listed here and builds a case that gives it, and `tests/conftest.py`
+checks every reason any test makes has the shape of a table sentence. These checks are backstops, not proof:
+a hand-written sentence shaped like one of the table's (say, starting "no" and ending "layer") would pass them.
+Every reason the code gives today comes from the table:
+
+- **The readings disagree:** "the readings give different values; …", then the open question from the table
+  above (the value is left to the architects; every reading is shown).
+- **The file:** "can't read <file>"; "the model's units (<units>) aren't supported" (feet, inches, millimetres,
+  centimetres and metres are).
+- **The lot outline:** "no Site layer"; "no lot outline"; "no closed lot outline on the Site layer"; "2 closed outlines on the Site layer: pick the
+  lot"; "the lot picked isn't a closed outline on the Site layer: pick the lot again"; "a block on the Site layer
+  can't be read yet (explode it)"; "the lot outline isn't one closed loop of lot lines"; "the lot outline crosses
+  itself (…)". A lot outline not from a survey stops the lot area (and so coverage): "say whether the lot outline
+  is from a survey"; "the lot outline isn't from a survey: the lot area needs one (an open question for the
+  architects)".
+- **The street side:** "the street side isn't given: pick the lot line on the street"; "a street line given
+  doesn't match a lot line: pick the street side again"; "the street lot lines given aren't next to each other";
+  "every lot line is on a street: which yards are front, side and rear is an open question for the architects".
+- **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
+  lot yes or no"; "a corner lot: which yards are front, side and rear yards, and which street's frontage is the
+  lot width (§325-19C), are open questions for the architects".
+- **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 4 lot lines could be
+  either: too many readings to list)"; "no reading of the lot lines gives two side lot lines and a rear lot line
+  (a triangular lot, for one): an open question for the architects".
+- **The ground:** "the ground level isn't given: enter it (the grade plane)"; "say whether the ground is flat";
+  "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
+- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the number of
+  stories"; "enter bedrooms / parking spaces".
+- **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
+  building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
+  points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
+  origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it
+  into a solid)" (the same for a surface or anything else that isn't a solid or mesh: it is reported, never left
+  out, since leaving it out would undercount coverage).
+- **The height:** "the roof's shape can't be read (no faces open to the sky)"; "another solid's height can't be
+  read: …"; "too many solids with open roof questions to list every reading: pick the main building's parts, or
+  ask the architects" (more than 200 combinations of readings).
+
+Sublayers count (`Building::Garage`); a block's own definition is never read as a building. Mistyped lot facts (a
+ground level that isn't a number) are refused with a plain message before anything is measured.
 
 Every measurement records its working: how it was found, the objects, the definition it follows, and for
 distances the two points it was measured between. The project file's `from` carries it, so the report shows it.
@@ -87,7 +120,8 @@ distances the two points it was measured between. The project file's `from` carr
   outline on the Site layer (the shift is found from the vertices). Every number is compared with their
   spreadsheet; each difference is pinned and explained in `docs/discrepancies_with_architects.md` §4.
 - **Made-up lots with known answers:** rectangular, tilted 37°, raised ground, a curved street, a jog, a corner
-  lot, two buildings, an overhang, a pitched roof, and each case that stops a measurement.
+  lot, two buildings, an overhang, a pitched roof; and in `tests/test_stop_list.py`, a case for each reason
+  that stops a measurement.
 - **Reading Rhino files:** inches, two outlines, a picked lot, a copy keeping its id, a mesh, a curved wall, a
   curved lot line.
 - CI re-measures every committed model and fails if a measured file is out of date.
