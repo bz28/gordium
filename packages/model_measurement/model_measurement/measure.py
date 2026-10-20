@@ -17,7 +17,7 @@ lot, curved surfaces) also gives None with a reason.
 import itertools
 import math
 
-from shapely import ops
+from shapely import STRtree, ops
 from shapely.geometry import LineString, MultiLineString, Point, Polygon
 from shapely.validation import explain_validity
 
@@ -245,14 +245,16 @@ def _open_to_the_sky(faces: list[dict]) -> list[dict]:
     (holes left out) no other face lies above. Undersides (soffits, the floor of an upper storey that sticks out)
     and floors are covered; roofs, and a roof with a chimney through a hole in it, are not."""
     flat = [(f, _plan(f)) for f in faces if _normal_z(f["points"]) > 0.001]
+    grown = [shape.buffer(TOL) for _, shape in flat]          # each outline grown once, and indexed
+    index = STRtree(grown)
     open_ = []
-    for f, shape in flat:
+    for i, (f, shape) in enumerate(flat):
         if shape.area <= 1e-9:
             continue
         for point in _samples(shape):
             z = _plane_z(f, point.x, point.y)
-            above = [_plane_z(g, point.x, point.y) for g, other in flat
-                     if g is not f and other.buffer(TOL).contains(point)]
+            above = [_plane_z(flat[j][0], point.x, point.y) for j in index.query(point)
+                     if j != i and grown[j].contains(point)]
             if not any(h is not None and h > z + TOL for h in above):
                 open_.append(f)
                 break

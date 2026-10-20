@@ -490,3 +490,40 @@ def test_where_the_model_sits_up_or_down_changes_nothing():
         m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}),
                     {**FACTS, "grade_elevation": shift})["building_height"]
         assert sorted({r["value"] for r in m["readings"]}) == [25.0, 30.0], shift
+
+
+def test_a_thin_roof_ring_around_a_tall_part_is_open_to_the_sky():
+    # a 1 ft roof ring at 30 ft around a 40 x 40 hole with a 50 ft part standing in it: every grid point of the
+    # ring's bounds lies in the hole, under the tall part; only the ring itself (holes kept) is open
+    from model_measurement.measure import _open_to_the_sky
+    ring = {"points": [[0, 0, 30], [42, 0, 30], [42, 42, 30], [0, 42, 30]],
+            "holes": [[[1, 1, 30], [41, 1, 30], [41, 41, 30], [1, 41, 30]]]}
+    tall = {"points": [[1, 1, 50], [41, 1, 50], [41, 41, 50], [1, 41, 50]]}
+    assert ring in _open_to_the_sky([ring, tall])
+
+
+def test_a_lower_roof_partly_under_an_overhang_is_open_to_the_sky():
+    # a 20 x 40 lower roof at 10 ft whose middle is under an upper slab at 20 ft (not touching, no hole): the
+    # middle point is covered, the rest of the roof isn't
+    from model_measurement.measure import _open_to_the_sky
+    low = {"points": [[0, 0, 10], [20, 0, 10], [20, 40, 10], [0, 40, 10]]}
+    slab = {"points": [[-5, 15, 20], [25, 15, 20], [25, 25, 20], [-5, 25, 20]]}
+    assert low in _open_to_the_sky([low, slab])
+
+
+def test_a_meshed_building_is_measured_quickly():
+    import time
+    n = 30                                                  # a 30 x 30 grid of triangles on top and bottom
+    faces = []
+    for k, z in ((0, 0.0), (1, 30.0)):
+        for i in range(n):
+            for j in range(n):
+                x0, y0, x1, y1 = 10 + i * 25 / n, 25 + j * 40 / n, 10 + (i + 1) * 25 / n, 25 + (j + 1) * 40 / n
+                faces += [{"points": [[x0, y0, z], [x1, y0, z], [x1, y1, z]]},
+                          {"points": [[x0, y0, z], [x1, y1, z], [x0, y1, z]]}]
+    walls = box(10, 25, 35, 65, 0, 30)["faces"]
+    faces += [f for f in walls if not all(p[2] in (0, 30) for p in f["points"])]
+    start = time.perf_counter()
+    m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)
+    assert m["building_height"]["value"] == 30.0
+    assert time.perf_counter() - start < 10
