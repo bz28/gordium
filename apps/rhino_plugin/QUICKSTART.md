@@ -158,14 +158,18 @@ When Ben says there is a new version:
    ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, how it was
    measured and worked out, and what to change ("To comply: move the building 0'-6" farther from that lot
    line."). **Zoom to** (or a double-click) frames the item: yards in Top, height in a front elevation.
-7. **Zoning report…** writes `<your model>_gordium_report.xlsx` next to the model (in Documents if the model
-   isn't saved yet), with the same statuses as the panel.
+7. **Zoning report…** checks the model as it is now and writes the report: `<your model>_gordium_report.xlsx`,
+   next to your model file, or in your **Documents** folder (`untitled_gordium_report.xlsx`) if the model isn't
+   saved yet. It has the same results as the panel. The line above the buttons says "Report saved to …" with the
+   full path, and the report opens in your spreadsheet app. That's Excel, or Numbers (free from the App Store), or
+   any app that opens .xlsx. If none is set up, open the file yourself from that folder. If the report can't be
+   written, the same line says why.
 
 ## The other commands
 
 | Command | What it does |
 |---|---|
-| `GordiumCheck` | Check the model now: your own design, or (on an empty file) the start flow. Writes the report. |
+| `GordiumCheck` | Check the model now: your own design, or (on an empty file) the start flow. Writes the report (so does **Zoning report…** in the panel). |
 | `GordiumLive` | Turn live re-checking after each edit on or off. |
 | `GordiumFacts` | Open the start box again to change the site facts (the panel's **Edit site…** does the same). |
 | `GordiumOff` | Stop Gordium and clear its drawing. Nothing in your model is changed. |
