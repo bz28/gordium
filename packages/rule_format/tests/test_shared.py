@@ -31,15 +31,26 @@ def test_jurisdictions_lists_each_place_folder(tmp_path):
 
 
 def _jsonl_readers(source: str) -> int:
-    """How many JSON-lines readers a module has: a json.loads(x) call where x is the loop variable of an
-    enclosing for-loop or comprehension (over lines), whatever the variable is called."""
-    tree = ast.parse(source)
-    looped = {t.id for node in ast.walk(tree) if isinstance(node, (ast.For, ast.comprehension))
-              for t in ast.walk(node.target) if isinstance(t, ast.Name)}
-    return sum(1 for node in ast.walk(tree) if isinstance(node, ast.Call)
-               and isinstance(node.func, ast.Attribute) and node.func.attr == "loads"
-               and isinstance(node.func.value, ast.Name) and node.func.value.id == "json"
-               and node.args and isinstance(node.args[0], ast.Name) and node.args[0].id in looped)
+    """How many JSON-lines readers a module has: a json.loads(x) call inside the for-loop or comprehension
+    whose loop variable x is (one call per line read), whatever the variable is called."""
+    def loads_of(nodes, names):
+        return {id(c) for n in nodes for c in ast.walk(n) if isinstance(c, ast.Call)
+                and isinstance(c.func, ast.Attribute) and c.func.attr == "loads"
+                and isinstance(c.func.value, ast.Name) and c.func.value.id == "json"
+                and c.args and isinstance(c.args[0], ast.Name) and c.args[0].id in names}
+
+    def targets(node):
+        return {t.id for t in ast.walk(node) if isinstance(t, ast.Name)}
+
+    found = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.For):
+            found |= loads_of(node.body, targets(node.target))
+        elif isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)):
+            names = set().union(*(targets(g.target) for g in node.generators))
+            parts = [node.key, node.value] if isinstance(node, ast.DictComp) else [node.elt]
+            found |= loads_of(parts + [c for g in node.generators for c in g.ifs], names)
+    return len(found)
 
 
 LISTING = re.compile(r"""\.glob\(\s*['"]\*/\*['"]\s*\)""")      # <state>/<place>, either quote style
@@ -49,6 +60,7 @@ def test_the_checks_recognise_any_spelling():
     assert _jsonl_readers("rows = [json.loads(l) for l in f]") == 1
     assert _jsonl_readers("for row in f:\n    r = json.loads(row)") == 1
     assert _jsonl_readers("x = json.loads(text)") == 0
+    assert _jsonl_readers("for text in f:\n    pass\nanswer = json.loads(text)") == 0   # same name, not in the loop
     assert LISTING.search("root.glob('*/*')") and LISTING.search('root.glob("*/*")')
     assert not LISTING.search('root.glob("*/*.pdf")')
 
