@@ -140,7 +140,7 @@ def test_the_reason_follows_the_checkers_order_and_names_the_value(tmp_path):
 def test_table_parameters_keep_the_formulas_brackets(t):
     params = {row[3]: row[1] for row in t["parameters"]}
     assert params["R-1b.parking_one_family"] == \
-        "parking_spaces ≥ (1 if sleeping_rooms ≤ 3 else 2 + max(sleeping_rooms - 5, 0))"
+        "parking_spaces ≥ (1 if sleeping_rooms ≤ 3 else 2 + 1 * max(sleeping_rooms - 5, 0))"
     assert params["R-1b.rear_yard"] == "rear_yard ≥ max(min(0.25 * lot_depth, 50), 20)"
 
 
