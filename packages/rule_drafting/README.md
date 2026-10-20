@@ -1,7 +1,8 @@
 # rule_drafting
 
 Drafts the zoning rules for every residential district, with one recorded AI call per unit, and checks
-every draft with code. Nothing it drafts is used to check a design until an architect approves it.
+every draft with code. Drafts stay marked draft: architect approval is deferred for now (decided 2026-10-19),
+so a draft that passes every code check can be used; people read the rules through the rules spreadsheet.
 
 ## The units
 

@@ -172,7 +172,7 @@ class Context:
     def _load_cells(self, name, sha, path):
         """Chart cells read by the chart reader (document_extraction/charts.py). Only cells it read with
         certainty are in the file; unresolved parts of a table can never be cited."""
-        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        rows = read_jsonl(path)
         if not rows or rows[0].get("sha256") != sha:
             self._problem(name, f"{path.name} was read from a different version; re-extract")
             return

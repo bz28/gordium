@@ -7,7 +7,8 @@ import yaml
 
 from rule_format.rulebook import REPO, jurisdictions, read_jsonl
 
-CODE = [p for p in (REPO / "packages").rglob("*.py") if "tests" not in p.relative_to(REPO).parts]
+CODE = [p for p in (REPO / "packages").rglob("*.py")   # dated eval records (evals/) are frozen as they were run
+        if not {"tests", "evals"} & set(p.relative_to(REPO).parts)]
 # Paths are judged inside the repository: a checkout can itself sit in a folder named .claude.
 # AI instructions (the labeling guide is the labeling model's prompt) change only with a re-run eval, so
 # they're judged by that eval, not by this wording check.

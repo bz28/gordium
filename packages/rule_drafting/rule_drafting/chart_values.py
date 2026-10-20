@@ -8,9 +8,10 @@ the template expects (another count of numbers, other footnotes, a "-") is never
 rule is listed for a person instead.
 """
 
-import json
 import re
 from pathlib import Path
+
+from rule_format.rulebook import read_jsonl
 
 FOOTNOTE = re.compile(r"\[fn([^\]]*)\]")
 NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?%?")
@@ -19,7 +20,7 @@ NOT_APPLICABLE = {"", "-"}          # the chart's "no requirement here" / "not p
 
 def load_cells(path: Path) -> tuple[dict, list[dict], list[dict]]:
     """(header, the per-page table records, the cells) from a chart reader's cells file."""
-    rows = [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows = read_jsonl(path)
     return rows[0], [r for r in rows[1:] if "columns" in r], [r for r in rows[1:] if "value" in r]
 
 

@@ -175,17 +175,17 @@ def _rule(books, rid):
     return next((r for r in books.get(district, {}).get("rules", []) if r["id"] == rid), {})
 
 
+def run_records(i: Inputs) -> list[dict]:
+    """Every recorded drafting call (drafted/records/runs/*.jsonl), oldest file first."""
+    return [call for f in sorted((i.records / "runs").glob("*.jsonl")) for call in read_jsonl(f)]
+
+
 def recorded_spend(i: Inputs) -> float:
-    total = 0.0
-    for f in (i.records / "runs").glob("*.jsonl"):
-        total += sum(json.loads(line).get("cost_usd", 0) for line in f.read_text().splitlines() if line.strip())
-    return total
+    return sum(call.get("cost_usd", 0) for call in run_records(i))
 
 
 def _measured_output(i: Inputs, model: str) -> float | None:
-    calls = [json.loads(line) for f in (i.records / "runs").glob("*.jsonl")
-             for line in f.read_text().splitlines() if line.strip()]
-    calls = [c for c in calls if c["model"] == model and c.get("stop_reason") == "end_turn"]
+    calls = [c for c in run_records(i) if c["model"] == model and c.get("stop_reason") == "end_turn"]
     return sum(c["usage"]["output_tokens"] for c in calls) / len(calls) if calls else None
 
 
@@ -351,8 +351,7 @@ def draft_uses(i: Inputs) -> dict:
 
 def cmd_cost(args) -> int:
     i = Inputs()
-    calls = [json.loads(line) for f in sorted((i.records / "runs").glob("*.jsonl"))
-             for line in f.read_text().splitlines() if line.strip()]
+    calls = run_records(i)
     print(f"{len(calls)} recorded calls, ${sum(c['cost_usd'] for c in calls):.4f}")
     return 0
 
