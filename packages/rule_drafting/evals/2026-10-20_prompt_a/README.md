@@ -107,7 +107,9 @@ The first and final runs differ partly by chance, not only because of the prompt
    one rule relaxes another. **Ben decides** how: a "relaxes" link between rules, or one combined rule drafted from
    the exception. The new check that judges exceptions alone (row above) keeps that future change from turning an
    incomplete exception into a false pass, for each yard §325-16C(1) names. The answer key has one 37 ft example
-   per yard (front, side, rear) with only that yard not enlarged.
+   per yard with only that yard not enlarged: the front yard; the smaller side yard (10 ft, while the larger is at
+   its enlarged 12 ft; the larger can never be smaller than the smaller, so this one example covers both sides);
+   and the rear yard.
 
 **Earlier prompt's differences, for comparison:**
 - **Front and side yards (4 examples):** the rules applied only when `lot_area > 0`, a placeholder test, so they
@@ -142,8 +144,9 @@ Each change is pinned by a test that fails if the change is undone.
    The exact-value test also skips those rules, because their cells are inputs, not their limit. The idle-number
    check still covers them: `test_a_law_pieces_rule_that_ignores_a_cell_it_cites_is_caught`.
 3. **Law exceptions judged alone must never pass what the answer key fails** (`exception_false_passes`). The
-   answer key gained two 37 ft examples, one with only the side yards and one with only the rear yard not enlarged
-   (the front-yard example was already there). Pinned by `test_an_exception_that_forgets_any_yard_is_caught`,
+   answer key gained two 37 ft examples, one with only the smaller side yard not enlarged (10 ft; the larger is at
+   its enlarged 12 ft, and since the larger side yard is never smaller than the smaller, this covers both sides)
+   and one with only the rear yard not enlarged (the front-yard example was already there). Pinned by `test_an_exception_that_forgets_any_yard_is_caught`,
    which leaves each yard out in turn.
 4. **Either reading of the side-yard columns counts where R-1B can't tell them apart.** This applies only while
    R-1B's two side minimums are equal. The two columns are judged as a pair: one must bind the smaller side yard
