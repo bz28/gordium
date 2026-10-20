@@ -30,25 +30,33 @@ def test_jurisdictions_lists_each_place_folder(tmp_path):
 
 
 def _jsonl_readers(source: str) -> int:
-    """How many JSON-lines readers a module has: a json.loads(x) call inside the for-loop or comprehension
-    whose loop variable x is (one call per line read), whatever the variable is called."""
-    def loads_of(nodes, names):
-        return {id(c) for n in nodes for c in ast.walk(n) if isinstance(c, ast.Call)
-                and isinstance(c.func, ast.Attribute) and c.func.attr == "loads"
-                and isinstance(c.func.value, ast.Name) and c.func.value.id == "json"
-                and c.args and isinstance(c.args[0], ast.Name) and c.args[0].id in names}
+    """How many JSON-lines readers a module has: json.loads applied to each item of a loop or comprehension
+    (json.loads(line), json.loads(line.strip()), loads(l) after `from json import loads`, map(json.loads, f)),
+    whatever the variable is called. One parse of the loop's own item counts once."""
+    tree = ast.parse(source)
+    names = {a.asname or a.name for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.module == "json"
+             for a in n.names if a.name == "loads"}
+
+    def is_loads(f):
+        return (isinstance(f, ast.Attribute) and f.attr == "loads" and isinstance(f.value, ast.Name)
+                and f.value.id == "json") or (isinstance(f, ast.Name) and f.id in names)
+
+    def loads_of(nodes, loop_vars):
+        return {id(c) for n in nodes for c in ast.walk(n) if isinstance(c, ast.Call) and is_loads(c.func)
+                and c.args and {x.id for x in ast.walk(c.args[0]) if isinstance(x, ast.Name)} & loop_vars}
 
     def targets(node):
         return {t.id for t in ast.walk(node) if isinstance(t, ast.Name)}
 
-    found = set()
-    for node in ast.walk(ast.parse(source)):
+    found = {id(n) for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+             and n.func.id == "map" and n.args and is_loads(n.args[0])}
+    for node in ast.walk(tree):
         if isinstance(node, ast.For):
             found |= loads_of(node.body, targets(node.target))
         elif isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)):
-            names = set().union(*(targets(g.target) for g in node.generators))
+            loop_vars = set().union(*(targets(g.target) for g in node.generators))
             parts = [node.key, node.value] if isinstance(node, ast.DictComp) else [node.elt]
-            found |= loads_of(parts + [c for g in node.generators for c in g.ifs], names)
+            found |= loads_of(parts + [c for g in node.generators for c in g.ifs], loop_vars)
     return len(found)
 
 
@@ -60,6 +68,10 @@ def test_the_checks_recognise_any_spelling():
     assert _jsonl_readers("for row in f:\n    r = json.loads(row)") == 1
     assert _jsonl_readers("x = json.loads(text)") == 0
     assert _jsonl_readers("for text in f:\n    pass\nanswer = json.loads(text)") == 0   # same name, not in the loop
+    assert _jsonl_readers("rows = [json.loads(l.strip()) for l in f]") == 1
+    assert _jsonl_readers("for l in f:\n    r.append(json.loads(l.rstrip()))") == 1
+    assert _jsonl_readers("rows = list(map(json.loads, f))") == 1
+    assert _jsonl_readers("from json import loads\nrows = [loads(l) for l in f]") == 1
     assert LISTING.search("root.glob('*/*')") and LISTING.search('root.glob("*/*")')
     assert not LISTING.search('root.glob("*/*.pdf")')
 
@@ -75,6 +87,8 @@ def test_every_jurisdiction_listing_uses_the_one_helper():
     assert len(found) == 1 and "rulebook.py" in found[0], f"use rulebook.jurisdictions(): {found}"
 
 
+# YAML files people read too (their comments describe the workflow): the vocabulary, definitions, rulebooks.
+REGULATION_YAML = [p for p in (REPO / "regulations").rglob("*.yaml") if "runs" not in p.parts]
 APPROVAL = re.compile(r"\barchitect\w*\b[^.\n]{0,80}?\bapprov|\bapprov\w*\b[^.\n]{0,80}?\barchitect", re.IGNORECASE)
 # Claims that are false while approval is deferred, however a document is worded around them.
 FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only approved rules|approved rulebook"
@@ -83,15 +97,20 @@ FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only app
 
 
 def test_docs_dont_promise_approval_while_it_is_deferred():
-    """Approval is deferred (2026-10-19): no reviewer is listed and the checker uses draft rules. Until a
-    reviewer is added, a document that talks about architects approving rules must say approval is deferred,
-    and none may claim the checker waits for, or reads only, approved rules."""
-    if yaml.safe_load((REPO / "regulations/reviewers.yaml").read_text()):
-        return
-    silent = [str(p.relative_to(REPO)) for p in DOCS
+    """Approval is deferred (2026-10-19): nothing is approved and the checker uses draft rules. Until something
+    is approved (listing a reviewer alone doesn't switch approval on), a document that talks about architects
+    approving rules must say approval is deferred, and none may claim the checker waits for approved rules."""
+    if any(re.search(r"^\s*status:\s*approved\b", p.read_text(), re.MULTILINE) for p in REGULATION_YAML):
+        return                                   # approval is switched on once anything is approved
+    silent = [str(p.relative_to(REPO)) for p in DOCS + REGULATION_YAML
               if APPROVAL.search(p.read_text()) and not re.search(r"deferred", p.read_text(), re.IGNORECASE)]
     false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text())]
-    assert not silent and not false, (silent, false)
+    # Architects confirming labels, definitions or the vocabulary is the same deferred layer: each sentence
+    # that says so must say it's deferred. (An architect confirming their own project's facts is not.)
+    confirm = [f"{p.relative_to(REPO)}: {line.strip()[:100]}" for p in DOCS + REGULATION_YAML
+               for line in re.split(r"(?<=[.!?])\s+|\n", p.read_text())
+               if re.search(r"architects (would )?confirm", line, re.IGNORECASE) and "defer" not in line.lower()]
+    assert not silent and not false and not confirm, (silent, false, confirm)
 
 
 def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
