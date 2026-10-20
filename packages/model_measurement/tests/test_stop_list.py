@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 import rhino3dm as r
 
-from model_measurement.measure import measure
+from model_measurement.measure import MAX_COMBINATIONS, MAX_UNCLEAR_EDGES, measure
 from model_measurement.read_3dm import read_site
 from model_measurement.stops import STOPS
 
@@ -23,8 +23,8 @@ from test_read_3dm import model, on, rect, write  # noqa: E402
 
 CODE = HERE.parent / "model_measurement"
 README = " ".join((HERE.parent / "README.md").read_text().split())     # as one line: wrapping doesn't matter
-# words that make a sentence a reason to stop: only stops.py may hold one
-STOP_WORDS = re.compile(r"isn't|aren't|can't|doesn't|pick the|say whether|not measured yet|too many|explode")
+# the blanks whose words are fixed by the code: the README must quote them as they are
+FIXED_BLANKS = {"limit": str(MAX_UNCLEAR_EDGES)}
 
 
 def fixed_words(template: str) -> list[str]:
@@ -163,6 +163,10 @@ CASES = {
     "lines_unclear": _plain(ZIGZAG),
     "no_rear_line": _plain(lot([(0, 0), (50, 0), (25, 100)]), buildings=[box(20, 10, 30, 30)]),
     "no_ground": _plain(grade_elevation=None),
+    "readings_differ": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house")]),
+    "no_use": _plain(use=None),
+    "no_stories": _plain(stories=None),
+    "no_rooms": _plain(),
     "ground_unknown": _plain(ground_is_flat=None),
     "sloped_ground": _plain(ground_is_flat=False),
     "no_building": _plain(buildings=[]),
@@ -183,6 +187,8 @@ CASES = {
 def quoted(template: str) -> re.Pattern:
     """The reason as the README quotes it: the whole sentence in quotes, each blank filled by a word or two
     (`<file>`, `2`, `Site`, `a block`)."""
+    for blank, words in FIXED_BLANKS.items():
+        template = template.replace("{" + blank + "}", words)
     parts = re.split(r"\{[a-z_]+\}", template)
     return re.compile('"' + '[^" ]+(?: [^" ]+)?'.join(re.escape(p) for p in parts) + '"')
 
@@ -202,14 +208,46 @@ def test_each_stop_is_given_by_its_case(key, tmp_path):
     assert all(w in said for w in fixed_words(STOPS[key])), (STOPS[key], said)
 
 
+def _reason_parts(node) -> list:
+    """The expressions in `node` that become a reason: a problems list, a `why_...`, `reason` or street problem,
+    the reason of `_missing` or `_record`."""
+    if isinstance(node, ast.Call):
+        f, name = node.func, ast.unparse(node.func)
+        if isinstance(f, ast.Attribute) and f.attr == "append" and ast.unparse(f.value).endswith(("problems", "trouble")):
+            return list(node.args)
+        if name == "_missing":
+            return node.args[1:] + [k.value for k in node.keywords]
+        if name == "_record":
+            return node.args[7:] + [k.value for k in node.keywords if k.arg == "reason"]
+    if isinstance(node, ast.Assign):
+        names = [ast.unparse(t) for t in node.targets]
+        if any(n.split(".")[-1].startswith("why") or n.endswith(("reason", "problems", "street_problem")) for n in names):
+            return [node.value]
+    if isinstance(node, ast.Dict):
+        return [v for k, v in zip(node.keys, node.values) if isinstance(k, ast.Constant) and k.value == "problems"]
+    return []
+
+
+def _written_out(node) -> list:
+    """Words in a reason that don't come from stop(): a string with letters, outside any stop(...) call."""
+    if isinstance(node, ast.Call) and ast.unparse(node.func) == "stop":
+        return []
+    if isinstance(node, ast.JoinedStr) or isinstance(node, ast.Constant) and isinstance(node.value, str) \
+            and re.search("[a-z] [a-z]", node.value):          # words, not a key like "lot"
+        return [ast.unparse(node)]
+    return [w for child in ast.iter_child_nodes(node) for w in _written_out(child)]
+
+
 def test_the_measuring_gives_reasons_only_from_the_table():
-    """A reason written straight into the code would be missed by the README and the cases."""
+    """Whatever becomes a reason comes from stop(): a reason written straight into the code would be missed by the
+    README and the cases."""
     found = []
     for name in ("read_3dm.py", "measure.py"):
-        tree = ast.parse((CODE / name).read_text())
-        docs = {id(n.body[0].value) for n in ast.walk(tree) if isinstance(n, (ast.Module, ast.FunctionDef, ast.ClassDef))
-                and n.body and isinstance(n.body[0], ast.Expr)}
-        found += [f"{name}:{n.lineno} {n.value!r}" for n in ast.walk(tree)
-                  if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in docs
-                  and STOP_WORDS.search(n.value)]
+        for node in ast.walk(ast.parse((CODE / name).read_text())):
+            found += [f"{name}:{node.lineno} {w}" for part in _reason_parts(node) for w in _written_out(part)]
     assert not found, "put these reasons in stops.py and use stop(): " + "; ".join(found)
+
+
+def test_the_limits_the_readme_names_are_the_code_s():
+    assert f"more than {MAX_COMBINATIONS} combinations of readings" in README
+    assert f"more than {MAX_UNCLEAR_EDGES} lot lines could be either" in README

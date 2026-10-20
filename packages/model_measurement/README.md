@@ -67,6 +67,8 @@ Things that stop a measurement. The measurement has no value and gives NEEDS REV
 for word. Every reason is in one table, `model_measurement/stops.py`, and the code gives no other;
 `tests/test_stop_list.py` checks each is listed here and builds a case that gives it:
 
+- **The readings disagree:** "the readings give different values; …", then the open question from the table
+  above (the value is left to the architects; every reading is shown).
 - **The file:** "can't read <file>"; "the model's units (<units>) aren't supported" (feet, inches, millimetres,
   centimetres and metres are).
 - **The lot outline:** "no Site layer"; "no lot outline"; "no closed lot outline on the Site layer"; "2 closed outlines on the Site layer: pick the
@@ -86,6 +88,8 @@ for word. Every reason is in one table, `model_measurement/stops.py`, and the co
   (a triangular lot, for one): an open question for the architects".
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "say whether the ground is flat";
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
+- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the number of
+  stories"; "enter bedrooms / parking spaces".
 - **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
   building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's

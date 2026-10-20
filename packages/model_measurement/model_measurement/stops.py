@@ -5,6 +5,8 @@ lists each one word for word and tests/test_stop_list.py has a case that gives e
 """
 
 STOPS = {
+    # the law reads more than one way and the readings disagree (each reading's question is in the README's table)
+    "readings_differ": "the readings give different values; {question}",
     # the file
     "unreadable_file": "can't read {path}",
     "units": "the model's units ({units}) aren't supported",
@@ -39,6 +41,10 @@ STOPS = {
     "ground_unknown": "say whether the ground is flat",
     "sloped_ground": "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't "
                      "measured yet",
+    # facts a massing model doesn't show, until they are entered
+    "no_use": "choose the use",
+    "no_stories": "enter the number of stories",
+    "no_rooms": "enter bedrooms / parking spaces",
     # the buildings
     "no_building": "no building on the Building layer",
     "no_main_building": "more than one building: pick the main building",

@@ -33,8 +33,7 @@ PARALLEL, PERPENDICULAR = 30, 60   # degrees from the street: clearly a rear lin
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 4     # more lot lines than this of unclear kind: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
-ASK = {"use": "choose the use", "stories": "enter the number of stories",
-       "sleeping_rooms": "enter bedrooms / parking spaces", "parking_spaces": "enter bedrooms / parking spaces"}
+ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft"}
 
@@ -61,7 +60,7 @@ def _decide(name: str, readings: list[tuple[str, float, dict]], how: str, object
         return _record(name, UNITS[name], _r(values[0]), how, objects, readings[0][2].get("points"),
                        shown if len(readings) > 1 else [])
     return _record(name, UNITS[name], None, how, objects, None, shown,
-                   f"the readings give different values; {question}")
+                   stop("readings_differ", question=question))
 
 
 # ---- the lot ---------------------------------------------------------------------------------------------
@@ -439,7 +438,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     for name, unit in STATED.items():
         v = facts.get(name)
         out[name] = (_record(name, unit, v, "stated by the architect (not measured from the model)")
-                     if v is not None else _record(name, unit, reason=ASK[name]))
+                     if v is not None else _record(name, unit, reason=stop(ASK[name])))
     buildings = site.get("buildings") or []
     grade = facts.get("grade_elevation")
     main = (buildings[0] if len(buildings) == 1 else
