@@ -1,5 +1,7 @@
 """The 106 Ithaca Rd report against the architects' own spreadsheet, and each safeguard of the report."""
 
+from pathlib import Path
+
 import openpyxl
 import pytest
 import yaml
@@ -256,13 +258,55 @@ def test_a_folder_that_is_not_a_jurisdiction_gets_a_plain_message(tmp_path):
 
 def test_a_rulebook_that_fails_the_rule_checks_gives_no_report(monkeypatch):
     """A rule whose quote isn't the city's words (edited locally, never checked) must never give PASS."""
-    import project_report.report as report
-    real_load = report.load
-    def load(path):
-        data = real_load(path)
-        if isinstance(data, dict) and "rules" in data:
+    def change(path, data):
+        if path.parent.name == "5_zoning_rules":
             data["rules"][0]["sources"][0]["quote"] = "made up words not in the law"
         return data
-    monkeypatch.setattr(report, "load", load)
+    report = _patched_load(monkeypatch, change)
     with pytest.raises(ValueError, match="doesn't pass the rule checks"):
+        report.tables(SITE)
+
+
+def _patched_load(monkeypatch, change):
+    """report.load and the rule checker's load, with `change(path, data)` applied to what they read."""
+    import project_report.report as report
+    import rule_format.rulebook as rulebook
+    real = rulebook.load
+    def load(path):
+        return change(Path(path), real(path))
+    monkeypatch.setattr(rulebook, "load", load)
+    monkeypatch.setattr(report, "load", load)
+    return report
+
+
+def test_a_rulebook_whose_district_isnt_its_file_name_gives_no_report(monkeypatch):
+    def change(path, data):
+        if path.parent.name == "5_zoning_rules":
+            data["district"] = "R-2"
+            for rule in data["rules"]:
+                rule["id"] = "R-2." + rule["id"].split(".", 1)[1]
+        return data
+    report = _patched_load(monkeypatch, change)
+    with pytest.raises(ValueError, match="doesn't match the file name"):
+        report.tables(SITE)
+
+
+def test_a_uses_list_that_fails_its_checks_gives_no_report(monkeypatch):
+    def change(path, data):
+        if path.name == "uses.yaml":
+            for entry in data.values():
+                entry["sources"] = []
+        return data
+    report = _patched_load(monkeypatch, change)
+    with pytest.raises(ValueError, match="needs at least one source"):
+        report.tables(SITE)
+
+
+def test_a_rulebook_that_isnt_valid_yaml_gives_a_plain_refusal(monkeypatch):
+    def change(path, data):
+        if path.parent.name == "5_zoning_rules":
+            raise yaml.YAMLError("bad")
+        return data
+    report = _patched_load(monkeypatch, change)
+    with pytest.raises(ValueError, match="can't read file"):
         report.tables(SITE)
