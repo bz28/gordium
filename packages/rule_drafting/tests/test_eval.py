@@ -203,24 +203,25 @@ def test_drafted_exception_rules_never_pass_what_the_answer_key_fails(hand, draf
     assert exception_false_passes(hand, drafted_r1b, ctx) == []
 
 
-def test_an_exception_that_forgets_a_yard_is_caught(ctx):
-    """Runs without drafts: §325-16C enlarges every yard; an exception rule set that enlarges only the front
-    yard passes the answer key's '37 ft, rear yard not enlarged' example, and is caught."""
+def test_an_exception_that_forgets_any_yard_is_caught(ctx):
+    """Runs without drafts: §325-16C(1) enlarges each required front, side and rear yard. An exception rule set
+    that leaves out any one of them passes an answer-key example where only that yard isn't enlarged, and is
+    caught; the complete set is not flagged. (The smaller side yard stands for both sides: the larger one is
+    never smaller.)"""
     hand = [h for h in load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"] if h["id"] == "R-1b.height"]
     quote = next(s for s in hand[0]["sources"] if s.get("quote", "").startswith("(1) Each required"))
-    def rule(rid, applies, check):
-        return {"id": rid, "kind": "rule", "sources": [quote], "applies_when": applies, "check": check,
-                "examples": []}
-    only_front = [rule("R-1b.x_limit", "building_height > 35", "building_height <= 35 + 0.1 * 35"),
-                  rule("R-1b.x_front", "building_height > 35", "front_yard >= 25 + (building_height - 35)")]
-    ids = {r["id"] for r in only_front}
-    assert exception_false_passes(hand, only_front, ctx, from_law=ids) != []
-    every_yard = only_front + [
-        rule("R-1b.x_sides", "building_height > 35",
-             "side_yard_smaller >= 10 + (building_height - 35) and side_yard_larger >= 10 + (building_height - 35)"),
-        rule("R-1b.x_rear", "building_height > 35",
-             "rear_yard >= max(min(0.25 * lot_depth, 50), 20) + (building_height - 35)")]
-    assert exception_false_passes(hand, every_yard, ctx, from_law=ids | {r["id"] for r in every_yard}) == []
+    def rule(rid, check):
+        return {"id": f"R-1b.x_{rid}", "kind": "rule", "sources": [quote], "applies_when": "building_height > 35",
+                "check": check, "examples": []}
+    yards = {"front": "front_yard >= 25 + (building_height - 35)",
+             "sides": "side_yard_smaller >= 10 + (building_height - 35) and side_yard_larger >= 10 + (building_height - 35)",
+             "rear": "rear_yard >= max(min(0.25 * lot_depth, 50), 20) + (building_height - 35)"}
+    limit = rule("limit", "building_height <= 35 + 0.1 * 35")
+    complete = [limit] + [rule(name, check) for name, check in yards.items()]
+    assert exception_false_passes(hand, complete, ctx, from_law={r["id"] for r in complete}) == []
+    for left_out in yards:
+        rules = [r for r in complete if r["id"] != f"R-1b.x_{left_out}"]
+        assert exception_false_passes(hand, rules, ctx, from_law={r["id"] for r in rules}) != [], left_out
 
 
 def load_chart_test():
@@ -242,10 +243,17 @@ SIDE_ROWS = {"Side (one side minimum)", "Side (other side minimum)"}
 OTHER_SIDE = {"side_yard_smaller": "side_yard_larger", "side_yard_larger": "side_yard_smaller"}
 
 
-def readings(key, chart):
-    """The chart reader's meanings of a row, plus, for a side-yard row, the other side's reading."""
+def side_cells_equal(chart, cells) -> bool:
+    """R-1B's two side-yard minimums state the same numbers (only then can either reading be right)."""
+    found = {c["row"]: chart.numbers(c["value"]) for c in cells if c["page"] == 3 and c["row"] in SIDE_ROWS}
+    return len(found) == 2 and len({tuple(v) for v in found.values()}) == 1
+
+
+def readings(key, chart, cells):
+    """The chart reader's meanings of a row, plus, for a side-yard row whose two R-1B minimums are equal, the
+    other side's reading."""
     out = list(chart.LIMITS[key])
-    if key[2] in SIDE_ROWS:
+    if key[2] in SIDE_ROWS and side_cells_equal(chart, cells):
         out += [(OTHER_SIDE[m], kind, {m: 100}, limit) for m, kind, fixed, limit in chart.LIMITS[key]]
     return out
 
@@ -253,8 +261,11 @@ def readings(key, chart):
 def chart_value_results(rules, chart, cells, ctx):
     """(cited rows, rows enforced exactly, wrong) for the drafted chart rules (a law piece's rule takes chart
     cells as inputs, not as its limit). A row is enforced when, under some reading, the rule passes at the value
-    and fails just past it; it's wrong when, under any reading, it does something else than that or not binding."""
+    and fails just past it; it's wrong when, under any reading, it does something else than that or not binding.
+    The two side-yard rows are judged as a pair: enforced only if one binds the smaller side yard and the other
+    the larger (either way round), never both the same yard."""
     cited, enforced, wrong = set(), set(), []
+    binds = {}                                      # row -> the measures it was enforced on
     from_law = law_unit_rules()
     for rule in rules:
         passing = [ex["given"] for ex in rule.get("examples", []) if ex["expect"] == "pass"]
@@ -265,15 +276,20 @@ def chart_value_results(rules, chart, cells, ctx):
             if key not in chart.LIMITS:
                 continue
             cited.add(key)
-            for measure, kind, fixed, limit in readings(key, chart):
+            for measure, kind, fixed, limit in readings(key, chart, cells):
                 bound = limit(chart.numbers(c["value"]))
                 past = bound + (1 if measure in chart.COUNTS else 0.01) * (1 if kind == "max" else -1)
                 at = outcome(rule, passing[0] | fixed | {measure: bound}, ctx.allowed())
                 beyond = outcome(rule, passing[0] | fixed | {measure: past}, ctx.allowed())
                 if (at, beyond) == ("pass", "fail"):
                     enforced.add(key)
+                    binds.setdefault(key, set()).add(measure)
                 elif (at, beyond) != ("pass", "pass"):
                     wrong.append(f"{rule['id']}: {measure} {kind} {bound} from {c['value']!r}: {at} at it, {beyond} past it")
+    sides = [k for k in cited if k[2] in SIDE_ROWS]
+    if len(sides) == 2 and not any(a != b for a in binds.get(sides[0], ()) for b in binds.get(sides[1], ())):
+        enforced -= set(sides)
+        wrong.append("the two side-yard minimums don't bind the two side yards (one the smaller, one the larger)")
     return cited, enforced, wrong
 
 
@@ -302,6 +318,18 @@ def test_either_reading_of_the_side_yard_columns_counts_and_a_wrong_number_still
     cited, enforced, wrong = chart_value_results([rule("side_yard_larger >= 12 and side_yard_smaller >= 12")],
                                                  chart, cells, ctx)
     assert wrong != []
+    other_side = {"file": CHART, "page": 3,
+                  "cell": {"section": "Yard Dimensions", "row": "Side (other side minimum)", "column": "R-1B"}}
+    same_yard = [rule("side_yard_larger >= 10"), rule("side_yard_larger >= 10") | {"id": "R-1b.side2", "sources": [other_side]}]
+    cited, enforced, wrong = chart_value_results(same_yard, chart, cells, ctx)
+    assert cited - enforced and wrong                    # both rows on the larger yard: the smaller has no limit
+    one_each = [rule("side_yard_larger >= 10"), rule("side_yard_smaller >= 10") | {"id": "R-1b.side2", "sources": [other_side]}]
+    cited, enforced, wrong = chart_value_results(one_each, chart, cells, ctx)
+    assert cited == enforced and len(cited) == 2 and wrong == []
+    key = (3, "Yard Dimensions", "Side (one side minimum)")         # the other reading only while R-1B's are equal
+    assert len(readings(key, chart, cells)) == 2 * len(chart.LIMITS[key])
+    unequal = [c | {"value": "5 ft"} if c["row"] == "Side (other side minimum)" else c for c in cells]
+    assert len(readings(key, chart, unequal)) == len(chart.LIMITS[key])
 
 
 def idle_chart_numbers(rules, chart, cells, ctx):

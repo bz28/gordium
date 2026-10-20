@@ -61,7 +61,7 @@ the same answer key.
 | Units fully accepted (vs. keeping a partial answer) | 7 of 9 | 9 of 9 | **9 of 9** |
 | Units accepted on the first try | 4 of 9 | 7 of 9 | **6 of 9** |
 | AI calls (incl. retries) / cost | 17 / $0.549 | 12 / $0.457 | **13 / $0.499** |
-| R-1b answer key: worked examples that agree | 19 of 28 | 29 of 31 | **28 of 31** |
+| R-1b answer key: worked examples that agree | 19 of 29 | 30 of 32 | **29 of 32** |
 | Architects' 106 Ithaca Rd spreadsheet: rows that agree | 9 (parking not drafted) | 11 of 11 | **10 of 11** |
 | R-1B chart rows enforced exactly (pass at the value, fail just past it) | 10 of 10 | 14 of 14 | **14 of 14** |
 | A chart number cited but unused, or wrong | 0 | 0 | **0** |
@@ -95,24 +95,24 @@ The first and final runs differ partly by chance, not only because of the prompt
    above 35 ft. The hand example gives no height, so the result is "needs review". A real check always has the
    height.
 2. **Height 35 ft (and the architects' 106 Ithaca Rd height row). Drafted rule incomplete: "needs review" where
-   the answer is PASS.** Two causes:
-   - The drafter made §325-16C's rear-yard increase a flag with no condition, so it applies to every building,
-     even one at or under 35 ft. It should apply only above the limit. Its open question explains the flag: how
-     the required rear yard is computed before the extra height is added.
-   - The hand example gives no story count, which the 325-16C stories rule needs.
-   This is cautious, not wrong: never a false pass.
+   the answer is PASS.** There is one cause. The drafter made §325-16C's rear-yard increase a flag with no
+   condition, so it applies to every building, even one at or under 35 ft. It should apply only above the limit.
+   Its open question explains the flag: how the required rear yard is computed before the extra height is added.
+   The grade's note that the stories rule "needs stories" only lists a name in that rule's formula. That rule
+   applies only above 35 ft, so it doesn't affect this example. This is cautious, not wrong: never a false pass.
 3. **Height 37 ft with every yard 2 ft larger. The drafted rules say FAIL; the law and the hand key say PASS.**
    The chart's "height ≤ 35 ft" and §325-16C's "up to 10% more if every yard grows 1 ft per extra foot" are
    separate rules. Every rule must pass, so the exception can't relax the limit. This is the cautious direction (a
    false FAIL), and the drafter followed its instructions. The cause is that the rule format has no way to say
    one rule relaxes another. **Ben decides** how: a "relaxes" link between rules, or one combined rule drafted from
-   the exception. The new check that judges exceptions alone (row above) is what keeps that future change from
-   turning an incomplete exception into a false pass.
+   the exception. The new check that judges exceptions alone (row above) keeps that future change from turning an
+   incomplete exception into a false pass, for each yard §325-16C(1) names. The answer key has one 37 ft example
+   per yard (front, side, rear) with only that yard not enlarged.
 
 **Earlier prompt's differences, for comparison:**
 - **Front and side yards (4 examples):** the rules applied only when `lot_area > 0`, a placeholder test, so they
   couldn't be decided without the lot area.
-- **Height (4 examples):** the chart's 35 ft limit was refused, because the draft folded §325-16C's 10% into it
+- **Height (5 examples):** the chart's 35 ft limit was refused, because the draft folded §325-16C's 10% into it
   and policy B doesn't trust that 0.1 there. Only the bonus rules and a yards flag remained, so the result was
   "needs review".
 - **Stories (1 example):** as in item 1 above.
@@ -142,10 +142,13 @@ Each change is pinned by a test that fails if the change is undone.
    The exact-value test also skips those rules, because their cells are inputs, not their limit. The idle-number
    check still covers them: `test_a_law_pieces_rule_that_ignores_a_cell_it_cites_is_caught`.
 3. **Law exceptions judged alone must never pass what the answer key fails** (`exception_false_passes`). The
-   answer key gained an example where the rear yard isn't enlarged at 37 ft. Pinned by
-   `test_an_exception_that_forgets_a_yard_is_caught`.
-4. **Either reading of the side-yard columns counts where R-1B can't tell them apart,** and a wrong number still
-   shows. Pinned by `test_either_reading_of_the_side_yard_columns_counts_and_a_wrong_number_still_shows`.
+   answer key gained two 37 ft examples, one with only the side yards and one with only the rear yard not enlarged
+   (the front-yard example was already there). Pinned by `test_an_exception_that_forgets_any_yard_is_caught`,
+   which leaves each yard out in turn.
+4. **Either reading of the side-yard columns counts where R-1B can't tell them apart.** This applies only while
+   R-1B's two side minimums are equal. The two columns are judged as a pair: one must bind the smaller side yard
+   and the other the larger, never both the same yard. A wrong number still shows. Pinned by
+   `test_either_reading_of_the_side_yard_columns_counts_and_a_wrong_number_still_shows`.
 
 ## Next prompt improvements (not tested yet)
 

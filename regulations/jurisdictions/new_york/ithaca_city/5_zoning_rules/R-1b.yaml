@@ -261,6 +261,8 @@ rules:
         expect: pass
       - given: {building_height: 37, front_yard: 25, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 26, lot_depth: 94.8, stories: 3}
         expect: fail
+      - given: {building_height: 37, front_yard: 27, side_yard_smaller: 10, side_yard_larger: 12, rear_yard: 26, lot_depth: 94.8, stories: 3}
+        expect: fail
       - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 24, lot_depth: 94.8, stories: 3}
         expect: fail
       - given: {building_height: 39, front_yard: 40, side_yard_smaller: 20, side_yard_larger: 20, rear_yard: 40, lot_depth: 94.8, stories: 3}
