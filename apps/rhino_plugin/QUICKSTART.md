@@ -47,7 +47,8 @@ never says "complies" unless it is sure (see [What "needs review" means](#what-n
    - **Lot**: its area and where it came from: "6,570 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
      survey…** to pick your surveyed outline instead.
-   - **Street side**: the lot line on the street (highlighted). **Change…** to pick another.
+   - **Street side**: the lot line on the street (highlighted). **Change…** to pick another. **Corner lot?**: answer
+     it (one street or two). Gordium never guesses: until you answer, the yards need review.
    - **Ground**: "flat at the lot level · as drawn", or your spot grades or terrain. **Place spot grades…**,
      **Pick terrain…**, or **I'll regrade: set finished ground…**.
    - **No regrading near the house**: tick it if the ground shown is the finished ground. Then height is checked.

@@ -30,7 +30,7 @@ A2 [code] **Rows, in this order** (`rhino_logic.box_rows`, tested in CI):
 2. **Zoning district**, with its source ("entered by you" today; "from City map" once the lookup exists), a dropdown, and **☐ I confirm**. One district today; more than one later.
 3. **Use**: a dropdown.
 4. **Lot**: "<area> sf · from the tax map (±2 ft, approximate)" or "… · from your survey", with **Use my survey…** (pick the surveyed outline).
-5. **Street side**: the street's name, or "the highlighted line", with **Change…** (pick another lot line).
+5. **Street side**: the street's name, or "the highlighted line", with **Change…** (pick another lot line), and **Corner lot?** (Not answered / No: one street / Yes: two streets). It is never guessed: while it is unanswered the amber line asks it and the yards need review (§325-19C).
 6. **Ground**: what the ground is and where it came from. Today that is "flat at the lot level · as drawn", or the spot grades or terrain with their range. Its actions are **Place spot grades…**, **Pick terrain…** and **I'll regrade: set finished ground…**, plus one tick, **☐ No regrading near the house**.
 7. One line: "Not checked yet: overlays (historic, gorge, flood) · pitched roofs".
 8. An uncertain case the box can't settle shows as **one amber line with the action**:

@@ -52,7 +52,8 @@ LAYERS = logic.LAYERS
 ID_KEY = "gordium:id"
 SECTION, ENTRY = "Gordium", "lot_facts"
 UI_ENTRY = "ui"                              # the start box's own choices (district confirmed, grade source…)
-GRADE_LAYER = "Gordium::Grade"               # spot grades: point objects the architect places
+GRADE_LAYER = "Gordium::Grade"               # spot grades of the ground as it is: point objects the architect places
+FINISHED_LAYER = "Gordium::Grade::Finished"  # finished ground the architect will grade to ("I'll regrade"): kept apart
 IDLE_SECONDS = 0.5                           # a re-check waits this long after the last edit
 TOAST_SECONDS = 6                            # the "no longer complies" notice shows this long at most
 
@@ -183,13 +184,14 @@ def _find(doc, object_id):
 
 def suggested_facts(doc, zones):
     """Prefilled lot facts, for the architect to confirm: the largest closed outline on the Site layer as the
-    lot, its lowest line on the screen (the bottom of the Top view) as the street side, not a corner lot (one
-    street line), flat ground at the lowest point of the buildings, the lot not from a survey (the safe answer:
+    lot, its lowest line on the screen (the bottom of the Top view) as the street side, the corner-lot question left
+    unanswered (never guessed: the yards wait for the answer; the box asks it), flat ground at the lowest point
+    of the buildings, the lot not from a survey (the safe answer:
     lot size and coverage wait for one), the first zone with rules, a detached one-family house, and the largest
     solid as the main building. Every one is shown in the dialog; nothing is used until the architect says OK.
     In feet, whatever the model's units."""
     facts = {"jurisdiction": JURISDICTION, "zone": zones[0] if zones else None, "use": "one_family_detached",
-             "corner_lot": False, "ground_is_flat": True, "lot_surveyed": False}
+             "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}   # corner lot: never guessed
     lots, buildings, _ = _sorted_objects(doc)
     if lots:
         lot = max(lots, key=lambda o: _area(o.Geometry))
@@ -504,7 +506,7 @@ def _actions():
     return {"zoom": zoom_to, "report": open_report, "envelope": set_envelope, "edit_site": edit_facts,
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check, "legend": ui.legend,
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
-            "massing": hide_massing}
+            "massing": hide_massing, "not_ground": not_the_ground}
 
 
 def panel():
@@ -574,14 +576,16 @@ def pick_survey():
     if picked:
         facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
         facts["lot_surveyed"] = True
+        _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
         save_facts(doc, facts)
     run_check(doc, report=False)
 
 
-def _grade_points(doc):
-    """Spot grades: the point objects on Gordium::Grade, in feet."""
+def _grade_points(doc, finished=False):
+    """Spot grades: the point objects on Gordium::Grade (or, finished, on Gordium::Grade::Finished only), in feet.
+    The two are never mixed: an existing spot grade must never count as finished grade."""
     k = _scale(doc)
-    index = doc.Layers.FindByFullPath(GRADE_LAYER, -1)
+    index = doc.Layers.FindByFullPath(FINISHED_LAYER if finished else GRADE_LAYER, -1)
     if index < 0:
         return []
     return [[o.Geometry.Location.X * k, o.Geometry.Location.Y * k, o.Geometry.Location.Z * k]
@@ -714,12 +718,37 @@ def _ground_like(doc, ids, lot):
 
 def this_is_the_ground(ids):
     """The panel's "This is the ground": the architect's own word that these objects are the ground, saved in the
-    file; then the check runs again without them."""
+    file with who said it and when (a site fact, shown in the panel and the report, with "Not the ground" to undo
+    it); then the check runs again without them."""
     doc = Rhino.RhinoDoc.ActiveDoc
     state = _ui_state(doc)
     state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
     _save_ui_state(doc, state)
+    n = len(state["ground_ids"])
+    _set_source(doc, "ground_marked", f"{n} object{'s' if n != 1 else ''} left out of the check as the ground",
+                logic.ENTERED)
     run_check(doc, report=False)
+
+
+def not_the_ground():
+    """Undo "This is the ground": every object marked so is checked again (counted as left out until added)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    state = _ui_state(doc)
+    state.pop("ground_ids", None)
+    _save_ui_state(doc, state)
+    _set_source(doc, "ground_marked", None, None)
+    run_check(doc, report=False)
+
+
+def _set_source(doc, key, value, source):
+    """One site fact's source, changed outside the start box (the panel's buttons): {value, source, confirmed_by,
+    date}, saved with the others; value None removes it. So the panel and the report never show a stale source."""
+    sources = fact_sources(doc)
+    if value is None:
+        sources.pop(key, None)
+    else:
+        sources[key] = {"value": value, "source": source, "confirmed_by": "you", "date": time.strftime("%Y-%m-%d")}
+    doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
 
 
 def _extras(doc, facts):
@@ -815,22 +844,27 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
         area = amp.Area * k * k if amp else None
     zone_fact = sources.get("zone") or {}
     confirmed = logic.district_confirmed(mode, zone_fact, facts.get("zone"))
-    points = _grade_points(doc)
     kind = saved_ui.get("ground_kind") or (facts.get("grade_from") if facts.get("grade_from") in ("spot", "terrain")
                                             else "flat")
+    points = _grade_points(doc, kind == "regrade")      # the set the ground row names, never both mixed
     if kind in ("spot", "regrade") and not points:
         kind = "flat"
     zs = [p[2] for p in points]
     span = (_ft_text(min(zs)) + " to " + _ft_text(max(zs))) if zs and kind in ("spot", "regrade") else ""
-    return {"address": facts.get("address") or "", "address_source": (sources.get("address") or {}).get("source"),
-            "zone": facts.get("zone"), "zone_source": zone_fact.get("source") or logic.ENTERED,
-            "district_confirmed": confirmed, "use": facts.get("use"),
+    default = "the sample project" if saved_ui.get("from_sample") else logic.SUGGESTED
+
+    def source(key, fallback=None):                    # what was saved at the last Draw, else where it came from
+        return (sources.get(key) or {}).get("source") or fallback or default
+
+    return {"address": facts.get("address") or "", "address_source": source("address"),
+            "zone": facts.get("zone"), "zone_source": source("zone", logic.ENTERED),
+            "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
             "lot_area": area, "lot_surveyed": bool(facts.get("lot_surveyed")),
-            "street_name": facts.get("street_name"), "street_source": saved_ui.get("street_source"),
+            "street_name": facts.get("street_name"), "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span},
-            "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": bool(facts.get("corner_lot")),
-            "zones_found": facts.get("zones_found") or [], "_scale": k}
+            "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
+            "corner_source": source("corner_lot"), "zones_found": facts.get("zones_found") or [], "_scale": k}
 
 
 def _ft_text(feet):
@@ -844,7 +878,9 @@ def _ft_text(feet):
 def _apply_box(doc, facts, state, saved_ui):
     """The facts (what the checker gets) and the box's own choices, from what the box says."""
     facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],
-                 lot_surveyed=bool(state.get("lot_surveyed")))
+                 lot_surveyed=bool(state.get("lot_surveyed")), corner_lot=state.get("corner_lot"))
+    if facts.get("corner_lot") is None:             # unanswered: the checker says the yards need review
+        facts.pop("corner_lot")
     if not facts.get("address"):
         facts.pop("address")
     facts.pop("grade_points", None)                 # read (or sampled) from the model at every check
@@ -858,8 +894,8 @@ def _apply_box(doc, facts, state, saved_ui):
     return facts, saved_ui
 
 
-def _place_spots(doc, prompt):
-    layer = _layer(doc, GRADE_LAYER)
+def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
+    layer = _layer(doc, layer_path)
     while True:                                      # each click places a spot grade; Enter when done
         rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, True)
         if rc != Rhino.Commands.Result.Success:
@@ -899,7 +935,8 @@ def _box_pick(doc, what, facts, saved_ui):
                 saved_ui["ground_kind"] = "terrain"
         elif what in ("spot", "regrade"):
             _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
-                         "Click the finished ground you'll grade to, at each wall (Enter when done)")
+                         "Click the finished ground you'll grade to, at each wall (Enter when done)",
+                         GRADE_LAYER if what == "spot" else FINISHED_LAYER)
             saved_ui["ground_kind"] = what
     finally:
         _highlight(doc, facts)
@@ -922,14 +959,17 @@ def confirm(doc, facts, options, mode="check"):
                 STATE["on_confirm"](doc, facts, _describe(facts, options["uses"]), state)
             state = dict(state, district_confirmed=True, **(STATE.get("box_overrides") or {}))
             return _drawn(doc, facts, state, saved_ui)
+        ticked = {}                       # this box session's ticks and changed sources, kept across picks
         while True:
-            state = _box_state(doc, facts, options, saved_ui, mode)
+            state = dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)
             state["_on_shown"] = STATE.get("on_box_shown")     # the dialog capture in the in-Rhino test
             what = ui.start_box(state, options, mode)
             if what is None:
                 return None
             if what == "draw":
                 return _drawn(doc, facts, state, saved_ui)
+            ticked = {k: state[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source",
+                                            "corner_source") if k in state}   # (saved only at Draw)
             facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
             facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui)
             _save_ui_state(doc, saved_ui)
@@ -1134,7 +1174,7 @@ def check_facts(doc, facts):
     walls now, so the grade follows the building (C4)."""
     out = dict(facts)
     if facts.get("grade_from") == "spot":
-        points = _grade_points(doc)
+        points = _grade_points(doc, _ui_state(doc).get("ground_kind") == "regrade")   # finished ground apart
     elif facts.get("grade_from") == "terrain":
         points = _terrain_points(doc, _ui_state(doc).get("terrain_id"))
     else:

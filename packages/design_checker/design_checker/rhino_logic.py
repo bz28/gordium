@@ -253,6 +253,8 @@ def guard(fn, where, fallback=None):
 NOT_CHECKED_YET = "Not checked yet: overlays (historic, gorge, flood) · pitched roofs"
 ENTERED = "entered by you"
 FLOOR_TO_FLOOR = 11 + 8 / 12                 # ft: the starting house's floor height (editable later in GordiumFacts)
+CORNER_CHOICES = ["Not answered", "No: one street", "Yes: two streets"]   # the Street side row's question
+SUGGESTED = "suggested by Gordium"
 GROUND_CHOICES = [("spot", "Place spot grades…"), ("terrain", "Pick terrain…"),
                   ("regrade", "I'll regrade: set finished ground…")]
 
@@ -290,7 +292,8 @@ def box_rows(state):
         {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed")),
          "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))], "tick": None},
         {"key": "street", "label": "Street side", "text": state.get("street_name") or "the highlighted line",
-         "actions": [("street", "Change…", True)], "tick": None},
+         "actions": [("street", "Change…", True)], "tick": None,
+         "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
          "actions": [(k, t, True) for k, t in GROUND_CHOICES],
          "tick": ("No regrading near the house", bool(state.get("no_regrading")))},
@@ -304,6 +307,8 @@ def can_draw(state):
 
 def uncertain(state):
     """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
+    if state.get("corner_lot") is None:          # never guessed: unanswered, the yards wait for it (§325-19C)
+        return "Does this lot face two streets? Answer Corner lot? under Street side"
     if state.get("corner_lot"):
         return "This lot faces two streets: pick the front"
     if len(state.get("zones_found") or []) > 1:
@@ -340,11 +345,13 @@ def fact_sources(state, today, confirmed):
         "address": fact(state.get("address") or None, state.get("address_source") or ENTERED),
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
-        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or ENTERED),
+        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
         "lot": fact(lot_text(state.get("lot_area"), state.get("lot_surveyed")),
                     "your survey" if state.get("lot_surveyed") else "the tax map (±2 ft)"),
         "street": fact(state.get("street_name") or "the highlighted line",
-                       state.get("street_source") or "suggested: the lot line on the street side"),
+                       state.get("street_source") or SUGGESTED),
+        "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
+                           state.get("corner_source") or SUGGESTED),
         "ground": fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
                        "as drawn" if kind == "flat" else ("picked by you" if kind == "terrain" else "placed by you")),
     }

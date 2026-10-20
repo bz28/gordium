@@ -504,9 +504,10 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
 
 def test_the_amber_line_names_what_to_do():
     from design_checker import rhino_logic as logic
-    assert logic.uncertain(_box()) is None
+    assert logic.uncertain(_box(corner_lot=False)) is None               # answered: no amber line
     assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: pick the front"
-    assert logic.uncertain(_box(zones_found=["R-1b", "R-2a"])) == "This lot is in two zones: pick the zone that applies"
+    assert logic.uncertain(_box(corner_lot=False, zones_found=["R-1b", "R-2a"])) == \
+        "This lot is in two zones: pick the zone that applies"
 
 
 def test_no_regrading_near_the_house_toggles_height_between_checked_and_needs_review(facts):
@@ -552,3 +553,52 @@ def test_system_colors_come_from_eto_drawing():
     on a dark panel) and a complying item's detail failed to draw. They are Eto.Drawing.SystemColors."""
     for path in PLUGIN:
         assert "ef.SystemColors" not in path.read_text(), path.name
+
+
+# ---- review round 5 ----------------------------------------------------------------------------------------------
+
+def test_a_corner_lot_is_never_guessed_the_box_asks_and_the_yards_wait(facts):
+    from design_checker import rhino_logic as logic
+    unanswered = _box(corner_lot=None)
+    street = {r["key"]: r for r in logic.box_rows(unanswered)}["street"]
+    assert street["choice"] == ("Corner lot?", ["Not answered", "No: one street", "Yes: two streets"], 0)
+    assert logic.uncertain(unanswered) == "Does this lot face two streets? Answer Corner lot? under Street side"
+    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: pick the front"
+    assert logic.uncertain(_box(corner_lot=False)) is None
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    suggested = rhino.split("def suggested_facts(", 1)[1].split("\ndef ", 1)[0]
+    assert '"corner_lot": None' in suggested and '"corner_lot": False' not in suggested   # never guessed
+    got = check(MODEL, {k: v for k, v in facts.items() if k != "corner_lot"})          # unanswered
+    yards = {i["name"]: i for i in got["view"]["items"]}
+    assert yards["Front yard"]["status"] == present.REVIEW
+
+
+def test_gordiums_own_defaults_say_suggested_and_a_change_says_entered_by_you():
+    from design_checker import rhino_logic as logic
+    s = logic.fact_sources(_box(corner_lot=False), "2026-10-20", confirmed=True)
+    assert s["use"]["source"] == "suggested by Gordium" and s["street"]["source"] == "suggested by Gordium"
+    assert s["corner_lot"]["value"] == "no, one street" and s["corner_lot"]["source"] == "suggested by Gordium"
+    s = logic.fact_sources(_box(use_source="entered by you", corner_lot=True, corner_source="entered by you"),
+                           "2026-10-20", confirmed=True)
+    assert s["use"]["source"] == "entered by you" and s["corner_lot"]["source"] == "entered by you"
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text().split("def start_box(", 1)[1]
+    for key in ("address_source", "use_source", "corner_source", "zone_source"):   # a change in the box records it
+        assert f'state["{key}"] = logic.ENTERED' in ui, key
+
+
+def test_finished_ground_and_existing_spot_grades_are_never_mixed():
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    assert 'FINISHED_LAYER = "Gordium::Grade::Finished"' in rhino
+    assert "GRADE_LAYER if what == \"spot\" else FINISHED_LAYER" in rhino          # placed apart
+    check_facts = rhino.split("def check_facts(", 1)[1].split("\ndef ", 1)[0]
+    assert '_grade_points(doc, _ui_state(doc).get("ground_kind") == "regrade")' in check_facts   # read apart
+
+
+def test_the_confirm_tick_survives_a_pick_and_ground_marking_can_be_undone():
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    loop = rhino.split("def confirm(", 1)[1].split("\ndef ", 1)[0]
+    assert "dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)" in loop
+    assert '"district_confirmed"' in loop.split("ticked = {k: state[k]", 1)[1].split(")", 1)[0]
+    assert "def not_the_ground(" in rhino and '"not_ground": not_the_ground' in rhino
+    survey = rhino.split("def pick_survey(", 1)[1].split("\ndef ", 1)[0]
+    assert '_set_source(doc, "lot"' in survey                                      # its source never goes stale

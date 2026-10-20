@@ -833,6 +833,7 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
 
 
 SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Street side",
+                "corner_lot": "Corner lot", "ground_marked": "Marked as the ground",
                 "ground": "Ground"}
 
 

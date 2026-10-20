@@ -295,6 +295,8 @@ def show_detail(parts):
             d.AddRow(_wide("Site facts", bold=True, size=12))
             for s in sources:
                 d.AddRow(_wide(s, size=11))
+                if s.startswith("Marked as the ground"):   # the architect's word, so it can be taken back
+                    d.AddRow(row(button("Not the ground", a["not_ground"])))
         d.Create()
         return
     det = i["detail"]
@@ -442,13 +444,26 @@ def start_box(state, options, mode):
     use.SelectedIndex = max(0, [k for k, _ in names].index(state.get("use")) if state.get("use") in options["uses"] else 0)
     regrade = ef.CheckBox()
     regrade.Checked = bool(state.get("no_regrading"))
+    corner = ef.DropDown()                # Corner lot? never guessed: "Not answered" until the architect says
+    for c in logic.CORNER_CHOICES:
+        corner.Items.Add(c)
+    corner.SelectedIndex = {None: 0, False: 1, True: 2}[state.get("corner_lot")]
+    first = {"address": address.Text, "use": use.SelectedIndex, "corner": corner.SelectedIndex}
 
-    def keep():                       # what the fields say now, back into `state`
+    def keep():                       # what the fields say now, back into `state`; what changed is the architect's
         z = zone.SelectedValue.Text if zone.SelectedValue else None
         state.update(address=address.Text, zone=z, district_confirmed=bool(confirm.Checked),
-                     use=names[use.SelectedIndex][0] if names else None, no_regrading=bool(regrade.Checked))
-        if z != first_zone:           # changed here: the architect's own entry
+                     use=names[use.SelectedIndex][0] if names else None, no_regrading=bool(regrade.Checked),
+                     corner_lot=[None, False, True][max(corner.SelectedIndex, 0)])
+        if z != first_zone:
             state["zone_source"] = logic.ENTERED
+        if address.Text != first["address"]:
+            state["address_source"] = logic.ENTERED
+        if use.SelectedIndex != first["use"]:
+            state["use_source"] = logic.ENTERED
+        if corner.SelectedIndex != first["corner"]:
+            state["corner_source"] = logic.ENTERED
+
 
     def pick(what):
         keep()
@@ -484,6 +499,8 @@ def start_box(state, options, mode):
         else:                          # lot, street side: what it is, and the one way to change it
             layout.AddRow(title, row(label(r["text"], size=12),
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
+            if r.get("choice"):        # the street side's question: Corner lot?
+                layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
     amber = logic.uncertain(state)
     if amber:
