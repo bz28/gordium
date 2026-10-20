@@ -34,7 +34,8 @@ HIDDEN = {
     "run": "the file of recorded AI calls; for auditing, not reading",
     "layout": "tells the code how to cut a document into pieces; not for reading",
 }
-NOT_DOWNLOADED_FIELDS = {"title", "url", "why_missing"}   # sources.yaml `not_yet_downloaded` entries
+NOT_DOWNLOADED_FIELDS = {"title", "url", "why_missing"}
+NOT_VERIFIED = "(not verified: the chart reader has no such cell; run python -m rule_format)"   # sources.yaml `not_yet_downloaded` entries
 FIELDS = {"rule": RULE_FIELDS, "definitions": TERM_SCHEMAS["definitions"]["fields"] | APPROVAL_FIELDS,
           "uses": TERM_SCHEMAS["uses"]["fields"] | APPROVAL_FIELDS, "label": LABEL_FIELDS | APPROVAL_FIELDS,
           "source": SOURCE_FIELDS | NOT_DOWNLOADED_FIELDS}   # documents and the ones still to get share a tab
@@ -239,7 +240,9 @@ def tables(j: Path) -> dict[str, dict]:
         if "quote" in s:
             return s["quote"]
         cell = _cell(s, ctx) if isinstance(s.get("cell"), dict) else None
-        return cell["value"] if cell else ""
+        if cell:
+            return cell["value"]
+        return NOT_VERIFIED if s.get("file") else ""       # never a blank that looks like an empty cell
     out = {}
 
     def per_source(entries, cols):                  # [(entry, fixed)] -> rows, links: one row per source
