@@ -12,10 +12,11 @@ import rule_export.workbook as wbk
 from rule_export.workbook import (COLUMNS, FIELDS, HIDDEN, build, contents, entry_rows, output_path, page_link,
                                   pdf_url, rulebooks, shown, tables)
 from rule_format.labels import load_pieces
-from rule_format.rulebook import REPO, load
+from rule_format.rulebook import REPO, Context, _cell, load
 
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 LAW = "chapter_325_zoning_2026-10.pdf"
+ITHACA_TITLES = {d["file"]: d.get("title") or d["file"] for d in load(ITHACA / "1_source_documents/sources.yaml")["documents"]}
 DOCUMENTS = {d["file"]: d for d in load(ITHACA / "1_source_documents/sources.yaml")["documents"]}
 LABELS = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
 
@@ -67,8 +68,11 @@ def test_the_real_files_use_only_known_fields():
 
 def test_every_rule_source_is_one_row_with_its_rulebook_words_and_link(data):
     t = data["Rules"]
-    expected = [(path, r["id"], r.get("drafted_by"), s["page"], s["quote"], link(s))
+    ctx = Context.for_jurisdiction(ITHACA)
+    words = lambda s: s["quote"] if "quote" in s else _cell(s, ctx)["value"]   # a quote, or the cell's value
+    expected = [(path, r["id"], r.get("drafted_by"), s["page"], words(s), link(s))
                 for path, book in rulebooks(ITHACA) for r in book["rules"] for s in r["sources"]]
+    assert any("cell" in s for _, book in rulebooks(ITHACA) for r in book["rules"] for s in r["sources"])
     got = list(zip(column(t, "Rulebook"), column(t, "Rule id"), column(t, "Drafted by"), column(t, "Page"),
                    column(t, "City's exact words"), t["links"]["Link"]))
     assert got == expected and got                                             # each once, in order, attributed
@@ -271,3 +275,29 @@ def test_questions_cite_where_each_question_points(data):
         if ident in first:
             assert citation == cite(first[ident])
     assert all(column(t, "Citation"))
+
+
+def test_a_chart_cell_source_shows_its_cell_and_value(data):
+    """A rule citing a chart cell (no quote) shows where the cell is (section · row · district) and its value."""
+    t = data["Rules"]
+    ctx = Context.for_jurisdiction(ITHACA)
+    cells = [(r["id"], s) for _, book in rulebooks(ITHACA) for r in book["rules"] for s in r["sources"] if "cell" in s]
+    rows = list(zip(column(t, "Rule id"), column(t, "Citation"), column(t, "City's exact words")))
+    for rid, s in cells:
+        c = s["cell"]
+        assert (rid, f"{ITHACA_TITLES[s['file']]}, p.{s['page']}, {c['section']} · {c['row']} · {c['column']}",
+                _cell(s, ctx)["value"]) in rows
+
+
+def test_an_unverified_chart_cell_says_so_instead_of_a_blank(monkeypatch):
+    rule = {"id": "R-1b.x", "title": "X", "sources": [{"file": "zoning_charts_2026-04.pdf", "page": 3,
+                                                        "cell": {"section": "Nope", "row": "x", "column": "R-1B"}}]}
+    monkeypatch.setattr(wbk, "rulebooks", lambda j: [("R-1b.yaml", {"district": "R-1b", "rules": [rule]})])
+    t = tables(ITHACA)["Rules"]
+    assert column(t, "City's exact words") == [wbk.NOT_VERIFIED]
+    assert "Nope · x · R-1B" in column(t, "Citation")[0]
+
+
+def test_the_readme_says_how_chart_cells_are_cited():
+    readme = (REPO / "packages/rule_export/README.md").read_text()
+    assert "section, row and district column" in readme and "(not verified" in readme

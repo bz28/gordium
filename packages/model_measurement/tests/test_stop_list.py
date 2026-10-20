@@ -168,6 +168,7 @@ CASES = {
                            grade_elevation=812, main_building="house"),
     "readings_differ": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house")]),
     "no_use": _plain(use=None),
+    "no_district": _plain(zone=None),
     "no_stories": _plain(stories=None),
     "no_rooms": _plain(),
     "ground_unknown": _plain(ground_is_flat=None),

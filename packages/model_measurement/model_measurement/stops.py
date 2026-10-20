@@ -47,6 +47,7 @@ STOPS = {
                      "measured yet",
     # facts a massing model doesn't show, until they are entered
     "no_use": "choose the use",
+    "no_district": "enter the lot's zoning district (zone)",
     "no_stories": "enter the number of stories",
     "no_rooms": "enter bedrooms / parking spaces",
     # the buildings
