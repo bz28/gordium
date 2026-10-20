@@ -204,7 +204,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 - **The city's words:** "In any district, any main building may be erected to a height in excess of that specified for the district, provided that: … (1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height." ([§325-16C, p.47](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47)). The bonus is capped at 10% (3.5 ft in R-1b).
 - **Why it matters:** a 37 ft R-1b house is legal only if every yard is 2 ft bigger than usual.
-- **Until you answer:** Today and from a model, Gordium assumes every yard (front, both sides, rear) must be its normal minimum plus the extra height, and that the bonus is for the main building only. This is the strictest reading, so it can't give a wrong PASS; it may give a FAIL that another reading would pass.
+- **Until you answer:** Today and from a model, Gordium assumes every yard (front, both sides, rear) must be its normal minimum plus the extra height. That is the strictest reading of the yards, so on the yards it can't give a wrong PASS; it may give a FAIL that another reading would pass. Gordium has one building height and doesn't tell the main building from accessory buildings: it treats the height as the main building's, and accessory buildings (garages, sheds) are not checked yet: check them by hand.
 - **Options:** (a) confirm both readings; (b) only some yards grow (which?); (c) the bonus also applies to accessory buildings.
 
 ### 4.6 Parapets and cornices above the limit
