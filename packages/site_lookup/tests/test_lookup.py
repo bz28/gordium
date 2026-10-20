@@ -302,11 +302,23 @@ def test_a_lot_on_a_street_rezoned_after_the_map_needs_review():
     assert z["status"] == "needs_review" and "Ord. 2025-12" in z["reason"] and "S CAYUGA ST" in z["reason"]
 
 
-def test_an_amendment_older_than_the_map_is_ignored(monkeypatch):
+def test_an_amendment_checked_on_the_map_is_cleared(monkeypatch):
+    """map_shows_since is set by hand once someone has seen the rezoning on the online map."""
     monkeypatch.setattr(lookup_module, "AMENDMENTS", [{"ordinance": "old", "title": "x", "adopted": "2020-01-01",
-                                                       "streets": ["ITHACA RD"]}])
+                                                       "map_shows_since": "2020-06-01", "streets": ["ITHACA RD"]}])
     r, _ = run("106_ithaca_rd")
     assert both(r)["zone"]["status"] == "suggested"
+
+
+def test_a_later_map_edit_alone_never_clears_an_amendment(monkeypatch):
+    """Any edit moves the layer's edit date, drawn rezoning or not: a map edited after the ordinance still
+    flags lots in its area until someone has checked (map_shows_since)."""
+    monkeypatch.setattr(sys.modules[__name__], "STAND_IN_MAP_EDITED", "2026-01-01")
+    x0, y0, x1, y1 = g.bounds(ring_of(load("106_ithaca_rd")), 50)
+    monkeypatch.setattr(lookup_module, "AMENDMENTS", [{"ordinance": "T", "title": "test", "adopted": "2025-11-19",
+                                                       "area_epsg2261": [x0, y0, x1, y1], "streets": []}])
+    z = both(run("106_ithaca_rd")[0])["zone"]
+    assert z["status"] == "needs_review" and "isn't confirmed to be on the City's online map" in z["reason"]
 
 
 def test_overlays_found_need_review():
@@ -482,12 +494,13 @@ def _numbers_only(v) -> bool:
 
 
 def check_snapshot(r: dict) -> None:
-    """Every kept fact obeys its own source's store policy: none keeps no value and no reason; derived keeps
-    numbers Gordium computed only (no outline, position or words); answer bodies are never kept."""
+    """Every kept fact obeys the strictest store policy of every source it was worked out from: none keeps no
+    value and no reason; derived keeps numbers Gordium computed only (no outline, position or words); answer
+    bodies are never kept."""
     s = r["snapshot"]
     for k, v in s["facts"].items():
         d = s["details"][k]
-        store = ENDPOINTS[d["source_key"]]["store"] if d.get("source_key") else "raw"
+        store = lookup_module.strictest(d["source_keys"])
         if store == "derived" and isinstance(v["value"], dict):
             assert all(_numbers_only(n) for n in v["value"].values()), k
             assert not {"outline_ft", "origin_epsg2261_us_survey_ft"} & set(v["value"]), k
@@ -513,7 +526,7 @@ def test_a_city_parcel_outline_is_never_kept():
     area and side lengths, never its outline or position."""
     fx = load("106_ithaca_rd")
     r = lookup(fx["address"], Failing(fx, ["state_parcels"]), NOW)
-    assert both(r)["lot"]["source_key"] == "city_parcels" and both(r)["lot"]["value"]["outline_ft"]
+    assert both(r)["lot"]["source_keys"] == ["city_parcels"] and both(r)["lot"]["value"]["outline_ft"]
     kept = r["snapshot"]["facts"]["lot"]["value"]
     assert set(kept) == {"area_sf", "edge_lengths_ft", "tolerance_ft"}
     assert r["snapshot"]["facts"]["parcel"]["value"] == lookup_module.USED_LIVE
@@ -527,3 +540,76 @@ def test_fixtures_hold_only_what_endpoints_yaml_allows():
         assert set(d) <= {"address", "captured", "answers", "live_status", "trimmed"}, (p.name, set(d))
         for a in d["answers"]:
             assert ENDPOINTS[a["source"]]["store"] == "raw", (p.name, a["source"])
+
+
+# ---- review round 2 ---------------------------------------------------------------------------------------
+
+def test_capture_records_what_the_fake_replays():
+    """Re-capturing must give fixtures the tests can use: the City-roads stand-in is built from NYS Streets,
+    which the lookup itself only asks when the City's roads fail, so capture() asks for them, with exactly the
+    request the lookup's fallback makes."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("capture", FIX / "capture.py")
+    capture = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(capture)
+    fx = load("106_ithaca_rd")
+    got = capture.capture(fx["address"], Fake(fx))             # the City's roads answer, as they do live
+    streets = [a for a in got["answers"] if a["source"] == "state_streets"]
+
+    class Asked:
+        def post(self, url, params):
+            self.params = params
+            return {"features": []}, b"{}"
+    asked = Asked()
+    lookup_module.Fetcher(asked).state_streets_near(ring_of(fx))
+    assert streets and json.dumps(streets[-1]["params"], sort_keys=True) == json.dumps(asked.params, sort_keys=True)
+    assert all(ENDPOINTS[a["source"]]["store"] == "raw" for a in got["answers"])
+
+
+def test_every_doubt_about_the_address_is_kept():
+    """Reasons add up: a second match with no parcel and a far County point are both said, on the address and
+    on the lot it picked."""
+    fx = load("106_ithaca_rd")
+    geo = next(a for a in fx["answers"] if a["source"] == "geocoder")["body"]
+    p = geo["candidates"][0]["location"]
+    other = copy.deepcopy(geo["candidates"][0])
+    other["location"]["x"] += 3000
+    other["address"] = "106 Elsewhere Rd, Ithaca, NY, 14850"
+    geo["candidates"].append(other)
+    f = both(lookup(fx["address"], Fake(fx, county=(p["x"] + 200, p["y"])), NOW))
+    for name in ("address", "lot", "parcel"):
+        assert "106 Elsewhere Rd" in f[name]["reason"] and "200 ft apart" in f[name]["reason"], name
+
+
+def test_status_changes_only_through_escalate():
+    """The rule 'the strongest status wins, reasons add up' holds only if nothing sets a status around it."""
+    import inspect
+    import re
+    src = inspect.getsource(lookup_module)
+    esc = inspect.getsource(lookup_module.escalate)
+    rest = src.replace(esc, "").replace(inspect.getsource(lookup_module.snapshot), "")   # snapshot copies, never decides
+    assert esc.count('f["status"] = status') == 1
+    assert not re.search(r"""\[["']status["']\]\s*=[^=]""", rest)
+    assert not re.search(r"""\b\w+_(status|reason)\b\s*(,\s*\w+\s*)?=[^=]""", rest)
+    assert not re.search(r"""\[["']reason["']\]\s*=[^=]""", rest)
+
+
+def test_the_snapshot_keeps_nothing_worked_out_from_a_city_or_county_answer():
+    """A County distance in the address's reason, the zoning map's edit date in the zone's description: each
+    came from a source that may not be kept, so neither is in the snapshot (the State's address is)."""
+    fx = load("106_ithaca_rd")
+    p = next(a for a in fx["answers"] if a["source"] == "geocoder")["body"]["candidates"][0]["location"]
+    r = lookup(fx["address"], Fake(fx, county=(p["x"] + 200, p["y"])), NOW)
+    assert "200 ft apart" in both(r)["address"]["reason"]
+    kept = json.dumps(r["snapshot"])
+    assert "200 ft apart" not in kept and STAND_IN_MAP_EDITED not in kept and STAND_IN_ZONE not in kept
+    assert r["snapshot"]["facts"]["address"]["value"] == both(r)["address"]["value"]
+    assert r["snapshot"]["details"]["address"]["status"] == "needs_review"
+    check_snapshot(r)
+
+
+def test_the_docs_describe_what_the_code_does():
+    methods = (REPO / "docs/methods.md").read_text()
+    readme = (Path(__file__).parents[1] / "README.md").read_text()
+    assert "matched by street name" not in methods and "padded box" in methods
+    assert "50 ft assumed, noted" not in readme and "source_keys" in readme and "map_shows_since" in readme

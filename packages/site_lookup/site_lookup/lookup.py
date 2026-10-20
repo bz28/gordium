@@ -3,8 +3,8 @@ and a zoning suggestion. Each fact is {value, source, confirmed_by, date}, exact
 stores, so a looked-up fact and one the architect types are treated alike. source is one of the start box's
 labels: "from tax map" for the lot (approximate: ±2'-0" downstream), "suggested by Gordium" for the rest.
 Beside each fact, result["details"][name] says how sure the lookup is and where the answer came from:
-{status, reason?, note?, source_detail, source_url, source_key} (source_key: the endpoints.yaml source,
-which decides what a project's snapshot may keep).
+{status, reason?, note?, source_detail, source_url, source_keys} (source_keys: every endpoints.yaml source
+the value was worked out from; the strictest one decides what a project's snapshot may keep).
 
 status: "suggested"   looked up, nothing doubtful (the architect still sees it and its source)
         "needs_review" looked up, but something is doubtful (the reason says what)
@@ -47,21 +47,31 @@ RANK = {"suggested": 0, "needs_review": 1, "ask": 2}    # the strongest status w
 def fact(value, source: str, url: str, date: str, status: str = "suggested", reason: str = "", note: str = "",
          label: str = SUGGESTED, key: str = "") -> dict:
     """A fact with its details while the lookup runs; lookup() splits the details off at the end. key is the
-    endpoints.yaml source the value came from: it decides what a project's snapshot may keep."""
-    out = {"value": value, "source": label, "confirmed_by": None, "date": date,
-           "status": "suggested", "source_detail": source, "source_url": url, "source_key": key}
+    endpoints.yaml source the value came from (more are added with uses()): the strictest one decides what a
+    project's snapshot may keep."""
+    out = {"value": value, "source": label, "confirmed_by": None, "date": date, "status": "suggested",
+           "source_detail": source, "source_url": url, "source_keys": [key] if key else [], "_reasons": []}
     if note:
         out["note"] = note
     return escalate(out, status, reason)
 
 
-def escalate(f: dict, status: str, reason: str = "") -> dict:
-    """Raise a fact's status to `status` if that's stronger (ask > needs review > suggested), and add the
-    reason to the ones it has. A fact whose evidence is incomplete is never left 'suggested'."""
+def escalate(f: dict, status: str, reason: str = "", key: str = "") -> dict:
+    """The only way a fact's status changes: raise it to `status` if that's stronger (ask > needs review >
+    suggested; never lowered), and add the reason to the ones it has. key names the source a reason was worked
+    out from when it isn't the fact's own (a County distance in the address's reason), so the snapshot can
+    leave it out. A fact whose evidence is incomplete is never left 'suggested'."""
     if RANK[status] > RANK[f["status"]]:
         f["status"] = status
-    if reason and reason not in f.get("reason", ""):
-        f["reason"] = f"{f['reason']} {reason}" if f.get("reason") else reason
+    if reason and all(reason != r for r, _ in f["_reasons"]):
+        f["_reasons"].append((reason, key))
+        f["reason"] = " ".join(r for r, _ in f["_reasons"])
+    return f
+
+
+def uses(f: dict, *keys: str) -> dict:
+    """Record more sources a fact's value was worked out from (the lot's outline under its ground points)."""
+    f["source_keys"] += [k for k in keys if k and k not in f["source_keys"]]
     return f
 
 
@@ -77,14 +87,15 @@ def lookup(address: str, http, now: dt.datetime | None = None) -> dict:
     except (ServiceError, KeyError, TypeError, ValueError, IndexError) as e:
         result.update(status="error", message="A map service answered with an error: enter the site by hand.",
                       detail=f"{type(e).__name__}: {e}")
-    result["details"] = {k: {d: v[d] for d in DETAIL_KEYS if d in v} for k, v in result["facts"].items()}
-    result["facts"] = {k: {d: v[d] for d in FACT_KEYS} for k, v in result["facts"].items()}
-    result["snapshot"] = snapshot(result, f)
+    working = result["facts"]
+    result["details"] = {k: {d: v[d] for d in DETAIL_KEYS if d in v} for k, v in working.items()}
+    result["facts"] = {k: {d: v[d] for d in FACT_KEYS} for k, v in working.items()}
+    result["snapshot"] = snapshot(result, working, f)
     return result
 
 
 FACT_KEYS = ("value", "source", "confirmed_by", "date")
-DETAIL_KEYS = ("status", "reason", "note", "source_detail", "source_url", "source_key")
+DETAIL_KEYS = ("status", "reason", "note", "source_detail", "source_url", "source_keys")
 
 
 def _lookup(address: str, f: Fetcher, today: str, result: dict) -> None:
@@ -118,20 +129,21 @@ def _lookup(address: str, f: Fetcher, today: str, result: dict) -> None:
     else:
         unplaced = []
     c = chosen[0]
-    addr_status, addr_reason = ("suggested", "") if c["type"] == "PointAddress" else (
-        "needs_review", "Found only along the street, not at a building: check the lot it picked.")
+    addr = facts["address"] = fact(c["label"], ENDPOINTS["geocoder"]["name"], ENDPOINTS["geocoder"]["url"], today,
+                                   key="geocoder")
+    if c["type"] != "PointAddress":
+        escalate(addr, "needs_review", "Found only along the street, not at a building: check the lot it picked.")
     if unplaced:
-        addr_status, addr_reason = "needs_review", (
-            f"Another match ({'; '.join(unplaced)}) couldn't be placed on a parcel: check this is the right address.")
+        escalate(addr, "needs_review", f"Another match ({'; '.join(unplaced)}) couldn't be placed on a parcel: "
+                                       "check this is the right address.")
     try:
         cp = f.county_point(c["number"], c["street"])
         if cp and math.dist(cp, c["point"]) > COUNTY_POINT_TOLERANCE_FT:
-            addr_status, addr_reason = "needs_review", (
-                f"The State and County place this address {math.dist(cp, c['point']):.0f} ft apart: check the lot.")
+            escalate(addr, "needs_review", f"The State and County place this address "
+                                           f"{math.dist(cp, c['point']):.0f} ft apart: check the lot.",
+                     key="address_points")
     except (Offline, ServiceError):
         pass                                                   # a cross-check only; the State point stands
-    facts["address"] = fact(c["label"], ENDPOINTS["geocoder"]["name"], ENDPOINTS["geocoder"]["url"], today,
-                            addr_status, addr_reason, key="geocoder")
     # ---- 2. point -> parcel (the State copy is the stored outline; the City's adds City-only flags) ---------
     try:
         state = f.state_parcels_at(c["point"])
@@ -160,28 +172,32 @@ def _lookup(address: str, f: Fetcher, today: str, result: dict) -> None:
     parcel = in_city[0]
     city_parcel = next((p for p in city if p["id"] == parcel["id"]), None)
     ring = max(parcel["rings"], key=g.area)
-    lot_status, lot_reason = ("suggested", "") if addr_status == "suggested" else (
-        "needs_review", "The address point is doubtful, so this may be the wrong lot: " + addr_reason)
-    if len(parcel["rings"]) > 1:
-        lot_status, lot_reason = "needs_review", "This parcel has more than one piece: check the lot outline."
     origin = tuple(round(v, 2) for v in g.centroid(ring))
     outline = [[round((x - origin[0]) * US_SURVEY_FT, 2), round((y - origin[1]) * US_SURVEY_FT, 2)] for x, y in ring]
     src = ENDPOINTS[parcel["source"]]
-    facts["parcel"] = fact(parcel["id"], src["name"], src["url"], today, *(
-        ("suggested",) if addr_status == "suggested" else ("needs_review", lot_reason)), key=parcel["source"])
+    facts["parcel"] = fact(parcel["id"], src["name"], src["url"], today, key=parcel["source"])
     facts["lot"] = fact({"outline_ft": outline, "area_sf": round(g.area(ring) * US_SURVEY_FT ** 2, 1),
                          "edge_lengths_ft": [round(math.dist(a, b) * US_SURVEY_FT, 2) for a, b in g.edges(ring)],
                          "origin_epsg2261_us_survey_ft": list(origin), "tolerance_ft": TAX_MAP_TOLERANCE_FT},
                         f"{src['name']} (tax map, approximate ±{TAX_MAP_TOLERANCE_FT:.0f} ft)", src["url"], today,
-                        lot_status, lot_reason, label=FROM_TAX_MAP, key=parcel["source"],
+                        label=FROM_TAX_MAP, key=parcel["source"],
                         note="outline_ft: international feet from the centroid (EPSG:2261 US survey feet × "
                              f"{US_SURVEY_FT:.7f}). " + (src.get("attribution") or f"Terms: {src['terms']}"))
+    for name in ("parcel", "lot"):                     # a doubtful address point may have picked the wrong lot
+        for why, key in addr["_reasons"]:
+            escalate(facts[name], addr["status"], "This may be the wrong lot: " + why, key=key)
+    if len(parcel["rings"]) > 1:
+        escalate(facts["lot"], "needs_review", "This parcel has more than one piece: check the lot outline.")
     # ---- 3. which lines face a street ------------------------------------------------------------------
     _streets(f, ring, c["street"], today, facts, asks)
     # ---- 4. ground --------------------------------------------------------------------------------------
     _ground(f, ring, origin, today, facts)
     # ---- 5. zoning suggestion and overlays (live, never stored) --------------------------------------------
     _zoning(f, ring, c["street"], facts, asks, today, city_parcel)
+    # everything after the lot is worked out on its outline: the outline's source counts for each of them
+    for name in ("street_side", "corner_lot", "ground", "zone", "overlays"):
+        if name in facts:
+            uses(facts[name], parcel["source"])
 
 
 def _distinct(cands: list[dict]) -> list[dict]:
@@ -336,11 +352,13 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     notes = []
     streets = {address_street} | set(((facts.get("street_side") or {}).get("value") or {}).get("streets", {}))
     for a in AMENDMENTS:
-        adopted = a["adopted"] if isinstance(a["adopted"], dt.date) else dt.date.fromisoformat(str(a["adopted"]))
-        if edited and adopted <= edited:
-            continue
-        line = (f"Ord. {a['ordinance']} ({a['title']}, adopted {adopted.isoformat()}) came after the City's map "
-                f"was last edited ({when})")
+        adopted = _date(a["adopted"])
+        shown = _date(a.get("map_shows_since"))
+        if shown and edited and edited >= shown:
+            continue                     # someone checked the online map and it shows this amendment
+        # Any edit moves the layer's edit date, drawn rezoning or not: only a hand check clears an amendment.
+        line = (f"Ord. {a['ordinance']} ({a['title']}, adopted {adopted.isoformat()}) isn't confirmed to be "
+                "on the City's online map")
         why = _amendment_reaches(a, ring, streets)
         if why:
             asks.append(f"{line} and {why}: check the current zoning map.")
@@ -350,6 +368,10 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     if notes:
         z["note"] = " ".join(notes)
     _overlays(f, ring, city_parcel, src, today, facts)
+
+
+def _date(v) -> dt.date | None:
+    return v if isinstance(v, dt.date) or v is None else dt.date.fromisoformat(str(v))
 
 
 def _amendment_reaches(a: dict, ring, streets: set) -> str:
@@ -389,6 +411,7 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict)
                              "needs_review" if found else "suggested",
                              "Overlays aren't checked in this release: check these by hand." if found else "",
                              key="historic_districts")
+    uses(facts["overlays"], "gorge_zones", "city_parcels")
 
 
 USED_LIVE = "(used live, not stored)"
@@ -406,20 +429,33 @@ def stored_value(value, store: str):
     return USED_LIVE
 
 
-DERIVED_NUMBERS = {"area_sf", "edge_lengths_ft", "tolerance_ft"}
+DERIVED_NUMBERS = {"area_sf", "edge_lengths_ft", "tolerance_ft", "min_ft", "max_ft"}
+STRICTNESS = {"raw": 0, "derived": 1, "none": 2}
 
 
-def snapshot(result: dict, f: Fetcher) -> dict:
+def strictest(keys) -> str:
+    """The store policy that holds for something worked out from all these sources."""
+    return max((ENDPOINTS[k]["store"] for k in keys if k), key=STRICTNESS.get, default="raw")
+
+
+def snapshot(result: dict, working: dict, f: Fetcher) -> dict:
     """What a project keeps: the facts Gordium may store, and for every source the URL, date and SHA-256.
-    Facts from sources whose terms don't allow storing are kept as 'used live' with no value."""
+    Each value, reason and note is kept only as far as the strictest source it was worked out from allows."""
     kept, details = {}, {}
     for k, v in result["facts"].items():
-        d = result["details"][k]
-        store = ENDPOINTS[d["source_key"]]["store"] if d.get("source_key") else "raw"
+        w = working[k]
+        store = strictest(w["source_keys"])
         kept[k] = {**v, "value": stored_value(v["value"], store)}
-        # a reason or note from a City source names what it found there (zones, streets): not kept
-        details[k] = d if store == "raw" else {n: d[n] for n in ("status", "source_detail", "source_url",
-                                                                  "source_key") if n in d}
+        d = {"status": w["status"], "source_url": w["source_url"], "source_keys": w["source_keys"],
+             # the description can carry a source's own data (the zoning map's edit date): names only then
+             "source_detail": w["source_detail"] if store == "raw" else
+             " + ".join(ENDPOINTS[s]["name"] for s in w["source_keys"])}
+        reasons = [r for r, key in w["_reasons"] if strictest(w["source_keys"] + [key]) == "raw"]
+        if reasons:
+            d["reason"] = " ".join(reasons)
+        if w.get("note") and store == "raw":
+            d["note"] = w["note"]
+        details[k] = d
     body = {"query": result["query"], "status": result["status"], "facts": kept, "details": details,
             "sources": f.records, "fetched": f.now.isoformat()}
     body["fingerprint"] = hashlib.sha256(json.dumps(body, sort_keys=True, default=str).encode()).hexdigest()

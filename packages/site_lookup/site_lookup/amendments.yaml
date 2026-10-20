@@ -1,6 +1,8 @@
-# Zoning changes the City adopted after its online zoning map was last edited (the map's own
-# editingInfo.dataLastEditDate). A suggestion from that map can be out of date for lots these touch.
-# Kept by hand: add a row when the City adopts a rezoning.
+# Zoning changes the City has adopted that its online zoning map may not show yet. A suggestion from that map
+# can be out of date for lots these touch. Kept by hand: add a row when the City adopts a rezoning.
+#   map_shows_since  set by hand, after checking that the online map shows the rezoning, to the map's
+#                    last-edit date at that check. Until it's set, lots the row reaches need review. The map's
+#                    own edit date alone never clears a row: any edit moves it, drawn rezoning or not.
 #   area_epsg2261  [xmin, ymin, xmax, ymax] in EPSG:2261 (US survey feet): a box around every district the
 #                  ordinance's map shows, padded generously. A lot touching it needs review. A row without
 #                  an area makes every lot in the City need review (its boundary isn't known here).

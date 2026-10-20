@@ -26,10 +26,10 @@ python -m site_lookup "106 Ithaca Rd, Ithaca, NY 14850" --json   # the full resu
 | **Address point** | The State's address points (score ≥ 90); the County's address points as a cross-check (more than 50 ft apart → needs review). Never the Census geocoder: it places addresses along the street, 46 ft off at 106 Ithaca Rd | NYS Geocoder; Tompkins County TCAddress (live only) |
 | **Parcel and lot outline** | The tax parcel containing the point, asked for in EPSG:2261 (NY State Plane, **US survey feet**); area and lengths computed by Gordium, never read from the service, and converted to Gordium's international feet (× 1200/3937 ÷ 0.3048 = 1.000002: 0.03 sf on a 7,000 sf lot). The outline is stored relative to its centroid, with the centroid's State Plane position (survey feet). Source "from tax map": downstream that means ±2'-0" and the 2 ft starting-house margin | NYS Tax Parcels Public (the State's copy of the County tax map, storable); City of Ithaca tax parcels as a live fallback and for City-only flags |
 | **City only** | The parcel's SWIS code must be 500700 (City of Ithaca). The State names both the City and the Town of Ithaca "ITHACA", so the code decides. Anything else is refused | NYS Tax Parcels |
-| **Street side and corner lot** | A lot line faces a street when it runs within 30° of the street's centerline and its midpoint is within half the right-of-way + 10 ft of it (tax-map lines sit a few feet off the right-of-way edge). A street counts with at least 10 ft of frontage. Corner lot is `yes`/`no`/`ask`: one street → `no`; two streets → `ask` (it looks like a corner lot, so the start box asks which line is the front). The address on a street the lot doesn't touch → needs review | City of Ithaca roads (with right-of-way widths, live only); NYS Streets as a fallback (width unknown → 50 ft assumed, noted) |
+| **Street side and corner lot** | A lot line faces a street when it runs within 30° of the street's centerline and its midpoint is within half the right-of-way + 10 ft of it (tax-map lines sit a few feet off the right-of-way edge). A street counts with at least 10 ft of frontage. Corner lot is `yes`/`no`/`ask`: one street → `no`; two streets → `ask` (it looks like a corner lot, so the start box asks which line is the front). The address on a street the lot doesn't touch → needs review. Road widths unknown (the State fallback, or a City road near the lot without one) → a 50 ft right-of-way is assumed, the street side needs review and the corner lot is `ask` (a wider second street could be missed) | City of Ithaca roads (with right-of-way widths, live only); NYS Streets as a fallback |
 | **Ground** | The elevation at each lot corner and the centre, in feet above NAVD88. It's **today's** ground; finished ground is set in the start box | USGS 3DEP (1 m, the 2020 LiDAR here) |
 | **Zone** | The City zoning polygon(s) under a grid of points inside the lot; more than one zone covering 2%+ of the lot → Gordium asks. Always a suggestion: the start box's "I confirm" tick is the architect's statement | City of Ithaca zoning map (online, informational; live only, never stored) |
-| **Rezonings since the map** | `amendments.yaml`: ordinances adopted after the map's last edit, each with a padded box around the districts on its map (Ord. 2025-12 Southside: from the May 2026 Southside Form District Map, p.9). A lot touching the box, or on a street the ordinance names → needs review. An ordinance without a box → every City lot needs review | kept by hand |
+| **Rezonings the map may not show** | `amendments.yaml`: ordinances the City adopted, each with a padded box around the districts on its map (Ord. 2025-12 Southside: from the May 2026 Southside Form District Map, p.9). A lot touching the box, or on a street the ordinance names → needs review. An ordinance without a box → every City lot needs review. A row is cleared only by `map_shows_since`, set by hand after checking the online map shows the rezoning; the map's own edit date never clears one (any edit moves it) | kept by hand |
 | **Overlays** | Historic districts, gorge protection zones, secondary zones and landmark flags on the parcel. Not checked in this release, so any found, or any that couldn't be looked for → needs review | City of Ithaca layers (live only) |
 
 **Incomplete evidence is never "suggested".** A second address match that couldn't be placed on a parcel,
@@ -43,8 +43,10 @@ Every fact in `result["facts"]` is exactly `{value, source, confirmed_by, date}`
 stores, so a looked-up fact and a typed one are handled alike. `source` is a start-box label: `from tax map`
 for the lot, `suggested by Gordium` for everything else. `confirmed_by` is always empty here: a lookup never
 confirms anything. Beside each fact, `result["details"][name]` is `{status, reason?, note?, source_detail,
-source_url}`: `status` is `suggested`, `needs_review` (something is doubtful; `reason` says what) or `ask`
-(the lookup can't choose: a corner lot, two zones), and `source_detail` names the service asked. The result's `status` is
+source_url, source_keys}`: `status` is `suggested`, `needs_review` (something is doubtful; `reason` says
+what) or `ask` (the lookup can't choose: a corner lot, two zones); `source_detail` names the service asked and
+`source_keys` every `endpoints.yaml` source the value was worked out from. Statuses only ever go up (ask >
+needs review > suggested) and reasons add up. The result's `status` is
 `found`, `not_found`, `multiple`, `outside_city`, `offline` or `error`, with a plain `message`; `asks` lists
 the amber lines the start box shows.
 
@@ -52,7 +54,9 @@ the amber lines the start box shows.
 
 `result["snapshot"]` is what a project saves: for every request the source, URL, date and SHA-256 of the
 answer (never the answer itself), and each fact as far as **its own source's** `store` in `endpoints.yaml`
-allows (`details[name]["source_key"]` names the source):
+allows (`details[name]["source_keys"]` lists every source the value was worked out from, and the strictest
+one decides; a reason worked out from another source, like the County point's distance, follows that source's
+rule):
 
 - **Kept:** State and USGS data (public, no redistribution limit).
 - **Numbers only:** a lot from the City's parcel layer (when the State's is down) keeps its area and side
