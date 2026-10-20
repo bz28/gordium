@@ -27,7 +27,7 @@ from openpyxl import Workbook
 from rule_export.workbook import page_link, title, write_block
 from rule_format import formula
 from rule_format.formula import EvaluationError, MissingMeasure
-from rule_format.rulebook import MEASURE_KINDS, MEASURES_FILE, REPO, Context, load, outcome, rulebook_for
+from rule_format.rulebook import MEASURE_KINDS, MEASURES_FILE, REPO, Context, load, outcome, rulebook_for, validate
 
 # The architects' tab names and headers, copied from their file, in their order.
 INPUTS_TAB, OUTPUT_TAB = "Inputs", "Output"
@@ -248,6 +248,14 @@ def tables(project_path: Path) -> dict:
     book_path = rulebook_for(j, project["zone"])
     book = load(book_path) or {}
     ctx = Context.for_jurisdiction(j)                 # sources and uses, read once, the way the checker reads them
+    try:                                              # only a rulebook that passes the inspector gives results
+        problems = ctx.problems + validate(book, ctx)
+    except Exception as e:                            # a rulebook too broken to inspect is refused the same way
+        problems = [f"validator error ({type(e).__name__}: {e})"]
+    if problems:
+        shown = book_path.relative_to(REPO) if book_path.is_relative_to(REPO) else book_path
+        raise ValueError(f"{shown} doesn't pass the rule checks (python -m rule_format), so no report: "
+                         + "; ".join(problems))
     uses_file = j / "4_term_definitions/uses.yaml"
     uses = (load(uses_file) or {}) if uses_file.exists() else {}
     use_names = {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}

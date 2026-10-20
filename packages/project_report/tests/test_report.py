@@ -251,3 +251,18 @@ def test_a_folder_that_is_not_a_jurisdiction_gets_a_plain_message(tmp_path):
     path.write_text(f"title: x\njurisdiction: {j}\nzone: R-1b\nmeasurements: {{}}\n")
     with pytest.raises(ValueError, match="isn't a jurisdiction folder"):
         load_project(path)
+
+
+
+def test_a_rulebook_that_fails_the_rule_checks_gives_no_report(monkeypatch):
+    """A rule whose quote isn't the city's words (edited locally, never checked) must never give PASS."""
+    import project_report.report as report
+    real_load = report.load
+    def load(path):
+        data = real_load(path)
+        if isinstance(data, dict) and "rules" in data:
+            data["rules"][0]["sources"][0]["quote"] = "made up words not in the law"
+        return data
+    monkeypatch.setattr(report, "load", load)
+    with pytest.raises(ValueError, match="doesn't pass the rule checks"):
+        report.tables(SITE)
