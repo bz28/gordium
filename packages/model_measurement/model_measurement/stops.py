@@ -45,6 +45,10 @@ STOPS = {
                     "joined directly under the building: check the ground level and where the solid is",
     "sloped_ground": "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't "
                      "measured yet",
+    "grade_off_walls": "spot grades no longer at the building's walls ({off} of {count} more than 2 ft from a wall, "
+                       "{bare} walls without one): set the grade again",
+    "existing_grade": "measured from existing grade; the code's grade plane is finished ground level (§325-3): set "
+                      "the finished grade",
     # facts a massing model doesn't show, until they are entered
     "no_use": "choose the use",
     "no_district": "enter the lot's zoning district (zone)",

@@ -14,7 +14,8 @@ from .measure import measure
 from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
-               "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces"}
+               "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
+               "grade_points", "grade_from", "grade_is"}
 
 
 def _number(x) -> bool:
@@ -39,6 +40,14 @@ def fact_problems(facts: dict) -> list[str]:
     for k in ("corner_lot", "lot_surveyed", "ground_is_flat"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
+    points = facts.get("grade_points")
+    if points is not None and not (isinstance(points, list) and points and all(
+            isinstance(p, list) and len(p) == 3 and all(_number(v) for v in p) for p in points)):
+        problems.append("grade_points must be a list of spot grades, each [x, y, z] in feet")
+    if facts.get("grade_from") not in (None, "spot", "terrain"):
+        problems.append("grade_from must be spot or terrain")
+    if facts.get("grade_is") not in (None, "finished", "existing"):
+        problems.append("grade_is must be finished or existing")
     street = facts.get("street_line")
     if street is not None and not (isinstance(street, list) and street and all(
             isinstance(s, list) and len(s) == 2 and all(_point(p) for p in s) for s in street)):

@@ -14,6 +14,7 @@ from pathlib import Path
 
 import yaml
 
+from design_checker import present
 from envelope_builder.envelope import envelope
 from envelope_builder.start import largest_legal_building
 from model_measurement.measure import measure
@@ -178,10 +179,55 @@ def _failing_distances(rule: dict, measured: dict, values: dict) -> list[dict]:
     return found
 
 
-def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None) -> dict:
+def _report(t: dict, view: dict, report_path: Path) -> None:
+    """The architects'-format workbook (PR 10), saying what the panel says (spec I1, I2): each rule's Error and
+    Comparison are its items' most cautious status (a rule the panel shows as needing review is never PASS here),
+    and a Check tab lists every item, the summary, the draft-rulebook label and the lot and grade sources."""
+    from rule_export.workbook import title, write_block
+    word = {present.FAILS: ("FAIL", "Outside table limit"), present.REVIEW: ("NEEDS REVIEW", "Needs review"),
+            present.COMPLIES: ("PASS", "Within table limit")}
+    worst = {}
+    for i in view["items"]:
+        if i["rule"] and i["status"] in word:
+            rank = present.ORDER.index(i["status"])
+            if i["rule"] not in worst or rank < present.ORDER.index(worst[i["rule"]][0]):
+                worst[i["rule"]] = (i["status"], i.get("reason") or "")
+    col = {h: n for n, h in enumerate(COLUMNS)}
+    rows = []
+    for r in t["output"]:
+        r = list(r)
+        found = worst.get(r[col["Rule id"]])
+        if found:
+            r[col["Error"]], r[col["Comparison"]] = word[found[0]]
+            if found[0] == present.REVIEW and found[1]:
+                r[col["Why it needs review"]] = found[1]
+        rows.append(r)
+    wb = build({**t, "output": rows})
+    ws = wb.create_sheet("Check")
+    h = view["header"]
+    title(ws, f"GORDIUM | {view['summary']}")
+    lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]]
+    for n, text in enumerate(lines, start=2):
+        ws.cell(row=n, column=1, value=text)
+    by_id = {i["id"]: i for i in view["items"]}
+    out = []
+    for g in present.grouped(view["items"]):
+        for item_id in g["items"]:
+            i = by_id[item_id]
+            out.append([g["title"], i["mark"], i["name"], i["proposed"], i["required"], i["margin"],
+                        i.get("reason") or "", i["detail"].get("citation") or "",
+                        (i["detail"].get("links") or [""])[0]])
+    write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
+                                     ("Margin", 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
+    wb.save(report_path)
+
+
+def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None,
+          extras: dict | None = None) -> dict:
     """Everything the Rhino command shows, for one model and its lot facts. `building_problems` are what the
     Rhino command found on the Building layer and couldn't send (a block, a surface): each one makes every
-    building measure need review, never silently dropped."""
+    building measure need review, never silently dropped. `extras` is what the command adds for the panel: what
+    it sent (scope), objects on the lot it didn't send (each makes the check need review), the grade source."""
     problems = fact_problems(facts)            # the same check as a facts file: a plain refusal, never a crash
     problems += [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
@@ -198,8 +244,6 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
         path = Path(tmp) / "project.yaml"
         path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True))
         t = tables(path)              # refuses a project or rulebook that fails its checks (ValueError)
-    if report_path is not None:
-        build(t).save(report_path)
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}
     every = [_why(dict(zip(COLUMNS, r)), by_id, measured) for r in t["output"]]
@@ -226,9 +270,12 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
                   if o != lot_id})
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
+    v = present.view(rows, waiting, by_id, measured, facts, extras)
+    if report_path is not None:
+        _report(t, v, report_path)
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
             "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
-            "envelope": envelope(site, facts, measured, rules), "problems": site.get("problems") or []}
+            "envelope": envelope(site, facts, measured, rules), "problems": site.get("problems") or [], "view": v}
 
 
 def start(model_path: Path, facts: dict) -> dict:

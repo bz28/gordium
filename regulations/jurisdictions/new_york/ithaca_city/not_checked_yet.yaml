@@ -1,0 +1,23 @@
+# What Gordium does not check yet for this city, listed on every result (the Rhino panel's "Not checked" and
+# "Not covered by this rulebook" groups, and the report), so a list of items that comply never reads as a full
+# zoning review. Plain data: each entry names the code section and says why in plain words.
+not_in_this_release:
+  - id: overlays
+    name: Overlays (historic, gorge, flood)
+    why: Overlay districts change which rules apply; this release doesn't look them up or check them.
+not_covered:
+  - id: height_exceptions
+    section: "§325-16A, §325-16B"
+    name: Height exceptions (chimneys, spires, parapets)
+  - id: yard_projections
+    section: "§325-18"
+    name: Projections into yards (porches, decks, eaves)
+  - id: corner_lots
+    section: "§325-19C"
+    name: Corner lots
+  - id: accessory_structures
+    section: "§325-25"
+    name: Accessory structures (garages, sheds)
+  - id: adus
+    section: "§325-28"
+    name: Accessory dwelling units

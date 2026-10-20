@@ -508,6 +508,36 @@ def _distance(line, shape):
     return line.distance(shape), [[_r(a.x), _r(a.y)], [_r(b.x), _r(b.y)]]
 
 
+SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall
+
+
+def _grade_from_points(buildings: list[dict], points: list) -> tuple:
+    """GRADE PLANE: "the average of finished ground level on each side of the building at exterior walls",
+    from spot grades placed in the model (or the terrain sampled at the walls). Each wall of the buildings'
+    outline seen from above (any longer than 1 ft) gets the levels of the points within SPOT_REACH of it; the grade
+    plane is the average of the walls' averages. (grade, None), or (None, reason) when a point is off the walls or
+    a wall has none: after the building moves, the points no longer say the ground level at its walls."""
+    plans = [_projection(b) for b in buildings if b.get("faces")]
+    if not plans:
+        return sum(p[2] for p in points) / len(points), None
+    outline = ops.unary_union(plans)
+    rings = [g.exterior for g in getattr(outline, "geoms", [outline]) if not g.is_empty]
+    walls = [LineString([a, b]) for ring in rings for a, b in zip(ring.coords, ring.coords[1:])
+             if math.dist(a, b) > 1.0]
+    levels, off = {i: [] for i in range(len(walls))}, 0
+    for x, y, z in points:
+        here = Point(x, y)
+        i = min(range(len(walls)), key=lambda k: walls[k].distance(here))
+        if walls[i].distance(here) > SPOT_REACH:
+            off += 1
+        else:
+            levels[i].append(z)
+    bare = sum(1 for v in levels.values() if not v)
+    if off or bare:
+        return None, stop("grade_off_walls", off=off, count=len(points), bare=bare)
+    return sum(sum(v) / len(v) for v in levels.values()) / len(levels), None
+
+
 def measure(site: dict, facts: dict) -> dict[str, dict]:
     """Every measurement in measures.yaml, in its order, each with its working, for one site and its lot facts."""
     out = _measure(site, facts)
@@ -533,6 +563,9 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
     # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
     # cut at the ground blamed on overhangs.
+    why_spots = None
+    if facts.get("grade_points"):       # spot grades (or terrain sampled at the walls): the grade plane from them
+        grade, why_spots = _grade_from_points(buildings, facts["grade_points"])
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
     off = (lo, hi) if zs and grade is not None and (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None
@@ -556,9 +589,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
             joined |= set(found)
             waiting = [i for i in waiting if i not in found]
         buried = spans[waiting[0]] if waiting else None
-    why_grade = (stop("no_ground") if grade is None else
+    why_grade = (why_spots if why_spots else stop("no_ground") if grade is None else
                  stop("ground_off_building", ground=_r(grade), bottom=_r(off[0]), top=_r(off[1])) if off else
                  stop("buried_solid", ground=_r(grade), bottom=_r(buried[0]), top=_r(buried[1])) if buried else
+                 None if facts.get("grade_points") else
                  stop("ground_unknown") if facts.get("ground_is_flat") is None else
                  None if facts["ground_is_flat"] else stop("sloped_ground"))
     # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
@@ -574,6 +608,9 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     others = [b for b in buildings if b is not main]
     if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):
         out["building_height"] = _with_others(out["building_height"], [_height(b, grade) for b in others])
+    if facts.get("grade_is") == "existing":     # the grade plane is finished ground: existing ground can't decide
+        for name in ("building_height", "stories"):
+            out[name] = _missing(name, stop("existing_grade"))
 
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None

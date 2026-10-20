@@ -97,6 +97,11 @@ Every reason the code gives today comes from the table:
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
   it lies within that solid's plan; a sub-basement under it too); "say whether the ground is flat";
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
+  With spot grades placed in the model (or the terrain, which the Rhino command samples at the walls each time it
+  checks), the grade plane is the average of each wall's points within 2 ft of it; after the building moves:
+  "spot grades no longer at the building's walls (<off> of <count> more than 2 ft from a wall, <bare> walls
+  without one): set the grade again". Measured from existing ground instead of finished: "measured from existing
+  grade; the code's grade plane is finished ground level (§325-3): set the finished grade" (height and stories).
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "the building is one
   solid with no floors: draw each story as its own solid standing on the one below (as Gordium's starting building
   is), or enter the number of stories"; "enter bedrooms / parking spaces".
