@@ -1350,6 +1350,8 @@ def gordium_check():
     live(True)                                      # live mode is on by default
     if result is not None:
         Rhino.RhinoApp.WriteLine("Gordium: " + result["view"]["summary"])     # the panel's own words (D3)
+    if not STATE.get("headless"):       # the command brings the panel forward (a live re-check never does)
+        logic.guard(lambda: panel()["form"].BringToFront(), "bring the panel forward")()
     return result
 
 

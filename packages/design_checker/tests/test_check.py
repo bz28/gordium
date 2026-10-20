@@ -447,3 +447,17 @@ def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
     assert unguarded == [], unguarded
     assert "def _conduit(" in rhino and "logic.guard(" in rhino.split("def _conduit(", 1)[1].split("\ndef ", 1)[0]
     assert "Paint +=" not in "".join(p.read_text() for p in PLUGIN)    # draw once into a bitmap instead
+
+
+def test_the_dash_patterns_fit_rhinos_signed_int32():
+    """DrawPatternedPolyline takes an Int32: a mask with the top bit set raised "value too large to convert" every
+    frame (caught by the guard), so the property line and the envelope were never dashed."""
+    import re
+    text = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text()
+    code = re.search(r"^def _signed\(bits\):\n(?:    .*\n)+", text, re.M).group(0)
+    code += "\n".join(re.findall(r"^(?:PHANTOM|DASHED) = .*$", text, re.M))
+    found = {}
+    exec(code, found)                                    # noqa: S102  (the file's own two constants)
+    for name in ("PHANTOM", "DASHED"):
+        assert -(1 << 31) <= found[name] < (1 << 31), name
+        assert found[name] & 0xFFFFFFFF == found[name] % (1 << 32)       # the same 32 bits

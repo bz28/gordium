@@ -1,6 +1,6 @@
 # Gordium in Rhino (rhino_plugin)
 
-`GordiumCheck` checks the open Rhino model against its zone's rules: PASS, FAIL or NEEDS REVIEW for every rule,
+New to it? Start with [QUICKSTART.md](QUICKSTART.md). `GordiumCheck` checks the open Rhino model against its zone's rules: PASS, FAIL or NEEDS REVIEW for every rule,
 the largest legal building drawn see-through on the lot, failing parts in red, and the architects'-format report
 saved next to the model. With live mode on (the default), it re-checks after every edit.
 

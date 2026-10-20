@@ -2,6 +2,8 @@
 
 A co-pilot inside Rhino for architects. It knows the zoning rules a building must follow and checks each design edit against them: **pass**, **fail**, or **needs review**.
 
+**Try it in Rhino:** [Gordium in Rhino: from scratch](apps/rhino_plugin/QUICKSTART.md), install once, then your first project step by step.
+
 First city: **City of Ithaca, NY** (residential districts first).
 
 ## How the repository is organized

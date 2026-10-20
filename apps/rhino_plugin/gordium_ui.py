@@ -532,5 +532,11 @@ def label_at(d, viewport, point, text, color, dark, size=12, taken=None):
     d.Draw2dText(text, color, rg.Point2d(p.X - width / 2 + 7, top + 3), False, size)
 
 
-PHANTOM = 0b11111111111111000110001100000000    # long dash, short, short: the property line
-DASHED = 0b11111111000000001111111100000000
+def _signed(bits):
+    """A 32-bit dash mask as Rhino takes it: a signed Int32 (a mask with its top bit set overflows otherwise:
+    "value too large to convert", caught by the guard 2026-10-20, so the dashed lines never drew)."""
+    return bits - (1 << 32) if bits & (1 << 31) else bits
+
+
+PHANTOM = _signed(0b11111111111111000110001100000000)    # long dash, short, short: the property line
+DASHED = _signed(0b11111111000000001111111100000000)
