@@ -141,8 +141,8 @@ def test_rhino_decisions():
     assert classify("Default", "Brep") is None
     assert update_counts({"stories": 2}, {"stories": None, "sleeping_rooms": 3}) == {"stories": 2, "sleeping_rooms": 3}
     assert "sleeping_rooms" not in update_counts({}, {"sleeping_rooms": None})       # skipped: never 0
-    assert missing({"sleeping_rooms": 3}) == ["jurisdiction", "zone", "use", "street_line", "corner_lot",
-                                              "lot_surveyed"]          # no grade yet: checked, height needs review
+    assert missing({"sleeping_rooms": 3}) == ["jurisdiction", "zone", "use", "street_line",
+                                              "lot_surveyed"]   # no grade, no corner answer: checked, they wait
     assert with_suggestions({"stories": 3, "zone": None}, {"zone": "R-1b"}) == {"zone": "R-1b", "stories": 3}
     assert to_feet({"street_line": [[[0, 0], [12, 0]]], "grade_elevation": 24}, 1 / 12) == {
         "street_line": [[[0.0, 0.0], [1.0, 0.0]]], "grade_elevation": 2.0}
@@ -591,7 +591,7 @@ def test_finished_ground_and_existing_spot_grades_are_never_mixed():
     assert 'FINISHED_LAYER = "Gordium::Grade::Finished"' in rhino
     assert "GRADE_LAYER if what == \"spot\" else FINISHED_LAYER" in rhino          # placed apart
     check_facts = rhino.split("def check_facts(", 1)[1].split("\ndef ", 1)[0]
-    assert '_grade_points(doc, _ui_state(doc).get("ground_kind") == "regrade")' in check_facts   # read apart
+    assert '_grade_points(doc, facts["grade_from"] == "finished_spots")' in check_facts   # read apart, by the facts
 
 
 def test_the_confirm_tick_survives_a_pick_and_ground_marking_can_be_undone():
@@ -602,3 +602,28 @@ def test_the_confirm_tick_survives_a_pick_and_ground_marking_can_be_undone():
     assert "def not_the_ground(" in rhino and '"not_ground": not_the_ground' in rhino
     survey = rhino.split("def pick_survey(", 1)[1].split("\ndef ", 1)[0]
     assert '_set_source(doc, "lot"' in survey                                      # its source never goes stale
+
+
+# ---- review round 6 ----------------------------------------------------------------------------------------------
+
+def test_an_unanswered_corner_lot_never_stops_the_check_it_makes_the_yards_wait(facts):
+    from design_checker import rhino_logic as logic
+    unanswered = {k: v for k, v in facts.items() if k != "corner_lot"}
+    assert "corner_lot" not in logic.missing(unanswered)                       # the check runs
+    items = {i["name"]: i for i in check(MODEL, unanswered)["view"]["items"]}
+    assert items["Front yard"]["status"] == present.REVIEW
+    assert items["Lot coverage"]["status"] in (present.FAILS, present.COMPLIES, present.REVIEW)   # measured
+
+
+def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
+    from design_checker import rhino_logic as logic
+    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0)["grade_from"] == "finished_spots"
+    assert logic.ground_facts(_box(ground={"kind": "spot"}), 0.0)["grade_from"] == "spot"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    check_facts = rhino.split("def check_facts(", 1)[1].split("\ndef ", 1)[0]
+    assert "_ui_state" not in check_facts.split("elif", 1)[0]                   # the points from the facts alone
+    loop = rhino.split("def confirm(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
+    assert "_save_ui_state" not in loop                                         # Cancel saves nothing
+    drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
+    assert "sources = fact_sources(doc)" in drawn and "sources.update(" in drawn  # the ground marking is kept
+    assert "from_sample=True" in rhino.split("def gordium_start(", 1)[1]

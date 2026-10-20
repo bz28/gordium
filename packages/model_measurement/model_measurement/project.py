@@ -44,8 +44,8 @@ def fact_problems(facts: dict) -> list[str]:
     if points is not None and not (isinstance(points, list) and points and all(
             isinstance(p, list) and len(p) == 3 and all(_number(v) for v in p) for p in points)):
         problems.append("grade_points must be a list of spot grades, each [x, y, z] in feet")
-    if facts.get("grade_from") not in (None, "spot", "terrain"):
-        problems.append("grade_from must be spot or terrain")
+    if facts.get("grade_from") not in (None, "spot", "terrain", "finished_spots"):
+        problems.append("grade_from must be spot, terrain or finished_spots")
     if facts.get("grade_is") not in (None, "finished", "existing"):
         problems.append("grade_is must be finished or existing")
     street = facts.get("street_line")

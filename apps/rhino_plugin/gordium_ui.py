@@ -502,9 +502,16 @@ def start_box(state, options, mode):
             if r.get("choice"):        # the street side's question: Corner lot?
                 layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
-    amber = logic.uncertain(state)
-    if amber:
-        layout.AddRow(None, row(label("?  " + amber, eto_status_color("needs_review"), size=12)))
+    amber = label("", eto_status_color("needs_review"), size=12)    # one line, following the answers given
+
+    def refresh_amber(*_):
+        state["corner_lot"] = [None, False, True][max(corner.SelectedIndex, 0)]
+        text = logic.uncertain(state)
+        amber.Text = "?  " + text if text else ""
+
+    refresh_amber()
+    corner.SelectedIndexChanged += logic.guard(refresh_amber, "answer the corner lot")
+    layout.AddRow(None, row(amber))
     layout.AddRow(None, row(reason))
     layout.AddRow(None, row(cancel, draw))
     dialog.Content = layout

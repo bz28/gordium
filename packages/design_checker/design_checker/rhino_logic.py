@@ -10,7 +10,7 @@ SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
 DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",
                 "Leader", "LinearDimension", "AngularDimension", "RadialDimension", "OrdinateDimension")
 # the grade isn't required: without one the check runs and height and stories need review until it's set (spec C3)
-REQUIRED = ("jurisdiction", "zone", "use", "street_line", "corner_lot", "lot_surveyed")
+REQUIRED = ("jurisdiction", "zone", "use", "street_line", "lot_surveyed")   # corner lot unanswered: the yards wait (C)
 
 
 def on_layer(full_path, layer):
@@ -327,7 +327,8 @@ def ground_facts(state, lot_level):
     if kind == "flat":
         out.update(ground_is_flat=True, grade_elevation=lot_level, grade_from=None)
     else:
-        out.update(ground_is_flat=None, grade_elevation=None, grade_from="terrain" if kind == "terrain" else "spot")
+        out.update(ground_is_flat=None, grade_elevation=None,     # the facts say which points: never the ui state
+                   grade_from={"terrain": "terrain", "regrade": "finished_spots"}.get(kind, "spot"))
     return out
 
 

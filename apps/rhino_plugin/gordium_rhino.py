@@ -844,8 +844,8 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
         area = amp.Area * k * k if amp else None
     zone_fact = sources.get("zone") or {}
     confirmed = logic.district_confirmed(mode, zone_fact, facts.get("zone"))
-    kind = saved_ui.get("ground_kind") or (facts.get("grade_from") if facts.get("grade_from") in ("spot", "terrain")
-                                            else "flat")
+    kind = saved_ui.get("ground_kind") or {"spot": "spot", "terrain": "terrain", "finished_spots": "regrade"}.get(
+        facts.get("grade_from"), "flat")
     points = _grade_points(doc, kind == "regrade")      # the set the ground row names, never both mixed
     if kind in ("spot", "regrade") and not points:
         kind = "flat"
@@ -972,7 +972,7 @@ def confirm(doc, facts, options, mode="check"):
                                             "corner_source") if k in state}   # (saved only at Draw)
             facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
             facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui)
-            _save_ui_state(doc, saved_ui)
+            # (nothing saved until Draw: Cancel leaves the facts and the box's choices as they were)
     finally:
         o.confirm = None
         o.labels = []
@@ -983,8 +983,9 @@ def _drawn(doc, facts, state, saved_ui):
     """Draw: the facts for the checker, and every fact's source and confirmation saved in the .3dm."""
     facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
     _save_ui_state(doc, saved_ui)
-    doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(
-        logic.fact_sources(state, time.strftime("%Y-%m-%d"), confirmed=True)))
+    sources = fact_sources(doc)            # what the box doesn't set (the ground marking) is kept
+    sources.update(logic.fact_sources(state, time.strftime("%Y-%m-%d"), confirmed=True))
+    doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
     return facts
 
 
@@ -1173,8 +1174,8 @@ def check_facts(doc, facts):
     """The facts as the checker gets them: the spot grades read from the model, or the terrain sampled at the
     walls now, so the grade follows the building (C4)."""
     out = dict(facts)
-    if facts.get("grade_from") == "spot":
-        points = _grade_points(doc, _ui_state(doc).get("ground_kind") == "regrade")   # finished ground apart
+    if facts.get("grade_from") in ("spot", "finished_spots"):    # which points: the facts saved at Draw say
+        points = _grade_points(doc, facts["grade_from"] == "finished_spots")
     elif facts.get("grade_from") == "terrain":
         points = _terrain_points(doc, _ui_state(doc).get("terrain_id"))
     else:
@@ -1542,6 +1543,7 @@ def gordium_start():
     if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
         sample = ask({"cmd": "sample_site"})
         _add_lot(doc, sample)
+        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True))   # its facts are the sample project's
         facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
                                        suggested_facts(doc, options["zones"]))
         facts["lot_id"] = str(_lot_candidates(doc)[0].Id)

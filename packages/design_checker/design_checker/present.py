@@ -809,8 +809,8 @@ def grade_label(facts: dict) -> str:
     if points:
         source = "terrain" if facts.get("grade_from") == "terrain" else f"{len(points)} spot grades"
         return f"{source} ({kind})"
-    if facts.get("ground_is_flat") and facts.get("grade_elevation") is not None:
-        return f"flat at elevation {feet_inches(facts['grade_elevation'])}"
+    if facts.get("ground_is_flat") and facts.get("grade_elevation") is not None:          # (flat: say which kind)
+        return f"flat at elevation {feet_inches(facts['grade_elevation'])}" + (" (existing)" if kind == "existing" else "")
     return "not set"
 
 
