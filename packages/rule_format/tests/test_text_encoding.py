@@ -8,6 +8,7 @@ that talks in text, names its encoding. Binary mode ("rb", "wb") has none and is
 """
 
 import ast
+import os
 import subprocess
 import sys
 import warnings
@@ -105,6 +106,16 @@ def test_every_venv_python_the_plugin_starts_runs_in_utf8_mode():
     assert worker.index('env["PYTHONUTF8"] = "1"') < worker.index("subprocess.Popen(")
 
 
+def test_every_command_prints_in_utf8():
+    """Each `python -m <package>` sets its output to UTF-8 first (rulebook.utf8_console), or on Windows a command
+    whose output goes to a file, a pipe or CI crashes on its first ✓ (found by the Windows CI job)."""
+    mains = sorted((REPO / "packages").glob("*/*/__main__.py"))
+    assert len(mains) >= 8
+    missing = [p.relative_to(REPO).as_posix() for p in mains
+               if "utf8_console()" not in p.read_text(encoding="utf-8").split('if __name__ == "__main__":', 1)[-1]]
+    assert missing == [], missing
+
+
 # ---- the Windows failure itself, on any computer ------------------------------------------------------------
 
 def _texts():
@@ -145,8 +156,11 @@ runpy.run_module(sys.argv[0], run_name="__main__")
 
 
 def _as_windows(module):
-    return subprocess.run([sys.executable, "-c", AS_WINDOWS, str(REPO / "pyproject.toml"), module], cwd=REPO,
-                          capture_output=True, text=True, encoding="utf-8", timeout=600)
+    """Its output goes to a cp1252 pipe too, as a Windows command's sent to a file or CI (✓ can't be printed there)."""
+    env = {k: v for k, v in os.environ.items() if k not in ("PYTHONUTF8", "PYTHONIOENCODING")}
+    env["PYTHONIOENCODING"] = "cp1252"
+    return subprocess.run([sys.executable, "-X", "utf8=0", "-c", AS_WINDOWS, str(REPO / "pyproject.toml"), module],
+                          cwd=REPO, env=env, capture_output=True, text=True, encoding="utf-8", timeout=600)
 
 
 def test_rule_format_passes_when_the_computer_reads_cp1252():

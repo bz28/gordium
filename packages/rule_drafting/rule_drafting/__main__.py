@@ -29,7 +29,7 @@ import yaml
 from document_extraction.sections import piece_text
 from rule_format import formula
 from rule_format.labels import load_pieces
-from rule_format.rulebook import REPO, Context, district_name, load, read_jsonl, validate
+from rule_format.rulebook import REPO, Context, district_name, load, read_jsonl, validate, utf8_console
 from section_labeling.budget import Budget, BudgetExceeded
 from section_labeling.labeler import numbered_lines
 
@@ -396,4 +396,5 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

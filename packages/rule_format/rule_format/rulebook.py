@@ -12,6 +12,7 @@ import datetime
 import hashlib
 import json
 import re
+import sys
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -90,8 +91,10 @@ def rulebook_paths(folder) -> list[Path]:
     under it, except the drafting script's own run records (drafted/records/), which aren't rulebooks. The one
     definition, used by the validator, the review list and the spreadsheet export alike."""
     folder = Path(folder)
-    return sorted(p for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file()
-                  and "records" not in p.relative_to(folder).parts) if folder.is_dir() else []
+    # Sorted by the path as written ("/", case kept), the same on every computer: Windows paths sort ignoring case.
+    return sorted((p for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file()
+                   and "records" not in p.relative_to(folder).parts),
+                  key=lambda p: p.relative_to(folder).as_posix()) if folder.is_dir() else []
 
 
 def rulebook_for(jurisdiction, zone: str) -> Path | None:
@@ -100,6 +103,14 @@ def rulebook_for(jurisdiction, zone: str) -> Path | None:
     project report and the answer-key test alike."""
     folder = Path(jurisdiction) / "5_zoning_rules"
     return next((p for p in (folder / f"{zone}.yaml", folder / "drafted" / f"{zone}.yaml") if p.is_file()), None)
+
+
+def utf8_console() -> None:
+    """Print in UTF-8, whatever the computer's code page: on Windows a command's output sent to a file, a pipe or CI
+    is cp1252, which can't print ✓ or ✗ (the command crashed). Every command line calls this first."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure") and (stream.encoding or "").replace("-", "").lower() != "utf8":
+            stream.reconfigure(encoding="utf-8")
 
 
 def read_jsonl(path) -> list[dict]:

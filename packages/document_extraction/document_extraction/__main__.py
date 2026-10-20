@@ -14,7 +14,7 @@ from pathlib import Path
 
 import yaml
 
-from rule_format.rulebook import jurisdictions
+from rule_format.rulebook import jurisdictions, utf8_console
 
 from . import sections
 from .charts import read_charts
@@ -61,4 +61,5 @@ def _write_or_check(path: Path, fresh: str, check: bool) -> bool:
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

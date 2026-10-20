@@ -11,7 +11,7 @@ import sys
 
 from openpyxl import load_workbook
 
-from rule_format.rulebook import REPO, jurisdictions
+from rule_format.rulebook import REPO, jurisdictions, utf8_console
 
 from .workbook import build, contents, output_path, tables
 
@@ -38,4 +38,5 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

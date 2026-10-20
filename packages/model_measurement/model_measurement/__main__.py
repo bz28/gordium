@@ -13,7 +13,7 @@ from pathlib import Path
 
 import yaml
 
-from rule_format.rulebook import REPO, load
+from rule_format.rulebook import REPO, load, utf8_console
 
 from .project import load_facts, project
 
@@ -65,4 +65,5 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

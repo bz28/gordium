@@ -845,13 +845,9 @@ def test_the_panel_message_line_is_cleared_by_every_check():
 def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_path):
     """Review round 10: a report file that couldn't be written (a read-only folder, the file open elsewhere) threw
     away the check's result as well."""
-    blocked = tmp_path / "ro"
-    blocked.mkdir()
-    blocked.chmod(0o500)
-    try:
-        got = check(MODEL, facts, blocked / "r.xlsx")
-    finally:
-        blocked.chmod(0o700)
+    blocked = tmp_path / "ro"          # a "folder" that is a file can't hold the report on any computer (Windows
+    blocked.write_text("", encoding="utf-8")       # ignores a read-only folder's permissions, so chmod proves nothing)
+    got = check(MODEL, facts, blocked / "r.xlsx")
     assert got["view"]["items"] and got["report_error"] and "r.xlsx" in got["report_error"]
     assert check(MODEL, facts, tmp_path / "ok.xlsx")["report_error"] is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
