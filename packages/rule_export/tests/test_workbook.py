@@ -9,8 +9,8 @@ from openpyxl import load_workbook
 
 import rule_export.__main__ as cli
 import rule_export.workbook as wbk
-from rule_export.workbook import (FIELDS, HIDDEN, SHOWN, build, contents, output_path, page_link, pdf_url, rulebooks,
-                                  tables)
+from rule_export.workbook import (COLUMNS, FIELDS, HIDDEN, build, contents, entry_rows, output_path, page_link,
+                                  pdf_url, rulebooks, shown, tables)
 from rule_format.labels import load_pieces
 from rule_format.rulebook import REPO, load
 
@@ -35,9 +35,34 @@ def link(s):
 
 
 def test_every_field_of_every_format_is_shown_or_left_out_on_purpose():
+    assert FIELDS.keys() == COLUMNS.keys()
     for kind, fields in FIELDS.items():
-        assert SHOWN[kind] | (fields & HIDDEN.keys()) == fields, kind          # nothing silently missing
-        assert SHOWN[kind] <= fields, kind                                    # nothing shown that doesn't exist
+        assert shown(COLUMNS[kind]) | (fields & HIDDEN.keys()) == fields, kind  # nothing silently missing
+        assert shown(COLUMNS[kind]) <= fields, kind                            # nothing shown that doesn't exist
+
+
+# One value of each field, in its format's shape, for checking that each column really shows its field.
+SAMPLE = {"review_when": [{"when": "W", "reason": "R"}], "examples": [{"given": {"a": 1}, "expect": "pass"}],
+          "open_questions": ["Q"], "answers": [{"question": "Q", "answer": "A"}], "measures": ["M"],
+          "sources": [{"file": LAW, "page": 3, "lines": [1, 2], "quote": "W"}], "quotable": False,
+          "revised": [{"from": "rule", "by": "B", "date": "D", "why": "Y"}]}
+
+
+def test_every_column_shows_the_field_it_names():
+    # Filling a field must change its column's cell: a column that forgot its field, or a field's column
+    # removed, fails here or above.
+    for kind, cols in COLUMNS.items():
+        fixed = {c.header: "" for c in cols if c.value is None}
+        for i, c in enumerate(cols):
+            for field in c.fields:
+                filled = entry_rows({field: SAMPLE.get(field, "X")}, cols, fixed)[0][i]
+                assert filled != entry_rows({}, cols, fixed)[0][i], (kind, c.header, field)
+
+
+def test_the_real_files_use_only_known_fields():
+    sources = load(ITHACA / "1_source_documents/sources.yaml")
+    for d in sources["documents"] + sources.get("not_yet_downloaded", []):
+        assert d.keys() <= FIELDS["source"], d.keys() - FIELDS["source"]
 
 
 def test_every_rule_source_is_one_row_with_its_rulebook_words_and_link(data):
@@ -47,6 +72,10 @@ def test_every_rule_source_is_one_row_with_its_rulebook_words_and_link(data):
     got = list(zip(column(t, "Rulebook"), column(t, "Rule id"), column(t, "Drafted by"), column(t, "Page"),
                    column(t, "City's exact words"), t["links"]["Link"]))
     assert got == expected and got                                             # each once, in order, attributed
+    # what readers filter on repeats on every row, so a filter keeps all of a rule's quotes
+    kinds = [(path, r["id"], r["kind"], r["topic"]) for path, book in rulebooks(ITHACA) for r in book["rules"]
+             for _ in r["sources"]]
+    assert list(zip(column(t, "Rulebook"), column(t, "Rule id"), column(t, "Kind"), column(t, "Topic"))) == kinds
 
 
 def test_rules_show_their_worked_examples(data):
@@ -87,7 +116,7 @@ def test_every_open_question_is_listed_once_where_it_was_asked(data):
             expected += [(schema.rstrip("s").capitalize(), f"4_term_definitions/{schema}.yaml", k, " ".join(q.split()),
                           link(d["sources"][0])) for q in d.get("open_questions", [])]
     for pid, e in LABELS.items():
-        expected += [("Section label", LAW, pid, " ".join(q.split()), link(e["sources"][0])) for q in e.get("open_questions", [])]
+        expected += [("Section label", "3_section_labels/chapter_325_zoning_2026-10.yaml", pid, " ".join(q.split()), link(e["sources"][0])) for q in e.get("open_questions", [])]
     t = data["Questions"]
     got = list(zip(column(t, "About"), column(t, "In"), column(t, "Id"), column(t, "Question"), t["links"]["Link"]))
     assert got == [(a, b, c, " ".join(d.split()), e) for a, b, c, d, e in expected] and got
@@ -96,11 +125,33 @@ def test_every_open_question_is_listed_once_where_it_was_asked(data):
 def test_every_piece_of_the_law_is_one_coverage_row_with_its_label_and_link(data):
     _, pieces = load_pieces(ITHACA / "2_extracted_text/chapter_325_zoning_2026-10.sections.jsonl")
     t = data["Coverage"]
+    first_page = lambda p, piece: ((LABELS.get(p, {}).get("sources") or [{}])[0].get("page") or piece["lines"][0][0])
     assert list(zip(column(t, "Document"), column(t, "Piece"), column(t, "Label"), t["links"]["Link"])) == [
-        (LAW, p, LABELS.get(p, {}).get("label", "unlabeled"), page_link(ITHACA, DOCUMENTS, LAW, piece["lines"][0][0]))
+        (LAW, p, LABELS.get(p, {}).get("label", "unlabeled"), page_link(ITHACA, DOCUMENTS, LAW, first_page(p, piece)))
         for p, piece in pieces.items()]
+    # each quote says its own page and lines (a piece may start a page before its quote)
+    quotes = dict(zip(column(t, "Piece"), column(t, "Quote(s)")))
+    for p, e in LABELS.items():
+        for s in e.get("sources") or []:
+            assert f"p.{s['page']} l.{wbk._lines(s)}: " in quotes[p], p
+    home = LABELS["325-3B:home_occupation"]["sources"][0]
+    assert home["page"] == 13 and "Open p.13" in column(t, "Link")[column(t, "Piece").index("325-3B:home_occupation")]
     changes = dict(zip(column(t, "Piece"), column(t, "Changed after the AI")))
     assert "reference → rule (Claude" in changes["325-3B:dwelling_one_family"]  # who changed it, from what, to what
+
+
+def test_every_source_document_and_missing_one_is_listed_with_its_details(data):
+    sources = load(ITHACA / "1_source_documents/sources.yaml")
+    t = data["Sources"]
+    got = list(zip(column(t, "File"), column(t, "Title"), column(t, "Adopted"), column(t, "Created"),
+                   column(t, "Quotable"), column(t, "Why not quotable / not downloaded"), column(t, "Contents"),
+                   column(t, "Notes"), t["links"]["Official URL"]))
+    text = lambda v: " ".join(str(v).split()) if v not in (None, "") else ""
+    assert got == [(d["file"], d["title"], text(d.get("adopted_on")), text(d.get("created_on")),
+                    "no" if d.get("quotable") is False else "yes", text(d.get("not_quotable_because")),
+                    text(d.get("contents")), text(d.get("notes")), d["url"]) for d in sources["documents"]] + [
+        ("", d["title"], "", "", "not downloaded", text(d["why_missing"]), "", "", d["url"])
+        for d in sources["not_yet_downloaded"]]
 
 
 def test_a_chain_of_label_changes_reads_in_order():
