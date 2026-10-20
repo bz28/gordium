@@ -136,6 +136,16 @@ try:
         st["worker"], st["worker_code"] = real, code
     expect(g.load_facts(doc).get("sleeping_rooms") == saved.get("sleeping_rooms"), "saved facts changed")
 
+    # Esc at a prompt cancels the whole edit: nothing is saved
+    g.save_facts(doc, saved)
+    real_ask = g._ask_zone
+    try:
+        g._ask_zone = lambda *a: (g.Rhino.Commands.Result.Cancel, "")       # Esc at the first prompt
+        expect(g.change_facts(doc, saved, {"zones": ["R-1b"], "uses": {}}) is None, "Esc didn't cancel the edit")
+    finally:
+        g._ask_zone = real_ask
+    expect(g.load_facts(doc) == saved, "a cancelled edit changed the saved facts")
+
     # an import into this model is an edit: its result stays until the re-check
     g.run_check(doc, report=False)
 

@@ -160,3 +160,10 @@ def test_the_checker_restarts_when_its_code_changes(tmp_path):
     assert after != before
     assert restart_checker(True, before, after) and restart_checker(False, before, before)
     assert not restart_checker(True, after, after)
+    (tmp_path / "pkg" / "measures.yaml").write_text("a: 1\n")       # data the checker loads counts too
+    assert code_fingerprint(str(tmp_path)) != after
+
+
+def test_closing_the_confirm_dialog_saves_nothing():
+    from design_checker.rhino_logic import after_confirm
+    assert (after_confirm("ok"), after_confirm("change"), after_confirm(None)) == ("keep", "change", "cancel")

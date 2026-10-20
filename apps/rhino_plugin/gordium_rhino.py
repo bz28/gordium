@@ -511,26 +511,39 @@ def confirm(doc, facts, options):
         dialog = ef.Dialog[bool]()
         dialog.Title = "Gordium"
         dialog.Padding = ed.Padding(12)
+        chosen = {}                     # which button closed it: none if closed or Esc (a cancel)
         ok, change = ef.Button(), ef.Button()
         ok.Text, change.Text = "OK", "Change…"
-        ok.Click += lambda s, e: dialog.Close(True)
-        change.Click += lambda s, e: dialog.Close(False)
+        ok.Click += lambda s, e: (chosen.update(choice="ok"), dialog.Close(True))
+        change.Click += lambda s, e: (chosen.update(choice="change"), dialog.Close(False))
         layout = ef.DynamicLayout()
         layout.Spacing = ed.Size(8, 8)
         layout.AddRow(_label(_describe(facts, options["uses"])))
         layout.AddRow(None, change, ok)
         dialog.Content = layout
         dialog.DefaultButton = ok
-        if dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow):
+        dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
+        what = logic.after_confirm(chosen.get("choice"))
+        if what == "keep":
             return facts
-        return change_facts(doc, facts, options)
+        return change_facts(doc, facts, options) if what == "change" else None
     finally:
         o.confirm = None
         doc.Views.Redraw()
 
 
+class Cancelled(Exception):
+    """Esc at a prompt: the whole edit is cancelled and nothing is saved (Enter keeps what is there)."""
+
+
+def _go_on(rc):
+    if rc == Rhino.Commands.Result.Cancel or rc == Rhino.Input.GetResult.Cancel:
+        raise Cancelled()
+
+
 def _yes_no(prompt, current):
     rc = Rhino.Input.RhinoGet.GetBool(prompt, True, "No", "Yes", bool(current))
+    _go_on(rc[0])
     return bool(rc[1]) if rc[0] == Rhino.Commands.Result.Success else current
 
 
@@ -540,19 +553,35 @@ def _count(prompt):
     gi.SetCommandPrompt(prompt + " (Enter to skip)")
     gi.AcceptNothing(True)
     gi.SetLowerLimit(0, False)
-    return gi.Number() if gi.Get() == Rhino.Input.GetResult.Number else None
+    got = gi.Get()
+    _go_on(got)
+    return gi.Number() if got == Rhino.Input.GetResult.Number else None
 
 
 def change_facts(doc, facts, options):
-    """Every lot fact, one prompt each (Enter keeps what is there). Model points become feet."""
-    facts = dict(facts)
+    """Every lot fact, one prompt each (Enter keeps what is there; Esc cancels the whole edit: None, nothing
+    saved). Model points become feet."""
+    try:
+        return _change_facts(doc, dict(facts), options)
+    except Cancelled:
+        return None
+
+
+def _ask_zone(options, current):
+    return Rhino.Input.RhinoGet.GetString("Zone (" + ", ".join(options["zones"]) + ")", True, current or "")
+
+
+def _change_facts(doc, facts, options):
     scale = _scale(doc)
-    zone = Rhino.Input.RhinoGet.GetString("Zone (" + ", ".join(options["zones"]) + ")", True, facts.get("zone") or "")
+    zone = _ask_zone(options, facts.get("zone"))
+    _go_on(zone[0])
     if zone[0] == Rhino.Commands.Result.Success and zone[1] in options["zones"]:
         facts["zone"] = zone[1]
     names = list(options["uses"].items())
     use = Rhino.UI.Dialogs.ShowListBox("Gordium", "Use of the lot", [n for _, n in names],
                                        options["uses"].get(facts.get("use"), ""))
+    if use is None:
+        raise Cancelled()
     if use:
         facts["use"] = next(k for k, n in names if n == use)
     lots, buildings, _ = _sorted_objects(doc)
@@ -560,12 +589,16 @@ def change_facts(doc, facts, options):
         go = Rhino.Input.Custom.GetObject()
         go.SetCommandPrompt("Click the lot outline")
         go.GeometryFilter = Rhino.DocObjects.ObjectType.Curve
-        if go.Get() == Rhino.Input.GetResult.Object:
+        got = go.Get()
+        _go_on(got)
+        if got == Rhino.Input.GetResult.Object:
             facts["lot_id"] = str(go.Object(0).ObjectId)
     if len(buildings) > 1:
         go = Rhino.Input.Custom.GetObject()
         go.SetCommandPrompt("Click the main building")
-        if go.Get() == Rhino.Input.GetResult.Object:
+        got = go.Get()
+        _go_on(got)
+        if got == Rhino.Input.GetResult.Object:
             facts["main_building"] = str(go.Object(0).ObjectId)
     facts["corner_lot"] = _yes_no("Corner lot (two streets meet at it)?", facts.get("corner_lot"))
     lot = _find(doc, facts.get("lot_id") or "")
@@ -574,6 +607,7 @@ def change_facts(doc, facts, options):
         while True:                      # every lot line on a street (both streets on a corner lot)
             prompt = "Click a lot line on the street" + (" (Enter when done)" if picked else "")
             rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, bool(picked))
+            _go_on(rc)
             if rc != Rhino.Commands.Result.Success:
                 break
             a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
@@ -587,6 +621,7 @@ def change_facts(doc, facts, options):
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,
                                             (facts.get("grade_elevation") or 0.0) / scale)
+    _go_on(ground[0])
     if ground[0] == Rhino.Commands.Result.Success:
         facts["grade_elevation"] = ground[1] * scale
     facts["lot_surveyed"] = _yes_no("Is the lot outline from a survey?", facts.get("lot_surveyed"))
@@ -602,9 +637,14 @@ def edit_facts():
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
     facts = change_facts(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options)
-    answers = {key: _count(prompt) for key, prompt in (("sleeping_rooms", "Bedrooms"),
-                                                       ("parking_spaces", "Off-street parking spaces"),
-                                                       ("stories", "Stories"))}
+    if facts is None:                   # Esc: nothing changes
+        return
+    try:
+        answers = {key: _count(prompt) for key, prompt in (("sleeping_rooms", "Bedrooms"),
+                                                           ("parking_spaces", "Off-street parking spaces"),
+                                                           ("stories", "Stories"))}
+    except Cancelled:
+        return
     save_facts(doc, logic.update_counts(facts, answers))
     run_check(doc, report=False)
 
@@ -814,6 +854,9 @@ def gordium_check():
         facts = {}
     if logic.missing(facts):
         facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
+        if facts is None:               # closed or Esc: nothing saved, nothing checked
+            Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
+            return None
         save_facts(doc, facts)
     result = run_check(doc, report=True)
     live(True)                                      # live mode is on by default

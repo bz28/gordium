@@ -94,15 +94,16 @@ def draws_in(checked, viewport):
 
 
 def code_fingerprint(packages_dir):
-    """What the checker's code is now: every .py file under packages/ with its size and time, as one text. The
+    """What the checker's code is now: every file under packages/ (code and the data it loads) with its size and
+    time, as one text. The
     background checker is started again whenever this changes (an update while Rhino is open), so results never
     come from code that is no longer there."""
     import os
     found = []
-    for root, dirs, files in os.walk(packages_dir):
-        dirs[:] = sorted(d for d in dirs if d != "__pycache__" and not d.startswith("."))
+    for root, dirs, files in os.walk(packages_dir):         # code and the data it loads (measures.yaml), not caches
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__" and not d.startswith(".") and not d.endswith(".egg-info"))
         for name in sorted(files):
-            if name.endswith(".py"):
+            if not name.endswith((".pyc", ".pyo")) and not name.startswith("."):
                 st = os.stat(os.path.join(root, name))
                 found.append("%s:%d:%d" % (os.path.relpath(os.path.join(root, name), packages_dir), st.st_size,
                                            st.st_mtime_ns))
@@ -112,3 +113,9 @@ def code_fingerprint(packages_dir):
 def restart_checker(alive, started_with, now):
     """Whether to start the background checker again: it stopped, or the code changed since it started."""
     return not alive or started_with != now
+
+
+def after_confirm(choice):
+    """What the confirm dialog's answer means: "keep" (OK), "change" (Change…), or "cancel" (closed, Esc):
+    a cancel saves nothing, since nothing is used until the architect says OK."""
+    return {"ok": "keep", "change": "change"}.get(choice, "cancel")
