@@ -53,6 +53,7 @@ Planned but not created until their code is written: `packages/ai_designer`, `pa
 - When Ben shares files, decide whether each is relevant and file it in the right place (unchanged, original name). Say where each went.
 - Explain things in plain, simple language. The audience includes architects and shareholders.
 - Ground claims in the actual files and documents; cite where information came from.
+- **One design document.** `docs/system_design.md` is the single plain-language place for how Gordium works and why (decisions, alternatives rejected, how we know, what's open). Any PR that changes how Gordium works or why updates it in the same PR; detailed docs link from it rather than repeat it.
 - **Resolve before asking.** When the law seems unclear, never guess, and never go straight to the architects. In order:
   1. **The whole law:** read every section the term index lists for the term and its synonyms (setback/yard, overhang/projection/eaves…), not just its definition.
   2. **Research, ranked:** (1) Ithaca's own code text; (2) Ithaca's official interpretations and Board of Zoning Appeals decisions; (3) NYS Uniform Code / IBC commentary on the same wording; (4) other cities' codes. Cite every source (quote + section, or URL + date).
