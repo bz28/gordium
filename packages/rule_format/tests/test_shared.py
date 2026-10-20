@@ -43,7 +43,8 @@ def _jsonl_readers(source: str) -> int:
 
     def loads_of(nodes, loop_vars):
         def the_item(arg):              # the loop's own item, maybe stripped: l, l.strip(), l.rstrip("\\n")
-            if isinstance(arg, ast.Call) and isinstance(arg.func, ast.Attribute):
+            if (isinstance(arg, ast.Call) and isinstance(arg.func, ast.Attribute)
+                    and arg.func.attr in ("strip", "rstrip", "lstrip", "decode")):
                 arg = arg.func.value
             return isinstance(arg, ast.Name) and arg.id in loop_vars
         return {id(c) for n in nodes for c in ast.walk(n) if isinstance(c, ast.Call) and is_loads(c.func)
@@ -77,6 +78,8 @@ def test_the_checks_recognise_any_spelling():
     assert _jsonl_readers("rows = list(map(json.loads, f))") == 1
     assert _jsonl_readers("from json import loads\nrows = [loads(l) for l in f]") == 1
     assert _jsonl_readers('answers = [json.loads(r["answer"]) for r in records]') == 0   # a field, not a line
+    assert _jsonl_readers('answers = [json.loads(r.get("answer")) for r in records]') == 0
+    assert _jsonl_readers("for p in paths:\n    d = json.loads(p.read_text())") == 0       # a whole file
     assert LISTING.search("root.glob('*/*')") and LISTING.search('root.glob("*/*")')
     assert not LISTING.search('root.glob("*/*.pdf")')
 
@@ -93,12 +96,40 @@ def test_every_jurisdiction_listing_uses_the_one_helper():
 
 
 # YAML files people read too (their comments describe the workflow): the vocabulary, definitions, rulebooks.
-REGULATION_YAML = [p for p in (REPO / "regulations").rglob("*.yaml") if "runs" not in p.parts]
+REGULATION_YAML = [p for p in (REPO / "regulations").rglob("*.yaml") if "runs" not in p.relative_to(REPO).parts]
+assert REGULATION_YAML
 APPROVAL = re.compile(r"\barchitect\w*\b[^.\n]{0,80}?\bapprov|\bapprov\w*\b[^.\n]{0,80}?\barchitect", re.IGNORECASE)
 # Claims that are false while approval is deferred, however a document is worded around them.
 FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only approved rules|approved rulebook"
                           r"|\|\s*architects approve\s*\||\(architects approve\)|architects? confirm each rule|compares the new draft with the approved"
                           r"|architect'?s approval freezes|architect\s*──►", re.IGNORECASE)
+
+
+ARCHITECT_REVIEW = re.compile(
+    r"\barchitects?\s+(would\s+)?(confirm|review|check|approve|sign)s?\b"                  # architects confirm...
+    r"|\b(confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{0,30}?\barchitects?\b"  # ...confirmed by architects
+    r"|\bthen architects\b|\barchitect review\b", re.IGNORECASE)
+NOT_A_PROMISE = re.compile(r"defer|once (it is |approval is )?switched on|when approval is switched on|\bwould\b"
+                           r"|their (own )?(site|design|project)|facts about|by hand|answer", re.IGNORECASE)
+
+
+def _promises_architect_review(sentence: str) -> bool:
+    """A sentence that presents architects checking drafts as happening now (not deferred, not conditional).
+    An architect confirming their own project's facts, or answering open questions, is not that."""
+    return bool(ARCHITECT_REVIEW.search(sentence)) and not NOT_A_PROMISE.search(sentence)
+
+
+def test_the_architect_review_matcher():
+    for promise in ["confirmed by step 2 and by architects", "an architect confirms each label",
+                    "reviewers and architects check the rest", "Code, then AI for leftovers, then architects",
+                    "is caught by comparing outputs, and by architect review", "Draft: architects approve"]:
+        assert _promises_architect_review(promise), promise
+    for fine in ["the architect confirms the facts about their site and design",
+                 "Architects answer the open questions", "architect approval is deferred for now",
+                 "Choices for the architects to confirm", "Rules checked by hand by architects",
+                 "Something only an architect can judge", "the architects' R-1b check for 106 Ithaca Road",
+                 "an answer key once approval is switched on", "Architects would confirm each definition"]:
+        assert not _promises_architect_review(fine), fine
 
 
 def test_docs_dont_promise_approval_while_it_is_deferred():
@@ -110,9 +141,8 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
     silent = [str(p.relative_to(REPO)) for p in DOCS + REGULATION_YAML
               if APPROVAL.search(p.read_text()) and not re.search(r"deferred", p.read_text(), re.IGNORECASE)]
     false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text())]
-    # Architects confirming labels, definitions or the vocabulary is the same deferred layer: each sentence
-    # that says so must say it's deferred. (An architect confirming their own project's facts is not.)
+    # Architects approving, confirming, checking or reviewing drafts is the deferred layer: each sentence that
+    # says so must say it's deferred (or describe what happens once it is switched on).
     confirm = [f"{p.relative_to(REPO)}: {line.strip()[:100]}" for p in DOCS + REGULATION_YAML
-               for line in re.split(r"(?<=[.!?])\s+|\n", p.read_text())
-               if re.search(r"architects (would )?confirm", line, re.IGNORECASE) and "defer" not in line.lower()]
+               for line in re.split(r"(?<=[.!?])\s+|\n", p.read_text()) if _promises_architect_review(line)]
     assert not silent and not false and not confirm, (silent, false, confirm)
