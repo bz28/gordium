@@ -1,11 +1,13 @@
 # Questions for the architects
 
-Gordium checks a design by reading the city's exact words. In the places below, the words can be read more than one way, so Gordium marks the result **NEEDS REVIEW** instead of guessing. Each answer you give turns a NEEDS REVIEW into an automatic PASS or FAIL for every future project.
+Gordium checks a design against the city's exact words. In the places below, the words can be read more than one way, and Gordium can't decide them on its own.
+
+**Please note, until these are answered:** today Gordium's checks run on measurements that a person types in, and they use whatever number is typed. So for these questions **the person typing the number has to apply a reading by hand, and Gordium can still report PASS.** When Gordium measures a Rhino model itself (being built now), each of these cases will give **NEEDS REVIEW** instead of a guess. Each answer you give lets Gordium decide the case automatically, for every future project.
 
 **How to read each question**
 - **The city's words:** the exact text, with the section and a link to the page.
 - **Why it matters:** a real design where the answer changes the result.
-- **Until you answer:** what Gordium does now. Measurements are typed in today; the step that measures a Rhino model is being built, and it follows these notes.
+- **Until you answer:** what Gordium does now with typed-in numbers, and what it will do when it measures a Rhino model ("when measured from a model").
 - **Options:** the readings we can see. Pick one, or tell us another.
 - 🔴 **Blocks R-1b today:** the question affects a check Gordium already runs on R-1b single-family houses (like 106 Ithaca Rd). Unmarked questions matter for other uses, other districts, or rules not built yet.
 
@@ -26,19 +28,19 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 ### 1.1 Where did your 106 Ithaca Rd lot outline come from? Is there a stamped survey? 🔴
 
-- **What we found:** we compared the lot in your Rhino model with the city's tax parcel map (City of Ithaca `Tax_Parcels`, the same outline as New York State's 2025 parcel layer, parcel 500700-84.-2-6) and Tompkins County's 2026 parcel layer, all accessed 2026-10-20.
+- **What we found:** we compared the lot in your Rhino model with the city's tax parcel map (City of Ithaca `Tax_Parcels`, parcel 500700-84.-2-6; New York State's 2025 parcel layer has the same shape and size) and Tompkins County's 2026 parcel layer, both downloaded 2026-10-20 and stored with Gordium's test data (`test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/gis/`).
 
     | Edge | Your model | City / State GIS | County 2026 |
     |---|---|---|---|
     | Front (Ithaca Rd) | 73.00 ft, straight | 75.8 ft along a curve of 8 segments | 73.52 ft, straight |
     | Side (toward #104) | 90.28 ft | 92.12 ft | 92.00 ft |
     | Rear | 67.72 ft | 69.51 ft | 68.86 ft |
-    | Jog | 10.47 ft | 10.34 ft | 10.34 ft |
+    | Jog | 10.47 ft | 10.35 ft | 10.35 ft |
     | Long side | 99.37 ft | 101.13 ft | 101.13 ft |
     | **Area** | **6,674.5 sf** | **7,033.7 sf** | **6,900.4 sf** |
 
-    The shapes are the same lot: same jog, same angles. Fitting your five corners onto the city's, they match within 2.14 ft as drawn, and within 0.60 ft if your lot is enlarged by 2.48% (and turned 1.05°). So your lot looks like the city's parcel drawn **about 2.5% too small**: a scaling slip while tracing, or a survey that differs from the tax map. Even the two official maps disagree with each other, by about 133 sf.
-- **Why it matters:** lot area, lot depth (and so the rear yard, §1.2), and frontage all come from this outline. Coverage fails under every version (1,855 sf against 25% of 6,674, 6,900 or 7,034 sf), but the rear yard does not: see §1.2.
+    The shapes are the same lot, with the same jog, but each of your sides is about 2% shorter than the city's (90.28 vs 92.12, 67.72 vs 69.51, 99.37 vs 101.13 ft), and your area is 5% smaller. So your lot looks like the city's parcel drawn **slightly too small**: a scaling slip while tracing, or a survey that differs from the tax map. Even the two official maps disagree with each other, by about 133 sf. (Your model's lot measures 6,674.5 sf as drawn; your spreadsheet and workflow document say 6,674.7 sf.)
+- **Why it matters:** lot area, lot depth (and so the rear yard, §1.2), and frontage all come from this outline. Coverage fails under every version (1,855 sf against 25% of 6,674, 6,900 or 7,034 sf), but the rear yard depends on both the outline and how depth is measured: see §1.2.
 - **Until you answer:** Gordium uses the lot area and depth it is given (yours). A GIS outline will only ever be a cross-check: it never turns a result into a PASS.
 - **Please tell us:** (a) where the model's lot outline came from (a survey, traced from the tax map, or something else); (b) whether a stamped survey exists, and if so, could we have a copy?
 
@@ -46,7 +48,15 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 `[lot_depth#1]` `[R-1b.rear_yard#1]`
 
 - **The city's words:** "Such percentage shall be taken of the lot depth. If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths." ([Chapter 325 §325-8A(14), p.25](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=25))
-- **Why it matters:** the R-1b rear yard is 25% of the lot depth (at most 50 ft, at least 20 ft). 106 Ithaca Rd has five sides, including a 10.47 ft jog. If the 90.28 ft and 99.37 ft lines are the side lot lines, the depth is 94.8 ft and the rear yard must be 23.7 ft. Other readings give at least 22.6 ft. The difference can decide PASS or FAIL for a house placed close to the rear. With the city's GIS outline (§1.1), it decides 106 Ithaca Rd itself, whose design has a 25 ft rear yard:
+- **Why it matters:** the R-1b rear yard is 25% of the lot depth (at most 50 ft, at least 20 ft). 106 Ithaca Rd has five sides, including a 10.47 ft jog. On your model's lot, the options below give very different answers for the rear yard your design must have (it has 25 ft):
+
+    | Option | Lot depth | Required rear yard | The 25 ft design |
+    |---|---|---|---|
+    | (a) the 90.28 and 99.37 ft lines | 94.8 ft | 23.7 ft | PASS |
+    | (b) the jog added to the 99.37 ft line it continues | (90.28 + 109.84) ÷ 2 = 100.06 ft | 25.015 ft | **FAIL** (by 0.015 ft) |
+    | (c) average of every line that isn't front or rear | (90.28 + 10.47 + 99.37) ÷ 3 = 66.7 ft | 20 ft (the minimum) | PASS |
+
+  And on the city's GIS outline (§1.1), the depth also depends on which outline is used:
 
     | Lot depth used | Required rear yard | The 25 ft design |
     |---|---|---|
@@ -61,7 +71,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 `[lot#1]`
 
 - **The city's words:** "LOT — A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building or a group of buildings…" (§325-3, [p.14](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=14)). Chapter 325 never defines "lot area" itself.
-- **Why it matters:** the R-1b coverage limit is 25% of lot area. 106 Ithaca Rd is about 7,034 sf on the city's tax map, but 6,674.7 sf in your model. That moves the limit from 1,669 sf to 1,759 sf, and the 1,855 sf house fails under both.
+- **Why it matters:** the R-1b coverage limit is 25% of lot area. 106 Ithaca Rd is about 7,034 sf on the city's tax map, but 6,674.7 sf in your spreadsheet (6,674.5 sf as drawn in your model). That moves the limit from 1,669 sf to 1,759 sf, and the 1,855 sf house fails under both.
 - **Until you answer:** coverage uses the lot area it is given (for 106 Ithaca Rd, your 6,674 sf). When measured from a model, the area inside the drawn lot lines is used, with a reminder to check it against a survey.
 - **Options:** (a) always the survey, and NEEDS REVIEW if there isn't one; (b) the survey if there is one, else the tax map; (c) whatever is drawn in the model, with a warning to check it against a survey.
 
@@ -70,7 +80,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 - **The city's words:** "Lots hereafter used for a permitted use in each use district shall have frontage measured on a public right-of-way equal to or greater than the width specified in this column…" (Column 7, [§325-8A, p.24](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=24))
 - **Why it matters:** R-1b requires 50 ft of frontage for a one-family house. In the city's GIS, 106 Ithaca Rd's street edge is a curve of 8 segments, 75.8 ft along the curve (your model draws one straight 73 ft line). A curve is always longer than the straight line between its ends, so a lot just under 50 ft could pass one way and fail the other. (106 Ithaca Rd passes either way.)
-- **Until you answer:** a straight street line is simply measured; a curved one gets NEEDS REVIEW on lot width.
+- **Until you answer:** lot width uses the number it is given (your 73 ft), so a curved street line must be measured by hand. When measured from a model, a curved street line gets NEEDS REVIEW on lot width.
 - **Options:** (a) along the curve; (b) the straight line between the two side lot corners.
 
 ### 1.5 Lot depth when the two side lot lines are equal
@@ -90,7 +100,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 - **The city's words:** "The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that such features shall not project more than two feet into any required yard." ([§325-18B, p.49](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=49))
 - **Why it matters:** every yard check (front, both sides, rear) depends on it. A house 10 ft from the side line with an 18-inch eave is either 10 ft away (to the wall) or 8.5 ft away (to the eave).
-- **Until you answer:** yards are measured to the wall, and a model whose eaves reach into a required yard gets NEEDS REVIEW on that yard.
+- **Until you answer:** yards use the numbers they are given (yours are to the wall). When measured from a model, yards are measured to the wall, and a model whose eaves reach into a required yard gets NEEDS REVIEW on that yard.
 - **Options:** (a) to the wall, with eaves allowed up to 2 ft into the yard; (b) to the outermost edge of anything, eaves included; (c) to the wall, but to the eave when it projects more than 2 ft.
 
 ### 2.2 Corner lots: one front yard per street 🔴
@@ -98,7 +108,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 - **The city's words:** "(1) FRONT YARD — An open space extending the full width of the lot between a main building and the front lot line… the depth of which shall be the least distance between the front lot line and the front of such main building." (§325-3, [p.20](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=20)). §325-19C (p.50) adds that on corner lots in residential districts, "yards facing public streets shall conform to the minimum front yard requirements", giving "two adjoining front yards".
 - **Why it matters:** on a corner lot, both street sides need the 25 ft front yard instead of 10 ft side yards. That costs 15 ft of buildable width.
-- **Until you answer:** Gordium asks which line faces the street. Corner lots aren't handled yet and get NEEDS REVIEW.
+- **Until you answer:** Gordium has no way yet to know a lot is a corner lot. It checks the typed front yard against 25 ft and the typed side yards against 10 ft, so **a corner lot can wrongly PASS: check corner lots by hand.** When measured from a model, Gordium will ask which lines face a street, and a corner lot will get NEEDS REVIEW.
 - **Options:** (a) confirm: every street-facing yard is a front yard, and only the rest are side or rear yards; (b) another reading.
 
 ### 2.3 Corner lots: how many side yards are left?
@@ -106,8 +116,8 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 - **The city's words:** "Buildings hereafter erected in each use district must have two side yards as specified in this column and Column 12." (Column 13, [§325-8A, p.25](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=25)). On a corner lot, §325-19C (p.50) makes two front yards, and §325-8A(14)(d) (pp.25–26) makes the yard opposite the address street the rear yard, which leaves one side yard.
 - **Why it matters:** decides how close a corner-lot house can be to its one remaining side line.
-- **Until you answer:** corner lots get NEEDS REVIEW.
-- **Options:** (a) the one side yard uses the larger minimum (Column 13); (b) the smaller one (Column 12); (c) another reading.
+- **Until you answer:** as in §2.2, corner lots aren't recognized yet: **check them by hand.** When measured from a model, a corner lot will get NEEDS REVIEW.
+- **Options:** (a) the one side yard uses the larger minimum (Column 12, "one side at least"); (b) the smaller one (Column 13, "other"); (c) another reading. (In R-1b both are 10 ft, so this matters only in districts where they differ.)
 
 ### 2.4 Do side yards apply to a detached garage or shed?
 `[side_yard#1]`
@@ -175,7 +185,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Options:** for the main entrance: (a) the entrance facing the street; (b) the one the architect names. For the 12 ft test: (a) every side; (b) only the main entrance side.
 
 ### 4.4 Basement or cellar, when a space fits both?
-`[basement#1]` `[basement#2]` `[cellar#1]`
+`[basement#1]` `[basement#2]` `[cellar#1]` `[cellar#2]`
 
 - **The city's words:** "BASEMENT — That space of a building that is partly below grade which has more than half of its height, measured from floor to ceiling, above the finished ground level at any point." (§325-3, [p.5](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=5)). "CELLAR — That space of a building that is partly or entirely below grade which has more than half of its height… below the average established curb level or finished grade of the ground adjoining the building." (§325-3, [p.6](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=6))
 - **Why it matters:** a basement can count as a story; a cellar never does. A walk-out lower level on a slope can be more than half above ground on one side and more than half below on average, so it fits both definitions.
@@ -185,7 +195,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 ### 4.5 The height bonus: how much bigger must the yards get? 🔴
 `[R-1b.height#1]` `[R-1b.height#2]`
 
-- **The city's words:** "In any district, any main building may be erected to a height in excess of that specified for the district, provided that: (1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height." ([§325-16C, p.47](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47)). The bonus is capped at 10% (3.5 ft in R-1b).
+- **The city's words:** "In any district, any main building may be erected to a height in excess of that specified for the district, provided that: … (1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height." ([§325-16C, p.47](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47)). The bonus is capped at 10% (3.5 ft in R-1b).
 - **Why it matters:** a 37 ft R-1b house is legal only if every yard is 2 ft bigger than usual.
 - **Until you answer:** Gordium's R-1b height rule reads it as: every yard (front, both sides, rear) must be its normal minimum plus the extra height. The bonus is applied to the main building only.
 - **Options:** (a) confirm both readings; (b) only some yards grow (which?); (c) the bonus also applies to accessory buildings.
@@ -193,7 +203,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 ### 4.6 Parapets and cornices above the limit
 `[R-1b.height#3]` `[height_of_building#3]`
 
-- **The city's words:** the height definition excludes "bulkheads, housing for mechanical equipment, towers and similar constructions not intended for human occupancy" (§325-3, p.12). §325-16A and B (p.46) separately exempt chimneys, spires, skylights and ornamental parapets or cornices up to 5 ft.
+- **The city's words:** the height definition excludes "bulkheads, housing for mechanical equipment, towers and similar constructions not intended for human occupancy" (§325-3, p.12). §325-16A (p.46) and §325-16B (p.47) separately exempt chimneys, spires, skylights and ornamental parapets or cornices up to 5 ft.
 - **Why it matters:** decides whether a parapet can sit on top of a house that already uses the height bonus.
 - **Until you answer:** these features aren't checked yet; §325-16A and B will become rules of their own.
 - **Options:** (a) confirm these exemptions don't change how height itself is measured; (b) a parapet is allowed on top of the bonus height too; (c) it isn't.
@@ -212,7 +222,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 - **The city's words:** the chart on [p.2](https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2) marks each use with •, - or SP, with no legend. §325-9B(1) (p.30) lists "uses… which require a special permit from the Planning and Development Board".
 - **Why it matters:** every use check depends on it.
-- **Until you answer:** Gordium reads • as permitted, - as not permitted, and SP as needing a special permit (NEEDS REVIEW).
+- **Until you answer:** Gordium reads • as permitted and - as not permitted. A use marked SP gets NEEDS REVIEW, from the special-permit review condition in Gordium's R-1b use rule (R-1b.use).
 - **Options:** (a) confirm; (b) correct us.
 
 ### 5.2 Is "public utility structure" the same as "public utility facilities"?
@@ -264,7 +274,7 @@ We checked your worked example against the city's documents. The full list is in
 - `[discrepancy 2.2]` **Rear yard:** the spreadsheet compares the *required* rear yard (22.5 ft) with the 20 ft minimum, instead of the house's *actual* rear distance (25 ft). It passes by coincidence.
 - `[discrepancy 3.1]` **Coverage counts more than the house:** porches, decks, balconies over 2 ft, ramps and landings count too (§325-3, §325-18A).
 - `[discrepancy 4.1]` **Rhino model:** the building sits about 76 ft away from the buildable area; all four corners are outside the lot. Intended as a test, or a mistake?
-- `[discrepancy 4.2]` **Rhino model:** the rear setback is drawn at 20 ft, but the rule requires at least 22.6 ft under any reading of this lot (23.7 ft if the 90.28 and 99.37 ft lines are the side lot lines).
+- `[discrepancy 4.2]` **Rhino model:** the rear setback is drawn at 20 ft. Only one reading of this lot's depth allows 20 ft (§1.2, option c); the others require 23.7 ft or 25.015 ft. Which did you intend?
 - `[discrepancy 4.3]` **Rhino model:** the building fills the whole buildable area (2,169 sf, about 32.5% of the lot), over the 25% coverage limit.
 - `[discrepancy 5.6]` **Workflow document:** says "the current example is within all limits", but coverage fails.
 
