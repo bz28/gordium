@@ -18,6 +18,7 @@ lot_facts:
   street_line:
     - [[395.4317, 360.94], [439.5101, 419.1302]]
 
+  corner_lot: false                # one street (Ithaca Rd) in the architects' model, spreadsheet and workflow
   grade_elevation: 0               # flat site: the house sits at z = 0 and its 35 ft top matches Inputs!B12 (35 ft)
 
   stories: 3                       # Inputs!B13 (not drawn in the model: the house is one solid with no floors)

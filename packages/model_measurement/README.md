@@ -22,7 +22,8 @@ format report from it.
   | Fact | Why it's needed |
   |---|---|
   | `zone`, `jurisdiction`, `use` | pick the rules |
-  | `street_line` | which lot line is on the street (by its two ends); front, side and rear all follow from it |
+  | `street_line` | **every** lot line on a street, each by its two ends (on a corner lot: both streets and any curve between them); front, side and rear all follow from it |
+  | `corner_lot` | yes or no: two streets meet at the lot (§325-19C). Stated, never guessed from the drawing (the city's definition has no angle in it). Without it, everything that depends on the street says "needs review"; a corner lot with only one street line given asks for both |
   | `grade_elevation` | the ground level heights are measured from (a flat site) |
   | `lot_id`, `main_building` | only when there is more than one candidate |
   | `stories`, `sleeping_rooms`, `parking_spaces` | not drawn in a massing model; the rules that need them say "needs review" until they're entered |
@@ -56,10 +57,12 @@ listed, and the reason names the open question for the architects, so the checke
 | Something sticking out above the ground floor (an overhang, eaves) | measured to the building seen from above / to its walls at ground level | building_area, yard_projections |
 | More than one solid on the Building layer | every yard to the main building / to any solid (a porch or deck drawn as its own solid is part of the building, §325-18A; an accessory building may follow other rules) | yard_projections, §325-25 |
 | A pitched roof | midway between eave and ridge / to the ridge | height_of_building: "average height" |
+| More than one solid, for the height | the main building alone / with every other solid as part of it | §325-25 |
 
 Things that stop a measurement, with the reason given: no street side, a street line that isn't a lot line, a
-building outside the lot, no ground level, more than one building and none picked, a corner lot (§325-19C: the
-street frontage turns more than 30° anywhere along it, a rounded corner included), every lot line on a street, a
+building outside the lot, no ground level, more than one building and none picked, a corner lot (§325-19C: which
+yards are front, side and rear, and which street's frontage is the lot width, are open questions), no corner-lot
+answer, a corner lot whose street lines don't turn (only one street given), every lot line on a street, a
 lot outline that isn't closed or crosses itself, a curved wall or edge (not measured yet), a solid that isn't
 closed, two candidate lot outlines, and anything on the Building layer that isn't a solid or mesh (a block, a
 surface): it is reported, never left out, since leaving it out would undercount coverage. Sublayers count

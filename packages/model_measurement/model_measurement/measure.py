@@ -28,6 +28,7 @@ MEASURES = list(load(MEASURES_FILE))
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
 PARALLEL, PERPENDICULAR = 30, 60   # degrees from the street: clearly a rear line / clearly a side line
+STRAIGHT = 5              # degrees: street lines that turn less than this in all are one straight frontage
 MAX_UNCLEAR_EDGES = 4     # more lot lines than this of unclear kind: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
 ASK = {"use": "choose the use", "stories": "enter the number of stories",
@@ -124,22 +125,21 @@ class Lot:
         start = next(i for i in self.street if (i - 1) % n not in s)
         return [(start + k) % n for k in range(len(self.street))]
 
-    def corner(self) -> bool:
-        """A corner lot (two front yards, §325-19C): the street frontage turns, anywhere along it, more than
-        PARALLEL degrees from the way it started. Measured along every piece of it, curved lines included, so
-        a rounded corner counts like a sharp one."""
+    def turn(self) -> float:
+        """How far the street frontage turns from the way it started, at most, in degrees: added up along
+        every piece of it, curved lines included (a corner rounded in several pieces turns as much as a sharp
+        one)."""
         points = [p for i in self.ordered_street() for p in self.edges[i]]
-        heading, turned = None, 0.0
+        heading, turned, most = None, 0.0, 0.0
         for a, b in zip(points, points[1:]):
             if math.dist(a, b) <= 1e-9:
                 continue
             h = math.atan2(b[1] - a[1], b[0] - a[0])
             if heading is not None:
                 turned += (h - heading + math.pi) % (2 * math.pi) - math.pi
-                if abs(math.degrees(turned)) > PARALLEL:
-                    return True
+                most = max(most, abs(math.degrees(turned)))
             heading = h
-        return False
+        return most
 
     def readings(self):
         """Every way to read which lot lines are side lines and which are rear lines: a list of
@@ -242,6 +242,20 @@ def _height(building: dict, grade: float) -> dict:
                    "the average height of a pitched roof is an open question for the architects (height_of_building)")
 
 
+def _with_others(main: dict, others: list[dict]) -> dict:
+    """The main building's height read two ways when there are other solids: alone, and with every other solid
+    as part of it (a wing or tower drawn as its own solid is part of the building; an accessory building
+    may have its own limit, §325-25). Each other solid counts at its highest reading."""
+    mine = [(r["reading"], r["value"]) for r in main["readings"]] or [("", main["value"])]
+    tallest = max(max([r["value"] for r in o["readings"]] or [o["value"]]) for o in others
+                  if o["value"] is not None or o["readings"])
+    readings = [(_both(w, "the main building only"), v, {}) for w, v in mine]
+    readings += [(_both(w, "with every other solid as part of it"), max(v, tallest), {}) for w, v in mine]
+    return _decide("building_height", readings, main["how"], main["objects"],
+                   main["reason"] or "whether another solid is part of the building or an accessory building (§325-25) "
+                                     "is an open question for the architects")
+
+
 # ---- measuring -------------------------------------------------------------------------------------------
 
 def _both(*words) -> str:
@@ -275,6 +289,9 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     why_main = None if main else "more than one building: pick the main building"
     why = why_building or why_grade or why_main
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
+    others = [b for b in buildings if b is not main]
+    if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):
+        out["building_height"] = _with_others(out["building_height"], [_height(b, grade) for b in others])
 
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None
@@ -285,10 +302,20 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         return out
     out["lot_area"] = _record("lot_area", "sf", _r(lot.polygon.area), "the area inside the lot lines", [lot.id])
 
-    # where the street is decides the lot width, the yards and the lot depth
+    # where the street is decides the lot width, the yards and the lot depth. Whether the lot is a corner lot
+    # (two streets, §325-19C) is stated by the architect, never guessed from the drawing (the city's definition
+    # has no angle in it); the street lines given must agree with it.
+    if not lot.street_problem and facts.get("corner_lot") is None:
+        lot.street_problem = ("say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot "
+                              "yes or no")
+    elif not lot.street_problem and facts["corner_lot"] and lot.turn() <= STRAIGHT:
+        lot.street_problem = "a corner lot: pick the lot lines on both streets (and any curve between them)"
     if lot.street_problem:
         for name in ("lot_width", "lot_depth", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard"):
             out[name] = _missing(name, lot.street_problem)
+    elif facts["corner_lot"]:
+        out["lot_width"] = _missing("lot_width", "a corner lot: which street's frontage is the lot width (§325-19C) is "
+                                                 "an open question for the architects")
     else:
         chain = lot.ordered_street()
         width = [("along the street line", lot.length(chain), {})]
@@ -315,7 +342,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
 
     if lot.street_problem:
         return out
-    corner, readings = lot.corner(), None
+    corner, readings = facts["corner_lot"], None
     sides = "which lot lines count as side and rear lot lines is an open question for the architects (lot_depth)"
     if corner:
         why_lines = ("a corner lot: which yards are front, side and rear yards (§325-19C) is an open question for the "

@@ -90,6 +90,23 @@ def _mesh_faces(mesh, s):
     return faces
 
 
+def _block_holds(model, ref, names, layer, depth=0) -> bool:
+    """Whether a placed block holds, at any depth of blocks inside blocks, an object on the layer (or below it)."""
+    definition = model.InstanceDefinitions.FindId(ref.ParentIdefId)
+    if definition is None or depth > 32:
+        return depth > 32                       # a loop of blocks: report rather than miss
+    for object_id in definition.GetObjectIds():
+        o = model.Objects.FindId(object_id)
+        if o is None:
+            continue
+        name = names[o.Attributes.LayerIndex]
+        if name == layer or name.startswith(layer + "::"):
+            return True
+        if isinstance(o.Geometry, r.InstanceReference) and _block_holds(model, o.Geometry, names, layer, depth + 1):
+            return True
+    return False
+
+
 def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
     """The lot and buildings in a .3dm, in feet: {"units", "lot", "buildings", "problems"}."""
     model = r.File3dm.Read(str(path))
@@ -107,6 +124,15 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
     placed = [o for o in model.Objects if not o.Attributes.IsInstanceDefinitionObject]   # not a block's definition
     on = {k: [o for o in placed if inside(names[o.Attributes.LayerIndex], v)] for k, v in layers.items()}
     problems = [] if layers["lot"] in names else [f"no {layers['lot']} layer"]
+    # a block's objects keep their own layers wherever the block is placed: a block holding anything on the
+    # lot or building layer (at any depth) is reported, never read at its definition's place or dropped
+    blocks = {k: False for k in layers}
+    for o in placed:
+        if isinstance(o.Geometry, r.InstanceReference):
+            for k, v in layers.items():
+                blocks[k] |= inside(names[o.Attributes.LayerIndex], v) or _block_holds(model, o.Geometry, names, v)
+    if blocks["lot"]:
+        problems.append(f"a block on the {layers['lot']} layer can't be read yet (explode it)")
 
     closed = [o for o in on["lot"] if isinstance(o.Geometry, r.Curve) and o.Geometry.IsClosed]
     picked = [o for o in closed if _id(o) == facts.get("lot_id")]
@@ -128,8 +154,10 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
             g = g.ToBrep(True)
         if isinstance(g, (r.Curve, r.Point, r.PointCloud, r.TextDot, r.AnnotationBase, r.Hatch)):
             continue                            # drawing aids, not building
+        if isinstance(g, r.InstanceReference):
+            continue                            # reported below, with blocks placed on any layer
         if not isinstance(g, (r.Brep, r.Mesh)):
-            unread.add("a block" if isinstance(g, r.InstanceReference) else f"a {type(g).__name__}")
+            unread.add(f"a {type(g).__name__}")
         elif isinstance(g, r.Brep):
             faces, trouble = _brep_faces(g, s)
             if not g.IsSolid:
@@ -138,6 +166,8 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
         elif isinstance(g, r.Mesh):
             buildings.append({"id": _id(o), "faces": _mesh_faces(g, s),
                               "problems": [] if g.IsClosed else ["a building mesh isn't closed"]})
+    if blocks["building"]:
+        unread.add("a block")
     for kind in sorted(unread):                 # never dropped silently: the coverage and yards would be wrong
         buildings.append({"id": kind, "faces": [], "problems": [
             f"{kind} on the {layers['building']} layer can't be measured yet (explode it or turn it into a solid)"]})

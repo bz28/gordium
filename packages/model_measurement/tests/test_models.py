@@ -141,7 +141,8 @@ def test_the_committed_spreadsheet_model_matches_its_generator(tmp_path):
 @pytest.mark.parametrize("bad, message", [({"grade_elevation": "0"}, "grade_elevation must be a number"),
                                           ({"street_line": [[[0, 0]]]}, "street_line must be"),
                                           ({"stories": "3"}, "stories must be a whole number"),
-                                          ({"zone": 7}, "zone must be text")])
+                                          ({"zone": 7}, "zone must be text"),
+                                          ({"corner_lot": "no"}, "corner_lot must be yes or no")])
 def test_mistyped_lot_facts_are_refused_with_a_plain_message(tmp_path, bad, message):
     import yaml
     from model_measurement.project import project

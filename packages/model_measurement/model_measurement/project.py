@@ -13,8 +13,8 @@ from rule_format.rulebook import load
 from .measure import measure
 from .read_3dm import read_site
 
-FACT_FIELDS = {"title", "jurisdiction", "zone", "use", "lot_id", "street_line", "grade_elevation", "main_building",
-               "stories", "sleeping_rooms", "parking_spaces"}
+FACT_FIELDS = {"title", "jurisdiction", "zone", "use", "lot_id", "street_line", "corner_lot", "grade_elevation",
+               "main_building", "stories", "sleeping_rooms", "parking_spaces"}
 
 
 def _number(x) -> bool:
@@ -36,6 +36,8 @@ def fact_problems(facts: dict) -> list[str]:
     for k in ("stories", "sleeping_rooms", "parking_spaces"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
+    if facts.get("corner_lot") is not None and not isinstance(facts["corner_lot"], bool):
+        problems.append("corner_lot must be yes or no (true / false)")
     street = facts.get("street_line")
     if street is not None and not (isinstance(street, list) and street and all(
             isinstance(s, list) and len(s) == 2 and all(_point(p) for p in s) for s in street)):

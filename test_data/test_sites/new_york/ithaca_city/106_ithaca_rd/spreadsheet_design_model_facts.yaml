@@ -9,6 +9,7 @@ lot_facts:
   use: one_family_detached         # Output!C3 (Detached one-family)
   street_line:                     # the 73 ft side (Inputs!B3, lot width)
     - [[0, 0], [73, 0]]
+  corner_lot: false                # one street (Ithaca Rd) in the architects' model, spreadsheet and workflow
   grade_elevation: 0               # flat site; the house sits on it
   stories: 3                       # Inputs!B13
   sleeping_rooms: 3                # Inputs!B14

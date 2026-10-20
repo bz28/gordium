@@ -37,7 +37,7 @@ def write(m, tmp_path, name="m.3dm"):
     return path
 
 
-FACTS = {"street_line": [[[0, 0], [50, 0]]], "grade_elevation": 0}
+FACTS = {"street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "grade_elevation": 0}
 
 
 def test_a_lot_and_a_solid(tmp_path):
@@ -137,7 +137,11 @@ def test_a_block_is_reported_and_its_definition_isnt_read_as_a_building(tmp_path
 
 
 def test_a_solid_on_a_sublayer_counts_and_a_surface_is_reported(tmp_path):
-    m = model(layers=("Site", "Building", "Building::Garage"))
+    m = model()
+    garage = r.Layer()
+    garage.Name = "Garage"                    # a real sublayer: its name is "Garage", its full path "Building::Garage"
+    garage.ParentLayerId = m.Layers.FindIndex(1).Id
+    m.Layers.Add(garage)
     rect(m, 0, 0, 50, 100)
     box(m, 10, 25, 35, 65, 30)
     box(m, 30, 75, 48, 95, 12, layer=2)
@@ -146,3 +150,15 @@ def test_a_solid_on_a_sublayer_counts_and_a_surface_is_reported(tmp_path):
     assert len([b for b in site["buildings"] if b["faces"]]) == 2
     assert any("a Surface on the Building layer can't be measured yet" in p for b in site["buildings"]
                for p in b["problems"])
+
+
+def test_a_block_placed_on_another_layer_with_building_objects_inside_is_reported(tmp_path):
+    m = model(layers=("Site", "Building", "Default"))
+    rect(m, 0, 0, 50, 100)
+    box(m, 10, 25, 35, 65, 30)
+    garage = r.Brep.CreateFromBoundingBox(r.BoundingBox(0, 0, 0, 18, 20, 12))
+    index = m.InstanceDefinitions.Add("garage", "", "", "", r.Point3d(0, 0, 0), (garage,), (on(1),))   # solid on Building
+    definition = m.InstanceDefinitions.FindIndex(index)
+    m.Objects.AddInstanceObject(r.InstanceReference(definition.Id, r.Transform.Translation(30, 75, 0)), on(2))
+    site = read_site(write(m, tmp_path), FACTS)
+    assert [b["id"] for b in site["buildings"]] [-1] == "a block"
