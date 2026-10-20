@@ -86,7 +86,7 @@ def button(text, action, enabled=True):
     b.Text = text
     b.Enabled = enabled
     if action is not None:
-        b.Click += lambda s, e: action()
+        b.Click += logic.guard(lambda s, e: action(), "do " + text)
     return b
 
 
@@ -139,7 +139,7 @@ def make_panel(actions):
             if e.Column.DisplayIndex in (0, 1, 3):          # the item (with its mark), proposed, margin
                 e.ForegroundColor = eto_status_color(found["status"])
 
-    tree.CellFormatting += formatting
+    tree.CellFormatting += logic.guard(formatting, "color a panel row")
 
     def selected(sender, e):
         item = tree.SelectedItem
@@ -149,8 +149,8 @@ def make_panel(actions):
         parts["selected"] = tag
         show_detail(parts)
 
-    tree.SelectedItemChanged += selected
-    tree.CellDoubleClick += lambda s, e: actions["zoom"](parts["by_id"].get(parts["selected"]))
+    tree.SelectedItemChanged += logic.guard(selected, "show the selected item")
+    tree.CellDoubleClick += logic.guard(lambda s, e: actions["zoom"](parts["by_id"].get(parts["selected"])), "zoom to the item")
     split = ef.Splitter()
     split.Orientation = ef.Orientation.Vertical
     split.Panel1 = tree
@@ -177,7 +177,7 @@ def _envelope_box(actions):
     box = ef.CheckBox()
     box.Text = "Show buildable envelope"
     box.Checked = True
-    box.CheckedChanged += lambda s, e: actions["envelope"](bool(box.Checked))
+    box.CheckedChanged += logic.guard(lambda s, e: actions["envelope"](bool(box.Checked)), "show or hide the envelope")
     return box
 
 
@@ -296,18 +296,74 @@ def show_detail(parts):
             d.AddRow(_wide("“" + q["text"] + "”", size=12))
             if q.get("where"):
                 d.AddRow(_wide(q["where"], size=11))
+    for t in det.get("definitions") or []:        # E5: the whole definitions an examiner measures height by
+        d.AddRow(_wide(t["term"], bold=True, size=12))
+        d.AddRow(_wide("“" + t["text"] + "”", size=11))
+    if det.get("spots"):
+        d.AddRow(_wide("Spot grades (" + str(len(det["spots"])) + ")", bold=True, size=12))
+        for s in det["spots"]:
+            d.AddRow(_wide(s, size=11))
+    if det.get("diagram"):
+        d.AddRow(_section(det["diagram"]))
+    if det.get("zoom_note"):
+        d.AddRow(_wide(det["zoom_note"], size=11))
     if det.get("citation"):
         d.AddRow(_wide(det["citation"], size=11))
     for c in det.get("cited") or []:
         link = ef.LinkButton()
         link.Text = "Open " + c["citation"]
         url = c["link"]
-        link.Click += lambda s, e, u=url: Rhino.UI.Dialogs.ShowMessage(u, "Gordium") if not _open(u) else None
+        link.Click += logic.guard(lambda s, e, u=url: Rhino.UI.Dialogs.ShowMessage(u, "Gordium") if not _open(u) else None, "open the link")
         d.AddRow(link)
     if det.get("precision"):
         d.AddRow(_wide(det["precision"], size=11))
     d.Add(None)
     d.Create()
+
+
+def _section(dg):
+    """E5's section diagram, not to scale: the lot lines at both ends, the front and rear yards, the grade plane,
+    the building and the height limit, each labelled with the checker's own text. Drawn ONCE into a bitmap, here,
+    inside try/except, then shown as an image: never in a Paint handler, because on the Mac an error raised while
+    the system draws a view aborts Rhino (it did: 2026-10-20). If drawing fails, a line of text stands in."""
+    w, h = PANEL_WIDTH - 60, 150
+    try:
+        bmp = ed.Bitmap(w, h, ed.PixelFormat.Format32bppRgba)
+        g = ed.Graphics(bmp)
+        try:
+            ink, faint = ef.SystemColors.ControlText, ef.SystemColors.DisabledText
+            red = eto_status_color("does_not_comply")
+            font = ed.Font(ed.SystemFont.Default, 9)
+            ground, left, right = h - 24.0, 16.0, w - 16.0
+            depth = dg.get("depth") or 0
+            front, rear = dg.get("front") or 0, dg.get("rear") or 0
+            span = right - left
+            fx = left + (span * front / depth if depth else span * 0.25)
+            rx = right - (span * rear / depth if depth else span * 0.25)
+            height, limit = dg.get("height"), dg.get("limit")
+            scale = (ground - 18.0) / max(v for v in (height, limit, 1.0) if v)
+            text = dg.get("text") or {}
+            g.DrawLine(ink, left, ground, right, ground)                     # the grade plane
+            for x in (left, right):                                          # the lot lines
+                g.DrawLine(faint, x, ground - 4, x, 8.0)
+            if height:
+                g.DrawRectangle(ink, fx, ground - height * scale, max(rx - fx, 4.0), height * scale)
+                g.DrawText(font, ink, fx + 3, ground - height * scale + 2, "height " + text.get("height", ""))
+            if limit:
+                y = ground - limit * scale
+                g.DrawLine(red, left, y, right, y)
+                g.DrawText(font, red, right - 110, y - 13, "limit " + text.get("limit", ""))
+            g.DrawText(font, faint, left + 2, ground + 3, "front yard " + text.get("front", ""))
+            g.DrawText(font, faint, rx + 2, ground + 3, "rear yard " + text.get("rear", ""))
+            g.DrawText(font, faint, left + 2, 2.0, dg.get("label") or "Diagram, not to scale")
+        finally:
+            g.Dispose()
+        view = ef.ImageView()
+        view.Image = bmp
+        view.Size = ed.Size(w, h)
+        return view
+    except Exception as e:                   # a drawing problem never costs the panel (or Rhino)
+        return _wide((dg.get("label") or "Diagram") + ": can't be drawn here (" + str(e)[:60] + ")", size=11)
 
 
 def _open(url):
@@ -405,10 +461,10 @@ def start_box(state, options, mode):
         draw.Enabled = bool(confirm.Checked)
         reason.Text = "" if confirm.Checked else "Confirm the district to continue."
 
-    confirm.CheckedChanged += confirmed
-    massing.SelectedIndexChanged += lambda s, e: setattr(draw, "Text", "Draw site and envelope"
+    confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
+    massing.SelectedIndexChanged += logic.guard(lambda s, e: setattr(draw, "Text", "Draw site and envelope"
                                                         if massing.SelectedIndex == 1 else "Draw site and massing") \
-        if mode == "start" else None
+        if mode == "start" else None, "choose the massing")
     cancel = button("Cancel", lambda: done(None))
     note = "?  Lot from tax map: dimensions approximate. Items within 2'-0\" of a limit will need review."
     grade_note = "?  Building height and stories need review until grade is set."
@@ -443,7 +499,7 @@ def start_box(state, options, mode):
     dialog.AbortButton = cancel
     shown = state.get("_on_shown")            # for the in-Rhino test: capture the real box, then close it
     if shown is not None:
-        dialog.Shown += lambda s, e: shown(dialog)
+        dialog.Shown += logic.guard(lambda s, e: shown(dialog), "run the start box hook")
     dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     return chosen.get("what")
 

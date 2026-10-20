@@ -32,7 +32,10 @@ try:
     if mode == "panel":
         p = g.STATE.get("panel_parts")
         items = (p.get("view") or {}).get("items") or [] if p else []
-        pick = next((i for i in items if i["status"] in ("does_not_comply", "needs_review") and i.get("detail")), None)
+        want = sc.sticky.pop("gordium_windows_item", None)    # an item by name, else the first problem
+        pick = next((i for i in items if i["name"] == want), None) if want else None
+        pick = pick or next((i for i in items if i["status"] in ("does_not_comply", "needs_review") and i.get("detail")),
+                            None)
         if pick is not None:
             p["selected"] = pick["id"]
             g.ui.show(p, p["view"])
@@ -41,7 +44,7 @@ try:
         def shown(dialog):
             timer = ef.UITimer()
             timer.Interval = 12
-            timer.Elapsed += lambda s, e: (timer.Stop(), dialog.Close(False))
+            timer.Elapsed += g.logic.guard(lambda s, e: (timer.Stop(), dialog.Close(False)), "close the start box")
             timer.Start()
             ready(title=dialog.Title)
 

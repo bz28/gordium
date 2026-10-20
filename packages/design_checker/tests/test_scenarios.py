@@ -136,3 +136,17 @@ def test_a_chart_heading_row_is_quoted_in_its_own_words():
 def test_a_zero_side_yard_is_never_named_by_a_direction_it_doesnt_have():
     zero = {"side_yard_smaller": {"points": [[0, 40], [0, 40]]}, "side_yard_larger": {"points": [[50, 40], [35, 40]]}}
     assert present._side_name("side_yard_smaller", zero) == "Side yard, narrower"
+
+
+def test_the_height_detail_has_the_definitions_every_spot_grade_and_a_section(  # spec E5
+):
+    v = _items("07_spot_grades_on_a_slope_then_the_house_moves.yaml")
+    d = v["Building height"]["detail"]
+    terms = [t["term"] for t in d["definitions"]]
+    assert terms == ["HEIGHT OF BUILDING", "GRADE PLANE"]
+    assert "average of finished ground level on each side of the building" in d["definitions"][1]["text"]
+    assert d["spots"][0] == "(30'-0\", 29'-0\") · elevation 1'-0\"" and len(d["spots"]) == 4
+    dg = d["diagram"]
+    assert dg["label"] == "Diagram, not to scale" and dg["height"] == 30 and dg["limit"] == 35
+    assert dg["text"]["height"] == "30'-0\"" and dg["text"]["front"] == "30'-0\""
+    assert d["zoom_note"] == "Zoom to opens the front elevation"

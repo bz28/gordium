@@ -36,6 +36,18 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 import gordium_ui as ui  # noqa: E402  (the panel, the start box, the drawing helpers)
 
+# no callback may raise into Rhino (on the Mac that aborts Rhino): rhino_logic.guard catches, logs, says it once
+logic.ERROR_LOG = os.path.join(tempfile.gettempdir(), "gordium_errors.log")
+logic.REPORT = Rhino.RhinoApp.WriteLine
+CONDUIT_WORDS = {"cull": "choose what to draw", "bounds": "size the drawing", "draw_scene": "draw in the model",
+                 "draw_screen": "draw the labels and status"}
+
+
+def _conduit(name, o, e):
+    """The display conduit's one way in: the named drawing function, guarded (a failure draws nothing this frame
+    and is logged and said once, never raised into Rhino's drawing)."""
+    logic.guard(globals().get(name) or (lambda *a: None), CONDUIT_WORDS.get(name, name))(o, e)
+
 LAYERS = logic.LAYERS
 ID_KEY = "gordium:id"
 SECTION, ENTRY = "Gordium", "lot_facts"
@@ -282,16 +294,16 @@ class Overlay(Rhino.Display.DisplayConduit):
         self.box = rg.BoundingBox.Empty
 
     def ObjectCulling(self, e):
-        sys.modules[__name__].cull(self, e)
+        sys.modules[__name__]._conduit("cull", self, e)
 
     def CalculateBoundingBox(self, e):
-        sys.modules[__name__].bounds(self, e)
+        sys.modules[__name__]._conduit("bounds", self, e)
 
     def PostDrawObjects(self, e):
-        sys.modules[__name__].draw_scene(self, e)
+        sys.modules[__name__]._conduit("draw_scene", self, e)
 
     def DrawForeground(self, e):
-        sys.modules[__name__].draw_screen(self, e)
+        sys.modules[__name__]._conduit("draw_screen", self, e)
 
 
 def _here(o, e):
@@ -1148,14 +1160,14 @@ def _toast(lines):
     o = overlay()
     o.toast = (list(lines), time.time() + TOAST_SECONDS)
     if STATE.get("command_hook") is None:              # the next command clears it
-        hook = System.EventHandler[Rhino.Commands.CommandEventArgs](lambda s, e: _clear_toast())
+        hook = System.EventHandler[Rhino.Commands.CommandEventArgs](logic.guard(lambda s, e: _clear_toast(), "clear the notice"))
         Rhino.Commands.Command.BeginCommand += hook
         STATE["command_hook"] = hook
     timer = STATE.get("toast_timer")
     if timer is None:
         timer = ef.UITimer()
         timer.Interval = 0.5
-        timer.Elapsed += lambda s, e: _toast_tick()
+        timer.Elapsed += logic.guard(lambda s, e: _toast_tick(), "time the notice")
         STATE["toast_timer"] = timer
     timer.Start()
     Rhino.RhinoDoc.ActiveDoc.Views.Redraw()
@@ -1228,9 +1240,9 @@ def documents(on):
         Rhino.RhinoDoc.EndOpenDocument -= opened
         Rhino.RhinoDoc.ActiveDocumentChanged -= active
     if on:
-        new_doc = System.EventHandler[Rhino.DocumentEventArgs](_new_document)
-        opened = System.EventHandler[Rhino.DocumentOpenEventArgs](_opened)
-        active = System.EventHandler[Rhino.DocumentEventArgs](_new_document)
+        new_doc = System.EventHandler[Rhino.DocumentEventArgs](logic.guard(_new_document, "follow a new document"))
+        opened = System.EventHandler[Rhino.DocumentOpenEventArgs](logic.guard(_opened, "follow an opened document"))
+        active = System.EventHandler[Rhino.DocumentEventArgs](logic.guard(_new_document, "follow the active document"))
         Rhino.RhinoDoc.NewDocument += new_doc
         Rhino.RhinoDoc.EndOpenDocument += opened
         Rhino.RhinoDoc.ActiveDocumentChanged += active
@@ -1265,10 +1277,10 @@ def live(on):
     STATE["live"] = on
     if not on:
         return
-    objects = System.EventHandler[Rhino.DocObjects.RhinoObjectEventArgs](_changed)
-    replaced = System.EventHandler[Rhino.DocObjects.RhinoReplaceObjectEventArgs](_changed)
-    attributes = System.EventHandler[Rhino.DocObjects.RhinoModifyObjectAttributesEventArgs](_changed)
-    idle = System.EventHandler(_idle)
+    objects = System.EventHandler[Rhino.DocObjects.RhinoObjectEventArgs](logic.guard(_changed, "notice an edit"))
+    replaced = System.EventHandler[Rhino.DocObjects.RhinoReplaceObjectEventArgs](logic.guard(_changed, "notice an edit"))
+    attributes = System.EventHandler[Rhino.DocObjects.RhinoModifyObjectAttributesEventArgs](logic.guard(_changed, "notice an edit"))
+    idle = System.EventHandler(logic.guard(_idle, "re-check after an edit"))
     Rhino.RhinoDoc.AddRhinoObject += objects
     Rhino.RhinoDoc.DeleteRhinoObject += objects
     Rhino.RhinoDoc.UndeleteRhinoObject += objects

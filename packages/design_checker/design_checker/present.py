@@ -541,7 +541,31 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 "precision": PRECISION,
                 "at_limit": (f"At the limit: {proposed} exact" if margin_t == "at limit" else None),
             }})
+        if node is not None and node.left.id == "building_height":
+            out[-1]["detail"].update(_height_detail(j, facts, values, node, numbers))
     return out
+
+
+def _height_detail(j: Path, facts: dict, values: dict, node, numbers) -> dict:
+    """E5: what an examiner checks a height by. The city's whole HEIGHT OF BUILDING and GRADE PLANE definitions,
+    each spot grade with where it is and its elevation, and the numbers for a section diagram (not to scale) of
+    the lot lines, the yards, the grade plane, the building and the limit. Zoom to opens the front elevation."""
+    terms = load(j / "4_term_definitions/definitions.yaml") or {}
+    definitions = [{"term": terms[k]["term"], "text": " ".join(" ".join(str(s["quote"]).split())
+                                                             for s in terms[k].get("sources") or [] if s.get("quote"))}
+                   for k in ("height_of_building", "grade_plane") if k in terms]
+    spots = [f"({feet_inches(p[0])}, {feet_inches(p[1])}) · elevation {feet_inches(p[2])}"
+             for p in facts.get("grade_points") or [] if len(p) >= 3]
+    limit = numbers[1] if isinstance(numbers[1], (int, float)) else None
+    diagram = {k: values.get(m) for k, m in (("height", "building_height"), ("front", "front_yard"),
+                                              ("rear", "rear_yard"), ("depth", "lot_depth"))}
+    diagram["limit"] = limit
+    diagram["label"] = "Diagram, not to scale"
+    rounding = {"height": "up", "limit": "down", "front": "down", "rear": "down"}     # never toward compliance
+    diagram["text"] = {k: feet_inches(diagram[k], d) if isinstance(diagram[k], (int, float)) else "—"
+                       for k, d in rounding.items()}
+    return {"definitions": definitions, "spots": spots, "diagram": diagram,
+            "zoom_note": "Zoom to opens the front elevation"}
 
 
 def _side_name(measure: str, measured: dict) -> str:

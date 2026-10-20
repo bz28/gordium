@@ -201,3 +201,37 @@ def could_be_building(kind, solid=False, faces=0):
     if kind == "Mesh":
         return solid or faces > 4
     return False
+
+
+# ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------
+# On the Mac an exception that escapes a callback into native code (a view's paint, a cell formatting event, a
+# display conduit's draw, an idle or document event) aborts Rhino outright (seen 2026-10-20: an Eto paint handler
+# raised; xamarin_process_managed_exception → abort). So no callback may raise: guard() catches everything, writes
+# it to the log, says it once on the command line (REPORT, set by the Rhino command), and returns a harmless
+# fallback (draw nothing, change nothing). tests/test_check.py scans the plugin for any callback without it.
+ERROR_LOG = None          # the log file's path (the Rhino command sets it; else <temp>/gordium_errors.log)
+REPORT = None             # a function(text) that writes a line to Rhino's command line
+_reported = set()
+
+
+def guard(fn, where, fallback=None):
+    """fn, wrapped so it never raises: an exception is logged (with where it happened) and fallback returned."""
+    def safe(*args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except Exception:                      # noqa: BLE001  (any error: native code must never see it)
+            import os
+            import tempfile
+            import time
+            import traceback
+            path = ERROR_LOG or os.path.join(tempfile.gettempdir(), "gordium_errors.log")
+            try:
+                with open(path, "a") as log:
+                    log.write(time.strftime("%Y-%m-%d %H:%M:%S") + " " + where + "\n" + traceback.format_exc() + "\n")
+                if REPORT is not None and where not in _reported:
+                    _reported.add(where)
+                    REPORT("Gordium: ⚠ couldn't " + where + " (it was skipped; details in " + path + ")")
+            except Exception:                  # noqa: BLE001  (even the report must not raise)
+                pass
+            return fallback
+    return safe

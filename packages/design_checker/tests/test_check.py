@@ -402,3 +402,48 @@ def test_what_off_the_building_layer_could_be_a_building_left_out():
     assert could_be_building("SubD") and could_be_building("InstanceReferenceGeometry")
     assert not could_be_building("Brep", solid=False, faces=1)      # one flat surface
     assert not could_be_building("PolylineCurve") and not could_be_building("Point")
+
+
+# ---- no callback may raise into Rhino: on the Mac that aborts Rhino (2026-10-20) --------------------------------
+
+PLUGIN = [REPO / "apps/rhino_plugin" / n for n in ("gordium_rhino.py", "gordium_ui.py")] + sorted(
+    (REPO / "apps/rhino_plugin/tests").glob("*_in_rhino.py"))
+
+
+def test_guard_catches_logs_and_says_it_once(tmp_path):
+    from design_checker import rhino_logic as logic
+    said = []
+    logic.ERROR_LOG, logic.REPORT = str(tmp_path / "errors.log"), said.append
+    logic._reported.clear()
+    boom = logic.guard(lambda: 1 / 0, "draw the test", fallback="nothing")
+    assert boom() == "nothing" and boom() == "nothing"                 # never raises
+    assert said == ["Gordium: ⚠ couldn't draw the test (it was skipped; details in " + logic.ERROR_LOG + ")"]
+    assert "ZeroDivisionError" in (tmp_path / "errors.log").read_text()
+    assert logic.guard(lambda x: x + 1, "add")(1) == 2                 # passes through when nothing goes wrong
+    logic.ERROR_LOG = logic.REPORT = None
+
+
+def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
+    """Every `obj.Event += handler`, every System.EventHandler(...) and every display conduit method: through
+    rhino_logic.guard, so an error inside one is logged and skipped, never raised into native code."""
+    import re
+    unguarded = []
+    for path in PLUGIN:
+        text = path.read_text()
+        guarded_names = set(re.findall(r"^\s*(\w+) = System\.EventHandler[^\n]*\((?:g\.)?logic\.guard\(", text, re.M))
+        for n, line in enumerate(text.splitlines(), 1):
+            m = re.match(r"\s*[\w.\[\]\"']+\.([A-Z]\w*) \+= (.+)", line)
+            if m and not (re.match(r"(g\.)?logic\.guard\(", m.group(2)) or m.group(2).strip() in guarded_names):
+                unguarded.append(f"{path.name}:{n}: {line.strip()}")
+            if "System.EventHandler" in line and "(" in line.split("System.EventHandler", 1)[1] \
+                    and "logic.guard(" not in line:
+                unguarded.append(f"{path.name}:{n}: {line.strip()}")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    overlay = rhino.split("class Overlay", 1)[1].split("\nclass ", 1)[0].split("\ndef ", 1)[0]
+    for method in re.findall(r"    def ((?:ObjectCulling|CalculateBoundingBox|PreDrawObjects|PostDrawObjects|"
+                             r"DrawForeground|DrawOverlay|DrawObject)\(self, e\):\n(?:        .*\n)+)", overlay):
+        if "_conduit(" not in method:
+            unguarded.append("Overlay: " + method.splitlines()[0].strip())
+    assert unguarded == [], unguarded
+    assert "def _conduit(" in rhino and "logic.guard(" in rhino.split("def _conduit(", 1)[1].split("\ndef ", 1)[0]
+    assert "Paint +=" not in "".join(p.read_text() for p in PLUGIN)    # draw once into a bitmap instead
