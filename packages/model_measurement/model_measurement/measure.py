@@ -378,12 +378,13 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
 
-def _with_others(main: dict, others: list[dict]) -> dict:
+def _with_others(main: dict, others: list[dict], main_with: dict | None = None) -> dict:
     """The main building's height read with the other solids: alone, and with every other solid as part of it
     (a wing or tower drawn as its own solid is part of the building; an accessory building may have its own
-    limit, §325-25). Every combination of each roof's own readings is listed. A question is named only if two
-    readings that differ in that answer alone have different values: each solid's roof question on its own,
-    and the accessory question."""
+    limit, §325-25). `main_with` is the main building's height from the grade plane of the whole building (when
+    the grade comes from spot grades, the walls of every solid; `others` are measured from it too). Every
+    combination of each roof's own readings is listed. A question is named only if two readings that differ in
+    that answer alone have different values: each solid's roof question on its own, and the accessory question."""
     unread = [o for o in others if o["value"] is None and not o["readings"]]
     if unread:                          # never dropped: it could be the tallest part
         return _missing("building_height", stop("other_height", reason=unread[0]["reason"]))
@@ -392,11 +393,12 @@ def _with_others(main: dict, others: list[dict]) -> dict:
         return [(r["reading"], r["value"]) for r in m["readings"]] or [("", m["value"])]
 
     mine, theirs = values(main), [values(o) for o in others]
+    mine_with = dict(values(main_with or main))
     if len(mine) * math.prod(len(t) for t in theirs) > MAX_COMBINATIONS:
         return _missing("building_height", stop("too_many_roofs"))
     names = [o["objects"][0] for o in others]
     combos = [((w, "alone") + (None,) * len(others), v) for w, v in mine]
-    combos += [((w, "with") + tuple(lbl for lbl, _ in picks), max([v] + [x for _, x in picks]))
+    combos += [((w, "with") + tuple(lbl for lbl, _ in picks), max([mine_with.get(w, v)] + [x for _, x in picks]))
                for w, v in mine for picks in itertools.product(*theirs)]
 
     def matters(i):
@@ -637,7 +639,14 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
     others = [b for b in buildings if b is not main]
     if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):
-        out["building_height"] = _with_others(out["building_height"], [_height(b, grade) for b in others])
+        # read with the other solids as part of the building, the grade plane is the ground at the walls of all of
+        # them (§325-3: "each side of the building"), not the main building's alone: a wing on lower ground
+        # lowers it. Spot grades that don't reach those walls leave that reading, and so the height, unknown.
+        with_grade, why_with = (_grade_from_points([main] + others, facts["grade_points"])
+                                if facts.get("grade_points") else (grade, None))
+        out["building_height"] = (_missing("building_height", stop("grade_with_others")) if why_with else
+                                  _with_others(out["building_height"], [_height(b, with_grade) for b in others],
+                                               _height(main, with_grade)))
     if facts.get("grade_is") == "existing":     # the grade plane is finished ground: existing ground can't decide
         for name in ("building_height", "stories"):
             out[name] = _missing(name, stop("existing_grade"))

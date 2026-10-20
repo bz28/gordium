@@ -47,6 +47,9 @@ STOPS = {
                      "measured yet",
     "grade_off_walls": "spot grades no longer at the building's walls ({off} of {count} more than 2 ft from a wall, "
                        "{bare} walls without one): set the grade again",
+    "grade_with_others": "with the other solids as part of the building, the grade plane needs spot grades at their "
+                         "walls too (§325-3: each side of the building): place spot grades around every solid on "
+                         "the Building layer",
     "grade_walls_unclear": "the building's walls can't be told apart in plan (no wall longer than 1 ft, a round or "
                            "finely faceted outline): set the grade as flat ground instead",
     "existing_grade": "measured from existing grade; the code's grade plane is finished ground level (§325-3): set "

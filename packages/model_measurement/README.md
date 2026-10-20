@@ -101,7 +101,10 @@ Every reason the code gives today comes from the table:
   checks), the grade plane is the average of each of the main building's walls' points within 2 ft of it (a point
   at another building's walls is that building's ground, left out); after the building moves:
   "spot grades no longer at the building's walls (<off> of <count> more than 2 ft from a wall, <bare> walls
-  without one): set the grade again". A round or finely faceted outline: "the building's walls can't be told
+  without one): set the grade again". Read with the other solids as part of the building, the grade plane is the
+  ground at all of their walls: "with the other solids as part of the building, the grade plane needs spot grades
+  at their walls too (§325-3: each side of the building): place spot grades around every solid on the Building
+  layer". A round or finely faceted outline: "the building's walls can't be told
   apart in plan (no wall longer than 1 ft, a round or finely faceted outline): set the grade as flat ground
   instead". Measured from existing ground instead of finished: "measured from existing
   grade; the code's grade plane is finished ground level (§325-3): set the finished grade" (height and stories).

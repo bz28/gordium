@@ -666,9 +666,9 @@ def _not_included(doc, lot):
         # anything that could be a building: a solid, a closed mesh, a SubD, a polysurface (open ones too: a garage
         # missing a face is still a garage), a block. Not the lot, the terrain, Gordium's own drawing, the Building
         # layer (measured), curves, points and single flat surfaces.
-        could_be = (isinstance(g, (rg.Extrusion, rg.SubD, rg.InstanceReferenceGeometry)) or
-                    (isinstance(g, rg.Brep) and (g.IsSolid or g.Faces.Count > 1)) or
-                    (isinstance(g, rg.Mesh) and g.IsClosed))
+        could_be = logic.could_be_building(
+            type(g).__name__, (isinstance(g, rg.Brep) and g.IsSolid) or (isinstance(g, rg.Mesh) and g.IsClosed),
+            g.Faces.Count if isinstance(g, (rg.Brep, rg.Mesh)) else 0)
         if not could_be or str(o.Id) == terrain or logic.on_layer(layer, LAYERS["building"]) \
                 or logic.on_layer(layer, "Gordium"):
             continue
@@ -1405,7 +1405,7 @@ def _preview(start, facts):
     where = "on tax-map lot" if not facts.get("lot_surveyed") else "on the surveyed lot"
     return ("Starting massing (" + where + "): 1 group of " + str(p["floors"]) + " floor solids · " + p["height"] +
             " · " + p["size"] + (" · " + p["area"] if p.get("area") else "") +
-            (", " + p["coverage"] + " coverage" if p.get("coverage") else ""))
+            (", " + p["coverage"] + (" of " + p["limit"] if p.get("limit") else " coverage") if p.get("coverage") else ""))
 
 
 def gordium_start():

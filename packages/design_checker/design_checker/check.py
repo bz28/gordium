@@ -369,7 +369,9 @@ def _start_preview(out: dict, measured: dict) -> dict | None:
     return {"floors": len(floors), "height": present.feet_inches(out.get("height") or 0, "nearest"),
             "size": f"{present.feet_inches(max(sides), 'nearest')} × {present.feet_inches(min(sides), 'nearest')}",
             "area": present._area(area, "up") if area else None,
-            "coverage": present._pct(area / lot_area * 100, "up", 2) if area and lot_area else None}
+            "coverage": present._pct(area / lot_area * 100, "up", 2) if area and lot_area else None,
+            "limit": (present._pct(out["coverage_allowed"] / lot_area * 100, "down", 2)      # a maximum: down
+                      if out.get("coverage_allowed") and lot_area else None)}
 
 
 def start(model_path: Path, facts: dict, floor_to_floor: float | None = None) -> dict:

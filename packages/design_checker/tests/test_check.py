@@ -377,6 +377,7 @@ def test_the_start_preview_and_the_panel_say_the_same_coverage(facts):
     assert got["preview"]["coverage"] == "24.95%"      # 1,638.6 / 6,570 = 24.941%: a maximum, rounded up
     assert got["preview"]["coverage"] == present._pct(got["area"] / 6570 * 100, "up", 2)
     assert got["preview"]["size"] == "53'-0\" × 30'-11\"" and got["preview"]["height"] == "35'-0\""
+    assert got["preview"]["limit"] == "25%"                 # the limit beside it (A11), a maximum rounded down
 
 
 def test_a_shortfall_is_never_shown_as_at_limit():
@@ -392,3 +393,12 @@ def test_side_yards_are_named_by_compass_direction_of_their_lot_line():
     east_west = {"side_yard_smaller": {"points": [[0, 40], [10, 40]]}, "side_yard_larger": {"points": [[50, 40], [35, 40]]}}
     assert present._side_name("side_yard_smaller", east_west) == "Side yard, West"
     assert present._hint("Side yard, East", "≥", -4.0, "ft") == "To comply: move the building 4'-0\" farther from that lot line."
+
+
+def test_what_off_the_building_layer_could_be_a_building_left_out():
+    from design_checker.rhino_logic import could_be_building
+    assert could_be_building("Mesh", solid=False, faces=120)        # an imported shed: an open, unwelded mesh
+    assert could_be_building("Brep", solid=False, faces=5)          # a garage missing a face
+    assert could_be_building("SubD") and could_be_building("InstanceReferenceGeometry")
+    assert not could_be_building("Brep", solid=False, faces=1)      # one flat surface
+    assert not could_be_building("PolylineCurve") and not could_be_building("Point")

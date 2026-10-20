@@ -110,3 +110,29 @@ def test_a_solid_left_out_makes_coverage_need_review_and_one_touching_the_buildi
     for name in ("Front yard", "Rear yard", "Building height", "Stories"):
         assert attached[name]["status"] == present.REVIEW, name
         assert "touching the building" in attached[name]["reason"]
+
+
+def _bonus(surveyed):
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "03_height_bonus_every_yard_increased.yaml"))
+    sc["lot"]["surveyed"] = surveyed
+    s, f, extras = scenarios.site(sc)
+    return {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}
+
+
+def test_raised_yards_keep_their_detail_and_on_a_tax_map_lot_need_review_and_say_why():
+    v = _bonus(True)
+    assert v["Front yard"]["detail"]["line"] == "27'-0\" proposed ≥ 27'-0\" required · at the limit"   # not +2'-0"
+    t = _bonus(False)
+    assert t["Building height"]["status"] == present.REVIEW
+    assert "at worst Front yard 25'-0\" against 27'-0\"" in t["Building height"]["reason"]   # the part that fails
+    assert t["Front yard"]["status"] == present.REVIEW and t["Front yard"]["required"] == "27'-0\""
+
+
+def test_a_chart_heading_row_is_quoted_in_its_own_words():
+    quotes = [q["text"] for q in _bonus(True)["Building height"]["detail"]["quotes"]]
+    assert "Maximum Building Height [fn10]" in quotes and not any(q.endswith("R-1B: ") for q in quotes)
+
+
+def test_a_zero_side_yard_is_never_named_by_a_direction_it_doesnt_have():
+    zero = {"side_yard_smaller": {"points": [[0, 40], [0, 40]]}, "side_yard_larger": {"points": [[50, 40], [35, 40]]}}
+    assert present._side_name("side_yard_smaller", zero) == "Side yard, narrower"

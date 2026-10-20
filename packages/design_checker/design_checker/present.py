@@ -464,10 +464,13 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if st == COMPLIES and not facts.get("lot_surveyed") and names & LOT_LENGTHS:
             worst = _worst_case(expr, values, names)
             if worst is not None:
-                w = _numbers(node, worst, measured, label)
+                bad = next((c for c in ([node] + raised if raised else _compares(expr))     # the way it uses
+                            if _evaluate(ast.unparse(c), worst) is False), node)
+                w = _numbers(bad, worst, measured, label)
+                what = "" if bad.left.id == node.left.id else NAMES.get(bad.left.id, bad.left.id.replace("_", " ")) + " "
                 st = REVIEW
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst "
-                       f"{_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
+                       f"{what}{_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
         tol = (measured.get("lot_area") or {}).get("tolerance")
         if st == REVIEW and tol and node is not None and row.get("Provisional") == SURVEY_ONLY:
             # waiting only on the survey: the same worst case as the lot lengths, for the lot area (spec C2)
@@ -491,7 +494,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             allowed = _evaluate(ast.unparse(node.comparators[0]), values)
             if isinstance(allowed, (int, float)) and values.get("building_area") is not None:
                 hint = f"To comply: reduce the footprint by at least {_area(values['building_area'] - allowed, 'up')}."
-        if raised:
+        if raised and st == FAILS:               # fails anyway: nothing to raise
+            raised = []
+        if raised and st == COMPLIES:            # (on a tax-map lot the reason stays the tax map: the yards still rise)
             hint, why = None, "Complies using the rule's other way, which needs: " + "; ".join(dict.fromkeys(
                 f"{NAMES.get(c.left.id, c.left.id)}{'s' if c.left.id.startswith('side_yard') else ''} "
                 f"{SIGNS[type(c.ops[0])]} "
@@ -547,6 +552,8 @@ def _side_name(measure: str, measured: dict) -> str:
         if not pts:
             return None
         dx, dy = pts[0][0] - pts[-1][0], pts[0][1] - pts[-1][1]      # lot-line end minus building end
+        if abs(dx) < 1e-6 and abs(dy) < 1e-6:          # a yard of 0: no direction to name it by
+            return None
         return ("East" if dx > 0 else "West") if abs(dx) >= abs(dy) else ("North" if dy > 0 else "South")
     a = facing((measured.get("side_yard_smaller") or {}).get("points"))
     b = facing((measured.get("side_yard_larger") or {}).get("points"))
@@ -585,7 +592,7 @@ def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict 
             cell = next((c for c in _chart_cells(j) if c["file"] == source.get("file") and c["page"] == source.get("page")
                          and c["column"].upper() == str(want.get("column", "")).upper()
                          and c["row"].startswith(str(want.get("row", ""))[:20])), None)
-        if cell is not None:
+        if cell is not None and str(cell.get("value") or "").strip():   # a heading row has no value: its own words
             section = re.sub(r"\s*\[fn[\d,]+\]", "", cell.get("section") or "")
             row = re.sub(r"\s*\[fn[\d,]+\]", "", cell["row"])
             return {"text": f"{section} · {row} · {cell['column']}: {cell['value']}", "where": cite(source)}
@@ -635,7 +642,7 @@ def state(items: list[dict]) -> str:
 BUILDING_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_height", "stories")
 
 
-def _raise_yards(items, measured, values):
+def _raise_yards(items, measured, values, facts):
     """A rule that complies by its other way (the §325-16C height bonus: every yard 1 ft larger per extra foot)
     raises the yards that way names: each yard row then shows that larger minimum and its true margin, so a
     "+2'-0"" never invites moving the house onto a yard the bonus needs. Only ever stricter."""
@@ -652,6 +659,15 @@ def _raise_yards(items, measured, values):
                 t["required"], t["margin"], t["hint"] = value_text(req, unit, sign, False), margin_text(margin, unit), None
                 t["reason"] = (f"At least {t['required']} while {i['name'].lower()} uses the rule's other way, "
                                "which raises this yard")
+                if not facts.get("lot_surveyed") and m in LOT_LENGTHS | {"front_yard", "side_yard_smaller",
+                                                                         "side_yard_larger", "rear_yard"} \
+                        and margin < TOLERANCE:          # the raised minimum within the tax-map tolerance (C2)
+                    t.update(status=REVIEW, mark=MARK[REVIEW], reason=(
+                        f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst "
+                        f"{value_text(v - TOLERANCE, unit, sign)} against {t['required']}, the minimum "
+                        f"{i['name'].lower()}'s other way needs · Pick survey lot lines…"))
+                t["detail"]["line"] = _detail_line(t["proposed"], t["required"], t["margin"], sign, margin)
+                t["detail"]["calc"] = f"Required: {t['required']}, raised by {i['name'].lower()}'s other way"
                 t["detail"]["at_limit"] = f"At the limit: {t['proposed']} exact" if t["margin"] == "at limit" else None
     for i in items:
         i.pop("_raises", None)
@@ -701,7 +717,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         items += _items_for(row, rules_by_id[row["Rule id"]], measured, values, facts, extras, cite, documents, j,
                             use_names)
     left_out = extras.get("not_included") or []
-    _raise_yards(items, measured, values)
+    _raise_yards(items, measured, values, facts)
     _cautious_for_left_out(items, left_out, extras.get("touching"))
     if left_out:
         n = len(left_out)

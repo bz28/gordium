@@ -706,7 +706,23 @@ def test_the_grade_plane_is_the_main_buildings_own_walls_never_a_detached_garage
     at_house = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]]
     at_garage = [[44, 74, 12], [44, 91, 12], [39, 82, 12], [49, 82, 12]]
     facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "main_building": "house"}
-    for spots in (at_house + at_garage, at_house):       # the garage's own spots are its ground, left out
-        h = measure(site(RECT, house, garage), {**facts, "grade_points": spots})["building_height"]
-        heights = [h["value"]] if h["value"] is not None else [r["value"] for r in h["readings"]]
-        assert heights and min(heights) >= 41.0 - 1e-6, (spots, h)       # was 35 ft with the garage averaged in
+    h = measure(site(RECT, house, garage), {**facts, "grade_points": at_house + at_garage})["building_height"]
+    by = {r["reading"]: r["value"] for r in h["readings"]}
+    assert by["the main building only"] == 41.0                  # its own walls: was 35 with the garage averaged in
+    assert h["value"] is None                                    # the readings differ: never a pass at 35
+    # spots only at the house: the reading with the garage as part of the building has no ground at its walls
+    h = measure(site(RECT, house, garage), {**facts, "grade_points": at_house})["building_height"]
+    assert h["value"] is None and h["reason"].startswith("with the other solids as part of the building")
+
+
+def test_a_wing_on_lower_ground_lowers_the_grade_plane_of_the_reading_that_includes_it():
+    house = box(10, 25, 35, 65, 0, 34, id="house")
+    wing = box(35, 30, 45, 50, -6, 20, id="wing")                 # touching, stepping down 6 ft
+    spots = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 55, 0], [36, 28, 0],
+             [40, 29, -6], [40, 51, -6], [46, 40, -6]]
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "main_building": "house", "grade_points": spots}
+    h = measure(site(RECT, house, wing), facts)["building_height"]
+    by = {r["reading"]: r["value"] for r in h["readings"]}
+    with_wing = next(v for k, v in by.items() if k.startswith("with every other solid"))
+    assert by["the main building only"] == 34.0 and with_wing > 35.0      # lower ground at the wing's walls
+    assert h["value"] is None                                    # was 34 under both readings: a false pass
