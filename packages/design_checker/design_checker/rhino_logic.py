@@ -300,9 +300,56 @@ def box_rows(state):
     ]
 
 
+def parse_feet(text):
+    """A length the architect typed, in feet: 11'-8", 1' 6", 6", 6 in, 1.5, 1.5 ft, 2' -> feet; empty -> 0.0;
+    anything it can't read -> None, never a silent 0."""
+    import re
+    t = (text or "").strip().lower()
+    if not t:
+        return 0.0
+    t = re.sub(r"\s*(feet|foot|ft)\b", "'", t)
+    t = re.sub(r"\s*(inches|inch|in)\b", '"', t)
+    num = r"(\d+(?:\.\d+)?)"
+    m = re.fullmatch(num + r"\s*'?", t)                                  # feet: 2, 2', 1.5 ft
+    if m:
+        return float(m.group(1))
+    m = re.fullmatch(num + r"\s*'\s*-?\s*" + num + r'\s*"?', t)        # feet and inches: 11'-8", 1' 6
+    if m:
+        return float(m.group(1)) + float(m.group(2)) / 12
+    m = re.fullmatch(num + r'\s*"', t)                                  # inches alone: 6", 6 in
+    if m:
+        return float(m.group(1)) / 12
+    return None
+
+
+BUFFER_UNREAD = "Design buffer not understood: type it like 1'-6\" or 6\""
+
+
+def draw_reason(state):
+    """Why Draw is off, in one line; "" when it is on."""
+    if not state.get("district_confirmed"):
+        return "Confirm the district to continue."
+    if parse_feet(state.get("design_buffer")) is None:
+        return BUFFER_UNREAD
+    return ""
+
+
 def can_draw(state):
-    """Draw is on only once the district is confirmed: Gordium doesn't look the zoning map up yet."""
-    return bool(state.get("district_confirmed"))
+    """Draw is on only once the district is confirmed (Gordium doesn't look the zoning map up yet) and the design
+    buffer, if typed, can be read."""
+    return draw_reason(state) == ""
+
+
+def starting_house_fact(note, today):
+    """The site fact for how far the starting house keeps back from the limits: Gordium's own figure, so never
+    "confirmed by you" (the architect didn't confirm it). None when no house was drawn (`note` None)."""
+    if not note:
+        return None
+    # the panel puts "Starting house: " in front, and it describes the house as Gordium drew it (the architect
+    # may since have moved or replaced it), so it says so
+    said = note[len("Starting house: "):] if note.startswith("Starting house: ") else \
+        "it " + note[len("Starting house "):] if note.startswith("Starting house ") else note
+    return {"value": "as first drawn, " + said, "source": SUGGESTED, "confirmed_by": None, "date": today}
 
 
 def uncertain(state):
@@ -363,3 +410,10 @@ def district_confirmed(mode, zone_fact, zone):
     same district was confirmed at an earlier Draw (its saved source says who confirmed it)."""
     zone_fact = zone_fact or {}
     return mode != "start" and bool(zone_fact.get("confirmed_by")) and zone_fact.get("value") == zone
+
+
+def is_plan_view(parallel, direction_z, tolerance=0.99):
+    """Whether a viewport is a plan view, where plan labels belong: a parallel projection looking (nearly) straight
+    down. Not a perspective (labels sit on the massing) and not an elevation (Front, Right: every plan label piles
+    up on the ground line)."""
+    return bool(parallel) and direction_z <= -tolerance

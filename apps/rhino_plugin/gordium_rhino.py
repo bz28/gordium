@@ -406,7 +406,9 @@ def draw_screen(o, e):
     dark = ui.viewport_dark()
     old = stale(o)
     taken = []                               # labels drawn this frame: none covers another
-    plan = not e.Viewport.IsPerspectiveProjection   # labels only in plan-like views: in 3D they sit on the massing
+    # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
+    # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
+    plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
@@ -760,14 +762,15 @@ def not_the_ground():
     run_check(doc, report=False)
 
 
-def _set_source(doc, key, value, source):
+def _set_source(doc, key, value, source, confirmed_by="you"):
     """One site fact's source, changed outside the start box (the panel's buttons): {value, source, confirmed_by,
     date}, saved with the others; value None removes it. So the panel and the report never show a stale source."""
     sources = fact_sources(doc)
     if value is None:
         sources.pop(key, None)
     else:
-        sources[key] = {"value": value, "source": source, "confirmed_by": "you", "date": time.strftime("%Y-%m-%d")}
+        sources[key] = {"value": value, "source": source, "confirmed_by": confirmed_by,
+                        "date": time.strftime("%Y-%m-%d")}
     doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
 
 
@@ -826,15 +829,6 @@ def _highlight(doc, facts):
     doc.Views.Redraw()
 
 
-def _feet(text, default):
-    """11'-8" or 11.5 (feet) -> feet; anything unreadable -> default."""
-    import re
-    m = re.match(r"^\s*(\d+(?:\.\d+)?)\s*'?\s*(?:-?\s*(\d+(?:\.\d+)?)\s*\"?)?\s*$", text or "")
-    if not m:
-        return default
-    return float(m.group(1)) + (float(m.group(2)) / 12 if m.group(2) else 0.0)
-
-
 SOURCES_ENTRY = "fact_sources"               # Gordium / fact_sources: {fact: {value, source, confirmed_by, date}}
 
 
@@ -883,7 +877,8 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "street_name": facts.get("street_name"), "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span},
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
-            "corner_source": source("corner_lot"), "zones_found": facts.get("zones_found") or []}
+            "corner_source": source("corner_lot"), "zones_found": facts.get("zones_found") or [],
+            "design_buffer": saved_ui.get("design_buffer") or "0'-0\""}
 
 
 def _ft_text(feet):
@@ -909,7 +904,7 @@ def _apply_box(doc, facts, state, saved_ui):
         else:
             facts[key] = value
     saved_ui = dict(saved_ui, ground_kind=(state.get("ground") or {}).get("kind") or "flat",
-                    no_regrading=bool(state.get("no_regrading")))
+                    no_regrading=bool(state.get("no_regrading")), design_buffer=state.get("design_buffer") or "0'-0\"")
     return facts, saved_ui
 
 
@@ -1575,11 +1570,13 @@ def gordium_start():
         Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
         return None
     save_facts(doc, facts)
+    _set_source(doc, "starting_house", None, None)           # an earlier start's margin is gone with its house
     saved_ui = _ui_state(doc)
     # always the envelope and the 3-floor starting house (hide it from the panel); floor to floor 11'-8" unless
     # GordiumFacts set another
     start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
-                 "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), logic.FLOOR_TO_FLOOR)})
+                 "floor_to_floor": logic.parse_feet(saved_ui.get("floor_to_floor")) or logic.FLOOR_TO_FLOOR,
+                 "design_buffer": logic.parse_feet(saved_ui.get("design_buffer")) or 0.0})   # Draw is off if unread
     STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)
@@ -1598,6 +1595,9 @@ def gordium_start():
         live(True)
         documents(True)
         return None
+    fact = logic.starting_house_fact(start.get("margin_note"), time.strftime("%Y-%m-%d"))   # Gordium's figure
+    if fact:
+        _set_source(doc, "starting_house", fact["value"], fact["source"], fact["confirmed_by"])
     doc.Views.Redraw()
     result = run_check(doc, report=False)
     live(True)
@@ -1627,9 +1627,18 @@ def frame_site(doc, facts):
     for view in doc.Views:
         view.ActiveViewport.ZoomBoundingBox(box)
     # a view that isn't on screen (Perspective maximized, as a new Mac file opens) ignores a zoom; Rhino's own
-    # Zoom All Extents frames those too (the drawing's extents: the lot, the house, Gordium's envelope)
+    # Zoom All Selected frames those too, on the lot and the house only (Extents would also take in anything far
+    # away in the file). The architect's selection is put back as it was.
+    picked = [o.Id for o in doc.Objects.GetSelectedObjects(False, False)]
     try:
-        Rhino.RhinoApp.RunScript("_-Zoom _All _Extents", False)
+        doc.Objects.UnselectAll()
+        for o in [lot] + list(_buildings(doc)):
+            o.Select(True)
+        Rhino.RhinoApp.RunScript("_-Zoom _All _Selected", False)
     except Exception:
         pass
+    finally:
+        doc.Objects.UnselectAll()
+        for i in picked:
+            doc.Objects.Select(i)
     doc.Views.Redraw()

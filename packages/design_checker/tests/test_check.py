@@ -309,7 +309,8 @@ def test_the_massing_layer_holds_building_objects():
 
 
 def test_the_sample_lot_gives_the_spec_massing():
-    """73'-0" x 90'-0" (6,570 sf) -> 53'-0" x 30'-11" = 1,639 sf, 24.94% of the lot, at the 25'-0" front yard."""
+    """73'-0" x 90'-0" (6,570 sf, from the tax map) -> kept 2'-0" back: 49'-0" x 31'-10" = 1,560 sf, 23.74% of the lot as
+    drawn (25% of the smallest lot the tax map allows, 71 x 88), at 27'-0" from the street."""
     import math
     import tempfile
     from pathlib import Path
@@ -333,9 +334,9 @@ def test_the_sample_lot_gives_the_spec_massing():
     outline = Polygon(got["floors"][0]["outline"])
     x0, y0, x1, y1 = outline.bounds
     assert Polygon(s["lot"]).area == 6570 and s["facts"]["lot_surveyed"] is False
-    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (53, 30 * 12 + 11)
-    assert round(outline.area) == 1639 and round(outline.area / 6570 * 100, 2) == 24.94
-    assert y0 == 25 and len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
+    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (49, 31 * 12 + 10)
+    assert round(outline.area) == 1560 and round(outline.area / 6570 * 100, 2) == 23.74
+    assert y0 == 27 and len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
 
 
 def test_a_flag_needing_review_never_crashes_the_check(facts):
@@ -374,10 +375,36 @@ def test_viewport_labels_never_cover_each_other():
 def test_the_start_preview_and_the_panel_say_the_same_coverage(facts):
     from design_checker.check import start
     got = start(MODEL, {**facts, "lot_surveyed": False})
-    assert got["preview"]["coverage"] == "24.95%"      # 1,638.6 / 6,570 = 24.941%: a maximum, rounded up
-    assert got["preview"]["coverage"] == present._pct(got["area"] / 6570 * 100, "up", 2)
-    assert got["preview"]["size"] == "53'-0\" × 30'-11\"" and got["preview"]["height"] == "35'-0\""
+    # tax-map lot, kept 2'-0" back (worked by hand): width 73 − 2 × (10 + 2) = 49'-0"; coverage for the smallest lot
+    # the tax map allows, 25% × 71 × 88 = 1,562 sf, so depth 1,562 / 49 = 31.88 → 31'-10" (whole inches, down);
+    # 49 × 31.833 = 1,559.8 sf = 23.74% of the drawn 6,570 sf: the panel shows it to 0.1% (margin over 0.5%), up
+    assert got["preview"]["coverage"] == "23.8%"
+    assert got["preview"]["coverage"] == present._display(got["area"] / 6570 * 100, 25.0, None, "%", "≤")[0]
+    assert got["preview"]["size"] == "49'-0\" × 31'-10\"" and got["preview"]["height"] == "35'-0\""
     assert got["preview"]["limit"] == "25%"                 # the limit beside it (A11), a maximum rounded down
+
+
+def test_on_a_tax_map_lot_the_starting_house_complies_even_at_the_worst_case(facts):
+    """Ben, 2026-10-20: kept 2'-0" back from every limit and under coverage at the worst case, so nothing about the
+    generated house needs review because of the tax map; on a survey it goes exactly to the limits."""
+    from design_checker.check import TAX_MAP_NOTE, check_site, start
+    from envelope_builder.start import floor_solids
+    from model_measurement.read_3dm import read_site
+    tax = start(MODEL, {**facts, "lot_surveyed": False})
+    assert tax["kept_back"] == 2.0 and TAX_MAP_NOTE in tax["notes"] and tax["preview"]["kept_back"] == "2'-0\""
+    assert tax["margin_note"] == TAX_MAP_NOTE
+    # coverage is sized for the worst case, so no note says it needs review (review round 7)
+    assert not any("NEEDS REVIEW for coverage" in n for n in tax["notes"])
+    site = {**read_site(MODEL, facts), "buildings": floor_solids(tax["floors"])}
+    view = check_site(site, {**facts, "lot_surveyed": False})["view"]
+    assert not [i["name"] for i in view["items"] if i["status"] == present.REVIEW and "tax map" in (i["reason"] or "")]
+    surveyed = start(MODEL, {**facts, "lot_surveyed": True})
+    assert surveyed["kept_back"] == 0.0 and TAX_MAP_NOTE not in surveyed["notes"]
+    xs = [p[0] for p in surveyed["floors"][0]["outline"]]
+    assert max(xs) - min(xs) == pytest.approx(53.0)                 # 73 − 2 × 10: exactly at the side yards
+    buffered = start(MODEL, {**facts, "lot_surveyed": True}, design_buffer=1.0)
+    xs = [p[0] for p in buffered["floors"][0]["outline"]]
+    assert buffered["kept_back"] == 1.0 and max(xs) - min(xs) == pytest.approx(51.0)   # 1 ft more on each side
 
 
 def test_a_shortfall_is_never_shown_as_at_limit():
@@ -641,10 +668,20 @@ def test_units_are_converted_in_one_place_both_ways():
         if name and name.group(1) in helpers:
             continue
         for line in chunk.splitlines():
-            if re.search(r"_scale\(doc\)(?!\))|\* k\b|\* scale\b|/ scale\b|\* k\)", line) and "logic.to_feet" not in line:
+            if re.search(UNITS_PATTERN, line) and "logic.to_feet(facts, _scale(doc))" not in line:
                 outside.append(line.strip())
     assert outside == [], outside
     assert "def frame_site(" in rhino and "frame_site(doc, facts)" in rhino.split("def gordium_start(", 1)[1]
+
+
+UNITS_PATTERN = r"_scale\(|\* k\b|\* scale\b|/ scale\b|\* k\)"     # any use of the scale, whatever follows it
+
+
+def test_the_units_scan_catches_a_conversion_inside_a_call():
+    """Review round 7: `_scale\(doc\)(?!\))` let `foo(y / _scale(doc))` through."""
+    import re
+    assert re.search(UNITS_PATTERN, "    x = foo(y / _scale(doc))")
+    assert re.search(UNITS_PATTERN, "    x = y * _scale(doc)")
 
 
 def test_a_value_measured_on_existing_ground_shows_with_its_review_mark_not_a_dash(facts, tmp_path):
@@ -658,3 +695,83 @@ def test_a_value_measured_on_existing_ground_shows_with_its_review_mark_not_a_da
     text = " ".join(str(c.value) for r in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows() for c in r if c.value)
     assert height["proposed"] in text                                          # the report shows the value too
     assert got["measurements"]["building_height"]["value"] is None            # it still never decides the rule
+
+
+def test_plan_labels_only_in_a_view_looking_straight_down():
+    from design_checker.rhino_logic import is_plan_view
+    assert is_plan_view(True, -1.0)                      # Top
+    assert not is_plan_view(True, 0.0)                   # Front, Right: elevations
+    assert not is_plan_view(False, -1.0)                 # a perspective, even from above
+    assert not is_plan_view(True, 1.0)                   # Bottom
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    assert "plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)" in rhino
+
+
+def test_the_margin_note_says_what_was_kept_and_which_part_is_the_buffer(facts):
+    """Review round 7: with a 1'-0" buffer on a tax-map lot the house keeps 3'-0" back; the note said 2'-0"."""
+    from design_checker.check import NOT_PROVEN, TAX_MAP_NOTE, margin_note, start
+    got = start(MODEL, {**facts, "lot_surveyed": False}, design_buffer=1.0)
+    assert got["kept_back"] == 3.0
+    assert got["margin_note"] == ("Starting house keeps 3'-0\" back from each limit: 2'-0\" because the lot is from "
+                                  "the tax map (use a survey for the full area) and 1'-0\" your design buffer.")
+    assert got["margin_note"] in got["notes"] and TAX_MAP_NOTE not in got["notes"]
+    assert margin_note(2.25, 0.0, True, True).startswith("Starting house keeps 2'-3\" back")
+    assert margin_note(2.0, 0.0, True, False) == NOT_PROVEN          # never claimed without the proof
+    assert margin_note(0.0, 0.0, False, True) == "Starting house goes to the limits (the lot is from a survey)."
+
+
+def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
+    """Review round 7: it was saved "confirmed by you" for a figure the architect never saw; and with no house drawn
+    there is no fact. Gordium saves it only after the house is drawn, and clears an earlier one first."""
+    from design_checker import rhino_logic as logic
+    fact = logic.starting_house_fact("Starting house keeps 2'-0\" back ...", "2026-10-20")
+    assert fact["confirmed_by"] is None and fact["source"] == logic.SUGGESTED
+    assert logic.starting_house_fact(None, "2026-10-20") is None
+    line = present.source_lines({"starting_house": fact})[0]
+    assert "confirmed by you" not in line and "not confirmed" in line
+    # round 8: said once, as the house first drawn; the not-proven note too
+    from design_checker.check import NOT_PROVEN, TAX_MAP_NOTE
+    lines = [present.source_lines({"starting_house": logic.starting_house_fact(n, "2026-10-20")})[0]
+             for n in (TAX_MAP_NOTE, NOT_PROVEN)]
+    assert lines[0].startswith("Starting house: as first drawn, it keeps 2'-0\" back from each limit")
+    assert lines[1].startswith("Starting house: as first drawn, Gordium couldn't keep it clear")
+    assert not any(ln.count("Starting house") > 1 for ln in lines) and NOT_PROVEN.endswith(".")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    body = rhino[rhino.index("def gordium_start"):]
+    # round 8: cleared before any way out (a start that draws nothing keeps no earlier start's margin)
+    assert body.index('_set_source(doc, "starting_house", None, None)') < body.index('if not start.get("floors")') \
+        < body.index("add_floors(doc, start)") < body.index("logic.starting_house_fact(")
+
+
+def test_a_design_buffer_is_read_or_draw_stays_off():
+    """Review round 7: 6" (inches alone) or "6 in" was read as 0, silently."""
+    from design_checker import rhino_logic as logic
+    assert logic.parse_feet('6"') == 0.5 and logic.parse_feet("6 in") == 0.5 and logic.parse_feet("1'-6\"") == 1.5
+    assert logic.parse_feet("") == 0.0 and logic.parse_feet("abc") is None and logic.parse_feet("-1") is None
+    state = {"district_confirmed": True, "design_buffer": "abc"}
+    assert not logic.can_draw(state) and logic.draw_reason(state) == logic.BUFFER_UNREAD
+    assert logic.can_draw({**state, "design_buffer": '6"'})
+
+
+def test_the_design_buffer_is_set_when_starting_not_in_edit_site():
+    """Review round 7: Edit site… showed it, but changing it there redrew nothing."""
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text()
+    assert 'buffer = ef.TextBox() if mode == "start" else None' in ui
+    guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text()
+    assert "Edit site… → Advanced" not in guide and "Advanced → Design buffer** in the GordiumStart box" in guide
+
+
+def test_frame_site_frames_the_lot_and_house_not_the_whole_file():
+    """Review round 7: Zoom All Extents undid the per-view framing and took in anything far away in the file."""
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    start = rhino.index("def frame_site")
+    body = rhino[start:start + 1800]
+    assert "_Extents" not in body and '"_-Zoom _All _Selected"' in body and "doc.Objects.Select(i)" in body
+
+
+def test_spec_item_ids_are_unique():
+    import collections
+    import re
+    spec = (REPO / "docs/design/rhino_ui_spec.md").read_text()
+    ids = collections.Counter(re.findall(r"^([A-Z]\d+) \[", spec, re.M))
+    assert [i for i, n in ids.items() if n > 1] == []
