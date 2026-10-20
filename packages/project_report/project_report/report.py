@@ -56,6 +56,10 @@ def load_project(path: Path) -> dict:
     answer-key test uses (spreadsheet, compare) may be there too. Anything else is an error, so a typo can't
     silently drop a value."""
     project = load(path) or {}
+    if not isinstance(project, dict):
+        raise ValueError(f"{path}: a project file must be a mapping of fields (title, jurisdiction, zone, measurements)")
+    if "measurements" in project and not isinstance(project["measurements"], dict):
+        raise ValueError(f"{path}: measurements must be a mapping {{name: {{value, from}}}}")
     problems = [f"unknown field {k!r}" for k in project if k not in PROJECT_FIELDS]
     problems += [f"missing {k!r}" for k in ("title", "jurisdiction", "zone", "measurements") if k not in project]
     for name, m in (project.get("measurements") or {}).items():

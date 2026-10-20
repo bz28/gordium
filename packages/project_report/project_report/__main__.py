@@ -37,7 +37,12 @@ def main(argv: list[str]) -> int:
     for project in projects() if args.check else [args.project.resolve()]:
         path = output_path(project)
         shown = path.relative_to(REPO) if path.is_relative_to(REPO) else path
-        fresh = build(tables(project))
+        try:
+            fresh = build(tables(project))
+        except ValueError as e:                  # a malformed project file: say what's wrong, no traceback
+            print(f"✗ {e}")
+            failed += 1
+            continue
         same = path.exists() and contents(load_workbook(path)) == contents(fresh)
         if args.check:
             why = "" if same else ": differs from a fresh build" if path.exists() else ": missing (run the report)"

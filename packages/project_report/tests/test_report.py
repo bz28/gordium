@@ -223,3 +223,15 @@ def test_output_is_deterministic():
 
 def test_committed_example_matches_a_fresh_build():
     assert contents(openpyxl.load_workbook(output_path(SITE))) == contents(build(tables(SITE)))
+
+
+
+@pytest.mark.parametrize("text, match", [("- title: x\n", "must be a mapping of fields"),
+                                         ("title: x\njurisdiction: x\nzone: R-1b\nmeasurements:\n- lot_width\n",
+                                          "measurements must be a mapping")])
+def test_a_project_file_of_the_wrong_shape_gets_a_plain_message(tmp_path, text, match):
+    from project_report.report import load_project
+    path = tmp_path / "project.yaml"
+    path.write_text(text)
+    with pytest.raises(ValueError, match=match):
+        load_project(path)
