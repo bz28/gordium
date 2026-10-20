@@ -764,3 +764,28 @@ def test_the_methods_doc_counts_the_units_the_script_drafts(inputs):
     m = re.search(r"(\d+) AI calls: (\d+) chart sections, (\d+) law pieces", doc)
     ai = [u for u in inputs.units() if not u.get("code")]
     assert m and tuple(map(int, m.groups())) == (len(ai), sum("section" in u for u in ai), sum("piece" in u for u in ai))
+
+
+def _scratch(inputs, tmp_path):
+    i = copy.copy(inputs)
+    i.records, i.drafted = tmp_path / "records", tmp_path / "drafted"
+    return i
+
+
+def test_proposed_measures_follow_the_saved_rules(inputs, tmp_path):
+    """Re-drafting a unit that no longer needs a measure drops it (and its rule id); a short name is credited
+    only to the rules that name it, not to rules whose other names merely contain it."""
+    i, log = _scratch(inputs, tmp_path), {"units": {}}
+    def rule(rid, check):
+        return {"id": rid, "kind": "rule", "check": check, "sources": [], "examples": []}
+    def proposed():
+        path = i.records / "proposed_measures.yaml"
+        return cli.load(path) if path.exists() else {}
+    m = {"unit": "yes_no", "meaning": "m"}
+    cli.save_result(i, log, "u1", {"rules": {"R-1b": [rule("R-1b.a", "adu == 1"), rule("R-1b.b", "adu_entrance == 1")]},
+                                   "proposed": {"adu": m, "adu_entrance": m}})
+    assert proposed()["adu"]["needed_by"] == ["R-1b.a"] and proposed()["adu_entrance"]["needed_by"] == ["R-1b.b"]
+    cli.save_result(i, log, "u1", {"rules": {"R-1b": [rule("R-1b.b", "adu_entrance == 1")]}, "proposed": {}})
+    assert set(proposed()) == {"adu_entrance"}
+    cli.save_result(i, log, "u1", {"rules": {}, "proposed": {}})
+    assert proposed() == {}

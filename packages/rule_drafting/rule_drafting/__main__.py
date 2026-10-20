@@ -27,6 +27,7 @@ from pathlib import Path
 import yaml
 
 from document_extraction.sections import piece_text
+from rule_format import formula
 from rule_format.labels import load_pieces
 from rule_format.rulebook import REPO, Context, district_name, load, read_jsonl, validate
 from section_labeling.budget import Budget, BudgetExceeded
@@ -157,22 +158,30 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
     if result.get("failed"):
         entry["failed"] = result["failed"]
     log["units"][unit_id] = entry
+    # The engineers' to-do list is rebuilt from the saved rules every time: a measure is needed by exactly the
+    # rules whose formulas name it (by name, not by substring), and one no rule uses any more is dropped.
     proposed_path = i.records / "proposed_measures.yaml"
-    proposed = (load(proposed_path) or {}) if proposed_path.exists() else {}
-    for name, m in result.get("proposed", {}).items():
-        users = [r for r in new_ids if name in json.dumps(_rule(books, r))]
-        if users:
-            entry_m = proposed.setdefault(name, {"unit": m["unit"], "meaning": m["meaning"], "needed_by": []})
-            entry_m["needed_by"] = sorted(set(entry_m["needed_by"]) | set(users))
+    known = ((load(proposed_path) or {}) if proposed_path.exists() else {}) | {
+        name: {"unit": m["unit"], "meaning": m["meaning"]} for name, m in result.get("proposed", {}).items()}
+    proposed = {}
+    for book in books.values():
+        for rule in book["rules"]:
+            for name in sorted(_formula_names(rule) & set(known)):
+                entry_m = proposed.setdefault(name, {"unit": known[name]["unit"], "meaning": known[name]["meaning"],
+                                                     "needed_by": []})
+                entry_m["needed_by"] = sorted(set(entry_m["needed_by"]) | {rule["id"]})
     i.records.mkdir(parents=True, exist_ok=True)
     if proposed:
         proposed_path.write_text(yaml.safe_dump(proposed, sort_keys=True, allow_unicode=True, width=110))
+    elif proposed_path.exists():
+        proposed_path.unlink()
     (i.records / "drafting_log.yaml").write_text(yaml.safe_dump(log, sort_keys=False, allow_unicode=True, width=110))
 
 
-def _rule(books, rid):
-    district = rid.split(".")[0]
-    return next((r for r in books.get(district, {}).get("rules", []) if r["id"] == rid), {})
+def _formula_names(rule: dict) -> set[str]:
+    """The measure names a rule's formulas use."""
+    texts = [rule.get("applies_when"), rule.get("check")] + [r.get("when") for r in rule.get("review_when") or []]
+    return {n for t in texts if isinstance(t, str) and t.strip() for n in formula.names(t)}
 
 
 def run_records(i: Inputs) -> list[dict]:
