@@ -187,8 +187,8 @@ def load_facts(doc):
         facts = json.loads(text) if text else None
     except ValueError:
         raise unreadable
-    if facts is not None and not (isinstance(facts, dict) and all(
-            isinstance(facts.get(k), (str, type(None))) for k in ("lot_id", "main_building"))):
+    if facts is not None and (not isinstance(facts, dict) or
+                              ask({"cmd": "facts", "facts": facts})["problems"]):   # the same check as a file
         raise unreadable
     return facts
 
@@ -488,6 +488,8 @@ def confirm(doc, facts, options):
     lot = _find(doc, facts.get("lot_id") or "")
     main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     o = overlay()
+    _clear(o)                           # facts are being set: no earlier result (of any model) stays shown
+    o.message = None
     o.doc = doc.RuntimeSerialNumber
     o.confirm = (lot.Geometry if lot else None, street_curve(doc, facts), _drawable(main.Geometry) if main else None)
     doc.Views.Redraw()
@@ -778,6 +780,8 @@ def off():
     STATE["live"] = False
     o = STATE.get("overlay")
     if o is not None:
+        _clear(o)
+        o.message = None
         o.Enabled = False
     p = STATE.get("panel")
     if p is not None:

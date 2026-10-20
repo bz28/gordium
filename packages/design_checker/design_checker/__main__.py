@@ -4,7 +4,8 @@
     python -m design_checker serve                            # Rhino: one JSON request per line in, one answer out
 
 Requests (one JSON object per line): {"id": 1, "cmd": "check", "model": "<.3dm>", "facts": {...}, "report":
-"<.xlsx or null>"}, {"id": 2, "cmd": "options", "jurisdiction": "regulations/jurisdictions/..."}. Answers:
+"<.xlsx or null>"}, {"id": 2, "cmd": "options", "jurisdiction": "regulations/jurisdictions/..."}, {"id": 3, "cmd": "facts",
+"facts": {...}} (what's wrong with saved lot facts: the same check as a facts file). Answers:
 {"id": 1, "ok": true, "result": {...}} or {"id": 1, "ok": false, "error": "..."}. The process stays up, so a
 check after an edit doesn't pay for starting Python and loading the rules again.
 """
@@ -14,7 +15,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from model_measurement.project import load_facts
+from model_measurement.project import fact_problems, load_facts
 
 from .check import check, options
 
@@ -25,6 +26,8 @@ def answer(request: dict) -> dict:
             report = request.get("report")
             result = check(Path(request["model"]), request["facts"], Path(report) if report else None,
                            request.get("building_problems"))
+        elif request.get("cmd") == "facts":
+            result = {"problems": fact_problems(request["facts"])}
         elif request.get("cmd") == "options":
             result = options(request["jurisdiction"])
         else:

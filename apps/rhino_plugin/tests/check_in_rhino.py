@@ -98,6 +98,23 @@ try:
         pass
     g.save_facts(doc, saved)
 
+    # saved facts with a value of the wrong kind: the same plain refusal (checked like a facts file)
+    doc.Strings.SetString(g.SECTION, g.ENTRY, '{"zone": "R-1b", "grade_elevation": "abc"}')
+    try:
+        g.current_facts(doc)
+        problems.append("facts with grade_elevation 'abc' were accepted")
+    except ValueError:
+        pass
+    g.save_facts(doc, saved)
+
+    # confirming facts never shows an earlier result, even one stamped for another document
+    g.run_check(doc, report=False)
+    o.doc = -1
+    st["auto_ok"] = True
+    g.confirm(doc, saved, {"uses": {}, "zones": ["R-1b"]})
+    st.pop("auto_ok", None)
+    expect(o.message is None and not o.red and o.envelope is None, "confirm showed an earlier result")
+
     # an import into this model is an edit: its result stays until the re-check
     g.run_check(doc, report=False)
 
@@ -114,6 +131,7 @@ try:
 
     # GordiumOff, then GordiumLive: another document still clears the drawing
     g.off()
+    expect(o.message is None and not o.red and o.envelope is None, "GordiumOff left the result")
     g.toggle_live()
     g.run_check(doc, report=False)
     expect(st.get("doc_hooks") is not None, "no document hooks after GordiumOff then GordiumLive")

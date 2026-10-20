@@ -140,3 +140,10 @@ def test_the_venv_python_on_each_system():
 def test_a_result_is_drawn_only_in_its_own_document():
     from design_checker.rhino_logic import draws_in
     assert draws_in(5, 5) and not draws_in(5, 6) and not draws_in(None, 5)
+
+
+def test_saved_facts_are_checked_like_a_facts_file():
+    from design_checker.__main__ import answer
+    for bad in ({"zone": "R-1b", "grade_elevation": "abc"}, {"street_line": 5}):
+        assert answer({"id": 1, "cmd": "facts", "facts": bad})["result"]["problems"], bad
+    assert answer({"id": 2, "cmd": "facts", "facts": {"zone": "R-1b"}})["result"]["problems"] == []
