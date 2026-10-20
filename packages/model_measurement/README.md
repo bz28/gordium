@@ -65,7 +65,8 @@ listed, and the reason names the open question for the architects, so the checke
 
 Things that stop a measurement. The measurement has no value and gives NEEDS REVIEW, with this reason, word
 for word. Every reason is in one table, `model_measurement/stops.py`, and the code gives no other;
-`tests/test_stop_list.py` checks each is listed here and builds a case that gives it:
+`tests/test_stop_list.py` checks each is listed here and builds a case that gives it, and `tests/conftest.py`
+checks every reason any test makes is built from the table:
 
 - **The readings disagree:** "the readings give different values; …", then the open question from the table
   above (the value is left to the architects; every reading is shown).

@@ -228,23 +228,33 @@ def _reason_parts(node) -> list:
     return []
 
 
-def _written_out(node) -> list:
-    """Words in a reason that don't come from stop(): a string with letters, outside any stop(...) call."""
+def _written_out(node, bound, seen=frozenset()) -> list:
+    """Words in a reason that don't come from stop(): a string with letters outside any stop(...) call, found
+    where the reason is made or in what a name in it was set to (a constant, a table like ASK[...])."""
     if isinstance(node, ast.Call) and ast.unparse(node.func) == "stop":
         return []
     if isinstance(node, ast.JoinedStr) or isinstance(node, ast.Constant) and isinstance(node.value, str) \
             and re.search("[a-z] [a-z]", node.value):          # words, not a key like "lot"
         return [ast.unparse(node)]
-    return [w for child in ast.iter_child_nodes(node) for w in _written_out(child)]
+    if isinstance(node, ast.Name) and node.id in bound and node.id not in seen:
+        return [w for value in bound[node.id] for w in _written_out(value, bound, seen | {node.id})]
+    return [w for child in ast.iter_child_nodes(node) for w in _written_out(child, bound, seen)]
 
 
 def test_the_measuring_gives_reasons_only_from_the_table():
-    """Whatever becomes a reason comes from stop(): a reason written straight into the code would be missed by the
-    README and the cases."""
+    """Whatever becomes a reason comes from stop(), followed through names: a reason written into the code
+    would be missed by the README and the cases. (conftest.py also checks every reason the tests make.)"""
     found = []
     for name in ("read_3dm.py", "measure.py"):
-        for node in ast.walk(ast.parse((CODE / name).read_text())):
-            found += [f"{name}:{node.lineno} {w}" for part in _reason_parts(node) for w in _written_out(part)]
+        tree = ast.parse((CODE / name).read_text())
+        bound = {}                      # module-level names (constants, tables); a local why_... is checked itself
+        for node in tree.body:
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        bound.setdefault(target.id, []).append(node.value)
+        for node in ast.walk(tree):
+            found += [f"{name}:{node.lineno} {w}" for part in _reason_parts(node) for w in _written_out(part, bound)]
     assert not found, "put these reasons in stops.py and use stop(): " + "; ".join(found)
 
 
