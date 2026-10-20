@@ -3,7 +3,7 @@
     python -m rule_export            # writes regulations/jurisdictions/<state>/<place>/<place>_rules.xlsx
     python -m rule_export --check    # exit 1 if a committed workbook differs from a fresh build (CI)
 
-A workbook is rewritten only when its content changes, so regenerating doesn't churn the file.
+A workbook is rewritten only when its content or look changes, so regenerating doesn't churn the file.
 """
 
 import argparse
