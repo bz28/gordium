@@ -182,10 +182,15 @@ def suggested_facts(doc, zones):
 
 def load_facts(doc):
     text = doc.Strings.GetValue(SECTION, ENTRY)
+    unreadable = ValueError("the saved lot facts can't be read: run GordiumFacts to enter them again")
     try:
-        return json.loads(text) if text else None
+        facts = json.loads(text) if text else None
     except ValueError:
-        raise ValueError("the saved lot facts can't be read: run GordiumFacts to enter them again")
+        raise unreadable
+    if facts is not None and not (isinstance(facts, dict) and all(
+            isinstance(facts.get(k), (str, type(None))) for k in ("lot_id", "main_building"))):
+        raise unreadable
+    return facts
 
 
 def current_facts(doc):
@@ -265,17 +270,26 @@ class Overlay(Rhino.Display.DisplayConduit):
         sys.modules[__name__].draw_screen(self, e)
 
 
+def _here(o, e):
+    """Whether this viewport belongs to the document the drawing is for."""
+    return e.RhinoDoc is not None and logic.draws_in(getattr(o, "doc", None), e.RhinoDoc.RuntimeSerialNumber)
+
+
 def cull(o, e):
+    if not _here(o, e):
+        return
     if e.RhinoObject is not None and str(e.RhinoObject.Id) in o.red_ids:
         e.CullObject = True                  # drawn by draw_scene in red instead
 
 
 def bounds(o, e):
-    if o.box.IsValid:
+    if _here(o, e) and o.box.IsValid:
         e.IncludeBoundingBox(o.box)
 
 
 def draw_scene(o, e):
+    if not _here(o, e):
+        return
     d = e.Display
     for g in o.red:                          # failing solids, in red
         if isinstance(g, rg.Mesh):
@@ -300,6 +314,8 @@ def draw_scene(o, e):
 
 
 def draw_screen(o, e):
+    if not _here(o, e):
+        return
     d = e.Display
     for line, label in o.dims:               # each failing distance: the line it was measured along, on top
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
@@ -333,6 +349,8 @@ def overlay():
         o = Overlay()
         STATE["overlay"] = o
     o.Enabled = True
+    if not STATE.get("doc_hooks"):          # whatever turned drawing on: another document clears it
+        documents(True)
     return o
 
 
@@ -470,6 +488,7 @@ def confirm(doc, facts, options):
     lot = _find(doc, facts.get("lot_id") or "")
     main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     o = overlay()
+    o.doc = doc.RuntimeSerialNumber
     o.confirm = (lot.Geometry if lot else None, street_curve(doc, facts), _drawable(main.Geometry) if main else None)
     doc.Views.Redraw()
     try:
@@ -587,6 +606,7 @@ def report_path(doc):
 def _clear(o):
     """Nothing from an earlier check is left on screen."""
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
+    o.doc = None
 
 
 def run_check(doc, report=True):
@@ -606,6 +626,7 @@ def run_check(doc, report=True):
         result = ask({"cmd": "check", "model": path, "facts": facts, "building_problems": problems,
                       "report": report_path(doc) if report else None})
         _clear(o)
+        o.doc = doc.RuntimeSerialNumber
         s = result["summary"]
         o.message = (s["state"], s["text"], s["lines"])
         failing = [(g, _red_copy(g.Geometry)) for g in (_find(doc, i) for i in result["red"]) if g is not None]
@@ -626,6 +647,7 @@ def run_check(doc, report=True):
         return result
     except Exception as e:
         _clear(o)
+        o.doc = doc.RuntimeSerialNumber
         o.message = ("review", "can't check: " + str(e)[:160], [])
         STATE["last"] = {"error": str(e), "at": time.time()}
         if not STATE.get("headless"):
@@ -655,6 +677,14 @@ def _new_document(sender, e):
     STATE["dirty"] = time.time()        # re-check the document now in front, if it has lot facts
 
 
+def _opened(sender, e):
+    """A file opened: another document; or merged into this one (Import, Insert, a reference): an edit."""
+    if e.Merge or e.Reference:
+        STATE["dirty"] = time.time()
+    else:
+        _new_document(sender, e)
+
+
 def _idle(sender, e):
     t = STATE.get("dirty")
     if t and time.time() - t >= IDLE_SECONDS and not STATE.get("running"):
@@ -674,7 +704,7 @@ def documents(on):
         Rhino.RhinoDoc.ActiveDocumentChanged -= active
     if on:
         new_doc = System.EventHandler[Rhino.DocumentEventArgs](_new_document)
-        opened = System.EventHandler[Rhino.DocumentOpenEventArgs](_new_document)
+        opened = System.EventHandler[Rhino.DocumentOpenEventArgs](_opened)
         active = System.EventHandler[Rhino.DocumentEventArgs](_new_document)
         Rhino.RhinoDoc.NewDocument += new_doc
         Rhino.RhinoDoc.EndOpenDocument += opened
@@ -769,7 +799,6 @@ def gordium_check():
     if logic.missing(facts):
         facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
         save_facts(doc, facts)
-    documents(True)                                 # another document never shows this one's results
     result = run_check(doc, report=True)
     live(True)                                      # live mode is on by default
     if result is not None:

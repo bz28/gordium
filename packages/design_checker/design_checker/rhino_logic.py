@@ -85,3 +85,9 @@ def venv_python(root, os_name):
     if os_name == "nt":
         return "\\".join((root, ".venv", "Scripts", "python.exe"))
     return "/".join((root, ".venv", "bin", "python"))
+
+
+def draws_in(checked, viewport):
+    """Whether a result is drawn in a viewport: only in the document it is the result for (Rhino for Mac keeps
+    several models open side by side; one model's verdict never shows on another)."""
+    return checked is not None and checked == viewport

@@ -89,6 +89,35 @@ try:
     g._new_document(None, None)
     expect("rows" not in st["last"] and o.message is None and not o.red, "results kept for another document")
 
+    # saved facts that are valid JSON but not lot facts: the same plain refusal
+    doc.Strings.SetString(g.SECTION, g.ENTRY, "5")
+    try:
+        g.current_facts(doc)
+        problems.append("facts '5' were accepted")
+    except ValueError:
+        pass
+    g.save_facts(doc, saved)
+
+    # an import into this model is an edit: its result stays until the re-check
+    g.run_check(doc, report=False)
+
+    class Opened:
+        Merge, Reference = True, False
+    g._opened(None, Opened())
+    expect("rows" in st["last"] and o.message is not None, "an import cleared this model's result")
+
+    # drawn only in the document checked
+    class View:
+        class RhinoDoc:
+            RuntimeSerialNumber = -1
+    expect(not g._here(o, View()), "drawn in another document's viewport")
+
+    # GordiumOff, then GordiumLive: another document still clears the drawing
+    g.off()
+    g.toggle_live()
+    g.run_check(doc, report=False)
+    expect(st.get("doc_hooks") is not None, "no document hooks after GordiumOff then GordiumLive")
+
     # a SubD's red copy can be drawn
     sub = rg.SubD.CreateFromMesh(rg.Mesh.CreateFromBox(rg.BoundingBox(0, 0, 0, 1, 1, 1), 1, 1, 1))
     expect(isinstance(g._red_copy(sub), rg.Brep), "no red copy for a SubD")

@@ -135,3 +135,8 @@ def test_the_venv_python_on_each_system():
     from design_checker.rhino_logic import venv_python
     assert venv_python("/repo", "posix") == "/repo/.venv/bin/python"
     assert venv_python("C:\\repo", "nt") == "C:\\repo\\.venv\\Scripts\\python.exe"
+
+
+def test_a_result_is_drawn_only_in_its_own_document():
+    from design_checker.rhino_logic import draws_in
+    assert draws_in(5, 5) and not draws_in(5, 6) and not draws_in(None, 5)
