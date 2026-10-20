@@ -239,6 +239,40 @@ def test_a_lot_in_two_zones_asks_which_applies():
     assert any("R-1b and R-2a" in a or "R-2a and R-1b" in a for a in r["asks"])
 
 
+def test_a_lot_partly_off_the_zoning_map_needs_review():
+    fx = load("106_ithaca_rd")
+    ring = g.open_ring(next(a for a in fx["answers"] if a["source"] == "state_parcels")["body"]["features"][0]["geometry"]["rings"][0])
+    cx = g.centroid(ring)[0]
+    f = Fake(fx)
+    f.zones = [f.square("R-1b", 840000, 880000, cx, 890000)]       # only the lot's west half is mapped
+    z = both(lookup(fx["address"], f, NOW))["zone"]
+    assert z["value"] == "R-1b" and z["status"] == "needs_review" and "of this lot is on the City's zoning map" in z["reason"]
+
+
+def test_a_point_found_only_along_the_street_makes_the_lot_doubtful():
+    """The geocoder's along-the-street guess can land on the neighbour's lot: the lot and parcel it picked
+    need review too, not only the address."""
+    fx = load("106_ithaca_rd")
+    for a in fx["answers"]:
+        if a["source"] == "geocoder":
+            for c in a["body"]["candidates"]:
+                c["attributes"]["Addr_type"] = "StreetAddress"
+    f = both(lookup(fx["address"], Fake(fx), NOW))
+    assert f["address"]["status"] == "needs_review"
+    assert f["lot"]["status"] == "needs_review" and f["parcel"]["status"] == "needs_review"
+    assert "wrong lot" in f["lot"]["reason"]
+
+
+def test_a_malformed_answer_is_an_error_state_not_a_crash():
+    fx = load("106_ithaca_rd")
+    for a in fx["answers"]:
+        if a["source"] == "geocoder":
+            for c in a["body"]["candidates"]:
+                del c["location"]
+    r = lookup(fx["address"], Fake(fx), NOW)
+    assert r["status"] == "error" and "by hand" in r["message"]
+
+
 def test_a_lot_on_a_street_rezoned_after_the_map_needs_review():
     fx = load("106_ithaca_rd")
     for a in fx["answers"]:

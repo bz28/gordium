@@ -60,9 +60,9 @@ def lookup(address: str, http, now: dt.datetime | None = None) -> dict:
     except Offline as e:
         result.update(status="offline", message="Couldn't reach the map services (offline?): enter the site by hand.",
                       detail=str(e))
-    except ServiceError as e:
+    except (ServiceError, KeyError, TypeError, ValueError, IndexError) as e:
         result.update(status="error", message="A map service answered with an error: enter the site by hand.",
-                      detail=str(e))
+                      detail=f"{type(e).__name__}: {e}")
     result["details"] = {k: {d: v[d] for d in DETAIL_KEYS if d in v} for k, v in result["facts"].items()}
     result["facts"] = {k: {d: v[d] for d in FACT_KEYS} for k, v in result["facts"].items()}
     result["snapshot"] = snapshot(result, f)
@@ -137,13 +137,15 @@ def _lookup(address: str, f: Fetcher, today: str, result: dict) -> None:
     parcel = in_city[0]
     city_parcel = next((p for p in city if p["id"] == parcel["id"]), None)
     ring = max(parcel["rings"], key=g.area)
-    lot_status, lot_reason = ("suggested", "")
+    lot_status, lot_reason = ("suggested", "") if addr_status == "suggested" else (
+        "needs_review", "The address point is doubtful, so this may be the wrong lot: " + addr_reason)
     if len(parcel["rings"]) > 1:
         lot_status, lot_reason = "needs_review", "This parcel has more than one piece: check the lot outline."
     origin = tuple(round(v, 2) for v in g.centroid(ring))
     outline = [[round((x - origin[0]) * US_SURVEY_FT, 2), round((y - origin[1]) * US_SURVEY_FT, 2)] for x, y in ring]
     src = ENDPOINTS[parcel["source"]]
-    facts["parcel"] = fact(parcel["id"], src["name"], src["url"], today)
+    facts["parcel"] = fact(parcel["id"], src["name"], src["url"], today, *(
+        ("suggested",) if addr_status == "suggested" else ("needs_review", lot_reason)))
     facts["lot"] = fact({"outline_ft": outline, "area_sf": round(g.area(ring) * US_SURVEY_FT ** 2, 1),
                          "origin_epsg2261_us_survey_ft": list(origin), "tolerance_ft": TAX_MAP_TOLERANCE_FT},
                         f"{src['name']} (tax map, approximate ±{TAX_MAP_TOLERANCE_FT:.0f} ft)", src["url"], today,
@@ -217,8 +219,8 @@ def _streets(f: Fetcher, ring, address_street: str, today: str, facts: dict, ask
         facts["street_side"] = fact(value, src["name"], src["url"], today, "ask",
                                     f"This lot faces {len(names)} streets ({', '.join(names)}): pick the front.", note)
         facts["corner_lot"] = fact("ask", src["name"], src["url"], today, "ask",
-                                   f"It faces {' and '.join(names)}, so it looks like a corner lot: confirm, "
-                                   "and pick the front.")
+                                   f"It faces {' and '.join(names)}: a corner lot (or a lot running through "
+                                   "between two streets): confirm, and pick the front.")
         asks.append(f"This lot faces two streets ({' and '.join(names[:2])}): pick the front.")
         return
     if address_street and front != address_street:
@@ -276,11 +278,15 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     zones = sorted((z for z, s in shares.items() if s >= ZONE_SHARE_MIN), key=lambda z: -shares[z])
     when = edited.isoformat() if edited else "unknown"
     source = f"{src['name']}, last edited {when}: a suggestion to confirm"
+    covered = sum(shares.values())
     if not zones:
         facts["zone"] = fact(None, source, src["url"], today, "needs_review",
                              "This lot isn't on the City's zoning map: choose the district.")
         return
     status, reason = "suggested", ""
+    if covered < 0.9:
+        status, reason = "needs_review", (f"Only {covered:.0%} of this lot is on the City's zoning map: "
+                                          "check the district.")
     if len(zones) > 1:
         status, reason = "ask", f"This lot is in {' and '.join(zones)}: pick the zone that applies."
         asks.append(reason)
