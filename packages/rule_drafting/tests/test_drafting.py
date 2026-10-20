@@ -755,3 +755,12 @@ def test_drafted_rules_are_listed_apart_from_hand_rules_with_the_same_id(tmp_pat
         (tmp_path / path).write_text(cli.yaml.safe_dump({"district": "R-1b", "rules": [rule]}))
     pieces = {"p": {"id": "p", "lines": [[1, 1, 3]]}}
     assert coverage.cited_by(tmp_path, "law.pdf", pieces) == {"p": ["R-1b.x", "drafted:R-1b.x"]}
+
+
+def test_the_methods_doc_counts_the_units_the_script_drafts(inputs):
+    """The full-run budget decision rests on this count, so it is worked out from the units, not typed."""
+    from rule_format.rulebook import REPO
+    doc = (REPO / "docs/methods.md").read_text()
+    m = re.search(r"(\d+) AI calls: (\d+) chart sections, (\d+) law pieces", doc)
+    ai = [u for u in inputs.units() if not u.get("code")]
+    assert m and tuple(map(int, m.groups())) == (len(ai), sum("section" in u for u in ai), sum("piece" in u for u in ai))
