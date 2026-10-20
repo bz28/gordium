@@ -282,14 +282,19 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
     v = present.view(rows, waiting, by_id, measured, facts, extras)
-    if report_path is not None:
-        _report(t, v, report_path)
+    report_error = None
+    if report_path is not None:      # a report that can't be written never takes the check's result with it
+        try:
+            _report(t, v, report_path)
+        except OSError as e:
+            report_error = f"{e.strerror or e} ({report_path})"
     env = envelope(site, _envelope_facts(site, facts), measured, rules)
     # the notice (spec G): the items that don't comply now and did at the last check the command sent ("before")
     statuses, notice_text = present.notice((extras or {}).get("before"), v["items"])
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
             "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
             "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": plan(site, env, v, measured),
+            "report_error": report_error,
             "statuses": statuses, "notice": notice_text}
 
 

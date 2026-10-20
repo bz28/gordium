@@ -179,14 +179,43 @@ def clear_spot(taken, x, y, w, h):
     spot is then taken. If none is free within four steps, the label stays where it was wanted."""
     def hits(top):
         return any(x < a + c and a < x + w and top < b + e and b < top + h for a, b, c, e in taken)
-    top = y
+    top = None
     for k in range(9):
         trial = y + (k + 1) // 2 * (h + 3) * (1 if k % 2 else -1)
-        if not hits(trial):
+        if (trial >= 0 or trial >= y) and not hits(trial):        # never moved up off the top of the view
             top = trial
             break
+    if top is None:                   # a tall box in the way (the status box): just below whatever it covers
+        below = y
+        for _ in range(len(taken) + 1):
+            over = [b + e for a, b, c, e in taken if x < a + c and a < x + w and below < b + e and b < below + h]
+            if not over:
+                top = below
+                break
+            below = max(over) + 3
+    top = y if top is None else top
     taken.append((x, top, w, h))
     return top
+
+
+def status_box(viewport_width, rows, size=13):
+    """Where the status box goes (top right of a view): (x, y, w, h) in screen pixels, the same size
+    gordium_ui.draw_text_box draws it. Reserved before the labels, so no label is drawn under it."""
+    width = max(len(r) for r in rows) * (size * 0.6) + 22
+    height = len(rows) * (size + 9) + 10
+    return (viewport_width - width - 14, 14, width, height)
+
+
+def survey_pick(n_lots, picked, outlined):
+    """Pick survey lot lines…: (the lot to mark as surveyed, or None; what to say, or None). Enter, with lots to
+    choose from, keeps the one outlined (as the prompt says); no lot at all says how to draw one."""
+    if n_lots == 0:
+        return None, "No lot outline to pick: draw the surveyed lot as one closed polyline on the Site layer."
+    if picked:
+        return picked, None
+    if outlined:
+        return outlined, None
+    return None, "No lot is outlined yet: run Pick survey lot lines… again and click the surveyed lot outline."
 
 
 def could_be_building(kind, solid=False, faces=0):

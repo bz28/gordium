@@ -405,7 +405,9 @@ def draw_screen(o, e):
         d.Draw2dText(text, BLUE, rg.Point2d(p.X - width // 2 + 8, p.Y - 8), False, 14)
     dark = ui.viewport_dark()
     old = stale(o)
-    taken = []                               # labels drawn this frame: none covers another
+    taken = []                               # labels drawn this frame: none covers another, nor the status box
+    if o.message:
+        taken.append(logic.status_box(e.Viewport.Bounds.Width, _status_rows(o, stale(o))))
     # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
     # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
     plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
@@ -429,15 +431,21 @@ def draw_screen(o, e):
                          int(e.Viewport.Bounds.Height) - (22 * len(lines) + 12) - 64, dark, 13)
     if not o.message:
         return
+    state = "stale" if old else o.message[0]
+    color = ui.status_color({"does_not_comply": "does_not_comply", "needs_review": "needs_review"}.get(state, "complies"),
+                            dark)
+    rows = _status_rows(o, old)
+    x, y, _, _ = logic.status_box(e.Viewport.Bounds.Width, rows)
+    ui.draw_text_box(d, rows, color, int(x), y, dark, 13)
+
+
+def _status_rows(o, old):
+    """The status box's lines: the summary, then up to 3 notes (never ✓ (D3); "–" means not checked)."""
     state, text, lines = o.message
     if old:                                  # out of date: neutral, no status (F7)
         state, text, lines = "stale", "Checking… (the model changed)", lines[:1]
-    color = ui.status_color({"does_not_comply": "does_not_comply", "needs_review": "needs_review"}.get(state, "complies"),
-                            dark)
-    mark = {"does_not_comply": "✕", "needs_review": "?"}.get(state, "")    # never ✓ (D3), and "–" means not checked
-    rows = ["Gordium · " + (mark + " " if mark else "") + text] + list(lines)[:3]
-    width = max(len(r) for r in rows) * 13 * 0.6 + 22
-    ui.draw_text_box(d, rows, color, int(e.Viewport.Bounds.Width) - width - 14, 14, dark, 13)
+    mark = {"does_not_comply": "✕", "needs_review": "?"}.get(state, "")
+    return ["Gordium · " + (mark + " " if mark else "") + text] + list(lines)[:3]
 
 
 def overlay():
@@ -600,14 +608,14 @@ def pick_survey():
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
-    if picked:
-        facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
-        facts["lot_surveyed"] = True
-        _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
-        save_facts(doc, facts)
-    else:
-        say("No lot outline to pick: draw the surveyed lot as one closed polyline on the Site layer.")
+    picked, why = logic.survey_pick(len(lots), picked, facts.get("lot_id"))
+    if not picked:
+        say(why)
         return
+    facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
+    facts["lot_surveyed"] = True
+    _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
+    save_facts(doc, facts)
     run_check(doc, report=False)
 
 
@@ -1255,6 +1263,8 @@ def run_check(doc, report=True):
         sent = check_facts(doc, facts)
         extras = _extras(doc, facts)
         extras["before"] = STATE.setdefault("statuses_by_doc", {}).get(doc.RuntimeSerialNumber)
+        if not STATE.get("headless"):            # the message line tells of the last action only, not an old one
+            ui.say(STATE.get("panel_parts"), "")
         result = ask({"cmd": "check", "model": path, "facts": sent, "building_problems": problems,
                       "report": report_path(doc) if report else None, "extras": extras})
         _clear(o)
@@ -1468,8 +1478,12 @@ def open_report():
         return
     path = report_path(doc)
     before = os.path.getmtime(path) if os.path.exists(path) else None
-    result = run_check(doc, report=True)
-    written = result is not None and os.path.exists(path) and os.path.getmtime(path) != before
+    result = run_check(doc, report=True)          # the check's result stays, even if the file can't be written
+    written = result is not None and not result.get("report_error") and os.path.exists(path) and \
+        os.path.getmtime(path) != before
+    if result is not None and result.get("report_error"):
+        say(logic.report_message(path, False, result["report_error"]))
+        return
     if not written:
         say(logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
                                  ("the report file wasn't written to " + os.path.dirname(path))))

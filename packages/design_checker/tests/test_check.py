@@ -818,3 +818,55 @@ def test_no_panel_button_does_nothing_silently():
     assert silent == [], silent
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text()
     assert 'parts["message"] = label(' in ui and "def say(parts, text):" in ui
+
+
+def test_pick_survey_with_enter_keeps_the_outlined_lot_and_only_no_lot_says_draw_one():
+    """Review round 10: Enter, with two lots, said "No lot outline to pick" (the prompt says Enter keeps the one
+    outlined)."""
+    from design_checker import rhino_logic as logic
+    assert logic.survey_pick(2, None, "lot-a") == ("lot-a", None)
+    assert logic.survey_pick(2, "lot-b", "lot-a") == ("lot-b", None)
+    assert logic.survey_pick(0, None, None)[1].startswith("No lot outline to pick")
+    assert logic.survey_pick(2, None, None)[0] is None and "No lot outline" not in logic.survey_pick(2, None, None)[1]
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    assert 'logic.survey_pick(len(lots), picked, facts.get("lot_id"))' in rhino
+
+
+def test_the_panel_message_line_is_cleared_by_every_check():
+    """Review round 10: "Report saved to …" stayed after later edits and checks."""
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert body.index('ui.say(STATE.get("panel_parts"), "")') < body.index("result = ask(")
+    report = rhino[rhino.index("def open_report():"):rhino.index("\ndef off():")]
+    assert report.index("run_check(doc, report=True)") < report.index("say(logic.report_message(path, True")
+
+
+def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_path):
+    """Review round 10: a report file that couldn't be written (a read-only folder, the file open elsewhere) threw
+    away the check's result as well."""
+    blocked = tmp_path / "ro"
+    blocked.mkdir()
+    blocked.chmod(0o500)
+    try:
+        got = check(MODEL, facts, blocked / "r.xlsx")
+    finally:
+        blocked.chmod(0o700)
+    assert got["view"]["items"] and got["report_error"] and "r.xlsx" in got["report_error"]
+    assert check(MODEL, facts, tmp_path / "ok.xlsx")["report_error"] is None
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    assert 'say(logic.report_message(path, False, result["report_error"]))' in rhino
+
+
+def test_no_viewport_label_is_drawn_under_the_status_box():
+    """Coordinator, from the captures (2026-10-20): the status box covered the lot's top length label. The box is
+    reserved first; a label it would cover moves just below it."""
+    from design_checker import rhino_logic as logic
+    box = logic.status_box(1000, ["Gordium · ? 2 need review · 8 comply · 2 not checked", "Draft rulebook · Lot lines",
+                                  "Grade: flat at elevation 0'-0\" (existing)", "one more line"])
+    x, y, w, h = box
+    taken = [box]
+    top = logic.clear_spot(taken, 600, 20, 120, 20)                # a label wanted under the box
+    assert top >= y + h
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    conduit = rhino[rhino.index("    taken = []"):]
+    assert conduit.index("logic.status_box(") < conduit.index("ui.label_at(")
