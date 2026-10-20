@@ -697,3 +697,23 @@ def test_the_use_rule_quotes_and_lists_the_notes_on_its_rows_and_column_heading(
     assert any("footnote 2" in w and "South Hill Overlay" in w for w in why)
     r3a = [g["why"] for g in result["unresolved"] if g["rule"] == "R-3a.use"]
     assert not any("column heading" in w for w in r3a)     # R-3's page-2 heading carries no note
+
+
+def test_a_reference_takes_its_lettered_subsections_not_the_next_numbered_section(inputs):
+    u = {"id": "x", "text": "See § 325-29.", "page": None}
+    ids = [p["id"] for p in drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)["pieces"]]
+    assert "325-29" in ids and not any(i.startswith("325-29.") for i in ids)
+
+
+def test_a_long_section_is_named_as_dropped_and_the_short_ones_after_it_still_come(inputs):
+    """325-8A points to 325-20D, too long to fit; the small subsections after it (325-20E ...) still come, and
+    whatever is left out is named in the message and listed for a person."""
+    u = unit(inputs, "325-8A")
+    context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
+    ids = [p["id"] for p in context["pieces"]]
+    assert "325-20D" in context["dropped"] and "325-20E" in ids             # the cut didn't stop the loop
+    assert "left out for length" in drafter.unit_message(u, context)
+    result = drafter.keep({"rules": {}, "unresolved": [], "rejected": [], "problems": []}, u, inputs.cells,
+                          inputs.columns, context)
+    assert {d for d in context["dropped"]} <= {g["why"].split()[3].rstrip(",") for g in result["unresolved"]
+                                                 if "left out of the drafter's input" in g["why"]}

@@ -80,13 +80,13 @@ for uid in [cli.USES_UNIT] + sorted(attempts):
             first_ok = bool(ok)
         if ok:
             result["reason"] = "" if result["rules"] else answer["no_rule_reason"].strip()
-            chosen = drafter.keep(result, unit, i.cells, i.columns)
+            chosen = drafter.keep(result, unit, i.cells, i.columns, context)
             break
         notes.append(f"attempt {rec['attempt']}: " + "; ".join(result["problems"])[:600])
         if result["rules"]:
             last = result
     if chosen is None and last is not None:
-        chosen, outcome = drafter.keep(last, unit, i.cells, i.columns, last_attempt=True), "partial (last attempt with working rules kept)"
+        chosen, outcome = drafter.keep(last, unit, i.cells, i.columns, context, last_attempt=True), "partial (last attempt with working rules kept)"
     elif chosen is None:
         chosen = {"failed": notes[-1] if notes else "no answer", "rules": {}, "unresolved": [], "rejected": [],
                   "proposed": {}, "problems": [], "templates": []}

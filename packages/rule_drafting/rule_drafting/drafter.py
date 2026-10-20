@@ -245,6 +245,9 @@ def unit_message(unit: dict, context: dict) -> str:
     if context["pieces"]:
         parts.append("Sections of the law it points to (document \"law\", by piece id):\n" + "\n\n".join(
             f"[piece {p['id']}] {p['title']}\n{p['text']}" for p in context["pieces"]))
+    if context.get("dropped"):
+        parts.append("It also points to these sections, left out for length (don't draft from them; a person checks "
+                     "them): " + ", ".join(context["dropped"]))
     if context["definitions"]:
         parts.append("Definitions used (for meaning; quote them only if a rule rests on them):\n" + "\n".join(
             f"- {d}" for d in context["definitions"]))
@@ -253,26 +256,29 @@ def unit_message(unit: dict, context: dict) -> str:
 
 def gather_context(unit: dict, law: dict, chart: dict, definitions: dict) -> dict:
     """Footnotes, sections and definitions the unit's text points to. law: {file, pieces, rows};
-    chart: {notes: {page: {n: note}}}."""
+    chart: {notes: {page: {n: note}}}. A reference to §325-29 takes 325-29 and its lettered subsections
+    (325-29A, 325-29B ...), never 325-29.1, a section of its own. The sections stop at 20,000 characters;
+    whatever doesn't fit is named in "dropped" (and in the message), never left out silently."""
     text = unit["text"]
     markers = sorted({n for m in re.findall(r"\[fn([^\]]*)\]", text) for n in m.split(",") if n.strip()}, key=int)
     notes = [{"page": unit["page"], **chart["notes"][unit["page"]][n]} for n in markers
              if unit.get("page") in chart["notes"] and n in chart["notes"][unit["page"]]]
     refs = section_refs(text + " " + " ".join(n["text"] for n in notes))
-    pieces, size = [], 0
+    pieces, dropped, size = [], [], 0
     for ref in refs:
         for pid, piece in law["pieces"].items():
-            if (pid == ref or pid.startswith(ref) and not pid[len(ref):len(ref) + 1].isdigit()) \
-                    and pid != unit.get("piece") and all(p["id"] != pid for p in pieces):
+            if (pid == ref or pid.startswith(ref) and pid[len(ref):len(ref) + 1].isalpha()) \
+                    and pid != unit.get("piece") and all(p["id"] != pid for p in pieces) and pid not in dropped:
                 body = piece_text(law["rows"], piece)
                 if size + len(body) > 20_000:
-                    break
+                    dropped.append(pid)
+                    continue
                 pieces.append({"id": pid, "title": piece["title"], "text": body})
                 size += len(body)
     lower = text.lower()
     defs = [f"{v['term']}: " + " ".join(_sentences(s["quote"]) for s in v["sources"])
             for v in definitions.values() if v["term"].split("(")[0].strip().lower() in lower]
-    return {"notes": notes, "pieces": pieces, "definitions": defs}
+    return {"notes": notes, "pieces": pieces, "dropped": dropped, "definitions": defs}
 
 
 def _within(lines: list[int], span: list[int]) -> bool:
@@ -512,14 +518,17 @@ def chart_gaps(unit: dict, result: dict, cells: dict, columns: list[str]) -> lis
     return out
 
 
-def keep(result: dict, unit: dict, cells: dict, columns: list[str], last_attempt: bool = False) -> dict:
+def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dict, last_attempt: bool = False) -> dict:
     """The answer kept for a unit, with everything it leaves for a person: on the last attempt its rejected
     templates, and always whatever the unit's input states that no saved rule covers (the law lines its
-    label cites, the chart cells of its section). The one way an answer is kept, by drafting and by replays."""
+    label cites, the chart cells of its section, the sections it points to that were left out for length). The
+    one way an answer is kept, by drafting and by replays."""
     if last_attempt:
         result["unresolved"] += result["rejected"]
         result["problems"] = []
-    result["unresolved"] += requirement_gaps(unit, result) + chart_gaps(unit, result, cells, columns)
+    result["unresolved"] += requirement_gaps(unit, result) + chart_gaps(unit, result, cells, columns) + [
+        {"rule": unit["id"], "why": f"it points to {pid}, which was left out of the drafter's input for length "
+                                    "(a person checks it)"} for pid in context.get("dropped", [])]
     return result
 
 
@@ -571,12 +580,13 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
                 "model": settings["model"], "effort": settings["effort"], "max_tokens": settings["max_tokens"],
                 "system_sha256": sha(system), "input_sha256": sha(json.dumps(messages, sort_keys=True, default=str)),
                 "request_id": getattr(response, "_request_id", None), "stop_reason": response.stop_reason,
+                "context_dropped": context.get("dropped", []),
                 "answer": text, "problem": why, "usage": usage, "cost_usd": round(spent, 6),
                 "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None})
         if crash is not None:
             raise crash
         if why is None:
-            return keep(result, unit, cells, columns)
+            return keep(result, unit, cells, columns, context)
         if response.stop_reason == "refusal":
             break
         if response.stop_reason == "end_turn":
@@ -584,5 +594,5 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
                          {"role": "user", "content": f"That answer can't be used: {why}. Answer again for the same "
                                                      "text, with every template (the ones that worked too)."}]
     if last is not None:                        # the last answer that had working rules: keep those
-        return keep(last, unit, cells, columns, last_attempt=True)
+        return keep(last, unit, cells, columns, context, last_attempt=True)
     return {"failed": why, "rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}
