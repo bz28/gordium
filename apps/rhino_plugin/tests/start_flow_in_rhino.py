@@ -84,7 +84,7 @@ try:
     log["start_objects"] = doc.Objects.Count
     shown = {}
 
-    def on_confirm(doc_, facts, text):
+    def on_confirm(doc_, facts, text, *box_state):
         shown["text"] = text
         lot = g._find(doc_, facts.get("lot_id") or "")
         box = lot.Geometry.GetBoundingBox(True)

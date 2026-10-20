@@ -32,10 +32,15 @@ JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
 CITY = "City of Ithaca"
 sys.path.insert(0, os.path.join(REPO, "packages", "design_checker", "design_checker"))
 import rhino_logic as logic  # noqa: E402  (plain Python, tested in CI: which objects, which facts)
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+import gordium_ui as ui  # noqa: E402  (the panel, the start box, the drawing helpers)
 
 LAYERS = logic.LAYERS
 ID_KEY = "gordium:id"
 SECTION, ENTRY = "Gordium", "lot_facts"
+UI_ENTRY = "ui"                              # the start box's own choices (district confirmed, grade source…)
+GRADE_LAYER = "Gordium::Grade"               # spot grades: point objects the architect places
 IDLE_SECONDS = 0.5                           # a re-check waits this long after the last edit
 TOAST_SECONDS = 6                            # the "no longer complies" notice shows this long at most
 
@@ -306,20 +311,38 @@ def bounds(o, e):
         e.IncludeBoundingBox(o.box)
 
 
+def stale(o):
+    """The model changed since the result on screen was checked, by more than a moment (F7, H1): until the
+    re-check, nothing is shown as complying or not."""
+    t = STATE.get("dirty")
+    return bool(t and time.time() - t >= ui.STALE_SECONDS and (STATE.get("last") or {}).get("at", 0) < t)
+
+
 def draw_scene(o, e):
     if not _here(o, e):
         return
     d = e.Display
-    for g in o.red:                          # failing solids, in red
+    dark = ui.viewport_dark()
+    old = stale(o)
+    if not old:
+        for g in getattr(o, "encroach", None) or []:   # only the part inside a yard or above the height (F5)
+            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(ui.status_color("does_not_comply", dark), 0.35))
+            d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+    for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
         if isinstance(g, rg.Mesh):
-            d.DrawMeshShaded(g, Rhino.Display.DisplayMaterial(RED, 0.1))
-            d.DrawMeshWires(g, System.Drawing.Color.Black)
+            d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
         else:
-            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(RED, 0.1))
-            d.DrawBrepWires(g, System.Drawing.Color.Black, 1)
+            d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+    if getattr(o, "yards_zone", None) is not None:          # the required yards, lightly shaded
+        d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
     if o.envelope is not None:               # see-through, drawn after the solids so they show through it
-        d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.85))
-        d.DrawBrepWires(o.envelope, BLUE, 2)
+        d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
+        d.DrawBrepWires(o.envelope, BLUE, 1)
+    for pt in getattr(o, "grade_points", None) or []:           # spot grades
+        d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
+    if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
+        pts = o.lot_outline
+        d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
     if o.confirm is not None:
         lot, lines, main = o.confirm
         if lot is not None:
@@ -342,39 +365,37 @@ def draw_screen(o, e):
         d.Draw2dRectangle(System.Drawing.Rectangle(int(p.X) - width // 2, int(p.Y) - 12, width, 24), BLUE, 1,
                           System.Drawing.Color.White)
         d.Draw2dText(text, BLUE, rg.Point2d(p.X - width // 2 + 8, p.Y - 8), False, 14)
-    for line, label in o.dims:               # each failing distance: the line it was measured along, on top
+    dark = ui.viewport_dark()
+    old = stale(o)
+    taken = []                               # labels drawn this frame: none covers another
+    for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
+        color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
-        d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), RED, 4)
-        for p in (a, b):
-            d.Draw2dRectangle(System.Drawing.Rectangle(int(p.X) - 4, int(p.Y) - 4, 8, 8), RED, 1, RED)
-        # the label beside the lot-line end, on a white card, clear of the building's edges
-        width = len(label) * 8 + 16
-        x, y = int(a.X) - width - 12 if a.X <= b.X else int(a.X) + 12, int(a.Y) - 30
-        d.Draw2dRectangle(System.Drawing.Rectangle(x, y, width, 24), RED, 1, System.Drawing.Color.White)
-        d.Draw2dText(label, RED, rg.Point2d(x + 8, y + 4), False, 14)
+        d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 2)
+        for p in (a, b):                     # tick ends
+            d.Draw2dLine(System.Drawing.PointF(p.X - 5, p.Y + 5), System.Drawing.PointF(p.X + 5, p.Y - 5), color, 2)
+        if old:
+            text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
+        ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken)
+    for point, text in getattr(o, "edge_labels", None) or []:     # each lot edge's length (approx. on a tax map)
+        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken)
     toast = getattr(o, "toast", None)
     active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
     if toast and time.time() < toast[1] and active is not None and e.Viewport.Id == active.ActiveViewportID:
-        rows = ["✕ " + line for line in toast[0]]         # bottom left, active view only
-        width = max(len(row) for row in rows) * 8 + 28
-        x, y = 14, int(e.Viewport.Bounds.Height) - (22 * len(rows) + 14) - 64   # above the axis icon
-        d.Draw2dRectangle(System.Drawing.Rectangle(x, y, width, 22 * len(rows) + 14), RED, 2,
-                          System.Drawing.Color.FromArgb(245, 255, 251, 250))
-        for i, row in enumerate(rows):
-            d.Draw2dText(row, RED, rg.Point2d(x + 14, y + 9 + i * 22), False, 14)
+        lines = ["✕ " + line for line in toast[0]]           # bottom left, active view only (G1)
+        ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), 14,
+                         int(e.Viewport.Bounds.Height) - (22 * len(lines) + 12) - 64, dark, 13)
     if not o.message:
         return
     state, text, lines = o.message
-    color = {"pass": GREEN, "complies": GREEN, "fail": RED, "review": AMBER}.get(state, AMBER)
-    mark = {"pass": "✓", "complies": "✓", "fail": "✗", "review": "?"}.get(state, "?")
-    rows = ["Gordium · " + mark + " " + text] + list(lines)[:6]
-    x, y, h = 14, 14, 22
-    width = max(len(r) for r in rows) * 8 + 24
-    d.Draw2dRectangle(System.Drawing.Rectangle(x, y, width, h * len(rows) + 12),
-                      color, 2, System.Drawing.Color.FromArgb(235, 255, 255, 255))
-    for i, row in enumerate(rows):
-        d.Draw2dText(row, color if i == 0 else System.Drawing.Color.FromArgb(40, 40, 40),
-                     rg.Point2d(x + 12, y + 8 + i * h), False, 15 if i == 0 else 13)
+    if old:                                  # out of date: neutral, no status (F7)
+        state, text, lines = "stale", "Checking… (the model changed)", lines[:1]
+    color = ui.status_color({"does_not_comply": "does_not_comply", "needs_review": "needs_review"}.get(state, "complies"),
+                            dark)
+    mark = {"does_not_comply": "✕", "needs_review": "?"}.get(state, "–")   # the summary never shows ✓ (D3)
+    rows = ["Gordium · " + mark + " " + text] + list(lines)[:3]
+    width = max(len(r) for r in rows) * 13 * 0.6 + 22
+    ui.draw_text_box(d, rows, color, int(e.Viewport.Bounds.Width) - width - 14, 14, dark, 13)
 
 
 def overlay():
@@ -414,6 +435,19 @@ def _red_copy(g):
     return g
 
 
+def _drawn_envelope(doc, facts, env):
+    """The envelope to draw. Without a grade the checker gives the buildable area but no height plane (height
+    needs review until the grade is set); it is drawn the way the starting building is, standing on the lot's
+    level, so the architect sees the room there is. A drawing aid only: no result depends on it."""
+    if not env or env.get("top") is not None or not env.get("outline") or env.get("height") is None:
+        return env
+    lot = _find(doc, facts.get("lot_id") or "")
+    if lot is None:
+        return env
+    z = lot.Geometry.GetBoundingBox(True).Min.Z * _scale(doc)
+    return dict(env, base=z, top=z + env["height"])
+
+
 def _envelope_brep(doc, env):
     """The envelope (in feet, from the checker) as a solid in the model's units."""
     if not env or not env.get("outline") or env.get("top") is None or env.get("base") is None:
@@ -432,91 +466,237 @@ def _envelope_brep(doc, env):
 
 # ---- the panel -------------------------------------------------------------------------------------------
 
-def _label(text, color=None, bold=False):
-    lab = ef.Label()
-    lab.Text = text
-    lab.Wrap = ef.WrapMode.Word
-    if color is not None:
-        lab.TextColor = color
-    if bold:
-        lab.Font = ed.Font(ed.SystemFont.Bold)
-    return lab
+def _prism(doc, outline, base, top):
+    """A closed prism (outline in feet, base and top heights in feet) in the model's units, or None."""
+    if not outline or top is None or base is None or top - base <= 1e-9:
+        return None
+    k = 1.0 / _scale(doc)
+    pts = [rg.Point3d(x * k, y * k, base * k) for x, y in outline]
+    pts.append(pts[0])
+    line = rg.Polyline(pts)
+    line.DeleteShortSegments(doc.ModelAbsoluteTolerance)   # an edge shorter than that can't be extruded
+    if line.Count < 4:
+        return None
+    curve = rg.PolylineCurve(line)
+    ext = rg.Extrusion.Create(curve, (base - top) * k, True)   # extrudes along -normal: sign by winding
+    brep = ext.ToBrep() if ext else None
+    if brep is not None and brep.GetBoundingBox(True).Max.Z < top * k - 1e-6:
+        brep = rg.Extrusion.Create(curve, (top - base) * k, True).ToBrep()
+    return brep
 
 
-class Panel(ef.Form):
-    """A small floating window: every rule with its result (or why there are none), and the buttons."""
-
-    def __init__(self):
-        ef.Form.__init__(self)
-        self.Title = "Gordium"
-        self.ClientSize = ed.Size(460, 520)
-        self.Topmost = True
-        self.Resizable = True
-
-
-def show_panel(p, result, facts, error=None):
-    """Fill the panel: every rule with its result, or why there are none. A module function, not a Panel
-    method: like the Overlay, the Panel class keeps its first methods for the whole Rhino session."""
-    layout = ef.DynamicLayout()
-    layout.Spacing = ed.Size(6, 4)
-    layout.Padding = ed.Padding(10)
-    layout.AddRow(_label(CITY + " · " + str(facts.get("zone")) + " · " + str(facts.get("use", "")).replace("_", " "),
-                         bold=True))
-    layout.AddRow(_label("Rules: draft rules, checked by code"))
-    colors = {"PASS": ed.Color.FromArgb(31, 122, 77), "FAIL": ed.Color.FromArgb(200, 50, 43),
-              "NEEDS REVIEW": ed.Color.FromArgb(154, 100, 0)}
-    if error is not None:                   # nothing is shown as checked when the check didn't run
-        layout.AddRow(_label("Can't check this model: " + error, colors["NEEDS REVIEW"], True))
-    def row(into, r):
-        detail = str(r["Table limit"]) + " · you have " + str(r["Proposed"]) + " " + str(r["Units"])
-        if r["Error"] == "NEEDS REVIEW":
-            detail = r["Why"] + (("\n✗ " if r.get("Fails") else "\n✓ ") + r["Provisional"] if r.get("Provisional") else "")
-        into.AddRow(_label(r["Error"], colors.get(r["Error"]), True), _label(r["Requirement"] + "\n" + detail))
-
-    for r in (result or {}).get("rows", []):
-        row(layout, r)
-    interior = (result or {}).get("interior") or []
-    if interior:                            # the inside of the building isn't checked in this phase: folded away
-        inside = ef.DynamicLayout()
-        inside.Spacing = ed.Size(6, 4)
-        for r in interior:
-            row(inside, r)
-        fold = ef.Expander()
-        fold.Header = _label("Not checked yet: interior (" + str(len(interior)) + ")")
-        fold.Content = inside
-        fold.Expanded = False
-        layout.AddRow(fold)
-    env = (result or {}).get("envelope") or {}
-    if env.get("coverage") and env["coverage"].get("over") is not None:
-        c = env["coverage"]
-        word = "over" if c["over"] > 0 else "left"
-        layout.AddRow(_label("Coverage: " + format(abs(c["over"]), ",.1f") + " sf " + word +
-                             " (allowed " + format(c["allowed"], ",.1f") + " sf)"))
-    for note in env.get("notes") or []:
-        layout.AddRow(_label("Envelope: " + note))
-    buttons = ef.StackLayout()
-    buttons.Orientation = ef.Orientation.Horizontal
-    buttons.Spacing = 6
-    for text, action in (("Lot facts…", lambda s, e: edit_facts()), ("Open report", lambda s, e: open_report()),
-                         ("Envelope on/off", lambda s, e: toggle_envelope()), ("Live on/off", lambda s, e: toggle_live())):
-        b = ef.Button()
-        b.Text = text
-        b.Click += action
-        buttons.Items.Add(ef.StackLayoutItem(b))
-    layout.AddRow(buttons)
-    layout.Add(None)
-    scroll = ef.Scrollable()
-    scroll.Content = layout
-    p.Content = scroll
+def _actions():
+    """What the panel's buttons do (gordium_ui.make_panel)."""
+    return {"zoom": zoom_to, "report": open_report, "envelope": set_envelope, "edit_site": edit_facts,
+            "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check, "legend": ui.legend,
+            "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False)}
 
 
 def panel():
-    p = STATE.get("panel")
-    if p is None or not p.Visible:
-        p = Panel()
-        STATE["panel"] = p
-        p.Show()
+    """The Gordium panel, made once and shown. (A floating panel: a docked one needs a Rhino plugin package.)"""
+    p = STATE.get("panel_parts")
+    if p is None or not p["form"].Visible:
+        p = ui.make_panel(_actions())
+        STATE["panel_parts"] = p
+        p["form"].Show()
     return p
+
+
+def show_panel(p, result, facts, error=None):
+    """Fill the panel from the checker's view (or say the check couldn't run). Kept by name for the scripted
+    tests; the panel's contents come only from `result["view"]`."""
+    ui.show(p, (result or {}).get("view"), error=error)
+
+
+def zoom_to(item):
+    """Frame the selected item: yards in Top, height and stories in a front elevation (D9)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if not item:
+        return
+    box = rg.BoundingBox.Empty
+    for i in item.get("objects") or []:
+        o = _find(doc, i)
+        if o is not None:
+            box.Union(o.Geometry.GetBoundingBox(True))
+    for p in item.get("points") or []:
+        box.Union(_model_point(doc, p))
+    if not box.IsValid:
+        return
+    box.Inflate(max(box.Diagonal.Length * 0.25, 5 / _scale(doc)))
+    view = doc.Views.Find("Front" if item.get("zoom") == "front" else "Top", False) or doc.Views.ActiveView
+    doc.Views.ActiveView = view
+    view.ActiveViewport.ZoomBoundingBox(box)
+    view.Redraw()
+
+
+def set_envelope(on):
+    STATE["envelope_on"] = bool(on)
+    run_check(Rhino.RhinoDoc.ActiveDoc, report=False)
+
+
+def _ui_state(doc):
+    try:
+        return json.loads(doc.Strings.GetValue(SECTION, UI_ENTRY) or "{}")
+    except ValueError:
+        return {}
+
+
+def _save_ui_state(doc, state):
+    doc.Strings.SetString(SECTION, UI_ENTRY, json.dumps(state))
+
+
+def pick_survey():
+    """Pick survey lot lines…: the lot outline the architect says is from a survey (a closed curve on the Site
+    layer); lot size and coverage no longer wait for one."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    try:
+        facts = current_facts(doc)
+        lots = _lot_candidates(doc)
+        picked = _pick(doc, "Click the surveyed lot outline (Site layer); Enter keeps the one outlined", lots, "Lot",
+                       Rhino.DocObjects.ObjectType.Curve) if len(lots) > 1 else (str(lots[0].Id) if lots else None)
+    except Cancelled:
+        return
+    if picked:
+        facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
+        facts["lot_surveyed"] = True
+        save_facts(doc, facts)
+    run_check(doc, report=False)
+
+
+def _grade_points(doc):
+    """Spot grades: the point objects on Gordium::Grade, in feet."""
+    k = _scale(doc)
+    index = doc.Layers.FindByFullPath(GRADE_LAYER, -1)
+    if index < 0:
+        return []
+    return [[o.Geometry.Location.X * k, o.Geometry.Location.Y * k, o.Geometry.Location.Z * k]
+            for o in doc.Objects.FindByLayer(doc.Layers[index]) or [] if isinstance(o.Geometry, rg.Point)]
+
+
+def _terrain_points(doc, terrain_id):
+    """The terrain sampled just outside each wall of each building, every time the check runs: so the grade
+    follows the building when it moves (C4). Feet."""
+    terrain = _find(doc, terrain_id or "")
+    if terrain is None:
+        return []
+    k = _scale(doc)
+    out = []
+    for b in _buildings(doc):
+        box = b.Geometry.GetBoundingBox(True)
+        center = box.Center
+        brep = _drawable(b.Geometry)
+        edges = []
+        if isinstance(brep, rg.Brep):
+            for face in brep.Faces:
+                n = face.NormalAt(face.Domain(0).Mid, face.Domain(1).Mid)
+                if n.Z < -0.9:                         # the bottom face: its edges are the walls at the ground
+                    loop = face.OuterLoop.To3dCurve()
+                    edges += [(s.PointAtStart, s.PointAtEnd) for s in loop.DuplicateSegments()]
+        for a, c in edges:
+            mid = (a + c) / 2
+            out_dir = rg.Vector3d(mid.X - center.X, mid.Y - center.Y, 0)
+            out_dir.Unitize()
+            probe = mid + out_dir * (1.0 / k)          # 1 ft outside the wall
+            hit = _down_onto(terrain.Geometry, probe)
+            if hit is not None:
+                out.append([hit.X * k, hit.Y * k, hit.Z * k])
+    return out
+
+
+def _down_onto(geometry, p):
+    line = rg.Line(rg.Point3d(p.X, p.Y, p.Z + 1e5), rg.Point3d(p.X, p.Y, p.Z - 1e5))
+    if isinstance(geometry, rg.Mesh):
+        hits = rg.Intersect.Intersection.MeshLine(geometry, line)
+        hits = hits[0] if isinstance(hits, tuple) else hits
+    else:
+        brep = _drawable(geometry)
+        if brep is None:
+            return None
+        ok, curves, hits = rg.Intersect.Intersection.CurveBrep(rg.LineCurve(line), brep, 0.001)
+    hits = list(hits or [])
+    return max(hits, key=lambda h: h.Z) if hits else None
+
+
+def set_grade():
+    """Set grade…: the start box, open at its Grade row."""
+    edit_facts()
+
+
+def enter_rooms():
+    """Enter bedrooms and parking spaces…: two prompts (Enter skips; never a default)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    try:
+        facts = current_facts(doc)
+        answers = {k: _count(p) for k, p in (("sleeping_rooms", "Bedrooms"), ("parking_spaces", "Off-street parking spaces"))}
+    except Cancelled:
+        return
+    save_facts(doc, logic.update_counts(facts, answers))
+    run_check(doc, report=False)
+
+
+def add_to_check(ids):
+    """Add to check…: objects on the lot that aren't measured go on the Building layer, so every rule measures
+    them."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    index = _layer(doc, LAYERS["building"])
+    for i in ids or []:
+        o = _find(doc, i)
+        if o is not None:
+            attrs = o.Attributes.Duplicate()
+            attrs.LayerIndex = index
+            doc.Objects.ModifyAttributes(o, attrs, True)
+    run_check(doc, report=False)
+
+
+def _not_included(doc, lot):
+    """Closed solids and meshes standing on the lot that no rule measures (not on the Building layer, nor the
+    Site or Gordium layers): each one makes the check need review (C8)."""
+    if lot is None:
+        return []
+    box = lot.Geometry.GetBoundingBox(True)
+    out = []
+    every = Rhino.DocObjects.ObjectEnumeratorSettings()
+    every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, False
+    for o in doc.Objects.GetObjectList(every):
+        layer = doc.Layers[o.Attributes.LayerIndex].FullPath
+        g = o.Geometry
+        closed = (isinstance(g, (rg.Brep, rg.Extrusion)) and g.IsSolid) or (isinstance(g, rg.Mesh) and g.IsClosed)
+        if not closed or logic.on_layer(layer, LAYERS["building"]) or logic.on_layer(layer, "Gordium") \
+                or logic.on_layer(layer, LAYERS["lot"]):
+            continue
+        c = g.GetBoundingBox(True).Center
+        if box.Min.X <= c.X <= box.Max.X and box.Min.Y <= c.Y <= box.Max.Y:
+            out.append(str(o.Id))
+    return out
+
+
+def _extras(doc, facts):
+    """What the panel needs to say about the check beyond the measurements: what was sent (C8), objects on the
+    lot left out, the use's name."""
+    buildings = _buildings(doc)
+    groups = {i for o in buildings for i in (o.Attributes.GetGroupList() or [])}
+    layers = sorted({doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings})
+    left_out = _not_included(doc, _find(doc, facts.get("lot_id") or ""))
+    return {"scope": {"groups": len(groups), "solids": len(buildings), "layer": ", ".join(layers)},
+            "not_included": left_out, "touching": _touching(doc, left_out, buildings)}
+
+
+def _touching(doc, ids, buildings):
+    """The left-out solids that may be part of the building: their box within 0.1 ft of a building's box. Boxes
+    say "touching" more often than the shapes do, which only ever makes the check more cautious."""
+    gap = 0.1 / _scale(doc)
+    boxes = []
+    for b in buildings:
+        bb = b.Geometry.GetBoundingBox(True)
+        bb.Inflate(gap)
+        boxes.append(bb)
+    out = []
+    for i in ids:
+        o = _find(doc, i)
+        bb = o.Geometry.GetBoundingBox(True) if o is not None else None
+        if bb is not None and any(rg.BoundingBox.Intersection(bb, k).IsValid for k in boxes):
+            out.append(i)
+    return out
 
 
 # ---- the confirm dialog and the lot facts ----------------------------------------------------------------
@@ -543,40 +723,132 @@ def _highlight(doc, facts):
     doc.Views.Redraw()
 
 
-def confirm(doc, facts, options):
-    """One small prefilled dialog. OK keeps the facts; Change… lets the architect set each one, then the dialog
-    shows again with the new answers outlined, so nothing is saved unseen; closing it (or Esc) saves nothing."""
+def _feet(text, default):
+    """11'-8" or 11.5 (feet) -> feet; anything unreadable -> default."""
+    import re
+    m = re.match(r"^\s*(\d+(?:\.\d+)?)\s*'?\s*(?:-?\s*(\d+(?:\.\d+)?)\s*\"?)?\s*$", text or "")
+    if not m:
+        return default
+    return float(m.group(1)) + (float(m.group(2)) / 12 if m.group(2) else 0.0)
+
+
+def _box_state(doc, facts, options, saved_ui):
+    """The start box's fields from the facts and the box's own saved choices."""
+    k = _scale(doc)
+    lines = facts.get("street_line") or []
+    length = sum(((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5 for a, b in lines)
+    grade = saved_ui.get("grade") or ("spot" if facts.get("grade_from") == "spot" else
+                                      "terrain" if facts.get("grade_from") == "terrain" else "not_set")
+    spots = len(_grade_points(doc))
+    return {"address": facts.get("address") or "", "zone": facts.get("zone"),
+            "district_confirmed": bool(saved_ui.get("district_confirmed")), "use": facts.get("use"),
+            "street": ("the highlighted line · " + _ft_text(length) + (" (approx.)" if not facts.get("lot_surveyed") else "")
+                       + " · " + ("corner lot" if facts.get("corner_lot") else "interior lot")) if lines else "",
+            "lot_source": "survey" if facts.get("lot_surveyed") else "tax_map",
+            "lot_picked": "1 curve picked" if facts.get("lot_id") else "none picked",
+            "grade": grade, "grade_is": facts.get("grade_is") or "finished",
+            "grade_result": (str(spots) + " spot grades" if grade == "spot" else
+                             "1 surface picked" if grade == "terrain" and saved_ui.get("terrain_id") else ""),
+            "floor_to_floor": saved_ui.get("floor_to_floor") or "11'-8\"", "massing": saved_ui.get("massing") or "both",
+            "preview": saved_ui.get("preview") or "", "_scale": k}
+
+
+def _ft_text(feet):
+    inches = int(round(feet * 12 * 8))            # to 1/8 in
+    ft, rest = divmod(inches, 96)
+    whole, eighth = divmod(rest, 8)
+    return "%d'-%d%s\"" % (ft, whole, (" %d/8" % eighth) if eighth else "")
+
+
+def _apply_box(doc, facts, state, saved_ui):
+    """The facts and the box's own choices from what the box says."""
+    facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],
+                 lot_surveyed=state["lot_source"] == "survey", grade_is=state["grade_is"])
+    if not facts.get("address"):
+        facts.pop("address")
+    for key in ("grade_points", "grade_from"):
+        facts.pop(key, None)
+    if state["grade"] == "not_set":                 # no grade: height and stories wait for one
+        facts.pop("ground_is_flat", None)
+        facts.pop("grade_elevation", None)
+    else:
+        facts["grade_from"] = state["grade"]        # the points are read (or sampled) at every check
+        facts.pop("ground_is_flat", None)
+        facts.pop("grade_elevation", None)
+    saved_ui = dict(saved_ui, district_confirmed=state["district_confirmed"], grade=state["grade"],
+                    floor_to_floor=state["floor_to_floor"], massing=state["massing"])
+    return facts, saved_ui
+
+
+def _box_pick(doc, what, facts, saved_ui):
+    """One pick the start box asked for, with the box hidden (A1). Esc or Enter: nothing changes."""
+    scale = _scale(doc)
+    try:
+        if what == "street":
+            lot = _find(doc, facts.get("lot_id") or "")
+            if lot is not None:
+                rc, point = Rhino.Input.RhinoGet.GetPoint("Click the lot line on the street", True)
+                if rc == Rhino.Commands.Result.Success:
+                    a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+                    facts["street_line"] = [[[a.X * scale, a.Y * scale], [b.X * scale, b.Y * scale]]]
+        elif what == "lot":
+            lots = _lot_candidates(doc)
+            picked = _pick(doc, "Click the lot outline (a closed curve on the Site layer); Enter keeps it", lots, "Lot",
+                           Rhino.DocObjects.ObjectType.Curve)
+            if picked:
+                facts = logic.after_lot_pick(facts, picked)
+        elif what == "terrain":
+            go = Rhino.Input.Custom.GetObject()
+            go.SetCommandPrompt("Click the terrain surface or mesh")
+            go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter | \
+                Rhino.DocObjects.ObjectType.Mesh
+            if go.Get() == Rhino.Input.GetResult.Object:
+                saved_ui["terrain_id"] = str(go.Object(0).ObjectId)
+                saved_ui["grade"] = "terrain"
+        elif what == "spot":
+            layer = _layer(doc, GRADE_LAYER)
+            while True:                              # each click places a spot grade; Enter when done
+                rc, point = Rhino.Input.RhinoGet.GetPoint("Click a spot grade at a wall (Enter when done)", True)
+                if rc != Rhino.Commands.Result.Success:
+                    break
+                attrs = Rhino.DocObjects.ObjectAttributes()
+                attrs.LayerIndex = layer
+                doc.Objects.AddPoint(point, attrs)
+                doc.Views.Redraw()
+            saved_ui["grade"] = "spot"
+    finally:
+        _highlight(doc, facts)
+    return facts, saved_ui
+
+
+def confirm(doc, facts, options, mode="check"):
+    """The start box (A1–A13), prefilled. Draw (or Check) keeps the facts once the district is confirmed; a pick
+    closes the box, picks in the model, and shows the box again with the result; closing it (or Esc) saves
+    nothing (None)."""
     o = overlay()
     _clear(o)                           # facts are being set: no earlier result (of any model) stays shown
     o.message = None
     _highlight(doc, facts)
+    saved_ui = _ui_state(doc)
     try:
         if STATE.get("auto_ok"):          # scripted runs (tests, the demo): accept the prefilled facts
+            state = _box_state(doc, facts, options, saved_ui)
+            state["district_confirmed"] = True
             if STATE.get("on_confirm"):   # ...after recording what the box shows (the demo captures it)
-                STATE["on_confirm"](doc, facts, _describe(facts, options["uses"]))
+                STATE["on_confirm"](doc, facts, _describe(facts, options["uses"]), state)
+            facts, saved_ui = _apply_box(doc, facts, dict(state, **(STATE.get("box_overrides") or {})), saved_ui)
+            _save_ui_state(doc, saved_ui)
             return facts
-        dialog = ef.Dialog[bool]()
-        dialog.Title = "Gordium"
-        dialog.Padding = ed.Padding(12)
-        chosen = {}                     # which button closed it: none if closed or Esc (a cancel)
-        ok, change = ef.Button(), ef.Button()
-        ok.Text, change.Text = "OK", "Change…"
-        ok.Click += lambda s, e: (chosen.update(choice="ok"), dialog.Close(True))
-        change.Click += lambda s, e: (chosen.update(choice="change"), dialog.Close(False))
-        layout = ef.DynamicLayout()
-        layout.Spacing = ed.Size(8, 8)
-        layout.AddRow(_label(_describe(facts, options["uses"])))
-        layout.AddRow(None, change, ok)
-        dialog.Content = layout
-        dialog.DefaultButton = ok
-        dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
-        what = logic.after_confirm(chosen.get("choice"))
-        if what == "keep":
-            return facts
-        if what == "cancel":
-            return None
-        changed = change_facts(doc, facts, options)
-        return None if changed is None else confirm(doc, changed, options)     # shown again before it is saved
+        while True:
+            state = _box_state(doc, facts, options, saved_ui)
+            what = ui.start_box(state, options, mode)
+            if what is None:
+                return None
+            facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
+            if what == "draw":
+                _save_ui_state(doc, saved_ui)
+                return facts
+            facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui)
     finally:
         o.confirm = None
         o.labels = []
@@ -722,7 +994,8 @@ def _change_facts(doc, facts, options):
 
 
 def edit_facts():
-    """Lot facts…: every lot fact, then bedrooms, parking spaces and stories (skipped prompts stay unset)."""
+    """Edit site… (and GordiumFacts): the start box, prefilled with what is saved. Bedrooms and parking spaces
+    are entered from their own rows ("Enter…")."""
     doc = Rhino.RhinoDoc.ActiveDoc
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     try:
@@ -730,11 +1003,13 @@ def edit_facts():
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
     try:
-        _edit_counts_and_save(doc, saved, options)
+        facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options, "check")
     finally:                            # the editing outline and names never stay on screen
         o = overlay()
         o.confirm, o.labels = None, []
         doc.Views.Redraw()
+    if facts is not None:
+        save_facts(doc, facts)
     run_check(doc, report=False)
 
 
@@ -762,13 +1037,56 @@ def report_path(doc):
 def _clear(o):
     """Nothing from an earlier check is left on screen."""
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
+    o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
     o.confirm, o.labels = None, []
     o.doc = None
 
 
+def check_facts(doc, facts):
+    """The facts as the checker gets them: the spot grades read from the model, or the terrain sampled at the
+    walls now, so the grade follows the building (C4)."""
+    out = dict(facts)
+    if facts.get("grade_from") == "spot":
+        points = _grade_points(doc)
+    elif facts.get("grade_from") == "terrain":
+        points = _terrain_points(doc, _ui_state(doc).get("terrain_id"))
+    else:
+        points = []
+    if points:
+        out["grade_points"] = points
+    else:
+        out.pop("grade_points", None)
+    return out
+
+
+def _draw_plan(doc, o, result, facts):
+    """What the viewport shows for a result (F): the property line, each lot edge's length, the required yards
+    shaded, the envelope (dashed, see-through), each yard as measured with its status, and red only on the part
+    of the building inside a yard or above the height limit (the massing stays neutral)."""
+    plan = result.get("plan") or {}
+    k = 1.0 / _scale(doc)
+    lot = _find(doc, facts.get("lot_id") or "")
+    if lot is not None:
+        ok, poly = lot.Geometry.TryGetPolyline()
+        o.lot_outline = list(poly) if ok else None
+    approx = "" if facts.get("lot_surveyed") else " (approx.)"
+    o.edge_labels = [(rg.Point3d((a[0] + b[0]) / 2 * k, (a[1] + b[1]) / 2 * k, 0), e["length"] + approx)
+                     for e in plan.get("edges") or [] for a, b in [e["points"]]]
+    o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
+                    y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
+    o.encroach = [b for b in (_prism(doc, e["outline"], e["base"], e["top"]) for e in plan.get("encroach") or [])
+                  if b is not None]
+    o.yards_zone = None
+    if lot is not None and plan.get("buildable"):
+        inner = rg.PolylineCurve([rg.Point3d(x * k, y * k, 0) for x, y in plan["buildable"] + plan["buildable"][:1]])
+        zone = rg.Brep.CreatePlanarBreps([lot.Geometry, inner], doc.ModelAbsoluteTolerance)
+        o.yards_zone = zone[0] if zone else None
+    o.grade_points = [_model_point(doc, p[:2], p[2]) for p in facts.get("grade_points") or []]
+
+
 def run_check(doc, report=True):
     """Measure and check the model now; draw the result; update the panel. If the check can't run, the old
-    result is cleared from the view and the panel, never left showing."""
+    result is cleared from the view and the panel says why, with Retry (H2): never left showing."""
     if STATE.get("running"):
         return None
     o = overlay()
@@ -780,38 +1098,47 @@ def run_check(doc, report=True):
             raise ValueError("lot facts missing: " + ", ".join(logic.missing(facts)) + " (run GordiumCheck)")
         path = os.path.join(tempfile.gettempdir(), "gordium_live_" + str(doc.RuntimeSerialNumber) + ".3dm")
         problems = export(doc, path)
-        result = ask({"cmd": "check", "model": path, "facts": facts, "building_problems": problems,
-                      "report": report_path(doc) if report else None})
+        sent = check_facts(doc, facts)
+        extras = _extras(doc, facts)
+        extras["before"] = STATE.setdefault("statuses_by_doc", {}).get(doc.RuntimeSerialNumber)
+        result = ask({"cmd": "check", "model": path, "facts": sent, "building_problems": problems,
+                      "report": report_path(doc) if report else None, "extras": extras})
         _clear(o)
         o.doc = doc.RuntimeSerialNumber
-        s = result["summary"]
-        o.message = (s["state"], s["text"], s["lines"])
-        failing = [(g, _red_copy(g.Geometry)) for g in (_find(doc, i) for i in result["red"]) if g is not None]
-        o.red = [copy for _, copy in failing if copy is not None]
-        o.red_ids = {str(g.Id) for g, copy in failing if copy is not None}     # hidden only if drawn in red
-        z = (facts.get("grade_elevation") or 0.0) + 0.1     # just above the ground, so it isn't hidden by it
-        o.dims = [(rg.Line(_model_point(doc, a, z), _model_point(doc, b, z)), dim["label"])
-                  for dim in result.get("dims", []) for a, b in [dim["points"]]]
-        env = _envelope_brep(doc, result.get("envelope")) if STATE.get("envelope_on", True) else None
+        view = result["view"]
+        head = view["header"]
+        second = [head["draft"].split(" · ")[0]] + [t for t in (head["lot"], head["grade"])
+                                                     if "approximate" in t or "not set" in t or "existing" in t]
+        o.message = (view["state"], view["summary"], [" · ".join(second)])
+        env = _envelope_brep(doc, _drawn_envelope(doc, facts, result.get("envelope"))) \
+            if STATE.get("envelope_on", True) else None
         o.envelope = env
         o.box = env.GetBoundingBox(True) if env else rg.BoundingBox.Empty
-        STATE["last"] = {"summary": s, "rows": [{k: r.get(k) for k in ("Requirement", "Table limit", "Proposed", "Units",
-                                                                        "Error", "Rule id", "Why", "Provisional")}
-                                                for r in result["rows"]],
-                         "interior": [r["Rule id"] for r in result.get("interior", [])],
-                         "red": result["red"], "dims": result.get("dims"), "envelope": result.get("envelope"),
-                         "at": time.time()}
-        _newly_failing(doc, result)
+        _draw_plan(doc, o, result, sent)
+        STATE["statuses_by_doc"][doc.RuntimeSerialNumber] = result["statuses"]
+        STATE["last"] = {"summary": result["summary"], "view_summary": view["summary"], "state": view["state"],
+                         "rows": [{k: r.get(k) for k in ("Requirement", "Table limit", "Proposed", "Units",
+                                                          "Error", "Rule id", "Why", "Provisional")}
+                                  for r in result["rows"]],
+                         "items": [{k: i.get(k) for k in ("id", "name", "status", "proposed", "required", "margin",
+                                                          "reason", "group")} for i in view["items"]],
+                         "header": head, "interior": [r["Rule id"] for r in result.get("interior", [])],
+                         "encroach": len(o.encroach), "plan_encroach": len((result.get("plan") or {}).get("encroach") or []),
+                         "envelope": result.get("envelope"), "at": time.time()}
+        if result.get("notice"):
+            STATE.setdefault("toasts", []).append([result["notice"]])
+            if not STATE.get("headless"):
+                _toast([result["notice"]])
         if not STATE.get("headless"):
-            show_panel(panel(), result, facts)
+            ui.show(panel(), view)
         return result
     except Exception as e:
         _clear(o)
         o.doc = doc.RuntimeSerialNumber
-        o.message = ("review", "can't check: " + str(e)[:160], [])
+        o.message = ("needs_review", "⚠ Check could not run", [str(e)[:120]])
         STATE["last"] = {"error": str(e), "at": time.time()}
         if not STATE.get("headless"):
-            show_panel(panel(), None, facts, str(e)[:300])
+            ui.show(panel(), None, error=str(e)[:300])
         return None
     finally:
         STATE["running"] = False
@@ -819,19 +1146,6 @@ def run_check(doc, report=True):
 
 
 # ---- "now fails": a short note, only when a rule starts failing --------------------------------------------
-
-def _newly_failing(doc, result):
-    """A short note for each rule that fails now and didn't at this document's last check: never for a failure
-    that was already there, never on the first check, and never in a dialog (it goes by itself)."""
-    seen = STATE.setdefault("fails_by_doc", {})
-    seen[doc.RuntimeSerialNumber], notice = logic.notice(seen.get(doc.RuntimeSerialNumber), result["rows"])
-    if not notice:
-        return []
-    STATE.setdefault("toasts", []).append(notice)      # kept for scripted runs (tests, the demo)
-    if not STATE.get("headless"):
-        _toast(notice)
-    return notice
-
 
 def _toast(lines):
     """The notice, drawn bottom left in the active view (no window, no button); it clears at the next command or
@@ -880,9 +1194,10 @@ def _new_document(sender, e):
         _clear(o)
         o.message = None
     STATE["last"] = {"error": "no check yet for this document", "at": time.time()}
-    p = STATE.get("panel")
-    if p is not None and p.Visible:
-        show_panel(p, None, {}, "no check yet for this document (run GordiumCheck)")
+    p = STATE.get("panel_parts")
+    if p is not None and p["form"].Visible:
+        p["view"] = None
+        ui.show(p, None, error="no check yet for this document (run GordiumCheck)")
     STATE["dirty"] = time.time()        # re-check the document now in front, if it has lot facts
 
 
@@ -896,6 +1211,12 @@ def _opened(sender, e):
 
 def _idle(sender, e):
     t = STATE.get("dirty")
+    p = STATE.get("panel_parts")
+    if t and time.time() - t >= ui.STALE_SECONDS and STATE.get("stale_shown") != t and p is not None \
+            and p["form"].Visible:          # out of date: no marks until the re-check (H1, F7)
+        STATE["stale_shown"] = t
+        ui.show(p, None, checking=True)
+        Rhino.RhinoDoc.ActiveDoc.Views.Redraw()
     if t and time.time() - t >= IDLE_SECONDS and not STATE.get("running"):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc
@@ -994,10 +1315,9 @@ def off():
         _clear(o)
         o.message = None
         o.Enabled = False
-    p = STATE.get("panel")
+    p = STATE.pop("panel_parts", None)
     if p is not None:
-        p.Close()
-        STATE.pop("panel", None)
+        p["form"].Close()
     Rhino.RhinoDoc.ActiveDoc.Views.Redraw()
 
 
@@ -1080,6 +1400,23 @@ def add_floors(doc, start):
     return ids
 
 
+def _preview(start, facts):
+    """The start box's preview line (A11): "Starting massing (on tax-map lot): 1 group of 3 floor solids · 35'-0" ·
+    53'-0" × 30'-11" · 1,639 sf, 24.94% of 25%"."""
+    floors = start.get("floors") or []
+    if not floors:
+        return "No starting massing on this lot shape: draw one and Gordium will check it"
+    ring = floors[0]["outline"]
+    sides = [((ring[i][0] - ring[i - 1][0]) ** 2 + (ring[i][1] - ring[i - 1][1]) ** 2) ** 0.5 for i in range(len(ring))]
+    where = "on tax-map lot" if not facts.get("lot_surveyed") else "on the surveyed lot"
+    text = ("Starting massing (" + where + "): 1 group of " + str(len(floors)) + " floor solids · " +
+            _ft_text(start.get("height") or 0) + " · " + _ft_text(max(sides)) + " × " + _ft_text(min(sides)) +
+            " · " + format(start.get("area") or 0, ",.0f") + " sf")
+    if start.get("coverage_allowed"):
+        text += " of " + format(start["coverage_allowed"], ",.0f") + " sf coverage allowed"
+    return text
+
+
 def gordium_start():
     """A new project: the prefilled facts (address, building type, zone, street side) for the architect to confirm,
     then the lot and the largest legal starting building as stacked floors, checked, with live mode on. Starts
@@ -1102,14 +1439,26 @@ def gordium_start():
         except ValueError:
             saved = {}
         facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
-    facts = confirm(doc, facts, options)
+    path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
+    export(doc, path)
+    saved_ui = _ui_state(doc)
+    saved_ui["preview"] = _preview(ask({"cmd": "start", "model": path, "facts": facts,
+                                        "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), None)}), facts)
+    _save_ui_state(doc, saved_ui)
+    facts = confirm(doc, facts, options, "start")
     if facts is None:
         Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
         return None
     save_facts(doc, facts)
-    path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
-    export(doc, path)
-    start = ask({"cmd": "start", "model": path, "facts": facts})
+    saved_ui = _ui_state(doc)
+    if saved_ui.get("massing") == "envelope":        # envelope only: the site and the envelope, no massing
+        result = run_check(doc, report=False)
+        live(True)
+        documents(True)
+        Rhino.RhinoApp.WriteLine("Gordium: drew the site and the buildable envelope (no massing)")
+        return result
+    start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
+                 "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), None)})
     STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)
