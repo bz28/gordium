@@ -144,10 +144,9 @@ def _example_value(text: str, values: dict[str, float]):
 
 
 def fill_template(template: dict, column: str | None, cells: dict, quote_sources: list[dict],
-                  drafted_by: str, nudge: str | None = None) -> tuple[dict | None, str | None]:
+                  drafted_by: str) -> tuple[dict | None, str | None]:
     """(the rule for this district column, None), or (None, why it can't be filled). With column None the
-    template must have no slots, and the rule is a general one. nudge: a slot whose value is changed in the
-    formulas only (not the examples), to test whether the slot decides anything."""
+    template must have no slots, and the rule is a general one."""
     values, cell_sources = {}, []
     for slot in template["slots"]:
         key = (slot["page"], slot["section"], slot["row"].strip(), column)
@@ -159,9 +158,6 @@ def fill_template(template: dict, column: str | None, cells: dict, quote_sources
                   "cell": {"section": slot["section"], "row": slot["row"].strip(), "column": column}}
         if source not in cell_sources:
             cell_sources.append(source)
-    examples_values = dict(values)
-    if nudge is not None:
-        values[nudge] = values[nudge] * 1.5 + 1
     district = district_name(column) if column else "general"
     rule = {"id": f"{district}.{template['id_suffix']}", "kind": template["kind"], "topic": template["topic"],
             "title": template["title"]}
@@ -173,7 +169,7 @@ def fill_template(template: dict, column: str | None, cells: dict, quote_sources
         rule["review_when"] = [{"when": _substitute(r["when"], values), "reason": r["reason"]} for r in template["review_when"]]
     rule["sources"] = cell_sources + quote_sources
     try:
-        rule["examples"] = [{"given": {g["measure"]: _example_value(g["value"], examples_values) for g in ex["given"]},
+        rule["examples"] = [{"given": {g["measure"]: _example_value(g["value"], values) for g in ex["given"]},
                              "expect": ex["expect"]} for ex in template["examples"]]
     except (formula.FormulaError, formula.EvaluationError, formula.MissingMeasure) as e:
         return None, f"an example value can't be worked out: {e}"

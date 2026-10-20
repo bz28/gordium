@@ -409,10 +409,7 @@ def test_a_number_in_a_slots_row_label_may_be_typed(inputs):
     assert records[0]["problem"] is None
     assert result["rules"]["R-1b"][0]["check"] == \
         "parking_spaces >= (1 if sleeping_rooms <= 3 else 2 + 1 * max(sleeping_rooms - 5, 0))"
-    # what a row label's number is about is for an architect: one open question per number, approval blocked
-    questions = result["rules"]["R-1b"][0]["open_questions"]
-    assert len(questions) == 2 and all("does it mean this here?" in q for q in questions)
-    assert any("'First three bed or sleeping rooms per dwelling unit'" in q for q in questions)
+    assert "open_questions" not in result["rules"]["R-1b"][0]          # a slot's own row label is trusted
 
 
 def test_a_footnote_that_isnt_a_number_is_sent_back_not_a_crash(inputs):
@@ -458,7 +455,7 @@ LOT_AREA_X = "{x}"   # the decoy cell's value, for examples
 
 @pytest.mark.parametrize("check, extra, expect", [
     # a slot written in but deciding nothing: caught by changing it, whatever the shape
-    ("stories <= 3 + 0 * {x}", {}, "decides nothing"),
+    ("stories <= 3 + 0 * {x}", {}, "isn't backed where it stands"),
     ("stories <= 3 and {x} == {x}", {}, "isn't backed where it stands"),
     # a slot that decides something, but in another comparison than the 3 it lends its note to
     ("stories <= 3 and lot_area >= {x}", {"lot_area": LOT_AREA_X}, "isn't backed where it stands"),
@@ -497,7 +494,7 @@ def test_a_flags_check_is_refused_and_lends_nothing(inputs):
 @pytest.mark.parametrize("numbers, expect", [
     ([], "isn't backed where it stands"),                                         # typed, never bound
     ([bound(3, "law_quote", quote=0)], "isn't one of this template's law quotes"),   # quote 0 is a chart note
-    ([bound(3, "slot_footnote", slot="x", footnote="16")], "isn't on slot 'x'"),     # not that slot's note
+    ([bound(3, "slot_footnote", slot="x", footnote="16")], "isn't marked on slot 'x''s own cell"),  # not its note
 ])
 def test_every_typed_number_is_bound_to_one_checked_evidence_item(inputs, numbers, expect):
     notes = [chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")]
@@ -531,41 +528,63 @@ def test_the_drafters_line_numbers_are_the_labelers(inputs):
         assert drafter.numbered_text(u["lines"]) == labeler_lines, u["id"]
 
 
-def test_a_number_picking_a_slots_branch_goes_to_an_architect_never_silently_in(inputs):
-    """'lot_area >= ({x} if stories <= 3 else 0)' has the parking rule's shape; code can't tell that note 7's
-    '1-3 units' isn't about stories. So it's never trusted silently: the rule carries an open question, and
-    the inspector refuses to approve it until an architect answers."""
-    notes = [chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")]
-    shape = template("lot_by_stories", "lot_area >= ({x} if stories <= 3 else 0)", [DECOY],
-                     [({"stories": "3", "lot_area": "{x}"}, "pass"), ({"stories": "3", "lot_area": "{x} - 1"}, "fail")],
-                     quotes=notes, numbers=[bound(3, "slot_footnote", slot="x", footnote="7")])
-    result, records = run(inputs, FakeClient({"templates": [shape], "no_rule_reason": ""}),
-                          uid="chart-p3-maximum_building_height")
-    rules = [r for rs in result["rules"].values() for r in rs]
-    assert rules and all(any("footnote 7" in q and "does it mean this here?" in q for q in r["open_questions"])
-                         for r in rules)
-    approved = copy.deepcopy(rules[0]) | {"status": "approved", "approved_by": "someone", "approved_on": "2026-10-19"}
-    problems = drafter.validate({"district": approved["id"].split(".")[0], "rules": [approved]}, inputs.ctx)
-    assert any("open_questions remain" in p for p in problems)
+@pytest.mark.parametrize("footnote, section, why", [
+    # note 3 sits on the section heading "Minimum Lot Size [fn3]", not on the cell
+    ("3", "Minimum Lot Size [fn3]", "the section heading's note"),
+    # note 7 belongs to another cell when the slot's own cell has none
+    ("7", "Minimum Lot Size [fn3]", "another cell's note"),
+])
+def test_only_a_note_marked_on_the_slots_own_cell_backs_a_number(inputs, footnote, section, why):
+    """Ben's policy: a footnote backs a typed number only if its marker is on the slot's own cell."""
+    unmarked = slot("x", "Multiple family dwelling, new construction", footnotes=[], section=section)
+    t = template("lot", "lot_area >= 3 * {x}", [unmarked],
+                 [({"lot_area": "3 * {x}"}, "pass"), ({"lot_area": "3 * {x} - 1"}, "fail")],
+                 quotes=[chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")],
+                 numbers=[bound(3, "slot_footnote", slot="x", footnote=footnote)])
+    answer = {"templates": [t], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid="chart-p3-maximum_building_height")
+    assert result["rules"] == {} and "isn't marked on slot 'x''s own cell" in records[0]["problem"], why
+
+
+def test_a_slot_its_examples_dont_exercise_is_fine_when_it_backs_nothing(inputs):
+    """The real Sonnet rear-yard draft: examples on a 1000 ft lot, where only the 50 ft cap binds. The percent
+    never changes an example, but it backs no number, so it can lend nothing: the rule is kept. (The 20 from
+    note 16 is backed by {cap}, which does decide.)"""
+    sonnet = copy.deepcopy(REAR_YARD) | {"check": "rear_yard >= max(20, min({pct} * lot_depth, {cap}))"}
+    sonnet["examples"] = [{"given": [{"measure": "lot_depth", "value": "1000"}, {"measure": "rear_yard", "value": "50"}],
+                           "expect": "pass"},
+                          {"given": [{"measure": "lot_depth", "value": "1000"}, {"measure": "rear_yard", "value": "49"}],
+                           "expect": "fail"}]
+    result, records = run(inputs, FakeClient({"templates": [sonnet], "no_rule_reason": ""}))
+    assert records[0]["problem"] is None
+    assert result["rules"]["R-1b"][0]["check"] == "rear_yard >= max(20, min(0.25 * lot_depth, 50))"
+
+
+def test_a_note_on_the_slots_own_cell_backs_its_number(inputs):
+    """'25%/ 50 ft [fn16]': note 16 ('But not less than 20 ft.') is on the rear-yard cell itself, so its 20 is trusted."""
+    result, records = run(inputs, FakeClient({"templates": [REAR_YARD], "no_rule_reason": ""}))
+    assert records[0]["problem"] is None
+    assert result["rules"]["R-1b"][0]["check"] == "rear_yard >= max(min(0.25 * lot_depth, 50), 20)"
+    assert "open_questions" not in result["rules"]["R-1b"][0]
 
 
 PARAPET = ("The provisions of this chapter shall not apply to prevent the erection above the building height limit of a "
            "parapet wall or cornice for ornament extending above such height five feet or less.")
 
 
-def test_a_number_from_another_sections_sentence_goes_to_an_architect(inputs):
-    """325-16B's parapet 'five feet or less' must not quietly become 'stories <= 5' in a chart rule
-    (R-3a's own cell says 4 stories): a sentence that isn't the text being drafted earns an open question."""
+def test_a_number_from_another_sections_sentence_is_rejected(inputs):
+    """325-16B's parapet 'five feet or less' must not become 'stories <= 5' in a chart rule (R-3a's own cell says
+    4 stories): a sentence that isn't the text being drafted never backs a number. Retried, then for a person."""
     notes = [chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")]
     t = template("probe", "lot_area >= {x} and stories <= 5", [DECOY],
                  [({"lot_area": "{x}", "stories": "5"}, "pass"), ({"lot_area": "{x} - 1", "stories": "5"}, "fail")],
                  quotes=notes + [{"document": "law", "page": 0, "piece": "325-16B", "text": PARAPET}],
                  numbers=[bound(5, "law_quote", quote=2)])
-    result, records = run(inputs, FakeClient({"templates": [t], "no_rule_reason": ""}),
-                          uid="chart-p3-maximum_building_height")
-    rules = [r for rs in result["rules"].values() for r in rs]
-    assert rules and all(any("§325-16B" in q and "does it mean this here?" in q for q in r["open_questions"])
-                         for r in rules)
+    answer = {"templates": [t], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid="chart-p3-maximum_building_height")
+    assert result["rules"] == {} and len(records) == 3
+    assert "is from §325-16B, not the text being drafted" in records[0]["problem"]
+    assert any("325-16B" in u["why"] for u in result["unresolved"]) or result.get("failed")
 
 
 def test_a_number_from_the_paragraph_being_drafted_needs_no_question(inputs):
