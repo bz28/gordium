@@ -24,7 +24,8 @@ from pathlib import Path
 import yaml
 from openpyxl import Workbook
 
-from rule_export.workbook import page_link, title, write_block
+from openpyxl.styles import Border, Font, PatternFill, Side
+from rule_export.workbook import FONT, INK, citer, page_link, title, write_block
 from rule_format import formula
 from rule_format.formula import EvaluationError, MissingMeasure
 from rule_format.rulebook import (MEASURE_KINDS, MEASURES_FILE, REPO, Context, load, outcome, rulebook_file_problems,
@@ -39,12 +40,17 @@ OUTPUT_HEADERS = ["Requirement", "Table limit", "Proposed", "Units", "Comparison
 # Ours, after theirs.
 INPUT_EXTRA = ["Where the value comes from"]
 PARAMETER_EXTRA = ["Rule", "Link"]
-OUTPUT_EXTRA = ["Rule id", "Formula", "Why it needs review", "City's exact words", "Document", "Link", "Rulebook"]
+OUTPUT_EXTRA = ["Rule id", "Formula", "Why it needs review", "Citation", "City's exact words", "Link", "Rulebook"]
 
 RESULT = {"pass": "PASS", "fail": "FAIL", "needs_review": "NEEDS REVIEW", "not_applicable": "NOT APPLICABLE"}
 COMPARISON = {"pass": "Within table limit", "fail": "Outside table limit", "needs_review": "Needs review",
               "not_applicable": "Not applicable"}
 INPUT_FILL = "FFFFF1BF"                # the architects' yellow for values typed in
+OURS_FILL = "FFEDF0F2"                 # their grey, on the headers of the columns we add after theirs
+RESULT_INK = {"FAIL": "FF0000", "NEEDS REVIEW": "9A6400"}   # their FAIL is red; review is amber
+# Column widths: theirs as in their file (Inputs A-C, Output A-G), then ours.
+INPUT_WIDTHS = [43, 17, 46.375, 40]
+OUTPUT_WIDTHS = [34, 20, 14, 12, 25, 14, 12.625] + [28, 40, 40, 40, 60, 10, 30]
 
 MEASURES = load(MEASURES_FILE)
 SYMBOL = {ast.GtE: "≥", ast.LtE: "≤", ast.Gt: ">", ast.Lt: "<", ast.Eq: "=", ast.NotEq: "≠"}
@@ -268,6 +274,7 @@ def tables(project_path: Path) -> dict:
     allowed = {"use": ctx.uses}                       # the same list the checker and the tests use
     kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in allowed.items()}
     which = book_path.relative_to(j / "5_zoning_rules").as_posix()
+    cite = citer(j, documents)
 
     inputs = [[k.replace("_", " ").capitalize(), use_names.get(m["value"], m["value"]),
                f"{_unit(k)}; {' '.join(str(MEASURES[k]['meaning']).split())}", str(m["from"])]
@@ -284,13 +291,13 @@ def tables(project_path: Path) -> dict:
         row = [rule.get("title", rule.get("id", "")), limit, proposed, units, COMPARISON[result],
                first.get("page", ""), RESULT[result], rule.get("id", ""), rule.get("check", ""),
                needs_review_reason(rule, values, kinds) if result == "needs_review" else "",
-               " ".join(str(first.get("quote", "")).split()), first.get("file", ""),
+               cite(first), " ".join(str(first.get("quote", "")).split()),
                f"Open p.{first['page']}" if first.get("file") else "",
                f"{which} ({rule.get('drafted_by', '')}, {rule.get('status', '')})"]
         (later if result == "not_applicable" else rows).append((row, link))
         if result != "not_applicable" and rule.get("check"):     # the limit as the table writes it
             params.append([rule.get("title", ""), table_values(rule["check"]),
-                           f"{first.get('file', '')} p.{first.get('page', '')}" if first.get("file") else "",
+                           cite(first),
                            rule.get("id", ""), f"Open p.{first['page']}" if first.get("file") else ""])
             param_links.append(link)
     return {"title": project["title"], "inputs": inputs, "parameters": params, "parameter_links": param_links,
@@ -298,26 +305,64 @@ def tables(project_path: Path) -> dict:
             "not_applicable": [r for r, _ in later], "not_applicable_links": [l for _, l in later]}
 
 
+def _mark_ours(ws, top: int, bottom: int, first: int, last: int) -> None:
+    """Set our added columns (first..last) apart from the architects': their grey on our headers, and a line
+    down the left edge of the first one."""
+    edge = Border(left=Side(style="medium", color=INK))
+    for c in range(first, last + 1):
+        ws.cell(row=top, column=c).fill = PatternFill("solid", fgColor=OURS_FILL)
+    for r in range(top, bottom):
+        ws.cell(row=r, column=first).border = edge
+
+
+def _color_results(ws, top: int, bottom: int, column: int) -> None:
+    for r in range(top, bottom):
+        cell = ws.cell(row=r, column=column)
+        if cell.value in RESULT_INK:
+            cell.font = Font(name=FONT, size=11, bold=True, color=RESULT_INK[cell.value])
+
+
+def _note(ws, cell: str, text: str, size=10, bold=False) -> None:
+    ws[cell] = text
+    ws[cell].font = Font(name=FONT, size=size, bold=bold, italic=not bold, color=INK)
+
+
 def build(t: dict) -> Workbook:
-    """The architects' two tabs, laid out like theirs (title in A1, headers bold on row 2), our columns after."""
+    """The architects' two tabs, laid out like theirs: title in A1, bold headers on row 2, their columns in
+    their order, widths, font and colors (yellow for typed-in values, red for FAIL). Our columns come after
+    theirs, set apart by their grey on the headers and a line down the left edge."""
     wb = Workbook()
     wb.remove(wb.active)
     wb.properties.creator = "Gordium (generated: python -m project_report)"
     ws = wb.create_sheet(INPUTS_TAB)
     title(ws, INPUTS_TITLE)
-    widths = [43, 17, 46, 40, 30, 10]
-    end = write_block(ws, 2, list(zip(INPUT_HEADERS + INPUT_EXTRA, widths)), t["inputs"],
+    end = write_block(ws, 2, list(zip(INPUT_HEADERS + INPUT_EXTRA, INPUT_WIDTHS)), t["inputs"],
                       fills={"Value": [INPUT_FILL] * len(t["inputs"])})
-    write_block(ws, end + 2, [(h, None) for h in PARAMETER_HEADERS + PARAMETER_EXTRA], t["parameters"],
-                links={"Link": t["parameter_links"]})
+    _mark_ours(ws, 2, end, len(INPUT_HEADERS) + 1, len(INPUT_HEADERS + INPUT_EXTRA))
+    params_end = write_block(ws, end + 2, [(h, None) if i < len(INPUT_WIDTHS) else (h, 30 if h == "Rule" else 10)
+                                           for i, h in enumerate(PARAMETER_HEADERS + PARAMETER_EXTRA)],
+                             t["parameters"], links={"Link": t["parameter_links"]})
+    _mark_ours(ws, end + 2, params_end, len(PARAMETER_HEADERS) + 1, len(PARAMETER_HEADERS + PARAMETER_EXTRA))
+    key = len(PARAMETER_HEADERS + PARAMETER_EXTRA) + 2          # a key to the colors, like theirs, to the right
+    _note(ws, ws.cell(row=2, column=key).coordinate, "Key", size=12, bold=True)
+    ws.cell(row=3, column=key).fill = PatternFill("solid", fgColor=INPUT_FILL)
+    _note(ws, ws.cell(row=3, column=key + 1).coordinate, "typed into the project file")
+    ws.cell(row=4, column=key).fill = PatternFill("solid", fgColor=OURS_FILL)
+    _note(ws, ws.cell(row=4, column=key + 1).coordinate, "a column Gordium adds after the architects' columns")
+
     ws = wb.create_sheet(OUTPUT_TAB)
     title(ws, f"GORDIUM | {t['title']} (draft rules, checked by code)")
-    columns = list(zip(OUTPUT_HEADERS + OUTPUT_EXTRA, [34, 24, 20, 12, 22, 10, 16, 30, 40, 40, 60, 26, 10, 30]))
+    first_ours = len(OUTPUT_HEADERS) + 1
+    _note(ws, ws.cell(row=1, column=first_ours).coordinate, "Columns from here on are added by Gordium")
+    columns = list(zip(OUTPUT_HEADERS + OUTPUT_EXTRA, OUTPUT_WIDTHS))
     end = write_block(ws, 2, columns, t["output"], links={"Link": t["output_links"]})
+    _mark_ours(ws, 2, end, first_ours, len(columns))
+    _color_results(ws, 3, end, OUTPUT_HEADERS.index("Error") + 1)
     if t["not_applicable"]:
-        ws.cell(row=end + 1, column=1, value="Rules in this zone that don't apply to this project")
-        write_block(ws, end + 2, [(h, None) for h, _ in columns], t["not_applicable"],
-                    links={"Link": t["not_applicable_links"]})
+        _note(ws, f"A{end + 1}", "Rules in this zone that don't apply to this project", size=12, bold=True)
+        later_end = write_block(ws, end + 2, [(h, None) for h, _ in columns], t["not_applicable"],
+                                links={"Link": t["not_applicable_links"]})
+        _mark_ours(ws, end + 2, later_end, first_ours, len(columns))
     ws.freeze_panes = "A3"
     return wb
 

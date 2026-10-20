@@ -8,7 +8,7 @@ import yaml
 
 from project_report import report
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, load_project, output_path, tables
-from rule_export.workbook import contents, page_link
+from rule_export.workbook import INK, citer, contents, page_link
 from rule_format.rulebook import REPO, Context, load, outcome, rulebook_for
 
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design.yaml"
@@ -78,7 +78,8 @@ def test_every_row_cites_its_rules_first_source(t):
         for row, link in zip(rows, links, strict=True):
             s = rules[row[COL["Rule id"]]]["sources"][0]
             assert row[COL["PDF page"]] == s["page"]
-            assert row[COL["Document"]] == s["file"]
+            assert row[COL["Citation"]] == citer(J, documents)(s) and row[COL["Citation"]].startswith(
+                documents[s["file"]]["title"])
             assert row[COL["City's exact words"]] == " ".join(s["quote"].split())
             assert link == page_link(J, documents, s["file"], s["page"])
 
@@ -317,3 +318,30 @@ def test_a_broken_source_list_gives_a_plain_refusal(monkeypatch):
     report = _patched_load(monkeypatch, lambda path, data: {} if path.name == "sources.yaml" else data)
     with pytest.raises(ValueError, match="can't load its sources"):
         report.tables(SITE)
+
+
+
+def test_the_report_looks_like_the_architects_sheet(t):
+    """Their columns in their font, ink and widths; FAIL in their red; ours set apart after theirs."""
+    theirs = openpyxl.load_workbook(REPO / "test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx")
+    wb = build(t)
+    for tab, n in (("Inputs", 3), ("Output", 7)):
+        a, b = theirs[tab], wb[tab]
+        for c in range(1, n + 1):
+            letter = openpyxl.utils.get_column_letter(c)
+            if letter in a.column_dimensions and a.column_dimensions[letter].customWidth:   # widths they set
+                assert b.column_dimensions[letter].width == a.column_dimensions[letter].width, (tab, letter)
+            for row in (1, 2, 4):              # title, headers, a body row (their E3 alone is 10 pt)
+                x, y = a.cell(row=row, column=c), b.cell(row=row, column=c)
+                if x.value is not None and y.value is not None:
+                    assert (y.font.name, y.font.sz, bool(y.font.b)) == (x.font.name, x.font.sz, bool(x.font.b)), (tab, row, c)
+                    assert y.font.color.rgb.endswith(INK) and x.font.color.rgb.endswith(INK), (tab, row, c)
+    out = wb["Output"]
+    error = OUTPUT_HEADERS.index("Error") + 1
+    fails = [r for r in range(3, out.max_row + 1) if out.cell(row=r, column=error).value == "FAIL"]
+    assert fails and all(out.cell(row=r, column=error).font.color.rgb.endswith("FF0000") for r in fails)
+    assert theirs["Output"]["G8"].font.color.rgb.endswith("FF0000")                 # their FAIL color
+    first_ours = len(OUTPUT_HEADERS) + 1
+    assert out.cell(row=2, column=first_ours).fill.fgColor.rgb == report.OURS_FILL
+    assert out.cell(row=2, column=first_ours - 1).fill.fill_type is None             # theirs stay plain
+    assert out.cell(row=3, column=first_ours).border.left.style == "medium"
