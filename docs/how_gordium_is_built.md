@@ -22,7 +22,7 @@ The city's documents go in on the left. A traceable rulebook, checked by code, c
 |---|---|---|---|---|
 | 1. Source documents | city websites → the original PDFs, each with a fingerprint | none (`1_source_documents/sources.yaml`) | downloaded by hand | ✅ PR 0 |
 | 2. Extracted text | PDFs → every line, with page and position | `document_extraction` | code, same result every time | ✅ PR 3 |
-| 3. Pieces and labels | the law's text → 626 pieces, each labeled rule / flag / reference / not for checking | `document_extraction.sections` cuts; `section_labeling` labels | code cuts; AI (Haiku) labels; code checks every label; reviewed | ✅ PR 7 |
+| 3. Pieces and labels | the law's text → 626 pieces, each labeled rule / flag / reference / not for checking | `document_extraction.sections` cuts; `section_labeling` labels | code cuts; AI (Haiku) labels; code checks every label; a second AI (Claude) reviewed them; architect approval deferred | ✅ PR 7 |
 | 4. Definitions | the law's definitions → what "height", "story", "lot depth"… mean, in the city's words | data only (`4_term_definitions/`) | written from the law; quotes checked by code | ✅ PR 4 |
 | 5. Rules | chart cells + rule pieces → one file per zone: title, the city's quotes, a formula, worked examples | data (`5_zoning_rules/`); `rule_format` defines and inspects them | R-1b drafted by Claude in conversation (PR 5); every zone by AI with code checks (PR 8, full run not done) | 🔨 |
 | 6. Coverage report | pieces + labels → every line of the law, its piece and its label | `section_labeling` | code | ✅ PR 7 |

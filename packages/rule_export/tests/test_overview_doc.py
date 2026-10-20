@@ -53,7 +53,18 @@ def test_side_branches_are_marked_and_none_joins_through_another():
     the main line through another side branch."""
     rows = [line for line in GUIDE.splitlines() if re.match(r"\| \d+ \|", line)]
     assert all("joins the main line through" not in r for r in rows)
-    if not (REPO / ".github/pull_request_template.md").exists():
-        assert "side branch" in next(r for r in rows if r.startswith("| 2 |"))
-    if not (REPO / "packages/document_extraction/document_extraction/charts.py").exists():
-        assert "side branch" in next(r for r in rows if r.startswith("| 6 |"))
+    marker = {2: ".github/pull_request_template.md", 6: "packages/document_extraction/document_extraction/charts.py",
+              8: "packages/rule_drafting"}                     # a file each PR adds
+    for pr, path in marker.items():
+        if not (REPO / path).exists():
+            assert "side branch" in next(r for r in rows if r.startswith(f"| {pr} |")), pr
+
+
+def test_the_guide_names_who_reviewed_the_labels():
+    """Every recorded label revision is by Claude and none is approved, so step 3 must name the AI reviewer:
+    a bare 'reviewed' reads as people having checked them."""
+    labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
+    revisers = {r.get("by") for e in labels.values() for r in (e.get("revised") or [])}
+    assert revisers                                      # the check below is about real records
+    if all(str(r).startswith("Claude") for r in revisers):
+        assert "Claude" in _row("3. Pieces and labels")
