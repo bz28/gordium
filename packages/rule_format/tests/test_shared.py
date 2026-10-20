@@ -42,8 +42,12 @@ def _jsonl_readers(source: str) -> int:
                 and f.value.id == "json") or (isinstance(f, ast.Name) and f.id in names)
 
     def loads_of(nodes, loop_vars):
+        def the_item(arg):              # the loop's own item, maybe stripped: l, l.strip(), l.rstrip("\\n")
+            if isinstance(arg, ast.Call) and isinstance(arg.func, ast.Attribute):
+                arg = arg.func.value
+            return isinstance(arg, ast.Name) and arg.id in loop_vars
         return {id(c) for n in nodes for c in ast.walk(n) if isinstance(c, ast.Call) and is_loads(c.func)
-                and c.args and {x.id for x in ast.walk(c.args[0]) if isinstance(x, ast.Name)} & loop_vars}
+                and c.args and the_item(c.args[0])}
 
     def targets(node):
         return {t.id for t in ast.walk(node) if isinstance(t, ast.Name)}
@@ -72,6 +76,7 @@ def test_the_checks_recognise_any_spelling():
     assert _jsonl_readers("for l in f:\n    r.append(json.loads(l.rstrip()))") == 1
     assert _jsonl_readers("rows = list(map(json.loads, f))") == 1
     assert _jsonl_readers("from json import loads\nrows = [loads(l) for l in f]") == 1
+    assert _jsonl_readers('answers = [json.loads(r["answer"]) for r in records]') == 0   # a field, not a line
     assert LISTING.search("root.glob('*/*')") and LISTING.search('root.glob("*/*")')
     assert not LISTING.search('root.glob("*/*.pdf")')
 
