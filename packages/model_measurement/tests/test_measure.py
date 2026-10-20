@@ -394,6 +394,11 @@ def test_something_above_the_main_roof_is_for_the_architects():
         f for f in chimney["faces"] if not all(p[2] == 30 for p in f["points"])]
     m = measure(site(RECT, house), FACTS)["building_height"]
     assert m["value"] is None and "rises above the main roof" in m["reason"]
+    assert sorted(r["value"] for r in m["readings"]) == [30.0, 34.0]
+    # with a low garage too, the question isn't lost
+    garage = box(30, 75, 48, 95, 0, 12, id="garage")
+    m = measure(site(RECT, house, garage), {**FACTS, "main_building": "house"})["building_height"]
+    assert m["value"] is None and "rises above the main roof" in m["reason"]
 
 
 def test_a_lot_not_from_a_survey_and_sloped_ground_need_review():

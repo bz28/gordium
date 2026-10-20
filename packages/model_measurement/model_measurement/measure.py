@@ -230,9 +230,10 @@ def _height(building: dict, grade: float) -> dict:
     how = "from the ground level (grade plane) to the top of the roof"
     main_roof = max(roof, key=lambda f: Polygon([p[:2] for p in f["points"]]).buffer(0).area)
     if max(p[2] for p in main_roof["points"]) < top - TOL:   # the top is something smaller above the main roof
-        return _record("building_height", "ft", None, how, [building["id"]], None,
-                       [{"reading": "to the top of what rises above the main roof", "value": _r(top - grade)}],
-                       ABOVE_ROOF)
+        roof_top = max(p[2] for p in main_roof["points"])
+        return _decide("building_height", [("leaving out what rises above the main roof", roof_top - grade, {}),
+                                           ("to the top of what rises above the main roof", top - grade, {})],
+                       how, [building["id"]], ABOVE_ROOF)
     highest = [f for f in roof if any(abs(p[2] - top) <= TOL for p in f["points"])]
     sloped = [f for f in highest if _normal_z(f["points"]) < FLAT]
     if not sloped:
@@ -278,7 +279,7 @@ def _with_others(main: dict, others: list[dict]) -> dict:
                    for a in combos for b in combos)
 
     def roof_questions(m):
-        return [q for q in (ROOF_KIND, PITCHED) if m["reason"] and q in m["reason"]]
+        return [q for q in (ROOF_KIND, PITCHED, ABOVE_ROOF) if m["reason"] and q in m["reason"]]
 
     questions = roof_questions(main) if matters(0) else []
     questions += [ACCESSORY] if matters(1) else []

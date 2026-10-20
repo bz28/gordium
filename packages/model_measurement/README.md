@@ -25,7 +25,7 @@ format report from it.
   | `street_line` | **every** lot line on a street, each by its two ends (on a corner lot: both streets and any curve between them); front, side and rear all follow from it |
   | `corner_lot` | yes or no: two streets meet at the lot (§325-19C). Stated, never guessed from the drawing (the city's definition has no angle in it). Without it, everything that depends on the street says "needs review". On a corner lot, the lot width, lot depth and every yard are left for the architects: which yards are front, side and rear, and which frontage is the width, are open questions (and a drawing can't show whether both streets were given) |
   | `grade_elevation` | the ground level heights are measured from (a flat site) |
-  | `ground_is_flat` | yes or no. Sloped ground needs the ground levels around the walls (the grade plane), not measured yet: without a yes, height and building area say "needs review" |
+  | `ground_is_flat` | yes or no. Sloped ground needs the ground levels around the walls (the grade plane), not measured yet: without a yes, height, building area and the yards say "needs review" |
   | `lot_surveyed` | yes or no: the lot outline is from a survey. A drawn lot (from a map) isn't: without a yes, the lot area, and so lot size and coverage, say "needs review" (the drawn area is listed as a reading) |
   | `lot_id`, `main_building` | only when there is more than one candidate |
   | `stories`, `sleeping_rooms`, `parking_spaces` | not drawn in a massing model; the rules that need them say "needs review" until they're entered |
@@ -68,7 +68,7 @@ building outside the lot, no ground level, more than one building and none picke
 yards are front, side and rear, and which street's frontage is the lot width, are open questions), no corner-lot
 answer, every lot line on a street, a
 lot outline that isn't closed or crosses itself, a curved wall or edge (not measured yet), a solid that isn't
-closed, two candidate lot outlines, and anything on the Building layer that isn't a solid or mesh (a block, a
+closed, two candidate lot outlines, sloped or unstated ground, a lot outline not from a survey (lot area), and anything on the Building layer that isn't a solid or mesh (a block, a
 surface): it is reported, never left out, since leaving it out would undercount coverage. Sublayers count
 (`Building::Garage`); a block's own definition is never read as a building. Mistyped lot facts (a ground level
 that isn't a number) are refused with a plain message.
@@ -95,4 +95,4 @@ distances the two points it was measured between. The project file's `from` carr
 
 Curved walls and roofs (reported, not measured); sloped ground (one level only); counting stories from floors
 in the model (stated by the architect for now); chimneys and other roof features the height definition leaves
-out (they are included, which can only make a height larger).
+out (a part above the main roof gets "needs review", with its top listed).
