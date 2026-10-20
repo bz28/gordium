@@ -32,15 +32,20 @@ def test_jurisdictions_lists_each_place_folder(tmp_path):
     assert jurisdictions(tmp_path) == [tmp_path / "regulations/jurisdictions/ny/a"]
 
 
+def _uses(pattern: str) -> list[str]:
+    """Where a pattern occurs in the packages' code (tests excluded), as file:line."""
+    return [f"{p.relative_to(REPO)}:{n}" for p in CODE
+            for n, line in enumerate(p.read_text().splitlines(), 1) if re.search(pattern, line)]
+
+
 def test_every_jsonl_file_is_read_by_the_one_reader():
-    copies = [p for p in CODE if p.name != "rulebook.py" and re.search(r"json\.loads\(line\)", p.read_text())]
-    assert not copies, f"read .jsonl files with rule_format.rulebook.read_jsonl: {copies}"
+    uses = _uses(r"json\.loads\(line\)")
+    assert len(uses) == 1 and "rulebook.py" in uses[0], f"read .jsonl files with rulebook.read_jsonl: {uses}"
 
 
 def test_every_jurisdiction_listing_uses_the_one_helper():
-    pattern = re.compile(r'\.glob\("\*/\*')       # <state>/<place>, however the folder is named
-    copies = [p for p in CODE if p.name != "rulebook.py" and pattern.search(p.read_text())]
-    assert not copies, f"list jurisdictions with rule_format.rulebook.jurisdictions(): {copies}"
+    uses = _uses(r'\.glob\("\*/\*')                  # <state>/<place>, however the folder is named
+    assert len(uses) == 1 and "rulebook.py" in uses[0], f"list jurisdictions with rulebook.jurisdictions(): {uses}"
 
 
 def test_docs_dont_promise_approval_while_it_is_deferred():
