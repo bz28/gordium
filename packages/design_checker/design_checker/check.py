@@ -39,6 +39,11 @@ def short(title: str) -> str:
     return words[:1].upper() + words[1:]
 
 
+def plain_name(measure: str) -> str:
+    """A measurement as an architect says it: side_yard_smaller -> side yard."""
+    return measure.replace("_smaller", "").replace("_larger", "").replace("_", " ")
+
+
 def _first_failing(rule: dict, measured: dict) -> str | None:
     """For a rule with several comparisons (the height with its bonus): the first one that fails, in plain words,
     'Building height 38 ft, needs ≤ 35 ft'. None if none can be worked out."""
@@ -57,7 +62,7 @@ def _first_failing(rule: dict, measured: dict) -> str | None:
         if holds is False:
             unit = m.get("unit") or ""
             unit = "" if unit == "count" else " " + unit
-            return (f"{name.replace('_', ' ').capitalize()} {_n(m['value'])}{unit}, needs "
+            return (f"{plain_name(name).capitalize()} {_n(m['value'])}{unit}, needs "
                     f"{signs[type(node.ops[0])]} {_n(need)}{unit}")
     return None
 
@@ -122,7 +127,7 @@ def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] 
     survey = SURVEY in open_ and len(choices[open_.index(SURVEY)]) == 1
     others = [n for n in open_ if n != SURVEY or not survey]
     return got.pop(), (f"{word} with the lot as drawn (confirm the survey)" if survey and not others else
-                       f"{word} under every reading of the lot" +
+                       f"{word} under every reading" +
                        (" and with the lot as drawn (confirm the survey)" if survey else ""))
 
 
@@ -169,7 +174,7 @@ def _failing_distances(rule: dict, measured: dict, values: dict) -> list[dict]:
         if holds is False and name not in [d["measure"] for d in found]:
             sign = {ast.GtE: "≥", ast.Gt: ">", ast.LtE: "≤", ast.Lt: "<"}.get(type(node.ops[0]), "")
             found.append({"rule": rule["id"], "measure": name, "points": m["points"],
-                          "label": f"{name.replace('_', ' ')} {_n(m['value'])} ft, needs {sign} {_n(need)}"})
+                          "label": f"{plain_name(name)} {_n(m['value'])} ft, needs {sign} {_n(need)}"})
     return found
 
 

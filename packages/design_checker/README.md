@@ -25,7 +25,7 @@ What it adds for the Rhino command, never changing a result:
   like any other, a FAIL included: nothing that fails is hidden.
 - **Provisional / Fails:** a NEEDS REVIEW rule waiting only on an open question (a measurement with readings, or a
   lot not yet surveyed, whose one reading is the lot as drawn) is worked out under every combination of readings.
-  If it passes under all of them, the row says so ("passes under every reading of the lot", "passes with the lot
+  If it passes under all of them, the row says so ("passes under every reading", "passes with the lot
   as drawn (confirm the survey)"); if it fails under all of them, it counts as failing (red, and in the "now
   fails" note). The result itself stays NEEDS REVIEW: only `outcome()` decides results. The summary then says
   "Complies" when nothing fails and every open question about how the law reads passes whichever way it is

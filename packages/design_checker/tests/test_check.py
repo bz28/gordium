@@ -107,7 +107,7 @@ def test_only_the_failing_distance_of_a_rule_is_drawn(facts, tmp_path):
     moved = tmp_path / "moved.3dm"
     model.Write(str(moved), 8)
     dims = check(moved, facts)["dims"]
-    assert [(d["measure"], d["label"]) for d in dims] == [("side_yard_smaller", "side yard smaller 8 ft, needs ≥ 10")]
+    assert [(d["measure"], d["label"]) for d in dims] == [("side_yard_smaller", "side yard 8 ft, needs ≥ 10")]
 
 
 def test_what_rhino_couldnt_send_makes_building_measures_need_review(facts):
@@ -239,7 +239,7 @@ COVER = {"id": "cover", "kind": "rule", "check": "building_area <= 0.25 * lot_ar
 def test_a_rule_that_passes_under_every_reading_says_so_and_stays_needs_review():
     from design_checker.check import every_reading
     measured = {"rear_yard": _m(None, [26, 27]), "lot_depth": _m(None, [90, 96.6])}
-    assert every_reading(REAR, measured, {}) == ("pass", "passes under every reading of the lot")
+    assert every_reading(REAR, measured, {}) == ("pass", "passes under every reading")
 
 
 def test_one_reading_that_fails_means_no_answer():
@@ -263,7 +263,7 @@ def test_a_measurement_with_no_reading_at_all_is_never_worked_out():
 
 def test_the_summary_says_complies_only_when_every_open_question_passes():
     rows = [{"Error": "PASS", "Requirement": "Front yard"},
-            {"Error": "NEEDS REVIEW", "Requirement": "Rear yard", "Provisional": "passes under every reading of the lot"}]
+            {"Error": "NEEDS REVIEW", "Requirement": "Rear yard", "Provisional": "passes under every reading"}]
     assert summary(rows)["state"] == "complies"
     survey = rows[:1] + [{"Error": "NEEDS REVIEW", "Requirement": "Lot coverage by buildings", "Survey": True,
                           "Provisional": "passes with the lot as drawn (confirm the survey)", "Why": "no survey"}]

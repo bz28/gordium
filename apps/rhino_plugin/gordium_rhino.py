@@ -357,7 +357,7 @@ def draw_screen(o, e):
     if toast and time.time() < toast[1] and active is not None and e.Viewport.Id == active.ActiveViewportID:
         rows = ["✕ " + line for line in toast[0]]         # bottom left, active view only
         width = max(len(row) for row in rows) * 8 + 28
-        x, y = 14, int(e.Viewport.Bounds.Height) - (22 * len(rows) + 14) - 14
+        x, y = 14, int(e.Viewport.Bounds.Height) - (22 * len(rows) + 14) - 64   # above the axis icon
         d.Draw2dRectangle(System.Drawing.Rectangle(x, y, width, 22 * len(rows) + 14), RED, 2,
                           System.Drawing.Color.FromArgb(245, 255, 251, 250))
         for i, row in enumerate(rows):
