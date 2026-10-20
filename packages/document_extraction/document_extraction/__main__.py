@@ -12,6 +12,8 @@ from pathlib import Path
 
 import yaml
 
+from rule_format.rulebook import jurisdictions
+
 from .extract import extract, sha256, to_jsonl
 
 REPO = Path(__file__).resolve().parents[3]
@@ -22,7 +24,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--check", action="store_true", help="compare with a fresh extraction; write nothing")
     check = parser.parse_args(argv).check  # unknown arguments stop here, so a typo can't overwrite files
     failed = 0
-    for jurisdiction in sorted(p for p in (REPO / "regulations/jurisdictions").glob("*/*") if p.is_dir()):
+    for jurisdiction in jurisdictions(REPO):
         sources = jurisdiction / "1_source_documents"
         out_dir = jurisdiction / "2_extracted_text"
         for doc in yaml.safe_load((sources / "sources.yaml").read_text())["documents"]:
