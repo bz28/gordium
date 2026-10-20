@@ -287,3 +287,17 @@ def test_a_chart_cell_source_shows_its_cell_and_value(data):
         c = s["cell"]
         assert (rid, f"{ITHACA_TITLES[s['file']]}, p.{s['page']}, {c['section']} · {c['row']} · {c['column']}",
                 _cell(s, ctx)["value"]) in rows
+
+
+def test_an_unverified_chart_cell_says_so_instead_of_a_blank(monkeypatch):
+    rule = {"id": "R-1b.x", "title": "X", "sources": [{"file": "zoning_charts_2026-04.pdf", "page": 3,
+                                                        "cell": {"section": "Nope", "row": "x", "column": "R-1B"}}]}
+    monkeypatch.setattr(wbk, "rulebooks", lambda j: [("R-1b.yaml", {"district": "R-1b", "rules": [rule]})])
+    t = tables(ITHACA)["Rules"]
+    assert column(t, "City's exact words") == [wbk.NOT_VERIFIED]
+    assert "Nope · x · R-1B" in column(t, "Citation")[0]
+
+
+def test_the_readme_says_how_chart_cells_are_cited():
+    readme = (REPO / "packages/rule_export/README.md").read_text()
+    assert "section, row and district column" in readme and "(not verified" in readme

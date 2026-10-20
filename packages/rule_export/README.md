@@ -22,8 +22,11 @@ row 1, bold 12-pt headers in row 2 (frozen), 11-pt wrapped text.
 **Citations.** Every quote has a **Citation** a reader can follow: the document's title (from
 `sources.yaml`), the section it is in (for a document cut into sections), the page and the lines, e.g.
 "City of Ithaca Code, Chapter 325 Zoning (full text), §325-8A, p.24, lines 15–16" or "City of Ithaca Zoning
-Charts (April 2026), p.3, line 31". The city's exact words are in their own column, and **Link** ("Open p.N")
-opens that page.
+Charts (April 2026), p.3, line 31". A rule that cites a chart cell (rather than quoting a line) is cited by
+its section, row and district column, e.g. "City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions ·
+Rear · R-1B", and its exact words are the cell's value as the chart reader read it; a cell the chart reader
+can't confirm says "(not verified …)" instead of a blank. The city's exact words are in their own column, and
+**Link** ("Open p.N") opens that page.
 
 | Tab | One row per | Columns |
 |---|---|---|
