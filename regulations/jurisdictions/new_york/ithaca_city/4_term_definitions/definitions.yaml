@@ -3,7 +3,7 @@
 # `measures` links each definition to the measurement names rules use (packages/rule_format/.../measures.yaml).
 # A definition is the city's own whole sentences, with no paraphrase (drafting_rules.md). Read the quotes.
 # `open_questions` are gaps or interpretations for the architects; never resolved by guessing.
-# A definition with open questions can't be approved. Draft: architects confirm.
+# A definition with open questions can't be approved. Draft: architect confirmation is deferred for now.
 
 grade_plane:
   term: GRADE PLANE
