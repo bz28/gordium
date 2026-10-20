@@ -60,7 +60,7 @@ listed, and the reason names the open question for the architects, so the checke
 | More than one solid on the Building layer | every yard to the main building / to any solid (a porch or deck drawn as its own solid is part of the building, §325-18A; an accessory building may follow other rules) | yard_projections, §325-25 |
 | A pitched roof | midway between eave and ridge / to the ridge | height_of_building: "average height" |
 | A roof with a level part and sloped sides at its top | a mansard, to its highest level / a pitched or hip roof, to its average height | height_of_building: "flat or mansard" vs "pitched, gabled, hip" |
-| Something above the main roof (a parapet, chimney, bulkhead, or a higher part of the building) | to its top, listed; whether it counts is the question (§325-3 leaves out bulkheads and chimneys) | height_of_building |
+| Something above the main roof (a parapet, chimney, bulkhead, or a higher part of the building) | leaving it out (the roof read as usual) / to its top; whether it counts is the question (§325-3 leaves out bulkheads and chimneys) | height_of_building |
 | More than one solid, for the height | the main building alone / with every other solid as part of it | §325-25 |
 
 Things that stop a measurement, with the reason given: no street side, a street line that isn't a lot line, a

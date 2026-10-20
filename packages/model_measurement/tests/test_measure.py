@@ -411,3 +411,16 @@ def test_a_lot_not_from_a_survey_and_sloped_ground_need_review():
     m = measure(site(), {**FACTS, "ground_is_flat": None, "lot_surveyed": None})
     assert m["building_height"]["reason"] == "say whether the ground is flat"
     assert m["lot_area"]["reason"] == "say whether the lot outline is from a survey"
+
+
+def test_a_pitched_house_with_a_chimney_is_read_as_pitched_without_it():
+    eave, ridge = 20, 30
+    house = box(10, 25, 35, 65, 0, eave)
+    house["faces"] = [f for f in house["faces"] if not all(p[2] == eave for p in f["points"])]
+    house["faces"] += [{"points": [[10, 25, eave], [35, 25, eave], [35, 45, ridge], [10, 45, ridge]]},
+                       {"points": [[10, 45, ridge], [35, 45, ridge], [35, 65, eave], [10, 65, eave]]}]
+    chimney = box(20, 44, 23, 47, ridge, 34, id="c")
+    house["faces"] += [f for f in chimney["faces"] if not all(p[2] == ridge for p in f["points"])]
+    m = measure(site(RECT, house), FACTS)["building_height"]
+    assert m["value"] is None and {25.0, 30.0, 34.0} <= {r["value"] for r in m["readings"]}
+    assert "average height of a pitched roof" in m["reason"] and "rises above the main roof" in m["reason"]

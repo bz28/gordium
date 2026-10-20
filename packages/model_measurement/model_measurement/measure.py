@@ -229,23 +229,33 @@ def _height(building: dict, grade: float) -> dict:
         return _missing("building_height", "the roof's shape can't be read (no faces above the floor that aren't walls)")
     how = "from the ground level (grade plane) to the top of the roof"
     main_roof = max(roof, key=lambda f: Polygon([p[:2] for p in f["points"]]).buffer(0).area)
-    if max(p[2] for p in main_roof["points"]) < top - TOL:   # the top is something smaller above the main roof
-        roof_top = max(p[2] for p in main_roof["points"])
-        return _decide("building_height", [("leaving out what rises above the main roof", roof_top - grade, {}),
-                                           ("to the top of what rises above the main roof", top - grade, {})],
-                       how, [building["id"]], ABOVE_ROOF)
+    roof_top = max(p[2] for p in main_roof["points"])
+    if roof_top >= top - TOL:
+        readings, question = _roof_readings(roof, top, grade)
+        return _decide("building_height", readings, how, [building["id"]], question)
+    # something smaller rises above the main roof: the roof read without it (the same way), and to its top
+    below = [f for f in roof if all(p[2] <= roof_top + TOL for p in f["points"])]
+    readings, question = _roof_readings(below, roof_top, grade)
+    readings = [(_both("leaving out what rises above the main roof", w), v, x) for w, v, x in readings]
+    readings.append(("to the top of what rises above the main roof", top - grade, {}))
+    return _decide("building_height", readings, how, [building["id"]], _both(ABOVE_ROOF, question))
+
+
+def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, str]:
+    """The readings of a roof whose highest point is `top`, and the open question they leave ("" if none). Its
+    highest section is the faces that reach the top: all level (or within a drainage slope of level), a flat
+    roof to its highest level; all sloped, a pitched roof (midway between that section's eave and the ridge, or
+    the ridge); both, a mansard (to its highest level) or a pitched or hip roof with a deck or ridge strip."""
     highest = [f for f in roof if any(abs(p[2] - top) <= TOL for p in f["points"])]
     sloped = [f for f in highest if _normal_z(f["points"]) < FLAT]
     if not sloped:
-        return _decide("building_height", [("flat roof", top - grade, {})], how + " (a flat roof, to its highest level)",
-                       [building["id"]], "")
+        return [("flat roof, to its highest level", top - grade, {})], ""
     eave = min(p[2] for f in sloped for p in f["points"])
     readings = [("pitched: midway between eave and ridge", (eave + top) / 2 - grade, {}),
                 ("pitched: to the ridge", top - grade, {})]
     if len(sloped) < len(highest):            # a level part at the top too
-        readings.insert(0, ("mansard: to its highest level", top - grade, {}))
-    return _decide("building_height", readings, how, [building["id"]],
-                   _both(ROOF_KIND, PITCHED) if len(sloped) < len(highest) else PITCHED)
+        return [("mansard: to its highest level", top - grade, {})] + readings, _both(ROOF_KIND, PITCHED)
+    return readings, PITCHED
 
 
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review

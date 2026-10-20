@@ -131,7 +131,7 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Working:** every value records how it was found, the objects, the definition, and the two points a distance was measured between; the project file's `from` carries it into the report.
 - **Why one code path:** Rhino's Python is 3.9; ours is 3.12. Rhino copies the objects into a small .3dm and our Python measures it, so CI and the live model use the same reader (`docs/decisions/2026-10-20_rhino_talks_to_python.md`).
 - **Tested by:** the architects' design drawn exactly as their spreadsheet describes gives every one of their numbers and their PASS/FAIL on 11/11 rows; their own model, measured, confirms the discrepancies in `discrepancies_with_architects.md` §4 by code; made-up lots with known answers cover tilted lots, a curved street, a jog, corner lots, two buildings, an overhang and a pitched roof; CI re-measures every committed model.
-- **Weakness:** curved walls and roofs, sloped ground and story counting aren't measured yet (reported, never approximated); roof features the height definition excludes (chimneys) are included, which can only make a height larger.
+- **Weakness:** curved walls and roofs, sloped ground and story counting aren't measured yet (reported, never approximated); a part above the main roof (a chimney, parapet or bulkhead) gives NEEDS REVIEW, with the height read both leaving it out and to its top.
 
 ## 16. What's not decided or not built
 
