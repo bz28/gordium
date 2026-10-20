@@ -3,7 +3,7 @@
 Open questions. Remove each one once answered (and record the answer where it belongs).
 
 ## About their 106 Ithaca Road example
-1. Their lot is 6,674.7 sf; the city's tax parcel is ~7,034 sf with a curved street side. Where did their lot outline come from, and is there a survey? (Zone is confirmed R-1b, no overlays, not historic, not in a flood zone.)
+1. Their lot is 6,674.5 sf as drawn (6,674 in their spreadsheet); the city's tax parcel is ~7,034 sf with a curved street side. Where did their lot outline come from, and is there a survey? (Zone is confirmed R-1b, no overlays, not historic, not in a flood zone.)
 2. Do they agree with `discrepancies_with_architects.md`? Especially the 🔴 items.
 3. Rhino model: the building sits ~76 ft off the lot, and the rear setback is 20 ft. The rule requires 25% of the average side lot line (§325-8A(14)(a)): 23.7 ft if the 90.28 and 99.37 ft lines are the side lot lines (see the side lot line question below), and at least 22.6 ft under any reading. Intended (a test) or mistakes?
 

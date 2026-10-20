@@ -23,9 +23,8 @@ from pathlib import Path
 
 import yaml
 
-from document_extraction.sections import load_rows
 from rule_format.labels import load_pieces
-from rule_format.rulebook import REPO, Context, load
+from rule_format.rulebook import REPO, Context, jurisdictions, load, read_jsonl
 
 from . import coverage, labeler
 from .budget import Budget, BudgetExceeded
@@ -35,9 +34,21 @@ LEDGER = Path.home() / ".config/gordium/section_labeling_ledger.json"   # outsid
 MIN_CACHEABLE = 512   # tokens; shorter fixed instructions silently don't cache (Haiku/Sonnet/Opus 5.5)
 
 
+def extracted_rows(j: Path, file: str) -> list[dict]:
+    """A document's extracted text: a header, then one row per line ({"page", "line", "text", ...})."""
+    return read_jsonl(j / "2_extracted_text" / f"{Path(file).stem}.jsonl")
+
+
+def run_records(j: Path) -> list[dict]:
+    """Every recorded labeling call in a jurisdiction (3_section_labels/runs/*.jsonl), oldest file first."""
+    return [call for f in sorted((j / "3_section_labels/runs").glob("*.jsonl")) for call in read_jsonl(f)]
+
+
 def documents(place: str | None = None):
     """(jurisdiction dir, document file name, sections file) for every document that has been cut into sections."""
-    for j in sorted(p for p in PLACES.glob("*/*") if p.is_dir() and (place is None or p.relative_to(PLACES).as_posix() == place)):
+    for j in jurisdictions(REPO):
+        if place is not None and j.relative_to(PLACES).as_posix() != place:
+            continue
         for path in sorted((j / "2_extracted_text").glob("*.sections.jsonl")):
             header, _ = load_pieces(path)
             yield j, header["file"], path
@@ -56,11 +67,10 @@ def cmd_coverage(args) -> int:
     failed = 0
     for j, file, path in documents(args.place):
         header, pieces = load_pieces(path)
-        rows = load_rows(j / "2_extracted_text" / f"{Path(file).stem}.jsonl")
+        rows = extracted_rows(j, file)
         labels = read_labels(j, file)
         bad = coverage.line_problems(rows, header, pieces)
-        runs = [json.loads(line) for f in sorted((j / "3_section_labels/runs").glob("*.jsonl"))
-                for line in f.read_text(encoding="utf-8").splitlines() if line.strip()]
+        runs = run_records(j)
         ctx = Context.for_jurisdiction(j)
         for problem in coverage.provenance_problems(labels, runs, pieces, rows, file, ctx):
             print(f"✗ provenance: {problem}")
@@ -91,16 +101,14 @@ def _todo(j, file, path, limit, only):
 
 def _measured_output(j: Path, model: str) -> float | None:
     """Average output tokens per call in this jurisdiction's recorded runs with this model, if any."""
-    calls = [json.loads(line) for f in (j / "3_section_labels/runs").glob("*.jsonl")
-             for line in f.read_text().splitlines() if line.strip()]
-    calls = [c for c in calls if c["model"] == model]
+    calls = [c for c in run_records(j) if c["model"] == model]
     return sum(c["usage"]["output_tokens"] for c in calls) / len(calls) if calls else None
 
 
 def estimate(j, file, todo, model, client=None) -> dict:
     """Projected tokens and dollars for labeling `todo`, one call each (retries not included).
     With a client, input counts are exact (count_tokens, which is free); without, ~4 characters per token."""
-    rows = load_rows(j / "2_extracted_text" / f"{Path(file).stem}.jsonl")
+    rows = extracted_rows(j, file)
     system = labeler.system_prompt()
     messages = [[{"role": "user", "content": labeler.piece_message(p, rows)}] for p in todo]
     if client:
@@ -211,7 +219,7 @@ def cmd_label(args) -> int:
 def _run(client, j: Path, file: str, path: Path, todo: list[dict], budget: Budget | None = None) -> None:
     ctx = Context.for_jurisdiction(j)
     header, _ = load_pieces(path)
-    rows = load_rows(j / "2_extracted_text" / f"{Path(file).stem}.jsonl")
+    rows = extracted_rows(j, file)
     runs = j / "3_section_labels/runs"
     runs.mkdir(parents=True, exist_ok=True)
     run_file = runs / f"{datetime.date.today():%Y-%m-%d}_{labeler.SETTINGS['model']}.jsonl"
@@ -256,14 +264,13 @@ def _run(client, j: Path, file: str, path: Path, todo: list[dict], budget: Budge
 
 def recorded_spend() -> float:
     """The measured cost of every call in every jurisdiction's run records."""
-    return sum(json.loads(line)["cost_usd"] for f in PLACES.glob("*/*/3_section_labels/runs/*.jsonl")
-               for line in f.read_text().splitlines() if line.strip())
+    return sum(call["cost_usd"] for j in jurisdictions(REPO) for call in run_records(j))
 
 
 def cmd_cost(args) -> int:
-    for j in sorted(p for p in PLACES.glob("*/*") if p.is_dir()):
+    for j in jurisdictions(REPO):
         for f in sorted((j / "3_section_labels/runs").glob("*.jsonl")):
-            calls = [json.loads(line) for line in f.read_text().splitlines() if line.strip()]
+            calls = read_jsonl(f)
             tokens = {k: sum(c["usage"][k] for c in calls) for k in calls[0]["usage"]} if calls else {}
             print(f"{f.relative_to(REPO)}: {len(calls)} calls, ${sum(c['cost_usd'] for c in calls):.4f}, {tokens}")
     return 0

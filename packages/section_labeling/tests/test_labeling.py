@@ -13,9 +13,8 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from document_extraction.sections import load_rows
 from rule_format.labels import load_pieces, piece_fingerprint, validate_labels
-from rule_format.rulebook import Context, load
+from rule_format.rulebook import Context, load, read_jsonl
 from section_labeling import __main__ as cli
 from section_labeling import coverage, labeler
 from section_labeling.budget import Budget, BudgetExceeded, worst_case
@@ -63,7 +62,7 @@ def private_ledger(tmp_path, monkeypatch):
 def law():
     ctx = Context.for_jurisdiction(ITHACA)
     header, pieces = load_pieces(ITHACA / "2_extracted_text/chapter_325_zoning_2026-10.sections.jsonl")
-    return ctx, header, pieces, load_rows(ITHACA / "2_extracted_text/chapter_325_zoning_2026-10.jsonl")
+    return ctx, header, pieces, read_jsonl(ITHACA / "2_extracted_text/chapter_325_zoning_2026-10.jsonl")
 
 
 def run(law, client, pid="325-16C"):
@@ -190,7 +189,7 @@ def isolated(tmp_path, monkeypatch, law, labels=None):
     for d in ("2_extracted_text", "3_section_labels"):
         (j / d).mkdir(parents=True)
     monkeypatch.setattr(cli.Context, "for_jurisdiction", classmethod(lambda cls, _: ctx))
-    monkeypatch.setattr(cli, "load_rows", lambda _: rows)
+    monkeypatch.setattr(cli, "extracted_rows", lambda *_: rows)
     monkeypatch.setattr(cli, "load_pieces", lambda _: (header, pieces))
     if labels:
         (j / "3_section_labels/chapter_325_zoning_2026-10.yaml").write_text(yaml.safe_dump({"document": LAW, "labels": labels}))
@@ -500,3 +499,28 @@ def test_the_collocation_review_scope_pieces_are_labeled_alike():
     too). Labeled alike, as reference, never not_for_checking (where nothing would ever be checked)."""
     labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
     assert {labels[f"325-29.17{x}"]["label"] for x in "ABC"} == {"reference"}
+
+
+def test_methods_doc_matches_what_this_branch_builds():
+    """docs/methods.md uses the stack's PR numbers, and says where the chart reader lives when it isn't here."""
+    import re
+
+    from rule_format.rulebook import REPO
+    doc = (REPO / "docs/methods.md").read_text()
+    assert not re.search(r"PR 7[ab]\b", doc)
+    if not (REPO / "packages/document_extraction/document_extraction/charts.py").exists():
+        section = doc[doc.index("## 4. Chart tables"):doc.index("## 5.")]
+        assert "own branch (PR 6)" in section
+
+
+def test_cited_by_reads_every_rulebook_including_drafted_ones(tmp_path, law):
+    """A piece cited only by an AI-drafted rulebook (5_zoning_rules/drafted/) still counts as cited, so its
+    label is on the review list: rulebook files have one definition (rulebook_paths)."""
+    ctx, header, pieces, rows = law
+    pid = "325-16C"
+    page, line = pieces[pid]["lines"][0][:2]          # the piece's first line
+    j = tmp_path / "j"
+    (j / "5_zoning_rules/drafted").mkdir(parents=True)
+    (j / "5_zoning_rules/drafted/X.yaml").write_text(yaml.safe_dump({"district": "X", "rules": [
+        {"id": "X.a", "sources": [{"file": LAW, "page": page, "lines": [line, line], "quote": "q"}]}]}))
+    assert coverage.cited_by(j, LAW, pieces) == {pid: ["X.a"]}

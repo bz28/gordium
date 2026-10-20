@@ -11,7 +11,7 @@ import sys
 
 from openpyxl import load_workbook
 
-from rule_format.rulebook import REPO
+from rule_format.rulebook import REPO, jurisdictions
 
 from .workbook import build, contents, output_path, tables
 
@@ -21,7 +21,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--check", action="store_true", help="compare with a fresh build; write nothing")
     args = parser.parse_args(argv)
     failed = 0
-    for j in sorted(p for p in (REPO / "regulations/jurisdictions").glob("*/*") if (p / "5_zoning_rules").is_dir()):
+    for j in [j for j in jurisdictions(REPO) if (j / "5_zoning_rules").is_dir()]:
         path = output_path(j)
         shown = path.relative_to(REPO) if path.is_relative_to(REPO) else path
         fresh = build(tables(j))
