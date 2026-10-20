@@ -43,7 +43,7 @@ Checked by us on 2026-10-19 against the official sources in `regulations/jurisdi
 | # | Issue | Severity |
 |---|---|---|
 | 4.1 | **The building is ~76 ft away from the buildable area.** All four of its corners are outside the lot. | 🔴 |
-| 4.2 | **Rear setback drawn at 20 ft, but the rule requires more.** The code takes 25% of the *average* of the two side lot lines when they differ (Chapter 325 §325-8A(14)(a), p.25). If the 90.28 and 99.37 ft lines are the side lot lines: (90.28 + 99.37) / 2 = 94.8 ft → **23.7 ft**. Under any reading of this 5-sided lot it's at least 22.6 ft, so 20 ft fails either way. (Which lines count as "side lot lines" is an open question.) | 🔴 |
+| 4.2 | **Rear setback drawn at 20 ft, but the rule requires more.** The code takes 25% of the *average* of the two side lot lines when they differ (Chapter 325 §325-8A(14)(a), p.25). If the 90.28 and 99.37 ft lines are the side lot lines: (90.28 + 99.37) / 2 = 94.8 ft → **23.7 ft**. Most readings of this 5-sided lot need more than 20 ft: 23.7 ft as above, or 25.015 ft if the jog is added to the 99.37 ft line it continues ((90.28 + 109.84) / 2 = 100.06 ft). Only averaging all three lines that aren't front or rear ((90.28 + 10.47 + 99.37) / 3 = 66.7 ft) gives the 20 ft minimum. So 20 ft fails under most readings, not all. (Which lines count as "side lot lines" is an open question.) | 🔴 |
 | 4.3 | **The building fills the whole buildable area** (2,169 sf ≈ 32.5% of the lot), over the 25% coverage limit. | 🔴 |
 | 4.4 | The building is ~53 × 41 ft. The spreadsheet's house is 53 × 35 ft. | 🟡 |
 | 4.5 | The buildable-area outline is on the "Site" layer, not "Setback". | ⚪ |

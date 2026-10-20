@@ -48,3 +48,17 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
                        re.IGNORECASE)
     found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in stale.finditer(p.read_text())]
     assert not found, found
+
+
+def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
+    """Item 4.2 (the 106 Ithaca Rd rear setback) must state the readings as the R-1b formula gives them:
+    one reading of the lot's side lines allows the drawn 20 ft, so it may not say 20 ft fails 'under any reading'."""
+    def required(depth):
+        return max(min(0.25 * depth, 50), 20)
+    readings = {"23.7": (90.28 + 99.37) / 2,              # the two long side lines
+                "25.015": (90.28 + (99.37 + 10.47)) / 2,  # the jog added to the line it continues
+                "20": (90.28 + 10.47 + 99.37) / 3}        # every line that isn't front or rear
+    assert [round(required(d), 3) for d in readings.values()] == [23.706, 25.015, 20]
+    item = next(line for line in (REPO / "docs/discrepancies_with_architects.md").read_text().splitlines()
+                if line.startswith("| 4.2 "))
+    assert "any reading" not in item and all(f"{k} ft" in item for k in readings)
