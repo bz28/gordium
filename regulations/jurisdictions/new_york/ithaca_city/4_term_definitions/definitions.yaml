@@ -128,7 +128,7 @@ lot:
       lines: [34, 36]
       quote: "LOT — A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building or a group of buildings that are united by a common interest or use and the customary accessories and open spaces belonging to the same."
   open_questions:
-    - "\"Lot area\" itself isn't defined. Is it the area inside the lot lines from a survey? What should be used when there's no survey (the tax parcel map can differ: 106 Ithaca Rd is ~7,034 sf on the tax map vs 6,674.7 sf in the architects' model)?"
+    - "\"Lot area\" itself isn't defined. Is it the area inside the lot lines from a survey? What should be used when there's no survey (the tax parcel map can differ: 106 Ithaca Rd is ~7,034 sf on the tax map vs 6,674.5 sf in the architects' model)?"
   drafted_by: claude
   status: draft
 

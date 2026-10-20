@@ -10,32 +10,40 @@ python -m rule_export --check    # CI: fails if the committed workbook differs f
 ```
 
 For Ithaca: `regulations/jurisdictions/new_york/ithaca_city/ithaca_city_rules.xlsx`. The file is rewritten
-only when its content changes. `--check` compares what the workbook says (sheets, cell values, links),
-not its bytes, because Excel files carry timestamps.
+only when its content or look changes. `--check` compares what the workbook says and how it looks (sheets;
+each cell's value, link, font, fill, left border and alignment; column widths; frozen panes), not its bytes,
+because Excel files carry timestamps.
 
 ## The tabs
 
-Styled like the architects' own spreadsheet: Arial, a bold title in row 1, headers in row 2 (frozen),
-wrapped text.
+Styled like the architects' own spreadsheet: Arial in their ink color (dark slate), a bold 16-pt title in
+row 1, bold 12-pt headers in row 2 (frozen), 11-pt wrapped text.
+
+**Citations.** Every quote has a **Citation** a reader can follow: the document's title (from
+`sources.yaml`), the section it is in (for a document cut into sections), the page and the lines, e.g.
+"City of Ithaca Code, Chapter 325 Zoning (full text), §325-8A, p.24, lines 15–16" or "City of Ithaca Zoning
+Charts (April 2026), p.3, line 31". The city's exact words are in their own column, and **Link** ("Open p.N")
+opens that page.
 
 | Tab | One row per | Columns |
 |---|---|---|
-| **Rules** | source of a rule, in every rulebook in `5_zoning_rules/` (hand or AI drafted, any subfolder) | Zone · Rulebook · Rule id · Title · Status · Drafted by · Kind · Topic · Check (formula) · Applies when · Needs review when · Worked examples · Source (1 of 3) · Document · Page · Lines · City's exact words · Link · Open questions · Answers · Notes |
-| **Definitions** | source of a definition | Id · Term · Status · Drafted by · Measures · Source · Document · Page · Lines · City's exact words · Link · Open questions · Answers · Notes |
-| **Uses** | source of a use name (the only values a rule's `use` may take) | Id · Name · Status · Drafted by · Source · Document · Page · Lines · City's exact words · Link · Notes |
-| **Questions** | open question anywhere (rules, definitions, uses, section labels) | About · In (which file) · Id · Question · Document · Page · Link |
-| **Coverage** | piece of each cut law (all 626 of Chapter 325), in order | Document · Piece · Title · Pages · Label · Topic · Reason · Quote(s) · Link · Status · Drafted by · Changed after the AI · Open questions · Answers · Notes |
-| **Sources** | source document | File · Title · Publisher · Official URL · Downloaded · Pages · Fingerprint · Quotable · Why not quotable |
+| **Rules** | source of a rule, in every rulebook in `5_zoning_rules/` (hand or AI drafted, any subfolder) | Zone · Rulebook · Rule id · Title · Status · Drafted by · Kind · Topic · Check (formula) · Applies when · Needs review when · Worked examples · Source (1 of 3) · Citation · Page · City's exact words · Link · Open questions · Answers · Notes |
+| **Definitions** | source of a definition | Id · Term · Status · Drafted by · Measures · Source · Citation · Page · City's exact words · Link · Open questions · Answers · Notes |
+| **Uses** | source of a use name (the only values a rule's `use` may take) | Id · Name · Status · Drafted by · Source · Citation · Page · City's exact words · Link · Notes |
+| **Questions** | open question anywhere (rules, definitions, uses, section labels) | About · In (the file the question is written in) · Id · Question · Citation · Page · Link |
+| **Coverage** | piece of each cut law (all 626 of Chapter 325), in order | Document · Piece · Title · Pages · Label · Topic · Reason · Quote(s), each with its page and lines · Link (the first quote's page) · Status · Drafted by · Changed after the AI · Open questions · Answers · Notes |
+| **Sources** | source document, then each one not yet downloaded | File · Title · Publisher · Official URL · Downloaded · Adopted · Created · Pages · Fingerprint · Quotable (yes / no / not downloaded) · Why not quotable / not downloaded · Contents · Notes |
 
 **One row per source.** A rule quoting three passages has three rows, so each quote sits next to its own page
-and link. What identifies the rule (zone, rulebook, rule id, title, status, drafted by) repeats on every row,
-so sorting and filtering keep a rule together and two rulebooks with the same rule id stay apart; the long
+and link. What identifies the rule and what readers filter on (zone, rulebook, rule id, title, status, drafted by,
+kind, topic) repeats on every row, so sorting and filtering keep a rule together and two rulebooks with the same rule id stay apart; the long
 fields (check, conditions, examples, questions, answers, notes) are on the rule's first row only.
 
-**Every field is accounted for.** `workbook.SHOWN` lists the fields each tab shows and `workbook.HIDDEN` the ones
-left out on purpose, with the reason (the approval fields, while approval is deferred; fingerprints and run-record
-paths, which are for code). A test holds both to the formats' own field lists, so a new field can't silently go
-missing.
+**Every field is accounted for.** Each tab's columns are declared once in `workbook.COLUMNS`: header, width,
+the field it shows, and how to fill it. `workbook.HIDDEN` lists the fields left out on purpose, with the reason
+(the approval fields, while approval is deferred; fingerprints, run-record paths and the document `layout`, which
+are for code). Tests hold the shown and hidden fields to the formats' own field lists, and fill each field to
+check its column really shows it, so a new or dropped field can't silently go missing.
 
 **Status and Drafted by.** Every rule is a draft: human approval is deferred (see `CLAUDE.md`). "Drafted by"
 says where it came from: `claude` for rules drafted in conversation (the hand-written R-1b), a script name

@@ -24,7 +24,7 @@ from pathlib import Path
 
 from document_extraction.sections import piece_keys
 from rule_format.labels import LABEL_KINDS
-from rule_format.rulebook import load
+from rule_format.rulebook import load, rulebook_paths
 
 
 def line_problems(rows: list[dict], header: dict, pieces: dict[str, dict]) -> list[str]:
@@ -66,11 +66,11 @@ def report(rows: list[dict], header: dict, pieces: dict[str, dict], labels: dict
 
 
 def cited_by(j: Path, file: str, pieces: dict[str, dict]) -> dict[str, list[str]]:
-    """{piece id: [rule or definition ids citing it]}, from every source in the rulebook (5_zoning_rules)
+    """{piece id: [rule or definition ids citing it]}, from every source in every rulebook (5_zoning_rules)
     and the definitions and uses (4_term_definitions) that quotes this document."""
     owner = {k: pid for pid, p in pieces.items() for k in piece_keys(p)}
     citing: list[tuple[str, dict]] = []
-    for path in sorted((j / "5_zoning_rules").glob("*.yaml")):
+    for path in rulebook_paths(j / "5_zoning_rules"):     # every rulebook, hand-drafted or in drafted/
         citing += [(r.get("id", "?"), s) for r in (load(path) or {}).get("rules", []) for s in r.get("sources", [])]
     for path in sorted((j / "4_term_definitions").glob("*.yaml")):
         citing += [(f"{path.stem}.{key}", s) for key, e in (load(path) or {}).items() for s in e.get("sources", [])]

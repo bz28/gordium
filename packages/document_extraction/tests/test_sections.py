@@ -8,6 +8,7 @@ import pytest
 
 from document_extraction import sections
 from document_extraction.sections import piece_keys, piece_text, split
+from rule_format.rulebook import read_jsonl
 
 REPO = Path(__file__).resolve().parents[3]
 TEXT = REPO / "regulations/jurisdictions/new_york/ithaca_city/2_extracted_text"
@@ -16,7 +17,7 @@ LAW = TEXT / "chapter_325_zoning_2026-10.jsonl"
 
 @pytest.fixture(scope="module")
 def law():
-    rows = sections.load_rows(LAW)
+    rows = read_jsonl(LAW)
     return rows, split(rows)
 
 
