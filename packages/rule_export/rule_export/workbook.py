@@ -359,12 +359,23 @@ def build(data: dict[str, dict]) -> Workbook:
     return wb
 
 
+def _look(c) -> tuple:
+    """How a cell looks: font, fill, left border and alignment (what makes a sheet read like the architects')."""
+    f, color = c.font, lambda x: x.rgb if x is not None and x.type == "rgb" else None
+    return (f.name, f.sz, bool(f.b), bool(f.i), f.u, color(f.color),
+            color(c.fill.fgColor) if c.fill.fill_type else None, c.border.left.style,
+            c.alignment.wrap_text, c.alignment.vertical)
+
+
 def contents(wb) -> list:
-    """What a workbook says (sheet names, cell values, links), for comparing a fresh build with a saved file.
-    Content, not bytes: Excel files carry a save timestamp."""
+    """What a workbook says and how it looks (sheet names; each cell's value, link and look; column widths;
+    frozen panes), for comparing a fresh build with a saved file. Content, not bytes: Excel files carry a save
+    timestamp."""
     value = lambda v: None if v == "" else v                  # a saved empty cell reads back as None
-    return [(ws.title, [[(value(c.value), c.hyperlink.target if c.hyperlink else None) for c in row]
-                        for row in ws.iter_rows()]) for ws in wb.worksheets]
+    return [(ws.title, ws.freeze_panes,
+             {k: d.width for k, d in sorted(ws.column_dimensions.items()) if d.customWidth},
+             [[(value(c.value), c.hyperlink.target if c.hyperlink else None, _look(c)) for c in row]
+              for row in ws.iter_rows()]) for ws in wb.worksheets]
 
 
 def output_path(j: Path) -> Path:

@@ -219,3 +219,19 @@ def test_text_is_in_the_architects_ink_color(data):
     ws = build(data)["Rules"]
     assert ws["A1"].font.color.rgb.endswith(wbk.INK) and ws["A2"].font.color.rgb.endswith(wbk.INK)
     assert ws["A3"].font.color.rgb.endswith(wbk.INK) and ws["A3"].font.name == "Arial"
+
+
+
+def test_check_also_catches_a_change_in_how_the_workbook_looks(tmp_path, data):
+    """A saved workbook with the right words but old formatting is stale too (the look is part of the format)."""
+    wb = build(data)
+    path = tmp_path / "w.xlsx"
+    wb.save(path)
+    assert contents(load_workbook(path)) == contents(build(data))       # a saved copy reads back the same
+    wb["Rules"]["A3"].font = wbk.Font(name="Calibri", size=11)
+    wb.save(path)
+    assert contents(load_workbook(path)) != contents(build(data))
+    wb = build(data)
+    wb["Rules"].column_dimensions["A"].width = 99
+    wb.save(path)
+    assert contents(load_workbook(path)) != contents(build(data))
