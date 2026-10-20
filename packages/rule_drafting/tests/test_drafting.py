@@ -201,7 +201,10 @@ def test_permitted_use_rules_follow_the_chart_marks(inputs):
     r1b = result["rules"]["R-1b"][0]
     hand = next(r for r in cli.load(cli.PLACE / "5_zoning_rules/R-1b.yaml")["rules"] if r["id"] == "R-1b.use")
     assert r1b["check"] == hand["check"]                                       # same allowed uses as the hand draft
-    assert {g["rule"] for g in result["unresolved"]} == {"R-3a.use", "R-3b.use"}  # nothing there fails: for a person
+    no_rule = {cli.district_name(c) for c in inputs.columns} - set(result["rules"])
+    assert no_rule == {"R-3a", "R-3b"}                                          # nothing there fails: for a person
+    assert all(any(g["rule"] == f"{d}.use" and "no failing example" in g["why"] for g in result["unresolved"])
+               for d in no_rule)
 
 
 def test_footnotes_and_section_references_are_read_from_the_page(inputs):
@@ -678,3 +681,19 @@ def test_a_chart_unit_answered_with_only_a_reason_still_lists_every_cell(inputs)
     result, _ = run(inputs, FakeClient({"templates": [], "no_rule_reason": "Nothing here sets a requirement."}))
     assert result["reason"] and not result["rules"]
     assert len(result["unresolved"]) == len(_stating_cells(inputs, 3, YARDS)) > 0
+
+
+def test_the_use_rule_quotes_and_lists_the_notes_on_its_rows_and_column_heading(inputs):
+    """Note 4 is on every dwelling row ("See §325-3 for occupancy restrictions") and notes 1, 2 on the R-1/R-2
+    headings (occupancy counting, the South Hill Overlay). No measure checks them, so each is quoted in the rule
+    and listed for a person, never dropped."""
+    result = cli.draft_uses(inputs)
+    r1b = result["rules"]["R-1b"][0]
+    quoted = {s["quote"][:4] for s in r1b["sources"] if "quote" in s}
+    assert {"(1) ", "(2) ", "(4) "} <= quoted
+    why = [g["why"] for g in result["unresolved"] if g["rule"] == "R-1b.use"]
+    assert any("footnote 4" in w and "One-family dwelling, detached" in w for w in why)
+    assert any("footnote 1" in w and "R-1B column heading" in w for w in why)
+    assert any("footnote 2" in w and "South Hill Overlay" in w for w in why)
+    r3a = [g["why"] for g in result["unresolved"] if g["rule"] == "R-3a.use"]
+    assert not any("column heading" in w for w in r3a)     # R-3's page-2 heading carries no note

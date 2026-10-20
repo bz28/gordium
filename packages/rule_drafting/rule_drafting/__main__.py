@@ -338,7 +338,10 @@ def draft_uses(i: Inputs) -> dict:
     rows = i.rows_of(2, USES_SECTION)
     result = {"rules": {}, "unresolved": [], "problems": [], "proposed": {}}
     for column in i.columns:
-        rule, problems = use_rule(column, rows, i.uses, i.notes.get(2, {}), "rule_drafting/chart_code")
+        heading = {n for t in i.tables if t["page"] == 2 for c in t["columns"] if c["name"] == column
+                   for h in c["headers"] for n in chart_values.footnotes(h)}
+        rule, problems, notes_for_a_person = use_rule(column, rows, i.uses, i.notes.get(2, {}),
+                                                      "rule_drafting/chart_code", heading)
         if rule is not None and (bad := validate({"district": rule["id"].split(".")[0], "rules": [rule]}, i.ctx)):
             problems, rule = problems + bad, None
         if rule is None:
@@ -346,6 +349,7 @@ def draft_uses(i: Inputs) -> dict:
         else:
             result["rules"][rule["id"].split(".")[0]] = [rule]
             result["problems"] += problems
+            result["unresolved"] += notes_for_a_person
     return result
 
 
