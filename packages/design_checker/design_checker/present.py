@@ -432,7 +432,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     status, reason = _status(row), _reason(row)
     splits = [c for c in compares if c.left.id in ("side_yard_smaller", "side_yard_larger")] if measure in (
         "side_yard_smaller", "side_yard_larger") else []
-    parts = [(c, _side_name(c.left.id, measured)) for c in splits] if len(splits) == 2 else [(primary, name)]
+    # two side yards: always in the same order (by name), so equal yards never swap with the model's units
+    parts = sorted(((c, _side_name(c.left.id, measured)) for c in splits), key=lambda p: p[1]) \
+        if len(splits) == 2 else [(primary, name)]
     district = facts.get("zone") or ""
     sources = rule.get("sources") or []
     quotes = [q for q in (_quote(s, j, documents, district, cite) for s in sources) if q is not None]

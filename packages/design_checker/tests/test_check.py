@@ -627,3 +627,21 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
     assert "sources = fact_sources(doc)" in drawn and "sources.update(" in drawn  # the ground marking is kept
     assert "from_sample=True" in rhino.split("def gordium_start(", 1)[1]
+
+
+def test_units_are_converted_in_one_place_both_ways():
+    """Gordium works in feet; the Rhino side converts at five helpers and nowhere else (a mm template showed why the
+    edge must be one place: there the start had to be checked line by line)."""
+    import re
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_facts_in_feet")
+    outside = []
+    for chunk in re.split(r"\n(?=def )", rhino):
+        name = re.match(r"def (\w+)", chunk)
+        if name and name.group(1) in helpers:
+            continue
+        for line in chunk.splitlines():
+            if re.search(r"_scale\(doc\)(?!\))|\* k\b|\* scale\b|/ scale\b|\* k\)", line) and "logic.to_feet" not in line:
+                outside.append(line.strip())
+    assert outside == [], outside
+    assert "def frame_site(" in rhino and "frame_site(doc, facts)" in rhino.split("def gordium_start(", 1)[1]
