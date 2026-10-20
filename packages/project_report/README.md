@@ -4,7 +4,8 @@ Fills in a project's compliance report in the architects' own spreadsheet format
 (`test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx`): the same two tabs,
 **Inputs** and **Output**, the same headers in the same order, and the same look: Arial in their ink color,
 their column widths, yellow for typed-in values, FAIL in red. Our columns come after theirs, set apart by
-their grey on the headers and a line down the left edge; a color key sits to the right of Inputs. Plain code,
+a light blue on the headers (a color their key doesn't
+use: there yellow means typed in and grey means worked out by formula) and a line down the left edge; a color key sits to the right of Inputs. Plain code,
 no AI.
 
 ```

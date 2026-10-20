@@ -345,3 +345,16 @@ def test_the_report_looks_like_the_architects_sheet(t):
     assert out.cell(row=2, column=first_ours).fill.fgColor.rgb == report.OURS_FILL
     assert out.cell(row=2, column=first_ours - 1).fill.fill_type is None             # theirs stay plain
     assert out.cell(row=3, column=first_ours).border.left.style == "medium"
+    # our key never gives one of their key's colors a different meaning (their Inputs E3:F4: yellow, grey)
+    their_key = {theirs["Inputs"].cell(row=r, column=5).fill.fgColor.rgb: theirs["Inputs"].cell(row=r, column=6).value
+                 for r in (3, 4)}
+    assert their_key == {"FFFFF1BF": "hard-code", "FFEDF0F2": "formula"}
+    ins = wb["Inputs"]
+    ours_key = {ins.cell(row=r, column=c).fill.fgColor.rgb: ins.cell(row=r, column=c + 1).value
+                for r in range(3, 6) for c in range(1, 12) if ins.cell(row=r, column=c).fill.fill_type
+                and ins.cell(row=r, column=c + 1).value and ins.cell(row=r, column=c).value is None}
+    assert ours_key and report.OURS_FILL in ours_key
+    for color, meaning in ours_key.items():
+        assert color not in their_key or their_key[color] == "hard-code" and "typed" in meaning, (color, meaning)
+    # the table parameters keep the inputs' widths; only their Link column (E) gets its own
+    assert [ins.column_dimensions[c].width for c in "ABCDE"] == [*report.INPUT_WIDTHS, 10]

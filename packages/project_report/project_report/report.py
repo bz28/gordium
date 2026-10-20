@@ -46,9 +46,11 @@ RESULT = {"pass": "PASS", "fail": "FAIL", "needs_review": "NEEDS REVIEW", "not_a
 COMPARISON = {"pass": "Within table limit", "fail": "Outside table limit", "needs_review": "Needs review",
               "not_applicable": "Not applicable"}
 INPUT_FILL = "FFFFF1BF"                # the architects' yellow for values typed in
-OURS_FILL = "FFEDF0F2"                 # their grey, on the headers of the columns we add after theirs
+OURS_FILL = "FFDDEBF7"                 # light blue on the headers of the columns we add; not a color in their
+                                       # key (there yellow = typed in, grey = worked out by formula)
 RESULT_INK = {"FAIL": "FF0000", "NEEDS REVIEW": "9A6400"}   # their FAIL is red; review is amber
-# Column widths: theirs as in their file (Inputs A-C, Output A-G), then ours.
+# Column widths: theirs where their file sets one (Inputs A-C; Output A, B, D-G; their Output C has none, so
+# Excel's default, and ours is 14 to fit a list of measurements), then ours.
 INPUT_WIDTHS = [43, 17, 46.375, 40]
 OUTPUT_WIDTHS = [34, 20, 14, 12, 25, 14, 12.625] + [28, 40, 40, 40, 60, 10, 30]
 
@@ -306,7 +308,7 @@ def tables(project_path: Path) -> dict:
 
 
 def _mark_ours(ws, top: int, bottom: int, first: int, last: int) -> None:
-    """Set our added columns (first..last) apart from the architects': their grey on our headers, and a line
+    """Set our added columns (first..last) apart from the architects': light blue on our headers, and a line
     down the left edge of the first one."""
     edge = Border(left=Side(style="medium", color=INK))
     for c in range(first, last + 1):
@@ -330,7 +332,8 @@ def _note(ws, cell: str, text: str, size=10, bold=False) -> None:
 def build(t: dict) -> Workbook:
     """The architects' two tabs, laid out like theirs: title in A1, bold headers on row 2, their columns in
     their order, widths, font and colors (yellow for typed-in values, red for FAIL). Our columns come after
-    theirs, set apart by their grey on the headers and a line down the left edge."""
+    theirs, set apart by a light blue on the headers (a color their key doesn't use) and a line down the left
+    edge."""
     wb = Workbook()
     wb.remove(wb.active)
     wb.properties.creator = "Gordium (generated: python -m project_report)"
@@ -339,8 +342,8 @@ def build(t: dict) -> Workbook:
     end = write_block(ws, 2, list(zip(INPUT_HEADERS + INPUT_EXTRA, INPUT_WIDTHS)), t["inputs"],
                       fills={"Value": [INPUT_FILL] * len(t["inputs"])})
     _mark_ours(ws, 2, end, len(INPUT_HEADERS) + 1, len(INPUT_HEADERS + INPUT_EXTRA))
-    params_end = write_block(ws, end + 2, [(h, None) if i < len(INPUT_WIDTHS) else (h, 30 if h == "Rule" else 10)
-                                           for i, h in enumerate(PARAMETER_HEADERS + PARAMETER_EXTRA)],
+    # Under the inputs, so it keeps their widths (None); only Link, its own fifth column, gets one.
+    params_end = write_block(ws, end + 2, [(h, 10 if h == "Link" else None) for h in PARAMETER_HEADERS + PARAMETER_EXTRA],
                              t["parameters"], links={"Link": t["parameter_links"]})
     _mark_ours(ws, end + 2, params_end, len(PARAMETER_HEADERS) + 1, len(PARAMETER_HEADERS + PARAMETER_EXTRA))
     key = len(PARAMETER_HEADERS + PARAMETER_EXTRA) + 2          # a key to the colors, like theirs, to the right
