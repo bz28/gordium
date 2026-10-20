@@ -56,9 +56,9 @@ The city's documents go in on the left. A traceable rulebook, checked by code, c
 | 3 | Text extracted from the PDFs (`document_extraction`) | The inspector needs it to verify quotes |
 | 4 | Definitions and use names, this document | Rules depend on these words |
 | 5 | R-1b rules drafted by Claude in conversation, matched against the architects' spreadsheet (11/11) | A second, independent reading; an answer key once architects approve it (deferred for now) |
-| 6 | The chart reader: every chart cell tied to its zone (side branch; PR 8, also a side branch, builds on it; both join when merged) | Numbers come from cells, never typed |
+| 6 | The chart reader: every chart cell tied to its zone (on PR 5, beside PR 7; PR 8 brings it into the main line) | Numbers come from cells, never typed |
 | 7 | The law cut into pieces, each labeled by AI and checked by code; the coverage report (`section_labeling`) | Proves nothing in the law was skipped |
-| 8 | Rule drafting for every zone (`rule_drafting`, side branch built on 6 and 7) | Scales PR 5 to every zone |
+| 8 | Rule drafting for every zone (`rule_drafting`, built on 7, with 6 merged in; 9 builds on it) | Scales PR 5 to every zone |
 | 9 | The rules spreadsheet (`rule_export`) | How people read and check the rules |
 | 10 | The project report in the architects' format (`project_report`) | A design's answer, in the form architects already use |
 | 11 | The questions page for the architects | What only they can decide |

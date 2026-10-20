@@ -63,19 +63,25 @@ def numbered_lines(rows: list[dict], piece: dict) -> list[tuple[int, int, str]]:
     return [(page, line, text[page, line]) for page, line in piece_keys(piece)]
 
 
-def piece_message(piece: dict, rows: list[dict]) -> str:
-    pages = sorted({p for p, _, _ in piece["lines"]})
-    where = f"page {pages[0]}" if len(pages) == 1 else f"pages {pages[0]}-{pages[-1]}"
+def numbered(lines: list[tuple[int, int, str]]) -> str:
+    """Lines as the AI sees them: L1, L2, ..., with a '--- page N ---' line at each page break. The one
+    numbering, used by labeling and drafting, so a line is called the same in both steps."""
     out, page = [], None
-    for i, (p, _, t) in enumerate(numbered_lines(rows, piece), 1):
+    for i, (p, _, t) in enumerate(lines, 1):
         if page is not None and p != page:
             out.append(f"--- page {p} ---")
         page = p
         out.append(f"L{i}: {t}")
+    return "\n".join(out)
+
+
+def piece_message(piece: dict, rows: list[dict]) -> str:
+    pages = sorted({p for p, _, _ in piece["lines"]})
+    where = f"page {pages[0]}" if len(pages) == 1 else f"pages {pages[0]}-{pages[-1]}"
     return (f"Piece {piece['id']}: {piece['title']} ({where}). Each line is numbered L1, L2, ...; the numbers are "
             f"not part of the city's text. Cite requirements by these line numbers. A '--- page N ---' line marks "
             f"a page break: cite a requirement that runs across one as one part per page.\n\n"
-            + "\n".join(out))
+            + numbered(numbered_lines(rows, piece)))
 
 
 def sha(text: str) -> str:
