@@ -380,7 +380,7 @@ def _start_preview(out: dict, measured: dict) -> dict | None:
 TAX_MAP_NOTE = ("Starting house keeps 2'-0\" back from each limit because the lot is from the tax map; use a survey "
                 "for the full area.")
 NOT_PROVEN = ("Starting house: Gordium couldn't keep it clear of the tax map's 2'-0\" tolerance on this lot; the items "
-              "that say so need review until a survey")
+              "that say so need review until a survey.")
 
 
 def margin_note(keep, buffer, tax, proven):

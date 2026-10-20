@@ -729,10 +729,18 @@ def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
     assert logic.starting_house_fact(None, "2026-10-20") is None
     line = present.source_lines({"starting_house": fact})[0]
     assert "confirmed by you" not in line and "not confirmed" in line
+    # round 8: said once, as the house first drawn; the not-proven note too
+    from design_checker.check import NOT_PROVEN, TAX_MAP_NOTE
+    lines = [present.source_lines({"starting_house": logic.starting_house_fact(n, "2026-10-20")})[0]
+             for n in (TAX_MAP_NOTE, NOT_PROVEN)]
+    assert lines[0].startswith("Starting house: as first drawn, it keeps 2'-0\" back from each limit")
+    assert lines[1].startswith("Starting house: as first drawn, Gordium couldn't keep it clear")
+    assert not any(ln.count("Starting house") > 1 for ln in lines) and NOT_PROVEN.endswith(".")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
     body = rhino[rhino.index("def gordium_start"):]
-    assert body.index('_set_source(doc, "starting_house", None, None)') < body.index("add_floors(doc, start)") \
-        < body.index("logic.starting_house_fact(")
+    # round 8: cleared before any way out (a start that draws nothing keeps no earlier start's margin)
+    assert body.index('_set_source(doc, "starting_house", None, None)') < body.index('if not start.get("floors")') \
+        < body.index("add_floors(doc, start)") < body.index("logic.starting_house_fact(")
 
 
 def test_a_design_buffer_is_read_or_draw_stays_off():

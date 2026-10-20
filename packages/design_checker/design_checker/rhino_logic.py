@@ -345,7 +345,11 @@ def starting_house_fact(note, today):
     "confirmed by you" (the architect didn't confirm it). None when no house was drawn (`note` None)."""
     if not note:
         return None
-    return {"value": note, "source": SUGGESTED, "confirmed_by": None, "date": today}
+    # the panel puts "Starting house: " in front, and it describes the house as Gordium drew it (the architect
+    # may since have moved or replaced it), so it says so
+    said = note[len("Starting house: "):] if note.startswith("Starting house: ") else \
+        "it " + note[len("Starting house "):] if note.startswith("Starting house ") else note
+    return {"value": "as first drawn, " + said, "source": SUGGESTED, "confirmed_by": None, "date": today}
 
 
 def uncertain(state):

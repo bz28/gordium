@@ -1570,6 +1570,7 @@ def gordium_start():
         Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
         return None
     save_facts(doc, facts)
+    _set_source(doc, "starting_house", None, None)           # an earlier start's margin is gone with its house
     saved_ui = _ui_state(doc)
     # always the envelope and the 3-floor starting house (hide it from the panel); floor to floor 11'-8" unless
     # GordiumFacts set another
@@ -1589,7 +1590,6 @@ def gordium_start():
                                  "(run GordiumStart again in " + _doc_name(doc) + ")")
         return None
     Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
-    _set_source(doc, "starting_house", None, None)           # an earlier start's margin is gone with its house
     if add_floors(doc, start) is None:
         Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; draw one and Gordium will check it")
         live(True)
