@@ -35,7 +35,9 @@ python -m site_lookup "106 Ithaca Rd, Ithaca, NY 14850" --json   # the full resu
 **Incomplete evidence is never "suggested".** A second address match that couldn't be placed on a parcel,
 elevations missing at some corners, road widths unknown (a second street could be missed: the corner lot is
 asked), the City's parcel flags unavailable: each makes its fact need review, with the reason. When two things
-apply, the strongest status wins (ask > needs review > suggested) and the reasons add up.
+apply, the strongest status wins (ask > needs review > suggested) and the reasons add up. A lot that may be
+the wrong one (a doubtful address point), or the largest piece of a parcel in several pieces, makes every fact
+worked out on it need review too: street side, corner lot, ground, zone and overlays.
 
 ## Each fact's shape
 

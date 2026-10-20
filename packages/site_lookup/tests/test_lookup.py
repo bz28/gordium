@@ -493,14 +493,20 @@ def _numbers_only(v) -> bool:
     return num(v) or (isinstance(v, list) and all(num(n) for n in v))
 
 
+ON_THE_LOT = ("street_side", "corner_lot", "ground", "zone", "overlays")    # worked out on the lot's outline
+
+
 def check_snapshot(r: dict) -> None:
     """Every kept fact obeys the strictest store policy of every source it was worked out from: none keeps no
     value and no reason; derived keeps numbers Gordium computed only (no outline, position or words); answer
-    bodies are never kept."""
+    bodies are never kept. Not trusted from each fact's own source_keys: a fact worked out on the lot's outline
+    counts the lot's own source (the parcel layer that gave the outline) here, whatever it lists."""
     s = r["snapshot"]
+    lot_layers = s["details"]["lot"]["source_keys"] if "lot" in s["details"] else []
     for k, v in s["facts"].items():
         d = s["details"][k]
-        store = lookup_module.strictest(d["source_keys"])
+        keys = list(d["source_keys"]) + (lot_layers if k in ON_THE_LOT else [])
+        store = lookup_module.strictest(keys)
         if store == "derived" and isinstance(v["value"], dict):
             assert all(_numbers_only(n) for n in v["value"].values()), k
             assert not {"outline_ft", "origin_epsg2261_us_survey_ft"} & set(v["value"]), k
@@ -613,3 +619,37 @@ def test_the_docs_describe_what_the_code_does():
     readme = (Path(__file__).parents[1] / "README.md").read_text()
     assert "matched by street name" not in methods and "padded box" in methods
     assert "50 ft assumed, noted" not in readme and "source_keys" in readme and "map_shows_since" in readme
+
+
+# ---- review round 3 ---------------------------------------------------------------------------------------
+
+def test_a_lookup_that_stops_half_way_keeps_nothing_from_the_city_outline():
+    """The reviewer's reproduction: the State parcels down (the lot comes from the City's layer, store:
+    derived) and a malformed zoning answer stops the lookup after the ground. The ground's points are offsets
+    of the City outline's corners: they count the City's source from the moment they exist, so they're not kept."""
+    fx = load("106_ithaca_rd")
+    fake = Failing(fx, ["state_parcels"], zones=[{"geometry": {"rings": [[[0, 0], [1, 0], [1, 1], [0, 0]]]}}])
+    r = lookup(fx["address"], fake, NOW)
+    assert r["status"] == "error"
+    assert "city_parcels" in r["snapshot"]["details"]["ground"]["source_keys"]
+    assert "points" not in r["snapshot"]["facts"]["ground"]["value"]
+    check_snapshot(r)
+
+
+@pytest.mark.parametrize("doubt", ["along the street", "several pieces"])
+def test_every_fact_on_a_doubtful_lot_is_doubtful(doubt):
+    """A lot that may be the wrong one (an address found only along the street), or a parcel in several pieces
+    (measured on its largest): the street side, corner lot, ground, zone and overlays were all worked out on it,
+    so none of them is 'suggested'."""
+    fx = load("106_ithaca_rd")
+    for a in fx["answers"]:
+        if doubt == "along the street" and a["source"] == "geocoder":
+            for c in a["body"]["candidates"]:
+                c["attributes"]["Addr_type"] = "StreetAddress"
+        if doubt == "several pieces" and a["source"] == "state_parcels":
+            for feat in a["body"].get("features", []):
+                feat["geometry"]["rings"].append([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]])
+    f = both(lookup(fx["address"], Fake(fx), NOW))
+    words = "may be the wrong one" if doubt == "along the street" else "largest piece"
+    for name in ON_THE_LOT:
+        assert f[name]["status"] != "suggested" and words in f[name]["reason"], name

@@ -45,14 +45,21 @@ RANK = {"suggested": 0, "needs_review": 1, "ask": 2}    # the strongest status w
 
 
 def fact(value, source: str, url: str, date: str, status: str = "suggested", reason: str = "", note: str = "",
-         label: str = SUGGESTED, key: str = "") -> dict:
+         label: str = SUGGESTED, key: str | tuple = "", lot: dict | None = None) -> dict:
     """A fact with its details while the lookup runs; lookup() splits the details off at the end. key is the
-    endpoints.yaml source the value came from (more are added with uses()): the strictest one decides what a
-    project's snapshot may keep."""
+    endpoints.yaml source (or sources) the value came from: the strictest one decides what a project's snapshot
+    may keep. lot is given for every fact worked out on the lot's outline: from the moment it exists, the fact
+    counts the outline's source and carries every doubt about the lot (so even a lookup that stops half way
+    keeps no more than the outline's source allows)."""
+    keys = [key] if isinstance(key, str) else list(key)
     out = {"value": value, "source": label, "confirmed_by": None, "date": date, "status": "suggested",
-           "source_detail": source, "source_url": url, "source_keys": [key] if key else [], "_reasons": []}
+           "source_detail": source, "source_url": url, "source_keys": [k for k in keys if k], "_reasons": []}
     if note:
         out["note"] = note
+    if lot:
+        uses(out, lot["key"])
+        for why, k in lot["doubts"]:
+            escalate(out, "needs_review", why, key=k)
     return escalate(out, status, reason)
 
 
@@ -188,16 +195,18 @@ def _lookup(address: str, f: Fetcher, today: str, result: dict) -> None:
             escalate(facts[name], addr["status"], "This may be the wrong lot: " + why, key=key)
     if len(parcel["rings"]) > 1:
         escalate(facts["lot"], "needs_review", "This parcel has more than one piece: check the lot outline.")
+    # Every fact after this is worked out on the lot's outline: it counts the outline's source and inherits
+    # every doubt about the lot, from the moment it's made.
+    lot = {"key": parcel["source"],
+           "doubts": [("Worked out on a lot that may be the wrong one: " + why, key) for why, key in addr["_reasons"]] +
+                     ([("Worked out on the largest piece of a parcel in several pieces: check the lot outline.", "")]
+                      if len(parcel["rings"]) > 1 else [])}
     # ---- 3. which lines face a street ------------------------------------------------------------------
-    _streets(f, ring, c["street"], today, facts, asks)
+    _streets(f, ring, c["street"], today, facts, asks, lot)
     # ---- 4. ground --------------------------------------------------------------------------------------
-    _ground(f, ring, origin, today, facts)
+    _ground(f, ring, origin, today, facts, lot)
     # ---- 5. zoning suggestion and overlays (live, never stored) --------------------------------------------
-    _zoning(f, ring, c["street"], facts, asks, today, city_parcel)
-    # everything after the lot is worked out on its outline: the outline's source counts for each of them
-    for name in ("street_side", "corner_lot", "ground", "zone", "overlays"):
-        if name in facts:
-            uses(facts[name], parcel["source"])
+    _zoning(f, ring, c["street"], facts, asks, today, city_parcel, lot)
 
 
 def _distinct(cands: list[dict]) -> list[dict]:
@@ -209,7 +218,8 @@ def _distinct(cands: list[dict]) -> list[dict]:
     return out
 
 
-def _streets(f: Fetcher, ring, address_street: str, today: str, facts: dict, asks: list) -> None:
+def _streets(f: Fetcher, ring, address_street: str, today: str, facts: dict, asks: list,
+             lot: dict | None = None) -> None:
     key = "city_roads"
     try:
         roads = f.city_roads_near(ring)
@@ -220,8 +230,8 @@ def _streets(f: Fetcher, ring, address_street: str, today: str, facts: dict, ask
             roads = f.state_streets_near(ring)
         except (Offline, ServiceError):
             facts["street_side"] = fact(None, "—", "", today, "needs_review",
-                                        "Couldn't reach the road maps: pick the front lot line.", key=key)
-            facts["corner_lot"] = fact("ask", "—", "", today, "ask", "Is this a corner lot?", key=key)
+                                        "Couldn't reach the road maps: pick the front lot line.", key=key, lot=lot)
+            facts["corner_lot"] = fact("ask", "—", "", today, "ask", "Is this a corner lot?", key=key, lot=lot)
             asks.append("Couldn't look up the streets: pick the front lot line and say if it's a corner lot.")
             return
     frontage: dict[str, float] = {}
@@ -253,8 +263,8 @@ def _streets(f: Fetcher, ring, address_street: str, today: str, facts: dict, ask
               "assumed: check the street side and whether a second street touches the lot.") if row_unknown else ""
     if not streets:
         facts["street_side"] = fact(None, src["name"], src["url"], today, "needs_review",
-                                    "No street found along this lot: pick the front lot line.", key=key)
-        facts["corner_lot"] = fact("ask", src["name"], src["url"], today, "ask", "Is this a corner lot?", key=key)
+                                    "No street found along this lot: pick the front lot line.", key=key, lot=lot)
+        facts["corner_lot"] = fact("ask", src["name"], src["url"], today, "ask", "Is this a corner lot?", key=key, lot=lot)
         asks.append("No street found along this lot: pick the front lot line.")
         return
     names = sorted(streets, key=lambda n: (n != address_street, -streets[n]))
@@ -263,10 +273,10 @@ def _streets(f: Fetcher, ring, address_street: str, today: str, facts: dict, ask
              "streets": {n: {"edges": edges_by[n], "frontage_ft": round(streets[n], 1)} for n in names}}
     if len(names) > 1:
         facts["street_side"] = fact(value, src["name"], src["url"], today, "ask",
-                                    f"This lot faces {len(names)} streets ({', '.join(names)}): pick the front.", key=key)
+                                    f"This lot faces {len(names)} streets ({', '.join(names)}): pick the front.", key=key, lot=lot)
         facts["corner_lot"] = fact("ask", src["name"], src["url"], today, "ask",
                                    f"It faces {' and '.join(names)}: a corner lot (or a lot running through "
-                                   "between two streets): confirm, and pick the front.", key=key)
+                                   "between two streets): confirm, and pick the front.", key=key, lot=lot)
         if unsure:
             escalate(facts["street_side"], "needs_review", unsure)
         asks.append(f"This lot faces two streets ({' and '.join(names[:2])}): pick the front.")
@@ -274,20 +284,20 @@ def _streets(f: Fetcher, ring, address_street: str, today: str, facts: dict, ask
     if address_street and front != address_street:
         facts["street_side"] = fact(value, src["name"], src["url"], today, "needs_review",
                                     f"The address is on {address_street}, but the lot only touches {front}: "
-                                    "check the front lot line.", key=key)
+                                    "check the front lot line.", key=key, lot=lot)
         asks.append(f"The address says {address_street}, but the lot faces {front}: check the front.")
     else:
-        facts["street_side"] = fact(value, src["name"], src["url"], today, key=key)
+        facts["street_side"] = fact(value, src["name"], src["url"], today, key=key, lot=lot)
     if unsure:                                   # one street found, but a second could have been missed
         escalate(facts["street_side"], "needs_review", unsure)
         facts["corner_lot"] = fact("ask", src["name"], src["url"], today, "ask",
-                                   "Road widths weren't available: is this a corner lot?", key=key)
+                                   "Road widths weren't available: is this a corner lot?", key=key, lot=lot)
         asks.append("Road widths weren't available: check the street side and say if it's a corner lot.")
     else:
-        facts["corner_lot"] = fact("no", src["name"], src["url"], today, key=key)
+        facts["corner_lot"] = fact("no", src["name"], src["url"], today, key=key, lot=lot)
 
 
-def _ground(f: Fetcher, ring, origin, today: str, facts: dict) -> None:
+def _ground(f: Fetcher, ring, origin, today: str, facts: dict, lot: dict | None = None) -> None:
     pts: list = []
     for p in ring:                                         # lot corners (merging ones closer than 3 ft)
         if all(math.dist(p, q) >= 3 for q in pts):
@@ -298,34 +308,35 @@ def _ground(f: Fetcher, ring, origin, today: str, facts: dict) -> None:
         elev = f.elevations_ft(pts)
     except (Offline, ServiceError):
         facts["ground"] = fact(None, src["name"], src["url"], today, "needs_review",
-                               "Couldn't reach the elevation service: set the ground by hand.", key="elevation")
+                               "Couldn't reach the elevation service: set the ground by hand.", key="elevation", lot=lot)
         return
     samples = [{"x": round((p[0] - origin[0]) * US_SURVEY_FT, 2), "y": round((p[1] - origin[1]) * US_SURVEY_FT, 2),
                 "ft": round(e, 2)}
                for p, e in zip(pts, elev) if e is not None]
     if not samples:
         facts["ground"] = fact(None, src["name"], src["url"], today, "needs_review",
-                               "No elevation data here: set the ground by hand.", key="elevation")
+                               "No elevation data here: set the ground by hand.", key="elevation", lot=lot)
         return
     lo, hi = min(s["ft"] for s in samples), max(s["ft"] for s in samples)
     facts["ground"] = fact({"points": samples, "min_ft": lo, "max_ft": hi, "kind": "existing"},
                            f"{src['name']} · today's ground (existing), an estimate", src["url"], today,
                            note="Elevations in feet above NAVD88. Finished ground after construction is set in the start box.",
-                           key="elevation")
+                           key="elevation", lot=lot)
     if len(samples) < len(pts):
         escalate(facts["ground"], "needs_review", f"Elevation missing at {len(pts) - len(samples)} of {len(pts)} "
                                                   "points: check the ground.")
 
 
-def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, today: str, city_parcel) -> None:
+def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, today: str, city_parcel,
+            lot: dict | None = None) -> None:
     src = ENDPOINTS["city_zoning"]
     try:
         polys = f.zoning_near(ring)
         edited = f.zoning_last_edited()
     except (Offline, ServiceError):
         facts["zone"] = fact(None, src["name"], src["url"], today, "needs_review",
-                             "Couldn't reach the City's zoning map: choose the district.", key="city_zoning")
-        _overlays(f, ring, city_parcel, src, today, facts)
+                             "Couldn't reach the City's zoning map: choose the district.", key="city_zoning", lot=lot)
+        _overlays(f, ring, city_parcel, src, today, facts, lot)
         return
     samples = g.grid_inside(ring)
     counts: dict[str, int] = {}
@@ -340,10 +351,10 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     covered = sum(shares.values())
     if not zones:
         facts["zone"] = fact(None, source, src["url"], today, "needs_review",
-                             "This lot isn't on the City's zoning map: choose the district.", key="city_zoning")
-        _overlays(f, ring, city_parcel, src, today, facts)
+                             "This lot isn't on the City's zoning map: choose the district.", key="city_zoning", lot=lot)
+        _overlays(f, ring, city_parcel, src, today, facts, lot)
         return
-    z = facts["zone"] = fact(zones[0] if len(zones) == 1 else zones, source, src["url"], today, key="city_zoning")
+    z = facts["zone"] = fact(zones[0] if len(zones) == 1 else zones, source, src["url"], today, key="city_zoning", lot=lot)
     if covered < 0.9:
         escalate(z, "needs_review", f"Only {covered:.0%} of this lot is on the City's zoning map: check the district.")
     if len(zones) > 1:
@@ -367,7 +378,7 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
             notes.append(line + "; this lot is outside the area it rezoned.")
     if notes:
         z["note"] = " ".join(notes)
-    _overlays(f, ring, city_parcel, src, today, facts)
+    _overlays(f, ring, city_parcel, src, today, facts, lot)
 
 
 def _date(v) -> dt.date | None:
@@ -387,7 +398,7 @@ def _amendment_reaches(a: dict, ring, streets: set) -> str:
     return f"rezoned {', '.join(hit)}" if hit else ""
 
 
-def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict) -> None:
+def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict, lot: dict | None = None) -> None:
     """Historic districts, gorge protection, secondary zones and landmark flags on the parcel. Not checked in
     this release, so any found (or any that couldn't be looked for) needs review."""
     found: list[str] = []
@@ -410,8 +421,7 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict)
     facts["overlays"] = fact(found, "City of Ithaca overlay maps (live)", src["url"], today,
                              "needs_review" if found else "suggested",
                              "Overlays aren't checked in this release: check these by hand." if found else "",
-                             key="historic_districts")
-    uses(facts["overlays"], "gorge_zones", "city_parcels")
+                             key=("historic_districts", "gorge_zones", "city_parcels"), lot=lot)
 
 
 USED_LIVE = "(used live, not stored)"
