@@ -121,7 +121,12 @@ When Ben says there is a new version:
    - To use your own lot instead, first draw it as one closed polyline on a layer named `Site`, then run
      `GordiumStart`.
 3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
-   - **Address**: recorded on the project and the report. (Look up from the City's map is coming soon.)
+   - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
+     45 seconds; the box says "Looking up…"). It fills in the lot from the tax map (drawn with its street at the
+     bottom of Top view), the street side, whether it's a corner lot, today's ground levels, and a suggested
+     zoning district, each with where it came from. Anything doubtful is amber with the reason: tick **I checked
+     this** once you have, or change it; until then the items that depend on it need review. If the lookup
+     can't help (offline, not found, outside the City of Ithaca), the box says why and you fill it in by hand.
    - **Zoning district**: R-1b, "entered by you". Tick **I confirm**: Draw stays off until you do, on every new
      project, because Gordium doesn't look up the zoning map yet.
    - **Use**: one-family dwelling, detached.
