@@ -1,0 +1,842 @@
+{
+ "address": "109 Ithaca Rd, Ithaca, NY 14850",
+ "captured": "2026-10-20",
+ "answers": [
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "109 Ithaca Rd, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": [
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847831.6101049442,
+       "y": 888274.7521168916
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847548.7003039664,
+       "ymin": 887910.0103594542,
+       "xmax": 848114.5113221142,
+       "ymax": 888639.4971192634
+      }
+     },
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847831.6101049442,
+       "y": 888274.7521168916
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847548.7003039664,
+       "ymin": 887910.0103594542,
+       "xmax": 848114.5113221142,
+       "ymax": 888639.4971192634
+      }
+     },
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847831.6101049442,
+       "y": 888274.7521168916
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847548.7003039664,
+       "ymin": 887910.0103594542,
+       "xmax": 848114.5113221142,
+       "ymax": 888639.4971192634
+      }
+     },
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847826.9569205819,
+       "y": 888346.7482484512
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847544.0478477367,
+       "ymin": 887982.0065320093,
+       "xmax": 848109.8574095746,
+       "ymax": 888711.4932098337
+      }
+     },
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847826.9569205819,
+       "y": 888346.7482484512
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847544.0478477367,
+       "ymin": 887982.0065320093,
+       "xmax": 848109.8574095746,
+       "ymax": 888711.4932098337
+      }
+     },
+     {
+      "address": "109 Ithaca Road, NY, 14850",
+      "location": {
+       "x": 847826.9569205819,
+       "y": 888346.7482484512
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847544.0478477367,
+       "ymin": 887982.0065320093,
+       "xmax": 848109.8574095746,
+       "ymax": 888711.4932098337
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_parcels",
+   "params": {
+    "geometry": "{\"x\": 847831.6101049442, \"y\": 888274.7521168916}",
+    "geometryType": "esriGeometryPoint",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "SWIS,PRINT_KEY,MUNI_NAME,CITYTOWN_NAME,PARCEL_ADDR"
+   },
+   "body": {
+    "objectIdFieldName": "OBJECTID",
+    "globalIdFieldName": "",
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "SWIS",
+      "alias": "SWIS",
+      "type": "esriFieldTypeString",
+      "length": 10
+     },
+     {
+      "name": "PRINT_KEY",
+      "alias": "PRINT_KEY",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "MUNI_NAME",
+      "alias": "MUNI_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "CITYTOWN_NAME",
+      "alias": "CITYTOWN_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "PARCEL_ADDR",
+      "alias": "PARCEL_ADDR",
+      "type": "esriFieldTypeString",
+      "length": 255
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "SWIS": "500700",
+       "PRINT_KEY": "84.-3-2",
+       "MUNI_NAME": "Ithaca, City",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "109 Ithaca Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          847900.9604781456,
+          888215.9583705652
+         ],
+         [
+          847850.7571606596,
+          888196.6178400882
+         ],
+         [
+          847776.1382228025,
+          888268.0360340683
+         ],
+         [
+          847825.283424503,
+          888326.2734762188
+         ],
+         [
+          847875.0624430462,
+          888277.0578144335
+         ],
+         [
+          847900.9604781456,
+          888215.9583705652
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "elevation",
+   "params": {
+    "geometry": "{\"points\": [[847900.9604781456, 888215.9583705652], [847850.7571606596, 888196.6178400882], [847776.1382228025, 888268.0360340683], [847825.283424503, 888326.2734762188], [847875.0624430462, 888277.0578144335], [847840.2015812435, 888257.3369426226]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryMultipoint",
+    "returnFirstValueOnly": "true",
+    "interpolation": "RSP_BilinearInterpolation"
+   },
+   "body": {
+    "samples": [
+     {
+      "location": {
+       "x": 847900.9604781456,
+       "y": 888215.9583705652,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 0,
+      "value": "229.222152710",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847850.7571606596,
+       "y": 888196.6178400882,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 1,
+      "value": "227.576309204",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847776.1382228025,
+       "y": 888268.0360340683,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 2,
+      "value": "225.662292480",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847825.283424503,
+       "y": 888326.2734762188,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 3,
+      "value": "226.993927002",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847875.0624430462,
+       "y": 888277.0578144335,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 4,
+      "value": "228.639221191",
+      "rasterId": 47371,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 847840.2015812435,
+       "y": 888257.3369426226,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 5,
+      "value": "227.180465698",
+      "rasterId": 47371,
+      "resolution": 1
+     }
+    ]
+   }
+  },
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "109 Ithaca Rd, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": [
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847831.6101049442,
+       "y": 888274.7521168916
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847548.7003039664,
+       "ymin": 887910.0103594542,
+       "xmax": 848114.5113221142,
+       "ymax": 888639.4971192634
+      }
+     },
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847831.6101049442,
+       "y": 888274.7521168916
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847548.7003039664,
+       "ymin": 887910.0103594542,
+       "xmax": 848114.5113221142,
+       "ymax": 888639.4971192634
+      }
+     },
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847831.6101049442,
+       "y": 888274.7521168916
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847548.7003039664,
+       "ymin": 887910.0103594542,
+       "xmax": 848114.5113221142,
+       "ymax": 888639.4971192634
+      }
+     },
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847826.9569205819,
+       "y": 888346.7482484512
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847544.0478477367,
+       "ymin": 887982.0065320093,
+       "xmax": 848109.8574095746,
+       "ymax": 888711.4932098337
+      }
+     },
+     {
+      "address": "109 Ithaca Road, Ithaca, NY, 14850",
+      "location": {
+       "x": 847826.9569205819,
+       "y": 888346.7482484512
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847544.0478477367,
+       "ymin": 887982.0065320093,
+       "xmax": 848109.8574095746,
+       "ymax": 888711.4932098337
+      }
+     },
+     {
+      "address": "109 Ithaca Road, NY, 14850",
+      "location": {
+       "x": 847826.9569205819,
+       "y": 888346.7482484512
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "109",
+       "StPreDir": "",
+       "StName": "Ithaca",
+       "StType": "Road",
+       "City": "",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 847544.0478477367,
+       "ymin": 887982.0065320093,
+       "xmax": 848109.8574095746,
+       "ymax": 888711.4932098337
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_parcels",
+   "params": {
+    "geometry": "{\"x\": 847831.6101049442, \"y\": 888274.7521168916}",
+    "geometryType": "esriGeometryPoint",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "SWIS,PRINT_KEY,MUNI_NAME,CITYTOWN_NAME,PARCEL_ADDR"
+   },
+   "body": {
+    "objectIdFieldName": "OBJECTID",
+    "globalIdFieldName": "",
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "SWIS",
+      "alias": "SWIS",
+      "type": "esriFieldTypeString",
+      "length": 10
+     },
+     {
+      "name": "PRINT_KEY",
+      "alias": "PRINT_KEY",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "MUNI_NAME",
+      "alias": "MUNI_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "CITYTOWN_NAME",
+      "alias": "CITYTOWN_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "PARCEL_ADDR",
+      "alias": "PARCEL_ADDR",
+      "type": "esriFieldTypeString",
+      "length": 255
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "SWIS": "500700",
+       "PRINT_KEY": "84.-3-2",
+       "MUNI_NAME": "Ithaca, City",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "109 Ithaca Rd"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          847900.9604781456,
+          888215.9583705652
+         ],
+         [
+          847850.7571606596,
+          888196.6178400882
+         ],
+         [
+          847776.1382228025,
+          888268.0360340683
+         ],
+         [
+          847825.283424503,
+          888326.2734762188
+         ],
+         [
+          847875.0624430462,
+          888277.0578144335
+         ],
+         [
+          847900.9604781456,
+          888215.9583705652
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_streets",
+   "params": {
+    "geometry": "847626.1382228025,888046.6178400882,848050.9604781456,888476.2734762188",
+    "geometryType": "esriGeometryEnvelope",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "CompleteStreetName"
+   },
+   "body": {
+    "displayFieldName": "CompleteStreetName",
+    "fieldAliases": {
+     "CompleteStreetName": "CompleteStreetName"
+    },
+    "geometryType": "esriGeometryPolyline",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "CompleteStreetName",
+      "type": "esriFieldTypeString",
+      "alias": "CompleteStreetName",
+      "length": 100
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "CompleteStreetName": "Irving Place"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847872.1030693857,
+          888428.0275420275
+         ],
+         [
+          847807.7540253955,
+          888497.9135266424
+         ],
+         [
+          847791.8001505822,
+          888535.0625654364
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Ithaca Road"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847872.1030693857,
+          888428.0275420275
+         ],
+         [
+          847921.973171248,
+          888479.8602785567
+         ],
+         [
+          847965.8994626228,
+          888517.7980338479
+         ],
+         [
+          848033.3361140528,
+          888567.4313682308
+         ],
+         [
+          848116.5028257251,
+          888621.466919725
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Ithaca Road"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847635.2013696413,
+          888117.2750635265
+         ],
+         [
+          847694.1903501607,
+          888218.637639511
+         ],
+         [
+          847760.769007309,
+          888305.47173447
+         ],
+         [
+          847854.8194054961,
+          888409.7858456142
+         ],
+         [
+          847872.1030693857,
+          888428.0275420275
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Mitchell Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847635.2013696413,
+          888117.2750635265
+         ],
+         [
+          847657.8857861442,
+          888106.3754633253
+         ],
+         [
+          847679.4747303727,
+          888104.9401424892
+         ],
+         [
+          847702.9625637754,
+          888110.7934769663
+         ],
+         [
+          848003.5139599942,
+          888234.3184792689
+         ],
+         [
+          848061.2727182141,
+          888246.7839561965
+         ],
+         [
+          848213.2156172565,
+          888247.3206231175
+         ],
+         [
+          848444.3181070277,
+          888233.7775732145
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Ithaca Road"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847620.391772847,
+          888089.561985586
+         ],
+         [
+          847635.2013696413,
+          888117.2750635265
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Ithaca Road"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          847663.3997262084,
+          887787.8699615306
+         ],
+         [
+          847634.5109270689,
+          888006.4974229602
+         ],
+         [
+          847620.391772847,
+          888089.561985586
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "live_status": "found",
+ "derived": {
+  "state_street_row_ft": [
+   50,
+   66,
+   66,
+   49.5,
+   66,
+   50
+  ],
+  "zone_at_lot": "R-1b",
+  "zoning_last_edited": "2024-09-26",
+  "note": "Derived from City of Ithaca layers (not stored): ROW widths, zone code, edit date."
+ }
+}
