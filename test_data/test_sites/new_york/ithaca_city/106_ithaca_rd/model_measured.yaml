@@ -7,6 +7,9 @@ measurements:
   use:
     value: one_family_detached
     from: stated by the architect (not measured from the model) (lot facts)
+  district:
+    value: R-1b
+    from: stated by the architect (the lot's zone) (lot facts)
   lot_area:
     value: null
     from: 'not measured: the lot outline isn''t from a survey: the lot area needs one (an open question for the architects) [readings: the lot as drawn = 6,674.51]'

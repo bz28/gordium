@@ -7,6 +7,9 @@ measurements:
   use:
     value: one_family_detached
     from: stated by the architect (not measured from the model) (lot facts)
+  district:
+    value: R-1b
+    from: stated by the architect (the lot's zone) (lot facts)
   lot_area:
     value: 6570.0
     from: 'measured from spreadsheet_design_model.3dm: the area inside the lot lines (a survey)'

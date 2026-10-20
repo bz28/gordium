@@ -8,7 +8,7 @@ from shapely.geometry import LineString, Polygon
 from model_measurement.measure import measure
 
 FACTS = {"street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True,
-         "grade_elevation": 0, "use": "one_family_detached", "stories": 2}
+         "grade_elevation": 0, "use": "one_family_detached", "stories": 2, "zone": "R-1b"}
 
 
 def lot(points, curved=()):
@@ -43,7 +43,7 @@ def values(m):
 
 def test_a_plain_rectangular_lot():
     m = measure(site(), FACTS)
-    assert values(m) == {"use": "one_family_detached", "lot_area": 5000.0, "lot_width": 50.0, "lot_depth": 100.0,
+    assert values(m) == {"use": "one_family_detached", "district": "R-1b", "lot_area": 5000.0, "lot_width": 50.0, "lot_depth": 100.0,
                          "building_area": 1000.0, "building_height": 30.0, "stories": 2, "front_yard": 25.0,
                          "side_yard_smaller": 10.0, "side_yard_larger": 15.0, "rear_yard": 35.0,
                          "sleeping_rooms": None, "parking_spaces": None}

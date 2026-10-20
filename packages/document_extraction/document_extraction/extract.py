@@ -41,16 +41,21 @@ def extract(pdf_path: Path) -> list[dict]:
     with pdfplumber.open(pdf_path) as pdf:
         for page_number, page in enumerate(pdf.pages, 1):
             rotated += sum(not _level(c) for c in page.chars)
-            # Some PDFs draw text twice, slightly offset, to look bold ("RREESS..."); keep one copy.
-            level = page.dedupe_chars().filter(lambda o: o.get("object_type") != "char" or _level(o))
-            lines = level.extract_text_lines(return_chars=True)
-            body = _body_size(level)
+            lines, body = page_lines(page)
             rows += [{"page": page_number, "line": n, "text": _mark_superscripts(line, body),
                       **{k: round(line[k], 1) for k in POSITION}}
                      for n, line in enumerate(lines, 1)]
         header = {"file": pdf_path.name, "sha256": sha256(pdf_path), "pages": len(pdf.pages),
                   "extractor": EXTRACTOR, "rotated_chars_skipped": rotated}
     return [header, *rows]
+
+
+def page_lines(page) -> tuple[list[dict], float]:
+    """A page's lines of level text (numbered 1, 2, … in this order) and its normal text size.
+    Shared with the chart reader, so a chart cell's line numbers are the extracted text's."""
+    # Some PDFs draw text twice, slightly offset, to look bold ("RREESS..."); keep one copy.
+    level = page.dedupe_chars().filter(lambda o: o.get("object_type") != "char" or _level(o))
+    return level.extract_text_lines(return_chars=True), _body_size(level)
 
 
 def _level(char: dict) -> bool:
@@ -66,9 +71,21 @@ def _body_size(page) -> float:
 
 
 def _mark_superscripts(line: dict, body: float) -> str:
-    """Wrap each footnote marker as a sealed token: [fn11]. A footnote marker is a run of characters
-    smaller than the page's normal text and raised above the baseline of the line's normal-size text.
-    A raised run of letters right after a digit is an ordinal ending ("19th") and stays plain."""
+    """Wrap each footnote marker as a sealed token: [fn11]."""
+    out, in_run = [], False
+    for t, mark in zip(line["text"], footnote_marks(line, body)):
+        if mark != in_run:  # a space is never marked, so a run always closes before it
+            out.append("[fn" if mark else "]")
+            in_run = mark
+        out.append(t)
+    return "".join(out) + ("]" if in_run else "")
+
+
+def footnote_marks(line: dict, body: float) -> list[bool]:
+    """For each character of the line's text: is it part of a footnote marker? A footnote marker is a
+    run of characters smaller than the page's normal text and raised above the baseline of the line's
+    normal-size text. A raised run of letters right after a digit is an ordinal ending ("19th") and
+    stays plain."""
     chars, text = line["chars"], line["text"]
     if len(text.replace(" ", "")) != len(chars):  # text and characters must line up one to one
         raise ValueError(f"can't align text and characters: {text!r}")
@@ -91,13 +108,7 @@ def _mark_superscripts(line: dict, body: float) -> str:
                 end += 1
             if text[start:end].isalpha():
                 marks[start:end] = [False] * (end - start)
-    out, in_run = [], False
-    for t, mark in zip(text, marks):
-        if mark != in_run:  # a space is never marked, so a run always closes before it
-            out.append("[fn" if mark else "]")
-            in_run = mark
-        out.append(t)
-    return "".join(out) + ("]" if in_run else "")
+    return marks
 
 
 def to_jsonl(rows: list[dict]) -> str:

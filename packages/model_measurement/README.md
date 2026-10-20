@@ -97,7 +97,7 @@ Every reason the code gives today comes from the table:
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
   it lies within that solid's plan; a sub-basement under it too); "say whether the ground is flat";
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
-- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the number of
+- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "enter the number of
   stories"; "enter bedrooms / parking spaces".
 - **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
   building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building

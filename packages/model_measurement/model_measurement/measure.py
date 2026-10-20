@@ -439,6 +439,9 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         v = facts.get(name)
         out[name] = (_record(name, unit, v, "stated by the architect (not measured from the model)")
                      if v is not None else _record(name, unit, reason=stop(ASK[name])))
+    # the lot's zoning district is the zone the architect stated (the facts' "zone")
+    out["district"] = (_record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
+                       if facts.get("zone") else _record("district", "text", reason=stop("no_district")))
     buildings = site.get("buildings") or []
     grade = facts.get("grade_elevation")
     main = (buildings[0] if len(buildings) == 1 else
