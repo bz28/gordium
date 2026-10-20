@@ -52,8 +52,8 @@ STOPS = {
                          "the Building layer",
     "grade_walls_unclear": "the building's walls can't be told apart in plan (no wall longer than 1 ft, a round or "
                            "finely faceted outline): set the grade as flat ground instead",
-    "existing_grade": "measured from existing grade; the code's grade plane is finished ground level (§325-3): set "
-                      "the finished grade",
+    "existing_grade": "measured from existing grade; the code's grade plane is finished ground level (§325-3): tick "
+                      "No regrading near the house, or set the finished ground",
     # facts a massing model doesn't show, until they are entered
     "no_use": "choose the use",
     "no_district": "enter the lot's zoning district (zone)",

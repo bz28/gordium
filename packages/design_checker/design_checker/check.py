@@ -397,8 +397,14 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None) ->
         lot_z = min((p[2] for e in (site.get("lot") or {}).get("edges", []) for p in e["points"] if len(p) > 2),
                     default=0.0)
         drawing = {**facts, "ground_is_flat": True, "grade_elevation": lot_z}
+    existing = drawing.get("grade_is") == "existing"
+    if existing:                        # drawn standing on the ground shown; the check still says it is existing
+        drawing = {**drawing, "grade_is": "finished"}
     measured = measure(site, drawing)
     out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor)
+    if existing and out.get("floors"):
+        out["notes"].append("drawn on the ground as it is: building height and stories need review until you tick "
+                            "No regrading near the house (or set the finished ground)")
     out["preview"] = _start_preview(out, measured)
     if no_grade and out.get("floors"):
         out["notes"].append("drawn standing at the lot's level: building height and stories need review until the "

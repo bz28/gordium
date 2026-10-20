@@ -534,3 +534,14 @@ def test_every_fact_records_its_source_and_who_confirmed_it_and_the_panel_and_re
     assert "Zoning district: R-1b · entered by you · confirmed by you, 2026-10-20" in lines
     text = " ".join(str(c.value) for r in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows() for c in r if c.value)
     assert "Zoning district: R-1b · entered by you" in text
+
+
+def test_start_on_existing_ground_still_draws_the_house_and_says_height_waits(facts):
+    """The box's default: ground as drawn, No regrading unticked (existing ground). The house is drawn standing on
+    it; the check that follows says height and stories need review (C5)."""
+    from design_checker.check import start
+    got = start(MODEL, {**facts, "lot_surveyed": True, "grade_is": "existing"})
+    assert len(got["floors"]) == 3
+    assert any("No regrading near the house" in n for n in got["notes"])
+    height = {i["name"]: i for i in check(MODEL, {**facts, "grade_is": "existing"})["view"]["items"]}["Building height"]
+    assert height["status"] == present.REVIEW

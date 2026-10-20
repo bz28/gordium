@@ -107,7 +107,8 @@ Every reason the code gives today comes from the table:
   layer". A round or finely faceted outline: "the building's walls can't be told
   apart in plan (no wall longer than 1 ft, a round or finely faceted outline): set the grade as flat ground
   instead". Measured from existing ground instead of finished: "measured from existing
-  grade; the code's grade plane is finished ground level (§325-3): set the finished grade" (height and stories).
+  grade; the code's grade plane is finished ground level (§325-3): tick No regrading near the house, or set the
+  finished ground" (height and stories).
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "the building is one
   solid with no floors: draw each story as its own solid standing on the one below (as Gordium's starting building
   is), or enter the number of stories"; "enter bedrooms / parking spaces".
