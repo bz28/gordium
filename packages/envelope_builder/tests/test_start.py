@@ -215,3 +215,11 @@ def test_a_flag_lot_whose_side_yards_fill_the_pole_still_gets_a_building(points,
     building_rules = {k: v for k, v in got.items() if "lot_width" not in k}   # the narrow frontage is the lot's own
     assert "fail" not in building_rules.values(), got
     assert m["front_yard"]["value"] >= 25
+
+
+def test_a_deep_flag_lot_is_quick():
+    import time
+    wedge = [(0, 0), (20, 0), (20, 40), (560, 600), (-540, 600), (0, 40)]
+    t = time.time()
+    start, _ = generated(wedge, {**FACTS, "street_line": [[[0, 0], [20, 0]]]})
+    assert start["floors"] and time.time() - t < 1.5

@@ -84,14 +84,16 @@ def _x_range(shape: Polygon, y: float, around: float):
     return s[0], s[-1]
 
 
-def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_limit: float):
+def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_limit: float,
+               front_from: float = -math.inf, stride: int = 1):
     """(x0, x1, front, depth): the largest rectangle square to the street inside the buildable area, at or under
     the coverage limit. The fronts tried run from the bottom of the buildable area up to `front_limit`: the front
     yard line (`front_line`, always tried exactly), or on a bent or curved street the deepest point of that line
     plus one STEP. From each, the width only narrows going back, so it grows deeper until coverage or the rear
     stops it; the largest wins, the widest on a tie. So when a front exists at the front yard line, the building
     sits on it, never slides back for a wider rear, and the search stays short. (A flag lot, where none exists, is
-    searched over its whole buildable area by the caller.)"""
+    searched over its whole buildable area by the caller: fronts a foot apart first (`stride`), then every
+    level near the best (`front_from`), so a deep lot stays quick.)"""
     y0, y1 = shape.bounds[1], shape.bounds[3]
     n = max(1, int(math.ceil((y1 - y0) / STEP)))
     levels = sorted({y0 + (y1 - y0) * k / n for k in range(n + 1)} | ({front_line} if y0 <= front_line <= y1 else set()))
@@ -99,6 +101,8 @@ def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_
     spans = [_x_range(shape, y, around) for y in levels]
     best, best_key = None, (0.0, 0.0)   # the largest area, then the widest (square to the side yards)
     for i, first in enumerate(spans):
+        if i % stride or levels[i] < front_from - 1e-9:
+            continue
         if levels[i] > front_limit + 1e-9:
             break                       # behind the front yard line (or its strip, on a bent street)
         if first is None or first[1] - first[0] <= 0:
@@ -164,7 +168,10 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     if found is None and buildable.bounds[1] > front_line + 1e-9:
         # a flag lot or a narrow neck: the side yards close the frontage, so the buildable area only starts behind
         # the front yard line; the building goes where the buildable area begins, and the note says why
-        found = _footprint(buildable, buildable.centroid.x, allowed, front_line, buildable.bounds[3])
+        around, top = buildable.centroid.x, buildable.bounds[3]
+        coarse = _footprint(buildable, around, allowed, front_line, top, stride=int(round(1.0 / STEP)))
+        found = coarse and (_footprint(buildable, around, allowed, front_line, coarse[2] + 1.0, coarse[2] - 1.0)
+                            or coarse)
         if found is not None:
             setback = found[2] - max(street)
             notes.append("the side yards close the lot's frontage (a flag lot or a narrow neck): the starting building "
