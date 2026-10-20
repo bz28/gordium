@@ -110,12 +110,15 @@ FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only app
 # up to three words between "architects" and the verb (but not "to"/"can"/"may"..., which make it a possibility),
 # and the noun forms (architect's / architects' / architect- review, approval...).
 _VERB = r"(?:confirm|review|check|approv|sign)\w*"
-_GAP = r"(?:[\s,]+(?!(?:to|can|could|may|might|would)\b)\w+){0,3}?"
+_MODALS = ("can", "could", "may", "might", "would")    # words that make it a possibility: the one list
+_MODAL = "(?:" + "|".join(_MODALS) + ")"
+_NOT_AFTER_MODAL = "".join(rf"(?<!\b{m}\s)" for m in _MODALS)
+_GAP = rf"(?:[\s,]+(?!(?:to|{_MODAL})\b)\w+){{0,3}}?"
 ARCHITECT_REVIEW = re.compile(
     rf"\barchitects?\b(?!['\u2019-]){_GAP}[\s,]+{_VERB}\b"
     rf"|\b(?:confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{{0,30}}?\barchitects?\b"
-    rf"|\barchitects?\s+(?:(?!(?:can|could|may|might|would)\b)\w+\s+){{0,2}}?(?:needs?|ha(?:ve|s|d)|required|asked|expected)\s+to\s+{_VERB}\b"
-    rf"|\b(?:needs?|requires?|required)\s+(?:an?\s+|the\s+)?architects?\s+to\s+{_VERB}\b"
+    rf"|\barchitects?\s+(?:(?!{_MODAL}\b)\w+\s+){{0,2}}?(?:needs?|ha(?:ve|s|d)|required|asked|expected)\s+to\s+{_VERB}\b"
+    rf"|{_NOT_AFTER_MODAL}\b(?:needs?|requires?|required)\s+(?:an?\s+|the\s+)?architects?\s+to\s+{_VERB}\b"
     r"|\bthen architects\b"
     r"|\barchitect(?:s['\u2019]|['\u2019]s|s)?[\s-]+(?:review|confirm\w*|check\w*|sign-?off|approv\w*)\b", re.IGNORECASE)
 # What makes such a phrase not a promise. A sentence that says approval is deferred, or describes what happens
@@ -206,7 +209,9 @@ def test_the_architect_review_matcher():
                  "an answer key once approval is switched on", "Architects would confirm each definition",
                  "An architect can approve each rule once approval is switched on",
                  "Code, then AI, checked by code (architect confirmation deferred)",
-                 "Architects would need to confirm each definition", "Architects may need to approve each rule"]:
+                 "Architects would need to confirm each definition", "Architects may need to approve each rule",
+                 "Each rule would need an architect to approve it", "A rule may need an architect to confirm it",
+                 "This might require an architect to review it"]:
         assert not _promises_architect_review(fine), fine
 
 
