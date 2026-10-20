@@ -9,7 +9,7 @@ import re
 import openpyxl
 import pytest
 
-from rule_format.rulebook import REPO, Context, load, outcome
+from rule_format.rulebook import REPO, Context, load, outcome, rulebook_for
 
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design.yaml"
 CELL = re.compile(r"(\w+)!([A-Z]+\d+)")    # Inputs!B4: sheet and cell
@@ -19,7 +19,7 @@ CELL = re.compile(r"(\w+)!([A-Z]+\d+)")    # Inputs!B4: sheet and cell
 def site():
     design = load(SITE)
     book = openpyxl.load_workbook(REPO / design["spreadsheet"], data_only=True)
-    rules = {r["id"]: r for r in load(REPO / design["rulebook"])["rules"]}
+    rules = {r["id"]: r for r in load(rulebook_for(REPO / design["jurisdiction"], design["zone"]))["rules"]}
     ctx = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/ithaca_city")
     values = {k: m["value"] for k, m in design["measurements"].items()}
     results = {i: outcome(r, values, {"use": ctx.uses}) for i, r in rules.items()}

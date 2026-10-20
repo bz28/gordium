@@ -14,7 +14,7 @@ from pathlib import Path
 
 from openpyxl import Workbook
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
-from openpyxl.styles import Alignment, Font
+from openpyxl.styles import Alignment, Font, PatternFill
 
 from rule_format.labels import LABEL_FIELDS, load_pieces, revision_steps
 from rule_format.rulebook import APPROVAL_FIELDS, REPO, RULE_FIELDS, TERM_SCHEMAS, load, rulebook_paths
@@ -236,6 +236,47 @@ def _cell_text(value):
     return ILLEGAL_CHARACTERS_RE.sub("�", value) if isinstance(value, str) else value
 
 
+def write_block(ws, top: int, columns: list[tuple[str, float]], rows: list[list], links: dict[str, list] | None = None,
+                fills: dict[str, list] | None = None) -> int:
+    """One table on a sheet, in the architects' style: bold 12-pt headers on row `top`, Arial 11 wrapped rows
+    under it, links as clickable cells (named by their column's header), optional cell fills (same naming:
+    {header: [hex color or None per row]}). A column's width is set where given (None keeps the width an
+    earlier block set). Returns the first row after the block."""
+    headers = [h for h, _ in columns]
+    for c, (header, width) in enumerate(columns, 1):
+        cell = ws.cell(row=top, column=c, value=header)
+        cell.font = Font(name=FONT, size=12, bold=True)
+        cell.alignment = Alignment(wrap_text=True, vertical="top")
+        if width:                                     # a later block on the sheet passes None to keep them
+            ws.column_dimensions[cell.column_letter].width = width
+    for r, row in enumerate(rows, top + 1):
+        for c, value in enumerate(row, 1):
+            cell = ws.cell(row=r, column=c, value=_cell_text(value))
+            if isinstance(value, str):
+                cell.data_type = "s"
+            cell.font = Font(name=FONT, size=11)
+            cell.alignment = Alignment(wrap_text=True, vertical="top")
+    for header, urls in (links or {}).items():
+        c = headers.index(header) + 1
+        for r, url in enumerate(urls, top + 1):
+            if url:
+                cell = ws.cell(row=r, column=c)
+                cell.hyperlink = url
+                cell.font = Font(name=FONT, size=11, color="0563C1", underline="single")
+    for header, colors in (fills or {}).items():
+        c = headers.index(header) + 1
+        for r, color in enumerate(colors, top + 1):
+            if color:
+                ws.cell(row=r, column=c).fill = PatternFill("solid", fgColor=color)
+    return top + 1 + len(rows)
+
+
+def title(ws, text: str) -> None:
+    """The sheet's title in A1: Arial 16 bold, like the architects' sheet."""
+    ws["A1"] = text
+    ws["A1"].font = Font(name=FONT, size=16, bold=True)
+
+
 def build(data: dict[str, dict]) -> Workbook:
     """Lay the tables out like the architects' sheet: a bold title in row 1, headers in row 2 (frozen),
     Arial, wrapped text, links as clickable cells."""
@@ -244,28 +285,8 @@ def build(data: dict[str, dict]) -> Workbook:
     wb.properties.creator = "Gordium (generated: python -m rule_export)"
     for name, t in data.items():
         ws = wb.create_sheet(name)
-        ws["A1"] = t["title"]
-        ws["A1"].font = Font(name=FONT, size=16, bold=True)
-        headers = [h for h, _ in t["columns"]]
-        for c, (header, width) in enumerate(t["columns"], 1):
-            cell = ws.cell(row=2, column=c, value=header)
-            cell.font = Font(name=FONT, size=12, bold=True)
-            cell.alignment = Alignment(wrap_text=True, vertical="top")
-            ws.column_dimensions[cell.column_letter].width = width
-        for r, row in enumerate(t["rows"], 3):
-            for c, value in enumerate(row, 1):
-                cell = ws.cell(row=r, column=c, value=_cell_text(value))
-                if isinstance(value, str):
-                    cell.data_type = "s"
-                cell.font = Font(name=FONT, size=11)
-                cell.alignment = Alignment(wrap_text=True, vertical="top")
-        for header, urls in t["links"].items():           # links name their column by its header
-            c = headers.index(header) + 1
-            for r, url in enumerate(urls, 3):
-                if url:
-                    cell = ws.cell(row=r, column=c)
-                    cell.hyperlink = url
-                    cell.font = Font(name=FONT, size=11, color="0563C1", underline="single")
+        title(ws, t["title"])
+        write_block(ws, 2, t["columns"], t["rows"], t["links"])
         ws.freeze_panes = "A3"
     return wb
 

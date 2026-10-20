@@ -1,0 +1,273 @@
+"""The compliance report for one project, in the architects' own spreadsheet format.
+
+The architects check a design with a two-tab workbook (test_data/answer_keys/.../Gordium_Single_Family_Simple_v1.xlsx):
+"Inputs" (the design's numbers, then the table values the check uses) and "Output" (one row per requirement:
+Requirement · Table limit · Proposed · Units · Comparison · PDF page · Error, where "Error" holds PASS/FAIL).
+This module fills in the same two tabs for any project file, from the rulebook for its zone. Plain code, no AI.
+
+- Which rows: every rule in the zone's rulebook (`rulebook_for`: hand-drafted first, else AI-drafted). Rules
+  that apply (or whose applicability can't be decided) come first; rules that don't apply are listed after,
+  under their own heading, so nothing is silently dropped.
+- The result of every row comes from `rule_format.outcome()` and nothing else.
+- "Table limit" and "Proposed" are read off the rule's own formula: each comparison of a measure against an
+  expression is evaluated with this project's numbers, e.g. rear_yard >= max(min(0.25 * lot_depth, 50), 20)
+  gives a limit of 22.5 ft for a 90 ft deep lot. A formula that isn't made of such comparisons shows its
+  formula only. The formula is always in its own column.
+- Our columns go after the architects' seven: the rule id, the formula, why a row needs review, the city's
+  exact words, the page and a link, which rulebook it came from.
+"""
+
+import ast
+import math
+from pathlib import Path
+
+from openpyxl import Workbook
+
+from rule_export.workbook import page_link, title, write_block
+from rule_format import formula
+from rule_format.formula import EvaluationError, MissingMeasure
+from rule_format.rulebook import MEASURE_KINDS, MEASURES_FILE, REPO, Context, load, outcome, rulebook_for
+
+# The architects' tab names and headers, copied from their file, in their order.
+INPUTS_TAB, OUTPUT_TAB = "Inputs", "Output"
+INPUTS_TITLE = "Inputs and sources"
+INPUT_HEADERS = ["Model / project input", "Value", "Units / meaning"]
+PARAMETER_HEADERS = ["Table parameters", "Value", "Source: tables PDF"]
+OUTPUT_HEADERS = ["Requirement", "Table limit", "Proposed", "Units", "Comparison", "PDF page", "Error"]
+# Ours, after theirs.
+INPUT_EXTRA = ["Where the value comes from"]
+PARAMETER_EXTRA = ["Rule", "Link"]
+OUTPUT_EXTRA = ["Rule id", "Formula", "Why it needs review", "City's exact words", "Document", "Link", "Rulebook"]
+
+RESULT = {"pass": "PASS", "fail": "FAIL", "needs_review": "NEEDS REVIEW", "not_applicable": "NOT APPLICABLE"}
+COMPARISON = {"pass": "Within table limit", "fail": "Outside table limit", "needs_review": "Needs review",
+              "not_applicable": "Not applicable"}
+INPUT_FILL = "FFFFF1BF"                # the architects' yellow for values typed in
+
+MEASURES = load(MEASURES_FILE)
+SYMBOL = {ast.GtE: "≥", ast.LtE: "≤", ast.Gt: ">", ast.Lt: "<", ast.Eq: "=", ast.NotEq: "≠"}
+PROJECT_FIELDS = {"title", "jurisdiction", "zone", "measurements", "spreadsheet", "compare"}
+
+
+# ---- the project file ----------------------------------------------------------------------------------
+
+def load_project(path: Path) -> dict:
+    """A project file: title, jurisdiction (a folder), zone, and measurements {name: {value, from}}. Fields the
+    answer-key test uses (spreadsheet, compare) may be there too. Anything else is an error, so a typo can't
+    silently drop a value."""
+    project = load(path) or {}
+    problems = [f"unknown field {k!r}" for k in project if k not in PROJECT_FIELDS]
+    problems += [f"missing {k!r}" for k in ("title", "jurisdiction", "zone", "measurements") if k not in project]
+    for name, m in (project.get("measurements") or {}).items():
+        if name not in MEASURES:
+            problems.append(f"measurement {name!r} isn't in measures.yaml")
+        elif not (isinstance(m, dict) and m.keys() == {"value", "from"}):
+            problems.append(f"measurement {name!r} needs exactly a value and where it comes from ('from')")
+        elif not (isinstance(m["from"], str) and m["from"].strip()):
+            problems.append(f"measurement {name!r} needs where it comes from ('from'), as text")
+        elif not (m["value"] is None or type(m["value"]) in (int, float, str)):
+            problems.append(f"measurement {name!r} value must be a number or text (or empty: not measured yet)")
+    if not problems and rulebook_for(REPO / project["jurisdiction"], project["zone"]) is None:
+        problems.append(f"no rulebook for zone {project['zone']!r} in {project['jurisdiction']}")
+    if problems:
+        raise ValueError(f"{path}: " + "; ".join(problems))
+    return project
+
+
+# ---- reading limits off a formula -----------------------------------------------------------------------
+
+def _number(x) -> str:
+    """A number as people write it (6,674; 22.5); anything else as it is, so a wrong kind of value (true, '25')
+    never looks like a usable number."""
+    if type(x) is float and math.isfinite(x):
+        return f"{x:,.2f}".rstrip("0").rstrip(".")
+    return f"{x:,}" if type(x) is int else repr(x)
+
+
+def _pretty(text: str) -> str:
+    """A formula with the comparison signs people write (≥ ≤ ≠), the one style for every shown limit."""
+    for op, sign in ((" >= ", " ≥ "), (" <= ", " ≤ "), (" != ", " ≠ "), (" == ", " = ")):
+        text = text.replace(op, sign)
+    return text
+
+
+def _unit(measure: str) -> str:
+    """The unit the architects would write: ft, sf, or for a count the thing counted (stories, spaces, rooms)."""
+    unit = MEASURES.get(measure, {}).get("unit", "")
+    return measure.split("_")[-1] if unit == "count" else "use" if unit == "text" else unit
+
+
+def _value(node, values, kinds):
+    """The value of a sub-expression for this project, or None when it can't be worked out."""
+    try:
+        return formula.evaluate(ast.unparse(node), values, kinds)
+    except (MissingMeasure, EvaluationError, ArithmeticError, formula.FormulaError):
+        return None
+
+
+def _comparisons(node) -> list | None:
+    """The formula as alternatives (or) of conditions (and) of comparisons `measure op expression`, or None
+    when it has another shape. Each comparison is (measure, op, expression node)."""
+    if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.Or):
+        parts = [_comparisons(v) for v in node.values]
+        return None if None in parts else [a for p in parts for a in p]
+    if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.And):
+        parts = [_comparisons(v) for v in node.values]
+        if None in parts or any(len(p) != 1 for p in parts):
+            return None
+        return [[c for p in parts for c in p[0]]]
+    if isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.left, ast.Name):
+        return [[(node.left.id, node.ops[0], node.comparators[0])]]
+    return None
+
+
+def limit_and_proposed(check: str, values: dict, kinds: dict, use_names: dict) -> tuple[str, str, str]:
+    """(table limit, proposed, units) for a rule's check, read off its comparisons for this project."""
+    alternatives = _comparisons(formula.parse(check).body)
+    if not alternatives:
+        return "see formula", "", ""
+    subjects = list(dict.fromkeys(m for alt in alternatives for m, _, _ in alt))
+    main = alternatives[0][0][0]                       # the measure the requirement is about
+    def show(measure, op, expr, named):
+        if isinstance(op, (ast.In, ast.NotIn)):
+            allowed = [use_names.get(e.value, e.value) for e in expr.elts if isinstance(e, ast.Constant)]
+            return ("Permitted: " if isinstance(op, ast.In) else "Not: ") + "; ".join(allowed)
+        v = _value(expr, values, kinds)
+        shown = _number(v) if v is not None else f"? ({_pretty(ast.unparse(expr))})"
+        return f"{measure} {SYMBOL[type(op)]} {shown}" if named else f"{SYMBOL[type(op)]} {shown}"
+    named = len(subjects) > 1
+    if len(alternatives) == 1 and len(alternatives[0]) == 1 and not isinstance(alternatives[0][0][1], (ast.In, ast.NotIn)):
+        m, op, expr = alternatives[0][0]                   # one comparison: limit and proposed as plain numbers
+        v, p = _value(expr, values, kinds), values.get(m)
+        if type(v) in (int, float) and type(p) in (int, float):
+            return f"{SYMBOL[type(op)]} {_number(v)}", p, _unit(m)
+    limit = " or ".join("; ".join(show(m, op, e, named or m != main) for m, op, e in alt) for alt in alternatives)
+    def proposed(m):
+        v = values.get(m)
+        if v is None:
+            return "not given"
+        return use_names.get(v, v) if _unit(m) == "use" and isinstance(v, str) else _number(v)
+    shown_subjects = [m for m in subjects if m == main or named]
+    prop = proposed(main) if not named else "; ".join(f"{m} = {proposed(m)}" for m in shown_subjects)
+    units = {_unit(m) for m in subjects}
+    return limit, prop, units.pop() if len(units) == 1 else ""
+
+
+def table_values(check: str) -> str:
+    """The limits a check uses, as written (the right-hand side of each comparison): e.g. for the rear yard
+    "max(min(0.25 * lot_depth, 50), 20)": a quarter of the lot depth, at most 50 ft, at least 20 ft."""
+    alternatives = _comparisons(formula.parse(check).body)
+    if not alternatives:
+        return check
+    # Each comparison is printed whole by Python's own printer, so brackets stay where the meaning needs them.
+    return " or ".join("; ".join(_pretty(ast.unparse(ast.Compare(ast.Name(m), [op], [e]))) for m, op, e in alt)
+                       for alt in alternatives)
+
+
+def _problems(text: str, values: dict, kinds: dict) -> list[str]:
+    """Why a formula can't be worked out for this project: each measurement it needs that is missing or
+    unusable (tested by the checker's own rule, a bare name evaluated as a formula), else an evaluation error."""
+    missing, unusable = [], []
+    for name in sorted(formula.names(text)):
+        try:
+            formula.evaluate(name, values, kinds)
+        except MissingMeasure:
+            (missing if values.get(name) is None else unusable).append(name)
+    if missing or unusable:
+        return ([f"missing measurement: {', '.join(missing)}"] if missing else []) + \
+               ([f"unusable value: {', '.join(f'{n} = {values[n]!r}' for n in unusable)}"] if unusable else [])
+    try:
+        formula.evaluate(text, values, kinds)
+        return []
+    except (EvaluationError, ArithmeticError) as e:
+        return [f"can't be worked out ({e})"]
+
+
+def needs_review_reason(rule: dict, values: dict, kinds: dict) -> str:
+    """Why a row needs review, in plain words, found in the same order outcome() decides it: whether the rule
+    applies, then a flag, then each review condition, then the check. (The result itself always comes from
+    outcome(); this only explains it.)"""
+    if rule.get("applies_when") and (p := _problems(rule["applies_when"], values, kinds)):
+        return "Can't tell whether this rule applies: " + "; ".join(p) + "."
+    if rule.get("kind") == "flag":
+        return "A judgment call: a person decides (this rule is a flag)."
+    for r in rule.get("review_when") or []:
+        if p := _problems(r["when"], values, kinds):
+            return f"Can't tell whether {r['when']!r}: " + "; ".join(p) + "."
+        if formula.evaluate(r["when"], values, kinds) is True:
+            return " ".join(str(r.get("reason", "")).split())
+    p = _problems(rule["check"], values, kinds) if rule.get("check") else []
+    return ("Can't check: " + "; ".join(p) + ".") if p else "The check can't be worked out with these values."
+
+
+# ---- the workbook --------------------------------------------------------------------------------------
+
+def tables(project_path: Path) -> dict:
+    """The two tabs as plain rows (so tests check content without Excel)."""
+    project = load_project(project_path)
+    j = REPO / project["jurisdiction"]
+    book_path = rulebook_for(j, project["zone"])
+    book = load(book_path) or {}
+    uses = load(j / "4_term_definitions/uses.yaml") or {}
+    use_names = {k: v.get("name", k) for k, v in uses.items()}
+    documents = {d["file"]: d for d in load(j / "1_source_documents/sources.yaml")["documents"]}
+    values = {k: m["value"] for k, m in project["measurements"].items()}
+    allowed = {"use": Context.for_jurisdiction(j).uses}     # the same list the checker and the tests use
+    kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in allowed.items()}
+    which = book_path.relative_to(j / "5_zoning_rules").as_posix()
+
+    inputs = [[k.replace("_", " ").capitalize(), use_names.get(m["value"], m["value"]),
+               f"{_unit(k)}; {' '.join(str(MEASURES[k]['meaning']).split())}", str(m["from"])]
+              for k, m in project["measurements"].items()]
+
+    rows, links, params, param_links, later = [], [], [], [], []
+    for rule in book.get("rules") or []:
+        result = outcome(rule, values, allowed)
+        sources = rule.get("sources") or [{}]
+        first = sources[0]
+        link = page_link(j, documents, first.get("file", ""), first.get("page")) if first.get("file") else None
+        limit, proposed, units = (limit_and_proposed(rule["check"], values, kinds, use_names) if rule.get("check")
+                                  else ("a person decides", "", ""))
+        row = [rule.get("title", rule.get("id", "")), limit, proposed, units, COMPARISON[result],
+               first.get("page", ""), RESULT[result], rule.get("id", ""), rule.get("check", ""),
+               needs_review_reason(rule, values, kinds) if result == "needs_review" else "",
+               " ".join(str(first.get("quote", "")).split()), first.get("file", ""),
+               f"Open p.{first['page']}" if first.get("file") else "",
+               f"{which} ({rule.get('drafted_by', '')}, {rule.get('status', '')})"]
+        (later if result == "not_applicable" else rows).append((row, link))
+        if result != "not_applicable" and rule.get("check"):     # the limit as the table writes it
+            params.append([rule.get("title", ""), table_values(rule["check"]),
+                           f"{first.get('file', '')} p.{first.get('page', '')}" if first.get("file") else "",
+                           rule.get("id", ""), f"Open p.{first['page']}" if first.get("file") else ""])
+            param_links.append(link)
+    return {"title": project["title"], "inputs": inputs, "parameters": params, "parameter_links": param_links,
+            "output": [r for r, _ in rows], "output_links": [l for _, l in rows],
+            "not_applicable": [r for r, _ in later], "not_applicable_links": [l for _, l in later]}
+
+
+def build(t: dict) -> Workbook:
+    """The architects' two tabs, laid out like theirs (title in A1, headers bold on row 2), our columns after."""
+    wb = Workbook()
+    wb.remove(wb.active)
+    wb.properties.creator = "Gordium (generated: python -m project_report)"
+    ws = wb.create_sheet(INPUTS_TAB)
+    title(ws, INPUTS_TITLE)
+    widths = [43, 17, 46, 40, 30, 10]
+    end = write_block(ws, 2, list(zip(INPUT_HEADERS + INPUT_EXTRA, widths)), t["inputs"],
+                      fills={"Value": [INPUT_FILL] * len(t["inputs"])})
+    write_block(ws, end + 2, [(h, None) for h in PARAMETER_HEADERS + PARAMETER_EXTRA], t["parameters"],
+                links={"Link": t["parameter_links"]})
+    ws = wb.create_sheet(OUTPUT_TAB)
+    title(ws, f"GORDIUM | {t['title']}")
+    columns = list(zip(OUTPUT_HEADERS + OUTPUT_EXTRA, [34, 24, 20, 12, 22, 10, 16, 30, 40, 40, 60, 26, 10, 30]))
+    end = write_block(ws, 2, columns, t["output"], links={"Link": t["output_links"]})
+    if t["not_applicable"]:
+        ws.cell(row=end + 1, column=1, value="Rules in this zone that don't apply to this project")
+        write_block(ws, end + 2, [(h, None) for h, _ in columns], t["not_applicable"],
+                    links={"Link": t["not_applicable_links"]})
+    ws.freeze_panes = "A3"
+    return wb
+
+
+def output_path(project_path: Path) -> Path:
+    return project_path.with_name(f"{project_path.stem}_report.xlsx")

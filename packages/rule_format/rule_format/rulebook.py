@@ -88,6 +88,14 @@ def rulebook_paths(folder) -> list[Path]:
     return sorted(p for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file()) if folder.is_dir() else []
 
 
+def rulebook_for(jurisdiction, zone: str) -> Path | None:
+    """The rulebook that holds a zone's rules: the hand-drafted 5_zoning_rules/<zone>.yaml when it exists,
+    else the AI-drafted 5_zoning_rules/drafted/<zone>.yaml, else None. The one definition, used by the
+    project report and the answer-key test alike."""
+    folder = Path(jurisdiction) / "5_zoning_rules"
+    return next((p for p in (folder / f"{zone}.yaml", folder / "drafted" / f"{zone}.yaml") if p.is_file()), None)
+
+
 @dataclass
 class Context:
     """Everything a rule is checked against, for one jurisdiction."""
