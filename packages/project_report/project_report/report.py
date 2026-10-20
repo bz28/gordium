@@ -21,6 +21,7 @@ import ast
 import math
 from pathlib import Path
 
+import yaml
 from openpyxl import Workbook
 
 from rule_export.workbook import page_link, title, write_block
@@ -55,13 +56,18 @@ def load_project(path: Path) -> dict:
     """A project file: title, jurisdiction (a folder), zone, and measurements {name: {value, from}}. Fields the
     answer-key test uses (spreadsheet, compare) may be there too. Anything else is an error, so a typo can't
     silently drop a value."""
-    project = load(path) or {}
+    try:
+        project = load(path) or {}
+    except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
+        raise ValueError(f"{path}: can't read the project file ({type(e).__name__}: {e})") from e
     if not isinstance(project, dict):
         raise ValueError(f"{path}: a project file must be a mapping of fields (title, jurisdiction, zone, measurements)")
     if "measurements" in project and not isinstance(project["measurements"], dict):
         raise ValueError(f"{path}: measurements must be a mapping {{name: {{value, from}}}}")
     problems = [f"unknown field {k!r}" for k in project if k not in PROJECT_FIELDS]
     problems += [f"missing {k!r}" for k in ("title", "jurisdiction", "zone", "measurements") if k not in project]
+    problems += [f"{k!r} must be text" for k in ("title", "jurisdiction", "zone")
+                 if k in project and not (isinstance(project[k], str) and project[k].strip())]
     for name, m in (project.get("measurements") or {}).items():
         if name not in MEASURES:
             problems.append(f"measurement {name!r} isn't in measures.yaml")
