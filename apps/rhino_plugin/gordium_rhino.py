@@ -663,11 +663,13 @@ def add_to_check(ids):
 
 
 def _not_included(doc, lot):
-    """Closed solids and meshes standing on the lot that no rule measures (not on the Building layer, nor the
-    Site or Gordium layers): each one makes the check need review (C8)."""
+    """Anything on the lot that could be a building and isn't measured (rhino_logic.could_be_building: solids,
+    polysurfaces, meshes, SubD, blocks; not the ground, the picked terrain, the Building layer or Gordium's own
+    layers): each one makes the check need review (C8)."""
     if lot is None:
         return []
     box = lot.Geometry.GetBoundingBox(True)
+    lot_plan = (box.Max.X - box.Min.X) * (box.Max.Y - box.Min.Y)
     out = []
     every = Rhino.DocObjects.ObjectEnumeratorSettings()          # hidden and locked too, as for the Building layer:
     every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # a hidden shed still counts
@@ -678,9 +680,11 @@ def _not_included(doc, lot):
         # anything that could be a building: a solid, a closed mesh, a SubD, a polysurface (open ones too: a garage
         # missing a face is still a garage), a block. Not the lot, the terrain, Gordium's own drawing, the Building
         # layer (measured), curves, points and single flat surfaces.
+        ob = g.GetBoundingBox(True)
         could_be = logic.could_be_building(
             type(g).__name__, (isinstance(g, rg.Brep) and g.IsSolid) or (isinstance(g, rg.Mesh) and g.IsClosed),
-            g.Faces.Count if isinstance(g, (rg.Brep, rg.Mesh)) else 0)
+            g.Faces.Count if isinstance(g, (rg.Brep, rg.Mesh)) else 0,
+            covers_lot=(ob.Max.X - ob.Min.X) * (ob.Max.Y - ob.Min.Y) >= 0.6 * lot_plan)   # the ground, not a shed
         if not could_be or str(o.Id) == terrain or logic.on_layer(layer, LAYERS["building"]) \
                 or logic.on_layer(layer, "Gordium"):
             continue

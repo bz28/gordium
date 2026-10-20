@@ -525,8 +525,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],
             "proposed": proposed, "required": required, "margin": margin_t if st != REVIEW or margin_t else "",
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
-            "_raises": [(c.left.id, _evaluate(ast.unparse(c.comparators[0]), values), SIGNS[type(c.ops[0])])
-                        for c in raised],
+            "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
             "objects": (measured.get(node.left.id) or {}).get("objects", []) if node is not None else [],
             "points": (measured.get(node.left.id) or {}).get("points") if node is not None else None,
@@ -668,28 +667,33 @@ BUILDING_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rea
 
 def _raise_yards(items, measured, values, facts):
     """A rule that complies by its other way (the §325-16C height bonus: every yard 1 ft larger per extra foot)
-    raises the yards that way names: each yard row then shows that larger minimum and its true margin, so a
-    "+2'-0"" never invites moving the house onto a yard the bonus needs. Only ever stricter."""
+    raises the yards that way names: each yard row that doesn't already fail then shows that larger minimum and
+    its true margin, so a "+2'-0"" never invites moving the house onto a yard the bonus needs. Only ever stricter.
+    On a tax-map lot the raised comparison gets the same worst case as every other item (C2): every lot length it
+    depends on (the yard, and the lot depth the rear minimum is taken from) off by the tolerance."""
     for i in items:
-        for m, req, sign in i.pop("_raises", None) or []:
-            v = values.get(m)
+        for c in i.pop("_raises", None) or []:
+            m, sign = c.left.id, SIGNS[type(c.ops[0])]
+            req, v = _evaluate(ast.unparse(c.comparators[0]), values), values.get(m)
             if not isinstance(req, (int, float)) or not isinstance(v, (int, float)):
                 continue
             unit = (measured.get(m) or {}).get("unit") or ""
             margin = v - req if sign in ("≥", ">") else req - v
+            expr = ast.unparse(c)
+            worst = _worst_case(expr, values, formula.names(expr)) if not facts.get("lot_surveyed") else None
             for t in items:
-                if t is i or t.get("measure") != m or t["status"] != COMPLIES:
+                if t is i or t.get("measure") != m or t["status"] == FAILS:
                     continue
                 t["required"], t["margin"], t["hint"] = value_text(req, unit, sign, False), margin_text(margin, unit), None
-                t["reason"] = (f"At least {t['required']} while {i['name'].lower()} uses the rule's other way, "
-                               "which raises this yard")
-                if not facts.get("lot_surveyed") and m in LOT_LENGTHS | {"front_yard", "side_yard_smaller",
-                                                                         "side_yard_larger", "rear_yard"} \
-                        and margin < TOLERANCE:          # the raised minimum within the tax-map tolerance (C2)
+                if worst is not None:                    # the raised minimum fails at the tax-map worst case
+                    w = _display(*_numbers(c, worst, measured, t["name"]))
                     t.update(status=REVIEW, mark=MARK[REVIEW], reason=(
-                        f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst "
-                        f"{value_text(v - TOLERANCE, unit, sign)} against {t['required']}, the minimum "
-                        f"{i['name'].lower()}'s other way needs · Pick survey lot lines…"))
+                        f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst {w[0]} against "
+                        f"{w[1]}, the minimum {i['name'].lower()}'s other way needs · Pick survey lot lines…"))
+                elif t["status"] == COMPLIES:
+                    t["reason"] = (f"At least {t['required']} while {i['name'].lower()} uses the rule's other way, "
+                                   "which raises this yard")
+                # (a row in review for another reason keeps it, with the raised numbers)
                 t["detail"]["line"] = _detail_line(t["proposed"], t["required"], t["margin"], sign, margin)
                 t["detail"]["calc"] = f"Required: {t['required']}, raised by {i['name'].lower()}'s other way"
                 t["detail"]["at_limit"] = f"At the limit: {t['proposed']} exact" if t["margin"] == "at limit" else None

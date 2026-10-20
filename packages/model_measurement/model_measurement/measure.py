@@ -547,14 +547,16 @@ def _grade_from_points(buildings: list[dict], points: list, others: list = ()) -
              if math.dist(a, b) > 1.0]
     if not walls:                       # a round or finely faceted outline: no wall longer than 1 ft to sort by
         return None, stop("grade_walls_unclear")
-    elsewhere = [_projection(b).boundary for b in others if b.get("faces")]
-    elsewhere = ops.unary_union(elsewhere) if elsewhere else None      # the other buildings' walls, in plan
+    elsewhere = [_projection(b) for b in others if b.get("faces")]          # filled: a point under one is its own
+    elsewhere = ops.unary_union(elsewhere) if elsewhere else None      # the other buildings, in plan
     levels, off = {i: [] for i in range(len(walls))}, 0
     for x, y, z in points:
         here = Point(x, y)
         i = min(range(len(walls)), key=lambda k: walls[k].distance(here))
         if walls[i].distance(here) <= SPOT_REACH:
             levels[i].append(z)
+        elif outline.contains(here):            # under the building itself (a terrain sample where a wing joins):
+            continue                            # ground beneath it, not off its walls
         elif elsewhere is None or elsewhere.distance(here) > SPOT_REACH:
             off += 1
     bare = sum(1 for v in levels.values() if not v)

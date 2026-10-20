@@ -150,3 +150,31 @@ def test_the_height_detail_has_the_definitions_every_spot_grade_and_a_section(  
     assert dg["label"] == "Diagram, not to scale" and dg["height"] == 30 and dg["limit"] == 35
     assert dg["text"]["height"] == "30'-0\"" and dg["text"]["front"] == "30'-0\""
     assert d["zoom_note"] == "Zoom to opens the front elevation"
+
+
+def _bonus_at(outline, floors=None):
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "03_height_bonus_every_yard_increased.yaml"))
+    sc["lot"]["surveyed"] = False
+    sc["buildings"][0]["outline"] = outline
+    if floors:
+        sc["buildings"][0]["floors"] = floors
+    s, f, extras = scenarios.site(sc)
+    return {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}
+
+
+def test_a_raised_rear_yard_gets_the_full_tax_map_worst_case_lot_depth_too():
+    v = _bonus_at([[14, 30], [46, 30], [46, 85.8], [38, 85.8], [38, 50], [14, 50]])     # rear 34.2, needs 32 (+0.5)
+    assert v["Rear yard"]["status"] == present.REVIEW and "32'-6\"" in v["Rear yard"]["reason"]
+
+
+def test_a_yard_already_in_review_is_raised_too():
+    v = _bonus_at([[14, 26.5], [46, 26.5], [46, 85], [38, 85], [38, 46.5], [14, 46.5]], [12, 12, 12])   # 36 ft
+    f = v["Front yard"]
+    assert f["status"] == present.REVIEW and f["required"] == "26'-0\"" and f["margin"] == "+0'-6\""
+    assert "against 26'-0\"" in f["reason"]
+
+
+def test_ground_covering_the_lot_is_never_a_left_out_building():
+    from design_checker.rhino_logic import could_be_building
+    assert not could_be_building("Mesh", solid=False, faces=5000, covers_lot=True)     # the topography
+    assert could_be_building("Mesh", solid=False, faces=200, covers_lot=False)         # a shed

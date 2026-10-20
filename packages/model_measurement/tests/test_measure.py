@@ -726,3 +726,17 @@ def test_a_wing_on_lower_ground_lowers_the_grade_plane_of_the_reading_that_inclu
     with_wing = next(v for k, v in by.items() if k.startswith("with every other solid"))
     assert by["the main building only"] == 34.0 and with_wing > 35.0      # lower ground at the wing's walls
     assert h["value"] is None                                    # was 34 under both readings: a false pass
+
+
+def test_terrain_samples_under_an_attached_wing_are_ground_beneath_not_off_the_walls():
+    """The plugin samples the terrain 1 ft outside each solid's own walls; where a wing joins the house those
+    samples fall under the other solid. They are left out: height is still measured from the walls around."""
+    house = box(10, 25, 35, 65, 0, 30, id="house")
+    wing = box(35, 30, 45, 50, 0, 20, id="wing")
+    house_walls = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 40, 0]]         # (36, 40) is under the wing
+    wing_walls = [[40, 29, 0], [40, 51, 0], [46, 40, 0], [34, 40, 0]]         # (34, 40) is under the house
+    extra = [[36, 27.5, 0], [36, 57.5, 0]]                                     # the house's east wall around the wing
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "main_building": "house",
+             "grade_points": house_walls + wing_walls + extra}
+    h = measure(site(RECT, house, wing), facts)["building_height"]
+    assert h["value"] == 30.0, h                       # was "with the other solids … needs spot grades": never checked

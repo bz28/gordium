@@ -43,14 +43,20 @@ def status_color(status, dark, drawing=True):
 
 
 def eto_status_color(status):
-    dark = _dark_panel()
-    c = status_color(status, dark)
+    """Red or amber in the shade for the panel's own background; anything else is the system's text color (J2):
+    a fixed dark ink was unreadable on the dark panel."""
+    if status not in ("does_not_comply", "needs_review"):
+        return ef.SystemColors.ControlText
+    c = status_color(status, _dark_panel())
     return ed.Color.FromArgb(c.R, c.G, c.B)
 
 
 def _dark_panel():
+    """Whether the panel's background is dark, from its own red, green and blue (Eto colors are 0-1 floats and
+    have no brightness property: asking for one always said "light")."""
     try:
-        return ef.SystemColors.ControlBackground.Brightness < 0.5
+        c = ef.SystemColors.ControlBackground
+        return 0.299 * c.R + 0.587 * c.G + 0.114 * c.B < 0.5
     except Exception:
         return False
 
@@ -291,11 +297,6 @@ def show_detail(parts):
         d.AddRow(row(button("Enter bedrooms and parking spaces…", a["enter"])))
     if i["id"] == "scope.not_included":
         d.AddRow(row(button("Add to check…", lambda: a["add"](i["objects"]))))
-    for q in det.get("quotes") or []:
-        if q.get("text"):
-            d.AddRow(_wide("“" + q["text"] + "”", size=12))
-            if q.get("where"):
-                d.AddRow(_wide(q["where"], size=11))
     for t in det.get("definitions") or []:        # E5: the whole definitions an examiner measures height by
         d.AddRow(_wide(t["term"], bold=True, size=12))
         d.AddRow(_wide("“" + t["text"] + "”", size=11))
@@ -307,6 +308,11 @@ def show_detail(parts):
         d.AddRow(_section(det["diagram"]))
     if det.get("zoom_note"):
         d.AddRow(_wide(det["zoom_note"], size=11))
+    for q in det.get("quotes") or []:
+        if q.get("text"):
+            d.AddRow(_wide("“" + q["text"] + "”", size=12))
+            if q.get("where"):
+                d.AddRow(_wide(q["where"], size=11))
     if det.get("citation"):
         d.AddRow(_wide(det["citation"], size=11))
     for c in det.get("cited") or []:
