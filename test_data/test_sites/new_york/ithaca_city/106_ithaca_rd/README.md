@@ -24,7 +24,7 @@ Note: the lot in the architects' model is **6,674.5 sf** (their spreadsheet type
 | Layer | Contents |
 |---|---|
 | Map | 94 outlines of neighbouring buildings (named with OpenStreetMap-style IDs) |
-| Site | The lot (5 sides: 73.00 front, 90.28 and 99.37 sides, 67.72 rear, 10.47 jog; 6,674.5 sf), **plus** the buildable-area outline (~53.3 × 40.8 ft, 2,169.5 sf) and one loose line |
+| Site | The lot (5 sides: 73.00 front, 90.28 and 99.37 sides, 67.72 rear, 10.47 jog; 6,674.5 sf), **plus** the buildable-area outline (~53.3 × 40.8 ft, 2,169.2 sf) and one loose line |
 | Setback | 3 loose construction lines (the setbacks used were 30 front / 10 / 10 / 20 rear) |
 | Building | One 35 ft tall solid |
 
