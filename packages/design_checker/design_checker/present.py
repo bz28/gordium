@@ -432,7 +432,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     status, reason = _status(row), _reason(row)
     splits = [c for c in compares if c.left.id in ("side_yard_smaller", "side_yard_larger")] if measure in (
         "side_yard_smaller", "side_yard_larger") else []
-    parts = [(c, _side_name(c.left.id, measured)) for c in splits] if len(splits) == 2 else [(primary, name)]
+    # two side yards: always in the same order (by name), so equal yards never swap with the model's units
+    parts = sorted(((c, _side_name(c.left.id, measured)) for c in splits), key=lambda p: p[1]) \
+        if len(splits) == 2 else [(primary, name)]
     district = facts.get("zone") or ""
     sources = rule.get("sources") or []
     quotes = [q for q in (_quote(s, j, documents, district, cite) for s in sources) if q is not None]
@@ -502,6 +504,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 f"{SIGNS[type(c.ops[0])]} "
                 f"{value_text(_evaluate(ast.unparse(c.comparators[0]), values), (measured.get(c.left.id) or {}).get('unit') or '', SIGNS[type(c.ops[0])], False)}"
                 for c in raised))
+        as_is = (measured.get(node.left.id) or {}).get("measured_as_is") if node is not None else None
+        if as_is is not None and proposed == "—":      # measured, but the result waits (existing ground): the value
+            proposed = value_text(as_is, (measured.get(node.left.id) or {}).get("unit") or "", numbers[4])   # with ?
         if node is not None and proposed == "—":        # the readings disagree: show their span, not a dash
             span = _range(node.left.id, measured, values, numbers[4])
             if span:
@@ -833,7 +838,7 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
 
 
 SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Street side",
-                "corner_lot": "Corner lot", "ground_marked": "Marked as the ground",
+                "corner_lot": "Corner lot", "ground_marked": "Marked as the ground", "starting_house": "Starting house",
                 "ground": "Ground"}
 
 

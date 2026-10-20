@@ -175,18 +175,48 @@ def suggested_ground(building_bottoms, lot_bottom):
 
 def clear_spot(taken, x, y, w, h):
     """Where a w × h label wanted at (x, y) (its top left, in screen pixels) covers none already drawn this frame
-    (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn; the
-    spot is then taken. If none is free within four steps, the label stays where it was wanted."""
+    (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn, never
+    moved up off the top of the view; the spot is then taken. If none is free within four steps (a tall box such as
+    the status box in the way), the label goes just below everything it would cover."""
     def hits(top):
         return any(x < a + c and a < x + w and top < b + e and b < top + h for a, b, c, e in taken)
-    top = y
+    top = None
     for k in range(9):
         trial = y + (k + 1) // 2 * (h + 3) * (1 if k % 2 else -1)
-        if not hits(trial):
+        if (trial >= 0 or trial >= y) and not hits(trial):        # never moved up off the top of the view
             top = trial
             break
+    if top is None:                   # a tall box in the way (the status box): just below whatever it covers
+        below = y
+        for _ in range(len(taken) + 1):
+            over = [b + e for a, b, c, e in taken if x < a + c and a < x + w and below < b + e and b < below + h]
+            if not over:
+                top = below
+                break
+            below = max(over) + 3
+    top = y if top is None else top
     taken.append((x, top, w, h))
     return top
+
+
+def status_box(viewport_width, rows, size=13):
+    """Where the status box goes (top right of a view): (x, y, w, h) in screen pixels, the same size
+    gordium_ui.draw_text_box draws it. Reserved before the labels, so no label is drawn under it."""
+    width = max(len(r) for r in rows) * (size * 0.6) + 22
+    height = len(rows) * (size + 9) + 10
+    return (viewport_width - width - 14, 14, width, height)
+
+
+def survey_pick(n_lots, picked, outlined):
+    """Pick survey lot lines…: (the lot to mark as surveyed, or None; what to say, or None). Enter, with lots to
+    choose from, keeps the one outlined (as the prompt says); no lot at all says how to draw one."""
+    if n_lots == 0:
+        return None, "No lot outline to pick: draw the surveyed lot as one closed polyline on the Site layer."
+    if picked:
+        return picked, None
+    if outlined:
+        return outlined, None
+    return None, "No lot is outlined yet: run Pick survey lot lines… again and click the surveyed lot outline."
 
 
 def could_be_building(kind, solid=False, faces=0):
@@ -300,9 +330,73 @@ def box_rows(state):
     ]
 
 
+def parse_feet(text):
+    """A length the architect typed, in feet: 11'-8", 1' 6", 6", 6 in, 1.5, 1.5 ft, 2' -> feet; empty -> 0.0;
+    anything it can't read -> None, never a silent 0."""
+    import re
+    t = (text or "").strip().lower()
+    if not t:
+        return 0.0
+    t = re.sub(r"\s*(feet|foot|ft)\b", "'", t)
+    t = re.sub(r"\s*(inches|inch|in)\b", '"', t)
+    num = r"(\d+(?:\.\d+)?)"
+    m = re.fullmatch(num + r"\s*'?", t)                                  # feet: 2, 2', 1.5 ft
+    if m:
+        return float(m.group(1))
+    m = re.fullmatch(num + r"\s*'\s*-?\s*" + num + r'\s*"?', t)        # feet and inches: 11'-8", 1' 6
+    if m:
+        return float(m.group(1)) + float(m.group(2)) / 12
+    m = re.fullmatch(num + r'\s*"', t)                                  # inches alone: 6", 6 in
+    if m:
+        return float(m.group(1)) / 12
+    return None
+
+
+def report_message(path, written, error=None, opened=True, open_error=None, stale=False):
+    """What the panel says after a report was asked for (Zoning report… or GordiumCheck): never nothing (Ben's
+    test, 2026-10-20: the button did nothing after GordiumStart, because only GordiumCheck wrote the report).
+    `stale`: an earlier report is still at that path, so it is said to be out of date."""
+    if not written:
+        return ("Zoning report not saved: " + (error or "the check could not run") + "." +
+                (" The report already at " + path + " is from an earlier check: out of date." if stale else ""))
+    if opened:
+        return "Report saved to " + path + " (opened)."
+    return ("Report saved to " + path + ". It couldn't be opened here" + (": " + open_error if open_error else "") +
+            "; open it with Excel, Numbers or any spreadsheet app.")
+
+
+BUSY = "A check is running: try again in a moment."
+NO_DOCUMENT = "Open a Rhino model first."
+
+
+BUFFER_UNREAD = "Design buffer not understood: type it like 1'-6\" or 6\""
+
+
+def draw_reason(state):
+    """Why Draw is off, in one line; "" when it is on."""
+    if not state.get("district_confirmed"):
+        return "Confirm the district to continue."
+    if parse_feet(state.get("design_buffer")) is None:
+        return BUFFER_UNREAD
+    return ""
+
+
 def can_draw(state):
-    """Draw is on only once the district is confirmed: Gordium doesn't look the zoning map up yet."""
-    return bool(state.get("district_confirmed"))
+    """Draw is on only once the district is confirmed (Gordium doesn't look the zoning map up yet) and the design
+    buffer, if typed, can be read."""
+    return draw_reason(state) == ""
+
+
+def starting_house_fact(note, today):
+    """The site fact for how far the starting house keeps back from the limits: Gordium's own figure, so never
+    "confirmed by you" (the architect didn't confirm it). None when no house was drawn (`note` None)."""
+    if not note:
+        return None
+    # the panel puts "Starting house: " in front, and it describes the house as Gordium drew it (the architect
+    # may since have moved or replaced it), so it says so
+    said = note[len("Starting house: "):] if note.startswith("Starting house: ") else \
+        "it " + note[len("Starting house "):] if note.startswith("Starting house ") else note
+    return {"value": "as first drawn, " + said, "source": SUGGESTED, "confirmed_by": None, "date": today}
 
 
 def uncertain(state):
@@ -363,3 +457,10 @@ def district_confirmed(mode, zone_fact, zone):
     same district was confirmed at an earlier Draw (its saved source says who confirmed it)."""
     zone_fact = zone_fact or {}
     return mode != "start" and bool(zone_fact.get("confirmed_by")) and zone_fact.get("value") == zone
+
+
+def is_plan_view(parallel, direction_z, tolerance=0.99):
+    """Whether a viewport is a plan view, where plan labels belong: a parallel projection looking (nearly) straight
+    down. Not a perspective (labels sit on the massing) and not an elevation (Front, Right: every plan label piles
+    up on the ground line)."""
+    return bool(parallel) and direction_z <= -tolerance

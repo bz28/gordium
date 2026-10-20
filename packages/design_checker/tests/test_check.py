@@ -309,7 +309,8 @@ def test_the_massing_layer_holds_building_objects():
 
 
 def test_the_sample_lot_gives_the_spec_massing():
-    """73'-0" x 90'-0" (6,570 sf) -> 53'-0" x 30'-11" = 1,639 sf, 24.94% of the lot, at the 25'-0" front yard."""
+    """73'-0" x 90'-0" (6,570 sf, from the tax map) -> kept 2'-0" back: 49'-0" x 31'-10" = 1,560 sf, 23.74% of the lot as
+    drawn (25% of the smallest lot the tax map allows, 71 x 88), at 27'-0" from the street."""
     import math
     import tempfile
     from pathlib import Path
@@ -333,9 +334,9 @@ def test_the_sample_lot_gives_the_spec_massing():
     outline = Polygon(got["floors"][0]["outline"])
     x0, y0, x1, y1 = outline.bounds
     assert Polygon(s["lot"]).area == 6570 and s["facts"]["lot_surveyed"] is False
-    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (53, 30 * 12 + 11)
-    assert round(outline.area) == 1639 and round(outline.area / 6570 * 100, 2) == 24.94
-    assert y0 == 25 and len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
+    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (49, 31 * 12 + 10)
+    assert round(outline.area) == 1560 and round(outline.area / 6570 * 100, 2) == 23.74
+    assert y0 == 27 and len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
 
 
 def test_a_flag_needing_review_never_crashes_the_check(facts):
@@ -374,10 +375,36 @@ def test_viewport_labels_never_cover_each_other():
 def test_the_start_preview_and_the_panel_say_the_same_coverage(facts):
     from design_checker.check import start
     got = start(MODEL, {**facts, "lot_surveyed": False})
-    assert got["preview"]["coverage"] == "24.95%"      # 1,638.6 / 6,570 = 24.941%: a maximum, rounded up
-    assert got["preview"]["coverage"] == present._pct(got["area"] / 6570 * 100, "up", 2)
-    assert got["preview"]["size"] == "53'-0\" × 30'-11\"" and got["preview"]["height"] == "35'-0\""
+    # tax-map lot, kept 2'-0" back (worked by hand): width 73 − 2 × (10 + 2) = 49'-0"; coverage for the smallest lot
+    # the tax map allows, 25% × 71 × 88 = 1,562 sf, so depth 1,562 / 49 = 31.88 → 31'-10" (whole inches, down);
+    # 49 × 31.833 = 1,559.8 sf = 23.74% of the drawn 6,570 sf: the panel shows it to 0.1% (margin over 0.5%), up
+    assert got["preview"]["coverage"] == "23.8%"
+    assert got["preview"]["coverage"] == present._display(got["area"] / 6570 * 100, 25.0, None, "%", "≤")[0]
+    assert got["preview"]["size"] == "49'-0\" × 31'-10\"" and got["preview"]["height"] == "35'-0\""
     assert got["preview"]["limit"] == "25%"                 # the limit beside it (A11), a maximum rounded down
+
+
+def test_on_a_tax_map_lot_the_starting_house_complies_even_at_the_worst_case(facts):
+    """Ben, 2026-10-20: kept 2'-0" back from every limit and under coverage at the worst case, so nothing about the
+    generated house needs review because of the tax map; on a survey it goes exactly to the limits."""
+    from design_checker.check import TAX_MAP_NOTE, check_site, start
+    from envelope_builder.start import floor_solids
+    from model_measurement.read_3dm import read_site
+    tax = start(MODEL, {**facts, "lot_surveyed": False})
+    assert tax["kept_back"] == 2.0 and TAX_MAP_NOTE in tax["notes"] and tax["preview"]["kept_back"] == "2'-0\""
+    assert tax["margin_note"] == TAX_MAP_NOTE
+    # coverage is sized for the worst case, so no note says it needs review (review round 7)
+    assert not any("NEEDS REVIEW for coverage" in n for n in tax["notes"])
+    site = {**read_site(MODEL, facts), "buildings": floor_solids(tax["floors"])}
+    view = check_site(site, {**facts, "lot_surveyed": False})["view"]
+    assert not [i["name"] for i in view["items"] if i["status"] == present.REVIEW and "tax map" in (i["reason"] or "")]
+    surveyed = start(MODEL, {**facts, "lot_surveyed": True})
+    assert surveyed["kept_back"] == 0.0 and TAX_MAP_NOTE not in surveyed["notes"]
+    xs = [p[0] for p in surveyed["floors"][0]["outline"]]
+    assert max(xs) - min(xs) == pytest.approx(53.0)                 # 73 − 2 × 10: exactly at the side yards
+    buffered = start(MODEL, {**facts, "lot_surveyed": True}, design_buffer=1.0)
+    xs = [p[0] for p in buffered["floors"][0]["outline"]]
+    assert buffered["kept_back"] == 1.0 and max(xs) - min(xs) == pytest.approx(51.0)   # 1 ft more on each side
 
 
 def test_a_shortfall_is_never_shown_as_at_limit():
@@ -627,3 +654,243 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
     assert "sources = fact_sources(doc)" in drawn and "sources.update(" in drawn  # the ground marking is kept
     assert "from_sample=True" in rhino.split("def gordium_start(", 1)[1]
+
+
+def test_units_are_converted_in_one_place_both_ways():
+    """Gordium works in feet; the Rhino side converts at five helpers and nowhere else (a mm template showed why the
+    edge must be one place: there the start had to be checked line by line)."""
+    import re
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_facts_in_feet")
+    outside = []
+    for chunk in re.split(r"\n(?=def )", rhino):
+        name = re.match(r"def (\w+)", chunk)
+        if name and name.group(1) in helpers:
+            continue
+        for line in chunk.splitlines():
+            if re.search(UNITS_PATTERN, line) and "logic.to_feet(facts, _scale(doc))" not in line:
+                outside.append(line.strip())
+    assert outside == [], outside
+    assert "def frame_site(" in rhino and "frame_site(doc, facts)" in rhino.split("def gordium_start(", 1)[1]
+
+
+UNITS_PATTERN = r"_scale\(|\* k\b|\* scale\b|/ scale\b|\* k\)"     # any use of the scale, whatever follows it
+
+
+def test_the_units_scan_catches_a_conversion_inside_a_call():
+    """Review round 7: `_scale\(doc\)(?!\))` let `foo(y / _scale(doc))` through."""
+    import re
+    assert re.search(UNITS_PATTERN, "    x = foo(y / _scale(doc))")
+    assert re.search(UNITS_PATTERN, "    x = y * _scale(doc)")
+
+
+def test_a_value_measured_on_existing_ground_shows_with_its_review_mark_not_a_dash(facts, tmp_path):
+    import openpyxl
+    got = check(MODEL, {**facts, "grade_is": "existing"}, tmp_path / "r.xlsx")
+    rows = {i["name"]: i for i in got["view"]["items"]}
+    height, stories = rows["Building height"], rows["Stories"]
+    assert (height["status"], height["mark"]) == (present.REVIEW, "?") and height["proposed"] not in ("—", "")
+    assert stories["status"] == present.REVIEW and stories["proposed"] not in ("—", "")
+    assert "No regrading near the house" in height["reason"]                 # the reason says what settles it
+    text = " ".join(str(c.value) for r in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows() for c in r if c.value)
+    assert height["proposed"] in text                                          # the report shows the value too
+    assert got["measurements"]["building_height"]["value"] is None            # it still never decides the rule
+
+
+def test_plan_labels_only_in_a_view_looking_straight_down():
+    from design_checker.rhino_logic import is_plan_view
+    assert is_plan_view(True, -1.0)                      # Top
+    assert not is_plan_view(True, 0.0)                   # Front, Right: elevations
+    assert not is_plan_view(False, -1.0)                 # a perspective, even from above
+    assert not is_plan_view(True, 1.0)                   # Bottom
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    assert "plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)" in rhino
+
+
+def test_the_margin_note_says_what_was_kept_and_which_part_is_the_buffer(facts):
+    """Review round 7: with a 1'-0" buffer on a tax-map lot the house keeps 3'-0" back; the note said 2'-0"."""
+    from design_checker.check import NOT_PROVEN, TAX_MAP_NOTE, margin_note, start
+    got = start(MODEL, {**facts, "lot_surveyed": False}, design_buffer=1.0)
+    assert got["kept_back"] == 3.0
+    assert got["margin_note"] == ("Starting house keeps 3'-0\" back from each limit: 2'-0\" because the lot is from "
+                                  "the tax map (use a survey for the full area) and 1'-0\" your design buffer.")
+    assert got["margin_note"] in got["notes"] and TAX_MAP_NOTE not in got["notes"]
+    assert margin_note(2.25, 0.0, True, True).startswith("Starting house keeps 2'-3\" back")
+    assert margin_note(2.0, 0.0, True, False) == NOT_PROVEN          # never claimed without the proof
+    assert margin_note(0.0, 0.0, False, True) == "Starting house goes to the limits (the lot is from a survey)."
+
+
+def test_the_starting_house_fact_is_gordiums_never_confirmed_by_you():
+    """Review round 7: it was saved "confirmed by you" for a figure the architect never saw; and with no house drawn
+    there is no fact. Gordium saves it only after the house is drawn, and clears an earlier one first."""
+    from design_checker import rhino_logic as logic
+    fact = logic.starting_house_fact("Starting house keeps 2'-0\" back ...", "2026-10-20")
+    assert fact["confirmed_by"] is None and fact["source"] == logic.SUGGESTED
+    assert logic.starting_house_fact(None, "2026-10-20") is None
+    line = present.source_lines({"starting_house": fact})[0]
+    assert "confirmed by you" not in line and "not confirmed" in line
+    # round 8: said once, as the house first drawn; the not-proven note too
+    from design_checker.check import NOT_PROVEN, TAX_MAP_NOTE
+    lines = [present.source_lines({"starting_house": logic.starting_house_fact(n, "2026-10-20")})[0]
+             for n in (TAX_MAP_NOTE, NOT_PROVEN)]
+    assert lines[0].startswith("Starting house: as first drawn, it keeps 2'-0\" back from each limit")
+    assert lines[1].startswith("Starting house: as first drawn, Gordium couldn't keep it clear")
+    assert not any(ln.count("Starting house") > 1 for ln in lines) and NOT_PROVEN.endswith(".")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    body = rhino[rhino.index("def gordium_start"):]
+    # round 8: cleared before any way out (a start that draws nothing keeps no earlier start's margin)
+    assert body.index('_set_source(doc, "starting_house", None, None)') < body.index('if not start.get("floors")') \
+        < body.index("add_floors(doc, start)") < body.index("logic.starting_house_fact(")
+
+
+def test_a_design_buffer_is_read_or_draw_stays_off():
+    """Review round 7: 6" (inches alone) or "6 in" was read as 0, silently."""
+    from design_checker import rhino_logic as logic
+    assert logic.parse_feet('6"') == 0.5 and logic.parse_feet("6 in") == 0.5 and logic.parse_feet("1'-6\"") == 1.5
+    assert logic.parse_feet("") == 0.0 and logic.parse_feet("abc") is None and logic.parse_feet("-1") is None
+    state = {"district_confirmed": True, "design_buffer": "abc"}
+    assert not logic.can_draw(state) and logic.draw_reason(state) == logic.BUFFER_UNREAD
+    assert logic.can_draw({**state, "design_buffer": '6"'})
+
+
+def test_the_design_buffer_is_set_when_starting_not_in_edit_site():
+    """Review round 7: Edit site… showed it, but changing it there redrew nothing."""
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text()
+    assert 'buffer = ef.TextBox() if mode == "start" else None' in ui
+    guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text()
+    assert "Edit site… → Advanced" not in guide and "Advanced → Design buffer** in the GordiumStart box" in guide
+
+
+def test_frame_site_frames_the_lot_and_house_not_the_whole_file():
+    """Review round 7: Zoom All Extents undid the per-view framing and took in anything far away in the file."""
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    start = rhino.index("def frame_site")
+    body = rhino[start:start + 1800]
+    assert "_Extents" not in body and '"_-Zoom _All _Selected"' in body and "doc.Objects.Select(i)" in body
+
+
+def test_spec_item_ids_are_unique():
+    import collections
+    import re
+    spec = (REPO / "docs/design/rhino_ui_spec.md").read_text()
+    ids = collections.Counter(re.findall(r"^([A-Z]\d+) \[", spec, re.M))
+    assert [i for i, n in ids.items() if n > 1] == []
+
+
+def _panel_actions(rhino):
+    """The functions the panel's buttons call (gordium_rhino._actions), by name."""
+    import re
+    body = rhino[rhino.index("def _actions():"):rhino.index("\ndef panel():")]
+    return sorted(set(re.findall(r'"\w+": (\w+)[,}]', body)) - {"ui"})
+
+
+def test_the_zoning_report_button_writes_the_report_for_the_model_now_then_opens_it():
+    """Ben's test, 2026-10-20: after GordiumStart the button did nothing (it only opened a report GordiumCheck had
+    written, and GordiumStart, live checks and Retry never write one). Now it checks the model as it is, writing the
+    report, opens it, and says where it was saved, or why not."""
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    body = rhino[rhino.index("def open_report():"):rhino.index("\ndef off():")]
+    assert "run_check(doc, report=True)" in body and "os.path.getmtime(path) != before" in body
+    assert body.count("say(") >= 4 and "if os.path.exists(path):\n" not in body
+    from design_checker import rhino_logic as logic
+    assert logic.report_message("/x/a_gordium_report.xlsx", True) == "Report saved to /x/a_gordium_report.xlsx (opened)."
+    assert logic.report_message("/x/r.xlsx", False, "lot facts missing: zone") == \
+        "Zoning report not saved: lot facts missing: zone."
+    assert "open it with Excel, Numbers or any spreadsheet app" in logic.report_message("/x/r.xlsx", True, opened=False)
+
+
+def test_no_panel_button_does_nothing_silently():
+    """Every way out of a panel action that doesn't do its job says why first (say(): the command line and the
+    panel's message line). A bare return with nothing said is how the report button failed unseen."""
+    import re
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    names = _panel_actions(rhino)
+    assert {"open_report", "zoom_to", "hide_massing", "add_to_check", "pick_survey"} <= set(names)
+    silent = []
+    for name in names:
+        m = re.search(r"\ndef " + name + r"\(.*?(?=\n(?:def |class |[A-Z_]+ = ))", rhino, re.S)
+        if m is None:
+            continue
+        lines = [ln for ln in m.group(0).splitlines() if ln.strip()]
+        for k, ln in enumerate(lines):
+            if ln.strip() in ("return", "return None") and not any("say(" in x for x in lines[max(0, k - 3):k]):
+                silent.append(name + ": " + lines[k - 1].strip())
+    assert silent == [], silent
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text()
+    assert 'parts["message"] = label(' in ui and "def say(parts, text):" in ui
+
+
+def test_pick_survey_with_enter_keeps_the_outlined_lot_and_only_no_lot_says_draw_one():
+    """Review round 10: Enter, with two lots, said "No lot outline to pick" (the prompt says Enter keeps the one
+    outlined)."""
+    from design_checker import rhino_logic as logic
+    assert logic.survey_pick(2, None, "lot-a") == ("lot-a", None)
+    assert logic.survey_pick(2, "lot-b", "lot-a") == ("lot-b", None)
+    assert logic.survey_pick(0, None, None)[1].startswith("No lot outline to pick")
+    assert logic.survey_pick(2, None, None)[0] is None and "No lot outline" not in logic.survey_pick(2, None, None)[1]
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    assert 'logic.survey_pick(len(lots), picked, facts.get("lot_id"))' in rhino
+
+
+def test_the_panel_message_line_is_cleared_by_every_check():
+    """Review round 10: "Report saved to …" stayed after later edits and checks."""
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    # round 11: before anything that can fail, so a check that fails early clears it too
+    assert body.index('ui.say(STATE.get("panel_parts"), "")') < body.index("facts = current_facts(doc)")
+    report = rhino[rhino.index("def open_report():"):rhino.index("\ndef off():")]
+    assert report.index("run_check(doc, report=True)") < report.index("say(logic.report_message(path, True")
+
+
+def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_path):
+    """Review round 10: a report file that couldn't be written (a read-only folder, the file open elsewhere) threw
+    away the check's result as well."""
+    blocked = tmp_path / "ro"
+    blocked.mkdir()
+    blocked.chmod(0o500)
+    try:
+        got = check(MODEL, facts, blocked / "r.xlsx")
+    finally:
+        blocked.chmod(0o700)
+    assert got["view"]["items"] and got["report_error"] and "r.xlsx" in got["report_error"]
+    assert check(MODEL, facts, tmp_path / "ok.xlsx")["report_error"] is None
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    # round 11: said by run_check, so GordiumCheck (which asks for the report too) is never silent about it
+    body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert 'if report and result.get("report_error"):' in body and "say(logic.report_message(path, False" in body
+    # round 12: "out of date" only for a report that was there before this check, not one its own write left
+    assert body.index("had_report = bool(report) and os.path.exists(report_path(doc))") < body.index("result = ask(")
+    assert 'result["report_error"], stale=had_report))' in body
+    from design_checker import rhino_logic as logic
+    assert logic.report_message("/x/r.xlsx", False, "Permission denied", stale=True).endswith(
+        "The report already at /x/r.xlsx is from an earlier check: out of date.")
+
+
+def test_no_viewport_label_is_drawn_under_the_status_box():
+    """Coordinator, from the captures (2026-10-20): the status box covered the lot's top length label. The box is
+    reserved first; a label it would cover moves just below it."""
+    from design_checker import rhino_logic as logic
+    box = logic.status_box(1000, ["Gordium · ? 2 need review · 8 comply · 2 not checked", "Draft rulebook · Lot lines",
+                                  "Grade: flat at elevation 0'-0\" (existing)", "one more line"])
+    x, y, w, h = box
+    taken = [box]
+    top = logic.clear_spot(taken, 600, 20, 120, 20)                # a label wanted under the box
+    assert top >= y + h
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    conduit = rhino[rhino.index("    taken = []"):]
+    assert conduit.index("logic.status_box(") < conduit.index("ui.label_at(")
+
+
+def test_a_report_write_that_fails_half_way_leaves_no_broken_report(facts, tmp_path, monkeypatch):
+    """Review round 12: the report was saved straight to its path, so a write failing part way (disk full) left a
+    broken file there. It is written beside it and moved into place."""
+    import openpyxl
+
+    def broken(self, path):
+        open(path, "wb").write(b"PK half a workbook")
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(openpyxl.Workbook, "save", broken)
+    got = check(MODEL, facts, tmp_path / "r.xlsx")
+    assert "No space left on device" in got["report_error"] and got["view"]["items"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == []          # no report, no leftover part file

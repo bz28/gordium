@@ -6,31 +6,112 @@ Gordium checks your massing against the City of Ithaca zoning rules (R-1b, one-f
 you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 
+**Contents:** [Set up (once)](#what-you-need-once) · [Your first project](#your-first-project-step-by-step) ·
+[Test it yourself](#test-it-yourself) · [Troubleshooting](#troubleshooting) · [Getting updates](#getting-updates)
+
 ## What you need (once)
 
-1. **Rhino 8** (tested on a Mac; Windows should work but hasn't been tried).
-2. **This repository** on your computer, with its Python environment. In Terminal, from the repository folder:
+About 20 minutes on a new Mac. Three words used below:
+
+- **Terminal**: the Mac app where you type commands. To open it: press **Cmd+Space**, type `Terminal`, press
+  **Enter**. To run a command, paste it in and press **Enter**.
+- **Repository**: Gordium's project folder, kept on GitHub (a website that stores code).
+- **Branch**: a version of that folder still being worked on. Until it is finished and merged, the Rhino part of
+  Gordium is on the branch `rhino-ui`; after that it is on `main`, and you skip the `git checkout rhino-ui` line.
+
+1. **Get access.** The Gordium repository is private. Make a free account at [github.com](https://github.com) and
+   send Ben your GitHub username. He adds you; GitHub emails you an invitation: click **Accept invitation**.
+2. **Make a GitHub token** (the password Terminal uses for GitHub; your normal password doesn't work there). On
+   github.com: your picture (top right) → **Settings** → **Developer settings** → **Personal access tokens** →
+   **Tokens (classic)** → **Generate new token (classic)**. Tick **repo**, click **Generate token**, and copy the
+   token (it starts with `ghp_`). Keep it for step 5.
+3. **Install Rhino 8** (tested on a Mac; Windows should work but hasn't been tried).
+4. **Install Python 3.12** (the language Gordium's checking is written in). From
+   [python.org/downloads/macos](https://www.python.org/downloads/macos/), download the newest **Python 3.12.x**
+   "macOS 64-bit universal2 installer", open it and click through. Check in Terminal:
 
    ```
+   python3.12 --version
+   ```
+
+   You should see `Python 3.12.` and a number. If it says `command not found`, run the installer again.
+5. **Download Gordium** into your Documents folder. This makes the folder `Documents/gordium`; every path below
+   assumes it is there.
+
+   ```
+   cd ~/Documents && git clone https://github.com/bz28/gordium.git
+   ```
+
+   It asks for your **Username** (your GitHub username) and **Password**: paste the token from step 2 (nothing
+   shows as you paste; that's normal) and press Enter. You should see `Cloning into 'gordium'...` and then
+   `done.` Your Mac remembers the token, so it won't ask again.
+   - `Repository not found` or `Authentication failed`: accept the invitation (step 1), or make the token
+     again with **repo** ticked (step 2), then run the line again.
+   - If a box says *"The git command requires the command line developer tools"*, click **Install**, wait for it
+     to finish, then run the line again. (Or run `xcode-select --install` first.)
+6. **Set up Gordium's Python.** Paste all four lines at once:
+
+   ```
+   cd ~/Documents/gordium
+   git checkout rhino-ui
    python3.12 -m venv .venv
    .venv/bin/pip install -e ".[dev]"
    ```
 
-   Gordium's checking runs in this `.venv` Python, in the background; Rhino only draws what it says. No AI
-   runs while you design.
+   The second line says `Switched to a new branch 'rhino-ui'`. The last one prints a lot for a minute or two and
+   ends with `Successfully installed …` (a list that includes `gordium-0.1.0`). Gordium's checking runs in this
+   `.venv` Python (a private copy of Python inside the gordium folder), in the background; Rhino only draws what
+   it says. No AI runs while you design.
+   - `python3.12: command not found`: go back to step 4.
+   - The last line ends with a red `ERROR`: check you are online and run it again. If it still fails, send Ben
+     the last 20 lines it printed.
 
 ## Install in Rhino (once)
 
-1. Open Rhino.
-2. Type this in Rhino's command line, with your repository's folder in place of `<repo>`, and press Enter:
+1. **Open Rhino 8** and start a new file.
+2. **Open the ScriptEditor:** type `ScriptEditor` in Rhino's command line and press Enter (or Tools →
+   ScriptEditor). A script window opens. This also starts Rhino's Python, which Gordium needs: in every Rhino
+   session, open the ScriptEditor once before using Gordium.
+3. **Open the installer:** in the ScriptEditor, **File → Open…**. In the file window press **Cmd+Shift+G**, paste
+   the line below, press Enter, then click **Open**:
 
    ```
-   _-RunPythonScript "<repo>/apps/rhino_plugin/install.py"
+   ~/Documents/gordium/apps/rhino_plugin/install.py
    ```
 
-   Or: **ScriptEditor** → open `apps/rhino_plugin/install.py` → **Run**.
-3. The command line says `Gordium: GordiumStart -> gordium_start.py`, and the same for `GordiumCheck`,
-   `GordiumLive`, `GordiumFacts` and `GordiumOff`. These are now Rhino commands, kept between sessions.
+   (Or click your way there: Documents → gordium → apps → rhino_plugin → `install.py`.)
+4. **Run it:** click the **Run** button (▶) in the ScriptEditor.
+5. Rhino's command line shows five lines:
+
+   ```
+   Gordium: GordiumStart -> gordium_start.py
+   Gordium: GordiumCheck -> gordium_check.py
+   Gordium: GordiumLive -> gordium_live.py
+   Gordium: GordiumFacts -> gordium_facts.py
+   Gordium: GordiumOff -> gordium_off.py
+   ```
+
+   These five are now Rhino commands, kept between sessions. You can close the ScriptEditor.
+
+Used to Rhino's command line? Instead of steps 3 and 4, type
+`_-RunPythonScript "/Users/<your Mac username>/Documents/gordium/apps/rhino_plugin/install.py"` (the full path; in
+Terminal, `echo ~` prints the `/Users/…` part).
+
+## Getting updates
+
+When Ben says there is a new version:
+
+1. In Terminal:
+
+   ```
+   cd ~/Documents/gordium && git pull
+   ```
+
+   It lists the files that changed (or says `Already up to date.`).
+2. **Quit Rhino completely (Cmd+Q) and open it again.** Rhino keeps the old Gordium loaded until it is quit;
+   closing the window is not enough. You don't need to install in Rhino again.
+3. If Gordium then says a module is missing (`No module named …`), run step 6's last line again:
+   `cd ~/Documents/gordium && .venv/bin/pip install -e ".[dev]"`.
 
 ## Your first project, step by step
 
@@ -61,7 +142,9 @@ never says "complies" unless it is sure (see [What "needs review" means](#what-n
    - the lot's property line with each edge's length (in Top view);
    - the buildable envelope, see-through blue: the space every yard and the height limit leave;
    - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
-     `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked);
+     `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
+     lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
+     on a survey it goes to the limits. **Advanced → Design buffer** in the GordiumStart box keeps it further back;
    - top right, the **status box**: one line such as "? 6 need review · 4 comply · 2 not checked";
    - the **Gordium panel** (a floating window): every item, bad news first.
 5. **Make an edit.** Move, stretch or add solids as you normally would. Half a second after you stop, Gordium
@@ -75,14 +158,18 @@ never says "complies" unless it is sure (see [What "needs review" means](#what-n
    ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, how it was
    measured and worked out, and what to change ("To comply: move the building 0'-6" farther from that lot
    line."). **Zoom to** (or a double-click) frames the item: yards in Top, height in a front elevation.
-7. **Zoning report…** writes `<your model>_gordium_report.xlsx` next to the model (in Documents if the model
-   isn't saved yet), with the same statuses as the panel.
+7. **Zoning report…** checks the model as it is now and writes the report: `<your model>_gordium_report.xlsx`,
+   next to your model file, or in your **Documents** folder (`untitled_gordium_report.xlsx`) if the model isn't
+   saved yet. It has the same results as the panel. The line above the buttons says "Report saved to …" with the
+   full path, and the report opens in your spreadsheet app. That's Excel, or Numbers (free from the App Store), or
+   any app that opens .xlsx. If none is set up, open the file yourself from that folder. If the report can't be
+   written, the same line says why.
 
 ## The other commands
 
 | Command | What it does |
 |---|---|
-| `GordiumCheck` | Check the model now: your own design, or (on an empty file) the start flow. Writes the report. |
+| `GordiumCheck` | Check the model now: your own design, or (on an empty file) the start flow. Writes the report (so does **Zoning report…** in the panel). |
 | `GordiumLive` | Turn live re-checking after each edit on or off. |
 | `GordiumFacts` | Open the start box again to change the site facts (the panel's **Edit site…** does the same). |
 | `GordiumOff` | Stop Gordium and clear its drawing. Nothing in your model is changed. |
@@ -109,6 +196,80 @@ usually what fixes it:
 later release). "Not covered by this rulebook" lists code sections still to be checked by hand.
 
 The rules are a **draft**, not yet reviewed by a licensed professional; the panel says so at the top.
+
+## Test it yourself
+
+Every number below is checked by a test in the repository (`packages/design_checker/tests/test_quickstart.py`),
+so the guide and Gordium can't drift apart.
+
+### Rhino basics you'll need
+
+- **Select the house:** click it once. The three floors are one group, so they move together.
+- **Move by an exact distance:** `Move`, click a start point, type the distance (for example `5`), press Enter,
+  click the direction.
+- **Move one face:** Cmd+Shift+click a face to select just that face. Then drag the Gumball arrow, or click the
+  arrow and type a distance.
+- **Undo:** Cmd+Z.
+- **Draw a box:** `Box`, then two corners and a height.
+
+### The starting house on the sample lot
+
+The sample lot is 106 Ithaca Rd: 73'-0" × 90'-0", from the tax map. The starting house is 49'-0" wide and
+31'-10" deep, 35'-0" tall, in three floors of 11'-8".
+
+It keeps 2'-0" back from every limit because the lot lines are from the tax map, so it complies even if the
+tax map is 2 ft off:
+- front yard 27'-0" (needs 25'-0");
+- side yards 12'-0" (need 10'-0");
+- rear yard 31'-2" (needs 22'-6");
+- coverage 23.8% (the limit is 25%).
+
+Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading near the house**.
+
+### Simple tests
+
+1. **Edit site… → tick No regrading near the house → Draw.** Building height 35'-0" complies, at limit;
+   Stories 3 complies.
+2. **Move the house 5 ft back (away from the street).** Front yard 32'-0", rear yard 26'-2": both comply.
+3. **Move it 10 ft back instead.** Rear yard 21'-2" against 22'-6" required: **does not comply, −1'-4"**.
+   A note appears bottom left, and only the strip of the house inside the rear yard turns red.
+4. **Undo, then pull the rear wall 6 ft back** (Cmd+Shift+click the rear face, Gumball 6). Lot coverage 28.3%
+   against 25%: **does not comply**, with "reduce the footprint by at least …".
+5. **Undo, then raise the roof 3 ft** (the top face of Floor 3). Building height 38'-0": **does not comply either
+   way**. Over 35'-0", and the height bonus (§325-16C) would need every yard 3 ft larger: "Front yard 27'-0",
+   needs ≥ 28'-0"". Only the part above 35'-0" turns red.
+6. **Undo, then widen the house 4 ft to the east** (the east face). Side yard, East 8'-0": **does not comply,
+   −2'-0"**, and lot coverage 25.7% also doesn't: one note, "2 items no longer comply".
+7. **Undo.** Everything is back to the starting results.
+
+### Harder tests
+
+8. **A garage: `Box` 12 × 20 × 10 ft on the Default layer**, behind the house. "Objects on the lot not included"
+   and Lot coverage need review: coverage counts every building on the lot. **Add to check…** puts it on the
+   Building layer, and it is measured.
+9. **Move one floor on its own** (Floor 2, 3 ft east). Stories needs review: "floors misaligned".
+10. **The height bonus, done right:** raise the roof 3 ft (38'-0"), move the house 3 ft back, and pull each side
+    wall 3 ft in. Every yard is then 3 ft larger, plus the 2 ft the tax map needs. Building height complies
+    against 38'-6"; the Front yard row shows 28'-0" required, +2'-0".
+11. **Spot grades, then move the house:** Edit site… → I'll regrade: set finished ground…, click one point at each
+    wall, Draw. Height is measured from them. Then move the house 5 ft back: height and stories need review,
+    "spot grades no longer at the building's walls".
+12. **Corner lot:** Edit site… → Corner lot? Yes: two streets. The yards need review (which yard is the front is
+    an open question for a corner lot).
+13. **A survey:** with a surveyed lot, a new starting house goes exactly to the limits: 53'-0" × 30'-11", with
+    side yards at 10'-0", at limit, complying.
+14. **Other units:** start in a Millimeters, Meters or Inches template. The results are the same: Gordium works
+    in feet and converts at Rhino's edge.
+
+### What counts as a problem
+
+- A row saying **complies** that you think doesn't (a false pass): the most important kind. Please send it
+  with the file.
+- A number that's wrong, or rounded in Gordium's favor.
+- Something that should be drawn but isn't, or is drawn in the wrong place.
+- Rhino closing or freezing (see Troubleshooting).
+
+"Needs review" with a reason is not a problem: it's Gordium saying it can't be sure.
 
 ## Troubleshooting
 
