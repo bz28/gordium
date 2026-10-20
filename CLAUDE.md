@@ -5,17 +5,17 @@
 A co-pilot inside Rhino for architects. It knows every zoning rule a building must follow and checks each design edit against them (pass / fail / needs review). Later it proposes design options and learns each firm's style.
 
 - **End goal:** an architect describes what they want and gets a final design in Rhino that is legal, meets the brief, and looks like their work.
-- **Moat:** trusted, approved rules; exact city-specific measurement code; each firm's design memory. Not the AI itself.
+- **Moat:** trusted, traceable rules; exact city-specific measurement code; each firm's design memory. Not the AI itself.
 - **First city:** City of Ithaca, NY (not the Town of Ithaca, which has its own code). Residential districts first.
 - **Design doc:** https://claude.ai/code/artifact/d980dd22-6b2e-4090-bcc4-d02c871b8a7b (tabs: Plan · How it's built · Research)
 
 ## Core principles (do not break these)
 
 1. **Compile, then freeze.** Documents are turned into rules once per code version. Approved rules are frozen as data.
-2. **AI drafts, architects approve.** AI may draft labels and formulas from documents. Nothing is used until an architect approves it.
+2. **AI drafts, code checks.** AI may draft labels and formulas from documents; code verifies every draft (exact quotes, valid formulas, worked examples, provenance). Human approval is deferred for now (decided 2026-10-19): rules stay marked draft, and the approval fields stay in the format, unused, so a reviewer can be added later without a rebuild. A spreadsheet export of the rules, with links to the city's exact words, is how people read and check them.
 3. **The checker never uses AI.** Checking a design is plain code reading frozen rules. Same design + same rulebook = same answer.
 4. **Never a false pass.** Missing data, unclear rules, or failed measurements give "needs review", never "pass".
-5. **Everything is traceable.** Every rule records its source file (with fingerprint), page, exact position, quote, who approved it, and when.
+5. **Everything is traceable.** Every rule records its source file (with fingerprint), page, exact position, quote, and every change after the AI's draft (who, when, why).
 6. **Measurement definitions are code written by engineers**, tested on real models. AI never writes them.
 
 ## Repository layout
