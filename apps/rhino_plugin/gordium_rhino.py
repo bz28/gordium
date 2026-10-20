@@ -1588,6 +1588,11 @@ def gordium_start():
         live(True)                   # the architect draws one; it is checked as they go
         documents(True)
         return None
+    if Rhino.RhinoDoc.ActiveDoc is None or Rhino.RhinoDoc.ActiveDoc.RuntimeSerialNumber != doc.RuntimeSerialNumber:
+        Rhino.RhinoApp.WriteLine("Gordium: the document in front changed while the box was open; nothing was drawn "
+                                 "(run GordiumStart again in " + _doc_name(doc) + ")")
+        return None
+    Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
     if add_floors(doc, start) is None:
         Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; draw one and Gordium will check it")
         live(True)
@@ -1601,6 +1606,11 @@ def gordium_start():
     Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
                              logic.MASSING)
     return result
+
+
+def _doc_name(doc):
+    """The document as the architect knows it: its file name, or "the untitled document"."""
+    return os.path.basename(doc.Path) if doc.Path else (doc.Name or "the untitled document")
 
 
 def frame_site(doc, facts):

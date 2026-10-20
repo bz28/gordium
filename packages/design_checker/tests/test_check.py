@@ -645,3 +645,16 @@ def test_units_are_converted_in_one_place_both_ways():
                 outside.append(line.strip())
     assert outside == [], outside
     assert "def frame_site(" in rhino and "frame_site(doc, facts)" in rhino.split("def gordium_start(", 1)[1]
+
+
+def test_a_value_measured_on_existing_ground_shows_with_its_review_mark_not_a_dash(facts, tmp_path):
+    import openpyxl
+    got = check(MODEL, {**facts, "grade_is": "existing"}, tmp_path / "r.xlsx")
+    rows = {i["name"]: i for i in got["view"]["items"]}
+    height, stories = rows["Building height"], rows["Stories"]
+    assert (height["status"], height["mark"]) == (present.REVIEW, "?") and height["proposed"] not in ("—", "")
+    assert stories["status"] == present.REVIEW and stories["proposed"] not in ("—", "")
+    assert "No regrading near the house" in height["reason"]                 # the reason says what settles it
+    text = " ".join(str(c.value) for r in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows() for c in r if c.value)
+    assert height["proposed"] in text                                          # the report shows the value too
+    assert got["measurements"]["building_height"]["value"] is None            # it still never decides the rule
