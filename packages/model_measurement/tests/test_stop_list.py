@@ -1,10 +1,9 @@
-"""Every reason the measuring can stop with is listed in the README, word for word, and is reached by a case.
-
-The reasons are read from the code itself (each sentence put into a problems list, a `why_...` or `reason`, a
-street problem, or `_missing`), so a new stop can't be added without its line in the README and its case here:
-CASES pairs each reason with a small lot or model that gives it."""
+"""Every reason a measurement can stop with (model_measurement/stops.py) is listed in the README word for word,
+and has a case here, a small lot or model that gives it. The measuring code gives reasons only through that
+table (checked below), so a new stop can't be added without its README line and its case."""
 
 import ast
+import re
 import sys
 from pathlib import Path
 
@@ -13,6 +12,7 @@ import rhino3dm as r
 
 from model_measurement.measure import measure
 from model_measurement.read_3dm import read_site
+from model_measurement.stops import STOPS
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))           # the lots and models the other tests build
@@ -23,43 +23,13 @@ from test_read_3dm import model, on, rect, write  # noqa: E402
 
 CODE = HERE.parent / "model_measurement"
 README = " ".join((HERE.parent / "README.md").read_text().split())     # as one line: wrapping doesn't matter
+# words that make a sentence a reason to stop: only stops.py may hold one
+STOP_WORDS = re.compile(r"isn't|aren't|can't|doesn't|pick the|say whether|not measured yet|too many|explode")
 
 
-def _pieces(node):
-    """The fixed words of a reason: a plain string, or the longest fixed part of an f-string."""
-    if isinstance(node, ast.Constant) and isinstance(node.value, str):
-        yield node.value
-    elif isinstance(node, ast.JoinedStr):
-        yield max((v.value for v in node.values if isinstance(v, ast.Constant)), key=len, default="")
-    elif isinstance(node, (ast.IfExp, ast.BoolOp, ast.List, ast.Tuple, ast.BinOp)):
-        for child in ast.iter_child_nodes(node):
-            yield from _pieces(child)
-
-
-def _targets(node):
-    """The expressions in `node` that hold a reason, if any."""
-    if isinstance(node, ast.Call):
-        f = node.func
-        if isinstance(f, ast.Attribute) and f.attr == "append" and ast.unparse(f.value).endswith(("problems", "trouble")):
-            return node.args
-        if isinstance(f, ast.Name) and f.id == "_missing":
-            return node.args[1:2]
-    if isinstance(node, ast.Assign):
-        names = [ast.unparse(t) for t in node.targets]
-        if any(n.startswith("why") or n.endswith(("reason", "street_problem")) for n in names):
-            return [node.value]
-    if isinstance(node, ast.Dict):
-        return [v for k, v in zip(node.keys, node.values) if isinstance(k, ast.Constant) and k.value == "problems"]
-    return []
-
-
-def stop_reasons() -> list[str]:
-    found = []
-    for name in ("read_3dm.py", "measure.py"):
-        for node in ast.walk(ast.parse((CODE / name).read_text())):
-            for target in _targets(node):
-                found += [p.strip(" :(") for p in _pieces(target) if " " in p.strip()]
-    return sorted(set(found))
+def fixed_words(template: str) -> list[str]:
+    """The parts of a reason that never change (its blanks, like {layer}, left out)."""
+    return [p.strip() for p in re.split(r"\{[a-z_]+\}", template) if len(p.strip()) > 3]
 
 
 # ---- a case for each reason: (what it is, a function giving every reason a lot or model produces) ----------
@@ -68,6 +38,14 @@ def _said(site, facts):
     """Every problem and reason for a site, as one text."""
     reasons = [str(m.get("reason")) for m in measure(site, facts).values()]
     return " | ".join(site.get("problems", []) + [p for b in site["buildings"] for p in b["problems"]] + reasons)
+
+
+def _file_with_layers(layers, build):
+    def run(tmp_path):
+        m = model(layers=layers)
+        build(m)
+        return _said(read_site(write(m, tmp_path), FILE_FACTS), FILE_FACTS)
+    return run
 
 
 def _plain(lot_=RECT, buildings=None, **facts):
@@ -161,64 +139,77 @@ ZIGZAG = lot([(0, 0), (50, 0), (50, 100), (40, 110), (30, 100), (20, 110), (10, 
 SHEDS = [sloped_roof_box(2 + 6 * i, 70, 6 + 6 * i, 74, 20, 30, f"shed {i}") for i in range(8)]
 
 CASES = {
-    "a building has a curved edge (not measured yet)": _file(_cylinder),
-    "a building has a curved surface (not measured yet)": _file(_cylinder),
-    "a building isn't a closed solid": _file(_open_brep),
-    "a building isn't inside the lot": _plain(buildings=[box(40, 25, 60, 65)]),
-    "a building mesh isn't closed": _file(_open_mesh),
-    "a building mesh's points may be single precision, too coarse this far from the origin to measure to 0.01 ft "
-    "(move it nearer the origin, or turn it into a solid)": _file(_far_mesh, {"street_line": [[[200000, 300000], [200050, 300000]]]}),
-    "a corner lot: which yards are front, side and rear yards, and which street's frontage is the lot width "
-    "(§325-19C), are open questions for the architects": _plain(corner_lot=True),
-    "a street line given doesn't match a lot line: pick the street side again": _plain(street_line=[[[0, 5], [50, 5]]]),
-    "another solid's height can't be read": _plain(buildings=[box(10, 25, 35, 65), _walls_only(38, 70, 48, 90, "shed")],
-                                                   main_building="house"),
-    "can't read": _unreadable_file,
-    "closed outlines on the": _file(lambda m: (rect(m, 0, 0, 50, 100), rect(m, 60, 0, 90, 30), file_box(m, 10, 25, 35, 65, 30))),
-    "every lot line is on a street: which yards are front, side and rear is an open question for the architects":
-        _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]], [[50, 100], [0, 100]], [[0, 100], [0, 0]]],
-               corner_lot=False),
-    "layer can't be measured yet (explode it or turn it into a solid)": _file(_surface),
-    "layer can't be read yet (explode it)": _file(_block_on_site),
-    "more than one building: pick the main building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
-    "no building on the Building layer": _plain(buildings=[]),
-    "no closed lot outline on the": _file(lambda m: file_box(m, 10, 25, 35, 65, 30)),
-    "say whether the ground is flat": _plain(ground_is_flat=None),
-    "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no": _plain(corner_lot=None),
-    "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet":
-        _plain(ground_is_flat=False),
-    "the ground level isn't given: enter it (the grade plane)": _plain(grade_elevation=None),
-    "the lot outline crosses itself": _plain(lot([(0, 0), (50, 0), (0, 100), (50, 100)])),
-    "the lot outline isn't one closed loop of lot lines":
-        _plain({"id": "lot", "edges": [{"points": [[0, 0], [50, 0]], "curved": False},
-                                       {"points": [[50, 0], [50, 100]], "curved": False},
-                                       {"points": [[50, 100], [0, 100]], "curved": False}]}),
-    "the lot picked isn't a closed outline on the Site layer: pick the lot again":
-        _file(lambda m: (rect(m, 0, 0, 50, 100), file_box(m, 10, 25, 35, 65, 30)), {"lot_id": "not-in-the-model"}),
-    "the model's units": _units,
-    "the roof's shape can't be read (no faces open to the sky)": _plain(buildings=[_walls_only(10, 25, 35, 65)]),
-    "the side and rear lot lines can't be told apart": _plain(ZIGZAG),
-    "the street lot lines given aren't next to each other":
-        _plain(street_line=[[[0, 0], [50, 0]], [[50, 100], [0, 100]]], corner_lot=False),
-    "the street side isn't given: pick the lot line on the street": _plain(street_line=[]),
-    "too many solids with open roof questions to list every reading: pick the main building's parts, or ask the architects":
-        _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house"), *SHEDS], main_building="house"),
+    "unreadable_file": _unreadable_file,
+    "units": _units,
+    "no_lot_layer": _file_with_layers(("Building",), lambda m: file_box(m, 10, 25, 35, 65, 30, layer=0)),
+    "no_lot_outline": _file(lambda m: file_box(m, 10, 25, 35, 65, 30)),
+    "several_lot_outlines": _file(lambda m: (rect(m, 0, 0, 50, 100), rect(m, 60, 0, 90, 30), file_box(m, 10, 25, 35, 65, 30))),
+    "lot_not_found": _file(lambda m: (rect(m, 0, 0, 50, 100), file_box(m, 10, 25, 35, 65, 30)), {"lot_id": "not-in-the-model"}),
+    "lot_block": _file(_block_on_site),
+    "no_lot": _plain(None),
+    "lot_not_a_loop": _plain({"id": "lot", "edges": [{"points": [[0, 0], [50, 0]], "curved": False},
+                                                     {"points": [[50, 0], [50, 100]], "curved": False},
+                                                     {"points": [[50, 100], [0, 100]], "curved": False}]}),
+    "lot_crosses_itself": _plain(lot([(0, 0), (50, 0), (0, 100), (50, 100)])),
+    "survey_unknown": _plain(lot_surveyed=None),
+    "not_surveyed": _plain(lot_surveyed=False),
+    "no_street": _plain(street_line=[]),
+    "street_not_a_lot_line": _plain(street_line=[[[0, 5], [50, 5]]]),
+    "street_lines_apart": _plain(street_line=[[[0, 0], [50, 0]], [[50, 100], [0, 100]]], corner_lot=False),
+    "all_street": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]], [[50, 100], [0, 100]], [[0, 100], [0, 0]]],
+                         corner_lot=False),
+    "corner_unknown": _plain(corner_lot=None),
+    "corner_lot": _plain(corner_lot=True),
+    "lines_unclear": _plain(ZIGZAG),
+    "no_rear_line": _plain(lot([(0, 0), (50, 0), (25, 100)]), buildings=[box(20, 10, 30, 30)]),
+    "no_ground": _plain(grade_elevation=None),
+    "ground_unknown": _plain(ground_is_flat=None),
+    "sloped_ground": _plain(ground_is_flat=False),
+    "no_building": _plain(buildings=[]),
+    "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
+    "outside_lot": _plain(buildings=[box(40, 25, 60, 65)]),
+    "open_solid": _file(_open_brep),
+    "open_mesh": _file(_open_mesh),
+    "curved_surface": _file(_cylinder),
+    "curved_edge": _file(_cylinder),
+    "single_precision": _file(_far_mesh, {"street_line": [[[200000, 300000], [200050, 300000]]]}),
+    "not_a_solid": _file(_surface),
+    "no_roof": _plain(buildings=[_walls_only(10, 25, 35, 65)]),
+    "other_height": _plain(buildings=[box(10, 25, 35, 65), _walls_only(38, 70, 48, 90, "shed")], main_building="house"),
+    "too_many_roofs": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house"), *SHEDS], main_building="house"),
 }
 
 
-def test_the_reasons_are_found_in_the_code():
-    assert "the side and rear lot lines can't be told apart" in stop_reasons() and len(stop_reasons()) > 25
+def quoted(template: str) -> re.Pattern:
+    """The reason as the README quotes it: the whole sentence in quotes, each blank filled by a word or two
+    (`<file>`, `2`, `Site`, `a block`)."""
+    parts = re.split(r"\{[a-z_]+\}", template)
+    return re.compile('"' + '[^" ]+(?: [^" ]+)?'.join(re.escape(p) for p in parts) + '"')
 
 
 def test_every_stop_is_listed_in_the_readme():
-    missing = [r for r in stop_reasons() if r not in README]
+    missing = [STOPS[k] for k in STOPS if not quoted(STOPS[k]).search(README)]
     assert not missing, "add to the README's list of what stops a measurement: " + "; ".join(missing)
 
 
 def test_every_stop_has_a_case():
-    assert sorted(CASES) == stop_reasons()
+    assert sorted(CASES) == sorted(STOPS)
 
 
-@pytest.mark.parametrize("reason", sorted(CASES))
-def test_each_stop_is_given_by_its_case(reason, tmp_path):
-    assert reason in CASES[reason](tmp_path)
+@pytest.mark.parametrize("key", sorted(STOPS))
+def test_each_stop_is_given_by_its_case(key, tmp_path):
+    said = CASES[key](tmp_path)
+    assert all(w in said for w in fixed_words(STOPS[key])), (STOPS[key], said)
+
+
+def test_the_measuring_gives_reasons_only_from_the_table():
+    """A reason written straight into the code would be missed by the README and the cases."""
+    found = []
+    for name in ("read_3dm.py", "measure.py"):
+        tree = ast.parse((CODE / name).read_text())
+        docs = {id(n.body[0].value) for n in ast.walk(tree) if isinstance(n, (ast.Module, ast.FunctionDef, ast.ClassDef))
+                and n.body and isinstance(n.body[0], ast.Expr)}
+        found += [f"{name}:{n.lineno} {n.value!r}" for n in ast.walk(tree)
+                  if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in docs
+                  and STOP_WORDS.search(n.value)]
+    assert not found, "put these reasons in stops.py and use stop(): " + "; ".join(found)

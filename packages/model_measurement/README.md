@@ -64,24 +64,26 @@ listed, and the reason names the open question for the architects, so the checke
 | More than one solid, for the height | the main building alone / with every other solid as part of it | §325-25 |
 
 Things that stop a measurement. The measurement has no value and gives NEEDS REVIEW, with this reason, word
-for word (`tests/test_stop_list.py` reads every reason from the code, checks it is listed here, and builds a case
-that gives it):
+for word. Every reason is in one table, `model_measurement/stops.py`, and the code gives no other;
+`tests/test_stop_list.py` checks each is listed here and builds a case that gives it:
 
 - **The file:** "can't read <file>"; "the model's units (<units>) aren't supported" (feet, inches, millimetres,
   centimetres and metres are).
-- **The lot outline:** "no closed lot outline on the Site layer"; "2 closed outlines on the Site layer: pick the
+- **The lot outline:** "no Site layer"; "no lot outline"; "no closed lot outline on the Site layer"; "2 closed outlines on the Site layer: pick the
   lot"; "the lot picked isn't a closed outline on the Site layer: pick the lot again"; "a block on the Site layer
   can't be read yet (explode it)"; "the lot outline isn't one closed loop of lot lines"; "the lot outline crosses
   itself (…)". A lot outline not from a survey stops the lot area (and so coverage): "say whether the lot outline
-  is from a survey" / "the lot outline isn't from a survey".
+  is from a survey"; "the lot outline isn't from a survey: the lot area needs one (an open question for the
+  architects)".
 - **The street side:** "the street side isn't given: pick the lot line on the street"; "a street line given
   doesn't match a lot line: pick the street side again"; "the street lot lines given aren't next to each other";
   "every lot line is on a street: which yards are front, side and rear is an open question for the architects".
 - **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
   lot yes or no"; "a corner lot: which yards are front, side and rear yards, and which street's frontage is the
   lot width (§325-19C), are open questions for the architects".
-- **Side and rear lot lines:** "the side and rear lot lines can't be told apart" (more than 4 lot lines that
-  could be either: too many readings to list).
+- **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 4 lot lines could be
+  either: too many readings to list)"; "no reading of the lot lines gives two side lot lines and a rear lot line
+  (a triangular lot, for one): an open question for the architects".
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "say whether the ground is flat";
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
 - **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a

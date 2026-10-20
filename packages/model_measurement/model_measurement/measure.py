@@ -23,6 +23,8 @@ from shapely.validation import explain_validity
 
 from rule_format.rulebook import MEASURES_FILE, load
 
+from .stops import stop
+
 MEASURES = list(load(MEASURES_FILE))
 
 TOL = 0.01                # ft: two points closer than this are the same point
@@ -92,23 +94,22 @@ class Lot:
         self.polygon = Polygon(ring)
         self.problems = []
         if n < 3 or any(not _same_point(self.edges[i][-1], self.edges[(i + 1) % n][0]) for i in range(n)):
-            self.problems.append("the lot outline isn't one closed loop of lot lines")
+            self.problems.append(stop("lot_not_a_loop"))
         elif not self.polygon.is_valid or self.polygon.area <= 0:
-            self.problems.append(f"the lot outline crosses itself ({explain_validity(self.polygon)})")
+            self.problems.append(stop("lot_crosses_itself", why=explain_validity(self.polygon)))
         street = [i for i, e in enumerate(self.edges)
                   if any(_same_point(e[0], a) and _same_point(e[-1], b) or _same_point(e[0], b) and _same_point(e[-1], a)
                          for a, b in facts.get("street_line") or [])]
         self.street = street
         self.street_problem = None
         if not facts.get("street_line"):
-            self.street_problem = "the street side isn't given: pick the lot line on the street"
+            self.street_problem = stop("no_street")
         elif len(street) != len(facts["street_line"]):
-            self.street_problem = "a street line given doesn't match a lot line: pick the street side again"
+            self.street_problem = stop("street_not_a_lot_line")
         elif not self._contiguous(street):
-            self.street_problem = "the street lot lines given aren't next to each other"
+            self.street_problem = stop("street_lines_apart")
         elif len(street) == n:
-            self.street_problem = ("every lot line is on a street: which yards are front, side and rear is an open "
-                                   "question for the architects")
+            self.street_problem = stop("all_street")
 
     def _contiguous(self, idx) -> bool:
         n = len(self.edges)
@@ -335,7 +336,7 @@ def _height(building: dict, grade: float) -> dict:
     bottom = min(zs)
     roof = [f for f in _open_to_the_sky(building["faces"]) if not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
     if not roof:
-        return _missing("building_height", "the roof's shape can't be read (no faces open to the sky)")
+        return _missing("building_height", stop("no_roof"))
     how = "from the ground level (grade plane) to the top of the roof"
     # the main roof: the largest roof plane seen from above (its faces together, so a meshed roof counts whole)
     main_roof = max(_planes(roof), key=lambda g: (ops.unary_union([_plan(f) for f in g]).area,
@@ -382,15 +383,14 @@ def _with_others(main: dict, others: list[dict]) -> dict:
     and the accessory question."""
     unread = [o for o in others if o["value"] is None and not o["readings"]]
     if unread:                          # never dropped: it could be the tallest part
-        return _missing("building_height", "another solid's height can't be read: " + unread[0]["reason"])
+        return _missing("building_height", stop("other_height", reason=unread[0]["reason"]))
 
     def values(m):
         return [(r["reading"], r["value"]) for r in m["readings"]] or [("", m["value"])]
 
     mine, theirs = values(main), [values(o) for o in others]
     if len(mine) * math.prod(len(t) for t in theirs) > MAX_COMBINATIONS:
-        return _missing("building_height", "too many solids with open roof questions to list every reading: "
-                                           "pick the main building's parts, or ask the architects")
+        return _missing("building_height", stop("too_many_roofs"))
     names = [o["objects"][0] for o in others]
     combos = [((w, "alone") + (None,) * len(others), v) for w, v in mine]
     combos += [((w, "with") + tuple(lbl for lbl, _ in picks), max([v] + [x for _, x in picks]))
@@ -444,14 +444,12 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     grade = facts.get("grade_elevation")
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if b["id"] == facts.get("main_building")), None))
-    why_building = ("no building on the Building layer" if not buildings else
+    why_building = (stop("no_building") if not buildings else
                     "; ".join(p for b in buildings for p in b.get("problems") or []) or None)
-    why_grade = ("the ground level isn't given: enter it (the grade plane)" if grade is None else
-                 "say whether the ground is flat" if facts.get("ground_is_flat") is None else
-                 None if facts["ground_is_flat"] else
-                 "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't "
-                 "measured yet")
-    why_main = None if main else "more than one building: pick the main building"
+    why_grade = (stop("no_ground") if grade is None else
+                 stop("ground_unknown") if facts.get("ground_is_flat") is None else
+                 None if facts["ground_is_flat"] else stop("sloped_ground"))
+    why_main = None if main else stop("no_main_building")
     why = why_building or why_grade or why_main
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
     others = [b for b in buildings if b is not main]
@@ -461,7 +459,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None
     if lot is None or lot.problems:
-        reason = "; ".join(problems or (lot.problems if lot else ["no lot outline"]))
+        reason = "; ".join(problems or (lot.problems if lot else [stop("no_lot")]))
         for name in UNITS:
             out.setdefault(name, _missing(name, reason))
         return out
@@ -471,20 +469,16 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     else:                               # a drawn lot isn't a surveyed one: the lot area waits for a survey
         out["lot_area"] = _record("lot_area", "sf", None, "the area inside the lot lines", [lot.id], None,
                                   [{"reading": "the lot as drawn", "value": _r(lot.polygon.area)}],
-                                  "say whether the lot outline is from a survey" if facts.get("lot_surveyed") is None
-                                  else "the lot outline isn't from a survey: the lot area needs one (an open question "
-                                       "for the architects)")
+                                  stop("survey_unknown") if facts.get("lot_surveyed") is None else stop("not_surveyed"))
 
     # where the street is decides the lot width, the yards and the lot depth. Whether the lot is a corner lot
     # (two streets, §325-19C) is stated by the architect, never guessed from the drawing (the city's definition
     # has no angle in it). On a corner lot every one of them is an open question: which yards are front, side
     # and rear, and which frontage is the lot width (and the drawing can't show whether both streets were given).
     if not lot.street_problem and facts.get("corner_lot") is None:
-        lot.street_problem = ("say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot "
-                              "yes or no")
+        lot.street_problem = stop("corner_unknown")
     elif not lot.street_problem and facts["corner_lot"]:
-        lot.street_problem = ("a corner lot: which yards are front, side and rear yards, and which street's frontage "
-                              "is the lot width (§325-19C), are open questions for the architects")
+        lot.street_problem = stop("corner_lot")
     if lot.street_problem:
         for name in ("lot_width", "lot_depth", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard"):
             out[name] = _missing(name, lot.street_problem)
@@ -501,7 +495,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     footprints = {b["id"]: _projection(b) for b in buildings}
     everything = ops.unary_union(list(footprints.values())) if footprints else Polygon()
     why_inside = (why_building or
-                  (None if everything.within(lot.polygon.buffer(TOL)) else "a building isn't inside the lot"))
+                  (None if everything.within(lot.polygon.buffer(TOL)) else stop("outside_lot")))
     if why_inside or why_grade:
         out["building_area"] = _missing("building_area", why_inside or why_grade)
     else:
@@ -516,7 +510,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         return out
     sides = "which lot lines count as side and rear lot lines is an open question for the architects (lot_depth)"
     readings = lot.readings()
-    why_lines = None if readings else "the side and rear lot lines can't be told apart"
+    why_lines = (stop("lines_unclear", limit=MAX_UNCLEAR_EDGES) if readings is None else  # too many to list
+                 stop("no_rear_line") if not readings else None)                         # none fits the definitions
     out["lot_depth"] = (_missing("lot_depth", why_lines) if why_lines else
                         _decide("lot_depth", [(w, (lot.length(l) + lot.length(r)) / 2, {}) for w, l, r, _ in readings],
                                 "the average length of the two side lot lines", [lot.id], sides))

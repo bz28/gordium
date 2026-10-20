@@ -14,6 +14,8 @@ from pathlib import Path
 
 import rhino3dm as r
 
+from .stops import stop
+
 LAYERS = {"lot": "Site", "building": "Building"}
 TO_FEET = {r.UnitSystem.Feet: 1.0, r.UnitSystem.Inches: 1 / 12, r.UnitSystem.Millimeters: 1 / 304.8,
            r.UnitSystem.Centimeters: 1 / 30.48, r.UnitSystem.Meters: 1 / 0.3048}
@@ -66,12 +68,12 @@ def _brep_faces(brep, s):
     for i in range(len(brep.Faces)):
         f = brep.Faces[i]
         if not f.IsPlanar():
-            problems.append("a building has a curved surface (not measured yet)")
+            problems.append(stop("curved_surface"))
             continue
         loops = [f.Loops[k] for k in range(len(f.Loops))]
         trims = [[loop.Trims[k] for k in range(loop.TrimCount)] for loop in loops]
         if any(not brep.Edges[t.EdgeIndex].IsLinear() for ts in trims for t in ts):
-            problems.append("a building has a curved edge (not measured yet)")
+            problems.append(stop("curved_edge"))
             continue
         rings = [(loop.LoopType, [_xyz(verts[t.StartVertexIndex], s) for t in ts]) for loop, ts in zip(loops, trims)]
         outer = [ring for kind, ring in rings if kind == r.BrepLoopType.Outer]
@@ -99,8 +101,7 @@ def _mesh_faces(mesh, s):
     problems = []
     far = any(max(abs(p.X), abs(p.Y), abs(p.Z)) * s > FLOAT_SAFE for p in points)
     if far and all(_single(c) for p in points for c in (p.X, p.Y, p.Z)):   # only single-precision points held
-        problems.append("a building mesh's points may be single precision, too coarse this far from the origin to "
-                        "measure to 0.01 ft (move it nearer the origin, or turn it into a solid)")
+        problems.append(stop("single_precision"))
     faces = []
     for i in range(len(mesh.Faces)):
         a, b, c, d = mesh.Faces[i]
@@ -131,11 +132,11 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
     """The lot and buildings in a .3dm, in feet: {"units", "lot", "buildings", "problems"}."""
     model = r.File3dm.Read(str(path))
     if model is None:
-        return {"units": "ft", "lot": None, "buildings": [], "problems": [f"can't read {path}"]}
+        return {"units": "ft", "lot": None, "buildings": [], "problems": [stop("unreadable_file", path=path)]}
     s = TO_FEET.get(model.Settings.ModelUnitSystem)
     if s is None:
         return {"units": "ft", "lot": None, "buildings": [],
-                "problems": [f"the model's units ({model.Settings.ModelUnitSystem}) aren't supported"]}
+                "problems": [stop("units", units=model.Settings.ModelUnitSystem)]}
     names = [layer.FullPath for layer in model.Layers]
 
     def inside(name, layer):            # a layer and its sublayers ("Building::Garage")
@@ -143,7 +144,7 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
 
     placed = [o for o in model.Objects if not o.Attributes.IsInstanceDefinitionObject]   # not a block's definition
     on = {k: [o for o in placed if inside(names[o.Attributes.LayerIndex], v)] for k, v in layers.items()}
-    problems = [] if layers["lot"] in names else [f"no {layers['lot']} layer"]
+    problems = [] if layers["lot"] in names else [stop("no_lot_layer", layer=layers["lot"])]
     # a block's objects keep their own layers wherever the block is placed: a block holding anything on the
     # lot or building layer (at any depth) is reported, never read at its definition's place or dropped
     blocks = {k: False for k in layers}
@@ -152,20 +153,20 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
             for k, v in layers.items():
                 blocks[k] |= inside(names[o.Attributes.LayerIndex], v) or _block_holds(model, o.Geometry, names, v)
     if blocks["lot"]:
-        problems.append(f"a block on the {layers['lot']} layer can't be read yet (explode it)")
+        problems.append(stop("lot_block", layer=layers["lot"]))
 
     closed = [o for o in on["lot"] if isinstance(o.Geometry, r.Curve) and o.Geometry.IsClosed]
     picked = [o for o in closed if _id(o) == facts.get("lot_id")]
     lot = None
     if facts.get("lot_id") and not picked:
-        problems.append("the lot picked isn't a closed outline on the Site layer: pick the lot again")
+        problems.append(stop("lot_not_found"))
     elif picked or len(closed) == 1:
         o = (picked or closed)[0]
         lot = {"id": _id(o), "edges": _edges(o.Geometry, s)}
     elif not closed:
-        problems.append(f"no closed lot outline on the {layers['lot']} layer")
+        problems.append(stop("no_lot_outline", layer=layers["lot"]))
     else:
-        problems.append(f"{len(closed)} closed outlines on the {layers['lot']} layer: pick the lot")
+        problems.append(stop("several_lot_outlines", count=len(closed), layer=layers["lot"]))
 
     buildings, unread = [], set()
     for o in on["building"]:
@@ -181,15 +182,14 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
         elif isinstance(g, r.Brep):
             faces, trouble = _brep_faces(g, s)
             if not g.IsSolid:
-                trouble.append("a building isn't a closed solid")
+                trouble.append(stop("open_solid"))
             buildings.append({"id": _id(o), "faces": faces, "problems": trouble})
         elif isinstance(g, r.Mesh):
             faces, trouble = _mesh_faces(g, s)
             buildings.append({"id": _id(o), "faces": faces,
-                              "problems": trouble + ([] if g.IsClosed else ["a building mesh isn't closed"])})
+                              "problems": trouble + ([] if g.IsClosed else [stop("open_mesh")])})
     if blocks["building"]:
         unread.add("a block")
     for kind in sorted(unread):                 # never dropped silently: the coverage and yards would be wrong
-        buildings.append({"id": kind, "faces": [], "problems": [
-            f"{kind} on the {layers['building']} layer can't be measured yet (explode it or turn it into a solid)"]})
+        buildings.append({"id": kind, "faces": [], "problems": [stop("not_a_solid", kind=kind, layer=layers["building"])]})
     return {"units": "ft", "lot": lot, "buildings": buildings, "problems": problems}
