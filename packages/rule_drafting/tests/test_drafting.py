@@ -15,7 +15,7 @@ import pytest
 
 from rule_drafting import __main__ as cli
 from rule_drafting import chart_values, drafter
-from rule_drafting.templates import SLOT, fill_template
+from rule_drafting.templates import DRAFTED_QUESTION, SLOT, fill_template
 from section_labeling.budget import Budget, BudgetExceeded
 
 USAGE = {"input_tokens": 900, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 9000, "output_tokens": 700}
@@ -206,6 +206,20 @@ def test_permitted_use_rules_follow_the_chart_marks(inputs):
     assert no_rule == {"R-3a", "R-3b"}                                          # nothing there fails: for a person
     assert all(any(g["rule"] == f"{d}.use" and "no failing example" in g["why"] for g in result["unresolved"])
                for d in no_rule)
+
+
+def test_a_drafted_question_says_it_is_not_researched_yet(inputs):
+    """A question a drafting run raises carries a research entry saying it is pending, so it passes the show-
+    your-work check honestly (nothing searched yet) instead of failing or claiming research it didn't do."""
+    from rule_format.rulebook import research_problems
+    r1b = cli.draft_uses(inputs)["rules"]["R-1b"][0]
+    assert [x["question"] for x in r1b["research"]] == r1b["open_questions"]
+    assert r1b["research"][0]["why_open"].startswith("pending") and research_problems(r1b, inputs.ctx) == []
+    asked = template("x", "front_yard >= 1", [], [({"front_yard": "2"}, "pass")]) | {"open_questions": ["Why?"]}
+    rule, why = fill_template(asked, None, {}, [], "claude")
+    assert why is None and rule["research"] == [{"question": "Why?", "searched": [], "sources": [],
+                                                 "why_open": "pending: " + DRAFTED_QUESTION}]
+    assert research_problems(rule, inputs.ctx) == []
 
 
 def test_footnotes_and_section_references_are_read_from_the_page(inputs):

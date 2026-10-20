@@ -267,7 +267,7 @@ def _run(client, j: Path, file: str, path: Path, todo: list[dict], budget: Budge
         if entry is None:
             failed.append(piece["id"])
             continue
-        kept = {k: old[k] for k in ("open_questions", "answers", "notes") if k in old}   # a reviewer's work survives
+        kept = {k: old[k] for k in ("open_questions", "research", "findings", "answers", "notes") if k in old}  # survives
         book["labels"][piece["id"]] = entry | kept | {"run": run_file.relative_to(j).as_posix()}
         book_path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
         labeled.append(piece["id"])
