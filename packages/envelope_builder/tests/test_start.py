@@ -157,15 +157,6 @@ def test_a_street_drawn_with_a_bend_still_gets_a_full_starting_building(bend):
     assert outline.area >= 0.25 * Polygon(bent).area - 60, outline.area
 
 
-@pytest.mark.parametrize("deep", [[(0, 0), (100, 0), (100, 600), (0, 600)],
-                                  [(0, 0), (100, 0), (115, 600), (-15, 600)]])      # straight, and widening
-def test_a_deep_lot_is_quick(deep):
-    import time
-    t = time.time()
-    start, _ = generated(deep, {**FACTS, "street_line": [[[0, 0], [100, 0]]]})
-    assert start["floors"] and time.time() - t < 3
-
-
 def test_on_a_lot_that_widens_toward_the_rear_the_building_stays_at_the_front_yard_line():
     widening = [(0, 0), (60, 0), (62, 150), (-2, 150)]
     start, _ = generated(widening, {**FACTS, "street_line": [[[0, 0], [60, 0]]]})
@@ -200,26 +191,114 @@ def test_a_lot_whose_sides_lean_outward_still_gets_a_full_building_at_the_front_
         assert m["front_yard"]["value"] == pytest.approx(25, abs=0.01)
 
 
+CANT = "Gordium can't generate a starting building on this lot shape yet"
+
+
 @pytest.mark.parametrize("points, street", [
     ([(0, 0), (20, 0), (20, 40), (60, 40), (60, 140), (-40, 140), (-40, 40), (0, 40)], [[0, 0], [20, 0]]),   # flag lot
     ([(0, 0), (18, 0), (18, 30), (70, 30), (70, 130), (-50, 130), (-50, 30), (0, 30)], [[0, 0], [18, 0]]),   # 18 ft neck
-    ([(0, 0), (20, 0), (20, 40), (300, 340), (-280, 340), (0, 40)], [[0, 0], [20, 0]]),     # a wedge that widens far back
+    ([(0, 0), (20, 0), (20, 40), (560, 600), (-540, 600), (0, 40)], [[0, 0], [20, 0]]),     # a deep wedge
 ])
-def test_a_flag_lot_whose_side_yards_fill_the_pole_still_gets_a_building(points, street):
-    facts = {**FACTS, "street_line": [street]}
+def test_a_flag_lot_gets_no_building_and_is_told_to_draw_one(points, street):
+    """The side yards close the frontage, so no rectangle sits on the front yard line: Gordium places nothing
+    (never a wrong building) and says so, and the architect draws one for Gordium to check."""
+    start, _ = generated(points, {**FACTS, "street_line": [street]})
+    assert start["floors"] == [] and any(n.startswith(CANT) for n in start["notes"]), start["notes"]
+
+
+def test_a_building_that_would_break_a_rule_is_never_placed(monkeypatch):
+    """The proof: whatever the search finds is measured and checked with the checker's rules before it is
+    returned. Here the search is made to hand back a rectangle 10 ft too deep, over the coverage limit."""
+    import envelope_builder.start as s
+    real = s._footprint
+
+    def too_wide(*a, **k):
+        f = real(*a, **k)
+        return f and (f[0], f[1], f[2], f[3] + 10)
+    monkeypatch.setattr(s, "_footprint", too_wide)
+    start, _ = generated(RECTANGLE, {**FACTS, "street_line": [[[0, 0], [73, 0]]]})
+    assert start["floors"] == [] and start["notes"] and start["notes"][-1].startswith(CANT), start["notes"]
+    assert "coverage" in start["notes"][-1]                                # says which rule it would break
+
+
+def _random_lot(rng):
+    """A made-up lot: 3 to 8 corners around a centre (convex or not), 30 to 250 ft across, the first edge the street."""
+    while True:
+        n = rng.randint(3, 8)
+        angles = sorted(rng.uniform(0, 2 * math.pi) for _ in range(n))
+        radii = [rng.uniform(15, 125) for _ in range(n)]
+        pts = [(round(r * math.cos(a), 2), round(r * math.sin(a), 2)) for a, r in zip(angles, radii)]
+        if len(set(pts)) == n and Polygon(pts).is_valid and Polygon(pts).area > 100:
+            return pts
+
+
+def test_on_any_lot_shape_a_generated_building_never_fails_a_rule():
+    """The guarantee, over 60 random lot shapes (convex or not): a building is placed only when every rule it
+    touches passes or needs review; otherwise none is, and the note says so."""
+    import random
+    rng = random.Random(14)
+    placed = 0
+    for _ in range(60):
+        points = _random_lot(rng)
+        facts = {**FACTS, "street_line": [[list(points[0]), list(points[1])]]}
+        start, site = generated(points, facts)
+        if not start["floors"]:
+            assert start["notes"], points
+            continue
+        placed += 1
+        got, _ = results(site, facts)
+        empty, _ = results({**site, "buildings": []}, facts)       # what the lot itself fails, with no building
+        assert not [k for k, v in got.items() if v == "fail" and empty[k] != "fail"], (points, got)
+    assert placed >= 10                       # tested on real buildings, not only on refusals
+
+
+@pytest.mark.parametrize("width, depth, skew", [(60, 100, 0), (73, 90, 0), (100, 150, 0), (60, 120, 8),
+                                                (80, 110, -6), (120, 70, 5)])
+def test_every_usual_four_sided_lot_gets_a_full_building(width, depth, skew):
+    """Convex four-sided lots (the R-1b kind): always a building, on the front yard line, passing every rule."""
+    points = [(0, 0), (width, 0), (width + skew, depth), (skew, depth)]
+    facts = {**FACTS, "street_line": [[[0, 0], [width, 0]]]}
     start, site = generated(points, facts)
-    assert start["floors"] and any("flag lot" in n for n in start["notes"]), start["notes"]
+    assert start["floors"] and start["notes"] == [], start["notes"]
     got, m = results(site, facts)
-    note = next(n for n in start["notes"] if "flag lot" in n)
-    assert f"{m['front_yard']['value']:.1f} ft from the street" in note        # the note says where it really is
-    building_rules = {k: v for k, v in got.items() if "lot_width" not in k}   # the narrow frontage is the lot's own
-    assert "fail" not in building_rules.values(), got
-    assert m["front_yard"]["value"] >= 25
+    assert "fail" not in got.values(), got
+    assert m["front_yard"]["value"] == pytest.approx(25, abs=0.01)
 
 
-def test_a_deep_flag_lot_is_quick():
-    import time
-    wedge = [(0, 0), (20, 0), (20, 40), (560, 600), (-540, 600), (0, 40)]
-    t = time.time()
-    start, _ = generated(wedge, {**FACTS, "street_line": [[[0, 0], [20, 0]]]})
-    assert start["floors"] and time.time() - t < 1.5
+def _search_steps(monkeypatch, points, street):
+    """How much searching the generator does: its inner loop's steps (each rounds one area once)."""
+    import builtins
+
+    import envelope_builder.start as s
+    count = [0]
+
+    def counting(*a):
+        count[0] += 1
+        return builtins.round(*a)
+    monkeypatch.setattr(s, "round", counting, raising=False)
+    start, _ = generated(points, {**FACTS, "street_line": [street]})
+    monkeypatch.undo()
+    assert start["floors"], start["notes"]
+    return count[0]
+
+
+@pytest.mark.parametrize("widens", [0, 1 / 40])          # straight, and widening toward the rear
+def test_a_deep_lot_takes_work_in_step_with_its_depth(monkeypatch, widens):
+    """Doubling a lot's depth at most about doubles the search (a search that grows with the square would be 4x).
+    Counted, not timed, so it holds on any machine."""
+    def lot_of(deep):
+        return [(0, 0), (100, 0), (100 + deep * widens, deep), (-deep * widens, deep)]
+    a = _search_steps(monkeypatch, lot_of(600), [[0, 0], [100, 0]])
+    b = _search_steps(monkeypatch, lot_of(1200), [[0, 0], [100, 0]])
+    assert 0 < b < 2.5 * a, (a, b)
+
+
+def test_a_lot_that_breaks_a_lot_rule_itself_still_gets_its_building():
+    """A 45 ft wide lot is narrower than R-1b's lot width: that's the lot's own (the check still shows it), not
+    the building's, so the building is still placed, and it breaks nothing else."""
+    narrow = [(0, 0), (45, 0), (45, 150), (0, 150)]
+    facts = {**FACTS, "street_line": [[[0, 0], [45, 0]]]}
+    start, site = generated(narrow, facts)
+    assert start["floors"], start["notes"]
+    got, _ = results(site, facts)
+    assert [k for k, v in got.items() if v == "fail"] == ["R-1b.lot_width_one_family_detached"], got

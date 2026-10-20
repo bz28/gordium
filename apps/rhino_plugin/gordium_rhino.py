@@ -1111,6 +1111,8 @@ def gordium_start():
         Rhino.RhinoApp.WriteLine("Gordium: " + note)
     if not start.get("floors"):
         Rhino.RhinoApp.WriteLine("Gordium: no starting building could be drawn")
+        live(True)                   # the architect draws one; it is checked as they go
+        documents(True)
         return None
     add_floors(doc, start)
     doc.Views.Redraw()

@@ -21,14 +21,16 @@ import math
 from shapely import affinity
 from shapely.geometry import LineString, Point, Polygon, box
 
-from model_measurement.measure import Lot
+from model_measurement.measure import Lot, measure
 from rule_format import formula
+from rule_format.rulebook import REPO, Context, outcome
 
 from .envelope import LOT_MEASURES, _applies, _worst, envelope
 
 STEP = 0.1        # ft: how finely the footprint's depth is searched
 SAFETY = 0.01     # ft: pulled in when a corner falls between samples
 INCH = 1 / 12     # the footprint's sides are whole inches, rounded down (never toward a limit)
+CANT = "Gordium can't generate a starting building on this lot shape yet; draw one and Gordium will check it"
 
 
 def _story_limit(rules: list[dict], measured: dict):
@@ -84,16 +86,14 @@ def _x_range(shape: Polygon, y: float, around: float):
     return s[0], s[-1]
 
 
-def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_limit: float,
-               front_from: float = -math.inf, stride: int = 1):
+def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_limit: float):
     """(x0, x1, front, depth): the largest rectangle square to the street inside the buildable area, at or under
     the coverage limit. The fronts tried run from the bottom of the buildable area up to `front_limit`: the front
     yard line (`front_line`, always tried exactly), or on a bent or curved street the deepest point of that line
     plus one STEP. From each, the width only narrows going back, so it grows deeper until coverage or the rear
     stops it; the largest wins, the widest on a tie. So when a front exists at the front yard line, the building
-    sits on it, never slides back for a wider rear, and the search stays short. (A flag lot, where none exists, is
-    searched over its whole buildable area by the caller: fronts a foot apart first (`stride`), then every
-    level near the best (`front_from`), so a deep lot stays quick.)"""
+    sits on it, never slides back for a wider rear, and the search stays short. (A flag lot or a narrow neck, where
+    the side yards close the frontage, gets none: the caller says it can't generate one on that shape yet.)"""
     y0, y1 = shape.bounds[1], shape.bounds[3]
     n = max(1, int(math.ceil((y1 - y0) / STEP)))
     levels = sorted({y0 + (y1 - y0) * k / n for k in range(n + 1)} | ({front_line} if y0 <= front_line <= y1 else set()))
@@ -101,8 +101,6 @@ def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_
     spans = [_x_range(shape, y, around) for y in levels]
     best, best_key = None, (0.0, 0.0)   # the largest area, then the widest (square to the side yards)
     for i, first in enumerate(spans):
-        if i % stride or levels[i] < front_from - 1e-9:
-            continue
         if levels[i] > front_limit + 1e-9:
             break                       # behind the front yard line (or its strip, on a bent street)
         if first is None or first[1] - first[0] <= 0:
@@ -131,9 +129,13 @@ def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_
     return best
 
 
-def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict]) -> dict:
+def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], uses=None) -> dict:
     """{"floors": [{"outline": [[x, y], ...], "base": z, "top": z}, ...], "stories", "height", "area",
-    "coverage_allowed", "notes"}: the starting building, or no floors and the notes that say why."""
+    "coverage_allowed", "notes"}: the starting building, or no floors and the notes that say why.
+
+    The guarantee, on any lot shape: the building returned has been measured and checked against every rule (each
+    passes or needs review), or no building is returned and the notes say "Gordium can't generate..." (`CANT`).
+    `uses`: the city's use names (read from the jurisdiction in the facts when not given)."""
     out = {"floors": [], "stories": None, "height": None, "area": None, "coverage_allowed": None, "notes": []}
     notes = out["notes"]
     sized, drawn = _as_drawn(measured)       # coverage on a lot not yet surveyed: from the lot as drawn (said below)
@@ -165,27 +167,15 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     front_line = max(street) + env["yards"]["front"]          # the front yard line, in the street's frame
     found = _footprint(buildable, buildable.centroid.x, allowed, front_line,
                        front_line + (STEP if bend > 1e-9 else 0.0))
-    if found is None and buildable.bounds[1] > front_line + 1e-9:
-        # a flag lot or a narrow neck: the side yards close the frontage, so the buildable area only starts behind
-        # the front yard line; the building goes where the buildable area begins, and the note says why
-        around, top = buildable.centroid.x, buildable.bounds[3]
-        coarse = _footprint(buildable, around, allowed, front_line, top, stride=int(round(1.0 / STEP)))
-        found = coarse and (_footprint(buildable, around, allowed, front_line, coarse[2] + 1.0, coarse[2] - 1.0)
-                            or coarse)
-        if found is not None:
-            setback = found[2] - max(street)
-            notes.append("the side yards close the lot's frontage (a flag lot or a narrow neck): the starting building "
-                         f"sits behind the front yard line, where the largest rectangle fits, {setback:.1f} ft from the "
-                         "street")
     if found is None:
-        notes.append("no rectangle square to the street fits inside the required yards")
+        notes.append(CANT)
         return out
     lo, hi, y0, depth = found
     best = box(lo, y0, hi, y0 + depth)
     while not best.within(buildable.buffer(1e-9)) and best.bounds[2] - best.bounds[0] > 2 * SAFETY:
         best = box(best.bounds[0] + SAFETY, y0, best.bounds[2] - SAFETY, y0 + depth)   # a corner between slices
     if not best.within(buildable.buffer(1e-9)):
-        notes.append("no rectangle square to the street fits inside the required yards")
+        notes.append(CANT)
         return out
     x0, _, x1, y1b = best.bounds                 # whole inches, rounded down, centred where it was
     width = math.floor((x1 - x0) / INCH + 1e-6) * INCH
@@ -199,4 +189,39 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     out["floors"] = [{"outline": ring, "base": base + i * story, "top": top if i == stories - 1 else base + (i + 1) * story}
                      for i in range(stories)]
     out.update(stories=stories, height=env["height"], area=outline.area, coverage_allowed=allowed)
+    failing = _failing(site, facts, out["floors"], rules, uses)
+    if failing:                          # never a wrong building: it is proven with the checker's own rules first
+        notes.append(f"{CANT} (the rectangle found would break: {', '.join(failing)})")
+        out.update(floors=[], stories=None, height=None, area=None)
     return out
+
+
+def floor_solids(floors: list[dict]) -> list[dict]:
+    """The floor blocks as solids the measuring code reads (as GordiumStart draws them), each marked as one story."""
+    solids = []
+    for i, f in enumerate(floors):
+        ring, z0, z1 = [tuple(p) for p in f["outline"]], f["base"], f["top"]
+        n = len(ring)
+        walls = [{"points": [[*ring[k], z0], [*ring[(k + 1) % n], z0], [*ring[(k + 1) % n], z1], [*ring[k], z1]]}
+                 for k in range(n)]
+        solids.append({"id": f"floor {i + 1}", "floor": z1 - z0, "problems": [],
+                       "faces": [{"points": [[x, y, z0] for x, y in ring]}, {"points": [[x, y, z1] for x, y in ring]},
+                                 *walls]})
+    return solids
+
+
+def _failing(site: dict, facts: dict, floors: list[dict], rules: list[dict], uses) -> list[str]:
+    """The ids of the rules the building breaks, measured and checked exactly as the checker does (measure, then
+    outcome). Only a FAIL counts: a rule that needs review (no survey yet, the bedrooms not drawn) is the
+    architect's to answer, and the check says so. A rule the lot itself already fails, with no building on it
+    (a frontage narrower than the lot-width rule), is the lot's, not the building's: the check still shows it."""
+    if uses is None:
+        j = facts.get("jurisdiction")
+        uses = Context.for_jurisdiction(REPO / j).uses if j and (REPO / j).is_dir() else set()
+
+    def fails(buildings):
+        values = {k: v["value"] for k, v in measure({**site, "buildings": buildings}, facts).items()}
+        return [r["id"] for r in rules if outcome(r, values, {"use": uses}) == "fail"]
+
+    lot_own = set(fails([]))
+    return [i for i in fails(floor_solids(floors)) if i not in lot_own]
