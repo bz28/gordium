@@ -151,13 +151,35 @@ def _sentences(text: str) -> str:
     return " ".join(text.split())
 
 
+def numbered_text(lines: list[tuple[int, int, str]]) -> str:
+    """A law piece's whole text, every line numbered L1, L2, ..., with a '--- page N ---' line at each page break
+    (the labeler's numbering, so a line is called the same in both steps)."""
+    out, page = [], None
+    for i, (p, _, text) in enumerate(lines, 1):
+        if page is not None and p != page:
+            out.append(f"--- page {p} ---")
+        page = p
+        out.append(f"L{i}: {text}")
+    return "\n".join(out)
+
+
 def unit_message(unit: dict, context: dict) -> str:
-    """The unit's own text plus what it points to: the requirements its label found, footnotes, sections
-    of the law, definitions."""
-    parts = [unit["intro"], unit["text"]]
+    """The unit's whole text (a law piece's every line, numbered) plus what it points to: the lines its label
+    cites (hints only), footnotes, sections of the law, definitions."""
+    number = {(p, n): i for i, (p, n, _) in enumerate(unit.get("lines", []), 1)}
+    if unit.get("lines"):
+        parts = [unit["intro"] + " Its whole text follows, every line numbered L1, L2, ... (the numbers are not part "
+                 "of the city's words: never put them in a quote). A '--- page N ---' line marks a page break; a quote "
+                 "can't run across one. Draft every requirement in the whole text.", numbered_text(unit["lines"])]
+    else:
+        parts = [unit["intro"], unit["text"]]
     if unit.get("requirements"):
-        parts.append("The requirements in this text (from its reviewed label; draft a rule for each):\n" + "\n".join(
-            f"- page {s['page']}, lines {s['lines'][0]}-{s['lines'][1]}: {s['quote']}" for s in unit["requirements"]))
+        def where(s):
+            first, last = number.get((s["page"], s["lines"][0])), number.get((s["page"], s["lines"][1]))
+            return f"L{first}-L{last}" if first and last else f"page {s['page']}, lines {s['lines'][0]}-{s['lines'][1]}"
+        parts.append("Lines its reviewed label cites (hints only: a label may cite just a heading or a lead-in, so "
+                     "don't stop at these; every requirement in the whole text needs a rule):\n" + "\n".join(
+                         f"- {where(s)}: {s['quote']}" for s in unit["requirements"]))
     if context["notes"]:
         parts.append("Footnotes under the chart (document \"chart\"):\n" + "\n".join(
             f"- page {n['page']}: {n['text']}" for n in context["notes"]))
@@ -337,11 +359,12 @@ def _typed_numbers(template: dict) -> list[float]:
 
 
 def requirement_gaps(unit: dict, result: dict) -> list[dict]:
-    """The requirements the unit's label found that no drafted rule cites: for a person."""
+    """The lines the unit's label cites that no drafted rule cites: for a person. The label's sources are hints
+    (it may cite only a heading), so this can list a line with no rule in it; a person says so. Never silent."""
     cited = {(s["page"], n) for rules in result["rules"].values() for r in rules for s in r["sources"]
              if s.get("file") != CHART_FILE and "lines" in s for n in range(s["lines"][0], s["lines"][1] + 1)}
     return [{"rule": f"{unit['id']}.requirement_p{s['page']}_l{s['lines'][0]}",
-             "why": f"no drafted rule cites this requirement: {s['quote']!r}"}
+             "why": f"the label cites this and no drafted rule does (a person checks whether it sets a rule): {s['quote']!r}"}
             for s in unit.get("requirements", [])
             if not any((s["page"], n) in cited for n in range(s["lines"][0], s["lines"][1] + 1))]
 

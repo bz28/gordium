@@ -6,6 +6,7 @@ exact lines, bad answers sent back, every call recorded, and the answer key (R-1
 """
 
 import copy
+import re
 import json
 import sys
 from types import SimpleNamespace
@@ -277,11 +278,26 @@ def test_a_requirement_no_rule_cites_goes_to_a_person(inputs):
     assert [g["rule"] for g in result["unresolved"]] == ["325-25A.requirement_p67_l3"]   # the cited one is covered
 
 
-def test_the_requirements_from_the_label_are_the_drafting_input(inputs):
+def test_every_law_piece_is_drafted_from_its_whole_numbered_text_with_the_label_as_hints(inputs):
+    """Older labels may cite only a heading or lead-in, so the input is the whole piece: every line, numbered,
+    page breaks marked. The label's cited lines are shown as hints, by the same line numbers."""
+    from section_labeling.labeler import numbered_lines
+    law_units = [u for u in inputs.units() if u.get("piece")]
+    assert law_units
+    for u in law_units:
+        piece = inputs.law["pieces"][u["piece"]]
+        message = drafter.unit_message(u, {"notes": [], "pieces": [], "definitions": []})
+        lines = numbered_lines(inputs.law["rows"], piece)
+        assert all(f"L{i}: {text}" in message for i, (_, _, text) in enumerate(lines, 1)), u["id"]
+        pages = [p for p, _, _ in lines]
+        breaks = re.findall(r"(?m)^--- page \d+ ---$", message)
+        assert len(breaks) == sum(a != b for a, b in zip(pages, pages[1:])), u["id"]
+        if u["requirements"]:
+            assert "hints only" in message and all(s["quote"] in message for s in u["requirements"])
     u = unit(inputs, "325-16C")
-    message = drafter.unit_message(u, drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions))
-    assert u["requirements"] and "draft a rule for each" in message
-    assert all(s["quote"] in message for s in u["requirements"])
+    first = u["requirements"][0]
+    i = next(i for i, (p, n, _) in enumerate(u["lines"], 1) if (p, n) == (first["page"], first["lines"][0]))
+    assert f"- L{i}-L" in drafter.unit_message(u, {"notes": [], "pieces": [], "definitions": []})
 
 
 def test_no_answer_key_arithmetic_reaches_the_drafter(inputs):

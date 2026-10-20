@@ -30,6 +30,7 @@ from document_extraction.sections import load_rows, piece_text
 from rule_format.labels import load_pieces
 from rule_format.rulebook import REPO, Context, district_name, load, validate
 from section_labeling.budget import Budget, BudgetExceeded
+from section_labeling.labeler import numbered_lines
 
 from . import chart_values, drafter
 from .templates import CHART_FILE
@@ -100,7 +101,9 @@ class Inputs:
                                       f"It was labeled {label['label']}: {label['reason']} Draft the rules it sets for "
                                       "the residential districts."),
                             "text": piece_text(self.law["rows"], piece),
-                            # the requirement lines the reviewed label cites: every one needs a rule or a person
+                            # the input is the whole piece, every line numbered; the label's sources are only hints
+                            # (older labels may cite just a heading or lead-in), but each must end with a rule or a person
+                            "lines": numbered_lines(self.law["rows"], piece),
                             "requirements": [s for s in label.get("sources", []) if s.get("file") == self.law["file"]]})
         return out
 
