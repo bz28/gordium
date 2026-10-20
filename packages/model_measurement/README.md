@@ -92,7 +92,9 @@ Every reason the code gives today comes from the table:
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
   of all the buildings, or under the lowest point of all of them, as when a survey elevation is typed for a model
-  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual); "say whether the ground is flat";
+  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual); "a solid lies wholly under the
+  ground (<ground> ft; it runs from <bottom> to <top> ft) and not under the building above it: check the ground
+  level and where the solid is"; "say whether the ground is flat";
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the number of
   stories"; "enter bedrooms / parking spaces".

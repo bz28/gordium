@@ -599,3 +599,12 @@ def test_stacked_solids_and_a_basement_drawn_as_its_own_solid_meet_the_ground():
     house, basement = box(10, 25, 35, 65, 10, 40, id="house"), box(10, 25, 35, 65, 0, 10, id="basement")
     m = measure(site(RECT, house, basement), {**FACTS, "main_building": "house", "grade_elevation": 10})
     assert m["front_yard"]["value"] == 25.0 and "doesn't meet" not in str(m["building_height"]["reason"])
+
+
+def test_a_solid_buried_beside_the_building_is_never_dropped():
+    house, tower = box(10, 25, 25, 65, 812, 842, id="house"), box(26, 25, 35, 65, 0, 45, id="tower")
+    m = measure(site(RECT, house, tower), {**FACTS, "main_building": "house", "grade_elevation": 812})
+    assert m["building_height"]["value"] is None and "wholly under the ground" in m["building_height"]["reason"]
+    garage = box(32, 70, 45, 90, 0, 10, id="garage")                   # buried by a ground level of 20
+    m = measure(site(RECT, box(10, 25, 30, 65, 0, 30), garage), {**FACTS, "main_building": "house", "grade_elevation": 20})
+    assert m["building_height"]["value"] is None and "wholly under the ground" in m["building_height"]["reason"]
