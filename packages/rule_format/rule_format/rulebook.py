@@ -88,6 +88,17 @@ def rulebook_paths(folder) -> list[Path]:
     return sorted(p for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file()) if folder.is_dir() else []
 
 
+def read_jsonl(path) -> list[dict]:
+    """Every row of a JSON-lines file, read as UTF-8, blank lines skipped. The one reader of the repository's
+    .jsonl files (extracted text, sections, run records), so every package reads the same bytes the same way."""
+    return [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def jurisdictions(repo: Path = REPO) -> list[Path]:
+    """Every jurisdiction folder, regulations/jurisdictions/<state>/<place> under `repo`, in a stable order."""
+    return sorted(p for p in (Path(repo) / "regulations/jurisdictions").glob("*/*") if p.is_dir())
+
+
 @dataclass
 class Context:
     """Everything a rule is checked against, for one jurisdiction."""
@@ -141,9 +152,9 @@ class Context:
 
     def _load_extracted(self, name, sha, path):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
-        The header ties it to the PDF version. Once the text-extraction step is merged, CI also re-extracts
-        it from the PDF and requires an exact match; until then nothing here checks the text against the PDF."""
-        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        The header ties it to the PDF version; CI re-extracts the text from the PDF (python -m
+        document_extraction --check) and requires an exact match, so this file can't be edited by hand."""
+        rows = read_jsonl(path)
         if not rows or rows[0].get("sha256") != sha:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return

@@ -27,7 +27,7 @@ import json
 from pathlib import Path
 
 from .rulebook import (APPROVAL_FIELDS, VOCABULARY_FILE, Context, _approval_problems, _list_of_dicts,
-                       _source_problems, load)
+                       _source_problems, load, read_jsonl)
 
 # A reviewer's doubt goes in open_questions (blocks approval); the architect's answer in answers, as for rules.
 LABEL_FIELDS = {"label", "topic", "reason", "sources", "piece_sha256", "run", "notes", "open_questions", "answers",
@@ -44,7 +44,7 @@ def piece_fingerprint(piece: dict, pdf_sha256: str) -> str:
 
 def load_pieces(path: Path) -> tuple[dict, dict[str, dict]]:
     """The sections file: (header, {piece id: piece})."""
-    rows = [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows = read_jsonl(path)
     return rows[0], {p["id"]: p for p in rows[1:]}
 
 
