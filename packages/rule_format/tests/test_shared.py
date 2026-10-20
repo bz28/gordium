@@ -102,7 +102,7 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
     approving rules must say approval is deferred, and none may claim the checker waits for approved rules."""
     if any(re.search(r"^\s*status:\s*approved\b", p.read_text(), re.MULTILINE) for p in REGULATION_YAML):
         return                                   # approval is switched on once anything is approved
-    silent = [str(p.relative_to(REPO)) for p in DOCS
+    silent = [str(p.relative_to(REPO)) for p in DOCS + REGULATION_YAML
               if APPROVAL.search(p.read_text()) and not re.search(r"deferred", p.read_text(), re.IGNORECASE)]
     false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text())]
     # Architects confirming labels, definitions or the vocabulary is the same deferred layer: each sentence
