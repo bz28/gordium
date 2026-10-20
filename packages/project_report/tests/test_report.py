@@ -141,6 +141,23 @@ def test_table_parameters_keep_the_formulas_brackets(t):
     assert params["R-1b.rear_yard"] == "rear_yard ≥ max(min(0.25 * lot_depth, 50), 20)"
 
 
+def test_the_reason_blames_only_what_the_checker_read():
+    kinds = report.MEASURE_KINDS
+    values = {"sleeping_rooms": 2, "lot_area": 5000, "parking_spaces": 1}       # lot_width not given
+    branch = "(1000 if sleeping_rooms <= 3 else lot_width)"                    # lot_width: branch not taken
+    rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= 1",
+            "review_when": [{"when": f"lot_area > {branch}", "reason": "big lot"}]}
+    assert outcome(rule, values, {}) == "needs_review"
+    assert report.needs_review_reason(rule, values, kinds) == "big lot"
+    rule = {"id": "y", "kind": "flag", "applies_when": f"lot_area > {branch}"}
+    assert outcome(rule, values, {}) == "needs_review"
+    assert report.needs_review_reason(rule, values, kinds) == "A judgment call: a person decides (this rule is a flag)."
+
+
+def test_every_shown_limit_uses_one_symbol_style():
+    assert report.table_values("lot_area / 2 >= 100") == "lot_area / 2 ≥ 100"
+
+
 def test_check_fails_when_a_report_is_missing(tmp_path, monkeypatch, capsys):
     from project_report import __main__ as cli
     project = write_project(tmp_path)
@@ -166,6 +183,8 @@ def test_rules_that_dont_apply_are_listed_not_dropped(t):
     ({"measurements": {"rear_yard": {"value": 1, "from": "  "}}}, "where it comes from"),
     ({"measurements": {"rear_yard": {"value": [1], "from": "x"}}}, "number or text"),
     ({"measurements": {"rear_yard": {"value": True, "from": "x"}}}, "number or text"),
+    ({"measurements": {"rear_yard": {"value": float("nan"), "from": "x"}}}, "number or text"),
+    ({"measurements": {"rear_yard": {"value": float("inf"), "from": "x"}}}, "number or text"),
 ])
 def test_a_bad_project_file_is_refused(tmp_path, change, message):
     with pytest.raises(ValueError, match=message):

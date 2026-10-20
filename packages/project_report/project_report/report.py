@@ -65,8 +65,9 @@ def load_project(path: Path) -> dict:
             problems.append(f"measurement {name!r} needs exactly a value and where it comes from ('from')")
         elif not (isinstance(m["from"], str) and m["from"].strip()):
             problems.append(f"measurement {name!r} needs where it comes from ('from'), as text")
-        elif not (m["value"] is None or type(m["value"]) in (int, float, str)):
-            problems.append(f"measurement {name!r} value must be a number or text (or empty: not measured yet)")
+        elif not (m["value"] is None or type(m["value"]) in (int, str)
+                  or type(m["value"]) is float and math.isfinite(m["value"])):
+            problems.append(f"measurement {name!r} value must be a number or text (a finite number; or empty: not measured yet)")
     if not problems and rulebook_for(REPO / project["jurisdiction"], project["zone"]) is None:
         problems.append(f"no rulebook for zone {project['zone']!r} in {project['jurisdiction']}")
     if problems:
@@ -158,27 +159,22 @@ def table_values(check: str) -> str:
     "max(min(0.25 * lot_depth, 50), 20)": a quarter of the lot depth, at most 50 ft, at least 20 ft."""
     alternatives = _comparisons(formula.parse(check).body)
     if not alternatives:
-        return check
+        return _pretty(check)
     # Each comparison is printed whole by Python's own printer, so brackets stay where the meaning needs them.
     return " or ".join("; ".join(_pretty(ast.unparse(ast.Compare(ast.Name(m), [op], [e]))) for m, op, e in alt)
                        for alt in alternatives)
 
 
 def _problems(text: str, values: dict, kinds: dict) -> list[str]:
-    """Why a formula can't be worked out for this project: each measurement it needs that is missing or
-    unusable (tested by the checker's own rule, a bare name evaluated as a formula), else an evaluation error."""
-    missing, unusable = [], []
-    for name in sorted(formula.names(text)):
-        try:
-            formula.evaluate(name, values, kinds)
-        except MissingMeasure:
-            (missing if values.get(name) is None else unusable).append(name)
-    if missing or unusable:
-        return ([f"missing measurement: {', '.join(missing)}"] if missing else []) + \
-               ([f"unusable value: {', '.join(f'{n} = {values[n]!r}' for n in unusable)}"] if unusable else [])
+    """Why a formula can't be worked out for this project, found by working it out exactly as the checker does
+    (so a measure only in a branch the formula doesn't take is never blamed): the measurement it stopped at,
+    missing or unusable, or the evaluation error. Empty when it works out."""
     try:
         formula.evaluate(text, values, kinds)
         return []
+    except MissingMeasure as e:
+        v = values.get(e.name)
+        return [f"missing measurement: {e.name}" if v is None else f"unusable value: {e.name} = {v!r}"]
     except (EvaluationError, ArithmeticError) as e:
         return [f"can't be worked out ({e})"]
 
