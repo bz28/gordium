@@ -15,7 +15,7 @@ Checked by us on 2026-10-19 against the official sources in `regulations/jurisdi
 
 | | Architects | Official / us | Severity |
 |---|---|---|---|
-| Lot area | 6,674.7 sf | ~7,034 sf (City tax parcel) | 🟡 Coverage limit depends on it (25% = 1,669 vs 1,759 sf). A survey would settle it. |
+| Lot area | 6,674.5 sf as drawn (6,674 in the spreadsheet) | ~7,034 sf (City tax parcel) | 🟡 Coverage limit depends on it (25% = 1,669 vs 1,759 sf). A survey would settle it. |
 | Street edge | One straight 73 ft line | Curved | 🟡 Affects front yard and lot area |
 | Spreadsheet lot | 73 × 90 ft rectangle | Irregular 5-sided lot | 🟡 Yards and depth are approximations |
 
@@ -53,7 +53,7 @@ Checked by us on 2026-10-19 against the official sources in `regulations/jurisdi
 
 | # | Issue | Severity |
 |---|---|---|
-| 5.1 | Says 73 × 90 = 6,675 sf; it's 6,570. (6,674.7 is the real irregular lot.) | ⚪ |
+| 5.1 | Says 73 × 90 = 6,675 sf; it's 6,570. (The irregular lot as drawn is 6,674.5 sf.) | ⚪ |
 | 5.2 | Front offset 25 ft in the doc, 30 ft in the spreadsheet and model. | ⚪ |
 | 5.3 | Step 8 switches to a different lot (60 × 120 ft). | ⚪ |
 | 5.4 | Steps 6 and 9 are missing; step 11 is unfinished. | ⚪ |

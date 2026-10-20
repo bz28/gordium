@@ -62,3 +62,14 @@ def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
     item = next(line for line in (REPO / "docs/discrepancies_with_architects.md").read_text().splitlines()
                 if line.startswith("| 4.2 "))
     assert "any reading" not in item and all(f"{k} ft" in item for k in readings)
+
+
+def test_the_106_ithaca_rd_lot_area_is_quoted_as_measured():
+    """The architects' model lot measures 6,674.5 sf (shoelace area of its Site polyline) and their
+    spreadsheet types 6,674. A third figure, 6,674.7, once spread through the docs and rules; keep it out."""
+    lot = [(395.432, 360.94), (439.51, 419.13), (367.546, 473.642), (326.184, 420.017), (315.713, 420.262)]
+    area = abs(sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(lot, lot[1:] + lot[:1]))) / 2
+    assert round(area, 1) == 6674.5
+    files = [p for p in REPO.rglob("*") if p.suffix in (".md", ".yaml") and p.is_file()
+             and not {".git", ".claude", ".venv"} & set(p.relative_to(REPO).parts)]
+    assert not [p.relative_to(REPO) for p in files if re.search(r"6,?674\.7", p.read_text())]
