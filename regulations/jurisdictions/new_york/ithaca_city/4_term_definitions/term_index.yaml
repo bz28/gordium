@@ -87,7 +87,7 @@ terms:
     - {piece: editors_note_41, title: Editor's Note 41, at: [[126, 40], [126, 41]]}
   story:
     title: STORY
-    forms: [story, stories, storey, storeys, mezzanine, attic]
+    forms: [story, stories, storey, storeys, half story, mezzanine, attic, main entrance, functioning entry]
     pieces:
     - {piece: '325-3B:fast_tracking', title: FAST-TRACKING, at: [[9, 30], [9, 31], [9, 32]]}
     - {piece: '325-3B:mezzanine', title: MEZZANINE, at: [[15, 3]]}
@@ -101,10 +101,10 @@ terms:
     - {piece: 325-16F, title: 'Notwithstanding anything to the contrary contained herein, in the WEDZ-1 District: [Added', at: [[47, 35], [48, 3]]}
     - {piece: 325-16G, title: 'Notwithstanding anything to the contrary contained herein, in the CBD-60, CBD-85, CBD-100,', at: [[48, 15], [48, 18], [48, 19]]}
     - {piece: 325-28C, title: ADU requirements, at: [[72, 22]]}
-    - {piece: 325-45.2B, title: Definitions and related standards, at: [[130, 26], [130, 27], [131, 18], [132, 6], [133, 13], [133, 19], [133, 22]]}
+    - {piece: 325-45.2B, title: Definitions and related standards, at: [[130, 26], [130, 27], [131, 18], [132, 6], [133, 5], [133, 13], [133, 19], [133, 22]]}
     - {piece: 325-45.2D, title: Maximum Height (in stories) Map, at: [[133, 27], [134, 3], [134, 6], [134, 8], [134, 16]]}
-    - {piece: 325-45.2E, title: 'Collegetown Residential (CR-1, CR-2, CR-3)', at: [[135, 12], [138, 5], [138, 6], [138, 7], [138, 11], [138, 14], [141, 15], [141, 16], [141, 17], [141, 21], [142, 5], [145, 5], [145, 6], [145, 7], [145, 11], [145, 14]]}
-    - {piece: 325-45.2F, title: Collegetown Residential 4 (CR-4), at: [[148, 6], [150, 14], [150, 15], [150, 17]]}
+    - {piece: 325-45.2E, title: 'Collegetown Residential (CR-1, CR-2, CR-3)', at: [[135, 12], [138, 5], [138, 6], [138, 7], [138, 11], [138, 14], [139, 7], [139, 9], [141, 15], [141, 16], [141, 17], [141, 21], [142, 5], [142, 14], [142, 16], [145, 5], [145, 6], [145, 7], [145, 11], [145, 14], [146, 8], [146, 10]]}
+    - {piece: 325-45.2F, title: Collegetown Residential 4 (CR-4), at: [[148, 6], [150, 14], [150, 15], [150, 17], [151, 11], [151, 13]]}
     - {piece: 325-45.2G, title: 'Mixed Use (MU-1, MU-2)', at: [[153, 4], [153, 5], [153, 7], [155, 5], [155, 6], [155, 8], [158, 15], [158, 16], [158, 18], [159, 7], [160, 6]]}
     - {piece: 325-45.5D, title: Maximum building height, at: [[164, 5]]}
   basement:
@@ -116,9 +116,9 @@ terms:
     - {piece: '325-3B:story', title: STORY, at: [[19, 15]]}
   cellar:
     title: CELLAR
-    forms: [cellar]
+    forms: [cellar, curb level]
     pieces:
-    - {piece: '325-3B:cellar', title: CELLAR, at: [[6, 6]]}
+    - {piece: '325-3B:cellar', title: CELLAR, at: [[6, 6], [6, 7]]}
     - {piece: '325-3B:story', title: STORY, at: [[19, 17]]}
   building_area:
     title: BUILDING AREA (lot coverage)
@@ -156,7 +156,7 @@ terms:
     - {piece: 325-45.5E, title: 'Maximum percentage of lot coverage by buildings: 35%', at: [[164, 6]]}
   lot:
     title: LOT
-    forms: [lot, lot area, parcel]
+    forms: [lot, lot area, parcel, through lot, survey]
     pieces:
     - {piece: front_matter, title: Table of contents and history, at: [[2, 35], [2, 44]]}
     - {piece: 325-3A, title: General rules and interpretation, at: [[3, 35]]}
@@ -250,7 +250,7 @@ terms:
     - {piece: editors_note_12, title: Editor's Note 12, at: [[49, 28]]}
   lot_width:
     title: LOT WIDTH (minimum lot size, width in feet at street line)
-    forms: [lot width, width of lot, frontage, street line]
+    forms: [lot width, width of lot, width at street line, frontage, street line]
     pieces:
     - {piece: '325-3B:lot_building', title: 'LOT, BUILDING', at: [[14, 40]]}
     - {piece: 325-6A, title: Where district boundaries are indicated as approximately following the center lines of streets or, at: [[23, 27]]}
@@ -277,7 +277,7 @@ terms:
     - {piece: 325-45.2F, title: Collegetown Residential 4 (CR-4), at: [[149, 24]]}
   yard:
     title: YARD
-    forms: [yard, setback, open space]
+    forms: [yard, setback, set back, open space]
     pieces:
     - {piece: front_matter, title: Table of contents and history, at: [[1, 50], [1, 64]]}
     - {piece: '325-3B:building_area', title: BUILDING AREA, at: [[5, 26], [5, 29]]}
@@ -313,7 +313,7 @@ terms:
     - {piece: 325-18, title: Yard regulations., at: [[49, 8]]}
     - {piece: 325-18A, title: Porches and structures, at: [[49, 11]]}
     - {piece: 325-18B, title: Projecting architectural features, at: [[49, 13], [49, 16]]}
-    - {piece: 325-18C, title: '[fn11]Notwithstanding anything herein contained to the contrary, in the U-1 Zone, for any building which', at: [[49, 20]]}
+    - {piece: 325-18C, title: '[fn11]Notwithstanding anything herein contained to the contrary, in the U-1 Zone, for any building which', at: [[49, 19], [49, 20]]}
     - {piece: 325-19A, title: '[fn12]Side yard and rear yard transition', at: [[49, 23], [49, 24]]}
     - {piece: 325-19B, title: Front yard transition, at: [[50, 3], [50, 4], [50, 5]]}
     - {piece: 325-19C, title: Corner lot transition, at: [[50, 7], [50, 8], [50, 9]]}
@@ -329,7 +329,7 @@ terms:
     - {piece: 325-28C, title: ADU requirements, at: [[72, 11], [72, 23], [72, 27], [72, 29], [72, 31]]}
     - {piece: 325-29.2B, title: Building setback, at: [[77, 10], [77, 12], [77, 16], [77, 20], [77, 21]]}
     - {piece: 325-29.2C, title: Minimum store size, at: [[77, 34]]}
-    - {piece: 325-29.3C, title: It shall be the duty and responsibility of all owners of property in the City of Ithaca to ensure the, at: [[78, 7], [78, 11]]}
+    - {piece: 325-29.3C, title: It shall be the duty and responsibility of all owners of property in the City of Ithaca to ensure the, at: [[78, 7], [78, 11], [79, 11]]}
     - {piece: 325-29.8A, title: Location standards, at: [[91, 30]]}
     - {piece: 325-29.9, title: Fall zone and setback requirements for PWSF's., at: [[93, 32]]}
     - {piece: 325-29.9B, title: 'Tier Three applications shall meet the following standards:', at: [[94, 6], [94, 8], [94, 11], [94, 12], [94, 15]]}
@@ -337,7 +337,7 @@ terms:
     - {piece: 325-35B, title: 'The Board of Zoning Appeals must review area variance requests for the following area deficiencies:', at: [[113, 34]]}
     - {piece: 325-41C, title: Application process, at: [[124, 10]]}
     - {piece: 325-45.1F, title: Other applicable sections, at: [[129, 21]]}
-    - {piece: 325-45.2B, title: Definitions and related standards, at: [[131, 6], [131, 8], [131, 9], [132, 15], [132, 21], [132, 23], [133, 3], [133, 10]]}
+    - {piece: 325-45.2B, title: Definitions and related standards, at: [[131, 6], [131, 8], [131, 9], [132, 15], [132, 21], [132, 23], [133, 3], [133, 5], [133, 10]]}
     - {piece: 325-45.2E, title: 'Collegetown Residential (CR-1, CR-2, CR-3)', at: [[137, 7], [137, 8], [137, 9], [137, 13], [137, 14], [137, 17], [137, 18], [140, 22], [140, 23], [141, 3], [141, 7], [141, 8], [141, 11], [141, 12], [144, 5], [144, 6], [144, 7], [144, 11], [144, 12], [144, 15], [144, 16]]}
     - {piece: 325-45.2F, title: Collegetown Residential 4 (CR-4), at: [[149, 20], [149, 21], [149, 24], [150, 4], [150, 5], [150, 8], [150, 9]]}
     - {piece: 325-45.2G, title: 'Mixed Use (MU-1, MU-2)', at: [[153, 15], [153, 17], [154, 8], [154, 9], [154, 12], [154, 16], [154, 17], [154, 20], [157, 9], [157, 15], [157, 16], [158, 3], [158, 5], [158, 6], [158, 9], [159, 16], [160, 4]]}
@@ -403,21 +403,26 @@ terms:
     - {piece: editors_note_11, title: Editor's Note 11, at: [[49, 26]]}
   yard_projections:
     title: PORCHES AND PROJECTIONS IN YARDS
-    forms: [projection, projecting, eave, eaves, overhang, cornice, windowsill, belt course, porch, deck, balcony, bay window, ramp, landing, stoop]
+    forms: [projection, projecting, eave, eaves, overhang, soffit, cornice, windowsill, belt course, encroach, encroachment, cantilever, cantilevered, porch, deck, balcony, bay window, terrace, patio, pergola, stair, ramp, landing, stoop]
     pieces:
     - {piece: '325-3B:building', title: BUILDING, at: [[5, 21]]}
-    - {piece: '325-3B:building_area', title: BUILDING AREA, at: [[5, 24], [5, 25]]}
+    - {piece: '325-3B:building_area', title: BUILDING AREA, at: [[5, 24], [5, 25], [5, 27], [5, 28]]}
     - {piece: '325-3B:deck', title: DECK, at: [[7, 5], [7, 9]]}
     - {piece: '325-3B:exit', title: EXIT, at: [[9, 19]]}
+    - {piece: '325-3B:green_space', title: GREEN SPACE, at: [[12, 7]]}
+    - {piece: '325-3B:pergola', title: PERGOLA, at: [[17, 24]]}
     - {piece: '325-3B:porch', title: PORCH, at: [[17, 29], [17, 30]]}
     - {piece: '325-3B:sign_advertising', title: 'SIGN, ADVERTISING', at: [[18, 33]]}
     - {piece: '325-3B:standard_awning', title: STANDARD AWNING, at: [[19, 8]]}
+    - {piece: '325-3B:structure', title: STRUCTURE, at: [[19, 20]]}
+    - {piece: '325-3B:terrace_or_patio', title: TERRACE OR PATIO, at: [[19, 23], [19, 24], [19, 25]]}
     - {piece: 325-8A, title: The District Regulations Chart is hereby made a part of this chapter, at: [[25, 8], [25, 9]]}
     - {piece: 325-15D, title: Garage sales, at: [[45, 28], [45, 31], [45, 35]]}
     - {piece: 325-16B, title: Ornamental and architectural features, at: [[47, 4]]}
     - {piece: 325-18A, title: Porches and structures, at: [[49, 9], [49, 10]]}
     - {piece: 325-18B, title: Projecting architectural features, at: [[49, 13], [49, 14]]}
     - {piece: 325-20D, title: General requirements, at: [[54, 30], [55, 12], [56, 37], [56, 43], [57, 9]]}
+    - {piece: 325-28C, title: ADU requirements, at: [[72, 27]]}
     - {piece: 325-29.9B, title: 'Tier Three applications shall meet the following standards:', at: [[94, 16]]}
     - {piece: 325-40B, title: Board of Appeals procedure, at: [[120, 14]]}
     - {piece: 325-45.2B, title: Definitions and related standards, at: [[131, 6], [131, 8], [131, 16], [131, 17], [131, 18], [131, 19], [131, 20], [131, 22], [131, 23], [132, 3], [133, 14]]}
@@ -534,9 +539,66 @@ terms:
     - {piece: 325-45.2G, title: 'Mixed Use (MU-1, MU-2)', at: [[155, 14], [155, 15], [159, 3], [159, 4]]}
   height_exceptions:
     title: Features allowed above the height limit
-    forms: [chimney, spire, belfry, cupola, skylight, bulkhead, mechanical penthouse, stairtower]
+    forms: [chimney, spire, belfry, cupola, skylight, bulkhead, penthouse, mechanical penthouse, stairtower]
     pieces:
     - {piece: '325-3B:height_of_building', title: HEIGHT OF BUILDING, at: [[12, 21]]}
     - {piece: '325-3B:ventilation_natural', title: 'VENTILATION, NATURAL', at: [[20, 20]]}
     - {piece: 325-16A, title: Exceptions, at: [[46, 14], [46, 16]]}
     - {piece: 325-45.2B, title: Definitions and related standards, at: [[131, 3]]}
+  accessory_dwelling_unit:
+    title: Accessory dwelling units (ADUs)
+    forms: [accessory dwelling unit, adu, accessory apartment]
+    pieces:
+    - {piece: front_matter, title: Table of contents and history, at: [[1, 24], [1, 25]]}
+    - {piece: '325-3B:accessory_dwelling_unit', title: ACCESSORY DWELLING UNIT, at: [[4, 7], [4, 8], [4, 10]]}
+    - {piece: '325-3B:accessory_dwelling_unit_attached', title: 'ACCESSORY DWELLING UNIT, ATTACHED', at: [[4, 12]]}
+    - {piece: '325-3B:accessory_dwelling_unit_detached', title: 'ACCESSORY DWELLING UNIT, DETACHED', at: [[4, 15]]}
+    - {piece: 325-27D, title: Short-term rental regulations, at: [[68, 28]]}
+    - {piece: 325-28, title: 'Accessory Dwelling Units (ADUs).[fn24] [Added 5-7-2025 by Ord. No. 2025-04]', at: [[71, 29]]}
+    - {piece: 325-28A, title: Purpose and intent, at: [[71, 30]]}
+    - {piece: 325-28B, title: Applicability, at: [[72, 4], [72, 5]]}
+    - {piece: 325-28C, title: ADU requirements, at: [[72, 7], [72, 8], [72, 9], [72, 10], [72, 11], [72, 12], [72, 13], [72, 15], [72, 16], [72, 17], [72, 20], [72, 23], [72, 24], [72, 25], [72, 28]]}
+    - {piece: 325-45.1F, title: Other applicable sections, at: [[129, 16]]}
+  parking:
+    title: Parking (spaces, areas, off-street)
+    forms: [parking space, parking area, off-street parking, driveway]
+    pieces:
+    - {piece: front_matter, title: Table of contents and history, at: [[1, 5]]}
+    - {piece: '325-3B:building_area', title: BUILDING AREA, at: [[5, 27]]}
+    - {piece: '325-3B:driveway', title: DRIVEWAY, at: [[7, 18]]}
+    - {piece: '325-3B:driveway_aisle', title: DRIVEWAY AISLE, at: [[7, 19], [7, 20]]}
+    - {piece: '325-3B:green_area', title: GREEN AREA, at: [[11, 41]]}
+    - {piece: '325-3B:green_space', title: GREEN SPACE, at: [[11, 44]]}
+    - {piece: '325-3B:motel_or_boatel', title: MOTEL OR BOATEL, at: [[15, 24]]}
+    - {piece: '325-3B:parking_area', title: PARKING AREA, at: [[17, 9]]}
+    - {piece: '325-3B:parking_space', title: PARKING SPACE, at: [[17, 20], [17, 21]]}
+    - {piece: '325-3B:variance', title: VARIANCE, at: [[20, 16]]}
+    - {piece: 325-8A, title: The District Regulations Chart is hereby made a part of this chapter, at: [[24, 19]]}
+    - {piece: 325-10C, title: Additional conditions, at: [[36, 16]]}
+    - {piece: 325-11C, title: Approval; information to be submitted, at: [[40, 13]]}
+    - {piece: 325-20, title: Off-street parking., at: [[51, 8]]}
+    - {piece: 325-20A, title: Purpose and intent, at: [[51, 19]]}
+    - {piece: 325-20B, title: Applicability, at: [[51, 24]]}
+    - {piece: 325-20C, title: Nonconforming uses, at: [[51, 27]]}
+    - {piece: 325-20D, title: General requirements, at: [[51, 34], [51, 36], [51, 37], [51, 42], [51, 43], [52, 9], [52, 13], [52, 15], [52, 17], [52, 22], [52, 23], [52, 24], [52, 26], [52, 27], [52, 30], [52, 31], [52, 33], [52, 35], [52, 38], [52, 39], [52, 44], [53, 9], [53, 10], [53, 11], [53, 12], [53, 14], [53, 15], [53, 16], [53, 19], [53, 23], [53, 26], [53, 28], [53, 29], [53, 31], [53, 32], [53, 39], [53, 41], [53, 43], [55, 6], [55, 10], [55, 12], [55, 16], [55, 17], [55, 18], [55, 19], [55, 20], [55, 22], [55, 28], [55, 32], [55, 38], [56, 3], [56, 4], [56, 7], [56, 11], [56, 14], [56, 17], [56, 27], [56, 32], [56, 33], [56, 34], [56, 35], [56, 36], [56, 37], [56, 38], [56, 39], [56, 40], [56, 41], [56, 42], [56, 44], [57, 4], [57, 6], [57, 7], [57, 8], [57, 11], [57, 16]]}
+    - {piece: 325-20E, title: Parking in front yards, at: [[57, 22], [57, 23], [57, 27], [57, 28], [57, 30], [57, 34], [57, 37], [57, 40], [57, 42], [58, 5], [58, 6]]}
+    - {piece: 325-20F, title: Requirements for new or enlarged parking areas with the capacity for three or more parking spaces, at: [[58, 7], [58, 9], [58, 12], [58, 17], [58, 21], [58, 23], [58, 25], [58, 26], [58, 31], [58, 38], [58, 39], [58, 45], [59, 3], [59, 4], [59, 6], [59, 8], [59, 10], [59, 19], [59, 24], [59, 30], [59, 31], [59, 35], [59, 37], [59, 38], [59, 40], [60, 6], [60, 8], [60, 21], [60, 24]]}
+    - {piece: 325-20G, title: Parking areas on lots in nonresidential zoning districts, at: [[60, 32], [60, 33], [60, 34], [60, 36], [60, 37], [61, 6], [61, 9], [61, 14], [61, 15], [61, 17], [61, 19], [61, 21], [61, 22], [61, 24]]}
+    - {piece: 325-20I, title: Parking in the Southwest Area, at: [[61, 38]]}
+    - {piece: 325-20J, title: Parking for the U-1 Zoning District, at: [[61, 46], [61, 47], [62, 5], [62, 7], [62, 8], [62, 9], [62, 10], [62, 12], [62, 15], [62, 16], [62, 17], [62, 18], [62, 31], [62, 33], [62, 36], [63, 3], [63, 6], [63, 10], [63, 12], [63, 17], [63, 18], [63, 28], [63, 32]]}
+    - {piece: 325-22C, title: Paving, at: [[64, 15]]}
+    - {piece: 325-22D, title: Driveway width, at: [[64, 17], [64, 18], [64, 19]]}
+    - {piece: 325-22G, title: Illumination, at: [[64, 23]]}
+    - {piece: 325-28C, title: ADU requirements, at: [[72, 9]]}
+    - {piece: 325-29.10C, title: Siting information, at: [[95, 35]]}
+    - {piece: 325-29.24A, title: Parking, at: [[110, 27]]}
+    - {piece: 325-35B, title: 'The Board of Zoning Appeals must review area variance requests for the following area deficiencies:', at: [[113, 33]]}
+    - {piece: 325-44A, title: 'Demolition, exterior alterations or additions to existing structures and parking areas and construction', at: [[126, 26], [126, 27]]}
+    - {piece: 325-44B, title: 'Demolition, exterior alteration or enlargement of structures or parking areas or construction of new', at: [[126, 33], [126, 34]]}
+    - {piece: 325-45.1F, title: Other applicable sections, at: [[129, 22]]}
+    - {piece: 325-45.2B, title: Definitions and related standards, at: [[131, 14], [132, 23]]}
+    - {piece: 325-45.2E, title: 'Collegetown Residential (CR-1, CR-2, CR-3)', at: [[136, 18], [140, 10], [143, 14]]}
+    - {piece: 325-45.2F, title: Collegetown Residential 4 (CR-4), at: [[149, 3]]}
+    - {piece: 325-45.2G, title: 'Mixed Use (MU-1, MU-2)', at: [[154, 4], [157, 11]]}
+    - {piece: 325-45.5B, title: Off-street parking/loading requirements, at: [[163, 21], [163, 22]]}
+    - {piece: editors_note_34, title: Editor's Note 34, at: [[116, 42]]}
