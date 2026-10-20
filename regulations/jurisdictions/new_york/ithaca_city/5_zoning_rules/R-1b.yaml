@@ -404,7 +404,7 @@ rules:
   - id: R-1b.parking_other_uses
     kind: flag
     topic: parking_and_loading
-    title: "Parking for other uses: an architect checks §325-20"
+    title: "Parking for other uses: §325-20, an architect's judgment call"
     applies_when: use != "one_family_detached"
     sources:
       - file: zoning_charts_2026-04.pdf
