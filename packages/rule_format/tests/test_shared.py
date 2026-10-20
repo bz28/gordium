@@ -66,7 +66,7 @@ def test_every_jurisdiction_listing_uses_the_one_helper():
 APPROVAL = re.compile(r"\barchitect\w*\b[^.\n]{0,80}?\bapprov|\bapprov\w*\b[^.\n]{0,80}?\barchitect", re.IGNORECASE)
 # Claims that are false while approval is deferred, however a document is worded around them.
 FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only approved rules|approved rulebook"
-                          r"|architects approve\b|architects? confirm each rule|compares the new draft with the approved"
+                          r"|\|\s*architects approve\s*\||\(architects approve\)|architects? confirm each rule|compares the new draft with the approved"
                           r"|architect'?s approval freezes|architect\s*──►", re.IGNORECASE)
 
 
