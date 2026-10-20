@@ -15,7 +15,7 @@ from pathlib import Path
 import yaml
 
 from design_checker import present
-from envelope_builder.envelope import envelope
+from envelope_builder.envelope import MARGIN, envelope
 from envelope_builder.start import largest_legal_building
 from model_measurement.measure import measure
 from model_measurement.project import fact_problems, load_facts, working
@@ -236,6 +236,17 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     site = read_site(model_path, facts)
     if building_problems:
         site["buildings"].append({"id": "Building layer", "faces": [], "problems": list(building_problems)})
+    return check_site(site, facts, model_path.name, report_path, extras)
+
+
+def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
+               extras: dict | None = None) -> dict:
+    """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
+    generator builds. Exactly the same measuring, rules and presentation as a model read from a file."""
+    problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
+    if problems:
+        raise ValueError("lot facts: " + "; ".join(problems))
+    model_path = Path(name)
     measured = measure(site, facts)
     project = {"title": facts.get("title") or model_path.stem, "jurisdiction": facts.get("jurisdiction"),
                "zone": facts.get("zone"),
@@ -273,14 +284,82 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     if report_path is not None:
         _report(t, v, report_path)
+    env = envelope(site, _envelope_facts(site, facts), measured, rules)
+    # the notice (spec G): the items that don't comply now and did at the last check the command sent ("before")
+    statuses, notice_text = present.notice((extras or {}).get("before"), v["items"])
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
             "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
-            "envelope": envelope(site, facts, measured, rules), "problems": site.get("problems") or [], "view": v}
+            "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": plan(site, env, v, measured),
+            "statuses": statuses, "notice": notice_text}
 
 
-def start(model_path: Path, facts: dict) -> dict:
+def _envelope_facts(site: dict, facts: dict) -> dict:
+    """The facts the envelope is drawn from. Spot grades (or terrain sampled at the walls) that the measuring
+    accepts give the grade plane, so the height plane is drawn from it; existing ground never sets it (it isn't
+    the grade the code measures from), so then only the buildable area is drawn."""
+    if facts.get("grade_is") == "existing":
+        return {**facts, "ground_is_flat": None}
+    if facts.get("grade_points"):
+        from model_measurement.measure import _grade_from_points
+        grade, why = _grade_from_points(site.get("buildings") or [], facts["grade_points"])
+        return {**facts, "ground_is_flat": True, "grade_elevation": grade} if why is None else {**facts, "ground_is_flat": None}
+    return facts
+
+
+def _ring(polygon) -> list:
+    """A polygon's outline as [[x, y], ...], without edges shorter than 0.001 ft."""
+    return [list(p) for p in polygon.simplify(0.001).exterior.coords[:-1]]
+
+
+YARD_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
+
+
+def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
+    """What the viewport draws in plan (feet): each lot edge with its length, the yard lines measured (each with
+    its item's status), and where the building breaks a limit: the strip of its footprint inside a required yard,
+    or the part above the height limit (spec F2, F4, F5). The building itself stays neutral."""
+    from model_measurement.measure import _projection
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+
+    lot = site.get("lot") or {}
+    edges = []
+    for e in lot.get("edges") or []:
+        a, b = e["points"][0], e["points"][-1]
+        length = sum(math.dist(p[:2], q[:2]) for p, q in zip(e["points"], e["points"][1:]))
+        edges.append({"points": [list(a[:2]), list(b[:2])], "length": present.feet_inches(length)})
+    yards = [{"points": i["points"], "status": i["status"], "label": f"{i['mark']} {i['name']} {i['proposed']}" +
+              ("" if i["status"] != present.REVIEW or "tax map" not in (i.get("reason") or "") else " (approx.)")}
+             for i in v["items"] if i.get("points") and i.get("measure") in YARD_MEASURES]
+    encroach = []
+    plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")]
+    footprint = unary_union(plans) if plans else None
+    tops = [p[2] for b in site.get("buildings") or [] for f in b.get("faces") or [] for p in f["points"]]
+    statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
+    if footprint is not None and not footprint.is_empty and env and env.get("outline") and tops:
+        # the envelope sits MARGIN inside every yard (so it is never illegal); grown back by twice that, a wall
+        # exactly at its limit leaves no hairline of red
+        buildable = Polygon(env["outline"], env.get("holes") or []).buffer(2 * MARGIN, join_style=2)
+        yard_fail = any(s == present.FAILS for m, s in statuses.items() if m in YARD_MEASURES)
+        strip = footprint.difference(buildable) if yard_fail else None
+        # outlines simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude;
+        # without a grade the strip stands on the building's own base, never at 0
+        for g in getattr(strip, "geoms", [strip]) if strip is not None and not strip.is_empty else []:
+            if g.area > 1e-3:
+                encroach.append({"outline": _ring(g), "base": env["base"] if env.get("base") is not None else min(tops),
+                                 "top": max(tops), "why": "yard"})
+        if statuses.get("building_height") == present.FAILS and env.get("top") is not None and max(tops) > env["top"]:
+            for g in getattr(footprint, "geoms", [footprint]):
+                encroach.append({"outline": _ring(g), "base": env["top"], "top": max(tops), "why": "height"})
+    return {"edges": edges, "yards": yards, "encroach": encroach,
+            "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
+
+
+def start(model_path: Path, facts: dict, floor_to_floor: float | None = None) -> dict:
     """The largest legal starting building for the lot in a model (its buildings, if any, left out): stacked
-    floor blocks, one per story, from the zone's rules (envelope_builder.start)."""
+    floor blocks, one per story, from the zone's rules (envelope_builder.start). With no grade set, it is drawn
+    standing at the lot's own level (and said so): the check then says height and stories need review until the
+    grade is set, so nothing about the height is taken as settled."""
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
@@ -288,7 +367,17 @@ def start(model_path: Path, facts: dict) -> dict:
     if site.get("problems"):
         return {"floors": [], "notes": list(site["problems"])}
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
-    return largest_legal_building(site, facts, measure(site, facts), rules)
+    drawing = facts
+    no_grade = not facts.get("grade_points") and not (facts.get("ground_is_flat") and facts.get("grade_elevation") is not None)
+    if no_grade:                        # drawn at the lot's level; the check still has no grade
+        lot_z = min((p[2] for e in (site.get("lot") or {}).get("edges", []) for p in e["points"] if len(p) > 2),
+                    default=0.0)
+        drawing = {**facts, "ground_is_flat": True, "grade_elevation": lot_z}
+    out = largest_legal_building(site, drawing, measure(site, drawing), rules, floor_to_floor=floor_to_floor)
+    if no_grade and out.get("floors"):
+        out["notes"].append("drawn standing at the lot's level: building height and stories need review until the "
+                            "grade is set")
+    return out
 
 
 SAMPLE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"

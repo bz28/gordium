@@ -29,7 +29,7 @@ def answer(request: dict) -> dict:
             result = check(Path(request["model"]), request["facts"], Path(report) if report else None,
                            request.get("building_problems"), request.get("extras"))
         elif request.get("cmd") == "start":
-            result = start(Path(request["model"]), request["facts"])
+            result = start(Path(request["model"]), request["facts"], request.get("floor_to_floor"))
         elif request.get("cmd") == "sample_site":
             result = sample_site()
         elif request.get("cmd") == "facts":

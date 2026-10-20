@@ -129,7 +129,8 @@ def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_
     return best
 
 
-def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], uses=None) -> dict:
+def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], uses=None,
+                           floor_to_floor: float | None = None) -> dict:
     """{"floors": [{"outline": [[x, y], ...], "base": z, "top": z}, ...], "stories", "height", "area",
     "coverage_allowed", "notes"}: the starting building, or no floors and the notes that say why.
 
@@ -189,9 +190,13 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     ring = [[x, y] for x, y in list(outline.exterior.coords)[:-1]]
     base, top = env["base"], env["base"] + env["height"]
     story = env["height"] / stories
+    if floor_to_floor:                  # the architect's floor-to-floor height: as many stories as fit, at most the limit
+        stories = max(1, min(stories, math.floor(env["height"] / floor_to_floor + 1e-9)))
+        story = floor_to_floor
+        top = base + stories * story
     out["floors"] = [{"outline": ring, "base": base + i * story, "top": top if i == stories - 1 else base + (i + 1) * story}
                      for i in range(stories)]
-    out.update(stories=stories, height=env["height"], area=outline.area, coverage_allowed=allowed)
+    out.update(stories=stories, height=top - base, area=outline.area, coverage_allowed=allowed)
     failing = _failing(site, facts, out["floors"], rules, uses)
     if failing:                          # never a wrong building: it is proven with the checker's own rules first
         notes.append(f"{CANT} (the rectangle found would break: {', '.join(failing)})")

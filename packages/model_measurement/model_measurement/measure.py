@@ -595,6 +595,13 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                  None if facts.get("grade_points") else
                  stop("ground_unknown") if facts.get("ground_is_flat") is None else
                  None if facts["ground_is_flat"] else stop("sloped_ground"))
+    # the grade decides height and stories. The plan (yards, building area) only needs the level where the building
+    # meets the ground: with no grade (not given, not known to be flat, spot grades off the walls) that is the
+    # building's own base, so the plan is still measured; a grade that contradicts the building (off it, a solid
+    # buried under it) still stops the plan, since then even the base can't be trusted.
+    why_plan = (stop("ground_off_building", ground=_r(grade), bottom=_r(off[0]), top=_r(off[1])) if off else
+                stop("buried_solid", ground=_r(grade), bottom=_r(buried[0]), top=_r(buried[1])) if buried else None)
+    plan_level = grade if (grade is not None and not why_grade) else lo
     # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
@@ -652,10 +659,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     everything = ops.unary_union(list(footprints.values())) if footprints else Polygon()
     why_inside = (why_building or
                   (None if everything.within(lot.polygon.buffer(TOL)) else stop("outside_lot")))
-    if why_inside or why_grade:
-        out["building_area"] = _missing("building_area", why_inside or why_grade)
+    if why_inside or why_plan or plan_level is None:
+        out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
     else:
-        cut = ops.unary_union([_section(b, grade + TOL) for b in buildings])
+        cut = ops.unary_union([_section(b, plan_level + TOL) for b in buildings])
         out["building_area"] = _decide(
             "building_area", [("covered from above", everything.area, {}), ("at the main grade level", cut.area, {})],
             "the ground area of every building on the lot, porches and decks included",
@@ -674,7 +681,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                 "the average length of the two side lot lines", [lot.id], sides))
 
     yards = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
-    why_yards = why_inside or why_grade or why_main
+    why_yards = why_inside or why_plan or why_main or (why_grade if plan_level is None else None)
     if why_yards:
         for name in yards:
             out[name] = _missing(name, why_yards)
@@ -684,7 +691,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # with more than one solid, a porch or deck drawn as its own solid is part of the building for yards
     # (§325-18A) while an accessory building may follow other rules (§325-25): measure to it as well
     shapes = [(w, s) for w, s in (("to the building seen from above", footprints[main["id"]]),
-                                  ("to its walls at ground level", _section(main, grade + TOL))) if not s.is_empty]
+                                  ("to its walls at ground level", _section(main, plan_level + TOL))) if not s.is_empty]
     shapes += [("to any solid on the Building layer, seen from above", everything)] if len(buildings) > 1 else []
     eaves = ("whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid "
              "is a porch or deck (part of the building, §325-18A) or an accessory building (§325-25), are open "

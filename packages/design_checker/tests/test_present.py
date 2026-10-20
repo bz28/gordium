@@ -206,7 +206,10 @@ def test_the_notice_is_one_line_for_newly_failing_items_and_none_on_the_first_ch
     assert text == "Rear yard no longer complies · 20'-0\" proposed · 22'-6\" required · −2'-6\""
     b = a + [{"id": "y", "name": "Lot coverage", "status": present.FAILS, "proposed": "", "required": "", "margin": ""}]
     _, text = present.notice({"x": present.COMPLIES, "y": present.COMPLIES}, b)
-    assert text == "2 items no longer comply: Rear yard, Lot coverage"
+    assert text == "2 items no longer comply: Rear yard; Lot coverage"     # "; ": names have commas
+    c = a + [{"id": "z", "name": "Side yard, East", "status": present.FAILS, "proposed": "", "required": "", "margin": ""}]
+    _, text = present.notice({"x": present.COMPLIES, "z": present.COMPLIES}, c)
+    assert text == "2 items no longer comply: Rear yard; Side yard, East"
     _, text = present.notice({"x": present.FAILS}, a)                       # already failing: no notice
     assert text is None
 
@@ -233,3 +236,63 @@ def test_every_status_has_its_own_shape_and_the_codes_words(tax_map):
     names = {i["name"] for i in tax_map["view"]["items"]}
     assert {"Front yard", "Rear yard", "Lot coverage", "Building height", "Stories"} <= names
     assert not any(re.search(r"\bsetback\b", n, re.I) for n in names)
+
+
+# ---- F: what the viewport draws in plan: red only where the building breaks a limit -----------------------------
+
+CITY = "regulations/jurisdictions/new_york/ithaca_city"
+
+
+def _plot(*buildings, lot_=RECT):
+    return {"units": "ft", "lot": lot_, "buildings": list(buildings), "problems": []}
+
+
+def test_red_is_only_the_strip_inside_a_failing_side_yard_even_without_a_grade():
+    from design_checker.check import check_site
+    facts = {**FACTS, "jurisdiction": CITY, "ground_is_flat": None, "grade_elevation": None}
+    r = check_site(_plot(box(6, 25, 35, 65)), facts)               # west wall 6 ft from the line: needs 10 ft
+    assert items(r["view"])["Side yard, West"]["status"] == present.FAILS
+    assert r["envelope"]["outline"] and r["envelope"]["top"] is None   # the plan is drawn, never a height plane
+    (strip,) = r["plan"]["encroach"]
+    xs = [p[0] for p in strip["outline"]]
+    assert strip["why"] == "yard" and min(xs) == pytest.approx(6) and max(xs) == pytest.approx(10, abs=0.01)
+    ok = check_site(_plot(box(10, 25, 35, 65)), facts)
+    assert ok["plan"]["encroach"] == []                          # nothing breaks a yard: no red at all
+
+
+def test_the_red_strip_has_no_hairline_edges_and_stands_on_the_building_without_a_grade():
+    import math
+    from design_checker.check import check_site
+    facts = {**FACTS, "jurisdiction": CITY, "ground_is_flat": None, "grade_elevation": None}
+    (strip,) = check_site(_plot(box(6, 25, 35, 65, 412, 442)), facts)["plan"]["encroach"]
+    ring = strip["outline"]
+    assert min(math.dist(ring[i - 1], ring[i]) for i in range(len(ring))) > 0.001    # Rhino extrudes it
+    assert strip["base"] == pytest.approx(412) and strip["top"] == pytest.approx(442)
+
+
+def test_red_above_the_height_limit_is_only_the_part_above_it():
+    from design_checker.check import check_site
+    r = check_site(_plot(box(10, 25, 35, 65, 0, 38)), {**FACTS, "jurisdiction": CITY, "stories": 3})
+    assert items(r["view"])["Building height"]["status"] == present.FAILS
+    (top,) = r["plan"]["encroach"]
+    assert top["why"] == "height" and top["base"] == pytest.approx(35) and top["top"] == pytest.approx(38)
+
+
+def test_the_plan_labels_each_lot_edge_and_each_measured_yard():
+    from design_checker.check import check_site
+    r = check_site(_plot(box(10, 25, 35, 65)), {**FACTS, "jurisdiction": CITY})
+    assert sorted(e["length"] for e in r["plan"]["edges"]) == ["100'-0\"", "100'-0\"", "50'-0\"", "50'-0\""]
+    labels = [y["label"] for y in r["plan"]["yards"]]
+    assert all(y["points"] for y in r["plan"]["yards"])
+    for name in ("Front yard", "Side yard, West", "Side yard, East", "Rear yard"):    # side yards too
+        assert any(lb[2:].startswith(name + " ") for lb in labels), (name, labels)
+
+
+def test_the_envelope_height_plane_comes_from_spot_grades_and_never_from_existing_ground():
+    from design_checker.check import check_site
+    house = box(10, 25, 35, 65, 2, 30)
+    spots = [[22, 24, 1], [22, 66, 3], [9, 45, 2], [36, 45, 2]]       # one per wall: grade plane 2
+    base = {**FACTS, "jurisdiction": CITY, "ground_is_flat": None, "grade_elevation": None, "grade_points": spots}
+    r = check_site(_plot(house), base)
+    assert r["envelope"]["base"] == pytest.approx(2) and r["envelope"]["top"] == pytest.approx(37)
+    assert check_site(_plot(house), {**base, "grade_is": "existing"})["envelope"]["top"] is None

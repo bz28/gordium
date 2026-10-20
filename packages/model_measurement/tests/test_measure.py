@@ -168,10 +168,13 @@ def test_a_pitched_roof_height_is_an_open_question():
     assert "pitched roof" in m["building_height"]["reason"]
 
 
-def test_no_ground_level():
+def test_no_ground_level_stops_the_height_but_not_the_plan():
+    """The grade decides height and stories (spec C3); yards and building area are measured where the building
+    meets the ground, its own base, so they still are."""
     m = measure(site(), {**FACTS, "grade_elevation": None})
-    for name in ("building_height", "building_area", "front_yard", "rear_yard"):
-        assert m[name]["value"] is None and m[name]["reason"].startswith("the ground level isn't given")
+    assert m["building_height"]["value"] is None and m["building_height"]["reason"].startswith("the ground level isn't given")
+    for name in ("building_area", "front_yard", "rear_yard"):
+        assert m[name]["value"] is not None, name
     assert m["lot_depth"]["value"] == 100
 
 
@@ -407,8 +410,9 @@ def test_a_lot_not_from_a_survey_and_sloped_ground_need_review():
     assert m["lot_area"]["value"] is None and "survey" in m["lot_area"]["reason"]
     assert m["lot_area"]["readings"][0]["value"] == 5000.0
     m = measure(site(), {**FACTS, "ground_is_flat": False})
-    for name in ("building_height", "building_area", "front_yard"):
-        assert m[name]["value"] is None and m[name]["reason"].startswith("sloped ground"), name
+    assert m["building_height"]["value"] is None and m["building_height"]["reason"].startswith("sloped ground")
+    for name in ("building_area", "front_yard"):            # the plan: at the building's base
+        assert m[name]["value"] is not None, name
     m = measure(site(), {**FACTS, "ground_is_flat": None, "lot_surveyed": None})
     assert m["building_height"]["reason"] == "say whether the ground is flat"
     assert m["lot_area"]["reason"] == "say whether the lot outline is from a survey"

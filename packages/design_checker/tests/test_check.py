@@ -132,7 +132,7 @@ def test_rhino_decisions():
     assert update_counts({"stories": 2}, {"stories": None, "sleeping_rooms": 3}) == {"stories": 2, "sleeping_rooms": 3}
     assert "sleeping_rooms" not in update_counts({}, {"sleeping_rooms": None})       # skipped: never 0
     assert missing({"sleeping_rooms": 3}) == ["jurisdiction", "zone", "use", "street_line", "corner_lot",
-                                              "grade_elevation", "ground_is_flat", "lot_surveyed"]
+                                              "lot_surveyed"]          # no grade yet: checked, height needs review
     assert with_suggestions({"stories": 3, "zone": None}, {"zone": "R-1b"}) == {"zone": "R-1b", "stories": 3}
     assert to_feet({"street_line": [[[0, 0], [12, 0]]], "grade_elevation": 24}, 1 / 12) == {
         "street_line": [[[0.0, 0.0], [1.0, 0.0]]], "grade_elevation": 2.0}
@@ -283,16 +283,13 @@ def test_a_rule_failing_under_every_reading_counts_as_failing():
 
 # ---- the start flow and the "no longer complies" notice ----------------------------------------------------
 
-def test_the_notice_comes_only_for_rules_that_newly_fail_and_merges_several():
-    from design_checker import rhino_logic as logic
-    rear = {"Rule id": "rear", "Error": "FAIL", "Short": "Rear yard", "Line": "Rear yard 20 ft, needs ≥ 22.5 ft"}
-    cover = {"Rule id": "cover", "Error": "NEEDS REVIEW", "Fails": True, "Short": "Lot coverage"}
-    ok = {"Rule id": "front", "Error": "PASS", "Short": "Front yard"}
-    now, said = logic.notice(None, [rear, ok])
-    assert now == {"rear"} and said == []                               # the first check: nothing is "new"
-    assert logic.notice({"rear"}, [rear, ok])[1] == []                  # still failing: not said again
-    assert logic.notice(set(), [rear, ok])[1] == ["Rear yard no longer complies: 20 ft, needs ≥ 22.5 ft"]
-    assert logic.notice(set(), [rear, cover])[1] == ["2 items no longer comply: Rear yard, Lot coverage"]
+def test_the_check_gives_the_notice_for_items_that_newly_fail(facts):
+    first = check(MODEL, facts)
+    assert first["notice"] is None                                      # the first check: nothing is "new"
+    before = {k: ("complies" if k == "R-1b.lot_coverage" else v) for k, v in first["statuses"].items()}
+    again = check(MODEL, facts, extras={"before": before})
+    assert again["notice"].startswith("Lot coverage no longer complies · ")
+    assert check(MODEL, facts, extras={"before": first["statuses"]})["notice"] is None   # still failing
 
 
 def test_the_massing_layer_holds_building_objects():
@@ -344,14 +341,21 @@ def test_a_new_project_on_the_architects_own_lot_suggests_the_lots_ground_level(
     assert logic.suggested_ground([], None) is None
 
 
-def test_the_notice_names_the_item_once_and_says_the_height_plainly(facts):
-    from design_checker import rhino_logic as logic
-    row = {"Rule id": "cover", "Error": "NEEDS REVIEW", "Fails": True, "Short": "Lot coverage by buildings",
-           "Line": "Lot coverage by buildings: fails with the lot as drawn (confirm the survey)"}
-    assert logic.notice(set(), [row])[1] == ["Lot coverage by buildings no longer complies: fails with the lot as "
-                                             "drawn (confirm the survey)"]
+def test_the_height_is_said_plainly(facts):
     tall = check(MODEL, {**facts, "stories": 3}, building_problems=None)
     from design_checker.check import _first_failing
     m = dict(tall["measurements"], building_height={**tall["measurements"]["building_height"], "value": 38})
     rule = {"check": "building_height <= 35 or building_height <= 38.5 and front_yard >= 25 + (building_height - 35)"}
     assert _first_failing(rule, m) == "Building height 38 ft, needs ≤ 35 ft"
+
+
+def test_viewport_labels_never_cover_each_other():
+    from design_checker.rhino_logic import clear_spot
+    taken = []
+    assert clear_spot(taken, 100, 100, 120, 20) == 100            # the first stays where it was wanted
+    assert clear_spot(taken, 150, 105, 120, 20) == 128            # overlapping: moved a label's height down
+    assert clear_spot(taken, 400, 100, 60, 20) == 100             # clear of the others: stays
+    boxes = taken
+    for i, (x, y, w, h) in enumerate(boxes):
+        for a, b, c, e in boxes[i + 1:]:
+            assert not (x < a + c and a < x + w and y < b + e and b < y + h)

@@ -140,9 +140,10 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
         notes.append("say whether this is a corner lot first" if facts.get("corner_lot") is None else
                      "a corner lot: which yards are front, side and rear is an open question; no envelope drawn")
         return out
-    if facts.get("ground_is_flat") is not True:  # the height limit is from the grade plane: flat ground only
-        notes.append("the ground isn't confirmed flat: the height limit can't be drawn from one ground level")
-        return out
+    level = facts.get("ground_is_flat") is True and facts.get("grade_elevation") is not None
+    if not level:   # the height plane is from the grade plane: without one the plan is drawn, never a top
+        out["base"] = None
+        notes.append("the grade isn't set: the buildable area is drawn, the height limit isn't")
     for rule in rules:
         if rule.get("kind") == "flag" or not rule.get("check") or not _applies(rule, measured):
             continue

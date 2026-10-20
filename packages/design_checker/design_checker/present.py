@@ -257,6 +257,52 @@ def _hint(name: str, sign: str, margin: float, unit: str) -> str | None:
     return f"To comply: {'increase' if sign in ('≥', '>') else 'reduce'} it by {gap}."
 
 
+def _alternatives(check: str, values: dict, measured: dict) -> list[list[tuple]]:
+    """For a rule that allows several ways to comply (`a or b and c …`), each way's failing comparisons as
+    (name, proposed, sign, required, gap): what the architect could change. [] if the rule has one way."""
+    body = formula.parse(check).body
+    if not (isinstance(body, ast.BoolOp) and isinstance(body.op, ast.Or)):
+        return []
+    out = []
+    for alt in body.values:
+        failing = []
+        for c in ([alt] if isinstance(alt, ast.Compare) else
+                  [v for v in getattr(alt, "values", []) if isinstance(v, ast.Compare)]):
+            if not (len(c.ops) == 1 and isinstance(c.left, ast.Name) and type(c.ops[0]) in SIGNS):
+                continue
+            if _evaluate(ast.unparse(c), values) is False:
+                proposed, required, margin, unit, sign = _numbers(c, values, measured, "")
+                failing.append((NAMES.get(c.left.id, c.left.id.replace("_", " ")), value_text(proposed, unit, sign),
+                                sign, value_text(required, unit, sign, False),
+                                margin_text(-margin, unit).lstrip("+") if margin is not None else ""))
+        out.append(failing)
+    return out
+
+
+def _range(measure: str, measured: dict, values: dict, sign: str) -> str | None:
+    """The span of a measurement's readings when they disagree ("12'-0" to 15'-0""), each end rounded the
+    cautious way; coverage as a share of the lot."""
+    readings = [r["value"] for r in (measured.get(measure) or {}).get("readings") or [] if r.get("value") is not None]
+    if len(set(readings)) < 2:
+        return None
+    lo, hi = min(readings), max(readings)
+    if measure == "building_area" and values.get("lot_area"):
+        lot = values["lot_area"]
+        return f"{_pct(lo / lot * 100, 'up', 1)} to {_pct(hi / lot * 100, 'up', 1)}"
+    unit = (measured.get(measure) or {}).get("unit") or ""
+    return f"{value_text(lo, unit, sign)} to {value_text(hi, unit, sign)}"
+
+
+def _fix(name, proposed, sign, required, gap) -> str:
+    """One way to comply, in an architect's words: "lower the building 2'-0"", "move the building 2'-0" farther
+    from the rear lot line"."""
+    if name.endswith("yard"):
+        return f"move the building {gap} farther from the {name[:-5].lower()} lot line"
+    if name == "Building height":
+        return f"lower the building {gap}"
+    return f"{'increase' if sign in ('≥', '>') else 'reduce'} {name.lower()} by {gap}"
+
+
 def _numbers(node, values: dict, measured: dict, name: str):
     """(proposed, required, margin, unit, sign) for one comparison; coverage as a percentage of lot area."""
     m = node.left.id
@@ -370,12 +416,20 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                    if "confirm the survey" in row["Provisional"] else
                    "Fails under every reading considered (" + _user_text(row["Provisional"]) + ")")
         line = _detail_line(proposed, required, margin_t, numbers[4] if node is not None else "", margin)
+        hint = _hint(label, numbers[4], margin, numbers[3]) if node is not None and margin is not None else None
+        if node is not None and proposed == "—":        # the readings disagree: show their span, not a dash
+            proposed = _range(node.left.id, measured, values, numbers[4]) or proposed
+        alts = _alternatives(check, values, measured) if st == FAILS and not why and not splits else []
+        if len(alts) > 1 and all(alts):                 # several ways to comply, none met: say each one
+            why = "Does not comply either way the rule allows: " + "; or ".join(
+                ", ".join(f"{n} {p}, needs {s} {r}" for n, p, s, r, _ in alt) for alt in alts)
+            fixes = [_fix(*alt[0]) for alt in alts if len(alt) == 1]
+            hint = "To comply: " + ", or ".join(fixes) + "." if fixes else hint
         out.append({
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],
             "proposed": proposed, "required": required, "margin": margin_t if st != REVIEW or margin_t else "",
-            "sign": numbers[4] if node is not None else "", "reason": why,
-            "hint": _hint(label, numbers[4], margin, numbers[3]) if node is not None and margin is not None else None,
+            "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
             "objects": (measured.get(node.left.id) or {}).get("objects", []) if node is not None else [],
             "points": (measured.get(node.left.id) or {}).get("points") if node is not None else None,
@@ -444,6 +498,33 @@ def state(items: list[dict]) -> str:
     return COMPLIES
 
 
+BUILDING_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_height", "stories")
+
+
+def _cautious_for_left_out(items, left_out, touching):
+    """Solids on the lot that aren't measured can change a result that looks like it complies (never a false
+    pass): lot coverage counts every building on the lot, principal and accessory (§325-8A), so it needs review
+    whenever one is left out; one touching the building may be part of it (a porch or deck counts in the yards,
+    §325-18A), so then the yards, height and stories need review too. `touching` is the ids of the left-out solids
+    that touch the measured buildings; not given, any of them might."""
+    if not left_out:
+        return
+    n = len(left_out)
+    some = f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t measured"
+    near = list(left_out) if touching is None else [o for o in left_out if o in set(touching)]
+    for i in items:
+        if i["status"] != COMPLIES:
+            continue
+        if i.get("measure") == "building_area":
+            why = f"Complies for the buildings measured; {some}, and lot coverage counts every building on the lot"
+        elif i.get("measure") in BUILDING_MEASURES and near:
+            why = (f"Complies for the buildings measured; {len(near)} object{'s' if len(near) != 1 else ''} "
+                   "touching the building isn't measured (a porch or deck is part of the building, §325-18A)")
+        else:
+            continue
+        i.update(status=REVIEW, mark=MARK[REVIEW], hint="Add to check…", reason=why + " · Add to check…")
+
+
 def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction=None) -> dict:
     """Every item, grouped; the summary; the header. `extras` is what the Rhino command adds: what it sent
     (scope), objects on the lot it didn't include, and the grade and lot sources."""
@@ -464,6 +545,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         items += _items_for(row, rules_by_id[row["Rule id"]], measured, values, facts, extras, cite, documents, j,
                             use_names)
     left_out = extras.get("not_included") or []
+    _cautious_for_left_out(items, left_out, extras.get("touching"))
     if left_out:
         n = len(left_out)
         items.append({"id": "scope.not_included", "rule": None, "name": "Objects on the lot not included",
@@ -547,7 +629,7 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
 def notice(before: dict | None, items: list[dict]) -> tuple[dict, str | None]:
     """(statuses now, the notice): one line for the items that don't comply now and did at the last check
     ("Rear yard no longer complies · 20'-0" proposed · 22'-6" required · −2'-6""), several merged ("2 items no
-    longer comply: Rear yard, Lot coverage"). None on the first check or when nothing newly fails."""
+    longer comply: Rear yard; Lot coverage"). None on the first check or when nothing newly fails."""
     now = {i["id"]: i["status"] for i in items}
     if before is None:
         return now, None
@@ -560,4 +642,4 @@ def notice(before: dict | None, items: list[dict]) -> tuple[dict, str | None]:
                                          f"{i['required']} required" if i["required"] not in ("", "—") else "",
                                          i["margin"]] if p)
         return now, f"{i['name']} no longer complies" + (" · " + detail if detail else "")
-    return now, f"{len(new)} items no longer comply: " + ", ".join(i["name"] for i in new)
+    return now, f"{len(new)} items no longer comply: " + "; ".join(i["name"] for i in new)   # names hold commas

@@ -9,8 +9,8 @@ MASSING = "Gordium::Massing"            # where GordiumStart draws the starting 
 SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
 DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",
                 "Leader", "LinearDimension", "AngularDimension", "RadialDimension", "OrdinateDimension")
-REQUIRED = ("jurisdiction", "zone", "use", "street_line", "corner_lot", "grade_elevation", "ground_is_flat",
-            "lot_surveyed")
+# the grade isn't required: without one the check runs and height and stories need review until it's set (spec C3)
+REQUIRED = ("jurisdiction", "zone", "use", "street_line", "corner_lot", "lot_surveyed")
 
 
 def on_layer(full_path, layer):
@@ -166,28 +166,24 @@ def after_corner_answer(facts, was_corner):
     return out
 
 
-def notice(before, rows):
-    """(the failing rule ids now, the notice lines): one notice for the rules that fail now and didn't at the last
-    check ("Rear yard no longer complies: …", or "2 items no longer comply: Rear yard, Lot coverage"); none on the
-    first check (before is None) or when nothing newly fails. A rule failing under every reading counts."""
-    fails = [r for r in rows if r.get("Fails") or r.get("Error") == "FAIL"]
-    now = {r["Rule id"] for r in fails}
-    if before is None:
-        return now, []
-    new = [r for r in fails if r["Rule id"] not in before]
-    if not new:
-        return now, []
-    names = [r.get("Short") or r["Requirement"] for r in new]
-    if len(new) == 1:
-        detail = new[0].get("Line") or ""
-        if detail.startswith(names[0]):           # the line already names the item: say it once
-            detail = detail[len(names[0]):].lstrip(": ")
-        return now, [names[0] + " no longer complies" + (": " + detail if detail else "")]
-    return now, [str(len(new)) + " items no longer comply: " + ", ".join(names)]
-
-
 def suggested_ground(building_bottoms, lot_bottom):
     """The ground level to suggest (feet or model units, as given): the lowest point of the buildings, or with no
     building yet (a new project on the architect's own lot) the lot outline's level. Shown in the dialog, never
     used unconfirmed."""
     return min(building_bottoms) if building_bottoms else lot_bottom
+
+
+def clear_spot(taken, x, y, w, h):
+    """Where a w × h label wanted at (x, y) (its top left, in screen pixels) covers none already drawn this frame
+    (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn; the
+    spot is then taken. If none is free within four steps, the label stays where it was wanted."""
+    def hits(top):
+        return any(x < a + c and a < x + w and top < b + e and b < top + h for a, b, c, e in taken)
+    top = y
+    for k in range(9):
+        trial = y + (k + 1) // 2 * (h + 3) * (1 if k % 2 else -1)
+        if not hits(trial):
+            top = trial
+            break
+    taken.append((x, top, w, h))
+    return top
