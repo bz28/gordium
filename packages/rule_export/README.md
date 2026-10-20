@@ -30,12 +30,17 @@ can't confirm says "(not verified …)" instead of a blank. The city's exact wor
 
 | Tab | One row per | Columns |
 |---|---|---|
-| **Rules** | source of a rule, in every rulebook in `5_zoning_rules/` (hand or AI drafted, any subfolder) | Zone · Rulebook · Rule id · Title · Status · Drafted by · Kind · Topic · Check (formula) · Applies when · Needs review when · Worked examples · Source (1 of 3) · Citation · Page · City's exact words · Link · Open questions · Answers · Notes |
-| **Definitions** | source of a definition | Id · Term · Status · Drafted by · Measures · Source · Citation · Page · City's exact words · Link · Open questions · Answers · Notes |
+| **Rules** | source of a rule, in every rulebook in `5_zoning_rules/` (hand or AI drafted, any subfolder) | Zone · Rulebook · Rule id · Title · Status · Drafted by · Kind · Topic · Check (formula) · Applies when · Needs review when · Worked examples · Source (1 of 3) · Citation · Page · City's exact words · Link · Related sections · Open questions · Research (why still open) · Findings (research settled) · Answers · Notes |
+| **Definitions** | source of a definition | Id · Term · Status · Drafted by · Measures · Source · Citation · Page · City's exact words · Link · Related sections · Open questions · Research (why still open) · Findings (research settled) · Answers · Notes |
 | **Uses** | source of a use name (the only values a rule's `use` may take) | Id · Name · Status · Drafted by · Source · Citation · Page · City's exact words · Link · Notes |
-| **Questions** | open question anywhere (rules, definitions, uses, section labels) | About · In (the file the question is written in) · Id · Question · Citation · Page · Link |
-| **Coverage** | piece of each cut law (all 626 of Chapter 325), in order | Document · Piece · Title · Pages · Label · Topic · Reason · Quote(s), each with its page and lines · Link (the first quote's page) · Status · Drafted by · Changed after the AI · Open questions · Answers · Notes |
+| **Questions** | open question anywhere (rules, definitions, uses, section labels) | About · In (the file the question is written in) · Id · Question · Searched (the sections read for it) · Why still open · Readings in play · Research report · Citation · Page · Link |
+| **Findings** | question research settled | About · In · Id · Finding (its id) · Kind (law / reading) · Strength · Confirm with · Question · Answer ("The law: …" or "Gordium's reading (…) · confirm with …") · Sources (the code's quotes, then ranked records, with links) · Research report · Link (the first quote's page) |
+| **Coverage** | piece of each cut law (all 626 of Chapter 325), in order | Document · Piece · Title · Pages · Label · Topic · Reason · Quote(s), each with its page and lines · Link (the first quote's page) · Status · Drafted by · Changed after the AI · Open questions · Research (why still open) · Findings (research settled) · Answers · Notes |
 | **Sources** | source document, then each one not yet downloaded | File · Title · Publisher · Official URL · Downloaded · Adopted · Created · Pages · Fingerprint · Quotable (yes / no / not downloaded) · Why not quotable / not downloaded · Contents · Notes |
+
+**Related sections** come from the term index (`4_term_definitions/term_index.yaml`): for a definition, every
+piece of the law that uses its word or a synonym; for a rule, the requirement sections (labeled rule or flag) that
+use the words it quotes, most relevant first, less the sections the rule itself cites. Both on an entry's first row.
 
 **One row per source.** A rule quoting three passages has three rows, so each quote sits next to its own page
 and link. What identifies the rule and what readers filter on (zone, rulebook, rule id, title, status, drafted by,
