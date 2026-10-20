@@ -15,7 +15,7 @@ from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
-               "grade_points", "grade_from", "grade_is"}
+               "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame"}
 
 
 def _number(x) -> bool:
@@ -37,7 +37,7 @@ def fact_problems(facts: dict) -> list[str]:
     for k in ("stories", "sleeping_rooms", "parking_spaces"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
-    for k in ("corner_lot", "lot_surveyed", "ground_is_flat"):
+    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")
@@ -48,10 +48,14 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("grade_from must be spot, terrain or finished_spots")
     if facts.get("grade_is") not in (None, "finished", "existing"):
         problems.append("grade_is must be finished or existing")
-    street = facts.get("street_line")
-    if street is not None and not (isinstance(street, list) and street and all(
-            isinstance(s, list) and len(s) == 2 and all(_point(p) for p in s) for s in street)):
-        problems.append("street_line must be a list of lot lines, each two points [[x, y], [x, y]]")
+    for k in ("street_line", "address_street_line"):
+        street = facts.get(k)
+        if street is not None and not (isinstance(street, list) and street and all(
+                isinstance(s, list) and len(s) == 2 and all(_point(p) for p in s) for s in street)):
+            problems.append(f"{k} must be a list of lot lines, each two points [[x, y], [x, y]]")
+    listed = facts.get("accessory_buildings")
+    if listed is not None and not (isinstance(listed, list) and all(isinstance(i, str) for i in listed)):
+        problems.append("accessory_buildings must be a list of object ids (the solids that are accessory buildings)")
     return problems
 
 

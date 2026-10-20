@@ -73,6 +73,9 @@ def _needs(node, measured: dict) -> list:
             if all(_known_true(part, measured) for part in _other_parts(v)):
                 return needs
         raise Unreadable(ast.unparse(node))
+    if (isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.left, ast.Name)
+            and node.left.id not in GEOMETRIC and node.left.id in MEASURE_KINDS):
+        return []         # a limit on something else (eaves past the walls, an accessory building): not the walls
     found = _comparison(node)
     if found is None:
         raise Unreadable(ast.unparse(node))

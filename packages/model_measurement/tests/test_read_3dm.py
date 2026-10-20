@@ -211,8 +211,9 @@ def test_a_meshed_gable_read_from_a_file_is_one_roof_per_slope(tmp_path, x0, y0,
     m.Objects.AddMesh(mesh, on(1))
     facts = {**FACTS, "street_line": [[list(lot[0]), list(lot[1])]]}
     h = measure(read_site(write(m, tmp_path), facts), facts)["building_height"]
-    assert "rises above" not in h["reason"]
-    assert sorted({round(r["value"], 3) for r in h["readings"]}) == [round((eave + ridge) / 2, 3), round(ridge, 3)]
+    assert "rises above" not in (h["reason"] or "")
+    # midway between eave and ridge (pitched_roof_midpoint); no overhang, so every eave reading agrees
+    assert {round(r["value"], 3) for r in h["readings"]} == {round((eave + ridge) / 2, 3)}
 
 
 def gable_mesh(x0, y0, n, double):
@@ -260,7 +261,8 @@ def measured_gable(tmp_path, x0, y0, n, double):
 
 def test_a_meshed_gable_on_ithaca_survey_coordinates_is_read_on_its_full_precision_points(tmp_path):
     h, eave, ridge = measured_gable(tmp_path, 870000.3, 900000.7, 32, double=True)     # NY State Plane, in ft
-    assert sorted({round(r["value"], 3) for r in h["readings"]}) == [round((eave + ridge) / 2, 3), round(ridge, 3)]
+    # midway between eave and ridge (pitched_roof_midpoint); no overhang, so every eave reading agrees
+    assert {round(r["value"], 3) for r in h["readings"]} == {round((eave + ridge) / 2, 3)}
 
 
 def test_a_single_precision_mesh_that_far_out_is_reported_not_measured(tmp_path):
