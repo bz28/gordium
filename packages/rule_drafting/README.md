@@ -58,6 +58,15 @@ coverage "35%/40% /50% [fn12]" depends on the use, so a one-number template can'
 5. Every unit drafted produced rules, a reason, or an entry for a person; when the run is complete,
    every unit was drafted. Every drafted rulebook passes the inspector.
 
+The answer key's examples are judged as R-1b lots (the checker always knows the district). A rule drafted from a
+piece of the law is compared on what it quotes, not on the chart cells it reads as inputs, the answer key's own
+convention.
+
+**The 10-unit test batch** (`evals/2026-10-20_prompt_a/`, with its records, scripts and every judged difference):
+with the current instructions (prompt A), 194 rules, 9 of 9 units accepted, R-1b examples 28/30, the architects'
+spreadsheet 11/11, chart values exact 15/15, for $0.457. The earlier prompt, replayed through today's checks,
+gave 152 rules, 19/27, and 9 of 10 drafted rows.
+
 ## Running it
 
 ```

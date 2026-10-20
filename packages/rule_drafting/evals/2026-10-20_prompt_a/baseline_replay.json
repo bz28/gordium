@@ -1,0 +1,186 @@
+{
+ "chart-p2-primary_uses": {
+  "attempts": 0,
+  "first_try_ok": null,
+  "rules": 7,
+  "rejected": [],
+  "unresolved": 2,
+  "outcome": "code"
+ },
+ "325-16C": {
+  "attempts": 3,
+  "first_try_ok": false,
+  "rules": 18,
+  "rejected": [
+   "R-3aa.325_16c_extra_height_stories: 'Number of stories': the cell '3/2 [fn11]' has 2 numbers, the rule expects 1"
+  ],
+  "unresolved": 1,
+  "outcome": "accepted",
+  "reason": "",
+  "notes": [
+   "attempt 1: 325-16C.325_16c_extra_height_limit: R-1a.325_16c_extra_height_limit: 'Height in feet': the cell '35 ft' has footnotes none, the rule expects ['10']; R-1b.325_16c_extra_height_limit: 'Height in feet': the cell '35 ft' has footnotes none, the rule expects ['10']; R-2a.325_16c_extra_height_limit: 'Height in feet': the cell '35 ft' has footnotes none, the rule expects ['10']; 325-16C.325_16c_extra_height_stories: R-1a.325_16c_extra_height_stories: 'Height in feet': the cell '35 ft' has footnotes none, the rule expects ['10']; R-1b.325_16c_extra_height_stories: 'Height in feet': the cell '35 ft' ha",
+   "attempt 2: 325-16C.325_16c_extra_height_limit: R-1a.325_16c_extra_height_limit: R-1a.325_16c_extra_height_limit: a 'rule' needs worked examples that pass and that fail, so its check is really exercised; R-1a.325_16c_extra_height_limit: example 1: unknown measures ['{max_height}']; R-1a.325_16c_extra_height_limit: example 2: unknown measures ['{max_height}']; R-1b.325_16c_extra_height_limit: R-1b.325_16c_extra_height_limit: a 'rule' needs worked examples that pass and that fail, so its check is really exercised; R-1b.325_16c_extra_height_limit: example 1: unknown measures ['{max_height}']; R-1b.325_16c_ex"
+  ]
+ },
+ "325-18A": {
+  "attempts": 1,
+  "first_try_ok": true,
+  "rules": 1,
+  "rejected": [],
+  "unresolved": 0,
+  "outcome": "accepted",
+  "reason": "",
+  "notes": []
+ },
+ "325-19C": {
+  "attempts": 1,
+  "first_try_ok": true,
+  "rules": 0,
+  "rejected": [
+   "325-19C.requirement_p50_l7: the label cites this and no drafted rule does (a person checks whether it sets a rule): 'buildings must be erected so that yards facing public streets shall conform to the minimum front yard requirements of said residential district'"
+  ],
+  "unresolved": 1,
+  "outcome": "accepted",
+  "reason": "The piece applies to corner lots, but none of the listed measures says whether a lot is a corner lot or which yards face public streets. The only yard measures are front_yard, side_yard_smaller, side_yard_larger and rear_yard, and they do not identify the street-facing yards. Code therefore cannot decide the requirement from the measurements available. It also needs a new measure and architect answers: what counts as a yard facing a public street, and how the two adjoining front yards map onto the measured yards. I did not guess at either, and no template is drafted. The requirement needs a corner-lot flag and street-facing yard depth measures added before a rule can be written.",
+  "notes": []
+ },
+ "chart-p14-residential": {
+  "attempts": 3,
+  "first_try_ok": false,
+  "rules": 3,
+  "rejected": [
+   "chart-p14-residential.residential_parking_by_sleeping_rooms: chart-p14-residential.residential_parking_by_sleeping_rooms: number 5 in 'parking_spaces >= ({first} if sleeping_rooms <= 3 else ({second} if sleeping_rooms <= 5 else {second} + {additional} * (sleeping_rooms - 5)))' isn't backed where it stands: bind it to a sentence of the text being drafted, or t",
+   "R-1a.dormitory_parking_per_persons_housed: 'Dormitory': the chart shows '-' here",
+   "R-1b.dormitory_parking_per_persons_housed: 'Dormitory': the chart shows '-' here",
+   "R-2a.dormitory_parking_per_persons_housed: 'Dormitory': the chart shows '-' here",
+   "R-2b.dormitory_parking_per_persons_housed: 'Dormitory': the chart shows '-' here",
+   "R-2c.dormitory_parking_per_persons_housed: 'Dormitory': the chart shows '-' here",
+   "R-3aa.dormitory_parking_per_persons_housed: 'Dormitory': the chart shows '-' here",
+   "chart-p14-residential.residential_parking_by_sleeping_rooms: chart-p14-residential.residential_parking_by_sleeping_rooms: number 5 in 'parking_spaces >= ({first} if sleeping_rooms <= 3 else ({second} if sleeping_rooms <= 5 else {second} + {additional} * (sleeping_rooms - 5)))' isn't backed where it stands: bind it to a sentence of the text being drafted, or t"
+  ],
+  "unresolved": 7,
+  "outcome": "partial (last attempt with working rules kept)",
+  "reason": "",
+  "notes": [
+   "attempt 1: chart-p14-residential.residential_parking_by_sleeping_rooms: number 1 in 'sleeping_rooms >= 1' isn't backed where it stands: bind it to a sentence of the text being drafted, or to the own-cell footnote or the row label of a slot it stands with (the same arithmetic, or the condition that picks the slot's value) where that slot decides something; a chart number must be a slot",
+   "attempt 2: chart-p14-residential.residential_parking_by_sleeping_rooms: R-1a.residential_parking_by_sleeping_rooms: R-1a.residential_parking_by_sleeping_rooms: use 'dormitory' is decided here but its row isn't cited (cite zoning_charts_2026-04.pdf p.2 lines [16, 16]); R-1a.residential_parking_by_sleeping_rooms: use 'fraternity_sorority_group_house' is decided here but its row isn't cited (cite zoning_charts_2026-04.pdf p.2 lines [15, 15]); R-1b.residential_parking_by_sleeping_rooms: R-1b.residential_parking_by_sleeping_rooms: use 'dormitory' is decided here but its row isn't cited (cite zoning_charts_202",
+   "attempt 3: chart-p14-residential.residential_parking_by_sleeping_rooms: chart-p14-residential.residential_parking_by_sleeping_rooms: number 5 in 'parking_spaces >= ({first} if sleeping_rooms <= 3 else ({second} if sleeping_rooms <= 5 else {second} + {additional} * (sleeping_rooms - 5)))' isn't backed where it stands: bind it to a sentence of the text being drafted, or to the own-cell footnote or the row label of a slot it stands with (the same arithmetic, or the condition that picks the slot's value) where that slot decides something; a chart number must be a slot"
+  ]
+ },
+ "chart-p3-maximum_building_height": {
+  "attempts": 2,
+  "first_try_ok": false,
+  "rules": 8,
+  "rejected": [
+   "chart-p3-maximum_building_height.max_height_ft: number 0.1 in 'building_height > {max_height} and building_height <= {max_height} + 0.1 * {max_height}' isn't backed where it stands: bind it to a sentence of the text being drafted, or to the own-cell footnote or the row label of a slot it stands with (the same arithmetic, or the condition that pic",
+   "R-3aa.max_stories: 'Number of stories': the cell '3/2 [fn11]' has 2 numbers, the rule expects 1",
+   "chart-p3-maximum_building_height.max_height_ft: number 0.1 in 'building_height > {max_height} and building_height <= {max_height} + 0.1 * {max_height}' isn't backed where it stands: bind it to a sentence of the text being drafted, or to the own-cell footnote or the row label of a slot it stands with (the same arithmetic, or the condition that pic"
+  ],
+  "unresolved": 2,
+  "outcome": "partial (last attempt with working rules kept)",
+  "reason": "",
+  "notes": [
+   "attempt 1: chart-p3-maximum_building_height.max_stories: R-1a.max_stories: R-1a.max_stories: 'true' is just a measure name; only a yes/no measure can be a test on its own; R-1a.max_stories: unknown measure 'true' in 'true'; R-1b.max_stories: R-1b.max_stories: 'true' is just a measure name; only a yes/no measure can be a test on its own; R-1b.max_stories: unknown measure 'true' in 'true'; R-2a.max_stories: R-2a.max_stories: 'true' is just a measure name; only a yes/no measure can be a test on its own; R-2a.max_stories: unknown measure 'true' in 'true'; chart-p3-maximum_building_height.stories_max_min: R-1",
+   "attempt 2: chart-p3-maximum_building_height.max_height_ft: number 0.1 in 'building_height > {max_height} and building_height <= {max_height} + 0.1 * {max_height}' isn't backed where it stands: bind it to a sentence of the text being drafted, or to the own-cell footnote or the row label of a slot it stands with (the same arithmetic, or the condition that picks the slot's value) where that slot decides something; a chart number must be a slot"
+  ]
+ },
+ "chart-p3-maximum_lot_coverage_by_buildings": {
+  "attempts": 3,
+  "first_try_ok": false,
+  "rules": 10,
+  "rejected": [
+   "R-2c.lot_coverage_max: 'Percent of lot area': the cell '35%/40% /50% [fn12]' has 3 numbers, the rule expects 1",
+   "RU.lot_coverage_max: 'Percent of lot area': the cell '25% [fn13]' has footnotes ['13'], the rule expects none",
+   "R-1a.lot_coverage_max_ru: 'Percent of lot area': the cell '20%' has footnotes none, the rule expects ['13']",
+   "R-1b.lot_coverage_max_ru: 'Percent of lot area': the cell '25%' has footnotes none, the rule expects ['13']",
+   "R-2a.lot_coverage_max_ru: 'Percent of lot area': the cell '30%' has footnotes none, the rule expects ['13']",
+   "R-2b.lot_coverage_max_ru: 'Percent of lot area': the cell '35%' has footnotes none, the rule expects ['13']",
+   "R-2c.lot_coverage_max_ru: 'Percent of lot area': the cell '35%/40% /50% [fn12]' has 3 numbers, the rule expects 1",
+   "R-3a.lot_coverage_max_ru: 'Percent of lot area': the cell '35%' has footnotes none, the rule expects ['13']",
+   "R-3aa.lot_coverage_max_ru: 'Percent of lot area': the cell '35%' has footnotes none, the rule expects ['13']",
+   "R-3b.lot_coverage_max_ru: 'Percent of lot area': the cell '40%' has footnotes none, the rule expects ['13']"
+  ],
+  "unresolved": 10,
+  "outcome": "accepted",
+  "reason": "",
+  "notes": [
+   "attempt 1: chart-p3-maximum_lot_coverage_by_buildings.lot_coverage_max_by_use: R-1a.lot_coverage_max_by_use: 'Percent of lot area': the cell '20%' has 1 numbers, the rule expects 3; R-1b.lot_coverage_max_by_use: 'Percent of lot area': the cell '25%' has 1 numbers, the rule expects 3; R-2a.lot_coverage_max_by_use: 'Percent of lot area': the cell '30%' has 1 numbers, the rule expects 3; chart-p3-maximum_lot_coverage_by_buildings.green_space_ru: number 0.5 in 'green_space_area >= 0.5 * developable_lot_area' isn't backed where it stands: bind it to a sentence of the text being drafted, or to the own-cell foo",
+   "attempt 2: chart-p3-maximum_lot_coverage_by_buildings.lot_coverage_r2c_by_use: general.lot_coverage_r2c_by_use: general.lot_coverage_r2c_by_use: unknown use or district 'R-2C' in 'district == \"R-2C\"'"
+  ]
+ },
+ "chart-p3-minimum_lot_size": {
+  "attempts": 1,
+  "first_try_ok": true,
+  "rules": 33,
+  "rejected": [
+   "R-2c.min_lot_area_one_family_detached: 'One-family dwelling, detached': the cell '2,500 sf [fn4]' has footnotes ['4'], the rule expects none",
+   "R-1a.min_lot_area_one_family_semi_detached: 'One-family dwelling, semi-detached': the chart shows '-' here",
+   "R-1b.min_lot_area_one_family_semi_detached: 'One-family dwelling, semi-detached': the chart shows '-' here",
+   "R-2c.min_lot_area_one_family_semi_detached: 'One-family dwelling, semi-detached': the cell '2,000 sf [fn5]' has footnotes ['5'], the rule expects none",
+   "R-1a.min_lot_area_two_family: 'Two-family dwelling': the chart shows '-' here",
+   "R-1b.min_lot_area_two_family: 'Two-family dwelling': the chart shows '-' here",
+   "R-2c.min_lot_area_two_family: 'Two-family dwelling': the cell '2,000 sf [fn5]' has footnotes ['5'], the rule expects none",
+   "R-1a.min_lot_area_fraternity_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here",
+   "R-1b.min_lot_area_fraternity_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here",
+   "R-2a.min_lot_area_fraternity_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here",
+   "R-2b.min_lot_area_fraternity_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here",
+   "R-2c.min_lot_area_fraternity_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here"
+  ],
+  "unresolved": 12,
+  "outcome": "accepted",
+  "reason": "",
+  "notes": []
+ },
+ "chart-p3-minimum_lot_width": {
+  "attempts": 1,
+  "first_try_ok": true,
+  "rules": 46,
+  "rejected": [
+   "R-1a.min_lot_width_one_family_detached_zero_lot_line: 'One-family dwelling, detached, zero lot line': the chart shows '-' here",
+   "R-1b.min_lot_width_one_family_detached_zero_lot_line: 'One-family dwelling, detached, zero lot line': the chart shows '-' here",
+   "R-2a.min_lot_width_one_family_detached_zero_lot_line: 'One-family dwelling, detached, zero lot line': the chart shows '-' here",
+   "R-2b.min_lot_width_one_family_detached_zero_lot_line: 'One-family dwelling, detached, zero lot line': the chart shows '-' here",
+   "R-3a.min_lot_width_one_family_detached_zero_lot_line: 'One-family dwelling, detached, zero lot line': the chart shows '-' here",
+   "R-3aa.min_lot_width_one_family_detached_zero_lot_line: 'One-family dwelling, detached, zero lot line': the chart shows '-' here",
+   "R-3b.min_lot_width_one_family_detached_zero_lot_line: 'One-family dwelling, detached, zero lot line': the chart shows '-' here",
+   "RU.min_lot_width_one_family_detached_zero_lot_line: 'One-family dwelling, detached, zero lot line': the chart shows '-' here",
+   "R-1a.min_lot_width_one_family_semi_detached: 'One-family dwelling, semi-detached': the chart shows '-' here",
+   "R-1b.min_lot_width_one_family_semi_detached: 'One-family dwelling, semi-detached': the chart shows '-' here",
+   "R-1a.min_lot_width_one_family_attached: 'One-family dwelling, attached': the chart shows '-' here",
+   "R-1b.min_lot_width_one_family_attached: 'One-family dwelling, attached': the chart shows '-' here",
+   "R-2a.min_lot_width_one_family_attached: 'One-family dwelling, attached': the chart shows '-' here",
+   "R-2b.min_lot_width_one_family_attached: 'One-family dwelling, attached': the chart shows '-' here",
+   "R-1a.min_lot_width_two_family: 'Two-family dwelling': the chart shows '-' here",
+   "R-1b.min_lot_width_two_family: 'Two-family dwelling': the chart shows '-' here",
+   "R-1a.min_lot_width_multiple_family: 'Multiple family dwelling': the chart shows '-' here",
+   "R-1b.min_lot_width_multiple_family: 'Multiple family dwelling': the chart shows '-' here",
+   "R-2a.min_lot_width_multiple_family: 'Multiple family dwelling': the chart shows '-' here",
+   "R-2b.min_lot_width_multiple_family: 'Multiple family dwelling': the chart shows '-' here",
+   "R-2c.min_lot_width_multiple_family: 'Multiple family dwelling': the chart shows '-' here",
+   "R-1a.min_lot_width_fraternity_sorority_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here",
+   "R-1b.min_lot_width_fraternity_sorority_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here",
+   "R-2a.min_lot_width_fraternity_sorority_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here",
+   "R-2b.min_lot_width_fraternity_sorority_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here",
+   "R-2c.min_lot_width_fraternity_sorority_group_house: 'Fraternity, sorority, or group house': the chart shows 'nothing' here"
+  ],
+  "unresolved": 26,
+  "outcome": "accepted",
+  "reason": "",
+  "notes": []
+ },
+ "chart-p3-yard_dimensions": {
+  "attempts": 2,
+  "first_try_ok": false,
+  "rules": 26,
+  "rejected": [
+   "R-2c.side_yards_min: 'Side (one side minimum)': the cell '10 ft /15 ft [fn14]' has 2 numbers, the rule expects 1",
+   "RU.rear_yard_min_fn16: 'Rear (minimum, % of depth or feet, whichever is less)': the cell '25% / 50 ft [fn17]' has footnotes ['17'], the rule expects ['16']"
+  ],
+  "unresolved": 2,
+  "outcome": "accepted",
+  "reason": "",
+  "notes": [
+   "attempt 1: chart-p3-yard_dimensions.front_yard_min: R-1a.front_yard_min: R-1a.front_yard_min: unknown use or district '' in 'use != \"\"'; R-1b.front_yard_min: R-1b.front_yard_min: unknown use or district '' in 'use != \"\"'; R-2a.front_yard_min: R-2a.front_yard_min: unknown use or district '' in 'use != \"\"'; chart-p3-yard_dimensions.side_yards_min: R-1a.side_yards_min: R-1a.side_yards_min: unknown use or district '' in 'use != \"\"'; R-1b.side_yards_min: R-1b.side_yards_min: unknown use or district '' in 'use != \"\"'; R-2a.side_yards_min: R-2a.side_yards_min: unknown use or district '' in 'use != \"\"'; chart-p3"
+  ]
+ }
+}
