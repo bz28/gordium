@@ -203,28 +203,33 @@ def _normal_z(points) -> float:
     return abs(nz) / n if n else 0.0
 
 
+PITCHED = "the average height of a pitched roof is an open question for the architects (height_of_building)"
+ACCESSORY = ("whether another solid is part of the building or an accessory building (§325-25) is an open question "
+             "for the architects")
+
+
 def _height(building: dict, grade: float) -> dict:
-    """HEIGHT OF BUILDING: from the grade plane to the highest level of a flat roof, or to the average height
-    of a pitched roof. The roof is every face that isn't a wall or the floor. If all of it is level, or within a
-    drainage slope of level (under 1/2 inch per foot), it is a flat roof, measured to its highest point (the
-    cautious reading of "highest level"). Any steeper face makes it a pitched roof, whose "average height" is an
-    open question (midway between eave and ridge, or another average), so it is read both ways."""
+    """HEIGHT OF BUILDING: from the grade plane "to the highest level of a flat or mansard roof or to the average
+    height of a pitched ... roof", using "that section of the roof that has the highest elevation". The roof is
+    every face that isn't a wall or the floor; its highest section is the faces that reach the top. If any of
+    them is level, or within a drainage slope of level (under 1/2 inch per foot), it is a flat or mansard roof,
+    measured to its highest point. If the top is reached only by sloped faces, it is a pitched roof, whose
+    average height is an open question, read midway between that section's eave and ridge and to the ridge."""
     zs = [p[2] for f in building["faces"] for p in f["points"]]
     bottom, top = min(zs), max(zs)
     roof = [f for f in building["faces"]
             if _normal_z(f["points"]) > 0.001 and not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
     if not roof:
         return _missing("building_height", "the roof's shape can't be read (no faces above the floor that aren't walls)")
+    highest = [f for f in roof if any(abs(p[2] - top) <= TOL for p in f["points"])]
     how = "from the ground level (grade plane) to the top of the roof"
-    steep = [f for f in roof if _normal_z(f["points"]) < FLAT]
-    if not steep:
-        return _decide("building_height", [("flat roof", top - grade, {})], how + " (a flat roof, to its highest point)",
-                       [building["id"]], "")
-    eave = min(p[2] for f in steep for p in f["points"])
+    if not highest or any(_normal_z(f["points"]) >= FLAT for f in highest):
+        return _decide("building_height", [("flat or mansard roof", top - grade, {})],
+                       how + " (a flat or mansard roof, to its highest level)", [building["id"]], "")
+    eave = min(p[2] for f in highest for p in f["points"])
     return _decide("building_height", [("midway between eave and ridge", (eave + top) / 2 - grade, {}),
                                        ("to the ridge", top - grade, {})],
-                   how + " (a pitched roof)", [building["id"]],
-                   "the average height of a pitched roof is an open question for the architects (height_of_building)")
+                   how + " (a pitched roof)", [building["id"]], PITCHED)
 
 
 def _with_others(main: dict, others: list[dict]) -> dict:
@@ -235,13 +240,12 @@ def _with_others(main: dict, others: list[dict]) -> dict:
     if unread:                          # never dropped: it could be the tallest part
         return _missing("building_height", "another solid's height can't be read: " + unread[0]["reason"])
     mine = [(r["reading"], r["value"]) for r in main["readings"]] or [("", main["value"])]
-    tallest = max(max([r["value"] for r in o["readings"]] or [o["value"]]) for o in others
-)
+    tallest = max(max([r["value"] for r in o["readings"]] or [o["value"]]) for o in others)
     readings = [(_both(w, "the main building only"), v, {}) for w, v in mine]
     readings += [(_both(w, "with every other solid as part of it"), max(v, tallest), {}) for w, v in mine]
-    return _decide("building_height", readings, main["how"], main["objects"],
-                   main["reason"] or "whether another solid is part of the building or an accessory building (§325-25) "
-                                     "is an open question for the architects")
+    questions = _both(PITCHED if main["readings"] else "", ACCESSORY)
+    return _decide("building_height", readings, main["how"], main["objects"] + [o["objects"][0] for o in others],
+                   questions)
 
 
 # ---- measuring -------------------------------------------------------------------------------------------

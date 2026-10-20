@@ -39,7 +39,7 @@ format report from it.
 | Side yards | least distance from each side lot line to the building; the nearer is `side_yard_smaller` | side_yard: "from the nearest point of the side lot line to the nearest part of" |
 | Rear yard | least distance from the rear lot line to the main building | rear_yard: "the least distance between the rear lot line and the rear of such main building" |
 | Building area | ground area of every building on the lot | building_area: "the total area … of the principal building and all accessory buildings" |
-| Height | ground level to a flat roof's highest point (a roof within a drainage slope of level, under 1/2 inch per foot, is flat) | height_of_building: "to the highest level of a flat or mansard roof" |
+| Height | ground level to the highest level of a flat or mansard roof (its highest section is level, or within a drainage slope of level: under 1/2 inch per foot) | height_of_building: "to the highest level of a flat or mansard roof" |
 
 Side and rear lot lines follow from the street: lines next to the street lines and about square to them
 (60° or more) are side lines; lines not next to them and about parallel (30° or less) are rear lines.

@@ -285,3 +285,33 @@ def test_another_solid_whose_height_cant_be_read_is_never_dropped():
     m = measure(site(RECT, house, wing), {**FACTS, "main_building": "house"})
     assert m["building_height"]["value"] is None
     assert sorted(r["value"] for r in m["building_height"]["readings"]) == [30.0, 45.0]
+
+
+def test_a_mansard_roof_and_a_flat_roof_over_a_lower_pitched_wing_are_measured_to_their_highest_level():
+    # a mansard: walls to 20 ft, sides sloping in 2 ft up to a level deck at 30 ft ("the highest level of a ...
+    # mansard roof")
+    low = [(10, 25), (35, 25), (35, 65), (10, 65)]
+    deck = [(12, 27), (33, 27), (33, 63), (12, 63)]
+    walls = [{"points": [[*low[i], 0], [*low[(i + 1) % 4], 0], [*low[(i + 1) % 4], 20], [*low[i], 20]]} for i in range(4)]
+    sides = [{"points": [[*low[i], 20], [*low[(i + 1) % 4], 20], [*deck[(i + 1) % 4], 30], [*deck[i], 30]]} for i in range(4)]
+    mansard = {"id": "house", "problems": [], "faces": [{"points": [[x, y, 0] for x, y in low]},
+                                                         {"points": [[x, y, 30] for x, y in deck]}, *walls, *sides]}
+    assert measure(site(RECT, mansard), FACTS)["building_height"]["value"] == 30.0
+    # a flat 30 ft house with a lower gable (eave 8, ridge 14) in the same solid: the highest section is flat
+    house = box(10, 25, 35, 65, 0, 30)
+    gable = [{"points": [[35, 30, 8], [45, 30, 8], [45, 40, 14], [35, 40, 14]]},
+             {"points": [[35, 40, 14], [45, 40, 14], [45, 50, 8], [35, 50, 8]]}]
+    house["faces"] += gable
+    assert measure(site(RECT, house), FACTS)["building_height"]["value"] == 30.0
+
+
+def test_a_pitched_house_with_another_solid_names_both_open_questions_once():
+    eave, ridge = 20, 30
+    house = box(10, 25, 35, 65, 0, eave)
+    house["faces"] = [f for f in house["faces"] if not all(p[2] == eave for p in f["points"])]
+    house["faces"] += [{"points": [[10, 25, eave], [35, 25, eave], [35, 45, ridge], [10, 45, ridge]]},
+                       {"points": [[10, 45, ridge], [35, 45, ridge], [35, 65, eave], [10, 65, eave]]}]
+    garage = box(30, 75, 48, 95, 0, 12, id="garage")
+    reason = measure(site(RECT, house, garage), {**FACTS, "main_building": "house"})["building_height"]["reason"]
+    assert reason.count("the readings give different values") == 1
+    assert "pitched roof" in reason and "§325-25" in reason
