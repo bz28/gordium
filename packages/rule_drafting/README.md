@@ -81,6 +81,7 @@ python -m rule_drafting status                      # what's drafted, and what's
 python -m rule_drafting estimate --limit 10         # cost first; exact with a key, rough without
 python -m rule_drafting draft --limit 10            # shows the estimate, sends nothing
 python -m rule_drafting draft --limit 10 --yes      # drafts them; --only UNIT... or --all also work
+                                                    # (ends by rewriting the labels' review list, as labeling does)
 python -m rule_drafting cost                        # what the recorded runs actually cost
 ```
 

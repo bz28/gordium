@@ -717,3 +717,29 @@ def test_a_long_section_is_named_as_dropped_and_the_short_ones_after_it_still_co
                           inputs.columns, context)
     assert {d for d in context["dropped"]} <= {g["why"].split()[3].rstrip(",") for g in result["unresolved"]
                                                  if "left out of the drafter's input" in g["why"]}
+
+
+def test_a_drafting_run_rewrites_the_labels_review_list(inputs, tmp_path, monkeypatch):
+    """Drafted rules feed the review list's 'cited by' column, so a run must end by rewriting it."""
+    refreshed = []
+    real = cli.Inputs
+    def scratch():
+        i = real()
+        i.records, i.drafted = tmp_path / "records", tmp_path / "drafted"
+        return i
+    monkeypatch.setattr(cli, "Inputs", scratch)
+    monkeypatch.setattr(cli, "LEDGER", tmp_path / "ledger.json")
+    monkeypatch.setattr(cli, "refresh_review_list", lambda i: refreshed.append(i.j))
+    assert cli.main(["draft", "--only", cli.USES_UNIT, "--yes"]) == 0
+    assert refreshed == [cli.PLACE]
+
+
+def test_drafted_rules_are_listed_apart_from_hand_rules_with_the_same_id(tmp_path):
+    from section_labeling import coverage
+    rule = {"id": "R-1b.x", "sources": [{"file": "law.pdf", "page": 1, "lines": [2, 2], "quote": "q"}]}
+    (tmp_path / "5_zoning_rules/drafted").mkdir(parents=True)
+    (tmp_path / "4_term_definitions").mkdir()
+    for path in ("5_zoning_rules/R-1b.yaml", "5_zoning_rules/drafted/R-1b.yaml"):
+        (tmp_path / path).write_text(cli.yaml.safe_dump({"district": "R-1b", "rules": [rule]}))
+    pieces = {"p": {"id": "p", "lines": [[1, 1, 3]]}}
+    assert coverage.cited_by(tmp_path, "law.pdf", pieces) == {"p": ["R-1b.x", "drafted:R-1b.x"]}

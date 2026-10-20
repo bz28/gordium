@@ -321,7 +321,16 @@ def cmd_draft(args) -> int:
         print(f"  budget ${budget.cap:.2f}: spent ${budget.spent:.4f}, ${budget.remaining:.4f} left")
     log["complete"] = all(u["id"] in log["units"] for u in i.units())
     (i.records / "drafting_log.yaml").write_text(yaml.safe_dump(log, sort_keys=False, allow_unicode=True, width=110))
+    refresh_review_list(i)
     return 0
+
+
+def refresh_review_list(i: Inputs) -> None:
+    """The labels' review list lists the pieces drafted rules cite, so a drafting run rewrites it (the same
+    command the labeling run ends with); otherwise CI's `section_labeling coverage --check` fails after it."""
+    from section_labeling.__main__ import PLACES, cmd_coverage
+    if i.j.is_relative_to(PLACES):
+        cmd_coverage(argparse.Namespace(place=i.j.relative_to(PLACES).as_posix(), check=False))
 
 
 def draft_accessory() -> dict:
