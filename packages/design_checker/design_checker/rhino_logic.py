@@ -135,3 +135,18 @@ def option_names(kind, count):
     """Command-line options naming each candidate ("Lot1", "Lot2"), so one that can't be clicked (locked or
     hidden: Rhino won't select it) can still be chosen."""
     return ["%s%d" % (kind, i + 1) for i in range(count)]
+
+
+def after_lot_pick(facts, picked_lot):
+    """The facts after the lot is (re)picked: a different lot drops the street lines, which belonged to the old
+    one (they are asked again on the new lot), and so Enter can't keep them."""
+    out = dict(facts)
+    if picked_lot and picked_lot != out.get("lot_id"):
+        out["lot_id"] = picked_lot
+        out.pop("street_line", None)
+    return out
+
+
+def street_enter_keeps(facts):
+    """Whether Enter at the first street-line prompt keeps the street lines saved for this lot."""
+    return bool(facts.get("street_line"))

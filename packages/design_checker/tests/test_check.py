@@ -188,6 +188,15 @@ def test_every_candidate_can_be_chosen_by_name():
     assert option_names("Lot", 3) == ["Lot1", "Lot2", "Lot3"]
 
 
+def test_a_new_lot_drops_the_old_street_line_and_enter_keeps_only_a_current_one():
+    from design_checker.rhino_logic import after_lot_pick, street_enter_keeps
+    facts = {"lot_id": "a", "street_line": [[[0, 0], [5, 0]]]}
+    assert after_lot_pick(facts, "a") == facts and street_enter_keeps(facts)
+    moved = after_lot_pick(facts, "b")
+    assert moved == {"lot_id": "b"} and not street_enter_keeps(moved)
+    assert after_lot_pick(facts, None) == facts
+
+
 def test_closing_the_confirm_dialog_saves_nothing():
     from design_checker.rhino_logic import after_confirm
     assert (after_confirm("ok"), after_confirm("change"), after_confirm(None)) == ("keep", "change", "cancel")

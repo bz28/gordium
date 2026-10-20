@@ -329,6 +329,12 @@ def draw_screen(o, e):
     if not _here(o, e):
         return
     d = e.Display
+    for point, text in getattr(o, "labels", None) or []:   # each candidate's name while a pick prompt is open
+        p = e.Viewport.WorldToClient(point)
+        width = len(text) * 8 + 16
+        d.Draw2dRectangle(System.Drawing.Rectangle(int(p.X) - width // 2, int(p.Y) - 12, width, 24), BLUE, 1,
+                          System.Drawing.Color.White)
+        d.Draw2dText(text, BLUE, rg.Point2d(p.X - width // 2 + 8, p.Y - 8), False, 14)
     for line, label in o.dims:               # each failing distance: the line it was measured along, on top
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
         d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), RED, 4)
@@ -495,16 +501,23 @@ def _describe(facts, uses):
             ("from a survey" if facts.get("lot_surveyed") else "not from a survey (lot size and coverage wait for one)"))
 
 
-def confirm(doc, facts, options):
-    """One small prefilled dialog. OK keeps the facts; Change… lets the architect set each one."""
+def _highlight(doc, facts):
+    """Outline what the facts say now: the lot in green, its street lines in blue, the main building in blue."""
     lot = _find(doc, facts.get("lot_id") or "")
     main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     o = overlay()
-    _clear(o)                           # facts are being set: no earlier result (of any model) stays shown
-    o.message = None
     o.doc = doc.RuntimeSerialNumber
     o.confirm = (lot.Geometry if lot else None, street_curve(doc, facts), _drawable(main.Geometry) if main else None)
     doc.Views.Redraw()
+
+
+def confirm(doc, facts, options):
+    """One small prefilled dialog. OK keeps the facts; Change… lets the architect set each one, then the dialog
+    shows again with the new answers outlined, so nothing is saved unseen; closing it (or Esc) saves nothing."""
+    o = overlay()
+    _clear(o)                           # facts are being set: no earlier result (of any model) stays shown
+    o.message = None
+    _highlight(doc, facts)
     try:
         if STATE.get("auto_ok"):          # scripted runs (tests, the demo): accept the prefilled facts
             return facts
@@ -526,9 +539,13 @@ def confirm(doc, facts, options):
         what = logic.after_confirm(chosen.get("choice"))
         if what == "keep":
             return facts
-        return change_facts(doc, facts, options) if what == "change" else None
+        if what == "cancel":
+            return None
+        changed = change_facts(doc, facts, options)
+        return None if changed is None else confirm(doc, changed, options)     # shown again before it is saved
     finally:
         o.confirm = None
+        o.labels = []
         doc.Views.Redraw()
 
 
@@ -582,9 +599,12 @@ def _pick(doc, prompt, candidates, kind, geometry=None):
     go.SetCommandPrompt(prompt)
     go.AcceptNothing(True)
     go.EnablePreSelect(False, True)
-    by_option = {}
+    by_option, labels = {}, []
     for name, o in zip(logic.option_names(kind, len(candidates)), candidates):
         by_option[go.AddOption(name)] = str(o.Id)
+        labels.append((o.Geometry.GetBoundingBox(True).Center, name))
+    overlay().labels = labels           # the names on screen, so a name always points at its object
+    doc.Views.Redraw()
     if geometry is not None:
         go.GeometryFilter = geometry
     go.SetCustomGeometryFilter(Rhino.Input.Custom.GetObjectGeometryFilter(
@@ -593,6 +613,7 @@ def _pick(doc, prompt, candidates, kind, geometry=None):
     _go_on(got)
     picked = (str(go.Object(0).ObjectId) if got == Rhino.Input.GetResult.Object else
               by_option.get(go.OptionIndex()) if got == Rhino.Input.GetResult.Option else None)
+    overlay().labels = []
     doc.Objects.UnselectAll()
     return picked if picked is not None and logic.accepts_pick(picked, ids) else None
 
@@ -618,23 +639,29 @@ def _change_facts(doc, facts, options):
     if len(lots) > 1:
         picked = _pick(doc, "Click the lot outline (a closed curve on the Site layer), or choose one; Enter keeps it",
                        lots, "Lot", Rhino.DocObjects.ObjectType.Curve)
-        if picked:
-            facts["lot_id"] = picked
+        facts = logic.after_lot_pick(facts, picked)
+        _highlight(doc, facts)
     if len(buildings) > 1:
         picked = _pick(doc, "Click the main building (a solid on the Building layer), or choose one; Enter keeps it",
                        buildings, "Building")
         if picked:
             facts["main_building"] = picked
+        _highlight(doc, facts)
     facts["corner_lot"] = _yes_no("Corner lot (two streets meet at it)?", facts.get("corner_lot"))
     lot = _find(doc, facts.get("lot_id") or "")
     if lot is not None:
         picked = []
         while True:                      # every lot line on a street (both streets on a corner lot)
-            prompt = "Click a lot line on the street" + (" (Enter when done)" if picked else "")
-            rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, bool(picked))
+            keeps = not picked and logic.street_enter_keeps(facts)
+            prompt = "Click a lot line on the street" + (" (Enter when done)" if picked else
+                                                         " (Enter keeps the blue one)" if keeps else "")
+            rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, True)      # Enter: done, keep, or asked again
             _go_on(rc)
             if rc != Rhino.Commands.Result.Success:
-                break
+                if picked or keeps:
+                    break
+                Rhino.RhinoApp.WriteLine("Gordium: this lot has no street line yet; click one (Esc cancels)")
+                continue
             a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
             line = [[a.X * scale, a.Y * scale], [b.X * scale, b.Y * scale]]
             if line not in picked:
@@ -643,6 +670,7 @@ def _change_facts(doc, facts, options):
                 break
         if picked:
             facts["street_line"] = picked
+        _highlight(doc, facts)
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,
                                             (facts.get("grade_elevation") or 0.0) / scale)
