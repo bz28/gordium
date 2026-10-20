@@ -1,4 +1,7 @@
 # People allowed to approve rules (rule_format rejects any other approved_by).
 # Architects only. AI drafts rules but never approves them.
 # Add one line per reviewer, e.g.:  - jane_doe   # Jane Doe, <firm>
+# Approval is deferred for now (decided 2026-10-19): listing someone here doesn't switch it on (nothing is
+# approved until a rule's status is set to approved). This list also says who may record an architect's
+# answer to an open question (answered_by), so an architect who answers must be listed here.
 []
