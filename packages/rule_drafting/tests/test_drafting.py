@@ -441,6 +441,21 @@ def test_the_docs_describe_the_typed_number_rule_the_code_enforces():
         assert "requirement lines its reviewed label cites" not in text and "whole text" in text and "hints" in text
 
 
+def test_the_drafting_prompt_gives_role_purpose_process_and_the_current_number_rule():
+    """Prompt A (2026-10-20): who the drafter is, why it matters, the steps in order, and the rules the code
+    enforces today; none of the removed ones (open questions for numbers, every slot must decide something)."""
+    text = " ".join(drafter.FORMAT.split())                  # one line: phrases may wrap anywhere
+    for heading in ("## Who you are, and why this matters", "## The process, in order", "## What to write"):
+        assert heading in text
+    assert "Never a false pass" in text and "Code checks everything you write" in text
+    assert "a sentence of the paragraph being drafted" in text and "Anything else is refused" in text
+    assert "a footnote whose marker is on the slot's own cell" in text and "that slot's own row label" in text
+    assert "Never write a placeholder test" in text and "an example in every tier, the top one included" in text
+    assert "not folded into this rule" in text
+    assert "sent to an architect as an open question" not in text            # numbers never go to a question
+    assert "Every slot must decide something" not in text
+
+
 def test_a_slot_no_formula_uses_cant_lend_its_footnote_to_a_typed_number(inputs):
     """A decoy slot on a cell that carries note 7 ('For the first 1-3 units') must not back 'stories <= 3':
     R-3A's chart says 4 stories."""
