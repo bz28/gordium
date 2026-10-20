@@ -102,8 +102,7 @@ def test_a_jog_gives_two_readings_of_the_side_lot_lines():
 def test_a_corner_lot_leaves_side_and_rear_yards_for_the_architects():
     facts = {**FACTS, "corner_lot": True, "street_line": [[[0, 0], [50, 0]], [[50, 0], [50, 100]]]}
     m = measure(site(), facts)
-    assert m["front_yard"]["value"] == 15.0        # nearest of the two street lines
-    for name in ("lot_width", "side_yard_smaller", "side_yard_larger", "rear_yard", "lot_depth"):
+    for name in ("lot_width", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "lot_depth"):
         assert m[name]["value"] is None and "corner lot" in m[name]["reason"]
 
 
@@ -214,7 +213,7 @@ def rounded_corner_lot():
 def test_a_corner_lot_with_a_rounded_corner_leaves_side_and_rear_yards_for_the_architects():
     corner, street = rounded_corner_lot()
     m = measure(site(corner), {**FACTS, "corner_lot": True, "street_line": street})
-    for name in ("lot_width", "side_yard_smaller", "side_yard_larger", "rear_yard", "lot_depth"):
+    for name in ("lot_width", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "lot_depth"):
         assert m[name]["value"] is None and "corner lot" in m[name]["reason"], name
 
 
@@ -244,24 +243,13 @@ def test_whether_it_is_a_corner_lot_is_stated_never_guessed():
     assert one["lot_width"]["value"] == round(50 + math.hypot(49, 10), 6)
 
 
-def test_a_corner_lot_with_only_one_street_line_asks_for_both():
-    m = measure(site(), {**FACTS, "corner_lot": True})
+def test_a_corner_lot_with_only_one_street_given_measures_no_yard():
+    # one street that bends 11.5 degrees is given; the second street (x = 99) isn't: nothing is measured to it
+    bend = lot([(0, 0), (50, 0), (99, 10), (99, 110), (0, 100)])
+    m = measure(site(bend, box(30, 40, 97, 80)), {**FACTS, "corner_lot": True,
+                                                   "street_line": [[[0, 0], [50, 0]], [[50, 0], [99, 10]]]})
     for name in ("front_yard", "lot_width", "rear_yard"):
-        assert m[name]["value"] is None and "both streets" in m[name]["reason"], name
-
-
-def test_a_corner_rounded_in_three_pieces_counts_as_turning():
-    # 90 degrees in three straight pieces of 30: no single join turns much, the frontage turns fully
-    pts = [(0, 0), (40, 0)]
-    for a in (30, 60, 90):
-        x, y = pts[-1]
-        pts.append((x + 5.18 * math.cos(math.radians(a - 15)), y + 5.18 * math.sin(math.radians(a - 15))))
-    x, y = pts[-1]
-    pts += [(x, 100), (0, 100)]
-    street = [[list(pts[i]), list(pts[i + 1])] for i in range(4)] + [[list(pts[4]), list(pts[5])]]
-    m = measure(site(lot(pts), box(10, 25, 35, 65)), {**FACTS, "corner_lot": True, "street_line": street})
-    assert m["front_yard"]["value"] is not None                # both streets given: no "pick both streets"
-    assert m["rear_yard"]["value"] is None and "corner lot" in m["rear_yard"]["reason"]
+        assert m[name]["value"] is None and "corner lot" in m[name]["reason"], name
 
 
 def test_a_taller_part_drawn_as_its_own_solid_counts_for_the_height():
@@ -271,3 +259,29 @@ def test_a_taller_part_drawn_as_its_own_solid_counts_for_the_height():
     assert sorted(r["value"] for r in m["building_height"]["readings"]) == [30.0, 45.0]
     garage = box(30, 75, 48, 95, 0, 12, id="garage")             # a lower solid doesn't change the height
     assert measure(site(RECT, house, garage), {**FACTS, "main_building": "house"})["building_height"]["value"] == 30.0
+
+
+def sloped_roof_box(x0, y0, x1, y1, low, high, id):
+    """A box whose roof slopes from `low` (at y0) to `high` (at y1) in one plane."""
+    base = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    top = {(x0, y0): low, (x1, y0): low, (x1, y1): high, (x0, y1): high}
+    walls = [{"points": [[*base[i], 0], [*base[(i + 1) % 4], 0], [*base[(i + 1) % 4], top[base[(i + 1) % 4]]],
+                         [*base[i], top[base[i]]]]} for i in range(4)]
+    return {"id": id, "faces": [{"points": [[x, y, 0] for x, y in base]},
+                                {"points": [[x, y, top[(x, y)]] for x, y in base]}, *walls], "problems": []}
+
+
+def test_a_roof_with_a_drainage_slope_is_flat_and_measured_to_its_highest_point():
+    m = measure(site(RECT, sloped_roof_box(10, 25, 35, 65, 29.8, 30, "house")), FACTS)   # 1/4 inch per foot
+    assert m["building_height"]["value"] == 30.0
+
+
+def test_another_solid_whose_height_cant_be_read_is_never_dropped():
+    house = box(10, 25, 35, 65, 0, 30)
+    flat_slab = {"id": "slab", "faces": [{"points": [[30, 75, 0], [45, 75, 0], [45, 90, 0]]}], "problems": []}
+    m = measure(site(RECT, house, flat_slab), {**FACTS, "main_building": "house"})
+    assert m["building_height"]["value"] is None and m["building_height"]["reason"].startswith("another solid's height")
+    wing = sloped_roof_box(10, 65, 20, 75, 44.8, 45, "wing")            # a 45 ft wing with a drainage slope
+    m = measure(site(RECT, house, wing), {**FACTS, "main_building": "house"})
+    assert m["building_height"]["value"] is None
+    assert sorted(r["value"] for r in m["building_height"]["readings"]) == [30.0, 45.0]

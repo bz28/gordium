@@ -28,7 +28,7 @@ MEASURES = list(load(MEASURES_FILE))
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
 PARALLEL, PERPENDICULAR = 30, 60   # degrees from the street: clearly a rear line / clearly a side line
-STRAIGHT = 5              # degrees: street lines that turn less than this in all are one straight frontage
+FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 4     # more lot lines than this of unclear kind: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
 ASK = {"use": "choose the use", "stories": "enter the number of stories",
@@ -125,22 +125,6 @@ class Lot:
         start = next(i for i in self.street if (i - 1) % n not in s)
         return [(start + k) % n for k in range(len(self.street))]
 
-    def turn(self) -> float:
-        """How far the street frontage turns from the way it started, at most, in degrees: added up along
-        every piece of it, curved lines included (a corner rounded in several pieces turns as much as a sharp
-        one)."""
-        points = [p for i in self.ordered_street() for p in self.edges[i]]
-        heading, turned, most = None, 0.0, 0.0
-        for a, b in zip(points, points[1:]):
-            if math.dist(a, b) <= 1e-9:
-                continue
-            h = math.atan2(b[1] - a[1], b[0] - a[0])
-            if heading is not None:
-                turned += (h - heading + math.pi) % (2 * math.pi) - math.pi
-                most = max(most, abs(math.degrees(turned)))
-            heading = h
-        return most
-
     def readings(self):
         """Every way to read which lot lines are side lines and which are rear lines: a list of
         (description, left side edges, right side edges, rear edges). Lines next to the street lines and
@@ -221,21 +205,22 @@ def _normal_z(points) -> float:
 
 def _height(building: dict, grade: float) -> dict:
     """HEIGHT OF BUILDING: from the grade plane to the highest level of a flat roof, or to the average height
-    of a pitched roof. A flat roof is a level face at the top of the building; a pitched roof's average height
-    is an open question (midway between eave and ridge, or another average), so a pitched roof is read both
-    ways."""
+    of a pitched roof. The roof is every face that isn't a wall or the floor. If all of it is level, or within a
+    drainage slope of level (under 1/2 inch per foot), it is a flat roof, measured to its highest point (the
+    cautious reading of "highest level"). Any steeper face makes it a pitched roof, whose "average height" is an
+    open question (midway between eave and ridge, or another average), so it is read both ways."""
     zs = [p[2] for f in building["faces"] for p in f["points"]]
-    top = max(zs)
-    level_top = any(_normal_z(f["points"]) > 0.999 and all(abs(p[2] - top) <= TOL for p in f["points"])
-                    for f in building["faces"])
+    bottom, top = min(zs), max(zs)
+    roof = [f for f in building["faces"]
+            if _normal_z(f["points"]) > 0.001 and not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
+    if not roof:
+        return _missing("building_height", "the roof's shape can't be read (no faces above the floor that aren't walls)")
     how = "from the ground level (grade plane) to the top of the roof"
-    if level_top:
-        return _decide("building_height", [("flat roof", top - grade, {})], how + " (a flat roof)", [building["id"]],
-                       "")
-    sloped = [p[2] for f in building["faces"] if 0.001 < _normal_z(f["points"]) < 0.999 for p in f["points"]]
-    if not sloped:
-        return _missing("building_height", "the roof's shape can't be read (no level or sloped top faces)")
-    eave = min(z for z in sloped if z > grade + TOL) if any(z > grade + TOL for z in sloped) else min(sloped)
+    steep = [f for f in roof if _normal_z(f["points"]) < FLAT]
+    if not steep:
+        return _decide("building_height", [("flat roof", top - grade, {})], how + " (a flat roof, to its highest point)",
+                       [building["id"]], "")
+    eave = min(p[2] for f in steep for p in f["points"])
     return _decide("building_height", [("midway between eave and ridge", (eave + top) / 2 - grade, {}),
                                        ("to the ridge", top - grade, {})],
                    how + " (a pitched roof)", [building["id"]],
@@ -246,9 +231,12 @@ def _with_others(main: dict, others: list[dict]) -> dict:
     """The main building's height read two ways when there are other solids: alone, and with every other solid
     as part of it (a wing or tower drawn as its own solid is part of the building; an accessory building
     may have its own limit, §325-25). Each other solid counts at its highest reading."""
+    unread = [o for o in others if o["value"] is None and not o["readings"]]
+    if unread:                          # never dropped: it could be the tallest part
+        return _missing("building_height", "another solid's height can't be read: " + unread[0]["reason"])
     mine = [(r["reading"], r["value"]) for r in main["readings"]] or [("", main["value"])]
     tallest = max(max([r["value"] for r in o["readings"]] or [o["value"]]) for o in others
-                  if o["value"] is not None or o["readings"])
+)
     readings = [(_both(w, "the main building only"), v, {}) for w, v in mine]
     readings += [(_both(w, "with every other solid as part of it"), max(v, tallest), {}) for w, v in mine]
     return _decide("building_height", readings, main["how"], main["objects"],
@@ -304,18 +292,17 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
 
     # where the street is decides the lot width, the yards and the lot depth. Whether the lot is a corner lot
     # (two streets, §325-19C) is stated by the architect, never guessed from the drawing (the city's definition
-    # has no angle in it); the street lines given must agree with it.
+    # has no angle in it). On a corner lot every one of them is an open question: which yards are front, side
+    # and rear, and which frontage is the lot width (and the drawing can't show whether both streets were given).
     if not lot.street_problem and facts.get("corner_lot") is None:
         lot.street_problem = ("say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot "
                               "yes or no")
-    elif not lot.street_problem and facts["corner_lot"] and lot.turn() <= STRAIGHT:
-        lot.street_problem = "a corner lot: pick the lot lines on both streets (and any curve between them)"
+    elif not lot.street_problem and facts["corner_lot"]:
+        lot.street_problem = ("a corner lot: which yards are front, side and rear yards, and which street's frontage "
+                              "is the lot width (§325-19C), are open questions for the architects")
     if lot.street_problem:
         for name in ("lot_width", "lot_depth", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard"):
             out[name] = _missing(name, lot.street_problem)
-    elif facts["corner_lot"]:
-        out["lot_width"] = _missing("lot_width", "a corner lot: which street's frontage is the lot width (§325-19C) is "
-                                                 "an open question for the architects")
     else:
         chain = lot.ordered_street()
         width = [("along the street line", lot.length(chain), {})]
@@ -342,14 +329,9 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
 
     if lot.street_problem:
         return out
-    corner, readings = facts["corner_lot"], None
     sides = "which lot lines count as side and rear lot lines is an open question for the architects (lot_depth)"
-    if corner:
-        why_lines = ("a corner lot: which yards are front, side and rear yards (§325-19C) is an open question for the "
-                     "architects")
-    else:
-        readings = lot.readings()
-        why_lines = None if readings else "the side and rear lot lines can't be told apart"
+    readings = lot.readings()
+    why_lines = None if readings else "the side and rear lot lines can't be told apart"
     out["lot_depth"] = (_missing("lot_depth", why_lines) if why_lines else
                         _decide("lot_depth", [(w, (lot.length(l) + lot.length(r)) / 2, {}) for w, l, r, _ in readings],
                                 "the average length of the two side lot lines", [lot.id], sides))

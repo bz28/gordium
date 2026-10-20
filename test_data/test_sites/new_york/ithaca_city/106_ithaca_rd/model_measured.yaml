@@ -21,7 +21,7 @@ measurements:
     from: 'not measured: a building isn''t inside the lot'
   building_height:
     value: 35.0
-    from: 'measured from model.3dm: from the ground level (grade plane) to the top of the roof (a flat roof)'
+    from: 'measured from model.3dm: from the ground level (grade plane) to the top of the roof (a flat roof, to its highest point)'
   stories:
     value: 3
     from: stated by the architect (not measured from the model) (lot facts)

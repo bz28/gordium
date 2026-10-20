@@ -23,7 +23,7 @@ format report from it.
   |---|---|
   | `zone`, `jurisdiction`, `use` | pick the rules |
   | `street_line` | **every** lot line on a street, each by its two ends (on a corner lot: both streets and any curve between them); front, side and rear all follow from it |
-  | `corner_lot` | yes or no: two streets meet at the lot (§325-19C). Stated, never guessed from the drawing (the city's definition has no angle in it). Without it, everything that depends on the street says "needs review"; a corner lot with only one street line given asks for both |
+  | `corner_lot` | yes or no: two streets meet at the lot (§325-19C). Stated, never guessed from the drawing (the city's definition has no angle in it). Without it, everything that depends on the street says "needs review". On a corner lot, the lot width, lot depth and every yard are left for the architects: which yards are front, side and rear, and which frontage is the width, are open questions (and a drawing can't show whether both streets were given) |
   | `grade_elevation` | the ground level heights are measured from (a flat site) |
   | `lot_id`, `main_building` | only when there is more than one candidate |
   | `stories`, `sleeping_rooms`, `parking_spaces` | not drawn in a massing model; the rules that need them say "needs review" until they're entered |
@@ -39,7 +39,7 @@ format report from it.
 | Side yards | least distance from each side lot line to the building; the nearer is `side_yard_smaller` | side_yard: "from the nearest point of the side lot line to the nearest part of" |
 | Rear yard | least distance from the rear lot line to the main building | rear_yard: "the least distance between the rear lot line and the rear of such main building" |
 | Building area | ground area of every building on the lot | building_area: "the total area … of the principal building and all accessory buildings" |
-| Height | ground level to a flat roof's top | height_of_building: "to the highest level of a flat or mansard roof" |
+| Height | ground level to a flat roof's highest point (a roof within a drainage slope of level, under 1/2 inch per foot, is flat) | height_of_building: "to the highest level of a flat or mansard roof" |
 
 Side and rear lot lines follow from the street: lines next to the street lines and about square to them
 (60° or more) are side lines; lines not next to them and about parallel (30° or less) are rear lines.
@@ -62,7 +62,7 @@ listed, and the reason names the open question for the architects, so the checke
 Things that stop a measurement, with the reason given: no street side, a street line that isn't a lot line, a
 building outside the lot, no ground level, more than one building and none picked, a corner lot (§325-19C: which
 yards are front, side and rear, and which street's frontage is the lot width, are open questions), no corner-lot
-answer, a corner lot whose street lines don't turn (only one street given), every lot line on a street, a
+answer, every lot line on a street, a
 lot outline that isn't closed or crosses itself, a curved wall or edge (not measured yet), a solid that isn't
 closed, two candidate lot outlines, and anything on the Building layer that isn't a solid or mesh (a block, a
 surface): it is reported, never left out, since leaving it out would undercount coverage. Sublayers count
