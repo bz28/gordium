@@ -63,9 +63,10 @@ piece of the law is compared on what it quotes, not on the chart cells it reads 
 convention.
 
 **The 10-unit test batch** (`evals/2026-10-20_prompt_a/`, with its records, scripts and every judged difference):
-with the current instructions (prompt A), 194 rules, 9 of 9 units accepted, R-1b examples 28/30, the architects'
-spreadsheet 11/11, chart values exact 15/15, for $0.457. The earlier prompt, replayed through today's checks,
-gave 152 rules, 19/27, and 9 of 10 drafted rows.
+with the current instructions (prompt A), 202 rules, 9 of 9 units accepted, R-1b examples 28/31, the architects'
+spreadsheet 10 of 11, chart rows exact 14/14, no law exception passing what the answer key fails, for $0.499. The
+earlier prompt, replayed through today's checks, gave 152 rules, 19/28 and 9 rows. Model choice (Sonnet over
+Haiku): `evals/2026-10-19_model_choice/`.
 
 ## Running it
 

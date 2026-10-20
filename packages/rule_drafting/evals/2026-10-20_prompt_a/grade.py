@@ -49,29 +49,14 @@ for row in book["Output"].iter_rows(min_row=3):
     out["spreadsheet"].append({"row": label, "theirs": theirs, "got": got, "agree": got == theirs.lower(),
                                "drafted": [r["id"] for r in cov], "notes": notes})
 
-# 3. chart values exact (the harness's own boundary test, collecting instead of asserting)
-spec2 = importlib.util.spec_from_file_location("r1b_chart", root / "packages/document_extraction/tests/test_r1b_matches_chart.py")
-chart = importlib.util.module_from_spec(spec2)
-spec2.loader.exec_module(chart)
-cells = [c for c in (json.loads(line) for line in chart.CELLS.open(encoding="utf-8"))
-         if c.get("column") == chart.COLUMN and not c.get("heading")]
-from_law = te.law_unit_rules()
-for rule in rules:
-    passing = [ex["given"] for ex in rule.get("examples", []) if ex["expect"] == "pass"]
-    if rule["kind"] != "rule" or not passing or rule["id"] in from_law:
-        continue
-    for c in chart.cited_rows(rule, cells):
-        key = (c["page"], c["section"], c["row"])
-        if key not in chart.LIMITS:
-            continue
-        for measure, kind, fixed, limit in chart.LIMITS[key]:
-            bound = limit(chart.numbers(c["value"]))
-            past = bound + (1 if measure in chart.COUNTS else 0.01) * (1 if kind == "max" else -1)
-            at = outcome(rule, passing[0] | fixed | {measure: bound}, ctx.allowed())
-            beyond = outcome(rule, passing[0] | fixed | {measure: past}, ctx.allowed())
-            out["chart_values"].append({"rule": rule["id"], "measure": measure, "kind": kind, "value": bound,
-                                        "at": at, "past": beyond, "ok": (at, beyond) in {("pass", "fail"), ("pass", "pass")},
-                                        "enforced": (at, beyond) == ("pass", "fail")})
+# 3. chart values exact (the harness's own check, with its readings)
+chart, cells = te.load_chart_test()
+cited, enforced, wrong = te.chart_value_results(rules, chart, cells, ctx)
+out["chart_values"] = {"cited": sorted(map(list, cited)), "enforced": sorted(map(list, enforced)), "wrong": wrong}
+
+# 3b. law exceptions judged alone never pass what the answer key fails
+out["exception_false_passes"] = te.exception_false_passes(hand, rules, ctx)
+out["idle_chart_numbers"] = te.idle_chart_numbers(rules, chart, cells, ctx)
 
 # 4. inspector and own cells
 for p in sorted(te.DRAFTED.glob("*.yaml")):
@@ -82,11 +67,13 @@ for p in sorted(te.DRAFTED.glob("*.yaml")):
 total = sum(len(load(p).get("rules", [])) for p in te.DRAFTED.glob("*.yaml"))
 he = out["hand_examples"]
 sp = [s for s in out["spreadsheet"] if s["agree"] is not None]
-cv = out["chart_values"]
 out["summary"] = {"rules_saved": total, "r1b_rules": len(rules),
                   "hand_examples_agree": f"{sum(x['agree'] for x in he)}/{len(he)}",
                   "spreadsheet_agree": f"{sum(x['agree'] for x in sp)}/{len(sp)} (of {len(out['spreadsheet'])} rows)",
-                  "chart_values_ok": f"{sum(x['ok'] for x in cv)}/{len(cv)}",
+                  "chart_rows_enforced_exactly": f"{len(enforced)}/{len(cited)}",
+                  "chart_values_wrong": len(wrong),
+                  "exception_false_passes": len(out["exception_false_passes"]),
+                  "idle_chart_numbers": len(out["idle_chart_numbers"]),
                   "inspector_clean": all(v == [] for v in out["inspector"].values()),
                   "foreign_cells": len(out["foreign_cells"]),
                   "uncovered_hand_rules": out["uncovered_hand_rules"]}

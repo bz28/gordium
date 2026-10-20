@@ -234,7 +234,8 @@
     "side_yard_smaller": 12,
     "side_yard_larger": 12,
     "rear_yard": 26,
-    "lot_depth": 94.8
+    "lot_depth": 94.8,
+    "stories": 3
    },
    "expect": "pass",
    "got": "needs_review",
@@ -253,7 +254,28 @@
     "side_yard_smaller": 12,
     "side_yard_larger": 12,
     "rear_yard": 26,
-    "lot_depth": 94.8
+    "lot_depth": 94.8,
+    "stories": 3
+   },
+   "expect": "fail",
+   "got": "needs_review",
+   "agree": false,
+   "drafted": [
+    "R-1b.325_16c_extra_height_limit",
+    "general.325_16c_extra_height_yards"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.height",
+   "given": {
+    "building_height": 37,
+    "front_yard": 27,
+    "side_yard_smaller": 12,
+    "side_yard_larger": 12,
+    "rear_yard": 24,
+    "lot_depth": 94.8,
+    "stories": 3
    },
    "expect": "fail",
    "got": "needs_review",
@@ -272,7 +294,8 @@
     "side_yard_smaller": 20,
     "side_yard_larger": 20,
     "rear_yard": 40,
-    "lot_depth": 94.8
+    "lot_depth": 94.8,
+    "stories": 3
    },
    "expect": "fail",
    "got": "fail",
@@ -528,118 +551,113 @@
    "agree": null
   }
  ],
- "chart_values": [
-  {
-   "rule": "R-1b.max_stories",
-   "measure": "stories",
-   "kind": "max",
-   "value": 3.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.lot_coverage_max",
-   "measure": "building_area",
-   "kind": "max",
-   "value": 2500.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.min_lot_area_one_family_detached",
-   "measure": "lot_area",
-   "kind": "min",
-   "value": 6000.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.min_lot_area_other_use",
-   "measure": "lot_area",
-   "kind": "min",
-   "value": 7500.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.min_lot_width_one_family_detached",
-   "measure": "lot_width",
-   "kind": "min",
-   "value": 50.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.min_lot_width_other_use",
-   "measure": "lot_width",
-   "kind": "min",
-   "value": 60.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.front_yard_min",
-   "measure": "front_yard",
-   "kind": "min",
-   "value": 25.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.side_yards_min",
-   "measure": "side_yard_smaller",
-   "kind": "min",
-   "value": 10.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.side_yards_min",
-   "measure": "side_yard_larger",
-   "kind": "min",
-   "value": 10.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.rear_yard_min_fn16",
-   "measure": "rear_yard",
-   "kind": "min",
-   "value": 40.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.rear_yard_min_fn16",
-   "measure": "rear_yard",
-   "kind": "min",
-   "value": 50.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  }
- ],
+ "chart_values": {
+  "cited": [
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Number of stories"
+   ],
+   [
+    3,
+    "Maximum lot coverage by buildings",
+    "Percent of lot area"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "Other use"
+   ],
+   [
+    3,
+    "Minimum Lot Width",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Width",
+    "Other use"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Front (minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Rear (minimum, % of depth or feet, whichever is less)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (one side minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (other side minimum)"
+   ]
+  ],
+  "enforced": [
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Number of stories"
+   ],
+   [
+    3,
+    "Maximum lot coverage by buildings",
+    "Percent of lot area"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "Other use"
+   ],
+   [
+    3,
+    "Minimum Lot Width",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Width",
+    "Other use"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Front (minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Rear (minimum, % of depth or feet, whichever is less)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (one side minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (other side minimum)"
+   ]
+  ],
+  "wrong": []
+ },
  "inspector": {
   "R-1a.yaml": [],
   "R-1b.yaml": [],
@@ -657,12 +675,17 @@
   "R-1b.parking_one_family",
   "R-1b.parking_other_uses"
  ],
+ "exception_false_passes": [],
+ "idle_chart_numbers": [],
  "summary": {
   "rules_saved": 152,
   "r1b_rules": 17,
-  "hand_examples_agree": "19/27",
+  "hand_examples_agree": "19/28",
   "spreadsheet_agree": "9/10 (of 11 rows)",
-  "chart_values_ok": "11/11",
+  "chart_rows_enforced_exactly": "10/10",
+  "chart_values_wrong": 0,
+  "exception_false_passes": 0,
+  "idle_chart_numbers": 0,
   "inspector_clean": true,
   "foreign_cells": 0,
   "uncovered_hand_rules": [

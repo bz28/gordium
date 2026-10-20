@@ -223,19 +223,40 @@ def test_an_exception_that_forgets_a_yard_is_caught(ctx):
     assert exception_false_passes(hand, every_yard, ctx, from_law=ids | {r["id"] for r in every_yard}) == []
 
 
-def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted_r1b, ctx):
-    """The hand examples can be loose (30 ft passes, 24 fails, whether the limit is 25 or 30). So each drafted
-    R-1b rule is also tried at the R-1B chart value it cites and just past it, with the same row meanings the
-    chart reader's own test uses: it must pass at the value and fail just past it, or not bind there."""
+def load_chart_test():
+    """The chart reader's own R-1B test module: its row meanings (LIMITS), cells and helpers."""
     spec = importlib.util.spec_from_file_location(
         "r1b_chart", REPO / "packages/document_extraction/tests/test_r1b_matches_chart.py")
     chart = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(chart)
     cells = [c for c in (json.loads(line) for line in chart.CELLS.open(encoding="utf-8"))
              if c.get("column") == chart.COLUMN and not c.get("heading")]
+    return chart, cells
+
+
+# Which side yard each side column binds is a reading of §325-8A(12)-(13) ("one side yard will be at least ...",
+# "One side yard shall be at least ..."), an open question for the architects: R-2c's Column 12 (10/15 ft) is
+# larger than its Column 13 (0/5/10 ft), which suggests the larger yard meets Column 12. R-1B's two minimums are
+# both 10 ft, so either reading enforces the cell exactly; the chart reader's test uses one, a draft may use the other.
+SIDE_ROWS = {"Side (one side minimum)", "Side (other side minimum)"}
+OTHER_SIDE = {"side_yard_smaller": "side_yard_larger", "side_yard_larger": "side_yard_smaller"}
+
+
+def readings(key, chart):
+    """The chart reader's meanings of a row, plus, for a side-yard row, the other side's reading."""
+    out = list(chart.LIMITS[key])
+    if key[2] in SIDE_ROWS:
+        out += [(OTHER_SIDE[m], kind, {m: 100}, limit) for m, kind, fixed, limit in chart.LIMITS[key]]
+    return out
+
+
+def chart_value_results(rules, chart, cells, ctx):
+    """(cited rows, rows enforced exactly, wrong) for the drafted chart rules (a law piece's rule takes chart
+    cells as inputs, not as its limit). A row is enforced when, under some reading, the rule passes at the value
+    and fails just past it; it's wrong when, under any reading, it does something else than that or not binding."""
     cited, enforced, wrong = set(), set(), []
-    from_law = law_unit_rules()                   # a law piece's rule takes chart cells as inputs, not as its limit
-    for rule in drafted_r1b:
+    from_law = law_unit_rules()
+    for rule in rules:
         passing = [ex["given"] for ex in rule.get("examples", []) if ex["expect"] == "pass"]
         if rule["kind"] != "rule" or not passing or rule["id"] in from_law:
             continue
@@ -244,7 +265,7 @@ def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted
             if key not in chart.LIMITS:
                 continue
             cited.add(key)
-            for measure, kind, fixed, limit in chart.LIMITS[key]:
+            for measure, kind, fixed, limit in readings(key, chart):
                 bound = limit(chart.numbers(c["value"]))
                 past = bound + (1 if measure in chart.COUNTS else 0.01) * (1 if kind == "max" else -1)
                 at = outcome(rule, passing[0] | fixed | {measure: bound}, ctx.allowed())
@@ -253,9 +274,34 @@ def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted
                     enforced.add(key)
                 elif (at, beyond) != ("pass", "pass"):
                     wrong.append(f"{rule['id']}: {measure} {kind} {bound} from {c['value']!r}: {at} at it, {beyond} past it")
+    return cited, enforced, wrong
+
+
+def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted_r1b, ctx):
+    """The hand examples can be loose (30 ft passes, 24 fails, whether the limit is 25 or 30). So each drafted
+    R-1b rule is also tried at the R-1B chart value it cites and just past it, with the same row meanings the
+    chart reader's own test uses: it must pass at the value and fail just past it, or not bind there."""
+    chart, cells = load_chart_test()
+    cited, enforced, wrong = chart_value_results(drafted_r1b, chart, cells, ctx)
     assert wrong == []
     assert sorted(cited - enforced) == []                     # every chart value a draft cites is enforced exactly
     assert idle_chart_numbers(drafted_r1b, chart, cells, ctx) == []       # and no cited number is ignored or idle
+
+
+def test_either_reading_of_the_side_yard_columns_counts_and_a_wrong_number_still_shows(ctx, monkeypatch):
+    """Runs without drafts: 'one side minimum' applied to the larger yard is enforced (R-1B's two minimums are
+    equal); 12 ft where the chart says 10 is wrong under every reading."""
+    chart, cells = load_chart_test()
+    monkeypatch.setattr(sys.modules[__name__], "law_unit_rules", lambda: set())
+    one_side = {"file": CHART, "page": 3, "cell": {"section": "Yard Dimensions", "row": "Side (one side minimum)", "column": "R-1B"}}
+    def rule(check):
+        return {"id": "R-1b.side", "kind": "rule", "sources": [one_side], "check": check,
+                "examples": [{"given": {"side_yard_larger": 12, "side_yard_smaller": 12}, "expect": "pass"}]}
+    cited, enforced, wrong = chart_value_results([rule("side_yard_larger >= 10")], chart, cells, ctx)
+    assert wrong == [] and cited == enforced != set()
+    cited, enforced, wrong = chart_value_results([rule("side_yard_larger >= 12 and side_yard_smaller >= 12")],
+                                                 chart, cells, ctx)
+    assert wrong != []
 
 
 def idle_chart_numbers(rules, chart, cells, ctx):
@@ -272,12 +318,7 @@ def idle_chart_numbers(rules, chart, cells, ctx):
 def test_a_law_pieces_rule_that_ignores_a_cell_it_cites_is_caught(ctx, monkeypatch):
     """Runs without drafts: a §325-16C-style rule citing the front-yard cell but never using its 25 ft is caught,
     though it comes from a law piece (exempt only from the exact-limit test)."""
-    spec = importlib.util.spec_from_file_location(
-        "r1b_chart", REPO / "packages/document_extraction/tests/test_r1b_matches_chart.py")
-    chart = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(chart)
-    cells = [c for c in (json.loads(line) for line in chart.CELLS.open(encoding="utf-8"))
-             if c.get("column") == chart.COLUMN and not c.get("heading")]
+    chart, cells = load_chart_test()
     cell = {"file": CHART, "page": 3, "cell": {"section": "Yard Dimensions", "row": "Front (minimum)", "column": "R-1B"}}
     ignores = {"id": "R-1b.325_16c_extra_front", "kind": "rule", "sources": [cell], "applies_when": "building_height > 35",
                "check": "front_yard >= 1 + (building_height - 35)",

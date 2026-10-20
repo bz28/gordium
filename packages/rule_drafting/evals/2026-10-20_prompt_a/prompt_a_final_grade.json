@@ -49,10 +49,10 @@
    "got": "pass",
    "agree": true,
    "drafted": [
-    "R-1b.min_lot_size_one_family_detached"
+    "R-1b.min_lot_area_one_family_detached"
    ],
    "notes": [
-    "R-1b.min_lot_size_one_family_detached given {'additional_primary_use_in_separate_building': False} from its own passing example"
+    "R-1b.min_lot_area_one_family_detached given {'additional_primary_use_in_separate_building': False} from its own passing example"
    ]
   },
   {
@@ -65,10 +65,10 @@
    "got": "fail",
    "agree": true,
    "drafted": [
-    "R-1b.min_lot_size_one_family_detached"
+    "R-1b.min_lot_area_one_family_detached"
    ],
    "notes": [
-    "R-1b.min_lot_size_one_family_detached given {'additional_primary_use_in_separate_building': False} from its own passing example"
+    "R-1b.min_lot_area_one_family_detached given {'additional_primary_use_in_separate_building': False} from its own passing example"
    ]
   },
   {
@@ -81,10 +81,10 @@
    "got": "not_applicable",
    "agree": true,
    "drafted": [
-    "R-1b.min_lot_size_one_family_detached"
+    "R-1b.min_lot_area_one_family_detached"
    ],
    "notes": [
-    "R-1b.min_lot_size_one_family_detached given {'additional_primary_use_in_separate_building': False} from its own passing example"
+    "R-1b.min_lot_area_one_family_detached given {'additional_primary_use_in_separate_building': False} from its own passing example"
    ]
   },
   {
@@ -97,10 +97,10 @@
    "got": "pass",
    "agree": true,
    "drafted": [
-    "R-1b.min_lot_size_other_use"
+    "R-1b.min_lot_area_other_use"
    ],
    "notes": [
-    "R-1b.min_lot_size_other_use given {'additional_primary_use_in_separate_building': False} from its own passing example"
+    "R-1b.min_lot_area_other_use given {'additional_primary_use_in_separate_building': False} from its own passing example"
    ]
   },
   {
@@ -113,10 +113,10 @@
    "got": "fail",
    "agree": true,
    "drafted": [
-    "R-1b.min_lot_size_other_use"
+    "R-1b.min_lot_area_other_use"
    ],
    "notes": [
-    "R-1b.min_lot_size_other_use given {'additional_primary_use_in_separate_building': False} from its own passing example"
+    "R-1b.min_lot_area_other_use given {'additional_primary_use_in_separate_building': False} from its own passing example"
    ]
   },
   {
@@ -218,16 +218,20 @@
     "lot_depth": 94.8
    },
    "expect": "pass",
-   "got": "pass",
-   "agree": true,
+   "got": "needs_review",
+   "agree": false,
    "drafted": [
-    "R-1b.max_height_ft",
-    "R-1b.325_16c_extra_height_limit",
+    "R-1b.max_building_height_feet",
     "R-1b.325_16c_extra_height_front_yard",
     "R-1b.325_16c_extra_height_side_yard_smaller",
-    "R-1b.325_16c_extra_height_side_yard_larger"
+    "R-1b.325_16c_extra_height_side_yard_larger",
+    "R-1b.325_16c_extra_height_stories",
+    "R-1b.325_16c_extra_height_max_additional_feet",
+    "general.325_16c_extra_height_rear_yard"
    ],
-   "notes": []
+   "notes": [
+    "R-1b.325_16c_extra_height_stories needs ['stories'], which the hand example doesn't give"
+   ]
   },
   {
    "hand": "R-1b.height",
@@ -237,17 +241,20 @@
     "side_yard_smaller": 12,
     "side_yard_larger": 12,
     "rear_yard": 26,
-    "lot_depth": 94.8
+    "lot_depth": 94.8,
+    "stories": 3
    },
    "expect": "pass",
    "got": "fail",
    "agree": false,
    "drafted": [
-    "R-1b.max_height_ft",
-    "R-1b.325_16c_extra_height_limit",
+    "R-1b.max_building_height_feet",
     "R-1b.325_16c_extra_height_front_yard",
     "R-1b.325_16c_extra_height_side_yard_smaller",
-    "R-1b.325_16c_extra_height_side_yard_larger"
+    "R-1b.325_16c_extra_height_side_yard_larger",
+    "R-1b.325_16c_extra_height_stories",
+    "R-1b.325_16c_extra_height_max_additional_feet",
+    "general.325_16c_extra_height_rear_yard"
    ],
    "notes": []
   },
@@ -259,17 +266,45 @@
     "side_yard_smaller": 12,
     "side_yard_larger": 12,
     "rear_yard": 26,
-    "lot_depth": 94.8
+    "lot_depth": 94.8,
+    "stories": 3
    },
    "expect": "fail",
    "got": "fail",
    "agree": true,
    "drafted": [
-    "R-1b.max_height_ft",
-    "R-1b.325_16c_extra_height_limit",
+    "R-1b.max_building_height_feet",
     "R-1b.325_16c_extra_height_front_yard",
     "R-1b.325_16c_extra_height_side_yard_smaller",
-    "R-1b.325_16c_extra_height_side_yard_larger"
+    "R-1b.325_16c_extra_height_side_yard_larger",
+    "R-1b.325_16c_extra_height_stories",
+    "R-1b.325_16c_extra_height_max_additional_feet",
+    "general.325_16c_extra_height_rear_yard"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.height",
+   "given": {
+    "building_height": 37,
+    "front_yard": 27,
+    "side_yard_smaller": 12,
+    "side_yard_larger": 12,
+    "rear_yard": 24,
+    "lot_depth": 94.8,
+    "stories": 3
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_building_height_feet",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yard_smaller",
+    "R-1b.325_16c_extra_height_side_yard_larger",
+    "R-1b.325_16c_extra_height_stories",
+    "R-1b.325_16c_extra_height_max_additional_feet",
+    "general.325_16c_extra_height_rear_yard"
    ],
    "notes": []
   },
@@ -281,17 +316,20 @@
     "side_yard_smaller": 20,
     "side_yard_larger": 20,
     "rear_yard": 40,
-    "lot_depth": 94.8
+    "lot_depth": 94.8,
+    "stories": 3
    },
    "expect": "fail",
    "got": "fail",
    "agree": true,
    "drafted": [
-    "R-1b.max_height_ft",
-    "R-1b.325_16c_extra_height_limit",
+    "R-1b.max_building_height_feet",
     "R-1b.325_16c_extra_height_front_yard",
     "R-1b.325_16c_extra_height_side_yard_smaller",
-    "R-1b.325_16c_extra_height_side_yard_larger"
+    "R-1b.325_16c_extra_height_side_yard_larger",
+    "R-1b.325_16c_extra_height_stories",
+    "R-1b.325_16c_extra_height_max_additional_feet",
+    "general.325_16c_extra_height_rear_yard"
    ],
    "notes": []
   },
@@ -359,7 +397,8 @@
    "got": "pass",
    "agree": true,
    "drafted": [
-    "R-1b.side_yards_min"
+    "R-1b.side_yard_one_side_min",
+    "R-1b.side_yard_other_side_min"
    ],
    "notes": []
   },
@@ -373,7 +412,8 @@
    "got": "fail",
    "agree": true,
    "drafted": [
-    "R-1b.side_yards_min"
+    "R-1b.side_yard_one_side_min",
+    "R-1b.side_yard_other_side_min"
    ],
    "notes": []
   },
@@ -482,10 +522,10 @@
    "got": "pass",
    "agree": true,
    "drafted": [
-    "R-1b.min_lot_size_one_family_detached"
+    "R-1b.min_lot_area_one_family_detached"
    ],
    "notes": [
-    "R-1b.min_lot_size_one_family_detached given {'additional_primary_use_in_separate_building': False} from its own passing example"
+    "R-1b.min_lot_area_one_family_detached given {'additional_primary_use_in_separate_building': False} from its own passing example"
    ]
   },
   {
@@ -512,14 +552,16 @@
   {
    "row": "Maximum height",
    "theirs": "PASS",
-   "got": "pass",
-   "agree": true,
+   "got": "needs_review",
+   "agree": false,
    "drafted": [
-    "R-1b.max_height_ft",
-    "R-1b.325_16c_extra_height_limit",
+    "R-1b.max_building_height_feet",
     "R-1b.325_16c_extra_height_front_yard",
     "R-1b.325_16c_extra_height_side_yard_smaller",
-    "R-1b.325_16c_extra_height_side_yard_larger"
+    "R-1b.325_16c_extra_height_side_yard_larger",
+    "R-1b.325_16c_extra_height_stories",
+    "R-1b.325_16c_extra_height_max_additional_feet",
+    "general.325_16c_extra_height_rear_yard"
    ],
    "notes": []
   },
@@ -549,7 +591,8 @@
    "got": "pass",
    "agree": true,
    "drafted": [
-    "R-1b.side_yards_min"
+    "R-1b.side_yard_one_side_min",
+    "R-1b.side_yard_other_side_min"
    ],
    "notes": []
   },
@@ -559,7 +602,8 @@
    "got": "pass",
    "agree": true,
    "drafted": [
-    "R-1b.side_yards_min"
+    "R-1b.side_yard_one_side_min",
+    "R-1b.side_yard_other_side_min"
    ],
    "notes": []
   },
@@ -584,158 +628,153 @@
    "notes": []
   }
  ],
- "chart_values": [
-  {
-   "rule": "R-1b.min_lot_size_one_family_detached",
-   "measure": "lot_area",
-   "kind": "min",
-   "value": 6000.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.min_lot_size_other_use",
-   "measure": "lot_area",
-   "kind": "min",
-   "value": 7500.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.min_lot_width_one_family_detached",
-   "measure": "lot_width",
-   "kind": "min",
-   "value": 50.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.min_lot_width_other_use",
-   "measure": "lot_width",
-   "kind": "min",
-   "value": 60.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.max_stories",
-   "measure": "stories",
-   "kind": "max",
-   "value": 3.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.max_height_ft",
-   "measure": "building_height",
-   "kind": "max",
-   "value": 35.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.max_lot_coverage",
-   "measure": "building_area",
-   "kind": "max",
-   "value": 2500.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.front_yard_min",
-   "measure": "front_yard",
-   "kind": "min",
-   "value": 25.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.side_yards_min",
-   "measure": "side_yard_smaller",
-   "kind": "min",
-   "value": 10.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.side_yards_min",
-   "measure": "side_yard_larger",
-   "kind": "min",
-   "value": 10.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.rear_yard_min",
-   "measure": "rear_yard",
-   "kind": "min",
-   "value": 40.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.rear_yard_min",
-   "measure": "rear_yard",
-   "kind": "min",
-   "value": 50.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.parking_by_sleeping_rooms",
-   "measure": "parking_spaces",
-   "kind": "min",
-   "value": 1.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.parking_by_sleeping_rooms",
-   "measure": "parking_spaces",
-   "kind": "min",
-   "value": 2.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  },
-  {
-   "rule": "R-1b.parking_by_sleeping_rooms",
-   "measure": "parking_spaces",
-   "kind": "min",
-   "value": 4.0,
-   "at": "pass",
-   "past": "fail",
-   "ok": true,
-   "enforced": true
-  }
- ],
+ "chart_values": {
+  "cited": [
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Height in feet"
+   ],
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Number of stories"
+   ],
+   [
+    3,
+    "Maximum lot coverage by buildings",
+    "Percent of lot area"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "Other use"
+   ],
+   [
+    3,
+    "Minimum Lot Width",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Width",
+    "Other use"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Front (minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Rear (minimum, % of depth or feet, whichever is less)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (one side minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (other side minimum)"
+   ],
+   [
+    14,
+    "Residential",
+    "4-5 bed or sleeping rooms per dwelling unit"
+   ],
+   [
+    14,
+    "Residential",
+    "Each additional bed or sleeping room"
+   ],
+   [
+    14,
+    "Residential",
+    "First three bed or sleeping rooms per dwelling unit"
+   ]
+  ],
+  "enforced": [
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Height in feet"
+   ],
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Number of stories"
+   ],
+   [
+    3,
+    "Maximum lot coverage by buildings",
+    "Percent of lot area"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "Other use"
+   ],
+   [
+    3,
+    "Minimum Lot Width",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Width",
+    "Other use"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Front (minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Rear (minimum, % of depth or feet, whichever is less)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (one side minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (other side minimum)"
+   ],
+   [
+    14,
+    "Residential",
+    "4-5 bed or sleeping rooms per dwelling unit"
+   ],
+   [
+    14,
+    "Residential",
+    "Each additional bed or sleeping room"
+   ],
+   [
+    14,
+    "Residential",
+    "First three bed or sleeping rooms per dwelling unit"
+   ]
+  ],
+  "wrong": []
+ },
  "inspector": {
   "R-1a.yaml": [],
   "R-1b.yaml": [],
@@ -752,12 +791,17 @@
  "uncovered_hand_rules": [
   "R-1b.parking_other_uses"
  ],
+ "exception_false_passes": [],
+ "idle_chart_numbers": [],
  "summary": {
-  "rules_saved": 194,
-  "r1b_rules": 20,
-  "hand_examples_agree": "28/30",
-  "spreadsheet_agree": "11/11 (of 11 rows)",
-  "chart_values_ok": "15/15",
+  "rules_saved": 202,
+  "r1b_rules": 23,
+  "hand_examples_agree": "28/31",
+  "spreadsheet_agree": "10/11 (of 11 rows)",
+  "chart_rows_enforced_exactly": "14/14",
+  "chart_values_wrong": 0,
+  "exception_false_passes": 0,
+  "idle_chart_numbers": 0,
   "inspector_clean": true,
   "foreign_cells": 0,
   "uncovered_hand_rules": [

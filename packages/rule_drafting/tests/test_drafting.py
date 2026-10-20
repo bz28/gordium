@@ -441,6 +441,23 @@ def test_the_docs_describe_the_typed_number_rule_the_code_enforces():
         assert "requirement lines its reviewed label cites" not in text and "whole text" in text and "hints" in text
 
 
+def test_every_eval_result_the_docs_cite_has_its_committed_record():
+    """A model or prompt comparison in the docs names the eval folder holding its run records and grades."""
+    import re
+    from pathlib import Path
+    root = Path(drafter.__file__).resolve().parents[3]
+    section = root.joinpath("docs/methods.md").read_text().split("## 10.")[1].split("## 11.")[0]
+    cited = re.findall(r"packages/rule_drafting/evals/[\w.-]+/", section)
+    assert {"packages/rule_drafting/evals/2026-10-19_model_choice/",
+            "packages/rule_drafting/evals/2026-10-20_prompt_a/"} <= set(cited)
+    for folder in cited:
+        runs = list((root / folder / "runs").glob("*.jsonl"))
+        assert (root / folder / "README.md").exists() and runs, folder
+    for line in section.splitlines():                  # every claim about a model or a test batch cites its eval
+        if "Haiku" in line or "Test batch" in line:
+            assert "packages/rule_drafting/evals/" in line, line[:120]
+
+
 def test_the_drafting_prompt_gives_role_purpose_process_and_the_current_number_rule():
     """Prompt A (2026-10-20): who the drafter is, why it matters, the steps in order, and the rules the code
     enforces today; none of the removed ones (open questions for numbers, every slot must decide something)."""
