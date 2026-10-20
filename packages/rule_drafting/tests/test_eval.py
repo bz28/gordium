@@ -89,12 +89,17 @@ def with_new_measures(rule, given, proposed):
 def combined(rules, values, ctx, proposed=frozenset()):
     """(outcome, notes): every covering rule judged on the example with its declared new measures supplied."""
     results, notes = set(), []
+    from rule_format import formula
     for r in rules:
         given, supplied, missing = with_new_measures(r, values, proposed)
         if missing:
             notes.append(f"{r['id']} needs {missing}, which neither the example nor its own passing example gives")
         elif supplied:
             notes.append(f"{r['id']} given {supplied} from its own passing example")
+        # an ordinary measure the hand example lacks is named, never filled from the draft (that could hide a
+        # real disagreement): the drafted rule needs review there, and the note says why
+        if other := sorted({n for t in rule_formulas(r) for n in formula.names(t)} - set(given) - set(proposed)):
+            notes.append(f"{r['id']} needs {other}, which the hand example doesn't give")
         results.add(outcome(r, given, ctx.allowed()))
     for result in ("fail", "needs_review", "pass"):
         if result in results:
@@ -131,6 +136,11 @@ def test_a_declared_new_measure_is_supplied_from_the_drafts_own_passing_example(
     assert outcome(rule, given, allowed) == "fail"                               # the real answer shows
     bare = rule | {"examples": [e for e in rule["examples"] if e["expect"] == "fail"]}
     assert with_new_measures(bare, {"lot_area": 5000}, {"second_building"})[2] == ["second_building"]
+    # an ordinary measure the hand example lacks is named, never filled from the draft
+    deep = {"id": "R-1b.depth", "kind": "rule", "check": "rear_yard >= 0.25 * lot_depth",
+            "examples": [{"given": {"rear_yard": 25, "lot_depth": 100}, "expect": "pass"}]}
+    got, notes = combined([deep], {"rear_yard": 25}, ctx)
+    assert got == "needs_review" and any("['lot_depth'], which the hand example doesn't give" in n for n in notes)
 
 
 def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted_r1b, ctx):

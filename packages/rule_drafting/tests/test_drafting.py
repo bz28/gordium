@@ -409,6 +409,10 @@ def test_a_number_in_a_slots_row_label_may_be_typed(inputs):
     assert records[0]["problem"] is None
     assert result["rules"]["R-1b"][0]["check"] == \
         "parking_spaces >= (1 if sleeping_rooms <= 3 else 2 + 1 * max(sleeping_rooms - 5, 0))"
+    # what a row label's number is about is for an architect: one open question per number, approval blocked
+    questions = result["rules"]["R-1b"][0]["open_questions"]
+    assert len(questions) == 2 and all("does it mean this here?" in q for q in questions)
+    assert any("'First three bed or sleeping rooms per dwelling unit'" in q for q in questions)
 
 
 def test_a_footnote_that_isnt_a_number_is_sent_back_not_a_crash(inputs):
@@ -462,6 +466,9 @@ LOT_AREA_X = "{x}"   # the decoy cell's value, for examples
     ("stories <= 3 and lot_area >= 3 * {x}", {"lot_area": "3 * {x}"}, "'stories <= 3 and lot_area >= 3 * {x}' isn't backed"),
     # a slot that only gates the branch can't lend its note to the number the branch picks
     ("stories <= (3 if lot_area >= {x} else 0)", {"lot_area": LOT_AREA_X}, "isn't backed where it stands"),
+    # {x} decides in the lot-area clause, but the occurrence next to the 3 decides nothing (round 7)
+    ("stories <= 3 + 0 * {x} and lot_area >= {x}", {"lot_area": LOT_AREA_X}, "isn't backed where it stands"),
+    ("stories <= min(3, {x}) and lot_area >= {x}", {"lot_area": LOT_AREA_X}, "isn't backed where it stands"),
 ])
 def test_a_slot_lends_its_note_only_to_a_number_it_decides_with(inputs, check, extra, expect):
     """Note 7 ('For the first 1-3 units') is about lot area per unit. Bound to a decoy slot, its 3 must not
@@ -522,3 +529,26 @@ def test_the_drafters_line_numbers_are_the_labelers(inputs):
     for u in (u for u in inputs.units() if u.get("piece")):
         labeler_lines = piece_message(inputs.law["pieces"][u["piece"]], inputs.law["rows"]).split("\n\n", 1)[1]
         assert drafter.numbered_text(u["lines"]) == labeler_lines, u["id"]
+
+
+def test_a_number_picking_a_slots_branch_goes_to_an_architect_never_silently_in(inputs):
+    """'lot_area >= ({x} if stories <= 3 else 0)' has the parking rule's shape; code can't tell that note 7's
+    '1-3 units' isn't about stories. So it's never trusted silently: the rule carries an open question, and
+    the inspector refuses to approve it until an architect answers."""
+    notes = [chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")]
+    shape = template("lot_by_stories", "lot_area >= ({x} if stories <= 3 else 0)", [DECOY],
+                     [({"stories": "3", "lot_area": "{x}"}, "pass"), ({"stories": "3", "lot_area": "{x} - 1"}, "fail")],
+                     quotes=notes, numbers=[bound(3, "slot_footnote", slot="x", footnote="7")])
+    result, records = run(inputs, FakeClient({"templates": [shape], "no_rule_reason": ""}),
+                          uid="chart-p3-maximum_building_height")
+    rules = [r for rs in result["rules"].values() for r in rs]
+    assert rules and all(any("footnote 7" in q and "does it mean this here?" in q for q in r["open_questions"])
+                         for r in rules)
+    approved = copy.deepcopy(rules[0]) | {"status": "approved", "approved_by": "someone", "approved_on": "2026-10-19"}
+    problems = drafter.validate({"district": approved["id"].split(".")[0], "rules": [approved]}, inputs.ctx)
+    assert any("open_questions remain" in p for p in problems)
+
+
+def test_a_rule_with_no_number_from_a_chart_note_carries_no_question(inputs):
+    result, records = run(inputs, FakeClient({"templates": [FRONT], "no_rule_reason": ""}))
+    assert records[0]["problem"] is None and "open_questions" not in result["rules"]["R-1b"][0]

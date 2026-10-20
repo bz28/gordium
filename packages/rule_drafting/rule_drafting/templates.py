@@ -18,13 +18,18 @@ SLOT = re.compile(r"\{([a-z][a-z0-9_]*)\}")
 CHART_FILE = "zoning_charts_2026-04.pdf"
 
 
-def live_formulas(template: dict) -> list[str]:
-    """The formulas that end up in the rule: applies_when, review_when, and the check (a rule's only: a flag
-    has none)."""
-    texts = [template.get("applies_when", "")] + [r["when"] for r in template.get("review_when", [])]
+def formula_fields(template: dict) -> list[tuple[tuple, str]]:
+    """(key, formula) for each formula that ends up in the rule: ("applies_when",), ("review_when", i), and
+    ("check",) for a rule only (a flag has none)."""
+    out = [(("applies_when",), template.get("applies_when", ""))]
+    out += [(("review_when", i), r["when"]) for i, r in enumerate(template.get("review_when", []))]
     if template.get("kind") == "rule":
-        texts.append(template.get("check", ""))
-    return [t for t in texts if t.strip()]
+        out.append((("check",), template.get("check", "")))
+    return [(k, t) for k, t in out if t.strip()]
+
+
+def live_formulas(template: dict) -> list[str]:
+    return [t for _, t in formula_fields(template)]
 
 
 def formula_slots(template: dict) -> set[str]:
@@ -32,18 +37,18 @@ def formula_slots(template: dict) -> set[str]:
     return {n for t in live_formulas(template) for n in SLOT.findall(t)}
 
 
-def number_places(template: dict) -> list[tuple[str, float, set[str]]]:
-    """(formula, number, the slots it stands with) for every number typed in the rule's own formulas (not 0).
-    A number stands with a slot when the two are directly related: operands of the same arithmetic or min/max
-    (`max(min({pct} * lot_depth, {cap}), 20)`: 20 stands with {cap}), or the number is in the condition that picks
-    the slot's value (`{first} if sleeping_rooms <= 3 else ...`: 3 stands with {first}). Not when they are only in
-    the same and/or (`stories <= 3 and lot_area >= {x}`), the same comparison's other side, or when the slot only
-    gates the branch the number is in (`3 if lot_area >= {x} else 0`). A slot's footnote or row label can back a
-    number only where it stands with that slot."""
+def number_places(template: dict) -> list[tuple[tuple, str, float, set[tuple[str, int]]]]:
+    """(key, formula, number, the slot occurrences it stands with) for every number typed in the rule's own
+    formulas (not 0). An occurrence is (slot name, its position among the formula's slots). A number stands with
+    a slot occurrence when the two are directly related: operands of the same arithmetic or min/max
+    (`max(min({pct} * lot_depth, {cap}), 20)`: 20 stands with {cap}), or the number is in the condition that
+    picks the branch the occurrence is in (`{first} if sleeping_rooms <= 3 else ...`). Not when they are only
+    in the same and/or, the same comparison's two sides, or when the slot only gates the number's branch."""
     out = []
-    for t in live_formulas(template):
+    for key, t in formula_fields(template):
+        counter = iter(range(10_000))
         try:
-            tree = formula.parse(SLOT.sub(lambda m: f"slot__{m[1]}", t))
+            tree = formula.parse(SLOT.sub(lambda m: f"slot__{m[1]}__{next(counter)}", t))
         except formula.FormulaError:
             continue                                     # reported when the rule is checked
         paths, stack = {}, []
@@ -55,11 +60,32 @@ def number_places(template: dict) -> list[tuple[str, float, set[str]]]:
                 walk(child)
             stack.pop()
         walk(tree.body)
-        nodes = [n for n in ast.walk(tree.body)]
+        nodes = list(ast.walk(tree.body))
         slots = [n for n in nodes if isinstance(n, ast.Name) and n.id.startswith("slot__")]
         for n in nodes:
             if isinstance(n, ast.Constant) and type(n.value) in (int, float) and n.value != 0:
-                out.append((t, n.value, {s.id[6:] for s in slots if _stands_with(paths[id(n)], paths[id(s)])}))
+                near = set()
+                for o in slots:
+                    if _stands_with(paths[id(n)], paths[id(o)]):
+                        name, k = o.id[6:].rsplit("__", 1)
+                        near.add((name, int(k)))
+                out.append((key, t, n.value, near))
+    return out
+
+
+def with_occurrence_nudged(template: dict, key: tuple, k: int) -> dict:
+    """The template with only the k-th slot of one formula changed (x becomes x * 1.5 + 1), to test whether
+    that one occurrence decides anything."""
+    counter = iter(range(10_000))
+
+    def nudge(text):
+        return SLOT.sub(lambda m: f"({{{m[1]}}} * 1.5 + 1)" if next(counter) == k else m[0], text)
+    out = dict(template)
+    if key[0] == "review_when":
+        out["review_when"] = [dict(r) for r in template["review_when"]]
+        out["review_when"][key[1]]["when"] = nudge(template["review_when"][key[1]]["when"])
+    else:
+        out[key[0]] = nudge(template[key[0]])
     return out
 
 

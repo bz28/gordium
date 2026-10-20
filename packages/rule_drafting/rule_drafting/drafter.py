@@ -31,7 +31,8 @@ from section_labeling.labeler import cost, find_quote, sha
 
 from .chart_values import section_refs
 from .chart_values import footnotes
-from .templates import CHART_FILE, fill_template, formula_slots, number_places, template_problems
+from .templates import (CHART_FILE, fill_template, formula_slots, number_places, template_problems,
+                        with_occurrence_nudged)
 
 HERE = Path(__file__).parent
 GUIDE_FILE = REPO / "regulations/document_extraction_guide/drafting_rules.md"
@@ -69,7 +70,9 @@ it has slots) or one rule for every district (when it has none).
   or {value, from: "slot_footnote", quote: -1, slot: <slot name>, footnote: <note number>}, or
   {value, from: "slot_row_label", quote: -1, slot: <slot name>, footnote: ""}. A slot's footnote or row
   label backs a number only where the number stands with that slot: in the same arithmetic or min/max, or in
-  the condition that picks the slot's value. Each place a number is typed is checked on its own.
+  the condition that picks the slot's value, and only where that slot occurrence decides something. Each place
+  a number is typed is checked on its own. A number backed by a chart note or row label is sent to an
+  architect as an open question (code can't tell what the note's number is about): prefer a law quote.
 - Every slot must decide something: changing its value must change some worked example's outcome.
 - Footnotes: a chart cell's footnote marker ([fn16]) points to a note printed under that page's table
   (listed below). Every footnote on a slot's cell, its row label or its section heading has to be quoted,
@@ -292,17 +295,14 @@ def slot_notes(template: dict) -> set[tuple[int, str]]:
             for n in set(slot["footnotes"]) | footnotes(slot["row"]) | footnotes(slot["section"])}
 
 
-def _binding_problems(template: dict, notes: dict[int, dict]) -> list[str]:
-    """Every number the drafter types is bound, in `numbers`, to ONE evidence item it names, and code checks
-    that exact item holds that value:
+def _binding_items(template: dict, notes: dict[int, dict]) -> tuple[list[str], list[dict]]:
+    """Check each entry of `numbers` names ONE evidence item that holds its value:
     - law_quote: the quote at that index is a sentence of the law (a chart quote is a footnote, and backs a
       number only as its slot's footnote);
     - slot_footnote: a footnote on that slot's own cell, row or section;
     - slot_row_label: that slot's row label ("First three bed or sleeping rooms").
-    Every place a number is typed must be backed where it stands: by a law quote binding with that value, or
-    by a slot binding with that value whose slot the number stands with there (number_places). One binding
-    never backs the same value somewhere else. A number that only labels or points ("(3)", "§ 325-20D(1)")
-    doesn't count; a percent counts only as its fraction (25% is 0.25)."""
+    A number that only labels or points ("(3)", "§ 325-20D(1)") doesn't count; a percent counts only as its
+    fraction (25% is 0.25). Returns (problems, the valid entries with their evidence text)."""
     slots = {s["name"]: s for s in template["slots"]}
     live = formula_slots(template)
     p, valid = [], []
@@ -331,13 +331,59 @@ def _binding_problems(template: dict, notes: dict[int, dict]) -> list[str]:
         if not v_close(v, source_numbers(text, percent_as_number=False)):
             p.append(f"{where}: {v:g} isn't written in it: {text!r}")
             continue
-        valid.append(b)
-    for text, n, near in number_places(template):
-        if not any(abs(b["value"] - n) < 1e-9 and (b["from"] == "law_quote" or b["slot"] in near) for b in valid):
-            p.append(f"number {n:g} in {text!r} isn't backed where it stands: bind it to a law quote, or to the footnote "
-                     "or row label of a slot it stands with (the same arithmetic, or the condition that picks the "
-                     "slot's value); a chart number must be a slot")
-    return p
+        valid.append(b | {"text": text})
+    for _, text, n, near in number_places(template):           # (whether a backing slot decides: after filling)
+        if not any(abs(b["value"] - n) < 1e-9 and (b["from"] == "law_quote" or b["slot"] in {s for s, _ in near})
+                   for b in valid):
+            p.append(_unbacked(n, text))
+    return p, valid
+
+
+def _unbacked(n: float, text: str) -> str:
+    return (f"number {n:g} in {text!r} isn't backed where it stands: bind it to a law quote, or to the footnote or "
+            "row label of a slot it stands with (the same arithmetic, or the condition that picks the slot's value) "
+            "where that slot decides something; a chart number must be a slot")
+
+
+def _backing(template: dict, valid: list[dict], filled: list[tuple[str, dict]], cells: dict, sources: list[dict],
+             drafted_by: str, allowed: dict) -> tuple[list[str], list[str]]:
+    """Every place a number is typed must be backed where it stands. A law quote binding with that value backs
+    it. A slot binding backs it only through an occurrence of that slot the number stands with which itself
+    decides something: changed alone, some worked example in some district comes out differently (so
+    `3 + 0 * {x}` or `min(3, {x})` with a large {x} back nothing there, whatever else {x} does).
+    Code can check that a chart note or row label holds the number, never what the number is about (note 7's
+    "1-3 units" and the parking row's "First three" look alike), so every number backed only by a slot's
+    footnote or row label becomes an open question for an architect; the rule can't be approved until it's
+    answered. Returns (problems, open questions)."""
+    decides = {}
+
+    def occurrence_decides(key, k):
+        if (key, k) not in decides:
+            changed = with_occurrence_nudged(template, key, k)
+            decides[key, k] = any(
+                outcome(new, ex["given"], allowed) != outcome(rule, ex["given"], allowed)
+                for column, rule in filled for new in [fill_template(changed, column, cells, sources, drafted_by)[0]]
+                if new is not None for ex in rule["examples"])
+        return decides[key, k]
+
+    problems, questions = [], []
+    for key, text, n, near in number_places(template):
+        same = [b for b in valid if abs(b["value"] - n) < 1e-9]
+        if any(b["from"] == "law_quote" for b in same):
+            continue
+        backer = next((b for b in same for name, k in sorted(near)
+                       if name == b["slot"] and occurrence_decides(key, k)), None)
+        if backer is None:
+            problems.append(_unbacked(n, text))
+            continue
+        what = f"footnote {backer['footnote']}" if backer["from"] == "slot_footnote" else "the row label"
+        questions.append(f"The {n:g} in {text!r} was taken from {what} of the chart row {template_slot_row(template, backer['slot'])!r} "
+                         f"({backer['text']!r}). Code can't tell what a chart note's number is about: does it mean this here?")
+    return problems, questions
+
+
+def template_slot_row(template: dict, name: str) -> str:
+    return next(s["row"] for s in template["slots"] if s["name"] == name)
 
 
 def v_close(v: float, values) -> bool:
@@ -379,7 +425,8 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 proposed[m["name"]] = {"unit": m["unit"], "meaning": m["meaning"]}
         sources, quote_problems = resolve_quotes(t, unit, context, law, ctx, notes)
         p += quote_problems + (_footnote_problems(t, sources, notes) if not quote_problems else [])
-        p += _binding_problems(t, notes)
+        binding_problems, valid = _binding_items(t, notes)
+        p += binding_problems
         if p:
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
             continue
@@ -396,6 +443,13 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                     gaps.append({"rule": f"{district_name(column) if column else 'general'}.{t['id_suffix']}", "why": why})
             if good and (idle := _idle_slots(t, good, cells, sources, drafted_by, ctx.allowed())):
                 gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in idle], []
+            if good:
+                unbacked, questions = _backing(t, valid, good, cells, sources, drafted_by, ctx.allowed())
+                if unbacked:
+                    gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in unbacked], []
+                for _, rule in good:
+                    if questions:
+                        rule["open_questions"] = rule.get("open_questions", []) + questions
         finally:
             ctx.proposed = saved
         good = [rule for _, rule in good]
