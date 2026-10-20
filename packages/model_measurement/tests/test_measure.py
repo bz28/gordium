@@ -298,8 +298,8 @@ def test_a_mansard_is_for_the_architects_and_a_flat_roof_over_a_lower_pitched_wi
                                                          {"points": [[x, y, 30] for x, y in deck]}, *walls, *sides]}
     m = measure(site(RECT, mansard), FACTS)["building_height"]
     # a level deck and sloped sides at the top: a mansard (to its highest level, 30) or a hip roof with a deck
-    # (to its average height, 25)? The architects decide; every reading is listed
-    assert m["value"] is None and "mansard" in m["reason"]
+    # (to its average height, 25)? The architects decide; every reading is listed, and both questions named
+    assert m["value"] is None and "mansard" in m["reason"] and "average height of a pitched roof" in m["reason"]
     assert sorted(r["value"] for r in m["readings"]) == [25.0, 30.0, 30.0]
     # a flat 30 ft house with a lower gable (eave 8, ridge 14) in the same solid: the highest section is flat
     house = box(10, 25, 35, 65, 0, 30)
@@ -343,3 +343,27 @@ def test_the_height_reason_names_only_the_questions_that_change_it():
     low_garage = box(30, 75, 48, 95, 0, 12, id="garage")
     m = measure(site(RECT, flat, low_garage), {**FACTS, "main_building": "house"})["building_height"]
     assert m["value"] == 30.0                                             # the garage changes nothing
+
+
+def test_a_low_shed_with_its_own_roof_question_changes_nothing_and_isnt_asked_about():
+    eave, ridge = 20, 30
+    house = box(10, 25, 35, 65, 0, eave)
+    house["faces"] = [f for f in house["faces"] if not all(p[2] == eave for p in f["points"])]
+    house["faces"] += [{"points": [[10, 25, eave], [35, 25, eave], [35, 45, ridge], [10, 45, ridge]]},
+                       {"points": [[10, 45, ridge], [35, 45, ridge], [35, 65, eave], [10, 65, eave]]}]
+    shed = box(36, 75, 48, 95, 0, 8, id="shed")                      # walls 8, a mansard-like top at 12
+    shed["faces"] = [f for f in shed["faces"] if not all(p[2] == 8 for p in f["points"])]
+    deck = [(38, 77), (46, 77), (46, 93), (38, 93)]
+    low = [(36, 75), (48, 75), (48, 95), (36, 95)]
+    shed["faces"] += [{"points": [[x, y, 12] for x, y in deck]}]
+    shed["faces"] += [{"points": [[*low[i], 8], [*low[(i + 1) % 4], 8], [*deck[(i + 1) % 4], 12], [*deck[i], 12]]}
+                      for i in range(4)]
+    m = measure(site(RECT, house, shed), {**FACTS, "main_building": "house"})["building_height"]
+    assert "pitched roof" in m["reason"] and "mansard" not in m["reason"] and "§325-25" not in m["reason"]
+
+
+def test_a_flat_other_solid_gives_no_duplicate_roof_readings():
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 30), box(10, 65, 20, 70, 0, 45, id="tower")),
+                {**FACTS, "main_building": "house"})["building_height"]
+    assert [r["value"] for r in m["readings"]] == [30.0, 45.0]
+    assert not any("read low" in r["reading"] for r in m["readings"])

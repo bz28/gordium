@@ -236,14 +236,14 @@ def _height(building: dict, grade: float) -> dict:
     if len(sloped) < len(highest):            # a level part at the top too
         readings.insert(0, ("mansard: to its highest level", top - grade, {}))
     return _decide("building_height", readings, how, [building["id"]],
-                   ROOF_KIND if len(sloped) < len(highest) else PITCHED)
+                   _both(ROOF_KIND, PITCHED) if len(sloped) < len(highest) else PITCHED)
 
 
 def _with_others(main: dict, others: list[dict]) -> dict:
     """The main building's height read with the other solids: alone, and with every other solid as part of it
     (a wing or tower drawn as its own solid is part of the building; an accessory building may have its own
-    limit, §325-25). Each roof keeps its own readings, at their lowest and at their highest. The reason names
-    exactly the questions that change the number."""
+    limit, §325-25). Each roof keeps its own readings. The reason names exactly the questions whose answer
+    changes the number: a question is named only if two readings that differ in that answer alone differ."""
     unread = [o for o in others if o["value"] is None and not o["readings"]]
     if unread:                          # never dropped: it could be the tallest part
         return _missing("building_height", "another solid's height can't be read: " + unread[0]["reason"])
@@ -254,13 +254,22 @@ def _with_others(main: dict, others: list[dict]) -> dict:
     mine = values(main)
     low = max(min(v for _, v in values(o)) for o in others)
     high = max(max(v for _, v in values(o)) for o in others)
-    readings = [(_both(w, "the main building only"), v, {}) for w, v in mine]
-    readings += [(_both(w, "with every other solid as part of it, their roofs read low"), max(v, low), {}) for w, v in mine]
-    readings += [(_both(w, "with every other solid as part of it, their roofs read high"), max(v, high), {}) for w, v in mine]
-    questions = [q for q in (main["reason"] and (ROOF_KIND if ROOF_KIND in main["reason"] else PITCHED), ) if q]
-    questions += [q for q in (ROOF_KIND, PITCHED) for o in others if o["reason"] and q in o["reason"]]
-    if any(max(v, high) != v for _, v in mine):
-        questions.append(ACCESSORY)
+    theirs = [("their roofs read low", low)] + ([("their roofs read high", high)] if high != low else [])
+    # every reading, with the answer it assumes to each question: (main roof, other roofs, other solids)
+    combos = [(w, None, "alone", v) for w, v in mine]
+    combos += [(w, t, "with", max(v, x)) for w, v in mine for t, x in theirs]
+
+    def matters(i):
+        return any(a[3] != b[3] and a[i] != b[i] and all(a[k] == b[k] for k in range(3) if k != i and
+                                                           not (k == 1 and i == 2))
+                   for a in combos for b in combos)
+
+    roof_questions = [q for q in (ROOF_KIND, PITCHED) if main["reason"] and q in main["reason"]]
+    other_questions = [q for q in (ROOF_KIND, PITCHED) if any(o["reason"] and q in o["reason"] for o in others)]
+    questions = (roof_questions if matters(0) else []) + (other_questions if matters(1) else []) + (
+        [ACCESSORY] if matters(2) else [])
+    readings = [(_both(w, "the main building only" if s == "alone" else "with every other solid as part of it"
+                       + (", " + t if len(theirs) > 1 else "")), v, {}) for w, t, s, v in combos]
     return _decide("building_height", readings, main["how"], main["objects"] + [o["objects"][0] for o in others],
                    "; ".join(dict.fromkeys(questions)))
 
