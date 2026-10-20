@@ -240,21 +240,53 @@ def _samples(shape, n: int = 7) -> list:
     return [p for p in grid if shape.contains(p)] + [shape.representative_point()]
 
 
+SAME_PLANE = math.cos(math.radians(0.05))   # faces this close to parallel, sharing an edge, are one plane
+
+
+def _unit_normal(points) -> tuple:
+    nx = ny = nz = 0.0
+    for p, q in zip(points, points[1:] + points[:1]):
+        nx += (p[1] - q[1]) * (p[2] + q[2])
+        ny += (p[2] - q[2]) * (p[0] + q[0])
+        nz += (p[0] - q[0]) * (p[1] + q[1])
+    n = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
+    return nx / n, ny / n, nz / n
+
+
 def _planes(faces: list[dict]) -> list[list[dict]]:
-    """The faces grouped by the plane they lie in, so a roof drawn as many triangles (a mesh) is one roof plane."""
+    """The faces grouped into planes: faces that share an edge (two corners within TOL) and are parallel within
+    0.05 degrees are one plane, so a roof drawn as many triangles (a mesh, whose points carry rounding noise) is
+    one roof plane, while two separate roofs at the same level stay two."""
+    normals = [_unit_normal(f["points"]) for f in faces]
+    parent = list(range(len(faces)))
+
+    def root(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def cell(p):
+        return tuple(math.floor(c / TOL) for c in p)
+
+    cells = {}
+    for i, f in enumerate(faces):
+        for p in f["points"]:
+            cells.setdefault(cell(p), []).append((i, p))
+    for i, f in enumerate(faces):
+        shared = {}
+        for p in f["points"]:
+            cx, cy, cz = cell(p)
+            near = {j for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1)
+                    for j, q in cells.get((cx + dx, cy + dy, cz + dz), []) if j != i and math.dist(p, q) <= TOL}
+            for j in near:
+                shared[j] = shared.get(j, 0) + 1
+        for j, count in shared.items():
+            if count >= 2 and abs(sum(a * b for a, b in zip(normals[i], normals[j]))) >= SAME_PLANE:
+                parent[root(i)] = root(j)
     groups = {}
-    for f in faces:
-        pts = f["points"]
-        nx = ny = nz = 0.0
-        for p, q in zip(pts, pts[1:] + pts[:1]):
-            nx += (p[1] - q[1]) * (p[2] + q[2])
-            ny += (p[2] - q[2]) * (p[0] + q[0])
-            nz += (p[0] - q[0]) * (p[1] + q[1])
-        n = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
-        sign = -1.0 if nz < 0 else 1.0
-        nx, ny, nz = sign * nx / n, sign * ny / n, sign * nz / n
-        d = nx * pts[0][0] + ny * pts[0][1] + nz * pts[0][2]
-        groups.setdefault((round(nx, 4) + 0.0, round(ny, 4) + 0.0, round(nz, 4) + 0.0, round(d, 3) + 0.0), []).append(f)
+    for i, f in enumerate(faces):
+        groups.setdefault(root(i), []).append(f)
     return list(groups.values())
 
 
@@ -282,7 +314,7 @@ def _open_to_the_sky(faces: list[dict]) -> list[dict]:
 def _height(building: dict, grade: float) -> dict:
     """HEIGHT OF BUILDING: from the grade plane "to the highest level of a flat or mansard roof or to the average
     height of a pitched ... roof", using "that section of the roof that has the highest elevation". The roof is
-    the faces open to the sky. If its largest face (the main roof) doesn't reach the top, something smaller rises
+    the faces open to the sky. If its largest roof plane seen from above (the main roof; a meshed roof's faces count together) doesn't reach the top, something smaller rises
     above it (a parapet, chimney, bulkhead or a higher part): the roof is read both without it and with it, each
     the same way, and whether it counts is an open question."""
     zs = [p[2] for f in building["faces"] for p in f["points"]]

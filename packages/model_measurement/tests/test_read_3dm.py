@@ -95,7 +95,7 @@ def test_a_mesh_building(tmp_path):
         for f in [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]:
             mesh.Faces.AddFace(*f)
     m.Objects.AddMesh(mesh, on(1))
-    values = {k: v["value"] for k, v in measure(read_site(write(m, tmp_path), FACTS), FACTS).items()}
+    values ={k: v["value"] for k, v in measure(read_site(write(m, tmp_path), FACTS), FACTS).items()}
     assert values["building_area"] == 1000 and values["front_yard"] == 25 and values["building_height"] == 30
 
 
@@ -162,3 +162,52 @@ def test_a_block_placed_on_another_layer_with_building_objects_inside_is_reporte
     m.Objects.AddInstanceObject(r.InstanceReference(definition.Id, r.Transform.Translation(30, 75, 0)), on(2))
     site = read_site(write(m, tmp_path), FACTS)
     assert [b["id"] for b in site["buildings"]] [-1] == "a block"
+
+
+def test_a_meshed_gable_read_from_a_file_is_one_roof_per_slope(tmp_path):
+    # a real meshed gable house at ordinary coordinates: the file stores mesh points in single precision, whose
+    # rounding noise must not split a slope into pieces (wrong eave, or a false "something above the roof")
+    x0, y0, w, depth, eave, ridge, n = 152.2131319706377, 194.70395691601078, 22.731880258796153, \
+        30.007429476637732, 17.724593436290334, 32.33899205293994, 8
+    m = model()
+    lot = [(x0 - 20, y0 - 30), (x0 + w + 20, y0 - 30), (x0 + w + 20, y0 + depth + 30), (x0 - 20, y0 + depth + 30)]
+    m.Objects.AddPolyline(r.Polyline([r.Point3d(x, y, 0) for x, y in lot + lot[:1]]), on(0))
+    mesh, index = r.Mesh(), {}
+
+    def vertex(x, y, z):                       # shared corners, so the mesh is closed
+        if (x, y, z) not in index:
+            mesh.Vertices.Add(x, y, z)
+            index[(x, y, z)] = len(mesh.Vertices) - 1
+        return index[(x, y, z)]
+
+    def quad(a, b, c, d):
+        mesh.Faces.AddFace(vertex(*a), vertex(*b), vertex(*c), vertex(*d))
+
+    mid = y0 + depth / 2
+    floor_ys = [y0 + j * (depth / 2) / n for j in range(n + 1)] + [mid + j * (depth / 2) / n for j in range(1, n + 1)]
+    floor_xs = [x0 + i * w / n for i in range(n + 1)]
+    for xa, xb in zip(floor_xs, floor_xs[1:]):                                          # floor, in a matching grid
+        for ya, yb in zip(floor_ys, floor_ys[1:]):
+            quad((xa, ya, 0), (xa, yb, 0), (xb, yb, 0), (xb, ya, 0))
+    for ya, yb in ((y0, mid), (mid, y0 + depth)):
+        za, zb = (eave, ridge) if ya == y0 else (ridge, eave)
+        for i in range(n):
+            for j in range(n):
+                xa, xb = x0 + i * w / n, x0 + (i + 1) * w / n
+                y1, y2 = ya + j * (yb - ya) / n, ya + (j + 1) * (yb - ya) / n
+                z1, z2 = za + j * (zb - za) / n, za + (j + 1) * (zb - za) / n
+                quad((xa, y1, z1), (xb, y1, z1), (xb, y2, z2), (xa, y2, z2))
+    xs = [x0 + i * w / n for i in range(n + 1)]
+    for y, z0 in ((y0, eave), (y0 + depth, eave)):                                   # long walls, in strips
+        for xa, xb in zip(xs, xs[1:]):
+            quad((xa, y, 0), (xb, y, 0), (xb, y, z0), (xa, y, z0))
+    ys = [y0 + j * (depth / 2) / n for j in range(n + 1)] + [mid + j * (depth / 2) / n for j in range(1, n + 1)]
+    zs = [eave + j * (ridge - eave) / n for j in range(n + 1)] + [ridge - j * (ridge - eave) / n for j in range(1, n + 1)]
+    for x in (x0, x0 + w):                                                            # gable ends, in strips
+        for (ya, za), (yb, zb) in zip(zip(ys, zs), zip(ys[1:], zs[1:])):
+            quad((x, ya, 0), (x, yb, 0), (x, yb, zb), (x, ya, za))
+    m.Objects.AddMesh(mesh, on(1))
+    facts = {**FACTS, "street_line": [[list(lot[0]), list(lot[1])]]}
+    h = measure(read_site(write(m, tmp_path), facts), facts)["building_height"]
+    assert "rises above" not in h["reason"]
+    assert sorted({round(r["value"], 3) for r in h["readings"]}) == [round((eave + ridge) / 2, 3), round(ridge, 3)]
