@@ -85,7 +85,12 @@ def test_every_question_says_what_happens_today_and_from_a_model():
     measures = set(load(MEASURES_FILE))
     for line in lines:
         assert "from a model" in line.lower() or "entered, not measured" in line, line
-        for thing in re.findall(r"The ([\w ]+?) (?:is|are) entered, not measured", line):  # a real input, not a wish
+        # Every "… is/are entered, not measured" names a real input, however it is worded: the subject is the
+        # clause before it (after the last . ; or :), less a leading "the".
+        subjects = [re.sub(r"^the ", "", m.group(1).strip().lower())
+                    for m in re.finditer(r"([^.;:]*?)\s+(?:is|are) entered, not measured", line)]
+        assert len(subjects) == line.count("entered, not measured"), line
+        for thing in subjects:
             assert thing.replace(" ", "_") in measures, (thing, line)
         assert any(case in line for case in ("NEEDS REVIEW", "assumes", "not checked yet")), line
 
