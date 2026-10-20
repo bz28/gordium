@@ -2,7 +2,7 @@
 
 Gordium checks a design against the city's exact words. In the places below, the words can be read more than one way, and Gordium can't decide them on its own.
 
-**Please note, until these are answered:** today Gordium's checks run on measurements that a person types in, and they use whatever number is typed. So for these questions **the person typing the number has to apply a reading by hand, and Gordium can still report PASS.** When Gordium measures a Rhino model itself (being built now), each of these cases will give **NEEDS REVIEW** instead of a guess. Each answer you give lets Gordium decide the case automatically, for every future project.
+**Please note, until these are answered:** today Gordium's checks run on measurements that a person types in, and they use whatever number is typed. So for these questions **the person typing the number has to apply a reading by hand, and Gordium can still report PASS.** When Gordium measures a Rhino model itself (being built now), each question below says what it will do: where it can't decide, it gives **NEEDS REVIEW**, never a guess. Each answer you give lets Gordium decide the case automatically, for every future project.
 
 **How to read each question**
 - **The city's words:** the exact text, with the section and a link to the page.
@@ -39,7 +39,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
     | Long side | 99.37 ft | 101.13 ft | 101.13 ft |
     | **Area** | **6,674.5 sf** | **7,033.7 sf** | **6,900.4 sf** |
 
-    The shapes are the same lot, with the same jog, but each of your sides is about 2% shorter than the city's (90.28 vs 92.12, 67.72 vs 69.51, 99.37 vs 101.13 ft), and your area is 5% smaller. So your lot looks like the city's parcel drawn **slightly too small**: a scaling slip while tracing, or a survey that differs from the tax map. Even the two official maps disagree with each other, by about 133 sf. (Your model's lot measures 6,674.5 sf as drawn; your spreadsheet and workflow document say 6,674.7 sf.)
+    The shapes are the same lot, with the same jog, but each of your sides is about 2% shorter than the city's (90.28 vs 92.12, 67.72 vs 69.51, 99.37 vs 101.13 ft), and your area is 5% smaller. So your lot looks like the city's parcel drawn **slightly too small**: a scaling slip while tracing, or a survey that differs from the tax map. Even the two official maps disagree with each other, by about 133 sf. (Your model's lot measures 6,674.5 sf as drawn; your spreadsheet types 6,674 sf (Inputs!B5), and your workflow document says 6,675 sf.)
 - **Why it matters:** lot area, lot depth (and so the rear yard, §1.2), and frontage all come from this outline. Coverage fails under every version (1,855 sf against 25% of 6,674, 6,900 or 7,034 sf), but the rear yard depends on both the outline and how depth is measured: see §1.2.
 - **Until you answer:** Gordium uses the lot area and depth it is given (yours). A GIS outline will only ever be a cross-check: it never turns a result into a PASS.
 - **Please tell us:** (a) where the model's lot outline came from (a survey, traced from the tax map, or something else); (b) whether a stamped survey exists, and if so, could we have a copy?
@@ -56,7 +56,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
     | (b) the jog added to the 99.37 ft line it continues | (90.28 + 109.84) ÷ 2 = 100.06 ft | 25.015 ft | **FAIL** (by 0.015 ft) |
     | (c) average of every line that isn't front or rear | (90.28 + 10.47 + 99.37) ÷ 3 = 66.7 ft | 20 ft (the minimum) | PASS |
 
-  And on the city's GIS outline (§1.1), the depth also depends on which outline is used:
+    And on the city's GIS outline (§1.1), the depth also depends on which outline is used:
 
     | Lot depth used | Required rear yard | The 25 ft design |
     |---|---|---|
@@ -71,8 +71,8 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 `[lot#1]`
 
 - **The city's words:** "LOT — A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building or a group of buildings…" (§325-3, [p.14](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=14)). Chapter 325 never defines "lot area" itself.
-- **Why it matters:** the R-1b coverage limit is 25% of lot area. 106 Ithaca Rd is about 7,034 sf on the city's tax map, but 6,674.7 sf in your spreadsheet (6,674.5 sf as drawn in your model). That moves the limit from 1,669 sf to 1,759 sf, and the 1,855 sf house fails under both.
-- **Until you answer:** coverage uses the lot area it is given (for 106 Ithaca Rd, your 6,674 sf). When measured from a model, the area inside the drawn lot lines is used, with a reminder to check it against a survey.
+- **Why it matters:** the R-1b coverage limit is 25% of lot area. 106 Ithaca Rd is about 7,034 sf on the city's tax map, but 6,674 sf in your spreadsheet (6,674.5 sf as drawn in your model). That moves the limit from 1,669 sf to 1,759 sf, and the 1,855 sf house fails under both.
+- **Until you answer:** coverage and lot size use the lot area they are given (for 106 Ithaca Rd, your 6,674 sf). When measured from a model, a lot with no survey gets NEEDS REVIEW on lot size and coverage, because the drawn area may not be the legal one (as 106 Ithaca Rd shows, §1.1).
 - **Options:** (a) always the survey, and NEEDS REVIEW if there isn't one; (b) the survey if there is one, else the tax map; (c) whatever is drawn in the model, with a warning to check it against a survey.
 
 ### 1.4 Lot width on a curved street 🔴

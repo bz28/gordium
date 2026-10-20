@@ -9,12 +9,13 @@
 A question added, answered or renumbered without updating the page fails here, so the page can't silently
 fall behind the files."""
 
+import hashlib
 import json
 import math
 import re
 from collections import Counter
 
-import pytest
+from openpyxl import load_workbook
 
 from rule_export.workbook import tables
 from rule_format.formula import evaluate
@@ -25,6 +26,7 @@ DOC = (REPO / "docs/questions_for_architects.md").read_text(encoding="utf-8")
 DISCREPANCIES = (REPO / "docs/discrepancies_with_architects.md").read_text(encoding="utf-8")
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 R1B = {r["id"]: r for r in load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"]}
+ANSWER_KEY = REPO / "test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx"
 
 
 def recorded_questions() -> list[str]:
@@ -64,6 +66,48 @@ def test_every_needs_review_claim_is_true_of_the_code():
         assert "from a model" in line.lower() or backed, line
 
 
+def test_no_blanket_promise_and_an_unsurveyed_lot_area_is_not_trusted():
+    """The intro promises NEEDS REVIEW only where Gordium can't decide (each question says what it will do),
+    and an unsurveyed lot area measured from a model gets NEEDS REVIEW (principle 4: unclear data is never a
+    PASS), since 106 Ithaca Rd's drawn lot differs from the city's."""
+    intro = DOC.split("**How to read each question**")[0]
+    assert "where it can't decide, it gives **NEEDS REVIEW**" in intro
+    lot_area = DOC.split("`[lot#1]`")[1].split("###")[0]
+    until = next(line for line in lot_area.splitlines() if line.startswith("- **Until you answer:**"))
+    model_clause = until.lower().split("when measured from a model", 1)[1]
+    assert "needs review" in model_clause, until
+
+
+def test_the_page_quotes_the_architects_own_lot_area():
+    """What the page says their spreadsheet says is what it says."""
+    typed = load_workbook(ANSWER_KEY, data_only=True)["Inputs"]["B5"].value
+    assert f"your spreadsheet types {typed:,} sf (Inputs!B5)" in DOC
+    assert "6,674.7" not in DOC
+
+
+def test_the_stored_outlines_are_the_downloads_named_in_their_readme():
+    readme = (SITE / "gis/README.md").read_text(encoding="utf-8")
+    files = sorted((SITE / "gis").glob("*.json"))
+    assert len(files) == 2
+    for f in files:
+        assert f"`{f.name}`" in readme
+        assert f"SHA-256: `{hashlib.sha256(f.read_bytes()).hexdigest()}`" in readme, f.name
+
+
+def _model_lot() -> tuple[list[float], float]:
+    """The model's lot (model.3dm, layer Site): its sides in drawing order (front, side toward #104, rear, jog,
+    long side) and its area."""
+    import rhino3dm
+    model = rhino3dm.File3dm.Read(str(SITE / "model.3dm"))
+    site = next(i for i, layer in enumerate(model.Layers) if layer.FullPath == "Site")
+    rings = [o.Geometry for o in model.Objects if o.Attributes.LayerIndex == site
+             and isinstance(o.Geometry, rhino3dm.PolylineCurve) and o.Geometry.IsClosed]
+    line = max(rings, key=lambda c: c.PointCount)
+    points = [(line.Point(i).X, line.Point(i).Y) for i in range(line.PointCount)]
+    area = abs(sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(points, points[1:]))) / 2
+    return [math.dist(a, b) for a, b in zip(points, points[1:])], area
+
+
 def _sides(file: str) -> tuple[list[float], float, int]:
     """A stored parcel outline as its sides (consecutive edges within 8 degrees of each other are one side, so
     a curve drawn as short edges is one side), its area, and how many edges make up the first side."""
@@ -97,17 +141,22 @@ def test_the_lot_outline_figures_come_from_the_stored_outlines():
 
 
 def test_the_rear_yard_tables_follow_the_r1b_rule():
-    """Every required rear yard in §1.2's two tables is what the R-1b rule gives for that depth, and the 25 ft
-    design is marked FAIL exactly when it falls short."""
+    """Every lot depth in §1.2's tables comes from the model or the stored city outline, every required rear
+    yard is what the R-1b rule gives for it, and the 25 ft design is marked FAIL exactly when it falls short."""
     required_for = R1B["R-1b.rear_yard"]["check"].split(">=", 1)[1].strip()
     city, _, _ = _sides("city_tax_parcel_2026-10-20.json")
-    side, long_side, jog = 90.28, 99.37, 10.47                   # the model's lot (see the model test below)
-    rows = {"| (a) ": (side + long_side) / 2, "| (b) ": (side + long_side + jog) / 2,
-            "| (c) ": (side + jog + long_side) / 3, "| 90 ft": 90, "| 92 ft": 92,
-            "| 96.6 ft": (city[4] + city[1]) / 2, "| 101.13 ft": city[1]}
+    (_, side, _, jog, long_side), _ = _model_lot()
+    a, b, c = (side + long_side) / 2, (side + long_side + jog) / 2, (side + jog + long_side) / 3
+    rows = {f"| (a) the {side:.2f} and {long_side:.2f} ft lines | {a:.1f} ft": a,
+            f"| (b) the jog added to the {long_side:.2f} ft line it continues | ({side:.2f} + {long_side + jog:.2f}) ÷ 2 = {b:.2f} ft": b,
+            f"| (c) average of every line that isn't front or rear | ({side:.2f} + {jog:.2f} + {long_side:.2f}) ÷ 3 = {c:.1f} ft": c,
+            "| 90 ft (your spreadsheet)": 90, "| 92 ft (assessor's depth": 92,
+            f"| {(city[4] + city[1]) / 2:.1f} ft (average of the two GIS sides)": (city[4] + city[1]) / 2,
+            f"| {city[1]:.2f} ft (the long side in GIS)": city[1]}
     lines = [line.strip() for line in DOC.splitlines()]
     for start, depth in rows.items():
-        row = next(line for line in lines if line.startswith(start))
+        row = next((line for line in lines if line.startswith(start)), None)
+        assert row, f"no row starting {start!r}"
         required = evaluate(required_for, {"lot_depth": depth}, MEASURE_KINDS)
         shown = [float(x.replace(",", "")) for x in re.findall(r"\| ([\d,.]+) ft", row)]
         assert any(abs(x - required) < 0.05 for x in shown), (row, required)
@@ -115,14 +164,10 @@ def test_the_rear_yard_tables_follow_the_r1b_rule():
 
 
 def test_the_model_lot_figures_are_the_model_s():
-    """The model's sides and area on the page are measured from model.3dm (needs rhino3dm; skipped without it)."""
-    rhino3dm = pytest.importorskip("rhino3dm")
-    model = rhino3dm.File3dm.Read(str(SITE / "model.3dm"))
-    site = next(i for i, layer in enumerate(model.Layers) if layer.FullPath == "Site")
-    rings = [o.Geometry for o in model.Objects if o.Attributes.LayerIndex == site
-             and isinstance(o.Geometry, rhino3dm.PolylineCurve) and o.Geometry.IsClosed]
-    line = max(rings, key=lambda c: c.PointCount)
-    points = [(line.Point(i).X, line.Point(i).Y) for i in range(line.PointCount)]
-    area = abs(sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(points, points[1:]))) / 2
-    assert sorted(round(math.dist(a, b), 2) for a, b in zip(points, points[1:])) == [10.47, 67.72, 73.0, 90.28, 99.37]
+    """§1.1's Model column and the model's area are measured from model.3dm."""
+    sides, area = _model_lot()
+    lines = [line.strip() for line in DOC.splitlines()]
+    for label, length in zip(("Front (Ithaca Rd)", "Side (toward #104)", "Rear", "Jog", "Long side"), sides):
+        row = next(line for line in lines if line.startswith(f"| {label} |"))
+        assert row.split("|")[2].strip().startswith(f"{length:.2f} ft"), (row, length)
     assert f"**{area:,.1f} sf**" in DOC
