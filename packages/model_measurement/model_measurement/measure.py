@@ -204,6 +204,8 @@ def _normal_z(points) -> float:
 
 
 PITCHED = "the average height of a pitched roof is an open question for the architects (height_of_building)"
+ROOF_KIND = ("whether a roof with both a level part and sloped sides at its top is a mansard roof (to its highest "
+             "level) or a pitched or hip roof (to its average height) is an open question for the architects")
 ACCESSORY = ("whether another solid is part of the building or an accessory building (§325-25) is an open question "
              "for the architects")
 
@@ -211,10 +213,11 @@ ACCESSORY = ("whether another solid is part of the building or an accessory buil
 def _height(building: dict, grade: float) -> dict:
     """HEIGHT OF BUILDING: from the grade plane "to the highest level of a flat or mansard roof or to the average
     height of a pitched ... roof", using "that section of the roof that has the highest elevation". The roof is
-    every face that isn't a wall or the floor; its highest section is the faces that reach the top. If any of
-    them is level, or within a drainage slope of level (under 1/2 inch per foot), it is a flat or mansard roof,
-    measured to its highest point. If the top is reached only by sloped faces, it is a pitched roof, whose
-    average height is an open question, read midway between that section's eave and ridge and to the ridge."""
+    every face that isn't a wall or the floor; its highest section is the faces that reach the top. All of them
+    level (or within a drainage slope of level, under 1/2 inch per foot): a flat roof, to its highest point. All
+    of them sloped: a pitched roof, whose average height is an open question (midway between that section's
+    eave and ridge, or the ridge). Both at the top: a mansard (to its highest level) or a pitched or hip roof with
+    a deck or ridge strip (to its average height), also an open question; every reading is listed."""
     zs = [p[2] for f in building["faces"] for p in f["points"]]
     bottom, top = min(zs), max(zs)
     roof = [f for f in building["faces"]
@@ -222,30 +225,44 @@ def _height(building: dict, grade: float) -> dict:
     if not roof:
         return _missing("building_height", "the roof's shape can't be read (no faces above the floor that aren't walls)")
     highest = [f for f in roof if any(abs(p[2] - top) <= TOL for p in f["points"])]
+    sloped = [f for f in highest if _normal_z(f["points"]) < FLAT]
     how = "from the ground level (grade plane) to the top of the roof"
-    if not highest or any(_normal_z(f["points"]) >= FLAT for f in highest):
-        return _decide("building_height", [("flat or mansard roof", top - grade, {})],
-                       how + " (a flat or mansard roof, to its highest level)", [building["id"]], "")
-    eave = min(p[2] for f in highest for p in f["points"])
-    return _decide("building_height", [("midway between eave and ridge", (eave + top) / 2 - grade, {}),
-                                       ("to the ridge", top - grade, {})],
-                   how + " (a pitched roof)", [building["id"]], PITCHED)
+    if not sloped:
+        return _decide("building_height", [("flat roof", top - grade, {})], how + " (a flat roof, to its highest level)",
+                       [building["id"]], "")
+    eave = min(p[2] for f in sloped for p in f["points"])
+    readings = [("pitched: midway between eave and ridge", (eave + top) / 2 - grade, {}),
+                ("pitched: to the ridge", top - grade, {})]
+    if len(sloped) < len(highest):            # a level part at the top too
+        readings.insert(0, ("mansard: to its highest level", top - grade, {}))
+    return _decide("building_height", readings, how, [building["id"]],
+                   ROOF_KIND if len(sloped) < len(highest) else PITCHED)
 
 
 def _with_others(main: dict, others: list[dict]) -> dict:
-    """The main building's height read two ways when there are other solids: alone, and with every other solid
-    as part of it (a wing or tower drawn as its own solid is part of the building; an accessory building
-    may have its own limit, §325-25). Each other solid counts at its highest reading."""
+    """The main building's height read with the other solids: alone, and with every other solid as part of it
+    (a wing or tower drawn as its own solid is part of the building; an accessory building may have its own
+    limit, §325-25). Each roof keeps its own readings, at their lowest and at their highest. The reason names
+    exactly the questions that change the number."""
     unread = [o for o in others if o["value"] is None and not o["readings"]]
     if unread:                          # never dropped: it could be the tallest part
         return _missing("building_height", "another solid's height can't be read: " + unread[0]["reason"])
-    mine = [(r["reading"], r["value"]) for r in main["readings"]] or [("", main["value"])]
-    tallest = max(max([r["value"] for r in o["readings"]] or [o["value"]]) for o in others)
+
+    def values(m):
+        return [(r["reading"], r["value"]) for r in m["readings"]] or [("", m["value"])]
+
+    mine = values(main)
+    low = max(min(v for _, v in values(o)) for o in others)
+    high = max(max(v for _, v in values(o)) for o in others)
     readings = [(_both(w, "the main building only"), v, {}) for w, v in mine]
-    readings += [(_both(w, "with every other solid as part of it"), max(v, tallest), {}) for w, v in mine]
-    questions = _both(PITCHED if main["readings"] else "", ACCESSORY)
+    readings += [(_both(w, "with every other solid as part of it, their roofs read low"), max(v, low), {}) for w, v in mine]
+    readings += [(_both(w, "with every other solid as part of it, their roofs read high"), max(v, high), {}) for w, v in mine]
+    questions = [q for q in (main["reason"] and (ROOF_KIND if ROOF_KIND in main["reason"] else PITCHED), ) if q]
+    questions += [q for q in (ROOF_KIND, PITCHED) for o in others if o["reason"] and q in o["reason"]]
+    if any(max(v, high) != v for _, v in mine):
+        questions.append(ACCESSORY)
     return _decide("building_height", readings, main["how"], main["objects"] + [o["objects"][0] for o in others],
-                   questions)
+                   "; ".join(dict.fromkeys(questions)))
 
 
 # ---- measuring -------------------------------------------------------------------------------------------

@@ -256,7 +256,7 @@ def test_a_taller_part_drawn_as_its_own_solid_counts_for_the_height():
     house, tower = box(10, 25, 35, 65, 0, 30), box(10, 65, 20, 70, 0, 45, id="tower")
     m = measure(site(RECT, house, tower), {**FACTS, "main_building": "house"})
     assert m["building_height"]["value"] is None
-    assert sorted(r["value"] for r in m["building_height"]["readings"]) == [30.0, 45.0]
+    assert sorted({r["value"] for r in m["building_height"]["readings"]}) == [30.0, 45.0]
     garage = box(30, 75, 48, 95, 0, 12, id="garage")             # a lower solid doesn't change the height
     assert measure(site(RECT, house, garage), {**FACTS, "main_building": "house"})["building_height"]["value"] == 30.0
 
@@ -284,10 +284,10 @@ def test_another_solid_whose_height_cant_be_read_is_never_dropped():
     wing = sloped_roof_box(10, 65, 20, 75, 44.8, 45, "wing")            # a 45 ft wing with a drainage slope
     m = measure(site(RECT, house, wing), {**FACTS, "main_building": "house"})
     assert m["building_height"]["value"] is None
-    assert sorted(r["value"] for r in m["building_height"]["readings"]) == [30.0, 45.0]
+    assert sorted({r["value"] for r in m["building_height"]["readings"]}) == [30.0, 45.0]
 
 
-def test_a_mansard_roof_and_a_flat_roof_over_a_lower_pitched_wing_are_measured_to_their_highest_level():
+def test_a_mansard_is_for_the_architects_and_a_flat_roof_over_a_lower_pitched_wing_is_flat():
     # a mansard: walls to 20 ft, sides sloping in 2 ft up to a level deck at 30 ft ("the highest level of a ...
     # mansard roof")
     low = [(10, 25), (35, 25), (35, 65), (10, 65)]
@@ -296,7 +296,11 @@ def test_a_mansard_roof_and_a_flat_roof_over_a_lower_pitched_wing_are_measured_t
     sides = [{"points": [[*low[i], 20], [*low[(i + 1) % 4], 20], [*deck[(i + 1) % 4], 30], [*deck[i], 30]]} for i in range(4)]
     mansard = {"id": "house", "problems": [], "faces": [{"points": [[x, y, 0] for x, y in low]},
                                                          {"points": [[x, y, 30] for x, y in deck]}, *walls, *sides]}
-    assert measure(site(RECT, mansard), FACTS)["building_height"]["value"] == 30.0
+    m = measure(site(RECT, mansard), FACTS)["building_height"]
+    # a level deck and sloped sides at the top: a mansard (to its highest level, 30) or a hip roof with a deck
+    # (to its average height, 25)? The architects decide; every reading is listed
+    assert m["value"] is None and "mansard" in m["reason"]
+    assert sorted(r["value"] for r in m["readings"]) == [25.0, 30.0, 30.0]
     # a flat 30 ft house with a lower gable (eave 8, ridge 14) in the same solid: the highest section is flat
     house = box(10, 25, 35, 65, 0, 30)
     gable = [{"points": [[35, 30, 8], [45, 30, 8], [45, 40, 14], [35, 40, 14]]},
@@ -305,7 +309,7 @@ def test_a_mansard_roof_and_a_flat_roof_over_a_lower_pitched_wing_are_measured_t
     assert measure(site(RECT, house), FACTS)["building_height"]["value"] == 30.0
 
 
-def test_a_pitched_house_with_another_solid_names_both_open_questions_once():
+def test_a_pitched_house_with_a_low_garage_names_the_roof_question_once():
     eave, ridge = 20, 30
     house = box(10, 25, 35, 65, 0, eave)
     house["faces"] = [f for f in house["faces"] if not all(p[2] == eave for p in f["points"])]
@@ -314,4 +318,28 @@ def test_a_pitched_house_with_another_solid_names_both_open_questions_once():
     garage = box(30, 75, 48, 95, 0, 12, id="garage")
     reason = measure(site(RECT, house, garage), {**FACTS, "main_building": "house"})["building_height"]["reason"]
     assert reason.count("the readings give different values") == 1
-    assert "pitched roof" in reason and "§325-25" in reason
+    assert "pitched roof" in reason and "§325-25" not in reason    # the 12 ft garage changes no reading
+
+
+def test_a_gable_with_a_level_ridge_strip_is_not_decided_as_flat():
+    eave, ridge = 20, 30
+    house = box(10, 25, 35, 65, 0, eave)
+    house["faces"] = [f for f in house["faces"] if not all(p[2] == eave for p in f["points"])]
+    house["faces"] += [{"points": [[10, 25, eave], [35, 25, eave], [35, 44.75, ridge], [10, 44.75, ridge]]},
+                       {"points": [[10, 44.75, ridge], [35, 44.75, ridge], [35, 45.25, ridge], [10, 45.25, ridge]]},
+                       {"points": [[10, 45.25, ridge], [35, 45.25, ridge], [35, 65, eave], [10, 65, eave]]}]
+    m = measure(site(RECT, house), FACTS)["building_height"]
+    assert m["value"] is None and 25.0 in [r["value"] for r in m["readings"]]
+
+
+def test_the_height_reason_names_only_the_questions_that_change_it():
+    flat = box(10, 25, 35, 65, 0, 30)
+    pitched_garage = box(36, 70, 48, 95, 0, 20, id="garage")
+    pitched_garage["faces"] = [f for f in pitched_garage["faces"] if not all(p[2] == 20 for p in f["points"])]
+    pitched_garage["faces"] += [{"points": [[36, 70, 20], [48, 70, 20], [48, 82.5, 40], [36, 82.5, 40]]},
+                                {"points": [[36, 82.5, 40], [48, 82.5, 40], [48, 95, 20], [36, 95, 20]]}]
+    m = measure(site(RECT, flat, pitched_garage), {**FACTS, "main_building": "house"})["building_height"]
+    assert "pitched roof" in m["reason"] and "§325-25" in m["reason"]     # both change the number (30 or 40)
+    low_garage = box(30, 75, 48, 95, 0, 12, id="garage")
+    m = measure(site(RECT, flat, low_garage), {**FACTS, "main_building": "house"})["building_height"]
+    assert m["value"] == 30.0                                             # the garage changes nothing
