@@ -146,6 +146,42 @@ try:
         g._ask_zone = real_ask
     expect(g.load_facts(doc) == saved, "a cancelled edit changed the saved facts")
 
+    # a pick prompt never takes what is already selected, only lets candidates be clicked, and asks once
+    class FakeGet:
+        made = []
+
+        def __init__(self):
+            self.preselect, self.filter = True, None
+            FakeGet.made.append(self)
+
+        def SetCommandPrompt(self, text):
+            pass
+
+        def EnablePreSelect(self, on, ignore_unacceptable):
+            self.preselect = on
+
+        def SetCustomGeometryFilter(self, f):
+            self.filter = f
+
+        def Get(self):              # Rhino hands back a selected object at once when pre-selection is on
+            return g.Rhino.Input.GetResult.Object if self.preselect else g.Rhino.Input.GetResult.Nothing
+
+        def Object(self, i):
+            class Ref:
+                ObjectId = lot_curve.Id
+            return Ref()
+    lot_curve = g._sorted_objects(doc)[0][0]
+    doc.Objects.Select(lot_curve.Id)            # the lot left selected by the lot prompt
+    real_new = g._new_get_object
+    try:
+        g._new_get_object = FakeGet
+        got = g._pick(doc, "Click the main building", g._sorted_objects(doc)[1])
+        expect(got is None and len(FakeGet.made) == 1 and not FakeGet.made[0].preselect
+               and FakeGet.made[0].filter is not None, "a pick prompt took the selection or asked again")
+    finally:
+        g._new_get_object = real_new
+        doc.Objects.UnselectAll()
+
     # an import into this model is an edit: its result stays until the re-check
     g.run_check(doc, report=False)
 
