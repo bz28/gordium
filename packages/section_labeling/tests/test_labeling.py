@@ -493,3 +493,10 @@ def test_the_committed_labels_all_match_their_recorded_answers(law):
     runs = [json.loads(line) for f in sorted((ITHACA / "3_section_labels/runs").glob("*.jsonl"))
             for line in f.read_text().splitlines() if line.strip()]
     assert coverage.provenance_problems(labels, runs, pieces, rows, LAW, ctx) == []
+
+
+def test_the_collocation_review_scope_pieces_are_labeled_alike():
+    """325-29.17A-C each say how the wireless requirements apply to a collocation (worst case; the existing mount
+    too). Labeled alike, as reference, never not_for_checking (where nothing would ever be checked)."""
+    labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
+    assert {labels[f"325-29.17{x}"]["label"] for x in "ABC"} == {"reference"}

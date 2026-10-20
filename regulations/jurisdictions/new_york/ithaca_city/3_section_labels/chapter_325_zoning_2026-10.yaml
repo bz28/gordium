@@ -7921,9 +7921,9 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17B:
-    label: not_for_checking
+    label: reference
     topic: site_features
-    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
+    reason: "Revised from not_for_checking by review: Sets what a collocation's review covers (the existing mount as well as the new equipment, under this article's requirements), which the wireless requirements rely on; like 325-29.17A. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -7939,12 +7939,16 @@ labels:
       by: Claude (review of all labels, 2026-10-19)
       date: 2026-10-19
       why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
+    - from: not_for_checking
+      by: Claude (second review of all not_for_checking labels, 2026-10-20)
+      date: 2026-10-20
+      why: "sets what a collocation's review covers (the existing mount as well as the new equipment, under this article's requirements), which the wireless requirements rely on; like 325-29.17A"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17C:
-    label: not_for_checking
+    label: reference
     topic: site_features
-    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
+    reason: "Revised from not_for_checking by review: Sets what a collocation's review covers (the existing mount as well as the new equipment, under this article's requirements), which the wireless requirements rely on; like 325-29.17A. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -7961,6 +7965,10 @@ labels:
       by: Claude (review of all labels, 2026-10-19)
       date: 2026-10-19
       why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
+    - from: not_for_checking
+      by: Claude (second review of all not_for_checking labels, 2026-10-20)
+      date: 2026-10-20
+      why: "sets what a collocation's review covers (the existing mount as well as the new equipment, under this article's requirements), which the wireless requirements rely on; like 325-29.17A"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17D:
