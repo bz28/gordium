@@ -885,7 +885,8 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "street_name": facts.get("street_name"), "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span},
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
-            "corner_source": source("corner_lot"), "zones_found": facts.get("zones_found") or []}
+            "corner_source": source("corner_lot"), "zones_found": facts.get("zones_found") or [],
+            "design_buffer": saved_ui.get("design_buffer") or "0'-0\""}
 
 
 def _ft_text(feet):
@@ -911,7 +912,7 @@ def _apply_box(doc, facts, state, saved_ui):
         else:
             facts[key] = value
     saved_ui = dict(saved_ui, ground_kind=(state.get("ground") or {}).get("kind") or "flat",
-                    no_regrading=bool(state.get("no_regrading")))
+                    no_regrading=bool(state.get("no_regrading")), design_buffer=state.get("design_buffer") or "0'-0\"")
     return facts, saved_ui
 
 
@@ -1581,8 +1582,13 @@ def gordium_start():
     # always the envelope and the 3-floor starting house (hide it from the panel); floor to floor 11'-8" unless
     # GordiumFacts set another
     start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
-                 "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), logic.FLOOR_TO_FLOOR)})
+                 "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), logic.FLOOR_TO_FLOOR),
+                 "design_buffer": _feet(saved_ui.get("design_buffer"), 0.0)})
     STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
+    kept = start.get("kept_back") or 0.0           # the margin, as a site fact (shown in the panel and the report)
+    _set_source(doc, "starting_house", ("kept " + _ft_text(kept) + " back from each limit" +
+                (": the lot is from the tax map; use a survey for the full area" if not facts.get("lot_surveyed")
+                 else " (your design buffer)")) if kept else "to the limits (a surveyed lot)", "Gordium")
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)
     if not start.get("floors"):

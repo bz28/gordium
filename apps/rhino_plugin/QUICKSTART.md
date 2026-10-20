@@ -61,7 +61,9 @@ never says "complies" unless it is sure (see [What "needs review" means](#what-n
    - the lot's property line with each edge's length (in Top view);
    - the buildable envelope, see-through blue: the space every yard and the height limit leave;
    - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
-     `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked);
+     `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
+     lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
+     on a survey it goes to the limits. **Edit site… → Advanced → Design buffer** keeps it further back;
    - top right, the **status box**: one line such as "? 6 need review · 4 comply · 2 not checked";
    - the **Gordium panel** (a floating window): every item, bad news first.
 5. **Make an edit.** Move, stretch or add solids as you normally would. Half a second after you stop, Gordium
@@ -109,6 +111,80 @@ usually what fixes it:
 later release). "Not covered by this rulebook" lists code sections still to be checked by hand.
 
 The rules are a **draft**, not yet reviewed by a licensed professional; the panel says so at the top.
+
+## Test it yourself
+
+Every number below is checked by a test in the repository (`packages/design_checker/tests/test_quickstart.py`),
+so the guide and Gordium can't drift apart.
+
+### Rhino basics you'll need
+
+- **Select the house:** click it once. The three floors are one group, so they move together.
+- **Move by an exact distance:** `Move`, click a start point, type the distance (for example `5`), press Enter,
+  click the direction.
+- **Move one face:** Cmd+Shift+click a face to select just that face. Then drag the Gumball arrow, or click the
+  arrow and type a distance.
+- **Undo:** Cmd+Z.
+- **Draw a box:** `Box`, then two corners and a height.
+
+### The starting house on the sample lot
+
+The sample lot is 106 Ithaca Rd: 73'-0" × 90'-0", from the tax map. The starting house is 49'-0" wide and
+31'-10" deep, 35'-0" tall, in three floors of 11'-8".
+
+It keeps 2'-0" back from every limit because the lot lines are from the tax map, so it complies even if the
+tax map is 2 ft off:
+- front yard 27'-0" (needs 25'-0");
+- side yards 12'-0" (need 10'-0");
+- rear yard 31'-2" (needs 22'-6");
+- coverage 23.8% (the limit is 25%).
+
+Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading near the house**.
+
+### Simple tests
+
+1. **Edit site… → tick No regrading near the house → Draw.** Building height 35'-0" complies, at limit;
+   Stories 3 complies.
+2. **Move the house 5 ft back (away from the street).** Front yard 32'-0", rear yard 26'-2": both comply.
+3. **Move it 10 ft back instead.** Rear yard 21'-2" against 22'-6" required: **does not comply, −1'-4"**.
+   A note appears bottom left, and only the strip of the house inside the rear yard turns red.
+4. **Undo, then pull the rear wall 6 ft back** (Cmd+Shift+click the rear face, Gumball 6). Lot coverage 28.3%
+   against 25%: **does not comply**, with "reduce the footprint by at least …".
+5. **Undo, then raise the roof 3 ft** (the top face of Floor 3). Building height 38'-0": **does not comply either
+   way**. Over 35'-0", and the height bonus (§325-16C) would need every yard 3 ft larger: "Front yard 27'-0",
+   needs ≥ 28'-0"". Only the part above 35'-0" turns red.
+6. **Undo, then widen the house 4 ft to the east** (the east face). Side yard, East 8'-0": **does not comply,
+   −2'-0"**, and lot coverage 25.7% also doesn't: one note, "2 items no longer comply".
+7. **Undo.** Everything is back to the starting results.
+
+### Harder tests
+
+8. **A garage: `Box` 12 × 20 × 10 ft on the Default layer**, behind the house. "Objects on the lot not included"
+   and Lot coverage need review: coverage counts every building on the lot. **Add to check…** puts it on the
+   Building layer, and it is measured.
+9. **Move one floor on its own** (Floor 2, 3 ft east). Stories needs review: "floors misaligned".
+10. **The height bonus, done right:** raise the roof 3 ft (38'-0"), move the house 3 ft back, and pull each side
+    wall 3 ft in. Every yard is then 3 ft larger, plus the 2 ft the tax map needs. Building height complies
+    against 38'-6"; the Front yard row shows 28'-0" required, +2'-0".
+11. **Spot grades, then move the house:** Edit site… → I'll regrade: set finished ground…, click one point at each
+    wall, Draw. Height is measured from them. Then move the house 5 ft back: height and stories need review,
+    "spot grades no longer at the building's walls".
+12. **Corner lot:** Edit site… → Corner lot? Yes: two streets. The yards need review (which yard is the front is
+    an open question for a corner lot).
+13. **A survey:** with a surveyed lot, a new starting house goes exactly to the limits: 53'-0" × 30'-11", with
+    side yards at 10'-0", at limit, complying.
+14. **Other units:** start in a Millimeters, Meters or Inches template. The results are the same: Gordium works
+    in feet and converts at Rhino's edge.
+
+### What counts as a problem
+
+- A row saying **complies** that you think doesn't (a false pass): the most important kind. Please send it
+  with the file.
+- A number that's wrong, or rounded in Gordium's favor.
+- Something that should be drawn but isn't, or is drawn in the wrong place.
+- Rhino closing or freezing (see Troubleshooting).
+
+"Needs review" with a reason is not a problem: it's Gordium saying it can't be sure.
 
 ## Troubleshooting
 

@@ -130,13 +130,16 @@ def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_
 
 
 def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], uses=None,
-                           floor_to_floor: float | None = None) -> dict:
+                           floor_to_floor: float | None = None, keep_back: float = 0.0,
+                           coverage_scale: float = 1.0) -> dict:
     """{"floors": [{"outline": [[x, y], ...], "base": z, "top": z}, ...], "stories", "height", "area",
     "coverage_allowed", "notes"}: the starting building, or no floors and the notes that say why.
 
     The guarantee, on any lot shape: the building returned has been measured and checked against every rule (each
     passes or needs review), or no building is returned and the notes say "Gordium can't generate..." (`CANT`).
-    `uses`: the city's use names (read from the jurisdiction in the facts when not given)."""
+    `uses`: the city's use names (read from the jurisdiction in the facts when not given). `keep_back` (ft) moves
+    every yard line that much further in (the tax-map tolerance, a design buffer); `coverage_scale` scales the
+    coverage allowed (below 1: sized for the smallest lot the tax map allows)."""
     out = {"floors": [], "stories": None, "height": None, "area": None, "coverage_allowed": None, "notes": []}
     notes = out["notes"]
     sized, drawn = _as_drawn(measured)       # coverage on a lot not yet surveyed: from the lot as drawn (said below)
@@ -150,7 +153,7 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     if env["height"] is None or env["base"] is None:
         notes.append("no height limit or ground level: the building's height can't be set")
         return out
-    allowed = env["coverage"]["allowed"] if env["coverage"] else None
+    allowed = env["coverage"]["allowed"] * coverage_scale if env["coverage"] else None
     if drawn and allowed is not None:
         notes.append("lot coverage sized from the lot as drawn, which isn't from a survey: the check says NEEDS "
                      "REVIEW for coverage until the survey is confirmed")
@@ -162,10 +165,17 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     lot = Lot(site, facts)
     angle, origin = _frame(lot)
     buildable = affinity.rotate(Polygon(env["outline"], env["holes"]), -angle, origin=origin, use_radians=True)
+    if keep_back > 0:                   # every yard line further in by the same distance (square corners kept)
+        buildable = buildable.buffer(-keep_back, join_style=2)
+        if buildable.is_empty:
+            notes.append("no buildable area left after keeping back " + f"{keep_back:g} ft from every limit")
+            return out
+        if buildable.geom_type != "Polygon":
+            buildable = max(buildable.geoms, key=lambda p: p.area)
     street = [affinity.rotate(Point(p), -angle, origin=origin, use_radians=True).y
               for i in lot.ordered_street() for p in lot.edges[i]]
     bend = max(street) - min(street)
-    front_line = max(street) + env["yards"]["front"]          # the front yard line, in the street's frame
+    front_line = max(street) + env["yards"]["front"] + keep_back    # the front yard line, in the street's frame
     found = _footprint(buildable, buildable.centroid.x, allowed, front_line,
                        front_line + (STEP if bend > 1e-9 else 0.0))
     if found is None:

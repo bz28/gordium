@@ -17,7 +17,7 @@ import yaml
 from design_checker import present
 from envelope_builder.envelope import MARGIN, envelope
 from envelope_builder.start import largest_legal_building
-from model_measurement.measure import measure
+from model_measurement.measure import TAX_MAP_TOLERANCE, measure
 from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
@@ -369,12 +369,52 @@ def _start_preview(out: dict, measured: dict) -> dict | None:
     return {"floors": len(floors), "height": present.feet_inches(out.get("height") or 0, "nearest"),
             "size": f"{present.feet_inches(max(sides), 'nearest')} × {present.feet_inches(min(sides), 'nearest')}",
             "area": present._area(area, "up") if area else None,
-            "coverage": present._pct(area / lot_area * 100, "up", 2) if area and lot_area else None,
+            "coverage": (present._display(area / lot_area * 100, (out.get("coverage_allowed") or 0) / lot_area * 100,
+                                          None, "%", "≤")[0]          # the panel's own text, so they always agree
+                         if area and lot_area and out.get("coverage_allowed") else None),
             "limit": (present._pct(out["coverage_allowed"] / lot_area * 100, "down", 2)      # a maximum: down
-                      if out.get("coverage_allowed") and lot_area else None)}
+                      if out.get("coverage_allowed") and lot_area else None),
+            "kept_back": present.feet_inches(out["kept_back"], "nearest") if out.get("kept_back") else None}
 
 
-def start(model_path: Path, facts: dict, floor_to_floor: float | None = None) -> dict:
+TAX_MAP_NOTE = ("Starting house keeps 2'-0\" back from each limit because the lot is from the tax map; use a survey "
+                "for the full area.")
+
+
+def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer):
+    """The starting house, kept back from the limits so that it complies even at the tax-map worst case (Ben,
+    2026-10-20): on a lot not from a survey, every yard line moves in by the tax-map tolerance and coverage is sized
+    for the smallest lot the tax map allows; on a survey it goes to the limits. A design buffer (ft) is added on top
+    of either. Proven, not assumed: the house is checked with the panel's own worst case, and if any item would still
+    need review from the tolerance (a rear yard minimum also grows with the lot depth) it steps back 3 in. more."""
+    from envelope_builder.start import floor_solids
+    tax = not drawing.get("lot_surveyed")
+    keep = (TAX_MAP_TOLERANCE if tax else 0.0) + max(design_buffer or 0.0, 0.0)
+    tol = (measured.get("lot_area") or {}).get("tolerance")
+    drawn = next((r["value"] for r in (measured.get("lot_area") or {}).get("readings") or []), None)
+    scale = tol["low"] / drawn if tax and tol and drawn else 1.0
+    out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
+                                 coverage_scale=scale)
+    for _ in range(12):
+        if not tax or not out.get("floors"):
+            break
+        view = check_site({**site, "buildings": floor_solids(out["floors"])}, drawing)["view"]
+        if not any(i["status"] == present.REVIEW and "tax map" in (i.get("reason") or "") for i in view["items"]
+                   if i.get("measure")):
+            break
+        keep += 0.25
+        out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
+                                     coverage_scale=scale)
+    out["kept_back"] = keep
+    if out.get("coverage_allowed") and scale:      # the rule's own allowance on the lot as drawn; what it was sized to
+        out["coverage_target"] = out["coverage_allowed"]
+        out["coverage_allowed"] = out["coverage_allowed"] / scale
+    if tax and out.get("floors"):
+        out["notes"].append(TAX_MAP_NOTE)
+    return out
+
+
+def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, design_buffer: float = 0.0) -> dict:
     """The largest legal starting building for the lot in a model (its buildings, if any, left out): stacked
     floor blocks, one per story, from the zone's rules (envelope_builder.start). With no grade set, it is drawn
     standing at the lot's own level (and said so): the check then says height and stories need review until the
@@ -401,7 +441,7 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None) ->
     if existing:                        # drawn standing on the ground shown; the check still says it is existing
         drawing = {**drawing, "grade_is": "finished"}
     measured = measure(site, drawing)
-    out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor)
+    out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer)
     if existing and out.get("floors"):
         out["notes"].append("drawn on the ground as it is: building height and stories need review until you tick "
                             "No regrading near the house (or set the finished ground)")

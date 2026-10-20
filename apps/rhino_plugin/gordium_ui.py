@@ -452,6 +452,7 @@ def start_box(state, options, mode):
 
     def keep():                       # what the fields say now, back into `state`; what changed is the architect's
         z = zone.SelectedValue.Text if zone.SelectedValue else None
+        state["design_buffer"] = buffer.Text
         state.update(address=address.Text, zone=z, district_confirmed=bool(confirm.Checked),
                      use=names[use.SelectedIndex][0] if names else None, no_regrading=bool(regrade.Checked),
                      corner_lot=[None, False, True][max(corner.SelectedIndex, 0)])
@@ -501,6 +502,14 @@ def start_box(state, options, mode):
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             if r.get("choice"):        # the street side's question: Corner lot?
                 layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
+    buffer = ef.TextBox()                # Advanced: a design buffer kept back from every limit, on top of the tax map's
+    buffer.Text = state.get("design_buffer") or "0'-0\""
+    advanced = ef.Expander()
+    advanced.Header = label("Advanced", bold=True, size=12)
+    advanced.Expanded = (state.get("design_buffer") or "0'-0\"") not in ("", "0'-0\"")
+    advanced.Content = row(label("Design buffer", size=12), buffer,
+                           label("kept back from every limit by the starting house", size=11))
+    layout.AddRow(None, advanced)
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
     amber = label("", eto_status_color("needs_review"), size=12)    # one line, following the answers given
 
