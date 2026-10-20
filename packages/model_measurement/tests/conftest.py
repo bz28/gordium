@@ -1,5 +1,6 @@
-"""In every test here, each reason a measurement gives is checked as it is made: it must be built from the
-stops table (model_measurement/stops.py), however the code got its words."""
+"""In every test here, each reason a measurement gives is checked as it is made: it must have the shape of a
+sentence in the stops table (model_measurement/stops.py). A backstop: a hand-written sentence shaped like a
+table one would pass (a known limit)."""
 
 import re
 
