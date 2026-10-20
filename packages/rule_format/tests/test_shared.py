@@ -34,7 +34,7 @@ def test_every_jsonl_file_is_read_by_the_one_reader():
 
 
 def test_every_jurisdiction_listing_uses_the_one_helper():
-    pattern = re.compile(r'regulations/jurisdictions"\)\.glob\("\*/\*"\)')
+    pattern = re.compile(r'\.glob\("\*/\*')       # <state>/<place>, however the folder is named
     copies = [p for p in CODE if p.name != "rulebook.py" and pattern.search(p.read_text())]
     assert not copies, f"list jurisdictions with rule_format.rulebook.jurisdictions(): {copies}"
 
