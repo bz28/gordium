@@ -170,3 +170,31 @@ def test_on_a_lot_that_widens_toward_the_rear_the_building_stays_at_the_front_ya
     widening = [(0, 0), (60, 0), (62, 150), (-2, 150)]
     start, _ = generated(widening, {**FACTS, "street_line": [[[0, 0], [60, 0]]]})
     assert min(p[1] for p in start["floors"][0]["outline"]) == pytest.approx(25, abs=0.01)
+
+
+def _arc_lot(radius=60, rear=170, spread=35, segments=4):
+    """A cul-de-sac pie lot: the street an arc of a circle, the lot widening toward the rear."""
+    arc = [(radius * math.sin(math.radians(a)), -radius * math.cos(math.radians(a)) + radius)
+           for a in [-30 + 60 * k / segments for k in range(segments + 1)]]
+    back = [(rear * math.sin(math.radians(a)), rear * math.cos(math.radians(a))) for a in (spread, -spread)]
+    return arc + back, [[list(arc[k]), list(arc[k + 1])] for k in range(segments)]
+
+
+@pytest.mark.parametrize("name", ["sides at 45 degrees", "stepped", "cul-de-sac pie"])
+def test_a_lot_whose_sides_lean_outward_still_gets_a_full_building_at_the_front_yard_line(name):
+    """The front yard is cut with rounded corners, so the buildable area dips below the front yard line where the
+    side lines lean outward; the building still sits on the front yard line, not on a corner tip."""
+    if name == "cul-de-sac pie":
+        points, street = _arc_lot()
+    else:
+        points = ([(0, 0), (60, 0), (210, 150), (-150, 150)] if name == "sides at 45 degrees" else
+                  [(0, 0), (60, 0), (160, 100), (160, 200), (-100, 200), (-100, 100)])
+        street = [[list(points[0]), list(points[1])]]
+    facts = {**FACTS, "street_line": street}
+    start, site = generated(points, facts)
+    assert start["floors"], start["notes"]
+    got, m = results(site, facts)
+    assert "fail" not in got.values(), got
+    assert start["area"] >= 0.10 * Polygon(points).area      # a real building, not a corner-tip sliver
+    if name != "cul-de-sac pie":
+        assert m["front_yard"]["value"] == pytest.approx(25, abs=0.01)

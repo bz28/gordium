@@ -84,21 +84,22 @@ def _x_range(shape: Polygon, y: float, around: float):
     return s[0], s[-1]
 
 
-def _footprint(shape: Polygon, around: float, allowed, band: float = 0.0):
+def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_limit: float):
     """(x0, x1, front, depth): the largest rectangle square to the street inside the buildable area, at or under
-    the coverage limit, its front on the front yard line. The fronts tried are the levels the front yard line
-    itself spans (`band`: how far the street line bends, plus one STEP; on a straight street, the line alone); from each the
-    width only narrows going back, so it grows deeper until coverage or the rear stops it. A bent or curved
-    street moves the front back within that strip to where the rectangle is largest (widest on a tie); the
-    building never slides further back for a wider rear, and the search stays short."""
+    the coverage limit. The fronts tried run from the bottom of the buildable area up to `front_limit`: the front
+    yard line (`front_line`, always tried exactly), or on a bent or curved street the deepest point of that line
+    plus one STEP. From each, the width only narrows going back, so it grows deeper until coverage or the rear
+    stops it; the largest wins, the widest on a tie. So the building sits on the front yard line, never slides
+    back for a wider rear, and the search stays short."""
     y0, y1 = shape.bounds[1], shape.bounds[3]
     n = max(1, int(math.ceil((y1 - y0) / STEP)))
-    levels = [y0 + (y1 - y0) * k / n for k in range(n + 1)]
+    levels = sorted({y0 + (y1 - y0) * k / n for k in range(n + 1)} | ({front_line} if y0 <= front_line <= y1 else set()))
+    n = len(levels) - 1
     spans = [_x_range(shape, y, around) for y in levels]
     best, best_key = None, (0.0, 0.0)   # the largest area, then the widest (square to the side yards)
     for i, first in enumerate(spans):
-        if levels[i] > y0 + (band + STEP if band > 1e-9 else 0.0) + 1e-9:
-            break                       # past the front yard line's own strip (just the line, on a straight street)
+        if levels[i] > front_limit + 1e-9:
+            break                       # behind the front yard line (or its strip, on a bent street)
         if first is None or first[1] - first[0] <= 0:
             continue
         width = first[1] - first[0]
@@ -155,7 +156,10 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     buildable = affinity.rotate(Polygon(env["outline"], env["holes"]), -angle, origin=origin, use_radians=True)
     street = [affinity.rotate(Point(p), -angle, origin=origin, use_radians=True).y
               for i in lot.ordered_street() for p in lot.edges[i]]
-    found = _footprint(buildable, buildable.centroid.x, allowed, band=max(street) - min(street))
+    bend = max(street) - min(street)
+    front_line = max(street) + env["yards"]["front"]          # the front yard line, in the street's frame
+    found = _footprint(buildable, buildable.centroid.x, allowed, front_line,
+                       front_line + (STEP if bend > 1e-9 else 0.0))
     if found is None:
         notes.append("no rectangle square to the street fits inside the required yards")
         return out
