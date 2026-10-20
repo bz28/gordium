@@ -161,6 +161,7 @@ def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
     item = next(line for line in (REPO / "docs/discrepancies_with_architects.md").read_text().splitlines()
                 if line.startswith("| 4.2 "))
     assert "any reading" not in item and all(f"{k} ft" in item for k in readings)
+    assert "requires more.**" not in item              # the headline may not settle the open question either
 
 
 def test_no_doc_claims_a_rear_yard_floor_across_readings():

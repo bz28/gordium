@@ -22,7 +22,7 @@ The city's documents go in on the left. A traceable rulebook, checked by code, c
 |---|---|---|---|---|
 | 1. Source documents | The city's original PDFs, never edited, each with a fingerprint | Everything traces back to these | Downloaded from official sites | ✅ PR 0 |
 | 2. Extracted text | Every line of every PDF, with its page and position | So a computer can check that a quote is really on its page | Code (same result every time) | ✅ PR 3 |
-| 3. Section labels | Every paragraph of the law tagged: rule / flag / pointer / not relevant | Proves nothing in the law was skipped | Code, then AI for leftovers, then architects | Later |
+| 3. Section labels | Every paragraph of the law tagged: rule / flag / pointer / not relevant | Proves nothing in the law was skipped | Code, then AI for leftovers, checked by code (architect confirmation deferred) | Later |
 | 4. Definitions | What "height", "story", "lot depth"… mean in Ithaca, in the city's words; unclear points as questions | A rule's numbers mean nothing until the words are defined | Written from the law under the drafting rules; quotes checked by code | 🔨 PR 4 |
 | 5. Rules | One file per zone: each rule in plain English + a formula + its source | What designs are checked against | Hand-written for R-1b, then code reads the charts for every zone | Next |
 | 6. Coverage report | List of every paragraph: handled or a gap | Proof for architects that we read everything | Code | Later |

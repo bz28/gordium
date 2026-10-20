@@ -1,6 +1,6 @@
 # Drafting rules
 
-How to write a definition or a rule from a city's documents. They apply to every zone and every city, and to anyone drafting, AI or person. The inspector (`python -m rule_format`) enforces what code can check; reviewers and architects check the rest.
+How to write a definition or a rule from a city's documents. They apply to every zone and every city, and to anyone drafting, AI or person. The inspector (`python -m rule_format`) enforces what code can check; the rest is checked in review (architect review is deferred for now, decided 2026-10-19).
 
 ## 1. Say only what the quotes say
 
@@ -13,7 +13,7 @@ For **rules**, every statement in `says` (the plain-English rule) must be backed
 
 ## 2. Interpretations go to `open_questions`, never into `says`
 
-When the law leaves something unsettled (a word it doesn't define, a measurement it doesn't explain, a case it doesn't mention), write the question for the architects in `open_questions`. A definition or rule with open questions can't be approved until they're answered. A definition's answer is recorded in `answers` (question, answer, answered_by, answered_on); a rule's answer is written into its `says` and `check`. Either way it's part of what's approved, so it can't change afterwards without re-approval.
+When the law leaves something unsettled (a word it doesn't define, a measurement it doesn't explain, a case it doesn't mention), write the question for the architects in `open_questions`. A definition or rule with open questions can't be approved until they're answered. A definition's answer is recorded in `answers` (question, answer, answered_by, answered_on); a rule's answer is written into its `says` and `check`. Either way it's part of what's approved, so it can't change afterwards without re-approval (approval is deferred for now; this applies once it is switched on).
 
 ## 3. Every number comes from a quote
 
