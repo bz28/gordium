@@ -48,7 +48,12 @@ STOPS = {
     # facts a massing model doesn't show, until they are entered
     "no_use": "choose the use",
     "no_district": "enter the lot's zoning district (zone)",
-    "no_stories": "enter the number of stories",
+    "no_stories": "the building is one solid with no floors: draw each story as its own solid standing on the one "
+                  "below (as Gordium's starting building is), or enter the number of stories",
+    "floors_misaligned": "floors misaligned: a floor block sticks out past the one below it (one floor moved on its "
+                         "own?): move the floors together, or draw the overhang as part of its floor",
+    "basement_story": "a floor block below the ground: whether a basement or cellar counts as a story (§325-3) isn't "
+                      "measured yet: an open question for the architects",
     "no_rooms": "enter bedrooms / parking spaces",
     # the buildings
     "no_building": "no building on the Building layer",

@@ -3,6 +3,7 @@ Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
 LAYERS = {"lot": "Site", "building": "Building"}
+MASSING = "Gordium::Massing"            # where GordiumStart draws the starting building: building objects too
 SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
 DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",
                 "Leader", "LinearDimension", "AngularDimension", "RadialDimension", "OrdinateDimension")
@@ -21,6 +22,8 @@ def classify(full_path, kind, holds_building=False):
     None (anything else, ignored), or a problem sentence. Nothing that could be part of a building is dropped:
     a block on the building layer, or a block holding building objects wherever it is placed, and any other
     geometry on the building layer, are problems, so the checker says NEEDS REVIEW."""
+    if on_layer(full_path, MASSING):
+        full_path = LAYERS["building"]
     if kind.startswith("InstanceReference") and (on_layer(full_path, LAYERS["building"]) or holds_building):
         return "a block on the Building layer can't be measured yet (explode it)"
     if on_layer(full_path, LAYERS["lot"]):
@@ -159,3 +162,20 @@ def after_corner_answer(facts, was_corner):
     if out.get("corner_lot") != was_corner:
         out.pop("street_line", None)
     return out
+
+
+def notice(before, rows):
+    """(the failing rule ids now, the notice lines): one notice for the rules that fail now and didn't at the last
+    check ("Rear yard no longer complies: …", or "2 items no longer comply: Rear yard, Lot coverage"); none on the
+    first check (before is None) or when nothing newly fails. A rule failing under every reading counts."""
+    fails = [r for r in rows if r.get("Fails") or r.get("Error") == "FAIL"]
+    now = {r["Rule id"] for r in fails}
+    if before is None:
+        return now, []
+    new = [r for r in fails if r["Rule id"] not in before]
+    if not new:
+        return now, []
+    names = [r.get("Short") or r["Requirement"] for r in new]
+    if len(new) == 1:
+        return now, [names[0] + " no longer complies" + (": " + new[0]["Line"] if new[0].get("Line") else "")]
+    return now, [str(len(new)) + " items no longer comply: " + ", ".join(names)]

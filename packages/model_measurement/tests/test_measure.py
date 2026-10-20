@@ -619,3 +619,45 @@ def test_a_solid_under_the_house_but_not_joined_to_it_is_never_dropped():
     basement, sub = box(10, 25, 35, 65, 802, 812, id="basement"), box(15, 30, 30, 60, 792, 802, id="sub-basement")
     m = measure(site(RECT, house, basement, sub), facts)
     assert m["building_height"]["value"] == 30.0 and m["front_yard"]["value"] == 25.0
+
+
+# ---- stories from the shape: stacked floor blocks ----------------------------------------------------------
+
+FLOORS = [box(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
+          box(10, 25, 35, 65, z0=22, z1=33, id="floor 3")]
+
+
+def test_stacked_floor_blocks_are_one_building_and_its_stories_are_counted():
+    m = measure(site(RECT, *FLOORS), {**FACTS, "stories": None})
+    assert m["stories"]["value"] == 3 and m["stories"]["objects"] == ["floor 1", "floor 2", "floor 3"]
+    assert m["building_height"]["value"] == 33          # one building, to its roof: not "pick the main building"
+    assert m["front_yard"]["value"] == 25
+    assert set(m["front_yard"]["objects"]) == {"lot", "floor 1", "floor 2", "floor 3"}
+    assert m["building_area"]["value"] == 25 * 40
+
+
+def test_floors_drawn_win_over_a_typed_count():
+    assert measure(site(RECT, *FLOORS), {**FACTS, "stories": 2})["stories"]["value"] == 3
+
+
+def test_one_solid_without_floors_asks_for_floors_or_a_count():
+    m = measure(site(RECT, box(10, 25, 35, 65)), {**FACTS, "stories": None})
+    assert m["stories"]["value"] is None and "draw each story as its own solid" in m["stories"]["reason"]
+
+
+def test_a_smaller_block_on_top_is_a_question_not_a_story():
+    bulkhead = box(15, 30, 20, 35, z0=33, z1=41, id="bulkhead")
+    m = measure(site(RECT, *FLOORS, bulkhead), {**FACTS, "stories": None})
+    assert m["stories"]["value"] is None and "stair bulkhead" in m["stories"]["reason"]
+    assert sorted(r["value"] for r in m["stories"]["readings"]) == [3, 4]
+
+
+def test_a_full_size_fourth_floor_is_counted():
+    top = box(10, 25, 35, 65, z0=33, z1=44, id="floor 4")
+    assert measure(site(RECT, *FLOORS, top), {**FACTS, "stories": None})["stories"]["value"] == 4
+
+
+def test_a_floor_moved_alone_is_floors_misaligned():
+    moved = box(13, 25, 38, 65, z0=11, z1=22, id="floor 2")            # floor 2 shifted 3 ft sideways on its own
+    m = measure(site(RECT, FLOORS[0], moved, FLOORS[2]), {**FACTS, "stories": None})
+    assert m["stories"]["value"] is None and m["stories"]["reason"].startswith("floors misaligned")

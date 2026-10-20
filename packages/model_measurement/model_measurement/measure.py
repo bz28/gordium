@@ -48,7 +48,7 @@ def _record(definition, unit, value=None, how="", objects=(), points=None, readi
 
 
 def _missing(name: str, reason: str) -> dict:
-    return _record(name, UNITS[name], reason=reason)
+    return _record(name, UNITS.get(name) or STATED[name], reason=reason)
 
 
 def _decide(name: str, readings: list[tuple[str, float, dict]], how: str, objects, question: str) -> dict:
@@ -57,9 +57,9 @@ def _decide(name: str, readings: list[tuple[str, float, dict]], how: str, object
     shown = [{"reading": r, "value": _r(v)} for r, v, _ in readings]
     if values and max(values) - min(values) <= SAME:
         how = how if len(readings) > 1 or not readings[0][0] else f"{how} ({readings[0][0]})"
-        return _record(name, UNITS[name], _r(values[0]), how, objects, readings[0][2].get("points"),
+        return _record(name, UNITS.get(name) or STATED[name], _r(values[0]), how, objects, readings[0][2].get("points"),
                        shown if len(readings) > 1 else [])
-    return _record(name, UNITS[name], None, how, objects, None, shown,
+    return _record(name, UNITS.get(name) or STATED[name], None, how, objects, None, shown,
                    stop("readings_differ", question=question))
 
 
@@ -343,13 +343,13 @@ def _height(building: dict, grade: float) -> dict:
     roof_top = max(p[2] for f in main_roof for p in f["points"])
     if roof_top >= top - TOL:
         readings, question = _roof_readings(roof, top, grade)
-        return _decide("building_height", readings, how, [building["id"]], question)
+        return _decide("building_height", readings, how, _parts(building), question)
     below = [f for f in roof if all(p[2] <= roof_top + TOL for p in f["points"])]
     low, low_question = _roof_readings(below, roof_top, grade)
     high, high_question = _roof_readings(roof, top, grade)
     readings = [(_both("leaving out what rises above the main roof", w), v, x) for w, v, x in low]
     readings += [(_both("including what rises above the main roof", w), v, x) for w, v, x in high]
-    return _decide("building_height", readings, how, [building["id"]],
+    return _decide("building_height", readings, how, _parts(building),
                    "; ".join(dict.fromkeys(q for q in (ABOVE_ROOF, low_question, high_question) if q)))
 
 
@@ -416,6 +416,68 @@ def _with_others(main: dict, others: list[dict]) -> dict:
                    "; ".join(dict.fromkeys(questions)))
 
 
+def _parts(building: dict) -> list[str]:
+    """A building's objects: its own id, or every floor block of a stacked building."""
+    return building.get("parts") or [building["id"]]
+
+
+def _stacks(buildings: list[dict]) -> list[dict]:
+    """Solids stacked floor on floor (each standing on the one below it, overlapping it seen from above) joined
+    into one building: its faces together, its parts listed (`parts`, bottom first) with their spans. A solid
+    that stands alone stays as it is."""
+    spans = {b["id"]: (min(p[2] for f in b["faces"] for p in f["points"]),
+                       max(p[2] for f in b["faces"] for p in f["points"])) for b in buildings if b.get("faces")}
+    plans = {i: _projection(b) for i, b in ((b["id"], b) for b in buildings) if i in spans}
+    parent = {b["id"]: b["id"] for b in buildings}
+
+    def root(i):
+        while parent[i] != i:
+            i = parent[i]
+        return i
+
+    for a in spans:
+        for b in spans:
+            if a != b and abs(spans[a][1] - spans[b][0]) <= TOL and plans[a].intersection(plans[b]).area > 1e-6:
+                parent[root(b)] = root(a)
+    groups = {}
+    for b in buildings:
+        groups.setdefault(root(b["id"]), []).append(b)
+    out = []
+    for members in groups.values():
+        if len(members) == 1:
+            out.append(members[0])
+            continue
+        members.sort(key=lambda b: spans[b["id"]][0])
+        out.append({"id": members[0]["id"], "parts": [b["id"] for b in members],
+                    "spans": [spans[b["id"]] for b in members], "plans": [plans[b["id"]] for b in members],
+                    "faces": [f for b in members for f in b["faces"]],
+                    "problems": [p for b in members for p in b.get("problems") or []]})
+    return out
+
+
+def _stories(building: dict, grade, why_grade) -> dict:
+    """STORY: the floor blocks of a stacked building standing on or above the ground, counted. A block below the
+    ground is a basement or cellar, and whether it counts as a story (§325-3) isn't measured yet."""
+    how = "the floor blocks of the building counted (each story drawn as its own solid)"
+    if why_grade:
+        return _record("stories", "count", reason=why_grade)
+    if any(lo < grade - TOL for lo, _ in building["spans"]):
+        return _record("stories", "count", reason=stop("basement_story"))
+    # a block smaller than the floor below it (a stair bulkhead, a penthouse, a stepped-back floor) may not be a
+    # story: counted both ways, and if that changes the count it's a question, never a guess
+    plans = building["plans"]
+    if any(not plans[i].difference(plans[i - 1].buffer(TOL)).is_empty
+           and plans[i].difference(plans[i - 1].buffer(TOL)).area > 1e-6 for i in range(1, len(plans))):
+        return _record("stories", "count", reason=stop("floors_misaligned"))
+    full = [i for i, p in enumerate(plans) if i == 0 or p.area >= plans[i - 1].area - 1e-6]
+    if len(full) == len(plans):
+        return _record("stories", "count", len(plans), how, building["parts"])
+    readings = [("every block a story", len(plans), {}), ("only blocks as large as the floor below", len(full), {})]
+    return _decide("stories", readings, how, building["parts"],
+                   "whether a block smaller than the floor below it (a stair bulkhead, a penthouse, a stepped-back "
+                   "floor) is a story is an open question for the architects (story)")
+
+
 # ---- measuring -------------------------------------------------------------------------------------------
 
 def _both(*words) -> str:
@@ -480,6 +542,13 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                  stop("buried_solid", ground=_r(grade), bottom=_r(buried[0]), top=_r(buried[1])) if buried else
                  stop("ground_unknown") if facts.get("ground_is_flat") is None else
                  None if facts["ground_is_flat"] else stop("sloped_ground"))
+    # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
+    # drawn) are one building, and its stories are counted from them: read from the shape, never typed
+    buildings = _stacks(buildings)
+    main = (buildings[0] if len(buildings) == 1 else
+            next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None))
+    if main is not None and len(main.get("parts", [])) > 1:
+        out["stories"] = _stories(main, grade, why_grade)
     why_main = None if main else stop("no_main_building")
     why = why_building or why_grade or why_main
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
@@ -533,7 +602,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         cut = ops.unary_union([_section(b, grade + TOL) for b in buildings])
         out["building_area"] = _decide(
             "building_area", [("covered from above", everything.area, {}), ("at the main grade level", cut.area, {})],
-            "the ground area of every building on the lot, porches and decks included", list(footprints),
+            "the ground area of every building on the lot, porches and decks included",
+            [i for b in buildings for i in _parts(b)],
             "whether parts above the ground floor that stick out (overhangs) count is an open question for the "
             "architects (building_area)")
 
@@ -563,7 +633,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     eaves = ("whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid "
              "is a porch or deck (part of the building, §325-18A) or an accessory building (§325-25), are open "
              "questions for the architects (yard_projections)")
-    objects = [lot.id, main["id"]]
+    objects = [lot.id, *_parts(main)]
     front = [(w, *_distance(lot.line(lot.ordered_street()), s)) for w, s in shapes]
     out["front_yard"] = _decide("front_yard", [(w, d, {"points": p}) for w, d, p in front],
                                 "the least distance from the street lot line to the main building", objects, eaves)

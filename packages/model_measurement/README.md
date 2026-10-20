@@ -97,8 +97,14 @@ Every reason the code gives today comes from the table:
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
   it lies within that solid's plan; a sub-basement under it too); "say whether the ground is flat";
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
-- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "enter the number of
-  stories"; "enter bedrooms / parking spaces".
+- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "the building is one
+  solid with no floors: draw each story as its own solid standing on the one below (as Gordium's starting building
+  is), or enter the number of stories"; "enter bedrooms / parking spaces".
+- **Stories, from the shape:** a building drawn as stacked floor blocks (each story its own solid, standing on the
+  one below) is one building, and its stories are its blocks counted. "a floor block below the ground: whether a
+  basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
+  "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
+  together, or draw the overhang as part of its floor".
 - **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
   building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
