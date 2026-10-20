@@ -588,7 +588,7 @@ def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict 
         if cell is not None:
             section = re.sub(r"\s*\[fn[\d,]+\]", "", cell.get("section") or "")
             row = re.sub(r"\s*\[fn[\d,]+\]", "", cell["row"])
-            return {"text": f"{section} · {row} · {cell['column']}: “{cell['value']}”", "where": cite(source)}
+            return {"text": f"{section} · {row} · {cell['column']}: {cell['value']}", "where": cite(source)}
     return {"text": text or _cell_words(source), "where": cite(source)}
 
 

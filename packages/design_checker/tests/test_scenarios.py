@@ -89,7 +89,7 @@ def test_the_tax_map_worst_case_applies_to_the_lot_area_too():
 
 def test_chart_quotes_are_the_districts_own_cell_never_a_whole_row():
     quotes = [q["text"] for q in _items("05_coverage_one_square_foot_over.yaml")["Lot area"]["detail"]["quotes"]]
-    assert "Minimum Lot Size · One-family dwelling, detached · R-1B: “6,000 sf”" in quotes
+    assert "Minimum Lot Size · One-family dwelling, detached · R-1B: 6,000 sf" in quotes   # the panel adds the quote marks
     assert not any("10,000 sf 6,000 sf 5,000 sf" in q or q.startswith("R-1A R-1B") for q in quotes)
 
 
