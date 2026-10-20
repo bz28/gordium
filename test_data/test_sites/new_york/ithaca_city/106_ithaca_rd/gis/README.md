@@ -8,7 +8,7 @@ Official outlines of this lot (tax parcel 500700-84.-2-6), compared with the lot
 - Downloaded 2026-10-20 with `curl -s -o <file> "<URL>"`; fetching it again gave the same bytes. Only these non-personal fields were requested: no owner or mailing details.
 - SHA-256: `ca1420eaa4c8950a7fce0295a582a4acf32e4126febcaa9f16fb1a24b52533ca`
 
-**`city_tax_parcel_facts.yaml`**: measurements we took from the City of Ithaca `Tax_Parcels` outline. The City's data itself is **not stored**, as a precaution until the City's GIS Program (gisrequest@cityofithaca.org) is asked for permission:
+**`city_tax_parcel_facts.yaml`**: measurements we took from the City of Ithaca `Tax_Parcels` outline. The City's data itself is **not stored**, as a precaution until the City's GIS Program (gisrequest@cityofithaca.org, as listed in the City's staff directory, https://www.cityofithaca.org/Directory.aspx) is asked for permission:
 - The `Tax_Parcels` layer's own terms (https://www.arcgis.com/sharing/rest/content/items/87c2aae68e0b405d8b9dcb7a0cc9cf06?f=json, `licenseInfo`) ask only that derived products include the attribution statement in the facts file (and on the page that uses these figures).
 - The City's `City_Zoning` layer, from the same City GIS Program, says (https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/info/itemInfo?f=json): "Data contained in this product was originally produced by the GIS Program, City of Ithaca, NY and may not be reproduced or redistributed without the express written consent of the originator."
 
