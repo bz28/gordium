@@ -580,3 +580,42 @@ def test_a_gently_curved_roof_is_not_one_plane():
             for g in group:
                 n, p0 = _unit_normal(g["points"]), g["points"][0]
                 assert all(abs(sum(n[c] * (q[c] - p0[c]) for c in range(3))) <= TOL for f in group for q in f["points"])
+
+
+def test_a_ground_level_that_doesnt_meet_the_building_stops_height_area_and_yards():
+    for grade in (812, 30, 31, -50):          # above the top, at it, just over it, under the lowest point
+        m = measure(site(), {**FACTS, "grade_elevation": grade})
+        for name in ("building_height", "building_area", "front_yard", "side_yard_smaller", "rear_yard"):
+            assert m[name]["value"] is None and "doesn't meet the buildings" in m[name]["reason"], (grade, name)
+    basement = measure(site(), {**FACTS, "grade_elevation": 4})      # a basement 4 ft below the ground
+    assert basement["building_height"]["value"] == 26.0 and basement["front_yard"]["value"] == 25.0
+
+
+def test_stacked_solids_and_a_basement_drawn_as_its_own_solid_meet_the_ground():
+    ground_floor, upper = box(10, 25, 35, 65, 0, 10, id="house"), box(10, 25, 35, 65, 10, 30, id="upper")
+    m = measure(site(RECT, ground_floor, upper), {**FACTS, "main_building": "house"})
+    assert (m["building_area"]["value"], m["front_yard"]["value"], m["rear_yard"]["value"]) == (1000.0, 25.0, 35.0)
+    assert "doesn't meet" not in str(m["building_height"]["reason"])
+    house, basement = box(10, 25, 35, 65, 10, 40, id="house"), box(10, 25, 35, 65, 0, 10, id="basement")
+    m = measure(site(RECT, house, basement), {**FACTS, "main_building": "house", "grade_elevation": 10})
+    assert m["front_yard"]["value"] == 25.0 and "doesn't meet" not in str(m["building_height"]["reason"])
+
+
+def test_a_solid_buried_beside_the_building_is_never_dropped():
+    house, tower = box(10, 25, 25, 65, 812, 842, id="house"), box(26, 25, 35, 65, 0, 45, id="tower")
+    m = measure(site(RECT, house, tower), {**FACTS, "main_building": "house", "grade_elevation": 812})
+    assert m["building_height"]["value"] is None and "wholly under the ground" in m["building_height"]["reason"]
+    garage = box(32, 70, 45, 90, 0, 10, id="garage")                   # buried by a ground level of 20
+    m = measure(site(RECT, box(10, 25, 30, 65, 0, 30), garage), {**FACTS, "main_building": "house", "grade_elevation": 20})
+    assert m["building_height"]["value"] is None and "wholly under the ground" in m["building_height"]["reason"]
+
+
+def test_a_solid_under_the_house_but_not_joined_to_it_is_never_dropped():
+    facts = {**FACTS, "main_building": "house", "grade_elevation": 812}
+    house = box(10, 25, 35, 65, 812, 842, id="house")
+    for left_behind in (box(20, 40, 25, 50, 0, 45, id="tower"), box(20, 40, 25, 50, 30, 34, id="bulkhead")):
+        m = measure(site(RECT, house, left_behind), facts)
+        assert m["building_height"]["value"] is None and "wholly under the ground" in m["building_height"]["reason"]
+    basement, sub = box(10, 25, 35, 65, 802, 812, id="basement"), box(15, 30, 30, 60, 792, 802, id="sub-basement")
+    m = measure(site(RECT, house, basement, sub), facts)
+    assert m["building_height"]["value"] == 30.0 and m["front_yard"]["value"] == 25.0

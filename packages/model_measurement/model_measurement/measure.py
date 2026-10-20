@@ -445,7 +445,36 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
             next((b for b in buildings if b["id"] == facts.get("main_building")), None))
     why_building = (stop("no_building") if not buildings else
                     "; ".join(p for b in buildings for p in b.get("problems") or []) or None)
+    # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
+    # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
+    # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
+    # cut at the ground blamed on overhangs.
+    zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
+    lo, hi = (min(zs), max(zs)) if zs else (None, None)
+    off = (lo, hi) if zs and grade is not None and (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None
+    # a solid wholly under the ground is a basement only if it is joined directly under the building: its top
+    # meets the bottom of a solid above it (the building, or a basement already joined to it) and it lies within
+    # that solid's plan. Any other (left at z = 0 when the rest was moved to a survey level, or a part left at its
+    # old level) can't be told from a mistake, and its height (below zero) would drop out of every reading unseen.
+    buried = None
+    if grade is not None and not off:
+        spans = {b["id"]: (min(p[2] for f in b["faces"] for p in f["points"]),
+                           max(p[2] for f in b["faces"] for p in f["points"])) for b in buildings if b.get("faces")}
+        plans = {b["id"]: _projection(b) for b in buildings if b["id"] in spans}
+        joined = {i for i, (lo_, hi_) in spans.items() if hi_ > grade + TOL or hi_ - lo_ <= TOL}   # above, or a slab
+        waiting = [i for i in spans if i not in joined]
+        while True:                     # from the top down: a sub-basement joins under a joined basement
+            found = [i for i in waiting
+                     if ops.unary_union([plans[j] for j in joined if abs(spans[j][0] - spans[i][1]) <= TOL])
+                     .buffer(TOL).contains(plans[i])]
+            if not found:
+                break
+            joined |= set(found)
+            waiting = [i for i in waiting if i not in found]
+        buried = spans[waiting[0]] if waiting else None
     why_grade = (stop("no_ground") if grade is None else
+                 stop("ground_off_building", ground=_r(grade), bottom=_r(off[0]), top=_r(off[1])) if off else
+                 stop("buried_solid", ground=_r(grade), bottom=_r(buried[0]), top=_r(buried[1])) if buried else
                  stop("ground_unknown") if facts.get("ground_is_flat") is None else
                  None if facts["ground_is_flat"] else stop("sloped_ground"))
     why_main = None if main else stop("no_main_building")

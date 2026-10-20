@@ -89,7 +89,13 @@ Every reason the code gives today comes from the table:
 - **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 4 lot lines could be
   either: too many readings to list)"; "no reading of the lot lines gives two side lot lines and a rear lot line
   (a triangular lot, for one): an open question for the architects".
-- **The ground:** "the ground level isn't given: enter it (the grade plane)"; "say whether the ground is flat";
+- **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
+  doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
+  of all the buildings, or under the lowest point of all of them, as when a survey elevation is typed for a model
+  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual); "a solid lies wholly under the
+  ground (<ground> ft; it runs from <bottom> to <top> ft) and isn't joined directly under the building: check the
+  ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
+  it lies within that solid's plan; a sub-basement under it too); "say whether the ground is flat";
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the number of
   stories"; "enter bedrooms / parking spaces".
