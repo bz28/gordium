@@ -7,11 +7,13 @@ you design. Every item is **✓ complies**, **✕ does not comply**, **? needs r
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 
 **Contents:** [Set up (once)](#what-you-need-once) · [Your first project](#your-first-project-step-by-step) ·
-[Test it yourself](#test-it-yourself) · [Troubleshooting](#troubleshooting) · [Getting updates](#getting-updates)
+[Test it yourself](#test-it-yourself) · [Troubleshooting](#troubleshooting) · [Getting updates](#getting-updates) ·
+[On Windows](#on-windows)
 
 ## What you need (once)
 
-About 20 minutes on a new Mac. Three words used below:
+About 20 minutes on a new Mac. (On a Windows PC, follow [On Windows](#on-windows) instead.) Three words used
+below:
 
 - **Terminal**: the Mac app where you type commands. To open it: press **Cmd+Space**, type `Terminal`, press
   **Enter**. To run a command, paste it in and press **Enter**.
@@ -25,16 +27,18 @@ About 20 minutes on a new Mac. Three words used below:
    github.com: your picture (top right) → **Settings** → **Developer settings** → **Personal access tokens** →
    **Tokens (classic)** → **Generate new token (classic)**. Tick **repo**, click **Generate token**, and copy the
    token (it starts with `ghp_`). Keep it for step 5.
-3. **Install Rhino 8** (tested on a Mac; Windows should work but hasn't been tried).
-4. **Install Python 3.12** (the language Gordium's checking is written in). From
-   [python.org/downloads/macos](https://www.python.org/downloads/macos/), download the newest **Python 3.12.x**
-   "macOS 64-bit universal2 installer", open it and click through. Check in Terminal:
+3. **Install Rhino 8.**
+4. **Install Python 3.12 or newer** (3.12, 3.13 and 3.14 all work; Python is the language Gordium's checking is
+   written in). Already have one of those? Skip to the check. Otherwise, from
+   [python.org/downloads/macos](https://www.python.org/downloads/macos/), download the newest
+   "macOS 64-bit universal2 installer", open it and click through. Check in a **new** Terminal window:
 
    ```
-   python3.12 --version
+   python3 --version
    ```
 
-   You should see `Python 3.12.` and a number. If it says `command not found`, run the installer again.
+   You should see `Python 3.12`, `3.13` or `3.14` and a number. If it shows a lower number (such as `3.9`, the
+   Mac's own old Python), type `python3.14` (or the version you installed) wherever step 6 says `python3`.
 5. **Download Gordium** into your Documents folder. This makes the folder `Documents/gordium`; every path below
    assumes it is there.
 
@@ -54,7 +58,7 @@ About 20 minutes on a new Mac. Three words used below:
    ```
    cd ~/Documents/gordium
    git checkout rhino-ui
-   python3.12 -m venv .venv
+   python3 -m venv .venv
    .venv/bin/pip install -e ".[dev]"
    ```
 
@@ -62,7 +66,7 @@ About 20 minutes on a new Mac. Three words used below:
    ends with `Successfully installed …` (a list that includes `gordium-0.1.0`). Gordium's checking runs in this
    `.venv` Python (a private copy of Python inside the gordium folder), in the background; Rhino only draws what
    it says. No AI runs while you design.
-   - `python3.12: command not found`: go back to step 4.
+   - `python3: command not found`, or a version below 3.12: go back to step 4.
    - The last line ends with a red `ERROR`: check you are online and run it again. If it still fails, send Ben
      the last 20 lines it printed.
 
@@ -112,6 +116,59 @@ When Ben says there is a new version:
    closing the window is not enough. You don't need to install in Rhino again.
 3. If Gordium then says a module is missing (`No module named …`), run step 6's last line again:
    `cd ~/Documents/gordium && .venv/bin/pip install -e ".[dev]"`.
+
+## On Windows
+
+**Windows hasn't been tested yet: please report anything that goes wrong.** The steps are the same as on a Mac,
+typed in **PowerShell** (the Windows app where you type commands: click **Start**, type `PowerShell`, press
+**Enter**) instead of Terminal.
+
+1. **Get access**, as on the Mac ([step 1](#what-you-need-once): a GitHub account; accept Ben's invitation). You
+   don't need a token on Windows: Git asks you to sign in to GitHub in your browser instead.
+2. **Install Rhino 8.**
+3. **Install Git** (the tool that downloads Gordium and its updates) from
+   [git-scm.com](https://git-scm.com/downloads/win): run the installer and keep every default.
+4. **Install Python 3.12 or newer** (3.12, 3.13 and 3.14 all work) from
+   [python.org/downloads/windows](https://www.python.org/downloads/windows/). On the installer's first screen,
+   **tick "Add python.exe to PATH"**, then click **Install Now**. Check in a new PowerShell window:
+
+   ```
+   py --version
+   ```
+
+   You should see `Python 3.12`, `3.13` or `3.14` and a number.
+5. **Download Gordium** into your Documents folder (this makes `Documents\gordium`):
+
+   ```
+   cd $HOME\Documents
+   git clone https://github.com/bz28/gordium.git
+   ```
+
+   If a window asks you to sign in to GitHub, choose **Sign in with your browser** and approve it. You should see
+   `Cloning into 'gordium'...` and then `done.`
+6. **Set up Gordium's Python.** Paste these four lines:
+
+   ```
+   cd $HOME\Documents\gordium
+   git checkout rhino-ui
+   py -m venv .venv
+   .\.venv\Scripts\pip install -e ".[dev]"
+   ```
+
+   The last one ends with `Successfully installed …` (a list that includes `gordium-0.1.0`). If it ends with a red
+   `ERROR`, send Ben the last 20 lines it printed.
+7. **Install in Rhino:** open Rhino 8, type `ScriptEditor` and press Enter. In the ScriptEditor, **File → Open…**,
+   go to Documents → gordium → apps → rhino_plugin, pick `install.py`, click **Open**, then **Run** (▶). Rhino's
+   command line shows the same five `Gordium: …` lines as [on the Mac](#install-in-rhino-once). As on the Mac,
+   open the ScriptEditor once in every Rhino session before using Gordium.
+8. **Getting updates:** in PowerShell,
+
+   ```
+   cd $HOME\Documents\gordium; git pull
+   ```
+
+   then **close Rhino completely (File → Exit) and open it again**: Rhino keeps the old Gordium loaded until it
+   is closed. If Gordium says a module is missing, run step 6's last line again from the gordium folder.
 
 ## Your first project, step by step
 
