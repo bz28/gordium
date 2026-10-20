@@ -1,6 +1,7 @@
 """One definition for things every package does: read a .jsonl file, list the jurisdictions, and describe
 approval truthfully. Each test fails if a second copy (or an outdated promise) creeps back in."""
 
+import ast
 import re
 
 import yaml
@@ -28,31 +29,57 @@ def test_jurisdictions_lists_each_place_folder(tmp_path):
     assert jurisdictions(tmp_path) == [tmp_path / "regulations/jurisdictions/ny/a"]
 
 
-def _uses(pattern: str) -> list[str]:
-    """Where a pattern occurs in the packages' code (tests excluded), as file:line."""
-    return [f"{p.relative_to(REPO)}:{n}" for p in CODE
-            for n, line in enumerate(p.read_text().splitlines(), 1) if re.search(pattern, line)]
+def _jsonl_readers(source: str) -> int:
+    """How many JSON-lines readers a module has: a json.loads(x) call where x is the loop variable of an
+    enclosing for-loop or comprehension (over lines), whatever the variable is called."""
+    tree = ast.parse(source)
+    looped = {t.id for node in ast.walk(tree) if isinstance(node, (ast.For, ast.comprehension))
+              for t in ast.walk(node.target) if isinstance(t, ast.Name)}
+    return sum(1 for node in ast.walk(tree) if isinstance(node, ast.Call)
+               and isinstance(node.func, ast.Attribute) and node.func.attr == "loads"
+               and isinstance(node.func.value, ast.Name) and node.func.value.id == "json"
+               and node.args and isinstance(node.args[0], ast.Name) and node.args[0].id in looped)
+
+
+LISTING = re.compile(r"""\.glob\(\s*['"]\*/\*['"]\s*\)""")      # <state>/<place>, either quote style
+
+
+def test_the_checks_recognise_any_spelling():
+    assert _jsonl_readers("rows = [json.loads(l) for l in f]") == 1
+    assert _jsonl_readers("for row in f:\n    r = json.loads(row)") == 1
+    assert _jsonl_readers("x = json.loads(text)") == 0
+    assert LISTING.search("root.glob('*/*')") and LISTING.search('root.glob("*/*")')
+    assert not LISTING.search('root.glob("*/*.pdf")')
 
 
 def test_every_jsonl_file_is_read_by_the_one_reader():
-    uses = _uses(r"json\.loads\(line\)")
-    assert len(uses) == 1 and "rulebook.py" in uses[0], f"read .jsonl files with rulebook.read_jsonl: {uses}"
+    found = {p.relative_to(REPO).as_posix(): n for p in CODE if (n := _jsonl_readers(p.read_text()))}
+    assert found == {"packages/rule_format/rule_format/rulebook.py": 1}, f"use rulebook.read_jsonl: {found}"
 
 
 def test_every_jurisdiction_listing_uses_the_one_helper():
-    uses = _uses(r'\.glob\("\*/\*')                  # <state>/<place>, however the folder is named
-    assert len(uses) == 1 and "rulebook.py" in uses[0], f"list jurisdictions with rulebook.jurisdictions(): {uses}"
+    found = [f"{p.relative_to(REPO)}:{n}" for p in CODE
+             for n, line in enumerate(p.read_text().splitlines(), 1) if LISTING.search(line)]
+    assert len(found) == 1 and "rulebook.py" in found[0], f"use rulebook.jurisdictions(): {found}"
+
+
+APPROVAL = re.compile(r"\barchitect\w*\b[^.\n]{0,80}?\bapprov|\bapprov\w*\b[^.\n]{0,80}?\barchitect", re.IGNORECASE)
+# Claims that are false while approval is deferred, however a document is worded around them.
+FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only approved rules|approved rulebook"
+                          r"|architects approve\b|architects? confirm each rule|compares the new draft with the approved"
+                          r"|architect'?s approval freezes|architect\s*──►", re.IGNORECASE)
 
 
 def test_docs_dont_promise_approval_while_it_is_deferred():
     """Approval is deferred (2026-10-19): no reviewer is listed and the checker uses draft rules. Until a
-    reviewer is added, no document may claim nothing is used before an architect approves it."""
+    reviewer is added, a document that talks about architects approving rules must say approval is deferred,
+    and none may claim the checker waits for, or reads only, approved rules."""
     if yaml.safe_load((REPO / "regulations/reviewers.yaml").read_text()):
         return
-    stale = re.compile(r"until an architect approves|only approved rules are used|architects approve every",
-                       re.IGNORECASE)
-    found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in stale.finditer(p.read_text())]
-    assert not found, found
+    silent = [str(p.relative_to(REPO)) for p in DOCS
+              if APPROVAL.search(p.read_text()) and not re.search(r"deferred", p.read_text(), re.IGNORECASE)]
+    false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text())]
+    assert not silent and not false, (silent, false)
 
 
 def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
