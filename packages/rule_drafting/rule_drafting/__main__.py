@@ -166,7 +166,7 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
     proposed = {}
     for book in books.values():
         for rule in book["rules"]:
-            for name in sorted(_formula_names(rule) & set(known)):
+            for name in sorted((_formula_names(rule) & set(known)) - i.ctx.measures):   # added since: not a to-do
                 entry_m = proposed.setdefault(name, {"unit": known[name]["unit"], "meaning": known[name]["meaning"],
                                                      "needed_by": []})
                 entry_m["needed_by"] = sorted(set(entry_m["needed_by"]) | {rule["id"]})
@@ -302,6 +302,7 @@ def cmd_draft(args) -> int:
             f.write(json.dumps(attempt, default=str) + "\n")
 
     system = i.system() if client else ""
+    saved = False
     try:
         for u in todo:
             if owned_rules_approved(i, log, u["id"]):
@@ -316,6 +317,7 @@ def cmd_draft(args) -> int:
                 result = drafter.draft_unit(client, u, context, system, i.law, i.ctx, i.columns, i.cells, i.notes,
                                             record, budget=budget)
             save_result(i, log, u["id"], result)
+            saved = True
             print(f"  {u['id']}: {sum(len(r) for r in result['rules'].values())} rules, "
                   f"{len(result.get('unresolved', []))} for a person"
                   + (f", none: {result['reason']}" if result.get("reason") else "")
@@ -325,9 +327,10 @@ def cmd_draft(args) -> int:
         return 1
     finally:
         print(f"  budget ${budget.cap:.2f}: spent ${budget.spent:.4f}, ${budget.remaining:.4f} left")
+        if saved:                               # however the run ended: what's saved is cited in the review list
+            refresh_review_list(i)
     log["complete"] = all(u["id"] in log["units"] for u in i.units())
     (i.records / "drafting_log.yaml").write_text(yaml.safe_dump(log, sort_keys=False, allow_unicode=True, width=110))
-    refresh_review_list(i)
     return 0
 
 

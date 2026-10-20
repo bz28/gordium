@@ -789,3 +789,57 @@ def test_proposed_measures_follow_the_saved_rules(inputs, tmp_path):
     assert set(proposed()) == {"adu_entrance"}
     cli.save_result(i, log, "u1", {"rules": {}, "proposed": {}})
     assert proposed() == {}
+
+
+def _cell_source(section, row, column, page=3):
+    return {"file": "zoning_charts_2026-04.pdf", "page": page, "cell": {"section": section, "row": row, "column": column}}
+
+
+def test_a_cell_cited_in_another_section_with_the_same_row_label_doesnt_cover_this_one(inputs):
+    """'Two-family dwelling' is a row of both Minimum Lot Size and Minimum Lot Width: citing the lot-size cell
+    doesn't cover the width cell, and a fill failure in the lot-size row doesn't hide it either."""
+    u = unit(inputs, "chart-p3-minimum_lot_width")
+    lot_size = "Minimum Lot Size [fn3]"
+    rule = {"id": "R-2a.x", "sources": [_cell_source(lot_size, "Two-family dwelling", "R-2A")]}
+    gaps = drafter.chart_gaps(u, {"rules": {"R-2a": [rule]}, "unresolved": []}, inputs.cells, inputs.columns)
+    assert any(g["rule"] == "R-2a.chart-p3-minimum_lot_width" and "'Two-family dwelling'" in g["why"] for g in gaps)
+    failed = {"rule": "R-2a.y", "why": "'Two-family dwelling': no", "cells": [[3, lot_size, "Two-family dwelling", "R-2A"]]}
+    gaps = drafter.chart_gaps(u, {"rules": {}, "unresolved": [failed]}, inputs.cells, inputs.columns)
+    assert any(g["rule"] == "R-2a.chart-p3-minimum_lot_width" and "'Two-family dwelling'" in g["why"] for g in gaps)
+
+
+def test_a_cell_a_template_couldnt_fill_is_listed_once(inputs):
+    """REAR_YARD fits the districts whose rear cell carries note 16; elsewhere it can't fill. Those cells are
+    listed by the fill failure, and not a second time as 'no drafted rule'."""
+    result, _ = run(inputs, FakeClient({"templates": [FRONT, REAR_YARD], "no_rule_reason": ""}))
+    failed = {g["rule"].split(".")[0] for g in result["unresolved"] if g.get("cells")}
+    assert failed
+    for d in failed:
+        rear = [g for g in result["unresolved"] if g["rule"].startswith(f"{d}.") and repr(REAR) in g["why"]]
+        assert len(rear) == 1, (d, rear)
+
+
+def test_a_run_stopped_by_the_budget_still_rewrites_the_review_list(inputs, tmp_path, monkeypatch):
+    refreshed = []
+    real = cli.Inputs
+    def scratch():
+        i = real()
+        i.records, i.drafted = tmp_path / "records", tmp_path / "drafted"
+        return i
+    def stop(*a, **k):
+        raise BudgetExceeded("cap reached")
+    monkeypatch.setattr(cli, "Inputs", scratch)
+    monkeypatch.setattr(cli, "LEDGER", tmp_path / "ledger.json")
+    monkeypatch.setattr(cli, "refresh_review_list", lambda i: refreshed.append(i.j))
+    monkeypatch.setattr(cli, "_client", lambda: FakeClient())
+    monkeypatch.setattr(drafter, "draft_unit", stop)
+    assert cli.main(["draft", "--only", cli.USES_UNIT, "chart-p3-yard_dimensions", "--yes"]) == 1
+    assert refreshed == [cli.PLACE]                                 # the use rules were saved before the stop
+
+
+def test_a_measure_added_since_isnt_a_to_do(inputs, tmp_path):
+    i, log = _scratch(inputs, tmp_path), {"units": {}}
+    m = {"unit": "ft", "meaning": "m"}
+    rule = {"id": "R-1b.a", "kind": "rule", "check": "front_yard >= 1", "sources": [], "examples": []}
+    cli.save_result(i, log, "u1", {"rules": {"R-1b": [rule]}, "proposed": {"front_yard": m}})
+    assert not (i.records / "proposed_measures.yaml").exists()

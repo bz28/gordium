@@ -449,8 +449,9 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                     why = "; ".join(problems[:3])
                 if why is None:
                     good.append((column, rule))
-                else:
-                    gaps.append({"rule": f"{district_name(column) if column else 'general'}.{t['id_suffix']}", "why": why})
+                else:                           # the cells it couldn't fill, so they aren't listed a second time
+                    gaps.append({"rule": f"{district_name(column) if column else 'general'}.{t['id_suffix']}", "why": why,
+                                 "cells": [[s["page"], s["section"], s["row"].strip(), column] for s in t["slots"]]})
             if good:
                 if unbacked := _backing(t, valid, good, cells, sources, drafted_by, ctx.allowed()):
                     gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in unbacked], []
@@ -487,18 +488,17 @@ def chart_gaps(unit: dict, result: dict, cells: dict, columns: list[str]) -> lis
     district; a cell a template couldn't fill is already listed (by fill_template's reason) and isn't repeated."""
     if "section" not in unit:
         return []
-    cited = {(s["page"], s["cell"]["row"], s["cell"]["column"]) for rules in result["rules"].values() for r in rules
-             for s in r["sources"] if s.get("file") == CHART_FILE and "cell" in s}
-    listed = [g for g in result["unresolved"]]
+    cited = {(s["page"], s["cell"]["section"], s["cell"]["row"], s["cell"]["column"]) for rules in result["rules"].values()
+             for r in rules for s in r["sources"] if s.get("file") == CHART_FILE and "cell" in s}
+    listed = {tuple(c) for g in result["unresolved"] for c in g.get("cells", [])}
     out = []
-    for (page, section, row, column), cell in cells.items():
+    for key, cell in cells.items():
+        page, section, row, column = key
         if (page, section) != (unit["page"], unit["section"]) or column not in columns:
             continue
-        if FOOTNOTE.sub("", cell["value"]).strip() in NOT_APPLICABLE or (page, row, column) in cited:
+        if FOOTNOTE.sub("", cell["value"]).strip() in NOT_APPLICABLE or key in cited or key in listed:
             continue
         district = district_name(column)
-        if any(g["rule"].startswith(f"{district}.") and repr(row) in g["why"] for g in listed):
-            continue
         out.append({"rule": f"{district}.{unit['id']}",
                     "why": f"chart page {page}, {section!r}, row {row!r}: the {column} cell {cell['value']!r} has no "
                            "drafted rule (a person checks the requirement it sets)"})
