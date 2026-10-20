@@ -53,7 +53,11 @@ Planned but not created until their code is written: `packages/ai_designer`, `pa
 - When Ben shares files, decide whether each is relevant and file it in the right place (unchanged, original name). Say where each went.
 - Explain things in plain, simple language. The audience includes architects and shareholders.
 - Ground claims in the actual files and documents; cite where information came from.
-- When unsure about a zoning interpretation, flag it for the architects instead of guessing.
+- **Resolve before asking.** When the law seems unclear, never guess, and never go straight to the architects. In order:
+  1. **The whole law:** read every section the term index lists for the term and its synonyms (setback/yard, overhang/projection/eaves…), not just its definition.
+  2. **Research, ranked:** (1) Ithaca's own code text; (2) Ithaca's official interpretations and Board of Zoning Appeals decisions; (3) NYS Uniform Code / IBC commentary on the same wording; (4) other cities' codes. Cite every source (quote + section, or URL + date).
+  3. **Classify:** *answered by the law* → record the answer with its citation; *strong common practice* → record Gordium's stated reading with its sources (always shown to the architect as a reading to confirm); *genuinely unclear* → an open question for the architects or the City zoning office, recording what was searched and why it's still open.
+  4. An answer from the City or the architects (who, when, which project) outranks Gordium's reading and replaces it.
 
 ## Git workflow
 
