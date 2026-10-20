@@ -152,6 +152,7 @@ def test_an_overhang_gives_two_readings_of_area_and_yards():
     assert m["front_yard"]["value"] is None
     assert sorted(r["value"] for r in m["front_yard"]["readings"]) == [22.0, 25.0]
     assert m["rear_yard"]["value"] == 35.0                      # nothing sticks out at the back
+    assert m["building_height"]["value"] == 30.0                # the underside of the upper floor isn't a roof
 
 
 def test_a_pitched_roof_height_is_an_open_question():
@@ -424,3 +425,42 @@ def test_a_pitched_house_with_a_chimney_is_read_as_pitched_without_it():
     m = measure(site(RECT, house), FACTS)["building_height"]
     assert m["value"] is None and {25.0, 30.0, 34.0} <= {r["value"] for r in m["readings"]}
     assert "average height of a pitched roof" in m["reason"] and "rises above the main roof" in m["reason"]
+
+
+def test_a_soffit_is_never_a_roof():
+    # a 29 ft box with a 30 ft roof slab overhanging 2 ft all round: the height is simply 30
+    walls = box(10, 25, 35, 65, 0, 29)
+    slab = box(8, 23, 37, 67, 29, 30, id="slab")
+    house = {"id": "house", "problems": [], "faces": [f for f in walls["faces"] if not all(p[2] == 29 for p in f["points"])]
+             + [f for f in slab["faces"] if not all(p[2] == 29 for p in f["points"])]
+             + [{"points": [[8, 23, 29], [37, 23, 29], [37, 67, 29], [8, 67, 29]],
+                 "holes": [[[10, 25, 29], [35, 25, 29], [35, 65, 29], [10, 65, 29]]]}]}
+    m = measure(site(RECT, house), FACTS)["building_height"]
+    assert m["value"] == 30.0 and m["reason"] is None and "flat roof" in m["how"]
+
+
+def test_a_higher_pitched_part_is_read_as_pitched_too():
+    eave, ridge = 20, 30
+    house = box(10, 25, 35, 65, 0, eave)
+    house["faces"] = [f for f in house["faces"] if not all(p[2] == eave for p in f["points"])]
+    house["faces"] += [{"points": [[10, 25, eave], [35, 25, eave], [35, 45, ridge], [10, 45, ridge]]},
+                       {"points": [[10, 45, ridge], [35, 45, ridge], [35, 65, eave], [10, 65, eave]]}]
+    tower = box(12, 40, 18, 50, ridge, 30)                          # a small gable part, eave 30 ridge 40
+    house["faces"] += [{"points": [[12, 40, 30], [18, 40, 30], [18, 45, 40], [12, 45, 40]]},
+                       {"points": [[12, 45, 40], [18, 45, 40], [18, 50, 30], [12, 50, 30]]}]
+    m = measure(site(RECT, house), FACTS)["building_height"]
+    assert {25.0, 30.0, 35.0, 40.0} <= {r["value"] for r in m["readings"]}
+
+
+def test_a_hip_roof_over_a_soffit_drawn_as_one_face_is_read_as_pitched():
+    # walls 30 x 30 to 20 ft; a hip roof from a 36 x 36 eave at 20 ft up to a point at 30 ft; the soffit under
+    # the overhang drawn as one level 36 x 36 face at 20 ft (larger than any roof slope, but covered by them)
+    walls = box(10, 25, 40, 55, 0, 20)
+    faces = [f for f in walls["faces"] if not all(p[2] == 20 for p in f["points"])]
+    eave = [(7, 22), (43, 22), (43, 58), (7, 58)]
+    apex = [25, 40, 30]
+    faces += [{"points": [[*eave[i], 20], [*eave[(i + 1) % 4], 20], apex]} for i in range(4)]
+    faces += [{"points": [[x, y, 20] for x, y in eave]}]
+    m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)["building_height"]
+    assert sorted({r["value"] for r in m["readings"]}) == [25.0, 30.0]
+    assert "pitched roof" in m["reason"] and "rises above" not in m["reason"]

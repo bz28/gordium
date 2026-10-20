@@ -12,7 +12,7 @@ measurements:
     from: 'measured from spreadsheet_design_model.3dm: the area inside the lot lines (a survey)'
   lot_width:
     value: 73.0
-    from: 'measured from spreadsheet_design_model.3dm: the length of the lot line(s) on the street (frontage)'
+    from: 'measured from spreadsheet_design_model.3dm: the length of the lot line(s) on the street (frontage) (along the street line)'
   lot_depth:
     value: 90.0
     from: 'measured from spreadsheet_design_model.3dm: the average length of the two side lot lines'
@@ -21,7 +21,7 @@ measurements:
     from: 'measured from spreadsheet_design_model.3dm: the ground area of every building on the lot, porches and decks included [readings: covered from above = 1,855; at the main grade level = 1,855]'
   building_height:
     value: 35.0
-    from: 'measured from spreadsheet_design_model.3dm: from the ground level (grade plane) to the top of the roof'
+    from: 'measured from spreadsheet_design_model.3dm: from the ground level (grade plane) to the top of the roof (a flat roof, to its highest level)'
   stories:
     value: 3
     from: stated by the architect (not measured from the model) (lot facts)

@@ -55,6 +55,7 @@ def _decide(name: str, readings: list[tuple[str, float, dict]], how: str, object
     values = [v for _, v, _ in readings]
     shown = [{"reading": r, "value": _r(v)} for r, v, _ in readings]
     if values and max(values) - min(values) <= SAME:
+        how = how if len(readings) > 1 or not readings[0][0] else f"{how} ({readings[0][0]})"
         return _record(name, UNITS[name], _r(values[0]), how, objects, readings[0][2].get("points"),
                        shown if len(readings) > 1 else [])
     return _record(name, UNITS[name], None, how, objects, None, shown,
@@ -213,32 +214,63 @@ ACCESSORY = ("whether another solid is part of the building or an accessory buil
              "for the architects")
 
 
+def _plane_z(face: dict, x: float, y: float):
+    """The height of a flat face at (x, y), or None for a wall."""
+    pts = face["points"]
+    nx = ny = nz = 0.0
+    for p, q in zip(pts, pts[1:] + pts[:1]):
+        nx += (p[1] - q[1]) * (p[2] + q[2])
+        ny += (p[2] - q[2]) * (p[0] + q[0])
+        nz += (p[0] - q[0]) * (p[1] + q[1])
+    if abs(nz) < 1e-12:
+        return None
+    x0, y0, z0 = pts[0]
+    return z0 - (nx * (x - x0) + ny * (y - y0)) / nz
+
+
+def _open_to_the_sky(faces: list[dict]) -> list[dict]:
+    """The faces of a solid that nothing of it covers: no other face lies above a point inside them. Undersides
+    (soffits, the floor of an upper storey that sticks out) and floors are covered; roofs are not."""
+    flat = [(f, Polygon([p[:2] for p in f["points"]]).buffer(0)) for f in faces if _normal_z(f["points"]) > 0.001]
+    open_ = []
+    for f, shape in flat:
+        if shape.area <= 1e-9:
+            continue
+        inside = shape.representative_point()
+        z = _plane_z(f, inside.x, inside.y)
+        if not any(g is not f and other.buffer(TOL).contains(inside) and (_plane_z(g, inside.x, inside.y) or z) > z + TOL
+                   for g, other in flat):
+            open_.append(f)
+    return open_
+
+
 def _height(building: dict, grade: float) -> dict:
     """HEIGHT OF BUILDING: from the grade plane "to the highest level of a flat or mansard roof or to the average
     height of a pitched ... roof", using "that section of the roof that has the highest elevation". The roof is
-    every face that isn't a wall or the floor; its highest section is the faces that reach the top. All of them
-    level (or within a drainage slope of level, under 1/2 inch per foot): a flat roof, to its highest point. All
-    of them sloped: a pitched roof, whose average height is an open question (midway between that section's
-    eave and ridge, or the ridge). Both at the top: a mansard (to its highest level) or a pitched or hip roof with
-    a deck or ridge strip (to its average height), also an open question; every reading is listed."""
+    the faces open to the sky. If its largest face (the main roof) doesn't reach the top, something smaller rises
+    above it (a parapet, chimney, bulkhead or a higher part): the roof is read both without it and with it, each
+    the same way, and whether it counts is an open question."""
     zs = [p[2] for f in building["faces"] for p in f["points"]]
-    bottom, top = min(zs), max(zs)
-    roof = [f for f in building["faces"]
-            if _normal_z(f["points"]) > 0.001 and not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
+    top = max(zs)
+    bottom = min(zs)
+    roof = [f for f in _open_to_the_sky(building["faces"]) if not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
     if not roof:
-        return _missing("building_height", "the roof's shape can't be read (no faces above the floor that aren't walls)")
+        return _missing("building_height", "the roof's shape can't be read (no faces open to the sky)")
     how = "from the ground level (grade plane) to the top of the roof"
-    main_roof = max(roof, key=lambda f: Polygon([p[:2] for p in f["points"]]).buffer(0).area)
+    main_roof = max(roof, key=lambda f: (Polygon([p[:2] for p in f["points"]],
+                                                 [[p[:2] for p in h] for h in f.get("holes") or []]).buffer(0).area,
+                                         max(p[2] for p in f["points"])))
     roof_top = max(p[2] for p in main_roof["points"])
     if roof_top >= top - TOL:
         readings, question = _roof_readings(roof, top, grade)
         return _decide("building_height", readings, how, [building["id"]], question)
-    # something smaller rises above the main roof: the roof read without it (the same way), and to its top
     below = [f for f in roof if all(p[2] <= roof_top + TOL for p in f["points"])]
-    readings, question = _roof_readings(below, roof_top, grade)
-    readings = [(_both("leaving out what rises above the main roof", w), v, x) for w, v, x in readings]
-    readings.append(("to the top of what rises above the main roof", top - grade, {}))
-    return _decide("building_height", readings, how, [building["id"]], _both(ABOVE_ROOF, question))
+    low, low_question = _roof_readings(below, roof_top, grade)
+    high, high_question = _roof_readings(roof, top, grade)
+    readings = [(_both("leaving out what rises above the main roof", w), v, x) for w, v, x in low]
+    readings += [(_both("including what rises above the main roof", w), v, x) for w, v, x in high]
+    return _decide("building_height", readings, how, [building["id"]],
+                   "; ".join(dict.fromkeys(q for q in (ABOVE_ROOF, low_question, high_question) if q)))
 
 
 def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, str]:
@@ -249,7 +281,7 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
     highest = [f for f in roof if any(abs(p[2] - top) <= TOL for p in f["points"])]
     sloped = [f for f in highest if _normal_z(f["points"]) < FLAT]
     if not sloped:
-        return [("flat roof, to its highest level", top - grade, {})], ""
+        return [("a flat roof, to its highest level", top - grade, {})], ""
     eave = min(p[2] for f in sloped for p in f["points"])
     readings = [("pitched: midway between eave and ridge", (eave + top) / 2 - grade, {}),
                 ("pitched: to the ridge", top - grade, {})]
