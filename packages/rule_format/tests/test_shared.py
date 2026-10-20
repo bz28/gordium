@@ -1,6 +1,7 @@
 """One definition for things every package does: read a .jsonl file, list the jurisdictions, and describe
 approval truthfully. Each test fails if a second copy (or an outdated promise) creeps back in."""
 
+import ast
 import re
 
 import yaml
@@ -10,13 +11,9 @@ from rule_format.rulebook import REPO, jurisdictions, read_jsonl
 CODE = [p for p in (REPO / "packages").rglob("*.py")   # dated eval records (evals/) are frozen as they were run
         if not {"tests", "evals"} & set(p.relative_to(REPO).parts)]
 # Paths are judged inside the repository: a checkout can itself sit in a folder named .claude.
-# AI instructions (the labeling guide is the labeling model's prompt) change only with a re-run eval, so
-# they're judged by that eval, not by this wording check.
-AI_INSTRUCTIONS = {"regulations/document_extraction_guide/labeling_guide.md"}
 DOCS = [p for p in REPO.rglob("*.md")
         if not {".git", ".claude", ".venv", "node_modules"} & set(p.relative_to(REPO).parts)
-        and p.name != "CLAUDE.md"   # CLAUDE.md states the project's principles; it is changed by its own PR
-        and p.relative_to(REPO).as_posix() not in AI_INSTRUCTIONS]
+        and p.name != "CLAUDE.md"]   # CLAUDE.md states the project's principles; it is changed by its own PR
 assert DOCS and CODE
 
 
@@ -33,31 +30,57 @@ def test_jurisdictions_lists_each_place_folder(tmp_path):
     assert jurisdictions(tmp_path) == [tmp_path / "regulations/jurisdictions/ny/a"]
 
 
-def _uses(pattern: str) -> list[str]:
-    """Where a pattern occurs in the packages' code (tests excluded), as file:line."""
-    return [f"{p.relative_to(REPO)}:{n}" for p in CODE
-            for n, line in enumerate(p.read_text().splitlines(), 1) if re.search(pattern, line)]
+def _jsonl_readers(source: str) -> int:
+    """How many JSON-lines readers a module has: a json.loads(x) call where x is the loop variable of an
+    enclosing for-loop or comprehension (over lines), whatever the variable is called."""
+    tree = ast.parse(source)
+    looped = {t.id for node in ast.walk(tree) if isinstance(node, (ast.For, ast.comprehension))
+              for t in ast.walk(node.target) if isinstance(t, ast.Name)}
+    return sum(1 for node in ast.walk(tree) if isinstance(node, ast.Call)
+               and isinstance(node.func, ast.Attribute) and node.func.attr == "loads"
+               and isinstance(node.func.value, ast.Name) and node.func.value.id == "json"
+               and node.args and isinstance(node.args[0], ast.Name) and node.args[0].id in looped)
+
+
+LISTING = re.compile(r"""\.glob\(\s*['"]\*/\*['"]\s*\)""")      # <state>/<place>, either quote style
+
+
+def test_the_checks_recognise_any_spelling():
+    assert _jsonl_readers("rows = [json.loads(l) for l in f]") == 1
+    assert _jsonl_readers("for row in f:\n    r = json.loads(row)") == 1
+    assert _jsonl_readers("x = json.loads(text)") == 0
+    assert LISTING.search("root.glob('*/*')") and LISTING.search('root.glob("*/*")')
+    assert not LISTING.search('root.glob("*/*.pdf")')
 
 
 def test_every_jsonl_file_is_read_by_the_one_reader():
-    uses = _uses(r"json\.loads\(line\)")
-    assert len(uses) == 1 and "rulebook.py" in uses[0], f"read .jsonl files with rulebook.read_jsonl: {uses}"
+    found = {p.relative_to(REPO).as_posix(): n for p in CODE if (n := _jsonl_readers(p.read_text()))}
+    assert found == {"packages/rule_format/rule_format/rulebook.py": 1}, f"use rulebook.read_jsonl: {found}"
 
 
 def test_every_jurisdiction_listing_uses_the_one_helper():
-    uses = _uses(r'\.glob\("\*/\*')                  # <state>/<place>, however the folder is named
-    assert len(uses) == 1 and "rulebook.py" in uses[0], f"list jurisdictions with rulebook.jurisdictions(): {uses}"
+    found = [f"{p.relative_to(REPO)}:{n}" for p in CODE
+             for n, line in enumerate(p.read_text().splitlines(), 1) if LISTING.search(line)]
+    assert len(found) == 1 and "rulebook.py" in found[0], f"use rulebook.jurisdictions(): {found}"
+
+
+APPROVAL = re.compile(r"\barchitect\w*\b[^.\n]{0,80}?\bapprov|\bapprov\w*\b[^.\n]{0,80}?\barchitect", re.IGNORECASE)
+# Claims that are false while approval is deferred, however a document is worded around them.
+FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only approved rules|approved rulebook"
+                          r"|\|\s*architects approve\s*\||\(architects approve\)|architects? confirm each rule|compares the new draft with the approved"
+                          r"|architect'?s approval freezes|architect\s*──►", re.IGNORECASE)
 
 
 def test_docs_dont_promise_approval_while_it_is_deferred():
     """Approval is deferred (2026-10-19): no reviewer is listed and the checker uses draft rules. Until a
-    reviewer is added, no document may claim nothing is used before an architect approves it."""
+    reviewer is added, a document that talks about architects approving rules must say approval is deferred,
+    and none may claim the checker waits for, or reads only, approved rules."""
     if yaml.safe_load((REPO / "regulations/reviewers.yaml").read_text()):
         return
-    stale = re.compile(r"until an architect approves|only approved rules are used|architects approve every",
-                       re.IGNORECASE)
-    found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in stale.finditer(p.read_text())]
-    assert not found, found
+    silent = [str(p.relative_to(REPO)) for p in DOCS
+              if APPROVAL.search(p.read_text()) and not re.search(r"deferred", p.read_text(), re.IGNORECASE)]
+    false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text())]
+    assert not silent and not false, (silent, false)
 
 
 def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
@@ -74,12 +97,25 @@ def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
     assert "any reading" not in item and all(f"{k} ft" in item for k in readings)
 
 
-def test_the_106_ithaca_rd_lot_area_is_quoted_as_measured():
-    """The architects' model lot measures 6,674.5 sf (shoelace area of its Site polyline) and their
-    spreadsheet types 6,674. A third figure, 6,674.7, once spread through the docs and rules; keep it out."""
+def test_no_doc_claims_a_rear_yard_floor_across_readings():
+    """On the 106 Ithaca Rd lot one reading of the side lot lines gives the 20 ft minimum (item 4.2), so no
+    document may claim the rear setback needs more 'under any reading' or quote 22.6 ft as a floor."""
+    claims = re.compile(r"(rear|setback)[^.\n]*(any reading|at least 22\.6)|22\.6 ft under", re.IGNORECASE)
+    found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in claims.finditer(p.read_text())]
+    assert not found, found
+
+
+def test_the_106_ithaca_rd_areas_are_quoted_as_measured():
+    """The areas of the architects' model, as measured (shoelace area of its Site polylines, in feet): the
+    lot is 6,674.5 sf (their spreadsheet types 6,674) and the buildable-area outline 2,169.2 sf. Figures
+    that match neither (6,674.7 and 2,169.5 once spread through the docs) are kept out."""
+    def area(points):
+        return abs(sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(points, points[1:] + points[:1]))) / 2
     lot = [(395.432, 360.94), (439.51, 419.13), (367.546, 473.642), (326.184, 420.017), (315.713, 420.262)]
-    area = abs(sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(lot, lot[1:] + lot[:1]))) / 2
-    assert round(area, 1) == 6674.5
+    buildable = [(344.641, 411.2), (377.402, 386.822), (409.558, 429.273), (377.381, 453.647)]
+    assert (round(area(lot), 1), round(area(buildable), 1)) == (6674.5, 2169.2)
+    site = (REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/README.md").read_text()
+    assert "6,674.5 sf" in site and "2,169.2 sf" in site
     files = [p for p in REPO.rglob("*") if p.suffix in (".md", ".yaml") and p.is_file()
              and not {".git", ".claude", ".venv"} & set(p.relative_to(REPO).parts)]
-    assert not [p.relative_to(REPO) for p in files if re.search(r"6,?674\.7", p.read_text())]
+    assert not [p.relative_to(REPO) for p in files if re.search(r"6,?674\.7|2,?169\.5", p.read_text())]

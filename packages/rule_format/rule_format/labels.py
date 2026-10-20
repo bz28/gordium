@@ -12,9 +12,9 @@ The law is cut into pieces by code (document_extraction/sections.py, saved as
       piece_sha256: ...             # fingerprint of the piece as labeled (its lines + the PDF version)
       run: 3_section_labels/runs/2026-10-20_claude-haiku-5-5.jsonl   # the recorded AI call, if AI drafted it
       drafted_by: section_labeling/claude-haiku-5-5
-      status: draft                 # architects approve, exactly as they approve rules
+      status: draft                 # approval (deferred for now) works exactly as for rules
 
-A label is a draft until an architect approves it; approval works exactly as for rules and definitions.
+A label stays a draft; approval (deferred for now, decided 2026-10-19) works exactly as for rules and definitions.
 A reviewer who doubts a label adds `open_questions` (which block approval); the architect records the
 `answers` (question, answer, answered_by, answered_on) and approves. Both are the same fields rules use.
 A reviewer who corrects a label records it in `revised`: [{from: <old label>, by, date, why}], so the
