@@ -174,7 +174,28 @@ def test_a_yard_already_in_review_is_raised_too():
     assert "against 26'-0\"" in f["reason"]
 
 
-def test_ground_covering_the_lot_is_never_a_left_out_building():
-    from design_checker.rhino_logic import could_be_building
-    assert not could_be_building("Mesh", solid=False, faces=5000, covers_lot=True)     # the topography
-    assert could_be_building("Mesh", solid=False, faces=200, covers_lot=False)         # a shed
+def test_nothing_is_left_out_of_the_check_on_a_guess_that_it_is_the_ground():
+    """One mesh holding a garage and a shed spreads over most of a 50 × 100 lot (box 50 × 60): it still counts,
+    and doesn't even look like the ground. Only an open surface spanning the whole lot looks like it, and even that
+    stays left out (needs review) until the architect says "This is the ground"."""
+    from design_checker.rhino_logic import could_be_building, looks_like_ground
+    lot = (0, 0, 50, 100)
+    assert could_be_building("Mesh", solid=False, faces=400)                            # the garage + shed mesh
+    assert not looks_like_ground("Mesh", False, (0, 40, 50, 100), lot)
+    assert could_be_building("Brep", solid=True, faces=6)
+    assert not looks_like_ground("Brep", True, (-5, -5, 55, 105), lot)                  # a closed solid: never
+    assert could_be_building("Mesh", solid=False, faces=5000)                           # the topography: counted…
+    assert looks_like_ground("Mesh", False, (-10, -10, 60, 110), lot)                   # …and offered as the ground
+
+
+def test_a_left_out_object_spreading_over_the_lot_still_makes_coverage_need_review():
+    """Round 4: the 50 × 100 lot, a 1,000 sf house (20%), and one mesh holding a 400 sf garage and a 100 sf shed
+    (30% together: does not comply). The mesh is left out; coverage must not read complies."""
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "06_detached_garage_not_on_the_building_layer.yaml"))
+    sc["lot"]["points"] = [[0, 0], [50, 0], [50, 100], [0, 100]]
+    sc["buildings"][0]["outline"] = [[15, 30], [35, 30], [35, 80], [15, 80]]
+    sc["others"] = [{"id": "garage_and_shed", "outline": [[0, 80], [20, 80], [20, 100], [0, 100]], "base": 0, "top": 10}]
+    s, f, extras = scenarios.site(sc)
+    v = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}
+    assert v["Lot coverage"]["status"] == present.REVIEW
+    assert v["Objects on the lot not included"]["status"] == present.REVIEW

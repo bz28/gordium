@@ -297,6 +297,8 @@ def show_detail(parts):
         d.AddRow(row(button("Enter bedrooms and parking spaces…", a["enter"])))
     if i["id"] == "scope.not_included":
         d.AddRow(row(button("Add to check…", lambda: a["add"](i["objects"]))))
+        if i.get("ground_like"):              # only the architect's word leaves it out (never a guess)
+            d.AddRow(row(button("This is the ground", lambda: a["ground"](i["ground_like"]))))
     for t in det.get("definitions") or []:        # E5: the whole definitions an examiner measures height by
         d.AddRow(_wide(t["term"], bold=True, size=12))
         d.AddRow(_wide("“" + t["text"] + "”", size=11))

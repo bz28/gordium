@@ -189,15 +189,12 @@ def clear_spot(taken, x, y, w, h):
     return top
 
 
-def could_be_building(kind, solid=False, faces=0, covers_lot=False):
+def could_be_building(kind, solid=False, faces=0):
     """Whether a Rhino object off the Building layer could be a building the check is leaving out (so lot coverage
     needs review): a solid, an extrusion, a SubD, a block, any polysurface of more than one face (a garage missing
     a face is still a garage) and any mesh of more than a few faces, open or closed (an imported shed is often an
-    unwelded mesh). Not a single flat surface, a curve or a point, and not the ground: anything covering most of
-    the lot in plan (`covers_lot`: a topography mesh or site solid; no building covers the lot under a coverage
-    limit). `kind` is the geometry's type name."""
-    if covers_lot:
-        return False
+    unwelded mesh). Not a single flat surface, a curve or a point. `kind` is the geometry's type name. Size is never
+    a reason to leave one out: one mesh holding a garage and a shed spreads over most of the lot as well."""
     if kind in ("Extrusion", "SubD", "InstanceReferenceGeometry"):
         return True
     if kind == "Brep":
@@ -205,6 +202,17 @@ def could_be_building(kind, solid=False, faces=0, covers_lot=False):
     if kind == "Mesh":
         return solid or faces > 4
     return False
+
+
+def looks_like_ground(kind, closed, extents, lot_extents, reach=1.0):
+    """Whether a left-out object looks like the ground: an open mesh or surface (never a closed solid, a block, a
+    SubD or an extrusion) whose plan extents (x0, y0, x1, y1) span the whole lot's, give or take `reach`. Only a
+    label for the panel's "This is the ground"; it is never left out of the check on this guess."""
+    if closed or kind not in ("Mesh", "Brep"):
+        return False
+    x0, y0, x1, y1 = extents
+    a0, b0, a1, b1 = lot_extents
+    return x0 <= a0 + reach and y0 <= b0 + reach and x1 >= a1 - reach and y1 >= b1 - reach
 
 
 # ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------

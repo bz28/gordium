@@ -503,7 +503,7 @@ def _actions():
     """What the panel's buttons do (gordium_ui.make_panel)."""
     return {"zoom": zoom_to, "report": open_report, "envelope": set_envelope, "edit_site": edit_facts,
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check, "legend": ui.legend,
-            "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False)}
+            "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground}
 
 
 def panel():
@@ -664,34 +664,61 @@ def add_to_check(ids):
 
 def _not_included(doc, lot):
     """Anything on the lot that could be a building and isn't measured (rhino_logic.could_be_building: solids,
-    polysurfaces, meshes, SubD, blocks; not the ground, the picked terrain, the Building layer or Gordium's own
-    layers): each one makes the check need review (C8)."""
+    polysurfaces, meshes, SubD, blocks; not the picked terrain, what the architect marked as the ground, the
+    Building layer or Gordium's own layers): each one makes the check need review (C8). Nothing is ever left out
+    on a guess: a topography mesh stays here (marked as looking like the ground, see _ground_like) until the
+    architect says "This is the ground"."""
     if lot is None:
         return []
     box = lot.Geometry.GetBoundingBox(True)
-    lot_plan = (box.Max.X - box.Min.X) * (box.Max.Y - box.Min.Y)
     out = []
     every = Rhino.DocObjects.ObjectEnumeratorSettings()          # hidden and locked too, as for the Building layer:
     every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # a hidden shed still counts
-    terrain = str(_ui_state(doc).get("terrain_id") or "")
+    state = _ui_state(doc)
+    known_ground = {str(state.get("terrain_id") or "")} | set(state.get("ground_ids") or [])
     for o in doc.Objects.GetObjectList(every):
         layer = doc.Layers[o.Attributes.LayerIndex].FullPath
         g = o.Geometry
-        # anything that could be a building: a solid, a closed mesh, a SubD, a polysurface (open ones too: a garage
-        # missing a face is still a garage), a block. Not the lot, the terrain, Gordium's own drawing, the Building
-        # layer (measured), curves, points and single flat surfaces.
-        ob = g.GetBoundingBox(True)
         could_be = logic.could_be_building(
             type(g).__name__, (isinstance(g, rg.Brep) and g.IsSolid) or (isinstance(g, rg.Mesh) and g.IsClosed),
-            g.Faces.Count if isinstance(g, (rg.Brep, rg.Mesh)) else 0,
-            covers_lot=(ob.Max.X - ob.Min.X) * (ob.Max.Y - ob.Min.Y) >= 0.6 * lot_plan)   # the ground, not a shed
-        if not could_be or str(o.Id) == terrain or logic.on_layer(layer, LAYERS["building"]) \
+            g.Faces.Count if isinstance(g, (rg.Brep, rg.Mesh)) else 0)
+        if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or logic.on_layer(layer, "Gordium"):
             continue
         c = g.GetBoundingBox(True).Center
         if box.Min.X <= c.X <= box.Max.X and box.Min.Y <= c.Y <= box.Max.Y:
             out.append(str(o.Id))
     return out
+
+
+def _ground_like(doc, ids, lot):
+    """Of the left-out objects, the open meshes and surfaces spreading over most of the lot: they look like the
+    ground, so the row offers "This is the ground". Only a label: they stay left out until the architect says."""
+    if lot is None:
+        return []
+    box = lot.Geometry.GetBoundingBox(True)
+    out = []
+    for i in ids:
+        o = _find(doc, i)
+        g = o.Geometry if o is not None else None
+        if g is None:
+            continue
+        ob = g.GetBoundingBox(True)
+        closed = (isinstance(g, rg.Brep) and g.IsSolid) or (isinstance(g, rg.Mesh) and g.IsClosed)
+        if logic.looks_like_ground(type(g).__name__, closed, (ob.Min.X, ob.Min.Y, ob.Max.X, ob.Max.Y),
+                                   (box.Min.X, box.Min.Y, box.Max.X, box.Max.Y)):
+            out.append(i)
+    return out
+
+
+def this_is_the_ground(ids):
+    """The panel's "This is the ground": the architect's own word that these objects are the ground, saved in the
+    file; then the check runs again without them."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    state = _ui_state(doc)
+    state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
+    _save_ui_state(doc, state)
+    run_check(doc, report=False)
 
 
 def _extras(doc, facts):
@@ -702,7 +729,8 @@ def _extras(doc, facts):
     layers = sorted({doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings})
     left_out = _not_included(doc, _find(doc, facts.get("lot_id") or ""))
     return {"scope": {"groups": len(groups), "solids": len(buildings), "layer": ", ".join(layers)},
-            "not_included": left_out, "touching": _touching(doc, left_out, buildings)}
+            "not_included": left_out, "touching": _touching(doc, left_out, buildings),
+            "ground_like": _ground_like(doc, left_out, _find(doc, facts.get("lot_id") or ""))}
 
 
 def _touching(doc, ids, buildings):

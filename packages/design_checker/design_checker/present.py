@@ -753,8 +753,11 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "group": "building", "status": REVIEW, "mark": MARK[REVIEW], "proposed": str(n), "required": "0",
                       "margin": "", "sign": "", "zoom": "top", "measure": None, "objects": list(left_out),
                       "points": None, "hint": "Add to check…",
+                      "ground_like": [o for o in extras.get("ground_like") or [] if o in left_out],
                       "reason": f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t "
-                                "measured (not on the Building layer) · Add to check…",
+                                "measured (not on the Building layer) · Add to check…" + (
+                                    f" (" + str(len(extras.get("ground_like") or [])) + " looks like the ground: if it is, "
+                                    "This is the ground)" if extras.get("ground_like") else ""),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
                                  "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     for row in interior:
