@@ -239,3 +239,15 @@ def test_a_project_file_of_the_wrong_shape_gets_a_plain_message(tmp_path, text, 
     path.write_text(text)
     with pytest.raises(ValueError, match=match):
         load_project(path)
+
+
+
+def test_a_folder_that_is_not_a_jurisdiction_gets_a_plain_message(tmp_path):
+    from project_report.report import load_project
+    j = tmp_path / "j"
+    (j / "5_zoning_rules").mkdir(parents=True)
+    (j / "5_zoning_rules/R-1b.yaml").write_text("district: R-1b\nrules: []\n")
+    path = tmp_path / "project.yaml"
+    path.write_text(f"title: x\njurisdiction: {j}\nzone: R-1b\nmeasurements: {{}}\n")
+    with pytest.raises(ValueError, match="isn't a jurisdiction folder"):
+        load_project(path)

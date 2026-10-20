@@ -78,6 +78,12 @@ def load_project(path: Path) -> dict:
         elif not (m["value"] is None or type(m["value"]) in (int, str)
                   or type(m["value"]) is float and math.isfinite(m["value"])):
             problems.append(f"measurement {name!r} value must be a number or text (a finite number; or empty: not measured yet)")
+    if not problems:                             # a real jurisdiction inside the repo, with its source list
+        j = (REPO / project["jurisdiction"]).resolve()
+        places = (REPO / "regulations/jurisdictions").resolve()
+        if not (j.is_relative_to(places) and (j / "1_source_documents/sources.yaml").is_file()):
+            problems.append(f"jurisdiction {project['jurisdiction']!r} isn't a jurisdiction folder in "
+                            "regulations/jurisdictions (one with 1_source_documents/sources.yaml)")
     if not problems and rulebook_for(REPO / project["jurisdiction"], project["zone"]) is None:
         problems.append(f"no rulebook for zone {project['zone']!r} in {project['jurisdiction']}")
     if problems:
@@ -241,11 +247,13 @@ def tables(project_path: Path) -> dict:
     j = REPO / project["jurisdiction"]
     book_path = rulebook_for(j, project["zone"])
     book = load(book_path) or {}
-    uses = load(j / "4_term_definitions/uses.yaml") or {}
-    use_names = {k: v.get("name", k) for k, v in uses.items()}
-    documents = {d["file"]: d for d in load(j / "1_source_documents/sources.yaml")["documents"]}
+    ctx = Context.for_jurisdiction(j)                 # sources and uses, read once, the way the checker reads them
+    uses_file = j / "4_term_definitions/uses.yaml"
+    uses = (load(uses_file) or {}) if uses_file.exists() else {}
+    use_names = {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}
+    documents = ctx.sources
     values = {k: m["value"] for k, m in project["measurements"].items()}
-    allowed = {"use": Context.for_jurisdiction(j).uses}     # the same list the checker and the tests use
+    allowed = {"use": ctx.uses}                       # the same list the checker and the tests use
     kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in allowed.items()}
     which = book_path.relative_to(j / "5_zoning_rules").as_posix()
 
@@ -291,7 +299,7 @@ def build(t: dict) -> Workbook:
     write_block(ws, end + 2, [(h, None) for h in PARAMETER_HEADERS + PARAMETER_EXTRA], t["parameters"],
                 links={"Link": t["parameter_links"]})
     ws = wb.create_sheet(OUTPUT_TAB)
-    title(ws, f"GORDIUM | {t['title']}")
+    title(ws, f"GORDIUM | {t['title']} (draft rules, checked by code)")
     columns = list(zip(OUTPUT_HEADERS + OUTPUT_EXTRA, [34, 24, 20, 12, 22, 10, 16, 30, 40, 40, 60, 26, 10, 30]))
     end = write_block(ws, 2, columns, t["output"], links={"Link": t["output_links"]})
     if t["not_applicable"]:
