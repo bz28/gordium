@@ -577,7 +577,6 @@ def test_a_gently_curved_roof_is_not_one_plane():
         faces.append({"points": [[xs[i], 0, z[i]], [xs[i + 1], 20, z[i + 1]], [xs[i], 20, z[i]]]})
     for order in (faces, faces[::-1]):
         for group in _planes(order):
-            anchor = max(group, key=lambda f: abs(_unit_normal(f["points"])[2]) and 1)
             for g in group:
                 n, p0 = _unit_normal(g["points"]), g["points"][0]
                 assert all(abs(sum(n[c] * (q[c] - p0[c]) for c in range(3))) <= TOL for f in group for q in f["points"])

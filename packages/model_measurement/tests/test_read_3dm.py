@@ -265,4 +265,4 @@ def test_a_meshed_gable_on_ithaca_survey_coordinates_is_read_on_its_full_precisi
 
 def test_a_single_precision_mesh_that_far_out_is_reported_not_measured(tmp_path):
     h, _, _ = measured_gable(tmp_path, 870000.3, 900000.7, 8, double=False)
-    assert h["value"] is None and "single precision too far from the origin" in h["reason"]
+    assert h["value"] is None and "may be single precision" in h["reason"]

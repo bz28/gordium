@@ -251,8 +251,9 @@ def _unit_normal(points) -> tuple:
 
 
 def _planes(faces: list[dict]) -> list[list[dict]]:
-    """The faces grouped into planes. Each group has an anchor face (its largest), and every corner of every face
-    in the group lies within TOL of the anchor's plane, so a group never drifts. Faces that share an edge (two
+    """The faces grouped into planes. Each group has an anchor face (the face it started from; when two groups
+    join, the larger group's anchor), and every corner of every face in the group lies within TOL of the anchor's
+    plane, so a group never drifts. Faces that share an edge (two
     corners within TOL) join when that stays true: the smaller group's faces are checked against the larger
     group's anchor, which anchors the joined group. So a roof drawn as many triangles (a mesh, with rounding
     noise) is one roof plane, two separate roofs at the same level stay two, and a curved roof isn't one plane.

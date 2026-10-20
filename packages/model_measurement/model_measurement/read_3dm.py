@@ -90,15 +90,17 @@ def _single(x: float) -> bool:
 
 def _mesh_faces(mesh, s):
     """A mesh's faces (quads split into triangles), on the full-precision points the file holds, and its
-    problems: a mesh stored only in single precision far from the origin (survey coordinates) can't be measured
-    to 0.01 ft, so it is reported, never measured on rounded points."""
+    problems. A mesh far from the origin (survey coordinates) whose points are all exactly single-precision values
+    may be stored only in single precision, too coarse there to measure to 0.01 ft; rhino3dm gives no other sign,
+    so it is reported (a mesh drawn on a whole-foot grid that far out is reported too), never measured on
+    possibly rounded points."""
     v = mesh.Vertices
     points = [v.Point3dAt(k) for k in range(len(v))]
     problems = []
     far = any(max(abs(p.X), abs(p.Y), abs(p.Z)) * s > FLOAT_SAFE for p in points)
     if far and all(_single(c) for p in points for c in (p.X, p.Y, p.Z)):   # only single-precision points held
-        problems.append("a building mesh is stored in single precision too far from the origin to measure to 0.01 ft "
-                        "(move it nearer the origin, or turn it into a solid)")
+        problems.append("a building mesh's points may be single precision, too coarse this far from the origin to "
+                        "measure to 0.01 ft (move it nearer the origin, or turn it into a solid)")
     faces = []
     for i in range(len(mesh.Faces)):
         a, b, c, d = mesh.Faces[i]

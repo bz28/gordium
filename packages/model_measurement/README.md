@@ -68,7 +68,8 @@ building outside the lot, no ground level, more than one building and none picke
 yards are front, side and rear, and which street's frontage is the lot width, are open questions), no corner-lot
 answer, every lot line on a street, a
 lot outline that isn't closed or crosses itself, a curved wall or edge (not measured yet), a solid that isn't
-closed, two candidate lot outlines, sloped or unstated ground, a lot outline not from a survey (lot area), and anything on the Building layer that isn't a solid or mesh (a block, a
+closed, two candidate lot outlines, a mesh far from the origin whose points may be single precision, sloped or unstated
+ground, a lot outline not from a survey (lot area), and anything on the Building layer that isn't a solid or mesh (a block, a
 surface): it is reported, never left out, since leaving it out would undercount coverage. Sublayers count
 (`Building::Garage`); a block's own definition is never read as a building. Mistyped lot facts (a ground level
 that isn't a number) are refused with a plain message.
