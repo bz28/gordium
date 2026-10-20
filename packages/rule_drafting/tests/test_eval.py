@@ -29,6 +29,7 @@ DRAFTED = ITHACA / "5_zoning_rules/drafted"
 LOG = DRAFTED / "records/drafting_log.yaml"
 CHART = "zoning_charts_2026-04.pdf"
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design.yaml"
+R1B = {"district": "R-1b"}       # every answer-key example is an R-1b lot, as the checker would know
 
 
 @pytest.fixture(scope="module")
@@ -51,17 +52,28 @@ def hand():
     return load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"]
 
 
-def covering(hand_rule, drafted, ctx):
+def law_unit_rules() -> set[str]:
+    """The drafted rules whose unit is a piece of the law (not a chart section), from the drafting log."""
+    if not LOG.exists():
+        return set()
+    return {rid for unit, e in load(LOG)["units"].items() if not unit.startswith("chart-") for rid in e["rules"]}
+
+
+def covering(hand_rule, drafted, ctx, from_law=None):
     """The drafted rules that cite a chart row or law line the hand rule quotes. Footnotes are left out
-    (many rows share one), and so are the cells a hand rule cites: in the answer key a rule quotes its own
-    subject and cites cells only as inputs (the height bonus cites the yard minimums it enlarges)."""
+    (many rows share one). A rule's subject is what it quotes, not the cells it takes as inputs: in the answer
+    key a rule cites cells only as inputs (the height bonus cites the yard minimums it enlarges), and so does a
+    rule drafted from a piece of the law (§325-16C's rules read the chart's height and yards), so those cells
+    are left out for both. from_law: the drafted rules from law pieces (default: from the drafting log)."""
+    from_law = law_unit_rules() if from_law is None else from_law
+
     def lines(rule, quotes_only=False):
         sources = [s for s in rule["sources"] if not (quotes_only and "cell" in s)]
         notes = {(s["file"], s["page"], n) for s in sources if s.get("quote", "").startswith("(")
                  and s["file"] == CHART for n in range(s["lines"][0], s["lines"][1] + 1)}
         return _cited_lines(sources, ctx) - notes
     wanted = lines(hand_rule, quotes_only=True)
-    return [r for r in drafted if lines(r) & wanted]
+    return [r for r in drafted if lines(r, quotes_only=r["id"] in from_law) & wanted]
 
 
 def rule_formulas(rule):
@@ -107,6 +119,12 @@ def combined(rules, values, ctx, proposed=frozenset()):
     return "not_applicable", notes
 
 
+def judge_r1b_example(rules, given, ctx):
+    """An answer-key example judged by the drafted rules covering it, as an R-1b lot (the checker always knows
+    the lot's district; the spreadsheet comparison gives it too)."""
+    return combined(rules, R1B | given, ctx, set(ctx.proposed))
+
+
 def test_drafted_r1b_agrees_with_the_hand_drafted_r1b(hand, drafted_r1b, ctx):
     disagreements, compared = [], 0
     for h in hand:
@@ -115,7 +133,7 @@ def test_drafted_r1b_agrees_with_the_hand_drafted_r1b(hand, drafted_r1b, ctx):
             continue                                   # not drafted yet; test_every_hand_rule_is_covered checks
         for ex in h["examples"]:
             compared += 1
-            got, notes = combined(rules, ex["given"], ctx, set(ctx.proposed))
+            got, notes = judge_r1b_example(rules, ex["given"], ctx)
             if got != ex["expect"]:
                 disagreements.append(f"{h['id']} {ex['given']}: hand {ex['expect']}, drafted {got} "
                                      f"({', '.join(r['id'] for r in rules)})" + (f" [{'; '.join(notes)}]" if notes else ""))
@@ -143,6 +161,26 @@ def test_a_declared_new_measure_is_supplied_from_the_drafts_own_passing_example(
     assert got == "needs_review" and any("['lot_depth'], which the hand example doesn't give" in n for n in notes)
 
 
+def test_an_answer_key_example_is_judged_as_an_r1b_lot(ctx):
+    """Runs without drafts: a drafted rule that names the district it doesn't apply to is decided on a hand
+    example, which never says its district, instead of 'needs review' for a missing district."""
+    rule = {"id": "R-1b.rear", "kind": "rule", "applies_when": 'district != "RU"', "check": "rear_yard >= 20",
+            "examples": [{"given": {"rear_yard": 20}, "expect": "pass"}, {"given": {"rear_yard": 19}, "expect": "fail"}]}
+    assert outcome(rule, {"rear_yard": 19}, ctx.allowed()) == "needs_review"
+    assert judge_r1b_example([rule], {"rear_yard": 19}, ctx)[0] == "fail"
+
+
+def test_a_law_pieces_rule_doesnt_cover_the_chart_rows_it_only_reads(ctx):
+    """Runs without drafts: §325-16C's drafted 'front yard grows with extra height' reads the front-yard cell
+    as an input; it covers the hand rule quoting §325-16C, not the hand front-yard rule quoting that row."""
+    hand = load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"]
+    front = next(h for h in hand if h["id"] == "R-1b.front_yard")
+    cell = {"file": CHART, "page": 3, "cell": {"section": "Yard Dimensions", "row": "Front (minimum)", "column": "R-1B"}}
+    bonus = {"id": "R-1b.325_16c_extra_front", "kind": "rule", "sources": [cell], "check": "front_yard >= 25"}
+    assert covering(front, [bonus], ctx, from_law=set()) == [bonus]          # as a chart rule, it would
+    assert covering(front, [bonus], ctx, from_law={bonus["id"]}) == []       # as a law piece's input, not
+
+
 def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted_r1b, ctx):
     """The hand examples can be loose (30 ft passes, 24 fails, whether the limit is 25 or 30). So each drafted
     R-1b rule is also tried at the R-1B chart value it cites and just past it, with the same row meanings the
@@ -154,9 +192,10 @@ def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted
     cells = [c for c in (json.loads(line) for line in chart.CELLS.open(encoding="utf-8"))
              if c.get("column") == chart.COLUMN and not c.get("heading")]
     cited, enforced, wrong = set(), set(), []
+    from_law = law_unit_rules()                   # a law piece's rule takes chart cells as inputs, not as its limit
     for rule in drafted_r1b:
         passing = [ex["given"] for ex in rule.get("examples", []) if ex["expect"] == "pass"]
-        if rule["kind"] != "rule" or not passing:
+        if rule["kind"] != "rule" or not passing or rule["id"] in from_law:
             continue
         for c in chart.cited_rows(rule, cells):
             key = (c["page"], c["section"], c["row"])
@@ -176,7 +215,7 @@ def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted
     assert sorted(cited - enforced) == []                     # every chart value a draft cites is enforced exactly
     idle = []                                                 # and no cited number is ignored or idle
     for rule in drafted_r1b:
-        if rule["kind"] == "rule":
+        if rule["kind"] == "rule" and rule["id"] not in from_law:
             idle += chart.idle_numbers(rule, [c for c in chart.cited_rows(rule, cells) if c["page"] != 2], ctx.allowed())
     assert idle == []
 
@@ -189,7 +228,7 @@ def test_every_hand_rule_is_covered_once_drafting_is_complete(hand, drafted_r1b,
 
 def test_drafted_r1b_matches_the_architects_spreadsheet(hand, drafted_r1b, ctx):
     design = load(SITE)
-    values = {k: m["value"] for k, m in design["measurements"].items()} | {"district": "R-1b"}
+    values = {k: m["value"] for k, m in design["measurements"].items()} | R1B
     book = openpyxl.load_workbook(REPO / design["spreadsheet"], data_only=True)
     hand_by_id = {h["id"]: h for h in hand}
     complete = LOG.exists() and load(LOG).get("complete")
