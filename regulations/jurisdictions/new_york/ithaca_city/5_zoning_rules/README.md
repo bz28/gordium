@@ -10,4 +10,4 @@ Each rule has:
 - **plain-English text** and **worked examples**
 - **drafted by**, **status**, **approved by**, **approved on**
 
-Nothing is used by the checker until an architect approves it.
+Rules stay marked **draft**: architect approval is deferred for now (decided 2026-10-19), so the checker uses draft rules that have passed every code check (`python -m rule_format`). The approval fields are kept, unused, so approval can be switched on later without a rebuild.
