@@ -9,7 +9,7 @@ not in CI). From a new empty document:
 Each step records the summary, the panel's rows (as the panel shows them), the notice, and viewport captures
 (Perspective and Top). Writes <temp>/gordium_ui_flow/flow_out.json and frames/NN_*.png.
 
-How to run: in Rhino, open a new empty document (feet), then RunPythonScript this file (or rhinocode script)."""
+How to run: in Rhino, RunPythonScript this file (it opens its own test document from Rhino's feet template) (or rhinocode script)."""
 import json
 import os
 import sys
@@ -19,6 +19,9 @@ import traceback
 import Rhino
 import Rhino.Geometry as rg
 import scriptcontext as sc
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from test_docs_in_rhino import TestDocs  # noqa: E402
 import System
 
 S = os.path.join(tempfile.gettempdir(), "gordium_ui_flow") + "/"
@@ -95,7 +98,9 @@ def record(g, doc, name, caption, box, toasts_before):
 
 try:
     g = fresh_module()
-    doc = Rhino.RhinoDoc.ActiveDoc
+    docs = TestDocs("ui_flow").__enter__()    # closes an earlier run's test document; this one stays open
+    log["leftovers_closed"] = docs.left_over
+    doc = docs.open("Large Objects - Feet")
     log["start_objects"] = doc.Objects.Count
     shown = {}
 

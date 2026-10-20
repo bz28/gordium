@@ -504,6 +504,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 f"{SIGNS[type(c.ops[0])]} "
                 f"{value_text(_evaluate(ast.unparse(c.comparators[0]), values), (measured.get(c.left.id) or {}).get('unit') or '', SIGNS[type(c.ops[0])], False)}"
                 for c in raised))
+        as_is = (measured.get(node.left.id) or {}).get("measured_as_is") if node is not None else None
+        if as_is is not None and proposed == "—":      # measured, but the result waits (existing ground): the value
+            proposed = value_text(as_is, (measured.get(node.left.id) or {}).get("unit") or "", numbers[4])   # with ?
         if node is not None and proposed == "—":        # the readings disagree: show their span, not a dash
             span = _range(node.left.id, measured, values, numbers[4])
             if span:

@@ -8,8 +8,7 @@ captures (Top and Perspective) to <temp>/gordium_scenarios/rhino_out.json and fr
 
 Compare with the answer key (in the repo's .venv):  python -m design_checker.scenarios rhino <rhino_out.json>
 
-How to run: open a new empty document (feet) that you don't mind being cleared (every object in it is deleted
-before each scenario, and it is never saved), then RunPythonScript this file."""
+How to run: RunPythonScript this file (it opens its own test document from Rhino's feet template)."""
 import json
 import os
 import subprocess
@@ -20,6 +19,9 @@ import traceback
 import Rhino
 import Rhino.Geometry as rg
 import scriptcontext as sc
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from test_docs_in_rhino import TestDocs  # noqa: E402
 import System
 
 S = os.path.join(tempfile.gettempdir(), "gordium_scenarios") + "/"
@@ -130,7 +132,9 @@ def step(g, doc, name, label, box):
 
 try:
     g = fresh_module()
-    doc = Rhino.RhinoDoc.ActiveDoc
+    docs = TestDocs("scenarios").__enter__()    # closes an earlier run's test document; this one stays open
+    log["leftovers_closed"] = docs.left_over
+    doc = docs.open("Large Objects - Feet")
     if doc.Path and "scratchpad" not in doc.Path and "gordium" not in doc.Path.lower():
         raise RuntimeError("refusing to clear " + doc.Path + ": open a new empty document first")
     folder = os.path.join(WT, "test_data/test_sites/new_york/ithaca_city/scenarios")

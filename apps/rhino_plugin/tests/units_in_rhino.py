@@ -1,23 +1,23 @@
 #! python3
 """GordiumStart in Rhino's own templates, in every unit (run in Rhino, not in CI). For each template (millimeters,
-meters, inches, feet) a fresh copy is opened as a new document (never saved), the real GordiumStart command script
+meters, inches, feet) a fresh copy is opened through test_docs_in_rhino (closed when the run ends), the real GordiumStart command script
 runs (the box accepted as an architect would: I confirm ticked), and this records the panel's results, the starting
 house's size in feet and whether it is in view in every standard view. The results must be the same in every unit,
 and the house visible everywhere. Writes <temp>/gordium_units/units_out.json and a capture per template and view.
 
 How to run: in Rhino, RunPythonScript this file (it opens and leaves one document per template)."""
-import glob
 import json
 import os
 import runpy
-import shutil
 import sys
 import tempfile
-import time
 import traceback
 
 import Rhino
 import scriptcontext as sc
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from test_docs_in_rhino import TestDocs  # noqa: E402
 import System
 
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -27,25 +27,8 @@ WANTED = ("Small Objects - Millimeters", "Large Objects - Millimeters", "Large O
           "Small Objects - Inches", "Large Objects - Feet")
 
 
-def templates():
-    folder = Rhino.ApplicationSettings.FileSettings.TemplateFolder
-    found = {}
-    for path in glob.glob(os.path.join(folder, "*.3dm")) + glob.glob(
-            "/Applications/Rhino 8.app/Contents/Frameworks/RhCore.framework/Versions/A/Resources/en.lproj/"
-            "Template Files/*.3dm"):
-        name = os.path.splitext(os.path.basename(path))[0]
-        if name in WANTED and name not in found:
-            found[name] = path
-    return found
-
-
-def run(name, path):
-    copy = OUT + name.replace(" ", "_") + "_%d.3dm" % int(time.time() * 1000)   # a new file: never one already open
-    shutil.copy(path, copy)
-    Rhino.RhinoDoc.Open(copy)
-    doc = Rhino.RhinoDoc.ActiveDoc
-    if os.path.realpath(doc.Path or "") != os.path.realpath(copy):      # never measure another document by mistake
-        raise RuntimeError("the opened copy is not the active document: " + str(doc.Path))
+def run(name, docs):
+    doc = docs.open(name)                      # a fresh copy of the template, the active document (or it raises)
     sc.sticky.setdefault("gordium_state", {})["auto_ok"] = True
     runpy.run_path(WT + "/apps/rhino_plugin/gordium_start.py", run_name="__main__")
     g = sys.modules["gordium_rhino"]
@@ -92,11 +75,13 @@ def fresh_modules():
 out = {"runs": {}}
 try:
     fresh_modules()
-    for name, path in sorted(templates().items()):
-        try:
-            out["runs"][name] = run(name, path)
-        except Exception:
-            out["runs"][name] = {"trace": traceback.format_exc()}
+    with TestDocs("units") as docs:            # closes what it opens (the last stays active), and old leftovers
+        out["leftovers_closed"] = docs.left_over
+        for name in WANTED:
+            try:
+                out["runs"][name] = run(name, docs)
+            except Exception:
+                out["runs"][name] = {"trace": traceback.format_exc()}
     runs = [r for r in out["runs"].values() if "trace" not in r]
     first = runs[0] if runs else {}
     out["same_results"] = bool(runs) and len(runs) == len(out["runs"]) and all(r["summary"] == first.get("summary") and r["items"] == first.get("items") and
