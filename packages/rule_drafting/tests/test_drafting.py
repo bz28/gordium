@@ -653,3 +653,28 @@ def test_a_number_from_the_paragraph_being_drafted_needs_no_question(inputs):
 def test_a_rule_with_no_number_from_a_chart_note_carries_no_question(inputs):
     result, records = run(inputs, FakeClient({"templates": [FRONT], "no_rule_reason": ""}))
     assert records[0]["problem"] is None and "open_questions" not in result["rules"]["R-1b"][0]
+
+
+def _stating_cells(inputs, page, section):
+    """(row, district) of every district cell in a chart section that states something."""
+    return {(row, col) for (pg, sec, row, col), c in inputs.cells.items()
+            if (pg, sec) == (page, section) and col in inputs.columns
+            and chart_values.FOOTNOTE.sub("", c["value"]).strip() not in chart_values.NOT_APPLICABLE}
+
+
+def test_a_chart_row_no_template_covers_goes_to_a_person_in_every_district(inputs):
+    """The drafter answered only the front yard: every other row of Yard Dimensions, in every district whose
+    cell states something, is listed for a person. A skipped row can't vanish (a false pass waiting to happen)."""
+    result, _ = run(inputs, FakeClient({"templates": [FRONT], "no_rule_reason": ""}))
+    listed = {(row, col) for row, col in _stating_cells(inputs, 3, YARDS)
+              if any(g["rule"] == f"{cli.district_name(col)}.chart-p3-yard_dimensions" and repr(row) in g["why"]
+                     and f"the {col} cell" in g["why"] for g in result["unresolved"])}
+    others = {(row, col) for row, col in _stating_cells(inputs, 3, YARDS) if row != "Front (minimum)"}
+    assert others and others <= listed
+    assert not any("'Front (minimum)'" in g["why"] and "has no drafted rule" in g["why"] for g in result["unresolved"])
+
+
+def test_a_chart_unit_answered_with_only_a_reason_still_lists_every_cell(inputs):
+    result, _ = run(inputs, FakeClient({"templates": [], "no_rule_reason": "Nothing here sets a requirement."}))
+    assert result["reason"] and not result["rules"]
+    assert len(result["unresolved"]) == len(_stating_cells(inputs, 3, YARDS)) > 0

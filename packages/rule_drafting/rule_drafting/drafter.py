@@ -29,8 +29,7 @@ from rule_format.rulebook import (MEASURES_FILE, REPO, VOCABULARY_FILE, Context,
 from section_labeling.budget import worst_case
 from section_labeling.labeler import cost, find_quote, sha
 
-from .chart_values import section_refs
-from .chart_values import footnotes
+from .chart_values import FOOTNOTE, NOT_APPLICABLE, footnotes, section_refs
 from .templates import (CHART_FILE, fill_template, formula_slots, number_places, template_problems,
                         with_occurrence_nudged)
 
@@ -489,6 +488,41 @@ def requirement_gaps(unit: dict, result: dict) -> list[dict]:
             if not any((s["page"], n) in cited for n in range(s["lines"][0], s["lines"][1] + 1))]
 
 
+def chart_gaps(unit: dict, result: dict, cells: dict, columns: list[str]) -> list[dict]:
+    """For a chart unit: every district cell of its section that states something ("-" and empty state
+    nothing) and that no saved rule cites, for a person. So a row the drafter skipped can't vanish, in any
+    district; a cell a template couldn't fill is already listed (by fill_template's reason) and isn't repeated."""
+    if "section" not in unit:
+        return []
+    cited = {(s["page"], s["cell"]["row"], s["cell"]["column"]) for rules in result["rules"].values() for r in rules
+             for s in r["sources"] if s.get("file") == CHART_FILE and "cell" in s}
+    listed = [g for g in result["unresolved"]]
+    out = []
+    for (page, section, row, column), cell in cells.items():
+        if (page, section) != (unit["page"], unit["section"]) or column not in columns:
+            continue
+        if FOOTNOTE.sub("", cell["value"]).strip() in NOT_APPLICABLE or (page, row, column) in cited:
+            continue
+        district = district_name(column)
+        if any(g["rule"].startswith(f"{district}.") and repr(row) in g["why"] for g in listed):
+            continue
+        out.append({"rule": f"{district}.{unit['id']}",
+                    "why": f"chart page {page}, {section!r}, row {row!r}: the {column} cell {cell['value']!r} has no "
+                           "drafted rule (a person checks the requirement it sets)"})
+    return out
+
+
+def keep(result: dict, unit: dict, cells: dict, columns: list[str], last_attempt: bool = False) -> dict:
+    """The answer kept for a unit, with everything it leaves for a person: on the last attempt its rejected
+    templates, and always whatever the unit's input states that no saved rule covers (the law lines its
+    label cites, the chart cells of its section). The one way an answer is kept, by drafting and by replays."""
+    if last_attempt:
+        result["unresolved"] += result["rejected"]
+        result["problems"] = []
+    result["unresolved"] += requirement_gaps(unit, result) + chart_gaps(unit, result, cells, columns)
+    return result
+
+
 def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: Context, columns: list[str],
                cells: dict, notes: dict[int, dict], record, settings: dict = SETTINGS, budget=None) -> dict:
     """Draft one unit. Every template that works nowhere sends the answer back with the reasons (keeping
@@ -542,8 +576,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
         if crash is not None:
             raise crash
         if why is None:
-            result["unresolved"] += requirement_gaps(unit, result)
-            return result
+            return keep(result, unit, cells, columns)
         if response.stop_reason == "refusal":
             break
         if response.stop_reason == "end_turn":
@@ -551,7 +584,5 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
                          {"role": "user", "content": f"That answer can't be used: {why}. Answer again for the same "
                                                      "text, with every template (the ones that worked too)."}]
     if last is not None:                        # the last answer that had working rules: keep those
-        last["unresolved"] += last["rejected"] + requirement_gaps(unit, last)
-        last["problems"] = []
-        return last
+        return keep(last, unit, cells, columns, last_attempt=True)
     return {"failed": why, "rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}
