@@ -63,13 +63,20 @@ def test_every_jurisdiction_listing_uses_the_one_helper():
     assert len(found) == 1 and "rulebook.py" in found[0], f"use rulebook.jurisdictions(): {found}"
 
 
+APPROVAL = re.compile(r"\barchitect\w*\b[^.\n]{0,80}?\bapprov|\bapprov\w*\b[^.\n]{0,80}?\barchitect", re.IGNORECASE)
+# Claims that are false while approval is deferred, however a document is worded around them.
+FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only approved rules|approved rulebook"
+                          r"|architects approve\b|architects? confirm each rule|compares the new draft with the approved"
+                          r"|architect'?s approval freezes|architect\s*──►", re.IGNORECASE)
+
+
 def test_docs_dont_promise_approval_while_it_is_deferred():
     """Approval is deferred (2026-10-19): no reviewer is listed and the checker uses draft rules. Until a
-    reviewer is added, no document may claim nothing is used before an architect approves it."""
+    reviewer is added, a document that talks about architects approving rules must say approval is deferred,
+    and none may claim the checker waits for, or reads only, approved rules."""
     if yaml.safe_load((REPO / "regulations/reviewers.yaml").read_text()):
         return
-    stale = re.compile(r"until an architect approves|only approved rules|architects approve\b|approved rulebook"
-                       r"|an architect confirms each rule|compares the new draft with the approved|architect\s*──►",
-                       re.IGNORECASE)
-    found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in stale.finditer(p.read_text())]
-    assert not found, found
+    silent = [str(p.relative_to(REPO)) for p in DOCS
+              if APPROVAL.search(p.read_text()) and not re.search(r"deferred", p.read_text(), re.IGNORECASE)]
+    false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text())]
+    assert not silent and not false, (silent, false)
