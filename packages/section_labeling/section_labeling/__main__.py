@@ -26,7 +26,7 @@ import yaml
 from rule_format.labels import load_pieces
 from rule_format.rulebook import REPO, Context, jurisdictions, load, read_jsonl
 
-from . import coverage, labeler
+from . import coverage, labeler, term_index
 from .budget import Budget, BudgetExceeded
 
 PLACES = REPO / "regulations/jurisdictions"
@@ -63,11 +63,24 @@ def read_labels(j: Path, file: str) -> dict:
     return (load(path) or {}).get("labels", {}) if path.exists() else {}
 
 
+def _write_or_check(out: Path, text: str, check: bool) -> bool:
+    """Write a generated file, or (check) say whether the saved one matches a fresh build. True when fine."""
+    if check:
+        same = out.exists() and out.read_text(encoding="utf-8") == text
+        print(f"{'✓' if same else '✗'} {out.relative_to(REPO)}" + ("" if same else ": differs from a fresh build"))
+        return same
+    out.write_text(text, encoding="utf-8", newline="\n")
+    print(f"wrote {out.relative_to(REPO)}")
+    return True
+
+
 def cmd_coverage(args) -> int:
     failed = 0
+    laws: dict[Path, list] = {}
     for j, file, path in documents(args.place):
         header, pieces = load_pieces(path)
         rows = extracted_rows(j, file)
+        laws.setdefault(j, []).append((file, pieces, rows))
         labels = read_labels(j, file)
         bad = coverage.line_problems(rows, header, pieces)
         runs = run_records(j)
@@ -79,16 +92,16 @@ def cmd_coverage(args) -> int:
                    j / "3_section_labels" / f"{Path(file).stem}.review.md":
                        coverage.review_list(header, pieces, labels, coverage.cited_by(j, file, pieces), rows)}
         for out, text in outputs.items():
-            if args.check:
-                same = out.exists() and out.read_text(encoding="utf-8") == text
-                print(f"{'✓' if same else '✗'} {out.relative_to(REPO)}" + ("" if same else ": differs from a fresh report"))
-                failed += not same
-            else:
-                out.write_text(text, encoding="utf-8", newline="\n")
-                print(f"wrote {out.relative_to(REPO)}")
+            failed += not _write_or_check(out, text, args.check)
         if bad:
             print(f"✗ {file}: {len(bad)} lines in no piece or in two (see the coverage report)")
             failed += 1
+    for j, docs in laws.items():                      # the term index: every piece that uses each term or synonym
+        definitions = j / "4_term_definitions/definitions.yaml"
+        if definitions.exists():
+            index = term_index.build(load(definitions) or {}, load(term_index.SYNONYMS_FILE) or {}, docs)
+            failed += not _write_or_check(j / "4_term_definitions" / term_index.INDEX_NAME,
+                                          term_index.render(index), args.check)
     return 1 if failed else 0
 
 
