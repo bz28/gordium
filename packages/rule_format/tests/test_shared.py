@@ -10,13 +10,9 @@ from rule_format.rulebook import REPO, jurisdictions, read_jsonl
 
 CODE = [p for p in (REPO / "packages").rglob("*.py") if "tests" not in p.relative_to(REPO).parts]
 # Paths are judged inside the repository: a checkout can itself sit in a folder named .claude.
-# AI instructions (the labeling guide is the labeling model's prompt) change only with a re-run eval, so
-# they're judged by that eval, not by this wording check.
-AI_INSTRUCTIONS = {"regulations/document_extraction_guide/labeling_guide.md"}
 DOCS = [p for p in REPO.rglob("*.md")
         if not {".git", ".claude", ".venv", "node_modules"} & set(p.relative_to(REPO).parts)
-        and p.name != "CLAUDE.md"   # CLAUDE.md states the project's principles; it is changed by its own PR
-        and p.relative_to(REPO).as_posix() not in AI_INSTRUCTIONS]
+        and p.name != "CLAUDE.md"]   # CLAUDE.md states the project's principles; it is changed by its own PR
 assert DOCS and CODE
 
 
