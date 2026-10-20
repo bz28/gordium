@@ -452,7 +452,8 @@ def start_box(state, options, mode):
 
     def keep():                       # what the fields say now, back into `state`; what changed is the architect's
         z = zone.SelectedValue.Text if zone.SelectedValue else None
-        state["design_buffer"] = buffer.Text
+        if buffer is not None:
+            state["design_buffer"] = buffer.Text
         state.update(address=address.Text, zone=z, district_confirmed=bool(confirm.Checked),
                      use=names[use.SelectedIndex][0] if names else None, no_regrading=bool(regrade.Checked),
                      corner_lot=[None, False, True][max(corner.SelectedIndex, 0)])
@@ -471,13 +472,17 @@ def start_box(state, options, mode):
         done("pick:" + what)
 
     draw = button("Draw" if mode == "start" else "Check", lambda: (keep(), done("draw")))
-    reason = label("" if logic.can_draw(state) else "Confirm the district to continue.", size=11)
+    reason = label(logic.draw_reason(state), size=11)
     draw.Enabled = logic.can_draw(state)
+    # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
+    buffer = ef.TextBox() if mode == "start" else None
 
     def confirmed(s, e):
         state["district_confirmed"] = bool(confirm.Checked)
+        if buffer is not None:
+            state["design_buffer"] = buffer.Text
         draw.Enabled = logic.can_draw(state)
-        reason.Text = "" if draw.Enabled else "Confirm the district to continue."
+        reason.Text = logic.draw_reason(state)
 
     confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
     cancel = button("Cancel", lambda: done(None))
@@ -502,14 +507,15 @@ def start_box(state, options, mode):
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             if r.get("choice"):        # the street side's question: Corner lot?
                 layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
-    buffer = ef.TextBox()                # Advanced: a design buffer kept back from every limit, on top of the tax map's
-    buffer.Text = state.get("design_buffer") or "0'-0\""
-    advanced = ef.Expander()
-    advanced.Header = label("Advanced", bold=True, size=12)
-    advanced.Expanded = (state.get("design_buffer") or "0'-0\"") not in ("", "0'-0\"")
-    advanced.Content = row(label("Design buffer", size=12), buffer,
-                           label("kept back from every limit by the starting house", size=11))
-    layout.AddRow(None, advanced)
+    if buffer is not None:               # Advanced: a design buffer kept back from every limit, on top of the tax map's
+        buffer.Text = state.get("design_buffer") or "0'-0\""
+        buffer.TextChanged += logic.guard(confirmed, "type the design buffer")
+        advanced = ef.Expander()
+        advanced.Header = label("Advanced", bold=True, size=12)
+        advanced.Expanded = (state.get("design_buffer") or "0'-0\"") not in ("", "0'-0\"")
+        advanced.Content = row(label("Design buffer", size=12), buffer,
+                               label("kept back from every limit by the starting house", size=11))
+        layout.AddRow(None, advanced)
     layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
     amber = label("", eto_status_color("needs_review"), size=12)    # one line, following the answers given
 

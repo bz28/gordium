@@ -762,14 +762,15 @@ def not_the_ground():
     run_check(doc, report=False)
 
 
-def _set_source(doc, key, value, source):
+def _set_source(doc, key, value, source, confirmed_by="you"):
     """One site fact's source, changed outside the start box (the panel's buttons): {value, source, confirmed_by,
     date}, saved with the others; value None removes it. So the panel and the report never show a stale source."""
     sources = fact_sources(doc)
     if value is None:
         sources.pop(key, None)
     else:
-        sources[key] = {"value": value, "source": source, "confirmed_by": "you", "date": time.strftime("%Y-%m-%d")}
+        sources[key] = {"value": value, "source": source, "confirmed_by": confirmed_by,
+                        "date": time.strftime("%Y-%m-%d")}
     doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
 
 
@@ -826,15 +827,6 @@ def _highlight(doc, facts):
     o.doc = doc.RuntimeSerialNumber
     o.confirm = (lot.Geometry if lot else None, street_curve(doc, facts), _drawable(main.Geometry) if main else None)
     doc.Views.Redraw()
-
-
-def _feet(text, default):
-    """11'-8" or 11.5 (feet) -> feet; anything unreadable -> default."""
-    import re
-    m = re.match(r"^\s*(\d+(?:\.\d+)?)\s*'?\s*(?:-?\s*(\d+(?:\.\d+)?)\s*\"?)?\s*$", text or "")
-    if not m:
-        return default
-    return float(m.group(1)) + (float(m.group(2)) / 12 if m.group(2) else 0.0)
 
 
 SOURCES_ENTRY = "fact_sources"               # Gordium / fact_sources: {fact: {value, source, confirmed_by, date}}
@@ -1582,13 +1574,9 @@ def gordium_start():
     # always the envelope and the 3-floor starting house (hide it from the panel); floor to floor 11'-8" unless
     # GordiumFacts set another
     start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
-                 "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), logic.FLOOR_TO_FLOOR),
-                 "design_buffer": _feet(saved_ui.get("design_buffer"), 0.0)})
+                 "floor_to_floor": logic.parse_feet(saved_ui.get("floor_to_floor")) or logic.FLOOR_TO_FLOOR,
+                 "design_buffer": logic.parse_feet(saved_ui.get("design_buffer")) or 0.0})   # Draw is off if unread
     STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
-    kept = start.get("kept_back") or 0.0           # the margin, as a site fact (shown in the panel and the report)
-    _set_source(doc, "starting_house", ("kept " + _ft_text(kept) + " back from each limit" +
-                (": the lot is from the tax map; use a survey for the full area" if not facts.get("lot_surveyed")
-                 else " (your design buffer)")) if kept else "to the limits (a surveyed lot)", "Gordium")
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)
     if not start.get("floors"):
@@ -1601,11 +1589,15 @@ def gordium_start():
                                  "(run GordiumStart again in " + _doc_name(doc) + ")")
         return None
     Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
+    _set_source(doc, "starting_house", None, None)           # an earlier start's margin is gone with its house
     if add_floors(doc, start) is None:
         Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; draw one and Gordium will check it")
         live(True)
         documents(True)
         return None
+    fact = logic.starting_house_fact(start.get("margin_note"), time.strftime("%Y-%m-%d"))   # Gordium's figure
+    if fact:
+        _set_source(doc, "starting_house", fact["value"], fact["source"], fact["confirmed_by"])
     doc.Views.Redraw()
     result = run_check(doc, report=False)
     live(True)
@@ -1635,9 +1627,18 @@ def frame_site(doc, facts):
     for view in doc.Views:
         view.ActiveViewport.ZoomBoundingBox(box)
     # a view that isn't on screen (Perspective maximized, as a new Mac file opens) ignores a zoom; Rhino's own
-    # Zoom All Extents frames those too (the drawing's extents: the lot, the house, Gordium's envelope)
+    # Zoom All Selected frames those too, on the lot and the house only (Extents would also take in anything far
+    # away in the file). The architect's selection is put back as it was.
+    picked = [o.Id for o in doc.Objects.GetSelectedObjects(False, False)]
     try:
-        Rhino.RhinoApp.RunScript("_-Zoom _All _Extents", False)
+        doc.Objects.UnselectAll()
+        for o in [lot] + list(_buildings(doc)):
+            o.Select(True)
+        Rhino.RhinoApp.RunScript("_-Zoom _All _Selected", False)
     except Exception:
         pass
+    finally:
+        doc.Objects.UnselectAll()
+        for i in picked:
+            doc.Objects.Select(i)
     doc.Views.Redraw()

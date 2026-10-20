@@ -379,6 +379,23 @@ def _start_preview(out: dict, measured: dict) -> dict | None:
 
 TAX_MAP_NOTE = ("Starting house keeps 2'-0\" back from each limit because the lot is from the tax map; use a survey "
                 "for the full area.")
+NOT_PROVEN = ("Starting house: Gordium couldn't keep it clear of the tax map's 2'-0\" tolerance on this lot; the items "
+              "that say so need review until a survey")
+
+
+def margin_note(keep, buffer, tax, proven):
+    """What the starting house keeps back, in the architect's words (Ben's wording when it is the tax map alone)."""
+    ft = lambda v: present.feet_inches(v, "nearest")
+    if tax and not proven:
+        return NOT_PROVEN
+    if tax and not buffer:
+        return TAX_MAP_NOTE if abs(keep - TAX_MAP_TOLERANCE) < 1e-9 else TAX_MAP_NOTE.replace("2'-0\"", ft(keep), 1)
+    if tax:
+        return (f"Starting house keeps {ft(keep)} back from each limit: {ft(keep - buffer)} because the lot is from "
+                f"the tax map (use a survey for the full area) and {ft(buffer)} your design buffer.")
+    if buffer:
+        return f"Starting house keeps {ft(keep)} back from each limit (your design buffer)."
+    return "Starting house goes to the limits (the lot is from a survey)."
 
 
 def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer):
@@ -389,18 +406,21 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
     need review from the tolerance (a rear yard minimum also grows with the lot depth) it steps back 3 in. more."""
     from envelope_builder.start import floor_solids
     tax = not drawing.get("lot_surveyed")
-    keep = (TAX_MAP_TOLERANCE if tax else 0.0) + max(design_buffer or 0.0, 0.0)
+    buffer = max(design_buffer or 0.0, 0.0)
+    keep = (TAX_MAP_TOLERANCE if tax else 0.0) + buffer
     tol = (measured.get("lot_area") or {}).get("tolerance")
     drawn = next((r["value"] for r in (measured.get("lot_area") or {}).get("readings") or []), None)
     scale = tol["low"] / drawn if tax and tol and drawn else 1.0
     out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
                                  coverage_scale=scale)
+    proven = not tax
     for _ in range(12):
         if not tax or not out.get("floors"):
             break
         view = check_site({**site, "buildings": floor_solids(out["floors"])}, drawing)["view"]
         if not any(i["status"] == present.REVIEW and "tax map" in (i.get("reason") or "") for i in view["items"]
                    if i.get("measure")):
+            proven = True
             break
         keep += 0.25
         out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor, keep_back=keep,
@@ -409,8 +429,9 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
     if out.get("coverage_allowed") and scale:      # the rule's own allowance on the lot as drawn; what it was sized to
         out["coverage_target"] = out["coverage_allowed"]
         out["coverage_allowed"] = out["coverage_allowed"] / scale
-    if tax and out.get("floors"):
-        out["notes"].append(TAX_MAP_NOTE)
+    out["margin_note"] = margin_note(keep, buffer, tax, proven) if out.get("floors") else None
+    if out["margin_note"] and (tax or buffer):
+        out["notes"].append(out["margin_note"])
     return out
 
 

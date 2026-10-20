@@ -154,7 +154,7 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
         notes.append("no height limit or ground level: the building's height can't be set")
         return out
     allowed = env["coverage"]["allowed"] * coverage_scale if env["coverage"] else None
-    if drawn and allowed is not None:
+    if drawn and allowed is not None and coverage_scale >= 1:     # below 1: sized for the worst case, it complies
         notes.append("lot coverage sized from the lot as drawn, which isn't from a survey: the check says NEEDS "
                      "REVIEW for coverage until the survey is confirmed")
     stories = _story_limit(rules, sized)

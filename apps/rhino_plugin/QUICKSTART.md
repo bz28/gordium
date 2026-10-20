@@ -63,7 +63,7 @@ never says "complies" unless it is sure (see [What "needs review" means](#what-n
    - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
      `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
      lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
-     on a survey it goes to the limits. **Edit site… → Advanced → Design buffer** keeps it further back;
+     on a survey it goes to the limits. **Advanced → Design buffer** in the GordiumStart box keeps it further back;
    - top right, the **status box**: one line such as "? 6 need review · 4 comply · 2 not checked";
    - the **Gordium panel** (a floating window): every item, bad news first.
 5. **Make an edit.** Move, stretch or add solids as you normally would. Half a second after you stop, Gordium
