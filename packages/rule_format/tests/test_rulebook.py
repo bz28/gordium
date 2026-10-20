@@ -16,9 +16,13 @@ def quote_found(quote, tokens):
 
 PAGE_3 = {41: "Side (other side minimum) 10 ft 10 ft",
           42: "Rear (minimum, % of depth or feet, 25%/ 25%/",
-          43: "whichever is less) 50 ft [fn16] 50 ft [fn16]"}
+          43: "whichever is less) 50 ft [fn16] 50 ft [fn16]",
+          66: "(16) But not less than 20 ft.",
+          67: "(18) A lot deeper than 500 ft is reviewed by the Board."}
 QUOTE = "Rear (minimum, % of depth or feet, 25%/ 25%/ whichever is less) 50 ft [fn16]"
 SOURCE = {"file": "charts.pdf", "page": 3, "lines": [42, 43], "quote": QUOTE}
+NOTES = [{"file": "charts.pdf", "page": 3, "lines": [66, 66], "quote": "(16) But not less than 20 ft."},
+         {"file": "charts.pdf", "page": 3, "lines": [67, 67], "quote": "(18) A lot deeper than 500 ft is reviewed by the Board."}]
 RULE = {
     "id": "R-1b.rear_yard",
     "kind": "rule",
@@ -27,7 +31,7 @@ RULE = {
     "applies_when": 'use == "one_family_detached"',
     "check": "rear_yard >= max(min(0.25 * lot_depth, 50), 20)",
     "review_when": [{"when": "lot_depth > 500", "reason": "unusually deep lot"}],
-    "sources": [SOURCE],
+    "sources": [SOURCE, *NOTES],
     "examples": [
         {"given": {"use": "one_family_detached", "rear_yard": 25, "lot_depth": 90}, "expect": "pass"},
         {"given": {"use": "one_family_detached", "rear_yard": 21, "lot_depth": 90}, "expect": "fail"},
@@ -500,6 +504,10 @@ def test_documents_marked_not_quotable_are_refused(ctx):
     ({"file": "a.pdf", "sha256": "x", "quoteable": False}, "unknown field 'quoteable'"),
     ({"file": "a.pdf", "sha256": "x", "quotable": "false"}, "'quotable' must be true or false"),
     ({"file": "a.pdf", "sha256": "x", "quotable": False}, "'not_quotable_because' is missing"),
+    ({"file": "a.pdf", "sha256": "x", "chart_pages": "2, 3"}, "'chart_pages' must be a list"),
+    ({"file": "a.pdf", "sha256": "x", "chart_pages": [2, 2]}, "'chart_pages' must be a list"),
+    ({"file": "a.pdf", "sha256": "x", "chart_pages": [0]}, "'chart_pages' must be a list"),
+    ({"file": "a.pdf", "sha256": "x", "pages": 17, "chart_pages": [18]}, "'chart_pages' must be a list"),
 ])
 def test_source_list_entries_fail_closed(entry, problem):
     from rule_format.rulebook import _source_entry_problems
@@ -639,3 +647,145 @@ def test_approved_rule_needs_reapproval_after_answer_or_title_edit(ctx, edit):
     assert validate({"district": "R-1b", "rules": [approved]}, ctx) == []
     assert any("changed since it was approved" in p
                for p in validate({"district": "R-1b", "rules": [approved | edit]}, ctx))
+
+
+# Chart cells as sources, numbers traced to sources, yes/no and proposed measures, district names.
+REAR_CELL = {"page": 3, "section": "Yard Dimensions", "row": "Rear (minimum, % of depth or feet, whichever is less)",
+             "column": "R-1B", "value": "25%/ 50 ft [fn16]", "row_lines": [42, 43]}
+CELL_SOURCE = {"file": "charts.pdf", "page": 3,
+               "cell": {"section": "Yard Dimensions", "row": REAR_CELL["row"], "column": "R-1B"}}
+
+
+@pytest.fixture
+def chart_ctx(ctx):
+    ctx.sources["charts.pdf"]["chart_pages"] = [3]
+    ctx.cells = {"charts.pdf": {(3, "Yard Dimensions", REAR_CELL["row"], "R-1B"): REAR_CELL}}
+    ctx.districts = {"R-1b", "R-2a"}
+    ctx.measures |= {"district"}
+    return ctx
+
+
+def test_a_cited_chart_cell_supports_its_numbers(chart_ctx):
+    assert validate(rulebook(sources=[CELL_SOURCE, *NOTES]), chart_ctx) == []
+
+
+@pytest.mark.parametrize("source, problem", [
+    (CELL_SOURCE | {"cell": CELL_SOURCE["cell"] | {"row": "Rear yard"}}, "no cell"),
+    (CELL_SOURCE | {"page": 2}, "isn't one of the chart pages"),
+    (CELL_SOURCE | {"lines": [42, 43]}, "exactly file, page and cell"),
+    (CELL_SOURCE | {"cell": {"row": "Rear"}}, "needs section, row and column"),
+])
+def test_bad_cell_sources_are_rejected(chart_ctx, source, problem):
+    assert any(problem in p for p in validate(rulebook(sources=[source, *NOTES]), chart_ctx))
+
+
+@pytest.mark.parametrize("check, number", [("rear_yard >= max(min(0.3 * lot_depth, 50), 20)", "0.3"),
+                                           ("rear_yard >= max(min(0.25 * lot_depth, 55), 20)", "55")])
+def test_a_number_not_written_in_any_source_is_rejected(ctx, check, number):
+    assert any(f"number {number} in 'check' isn't written" in p for p in validate(rulebook(check=check), ctx))
+
+
+def test_numbers_can_come_from_number_words_and_row_labels():
+    from rule_format.rulebook import source_numbers
+    assert {3.0, 4.0, 5.0} <= source_numbers("First three bed or sleeping rooms; 4-5 bed rooms")
+    assert source_numbers("50 ft [fn16]") == {50.0}                           # no footnote number, no 0.5
+    assert source_numbers("6,000 sf 25% and 10 percent") == {6000.0, 25.0, 0.25, 10.0, 0.1}  # only percents / 100
+    assert source_numbers("two-family dwelling") == set()                     # "two" in a compound isn't a count
+    assert source_numbers("(10) See §325-16.") == set()                       # a note's marker and a section number
+    assert 3.0 not in source_numbers("(3) In each district, the number of additional feet may not exceed 10% of the height")
+    assert source_numbers("as specified in this column and Column 12 [Amended 10-1-2014 by Ord. No. 2014-12]") == set()
+    # references as Chapter 325 writes them (strings from its extracted text)
+    for ref in ("the requirements of § 325-20D(1) are met.", "See § 325-20D(3)(b).", "except as provided in Subsection B(7)",
+                "pursuant to Section 325-16 of this chapter", "in accordance with §§ 325-8 and 325-9",
+                "§ 81-a of the General City Law", "Article 78 of the Civil Practice", "Note: Former Subsection B(9)"):
+        assert source_numbers(ref) == set(), ref
+    assert source_numbers("50% of the lot", percent_as_number=False) == {0.5}   # a typed percent is its fraction
+
+
+def test_no_number_is_left_in_any_reference_in_the_citys_text():
+    """Every '§ ...', 'Section ...', 'Subsection ...' in Chapter 325, up to the next plain word: no number survives."""
+    import json, re
+    from rule_format.rulebook import REPO, source_numbers
+    path = REPO / "regulations/jurisdictions/new_york/ithaca_city/2_extracted_text/chapter_325_zoning_2026-10.jsonl"
+    left = set()
+    for line in path.read_text().splitlines():
+        text = json.loads(line).get("text", "")
+        for m in re.finditer(r"(?i)(?:§+|\bsub(?:section|paragraph)s?\b|\bsections?\b)\s*[\w.\-()§, ]*?(?=\s+[a-z]{3,}\b|$)", text):
+            ref = re.split(r"(?i)\s+(?:zoning|ithaca)\b", m.group(0))[0]           # page headers: "§ 325-16 ZONING § 325-16"
+            if source_numbers(ref) and not re.search(r"(?i)\((?:january|february|march|april|may|june|july|august|september|october|november|december) ", ref):
+                left.add(ref)
+    assert sorted(left) == []
+
+
+def test_a_cell_from_another_districts_column_is_rejected(chart_ctx):
+    other = {"page": 3, "section": "Yard Dimensions", "row": REAR_CELL["row"], "column": "R-2A",
+             "value": "25%/ 50 ft [fn16]", "row_lines": [42, 43]}
+    chart_ctx.cells["charts.pdf"][(3, "Yard Dimensions", REAR_CELL["row"], "R-2A")] = other
+    foreign = CELL_SOURCE | {"cell": CELL_SOURCE["cell"] | {"column": "R-2A"}}
+    assert any("cell column R-2A isn't district R-1b" in p for p in validate(rulebook(sources=[foreign, *NOTES]), chart_ctx))
+    general = {"district": "general", "rules": [copy.deepcopy(RULE) | {"id": "general.rear_yard", "sources": [CELL_SOURCE, *NOTES]}]}
+    assert any("can't cite one district's cell" in p for p in validate(general, chart_ctx))
+
+
+def test_a_yes_no_measure_can_be_a_test_on_its_own(ctx):
+    ctx.proposed = {"adu_separate_entrance": {"unit": "yes_no", "meaning": "ADU has a separate entrance"}}
+    rule = {"id": "R-1b.adu_entrance", "kind": "rule", "topic": "dimensions", "title": "ADU entrance",
+            "check": "adu_separate_entrance", "sources": [SOURCE],
+            "examples": [{"given": {"adu_separate_entrance": True}, "expect": "pass"},
+                         {"given": {"adu_separate_entrance": False}, "expect": "fail"}],
+            "drafted_by": "claude", "status": "draft"}
+    assert validate({"district": "R-1b", "rules": [rule]}, ctx) == []
+    assert any("wrong kind of value" in p for p in validate({"district": "R-1b", "rules": [
+        rule | {"examples": [{"given": {"adu_separate_entrance": 1}, "expect": "pass"}]}]}, ctx))
+    assert any("only a yes/no measure" in p for p in validate(rulebook(check="rear_yard"), ctx))   # a number isn't a test
+    approved = rule | {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 20)}
+    approved["approved_hash"] = approval_hash(approved, ctx)
+    assert any("proposed measure 'adu_separate_entrance'" in p
+               for p in validate({"district": "R-1b", "rules": [approved]}, ctx))
+
+
+def test_a_proposed_measure_is_unknown_until_listed(ctx):
+    rule = rulebook(check="rear_yard >= 20 and adu_separate_entrance")
+    assert any("unknown measure 'adu_separate_entrance'" in p for p in validate(rule, ctx))
+
+
+def test_district_names_are_known_text_values(chart_ctx):
+    scoped = rulebook(applies_when='district == "R-1b"', sources=[CELL_SOURCE, *NOTES],
+                      examples=[{"given": {"district": "R-1b", "rear_yard": 25, "lot_depth": 90}, "expect": "pass"},
+                                {"given": {"district": "R-1b", "rear_yard": 21, "lot_depth": 90}, "expect": "fail"},
+                                {"given": {"district": "R-2a", "rear_yard": 0, "lot_depth": 90}, "expect": "not_applicable"}])
+    assert validate(scoped, chart_ctx) == []
+    assert any("unknown district 'R-9z'" in p for p in validate(rulebook(
+        examples=RULE["examples"] + [{"given": {"district": "R-9z"}, "expect": "needs_review"}]), chart_ctx))
+
+
+def test_district_names_are_written_as_the_city_writes_them():
+    from rule_format.rulebook import district_name
+    assert [district_name(c) for c in ("R-1B", "R-3AA", "RU", "R-2C")] == ["R-1b", "R-3aa", "RU", "R-2c"]
+
+
+@pytest.mark.parametrize("applies_when, problem", [
+    ('district == "R-1b" or use == "R-2a"', "unknown use 'R-2a'"),      # a district where a use belongs: dead
+    ('district == "one_family_detached"', "unknown district 'one_family_detached'"),
+    ('use in ["one_family_detached", "R-1b"]', "unknown use 'R-1b'"),
+    ('lot_area > 0 and "R-1b" == "R-1b"', "must be compared with district or use"),
+])
+def test_a_quoted_value_must_fit_the_measure_it_is_compared_with(chart_ctx, applies_when, problem):
+    assert any(problem in p for p in validate(rulebook(sources=[CELL_SOURCE, *NOTES], applies_when=applies_when),
+                                              chart_ctx)), applies_when
+
+
+def test_quoted_values_that_fit_their_measure_pass(chart_ctx):
+    good = 'district == "R-1b" and use in ["one_family_detached"]'
+    assert not any("unknown" in p or "compared with" in p
+                   for p in validate(rulebook(sources=[CELL_SOURCE, *NOTES], applies_when=good), chart_ctx))
+
+
+def test_one_definition_of_a_district_column():
+    """The chart reader, the inspector and the drafter decide 'is this column a district' the same way, so an
+    extra all-caps heading (NOTES, SP) can't become a district in one place and not another."""
+    from document_extraction import charts
+    from rule_format.rulebook import DISTRICT_COLUMN
+    assert charts.DISTRICT is DISTRICT_COLUMN
+    names = ["R-1A", "R-1B", "R-3AA", "RU", "NOTES", "SP", "ADU", "Additional Regulations"]
+    assert [n for n in names if DISTRICT_COLUMN.fullmatch(n)] == ["R-1A", "R-1B", "R-3AA", "RU"]

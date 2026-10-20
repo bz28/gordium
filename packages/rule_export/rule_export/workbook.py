@@ -18,7 +18,8 @@ from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from openpyxl.styles import Alignment, Font, PatternFill
 
 from rule_format.labels import LABEL_FIELDS, load_pieces, revision_steps
-from rule_format.rulebook import APPROVAL_FIELDS, REPO, RULE_FIELDS, SOURCE_FIELDS, TERM_SCHEMAS, load, rulebook_paths
+from rule_format.rulebook import (APPROVAL_FIELDS, REPO, RULE_FIELDS, SOURCE_FIELDS, TERM_SCHEMAS, Context, _cell, load,
+                                  rulebook_paths)
 
 FONT = "Arial"                                   # like the architects' spreadsheet: 16 title, 12 headers, 11 body
 INK = "243746"                                   # their text color, on every cell they wrote
@@ -63,7 +64,9 @@ def citer(j: Path, documents: dict[str, dict]):
     """citation(source): where a quote is, in words a reader can follow, e.g. "City of Ithaca Code, Chapter 325
     Zoning (full text), §325-8A, p.24, lines 15–16". The document by its title in sources.yaml; for a document
     cut into pieces (2_extracted_text/<doc>.sections.jsonl), the section the first cited line is in; then page
-    and lines. The exact words go in their own column, and the link opens the page."""
+    and lines. A chart cell is cited by its section, row and district column, e.g. "City of Ithaca Zoning
+    Charts, p.3, Yard Dimensions · Rear · R-1B". The exact words go in their own column, and the link opens
+    the page."""
     sections = {}                                  # file -> [(page, first, last, piece id, title)]
     for path in sorted((j / "2_extracted_text").glob("*.sections.jsonl")):
         header, pieces = load_pieces(path)
@@ -83,6 +86,11 @@ def citer(j: Path, documents: dict[str, dict]):
         if not s.get("file"):
             return ""
         lines = s.get("lines") or []
+        if isinstance(s.get("cell"), dict):              # a chart cell: section · row · district column
+            c = s["cell"]
+            return ", ".join(p for p in [(documents.get(s["file"]) or {}).get("title") or s["file"],
+                                         f"p.{s['page']}" if s.get("page") is not None else "",
+                                         " · ".join(str(c.get(k, "")) for k in ("section", "row", "column"))] if p)
         parts = [(documents.get(s["file"]) or {}).get("title") or s["file"],
                  section(s["file"], s.get("page"), lines[0]) if lines else "",
                  f"p.{s['page']}" if s.get("page") is not None else "",
@@ -158,7 +166,7 @@ def _source_cols(quote_width):
     return [Col("Source", 8, "sources", lambda e, s, n, t: f"{n + 1} of {t}" if e.get("sources") else ""),
             Col("Citation", 34),
             Col("Page", 6, "sources", lambda e, s, n, t: s.get("page", "")),
-            Col("City's exact words", quote_width, "sources", lambda e, s, n, t: s.get("quote", "")),
+            Col("City's exact words", quote_width),          # a quote, or a chart cell's value (filled per tab)
             Col("Link", 10, "sources", lambda e, s, n, t: f"Open p.{s.get('page')}" if s.get("file") else "")]
 
 
@@ -194,6 +202,7 @@ COLUMNS = {
                Col("Downloaded", 12, "downloaded_on", _get("downloaded_on", _text)),
                Col("Adopted", 12, "adopted_on", _get("adopted_on", _text)),
                Col("Created", 12, "created_on", _get("created_on", _text)), Col("Pages", 7, "pages", _get("pages")),
+               Col("Chart pages", 10, "chart_pages", _get("chart_pages", lambda v: ", ".join(map(str, v)) if v else "")),
                Col("Fingerprint (SHA-256)", 30, "sha256", _get("sha256")),
                Col("Quotable", 9, "quotable", lambda e, s, n, t: "not downloaded" if "why_missing" in e
                    else "no" if e.get("quotable") is False else "yes"),
@@ -225,6 +234,12 @@ def tables(j: Path) -> dict[str, dict]:
     documents = {d["file"]: d for d in sources_file["documents"]}
     link = lambda s: page_link(j, documents, s["file"], s.get("page")) if s.get("file") else None
     cite = citer(j, documents)
+    ctx = Context.for_jurisdiction(j)          # the chart cells as the checker reads them (only verified ones)
+    def words(s):                              # the city's exact words: a quote, or the cited cell's value
+        if "quote" in s:
+            return s["quote"]
+        cell = _cell(s, ctx) if isinstance(s.get("cell"), dict) else None
+        return cell["value"] if cell else ""
     out = {}
 
     def per_source(entries, cols):                  # [(entry, fixed)] -> rows, links: one row per source
@@ -235,7 +250,7 @@ def tables(j: Path) -> dict[str, dict]:
         return rows, links
 
     out["Rules"] = _tab("GORDIUM | Zoning rules (drafts, checked by code)", COLUMNS["rule"], *per_source(
-        [(r, {"Zone": book.get("district", ""), "Rulebook": path, "Citation": cite})
+        [(r, {"Zone": book.get("district", ""), "Rulebook": path, "Citation": cite, "City's exact words": words})
          for path, book in rulebooks(j) for r in book.get("rules") or []], COLUMNS["rule"]))
 
     terms = {schema: load(j / f"4_term_definitions/{schema}.yaml") or {} for schema in TERM_SCHEMAS
@@ -243,7 +258,8 @@ def tables(j: Path) -> dict[str, dict]:
     for schema, tab, title in [("definitions", "Definitions", "GORDIUM | Definitions (the city's own words)"),
                                ("uses", "Uses", "GORDIUM | Use names (the only values a rule's `use` may take)")]:
         out[tab] = _tab(title, COLUMNS[schema], *per_source(
-            [(e, {"Id": key, "Citation": cite}) for key, e in terms.get(schema, {}).items()], COLUMNS[schema]))
+            [(e, {"Id": key, "Citation": cite, "City's exact words": words})
+             for key, e in terms.get(schema, {}).items()], COLUMNS[schema]))
 
     labels_by_doc = {}                                 # document -> (its labels file, the labels)
     for path in sorted((j / "3_section_labels").glob("*.yaml")):
