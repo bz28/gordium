@@ -310,3 +310,10 @@ def test_a_rulebook_that_isnt_valid_yaml_gives_a_plain_refusal(monkeypatch):
     report = _patched_load(monkeypatch, change)
     with pytest.raises(ValueError, match="can't read file"):
         report.tables(SITE)
+
+
+
+def test_a_broken_source_list_gives_a_plain_refusal(monkeypatch):
+    report = _patched_load(monkeypatch, lambda path, data: {} if path.name == "sources.yaml" else data)
+    with pytest.raises(ValueError, match="can't load its sources"):
+        report.tables(SITE)

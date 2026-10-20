@@ -74,4 +74,7 @@ writer is shared with `rule_export`).
 - the rear yard limit is worked out for this lot (≥ 22.5 ft);
 - every NEEDS REVIEW row has a reason, and no other row does;
 - the hand-drafted rulebook is preferred; bad project files are refused;
+- no report from a jurisdiction, term file or rulebook that fails `python -m rule_format`'s per-file checks
+  (the same functions, shared): a wrong quote, a district that isn't its file name, a uses list that fails its
+  checks, an unreadable file or source list each give a plain refusal, never PASS;
 - the same project gives the same workbook; the committed example matches a fresh build (also in CI).
