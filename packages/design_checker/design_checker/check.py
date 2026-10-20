@@ -206,7 +206,7 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     ws = wb.create_sheet("Check")
     h = view["header"]
     title(ws, f"GORDIUM | {view['summary']}")
-    lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]]
+    lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + (h.get("sources") or [])   # where each fact came from
     for n, text in enumerate(lines, start=2):
         ws.cell(row=n, column=1, value=text)
     by_id = {i["id"]: i for i in view["items"]}

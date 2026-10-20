@@ -21,46 +21,36 @@ A PR is done when every item has its test, and each test fails if the behavior i
 
 ---
 
-## A. Start box (board 1)
+## A. Start box (board 1; simplified as approved by Ben, 2026-10-20: this section supersedes the earlier one)
 
-A1 [rhino] **Command and dialog.** `GordiumStart` opens a semi-modal Eto dialog. Picking uses Rhino's pick-button pattern: the dialog hides while the user picks, then reappears with an inline result (e.g. "4 curves picked").
+A1 [rhino] **Command and dialog.** `GordiumStart` (and `GordiumCheck` on an empty file) opens one modal box, titled "New zoning check". `GordiumFacts` and the panel's **Edit site…** open the same box, titled "Zoning check · site". A Change or Pick button closes the box, runs the pick in the model, and opens the box again with the result.
 
-A2 [rhino] **Field order:** Address → Zoning district → Use → Street frontage → Lot lines → Grade → Existing building → Massing → buttons.
+A2 [code] **Rows, in this order** (`rhino_logic.box_rows`, tested in CI):
+1. **Address** and **[Look up]**. The lookup is a later PR; until then it reads "Look up (coming soon)", disabled, and the facts come from the lot as drawn.
+2. **Zoning district**, with its source ("entered by you" today; "from City map" once the lookup exists), a dropdown, and **☐ I confirm**. One district today; more than one later.
+3. **Use**: a dropdown.
+4. **Lot**: "<area> sf · from the tax map (±2 ft, approximate)" or "… · from your survey", with **Use my survey…** (pick the surveyed outline).
+5. **Street side**: the street's name, or "the highlighted line", with **Change…** (pick another lot line).
+6. **Ground**: what the ground is and where it came from. Today that is "flat at the lot level · as drawn", or the spot grades or terrain with their range. Its actions are **Place spot grades…**, **Pick terrain…** and **I'll regrade: set finished ground…**, plus one tick, **☐ No regrading near the house**.
+7. One line: "Not checked yet: overlays (historic, gorge, flood) · pitched roofs".
+8. An uncertain case the box can't settle shows as **one amber line with the action**:
+   - a corner lot → "This lot faces two streets: pick the front";
+   - two zones → "This lot is in two zones: pick the zone that applies";
+   - (with the lookup) not found or offline → manual entry.
+9. **[Cancel] [Draw]**.
 
-A3 [code] **Address.** Typed by the architect (prefilled "106 Ithaca Rd, Ithaca NY" for the example). Automatic lookup of the parcel, zone and lot outline from the City's map services comes with the separate site-lookup PR (it needs the City's permission first). Until then there is no lookup and no lookup errors; the field just records the address on the project and in the report.
+A3 [code] **"I confirm" is unticked on every new project.** On an existing project it is ticked only if the same district was confirmed at an earlier Draw. **Draw is enabled only when it is ticked**, with "Confirm the district to continue." beside it (`rhino_logic.district_confirmed`, `can_draw`).
 
-A4 [both] **Zoning district.**
-- A dropdown, prefilled "R-1b" (the only district with a rulebook today); source shown as "Entered by you" (later: "From the City zoning map, updated …" once site lookup exists).
-- An "I confirm the district" checkbox, unticked by default.
-- "Draw…" stays disabled until it is ticked.
-- The text "Overlays (historic, gorge, flood) are not checked in this release" is always shown.
+A4 [code] **No regrading near the house.** Ticked, the ground shown counts as the finished grade, and height is checked normally. Unticked, with only the existing ground, height and stories need review (C5). Ground set with "I'll regrade" is finished ground (`rhino_logic.ground_facts`).
 
-A5 [rhino] **Use:** a dropdown, default "One-family dwelling, detached".
+A5 [code] **Every fact has a source.** Each fact the box sets is saved as {value, source, confirmed_by, date} in the .3dm (`Gordium / fact_sources`). A Change records the source "entered by you". The checker never reads the sources, only the values. The panel shows them (Site facts, when no row is selected), and the report's Check tab lists them (`rhino_logic.fact_sources`, `present.source_lines`).
 
-A6 [rhino] **Street frontage:** a "Pick line…" button and an inline result: "Ithaca Rd · 73'-0" (approx.) · interior lot".
+A6 [rhino] **Removed from the box:**
+- existing building, roof, floor-to-floor, the "Ground is" select, and the massing radio;
+- the starting building is always drawn with the envelope (a "Hide starting house" toggle sits in the panel, and hiding it doesn't stop it being checked);
+- floor-to-floor stays 11'-8" in code, editable later through GordiumFacts.
 
-A7 [both] **Lot lines.** Radios, with "Tax map, approximate (±2'-0")" as the default and "Survey" with a "Pick curves…" button plus inline result. Survey is never preselected. While the tax map is selected, an amber "?" note says: "Lot from tax map: dimensions approximate. Items within 2'-0" of a limit will need review."
-
-A8 [both] **Grade.**
-- Plain radios: "Not set" (default) / "Terrain surface or mesh" with "Pick…" / "Spot grades" with "Place points…". Each has its own inline result.
-- Spot grades are point objects placed in the model, not typed numbers.
-- A "Ground is: Finished grade / Existing grade" select.
-- While not set, an amber note: "Building height and stories need review until grade is set."
-
-A9 [rhino] **Existing building:** "None" (default) / "Pick existing… (coming later)", disabled.
-
-A10 [both] **Massing options.**
-- Floor-to-floor height, default 11'-8".
-- Roof: Flat only; Gable and Hip listed as "(coming later)", disabled.
-- Radios: "Envelope and starting massing" (default) / "Envelope only, no massing".
-
-A11 [code] **Preview line.** Before drawing, the dialog states the starting massing, including the lot source: "Starting massing (on tax-map lot): 1 group of 3 floor solids · 35'-0" · 53'-0" × 30'-11" · 1,639 sf, 24.94% of 25%".
-
-A12 [rhino] **Draw button.**
-- The label reads "Draw site and massing", or "Draw site and envelope" with Envelope only.
-- It is disabled until the district is confirmed, with the reason shown: "Confirm the district to continue."
-
-A13 [rhino] **Look.** System default buttons, checkboxes and link color; no brand accent color.
+A7 [rhino] **Look.** System default buttons and checkboxes; no brand accent color.
 
 ## B. Generated massing and envelope (board 2)
 

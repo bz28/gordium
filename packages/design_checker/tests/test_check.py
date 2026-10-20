@@ -461,3 +461,76 @@ def test_the_dash_patterns_fit_rhinos_signed_int32():
     for name in ("PHANTOM", "DASHED"):
         assert -(1 << 31) <= found[name] < (1 << 31), name
         assert found[name] & 0xFFFFFFFF == found[name] % (1 << 32)       # the same 32 bits
+
+
+# ---- the start box as approved 2026-10-20 (spec A) ----------------------------------------------------------------
+
+def _box(**over):
+    return {"address": "106 Ithaca Rd, Ithaca, NY", "zone": "R-1b", "use": "one_family_detached",
+            "use_name": "One-family dwelling, detached", "lot_area": 6570.0, "lot_surveyed": False,
+            "ground": {"kind": "flat"}, **over}
+
+
+def test_i_confirm_is_unticked_on_a_new_project_and_draw_waits_for_it():
+    from design_checker import rhino_logic as logic
+    confirmed = {"value": "R-1b", "source": "entered by you", "confirmed_by": "you", "date": "2026-10-20"}
+    assert not logic.district_confirmed("start", confirmed, "R-1b")             # a new project: always unticked
+    assert logic.district_confirmed("check", confirmed, "R-1b")                 # this district, confirmed before
+    assert not logic.district_confirmed("check", confirmed, "R-2a")             # changed since: confirm again
+    assert not logic.district_confirmed("check", {}, "R-1b")
+    rows = {r["key"]: r for r in logic.box_rows(_box())}
+    assert rows["zone"]["tick"] == ("I confirm", False) and not logic.can_draw(_box())
+    assert logic.can_draw(_box(district_confirmed=True))
+
+
+def test_the_box_has_only_the_approved_rows_with_their_sources():
+    from design_checker import rhino_logic as logic
+    rows = logic.box_rows(_box())
+    assert [r["key"] for r in rows] == ["address", "zone", "use", "lot", "street", "ground"]
+    by = {r["key"]: r for r in rows}
+    assert by["address"]["actions"] == [("lookup", "Look up (coming soon)", False)]      # lookup: a later PR
+    assert by["zone"]["text"] == "R-1b · entered by you"
+    assert by["lot"]["text"] == "6,570 sf · from the tax map (±2 ft, approximate)"
+    assert by["lot"]["actions"] == [("lot", "Use my survey…", True)]
+    assert by["street"]["text"] == "the highlighted line"
+    assert by["ground"]["text"] == "flat at the lot level · as drawn"
+    assert by["ground"]["tick"] == ("No regrading near the house", False)
+    assert [a for a, _, _ in by["ground"]["actions"]] == ["spot", "terrain", "regrade"]
+    assert logic.NOT_CHECKED_YET == "Not checked yet: overlays (historic, gorge, flood) · pitched roofs"
+    box = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text().split("def start_box(", 1)[1].split("\ndef ", 1)[0]
+    for gone in ("Existing building", "Floor to floor", "\"Roof\"", "Ground is", "Envelope only", "Massing"):
+        assert gone not in box, gone                                          # removed from the box
+
+
+def test_the_amber_line_names_what_to_do():
+    from design_checker import rhino_logic as logic
+    assert logic.uncertain(_box()) is None
+    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: pick the front"
+    assert logic.uncertain(_box(zones_found=["R-1b", "R-2a"])) == "This lot is in two zones: pick the zone that applies"
+
+
+def test_no_regrading_near_the_house_toggles_height_between_checked_and_needs_review(facts):
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check
+    for ticked, expected in ((True, {"complies", "does_not_comply"}), (False, {"needs_review"})):
+        ground = logic.ground_facts(_box(no_regrading=ticked), 0.0)
+        got = check(MODEL, {**facts, **{k: v for k, v in ground.items() if v is not None}})
+        height = {i["name"]: i for i in got["view"]["items"]}["Building height"]
+        assert height["status"] in expected, (ticked, height["status"], height["reason"])
+    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0)["grade_is"] == "finished"   # set as finished
+
+
+def test_every_fact_records_its_source_and_who_confirmed_it_and_the_panel_and_report_show_it(facts, tmp_path):
+    import openpyxl
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check
+    sources = logic.fact_sources(_box(district_confirmed=True), "2026-10-20", confirmed=True)
+    assert sources["zone"] == {"value": "R-1b", "source": "entered by you", "confirmed_by": "you", "date": "2026-10-20"}
+    assert sources["lot"]["source"] == "the tax map (±2 ft)"
+    unticked = logic.fact_sources(_box(), "2026-10-20", confirmed=True)
+    assert unticked["zone"]["confirmed_by"] is None                       # the district needs its own tick
+    got = check(MODEL, facts, tmp_path / "r.xlsx", extras={"sources": sources})
+    lines = got["view"]["header"]["sources"]
+    assert "Zoning district: R-1b · entered by you · confirmed by you, 2026-10-20" in lines
+    text = " ".join(str(c.value) for r in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows() for c in r if c.value)
+    assert "Zoning district: R-1b · entered by you" in text

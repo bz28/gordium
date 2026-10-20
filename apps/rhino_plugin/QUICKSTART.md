@@ -39,27 +39,28 @@ never says "complies" unless it is sure (see [What "needs review" means](#what-n
    - On an empty file Gordium draws its sample lot (106 Ithaca Rd, 73 ft × 90 ft) so you can try it at once.
    - To use your own lot instead, first draw it as one closed polyline on a layer named `Site`, then run
      `GordiumStart`.
-3. **The start box** opens, filled in. Check each line, top to bottom:
-   - **Address**: recorded on the project and the report.
-   - **Zoning district**: R-1b. Tick **I confirm the district**. Draw stays off until you do, because
-     Gordium doesn't look up the zoning map yet. Overlays (historic, gorge, flood) aren't checked in this
-     release.
+3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
+   - **Address**: recorded on the project and the report. (Look up from the City's map is coming soon.)
+   - **Zoning district**: R-1b, "entered by you". Tick **I confirm**: Draw stays off until you do, on every new
+     project, because Gordium doesn't look up the zoning map yet.
    - **Use**: one-family dwelling, detached.
-   - **Street frontage**: the lot line on the street (highlighted blue). **Pick line…** to change it.
-   - **Lot lines**: *Tax map, approximate (±2'-0")* or *Survey*. Gordium treats tax-map lines as uncertain by
-     2 ft: anything within 2 ft of a limit needs review until you pick survey lot lines.
-   - **Grade**: *Not set*, a *Terrain surface or mesh* (**Pick…**), or *Spot grades* (**Place points…**).
-     Without a grade, the yards and coverage are still checked, but height and stories need review.
-   - **Ground is**: *Finished grade* (what the code measures from) or *Existing grade* (height then needs
-     review).
-   - **Floor to floor**, **Massing** (*Envelope and starting massing*, or *Envelope only*), and the preview
-     line: the starting building's size, footprint and coverage.
-   
-   Any **Pick** button closes the box, lets you pick in the model, and opens it again.
-4. **Draw site and massing.** You see:
+   - **Lot**: its area and where it came from: "6,570 sf · from the tax map (±2 ft, approximate)". Gordium treats
+     tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my
+     survey…** to pick your surveyed outline instead.
+   - **Street side**: the lot line on the street (highlighted). **Change…** to pick another.
+   - **Ground**: "flat at the lot level · as drawn", or your spot grades or terrain. **Place spot grades…**,
+     **Pick terrain…**, or **I'll regrade: set finished ground…**.
+   - **No regrading near the house**: tick it if the ground shown is the finished ground. Then height is checked.
+     Unticked, height and stories need review, because the code measures height from *finished* grade.
+   - An amber line appears when the box can't decide something itself, with what to do (for example "This lot
+     faces two streets: pick the front").
+
+   Any button that picks something closes the box, lets you pick in the model, and opens it again.
+4. **Draw.** You see:
    - the lot's property line with each edge's length (in Top view);
    - the buildable envelope, see-through blue: the space every yard and the height limit leave;
-   - the largest legal starting building: three floor blocks, one group, on the `Gordium::Massing` layer;
+   - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
+     `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked);
    - top right, the **status box**: one line such as "? 6 need review · 4 comply · 2 not checked";
    - the **Gordium panel** (a floating window): every item, bad news first.
 5. **Make an edit.** Move, stretch or add solids as you normally would. Half a second after you stop, Gordium

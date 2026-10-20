@@ -828,7 +828,25 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
         ["Set grade…"] if grade_label(facts) == "not set" or facts.get("grade_is") == "existing" else [])
     return {"place": " · ".join(p for p in [facts.get("address") or "", facts.get("zone") or "",
                                             use_names.get(use, use.replace("_", " "))] if p),
-            "code": code, "draft": DRAFT, "lot": lot, "grade": grade, "actions": actions}
+            "code": code, "draft": DRAFT, "lot": lot, "grade": grade, "actions": actions,
+            "sources": source_lines(extras.get("sources") or {})}
+
+
+SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Street side",
+                "ground": "Ground"}
+
+
+def source_lines(sources: dict) -> list[str]:
+    """Each site fact with where it came from, as the panel and the report show it: "Zoning district: R-1b ·
+    entered by you · confirmed by you, 2026-10-20". The checker never reads these: only the facts' values."""
+    out = []
+    for key, name in SOURCE_NAMES.items():
+        s = sources.get(key)
+        if not s or s.get("value") in (None, ""):
+            continue
+        who = f"confirmed by {s['confirmed_by']}, {s.get('date')}" if s.get("confirmed_by") else "not confirmed"
+        out.append(f"{name}: {s['value']} · {s.get('source') or 'not known'} · {who}")
+    return out
 
 
 def notice(before: dict | None, items: list[dict]) -> tuple[dict, str | None]:

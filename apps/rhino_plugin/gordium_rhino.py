@@ -503,7 +503,8 @@ def _actions():
     """What the panel's buttons do (gordium_ui.make_panel)."""
     return {"zoom": zoom_to, "report": open_report, "envelope": set_envelope, "edit_site": edit_facts,
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check, "legend": ui.legend,
-            "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground}
+            "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
+            "massing": hide_massing}
 
 
 def panel():
@@ -730,7 +731,8 @@ def _extras(doc, facts):
     left_out = _not_included(doc, _find(doc, facts.get("lot_id") or ""))
     return {"scope": {"groups": len(groups), "solids": len(buildings), "layer": ", ".join(layers)},
             "not_included": left_out, "touching": _touching(doc, left_out, buildings),
-            "ground_like": _ground_like(doc, left_out, _find(doc, facts.get("lot_id") or ""))}
+            "ground_like": _ground_like(doc, left_out, _find(doc, facts.get("lot_id") or "")),
+            "sources": fact_sources(doc)}
 
 
 def _touching(doc, ids, buildings):
@@ -784,57 +786,92 @@ def _feet(text, default):
     return float(m.group(1)) + (float(m.group(2)) / 12 if m.group(2) else 0.0)
 
 
-def _box_state(doc, facts, options, saved_ui):
-    """The start box's fields from the facts and the box's own saved choices."""
+SOURCES_ENTRY = "fact_sources"               # Gordium / fact_sources: {fact: {value, source, confirmed_by, date}}
+
+
+def fact_sources(doc):
+    try:
+        return json.loads(doc.Strings.GetValue(SECTION, SOURCES_ENTRY) or "{}")
+    except ValueError:
+        return {}
+
+
+def _lot_level(doc, facts):
+    """The lot outline's level, in feet (the ground "as drawn" when nothing else says where it is)."""
+    lot = _find(doc, facts.get("lot_id") or "")
+    return lot.Geometry.GetBoundingBox(True).Min.Z * _scale(doc) if lot is not None else 0.0
+
+
+def _box_state(doc, facts, options, saved_ui, mode="check"):
+    """The start box's state from the facts, their saved sources and the box's own choices (rhino_logic.box_rows
+    turns it into rows). "I confirm" is unticked on every new project: only a district confirmed at an earlier
+    Draw, and unchanged since, stays ticked."""
     k = _scale(doc)
-    lines = facts.get("street_line") or []
-    length = sum(((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5 for a, b in lines)
-    # the facts the check uses decide what the box shows (set from the panel too, not only from the box)
-    grade = facts.get("grade_from") if facts.get("grade_from") in ("spot", "terrain") else \
-        "not_set" if facts.get("grade_elevation") is None else (saved_ui.get("grade") or "not_set")
-    spots = len(_grade_points(doc))
-    return {"address": facts.get("address") or "", "zone": facts.get("zone"),
-            "district_confirmed": bool(saved_ui.get("district_confirmed")), "use": facts.get("use"),
-            "street": ("the highlighted line · " + _ft_text(length) + (" (approx.)" if not facts.get("lot_surveyed") else "")
-                       + " · " + ("corner lot" if facts.get("corner_lot") else "interior lot")) if lines else "",
-            "lot_source": "survey" if facts.get("lot_surveyed") else "tax_map",
-            "lot_picked": "1 curve picked" if facts.get("lot_id") else "none picked",
-            "grade": grade, "grade_is": facts.get("grade_is") or "finished",
-            "grade_result": (str(spots) + " spot grades" if grade == "spot" else
-                             "1 surface picked" if grade == "terrain" and saved_ui.get("terrain_id") else ""),
-            "floor_to_floor": saved_ui.get("floor_to_floor") or "11'-8\"", "massing": saved_ui.get("massing") or "both",
-            "preview": saved_ui.get("preview") or "", "_scale": k}
+    sources = fact_sources(doc)
+    lot = _find(doc, facts.get("lot_id") or "")
+    area = None
+    if lot is not None:
+        amp = rg.AreaMassProperties.Compute(lot.Geometry)
+        area = amp.Area * k * k if amp else None
+    zone_fact = sources.get("zone") or {}
+    confirmed = logic.district_confirmed(mode, zone_fact, facts.get("zone"))
+    points = _grade_points(doc)
+    kind = saved_ui.get("ground_kind") or (facts.get("grade_from") if facts.get("grade_from") in ("spot", "terrain")
+                                            else "flat")
+    if kind in ("spot", "regrade") and not points:
+        kind = "flat"
+    zs = [p[2] for p in points]
+    span = (_ft_text(min(zs)) + " to " + _ft_text(max(zs))) if zs and kind in ("spot", "regrade") else ""
+    return {"address": facts.get("address") or "", "address_source": (sources.get("address") or {}).get("source"),
+            "zone": facts.get("zone"), "zone_source": zone_fact.get("source") or logic.ENTERED,
+            "district_confirmed": confirmed, "use": facts.get("use"),
+            "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
+            "lot_area": area, "lot_surveyed": bool(facts.get("lot_surveyed")),
+            "street_name": facts.get("street_name"), "street_source": saved_ui.get("street_source"),
+            "ground": {"kind": kind, "count": len(points), "range": span},
+            "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": bool(facts.get("corner_lot")),
+            "zones_found": facts.get("zones_found") or [], "_scale": k}
 
 
 def _ft_text(feet):
     inches = int(round(feet * 12 * 8))            # to 1/8 in
-    ft, rest = divmod(inches, 96)
+    sign = "-" if inches < 0 else ""
+    ft, rest = divmod(abs(inches), 96)
     whole, eighth = divmod(rest, 8)
-    return "%d'-%d%s\"" % (ft, whole, (" %d/8" % eighth) if eighth else "")
+    return "%s%d'-%d%s\"" % (sign, ft, whole, (" %d/8" % eighth) if eighth else "")
 
 
 def _apply_box(doc, facts, state, saved_ui):
-    """The facts and the box's own choices from what the box says."""
+    """The facts (what the checker gets) and the box's own choices, from what the box says."""
     facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],
-                 lot_surveyed=state["lot_source"] == "survey", grade_is=state["grade_is"])
+                 lot_surveyed=bool(state.get("lot_surveyed")))
     if not facts.get("address"):
         facts.pop("address")
-    for key in ("grade_points", "grade_from"):
-        facts.pop(key, None)
-    if state["grade"] == "not_set":                 # no grade: height and stories wait for one
-        facts.pop("ground_is_flat", None)
-        facts.pop("grade_elevation", None)
-    else:
-        facts["grade_from"] = state["grade"]        # the points are read (or sampled) at every check
-        facts.pop("ground_is_flat", None)
-        facts.pop("grade_elevation", None)
-    saved_ui = dict(saved_ui, district_confirmed=state["district_confirmed"], grade=state["grade"],
-                    floor_to_floor=state["floor_to_floor"], massing=state["massing"])
+    facts.pop("grade_points", None)                 # read (or sampled) from the model at every check
+    for key, value in logic.ground_facts(state, _lot_level(doc, facts)).items():
+        if value is None:
+            facts.pop(key, None)
+        else:
+            facts[key] = value
+    saved_ui = dict(saved_ui, ground_kind=(state.get("ground") or {}).get("kind") or "flat",
+                    no_regrading=bool(state.get("no_regrading")))
     return facts, saved_ui
 
 
+def _place_spots(doc, prompt):
+    layer = _layer(doc, GRADE_LAYER)
+    while True:                                      # each click places a spot grade; Enter when done
+        rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, True)
+        if rc != Rhino.Commands.Result.Success:
+            break
+        attrs = Rhino.DocObjects.ObjectAttributes()
+        attrs.LayerIndex = layer
+        doc.Objects.AddPoint(point, attrs)
+        doc.Views.Redraw()
+
+
 def _box_pick(doc, what, facts, saved_ui):
-    """One pick the start box asked for, with the box hidden (A1). Esc or Enter: nothing changes."""
+    """One pick the start box asked for, with the box hidden. Esc or Enter: nothing changes."""
     scale = _scale(doc)
     try:
         if what == "street":
@@ -844,12 +881,14 @@ def _box_pick(doc, what, facts, saved_ui):
                 if rc == Rhino.Commands.Result.Success:
                     a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
                     facts["street_line"] = [[[a.X * scale, a.Y * scale], [b.X * scale, b.Y * scale]]]
-        elif what == "lot":
+                    saved_ui["street_source"] = logic.ENTERED
+        elif what == "lot":                          # Use my survey: the surveyed outline
             lots = _lot_candidates(doc)
-            picked = _pick(doc, "Click the lot outline (a closed curve on the Site layer); Enter keeps it", lots, "Lot",
-                           Rhino.DocObjects.ObjectType.Curve)
+            picked = _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
+                           lots, "Lot", Rhino.DocObjects.ObjectType.Curve)
             if picked:
-                facts = logic.after_lot_pick(facts, picked)
+                facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
+                facts["lot_surveyed"] = True
         elif what == "terrain":
             go = Rhino.Input.Custom.GetObject()
             go.SetCommandPrompt("Click the terrain surface or mesh")
@@ -857,56 +896,65 @@ def _box_pick(doc, what, facts, saved_ui):
                 Rhino.DocObjects.ObjectType.Mesh
             if go.Get() == Rhino.Input.GetResult.Object:
                 saved_ui["terrain_id"] = str(go.Object(0).ObjectId)
-                saved_ui["grade"] = "terrain"
-        elif what == "spot":
-            layer = _layer(doc, GRADE_LAYER)
-            while True:                              # each click places a spot grade; Enter when done
-                rc, point = Rhino.Input.RhinoGet.GetPoint("Click a spot grade at a wall (Enter when done)", True)
-                if rc != Rhino.Commands.Result.Success:
-                    break
-                attrs = Rhino.DocObjects.ObjectAttributes()
-                attrs.LayerIndex = layer
-                doc.Objects.AddPoint(point, attrs)
-                doc.Views.Redraw()
-            saved_ui["grade"] = "spot"
+                saved_ui["ground_kind"] = "terrain"
+        elif what in ("spot", "regrade"):
+            _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
+                         "Click the finished ground you'll grade to, at each wall (Enter when done)")
+            saved_ui["ground_kind"] = what
     finally:
         _highlight(doc, facts)
     return facts, saved_ui
 
 
 def confirm(doc, facts, options, mode="check"):
-    """The start box (A1–A13), prefilled. Draw (or Check) keeps the facts once the district is confirmed; a pick
-    closes the box, picks in the model, and shows the box again with the result; closing it (or Esc) saves
-    nothing (None)."""
+    """The start box, prefilled (spec A). Draw keeps the facts once the district is confirmed, with where each came
+    from (saved beside them); a pick closes the box, picks in the model, and shows the box again with the result;
+    closing it (or Esc) saves nothing (None)."""
     o = overlay()
     _clear(o)                           # facts are being set: no earlier result (of any model) stays shown
     o.message = None
     _highlight(doc, facts)
     saved_ui = _ui_state(doc)
     try:
-        if STATE.get("auto_ok"):          # scripted runs (tests, the demo): accept the prefilled facts
-            state = _box_state(doc, facts, options, saved_ui)
-            state["district_confirmed"] = True
-            if STATE.get("on_confirm"):   # ...after recording what the box shows (the demo captures it)
+        if STATE.get("auto_ok"):          # scripted runs (tests, the demo): the architect ticks and draws
+            state = _box_state(doc, facts, options, saved_ui, mode)
+            if STATE.get("on_confirm"):   # ...after recording what the box shows, before the tick
                 STATE["on_confirm"](doc, facts, _describe(facts, options["uses"]), state)
-            facts, saved_ui = _apply_box(doc, facts, dict(state, **(STATE.get("box_overrides") or {})), saved_ui)
-            _save_ui_state(doc, saved_ui)
-            return facts
+            state = dict(state, district_confirmed=True, **(STATE.get("box_overrides") or {}))
+            return _drawn(doc, facts, state, saved_ui)
         while True:
-            state = _box_state(doc, facts, options, saved_ui)
+            state = _box_state(doc, facts, options, saved_ui, mode)
             state["_on_shown"] = STATE.get("on_box_shown")     # the dialog capture in the in-Rhino test
             what = ui.start_box(state, options, mode)
             if what is None:
                 return None
-            facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
             if what == "draw":
-                _save_ui_state(doc, saved_ui)
-                return facts
+                return _drawn(doc, facts, state, saved_ui)
+            facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
             facts, saved_ui = _box_pick(doc, what.split(":", 1)[1], facts, saved_ui)
+            _save_ui_state(doc, saved_ui)
     finally:
         o.confirm = None
         o.labels = []
         doc.Views.Redraw()
+
+
+def _drawn(doc, facts, state, saved_ui):
+    """Draw: the facts for the checker, and every fact's source and confirmation saved in the .3dm."""
+    facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
+    _save_ui_state(doc, saved_ui)
+    doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(
+        logic.fact_sources(state, time.strftime("%Y-%m-%d"), confirmed=True)))
+    return facts
+
+
+def hide_massing(hidden):
+    """Hide starting house: the Gordium::Massing layer off (still checked: only its drawing is turned off)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    index = doc.Layers.FindByFullPath(logic.MASSING, -1)
+    if index >= 0:
+        doc.Layers[index].IsVisible = not hidden
+    doc.Views.Redraw()
 
 
 class Cancelled(Exception):
@@ -1441,19 +1489,6 @@ def add_floors(doc, start):
     return ids
 
 
-def _preview(start, facts):
-    """The start box's preview line (A11): "Starting massing (on tax-map lot): 1 group of 3 floor solids · 35'-0" ·
-    53'-0" × 30'-11" · 1,639 sf, 24.95% coverage". Every number is the checker's own text (present.py), so it
-    reads the same as the panel (coverage, a maximum, rounded up)."""
-    p = start.get("preview")
-    if not p:
-        return "No starting massing on this lot shape: draw one and Gordium will check it"
-    where = "on tax-map lot" if not facts.get("lot_surveyed") else "on the surveyed lot"
-    return ("Starting massing (" + where + "): 1 group of " + str(p["floors"]) + " floor solids · " + p["height"] +
-            " · " + p["size"] + (" · " + p["area"] if p.get("area") else "") +
-            (", " + p["coverage"] + (" of " + p["limit"] if p.get("limit") else " coverage") if p.get("coverage") else ""))
-
-
 def gordium_start():
     """A new project: the prefilled facts (address, building type, zone, street side) for the architect to confirm,
     then the lot and the largest legal starting building as stacked floors, checked, with live mode on. Starts
@@ -1478,27 +1513,16 @@ def gordium_start():
         facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
     path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
     export(doc, path)
-    saved_ui = _ui_state(doc)
-    try:                                 # the box's preview line; the box still opens if it can't be worked out
-        saved_ui["preview"] = _preview(ask({"cmd": "start", "model": path, "facts": facts,
-                                            "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), None)}), facts)
-    except Exception as e:
-        saved_ui["preview"] = "No preview yet (" + str(e)[:80] + ")"
-    _save_ui_state(doc, saved_ui)
     facts = confirm(doc, facts, options, "start")
     if facts is None:
         Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
         return None
     save_facts(doc, facts)
     saved_ui = _ui_state(doc)
-    if saved_ui.get("massing") == "envelope":        # envelope only: the site and the envelope, no massing
-        result = run_check(doc, report=False)
-        live(True)
-        documents(True)
-        Rhino.RhinoApp.WriteLine("Gordium: drew the site and the buildable envelope (no massing)")
-        return result
+    # always the envelope and the 3-floor starting house (hide it from the panel); floor to floor 11'-8" unless
+    # GordiumFacts set another
     start = ask({"cmd": "start", "model": path, "facts": check_facts(doc, facts),
-                 "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), None)})
+                 "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), logic.FLOOR_TO_FLOOR)})
     STATE["start"] = {k: start.get(k) for k in ("stories", "height", "area", "coverage_allowed", "notes", "floors")}
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)

@@ -247,3 +247,111 @@ def guard(fn, where, fallback=None):
                 pass
             return fallback
     return safe
+
+
+# ---- the start box (spec A, as approved 2026-10-20): what it shows, decided here so CI can test it ------------
+NOT_CHECKED_YET = "Not checked yet: overlays (historic, gorge, flood) · pitched roofs"
+ENTERED = "entered by you"
+FLOOR_TO_FLOOR = 11 + 8 / 12                 # ft: the starting house's floor height (editable later in GordiumFacts)
+GROUND_CHOICES = [("spot", "Place spot grades…"), ("terrain", "Pick terrain…"),
+                  ("regrade", "I'll regrade: set finished ground…")]
+
+
+def lot_text(area, surveyed):
+    """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"."""
+    size = f"{area:,.0f} sf" if isinstance(area, (int, float)) else "area not known"
+    return size + " · from " + ("your survey" if surveyed else "the tax map (±2 ft, approximate)")
+
+
+def ground_text(ground):
+    """The Ground row: what the ground is and where it came from ("flat at the lot level · as drawn", "4 spot
+    grades, 0'-0" to 3'-0" · placed by you", "terrain · picked by you", or finished ground you set)."""
+    kind = ground.get("kind") or "flat"
+    if kind == "flat":
+        return "flat at the lot level · as drawn"
+    span = ground.get("range") or ""
+    what = {"spot": f"{ground.get('count', 0)} spot grades", "terrain": "terrain",
+            "regrade": f"finished ground you set ({ground.get('count', 0)} spot grades)"}[kind]
+    return what + (", " + span if span else "") + " · " + ("picked by you" if kind == "terrain" else "placed by you")
+
+
+def box_rows(state):
+    """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
+    tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,
+    lot_area, lot_surveyed, street_name, ground {kind, count, range}, no_regrading."""
+    return [
+        {"key": "address", "label": "Address", "text": state.get("address") or "",
+         "actions": [("lookup", "Look up (coming soon)", False)], "tick": None},
+        {"key": "zone", "label": "Zoning district",
+         "text": (state.get("zone") or "—") + " · " + (state.get("zone_source") or ENTERED),
+         "actions": [("zone", "Change", True)], "tick": ("I confirm", bool(state.get("district_confirmed")))},
+        {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
+         "actions": [("use", "Change", True)], "tick": None},
+        {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed")),
+         "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))], "tick": None},
+        {"key": "street", "label": "Street side", "text": state.get("street_name") or "the highlighted line",
+         "actions": [("street", "Change…", True)], "tick": None},
+        {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
+         "actions": [(k, t, True) for k, t in GROUND_CHOICES],
+         "tick": ("No regrading near the house", bool(state.get("no_regrading")))},
+    ]
+
+
+def can_draw(state):
+    """Draw is on only once the district is confirmed: Gordium doesn't look the zoning map up yet."""
+    return bool(state.get("district_confirmed"))
+
+
+def uncertain(state):
+    """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
+    if state.get("corner_lot"):
+        return "This lot faces two streets: pick the front"
+    if len(state.get("zones_found") or []) > 1:
+        return "This lot is in two zones: pick the zone that applies"
+    return None
+
+
+def ground_facts(state, lot_level):
+    """The facts the checker gets from the Ground row (the checker never sees where a fact came from). Ground you
+    set as finished, or ticked "No regrading near the house", counts as the finished grade the code measures
+    from; ground only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
+    ground = state.get("ground") or {}
+    kind = ground.get("kind") or "flat"
+    finished = kind == "regrade" or bool(state.get("no_regrading"))
+    out = {"grade_is": "finished" if finished else "existing"}
+    if kind == "flat":
+        out.update(ground_is_flat=True, grade_elevation=lot_level, grade_from=None)
+    else:
+        out.update(ground_is_flat=None, grade_elevation=None, grade_from="terrain" if kind == "terrain" else "spot")
+    return out
+
+
+def fact_sources(state, today, confirmed):
+    """Every fact the box set, as {value, source, confirmed_by, date}: saved in the .3dm beside the facts and
+    shown in the panel and the report. `confirmed`: the architect pressed Draw (the district needs its own tick)."""
+    by = "you" if confirmed else None
+    ground = state.get("ground") or {}
+    kind = ground.get("kind") or "flat"
+
+    def fact(value, source, who=by):
+        return {"value": value, "source": source, "confirmed_by": who, "date": today}
+
+    return {
+        "address": fact(state.get("address") or None, state.get("address_source") or ENTERED),
+        "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
+                     by if state.get("district_confirmed") else None),
+        "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or ENTERED),
+        "lot": fact(lot_text(state.get("lot_area"), state.get("lot_surveyed")),
+                    "your survey" if state.get("lot_surveyed") else "the tax map (±2 ft)"),
+        "street": fact(state.get("street_name") or "the highlighted line",
+                       state.get("street_source") or "suggested: the lot line on the street side"),
+        "ground": fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
+                       "as drawn" if kind == "flat" else ("picked by you" if kind == "terrain" else "placed by you")),
+    }
+
+
+def district_confirmed(mode, zone_fact, zone):
+    """Whether "I confirm" starts ticked: never on a new project (GordiumStart); on an existing one only if this
+    same district was confirmed at an earlier Draw (its saved source says who confirmed it)."""
+    zone_fact = zone_fact or {}
+    return mode != "start" and bool(zone_fact.get("confirmed_by")) and zone_fact.get("value") == zone

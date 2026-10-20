@@ -173,10 +173,20 @@ def make_panel(actions):
     layout.Spacing = ed.Size(6, 6)
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
-    layout.Add(_envelope_box(actions))
+    layout.Add(row(_envelope_box(actions), _massing_box(actions)))
     layout.Add(footer)
     form.Content = layout
     return parts
+
+
+def _massing_box(actions):
+    """Hide starting house: the Gordium::Massing layer off. Hidden, it is still checked (a hidden building still
+    counts, as everywhere in Gordium): only drawing it is turned off."""
+    box = ef.CheckBox()
+    box.Text = "Hide starting house"
+    box.Checked = False
+    box.CheckedChanged += logic.guard(lambda s, e: actions["massing"](bool(box.Checked)), "hide the starting house")
+    return box
 
 
 def _envelope_box(actions):
@@ -280,6 +290,11 @@ def show_detail(parts):
     i = parts["by_id"].get(parts["selected"])
     if i is None:
         d.AddRow(_wide("Select an item to see the code's words, the citation and how it was measured.", size=11))
+        sources = (((parts.get("view") or {}).get("header") or {}).get("sources")) or []
+        if sources:                           # the site facts, each with where it came from
+            d.AddRow(_wide("Site facts", bold=True, size=12))
+            for s in sources:
+                d.AddRow(_wide(s, size=11))
         d.Create()
         return
     det = i["detail"]
@@ -393,11 +408,11 @@ def legend():
 # ---- the start box (A1–A13) ----------------------------------------------------------------------------------
 
 def start_box(state, options, mode):
-    """The start box, every field in the order an architect works (A2). `state` is a dict this edits:
-    address, zone, district_confirmed, use, street (text), lot_source ("tax_map"/"survey"), lot_picked (text),
-    grade ("not_set"/"terrain"/"spot"), grade_result (text), grade_is ("finished"/"existing"), floor_to_floor
-    (text), massing ("both"/"envelope"), preview (text). Returns "draw", "pick:<what>" (the caller hides it,
-    picks, and shows it again: A1) or None (closed, Esc: nothing saved)."""
+    """The start box (spec A, as approved 2026-10-20). What it shows is rhino_logic.box_rows (tested in CI); this
+    only draws it: Address, Zoning district (with its source and "I confirm", unticked on a new project), Use,
+    Lot, Street side, Ground (with "No regrading near the house"), what isn't checked yet, the one amber line for
+    a case it can't settle, and [Cancel] [Draw]. Returns "draw", "pick:<what>" (the caller hides it, picks, and
+    shows it again) or None (closed, Esc: nothing saved). `state` is edited in place."""
     dialog = ef.Dialog[bool]()
     dialog.Title = "New zoning check" if mode == "start" else "Zoning check · site"
     dialog.Padding = ed.Padding(14)
@@ -410,96 +425,69 @@ def start_box(state, options, mode):
 
     address = ef.TextBox()
     address.Text = state.get("address") or ""
+    address.Width = 300
     zone = ef.DropDown()
     for z in options["zones"]:
         zone.Items.Add(z)
     zone.SelectedValue = next((x for x in zone.Items if x.Text == state.get("zone")), None)
     if zone.SelectedIndex < 0 and zone.Items.Count:
         zone.SelectedIndex = 0
+    first_zone = zone.SelectedValue.Text if zone.SelectedValue else None
     confirm = ef.CheckBox()
-    confirm.Text = "I confirm the district"
     confirm.Checked = bool(state.get("district_confirmed"))
     use = ef.DropDown()
     names = list(options["uses"].items())
     for _, n in names:
         use.Items.Add(n)
     use.SelectedIndex = max(0, [k for k, _ in names].index(state.get("use")) if state.get("use") in options["uses"] else 0)
-    lot = ef.RadioButtonList()
-    lot.Orientation = ef.Orientation.Vertical
-    lot.Items.Add("Tax map, approximate (±2'-0\")")
-    lot.Items.Add("Survey")
-    lot.SelectedIndex = 1 if state.get("lot_source") == "survey" else 0
-    grade = ef.RadioButtonList()
-    grade.Orientation = ef.Orientation.Vertical
-    for g in ("Not set", "Terrain surface or mesh", "Spot grades"):
-        grade.Items.Add(g)
-    grade.SelectedIndex = {"not_set": 0, "terrain": 1, "spot": 2}.get(state.get("grade"), 0)
-    ground = ef.DropDown()
-    ground.Items.Add("Finished grade")
-    ground.Items.Add("Existing grade")
-    ground.SelectedIndex = 1 if state.get("grade_is") == "existing" else 0
-    f2f = ef.TextBox()
-    f2f.Text = state.get("floor_to_floor") or "11'-8\""
-    massing = ef.RadioButtonList()
-    massing.Orientation = ef.Orientation.Vertical
-    massing.Items.Add("Envelope and starting massing")
-    massing.Items.Add("Envelope only, no massing")
-    massing.SelectedIndex = 1 if state.get("massing") == "envelope" else 0
+    regrade = ef.CheckBox()
+    regrade.Checked = bool(state.get("no_regrading"))
 
     def keep():                       # what the fields say now, back into `state`
-        state.update(address=address.Text, zone=zone.SelectedValue.Text if zone.SelectedValue else None,
-                     district_confirmed=bool(confirm.Checked), use=names[use.SelectedIndex][0] if names else None,
-                     lot_source="survey" if lot.SelectedIndex == 1 else "tax_map",
-                     grade=["not_set", "terrain", "spot"][max(grade.SelectedIndex, 0)],
-                     grade_is="existing" if ground.SelectedIndex == 1 else "finished", floor_to_floor=f2f.Text,
-                     massing="envelope" if massing.SelectedIndex == 1 else "both")
+        z = zone.SelectedValue.Text if zone.SelectedValue else None
+        state.update(address=address.Text, zone=z, district_confirmed=bool(confirm.Checked),
+                     use=names[use.SelectedIndex][0] if names else None, no_regrading=bool(regrade.Checked))
+        if z != first_zone:           # changed here: the architect's own entry
+            state["zone_source"] = logic.ENTERED
 
     def pick(what):
         keep()
         done("pick:" + what)
 
-    draw = button("Draw site and envelope" if state.get("massing") == "envelope" else "Draw site and massing",
-                  lambda: (keep(), done("draw")))
-    if mode != "start":
-        draw.Text = "Check the design"
-    reason = label("" if confirm.Checked else "Confirm the district to continue.", size=11)
-    draw.Enabled = bool(confirm.Checked)
+    draw = button("Draw" if mode == "start" else "Check", lambda: (keep(), done("draw")))
+    reason = label("" if logic.can_draw(state) else "Confirm the district to continue.", size=11)
+    draw.Enabled = logic.can_draw(state)
 
     def confirmed(s, e):
-        draw.Enabled = bool(confirm.Checked)
-        reason.Text = "" if confirm.Checked else "Confirm the district to continue."
+        state["district_confirmed"] = bool(confirm.Checked)
+        draw.Enabled = logic.can_draw(state)
+        reason.Text = "" if draw.Enabled else "Confirm the district to continue."
 
     confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
-    massing.SelectedIndexChanged += logic.guard(lambda s, e: setattr(draw, "Text", "Draw site and envelope"
-                                                        if massing.SelectedIndex == 1 else "Draw site and massing") \
-        if mode == "start" else None, "choose the massing")
     cancel = button("Cancel", lambda: done(None))
-    note = "?  Lot from tax map: dimensions approximate. Items within 2'-0\" of a limit will need review."
-    grade_note = "?  Building height and stories need review until grade is set."
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
-    layout.AddRow(label("Address", bold=True), address)
-    layout.AddRow(None, label("Recorded on the project and the report (lookup from the City's map comes later)", size=11))
-    layout.AddRow(label("Zoning district", bold=True), row(zone, confirm))
-    layout.AddRow(None, label("Entered by you · Overlays (historic, gorge, flood) are not checked in this release", size=11))
-    layout.AddRow(label("Use", bold=True), use)
-    layout.AddRow(label("Street frontage", bold=True), row(label(state.get("street") or "not picked", size=12),
-                                                           button("Pick line…", lambda: pick("street"))))
-    layout.AddRow(label("Lot lines", bold=True), lot)
-    layout.AddRow(None, row(button("Pick curves…", lambda: pick("lot")), label(state.get("lot_picked") or "", size=11)))
-    layout.AddRow(None, label(note if lot.SelectedIndex == 0 else "", eto_status_color("needs_review"), size=11))
-    layout.AddRow(label("Grade", bold=True), grade)
-    layout.AddRow(None, row(button("Pick…", lambda: pick("terrain")), button("Place points…", lambda: pick("spot")),
-                            label(state.get("grade_result") or "", size=11)))
-    layout.AddRow(label("Ground is", bold=True), ground)
-    layout.AddRow(None, label(grade_note if grade.SelectedIndex == 0 else "", eto_status_color("needs_review"), size=11))
-    layout.AddRow(label("Existing building", bold=True), row(label("None", size=12),
-                                                             button("Pick existing… (coming later)", None, False)))
-    if mode == "start":
-        layout.AddRow(label("Floor to floor", bold=True), f2f)
-        layout.AddRow(label("Roof", bold=True), label("Flat (gable and hip: coming later)", size=12))
-        layout.AddRow(label("Massing", bold=True), massing)
-        layout.AddRow(None, label(state.get("preview") or "", size=11))
+    for r in logic.box_rows(state):
+        key, title = r["key"], label(r["label"], bold=True)
+        if key == "address":
+            layout.AddRow(title, row(address, *[button(t, None, on) for _, t, on in r["actions"]]))
+        elif key == "zone":
+            confirm.Text = r["tick"][0]
+            layout.AddRow(title, row(zone, label(r["text"].split(" · ", 1)[-1], size=11), confirm))
+        elif key == "use":
+            layout.AddRow(title, use)
+        elif key == "ground":
+            layout.AddRow(title, label(r["text"], size=12))
+            layout.AddRow(None, row(*[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
+            regrade.Text = r["tick"][0]
+            layout.AddRow(None, regrade)
+        else:                          # lot, street side: what it is, and the one way to change it
+            layout.AddRow(title, row(label(r["text"], size=12),
+                                     *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
+    layout.AddRow(None, label(logic.NOT_CHECKED_YET, size=11))
+    amber = logic.uncertain(state)
+    if amber:
+        layout.AddRow(None, label("?  " + amber, eto_status_color("needs_review"), size=12))
     layout.AddRow(None, reason)
     layout.AddRow(None, row(cancel, draw))
     dialog.Content = layout

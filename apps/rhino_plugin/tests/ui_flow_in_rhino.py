@@ -179,7 +179,9 @@ try:
         out.Unitize()
         doc.Objects.AddPoint(m + out * 1 * ft, a)
     facts = g.current_facts(doc)
-    facts["grade_from"] = "spot"
+    facts["grade_from"], facts["grade_is"] = "spot", "finished"      # finished ground placed at the walls
+    facts.pop("ground_is_flat", None)
+    facts.pop("grade_elevation", None)
     g.save_facts(doc, facts)
     g.run_check(doc, report=False)
     record(g, doc, "12_spot_grades", "Spot grades placed at the walls: the grade is set", lot_box,
