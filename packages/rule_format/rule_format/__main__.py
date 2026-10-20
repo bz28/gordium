@@ -15,13 +15,13 @@ import sys
 from pathlib import Path
 
 from .labels import load_pieces, validate_labels
-from .rulebook import (REPO, Context, load, locate, not_quotable, rulebook_file_problems, rulebook_paths,
+from .rulebook import (REPO, Context, jurisdictions, load, locate, not_quotable, rulebook_file_problems, rulebook_paths,
                        term_file_problems)
 
 
 def main() -> int:
     failed = checked = 0
-    for jurisdiction in sorted(p for p in (REPO / "regulations/jurisdictions").glob("*/*") if p.is_dir()):
+    for jurisdiction in jurisdictions(REPO):
         place = jurisdiction.relative_to(REPO / "regulations/jurisdictions")
         try:
             ctx = Context.for_jurisdiction(jurisdiction)

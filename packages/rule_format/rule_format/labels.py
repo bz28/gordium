@@ -12,9 +12,9 @@ The law is cut into pieces by code (document_extraction/sections.py, saved as
       piece_sha256: ...             # fingerprint of the piece as labeled (its lines + the PDF version)
       run: 3_section_labels/runs/2026-10-20_claude-haiku-5-5.jsonl   # the recorded AI call, if AI drafted it
       drafted_by: section_labeling/claude-haiku-5-5
-      status: draft                 # architects approve, exactly as they approve rules
+      status: draft                 # approval (deferred for now) works exactly as for rules
 
-A label is a draft until an architect approves it; approval works exactly as for rules and definitions.
+A label stays a draft; approval (deferred for now, decided 2026-10-19) works exactly as for rules and definitions.
 A reviewer who doubts a label adds `open_questions` (which block approval); the architect records the
 `answers` (question, answer, answered_by, answered_on) and approves. Both are the same fields rules use.
 A reviewer who corrects a label records it in `revised`: [{from: <old label>, by, date, why}], so the
@@ -27,7 +27,7 @@ import json
 from pathlib import Path
 
 from .rulebook import (APPROVAL_FIELDS, VOCABULARY_FILE, Context, _approval_problems, _list_of_dicts,
-                       _source_problems, load)
+                       _source_problems, load, read_jsonl)
 
 # A reviewer's doubt goes in open_questions (blocks approval); the architect's answer in answers, as for rules.
 LABEL_FIELDS = {"label", "topic", "reason", "sources", "piece_sha256", "run", "notes", "open_questions", "answers",
@@ -44,7 +44,7 @@ def piece_fingerprint(piece: dict, pdf_sha256: str) -> str:
 
 def load_pieces(path: Path) -> tuple[dict, dict[str, dict]]:
     """The sections file: (header, {piece id: piece})."""
-    rows = [json.loads(line) for line in Path(path).read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows = read_jsonl(path)
     return rows[0], {p["id"]: p for p in rows[1:]}
 
 

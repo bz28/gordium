@@ -146,3 +146,13 @@ def test_real_not_quotable_documents_are_refused(file, page, quote):
     ctx = Context.for_jurisdiction(ITHACA)
     assert quote_found(quote, ctx.pages[file][page])                     # the words really are there…
     assert any("isn't quotable yet" in p for p in _source_problems([{"file": file, "page": page, "quote": quote}], ctx))
+
+
+def test_docs_describe_the_extraction_check_ci_runs():
+    """CI re-extracts every PDF (document_extraction --check); no doc may still say that's to come."""
+    from rule_format.rulebook import REPO
+    assert "python -m document_extraction --check" in (REPO / ".github/workflows/ci.yml").read_text()
+    files = [p for p in REPO.rglob("*") if p.suffix in (".md", ".py") and p.is_file()
+             and not {".git", ".claude", ".venv"} & set(p.relative_to(REPO).parts) and p.name != "test_extract.py"]
+    stale = [p.relative_to(REPO) for p in files if "text-extraction step is merged" in p.read_text(errors="ignore")]
+    assert not stale, stale

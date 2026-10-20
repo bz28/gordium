@@ -30,9 +30,11 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Why:** whole tokens stop accidental matches ("5 ft" inside "25 ft"); exact lines plus uniqueness make each citation point at one place. An earlier page-wide search needed ever more special cases; recording the position was the root fix.
 - **Weaknesses:** a line pins a chart row, not its column (closed by chart cells, §4); a quote must be copied exactly.
 - **Tested by:** tests on numbers inside numbers, fractions, decimals, footnotes, district names, wrong lines, repeated quotes.
-- **Improve:** cite chart cells directly in rules (PR 7b).
+- **Improve:** cite chart cells directly in rules (PR 8).
 
 ## 4. Chart tables to cells (code, PR 6)
+
+The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a side branch) builds on it; both join the main line when they are merged. On a branch without it, the tests and CI step named here don't run.
 
 - **What:** reads the chart's drawn rectangles and borders to find rows, district columns and merged cells, then places each word in the cell that contains it. Output: one record per cell (page, section, row, district, value, lines, position). 683 cells on pages 2, 3, 14.
 - **Why:** plain text lines lose columns, so "25 ft" can't be tied to R-1B. Drawn boxes are what the PDF actually says about the table.
@@ -41,27 +43,28 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Tested by:** every R-1B number matches the R-1b rules (exact pass/fail boundary); every district cross-checked against the plain text (56 rows agree, 0 disagree); the 6 wrapped rows hand-read in every column; 7 planted errors caught; CI reproduces the cells file.
 - **Improve:** generalize to other cities' chart layouts, each with the same two-way cross-check.
 
-## 5. Cutting the law into pieces (code, PR 7a)
+## 5. Cutting the law into pieces (code, PR 7)
 
 - **What:** splits Chapter 325 at its own headings into 626 pieces (sections, lettered subsections, one per defined term, editor's notes, front matter). Page furniture (repeated titles, headers, footers) is set aside.
 - **Why:** a small piece is one idea, can be judged alone and cited exactly. The law's own numbering is the natural unit.
 - **Weaknesses:** heading patterns are tuned to Ithaca's code format.
 - **Tested by:** every one of 6,027 lines is in exactly one piece or is furniture; the cut matches the law's table of contents; CI reproduces it.
 
-## 6. Labeling pieces (AI: Haiku; code checks; PR 7a)
+## 6. Labeling pieces (AI: Haiku; code checks; PR 7)
 
 - **What:** one recorded AI call per piece labels it rule, flag, reference or not_for_checking. Instructions: `regulations/document_extraction_guide/labeling_guide.md` (role, purpose, process, rules). The answer lists the requirements first, as line numbers (L3–L5), then the label, topic, reason and one exact quote. Code takes the exact words from the cited lines.
 - **Why this model:** sorting is simple reading; Haiku labeled all 626 for $0.085. Everything it says is checked by code and reviewed.
 - **Why requirements first, by line number:** labeling first and justifying after let the model explain limits away ("the six-unit maximum is descriptive"). Listing requirements first, with code rejecting a label that disagrees with them, removes that. Line numbers instead of copied text remove copying errors (18 of 100 answers failed when asked to copy).
 - **Fail-safe rules:** when unsure between not_for_checking and rule/flag, choose rule/flag; procedures are not_for_checking even with "shall".
-- **Not repeatable bit for bit:** current models don't accept temperature 0. Every call is recorded; an architect's approval freezes a label.
+- **Not repeatable bit for bit:** current models don't accept temperature 0. Every call is recorded and every label is rebuilt from the records by code; once approval is switched on (deferred for now), an architect's approval would freeze a label.
+- **The instructions have changed since the recorded runs:** the run records hold one fingerprint per version of the guide used during the 2026-10-19 runs. After the last recorded call, the guide changed twice: rule 3 was rewritten into the category-vs-limit principle below (a real change to how definitions with numbers are labeled, so a re-run could label the kitchen or adult day-care home definitions differently), and later its approval sentences were reworded. No recorded run used the current guide. The kitchen, adult day-care home and bed-and-breakfast inn labels (reference) are Haiku's answers from the first full run, which used an earlier guide; the review's corrections to them were undone under the category-vs-limit principle, and each carries an open question for the architects. A re-run would send, and record, the current guide.
 - **Cost control:** a shared ledger with a hard cap ($1), worst case reserved before each call.
 - **Tested by (evals):**
   - First prompt, 28 pieces with an answer key: 25/28, then 26/28 after guide fixes.
   - Independent AI review (Claude) of all 399 rule/flag/reference labels: 354 judged correct (89%); 4 flagged as dangerous (a limit hidden in a definition), 41 minor. Under the category-vs-limit principle adopted afterwards, two of the four (kitchen, bed-and-breakfast inn) are category definitions, so they are open questions for the architects rather than clear misses.
   - Second review (Claude) of all 244 not_for_checking labels, looking only for the dangerous miss: a piece that constrains a design but would never be checked. 239 confirmed (325-27I among them, after a closer look); 5 changed (325-15F gas station site plan review and 325-29.6D collocation on a site with unpermitted equipment to flag; 325-29.17A-C, which say how the wireless requirements apply to a collocation, to reference); 0 open questions. 325-27I (who may operate a short-term rental) stays not_for_checking: it limits the operator, not the building. None of the 4 borderline pieces concerns house design.
   - Improved prompt (role, purpose, process, line citations) on the 100 pieces with known answers (chosen because the first prompt failed them): 70/100 against the key at the time. Under the later category-vs-limit principle the kitchen answer (reference) counts as right (71/100); dwelling unit (reference, key rule) is an open question for the architects. The rest of the misses are procedures over-labeled as rules (safe direction).
-- **The committed labels:** Haiku's answers plus 70 corrections made by an AI review (Claude, reading every rule, flag and reference label against the text) and 5 from the second review of every not_for_checking label, each recorded in `revised: {from, by, date, why}` with the reason rewritten for the new label. They are still drafts: architects approve. (Corrections to kitchen, adult day-care home and bed-and-breakfast inn were undone under the principle below and are open questions for the architects; dwelling unit and rooming unit are labeled rule until the architects decide, also as open questions.)
+- **The committed labels:** Haiku's answers plus 70 corrections made by an AI review (Claude, reading every rule, flag and reference label against the text) and 5 from the second review of every not_for_checking label, each recorded in `revised: {from, by, date, why}` with the reason rewritten for the new label. They are still drafts (architect approval is deferred for now, decided 2026-10-19). (Corrections to kitchen, adult day-care home and bed-and-breakfast inn were undone under the principle below and are open questions for the architects; dwelling unit and rooming unit are labeled rule until the architects decide, also as open questions.)
 - **Category vs limit:** a definition whose number sorts things into categories (a kitchen is 60 sq ft or more; an adult day-care home serves up to six adults) is reference: rules use it to classify. A definition that caps what a design may do ("a maximum of six units may be attached", "not more than two unrelated individuals is permitted") is a rule. The test: does it forbid or cap something, or only say what to call it?
 - **Weaknesses:** definitions with embedded limits remain the hardest case; procedures get over-labeled as rules.
 - **Improve:** a second, independent AI pass on every non-rule piece asking only "does this set a requirement?"; few-shot examples from another city's code (never from the answer key); compare models on the known-answer set.
@@ -83,14 +86,14 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Why:** readable by architects, nothing hidden (no code execution), exact and repeatable. No plain-English retelling: retellings kept dropping or adding words; the quotes are the words and the examples show the meaning.
 - **Fail closed:** missing, non-numeric, negative or impossible values give "needs review", never "pass".
 - **Alternatives considered:** free-form code (unsafe, unreadable), a custom rule language (more to build and learn), JSON logic (hard to read).
-- **Weaknesses:** yes/no measurements (e.g. "has a separate entrance") are being added in PR 7b.
+- **Weaknesses:** yes/no measurements (e.g. "has a separate entrance") are being added in PR 8 (rule drafting).
 
 ## 9. The inspector (code, PR 1 onward)
 
 - **What:** checks every rule, definition and label: sources (listed, unchanged, quotable, exact and unique on cited lines), formula (allowed, true/false, known names), examples (a pass and a fail, each giving its stated result), a use decided by a rule cites its chart row, approvals (a listed architect, not the drafter, no open questions, nothing changed since: an approval fingerprint covers content, id and the cited documents).
 - **Weakness:** proves a rule is traceable and well formed, not that it means the right thing. Meaning comes from comparisons (§11) and architects.
 
-## 10. Drafting rules (AI: planned Sonnet; code checks; PR 7b, in progress)
+## 10. Drafting rules (AI: planned Sonnet; code checks; PR 8, in progress)
 
 - **Plan:** chart rules get their numbers from cells, never typed by the AI; paragraph rules are drafted from each rule-labeled piece with its definitions and cross-referenced sections; every draft goes through the inspector with retries; every call recorded; hard cap ($5).
 - **Model choice to be decided by eval:** draft ~10 rules with Haiku and with Sonnet, grade both against R-1b and the architects' spreadsheet.
@@ -98,8 +101,8 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 
 ## 11. Evaluation against independent sources
 
-- **Two readings of the chart:** code (§4) vs the hand-drafted R-1b: all R-1B numbers agree.
-- **Two readings of each row:** drawn cells vs plain text lines, for every district.
+- **Two readings of the chart** (PR 6, the chart reader): code (§4) vs the hand-drafted R-1b: all R-1B numbers agree.
+- **Two readings of each row** (PR 6): drawn cells vs plain text lines, for every district.
 - **The architects' own check:** their spreadsheet of 106 Ithaca Rd vs our R-1b formulas: 11/11 rows give the same PASS/FAIL (`test_answer_keys.py`). Limits: one house, one zone; their files have their own errors (listed in `docs/discrepancies_with_architects.md`).
 - **Planned:** 2–3 more worked examples in other zones from the architects; real Rhino models once measuring exists.
 
