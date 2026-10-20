@@ -56,6 +56,14 @@ def test_a_phrase_split_across_a_line_break_is_found_at_its_first_line():
     assert not term_index.pattern(["yard"]).search("courtyard and backyards")      # whole words only
 
 
+def test_a_consonant_y_plural_is_found_without_listing_it(index):
+    """"balconies" (§325-29.21B: "distances from windows and balconies") is found from "balcony"; a vowel + y word
+    takes a plain s."""
+    assert term_index.pattern(["balcony"]).search("windows and balconies")
+    assert term_index.plurals("story") == ["story", "stories"] and term_index.plurals("bay") == ["bay"]
+    assert "325-29.21B" in ids(index, "yard_projections")
+
+
 def test_every_definition_has_synonyms_and_every_concept_a_title():
     with pytest.raises(ValueError, match="no entry"):
         term_index.entries({"new_term": {"term": "NEW"}}, {})

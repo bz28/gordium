@@ -5013,11 +5013,23 @@ labels:
         - 6
         - 7
         quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
-      why_open: §325-25C sets distances only for "frame accessory buildings", and §325-25 sets no height limit; nothing
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines:
+        - 7
+        - 8
+        quote: except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side
+          lot line nor less than three feet from any rear lot line
+      why_open: §325-25C's first sentence sets distances for "frame accessory buildings". Its R-1 clause says "accessory
+        buildings" without "frame", but the subsection is headed "Frame accessory buildings", so whether a building
+        that isn't frame has distance limits (in R-1 or elsewhere) isn't settled. §325-25 sets no height limit. Nothing
         else in the code or the City's records fills the gap.
       readings:
       - id: frame_distances_apply
         reading: the frame distances apply to every accessory building
+      - id: r1_distances_apply_to_all_accessory_buildings
+        reading: in R-1, the 6 ft side / 3 ft rear distances apply to every accessory building; elsewhere only frame
+          ones have distances
       - id: front_yard_rule_only
         reading: only "not in a required front yard" applies
       report: docs/research/2026-10-20_architect_questions.md §X2

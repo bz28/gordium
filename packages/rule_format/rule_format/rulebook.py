@@ -862,6 +862,61 @@ def _source_problems(sources: list[dict], ctx: Context, district: str | None = N
 
 # ---- one file's checks, shared by `python -m rule_format` and everything that uses a rulebook -----------
 
+def research_entries(jurisdiction) -> list[tuple[str, dict]]:
+    """(where, entry) for every entry that can hold open questions: definitions, rules (5_zoning_rules) and
+    section labels. `where` names it for a message ("definitions.yaml story", "R-1b.yaml R-1b.height")."""
+    j = Path(jurisdiction)
+    out = []
+    definitions = j / "4_term_definitions/definitions.yaml"
+    if definitions.exists():
+        out += [(f"definitions.yaml {k}", e) for k, e in (load(definitions) or {}).items() if isinstance(e, dict)]
+    for path in rulebook_paths(j / "5_zoning_rules"):
+        out += [(f"{path.name} {r.get('id')}", r) for r in (load(path) or {}).get("rules") or [] if isinstance(r, dict)]
+    for path in sorted((j / "3_section_labels").glob("*.yaml")):
+        book = load(path) or {}
+        out += [(f"{path.name} {k}", e) for k, e in (book.get("labels") or {}).items() if isinstance(e, dict)]
+    return out
+
+
+def _quoted_phrases(text: str) -> list[list[str]]:
+    """The tokens of each phrase a question quotes ("at any point"), three words or more."""
+    return [t for t in (tokenize(m) for m in re.findall(r'["\u201c]([^"\u201d]+)["\u201d]', text)) if len(t) >= 3]
+
+
+def _contains(tokens: list[str], part: list[str]) -> bool:
+    return any(tokens[i:i + len(part)] == part for i in range(len(tokens) - len(part) + 1))
+
+
+def law_conflicts(entries: list[tuple[str, dict]]) -> list[str]:
+    """A question is settled or open, never both. A finding of kind law may not answer what an open question
+    still asks: anywhere, if the open question quotes words the law finding quotes (the same words can't be
+    settled in one entry and open in another); in its own entry, if the open question's research cites the same
+    lines. Then the finding claims too much: narrow it to what the law settles, or make it a reading."""
+    opens = [(where, q, x) for where, e in entries for q in e.get("open_questions") or [] if isinstance(q, str)
+             for x in [next((r for r in e.get("research") or [] if isinstance(r, dict) and r.get("question") == q), {})]]
+    p = []
+    for where, e in entries:
+        for f in e.get("findings") or []:
+            if not (isinstance(f, dict) and f.get("kind") == "law"):
+                continue
+            code = [s for s in f.get("sources") or [] if isinstance(s, dict) and isinstance(s.get("quote"), str)
+                    and "file" in s]
+            quoted = [tokenize(s["quote"]) for s in code]
+            for owhere, q, x in opens:
+                same = [ph for ph in _quoted_phrases(q) if any(_contains(t, ph) for t in quoted)]
+                shared = owhere == where and any(
+                    isinstance(s, dict) and (s.get("file"), s.get("page")) == (c.get("file"), c.get("page"))
+                    and _is_line_range(s.get("lines")) and _is_line_range(c.get("lines"))
+                    and s["lines"][0] <= c["lines"][1] and c["lines"][0] <= s["lines"][1]
+                    for s in x.get("sources") or [] for c in code)
+                if same or shared:
+                    why = f"quotes {' '.join(same[0])!r}, which" if same else "cites the lines whose research"
+                    p.append(f"{where}: the law finding {f.get('id') or f.get('question', '')[:40]!r} {why} the open "
+                             f"question in {owhere} still asks about ({q[:60]}...); narrow the finding to what the "
+                             "law settles, or make it a reading")
+    return p
+
+
 def term_file_problems(jurisdiction, ctx: Context) -> dict[Path, list[str]]:
     """Each term file (4_term_definitions/<schema>.yaml) that exists, with its problems."""
     found = {}

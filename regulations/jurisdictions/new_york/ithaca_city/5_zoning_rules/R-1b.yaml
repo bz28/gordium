@@ -148,8 +148,9 @@ rules:
         quote: subject to the further regulations in this section and of Article V
       strength: strong
       report: docs/research/2026-10-20_architect_questions.md §5.3
-    notes: >-
-      The check passes uses marked • for R-1B, sends uses marked SP to review, and fails the rest (marked -). What the marks mean is an open question. The chart's columns are R-1A, R-1B, … so R-1b is the second mark in each row.
+    notes: The check passes uses marked • for R-1B, sends uses marked SP to review, and fails the rest (marked -). What
+      the marks mean is Gordium's reading (the chart_marks finding, to confirm with the architects). The chart's columns
+      are R-1A, R-1B, … so R-1b is the second mark in each row.
     drafted_by: claude
     status: draft
 
@@ -371,8 +372,8 @@ rules:
     - id: height_bonus_main_building_only
       question: Does the bonus apply to accessory buildings too, or only the main building ("any main building")?
       kind: law
-      answer: Only the main building ("any main building"). The number of stories still can't be exceeded, the extra
-        feet are at most 10% of the maximum height, and the bonus doesn't apply in U-1.
+      answer: Only the main building ("any main building"). The number of stories still can't be exceeded, and the extra
+        feet are at most 10% of the maximum building height.
       sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 47
@@ -380,6 +381,18 @@ rules:
         - 6
         - 6
         quote: any main building may be erected to a height in excess of that
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines:
+        - 10
+        - 10
+        quote: the number of stories permitted may not be exceeded
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines:
+        - 11
+        - 12
+        quote: may not exceed 10% of the maximum building height
       strength: strong
       report: docs/research/2026-10-20_architect_questions.md §4.5
     notes: >-

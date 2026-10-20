@@ -40,9 +40,19 @@ def entries(definitions: dict, synonyms: dict) -> dict[str, dict]:
     return out
 
 
+def plurals(form: str) -> list[str]:
+    """The form, and its -ies plural when it ends in a consonant and y (balcony -> balconies, story -> stories);
+    +s and +es are matched by the pattern itself. Other irregular plurals are listed in the synonyms file."""
+    if re.search(r"[^aeiou]y$", form):
+        return [form, form[:-1] + "ies"]
+    return [form]
+
+
 def pattern(forms: list[str]) -> re.Pattern:
-    """Any of the forms as whole words, any case, across line breaks and hyphens; a plain +s/+es plural too."""
-    alts = sorted(({r"[\s\-]+".join(re.escape(w) for w in f.split()) for f in forms}), key=len, reverse=True)
+    """Any of the forms as whole words, any case, across line breaks and hyphens; a plain +s/+es plural too,
+    and a consonant + y -> ies plural (plurals())."""
+    alts = sorted(({r"[\s\-]+".join(re.escape(w) for w in v.split()) for f in forms for v in plurals(f)}),
+                  key=len, reverse=True)
     return re.compile(r"(?<![\w-])(?:" + "|".join(alts) + r")(?:s|es)?(?![\w-])", re.IGNORECASE)
 
 

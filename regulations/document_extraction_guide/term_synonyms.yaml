@@ -4,8 +4,8 @@
 #
 # Keys are the ids in 4_term_definitions/definitions.yaml; every definition has an entry here (a test checks).
 # Keys that aren't definitions yet are concepts the rules depend on, and need a `title`.
-# Forms are matched as whole words, any case, across line breaks; a plain plural (+s / +es) is matched too,
-# so list only irregular plurals (story -> stories). Checked against Chapter 325's own wording (2026-10):
+# Forms are matched as whole words, any case, across line breaks; a plain plural (+s / +es) and a consonant + y
+# plural (balcony -> balconies, story -> stories) are matched too, so list only other irregular plurals. Checked against Chapter 325's own wording (2026-10):
 # e.g. "setback" appears 95 times and "eaves" is in §325-18B, the rule on what may project into a yard.
 # Compared with the synonym search of the 2026-10-20 research (docs/research/2026-10-20_architect_questions.md,
 # Appendix A) and completed from it; a word kept with no hits ("storey", "survey") records that it was looked for.

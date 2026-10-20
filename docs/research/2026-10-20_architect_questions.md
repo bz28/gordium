@@ -6,6 +6,13 @@
 > written. The BZA packets it cites are linked, not stored. The search script it mentions (`scripts/syn2.py`)
 > was a one-off outside the repository; the term index (`4_term_definitions/term_index.yaml`) is the
 > repository's version of that search.
+>
+> **Corrections from the first review of PR 17 (2026-10-20).** The report below is unchanged; the records follow
+> these corrections. (1) §4.3: the 12 ft test is not settled. "At any point" points to every side, but whether
+> "computed at the main entrance side" limits it is the open question, so it stays open with both readings.
+> (2) §4.5: §325-16C(4) says conditions (1) to (3) "shall not apply in the U-1 Zone"; it removes the bonus's
+> limits there, not the bonus. (3) §2.4, §2.5 and X2: §325-25C's R-1 clause says "accessory buildings" without
+> "frame", so whether the R-1 distances cover buildings that aren't frame is part of the X2 question.
 
 Prepared 2026-10-20 for Gordium. Read-only research; no repository was changed.
 Every web source below was accessed **2026-10-20**. Chapter 325 quotes are from Gordium's stored copy

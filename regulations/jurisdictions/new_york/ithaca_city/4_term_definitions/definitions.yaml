@@ -119,7 +119,7 @@ height_of_building:
       if the eaves are at different heights? How for gambrel and hip roofs?'
     kind: reading
     answer: Midway between eave and ridge, on the roof section with the highest elevation. A mansard is measured to
-      its top; gambrel and hip roofs are averaged like a gable.
+      its top; gambrel and hip roofs are averaged like a gable. Which eave is still open (the open question above).
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 12
@@ -166,6 +166,12 @@ height_of_building:
       - 33
       - 33
       quote: In no case shall the horizontal surface area covered or occupied by such feature exceed 20%
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 46
+      lines:
+      - 34
+      - 35
+      quote: or 30% of the area of the roof plane on which it is located, whichever is less
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §4.6
   drafted_by: claude
@@ -192,13 +198,11 @@ story:
       lines: [35, 36]
       quote: "Buildings hereafter erected shall be limited to the number of stories herein specified, computed at the main entrance side."
   open_questions:
-  - 'Which entrance is the "main entrance" for Column 8: the one facing the street the address is on, or the one the
-    designer names? And when a basement passes the story test only on a side other than the main entrance side, does
-    "computed at the main entrance side" override the "at any point" test?'
+  - Which entrance is the "main entrance" when a house has more than one?
+  - The basement test says "12 feet above the finished ground level at any point", while stories are "computed at
+    the main entrance side". Does the 12 ft test look at every side, or only the main entrance side?
   research:
-  - question: 'Which entrance is the "main entrance" for Column 8: the one facing the street the address is on, or
-      the one the designer names? And when a basement passes the story test only on a side other than the main entrance
-      side, does "computed at the main entrance side" override the "at any point" test?'
+  - question: Which entrance is the "main entrance" when a house has more than one?
     searched:
     - 325-8A
     - 325-3B:story
@@ -219,14 +223,13 @@ story:
     - id: designer_named_entrance
       reading: the entrance the designer names
     report: docs/research/2026-10-20_architect_questions.md §4.3
-  findings:
-  - id: story_12ft_any_point
-    question: The basement test says "12 feet above the finished ground level at any point", while stories are "computed
+  - question: The basement test says "12 feet above the finished ground level at any point", while stories are "computed
       at the main entrance side". Does the 12 ft test look at every side, or only the main entrance side?
-    kind: law
-    answer: 'Every side: the 12 ft test is "at any point", so one point anywhere around the building is enough (as
-      in the NYS building code''s "story above grade plane"). How it combines with "computed at the main entrance
-      side" is part of the main-entrance question.'
+    searched:
+    - 325-3B:story
+    - 325-8A
+    - 325-3B:basement
+    - 325-3B:grade_plane
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 19
@@ -235,9 +238,16 @@ story:
       - 17
       quote: more than 12 feet above the finished ground level at any point
     - rank: 3
-      cite: 'NYS Department of State, Uniform Code rule text: STORY ABOVE GRADE PLANE'
+      cite: 'NYS Department of State, Uniform Code rule text: STORY ABOVE GRADE PLANE (the same 6 ft / 12 ft test)'
       url: https://dos.ny.gov/2024-12-2-rule-text-uniform-code
-    strength: strong
+    why_open: '"At any point" and the building code''s same test point to every side, but stories are "computed at
+      the main entrance side" (§325-8A(8)), which may limit the count to that side; nothing says which governs, and
+      no City record was found.'
+    readings:
+    - id: any_side
+      reading: the 12 ft test applies at any point on any side
+    - id: main_entrance_side_only
+      reading: only on the main entrance side, where stories are computed
     report: docs/research/2026-10-20_architect_questions.md §4.3
   drafted_by: claude
   status: draft
@@ -263,9 +273,9 @@ basement:
     - 325-3B:story
     - 325-3B:cellar
     sources: []
-    why_open: The research read the same words in the story definition as "at any single point" (§4.3 of the report),
-      which would make one point enough here too, but it didn't settle this definition on its own, and the walk-out
-      case is still open (the next question).
+    why_open: The words most simply mean that one point is enough, but the research didn't settle this definition,
+      and whether the story count looks past the main entrance side is open too (story's questions); the walk-out
+      case is the next question.
     readings:
     - id: one_point
       reading: more than half above ground at any one point is enough
@@ -404,7 +414,7 @@ building_area:
     kind: reading
     answer: 'Coverage is the outline, seen from above, of everything above ground: walls, cantilevered upper floors,
       roofed porches, decks, balconies projecting more than 2 ft, ramps and landings. Parts wholly below ground don''t
-      count.'
+      count. Roof eaves are still open (the open question above).'
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 25
@@ -571,7 +581,7 @@ lot_depth:
     question: When the two side lot lines are equal, is the lot depth simply their length? (Implied, but not stated.)
     kind: law
     answer: 'Yes: the averaging applies only when the side lot lines are unequal; otherwise the depth is their length.
-      On a skewed lot, measure at 90 degrees to the front line (the perpendicular method).'
+      (On a skewed lot, see the perpendicular_lot_depth reading.)'
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 25
@@ -656,8 +666,9 @@ side_yard:
       garage or shed. Confirm. (§325-25 will be rules of their own.)'
     kind: law
     answer: 'The chart''s side yards apply to the main building only. Detached accessory structures follow §325-25:
-      not in a required front yard; frame ones at least 3 ft from side and rear lot lines (in R-1: 6 ft side, 3 ft
-      rear). Those are rules of their own.'
+      not in a required front yard, and frame ones at least 3 ft from side and rear lot lines; in R-1 districts, 6
+      ft from side and 3 ft from rear lot lines (whether that R-1 clause covers buildings that aren''t frame is still
+      open: §325-25C''s question). Those are rules of their own.'
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 66
@@ -671,11 +682,18 @@ side_yard:
       - 6
       - 7
       quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
-    - &id001
-      rank: 2
-      cite: 'BZA Appeal #3093, 412 E. Yates St (2018): the new garage counted in lot coverage; corner-lot columns'
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 67
+      lines:
+      - 7
+      - 8
+      quote: except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side
+        lot line nor less than three feet from any rear lot line
+    - rank: 2
+      cite: 'BZA Appeal #3093, 412 E. Yates St (2018): §325-25C''s 3 ft side distance applied to a new garage, not
+        the chart''s side yard'
       url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_04032018-1576
-      quote: The new garage will increase the lot coverage from 48% to 52%
+      quote: will have 1 foot of the 3 feet required by the zoning ordinance for the side yard
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §2.4
   - id: attached_garage_is_main_building
@@ -726,7 +744,10 @@ side_yard:
       cite: 'BZA notice, Appeal #3078, 339 S. Geneva St (2017)'
       url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_07132017-1397
       quote: Column 12, Other Front Yard, Column 13, Side Yard
-    - *id001
+    - rank: 2
+      cite: 'BZA notice, Appeal #3093, 412 E. Yates St (2018): the corner-lot columns'
+      url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_04032018-1576
+      quote: Column 11, Front Yard, Column 12, Other Front Yard, Column 13, Side Yard
     strength: city_practice
     confirm_with: the City zoning office
     report: docs/research/2026-10-20_architect_questions.md §2.3
@@ -754,12 +775,13 @@ rear_yard:
     question: '"Except as hereinafter specified": which later sections allow something in the rear yard (e.g. accessory
       buildings)? Those will be rules of their own.'
     kind: law
-    answer: 'What may be in a rear yard: accessory structures (frame ones 3 ft from side and rear lot lines; in R-1,
-      6 ft side, 3 ft rear; wholly below-grade ones anywhere, §325-25); detached ADUs, 5 ft or the main building''s
-      setback, whichever is less (§325-28C); sills, cornices and eaves up to 2 ft (§325-18B); terraces and patios
-      at grade (§325-3); parking under §325-20F. Porches, decks, balconies over 2 ft, ramps and landings are part
-      of the building (§325-18A). Fences (§325-17D) and stream setbacks (§325-26) also apply. Each is a rule of its
-      own.'
+    answer: 'What may be in a rear yard: accessory structures (frame ones 3 ft from side and rear lot lines; in R-1
+      districts, 6 ft from side and 3 ft from rear lot lines, and whether that covers buildings that aren''t frame
+      is still open: §325-25C''s question; wholly below-grade ones anywhere, §325-25B); detached ADUs, 5 ft or the
+      main building''s setback, whichever is less (§325-28C); sills, cornices and eaves up to 2 ft (§325-18B); terraces
+      and patios at grade (§325-3); parking under §325-20F. Porches, decks, balconies over 2 ft, ramps and landings
+      are part of the building (§325-18A). Fences (§325-17D) and stream setbacks (§325-26) also apply. Each is a rule
+      of its own.'
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 66
@@ -773,6 +795,37 @@ rear_yard:
       - 28
       - 29
       quote: neither pergolas or terraces and patios above grade shall be located in a required yard
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 67
+      lines:
+      - 6
+      - 7
+      quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 67
+      lines:
+      - 7
+      - 8
+      quote: except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side
+        lot line nor less than three feet from any rear lot line
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 72
+      lines:
+      - 29
+      - 30
+      quote: 5' or setback required for primary structure, whichever is less
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 49
+      lines:
+      - 15
+      - 16
+      quote: such features shall not project more than two feet into any required yard
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 49
+      lines:
+      - 10
+      - 11
+      quote: shall be considered a part of the building in both the determination of required yards and lot coverage
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §2.5
   drafted_by: claude
@@ -838,12 +891,6 @@ yard_projections:
       - 15
       - 16
       quote: such features shall not project more than two feet into any required yard
-    - file: chapter_325_zoning_2026-10.pdf
-      page: 131
-      lines:
-      - 8
-      - 8
-      quote: Overhanging eaves and bay windows may project up to two feet into any required setback
     - rank: 2
       cite: 'BZA, ZONE-25-12, 132 Cherry St (3 Mar 2026): the front yard is measured to the overhanging upper floors'
       url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_03032026-3164

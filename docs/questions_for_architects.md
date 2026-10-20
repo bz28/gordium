@@ -2,7 +2,7 @@
 
 Gordium checks a design against the city's exact words. In the places below, the words can be read more than one way, and Gordium can't decide them on its own.
 
-**Researched first.** Before a question reaches you, Gordium reads the whole law for it (every section that uses the word, or a word that means the same, from the term index), then the City's own decisions (zoning board records), then the building codes, then other cities. That research, on 2026-10-20, settled 21 of the 37 questions this page used to ask, narrowed 5 more to the part still open, and found 2 new ones, so 18 are left. What it settled is listed in §6, with its sources, and recorded with each rule or definition (the full report is `docs/research/2026-10-20_architect_questions.md`). What is left below is what research couldn't settle. Each question says what was searched and why it is still open, and a test fails if a recorded question has no research behind it.
+**Researched first.** Before a question reaches you, Gordium reads the whole law for it (every section that uses the word, or a word that means the same, from the term index), then the City's own decisions (zoning board records), then the building codes, then other cities. That research, on 2026-10-20, settled 20 of the 37 questions this page used to ask, narrowed 4 more to the part still open, and found 2 new ones, so 19 are left. What it settled is listed in §6, with its sources, and recorded with each rule or definition (the full report is `docs/research/2026-10-20_architect_questions.md`). What is left below is what research couldn't settle. Each question says what was searched and why it is still open, and a test fails if a recorded question has no research behind it.
 
 **Please note, until these are answered:** each question below says what Gordium does **today** and what it will do **from a model**, once it measures a Rhino model itself (being built now). There are three cases:
 - **NEEDS REVIEW:** Gordium can't decide, so it says so instead of guessing.
@@ -150,14 +150,14 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Options for averaging:** (a) one value per side, simple average; (b) weighted by the length of each wall.
 - **Options for "a side" of an L-shaped or irregular house:** (a) each wall segment; (b) the four sides of the smallest rectangle around the house; (c) another rule.
 
-### 4.3 Which entrance is the "main entrance"?
-`[story#1]`
+### 4.3 Stories: which entrance is the "main entrance", and does it limit the 12 ft test?
+`[story#1]` `[story#2]`
 
 - **The city's words:** "Buildings hereafter erected shall be limited to the number of stories herein specified, computed at the main entrance side." ([§325-8A, p.24](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=24)). And: "A basement shall be deemed to be a story when the finished surface of the floor next above is 1) more than six feet above grade plane or 2) more than 12 feet above the finished ground level at any point." (§325-3, [p.19](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=19))
-- **What research found:** the 12 ft test looks at every point around the building (§6). "Main entrance" is never defined: it appears once in Chapter 325, and the form districts' "functioning entry" doesn't apply here. No City record was found.
+- **What research found:** "main entrance" is never defined: it appears once in Chapter 325, and the form districts' "functioning entry" doesn't apply here. The 12 ft test's "at any point", like the building code's same test, points to every side, but stories are "computed at the main entrance side", which may limit the count to that side; nothing says which governs. No City record was found.
 - **Why it matters:** R-1b allows 3 stories. A house on a slope can be 3 stories at the street and 4 at the back.
-- **Until you answer:** Today, stories use the number they are given (your 3). From a model, a sloped site gets NEEDS REVIEW on stories unless both entrances give the same answer.
-- **Options:** for the main entrance: (a) the entrance facing the street the address is on; (b) the one the designer names. And when a basement passes the story test only on another side, does "computed at the main entrance side" override the "at any point" test?
+- **Until you answer:** Today, stories use the number they are given (your 3). From a model, a sloped site gets NEEDS REVIEW on stories unless every reading gives the same answer.
+- **Options:** for the main entrance: (a) the entrance facing the street the address is on; (b) the one the designer names. For the 12 ft test: (a) any point on any side; (b) only the main entrance side.
 
 ### 4.4 Basement or cellar, when a space fits both?
 `[basement#1]` `[basement#2]` `[cellar#1]` `[cellar#2]`
@@ -166,7 +166,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **What research found:** a walk-out level can fit both, and nothing says which wins. The building codes have no cellar exemption at all (any level that meets the story tests is a story), so this exemption is Ithaca's own and the codes can't settle it. No City record was found.
 - **Why it matters:** a basement can count as a story; a cellar never does.
 - **Until you answer:** Today, stories use the number they are given. From a model, any lower level on a sloped site gets NEEDS REVIEW on stories unless every reading gives the same answer.
-- **Options:** (a) "at any point" means one point is enough, and a space that fits both is a basement (it counts as a story if the floor above meets the 6 ft or 12 ft test); (b) it is a cellar; (c) for the cellar test, the curb level or the average adjoining grade when they differ?
+- **Options:** for "at any point" in the basement definition: (a) more than half above ground at one point is enough; (b) at every point around the building. For a space that fits both: (a) a basement (it counts as a story if the floor above meets the 6 ft or 12 ft test); (b) a cellar. And for the cellar test, the curb level or the average adjoining grade when they differ?
 
 ### 4.5 A parapet on top of the height bonus?
 `[R-1b.height#1]`
@@ -184,11 +184,11 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 ### 5.1 An accessory building that isn't frame; a height limit?
 `[325-25C#1]`
 
-- **The city's words:** "Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line in all districts…" (§325-25C, [p.67](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=67)).
-- **What research found:** the chart's side yards don't apply to garages and sheds; §325-25 does (§6). But §325-25C sets distances only for "frame" buildings, and §325-25 sets no height limit (detached ADUs have their own). Nothing else in the code or the City's records fills the gap.
-- **Why it matters:** a masonry garage could otherwise sit on the lot line, at any height.
+- **The city's words:** "C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side lot line nor less than three feet from any rear lot line…" (§325-25C, [p.67](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=67)).
+- **What research found:** the chart's side yards don't apply to garages and sheds; §325-25 does (§6). The first sentence sets distances for "frame" buildings. The R-1 clause says "accessory buildings" without "frame", but the subsection is headed "Frame accessory buildings", so whether it covers other buildings isn't settled. §325-25 sets no height limit (detached ADUs have their own). Nothing else in the code or the City's records fills the gap.
+- **Why it matters:** outside R-1, a masonry garage could otherwise sit on the lot line; in R-1 (and R-1b, like 106 Ithaca Rd) it may or may not have to keep 6 ft from the side line. And no accessory building has a height limit.
 - **Until you answer:** Today, accessory buildings are not checked yet: check them by hand. From a model, an accessory building that isn't frame gets NEEDS REVIEW on its distances (being built).
-- **Options:** (a) the frame distances apply to every accessory building; (b) only "not in a required front yard" applies; and is there a height limit for accessory buildings other than ADUs?
+- **Options:** (a) the frame distances apply to every accessory building; (b) in R-1, the 6 ft side / 3 ft rear distances apply to every accessory building, elsewhere only to frame ones; (c) only "not in a required front yard" applies to a building that isn't frame. And is there a height limit for accessory buildings other than ADUs?
 
 ### 5.2 Which front yard is the "primary front yard" for an ADU on a corner lot?
 `[325-28C#1]`
@@ -208,18 +208,17 @@ These were questions on this page. Research answered them, so Gordium uses the a
 | Was | What Gordium uses now | Kind | Source |
 |---|---|---|---|
 | Lot depth on an irregular lot (§1.2 before) | Side lot lines drawn at 90° to the front lot line, from each end to the furthest rear line; depth = their average. One detail is still open (§1.2) | Reading · City practice | Zoning Administrator, BZA Appeal #3202 (2019–2022) |
-| Lot depth when the side lines are equal | That length (the averaging is only for unequal lines); on a skewed lot, measured at 90° to the front | The law | §325-8A(14)(a), p.25 |
+| Lot depth when the side lines are equal | That length (the averaging is only for unequal lines); on a skewed lot, the City's 90° method above | The law | §325-8A(14)(a), p.25 |
 | Yards: to the wall or the eave? | To the nearest part of the building (walls, overhanging floors, porches, decks, balconies over 2 ft, ramps, landings). Sills, cornices and eaves may project up to 2 ft into a yard; more is a violation of that yard | The law | §325-18B, p.49; §325-3 SIDE YARD, p.20; City practice: 132 Cherry St (2026) |
 | Porch steps and stair walls | Count as part of the building for yards and coverage | Reading · City practice | 209 Bryant Ave (R-1b, 2022), 511 S. Plain St (2021) |
 | Corner lots: a front yard on each street | Yes, every street-facing yard is a front yard. Typed-in numbers can't show a corner lot yet: check corner lots by hand | The law | §325-19C, p.50; §325-25A, p.66 |
 | Corner lots: the side yard left | Checked against Column 13 ("other side"); Column 12's place becomes the second front yard (in R-1b both are 10 ft) | Reading · City practice | BZA worksheets #3174 (2021), ZONE-25-12 (2026) |
-| Side yards for a detached garage or shed | The chart's side yards apply to the main building only; garages and sheds follow §325-25 (not in a required front yard; frame ones 3 ft from side and rear lines, 6 ft side in R-1). Not checked yet: they will be rules of their own | The law | §325-25, pp.66–67 |
+| Side yards for a detached garage or shed | The chart's side yards apply to the main building only; garages and sheds follow §325-25 (not in a required front yard; frame ones 3 ft from side and rear lines; in R-1, 6 ft side and 3 ft rear, and whether that covers buildings that aren't frame is §5.1). Not checked yet: they will be rules of their own | The law | §325-25, pp.66–67 |
 | An attached garage | Part of the main building, so the chart's yards apply | Reading · City practice | 409 Campbell Ave (2014) |
 | What may be in the rear yard | Accessory buildings (§325-25), detached ADUs (§325-28C), eaves up to 2 ft (§325-18B), patios at grade, parking (§325-20F); porches, decks, ramps and landings are part of the building (§325-18A). Each will be a rule of its own | The law | §325-3 YARD, REAR YARD, p.20 and the sections named |
 | Does a garage count toward coverage? | Yes, attached or detached, and carports; "parking areas and parking spaces" means open parking | Reading · City practice | §325-3 BUILDING AREA, p.5; 412 E. Yates St (2018) |
-| Footprint at the ground, or from above? | The outline from above of everything above ground; parts wholly below ground don't count. Eaves are still open (§3.1) | Reading · strong | Column 10 "above ground", p.25; §325-18A |
+| Footprint at the ground, or from above? | The outline from above of everything above ground; parts wholly below ground don't count. Roof eaves are still open (§3.1) | Reading · strong | Column 10 "above ground", p.25; §325-18A |
 | Pitched-roof height | Midway between eave and ridge, on the highest roof section; a mansard to its top. Which eave is still open (§4.1) | Reading · moderate | §325-3, p.12; the building codes' "mean roof height" |
-| The 12 ft basement test | At any point around the building | The law | §325-3 STORY, p.19 |
 | Height bonus: which yards grow | Every required front, side and rear yard, one foot per foot of extra height; main buildings only; stories still capped; at most 10% | The law | §325-16C, p.47 |
 | Chimneys, spires, skylights above the limit | They don't change how height is measured; each covers at most 20% of the ground floor or 30% of its roof plane | The law | §325-16A, p.46 |
 | The typo "he vertical distance" | Read as "The" | The law | §325-3, p.12 |

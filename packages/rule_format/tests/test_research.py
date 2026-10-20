@@ -7,7 +7,10 @@ import copy
 
 import pytest
 
-from rule_format.rulebook import REPO, Context, load, pending_research, research_problems, validate_terms
+import re
+
+from rule_format.rulebook import (REPO, Context, law_conflicts, load, pending_research, research_entries,
+                                  research_problems, validate_terms)
 
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 REPORT = "docs/research/2026-10-20_architect_questions.md"
@@ -120,7 +123,7 @@ def test_every_open_question_was_researched_and_none_is_pending():
     """The 2026-10-20 pass researched every question then open: none is left pending, and every one names the
     sections read, its report section and why it is still open."""
     research = [x for _, e in entries() for x in e.get("research", [])]
-    assert len(research) == sum(len(e.get("open_questions", [])) for _, e in entries()) == 18
+    assert len(research) == sum(len(e.get("open_questions", [])) for _, e in entries()) == 19
     assert all(x["searched"] and not x["why_open"].startswith("pending") and x["report"].startswith(REPORT)
                for x in research)
 
@@ -132,3 +135,89 @@ def test_the_eaves_rule_settles_where_yards_are_measured_to():
     assert yards["kind"] == "law" and any(s.get("page") == 49 and "two feet" in s.get("quote", "") for s in yards["sources"])
     assert found["perpendicular_lot_depth"]["strength"] == "city_practice"
     assert found["adu_needs_no_parking"]["kind"] == "law"
+
+
+# ---- review round 1 (2026-10-20): what research may claim -------------------------------------------------
+
+NUMBER_WORDS = {"one": "1", "two": "2", "three": "3", "four": "4", "five": "5", "six": "6", "seven": "7", "eight": "8",
+                "nine": "9", "ten": "10", "twelve": "12"}
+
+
+def claims(text: str) -> set[str]:
+    """The numbers (spelled or not) and district names a text states, leaving out references (sections, pages,
+    chart columns, list markers): those say where words are, not what they say."""
+    text = re.sub(r"§\s*[\w.\-()\[\]]+|\bp\.\s*\d+|\bColumns? \d+|\(\d\)", " ", text)
+    words = {NUMBER_WORDS[w.lower()] for w in re.findall(r"[A-Za-z]+", text) if w.lower() in NUMBER_WORDS}
+    return words | set(re.findall(r"\b[A-Z]{1,2}-\d+[a-z]*\b", text)) | \
+        {n for n in re.findall(r"(?<![\w-])\d+(?:\.\d+)?", text)}
+
+
+def test_a_law_answer_states_no_number_or_district_its_quotes_dont():
+    """An answer filed as the law says nothing its quotes don't: every number and district name in it is in one of
+    its quotes from the code. (The height-bonus answer once said "the bonus doesn't apply in U-1"; the code says
+    the bonus's limits don't apply there, and no quote said U-1.)"""
+    for where, e in entries():
+        for f in e.get("findings") or []:
+            if f["kind"] == "law":
+                quoted = set().union(*(claims(s["quote"]) for s in f["sources"] if "file" in s))
+                assert claims(f["answer"]) <= quoted, (where, f["id"], claims(f["answer"]) - quoted)
+
+
+def test_the_height_bonus_answer_keeps_u1_to_what_the_code_says():
+    bonus = next(f for _, e in entries() for f in e.get("findings") or [] if f["id"] == "height_bonus_main_building_only")
+    assert "U-1" not in bonus["answer"]
+
+
+def test_no_law_finding_settles_what_an_open_question_still_asks(ctx):
+    """The 12 ft story test was filed as the law while story's open question still asked whether "computed at the
+    main entrance side" overrides "at any point", and basement kept the same words open."""
+    assert law_conflicts(research_entries(ITHACA)) == []
+    story = next(e for w, e in entries() if w == "story")
+    assert not [f for f in story.get("findings") or [] if f["kind"] == "law" and "at any point" in
+                " ".join(s.get("quote", "") for s in f["sources"])]
+    readings = {g["id"] for x in story["research"] for g in x.get("readings") or []}
+    assert {"any_side", "main_entrance_side_only"} <= readings
+
+
+def test_law_conflicts_are_found_by_quoted_words_and_by_shared_lines():
+    law = {"findings": [{"id": "f", "kind": "law", "sources": [EAVES]}]}
+    elsewhere = {"open_questions": ['Is "not project more than two feet" measured to the wall?']}
+    assert any("quotes 'not project more than two feet'" in p
+               for p in law_conflicts([("a", law), ("b", elsewhere)]))
+    same = law | {"open_questions": ["Bay windows?"], "research": [{"question": "Bay windows?", "sources": [EAVES]}]}
+    assert any("cites the lines" in p for p in law_conflicts([("a", same)]))
+    reading = {"findings": [{"id": "f", "kind": "reading", "sources": [EAVES]}]}
+    assert law_conflicts([("a", reading), ("b", elsewhere)]) == []                # only the law can't be open
+
+
+def test_a_finding_about_part_of_an_open_question_says_the_rest_is_open():
+    """A finding whose question asks about eaves, in an entry whose open question is about eaves, says the eaves part
+    is still open (coverage seen from above; the pitched-roof midpoint)."""
+    for where, e in entries():
+        if any("eave" in q.lower() for q in e.get("open_questions") or []):
+            for f in e.get("findings") or []:
+                if "eave" in f["question"].lower():
+                    assert "still open" in f["answer"], (where, f["id"])
+
+
+def test_the_accessory_question_cites_the_r1_clause_that_drops_frame():
+    label = next(e for w, e in entries() if w == "325-25C")
+    r = label["research"][0]
+    assert any(s.get("page") == 67 and s.get("lines") == [7, 8] for s in r["sources"])
+    assert "r1_distances_apply_to_all_accessory_buildings" in {g["id"] for g in r["readings"]}
+
+
+def test_each_findings_sources_are_about_that_finding():
+    """The #3093 garage-coverage sentence once backed the side-yard and corner-lot findings too."""
+    found = {f["id"]: f for _, e in entries() for f in e.get("findings") or []}
+    def yates(fid):
+        return [s["quote"] for s in found[fid]["sources"] if "Yates" in s.get("cite", "")]
+    assert yates("accessory_structures_follow_325_25") and all("side yard" in q for q in yates("accessory_structures_follow_325_25"))
+    assert yates("corner_lot_side_yard_column_13") and all("Column 13" in q for q in yates("corner_lot_side_yard_column_13"))
+    assert all("lot coverage" in q for q in yates("garages_count"))
+
+
+def test_a_note_never_says_open_question_once_none_is_open():
+    for where, e in entries():
+        if not e.get("open_questions"):
+            assert "open question" not in str(e.get("notes", "")).lower(), where
