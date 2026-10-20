@@ -17,12 +17,12 @@ from pathlib import Path
 import yaml
 
 from .labels import load_pieces, validate_labels
-from .rulebook import REPO, TERM_SCHEMAS, Context, load, locate, not_quotable, validate, validate_terms
+from .rulebook import REPO, TERM_SCHEMAS, Context, jurisdictions, load, locate, not_quotable, validate, validate_terms
 
 
 def main() -> int:
     failed = checked = 0
-    for jurisdiction in sorted(p for p in (REPO / "regulations/jurisdictions").glob("*/*") if p.is_dir()):
+    for jurisdiction in jurisdictions(REPO):
         place = jurisdiction.relative_to(REPO / "regulations/jurisdictions")
         try:
             ctx = Context.for_jurisdiction(jurisdiction)
