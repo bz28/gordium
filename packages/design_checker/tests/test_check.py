@@ -263,8 +263,12 @@ def test_a_measurement_with_no_reading_at_all_is_never_worked_out():
 
 def test_the_summary_says_complies_only_when_every_open_question_passes():
     rows = [{"Error": "PASS", "Requirement": "Front yard"},
-            {"Error": "NEEDS REVIEW", "Requirement": "Lot coverage by buildings", "Provisional": "passes with the lot as drawn (confirm the survey)"}]
+            {"Error": "NEEDS REVIEW", "Requirement": "Rear yard", "Provisional": "passes under every reading of the lot"}]
     assert summary(rows)["state"] == "complies"
+    survey = rows[:1] + [{"Error": "NEEDS REVIEW", "Requirement": "Lot coverage by buildings", "Survey": True,
+                          "Provisional": "passes with the lot as drawn (confirm the survey)", "Why": "no survey"}]
+    s = summary(survey)                 # a lot not yet surveyed is a missing fact: amber, never a green complies
+    assert s["state"] == "review" and s["lines"] == ["Lot coverage by buildings: passes with the lot as drawn (confirm the survey)"]
     rows.append({"Error": "NEEDS REVIEW", "Requirement": "Rear yard", "Provisional": None, "Why": "x"})
     assert summary(rows)["state"] == "review"
 
@@ -325,3 +329,9 @@ def test_the_sample_lot_gives_the_spec_massing():
     assert (x1 - x0, round((y1 - y0) * 12, 6)) == (53, 30 * 12 + 11)
     assert round(outline.area) == 1639 and round(outline.area / 6570 * 100, 2) == 24.94
     assert y0 == 25 and len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
+
+
+def test_a_flag_needing_review_never_crashes_the_check(facts):
+    result = check(MODEL, {**facts, "use": "two_family"})
+    flag = next(r for r in result["rows"] if r["Rule id"] == "R-1b.parking_other_uses")
+    assert flag["Error"] == "NEEDS REVIEW"

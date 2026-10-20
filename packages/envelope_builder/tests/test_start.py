@@ -37,7 +37,8 @@ def solid(outline, z0, z1, id):
 
 
 def floors_as_solids(start):
-    return [solid([tuple(p) for p in f["outline"]], f["base"], f["top"], f"floor {i + 1}")
+    """The floor blocks as GordiumStart draws them: each marked as one story."""
+    return [{**solid([tuple(p) for p in f["outline"]], f["base"], f["top"], f"floor {i + 1}"), "floor": True}
             for i, f in enumerate(start["floors"])]
 
 
@@ -96,7 +97,7 @@ def test_growing_any_side_by_one_foot_breaks_a_rule():
     for grown in ([x0 - 1, y0, x1, y1], [x0, y0 - 1, x1, y1], [x0, y0, x1 + 1, y1], [x0, y0, x1, y1 + 1]):
         a, b, c, d = grown
         outline = [(a, b), (c, b), (c, d), (a, d)]
-        bigger = {**site, "buildings": [solid(outline, f["base"], f["top"], f"floor {i}")
+        bigger = {**site, "buildings": [{**solid(outline, f["base"], f["top"], f"floor {i}"), "floor": True}
                                         for i, f in enumerate(start["floors"])]}
         got, _ = results(bigger, facts)
         assert "fail" in got.values(), (grown, got)
@@ -124,12 +125,34 @@ def test_no_buildable_area_is_said_not_drawn():
 
 
 def test_limits_come_from_the_rules_not_the_code():
-    """Another zone's numbers give another building: double every yard and halve the height in a copy of the rules."""
+    """Other numbers give another building: in a copy of the rules, the front yard 30, the side yards 12, the rear
+    yard minimum 30 and the height 30."""
     import envelope_builder.start as s
-    changed = [{**r, "check": r["check"].replace(">= 25", ">= 30").replace("<= 35", "<= 30")} if r.get("check") else r
-               for r in RULES]
+    changed = [{**r, "check": r["check"].replace(">= 25", ">= 30").replace("<= 35", "<= 30").replace(">= 10", ">= 12")
+                .replace(", 20)", ", 30)")} if r.get("check") else r for r in RULES]
     site = {"units": "ft", "lot": lot(RECTANGLE), "buildings": [], "problems": []}
     facts = {**FACTS, "street_line": [[[0, 0], [73, 0]]]}
     start = s.largest_legal_building(site, facts, measure(site, facts), changed)
     assert start["height"] == 30
-    assert min(p[1] for p in start["floors"][0]["outline"]) == pytest.approx(30, abs=0.01)
+    xs = [p[0] for p in start["floors"][0]["outline"]]
+    ys = [p[1] for p in start["floors"][0]["outline"]]
+    assert min(ys) == pytest.approx(30, abs=0.01)
+    assert min(xs) >= 12 - 0.01 and max(xs) <= 73 - 12 + 0.01 and max(xs) - min(xs) >= 73 - 24 - 1 / 12 - 0.01
+    assert max(ys) <= 90 - 30 + 0.01
+
+
+def test_a_street_drawn_with_a_bend_still_gets_a_starting_building():
+    bent = [(0, 0), (36.5, 0.5), (73, 0), (73, 90), (0, 90)]
+    facts = {**FACTS, "street_line": [[[0, 0], [36.5, 0.5]], [[36.5, 0.5], [73, 0]]]}
+    start, site = generated(bent, facts)
+    assert start["floors"], start["notes"]
+    got, _ = results(site, facts)
+    assert "fail" not in got.values(), got
+
+
+def test_a_deep_lot_is_quick():
+    import time
+    deep = [(0, 0), (100, 0), (100, 600), (0, 600)]
+    t = time.time()
+    start, _ = generated(deep, {**FACTS, "street_line": [[[0, 0], [100, 0]]]})
+    assert start["floors"] and time.time() - t < 3

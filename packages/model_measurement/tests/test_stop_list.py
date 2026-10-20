@@ -16,7 +16,7 @@ from model_measurement.stops import STOPS
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))           # the lots and models the other tests build
-from test_measure import FACTS, RECT, box, lot, sloped_roof_box  # noqa: E402
+from test_measure import FACTS, RECT, box, floor, lot, sloped_roof_box  # noqa: E402
 from test_read_3dm import FACTS as FILE_FACTS  # noqa: E402
 from test_read_3dm import box as file_box  # noqa: E402
 from test_read_3dm import model, on, rect, write  # noqa: E402
@@ -170,11 +170,11 @@ CASES = {
     "no_use": _plain(use=None),
     "no_district": _plain(zone=None),
     "no_stories": _plain(stories=None),
-    "floors_misaligned": _plain(stories=None, buildings=[box(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
-                                                         box(13, 25, 38, 65, z0=11, z1=22, id="floor 2")]),
-    "basement_story": _plain(stories=None, buildings=[box(10, 25, 35, 65, z0=-9, z1=0, id="basement"),
-                                                      box(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
-                                                      box(10, 25, 35, 65, z0=11, z1=22, id="floor 2")]),
+    "floors_misaligned": _plain(stories=None, buildings=[floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
+                                                         floor(13, 25, 38, 65, z0=11, z1=22, id="floor 2")]),
+    "basement_story": _plain(stories=None, buildings=[floor(10, 25, 35, 65, z0=-9, z1=0, id="basement"),
+                                                      floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
+                                                      floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2")]),
     "no_rooms": _plain(),
     "ground_unknown": _plain(ground_is_flat=None),
     "sloped_ground": _plain(ground_is_flat=False),

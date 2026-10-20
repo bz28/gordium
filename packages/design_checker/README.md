@@ -28,7 +28,9 @@ What it adds for the Rhino command, never changing a result:
   If it passes under all of them, the row says so ("passes under every reading of the lot", "passes with the lot
   as drawn (confirm the survey)"); if it fails under all of them, it counts as failing (red, and in the "now
   fails" note). The result itself stays NEEDS REVIEW: only `outcome()` decides results. The summary then says
-  "Complies" when nothing fails and every open question passes whichever way it is answered.
+  "Complies" when nothing fails and every open question about how the law reads passes whichever way it is
+  answered. A rule that passes only with the lot as drawn (no survey yet) stays amber, needs review: a missing
+  survey is a missing fact, so it never shows as complying.
 
 The worker stays running, so a re-check after an edit doesn't pay for starting Python again. A bad request gets a
 plain error answer; the worker keeps serving.

@@ -84,23 +84,31 @@ def _x_range(shape: Polygon, y: float, around: float):
     return s[0], s[-1]
 
 
-def _rectangle(shape: Polygon, depth: float, y0: float, around: float):
-    """The widest rectangle [x0, x1] x [y0, y0 + depth] inside the shape (sampled every STEP in depth)."""
-    lo, hi = -math.inf, math.inf
-    n = max(2, int(math.ceil(depth / STEP)) + 1)
-    for k in range(n):
-        y = y0 + depth * k / (n - 1)
+def _footprint(shape: Polygon, around: float, allowed):
+    """(x0, x1, front, depth): the rectangle square to the street, from the first level where the buildable area is
+    at least a foot wide (the front yard line; a bent or curved street pushes it back to where a rectangle fits),
+    as wide as it stays all the way back, and as deep as the coverage limit or the rear allow. One pass from front
+    to back, a slice every STEP: the width only narrows going back, so each slice is looked at once."""
+    y0, y1 = shape.bounds[1], shape.bounds[3]
+    front = y0
+    span = _x_range(shape, front, around)
+    while span is None or span[1] - span[0] < 1.0:
+        front += STEP
+        if front > y1:
+            return None
+        span = _x_range(shape, front, around)
+    lo, hi = span
+    found, y = None, front
+    while y < y1:
+        y = min(y + STEP, y1)
         span = _x_range(shape, y, around)
-        if span is None:
-            return None
+        if span is None or min(hi, span[1]) - max(lo, span[0]) <= 0:
+            break
         lo, hi = max(lo, span[0]), min(hi, span[1])
-        if hi <= lo:
-            return None
-    rect = box(lo, y0, hi, y0 + depth)
-    while not rect.within(shape.buffer(1e-9)) and hi - lo > 2 * SAFETY:   # a corner between samples: pull in
-        lo, hi = lo + SAFETY, hi - SAFETY
-        rect = box(lo, y0, hi, y0 + depth)
-    return rect if rect.within(shape.buffer(1e-9)) else None
+        if allowed is not None and (hi - lo) * (y - front) >= allowed:
+            return lo, hi, front, allowed / (hi - lo)
+        found = (lo, hi, front, y - front)
+    return found
 
 
 def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict]) -> dict:
@@ -131,20 +139,15 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     lot = Lot(site, facts)
     angle, origin = _frame(lot)
     buildable = affinity.rotate(Polygon(env["outline"], env["holes"]), -angle, origin=origin, use_radians=True)
-    y0, y1 = buildable.bounds[1], buildable.bounds[3]
-    around = buildable.centroid.x
-    best = None
-    depth = STEP
-    while depth <= y1 - y0 + 1e-9:            # deeper and deeper, until coverage or the rear yard stops it
-        rect = _rectangle(buildable, depth, y0, around)
-        if rect is not None:
-            if allowed is not None and rect.area >= allowed:
-                width = rect.bounds[2] - rect.bounds[0]
-                best = box(rect.bounds[0], y0, rect.bounds[2], y0 + allowed / width)
-                break
-            best = rect if best is None or rect.area > best.area else best
-        depth += STEP
-    if best is None:
+    found = _footprint(buildable, buildable.centroid.x, allowed)
+    if found is None:
+        notes.append("no rectangle square to the street fits inside the required yards")
+        return out
+    lo, hi, y0, depth = found
+    best = box(lo, y0, hi, y0 + depth)
+    while not best.within(buildable.buffer(1e-9)) and best.bounds[2] - best.bounds[0] > 2 * SAFETY:
+        best = box(best.bounds[0] + SAFETY, y0, best.bounds[2] - SAFETY, y0 + depth)   # a corner between slices
+    if not best.within(buildable.buffer(1e-9)):
         notes.append("no rectangle square to the street fits inside the required yards")
         return out
     x0, _, x1, y1b = best.bounds                 # whole inches, rounded down, centred where it was

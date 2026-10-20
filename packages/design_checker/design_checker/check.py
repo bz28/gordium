@@ -102,14 +102,16 @@ def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] 
 
 
 def summary(rows: list[dict]) -> dict:
-    """One line for the viewport corner: all pass; it complies under every reading (rules waiting only on a survey
-    or an architects' answer, each passing whichever way it goes); or what fails and what needs review."""
+    """One line for the viewport corner: all pass; it complies under every reading (rules waiting only on how the
+    law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
+    with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
+    missing fact, not a reading, so it is never shown as complying."""
     fails = [r for r in rows if r.get("Fails") or r["Error"] == "FAIL"]
     review = [r for r in rows if r["Error"] == "NEEDS REVIEW" and r not in fails]
     passes = [r for r in rows if r["Error"] == "PASS"]
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
-    if not fails and all(r.get("Provisional") for r in review):
+    if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):
         waiting = {}
         for r in review:
             waiting.setdefault(r["Provisional"], []).append(short(r["Requirement"]))
@@ -170,8 +172,11 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}
     every = [_why(dict(zip(COLUMNS, r)), by_id, measured) for r in t["output"]]
+    def checks(rule):                   # a flag has no check
+        return formula.names(rule["check"]) if rule.get("check") else set()
+
     waiting = [r for r in every if r["Error"] == "NEEDS REVIEW" and any(
-        (measured.get(n) or {}).get("value") is None for n in formula.names(by_id[r["Rule id"]]["check"]) & INTERIOR)]
+        (measured.get(n) or {}).get("value") is None for n in checks(by_id[r["Rule id"]]) & INTERIOR)]
     rows = [{**r, "Line": _amount(r)} if r["Error"] == "FAIL" else r for r in every if r not in waiting]
     for r in rows:
         r["Short"] = short(r["Requirement"])
@@ -179,6 +184,7 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     for r in rows:
         found = every_reading(by_id[r["Rule id"]], measured, allowed) if r["Error"] == "NEEDS REVIEW" else None
         r["Provisional"] = found[1] if found else None
+        r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
         r["Fails"] = r["Error"] == "FAIL" or bool(found and found[0] == "fail")   # fails whichever way it goes
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"

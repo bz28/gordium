@@ -3,6 +3,7 @@ Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
 LAYERS = {"lot": "Site", "building": "Building"}
+FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew (its story number)
 MASSING = "Gordium::Massing"            # where GordiumStart draws the starting building: building objects too
 SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
 DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",

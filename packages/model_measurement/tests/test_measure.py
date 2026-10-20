@@ -623,8 +623,13 @@ def test_a_solid_under_the_house_but_not_joined_to_it_is_never_dropped():
 
 # ---- stories from the shape: stacked floor blocks ----------------------------------------------------------
 
-FLOORS = [box(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
-          box(10, 25, 35, 65, z0=22, z1=33, id="floor 3")]
+def floor(*args, **kw):
+    """A floor block GordiumStart drew: marked as one story."""
+    return {**box(*args, **kw), "floor": True}
+
+
+FLOORS = [floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
+          floor(10, 25, 35, 65, z0=22, z1=33, id="floor 3")]
 
 
 def test_stacked_floor_blocks_are_one_building_and_its_stories_are_counted():
@@ -636,8 +641,23 @@ def test_stacked_floor_blocks_are_one_building_and_its_stories_are_counted():
     assert m["building_area"]["value"] == 25 * 40
 
 
-def test_floors_drawn_win_over_a_typed_count():
-    assert measure(site(RECT, *FLOORS), {**FACTS, "stories": 2})["stories"]["value"] == 3
+def test_a_typed_count_that_disagrees_with_the_floors_drawn_is_a_question():
+    m = measure(site(RECT, *FLOORS), {**FACTS, "stories": 2})["stories"]
+    assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [2, 3]
+    assert measure(site(RECT, *FLOORS), {**FACTS, "stories": 3})["stories"]["value"] == 3
+
+
+def test_stacked_blocks_that_arent_gordiums_floors_never_override_the_typed_count():
+    """A podium and an upper block, 17 ft each, holding 4 real floors: never "2 stories" (a false pass)."""
+    podium = [box(10, 25, 35, 65, z0=0, z1=17, id="podium"), box(10, 25, 35, 65, z0=17, z1=34, id="upper")]
+    m = measure(site(RECT, *podium), {**FACTS, "stories": 4})["stories"]
+    assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [2, 4]
+    assert measure(site(RECT, *podium), {**FACTS, "stories": None})["stories"]["reason"].startswith("the building is one")
+
+
+def test_one_gordium_floor_block_is_one_story():
+    assert measure(site(RECT, floor(10, 25, 35, 65, z0=0, z1=12, id="floor 1")), {**FACTS, "stories": None})[
+        "stories"]["value"] == 1
 
 
 def test_one_solid_without_floors_asks_for_floors_or_a_count():
@@ -648,16 +668,16 @@ def test_one_solid_without_floors_asks_for_floors_or_a_count():
 def test_a_smaller_block_on_top_is_a_question_not_a_story():
     bulkhead = box(15, 30, 20, 35, z0=33, z1=41, id="bulkhead")
     m = measure(site(RECT, *FLOORS, bulkhead), {**FACTS, "stories": None})
-    assert m["stories"]["value"] is None and "stair bulkhead" in m["stories"]["reason"]
+    assert m["stories"]["value"] is None and "a bulkhead" in m["stories"]["reason"]
     assert sorted(r["value"] for r in m["stories"]["readings"]) == [3, 4]
 
 
 def test_a_full_size_fourth_floor_is_counted():
-    top = box(10, 25, 35, 65, z0=33, z1=44, id="floor 4")
+    top = floor(10, 25, 35, 65, z0=33, z1=44, id="floor 4")
     assert measure(site(RECT, *FLOORS, top), {**FACTS, "stories": None})["stories"]["value"] == 4
 
 
 def test_a_floor_moved_alone_is_floors_misaligned():
-    moved = box(13, 25, 38, 65, z0=11, z1=22, id="floor 2")            # floor 2 shifted 3 ft sideways on its own
+    moved = floor(13, 25, 38, 65, z0=11, z1=22, id="floor 2")            # floor 2 shifted 3 ft sideways on its own
     m = measure(site(RECT, FLOORS[0], moved, FLOORS[2]), {**FACTS, "stories": None})
     assert m["stories"]["value"] is None and m["stories"]["reason"].startswith("floors misaligned")

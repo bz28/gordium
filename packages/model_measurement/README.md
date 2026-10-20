@@ -100,8 +100,10 @@ Every reason the code gives today comes from the table:
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "the building is one
   solid with no floors: draw each story as its own solid standing on the one below (as Gordium's starting building
   is), or enter the number of stories"; "enter bedrooms / parking spaces".
-- **Stories, from the shape:** a building drawn as stacked floor blocks (each story its own solid, standing on the
-  one below) is one building, and its stories are its blocks counted. "a floor block below the ground: whether a
+- **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
+  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked (a podium, a bulkhead, a
+  roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
+  they disagree it's a question, never an override. "a floor block below the ground: whether a
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
   together, or draw the overhang as part of its floor".

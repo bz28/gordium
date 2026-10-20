@@ -231,6 +231,9 @@ def export(doc, path):
             attrs = Rhino.DocObjects.ObjectAttributes()
             attrs.LayerIndex = index
             attrs.SetUserString(ID_KEY, str(o.Id))
+            floor = o.Attributes.GetUserString(logic.FLOOR_KEY)
+            if floor:
+                attrs.SetUserString(logic.FLOOR_KEY, floor)
             g = o.Geometry
             if isinstance(g, rg.SubD):
                 g = g.ToBrep(rg.SubDToBrepOptions.Default)
@@ -1063,6 +1066,7 @@ def add_floors(doc, start):
         a = Rhino.DocObjects.ObjectAttributes()
         a.LayerIndex = _layer(doc, logic.MASSING)
         a.Name = "Floor " + str(i + 1)
+        a.SetUserString(logic.FLOOR_KEY, str(i + 1))      # one story: what makes it count as a story
         a.AddToGroup(group)
         ids.append(doc.Objects.AddBrep(brep, a))
     return ids
@@ -1078,14 +1082,18 @@ def gordium_start():
                                  "(use GordiumCheck to check a design)")
         return None
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
-    sample = ask({"cmd": "sample_site"})
-    if not _lot_candidates(doc):
+    if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
+        sample = ask({"cmd": "sample_site"})
         _add_lot(doc, sample)
-    facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
-                                   suggested_facts(doc, options["zones"]))
-    lots = _lot_candidates(doc)
-    if len(lots) == 1:
-        facts["lot_id"] = str(lots[0].Id)
+        facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
+                                       suggested_facts(doc, options["zones"]))
+        facts["lot_id"] = str(_lot_candidates(doc)[0].Id)
+    else:                               # the architect's own lot: their saved facts, else the suggestions
+        try:
+            saved = current_facts(doc)
+        except ValueError:
+            saved = {}
+        facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
     facts = confirm(doc, facts, options)
     if facts is None:
         Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")

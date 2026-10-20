@@ -444,38 +444,49 @@ def _stacks(buildings: list[dict]) -> list[dict]:
         groups.setdefault(root(b["id"]), []).append(b)
     out = []
     for members in groups.values():
-        if len(members) == 1:
+        if len(members) == 1 and not members[0].get("floor"):     # one solid, not a Gordium floor block
             out.append(members[0])
             continue
         members.sort(key=lambda b: spans[b["id"]][0])
         out.append({"id": members[0]["id"], "parts": [b["id"] for b in members],
                     "spans": [spans[b["id"]] for b in members], "plans": [plans[b["id"]] for b in members],
+                    "floor": [bool(b.get("floor")) for b in members],
                     "faces": [f for b in members for f in b["faces"]],
                     "problems": [p for b in members for p in b.get("problems") or []]})
     return out
 
 
-def _stories(building: dict, grade, why_grade) -> dict:
-    """STORY: the floor blocks of a stacked building standing on or above the ground, counted. A block below the
-    ground is a basement or cellar, and whether it counts as a story (§325-3) isn't measured yet."""
-    how = "the floor blocks of the building counted (each story drawn as its own solid)"
+def _stories(building: dict, grade, why_grade, stated) -> dict:
+    """STORY, read from the shape: the floor blocks Gordium drew (each marked as one story) standing on or above the
+    ground, counted. Any other way of counting is a reading, never an override: a block that isn't one of Gordium's
+    floors (a podium, a bulkhead, a roof solid: its stories can't be told from its height) and the count the
+    architect typed. If the readings disagree, it's a question. A block below the ground is a basement or cellar,
+    whether it counts as a story (§325-3) isn't measured yet."""
+    how = "the floor blocks of the building counted (each story drawn as its own solid by Gordium)"
+    floors = [i for i, f in enumerate(building["floor"]) if f]
+    if not floors:                      # nobody marked these as one story each: the typed count, or ask
+        readings = [("as stated by the architect", stated, {})] if stated is not None else []
+        readings += [("every stacked block a story", len(building["parts"]), {})] if readings else []
+        if not readings:
+            return _record("stories", "count", reason=stop("no_stories"))
+        return _decide("stories", readings, "stated by the architect (not measured from the model)", building["parts"],
+                       "the stacked blocks aren't Gordium's floor blocks, so how many stories they hold can't be told "
+                       "from the model; the count typed and the blocks disagree (story)")
     if why_grade:
         return _record("stories", "count", reason=why_grade)
     if any(lo < grade - TOL for lo, _ in building["spans"]):
         return _record("stories", "count", reason=stop("basement_story"))
-    # a block smaller than the floor below it (a stair bulkhead, a penthouse, a stepped-back floor) may not be a
-    # story: counted both ways, and if that changes the count it's a question, never a guess
-    plans = building["plans"]
-    if any(not plans[i].difference(plans[i - 1].buffer(TOL)).is_empty
-           and plans[i].difference(plans[i - 1].buffer(TOL)).area > 1e-6 for i in range(1, len(plans))):
+    plans = [building["plans"][i] for i in floors]
+    if any(plans[i].difference(plans[i - 1].buffer(TOL)).area > 1e-6 for i in range(1, len(plans))):
         return _record("stories", "count", reason=stop("floors_misaligned"))
-    full = [i for i, p in enumerate(plans) if i == 0 or p.area >= plans[i - 1].area - 1e-6]
-    if len(full) == len(plans):
-        return _record("stories", "count", len(plans), how, building["parts"])
-    readings = [("every block a story", len(plans), {}), ("only blocks as large as the floor below", len(full), {})]
+    readings = [("Gordium's floor blocks", len(floors), {})]
+    if len(floors) < len(building["parts"]):    # something else stacked on them (a bulkhead, a penthouse)
+        readings.append(("every stacked block a story", len(building["parts"]), {}))
+    if stated is not None:
+        readings.append(("as stated by the architect", stated, {}))
     return _decide("stories", readings, how, building["parts"],
-                   "whether a block smaller than the floor below it (a stair bulkhead, a penthouse, a stepped-back "
-                   "floor) is a story is an open question for the architects (story)")
+                   "whether a block that isn't one of Gordium's floors (a bulkhead, a penthouse) is a story, or the "
+                   "count typed, disagrees with the floors drawn: a question (story)")
 
 
 # ---- measuring -------------------------------------------------------------------------------------------
@@ -547,8 +558,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     buildings = _stacks(buildings)
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None))
-    if main is not None and len(main.get("parts", [])) > 1:
-        out["stories"] = _stories(main, grade, why_grade)
+    if main is not None and main.get("parts"):
+        out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
     why_main = None if main else stop("no_main_building")
     why = why_building or why_grade or why_main
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)

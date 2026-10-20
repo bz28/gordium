@@ -152,12 +152,13 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
   building as stacked floor blocks (`envelope_builder.start`): inside every yard, at the coverage and height
   limits, one block per story. Live checking is on: after each edit the corner message updates, failing parts
   turn red, and a short note shows in the view only when a rule newly fails.
-- **Stories from the shape:** stacked solids are one building and its stories are its blocks counted; a block
-  smaller than the floor below (a bulkhead) is a question, not a story; one solid with no floors asks for floors
-  or a count. Never guessed from the height.
-- **"Complies" without a guess:** a rule waiting on an open question (which lines are side lot lines, a lot not
-  yet surveyed) is worked out under every reading; if every reading passes, the design is said to comply whichever
-  way the question is answered. The rule's result stays NEEDS REVIEW.
+- **Stories from the shape:** Gordium's own floor blocks (each marked as one story when drawn) are counted.
+  Anything else stacked (a podium, a bulkhead, a roof solid) and any typed count are readings: if they disagree
+  it's a question. One solid with no floors asks for floors or a count. Never guessed from the height.
+- **"Complies" without a guess:** a rule waiting on how the law reads (which lines are side lot lines) is worked
+  out under every reading; if every reading passes, the design is said to comply whichever way the question is
+  answered. The rule's result stays NEEDS REVIEW. A lot not yet surveyed is a missing fact, not a reading: those
+  rules say "passes with the lot as drawn (confirm the survey)" and stay amber.
 - **Tested by:** the generated building passes every outside R-1b rule on made-up lots and 106 Ithaca Rd, and is
   maximal (1 ft more on any side breaks a rule); the whole flow run in Rhino 8 from an empty document (PR
   description).
