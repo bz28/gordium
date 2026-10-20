@@ -41,8 +41,8 @@ STOPS = {
     "ground_unknown": "say whether the ground is flat",
     "ground_off_building": "the ground level ({ground} ft) doesn't meet the buildings (they run from {bottom} to "
                            "{top} ft): check the ground level",
-    "buried_solid": "a solid lies wholly under the ground ({ground} ft; it runs from {bottom} to {top} ft) and not "
-                    "under the building above it: check the ground level and where the solid is",
+    "buried_solid": "a solid lies wholly under the ground ({ground} ft; it runs from {bottom} to {top} ft) and isn't "
+                    "joined directly under the building: check the ground level and where the solid is",
     "sloped_ground": "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't "
                      "measured yet",
     # facts a massing model doesn't show, until they are entered
