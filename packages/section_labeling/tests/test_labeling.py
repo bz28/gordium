@@ -511,3 +511,13 @@ def test_methods_doc_matches_what_this_branch_builds():
     if not (REPO / "packages/document_extraction/document_extraction/charts.py").exists():
         section = doc[doc.index("## 4. Chart tables"):doc.index("## 5.")]
         assert "own branch (PR 6)" in section
+
+
+def test_methods_doc_says_whether_a_run_used_the_current_labeling_guide():
+    """The run records keep the fingerprint of the guide each call was sent. If the current guide was never
+    sent, methods.md must say so and must not call the change cosmetic."""
+    from rule_format.rulebook import REPO
+    sent = {call["system_sha256"] for call in cli.run_records(ITHACA)}
+    doc = (REPO / "docs/methods.md").read_text()
+    if labeler.sha(labeler.system_prompt()) not in sent:
+        assert "No recorded run used the current guide" in doc and "wording only" not in doc
