@@ -69,6 +69,14 @@ def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
     assert "any reading" not in item and all(f"{k} ft" in item for k in readings)
 
 
+def test_no_doc_claims_a_rear_yard_floor_across_readings():
+    """On the 106 Ithaca Rd lot one reading of the side lot lines gives the 20 ft minimum (item 4.2), so no
+    document may claim the rear setback needs more 'under any reading' or quote 22.6 ft as a floor."""
+    claims = re.compile(r"(rear|setback)[^.\n]*(any reading|at least 22\.6)|22\.6 ft under", re.IGNORECASE)
+    found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in claims.finditer(p.read_text())]
+    assert not found, found
+
+
 def test_the_106_ithaca_rd_lot_area_is_quoted_as_measured():
     """The architects' model lot measures 6,674.5 sf (shoelace area of its Site polyline) and their
     spreadsheet types 6,674. A third figure, 6,674.7, once spread through the docs and rules; keep it out."""

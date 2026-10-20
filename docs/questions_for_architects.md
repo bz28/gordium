@@ -5,7 +5,7 @@ Open questions. Remove each one once answered (and record the answer where it be
 ## About their 106 Ithaca Road example
 1. Their lot is 6,674.5 sf as drawn (6,674 in their spreadsheet); the city's tax parcel is ~7,034 sf with a curved street side. Where did their lot outline come from, and is there a survey? (Zone is confirmed R-1b, no overlays, not historic, not in a flood zone.)
 2. Do they agree with `discrepancies_with_architects.md`? Especially the 🔴 items.
-3. Rhino model: the building sits ~76 ft off the lot, and the rear setback is 20 ft. The rule requires 25% of the average side lot line (§325-8A(14)(a)): 23.7 ft if the 90.28 and 99.37 ft lines are the side lot lines (see the side lot line question below), and at least 22.6 ft under any reading. Intended (a test) or mistakes?
+3. Rhino model: the building sits ~76 ft off the lot, and the rear setback is 20 ft. The rule requires 25% of the average side lot line (§325-8A(14)(a)): 23.7 ft if the 90.28 and 99.37 ft lines are the side lot lines, 25.015 ft if the jog is added to the 99.37 ft line it continues, and the 20 ft minimum only if all three lines that aren't front or rear are averaged (see the side lot line question below, and discrepancy 4.2). Intended (a test) or mistakes?
 
 ## About definitions (from `regulations/.../4_term_definitions/definitions.yaml`)
 4. **Lot area** isn't defined in Chapter 325. Should we use the area inside the lot lines from a survey? What if there's no survey (the tax map can differ)?
