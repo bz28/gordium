@@ -228,19 +228,34 @@ def _plane_z(face: dict, x: float, y: float):
     return z0 - (nx * (x - x0) + ny * (y - y0)) / nz
 
 
+def _plan(face: dict):
+    """A face seen from above, with its holes."""
+    return Polygon([p[:2] for p in face["points"]], [[p[:2] for p in h] for h in face.get("holes") or []]).buffer(0)
+
+
+def _samples(shape, n: int = 7) -> list:
+    """Points spread over a shape (a grid inside it, and one point surely inside)."""
+    x0, y0, x1, y1 = shape.bounds
+    grid = [Point(x0 + (x1 - x0) * (i + 0.5) / n, y0 + (y1 - y0) * (j + 0.5) / n) for i in range(n) for j in range(n)]
+    return [p for p in grid if shape.contains(p)] + [shape.representative_point()]
+
+
 def _open_to_the_sky(faces: list[dict]) -> list[dict]:
-    """The faces of a solid that nothing of it covers: no other face lies above a point inside them. Undersides
-    (soffits, the floor of an upper storey that sticks out) and floors are covered; roofs are not."""
-    flat = [(f, Polygon([p[:2] for p in f["points"]]).buffer(0)) for f in faces if _normal_z(f["points"]) > 0.001]
+    """The faces of a solid that aren't wholly covered by the solid itself: a face is open if at some point of it
+    (holes left out) no other face lies above. Undersides (soffits, the floor of an upper storey that sticks out)
+    and floors are covered; roofs, and a roof with a chimney through a hole in it, are not."""
+    flat = [(f, _plan(f)) for f in faces if _normal_z(f["points"]) > 0.001]
     open_ = []
     for f, shape in flat:
         if shape.area <= 1e-9:
             continue
-        inside = shape.representative_point()
-        z = _plane_z(f, inside.x, inside.y)
-        if not any(g is not f and other.buffer(TOL).contains(inside) and (_plane_z(g, inside.x, inside.y) or z) > z + TOL
-                   for g, other in flat):
-            open_.append(f)
+        for point in _samples(shape):
+            z = _plane_z(f, point.x, point.y)
+            above = [_plane_z(g, point.x, point.y) for g, other in flat
+                     if g is not f and other.buffer(TOL).contains(point)]
+            if not any(h is not None and h > z + TOL for h in above):
+                open_.append(f)
+                break
     return open_
 
 
@@ -257,9 +272,7 @@ def _height(building: dict, grade: float) -> dict:
     if not roof:
         return _missing("building_height", "the roof's shape can't be read (no faces open to the sky)")
     how = "from the ground level (grade plane) to the top of the roof"
-    main_roof = max(roof, key=lambda f: (Polygon([p[:2] for p in f["points"]],
-                                                 [[p[:2] for p in h] for h in f.get("holes") or []]).buffer(0).area,
-                                         max(p[2] for p in f["points"])))
+    main_roof = max(roof, key=lambda f: (_plan(f).area, max(p[2] for p in f["points"])))
     roof_top = max(p[2] for p in main_roof["points"])
     if roof_top >= top - TOL:
         readings, question = _roof_readings(roof, top, grade)

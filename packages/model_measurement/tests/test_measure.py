@@ -464,3 +464,29 @@ def test_a_hip_roof_over_a_soffit_drawn_as_one_face_is_read_as_pitched():
     m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)["building_height"]
     assert sorted({r["value"] for r in m["readings"]}) == [25.0, 30.0]
     assert "pitched roof" in m["reason"] and "rises above" not in m["reason"]
+
+
+def test_a_chimney_through_a_hole_in_the_roof_is_still_above_the_roof():
+    walls = box(10, 25, 40, 55, 0, 30)
+    faces = [f for f in walls["faces"] if not all(p[2] == 30 for p in f["points"])]
+    faces += [{"points": [[10, 25, 30], [40, 25, 30], [40, 55, 30], [10, 55, 30]],
+               "holes": [[[24, 39, 30], [26, 39, 30], [26, 41, 30], [24, 41, 30]]]}]
+    chimney = box(24, 39, 26, 41, 30, 36, id="c")
+    faces += [f for f in chimney["faces"] if not all(p[2] == 30 for p in f["points"])]
+    m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)["building_height"]
+    assert m["value"] is None and "rises above the main roof" in m["reason"]
+    assert {r["value"] for r in m["readings"]} == {30.0, 36.0}
+
+
+def test_where_the_model_sits_up_or_down_changes_nothing():
+    eave = [(7, 22), (43, 22), (43, 58), (7, 58)]
+    for shift in (0.0, -30.0, 7.0):                   # the apex at 30, at 0, at 37
+        walls = box(10, 25, 40, 55, 0, 20)
+        faces = [{"points": [[x, y, z + shift] for x, y, z in f["points"]]} for f in walls["faces"]
+                 if not all(p[2] == 20 for p in f["points"])]
+        apex = [25, 40, 30 + shift]
+        faces += [{"points": [[*eave[i], 20 + shift], [*eave[(i + 1) % 4], 20 + shift], apex]} for i in range(4)]
+        faces += [{"points": [[x, y, 20 + shift] for x, y in eave]}]
+        m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}),
+                    {**FACTS, "grade_elevation": shift})["building_height"]
+        assert sorted({r["value"] for r in m["readings"]}) == [25.0, 30.0], shift
