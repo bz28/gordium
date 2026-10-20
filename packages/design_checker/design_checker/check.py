@@ -8,6 +8,7 @@ Rhino panel and the viewport message show: the rows, a short summary, the object
 import ast
 import itertools
 import math
+import os
 import re
 import tempfile
 from pathlib import Path
@@ -219,7 +220,15 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
                                      ("Margin", 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
-    wb.save(report_path)
+    # written beside it, then moved into place: a write that fails half way never leaves a broken report there
+    report_path = Path(report_path)
+    part = report_path.with_name("." + report_path.name + ".part")
+    try:
+        wb.save(part)
+        os.replace(part, report_path)
+    finally:
+        if part.exists():
+            part.unlink()
 
 
 def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None,

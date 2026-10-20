@@ -1265,6 +1265,7 @@ def run_check(doc, report=True):
         sent = check_facts(doc, facts)
         extras = _extras(doc, facts)
         extras["before"] = STATE.setdefault("statuses_by_doc", {}).get(doc.RuntimeSerialNumber)
+        had_report = bool(report) and os.path.exists(report_path(doc))    # before this check tries to write one
         result = ask({"cmd": "check", "model": path, "facts": sent, "building_problems": problems,
                       "report": report_path(doc) if report else None, "extras": extras})
         _clear(o)
@@ -1297,7 +1298,7 @@ def run_check(doc, report=True):
             ui.show(panel(), view)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
-            say(logic.report_message(path, False, result["report_error"], stale=os.path.exists(path)))
+            say(logic.report_message(path, False, result["report_error"], stale=had_report))
         return result
     except Exception as e:
         _clear(o)

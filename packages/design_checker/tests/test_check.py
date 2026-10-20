@@ -858,6 +858,9 @@ def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_p
     # round 11: said by run_check, so GordiumCheck (which asks for the report too) is never silent about it
     body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
     assert 'if report and result.get("report_error"):' in body and "say(logic.report_message(path, False" in body
+    # round 12: "out of date" only for a report that was there before this check, not one its own write left
+    assert body.index("had_report = bool(report) and os.path.exists(report_path(doc))") < body.index("result = ask(")
+    assert 'result["report_error"], stale=had_report))' in body
     from design_checker import rhino_logic as logic
     assert logic.report_message("/x/r.xlsx", False, "Permission denied", stale=True).endswith(
         "The report already at /x/r.xlsx is from an earlier check: out of date.")
@@ -876,3 +879,18 @@ def test_no_viewport_label_is_drawn_under_the_status_box():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
     conduit = rhino[rhino.index("    taken = []"):]
     assert conduit.index("logic.status_box(") < conduit.index("ui.label_at(")
+
+
+def test_a_report_write_that_fails_half_way_leaves_no_broken_report(facts, tmp_path, monkeypatch):
+    """Review round 12: the report was saved straight to its path, so a write failing part way (disk full) left a
+    broken file there. It is written beside it and moved into place."""
+    import openpyxl
+
+    def broken(self, path):
+        open(path, "wb").write(b"PK half a workbook")
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(openpyxl.Workbook, "save", broken)
+    got = check(MODEL, facts, tmp_path / "r.xlsx")
+    assert "No space left on device" in got["report_error"] and got["view"]["items"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == []          # no report, no leftover part file
