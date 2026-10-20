@@ -164,6 +164,25 @@ def test_the_checker_restarts_when_its_code_changes(tmp_path):
     assert code_fingerprint(str(tmp_path)) != after
 
 
+def test_a_file_gone_during_the_fingerprint_is_a_change_not_a_crash(tmp_path, monkeypatch):
+    import os
+    from design_checker import rhino_logic
+    (tmp_path / "pkg").mkdir()
+    (tmp_path / "pkg" / "a.py").write_text("x = 1\n")
+    (tmp_path / "pkg" / "b.py~").write_text("temp\n")
+    before = rhino_logic.code_fingerprint(str(tmp_path))
+    real = os.stat
+    monkeypatch.setattr(os, "stat", lambda p, *a, **k: (_ for _ in ()).throw(FileNotFoundError(p))
+                        if str(p).endswith("~") else real(p, *a, **k))
+    after = rhino_logic.code_fingerprint(str(tmp_path))
+    assert after != before and "b.py~:gone" in after
+
+
+def test_only_a_candidate_can_be_picked_as_the_lot_or_main_building():
+    from design_checker.rhino_logic import accepts_pick
+    assert accepts_pick("lot-1", {"lot-1", "lot-2"}) and not accepts_pick("a-sketch", {"lot-1"})
+
+
 def test_closing_the_confirm_dialog_saves_nothing():
     from design_checker.rhino_logic import after_confirm
     assert (after_confirm("ok"), after_confirm("change"), after_confirm(None)) == ("keep", "change", "cancel")

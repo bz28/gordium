@@ -104,9 +104,12 @@ def code_fingerprint(packages_dir):
         dirs[:] = sorted(d for d in dirs if d != "__pycache__" and not d.startswith(".") and not d.endswith(".egg-info"))
         for name in sorted(files):
             if not name.endswith((".pyc", ".pyo")) and not name.startswith("."):
-                st = os.stat(os.path.join(root, name))
-                found.append("%s:%d:%d" % (os.path.relpath(os.path.join(root, name), packages_dir), st.st_size,
-                                           st.st_mtime_ns))
+                path = os.path.join(root, name)
+                try:
+                    st = os.stat(path)
+                    found.append("%s:%d:%d" % (os.path.relpath(path, packages_dir), st.st_size, st.st_mtime_ns))
+                except OSError:         # gone between listing and reading (an editor's temporary file): changed
+                    found.append("%s:gone" % os.path.relpath(path, packages_dir))
     return "|".join(found)
 
 
@@ -119,3 +122,10 @@ def after_confirm(choice):
     """What the confirm dialog's answer means: "keep" (OK), "change" (Change…), or "cancel" (closed, Esc):
     a cancel saves nothing, since nothing is used until the architect says OK."""
     return {"ok": "keep", "change": "change"}.get(choice, "cancel")
+
+
+def accepts_pick(object_id, candidate_ids):
+    """Whether a clicked object can be saved as the lot or the main building: only one of the candidates the
+    check reads (a closed outline on the Site layer, a solid on the Building layer); any other pick would be
+    saved and then dropped on the next check, so the prompt asks again."""
+    return object_id in candidate_ids
