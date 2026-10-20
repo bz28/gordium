@@ -118,7 +118,8 @@ ARCHITECT_REVIEW = re.compile(
 # What makes such a phrase not a promise. A sentence that says approval is deferred, or describes what happens
 # once it is switched on, is fine wherever it says so. The narrower excuses ("by hand", "facts about their
 # site") only count right next to the phrase, so they can't excuse an unrelated promise in the same sentence.
-DEFERRED = re.compile(r"\b(approval|review|reviews|it|this|that|they)\s+((is|are|stays|remains)\s+)?deferred"
+DEFERRED = re.compile(r"\b(approval|confirmation|review|reviews|check|checks|sign-?off|it|this|that|they)\s+"
+                      r"((is|are|stays|remains)\s+)?deferred"
                       r"|deferred\s+(for now|until)|\(deferred|\bonce (approval|it) is (switched )?on\b|\bonce approved\b"
                       r"|\bonce (the )?architects? approves?|when (approval is|it's|it is) switched on|\bwould\b",
                       re.IGNORECASE)
@@ -179,7 +180,8 @@ def test_the_architect_review_matcher():
                  "Choices for the architects to confirm", "Rules checked by hand by architects",
                  "Something only an architect can judge", "the architects' R-1b check for 106 Ithaca Road",
                  "an answer key once approval is switched on", "Architects would confirm each definition",
-                 "An architect can approve each rule once approval is switched on"]:
+                 "An architect can approve each rule once approval is switched on",
+                 "Code, then AI, checked by code (architect confirmation deferred)"]:
         assert not _promises_architect_review(fine), fine
 
 
