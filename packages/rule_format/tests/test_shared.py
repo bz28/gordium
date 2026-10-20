@@ -106,11 +106,13 @@ FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only app
 
 
 ARCHITECT_REVIEW = re.compile(
-    r"\barchitects?\s+(would\s+)?(confirm|review|check|approve|sign)s?\b"                  # architects confirm...
+    r"\barchitects?\s+(?:(?:will|must|should|then|also|would)\s+)?(confirm|review|check|approve|sign)s?\b"
     r"|\b(confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{0,30}?\barchitects?\b"  # ...confirmed by architects
-    r"|\bthen architects\b|\barchitect review\b", re.IGNORECASE)
-NOT_A_PROMISE = re.compile(r"defer|\bonce\b|when approval is switched on|\bwould\b"
-                           r"|their (own )?(site|design|project)|facts about|by hand|answers? (the |any )?open questions", re.IGNORECASE)
+    r"|\bthen architects\b|\barchitect(?:'?s)?\s+(review|confirmation|check|sign-?off|approval)\b", re.IGNORECASE)
+NOT_A_PROMISE = re.compile(r"defer|\bonce (approval|it) is (switched )?on\b|\bonce approved\b|\bonce (the )?architects? approves?"
+                           r"|when approval is switched on|\bwould\b"
+                           r"|their (own )?(site|design|project)|facts about|by hand|answers? (the |any )?open questions",
+                           re.IGNORECASE)
 
 
 def _promises_architect_review(sentence: str) -> bool:
@@ -123,7 +125,10 @@ def test_the_architect_review_matcher():
     for promise in ["confirmed by step 2 and by architects", "an architect confirms each label",
                     "reviewers and architects check the rest", "Code, then AI for leftovers, then architects",
                     "is caught by comparing outputs, and by architect review", "Draft: architects approve",
-                    "caught by comparing the answer key with the chart, and by architect review"]:
+                    "caught by comparing the answer key with the chart, and by architect review",
+                    "once per code version: an architect confirms each rule is right",
+                    "Architects will confirm each label", "An architect must approve each rule",
+                    "Labels need architect confirmation", "an architect's review catches the wrong column"]:
         assert _promises_architect_review(promise), promise
     for fine in ["the architect confirms the facts about their site and design",
                  "Architects answer the open questions", "architect approval is deferred for now",
