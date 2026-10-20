@@ -775,3 +775,46 @@ def test_spec_item_ids_are_unique():
     spec = (REPO / "docs/design/rhino_ui_spec.md").read_text()
     ids = collections.Counter(re.findall(r"^([A-Z]\d+) \[", spec, re.M))
     assert [i for i, n in ids.items() if n > 1] == []
+
+
+def _panel_actions(rhino):
+    """The functions the panel's buttons call (gordium_rhino._actions), by name."""
+    import re
+    body = rhino[rhino.index("def _actions():"):rhino.index("\ndef panel():")]
+    return sorted(set(re.findall(r'"\w+": (\w+)[,}]', body)) - {"ui"})
+
+
+def test_the_zoning_report_button_writes_the_report_for_the_model_now_then_opens_it():
+    """Ben's test, 2026-10-20: after GordiumStart the button did nothing (it only opened a report GordiumCheck had
+    written, and GordiumStart, live checks and Retry never write one). Now it checks the model as it is, writing the
+    report, opens it, and says where it was saved, or why not."""
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    body = rhino[rhino.index("def open_report():"):rhino.index("\ndef off():")]
+    assert "run_check(doc, report=True)" in body and "os.path.getmtime(path) != before" in body
+    assert body.count("say(") >= 4 and "if os.path.exists(path):\n" not in body
+    from design_checker import rhino_logic as logic
+    assert logic.report_message("/x/a_gordium_report.xlsx", True) == "Report saved to /x/a_gordium_report.xlsx (opened)."
+    assert logic.report_message("/x/r.xlsx", False, "lot facts missing: zone") == \
+        "Zoning report not saved: lot facts missing: zone."
+    assert "open it with Excel, Numbers or any spreadsheet app" in logic.report_message("/x/r.xlsx", True, opened=False)
+
+
+def test_no_panel_button_does_nothing_silently():
+    """Every way out of a panel action that doesn't do its job says why first (say(): the command line and the
+    panel's message line). A bare return with nothing said is how the report button failed unseen."""
+    import re
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    names = _panel_actions(rhino)
+    assert {"open_report", "zoom_to", "hide_massing", "add_to_check", "pick_survey"} <= set(names)
+    silent = []
+    for name in names:
+        m = re.search(r"\ndef " + name + r"\(.*?(?=\n(?:def |class |[A-Z_]+ = ))", rhino, re.S)
+        if m is None:
+            continue
+        lines = [ln for ln in m.group(0).splitlines() if ln.strip()]
+        for k, ln in enumerate(lines):
+            if ln.strip() in ("return", "return None") and not any("say(" in x for x in lines[max(0, k - 3):k]):
+                silent.append(name + ": " + lines[k - 1].strip())
+    assert silent == [], silent
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text()
+    assert 'parts["message"] = label(' in ui and "def say(parts, text):" in ui

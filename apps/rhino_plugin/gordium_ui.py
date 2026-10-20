@@ -174,9 +174,17 @@ def make_panel(actions):
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
     layout.Add(row(_envelope_box(actions), _massing_box(actions)))
+    parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
+    layout.Add(parts["message"])
     layout.Add(footer)
     form.Content = layout
     return parts
+
+
+def say(parts, text):
+    """One line under the list: what the last button did, or why it couldn't."""
+    if parts is not None and parts.get("message") is not None:
+        parts["message"].Text = text or ""
 
 
 def _massing_box(actions):

@@ -322,6 +322,21 @@ def parse_feet(text):
     return None
 
 
+def report_message(path, written, error=None, opened=True, open_error=None):
+    """What the panel says after Zoning report…: never nothing (Ben's test, 2026-10-20: the button did nothing
+    after GordiumStart, because only GordiumCheck wrote the report)."""
+    if not written:
+        return "Zoning report not saved: " + (error or "the check could not run") + "."
+    if opened:
+        return "Report saved to " + path + " (opened)."
+    return ("Report saved to " + path + ". It couldn't be opened here" + (": " + open_error if open_error else "") +
+            "; open it with Excel, Numbers or any spreadsheet app.")
+
+
+BUSY = "A check is running: try again in a moment."
+NO_DOCUMENT = "Open a Rhino model first."
+
+
 BUFFER_UNREAD = "Design buffer not understood: type it like 1'-6\" or 6\""
 
 

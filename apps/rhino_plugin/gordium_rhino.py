@@ -553,6 +553,7 @@ def zoom_to(item):
     """Frame the selected item: yards in Top, height and stories in a front elevation (D9)."""
     doc = Rhino.RhinoDoc.ActiveDoc
     if not item:
+        say("Zoom to: select an item in the list first.")
         return
     box = rg.BoundingBox.Empty
     for i in item.get("objects") or []:
@@ -562,6 +563,7 @@ def zoom_to(item):
     for p in item.get("points") or []:
         box.Union(_model_point(doc, p))
     if not box.IsValid:
+        say("Zoom to: " + (item.get("name") or "this item") + " has nothing drawn in the model to zoom to.")
         return
     box.Inflate(max(box.Diagonal.Length * 0.25, _model_length(doc, 5)))
     view = doc.Views.Find("Front" if item.get("zoom") == "front" else "Top", False) or doc.Views.ActiveView
@@ -596,12 +598,16 @@ def pick_survey():
         picked = _pick(doc, "Click the surveyed lot outline (Site layer); Enter keeps the one outlined", lots, "Lot",
                        Rhino.DocObjects.ObjectType.Curve) if len(lots) > 1 else (str(lots[0].Id) if lots else None)
     except Cancelled:
+        say("Cancelled: nothing changed.")
         return
     if picked:
         facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
         facts["lot_surveyed"] = True
         _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
         save_facts(doc, facts)
+    else:
+        say("No lot outline to pick: draw the surveyed lot as one closed polyline on the Site layer.")
+        return
     run_check(doc, report=False)
 
 
@@ -670,6 +676,7 @@ def enter_rooms():
         facts = current_facts(doc)
         answers = {k: _count(p) for k, p in (("sleeping_rooms", "Bedrooms"), ("parking_spaces", "Off-street parking spaces"))}
     except Cancelled:
+        say("Cancelled: nothing changed.")
         return
     save_facts(doc, logic.update_counts(facts, answers))
     run_check(doc, report=False)
@@ -679,6 +686,9 @@ def add_to_check(ids):
     """Add to check…: objects on the lot that aren't measured go on the Building layer, so every rule measures
     them."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if not ids:
+        say("Nothing selected to add to the check: pick the objects in the row first.")
+        return
     index = _layer(doc, LAYERS["building"])
     for i in ids or []:
         o = _find(doc, i)
@@ -743,6 +753,9 @@ def this_is_the_ground(ids):
     file with who said it and when (a site fact, shown in the panel and the report, with "Not the ground" to undo
     it); then the check runs again without them."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if not ids:
+        say("Nothing selected to mark as the ground: pick the objects in the row first.")
+        return
     state = _ui_state(doc)
     state["ground_ids"] = sorted(set(state.get("ground_ids") or []) | set(ids or []))
     _save_ui_state(doc, state)
@@ -1006,8 +1019,10 @@ def hide_massing(hidden):
     """Hide starting house: the Gordium::Massing layer off (still checked: only its drawing is turned off)."""
     doc = Rhino.RhinoDoc.ActiveDoc
     index = doc.Layers.FindByFullPath(logic.MASSING, -1)
-    if index >= 0:
-        doc.Layers[index].IsVisible = not hidden
+    if index < 0:
+        say("There is no starting house in this file to hide (run GordiumStart on a new file to draw one).")
+        return
+    doc.Layers[index].IsVisible = not hidden
     doc.Views.Redraw()
 
 
@@ -1432,13 +1447,43 @@ def toggle_envelope():
     run_check(Rhino.RhinoDoc.ActiveDoc, report=False)
 
 
+def say(text):
+    """What a button did, or why it couldn't: on the command line and in the panel's message line. Never silent
+    (an action that can't do its job says so). Kept in STATE["said"] for the in-Rhino tests."""
+    Rhino.RhinoApp.WriteLine("Gordium: " + text)
+    STATE.setdefault("said", []).append(text)
+    if not STATE.get("headless"):
+        ui.say(STATE.get("panel_parts"), text)
+
+
 def open_report():
-    path = report_path(Rhino.RhinoDoc.ActiveDoc)
-    if os.path.exists(path):
+    """Zoning report…: the report for the model as it is now (a fresh check that writes it), then opened with the
+    Mac's default app for .xlsx (Excel or Numbers). The panel says where it was saved, or why it wasn't."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:
+        say(logic.NO_DOCUMENT)
+        return
+    if STATE.get("running"):
+        say(logic.BUSY)
+        return
+    path = report_path(doc)
+    before = os.path.getmtime(path) if os.path.exists(path) else None
+    result = run_check(doc, report=True)
+    written = result is not None and os.path.exists(path) and os.path.getmtime(path) != before
+    if not written:
+        say(logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
+                                 ("the report file wasn't written to " + os.path.dirname(path))))
+        return
+    opened, why = True, None
+    try:
         if os.name == "nt":
             os.startfile(path)
         else:
-            subprocess.Popen(["open", path])
+            done = subprocess.run(["open", path], capture_output=True, text=True, timeout=20)
+            opened, why = done.returncode == 0, (done.stderr or "").strip()[:160] or None
+    except Exception as e:
+        opened, why = False, str(e)[:160]
+    say(logic.report_message(path, True, opened=opened, open_error=why))
 
 
 def off():
