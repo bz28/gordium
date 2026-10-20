@@ -3,7 +3,8 @@ Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
 LAYERS = {"lot": "Site", "building": "Building"}
-FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew (its story number)
+ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
+FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew: "<story>;<height drawn, ft>"
 MASSING = "Gordium::Massing"            # where GordiumStart draws the starting building: building objects too
 SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
 DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",
@@ -178,5 +179,15 @@ def notice(before, rows):
         return now, []
     names = [r.get("Short") or r["Requirement"] for r in new]
     if len(new) == 1:
-        return now, [names[0] + " no longer complies" + (": " + new[0]["Line"] if new[0].get("Line") else "")]
+        detail = new[0].get("Line") or ""
+        if detail.startswith(names[0]):           # the line already names the item: say it once
+            detail = detail[len(names[0]):].lstrip(": ")
+        return now, [names[0] + " no longer complies" + (": " + detail if detail else "")]
     return now, [str(len(new)) + " items no longer comply: " + ", ".join(names)]
+
+
+def suggested_ground(building_bottoms, lot_bottom):
+    """The ground level to suggest (feet or model units, as given): the lowest point of the buildings, or with no
+    building yet (a new project on the architect's own lot) the lot outline's level. Shown in the dialog, never
+    used unconfirmed."""
+    return min(building_bottoms) if building_bottoms else lot_bottom

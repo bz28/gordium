@@ -421,6 +421,14 @@ def _parts(building: dict) -> list[str]:
     return building.get("parts") or [building["id"]]
 
 
+def _is_floor(building: dict, spans: dict) -> bool:
+    """A floor block Gordium drew, still at the height it was drawn: only then is it one story. Stretched, scaled
+    or merged with others, its height changes and it is a block like any other (a reading, never an override)."""
+    drawn = building.get("floor")
+    span = spans.get(building["id"])
+    return drawn is not None and span is not None and abs((span[1] - span[0]) - drawn) <= TOL
+
+
 def _stacks(buildings: list[dict]) -> list[dict]:
     """Solids stacked floor on floor (each standing on the one below it, overlapping it seen from above) joined
     into one building: its faces together, its parts listed (`parts`, bottom first) with their spans. A solid
@@ -444,13 +452,13 @@ def _stacks(buildings: list[dict]) -> list[dict]:
         groups.setdefault(root(b["id"]), []).append(b)
     out = []
     for members in groups.values():
-        if len(members) == 1 and not members[0].get("floor"):     # one solid, not a Gordium floor block
+        if len(members) == 1 and not _is_floor(members[0], spans):    # one solid, not a Gordium floor block
             out.append(members[0])
             continue
         members.sort(key=lambda b: spans[b["id"]][0])
         out.append({"id": members[0]["id"], "parts": [b["id"] for b in members],
                     "spans": [spans[b["id"]] for b in members], "plans": [plans[b["id"]] for b in members],
-                    "floor": [bool(b.get("floor")) for b in members],
+                    "floor": [_is_floor(b, spans) for b in members],
                     "faces": [f for b in members for f in b["faces"]],
                     "problems": [p for b in members for p in b.get("problems") or []]})
     return out

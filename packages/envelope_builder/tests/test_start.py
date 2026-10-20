@@ -38,7 +38,7 @@ def solid(outline, z0, z1, id):
 
 def floors_as_solids(start):
     """The floor blocks as GordiumStart draws them: each marked as one story."""
-    return [{**solid([tuple(p) for p in f["outline"]], f["base"], f["top"], f"floor {i + 1}"), "floor": True}
+    return [{**solid([tuple(p) for p in f["outline"]], f["base"], f["top"], f"floor {i + 1}"), "floor": f["top"] - f["base"]}
             for i, f in enumerate(start["floors"])]
 
 
@@ -97,7 +97,7 @@ def test_growing_any_side_by_one_foot_breaks_a_rule():
     for grown in ([x0 - 1, y0, x1, y1], [x0, y0 - 1, x1, y1], [x0, y0, x1 + 1, y1], [x0, y0, x1, y1 + 1]):
         a, b, c, d = grown
         outline = [(a, b), (c, b), (c, d), (a, d)]
-        bigger = {**site, "buildings": [{**solid(outline, f["base"], f["top"], f"floor {i}"), "floor": True}
+        bigger = {**site, "buildings": [{**solid(outline, f["base"], f["top"], f"floor {i}"), "floor": f["top"] - f["base"]}
                                         for i, f in enumerate(start["floors"])]}
         got, _ = results(bigger, facts)
         assert "fail" in got.values(), (grown, got)
@@ -141,13 +141,19 @@ def test_limits_come_from_the_rules_not_the_code():
     assert max(ys) <= 90 - 30 + 0.01
 
 
-def test_a_street_drawn_with_a_bend_still_gets_a_starting_building():
-    bent = [(0, 0), (36.5, 0.5), (73, 0), (73, 90), (0, 90)]
-    facts = {**FACTS, "street_line": [[[0, 0], [36.5, 0.5]], [[36.5, 0.5], [73, 0]]]}
+@pytest.mark.parametrize("bend", [0.5, -0.5, 3, -3])    # into the lot, and away from it
+def test_a_street_drawn_with_a_bend_still_gets_a_full_starting_building(bend):
+    """Not a sliver: as wide as the side yards allow, and as large as the coverage limit allows."""
+    bent = [(0, 0), (36.5, bend), (73, 0), (73, 90), (0, 90)]
+    facts = {**FACTS, "street_line": [[[0, 0], [36.5, bend]], [[36.5, bend], [73, 0]]]}
     start, site = generated(bent, facts)
     assert start["floors"], start["notes"]
     got, _ = results(site, facts)
     assert "fail" not in got.values(), got
+    outline = Polygon(start["floors"][0]["outline"])
+    xs = [p[0] for p in start["floors"][0]["outline"]]
+    assert max(xs) - min(xs) >= 73 - 20 - 1, xs
+    assert outline.area >= 0.25 * Polygon(bent).area - 60, outline.area
 
 
 def test_a_deep_lot_is_quick():

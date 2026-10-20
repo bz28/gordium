@@ -179,9 +179,12 @@ def suggested_facts(doc, zones):
         facts["lot_id"] = str(lot.Id)
         a, b = min(_segments(lot.Geometry), key=lambda s: (s[0].Y + s[1].Y) / 2)
         facts["street_line"] = [[[a.X, a.Y], [b.X, b.Y]]]
+    boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
+    lot_z = max(lots, key=lambda o: _area(o.Geometry)).Geometry.GetBoundingBox(True).Min.Z if lots else None
+    ground = logic.suggested_ground([b.Min.Z for b in boxes], lot_z)
+    if ground is not None:
+        facts["grade_elevation"] = ground
     if buildings:
-        boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
-        facts["grade_elevation"] = min(b.Min.Z for b in boxes)
         if len(buildings) > 1:
             big = max(zip(buildings, boxes), key=lambda ob: ob[1].Diagonal.X * ob[1].Diagonal.Y * ob[1].Diagonal.Z)
             facts["main_building"] = str(big[0].Id)
@@ -1066,7 +1069,8 @@ def add_floors(doc, start):
         a = Rhino.DocObjects.ObjectAttributes()
         a.LayerIndex = _layer(doc, logic.MASSING)
         a.Name = "Floor " + str(i + 1)
-        a.SetUserString(logic.FLOOR_KEY, str(i + 1))      # one story: what makes it count as a story
+        # one story, at the height drawn: what makes it count as a story (a stretched block no longer does)
+        a.SetUserString(logic.FLOOR_KEY, str(i + 1) + ";" + repr(floor["top"] - floor["base"]))
         a.AddToGroup(group)
         ids.append(doc.Objects.AddBrep(brep, a))
     return ids

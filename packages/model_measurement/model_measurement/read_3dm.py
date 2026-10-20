@@ -21,7 +21,16 @@ TO_FEET = {r.UnitSystem.Feet: 1.0, r.UnitSystem.Inches: 1 / 12, r.UnitSystem.Mil
            r.UnitSystem.Centimeters: 1 / 30.48, r.UnitSystem.Meters: 1 / 0.3048}
 ARC_STEP = 0.25           # ft: a curved lot line is followed with points this far apart (at most)
 ID_KEY = "gordium:id"     # the original object's id, when the Rhino command exported a copy
-FLOOR_KEY = "gordium:floor"   # on a floor block GordiumStart drew: one story (its number)
+FLOOR_KEY = "gordium:floor"   # on a floor block GordiumStart drew: "<story number>;<height drawn, ft>"
+
+
+def _floor_height(mark):
+    """The height a floor block was drawn at (ft), from its mark "<story>;<height>", or None (no mark, or one that
+    can't be read)."""
+    try:
+        return float(mark.split(";")[1]) if mark else None
+    except (IndexError, ValueError):
+        return None
 
 
 def _id(obj) -> str:
@@ -185,7 +194,7 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
             if not g.IsSolid:
                 trouble.append(stop("open_solid"))
             buildings.append({"id": _id(o), "faces": faces, "problems": trouble,
-                              "floor": bool(o.Attributes.GetUserString(FLOOR_KEY))})
+                              "floor": _floor_height(o.Attributes.GetUserString(FLOOR_KEY))})
         elif isinstance(g, r.Mesh):
             faces, trouble = _mesh_faces(g, s)
             buildings.append({"id": _id(o), "faces": faces,

@@ -39,8 +39,32 @@ def short(title: str) -> str:
     return words[:1].upper() + words[1:]
 
 
-def _amount(row: dict) -> str:
-    """'Rear yard 20 ft, needs ≥ 22.5 ft (2.5 ft short)' for a one-number limit; else the formula's words."""
+def _first_failing(rule: dict, measured: dict) -> str | None:
+    """For a rule with several comparisons (the height with its bonus): the first one that fails, in plain words,
+    'Building height 38 ft, needs ≤ 35 ft'. None if none can be worked out."""
+    values = {k: m["value"] for k, m in measured.items()}
+    signs = {ast.GtE: "≥", ast.Gt: ">", ast.LtE: "≤", ast.Lt: "<"}
+    for node in ast.walk(formula.parse(rule["check"]).body):
+        if not (isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.left, ast.Name)
+                and type(node.ops[0]) in signs):
+            continue
+        name, m = node.left.id, measured.get(node.left.id) or {}
+        try:
+            holds = formula.evaluate(ast.unparse(node), values, MEASURE_KINDS)
+            need = formula.evaluate(ast.unparse(node.comparators[0]), values, MEASURE_KINDS)
+        except (formula.EvaluationError, formula.MissingMeasure, ArithmeticError):
+            continue
+        if holds is False:
+            unit = m.get("unit") or ""
+            unit = "" if unit == "count" else " " + unit
+            return (f"{name.replace('_', ' ').capitalize()} {_n(m['value'])}{unit}, needs "
+                    f"{signs[type(node.ops[0])]} {_n(need)}{unit}")
+    return None
+
+
+def _amount(row: dict, rule: dict | None = None, measured: dict | None = None) -> str:
+    """'Rear yard 20 ft, needs ≥ 22.5 ft (2.5 ft short)' for a one-number limit; for a rule with several
+    comparisons, the first that fails; else the formula's words."""
     limit, proposed, units = row["Table limit"], row["Proposed"], row["Units"]
     m = NUMBER.match(str(limit))
     if m and isinstance(proposed, (int, float)):
@@ -48,7 +72,8 @@ def _amount(row: dict) -> str:
         gap = abs(proposed - need)
         side = "over" if m.group(1) in "≤<" else "short"
         return f"{short(row['Requirement'])} {_n(proposed)} {units}, needs {limit} {units} ({_n(gap)} {units} {side})"
-    return f"{short(row['Requirement'])}: {proposed} (needs {limit})"
+    plain = _first_failing(rule, measured) if rule and measured and rule.get("check") else None
+    return plain or f"{short(row['Requirement'])}: {proposed} (needs {limit})"
 
 
 def _n(x) -> str:
@@ -118,7 +143,8 @@ def summary(rows: list[dict]) -> dict:
         return {"state": "complies", "text": f"Complies: {len(passes)} pass, {len(review)} pass whichever way open "
                                              "questions go",
                 "lines": [", ".join(names) + ": " + why for why, names in waiting.items()]}
-    lines = [_amount(r) if r["Error"] == "FAIL" else f"{short(r['Requirement'])}: {r['Provisional']}" for r in fails]
+    lines = [r.get("Line") or (_amount(r) if r["Error"] == "FAIL" else f"{short(r['Requirement'])}: {r['Provisional']}")
+             for r in fails]
     lines += [f"{short(r['Requirement'])}: {r.get('Provisional') or r['Why']}" for r in review]
     counts = f"{len(passes)} pass" + (f" · {len(fails)} fail" if fails else "") + (
         f" · {len(review)} need review" if review else "")
@@ -177,7 +203,8 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
 
     waiting = [r for r in every if r["Error"] == "NEEDS REVIEW" and any(
         (measured.get(n) or {}).get("value") is None for n in checks(by_id[r["Rule id"]]) & INTERIOR)]
-    rows = [{**r, "Line": _amount(r)} if r["Error"] == "FAIL" else r for r in every if r not in waiting]
+    rows = [{**r, "Line": _amount(r, by_id[r["Rule id"]], measured)} if r["Error"] == "FAIL" else r
+            for r in every if r not in waiting]
     for r in rows:
         r["Short"] = short(r["Requirement"])
     allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}

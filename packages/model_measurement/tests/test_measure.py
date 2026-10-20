@@ -623,9 +623,10 @@ def test_a_solid_under_the_house_but_not_joined_to_it_is_never_dropped():
 
 # ---- stories from the shape: stacked floor blocks ----------------------------------------------------------
 
-def floor(*args, **kw):
-    """A floor block GordiumStart drew: marked as one story."""
-    return {**box(*args, **kw), "floor": True}
+def floor(x0, y0, x1, y1, z0=0, z1=30, id="house", drawn=None):
+    """A floor block GordiumStart drew: marked as one story, at the height it was drawn (`drawn`, if it has been
+    stretched since)."""
+    return {**box(x0, y0, x1, y1, z0=z0, z1=z1, id=id), "floor": z1 - z0 if drawn is None else drawn}
 
 
 FLOORS = [floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
@@ -681,3 +682,14 @@ def test_a_floor_moved_alone_is_floors_misaligned():
     moved = floor(13, 25, 38, 65, z0=11, z1=22, id="floor 2")            # floor 2 shifted 3 ft sideways on its own
     m = measure(site(RECT, FLOORS[0], moved, FLOORS[2]), {**FACTS, "stories": None})
     assert m["stories"]["value"] is None and m["stories"]["reason"].startswith("floors misaligned")
+
+
+def test_a_gordium_floor_stretched_or_merged_is_no_longer_one_story():
+    """Four 8.5 ft floors merged into one 34 ft block keep the first floor's mark: never "1 story" (a false pass)."""
+    merged = floor(10, 25, 35, 65, z0=0, z1=34, id="floor 1", drawn=8.5)
+    m = measure(site(RECT, merged), {**FACTS, "stories": None})["stories"]
+    assert m["value"] is None and m["reason"].startswith("the building is one")
+    stretched = [floor(10, 25, 35, 65, z0=0, z1=8.5, id="floor 1"), floor(10, 25, 35, 65, z0=8.5, z1=17, id="floor 2"),
+                 floor(10, 25, 35, 65, z0=17, z1=34, id="floor 3", drawn=8.5)]
+    m = measure(site(RECT, *stretched), {**FACTS, "stories": None})["stories"]
+    assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [2, 3]

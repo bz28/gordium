@@ -85,30 +85,41 @@ def _x_range(shape: Polygon, y: float, around: float):
 
 
 def _footprint(shape: Polygon, around: float, allowed):
-    """(x0, x1, front, depth): the rectangle square to the street, from the first level where the buildable area is
-    at least a foot wide (the front yard line; a bent or curved street pushes it back to where a rectangle fits),
-    as wide as it stays all the way back, and as deep as the coverage limit or the rear allow. One pass from front
-    to back, a slice every STEP: the width only narrows going back, so each slice is looked at once."""
+    """(x0, x1, front, depth): the largest rectangle square to the street inside the buildable area, at or under
+    the coverage limit. Each level from front to back (a slice every STEP) is tried as the front; from there the
+    width only narrows going back, so it grows deeper until coverage or the rear stops it. On a straight street
+    the first level wins at once (the front yard line); on a bent or curved one the front moves back to where the
+    rectangle is largest. A front that can no longer beat the best found is skipped, so it stays quick."""
     y0, y1 = shape.bounds[1], shape.bounds[3]
-    front = y0
-    span = _x_range(shape, front, around)
-    while span is None or span[1] - span[0] < 1.0:
-        front += STEP
-        if front > y1:
-            return None
-        span = _x_range(shape, front, around)
-    lo, hi = span
-    found, y = None, front
-    while y < y1:
-        y = min(y + STEP, y1)
-        span = _x_range(shape, y, around)
-        if span is None or min(hi, span[1]) - max(lo, span[0]) <= 0:
-            break
-        lo, hi = max(lo, span[0]), min(hi, span[1])
-        if allowed is not None and (hi - lo) * (y - front) >= allowed:
-            return lo, hi, front, allowed / (hi - lo)
-        found = (lo, hi, front, y - front)
-    return found
+    n = max(1, int(math.ceil((y1 - y0) / STEP)))
+    levels = [y0 + (y1 - y0) * k / n for k in range(n + 1)]
+    spans = [_x_range(shape, y, around) for y in levels]
+    best, best_key = None, (0.0, 0.0)   # the largest area, then the widest (square to the side yards)
+    for i, first in enumerate(spans):
+        if first is None or first[1] - first[0] <= 0:
+            continue
+        width = first[1] - first[0]
+        if allowed is not None and best_key[0] >= allowed - 1e-6 and width <= best_key[1] + 1e-9:
+            continue                    # the coverage limit is reached: only a wider front could still win
+        if width * (y1 - levels[i]) < best_key[0] - 1e-6 or (                 # can't be larger,
+                width * (y1 - levels[i]) <= best_key[0] + 1e-6 and width <= best_key[1] + 1e-9):  # nor as large and wider
+            continue
+        lo, hi = first
+        for j in range(i + 1, n + 1):
+            span = spans[j]
+            if span is None or min(hi, span[1]) - max(lo, span[0]) <= 0:
+                break
+            lo, hi = max(lo, span[0]), min(hi, span[1])
+            depth = levels[j] - levels[i]
+            area = (hi - lo) * depth
+            if allowed is not None and area >= allowed:
+                area, depth = allowed, allowed / (hi - lo)
+            key = (round(area, 6), hi - lo)
+            if key > best_key:
+                best, best_key = (lo, hi, levels[i], depth), key
+            if allowed is not None and area >= allowed:
+                break
+    return best
 
 
 def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict]) -> dict:

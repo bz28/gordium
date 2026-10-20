@@ -291,7 +291,7 @@ def test_the_notice_comes_only_for_rules_that_newly_fail_and_merges_several():
     now, said = logic.notice(None, [rear, ok])
     assert now == {"rear"} and said == []                               # the first check: nothing is "new"
     assert logic.notice({"rear"}, [rear, ok])[1] == []                  # still failing: not said again
-    assert logic.notice(set(), [rear, ok])[1] == ["Rear yard no longer complies: Rear yard 20 ft, needs ≥ 22.5 ft"]
+    assert logic.notice(set(), [rear, ok])[1] == ["Rear yard no longer complies: 20 ft, needs ≥ 22.5 ft"]
     assert logic.notice(set(), [rear, cover])[1] == ["2 items no longer comply: Rear yard, Lot coverage"]
 
 
@@ -335,3 +335,23 @@ def test_a_flag_needing_review_never_crashes_the_check(facts):
     result = check(MODEL, {**facts, "use": "two_family"})
     flag = next(r for r in result["rows"] if r["Rule id"] == "R-1b.parking_other_uses")
     assert flag["Error"] == "NEEDS REVIEW"
+
+
+def test_a_new_project_on_the_architects_own_lot_suggests_the_lots_ground_level():
+    from design_checker import rhino_logic as logic
+    assert logic.suggested_ground([], 12.0) == 12.0               # no building yet: the lot's level
+    assert logic.suggested_ground([3.0, 1.0], 12.0) == 1.0        # the lowest point of the buildings
+    assert logic.suggested_ground([], None) is None
+
+
+def test_the_notice_names_the_item_once_and_says_the_height_plainly(facts):
+    from design_checker import rhino_logic as logic
+    row = {"Rule id": "cover", "Error": "NEEDS REVIEW", "Fails": True, "Short": "Lot coverage by buildings",
+           "Line": "Lot coverage by buildings: fails with the lot as drawn (confirm the survey)"}
+    assert logic.notice(set(), [row])[1] == ["Lot coverage by buildings no longer complies: fails with the lot as "
+                                             "drawn (confirm the survey)"]
+    tall = check(MODEL, {**facts, "stories": 3}, building_problems=None)
+    from design_checker.check import _first_failing
+    m = dict(tall["measurements"], building_height={**tall["measurements"]["building_height"], "value": 38})
+    rule = {"check": "building_height <= 35 or building_height <= 38.5 and front_yard >= 25 + (building_height - 35)"}
+    assert _first_failing(rule, m) == "Building height 38 ft, needs ≤ 35 ft"
