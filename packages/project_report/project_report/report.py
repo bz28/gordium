@@ -174,10 +174,12 @@ def _unreadable(node, values: dict, kinds: dict) -> list[str]:
         if bad := _unreadable(node.test, values, kinds):
             return bad
         try:
-            taken = node.body if formula.evaluate(ast.unparse(node.test), values, kinds) is True else node.orelse
+            test = formula.evaluate(ast.unparse(node.test), values, kinds)
         except (EvaluationError, ArithmeticError):
             return []
-        return _unreadable(taken, values, kinds)
+        if type(test) is not bool:                  # the checker refuses a test that isn't true/false: no branch
+            return []
+        return _unreadable(node.body if test else node.orelse, values, kinds)
     if isinstance(node, ast.Name):
         try:
             formula.evaluate(node.id, values, kinds)       # the checker's own test of a usable value

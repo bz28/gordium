@@ -166,6 +166,10 @@ def test_the_reason_names_every_measure_the_checker_needs():
     rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= (1 if sleeping_rooms <= 3 else lot_width)"}
     assert report.needs_review_reason(rule, {"parking_spaces": 1}, kinds) == \
         "Can't check: missing measurement: sleeping_rooms."
+    # A test that isn't true/false: the checker reads neither branch, so neither is blamed.
+    rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= (1 if lot_width else sleeping_rooms)"}
+    assert report.needs_review_reason(rule, {"lot_width": 50}, kinds) == \
+        "Can't check: missing measurement: parking_spaces."
 
 
 def test_every_shown_limit_uses_one_symbol_style():
