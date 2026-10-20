@@ -206,6 +206,11 @@ def test_every_source_has_a_citation_people_can_read(data):
     law = "City of Ithaca Code, Chapter 325 Zoning (full text)"
     assert cite({"file": LAW, "page": 24, "lines": [15, 16]}) == f"{law}, §325-8A, p.24, lines 15–16"
     assert cite({"file": LAW, "page": 5, "lines": [23, 25]}) == f"{law}, §325-3B (BUILDING AREA), p.5, lines 23–25"
+    assert cite({"file": LAW, "page": 1, "lines": [10, 10]}) == f"{law}, Table of contents and history, p.1, line 10"
+    _, pieces = load_pieces(ITHACA / "2_extracted_text/chapter_325_zoning_2026-10.sections.jsonl")
+    page, first, _ = pieces["editors_note_1"]["lines"][0]
+    assert cite({"file": LAW, "page": page, "lines": [first, first]}) == \
+        f"{law}, {pieces['editors_note_1']['title']}, p.{page}, line {first}"   # no § for an unnumbered piece
     assert cite({"file": "zoning_charts_2026-04.pdf", "page": 3, "lines": [31, 31]}) == \
         "City of Ithaca Zoning Charts (April 2026), p.3, line 31"                 # no sections: page and line
     for tab in ("Rules", "Definitions", "Uses"):
@@ -235,3 +240,34 @@ def test_check_also_catches_a_change_in_how_the_workbook_looks(tmp_path, data):
     wb["Rules"].column_dimensions["A"].width = 99
     wb.save(path)
     assert contents(load_workbook(path)) != contents(build(data))
+
+
+
+def test_write_block_stacks_tables_keeps_widths_and_fills_only_its_cells():
+    """The shared table writer, as the project report uses it: a second table under the first keeps the first's
+    widths (width None), fills land on the named column's cells only, and the next free row is returned."""
+    from openpyxl import Workbook
+    ws = Workbook().active
+    end = wbk.write_block(ws, 2, [("A", 30), ("B", 12)], [["x", "y"], ["z", "w"]])
+    assert end == 5
+    end2 = wbk.write_block(ws, end + 1, [("Col", None), ("B", None)], [["p", "q"], ["r", "s"]],
+                           fills={"Col": ["FFC7CE", None]})
+    assert end2 == 9 and ws.column_dimensions["A"].width == 30 and ws.column_dimensions["B"].width == 12
+    assert ws["A7"].fill.fgColor.rgb == "00FFC7CE" or ws["A7"].fill.fgColor.rgb.endswith("FFC7CE")
+    assert ws["A8"].fill.fill_type is None and ws["B7"].fill.fill_type is None
+    assert ws["A6"].font.bold and ws["A6"].font.color.rgb.endswith(wbk.INK)
+    with pytest.raises(ValueError):                             # a fill for a column that isn't there
+        wbk.write_block(ws, 20, [("A", None)], [["x"]], fills={"Nope": ["FFC7CE"]})
+
+
+def test_questions_cite_where_each_question_points(data):
+    t = data["Questions"]
+    cite = wbk.citer(ITHACA, DOCUMENTS)
+    first = {}
+    for path, book in rulebooks(ITHACA):
+        for r in book["rules"]:
+            first[r["id"]] = r["sources"][0]
+    for ident, citation in zip(column(t, "Id"), column(t, "Citation")):
+        if ident in first:
+            assert citation == cite(first[ident])
+    assert all(column(t, "Citation"))
