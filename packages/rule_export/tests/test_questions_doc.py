@@ -29,7 +29,7 @@ SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 R1B = {r["id"]: r for r in load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"]}
 ANSWER_KEY = REPO / "test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx"
 # What we measured from the City's outline (the City's data itself may not be stored; see gis/README.md).
-CITY = load(SITE / "gis/city_tax_parcel_facts.yaml")
+CITY = load(SITE / "gis/city_tax_parcel_measurements.yaml")
 CITY_STATEMENT = ("Data contained in this product was amended by the GIS Program, City of Ithaca, NY from a file created by "
                   "Tompkins County Assessment Office. The originators do not warrant the accuracy or completeness of the "
                   "information portrayed by the data.")
@@ -116,7 +116,7 @@ def test_only_shareable_data_is_stored_and_it_is_what_was_downloaded():
     redistributed, so no City file is stored: only our measurements, with the URL and the raw response's
     fingerprint, and the statement the City asks derived products (the page) to carry."""
     readme = (SITE / "gis/README.md").read_text(encoding="utf-8")
-    assert [f.name for f in sorted((SITE / "gis").iterdir())] == ["README.md", "city_tax_parcel_facts.yaml",
+    assert [f.name for f in sorted((SITE / "gis").iterdir())] == ["README.md", "city_tax_parcel_measurements.yaml",
                                                                  "county_parcel_2026-10-20.json"]
     county = SITE / "gis/county_parcel_2026-10-20.json"
     assert f"SHA-256: `{hashlib.sha256(county.read_bytes()).hexdigest()}`" in readme
@@ -125,13 +125,13 @@ def test_only_shareable_data_is_stored_and_it_is_what_was_downloaded():
     assert re.fullmatch(r"[0-9a-f]{64}", CITY["sha256"]) and CITY["url"].startswith("https://")
     # Why the City's data isn't stored, with its sources: the parcel layer's terms, and the zoning layer's
     # consent clause (the precaution's reason). The County's terms are cited the same way.
-    city_part = readme.split("**`city_tax_parcel_facts.yaml`**")[1]
+    city_part = readme.split("**`city_tax_parcel_measurements.yaml`**")[1]
     for cited in ("https://www.arcgis.com/sharing/rest/content/items/87c2aae68e0b405d8b9dcb7a0cc9cf06?f=json",
                   "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/info/itemInfo?f=json",
                   "may not be reproduced or redistributed without the express written consent of the originator"):
         assert cited in city_part, cited
     assert "https://www.arcgis.com/sharing/rest/content/items/505beb987c93401b8445777a8bb9bda6?f=json" in readme
-    header = " ".join(line.lstrip("# ").strip() for line in (SITE / "gis/city_tax_parcel_facts.yaml").read_text().splitlines())
+    header = " ".join(line.lstrip("# ").strip() for line in (SITE / "gis/city_tax_parcel_measurements.yaml").read_text().splitlines())
     assert CITY_STATEMENT in header
     assert CITY_STATEMENT in DOC
 
@@ -170,7 +170,7 @@ def _sides(file: str) -> tuple[list[float], float, int]:
 
 def test_the_lot_outline_figures_come_from_the_stored_outlines():
     """§1.1's GIS numbers: the County's recomputed from its stored outline, the City's from our measurements of
-    it (city_tax_parcel_facts.yaml)."""
+    it (city_tax_parcel_measurements.yaml)."""
     sides = CITY["sides_ft"]
     city = [sides[k]["length"] for k in ("front", "long_side", "jog", "rear", "side_toward_104")]
     city_area, front_edges = CITY["area_sf"], sides["front"]["edges"]

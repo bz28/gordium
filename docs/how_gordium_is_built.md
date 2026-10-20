@@ -62,7 +62,11 @@ The city's documents go in on the left. A traceable rulebook, checked by code, c
 | 9 | The rules spreadsheet (`rule_export`) | How people read and check the rules |
 | 10 | The project report in the architects' format (`project_report`) | A design's answer, in the form architects already use |
 | 11 | The questions page for the architects | What only they can decide |
-| 12+ | Measuring a Rhino model, the Rhino command (coming) | The design side of the check |
+| 12 | Measuring a Rhino model the way the city defines each measurement (`model_measurement`) | The design side of the check |
+| 13 | GordiumCheck in Rhino: the largest legal building (`envelope_builder`) and live re-checks (`design_checker`) | The check runs where architects design |
+| 14–15 | Starting a project in Rhino, and the Gordium panel (`apps/rhino_plugin`) | What the architect sees |
+| 16 | Looking up an address (`site_lookup`; side branch, joins after 15) | The start box fills itself |
+| 17 | The term index (every section that uses a defined word) and the "show your work" check on open questions, with the 2026-10-20 research filed in | Only what research can't settle reaches the architects |
 
 ## Where each piece of information comes from
 
