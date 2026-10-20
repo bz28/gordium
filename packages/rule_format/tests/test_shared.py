@@ -110,7 +110,7 @@ ARCHITECT_REVIEW = re.compile(
     r"|\b(confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{0,30}?\barchitects?\b"  # ...confirmed by architects
     r"|\bthen architects\b|\barchitect review\b", re.IGNORECASE)
 NOT_A_PROMISE = re.compile(r"defer|once (it is |approval is )?switched on|when approval is switched on|\bwould\b"
-                           r"|their (own )?(site|design|project)|facts about|by hand|answer", re.IGNORECASE)
+                           r"|their (own )?(site|design|project)|facts about|by hand|answers? (the |any )?open questions", re.IGNORECASE)
 
 
 def _promises_architect_review(sentence: str) -> bool:
@@ -122,7 +122,8 @@ def _promises_architect_review(sentence: str) -> bool:
 def test_the_architect_review_matcher():
     for promise in ["confirmed by step 2 and by architects", "an architect confirms each label",
                     "reviewers and architects check the rest", "Code, then AI for leftovers, then architects",
-                    "is caught by comparing outputs, and by architect review", "Draft: architects approve"]:
+                    "is caught by comparing outputs, and by architect review", "Draft: architects approve",
+                    "caught by comparing the answer key with the chart, and by architect review"]:
         assert _promises_architect_review(promise), promise
     for fine in ["the architect confirms the facts about their site and design",
                  "Architects answer the open questions", "architect approval is deferred for now",
