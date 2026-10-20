@@ -113,6 +113,7 @@ _GAP = r"(?:[\s,]+(?!(?:to|can|could|may|might|would)\b)\w+){0,3}?"
 ARCHITECT_REVIEW = re.compile(
     rf"\barchitects?\b(?!['\u2019-]){_GAP}[\s,]+{_VERB}\b"
     rf"|\b(?:confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{{0,30}}?\barchitects?\b"
+    rf"|\barchitects?\s+(?:\w+\s+){{0,2}}?(?:needs?|ha(?:ve|s|d)|required|asked|expected)\s+to\s+{_VERB}\b"
     r"|\bthen architects\b"
     r"|\barchitect(?:s['\u2019]|['\u2019]s|s)?[\s-]+(?:review|confirm\w*|check\w*|sign-?off|approv\w*)\b", re.IGNORECASE)
 # What makes such a phrase not a promise. A sentence that says approval is deferred, or describes what happens
@@ -121,7 +122,7 @@ ARCHITECT_REVIEW = re.compile(
 DEFERRED = re.compile(r"\b(approval|confirmation|review|reviews|check|checks|sign-?off|it|this|that|they)\s+"
                       r"((is|are|stays|remains)\s+)?deferred"
                       r"|deferred\s+(for now|until)|\(deferred|\bonce (approval|it) is (switched )?on\b|\bonce approved\b"
-                      r"|\bonce (the )?architects? approves?|when (approval is|it's|it is) switched on|\bwould\b",
+                      r"|\bonce (the )?architects? approves?|when (approval is|it's|it is) switched on",
                       re.IGNORECASE)
 NEARBY_EXCUSE = re.compile(r"facts about their (own )?(site|design|project)|checked by hand by architects"
                            r"|answers? (the |any )?open questions", re.IGNORECASE)
@@ -137,27 +138,44 @@ def _promises_architect_review(sentence: str) -> bool:
                for m in ARCHITECT_REVIEW.finditer(sentence))
 
 
-def _sentences(text: str, yaml_comments: bool = False) -> list[str]:
-    """Whole sentences: lines wrapped inside a paragraph (or inside a YAML comment) are joined back together.
-    Headings, list items, table rows and code-block lines each stand alone."""
+def _sentences(text: str) -> list[str]:
+    """Whole sentences: lines wrapped inside a paragraph or a list item are joined back together. Headings,
+    table rows and code-block lines each stand alone; a new list item starts a new paragraph."""
     sentences, current, in_code = [], [], False
     def flush():
         if current:
             sentences.extend(re.split(r"(?<=[.!?])\s+", " ".join(current)))
             current.clear()
     for line in text.splitlines():
-        if yaml_comments:
-            line = line.split("#", 1)[1] if "#" in line else ""
         stripped = line.strip()
         if stripped.startswith("```"):
             flush(); in_code = not in_code; continue
-        if in_code or re.match(r"(#|\||[-*+]\s|\d+\.\s)", stripped):
+        if in_code or re.match(r"(#|\|)", stripped):
             flush(); current.append(stripped); flush(); continue
+        if re.match(r"([-*+]\s|\d+\.\s)", stripped):       # a list item: its wrapped lines join it
+            flush(); current.append(stripped); continue
         if not stripped:
             flush(); continue
         current.append(stripped)
     flush()
     return [s for s in sentences if s]
+
+
+def _yaml_sentences(text: str) -> list[str]:
+    """What people read in a YAML file: its comments (joined across lines) and every text value."""
+    comments = "\n".join(line.split("#", 1)[1].strip() if "#" in line else "" for line in text.splitlines())
+    values = []
+    def walk(node):
+        if isinstance(node, str):
+            values.append(node)
+        elif isinstance(node, dict):
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+    walk(yaml.safe_load(text))
+    return _sentences(comments) + [s for v in values for s in _sentences(v)]
 
 
 def test_the_architect_review_matcher():
@@ -173,7 +191,10 @@ def test_the_architect_review_matcher():
                     "Architects carefully check each rule", "the architects' review catches errors",
                     "architect-approved rules", "Architects review every draft rule by hand",
                     "Architects review each rule against their design",
-                    "Architects review each label; the deferred items listed at the end of this long document go to Ben"]:
+                    "Architects review each label; the deferred items listed at the end of this long document go to Ben",
+                    "Architects need to approve each rule", "Architects have to review the labels",
+                    "Architects are asked to review each rule",
+                    "Architects review each rule, which would otherwise slip through"]:
         assert _promises_architect_review(promise), promise
     for fine in ["the architect confirms the facts about their site and design",
                  "Architects answer the open questions", "architect approval is deferred for now",
@@ -187,7 +208,12 @@ def test_the_architect_review_matcher():
 
 def test_sentences_are_joined_across_wrapped_lines():
     comment = "key: 1  # Rules are drafts. Architects check each\n# rule before use.\nother: 2\n"
-    assert "Architects check each rule before use." in _sentences(comment, yaml_comments=True)
+    assert "Architects check each rule before use." in _yaml_sentences(comment)
+    values = "label_kinds:\n  rule: Checked by code, then architects approve each one.\nnotes: >\n  Architects review each\n  rule before use.\n"
+    assert any(_promises_architect_review(s) for s in _yaml_sentences(values))
+    assert "Architects review each rule before use." in _yaml_sentences(values)
+    assert _sentences("- Architects check each\n  rule before use.\n") == ["- Architects check each rule before use."]
+    assert not any(_promises_architect_review(s) for s in _sentences("- Architects check each rule (approval\n  deferred).\n"))
     prose = "Rules are drafts. Architects check each\nrule before use.\n\n- a list item\n"
     assert "Architects check each rule before use." in _sentences(prose)
     assert _sentences("- one item\n- two items\n") == ["- one item", "- two items"]
@@ -205,6 +231,6 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
     # Architects approving, confirming, checking or reviewing drafts is the deferred layer: each sentence that
     # says so must say it's deferred (or describe what happens once it is switched on).
     confirm = [f"{p.relative_to(REPO)}: {line.strip()[:100]}" for p in DOCS + REGULATION_YAML
-               for line in _sentences(p.read_text(), yaml_comments=p.suffix == ".yaml")
+               for line in (_yaml_sentences if p.suffix == ".yaml" else _sentences)(p.read_text())
                if _promises_architect_review(line)]
     assert not silent and not false and not confirm, (silent, false, confirm)
