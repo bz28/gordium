@@ -445,13 +445,13 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
             next((b for b in buildings if b["id"] == facts.get("main_building")), None))
     why_building = (stop("no_building") if not buildings else
                     "; ".join(p for b in buildings for p in b.get("problems") or []) or None)
-    # the ground must meet every building: at or above its lowest point (a basement goes below it) and below
-    # its top. A level outside that (a survey elevation typed for a model drawn at z = 0) would give a negative
-    # or inflated height, and an empty cut at the ground blamed on overhangs.
-    spans = [(min(p[2] for f in b["faces"] for p in f["points"]), max(p[2] for f in b["faces"] for p in f["points"]))
-             for b in buildings if b.get("faces")]
-    off = next(((lo, hi) for lo, hi in spans if grade is not None and              # a flat slab on the ground meets it
-                (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL)), None)
+    # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
+    # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
+    # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
+    # cut at the ground blamed on overhangs.
+    zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
+    lo, hi = (min(zs), max(zs)) if zs else (None, None)
+    off = (lo, hi) if zs and grade is not None and (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None
     why_grade = (stop("no_ground") if grade is None else
                  stop("ground_off_building", ground=_r(grade), bottom=_r(off[0]), top=_r(off[1])) if off else
                  stop("ground_unknown") if facts.get("ground_is_flat") is None else

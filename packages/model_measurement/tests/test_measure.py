@@ -586,6 +586,16 @@ def test_a_ground_level_that_doesnt_meet_the_building_stops_height_area_and_yard
     for grade in (812, 30, 31, -50):          # above the top, at it, just over it, under the lowest point
         m = measure(site(), {**FACTS, "grade_elevation": grade})
         for name in ("building_height", "building_area", "front_yard", "side_yard_smaller", "rear_yard"):
-            assert m[name]["value"] is None and "doesn't meet a building" in m[name]["reason"], (grade, name)
+            assert m[name]["value"] is None and "doesn't meet the buildings" in m[name]["reason"], (grade, name)
     basement = measure(site(), {**FACTS, "grade_elevation": 4})      # a basement 4 ft below the ground
     assert basement["building_height"]["value"] == 26.0 and basement["front_yard"]["value"] == 25.0
+
+
+def test_stacked_solids_and_a_basement_drawn_as_its_own_solid_meet_the_ground():
+    ground_floor, upper = box(10, 25, 35, 65, 0, 10, id="house"), box(10, 25, 35, 65, 10, 30, id="upper")
+    m = measure(site(RECT, ground_floor, upper), {**FACTS, "main_building": "house"})
+    assert (m["building_area"]["value"], m["front_yard"]["value"], m["rear_yard"]["value"]) == (1000.0, 25.0, 35.0)
+    assert "doesn't meet" not in str(m["building_height"]["reason"])
+    house, basement = box(10, 25, 35, 65, 10, 40, id="house"), box(10, 25, 35, 65, 0, 10, id="basement")
+    m = measure(site(RECT, house, basement), {**FACTS, "main_building": "house", "grade_elevation": 10})
+    assert m["front_yard"]["value"] == 25.0 and "doesn't meet" not in str(m["building_height"]["reason"])
