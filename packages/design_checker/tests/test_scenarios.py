@@ -52,14 +52,45 @@ def test_a_rule_with_two_ways_to_comply_says_how_each_falls_short_and_both_fixes
     assert h["status"] == present.FAILS
     assert h["reason"] == ("Does not comply either way the rule allows: Building height 37'-0\", needs ≤ 35'-0\"; "
                            "or Rear yard 30'-0\", needs ≥ 32'-0\"")
-    assert h["hint"] == ("To comply: lower the building 2'-0\", or move the building 2'-0\" farther from the rear "
-                         "lot line.")
+    # moving the whole house forward would take the 2 ft from the front yard, which the bonus needs too
+    assert h["hint"] == "To comply: lower the building 2'-0\", or make the rear yard 2'-0\" deeper, keeping the other yards."
 
 
-def test_when_the_readings_disagree_the_row_shows_their_span_not_a_dash():
+def test_when_the_readings_disagree_the_row_keeps_its_side_and_shows_the_span_in_the_limits_unit():
     v = _items("10_one_floor_moved_on_its_own.yaml")
-    assert v["Side yard, narrower"]["proposed"] == "12'-0\" to 15'-0\""
+    assert v["Side yard, East"]["proposed"] == "12'-0\" to 15'-0\""   # still named: the shortest reading's line
+    assert v["Side yard, East"]["points"]
     assert v["Lot coverage"]["proposed"] == "16.7% to 18.4%"          # 1,200 and 1,320 of 7,200 sf, rounded up
+    assert v["Lot coverage"]["required"] == "25%"                    # the limit in the same unit, never sf
+
+
+def test_a_design_using_the_height_bonus_shows_the_bonus_limit_and_the_raised_yards():
+    v = _items("03_height_bonus_every_yard_increased.yaml")
+    h = v["Building height"]
+    assert (h["status"], h["required"], h["margin"], h["hint"]) == (present.COMPLIES, "38'-6\"", "+1'-6\"", None)
+    assert "Front yard ≥ 27'-0\"; Side yards ≥ 12'-0\"; Rear yard ≥ 32'-0\"" in h["reason"]
+    for name, req in (("Front yard", "27'-0\""), ("Side yard, West", "12'-0\""), ("Rear yard", "32'-0\"")):
+        assert (v[name]["required"], v[name]["margin"]) == (req, "at limit"), name   # not "+2'-0"": the bonus needs it
+
+
+def test_a_fix_is_never_rounded_short():
+    c = _items("05_coverage_one_square_foot_over.yaml")["Lot coverage"]
+    assert c["hint"] == "To comply: reduce the footprint by at least 1 sf."     # 1 sf over, never "0.01%"
+    assert present._gap(-0.01, "ft") == "0'-0 1/8\""                            # up, never down to nothing
+    assert present._gap(-2.0001, "ft") == "2'-0 1/8\""
+
+
+def test_the_tax_map_worst_case_applies_to_the_lot_area_too():
+    v = _items("08_tax_map_lot_front_yard_within_two_feet.yaml")
+    assert v["Lot area"]["status"] == present.COMPLIES
+    assert "worst case (lot area 6,844 sf)" in v["Lot area"]["reason"]          # 58 × 118
+    assert v["Front yard"]["status"] == present.REVIEW                         # 26 ft: at worst 24 ft
+
+
+def test_chart_quotes_are_the_districts_own_cell_never_a_whole_row():
+    quotes = [q["text"] for q in _items("05_coverage_one_square_foot_over.yaml")["Lot area"]["detail"]["quotes"]]
+    assert "Minimum Lot Size · One-family dwelling, detached · R-1B: “6,000 sf”" in quotes
+    assert not any("10,000 sf 6,000 sf 5,000 sf" in q or q.startswith("R-1A R-1B") for q in quotes)
 
 
 def _garage(touching: bool):

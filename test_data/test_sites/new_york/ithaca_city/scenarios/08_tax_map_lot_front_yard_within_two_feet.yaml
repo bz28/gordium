@@ -36,3 +36,23 @@ expected:
     cites: "§325-8 chart, R-1b, Percent of lot area"
   R-1b.height: {status: complies, working: "20 ≤ 35 (height isn't from the lot lines)", cites: "§325-8 chart, R-1b, Height"}
   R-1b.stories: {status: complies, working: "2 ≤ 3", cites: "§325-8 chart, R-1b, Number of stories"}
+# added after running Gordium (the expected results above are as written before it ran, commit 6d28ce0)
+disagreements:
+  R-1b.lot_area_one_family_detached:
+    gordium: complies
+    direction: gordium_less_cautious
+    finding: >-
+      2026-10-20, after the spec's C2 was corrected (the tax-map worst case applies to every lot-dependent item,
+      areas included; docs/design/rhino_ui_spec.md C2). The answer key followed the old rule that a lot area
+      always waits for a survey. Worked by hand at the worst case: each lot length 2 ft short, 58 × 118 =
+      6,844 sf ≥ 6,000 sf. Complies under every lot the tax map allows; Gordium says so and names 6,844 sf.
+    question_for_architects: >-
+      Is a lot area that complies even with every tax-map length 2 ft short acceptable without a survey, or does
+      the zoning office require a survey for any lot-area finding?
+  R-1b.lot_coverage:
+    gordium: complies
+    direction: gordium_less_cautious
+    finding: >-
+      Same correction. By hand at the worst case (the smallest lot, 6,844 sf): 25% = 1,711 sf ≥ the 1,700 sf
+      footprint (24.84%). Complies at the worst case.
+    question_for_architects: "Same as lot area: is the worst case over the tax-map tolerance enough for coverage?"

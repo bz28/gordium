@@ -92,7 +92,7 @@ C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gi
 C2 [code] **Tax-map tolerance** of ±2'-0".
 - Each lot-dependent value is evaluated at the worst case over ±2'-0": lengths directly, and areas and percentages by offsetting the lot outline.
 - If the item would not comply at that worst case, it needs review, with the reason "Lot lines are from the tax map (±2'-0")…" plus the worst-case value.
-- On the example lot this flags Front yard, both Side yards, Lot coverage and Lot area; Rear yard (+11'-7") and Lot width (+23'-0") still comply.
+- On the example lot this flags Front yard, both Side yards and Lot coverage; Rear yard (+11'-7"), Lot width (+23'-0") and Lot area (6,570 sf; 6,248 sf at the worst case, 71' × 88') still comply. (Corrected 2026-10-20: lot area was listed by mistake; the worst-case method applies to every lot-dependent item, areas and percentages as well as lengths.)
 
 C3 [code] **Grade not set** → Building height and Stories need review ("no grade").
 

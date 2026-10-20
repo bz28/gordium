@@ -67,11 +67,16 @@ def test_an_at_limit_yard_needs_review_on_a_tax_map_lot_but_complies_on_a_survey
     assert sv["Side yard, West"]["status"] == present.COMPLIES      # a survey: no tolerance
 
 
-def test_the_tolerance_only_ever_makes_a_result_more_cautious(tax_map):
-    rows = {r["Rule id"]: r["Error"] for r in tax_map["rows"]}
+def test_complies_only_when_the_checker_passed_or_it_holds_at_the_tax_map_worst_case(tax_map):
+    """The one way a row the checker left NEEDS REVIEW reads complies: it waits only on the survey, and it holds
+    at both ends of the tax-map tolerance (spec C2). Nothing else is ever made less cautious."""
+    rows = {r["Rule id"]: r for r in tax_map["rows"]}
     for i in tax_map["view"]["items"]:
-        if i["rule"] and i["status"] == present.COMPLIES:
-            assert rows[i["rule"]] == "PASS"                         # never complies unless the checker passed it
+        if i["rule"] and i["status"] == present.COMPLIES and rows[i["rule"]]["Error"] != "PASS":
+            assert rows[i["rule"]]["Provisional"] == present.SURVEY_ONLY, i["name"]
+            assert "worst case" in i["reason"], i["name"]
+    area = items(tax_map["view"])["Lot area"]                      # the 73 × 90 lot of 106 Ithaca Rd
+    assert area["status"] == present.COMPLIES and "worst case (lot area 6,248 sf)" in area["reason"]   # 71 × 88
 
 
 # ---- C3–C6: the grade, the roof ---------------------------------------------------------------------------------

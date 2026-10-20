@@ -54,12 +54,16 @@ def _missing(name: str, reason: str) -> dict:
 def _decide(name: str, readings: list[tuple[str, float, dict]], how: str, objects, question: str) -> dict:
     """One value if every reading gives the same number; else None, with the readings and the question."""
     values = [v for _, v, _ in readings]
-    shown = [{"reading": r, "value": _r(v)} for r, v, _ in readings]
+    shown = [{"reading": r, "value": _r(v), **({"points": x["points"]} if x.get("points") else {})}
+             for r, v, x in readings]
     if values and max(values) - min(values) <= SAME:
         how = how if len(readings) > 1 or not readings[0][0] else f"{how} ({readings[0][0]})"
         return _record(name, UNITS.get(name) or STATED[name], _r(values[0]), how, objects, readings[0][2].get("points"),
                        shown if len(readings) > 1 else [])
-    return _record(name, UNITS.get(name) or STATED[name], None, how, objects, None, shown,
+    # no value, but where it was measured is still known: the line of the smallest reading (for a yard, the
+    # cautious one), so the panel can name the side and the viewport can draw it
+    least = min(readings, key=lambda r: r[1])[2].get("points")
+    return _record(name, UNITS.get(name) or STATED[name], None, how, objects, least, shown,
                    stop("readings_differ", question=question))
 
 
@@ -508,6 +512,7 @@ def _distance(line, shape):
     return line.distance(shape), [[_r(a.x), _r(a.y)], [_r(b.x), _r(b.y)]]
 
 
+TAX_MAP_TOLERANCE = 2.0   # ft: a lot line from the tax map is taken as right to within this (spec C2)
 SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall
 
 
@@ -633,6 +638,13 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         out["lot_area"] = _record("lot_area", "sf", None, "the area inside the lot lines", [lot.id], None,
                                   [{"reading": "the lot as drawn", "value": _r(lot.polygon.area)}],
                                   stop("survey_unknown") if facts.get("lot_surveyed") is None else stop("not_surveyed"))
+        # tax-map lot lines can each be off by up to TAX_MAP_TOLERANCE: every length longer or shorter by that much
+        # is the outline moved half of it out or in (73 × 90 → 71 × 88 at the smallest). Not a value: the area
+        # still waits for a survey; this only lets a result that holds at both ends be said (spec C2)
+        out["lot_area"]["tolerance"] = {
+            "ft": TAX_MAP_TOLERANCE,
+            "low": _r(lot.polygon.buffer(-TAX_MAP_TOLERANCE / 2, join_style=2).area),
+            "high": _r(lot.polygon.buffer(TAX_MAP_TOLERANCE / 2, join_style=2).area)}
 
     # where the street is decides the lot width, the yards and the lot depth. Whether the lot is a corner lot
     # (two streets, §325-19C) is stated by the architect, never guessed from the drawing (the city's definition

@@ -1444,8 +1444,11 @@ def gordium_start():
     path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
     export(doc, path)
     saved_ui = _ui_state(doc)
-    saved_ui["preview"] = _preview(ask({"cmd": "start", "model": path, "facts": facts,
-                                        "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), None)}), facts)
+    try:                                 # the box's preview line; the box still opens if it can't be worked out
+        saved_ui["preview"] = _preview(ask({"cmd": "start", "model": path, "facts": facts,
+                                            "floor_to_floor": _feet(saved_ui.get("floor_to_floor"), None)}), facts)
+    except Exception as e:
+        saved_ui["preview"] = "No preview yet (" + str(e)[:80] + ")"
     _save_ui_state(doc, saved_ui)
     facts = confirm(doc, facts, options, "start")
     if facts is None:
