@@ -7,7 +7,7 @@ A co-pilot inside Rhino for architects. It knows every zoning rule a building mu
 - **End goal:** an architect describes what they want and gets a final design in Rhino that is legal, meets the brief, and looks like their work.
 - **Moat:** trusted, traceable rules; exact city-specific measurement code; each firm's design memory. Not the AI itself.
 - **First city:** City of Ithaca, NY (not the Town of Ithaca, which has its own code). Residential districts first.
-- **Design doc:** https://claude.ai/code/artifact/d980dd22-6b2e-4090-bcc4-d02c871b8a7b (tabs: Plan · How it's built · Research)
+- **Design doc (the one place for how Gordium works and why):** https://claude.ai/artifact/BMkp3eyrgemdqcwhi9oFxf (Gordium System Map: flow, one rule end to end, each stage, PRs, decisions). The original plan (Oct 16, superseded): https://claude.ai/code/artifact/d980dd22-6b2e-4090-bcc4-d02c871b8a7b
 
 ## Core principles (do not break these)
 
@@ -53,7 +53,7 @@ Planned but not created until their code is written: `packages/ai_designer`, `pa
 - When Ben shares files, decide whether each is relevant and file it in the right place (unchanged, original name). Say where each went.
 - Explain things in plain, simple language. The audience includes architects and shareholders.
 - Ground claims in the actual files and documents; cite where information came from.
-- **One design document.** The design doc linked at the top of this file (Claude Docs: Plan · How it's built · Research · Decisions) is the single plain-language place for how Gordium works and why (decisions, alternatives rejected, how we know, what's open). Any PR that changes how Gordium works or why updates it; repo docs link to it rather than repeat it.
+- **One design document.** The System Map linked at the top of this file is the single plain-language place for how Gordium works and why: the flow, each stage, the decisions (why, alternatives rejected), how we know, what's open. Any PR that changes how Gordium works or why updates it. Repo docs (`docs/`) hold code-level detail and link to it rather than repeat it.
 - **Resolve before asking.** When the law seems unclear, never guess, and never go straight to the architects. In order:
   1. **The whole law:** read every section the term index lists for the term and its synonyms (setback/yard, overhang/projection/eaves…), not just its definition.
   2. **Research, ranked:** (1) Ithaca's own code text; (2) Ithaca's official interpretations and Board of Zoning Appeals decisions; (3) NYS Uniform Code / IBC commentary on the same wording; (4) other cities' codes. Cite every source (quote + section, or URL + date).
