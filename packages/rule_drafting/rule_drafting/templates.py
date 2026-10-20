@@ -6,6 +6,7 @@ fills the slots from each district's own cell and cites that cell, so every numb
 from the chart reader. A template with no slots is one rule for every district (`general`).
 """
 
+import ast
 import re
 
 from rule_format import formula
@@ -17,11 +18,61 @@ SLOT = re.compile(r"\{([a-z][a-z0-9_]*)\}")
 CHART_FILE = "zoning_charts_2026-04.pdf"
 
 
+def live_formulas(template: dict) -> list[str]:
+    """The formulas that end up in the rule: applies_when, review_when, and the check (a rule's only: a flag
+    has none)."""
+    texts = [template.get("applies_when", "")] + [r["when"] for r in template.get("review_when", [])]
+    if template.get("kind") == "rule":
+        texts.append(template.get("check", ""))
+    return [t for t in texts if t.strip()]
+
+
 def formula_slots(template: dict) -> set[str]:
-    """The slots the rule's formulas use (check, applies_when, review_when): the ones that decide something."""
-    texts = [template.get("check", ""), template.get("applies_when", "")]
-    texts += [r["when"] for r in template.get("review_when", [])]
-    return {n for t in texts for n in SLOT.findall(t)}
+    """The slots the rule's own formulas use."""
+    return {n for t in live_formulas(template) for n in SLOT.findall(t)}
+
+
+def number_places(template: dict) -> list[tuple[str, float, set[str]]]:
+    """(formula, number, the slots it stands with) for every number typed in the rule's own formulas (not 0).
+    A number stands with a slot when the two are directly related: operands of the same arithmetic or min/max
+    (`max(min({pct} * lot_depth, {cap}), 20)`: 20 stands with {cap}), or the number is in the condition that picks
+    the slot's value (`{first} if sleeping_rooms <= 3 else ...`: 3 stands with {first}). Not when they are only in
+    the same and/or (`stories <= 3 and lot_area >= {x}`), the same comparison's other side, or when the slot only
+    gates the branch the number is in (`3 if lot_area >= {x} else 0`). A slot's footnote or row label can back a
+    number only where it stands with that slot."""
+    out = []
+    for t in live_formulas(template):
+        try:
+            tree = formula.parse(SLOT.sub(lambda m: f"slot__{m[1]}", t))
+        except formula.FormulaError:
+            continue                                     # reported when the rule is checked
+        paths, stack = {}, []
+
+        def walk(node):
+            stack.append(node)
+            paths[id(node)] = list(stack)
+            for child in ast.iter_child_nodes(node):
+                walk(child)
+            stack.pop()
+        walk(tree.body)
+        nodes = [n for n in ast.walk(tree.body)]
+        slots = [n for n in nodes if isinstance(n, ast.Name) and n.id.startswith("slot__")]
+        for n in nodes:
+            if isinstance(n, ast.Constant) and type(n.value) in (int, float) and n.value != 0:
+                out.append((t, n.value, {s.id[6:] for s in slots if _stands_with(paths[id(n)], paths[id(s)])}))
+    return out
+
+
+def _stands_with(number_path: list, slot_path: list) -> bool:
+    i = 0
+    while i < min(len(number_path), len(slot_path)) and number_path[i] is slot_path[i]:
+        i += 1
+    common = number_path[i - 1]                          # the smallest expression holding both
+    if isinstance(common, (ast.BinOp, ast.UnaryOp, ast.Call)):
+        return True
+    if isinstance(common, ast.IfExp):                    # the number picks the branch the slot is in
+        return number_path[i] is common.test and slot_path[i] is not common.test
+    return False
 
 
 def slot_names(template: dict) -> set[str]:
@@ -38,6 +89,8 @@ def template_problems(template: dict) -> list[str]:
     p = [f"slot {{{n}}} is used but not defined in 'slots'" for n in sorted(slot_names(template) - set(defined))]
     p += [f"slot {n!r} is defined but no formula uses it (check, applies_when, review_when)"
           for n in sorted(set(defined) - formula_slots(template))]
+    if template["kind"] == "flag" and template.get("check", "").strip():
+        p.append("a flag has no check (an architect decides it): leave check empty")
     p += [f"slot {n!r} is defined twice" for n in sorted({n for n in defined if defined.count(n) > 1})]
     p += [f"slot {s['name']!r}: footnote {f!r} must be the note's number, like \"16\""
           for s in template["slots"] for f in s["footnotes"] if not re.fullmatch(r"\d+", f)]
@@ -65,9 +118,10 @@ def _example_value(text: str, values: dict[str, float]):
 
 
 def fill_template(template: dict, column: str | None, cells: dict, quote_sources: list[dict],
-                  drafted_by: str) -> tuple[dict | None, str | None]:
+                  drafted_by: str, nudge: str | None = None) -> tuple[dict | None, str | None]:
     """(the rule for this district column, None), or (None, why it can't be filled). With column None the
-    template must have no slots, and the rule is a general one."""
+    template must have no slots, and the rule is a general one. nudge: a slot whose value is changed in the
+    formulas only (not the examples), to test whether the slot decides anything."""
     values, cell_sources = {}, []
     for slot in template["slots"]:
         key = (slot["page"], slot["section"], slot["row"].strip(), column)
@@ -79,6 +133,9 @@ def fill_template(template: dict, column: str | None, cells: dict, quote_sources
                   "cell": {"section": slot["section"], "row": slot["row"].strip(), "column": column}}
         if source not in cell_sources:
             cell_sources.append(source)
+    examples_values = dict(values)
+    if nudge is not None:
+        values[nudge] = values[nudge] * 1.5 + 1
     district = district_name(column) if column else "general"
     rule = {"id": f"{district}.{template['id_suffix']}", "kind": template["kind"], "topic": template["topic"],
             "title": template["title"]}
@@ -90,7 +147,7 @@ def fill_template(template: dict, column: str | None, cells: dict, quote_sources
         rule["review_when"] = [{"when": _substitute(r["when"], values), "reason": r["reason"]} for r in template["review_when"]]
     rule["sources"] = cell_sources + quote_sources
     try:
-        rule["examples"] = [{"given": {g["measure"]: _example_value(g["value"], values) for g in ex["given"]},
+        rule["examples"] = [{"given": {g["measure"]: _example_value(g["value"], examples_values) for g in ex["given"]},
                              "expect": ex["expect"]} for ex in template["examples"]]
     except (formula.FormulaError, formula.EvaluationError, formula.MissingMeasure) as e:
         return None, f"an example value can't be worked out: {e}"

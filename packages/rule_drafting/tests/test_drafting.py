@@ -55,11 +55,17 @@ def slot(name, row, number=1, count=1, percent=False, footnotes=(), page=3, sect
             "percent": percent, "footnotes": list(footnotes)}
 
 
-def template(suffix, check, slots, examples, quotes=(), kind="rule", applies_when="", new_measures=()):
+def template(suffix, check, slots, examples, quotes=(), kind="rule", applies_when="", new_measures=(), numbers=()):
     return {"id_suffix": suffix, "title": suffix.replace("_", " ").capitalize(), "topic": "dimensions", "kind": kind,
             "applies_when": applies_when, "check": check, "slots": slots, "review_when": [], "quotes": list(quotes),
+            "numbers": list(numbers),
             "examples": [{"given": [{"measure": m, "value": v} for m, v in g.items()], "expect": e} for g, e in examples],
             "open_questions": [], "new_measures": list(new_measures)}
+
+
+def bound(value, source, quote=-1, slot="", footnote=""):
+    """One entry of a template's numbers: where a typed number is written."""
+    return {"value": value, "from": source, "quote": quote, "slot": slot, "footnote": footnote}
 
 
 FRONT = template("front_yard", "front_yard >= {front}", [slot("front", "Front (minimum)")],
@@ -67,8 +73,11 @@ FRONT = template("front_yard", "front_yard >= {front}", [slot("front", "Front (m
 REAR_YARD = template(
     "rear_yard", "rear_yard >= max(min({pct} * lot_depth, {cap}), 20)",
     [slot("pct", REAR, 1, 2, True, ["16"]), slot("cap", REAR, 2, 2, False, ["16"])],
-    [({"rear_yard": "50", "lot_depth": "100"}, "pass"), ({"rear_yard": "19", "lot_depth": "60"}, "fail")],
-    quotes=[{"document": "chart", "page": 3, "piece": "", "text": "(16) But not less than 20 ft."}])
+    # each slot binds in some example: the percent on a 100 ft lot, the 50 ft cap on a 400 ft lot
+    [({"rear_yard": "25", "lot_depth": "100"}, "pass"), ({"rear_yard": "50", "lot_depth": "400"}, "pass"),
+     ({"rear_yard": "19", "lot_depth": "60"}, "fail")],
+    quotes=[{"document": "chart", "page": 3, "piece": "", "text": "(16) But not less than 20 ft."}],
+    numbers=[bound(20, "slot_footnote", slot="cap", footnote="16")])
 
 
 def unit(inputs, uid):
@@ -322,7 +331,7 @@ def test_a_typed_number_backed_only_by_a_footnote_marker_is_rejected(inputs):
                           "in each dwelling unit.")}])
     answer = {"templates": [sneaky], "no_rule_reason": ""}
     result, records = run(inputs, FakeClient(answer, answer, answer))
-    assert result["rules"] == {} and "number 5 is typed" in records[0]["problem"]
+    assert result["rules"] == {} and "number 5 in" in records[0]["problem"]
 
 
 def test_two_templates_with_one_id_in_an_answer_are_rejected(inputs):
@@ -368,7 +377,7 @@ def test_a_typed_number_backed_only_by_another_cells_footnote_is_rejected(inputs
                    quotes=[chart_quote(quote)])
     answer = {"templates": [bad], "no_rule_reason": ""}
     result, records = run(inputs, FakeClient(answer, answer, answer), uid=uid)
-    assert result["rules"] == {} and f"number {n} is typed" in records[0]["problem"]
+    assert result["rules"] == {} and f"number {n} in" in records[0]["problem"]
 
 
 def test_a_typed_number_backed_only_by_a_subsection_reference_is_rejected(inputs):
@@ -379,7 +388,7 @@ def test_a_typed_number_backed_only_by_a_subsection_reference_is_rejected(inputs
                             "text": "No building permit shall be issued unless the requirements of § 325-20D(1) are met."}])
     answer = {"templates": [bad], "no_rule_reason": ""}
     result, records = run(inputs, FakeClient(answer, answer, answer), uid="325-20F")
-    assert result["rules"] == {} and "number 1 is typed" in records[0]["problem"]
+    assert result["rules"] == {} and "number 1 in" in records[0]["problem"]
 
 
 def test_a_number_in_a_slots_row_label_may_be_typed(inputs):
@@ -391,8 +400,11 @@ def test_a_number_in_a_slots_row_label_may_be_typed(inputs):
         "parking_spaces >= ({first} if sleeping_rooms <= 3 else {mid} + {each} * max(sleeping_rooms - 5, 0))",
         [slot(name, row, page=14, section="Residential") for name, row in zip(("first", "mid", "each"), rows)],
         [({"use": "one_family_detached", "sleeping_rooms": "3", "parking_spaces": "{first}"}, "pass"),
-         ({"use": "one_family_detached", "sleeping_rooms": "4", "parking_spaces": "{first}"}, "fail")],
-        applies_when='use == "one_family_detached"')
+         ({"use": "one_family_detached", "sleeping_rooms": "4", "parking_spaces": "{first}"}, "fail"),
+         ({"use": "one_family_detached", "sleeping_rooms": "4", "parking_spaces": "{mid}"}, "pass"),
+         ({"use": "one_family_detached", "sleeping_rooms": "6", "parking_spaces": "{mid} + {each}"}, "pass")],
+        applies_when='use == "one_family_detached"',
+        numbers=[bound(3, "slot_row_label", slot="first"), bound(5, "slot_row_label", slot="mid")])
     result, records = run(inputs, FakeClient({"templates": [parking], "no_rule_reason": ""}), uid="chart-p14-residential")
     assert records[0]["problem"] is None
     assert result["rules"]["R-1b"][0]["check"] == \
@@ -434,6 +446,74 @@ def test_a_slot_no_formula_uses_cant_lend_its_footnote_to_a_typed_number(inputs)
     answer = {"templates": [bad], "no_rule_reason": ""}
     result, records = run(inputs, FakeClient(answer, answer, answer), uid="chart-p3-maximum_building_height")
     assert result["rules"] == {} and "no formula uses it" in records[0]["problem"]
+
+
+DECOY = slot("x", "Multiple family dwelling, new construction", footnotes=["7"], section="Minimum Lot Size [fn3]")
+LOT_AREA_X = "{x}"   # the decoy cell's value, for examples
+
+
+@pytest.mark.parametrize("check, extra, expect", [
+    # a slot written in but deciding nothing: caught by changing it, whatever the shape
+    ("stories <= 3 + 0 * {x}", {}, "decides nothing"),
+    ("stories <= 3 and {x} == {x}", {}, "isn't backed where it stands"),
+    # a slot that decides something, but in another comparison than the 3 it lends its note to
+    ("stories <= 3 and lot_area >= {x}", {"lot_area": LOT_AREA_X}, "isn't backed where it stands"),
+    # one binding, legitimate where the 3 stands with {x}, must not also back the 3 of 'stories <= 3'
+    ("stories <= 3 and lot_area >= 3 * {x}", {"lot_area": "3 * {x}"}, "'stories <= 3 and lot_area >= 3 * {x}' isn't backed"),
+    # a slot that only gates the branch can't lend its note to the number the branch picks
+    ("stories <= (3 if lot_area >= {x} else 0)", {"lot_area": LOT_AREA_X}, "isn't backed where it stands"),
+])
+def test_a_slot_lends_its_note_only_to_a_number_it_decides_with(inputs, check, extra, expect):
+    """Note 7 ('For the first 1-3 units') is about lot area per unit. Bound to a decoy slot, its 3 must not
+    become 'stories <= 3' for R-3a, whose own chart cell says 4 stories."""
+    notes = [chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")]
+    bad = template("stories", check, [DECOY], [({"stories": "3"} | extra, "pass"), ({"stories": "5"} | extra, "fail"),
+                                               ({"stories": "3", "lot_area": "1"}, "fail")] if extra else
+                   [({"stories": "3"}, "pass"), ({"stories": "5"}, "fail")],
+                   quotes=notes, numbers=[bound(3, "slot_footnote", slot="x", footnote="7")])
+    answer = {"templates": [bad], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid="chart-p3-maximum_building_height")
+    assert result["rules"] == {} and expect in records[0]["problem"], records[0]["problem"]
+
+
+def test_a_flags_check_is_refused_and_lends_nothing(inputs):
+    """A flag's check is thrown away, so it can't carry a slot that lends a note: a flag with a check is refused."""
+    notes = [chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")]
+    bad = template("stories_flag", "lot_area >= {x}", [DECOY], [], kind="flag", applies_when="stories <= 3",
+                   quotes=notes, numbers=[bound(3, "slot_footnote", slot="x", footnote="7")])
+    answer = {"templates": [bad], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid="chart-p3-maximum_building_height")
+    assert result["rules"] == {} and "a flag has no check" in records[0]["problem"]
+    assert "isn't one this rule's formulas use" in records[0]["problem"]
+
+
+@pytest.mark.parametrize("numbers, expect", [
+    ([], "isn't backed where it stands"),                                         # typed, never bound
+    ([bound(3, "law_quote", quote=0)], "isn't one of this template's law quotes"),   # quote 0 is a chart note
+    ([bound(3, "slot_footnote", slot="x", footnote="16")], "isn't on slot 'x'"),     # not that slot's note
+])
+def test_every_typed_number_is_bound_to_one_checked_evidence_item(inputs, numbers, expect):
+    notes = [chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")]
+    bad = template("lot", "lot_area >= 3 * {x}", [DECOY],
+                   [({"lot_area": "3 * {x}"}, "pass"), ({"lot_area": "3 * {x} - 1"}, "fail")],
+                   quotes=notes, numbers=numbers)
+    answer = {"templates": [bad], "no_rule_reason": ""}
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid="chart-p3-maximum_building_height")
+    assert result["rules"] == {} and expect in records[0]["problem"], records[0]["problem"]
+
+
+def test_a_bound_item_must_hold_the_value(inputs):
+    sentence = "Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+    piece = next(p for p in inputs.law["pieces"] if sentence[:40] in drafter.piece_text(inputs.law["rows"], inputs.law["pieces"][p]))
+    bad = template("yards_up", "front_yard >= 7", [], [({"front_yard": "7"}, "pass"), ({"front_yard": "6"}, "fail")],
+                   quotes=[{"document": "law", "page": 0, "piece": piece, "text": sentence}],
+                   numbers=[bound(7, "law_quote", quote=0)])
+    answer = {"templates": [bad], "no_rule_reason": ""}
+    u = unit(inputs, piece) if any(x["id"] == piece for x in inputs.units()) else None
+    if u is None:
+        pytest.skip(f"{piece} isn't a drafted unit")
+    result, records = run(inputs, FakeClient(answer, answer, answer), uid=piece)
+    assert result["rules"] == {} and "7 isn't written in it" in records[0]["problem"]
 
 
 def test_the_drafters_line_numbers_are_the_labelers(inputs):

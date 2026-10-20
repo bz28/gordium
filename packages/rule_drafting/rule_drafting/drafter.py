@@ -24,15 +24,14 @@ from pathlib import Path
 import yaml
 
 from document_extraction.sections import piece_text
-from rule_format import formula
 from rule_format.rulebook import (MEASURES_FILE, REPO, VOCABULARY_FILE, Context, _source_problems, district_name,
-                                  locate, source_numbers, validate)
+                                  locate, outcome, source_numbers, validate)
 from section_labeling.budget import worst_case
 from section_labeling.labeler import cost, find_quote, sha
 
 from .chart_values import section_refs
 from .chart_values import footnotes
-from .templates import CHART_FILE, SLOT, fill_template, template_problems
+from .templates import CHART_FILE, fill_template, formula_slots, number_places, template_problems
 
 HERE = Path(__file__).parent
 GUIDE_FILE = REPO / "regulations/document_extraction_guide/drafting_rules.md"
@@ -65,6 +64,13 @@ it has slots) or one rule for every district (when it has none).
   formula itself from quoted inputs (0.02 * 1000), never as a result (20). A number you type must be
   written in a law sentence you quote, in a footnote of one of your slots, or in a slot's row label; a
   number from a chart cell is always a slot, never typed. A percent is typed as its fraction (2% is 0.02).
+- numbers: one entry for every number you type in applies_when, check or review_when (not slots, not 0),
+  naming where it is written: {value, from: "law_quote", quote: <index in quotes>, slot: "", footnote: ""},
+  or {value, from: "slot_footnote", quote: -1, slot: <slot name>, footnote: <note number>}, or
+  {value, from: "slot_row_label", quote: -1, slot: <slot name>, footnote: ""}. A slot's footnote or row
+  label backs a number only where the number stands with that slot: in the same arithmetic or min/max, or in
+  the condition that picks the slot's value. Each place a number is typed is checked on its own.
+- Every slot must decide something: changing its value must change some worked example's outcome.
 - Footnotes: a chart cell's footnote marker ([fn16]) points to a note printed under that page's table
   (listed below). Every footnote on a slot's cell, its row label or its section heading has to be quoted,
   and applied in the rule.
@@ -90,7 +96,7 @@ def output_schema(topics: list[str]) -> dict:
                            "percent": {"type": "boolean"}, "footnotes": {"type": "array", "items": text}}}
     template = {"type": "object", "additionalProperties": False,
                 "required": ["id_suffix", "title", "topic", "kind", "applies_when", "check", "slots", "review_when",
-                             "quotes", "examples", "open_questions", "new_measures"],
+                             "quotes", "numbers", "examples", "open_questions", "new_measures"],
                 "properties": {
                     "id_suffix": text, "title": text, "topic": {"type": "string", "enum": topics},
                     "kind": {"type": "string", "enum": ["rule", "flag"]}, "applies_when": text, "check": text,
@@ -102,6 +108,12 @@ def output_schema(topics: list[str]) -> dict:
                         "type": "object", "additionalProperties": False, "required": ["document", "page", "piece", "text"],
                         "properties": {"document": {"type": "string", "enum": ["chart", "law"]}, "page": {"type": "integer"},
                                        "piece": text, "text": text}}},
+                    "numbers": {"type": "array", "items": {
+                        "type": "object", "additionalProperties": False,
+                        "required": ["value", "from", "quote", "slot", "footnote"],
+                        "properties": {"value": {"type": "number"},
+                                       "from": {"type": "string", "enum": ["law_quote", "slot_footnote", "slot_row_label"]},
+                                       "quote": {"type": "integer"}, "slot": text, "footnote": text}}},
                     "examples": {"type": "array", "items": {
                         "type": "object", "additionalProperties": False, "required": ["given", "expect"],
                         "properties": {"given": {"type": "array", "items": {
@@ -280,19 +292,71 @@ def slot_notes(template: dict) -> set[tuple[int, str]]:
             for n in set(slot["footnotes"]) | footnotes(slot["row"]) | footnotes(slot["section"])}
 
 
-def _typed_number_problems(template: dict, sources: list[dict], notes: dict[int, dict]) -> list[str]:
-    """A number the drafter types must be written in the template's own evidence: a quoted sentence of the law,
-    a footnote of one of its slots, or a slot's row label ("First three bed or sleeping rooms"). A chart footnote
-    of some other cell proves nothing about this rule, chart cell values reach a rule only through slots, a
-    number that only labels or points ("(3)", "§ 325-20D(1)") doesn't count, and a percent counts only as the
-    fraction it is (25% is 0.25)."""
-    texts = [s["quote"] for s in sources if s.get("file") != CHART_FILE and "quote" in s]
-    texts += [notes[page][n]["text"] for page, n in slot_notes(template) if n in notes.get(page, {})]
-    texts += [slot["row"] for slot in template["slots"]]
-    backed = set().union(*(source_numbers(x, percent_as_number=False) for x in texts))
-    return [f"number {n:g} is typed but isn't written in a quoted law sentence, a footnote of one of its slots or "
-            "a slot's row label; a chart number must be a slot" for n in dict.fromkeys(_typed_numbers(template))
-            if not any(abs(n - b) < 1e-9 for b in backed)]
+def _binding_problems(template: dict, notes: dict[int, dict]) -> list[str]:
+    """Every number the drafter types is bound, in `numbers`, to ONE evidence item it names, and code checks
+    that exact item holds that value:
+    - law_quote: the quote at that index is a sentence of the law (a chart quote is a footnote, and backs a
+      number only as its slot's footnote);
+    - slot_footnote: a footnote on that slot's own cell, row or section;
+    - slot_row_label: that slot's row label ("First three bed or sleeping rooms").
+    Every place a number is typed must be backed where it stands: by a law quote binding with that value, or
+    by a slot binding with that value whose slot the number stands with there (number_places). One binding
+    never backs the same value somewhere else. A number that only labels or points ("(3)", "§ 325-20D(1)")
+    doesn't count; a percent counts only as its fraction (25% is 0.25)."""
+    slots = {s["name"]: s for s in template["slots"]}
+    live = formula_slots(template)
+    p, valid = [], []
+    for i, b in enumerate(template.get("numbers", [])):
+        v, where = b["value"], f"numbers[{i}] ({b['value']:g} from {b['from']})"
+        if b["from"] == "law_quote":
+            q = template["quotes"][b["quote"]] if 0 <= b["quote"] < len(template["quotes"]) else None
+            if q is None or q["document"] != "law":
+                p.append(f"{where}: quote {b['quote']} isn't one of this template's law quotes")
+                continue
+            text = q["text"]
+        else:
+            slot = slots.get(b["slot"])
+            if slot is None or b["slot"] not in live:
+                p.append(f"{where}: slot {b['slot']!r} isn't one this rule's formulas use")
+                continue
+            if b["from"] == "slot_row_label":
+                text = slot["row"]
+            else:
+                own = set(slot["footnotes"]) | footnotes(slot["row"]) | footnotes(slot["section"])
+                note = notes.get(slot["page"], {}).get(b["footnote"])
+                if b["footnote"] not in own or note is None:
+                    p.append(f"{where}: footnote {b['footnote']!r} isn't on slot {b['slot']!r}'s cell, row or section")
+                    continue
+                text = note["text"]
+        if not v_close(v, source_numbers(text, percent_as_number=False)):
+            p.append(f"{where}: {v:g} isn't written in it: {text!r}")
+            continue
+        valid.append(b)
+    for text, n, near in number_places(template):
+        if not any(abs(b["value"] - n) < 1e-9 and (b["from"] == "law_quote" or b["slot"] in near) for b in valid):
+            p.append(f"number {n:g} in {text!r} isn't backed where it stands: bind it to a law quote, or to the footnote "
+                     "or row label of a slot it stands with (the same arithmetic, or the condition that picks the "
+                     "slot's value); a chart number must be a slot")
+    return p
+
+
+def v_close(v: float, values) -> bool:
+    return any(abs(v - x) < 1e-9 for x in values)
+
+
+def _idle_slots(template: dict, filled: list[tuple[str, dict]], cells: dict, sources: list[dict], drafted_by: str,
+                allowed: dict) -> list[str]:
+    """Slots whose value decides nothing: changed in the formulas (not the examples), no worked example in any
+    district comes out differently. `0 * {x}`, `{x} == {x}` or a condition no example reaches all land here,
+    whatever their shape."""
+    idle = []
+    for name in sorted(formula_slots(template)):
+        if not any(outcome(changed, ex["given"], allowed) != outcome(rule, ex["given"], allowed)
+                   for column, rule in filled
+                   for changed in [fill_template(template, column, cells, sources, drafted_by, nudge=name)[0]]
+                   if changed is not None for ex in rule["examples"]):
+            idle.append(f"slot {{{name}}} decides nothing: changing it changes no worked example's outcome")
+    return idle
 
 
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
@@ -315,7 +379,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 proposed[m["name"]] = {"unit": m["unit"], "meaning": m["meaning"]}
         sources, quote_problems = resolve_quotes(t, unit, context, law, ctx, notes)
         p += quote_problems + (_footnote_problems(t, sources, notes) if not quote_problems else [])
-        p += _typed_number_problems(t, sources, notes)
+        p += _binding_problems(t, notes)
         if p:
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
             continue
@@ -327,11 +391,14 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 if why is None and (problems := validate({"district": rule["id"].split(".")[0], "rules": [rule]}, ctx)):
                     why = "; ".join(problems[:3])
                 if why is None:
-                    good.append(rule)
+                    good.append((column, rule))
                 else:
                     gaps.append({"rule": f"{district_name(column) if column else 'general'}.{t['id_suffix']}", "why": why})
+            if good and (idle := _idle_slots(t, good, cells, sources, drafted_by, ctx.allowed())):
+                gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in idle], []
         finally:
             ctx.proposed = saved
+        good = [rule for _, rule in good]
         if good:                                # the template works: districts that don't fit go to a person
             out["templates"].append(t)
             out["proposed"] |= proposed
@@ -343,19 +410,6 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                                     "why": "; ".join(f"{g['rule']}: {g['why']}" for g in gaps[:3])})
     out["problems"] = [f"{r['rule']}: {r['why']}" for r in out["rejected"]]
     return out
-
-
-def _typed_numbers(template: dict) -> list[float]:
-    """The numbers written in a template's formulas (not its slots, which code fills; not 0)."""
-    texts = [template.get("check", ""), template.get("applies_when", "")] + [r["when"] for r in template["review_when"]]
-    found = []
-    for t in texts:
-        if t.strip():
-            try:
-                found += [n for n in formula.numbers(SLOT.sub("slot_value", t)) if n != 0]
-            except formula.FormulaError:
-                pass                                         # reported when the rule is checked
-    return found
 
 
 def requirement_gaps(unit: dict, result: dict) -> list[dict]:

@@ -64,12 +64,42 @@ def covering(hand_rule, drafted, ctx):
     return [r for r in drafted if lines(r) & wanted]
 
 
-def combined(rules, values, ctx):
-    results = {outcome(r, values, ctx.allowed()) for r in rules}
+def rule_formulas(rule):
+    return [rule[k] for k in ("applies_when", "check") if k in rule] + [r["when"] for r in rule.get("review_when", [])]
+
+
+def with_new_measures(rule, given, proposed):
+    """The hand example's values plus, for each new measure the drafted rule declared (proposed_measures.yaml)
+    that the hand example doesn't give, the value the drafted rule's own passing example gives it: the
+    ordinary case ("no second primary building on the lot"), so a missing input never stands in for a real
+    disagreement. Returns (values, what was supplied, what no example supplies)."""
+    from rule_format import formula
+    needed = sorted({n for t in rule_formulas(rule) for n in formula.names(t)} & set(proposed) - set(given))
+    passing = [ex["given"] for ex in rule.get("examples", []) if ex["expect"] == "pass"]
+    supplied, missing = {}, []
+    for name in needed:
+        source = next((g for g in passing if name in g), None)
+        if source is None:
+            missing.append(name)
+        else:
+            supplied[name] = source[name]
+    return given | supplied, supplied, missing
+
+
+def combined(rules, values, ctx, proposed=frozenset()):
+    """(outcome, notes): every covering rule judged on the example with its declared new measures supplied."""
+    results, notes = set(), []
+    for r in rules:
+        given, supplied, missing = with_new_measures(r, values, proposed)
+        if missing:
+            notes.append(f"{r['id']} needs {missing}, which neither the example nor its own passing example gives")
+        elif supplied:
+            notes.append(f"{r['id']} given {supplied} from its own passing example")
+        results.add(outcome(r, given, ctx.allowed()))
     for result in ("fail", "needs_review", "pass"):
         if result in results:
-            return result
-    return "not_applicable"
+            return result, notes
+    return "not_applicable", notes
 
 
 def test_drafted_r1b_agrees_with_the_hand_drafted_r1b(hand, drafted_r1b, ctx):
@@ -80,12 +110,27 @@ def test_drafted_r1b_agrees_with_the_hand_drafted_r1b(hand, drafted_r1b, ctx):
             continue                                   # not drafted yet; test_every_hand_rule_is_covered checks
         for ex in h["examples"]:
             compared += 1
-            got = combined(rules, ex["given"], ctx)
+            got, notes = combined(rules, ex["given"], ctx, set(ctx.proposed))
             if got != ex["expect"]:
                 disagreements.append(f"{h['id']} {ex['given']}: hand {ex['expect']}, drafted {got} "
-                                     f"({', '.join(r['id'] for r in rules)})")
+                                     f"({', '.join(r['id'] for r in rules)})" + (f" [{'; '.join(notes)}]" if notes else ""))
     assert compared, "no drafted rule covers any hand rule"
     assert disagreements == []
+
+
+def test_a_declared_new_measure_is_supplied_from_the_drafts_own_passing_example(ctx):
+    """Runs without drafts: a drafted rule that needs a measure the hand example doesn't give is judged with the
+    value its own passing example gives it; one no example gives is named, never silently 'needs_review'."""
+    rule = {"id": "R-1b.one_building", "kind": "rule", "check": "lot_area >= 6000 and not second_building",
+            "examples": [{"given": {"lot_area": 6000, "second_building": False}, "expect": "pass"},
+                         {"given": {"lot_area": 6000, "second_building": True}, "expect": "fail"}]}
+    allowed = ctx.allowed() | {"second_building": "boolean"}
+    assert outcome(rule, {"lot_area": 6000}, allowed) == "needs_review"          # what hid disagreements
+    given, supplied, missing = with_new_measures(rule, {"lot_area": 5000}, {"second_building"})
+    assert supplied == {"second_building": False} and missing == []
+    assert outcome(rule, given, allowed) == "fail"                               # the real answer shows
+    bare = rule | {"examples": [e for e in rule["examples"] if e["expect"] == "fail"]}
+    assert with_new_measures(bare, {"lot_area": 5000}, {"second_building"})[2] == ["second_building"]
 
 
 def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted_r1b, ctx):
@@ -148,8 +193,9 @@ def test_drafted_r1b_matches_the_architects_spreadsheet(hand, drafted_r1b, ctx):
             assert not complete, f"{label}: no drafted rule covers it"
             continue
         compared += 1
-        if (got := combined(rules, values, ctx)) != theirs.lower():
-            wrong.append(f"{label}: they say {theirs}, drafted rules say {got}")
+        got, notes = combined(rules, values, ctx, set(ctx.proposed))
+        if got != theirs.lower():
+            wrong.append(f"{label}: they say {theirs}, drafted rules say {got}" + (f" [{'; '.join(notes)}]" if notes else ""))
     assert compared, "no spreadsheet row is covered by a drafted rule yet"
     assert wrong == []
 
