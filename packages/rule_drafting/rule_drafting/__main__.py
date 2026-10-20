@@ -205,30 +205,27 @@ def estimate(i: Inputs, todo: list[dict], model: str, client=None) -> dict:
     characters per token; output at the measured average of recorded calls, else max_tokens."""
     ai = [u for u in todo if not u.get("code")]
     system = i.system()
-    tokens, exact = 0, client is not None
-    for u in ai:
-        message = drafter.unit_message(u, drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions))
-        if client is not None:
-            tokens += client.messages.count_tokens(model=model, messages=[{"role": "user", "content": message}]).input_tokens
-        else:
-            tokens += len(message) // 4
-    system_tokens = (client.messages.count_tokens(model=model, system=system, messages=[{"role": "user", "content": "x"}]).input_tokens
-                     if client is not None and ai else len(system) // 4)
-    p = drafter.PRICES[model]
+    messages = [drafter.unit_message(u, drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions)) for u in ai]
+    if client is not None and ai:           # exact, counted the way a call is sent (instructions and answer schema too)
+        fmt = {"effort": drafter.SETTINGS["effort"], "format": drafter.output_schema(sorted(i.ctx.topics))}
+        count = lambda text: client.messages.count_tokens(model=model, system=system, output_config=fmt,
+                                                          messages=[{"role": "user", "content": text}]).input_tokens
+        system_tokens = count(".")
+        tokens = sum(count(m) - system_tokens for m in messages)
+    else:
+        system_tokens, tokens = len(system) // 4, sum(len(m) // 4 for m in messages)
     out_each = _measured_output(i, model) or drafter.SETTINGS["max_tokens"]
-    usage = {"input_tokens": tokens, "cache_write": system_tokens if ai else 0,
-             "cache_read": system_tokens * max(len(ai) - 1, 0), "output_tokens": int(out_each * len(ai))}
-    dollars = (usage["input_tokens"] * p["input"] + usage["cache_write"] * p["cache_write"]
-               + usage["cache_read"] * p["cache_read"] + usage["output_tokens"] * p["output"]) / 1e6
-    return {"units": len(todo), "ai_calls": len(ai), "exact_input": exact, "usage": usage,
-            "measured_output": _measured_output(i, model) is not None, "cost_usd": dollars}
+    usage = {"input_tokens": tokens, "cache_creation_input_tokens": system_tokens if ai else 0,
+             "cache_read_input_tokens": system_tokens * max(len(ai) - 1, 0), "output_tokens": int(out_each * len(ai))}
+    return {"units": len(todo), "ai_calls": len(ai), "exact_input": client is not None, "usage": usage,
+            "measured_output": _measured_output(i, model) is not None, "cost_usd": drafter.cost(usage, model)}
 
 
 def print_estimate(e: dict, model: str) -> None:
     u = e["usage"]
     print(f"  model {model}: {e['units']} units, {e['ai_calls']} AI calls (retries not included)")
     print(f"  input   {u['input_tokens']:,} tokens ({'exact, counted by the API' if e['exact_input'] else 'ROUGH: ~4 characters per token'})")
-    print(f"  cached  {u['cache_write']:,} written once + {u['cache_read']:,} read (the fixed instructions)")
+    print(f"  cached  {u['cache_creation_input_tokens']:,} written once + {u['cache_read_input_tokens']:,} read (the fixed instructions)")
     print(f"  output  {u['output_tokens']:,} tokens ({'measured average' if e['measured_output'] else 'UPPER BOUND: max_tokens per call'})")
     print(f"  cost    ${e['cost_usd']:.2f} (prices from section_labeling/prices.yaml; confirm before a large run)")
 

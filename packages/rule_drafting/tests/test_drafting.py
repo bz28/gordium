@@ -36,7 +36,8 @@ class FakeClient:
         return SimpleNamespace(content=[SimpleNamespace(type="text", text=text)], stop_reason=self.stop,
                                usage=SimpleNamespace(**USAGE), _request_id="req_test")
 
-    def count_tokens(self, model, messages, system=""):
+    def count_tokens(self, model, messages, system="", output_config=None):
+        self.counted = getattr(self, "counted", []) + [{"system": system, "output_config": output_config}]
         return SimpleNamespace(input_tokens=(len(system) + sum(len(m["content"]) for m in messages)) // 4)
 
 
@@ -576,11 +577,22 @@ def test_a_bound_item_must_hold_the_value(inputs):
 
 
 def test_the_drafters_line_numbers_are_the_labelers(inputs):
-    """Both steps must call a line by the same number: the drafter's rendering equals the labeler's, every piece."""
-    from section_labeling.labeler import piece_message
+    """Both steps must call a line by the same number: one numbering function, and every piece's lines in the
+    drafter's message are exactly the labeler's."""
+    from section_labeling import labeler
+    assert drafter.numbered is labeler.numbered
     for u in (u for u in inputs.units() if u.get("piece")):
-        labeler_lines = piece_message(inputs.law["pieces"][u["piece"]], inputs.law["rows"]).split("\n\n", 1)[1]
-        assert drafter.numbered_text(u["lines"]) == labeler_lines, u["id"]
+        labeler_lines = labeler.piece_message(inputs.law["pieces"][u["piece"]], inputs.law["rows"]).split("\n\n", 1)[1]
+        assert labeler_lines in drafter.unit_message(u, {"notes": [], "pieces": [], "definitions": []}), u["id"]
+
+
+def test_the_estimate_uses_the_labelers_prices_and_cost_and_counts_like_a_real_call(inputs):
+    from section_labeling import labeler
+    assert drafter.PRICES is labeler.PRICES
+    client = FakeClient()
+    e = cli.estimate(inputs, [unit(inputs, "chart-p3-yard_dimensions")], drafter.SETTINGS["model"], client)
+    assert e["cost_usd"] == labeler.cost(e["usage"], drafter.SETTINGS["model"])
+    assert client.counted and all(c["system"] and c["output_config"]["format"] for c in client.counted)
 
 
 @pytest.mark.parametrize("footnote, section, why", [

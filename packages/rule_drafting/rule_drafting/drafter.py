@@ -27,7 +27,7 @@ from document_extraction.sections import piece_text
 from rule_format.rulebook import (MEASURES_FILE, REPO, VOCABULARY_FILE, Context, _source_problems, district_name,
                                   locate, outcome, source_numbers, validate)
 from section_labeling.budget import worst_case
-from section_labeling.labeler import cost, find_quote, sha
+from section_labeling.labeler import PRICES, cost, find_quote, numbered, sha
 
 from .chart_values import FOOTNOTE, NOT_APPLICABLE, footnotes, section_refs
 from .templates import (CHART_FILE, fill_template, formula_slots, number_places, template_problems,
@@ -36,7 +36,6 @@ from .templates import (CHART_FILE, fill_template, formula_slots, number_places,
 HERE = Path(__file__).parent
 GUIDE_FILE = REPO / "regulations/document_extraction_guide/drafting_rules.md"
 SETTINGS = yaml.safe_load((HERE / "settings.yaml").read_text())
-PRICES = yaml.safe_load((REPO / "packages/section_labeling/section_labeling/prices.yaml").read_text())
 UNITS = ("ft", "sf", "count", "text", "yes_no")
 OUTCOMES = ["pass", "fail", "needs_review", "not_applicable"]
 
@@ -210,18 +209,6 @@ def _sentences(text: str) -> str:
     return " ".join(text.split())
 
 
-def numbered_text(lines: list[tuple[int, int, str]]) -> str:
-    """A law piece's whole text, every line numbered L1, L2, ..., with a '--- page N ---' line at each page break
-    (the labeler's numbering, so a line is called the same in both steps)."""
-    out, page = [], None
-    for i, (p, _, text) in enumerate(lines, 1):
-        if page is not None and p != page:
-            out.append(f"--- page {p} ---")
-        page = p
-        out.append(f"L{i}: {text}")
-    return "\n".join(out)
-
-
 def unit_message(unit: dict, context: dict) -> str:
     """The unit's whole text (a law piece's every line, numbered) plus what it points to: the lines its label
     cites (hints only), footnotes, sections of the law, definitions."""
@@ -229,7 +216,7 @@ def unit_message(unit: dict, context: dict) -> str:
     if unit.get("lines"):
         parts = [unit["intro"] + " Its whole text follows, every line numbered L1, L2, ... (the numbers are not part "
                  "of the city's words: never put them in a quote). A '--- page N ---' line marks a page break; a quote "
-                 "can't run across one. Draft every requirement in the whole text.", numbered_text(unit["lines"])]
+                 "can't run across one. Draft every requirement in the whole text.", numbered(unit["lines"])]
     else:
         parts = [unit["intro"], unit["text"]]
     if unit.get("requirements"):
