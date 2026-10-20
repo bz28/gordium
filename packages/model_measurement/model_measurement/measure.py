@@ -240,6 +240,24 @@ def _samples(shape, n: int = 7) -> list:
     return [p for p in grid if shape.contains(p)] + [shape.representative_point()]
 
 
+def _planes(faces: list[dict]) -> list[list[dict]]:
+    """The faces grouped by the plane they lie in, so a roof drawn as many triangles (a mesh) is one roof plane."""
+    groups = {}
+    for f in faces:
+        pts = f["points"]
+        nx = ny = nz = 0.0
+        for p, q in zip(pts, pts[1:] + pts[:1]):
+            nx += (p[1] - q[1]) * (p[2] + q[2])
+            ny += (p[2] - q[2]) * (p[0] + q[0])
+            nz += (p[0] - q[0]) * (p[1] + q[1])
+        n = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
+        sign = -1.0 if nz < 0 else 1.0
+        nx, ny, nz = sign * nx / n, sign * ny / n, sign * nz / n
+        d = nx * pts[0][0] + ny * pts[0][1] + nz * pts[0][2]
+        groups.setdefault((round(nx, 4) + 0.0, round(ny, 4) + 0.0, round(nz, 4) + 0.0, round(d, 3) + 0.0), []).append(f)
+    return list(groups.values())
+
+
 def _open_to_the_sky(faces: list[dict]) -> list[dict]:
     """The faces of a solid that aren't wholly covered by the solid itself: a face is open if at some point of it
     (holes left out) no other face lies above. Undersides (soffits, the floor of an upper storey that sticks out)
@@ -274,8 +292,10 @@ def _height(building: dict, grade: float) -> dict:
     if not roof:
         return _missing("building_height", "the roof's shape can't be read (no faces open to the sky)")
     how = "from the ground level (grade plane) to the top of the roof"
-    main_roof = max(roof, key=lambda f: (_plan(f).area, max(p[2] for p in f["points"])))
-    roof_top = max(p[2] for p in main_roof["points"])
+    # the main roof: the largest roof plane seen from above (its faces together, so a meshed roof counts whole)
+    main_roof = max(_planes(roof), key=lambda g: (ops.unary_union([_plan(f) for f in g]).area,
+                                                  max(p[2] for f in g for p in f["points"])))
+    roof_top = max(p[2] for f in main_roof for p in f["points"])
     if roof_top >= top - TOL:
         readings, question = _roof_readings(roof, top, grade)
         return _decide("building_height", readings, how, [building["id"]], question)
@@ -293,11 +313,12 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
     highest section is the faces that reach the top: all level (or within a drainage slope of level), a flat
     roof to its highest level; all sloped, a pitched roof (midway between that section's eave and the ridge, or
     the ridge); both, a mansard (to its highest level) or a pitched or hip roof with a deck or ridge strip."""
-    highest = [f for f in roof if any(abs(p[2] - top) <= TOL for p in f["points"])]
-    sloped = [f for f in highest if _normal_z(f["points"]) < FLAT]
+    # by plane, so a meshed roof is read like one drawn with whole faces
+    highest = [g for g in _planes(roof) if any(abs(p[2] - top) <= TOL for f in g for p in f["points"])]
+    sloped = [g for g in highest if _normal_z(g[0]["points"]) < FLAT]
     if not sloped:
         return [("a flat roof, to its highest level", top - grade, {})], ""
-    eave = min(p[2] for f in sloped for p in f["points"])
+    eave = min(p[2] for g in sloped for f in g for p in f["points"])
     readings = [("pitched: midway between eave and ridge", (eave + top) / 2 - grade, {}),
                 ("pitched: to the ridge", top - grade, {})]
     if len(sloped) < len(highest):            # a level part at the top too

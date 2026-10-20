@@ -527,3 +527,39 @@ def test_a_meshed_building_is_measured_quickly():
     m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)
     assert m["building_height"]["value"] == 30.0
     assert time.perf_counter() - start < 10
+
+
+def meshed_box_top(n, z, x0=10, y0=25, x1=35, y1=65):
+    faces = []
+    for i in range(n):
+        for j in range(n):
+            a, b = x0 + i * (x1 - x0) / n, y0 + j * (y1 - y0) / n
+            c, d = x0 + (i + 1) * (x1 - x0) / n, y0 + (j + 1) * (y1 - y0) / n
+            faces += [{"points": [[a, b, z], [c, b, z], [c, d, z]]}, {"points": [[a, b, z], [c, d, z], [a, d, z]]}]
+    return faces
+
+
+def test_a_meshed_roof_with_a_chimney_still_asks_about_the_chimney():
+    walls = box(10, 25, 35, 65, 0, 30)["faces"]
+    faces = [f for f in walls if not all(p[2] == 30 for p in f["points"])] + meshed_box_top(30, 30)
+    chimney = box(20, 40, 23, 43, 30, 35, id="c")
+    faces += [f for f in chimney["faces"] if not all(p[2] == 30 for p in f["points"])]
+    m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)["building_height"]
+    assert m["value"] is None and "rises above the main roof" in m["reason"]
+    assert sorted({r["value"] for r in m["readings"]}) == [30.0, 35.0]
+
+
+def test_a_meshed_gable_is_read_like_a_whole_one():
+    eave, ridge, n = 20, 30, 4
+    walls = box(10, 25, 35, 65, 0, eave)["faces"]
+    faces = [f for f in walls if not all(p[2] == eave for p in f["points"])]
+    for (ya, za), (yb, zb) in (((25, eave), (45, ridge)), ((45, ridge), (65, eave))):
+        for i in range(n):
+            for j in range(n):
+                xa, xb = 10 + i * 25 / n, 10 + (i + 1) * 25 / n
+                y1, y2 = ya + j * (yb - ya) / n, ya + (j + 1) * (yb - ya) / n
+                z1, z2 = za + j * (zb - za) / n, za + (j + 1) * (zb - za) / n
+                faces += [{"points": [[xa, y1, z1], [xb, y1, z1], [xb, y2, z2]]},
+                          {"points": [[xa, y1, z1], [xb, y2, z2], [xa, y2, z2]]}]
+    m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)["building_height"]
+    assert sorted({r["value"] for r in m["readings"]}) == [25.0, 30.0]
