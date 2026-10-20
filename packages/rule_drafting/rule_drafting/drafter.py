@@ -71,8 +71,9 @@ it has slots) or one rule for every district (when it has none).
   {value, from: "slot_row_label", quote: -1, slot: <slot name>, footnote: ""}. A slot's footnote or row
   label backs a number only where the number stands with that slot: in the same arithmetic or min/max, or in
   the condition that picks the slot's value, and only where that slot occurrence decides something. Each place
-  a number is typed is checked on its own. A number backed by a chart note or row label is sent to an
-  architect as an open question (code can't tell what the note's number is about): prefer a law quote.
+  a number is typed is checked on its own. A number backed by a chart note, a row label, or a sentence of
+  another section of the law is sent to an architect as an open question (code can't tell what that number is
+  about); only a sentence of the text being drafted backs a number without one.
 - Every slot must decide something: changing its value must change some worked example's outcome.
 - Footnotes: a chart cell's footnote marker ([fn16]) points to a note printed under that page's table
   (listed below). Every footnote on a slot's cell, its row label or its section heading has to be quoted,
@@ -346,7 +347,7 @@ def _unbacked(n: float, text: str) -> str:
 
 
 def _backing(template: dict, valid: list[dict], filled: list[tuple[str, dict]], cells: dict, sources: list[dict],
-             drafted_by: str, allowed: dict) -> tuple[list[str], list[str]]:
+             drafted_by: str, allowed: dict, own_piece: str | None = None) -> tuple[list[str], list[str]]:
     """Every place a number is typed must be backed where it stands. A law quote binding with that value backs
     it. A slot binding backs it only through an occurrence of that slot the number stands with which itself
     decides something: changed alone, some worked example in some district comes out differently (so
@@ -354,7 +355,9 @@ def _backing(template: dict, valid: list[dict], filled: list[tuple[str, dict]], 
     Code can check that a chart note or row label holds the number, never what the number is about (note 7's
     "1-3 units" and the parking row's "First three" look alike), so every number backed only by a slot's
     footnote or row label becomes an open question for an architect; the rule can't be approved until it's
-    answered. Returns (problems, open questions)."""
+    answered. So does a number backed by a sentence of another section of the law (a chart unit has no section
+    of its own); only a sentence of the paragraph being drafted backs a number without a question.
+    Returns (problems, open questions)."""
     decides = {}
 
     def occurrence_decides(key, k):
@@ -369,7 +372,13 @@ def _backing(template: dict, valid: list[dict], filled: list[tuple[str, dict]], 
     problems, questions = [], []
     for key, text, n, near in number_places(template):
         same = [b for b in valid if abs(b["value"] - n) < 1e-9]
-        if any(b["from"] == "law_quote" for b in same):
+        laws = [b for b in same if b["from"] == "law_quote"]
+        if any(template["quotes"][b["quote"]]["piece"] == own_piece for b in laws if own_piece):
+            continue                            # the sentence of the paragraph being drafted: what the rule is drafted from
+        if laws:                                # another section's sentence: what its number is about is for an architect
+            q = template["quotes"][laws[0]["quote"]]
+            questions.append(f"The {n:g} in {text!r} was taken from §{q['piece']}, which isn't the text being drafted "
+                             f"({q['text']!r}). Code can't tell what that sentence's number is about: does it mean this here?")
             continue
         backer = next((b for b in same for name, k in sorted(near)
                        if name == b["slot"] and occurrence_decides(key, k)), None)
@@ -444,7 +453,8 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
             if good and (idle := _idle_slots(t, good, cells, sources, drafted_by, ctx.allowed())):
                 gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in idle], []
             if good:
-                unbacked, questions = _backing(t, valid, good, cells, sources, drafted_by, ctx.allowed())
+                unbacked, questions = _backing(t, valid, good, cells, sources, drafted_by, ctx.allowed(),
+                                               unit.get("piece"))
                 if unbacked:
                     gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in unbacked], []
                 for _, rule in good:

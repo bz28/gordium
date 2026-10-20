@@ -549,6 +549,36 @@ def test_a_number_picking_a_slots_branch_goes_to_an_architect_never_silently_in(
     assert any("open_questions remain" in p for p in problems)
 
 
+PARAPET = ("The provisions of this chapter shall not apply to prevent the erection above the building height limit of a "
+           "parapet wall or cornice for ornament extending above such height five feet or less.")
+
+
+def test_a_number_from_another_sections_sentence_goes_to_an_architect(inputs):
+    """325-16B's parapet 'five feet or less' must not quietly become 'stories <= 5' in a chart rule
+    (R-3a's own cell says 4 stories): a sentence that isn't the text being drafted earns an open question."""
+    notes = [chart_quote(n["text"]) for k, n in inputs.notes[3].items() if k in ("3", "7")]
+    t = template("probe", "lot_area >= {x} and stories <= 5", [DECOY],
+                 [({"lot_area": "{x}", "stories": "5"}, "pass"), ({"lot_area": "{x} - 1", "stories": "5"}, "fail")],
+                 quotes=notes + [{"document": "law", "page": 0, "piece": "325-16B", "text": PARAPET}],
+                 numbers=[bound(5, "law_quote", quote=2)])
+    result, records = run(inputs, FakeClient({"templates": [t], "no_rule_reason": ""}),
+                          uid="chart-p3-maximum_building_height")
+    rules = [r for rs in result["rules"].values() for r in rs]
+    assert rules and all(any("§325-16B" in q and "does it mean this here?" in q for q in r["open_questions"])
+                         for r in rules)
+
+
+def test_a_number_from_the_paragraph_being_drafted_needs_no_question(inputs):
+    t = template("parapet", "parapet_height <= 5", [],
+                 [({"parapet_height": "5"}, "pass"), ({"parapet_height": "6"}, "fail")],
+                 quotes=[{"document": "law", "page": 0, "piece": "325-16B", "text": PARAPET}],
+                 numbers=[bound(5, "law_quote", quote=0)],
+                 new_measures=[{"name": "parapet_height", "unit": "ft", "meaning": "height of a parapet above the limit"}])
+    result, records = run(inputs, FakeClient({"templates": [t], "no_rule_reason": ""}), uid="325-16B")
+    assert records[0]["problem"] is None
+    assert "open_questions" not in result["rules"]["general"][0]
+
+
 def test_a_rule_with_no_number_from_a_chart_note_carries_no_question(inputs):
     result, records = run(inputs, FakeClient({"templates": [FRONT], "no_rule_reason": ""}))
     assert records[0]["problem"] is None and "open_questions" not in result["rules"]["R-1b"][0]
