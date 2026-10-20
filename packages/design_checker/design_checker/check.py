@@ -185,7 +185,7 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     and a Check tab lists every item, the summary, the draft-rulebook label and the lot and grade sources."""
     from rule_export.workbook import title, write_block
     word = {present.FAILS: ("FAIL", "Outside table limit"), present.REVIEW: ("NEEDS REVIEW", "Needs review"),
-            present.COMPLIES: ("PASS", "Within table limit")}
+            present.COMPLIES: ("PASS", "Within table limit"), present.NOT_CHECKED: ("NOT CHECKED", "Needs input")}
     worst = {}
     for i in view["items"]:
         if i["rule"] and i["status"] in word:
@@ -300,8 +300,8 @@ def _envelope_facts(site: dict, facts: dict) -> dict:
     if facts.get("grade_is") == "existing":
         return {**facts, "ground_is_flat": None}
     if facts.get("grade_points"):
-        from model_measurement.measure import _grade_from_points
-        grade, why = _grade_from_points(site.get("buildings") or [], facts["grade_points"])
+        from model_measurement.measure import grade_plane
+        grade, why = grade_plane(site.get("buildings") or [], facts)
         return {**facts, "ground_is_flat": True, "grade_elevation": grade} if why is None else {**facts, "ground_is_flat": None}
     return facts
 
@@ -355,6 +355,23 @@ def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
             "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
 
 
+def _start_preview(out: dict, measured: dict) -> dict | None:
+    """The start box's preview numbers, in the panel's own words (present.py: a maximum such as coverage is
+    rounded up at the shown precision, so the box and the panel always agree)."""
+    floors = out.get("floors") or []
+    if not floors:
+        return None
+    ring = floors[0]["outline"]
+    sides = [math.dist(ring[i - 1][:2], ring[i][:2]) for i in range(len(ring))]
+    lot = (measured.get("lot_area") or {})
+    lot_area = lot.get("value") or next((r["value"] for r in lot.get("readings") or []), None)
+    area = out.get("area")
+    return {"floors": len(floors), "height": present.feet_inches(out.get("height") or 0, "nearest"),
+            "size": f"{present.feet_inches(max(sides), 'nearest')} × {present.feet_inches(min(sides), 'nearest')}",
+            "area": present._area(area, "up") if area else None,
+            "coverage": present._pct(area / lot_area * 100, "up", 2) if area and lot_area else None}
+
+
 def start(model_path: Path, facts: dict, floor_to_floor: float | None = None) -> dict:
     """The largest legal starting building for the lot in a model (its buildings, if any, left out): stacked
     floor blocks, one per story, from the zone's rules (envelope_builder.start). With no grade set, it is drawn
@@ -367,13 +384,20 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None) ->
     if site.get("problems"):
         return {"floors": [], "notes": list(site["problems"])}
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
+    # spot grades with no building yet: the grade plane is their average (as the envelope draws it); then drawn on it
+    # (the spots themselves aren't at the new building's walls: it's drawn on their plane, and the check that follows
+    # judges the spots as they are)
     drawing = facts
-    no_grade = not facts.get("grade_points") and not (facts.get("ground_is_flat") and facts.get("grade_elevation") is not None)
+    if facts.get("grade_points"):
+        drawing = {k: v for k, v in _envelope_facts(site, facts).items() if k not in ("grade_points", "grade_from")}
+    no_grade = not (drawing.get("ground_is_flat") and drawing.get("grade_elevation") is not None)
     if no_grade:                        # drawn at the lot's level; the check still has no grade
         lot_z = min((p[2] for e in (site.get("lot") or {}).get("edges", []) for p in e["points"] if len(p) > 2),
                     default=0.0)
         drawing = {**facts, "ground_is_flat": True, "grade_elevation": lot_z}
-    out = largest_legal_building(site, drawing, measure(site, drawing), rules, floor_to_floor=floor_to_floor)
+    measured = measure(site, drawing)
+    out = largest_legal_building(site, drawing, measured, rules, floor_to_floor=floor_to_floor)
+    out["preview"] = _start_preview(out, measured)
     if no_grade and out.get("floors"):
         out["notes"].append("drawn standing at the lot's level: building height and stories need review until the "
                             "grade is set")

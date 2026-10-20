@@ -697,3 +697,16 @@ def test_a_gordium_floor_stretched_or_merged_is_no_longer_one_story():
                  floor(10, 25, 35, 65, z0=17, z1=34, id="floor 3", drawn=8.5)]
     m = measure(site(RECT, *stretched), {**FACTS, "stories": None})["stories"]
     assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [2, 3]
+
+
+def test_the_grade_plane_is_the_main_buildings_own_walls_never_a_detached_garages():
+    """§325-3: the ground "on each side of the building". A garage uphill must not lower the house's height."""
+    house = box(10, 25, 35, 65, 0, 41, id="house")
+    garage = box(40, 75, 48, 90, 12, 22, id="garage")
+    at_house = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]]
+    at_garage = [[44, 74, 12], [44, 91, 12], [39, 82, 12], [49, 82, 12]]
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "main_building": "house"}
+    for spots in (at_house + at_garage, at_house):       # the garage's own spots are its ground, left out
+        h = measure(site(RECT, house, garage), {**facts, "grade_points": spots})["building_height"]
+        heights = [h["value"]] if h["value"] is not None else [r["value"] for r in h["readings"]]
+        assert heights and min(heights) >= 41.0 - 1e-6, (spots, h)       # was 35 ft with the garage averaged in

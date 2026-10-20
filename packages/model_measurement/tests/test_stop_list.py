@@ -3,6 +3,7 @@ and has a case here, a small lot or model that gives it. The measuring code give
 table (checked below), so a new stop can't be added without its README line and its case."""
 
 import ast
+import math
 import re
 import sys
 from pathlib import Path
@@ -16,7 +17,7 @@ from model_measurement.stops import STOPS
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))           # the lots and models the other tests build
-from test_measure import FACTS, RECT, box, floor, lot, sloped_roof_box  # noqa: E402
+from test_measure import FACTS, RECT, box, floor, lot, prism, sloped_roof_box  # noqa: E402
 from test_read_3dm import FACTS as FILE_FACTS  # noqa: E402
 from test_read_3dm import box as file_box  # noqa: E402
 from test_read_3dm import model, on, rect, write  # noqa: E402
@@ -179,6 +180,9 @@ CASES = {
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
+    "grade_walls_unclear": _plain(buildings=[prism([(22 + 8 * math.cos(k * math.pi / 32), 45 + 8 * math.sin(k * math.pi / 32))
+                                                    for k in range(64)], 0, 30)],      # a round tower: 0.8 ft sides
+                                  grade_points=[[22, 36, 0]]),
     "sloped_ground": _plain(ground_is_flat=False),
     "no_building": _plain(buildings=[]),
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),

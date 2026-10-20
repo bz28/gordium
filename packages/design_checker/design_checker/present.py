@@ -11,7 +11,6 @@ writes one summary used everywhere (D3).
 
 import ast
 import functools
-import json
 import itertools
 import math
 import re
@@ -20,7 +19,7 @@ from pathlib import Path
 
 from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, load
+from rule_format.rulebook import MEASURE_KINDS, REPO, load, read_jsonl
 
 COMPLIES, FAILS, REVIEW, NOT_CHECKED = "complies", "does_not_comply", "needs_review", "not_checked"
 MARK = {FAILS: "✕", REVIEW: "?", COMPLIES: "✓", NOT_CHECKED: "–"}
@@ -103,7 +102,12 @@ def value_text(value, unit: str, sign: str = "", for_proposed: bool = True) -> s
 
 
 def margin_text(margin: float, unit: str) -> str:
-    """+11'-7", −2'-6", at limit: a margin is never overstated (a positive one rounds down, a shortfall up)."""
+    """+11'-7", −2'-6", at limit: a margin is never overstated (a positive one rounds down, a shortfall up). A
+    shortfall is never "at limit": however small, it shows as at least the smallest step (−0'-0 1/8", −1 sf)."""
+    if margin < 0 and unit in ("ft", "sf", "%"):
+        least = {"ft": EIGHTH, "sf": 1.0, "%": 0.01}[unit]
+        gap = max(-margin, least)
+        return "−" + (feet_inches(gap, "up") if unit == "ft" else _area(gap, "up") if unit == "sf" else _pct(gap, "up", 2))
     if unit == "ft":
         if abs(margin) < EIGHTH / 2:
             return "at limit"
@@ -250,7 +254,7 @@ def _hint(name: str, sign: str, margin: float, unit: str) -> str | None:
     if margin is None or margin >= 0:
         return None
     gap = _gap(margin, unit)                  # rounded up: a fix never falls short
-    if name.endswith("yard"):
+    if name.split(",")[0].endswith("yard"):          # "Side yard, East" too
         return f"To comply: move the building {gap} farther from that lot line."
     if name == "Building height":
         return f"To comply: lower the building {gap}."
@@ -536,13 +540,18 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
 
 
 def _side_name(measure: str, measured: dict) -> str:
-    """Side yard, West or East: which side of the lot the yard was measured on (the lot-line end of its line,
-    west = smaller x in plan). Without a measured line, narrower or wider."""
-    a = (measured.get("side_yard_smaller") or {}).get("points")
-    b = (measured.get("side_yard_larger") or {}).get("points")
-    if a and b:
-        west = "side_yard_smaller" if a[0][0] <= b[0][0] else "side_yard_larger"
-        return "Side yard, " + ("West" if measure == west else "East")
+    """Side yard, East/West/North/South: the compass direction from the building to the lot line the yard was
+    measured to (plan north = +y), so a lot whose street runs north-south gets North and South. Without a
+    measured line, or if both point the same way, narrower or wider."""
+    def facing(pts):
+        if not pts:
+            return None
+        dx, dy = pts[0][0] - pts[-1][0], pts[0][1] - pts[-1][1]      # lot-line end minus building end
+        return ("East" if dx > 0 else "West") if abs(dx) >= abs(dy) else ("North" if dy > 0 else "South")
+    a = facing((measured.get("side_yard_smaller") or {}).get("points"))
+    b = facing((measured.get("side_yard_larger") or {}).get("points"))
+    if a and b and a != b:
+        return "Side yard, " + (a if measure == "side_yard_smaller" else b)
     return "Side yard, " + ("narrower" if measure == "side_yard_smaller" else "wider")
 
 
@@ -552,9 +561,9 @@ def _chart_cells(j: Path) -> tuple:
     value, lines."""
     out = []
     for f in sorted((j / "2_extracted_text").glob("*.cells.jsonl")):
-        lines = f.read_text().splitlines()
-        name = json.loads(lines[0]).get("file") if lines else None
-        out += [dict(json.loads(x), file=name) for x in lines[1:] if '"column"' in x and '"value"' in x]
+        rows = read_jsonl(f)                 # the first row names the file; then a page's columns, then each cell
+        name = rows[0].get("file") if rows else None
+        out += [dict(r, file=name) for r in rows[1:] if "column" in r and "value" in r]
     return tuple(out)
 
 

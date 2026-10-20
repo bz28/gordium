@@ -7,6 +7,7 @@ import json
 import pytest
 
 from design_checker.__main__ import answer, serve
+from design_checker import present
 from design_checker.check import check, short, summary
 from model_measurement.project import load_facts
 from rule_format.rulebook import REPO
@@ -68,6 +69,15 @@ def test_start_gives_the_largest_legal_building_as_stacked_floors(facts):
     assert len(got["floors"]) == 3 and got["height"] == 35
     assert [f["base"] for f in got["floors"]] == sorted(f["base"] for f in got["floors"])
     assert got["floors"][-1]["top"] == 35
+
+
+def test_start_with_spot_grades_stands_the_building_on_their_grade_plane(facts):
+    from design_checker.check import start
+    spots = [[30, 1, 4.0], [30, 80, 6.0], [1, 40, 5.0], [70, 40, 5.0]]          # no building yet: their average, 5
+    got = start(MODEL, {**facts, "lot_surveyed": True, "ground_is_flat": None, "grade_elevation": None,
+                        "grade_from": "spot", "grade_points": spots})
+    assert len(got["floors"]) == 3 and got["floors"][0]["base"] == 5.0 and got["floors"][-1]["top"] == 40.0
+    assert not any("lot's level" in n for n in got["notes"])
 
 
 def test_short_titles():
@@ -359,3 +369,26 @@ def test_viewport_labels_never_cover_each_other():
     for i, (x, y, w, h) in enumerate(boxes):
         for a, b, c, e in boxes[i + 1:]:
             assert not (x < a + c and a < x + w and y < b + e and b < y + h)
+
+
+def test_the_start_preview_and_the_panel_say_the_same_coverage(facts):
+    from design_checker.check import start
+    got = start(MODEL, {**facts, "lot_surveyed": False})
+    assert got["preview"]["coverage"] == "24.95%"      # 1,638.6 / 6,570 = 24.941%: a maximum, rounded up
+    assert got["preview"]["coverage"] == present._pct(got["area"] / 6570 * 100, "up", 2)
+    assert got["preview"]["size"] == "53'-0\" × 30'-11\"" and got["preview"]["height"] == "35'-0\""
+
+
+def test_a_shortfall_is_never_shown_as_at_limit():
+    assert present.margin_text(-0.001, "ft") == "−0'-0 1/8\""
+    assert present.margin_text(-0.2, "sf") == "−1 sf" and present.margin_text(-0.001, "%") == "−0.01%"
+    assert present.margin_text(0.001, "ft") == "at limit"
+
+
+def test_side_yards_are_named_by_compass_direction_of_their_lot_line():
+    north_south = {"side_yard_smaller": {"points": [[5, 60], [5, 50]]}, "side_yard_larger": {"points": [[5, 0], [5, 10]]}}
+    assert present._side_name("side_yard_smaller", north_south) == "Side yard, North"
+    assert present._side_name("side_yard_larger", north_south) == "Side yard, South"
+    east_west = {"side_yard_smaller": {"points": [[0, 40], [10, 40]]}, "side_yard_larger": {"points": [[50, 40], [35, 40]]}}
+    assert present._side_name("side_yard_smaller", east_west) == "Side yard, West"
+    assert present._hint("Side yard, East", "≥", -4.0, "ft") == "To comply: move the building 4'-0\" farther from that lot line."

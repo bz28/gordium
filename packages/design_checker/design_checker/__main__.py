@@ -71,12 +71,12 @@ def main(argv: list[str]) -> int:
     except ValueError as e:
         print(f"✗ {e}")
         return 1
-    s = result["summary"]
-    print({"pass": "✓", "fail": "✗", "review": "?"}[s["state"]], s["text"])
-    for line in s["lines"]:
-        print("   ", line)
-    for row in result["rows"]:
-        print(f"  {row['Error']:13} {row['Requirement']}")
+    v = result["view"]                  # the panel's own summary and rows (D3: one summary everywhere, never a ✓)
+    print("Gordium ·", v["summary"])
+    for i in v["items"]:
+        if i["group"] != "not_covered":
+            print(f"  {i['mark'] or ' '} {i['name']:34} {i['proposed']:>14} {i['required']:>12} {i['margin']:>10}"
+                  + (f"  · {i['reason']}" if i.get("reason") else ""))
     env = result["envelope"]
     print(f"  envelope: yards {env['yards']}, height {env['height']}, top {env['top']}; notes {env['notes']}")
     return 0

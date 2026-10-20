@@ -368,6 +368,7 @@ def draw_screen(o, e):
     dark = ui.viewport_dark()
     old = stale(o)
     taken = []                               # labels drawn this frame: none covers another
+    plan = not e.Viewport.IsPerspectiveProjection   # labels only in plan-like views: in 3D they sit on the massing
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
@@ -376,8 +377,9 @@ def draw_screen(o, e):
             d.Draw2dLine(System.Drawing.PointF(p.X - 5, p.Y + 5), System.Drawing.PointF(p.X + 5, p.Y - 5), color, 2)
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
-        ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken)
-    for point, text in getattr(o, "edge_labels", None) or []:     # each lot edge's length (approx. on a tax map)
+        if plan:
+            ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken)
+    for point, text in (getattr(o, "edge_labels", None) or []) if plan else []:   # each lot edge's length
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken)
     toast = getattr(o, "toast", None)
     active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
@@ -392,8 +394,8 @@ def draw_screen(o, e):
         state, text, lines = "stale", "Checking… (the model changed)", lines[:1]
     color = ui.status_color({"does_not_comply": "does_not_comply", "needs_review": "needs_review"}.get(state, "complies"),
                             dark)
-    mark = {"does_not_comply": "✕", "needs_review": "?"}.get(state, "–")   # the summary never shows ✓ (D3)
-    rows = ["Gordium · " + mark + " " + text] + list(lines)[:3]
+    mark = {"does_not_comply": "✕", "needs_review": "?"}.get(state, "")    # never ✓ (D3), and "–" means not checked
+    rows = ["Gordium · " + (mark + " " if mark else "") + text] + list(lines)[:3]
     width = max(len(r) for r in rows) * 13 * 0.6 + 22
     ui.draw_text_box(d, rows, color, int(e.Viewport.Bounds.Width) - width - 14, 14, dark, 13)
 
@@ -655,14 +657,20 @@ def _not_included(doc, lot):
         return []
     box = lot.Geometry.GetBoundingBox(True)
     out = []
-    every = Rhino.DocObjects.ObjectEnumeratorSettings()
-    every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, False
+    every = Rhino.DocObjects.ObjectEnumeratorSettings()          # hidden and locked too, as for the Building layer:
+    every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # a hidden shed still counts
+    terrain = str(_ui_state(doc).get("terrain_id") or "")
     for o in doc.Objects.GetObjectList(every):
         layer = doc.Layers[o.Attributes.LayerIndex].FullPath
         g = o.Geometry
-        closed = (isinstance(g, (rg.Brep, rg.Extrusion)) and g.IsSolid) or (isinstance(g, rg.Mesh) and g.IsClosed)
-        if not closed or logic.on_layer(layer, LAYERS["building"]) or logic.on_layer(layer, "Gordium") \
-                or logic.on_layer(layer, LAYERS["lot"]):
+        # anything that could be a building: a solid, a closed mesh, a SubD, a polysurface (open ones too: a garage
+        # missing a face is still a garage), a block. Not the lot, the terrain, Gordium's own drawing, the Building
+        # layer (measured), curves, points and single flat surfaces.
+        could_be = (isinstance(g, (rg.Extrusion, rg.SubD, rg.InstanceReferenceGeometry)) or
+                    (isinstance(g, rg.Brep) and (g.IsSolid or g.Faces.Count > 1)) or
+                    (isinstance(g, rg.Mesh) and g.IsClosed))
+        if not could_be or str(o.Id) == terrain or logic.on_layer(layer, LAYERS["building"]) \
+                or logic.on_layer(layer, "Gordium"):
             continue
         c = g.GetBoundingBox(True).Center
         if box.Min.X <= c.X <= box.Max.X and box.Min.Y <= c.Y <= box.Max.Y:
@@ -1015,21 +1023,6 @@ def edit_facts():
     run_check(doc, report=False)
 
 
-def _edit_counts_and_save(doc, saved, options):
-    facts = change_facts(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options)
-    if facts is None:                   # Esc: nothing changes
-        return
-    try:
-        answers = {key: _count(prompt) for key, prompt in (("sleeping_rooms", "Bedrooms"),
-                                                           ("parking_spaces", "Off-street parking spaces"),
-                                                           ("stories", "Stories"))}
-    except Cancelled:
-        return
-    save_facts(doc, logic.update_counts(facts, answers))
-
-
-# ---- checking --------------------------------------------------------------------------------------------
-
 def report_path(doc):
     folder = os.path.dirname(doc.Path) if doc.Path else os.path.expanduser("~/Documents")
     name = os.path.splitext(os.path.basename(doc.Path))[0] if doc.Path else "untitled"
@@ -1344,7 +1337,7 @@ def gordium_check():
     result = run_check(doc, report=True)
     live(True)                                      # live mode is on by default
     if result is not None:
-        Rhino.RhinoApp.WriteLine("Gordium: " + result["summary"]["text"])
+        Rhino.RhinoApp.WriteLine("Gordium: " + result["view"]["summary"])     # the panel's own words (D3)
     return result
 
 
@@ -1404,19 +1397,15 @@ def add_floors(doc, start):
 
 def _preview(start, facts):
     """The start box's preview line (A11): "Starting massing (on tax-map lot): 1 group of 3 floor solids · 35'-0" ·
-    53'-0" × 30'-11" · 1,639 sf, 24.94% of 25%"."""
-    floors = start.get("floors") or []
-    if not floors:
+    53'-0" × 30'-11" · 1,639 sf, 24.95% coverage". Every number is the checker's own text (present.py), so it
+    reads the same as the panel (coverage, a maximum, rounded up)."""
+    p = start.get("preview")
+    if not p:
         return "No starting massing on this lot shape: draw one and Gordium will check it"
-    ring = floors[0]["outline"]
-    sides = [((ring[i][0] - ring[i - 1][0]) ** 2 + (ring[i][1] - ring[i - 1][1]) ** 2) ** 0.5 for i in range(len(ring))]
     where = "on tax-map lot" if not facts.get("lot_surveyed") else "on the surveyed lot"
-    text = ("Starting massing (" + where + "): 1 group of " + str(len(floors)) + " floor solids · " +
-            _ft_text(start.get("height") or 0) + " · " + _ft_text(max(sides)) + " × " + _ft_text(min(sides)) +
-            " · " + format(start.get("area") or 0, ",.0f") + " sf")
-    if start.get("coverage_allowed"):
-        text += " of " + format(start["coverage_allowed"], ",.0f") + " sf coverage allowed"
-    return text
+    return ("Starting massing (" + where + "): 1 group of " + str(p["floors"]) + " floor solids · " + p["height"] +
+            " · " + p["size"] + (" · " + p["area"] if p.get("area") else "") +
+            (", " + p["coverage"] + " coverage" if p.get("coverage") else ""))
 
 
 def gordium_start():

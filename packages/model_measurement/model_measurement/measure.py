@@ -516,12 +516,26 @@ TAX_MAP_TOLERANCE = 2.0   # ft: a lot line from the tax map is taken as right to
 SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall
 
 
-def _grade_from_points(buildings: list[dict], points: list) -> tuple:
+def grade_plane(buildings: list[dict], facts: dict) -> tuple:
+    """(grade, None) or (None, reason): the grade plane from the spot grades in `facts`, at the main building's own
+    walls (§325-3 GRADE PLANE: "on each side of the building"). The main building is the one stack of floor
+    blocks, or the one named main_building; with several and none named, it's a question, as for the height."""
+    stacks = _stacks(buildings)
+    main = (stacks[0] if len(stacks) == 1 else
+            next((b for b in stacks if facts.get("main_building") in b.get("parts", [b["id"]])), None))
+    if stacks and main is None:
+        return None, stop("no_main_building")
+    return _grade_from_points([main] if main else [], facts["grade_points"], [b for b in stacks if b is not main])
+
+
+def _grade_from_points(buildings: list[dict], points: list, others: list = ()) -> tuple:
     """GRADE PLANE: "the average of finished ground level on each side of the building at exterior walls",
     from spot grades placed in the model (or the terrain sampled at the walls). Each wall of the buildings'
     outline seen from above (any longer than 1 ft) gets the levels of the points within SPOT_REACH of it; the grade
     plane is the average of the walls' averages. (grade, None), or (None, reason) when a point is off the walls or
-    a wall has none: after the building moves, the points no longer say the ground level at its walls."""
+    a wall has none: after the building moves, the points no longer say the ground level at its walls.
+    `buildings` is the building measured (the main building); a point at the walls of one of the `others` (a
+    detached garage) is that building's ground, never this one's: it is left out, not counted as off."""
     plans = [_projection(b) for b in buildings if b.get("faces")]
     if not plans:
         return sum(p[2] for p in points) / len(points), None
@@ -529,14 +543,18 @@ def _grade_from_points(buildings: list[dict], points: list) -> tuple:
     rings = [g.exterior for g in getattr(outline, "geoms", [outline]) if not g.is_empty]
     walls = [LineString([a, b]) for ring in rings for a, b in zip(ring.coords, ring.coords[1:])
              if math.dist(a, b) > 1.0]
+    if not walls:                       # a round or finely faceted outline: no wall longer than 1 ft to sort by
+        return None, stop("grade_walls_unclear")
+    elsewhere = [_projection(b).boundary for b in others if b.get("faces")]
+    elsewhere = ops.unary_union(elsewhere) if elsewhere else None      # the other buildings' walls, in plan
     levels, off = {i: [] for i in range(len(walls))}, 0
     for x, y, z in points:
         here = Point(x, y)
         i = min(range(len(walls)), key=lambda k: walls[k].distance(here))
-        if walls[i].distance(here) > SPOT_REACH:
-            off += 1
-        else:
+        if walls[i].distance(here) <= SPOT_REACH:
             levels[i].append(z)
+        elif elsewhere is None or elsewhere.distance(here) > SPOT_REACH:
+            off += 1
     bare = sum(1 for v in levels.values() if not v)
     if off or bare:
         return None, stop("grade_off_walls", off=off, count=len(points), bare=bare)
@@ -570,7 +588,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # cut at the ground blamed on overhangs.
     why_spots = None
     if facts.get("grade_points"):       # spot grades (or terrain sampled at the walls): the grade plane from them
-        grade, why_spots = _grade_from_points(buildings, facts["grade_points"])
+        grade, why_spots = grade_plane(buildings, facts)
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
     off = (lo, hi) if zs and grade is not None and (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None

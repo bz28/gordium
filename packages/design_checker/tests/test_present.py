@@ -140,7 +140,7 @@ def test_values_are_never_rounded_toward_compliance():
     assert present.value_text(24.999, "ft", "≥", True) == "24'-11 7/8\""     # a minimum: proposed rounds down
     assert present.value_text(35.001, "ft", "≤", True) == "35'-0 1/8\""      # a maximum: proposed rounds up
     assert present.margin_text(0.04, "ft") == "+0\"" .replace("+0\"", "+0'-0 3/8\"")
-    assert present.margin_text(-0.001, "ft") == "at limit"
+    assert present.margin_text(-0.001, "ft") == "−0'-0 1/8\""        # a shortfall is never "at limit"
     assert present.margin_text(-0.02, "ft") == "−0'-0 1/4\""                # a shortfall is never shown smaller
 
 
