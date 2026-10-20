@@ -9,6 +9,7 @@ outlines) is reported as a problem, never guessed.
 """
 
 import math
+import struct
 from pathlib import Path
 
 import rhino3dm as r
@@ -79,15 +80,32 @@ def _brep_faces(brep, s):
     return faces, sorted(set(problems))
 
 
+FLOAT_SAFE = 2.0 ** 17      # ft from the origin: beyond this, single-precision points are coarser than 0.01 ft
+
+
+def _single(x: float) -> bool:
+    """Whether a number is exactly a single-precision value (as a mesh point stored only in single precision is)."""
+    return struct.unpack("f", struct.pack("f", x))[0] == x
+
+
 def _mesh_faces(mesh, s):
+    """A mesh's faces (quads split into triangles), on the full-precision points the file holds, and its
+    problems: a mesh stored only in single precision far from the origin (survey coordinates) can't be measured
+    to 0.01 ft, so it is reported, never measured on rounded points."""
     v = mesh.Vertices
+    points = [v.Point3dAt(k) for k in range(len(v))]
+    problems = []
+    far = any(max(abs(p.X), abs(p.Y), abs(p.Z)) * s > FLOAT_SAFE for p in points)
+    if far and all(_single(c) for p in points for c in (p.X, p.Y, p.Z)):   # only single-precision points held
+        problems.append("a building mesh is stored in single precision too far from the origin to measure to 0.01 ft "
+                        "(move it nearer the origin, or turn it into a solid)")
     faces = []
     for i in range(len(mesh.Faces)):
         a, b, c, d = mesh.Faces[i]
-        pts = [_xyz(v[k], s) for k in ((a, b, c) if c == d else (a, b, c, d))]
+        pts = [_xyz(points[k], s) for k in ((a, b, c) if c == d else (a, b, c, d))]
         faces += [{"points": pts}] if len(pts) == 3 else [{"points": [pts[0], pts[1], pts[2]]},
                                                           {"points": [pts[0], pts[2], pts[3]]}]
-    return faces
+    return faces, problems
 
 
 def _block_holds(model, ref, names, layer, depth=0) -> bool:
@@ -164,8 +182,9 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
                 trouble.append("a building isn't a closed solid")
             buildings.append({"id": _id(o), "faces": faces, "problems": trouble})
         elif isinstance(g, r.Mesh):
-            buildings.append({"id": _id(o), "faces": _mesh_faces(g, s),
-                              "problems": [] if g.IsClosed else ["a building mesh isn't closed"]})
+            faces, trouble = _mesh_faces(g, s)
+            buildings.append({"id": _id(o), "faces": faces,
+                              "problems": trouble + ([] if g.IsClosed else ["a building mesh isn't closed"])})
     if blocks["building"]:
         unread.add("a block")
     for kind in sorted(unread):                 # never dropped silently: the coverage and yards would be wrong

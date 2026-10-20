@@ -563,3 +563,21 @@ def test_a_meshed_gable_is_read_like_a_whole_one():
                           {"points": [[xa, y1, z1], [xb, y2, z2], [xa, y2, z2]]}]
     m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)["building_height"]
     assert sorted({r["value"] for r in m["readings"]}) == [25.0, 30.0]
+
+
+def test_a_gently_curved_roof_is_not_one_plane():
+    # a 20 ft wide roof curving with a 2000 ft radius, in 40 strips: no group's corners stray beyond 0.01 ft of
+    # its anchor's plane, whatever order the faces come in
+    from model_measurement.measure import TOL, _planes, _unit_normal
+    radius, faces = 2000.0, []
+    xs = [i * 20 / 40 for i in range(41)]
+    z = [math.sqrt(radius ** 2 - (x - 10) ** 2) - radius + 30 for x in xs]
+    for i in range(40):
+        faces.append({"points": [[xs[i], 0, z[i]], [xs[i + 1], 0, z[i + 1]], [xs[i + 1], 20, z[i + 1]]]})
+        faces.append({"points": [[xs[i], 0, z[i]], [xs[i + 1], 20, z[i + 1]], [xs[i], 20, z[i]]]})
+    for order in (faces, faces[::-1]):
+        for group in _planes(order):
+            anchor = max(group, key=lambda f: abs(_unit_normal(f["points"])[2]) and 1)
+            for g in group:
+                n, p0 = _unit_normal(g["points"]), g["points"][0]
+                assert all(abs(sum(n[c] * (q[c] - p0[c]) for c in range(3))) <= TOL for f in group for q in f["points"])

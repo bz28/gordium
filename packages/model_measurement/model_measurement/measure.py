@@ -251,22 +251,28 @@ def _unit_normal(points) -> tuple:
 
 
 def _planes(faces: list[dict]) -> list[list[dict]]:
-    """The faces grouped into planes: faces that share an edge (two corners within TOL) and whose corners all lie
-    within TOL of the group's first face's plane are one plane. So a roof drawn as many triangles (a mesh, whose
-    points carry rounding noise that grows far from the origin) is one roof plane, while two separate roofs at
-    the same level stay two. A distance, not an angle: the same tolerance as everywhere else here."""
+    """The faces grouped into planes. Each group has an anchor face (its largest), and every corner of every face
+    in the group lies within TOL of the anchor's plane, so a group never drifts. Faces that share an edge (two
+    corners within TOL) join when that stays true: the smaller group's faces are checked against the larger
+    group's anchor, which anchors the joined group. So a roof drawn as many triangles (a mesh, with rounding
+    noise) is one roof plane, two separate roofs at the same level stay two, and a curved roof isn't one plane.
+    A distance, not an angle: the same tolerance as everywhere else here."""
     normals = [_unit_normal(f["points"]) for f in faces]
+    area = [_plan(f).area for f in faces]
     parent = list(range(len(faces)))
-
-    def near_plane(anchor, face):           # every corner of `face` within TOL of `anchor`'s plane
-        n, p0 = normals[anchor], faces[anchor]["points"][0]
-        return all(abs(sum(n[k] * (q[k] - p0[k]) for k in range(3))) <= TOL for q in face["points"])
+    members = {i: [i] for i in range(len(faces))}
+    anchor = {i: i for i in range(len(faces))}
+    size = {i: area[i] for i in range(len(faces))}
 
     def root(i):
         while parent[i] != i:
             parent[i] = parent[parent[i]]
             i = parent[i]
         return i
+
+    def near_plane(k, face):                # every corner of `face` within TOL of face k's plane
+        n, p0 = normals[k], faces[k]["points"][0]
+        return all(abs(sum(n[c] * (q[c] - p0[c]) for c in range(3))) <= TOL for q in face["points"])
 
     def cell(p):
         return tuple(math.floor(c / TOL) for c in p)
@@ -285,12 +291,14 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
                 shared[j] = shared.get(j, 0) + 1
         for j, count in shared.items():
             a, b = root(i), root(j)
-            if count >= 2 and a != b and near_plane(a, faces[j]) and near_plane(b, f):
-                parent[a] = b
-    groups = {}
-    for i, f in enumerate(faces):
-        groups.setdefault(root(i), []).append(f)
-    return list(groups.values())
+            if count < 2 or a == b:
+                continue
+            big, small = (a, b) if size[a] >= size[b] else (b, a)
+            if all(near_plane(anchor[big], faces[k]) for k in members[small]):
+                parent[small] = big
+                members[big] += members.pop(small)
+                size[big] += size.pop(small)
+    return [[faces[k] for k in group] for group in members.values()]
 
 
 def _open_to_the_sky(faces: list[dict]) -> list[dict]:

@@ -168,8 +168,8 @@ def test_a_block_placed_on_another_layer_with_building_objects_inside_is_reporte
 @pytest.mark.parametrize("x0, y0, n", [(152.2131319706377, 194.70395691601078, 8),
                                        (40000.1, 50000.9, 16), (20000.5, 22000.25, 16)])   # near and far from 0
 def test_a_meshed_gable_read_from_a_file_is_one_roof_per_slope(tmp_path, x0, y0, n):
-    # a real meshed gable house: the file stores mesh points in single precision, whose rounding noise (larger on
-    # survey coordinates far from the origin) must not split a slope (wrong eave, or a false "something above")
+    # a real meshed gable house drawn with single-precision points: their rounding noise (larger far from the
+    # origin) must not split a slope (wrong eave, or a false "something above")
     w, depth, eave, ridge = 22.731880258796153, 30.007429476637732, 17.724593436290334, 32.33899205293994
     m = model()
     lot = [(x0 - 20, y0 - 30), (x0 + w + 20, y0 - 30), (x0 + w + 20, y0 + depth + 30), (x0 - 20, y0 + depth + 30)]
@@ -213,3 +213,56 @@ def test_a_meshed_gable_read_from_a_file_is_one_roof_per_slope(tmp_path, x0, y0,
     h = measure(read_site(write(m, tmp_path), facts), facts)["building_height"]
     assert "rises above" not in h["reason"]
     assert sorted({round(r["value"], 3) for r in h["readings"]}) == [round((eave + ridge) / 2, 3), round(ridge, 3)]
+
+
+def gable_mesh(x0, y0, n, double):
+    """A closed meshed gable house (walls, floor and roof in matching strips), and its sizes."""
+    w, depth, eave, ridge = 22.731880258796153, 30.007429476637732, 17.724593436290334, 32.33899205293994
+    mesh, index = r.Mesh(), {}
+    mesh.Vertices.UseDoublePrecisionVertices = double
+
+    def vertex(x, y, z):
+        key = (round(x, 6), round(y, 6), round(z, 6))
+        if key not in index:
+            (mesh.Vertices.AddPoint3d if double else mesh.Vertices.Add)(x, y, z)
+            index[key] = len(mesh.Vertices) - 1
+        return index[key]
+
+    def quad(a, b, c, d):
+        mesh.Faces.AddFace(vertex(*a), vertex(*b), vertex(*c), vertex(*d))
+
+    mid = y0 + depth / 2
+    ys = [y0 + j * (depth / 2) / n for j in range(n + 1)] + [mid + j * (depth / 2) / n for j in range(1, n + 1)]
+    zs = [eave + j * (ridge - eave) / n for j in range(n + 1)] + [ridge - j * (ridge - eave) / n for j in range(1, n + 1)]
+    xs = [x0 + i * w / n for i in range(n + 1)]
+    for xa, xb in zip(xs, xs[1:]):
+        for (ya, za), (yb, zb) in zip(zip(ys, zs), zip(ys[1:], zs[1:])):
+            quad((xa, ya, 0), (xa, yb, 0), (xb, yb, 0), (xb, ya, 0))          # floor
+            quad((xa, ya, za), (xb, ya, za), (xb, yb, zb), (xa, yb, zb))      # roof
+    for y in (y0, y0 + depth):
+        for xa, xb in zip(xs, xs[1:]):
+            quad((xa, y, 0), (xb, y, 0), (xb, y, eave), (xa, y, eave))
+    for x in (x0, x0 + w):
+        for (ya, za), (yb, zb) in zip(zip(ys, zs), zip(ys[1:], zs[1:])):
+            quad((x, ya, 0), (x, yb, 0), (x, yb, zb), (x, ya, za))
+    return mesh, w, depth, eave, ridge
+
+
+def measured_gable(tmp_path, x0, y0, n, double):
+    mesh, w, depth, eave, ridge = gable_mesh(x0, y0, n, double)
+    m = model()
+    lot = [(x0 - 20, y0 - 30), (x0 + w + 20, y0 - 30), (x0 + w + 20, y0 + depth + 30), (x0 - 20, y0 + depth + 30)]
+    m.Objects.AddPolyline(r.Polyline([r.Point3d(x, y, 0) for x, y in lot + lot[:1]]), on(0))
+    m.Objects.AddMesh(mesh, on(1))
+    facts = {**FACTS, "street_line": [[list(lot[0]), list(lot[1])]]}
+    return measure(read_site(write(m, tmp_path), facts), facts)["building_height"], eave, ridge
+
+
+def test_a_meshed_gable_on_ithaca_survey_coordinates_is_read_on_its_full_precision_points(tmp_path):
+    h, eave, ridge = measured_gable(tmp_path, 870000.3, 900000.7, 32, double=True)     # NY State Plane, in ft
+    assert sorted({round(r["value"], 3) for r in h["readings"]}) == [round((eave + ridge) / 2, 3), round(ridge, 3)]
+
+
+def test_a_single_precision_mesh_that_far_out_is_reported_not_measured(tmp_path):
+    h, _, _ = measured_gable(tmp_path, 870000.3, 900000.7, 8, double=False)
+    assert h["value"] is None and "single precision too far from the origin" in h["reason"]
