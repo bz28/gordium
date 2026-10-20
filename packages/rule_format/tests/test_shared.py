@@ -106,7 +106,7 @@ FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only app
 
 
 ARCHITECT_REVIEW = re.compile(
-    r"\barchitects?\s+(?:(?:will|must|should|can|then|also|would)\s+)?(confirm|review|check|approve|sign)s?\b"
+    r"\barchitects?\s+(?:(?:will|must|should|then|also|would)\s+)?(confirm|review|check|approve|sign)s?\b"
     r"|\b(confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{0,30}?\barchitects?\b"  # ...confirmed by architects
     r"|\bthen architects\b|\barchitect(?:'?s)?\s+(review|confirmation|check|sign-?off|approval)\b", re.IGNORECASE)
 NOT_A_PROMISE = re.compile(r"defer|\bonce (approval|it) is (switched )?on\b|\bonce approved\b|\bonce (the )?architects? approves?"
