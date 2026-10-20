@@ -112,7 +112,7 @@ rules:
         lines: [8, 8]
         quote: "R-1A R-1B R-2A R-2B R-2C R-3A R-3AA [fn2] R-3B"
     examples:
-      - given: {use: one_family_detached, lot_area: 6674.7}
+      - given: {use: one_family_detached, lot_area: 6674}
         expect: pass
       - given: {use: one_family_detached, lot_area: 5999}
         expect: fail
@@ -287,11 +287,11 @@ rules:
       - "See the building_area and lot definitions: whether garages and overhangs count, and what lot area to use."
       - "\"Above ground\": are parts of a building below grade (e.g. a buried garage under a deck) left out of building_area?"
     examples:
-      - given: {building_area: 1500, lot_area: 6674.7}
+      - given: {building_area: 1500, lot_area: 6674}
         expect: pass
-      - given: {building_area: 1855, lot_area: 6674.7}
+      - given: {building_area: 1855, lot_area: 6674}
         expect: fail
-    notes: "The failing example is the architects' 106 Ithaca Rd house (53 × 35 ft on a 6,674.7 sf lot = 27.8%)."
+    notes: "The failing example is the architects' 106 Ithaca Rd house (53 × 35 ft on their 6,674 sf lot = 27.8%)."
     drafted_by: claude
     status: draft
 
