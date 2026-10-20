@@ -113,7 +113,8 @@ _GAP = r"(?:[\s,]+(?!(?:to|can|could|may|might|would)\b)\w+){0,3}?"
 ARCHITECT_REVIEW = re.compile(
     rf"\barchitects?\b(?!['\u2019-]){_GAP}[\s,]+{_VERB}\b"
     rf"|\b(?:confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{{0,30}}?\barchitects?\b"
-    rf"|\barchitects?\s+(?:\w+\s+){{0,2}}?(?:needs?|ha(?:ve|s|d)|required|asked|expected)\s+to\s+{_VERB}\b"
+    rf"|\barchitects?\s+(?:(?!(?:can|could|may|might|would)\b)\w+\s+){{0,2}}?(?:needs?|ha(?:ve|s|d)|required|asked|expected)\s+to\s+{_VERB}\b"
+    rf"|\b(?:needs?|requires?|required)\s+(?:an?\s+|the\s+)?architects?\s+to\s+{_VERB}\b"
     r"|\bthen architects\b"
     r"|\barchitect(?:s['\u2019]|['\u2019]s|s)?[\s-]+(?:review|confirm\w*|check\w*|sign-?off|approv\w*)\b", re.IGNORECASE)
 # What makes such a phrase not a promise. A sentence that says approval is deferred, or describes what happens
@@ -194,7 +195,8 @@ def test_the_architect_review_matcher():
                     "Architects review each label; the deferred items listed at the end of this long document go to Ben",
                     "Architects need to approve each rule", "Architects have to review the labels",
                     "Architects are asked to review each rule",
-                    "Architects review each rule, which would otherwise slip through"]:
+                    "Architects review each rule, which would otherwise slip through",
+                    "Each rule needs an architect to approve it", "Each rule requires an architect to sign off"]:
         assert _promises_architect_review(promise), promise
     for fine in ["the architect confirms the facts about their site and design",
                  "Architects answer the open questions", "architect approval is deferred for now",
@@ -202,7 +204,8 @@ def test_the_architect_review_matcher():
                  "Something only an architect can judge", "the architects' R-1b check for 106 Ithaca Road",
                  "an answer key once approval is switched on", "Architects would confirm each definition",
                  "An architect can approve each rule once approval is switched on",
-                 "Code, then AI, checked by code (architect confirmation deferred)"]:
+                 "Code, then AI, checked by code (architect confirmation deferred)",
+                 "Architects would need to confirm each definition", "Architects may need to approve each rule"]:
         assert not _promises_architect_review(fine), fine
 
 
