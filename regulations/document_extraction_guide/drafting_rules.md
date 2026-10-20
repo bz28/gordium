@@ -1,6 +1,6 @@
 # Drafting rules
 
-How to write a definition or a rule from a city's documents. They apply to every zone and every city, and to anyone drafting, AI or person. The inspector (`python -m rule_format`) enforces what code can check; reviewers and architects check the rest.
+How to write a definition or a rule from a city's documents. They apply to every zone and every city, and to anyone drafting, AI or person. The inspector (`python -m rule_format`) enforces what code can check; the rest is checked in review (architect review is deferred for now, decided 2026-10-19).
 
 ## 1. Say only what the quotes say
 
@@ -13,7 +13,7 @@ How to write a definition or a rule from a city's documents. They apply to every
 
 ## 2. Interpretations go to `open_questions`, never into a formula or note
 
-When the law leaves something unsettled (a word it doesn't define, a measurement it doesn't explain, a case it doesn't mention), write the question for the architects in `open_questions`. A definition or rule with open questions can't be approved until they're answered. The answer is recorded in `answers` (question, answer, answered_by, answered_on), and the rule's `check` is updated to match. Both are part of what's approved, so they can't change afterwards without re-approval.
+When the law leaves something unsettled (a word it doesn't define, a measurement it doesn't explain, a case it doesn't mention), write the question for the architects in `open_questions`. A definition or rule with open questions can't be approved until they're answered. The answer is recorded in `answers` (question, answer, answered_by, answered_on), and the rule's `check` is updated to match. Both are part of what's approved, so they can't change afterwards without re-approval (approval is deferred for now; this applies once it is switched on).
 
 ## 3. Every number comes from a quote
 

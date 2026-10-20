@@ -6,6 +6,7 @@ output, effort, no temperature) and what is recorded (settings, fingerprints, to
 
 import copy
 import json
+import re
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -521,3 +522,18 @@ def test_methods_doc_says_whether_a_run_used_the_current_labeling_guide():
     doc = (REPO / "docs/methods.md").read_text()
     if labeler.sha(labeler.system_prompt()) not in sent:
         assert "No recorded run used the current guide" in doc and "wording only" not in doc
+    else:
+        assert "No recorded run used the current guide" not in doc
+    assert not re.search(r"hold (\w+) fingerprints", doc)      # a count in prose goes stale with the next run
+
+
+def test_methods_doc_says_where_the_category_definitions_labels_came_from():
+    """The category-vs-limit definitions keep Haiku's run answers (their review corrections were undone), so the
+    doc may not say they come from review revisions."""
+    from rule_format.rulebook import REPO
+    labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
+    category = [pid for pid in ("325-3B:kitchen", "325-3B:adult_day_care_home", "325-3B:bed_and_breakfast_inn")
+                if not labels[pid].get("revised")]
+    doc = (REPO / "docs/methods.md").read_text()
+    if category:
+        assert "come from recorded review revisions" not in doc and "Haiku's answers from the first full run" in doc
