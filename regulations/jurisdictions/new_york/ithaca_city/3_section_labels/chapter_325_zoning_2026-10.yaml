@@ -3836,11 +3836,9 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-15F:
-    label: not_for_checking
+    label: flag
     topic: procedures
-    reason: The piece describes an internal referral and review process for gasoline station permit applications,
-      with the Director reviewing comments from other officials. It sets no measurable design, lot or use requirement
-      itself.
+    reason: "Revised from not_for_checking by review: The Director may require changes to the site plan to lessen fire, traffic and other hazards: the design depends on the city's review. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 46
@@ -3850,8 +3848,23 @@ labels:
       quote: The Director of Planning and Development or designee shall refer all applications for permits to construct
         or alter gasoline service stations to the Fire Chief, the Chief of Police and the City Traffic Engineer
         for analysis of fire, traffic and other possible hazards.
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 46
+      lines:
+      - 7
+      - 10
+      quote: "The Director of Planning and Development or designee shall review their comments on the proposed new or altered facility and may require modification of the site plan to lessen potential fire, traffic and other hazards."
     piece_sha256: d1ae97320da4bb0fa934d49179692bd4e0f385a3e51f5531878358c9464418fa
     drafted_by: section_labeling/claude-haiku-5-5
+    revised:
+    - from: not_for_checking
+      by: Claude (second review of all not_for_checking labels, 2026-10-20)
+      date: 2026-10-20
+      why: "the Director may require changes to the site plan to lessen fire, traffic and other hazards: the design depends on the city's review"
+    - field: sources
+      by: Claude (second review of all not_for_checking labels, 2026-10-20)
+      date: 2026-10-20
+      why: "adds the sentence that shows the review can change the design"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-16:
@@ -6991,9 +7004,9 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.6D:
-    label: not_for_checking
+    label: flag
     topic: site_features
-    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
+    reason: "Revised from not_for_checking by review: A collocation can't be approved on a site, mount or facility with unpermitted equipment: someone must confirm the host site's permits. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 88
@@ -7011,6 +7024,10 @@ labels:
       by: Claude (review of all labels, 2026-10-19)
       date: 2026-10-19
       why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
+    - from: not_for_checking
+      by: Claude (second review of all not_for_checking labels, 2026-10-20)
+      date: 2026-10-20
+      why: "a collocation can't be approved on a site, mount or facility with unpermitted equipment: someone must confirm the host site's permits"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.6E:
@@ -7879,9 +7896,9 @@ labels:
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17A:
-    label: not_for_checking
+    label: reference
     topic: procedures
-    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
+    reason: "Revised from not_for_checking by review: Sets how collocations are measured (every position on the mount filled, the worst case), which the wireless requirements rely on. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -7897,12 +7914,16 @@ labels:
       by: Claude (review of all labels, 2026-10-19)
       date: 2026-10-19
       why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
+    - from: not_for_checking
+      by: Claude (second review of all not_for_checking labels, 2026-10-20)
+      date: 2026-10-20
+      why: "sets how collocations are measured (every position on the mount filled, the worst case), which the wireless requirements rely on"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17B:
-    label: not_for_checking
+    label: reference
     topic: site_features
-    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
+    reason: "Revised from not_for_checking by review: Sets what a collocation's review covers (the existing mount as well as the new equipment, under this article's requirements), which the wireless requirements rely on; like 325-29.17A. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -7918,12 +7939,16 @@ labels:
       by: Claude (review of all labels, 2026-10-19)
       date: 2026-10-19
       why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
+    - from: not_for_checking
+      by: Claude (second review of all not_for_checking labels, 2026-10-20)
+      date: 2026-10-20
+      why: "sets what a collocation's review covers (the existing mount as well as the new equipment, under this article's requirements), which the wireless requirements rely on; like 325-29.17A"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17C:
-    label: not_for_checking
+    label: reference
     topic: site_features
-    reason: "Revised from rule by review: A procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement. (The AI's original reason is in the run record.)"
+    reason: "Revised from not_for_checking by review: Sets what a collocation's review covers (the existing mount as well as the new equipment, under this article's requirements), which the wireless requirements rely on; like 325-29.17A. (The AI's original reason is in the run record.)"
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 106
@@ -7940,6 +7965,10 @@ labels:
       by: Claude (review of all labels, 2026-10-19)
       date: 2026-10-19
       why: "a procedure (application, deadline, notice, permit, filing or enforcement), not a design requirement"
+    - from: not_for_checking
+      by: Claude (second review of all not_for_checking labels, 2026-10-20)
+      date: 2026-10-20
+      why: "sets what a collocation's review covers (the existing mount as well as the new equipment, under this article's requirements), which the wireless requirements rely on; like 325-29.17A"
     status: draft
     run: 3_section_labels/runs/2026-10-19_claude-haiku-5-5.jsonl
   325-29.17D:

@@ -6,8 +6,9 @@ Plain code, no AI. The workbook is generated from the rule files and never edite
 (see __main__) confirms the committed copy says the same as a fresh build.
 
 The tables are built as plain rows first (`tables(j)`), so tests check the content without Excel; `build()`
-only lays them out. Which fields of each format are shown, and which are deliberately left out, is declared
-in SHOWN and HIDDEN, and a test holds them to the formats' own field lists.
+only lays them out. Each tab's columns are declared once (Col): header, width, the format fields it shows
+and how to fill it. The fields shown plus the ones in HIDDEN (left out on purpose) are held by a test to the
+formats' own field lists, and each column is tested to show its field, so nothing goes missing silently.
 """
 
 from pathlib import Path
@@ -17,29 +18,25 @@ from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from openpyxl.styles import Alignment, Font, PatternFill
 
 from rule_format.labels import LABEL_FIELDS, load_pieces, revision_steps
-from rule_format.rulebook import APPROVAL_FIELDS, REPO, RULE_FIELDS, TERM_SCHEMAS, load, rulebook_paths
+from rule_format.rulebook import APPROVAL_FIELDS, REPO, RULE_FIELDS, SOURCE_FIELDS, TERM_SCHEMAS, load, rulebook_paths
 
 FONT = "Arial"                                   # like the architects' spreadsheet: 16 title, 12 headers, 11 body
+INK = "243746"                                   # their text color, on every cell they wrote
 REPO_BLOB = "https://github.com/bz28/gordium/blob/main"
 
-# Every field of every format is either shown in the workbook or left out on purpose, with the reason.
-SHOWN = {
-    "rule": {"id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "examples",
-             "notes", "open_questions", "answers", "drafted_by", "status"},
-    "definitions": {"term", "measures", "sources", "open_questions", "answers", "notes", "drafted_by", "status"},
-    "uses": {"name", "sources", "notes", "drafted_by", "status"},
-    "label": {"label", "topic", "reason", "sources", "notes", "open_questions", "answers", "revised", "drafted_by",
-              "status"},
-}
+# Fields left out of the workbook on purpose, with the reason. Every other field is shown by a column.
 HIDDEN = {
     "approved_by": "human approval is deferred; no one approves yet",
     "approved_on": "human approval is deferred",
     "approved_hash": "a fingerprint for code, not for reading",
     "piece_sha256": "a fingerprint for code, not for reading",
     "run": "the file of recorded AI calls; for auditing, not reading",
+    "layout": "tells the code how to cut a document into pieces; not for reading",
 }
+NOT_DOWNLOADED_FIELDS = {"title", "url", "why_missing"}   # sources.yaml `not_yet_downloaded` entries
 FIELDS = {"rule": RULE_FIELDS, "definitions": TERM_SCHEMAS["definitions"]["fields"] | APPROVAL_FIELDS,
-          "uses": TERM_SCHEMAS["uses"]["fields"] | APPROVAL_FIELDS, "label": LABEL_FIELDS | APPROVAL_FIELDS}
+          "uses": TERM_SCHEMAS["uses"]["fields"] | APPROVAL_FIELDS, "label": LABEL_FIELDS | APPROVAL_FIELDS,
+          "source": SOURCE_FIELDS | NOT_DOWNLOADED_FIELDS}   # documents and the ones still to get share a tab
 
 
 # ---- links ---------------------------------------------------------------------------------------------
@@ -58,6 +55,40 @@ def pdf_url(j: Path, documents: dict[str, dict], file: str) -> str:
 def page_link(j: Path, documents: dict[str, dict], file: str, page) -> str:
     """A link that opens the PDF at the page (browsers' PDF viewers honor #page=N; GitHub's viewer may not)."""
     return f"{pdf_url(j, documents, file)}#page={page}" if isinstance(page, int) else pdf_url(j, documents, file)
+
+
+# ---- citations -----------------------------------------------------------------------------------------
+
+def citer(j: Path, documents: dict[str, dict]):
+    """citation(source): where a quote is, in words a reader can follow, e.g. "City of Ithaca Code, Chapter 325
+    Zoning (full text), §325-8A, p.24, lines 15–16". The document by its title in sources.yaml; for a document
+    cut into pieces (2_extracted_text/<doc>.sections.jsonl), the section the first cited line is in; then page
+    and lines. The exact words go in their own column, and the link opens the page."""
+    sections = {}                                  # file -> [(page, first, last, piece id, title)]
+    for path in sorted((j / "2_extracted_text").glob("*.sections.jsonl")):
+        header, pieces = load_pieces(path)
+        sections[header["file"]] = [(pg, a, b, pid, piece["title"]) for pid, piece in pieces.items()
+                                    for pg, a, b in piece["lines"]]
+
+    def section(file, page, line):
+        for pg, a, b, pid, piece_title in sections.get(file, ()):
+            if pg == page and a <= line <= b:
+                if not pid[:1].isdigit():                       # front matter, an editor's note
+                    return piece_title
+                number, _, term = pid.partition(":")            # 325-3B:kitchen is the definition of KITCHEN
+                return f"§{number}" + (f" ({piece_title})" if term else "")
+        return ""
+
+    def citation(s: dict) -> str:
+        if not s.get("file"):
+            return ""
+        lines = s.get("lines") or []
+        parts = [(documents.get(s["file"]) or {}).get("title") or s["file"],
+                 section(s["file"], s.get("page"), lines[0]) if lines else "",
+                 f"p.{s['page']}" if s.get("page") is not None else "",
+                 (f"line {lines[0]}" if lines[0] == lines[1] else f"lines {lines[0]}–{lines[1]}") if len(lines) == 2 else ""]
+        return ", ".join(p for p in parts if p)
+    return citation
 
 
 # ---- cell text -----------------------------------------------------------------------------------------
@@ -95,136 +126,173 @@ def rulebooks(j: Path) -> list[tuple[str, dict]]:
     return [(p.relative_to(folder).as_posix(), load(p) or {}) for p in rulebook_paths(folder)]
 
 
-def _source_rows(entry: dict, link) -> list[tuple[int, dict, str | None]]:
-    sources = entry.get("sources") or [{}]
-    return [(n, s, link(s) if s.get("file") else None) for n, s in enumerate(sources)]
+def _text(value) -> str:
+    return " ".join(str(value).split()) if value not in (None, "") else ""
+
+
+def _quotes(sources) -> str:
+    return _bullets(f"p.{s.get('page')} l.{_lines(s)}: {s.get('quote')}" for s in sources or [])
+
+
+class Col:
+    """One column: header, width, the format fields it shows (none for a column filled per tab, like Zone or
+    Link) and value(entry, source, n, total) for one row. every=False puts it on an entry's first source row
+    only (long text); identifying and short filterable columns repeat, so sorting and filtering keep an
+    entry together."""
+    def __init__(self, header, width, fields=(), value=None, every=True):
+        self.header, self.width, self.every, self.value = header, width, every, value
+        self.fields = {fields} if isinstance(fields, str) else set(fields)
+
+
+def shown(cols: list[Col]) -> set[str]:
+    return set().union(*(c.fields for c in cols))
+
+
+def _get(field, fmt=lambda v: v if v is not None else ""):
+    return lambda e, s, n, t: fmt(e.get(field))
+
+
+def _source_cols(quote_width):
+    """The columns every one-row-per-source tab shares: which source, where it is (a citation people can
+    read, filled per tab; and the page, to sort by), the words, the link."""
+    return [Col("Source", 8, "sources", lambda e, s, n, t: f"{n + 1} of {t}" if e.get("sources") else ""),
+            Col("Citation", 34),
+            Col("Page", 6, "sources", lambda e, s, n, t: s.get("page", "")),
+            Col("City's exact words", quote_width, "sources", lambda e, s, n, t: s.get("quote", "")),
+            Col("Link", 10, "sources", lambda e, s, n, t: f"Open p.{s.get('page')}" if s.get("file") else "")]
+
+
+_QUESTIONS = [Col("Open questions", 50, "open_questions", _get("open_questions", _bullets), every=False),
+              Col("Answers", 40, "answers", _get("answers", _answers), every=False)]
+_NOTES = Col("Notes", 40, "notes", _get("notes", _text), every=False)
+_WHO = [Col("Status", 8, "status", _get("status")), Col("Drafted by", 18, "drafted_by", _get("drafted_by"))]
+
+COLUMNS = {
+    "rule": [Col("Zone", 9), Col("Rulebook", 18), Col("Rule id", 28, "id", _get("id")),
+             Col("Title", 34, "title", _get("title")), *_WHO,
+             Col("Kind", 7, "kind", _get("kind")), Col("Topic", 14, "topic", _get("topic")),
+             Col("Check (formula)", 40, "check", _get("check"), every=False),
+             Col("Applies when", 26, "applies_when", _get("applies_when"), every=False),
+             Col("Needs review when", 34, "review_when", _get("review_when", lambda v: _bullets(
+                 f"{r.get('when')}: {r.get('reason')}" for r in v or [])), every=False),
+             Col("Worked examples", 40, "examples", _get("examples", _examples), every=False),
+             *_source_cols(60), *_QUESTIONS, _NOTES],
+    "definitions": [Col("Id", 24), Col("Term", 26, "term", _get("term")), *_WHO,
+                    Col("Measures", 22, "measures", _get("measures", lambda v: ", ".join(v or [])), every=False),
+                    *_source_cols(70), *_QUESTIONS, _NOTES],
+    "uses": [Col("Id", 30), Col("Name", 40, "name", _get("name")), *_WHO, *_source_cols(50), _NOTES],
+    # One row per piece of the law (so the tab proves nothing was skipped); each quote says its own page.
+    "label": [Col("Document", 26), Col("Piece", 22), Col("Title", 40), Col("Pages", 8),
+              Col("Label", 16, "label", _get("label", lambda v: v or "unlabeled")),
+              Col("Topic", 14, "topic", _get("topic")), Col("Reason", 60, "reason", _get("reason", _text)),
+              Col("Quote(s)", 60, "sources", _get("sources", _quotes)), Col("Link", 10), *_WHO,
+              Col("Changed after the AI", 60, "revised",
+                  lambda e, s, n, t: _revisions(e.get("revised"), e.get("label"))),
+              *_QUESTIONS, _NOTES],
+    "source": [Col("File", 34, "file", _get("file")), Col("Title", 44, "title", _get("title")),
+               Col("Publisher", 22, "publisher", _get("publisher")), Col("Official URL", 50, "url", _get("url")),
+               Col("Downloaded", 12, "downloaded_on", _get("downloaded_on", _text)),
+               Col("Adopted", 12, "adopted_on", _get("adopted_on", _text)),
+               Col("Created", 12, "created_on", _get("created_on", _text)), Col("Pages", 7, "pages", _get("pages")),
+               Col("Fingerprint (SHA-256)", 30, "sha256", _get("sha256")),
+               Col("Quotable", 9, "quotable", lambda e, s, n, t: "not downloaded" if "why_missing" in e
+                   else "no" if e.get("quotable") is False else "yes"),
+               Col("Why not quotable / not downloaded", 50, ("not_quotable_because", "why_missing"),
+                   lambda e, s, n, t: _text(e.get("not_quotable_because") or e.get("why_missing"))),
+               Col("Contents", 50, "contents", _get("contents", _text)),
+               Col("Notes", 50, "notes", _get("notes", _text))],
+}
+
+
+def entry_rows(entry: dict, cols: list[Col], fixed: dict, per_source=True) -> list[list]:
+    """An entry's rows: one per source (or one in all), each cell from its column; `fixed` fills the columns
+    that show no field of the entry (Zone, Id, Link...)."""
+    sources = (entry.get("sources") or [{}]) if per_source else [{}]
+    cell = lambda c, s, n: (fixed[c.header](s) if callable(fixed[c.header]) else fixed[c.header]) if c.value is None \
+        else c.value(entry, s, n, len(sources)) if c.every or n == 0 else ""
+    return [[cell(c, s, n) for c in cols] for n, s in enumerate(sources)]
+
+
+def _tab(title, cols, rows, links, link_header="Link") -> dict:
+    return {"title": title, "columns": [(c.header, c.width) for c in cols], "rows": rows,
+            "links": {link_header: links}}
 
 
 def tables(j: Path) -> dict[str, dict]:
     """{tab: {"title", "columns": [(header, width)], "rows": [[cell, ...]], "links": {header: [url per row]}}}.
     A link cell holds its display text; its URL is in "links"."""
-    documents = {d["file"]: d for d in load(j / "1_source_documents/sources.yaml")["documents"]}
-    link = lambda s: page_link(j, documents, s.get("file", ""), s.get("page"))
-    shown = lambda s: f"Open p.{s.get('page')}" if s.get("file") else ""
+    sources_file = load(j / "1_source_documents/sources.yaml")
+    documents = {d["file"]: d for d in sources_file["documents"]}
+    link = lambda s: page_link(j, documents, s["file"], s.get("page")) if s.get("file") else None
+    cite = citer(j, documents)
     out = {}
 
-    # Rules: one row per source, so each quote sits next to its page and link. Rows that identify the rule
-    # (zone, rulebook, id, title, status, who drafted it) repeat on every row, so sorting and filtering keep
-    # a rule together; the long fields are on the rule's first row only.
-    rows, links = [], []
-    for book_path, book in rulebooks(j):
-        for rule in book.get("rules") or []:
-            for n, s, url in _source_rows(rule, link):
-                first, total = n == 0, len(rule.get("sources") or [{}])
-                rows.append([
-                    book.get("district", ""), book_path, rule.get("id", ""), rule.get("title", ""),
-                    rule.get("status", ""), rule.get("drafted_by", ""),
-                    rule.get("kind", "") if first else "", rule.get("topic", "") if first else "",
-                    rule.get("check", "") if first else "", rule.get("applies_when", "") if first else "",
-                    _bullets(f"{r.get('when')}: {r.get('reason')}" for r in rule.get("review_when") or []) if first else "",
-                    _examples(rule.get("examples")) if first else "",
-                    f"{n + 1} of {total}", s.get("file", ""), s.get("page", ""), _lines(s), s.get("quote", ""), shown(s),
-                    _bullets(rule.get("open_questions")) if first else "", _answers(rule.get("answers")) if first else "",
-                    " ".join(str(rule.get("notes", "")).split()) if first else ""])
-                links.append(url)
-    out["Rules"] = {"title": "GORDIUM | Zoning rules (drafts, checked by code)", "rows": rows, "links": {"Link": links},
-                    "columns": [("Zone", 9), ("Rulebook", 18), ("Rule id", 28), ("Title", 34), ("Status", 8),
-                                ("Drafted by", 18), ("Kind", 7), ("Topic", 14), ("Check (formula)", 40),
-                                ("Applies when", 26), ("Needs review when", 34), ("Worked examples", 40), ("Source", 8),
-                                ("Document", 26), ("Page", 6), ("Lines", 7), ("City's exact words", 60), ("Link", 10),
-                                ("Open questions", 50), ("Answers", 40), ("Notes", 40)]}
+    def per_source(entries, cols):                  # [(entry, fixed)] -> rows, links: one row per source
+        rows, links = [], []
+        for e, fixed in entries:
+            rows += entry_rows(e, cols, fixed)
+            links += [link(s) for s in e.get("sources") or [{}]]
+        return rows, links
 
-    # Definitions and use names: one row per source, like rules.
+    out["Rules"] = _tab("GORDIUM | Zoning rules (drafts, checked by code)", COLUMNS["rule"], *per_source(
+        [(r, {"Zone": book.get("district", ""), "Rulebook": path, "Citation": cite})
+         for path, book in rulebooks(j) for r in book.get("rules") or []], COLUMNS["rule"]))
+
     terms = {schema: load(j / f"4_term_definitions/{schema}.yaml") or {} for schema in TERM_SCHEMAS
              if (j / f"4_term_definitions/{schema}.yaml").exists()}
-    rows, links = [], []
-    for key, d in terms.get("definitions", {}).items():
-        for n, s, url in _source_rows(d, link):
-            first = n == 0
-            rows.append([key, d.get("term", ""), d.get("status", ""), d.get("drafted_by", ""),
-                         ", ".join(d.get("measures") or []) if first else "",
-                         f"{n + 1} of {len(d.get('sources') or [{}])}", s.get("file", ""), s.get("page", ""), _lines(s),
-                         s.get("quote", ""), shown(s), _bullets(d.get("open_questions")) if first else "",
-                         _answers(d.get("answers")) if first else "", " ".join(str(d.get("notes", "")).split()) if first else ""])
-            links.append(url)
-    out["Definitions"] = {"title": "GORDIUM | Definitions (the city's own words)", "rows": rows, "links": {"Link": links},
-                          "columns": [("Id", 24), ("Term", 26), ("Status", 8), ("Drafted by", 14), ("Measures", 22),
-                                      ("Source", 8), ("Document", 26), ("Page", 6), ("Lines", 7), ("City's exact words", 70),
-                                      ("Link", 10), ("Open questions", 50), ("Answers", 40), ("Notes", 40)]}
-    rows, links = [], []
-    for key, u in terms.get("uses", {}).items():
-        for n, s, url in _source_rows(u, link):
-            rows.append([key, u.get("name", ""), u.get("status", ""), u.get("drafted_by", ""),
-                         f"{n + 1} of {len(u.get('sources') or [{}])}", s.get("file", ""), s.get("page", ""), _lines(s),
-                         s.get("quote", ""), shown(s), " ".join(str(u.get("notes", "")).split()) if n == 0 else ""])
-            links.append(url)
-    out["Uses"] = {"title": "GORDIUM | Use names (the only values a rule's `use` may take)", "rows": rows,
-                   "links": {"Link": links},
-                   "columns": [("Id", 30), ("Name", 40), ("Status", 8), ("Drafted by", 14), ("Source", 8),
-                               ("Document", 26), ("Page", 6), ("Lines", 7), ("City's exact words", 50), ("Link", 10),
-                               ("Notes", 40)]}
+    for schema, tab, title in [("definitions", "Definitions", "GORDIUM | Definitions (the city's own words)"),
+                               ("uses", "Uses", "GORDIUM | Use names (the only values a rule's `use` may take)")]:
+        out[tab] = _tab(title, COLUMNS[schema], *per_source(
+            [(e, {"Id": key, "Citation": cite}) for key, e in terms.get(schema, {}).items()], COLUMNS[schema]))
 
-    # Section labels, for the Questions and Coverage tabs.
-    labels_by_doc = {}
+    labels_by_doc = {}                                 # document -> (its labels file, the labels)
     for path in sorted((j / "3_section_labels").glob("*.yaml")):
         book = load(path)
         if isinstance(book, dict) and "labels" in book:
-            labels_by_doc[book["document"]] = book["labels"]
+            labels_by_doc[book["document"]] = (path.relative_to(j).as_posix(), book["labels"])
 
-    # Questions: every open question anywhere, one row each, with where it was asked.
+    # Questions: every open question anywhere, one row each, with the file it is written in.
     rows, links = [], []
-    def ask(kind, where, ident, questions, sources):
-        s = (sources or [{}])[0]
-        for q in questions or []:
-            rows.append([kind, where, ident, " ".join(str(q).split()), s.get("file", ""), s.get("page", ""), shown(s)])
-            links.append(link(s) if s.get("file") else None)
-    for book_path, book in rulebooks(j):
+    def ask(kind, where, ident, entry):
+        s = (entry.get("sources") or [{}])[0]
+        for q in entry.get("open_questions") or []:
+            rows.append([kind, where, ident, _text(q), cite(s), s.get("page", ""),
+                         f"Open p.{s.get('page')}" if s.get("file") else ""])
+            links.append(link(s))
+    for path, book in rulebooks(j):
         for rule in book.get("rules") or []:
-            ask("Rule", f"5_zoning_rules/{book_path}", rule.get("id", ""), rule.get("open_questions"), rule.get("sources"))
+            ask("Rule", f"5_zoning_rules/{path}", rule.get("id", ""), rule)
     for schema, entries in terms.items():
-        for key, d in entries.items():
-            ask(schema.rstrip("s").capitalize(), f"4_term_definitions/{schema}.yaml", key, d.get("open_questions"),
-                d.get("sources"))
-    for document, labels in labels_by_doc.items():
+        for key, e in entries.items():
+            ask(schema.rstrip("s").capitalize(), f"4_term_definitions/{schema}.yaml", key, e)
+    for labels_path, labels in labels_by_doc.values():
         for pid, e in labels.items():
-            ask("Section label", document, pid, e.get("open_questions"), e.get("sources"))
+            ask("Section label", labels_path, pid, e)
     out["Questions"] = {"title": "GORDIUM | Open questions", "rows": rows, "links": {"Link": links},
-                        "columns": [("About", 14), ("In", 34), ("Id", 30), ("Question", 90), ("Document", 26),
+                        "columns": [("About", 14), ("In", 40), ("Id", 30), ("Question", 90), ("Citation", 34),
                                     ("Page", 6), ("Link", 10)]}
 
-    # Coverage: every piece of every cut document, in the law's order, with its label.
+    # Coverage: every piece of every cut document, in the law's order, with its label. The link opens the
+    # page of the label's first quote (where its reason points), else the piece's first page.
     rows, links = [], []
     for sections in sorted((j / "2_extracted_text").glob("*.sections.jsonl")):
         header, pieces = load_pieces(sections)
-        labels = labels_by_doc.get(header["file"], {})
+        labels = labels_by_doc.get(header["file"], ("", {}))[1]
         for pid, piece in pieces.items():
             e = labels.get(pid, {})
             pages = sorted({p for p, _, _ in piece["lines"]})
-            first_page = piece["lines"][0][0]
-            rows.append([header["file"], pid, piece["title"], str(pages[0]) if len(pages) == 1 else f"{pages[0]}–{pages[-1]}",
-                         e.get("label", "unlabeled"), e.get("topic", ""), " ".join(str(e.get("reason", "")).split()),
-                         _bullets(s.get("quote") for s in e.get("sources") or []), f"Open p.{first_page}",
-                         e.get("status", ""), e.get("drafted_by", ""), _revisions(e.get("revised"), e.get("label")),
-                         _bullets(e.get("open_questions")), _answers(e.get("answers")),
-                         " ".join(str(e.get("notes", "")).split())])
-            links.append(page_link(j, documents, header["file"], first_page))
-    out["Coverage"] = {"title": "GORDIUM | Every part of the law, and what it is", "rows": rows, "links": {"Link": links},
-                       "columns": [("Document", 26), ("Piece", 22), ("Title", 40), ("Pages", 8), ("Label", 16),
-                                   ("Topic", 14), ("Reason", 60), ("Quote(s)", 60), ("Link", 10), ("Status", 8),
-                                   ("Drafted by", 22), ("Changed after the AI", 60), ("Open questions", 50),
-                                   ("Answers", 40), ("Notes", 40)]}
+            page = (e.get("sources") or [{}])[0].get("page") or piece["lines"][0][0]
+            rows += entry_rows(e, COLUMNS["label"], {
+                "Document": header["file"], "Piece": pid, "Title": piece["title"], "Link": f"Open p.{page}",
+                "Pages": str(pages[0]) if len(pages) == 1 else f"{pages[0]}–{pages[-1]}"}, per_source=False)
+            links.append(page_link(j, documents, header["file"], page))
+    out["Coverage"] = _tab("GORDIUM | Every part of the law, and what it is", COLUMNS["label"], rows, links)
 
-    # Sources: the documents themselves.
-    rows, links = [], []
-    for d in documents.values():
-        rows.append([d.get("file", ""), d.get("title", ""), d.get("publisher", ""), d.get("url", ""),
-                     str(d.get("downloaded_on", "")), d.get("pages", ""), d.get("sha256", ""),
-                     "no" if d.get("quotable") is False else "yes", " ".join(str(d.get("not_quotable_because", "")).split())])
-        links.append(d.get("url") or None)
-    out["Sources"] = {"title": "GORDIUM | Source documents (fingerprinted)", "rows": rows, "links": {"Official URL": links},
-                      "columns": [("File", 34), ("Title", 44), ("Publisher", 22), ("Official URL", 50),
-                                  ("Downloaded", 12), ("Pages", 7), ("Fingerprint (SHA-256)", 30), ("Quotable", 9),
-                                  ("Why not quotable", 50)]}
+    # Sources: the documents, then the ones not yet downloaded (and why).
+    entries = list(documents.values()) + list(sources_file.get("not_yet_downloaded") or [])
+    out["Sources"] = _tab("GORDIUM | Source documents (fingerprinted)", COLUMNS["source"],
+                          [entry_rows(d, COLUMNS["source"], {}, per_source=False)[0] for d in entries],
+                          [d.get("url") or None for d in entries], "Official URL")
     return out
 
 
@@ -238,14 +306,14 @@ def _cell_text(value):
 
 def write_block(ws, top: int, columns: list[tuple[str, float]], rows: list[list], links: dict[str, list] | None = None,
                 fills: dict[str, list] | None = None) -> int:
-    """One table on a sheet, in the architects' style: bold 12-pt headers on row `top`, Arial 11 wrapped rows
-    under it, links as clickable cells (named by their column's header), optional cell fills (same naming:
-    {header: [hex color or None per row]}). A column's width is set where given (None keeps the width an
-    earlier block set). Returns the first row after the block."""
+    """One table on a sheet, in the architects' style: Arial in their ink color, bold 12-pt headers on row
+    `top`, 11-pt wrapped rows under it, links as clickable cells (named by their column's header), optional
+    cell fills (same naming: {header: [hex color or None per row]}). A column's width is set where given (None
+    keeps the width an earlier block set). Returns the first row after the block."""
     headers = [h for h, _ in columns]
     for c, (header, width) in enumerate(columns, 1):
         cell = ws.cell(row=top, column=c, value=header)
-        cell.font = Font(name=FONT, size=12, bold=True)
+        cell.font = Font(name=FONT, size=12, bold=True, color=INK)
         cell.alignment = Alignment(wrap_text=True, vertical="top")
         if width:                                     # a later block on the sheet passes None to keep them
             ws.column_dimensions[cell.column_letter].width = width
@@ -254,7 +322,7 @@ def write_block(ws, top: int, columns: list[tuple[str, float]], rows: list[list]
             cell = ws.cell(row=r, column=c, value=_cell_text(value))
             if isinstance(value, str):
                 cell.data_type = "s"
-            cell.font = Font(name=FONT, size=11)
+            cell.font = Font(name=FONT, size=11, color=INK)
             cell.alignment = Alignment(wrap_text=True, vertical="top")
     for header, urls in (links or {}).items():
         c = headers.index(header) + 1
@@ -272,14 +340,14 @@ def write_block(ws, top: int, columns: list[tuple[str, float]], rows: list[list]
 
 
 def title(ws, text: str) -> None:
-    """The sheet's title in A1: Arial 16 bold, like the architects' sheet."""
+    """The sheet's title in A1: Arial 16 bold in their ink color, like the architects' sheet."""
     ws["A1"] = text
-    ws["A1"].font = Font(name=FONT, size=16, bold=True)
+    ws["A1"].font = Font(name=FONT, size=16, bold=True, color=INK)
 
 
 def build(data: dict[str, dict]) -> Workbook:
     """Lay the tables out like the architects' sheet: a bold title in row 1, headers in row 2 (frozen),
-    Arial, wrapped text, links as clickable cells."""
+    Arial in their ink color, wrapped text, links as clickable cells."""
     wb = Workbook()
     wb.remove(wb.active)
     wb.properties.creator = "Gordium (generated: python -m rule_export)"
@@ -291,12 +359,23 @@ def build(data: dict[str, dict]) -> Workbook:
     return wb
 
 
+def _look(c) -> tuple:
+    """How a cell looks: font, fill, left border and alignment (what makes a sheet read like the architects')."""
+    f, color = c.font, lambda x: x.rgb if x is not None and x.type == "rgb" else None
+    return (f.name, f.sz, bool(f.b), bool(f.i), f.u, color(f.color),
+            color(c.fill.fgColor) if c.fill.fill_type else None, c.border.left.style,
+            c.alignment.wrap_text, c.alignment.vertical)
+
+
 def contents(wb) -> list:
-    """What a workbook says (sheet names, cell values, links), for comparing a fresh build with a saved file.
-    Content, not bytes: Excel files carry a save timestamp."""
+    """What a workbook says and how it looks (sheet names; each cell's value, link and look; column widths;
+    frozen panes), for comparing a fresh build with a saved file. Content, not bytes: Excel files carry a save
+    timestamp."""
     value = lambda v: None if v == "" else v                  # a saved empty cell reads back as None
-    return [(ws.title, [[(value(c.value), c.hyperlink.target if c.hyperlink else None) for c in row]
-                        for row in ws.iter_rows()]) for ws in wb.worksheets]
+    return [(ws.title, ws.freeze_panes,
+             {k: d.width for k, d in sorted(ws.column_dimensions.items()) if d.customWidth},
+             [[(value(c.value), c.hyperlink.target if c.hyperlink else None, _look(c)) for c in row]
+              for row in ws.iter_rows()]) for ws in wb.worksheets]
 
 
 def output_path(j: Path) -> Path:
