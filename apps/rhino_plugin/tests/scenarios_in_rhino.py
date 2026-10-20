@@ -59,10 +59,11 @@ def dump(g, path):
     """The scenario as JSON, from the same generator the code test uses (design_checker.scenarios)."""
     packages = os.path.join(WT, "packages")
     env = dict(os.environ)
+    env["PYTHONUTF8"] = "1"                                   # as the plugin's own checker: UTF-8 on Windows too
     env["PYTHONPATH"] = os.pathsep.join(os.path.join(packages, n) for n in sorted(os.listdir(packages))
                                         if os.path.isdir(os.path.join(packages, n)))
     out = subprocess.check_output([g._python(), "-m", "design_checker.scenarios", "dump", path], cwd=WT, env=env,
-                                  universal_newlines=True)
+                                  universal_newlines=True, encoding="utf-8")
     return json.loads(out)
 
 
@@ -157,4 +158,4 @@ try:
         log["scenarios"][name] = steps
 except Exception:
     log["trace"] = traceback.format_exc()
-json.dump(log, open(S + "rhino_out.json", "w"), default=str, indent=1)
+json.dump(log, open(S + "rhino_out.json", "w", encoding="utf-8"), default=str, indent=1)

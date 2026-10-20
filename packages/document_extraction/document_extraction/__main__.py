@@ -31,7 +31,7 @@ def main(argv: list[str]) -> int:
     for jurisdiction in jurisdictions(REPO):
         sources = jurisdiction / "1_source_documents"
         out_dir = jurisdiction / "2_extracted_text"
-        for doc in yaml.safe_load((sources / "sources.yaml").read_text())["documents"]:
+        for doc in yaml.safe_load((sources / "sources.yaml").read_text(encoding="utf-8"))["documents"]:
             pdf, out = sources / doc["file"], out_dir / f"{Path(doc['file']).stem}.jsonl"
             if sha256(pdf) != doc["sha256"]:
                 print(f"✗ {pdf.relative_to(REPO)}: fingerprint doesn't match sources.yaml; not extracted")

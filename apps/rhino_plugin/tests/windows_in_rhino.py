@@ -25,7 +25,7 @@ mode = sc.sticky.pop("gordium_windows_mode", "panel")
 
 
 def ready(**info):
-    json.dump(dict(info, mode=mode, at=time.time()), open(os.path.join(OUT, "ready.json"), "w"))
+    json.dump(dict(info, mode=mode, at=time.time()), open(os.path.join(OUT, "ready.json"), "w", encoding="utf-8"))
 
 
 try:

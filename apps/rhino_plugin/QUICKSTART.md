@@ -338,6 +338,8 @@ Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading
   Control). Run `GordiumCheck` again to bring it back.
 - **"Gordium: ⚠ couldn't … (it was skipped; details in …gordium_errors.log)"**: one drawing or panel step failed
   and was skipped; the check itself is unaffected. Please send that log file.
+- **A check refuses with "â€”" in a quote** (Windows): your copy of Gordium reads files the old way. Update
+  Gordium (`git pull`) and restart Rhino. (Older versions needed `PYTHONUTF8=1` set before starting Rhino.)
 - **Rhino closed unexpectedly**: please send
   1. the newest `Rhinoceros-….ips` in `~/Library/Logs/DiagnosticReports/`;
   2. `gordium_errors.log` and `gordium_worker.log` from your temporary folder (in Terminal: `open $TMPDIR`);

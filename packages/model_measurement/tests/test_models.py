@@ -122,7 +122,7 @@ def test_the_committed_measured_projects_match_a_fresh_measurement():
     found = pairs()
     assert {p[0].name for p in found} >= {"model.3dm", "spreadsheet_design_model.3dm"}
     for model, facts, out in found:
-        assert out.read_text() == text(model, facts), f"{out.name} is out of date: run python -m model_measurement"
+        assert out.read_text(encoding="utf-8") == text(model, facts), f"{out.name} is out of date: run python -m model_measurement"
 
 
 def test_the_committed_spreadsheet_model_matches_its_generator(tmp_path):
@@ -151,7 +151,7 @@ def test_mistyped_lot_facts_are_refused_with_a_plain_message(tmp_path, bad, mess
     from model_measurement.project import project
     facts = {**load_facts(SITE / "spreadsheet_design_model_facts.yaml"), **bad}
     path = tmp_path / "facts.yaml"
-    path.write_text(yaml.safe_dump({"lot_facts": facts}))
+    path.write_text(yaml.safe_dump({"lot_facts": facts}), encoding="utf-8")
     with pytest.raises(ValueError, match=message):
         load_facts(path)
     with pytest.raises(ValueError, match=message):

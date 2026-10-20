@@ -41,7 +41,7 @@ ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "l
 CELL_FIELDS = {"section", "row", "column"}   # a chart cell source: {file, page, cell: {section, row, column}}
 APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "answers")
 UNIT_KINDS = {"text": "text", "yes_no": "boolean"}       # every other unit (ft, sf, count) is a number
-MEASURE_KINDS = {name: UNIT_KINDS.get(m["unit"], "number") for name, m in yaml.safe_load(MEASURES_FILE.read_text()).items()}
+MEASURE_KINDS = {name: UNIT_KINDS.get(m["unit"], "number") for name, m in yaml.safe_load(MEASURES_FILE.read_text(encoding="utf-8")).items()}
 # Measures a draft asked for that aren't in measures.yaml yet: listed for engineers, never used silently.
 PROPOSED_MEASURES = "5_zoning_rules/drafted/records/proposed_measures.yaml"
 
@@ -82,7 +82,7 @@ class _StrictLoader(yaml.SafeLoader):
 
 
 def load(path):
-    return yaml.load(Path(path).read_text(), Loader=_StrictLoader)
+    return yaml.load(Path(path).read_text(encoding="utf-8"), Loader=_StrictLoader)
 
 
 def rulebook_paths(folder) -> list[Path]:

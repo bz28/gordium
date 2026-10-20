@@ -74,4 +74,4 @@ try:
                                       all(v["objects"] == 0 for n, v in out["docs"].items() if n != front_name))
 except Exception:
     out["trace"] = traceback.format_exc()
-json.dump(out, open(OUT + "out.json", "w"), indent=1, default=str)
+json.dump(out, open(OUT + "out.json", "w", encoding="utf-8"), indent=1, default=str)

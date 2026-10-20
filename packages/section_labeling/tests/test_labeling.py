@@ -157,7 +157,7 @@ def test_estimate_with_a_key_counts_tokens_and_uses_measured_output(law, tmp_pat
     assert e["exact_input"] and e["usage"]["output_tokens"] == 5 * labeler.SETTINGS["max_tokens"]   # nothing measured yet
     runs = tmp_path / "3_section_labels/runs"
     runs.mkdir(parents=True)
-    (runs / "x.jsonl").write_text(json.dumps({"model": "claude-haiku-5-5", "usage": USAGE}) + "\n")
+    (runs / "x.jsonl").write_text(json.dumps({"model": "claude-haiku-5-5", "usage": USAGE}) + "\n", encoding="utf-8")
     monkeypatch.undo()
     assert cli._measured_output(tmp_path, "claude-haiku-5-5") == 80
 
@@ -179,7 +179,7 @@ def test_a_run_writes_labels_and_records_and_never_overwrites_an_approved_label(
     book = load(j / "3_section_labels/chapter_325_zoning_2026-10.yaml")
     assert book["labels"]["325-16B"] == approved and book["labels"]["325-16C"]["label"] == "rule"
     assert book["labels"]["325-16C"]["run"].startswith("3_section_labels/runs/")
-    records = [json.loads(line) for f in (j / "3_section_labels/runs").glob("*.jsonl") for line in f.read_text().splitlines()]
+    records = [json.loads(line) for f in (j / "3_section_labels/runs").glob("*.jsonl") for line in f.read_text(encoding="utf-8").splitlines()]
     assert [r["piece"] for r in records] == ["325-16C"] and records[0]["document"] == LAW
 
 
@@ -193,7 +193,7 @@ def isolated(tmp_path, monkeypatch, law, labels=None):
     monkeypatch.setattr(cli, "extracted_rows", lambda *_: rows)
     monkeypatch.setattr(cli, "load_pieces", lambda _: (header, pieces))
     if labels:
-        (j / "3_section_labels/chapter_325_zoning_2026-10.yaml").write_text(yaml.safe_dump({"document": LAW, "labels": labels}))
+        (j / "3_section_labels/chapter_325_zoning_2026-10.yaml").write_text(yaml.safe_dump({"document": LAW, "labels": labels}), encoding="utf-8")
     return j, pieces
 
 
@@ -222,7 +222,7 @@ def test_relabeling_keeps_a_reviewers_questions_and_counts_skipped_pieces(law, t
 
 def test_spent_is_never_less_than_the_recorded_runs(tmp_path):
     assert Budget(1.00, tmp_path / "missing.json", recorded_usd=0.4).spent == 0.4
-    (tmp_path / "ledger.json").write_text(json.dumps({"spent_usd": 0.7, "calls": 9}))
+    (tmp_path / "ledger.json").write_text(json.dumps({"spent_usd": 0.7, "calls": 9}), encoding="utf-8")
     assert Budget(1.00, tmp_path / "ledger.json", recorded_usd=0.4).spent == 0.7
 
 
@@ -303,13 +303,13 @@ def label_with_budget(law, client, budget):
 def test_measured_cost_is_added_and_kept_across_runs(law, tmp_path):
     ledger = tmp_path / "ledger.json"
     _, records = label_with_budget(law, FakeClient(GOOD), Budget(1.00, ledger))
-    assert Budget(1.00, ledger).spent == pytest.approx(PRICE) and json.loads(ledger.read_text())["calls"] == 1
+    assert Budget(1.00, ledger).spent == pytest.approx(PRICE) and json.loads(ledger.read_text(encoding="utf-8"))["calls"] == 1
     assert records[0]["budget_usd"] == labeler.SETTINGS["budget_usd"] and records[0]["ledger_spent_usd"] == pytest.approx(PRICE)
 
 
 def test_no_call_is_sent_that_could_cross_the_cap(law, tmp_path):
     ledger = tmp_path / "ledger.json"
-    ledger.write_text(json.dumps({"spent_usd": 0.9999, "calls": 5000}))
+    ledger.write_text(json.dumps({"spent_usd": 0.9999, "calls": 5000}), encoding="utf-8")
     client = FakeClient(GOOD)
     with pytest.raises(BudgetExceeded, match="budget is left"):
         label_with_budget(law, client, Budget(1.00, ledger))
@@ -322,7 +322,7 @@ def test_a_retry_is_checked_too(law, tmp_path):
     messages = [{"role": "user", "content": labeler.piece_message(piece, rows)}]
     first = worst_case(len(labeler.system_prompt()) + len(json.dumps(messages)), labeler.SETTINGS, labeler.PRICES)
     ledger = tmp_path / "ledger.json"
-    ledger.write_text(json.dumps({"spent_usd": 1.00 - first - PRICE / 2, "calls": 0}))   # room for one call, not two
+    ledger.write_text(json.dumps({"spent_usd": 1.00 - first - PRICE / 2, "calls": 0}), encoding="utf-8")   # room for one call, not two
     client = FakeClient(GOOD | {"quote": "not in the piece at all"}, GOOD)
     with pytest.raises(BudgetExceeded):
         label_with_budget(law, client, Budget(1.00, ledger))
@@ -393,7 +393,7 @@ def test_worst_case_is_never_below_a_measured_call():
 
 def test_a_run_whose_estimate_exceeds_what_is_left_is_refused(monkeypatch, tmp_path, capsys):
     ledger = tmp_path / "ledger.json"
-    ledger.write_text(json.dumps({"spent_usd": 0.99999, "calls": 1}))
+    ledger.write_text(json.dumps({"spent_usd": 0.99999, "calls": 1}), encoding="utf-8")
     monkeypatch.setattr(cli, "LEDGER", ledger)
     client = FakeClient()
     monkeypatch.setattr(cli, "_client", lambda: client)
@@ -505,7 +505,7 @@ def test_methods_doc_matches_what_this_branch_builds():
     import re
 
     from rule_format.rulebook import REPO
-    doc = (REPO / "docs/methods.md").read_text()
+    doc = (REPO / "docs/methods.md").read_text(encoding="utf-8")
     assert not re.search(r"PR 7[ab]\b", doc)
     if not (REPO / "packages/document_extraction/document_extraction/charts.py").exists():
         section = doc[doc.index("## 4. Chart tables"):doc.index("## 5.")]
@@ -522,10 +522,10 @@ def test_cited_by_reads_every_rulebook_including_drafted_ones(tmp_path, law):
     j = tmp_path / "j"
     (j / "5_zoning_rules/drafted").mkdir(parents=True)
     (j / "5_zoning_rules/drafted/X.yaml").write_text(yaml.safe_dump({"district": "X", "rules": [
-        {"id": "X.a", "sources": [{"file": LAW, "page": page, "lines": [line, line], "quote": "q"}]}]}))
+        {"id": "X.a", "sources": [{"file": LAW, "page": page, "lines": [line, line], "quote": "q"}]}]}), encoding="utf-8")
     (j / "5_zoning_rules/drafted/records").mkdir()
     (j / "5_zoning_rules/drafted/records/run.yaml").write_text(yaml.safe_dump({"rules": [
-        {"id": "R.z", "sources": [{"file": LAW, "page": page, "lines": [line, line], "quote": "q"}]}]}))
+        {"id": "R.z", "sources": [{"file": LAW, "page": page, "lines": [line, line], "quote": "q"}]}]}), encoding="utf-8")
     assert coverage.cited_by(j, LAW, pieces) == {pid: ["drafted:X.a"]}    # tagged, so it stays apart from a hand rule
 
 
@@ -534,7 +534,7 @@ def test_methods_doc_says_whether_a_run_used_the_current_labeling_guide():
     sent, methods.md must say so and must not call the change cosmetic."""
     from rule_format.rulebook import REPO
     sent = {call["system_sha256"] for call in cli.run_records(ITHACA)}
-    doc = (REPO / "docs/methods.md").read_text()
+    doc = (REPO / "docs/methods.md").read_text(encoding="utf-8")
     if labeler.sha(labeler.system_prompt()) not in sent:
         assert "No recorded run used the current guide" in doc and "wording only" not in doc
     else:
@@ -578,6 +578,6 @@ def test_methods_doc_says_where_the_category_definitions_labels_came_from():
     pieces = ("325-3B:kitchen", "325-3B:adult_day_care_home", "325-3B:bed_and_breakfast_inn")
     holds = all(not labels[pid].get("revised") and labels[pid].get("open_questions") and first_run_answer(pid)
                 for pid in pieces)
-    doc = (REPO / "docs/methods.md").read_text()
+    doc = (REPO / "docs/methods.md").read_text(encoding="utf-8")
     assert ("Haiku's answers from the first full run" in doc) == holds
     assert "come from recorded review revisions" not in doc

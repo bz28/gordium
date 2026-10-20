@@ -36,13 +36,13 @@ class Budget:
     def _locked(self):
         """The ledger's contents ({spent_usd, calls}), read under an exclusive lock and written back atomically."""
         self.ledger.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.ledger.with_suffix(".lock"), "w") as lock:
+        with open(self.ledger.with_suffix(".lock"), "w", encoding="utf-8") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
-            data = json.loads(self.ledger.read_text()) if self.ledger.exists() else {}
+            data = json.loads(self.ledger.read_text(encoding="utf-8")) if self.ledger.exists() else {}
             data = {"spent_usd": max(float(data.get("spent_usd", 0.0)), self.recorded), "calls": int(data.get("calls", 0))}
             yield data
             tmp = self.ledger.with_suffix(".tmp")
-            tmp.write_text(json.dumps({"spent_usd": data["spent_usd"], "calls": data["calls"]}) + "\n")   # unrounded: no drift
+            tmp.write_text(json.dumps({"spent_usd": data["spent_usd"], "calls": data["calls"]}) + "\n", encoding="utf-8")   # unrounded: no drift
             os.replace(tmp, self.ledger)
 
     @property
