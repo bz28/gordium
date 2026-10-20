@@ -202,6 +202,22 @@ try:
         g._new_get_object = real_new
         doc.Objects.UnselectAll()
 
+    # Esc at a pick prompt clears its names; a check clears the editing outline
+    real_new = g._new_get_object
+    try:
+        g._new_get_object = FakeGet
+        FakeGet.answer = g.Rhino.Input.GetResult.Cancel
+        try:
+            g._pick(doc, "Click the main building", buildings, "Building")
+        except g.Cancelled:
+            pass
+        expect(not o.labels, "names stayed on screen after Esc")
+    finally:
+        g._new_get_object = real_new
+    g._highlight(doc, saved)
+    g.run_check(doc, report=False)
+    expect(o.confirm is None, "the editing outline stayed after a check")
+
     # an import into this model is an edit: its result stays until the re-check
     g.run_check(doc, report=False)
 

@@ -197,6 +197,13 @@ def test_a_new_lot_drops_the_old_street_line_and_enter_keeps_only_a_current_one(
     assert after_lot_pick(facts, None) == facts
 
 
+def test_a_changed_corner_answer_drops_the_street_lines():
+    from design_checker.rhino_logic import after_corner_answer, street_enter_keeps
+    two = {"corner_lot": False, "street_line": [[[0, 0], [5, 0]], [[5, 0], [5, 9]]]}
+    assert not street_enter_keeps(after_corner_answer(two, True))
+    assert after_corner_answer(two, False) == two
+
+
 def test_closing_the_confirm_dialog_saves_nothing():
     from design_checker.rhino_logic import after_confirm
     assert (after_confirm("ok"), after_confirm("change"), after_confirm(None)) == ("keep", "change", "cancel")

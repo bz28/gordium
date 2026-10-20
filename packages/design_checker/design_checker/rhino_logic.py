@@ -150,3 +150,12 @@ def after_lot_pick(facts, picked_lot):
 def street_enter_keeps(facts):
     """Whether Enter at the first street-line prompt keeps the street lines saved for this lot."""
     return bool(facts.get("street_line"))
+
+
+def after_corner_answer(facts, was_corner):
+    """The facts after the corner-lot answer: a changed answer drops the street lines (a corner lot has two
+    streets, any other lot one), so they are picked again and Enter can't keep the old ones."""
+    out = dict(facts)
+    if out.get("corner_lot") != was_corner:
+        out.pop("street_line", None)
+    return out

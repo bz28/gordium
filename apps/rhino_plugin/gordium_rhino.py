@@ -609,12 +609,15 @@ def _pick(doc, prompt, candidates, kind, geometry=None):
         go.GeometryFilter = geometry
     go.SetCustomGeometryFilter(Rhino.Input.Custom.GetObjectGeometryFilter(
         lambda obj, geo, part: obj is not None and logic.accepts_pick(str(obj.Id), ids)))
-    got = go.Get()
-    _go_on(got)
+    try:
+        got = go.Get()
+        _go_on(got)
+    finally:
+        overlay().labels = []
+        doc.Objects.UnselectAll()
+        doc.Views.Redraw()
     picked = (str(go.Object(0).ObjectId) if got == Rhino.Input.GetResult.Object else
               by_option.get(go.OptionIndex()) if got == Rhino.Input.GetResult.Option else None)
-    overlay().labels = []
-    doc.Objects.UnselectAll()
     return picked if picked is not None and logic.accepts_pick(picked, ids) else None
 
 
@@ -647,7 +650,10 @@ def _change_facts(doc, facts, options):
         if picked:
             facts["main_building"] = picked
         _highlight(doc, facts)
-    facts["corner_lot"] = _yes_no("Corner lot (two streets meet at it)?", facts.get("corner_lot"))
+    was_corner = facts.get("corner_lot")
+    facts["corner_lot"] = _yes_no("Corner lot (two streets meet at it)?", was_corner)
+    facts = logic.after_corner_answer(facts, was_corner)
+    _highlight(doc, facts)
     lot = _find(doc, facts.get("lot_id") or "")
     if lot is not None:
         picked = []
@@ -689,6 +695,16 @@ def edit_facts():
         saved = current_facts(doc)
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
+    try:
+        _edit_counts_and_save(doc, saved, options)
+    finally:                            # the editing outline and names never stay on screen
+        o = overlay()
+        o.confirm, o.labels = None, []
+        doc.Views.Redraw()
+    run_check(doc, report=False)
+
+
+def _edit_counts_and_save(doc, saved, options):
     facts = change_facts(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options)
     if facts is None:                   # Esc: nothing changes
         return
@@ -699,7 +715,6 @@ def edit_facts():
     except Cancelled:
         return
     save_facts(doc, logic.update_counts(facts, answers))
-    run_check(doc, report=False)
 
 
 # ---- checking --------------------------------------------------------------------------------------------
@@ -713,6 +728,7 @@ def report_path(doc):
 def _clear(o):
     """Nothing from an earlier check is left on screen."""
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
+    o.confirm, o.labels = None, []
     o.doc = None
 
 
