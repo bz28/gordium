@@ -160,6 +160,13 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     front_line = max(street) + env["yards"]["front"]          # the front yard line, in the street's frame
     found = _footprint(buildable, buildable.centroid.x, allowed, front_line,
                        front_line + (STEP if bend > 1e-9 else 0.0))
+    if found is None and buildable.bounds[1] > front_line + 1e-9:
+        # a flag lot or a narrow neck: the side yards close the frontage, so the buildable area only starts behind
+        # the front yard line; the building goes where the buildable area begins, and the note says why
+        found = _footprint(buildable, buildable.centroid.x, allowed, front_line, buildable.bounds[3])
+        if found is not None:
+            notes.append("the side yards close the lot's frontage (a flag lot or a narrow neck): the starting building "
+                         "sits where the buildable area begins, behind the front yard line")
     if found is None:
         notes.append("no rectangle square to the street fits inside the required yards")
         return out

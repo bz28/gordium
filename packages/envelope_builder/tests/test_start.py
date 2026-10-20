@@ -198,3 +198,17 @@ def test_a_lot_whose_sides_lean_outward_still_gets_a_full_building_at_the_front_
     assert start["area"] >= 0.10 * Polygon(points).area      # a real building, not a corner-tip sliver
     if name != "cul-de-sac pie":
         assert m["front_yard"]["value"] == pytest.approx(25, abs=0.01)
+
+
+@pytest.mark.parametrize("points, street", [
+    ([(0, 0), (20, 0), (20, 40), (60, 40), (60, 140), (-40, 140), (-40, 40), (0, 40)], [[0, 0], [20, 0]]),   # flag lot
+    ([(0, 0), (18, 0), (18, 30), (70, 30), (70, 130), (-50, 130), (-50, 30), (0, 30)], [[0, 0], [18, 0]]),   # 18 ft neck
+])
+def test_a_flag_lot_whose_side_yards_fill_the_pole_still_gets_a_building(points, street):
+    facts = {**FACTS, "street_line": [street]}
+    start, site = generated(points, facts)
+    assert start["floors"] and any("flag lot" in n for n in start["notes"]), start["notes"]
+    got, m = results(site, facts)
+    building_rules = {k: v for k, v in got.items() if "lot_width" not in k}   # the narrow frontage is the lot's own
+    assert "fail" not in building_rules.values(), got
+    assert m["front_yard"]["value"] >= 25
