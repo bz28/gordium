@@ -39,6 +39,8 @@ STOPS = {
     # the ground
     "no_ground": "the ground level isn't given: enter it (the grade plane)",
     "ground_unknown": "say whether the ground is flat",
+    "ground_off_building": "the ground level ({ground} ft) doesn't meet a building (it runs from {bottom} to {top} "
+                           "ft): check the ground level",
     "sloped_ground": "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't "
                      "measured yet",
     # facts a massing model doesn't show, until they are entered

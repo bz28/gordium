@@ -163,6 +163,7 @@ CASES = {
     "lines_unclear": _plain(ZIGZAG),
     "no_rear_line": _plain(lot([(0, 0), (50, 0), (25, 100)]), buildings=[box(20, 10, 30, 30)]),
     "no_ground": _plain(grade_elevation=None),
+    "ground_off_building": _plain(grade_elevation=812),
     "readings_differ": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house")]),
     "no_use": _plain(use=None),
     "no_stories": _plain(stories=None),

@@ -580,3 +580,12 @@ def test_a_gently_curved_roof_is_not_one_plane():
             for g in group:
                 n, p0 = _unit_normal(g["points"]), g["points"][0]
                 assert all(abs(sum(n[c] * (q[c] - p0[c]) for c in range(3))) <= TOL for f in group for q in f["points"])
+
+
+def test_a_ground_level_that_doesnt_meet_the_building_stops_height_area_and_yards():
+    for grade in (812, 30, 31, -50):          # above the top, at it, just over it, under the lowest point
+        m = measure(site(), {**FACTS, "grade_elevation": grade})
+        for name in ("building_height", "building_area", "front_yard", "side_yard_smaller", "rear_yard"):
+            assert m[name]["value"] is None and "doesn't meet a building" in m[name]["reason"], (grade, name)
+    basement = measure(site(), {**FACTS, "grade_elevation": 4})      # a basement 4 ft below the ground
+    assert basement["building_height"]["value"] == 26.0 and basement["front_yard"]["value"] == 25.0
