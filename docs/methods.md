@@ -165,9 +165,34 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
   maximal (1 ft more on any side breaks a rule); over 60 random lot shapes no building placed breaks a rule; the whole flow run in Rhino 8 from an empty document (PR
   description).
 
-## 17. What's not decided or not built
+## 17. Looking up a site from its address (code, `packages/site_lookup`)
+
+- **What:** `python -m site_lookup "<address>"` turns an address into start-box facts, each
+  exactly `{value, source, confirmed_by, date}` (source "from tax map" for the lot, "suggested by Gordium"
+  otherwise), with a status beside each (suggested / needs review / ask) and the service it came from. EPSG:2261
+  is US survey feet; lengths are converted to Gordium's international feet (× 1200/3937 ÷ 0.3048 = 1.000002).
+  No AI.
+- **How:** the NYS Geocoder's address point (the County's address points as a cross-check) → the tax parcel
+  containing it, outline asked for in EPSG:2261 (NY State Plane, feet) and measured by our own code (never the
+  service's area field) → the parcel's SWIS code must be the City of Ithaca's (500700), otherwise refused → lot
+  lines that run along a street centerline (within 30°) and sit within half the right-of-way + 10 ft of it are
+  street lines; two streets is a corner lot, and Gordium asks for the front → USGS 3DEP elevations at the
+  corners (today's ground, an estimate) → the City zoning map's zone under the lot, always a suggestion, with
+  rezonings adopted after the map's last edit (`amendments.yaml`, Ord. 2025-12 Southside) flagged.
+- **Never a false pass:** two zones, two streets, a mismatched street, a far County point, an overlay, a
+  failing service: each becomes ask or needs review with a plain reason, never a silent choice.
+- **Licensing:** City and County layers are used live and never stored; a project's snapshot keeps the facts
+  Gordium may keep plus each source's URL, date and SHA-256 (`endpoints.yaml` says what each source allows).
+- **Tested by:** recorded State and USGS answers for 106, 109 and 96 Ithaca Rd, a Town of Ithaca address and
+  an unknown one, with stand-in City layers built from derived numbers (106: parcel 84.-2-6, 7,033.7 sf, 75.8
+  ft on Ithaca Rd, interior, ground 735–749 ft, R-1b suggested; 109 and 96: corner lots, ask). A live check
+  runs with `GORDIUM_LIVE=1`.
+- **Weakness:** the tax map is approximate (about ±2 ft); the Southside boundary is matched by street name,
+  not its map; overlays are found but not checked.
+
+## 18. What's not decided or not built
 
 - How model objects are identified beyond the layers (names, or asking every time).
-- Site facts: zone lookup from the address, lot lines and area (survey vs city records), ground levels.
+- Site facts: wiring the address lookup into the start box; survey vs city records for the lot lines.
 - Measuring curved walls and roofs, sloped ground, and stories from floors in the model.
 - Human approval: deferred (rules stay drafts, checked by code); the approval fields stay in the formats, unused.
