@@ -15,8 +15,11 @@ import Rhino.Geometry as rg
 
 import rhino_logic as logic  # plain Python, tested in CI (on the path: gordium_rhino puts it there first)
 
-PANEL_WIDTH = 360          # wide enough that Proposed, Required and Margin never truncate (D4)
-COLUMNS = [("", 22), ("Item", 150), ("Proposed", 70), ("Req. ≥/≤", 64), ("Margin", 62)]
+PANEL_WIDTH = 440          # wide enough that Proposed, Required and Margin never truncate (D4)
+# fixed widths that fit the panel: an Item column sized to its text pushed the numbers out of sight (seen in the
+# Rhino window capture). The mark is the first thing in the Item cell: on the Mac the tree's expand arrows take
+# the first column, which hid a column of its own.
+COLUMNS = [("Item", 190), ("Proposed", 84), ("Required", 72), ("Margin", 62)]
 STALE_SECONDS = 0.3        # results older than an edit by this long are shown as out of date (F7, H1)
 
 
@@ -59,15 +62,23 @@ def backing(dark):
 
 # ---- small Eto helpers ---------------------------------------------------------------------------------------
 
-def label(text, color=None, bold=False, size=None, wrap=True):
+def label(text, color=None, bold=False, size=None, wrap=True, width=None):
     lab = ef.Label()
     lab.Text = text or ""
     lab.Wrap = ef.WrapMode.Word if wrap else getattr(ef.WrapMode, "None")
+    if width is not None:               # wraps at this width, left aligned (an unbounded label ran off the panel)
+        lab.Width = width
+        lab.TextAlignment = ef.TextAlignment.Left
     if color is not None:
         lab.TextColor = color
     if bold or size:
         lab.Font = ed.Font(ed.SystemFont.Bold if bold else ed.SystemFont.Default, size or 13)
     return lab
+
+
+def _wide(text, color=None, bold=False, size=None):
+    """A label the width of the panel's content, wrapping there."""
+    return label(text, color, bold, size, True, PANEL_WIDTH - 48)
 
 
 def button(text, action, enabled=True):
@@ -111,7 +122,8 @@ def make_panel(actions):
         col.Editable = False
         col.Sortable = False
         col.Width = width
-        col.AutoSize = i == 1               # only Item gives way (D4); the values keep their width
+        col.AutoSize = False                # never sized to its text: every column stays in view (D4)
+        col.Resizable = True
         tree.Columns.Add(col)
     parts = {"form": form, "tree": tree, "actions": actions, "by_id": {}, "expanded": {}, "selected": None,
              "header": ef.DynamicLayout(), "detail": ef.DynamicLayout(), "view": None}
@@ -124,7 +136,7 @@ def make_panel(actions):
             return
         found = parts["by_id"].get(tag)
         if found is not None and not parts.get("stale") and found["status"] in ("does_not_comply", "needs_review"):
-            if e.Column.DisplayIndex in (0, 2, 4) or (e.Column.DisplayIndex == 1):
+            if e.Column.DisplayIndex in (0, 1, 3):          # the item (with its mark), proposed, margin
                 e.ForegroundColor = eto_status_color(found["status"])
 
     tree.CellFormatting += formatting
@@ -143,18 +155,19 @@ def make_panel(actions):
     split.Orientation = ef.Orientation.Vertical
     split.Panel1 = tree
     detail_scroll = ef.Scrollable()
+    detail_scroll.ExpandContentWidth = True      # the detail's text wraps to the panel, never runs off it
     detail_scroll.Content = parts["detail"]
     split.Panel2 = detail_scroll
     split.Position = 380
-    footer = row(_envelope_box(actions), button("?", actions["legend"]),
-                 button("Zoom to", lambda: actions["zoom"](parts["by_id"].get(parts["selected"]))),
-                 button("Zoning report…", actions["report"]))
-    parts["zoom_button"] = footer.Items[2].Control
+    footer = row(button("Zoom to", lambda: actions["zoom"](parts["by_id"].get(parts["selected"]))),
+                 button("Zoning report…", actions["report"]), button("?", actions["legend"]))
+    parts["zoom_button"] = footer.Items[0].Control
     layout = ef.DynamicLayout()
     layout.Padding = ed.Padding(10)
     layout.Spacing = ed.Size(6, 6)
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
+    layout.Add(_envelope_box(actions))
     layout.Add(footer)
     form.Content = layout
     return parts
@@ -194,12 +207,12 @@ def show(parts, view, stale=False, error=None, checking=False):
         gi = ef.TreeGridItem()
         gi.Tag = "group:" + g["key"]
         title = ("Site · " if g["key"] == "complies" and all(by_id[i]["group"] == "site" for i in g["items"]) else "")
-        gi.Values = System.Array[System.Object](["", title + g["title"] + " · " + str(len(g["items"])), "", "", ""])
+        gi.Values = System.Array[System.Object]([title + g["title"] + " · " + str(len(g["items"])), "", "", ""])
         gi.Expanded = parts["expanded"].get(gi.Tag, g["key"] not in ("complies", "not_covered"))
         for item_id in g["items"]:
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
-            values = ["" if stale_row else i["mark"], i["name"] + ("" if i["group"] != "site" else " (site)"),
+            values = [("" if stale_row else i["mark"] + "  ") + i["name"] + ("" if i["group"] != "site" else " (site)"),
                       "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else "needs input"
                                              if i["id"].startswith("R-") else ""),
                       "" if stale_row else i["required"], "" if stale_row else i["margin"]]
@@ -212,8 +225,15 @@ def show(parts, view, stale=False, error=None, checking=False):
         store.Add(gi)
         parts["groups"].append(gi)
     tree.DataStore = store
-    if selected_item is not None:
-        tree.SelectedItem = selected_item
+    if selected_item is not None:           # SelectedItem is read-only here: select by row in the visible list
+        k = 0
+        for gi in parts["groups"]:
+            if gi.Expanded:
+                for c in range(gi.Children.Count):
+                    if gi.Children[c] is selected_item or gi.Children[c].Tag == selected_item.Tag:
+                        tree.SelectedRow = k + 1 + c
+                k += gi.Children.Count
+            k += 1
     parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]
     show_detail(parts)
 
@@ -223,26 +243,25 @@ def _header(parts, view, error, out_of_date):
     h.Clear()
     a = parts["actions"]
     head = (view or {}).get("header") or {}
-    h.AddRow(label(head.get("place") or "Gordium", bold=True, size=13))
-    h.AddRow(label(head.get("code") or "", size=11))
+    h.AddRow(_wide(head.get("place") or "Gordium", bold=True, size=13))
+    h.AddRow(_wide(head.get("code") or "", size=11))
     if error is not None:
-        h.AddRow(row(label("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15),
+        h.AddRow(row(_wide("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15),
                      button("Retry", a["retry"])))
-        h.AddRow(label(error, size=11))
+        h.AddRow(_wide(error, size=11))
     elif out_of_date:
-        h.AddRow(label("Checking…", bold=True, size=15))
+        h.AddRow(_wide("Checking…", bold=True, size=15))
     else:
-        h.AddRow(label((view or {}).get("summary") or "No check yet", bold=True, size=15))
-    h.AddRow(label(head.get("draft") or "Draft rulebook", eto_status_color("needs_review"), size=11))
-    lot_row = [label(head.get("lot") or "", size=11)]
+        h.AddRow(_wide((view or {}).get("summary") or "No check yet", bold=True, size=15))
+    h.AddRow(_wide(head.get("draft") or "Draft rulebook", eto_status_color("needs_review"), size=11))
+    h.AddRow(_wide(head.get("lot") or "", size=11))          # each fact on its line, its buttons below it: a
+    h.AddRow(_wide(head.get("grade") or "", size=11))        # button beside a long line ran off the panel
+    buttons = [button("Edit site…", a["edit_site"])]
     if "Pick survey lot lines…" in (head.get("actions") or []):
-        lot_row.append(button("Pick survey lot lines…", a["survey"]))
-    h.AddRow(row(*lot_row))
-    grade_row = [label(head.get("grade") or "", size=11)]
+        buttons.append(button("Pick survey lot lines…", a["survey"]))
     if "Set grade…" in (head.get("actions") or []):
-        grade_row.append(button("Set grade…", a["grade"]))
-    h.AddRow(row(*grade_row))
-    h.AddRow(row(button("Edit site…", a["edit_site"])))
+        buttons.append(button("Set grade…", a["grade"]))
+    h.AddRow(row(*buttons))
     h.Create()
 
 
@@ -254,31 +273,31 @@ def show_detail(parts):
     a = parts["actions"]
     i = parts["by_id"].get(parts["selected"])
     if i is None:
-        d.AddRow(label("Select an item to see the code's words, the citation and how it was measured.", size=11))
+        d.AddRow(_wide("Select an item to see the code's words, the citation and how it was measured.", size=11))
         d.Create()
         return
     det = i["detail"]
     words = {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
              "not_checked": "Not checked"}[i["status"]]
-    d.AddRow(label((i["mark"] + " " if i["mark"] else "") + i["name"] + " · " + words,
+    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + i["name"] + " · " + words,
                    eto_status_color(i["status"]), bold=True, size=13))
     if parts.get("stale"):
-        d.AddRow(label("Out of date: the model changed since this was checked.", size=11))
+        d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))
     for text in (det.get("line"), i.get("reason"), i.get("hint") if i.get("hint") not in ("Add to check…",) else None,
                  det.get("at_limit"), det.get("calc"), det.get("scope")):
         if text:
-            d.AddRow(label(text, size=12))
+            d.AddRow(_wide(text, size=12))
     if i["id"].startswith("R-") and i["status"] == "not_checked":
         d.AddRow(row(button("Enter bedrooms and parking spaces…", a["enter"])))
     if i["id"] == "scope.not_included":
         d.AddRow(row(button("Add to check…", lambda: a["add"](i["objects"]))))
     for q in det.get("quotes") or []:
         if q.get("text"):
-            d.AddRow(label("“" + q["text"] + "”", size=12))
+            d.AddRow(_wide("“" + q["text"] + "”", size=12))
             if q.get("where"):
-                d.AddRow(label(q["where"], size=11))
+                d.AddRow(_wide(q["where"], size=11))
     if det.get("citation"):
-        d.AddRow(label(det["citation"], size=11))
+        d.AddRow(_wide(det["citation"], size=11))
     for c in det.get("cited") or []:
         link = ef.LinkButton()
         link.Text = "Open " + c["citation"]
@@ -286,7 +305,7 @@ def show_detail(parts):
         link.Click += lambda s, e, u=url: Rhino.UI.Dialogs.ShowMessage(u, "Gordium") if not _open(u) else None
         d.AddRow(link)
     if det.get("precision"):
-        d.AddRow(label(det["precision"], size=11))
+        d.AddRow(_wide(det["precision"], size=11))
     d.Add(None)
     d.Create()
 
@@ -422,6 +441,9 @@ def start_box(state, options, mode):
     dialog.Content = layout
     dialog.DefaultButton = draw
     dialog.AbortButton = cancel
+    shown = state.get("_on_shown")            # for the in-Rhino test: capture the real box, then close it
+    if shown is not None:
+        dialog.Shown += lambda s, e: shown(dialog)
     dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     return chosen.get("what")
 

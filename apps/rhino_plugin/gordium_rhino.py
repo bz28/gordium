@@ -737,8 +737,9 @@ def _box_state(doc, facts, options, saved_ui):
     k = _scale(doc)
     lines = facts.get("street_line") or []
     length = sum(((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5 for a, b in lines)
-    grade = saved_ui.get("grade") or ("spot" if facts.get("grade_from") == "spot" else
-                                      "terrain" if facts.get("grade_from") == "terrain" else "not_set")
+    # the facts the check uses decide what the box shows (set from the panel too, not only from the box)
+    grade = facts.get("grade_from") if facts.get("grade_from") in ("spot", "terrain") else \
+        "not_set" if facts.get("grade_elevation") is None else (saved_ui.get("grade") or "not_set")
     spots = len(_grade_points(doc))
     return {"address": facts.get("address") or "", "zone": facts.get("zone"),
             "district_confirmed": bool(saved_ui.get("district_confirmed")), "use": facts.get("use"),
@@ -841,6 +842,7 @@ def confirm(doc, facts, options, mode="check"):
             return facts
         while True:
             state = _box_state(doc, facts, options, saved_ui)
+            state["_on_shown"] = STATE.get("on_box_shown")     # the dialog capture in the in-Rhino test
             what = ui.start_box(state, options, mode)
             if what is None:
                 return None

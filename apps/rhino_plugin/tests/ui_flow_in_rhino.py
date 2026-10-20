@@ -73,7 +73,7 @@ def panel_rows(g):
         return None
     out = []
     for group in p.get("groups") or []:
-        out.append(["GROUP", str(group.Values[1])])
+        out.append(["GROUP", str(group.Values[0])])
         for k in range(group.Children.Count):
             out.append([str(v) for v in group.Children[k].Values])
     return out
