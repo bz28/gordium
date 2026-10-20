@@ -11,9 +11,9 @@ An architect edits a design in Rhino, and Gordium says, for every zoning rule: *
 The city's documents go in on the left. A traceable rulebook, checked by code, comes out on the right. A design is then checked against that rulebook.
 
 ```
- City PDFs ──► Text ──► Definitions ──► Rules ──► Architect ──► Frozen ──► Check a
- (step 1)     (step 2)   (step 4)       (step 5)   approval      rulebook    Rhino design
-                 │                         ▲        (step 7)     (step 7)    (later)
+ City PDFs ──► Text ──► Definitions ──► Rules ──► Frozen ──► Check a
+ (step 1)     (step 2)   (step 4)       (step 5)   rulebook    Rhino design
+                 │                         ▲        (step 7)    (later)
                  └── every quote is ───────┘
                      checked against this text
 ```
