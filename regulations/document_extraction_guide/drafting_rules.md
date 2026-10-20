@@ -17,7 +17,7 @@ When the law leaves something unsettled (a word it doesn't define, a measurement
 
 ## 3. Every number comes from a quote
 
-Every number in a formula (`check`, `applies_when`, `review_when`: a length, a percent, an area) must be written in one of the rule's own sources: a quoted sentence, or a cited chart cell or its row label. The inspector checks this (0 needs no source; "2%" supports 0.02; number words count, "three" supports 3; a number that only labels or points, like the "(3)" of a list or "§325-16", doesn't count). A number we work out is written as the arithmetic, from cited inputs: `0.02 * 1000`, not 20. The worked examples prove it (20 passes, 21 fails).
+Every number in a formula (`check`, `applies_when`, `review_when`: a length, a percent, an area) must be written in one of the rule's own sources: a quoted sentence, or a cited chart cell or its row label. The inspector checks this (0 needs no source; "2%" supports 0.02; number words count, "three" supports 3; a number that only labels or points, like the "(3)" of a list or "§325-16", doesn't count). A number we work out is written as the arithmetic, from cited inputs: `0.02 * 1000`, not 20. The worked examples prove it (20 passes, 21 fails). The drafting script is stricter, because code can check that a source holds a number but not what the number is about: it never types a chart number (each is a slot, filled from the district's own cell), and a number it types is trusted only from a sentence of the paragraph being drafted, a footnote marked on the slot's own cell, or that slot's own row label (its instructions give the details).
 
 ## 4. Quote the exact words, including footnote markers
 
@@ -27,7 +27,7 @@ Each source gives `page`, `lines: [first, last]` and `quote`. The quote must be 
 
 ## 5. Say where each part of a rule comes from
 
-A rule can combine a chart value with conditions from the law (a district's limit from the chart, and an exception to it in a section of the law). Cite both. The chart reader's cells cover only the chart part, so this keeps the comparison honest.
+When drafting by hand, a rule can combine a chart value with conditions from the law (a district's limit from the chart, and an exception to it in a section of the law). Cite both. The chart reader's cells cover only the chart part, so this keeps the comparison honest. The drafting script drafts one text at a time, so it drafts only that text's own requirements: the chart's limit from the chart section, and the exception from the section of the law that sets it, each citing its own sources.
 
 ## 6. Use the city's own scope words
 

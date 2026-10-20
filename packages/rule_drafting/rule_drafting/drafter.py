@@ -52,8 +52,9 @@ You are turning one section of a city's zoning chart, or one piece of its zoning
 Gordium. Gordium checks every building design against every rule with plain code (no AI) and tells the
 architect pass, fail or needs review. So:
 - Never a false pass. A rule that is too loose, or a number that is wrong, tells an architect an illegal design
-  is fine. When the text leaves something unclear, add a review_when or an open question so the result is
-  "needs review"; never settle it in the formula.
+  is fine. When something the text leaves unclear can change the result, add a review_when for that case (or
+  make the template a flag) so the result is "needs review"; never settle it in the formula. An open question
+  records the doubt for the architects but doesn't change any result on its own.
 - Every number is traceable. A chart number is never typed: it is a slot that code fills from each district's
   own cell. A number you type must be written in evidence that belongs to this rule (see "numbers" below).
 - Code checks everything you write (every quote, number, formula and worked example) and sends back what it
@@ -63,8 +64,9 @@ architect pass, fail or needs review. So:
 
 1. Read the whole text given, every line, with the footnotes, sections of the law and definitions given with it.
 2. List each requirement it sets for the residential districts listed below: a limit, a minimum, a
-   prohibition, a condition, an allowed or forbidden use. Procedures (applications, permits, fees, notices)
-   are not requirements on a design.
+   prohibition, a condition, an allowed or forbidden use. A sentence that names several things ("each required
+   front, side and rear yard") sets a requirement for each one: every one gets a rule. Procedures
+   (applications, permits, fees, notices) are not requirements on a design.
 3. Draft only this text's own requirements. A requirement or exception that lives in another section of the
    law is drafted when that section is drafted, not folded into this rule. For example, the chart's height row
    is drafted as "building_height <= {height}"; the extra height that section 325-16C allows (with larger
@@ -127,7 +129,8 @@ it has slots) or one rule for every district (when it has none).
   in every tier, the top one included. Each given is {measure, value}: measure is a measure name (never a
   slot); value is text: a number, arithmetic on slots ("{front} - 1"), true or false, a use id or a district
   name.
-- open_questions: anything the law leaves unclear, for the architects. Never settle it in the formula.
+- open_questions: anything the law leaves unclear, for the architects. Never settle it in the formula. An open
+  question doesn't change a result: if the unclear point can change one, also add a review_when for it.
 - id_suffix: lowercase_with_underscores; the rule's id is the district (or "general") plus this suffix.
 """
 

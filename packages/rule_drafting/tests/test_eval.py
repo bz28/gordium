@@ -16,6 +16,7 @@ rule; together they fail if any fails, need review if any does, and pass if one 
 
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import openpyxl
@@ -181,6 +182,47 @@ def test_a_law_pieces_rule_doesnt_cover_the_chart_rows_it_only_reads(ctx):
     assert covering(front, [bonus], ctx, from_law={bonus["id"]}) == []       # as a law piece's input, not
 
 
+def exception_false_passes(hand, drafted, ctx, from_law=None):
+    """Answer-key examples that fail, where the drafted rules from law pieces covering them, judged alone,
+    pass. Each unit is drafted on its own, so a law exception (§325-16C's extra height with larger yards) and
+    the chart limit it relaxes (35 ft) are separate rules, and today the limit's FAIL hides an incomplete
+    exception. Once an exception can relax a limit, an exception that leaves out a requirement (one of the
+    yards) would let an illegal design pass. Judged alone, it shows now."""
+    from_law = law_unit_rules() if from_law is None else from_law
+    found = []
+    for h in hand:
+        rules = [r for r in covering(h, drafted, ctx, from_law) if r["id"] in from_law]
+        for ex in h["examples"] if rules else []:
+            if ex["expect"] == "fail" and judge_r1b_example(rules, ex["given"], ctx)[0] == "pass":
+                found.append(f"{h['id']} {ex['given']}: the hand key fails it; "
+                             f"{', '.join(r['id'] for r in rules)} alone pass it")
+    return found
+
+
+def test_drafted_exception_rules_never_pass_what_the_answer_key_fails(hand, drafted_r1b, ctx):
+    assert exception_false_passes(hand, drafted_r1b, ctx) == []
+
+
+def test_an_exception_that_forgets_a_yard_is_caught(ctx):
+    """Runs without drafts: §325-16C enlarges every yard; an exception rule set that enlarges only the front
+    yard passes the answer key's '37 ft, rear yard not enlarged' example, and is caught."""
+    hand = [h for h in load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"] if h["id"] == "R-1b.height"]
+    quote = next(s for s in hand[0]["sources"] if s.get("quote", "").startswith("(1) Each required"))
+    def rule(rid, applies, check):
+        return {"id": rid, "kind": "rule", "sources": [quote], "applies_when": applies, "check": check,
+                "examples": []}
+    only_front = [rule("R-1b.x_limit", "building_height > 35", "building_height <= 35 + 0.1 * 35"),
+                  rule("R-1b.x_front", "building_height > 35", "front_yard >= 25 + (building_height - 35)")]
+    ids = {r["id"] for r in only_front}
+    assert exception_false_passes(hand, only_front, ctx, from_law=ids) != []
+    every_yard = only_front + [
+        rule("R-1b.x_sides", "building_height > 35",
+             "side_yard_smaller >= 10 + (building_height - 35) and side_yard_larger >= 10 + (building_height - 35)"),
+        rule("R-1b.x_rear", "building_height > 35",
+             "rear_yard >= max(min(0.25 * lot_depth, 50), 20) + (building_height - 35)")]
+    assert exception_false_passes(hand, every_yard, ctx, from_law=ids | {r["id"] for r in every_yard}) == []
+
+
 def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted_r1b, ctx):
     """The hand examples can be loose (30 ft passes, 24 fails, whether the limit is 25 or 30). So each drafted
     R-1b rule is also tried at the R-1B chart value it cites and just past it, with the same row meanings the
@@ -213,11 +255,36 @@ def test_drafted_r1b_turns_from_pass_to_fail_exactly_at_each_chart_value(drafted
                     wrong.append(f"{rule['id']}: {measure} {kind} {bound} from {c['value']!r}: {at} at it, {beyond} past it")
     assert wrong == []
     assert sorted(cited - enforced) == []                     # every chart value a draft cites is enforced exactly
-    idle = []                                                 # and no cited number is ignored or idle
-    for rule in drafted_r1b:
-        if rule["kind"] == "rule" and rule["id"] not in from_law:
+    assert idle_chart_numbers(drafted_r1b, chart, cells, ctx) == []       # and no cited number is ignored or idle
+
+
+def idle_chart_numbers(rules, chart, cells, ctx):
+    """Every number of every chart cell a rule cites is used in its formula and decides something. Unlike the
+    exact-limit test, this covers a law piece's rules too: they cite cells as inputs (§325-16C reads the yard
+    minimums), which is exactly where a cell's number could sit idle without the exact-limit test noticing."""
+    idle = []
+    for rule in rules:
+        if rule["kind"] == "rule":
             idle += chart.idle_numbers(rule, [c for c in chart.cited_rows(rule, cells) if c["page"] != 2], ctx.allowed())
-    assert idle == []
+    return idle
+
+
+def test_a_law_pieces_rule_that_ignores_a_cell_it_cites_is_caught(ctx, monkeypatch):
+    """Runs without drafts: a §325-16C-style rule citing the front-yard cell but never using its 25 ft is caught,
+    though it comes from a law piece (exempt only from the exact-limit test)."""
+    spec = importlib.util.spec_from_file_location(
+        "r1b_chart", REPO / "packages/document_extraction/tests/test_r1b_matches_chart.py")
+    chart = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(chart)
+    cells = [c for c in (json.loads(line) for line in chart.CELLS.open(encoding="utf-8"))
+             if c.get("column") == chart.COLUMN and not c.get("heading")]
+    cell = {"file": CHART, "page": 3, "cell": {"section": "Yard Dimensions", "row": "Front (minimum)", "column": "R-1B"}}
+    ignores = {"id": "R-1b.325_16c_extra_front", "kind": "rule", "sources": [cell], "applies_when": "building_height > 35",
+               "check": "front_yard >= 1 + (building_height - 35)",
+               "examples": [{"given": {"building_height": 36, "front_yard": 2}, "expect": "pass"},
+                            {"given": {"building_height": 36, "front_yard": 1}, "expect": "fail"}]}
+    monkeypatch.setattr(sys.modules[__name__], "law_unit_rules", lambda: {ignores["id"]})
+    assert idle_chart_numbers([ignores], chart, cells, ctx) != []
 
 
 def test_every_hand_rule_is_covered_once_drafting_is_complete(hand, drafted_r1b, ctx):

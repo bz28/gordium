@@ -454,6 +454,22 @@ def test_the_drafting_prompt_gives_role_purpose_process_and_the_current_number_r
     assert "not folded into this rule" in text
     assert "sent to an architect as an open question" not in text            # numbers never go to a question
     assert "Every slot must decide something" not in text
+    # only a review_when (or a flag) gives "needs review"; the checker never reads open questions
+    assert "open question so the result is" not in text
+    assert "An open question records the doubt for the architects but doesn't change any result" in text
+    assert "every one gets a rule" in text
+
+
+def test_the_whole_system_prompt_never_tells_the_drafter_to_do_what_its_rules_forbid(inputs):
+    """The drafter reads the shared drafting guide and then its own instructions, in one message. Where the
+    guide describes drafting by hand (combining a chart limit with a law exception; typing a chart number), it
+    must say the script works differently, so the two never disagree."""
+    text = " ".join(inputs.system().split())
+    assert "A rule can combine a chart value with conditions from the law" not in text      # unqualified
+    assert "When drafting by hand, a rule can combine a chart value" in text
+    assert "The drafting script drafts one text at a time, so it drafts only that text's own requirements" in text
+    assert "a quoted sentence, or a cited chart cell or its row label. The inspector" in text
+    assert "The drafting script is stricter" in text and "it never types a chart number" in text
 
 
 def test_a_slot_no_formula_uses_cant_lend_its_footnote_to_a_typed_number(inputs):
