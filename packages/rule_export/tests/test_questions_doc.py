@@ -27,6 +27,11 @@ DISCREPANCIES = (REPO / "docs/discrepancies_with_architects.md").read_text(encod
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 R1B = {r["id"]: r for r in load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"]}
 ANSWER_KEY = REPO / "test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx"
+# What we measured from the City's outline (the City's data itself may not be stored; see gis/README.md).
+CITY = load(SITE / "gis/city_tax_parcel_facts.yaml")
+CITY_STATEMENT = ("Data contained in this product was amended by the GIS Program, City of Ithaca, NY from a file created by "
+                  "Tompkins County Assessment Office. The originators do not warrant the accuracy or completeness of the "
+                  "information portrayed by the data.")
 
 
 def recorded_questions() -> list[str]:
@@ -66,16 +71,27 @@ def test_every_needs_review_claim_is_true_of_the_code():
         assert "from a model" in line.lower() or backed, line
 
 
-def test_no_blanket_promise_and_an_unsurveyed_lot_area_is_not_trusted():
-    """The intro promises NEEDS REVIEW only where Gordium can't decide (each question says what it will do),
-    and an unsurveyed lot area measured from a model gets NEEDS REVIEW (principle 4: unclear data is never a
-    PASS), since 106 Ithaca Rd's drawn lot differs from the city's."""
+def test_every_question_says_what_happens_today_and_from_a_model():
+    """Each question tells the architects what Gordium does today (typed numbers) and from a model, and which of
+    the intro's three cases it is: NEEDS REVIEW, an assumed reading (which can give PASS, so it is named), or not
+    checked yet. So the page never implies a safety net it doesn't have."""
     intro = DOC.split("**How to read each question**")[0]
-    assert "where it can't decide, it gives **NEEDS REVIEW**" in intro
+    for case in ("**NEEDS REVIEW:**", "**Gordium assumes a reading:**", "That can give PASS", "**Not checked yet:**",
+                 "Gordium can still report PASS"):
+        assert case in intro, case
+    lines = [line for line in DOC.splitlines() if line.startswith("- **Until you answer:** Today")]
+    assert len(lines) == DOC.count("- **Until you answer:**") - 1           # all but the legend's own line
+    for line in lines:
+        assert "from a model" in line.lower() or "entered, not measured" in line, line
+        assert any(case in line for case in ("NEEDS REVIEW", "assumes", "not checked yet")), line
+
+
+def test_an_unsurveyed_lot_area_is_not_trusted():
+    """From a model, an unsurveyed lot area gets NEEDS REVIEW (principle 4: unclear data is never a PASS), since
+    106 Ithaca Rd's drawn lot differs from the city's."""
     lot_area = DOC.split("`[lot#1]`")[1].split("###")[0]
     until = next(line for line in lot_area.splitlines() if line.startswith("- **Until you answer:**"))
-    model_clause = until.lower().split("when measured from a model", 1)[1]
-    assert "needs review" in model_clause, until
+    assert "needs review" in until.lower().split("from a model", 1)[1], until
 
 
 def test_the_page_quotes_the_architects_own_lot_area():
@@ -85,13 +101,21 @@ def test_the_page_quotes_the_architects_own_lot_area():
     assert "6,674.7" not in DOC
 
 
-def test_the_stored_outlines_are_the_downloads_named_in_their_readme():
+def test_only_shareable_data_is_stored_and_it_is_what_was_downloaded():
+    """The County outline is stored as downloaded (its fingerprint is in the README). The City's data may not be
+    redistributed, so no City file is stored: only our measurements, with the URL and the raw response's
+    fingerprint, and the statement the City asks derived products (the page) to carry."""
     readme = (SITE / "gis/README.md").read_text(encoding="utf-8")
-    files = sorted((SITE / "gis").glob("*.json"))
-    assert len(files) == 2
-    for f in files:
-        assert f"`{f.name}`" in readme
-        assert f"SHA-256: `{hashlib.sha256(f.read_bytes()).hexdigest()}`" in readme, f.name
+    assert [f.name for f in sorted((SITE / "gis").iterdir())] == ["README.md", "city_tax_parcel_facts.yaml",
+                                                                 "county_parcel_2026-10-20.json"]
+    county = SITE / "gis/county_parcel_2026-10-20.json"
+    assert f"SHA-256: `{hashlib.sha256(county.read_bytes()).hexdigest()}`" in readme
+    assert set(json.loads(county.read_text())["features"][0]["attributes"]) == {
+        "SWISPRINTK", "LOCADDR", "ZONING", "FRONTAGE", "DEPTH", "PROPCLASS"}        # nothing personal
+    assert re.fullmatch(r"[0-9a-f]{64}", CITY["sha256"]) and CITY["url"].startswith("https://")
+    header = " ".join(line.lstrip("# ").strip() for line in (SITE / "gis/city_tax_parcel_facts.yaml").read_text().splitlines())
+    assert CITY_STATEMENT in header
+    assert CITY_STATEMENT in DOC
 
 
 def _model_lot() -> tuple[list[float], float]:
@@ -127,11 +151,13 @@ def _sides(file: str) -> tuple[list[float], float, int]:
 
 
 def test_the_lot_outline_figures_come_from_the_stored_outlines():
-    """§1.1's GIS numbers are recomputed from the outlines stored with the test site, not copied by hand."""
-    city, city_area, front_edges = _sides("city_tax_parcel_2026-10-20.json")
+    """§1.1's GIS numbers: the County's recomputed from its stored outline, the City's from our measurements of
+    it (city_tax_parcel_facts.yaml)."""
+    sides = CITY["sides_ft"]
+    city = [sides[k]["length"] for k in ("front", "long_side", "jog", "rear", "side_toward_104")]
+    city_area, front_edges = CITY["area_sf"], sides["front"]["edges"]
     county, county_area, _ = _sides("county_parcel_2026-10-20.json")
-    # in the order both rings run: front, long side, jog, rear, side toward #104
-    assert [round(x, 2) for x in city] == [75.83, 101.13, 10.35, 69.51, 92.12]
+    # in the order the County ring runs: front, long side, jog, rear, side toward #104
     assert [round(x, 2) for x in county] == [73.52, 101.13, 10.35, 68.86, 92.00]
     for text in (f"{city[0]:.1f} ft along a curve of {front_edges} segments", f"{city[4]:.2f} ft", f"{city[3]:.2f} ft",
                  f"{city[2]:.2f} ft", f"{city[1]:.2f} ft", f"{county[0]:.2f} ft, straight", f"{county[4]:.2f} ft",
@@ -141,16 +167,20 @@ def test_the_lot_outline_figures_come_from_the_stored_outlines():
 
 
 def test_the_rear_yard_tables_follow_the_r1b_rule():
-    """Every lot depth in §1.2's tables comes from the model or the stored city outline, every required rear
+    """Every lot depth in §1.2's tables comes from its source (the model, their spreadsheet, the County's
+    assessor depth, our measurements of the City outline), every required rear
     yard is what the R-1b rule gives for it, and the 25 ft design is marked FAIL exactly when it falls short."""
     required_for = R1B["R-1b.rear_yard"]["check"].split(">=", 1)[1].strip()
-    city, _, _ = _sides("city_tax_parcel_2026-10-20.json")
+    city = [CITY["sides_ft"][k]["length"] for k in ("front", "long_side", "jog", "rear", "side_toward_104")]
     (_, side, _, jog, long_side), _ = _model_lot()
+    typed_depth = load_workbook(ANSWER_KEY, data_only=True)["Inputs"]["B4"].value          # their "Lot depth"
+    county = json.loads((SITE / "gis/county_parcel_2026-10-20.json").read_text())
+    assessor_depth = county["features"][0]["attributes"]["DEPTH"]
     a, b, c = (side + long_side) / 2, (side + long_side + jog) / 2, (side + jog + long_side) / 3
     rows = {f"| (a) the {side:.2f} and {long_side:.2f} ft lines | {a:.1f} ft": a,
             f"| (b) the jog added to the {long_side:.2f} ft line it continues | ({side:.2f} + {long_side + jog:.2f}) ÷ 2 = {b:.2f} ft": b,
             f"| (c) average of every line that isn't front or rear | ({side:.2f} + {jog:.2f} + {long_side:.2f}) ÷ 3 = {c:.1f} ft": c,
-            "| 90 ft (your spreadsheet)": 90, "| 92 ft (assessor's depth": 92,
+            f"| {typed_depth} ft (your spreadsheet)": typed_depth, f"| {assessor_depth} ft (assessor's depth": assessor_depth,
             f"| {(city[4] + city[1]) / 2:.1f} ft (average of the two GIS sides)": (city[4] + city[1]) / 2,
             f"| {city[1]:.2f} ft (the long side in GIS)": city[1]}
     lines = [line.strip() for line in DOC.splitlines()]
