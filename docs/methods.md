@@ -108,9 +108,16 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Lesson learned:** fix the pattern, not the instance: several rounds re-found the same mistake elsewhere after a narrow fix.
 - **Pins:** every safeguard is switched off once on purpose to confirm a test fails.
 
-## 13. What's not decided or not built
+## 13. The rules spreadsheet (code)
+
+- **What:** `python -m rule_export` writes `<place>_rules.xlsx` (for Ithaca, `regulations/jurisdictions/new_york/ithaca_city/ithaca_city_rules.xlsx`): tabs for rules (with worked examples), definitions, use names, open questions, every piece of the law with its label and every change made after the AI, and the source documents. Every field of every format is shown or listed as left out on purpose (a test enforces it). Each row has the city's exact words, the page, and a link that opens the document at that page. Laid out like the architects' own spreadsheet.
+- **Why:** human approval is deferred; the spreadsheet is how people read and check what the code has verified, in a format they already use. Generated from the rule files, never edited, so it can't drift from them.
+- **Links:** the city's URL where it serves the PDF itself; otherwise the fingerprinted copy in the repository (private: needs access). The page number is shown too, since some viewers ignore `#page=N`.
+- **Tested by:** every rule, definition and use source, open question and piece of the law appears exactly once, attributed to its file, with the right words and link; text never becomes a formula; CI fails if the committed workbook differs from a fresh build (compared by content, since Excel files carry timestamps).
+
+## 14. What's not decided or not built
 
 - Rhino plugin language (C# vs Rhino 8 Python); how model objects are identified (layers, names, or asking).
 - Site facts: zone lookup from the address, lot lines and area (survey vs city records), ground levels.
 - Measuring the model (engineer-written code, tested on real models).
-- Architect approval workflow (identity: their own accounts).
+- Human approval: deferred (rules stay drafts, checked by code); the approval fields stay in the formats, unused.

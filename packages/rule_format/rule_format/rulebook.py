@@ -81,6 +81,13 @@ def load(path):
     return yaml.load(Path(path).read_text(), Loader=_StrictLoader)
 
 
+def rulebook_paths(folder) -> list[Path]:
+    """The rulebook files in a folder (5_zoning_rules/, an answer-key folder): every .yaml or .yml file
+    under it. The one definition, used by the validator and the spreadsheet export alike."""
+    folder = Path(folder)
+    return sorted(p for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file()) if folder.is_dir() else []
+
+
 @dataclass
 class Context:
     """Everything a rule is checked against, for one jurisdiction."""

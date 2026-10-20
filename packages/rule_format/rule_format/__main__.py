@@ -17,7 +17,7 @@ from pathlib import Path
 import yaml
 
 from .labels import load_pieces, validate_labels
-from .rulebook import REPO, TERM_SCHEMAS, Context, load, locate, not_quotable, validate, validate_terms
+from .rulebook import REPO, TERM_SCHEMAS, Context, load, locate, not_quotable, rulebook_paths, validate, validate_terms
 
 
 def main() -> int:
@@ -57,8 +57,8 @@ def main() -> int:
             for problem in problems:
                 print(f"    {problem}")
             failed += bool(problems)
-        files = sorted(p for folder in (jurisdiction / "5_zoning_rules", REPO / "test_data/answer_keys" / place)
-                       for p in folder.rglob("*") if p.suffix in (".yaml", ".yml") and p.is_file())
+        files = [p for folder in (jurisdiction / "5_zoning_rules", REPO / "test_data/answer_keys" / place)
+                 for p in rulebook_paths(folder)]
         for path in files:
             checked += 1
             try:
