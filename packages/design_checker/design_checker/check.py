@@ -5,6 +5,7 @@ refuses a rulebook that fails the rule checks. This module adds nothing to a res
 Rhino panel and the viewport message show: the rows, a short summary, the objects to show in red, the envelope.
 """
 
+import ast
 import re
 import tempfile
 from pathlib import Path
@@ -17,7 +18,7 @@ from model_measurement.project import fact_problems, working
 from model_measurement.read_3dm import read_site
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
 from rule_format import formula
-from rule_format.rulebook import REPO, load, rulebook_for
+from rule_format.rulebook import MEASURE_KINDS, REPO, load, rulebook_for
 
 COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 NUMBER = re.compile(r"^([≥≤<>=]) (-?[\d,]+(?:\.\d+)?)$")
@@ -74,13 +75,40 @@ def summary(rows: list[dict]) -> dict:
     return {"state": "fail" if fails else "review", "text": counts, "lines": lines}
 
 
-def check(model_path: Path, facts: dict, report_path: Path | None = None) -> dict:
-    """Everything the Rhino command shows, for one model and its lot facts."""
+def _failing_distances(rule: dict, measured: dict, values: dict) -> list[dict]:
+    """Each distance whose own comparison fails, as the line it was measured along, to draw in the model. A
+    distance that passes isn't drawn, even inside a failing rule (the other side yard, the bonus's yards)."""
+    found = []
+    for node in ast.walk(formula.parse(rule["check"]).body):
+        if not (isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.left, ast.Name)):
+            continue
+        name, m = node.left.id, measured.get(node.left.id) or {}
+        if not m.get("points") or m.get("value") is None:
+            continue
+        try:
+            holds = formula.evaluate(ast.unparse(node), values, MEASURE_KINDS)
+            need = formula.evaluate(ast.unparse(node.comparators[0]), values, MEASURE_KINDS)
+        except (formula.EvaluationError, formula.MissingMeasure, ArithmeticError):
+            continue
+        if holds is False and name not in [d["measure"] for d in found]:
+            sign = {ast.GtE: "≥", ast.Gt: ">", ast.LtE: "≤", ast.Lt: "<"}.get(type(node.ops[0]), "")
+            found.append({"rule": rule["id"], "measure": name, "points": m["points"],
+                          "label": f"{name.replace('_', ' ')} {_n(m['value'])} ft, needs {sign} {_n(need)}"})
+    return found
+
+
+def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None) -> dict:
+    """Everything the Rhino command shows, for one model and its lot facts. `building_problems` are what the
+    Rhino command found on the Building layer and couldn't send (a block, a surface): each one makes every
+    building measure need review, never silently dropped."""
     problems = fact_problems(facts)            # the same check as a facts file: a plain refusal, never a crash
+    problems += [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
     model_path = Path(model_path)
     site = read_site(model_path, facts)
+    if building_problems:
+        site["buildings"].append({"id": "Building layer", "faces": [], "problems": list(building_problems)})
     measured = measure(site, facts)
     project = {"title": facts.get("title") or model_path.stem, "jurisdiction": facts.get("jurisdiction"),
                "zone": facts.get("zone"),
@@ -98,13 +126,8 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None) -> dic
     red = sorted({o for r in rows if r["Error"] == "FAIL"
                   for name in formula.names(by_id[r["Rule id"]]["check"]) for o in measured.get(name, {}).get("objects", [])
                   if o != lot_id})
-    # each failing distance, as the line it was measured along, to draw in the model
-    dims = [{"rule": r["Rule id"], "measure": name, "points": measured[name]["points"],
-             "label": f"{name.replace('_', ' ')} {_n(measured[name]['value'])} ft, needs {r['Table limit']}"
-                      if NUMBER.match(str(r["Table limit"])) else f"{name.replace('_', ' ')} {_n(measured[name]['value'])} ft"}
-            for r in rows if r["Error"] == "FAIL"
-            for name in sorted(formula.names(by_id[r["Rule id"]]["check"]))
-            if (measured.get(name) or {}).get("points") and measured[name]["value"] is not None]
+    values = {k: m["value"] for k, m in measured.items()}
+    dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
     return {"rows": rows, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
             "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
             "envelope": envelope(site, facts, measured, rules), "problems": site.get("problems") or []}

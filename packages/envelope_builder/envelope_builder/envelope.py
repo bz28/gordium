@@ -31,25 +31,76 @@ MINIMUM, MAXIMUM = (ast.GtE, ast.Gt), (ast.LtE, ast.Lt)
 QUAD_SEGS, MARGIN = 128, 0.001
 
 
-def _limits(rule: dict) -> list[tuple[str, type, str]]:
-    """(measure, comparison, limit formula) for each comparison of a yard, the height or the building area
-    against a limit that depends only on the lot."""
-    found = []
-    for node in ast.walk(formula.parse(rule["check"]).body):
-        if isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.left, ast.Name):
-            name, op, limit = node.left.id, type(node.ops[0]), ast.unparse(node.comparators[0])
-            wanted = (name in YARDS and op in MINIMUM) or (name in ("building_height", "building_area") and op in MAXIMUM)
-            if wanted and formula.names(limit) <= LOT_MEASURES:
-                found.append((name, op, limit))
-    return found
+GEOMETRIC = set(YARDS) | {"building_height", "building_area"}
+FLIP = {ast.GtE: ast.LtE, ast.Gt: ast.Lt, ast.LtE: ast.GtE, ast.Lt: ast.Gt}
+
+
+class Unreadable(Exception):
+    """A rule limits a yard, the height or the building area in a form the envelope can't read."""
+
+
+def _comparison(node):
+    """(measure, comparison, limit formula) for `measure op limit` or `limit op measure` (turned round), where the
+    measure is a yard, the height or the building area and the limit depends only on the lot; else None."""
+    if not (isinstance(node, ast.Compare) and len(node.ops) == 1):
+        return None
+    left, op, right = node.left, type(node.ops[0]), node.comparators[0]
+    if not isinstance(left, ast.Name) and isinstance(right, ast.Name) and op in FLIP:
+        left, op, right = right, FLIP[op], left
+    if not isinstance(left, ast.Name):
+        return None
+    name, limit = left.id, ast.unparse(right)
+    wanted = (name in YARDS and op in MINIMUM) or (name in ("building_height", "building_area") and op in MAXIMUM)
+    return (name, op, limit) if wanted and formula.names(limit) <= LOT_MEASURES else None
+
+
+def _needs(node, measured: dict) -> list:
+    """The yard, height and building-area limits a box must meet for this formula to hold everywhere in it: all
+    parts of an `and`; one alternative of an `or` whose limits can all be read (and whose other parts are known
+    true for this lot). Parts about anything else (use, stories, parking) set nothing for the shape. Raises
+    Unreadable when a yard, height or area limit is written in a form that can't be read."""
+    names = {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
+    if not names & GEOMETRIC:
+        return []
+    if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.And):
+        return [c for v in node.values for c in _needs(v, measured)]
+    if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.Or):
+        for v in node.values:
+            try:
+                needs = _needs(v, measured)
+            except Unreadable:
+                continue
+            if all(_known_true(part, measured) for part in _other_parts(v)):
+                return needs
+        raise Unreadable(ast.unparse(node))
+    found = _comparison(node)
+    if found is None:
+        raise Unreadable(ast.unparse(node))
+    return [found]
+
+
+def _other_parts(node) -> list:
+    """The parts of an alternative that aren't about the shape (to be known true for this lot)."""
+    parts = node.values if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.And) else [node]
+    return [p for p in parts if not {n.id for n in ast.walk(p) if isinstance(n, ast.Name)} & GEOMETRIC]
+
+
+def _known_true(node, measured: dict) -> bool:
+    values = {k: m["value"] for k, m in measured.items()}
+    try:
+        return formula.evaluate(ast.unparse(node), values, MEASURE_KINDS | {"use": frozenset([values.get("use")])}) is True
+    except (formula.EvaluationError, formula.MissingMeasure, ArithmeticError):
+        return False
 
 
 def _values(measured: dict, name: str):
-    """Every value a measure could have: its value, or each of its readings when the readings disagree."""
+    """Every value a measure could have: its value, or each of its readings when they are real alternatives (two
+    or more). A single reading without a value (the lot as drawn, waiting for a survey) isn't a value: unknown."""
     m = measured.get(name) or {}
     if m.get("value") is not None:
         return [m["value"]]
-    return [r["value"] for r in m.get("readings") or []]
+    readings = [r["value"] for r in m.get("readings") or []]
+    return readings if len(readings) > 1 else []
 
 
 def _worst(limit: str, op, measured: dict):
@@ -89,25 +140,33 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict]) -> dict
         notes.append("say whether this is a corner lot first" if facts.get("corner_lot") is None else
                      "a corner lot: which yards are front, side and rear is an open question; no envelope drawn")
         return out
+    if facts.get("ground_is_flat") is not True:  # the height limit is from the grade plane: flat ground only
+        notes.append("the ground isn't confirmed flat: the height limit can't be drawn from one ground level")
+        return out
     for rule in rules:
         if rule.get("kind") == "flag" or not rule.get("check") or not _applies(rule, measured):
             continue
-        for name, op, limit in _limits(rule):
+        try:
+            limits = _needs(formula.parse(rule["check"]).body, measured)
+        except Unreadable as e:
+            notes.append(f"{rule['id']}: a limit the envelope can't read ({e}); no envelope drawn")
+            return out
+        for name, op, limit in limits:
             worst = _worst(limit, op, measured)
             key = YARDS.get(name, name)
             if worst is None:
                 notes.append(f"{rule['id']}: the limit {limit} can't be worked out for this lot")
             need[key].append(worst)
+    area = [v for v in need.pop("building_area")]
+    if area and None not in area:            # coverage is numbers, never a shape; unknown without a surveyed lot
+        have = (measured.get("building_area") or {}).get("value")
+        out["coverage"] = {"allowed": min(area), "have": have, "over": None if have is None else have - min(area)}
     if any(v is None for vs in need.values() for v in vs):
         return out
     yards = {k: max(need[k], default=0.0) for k in ("front", "side", "rear")}
     out["yards"] = yards
     if need["building_height"]:
         out["height"] = min(need["building_height"])
-    if need["building_area"]:
-        allowed = min(need["building_area"])
-        have = (measured.get("building_area") or {}).get("value")
-        out["coverage"] = {"allowed": allowed, "have": have, "over": None if have is None else have - allowed}
 
     if not site.get("lot") or site.get("problems"):
         notes.append("no lot outline to build on")

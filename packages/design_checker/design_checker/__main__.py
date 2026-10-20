@@ -23,7 +23,8 @@ def answer(request: dict) -> dict:
     try:
         if request.get("cmd") == "check":
             report = request.get("report")
-            result = check(Path(request["model"]), request["facts"], Path(report) if report else None)
+            result = check(Path(request["model"]), request["facts"], Path(report) if report else None,
+                           request.get("building_problems"))
         elif request.get("cmd") == "options":
             result = options(request["jurisdiction"])
         else:

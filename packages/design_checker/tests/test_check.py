@@ -79,3 +79,43 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
 def test_bad_lot_facts_are_a_plain_refusal(facts):
     reply = answer({"id": 1, "cmd": "check", "model": str(MODEL), "facts": {**facts, "grade_elevation": "0"}})
     assert reply["ok"] is False and "grade_elevation must be a number" in reply["error"]
+
+
+def test_only_the_failing_distance_of_a_rule_is_drawn(facts, tmp_path):
+    import rhino3dm as r
+    model = r.File3dm.Read(str(MODEL))
+    for o in model.Objects:
+        if isinstance(o.Geometry, r.Brep):
+            o.Geometry.Translate(r.Vector3d(-2, 0, 0))     # 8 ft from the left side, 12 ft from the right
+    moved = tmp_path / "moved.3dm"
+    model.Write(str(moved), 8)
+    dims = check(moved, facts)["dims"]
+    assert [(d["measure"], d["label"]) for d in dims] == [("side_yard_smaller", "side yard smaller 8 ft, needs ≥ 10")]
+
+
+def test_what_rhino_couldnt_send_makes_building_measures_need_review(facts):
+    result = check(MODEL, facts, building_problems=["a block on the Building layer can't be measured yet (explode it)"])
+    coverage = next(r for r in result["rows"] if r["Rule id"] == "R-1b.lot_coverage")
+    assert coverage["Error"] == "NEEDS REVIEW" and "block" in coverage["Why"]
+
+
+def test_no_jurisdiction_or_zone_is_a_plain_refusal(facts):
+    with pytest.raises(ValueError, match="no zone given"):
+        check(MODEL, {k: v for k, v in facts.items() if k != "zone"})
+
+
+def test_rhino_decisions():
+    from design_checker.rhino_logic import classify, missing, to_feet, update_counts, with_suggestions
+    assert classify("Building::Garage", "Brep") == "building"
+    assert classify("Building", "InstanceReferenceGeometry").startswith("a block")
+    assert classify("Default", "InstanceReferenceGeometry", holds_building=True).startswith("a block")
+    assert classify("Building", "PlaneSurface").startswith("a PlaneSurface")
+    assert classify("Building", "LineCurve") is None and classify("Site::Old", "PolylineCurve") == "lot"
+    assert classify("Default", "Brep") is None
+    assert update_counts({"stories": 2}, {"stories": None, "sleeping_rooms": 3}) == {"stories": 2, "sleeping_rooms": 3}
+    assert "sleeping_rooms" not in update_counts({}, {"sleeping_rooms": None})       # skipped: never 0
+    assert missing({"sleeping_rooms": 3}) == ["jurisdiction", "zone", "use", "street_line", "corner_lot",
+                                              "grade_elevation", "ground_is_flat", "lot_surveyed"]
+    assert with_suggestions({"stories": 3, "zone": None}, {"zone": "R-1b"}) == {"zone": "R-1b", "stories": 3}
+    assert to_feet({"street_line": [[[0, 0], [12, 0]]], "grade_elevation": 24}, 1 / 12) == {
+        "street_line": [[[0.0, 0.0], [1.0, 0.0]]], "grade_elevation": 2.0}

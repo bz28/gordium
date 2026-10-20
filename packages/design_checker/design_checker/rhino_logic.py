@@ -1,0 +1,68 @@
+"""The decisions the Rhino command makes, as plain functions (no Rhino, Python 3.9), so CI can test them. The
+Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
+"""
+
+LAYERS = {"lot": "Site", "building": "Building"}
+SOLIDS = ("Brep", "Extrusion", "Mesh", "SubD")
+DRAWING_AIDS = ("Curve", "Point", "PointCloud", "TextDot", "AnnotationBase", "Hatch", "TextEntity", "Dimension",
+                "Leader", "LinearDimension", "AngularDimension", "RadialDimension", "OrdinateDimension")
+REQUIRED = ("jurisdiction", "zone", "use", "street_line", "corner_lot", "grade_elevation", "ground_is_flat",
+            "lot_surveyed")
+
+
+def on_layer(full_path, layer):
+    """A layer or one of its sublayers ("Building::Garage")."""
+    return full_path == layer or full_path.startswith(layer + "::")
+
+
+def classify(full_path, kind, holds_building=False):
+    """What the Rhino command does with one object, from its layer's full path and its geometry's type name:
+    "lot" (a curve on the lot layer: a possible lot outline), "building" (a solid or mesh on the building layer),
+    None (anything else, ignored), or a problem sentence. Nothing that could be part of a building is dropped:
+    a block on the building layer, or a block holding building objects wherever it is placed, and any other
+    geometry on the building layer, are problems, so the checker says NEEDS REVIEW."""
+    if kind.startswith("InstanceReference") and (on_layer(full_path, LAYERS["building"]) or holds_building):
+        return "a block on the Building layer can't be measured yet (explode it)"
+    if on_layer(full_path, LAYERS["lot"]):
+        return "lot" if kind.endswith("Curve") else None
+    if not on_layer(full_path, LAYERS["building"]):
+        return None
+    if kind in SOLIDS:
+        return "building"
+    if kind in DRAWING_AIDS or kind.endswith("Curve") or kind.endswith("Dimension"):
+        return None
+    return "a " + kind + " on the Building layer can't be measured yet (explode it or turn it into a solid)"
+
+
+def missing(facts):
+    """The required lot facts not yet given: the confirm dialog shows whenever any is missing."""
+    facts = facts or {}
+    return [k for k in REQUIRED if facts.get(k) is None or facts.get(k) == []]
+
+
+def with_suggestions(saved, suggested):
+    """The facts to confirm: what is saved, with suggestions only for what is missing."""
+    out = dict(suggested)
+    out.update({k: v for k, v in (saved or {}).items() if v is not None})
+    return out
+
+
+def update_counts(facts, answers):
+    """Bedrooms, parking spaces and stories from the Lot facts prompts. An answer of None means the prompt was
+    skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0."""
+    out = dict(facts or {})
+    for key in ("sleeping_rooms", "parking_spaces", "stories"):
+        if answers.get(key) is not None:
+            out[key] = int(answers[key])
+    return out
+
+
+def to_feet(facts, scale):
+    """Facts read off the model (street line ends, ground level), in model units, as feet (scale = feet per
+    model unit). Everything Gordium measures and stores is in feet."""
+    out = dict(facts)
+    if out.get("street_line"):
+        out["street_line"] = [[[c * scale for c in p] for p in line] for line in out["street_line"]]
+    if out.get("grade_elevation") is not None:
+        out["grade_elevation"] = out["grade_elevation"] * scale
+    return out

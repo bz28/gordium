@@ -97,3 +97,25 @@ def test_the_envelope_depends_on_the_lot_not_the_design():
     a, _ = build([(0, 0), (73, 0), (73, 90), (0, 90)], house=box(10, 30, 63, 65, 30))
     b, _ = build([(0, 0), (73, 0), (73, 90), (0, 90)], house=box(20, 40, 50, 60, 37))
     assert a["outline"] == b["outline"] and a["top"] == b["top"] == 35
+
+
+def test_a_yard_limit_written_another_way_is_read_or_stops_the_envelope():
+    lot_ = [(0, 0), (73, 0), (73, 90), (0, 90)]
+    site = {"lot": lot(lot_), "buildings": [box(10, 30, 63, 65)], "problems": []}
+    m = measure(site, FACTS)
+    turned = envelope(site, FACTS, m, [{"id": "f", "check": "25 <= front_yard"}])
+    assert turned["yards"]["front"] == 25 and turned["outline"] is not None
+    for check in ("side_yard_smaller + side_yard_larger >= 30", "side_yard_smaller >= max(10, 0.5 * building_height)"):
+        env = envelope(site, FACTS, m, [{"id": "x", "check": check}])
+        assert env["outline"] is None and any("can't read" in n for n in env["notes"]), check
+
+
+def test_no_envelope_unless_the_ground_is_confirmed_flat():
+    for flat in (False, None):
+        env, _ = build([(0, 0), (73, 0), (73, 90), (0, 90)], {**FACTS, "ground_is_flat": flat})
+        assert env["outline"] is None and any("flat" in n for n in env["notes"])
+
+
+def test_no_coverage_numbers_from_a_lot_that_isnt_surveyed():
+    env, _ = build([(0, 0), (73, 0), (73, 90), (0, 90)], {**FACTS, "lot_surveyed": False})
+    assert env["coverage"] is None and env["outline"] is not None
