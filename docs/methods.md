@@ -30,9 +30,11 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Why:** whole tokens stop accidental matches ("5 ft" inside "25 ft"); exact lines plus uniqueness make each citation point at one place. An earlier page-wide search needed ever more special cases; recording the position was the root fix.
 - **Weaknesses:** a line pins a chart row, not its column (closed by chart cells, §4); a quote must be copied exactly.
 - **Tested by:** tests on numbers inside numbers, fractions, decimals, footnotes, district names, wrong lines, repeated quotes.
-- **Improve:** cite chart cells directly in rules (PR 7b).
+- **Improve:** cite chart cells directly in rules (PR 8).
 
 ## 4. Chart tables to cells (code, PR 6)
+
+The chart reader is built on its own branch (PR 6), which joins the main line through rule drafting (PR 8). On a branch without it, the tests and CI step named here don't run.
 
 - **What:** reads the chart's drawn rectangles and borders to find rows, district columns and merged cells, then places each word in the cell that contains it. Output: one record per cell (page, section, row, district, value, lines, position). 683 cells on pages 2, 3, 14.
 - **Why:** plain text lines lose columns, so "25 ft" can't be tied to R-1B. Drawn boxes are what the PDF actually says about the table.
@@ -41,14 +43,14 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Tested by:** every R-1B number matches the R-1b rules (exact pass/fail boundary); every district cross-checked against the plain text (56 rows agree, 0 disagree); the 6 wrapped rows hand-read in every column; 7 planted errors caught; CI reproduces the cells file.
 - **Improve:** generalize to other cities' chart layouts, each with the same two-way cross-check.
 
-## 5. Cutting the law into pieces (code, PR 7a)
+## 5. Cutting the law into pieces (code, PR 7)
 
 - **What:** splits Chapter 325 at its own headings into 626 pieces (sections, lettered subsections, one per defined term, editor's notes, front matter). Page furniture (repeated titles, headers, footers) is set aside.
 - **Why:** a small piece is one idea, can be judged alone and cited exactly. The law's own numbering is the natural unit.
 - **Weaknesses:** heading patterns are tuned to Ithaca's code format.
 - **Tested by:** every one of 6,027 lines is in exactly one piece or is furniture; the cut matches the law's table of contents; CI reproduces it.
 
-## 6. Labeling pieces (AI: Haiku; code checks; PR 7a)
+## 6. Labeling pieces (AI: Haiku; code checks; PR 7)
 
 - **What:** one recorded AI call per piece labels it rule, flag, reference or not_for_checking. Instructions: `regulations/document_extraction_guide/labeling_guide.md` (role, purpose, process, rules). The answer lists the requirements first, as line numbers (L3–L5), then the label, topic, reason and one exact quote. Code takes the exact words from the cited lines.
 - **Why this model:** sorting is simple reading; Haiku labeled all 626 for $0.085. Everything it says is checked by code and reviewed.
@@ -83,14 +85,14 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Why:** readable by architects, nothing hidden (no code execution), exact and repeatable. No plain-English retelling: retellings kept dropping or adding words; the quotes are the words and the examples show the meaning.
 - **Fail closed:** missing, non-numeric, negative or impossible values give "needs review", never "pass".
 - **Alternatives considered:** free-form code (unsafe, unreadable), a custom rule language (more to build and learn), JSON logic (hard to read).
-- **Yes/no measurements:** a measure with unit `yes_no` (e.g. "the accessory dwelling unit has a separate entrance") is a test on its own in a formula (PR 7b). A measure a draft needs that isn't listed yet is proposed for an engineer and blocks approval until added.
+- **Yes/no measurements:** a measure with unit `yes_no` (e.g. "the accessory dwelling unit has a separate entrance") is a test on its own in a formula (PR 8). A measure a draft needs that isn't listed yet is proposed for an engineer and blocks approval until added.
 
 ## 9. The inspector (code, PR 1 onward)
 
 - **What:** checks every rule, definition and label: sources (listed, unchanged, quotable, exact and unique on cited lines), formula (allowed, true/false, known names), examples (a pass and a fail, each giving its stated result), a use decided by a rule cites its chart row, approvals (a listed architect, not the drafter, no open questions, nothing changed since: an approval fingerprint covers content, id and the cited documents).
 - **Weakness:** proves a rule is traceable and well formed, not that it means the right thing. Meaning comes from comparisons (§11) and architects.
 
-## 10. Drafting rules (AI: Sonnet; code checks; PR 7b, built, 10-unit test graded, full run not done)
+## 10. Drafting rules (AI: Sonnet; code checks; PR 8, built, 10-unit test graded, full run not done)
 
 - **What:** `packages/rule_drafting` drafts rules for every residential district. A unit is one chart section (e.g. page 3 "Yard Dimensions"), one piece of the law labeled rule or flag, or the chart's page 2 use lists. One recorded AI call per unit; drafts go to `5_zoning_rules/drafted/<district>.yaml` and `general.yaml`, the script's records to `drafted/records/`.
 - **Inputs:** for a law piece, its **whole text**: every line, numbered L1, L2, ... with page breaks marked (the labeler's numbering). A label's sources justify the label (newer labels also cite the requirement lines; older ones may cite only a heading or lead-in), so the drafter gets them only as **hints**: it drafts every requirement in the whole text, and any line the label cites that no drafted rule cites is listed for a person. Also the sections of the law it points to and the definitions it uses. For every unit, cached instructions: the drafting rules, the formula language, every measure, use and district, the chart's rows and the footnotes under each table.
@@ -106,8 +108,8 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 
 ## 11. Evaluation against independent sources
 
-- **Two readings of the chart:** code (§4) vs the hand-drafted R-1b: all R-1B numbers agree.
-- **Two readings of each row:** drawn cells vs plain text lines, for every district.
+- **Two readings of the chart** (PR 6, the chart reader): code (§4) vs the hand-drafted R-1b: all R-1B numbers agree.
+- **Two readings of each row** (PR 6): drawn cells vs plain text lines, for every district.
 - **The architects' own check:** their spreadsheet of 106 Ithaca Rd vs our R-1b formulas: 11/11 rows give the same PASS/FAIL (`test_answer_keys.py`). Limits: one house, one zone; their files have their own errors (listed in `docs/discrepancies_with_architects.md`).
 - **Planned:** 2–3 more worked examples in other zones from the architects; real Rhino models once measuring exists.
 

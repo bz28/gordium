@@ -26,9 +26,9 @@ from pathlib import Path
 
 import yaml
 
-from document_extraction.sections import load_rows, piece_text
+from document_extraction.sections import piece_text
 from rule_format.labels import load_pieces
-from rule_format.rulebook import REPO, Context, district_name, load, validate
+from rule_format.rulebook import REPO, Context, district_name, load, read_jsonl, validate
 from section_labeling.budget import Budget, BudgetExceeded
 from section_labeling.labeler import numbered_lines
 
@@ -60,11 +60,11 @@ class Inputs:
         self.cells_list = cells
         self.cells = {(c["page"], c["section"], c["row"].strip(), c["column"]): c for c in cells if not c["heading"]}
         self.columns = chart_values.districts(self.tables)
-        chart_rows = load_rows(j / f"2_extracted_text/{stem}.jsonl")
+        chart_rows = read_jsonl(j / f"2_extracted_text/{stem}.jsonl")
         self.notes = {t["page"]: chart_values.notes_under_table(chart_rows[1:], t["page"], t["bottom"]) for t in self.tables}
         law_header, pieces = load_pieces(j / f"2_extracted_text/{Path(LAW_FILE).stem}.sections.jsonl")
         self.law = {"file": law_header["file"], "pieces": pieces,
-                    "rows": load_rows(j / f"2_extracted_text/{Path(LAW_FILE).stem}.jsonl")}
+                    "rows": read_jsonl(j / f"2_extracted_text/{Path(LAW_FILE).stem}.jsonl")}
         labels_file = j / f"3_section_labels/{Path(LAW_FILE).stem}.yaml"
         self.labels = (load(labels_file) or {}).get("labels", {}) if labels_file.exists() else {}
         self.uses = load(j / "4_term_definitions/uses.yaml")

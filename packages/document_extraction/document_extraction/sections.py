@@ -230,6 +230,3 @@ def to_jsonl(result: dict, header: dict) -> str:
             "pieces": len(result["pieces"]), "problems": result["problems"], "furniture": result["furniture"]}
     return "\n".join(json.dumps(x, ensure_ascii=False) for x in [head, *result["pieces"]]) + "\n"
 
-
-def load_rows(path: Path) -> list[dict]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
