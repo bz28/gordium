@@ -49,7 +49,7 @@ def _python():
     """The repo's .venv Python (3.12): this checkout's, or the main checkout's for a worktree."""
     d = REPO
     while True:
-        candidate = os.path.join(d, ".venv", "bin", "python")
+        candidate = logic.venv_python(d, os.name)
         if os.path.exists(candidate):
             return candidate
         parent = os.path.dirname(d)
@@ -115,7 +115,10 @@ def _holds_building(definition, depth=0):
 def _sorted_objects(doc):
     """(lot candidates, buildings, problems) for the whole model."""
     lots, buildings, problems = [], [], []
-    for o in doc.Objects.GetObjectList(Rhino.DocObjects.ObjectEnumeratorSettings()):
+    every = Rhino.DocObjects.ObjectEnumeratorSettings()
+    every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # hidden still counts
+    every.IdefObjects = False
+    for o in doc.Objects.GetObjectList(every):
         layer = doc.Layers[o.Attributes.LayerIndex].FullPath
         kind = type(o.Geometry).__name__
         holds = isinstance(o, Rhino.DocObjects.InstanceObject) and _holds_building(o.InstanceDefinition)
@@ -179,7 +182,16 @@ def suggested_facts(doc, zones):
 
 def load_facts(doc):
     text = doc.Strings.GetValue(SECTION, ENTRY)
-    return json.loads(text) if text else None
+    try:
+        return json.loads(text) if text else None
+    except ValueError:
+        raise ValueError("the saved lot facts can't be read: run GordiumFacts to enter them again")
+
+
+def current_facts(doc):
+    """The saved facts, without a lot or main building that is no longer in the model."""
+    lots, buildings, _ = _sorted_objects(doc)
+    return logic.drop_stale(load_facts(doc), {str(o.Id) for o in lots}, {str(o.Id) for o in buildings})
 
 
 def save_facts(doc, facts):
@@ -283,6 +295,8 @@ def draw_scene(o, e):
             d.DrawLine(line, BLUE, 7)
         if isinstance(main, rg.Brep):
             d.DrawBrepWires(main, BLUE, 3)
+        elif isinstance(main, rg.Mesh):
+            d.DrawMeshWires(main, BLUE, 3)
 
 
 def draw_screen(o, e):
@@ -322,17 +336,24 @@ def overlay():
     return o
 
 
-def _red_copy(g):
-    """A failing object's copy for drawing in red: a hair (about 0.03 ft) larger than the object, so it wraps
-    it instead of flickering against its faces; a Brep or a mesh (an extrusion or SubD becomes a Brep), or None
-    if it can't be made. Only drawn; the model is never changed."""
+def _drawable(g):
+    """A building as a Brep or a mesh, which is what can be drawn (an extrusion or SubD becomes a Brep); a copy,
+    or None if it can't be made."""
     if isinstance(g, rg.Extrusion):
         g = g.ToBrep()
     elif isinstance(g, rg.SubD):
         g = g.ToBrep(rg.SubDToBrepOptions.Default)
-    else:
+    elif g is not None:
         g = g.Duplicate()
-    if not isinstance(g, (rg.Brep, rg.Mesh)):
+    return g if isinstance(g, (rg.Brep, rg.Mesh)) else None
+
+
+def _red_copy(g):
+    """A failing object's copy for drawing in red: a hair (about 0.03 ft) larger than the object, so it wraps
+    it instead of flickering against its faces; or None if it can't be made. Only drawn; the model is never
+    changed."""
+    g = _drawable(g)
+    if g is None:
         return None
     box = g.GetBoundingBox(True)
     size = max(box.Diagonal.X, box.Diagonal.Y, box.Diagonal.Z, 1e-6)
@@ -379,44 +400,47 @@ class Panel(ef.Form):
         self.Topmost = True
         self.Resizable = True
 
-    def show(self, result, facts, error=None):
-        layout = ef.DynamicLayout()
-        layout.Spacing = ed.Size(6, 4)
-        layout.Padding = ed.Padding(10)
-        layout.AddRow(_label(CITY + " · " + str(facts.get("zone")) + " · " + str(facts.get("use", "")).replace("_", " "),
-                             bold=True))
-        layout.AddRow(_label("Rules: draft rules, checked by code"))
-        colors = {"PASS": ed.Color.FromArgb(31, 122, 77), "FAIL": ed.Color.FromArgb(200, 50, 43),
-                  "NEEDS REVIEW": ed.Color.FromArgb(154, 100, 0)}
-        if error is not None:                   # nothing is shown as checked when the check didn't run
-            layout.AddRow(_label("Can't check this model: " + error, colors["NEEDS REVIEW"], True))
-        for r in (result or {}).get("rows", []):
-            detail = str(r["Table limit"]) + " · you have " + str(r["Proposed"]) + " " + str(r["Units"])
-            if r["Error"] == "NEEDS REVIEW":
-                detail = r["Why"]
-            layout.AddRow(_label(r["Error"], colors.get(r["Error"]), True), _label(r["Requirement"] + "\n" + detail))
-        env = (result or {}).get("envelope") or {}
-        if env.get("coverage") and env["coverage"].get("over") is not None:
-            c = env["coverage"]
-            word = "over" if c["over"] > 0 else "left"
-            layout.AddRow(_label("Coverage: " + format(abs(c["over"]), ",.1f") + " sf " + word +
-                                 " (allowed " + format(c["allowed"], ",.1f") + " sf)"))
-        for note in env.get("notes") or []:
-            layout.AddRow(_label("Envelope: " + note))
-        buttons = ef.StackLayout()
-        buttons.Orientation = ef.Orientation.Horizontal
-        buttons.Spacing = 6
-        for text, action in (("Lot facts…", lambda s, e: edit_facts()), ("Open report", lambda s, e: open_report()),
-                             ("Envelope on/off", lambda s, e: toggle_envelope()), ("Live on/off", lambda s, e: toggle_live())):
-            b = ef.Button()
-            b.Text = text
-            b.Click += action
-            buttons.Items.Add(ef.StackLayoutItem(b))
-        layout.AddRow(buttons)
-        layout.Add(None)
-        scroll = ef.Scrollable()
-        scroll.Content = layout
-        self.Content = scroll
+
+def show_panel(p, result, facts, error=None):
+    """Fill the panel: every rule with its result, or why there are none. A module function, not a Panel
+    method: like the Overlay, the Panel class keeps its first methods for the whole Rhino session."""
+    layout = ef.DynamicLayout()
+    layout.Spacing = ed.Size(6, 4)
+    layout.Padding = ed.Padding(10)
+    layout.AddRow(_label(CITY + " · " + str(facts.get("zone")) + " · " + str(facts.get("use", "")).replace("_", " "),
+                         bold=True))
+    layout.AddRow(_label("Rules: draft rules, checked by code"))
+    colors = {"PASS": ed.Color.FromArgb(31, 122, 77), "FAIL": ed.Color.FromArgb(200, 50, 43),
+              "NEEDS REVIEW": ed.Color.FromArgb(154, 100, 0)}
+    if error is not None:                   # nothing is shown as checked when the check didn't run
+        layout.AddRow(_label("Can't check this model: " + error, colors["NEEDS REVIEW"], True))
+    for r in (result or {}).get("rows", []):
+        detail = str(r["Table limit"]) + " · you have " + str(r["Proposed"]) + " " + str(r["Units"])
+        if r["Error"] == "NEEDS REVIEW":
+            detail = r["Why"]
+        layout.AddRow(_label(r["Error"], colors.get(r["Error"]), True), _label(r["Requirement"] + "\n" + detail))
+    env = (result or {}).get("envelope") or {}
+    if env.get("coverage") and env["coverage"].get("over") is not None:
+        c = env["coverage"]
+        word = "over" if c["over"] > 0 else "left"
+        layout.AddRow(_label("Coverage: " + format(abs(c["over"]), ",.1f") + " sf " + word +
+                             " (allowed " + format(c["allowed"], ",.1f") + " sf)"))
+    for note in env.get("notes") or []:
+        layout.AddRow(_label("Envelope: " + note))
+    buttons = ef.StackLayout()
+    buttons.Orientation = ef.Orientation.Horizontal
+    buttons.Spacing = 6
+    for text, action in (("Lot facts…", lambda s, e: edit_facts()), ("Open report", lambda s, e: open_report()),
+                         ("Envelope on/off", lambda s, e: toggle_envelope()), ("Live on/off", lambda s, e: toggle_live())):
+        b = ef.Button()
+        b.Text = text
+        b.Click += action
+        buttons.Items.Add(ef.StackLayoutItem(b))
+    layout.AddRow(buttons)
+    layout.Add(None)
+    scroll = ef.Scrollable()
+    scroll.Content = layout
+    p.Content = scroll
 
 
 def panel():
@@ -446,7 +470,7 @@ def confirm(doc, facts, options):
     lot = _find(doc, facts.get("lot_id") or "")
     main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     o = overlay()
-    o.confirm = (lot.Geometry if lot else None, street_curve(doc, facts), main.Geometry if main else None)
+    o.confirm = (lot.Geometry if lot else None, street_curve(doc, facts), _drawable(main.Geometry) if main else None)
     doc.Views.Redraw()
     try:
         if STATE.get("auto_ok"):          # scripted runs (tests, the demo): accept the prefilled facts
@@ -540,8 +564,11 @@ def edit_facts():
     """Lot facts…: every lot fact, then bedrooms, parking spaces and stories (skipped prompts stay unset)."""
     doc = Rhino.RhinoDoc.ActiveDoc
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
-    facts = logic.with_suggestions(load_facts(doc), suggested_facts(doc, options["zones"]))
-    facts = change_facts(doc, facts, options)
+    try:
+        saved = current_facts(doc)
+    except ValueError:                  # unreadable: start again from the suggestions
+        saved = {}
+    facts = change_facts(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options)
     answers = {key: _count(prompt) for key, prompt in (("sleeping_rooms", "Bedrooms"),
                                                        ("parking_spaces", "Off-street parking spaces"),
                                                        ("stories", "Stories"))}
@@ -567,10 +594,11 @@ def run_check(doc, report=True):
     result is cleared from the view and the panel, never left showing."""
     if STATE.get("running"):
         return None
-    STATE["running"] = True
     o = overlay()
-    facts = load_facts(doc) or {}
+    facts = {}
     try:
+        STATE["running"] = True
+        facts = current_facts(doc)
         if logic.missing(facts):
             raise ValueError("lot facts missing: " + ", ".join(logic.missing(facts)) + " (run GordiumCheck)")
         path = os.path.join(tempfile.gettempdir(), "gordium_live_" + str(doc.RuntimeSerialNumber) + ".3dm")
@@ -594,14 +622,14 @@ def run_check(doc, report=True):
                          "red": result["red"], "dims": result.get("dims"), "envelope": result.get("envelope"),
                          "at": time.time()}
         if not STATE.get("headless"):
-            panel().show(result, facts)
+            show_panel(panel(), result, facts)
         return result
     except Exception as e:
         _clear(o)
         o.message = ("review", "can't check: " + str(e)[:160], [])
         STATE["last"] = {"error": str(e), "at": time.time()}
         if not STATE.get("headless"):
-            panel().show(None, facts, str(e)[:300])
+            show_panel(panel(), None, facts, str(e)[:300])
         return None
     finally:
         STATE["running"] = False
@@ -615,11 +643,16 @@ def _changed(sender, e):
 
 
 def _new_document(sender, e):
-    """Another document: nothing from the last one stays drawn."""
+    """Another document (new, opened, or switched to): nothing from the last one stays drawn or listed."""
     o = STATE.get("overlay")
     if o is not None:
         _clear(o)
         o.message = None
+    STATE["last"] = {"error": "no check yet for this document", "at": time.time()}
+    p = STATE.get("panel")
+    if p is not None and p.Visible:
+        show_panel(p, None, {}, "no check yet for this document (run GordiumCheck)")
+    STATE["dirty"] = time.time()        # re-check the document now in front, if it has lot facts
 
 
 def _idle(sender, e):
@@ -627,20 +660,42 @@ def _idle(sender, e):
     if t and time.time() - t >= IDLE_SECONDS and not STATE.get("running"):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc
-        if doc is not None and load_facts(doc):
+        if doc is not None and doc.Strings.GetValue(SECTION, ENTRY):    # checked before: run_check says why
             run_check(doc, report=False)
+
+
+def documents(on):
+    """Hooks for another document coming to the front (new, opened, switched to); on while Gordium is."""
+    hooks = STATE.pop("doc_hooks", None)
+    if hooks:
+        new_doc, opened, active = hooks
+        Rhino.RhinoDoc.NewDocument -= new_doc
+        Rhino.RhinoDoc.EndOpenDocument -= opened
+        Rhino.RhinoDoc.ActiveDocumentChanged -= active
+    if on:
+        new_doc = System.EventHandler[Rhino.DocumentEventArgs](_new_document)
+        opened = System.EventHandler[Rhino.DocumentOpenEventArgs](_new_document)
+        active = System.EventHandler[Rhino.DocumentEventArgs](_new_document)
+        Rhino.RhinoDoc.NewDocument += new_doc
+        Rhino.RhinoDoc.EndOpenDocument += opened
+        Rhino.RhinoDoc.ActiveDocumentChanged += active
+        STATE["doc_hooks"] = (new_doc, opened, active)
 
 
 def _unhook():
     hooks = STATE.pop("hooks", None)
     if hooks and len(hooks) == 3:            # set by an earlier version of this script, before a reload
         hooks = (hooks[0], hooks[1], None, None, None, hooks[2])
-    if hooks:
+    if hooks and len(hooks) == 6:            # also an earlier version: the document hooks were here
         objects, replaced, attributes, new_doc, opened, idle = hooks
         if attributes is not None:
-            Rhino.RhinoDoc.ModifyObjectAttributes -= attributes
             Rhino.RhinoDoc.NewDocument -= new_doc
             Rhino.RhinoDoc.EndOpenDocument -= opened
+        hooks = (objects, replaced, attributes, idle)
+    if hooks:
+        objects, replaced, attributes, idle = hooks
+        if attributes is not None:
+            Rhino.RhinoDoc.ModifyObjectAttributes -= attributes
         Rhino.RhinoDoc.AddRhinoObject -= objects
         Rhino.RhinoDoc.DeleteRhinoObject -= objects
         Rhino.RhinoDoc.UndeleteRhinoObject -= objects
@@ -649,8 +704,8 @@ def _unhook():
 
 
 def live(on):
-    """Re-check after each edit: objects added, deleted, moved or changed, a layer change (attributes); a new or
-    opened document clears what was drawn."""
+    """Re-check after each edit: objects added, deleted, moved or changed, a layer change or hiding one
+    (attributes)."""
     _unhook()
     STATE["live"] = on
     if not on:
@@ -658,18 +713,14 @@ def live(on):
     objects = System.EventHandler[Rhino.DocObjects.RhinoObjectEventArgs](_changed)
     replaced = System.EventHandler[Rhino.DocObjects.RhinoReplaceObjectEventArgs](_changed)
     attributes = System.EventHandler[Rhino.DocObjects.RhinoModifyObjectAttributesEventArgs](_changed)
-    new_doc = System.EventHandler[Rhino.DocumentEventArgs](_new_document)
-    opened = System.EventHandler[Rhino.DocumentOpenEventArgs](_new_document)
     idle = System.EventHandler(_idle)
     Rhino.RhinoDoc.AddRhinoObject += objects
     Rhino.RhinoDoc.DeleteRhinoObject += objects
     Rhino.RhinoDoc.UndeleteRhinoObject += objects
     Rhino.RhinoDoc.ReplaceRhinoObject += replaced
     Rhino.RhinoDoc.ModifyObjectAttributes += attributes
-    Rhino.RhinoDoc.NewDocument += new_doc
-    Rhino.RhinoDoc.EndOpenDocument += opened
     Rhino.RhinoApp.Idle += idle
-    STATE["hooks"] = (objects, replaced, attributes, new_doc, opened, idle)
+    STATE["hooks"] = (objects, replaced, attributes, idle)
 
 
 def toggle_live():
@@ -685,11 +736,15 @@ def toggle_envelope():
 def open_report():
     path = report_path(Rhino.RhinoDoc.ActiveDoc)
     if os.path.exists(path):
-        subprocess.Popen(["open", path])
+        if os.name == "nt":
+            os.startfile(path)
+        else:
+            subprocess.Popen(["open", path])
 
 
 def off():
     _unhook()
+    documents(False)
     STATE["live"] = False
     o = STATE.get("overlay")
     if o is not None:
@@ -707,10 +762,14 @@ def gordium_check():
     """Confirm the lot facts whenever any required one is missing (keeping what is saved), then check."""
     doc = Rhino.RhinoDoc.ActiveDoc
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
-    facts = load_facts(doc) or {}
+    try:
+        facts = current_facts(doc)
+    except ValueError:                  # unreadable: confirm again from the suggestions
+        facts = {}
     if logic.missing(facts):
         facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
         save_facts(doc, facts)
+    documents(True)                                 # another document never shows this one's results
     result = run_check(doc, report=True)
     live(True)                                      # live mode is on by default
     if result is not None:

@@ -66,3 +66,22 @@ def to_feet(facts, scale):
     if out.get("grade_elevation") is not None:
         out["grade_elevation"] = out["grade_elevation"] * scale
     return out
+
+
+def drop_stale(facts, lot_ids, building_ids):
+    """The saved facts without a lot or main building that is no longer in the model (redrawn, joined, deleted):
+    the lot's street lines go with it, so the confirm dialog asks again instead of keeping an id nothing has."""
+    out = dict(facts or {})
+    if out.get("lot_id") and out["lot_id"] not in lot_ids:
+        out.pop("lot_id")
+        out.pop("street_line", None)
+    if out.get("main_building") and out["main_building"] not in building_ids:
+        out.pop("main_building")
+    return out
+
+
+def venv_python(root, os_name):
+    """Where the repo's virtual environment keeps Python: bin/python (Mac, Linux), Scripts\\python.exe (Windows)."""
+    if os_name == "nt":
+        return "\\".join((root, ".venv", "Scripts", "python.exe"))
+    return "/".join((root, ".venv", "bin", "python"))

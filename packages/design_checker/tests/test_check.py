@@ -119,3 +119,19 @@ def test_rhino_decisions():
     assert with_suggestions({"stories": 3, "zone": None}, {"zone": "R-1b"}) == {"zone": "R-1b", "stories": 3}
     assert to_feet({"street_line": [[[0, 0], [12, 0]]], "grade_elevation": 24}, 1 / 12) == {
         "street_line": [[[0.0, 0.0], [1.0, 0.0]]], "grade_elevation": 2.0}
+
+
+def test_a_lot_or_building_no_longer_in_the_model_is_asked_again():
+    from design_checker.rhino_logic import drop_stale, missing, with_suggestions
+    saved = {"lot_id": "old", "street_line": [[[0, 0], [5, 0]]], "main_building": "gone", "zone": "R-1b"}
+    fresh = drop_stale(saved, {"new"}, {"house"})
+    assert fresh == {"zone": "R-1b"} and "street_line" in missing(fresh)
+    merged = with_suggestions(fresh, {"lot_id": "new", "street_line": [[[0, 0], [73, 0]]]})
+    assert merged["lot_id"] == "new" and merged["street_line"] == [[[0, 0], [73, 0]]]
+    assert drop_stale(saved, {"old"}, {"gone"}) == saved
+
+
+def test_the_venv_python_on_each_system():
+    from design_checker.rhino_logic import venv_python
+    assert venv_python("/repo", "posix") == "/repo/.venv/bin/python"
+    assert venv_python("C:\\repo", "nt") == "C:\\repo\\.venv\\Scripts\\python.exe"

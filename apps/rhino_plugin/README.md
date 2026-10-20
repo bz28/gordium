@@ -6,7 +6,7 @@ saved next to the model. With live mode on (the default), it re-checks after eve
 
 ## Set up (once)
 
-1. Rhino 8 (Mac or Windows) and this repository with its `.venv` (`python3.12 -m venv .venv && .venv/bin/pip install -e .`).
+1. Rhino 8 (tested on Mac; Windows should work but is untested) and this repository with its `.venv` (`python3.12 -m venv .venv && .venv/bin/pip install -e .`).
 2. In Rhino: `RunPythonScript`, pick `apps/rhino_plugin/install.py`. That adds the commands `GordiumCheck`,
    `GordiumLive`, `GordiumFacts` and `GordiumOff`.
 
@@ -14,7 +14,7 @@ saved next to the model. With live mode on (the default), it re-checks after eve
 
 1. **Find:** the lot is the closed outline on the `Site` layer or a sublayer (the largest, if there are
    several); the buildings are the solids and meshes on the `Building` layer and its sublayers
-   (`Building::Garage`). Anything else there that could be part of a building (a block, a loose surface) isn't
+   (`Building::Garage`), hidden or locked ones too. Anything else there that could be part of a building (a block, a loose surface) isn't
    dropped: it is reported, and every rule that measures the building says NEEDS REVIEW until it is exploded or
    made a solid. Any model units work: Gordium works in feet and converts at the edge.
 2. **Confirm once:** one small dialog, prefilled: "City of Ithaca · R-1b · one-family dwelling, detached ·

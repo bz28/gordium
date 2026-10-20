@@ -18,7 +18,7 @@ o = g.overlay()
 saved = g.load_facts(doc)
 st = sc.sticky["gordium_state"]
 st["headless"] = True
-problems, added = [], []
+problems, added, hidden = [], [], []
 
 
 def expect(ok, what):
@@ -58,6 +58,37 @@ try:
     added.remove(ref)
     doc.InstanceDefinitions.Delete(idef, True, True)
 
+    # a hidden building still counts (never a pass by hiding it)
+    house = g._buildings(doc)[0]
+    doc.Objects.Hide(house.Id, True)
+    hidden.append(house.Id)
+    g.run_check(doc, report=False)
+    rows = {r["Rule id"]: r["Error"] for r in st["last"].get("rows", [])}
+    doc.Objects.Show(house.Id, True)
+    expect(rows.get("R-1b.lot_coverage") == "FAIL", "a hidden house was left out: " + repr(rows))
+
+    # saved facts that can't be read: a plain refusal, and checks keep running afterwards
+    doc.Strings.SetString(g.SECTION, g.ENTRY, "{bad")
+    expect(g.run_check(doc, report=False) is None and st.get("running") is False and "can't be read" in
+           st["last"].get("error", ""), "unreadable facts: " + repr(st.get("last")))
+    g.save_facts(doc, saved)
+
+    # a lot that is no longer in the model is asked again (its street line goes with it)
+    g.save_facts(doc, dict(saved, lot_id="00000000-0000-0000-0000-000000000000"))
+    stale = g.current_facts(doc)
+    expect("lot_id" not in stale and "street_line" in g.logic.missing(stale), "stale lot kept: " + repr(stale))
+    g.save_facts(doc, saved)
+
+    # an extrusion main building can be outlined in the confirm dialog
+    ext = rg.Extrusion.Create(rg.PolylineCurve([rg.Point3d(0, 0, 0), rg.Point3d(1, 0, 0), rg.Point3d(1, 1, 0),
+                                                rg.Point3d(0, 0, 0)]), 3, True)
+    expect(isinstance(g._drawable(ext), rg.Brep), "an extrusion can't be outlined")
+
+    # another document in front: nothing of this one's result stays listed
+    g.run_check(doc, report=False)
+    g._new_document(None, None)
+    expect("rows" not in st["last"] and o.message is None and not o.red, "results kept for another document")
+
     # a SubD's red copy can be drawn
     sub = rg.SubD.CreateFromMesh(rg.Mesh.CreateFromBox(rg.BoundingBox(0, 0, 0, 1, 1, 1), 1, 1, 1))
     expect(isinstance(g._red_copy(sub), rg.Brep), "no red copy for a SubD")
@@ -66,6 +97,8 @@ except Exception:
 finally:
     for i in added:
         doc.Objects.Delete(i, True)
+    for i in hidden:
+        doc.Objects.Show(i, True)
     g.save_facts(doc, saved)
     st["headless"] = False
     g.run_check(doc, report=False)

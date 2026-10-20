@@ -1,5 +1,6 @@
 #! python3
-"""GordiumFacts: edit the lot facts (bedrooms, parking spaces, stories)."""
+"""GordiumFacts: change any lot fact (zone, use, lot, main building, corner lot, street lines,
+ground, survey), then bedrooms, parking spaces and stories."""
 import os
 import sys
 

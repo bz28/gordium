@@ -4,7 +4,7 @@
 It adds four command aliases that run the scripts in this folder:
     GordiumCheck   check the open model, show the largest legal building, turn on live re-checking
     GordiumLive    turn live re-checking on or off
-    GordiumFacts   edit the lot facts (bedrooms, parking spaces, stories)
+    GordiumFacts   change any lot fact, then bedrooms, parking spaces and stories
     GordiumOff     stop live mode and clear Gordium's drawing
 """
 import os
