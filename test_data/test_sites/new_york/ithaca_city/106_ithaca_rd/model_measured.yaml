@@ -8,8 +8,8 @@ measurements:
     value: one_family_detached
     from: stated by the architect (not measured from the model) (lot facts)
   lot_area:
-    value: 6674.514596
-    from: 'measured from model.3dm: the area inside the lot lines'
+    value: null
+    from: 'not measured: the lot outline isn''t from a survey: the lot area needs one (an open question for the architects) [readings: the lot as drawn = 6,674.51]'
   lot_width:
     value: 73.0
     from: 'measured from model.3dm: the length of the lot line(s) on the street (frontage)'

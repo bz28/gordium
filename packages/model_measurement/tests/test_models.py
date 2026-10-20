@@ -66,7 +66,8 @@ def their_model():
 def test_their_model_as_sent_measures_the_lot_but_not_the_yards(their_model):
     facts, site = their_model
     m = measure(site, facts)
-    assert round(m["lot_area"]["value"]) == 6675 and m["lot_width"]["value"] == 73.0
+    assert m["lot_area"]["value"] is None and "survey" in m["lot_area"]["reason"]     # drawn, not surveyed
+    assert round(m["lot_area"]["readings"][0]["value"]) == 6675 and m["lot_width"]["value"] == 73.0
     assert m["building_height"]["value"] == 35.0
     for name in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_area"):
         assert m[name]["value"] is None and m[name]["reason"] == "a building isn't inside the lot"
@@ -109,10 +110,12 @@ def test_their_model_with_the_house_on_its_outline_against_their_spreadsheet(the
     assert got["rear_yard"] == 20.0 and cells["rear_yard"] == 25
     assert got["lot_depth"] is None and cells["lot_depth"] == 90                         # the jog: two readings, neither 90
     assert sorted(round(r["value"], 2) for r in m["lot_depth"]["readings"]) == [94.82, 100.06]
-    # results: never a PASS where they don't agree; the two rules that need the lot depth need review
+    # results: never a PASS where they don't agree. The two rules that need the lot depth need review, and so
+    # do the two that need the lot area: their model's lot is drawn from the map, not a survey
     mine = ours(m, rules, allowed, results)
-    assert {k: v for k, v in mine.items() if v != results[k]} == {"R-1b.height": "needs_review",
-                                                                  "R-1b.rear_yard": "needs_review"}
+    assert {k: v for k, v in mine.items() if v != results[k]} == {
+        "R-1b.height": "needs_review", "R-1b.rear_yard": "needs_review",
+        "R-1b.lot_area_one_family_detached": "needs_review", "R-1b.lot_coverage": "needs_review"}
 
 
 def test_the_committed_measured_projects_match_a_fresh_measurement():

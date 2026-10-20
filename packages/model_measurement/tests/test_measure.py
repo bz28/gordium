@@ -7,8 +7,8 @@ from shapely.geometry import LineString, Polygon
 
 from model_measurement.measure import measure
 
-FACTS = {"street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "grade_elevation": 0, "use": "one_family_detached",
-         "stories": 2}
+FACTS = {"street_line": [[[0, 0], [50, 0]]], "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True,
+         "grade_elevation": 0, "use": "one_family_detached", "stories": 2}
 
 
 def lot(points, curved=()):
@@ -367,3 +367,42 @@ def test_a_flat_other_solid_gives_no_duplicate_roof_readings():
                 {**FACTS, "main_building": "house"})["building_height"]
     assert [r["value"] for r in m["readings"]] == [30.0, 45.0]
     assert not any("read low" in r["reading"] for r in m["readings"])
+
+
+def test_only_the_questions_of_solids_that_can_change_the_height_are_named():
+    house = box(10, 25, 35, 65, 0, 10)
+    shed = box(36, 75, 48, 95, 0, 8, id="shed")                      # a mansard-like top at 12: never the tallest
+    shed["faces"] = [f for f in shed["faces"] if not all(p[2] == 8 for p in f["points"])]
+    deck, low = [(38, 77), (46, 77), (46, 93), (38, 93)], [(36, 75), (48, 75), (48, 95), (36, 95)]
+    shed["faces"] += [{"points": [[x, y, 12] for x, y in deck]}]
+    shed["faces"] += [{"points": [[*low[i], 8], [*low[(i + 1) % 4], 8], [*deck[(i + 1) % 4], 12], [*deck[i], 12]]}
+                      for i in range(4)]
+    tower = box(10, 66, 20, 72, 0, 30, id="tower")                   # a gable tower: eave 30, ridge 40
+    tower["faces"] = [f for f in tower["faces"] if not all(p[2] == 30 for p in f["points"])]
+    tower["faces"] += [{"points": [[10, 66, 30], [20, 66, 30], [20, 69, 40], [10, 69, 40]]},
+                       {"points": [[10, 69, 40], [20, 69, 40], [20, 72, 30], [10, 72, 30]]}]
+    m = measure(site(RECT, house, shed, tower), {**FACTS, "main_building": "house"})["building_height"]
+    assert m["value"] is None and "average height of a pitched roof" in m["reason"]
+    assert "mansard" not in m["reason"]
+
+
+def test_something_above_the_main_roof_is_for_the_architects():
+    house = box(10, 25, 35, 65, 0, 30)
+    chimney = box(12, 27, 15, 30, 30, 34)
+    house["faces"] = [f for f in house["faces"] if not (all(p[2] == 30 for p in f["points"]))] + [
+        {"points": [[10, 25, 30], [35, 25, 30], [35, 65, 30], [10, 65, 30]]}] + [
+        f for f in chimney["faces"] if not all(p[2] == 30 for p in f["points"])]
+    m = measure(site(RECT, house), FACTS)["building_height"]
+    assert m["value"] is None and "rises above the main roof" in m["reason"]
+
+
+def test_a_lot_not_from_a_survey_and_sloped_ground_need_review():
+    m = measure(site(), {**FACTS, "lot_surveyed": False})
+    assert m["lot_area"]["value"] is None and "survey" in m["lot_area"]["reason"]
+    assert m["lot_area"]["readings"][0]["value"] == 5000.0
+    m = measure(site(), {**FACTS, "ground_is_flat": False})
+    for name in ("building_height", "building_area", "front_yard"):
+        assert m[name]["value"] is None and m[name]["reason"].startswith("sloped ground"), name
+    m = measure(site(), {**FACTS, "ground_is_flat": None, "lot_surveyed": None})
+    assert m["building_height"]["reason"] == "say whether the ground is flat"
+    assert m["lot_area"]["reason"] == "say whether the lot outline is from a survey"

@@ -25,6 +25,8 @@ format report from it.
   | `street_line` | **every** lot line on a street, each by its two ends (on a corner lot: both streets and any curve between them); front, side and rear all follow from it |
   | `corner_lot` | yes or no: two streets meet at the lot (§325-19C). Stated, never guessed from the drawing (the city's definition has no angle in it). Without it, everything that depends on the street says "needs review". On a corner lot, the lot width, lot depth and every yard are left for the architects: which yards are front, side and rear, and which frontage is the width, are open questions (and a drawing can't show whether both streets were given) |
   | `grade_elevation` | the ground level heights are measured from (a flat site) |
+  | `ground_is_flat` | yes or no. Sloped ground needs the ground levels around the walls (the grade plane), not measured yet: without a yes, height and building area say "needs review" |
+  | `lot_surveyed` | yes or no: the lot outline is from a survey. A drawn lot (from a map) isn't: without a yes, the lot area, and so lot size and coverage, say "needs review" (the drawn area is listed as a reading) |
   | `lot_id`, `main_building` | only when there is more than one candidate |
   | `stories`, `sleeping_rooms`, `parking_spaces` | not drawn in a massing model; the rules that need them say "needs review" until they're entered |
 
@@ -58,6 +60,7 @@ listed, and the reason names the open question for the architects, so the checke
 | More than one solid on the Building layer | every yard to the main building / to any solid (a porch or deck drawn as its own solid is part of the building, §325-18A; an accessory building may follow other rules) | yard_projections, §325-25 |
 | A pitched roof | midway between eave and ridge / to the ridge | height_of_building: "average height" |
 | A roof with a level part and sloped sides at its top | a mansard, to its highest level / a pitched or hip roof, to its average height | height_of_building: "flat or mansard" vs "pitched, gabled, hip" |
+| Something above the main roof (a parapet, chimney, bulkhead, or a higher part of the building) | to its top, listed; whether it counts is the question (§325-3 leaves out bulkheads and chimneys) | height_of_building |
 | More than one solid, for the height | the main building alone / with every other solid as part of it | §325-25 |
 
 Things that stop a measurement, with the reason given: no street side, a street line that isn't a lot line, a

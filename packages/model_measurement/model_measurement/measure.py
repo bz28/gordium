@@ -206,6 +206,9 @@ def _normal_z(points) -> float:
 PITCHED = "the average height of a pitched roof is an open question for the architects (height_of_building)"
 ROOF_KIND = ("whether a roof with both a level part and sloped sides at its top is a mansard roof (to its highest "
              "level) or a pitched or hip roof (to its average height) is an open question for the architects")
+ABOVE_ROOF = ("something rises above the main roof (a parapet, chimney, bulkhead or a higher part of the "
+              "building): whether it counts in the height (§325-3 leaves out bulkheads, chimneys and similar "
+              "constructions) is an open question for the architects")
 ACCESSORY = ("whether another solid is part of the building or an accessory building (§325-25) is an open question "
              "for the architects")
 
@@ -224,9 +227,14 @@ def _height(building: dict, grade: float) -> dict:
             if _normal_z(f["points"]) > 0.001 and not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
     if not roof:
         return _missing("building_height", "the roof's shape can't be read (no faces above the floor that aren't walls)")
+    how = "from the ground level (grade plane) to the top of the roof"
+    main_roof = max(roof, key=lambda f: Polygon([p[:2] for p in f["points"]]).buffer(0).area)
+    if max(p[2] for p in main_roof["points"]) < top - TOL:   # the top is something smaller above the main roof
+        return _record("building_height", "ft", None, how, [building["id"]], None,
+                       [{"reading": "to the top of what rises above the main roof", "value": _r(top - grade)}],
+                       ABOVE_ROOF)
     highest = [f for f in roof if any(abs(p[2] - top) <= TOL for p in f["points"])]
     sloped = [f for f in highest if _normal_z(f["points"]) < FLAT]
-    how = "from the ground level (grade plane) to the top of the roof"
     if not sloped:
         return _decide("building_height", [("flat roof", top - grade, {})], how + " (a flat roof, to its highest level)",
                        [building["id"]], "")
@@ -239,11 +247,15 @@ def _height(building: dict, grade: float) -> dict:
                    _both(ROOF_KIND, PITCHED) if len(sloped) < len(highest) else PITCHED)
 
 
+MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
+
+
 def _with_others(main: dict, others: list[dict]) -> dict:
     """The main building's height read with the other solids: alone, and with every other solid as part of it
     (a wing or tower drawn as its own solid is part of the building; an accessory building may have its own
-    limit, §325-25). Each roof keeps its own readings. The reason names exactly the questions whose answer
-    changes the number: a question is named only if two readings that differ in that answer alone differ."""
+    limit, §325-25). Every combination of each roof's own readings is listed. A question is named only if two
+    readings that differ in that answer alone have different values: each solid's roof question on its own,
+    and the accessory question."""
     unread = [o for o in others if o["value"] is None and not o["readings"]]
     if unread:                          # never dropped: it could be the tallest part
         return _missing("building_height", "another solid's height can't be read: " + unread[0]["reason"])
@@ -251,26 +263,33 @@ def _with_others(main: dict, others: list[dict]) -> dict:
     def values(m):
         return [(r["reading"], r["value"]) for r in m["readings"]] or [("", m["value"])]
 
-    mine = values(main)
-    low = max(min(v for _, v in values(o)) for o in others)
-    high = max(max(v for _, v in values(o)) for o in others)
-    theirs = [("their roofs read low", low)] + ([("their roofs read high", high)] if high != low else [])
-    # every reading, with the answer it assumes to each question: (main roof, other roofs, other solids)
-    combos = [(w, None, "alone", v) for w, v in mine]
-    combos += [(w, t, "with", max(v, x)) for w, v in mine for t, x in theirs]
+    mine, theirs = values(main), [values(o) for o in others]
+    if len(mine) * math.prod(len(t) for t in theirs) > MAX_COMBINATIONS:
+        return _missing("building_height", "too many solids with open roof questions to list every reading: "
+                                           "pick the main building's parts, or ask the architects")
+    names = [o["objects"][0] for o in others]
+    combos = [((w, "alone") + (None,) * len(others), v) for w, v in mine]
+    combos += [((w, "with") + tuple(lbl for lbl, _ in picks), max([v] + [x for _, x in picks]))
+               for w, v in mine for picks in itertools.product(*theirs)]
 
     def matters(i):
-        return any(a[3] != b[3] and a[i] != b[i] and all(a[k] == b[k] for k in range(3) if k != i and
-                                                           not (k == 1 and i == 2))
+        same = [k for k in range(len(combos[0][0])) if k != i and not (i == 1 and k >= 2)]
+        return any(a[1] != b[1] and a[0][i] != b[0][i] and all(a[0][k] == b[0][k] for k in same)
                    for a in combos for b in combos)
 
-    roof_questions = [q for q in (ROOF_KIND, PITCHED) if main["reason"] and q in main["reason"]]
-    other_questions = [q for q in (ROOF_KIND, PITCHED) if any(o["reason"] and q in o["reason"] for o in others)]
-    questions = (roof_questions if matters(0) else []) + (other_questions if matters(1) else []) + (
-        [ACCESSORY] if matters(2) else [])
-    readings = [(_both(w, "the main building only" if s == "alone" else "with every other solid as part of it"
-                       + (", " + t if len(theirs) > 1 else "")), v, {}) for w, t, s, v in combos]
-    return _decide("building_height", readings, main["how"], main["objects"] + [o["objects"][0] for o in others],
+    def roof_questions(m):
+        return [q for q in (ROOF_KIND, PITCHED) if m["reason"] and q in m["reason"]]
+
+    questions = roof_questions(main) if matters(0) else []
+    questions += [ACCESSORY] if matters(1) else []
+    for j, o in enumerate(others):
+        questions += roof_questions(o) if matters(2 + j) else []
+    readings = []
+    for choice, v in combos:
+        words = "the main building only" if choice[1] == "alone" else "with every other solid as part of it" + "".join(
+            f"; {n}: {lbl}" for n, lbl in zip(names, choice[2:]) if lbl)
+        readings.append((_both(choice[0], words), v, {}))
+    return _decide("building_height", readings, main["how"], main["objects"] + names,
                    "; ".join(dict.fromkeys(questions)))
 
 
@@ -303,7 +322,11 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
             next((b for b in buildings if b["id"] == facts.get("main_building")), None))
     why_building = ("no building on the Building layer" if not buildings else
                     "; ".join(p for b in buildings for p in b.get("problems") or []) or None)
-    why_grade = None if grade is not None else "the ground level isn't given: enter it (the grade plane)"
+    why_grade = ("the ground level isn't given: enter it (the grade plane)" if grade is None else
+                 "say whether the ground is flat" if facts.get("ground_is_flat") is None else
+                 None if facts["ground_is_flat"] else
+                 "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't "
+                 "measured yet")
     why_main = None if main else "more than one building: pick the main building"
     why = why_building or why_grade or why_main
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
@@ -318,7 +341,15 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         for name in UNITS:
             out.setdefault(name, _missing(name, reason))
         return out
-    out["lot_area"] = _record("lot_area", "sf", _r(lot.polygon.area), "the area inside the lot lines", [lot.id])
+    if facts.get("lot_surveyed"):
+        out["lot_area"] = _record("lot_area", "sf", _r(lot.polygon.area), "the area inside the lot lines (a survey)",
+                                  [lot.id])
+    else:                               # a drawn lot isn't a surveyed one: the lot area waits for a survey
+        out["lot_area"] = _record("lot_area", "sf", None, "the area inside the lot lines", [lot.id], None,
+                                  [{"reading": "the lot as drawn", "value": _r(lot.polygon.area)}],
+                                  "say whether the lot outline is from a survey" if facts.get("lot_surveyed") is None
+                                  else "the lot outline isn't from a survey: the lot area needs one (an open question "
+                                       "for the architects)")
 
     # where the street is decides the lot width, the yards and the lot depth. Whether the lot is a corner lot
     # (two streets, §325-19C) is stated by the architect, never guessed from the drawing (the city's definition

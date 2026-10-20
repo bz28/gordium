@@ -61,7 +61,7 @@ Checked by us on 2026-10-19 against the official sources in `regulations/jurisdi
 | Rear yard | 25 ft | 20.0 ft | the model's deeper house; 20 ft is the spreadsheet's unused "Back offset" input (2.2) |
 | Lot depth | 90 ft | no single value: 94.82 ft (the jog as a rear lot line) or 100.06 ft (as a side lot line) | §325-8A(14)(a) averages the two side lot lines; 90 ft is neither reading (4.2) |
 
-With those numbers the R-1b results agree with the spreadsheet on 9 of its 11 rows; the other two (rear yard and height, which both use the lot depth) are NEEDS REVIEW until the architects say which lines are the side lot lines. Under either reading the model's 20 ft rear yard is short (23.7 or 25.0 ft required).
+With those numbers the R-1b results agree with the spreadsheet on 7 of its 11 rows. The other four are NEEDS REVIEW: rear yard and height (both use the lot depth) until the architects say which lines are the side lot lines, and lot size and coverage (both use the lot area) because the model's lot is drawn from the City's map, not a survey. Under either reading the model's 20 ft rear yard is short (23.7 or 25.0 ft required).
 
 ## 5. The workflow document
 
