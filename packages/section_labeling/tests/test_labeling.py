@@ -490,9 +490,7 @@ def test_every_label_matches_a_recorded_answer_or_says_how_it_differs(law):
 def test_the_committed_labels_all_match_their_recorded_answers(law):
     ctx, header, pieces, rows = law
     labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
-    runs = [json.loads(line) for f in sorted((ITHACA / "3_section_labels/runs").glob("*.jsonl"))
-            for line in f.read_text().splitlines() if line.strip()]
-    assert coverage.provenance_problems(labels, runs, pieces, rows, LAW, ctx) == []
+    assert coverage.provenance_problems(labels, cli.run_records(ITHACA), pieces, rows, LAW, ctx) == []
 
 
 def test_the_collocation_review_scope_pieces_are_labeled_alike():
@@ -540,13 +538,42 @@ def test_methods_doc_says_whether_a_run_used_the_current_labeling_guide():
     assert not re.search(r"hold (\w+) fingerprints", doc)      # a count in prose goes stale with the next run
 
 
+def first_full_run(calls, n_pieces):
+    """The guide fingerprint of the first run, in record order, that answered nearly the whole law (95% of its
+    pieces): "first" by order, not "biggest", so a later, larger re-run never takes its place."""
+    from collections import defaultdict
+    covered = defaultdict(set)
+    for c in calls:
+        covered[c["system_sha256"]].add(c["piece"])
+        if len(covered[c["system_sha256"]]) >= 0.95 * n_pieces:
+            return c["system_sha256"]
+    return None
+
+
+def test_first_full_run_is_the_earliest_not_the_largest():
+    small = [{"system_sha256": "a", "piece": f"p{i}"} for i in range(5)]
+    first = [{"system_sha256": "b", "piece": f"p{i}"} for i in range(96)]
+    later = [{"system_sha256": "c", "piece": f"p{i}"} for i in range(100)]
+    assert first_full_run(small + first + later, 100) == "b"
+    assert first_full_run(small, 100) is None
+
+
 def test_methods_doc_says_where_the_category_definitions_labels_came_from():
-    """The category-vs-limit definitions keep Haiku's run answers (their review corrections were undone), so the
-    doc may not say they come from review revisions."""
+    """methods.md says the three category-vs-limit definitions are Haiku's first-full-run answers (their
+    review corrections undone), each with an open question. Worked out from the records: the sentence is
+    there exactly when every one of them is unrevised, matches a first-full-run answer word for word, and has
+    an open question; and the doc never says they come from review revisions."""
     from rule_format.rulebook import REPO
     labels = load(ITHACA / "3_section_labels/chapter_325_zoning_2026-10.yaml")["labels"]
-    category = [pid for pid in ("325-3B:kitchen", "325-3B:adult_day_care_home", "325-3B:bed_and_breakfast_inn")
-                if not labels[pid].get("revised")]
+    calls = [c for c in cli.run_records(ITHACA) if c.get("answer")]
+    first_full = first_full_run(calls, len(labels))
+    def first_run_answer(pid):
+        return any(c["piece"] == pid and c["system_sha256"] == first_full
+                   and {k: json.loads(c["answer"]).get(k) for k in ("label", "reason")}
+                   == {"label": labels[pid]["label"], "reason": labels[pid]["reason"]} for c in calls)
+    pieces = ("325-3B:kitchen", "325-3B:adult_day_care_home", "325-3B:bed_and_breakfast_inn")
+    holds = all(not labels[pid].get("revised") and labels[pid].get("open_questions") and first_run_answer(pid)
+                for pid in pieces)
     doc = (REPO / "docs/methods.md").read_text()
-    if category:
-        assert "come from recorded review revisions" not in doc and "Haiku's answers from the first full run" in doc
+    assert ("Haiku's answers from the first full run" in doc) == holds
+    assert "come from recorded review revisions" not in doc

@@ -105,32 +105,128 @@ FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only app
                           r"|architect'?s approval freezes|architect\s*──►", re.IGNORECASE)
 
 
+# A backstop, not a parser: it catches the usual ways of saying architects check drafts now. Verbs in any tense,
+# up to three words between "architects" and the verb (but not "to"/"can"/"may"..., which make it a possibility),
+# and the noun forms (architect's / architects' / architect- review, approval...).
+_VERB = (r"(?:confirm(?:s|ed|ing)?|review(?:s|ed|ing)?|check(?:s|ed|ing)?|approv(?:e|es|ed|ing)"
+         r"|sign(?:s|ed|ing)?(?:[\s-]+off)?)")      # verb forms only: "checker" or "reviewer" is not a verb
+_MODALS = ("can", "could", "may", "might", "would")    # words that make it a possibility: the one list
+_MODAL = "(?:" + "|".join(_MODALS) + ")"
+_NOT_AFTER_MODAL = "".join(rf"(?<!\b{m}\s)" for m in _MODALS)
+_GAP = rf"(?:[\s,]+(?!(?:to|{_MODAL})\b)\w+){{0,3}}?"
 ARCHITECT_REVIEW = re.compile(
-    r"\barchitects?\s+(would\s+)?(confirm|review|check|approve|sign)s?\b"                  # architects confirm...
-    r"|\b(confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{0,30}?\barchitects?\b"  # ...confirmed by architects
-    r"|\bthen architects\b|\barchitect review\b", re.IGNORECASE)
-NOT_A_PROMISE = re.compile(r"defer|\bonce\b|when approval is switched on|\bwould\b"
-                           r"|their (own )?(site|design|project)|facts about|by hand|answers? (the |any )?open questions", re.IGNORECASE)
+    rf"\barchitects?\b(?!['\u2019-]){_GAP}[\s,]+{_VERB}\b"
+    rf"|\b(?:confirmed|reviewed|checked|approved|signed off)\s+by\b[^.\n]{{0,30}}?\barchitects?\b"
+    rf"|\barchitects?\s+(?:(?!{_MODAL}\b)\w+\s+){{0,2}}?(?:needs?|ha(?:ve|s|d)|required|asked|expected)\s+to\s+{_VERB}\b"
+    rf"|{_NOT_AFTER_MODAL}\b(?:needs?|requires?|required)\s+(?:an?\s+|the\s+)?architects?\s+to\s+{_VERB}\b"
+    r"|\bthen architects\b"
+    r"|\barchitect(?:s['\u2019]|['\u2019]s|s)?[\s-]+(?:review|confirm\w*|check\w*|sign-?off|approv\w*)\b", re.IGNORECASE)
+# What makes such a phrase not a promise. A sentence that says approval is deferred, or describes what happens
+# once it is switched on, is fine wherever it says so. The narrower excuses ("by hand", "facts about their
+# site") only count right next to the phrase, so they can't excuse an unrelated promise in the same sentence.
+DEFERRED = re.compile(r"\b(approval|confirmation|review|reviews|check|checks|sign-?off|it|this|that|they)\s+"
+                      r"((is|are|stays|remains)\s+)?deferred"
+                      r"|deferred\s+(for now|until)|\(deferred|\bonce (approval|it) is (switched )?on\b|\bonce approved\b"
+                      r"|\bonce (the )?architects? approves?|when (approval is|it's|it is) switched on",
+                      re.IGNORECASE)
+NEARBY_EXCUSE = re.compile(r"facts about their (own )?(site|design|project)|checked by hand by architects"
+                           r"|answers? (the |any )?open questions", re.IGNORECASE)
+_WINDOW = 40
 
 
 def _promises_architect_review(sentence: str) -> bool:
     """A sentence that presents architects checking drafts as happening now (not deferred, not conditional).
     An architect confirming their own project's facts, or answering open questions, is not that."""
-    return bool(ARCHITECT_REVIEW.search(sentence)) and not NOT_A_PROMISE.search(sentence)
+    if DEFERRED.search(sentence):
+        return False
+    return any(not NEARBY_EXCUSE.search(sentence[max(0, m.start() - _WINDOW):m.end() + _WINDOW])
+               for m in ARCHITECT_REVIEW.finditer(sentence))
+
+
+def _sentences(text: str) -> list[str]:
+    """Whole sentences: lines wrapped inside a paragraph or a list item are joined back together. Headings,
+    table rows and code-block lines each stand alone; a new list item starts a new paragraph."""
+    sentences, current, in_code = [], [], False
+    def flush():
+        if current:
+            sentences.extend(re.split(r"(?<=[.!?])\s+", " ".join(current)))
+            current.clear()
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            flush(); in_code = not in_code; continue
+        if in_code or re.match(r"(#|\|)", stripped):
+            flush(); current.append(stripped); flush(); continue
+        if re.match(r"([-*+]\s|\d+\.\s)", stripped):       # a list item: its wrapped lines join it
+            flush(); current.append(stripped); continue
+        if not stripped:
+            flush(); continue
+        current.append(stripped)
+    flush()
+    return [s for s in sentences if s]
+
+
+def _yaml_sentences(text: str) -> list[str]:
+    """What people read in a YAML file: its comments (joined across lines) and every text value."""
+    comments = "\n".join(line.split("#", 1)[1].strip() if "#" in line else "" for line in text.splitlines())
+    values = []
+    def walk(node):
+        if isinstance(node, str):
+            values.append(node)
+        elif isinstance(node, dict):
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+    walk(yaml.safe_load(text))
+    return _sentences(comments) + [s for v in values for s in _sentences(v)]
 
 
 def test_the_architect_review_matcher():
     for promise in ["confirmed by step 2 and by architects", "an architect confirms each label",
                     "reviewers and architects check the rest", "Code, then AI for leftovers, then architects",
                     "is caught by comparing outputs, and by architect review", "Draft: architects approve",
-                    "caught by comparing the answer key with the chart, and by architect review"]:
+                    "caught by comparing the answer key with the chart, and by architect review",
+                    "once per code version: an architect confirms each rule is right",
+                    "Architects will confirm each label", "An architect must approve each rule",
+                    "Labels need architect confirmation", "an architect's review catches the wrong column",
+                    "Architects approved each rule", "An architect confirmed each label",
+                    "Architects have approved the rulebook", "Architects are reviewing each rule",
+                    "Architects carefully check each rule", "the architects' review catches errors",
+                    "architect-approved rules", "Architects review every draft rule by hand",
+                    "Architects review each rule against their design",
+                    "Architects review each label; the deferred items listed at the end of this long document go to Ben",
+                    "Architects need to approve each rule", "Architects have to review the labels",
+                    "Architects are asked to review each rule",
+                    "Architects review each rule, which would otherwise slip through",
+                    "Each rule needs an architect to approve it", "Each rule requires an architect to sign off"]:
         assert _promises_architect_review(promise), promise
     for fine in ["the architect confirms the facts about their site and design",
                  "Architects answer the open questions", "architect approval is deferred for now",
                  "Choices for the architects to confirm", "Rules checked by hand by architects",
                  "Something only an architect can judge", "the architects' R-1b check for 106 Ithaca Road",
-                 "an answer key once approval is switched on", "Architects would confirm each definition"]:
+                 "an answer key once approval is switched on", "Architects would confirm each definition",
+                 "An architect can approve each rule once approval is switched on",
+                 "Code, then AI, checked by code (architect confirmation deferred)",
+                 "Architects would need to confirm each definition", "Architects may need to approve each rule",
+                 "Each rule would need an architect to approve it", "A rule may need an architect to confirm it",
+                 "This might require an architect to review it",
+                 "the reason names the open question for the architects, so the checker says NEEDS REVIEW"]:
         assert not _promises_architect_review(fine), fine
+
+
+def test_sentences_are_joined_across_wrapped_lines():
+    comment = "key: 1  # Rules are drafts. Architects check each\n# rule before use.\nother: 2\n"
+    assert "Architects check each rule before use." in _yaml_sentences(comment)
+    values = "label_kinds:\n  rule: Checked by code, then architects approve each one.\nnotes: >\n  Architects review each\n  rule before use.\n"
+    assert any(_promises_architect_review(s) for s in _yaml_sentences(values))
+    assert "Architects review each rule before use." in _yaml_sentences(values)
+    assert _sentences("- Architects check each\n  rule before use.\n") == ["- Architects check each rule before use."]
+    assert not any(_promises_architect_review(s) for s in _sentences("- Architects check each rule (approval\n  deferred).\n"))
+    prose = "Rules are drafts. Architects check each\nrule before use.\n\n- a list item\n"
+    assert "Architects check each rule before use." in _sentences(prose)
+    assert _sentences("- one item\n- two items\n") == ["- one item", "- two items"]
 
 
 def test_docs_dont_promise_approval_while_it_is_deferred():
@@ -145,7 +241,8 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
     # Architects approving, confirming, checking or reviewing drafts is the deferred layer: each sentence that
     # says so must say it's deferred (or describe what happens once it is switched on).
     confirm = [f"{p.relative_to(REPO)}: {line.strip()[:100]}" for p in DOCS + REGULATION_YAML
-               for line in re.split(r"(?<=[.!?])\s+|\n", p.read_text()) if _promises_architect_review(line)]
+               for line in (_yaml_sentences if p.suffix == ".yaml" else _sentences)(p.read_text())
+               if _promises_architect_review(line)]
     assert not silent and not false and not confirm, (silent, false, confirm)
 
 
