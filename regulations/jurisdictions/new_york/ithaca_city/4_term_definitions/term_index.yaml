@@ -5,7 +5,6 @@ documents: [chapter_325_zoning_2026-10.pdf]
 terms:
   grade_plane:
     title: GRADE PLANE
-...
     forms: [grade plane, grade, finished grade, ground level, finished ground level]
     pieces:
     - {piece: '325-3B:basement', title: BASEMENT, at: [[5, 10], [5, 11]]}
@@ -30,7 +29,6 @@ terms:
     - {piece: 325-45.2B, title: Definitions and related standards, at: [[130, 30]]}
   height_of_building:
     title: HEIGHT OF BUILDING
-...
     forms: [height of building, building height, height, tall]
     pieces:
     - {piece: front_matter, title: Table of contents and history, at: [[1, 60]]}
@@ -89,7 +87,6 @@ terms:
     - {piece: editors_note_41, title: Editor's Note 41, at: [[126, 40], [126, 41]]}
   story:
     title: STORY
-...
     forms: [story, stories, storey, storeys, mezzanine, attic]
     pieces:
     - {piece: '325-3B:fast_tracking', title: FAST-TRACKING, at: [[9, 30], [9, 31], [9, 32]]}
@@ -112,7 +109,6 @@ terms:
     - {piece: 325-45.5D, title: Maximum building height, at: [[164, 5]]}
   basement:
     title: BASEMENT
-...
     forms: [basement]
     pieces:
     - {piece: '325-3B:accessory_dwelling_unit_attached', title: 'ACCESSORY DWELLING UNIT, ATTACHED', at: [[4, 13]]}
@@ -120,14 +116,12 @@ terms:
     - {piece: '325-3B:story', title: STORY, at: [[19, 15]]}
   cellar:
     title: CELLAR
-...
     forms: [cellar]
     pieces:
     - {piece: '325-3B:cellar', title: CELLAR, at: [[6, 6]]}
     - {piece: '325-3B:story', title: STORY, at: [[19, 17]]}
   building_area:
     title: BUILDING AREA (lot coverage)
-...
     forms: [building area, lot coverage, coverage, footprint]
     pieces:
     - {piece: '325-3B:building_area', title: BUILDING AREA, at: [[5, 23], [5, 26], [5, 28]]}
@@ -162,7 +156,6 @@ terms:
     - {piece: 325-45.5E, title: 'Maximum percentage of lot coverage by buildings: 35%', at: [[164, 6]]}
   lot:
     title: LOT
-...
     forms: [lot, lot area, parcel]
     pieces:
     - {piece: front_matter, title: Table of contents and history, at: [[2, 35], [2, 44]]}
@@ -257,7 +250,6 @@ terms:
     - {piece: editors_note_12, title: Editor's Note 12, at: [[49, 28]]}
   lot_width:
     title: LOT WIDTH (minimum lot size, width in feet at street line)
-...
     forms: [lot width, width of lot, frontage, street line]
     pieces:
     - {piece: '325-3B:lot_building', title: 'LOT, BUILDING', at: [[14, 40]]}
@@ -278,7 +270,6 @@ terms:
     - {piece: 325-45.5C, title: Minimum lot size, at: [[164, 3]]}
   lot_depth:
     title: LOT DEPTH (for the rear yard percentage)
-...
     forms: [lot depth, depth of lot]
     pieces:
     - {piece: 325-8A, title: The District Regulations Chart is hereby made a part of this chapter, at: [[25, 24], [25, 27], [25, 32]]}
@@ -286,7 +277,6 @@ terms:
     - {piece: 325-45.2F, title: Collegetown Residential 4 (CR-4), at: [[149, 24]]}
   yard:
     title: YARD
-...
     forms: [yard, setback, open space]
     pieces:
     - {piece: front_matter, title: Table of contents and history, at: [[1, 50], [1, 64]]}
@@ -357,7 +347,6 @@ terms:
     - {piece: editors_note_18, title: Editor's Note 18, at: [[65, 39]]}
   front_yard:
     title: FRONT YARD
-...
     forms: [front yard, front setback]
     pieces:
     - {piece: '325-3B:front_yard', title: FRONT YARD, at: [[20, 31]]}
@@ -379,7 +368,6 @@ terms:
     - {piece: 325-45.5F, title: Yard dimensions, at: [[164, 8]]}
   side_yard:
     title: SIDE YARD
-...
     forms: [side yard, side setback]
     pieces:
     - {piece: '325-3B:side_yard', title: SIDE YARD, at: [[20, 35], [20, 37]]}
@@ -394,7 +382,6 @@ terms:
     - {piece: 325-45.5F, title: Yard dimensions, at: [[164, 10], [164, 11]]}
   rear_yard:
     title: REAR YARD
-...
     forms: [rear yard, rear setback]
     pieces:
     - {piece: '325-3B:side_yard', title: SIDE YARD, at: [[20, 35]]}
@@ -416,7 +403,6 @@ terms:
     - {piece: editors_note_11, title: Editor's Note 11, at: [[49, 26]]}
   yard_projections:
     title: PORCHES AND PROJECTIONS IN YARDS
-...
     forms: [projection, projecting, eave, eaves, overhang, cornice, windowsill, belt course, porch, deck, balcony, bay window, ramp, landing, stoop]
     pieces:
     - {piece: '325-3B:building', title: BUILDING, at: [[5, 21]]}
@@ -439,7 +425,6 @@ terms:
     - {piece: 325-45.2F, title: Collegetown Residential 4 (CR-4), at: [[151, 15], [151, 16]]}
   accessory_building:
     title: Accessory buildings and structures (garages, sheds)
-...
     forms: [accessory building, accessory structure, accessory use, garage, shed, toolhouse, garden house, playhouse, carport]
     pieces:
     - {piece: front_matter, title: Table of contents and history, at: [[1, 18]]}
@@ -485,7 +470,6 @@ terms:
     - {piece: 325-45.5A, title: Permitted uses, at: [[163, 18]]}
   corner_lot:
     title: Corner lots
-...
     forms: [corner lot, two front yards]
     pieces:
     - {piece: '325-3B:corner_lot', title: CORNER LOT, at: [[7, 4]]}
@@ -499,7 +483,6 @@ terms:
     - {piece: 325-45.2G, title: 'Mixed Use (MU-1, MU-2)', at: [[153, 17], [160, 3], [160, 7]]}
   lot_line:
     title: Lot lines (property lines)
-...
     forms: [lot line, property line, front lot line, side lot line, rear lot line]
     pieces:
     - {piece: '325-3B:one_family_detached_dwelling_zero_lot_line', title: 'ONE-FAMILY DETACHED DWELLING, ZERO LOT LINE', at: [[8, 4], [8, 6]]}
@@ -533,7 +516,6 @@ terms:
     - {piece: 325-45.5F, title: Yard dimensions, at: [[164, 8], [164, 9]]}
   roof:
     title: Roofs (flat, pitched, gable, hip, gambrel, mansard)
-...
     forms: [roof, flat roof, pitched roof, gable, gabled, hip roof, gambrel, mansard, ridge, parapet]
     pieces:
     - {piece: '325-3B:building', title: BUILDING, at: [[5, 21]]}
@@ -552,7 +534,6 @@ terms:
     - {piece: 325-45.2G, title: 'Mixed Use (MU-1, MU-2)', at: [[155, 14], [155, 15], [159, 3], [159, 4]]}
   height_exceptions:
     title: Features allowed above the height limit
-...
     forms: [chimney, spire, belfry, cupola, skylight, bulkhead, mechanical penthouse, stairtower]
     pieces:
     - {piece: '325-3B:height_of_building', title: HEIGHT OF BUILDING, at: [[12, 21]]}

@@ -80,7 +80,8 @@ def render(index: dict) -> str:
             "# For every defined term and its synonyms (regulations/document_extraction_guide/term_synonyms.yaml),\n"
             "# every piece of the law that uses it, with the [page, line] of each use.\n")
     def flow(value) -> str:                       # one line, so each section is one row of the file
-        return yaml.safe_dump(value, default_flow_style=True, allow_unicode=True, width=10_000, sort_keys=False).strip()
+        text = yaml.safe_dump(value, default_flow_style=True, allow_unicode=True, width=10_000, sort_keys=False)
+        return text.removesuffix("\n").removesuffix("\n...")       # a bare scalar comes with a "..." end marker
     out = [head + f"documents: {flow(index['documents'])}", "terms:"]
     for key, e in index["terms"].items():
         out += [f"  {key}:", f"    title: {flow(e['title'])}", f"    forms: {flow(e['forms'])}",
@@ -89,10 +90,16 @@ def render(index: dict) -> str:
     return "\n".join(out) + "\n"
 
 
-def related(index: dict, text: str) -> list[str]:
-    """Piece ids the index lists for every term the text uses, in the order the terms are listed, deduplicated."""
-    out = []
-    for e in index["terms"].values():
-        if pattern(e["forms"]).search(text):
-            out += [p["piece"] for p in e["pieces"] if p["piece"] not in out]
-    return out
+def related(index: dict, text: str, texts: dict[str, str] | None = None) -> list[str]:
+    """Piece ids the index lists for the terms the text uses, deduplicated. Given the pieces' texts, the most
+    relevant come first: those that use those terms most densely (uses per word), so a short section about
+    yards (§325-18B) comes before a long one that mentions a yard once; ties keep the law's order."""
+    used = [e for e in index["terms"].values() if pattern(e["forms"]).search(text)]
+    order = list(dict.fromkeys(p["piece"] for e in used for p in e["pieces"]))
+    if texts is None:
+        return order
+    rxs = [pattern(e["forms"]) for e in used]
+    def density(pid):
+        t = texts.get(pid, "")
+        return sum(len(rx.findall(t)) for rx in rxs) / max(len(t.split()), 1)
+    return sorted((p for p in order if p in texts), key=density, reverse=True)

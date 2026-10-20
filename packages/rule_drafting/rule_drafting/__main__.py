@@ -64,10 +64,13 @@ class Inputs:
         chart_rows = read_jsonl(j / f"2_extracted_text/{stem}.jsonl")
         self.notes = {t["page"]: chart_values.notes_under_table(chart_rows[1:], t["page"], t["bottom"]) for t in self.tables}
         law_header, pieces = load_pieces(j / f"2_extracted_text/{Path(LAW_FILE).stem}.sections.jsonl")
+        terms_file = j / "4_term_definitions/term_index.yaml"     # related sections by shared words (generated)
         self.law = {"file": law_header["file"], "pieces": pieces,
-                    "rows": read_jsonl(j / f"2_extracted_text/{Path(LAW_FILE).stem}.jsonl")}
+                    "rows": read_jsonl(j / f"2_extracted_text/{Path(LAW_FILE).stem}.jsonl"),
+                    "terms": load(terms_file) if terms_file.exists() else None}
         labels_file = j / f"3_section_labels/{Path(LAW_FILE).stem}.yaml"
         self.labels = (load(labels_file) or {}).get("labels", {}) if labels_file.exists() else {}
+        self.law["requires"] = {pid for pid, label in self.labels.items() if label.get("label") in DRAFTED_LABELS}
         self.uses = load(j / "4_term_definitions/uses.yaml")
         self.definitions = load(j / "4_term_definitions/definitions.yaml")
         # Every section of every chart page the reader read; the use lists are built by code, not the AI.

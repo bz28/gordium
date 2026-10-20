@@ -69,9 +69,18 @@ def test_related_sections_for_a_text(index):
     assert "325-18B" in found and len(found) == len(set(found))
 
 
-def test_the_committed_index_is_a_fresh_build(index):
+def test_with_texts_the_densest_uses_come_first():
+    """A short section about yards outranks a long one that mentions a yard once, so a size limit cuts the
+    least relevant; sections without a text are left out."""
+    index = {"terms": {"yard": {"forms": ["yard"], "pieces": [{"piece": "long"}, {"piece": "short"}, {"piece": "x"}]}}}
+    texts = {"long": "yard " + "word " * 200, "short": "No projection into any required yard, front yard or side yard."}
+    assert term_index.related(index, "the yard", texts) == ["short", "long"]
+
+
+def test_the_committed_index_is_a_fresh_build_and_reads_back_as_built(index):
     saved = (ITHACA / "4_term_definitions" / term_index.INDEX_NAME).read_text(encoding="utf-8")
     assert saved == term_index.render(index)
+    assert load(ITHACA / "4_term_definitions" / term_index.INDEX_NAME) == index      # the strict loader reads it whole
 
 
 def test_the_review_list_reads_definitions_not_the_index(tmp_path):
