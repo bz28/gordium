@@ -24,7 +24,7 @@ The city's documents go in on the left. A traceable rulebook, checked by code, c
 | 2. Extracted text | PDFs → every line, with page and position | `document_extraction` | code, same result every time | ✅ PR 3 |
 | 3. Pieces and labels | the law's text → 626 pieces, each labeled rule / flag / reference / not for checking | `document_extraction.sections` cuts; `section_labeling` labels | code cuts; AI (Haiku) labels; code checks every label; reviewed | ✅ PR 7 |
 | 4. Definitions | the law's definitions → what "height", "story", "lot depth"… mean, in the city's words | data only (`4_term_definitions/`) | written from the law; quotes checked by code | ✅ PR 4 |
-| 5. Rules | chart cells + rule pieces → one file per zone: title, the city's quotes, a formula, worked examples | data (`5_zoning_rules/`); `rule_format` defines and inspects them | R-1b by hand (PR 5); every zone by AI with code checks (PR 8, full run not done) | 🔨 |
+| 5. Rules | chart cells + rule pieces → one file per zone: title, the city's quotes, a formula, worked examples | data (`5_zoning_rules/`); `rule_format` defines and inspects them | R-1b drafted by Claude in conversation (PR 5); every zone by AI with code checks (PR 8, full run not done) | 🔨 |
 | 6. Coverage report | pieces + labels → every line of the law, its piece and its label | `section_labeling` | code | ✅ PR 7 |
 | 7. Frozen rulebook | rules that pass every check → a dated version that never changes. Architect approval is deferred for now (decided 2026-10-19); the approval fields wait unused | `rule_format` (planned) | code | Later |
 
@@ -52,11 +52,11 @@ The city's documents go in on the left. A traceable rulebook, checked by code, c
 |---|---|---|
 | 0 | Folders, the city's PDFs, the architects' example | The foundation |
 | 1 | The rule form, the calculator, the inspector, CI | Everything after it writes rules, so the form comes first |
-| 2 | Gordium's own instructions for the AI, the review loop, the PR template | How every later PR is built and reviewed |
+| 2 | Gordium's own instructions for the AI, the review loop, the PR template (side branch off main; its files join when it merges) | How every later PR is built and reviewed |
 | 3 | Text extracted from the PDFs (`document_extraction`) | The inspector needs it to verify quotes |
 | 4 | Definitions and use names, this document | Rules depend on these words |
-| 5 | R-1b rules drafted by hand, matched against the architects' spreadsheet (11/11) | An independent answer key |
-| 6 | The chart reader: every chart cell tied to its zone (side branch; it joins the main line through PR 8) | Numbers come from cells, never typed |
+| 5 | R-1b rules drafted by Claude in conversation, matched against the architects' spreadsheet (11/11) | A second, independent reading; an answer key once architects approve it (deferred for now) |
+| 6 | The chart reader: every chart cell tied to its zone (side branch; PR 8, also a side branch, builds on it; both join when merged) | Numbers come from cells, never typed |
 | 7 | The law cut into pieces, each labeled by AI and checked by code; the coverage report (`section_labeling`) | Proves nothing in the law was skipped |
 | 8 | Rule drafting for every zone (`rule_drafting`, side branch built on 6 and 7) | Scales PR 5 to every zone |
 | 9 | The rules spreadsheet (`rule_export`) | How people read and check the rules |

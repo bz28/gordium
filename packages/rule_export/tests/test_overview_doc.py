@@ -34,3 +34,26 @@ def test_the_questions_page_claims_no_main_or_accessory_distinction_the_code_lac
         return
     doc = (REPO / "docs/questions_for_architects.md").read_text(encoding="utf-8")
     assert "the bonus is for the main building only" not in doc
+
+
+def test_the_guide_says_who_drafted_r1b_and_that_it_is_not_yet_an_answer_key():
+    """Every R-1b rule records drafted_by: claude and none is approved, so the start-here guide may not call
+    it hand-drafted or present it as an answer key already (principle 5: who drafted is traceable)."""
+    rules = load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"]
+    pr5 = next(line for line in GUIDE.splitlines() if line.startswith("| 5 |"))
+    step5 = _row("5. Rules")
+    if all(r.get("drafted_by") == "claude" for r in rules):
+        assert "by hand" not in pr5 + step5 and "Claude" in pr5 and "Claude" in step5
+    if not any(r.get("status") == "approved" for r in rules):
+        assert "answer key once" in pr5
+
+
+def test_side_branches_are_marked_and_none_joins_through_another():
+    """PRs whose work isn't in this branch are marked side branches, and no row says a side branch reaches
+    the main line through another side branch."""
+    rows = [line for line in GUIDE.splitlines() if re.match(r"\| \d+ \|", line)]
+    assert all("joins the main line through" not in r for r in rows)
+    if not (REPO / ".github/pull_request_template.md").exists():
+        assert "side branch" in next(r for r in rows if r.startswith("| 2 |"))
+    if not (REPO / "packages/document_extraction/document_extraction/charts.py").exists():
+        assert "side branch" in next(r for r in rows if r.startswith("| 6 |"))
