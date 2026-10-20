@@ -88,6 +88,14 @@ covers are the same kinds in every run:
 **Two runs is a small sample, and answers vary from run to run** (the model can't be pinned to identical output).
 The first and final runs differ partly by chance, not only because of the prompt change.
 
+### Chart cells the drafts skipped (added 2026-10-20, cleanup audit)
+
+The cleanup audit found that a chart row no template covered disappeared silently. Code now requires every district
+cell that states something to be cited by a saved rule or listed for a person. Replaying the final run through it
+(`replay.py`, no API calls; `coverage_replay.json`): the same 202 rules, plus **22 cells for a person** that were
+missing before: lot sizes for attached and multiple-family dwellings in R-2C, R-3A, R-3AA, R-3B and RU (19), and
+dormitory parking in R-3A, R-3B and RU (3). The next prompt change should ask for every row.
+
 ## Every R-1b difference in the final run, judged
 
 1. **Stories, `stories = 3` with no height given. Same in substance.** The hand rule quotes §325-16C(2) ("the
