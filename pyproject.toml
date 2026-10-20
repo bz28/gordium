@@ -7,7 +7,8 @@ name = "gordium"
 version = "0.1.0"
 requires-python = ">=3.12"
 # pdfplumber and pdfminer.six are pinned exactly: a different version could extract text differently.
-dependencies = ["pyyaml>=6", "pdfplumber==0.11.10", "pdfminer.six==20260107"]
+# shapely and rhino3dm are pinned too: measuring a model must give the same numbers on every machine.
+dependencies = ["pyyaml>=6", "pdfplumber==0.11.10", "pdfminer.six==20260107", "shapely==2.1.2", "rhino3dm==8.35.0"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "openpyxl==3.1.5"]   # openpyxl reads the architects' spreadsheets and writes the rules workbook
@@ -18,8 +19,9 @@ labeling = ["anthropic==1.15.0"]
 
 [tool.setuptools.packages.find]
 where = ["packages/rule_format", "packages/document_extraction", "packages/section_labeling", "packages/rule_export",
-         "packages/project_report"]
-include = ["rule_format*", "document_extraction*", "section_labeling*", "rule_export*", "project_report*"]
+         "packages/project_report", "packages/model_measurement"]
+include = ["rule_format*", "document_extraction*", "section_labeling*", "rule_export*", "project_report*",
+           "model_measurement*"]
 
 [tool.setuptools.package-data]
 rule_format = ["*.yaml"]

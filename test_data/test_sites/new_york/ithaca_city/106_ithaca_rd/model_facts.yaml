@@ -1,0 +1,25 @@
+# Lot facts for model.3dm: what the model itself can't show, stated by the architect. In Rhino, Gordium asks for
+# these once (prefilled) and saves them inside the .3dm as document user text; this file holds the same facts for
+# the model on disk. Each line says where its value comes from.
+
+lot_facts:
+  title: New single-family home, 106 Ithaca Rd (measured from the architects' model)
+  jurisdiction: regulations/jurisdictions/new_york/ithaca_city
+  zone: R-1b                       # the architects' spreadsheet (Output tab: R-1b rules)
+  use: one_family_detached         # spreadsheet Output!C3 (Detached one-family)
+
+  # The Site layer has two closed outlines: the lot (5 lines, 6,674.5 sf, matching the spreadsheet's 6,674 sf lot
+  # area, Inputs!B5) and the house's outline (4 lines). This is the lot.
+  lot_id: e3d31316-5911-429f-8ce8-84d2568aa082
+
+  # The lot line on Ithaca Rd: the 73.0 ft line (the spreadsheet's lot width is 73 ft, Inputs!B3; it is the only
+  # lot line that long, and the model's front setback line runs parallel to it 30 ft in, the spreadsheet's front
+  # offset, Inputs!B9). Given by its two ends.
+  street_line:
+    - [[395.4317, 360.94], [439.5101, 419.1302]]
+
+  grade_elevation: 0               # flat site: the house sits at z = 0 and its 35 ft top matches Inputs!B12 (35 ft)
+
+  stories: 3                       # Inputs!B13 (not drawn in the model: the house is one solid with no floors)
+  sleeping_rooms: 3                # Inputs!B14
+  parking_spaces: 1                # Inputs!B15

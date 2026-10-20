@@ -1,0 +1,144 @@
+"""Read a Rhino file into the plain geometry `measure()` works on, with rhino3dm (Rhino's own file library,
+no Rhino needed). The Rhino command uses this same reader: it exports the lot and buildings to a small .3dm
+and hands it over, so a file on disk and a live model are measured by one code path.
+
+Which objects: the lot is the closed outline on the lot layer ("Site"), or the one the architect picked
+(`lot_id` in the lot facts) when there are several; buildings are the solids and meshes on the building layer
+("Building"). Anything that can't be read exactly (a curved wall, a solid that isn't closed, two candidate lot
+outlines) is reported as a problem, never guessed.
+"""
+
+import math
+from pathlib import Path
+
+import rhino3dm as r
+
+LAYERS = {"lot": "Site", "building": "Building"}
+TO_FEET = {r.UnitSystem.Feet: 1.0, r.UnitSystem.Inches: 1 / 12, r.UnitSystem.Millimeters: 1 / 304.8,
+           r.UnitSystem.Centimeters: 1 / 30.48, r.UnitSystem.Meters: 1 / 0.3048}
+ARC_STEP = 0.25           # ft: a curved lot line is followed with points this far apart (at most)
+ID_KEY = "gordium:id"     # the original object's id, when the Rhino command exported a copy
+
+
+def _id(obj) -> str:
+    return obj.Attributes.GetUserString(ID_KEY) or str(obj.Attributes.Id)
+
+
+def _xyz(p, s):
+    return [p.X * s, p.Y * s, p.Z * s]
+
+
+def _straight(c):
+    """The corner points of a curve made only of straight pieces, or None if any piece is curved."""
+    if isinstance(c, r.PolylineCurve):
+        return [c.Point(i) for i in range(c.PointCount)]
+    if c.IsLinear():
+        return [c.PointAtStart, c.PointAtEnd]
+    polyline = c.TryGetPolyline()
+    return [polyline[i] for i in range(polyline.Count)] if polyline is not None and polyline.Count >= 2 else None
+
+
+def _edges(curve, s):
+    """A closed curve as lot lines: each straight piece is one line; each curved piece is followed closely."""
+    pieces = [curve.SegmentCurve(i) for i in range(curve.SegmentCount)] if isinstance(curve, r.PolyCurve) else [curve]
+    edges = []
+    for c in pieces:
+        pts = _straight(c)
+        if pts is not None:
+            edges += [{"points": [_xyz(a, s)[:2], _xyz(b, s)[:2]], "curved": False}
+                      for a, b in zip(pts, pts[1:]) if a.DistanceTo(b) > 0]
+            continue
+        t0, t1 = c.Domain.T0, c.Domain.T1
+        rough = sum(c.PointAt(t0 + (t1 - t0) * k / 64).DistanceTo(c.PointAt(t0 + (t1 - t0) * (k + 1) / 64))
+                    for k in range(64)) * s
+        n = max(16, math.ceil(rough / ARC_STEP))
+        edges.append({"points": [_xyz(c.PointAt(t0 + (t1 - t0) * k / n), s)[:2] for k in range(n + 1)],
+                      "curved": True})
+    return edges
+
+
+def _brep_faces(brep, s):
+    """Each face of a solid as a flat polygon (outer loop, holes). A curved face or curved edge can't be
+    measured exactly yet, so it is reported, never approximated."""
+    verts = [brep.Vertices[i].Location for i in range(len(brep.Vertices))]
+    faces, problems = [], []
+    for i in range(len(brep.Faces)):
+        f = brep.Faces[i]
+        if not f.IsPlanar():
+            problems.append("a building has a curved surface (not measured yet)")
+            continue
+        loops = [f.Loops[k] for k in range(len(f.Loops))]
+        trims = [[loop.Trims[k] for k in range(loop.TrimCount)] for loop in loops]
+        if any(not brep.Edges[t.EdgeIndex].IsLinear() for ts in trims for t in ts):
+            problems.append("a building has a curved edge (not measured yet)")
+            continue
+        rings = [(loop.LoopType, [_xyz(verts[t.StartVertexIndex], s) for t in ts]) for loop, ts in zip(loops, trims)]
+        outer = [ring for kind, ring in rings if kind == r.BrepLoopType.Outer]
+        faces.append({"points": outer[0] if outer else rings[0][1],
+                      "holes": [ring for kind, ring in rings if kind == r.BrepLoopType.Inner]})
+    return faces, sorted(set(problems))
+
+
+def _mesh_faces(mesh, s):
+    v = mesh.Vertices
+    faces = []
+    for i in range(len(mesh.Faces)):
+        a, b, c, d = mesh.Faces[i]
+        pts = [_xyz(v[k], s) for k in ((a, b, c) if c == d else (a, b, c, d))]
+        faces += [{"points": pts}] if len(pts) == 3 else [{"points": [pts[0], pts[1], pts[2]]},
+                                                          {"points": [pts[0], pts[2], pts[3]]}]
+    return faces
+
+
+def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
+    """The lot and buildings in a .3dm, in feet: {"units", "lot", "buildings", "problems"}."""
+    model = r.File3dm.Read(str(path))
+    if model is None:
+        return {"units": "ft", "lot": None, "buildings": [], "problems": [f"can't read {path}"]}
+    s = TO_FEET.get(model.Settings.ModelUnitSystem)
+    if s is None:
+        return {"units": "ft", "lot": None, "buildings": [],
+                "problems": [f"the model's units ({model.Settings.ModelUnitSystem}) aren't supported"]}
+    names = [layer.FullPath for layer in model.Layers]
+
+    def inside(name, layer):            # a layer and its sublayers ("Building::Garage")
+        return name == layer or name.startswith(layer + "::")
+
+    placed = [o for o in model.Objects if not o.Attributes.IsInstanceDefinitionObject]   # not a block's definition
+    on = {k: [o for o in placed if inside(names[o.Attributes.LayerIndex], v)] for k, v in layers.items()}
+    problems = [] if layers["lot"] in names else [f"no {layers['lot']} layer"]
+
+    closed = [o for o in on["lot"] if isinstance(o.Geometry, r.Curve) and o.Geometry.IsClosed]
+    picked = [o for o in closed if _id(o) == facts.get("lot_id")]
+    lot = None
+    if facts.get("lot_id") and not picked:
+        problems.append("the lot picked isn't a closed outline on the Site layer: pick the lot again")
+    elif picked or len(closed) == 1:
+        o = (picked or closed)[0]
+        lot = {"id": _id(o), "edges": _edges(o.Geometry, s)}
+    elif not closed:
+        problems.append(f"no closed lot outline on the {layers['lot']} layer")
+    else:
+        problems.append(f"{len(closed)} closed outlines on the {layers['lot']} layer: pick the lot")
+
+    buildings, unread = [], set()
+    for o in on["building"]:
+        g = o.Geometry
+        if isinstance(g, r.Extrusion):
+            g = g.ToBrep(True)
+        if isinstance(g, (r.Curve, r.Point, r.PointCloud, r.TextDot, r.AnnotationBase, r.Hatch)):
+            continue                            # drawing aids, not building
+        if not isinstance(g, (r.Brep, r.Mesh)):
+            unread.add("a block" if isinstance(g, r.InstanceReference) else f"a {type(g).__name__}")
+        elif isinstance(g, r.Brep):
+            faces, trouble = _brep_faces(g, s)
+            if not g.IsSolid:
+                trouble.append("a building isn't a closed solid")
+            buildings.append({"id": _id(o), "faces": faces, "problems": trouble})
+        elif isinstance(g, r.Mesh):
+            buildings.append({"id": _id(o), "faces": _mesh_faces(g, s),
+                              "problems": [] if g.IsClosed else ["a building mesh isn't closed"]})
+    for kind in sorted(unread):                 # never dropped silently: the coverage and yards would be wrong
+        buildings.append({"id": kind, "faces": [], "problems": [
+            f"{kind} on the {layers['building']} layer can't be measured yet (explode it or turn it into a solid)"]})
+    return {"units": "ft", "lot": lot, "buildings": buildings, "problems": problems}

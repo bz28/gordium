@@ -1,0 +1,15 @@
+# Lot facts for spreadsheet_design_model.3dm (the 106 Ithaca Rd design drawn exactly as the architects'
+# spreadsheet describes it; made by packages/model_measurement/tests/make_spreadsheet_model.py). Each value is
+# what the model can't show, stated as in the spreadsheet.
+
+lot_facts:
+  title: New single-family home, 106 Ithaca Rd (the spreadsheet's design, drawn as a model)
+  jurisdiction: regulations/jurisdictions/new_york/ithaca_city
+  zone: R-1b                       # the spreadsheet's Output tab: R-1b rules
+  use: one_family_detached         # Output!C3 (Detached one-family)
+  street_line:                     # the 73 ft side (Inputs!B3, lot width)
+    - [[0, 0], [73, 0]]
+  grade_elevation: 0               # flat site; the house sits on it
+  stories: 3                       # Inputs!B13
+  sleeping_rooms: 3                # Inputs!B14
+  parking_spaces: 1                # Inputs!B15

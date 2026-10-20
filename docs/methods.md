@@ -123,9 +123,18 @@ Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded A
 - **Tested by:** the 106 Ithaca Rd report gives the architects' PASS/FAIL on all 11 rows; a rulebook, term file or source list that fails the rule checks gives no report; every result equals `outcome()`; every row's page and link are its rule's source; every NEEDS REVIEW row says why; CI fails if the committed example differs from a fresh build.
 - **Weakness:** one example project; the measurements are typed in (from the architects' sheet), not measured from a model.
 
-## 15. What's not decided or not built
+## 15. Measuring a Rhino model (code, PR 11)
 
-- Rhino plugin language (C# vs Rhino 8 Python); how model objects are identified (layers, names, or asking).
+- **What:** `model_measurement` reads a .3dm with rhino3dm (Rhino's own file library) and measures lot area, width and depth, the yards, building area and height as the city's definitions say (`4_term_definitions/definitions.yaml`). What a model can't show (street side, ground level, use, stories, bedrooms, parking) comes from lot facts the architect states. Geometry with shapely (pinned).
+- **Never a guess:** where the law reads more than one way (a jog: side or rear lot line? a curved street: along the curve or straight across? an overhang: to the wall or to the edge above? a pitched roof's "average height"), every reading is measured; the same number under all of them is the value, otherwise no value, the readings, and the open question, so the checker says NEEDS REVIEW.
+- **Working:** every value records how it was found, the objects, the definition, and the two points a distance was measured between; the project file's `from` carries it into the report.
+- **Why one code path:** Rhino's Python is 3.9; ours is 3.12. Rhino copies the objects into a small .3dm and our Python measures it, so CI and the live model use the same reader (`docs/decisions/2026-10-20_rhino_talks_to_python.md`).
+- **Tested by:** the architects' design drawn exactly as their spreadsheet describes gives every one of their numbers and their PASS/FAIL on 11/11 rows; their own model, measured, confirms the discrepancies in `discrepancies_with_architects.md` §4 by code; made-up lots with known answers cover tilted lots, a curved street, a jog, corner lots, two buildings, an overhang and a pitched roof; CI re-measures every committed model.
+- **Weakness:** curved walls and roofs, sloped ground and story counting aren't measured yet (reported, never approximated); roof features the height definition excludes (chimneys) are included, which can only make a height larger.
+
+## 16. What's not decided or not built
+
+- How model objects are identified beyond the layers (names, or asking every time).
 - Site facts: zone lookup from the address, lot lines and area (survey vs city records), ground levels.
-- Measuring the model (engineer-written code, tested on real models).
+- Measuring curved walls and roofs, sloped ground, and stories from floors in the model.
 - Human approval: deferred (rules stay drafts, checked by code); the approval fields stay in the formats, unused.
