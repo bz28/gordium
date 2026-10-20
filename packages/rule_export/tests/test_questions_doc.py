@@ -84,12 +84,13 @@ def test_every_question_says_what_happens_today_and_from_a_model():
     assert len(lines) == DOC.count("- **Until you answer:**") - 1           # all but the legend's own line
     measures = set(load(MEASURES_FILE))
     for line in lines:
-        assert "from a model" in line.lower() or "entered, not measured" in line, line
+        low = line.lower()                                     # wording checks ignore capitals
+        assert "from a model" in low or "entered, not measured" in low, line
         # Every "… is/are entered, not measured" names a real input, however it is worded: the subject is the
         # clause before it (after the last . ; or :), less a leading "the".
-        subjects = [re.sub(r"^the ", "", m.group(1).strip().lower())
-                    for m in re.finditer(r"([^.;:]*?)\s+(?:is|are) entered, not measured", line)]
-        assert len(subjects) == line.count("entered, not measured"), line
+        subjects = [re.sub(r"^the ", "", m.group(1).strip())
+                    for m in re.finditer(r"([^.;:]*?)\s+(?:is|are) entered, not measured", low)]
+        assert len(subjects) == low.count("entered, not measured"), line
         for thing in subjects:
             assert thing.replace(" ", "_") in measures, (thing, line)
         assert any(case in line for case in ("NEEDS REVIEW", "assumes", "not checked yet")), line
