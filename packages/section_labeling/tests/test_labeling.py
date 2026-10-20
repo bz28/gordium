@@ -511,3 +511,16 @@ def test_methods_doc_matches_what_this_branch_builds():
     if not (REPO / "packages/document_extraction/document_extraction/charts.py").exists():
         section = doc[doc.index("## 4. Chart tables"):doc.index("## 5.")]
         assert "own branch (PR 6)" in section
+
+
+def test_cited_by_reads_every_rulebook_including_drafted_ones(tmp_path, law):
+    """A piece cited only by an AI-drafted rulebook (5_zoning_rules/drafted/) still counts as cited, so its
+    label is on the review list: rulebook files have one definition (rulebook_paths)."""
+    ctx, header, pieces, rows = law
+    pid = "325-16C"
+    page, line = pieces[pid]["lines"][0][:2]          # the piece's first line
+    j = tmp_path / "j"
+    (j / "5_zoning_rules/drafted").mkdir(parents=True)
+    (j / "5_zoning_rules/drafted/X.yaml").write_text(yaml.safe_dump({"district": "X", "rules": [
+        {"id": "X.a", "sources": [{"file": LAW, "page": page, "lines": [line, line], "quote": "q"}]}]}))
+    assert coverage.cited_by(j, LAW, pieces) == {pid: ["X.a"]}
