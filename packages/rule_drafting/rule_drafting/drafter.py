@@ -281,7 +281,7 @@ def gather_context(unit: dict, law: dict, chart: dict, definitions: dict) -> dic
     related, related_dropped, size = [], [], 0
     seen = {unit.get("piece")} | {p["id"] for p in pieces} | set(dropped)
     # Only sections that set requirements (labeled rule or flag: law["requires"]) are worth the space; the most
-    # relevant first, so the limit cuts the least relevant (definitions come separately, below).
+    # relevant first, so the limit cuts the least relevant (definitions are given separately, above).
     candidates = {pid: piece_text(law["rows"], law["pieces"][pid])
                   for pid in (related_pieces(law["terms"], text) if law.get("terms") else [])
                   if pid in law["pieces"] and pid not in seen and pid in law.get("requires", law["pieces"])}
