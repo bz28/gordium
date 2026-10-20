@@ -1255,6 +1255,8 @@ def run_check(doc, report=True):
     facts = {}
     try:
         STATE["running"] = True
+        if not STATE.get("headless"):            # the message line tells of this check's action only, whatever happens
+            ui.say(STATE.get("panel_parts"), "")
         facts = current_facts(doc)
         if logic.missing(facts):
             raise ValueError("lot facts missing: " + ", ".join(logic.missing(facts)) + " (run GordiumCheck)")
@@ -1263,8 +1265,6 @@ def run_check(doc, report=True):
         sent = check_facts(doc, facts)
         extras = _extras(doc, facts)
         extras["before"] = STATE.setdefault("statuses_by_doc", {}).get(doc.RuntimeSerialNumber)
-        if not STATE.get("headless"):            # the message line tells of the last action only, not an old one
-            ui.say(STATE.get("panel_parts"), "")
         result = ask({"cmd": "check", "model": path, "facts": sent, "building_problems": problems,
                       "report": report_path(doc) if report else None, "extras": extras})
         _clear(o)
@@ -1295,6 +1295,9 @@ def run_check(doc, report=True):
                 _toast([result["notice"]])
         if not STATE.get("headless"):
             ui.show(panel(), view)
+        if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
+            path = report_path(doc)
+            say(logic.report_message(path, False, result["report_error"], stale=os.path.exists(path)))
         return result
     except Exception as e:
         _clear(o)
@@ -1481,12 +1484,10 @@ def open_report():
     result = run_check(doc, report=True)          # the check's result stays, even if the file can't be written
     written = result is not None and not result.get("report_error") and os.path.exists(path) and \
         os.path.getmtime(path) != before
-    if result is not None and result.get("report_error"):
-        say(logic.report_message(path, False, result["report_error"]))
-        return
     if not written:
-        say(logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
-                                 ("the report file wasn't written to " + os.path.dirname(path))))
+        if not (result or {}).get("report_error"):    # a report error: run_check has said it
+            say(logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
+                                     ("the report file wasn't written to " + os.path.dirname(path))))
         return
     opened, why = True, None
     try:

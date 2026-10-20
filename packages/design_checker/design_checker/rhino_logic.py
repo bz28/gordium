@@ -175,8 +175,9 @@ def suggested_ground(building_bottoms, lot_bottom):
 
 def clear_spot(taken, x, y, w, h):
     """Where a w × h label wanted at (x, y) (its top left, in screen pixels) covers none already drawn this frame
-    (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn; the
-    spot is then taken. If none is free within four steps, the label stays where it was wanted."""
+    (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn, never
+    moved up off the top of the view; the spot is then taken. If none is free within four steps (a tall box such as
+    the status box in the way), the label goes just below everything it would cover."""
     def hits(top):
         return any(x < a + c and a < x + w and top < b + e and b < top + h for a, b, c, e in taken)
     top = None
@@ -351,11 +352,13 @@ def parse_feet(text):
     return None
 
 
-def report_message(path, written, error=None, opened=True, open_error=None):
-    """What the panel says after Zoning report…: never nothing (Ben's test, 2026-10-20: the button did nothing
-    after GordiumStart, because only GordiumCheck wrote the report)."""
+def report_message(path, written, error=None, opened=True, open_error=None, stale=False):
+    """What the panel says after a report was asked for (Zoning report… or GordiumCheck): never nothing (Ben's
+    test, 2026-10-20: the button did nothing after GordiumStart, because only GordiumCheck wrote the report).
+    `stale`: an earlier report is still at that path, so it is said to be out of date."""
     if not written:
-        return "Zoning report not saved: " + (error or "the check could not run") + "."
+        return ("Zoning report not saved: " + (error or "the check could not run") + "." +
+                (" The report already at " + path + " is from an earlier check: out of date." if stale else ""))
     if opened:
         return "Report saved to " + path + " (opened)."
     return ("Report saved to " + path + ". It couldn't be opened here" + (": " + open_error if open_error else "") +

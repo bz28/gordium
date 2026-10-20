@@ -836,7 +836,8 @@ def test_the_panel_message_line_is_cleared_by_every_check():
     """Review round 10: "Report saved to …" stayed after later edits and checks."""
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
     body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert body.index('ui.say(STATE.get("panel_parts"), "")') < body.index("result = ask(")
+    # round 11: before anything that can fail, so a check that fails early clears it too
+    assert body.index('ui.say(STATE.get("panel_parts"), "")') < body.index("facts = current_facts(doc)")
     report = rhino[rhino.index("def open_report():"):rhino.index("\ndef off():")]
     assert report.index("run_check(doc, report=True)") < report.index("say(logic.report_message(path, True")
 
@@ -854,7 +855,12 @@ def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_p
     assert got["view"]["items"] and got["report_error"] and "r.xlsx" in got["report_error"]
     assert check(MODEL, facts, tmp_path / "ok.xlsx")["report_error"] is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
-    assert 'say(logic.report_message(path, False, result["report_error"]))' in rhino
+    # round 11: said by run_check, so GordiumCheck (which asks for the report too) is never silent about it
+    body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert 'if report and result.get("report_error"):' in body and "say(logic.report_message(path, False" in body
+    from design_checker import rhino_logic as logic
+    assert logic.report_message("/x/r.xlsx", False, "Permission denied", stale=True).endswith(
+        "The report already at /x/r.xlsx is from an earlier check: out of date.")
 
 
 def test_no_viewport_label_is_drawn_under_the_status_box():
