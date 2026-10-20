@@ -1,6 +1,6 @@
 # Drafting rules
 
-How to write a definition or a rule from a city's documents. They apply to every zone and every city, and to anyone drafting, AI or person. The inspector (`python -m rule_format`) enforces what code can check; reviewers and architects check the rest.
+How to write a definition or a rule from a city's documents. They apply to every zone and every city, and to anyone drafting, AI or person. The inspector (`python -m rule_format`) enforces what code can check; the rest is checked in review (architect review is deferred for now, decided 2026-10-19).
 
 ## 1. Say only what the quotes say
 
