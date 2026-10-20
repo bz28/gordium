@@ -116,6 +116,7 @@ def test_106_ithaca_rd_starting_building_fits_the_architects_lot():
     got, m = results(built, {**facts, "lot_surveyed": True})
     assert {k: v for k, v in got.items() if v == "fail"} == {}
     assert m["stories"]["value"] == 3
+    assert m["front_yard"]["value"] == pytest.approx(25, abs=0.01)       # at the front yard line, not pushed back
 
 
 def test_no_buildable_area_is_said_not_drawn():
@@ -156,9 +157,16 @@ def test_a_street_drawn_with_a_bend_still_gets_a_full_starting_building(bend):
     assert outline.area >= 0.25 * Polygon(bent).area - 60, outline.area
 
 
-def test_a_deep_lot_is_quick():
+@pytest.mark.parametrize("deep", [[(0, 0), (100, 0), (100, 600), (0, 600)],
+                                  [(0, 0), (100, 0), (115, 600), (-15, 600)]])      # straight, and widening
+def test_a_deep_lot_is_quick(deep):
     import time
-    deep = [(0, 0), (100, 0), (100, 600), (0, 600)]
     t = time.time()
     start, _ = generated(deep, {**FACTS, "street_line": [[[0, 0], [100, 0]]]})
     assert start["floors"] and time.time() - t < 3
+
+
+def test_on_a_lot_that_widens_toward_the_rear_the_building_stays_at_the_front_yard_line():
+    widening = [(0, 0), (60, 0), (62, 150), (-2, 150)]
+    start, _ = generated(widening, {**FACTS, "street_line": [[[0, 0], [60, 0]]]})
+    assert min(p[1] for p in start["floors"][0]["outline"]) == pytest.approx(25, abs=0.01)
