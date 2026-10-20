@@ -321,6 +321,13 @@ def test_related_sections_come_from_the_term_index(data):
     assert "325-8A" not in rule[_at(t, "Related sections")].split(", ")              # its own section
 
 
+def test_an_entry_without_sources_still_shows_its_related_sections(monkeypatch):
+    rule = {"id": "R-1b.x", "title": "Rear yard", "kind": "rule"}
+    monkeypatch.setattr(wbk, "rulebooks", lambda j: [("R-1b.yaml", {"district": "R-1b", "rules": [rule]})])
+    t = tables(ITHACA)["Rules"]
+    assert "325-18B" in t["rows"][0][_at(t, "Related sections")].split(", ")
+
+
 def test_open_questions_show_their_research_and_findings_have_a_tab(data):
     q = data["Questions"]
     lot = next(r for r in q["rows"] if r[2] == "lot")

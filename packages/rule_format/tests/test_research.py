@@ -49,6 +49,10 @@ def test_nothing_searched_is_allowed_only_while_it_says_pending(ctx):
     assert pending["why_open"].startswith("pending") and problems(ctx, open_questions=[Q], research=[pending]) == []
 
 
+def test_open_questions_of_the_wrong_shape_get_one_message_not_one_per_letter(ctx):
+    assert research_problems({"open_questions": "why?"}, ctx) == []      # open_question_problems says it's not a list
+
+
 def test_searched_sections_must_exist(ctx):
     bad = RESEARCH | {"searched": ["325-18B", "325-99Z"]}
     assert any("don't exist: 325-99Z" in p for p in problems(ctx, open_questions=[Q], research=[bad]))

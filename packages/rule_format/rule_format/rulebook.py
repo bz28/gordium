@@ -680,7 +680,8 @@ def research_problems(entry: dict, ctx: Context) -> list[str]:
     confirm_with?, report?}: kind law is answered by the code's own words (a quote, checked; strength strong),
     kind reading by sources that support it (strength no higher than its best source; confirm_with says who
     should confirm it). A finding's question can't still be open."""
-    questions = [q for q in entry.get("open_questions", []) if isinstance(q, str)]
+    questions = entry.get("open_questions", [])
+    questions = [q for q in questions if isinstance(q, str)] if isinstance(questions, list) else []  # shape: above
     research, findings = entry.get("research", []), entry.get("findings", [])
     if not (isinstance(research, list) and all(isinstance(x, dict) for x in research)):
         return ["'research' must be a list of {question, searched, sources, why_open}"]

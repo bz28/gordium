@@ -53,6 +53,12 @@ def test_every_recorded_question_is_on_the_page_and_nothing_else():
     assert [t for t, n in Counter(cited).items() if n > 1] == [], "each question is cited once"
 
 
+def test_the_page_counts_what_is_left_from_the_files():
+    """The research summary's "so N are left" is the number of questions recorded now."""
+    left = re.search(r"so (\d+) are left", DOC)
+    assert left and int(left.group(1)) == len(recorded_questions())
+
+
 def test_every_result_changing_discrepancy_is_on_the_page():
     red = {m for m in re.findall(r"^\| (\d+\.\d+) \|.*🔴", DISCREPANCIES, re.M)}
     cited = set(re.findall(r"\[discrepancy (\d+\.\d+)\]", DOC))

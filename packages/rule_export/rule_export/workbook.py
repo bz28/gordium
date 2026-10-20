@@ -317,6 +317,8 @@ def tables(j: Path) -> dict[str, dict]:
     def related_to_term(key):
         return ", ".join(p["piece"] for p in index["terms"].get(key, {}).get("pieces", [])) if index else ""
     def once(e, value):                              # on an entry's first source row only (long text)
+        if not e.get("sources"):
+            return lambda s: value                   # one row in all
         is_first = first_row(e)
         return lambda s: value if is_first(s) else ""
 
