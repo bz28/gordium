@@ -115,6 +115,27 @@ try:
     st.pop("auto_ok", None)
     expect(o.message is None and not o.red and o.envelope is None, "confirm showed an earlier result")
 
+    # a checker that fails (an old one that doesn't know a request) never makes saved facts look unreadable
+    class Stub:
+        def __init__(self):
+            import io
+            self.stdin, self.stdout = io.StringIO(), io.StringIO('{"ok": false, "error": "unknown command"}\n')
+
+        def poll(self):
+            return None
+    real, code = st.get("worker"), st.get("worker_code")
+    st["worker"], st["worker_code"] = Stub(), g.logic.code_fingerprint(g.os.path.join(g.REPO, "packages"))
+    try:
+        g.current_facts(doc)
+        problems.append("a failing checker's answer was accepted")
+    except RuntimeError:
+        pass
+    except ValueError:
+        problems.append("a failing checker made the saved facts look unreadable")
+    finally:
+        st["worker"], st["worker_code"] = real, code
+    expect(g.load_facts(doc).get("sleeping_rooms") == saved.get("sleeping_rooms"), "saved facts changed")
+
     # an import into this model is an edit: its result stays until the re-check
     g.run_check(doc, report=False)
 

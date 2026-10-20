@@ -147,3 +147,16 @@ def test_saved_facts_are_checked_like_a_facts_file():
     for bad in ({"zone": "R-1b", "grade_elevation": "abc"}, {"street_line": 5}):
         assert answer({"id": 1, "cmd": "facts", "facts": bad})["result"]["problems"], bad
     assert answer({"id": 2, "cmd": "facts", "facts": {"zone": "R-1b"}})["result"]["problems"] == []
+
+
+def test_the_checker_restarts_when_its_code_changes(tmp_path):
+    from design_checker.rhino_logic import code_fingerprint, restart_checker
+    (tmp_path / "pkg").mkdir()
+    (tmp_path / "pkg" / "a.py").write_text("x = 1\n")
+    before = code_fingerprint(str(tmp_path))
+    assert code_fingerprint(str(tmp_path)) == before
+    (tmp_path / "pkg" / "a.py").write_text("x = 22\n")
+    after = code_fingerprint(str(tmp_path))
+    assert after != before
+    assert restart_checker(True, before, after) and restart_checker(False, before, before)
+    assert not restart_checker(True, after, after)

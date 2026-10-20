@@ -59,9 +59,15 @@ def _python():
 
 
 def _worker():
+    """The background checker, started again if it stopped or the code changed since it started."""
     p = STATE.get("worker")
-    if p is None or p.poll() is not None:
-        packages = os.path.join(REPO, "packages")
+    packages = os.path.join(REPO, "packages")
+    now = logic.code_fingerprint(packages)
+    if p is not None and logic.restart_checker(p.poll() is None, STATE.get("worker_code"), now):
+        if p.poll() is None:
+            p.terminate()
+        p = None
+    if p is None:
         env = dict(os.environ)
         env["PYTHONPATH"] = os.pathsep.join(STATE.get("extra_paths", []) + [
             os.path.join(packages, n) for n in sorted(os.listdir(packages)) if os.path.isdir(os.path.join(packages, n))])
@@ -69,6 +75,7 @@ def _worker():
         p = subprocess.Popen([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log, universal_newlines=True)
         STATE["worker"] = p
+        STATE["worker_code"] = now
     return p
 
 
@@ -187,8 +194,13 @@ def load_facts(doc):
         facts = json.loads(text) if text else None
     except ValueError:
         raise unreadable
-    if facts is not None and (not isinstance(facts, dict) or
-                              ask({"cmd": "facts", "facts": facts})["problems"]):   # the same check as a file
+    if facts is not None and not isinstance(facts, dict):
+        raise unreadable
+    try:
+        problems = ask({"cmd": "facts", "facts": facts})["problems"] if facts is not None else []
+    except ValueError as e:             # the checker failed, not the facts: never treated as unreadable (reset)
+        raise RuntimeError("the Gordium checker failed: " + str(e))
+    if problems:                        # the same check as a facts file
         raise unreadable
     return facts
 

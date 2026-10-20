@@ -91,3 +91,24 @@ def draws_in(checked, viewport):
     """Whether a result is drawn in a viewport: only in the document it is the result for (Rhino for Mac keeps
     several models open side by side; one model's verdict never shows on another)."""
     return checked is not None and checked == viewport
+
+
+def code_fingerprint(packages_dir):
+    """What the checker's code is now: every .py file under packages/ with its size and time, as one text. The
+    background checker is started again whenever this changes (an update while Rhino is open), so results never
+    come from code that is no longer there."""
+    import os
+    found = []
+    for root, dirs, files in os.walk(packages_dir):
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__" and not d.startswith("."))
+        for name in sorted(files):
+            if name.endswith(".py"):
+                st = os.stat(os.path.join(root, name))
+                found.append("%s:%d:%d" % (os.path.relpath(os.path.join(root, name), packages_dir), st.st_size,
+                                           st.st_mtime_ns))
+    return "|".join(found)
+
+
+def restart_checker(alive, started_with, now):
+    """Whether to start the background checker again: it stopped, or the code changed since it started."""
+    return not alive or started_with != now
