@@ -2,7 +2,10 @@
 
 Fills in a project's compliance report in the architects' own spreadsheet format
 (`test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx`): the same two tabs,
-**Inputs** and **Output**, the same headers in the same order, the same plain Arial style. Plain code, no AI.
+**Inputs** and **Output**, the same headers in the same order, and the same look: Arial in their ink color,
+their column widths, yellow for typed-in values, FAIL in red. Our columns come after theirs, set apart by
+their grey on the headers and a line down the left edge; a color key sits to the right of Inputs. Plain code,
+no AI.
 
 ```
 python -m project_report <project.yaml>    # writes <project>_report.xlsx next to the project file
@@ -51,7 +54,7 @@ the table writes it (e.g. `rear_yard ≥ max(min(0.25 * lot_depth, 50), 20)`), w
 | Error | **PASS / FAIL / NEEDS REVIEW / NOT APPLICABLE** (their header, kept as is) |
 | Rule id · Formula | which rule, and its formula exactly |
 | Why it needs review | filled on every NEEDS REVIEW row, found in the same order the checker decides: can't tell whether the rule applies, a flag (a person decides), a review condition that holds, or a measurement missing or unusable (named, with its value) |
-| City's exact words · Document · Link | the rule's first source, with a link that opens the document at that page |
+| Citation · City's exact words · Link | the rule's first source: a citation people can read (document, section, page, lines), the exact words, and a link that opens that page |
 | Rulebook | which rulebook file, who drafted it, its status (the Output title says the rules are drafts, checked by code: approval is deferred) |
 
 Rules that apply, or whose applicability can't be decided, come first. Rules that don't apply follow under
