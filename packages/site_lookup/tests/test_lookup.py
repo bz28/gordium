@@ -1,6 +1,6 @@
 """The address lookup, offline: real recorded answers from the public State and USGS services (fixtures/,
-made by capture.py), and stand-ins for the City and County layers built from numbers derived from them
-(their terms don't allow storing their data)."""
+made by capture.py), and synthetic stand-ins for the City and County layers, whose terms don't allow storing
+their data: nothing from those layers is in the fixtures or in this file."""
 
 import copy
 import datetime as dt
@@ -9,11 +9,12 @@ import os
 from pathlib import Path
 
 import pytest
+import yaml
 
 import sys
 
 from site_lookup import geometry as g
-from site_lookup.http import Offline
+from site_lookup.http import Offline, ServiceError
 from site_lookup.lookup import lookup
 from site_lookup.sources import ENDPOINTS
 
@@ -21,6 +22,14 @@ lookup_module = sys.modules["site_lookup.lookup"]        # the module (the packa
 
 FIX = Path(__file__).parent / "fixtures"
 NOW = dt.datetime(2026, 10, 20, 18, 0, tzinfo=dt.timezone.utc)
+REPO = Path(__file__).parents[3]
+# Stand-ins for the City layers (test values, not the City's):
+STAND_IN_ROW_FT = 60                       # every street's right-of-way width
+STAND_IN_MAP_EDITED = "2025-01-01"         # the zoning map's last edit (before Ord. 2025-12)
+# 106 Ithaca Rd's district from Gordium's own test site (architect-checked, and the May 2026 PDF map), not the
+# City's online layer:
+STAND_IN_ZONE = yaml.safe_load((REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/model_facts.yaml")
+                               .read_text())["lot_facts"]["zone"]
 
 
 def load(name: str) -> dict:
@@ -58,18 +67,17 @@ class Fake:
         self.asked.append(key)
         if self.offline:
             raise Offline(url)
-        d = self.fx.get("derived", {})
-        if key == "city_roads":                      # stand-in: State centerlines with the City's ROW widths
-            feats = [{"attributes": {"NAME": f["attributes"].get("CompleteStreetName"), "ROW_WIDTH": w},
-                      "geometry": f["geometry"]} for f, w in zip(self._streets(), d.get("state_street_row_ft", []))]
+        if key == "city_roads":                      # stand-in: State centerlines with a test width
+            feats = [{"attributes": {"NAME": f["attributes"].get("CompleteStreetName"), "ROW_WIDTH": STAND_IN_ROW_FT},
+                      "geometry": f["geometry"]} for f in self._streets()]
             body = {"features": feats}
         elif key == "city_zoning" and url == ENDPOINTS["city_zoning"]["layer"]:
-            day = dt.datetime.fromisoformat(d.get("zoning_last_edited", "2024-09-26")).replace(tzinfo=dt.timezone.utc)
+            day = dt.datetime.fromisoformat(STAND_IN_MAP_EDITED).replace(tzinfo=dt.timezone.utc)
             body = {"editingInfo": {"dataLastEditDate": int(day.timestamp() * 1000)}}
         elif key == "city_zoning":
-            body = {"features": self.zones if self.zones is not None else [self.square(d.get("zone_at_lot"))]}
-        elif key == "city_parcels":
-            body = {"features": self.city_parcels or []}
+            body = {"features": self.zones if self.zones is not None else [self.square(STAND_IN_ZONE)]}
+        elif key == "city_parcels":                  # stand-in: the State parcel there, with no City flags
+            body = {"features": self.city_parcels if self.city_parcels is not None else self._state_as_city(params)}
         elif key == "address_points":
             body = {"features": [{"attributes": {}, "geometry": {"x": self.county[0], "y": self.county[1]}}]
                     if self.county else []}
@@ -80,6 +88,15 @@ class Fake:
         else:
             body = self._recorded(key, params)
         return body, json.dumps(body, sort_keys=True).encode()
+
+    def _state_as_city(self, params):
+        want = params["geometry"]
+        for a in self.fx["answers"]:
+            if a["source"] == "state_parcels" and a["params"].get("geometry") == want:
+                return [{"attributes": {"SWISPRINTK": f"{f['attributes']['SWIS']}-{f['attributes']['PRINT_KEY']}",
+                                        "SWIS": f["attributes"]["SWIS"]}, "geometry": f["geometry"]}
+                        for f in a["body"].get("features", [])]
+        return []
 
     def square(self, zone, x0=840000, y0=880000, x1=850000, y1=890000):
         return {"attributes": {"ZONE": zone}, "geometry": {"rings": [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]]}}
@@ -113,7 +130,8 @@ def test_106_ithaca_rd_end_to_end():
     assert 734 <= ground["min_ft"] <= 736 and 748 <= ground["max_ft"] <= 750 and ground["kind"] == "existing"
     assert f["zone"]["value"] == "R-1b" and f["zone"]["status"] == "suggested"
     assert f["zone"]["source"] == "suggested by Gordium"
-    assert "confirm" in f["zone"]["source_detail"] and "2024-09-26" in f["zone"]["source_detail"]
+    assert "confirm" in f["zone"]["source_detail"] and STAND_IN_MAP_EDITED in f["zone"]["source_detail"]
+    assert "outside the area it rezoned" in f["zone"]["note"]           # Ord. 2025-12 is far from Ithaca Rd
     assert f["overlays"]["value"] == []
     assert all(v["confirmed_by"] is None for v in f.values())   # a lookup never confirms anything
 
@@ -339,3 +357,173 @@ def test_live_106_ithaca_rd():
     r = lookup("106 Ithaca Rd, Ithaca, NY 14850", Http())
     assert r["status"] == "found" and both(r)["parcel"]["value"] == "500700-84.-2-6"
     assert both(r)["zone"]["value"] == "R-1b"
+
+
+# ---- review round 1: incomplete evidence is never "suggested" ------------------------------------------------
+
+class Failing(Fake):
+    """A Fake where the listed sources fail (ServiceError)."""
+
+    def __init__(self, fixture, failing=(), **kw):
+        super().__init__(fixture, **kw)
+        self.failing = set(failing)
+
+    def post(self, url, params):
+        if key_of(url) in self.failing:
+            raise ServiceError(url)
+        return super().post(url, params)
+
+
+def ring_of(fx: dict):
+    return g.open_ring(next(a for a in fx["answers"] if a["source"] == "state_parcels")["body"]["features"][0]
+                       ["geometry"]["rings"][0])
+
+
+def test_a_second_match_that_couldnt_be_placed_makes_the_chosen_one_doubtful():
+    fx = load("106_ithaca_rd")
+    geo = next(a for a in fx["answers"] if a["source"] == "geocoder")["body"]
+    other = copy.deepcopy(geo["candidates"][0])
+    other["location"]["x"] += 3000                       # 106 on another street: its parcel query finds nothing
+    other["address"] = "106 Elsewhere Rd, Ithaca, NY, 14850"
+    geo["candidates"].append(other)
+    f = both(lookup(fx["address"], Fake(fx), NOW))
+    assert f["address"]["status"] == "needs_review" and "106 Elsewhere Rd" in f["address"]["reason"]
+    assert f["lot"]["status"] == "needs_review" and f["parcel"]["status"] == "needs_review"
+
+
+def test_missing_elevation_samples_need_review():
+    fx = load("106_ithaca_rd")
+    body = next(a for a in fx["answers"] if a["source"] == "elevation")["body"]
+    total = len(body["samples"])
+    body["samples"] = body["samples"][-1:]               # only the centre came back
+    gr = both(lookup(fx["address"], Fake(fx), NOW))["ground"]
+    assert gr["status"] == "needs_review" and f"missing at {total - 1} of {total} points" in gr["reason"]
+
+
+def test_unknown_road_widths_never_give_a_confident_interior_lot():
+    """The State streets fallback has no widths: a 50 ft right-of-way is assumed, which can miss a wider
+    second street, so the street side needs review and the corner lot is asked."""
+    fx = load("106_ithaca_rd")
+    f = both(lookup(fx["address"], Failing(fx, ["city_roads"]), NOW))
+    assert f["street_side"]["value"]["street"] == "ITHACA RD"
+    assert f["street_side"]["status"] == "needs_review" and "widths weren't available" in f["street_side"]["reason"]
+    assert f["corner_lot"]["value"] == "ask" and f["corner_lot"]["status"] == "ask"
+
+
+def test_a_city_road_without_a_width_near_the_lot_makes_the_streets_doubtful(monkeypatch):
+    monkeypatch.setattr(sys.modules[__name__], "STAND_IN_ROW_FT", None)
+    f = both(run("106_ithaca_rd")[0])
+    assert f["street_side"]["status"] == "needs_review" and f["corner_lot"]["value"] == "ask"
+
+
+@pytest.mark.parametrize("city", ["fails", "another parcel"])
+def test_city_flags_that_couldnt_be_checked_need_review(city):
+    fx = load("106_ithaca_rd")
+    if city == "fails":
+        fake = Failing(fx, ["city_parcels"])
+    else:
+        fake = Fake(fx, city_parcels=[{"attributes": {"SWISPRINTK": "500700-1.-1-1", "SWIS": "500700"},
+                                       "geometry": {"rings": [[[0, 0], [1, 0], [1, 1], [0, 0]]]}}])
+    o = both(lookup(fx["address"], fake, NOW))["overlays"]
+    assert o["status"] == "needs_review" and any("couldn't check" in v and "Historic property" in v for v in o["value"])
+
+
+def test_a_two_zone_ask_survives_an_amendment_hit():
+    fx = load("106_ithaca_rd")
+    for a in fx["answers"]:
+        if a["source"] == "geocoder":
+            for c in a["body"]["candidates"]:
+                c["attributes"].update(StPreDir="S", StName="Cayuga", StType="Street")
+    cx = g.centroid(ring_of(fx))[0]
+    f = Fake(fx)
+    f.zones = [f.square("R-1b", 840000, 880000, cx, 890000), f.square("R-2a", cx, 880000, 850000, 890000)]
+    z = both(lookup(fx["address"], f, NOW))["zone"]
+    assert z["status"] == "ask" and "pick the zone" in z["reason"] and "Ord. 2025-12" in z["reason"]
+
+
+# ---- the Southside amendment, by area ------------------------------------------------------------------------
+
+def _dot(x, y):
+    return [(x - 1, y - 1), (x + 1, y - 1), (x + 1, y + 1), (x - 1, y + 1)]
+
+
+def test_the_southside_area_covers_its_streets_and_not_ithaca_rd():
+    """Points from the NYS Geocoder: Southside lots are in Ord. 2025-12's area whatever street they're on
+    (S Plain St isn't named in its text); 106 Ithaca Rd, on East Hill, isn't."""
+    a = next(a for a in lookup_module.AMENDMENTS if a["ordinance"] == "2025-12")
+    reaches = lookup_module._amendment_reaches
+    assert reaches(a, _dot(841738, 886359), {"S PLAIN ST"})          # S Plain St & Wood St
+    assert reaches(a, _dot(843068, 887666), {"S CAYUGA ST"})         # 315 S Cayuga St
+    assert reaches(a, _dot(841753, 886005), {"PARK ST"})             # Park St & S Plain St
+    assert reaches(a, ring_of(load("106_ithaca_rd")), {"ITHACA RD"}) == ""
+
+
+def test_a_lot_in_an_amendments_area_needs_review_whatever_its_street(monkeypatch):
+    x0, y0, x1, y1 = g.bounds(ring_of(load("106_ithaca_rd")), 50)
+    monkeypatch.setattr(lookup_module, "AMENDMENTS", [{"ordinance": "T", "title": "test", "adopted": "2025-11-19",
+                                                       "area_epsg2261": [x0, y0, x1, y1], "streets": []}])
+    z = both(run("106_ithaca_rd")[0])["zone"]
+    assert z["status"] == "needs_review" and "in or near the area it rezoned" in z["reason"]
+
+
+def test_an_amendment_without_an_area_makes_every_city_lot_need_review(monkeypatch):
+    monkeypatch.setattr(lookup_module, "AMENDMENTS", [{"ordinance": "T", "title": "test", "adopted": "2025-11-19",
+                                                       "streets": ["S PLAIN ST"]}])
+    z = both(run("106_ithaca_rd")[0])["zone"]
+    assert z["status"] == "needs_review" and "boundary isn't recorded" in z["reason"]
+
+
+# ---- licensing: what is kept follows endpoints.yaml ------------------------------------------------------------
+
+def _numbers_only(v) -> bool:
+    def num(n):
+        return isinstance(n, (int, float)) and not isinstance(n, bool)
+    return num(v) or (isinstance(v, list) and all(num(n) for n in v))
+
+
+def check_snapshot(r: dict) -> None:
+    """Every kept fact obeys its own source's store policy: none keeps no value and no reason; derived keeps
+    numbers Gordium computed only (no outline, position or words); answer bodies are never kept."""
+    s = r["snapshot"]
+    for k, v in s["facts"].items():
+        d = s["details"][k]
+        store = ENDPOINTS[d["source_key"]]["store"] if d.get("source_key") else "raw"
+        if store == "derived" and isinstance(v["value"], dict):
+            assert all(_numbers_only(n) for n in v["value"].values()), k
+            assert not {"outline_ft", "origin_epsg2261_us_survey_ft"} & set(v["value"]), k
+        elif store != "raw":
+            assert v["value"] in (None, lookup_module.USED_LIVE), k
+        if store != "raw":
+            assert "reason" not in d and "note" not in d, k
+    assert all("body" not in rec for rec in s["sources"])
+
+
+def test_snapshots_keep_only_what_each_source_allows():
+    scenarios = [Fake(load("106_ithaca_rd")), Fake(load("109_ithaca_rd")), Fake(load("96_ithaca_rd")),
+                 Failing(load("106_ithaca_rd"), ["state_parcels"]), Failing(load("106_ithaca_rd"), ["city_roads"])]
+    for fake in scenarios:
+        r = lookup(fake.fx["address"], fake, NOW)
+        assert r["status"] == "found"
+        check_snapshot(r)
+        assert STAND_IN_ZONE not in json.dumps(r["snapshot"])
+
+
+def test_a_city_parcel_outline_is_never_kept():
+    """With the State parcels down the lot comes from the City's layer (store: derived): the project keeps its
+    area and side lengths, never its outline or position."""
+    fx = load("106_ithaca_rd")
+    r = lookup(fx["address"], Failing(fx, ["state_parcels"]), NOW)
+    assert both(r)["lot"]["source_key"] == "city_parcels" and both(r)["lot"]["value"]["outline_ft"]
+    kept = r["snapshot"]["facts"]["lot"]["value"]
+    assert set(kept) == {"area_sf", "edge_lengths_ft", "tolerance_ft"}
+    assert r["snapshot"]["facts"]["parcel"]["value"] == lookup_module.USED_LIVE
+
+
+def test_fixtures_hold_only_what_endpoints_yaml_allows():
+    """Fixtures keep answers from store: raw sources and nothing else: no block of values from the City or
+    County layers (their stand-ins are synthetic, in this file)."""
+    for p in FIX.glob("*.json"):
+        d = json.loads(p.read_text())
+        assert set(d) <= {"address", "captured", "answers", "live_status", "trimmed"}, (p.name, set(d))
+        for a in d["answers"]:
+            assert ENDPOINTS[a["source"]]["store"] == "raw", (p.name, a["source"])

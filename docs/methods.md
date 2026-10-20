@@ -178,13 +178,17 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
   lines that run along a street centerline (within 30°) and sit within half the right-of-way + 10 ft of it are
   street lines; two streets is a corner lot, and Gordium asks for the front → USGS 3DEP elevations at the
   corners (today's ground, an estimate) → the City zoning map's zone under the lot, always a suggestion, with
-  rezonings adopted after the map's last edit (`amendments.yaml`, Ord. 2025-12 Southside) flagged.
+  rezonings adopted after the map's last edit (`amendments.yaml`: a padded box around each ordinance's map
+  area; Ord. 2025-12 Southside from the May 2026 Southside Form District Map) flagged for lots touching them.
 - **Never a false pass:** two zones, two streets, a mismatched street, a far County point, an overlay, a
-  failing service: each becomes ask or needs review with a plain reason, never a silent choice.
-- **Licensing:** City and County layers are used live and never stored; a project's snapshot keeps the facts
-  Gordium may keep plus each source's URL, date and SHA-256 (`endpoints.yaml` says what each source allows).
+  failing service, or incomplete evidence (missing elevations, unknown road widths, a match with no parcel,
+  City flags unavailable): each becomes ask or needs review with a plain reason, never a silent choice. The
+  strongest status wins (ask > needs review > suggested).
+- **Licensing:** City and County layers are used live and never stored; a project's snapshot keeps each fact
+  only as far as its own source's `store` in `endpoints.yaml` allows, plus each source's URL, date and
+  SHA-256. Test fixtures hold State and USGS answers only; the City stand-ins are synthetic.
 - **Tested by:** recorded State and USGS answers for 106, 109 and 96 Ithaca Rd, a Town of Ithaca address and
-  an unknown one, with stand-in City layers built from derived numbers (106: parcel 84.-2-6, 7,033.7 sf, 75.8
+  an unknown one, with synthetic stand-in City layers (106: parcel 84.-2-6, 7,033.7 sf, 75.8
   ft on Ithaca Rd, interior, ground 735–749 ft, R-1b suggested; 109 and 96: corner lots, ask). A live check
   runs with `GORDIUM_LIVE=1`.
 - **Weakness:** the tax map is approximate (about ±2 ft); the Southside boundary is matched by street name,

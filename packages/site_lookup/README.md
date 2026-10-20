@@ -29,8 +29,13 @@ python -m site_lookup "106 Ithaca Rd, Ithaca, NY 14850" --json   # the full resu
 | **Street side and corner lot** | A lot line faces a street when it runs within 30° of the street's centerline and its midpoint is within half the right-of-way + 10 ft of it (tax-map lines sit a few feet off the right-of-way edge). A street counts with at least 10 ft of frontage. Corner lot is `yes`/`no`/`ask`: one street → `no`; two streets → `ask` (it looks like a corner lot, so the start box asks which line is the front). The address on a street the lot doesn't touch → needs review | City of Ithaca roads (with right-of-way widths, live only); NYS Streets as a fallback (width unknown → 50 ft assumed, noted) |
 | **Ground** | The elevation at each lot corner and the centre, in feet above NAVD88. It's **today's** ground; finished ground is set in the start box | USGS 3DEP (1 m, the 2020 LiDAR here) |
 | **Zone** | The City zoning polygon(s) under a grid of points inside the lot; more than one zone covering 2%+ of the lot → Gordium asks. Always a suggestion: the start box's "I confirm" tick is the architect's statement | City of Ithaca zoning map (online, informational; live only, never stored) |
-| **Rezonings since the map** | `amendments.yaml`: ordinances adopted after the map's last edit. A lot on a street the ordinance names → needs review (Ord. 2025-12, Southside) | kept by hand |
-| **Overlays** | Historic districts, gorge protection zones, secondary zones and landmark flags on the parcel. Not checked in this release, so any found → needs review | City of Ithaca layers (live only) |
+| **Rezonings since the map** | `amendments.yaml`: ordinances adopted after the map's last edit, each with a padded box around the districts on its map (Ord. 2025-12 Southside: from the May 2026 Southside Form District Map, p.9). A lot touching the box, or on a street the ordinance names → needs review. An ordinance without a box → every City lot needs review | kept by hand |
+| **Overlays** | Historic districts, gorge protection zones, secondary zones and landmark flags on the parcel. Not checked in this release, so any found, or any that couldn't be looked for → needs review | City of Ithaca layers (live only) |
+
+**Incomplete evidence is never "suggested".** A second address match that couldn't be placed on a parcel,
+elevations missing at some corners, road widths unknown (a second street could be missed: the corner lot is
+asked), the City's parcel flags unavailable: each makes its fact need review, with the reason. When two things
+apply, the strongest status wins (ask > needs review > suggested) and the reasons add up.
 
 ## Each fact's shape
 
@@ -45,11 +50,13 @@ the amber lines the start box shows.
 
 ## What a project keeps (licensing)
 
-`result["snapshot"]` is what a project saves: the facts Gordium may keep, and for every request the source,
-URL, date and SHA-256 of the answer, never the answer itself. Sources and what may be kept are listed in
-`endpoints.yaml`:
+`result["snapshot"]` is what a project saves: for every request the source, URL, date and SHA-256 of the
+answer (never the answer itself), and each fact as far as **its own source's** `store` in `endpoints.yaml`
+allows (`details[name]["source_key"]` names the source):
 
-- **Kept:** State and USGS data (public, no redistribution limit) and numbers Gordium computed.
+- **Kept:** State and USGS data (public, no redistribution limit).
+- **Numbers only:** a lot from the City's parcel layer (when the State's is down) keeps its area and side
+  lengths, never its outline, position or parcel id.
 - **Used live, never kept:** the City of Ithaca zoning and overlay layers ("may not be reproduced or
   redistributed without the express written consent") and the County address points ("please do not
   redistribute"). The snapshot records that they were used, when, and the answer's fingerprint.
@@ -60,17 +67,22 @@ suggestion, and the start box's "I confirm" tick stays unticked until the archit
 ## How we know it's right
 
 `tests/test_lookup.py`, offline: the State and USGS answers recorded from the live services
-(`tests/fixtures/capture.py`), and stand-in City layers built from numbers derived from them.
+(`tests/fixtures/capture.py`), and synthetic stand-ins for the City layers (every street 60 ft wide, the map
+last edited 2025-01-01, 106's zone from Gordium's own test site): nothing from a City or County layer is in
+the fixtures. A test checks every fixture and snapshot against `endpoints.yaml`.
 
 - **106 Ithaca Rd:** parcel 84.-2-6, 7,033.7 sf from the State Plane outline, 75.8 ft of frontage on Ithaca Rd
-  (its 8-segment curve), an interior lot, ground 735–749 ft, zone suggestion R-1b, nothing confirmed.
+  (its 8-segment curve), an interior lot, ground 735–749 ft, zone suggestion R-1b, nothing confirmed; outside
+  the Southside area.
 - **109 Ithaca Rd:** touches Ithaca Rd and Mitchell St → a corner lot, asks for the front.
 - **96 Ithaca Rd:** touches both streets too. The research's first test (a 3 ft margin) matched only Mitchell
   St, which looked like an address/street mismatch; with the 10 ft margin and the parallel rule the tax map
   shows lines along both Ithaca Rd and Mitchell St, so it's treated as a corner lot and Gordium asks.
 - **A Town of Ithaca address** (953 Danby Rd) is refused; an unknown address is not found; offline is a plain
   state; a failing zoning map leaves the rest and asks for the district.
-- **Synthetic checks:** an address on a street the lot doesn't touch, a lot in two zones, a Southside street,
+- **Synthetic checks:** an address on a street the lot doesn't touch, a lot in two zones, a Southside lot on a
+  street the ordinance doesn't name (S Plain St), a two-zone lot on a Southside street (still asks), missing
+  elevations, unknown road widths, the City's parcel layer down, a second address match with no parcel,
   a historic district, County and State points 200 ft apart, a shallow lot whose side lines must not count as
   frontage.
 - **Never kept:** the snapshot contains no City value (the zone is nowhere in it) and no answer bodies;
@@ -80,4 +92,5 @@ suggestion, and the start box's "I confirm" tick stays unticked until the archit
 ## Not yet
 
 Wiring into the Rhino start box (after the start box PR lands); confirming the zone suggestion against the
-City's official map; the Southside boundary as a polygon (it's only on the ordinance's map); more cities.
+City's official map; the Southside area as the districts' own outline rather than a padded box; more
+cities.

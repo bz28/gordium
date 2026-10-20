@@ -1025,18 +1025,5 @@
    }
   }
  ],
- "live_status": "found",
- "derived": {
-  "state_street_row_ft": [
-   50,
-   50,
-   66,
-   66,
-   49.5,
-   66
-  ],
-  "zone_at_lot": "R-1b",
-  "zoning_last_edited": "2024-09-26",
-  "note": "Derived from City of Ithaca layers (not stored): ROW widths, zone code, edit date."
- }
+ "live_status": "found"
 }
