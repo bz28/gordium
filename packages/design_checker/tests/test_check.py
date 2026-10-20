@@ -515,7 +515,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
     rows = logic.box_rows(_box())
     assert [r["key"] for r in rows] == ["address", "zone", "use", "lot", "street", "ground"]
     by = {r["key"]: r for r in rows}
-    assert by["address"]["actions"] == [("lookup", "Look up (coming soon)", False)]      # lookup: a later PR
+    assert by["address"]["actions"] == [("lookup", "Look up", True)]          # the address lookup (PR #19)
     assert by["zone"]["text"] == "R-1b · entered by you"
     assert by["lot"]["text"] == "6,570 sf · from the tax map (±2 ft, approximate)"
     assert by["lot"]["actions"] == [("lot", "Use my survey…", True)]
@@ -764,7 +764,7 @@ def test_the_design_buffer_is_set_when_starting_not_in_edit_site():
 def test_frame_site_frames_the_lot_and_house_not_the_whole_file():
     """Review round 7: Zoom All Extents undid the per-view framing and took in anything far away in the file."""
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
-    start = rhino.index("def frame_site")
+    start = rhino.index("def frame_site(doc, facts):")
     body = rhino[start:start + 1800]
     assert "_Extents" not in body and '"_-Zoom _All _Selected"' in body and "doc.Objects.Select(i)" in body
 

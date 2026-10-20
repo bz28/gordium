@@ -289,10 +289,12 @@ GROUND_CHOICES = [("spot", "Place spot grades…"), ("terrain", "Pick terrain…
                   ("regrade", "I'll regrade: set finished ground…")]
 
 
-def lot_text(area, surveyed):
-    """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"."""
+def lot_text(area, surveyed, source=None):
+    """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"; with the map
+    service the lookup read it from ("… · NYS Tax Parcels Public")."""
     size = f"{area:,.0f} sf" if isinstance(area, (int, float)) else "area not known"
-    return size + " · from " + ("your survey" if surveyed else "the tax map (±2 ft, approximate)")
+    return size + " · from " + ("your survey" if surveyed else "the tax map (±2 ft, approximate)") + \
+        (" · " + source if source and not surveyed else "")
 
 
 def ground_text(ground):
@@ -304,22 +306,33 @@ def ground_text(ground):
     span = ground.get("range") or ""
     what = {"spot": f"{ground.get('count', 0)} spot grades", "terrain": "terrain",
             "regrade": f"finished ground you set ({ground.get('count', 0)} spot grades)"}[kind]
-    return what + (", " + span if span else "") + " · " + ("picked by you" if kind == "terrain" else "placed by you")
+    return what + (", " + span if span else "") + " · " + (ground.get("source") or
+                                                         ("picked by you" if kind == "terrain" else "placed by you"))
 
 
 def box_rows(state):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,
     lot_area, lot_surveyed, street_name, ground {kind, count, range}, no_regrading."""
-    return [
+    look = state.get("lookup") or {}
+    reviews, checked = look.get("reviews") or {}, set(state.get("checked") or [])
+
+    def review(key):                  # a looked-up fact found doubtful: amber, with why, and "I checked this"
+        why = reviews.get(key)
+        return {"review": "? " + why if why else None,
+                "check": ("I checked this", key in checked) if why and key in CHECKABLE else None}
+
+    rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
-         "actions": [("lookup", "Look up (coming soon)", False)], "tick": None},
+         "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))],
+         "tick": None, "matches": look.get("matches") or [],
+         "status": LOOKING.format(look["looking"]) if look.get("looking") else None},
         {"key": "zone", "label": "Zoning district",
          "text": (state.get("zone") or "—") + " · " + (state.get("zone_source") or ENTERED),
          "actions": [("zone", "Change", True)], "tick": ("I confirm", bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
-        {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed")),
+        {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source")),
          "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))], "tick": None},
         {"key": "street", "label": "Street side", "text": state.get("street_name") or "the highlighted line",
          "actions": [("street", "Change…", True)], "tick": None,
@@ -328,6 +341,123 @@ def box_rows(state):
          "actions": [(k, t, True) for k, t in GROUND_CHOICES],
          "tick": ("No regrading near the house", bool(state.get("no_regrading")))},
     ]
+    for r in rows:
+        r.update(review(r["key"]))
+    return rows
+
+
+# ---- the address lookup (design_checker.lookup_box runs it; this turns its answer into the box's choices) ----
+
+LOOKING = "Looking up {}… (up to 45 s)"
+CHECKABLE = ("lot", "street", "ground")          # what "I checked this" settles (the district has its own tick)
+LOOKUP_SAYS = {                                   # the box's one amber line when a lookup couldn't fill it in
+    "not_found": "No City of Ithaca address found for {query}: check the spelling, or draw the lot.",
+    "outside_city": "{message}",
+    "offline": "Couldn't reach the map services (offline?): enter the site by hand.",
+    "error": "A map service answered with an error: enter the site by hand.",
+    "timeout": "The lookup took too long: enter the site by hand, or try again.",
+    "multiple": "{message} Pick one under Address, then Look up again.",
+}
+ROW_OF = {"address": "lot", "parcel": "lot", "lot": "lot", "street_side": "street", "corner_lot": "street",
+          "ground": "ground", "zone": "zone", "overlays": "overlays"}
+SOURCE_OF = {"address": "NYS Geocoder", "lot": "NYS Tax Parcels Public", "street": "City roads",
+             "ground": "USGS 3DEP, today's ground", "zone": "City zoning map, used live"}
+
+
+def lookup_says(payload):
+    """The amber line for a lookup that didn't find the site (None when it did)."""
+    status = (payload or {}).get("status")
+    if status in (None, "found"):
+        return None
+    text = LOOKUP_SAYS.get(status, LOOKUP_SAYS["error"])
+    return text.format(query=payload.get("query") or "this address", message=payload.get("message") or "").strip()
+
+
+def lookup_choices(payload, facts, saved_ui, zones=()):
+    """(facts, saved_ui) after a lookup, as a pick returns them: each found fact a suggestion with its source,
+    never confirmed (the district keeps its own unticked "I confirm"); every doubtful one listed by its row with
+    why (amber; the check treats it as unsettled until the architect ticks I checked this or changes it); what the
+    box asks (a corner lot, two zones, several matches) left for the architect. The lot curve and the spot grades
+    are the Rhino side's to draw, from payload["writes"] (only what may be kept)."""
+    facts, saved_ui = dict(facts), dict(saved_ui)
+    look = {"status": (payload or {}).get("status") or "error", "says": lookup_says(payload),
+            "asks": list((payload or {}).get("asks") or []), "matches": list((payload or {}).get("matches") or []),
+            "reviews": {}, "query": (payload or {}).get("query")}
+    saved_ui["lookup"] = look
+    if look["status"] != "found":
+        return facts, saved_ui
+    got = payload.get("facts") or {}
+    details = payload.get("details") or {}
+
+    def value(name):
+        return (got.get(name) or {}).get("value")
+
+    for name, d in details.items():          # the strongest reason per row; reasons add up
+        if d.get("status") in ("needs_review", "ask") and d.get("reason"):
+            row = ROW_OF.get(name, name)
+            if d["status"] == "needs_review" or row not in ("street", "zone"):
+                old = look["reviews"].get(row)
+                look["reviews"][row] = d["reason"] if not old or d["reason"] in old else old + " " + d["reason"]
+    if value("address"):
+        facts["address"] = value("address")
+        saved_ui["address_source"] = SUGGESTED + " · " + SOURCE_OF["address"]
+    zone = value("zone")
+    names = {z.lower(): z for z in zones} if zones else {}
+    if isinstance(zone, list):                   # two zones: the box asks which applies
+        found = [names.get(z.lower(), z) for z in zone]
+        saved_ui["zones_found"] = found
+        facts["zone"] = found[0]
+    elif zone:
+        facts["zone"] = names.get(zone.lower(), zone)
+        saved_ui.pop("zones_found", None)
+    if zone:
+        saved_ui["zone_source"] = SUGGESTED + " · " + SOURCE_OF["zone"]
+    side = value("street_side") or {}
+    if side.get("street"):
+        saved_ui["street_name"] = side["street"].title()
+        saved_ui["street_source"] = SUGGESTED + " · " + SOURCE_OF["street"]
+    corner = value("corner_lot")
+    streets = side.get("streets") or {}
+    if corner == "no":
+        facts["corner_lot"] = False
+    elif corner == "yes" or (corner == "ask" and len(streets) > 1):
+        facts["corner_lot"] = True               # it faces two streets (the box asks which line is the front)
+    else:
+        facts.pop("corner_lot", None)            # unknown: asked, never guessed
+    if corner:
+        saved_ui["corner_source"] = SUGGESTED + " · " + SOURCE_OF["street"]
+    lot = value("lot") or {}
+    if lot:
+        facts["lot_surveyed"] = False            # the tax map: ±2'-0" and the 2'-0" starting-house margin apply
+        saved_ui["lot_source"] = SOURCE_OF["lot"]
+        saved_ui["lot_area"] = lot.get("area_sf")
+    writes = payload.get("writes") or {}
+    if writes.get("spots"):
+        saved_ui["ground_kind"] = "spot"
+        saved_ui["ground_source"] = SUGGESTED + " · " + SOURCE_OF["ground"]
+    if not writes.get("lot_ring") and lot:      # the City's parcels: a guide only, never kept
+        look["reviews"]["lot"] = ("The State's tax map didn't answer; the City's outline is shown as a guide only "
+                                  "(it can't be kept): draw your lot on the Site layer, then pick it.")
+    saved_ui["checked"] = []
+    return facts, saved_ui
+
+
+def unsettled(saved_ui, checked=None):
+    """The checker's facts["unsettled"]: each doubtful looked-up row the architect hasn't ticked I checked this
+    for (or changed). Empty when there are none."""
+    look = (saved_ui or {}).get("lookup") or {}
+    done = set(checked if checked is not None else (saved_ui or {}).get("checked") or [])
+    return {k: v for k, v in (look.get("reviews") or {}).items() if k in CHECKABLE and k not in done}
+
+
+def settle(saved_ui, row):
+    """The architect changed a looked-up fact (picked another street line, their survey, other ground): that row
+    is theirs now, so it is no longer unsettled."""
+    saved_ui = dict(saved_ui)
+    look = dict(saved_ui.get("lookup") or {})
+    look["reviews"] = {k: v for k, v in (look.get("reviews") or {}).items() if k != row}
+    saved_ui["lookup"] = look
+    return saved_ui
 
 
 def parse_feet(text):
@@ -401,6 +531,9 @@ def starting_house_fact(note, today):
 
 def uncertain(state):
     """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
+    says = (state.get("lookup") or {}).get("says")
+    if says:                                     # a lookup that couldn't fill the box in: why, and what to do
+        return says
     if state.get("corner_lot") is None:          # never guessed: unanswered, the yards wait for it (§325-19C)
         return "Does this lot face two streets? Answer Corner lot? under Street side"
     if state.get("corner_lot"):
@@ -442,13 +575,15 @@ def fact_sources(state, today, confirmed):
                      by if state.get("district_confirmed") else None),
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
         "lot": fact(lot_text(state.get("lot_area"), state.get("lot_surveyed")),
-                    "your survey" if state.get("lot_surveyed") else "the tax map (±2 ft)"),
+                    "your survey" if state.get("lot_surveyed") else
+                    "the tax map (±2 ft)" + (" · " + state["lot_source"] if state.get("lot_source") else "")),
         "street": fact(state.get("street_name") or "the highlighted line",
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
         "ground": fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
-                       "as drawn" if kind == "flat" else ("picked by you" if kind == "terrain" else "placed by you")),
+                       "as drawn" if kind == "flat" else ground.get("source") or
+                       ("picked by you" if kind == "terrain" else "placed by you")),
     }
 
 

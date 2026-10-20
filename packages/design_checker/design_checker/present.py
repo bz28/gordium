@@ -730,6 +730,31 @@ def _cautious_for_left_out(items, left_out, touching):
         i.update(status=REVIEW, mark=MARK[REVIEW], hint="Add to check…", reason=why + " · Add to check…")
 
 
+# What each looked-up fact decides (facts["unsettled"]): the lot decides every measurement but the building's own
+# height and stories; the street side decides the yards (which line is the front) and the lot's width and depth;
+# the ground decides height and stories.
+UNSETTLED_DECIDES = {
+    "street": ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "lot_width", "lot_depth"),
+    "ground": ("building_height", "stories"),
+}
+UNSETTLED_NAMES = {"lot": "lot outline", "street": "street side", "ground": "ground levels"}
+
+
+def _cautious_for_unsettled(items, unsettled):
+    """A looked-up fact the lookup found doubtful, not yet confirmed or changed by the architect: every item
+    measured from it needs review, whatever it measures (coordinator, 2026-10-20: never a false pass)."""
+    for key, why in (unsettled or {}).items():
+        decides = UNSETTLED_DECIDES.get(key)
+        for i in items:
+            m = i.get("measure")
+            if i["status"] != COMPLIES or m is None:
+                continue
+            if (decides is None and m not in UNSETTLED_DECIDES["ground"]) or (decides and m in decides):
+                i.update(status=REVIEW, mark=MARK[REVIEW], hint="Edit site…",
+                         reason=f"Complies on the looked-up {UNSETTLED_NAMES[key]}, which needs review: {why} · "
+                                "confirm it (I checked this) or change it in Edit site…")
+
+
 def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction=None) -> dict:
     """Every item, grouped; the summary; the header. `extras` is what the Rhino command adds: what it sent
     (scope), objects on the lot it didn't include, and the grade and lot sources."""
@@ -752,6 +777,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
     _cautious_for_left_out(items, left_out, extras.get("touching"))
+    _cautious_for_unsettled(items, facts.get("unsettled"))
     if left_out:
         n = len(left_out)
         items.append({"id": "scope.not_included", "rule": None, "name": "Objects on the lot not included",

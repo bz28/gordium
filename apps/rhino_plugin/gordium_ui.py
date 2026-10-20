@@ -458,7 +458,10 @@ def start_box(state, options, mode):
     corner.SelectedIndex = {None: 0, False: 1, True: 2}[state.get("corner_lot")]
     first = {"address": address.Text, "use": use.SelectedIndex, "corner": corner.SelectedIndex}
 
+    checks = {}                       # row key -> its "I checked this" tick (a looked-up fact found doubtful)
+
     def keep():                       # what the fields say now, back into `state`; what changed is the architect's
+        state["checked"] = sorted(k for k, c in checks.items() if c.Checked)
         z = zone.SelectedValue.Text if zone.SelectedValue else None
         if buffer is not None:
             state["design_buffer"] = buffer.Text
@@ -481,7 +484,15 @@ def start_box(state, options, mode):
 
     draw = button("Draw" if mode == "start" else "Check", lambda: (keep(), done("draw")))
     reason = label(logic.draw_reason(state), size=11)
-    draw.Enabled = logic.can_draw(state)
+    looking = bool((state.get("lookup") or {}).get("looking"))
+    draw.Enabled = logic.can_draw(state) and not looking
+
+    def enter_looks_up(s, e):          # Enter in the address: Look up (not Draw, the box's default button)
+        if e.Key == ef.Keys.Enter and not looking:
+            e.Handled = True
+            pick("lookup")
+
+    address.KeyDown += logic.guard(enter_looks_up, "look up the address")
     # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
     buffer = ef.TextBox() if mode == "start" else None
 
@@ -489,7 +500,7 @@ def start_box(state, options, mode):
         state["district_confirmed"] = bool(confirm.Checked)
         if buffer is not None:
             state["design_buffer"] = buffer.Text
-        draw.Enabled = logic.can_draw(state)
+        draw.Enabled = logic.can_draw(state) and not looking
         reason.Text = logic.draw_reason(state)
 
     confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
@@ -499,7 +510,22 @@ def start_box(state, options, mode):
     for r in logic.box_rows(state):
         key, title = r["key"], label(r["label"], bold=True)
         if key == "address":
-            layout.AddRow(title, row(address, *[button(t, None, on) for _, t, on in r["actions"]]))
+            layout.AddRow(title, row(address, *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
+            if r.get("matches"):           # several places match: pick one, then Look up again
+                matches = ef.DropDown()
+                matches.Items.Add("Which address?")
+                for m in r["matches"]:
+                    matches.Items.Add(m)
+                matches.SelectedIndex = 0
+
+                def matched(s, e, box=matches):
+                    if box.SelectedIndex > 0:
+                        address.Text = box.SelectedValue.Text
+
+                matches.SelectedIndexChanged += logic.guard(matched, "pick the address")
+                layout.AddRow(None, row(matches))
+            if r.get("status"):            # Looking up 106 Ithaca Rd… (the box stays usable; Cancel works)
+                layout.AddRow(None, row(label(r["status"], size=11)))
         elif key == "zone":
             confirm.Text = r["tick"][0]
             layout.AddRow(title, row(zone, label(r["text"].split(" · ", 1)[-1], size=11), confirm))
@@ -515,6 +541,13 @@ def start_box(state, options, mode):
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             if r.get("choice"):        # the street side's question: Corner lot?
                 layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
+        if r.get("review"):            # a looked-up fact found doubtful: why, in amber, and I checked this
+            layout.AddRow(None, row(label(r["review"], eto_status_color("needs_review"), size=11, width=560)))
+        if r.get("check"):
+            tick = ef.CheckBox()
+            tick.Text, tick.Checked = r["check"][0], r["check"][1]
+            checks[key] = tick
+            layout.AddRow(None, tick)
     if buffer is not None:               # Advanced: a design buffer kept back from every limit, on top of the tax map's
         buffer.Text = state.get("design_buffer") or "0'-0\""
         buffer.TextChanged += logic.guard(confirmed, "type the design buffer")
@@ -543,6 +576,20 @@ def start_box(state, options, mode):
     shown = state.get("_on_shown")            # for the in-Rhino test: capture the real box, then close it
     if shown is not None:
         dialog.Shown += logic.guard(lambda s, e: shown(dialog), "run the start box hook")
+    poll = state.get("_poll")                 # a lookup running in its own process: the box closes itself when it
+    if looking and poll is not None:          # answers (or the time runs out), and opens again filled in
+        timer = ef.UITimer()
+        timer.Interval = 0.5
+
+        def tick(s, e):
+            if poll() is not None:
+                timer.Stop()
+                keep()
+                done("pick:lookup_done")
+
+        timer.Elapsed += logic.guard(tick, "wait for the address lookup")
+        dialog.Shown += logic.guard(lambda s, e: timer.Start(), "start waiting for the lookup")
+        dialog.Closed += logic.guard(lambda s, e: timer.Stop(), "stop waiting for the lookup")
     dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     return chosen.get("what")
 
