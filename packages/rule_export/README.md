@@ -10,8 +10,9 @@ python -m rule_export --check    # CI: fails if the committed workbook differs f
 ```
 
 For Ithaca: `regulations/jurisdictions/new_york/ithaca_city/ithaca_city_rules.xlsx`. The file is rewritten
-only when its content changes. `--check` compares what the workbook says (sheets, cell values, links),
-not its bytes, because Excel files carry timestamps.
+only when its content or look changes. `--check` compares what the workbook says and how it looks (sheets;
+each cell's value, link, font, fill, left border and alignment; column widths; frozen panes), not its bytes,
+because Excel files carry timestamps.
 
 ## The tabs
 
