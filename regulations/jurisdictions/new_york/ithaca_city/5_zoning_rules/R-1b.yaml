@@ -367,6 +367,7 @@ rules:
         - 8
         - 8
         quote: Each required front, side and rear yard is increased one foot on the ground for each one foot
+      still_open: []
       strength: strong
       report: docs/research/2026-10-20_architect_questions.md §4.5
     - id: height_bonus_main_building_only
@@ -393,6 +394,7 @@ rules:
         - 11
         - 12
         quote: may not exceed 10% of the maximum building height
+      still_open: []
       strength: strong
       report: docs/research/2026-10-20_architect_questions.md §4.5
     notes: >-
@@ -460,6 +462,7 @@ rules:
         - 4
         - 4
         quote: entirely below the finished grade
+      still_open: []
       strength: strong
       confirm_with: the City zoning office
       report: docs/research/2026-10-20_architect_questions.md §3.2

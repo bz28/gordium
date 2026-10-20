@@ -626,7 +626,7 @@ SOURCE_RANKS = {1: "the city's code or charts", 2: "the City's own interpretatio
                 3: "the NYS Uniform Code, IBC or IRC and their commentary", 4: "other places' codes"}
 PENDING = "pending"     # why_open of a question not researched yet starts with it: "pending the 2026-10-20 research pass"
 RESEARCH_FIELDS = {"question", "searched", "sources", "why_open", "readings", "report"}
-FINDING_FIELDS = {"id", "question", "kind", "answer", "sources", "strength", "confirm_with", "report"}
+FINDING_FIELDS = {"id", "question", "kind", "answer", "sources", "strength", "confirm_with", "still_open", "report"}
 SLUG = re.compile(r"[a-z][a-z0-9_]*")
 
 
@@ -887,33 +887,64 @@ def _contains(tokens: list[str], part: list[str]) -> bool:
     return any(tokens[i:i + len(part)] == part for i in range(len(tokens) - len(part) + 1))
 
 
-def law_conflicts(entries: list[tuple[str, dict]]) -> list[str]:
-    """A question is settled or open, never both. A finding of kind law may not answer what an open question
-    still asks: anywhere, if the open question quotes words the law finding quotes (the same words can't be
-    settled in one entry and open in another); in its own entry, if the open question's research cites the same
-    lines. Then the finding claims too much: narrow it to what the law settles, or make it a reading."""
-    opens = [(where, q, x) for where, e in entries for q in e.get("open_questions") or [] if isinstance(q, str)
-             for x in [next((r for r in e.get("research") or [] if isinstance(r, dict) and r.get("question") == q), {})]]
+def open_question_tags(entries: list[tuple[str, dict]]) -> dict[str, tuple[str, str, dict]]:
+    """{"<id>#<n>": (where, question, its research)}: the n-th open question of each entry, the tags the questions
+    page and the spreadsheet use (where ends with the entry's id)."""
+    tags = {}
+    for where, e in entries:
+        for n, q in enumerate(q for q in e.get("open_questions") or [] if isinstance(q, str)):
+            x = next((r for r in e.get("research") or [] if isinstance(r, dict) and r.get("question") == q), {})
+            tags[f"{where.rsplit(' ', 1)[-1]}#{n + 1}"] = (where, q, x)
+    return tags
+
+
+def _overlap(a: dict, b: dict) -> bool:
+    return (isinstance(a, dict) and isinstance(b, dict) and "file" in a and "file" in b
+            and (a.get("file"), a.get("page")) == (b.get("file"), b.get("page"))
+            and _is_line_range(a.get("lines")) and _is_line_range(b.get("lines"))
+            and a["lines"][0] <= b["lines"][1] and b["lines"][0] <= a["lines"][1])
+
+
+def finding_conflicts(entries: list[tuple[str, dict]]) -> list[str]:
+    """A question is settled or open, never both, across every rule, definition and label. A finding may touch
+    what an open question still asks only by saying so, in `still_open: ["<id>#<n>", ...]` (each a real open
+    question, and the answer says what is still open). Touching means: the open question quotes words the
+    finding quotes, or its research cites lines the finding cites (in any entry). And in an entry that still has
+    open questions, every finding carries `still_open` (an empty list when it leaves none of them open), so the
+    relation is stated on purpose, never guessed from words like "eave"."""
+    tags = open_question_tags(entries)
     p = []
     for where, e in entries:
+        own = {t for t, (w, _, _) in tags.items() if w == where}
         for f in e.get("findings") or []:
-            if not (isinstance(f, dict) and f.get("kind") == "law"):
+            if not isinstance(f, dict):
                 continue
-            code = [s for s in f.get("sources") or [] if isinstance(s, dict) and isinstance(s.get("quote"), str)
-                    and "file" in s]
-            quoted = [tokenize(s["quote"]) for s in code]
-            for owhere, q, x in opens:
+            name = f"{where}: the finding {f.get('id') or str(f.get('question', ''))[:40]!r}"
+            listed = f.get("still_open", [])
+            if not (isinstance(listed, list) and all(isinstance(t, str) for t in listed)):
+                p.append(f"{name}: 'still_open' must be a list of open-question tags like '325-25C#1'")
+                continue
+            if unknown := [t for t in listed if t not in tags]:
+                p.append(f"{name}: still_open names {', '.join(unknown)}, which isn't an open question "
+                         "(answered or renumbered?)")
+            if listed and "still open" not in str(f.get("answer", "")):
+                p.append(f"{name}: lists still_open questions, so its answer must say what is still open")
+            if own and "still_open" not in f:
+                p.append(f"{name}: its entry still has open questions ({', '.join(sorted(own))}), so it says which "
+                         "of them it leaves open: still_open: [...] (or [] for none)")
+            code = [c for c in f.get("sources") or [] if isinstance(c, dict) and "file" in c and isinstance(c.get("quote"), str)]
+            quoted = [tokenize(c["quote"]) for c in code]
+            for tag, (owhere, q, x) in tags.items():
+                if tag in listed:
+                    continue
                 same = [ph for ph in _quoted_phrases(q) if any(_contains(t, ph) for t in quoted)]
-                shared = owhere == where and any(
-                    isinstance(s, dict) and (s.get("file"), s.get("page")) == (c.get("file"), c.get("page"))
-                    and _is_line_range(s.get("lines")) and _is_line_range(c.get("lines"))
-                    and s["lines"][0] <= c["lines"][1] and c["lines"][0] <= s["lines"][1]
-                    for s in x.get("sources") or [] for c in code)
+                shared = [c for c in code if any(_overlap(c, s) for s in x.get("sources") or [])]
                 if same or shared:
-                    why = f"quotes {' '.join(same[0])!r}, which" if same else "cites the lines whose research"
-                    p.append(f"{where}: the law finding {f.get('id') or f.get('question', '')[:40]!r} {why} the open "
-                             f"question in {owhere} still asks about ({q[:60]}...); narrow the finding to what the "
-                             "law settles, or make it a reading")
+                    why = (f"quotes {' '.join(same[0])!r}, which the open question {tag} asks about" if same else
+                           f"cites p.{shared[0]['page']} lines {shared[0]['lines'][0]}-{shared[0]['lines'][1]}, which "
+                           f"the research on open question {tag} cites")
+                    p.append(f"{name} {why} ({owhere}: {q[:50]}...): narrow the finding to what is settled and name "
+                             f"the question in still_open: [{tag!r}], or make it a reading")
     return p
 
 

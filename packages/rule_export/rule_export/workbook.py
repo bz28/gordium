@@ -143,7 +143,8 @@ def finding_text(f: dict) -> str:
     (an architect's or the City's answer, in `answers`, outranks a reading)."""
     head = ("The law" if f.get("kind") == "law" else
             f"Gordium's reading ({str(f.get('strength', '')).replace('_', ' ')}) · confirm with {f.get('confirm_with')}")
-    return f"{head}: {_text(f.get('answer'))}"
+    still = f" Still open: {', '.join(f['still_open'])}." if f.get("still_open") else ""
+    return f"{head}: {_text(f.get('answer'))}{still}"
 
 
 def _source_text(s: dict) -> str:
@@ -366,6 +367,7 @@ def tables(j: Path) -> dict[str, dict]:
             code = next((c for c in f.get("sources") or [] if c.get("file")), {})
             found.append([kind, where, ident, f.get("id", ""), f.get("kind", ""), f.get("strength", ""),
                           f.get("confirm_with", ""), _text(f.get("question")), finding_text(f),
+                          ", ".join(f.get("still_open") or []),
                           _bullets(_source_text(c) for c in f.get("sources") or []), f.get("report", ""),
                           f"Open p.{code.get('page')}" if code else ""])
             found_links.append(link(code) if code else None)
@@ -387,7 +389,7 @@ def tables(j: Path) -> dict[str, dict]:
                        "rows": found, "links": {"Link": found_links},
                        "columns": [("About", 14), ("In", 40), ("Id", 30), ("Finding", 28), ("Kind", 9),
                                    ("Strength", 13), ("Confirm with", 30), ("Question", 60), ("Answer", 80),
-                                   ("Sources", 80), ("Research report", 30), ("Link", 10)]}
+                                   ("Still open", 24), ("Sources", 80), ("Research report", 30), ("Link", 10)]}
 
     # Coverage: every piece of every cut document, in the law's order, with its label. The link opens the
     # page of the label's first quote (where its reason points), else the piece's first page.

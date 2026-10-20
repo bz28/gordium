@@ -9,7 +9,7 @@ import pytest
 
 import re
 
-from rule_format.rulebook import (REPO, Context, law_conflicts, load, pending_research, research_entries,
+from rule_format.rulebook import (REPO, Context, finding_conflicts, load, pending_research, research_entries,
                                   research_problems, validate_terms)
 
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
@@ -168,10 +168,10 @@ def test_the_height_bonus_answer_keeps_u1_to_what_the_code_says():
     assert "U-1" not in bonus["answer"]
 
 
-def test_no_law_finding_settles_what_an_open_question_still_asks(ctx):
+def test_no_finding_settles_what_an_open_question_still_asks(ctx):
     """The 12 ft story test was filed as the law while story's open question still asked whether "computed at the
     main entrance side" overrides "at any point", and basement kept the same words open."""
-    assert law_conflicts(research_entries(ITHACA)) == []
+    assert finding_conflicts(research_entries(ITHACA)) == []
     story = next(e for w, e in entries() if w == "story")
     assert not [f for f in story.get("findings") or [] if f["kind"] == "law" and "at any point" in
                 " ".join(s.get("quote", "") for s in f["sources"])]
@@ -179,25 +179,44 @@ def test_no_law_finding_settles_what_an_open_question_still_asks(ctx):
     assert {"any_side", "main_entrance_side_only"} <= readings
 
 
-def test_law_conflicts_are_found_by_quoted_words_and_by_shared_lines():
-    law = {"findings": [{"id": "f", "kind": "law", "sources": [EAVES]}]}
-    elsewhere = {"open_questions": ['Is "not project more than two feet" measured to the wall?']}
-    assert any("quotes 'not project more than two feet'" in p
-               for p in law_conflicts([("a", law), ("b", elsewhere)]))
-    same = law | {"open_questions": ["Bay windows?"], "research": [{"question": "Bay windows?", "sources": [EAVES]}]}
-    assert any("cites the lines" in p for p in law_conflicts([("a", same)]))
-    reading = {"findings": [{"id": "f", "kind": "reading", "sources": [EAVES]}]}
-    assert law_conflicts([("a", reading), ("b", elsewhere)]) == []                # only the law can't be open
+OPEN = {"open_questions": ["Bay windows?"], "research": [{"question": "Bay windows?", "sources": [EAVES]}]}
 
 
-def test_a_finding_about_part_of_an_open_question_says_the_rest_is_open():
-    """A finding whose question asks about eaves, in an entry whose open question is about eaves, says the eaves part
-    is still open (coverage seen from above; the pitched-roof midpoint)."""
-    for where, e in entries():
-        if any("eave" in q.lower() for q in e.get("open_questions") or []):
-            for f in e.get("findings") or []:
-                if "eave" in f["question"].lower():
-                    assert "still open" in f["answer"], (where, f["id"])
+def test_a_finding_touching_an_open_question_anywhere_must_name_it():
+    """Quoted words or shared cited lines, in the same entry or another one: the finding names the open question in
+    still_open (a real one), and says in its answer what is still open."""
+    law = {"findings": [{"id": "f", "kind": "law", "answer": "Up to 2 ft.", "sources": [EAVES]}]}
+    words = {"open_questions": ['Is "not project more than two feet" measured to the wall?']}
+    assert any("quotes 'not project more than two feet'" in p for p in finding_conflicts([("a x", law), ("b y", words)]))
+    found = finding_conflicts([("a x", law), ("b y", OPEN)])                          # another entry, same lines
+    assert any("cites p.49 lines 15-16, which the research on open question y#1 cites" in p for p in found)
+    reading = {"findings": [law["findings"][0] | {"kind": "reading"}]}
+    assert finding_conflicts([("a x", reading), ("b y", OPEN)])                       # a reading too
+    named = {"findings": [law["findings"][0] | {"still_open": ["y#1"], "answer": "Up to 2 ft; bay windows still open."}]}
+    assert finding_conflicts([("a x", named), ("b y", OPEN)]) == []
+    unsaid = {"findings": [named["findings"][0] | {"answer": "Up to 2 ft."}]}
+    assert any("answer must say what is still open" in p for p in finding_conflicts([("a x", unsaid), ("b y", OPEN)]))
+    wrong = {"findings": [named["findings"][0] | {"still_open": ["y#2"]}]}
+    assert any("y#2, which isn't an open question" in p for p in finding_conflicts([("a x", wrong), ("b y", OPEN)]))
+
+
+def test_in_an_entry_with_open_questions_every_finding_says_which_it_leaves_open():
+    """This replaces guessing from words like "eave": the relation is a field, so it can't be forgotten."""
+    entry = OPEN | {"findings": [{"id": "f", "kind": "law", "answer": "A.", "sources": []}]}
+    assert any("says which of them it leaves open" in p for p in finding_conflicts([("a x", entry)]))
+    entry["findings"][0]["still_open"] = []
+    assert finding_conflicts([("a x", entry)]) == []
+
+
+def test_the_side_yard_finding_names_the_r1_question_it_leaves_open():
+    """accessory_structures_follow_325_25 cites §325-25C's R-1 clause (p.67), which 325-25C#1 asks about; without
+    its still_open the check refuses it."""
+    found = research_entries(ITHACA)
+    side = next(e for w, e in found if w.endswith(" side_yard"))
+    f = next(f for f in side["findings"] if f["id"] == "accessory_structures_follow_325_25")
+    assert f["still_open"] == ["325-25C#1"]
+    del f["still_open"]
+    assert any("accessory_structures_follow_325_25" in p and "325-25C#1" in p for p in finding_conflicts(found))
 
 
 def test_the_accessory_question_cites_the_r1_clause_that_drops_frame():

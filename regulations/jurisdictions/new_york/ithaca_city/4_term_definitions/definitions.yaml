@@ -136,6 +136,8 @@ height_of_building:
     - rank: 4
       cite: City of Depew NY
       url: https://www.zoneomics.com/code/depew-NY/chapter_16
+    still_open:
+    - height_of_building#1
     strength: moderate
     confirm_with: the City zoning office
     report: docs/research/2026-10-20_architect_questions.md §4.1
@@ -150,6 +152,7 @@ height_of_building:
       - 19
       - 19
       quote: he vertical distance
+    still_open: []
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §4.7
   - id: roof_features_dont_change_height
@@ -172,6 +175,7 @@ height_of_building:
       - 34
       - 35
       quote: or 30% of the area of the roof plane on which it is located, whichever is less
+    still_open: []
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §4.6
   drafted_by: claude
@@ -404,6 +408,7 @@ building_area:
     - rank: 2
       cite: 'BZA Appeal #3254, 409 Willow Ave (2023): the applicant counted the detached garage (practitioner evidence)'
       url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_07112023-2702
+    still_open: []
     strength: city_practice
     confirm_with: the City zoning office
     report: docs/research/2026-10-20_architect_questions.md §3.1
@@ -432,6 +437,8 @@ building_area:
       cite: 'BZA, ZONE-25-12, 132 Cherry St (3 Mar 2026): the front yard is measured to the overhanging upper floors'
       url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_03032026-3164
       quote: would provide a front yard of 3.5'
+    still_open:
+    - building_area#1
     strength: strong
     confirm_with: the City zoning office
     report: docs/research/2026-10-20_architect_questions.md §3.2
@@ -560,7 +567,8 @@ lot_depth:
     answer: 'The side lot lines are drawn at 90 degrees to the front lot line, from each end of the front lot line
       to the furthest rear line, and the lot depth is the average of the two (the Zoning Administrator''s method,
       BZA Appeal #3202). 106 Ithaca Rd on the County outline: (92.01 + 100.28) / 2 = 96.15 ft, so the rear yard must
-      be 24.04 ft; the 25 ft design passes.'
+      be 24.04 ft; the 25 ft design passes. Whether the second perpendicular stops at the jog or continues to the
+      main rear line is still open.'
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 25
@@ -574,6 +582,8 @@ lot_depth:
       url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_02012022-2446
       quote: side lot lines should be drawn at a 90-degree angle perpendicular to the front lot line to determine
         the average lot depth
+    still_open:
+    - lot_depth#1
     strength: city_practice
     confirm_with: 'the City zoning office (ideally from the BZA''s written #3202 resolution)'
     report: docs/research/2026-10-20_architect_questions.md §1.2
@@ -589,6 +599,7 @@ lot_depth:
       - 24
       - 25
       quote: If the two side lot lines are of unequal lengths
+    still_open: []
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §1.5
   drafted_by: claude
@@ -694,6 +705,8 @@ side_yard:
         the chart''s side yard'
       url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_04032018-1576
       quote: will have 1 foot of the 3 feet required by the zoning ordinance for the side yard
+    still_open:
+    - 325-25C#1
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §2.4
   - id: attached_garage_is_main_building
@@ -781,7 +794,7 @@ rear_yard:
       main building''s setback, whichever is less (§325-28C); sills, cornices and eaves up to 2 ft (§325-18B); terraces
       and patios at grade (§325-3); parking under §325-20F. Porches, decks, balconies over 2 ft, ramps and landings
       are part of the building (§325-18A). Fences (§325-17D) and stream setbacks (§325-26) also apply. Each is a rule
-      of its own.'
+      of its own. (Whether eaves count toward lot coverage is still open.)'
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 66
@@ -826,6 +839,9 @@ rear_yard:
       - 10
       - 11
       quote: shall be considered a part of the building in both the determination of required yards and lot coverage
+    still_open:
+    - 325-25C#1
+    - building_area#1
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §2.5
   drafted_by: claude
@@ -877,7 +893,8 @@ yard_projections:
     kind: law
     answer: Each yard is measured to the nearest part of the building (walls, cantilevered upper floors, porches,
       decks, balconies over 2 ft, ramps, landings). Sills, belt courses, cornices and eaves may project up to 2 ft
-      into a required yard; more than 2 ft is a violation of that yard, not a new measuring point.
+      into a required yard; more than 2 ft is a violation of that yard, not a new measuring point. Whether a bay window
+      is such a feature, and whether eaves count toward lot coverage, is still open.
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 20
@@ -895,6 +912,9 @@ yard_projections:
       cite: 'BZA, ZONE-25-12, 132 Cherry St (3 Mar 2026): the front yard is measured to the overhanging upper floors'
       url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_03032026-3164
       quote: would provide a front yard of 3.5'
+    still_open:
+    - yard_projections#1
+    - building_area#1
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §2.1
   - id: steps_count
@@ -915,6 +935,7 @@ yard_projections:
     - rank: 2
       cite: 'BZA Appeal #3175, 511 S. Plain St (2021): porch steps reduce the front yard'
       url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_01052021-2224
+    still_open: []
     strength: city_practice
     confirm_with: the City zoning office
     report: docs/research/2026-10-20_architect_questions.md §X1
