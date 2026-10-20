@@ -108,7 +108,8 @@ FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only app
 # A backstop, not a parser: it catches the usual ways of saying architects check drafts now. Verbs in any tense,
 # up to three words between "architects" and the verb (but not "to"/"can"/"may"..., which make it a possibility),
 # and the noun forms (architect's / architects' / architect- review, approval...).
-_VERB = r"(?:confirm|review|check|approv|sign)\w*"
+_VERB = (r"(?:confirm(?:s|ed|ing)?|review(?:s|ed|ing)?|check(?:s|ed|ing)?|approv(?:e|es|ed|ing)"
+         r"|sign(?:s|ed|ing)?(?:[\s-]+off)?)")      # verb forms only: "checker" or "reviewer" is not a verb
 _MODALS = ("can", "could", "may", "might", "would")    # words that make it a possibility: the one list
 _MODAL = "(?:" + "|".join(_MODALS) + ")"
 _NOT_AFTER_MODAL = "".join(rf"(?<!\b{m}\s)" for m in _MODALS)
@@ -210,7 +211,8 @@ def test_the_architect_review_matcher():
                  "Code, then AI, checked by code (architect confirmation deferred)",
                  "Architects would need to confirm each definition", "Architects may need to approve each rule",
                  "Each rule would need an architect to approve it", "A rule may need an architect to confirm it",
-                 "This might require an architect to review it"]:
+                 "This might require an architect to review it",
+                 "the reason names the open question for the architects, so the checker says NEEDS REVIEW"]:
         assert not _promises_architect_review(fine), fine
 
 
