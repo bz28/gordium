@@ -201,7 +201,9 @@ class Context:
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
                  "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages"}
 LAYOUTS = {"ecode360"}   # document layouts the section splitter knows (document_extraction/sections.py)
-DISTRICT_COLUMN = re.compile(r"[A-Z]+(?:-\d+[A-Z]*)?")   # a chart column that is a district (R-1B, RU)
+# A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU): the one definition, used by the
+# chart reader, the inspector and the drafter alike. Ithaca's residential names; another city adds its own here.
+DISTRICT_COLUMN = re.compile(r"R-\d[A-Z]*|RU")
 
 
 def district_name(column: str) -> str:

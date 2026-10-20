@@ -779,3 +779,13 @@ def test_quoted_values_that_fit_their_measure_pass(chart_ctx):
     good = 'district == "R-1b" and use in ["one_family_detached"]'
     assert not any("unknown" in p or "compared with" in p
                    for p in validate(rulebook(sources=[CELL_SOURCE, *NOTES], applies_when=good), chart_ctx))
+
+
+def test_one_definition_of_a_district_column():
+    """The chart reader, the inspector and the drafter decide 'is this column a district' the same way, so an
+    extra all-caps heading (NOTES, SP) can't become a district in one place and not another."""
+    from document_extraction import charts
+    from rule_format.rulebook import DISTRICT_COLUMN
+    assert charts.DISTRICT is DISTRICT_COLUMN
+    names = ["R-1A", "R-1B", "R-3AA", "RU", "NOTES", "SP", "ADU", "Additional Regulations"]
+    assert [n for n in names if DISTRICT_COLUMN.fullmatch(n)] == ["R-1A", "R-1B", "R-3AA", "RU"]

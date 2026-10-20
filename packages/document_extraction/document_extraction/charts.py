@@ -38,11 +38,12 @@ import statistics
 from dataclasses import dataclass, field
 
 import pdfplumber
+from rule_format.rulebook import DISTRICT_COLUMN
 
 from .extract import EXTRACTOR, footnote_marks, page_lines, sha256
 
 READER = f"{EXTRACTOR}; cells from drawn rectangles (charts.py)"
-DISTRICT = re.compile(r"(R-\d[A-Z]*|RU)")      # a district column's name, as the chart prints it
+DISTRICT = DISTRICT_COLUMN                      # a district column's name, as the chart prints it (one definition)
 EDGE = 1.0          # points: a word or cell may overhang an edge by this much (drawing rounding)
 ROW_GAP = 0.75      # lines of one row are closer than this share of the normal row height
 
