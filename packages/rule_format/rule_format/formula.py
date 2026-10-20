@@ -105,6 +105,26 @@ def strings(text: str) -> set[str]:
     return {n.value for n in ast.walk(parse(text)) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
 
 
+def compared_strings(text: str) -> list[tuple[str | None, str]]:
+    """(the measure it is compared with, or None; the quoted value) for each quoted text value in a formula:
+    'use in ["a", "b"] and district == "R-1b"' -> [("use", "a"), ("use", "b"), ("district", "R-1b")]."""
+    tree, out, seen = parse(text), [], set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Compare):
+            continue
+        operands = [node.left, *node.comparators]
+        names = [o.id for o in operands if isinstance(o, ast.Name)]
+        for o in operands:
+            values = o.elts if isinstance(o, (ast.List, ast.Tuple, ast.Set)) else [o]
+            for v in values:
+                if isinstance(v, ast.Constant) and isinstance(v.value, str):
+                    seen.add(id(v))
+                    out.append((names[0] if len(names) == 1 else None, v.value))
+    out += [(None, n.value) for n in ast.walk(tree)
+            if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in seen]
+    return out
+
+
 def numbers(text: str) -> list[float]:
     """Number constants written in a formula (each must come from the rule's sources)."""
     return [n.value for n in ast.walk(parse(text)) if isinstance(n, ast.Constant) and type(n.value) in (int, float)]

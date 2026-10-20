@@ -144,7 +144,7 @@ def test_valid_rulebooks(ctx):
                    "answered_on": datetime.date(2026, 10, 20)}]}, "answered_by must be a reviewer"),
     ({"check": None}, "a 'rule' needs a 'check'"),
     ({"check": "rear_yard >= setback"}, "unknown measure 'setback'"),
-    ({"applies_when": 'use == "castle"'}, "unknown use or district 'castle'"),
+    ({"applies_when": 'use == "castle"'}, "unknown use 'castle'"),
     ({"check": "import os"}, "cannot read formula"),
     ({"check": "rear_yard - 20"}, "must be a true/false test"),
     ({"check": "rear_yard >= 20, lot_depth > 0"}, "must be a true/false test"),
@@ -762,3 +762,20 @@ def test_district_names_are_known_text_values(chart_ctx):
 def test_district_names_are_written_as_the_city_writes_them():
     from rule_format.rulebook import district_name
     assert [district_name(c) for c in ("R-1B", "R-3AA", "RU", "R-2C")] == ["R-1b", "R-3aa", "RU", "R-2c"]
+
+
+@pytest.mark.parametrize("applies_when, problem", [
+    ('district == "R-1b" or use == "R-2a"', "unknown use 'R-2a'"),      # a district where a use belongs: dead
+    ('district == "one_family_detached"', "unknown district 'one_family_detached'"),
+    ('use in ["one_family_detached", "R-1b"]', "unknown use 'R-1b'"),
+    ('lot_area > 0 and "R-1b" == "R-1b"', "must be compared with district or use"),
+])
+def test_a_quoted_value_must_fit_the_measure_it_is_compared_with(chart_ctx, applies_when, problem):
+    assert any(problem in p for p in validate(rulebook(sources=[CELL_SOURCE, *NOTES], applies_when=applies_when),
+                                              chart_ctx)), applies_when
+
+
+def test_quoted_values_that_fit_their_measure_pass(chart_ctx):
+    good = 'district == "R-1b" and use in ["one_family_detached"]'
+    assert not any("unknown" in p or "compared with" in p
+                   for p in validate(rulebook(sources=[CELL_SOURCE, *NOTES], applies_when=good), chart_ctx))

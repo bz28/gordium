@@ -210,6 +210,20 @@ def district_name(column: str) -> str:
     return m[1] + m[2].lower() if m else column
 
 
+def _text_problems(f: str, allowed: dict[str, set]) -> list[str]:
+    """Each quoted value must be one the measure it is compared with can take: a use for `use`, a district
+    for `district`. So `use == "R-2a"` (a district written where a use belongs) can't pass the inspector and
+    then never apply. A quoted value compared with anything else (another measure, or nothing) is refused."""
+    out = []
+    for name, value in formula.compared_strings(f):
+        if name not in allowed:
+            out.append(f"text value '{value}' in {f!r} must be compared with "
+                       f"{' or '.join(sorted(allowed))}, not {name or 'nothing'}")
+        elif value not in allowed[name]:
+            out.append(f"unknown {name} '{value}' in {f!r}")
+    return out
+
+
 def _use_rows(uses) -> dict[str, list[dict]]:
     """Each use's well-formed cited rows from uses.yaml. Malformed entries are left out here and
     reported by validate_terms(uses), so a typo there can't crash rule validation."""
@@ -499,7 +513,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             elif (name := formula.bare_name(f)) and kinds.get(name) != "boolean":
                 p.append(f"{f!r} is just a measure name; only a yes/no measure can be a test on its own")
             p += [f"unknown measure '{n}' in {f!r}" for n in sorted(formula.names(f) - set(kinds))]
-            p += [f"unknown use or district '{u}' in {f!r}" for u in sorted(formula.strings(f) - ctx.uses - ctx.districts)]
+            p += _text_problems(f, {"use": ctx.uses, "district": ctx.districts})
         except FormulaError as e:
             p.append(str(e))
 
