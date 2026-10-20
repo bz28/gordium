@@ -1,0 +1,44 @@
+title: Spot grades on a sloped lot, then the house moves
+what: >-
+  The lot falls toward the street. The architect places four spot grades of finished ground, one at each wall:
+  front 1.0, rear 3.0, west 2.0, east 2.0. The grade plane is their average, 2.0, and the three-story house stands
+  on it, 30 ft to the roof. Then the house is moved 10 ft back: two spot grades are no longer at its walls, so the
+  grade plane can't be worked out for the new position; height and stories need review until the grade is set
+  again (spec C4). The yards and coverage don't depend on the grade and are still checked.
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[15, 30], [45, 30], [45, 70], [15, 70]]
+    base: 2
+    floors: [10, 10, 10]
+grade:
+  points: [[30, 29, 1.0], [30, 71, 3.0], [14, 50, 2.0], [46, 50, 2.0]]
+expected:
+  R-1b.height:
+    status: complies
+    working: >-
+      GRADE PLANE = average of finished ground on each side at the exterior walls = (1.0 + 3.0 + 2.0 + 2.0) / 4 =
+      2.0 ft. Roof at 2 + 30 = 32.0 ft; height 32.0 − 2.0 = 30.0 ft ≤ 35 ft.
+    cites: "§325-3 GRADE PLANE (p.11); §325-3 HEIGHT OF BUILDING (p.12); §325-8 chart, R-1b, Height: 35 ft"
+  R-1b.stories: {status: complies, working: "3 floor blocks standing on the grade plane = 3 ≤ 3", cites: "§325-3 STORY; §325-8 chart"}
+  R-1b.front_yard: {status: complies, working: "30 ≥ 25", cites: "§325-8 chart, R-1b, Front"}
+  R-1b.side_yards: {status: complies, working: "15 and 15 ≥ 10", cites: "§325-8 chart, R-1b, Side"}
+  R-1b.rear_yard: {status: complies, working: "120 − 70 = 50 ≥ 30", cites: "§325-8 chart, R-1b, Rear"}
+  R-1b.lot_coverage: {status: complies, working: "30 × 40 = 1,200 ≤ 1,800 sf", cites: "§325-8 chart, R-1b, Percent of lot area"}
+then:
+  what: "The house moved 10 ft back (y 40 to 80); the spot grades stay where they were."
+  move: [0, 10]
+  expected:
+    R-1b.height:
+      status: needs_review
+      reason_has: "spot grades no longer at the building's walls"
+      working: >-
+        The front spot (30, 29) is now 11 ft from the front wall (y = 40) and the rear spot (30, 71) is inside the
+        footprint, 9 ft from the rear wall (y = 80): both more than 2 ft from any wall, and the front and rear walls
+        have no spot grade. The grade plane at the new walls isn't known.
+      cites: "§325-3 GRADE PLANE (\"at exterior walls\"); spec C4"
+    R-1b.stories: {status: needs_review, reason_has: "spot grades no longer at the building's walls", working: "stories are counted from the grade plane, which isn't known", cites: "§325-3 STORY (basement rule uses grade plane); spec C4"}
+    R-1b.front_yard: {status: complies, working: "40 ≥ 25", cites: "§325-8 chart, R-1b, Front"}
+    R-1b.side_yards: {status: complies, working: "15 and 15 ≥ 10", cites: "§325-8 chart, R-1b, Side"}
+    R-1b.rear_yard: {status: complies, working: "120 − 80 = 40 ≥ 30", cites: "§325-8 chart, R-1b, Rear"}
+    R-1b.lot_coverage: {status: complies, working: "1,200 ≤ 1,800 sf", cites: "§325-8 chart, R-1b, Percent of lot area"}

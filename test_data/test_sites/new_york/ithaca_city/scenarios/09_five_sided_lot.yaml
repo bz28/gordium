@@ -1,0 +1,33 @@
+title: A lot with five sides
+what: >-
+  A surveyed lot whose back comes to a point: two straight side lines 110 ft long, then two short lines meeting
+  15 ft further back. The code defines the rear yard to "the rear lot line" and takes the rear-yard percentage of
+  "the average of the two side lot lines", but doesn't say which line is the rear lot line when the back is two
+  lines. So the rear yard needs review. The side yards are 15 ft to the straight sides under any reading and
+  comply.
+lot: {points: [[0, 0], [60, 0], [60, 110], [30, 125], [0, 110]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[15, 30], [45, 30], [45, 80], [15, 80]]
+    base: 0
+    floors: [10, 10]
+grade: {elevation: 0}
+expected:
+  R-1b.rear_yard:
+    status: needs_review
+    working: >-
+      Reading 1 (both short lines are the rear lot line): depth = average of the side lines (110 + 110) / 2 = 110,
+      required max(min(27.5, 50), 20) = 27.5 ft; least distance from the rear wall (y = 80) to the rear lines is to
+      the corner (60, 110): √(15² + 30²) = 33.5 ft ✓. Other readings (one short line a side line) change both the
+      depth and the distance. Which reading the code means isn't stated: an open question for the architects.
+    cites: "§325-3 REAR YARD; §325-8A, p.25 (rear-yard % of the average of the two side lot lines); definitions.yaml lot_depth open question (more than two side lot lines)"
+  R-1b.side_yards:
+    status: complies
+    working: "west 15 ft, east 60 − 45 = 15 ft to the straight side lines; the short back lines are ≥ 33 ft away, so ≥ 10 ft under every reading"
+    cites: "§325-8 chart, R-1b, Side"
+  R-1b.front_yard: {status: complies, working: "30 ≥ 25", cites: "§325-8 chart, R-1b, Front"}
+  R-1b.lot_area_one_family_detached: {status: complies, working: "60 × 110 + ½ × 60 × 15 = 6,600 + 450 = 7,050 sf ≥ 6,000", cites: "§325-8 chart, R-1b, Lot area"}
+  R-1b.lot_width_one_family_detached: {status: complies, working: "60 ft at the street ≥ 50", cites: "§325-8 chart, R-1b, Lot width"}
+  R-1b.lot_coverage: {status: complies, working: "30 × 50 = 1,500 ≤ 25% × 7,050 = 1,762.5 sf", cites: "§325-8 chart, R-1b, Percent of lot area"}
+  R-1b.height: {status: complies, working: "20 ≤ 35", cites: "§325-8 chart, R-1b, Height"}
+  R-1b.stories: {status: complies, working: "2 ≤ 3", cites: "§325-8 chart, R-1b, Number of stories"}
