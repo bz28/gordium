@@ -46,7 +46,7 @@ def eto_status_color(status):
     """Red or amber in the shade for the panel's own background; anything else is the system's text color (J2):
     a fixed dark ink was unreadable on the dark panel."""
     if status not in ("does_not_comply", "needs_review"):
-        return ef.SystemColors.ControlText
+        return ed.SystemColors.ControlText
     c = status_color(status, _dark_panel())
     return ed.Color.FromArgb(c.R, c.G, c.B)
 
@@ -55,7 +55,7 @@ def _dark_panel():
     """Whether the panel's background is dark, from its own red, green and blue (Eto colors are 0-1 floats and
     have no brightness property: asking for one always said "light")."""
     try:
-        c = ef.SystemColors.ControlBackground
+        c = ed.SystemColors.ControlBackground
         return 0.299 * c.R + 0.587 * c.G + 0.114 * c.B < 0.5
     except Exception:
         return False
@@ -354,7 +354,7 @@ def _section(dg):
         bmp = ed.Bitmap(w, h, ed.PixelFormat.Format32bppRgba)
         g = ed.Graphics(bmp)
         try:
-            ink, faint = ef.SystemColors.ControlText, ef.SystemColors.DisabledText
+            ink, faint = ed.SystemColors.ControlText, ed.SystemColors.DisabledText
             red = eto_status_color("does_not_comply")
             font = ed.Font(ed.SystemFont.Default, 9)
             ground, left, right = h - 24.0, 16.0, w - 16.0
@@ -477,18 +477,18 @@ def start_box(state, options, mode):
         elif key == "use":
             layout.AddRow(title, use)
         elif key == "ground":
-            layout.AddRow(title, label(r["text"], size=12))
+            layout.AddRow(title, row(label(r["text"], size=12)))          # left aligned, as the others
             layout.AddRow(None, row(*[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
             regrade.Text = r["tick"][0]
             layout.AddRow(None, regrade)
         else:                          # lot, street side: what it is, and the one way to change it
             layout.AddRow(title, row(label(r["text"], size=12),
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
-    layout.AddRow(None, label(logic.NOT_CHECKED_YET, size=11))
+    layout.AddRow(None, row(label(logic.NOT_CHECKED_YET, size=11)))
     amber = logic.uncertain(state)
     if amber:
-        layout.AddRow(None, label("?  " + amber, eto_status_color("needs_review"), size=12))
-    layout.AddRow(None, reason)
+        layout.AddRow(None, row(label("?  " + amber, eto_status_color("needs_review"), size=12)))
+    layout.AddRow(None, row(reason))
     layout.AddRow(None, row(cancel, draw))
     dialog.Content = layout
     dialog.DefaultButton = draw

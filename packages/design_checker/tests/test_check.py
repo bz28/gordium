@@ -545,3 +545,10 @@ def test_start_on_existing_ground_still_draws_the_house_and_says_height_waits(fa
     assert any("No regrading near the house" in n for n in got["notes"])
     height = {i["name"]: i for i in check(MODEL, {**facts, "grade_is": "existing"})["view"]["items"]}["Building height"]
     assert height["status"] == present.REVIEW
+
+
+def test_system_colors_come_from_eto_drawing():
+    """Eto.Forms has no SystemColors: asking it raised, so the dark-panel check always said "light" (unreadable text
+    on a dark panel) and a complying item's detail failed to draw. They are Eto.Drawing.SystemColors."""
+    for path in PLUGIN:
+        assert "ef.SystemColors" not in path.read_text(), path.name
