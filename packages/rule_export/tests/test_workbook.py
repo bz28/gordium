@@ -198,3 +198,24 @@ def test_the_committed_workbook_is_current_and_check_catches_a_stale_one(tmp_pat
     stale.save(path)
     monkeypatch.setattr(cli, "output_path", lambda j: path)
     assert cli.main(["--check"]) == 1 and "differs from a fresh build" in capsys.readouterr().out
+
+
+def test_every_source_has_a_citation_people_can_read(data):
+    """The document by its title, the section the quote is in (for a document cut into sections), page, lines."""
+    cite = wbk.citer(ITHACA, DOCUMENTS)
+    law = "City of Ithaca Code, Chapter 325 Zoning (full text)"
+    assert cite({"file": LAW, "page": 24, "lines": [15, 16]}) == f"{law}, §325-8A, p.24, lines 15–16"
+    assert cite({"file": LAW, "page": 5, "lines": [23, 25]}) == f"{law}, §325-3B (BUILDING AREA), p.5, lines 23–25"
+    assert cite({"file": "zoning_charts_2026-04.pdf", "page": 3, "lines": [31, 31]}) == \
+        "City of Ithaca Zoning Charts (April 2026), p.3, line 31"                 # no sections: page and line
+    for tab in ("Rules", "Definitions", "Uses"):
+        t = data[tab]
+        sources = [s for _, e in ([(None, r) for _, b in rulebooks(ITHACA) for r in b["rules"]] if tab == "Rules" else
+                                  load(ITHACA / f"4_term_definitions/{tab.lower()}.yaml").items()) for s in e["sources"]]
+        assert column(t, "Citation") == [cite(s) for s in sources] and all(column(t, "Citation")), tab
+
+
+def test_text_is_in_the_architects_ink_color(data):
+    ws = build(data)["Rules"]
+    assert ws["A1"].font.color.rgb.endswith(wbk.INK) and ws["A2"].font.color.rgb.endswith(wbk.INK)
+    assert ws["A3"].font.color.rgb.endswith(wbk.INK) and ws["A3"].font.name == "Arial"

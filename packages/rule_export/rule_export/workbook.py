@@ -15,12 +15,13 @@ from pathlib import Path
 
 from openpyxl import Workbook
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
-from openpyxl.styles import Alignment, Font
+from openpyxl.styles import Alignment, Font, PatternFill
 
 from rule_format.labels import LABEL_FIELDS, load_pieces, revision_steps
 from rule_format.rulebook import APPROVAL_FIELDS, REPO, RULE_FIELDS, SOURCE_FIELDS, TERM_SCHEMAS, load, rulebook_paths
 
 FONT = "Arial"                                   # like the architects' spreadsheet: 16 title, 12 headers, 11 body
+INK = "243746"                                   # their text color, on every cell they wrote
 REPO_BLOB = "https://github.com/bz28/gordium/blob/main"
 
 # Fields left out of the workbook on purpose, with the reason. Every other field is shown by a column.
@@ -54,6 +55,40 @@ def pdf_url(j: Path, documents: dict[str, dict], file: str) -> str:
 def page_link(j: Path, documents: dict[str, dict], file: str, page) -> str:
     """A link that opens the PDF at the page (browsers' PDF viewers honor #page=N; GitHub's viewer may not)."""
     return f"{pdf_url(j, documents, file)}#page={page}" if isinstance(page, int) else pdf_url(j, documents, file)
+
+
+# ---- citations -----------------------------------------------------------------------------------------
+
+def citer(j: Path, documents: dict[str, dict]):
+    """citation(source): where a quote is, in words a reader can follow, e.g. "City of Ithaca Code, Chapter 325
+    Zoning (full text), §325-8A, p.24, lines 15–16". The document by its title in sources.yaml; for a document
+    cut into pieces (2_extracted_text/<doc>.sections.jsonl), the section the first cited line is in; then page
+    and lines. The exact words go in their own column, and the link opens the page."""
+    sections = {}                                  # file -> [(page, first, last, piece id, title)]
+    for path in sorted((j / "2_extracted_text").glob("*.sections.jsonl")):
+        header, pieces = load_pieces(path)
+        sections[header["file"]] = [(pg, a, b, pid, piece["title"]) for pid, piece in pieces.items()
+                                    for pg, a, b in piece["lines"]]
+
+    def section(file, page, line):
+        for pg, a, b, pid, piece_title in sections.get(file, ()):
+            if pg == page and a <= line <= b:
+                if not pid[:1].isdigit():                       # front matter, an editor's note
+                    return piece_title
+                number, _, term = pid.partition(":")            # 325-3B:kitchen is the definition of KITCHEN
+                return f"§{number}" + (f" ({piece_title})" if term else "")
+        return ""
+
+    def citation(s: dict) -> str:
+        if not s.get("file"):
+            return ""
+        lines = s.get("lines") or []
+        parts = [(documents.get(s["file"]) or {}).get("title") or s["file"],
+                 section(s["file"], s.get("page"), lines[0]) if lines else "",
+                 f"p.{s['page']}" if s.get("page") is not None else "",
+                 (f"line {lines[0]}" if lines[0] == lines[1] else f"lines {lines[0]}–{lines[1]}") if len(lines) == 2 else ""]
+        return ", ".join(p for p in parts if p)
+    return citation
 
 
 # ---- cell text -----------------------------------------------------------------------------------------
@@ -118,11 +153,11 @@ def _get(field, fmt=lambda v: v if v is not None else ""):
 
 
 def _source_cols(quote_width):
-    """The columns every one-row-per-source tab shares: which source, where it is, the words, the link."""
+    """The columns every one-row-per-source tab shares: which source, where it is (a citation people can
+    read, filled per tab; and the page, to sort by), the words, the link."""
     return [Col("Source", 8, "sources", lambda e, s, n, t: f"{n + 1} of {t}" if e.get("sources") else ""),
-            Col("Document", 26, "sources", lambda e, s, n, t: s.get("file", "")),
+            Col("Citation", 34),
             Col("Page", 6, "sources", lambda e, s, n, t: s.get("page", "")),
-            Col("Lines", 7, "sources", lambda e, s, n, t: _lines(s)),
             Col("City's exact words", quote_width, "sources", lambda e, s, n, t: s.get("quote", "")),
             Col("Link", 10, "sources", lambda e, s, n, t: f"Open p.{s.get('page')}" if s.get("file") else "")]
 
@@ -173,8 +208,9 @@ def entry_rows(entry: dict, cols: list[Col], fixed: dict, per_source=True) -> li
     """An entry's rows: one per source (or one in all), each cell from its column; `fixed` fills the columns
     that show no field of the entry (Zone, Id, Link...)."""
     sources = (entry.get("sources") or [{}]) if per_source else [{}]
-    return [[fixed[c.header] if c.value is None else c.value(entry, s, n, len(sources)) if c.every or n == 0 else ""
-             for c in cols] for n, s in enumerate(sources)]
+    cell = lambda c, s, n: (fixed[c.header](s) if callable(fixed[c.header]) else fixed[c.header]) if c.value is None \
+        else c.value(entry, s, n, len(sources)) if c.every or n == 0 else ""
+    return [[cell(c, s, n) for c in cols] for n, s in enumerate(sources)]
 
 
 def _tab(title, cols, rows, links, link_header="Link") -> dict:
@@ -188,6 +224,7 @@ def tables(j: Path) -> dict[str, dict]:
     sources_file = load(j / "1_source_documents/sources.yaml")
     documents = {d["file"]: d for d in sources_file["documents"]}
     link = lambda s: page_link(j, documents, s["file"], s.get("page")) if s.get("file") else None
+    cite = citer(j, documents)
     out = {}
 
     def per_source(entries, cols):                  # [(entry, fixed)] -> rows, links: one row per source
@@ -198,7 +235,7 @@ def tables(j: Path) -> dict[str, dict]:
         return rows, links
 
     out["Rules"] = _tab("GORDIUM | Zoning rules (drafts, checked by code)", COLUMNS["rule"], *per_source(
-        [(r, {"Zone": book.get("district", ""), "Rulebook": path})
+        [(r, {"Zone": book.get("district", ""), "Rulebook": path, "Citation": cite})
          for path, book in rulebooks(j) for r in book.get("rules") or []], COLUMNS["rule"]))
 
     terms = {schema: load(j / f"4_term_definitions/{schema}.yaml") or {} for schema in TERM_SCHEMAS
@@ -206,7 +243,7 @@ def tables(j: Path) -> dict[str, dict]:
     for schema, tab, title in [("definitions", "Definitions", "GORDIUM | Definitions (the city's own words)"),
                                ("uses", "Uses", "GORDIUM | Use names (the only values a rule's `use` may take)")]:
         out[tab] = _tab(title, COLUMNS[schema], *per_source(
-            [(e, {"Id": key}) for key, e in terms.get(schema, {}).items()], COLUMNS[schema]))
+            [(e, {"Id": key, "Citation": cite}) for key, e in terms.get(schema, {}).items()], COLUMNS[schema]))
 
     labels_by_doc = {}                                 # document -> (its labels file, the labels)
     for path in sorted((j / "3_section_labels").glob("*.yaml")):
@@ -219,7 +256,7 @@ def tables(j: Path) -> dict[str, dict]:
     def ask(kind, where, ident, entry):
         s = (entry.get("sources") or [{}])[0]
         for q in entry.get("open_questions") or []:
-            rows.append([kind, where, ident, _text(q), s.get("file", ""), s.get("page", ""),
+            rows.append([kind, where, ident, _text(q), cite(s), s.get("page", ""),
                          f"Open p.{s.get('page')}" if s.get("file") else ""])
             links.append(link(s))
     for path, book in rulebooks(j):
@@ -232,7 +269,7 @@ def tables(j: Path) -> dict[str, dict]:
         for pid, e in labels.items():
             ask("Section label", labels_path, pid, e)
     out["Questions"] = {"title": "GORDIUM | Open questions", "rows": rows, "links": {"Link": links},
-                        "columns": [("About", 14), ("In", 40), ("Id", 30), ("Question", 90), ("Document", 26),
+                        "columns": [("About", 14), ("In", 40), ("Id", 30), ("Question", 90), ("Citation", 34),
                                     ("Page", 6), ("Link", 10)]}
 
     # Coverage: every piece of every cut document, in the law's order, with its label. The link opens the
@@ -267,36 +304,57 @@ def _cell_text(value):
     return ILLEGAL_CHARACTERS_RE.sub("�", value) if isinstance(value, str) else value
 
 
+def write_block(ws, top: int, columns: list[tuple[str, float]], rows: list[list], links: dict[str, list] | None = None,
+                fills: dict[str, list] | None = None) -> int:
+    """One table on a sheet, in the architects' style: Arial in their ink color, bold 12-pt headers on row
+    `top`, 11-pt wrapped rows under it, links as clickable cells (named by their column's header), optional
+    cell fills (same naming: {header: [hex color or None per row]}). A column's width is set where given (None
+    keeps the width an earlier block set). Returns the first row after the block."""
+    headers = [h for h, _ in columns]
+    for c, (header, width) in enumerate(columns, 1):
+        cell = ws.cell(row=top, column=c, value=header)
+        cell.font = Font(name=FONT, size=12, bold=True, color=INK)
+        cell.alignment = Alignment(wrap_text=True, vertical="top")
+        if width:                                     # a later block on the sheet passes None to keep them
+            ws.column_dimensions[cell.column_letter].width = width
+    for r, row in enumerate(rows, top + 1):
+        for c, value in enumerate(row, 1):
+            cell = ws.cell(row=r, column=c, value=_cell_text(value))
+            if isinstance(value, str):
+                cell.data_type = "s"
+            cell.font = Font(name=FONT, size=11, color=INK)
+            cell.alignment = Alignment(wrap_text=True, vertical="top")
+    for header, urls in (links or {}).items():
+        c = headers.index(header) + 1
+        for r, url in enumerate(urls, top + 1):
+            if url:
+                cell = ws.cell(row=r, column=c)
+                cell.hyperlink = url
+                cell.font = Font(name=FONT, size=11, color="0563C1", underline="single")
+    for header, colors in (fills or {}).items():
+        c = headers.index(header) + 1
+        for r, color in enumerate(colors, top + 1):
+            if color:
+                ws.cell(row=r, column=c).fill = PatternFill("solid", fgColor=color)
+    return top + 1 + len(rows)
+
+
+def title(ws, text: str) -> None:
+    """The sheet's title in A1: Arial 16 bold in their ink color, like the architects' sheet."""
+    ws["A1"] = text
+    ws["A1"].font = Font(name=FONT, size=16, bold=True, color=INK)
+
+
 def build(data: dict[str, dict]) -> Workbook:
     """Lay the tables out like the architects' sheet: a bold title in row 1, headers in row 2 (frozen),
-    Arial, wrapped text, links as clickable cells."""
+    Arial in their ink color, wrapped text, links as clickable cells."""
     wb = Workbook()
     wb.remove(wb.active)
     wb.properties.creator = "Gordium (generated: python -m rule_export)"
     for name, t in data.items():
         ws = wb.create_sheet(name)
-        ws["A1"] = t["title"]
-        ws["A1"].font = Font(name=FONT, size=16, bold=True)
-        headers = [h for h, _ in t["columns"]]
-        for c, (header, width) in enumerate(t["columns"], 1):
-            cell = ws.cell(row=2, column=c, value=header)
-            cell.font = Font(name=FONT, size=12, bold=True)
-            cell.alignment = Alignment(wrap_text=True, vertical="top")
-            ws.column_dimensions[cell.column_letter].width = width
-        for r, row in enumerate(t["rows"], 3):
-            for c, value in enumerate(row, 1):
-                cell = ws.cell(row=r, column=c, value=_cell_text(value))
-                if isinstance(value, str):
-                    cell.data_type = "s"
-                cell.font = Font(name=FONT, size=11)
-                cell.alignment = Alignment(wrap_text=True, vertical="top")
-        for header, urls in t["links"].items():           # links name their column by its header
-            c = headers.index(header) + 1
-            for r, url in enumerate(urls, 3):
-                if url:
-                    cell = ws.cell(row=r, column=c)
-                    cell.hyperlink = url
-                    cell.font = Font(name=FONT, size=11, color="0563C1", underline="single")
+        title(ws, t["title"])
+        write_block(ws, 2, t["columns"], t["rows"], t["links"])
         ws.freeze_panes = "A3"
     return wb
 
