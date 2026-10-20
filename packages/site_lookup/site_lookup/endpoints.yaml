@@ -1,0 +1,81 @@
+# Where each looked-up fact comes from. Data, not code: a moved service is a one-line change here.
+# store: what Gordium may keep with a project from this source.
+#   raw     the response itself may be stored (public data, no redistribution limit)
+#   derived only numbers Gordium computed from it (areas, lengths, distances) plus the URL, date and the
+#           response's SHA-256; never the response
+#   none    used live, never stored (only the URL, date and SHA-256 of what was used)
+# All coordinates are requested in EPSG:2261 (NAD83 / New York Central, US survey feet), so lengths and
+# areas are worked out by Gordium in feet, never read from a service's own Shape__Area (Web Mercator).
+
+geocoder:
+  name: NYS Geocoder (address points)
+  owner: NYS ITS Geospatial Services
+  url: https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates
+  terms: https://gis.ny.gov/address-geocoder
+  store: raw
+
+address_points:
+  name: Tompkins County address points (TCAddress)
+  owner: Tompkins County GIS Division
+  url: https://services.arcgis.com/oJbAAWNInLrxvF0A/arcgis/rest/services/TCAddress/FeatureServer/0/query
+  terms: "Access: Open. Please do not redistribute data to a third party without permission from Tompkins County GIS."
+  store: none
+
+city_parcels:
+  name: City of Ithaca tax parcels
+  owner: City of Ithaca GIS Program (from Tompkins County Assessment)
+  url: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Tax_Parcels/FeatureServer/0/query
+  layer: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Tax_Parcels/FeatureServer/0
+  attribution: >-
+    Data contained in this product was amended by the GIS Program, City of Ithaca, NY from a file created by
+    Tompkins County Assessment Office. The originators do not warrant the accuracy or completeness of the
+    information portrayed by the data.
+  store: derived
+
+state_parcels:
+  name: NYS Tax Parcels Public
+  owner: NYS ITS Geospatial Services (from Tompkins County Real Property)
+  url: https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query
+  terms: https://gis.ny.gov/parcels
+  store: raw
+
+city_roads:
+  name: City of Ithaca roads (centerlines with right-of-way width)
+  owner: City of Ithaca GIS Program
+  url: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query
+  store: none
+
+state_streets:
+  name: NYS Streets (centerlines)
+  owner: NYS ITS Geospatial Services
+  url: https://nysgeohub.ny.gov/arcgis/rest/services/Transportation/NYS_Streets/MapServer/4/query
+  store: raw
+
+city_zoning:
+  name: City of Ithaca zoning map (online, informational)
+  owner: City of Ithaca GIS Program / Planning
+  url: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query
+  layer: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0
+  terms: >-
+    "Do not use this data for determinations of zoning." "May not be reproduced or redistributed without the
+    express written consent of the originator." Used only as a live suggestion the architect confirms.
+  store: none
+
+historic_districts:
+  name: City of Ithaca historic districts
+  owner: City of Ithaca GIS Program
+  url: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Historic_Districts/FeatureServer/0/query
+  store: none
+
+gorge_zones:
+  name: City of Ithaca gorge protection zones
+  owner: City of Ithaca GIS Program
+  url: https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Gorge_Protection_Zones/FeatureServer/0/query
+  store: none
+
+elevation:
+  name: USGS 3DEP elevation (1 m where available; here the 2020 LiDAR)
+  owner: U.S. Geological Survey
+  url: https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples
+  terms: "Free of charge and without use restrictions."
+  store: raw

@@ -1,0 +1,10 @@
+# Zoning changes the City adopted after its online zoning map was last edited (the map's own
+# editingInfo.dataLastEditDate). A suggestion from that map can be out of date for lots these touch.
+# Kept by hand: add a row when the City adopts a rezoning. Where the boundary is only on a map, `streets`
+# lists the streets the ordinance names; a lot on (or facing) one of them needs review.
+- ordinance: "2025-12"
+  title: Southside form districts (TR, RT, MD-MU, UMU)
+  adopted: 2025-11-19
+  source: regulations/jurisdictions/new_york/ithaca_city/1_source_documents/ordinance_no_2025-12_southside_form_districts.pdf
+  boundary: on the ordinance's map, not in its text; the streets below are the ones its text names (partial)
+  streets: [S CAYUGA ST, S ALBANY ST, S TITUS AVE, FAIR ST, W GREEN ST, S MEADOW ST, S GENEVA ST]
