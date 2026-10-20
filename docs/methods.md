@@ -125,4 +125,4 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
 - Rhino plugin language (C# vs Rhino 8 Python); how model objects are identified (layers, names, or asking).
 - Site facts: zone lookup from the address, lot lines and area (survey vs city records), ground levels.
 - Measuring the model (engineer-written code, tested on real models).
-- Architect approval workflow (identity: their own accounts).
+- Architect approval workflow, deferred for now (identity: their own accounts).
