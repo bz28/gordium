@@ -165,16 +165,41 @@ def table_values(check: str) -> str:
                        for alt in alternatives)
 
 
+def _unreadable(node, values: dict, kinds: dict) -> list[str]:
+    """Every measure the checker reads on the way it works this formula out, that is missing or unusable.
+    The checker reads every part of and/or, comparisons, arithmetic and min/max, but only the branch an
+    `a if test else b` takes, so an untaken branch is never blamed (and when the test itself can't be
+    worked out, only the test's measures are)."""
+    if isinstance(node, ast.IfExp):
+        if bad := _unreadable(node.test, values, kinds):
+            return bad
+        try:
+            taken = node.body if formula.evaluate(ast.unparse(node.test), values, kinds) is True else node.orelse
+        except (EvaluationError, ArithmeticError):
+            return []
+        return _unreadable(taken, values, kinds)
+    if isinstance(node, ast.Name):
+        try:
+            formula.evaluate(node.id, values, kinds)       # the checker's own test of a usable value
+            return []
+        except MissingMeasure:
+            return [node.id]
+    children = node.args if isinstance(node, ast.Call) else ast.iter_child_nodes(node)   # min/max aren't measures
+    return list(dict.fromkeys(n for child in children for n in _unreadable(child, values, kinds)))
+
+
 def _problems(text: str, values: dict, kinds: dict) -> list[str]:
-    """Why a formula can't be worked out for this project, found by working it out exactly as the checker does
-    (so a measure only in a branch the formula doesn't take is never blamed): the measurement it stopped at,
-    missing or unusable, or the evaluation error. Empty when it works out."""
+    """Why a formula can't be worked out for this project, or [] when the checker works it out: every
+    measurement it needs that is missing or unusable (with its value), else the evaluation error."""
     try:
         formula.evaluate(text, values, kinds)
         return []
-    except MissingMeasure as e:
-        v = values.get(e.name)
-        return [f"missing measurement: {e.name}" if v is None else f"unusable value: {e.name} = {v!r}"]
+    except MissingMeasure:
+        bad = _unreadable(formula.parse(text).body, values, kinds)
+        missing = [n for n in bad if values.get(n) is None]
+        unusable = [f"{n} = {values[n]!r}" for n in bad if values.get(n) is not None]
+        return ([f"missing measurement: {', '.join(missing)}"] if missing else []) + \
+               ([f"unusable value: {', '.join(unusable)}"] if unusable else []) or ["a measurement can't be used"]
     except (EvaluationError, ArithmeticError) as e:
         return [f"can't be worked out ({e})"]
 

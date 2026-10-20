@@ -154,6 +154,20 @@ def test_the_reason_blames_only_what_the_checker_read():
     assert report.needs_review_reason(rule, values, kinds) == "A judgment call: a person decides (this rule is a flag)."
 
 
+def test_the_reason_names_every_measure_the_checker_needs():
+    kinds = report.MEASURE_KINDS
+    rule = {"id": "x", "kind": "rule", "check": "side_yard_smaller >= 10 and side_yard_larger >= 10"}
+    assert report.needs_review_reason(rule, {}, kinds) == \
+        "Can't check: missing measurement: side_yard_smaller, side_yard_larger."
+    rule = {"id": "x", "kind": "rule", "check": "rear_yard >= max(min(0.25 * lot_depth, 50), 20)"}
+    assert report.needs_review_reason(rule, {"rear_yard": -1}, kinds) == \
+        "Can't check: missing measurement: lot_depth; unusable value: rear_yard = -1."
+    # An if-else whose test can't be worked out blames only the test, never either branch.
+    rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= (1 if sleeping_rooms <= 3 else lot_width)"}
+    assert report.needs_review_reason(rule, {"parking_spaces": 1}, kinds) == \
+        "Can't check: missing measurement: sleeping_rooms."
+
+
 def test_every_shown_limit_uses_one_symbol_style():
     assert report.table_values("lot_area / 2 >= 100") == "lot_area / 2 ≥ 100"
 
