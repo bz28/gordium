@@ -524,3 +524,13 @@ def test_cited_by_reads_every_rulebook_including_drafted_ones(tmp_path, law):
     (j / "5_zoning_rules/drafted/X.yaml").write_text(yaml.safe_dump({"district": "X", "rules": [
         {"id": "X.a", "sources": [{"file": LAW, "page": page, "lines": [line, line], "quote": "q"}]}]}))
     assert coverage.cited_by(j, LAW, pieces) == {pid: ["X.a"]}
+
+
+def test_methods_doc_says_whether_a_run_used_the_current_labeling_guide():
+    """The run records keep the fingerprint of the guide each call was sent. If the current guide was never
+    sent, methods.md must say so and must not call the change cosmetic."""
+    from rule_format.rulebook import REPO
+    sent = {call["system_sha256"] for call in cli.run_records(ITHACA)}
+    doc = (REPO / "docs/methods.md").read_text()
+    if labeler.sha(labeler.system_prompt()) not in sent:
+        assert "No recorded run used the current guide" in doc and "wording only" not in doc
