@@ -406,7 +406,9 @@ def draw_screen(o, e):
     dark = ui.viewport_dark()
     old = stale(o)
     taken = []                               # labels drawn this frame: none covers another
-    plan = not e.Viewport.IsPerspectiveProjection   # labels only in plan-like views: in 3D they sit on the massing
+    # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
+    # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
+    plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)

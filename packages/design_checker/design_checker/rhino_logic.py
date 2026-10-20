@@ -363,3 +363,10 @@ def district_confirmed(mode, zone_fact, zone):
     same district was confirmed at an earlier Draw (its saved source says who confirmed it)."""
     zone_fact = zone_fact or {}
     return mode != "start" and bool(zone_fact.get("confirmed_by")) and zone_fact.get("value") == zone
+
+
+def is_plan_view(parallel, direction_z, tolerance=0.99):
+    """Whether a viewport is a plan view, where plan labels belong: a parallel projection looking (nearly) straight
+    down. Not a perspective (labels sit on the massing) and not an elevation (Front, Right: every plan label piles
+    up on the ground line)."""
+    return bool(parallel) and direction_z <= -tolerance

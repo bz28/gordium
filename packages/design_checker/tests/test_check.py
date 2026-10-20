@@ -658,3 +658,13 @@ def test_a_value_measured_on_existing_ground_shows_with_its_review_mark_not_a_da
     text = " ".join(str(c.value) for r in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows() for c in r if c.value)
     assert height["proposed"] in text                                          # the report shows the value too
     assert got["measurements"]["building_height"]["value"] is None            # it still never decides the rule
+
+
+def test_plan_labels_only_in_a_view_looking_straight_down():
+    from design_checker.rhino_logic import is_plan_view
+    assert is_plan_view(True, -1.0)                      # Top
+    assert not is_plan_view(True, 0.0)                   # Front, Right: elevations
+    assert not is_plan_view(False, -1.0)                 # a perspective, even from above
+    assert not is_plan_view(True, 1.0)                   # Bottom
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text()
+    assert "plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)" in rhino
