@@ -34,8 +34,9 @@ HIDDEN = {
     "run": "the file of recorded AI calls; for auditing, not reading",
     "layout": "tells the code how to cut a document into pieces; not for reading",
 }
-NOT_DOWNLOADED_FIELDS = {"title", "url", "why_missing"}
-NOT_VERIFIED = "(not verified: the chart reader has no such cell; run python -m rule_format)"   # sources.yaml `not_yet_downloaded` entries
+NOT_DOWNLOADED_FIELDS = {"title", "url", "why_missing"}   # sources.yaml `not_yet_downloaded` entries
+# The "City's exact words" for a cited chart cell the chart reader can't confirm (never a blank).
+NOT_VERIFIED = "(not verified: the chart reader has no such cell; run python -m rule_format)"
 FIELDS = {"rule": RULE_FIELDS, "definitions": TERM_SCHEMAS["definitions"]["fields"] | APPROVAL_FIELDS,
           "uses": TERM_SCHEMAS["uses"]["fields"] | APPROVAL_FIELDS, "label": LABEL_FIELDS | APPROVAL_FIELDS,
           "source": SOURCE_FIELDS | NOT_DOWNLOADED_FIELDS}   # documents and the ones still to get share a tab
