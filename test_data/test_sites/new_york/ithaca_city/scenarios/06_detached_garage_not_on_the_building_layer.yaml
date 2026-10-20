@@ -35,3 +35,10 @@ expected:
   R-1b.front_yard: {status: complies, working: "30 ≥ 25", cites: "§325-8 chart, R-1b, Front"}
   R-1b.height: {status: complies, working: "20 ≤ 35", cites: "§325-8 chart, R-1b, Height"}
   R-1b.stories: {status: complies, working: "2 ≤ 3", cites: "§325-8 chart, R-1b, Number of stories"}
+# added after running Gordium (the expected results above are as written before it ran, commit 6d28ce0)
+fixed:
+  R-1b.lot_coverage: >-
+    First run, 2026-10-20: Gordium said lot coverage complies (1,500 sf of the house alone): a FALSE PASS, since
+    the garage it couldn't see makes it 2,076 sf. Fixed in code (design_checker/present.py
+    _cautious_for_left_out): any solid on the lot left out of the check makes lot coverage need review, and one
+    touching the building makes the yards, height and stories need review too (it may be a porch or deck).
