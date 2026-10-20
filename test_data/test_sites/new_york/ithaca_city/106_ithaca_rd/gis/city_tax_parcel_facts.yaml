@@ -1,5 +1,8 @@
 # Facts we measured from the City of Ithaca's tax parcel outline of 106 Ithaca Rd. The City's data itself is not
-# stored here: the City's GIS terms don't allow redistributing it without their written consent (not asked yet).
+# stored here, as a precaution until the City's GIS Program is asked for permission: this layer's terms ask only
+# for the statement below (https://www.arcgis.com/sharing/rest/content/items/87c2aae68e0b405d8b9dcb7a0cc9cf06?f=json), but the City's zoning layer, from the same GIS Program, says its data
+# "may not be reproduced or redistributed without the express written consent of the originator"
+# (https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/info/itemInfo?f=json). See README.md.
 # Anyone can re-download it from `url` and check it is the same data by its `sha256`, then re-measure.
 #
 # The City's layer asks that products derived from it carry this statement:

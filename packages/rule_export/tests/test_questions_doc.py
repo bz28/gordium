@@ -3,8 +3,9 @@
 - every open question recorded anywhere (the same list as the workbook's Questions tab) is cited there by its
   tag, `[<id>#<n>]`, the n-th open question of that rule, definition or label, and nothing else is;
 - every result-changing (🔴) item in docs/discrepancies_with_architects.md is cited as `[discrepancy <number>]`;
-- what it says Gordium does is true of the code, and its lot numbers are recomputed from the stored outlines
-  and the R-1b rule.
+- what it says Gordium does is true of the code; its lot numbers match their sources (the County outline,
+  recomputed from the stored file; the City outline, our recorded measurements of it, since the City's data
+  isn't stored; the model, measured from model.3dm; their spreadsheet), and its rear yards follow the R-1b rule.
 
 A question added, answered or renumbered without updating the page fails here, so the page can't silently
 fall behind the files."""
@@ -19,7 +20,7 @@ from openpyxl import load_workbook
 
 from rule_export.workbook import tables
 from rule_format.formula import evaluate
-from rule_format.rulebook import MEASURE_KINDS, REPO, load
+from rule_format.rulebook import MEASURE_KINDS, MEASURES_FILE, REPO, load
 
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 DOC = (REPO / "docs/questions_for_architects.md").read_text(encoding="utf-8")
@@ -81,8 +82,11 @@ def test_every_question_says_what_happens_today_and_from_a_model():
         assert case in intro, case
     lines = [line for line in DOC.splitlines() if line.startswith("- **Until you answer:** Today")]
     assert len(lines) == DOC.count("- **Until you answer:**") - 1           # all but the legend's own line
+    measures = set(load(MEASURES_FILE))
     for line in lines:
         assert "from a model" in line.lower() or "entered, not measured" in line, line
+        for thing in re.findall(r"The (\w+) is entered, not measured", line):         # a real input, not a wish
+            assert thing in measures, (thing, line)
         assert any(case in line for case in ("NEEDS REVIEW", "assumes", "not checked yet")), line
 
 
@@ -113,6 +117,14 @@ def test_only_shareable_data_is_stored_and_it_is_what_was_downloaded():
     assert set(json.loads(county.read_text())["features"][0]["attributes"]) == {
         "SWISPRINTK", "LOCADDR", "ZONING", "FRONTAGE", "DEPTH", "PROPCLASS"}        # nothing personal
     assert re.fullmatch(r"[0-9a-f]{64}", CITY["sha256"]) and CITY["url"].startswith("https://")
+    # Why the City's data isn't stored, with its sources: the parcel layer's terms, and the zoning layer's
+    # consent clause (the precaution's reason). The County's terms are cited the same way.
+    city_part = readme.split("**`city_tax_parcel_facts.yaml`**")[1]
+    for cited in ("https://www.arcgis.com/sharing/rest/content/items/87c2aae68e0b405d8b9dcb7a0cc9cf06?f=json",
+                  "https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/info/itemInfo?f=json",
+                  "may not be reproduced or redistributed without the express written consent of the originator"):
+        assert cited in city_part, cited
+    assert "https://www.arcgis.com/sharing/rest/content/items/505beb987c93401b8445777a8bb9bda6?f=json" in readme
     header = " ".join(line.lstrip("# ").strip() for line in (SITE / "gis/city_tax_parcel_facts.yaml").read_text().splitlines())
     assert CITY_STATEMENT in header
     assert CITY_STATEMENT in DOC

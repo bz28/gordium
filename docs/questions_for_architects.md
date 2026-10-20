@@ -33,7 +33,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 ### 1.1 Where did your 106 Ithaca Rd lot outline come from? Is there a stamped survey? 🔴
 
-- **What we found:** we compared the lot in your Rhino model with the city's tax parcel map (City of Ithaca `Tax_Parcels`, parcel 500700-84.-2-6; New York State's 2025 parcel layer has the same shape and size) and Tompkins County's 2026 parcel layer, both downloaded 2026-10-20. The County's outline, and the measurements we took from the City's, are kept with Gordium's test data (`test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/gis/`); the City's data itself isn't stored, because its terms don't allow sharing it without the City's consent.
+- **What we found:** we compared the lot in your Rhino model with the city's tax parcel map (City of Ithaca `Tax_Parcels`, parcel 500700-84.-2-6; New York State's 2025 parcel layer has the same shape and size) and Tompkins County's 2026 parcel layer, both downloaded 2026-10-20. The County's outline, and the measurements we took from the City's, are kept with Gordium's test data (`test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/gis/`); the City's data itself isn't stored: a precaution until we ask the City's GIS Program for permission, since its zoning layer's terms forbid redistributing the City's data without written consent (the parcel layer itself asks only for the statement below).
 
     | Edge | Your model | City / State GIS | County 2026 |
     |---|---|---|---|
@@ -252,7 +252,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 - **The city's words:** "First three bed or sleeping rooms per dwelling 1 space per dwelling unit" (chart [p.14](https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=14)).
 - **Why it matters:** R-1b allows an ADU. If parking is per unit, a house with an ADU needs more spaces.
-- **Until you answer:** Today, ADUs are not checked yet, so a house with an ADU can PASS parking with too few spaces: check it by hand. The number of units is entered, not measured, so the same applies from a model.
+- **Until you answer:** Today, ADUs are not checked yet: Gordium has no input for the number of dwelling units, so a house with an ADU can PASS parking with too few spaces. Check it by hand. The same applies from a model until such an input exists.
 - **Options:** (a) parking per unit, ADU included; (b) the ADU needs none of its own; (c) §325-28's ADU rules decide (please point us to the part).
 
 ---
