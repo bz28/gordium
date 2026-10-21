@@ -30,10 +30,10 @@ measurements:
     from: 'stated by the architect (not measured from the model: no floor blocks are drawn) (lot facts)'
   front_yard:
     value: 30.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building; between (63, 0) and (63, 30)'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building; between (10, 0) and (10, 30)'
   side_yard_smaller:
     value: 10.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the nearer side lot line to the building; between (0, 65) and (10, 65)'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the nearer side lot line to the building; between (0, 30) and (10, 30)'
   side_yard_larger:
     value: 10.0
     from: 'measured from spreadsheet_design_model.3dm: the least distance from the farther side lot line to the building; between (73, 65) and (63, 65)'
@@ -48,10 +48,10 @@ measurements:
     from: stated by the architect (not measured from the model) (lot facts)
   front_yard_eaves:
     value: 30.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building, eaves included; between (63, 0) and (63, 30)'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building, eaves included; between (10, 0) and (10, 30)'
   side_yard_smaller_eaves:
     value: 10.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the nearer side lot line to the building, eaves included; between (0, 65) and (10, 65)'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the nearer side lot line to the building, eaves included; between (0, 30) and (10, 30)'
   side_yard_larger_eaves:
     value: 10.0
     from: 'measured from spreadsheet_design_model.3dm: the least distance from the farther side lot line to the building, eaves included; between (73, 65) and (63, 65)'

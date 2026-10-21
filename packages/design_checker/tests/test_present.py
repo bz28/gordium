@@ -1149,3 +1149,48 @@ def test_never_kinder_than_picking_the_starting_house_with_solids_touching_it():
                     (name, assumed[name]["status"], i["status"], assumed[name]["reason"], spots)
     assert compared > 150 and touching >= 10, (compared, touching)
 
+
+def _degenerate(kind, problem):
+    """A building object as a model can hold one: walls only (an open polysurface), a single face, a face of no
+    area, points in a line, or no faces; with the reading's own problem, or (a defence) without one."""
+    b = box(40, 70, 48, 80, 0, 10, "odd")
+    if kind == "walls":
+        b["faces"] = [f for f in b["faces"] if len({round(p[2], 6) for p in f["points"]}) > 1]
+    elif kind == "one_face":
+        b["faces"] = b["faces"][:1]
+    elif kind == "zero_area":
+        b["faces"] = [{"points": [[40, 70, 0], [40, 70, 0], [40, 70, 0]]}] + b["faces"][1:]
+    elif kind == "collinear":
+        b["faces"] = [{"points": [[40, 70, 0], [44, 70, 0], [48, 70, 0]]}]
+    elif kind == "none":
+        b["faces"] = []
+    if problem:
+        b["problems"] = ["a building isn't a closed solid"]
+    return b
+
+
+@pytest.mark.parametrize("kind", ["walls", "one_face", "zero_area", "collinear", "none"])
+def test_a_degenerate_building_object_never_raises_and_never_passes(kind):
+    """Main-building round 3 (P1): a building object of walls only crashed the ground check (an empty convex
+    hull) when spot grades were set, before its own problem could stop the building measurements. Fuzz: every
+    degenerate object, alone or beside a good house, with or without spot grades and with or without its
+    reading's problem, goes through measure() and check_site without an exception, and with its problem, the
+    building measurements wait with that reason."""
+    from design_checker.check import check_site
+    from model_measurement.measure import measure
+    from test_measure import floor
+    lot, facts = _sample106()
+    for house in (False, True):
+        for spots in (False, True):
+            for problem in (False, True):
+                blds = ([floor(12, 30, 36, 60, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+                        if house else []) + [_degenerate(kind, problem)]
+                f = {**facts, "lot_surveyed": True, "stories": 3}
+                if spots:
+                    f.update(ground_is_flat=None, grade_elevation=None,
+                             grade_points=_walls_spots(12, 30, 36, 60, 0) + _walls_spots(40, 70, 48, 80, 0))
+                m = measure(_plot(*blds, lot_=lot), f)
+                check_site(_plot(*blds, lot_=lot), f)
+                if problem:
+                    for name in ("building_height", "front_yard"):
+                        assert m[name]["value"] is None and "isn't a closed solid" in m[name]["reason"], (name, m[name])

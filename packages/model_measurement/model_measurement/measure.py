@@ -820,7 +820,8 @@ def _eaves(building: dict, sloped: list[list[dict]], candidate: dict) -> dict:
 STORY_ROOM = 7.0            # ft
 ROOM_AREA = 70.0            # sf: the least floor area of a habitable room (NYS Residential Code R304.1)
 # With no main building picked and exactly one starting house, it is the main building, assumed (a marker on
-# every measurement made from it: "main_assumed"); every other building is also read as if it were the main one.
+# every measurement made from it: "main_assumed"); every other building that could be a principal one (enclosed,
+# at least STORY_ROOM tall, at least ROOM_AREA: R305.1, R304.1) is also read as if it were the main one.
 MAIN_IF = "if {} were the main building"
 MAIN_QUESTION = ("which building is the main building (the starting house is assumed, not picked) is a question "
                  "(main_building)")
@@ -1291,7 +1292,7 @@ def _floating(buildings: list[dict], points: list) -> str | None:
     clear at every corner; touching if clear at one; between, it can't be told: ground_unclear (it asks). Read from
     the points themselves, so a point drifting off a wall never hides it (stress F15)."""
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
-    corners = [c[:2] for b in buildings if b.get("faces") for c in _projection(b).convex_hull.exterior.coords]
+    corners = [p[:2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]    # never empty
     if not zs or not points or not corners:
         return None
     pts = np.array([p[:3] for p in points], dtype=float)
@@ -1402,8 +1403,9 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
 def pick_main(buildings: list[dict], facts: dict) -> tuple:
     """THE main-building pick, (main, assumed), for every measurement (and the grade plane): the only building;
     else the one picked (main_building names one of its blocks); else, with none picked, Gordium's own starting
-    house if exactly one building is all floor blocks GordiumStart drew (assumed: every other building is then
-    also read as if it were the main one, _assemblies); else none. `buildings`: as _stacks joins them."""
+    house if exactly one building is all floor blocks GordiumStart drew (assumed: every other building that could
+    be a principal one, _could_be_principal, is then also read as if it were the main one, _assemblies); else
+    none. `buildings`: as _stacks joins them."""
     if len(buildings) == 1:
         return buildings[0], False
     picked = next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None)
@@ -1440,18 +1442,20 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
     why_building = (stop("no_building") if not buildings else
                     "; ".join([p for b in buildings for p in b.get("problems") or []]
-                              + [stop("same_id", id=i) for i in same]) or None)
+                              + [stop("same_id", id=i) for i in same]
+                              + [stop("empty_building") for b in buildings[:1]
+                                 if any(not b_.get("faces") and not b_.get("problems") for b_ in buildings)]) or None)
     # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
     # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
     # cut at the ground blamed on overhangs.
     why_spots = None
-    if facts.get("grade_points"):       # spot grades (or terrain sampled at the walls): the grade plane from them
-        grade, why_spots = grade_plane(buildings, facts)
+    if facts.get("grade_points") and not why_building:     # spot grades (or terrain sampled at the walls): the
+        grade, why_spots = grade_plane(buildings, facts)        # grade plane, once the buildings can be measured
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
     ground_problem = _ground_against(buildings, grade) if grade is not None else None
-    if ground_problem is None and facts.get("grade_points"):
+    if ground_problem is None and facts.get("grade_points") and not why_building:
         # whether the buildings reach the ground never depends on the spot grades sitting at their walls: the
         # ground under their footprint (the spot grades' plane), against their own lowest point (stress F15)
         ground_problem = _floating(buildings, facts["grade_points"])
@@ -1470,7 +1474,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
     main, assumed = pick_main(buildings, facts)
-    if assumed:                         # every other building is also read as if it were the main one
+    if assumed:                         # every other possible principal building is also read as the main one
         out["_assumed_main"] = list(main["parts"])
     why_main = None if main else stop("no_main_building")
     others = [b for b in buildings if b is not main]
@@ -1573,7 +1577,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     place = {}
     for b in buildings:
         p = _projection(b)
-        place[b["id"]] = ("on" if p.within(lot.polygon.buffer(TOL)) else
+        place[b["id"]] = ("flat" if p.is_empty else          # nothing seen from above: nowhere to place it
+                          "on" if p.within(lot.polygon.buffer(TOL)) else
                           "off" if p.intersection(lot.polygon).area <= 1e-6 else "partly")
     crossed = {i: _crossed(lot, _projection(next(b for b in buildings if b["id"] == i)))
                for i, s in place.items() if s == "partly"}
@@ -1586,11 +1591,13 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         return " and ".join((["the main building" if len(buildings) > 1 else "the building"] if main_off else []) +
                             ([f"{n} other building{'s' if n > 1 else ''}" if main_off or main is not None else
                               f"{n} building{'s' if n > 1 else ''}"] if n else []))
-    why_main_off = stop("outside_lot", what=off_named(group)) if any(place.get(b["id"]) == "off" for b in group) else None
-    why_acc_off = (stop("outside_lot", what=off_named(detached))
-                   if any(place.get(b["id"]) == "off" for b in detached) else None)
-    why_inside = why_building or (stop("outside_lot", what=off_named(buildings)) if "off" in place.values()
-                                  else None)    # coverage
+    def unplaced(bs):               # wholly off the lot, or covering nothing seen from above: the rules wait
+        if any(place.get(b["id"]) == "flat" for b in bs):
+            return stop("flat_building")
+        return stop("outside_lot", what=off_named(bs)) if any(place.get(b["id"]) == "off" for b in bs) else None
+    why_main_off = unplaced(group)
+    why_acc_off = unplaced(detached)
+    why_inside = why_building or unplaced(buildings)    # coverage
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
         outside = [b for b in buildings if place.get(b["id"]) == "off"]
@@ -2040,6 +2047,10 @@ def _accessory_yards(out: dict, lot: Lot, lines: dict, facts: dict, detached: li
     if rule is None:
         for name in ACCESSORY_YARDS:
             out[name] = _missing(name, stop("law_missing", what="§325-25's finding (side_yard)"))
+        return
+    if any(views[b["id"]]["above"].is_empty for b in detached):   # nothing to place against the lot lines
+        for name in ACCESSORY_YARDS:
+            out[name] = _missing(name, stop("flat_building"))
         return
     shape = ops.unary_union([views[b["id"]]["above"] for b in detached])
     objects = [lot.id, *[i for b in detached for i in _parts(b)]]

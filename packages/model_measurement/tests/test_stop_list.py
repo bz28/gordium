@@ -260,6 +260,12 @@ CASES = {
     "geometry_error": _geos_error,
     "same_id": _plain(buildings=[box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)]),   # both "house"
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
+    "empty_building": _plain(buildings=[{"id": "house", "faces": [], "problems": []}]),
+    # a shed of walls only (no roof, no floor) standing apart: nothing seen from above to place (main-building
+    # round 3's fuzz, with #18's accessory distances)
+    "flat_building": _plain(buildings=[box(10, 25, 35, 65), {**box(38, 70, 46, 80, 0, 10, id="shed"), "faces": [
+        f for f in box(38, 70, 46, 80, 0, 10, id="shed")["faces"] if len({round(p[2], 6) for p in f["points"]}) > 1]}],
+        main_building="house"),
     "outside_lot": _plain(buildings=[box(60, 25, 80, 65)]),      # wholly off the lot (crossing it is measured)
     "open_solid": _file(_open_brep),
     "open_mesh": _file(_open_mesh),
