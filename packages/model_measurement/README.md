@@ -93,7 +93,9 @@ Every reason the code gives today comes from the table:
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
   of all the buildings, or under the lowest point of all of them, as when a survey elevation is typed for a model
   drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual; with spot grades,
-  read from the ground under the footprint whether or not they sit at the walls); "the spot grades don't show the
+  one test whatever the points' positions: each connected building group (touching in plan or one over another,
+  so a balcony against the house is part of it) meets the ground if its bottom is at or below the ground the
+  points describe at some corner of its footprint, and its top is above it); "the spot grades don't show the
   ground under the building (too few, or in a line): place spot grades around the building"; "a solid lies wholly under the
   ground (<ground> ft; it runs from <bottom> to <top> ft) and isn't joined directly under the building: check the
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
