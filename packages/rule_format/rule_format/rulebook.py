@@ -627,13 +627,12 @@ def validate(rulebook, ctx: Context) -> list[str]:
         return ["'rules' must be a non-empty list"]
     district, problems, seen = rulebook["district"], [], set()
     linked = _relaxes_problems(rules)
-    composed = {} if linked else {r.get("id"): r for r in apply_relaxes(rules) if r.get("relaxed_by")}
     for i, rule in enumerate(rules, 1):
         if not isinstance(rule, dict):
             problems.append(f"rule #{i}: must be a mapping")
             continue
         rid = rule["id"] if isinstance(rule.get("id"), str) else f"rule #{i}"
-        problems += [f"{rid}: {p}" for p in _rule_problems(rule, district, ctx, composed.get(rid))]
+        problems += [f"{rid}: {p}" for p in _rule_problems(rule, district, ctx)]
         if rid in seen:
             problems.append(f"{rid}: duplicate id")
         seen.add(rid)
@@ -645,8 +644,7 @@ def _list_of_dicts(rule, key):
     return value if isinstance(value, list) and all(isinstance(v, dict) for v in value) else None
 
 
-def _rule_problems(rule: dict, district: str, ctx: Context, relaxed: dict | None = None) -> list[str]:
-    """relaxed: the rule as the checker reads it with its `relaxes` links applied; its worked examples are judged so."""
+def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     p = [f"unknown field '{k}'" for k in rule.keys() - RULE_FIELDS]
     p += [f"'{k}' must be text" for k in TEXT_FIELDS if k in rule and not isinstance(rule[k], str)]
     if p:
@@ -718,7 +716,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context, relaxed: dict | None
             p.append(f"example {n}: unknown district {given['district']!r}")
         elif ex.get("expect") not in OUTCOMES:
             p.append(f"example {n}: expect must be one of {OUTCOMES}")
-        elif not p and (got := outcome(relaxed or rule, given, ctx.allowed())) != ex["expect"]:
+        elif not p and (got := outcome(rule, given, ctx.allowed())) != ex["expect"]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
 
     p += _approval_problems(rule, ctx, APPROVED_FIELDS)

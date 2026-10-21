@@ -90,15 +90,17 @@ def test_relaxes_is_checked_statically():
     assert any("no check to widen" in p for p in problems(BASE | {"kind": "flag"}, BONUS))
 
 
-def test_a_relaxed_rules_worked_examples_are_judged_as_the_checker_reads_it():
-    """A rear yard of 15 ft on a 90 ft deep lot fails RULE alone but passes once a relaxer allows 15 ft there."""
+def test_each_rules_examples_document_its_own_formula_relaxed_or_not():
+    """The chart's height rule keeps its "36 ft fails" example when §325-16C relaxes it (drafted in another unit):
+    examples are judged on the rule as written, so linking an exception never breaks the rule it widens."""
     base = copy.deepcopy(RULE)
-    base["examples"].append({"given": {"use": "one_family_detached", "rear_yard": 15, "lot_depth": 90}, "expect": "pass"})
     relief = {"id": "R-1b.rear_relief", "kind": "rule", "topic": "dimensions", "title": "x", "relaxes": RULE["id"],
               "applies_when": 'use == "one_family_detached"', "check": "rear_yard >= 0.25 * lot_depth - 10"}
-    alone = [p for p in validate({"district": "R-1b", "rules": [base]}, CTX) if "example 3" in p]
-    linked = [p for p in validate({"district": "R-1b", "rules": [base, relief]}, CTX) if p.startswith(RULE["id"])]
-    assert alone and not any("example 3" in p for p in linked)
+    linked = [p for p in validate({"district": "R-1b", "rules": [base, relief]}, CTX) if p.startswith(RULE["id"] + ":")]
+    assert not any("example" in p for p in linked)       # its 21 ft fail example still holds as written
+    base["examples"].append({"given": {"use": "one_family_detached", "rear_yard": 15, "lot_depth": 90}, "expect": "pass"})
+    linked = [p for p in validate({"district": "R-1b", "rules": [base, relief]}, CTX) if p.startswith(RULE["id"] + ":")]
+    assert any("example 3" in p for p in linked)         # a pass only by the exception isn't the rule's own
 
 
 def test_the_checker_reads_rules_with_their_relaxes_links_applied(tmp_path):
