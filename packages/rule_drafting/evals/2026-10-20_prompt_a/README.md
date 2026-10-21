@@ -172,6 +172,6 @@ Each change is pinned by a test that fails if the change is undone.
 Work from a scratch checkout of the matching commit (`git worktree add --detach <dir> <commit>`), with
 `PYTHONPATH` set to its `packages/*`.
 
-- **The baseline:** run `python replay.py runs/baseline_…jsonl`, then `python grade.py baseline_grade.json`.
+- **The baseline:** run `python replay.py --checkout <dir> runs/baseline_…jsonl` (it refuses the checkout Gordium is installed from, and one whose drafted/ holds any file git does not have: drafts and paid-call records live only on disk), then `python grade.py baseline_grade.json`.
 - **A prompt A run:** run `python -m rule_drafting draft --only <the 10 units> --yes`, then
   `python grade.py <file>`. This needs an API key and costs money.
