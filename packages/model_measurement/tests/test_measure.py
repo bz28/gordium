@@ -712,3 +712,13 @@ def test_a_gordium_floor_stretched_or_merged_is_no_longer_one_story():
                  floor(10, 25, 35, 65, z0=17, z1=34, id="floor 3", drawn=8.5)]
     m = measure(site(RECT, *stretched), {**FACTS, "stories": None})["stories"]
     assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [2, 3]
+
+
+def test_two_building_objects_with_one_id_are_never_measured_as_one():
+    """Stress test F4: two floor blocks sharing an id; one was dropped from the story count while the height
+    still counted it. Nothing is ever dropped silently: every building measurement needs review, saying why."""
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)), FACTS)
+    for name in ("building_height", "building_area", "front_yard", "rear_yard"):
+        assert m[name]["value"] is None and "share the id house" in (m[name]["reason"] or ""), name
+    ok = measure(site(RECT, box(10, 25, 35, 65, 0, 10, id="f1"), box(10, 25, 35, 65, 10, 20, id="f2")), FACTS)
+    assert "share the id" not in str(ok)

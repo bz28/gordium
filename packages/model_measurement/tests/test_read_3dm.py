@@ -287,3 +287,25 @@ def test_the_rhino_side_uses_the_same_keys():
     from design_checker import rhino_logic
     from model_measurement import read_3dm
     assert (rhino_logic.ID_KEY, rhino_logic.FLOOR_KEY) == (read_3dm.ID_KEY, read_3dm.FLOOR_KEY)
+
+
+def test_a_single_precision_mesh_reads_as_the_numbers_typed(tmp_path):
+    """Stress test: a mesh made with Vertices.Add holds single-precision points; 27 ft drawn in millimetres
+    (8229.6 mm) was read as 26.999999 ft, so a design exactly at a limit failed. Near the origin its points are
+    read as the shortest decimals they store (what was typed): 27 ft exactly."""
+    from rule_format.rulebook import outcome
+    m = model(units=r.UnitSystem.Millimeters)
+    mm = 304.8
+    rect(m, 0, 0, 50 * mm, 100 * mm)
+    mesh = r.Mesh()
+    for x, y, z in [(10, 25, 0), (35, 25, 0), (35, 65, 0), (10, 65, 0), (10, 25, 27), (35, 25, 27), (35, 65, 27), (10, 65, 27)]:
+        mesh.Vertices.Add(x * mm, y * mm, z * mm)
+    for f in [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]:
+        mesh.Faces.AddFace(*f)
+    m.Objects.AddMesh(mesh, on(1))
+    facts = {**FACTS, "street_line": [[[0, 0], [50 * mm / mm, 0]]]}
+    got = measure(read_site(write(m, tmp_path), facts), facts)
+    height = got["building_height"]["value"]
+    assert abs(height - 27) < 1e-9, height
+    assert outcome({"id": "h", "kind": "rule", "check": "building_height <= 27"}, {"building_height": height}, {}) == "pass"
+    assert abs(got["front_yard"]["value"] - 25) < 1e-9 and abs(got["building_area"]["value"] - 1000) < 1e-6

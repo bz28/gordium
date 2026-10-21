@@ -107,7 +107,8 @@ Every reason the code gives today comes from the table:
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
   together, or draw the overhang as part of its floor".
-- **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
+- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
+  measurements"; "more than one building: pick the main building"; "a
   building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
