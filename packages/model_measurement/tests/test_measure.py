@@ -817,13 +817,12 @@ def test_a_single_plain_solid_keeps_the_typed_count_stated_by_the_architect():
 def test_a_plain_main_building_with_a_floor_block_wing_never_keeps_the_typed_count():
     """Review round 3 of the stories fix (P0): the main building picked is one plain solid, and a wing of four floor
     blocks stands beside it. The height reads both (main alone, and with the wing as part of it: §325-25), but
-    stories kept the typed 2 as the value. Stories are read over the same candidate buildings: 2 as stated for the
-    main building alone, 4 with the wing, so it needs review (the accessory question), never 2."""
+    stories kept the typed 2 as the value. Stories are read over the same candidate buildings: with the wing, the
+    typed 2 is fewer than its 4 floor blocks, so it needs review, never 2."""
     main = box(10, 25, 35, 65, 0, 20, id="house")
     wing = [floor(35, 25, 45, 45, z0=i * 10, z1=(i + 1) * 10, id=f"w{i}") for i in range(4)]
     m = measure(site(RECT, main, *wing), {**FACTS, "stories": 2, "main_building": "house"})["stories"]
-    assert m["value"] is None and {r["value"] for r in m["readings"]} == {2, 4}
-    assert "accessory building" in m["reason"]
+    assert m["value"] is None and "the stories typed (2) are fewer than the floor blocks drawn (4)" in m["reason"]
 
 
 SEEDS = range(10)                       # fixed: 10 x 200 = 2,000 drawings, the same every run
@@ -887,7 +886,7 @@ def test_a_plain_house_with_a_three_floor_wing_against_its_rear_wall_never_compl
     house = box(10, 25, 35, 55, 0, 20, id="house")
     wing = [floor(10, 55, 35, 65, z0=i * 11, z1=(i + 1) * 11, id=f"w{i}") for i in range(3)]
     m = measure(site(RECT, house, *wing), {**FACTS, "stories": typed, "main_building": "house"})["stories"]
-    assert m["value"] is None and 3 in {r["value"] for r in m["readings"]}
+    assert m["value"] is None and "fewer than the floor blocks drawn (3)" in m["reason"]
 
 
 def test_height_and_stories_report_over_the_same_candidate_buildings():
@@ -895,7 +894,7 @@ def test_height_and_stories_report_over_the_same_candidate_buildings():
     from model_measurement.measure import _assemblies
     main = box(10, 25, 35, 65, 0, 20, id="house")
     wing = [floor(35, 25, 45, 45, z0=i * 10, z1=(i + 1) * 10, id=f"w{i}") for i in range(4)]
-    m = measure(site(RECT, main, *wing), {**FACTS, "stories": 2, "main_building": "house"})
+    m = measure(site(RECT, main, *wing), {**FACTS, "stories": 4, "main_building": "house"})
     words = [w for w, _ in _assemblies({"id": "x"}, [{"id": "y"}])]
 
     def over(record):
@@ -915,9 +914,9 @@ def test_a_plain_solid_joined_to_a_floor_stack_leaves_its_stories_to_the_count_t
     m = measure(site(RECT, *floors, other), {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
     assert m["value"] == expect, m
     if typed is None and not porch:
-        assert "wing is drawn as one solid, so its stories aren't drawn" in m["reason"]
+        assert "part of the building (wing) isn't drawn as floor blocks" in m["reason"]
     if typed == 2:
-        assert {r["value"] for r in m["readings"]} == {2, 3} and "(story)" in m["reason"]
+        assert "the stories typed (2) are fewer than the floor blocks drawn (3)" in m["reason"]
 
 
 def test_the_faces_open_to_the_sky_are_found_point_by_point():
@@ -954,7 +953,7 @@ def test_a_walk_out_wing_reaching_below_the_ground_asks_whatever_was_typed(typed
     floors = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
     m = measure(site(RECT, *floors, box(35, 25, 45, 45, -10, 10.5, id="wing")),
                 {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
-    assert m["value"] is None and "wing reaches below the ground" in m["reason"]
+    assert m["value"] is None and "part of the building (wing) is below the ground" in m["reason"]
 
 
 def test_a_plain_house_and_a_plain_garage_take_the_count_typed():
@@ -973,4 +972,20 @@ def test_a_plain_20_ft_wing_beside_three_floor_blocks_takes_the_count_typed_only
     if typed == 2:
         assert "fewer than the floor blocks drawn" in m["reason"]
     if typed is None:
-        assert "drawn as one solid" in m["reason"] and "floors are drawn" not in m["reason"]
+        assert "isn't drawn as floor blocks" in m["reason"] and "floors are drawn" not in m["reason"]
+
+
+@pytest.mark.parametrize("typed, expect", [(1, None), (2, None), (3, 3)])
+def test_a_wing_of_two_stacked_plain_solids_beside_three_floor_blocks_takes_only_a_count_that_covers_them(typed, expect):
+    """#14 round 4 (P0): a 40 ft wing of two plain solids stacked was counted by its blocks with the typed count
+    folded in: 1 or 2 typed beside 3 floor blocks came out 3, saying "as stated by the architect". Plain solids,
+    stacked or not, are never counted: 1 or 2 typed is fewer than the 3 floor blocks (needs review); 3 typed is
+    the architect's statement for the whole building."""
+    floors = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    wing = [box(35, 25, 45, 45, 0, 20, id="w0"), box(35, 25, 45, 45, 20, 40, id="w1")]
+    m = measure(site(RECT, *floors, *wing), {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
+    assert m["value"] == expect, m
+    if expect is None:
+        assert "fewer than the floor blocks drawn (3)" in m["reason"]
+    else:
+        assert "for the whole building" in m["how"] or any("for the whole building" in r["reading"] for r in m["readings"])
