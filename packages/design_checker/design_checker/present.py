@@ -334,9 +334,13 @@ def _hint(name: str, sign: str, margin: float, unit: str) -> str | None:
     return f"To comply: {'increase' if sign in ('≥', '>') else 'reduce'} it by {gap}."
 
 
-def _alternatives(check: str, values: dict, measured: dict) -> list[list[tuple]]:
+def _alternatives(check: str, values: dict, measured: dict, facts: dict | None = None) -> list[list[tuple]]:
     """For a rule that allows several ways to comply (`a or b and c …`), each way's failing comparisons as
-    (name, proposed, sign, required, gap): what the architect could change. [] if the rule has one way."""
+    (name, proposed, sign, required, gap, moved, drawn): what the architect could change. [] if the rule has one way. With
+    `facts`, a comparison fails if it does under any reading of THE reading set and its gap is the worst one's,
+    with the as-drawn gap after it when that differs ("9'-7 3/4" (7'-7 3/4" as drawn)"): doing it makes that way
+    hold under every reading, never leaves it in review (the architect's review, pass 2); `moved`: it differs;
+    `drawn`: it fails as drawn (what the reason lists)."""
     body = formula.parse(check).body
     if not (isinstance(body, ast.BoolOp) and isinstance(body.op, ast.Or)):
         return []
@@ -347,11 +351,17 @@ def _alternatives(check: str, values: dict, measured: dict) -> list[list[tuple]]
                   [v for v in getattr(alt, "values", []) if isinstance(v, ast.Compare)]):
             if not (len(c.ops) == 1 and isinstance(c.left, ast.Name) and type(c.ops[0]) in SIGNS):
                 continue
-            if _evaluate(ast.unparse(c), values) is False:
+            rs = readings(c, ast.unparse(c), values, measured, facts) if facts is not None else []
+            worst = min((r["margin"] for r in rs), default=None)
+            drawn = _evaluate(ast.unparse(c), values) is False
+            if drawn or (worst is not None and worst < 0):
                 proposed, required, margin, unit, sign = _numbers(c, values, measured, "")
+                gap = _gap(margin, unit) if margin is not None else ""
+                moved = worst is not None and margin is not None and _gap(min(worst, margin), unit) != gap
+                if moved:
+                    gap = _gap(min(worst, margin), unit) + (f" ({gap} as drawn)" if margin < 0 else "")
                 failing.append((NAMES.get(c.left.id, c.left.id.replace("_", " ")), value_text(proposed, unit, sign),
-                                sign, value_text(required, unit, sign, False),
-                                _gap(margin, unit) if margin is not None else ""))
+                                sign, value_text(required, unit, sign, False), gap, moved, drawn))
         out.append(failing)
     return out
 
@@ -371,6 +381,43 @@ def _range(measure: str, measured: dict, values: dict, sign: str) -> str | None:
 
 
 SURVEY_ONLY = "passes with the lot as drawn (confirm the survey)"     # check.every_reading's words
+
+
+def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx: bool) -> str | None:
+    """What to change so the row complies, from THE reading set (the verdict's own): the shortfall under its worst
+    reading, rounded up, so the advised change makes it comply under every reading, never one that leaves it in
+    review (the architect's review: "move 2'-11 3/8"" left a tax-map side yard needing review). On a tax-map lot
+    it says so and gives the as-drawn figure too; on a survey, the one number."""
+    sign = SIGNS[type(node.ops[0])]
+    m = node.left.id
+    worst = min(r["margin"] for r in rs)
+    if worst >= 0:
+        return None
+    drawn, unit = _margin_of(node, values, measured)
+    if m == "building_area":                     # coverage: the footprint, in sf, against the smallest allowed
+        have = values.get("building_area")
+        limits = [r["limit"] for r in rs if isinstance(r.get("limit"), (int, float))]
+        if not isinstance(have, (int, float)) or not limits:
+            return None
+        need, as_drawn = have - min(limits), have - (_evaluate(ast.unparse(node.comparators[0]), values) or have)
+        amount = lambda x: _area(x, "up")                                            # noqa: E731
+        verb = lambda x: f"reduce the footprint by at least {amount(x)}"             # noqa: E731
+    else:
+        need, as_drawn = -worst, (-drawn if isinstance(drawn, (int, float)) else None)
+        amount = lambda x: _gap(-x, unit)                                            # noqa: E731
+        if name.split(",")[0].endswith("yard"):
+            verb = lambda x: f"move the building {amount(x)} farther from that lot line"     # noqa: E731
+        elif m == "building_height":
+            verb = lambda x: f"lower the building {amount(x)}"                       # noqa: E731
+        else:
+            verb = lambda x: f"{'increase' if sign in ('≥', '>') else 'reduce'} it by {amount(x)}"   # noqa: E731
+    several = len({round(r["margin"], 9) for r in rs}) > 1
+    if not several:
+        return f"To comply: {verb(need)}."
+    whatever = "whatever the survey shows" if approx else "under every reading"
+    drawn_part = f" ({amount(as_drawn)} as drawn)" if as_drawn and as_drawn > 0 and amount(as_drawn) != amount(need) \
+        else ""
+    return f"To comply {whatever}: {verb(need)}{drawn_part}."
 
 
 def _gap(margin: float, unit: str) -> str:
@@ -495,7 +542,7 @@ def readings(node, expr: str, values: dict, measured: dict, facts: dict) -> list
         if raised and isinstance(node.ops[0], (ast.GtE, ast.Gt)):    # its own margin with the slack's full depth
             margin -= raised                                          # (the trial is kept at 0 for the verdict)
         out.append({"margin": margin, "unit": unit, "holds": _evaluate(expr, trial), "value": value,
-                    "points": points})
+                    "points": points, "limit": _evaluate(ast.unparse(node.comparators[0]), trial)})
     return out
 
 
@@ -587,6 +634,9 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
             i.update(status=REVIEW, mark=MARK[REVIEW], reason=(
                 f"Complies as drawn, but not under every reading of {_which(lot, open_)} · Pick survey lot lines…"))
         i.update(delta=delta_words(i["status"], span, unit, approx), approx=approx)
+        one_way = not isinstance(ast.parse(expr or ast.unparse(node), mode="eval").body, ast.BoolOp)
+        if span[0] < 0 and one_way and (not i.get("hint") or i["hint"].startswith("To comply")):
+            i["hint"] = comply_hint(i["name"], node, rs, values, measured, approx) or i.get("hint")
         if approx and i["detail"].get("line"):
             i["detail"]["line"] = (f"{i['proposed']} proposed, {i['required']} required as drawn · with the tax map's "
                                    f"±{feet_inches(TOLERANCE)}: {i['delta']}")
@@ -777,12 +827,15 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 if worst is not None:                   # say the bad one first: "probably fine" it isn't
                     why = (f"At worst {worst[0]} against {worst[1]}: does not comply under that reading. " +
                            (why or ""))
-        alts = _alternatives(check, values, measured) if st == FAILS and not why and not splits else []
-        if len(alts) > 1 and all(alts):                 # several ways to comply, none met: say each one
+        alts = _alternatives(check, values, measured, facts) if st == FAILS and not why and not splits else []
+        shown = [[x for x in alt if x[6]] for alt in alts]          # the reason: what fails as drawn
+        if len(alts) > 1 and all(shown):                # several ways to comply, none met: say each one
             why = "Does not comply either way the rule allows: " + "; or ".join(
-                ", ".join(f"{n} {p}, needs {s} {r}" for n, p, s, r, _ in alt) for alt in alts)
-            fixes = [_fix(*alt[0]) for alt in alts if len(alt) == 1]
-            hint = "To comply: " + ", or ".join(fixes) + "." if fixes else hint
+                ", ".join(f"{n} {p}, needs {s} {r}" for n, p, s, r, *_ in alt) for alt in shown)
+            ways = [alt[0] for alt in alts if len(alt) == 1]
+            fixes = [_fix(*w[:5]) for w in ways]
+            hint = ("To comply" + (" whatever the survey shows" if any(w[5] for w in ways) else "") + ": " +
+                    ", or ".join(fixes) + "." if fixes else hint)
         out.append({
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],

@@ -635,6 +635,7 @@ def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,
     lot_area, lot_surveyed, street_name, ground {kind, count, range}, no_regrading."""
+    has_lot = bool(state.get("has_lot") or state.get("lot_area") is not None or state.get("lot_surveyed"))
     rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
          "actions": [("lookup", "Look up (coming soon)", False)], "tick": None},
@@ -644,12 +645,11 @@ def box_rows(state, flat=None):
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed"))
-         if state.get("has_lot") or state.get("lot_area") is not None or state.get("lot_surveyed") else NO_LOT,
-         "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))], "tick": None},
+         if has_lot else NO_LOT,
+         "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot else [], "tick": None},
         {"key": "street", "label": "Street side", "text": state.get("street_name") or (
-            "the highlighted line" if state.get("has_lot") or state.get("lot_area") is not None or state.get("lot_surveyed")
-            else "set from the lot, once there is one"),
-         "actions": [("street", "Change…", True)], "tick": None,
+            "the highlighted line" if has_lot else "set from the lot, once there is one"),
+         "actions": [("street", "Change…", True)] if has_lot else [], "tick": None,   # nothing to change yet: hidden
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
          "actions": [(k, t, True) for k, t in GROUND_CHOICES],

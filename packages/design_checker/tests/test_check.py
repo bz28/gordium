@@ -1048,7 +1048,7 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
     assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
-    assert "if plan and logic.yard_label_shown(labels, status):" in draw and "if not o.message or not labels:" in draw
+    assert "if plan and logic.yard_label_shown(labels, status):" in draw and "    if not boxed:\n        return" in draw
     assert "if plan and labels else []" in draw                                   # lot-edge labels: only when on
     assert "d.Draw2dLine(System.Drawing.PointF(a.X, a.Y)" in draw.split("yard_label_shown")[0]   # lines regardless
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
@@ -1656,3 +1656,41 @@ def test_review_round_1_of_the_architects_fixes():
     assert logic.height_limit_text(35.0, "35'-0\"") == "Height limit 35'-0\""
     assert "no grade plane yet" in logic.height_limit_text(None, "35'-0\"")
     assert "logic.height_limit_text(" in src
+
+
+def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
+    """The architect's review, pass 2 (items 2-6; item 1 is test_present's "doing what to comply says"):
+    2 the detail pane's button sits right under the reason, and its words aren't repeated as text above it;
+    3 Zoom to selects the row's objects, so it's clear what the row is about;
+    4 the "Height limit" label is the status box's size (13 pt), not 11;
+    5 with labels on, the status box is drawn once, in the active view, not in all four;
+    6 the empty file's start box hides "Use my survey…" and the street's "Change…" until a lot exists."""
+    from design_checker import rhino_logic as logic
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    detail = ui[ui.index("def show_detail("):]
+    # 2: reason, then the buttons, then the measuring notes; the hint as text only when there's no button
+    assert detail.index('for text in (det.get("line"), i.get("reason")):') < detail.index("for b in buttons:") \
+        < detail.index('for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):')
+    assert "    if i.get(\"hint\") and not buttons:\n        d.AddRow(_wide(i[\"hint\"], size=12))" in detail
+    assert 'buttons.append(button("Pick the main building…", a["main"]))' in detail
+    # 3
+    zoom = rhino[rhino.index("def zoom_to("):rhino.index("def set_labels(")]
+    assert zoom.index("view.ActiveViewport.ZoomBoundingBox(box)") < zoom.index("doc.Objects.UnselectAll()") \
+        < zoom.index("        o.Select(True)")
+    # 4 and 5
+    draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
+    assert "ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 30, dark, 13)" in rhino
+    assert "    boxed = bool(o.message and labels and _in_active_view(e))" in draw
+    assert draw.index("    boxed = ") < draw.index("    if boxed:\n        taken.append(logic.status_box(") \
+        < draw.index("    if not boxed:\n        return")         # nor its room kept clear in the other views
+    assert "return active is not None and e.Viewport.Id == active.ActiveViewportID" in rhino
+    # 6: behaviour
+    empty = {r["key"]: r for r in logic.box_rows({})}
+    assert empty["lot"]["actions"] == [] and empty["street"]["actions"] == [], (empty["lot"], empty["street"])
+    assert empty["lot"]["text"] == logic.NO_LOT
+    lot = {r["key"]: r for r in logic.box_rows({"has_lot": True, "lot_area": 5000})}
+    assert lot["lot"]["actions"] == [("lot", "Use my survey…", True)]
+    assert lot["street"]["actions"] == [("street", "Change…", True)]
+    surveyed = {r["key"]: r for r in logic.box_rows({"lot_area": 5000, "lot_surveyed": True})}
+    assert surveyed["lot"]["actions"] == [("lot", "Use my survey…", False)]

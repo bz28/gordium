@@ -888,3 +888,92 @@ def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
     assert {"Side yard, Northeast", "Side yard, Southwest"} <= names
     names = {i["name"] for i in check_site(s, f, extras=extras)["view"]["items"]}
     assert {"Side yard, East", "Side yard, West"} <= names
+
+
+def _feet(text):
+    """4'-11 3/8" -> 4.921875 (feet_inches read back)."""
+    import re
+    ft, inch, frac = re.fullmatch(r"(\d+)'-(\d+)(?: (\d+/\d+))?\"", text).groups()
+    num, den = (frac or "0/1").split("/")
+    return int(ft) + (int(inch) + int(num) / int(den)) / 12
+
+
+def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a_survey():
+    """The architect's review (pass 2, P1): on a tax-map lot "To comply" gave the shortfall as drawn, and moving
+    by it left the side yard needing review. The advice now comes from the verdict's own reading set: for random
+    houses on the plain lot, tax map and survey, doing exactly what a row's "To comply" says (that wall pulled in,
+    or the roof lowered, by the amount it gives; for the height's two ways, each in turn) makes that row COMPLY.
+    On the tax map it says "whatever the survey shows" and gives the as-drawn figure as well; on a survey, one
+    number. (A yard the height bonus raises is the height row's to settle: there the yard's own rule complies and
+    the row says the height's other way needs more.)"""
+    import random
+    import re
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    rnd = random.Random(21)
+    plain = lot_of([(0, 0), (50, 0), (50, 100), (0, 100)])
+    pull = {"Side yard, West": (1, 0), "Side yard, East": (-1, 2), "Front yard": (1, 1), "Rear yard": (-1, 3)}
+    one = r"(\d+'-\d+(?: \d/\d)?\")"
+    drawn = r"(?: \(" + one + r" as drawn\))?"
+    length = one + drawn
+    ways = {"move": re.compile(r"move the building " + one + r" farther from that lot line" + drawn),
+            "lower": re.compile(r"lower the building " + length),
+            "deeper": re.compile(r"make the (front yard|rear yard|side yard) " + length + r" deeper, keeping the other yards")}
+    tried = {True: 0, False: 0}
+    kinds = set()
+    for k in range(80):
+        surveyed = k % 2 == 0
+        x0, y0 = rnd.uniform(4, 14), rnd.uniform(18, 30)
+        x1, y1 = rnd.uniform(36, 47), rnd.uniform(70, 82)
+        h = rnd.choice((30, 35, 36.5, 38))
+        facts = {**FACTS, "jurisdiction": CITY, "lot_surveyed": surveyed}
+        rows = {i["name"]: i for i in check_site(_plot(box(x0, y0, x1, y1, 0, h), lot_=plain), facts)["view"]["items"]}
+        for name, i in rows.items():
+            hint = i.get("hint") or ""
+            if not hint.startswith("To comply") or not (name in pull or name == "Building height"):
+                continue
+            head, _, body = hint.partition(": ")
+            assert head in ("To comply", "To comply whatever the survey shows") and body.endswith("."), (k, name, hint)
+            for part in body[:-1].split(", or "):
+                kind, m = next(((kd, w.fullmatch(part)) for kd, w in ways.items() if w.fullmatch(part)), (None, None))
+                assert m, (k, name, part)
+                yard, gap_t, drawn_t = (m.group(1), m.group(2), m.group(3)) if kind == "deeper" else \
+                    (None, m.group(1), m.group(2))
+                if surveyed:                                   # a survey: one number, said plainly
+                    assert head == "To comply" and drawn_t is None, (k, name, hint)
+                if drawn_t:                                    # the as-drawn figure only beside a larger one
+                    assert _feet(drawn_t) < _feet(gap_t) and head.endswith("survey shows"), (k, name, hint)
+                gap, c, hh = _feet(gap_t), [x0, y0, x1, y1], h
+                if kind == "lower":
+                    hh = h - gap
+                else:
+                    side = "Side yard, West" if x0 <= 50 - x1 else "Side yard, East"    # the smaller one
+                    sign, at = pull[name if kind == "move" else side if yard == "side yard" else yard.capitalize()]
+                    c[at] += sign * gap
+                r2 = check_site(_plot(box(*c, 0, hh), lot_=plain), facts)
+                after = {j["name"]: j for j in r2["view"]["items"]}[name]
+                if after["status"] != present.COMPLIES and "other way needs" in (after["reason"] or ""):
+                    row = {x["Rule id"]: x for x in r2["rows"]}[after["rule"]]   # the yard's own rule complies
+                    after = {"status": (row.get("Sides") or {}).get(after.get("measure")) or row["Verdict"],
+                             "reason": after["reason"]}
+                assert after["status"] == present.COMPLIES, (k, name, part, after["status"], after["reason"])
+                tried[surveyed] += 1
+                kinds.add((kind, bool(drawn_t)))
+    assert tried[True] >= 15 and tried[False] >= 15, tried          # both kinds of lot really exercised
+    assert {("move", True), ("move", False), ("lower", False), ("deeper", False)} <= kinds, kinds
+    # the architect's case, word for word (the coordinator's wording): a west side yard 2'-11 3/8" short as drawn
+    words = {}
+    for surveyed in (False, True):
+        for b in ((7.053, 26, 38, 72, 30), (16, 20, 34, 66, 36.5)):
+            r = check_site(_plot(box(*b[:4], 0, b[4]), lot_=plain), {**FACTS, "jurisdiction": CITY, "lot_surveyed": surveyed})
+            words.update({(surveyed, b[4], i["name"]): i.get("hint") for i in r["view"]["items"]})
+    assert words[(False, 30, "Side yard, West")] == ("To comply whatever the survey shows: move the building 4'-11 3/8\" "
+                                                     "farther from that lot line (2'-11 3/8\" as drawn).")
+    assert words[(True, 30, "Side yard, West")] == "To comply: move the building 2'-11 3/8\" farther from that lot line."
+    assert words[(False, 30, "Front yard")] == ("To comply whatever the survey shows: move the building 1'-0\" farther "
+                                                "from that lot line.")       # in review as drawn: what makes it comply
+    assert words[(False, 36.5, "Building height")] == (
+        "To comply whatever the survey shows: lower the building 1'-6\", or make the front yard 8'-6\" (6'-6\" as drawn) "
+        "deeper, keeping the other yards.")
+    assert words[(True, 36.5, "Building height")] == ("To comply: lower the building 1'-6\", or make the front yard 6'-6\" "
+                                                      "deeper, keeping the other yards.")

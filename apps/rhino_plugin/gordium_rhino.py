@@ -475,6 +475,14 @@ def _notice_box(o, viewport, taken):
     return lines, x, y, w, h
 
 
+def _in_active_view(e):
+    """Whether this frame is the active view's: the status box is drawn there only, not in all four (the
+    architect's review, pass 2)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    active = doc.Views.ActiveView if doc is not None else None
+    return active is not None and e.Viewport.Id == active.ActiveViewportID
+
+
 def draw_screen(o, e):
     if not _here(o, e):
         return
@@ -489,7 +497,8 @@ def draw_screen(o, e):
     old = stale(o)
     labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))     # Show on-screen labels (off by default)
     taken = []                               # labels drawn this frame: none covers another, nor the status box
-    if o.message and labels:
+    boxed = bool(o.message and labels and _in_active_view(e))   # the status box once, in the view being worked in
+    if boxed:
         taken.append(logic.status_box(e.Viewport.Bounds.Width, _status_rows(o, stale(o))))
     # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
     # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
@@ -521,11 +530,11 @@ def draw_screen(o, e):
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
         left = min(corners, key=lambda p: p.X)       # the height limit, labelled at its left end in an elevation
-        ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 24, dark, 11)
+        ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 30, dark, 13)
     if notice is not None:
         lines, x, y, _, _ = notice
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
-    if not o.message or not labels:
+    if not boxed:
         return
     state = "stale" if old else o.message[0]
     color = ui.status_color({"does_not_comply": "does_not_comply", "needs_review": "needs_review"}.get(state, "complies"),
@@ -806,6 +815,13 @@ def zoom_to(item):
     view = doc.Views.Find("Front" if item.get("zoom") == "front" else "Top", False) or doc.Views.ActiveView
     doc.Views.ActiveView = view
     view.ActiveViewport.ZoomBoundingBox(box)
+    doc.Objects.UnselectAll()                # and selected, so it's clear what the row is about (the review)
+    picked = [o for o in (_find(doc, i) for i in item.get("objects") or []) if o is not None and o.IsSelectable()]
+    for o in picked:
+        o.Select(True)
+    if picked:
+        say("Zoom to: " + (item.get("name") or "this item") + ": " + str(len(picked)) + " object" +
+            ("s" if len(picked) != 1 else "") + " selected.")
     view.Redraw()
 
 

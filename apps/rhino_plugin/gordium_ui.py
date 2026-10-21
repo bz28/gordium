@@ -495,18 +495,27 @@ def show_detail(parts):
                    eto_status_color(i["status"]), bold=True, size=13))
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))
-    for text in (det.get("line"), i.get("reason"), i.get("hint") if i.get("hint") not in ("Add to check…",) else None,
-                 det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
+    for text in (det.get("line"), i.get("reason")):
         if text:
             d.AddRow(_wide(text, size=12))
+    # what to do about it, right under the reason: a button where there is one (never its words twice, nor the
+    # button scrolled out of sight below the measuring notes: the architect's review), else the hint's words
+    buttons = []
     if i.get("needs"):                    # exactly the stated facts this row waits for, asked in turn
-        d.AddRow(row(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"]))))
+        buttons.append(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"])))
     if i.get("hint") == "Pick the main building…":
-        d.AddRow(row(button("Pick the main building…", a["main"])))
+        buttons.append(button("Pick the main building…", a["main"]))
     if i["id"] == "scope.not_included":
-        d.AddRow(row(button("Add to check…", lambda: a["add"](i["objects"]))))
+        buttons.append(button("Add to check…", lambda: a["add"](i["objects"])))
         if i.get("ground_like"):              # only the architect's word leaves it out (never a guess)
-            d.AddRow(row(button("This is the ground", lambda: a["ground"](i["ground_like"]))))
+            buttons.append(button("This is the ground", lambda: a["ground"](i["ground_like"])))
+    for b in buttons:
+        d.AddRow(row(b))
+    if i.get("hint") and not buttons:
+        d.AddRow(_wide(i["hint"], size=12))
+    for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
+        if text:
+            d.AddRow(_wide(text, size=12))
     for t in det.get("definitions") or []:        # E5: the whole definitions an examiner measures height by
         d.AddRow(_wide(t["term"], bold=True, size=12))
         d.AddRow(_wide("“" + t["text"] + "”", size=11))
