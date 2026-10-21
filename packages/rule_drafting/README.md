@@ -93,7 +93,7 @@ python -m rule_drafting draft --limit 10 --yes      # drafts them; --only UNIT..
 python -m rule_drafting cost                        # what the recorded runs actually cost
 ```
 
-Settings are in `rule_drafting/settings.yaml` (default `claude-sonnet-5-5`, effort medium, budget $5.00).
+Settings are in `rule_drafting/settings.yaml` (default `claude-sonnet-5-5`, effort medium, budget $20.00).
 The budget is a hard cap kept in `~/.config/gordium/rule_drafting_ledger.json`, separate from labeling's,
 with the same rules: a run whose estimate exceeds what's left is refused, and no call is sent whose worst
 case could cross the cap. Drafting never runs in CI; the tests use a fake client.

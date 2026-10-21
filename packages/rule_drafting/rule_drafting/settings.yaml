@@ -12,4 +12,4 @@ max_attempts: 3           # the first answer plus up to 2 retries when code reje
 # A hard cap on total spending across all drafting runs, in US dollars, separate from labeling's. Kept in
 # ~/.config/gordium/rule_drafting_ledger.json (shared by every checkout), never taken as less than the
 # repository's run records add up to.
-budget_usd: 5.00
+budget_usd: 20.00
