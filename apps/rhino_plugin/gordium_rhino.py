@@ -12,6 +12,7 @@ GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts), GordiumOf
 """
 
 import json
+import math
 import os
 import subprocess
 import sys
@@ -103,6 +104,7 @@ TOAST_SECONDS = 6                            # the "no longer complies" notice s
 GREEN, RED, AMBER = System.Drawing.Color.FromArgb(31, 122, 77), System.Drawing.Color.FromArgb(200, 50, 43), \
     System.Drawing.Color.FromArgb(154, 100, 0)
 BLUE = System.Drawing.Color.FromArgb(29, 95, 138)
+CONTEXT_GUIDE = System.Drawing.Color.FromArgb(135, 135, 135)    # the live footprints (the context map)
 
 
 # ---- the background checker ------------------------------------------------------------------------------
@@ -407,6 +409,10 @@ def cull(o, e):
 def bounds(o, e):
     if _here(o, e) and o.box.IsValid:
         e.IncludeBoundingBox(o.box)
+    context = STATE.get("context_guides") or {}
+    if e.RhinoDoc is not None and logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
+            and context.get("box") is not None and context["box"].IsValid:
+        e.IncludeBoundingBox(context["box"])         # the live footprints reach past the lot
 
 
 def stale(o):
@@ -450,6 +456,11 @@ def draw_scene(o, e):
     if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
         pts = o.lot_outline
         d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
+    context = STATE.get("context_guides") or {}
+    if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
+            and (STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True):
+        for line in context.get("lines") or []:          # the neighbouring footprints: live only, never in the file
+            d.DrawPolyline(line, CONTEXT_GUIDE, 1)
     guide = STATE.get("lookup_guide")
     if guide is not None and getattr(o, "confirm", None) is not None:    # only while the start box is open
         d.DrawPatternedPolyline(guide, ui.status_color("needs_review", ui.viewport_dark()), ui.DASHED, 2, True)
@@ -699,7 +710,8 @@ def PANEL_ACTIONS():
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check,
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
-            "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building}
+            "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
+            "context": show_context}
 
 
 DOCK_ID = "7c3e9a51-2d84-4b6f-9e17-5a0c8d2f4b63"   # the Gordium panel's id: Rhino remembers where it is docked
@@ -786,14 +798,14 @@ def panel():
         host = logic.dock_host(sc.sticky.get("gordium_dock_hosts") or {}, doc.RuntimeSerialNumber if doc else None)
         if host is not None:
             if p is None or getattr(p["form"], "host", None) is not host or not p["form"].Visible:
-                p = ui.make_panel(_actions(), ui.DockHost(dock, host))
+                p = ui.make_panel(_actions(), ui.DockHost(dock, host), context_on=_context_on(doc))
                 STATE["panel_parts"] = p
                 LEFTOVERS["panel"] = p["form"].Close
             if logic.place_panel_now(p.get("placed")):          # once: then where the architect puts it
                 p["placed"] = ui.fit_floating(host, Rhino.UI.RhinoEtoApp.MainWindowForDocument(doc) if doc else None)
             return p
     if p is None or not p["form"].Visible:
-        p = ui.make_panel(_actions())
+        p = ui.make_panel(_actions(), context_on=_context_on(doc))
         STATE["panel_parts"] = p
         LEFTOVERS["panel"] = p["form"].Close
         p["form"].Show()
@@ -1486,14 +1498,18 @@ def confirm(doc, facts, options, mode="check"):
     if not logic.allowed("open_box", _box_open()) or not gate.enter():   # one start box at a time
         say(logic.BOX_BUSY)
         return None
+    result = None
     try:
         ui.set_box_open(STATE.get("panel_parts"), True)
-        return _confirm(doc, facts, options, mode)
+        result = _confirm(doc, facts, options, mode)
     finally:
         gate.leave()
         ui.set_box_open(STATE.get("panel_parts"), False)
         if STATE.get("dirty"):          # edits made while the box was open: live mode checks them at the next idle
             STATE["dirty"] = time.time() - IDLE_SECONDS
+    if result is not None:              # Draw (GordiumStart or Edit site…): the neighbourhood follows the lot
+        logic.guard(sync_context, "draw the neighbourhood")(doc, result)
+    return result
 
 
 def _confirm(doc, facts, options, mode):
@@ -1987,6 +2003,7 @@ def run_check(doc, report=True):
         if not STATE.get("headless"):
             ui.show(panel(), view)
             ui.set_labels_tick(STATE.get("panel_parts"), shown)
+            ui.set_context_tick(STATE.get("panel_parts"), _context_on(doc))
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
             say(logic.report_message(path, False, result["report_error"], stale=had_report))
@@ -2367,6 +2384,243 @@ def gordium_start():
     Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
                              logic.MASSING)
     return result
+
+
+# ---- the context map: the neighbourhood around a looked-up lot (design_checker.context_box) ---------------------
+# Drawn after Draw on its own locked, grey layers under Gordium::Context, which the checker never measures
+# (rhino_logic.classify). Only what rhino_logic.context_objects allows is written into the file (sources whose store
+# is raw: the State's parcels and streets, and Gordium's own frame, north arrow, scale bar and credits); the
+# building footprints (store: none) are only drawn on screen by the overlay, never saved.
+
+CONTEXT_GREYS = {"Parcels": (150, 150, 150), "Streets": (120, 120, 120), "Notes": (110, 110, 110)}
+
+
+def _context_layer(doc, name):
+    """A context sublayer, made grey; locked again by _lock_context once its objects are in."""
+    index = _layer(doc, logic.CONTEXT + "::" + name)
+    r, g, b = CONTEXT_GREYS[name]
+    doc.Layers[index].Color = System.Drawing.Color.FromArgb(r, g, b)
+    return index
+
+
+def _context_layer_indexes(doc):
+    return [i for i, layer in enumerate(doc.Layers)
+            if not layer.IsDeleted and logic.on_layer(layer.FullPath, logic.CONTEXT)]
+
+
+def _lock_context(doc, locked):
+    for i in _context_layer_indexes(doc):
+        doc.Layers[i].IsLocked = locked
+
+
+def _clear_context(doc, sources=None):
+    """Every object Gordium drew on the context layers (each carries its source in CONTEXT_KEY) deleted, whatever the
+    layers' state: a hidden or locked layer's objects aren't deleted (Delete without ignoring modes), so each layer
+    is shown and unlocked for it, then put back as it was and locked (review round 1: a context hidden in an earlier
+    session was drawn twice). The live footprints and the saved snapshot go with it. With `sources`
+    (rhino_logic.context_replaces), only those sources' objects go, and the caller rewrites the record and the
+    footprints: a layer whose service failed keeps what was saved."""
+    dirty = STATE.get("dirty")             # deleting the context changes nothing the check reads (see draw_context)
+    indexes = _context_layer_indexes(doc)
+    parents = []                           # a locked or hidden parent ("Gordium") holds its sublayers' objects too
+    for i in indexes:                      # (review round 4): shown and unlocked for the delete, then put back
+        parent = doc.Layers[i].ParentLayerId
+        while parent != System.Guid.Empty:
+            j = doc.Layers.FindId(parent)
+            if j is None:
+                break
+            if j.Index not in indexes and j.Index not in [k for k, _, _ in parents]:
+                parents.append((j.Index, j.IsVisible, j.IsLocked))
+            parent = j.ParentLayerId
+    shown = [(i, doc.Layers[i].IsVisible) for i in indexes]
+    for i in indexes + [k for k, _, _ in parents]:
+        doc.Layers[i].IsVisible = True
+        doc.Layers[i].IsLocked = False
+    for i in indexes:
+        for o in list(doc.Objects.FindByLayer(doc.Layers[i]) or []):
+            source = o.Attributes.GetUserString(logic.CONTEXT_KEY)
+            if source and (sources is None or source in sources):
+                doc.Objects.Delete(o, True)
+    for i, was in shown:
+        doc.Layers[i].IsVisible = was
+        doc.Layers[i].IsLocked = True
+    for k, was_visible, was_locked in parents:
+        doc.Layers[k].IsVisible = was_visible
+        doc.Layers[k].IsLocked = was_locked
+    if sources is None:
+        if logic.guides_of(STATE.get("context_guides"), doc.RuntimeSerialNumber):
+            STATE.pop("context_guides", None)
+        doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)
+    STATE["dirty"] = dirty
+
+
+def _context_record(doc):
+    """The record of the neighbourhood in this file (rhino_logic.context_record), or None."""
+    try:
+        return json.loads(doc.Strings.GetValue(SECTION, logic.CONTEXT_ENTRY) or "null")
+    except (ValueError, AttributeError):
+        return None
+
+
+def _context_payload(frame):
+    """The context for a saved lookup frame: context_box in its own process (the repo's .venv), stopped after
+    CONTEXT_LIMIT_S. None when there is no looked-up lot to centre it on."""
+    args = logic.context_command(_python(), frame, STATE.get("lookup_fixture"))
+    if args is None:
+        return None
+    say("Fetching the neighbourhood (up to %d s)…" % logic.CONTEXT_LIMIT_S)   # Rhino waits: say why first (round 4)
+    Rhino.RhinoApp.Wait()
+    packages = os.path.join(REPO, "packages")
+    env = dict(os.environ)
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONPATH"] = os.pathsep.join(STATE.get("extra_paths", []) + [
+        os.path.join(packages, n) for n in sorted(os.listdir(packages)) if os.path.isdir(os.path.join(packages, n))])
+    with open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a", encoding="utf-8") as err:
+        try:
+            done = subprocess.run(args, cwd=REPO, env=env, stdout=subprocess.PIPE, stderr=err,
+                                  timeout=logic.CONTEXT_LIMIT_S, encoding="utf-8")
+        except subprocess.TimeoutExpired:
+            return {"status": "timeout", "message": "The neighbourhood took longer than %d s: the lot is drawn "
+                    "without it (Show neighbourhood tries again)." % logic.CONTEXT_LIMIT_S}
+    lines = (done.stdout or "").strip().splitlines()
+    return json.loads(lines[-1]) if lines else {"status": "error"}
+
+
+def _context_text(doc, o, anchor):
+    """A context note as model text: its lines from the anchor up (bottom-left justified), along the note's turn
+    (`rotation_deg`, the square's), o["height_ft"] high."""
+    a = math.radians(o.get("rotation_deg") or 0.0)
+    plane = rg.Plane(anchor, rg.Vector3d(math.cos(a), math.sin(a), 0), rg.Vector3d(-math.sin(a), math.cos(a), 0))
+    text = rg.TextEntity.Create(o.get("text") or "", plane, doc.DimStyles.Current, False, 0, 0)
+    # the note's own scale, not the document's: a template's dimension style can carry a model-space scale (the feet
+    # template's "Feet Decimal": 12, with annotation scaling on), which multiplied the text to ~30 ft letters (Rhino
+    # job's probe, PR #23). At 1 the note is NOTE_HEIGHT_FT high as drawn, whatever the template.
+    text.DimensionScale = 1.0
+    text.TextHeight = _model_length(doc, o.get("height_ft") or logic.NOTE_HEIGHT_FT)
+    text.Justification = rg.TextJustification.BottomLeft
+    return text
+
+
+def draw_context(doc, frame):
+    """The neighbourhood around the looked-up lot: fetched, then drawn in place of any earlier one. Says what it
+    drew (or why it didn't)."""
+    payload = _context_payload(frame)
+    if payload is None:
+        say(logic.NO_CONTEXT)
+        return None
+    if payload.get("status") != "found":   # nothing answered: what is saved stays as it is
+        say(logic.context_says(payload))
+        return payload
+    old = _context_record(doc)
+    held = STATE.get("context_guides") or {}
+    # one plan for the message, the record, what is deleted and the footprints on screen (review rounds 6-7)
+    plan = logic.context_merge(payload, old, frame,
+                               live_on_screen=logic.guides_on_screen(held, doc.RuntimeSerialNumber))
+    payload, record, sources, keep_guides = plan["payload"], plan["record"], plan["replace"], plan["keep_guides"]
+    STATE.pop("context_guides", None)
+    dirty = STATE.get("dirty")             # live mode hears every add: the context changes nothing the check reads,
+    _clear_context(doc, sources)           # so the model's "changed since the check" mark is put back after
+    _lock_context(doc, False)
+    layers = {logic.CONTEXT + "::" + name: _context_layer(doc, name) for name in CONTEXT_GREYS}
+    for o in logic.context_objects(payload):
+        attrs = Rhino.DocObjects.ObjectAttributes()
+        attrs.LayerIndex = layers.get(o["layer"]) if o["layer"] in layers else _layer(doc, o["layer"])
+        attrs.Name = o.get("name") or ""
+        attrs.SetUserString(logic.CONTEXT_KEY, o["source"])
+        pts = [_model_point(doc, p) for p in o["points"]]
+        if o["kind"] == "dot":
+            doc.Objects.AddTextDot(o.get("text") or "", pts[0], attrs)
+        elif o["kind"] == "text":          # the sources: wrapped model text from its anchor, turned with the square
+            doc.Objects.AddText(_context_text(doc, o, pts[0]), attrs)
+        else:
+            doc.Objects.AddCurve(rg.PolylineCurve(pts + [pts[0]] if o["kind"] == "closed" else pts), attrs)
+    _lock_context(doc, True)
+    STATE["dirty"] = dirty
+    _context_visible(doc, _context_on(doc))
+    # the snapshot (records, never data) with the frame it was drawn around: sync_context compares the lot's frame
+    # (layer by layer: a failed layer's entries carried over, rhino_logic.context_merge)
+    doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(record))
+    if keep_guides:                        # the footprint service didn't answer: the ones on screen stay
+        STATE["context_guides"] = held
+    else:
+        guides = [rg.Polyline([_model_point(doc, p) for p in pts + [pts[0]]]) for pts in logic.context_guides(payload)]
+        box = rg.BoundingBox.Empty
+        for line in guides:
+            box.Union(line.BoundingBox)
+        STATE["context_guides"] = {"doc": doc.RuntimeSerialNumber, "lines": guides, "box": box}
+    doc.Views.Redraw()
+    say(logic.context_says(payload))
+    return payload
+
+
+def sync_context(doc, facts):
+    """After a box's Draw (GordiumStart or Edit site…): the neighbourhood follows the lot (rhino_logic.context_step).
+    A lot the lookup drew gets its own, an earlier one (another address, a lot since drawn or picked) is cleared, the
+    same lot keeps what is drawn (review round 2: an Edit site… lookup left the earlier address's neighbourhood)."""
+    drawn = (_context_record(doc) or {}).get("frame")
+    frame = logic.context_frame(facts, _ui_state(doc))
+    on = _context_on(doc)
+    step = logic.context_step(frame, drawn, on)
+    refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
+    if step == "keep" and frame and on and refetch:
+        # the same lot in a reopened file: its footprints (never saved) fetched again. draw_context replaces what is
+        # drawn only once the fetch has worked, so offline the saved parcels and streets stay (review round 3)
+        draw_context(doc, frame)
+        return
+    if step in ("clear", "draw", "off"):
+        _clear_context(doc)
+    if step == "draw":
+        draw_context(doc, frame)       # says what it drew, or why not
+    elif step == "off":
+        say("Neighbourhood not drawn: Show neighbourhood is off in the panel (tick it to draw it).")
+    elif step == "clear":
+        say("Neighbourhood removed: it is drawn only around a lot the start box looked up.")
+    elif frame and on:
+        _context_visible(doc, True)    # as the tick says (a file saved with it off opens hidden)
+
+
+def _context_on(doc):
+    """This document's Show neighbourhood (rhino_logic.context_shown: its Gordium settings, on unless unticked), also
+    kept per document for the drawing (draw_scene runs every frame). On when there is no document."""
+    if doc is None:
+        return True
+    on = logic.context_shown(_ui_state(doc))
+    STATE.setdefault("context_by_doc", {})[doc.RuntimeSerialNumber] = on
+    return on
+
+
+def _context_visible(doc, on):
+    """Every context layer on or off (a sublayer hidden in the Layers panel too). Whether there is one."""
+    indexes = _context_layer_indexes(doc)
+    for i in indexes:
+        doc.Layers[i].IsVisible = bool(on)
+    return bool(indexes)
+
+
+def show_context(on):
+    """The panel's "Show neighbourhood": the context layers and the live footprints on or off. Turned on in a file
+    whose footprints aren't on screen (they are never saved: a reopened file), the neighbourhood is fetched again."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:
+        say(logic.NO_DOCUMENT)
+        return
+    _save_ui_state(doc, dict(_ui_state(doc), show_context=bool(on)))     # per file (coordinator, 2026-10-21)
+    STATE.setdefault("context_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
+    drawn = _context_visible(doc, on)
+    refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
+    loaded = not refetch
+    if on and refetch:                     # draw_context says what it drew, or why it couldn't
+        try:
+            facts = current_facts(doc)
+        except ValueError:
+            facts = {}
+        draw_context(doc, logic.context_frame(facts, _ui_state(doc)))
+    elif on:
+        doc.Views.Redraw()
+        say("Neighbourhood shown (drawing only: the check never measures it).")
+    else:
+        doc.Views.Redraw()
+        say("Neighbourhood hidden." if drawn or loaded else "Neighbourhood off (none drawn in this file).")
 
 
 def _doc_name(doc):

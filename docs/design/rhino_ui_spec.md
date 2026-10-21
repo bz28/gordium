@@ -54,6 +54,8 @@ A6 [rhino] **Removed from the box:**
 - the starting building is always drawn with the envelope (a "Hide starting house" toggle sits in the panel, and hiding it doesn't stop it being checked);
 - floor-to-floor stays 11'-8" in code, editable later through GordiumFacts.
 
+A6b [rhino] **The neighbourhood (context map).** After Draw on a looked-up lot, the 1500 ft × 1500 ft square around it is drawn as a site context drawing: neighbouring parcels and street centerlines (the State's, `store: raw`) as grey curves on locked `Gordium::Context::Parcels` / `::Streets`, the square, a north arrow (the lot is turned so its street runs along the bottom, so north is rarely up), a 100 ft scale bar and the source lines on `::Notes`; the building footprints (`store: none` until Ben decides) only on screen. Never measured (`rhino_logic.classify`). A "Show neighbourhood" tick in the panel; turned on in a reopened file it fetches again. (`design_checker.context_box`, `site_lookup.context`.)
+
 A7 [rhino] **Look.** System default buttons and checkboxes; no brand accent color.
 
 ## B. Generated massing and envelope (board 2)
