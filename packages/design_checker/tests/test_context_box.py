@@ -308,8 +308,12 @@ def test_the_tick_starts_as_it_was_last_set():
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     box = ui[ui.index("def _context_box("):ui.index("def _envelope_box(")]
     assert "box.Checked = bool(on)" in box and box.index("box.Checked") < box.index("CheckedChanged")
-    assert "_context_box(actions, context_on)" in ui and "def make_panel(actions, context_on=True):" in ui
+    assert "_context_box(actions, context_on)" in ui and "def make_panel(actions, host=None, context_on=True):" in ui
+    # both ways the panel is made (docked, the default since the MVP panel; floating when it can't be) start the tick
+    # as it was last set
+    assert 'ui.make_panel(_actions(), ui.DockHost(dock, host), context_on=STATE.get("context_on", True))' in RHINO
     assert 'ui.make_panel(_actions(), context_on=STATE.get("context_on", True))' in RHINO
+    assert RHINO.count("ui.make_panel(") == 2
 
 
 def test_the_quickstart_says_how_footprints_come_back_after_reopening():
@@ -615,7 +619,8 @@ def test_the_plugin_draws_the_context_after_a_box_draw_guarded_and_has_a_tick():
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert re.search(r'CheckedChanged \+= logic\.guard\(lambda s, e: actions\["context"\]', ui)
     greyed = ui[ui.index('parts["greyed"] = ['):].split("\n", 1)[0]
-    assert "context_tick" in greyed                                      # off while a start box is open
+    ticks = ui[ui.index("    ticks = ["):].split("\n    # while", 1)[0]
+    assert "row(_context_box(actions, context_on))" in ticks and "*ticks" in greyed   # off while a box is open
 
 
 def test_the_panel_says_what_was_drawn():

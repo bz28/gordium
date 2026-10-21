@@ -77,7 +77,8 @@ def test_106_fills_the_box_with_suggestions_and_never_confirms_the_district():
     assert saved["street_source"] == "suggested by Gordium · City of Ithaca roads, used live"
     assert not state.get("district_confirmed") and not logic.can_draw(state)       # I confirm: still the architect's
     rows = {r["key"]: r for r in logic.box_rows(state)}
-    assert rows["lot"]["text"] == "7,034 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public"
+    # whole square feet rounded down, as the checker's Lot area row says it (the MVP list, #15)
+    assert rows["lot"]["text"] == "7,033 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public"
     assert all(r["review"] is None for r in rows.values()) and logic.unsettled(saved) == {}
     assert "zones_found" not in facts and "street_name" not in facts                # box choices, not lot facts
     from model_measurement.project import fact_problems
@@ -292,16 +293,20 @@ def test_a_starting_house_is_drawn_on_the_looked_up_ground_as_it_is(tmp_path):
 
 def test_tax_map_slivers_get_no_length_label():
     """Seen in Rhino on 106 Ithaca Rd: its tax-map outline has edges of 0.14 and 0.24 ft, each labelled
-    (0'-1 5/8"), cluttering the plan. Edges under SHORTEST_LABELLED_EDGE get none; every other edge keeps its own."""
-    from design_checker.check import SHORTEST_LABELLED_EDGE, plan
+    (0'-1 5/8"), cluttering the plan. With #15's runs (edges carrying on in nearly one direction labelled once),
+    no label is shorter than SHORTEST_LABELLED_EDGE and every run that long keeps one."""
+    from design_checker.check import SHORTEST_LABELLED_EDGE, edge_runs, plan
     p = looked_up("106_ithaca_rd")
     ring = p["writes"]["lot_ring"]
     n = len(ring)
     site = {"lot": {"edges": [{"points": [ring[i] + [0.0], ring[(i + 1) % n] + [0.0]]} for i in range(n)]},
             "buildings": []}
     got = plan(site, {"outline": [], "holes": []}, {"items": []}, {})
-    long_edges = [i for i in range(n) if math.dist(ring[i], ring[(i + 1) % n]) >= SHORTEST_LABELLED_EDGE]
-    assert len(got["edges"]) == len(long_edges) == n - 2
+    runs = [length for _, length in edge_runs(site["lot"]["edges"])]
+    short = [i for i in range(n) if math.dist(ring[i], ring[(i + 1) % n]) < SHORTEST_LABELLED_EDGE]
+    assert len(short) == 2                                  # the two slivers of the real outline
+    assert len(got["edges"]) == sum(r >= SHORTEST_LABELLED_EDGE for r in runs) and len(got["edges"]) < n - 2
+    assert all(not e["length"].startswith("0'") for e in got["edges"])          # no sliver labelled
 
 
 # ---- review round 1 of PR #19 (2026-10-20): each finding pinned ------------------------------------------------

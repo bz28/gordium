@@ -1,0 +1,36 @@
+# MVP UI: evidence from Rhino 8 (Mac), 2026-10-21
+
+**Purpose:** what each scripted Rhino check of the MVP screens proved, with its results and screenshots.\
+**For:** engineers, Ben, and architects who want to see the screens.\
+**Kept current by:** the MVP PR, each time a Rhino check is run again.
+
+Each file below comes from a scripted run in Rhino that **asserts** its claims (the run fails loudly otherwise) and
+closes its documents. Scripts live in `apps/rhino_plugin/tests/`. The sample is 106 Ithaca Rd's real lot as the
+State tax map draws it (parcel 84.-2-6), placed as the address lookup places it: the street along the bottom of
+Top view, the lot facing south-east, so its side yards are named Southwest (on your left from the street) and
+Northeast. Since review round 1 each row's verdict, Delta and red/amber come from one set of its readings
+(design_checker.present.settle).
+
+| File | What it proves |
+|---|---|
+| `mvp_checks_results.json` | `mvp_checks_in_rhino.py`: 13 of 13. Flat ground: no Ground row in the start box; Stories and Building height (at the limit) comply, each saying "assuming flat ground" (the height rule's bonus reads the rear yard, but at 35 ft or under it never comes into it). Labels off by default (the document's setting and the tick); with labels off a failing yard's shortfall is still labelled (the house 5 ft to the left); the tick turns labels on and is saved in the document. No code-edition line in the panel header (the legend names it). The column is "Delta", in words. |
+| `1_labels_off_failing_shortfall_only.png` | Top view, labels off, the house 5 ft to the left: only the failing Southwest side yard's label shows. |
+| `1_labels_on.png` | The same view with "Show on-screen labels" ticked. |
+| `2_3_panel_delta_in_words_no_code_line.png` | The panel (an earlier run, the floating window): no code-edition line in its header; Delta in words. |
+| `highlight_results.json` | `highlight_in_rhino.py`: 19 of 19. The Southwest side yard 12'-0 5/8" of 10'-0"; the start house has nothing red; moved 5 ft left, 7'-0 5/8": does not comply. Measured from the lot's own left line (slightly slanted on this lot): red runs from the wall to 8 ft (over even if the line is 2 ft out), amber from 8 to 12 ft, beside it; the only
+amber past 12 ft is the rear yard's own strip (it needs review: its minimum also moves with the lot depth's
+±4'-0"). The notice and the panel's Delta say "at least 0'-11 1/4" short" (rounded down: never more than certain). Highlights #D7263D / #F2A900, red with the heavier edge; no label (yards and the five lot-edge runs) crosses a dimension, a lot edge or the house, covers another label or leaves the view, each within 12 px of its own line (the long Southwest label goes
+on two lines, its name then its numbers, as there is no room for it on one); the notice covers neither the model nor the status box; the Lot fact names its source once, its size the Lot area row's; the selected yard's detail says what red and amber mean; the same on a dark background (put back after). |
+| `4_red_amber_top.png`, `4_red_amber_perspective.png` | Plan and 3D, light background: the red strip with its solid edge at the left wall, the amber band beside it, drawn over the envelope; the model framed with room, the notice clear of it. |
+| `4_red_amber_top_dark.png`, `4_red_amber_perspective_dark.png` | The same on a dark viewport background. |
+| `2_labels_on_off_every_line.png` | Plan with labels on: every yard label and the five lot-edge runs (the curved front labelled once, 75'-10") beside their own lines, none crossing a line or another label. |
+| `dock_results.json`, `6_docked_panel.png` | `dock_in_rhino.py`: 8 of 8. The Gordium panel is a real Rhino panel (a .NET type made at run time with Reflection.Emit). Docked beside Rhino's panels when Properties or Layers is showing; otherwise Rhino floats it, and its window is made the panel's size at the document's right edge (this run: floating, 400 × 720). Its text left aligned; a reload refills the same panel; GordiumOff closes it; the next command opens it again. The screenshot is an earlier, docked run. |
+| `panel_width_results.json`, `7_panel_at_380px.png`, `7_panel_at_540px.png` | `panel_width_in_rhino.py`: 9 of 9. At 380 and 540 px, with every group open and a failing yard: measured at the widths the cells are drawn, no cell draws beyond itself (each wraps to two lines at most); every cell shortened with "…" is whole in its item's detail; every row of buttons and ticks fits. (Screenshots from the earlier sample.) |
+| `startup_panel_results.json` | `startup_panel_in_rhino.py`: 4 of 4. GordiumPanel (the command Rhino's startup list runs) registers the panel and nothing else: no checker, no check, the model untouched; a Gordium tab Rhino reopens shows "Gordium: run GordiumStart or GordiumCheck to check this model.", never "container is empty". Not checked here: Rhino's startup list running it at a real launch (needs a restart). |
+| `no_freeze_results.json` | `no_freeze_in_rhino.py`: 15 of 15. No pipe I/O on Rhino's thread; reloads (with the state cleared, with it kept, and over a copy from before LEFTOVERS existed, 9303d10) leave one copy's handlers attached, the old drawing off and the old checker stopped; an edit is noticed and re-checked (the left yard 12'-0 5/8" → 11'-0 5/8"); off() leaves nothing attached. |
+| `quickstart_results.json`, `quickstart/*.png` | `quickstart_in_rhino.py`: 18 of 18. QUICKSTART's "Test it yourself" on the real sample, each edit made in the model and checked as live mode checks it, then undone: the starting house (35'-11" × 37'-4", the Southwest side yard 12'-0 5/8", coverage 19.1%, the rear yard needing review for the open question, the 35 ft height complying), 5 ft back, 6 ft and 7 ft back (needs review: with the depth's 4 ft slack some reading complies) and 10 ft (does not
+comply, at least 0'-7 1/4" short), the rear wall 17 ft (coverage 27.8%: does not comply), the roof 4 ft (−4'-0" short: the height reads no lot line), the Southwest wall 3 ft out (needs review, up to 2'-11 3/8" short) and 5 ft (at least 0'-11 1/4" short), a garage, a floor moved, the height bonus (needs review), Delta in words, a corner lot, a survey (39'-10" wide, the Southwest yard 10'-0", at limit), and a millimeter template giving the same rows. |
+
+Not yet checked: the red/amber drawing and the docked panel on **Windows** (the same code, but Windows draws through
+a different graphics path and its own panel host; run `highlight_in_rhino.py` and `dock_in_rhino.py` there before
+relying on them).

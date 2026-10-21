@@ -3,6 +3,7 @@ summary, which objects turn red, the failing distances, and the background JSON 
 
 import io
 import json
+import math
 
 import pytest
 
@@ -273,6 +274,32 @@ def test_a_lot_not_yet_surveyed_is_the_lot_as_drawn_and_said_so():
     assert every_reading(COVER, over, {}) == ("fail", "fails with the lot as drawn (confirm the survey)")
 
 
+def test_the_checker_and_the_panel_read_one_reading_set():
+    """Review round 2: the checker took its readings independently and gave up past 200 combinations, while the
+    panel's set kept each lot reading's measurements together: they disagreed. Both now read reading_set.combos:
+    the readings of one lot reading together (2 + 2, not 2 x 2 here), a word (the use, read by applies_when)
+    taken as it is, and on a tax-map lot the slack, a yard never below 0."""
+    from design_checker import reading_set
+    from design_checker.check import every_reading
+    a, b = "line 10 as a side lot line", "line 10 as a rear lot line"
+    measured = {"rear_yard": {"value": None, "readings": [{"reading": a + "; to the wall", "value": 23},
+                                                          {"reading": b + "; to the wall", "value": 27}]},
+                "lot_depth": {"value": None, "readings": [{"reading": a, "value": 100}, {"reading": b, "value": 90}]},
+                "use": {"value": "one_family_detached"}}
+    values = {k: m["value"] for k, m in measured.items()}
+    every = reading_set.combos({"rear_yard", "lot_depth"}, values, measured)
+    assert sorted((t["rear_yard"], t["lot_depth"]) for t, _ in every) == [(23, 100), (27, 90)]   # never 23 with 90
+    rule, uses = dict(REAR, applies_when='use == "one_family_detached"'), {"use": {"one_family_detached"}}
+    assert every_reading(rule, measured, uses) is None               # 23 < 25 under one reading, 27 >= 22.5 the other
+    fails = {**measured, "rear_yard": {"value": None, "readings": [{"reading": a + "; to the wall", "value": 20},
+                                                                   {"reading": b + "; to the wall", "value": 21}]}}
+    assert every_reading(rule, fails, uses) == ("fail", "fails under every reading")   # the use read as a word
+    tax = {"side_yard_smaller": {"value": 1.0}, "lot_area": {"value": None, "tolerance": {"low": 5000, "high": 6000},
+                                                             "readings": [{"reading": "as drawn", "value": 5500}]}}
+    trials = reading_set.combos({"side_yard_smaller"}, {"side_yard_smaller": 1.0}, tax, {"lot_surveyed": False})
+    assert sorted(t["side_yard_smaller"] for t, _ in trials) == [0.0, 3.0]          # 1 − 2 kept at 0
+
+
 def test_a_measurement_with_no_reading_at_all_is_never_worked_out():
     from design_checker.check import every_reading
     assert every_reading(COVER, {"building_area": _m(1600), "lot_area": _m(None)}, {}) is None
@@ -316,9 +343,10 @@ def test_the_massing_layer_holds_building_objects():
 
 
 def test_the_sample_lot_gives_the_spec_massing():
-    """73'-0" x 90'-0" (6,570 sf, from the tax map) -> kept 2'-0" back: 49'-0" x 30'-3" = 1,482 sf, 22.56% of the lot as
-    drawn (25% of the smallest lot the tax map allows: every line 2 ft in, 69 x 86 = 5,934 sf, so at most 1,483.5
-    sf), at 27'-0" from the street."""
+    """106 Ithaca Rd as the State tax map draws it (7,033.8 sf; 7,033.5 as placed, its points rounded to 1/10,000 ft) -> the starting house
+    kept 2'-0" back from every limit: 35'-11" x 37'-4", three floors to 35'-0", 27'-0 3/4" from the street. Here the
+    left side yard binds, not coverage: 19.1% of the lot as drawn, well under 25% of the smallest lot the tax map
+    allows (6,357 sf, the checker's own worst case)."""
     import math
     import tempfile
     from pathlib import Path
@@ -341,10 +369,23 @@ def test_the_sample_lot_gives_the_spec_massing():
     got = start(path, s["facts"])
     outline = Polygon(got["floors"][0]["outline"])
     x0, y0, x1, y1 = outline.bounds
-    assert Polygon(s["lot"]).area == 6570 and s["facts"]["lot_surveyed"] is False
-    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (49, 30 * 12 + 3)
-    assert round(outline.area) == 1482 and round(outline.area / 6570 * 100, 2) == 22.56 and outline.area <= 0.25 * 5934
-    assert y0 == 27 and len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
+    from design_checker import present
+    lot = Polygon(s["lot"])
+    from rule_format.rulebook import load
+    stored = load(REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/lot_outline_tax_map.yaml")
+    assert abs(lot.area - stored["area_sf"]) < 1 and s["facts"]["lot_surveyed"] is False   # placed points rounded
+    assert (present.feet_inches(x1 - x0), present.feet_inches(y1 - y0)) == ("35'-11\"", "37'-4\"")
+    assert round(outline.area / lot.area * 100, 1) == 19.1 and outline.area <= 0.25 * 6357
+    assert len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
+    from design_checker.check import check_site
+    from envelope_builder.start import floor_solids
+    n = len(s["lot"])
+    lot_site = {"id": "lot", "edges": [{"points": [list(s["lot"][i]) + [0.0], list(s["lot"][(i + 1) % n]) + [0.0]],
+                                        "curved": False} for i in range(n)]}
+    view = check_site({"units": "ft", "lot": lot_site, "buildings": floor_solids(got["floors"]), "problems": []},
+                      {**s["facts"], "jurisdiction": s["facts"]["jurisdiction"]})["view"]
+    front = {i["name"]: i for i in view["items"]}["Front yard"]
+    assert front["proposed"] == "27'-0 3/4\"" and front["status"] == present.COMPLIES     # 25'-0" + 2'-0", and more
 
 
 def test_a_flag_needing_review_never_crashes_the_check(facts):
@@ -469,12 +510,19 @@ def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
     for path in PLUGIN:
         text = path.read_text(encoding="utf-8")
         guarded_names = set(re.findall(r"^\s*(\w+) = System\.EventHandler[^\n]*\((?:g\.)?logic\.guard\(", text, re.M))
+        # the plugin's own route: _handler(...) guards (checked below), _on(owner, "Event", name) attaches
+        guarded_names |= set(re.findall(r"^\s*(\w+) = _handler\(", text, re.M))
+        for name in re.findall(r"_on\([\w.]+, \"\w+\", (\w+)\)", text):
+            if name not in guarded_names:
+                unguarded.append(f"{path.name}: _on(..., {name}) not made by _handler")
         for n, line in enumerate(text.splitlines(), 1):
             m = re.match(r"\s*[\w.\[\]\"']+\.([A-Z]\w*) \+= (.+)", line)
+            if m and line.strip() == "event += handler" and path.name == "gordium_rhino.py":
+                continue                                   # inside _on: every caller's handler is checked above
             if m and not (re.match(r"(g\.)?logic\.guard\(", m.group(2)) or m.group(2).strip() in guarded_names):
                 unguarded.append(f"{path.name}:{n}: {line.strip()}")
             if "System.EventHandler" in line and "(" in line.split("System.EventHandler", 1)[1] \
-                    and "logic.guard(" not in line:
+                    and "logic.guard(" not in line and "_handler(System.EventHandler" not in line:
                 unguarded.append(f"{path.name}:{n}: {line.strip()}")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     overlay = rhino.split("class Overlay", 1)[1].split("\nclass ", 1)[0].split("\ndef ", 1)[0]
@@ -483,8 +531,14 @@ def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
         if "_conduit(" not in method:
             unguarded.append("Overlay: " + method.splitlines()[0].strip())
     assert unguarded == [], unguarded
+    handler = rhino.split("def _handler(", 1)[1].split("\ndef ", 1)[0]
+    assert "logic.guard(logic.current_only(" in handler
     assert "def _conduit(" in rhino and "logic.guard(" in rhino.split("def _conduit(", 1)[1].split("\ndef ", 1)[0]
-    assert "Paint +=" not in "".join(p.read_text(encoding="utf-8") for p in PLUGIN)    # draw once into a bitmap instead
+    # an error raised while the Mac draws a view aborted Rhino (2026-10-20, before the guard): every paint handler is
+    # guarded (the panel's wrapping cells are drawn); the section diagram is still drawn once into a bitmap
+    import re as _re
+    paints = [m for p in PLUGIN for m in _re.findall(r"\.Paint \+= (.*)", p.read_text(encoding="utf-8"))]
+    assert all(m.startswith("logic.guard(") for m in paints), paints
 
 
 def test_the_dash_patterns_fit_rhinos_signed_int32():
@@ -516,14 +570,14 @@ def test_i_confirm_is_unticked_on_a_new_project_and_draw_waits_for_it():
     assert logic.district_confirmed("check", confirmed, "R-1b")                 # this district, confirmed before
     assert not logic.district_confirmed("check", confirmed, "R-2a")             # changed since: confirm again
     assert not logic.district_confirmed("check", {}, "R-1b")
-    rows = {r["key"]: r for r in logic.box_rows(_box())}
+    rows = {r["key"]: r for r in logic.box_rows(_box(), flat=False)}
     assert rows["zone"]["tick"] == ("I confirm", False) and not logic.can_draw(_box())
     assert logic.can_draw(_box(district_confirmed=True))
 
 
 def test_the_box_has_only_the_approved_rows_with_their_sources():
     from design_checker import rhino_logic as logic
-    rows = logic.box_rows(_box())
+    rows = logic.box_rows(_box(), flat=False)
     assert [r["key"] for r in rows] == ["address", "zone", "use", "lot", "street", "ground"]
     by = {r["key"]: r for r in rows}
     assert by["address"]["actions"] == [("lookup", "Look up", True)]          # the address lookup (PR #19)
@@ -552,11 +606,11 @@ def test_no_regrading_near_the_house_toggles_height_between_checked_and_needs_re
     from design_checker import rhino_logic as logic
     from design_checker.check import check
     for ticked, expected in ((True, {"complies", "does_not_comply"}), (False, {"needs_review"})):
-        ground = logic.ground_facts(_box(no_regrading=ticked), 0.0)
+        ground = logic.ground_facts(_box(no_regrading=ticked), 0.0, flat=False)
         got = check(MODEL, {**facts, **{k: v for k, v in ground.items() if v is not None}})
         height = {i["name"]: i for i in got["view"]["items"]}["Building height"]
         assert height["status"] in expected, (ticked, height["status"], height["reason"])
-    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0)["grade_is"] == "finished"   # set as finished
+    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0, flat=False)["grade_is"] == "finished"   # set as finished
 
 
 def test_every_fact_records_its_source_and_who_confirmed_it_and_the_panel_and_report_show_it(facts, tmp_path):
@@ -565,7 +619,8 @@ def test_every_fact_records_its_source_and_who_confirmed_it_and_the_panel_and_re
     from design_checker.check import check
     sources = logic.fact_sources(_box(district_confirmed=True), "2026-10-20", confirmed=True)
     assert sources["zone"] == {"value": "R-1b", "source": "entered by you", "confirmed_by": "you", "date": "2026-10-20"}
-    assert sources["lot"]["source"] == "the tax map (±2 ft)"
+    assert sources["lot"] == {"value": "6,570 sf", "source": "the tax map (±2 ft, approximate)",
+                              "confirmed_by": "you", "date": "2026-10-20"}       # the source said once
     unticked = logic.fact_sources(_box(), "2026-10-20", confirmed=True)
     assert unticked["zone"]["confirmed_by"] is None                       # the district needs its own tick
     got = check(MODEL, facts, tmp_path / "r.xlsx", extras={"sources": sources})
@@ -655,8 +710,8 @@ def test_an_unanswered_corner_lot_never_stops_the_check_it_makes_the_yards_wait(
 
 def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     from design_checker import rhino_logic as logic
-    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0)["grade_from"] == "finished_spots"
-    assert logic.ground_facts(_box(ground={"kind": "spot"}), 0.0)["grade_from"] == "spot"
+    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0, flat=False)["grade_from"] == "finished_spots"
+    assert logic.ground_facts(_box(ground={"kind": "spot"}), 0.0, flat=False)["grade_from"] == "spot"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     check_facts = rhino.split("def check_facts(", 1)[1].split("\ndef ", 1)[0]
     assert "_ui_state" not in check_facts.split("elif", 1)[0]                   # the points from the facts alone
@@ -767,9 +822,12 @@ def test_a_design_buffer_is_read_or_draw_stays_off():
 def test_the_design_buffer_is_set_when_starting_not_in_edit_site():
     """Review round 7: Edit site… showed it, but changing it there redrew nothing."""
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'buffer = ef.TextBox() if mode == "start" else None' in ui
+    assert 'buffer = ef.TextBox() if mode == "start" and not logic.FLAT_GROUND else None' in ui
     guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8")
-    assert "Edit site… → Advanced" not in guide and "Advanced → Design buffer** in the GordiumStart box" in guide
+    from design_checker import rhino_logic as logic
+    # (hidden while the MVP assumes flat ground: the box has no Advanced then)
+    assert "Edit site… → Advanced" not in guide and (logic.FLAT_GROUND or
+                                                     "Advanced → Design buffer** in the GordiumStart box" in guide)
 
 
 def test_frame_site_frames_the_lot_and_house_not_the_whole_file():
@@ -927,6 +985,141 @@ def test_no_backup_or_copy_files_are_committed():
     assert files and junk == [], junk
 
 
+def test_the_panel_header_has_no_code_edition_line_but_the_report_keeps_it(facts, tmp_path):
+    """MVP list (Ben's team): the panel drops "Ch. 325 as amended through Ord. No. … · District Regulations Chart";
+    the report keeps it."""
+    import openpyxl
+    from design_checker import rhino_logic as logic
+    got = check(MODEL, facts, tmp_path / "r.xlsx")
+    head = got["view"]["header"]
+    assert "Ch. 325" in head["code"]
+    lines = logic.panel_header(head)
+    assert not any("Ch. 325" in t or "Ordinance" in t or "Ord. No." in t for t in lines["above"] + lines["below"])
+    assert lines["above"] == [head["place"]] and lines["below"][0] == head["draft"]
+    text = " ".join(str(c) for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
+                    for row in ws.iter_rows(values_only=True) for c in row if c)
+    assert "Ch. 325" in text
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'head.get("code")' not in ui and "logic.panel_header(head)" in ui
+
+
+def test_the_delta_column_is_named_delta_in_the_panel_and_the_report(facts, tmp_path):
+    """MVP list: "Margin" renamed "Delta" everywhere the architect sees it."""
+    import openpyxl
+    from design_checker import rhino_logic as logic
+    check(MODEL, facts, tmp_path / "r.xlsx")
+    cells = [c for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
+             for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
+    assert logic.COLUMN_DELTA == "Delta" and "Delta" in cells and "Margin" not in cells
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert '(logic.COLUMN_DELTA, 86)' in ui and '"Margin"' not in ui
+
+
+def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_document():
+    """MVP list (Ben's team): the yard and lot-edge labels and the viewport's status box are off unless the
+    architect ticks Show on-screen labels, which this document remembers. The yard lines and the red stay."""
+    from design_checker import rhino_logic as logic
+    assert logic.labels_on({}) is False and logic.labels_on(None) is False
+    assert logic.labels_on({"show_labels": True}) is True and logic.labels_on({"show_labels": False}) is False
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
+    assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
+    assert "if plan and logic.yard_label_shown(labels, status):" in draw and "if not o.message or not labels:" in draw
+    assert "if plan and labels else []" in draw                                   # lot-edge labels: only when on
+    assert "d.Draw2dLine(System.Drawing.PointF(a.X, a.Y)" in draw.split("yard_label_shown")[0]   # lines regardless
+    tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
+    assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
+    check_code = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert "logic.labels_on(_ui_state(doc))" in check_code and "ui.set_labels_tick(" in check_code
+    assert '"labels": set_labels' in rhino
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'box.Text = "Show on-screen labels"' in ui and "box.Checked = False" in ui.split("def _labels_box(")[1]
+
+
+def test_with_labels_off_a_failing_yards_shortfall_still_shows():
+    """Coordinator refinement (a): labels off hides passing and neutral labels and the status box, never a failing
+    yard's shortfall ("✕ Rear yard 21'-2", needs 22'-6""): it is the live feedback."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import plan
+    assert logic.yard_label_shown(False, "does_not_comply") and logic.yard_label_shown(True, "complies")
+    assert not logic.yard_label_shown(False, "complies") and not logic.yard_label_shown(False, "needs_review")
+    items = [{"points": [[0, 0], [0, 21.17]], "status": "does_not_comply", "mark": "✕", "name": "Rear yard",
+              "proposed": "21'-2\"", "required": "22'-6\"", "measure": "rear_yard", "reason": ""},
+             {"points": [[0, 0], [12, 0]], "status": "complies", "mark": "✓", "name": "Side yard, West",
+              "proposed": "12'-0\"", "required": "10'-0\"", "measure": "side_yard_smaller", "reason": ""}]
+    got = plan({"lot": {"edges": []}, "buildings": []}, {"outline": [], "holes": []}, {"items": items}, {})
+    labels = [y["label"] for y in got["yards"]]
+    assert "✕ Rear yard 21'-2\", needs 22'-6\"" in labels and "✓ Side yard, West 12'-0\"" in labels
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "if plan and logic.yard_label_shown(labels, status):" in rhino
+
+
+def test_the_code_edition_line_is_in_the_legend_and_the_report_not_the_panel(facts, tmp_path):
+    """Coordinator refinement (b): which version of the law was checked stays traceable: the legend ("?") says it."""
+    from design_checker import rhino_logic as logic
+    head = check(MODEL, facts, tmp_path / "r.xlsx")["view"]["header"]
+    assert logic.legend_text(head["code"]).endswith("Checked against: " + head["code"])
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert '"legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code"))' in rhino
+
+
+def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
+    """Coordinator refinement (c): the sign unmistakable beside the colour, in the panel and the report; the value
+    itself (and the answer key's) unchanged."""
+    import openpyxl
+    from design_checker import rhino_logic as logic
+    assert present.delta_words(present.COMPLIES, (2.0, 2.0), "ft", False) == "+2'-0\" to spare"
+    assert present.delta_words(present.FAILS, (-1 - 1 / 3, -1 - 1 / 3), "ft", False) == "−1'-4\" short"
+    assert present.delta_words(present.COMPLIES, (0.0, 0.0), "ft", False) == "at limit"
+    got = check(MODEL, facts, tmp_path / "r.xlsx")
+    margins = [i["margin"] for i in got["view"]["items"] if i["margin"]]
+    assert margins and not any(m.endswith(("to spare", "short")) for m in margins)        # the data as it was
+    cells = [c for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
+             for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
+    assert any(c.endswith(" to spare") for c in cells)
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert '(i.get("delta") or "")' in ui and "delta_text" not in ui          # settle's words only (round 2)
+
+
+
+def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
+    """MVP list (Ben): no Ground section in the start box; the ground is flat at the lot level and finished, so height
+    and stories are checked, each row saying "assuming flat ground", and the report states it. Switched off, the
+    Ground row and the spot-grade paths come back (a switch, not a deletion)."""
+    import openpyxl
+    from design_checker import rhino_logic as logic
+    from model_measurement.project import fact_problems
+    assert logic.FLAT_GROUND is True
+    assert "ground" not in {r["key"] for r in logic.box_rows({})}
+    assert "ground" in {r["key"] for r in logic.box_rows({}, flat=False)}                        # the switch
+    flat = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False}, 2.0)
+    assert flat == {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": 2.0, "grade_from": None,
+                    "ground_assumed": "flat"}
+    assert logic.ground_facts({"ground": {"kind": "spot"}}, 2.0, flat=False)["grade_from"] == "spot"
+    # the check itself at the house's own base (0 here): a ground above it would put part of the house below
+    # grade, which the stories rule rightly asks about (a basement or cellar, §325-3; #14's one stories definition)
+    level = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False}, 0.0)
+    sent = {**facts, **{k: v for k, v in level.items() if v is not None}}
+    assert fact_problems(sent) == []
+    got = check(MODEL, sent, tmp_path / "r.xlsx")
+    rows = {i["name"]: i for i in got["view"]["items"]}
+    for name in ("Building height", "Stories"):
+        assert rows[name]["status"] == present.COMPLIES and rows[name]["note"] == "assuming flat ground"
+        assert logic.row_name(rows[name]) == name + " · assuming flat ground"
+    assert "assumed" in got["view"]["header"]["grade"]
+    text = " ".join(str(c) for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
+                    for row in ws.iter_rows(values_only=True) for c in row if c)
+    assert "assuming flat ground" in text and "assumed flat (elevation 0'-0\")" in text      # the lot level here
+    # round 1: the note is with the item, never under "Why it needs review" on a row that complies
+    sheet = openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"]
+    head = next(r for r in sheet.iter_rows(values_only=True) if "Why it needs review" in r)
+    why, item = head.index("Why it needs review"), head.index("Item")
+    row = next(r for r in sheet.iter_rows(values_only=True) if r[item] == "Stories · assuming flat ground")
+    assert not row[why]
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "logic.row_name(i)" in ui
+
+
 # ---- the plugin and the worker stay in step (audit P1-1) -----------------------------------------------------
 
 def test_a_stray_line_on_the_workers_stdout_never_reaches_the_plugin(facts):
@@ -1055,6 +1248,95 @@ def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
     assert "logic.reaches_into_lot(" in body and ".Center" not in body
 
 
+
+def test_the_panel_columns_fit_a_rhino_sized_panel_and_wrap():
+    """Architect's review (2026-10-21): the dock was 540-620 px, nearly half the screen; Rhino's own panels are
+    300-400. At 380 px every column fits (the item takes what is left), and every cell wraps to two lines instead
+    of being cut off (drawn cells: a text cell is one line). Each tick has its own row (side by side they ran off).
+    In Rhino, panel_width_in_rhino.py measures every cell's text at 380 and 540."""
+    import ast
+    import re
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    width = int(re.search(r"^PANEL_WIDTH = (\d+)", ui, re.M).group(1))
+    columns = re.search(r"^COLUMNS = (\[.*\])", ui, re.M).group(1).replace("logic.COLUMN_DELTA", "'Delta'")
+    cols = dict(ast.literal_eval(columns))
+    assert 380 <= width <= 420 and sum(cols.values()) + 40 <= 380             # fits the narrowest Rhino panel
+    assert "col.Expand = i == 0" in ui and "ef.DrawableCell()" in ui and "ef.TextBoxCell(" not in ui
+    assert int(re.search(r"^ROW_HEIGHT = (\d+)", ui, re.M).group(1)) >= 2 * 16           # two lines
+    assert "ft.Wrap = ed.FormattedTextWrapMode.Word" in ui
+    for tick in ("_envelope_box(actions)", "_massing_box(actions)", "_labels_box(actions, parts)"):
+        assert "row(%s)" % tick in ui and "row(%s, " % tick not in ui, tick     # each in a row of its own
+
+
+def test_a_yard_label_sits_beside_its_dimension_line_never_on_it():
+    """Seen in Rhino (2026-10-21): "Side yard, West 7'-0", needs 10'-0"" was crossed by its own dimension line. The
+    label goes beside the line (above a horizontal one, right of a vertical one), and moving it off another label
+    never puts it back on the line."""
+    from design_checker.rhino_logic import beside_line, clear_spot, crosses
+    assert crosses(((0, 10), (100, 10)), 40, 0, 30, 20) and not crosses(((0, 10), (100, 10)), 40, 11, 30, 20)
+    assert crosses(((0, 0), (100, 100)), 40, 40, 5, 5) and not crosses(((0, 0), (100, 100)), 60, 0, 30, 20)
+    for a, b in [((0, 300), (200, 300)), ((50, 0), (50, 400)), ((0, 300), (200, 260)), ((50, 0), (90, 400)),
+                 ((200, 300), (0, 300))]:
+        w, h = 180, 20
+        x, y = beside_line(a, b, w, h)
+        assert not crosses((a, b), x, y, w, h), (a, b)
+        mid = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+        assert abs(x + w / 2 - mid[0]) < w and abs(y + h / 2 - mid[1]) < 60           # still next to its line
+        taken = [(x - 20, y - 5, w + 40, h + 10)]                                      # another label there first
+        top = clear_spot(taken, x, y, w, h, avoid=[(a, b)])
+        assert not crosses((a, b), x, top, w, h), (a, b, top)
+
+
+def test_a_yard_label_is_never_placed_off_the_screen():
+    """Seen in Rhino (2026-10-21, the highlight check): with its compass name the label "✕ Side yard, Southwest
+    7'-0 5/8", needs 10'-0" (approx.)" (about 400 px) beside a short dimension near the view's left edge went 15 px
+    off it. Spots off the screen are never used; with none clear, the first is moved onto it."""
+    from design_checker.rhino_logic import place_label
+    own = ((150, 411), (205, 411))                          # lot line to wall, near the left of a 1062 x 668 view
+    w, h, view = 400, 20, (1062, 668)
+    left, top, clear = place_label(own, w, h, view=view)
+    assert 0 <= left and left + w <= view[0] and 0 <= top and top + h <= view[1] and clear
+    wall = [((0, 380), (1062, 380)), ((0, 440), (1062, 440)), ((420, 0), (420, 668))]   # nowhere beside it is clear
+    left, top, clear = place_label(own, w, h, wall, view=view)
+    assert 0 <= left and left + w <= view[0] and 0 <= top and top + h <= view[1]
+    assert place_label(own, w, h)[0] < 0                    # without the view's size it would have gone off it
+    # with no room for it on one line, it goes on two: its name, then its numbers (half as wide, so it fits)
+    from design_checker.rhino_logic import label_lines
+    assert label_lines("✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)") == [
+        "✕ Side yard, Southwest", "7'-0 5/8\", needs 10'-0\" (approx.)"]
+    assert label_lines("75'-10\" (approx.)") == ["75'-10\" (approx.)"]          # a lot edge's length: one line
+    assert label_lines("? Rear yard 27'-6 7/8\"") == ["? Rear yard", "27'-6 7/8\""]
+
+
+def test_a_yard_label_stays_off_every_dimension_and_edge_not_only_its_own():
+    """The Top view in Rhino (2026-10-21, after the first fix): the West yard's label sat above its own short
+    dimension but across the front yard's vertical dimension. Placement tries the spots beside its line and takes
+    the first that crosses no line: other dimensions, the lot's edges, the house's edges."""
+    from design_checker.rhino_logic import crosses, place_label
+    own = ((265, 230), (310, 230))                          # the West yard, lot line to wall (screen pixels)
+    obstacles = [((310, 30), (310, 230)),                    # the front yard's dimension, vertical
+                 ((265, 30), (265, 610)), ((265, 30), (735, 30)),   # the lot's west and front edges
+                 ((310, 230), (625, 230)), ((310, 230), (310, 435)), ((310, 435), (625, 435))]   # the house
+    w, h = 250, 20
+    left, top, clear = place_label(own, w, h, obstacles)
+    assert clear and not any(crosses(s, left, top, w, h) for s in obstacles + [own]), (left, top)
+    assert abs(top + h / 2 - 230) < 40                     # still beside its own line
+    # the centred spot (the first tried) crosses the vertical dimension: it was not the one used
+    assert crosses(obstacles[0], (265 + 310) / 2 - w / 2, 230 - 6 - h, w, h)
+    # another label already there: the next clear spot
+    left2, top2, clear2 = place_label(own, w, h, obstacles, taken=[(left, top, w, h)])
+    assert clear2 and (left2, top2) != (left, top)
+    # a vertical lot edge whose right side is the house: centred on its left, not shifted along its right (Rhino:
+    # the west edge's length went under the front edge, where it read as the front edge's)
+    edge = ((265, 30), (265, 610))
+    house = [((310, 230), (625, 230)), ((310, 230), (310, 435)), ((310, 435), (625, 435))]
+    left3, top3, clear3 = place_label(edge, 115, h, house)
+    assert clear3 and left3 + 115 <= 265 and abs(top3 + h / 2 - 320) < 1, (left3, top3)
+    # boxed in on every side: says so, and the caller falls back to moving it off the other labels
+    cage = [((0, y), (1000, y)) for y in range(0, 640, 10)]
+    assert place_label(own, w, h, cage)[2] is False
+
+
 def test_the_suggested_facts_never_answer_the_corner_lot_question():
     """eval-integrity P1-5: the guarantee was pinned only by the plugin's source text (setting corner_lot to False
     in suggested_facts passed). Now the decisions are plain logic, run here on every kind of model."""
@@ -1112,3 +1394,109 @@ def test_the_box_pre_filter_never_drops_an_object_that_reaches_the_lot():
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
     assert body.index("logic.box_near_lot(") < body.index("_plan_points(g)")
+
+
+def test_the_notice_never_hides_the_model_when_there_is_room():
+    """Architect's review (2026-10-21): bottom left, the "no longer complies" notice hid the lot's lower edge and
+    dimensions. Screen numbers from that Top view (1000 x 640, the lot from y 30 to 610, x 265 to 735); the notice
+    690 x 32; the status box top right."""
+    from design_checker.rhino_logic import notice_spot
+    status = (518, 12, 467, 56)
+
+    def covers(x, y, box, w=690, h=32):
+        a, b, c, e = box
+        return min(x + w, c) > max(x, a) and min(y + h, e) > max(y, b)
+    # framed tight (as it was): every corner covers some of the lot; never the status box
+    x, y = notice_spot(1000, 640, 690, 32, (265, 30, 735, 610), [status])
+    assert not covers(x, y, (518, 12, 985, 68))
+    # framed with room (FRAME_ROOM 0.75: the lot from y 102 to 538): top left is clear of the lot; with the status
+    # box there too, bottom left; nothing covered either way
+    roomy = (324, 102, 676, 538)
+    assert notice_spot(1000, 640, 690, 32, roomy) == (12, 34)
+    x, y = notice_spot(1000, 640, 690, 32, roomy, [status])
+    assert (x, y) == (12, 640 - 32 - 64) and not covers(x, y, roomy) and not covers(x, y, (518, 12, 985, 68))
+    assert notice_spot(1000, 640, 690, 32, None) == (12, 34)                    # no model on screen: top left
+
+
+def test_the_setup_brings_the_panel_back_with_rhino():
+    """A Gordium tab Rhino reopens at launch is empty until something registers the panel: GordiumPanel does only
+    that (no check, no checker), install.py adds it, and the guide says, for Mac and Windows, to put it in Rhino's
+    startup commands (no setting a script can change). startup_panel_in_rhino.py runs it in Rhino."""
+    app = REPO / "apps/rhino_plugin"
+    import ast
+    tree = ast.parse((app / "gordium_panel.py").read_text(encoding="utf-8"))
+    calls = [ast.unparse(n) for n in tree.body[1:] if isinstance(n, ast.Expr)]        # after the docstring
+    assert calls == ["sys.path.insert(0, HERE)", "gordium_rhino.register_dock()"], calls   # nothing else runs
+    install = (app / "install.py").read_text(encoding="utf-8")
+    assert '"GordiumPanel": "gordium_panel.py"' in install and "Run these commands every time Rhino starts" in install
+    guide = " ".join((app / "QUICKSTART.md").read_text(encoding="utf-8").split())        # the guide wraps its lines
+    assert "Rhino → Settings… → General" in guide and "Tools → Options → General" in guide
+    assert guide.count("add the line `GordiumPanel`") == 2 and "Gordium: GordiumPanel -> gordium_panel.py" in guide
+
+
+def test_the_stored_sample_ring_is_rebuilt_from_the_states_own_outline():
+    """Round 1: the stored 106 ring said "generated by code" with its generator on another branch and nothing
+    checking it. The State's own ring is stored beside it; here it is placed as the address lookup places it
+    (design_checker.lookup_box.frame, PR #19: survey feet to feet from the origin, turned by rotation_deg, its
+    corner at 0, 0, to 1/10,000 ft) and must give the stored ring, its street line and its area."""
+    import yaml
+    stored = yaml.safe_load((REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/lot_outline_tax_map.yaml")
+                            .read_text(encoding="utf-8"))
+    raw = stored["state_ring_epsg2261_us_survey_ft"]
+    assert raw[0] == raw[-1] and len(raw) == len(stored["ring"]) + 1
+    us = (1200 / 3937) / 0.3048                             # survey feet to feet (site_lookup.lookup.US_SURVEY_FT)
+    ox, oy = stored["frame"]["origin_epsg2261_us_survey_ft"]
+    outline = [[round((x - ox) * us, 2), round((y - oy) * us, 2)] for x, y in raw[:-1]]
+    a = math.radians(stored["frame"]["rotation_deg"])
+    turned = [[x * math.cos(a) - y * math.sin(a), x * math.sin(a) + y * math.cos(a)] for x, y in outline]
+    x0, y0 = min(p[0] for p in turned), min(p[1] for p in turned)
+    ring = [[x - x0, y - y0] for x, y in turned]
+    assert max(abs(u - v) for p, q in zip(ring, stored["ring"]) for u, v in zip(p, q)) < 2e-4
+    n = len(stored["ring"])
+    assert stored["street_line"] == [[stored["ring"][i], stored["ring"][(i + 1) % n]] for i in stored["street_edges"]]
+    area = abs(sum(p[0] * q[1] - q[0] * p[1] for p, q in zip(raw, raw[1:]))) / 2 * us ** 2
+    assert round(area, 1) == stored["area_sf"]
+
+
+def test_lot_edges_are_labelled_as_an_architect_dimensions_them():
+    """The real 106 Ithaca Rd (Rhino, 2026-10-21): sixteen labels, eight of them for the ~10 ft pieces of its curved
+    front, crowded the plan and one couldn't find room. Edges carrying on in nearly the same direction are one run,
+    labelled with its whole length; a jog under 1 ft isn't labelled. The measurements still use every edge."""
+    from design_checker.check import edge_runs, sample_site
+    from design_checker import present
+    ring = sample_site()["lot"]
+    runs = edge_runs([{"points": [ring[i], ring[(i + 1) % len(ring)]]} for i in range(len(ring))])
+    assert [(len(pts) - 1, present.feet_inches(length)) for pts, length in runs] == [
+        (8, "75'-10\""), (1, "101'-1 1/2\""), (2, "10'-4 1/8\""), (1, "69'-6 1/8\""), (3, "92'-1 3/8\"")]
+    rect = [[0, 0], [50, 0], [50, 100], [0, 100]]
+    assert [round(length, 6) for _, length in edge_runs([{"points": [rect[i], rect[(i + 1) % 4]]} for i in range(4)])] \
+        == [50, 100, 50, 100]
+    # round 1: a rounded corner (a 10 ft radius in six 15° pieces) joined the 40 ft front, the arc and the 90 ft side
+    # into one "145'-8"" label on the chord across the lot. A run turns less than RUN_TURN_DEG in all.
+    from design_checker.check import RUN_TURN_DEG
+    arc = [[40 + 10 * math.sin(math.radians(a)), 10 - 10 * math.cos(math.radians(a))] for a in range(0, 91, 15)]
+    fillet = [[0, 0]] + arc + [[50, 100], [0, 100]]
+    runs = edge_runs([{"points": [fillet[i], fillet[(i + 1) % len(fillet)]]} for i in range(len(fillet))])
+    for pts, _ in runs:
+        a, b, y, z = pts[0], pts[1], pts[-2], pts[-1]
+        first, last = math.atan2(b[1] - a[1], b[0] - a[0]), math.atan2(z[1] - y[1], z[0] - y[0])
+        d = abs(first - last) % (2 * math.pi)
+        assert math.degrees(min(d, 2 * math.pi - d)) < RUN_TURN_DEG, pts
+    assert runs[0][0][0] == [0, 0] and 40 <= runs[0][1] < 45       # the 40 ft front (and a piece of the arc), no side
+    assert max(length for _, length in runs) < 101                  # never the 145'-8" across the lot
+
+
+def test_the_lot_fact_rounds_its_area_down_like_the_lot_area_row():
+    """106 Ithaca Rd in Rhino (2026-10-21): the site facts said 7,034 sf (to the nearest) while the Lot area row said
+    7,033 sf (rounded down, never in the architect's favour). One rounding for both."""
+    from design_checker import rhino_logic as logic
+    assert logic.lot_size(7033.5) == "7,033 sf" and logic.lot_size(6570.0) == "6,570 sf"
+
+
+def test_the_module_docs_say_how_a_row_is_decided():
+    """check.py's own description of a row's verdict, and the QUICKSTART's, match row_verdict: a row that passes
+    under every reading complies unless its result turns on an open question."""
+    from design_checker import check as checking
+    assert "turns_on" in checking.__doc__ and "nothing it reads open" not in checking.__doc__
+    quick = " ".join((checking.REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8").split())
+    assert "the row simply complies" in quick and "it still needs review, because only the zoning office" not in quick
