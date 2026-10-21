@@ -916,7 +916,7 @@ def test_height_and_stories_report_over_the_same_candidate_buildings():
     main = box(10, 25, 35, 65, 0, 20, id="house")
     wing = [floor(35, 25, 45, 45, z0=i * 10, z1=(i + 1) * 10, id=f"w{i}") for i in range(4)]
     m = measure(site(RECT, main, *wing), {**FACTS, "stories": 4, "main_building": "house"})
-    words = [w for w, _ in _assemblies({"id": "x"}, [{"id": "y"}])]
+    words = [c["words"] for c in _assemblies({"id": "x"}, [{"id": "y"}])]
 
     def over(record):
         return {next(w for w in words if r["reading"].startswith(w)) for r in record["readings"]
@@ -1176,3 +1176,31 @@ def test_a_building_outside_the_lot_is_named_and_waits_only_what_it_touches():
         assert m[name]["value"] is not None or m[name]["readings"], (name, m[name])
     m = measure(site(RECT, box(40, 25, 65, 65, id="house")), FACTS)
     assert m["front_yard"]["reason"] == "a building isn't inside the lot: the building"
+
+
+def test_too_many_roofs_with_the_main_building_assumed_keeps_its_own_stop():
+    """Round 2 of the main-building fixes (P1): with eight pitched-roof sheds (too many roof readings to list)
+    _with_others gave its stop, and reading each shed as the main one then crashed on it. The stop stands."""
+    house = [floor(2, 2, 20, 20, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    sheds = [sloped_roof_box(24 + 13 * (k % 2), 4 + 12 * (k // 2), 34 + 13 * (k % 2), 14 + 12 * (k // 2), 8, 12, f"s{k}")
+             for k in range(8)]
+    m = measure(site(RECT, *house, *sheds), {**FACTS, "stories": 3})
+    h = m["building_height"]
+    assert h["value"] is None and not h["readings"] and "too many" in h["reason"], h
+
+
+def test_only_a_possible_principal_building_is_read_as_the_main_one():
+    """Round 2 (P2): with the main building assumed, a deck slab, a balcony or a small shed was read as the main
+    building on its own, asking a spurious main-building question. Only a solid that could be a principal
+    building (enclosed, 7 ft or more, at least 70 sf: a habitable room, R304.1) is."""
+    house = [floor(10, 25, 35, 55, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    deck = box(10, 55, 35, 65, 0, 2, id="deck")
+    porch = box(10, 20, 35, 25, 0, 1, id="porch")
+    shed = box(40, 80, 46, 86, 0, 8, id="shed")                      # 36 sf: too small for a room
+    m = measure(site(RECT, *house, deck, porch, shed), {**FACTS, "stories": 3})
+    for name in ("building_height", "stories"):
+        assert not any("were the main building" in r["reading"] for r in m[name]["readings"]), (name, m[name])
+        assert "(main_building)" not in (m[name]["reason"] or "")
+    garage = box(38, 70, 48, 90, 0, 10, id="garage")                 # 200 sf, 10 ft: it could be
+    m = measure(site(RECT, *house, garage), {**FACTS, "stories": 3})
+    assert any("if garage were the main building" in r["reading"] for r in m["building_height"]["readings"])
