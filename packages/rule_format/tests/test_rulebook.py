@@ -510,3 +510,9 @@ def test_source_entry_problems_reach_the_file(tmp_path):
     (j / "1_source_documents/sources.yaml").write_text(s + "    quoteable: false\n")
     ctx = Context.for_jurisdiction(j)
     assert any("unknown field 'quoteable'" in p for p in ctx.file_problems["doc.pdf"]) and "doc.pdf" not in ctx.pages
+
+
+def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):
+    """Compile, then freeze: an ill-typed formula is a validation problem, so no frozen rule can be ill-typed."""
+    assert any("compare values of one kind" in p for p in validate(rulebook(check='rear_yard >= 20 or use == 5'), ctx))
+    assert not any("kind" in p for p in validate(rulebook(), ctx))
