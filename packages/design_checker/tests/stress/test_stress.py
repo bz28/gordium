@@ -193,7 +193,7 @@ def _coverage_range_by_order(v):
 
 
 MATCHERS["F16"] = _coverage_range_by_order
-KNOWN = {"F15": _floating_ground_stop, "F16": _coverage_range_by_order}   # F1-F14 fixed: a return of any of them fails CI
+KNOWN = {"F15": _floating_ground_stop}   # F1-F14, F16 fixed: a return of any of them fails CI   # F1-F14 fixed: a return of any of them fails CI
 
 
 def known(v):

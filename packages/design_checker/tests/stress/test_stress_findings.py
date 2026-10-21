@@ -8,7 +8,7 @@ output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper
 (2 ft per line everywhere, carried up in d43e11f); F4 in #12 (the same_id stop, b5a899b); F6, F7 in #18 (ca4f6c3,
-4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). F13, F14 in #18 (1262820). Open: F15 (the rest), F16.
+4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). F13, F14 in #18 (1262820). F16 in #18 (44b185d). Open: F15 (the rest).
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -378,15 +378,13 @@ def test_F15_the_yards_of_a_floating_house_do_not_wait_on_the_ground_only_someti
     assert rank[after] <= rank[before], (before, after)          # closer to the rear line: never a better result
 
 
-# ---- F16 (P2, for #18): a rotated house's walls-only coverage keeps one eave, by outline order ---------------------
+# ---- F16 (P2, fixed in #18 44b185d): a rotated house's walls-only coverage keeps one eave, by outline order ---------------------
 
 F16_CASE = ("corner", [{"op": "rotate", "deg": -5.3}, {"op": "move_house", "dx": 10.0, "dy": 7.75},
                        {"op": "add_roof", "kind": "roof", "axis": 1, "over": 0.5, "fascia": 1.0, "inset": 4.75,
                         "rise": 10.75}])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F16: the eaves-not-counted coverage of a rotated house keeps one of its two eaves (by order)")
 def test_F16_the_eaves_not_counted_coverage_leaves_out_both_eaves_whichever_way_the_outlines_run():
     """The corner lot's 40 x 35 house rotated 5.3 degrees, moved 10 ft east and 7'-9" back, a gable roof solid
     with eaves 6 in. past its two 35 ft side walls. Seen from above: walls 40 x 35 = 1,400 sf, with both eaves

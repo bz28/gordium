@@ -414,11 +414,15 @@ def test_a_dormer_on_floor_2_reaching_past_the_front_wall_counts():
 def test_a_bay_window_and_a_balcony_touching_the_house_count():
     """A bay window (a solid from 3 to 12 ft, 2 ft deep) and a balcony slab (10 to 10.5 ft, 3 ft deep) touching
     the front wall: part of the building (§325-18A; the balcony projects more than 2 ft): front 30 − 3 = 27; both
-    counted in coverage: 1,200 + 2 × 8 + 3 × 6 = 1,234 sf."""
+    counted in coverage: 1,200 + 2 × 8 + 3 × 6 = 1,234 sf. They stick out past the walls at the ground, as a bump
+    drawn on the house's own solid would: the same projection question (§325-18B), the same two readings, 27 as
+    part of the building and 30 to the walls at ground level, however it is drawn (one solid or touching ones) and
+    whichever solid is called the main one."""
     bay = prism(rect(18, 28, 26, 30), 3, 12, "bay")
     balcony = prism(rect(32, 27, 38, 30), 10, 10.5, "balcony")
     res = run(floors(*HOUSE, 2) + [roof(*HOUSE, 20, 30, 0.0, 0), bay, balcony])
-    assert res["measurements"]["front_yard"]["value"] == 27.0
+    front = res["measurements"]["front_yard"]
+    assert sorted(r["value"] for r in front["readings"]) == [27.0, 30.0] and "bay window" in front["reason"], front
     assert res["measurements"]["building_area"]["value"] == 1234.0
 
 

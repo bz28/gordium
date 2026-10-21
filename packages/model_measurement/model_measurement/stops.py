@@ -45,6 +45,8 @@ STOPS = {
     # the ground
     "no_ground": "the ground level isn't given: enter it (the grade plane)",
     "ground_unknown": "say whether the ground is flat",
+    "ground_unclear": "the spot grades don't show the ground under the building (too few, or in a line): place "
+                      "spot grades around the building",
     "ground_off_building": "the ground level ({ground} ft) doesn't meet the buildings (they run from {bottom} to "
                            "{top} ft): check the ground level",
     "buried_solid": "a solid lies wholly under the ground ({ground} ft; it runs from {bottom} to {top} ft) and isn't "
@@ -91,6 +93,9 @@ STOPS = {
     "geometry_error": "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines "
                       "for faces meeting at slivers",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
+    "empty_building": "a building object has nothing to measure (no faces): check it on the Building layer",
+    "flat_building": "a building covers no area seen from above (walls only, or faces in a line): check it on "
+                     "the Building layer",
     "no_main_building": "more than one building: pick the main building",
     "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
     "outside_lot": "a building isn't inside the lot: {what}",
