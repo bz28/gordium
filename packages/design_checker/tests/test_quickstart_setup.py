@@ -170,6 +170,33 @@ def test_troubleshooting_names_the_start_over_block_not_the_first_setup_block():
         label = section.index("**start-over lines**")
         block = section.index(delete)
         assert label < block and "-m venv" not in section[label:block], section[label:block]    # labels that block
+    _counts_and_first_lines_are_real(trouble)
+
+
+def _code_blocks(text):
+    return [[ln.strip() for ln in b.strip().splitlines()] for b in re.findall(r"```\n(.*?)```", text, flags=re.S)]
+
+
+def _counts_and_first_lines_are_real(text):
+    """Whatever Troubleshooting says about a block ("the four … lines", "starting with the `cd` line", "begins
+    with `X`") must be true of the real blocks in step 6, Mac and Windows."""
+    flat = " ".join(text.split())
+    words = {"two": 2, "three": 3, "four": 4, "five": 5}
+    blocks = [b for b in _code_blocks(SETUP) + _code_blocks(WINDOWS) if any("-m venv" in ln for ln in b)]
+    assert len(blocks) == 4                                             # set up + start over, Mac and Windows
+    for n in re.findall(r"\b(two|three|four|five) (?:[\w*-]+ )*?lines\b", flat):
+        assert all(len(b) == words[n] for b in blocks), (n, [len(b) for b in blocks])
+    for first in re.findall(r"begins with `([^`]+)`", flat):
+        assert all(b[0] == first for b in blocks), (first, [b[0] for b in blocks])
+    for word in re.findall(r"starting with the `(\w+)` line", flat):
+        assert all(b[0].split()[0] == word for b in blocks), (word, [b[0] for b in blocks])
+
+
+def test_the_no_venv_entry_counts_the_setup_lines_right():
+    entry = _section("Troubleshooting").split("\n- ")[1]
+    assert entry.startswith('**"no .venv found above'), entry
+    assert re.search(r"\b(two|three|four|five) ", entry), entry          # it says how many lines, and …
+    _counts_and_first_lines_are_real(entry)                             # … that number is the real one
 
 
 def test_the_py_install_fallback_names_both_symptoms():

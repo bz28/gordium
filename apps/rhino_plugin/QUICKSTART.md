@@ -375,13 +375,13 @@ Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading
 
 ## Troubleshooting
 
-- **"no .venv found above …"**: the repository's Python environment is missing. Run the two Terminal lines in
-  [What you need](#what-you-need-once) from the repository folder, then the command again.
+- **"no .venv found above …"**: the repository's Python environment is missing. Paste the four set-up lines of
+  step 6 ([Mac](#what-you-need-once), [Windows](#on-windows)), then run the command again.
 - **"Microsoft Visual C++ 14.0 or greater is required"** or **"requires a different Python"** while setting up:
   the wrong Python version made the `.venv` (Gordium needs 3.12 to 3.14; 3.15 not yet supported). Delete the
-  `.venv` and make it again with 3.14: run the **start-over lines** in step 6 (the block that begins with
+  `.venv` and make it again with 3.14: run the four **start-over lines** in step 6 (the block with
   `rm -rf .venv` on a [Mac](#what-you-need-once), `Remove-Item -Recurse -Force .venv` on
-  [Windows](#on-windows)), not the first set-up block. On Windows, if `py list` doesn't show 3.14,
+  [Windows](#on-windows)), not the first set-up block; paste all four, starting with the `cd` line. On Windows, if `py list` doesn't show 3.14,
   run `py install 3.14` first.
 - **Nothing happens / the commands aren't found**: run the install step again. If the ScriptEditor hasn't been
   opened in this Rhino session, open it once (Tools → ScriptEditor). That starts Rhino's Python.
