@@ -496,7 +496,8 @@ def show_detail(parts):
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))
     for text in (det.get("line"), i.get("reason"), i.get("hint") if i.get("hint") not in ("Add to check…",) else None,
-                 det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
+                 det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope"),
+                 det.get("outline")):           # how the lot lines were read from a cleaned outline (PR 18)
         if text:
             d.AddRow(_wide(text, size=12))
     if i.get("needs"):                    # exactly the stated facts this row waits for, asked in turn

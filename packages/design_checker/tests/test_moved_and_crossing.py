@@ -606,3 +606,52 @@ def test_a_row_held_back_only_by_the_tax_maps_lines_says_so_and_never_counts_as_
     assert res["summary"]["state"] != "pass"
     assert any("Side yard" in line for line in res["summary"]["lines"]), res["summary"]
 
+
+def test_a_geometry_error_anywhere_in_the_check_is_a_reason_never_a_crash(monkeypatch):
+    """Review round 21, P2: the F14 guard covered the measuring only; the check's plan and envelope worked the
+    overlays out again, unguarded, and crashed. One guard for the whole check: a GEOS failure while measuring
+    flags every measurement, nothing is drawn from it (no envelope, no overlays), and every building row needs
+    review saying why."""
+    import shapely
+    from model_measurement import measure as m
+
+    def broken(building):
+        raise shapely.errors.GEOSException("TopologyException: side location conflict at 1 2")
+    monkeypatch.setattr(m, "_projection_now", broken)
+    res = run(floors(15, 30, 45, 70, 2))
+    assert res["plan"]["encroach"] == [] and res["envelope"]["outline"] is None
+    building = [i for i in res["view"]["items"] if i.get("measure") in (
+        "front_yard", "side_yard_smaller", "rear_yard", "building_height", "building_area")]
+    assert building and all(i["status"] == present.REVIEW and "geometry couldn't be worked out" in i["reason"]
+                            for i in building), [(i["name"], i["status"], i["reason"]) for i in building]
+
+
+def test_the_envelope_and_the_plan_use_the_one_union_rule():
+    """Round 21: the plan drawn and the envelope union shapes with the measuring's own rule (measure.union, the
+    grid fallback included), never a second copy that can crash where the measuring didn't."""
+    text = {p: (REPO / p).read_text(encoding="utf-8") for p in (
+        "packages/design_checker/design_checker/check.py", "packages/envelope_builder/envelope_builder/envelope.py")}
+    assert all("ops.unary_union(" not in t for t in text.values())
+    assert "union as unary_union" in text["packages/design_checker/design_checker/check.py"]
+
+
+def test_the_outline_cleaning_note_is_shown_in_the_panel_and_the_report(tmp_path):
+    """Review round 21, P2: the note was in each item's detail and nothing showed it. The panel's detail lists it
+    (apps/rhino_plugin/gordium_ui.py show_detail) and the report's Check sheet says it once, with the lot."""
+    import openpyxl
+    from design_checker.check import check_site, sample_site
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    show = ui.split("def show_detail", 1)[1].split("\ndef ", 1)[0]
+    assert 'det.get("outline")' in show
+    s = sample_site()
+    n = len(s["lot"])
+    site = {"units": "ft", "problems": [], "buildings": floors(20, 30, 50, 60, 2),
+            "lot": {"id": "lot", "edges": [{"points": [list(s["lot"][i]), list(s["lot"][(i + 1) % n])], "curved": False}
+                                           for i in range(n)]}}
+    report = tmp_path / "check.xlsx"
+    res = check_site(site, {**s["facts"], "ground_is_flat": True, "grade_elevation": 0.0}, report_path=report)
+    note = next(i["detail"]["outline"] for i in res["view"]["items"] if i["detail"].get("outline"))
+    assert note.startswith("tax-map outline cleaned within 0.25 ft")
+    sheet = openpyxl.load_workbook(report)["Check"]
+    assert any(c.value == "Lot lines: " + note for c in sheet["A"]), [c.value for c in sheet["A"]][:12]
+

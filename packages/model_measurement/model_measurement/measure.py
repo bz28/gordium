@@ -281,13 +281,19 @@ def _projection_now(building: dict):
         poly = shapely.make_valid(Polygon(shell, holes)).buffer(0)
         if poly.area > 1e-9:
             parts.append(poly)
+    return union(parts)
+
+
+def union(parts):
+    """The one union rule for plans (measuring, the plan drawn, the envelope): the shapes together, made valid;
+    where faces meet at slivers too thin for the overlay (a rotated gable: stress F14), the same union with every
+    point on a 1e-6 ft grid, far below anything measured (TOL is 0.01 ft)."""
+    parts = [p for p in parts if p is not None and not p.is_empty]
     if not parts:
         return Polygon()
     try:
         return ops.unary_union(parts).buffer(0)
     except shapely.errors.GEOSException:
-        # faces meeting at slivers too thin for the overlay (a rotated gable: stress F14): the same union with
-        # every point on a 1e-6 ft grid, far below anything measured (TOL is 0.01 ft)
         return shapely.union_all(parts, grid_size=1e-6).buffer(0)
 
 
@@ -1297,6 +1303,8 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
             why = stop("geometry_error", what=str(e).split(":")[0][:80])
             out = {name: (_record(name, "text", reason=why) if name == "district" else _missing(name, why))
                    for name in MEASURES}
+            for r in out.values():          # the flag the rest of the check reads: no overlays drawn from it
+                r["geometry_error"] = why
             for name, unit in STATED.items():           # what the architect stated still stands
                 if facts.get(name) is not None:
                     out[name] = _record(name, unit, facts[name], "stated by the architect (not measured from the model)")

@@ -945,10 +945,12 @@ def test_a_limit_waiting_on_the_lot_depth_shows_its_range_and_says_once_why():
     assert rear["reason"].startswith("Does not comply whichever way it is read: needs 24'-1 7/8\"")
 
 
-def test_coverage_that_turns_on_the_overhang_question_says_both_ways():
-    """Architect review in Rhino (P2-10): "At worst 28.5% against 25%: does not comply under that reading. the
-    readings give different values; whether parts … count isn't settled yet" said one way, twice. Now both ways in
-    one sentence; complying either way keeps its own words."""
+def test_coverage_with_an_upper_floor_overhang_is_read_as_seen_from_above_and_says_the_reading():
+    """Architect review in Rhino (P2-10) asked that coverage turning on the overhang question say it once. PR 18
+    settles that question: research reads coverage as everything above ground seen from above
+    (coverage_seen_from_above), cantilevered upper floors included. So a floor block overhanging the one below
+    counts: 28.5% does not comply, 22.8% complies, each saying the reading it applied (Gordium's reading, to
+    confirm)."""
     from design_checker.check import check_site
     lot, facts = _sample106()
     ground = box(12, 30, 40, 70, 0, 10, "a")
