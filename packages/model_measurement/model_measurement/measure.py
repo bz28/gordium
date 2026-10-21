@@ -34,6 +34,7 @@ MEASURES = list(load(MEASURES_FILE))
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
 PARALLEL, PERPENDICULAR = 30, 60   # degrees from the street: clearly a rear line / clearly a side line
+SQUARE = 5                # degrees from the street: a line next to a side line only this close is surely a rear line
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 4     # more lot lines than this of unclear kind: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
@@ -172,11 +173,14 @@ class Lot:
         rest = [(chain[-1] + k) % n for k in range(1, n - len(chain) + 1)]     # from the street's end, around
         ends = {rest[0], rest[-1]}
         kinds = {}
+        beside = {rest[1], rest[-2]} if len(rest) > 2 else set()     # next to a line from the street's ends
         for i in rest:
             a = _angle(_chord(self.edges[i]), front)
             if i in ends and a >= PERPENDICULAR:
                 kinds[i] = ("side",)
-            elif i not in ends and a <= PARALLEL:
+            elif i not in ends and a <= (SQUARE if i in beside else PARALLEL):
+                # a line next to a side lot line could continue it unless it runs square to the side (parallel to
+                # the street): then only the rear; one farther along is a rear line when about parallel
                 kinds[i] = ("rear",)
             else:
                 kinds[i] = ("side", "rear")

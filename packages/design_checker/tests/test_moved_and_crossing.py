@@ -210,3 +210,18 @@ def test_a_rule_failing_for_a_crossing_counts_once():
 def test_the_stories_rule_fails_too_for_a_main_building_partly_off_the_lot():
     res = run(floors(50, 30, 65, 70, 2))
     assert status(res, "R-1b.stories") == present.FAILS
+
+
+FIVE_SIDED = [(0, 0), (60, 0), (60, 110), (30, 125), (0, 110)]     # scenario 09's lot: the back two short lines
+
+
+def test_the_five_sided_lots_short_back_line_is_also_read_as_part_of_a_side_line():
+    """Eval-integrity audit P1-2 (a false pass on a831e38: complies). Scenario 09's house moved 4 ft back
+    (15..45 x 34..84). Read as the rear lot line, the two short back lines give depth (110 + 110) / 2 = 110,
+    27'-6" required, and the house is 29.96 ft away: complies. Read with the east short line part of the east
+    side line, depth (110 + 143.54) / 2 = 126.77 ft, 31'-8 5/16" required, and the house is still 29.96 ft from
+    the west short line: fails. Every reading is evaluated: never complies."""
+    res = run(floors(15, 34, 45, 84, 2), lot=FIVE_SIDED)
+    depth = res["measurements"]["lot_depth"]
+    assert sorted({round(r["value"], 2) for r in depth["readings"]}) == [110.0, 126.77]
+    assert status(res, "R-1b.rear_yard") != present.COMPLIES

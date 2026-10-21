@@ -33,23 +33,23 @@ expected:
   R-1b.stories: {status: complies, working: "2 ≤ 3", cites: "§325-8 chart, R-1b, Number of stories"}
 # added after running Gordium (the expected results above are as written before it ran, commit 6d28ce0)
 disagreements:
-  R-1b.rear_yard:
-    gordium: complies
-    direction: gordium_less_cautious
+  R-1b.height:
+    gordium: needs_review
+    direction: gordium_more_cautious
     finding: >-
-      Investigated 2026-10-20, re-checked 2026-10-21 on PR 18 (0cbd813). Both short back lines run 26.6° from the
-      street (rise 15 over 30), within the 30° Gordium reads as "about parallel", and neither touches the street
-      lines, so Gordium reads them as the rear lot line (one reading): depth = the two side lines (110 + 110) / 2 =
-      110 ft (the City's perpendicular method gives the same 110 here), required max(min(27.5, 50), 20) =
-      27'-6"; the house's rear corner (45, 80) is 33'-6 3/8" from the corner (60, 110) where the rear line starts
-      (the foot of the perpendicular falls exactly on that corner: √(15² + 30²) = 33.54 ft): complies. Worked by
-      hand for the readings the answer key worried about, one short line part of a side line: east one a side
-      line, depth (110 + 143.54) / 2 = 126.77 ft, required 31.69 ft (31'-8 5/16"), the rear line (the west short
-      line) still 33.54 ft from the house's other rear corner (15, 80): complies; the west one a side line: the
-      same by symmetry. Both short lines side lines leaves no rear line (no reading). So every reading complies
-      and the answer doesn't depend on the open question; the answer key's needs review was more cautious than
-      the code requires.
-    question_for_architects: >-
-      On a lot whose back is two lines meeting at a point, is "the rear lot line" both lines (the rear yard
-      measured to the nearer one), or does the city use another convention (e.g. a 10 ft line parallel to the
-      front, as some codes do)? If such a convention applies, the rear yard here would be measured differently.
+      2026-10-21. The height rule (R-1b.height) carries the §325-16C bonus, which names the rear yard and the lot
+      depth; the checker reads every part of a rule, so the lot depth's readings (110 or 126.77 ft: which back line
+      is a side lot line) carry over to it, although the house is 20 ft (≤ 35 ft under every reading). By design
+      (the rule's notes); not a false pass.
+    question_for_architects: "None beyond the rear lot line question: once that is settled, the height row follows it."
+fixed:
+  R-1b.rear_yard: >-
+    Until 2026-10-21 Gordium read both short back lines only as the rear lot line (each runs 26.6° from the
+    street, within the 30° it then read as "about parallel") and said complies: depth (110 + 110) / 2 = 110 ft,
+    27'-6" required, the house 33'-6 3/8" away. The eval-integrity audit (P1-2) showed the reading the answer key
+    worried about, one short line as part of a side lot line, was never evaluated: with the house 4 ft further back
+    it is a false pass (29'-11 1/2" against 31'-8 5/16" under that reading: depth (110 + 143.54) / 2 = 126.77 ft).
+    Fixed in code (model_measurement Lot.readings): a lot line next to a side lot line is read as either a side
+    or a rear line unless it runs within 5° of the street. Gordium now evaluates every reading and says needs
+    review here, as the key does (complies under each, but the readings are the open question); the moved case is
+    pinned in packages/design_checker/tests/test_moved_and_crossing.py.
