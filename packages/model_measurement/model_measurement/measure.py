@@ -559,6 +559,52 @@ def _stories(building: dict, grade, why_grade, stated) -> dict:
                    "count typed, disagrees with the floors drawn: a question (story)")
 
 
+def _assemblies(main: dict, others: list[dict]) -> list[tuple[str, list[dict]]]:
+    """The candidate buildings the height is read over (_with_others), for every building measurement read from
+    the drawing: the main building only, and, with other solids drawn, the main building with every other solid as
+    part of it (a wing drawn as its own solid is part of the building; an accessory building isn't, §325-25)."""
+    out = [("the main building only", [main])]
+    if others:
+        out.append(("with every other solid as part of it", [main] + list(others)))
+    return out
+
+
+def _stories_over(assemblies, grade, why_grade, stated) -> dict:
+    """STORY over the same candidate buildings as the height: each assembly's count is the most stories of any
+    building in it that can be counted (its floor blocks, or its stacked solids beside the typed count, _stories);
+    an assembly with nothing countable in it is the typed count, as a reading only. If the assemblies' counts
+    differ, it is the accessory question; if any count can't be read, stories need review with its reason."""
+    readings, questions, objects = [], [], []
+    for words, members in assemblies:
+        # a stack of floor blocks is counted on its own; plain stacked solids only beside the typed count
+        counted = [_stories(b, grade, why_grade, None if any(b["floor"]) else stated)
+                   for b in members if b.get("parts")]
+        objects += [i for b in members for i in _parts(b)]
+        for r in counted:
+            if r["value"] is None and not r["readings"]:
+                return _missing("stories", r["reason"])
+            if r["value"] is None and r["reason"]:
+                questions.append(r["reason"].split("; ", 1)[-1])
+        if not counted:
+            if stated is None:
+                return _missing("stories", stop("no_stories"))
+            readings.append((_both(words, "as stated by the architect"), stated, {}))
+            continue
+        choices = [[(x["reading"], x["value"]) for x in r["readings"]] or [("", r["value"])] for r in counted]
+        for picks in itertools.product(*choices):
+            readings.append((_both(words, *[w for w, _ in picks]), max(v for _, v in picks), {}))
+    if stated is not None and not any(w.endswith("as stated by the architect") for w, _, _ in readings):
+        readings.append(("as stated by the architect", stated, {}))      # the typed count: a reading beside them
+        if any(v != stated for _, v, _ in readings):
+            questions.append("the count typed disagrees with the floors drawn: a question (story)")
+    values = {v for _, v, _ in readings}
+    if len(assemblies) > 1 and len({max(v for w, v, _ in readings if w.startswith(a)) for a, _ in assemblies}) > 1:
+        questions.append(ACCESSORY)
+    return _decide("stories", readings, "the stories of the building counted from the model (floor blocks or stacked "
+                   "solids; the count typed is a reading beside them)", list(dict.fromkeys(objects)),
+                   "; ".join(dict.fromkeys(questions)) if len(values) > 1 else "")
+
+
 # ---- measuring -------------------------------------------------------------------------------------------
 
 def _both(*words) -> str:
@@ -708,21 +754,20 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None))
     why_main = None if main else stop("no_main_building")
-    # One decision for every building measurement: which building, and can it be measured (why_which). Stories
-    # follow the rule of the fact model: a typed count is a stated fact and stands only when nothing drawn could be
-    # counted (no building, or a main building that is one plain solid). Whenever the drawing can produce a count
-    # (floor blocks or stacked solids on any building; or building objects with a problem, which might be either),
-    # the stories come from the drawing, with the typed count as a cross-check reading, and every stop that
-    # applies to the height applies to them identically (the grade is checked inside _stories).
+    others = [b for b in buildings if b is not main]
+    # One decision for every building measurement: which building (why_which), over which candidate buildings
+    # (_assemblies: the main one alone, and with every other solid as part of it). The typed story count is a
+    # stated fact: it stands as the value only when nothing drawn anywhere can be counted (no floor blocks and no
+    # stacked solids on any building, and no building object with a problem, which might be either). Otherwise
+    # the stories come from the drawing over the same assemblies as the height, the typed count only a reading
+    # beside them, and every stop that applies to the height applies to them.
     why_which = why_building or why_main
     countable = any(b.get("parts") for b in buildings) or bool(why_building and site.get("buildings"))
-    if countable and why_which:
-        out["stories"] = _missing("stories", why_which)
-    elif main is not None and main.get("parts"):
-        out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
+    if countable:
+        out["stories"] = (_missing("stories", why_which) if why_which else
+                          _stories_over(_assemblies(main, others), grade, why_grade, facts.get("stories")))
     why = why_which or why_grade
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
-    others = [b for b in buildings if b is not main]
     if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):
         # read with the other solids as part of the building, the grade plane is the ground at the walls of all of
         # them (§325-3: "each side of the building"), not the main building's alone: a wing on lower ground
