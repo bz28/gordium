@@ -405,3 +405,22 @@ def test_a_row_complying_under_every_reading_names_the_open_question_it_depends_
     side = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Side yard, East"]
     assert side["reason"].startswith("Complies under every reading, but it depends on open questions: which lot "
                                      "lines count as side and which as rear; whether a yard is measured to the wall")
+
+
+def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
+    """A looked-up lot is drawn turned so its street runs along the bottom (106 Ithaca Rd: 306.38 degrees), so
+    "East" in the plan isn't east: its side yards face northeast and southwest. A hand-drawn lot (no turn) keeps
+    East/West."""
+    sides = {"side_yard_smaller": {"points": [[73.0, 40.0], [61.0, 40.0]]},     # lot line end, building end
+             "side_yard_larger": {"points": [[0.0, 40.0], [12.0, 40.0]]}}
+    assert present._side_name("side_yard_smaller", sides) == "Side yard, East"
+    assert present._side_name("side_yard_larger", sides) == "Side yard, West"
+    assert present._side_name("side_yard_smaller", sides, 306.38) == "Side yard, Northeast"
+    assert present._side_name("side_yard_larger", sides, 306.38) == "Side yard, Southwest"
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "01_every_limit_at_the_line.yaml"))
+    names = {i["name"] for i in check_site(s, {**f, "plan_north_deg": 306.38}, extras=extras)["view"]["items"]}
+    assert {"Side yard, Northeast", "Side yard, Southwest"} <= names
+    names = {i["name"] for i in check_site(s, f, extras=extras)["view"]["items"]}
+    assert {"Side yard, East", "Side yard, West"} <= names

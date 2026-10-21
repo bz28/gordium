@@ -472,7 +472,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     splits = [c for c in compares if c.left.id in ("side_yard_smaller", "side_yard_larger")] if measure in (
         "side_yard_smaller", "side_yard_larger") else []
     # two side yards: always in the same order (by name), so equal yards never swap with the model's units
-    parts = sorted(((c, _side_name(c.left.id, measured)) for c in splits), key=lambda p: p[1]) \
+    parts = sorted(((c, _side_name(c.left.id, measured, facts.get("plan_north_deg") or 0.0)) for c in splits),
+                   key=lambda p: p[1]) \
         if len(splits) == 2 else [(primary, name)]
     district = facts.get("zone") or ""
     sources = rule.get("sources") or []
@@ -626,17 +627,26 @@ def _height_detail(j: Path, facts: dict, values: dict, node, numbers) -> dict:
             "zoom_note": "Zoom to opens the front elevation"}
 
 
-def _side_name(measure: str, measured: dict) -> str:
-    """Side yard, East/West/North/South: the compass direction from the building to the lot line the yard was
-    measured to (plan north = +y), so a lot whose street runs north-south gets North and South. Without a
-    measured line, or if both point the same way, narrower or wider."""
+COMPASS = ("North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest")
+
+
+def _side_name(measure: str, measured: dict, plan_north_deg: float = 0.0) -> str:
+    """Side yard, East/Northeast/...: the true compass direction, on 8 points, from the building to the lot line the
+    yard was measured to. `plan_north_deg` is how far the plan is turned from true north (a looked-up lot is drawn
+    turned so its street runs along the bottom: lookup_box.frame's rotation); 0 for a lot drawn by hand (plan north
+    = +y). Without a measured line, or if both point the same way, narrower or wider."""
+    turn = math.radians(plan_north_deg or 0.0)
+
     def facing(pts):
         if not pts:
             return None
         dx, dy = pts[0][0] - pts[-1][0], pts[0][1] - pts[-1][1]      # lot-line end minus building end
         if abs(dx) < 1e-6 and abs(dy) < 1e-6:          # a yard of 0: no direction to name it by
             return None
-        return ("East" if dx > 0 else "West") if abs(dx) >= abs(dy) else ("North" if dy > 0 else "South")
+        east = dx * math.cos(turn) + dy * math.sin(turn)            # back from the plan to true north
+        north = -dx * math.sin(turn) + dy * math.cos(turn)
+        bearing = math.degrees(math.atan2(east, north)) % 360
+        return COMPASS[int((bearing + 22.5) // 45) % 8]
     a = facing((measured.get("side_yard_smaller") or {}).get("points"))
     b = facing((measured.get("side_yard_larger") or {}).get("points"))
     if a and b and a != b:
