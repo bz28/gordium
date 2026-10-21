@@ -78,9 +78,14 @@ LIMITS = {
     # rows for the uses of the multi-family districts (R-3a): each limit holds for its own use
     **_by_use(LOT_SIZE, "One-family dwelling, semi-detached", "lot_area", "one_family_semi_detached"),
     **_by_use(LOT_SIZE, "Two-family dwelling", "lot_area", "two_family"),
-    # note 7's "for the first 1-3 units" figure, new construction: the least any such building needs (a floor)
-    **_by_use(LOT_SIZE, "One-family dwelling, attached, new construction", "lot_area", "one_family_attached"),
-    **_by_use(LOT_SIZE, "Multiple family dwelling, new construction", "lot_area", "multiple_family"),
+    # note 7's "for the first 1-3 units" figures, new construction and by conversion (3 units, no rooms let: the
+    # cell's number itself; the additions past 3 units are the rule's own worked examples)
+    **{(*LOT_SIZE, f"{label}, {how}"): [("lot_area", "min", {"use": use, "conversion": how == "by conversion",
+                                                              "dwelling_units": 3, "rooms_let_for_profit": 0},
+                                         lambda n: n[0])]
+       for label, use in (("One-family dwelling, attached", "one_family_attached"),
+                          ("Multiple family dwelling", "multiple_family"))
+       for how in ("new construction", "by conversion")},
     **_by_use(LOT_SIZE, "Fraternity, sorority, or group house", "lot_area", "fraternity_sorority_group_house"),
     **_by_use(LOT_WIDTH, "One-family dwelling, semi-detached", "lot_width", "one_family_semi_detached"),
     **_by_use(LOT_WIDTH, "One-family dwelling, attached", "lot_width", "one_family_attached"),
@@ -113,12 +118,10 @@ LIMITS = {
     (14, "Residential", "Each additional bed or sleeping room"):           # 7 rooms: the 4-5 band, then 2 more
         [("parking_spaces", "min", {"sleeping_rooms": 7}, lambda n: 2 + 2 * n[0])],
 }
-# Numbered cells no measurement can check yet: cited only by flags, with the reason. (Note 7's conversion figures
-# need a conversion yes/no; dormitory parking needs persons housed; loading needs units and floor space.)
+# Numbered cells no measurement can check yet: cited only by flags, with the reason. (Dormitory parking needs
+# persons housed; loading needs units and floor space.)
 # Each is still required to be cited (by a flag), and never by a rule's formula.
 FLAG_ONLY = {
-    (3, "Minimum Lot Size [fn3]", "One-family dwelling, attached, by conversion"),
-    (3, "Minimum Lot Size [fn3]", "Multiple family dwelling, by conversion"),
     (14, "Residential", "Dormitory"),
     (14, "Minimum Loading Requirement", "Multiple dweling with 25 + units"),
     (14, "Minimum Loading Requirement", "Nursing home, hospital, or sanitarium"),

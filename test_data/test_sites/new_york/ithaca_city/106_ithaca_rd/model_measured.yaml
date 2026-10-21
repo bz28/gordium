@@ -46,6 +46,15 @@ measurements:
   parking_spaces:
     value: 1
     from: stated by the architect (not measured from the model) (lot facts)
+  dwelling_units:
+    value: null
+    from: 'not measured: enter the dwelling units, the rooms let for profit, and whether it is a conversion'
+  rooms_let_for_profit:
+    value: null
+    from: 'not measured: enter the dwelling units, the rooms let for profit, and whether it is a conversion'
+  conversion:
+    value: null
+    from: 'not measured: enter the dwelling units, the rooms let for profit, and whether it is a conversion'
   front_yard_eaves:
     value: null
     from: 'not measured: a building isn''t on the lot (is it part of this design?)'
