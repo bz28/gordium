@@ -44,19 +44,37 @@ def drafts_on(monkeypatch):
 
 
 def test_general_rules_come_with_a_drafted_district_and_never_with_a_hand_rulebook():
-    assert is_ai_drafted(J, "R-1a") and not is_ai_drafted(J, "R-1b")
-    assert [p.name for p in zone_rulebooks(J, "R-1a")] == ["R-1a.yaml", "general.yaml"]
+    assert is_ai_drafted(J, "R-2a") and not is_ai_drafted(J, "R-1b")
+    assert [p.name for p in zone_rulebooks(J, "R-2a")] == ["R-2a.yaml", "general.yaml"]
     assert [p.name for p in zone_rulebooks(J, "R-1b")] == ["R-1b.yaml"]         # the hand R-1b carries its own
+
+
+def test_a_hand_written_rulebook_always_wins_over_a_draft():
+    """#20 adds hand-written R-1a and R-3a beside their AI drafts: the hand rulebook wins (its rules, never the drafts'
+    nor general.yaml's), and the zone is offered without "(draft)", whatever Ben's setting; drafted zones are offered
+    only for districts with no hand rulebook. Decided from the files present."""
+    from design_checker import check
+    from rule_format.rulebook import zone_rules
+    for d in ("R-1a", "R-3a"):
+        assert (J / "5_zoning_rules" / f"{d}.yaml").exists() and (J / "5_zoning_rules/drafted" / f"{d}.yaml").exists()
+        assert not is_ai_drafted(J, d)
+        assert zone_rulebooks(J, d) == [J / "5_zoning_rules" / f"{d}.yaml"]
+        hand = [r["id"] for r in __import__("rule_format.rulebook", fromlist=["load"]).load(J / "5_zoning_rules" / f"{d}.yaml")["rules"]]
+        assert [r["id"] for r in zone_rules(J, d)] == hand
+    off, on = check.options(ITHACA), check.options(ITHACA, offer_drafted=True)
+    hand_zones = sorted(p.stem for p in (J / "5_zoning_rules").glob("*.yaml"))
+    assert off["zones"] == hand_zones and all(off["labels"][z] == z for z in hand_zones)
+    assert on["labels"]["R-1a"] == "R-1a" and on["labels"]["R-3a"] == "R-3a" and on["labels"]["R-2a"] == "R-2a (draft)"
     assert rulebook_for(J, "general") is None and zone_rulebooks(J, "general") == []   # never a zone
 
 
-def test_a_shed_4_ft_from_an_r1_side_line_in_a_drafted_only_district_does_not_comply(drafts_on):
-    """§325-25C: in R-1 districts an accessory building may not be less than 6 ft from a side lot line. R-1a has no
-    hand rulebook; the rule is in drafted/general.yaml. Without it the shed's only row was the front-yard rule
-    (drafted/R-1a.yaml), which passes: the shed was shown as complying."""
-    shed = box(40, 75, 46, 85, 0, 10, id="shed")                    # 50 - 46 = 4 ft from the east side line
-    got = check_site(site(box(10, 25, 35, 65), shed), {**FACTS, "zone": "R-1a"})
-    side = [r for r in got["rows"] if r["Rule id"].startswith("general.325_25c_frame_accessory_side_setback_r1")]
+def test_a_shed_too_close_to_a_side_line_in_a_drafted_only_district_does_not_comply(drafts_on):
+    """§325-25C: outside R-1 an accessory building may not be less than 3 ft from a side lot line. R-2a has no hand
+    rulebook; the rule is in drafted/general.yaml. Without it the shed's only row was the front-yard rule (drafted
+    R-2a.yaml), which passes: the shed was shown as complying. (R-1a has a hand rulebook since #20.)"""
+    shed = box(40, 75, 48, 85, 0, 10, id="shed")                    # 50 - 48 = 2 ft from the east side line
+    got = check_site(site(box(10, 25, 35, 65), shed), {**FACTS, "zone": "R-2a"})
+    side = [r for r in got["rows"] if r["Rule id"].startswith("general.325_25c_frame_accessory_side_setback")]
     assert side and all(r["Error"] != "PASS" for r in side)
     assert got["summary"]["state"] not in ("pass", "complies")
 
@@ -84,7 +102,7 @@ def test_every_chart_row_the_zone_states_is_checked_by_a_rule_or_listed_as_not_c
 
 
 def test_a_missing_rule_shows_as_a_not_checked_item_on_the_panel(drafts_on):
-    got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-1a", "accessory_buildings": []})
+    got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-2a", "accessory_buildings": []})
     items = {i["id"]: i for i in got["view"]["items"]}
     loading = [i for k, i in items.items() if k.startswith("gap.chart.p14.minimum_loading_requirement")]
     assert loading and all(i["status"] == "not_checked" and i["group"] == "not_covered" for i in loading)
@@ -98,10 +116,12 @@ def test_the_start_box_offers_drafted_zones_only_behind_bens_setting_labeled_dra
     from design_checker import check
     assert check.offer_ai_drafted_zones() is False                       # default off until Ben turns it on
     off = check.options(ITHACA)
-    assert off["zones"] == ["R-1b"] and off["labels"] == {"R-1b": "R-1b"} and off["default_zone"] == "R-1b"
+    hand = sorted(p.stem for p in (J / "5_zoning_rules").glob("*.yaml"))       # the hand rulebooks only
+    assert off["zones"] == hand and off["labels"] == {z: z for z in hand} and off["default_zone"] == "R-1b"
     on = check.options(ITHACA, offer_drafted=True)
     assert "general" not in on["zones"] and {"R-1a", "R-2a", "RU"} <= set(on["zones"])
     assert on["labels"]["R-2a"] == "R-2a (draft)" and on["labels"]["R-1b"] == "R-1b"
+    assert on["labels"]["R-1a"] == "R-1a"                                  # a hand rulebook wins (#20)
     assert on["default_zone"] == "R-1b"                     # the sample project's zone, not the first (R-1a)
 
 
@@ -154,10 +174,10 @@ def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_check
     districts it doesn't reach. Now: one item per unit, nothing dropped."""
     from design_checker.gaps import drafting_gaps
     from rule_format.rulebook import zone_rules
-    r3a = {g["id"]: g for g in drafting_gaps(J, "R-3a", zone_rules(J, "R-3a"))}
+    r3a = {g["id"]: g for g in drafting_gaps(J, "R-3b", zone_rules(J, "R-3b"))}      # R-3b: drafted only (#20 adds R-3a)
     # §325-19E's 75% coverage is a rule now (its one failing example was the attached-dwelling case, which code
     # now sends to review); the rest of the unit still lists what isn't checked
-    assert "R-3a.325_19e_r3_abut_r1_max_coverage" in {r["id"] for r in zone_rules(J, "R-3a")}
+    assert "R-3b.325_19e_r3_abut_r1_max_coverage" in {r["id"] for r in zone_rules(J, "R-3b")}
     assert "325_19e_r3_abut_r1_min_lot_area_footnoted_rows" in r3a["drafting.325-19E"]["why"]
     assert "fraternity_sorority_group_house" in r3a["drafting.325-19E"]["why"]   # a group house next to R-1
     assert "97 sections the AI drafter didn't read" in r3a["drafting.325-20D"]["why"]   # named once, in one item

@@ -27,6 +27,7 @@ from openpyxl import Workbook
 
 from openpyxl.styles import Border, Font, PatternFill, Side
 from rule_export.workbook import FONT, INK, citer, page_link, title, write_block
+from . import plain
 from rule_format import formula
 from rule_format.formula import EvaluationError, MissingMeasure
 from rule_format.rulebook import (MEASURE_KINDS, MEASURES_FILE, REPO, Context, load, outcome, rulebook_file_problems,
@@ -42,6 +43,11 @@ OUTPUT_HEADERS = ["Requirement", "Table limit", "Proposed", "Units", "Comparison
 INPUT_EXTRA = ["Where the value comes from"]
 PARAMETER_EXTRA = ["Rule", "Link"]
 OUTPUT_EXTRA = ["Rule id", "Formula", "Why it needs review", "Citation", "City's exact words", "Link", "Rulebook"]
+# What the Output tab shows after the architects' columns (in their words); the rule id, formula and rulebook,
+# for checking the rules themselves, are on their own tab at the end (TRACE_TAB).
+OUTPUT_SHOWN = ["Why it needs review", "Citation", "City's exact words", "Link"]
+TRACE_TAB = "Rule trace"
+TRACE_HEADERS = ["Requirement", "Rule id", "Formula", "Rulebook"]
 
 RESULT = {"pass": "PASS", "fail": "FAIL", "needs_review": "NEEDS REVIEW", "not_applicable": "NOT APPLICABLE"}
 COMPARISON = {"pass": "Within table limit", "fail": "Outside table limit", "needs_review": "Needs review",
@@ -54,6 +60,7 @@ RESULT_INK = {"FAIL": "FF0000", "NEEDS REVIEW": "9A6400"}   # their FAIL is red;
 # Excel's default, and ours is 14 to fit a list of measurements), then ours.
 INPUT_WIDTHS = [43, 17, 46.375, 40]
 OUTPUT_WIDTHS = [34, 20, 14, 12, 25, 14, 12.625] + [28, 40, 40, 40, 60, 10, 30]
+OUTPUT_SHOWN_WIDTHS = [34, 20, 14, 12, 25, 14, 12.625] + [50, 40, 60, 10]
 
 MEASURES = load(MEASURES_FILE)
 SYMBOL = {ast.GtE: "≥", ast.LtE: "≤", ast.Gt: ">", ast.Lt: "<", ast.Eq: "=", ast.NotEq: "≠"}
@@ -304,7 +311,8 @@ def tables(project_path: Path) -> dict:
                            cite(first),
                            rule.get("id", ""), f"Open p.{first['page']}" if first.get("file") else ""])
             param_links.append(link)
-    return {"title": project["title"], "inputs": inputs, "parameters": params, "parameter_links": param_links,
+    return {"title": project["title"], "use_names": use_names, "inputs": inputs, "parameters": params,
+            "parameter_links": param_links,
             "output": [r for r, _ in rows], "output_links": [l for _, l in rows],
             "not_applicable": [r for r, _ in later], "not_applicable_links": [l for _, l in later]}
 
@@ -331,11 +339,39 @@ def _note(ws, cell: str, text: str, size=10, bold=False) -> None:
     ws[cell].font = Font(name=FONT, size=size, bold=bold, italic=not bold, color=INK)
 
 
+def shown(t: dict, use_names: dict | None = None) -> dict:
+    """The tables as an architect reads them (plain.py): titles, not measure names; lengths in feet and inches and
+    areas in square feet, rounded never in the design's favour; no file names. The values and verdicts are t's:
+    only how they are written changes."""
+    col = {h: n for n, h in enumerate(OUTPUT_HEADERS + OUTPUT_EXTRA)}
+    names = use_names if use_names is not None else t.get("use_names") or {}
+
+    def row(r):
+        unit, lim = r[col["Units"]], r[col["Table limit"]]
+        out = [r[col["Requirement"]], plain.limit(lim, unit, names), plain.proposed(r[col["Proposed"]], unit, lim, names),
+               r[col["Units"]], r[col["Comparison"]], r[col["PDF page"]], r[col["Error"]],
+               plain.names(r[col["Why it needs review"]], names), r[col["Citation"]], r[col["City's exact words"]],
+               r[col["Link"]]]
+        return out
+
+    inputs = [[i[0], plain.input_value(i[0].lower().replace(" ", "_"), i[1]),
+               plain.meaning(i[2]).replace("use; ", "", 1) if i[2].startswith("use; ") else plain.meaning(i[2]),
+               plain.source(i[3])] for i in t["inputs"]]
+    # the rule as words ("R-1b rear yard"): its id, for the trace tab, without the code's dots and underscores
+    params = [[p[0], plain.names(p[1], names), p[2], str(p[3]).replace(".", " ").replace("_", " "), *p[4:]]
+              for p in t["parameters"]]
+    trace = [[r[col["Requirement"]], r[col["Rule id"]], r[col["Formula"]], r[col["Rulebook"]]]
+             for r in t["output"] + t["not_applicable"]]
+    return {**t, "inputs": inputs, "parameters": params, "output": [row(r) for r in t["output"]],
+            "not_applicable": [row(r) for r in t["not_applicable"]], "trace": trace}
+
+
 def build(t: dict) -> Workbook:
     """The architects' two tabs, laid out like theirs: title in A1, bold headers on row 2, their columns in
-    their order, widths, font and colors (yellow for typed-in values, red for FAIL). Our columns come after
-    theirs, set apart by a light blue on the headers (a color their key doesn't use) and a line down the left
-    edge."""
+    their order, widths, font and colors (yellow for typed-in values, red for FAIL), in their words (shown): our
+    columns come after theirs, set apart by a light blue on the headers (a color their key doesn't use) and a line
+    down the left edge. The rule ids, formulas and rulebook, for checking the rules, are on a last tab."""
+    t = shown(t)
     wb = Workbook()
     wb.remove(wb.active)
     wb.properties.creator = "Gordium (generated: python -m project_report)"
@@ -353,13 +389,13 @@ def build(t: dict) -> Workbook:
     ws.cell(row=3, column=key).fill = PatternFill("solid", fgColor=INPUT_FILL)
     _note(ws, ws.cell(row=3, column=key + 1).coordinate, "typed into the project file")
     ws.cell(row=4, column=key).fill = PatternFill("solid", fgColor=OURS_FILL)
-    _note(ws, ws.cell(row=4, column=key + 1).coordinate, "a column Gordium adds after the architects' columns")
+    _note(ws, ws.cell(row=4, column=key + 1).coordinate, "where each value comes from, and the city's own words")
 
     ws = wb.create_sheet(OUTPUT_TAB)
     title(ws, f"GORDIUM | {t['title']} (draft rules, checked by code)")
     first_ours = len(OUTPUT_HEADERS) + 1
-    _note(ws, ws.cell(row=1, column=first_ours).coordinate, "Columns from here on are added by Gordium")
-    columns = list(zip(OUTPUT_HEADERS + OUTPUT_EXTRA, OUTPUT_WIDTHS))
+    _note(ws, ws.cell(row=1, column=first_ours).coordinate, "Why, and the city's own words")
+    columns = list(zip(OUTPUT_HEADERS + OUTPUT_SHOWN, OUTPUT_SHOWN_WIDTHS))
     end = write_block(ws, 2, columns, t["output"], links={"Link": t["output_links"]})
     _mark_ours(ws, 2, end, first_ours, len(columns))
     _color_results(ws, 3, end, OUTPUT_HEADERS.index("Error") + 1)
@@ -369,6 +405,10 @@ def build(t: dict) -> Workbook:
                                 links={"Link": t["not_applicable_links"]})
         _mark_ours(ws, end + 2, later_end, first_ours, len(columns))
     ws.freeze_panes = "A3"
+
+    ws = wb.create_sheet(TRACE_TAB)
+    title(ws, "For checking the rules: each requirement's rule, its formula and the rulebook it came from")
+    write_block(ws, 2, list(zip(TRACE_HEADERS, [34, 34, 60, 50])), t["trace"])
     return wb
 
 

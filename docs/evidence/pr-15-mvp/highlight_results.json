@@ -25,7 +25,9 @@
      ]
     ],
     "reason": null,
-    "group": "building"
+    "group": "building",
+    "needs": [],
+    "hint": null
    }
   },
   "the start house: nothing red": {
@@ -58,7 +60,9 @@
      ]
     ],
     "reason": null,
-    "group": "building"
+    "group": "building",
+    "needs": [],
+    "hint": "To comply: move the building 2'-11 3/8\" farther from that lot line."
    }
   },
   "red: from the wall to 8 ft from the lot line (over even if the line is 2 ft out)": {
@@ -150,7 +154,9 @@
       ]
      ],
      "reason": "the readings give different values; which lot lines count as side and rear lot lines isn't settled yet: confirm with the zoning office",
-     "group": "building"
+     "group": "building",
+     "needs": [],
+     "hint": null
     },
     "bands": {
      "yard": 7.056,
@@ -290,8 +296,8 @@
       8.5
      ],
      [
-      "75'-10\" (approx.)",
-      472,
+      "75'-10\"",
+      504,
       535,
       0,
       0,
@@ -299,8 +305,8 @@
       6.0
      ],
      [
-      "101'-1 1/2\" (approx.)",
-      204,
+      "101'-1 1/2\"",
+      268,
       323,
       0,
       0,
@@ -308,7 +314,7 @@
       8.5
      ],
      [
-      "10'-4 1/8\" (approx.)",
+      "10'-4 1/8\"",
       393,
       115,
       0,
@@ -317,8 +323,8 @@
       9.9
      ],
      [
-      "69'-6 1/8\" (approx.)",
-      557,
+      "69'-6 1/8\"",
+      621,
       153,
       0,
       0,
@@ -326,7 +332,7 @@
       6.0
      ],
      [
-      "92'-1 3/8\" (approx.)",
+      "92'-1 3/8\"",
       710,
       344,
       0,
@@ -378,8 +384,8 @@
      8.5
     ],
     [
-     "75'-10\" (approx.)",
-     472,
+     "75'-10\"",
+     504,
      535,
      0,
      0,
@@ -387,8 +393,8 @@
      6.0
     ],
     [
-     "101'-1 1/2\" (approx.)",
-     204,
+     "101'-1 1/2\"",
+     268,
      323,
      0,
      0,
@@ -396,7 +402,7 @@
      8.5
     ],
     [
-     "10'-4 1/8\" (approx.)",
+     "10'-4 1/8\"",
      393,
      115,
      0,
@@ -405,8 +411,8 @@
      9.9
     ],
     [
-     "69'-6 1/8\" (approx.)",
-     557,
+     "69'-6 1/8\"",
+     621,
      153,
      0,
      0,
@@ -414,7 +420,7 @@
      6.0
     ],
     [
-     "92'-1 3/8\" (approx.)",
+     "92'-1 3/8\"",
      710,
      344,
      0,
@@ -465,8 +471,8 @@
       8.5
      ],
      [
-      "75'-10\" (approx.)",
-      472,
+      "75'-10\"",
+      504,
       535,
       0,
       0,
@@ -474,8 +480,8 @@
       6.0
      ],
      [
-      "101'-1 1/2\" (approx.)",
-      204,
+      "101'-1 1/2\"",
+      268,
       323,
       0,
       0,
@@ -483,7 +489,7 @@
       8.5
      ],
      [
-      "10'-4 1/8\" (approx.)",
+      "10'-4 1/8\"",
       393,
       115,
       0,
@@ -492,8 +498,8 @@
       9.9
      ],
      [
-      "69'-6 1/8\" (approx.)",
-      557,
+      "69'-6 1/8\"",
+      621,
       153,
       0,
       0,
@@ -501,7 +507,7 @@
       6.0
      ],
      [
-      "92'-1 3/8\" (approx.)",
+      "92'-1 3/8\"",
       710,
       344,
       0,
@@ -538,8 +544,8 @@
     "\u201cYard Dimensions \u00b7 Side (other side minimum) \u00b7 R-1B: 10 ft\u201d",
     "City of Ithaca Zoning Charts (April 2026), p.3, line 40",
     "\u00a7325-8, District Regulations Chart, R-1b, Side yard, one side column; \u00a7325-8, District Regulations Chart, R-1b, Side yard, other side column",
-    "Open \u00a7325-8, District Regulations Chart, R-1b, Side yard, one side column",
-    "Open \u00a7325-8, District Regulations Chart, R-1b, Side yard, other side column"
+    "Open \u2026R-1b, Side yard, one side column",
+    "Open \u2026R-1b, Side yard, other side column"
    ]
   },
   "3 dark background seen as dark": {
@@ -629,8 +635,8 @@
    8.5
   ],
   [
-   "75'-10\" (approx.)",
-   472,
+   "75'-10\"",
+   504,
    535,
    0,
    0,
@@ -638,8 +644,8 @@
    6.0
   ],
   [
-   "101'-1 1/2\" (approx.)",
-   204,
+   "101'-1 1/2\"",
+   268,
    323,
    0,
    0,
@@ -647,7 +653,7 @@
    8.5
   ],
   [
-   "10'-4 1/8\" (approx.)",
+   "10'-4 1/8\"",
    393,
    115,
    0,
@@ -656,8 +662,8 @@
    9.9
   ],
   [
-   "69'-6 1/8\" (approx.)",
-   557,
+   "69'-6 1/8\"",
+   621,
    153,
    0,
    0,
@@ -665,7 +671,7 @@
    6.0
   ],
   [
-   "92'-1 3/8\" (approx.)",
+   "92'-1 3/8\"",
    710,
    344,
    0,
@@ -696,8 +702,8 @@
   "\u201cYard Dimensions \u00b7 Side (other side minimum) \u00b7 R-1B: 10 ft\u201d",
   "City of Ithaca Zoning Charts (April 2026), p.3, line 40",
   "\u00a7325-8, District Regulations Chart, R-1b, Side yard, one side column; \u00a7325-8, District Regulations Chart, R-1b, Side yard, other side column",
-  "Open \u00a7325-8, District Regulations Chart, R-1b, Side yard, one side column",
-  "Open \u00a7325-8, District Regulations Chart, R-1b, Side yard, other side column",
+  "Open \u2026R-1b, Side yard, one side column",
+  "Open \u2026R-1b, Side yard, other side column",
   "Measured to 1/8 in.; values are never rounded toward compliance; near a limit they are shown with one more decimal.",
   "\u2715 Side yard, Southwest \u00b7 Does not comply",
   "7'-0 5/8\" proposed, 10'-0\" required as drawn \u00b7 with the tax map's \u00b12'-0\": at least 0'-11 1/4\" short",

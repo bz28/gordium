@@ -36,6 +36,15 @@ format report from it.
 
 ## How each number is found
 
+**Which drawn lines form each lot line (decided 2026-10-21, review round 20).** A drawn outline's pieces are grouped
+into lot lines by cleaning it within its own accuracy: a corner goes when leaving it out moves the outline by no
+more than 0.01 ft on a survey, 0.25 ft on the tax map (pieces in line, slivers). A corner where the street meets
+the other lines, or at a curved line, always stays. The cleaned outline only decides which drawn pieces form each
+line (street, side, rear; the readings of which are which), so it can only drop readings the drawing's noise made.
+Every distance is still measured to the pieces drawn, never to a chord across them, and the lot area is the
+outline drawn. Lines are named by the architect's own numbering ("line 10 to 11" for two drawn pieces read as
+one), and each lot-line measurement says the outline was cleaned (its `from` text and the panel's detail).
+
 | Measure | How | The city's words (4_term_definitions/definitions.yaml) |
 |---|---|---|
 | Lot area | area inside the lot lines | |
@@ -144,7 +153,9 @@ Every reason the code gives today comes from the table:
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
   of all the buildings, or under the lowest point of all of them, as when a survey elevation is typed for a model
-  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual); "a solid lies wholly under the
+  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual; with spot grades,
+  read from the ground under the footprint whether or not they sit at the walls); "the spot grades don't show the
+  ground under the building (too few, or in a line): place spot grades around the building"; "a solid lies wholly under the
   ground (<ground> ft; it runs from <bottom> to <top> ft) and isn't joined directly under the building: check the
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
   it lies within that solid's plan; a sub-basement under it too); "say whether the ground is flat";
@@ -163,7 +174,7 @@ Every reason the code gives today comes from the table:
   finished ground" (height and stories).
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
   are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
-  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces".
+  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces"; "enter the dwelling units, the rooms let for profit, and whether it is a conversion" (R-3a chart note 7: the lot size grows with them); "say whether the lot abuts R-1a or R-1b land, sharing a lot line or across a street (§325-19E)" (R-3a.abutting_r1: no, and the stricter limits don't apply).
 - **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
   Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked on them (a podium, a bulkhead, a
   roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
@@ -174,7 +185,10 @@ Every reason the code gives today comes from the table:
   blocks) is the same building whatever the gap between them (a tolerance never decides what the building is), and
   a real gap between its levels asks: "parts of the building drawn one over another don't stand on each other (from
   {low} ft to {high} ft): a floor not drawn, or a space open to below? draw the missing floor, or check the
-  blocks". Parts at the same level (an L-shaped house of two stacks) are no gap. One starting partly inside the one below
+  blocks". Parts at the same level (an L-shaped house of two stacks) are no gap. A plain part starting above the ground
+  (a room beside the roof edge or over it, touching in plan or not) asks, whatever was typed: "part of the
+  building ({what}) starts above the ground: it may be another story: draw its stories as floor blocks, or check
+  the count". One starting partly inside the one below
   (a floor moved down into it, a room sunk into the roof) asks too: "part of the building ({what}) starts partly
   inside the one below it (from {low} ft to {high} ft): move it to stand on the one below, or join them". So moving
   a part a tenth of a foot never turns one count into another. Stories are counted only from floor blocks: a part drawn as a plain solid
@@ -189,12 +203,14 @@ Every reason the code gives today comes from the table:
   stories of the whole building". Any part reaching below the ground, whatever was typed: "part of the building
   ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
   question for the architects".
-- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the measurements"; "more than one building: pick the main building"; "a building isn't on the lot (is it part of this design?)" (a building
-  wholly off the lot: only the rules that would measure it wait: the main yards for the main building, the accessory
-  rule for an accessory building, coverage for any. A building partly off the lot is measured, and every rule that
-  measures it does not comply, whatever the readings or answers: the main yards, the eaves, the height and the
-  stories for the main building, the accessory rule for an accessory building, coverage for any; each building is
-  placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
+  measurements"; "more than one building: pick the main building" (with none picked and exactly one starting house, it is
+  the main building, assumed: every measurement from it carries `main_assumed`, and every other building that
+  could be a principal one (enclosed, at least 7 ft tall and 70 sf: NYS Residential Code R305.1, R304.1) is also
+  read as if it were the main one, so the assumption never passes what a pick wouldn't); "a building object has
+  nothing to measure (no faces): check it on the Building layer"; "a building covers no area seen from above: {what} (walls only, or faces in a line); check
+  it on the Building layer" (which one; it can't be placed on the lot: the rules that would measure it wait, as for one
+  off the lot, and with one off the lot too, both reasons are said, each naming its own buildings); "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "a building isn't inside the lot: {what}" (a building wholly off the lot: only the rules that would measure it wait. A building partly off the lot is measured, and every rule that measures it does not comply, whatever the readings or answers; each building is placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

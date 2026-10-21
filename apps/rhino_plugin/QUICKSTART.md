@@ -2,8 +2,8 @@
 
 For an architect who has just opened Rhino. About 10 minutes the first time, then 1 minute per project.
 
-Gordium checks your massing against the City of Ithaca zoning rules (R-1b, one-family houses, for now) while
-you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
+Gordium checks your massing against the City of Ithaca zoning rules (the R-1a, R-1b and R-3a districts, for now;
+the sample project below is an R-1b one-family house) while you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 
 **Contents:** [Set up (once)](#what-you-need-once) · [Your first project](#your-first-project-step-by-step) ·
@@ -233,7 +233,8 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
      `GordiumStart`.
 3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
    - **Address**: recorded on the project and the report. (Look up from the City's map is coming soon.)
-   - **Zoning district**: R-1b, "entered by you". Tick **I confirm**: Draw stays off until you do, on every new
+   - **Zoning district**: R-1b, "entered by you" (R-1a and R-3a can be picked too). Tick **I confirm**: Draw
+     stays off until you do, on every new
      project, because Gordium doesn't look up the zoning map yet.
    - **Use**: one-family dwelling, detached.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
@@ -344,7 +345,8 @@ lot the tax map allows:
 One row needs review from the start, and that is Gordium being honest about this lot, not a mistake:
 - **Rear yard**: which of the short lines at the back count as side lot lines and which as the rear lot line is an
   open question for the architects (it decides the lot's depth, and so the rear yard's requirement), so the rear
-  yard shows two readings and "confirm with the zoning office".
+  yard's Required shows the range it can take, and the reason says so once: "Needs … to …, depending on which lot
+  lines count as side and which as rear (it sets the lot depth): ask the zoning office".
 
 **Building height**: 35'-0" is at the limit and complies. The height rule's taller-house bonus reads the rear yard,
 but at 35 ft or under the bonus never comes into it, so the open question doesn't matter.

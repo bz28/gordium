@@ -97,13 +97,14 @@ def label(text, color=None, bold=False, size=None, wrap=True, width=None):
 
 
 DOCKED = False                  # set by make_panel: docked, labels stretch with Rhino's panel (no fixed width)
+WRAP_AT = None                  # docked: the width labels wrap at, from the panel's own width (set by show)
 
 
 
 def _wide(text, color=None, bold=False, size=None):
     """A label the width of the panel's content, wrapping there: the floating window's fixed width, or docked,
     whatever width the architect gives Rhino's panel."""
-    return label(text, color, bold, size, True, None if DOCKED else PANEL_WIDTH - 48)
+    return label(text, color, bold, size, True, (WRAP_AT or PANEL_WIDTH - 48) if DOCKED else PANEL_WIDTH - 48)
 
 
 def button(text, action, enabled=True):
@@ -371,10 +372,20 @@ def _envelope_box(actions):
     return box
 
 
+def _wrap_width(parts):
+    """Docked: the width labels wrap at, the panel's own width less its margins (an unbounded label ran off the
+    docked panel's right edge: the architect's review, 2026-10-21); never below 240 px."""
+    host = getattr(parts.get("form"), "host", None)
+    width = getattr(host, "Width", 0) or 0
+    return max(240, width - 48) if width > 0 else None
+
+
 def show(parts, view, stale=False, error=None, checking=False):
     """Fill the panel from the checker's view. Stale (the model changed and the check hasn't run again yet) or a
     check that couldn't run: rows keep their names but show no mark and "—", Zoom to is off (H1, H2, H5). The
     selection, which groups are open and the scroll position are kept by item id across refreshes (D8)."""
+    global WRAP_AT
+    WRAP_AT = _wrap_width(parts) if DOCKED else None
     tree = parts["tree"]
     parts["stale"] = stale or error is not None or checking
     if view is not None:
@@ -403,8 +414,7 @@ def show(parts, view, stale=False, error=None, checking=False):
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
             values = [("" if stale_row else i["mark"] + "  ") + logic.row_name(i),
-                      "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else "needs input"
-                                             if i["id"].startswith("R-") else ""),
+                      "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else ""),   # the name says it
                       "" if stale_row else i["required"], "" if stale_row else (i.get("delta") or "")]
             ci = ef.TreeGridItem()
             ci.Tag = item_id
@@ -447,7 +457,11 @@ def _header(parts, view, error, out_of_date):
     h.AddRow(_wide(draft, eto_status_color("needs_review"), size=11))
     h.AddRow(_wide(lot, size=11))          # each fact on its line, its buttons below it: a
     h.AddRow(_wide(grade, size=11))        # button beside a long line ran off the panel
+    if head.get("main"):                   # several buildings: which is measured, and a way to change it
+        h.AddRow(_wide(head["main"], size=11))
     buttons = [button("Edit site…", a["edit_site"])]
+    if head.get("main"):
+        buttons.append(button("Main building…", a["main"]))
     if "Pick survey lot lines…" in (head.get("actions") or []):
         buttons.append(button("Pick survey lot lines…", a["survey"]))
     if "Set grade…" in (head.get("actions") or []):
@@ -482,11 +496,14 @@ def show_detail(parts):
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))
     for text in (det.get("line"), i.get("reason"), i.get("hint") if i.get("hint") not in ("Add to check…",) else None,
-                 det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
+                 det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope"),
+                 det.get("outline")):           # how the lot lines were read from a cleaned outline (PR 18)
         if text:
             d.AddRow(_wide(text, size=12))
     if i.get("needs"):                    # exactly the stated facts this row waits for, asked in turn
         d.AddRow(row(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"]))))
+    if i.get("hint") == "Pick the main building…":
+        d.AddRow(row(button("Pick the main building…", a["main"])))
     if i["id"] == "scope.not_included":
         d.AddRow(row(button("Add to check…", lambda: a["add"](i["objects"]))))
         if i.get("ground_like"):              # only the architect's word leaves it out (never a guess)
@@ -510,8 +527,10 @@ def show_detail(parts):
     if det.get("citation"):
         d.AddRow(_wide(det["citation"], size=11))
     for c in det.get("cited") or []:
-        link = ef.LinkButton()
-        link.Text = "Open " + c["citation"]
+        link = ef.LinkButton()            # a link can't wrap: it fits the panel, shortened, the whole in its tip
+        room = (WRAP_AT or PANEL_WIDTH - 48) if DOCKED else PANEL_WIDTH - 48
+        link.Text = logic.link_text(c["citation"], int(room / 7.5))
+        link.ToolTip = "Open " + c["citation"]
         url = c["link"]
         link.Click += logic.guard(lambda s, e, u=url: Rhino.UI.Dialogs.ShowMessage(u, "Gordium") if not _open(u) else None, "open the link")
         d.AddRow(link)
@@ -720,6 +739,28 @@ def text_box_size(lines, size=13):
     """The (width, height) draw_text_box gives these lines, in screen pixels."""
     return max(len(t) for t in lines) * (size * 0.6) + 22, len(lines) * (size + 9) + 10
 
+
+NORTH_PX = 36                 # the north arrow's length on screen
+
+
+def north_arrow(d, viewport, at, direction, color):
+    """A small north arrow at model point `at`, pointing along `direction` (true north in the plan), with "N" past
+    its tip: screen size, so it reads at any zoom. Returns its box on screen (x, y, w, h)."""
+    import math
+    a = viewport.WorldToClient(at)
+    b = viewport.WorldToClient(at + direction)
+    dx, dy = b.X - a.X, b.Y - a.Y
+    n = math.hypot(dx, dy) or 1.0
+    ux, uy = dx / n, dy / n
+    tip = System.Drawing.PointF(a.X + ux * NORTH_PX, a.Y + uy * NORTH_PX)
+    d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), tip, color, 2)
+    for side in (1, -1):                      # the head: two short strokes back from the tip
+        hx = tip.X - ux * 10 + side * (-uy) * 6
+        hy = tip.Y - uy * 10 + side * ux * 6
+        d.Draw2dLine(tip, System.Drawing.PointF(hx, hy), color, 2)
+    d.Draw2dText("N", color, rg.Point2d(tip.X + ux * 10 - 5, tip.Y + uy * 10 - 8), False, 13)
+    xs, ys = (a.X, tip.X, tip.X + ux * 10), (a.Y, tip.Y, tip.Y + uy * 10)
+    return min(xs) - 12, min(ys) - 14, max(xs) - min(xs) + 24, max(ys) - min(ys) + 28    # its box: labels keep off
 
 def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=None):
     """Lines of text on a backing box (F3), at screen point x, y (top left)."""

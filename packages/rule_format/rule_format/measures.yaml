@@ -17,6 +17,13 @@ side_yard_larger:  {unit: ft,    meaning: Width of the wider side yard}
 rear_yard:         {unit: ft,    meaning: Depth of the rear yard}
 sleeping_rooms:    {unit: count, meaning: Bed or sleeping rooms in the dwelling unit}
 parking_spaces:    {unit: count, meaning: Off-street parking spaces provided}
+# Stated by the architect (the model doesn't show them): a lot size that grows with the units (R-3a chart note 7).
+dwelling_units:       {unit: count,  meaning: "Dwelling units in the building"}
+rooms_let_for_profit: {unit: count,  meaning: "Rooms let for profit (to roomers) in the building"}
+conversion:           {unit: yes_no, meaning: "The building is a conversion of an existing building (§325-3B CONVERSION), not new construction"}
+# Stated by the architect: whether §325-19E's stricter limits can apply (R-3a.abutting_r1). Whether land across a
+# street "directly abuts" is open (R-3a.abutting_r1, open question 1); asked the cautious way, so yes covers both.
+abuts_r1_district:    {unit: yes_no, meaning: "The lot directly abuts land in the R-1a or R-1b district (§325-19E): it shares a lot line with that land, or faces it across a street (Gordium's reading of the open question, to confirm)"}
 # Yards to the building seen from above, eaves and cornices included: §325-18B lets those project up to 2 ft
 # into a required yard (the yards above are measured to the building, its eaves left out).
 front_yard_eaves:        {unit: ft, meaning: "Depth of the front yard measured to the outermost part of the building, eaves included"}
