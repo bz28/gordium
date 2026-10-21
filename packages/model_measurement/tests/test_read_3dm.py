@@ -266,3 +266,25 @@ def test_a_meshed_gable_on_ithaca_survey_coordinates_is_read_on_its_full_precisi
 def test_a_single_precision_mesh_that_far_out_is_reported_not_measured(tmp_path):
     h, _, _ = measured_gable(tmp_path, 870000.3, 900000.7, 8, double=False)
     assert h["value"] is None and "may be single precision" in h["reason"]
+
+
+def test_a_single_precision_mesh_reads_as_the_numbers_typed(tmp_path):
+    """Stress test: a mesh made with Vertices.Add holds single-precision points; 27 ft drawn in millimetres
+    (8229.6 mm) was read as 26.999999 ft, so a design exactly at a limit failed. Near the origin its points are
+    read as the shortest decimals they store (what was typed): 27 ft exactly."""
+    from rule_format.rulebook import outcome
+    m = model(units=r.UnitSystem.Millimeters)
+    mm = 304.8
+    rect(m, 0, 0, 50 * mm, 100 * mm)
+    mesh = r.Mesh()
+    for x, y, z in [(10, 25, 0), (35, 25, 0), (35, 65, 0), (10, 65, 0), (10, 25, 27), (35, 25, 27), (35, 65, 27), (10, 65, 27)]:
+        mesh.Vertices.Add(x * mm, y * mm, z * mm)
+    for f in [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]:
+        mesh.Faces.AddFace(*f)
+    m.Objects.AddMesh(mesh, on(1))
+    facts = {**FACTS, "street_line": [[[0, 0], [50 * mm / mm, 0]]]}
+    got = measure(read_site(write(m, tmp_path), facts), facts)
+    height = got["building_height"]["value"]
+    assert abs(height - 27) < 1e-9, height
+    assert outcome({"id": "h", "kind": "rule", "check": "building_height <= 27"}, {"building_height": height}, {}) == "pass"
+    assert abs(got["front_yard"]["value"] - 25) < 1e-9 and abs(got["building_area"]["value"] - 1000) < 1e-6
