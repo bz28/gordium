@@ -285,8 +285,20 @@ def _header(parts, view, error, out_of_date):
         buttons.append(button("Pick survey lot lines…", a["survey"]))
     if "Set grade…" in (head.get("actions") or []):
         buttons.append(button("Set grade…", a["grade"]))
+    parts["box_buttons"] = buttons      # off while a start box is open (set_box_open)
+    for b in buttons:
+        b.Enabled = not parts.get("box_open")
     h.AddRow(row(*buttons))
     h.Create()
+
+
+def set_box_open(parts, is_open):
+    """While a start box is open, the panel's buttons that would open another (or change the site under it) are off."""
+    if parts is None:
+        return
+    parts["box_open"] = bool(is_open)
+    for b in parts.get("box_buttons") or []:
+        b.Enabled = not is_open
 
 
 def show_detail(parts):

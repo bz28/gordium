@@ -496,16 +496,17 @@ class FakeTable:
     def layer_of(self, i):
         return self.objects[i]["layer"]
 
-    def hold(self, i):
+    def hold(self, i, token=None):
         self.layers.add(logic.HOLDING_LAYER)
-        self.objects[i].update(held_from=self.objects[i]["layer"], layer=logic.HOLDING_LAYER)
+        self.objects[i].update(held_from=self.objects[i]["layer"], layer=logic.HOLDING_LAYER, held_by=token)
 
     def release(self, i, layer):
         self.layers.add(layer)
-        self.objects[i].update(layer=layer, held_from=None)
+        self.objects[i].update(layer=layer, held_from=None, held_by=None)
 
     def held_objects(self):
-        return [(i, o["held_from"]) for i, o in self.objects.items() if o["layer"] == logic.HOLDING_LAYER]
+        return [(i, o["held_from"], o.get("held_by")) for i, o in self.objects.items()
+                if o["layer"] == logic.HOLDING_LAYER]
 
     def mark_added(self, i, token):
         self.objects[i]["added_by"] = token
@@ -514,7 +515,7 @@ class FakeTable:
         self.objects[i].pop("added_by", None)
 
     def added_objects(self):
-        return [i for i, o in self.objects.items() if o.get("added_by")]
+        return [(i, o["added_by"]) for i, o in self.objects.items() if o.get("added_by")]
 
     def layer_names(self):
         return sorted(self.layers)
@@ -638,15 +639,15 @@ def test_objects_held_when_rhino_closed_are_put_back_and_never_measured():
     """A box Rhino didn't finish: what it held goes back to its own layer at the next GordiumStart or GordiumCheck;
     meanwhile nothing on the holding layer is a lot, a building or a problem for the checker."""
     table = FakeTable({"sample": {"layer": "Site", "kind": "lot"}, "spot": {"layer": "Gordium::Grade", "kind": "point"}})
-    table.hold("sample")
-    table.hold("spot")
-    assert logic.recover_held(table) == 2
+    table.hold("sample", "a-session-rhino-closed-on")
+    table.hold("spot", "a-session-rhino-closed-on")
+    assert logic.recover_held(table) == (0, 2)
     assert table.objects["sample"]["layer"] == "Site" and table.objects["spot"]["layer"] == "Gordium::Grade"
     assert logic.HOLDING_LAYER not in table.layers
     for kind, holds in (("PolylineCurve", False), ("Brep", False), ("InstanceReferenceGeometry", True)):
         assert logic.classify(logic.HOLDING_LAYER, kind, holds) is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    for command in ("def gordium_start():", "def gordium_check():", "def confirm("):
+    for command in ("def gordium_start():", "def gordium_check():", "def _confirm("):
         body = rhino[rhino.index(command):]
         assert body.index("_recover(doc)") < body.index("\ndef ")
 
@@ -676,7 +677,7 @@ def test_cancel_during_a_lookup_never_raises_before_the_rollback():
     assert "except OSError:" in files
     poll = rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
     assert poll.index('run["answer"] = {"status": "timeout"') < poll.index("_lookup_kill(run)")
-    conf = rhino[rhino.index("def confirm("):rhino.index("def _box_loop(")]
+    conf = rhino[rhino.index("def _confirm("):rhino.index("def _box_loop(")]
     assert conf.index("logic.run_box(session") < conf.index("finally:") < conf.index("_lookup_stop()")
 
 
@@ -705,8 +706,10 @@ def test_crash_recovery_leaves_the_model_as_it_was_before_the_box():
     session = logic.BoxSession(table)
     logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
     session.add([table._new("Gordium::Grade", "point")])         # one placed in the box too
-    # Rhino closes here: no rollback, no commit. The next GordiumStart:
-    assert logic.recover_held(table) > 0
+    # Rhino closes here: no rollback, no commit; its session is no longer open. The next GordiumStart:
+    logic.OPEN_SESSIONS.discard(session.token)
+    # removed: the lot, its 14 spot grades and the one placed; put back: the sample lot and the architect's grade
+    assert logic.recover_held(table) == (16, 2)
     assert table.snapshot() == before
 
 
@@ -715,7 +718,7 @@ def test_draw_keeps_what_it_drew_unmarked():
     session = logic.BoxSession(table)
     f, _, _ = logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
     session.commit()
-    assert table.added_objects() == [] and logic.recover_held(table) == 0 and f["lot_id"] in table.objects
+    assert table.added_objects() == [] and logic.recover_held(table) == (0, 0) and f["lot_id"] in table.objects
 
 
 def test_draw_commits_last_so_a_failure_before_it_is_rolled_back():
@@ -739,3 +742,51 @@ def test_draw_commits_last_so_a_failure_before_it_is_rolled_back():
     s2 = logic.BoxSession(FakeTable({}))
     s2.commit = lambda: calls.append("commit")
     assert logic.draw_then_commit(s2, lambda: calls.append("save") or "facts") == "facts" and calls == ["save", "commit"]
+
+
+
+# ---- review round 4 of PR #19 ------------------------------------------------------------------------------------
+
+def test_recovery_never_touches_a_start_box_still_open():
+    """Round 4: Edit site… from the panel during a pick opened a second box, whose recovery deleted the open box's
+    drawn objects and released what it held. Open sessions are registered; recovery touches only dead ones."""
+    table, facts, saved = sample_model()
+    session = logic.BoxSession(table)                               # open (not committed, not rolled back)
+    f, sv, _ = logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    during = table.snapshot()
+    assert logic.recover_held(table) == (0, 0) and table.snapshot() == during
+    session.rollback()                                              # and that box still rolls back exactly
+    assert "sample" in table.objects and table.objects["sample"]["layer"] == "Site"
+    assert session.token not in logic.OPEN_SESSIONS
+
+
+def test_a_dead_sessions_objects_are_recovered_while_another_box_is_open():
+    table, facts, saved = sample_model()
+    dead = logic.BoxSession(table)
+    logic.apply_lookup(table, dead, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    logic.OPEN_SESSIONS.discard(dead.token)                          # Rhino closed on it
+    live = logic.BoxSession(table)
+    mine = table._new("Gordium::Grade", "point")
+    live.add([mine])
+    assert logic.recover_held(table) == (15, 1)
+    assert mine in table.objects and table.objects["sample"]["layer"] == "Site"
+    live.rollback()
+
+
+def test_only_one_start_box_at_a_time():
+    gate = logic.BoxGate()
+    assert gate.enter() and not gate.enter()                         # the second box refuses
+    gate.leave()
+    assert gate.enter()
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
+    assert "if not gate.enter():" in conf and "say(logic.BOX_BUSY)" in conf and "gate.leave()" in conf
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'parts["box_buttons"] = buttons' in ui and "b.Enabled = not is_open" in ui
+
+
+def test_the_recovery_message_says_what_it_did():
+    assert logic.recovery_message(15, 1) == \
+        "removed 15 objects an unfinished start box drew and put back 1 object it had set aside"
+    assert logic.recovery_message(0, 2) == "put back 2 objects it had set aside"
+    assert logic.recovery_message(0, 0) is None

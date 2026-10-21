@@ -21,6 +21,25 @@ def on_layer(full_path, layer):
 HOLDING_LAYER = "Gordium::Replaced (Cancel restores)"   # objects a start box replaced, until Draw (BoxSession)
 HELD_FROM = "gordium_held_from"                          # on each held object: the layer it came from
 ADDED_BY = "gordium_added"                               # on each object a start box drew: its session, until Draw
+HELD_BY = "gordium_held_by"                              # on each held object: the session holding it
+OPEN_SESSIONS = set()          # the sessions of start boxes open now (recovery never touches theirs: review round 4)
+BOX_BUSY = "Finish or cancel the open start box first."
+
+
+class BoxGate:
+    """One start box at a time (review round 4: Edit site… from the panel during a pick opened a second box)."""
+
+    def __init__(self):
+        self.open = False
+
+    def enter(self):
+        if self.open:
+            return False
+        self.open = True
+        return True
+
+    def leave(self):
+        self.open = False
 
 
 def classify(full_path, kind, holds_building=False):
@@ -708,7 +727,8 @@ class BoxSession:
     def __init__(self, table):
         import uuid
         self.table = table
-        self.token = uuid.uuid4().hex                  # marks what this session draws (crash recovery deletes it)
+        self.token = uuid.uuid4().hex                  # marks what this session draws and holds
+        OPEN_SESSIONS.add(self.token)                  # live: recovery leaves its objects alone
         self.added, self.held = [], []
         self.layers_before = set(table.layer_names())
         self.views = table.save_views()
@@ -731,7 +751,7 @@ class BoxSession:
             self.table.delete(object_id)
             return
         self.held.append((object_id, self.table.layer_of(object_id)))
-        self.table.hold(object_id)
+        self.table.hold(object_id, self.token)
 
     def rollback(self):
         """Cancel, Esc or an error: the model as the box found it (objects, the layers it made, the views)."""
@@ -746,6 +766,7 @@ class BoxSession:
             self.table.remove_layer_if_empty(name)
         self.table.restore_views(self.views)
         self.added, self.held = [], []
+        OPEN_SESSIONS.discard(self.token)
 
     def commit(self):
         """Draw: what was replaced goes for good, and what was drawn is kept (its session mark cleared)."""
@@ -757,19 +778,31 @@ class BoxSession:
                 self.table.clear_mark(i)
         self.table.remove_layer_if_empty(HOLDING_LAYER)
         self.added, self.held = [], []
+        OPEN_SESSIONS.discard(self.token)
 
 
-def recover_held(table):
-    """A box session Rhino didn't finish (it closed): what it drew deleted, what it held back on the layer it came
-    from, so the model is as it was before that box opened. How many objects were put right."""
-    added = list(table.added_objects())
-    for i in added:
+def recover_held(table, live=None):
+    """Box sessions Rhino didn't finish (it closed): what they drew deleted, what they held back on the layer it came
+    from, so the model is as it was before those boxes opened. A session still open (`live`, OPEN_SESSIONS) is never
+    touched. (removed, put back)."""
+    live = OPEN_SESSIONS if live is None else live
+    removed = [i for i, token in table.added_objects() if token not in live]
+    for i in removed:
         table.delete(i)
-    held = list(table.held_objects())
-    for i, layer in held:
+    back = [(i, layer) for i, layer, token in table.held_objects() if token not in live]
+    for i, layer in back:
         table.release(i, layer)
     table.remove_layer_if_empty(HOLDING_LAYER)
-    return len(added) + len(held)
+    return len(removed), len(back)
+
+
+def recovery_message(removed, back):
+    """What recovery did, in words (None when it did nothing)."""
+    def n(k):
+        return "%d object%s" % (k, "s" if k != 1 else "")
+    parts = (["removed %s an unfinished start box drew" % n(removed)] if removed else []) + \
+        (["put back %s it had set aside" % n(back)] if back else [])
+    return " and ".join(parts) or None
 
 
 def draw_then_commit(session, save):

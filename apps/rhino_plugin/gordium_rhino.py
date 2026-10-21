@@ -995,16 +995,18 @@ class RhinoTable:
         attrs.SetUserString(logic.HELD_FROM, held_from)
         self.doc.Objects.ModifyAttributes(o, attrs, True)
 
-    def hold(self, object_id):
-        """Onto the hidden holding layer, the layer it came from written on it (for Cancel, and for a Rhino that
-        closed mid-session: recover_held)."""
+    def hold(self, object_id, token):
+        """Onto the hidden holding layer, the layer it came from and the session holding it written on it (for
+        Cancel, and for a Rhino that closed mid-session: recover_held)."""
         self._move(object_id, logic.HOLDING_LAYER, self.layer_of(object_id))
+        self._mark(object_id, logic.HELD_BY, token)
         holding = self.doc.Layers.FindByFullPath(logic.HOLDING_LAYER, -1)
         if holding >= 0 and self.doc.Layers[holding].IsVisible:
             self.doc.Layers[holding].IsVisible = False
 
     def release(self, object_id, layer_path):
         self._move(object_id, layer_path, None)
+        self._mark(object_id, logic.HELD_BY, None)
 
     def mark_added(self, object_id, token):
         self._mark(object_id, logic.ADDED_BY, token)
@@ -1022,13 +1024,15 @@ class RhinoTable:
     def added_objects(self):
         every = Rhino.DocObjects.ObjectEnumeratorSettings()
         every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True
-        return [str(o.Id) for o in self.doc.Objects.GetObjectList(every) if o.Attributes.GetUserString(logic.ADDED_BY)]
+        return [(str(o.Id), o.Attributes.GetUserString(logic.ADDED_BY)) for o in self.doc.Objects.GetObjectList(every)
+                if o.Attributes.GetUserString(logic.ADDED_BY)]
 
     def held_objects(self):
         index = self.doc.Layers.FindByFullPath(logic.HOLDING_LAYER, -1)
         if index < 0:
             return []
-        return [(str(o.Id), o.Attributes.GetUserString(logic.HELD_FROM) or LAYERS["lot"])
+        return [(str(o.Id), o.Attributes.GetUserString(logic.HELD_FROM) or LAYERS["lot"],
+                 o.Attributes.GetUserString(logic.HELD_BY))
                 for o in self.doc.Objects.FindByLayer(self.doc.Layers[index]) or []]
 
     def layer_names(self):
@@ -1072,10 +1076,9 @@ class RhinoTable:
 
 def _recover(doc):
     """Objects a start box held when Rhino closed mid-session: back where they were (rhino_logic.recover_held)."""
-    n = logic.recover_held(RhinoTable(doc))
-    if n:
-        Rhino.RhinoApp.WriteLine("Gordium: put back %d object%s an unfinished start box had set aside" %
-                                 (n, "s" if n != 1 else ""))
+    said = logic.recovery_message(*logic.recover_held(RhinoTable(doc)))   # never a box still open
+    if said:
+        say(said[0].upper() + said[1:] + ".")
 
 
 def _draw_lot(doc):
@@ -1159,6 +1162,19 @@ def confirm(doc, facts, options, mode="check"):
     """The start box, prefilled (spec A). Draw keeps the facts once the district is confirmed, with where each came
     from (saved beside them); a pick closes the box, picks in the model, and shows the box again with the result;
     closing it (or Esc) saves nothing (None)."""
+    gate = STATE.setdefault("box_gate", logic.BoxGate())
+    if not gate.enter():                # one start box at a time (Edit site… from the panel during a pick)
+        say(logic.BOX_BUSY)
+        return None
+    try:
+        ui.set_box_open(STATE.get("panel_parts"), True)
+        return _confirm(doc, facts, options, mode)
+    finally:
+        gate.leave()
+        ui.set_box_open(STATE.get("panel_parts"), False)
+
+
+def _confirm(doc, facts, options, mode):
     o = overlay()
     _clear(o)                           # facts are being set: no earlier result (of any model) stays shown
     o.message = None
