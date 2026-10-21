@@ -239,7 +239,7 @@ def test_the_scenarios_are_never_called_an_architects_answer_key():
     assert "Not yet verified by an architect" in readme and "Claude" in readme
     places = [folder / "README.md", *sorted(folder.glob("*.yaml")), REPO / "packages/design_checker/design_checker/scenarios.py",
               REPO / "packages/design_checker/tests/test_scenarios.py", REPO / "apps/rhino_plugin/README.md",
-              REPO / "apps/rhino_plugin/tests/scenarios_in_rhino.py"]
+              REPO / "apps/rhino_plugin/tests/scenarios_in_rhino.py", REPO / "docs/README.md"]
     for p in places:
         text = p.read_text(encoding="utf-8").lower().split("def test_the_scenarios_are_never_called")[0]
         for phrase in ("architect's answer key", "architects' answer key", "the answer key"):
