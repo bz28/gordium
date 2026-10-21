@@ -655,3 +655,30 @@ def test_the_outline_cleaning_note_is_shown_in_the_panel_and_the_report(tmp_path
     sheet = openpyxl.load_workbook(report)["Check"]
     assert any(c.value == "Lot lines: " + note for c in sheet["A"]), [c.value for c in sheet["A"]][:12]
 
+
+def test_no_starting_house_is_drawn_from_geometry_the_measuring_couldnt_work_out(monkeypatch, tmp_path):
+    """Review round 21, P2: the starting-house generator read the lot again after the measuring had failed on it
+    and crashed. A geometry error while measuring is flagged on every measurement, and the generator draws nothing
+    from it, saying why."""
+    import rhino3dm as r
+    import shapely
+    from design_checker.check import sample_site, start
+    from model_measurement import measure as m
+    sample = sample_site()
+    model = r.File3dm()
+    model.Settings.ModelUnitSystem = r.UnitSystem.Feet
+    layer = r.Layer()
+    layer.Name = "Site"
+    model.Layers.Add(layer)
+    attrs = r.ObjectAttributes()
+    attrs.LayerIndex = 0
+    model.Objects.AddPolyline([r.Point3d(x, y, 0) for x, y in sample["lot"] + sample["lot"][:1]], attrs)
+    path = tmp_path / "lot.3dm"
+    model.Write(str(path), 8)
+
+    def broken(self, tol, kind):
+        raise shapely.errors.GEOSException("TopologyException: side location conflict at 1 2")
+    monkeypatch.setattr(m.Lot, "_simplify", broken)
+    out = start(path, {**sample["facts"], "address": sample["address"], "grade_is": "finished",
+                       "ground_is_flat": True, "grade_elevation": 0.0})
+    assert out["floors"] == [] and any("geometry couldn't be worked out" in n for n in out["notes"]), out

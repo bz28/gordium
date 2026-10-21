@@ -1330,6 +1330,13 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
     try:
         try:
             out = _measure(site, facts)
+            if site.get("lot") and site["lot"].get("edges"):
+                # the decision line: how the lot lines read were cleaned from the outline drawn (its own accuracy);
+                # inside the one guard, so a lot whose geometry can't be worked out stops here too (round 21)
+                note = Lot(site, facts).outline_note
+                for name in LOT_LINE_MEASURES if note else ():
+                    if name in out:
+                        out[name]["outline"] = note
         except shapely.errors.GEOSException as e:
             # the drawing's geometry couldn't be worked out: every measurement needs review, saying why; never a
             # crash (no answer at all in Rhino) and never a guess (stress F14)
@@ -1353,12 +1360,6 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
             r = out[name]
             if set(r.get("objects") or []) & set(assumed) and (r.get("value") is not None or r.get("readings")):
                 out[name] = dict(r, main_assumed=True)
-    if site.get("lot") and site["lot"].get("edges"):
-        # the decision line: how the lot lines read were cleaned from the outline drawn (its own accuracy)
-        note = Lot(site, facts).outline_note
-        for name in LOT_LINE_MEASURES if note else ():
-            if name in out:
-                out[name]["outline"] = note
     return {name: out[name] for name in MEASURES}
 
 
