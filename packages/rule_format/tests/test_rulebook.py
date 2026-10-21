@@ -598,3 +598,9 @@ def test_approved_entry_without_drafter_is_reported_not_crashed(ctx):
     entry = {k: v for k, v in DEFINITION.items() if k not in ("drafted_by", "open_questions")}
     entry |= {"status": "approved", "approved_by": "jane", "approved_on": datetime.date(2026, 10, 19)}
     assert any("missing 'drafted_by'" in p for p in validate_terms({"rear_yard": entry}, ctx, "definitions"))
+
+
+def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):
+    """Compile, then freeze: an ill-typed formula is a validation problem, so no frozen rule can be ill-typed."""
+    assert any("compare values of one kind" in p for p in validate(rulebook(check='rear_yard >= 20 or use == 5'), ctx))
+    assert not any("kind" in p for p in validate(rulebook(), ctx))
