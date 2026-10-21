@@ -9,13 +9,13 @@
    "ok": true,
    "detail": {
     "window": [
-     1000,
+     869,
      97,
      400,
      720
     ],
     "document": [
-     232,
+     101,
      37,
      1192,
      814
@@ -62,13 +62,13 @@
  "parent": "TabPanelDockBarFloatingForm()",
  "floating": {
   "window": [
-   1000,
+   869,
    97,
    400,
    720
   ],
   "document": [
-   232,
+   101,
    37,
    1192,
    814

@@ -7,7 +7,7 @@
     "active": true,
     "visible": true,
     "occlusion": "8194",
-    "window": 21774
+    "window": 21823
    }
   },
   "2 docked, every detail label wraps inside the panel": {
@@ -89,12 +89,12 @@
      [
       "LinkButton",
       368,
-      "Open \u00a7325-8, District Regulati"
+      "Open \u00a7325-8, chart, R-1b, Rear"
      ],
      [
       "LinkButton",
       368,
-      "Open \u00a7325-8, District Regulati"
+      "Open \u00a7325-8, chart, R-1b, note"
      ],
      [
       "LinkButton",
@@ -162,13 +162,23 @@
     "kept": 2,
     "open": 2
    }
+  },
+  "7 a check that can't run leaves no north arrow, outline or height label of the last one": {
+   "ok": true,
+   "detail": {
+    "north": "None",
+    "unmeasured": "0",
+    "height_limit": "None",
+    "envelope_lines": "False",
+    "message": "\u26a0 Check could not run"
+   }
   }
  },
  "panel_window": {
   "active": true,
   "visible": true,
   "occlusion": "8194",
-  "window": 21774
+  "window": 21823
  },
  "detail_widths": {
   "panel": 390,
@@ -247,12 +257,12 @@
    [
     "LinkButton",
     368,
-    "Open \u00a7325-8, District Regulati"
+    "Open \u00a7325-8, chart, R-1b, Rear"
    ],
    [
     "LinkButton",
     368,
-    "Open \u00a7325-8, District Regulati"
+    "Open \u00a7325-8, chart, R-1b, note"
    ],
    [
     "LinkButton",
@@ -301,6 +311,13 @@
   "kept": 2,
   "open": 2
  },
- "window": 21774,
+ "after_failed_check": {
+  "north": "None",
+  "unmeasured": "0",
+  "height_limit": "None",
+  "envelope_lines": "False",
+  "message": "\u26a0 Check could not run"
+ },
+ "window": 21823,
  "ok": true
 }

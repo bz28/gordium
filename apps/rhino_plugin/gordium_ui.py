@@ -528,7 +528,7 @@ def show_detail(parts):
     for c in det.get("cited") or []:
         link = ef.LinkButton()            # a link can't wrap: it fits the panel, shortened, the whole in its tip
         room = (WRAP_AT or PANEL_WIDTH - 48) if DOCKED else PANEL_WIDTH - 48
-        link.Text = logic.shorten("Open " + c["citation"], int(room / 7.5))
+        link.Text = logic.link_text(c["citation"], int(room / 7.5))
         link.ToolTip = "Open " + c["citation"]
         url = c["link"]
         link.Click += logic.guard(lambda s, e, u=url: Rhino.UI.Dialogs.ShowMessage(u, "Gordium") if not _open(u) else None, "open the link")

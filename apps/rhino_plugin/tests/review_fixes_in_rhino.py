@@ -13,7 +13,8 @@ Claims:
    "Main building…" button, the waiting rows say "Pick the main building…"; picking the starting house measures
    the yards again, their dimensions drawn;
 5. a cottage off the Building layer is drawn dashed (unmeasured);
-6. closed documents' panels are let go.
+6. closed documents' panels are let go;
+7. a check that can't run leaves nothing of the last one drawn.
 Writes <temp>/gordium_review/run_out.json and frames/*.png."""
 import json
 import os
@@ -170,6 +171,18 @@ try:
         hosts = set(sc.sticky.get("gordium_dock_hosts") or {})
         log["hosts"] = {"kept": len(hosts), "open": len(open_serials)}
         claim("6 only open documents' panels are kept", hosts <= open_serials | {0}, log["hosts"])
+        # 7: a check that can't run leaves nothing of the last one drawn (review round 1)
+        facts = g.current_facts(doc)
+        facts["zone"] = "No-such-zone"                    # the checker refuses it: the check cannot run
+        g.save_facts(doc, facts)
+        g.run_check(doc, report=False)
+        o = g.overlay()
+        left = {"north": o.north, "unmeasured": len(o.unmeasured), "height_limit": o.height_limit,
+                "envelope_lines": o.envelope_lines is not None, "message": (o.message or [None, None])[1]}
+        log["after_failed_check"] = {k: str(v) for k, v in left.items()}
+        claim("7 a check that can't run leaves no north arrow, outline or height label of the last one",
+              left["north"] is None and left["unmeasured"] == 0 and left["height_limit"] is None
+              and not left["envelope_lines"], log["after_failed_check"])
         log["window"] = seen["window"]
         log["ok"] = True
     else:

@@ -644,10 +644,10 @@ def box_rows(state, flat=None):
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed"))
-         if state.get("lot_area") is not None or state.get("lot_surveyed") else NO_LOT,
+         if state.get("has_lot") or state.get("lot_area") is not None or state.get("lot_surveyed") else NO_LOT,
          "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))], "tick": None},
         {"key": "street", "label": "Street side", "text": state.get("street_name") or (
-            "the highlighted line" if state.get("lot_area") is not None or state.get("lot_surveyed")
+            "the highlighted line" if state.get("has_lot") or state.get("lot_area") is not None or state.get("lot_surveyed")
             else "set from the lot, once there is one"),
          "actions": [("street", "Change…", True)], "tick": None,
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
@@ -833,6 +833,26 @@ def building_name(layer, name, grouped):
     if name:
         return name + (" (and its group)" if grouped else "")
     return ("a group on " if grouped else "a solid on ") + layer
+
+
+def link_text(citation, most):
+    """A citation link's words in at most `most` characters, keeping what tells it apart: "District Regulations
+    Chart" said "chart", and if still too long its front cut, never its end (district, column, note: review round
+    1, eight links read "Open §325-8, District Regulations Chart…")."""
+    text = "Open " + (citation or "").replace("District Regulations Chart", "chart")
+    if len(text) <= most:
+        return text
+    tail = text[len(text) - (most - 7):]
+    tail = tail.split(" ", 1)[1] if " " in tail[1:] else tail
+    return "Open …" + tail.lstrip(" ,·;")
+
+
+def height_limit_text(checker_top, height):
+    """The height limit's label in an elevation: plain when the checker has the grade plane (its top), else said to
+    be shown from the lot's level, a drawing aid ("height" is the limit as text, 35'-0")."""
+    if checker_top is not None:
+        return "Height limit " + height
+    return "Height limit " + height + " (no grade plane yet: shown from the lot's level)"
 
 
 def prune_hosts(hosts, open_serials):

@@ -180,20 +180,26 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
 
 
 def side_lines(site: dict, facts: dict) -> list[str] | None:
-    """The true compass names of the lot's two side lines (its first reading of which lines are sides), each from
-    the lot's middle to the line: what a side yard is called when it couldn't be measured. None without a lot."""
+    """The true compass names of the lot's two side lines, each from the lot's middle to the line: what a side yard
+    is called when it couldn't be measured. Only when the measuring itself knows which lines are sides: the lot not
+    a corner lot (unknown counts as maybe), and every reading of its lines giving the same two names (review round
+    1). None otherwise, or without a lot."""
     from model_measurement.measure import Lot
-    if not (site.get("lot") or {}).get("edges") or not facts.get("street_line"):
+    if facts.get("corner_lot") is not False or not (site.get("lot") or {}).get("edges") or not facts.get("street_line"):
         return None
     lot = Lot(site, facts)
     readings = None if lot.problems or lot.street_problem else lot.readings()
     if not readings:
         return None
-    _, left, right, _ = readings[0]
     middle = lot.polygon.centroid
-    names = [present.compass(lot.line(g).centroid.x - middle.x, lot.line(g).centroid.y - middle.y,
-                             facts.get("plan_north_deg") or 0.0) for g in (left, right)]
-    return names if all(names) else None
+    pairs = set()
+    for _, left, right, _ in readings:
+        names = [present.compass(lot.line(g).centroid.x - middle.x, lot.line(g).centroid.y - middle.y,
+                                 facts.get("plan_north_deg") or 0.0) for g in (left, right)]
+        if not all(names):
+            return None
+        pairs.add(tuple(sorted(names)))
+    return list(pairs.pop()) if len(pairs) == 1 else None
 
 
 def side_checks(rule: dict) -> dict:

@@ -370,6 +370,7 @@ class Overlay(Rhino.Display.DisplayConduit):
         self.confirm = None          # (lot curve, street lines, main building) while the dialog is open
         self.message = None          # (state, text, lines)
         self.box = rg.BoundingBox.Empty
+        self.envelope_lines, self.height_limit, self.north, self.unmeasured = None, None, None, []
 
     def ObjectCulling(self, e):
         sys.modules[__name__]._conduit("cull", self, e)
@@ -1107,10 +1108,8 @@ def _extras(doc, facts):
     groups = {i for o in buildings for i in (o.Attributes.GetGroupList() or [])}
     layers = sorted({doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings})
     left_out = _not_included(doc, _find(doc, facts.get("lot_id") or ""))
-    ungrouped = [o for o in buildings if not (o.Attributes.GetGroupList() or [])]
     main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     return {"scope": {"groups": len(groups), "solids": len(buildings), "layer": ", ".join(layers)},
-            "buildings": len(groups) + len(ungrouped),       # a group (the starting house's floors) is one
             "main_name": logic.building_name(doc.Layers[main.Attributes.LayerIndex].FullPath, main.Attributes.Name,
                                              bool(main.Attributes.GetGroupList())) if main else None,
             "not_included": left_out, "touching": _touching(doc, left_out, buildings),
@@ -1204,7 +1203,7 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "zone": facts.get("zone"), "zone_source": source("zone", logic.ENTERED),
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
-            "lot_area": area, "lot_surveyed": bool(facts.get("lot_surveyed")),
+            "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
             "street_name": facts.get("street_name"), "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span},
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
@@ -1525,6 +1524,7 @@ def _clear(o):
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
     o.plan_lines = []
     o.confirm, o.labels = None, []
+    o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
     o.doc = None
 
 
@@ -1622,7 +1622,8 @@ def run_check(doc, report=True):
         o.box = env.GetBoundingBox(True) if env else rg.BoundingBox.Empty
         drawn = _drawn_envelope(doc, facts, result.get("envelope")) if env is not None else None
         o.envelope_lines = _envelope_lines(doc, drawn) if drawn else None
-        o.height_limit = (o.envelope_lines[1], "Height limit " + _ft_text(drawn["top"] - drawn["base"])) \
+        o.height_limit = (o.envelope_lines[1], logic.height_limit_text((result.get("envelope") or {}).get("top"),
+                                                                       _ft_text(drawn["top"] - drawn["base"]))) \
             if o.envelope_lines else None
         o.north = _north(doc, facts)
         o.unmeasured = _unmeasured_outlines(doc, extras.get("not_included"))

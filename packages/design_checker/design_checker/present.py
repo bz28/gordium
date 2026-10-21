@@ -950,7 +950,9 @@ def state(items: list[dict]) -> str:
     return COMPLIES
 
 
-PICK_MAIN_WHY = "pick the main building"         # the measuring's words when several buildings could be it
+from model_measurement.stops import stop as _stop  # noqa: E402
+
+PICK_MAIN_WHY = _stop("no_main_building")        # the measuring's exact words when several buildings could be it
 PICK_MAIN = "Pick the main building…"            # the row's hint, and the panel's button
 
 
@@ -1098,7 +1100,9 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
                                  "scope": "", "precision": "", "at_limit": None}})
     return {"items": items, "summary": summary(items), "state": state(items),
-            "header": header(facts, extras, documents, use_names), "groups": grouped(items)}
+            "header": header(facts, dict(extras, waiting_main=any(
+                PICK_MAIN_WHY in (m.get("reason") or "") for m in measured.values())), documents, use_names),
+            "groups": grouped(items)}
 
 
 def grouped(items: list[dict]) -> list[dict]:
@@ -1138,9 +1142,10 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
     grade = ("Ground: " if facts.get("ground_assumed") == "flat" else "Grade: ") + grade_label(facts)
     actions = (["Pick survey lot lines…"] if not facts.get("lot_surveyed") else []) + (
         ["Set grade…"] if grade_label(facts) == "not set" or facts.get("grade_is") == "existing" else [])
-    # several buildings: which one the yards, height and stories are measured to, said, with a way to change it
-    main = ("Main building: " + (extras.get("main_name") or "not picked yet")) if (extras.get("buildings") or 1) > 1 \
-        else None
+    # several buildings: which one the yards, height and stories are measured to, said, with a way to change it.
+    # The checker's word decides it (its measuring asked for a pick), never a count made in Rhino (review round 1)
+    main = ("Main building: not picked yet" if extras.get("waiting_main") else
+            "Main building: " + extras["main_name"] if facts.get("main_building") and extras.get("main_name") else None)
     return {"place": " · ".join(p for p in [facts.get("address") or "", facts.get("zone") or "",
                                             use_names.get(use, use.replace("_", " "))] if p),
             "code": code, "draft": DRAFT, "lot": lot, "grade": grade, "actions": actions, "main": main,
