@@ -366,13 +366,13 @@ def _numbers(node, values: dict, measured: dict, name: str):
         return proposed / lot * 100, required / lot * 100, None, "%", sign
     if not isinstance(proposed, (int, float)) or not isinstance(required, (int, float)):
         return proposed, required, None, unit, sign
-    margin = proposed - required if sign in ("≥", ">") else required - proposed
+    margin = formula.margin(proposed, required, sign in ("≥", ">"))     # exact, as the comparison: never disagree
     return proposed, required, margin, unit, sign
 
 
 def _display(proposed, required, margin, unit, sign):
     if unit == "%":
-        margin = (required - proposed) if sign in ("≤", "<") else (proposed - required)
+        margin = formula.margin(proposed, required, sign not in ("≤", "<"))
         places = 2 if abs(margin) < 0.5 else 1
         return (_pct(proposed, _toward(sign, True), places), _pct(required, _toward(sign, False), places),
                 margin_text(margin, "%"), margin)

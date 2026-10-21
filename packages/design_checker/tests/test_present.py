@@ -369,3 +369,23 @@ def test_the_tax_map_worst_case_moves_every_lot_line_2_ft_the_unlucky_way():
     assert present.TAX_MAP_SLACK is TAX_MAP_SLACK                                   # the checker reads the same one
     worst = present._worst_case("lot_width >= 70", {"lot_width": 73.0}, {"lot_width"})
     assert worst == {"lot_width": 69.0}                                             # 73 − 4: fails 70 at worst
+
+
+def test_at_the_limit_and_complies_never_disagree():
+    """PR #20 review: margins were worked out in floats (26.4 − 0.2 × 132 = −3.6e-15), so a rear yard exactly at
+    its limit could show "−0'-0 1/8"" beside "complies". The margin now comes from formula.margin, the same exact
+    arithmetic and tolerance as the comparison."""
+    import ast as _ast
+    node = _ast.parse("rear_yard >= 0.2 * lot_depth", mode="eval").body
+    values = {"rear_yard": 26.4, "lot_depth": 132}
+    numbers = present._numbers(node, values, {"rear_yard": {"unit": "ft"}}, "Rear yard")
+    assert numbers[2] == 0.0 and present._display(*numbers)[2] == "at limit"
+    assert present.formula.evaluate("rear_yard >= 0.2 * lot_depth", values, present.MEASURE_KINDS) is True
+    noisy = {"rear_yard": 26.399999999999995, "lot_depth": 132}          # the geometry's float noise: complies
+    assert present.formula.evaluate("rear_yard >= 0.2 * lot_depth", noisy, present.MEASURE_KINDS) is True
+    assert present._display(*present._numbers(node, noisy, {"rear_yard": {"unit": "ft"}}, "Rear yard"))[2] == "at limit"
+    short = present._numbers(node, {"rear_yard": 26.39, "lot_depth": 132}, {"rear_yard": {"unit": "ft"}}, "Rear yard")
+    assert short[2] < 0 and present._display(*short)[2].startswith("−")
+    cov = _ast.parse("building_area <= 0.35 * lot_area", mode="eval").body
+    pct = present._numbers(cov, {"building_area": 1750.7, "lot_area": 5002}, {"building_area": {"unit": "sf"}}, "x")
+    assert present._display(*pct)[2] == "at limit"
