@@ -62,3 +62,31 @@ def test_a_building_wholly_off_the_lot_still_waits():
     """Wholly outside (no part on the lot): it can't be measured against the lot: needs review, as before."""
     res = run([prism(rect(70, 30, 90, 70), 0, 20, "house")])
     assert status(res, "R-1b.front_yard") == present.REVIEW
+
+
+# ---- verification round (4d0a2e6): each building is placed on the lot on its own ------------------------------
+
+def test_a_house_wholly_off_the_lot_never_complies_because_a_shed_is_on_it():
+    """Case A (a false pass on 4d0a2e6: every row complied). The house past the rear line (y 150..190 on a 120 ft
+    deep lot), a listed frame shed on the lot: the house can't be measured against the lot, so no yard complies."""
+    res = run(floors(15, 150, 45, 190, 2) + [prism(rect(20, 90, 30, 100), 0, 10, "shed")],
+              accessory_buildings=["shed"], accessory_frame=True, stories=2)
+    for rule in ("R-1b.front_yard", "R-1b.side_yards", "R-1b.rear_yard"):
+        assert status(res, rule) != present.COMPLIES, rule
+
+
+def test_a_shed_wholly_off_the_lot_never_complies_because_the_house_is_on_it():
+    """Case B: the house on the lot, a listed shed off it (x 70..80 on a 60 ft wide lot): the accessory rule
+    never complies."""
+    res = run(floors(15, 30, 45, 70, 2) + [prism(rect(70, 90, 80, 100), 0, 10, "shed")],
+              accessory_buildings=["shed"], accessory_frame=True)
+    assert status(res, "R-1b.accessory_buildings") != present.COMPLIES
+
+
+def test_only_the_line_actually_crossed_says_crosses():
+    """A building 50..65 x 0..70: its front face lies exactly on the street line (inside the lot), and it crosses
+    the east line. The east side row says it crosses the lot line; the front row (0 ft, does not comply) doesn't."""
+    res = run(floors(50, 0, 65, 70, 2))
+    front = rows(res, "R-1b.front_yard")[0]
+    assert front["status"] == present.FAILS and "crosses the lot line" not in (front["reason"] or "")
+    assert any("crosses the lot line" in (i["reason"] or "") for i in rows(res, "R-1b.side_yards"))

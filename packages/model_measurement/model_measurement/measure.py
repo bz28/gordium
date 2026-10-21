@@ -19,6 +19,7 @@ import hashlib
 import itertools
 import math
 
+import shapely
 from shapely import STRtree, ops
 from shapely.geometry import LineString, MultiLineString, Point, Polygon
 from shapely.validation import explain_validity
@@ -570,7 +571,7 @@ def _fingerprint(makers: list, zone) -> str:
     for solid_id, faces in makers:
         text.append("solid " + str(solid_id))
         text += [" ".join(r(c) for p in f["points"] for c in p) for f in faces]
-    for poly in getattr(zone, "geoms", [zone]):
+    for poly in getattr(shapely.normalize(zone), "geoms", [shapely.normalize(zone)]):   # the same ring, any order
         if poly.geom_type == "Polygon":
             text.append("zone " + " ".join(r(c) for x, y in poly.exterior.coords for c in (x, y)))
     return "eave:" + hashlib.sha256("\n".join(text).encode("utf-8")).hexdigest()[:24]
@@ -977,12 +978,20 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
 
     views = ({b["id"]: _views(b, plan_level, facts) for b in buildings} if plan_level is not None and not why_building
              else {})
-    everything = ops.unary_union([_projection(b) for b in buildings]) if buildings else Polygon()
-    # a building wholly off the lot can't be measured against it (outside_lot); one that crosses a lot line is
-    # measured: the yard to the line it crosses is 0, and it is said so (crosses_lot_line): never a pass
-    inside = everything.within(lot.polygon.buffer(TOL))
-    crosses = not inside and everything.intersection(lot.polygon).area > 1e-6
-    why_inside = why_building or (None if inside or crosses else stop("outside_lot"))
+    # each building on its own (each stack, each detached building): one wholly off the lot can't be measured
+    # against it (outside_lot, whatever the others do); one that crosses a lot line is measured, and the yard to
+    # each line it actually crosses is marked (crosses_lot_line): never a pass
+    plans = [_projection(b) for b in buildings]
+    within = [p.within(lot.polygon.buffer(TOL)) for p in plans]
+    off = [not w and p.intersection(lot.polygon).area <= 1e-6 for p, w in zip(plans, within)]
+    outside = ops.unary_union([p.difference(lot.polygon.buffer(TOL)) for p, w in zip(plans, within) if not w]) \
+        if not all(within) else Polygon()
+    # a line is crossed where the part outside the lot runs along it (shares a stretch of it, not just a corner)
+    reach = outside.buffer(2 * TOL) if outside.area > 1e-6 else None
+    crossed = {i for i, e in enumerate(lot.edges)
+               if reach is not None and reach.intersection(LineString(e)).length > 4 * TOL}
+    crosses = bool(crossed) and not any(off)
+    why_inside = why_building or (stop("outside_lot") if any(off) or (not all(within) and not crosses) else None)
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
     else:
@@ -1004,12 +1013,14 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
             out[name] = _missing(name, why_yards)
         return out
     _yards(out, lot, lines, facts, main, parts_of, detached, views)
-    if crosses:
+    if crosses:                                  # each yard measured to a line the building crosses: marked
+        sides = {i for _w, r in lines["readings"] for g in r["sides"] for i in g}
+        rears = {i for _w, r in lines["readings"] for i in r["rear"]}
+        to = {"front": set(lot.street), "side": sides, "rear": rears}
         for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
-            m = out.get(name) or {}
-            values = [m.get("value")] + [r["value"] for r in m.get("readings") or []]
-            if any(v is not None and v <= TOL for v in values):
-                m["crosses_lot_line"] = True
+            kind = "front" if "front" in name else "side" if "side" in name else "rear"
+            if crossed & to[kind] and name in out:
+                out[name]["crosses_lot_line"] = True
     return out
 
 

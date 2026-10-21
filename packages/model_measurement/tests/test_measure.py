@@ -808,3 +808,13 @@ def test_terrain_samples_under_an_attached_wing_are_ground_beneath_not_off_the_w
              "grade_points": house_walls + wing_walls + extra}
     h = measure(site(RECT, house, wing), facts)["building_height"]
     assert h["value"] == 30.0, h                       # was "with the other solids … needs spot grades": never checked
+
+
+def test_the_eave_fingerprint_doesnt_depend_on_how_the_outline_is_ordered():
+    """Verification round: the same overhang, its ring started elsewhere or run the other way, is the same."""
+    from model_measurement.measure import _fingerprint
+    makers = [("roof", box(0, 0, 10, 10)["faces"])]
+    ring = [(0, 0), (10, 0), (10, 2), (0, 2)]
+    a = _fingerprint(makers, Polygon(ring))
+    assert a == _fingerprint(makers, Polygon(ring[2:] + ring[:2])) == _fingerprint(makers, Polygon(ring[::-1]))
+    assert a != _fingerprint(makers, Polygon([(0, 0), (10, 0), (10, 2.5), (0, 2.5)]))
