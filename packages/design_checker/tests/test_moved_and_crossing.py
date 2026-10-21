@@ -351,3 +351,24 @@ def test_an_accessory_building_beside_an_off_lot_house_still_waits_for_trustwort
               accessory_buildings=["shed"], accessory_frame=True, grade_elevation=500)
     assert res["measurements"]["accessory_side_yard"]["value"] is None
     assert status(res, "R-1b.accessory_buildings") != present.COMPLIES
+
+
+def test_an_eaves_row_that_fails_at_every_height_reading_never_says_needs_review():
+    """Round 12, P2: the same gable 11 ft nearer the street (front wall 15 ft back, GABLE (15, 15, 45, 55)): the
+    front eaves are 15'-0" against 25'-6" to 26'-10" (the requirement at each height reading): it fails at all of
+    them, and the reason begins with the status it has, never 'Needs review' beside 'Does not comply'."""
+    from test_every_reading import roof
+    b = (15, 15, 45, 55)
+    got = rows(run(floors(*b, 3) + [roof(*b, 30, 45, 2.0, 1.0)]), "R-1b.yard_projections")
+    front = next(r for r in got if r["name"] == "Eaves into front yard")
+    assert front["status"] == present.FAILS and front["proposed"] == "15'-0\""
+    assert front["required"] == "≥ 25'-6\" to 26'-10\""
+    assert front["reason"].startswith("Does not comply at any of the height's readings (")
+    assert "Needs review" not in front["reason"]
+
+
+def test_the_bonus_wait_prefix_follows_the_status():
+    """Round 12: one helper picks how a bonus-waiting row begins, from its status, for both cases."""
+    assert present._bonus_waits(present.FAILS, True) == "Does not comply at any of the height's readings"
+    assert present._bonus_waits(present.FAILS, False) == "Does not comply even before the §325-16C height bonus"
+    assert present._bonus_waits(present.REVIEW, True) == present._bonus_waits(present.REVIEW, False) == "Needs review"

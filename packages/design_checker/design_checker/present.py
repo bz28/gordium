@@ -272,6 +272,16 @@ def _reason(row: dict) -> str | None:
     return _user_text(row.get("Why") or "")
 
 
+def _bonus_waits(status: str, across_readings: bool) -> str:
+    """How a row whose limit waits on the §325-16C height bonus begins, from its status (review round 12): it
+    fails at every height reading, or even before the bonus (the base requirement is the least it can be), or it
+    needs review. Never a status word the row doesn't have."""
+    if status == FAILS:
+        return ("Does not comply at any of the height's readings" if across_readings else
+                "Does not comply even before the §325-16C height bonus")
+    return "Needs review"
+
+
 def _hint(name: str, sign: str, margin: float, unit: str) -> str | None:
     if margin is None or margin >= 0:
         return None
@@ -570,7 +580,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 required = f"{numbers[4]} {low} to {high}"
                 span = f"{value_text(heights[0], 'ft')} to {value_text(heights[-1], 'ft')}"
                 more = f"the requirement depends on the height, whose readings disagree ({span})"
-                why = f"{why} ({more})" if why else f"Needs review ({more})"
+                why = f"{why} ({more})" if why else f"{_bonus_waits(st, True)} ({more})"
                 line = f"{proposed} proposed · {required} required, across the height's readings ({span})"
                 base_calc = (f"Required: {required}: {limit} at each reading of the height ({span}; the readings "
                              f"disagree)")
@@ -581,7 +591,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     waits = ("the height is measured from existing grade only; the bonus needs it from finished grade"
                              if as_is else "the height isn't measured yet")
                     more = f"more if the §325-16C height bonus applies; {waits}"
-                    why = f"{why} ({more})" if why else f"Needs review ({more})"
+                    why = f"{why} ({more})" if why else f"{_bonus_waits(st, False)} ({more})"
                     line = f"{proposed} proposed · {required} required before the §325-16C height bonus"
                     base_calc = f"Required: {required} before the §325-16C height bonus ({waits})"
         applied = _applied(names, measured)
