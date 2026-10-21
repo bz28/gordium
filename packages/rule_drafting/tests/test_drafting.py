@@ -1180,3 +1180,53 @@ def test_a_use_left_out_in_any_form_is_listed_when_nothing_else_checks_it(inputs
     other = {"id": "R-3a.frat", "kind": "rule", "applies_when": 'use == "fraternity_sorority_group_house"',
              "check": "lot_area >= 37500"}
     assert drafter.exemption_gaps(u, {"rules": {"R-3a": [lot, coverage, other]}}, inputs.ctx) == []
+
+
+def test_a_range_the_law_sets_is_never_kept_by_one_end_only(inputs):
+    """The R-2 keys (2026-10-21) found a real drafted false pass: §325-3B's attached dwelling is "A building containing
+    three or more one-family dwellings" and "A maximum of six" may be attached; the draft checked only <= 6, so a
+    two-unit building passed. It quoted only the sentence with the maximum. Code reads the rule's quotes and the
+    sentences of its own piece about the same thing, sets each tested measure just under every lower bound in its own
+    passing example, and if the rule still passes, sends that case to review (citing the sentence) until re-drafted."""
+    from rule_format.rulebook import outcome
+    assert "Ranges: when the text sets a minimum or a range" in inputs.system()      # the instruction for re-drafts
+    allowed = inputs.ctx.allowed()
+    u = unit(inputs, "325-3B:one_family_attached_dwelling")
+    quote = {"file": "chapter_325_zoning_2026-10.pdf", "page": 8, "lines": [14, 14],
+             "quote": "A maximum of six one-family dwelling units may be attached to form a single building."}
+    rule = {"id": "general.x", "kind": "rule", "applies_when": 'use == "one_family_attached"',
+            "check": "attached_units_in_building <= 6", "sources": [quote],
+            "examples": [{"given": {"use": "one_family_attached", "attached_units_in_building": 4}, "expect": "pass"},
+                         {"given": {"use": "one_family_attached", "attached_units_in_building": 7}, "expect": "fail"}]}
+    got = drafter.unenforced_lower_bound(rule, u, inputs.law, inputs.ctx)
+    assert [r["when"] for r in got["review_when"]] == ["attached_units_in_building < 3"]
+    assert any(x.get("page") == 8 and "three or more one-family dwellings" in x.get("quote", "") for x in got["sources"])
+    two = {"use": "one_family_attached", "attached_units_in_building": 2}
+    assert outcome(rule, two, allowed) == "pass" and outcome(got, two, allowed) == "needs_review"
+    whole = rule | {"check": "attached_units_in_building >= 3 and attached_units_in_building <= 6"}
+    assert drafter.unenforced_lower_bound(whole, u, inputs.law, inputs.ctx) is whole          # both ends: unchanged
+    # a sentence with a bound per case (8 ft residential, 10 ft otherwise) is kept when one of them holds
+    drive = unit(inputs, "325-20D")
+    width = {"id": "general.w", "kind": "rule", "check": "driveway_width >= 8", "sources": [{"quote":
+             "Driveways must be at least eight feet wide in residential zoning districts and at least 10 feet wide"}],
+             "examples": [{"given": {"driveway_width": 9}, "expect": "pass"}]}
+    assert drafter.unenforced_lower_bound(width, drive, inputs.law, inputs.ctx) is width
+    # a bound of another unit ("three or more dwellings" is no height) and "one or more" set nothing for the rule
+    height = {"id": "R-3a.h", "kind": "rule", "check": "building_height <= 35", "sources": [quote],
+              "examples": [{"given": {"building_height": 30}, "expect": "pass"}]}
+    assert drafter.unenforced_lower_bound(height, u, inputs.law, inputs.ctx) is height
+    assert drafter.lower_bounds({"sources": [{"quote": "one or more primary structures"}]}, {}, inputs.law, inputs.ctx) == []
+
+
+def test_no_saved_draft_keeps_one_end_of_a_range(inputs):
+    """Every saved drafted rule already enforces, or sends to review, every lower bound its law sets (the guard run
+    over all of them): a new draft that drops one fails here until it is replayed or re-drafted."""
+    log = cli.read_log(inputs)
+    units = {x["id"]: x for x in inputs.units()}
+    unit_of = {rid: uid for uid, e in log["units"].items() for rid in e["rules"]}
+    flagged = []
+    for book in inputs.drafted.glob("*.yaml"):
+        for r in cli.load(book)["rules"]:
+            if drafter.unenforced_lower_bound(r, units.get(unit_of.get(r["id"], ""), {}), inputs.law, inputs.ctx) is not r:
+                flagged.append(r["id"])
+    assert flagged == []

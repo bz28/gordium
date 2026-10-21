@@ -125,6 +125,10 @@ it has slots) or one rule for every district (when it has none).
   a slot, so a chart row whose section has no footnote is drafted with quotes: [] (no quote needed; never quote
   the row itself, a definition or a related section to have one). Never leave a chart row undrafted because
   there is nothing to quote.
+- Ranges: when the text sets a minimum or a range ("three or more", "at least", "not less than", "between 3 and
+  6"), the formula enforces every end of it, even when the ends are in different sentences ("a building
+  containing three or more dwellings" and "a maximum of six may be attached" are one rule: quote both sentences
+  and check both ends). Code tests each quoted lower bound and sends a rule that drops one to a person.
 - examples: for a rule, at least one that passes and one that fails, chosen so they exercise the whole
   formula: both sides of every `if` and of every comparison in applies_when; for min or max, an example
   where each part decides; for a tiered rule (parking by bedrooms: up to 3, 4 to 5, more than 5), an example
@@ -542,6 +546,109 @@ def in_scope(rule: dict, scope: set[str]) -> list[dict]:
     return [rule | {"id": f"{d}.{rest}"} for d in sorted(scope)]
 
 
+WORD_NUMBERS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9,
+                "ten": 10, "twelve": 12, "twenty": 20, "fifty": 50}
+_NUM = r"(\d+(?:,\d{3})*(?:\.\d+)?|" + "|".join(WORD_NUMBERS) + r")"
+LOWER_BOUND = re.compile(
+    rf"\b{_NUM}\s+or\s+more\b|\bat\s+least\s+{_NUM}\b|\bnot\s+less\s+than\s+{_NUM}\b|\bminimum\s+of\s+{_NUM}\b"
+    rf"|\bbetween\s+{_NUM}\s+and\s+{_NUM}\b|\b{_NUM}\s+to\s+{_NUM}\b", re.IGNORECASE)
+STOP = {"the", "a", "an", "of", "or", "and", "to", "in", "on", "for", "be", "may", "shall", "is", "are", "by", "any", "with"}
+
+
+def _value(token: str) -> float:
+    return float(WORD_NUMBERS.get(token.lower(), token.replace(",", "")))
+
+
+def _content(text: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z]+(?:-[a-z]+)?", text.lower()) if w not in STOP and len(w) > 2}
+
+
+def _bound_unit(sentence: str, end: int) -> str:
+    """The unit of a bound, from the words after it: "eight feet" ft, "6,000 square feet" sf, "three or more one-family
+    dwellings" count."""
+    after = sentence[end:end + 30].lower()
+    if re.match(r"\s*(?:square\s+feet|sq\.?\s*ft|sf)\b", after):
+        return "sf"
+    if re.match(r"\s*(?:feet|foot|ft)\b", after):
+        return "ft"
+    if re.match(r"\s*(?:percent|%)", after):
+        return "percent"
+    return "count"
+
+
+def _measure_unit(name: str, ctx: Context) -> str | None:
+    from rule_format.rulebook import MEASURES_FILE, load as load_yaml
+    known = (load_yaml(MEASURES_FILE) or {}) if MEASURES_FILE.exists() else {}
+    m = known.get(name) or ctx.proposed.get(name) or {}
+    return m.get("unit") if isinstance(m, dict) else None
+
+
+def lower_bounds(rule: dict, unit: dict, law: dict, ctx: Context) -> list[tuple[float, str, dict | None]]:
+    """(the bound, the sentence that states it, its source when it isn't one of the rule's quotes) for every lower bound
+    or range ("three or more", "at least 20", "not less than", "between 3 and 6") in the rule's own quotes, or in a
+    sentence of its own law piece about the same thing (two words in common with a quote): the §325-3B attached
+    dwelling's "three or more one-family dwellings" sits in the sentence before the quoted "A maximum of six"."""
+    quotes = [s_.get("quote", "") for s_ in rule.get("sources") or [] if isinstance(s_, dict)]
+    sentences = [(q, None) for q in quotes]
+    piece = law.get("pieces", {}).get(unit.get("piece") or "")
+    if piece is not None:
+        words = set().union(*(_content(q) for q in quotes)) if quotes else set()
+        text = " ".join(piece_text(law["rows"], piece).split())
+        for sentence in re.split(r"(?<=[.;])\s+", text):
+            if sentence not in quotes and len(_content(sentence) & words) >= 2:
+                sentences.append((sentence, piece))
+    out = []
+    for sentence, from_piece in sentences:
+        found = []
+        for m in LOWER_BOUND.finditer(sentence):
+            value = _value(next(g for g in m.groups() if g))
+            if value > 1:                             # "one or more" sets nothing to check
+                found.append((value, _bound_unit(sentence, m.end())))
+        if found:
+            source = find_quote(sentence, from_piece, law["file"], ctx)[0] if from_piece is not None else None
+            out.append((found, sentence, source))
+    return out
+
+
+def unenforced_lower_bound(rule: dict, unit: dict, law: dict, ctx: Context) -> dict:
+    """A drafted rule that keeps one end of a range and drops the other (§325-3B's attached dwelling: "three or more"
+    units, "a maximum of six"; the draft checked only <= 6, so a two-unit building passed). Judged by meaning: in the
+    rule's own passing example, each measure its check tests is set just under the bound; if the rule still passes for
+    every one, the bound isn't enforced, and the rule sends a design under it to review (citing the sentence), never a
+    pass, until it is re-drafted. Rules it can't judge (no check, no passing example) are left as they are."""
+    from rule_format import formula
+    from rule_format.rulebook import outcome
+    if not rule.get("check"):
+        return rule
+    passing = next((ex["given"] for ex in rule.get("examples") or [] if ex.get("expect") == "pass"), None)
+    if passing is None:
+        return rule
+    kinds = ctx.kinds()
+    tested = sorted(n for n in _checked_names(rule) if kinds.get(n) == "number")
+    review, sources = list(rule.get("review_when") or []), list(rule.get("sources") or [])
+    allowed = ctx.allowed()
+    def enforced(value, names):
+        under = value - 1 if value == int(value) else value * 0.99
+        return any(outcome(rule, passing | {n: under}, allowed) != "pass" for n in names)
+
+    for found, sentence, source in lower_bounds(rule, unit, law, ctx):
+        # only a measure of the bound's own unit can be held to it ("three or more dwellings" is no height), and a
+        # sentence with several bounds for different cases (8 ft residential, 10 ft otherwise) is kept when one holds
+        fits = [(v, [n for n in tested if _measure_unit(n, ctx) == u]) for v, u in found]
+        fits = [(v, names) for v, names in fits if names]
+        if not fits or any(enforced(v, names) for v, names in fits):
+            continue
+        value, names = min(fits)
+        when = " or ".join(f"{n} < {int(value) if value == int(value) else value}" for n in names)
+        if any(r.get("when") == when for r in review):
+            continue
+        review.append({"when": when, "reason": f"The law sets a lower bound ({sentence[:120]!r}) this rule doesn't "
+                                               "check; a person checks it until the rule is re-drafted."})
+        if source is not None and source not in sources:
+            sources.append(copy_of(source))
+    return rule if len(review) == len(rule.get("review_when") or []) else rule | {"review_when": review, "sources": sources}
+
+
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
                  cells: dict, notes: dict[int, dict], drafted_by: str) -> dict:
     """Turn an answer into rules, every one checked by the inspector. Returns {rules: {district: [rule]},
@@ -578,6 +685,8 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 rule, why = fill_template(t, column, cells, sources, drafted_by)
                 if why is None:
                     rule, why = unclear_exemption(unclear_catch_all(rule, law, ctx), unit, law, ctx)
+                if why is None:
+                    rule = unenforced_lower_bound(rule, unit, law, ctx)
                 if why is None and unread:
                     why = (f"the text names districts its scope can't be read from ({', '.join(unread)}): a person "
                            "decides which districts this rule applies to")

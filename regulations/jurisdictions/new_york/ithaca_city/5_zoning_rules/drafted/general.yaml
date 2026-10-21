@@ -661,34 +661,6 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: general.325_3b_one_family_attached_dwelling_max_attached_units_per_building
-  kind: rule
-  topic: density_and_occupancy
-  title: Maximum six one-family attached units per building (325-3B)
-  applies_when: use == "one_family_attached"
-  check: attached_units_in_building <= 6
-  sources:
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 8
-    lines:
-    - 14
-    - 14
-    quote: A maximum of six one-family dwelling units may be attached to form a single building.
-  examples:
-  - given:
-      use: one_family_attached
-      attached_units_in_building: 6
-    expect: pass
-  - given:
-      use: one_family_attached
-      attached_units_in_building: 7
-    expect: fail
-  - given:
-      use: two_family
-    expect: not_applicable
-  notes: Drafted by the rule-drafting script.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
 - id: general.325_3b_row_house_row_house_module_facade_length
   kind: rule
   topic: form_and_design_standards
@@ -2207,3 +2179,44 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: general.325_3b_one_family_attached_dwelling_max_attached_units_per_building
+  kind: rule
+  topic: density_and_occupancy
+  title: Maximum six one-family attached units per building (325-3B)
+  applies_when: use == "one_family_attached"
+  check: attached_units_in_building <= 6
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 14
+    - 14
+    quote: A maximum of six one-family dwelling units may be attached to form a single building.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 11
+    - 13
+    quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
+      which shares one or more party walls or structural elements with the other one-family dwellings in the building
+      and which has direct exterior access from the ground floor.
+  examples:
+  - given:
+      use: one_family_attached
+      attached_units_in_building: 6
+    expect: pass
+  - given:
+      use: one_family_attached
+      attached_units_in_building: 7
+    expect: fail
+  - given:
+      use: two_family
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+  review_when:
+  - when: attached_units_in_building < 3
+    reason: The law sets a lower bound ('(4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more
+      one-family dwellings, each of which shares one or') this rule doesn't check; a person checks it until the
+      rule is re-drafted.
