@@ -868,3 +868,14 @@ def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
             alone = main["floors"] if main["countable"] else typed
             together = max(s["floors"] for s in stacks if s["countable"])
             assert m["value"] >= together and (alone is None or m["value"] >= alone), (seed, stacks, pick, typed, m)
+
+
+@pytest.mark.parametrize("typed", [1, 2])
+def test_a_plain_house_with_a_three_floor_wing_against_its_rear_wall_never_complies_below_three(typed):
+    """Stress test F6 (stress-tests d32d437): a plain-solid house and a wing of three floor blocks against its rear
+    wall, a typed 1 or 2: stories complied. Read over the height's candidate buildings it is the typed count alone
+    and three with the wing: needs review, never a count below three."""
+    house = box(10, 25, 35, 55, 0, 20, id="house")
+    wing = [floor(10, 55, 35, 65, z0=i * 11, z1=(i + 1) * 11, id=f"w{i}") for i in range(3)]
+    m = measure(site(RECT, house, *wing), {**FACTS, "stories": typed, "main_building": "house"})["stories"]
+    assert m["value"] is None and 3 in {r["value"] for r in m["readings"]}
