@@ -560,3 +560,15 @@ def test_drawing_the_house_as_floor_blocks_a_solid_or_a_mesh_never_flips_a_row_b
             seen = {got[style].get(rule) for style in got}
             assert not {FAILS, COMPLIES} <= seen, (lt, edits, rule, {k: v.get(rule) for k, v in got.items()})
     assert sum(n >= 2 for n in compared) >= 15, compared
+
+
+def test_no_test_or_helper_in_the_stress_folder_is_defined_twice():
+    """Merging #18's copies of these tests once left two functions with the same name in one file: Python keeps
+    only the last, so the other (an xfail, or a stronger assertion) silently stops running. One name, one
+    definition, in every file of this folder."""
+    import ast
+    from collections import Counter
+    for path in sorted(Path(__file__).resolve().parent.glob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        names = Counter(n.name for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef)))
+        assert not [n for n, k in names.items() if k > 1], (path.name, [n for n, k in names.items() if k > 1])
