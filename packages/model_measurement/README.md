@@ -101,7 +101,7 @@ Every reason the code gives today comes from the table:
   are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
   below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces".
 - **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
-  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked (a podium, a bulkhead, a
+  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked on them (a podium, a bulkhead, a
   roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
   they disagree it's a question, never an override. "a floor block below the ground: whether a
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
