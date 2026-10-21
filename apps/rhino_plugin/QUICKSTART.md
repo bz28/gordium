@@ -344,17 +344,18 @@ Building height 35'-0" and Stories 3 comply, at the limit, each saying "assuming
 1. **Tick Show on-screen labels** in the panel: each yard's label and the status box appear in Top view. Untick it:
    they go (the yard lines stay).
 2. **Move the house 5 ft back (away from the street).** Front yard 32'-0", rear yard 27'-9": both comply.
-3. **Move it 11 ft back instead.** Rear yard 21'-9" against 22'-6" required: **does not comply, −0'-9"** as
-   drawn. On this tax-map lot its Delta reads "up to 3'-3" short": the lot lines could each be 2 ft off, so the
-   shortfall could be anywhere up to that, or none. A note appears, and the part of the house inside that band
-   turns amber; nothing turns red, because no part is over the line however the lines really lie.
-4. **Undo, then pull the rear wall 6 ft back** (Cmd+Shift+click the rear face, Gumball 6). Lot coverage 27.1%
-   against 25%: **does not comply**, with "reduce the footprint by at least …".
-5. **Undo, then raise the roof 3 ft** (the top face of Floor 3). Building height 38'-0": **does not comply either
-   way**. Over 35'-0", and the height bonus (§325-16C) would need every yard 3 ft larger: "Front yard 27'-0",
-   needs ≥ 28'-0"". Only the part above 35'-0" turns red.
-6. **Undo, then widen the house 4 ft to the east** (the east face). Side yard, East 8'-0": **does not comply,
-   −2'-0"**, and lot coverage 24.5% needs review: at the tax map's worst case it would be 27.1%.
+3. **Move it 11 ft back instead.** Rear yard 21'-9" against 22'-6" required: **needs review**. It is short as
+   drawn, but the tax map's lines could each be 2 ft off in its favour, and then it would comply (at best
+   23'-9"). **Now move it 14 ft back:** Rear yard 18'-9": **does not comply, −3'-9"**, short however the lines
+   are off. A note appears bottom left, and only the strip of the house inside the rear yard turns red.
+4. **Undo, then pull the rear wall 10 ft back** (Cmd+Shift+click the rear face, Gumball 10). Lot coverage 30.1%
+   against 25%: **does not comply**, even on the largest lot the tax map allows, with "reduce the footprint by at
+   least …".
+5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply either
+   way**. Over 35'-0", and over the 38'-6" the height bonus (§325-16C) allows: "Front yard 27'-0",
+   needs ≥ 29'-0"". Only the part above 35'-0" turns red.
+6. **Undo, then widen the house 5 ft to the east** (the east face). Side yard, East 7'-0": **does not comply,
+   −3'-0"**, and lot coverage 24.87% needs review: at the tax map's worst case it would be 27.6%.
 7. **Undo.** Everything is back to the starting results.
 
 ### Harder tests
@@ -367,8 +368,9 @@ Building height 35'-0" and Stories 3 comply, at the limit, each saying "assuming
     wall 3 ft in. Every yard is then 3 ft larger, plus the 2 ft the tax map needs. Building height complies
     against 38'-6"; the Front yard row shows 28'-0" required, +2'-0".
 11. **Delta in words, true however the lot lines lie:** after test 2 the Front yard row reads "at least 5'-0" to
-    spare"; after test 3 the Rear yard row reads "up to 3'-3" short" (the same in the report and the note). With a
-    survey it reads the margin itself, such as "+7'-0" to spare".
+    spare"; after test 3 the Rear yard row reads "up to 3'-9" short" (11 ft back: it may comply) and, 14 ft back,
+    "at least 0'-9" short" (the red strip). The same in the report and the note. With a survey it reads the
+    margin itself, such as "+7'-0" to spare".
 12. **Corner lot:** Edit site… → Corner lot? Yes: two streets. The yards need review (which yard is the front is
     an open question for a corner lot).
 13. **A survey:** with a surveyed lot, a new starting house goes exactly to the limits: 53'-0" × 30'-11", with

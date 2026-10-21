@@ -384,14 +384,14 @@ def _display(proposed, required, margin, unit, sign):
 
 def _delta_span(node, values: dict, measured: dict, names: set):
     """(lowest, highest) margin of one comparison over every way the tax map's lot lines could really lie: each
-    lot length the rule reads off by up to TOLERANCE either way (the same combinations as _worst_case, and as the
+    lot length the rule reads off by its TAX_MAP_SLACK either way (the same combinations as _worst_case and the
     model's red and amber). None when the rule reads no lot length or has no margin in feet."""
     lengths = sorted(n for n in names & LOT_LENGTHS if isinstance(values.get(n), (int, float)))
     if not lengths:
         return None
     margins = []
     for signs in itertools.product((-1, 1), repeat=len(lengths)):
-        trial = dict(values, **{n: values[n] + s * TOLERANCE for n, s in zip(lengths, signs)})
+        trial = dict(values, **{n: values[n] + s * TAX_MAP_SLACK[n] for n, s in zip(lengths, signs)})
         proposed, required, margin, unit, sign = _numbers(node, trial, measured, "")
         if margin is None or unit != "ft":
             return None
@@ -439,6 +439,16 @@ def colours_note(measure: str | None, status: str, measured: dict) -> str | None
     fails or needs review (the "?" legend says it too); otherwise nothing."""
     tax = bool((measured.get("lot_area") or {}).get("tolerance"))
     return COLOURS_NOTE if tax and measure in YARD_MEASURES and status in (FAILS, REVIEW) else None
+def _best_case(expr: str, values: dict, names: set) -> dict | None:
+    """The values that make `expr` hold when every lot line is off by up to TOLERANCE the lucky way (the same
+    slack as _worst_case), or None if it fails for every combination: on a tax-map lot a rule fails only if it
+    fails under every reading of where the lines are (Ben, 2026-10-21)."""
+    lengths = sorted(n for n in names & LOT_LENGTHS if isinstance(values.get(n), (int, float)))
+    for signs in itertools.product((-1, 1), repeat=len(lengths)):
+        trial = dict(values, **{n: values[n] + s * TAX_MAP_SLACK[n] for n, s in zip(lengths, signs)})
+        if _evaluate(expr, trial) is True:
+            return trial
+    return None
 
 
 def _scope(extras: dict, measured: dict) -> str:
@@ -536,6 +546,21 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 w = _numbers(node, bad, measured, label)
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst {_display(*w)[0]} "
                        f"against {_display(*w)[1]} · Pick survey lot lines…")
+        if st == FAILS and not facts.get("lot_surveyed") and node is not None and (names & LOT_LENGTHS or tol):
+            # fails as drawn, but the tax-map lines could be off: it fails only if it fails under every reading of
+            # them (each line up to TOLERANCE either way); else it needs review (the same slack as for a pass)
+            ends = [values] + ([dict(values, lot_area=tol["high"])] if tol and "lot_area" in names else [])
+            best = next((v if _evaluate(expr, v) is True else b for v in ends
+                         for b in [_best_case(expr, v, names)] if _evaluate(expr, v) is True or b is not None), None)
+            if best is not None:
+                st = REVIEW
+                if _evaluate(ast.unparse(node), best) is True:      # its own comparison holds at best: say how
+                    w = _numbers(node, best, measured, label)
+                    could = f"at best {_display(*w)[0]} against {_display(*w)[1]}"
+                else:                                               # it holds the rule's other way at best
+                    could = "it could comply the rule's other way if the lines are off in its favour"
+                why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it does not comply, "
+                       f"but {could} · Pick survey lot lines…")
         if st == FAILS and row.get("Provisional") and not row.get("Error") == "FAIL":
             why = ("Does not comply with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…"
                    if "confirm the survey" in row["Provisional"] else

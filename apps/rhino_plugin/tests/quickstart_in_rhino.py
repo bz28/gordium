@@ -138,25 +138,30 @@ try:
     undo(ids, t)
     t = rg.Transform.Translation(north * 11)
     xf(ids, t)
-    check(doc, 3, "3 Move back 11 ft", {"Rear yard": {"status": "does_not_comply", "proposed": "21'-9\"",
-                                                      "required": "22'-6\"", "margin": "−0'-9\""}})
+    check(doc, 3, "3 Move back 11 ft", {"Rear yard": {"status": "needs_review", "proposed": "21'-9\"",
+                                                      "required": "22'-6\"", "reason": "at best 23'-9\""}})
     undo(ids, t)
-    t = stretch(ids, 1, None, 6)
+    t = rg.Transform.Translation(north * 14)
     xf(ids, t)
-    check(doc, 4, "4 Pull the rear wall 6 ft", {"Lot coverage": {"status": "does_not_comply", "proposed": "27.1%"}})
+    check(doc, 3, "3 Move back 14 ft", {"Rear yard": {"status": "does_not_comply", "proposed": "18'-9\"",
+                                                      "margin": "−3'-9\""}})
+    undo(ids, t)
+    t = stretch(ids, 1, None, 10)
+    xf(ids, t)
+    check(doc, 4, "4 Pull the rear wall 10 ft", {"Lot coverage": {"status": "does_not_comply", "proposed": "30.1%"}})
     undo(ids, t)
     base = g.STATE["start"]["floors"][-1]
     roof = rg.Transform.Scale(rg.Plane(rg.Point3d(0, 0, base["base"] * ft), rg.Vector3d.ZAxis), 1, 1,
-                              (base["top"] - base["base"] + 3) / (base["top"] - base["base"]))
+                              (base["top"] - base["base"] + 4) / (base["top"] - base["base"]))
     xf(top_floor, roof)
-    check(doc, 5, "5 Raise the roof 3 ft", {"Building height": {"status": "does_not_comply", "proposed": "38'-0\"",
-                                                                "reason": "Front yard 27'-0\", needs ≥ 28'-0\""}})
+    check(doc, 5, "5 Raise the roof 4 ft", {"Building height": {"status": "does_not_comply", "proposed": "39'-0\"",
+                                                                "reason": "Front yard 27'-0\", needs ≥ 29'-0\""}})
     undo(top_floor, roof)
-    t = stretch(ids, 0, None, 4)
+    t = stretch(ids, 0, None, 5)
     xf(ids, t)
-    check(doc, 6, "6 Widen 4 ft to the east", {"Side yard, East": {"status": "does_not_comply", "proposed": "8'-0\"",
-                                                                   "margin": "−2'-0\""},
-                                               "Lot coverage": {"status": "needs_review", "proposed": "24.5%"}})
+    check(doc, 6, "6 Widen 5 ft to the east", {"Side yard, East": {"status": "does_not_comply", "proposed": "7'-0\"",
+                                                                   "margin": "−3'-0\""},
+                                               "Lot coverage": {"status": "needs_review", "proposed": "24.87%"}})
     undo(ids, t)
     check(doc, 7, "7 Undo: back to the start", {"Rear yard": {"proposed": "32'-9\"", "status": "complies"},
                                                 "Lot coverage": {"proposed": "22.6%", "status": "complies"}})

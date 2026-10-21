@@ -1966,9 +1966,9 @@ def _release(key, value):
         _off(Rhino.Commands.Command, "BeginCommand", value)
     elif key == "overlay":
         value.Enabled = False
-    elif key == "panel":
+    elif key == "panel":                       # an older copy's panel (a form)
         value.Close()
-    elif key == "panel_parts":
+    elif key == "panel_parts":                 # this PR's panel: its parts, the form among them
         value["form"].Close()
     elif key == "toast_timer":
         value.Stop()
