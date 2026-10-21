@@ -1,0 +1,113 @@
+{
+ "phase": "run",
+ "claims": {
+  "5 no Ground row in the start box": {
+   "ok": true,
+   "detail": [
+    "address",
+    "zone",
+    "use",
+    "lot",
+    "street"
+   ]
+  },
+  "5 the ground is assumed flat, finished": {
+   "ok": true,
+   "detail": {
+    "ground_assumed": "flat",
+    "grade_is": "finished"
+   }
+  },
+  "5 height and stories comply": {
+   "ok": true,
+   "detail": {
+    "Building height": "complies",
+    "Stories": "complies"
+   }
+  },
+  "5 the rows say assuming flat ground": {
+   "ok": true,
+   "detail": [
+    "\u2713  Use (site)",
+    "\u2713  Lot area (site)",
+    "\u2713  Lot width (site)",
+    "\u2713  Stories \u00b7 assuming flat ground",
+    "\u2713  Building height \u00b7 assuming flat ground",
+    "\u2713  Lot coverage",
+    "\u2713  Front yard",
+    "\u2713  Side yard, East",
+    "\u2713  Side yard, West",
+    "\u2713  Rear yard",
+    "\u2013  Parking \u00b7 needs input",
+    "\u2013  Overlays \u00b7 not in this release"
+   ]
+  },
+  "1 labels off by default (the document's setting, the tick)": {
+   "ok": true,
+   "detail": null
+  },
+  "2 no code-edition line in the panel header": {
+   "ok": true,
+   "detail": null
+  },
+  "2 the legend names it": {
+   "ok": true,
+   "detail": null
+  },
+  "3 the column is Delta": {
+   "ok": true,
+   "detail": [
+    "Item",
+    "Proposed",
+    "Required",
+    "Delta"
+   ]
+  },
+  "3 Delta in words": {
+   "ok": true,
+   "detail": [
+    "",
+    "+570 sf to spare",
+    "+23'-0\" to spare",
+    "at limit",
+    "at limit",
+    "+1.25% to spare",
+    "+2'-0\" to spare",
+    "+2'-0\" to spare",
+    "+2'-0\" to spare",
+    "+8'-8\" to spare",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ]
+  },
+  "3 a shortfall says short": {
+   "ok": true,
+   "detail": [
+    "\u2715  Rear yard",
+    "21'-2\"",
+    "22'-6\"",
+    "\u22121'-4\" short"
+   ]
+  },
+  "1 labels off: a failing yard's shortfall still labelled": {
+   "ok": true,
+   "detail": [
+    "\u2715 Rear yard 21'-2\", needs 22'-6\""
+   ]
+  },
+  "1 labels off: the others not": {
+   "ok": true,
+   "detail": null
+  },
+  "1 the tick turns them on, saved in the document": {
+   "ok": true,
+   "detail": null
+  }
+ },
+ "ok": true
+}
