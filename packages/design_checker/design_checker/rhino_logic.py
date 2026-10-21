@@ -123,6 +123,38 @@ def with_suggestions(saved, suggested):
     return out
 
 
+# The facts only the architect can state (the model can't show them), in the order they are asked: each with its
+# prompt, its kind (a whole number 0 or more, or yes / no) and its name in a row's words. A row waiting on any of
+# them says which, and its "Enter …" button asks for exactly those (needs_of, enter_words).
+STATED_FACTS = {
+    "sleeping_rooms": ("Bedrooms", "count", "bedrooms"),
+    "parking_spaces": ("Off-street parking spaces", "count", "parking spaces"),
+    "dwelling_units": ("Dwelling units", "count", "dwelling units"),
+    "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
+    "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
+                   "whether it is a conversion"),
+}
+
+
+def needs_of(names, values):
+    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
+    return [k for k in STATED_FACTS if k in names and (values or {}).get(k) is None]
+
+
+def _and(words):
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
+
+
+def enter_words(needs):
+    """The button's words for a row waiting on `needs`: "Enter bedrooms and parking spaces"."""
+    return "Enter " + _and([STATED_FACTS[k][2] for k in needs]) if needs else None
+
+
+def needs_reason(needs):
+    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show"."""
+    return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show" if needs else None
+
+
 def update_counts(facts, answers):
     """Bedrooms, parking spaces, stories, dwelling units and rooms let for profit (whole numbers, 0 or more) and
     whether the building is a conversion (yes / no) from the Lot facts prompts. An answer of None means the prompt

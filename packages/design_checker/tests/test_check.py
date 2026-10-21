@@ -58,6 +58,36 @@ def test_needs_review_rows_say_why_in_the_measuring_words(facts):
     assert result["summary"]["state"] == "fail" and "need review" not in result["summary"]["text"]
 
 
+def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
+    """A row waiting on facts only the architect can state carries `needs`: exactly those it reads that aren't set,
+    in the order they are asked. Its "Enter …" button (named from them) asks for exactly those: one parking fact
+    entered, the row then asks only for the other."""
+    from design_checker import rhino_logic as logic
+    result = check(MODEL, {**facts, "sleeping_rooms": None, "parking_spaces": None})
+    row = next(r for r in result["interior"] if r["Rule id"] == "R-1b.parking_one_family")
+    item = next(i for i in result["view"]["items"] if i["rule"] == "R-1b.parking_one_family")
+    assert row["needs"] == item["needs"] == ["sleeping_rooms", "parking_spaces"]
+    assert (item["name"], item["hint"], item["reason"]) == (
+        "Parking · needs input", "Enter bedrooms and parking spaces",
+        "Needs bedrooms and parking spaces, which the model doesn't show")
+    half = check(MODEL, {**facts, "sleeping_rooms": 3, "parking_spaces": None})
+    item = next(i for i in half["view"]["items"] if i["rule"] == "R-1b.parking_one_family")
+    assert item["needs"] == ["parking_spaces"] and item["hint"] == "Enter parking spaces"
+    # R-3a's lot size (PR #20): a needs-review row whose condition reads dwelling units, rooms let for profit and
+    # whether it is a conversion: its own button asks those three, a count, a count and a yes / no
+    names = {"lot_area", "dwelling_units", "rooms_let_for_profit", "conversion", "use"}
+    needs = logic.needs_of(names, {"use": "multiple_dwelling", "lot_area": 7000})
+    assert needs == ["dwelling_units", "rooms_let_for_profit", "conversion"]
+    assert logic.enter_words(needs) == "Enter dwelling units, rooms let for profit and whether it is a conversion"
+    assert [logic.STATED_FACTS[k][1] for k in needs] == ["count", "count", "yes_no"]
+    assert logic.needs_of(names, {"dwelling_units": 4, "rooms_let_for_profit": 0, "conversion": False}) == []
+    # the panel asks exactly the row's own list (never a fixed pair), and saves through update_counts
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert 'a["enter"](i["needs"])' in ui and "Enter bedrooms and parking spaces…" not in ui
+    assert "for key in needs or" in rhino and "logic.update_counts(facts, answers)" in rhino
+
+
 def test_an_interior_rule_that_fails_is_never_hidden(facts):
     result = check(MODEL, {**facts, "sleeping_rooms": 3, "parking_spaces": 0})
     parking = next(r for r in result["rows"] if r["Rule id"] == "R-1b.parking_one_family")

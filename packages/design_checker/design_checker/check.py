@@ -20,6 +20,7 @@ from pathlib import Path
 import yaml
 
 from design_checker import present, reading_set
+from design_checker import rhino_logic as logic
 from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder import start as generator
 from envelope_builder.envelope import envelope
@@ -34,7 +35,7 @@ COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # Facts about the inside of a building (rooms, parking spaces). This phase checks the outside only: a rule waiting
 # on one of these goes in its own group, "not checked yet: interior", out of the counts. A rule they decide once
 # entered (a FAIL included) is shown like any other: nothing that fails is ever hidden.
-INTERIOR = {"sleeping_rooms", "parking_spaces"}
+INTERIOR = set(logic.STATED_FACTS)       # facts only the architect can state: a rule waiting on one isn't checked
 NUMBER = re.compile(r"^([≥≤<>=]) (-?[\d,]+(?:\.\d+)?)$")
 
 
@@ -356,6 +357,8 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
 
     waiting = [r for r in every if r["Error"] == "NEEDS REVIEW" and any(
         (measured.get(n) or {}).get("value") is None for n in checks(by_id[r["Rule id"]]) & INTERIOR)]
+    for r in waiting:                   # exactly which stated facts each one waits for (its "Enter …" asks those)
+        r["needs"] = logic.needs_of(_names(by_id[r["Rule id"]]), {k: m.get("value") for k, m in measured.items()})
     rows = [{**r, "Line": _amount(r, by_id[r["Rule id"]], measured)} if r["Error"] == "FAIL" else r
             for r in every if r not in waiting]
     for r in rows:
