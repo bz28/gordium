@@ -1026,15 +1026,22 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # each building on its own (each stack, each detached building): one wholly off the lot can't be measured
     # against it (outside_lot, whatever the others do); one that crosses a lot line is measured, and the yard to
     # its own crossings are recorded (_mark_crossings): it fails every rule that measures it, never a pass
-    plans = [_projection(b) for b in buildings]
-    within = [p.within(lot.polygon.buffer(TOL)) for p in plans]
-    off = [not w and p.intersection(lot.polygon).area <= 1e-6 for p, w in zip(plans, within)]
-    # each building's own crossings (never pooled): the lot lines its part outside the lot runs along (a stretch
-    # of the line, not just a corner)
-    crossed = {b["id"]: _crossed(lot, p) for b, p, w in zip(buildings, plans, within) if not w}
-    crossed = {k: v for k, v in crossed.items() if v}
-    crosses = bool(crossed) and not any(off)
-    why_inside = why_building or (stop("outside_lot") if any(off) or (not all(within) and not crosses) else None)
+    # one rule for each building on its own (each stack, each detached building), whatever the others are:
+    # within the lot: measured as usual; partly outside: every rule that measures it does not comply
+    # (_mark_crossings, naming the lines it crosses where they can be told); wholly outside: the rules that would
+    # measure it need review (outside_lot: is it part of this design?)
+    place = {}
+    for b in buildings:
+        p = _projection(b)
+        place[b["id"]] = ("on" if p.within(lot.polygon.buffer(TOL)) else
+                          "off" if p.intersection(lot.polygon).area <= 1e-6 else "partly")
+    crossed = {i: _crossed(lot, _projection(next(b for b in buildings if b["id"] == i)))
+               for i, s in place.items() if s == "partly"}
+    crosses = bool(crossed)
+    group = [main, *parts_of] if main is not None else []
+    why_main_off = stop("outside_lot") if any(place.get(b["id"]) == "off" for b in group) else None
+    why_acc_off = stop("outside_lot") if any(place.get(b["id"]) == "off" for b in detached) else None
+    why_inside = why_building or (stop("outside_lot") if "off" in place.values() else None)    # coverage
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
     else:
@@ -1052,12 +1059,15 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                    "the average length of the two side lot lines", [lot.id], lines["question"],
                                    lines["basis"]["depth"])
 
-    why_yards = why_inside or why_plan or why_main or (why_grade if plan_level is None else None)
+    why_yards = why_building or why_main_off or why_plan or why_main or (why_grade if plan_level is None else None)
     if why_yards:
         for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
             out[name] = _missing(name, why_yards)
         return out
     _yards(out, lot, lines, facts, main, parts_of, detached, views)
+    if why_acc_off:                              # an accessory building wholly off the lot: its own rule waits
+        for name in ACCESSORY_YARDS:
+            out[name] = _missing(name, why_acc_off)
     if crosses:
         _mark_crossings(out, lot, lines, crossed, main, parts_of, detached)
     return out
@@ -1081,15 +1091,16 @@ def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict,
     sides = {i for _w, r in lines["readings"] for g in r["sides"] for i in g} if lines and not isinstance(lines, str) else set()
     rears = {i for _w, r in lines["readings"] for i in r["rear"]} if lines and not isinstance(lines, str) else set()
 
-    def kinds(idx):
-        return sorted({"street" if i in lot.street else "side" if i in sides else "rear" if i in rears else "lot"
-                       for i in idx})
+    def kinds(idx):                  # the lines that can be named: street, side, rear (an unclear one isn't)
+        return sorted({"street" if i in lot.street else "side" if i in sides else "rear" if i in rears else ""
+                       for i in idx} - {""})
     group = [main, *parts_of] if main is not None else []
-    mine = set().union(*(crossed.get(b["id"], set()) for b in group)) if group else set()
-    entries_main = [{"who": "the main building", "lines": kinds(mine)}] if mine else []
+    partly = [b for b in group if b["id"] in crossed]
+    mine = set().union(*(crossed[b["id"]] for b in partly)) if partly else set()
+    entries_main = [{"who": "the main building", "lines": kinds(mine)}] if partly else []
     entries_acc = [{"who": f'accessory building "{_parts(b)[0]}"', "lines": kinds(crossed[b["id"]])}
-                   for b in detached if crossed.get(b["id"])]
-    for name in YARDS + EAVE_YARDS + ("building_height",):
+                   for b in detached if b["id"] in crossed]
+    for name in YARDS + EAVE_YARDS + ("building_height", "stories"):
         if entries_main and name in out:
             out[name]["crossings"] = entries_main
     for name in ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply"):

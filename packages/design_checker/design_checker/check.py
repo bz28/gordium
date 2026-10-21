@@ -89,7 +89,7 @@ def _n(x) -> str:
 
 def _why(row: dict, rules: dict, measured: dict) -> dict:
     """The row, plus "Why": for a NEEDS REVIEW row whose measurements are missing, why each is missing (the
-    measuring's own reason: "a building isn't inside the lot", "enter bedrooms / parking spaces"), else the
+    measuring's own reason: "a building isn't on the lot (is it part of this design?)", "enter bedrooms / parking spaces"), else the
     report's reason."""
     reasons = []
     if row["Error"] == "NEEDS REVIEW":
@@ -227,8 +227,11 @@ def crossing(rule: dict, measured: dict) -> str | None:
             found.setdefault(c["who"], set()).update(c["lines"])
     if not found:
         return None
-    text = "; ".join(f"{who} crosses the {' and '.join(sorted(lines))} lot line{'s' if len(lines) > 1 else ''}"
-                     for who, lines in found.items())
+    def where(lines):
+        if not lines:                                   # past a corner, or a line that can't be named
+            return "it reaches past the lot line"
+        return f"it crosses the {' and '.join(sorted(lines))} lot line{'s' if len(lines) > 1 else ''}"
+    text = "; ".join(f"{who} is not entirely on the lot ({where(lines)})" for who, lines in found.items())
     return text[:1].upper() + text[1:]
 
 
@@ -258,9 +261,9 @@ def summary(rows: list[dict]) -> dict:
     with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
     missing fact, not a reading, so it is never shown as complying."""
     fails = [r for r in rows if r.get("Fails") or r["Error"] == "FAIL"]
-    named = [r for r in rows if (r.get("Named") or {}).get("result") == "pass"]   # complies under every reading
+    named = [r for r in rows if (r.get("Named") or {}).get("result") == "pass" and r not in fails]   # counted once
     review = [r for r in rows if r["Error"] == "NEEDS REVIEW" and r not in fails and r not in named]
-    passes = [r for r in rows if r["Error"] == "PASS"] + named
+    passes = [r for r in rows if r["Error"] == "PASS" and r not in fails] + named     # a rule counted once
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):

@@ -154,7 +154,7 @@ def test_a_building_outside_the_lot():
     # wholly off the lot: nothing can be measured against it
     m = measure(site(RECT, box(60, 25, 85, 65)), FACTS)
     for name in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_area"):
-        assert m[name]["value"] is None and m[name]["reason"] == "a building isn't inside the lot"
+        assert m[name]["value"] is None and m[name]["reason"] == "a building isn't on the lot (is it part of this design?)"
     assert m["building_height"]["value"] == 30
     # crossing the side lot line (x = 50): measured, the yard to that line is 0 and it says it crosses it
     m = measure(site(RECT, box(40, 25, 65, 65)), FACTS)
