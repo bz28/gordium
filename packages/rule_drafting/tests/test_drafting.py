@@ -215,6 +215,31 @@ def test_footnotes_and_section_references_are_read_from_the_page(inputs):
     assert chart_values.section_refs("see §325-8(B)(1) and § 325-16, also §325-29.1") == ["325-8B", "325-16", "325-29.1"]
 
 
+def test_the_capital_starting_the_next_word_is_not_a_subsection_letter():
+    """Audit P1-4: "§ 325-20 The yard" once read as 325-20T and "§325-22 Minimum Building Height" (real chart
+    text) as 325-22M, ids that match no piece, so the drafter silently lost the section."""
+    assert chart_values.section_refs("§ 325-20 The yard") == ["325-20"]
+    assert chart_values.section_refs("§325-22 Minimum Building Height") == ["325-22"]
+    assert chart_values.section_refs("§ 325-8 (B) and §325-8C, §325-9A.") == ["325-8B", "325-8C", "325-9A"]
+    assert chart_values.section_refs("§ 325-45.2 (B), and") == ["325-45.2B"]     # real law text: space, then bracket
+    assert chart_values.section_refs("See §325-21 See §325-21 -") == ["325-21"]  # real chart text
+    assert chart_values.section_refs("§325-21 SEE; §325-29.1 Sign; § 325-3 ZONING") == ["325-21", "325-29.1", "325-3"]
+    assert chart_values.section_refs("§325-20D(3)(b)") == ["325-20D"]
+    assert chart_values.section_refs("§ 325-8 B") == ["325-8"]    # a bare letter after a space is not one (never in the text)
+
+
+def test_a_reference_to_no_section_of_the_law_is_named_for_a_person(inputs):
+    """Audit P1-4: a reference that resolves to no piece is never left out silently."""
+    u = unit(inputs, "325-8A")
+    u = u | {"text": u["text"] + " See §325-999."}
+    context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
+    assert context["unfound"] == ["325-999"]
+    assert "325-999" in drafter.unit_message(u, context)
+    result = drafter.keep({"rules": {}, "unresolved": [], "rejected": [], "problems": []}, u, inputs.cells,
+                          inputs.columns, context)
+    assert any("325-999" in g["why"] and "matches no section" in g["why"] for g in result["unresolved"])
+
+
 def test_a_template_with_an_undefined_slot_is_rejected(inputs):
     bad = copy.deepcopy(FRONT)
     bad["slots"] = []
