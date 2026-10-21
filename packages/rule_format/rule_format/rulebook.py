@@ -62,8 +62,8 @@ def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
         if any(_condition(r["when"], values, kinds) for r in rule.get("review_when", [])):
             return "needs_review"
         return "pass" if _condition(rule["check"], values, kinds) else "fail"
-    except (MissingMeasure, EvaluationError, ArithmeticError):
-        return "needs_review"
+    except (MissingMeasure, EvaluationError, FormulaError, ArithmeticError):
+        return "needs_review"         # a formula that can't be read (never frozen so) is never a crash
 
 
 def _condition(text: str, values: dict, kinds: dict) -> bool:
