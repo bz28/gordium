@@ -438,10 +438,10 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
     return readings, PITCHED
 
 
-# A plain solid (no floors drawn) whose top is more than this above the grade could hold a story: the lowest ceiling
-# a habitable room may have (7 ft, NYS Residential Code R305.1). Lower (a porch slab, steps, a deck) it can't.
+# A part drawn without floor blocks at least this tall could hold a story: the lowest ceiling a habitable room may
+# have (7 ft, NYS Residential Code R305.1). Lower (a porch slab, steps, a deck) it can't.
 STORY_ROOM = 7.0            # ft
-WHOLE = "as stated by the architect for the whole building (a joined part's stories aren't drawn)"
+WHOLE = "as stated by the architect for the whole building (a part is drawn as a plain solid: its stories aren't drawn)"
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
 
@@ -573,13 +573,17 @@ def _stories(building: dict, grade, why_grade, stated) -> dict:
                    "count typed, disagrees with the floors drawn: a question (story)")
 
 
-def _holds_a_story(solid: dict, grade, first_floor_top) -> bool:
-    """Whether a plain solid (no floors drawn) could hold a story: its top more than STORY_ROOM above the grade, or
-    above the top of the main building's first floor. Not knowing the grade or its top, it could."""
-    top = max((p[2] for f in solid.get("faces") or [] for p in f["points"]), default=None)
-    if top is None or grade is None:
-        return True
-    return top - grade > STORY_ROOM or (first_floor_top is not None and top > first_floor_top + TOL)
+def _extent(building: dict) -> tuple:
+    """The bottom and top of a building's solids (None, None if it has no faces)."""
+    zs = [p[2] for f in building.get("faces") or [] for p in f["points"]]
+    return (min(zs), max(zs)) if zs else (None, None)
+
+
+def _could_hold_a_story(solid: dict) -> bool:
+    """Whether a part drawn without floor blocks is tall enough to hold a story: at least STORY_ROOM from its bottom
+    to its top (a porch slab, steps or a deck isn't). Its stories are never guessed from its height."""
+    lo, hi = _extent(solid)
+    return lo is None or hi - lo >= STORY_ROOM - TOL
 
 
 def _assemblies(main: dict, others: list[dict]) -> list[tuple[str, list[dict]]]:
@@ -593,44 +597,51 @@ def _assemblies(main: dict, others: list[dict]) -> list[tuple[str, list[dict]]]:
 
 
 def _stories_over(assemblies, grade, why_grade, stated) -> dict:
-    """STORY over the same candidate buildings as the height: each assembly's count is the most stories of any
-    building in it that can be counted (its floor blocks, or its stacked solids beside the typed count, _stories);
-    an assembly with nothing countable in it is the typed count, as a reading only. A plain solid (no floors drawn)
-    tall enough to hold a story (_holds_a_story) has an unknown count, so an assembly with one and something
-    countable is the count typed for the whole building, and only if no countable part has more floors (else the
-    readings disagree: the story question); with no count typed it needs review. If the assemblies' counts differ,
-    it is the accessory question; if any count can't be read, stories need review with its reason."""
-    readings, questions, objects = [], [], []
-    main = assemblies[0][1][0]
-    first = (main["spans"][main["floor"].index(True)][1] if main.get("parts") and any(main["floor"]) else None)
+    """STORY over the same candidate buildings as the height. Stories are counted only from Gordium's floor blocks
+    (_stories); a part drawn as plain solids never has its stories guessed from its height. So, for each assembly:
+    - any part reaching below the ground: whether a basement or cellar is a story (§325-3) is open: needs review,
+      whatever was typed;
+    - a part without floor blocks that could hold a story (_could_hold_a_story): the drawing can't give the whole
+      count, so it is the count typed for the whole building, and only if no part's floor blocks count more (else
+      the readings disagree: the story question); with no count typed, needs review;
+    - otherwise the most floors counted on any part (the count typed a reading beside them), or, with nothing
+      counted or tall, the count typed.
+    If the assemblies' counts differ, it is the accessory question."""
+    readings, questions, objects, any_counted = [], [], [], False
+    if grade is None:                   # nothing can be told against the ground
+        return _missing("stories", why_grade)
     for words, members in assemblies:
-        # a stack of floor blocks is counted on its own; plain stacked solids only beside the typed count
-        counted = [_stories(b, grade, why_grade, None if any(b["floor"]) else stated)
-                   for b in members if b.get("parts")]
         objects += [i for b in members for i in _parts(b)]
+        for b in members:               # a basement or cellar (§325-3), for every part, plain or floor blocks
+            lo, _ = _extent(b)
+            if lo is not None and lo < grade - TOL and not (b.get("parts") and any(b["floor"])):
+                return _missing("stories", stop("part_below_ground", part=b["id"]))
+        floored = [b for b in members if b.get("parts") and any(b["floor"])]
+        plain = [b for b in members if b not in floored and _could_hold_a_story(b)]
+        counted = [_stories(b, grade, why_grade, None) for b in floored]
+        any_counted = any_counted or bool(counted)
         for r in counted:
             if r["value"] is None and not r["readings"]:
                 return _missing("stories", r["reason"])
             if r["value"] is None and r["reason"]:
                 questions.append(r["reason"].split("; ", 1)[-1])
+        choices = [[(x["reading"], x["value"]) for x in r["readings"]] or [("", r["value"])] for r in counted]
         if not counted:
             if stated is None:
                 return _missing("stories", stop("no_stories"))
             readings.append((_both(words, "as stated by the architect"), stated, {}))
-            continue
-        choices = [[(x["reading"], x["value"]) for x in r["readings"]] or [("", r["value"])] for r in counted]
-        plain = [b for b in members if not b.get("parts") and _holds_a_story(b, grade, first)]
-        if plain:                       # its stories aren't drawn: only the count typed covers the whole building
+        elif plain:                     # its stories aren't drawn: only the count typed covers the whole building
             if stated is None:
-                return _missing("stories", stop("joined_part_stories", part=plain[0]["id"]))
+                return _missing("stories", stop("part_stories_not_drawn", part=plain[0]["id"]))
             readings.append((_both(words, WHOLE), stated, {}))
             for picks in itertools.product(*choices):
-                if max(v for _, v in picks) > stated:          # a part has more floors than the count typed
+                if max(v for _, v in picks) > stated:          # a part's floor blocks count more than typed
                     readings.append((_both(words, *[w for w, _ in picks]), max(v for _, v in picks), {}))
-                    questions.append("the count typed disagrees with the floors drawn: a question (story)")
-            continue
-        for picks in itertools.product(*choices):
-            readings.append((_both(words, *[w for w, _ in picks]), max(v for _, v in picks), {}))
+                    questions.append("the count typed for the whole building is fewer than the floor blocks drawn "
+                                     "on a part of it: a question (story)")
+        else:
+            for picks in itertools.product(*choices):
+                readings.append((_both(words, *[w for w, _ in picks]), max(v for _, v in picks), {}))
     if stated is not None and not any("as stated by the architect" in w for w, _, _ in readings):
         readings.append(("as stated by the architect", stated, {}))      # the typed count: a reading beside them
         if any(v != stated for _, v, _ in readings):
@@ -638,8 +649,10 @@ def _stories_over(assemblies, grade, why_grade, stated) -> dict:
     values = {v for _, v, _ in readings}
     if len(assemblies) > 1 and len({max(v for w, v, _ in readings if w.startswith(a)) for a, _ in assemblies}) > 1:
         questions.append(ACCESSORY)
-    return _decide("stories", readings, "the stories of the building counted from the model (floor blocks or stacked "
-                   "solids; the count typed is a reading beside them)", list(dict.fromkeys(objects)),
+    how = ("the stories of the building counted from its floor blocks (a part drawn as a plain solid takes the count "
+           "typed for the whole building; the count typed is a reading beside them)" if any_counted else
+           "stated by the architect (not measured from the model: no floor blocks are drawn)")
+    return _decide("stories", readings, how, list(dict.fromkeys(objects)),
                    "; ".join(dict.fromkeys(questions)) if len(values) > 1 else "")
 
 
@@ -800,7 +813,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # the stories come from the drawing over the same assemblies as the height, the typed count only a reading
     # beside them, and every stop that applies to the height applies to them.
     why_which = why_building or why_main
-    countable = any(b.get("parts") for b in buildings) or bool(why_building and site.get("buildings"))
+    countable = bool(buildings) or bool(why_building and site.get("buildings"))   # every drawn part is checked
     if countable:
         out["stories"] = (_missing("stories", why_which) if why_which else
                           _stories_over(_assemblies(main, others), grade, why_grade, facts.get("stories")))
