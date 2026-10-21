@@ -18,6 +18,8 @@ def on_layer(full_path, layer):
     return full_path == layer or full_path.startswith(layer + "::")
 
 
+CONTEXT = "Gordium::Context"            # the context map (neighbouring parcels, streets, notes): drawing only
+CONTEXT_KEY = "gordium_context"         # on each context object: the endpoints.yaml source it was drawn from
 HOLDING_LAYER = "Gordium::Replaced (Cancel restores)"   # objects a start box replaced, until Draw (BoxSession)
 HELD_FROM = "gordium_held_from"                          # on each held object: the layer it came from
 ADDED_BY = "gordium_added"                               # on each object a start box drew: its session, until Draw
@@ -49,6 +51,8 @@ def classify(full_path, kind, holds_building=False):
     a block on the building layer, or a block holding building objects wherever it is placed, and any other
     geometry on the building layer, are problems, so the checker says NEEDS REVIEW."""
     if on_layer(full_path, HOLDING_LAYER):           # held by an open start box: never measured or sent
+        return None
+    if on_layer(full_path, CONTEXT):                 # the neighbourhood drawn for context: never measured or sent
         return None
     if on_layer(full_path, MASSING):
         full_path = LAYERS["building"]
@@ -909,3 +913,61 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         guide = w["guide_ring"]
     saved_ui["lookup_snapshot"] = w.get("snapshot")
     return facts, saved_ui, guide
+
+
+# ---- the context map (design_checker.context_box): the neighbourhood around a looked-up lot ---------------------
+CONTEXT_LIMIT_S = 20                    # the whole fetch (three map requests, about 1 s); the Rhino side stops it then
+CONTEXT_ENTRY = "context"               # the document string holding the context's snapshot (records, never data)
+NO_CONTEXT = ("No neighbourhood to show: it is drawn around a lot the start box looked up (GordiumStart, type the "
+              "address, Look up, Draw).")
+
+
+def context_command(python, frame, fixture=None):
+    """The context_box command for a lookup's saved frame (the box's `lookup_frame`), or None when there is no
+    looked-up lot to centre it on (the sample lot, a drawn or picked lot, a file saved before the context map)."""
+    frame = frame or {}
+    origin, shift = frame.get("origin_epsg2261_us_survey_ft"), frame.get("shift_ft")
+    if not origin or not shift or frame.get("rotation_deg") is None:
+        return None
+    args = [python, "-m", "design_checker.context_box", "--origin", repr(float(origin[0])), repr(float(origin[1])),
+            "--rotation", repr(float(frame["rotation_deg"])), "--shift", repr(float(shift[0])), repr(float(shift[1]))]
+    if frame.get("parcel_id"):
+        args += ["--parcel", str(frame["parcel_id"])]
+    return args + (["--fixture", fixture] if fixture else [])
+
+
+def context_frame(facts, saved_ui):
+    """The lookup frame to draw the neighbourhood around, only while the lot in the model is the one that lookup drew
+    (still its `replaceable_lot`): a lot the architect drew, picked or surveyed, or one a later lookup couldn't
+    place (no frame), has no neighbourhood drawn around an earlier address."""
+    saved_ui = saved_ui or {}
+    lot = (facts or {}).get("lot_id")
+    frame = saved_ui.get("lookup_frame")
+    return frame if frame and lot and lot == saved_ui.get("replaceable_lot") else None
+
+
+def context_objects(payload):
+    """What may be written into the .3dm: objects from a source whose store is raw (the payload's layers say which),
+    and Gordium's own marks (frame, north arrow, scale bar, credits). Anything else is never written, whatever the
+    payload's object list holds."""
+    payload = payload or {}
+    raw = set(s.get("source") for s in (payload.get("layers") or {}).values() if s.get("store") == "raw")
+    return [o for o in payload.get("objects") or []
+            if (o.get("source") in raw or o.get("source") == "gordium") and on_layer(o.get("layer") or "", CONTEXT)]
+
+
+def context_guides(payload):
+    """What is only shown on screen (never written): every guide, from a source that may not be kept."""
+    return [g.get("points") for g in (payload or {}).get("guides") or [] if len(g.get("points") or []) > 1]
+
+
+def context_says(payload):
+    """The line after the neighbourhood is drawn (or why it isn't)."""
+    payload = payload or {}
+    if payload.get("status") not in ("found",):
+        return payload.get("message") or "Couldn't fetch the neighbourhood: the lot is drawn without it."
+    n = payload.get("counts") or {}
+    kept = "%d neighbouring parcels and %d street lines (State tax map and streets, kept in this file)" % (
+        n.get("parcels", 0), n.get("streets", 0))
+    live = "; %d building footprints shown live (not saved)" % n["buildings"] if n.get("buildings") else ""
+    return "Neighbourhood drawn: " + kept + live + "." + (" " + payload["message"] if payload.get("message") else "")
