@@ -224,3 +224,26 @@ def test_a_floating_panel_is_placed_once_never_on_every_check():
     assert fits == [host]                                    # placed once; the second check leaves it where it is
     assert logic.place_panel_now(None) and not logic.place_panel_now("floating")
     assert not logic.place_panel_now("docked")
+
+
+def test_the_plugin_has_no_two_top_level_definitions_with_one_name():
+    """enter-needs review round 1: a second `_yes_no(prompt)` replaced the existing `_yes_no(prompt, current)`, so
+    Edit site…'s "Corner lot?" prompt raised TypeError. No top-level name is defined twice, and every call to one of
+    the plugin's own top-level functions passes a number of arguments its definition accepts."""
+    import ast
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    defs = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
+    names = [n.name for n in defs]
+    assert len(names) == len(set(names)), sorted(n for n in set(names) if names.count(n) > 1)
+    funcs = {n.name: n for n in defs if isinstance(n, ast.FunctionDef)}
+    bad = []
+    for call in (c for c in ast.walk(tree) if isinstance(c, ast.Call) and isinstance(c.func, ast.Name)):
+        f = funcs.get(call.func.id)
+        if f is None or f.args.vararg or any(isinstance(a, ast.Starred) for a in call.args) or call.keywords:
+            continue
+        most = len(f.args.args)
+        least = most - len(f.args.defaults)
+        if not least <= len(call.args) <= most:
+            bad.append((call.func.id, call.lineno, len(call.args), (least, most)))
+    assert not bad, bad
