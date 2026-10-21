@@ -1,0 +1,6 @@
+# What the Rhino start box offers.
+#
+# offer_ai_drafted_zones: the zones whose rules are only the AI's drafts (5_zoning_rules/drafted/, stage 1 of drafting,
+#   2026-10-20; checked by code, not yet verified by a person) are offered in the zone list only when this is true,
+#   each labeled "(draft)". Off until Ben turns it on. A zone with a hand-written rulebook (R-1b) is always offered.
+offer_ai_drafted_zones: false

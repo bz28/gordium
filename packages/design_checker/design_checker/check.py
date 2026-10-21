@@ -23,7 +23,8 @@ from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, Context, load, outcome, rulebook_for
+from rule_format.rulebook import (MEASURE_KINDS, REPO, Context, is_ai_drafted, load, outcome, rulebook_for,
+                                  zone_rules)
 
 COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # Facts about the inside of a building (rooms, parking spaces). This phase checks the outside only: a rule waiting
@@ -366,7 +367,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         path = Path(tmp) / "project.yaml"
         path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True), encoding="utf-8")
         t = tables(path)              # refuses a project or rulebook that fails its checks (ValueError)
-    rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
+    rules = zone_rules(REPO / facts["jurisdiction"], facts["zone"])     # a drafted district: + drafted/general.yaml
     by_id = {r["id"]: r for r in rules}
     every = [_why(dict(zip(COLUMNS, r)), by_id, measured) for r in t["output"]]
     def checks(rule):                   # a flag has no check
@@ -568,7 +569,7 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     site = {**read_site(Path(model_path), facts), "buildings": []}
     if site.get("problems"):
         return {"floors": [], "notes": list(site["problems"])}
-    rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
+    rules = zone_rules(REPO / facts["jurisdiction"], facts["zone"])     # a drafted district: + drafted/general.yaml
     # spot grades with no building yet: the grade plane is their average (as the envelope draws it); then drawn on it
     # (the spots themselves aren't at the new building's walls: it's drawn on their plane, and the check that follows
     # judges the spots as they are)
@@ -621,11 +622,28 @@ def sample_site() -> dict:
             "facts": {k: v for k, v in facts.items() if k in keep}}
 
 
-def options(jurisdiction: str) -> dict:
-    """What the confirm dialog offers: the zones that have a rulebook, and the city's use names."""
+SETTINGS = Path(__file__).with_name("settings.yaml")
+
+
+def offer_ai_drafted_zones() -> bool:
+    """Ben's switch (settings.yaml): are the zones with only AI-drafted rules offered in the start box? Off unless it
+    says exactly true."""
+    return (load(SETTINGS) or {}).get("offer_ai_drafted_zones") is True
+
+
+def options(jurisdiction: str, offer_drafted: bool | None = None) -> dict:
+    """What the confirm dialog offers: the zones that have a rulebook, each with the label the list shows; the zone
+    to pre-select; and the city's use names. A zone with only AI-drafted rules is offered only behind Ben's setting
+    (offer_ai_drafted_zones, default off), labeled "R-2a (draft)"; "general" (the drafted rules for every district) is
+    never a zone. The pre-selected zone is the looked-up one, else the sample project's (106 Ithaca Rd, R-1b), when
+    offered; never the first in alphabetical order (with drafts on, that was R-1a): None leaves it to the architect."""
     j = REPO / jurisdiction
+    offer = offer_ai_drafted_zones() if offer_drafted is None else offer_drafted
     zones = sorted({p.stem for folder in (j / "5_zoning_rules", j / "5_zoning_rules/drafted") if folder.is_dir()
-                    for p in folder.glob("*.yaml") if rulebook_for(j, p.stem)})
+                    for p in folder.glob("*.yaml") if rulebook_for(j, p.stem) and (offer or not is_ai_drafted(j, p.stem))})
+    labels = {z: f"{z} (draft)" if is_ai_drafted(j, z) else z for z in zones}
+    sample_zone = (load_facts(SAMPLE / "spreadsheet_design_model_facts.yaml") or {}).get("zone")
     uses_file = j / "4_term_definitions/uses.yaml"
     uses = load(uses_file) or {} if uses_file.exists() else {}
-    return {"zones": zones, "uses": {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}}
+    return {"zones": zones, "labels": labels, "default_zone": sample_zone if sample_zone in zones else None,
+            "uses": {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}}

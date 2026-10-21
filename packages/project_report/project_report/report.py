@@ -5,8 +5,9 @@ The architects check a design with a two-tab workbook (test_data/answer_keys/...
 Requirement · Table limit · Proposed · Units · Comparison · PDF page · Error, where "Error" holds PASS/FAIL).
 This module fills in the same two tabs for any project file, from the rulebook for its zone. Plain code, no AI.
 
-- Which rows: every rule in the zone's rulebook (`rulebook_for`: hand-drafted first, else AI-drafted). Rules
-  that apply (or whose applicability can't be decided) come first; rules that don't apply are listed after,
+- Which rows: every rule in the zone's rulebook (`rulebook_for`: hand-drafted first, else AI-drafted, which also brings
+  the AI-drafted general.yaml, the rules for every district: `zone_rulebooks`). Rules that apply (or whose
+  applicability can't be decided) come first; rules that don't apply are listed after,
   under their own heading, so nothing is silently dropped.
 - The result of every row comes from `rule_format.outcome()` and nothing else.
 - "Table limit" and "Proposed" are read off the rule's own formula: each comparison of a measure against an
@@ -29,7 +30,7 @@ from rule_export.workbook import FONT, INK, citer, page_link, title, write_block
 from rule_format import formula
 from rule_format.formula import EvaluationError, MissingMeasure
 from rule_format.rulebook import (MEASURE_KINDS, MEASURES_FILE, REPO, Context, load, outcome, rulebook_file_problems,
-                                  rulebook_for, term_file_problems)
+                                  rulebook_for, term_file_problems, zone_rulebooks)
 
 # The architects' tab names and headers, copied from their file, in their order.
 INPUTS_TAB, OUTPUT_TAB = "Inputs", "Output"
@@ -256,7 +257,7 @@ def tables(project_path: Path) -> dict:
     """The two tabs as plain rows (so tests check content without Excel)."""
     project = load_project(project_path)
     j = REPO / project["jurisdiction"]
-    book_path = rulebook_for(j, project["zone"])
+    book_paths = zone_rulebooks(j, project["zone"])     # an AI-drafted district also gets drafted/general.yaml
     # Only a jurisdiction and rulebook that pass the same checks as `python -m rule_format` give results,
     # so a rule edited and never checked can't give PASS (approval is deferred: code is the last defense).
     try:
@@ -264,12 +265,12 @@ def tables(project_path: Path) -> dict:
     except Exception as e:
         raise ValueError(f"{project['jurisdiction']}: can't load its sources ({type(e).__name__}: {e})") from e
     problems = ctx.problems + [f"{p.name}: {x}" for p, found in term_file_problems(j, ctx).items() for x in found] \
-        + rulebook_file_problems(book_path, ctx)
+        + [x for b in book_paths for x in rulebook_file_problems(b, ctx)]
     if problems:
-        shown = book_path.relative_to(REPO) if book_path.is_relative_to(REPO) else book_path
+        shown = ", ".join(str(b.relative_to(REPO) if b.is_relative_to(REPO) else b) for b in book_paths)
         raise ValueError(f"{shown} doesn't pass the rule checks (python -m rule_format), so no report: "
                          + "; ".join(problems))
-    book = load(book_path)
+    books = [(b.relative_to(j / "5_zoning_rules").as_posix(), load(b) or {}) for b in book_paths]
     uses_file = j / "4_term_definitions/uses.yaml"
     uses = (load(uses_file) or {}) if uses_file.exists() else {}
     use_names = {k: v.get("name", k) for k, v in uses.items() if isinstance(v, dict)}
@@ -277,7 +278,6 @@ def tables(project_path: Path) -> dict:
     values = {k: m["value"] for k, m in project["measurements"].items()}
     allowed = {"use": ctx.uses}                       # the same list the checker and the tests use
     kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in allowed.items()}
-    which = book_path.relative_to(j / "5_zoning_rules").as_posix()
     cite = citer(j, documents)
 
     inputs = [[k.replace("_", " ").capitalize(), use_names.get(m["value"], m["value"]),
@@ -285,7 +285,7 @@ def tables(project_path: Path) -> dict:
               for k, m in project["measurements"].items()]
 
     rows, links, params, param_links, later = [], [], [], [], []
-    for rule in book.get("rules") or []:
+    for which, rule in ((w, r) for w, book in books for r in book.get("rules") or []):
         result = outcome(rule, values, allowed)
         sources = rule.get("sources") or [{}]
         first = sources[0]

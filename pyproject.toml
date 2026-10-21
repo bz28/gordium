@@ -30,6 +30,7 @@ include = ["rule_format*", "document_extraction*", "section_labeling*", "rule_dr
 rule_format = ["*.yaml"]
 section_labeling = ["*.yaml"]
 rule_drafting = ["*.yaml"]
+design_checker = ["*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["packages"]

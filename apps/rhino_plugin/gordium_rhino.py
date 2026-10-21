@@ -184,15 +184,16 @@ def _find(doc, object_id):
         return None
 
 
-def suggested_facts(doc, zones):
+def suggested_facts(doc, zones, default_zone=None):
     """Prefilled lot facts, for the architect to confirm: the largest closed outline on the Site layer as the
     lot, its lowest line on the screen (the bottom of the Top view) as the street side, the corner-lot question left
     unanswered (never guessed: the yards wait for the answer; the box asks it), flat ground at the lowest point
     of the buildings, the lot not from a survey (the safe answer:
-    lot size and coverage wait for one), the first zone with rules, a detached one-family house, and the largest
+    lot size and coverage wait for one), the looked-up or sample zone (`default_zone`, never the first in
+    alphabetical order: none leaves it to the architect), a detached one-family house, and the largest
     solid as the main building. Every one is shown in the dialog; nothing is used until the architect says OK.
     In feet, whatever the model's units."""
-    facts = {"jurisdiction": JURISDICTION, "zone": zones[0] if zones else None, "use": "one_family_detached",
+    facts = {"jurisdiction": JURISDICTION, "zone": default_zone if default_zone in zones else None, "use": "one_family_detached",
              "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}   # corner lot: never guessed
     lots, buildings, _ = _sorted_objects(doc)
     if lots:
@@ -1109,7 +1110,9 @@ def _pick(doc, prompt, candidates, kind, geometry=None):
 
 
 def _ask_zone(options, current):
-    return Rhino.Input.RhinoGet.GetString("Zone (" + ", ".join(options["zones"]) + ")", True, current or "")
+    labels = options.get("labels") or {}
+    return Rhino.Input.RhinoGet.GetString("Zone (" + ", ".join(labels.get(z, z) for z in options["zones"]) + ")", True,
+                                          current or "")
 
 
 def _change_facts(doc, facts, options):
@@ -1183,7 +1186,7 @@ def edit_facts():
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
     try:
-        facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options, "check")
+        facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"], options.get("default_zone"))), options, "check")
     finally:                            # the editing outline and names never stay on screen
         o = overlay()
         o.confirm, o.labels = None, []
@@ -1536,7 +1539,7 @@ def gordium_check():
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
     if logic.missing(facts):
-        facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"])), options)
+        facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"], options.get("default_zone"))), options)
         if facts is None:               # closed or Esc: nothing saved, nothing checked
             Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")
             return None
@@ -1618,14 +1621,14 @@ def gordium_start():
         _add_lot(doc, sample)
         _save_ui_state(doc, dict(_ui_state(doc), from_sample=True))   # its facts are the sample project's
         facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
-                                       suggested_facts(doc, options["zones"]))
+                                       suggested_facts(doc, options["zones"], options.get("default_zone")))
         facts["lot_id"] = str(_lot_candidates(doc)[0].Id)
     else:                               # the architect's own lot: their saved facts, else the suggestions
         try:
             saved = current_facts(doc)
         except ValueError:
             saved = {}
-        facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
+        facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"], options.get("default_zone")))
     path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
     export(doc, path)
     facts = confirm(doc, facts, options, "start")

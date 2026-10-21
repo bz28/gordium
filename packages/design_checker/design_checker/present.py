@@ -20,6 +20,7 @@ from pathlib import Path
 from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
 from rule_format.rulebook import MEASURE_KINDS, REPO, load, read_jsonl
+from design_checker.gaps import zone_gaps
 
 COMPLIES, FAILS, REVIEW, NOT_CHECKED = "complies", "does_not_comply", "needs_review", "not_checked"
 MARK = {FAILS: "✕", REVIEW: "?", COMPLIES: "✓", NOT_CHECKED: "–"}
@@ -832,6 +833,15 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "group": "not_covered", "status": NOT_CHECKED, "mark": "", "proposed": "", "required": "",
                       "margin": "", "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
                       "hint": None, "reason": "Not encoded in this rulebook yet: check by hand",
+                      "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
+                                 "scope": "", "precision": "", "at_limit": None}})
+    # what this zone's own rulebook doesn't check (a chart row no rule cites; what the drafting run couldn't draft):
+    # listed, never silently absent
+    for g in zone_gaps(j, facts.get("zone") or "", list(rules_by_id.values())):
+        items.append({"id": "gap." + g["id"], "rule": None, "name": f"{g['section']} {g['name']}",
+                      "group": "not_covered", "status": NOT_CHECKED, "mark": "", "proposed": "", "required": "",
+                      "margin": "", "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
+                      "hint": None, "reason": g["why"],
                       "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
                                  "scope": "", "precision": "", "at_limit": None}})
     return {"items": items, "summary": summary(items), "state": state(items),

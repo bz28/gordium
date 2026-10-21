@@ -437,12 +437,14 @@ def start_box(state, options, mode):
     address.Text = state.get("address") or ""
     address.Width = 300
     zone = ef.DropDown()
+    labels = options.get("labels") or {}
+    zone_of = {labels.get(z, z): z for z in options["zones"]}       # the list shows "R-2a (draft)"; facts keep "R-2a"
     for z in options["zones"]:
-        zone.Items.Add(z)
-    zone.SelectedValue = next((x for x in zone.Items if x.Text == state.get("zone")), None)
-    if zone.SelectedIndex < 0 and zone.Items.Count:
-        zone.SelectedIndex = 0
-    first_zone = zone.SelectedValue.Text if zone.SelectedValue else None
+        zone.Items.Add(labels.get(z, z))
+    # the stated zone, else the looked-up or sample one; never the first in the list (that was alphabetical: R-1a)
+    wanted = state.get("zone") if state.get("zone") in options["zones"] else options.get("default_zone")
+    zone.SelectedValue = next((x for x in zone.Items if zone_of.get(x.Text) == wanted), None)
+    first_zone = zone_of.get(zone.SelectedValue.Text) if zone.SelectedValue else None
     confirm = ef.CheckBox()
     confirm.Checked = bool(state.get("district_confirmed"))
     use = ef.DropDown()
@@ -459,7 +461,7 @@ def start_box(state, options, mode):
     first = {"address": address.Text, "use": use.SelectedIndex, "corner": corner.SelectedIndex}
 
     def keep():                       # what the fields say now, back into `state`; what changed is the architect's
-        z = zone.SelectedValue.Text if zone.SelectedValue else None
+        z = zone_of.get(zone.SelectedValue.Text) if zone.SelectedValue else None
         if buffer is not None:
             state["design_buffer"] = buffer.Text
         state.update(address=address.Text, zone=z, district_confirmed=bool(confirm.Checked),

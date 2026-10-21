@@ -101,9 +101,39 @@ def rulebook_paths(folder) -> list[Path]:
 def rulebook_for(jurisdiction, zone: str) -> Path | None:
     """The rulebook that holds a zone's rules: the hand-drafted 5_zoning_rules/<zone>.yaml when it exists,
     else the AI-drafted 5_zoning_rules/drafted/<zone>.yaml, else None. The one definition, used by the
-    project report and the answer-key test alike."""
+    project report and the answer-key test alike. "general" (drafted/general.yaml, the rules for every district)
+    is never a zone: None."""
+    if zone == GENERAL:
+        return None
     folder = Path(jurisdiction) / "5_zoning_rules"
     return next((p for p in (folder / f"{zone}.yaml", folder / "drafted" / f"{zone}.yaml") if p.is_file()), None)
+
+
+GENERAL = "general"     # the AI-drafted rules for every district (drafted/general.yaml): never a zone of its own
+
+
+def zone_rulebooks(jurisdiction, zone: str) -> list[Path]:
+    """Every rulebook file whose rules apply to a zone: its rulebook (`rulebook_for`), and, when that is the
+    AI-drafted one, the AI-drafted drafted/general.yaml too: the drafting script writes a law piece's rules for every
+    district there (accessory-building distances, eaves), so a drafted district checked without it would silently
+    drop them (a shed 4 ft from an R-1 side line shown as complying). A hand rulebook carries its own (R-1b), so
+    general.yaml isn't added to it. Empty when the zone has no rulebook; "general" itself is never a zone."""
+    book = rulebook_for(jurisdiction, zone)
+    if book is None:
+        return []
+    general = Path(jurisdiction) / "5_zoning_rules/drafted" / f"{GENERAL}.yaml"
+    return [book] + ([general] if book.parent.name == "drafted" and general.is_file() else [])
+
+
+def is_ai_drafted(jurisdiction, zone: str) -> bool:
+    """The zone's rules are the AI's drafts (no hand rulebook)."""
+    book = rulebook_for(jurisdiction, zone)
+    return book is not None and book.parent.name == "drafted"
+
+
+def zone_rules(jurisdiction, zone: str) -> list[dict]:
+    """The rules of every file in `zone_rulebooks`, in that order."""
+    return [r for p in zone_rulebooks(jurisdiction, zone) for r in (load(p) or {}).get("rules") or []]
 
 
 def utf8_console() -> None:
