@@ -264,12 +264,14 @@ HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_part
            "worker", "worker_sends", "worker_lines")
 
 
-def sweep(leftovers, state=None):
+def sweep(leftovers, state=None, release=None):
     """Undo everything an earlier copy of the plugin left attached to Rhino (event handlers, its drawing, its
     panel, its checker): `leftovers` maps a name to its undo, kept outside the plugin's state so clearing the
     state can't lose it. Each undo runs even if another fails; returns how many ran. Given the plugin's `state`,
-    its handles to those things are forgotten too (so it never says a detached hook is attached); what the
-    architect asked for (live mode on, the choices) stays, for the new copy to put back."""
+    its handles to those things are forgotten too (so it never says a detached hook is attached), each RELEASED
+    first through `release(key, value)`: a copy from before LEFTOVERS existed recorded nothing there, so without
+    this its handlers, drawing, panel and checker would stay attached with nothing left to undo them (review
+    round 2). Releasing twice is harmless. What the architect asked for (live mode on, the choices) stays."""
     n = 0
     for key in list(leftovers):
         undo = leftovers.pop(key, None)
@@ -279,6 +281,11 @@ def sweep(leftovers, state=None):
         except Exception:                      # noqa: BLE001  (already gone: nothing to undo)
             pass
     for key in HANDLES if state is not None else ():
+        if key in state and release is not None:
+            try:
+                release(key, state[key])
+            except Exception:                  # noqa: BLE001  (already gone: nothing to release)
+                pass
         state.pop(key, None)
     return n
 
