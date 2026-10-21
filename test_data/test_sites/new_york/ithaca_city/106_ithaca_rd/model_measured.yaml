@@ -27,7 +27,7 @@ measurements:
     from: 'measured from model.3dm: from the ground level (grade plane) to the top of the roof (a flat roof, to its highest level)'
   stories:
     value: 3.0
-    from: 'stated by the architect (not measured from the model: no floor blocks are drawn) (the main building only; as stated by the architect) (lot facts)'
+    from: 'stated by the architect (not measured from the model: no floor blocks are drawn) (lot facts)'
   front_yard:
     value: null
     from: 'not measured: a building isn''t inside the lot'
