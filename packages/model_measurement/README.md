@@ -174,7 +174,7 @@ Every reason the code gives today comes from the table:
   finished ground" (height and stories).
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
   are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
-  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces".
+  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces"; "enter the dwelling units, the rooms let for profit, and whether it is a conversion" (R-3a chart note 7: the lot size grows with them).
 - **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
   Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked on them (a podium, a bulkhead, a
   roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
