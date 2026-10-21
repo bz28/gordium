@@ -51,3 +51,40 @@ def test_the_panel_asks_it_yes_or_no_and_a_skipped_answer_stays_unset():
     assert rhino_logic.update_counts({}, {"abuts_r1_district": False}) == {"abuts_r1_district": False}
     assert rhino_logic.update_counts({"abuts_r1_district": True}, {"abuts_r1_district": None}) == \
         {"abuts_r1_district": True}
+
+
+# every case a "no" must rule out (#20 review round 1, P1): R-1 land touching even at a corner, and across a street,
+# an alley, a creek or other waterway, a railroad or other right-of-way (§325-9B(1)(j): "a street or waterway")
+CASES = ("corner", "street", "alley", "creek", "waterway", "railroad", "right-of-way")
+
+
+def test_every_place_the_question_is_asked_names_every_case_a_no_must_rule_out():
+    """A truthful "no" for R-1 land across a creek or touching at a corner dropped §325-19E while R-3a's own limits
+    passed. The prompt, the measures.yaml meaning, the stop and the recorded reading (why_open) each name every
+    case, so "no" is right under every reading of open question 1."""
+    import yaml
+    from model_measurement.stops import STOPS
+    from rule_format.rulebook import MEASURES_FILE, REPO, load
+    rule = next(r for r in load(REPO / "regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-3a.yaml")["rules"]
+                if r["id"] == RULE)
+    places = {"prompt": rhino_logic.STATED_FACTS["abuts_r1_district"][0],
+              "measures.yaml": yaml.safe_load(MEASURES_FILE.read_text(encoding="utf-8"))["abuts_r1_district"]["meaning"],
+              "stop": STOPS["no_abuts_r1"],
+              "why_open": " ".join(rule["research"][0]["why_open"].split())}
+    for where, text in places.items():
+        missing = [c for c in CASES if c not in text]
+        assert not missing, (where, missing, text)
+
+
+def test_the_rules_notes_and_the_architects_page_say_the_architect_states_it():
+    """#20 review round 1, P2: the notes (exported to the rules workbook) and §5.5/§5.6 still said Gordium doesn't
+    know the neighbouring zoning and always sends the lot to review."""
+    from rule_format.rulebook import REPO, load
+    rule = next(r for r in load(REPO / "regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-3a.yaml")["rules"]
+                if r["id"] == RULE)
+    assert "abuts_r1_district" in rule["notes"] and "doesn't know the zoning" not in rule["notes"]
+    doc = (REPO / "docs/questions_for_architects.md").read_text(encoding="utf-8")
+    for tag in ("[R-3a.abutting_r1#1]", "[R-3a.abutting_r1#2]"):
+        section = doc.split(tag, 1)[1].split("\n### ", 1)[0]
+        assert "abuts_r1_district" in section and "doesn't know the zoning" not in section, tag
+

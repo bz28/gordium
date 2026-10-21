@@ -133,7 +133,7 @@ STATED_FACTS = {
     "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
     "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
                    "whether it is a conversion"),
-    "abuts_r1_district": ("Does the lot abut R-1a or R-1b land, sharing a lot line or across a street? (§325-19E)",
+    "abuts_r1_district": ("Is any R-1a or R-1b land touching this lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it? (§325-19E)",
                           "yes_no", "whether the lot abuts R-1 land"),
 }
 
