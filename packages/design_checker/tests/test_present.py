@@ -919,7 +919,8 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
     drawn = r"(?: \(" + one + r" as drawn\))?"
     length = one + drawn
     tall = r"(?:; " + one + r" if it stays \d+'-\d+(?: \d/\d)?\" tall \(the building height rule's other way raises this yard\))?"
-    ways = {"move": re.compile(r"move the building " + one + r" farther from that lot line" + drawn + tall),
+    ways = {"move": re.compile(r"(move the building|make this yard) " + one +
+                               r" (?:farther from that lot line|deeper, keeping the other yards)" + drawn + tall),
             "lower": re.compile(r"lower the building " + length),
             "deeper": re.compile(r"make the (front yard|rear yard|side yard) " + length + r" deeper, keeping the other yards")}
     tried = {True: 0, False: 0}
@@ -940,17 +941,20 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
             for part in body[:-1].split(", or "):
                 kind, m = next(((kd, w.fullmatch(part)) for kd, w in ways.items() if w.fullmatch(part)), (None, None))
                 assert m, (k, name, part)
+                whole = kind == "move" and m.group(1) == "move the building"   # else only that wall pulled in
                 yard, gap_t, drawn_t = (m.group(1), m.group(2), m.group(3)) if kind == "deeper" else \
-                    (None, m.group(1), m.group(2))
-                if kind == "move" and m.group(3):              # while it stays this tall: its own figure too
-                    tall_gap = _feet(m.group(3))
+                    (None, m.group(2), m.group(3)) if kind == "move" else (None, m.group(1), m.group(2))
+                if kind == "move" and m.group(4):              # while it stays this tall: its own figure too
+                    tall_gap = _feet(m.group(4))
                     assert tall_gap > _feet(gap_t), (k, name, hint)
                     sign, at = pull[name]
                     c = [x0, y0, x1, y1]
                     c[at] += sign * _feet(gap_t)
+                    if whole:
+                        c[at ^ 2] += sign * _feet(gap_t)
                     lowered = {j["name"]: j for j in check_site(_plot(box(*c, 0, 35), lot_=plain), facts)["view"]["items"]}
                     assert lowered[name]["status"] == present.COMPLIES, (k, name, hint, lowered[name]["reason"])
-                    gap_t = m.group(3)                         # and with the height kept: the larger figure
+                    gap_t = m.group(4)                         # and with the height kept: the larger figure
                     kinds.add(("tall", True))
                 if surveyed:                                   # a survey: one number, said plainly
                     assert head == "To comply" and drawn_t is None, (k, name, hint)
@@ -963,31 +967,49 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
                     side = "Side yard, West" if x0 <= 50 - x1 else "Side yard, East"    # the smaller one
                     sign, at = pull[name if kind == "move" else side if yard == "side yard" else yard.capitalize()]
                     c[at] += sign * gap
+                    if whole:                                  # the whole building: the opposite yard shrinks
+                        c[at ^ 2] += sign * gap
                 r2 = check_site(_plot(box(*c, 0, hh), lot_=plain), facts)
-                after = {j["name"]: j for j in r2["view"]["items"]}[name]
+                every = {j["name"]: j for j in r2["view"]["items"]}
+                after = every[name]
                 assert after["status"] == present.COMPLIES, (k, name, part, after["status"], after["reason"])
+                if kind == "move":                             # review round 3, F2: and never at the opposite
+                    opp = {0: "Side yard, East", 2: "Side yard, West", 1: "Rear yard", 3: "Front yard"}[pull[name][1]]
+                    assert present.RANK[every[opp]["status"]] >= present.RANK[rows[opp]["status"]], \
+                        (k, name, part, opp, rows[opp]["status"], every[opp]["status"])
+                    kinds.add(("keep" if not whole else "whole", True))
                 tried[surveyed] += 1
                 kinds.add((kind, bool(drawn_t)))
     assert tried[True] >= 15 and tried[False] >= 15, tried          # both kinds of lot really exercised
-    assert {("move", True), ("move", False), ("lower", False), ("deeper", False), ("tall", True)} <= kinds, kinds
+    assert {("move", True), ("move", False), ("lower", False), ("deeper", False), ("tall", True), ("keep", True),
+            ("whole", True)} <= kinds, kinds
     # the architect's case, word for word (the coordinator's wording): a west side yard 2'-11 3/8" short as drawn
     words = {}
     for surveyed in (False, True):
         for b in ((7.053, 26, 38, 72, 30), (16, 20, 34, 66, 36.5)):
             r = check_site(_plot(box(*b[:4], 0, b[4]), lot_=plain), {**FACTS, "jurisdiction": CITY, "lot_surveyed": surveyed})
             words.update({(surveyed, b[4], i["name"]): i.get("hint") for i in r["view"]["items"]})
-    assert words[(False, 30, "Side yard, West")] == ("To comply whatever the survey shows: move the building 4'-11 3/8\" "
-                                                     "farther from that lot line (2'-11 3/8\" as drawn).")
-    assert words[(True, 30, "Side yard, West")] == "To comply: move the building 2'-11 3/8\" farther from that lot line."
-    assert words[(False, 30, "Front yard")] == ("To comply whatever the survey shows: move the building 1'-0\" farther "
-                                                "from that lot line.")       # in review as drawn: what makes it comply
+    # this 31 ft house has 19 ft between its side yards, which need 20: moving it west would take the east yard
+    # under its minimum, so the advice keeps the other yards (review round 3, F2)
+    assert words[(False, 30, "Side yard, West")] == ("To comply whatever the survey shows: make this yard 4'-11 3/8\" "
+                                                     "deeper, keeping the other yards (2'-11 3/8\" as drawn).")
+    assert words[(True, 30, "Side yard, West")] == "To comply: make this yard 2'-11 3/8\" deeper, keeping the other yards."
+    # a 26 ft house, the east yard 17 ft: room to move it, so the coordinator's words, exactly
+    for surveyed, want in ((False, "To comply whatever the survey shows: move the building 4'-11 3/8\" farther from that "
+                                   "lot line (2'-11 3/8\" as drawn)."),
+                           (True, "To comply: move the building 2'-11 3/8\" farther from that lot line.")):
+        r = check_site(_plot(box(7.053, 26, 33, 72, 0, 30), lot_=plain), {**FACTS, "jurisdiction": CITY, "lot_surveyed": surveyed})
+        assert next(i for i in r["view"]["items"] if i["name"] == "Side yard, West")["hint"] == want
+    assert words[(False, 30, "Front yard")] == ("To comply whatever the survey shows: make this yard 1'-0\" deeper, "
+                                                "keeping the other yards.")  # in review as drawn: what makes it comply
+    # (the rear yard, 28'-0" against up to 26'-0" at the tax map's worst, has no foot to give)
     assert words[(False, 36.5, "Building height")] == (
         "To comply whatever the survey shows: lower the building 1'-6\", or make the front yard 8'-6\" (6'-6\" as drawn) "
         "deeper, keeping the other yards.")
     assert words[(True, 36.5, "Building height")] == ("To comply: lower the building 1'-6\", or make the front yard 6'-6\" "
                                                       "deeper, keeping the other yards.")
     assert words[(False, 36.5, "Front yard")] == (
-        "To comply whatever the survey shows: move the building 7'-0\" farther from that lot line (5'-0\" as drawn); "
+        "To comply whatever the survey shows: make this yard 7'-0\" deeper, keeping the other yards (5'-0\" as drawn); "
         "8'-6\" if it stays 36'-6\" tall (the building height rule's other way raises this yard).")
     assert words[(True, 36.5, "Front yard")] == (
         "To comply: move the building 5'-0\" farther from that lot line; 6'-6\" if it stays 36'-6\" tall (the building "
@@ -1314,19 +1336,24 @@ def test_every_to_comply_is_confirmed_by_the_checker_on_the_real_106_lot_too():
         items = {i["name"]: i for i in check_site(_plot(box(x0, y0, x1, y1, 0, h), lot_=lot106), facts)["view"]["items"]}
         assert not (items["Rear yard"].get("hint") or "").startswith("To comply"), (k, items["Rear yard"]["hint"])
         front = items["Front yard"].get("hint") or ""
-        m = re.match(r"To comply[^:]*: move the building (\d+'-\d+(?: \d/\d)?\") farther", front)
-        if m and items["Front yard"].get("points"):          # moved straight away from that line, as measured
+        m = re.match(r"To comply[^:]*: (move the building|make this yard) (\d+'-\d+(?: \d/\d)?\")", front)
+        tall = re.search(r"; (\d+'-\d+(?: \d/\d)?\") if it stays", front)     # the house stays this tall: that
+        if m and items["Front yard"].get("points"):          # figure; along the line it was measured on
+            gap = _feet((tall or m).group(1 if tall else 2))
             (ax, ay), (bx, by) = items["Front yard"]["points"][:2]
             mid = ((x0 + x1) / 2, (y0 + y1) / 2)
             if (ax - mid[0]) ** 2 + (ay - mid[1]) ** 2 > (bx - mid[0]) ** 2 + (by - mid[1]) ** 2:
                 (ax, ay), (bx, by) = (bx, by), (ax, ay)          # a: on the wall, b: on the street line
             n = ((ax - bx) ** 2 + (ay - by) ** 2) ** 0.5
-            dx, dy = (ax - bx) / n * _feet(m.group(1)), (ay - by) / n * _feet(m.group(1))
-            again = check_site(_plot(box(x0 + dx, y0 + dy, x1 + dx, y1 + dy, 0, h), lot_=lot106), facts)
+            ux, uy = (ax - bx) / n, (ay - by) / n
+            if m.group(1) == "move the building":            # the whole house moved away
+                c = (x0 + ux * gap, y0 + uy * gap, x1 + ux * gap, y1 + uy * gap)
+            else:                                            # only its front wall pulled back, the rest kept
+                c = (x0, y0 + gap / abs(uy), x1, y1)
+            again = check_site(_plot(box(*c, 0, h), lot_=lot106), facts)
             got = next(i for i in again["view"]["items"] if i["name"] == "Front yard")
-            if Polygon(ring).buffer(-1).contains(rect(x0 + dx, y0 + dy, x1 + dx, y1 + dy)):
-                assert got["status"] == present.COMPLIES or "other way needs" in (got["reason"] or ""), \
-                    (k, front, got["status"], got["reason"])
+            if Polygon(ring).buffer(-1).contains(rect(*c)) and c[1] < c[3] - 5:
+                assert got["status"] == present.COMPLIES, (k, front, got["status"], got["reason"])
                 followed["front"] += 1
         height = items["Building height"].get("hint") or ""
         m = re.match(r"To comply[^:]*: lower the building (\d+'-\d+(?: \d/\d)?\")", height)
@@ -1354,3 +1381,31 @@ def test_every_to_comply_is_confirmed_by_the_checker_on_the_real_106_lot_too():
     r = check_site(_plot(box(12, 20, 38, 66, 0, 60), lot_=small), {**FACTS, "jurisdiction": CITY, "lot_surveyed": True})
     fy = next(i for i in r["view"]["items"] if i["name"] == "Front yard")
     assert fy["hint"] == "To comply: move the building 5'-0\" farther from that lot line.", fy["hint"]
+
+
+def test_a_raised_yards_advice_is_confirmed_against_the_raise_not_just_its_own_minimum(monkeypatch):
+    """Review round 3, F3: a yard the height bonus raises is short of the raised minimum, not its own; confirmed
+    against its own minimum alone, any change at all passed (a tenth of the figure kept the hint). Now each change
+    is also decided against the raise it answers to: a tenth of it is no fix, so no hint, while the real figure
+    (1'-6": the front yard 27'-0" against 26'-6", 25'-0" at the tax map's worst) stays."""
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    plain = lot_of([(0, 0), (50, 0), (50, 100), (0, 100)])
+    facts = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
+
+    def front():
+        r = check_site(_plot(box(15, 27, 35, 66, 0, 36.5), lot_=plain), facts)
+        return next(i for i in r["view"]["items"] if i["name"] == "Front yard")
+
+    assert front()["hint"] == "To comply whatever the survey shows: move the building 1'-6\" farther from that lot line."
+    real = present.comply_hint
+
+    def tenth(*a, **k):                  # every advised change a tenth of what it says
+        advice = real(*a, **k)
+        for way in (advice or {}).get("ways") or []:
+            way["changes"] = {m: d / 10 for m, d in way["changes"].items()}
+        return advice
+
+    monkeypatch.setattr(present, "comply_hint", tenth)
+    got = front()
+    assert got["status"] == present.REVIEW and got["hint"] is None, got["hint"]

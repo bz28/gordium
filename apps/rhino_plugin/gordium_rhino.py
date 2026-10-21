@@ -516,7 +516,9 @@ def draw_screen(o, e):
                                                         for line in getattr(o, "plan_lines", None) or [])]
     obstacles = on_screen if plan else []
     # zoomed out to the neighbourhood (the lot under LABEL_MIN_LOT_PX on screen), the lot's plan labels give way
-    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, getattr(o, "lot_outline", None)))
+    # (judged from the lot's edges, which a lot with arcs has too, else its outline: review round 3, F5)
+    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]
+    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, lot_points or getattr(o, "lot_outline", None)))
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
@@ -1231,7 +1233,9 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
-            "street_name": saved_ui.get("street_name"), "street_source": saved_ui.get("street_source") or source("street"),
+            # the street's name only with its street line (a survey outline or a corner answer drops the line:
+            # review round 3, F6)
+            "street_name": saved_ui.get("street_name") if facts.get("street_line") else None, "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span},
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
             "corner_source": source("corner_lot"), "zones_found": facts.get("zones_found") or [],
@@ -1296,7 +1300,7 @@ def _box_pick(doc, what, facts, saved_ui):
                         got = ask.GetLiteralString()
                         name = (ask.StringResult() or "").strip() or None \
                             if got == Rhino.Input.GetResult.String else None
-                    facts["street_line"] = [picked]
+                    facts["street_line"] = logic.street_lines_after_pick(facts.get("street_line"), picked)
                     saved_ui["street_name"] = name
                     saved_ui["street_source"] = logic.ENTERED
         elif what == "lot":                          # Use my survey: the surveyed outline

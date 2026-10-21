@@ -6,6 +6,10 @@
     "ok": true,
     "detail": false
    },
+   "8 the address is there too": {
+    "ok": true,
+    "detail": "106 Ithaca Rd, Ithaca, NY"
+   },
    "8 the sample's Street side reads Ithaca Rd, from the lookup": {
     "ok": true,
     "detail": {
@@ -66,16 +70,16 @@
     "ok": true,
     "detail": {
      "objects": [
-      "4e97c997-8c55-4d93-a725-e9a301b01742",
-      "44dd61ac-cdb9-4be1-a02a-fe3406311646",
-      "94767220-19f3-471a-96d5-767123637a9c",
-      "5009f58d-e0b5-4624-bc23-9fed80633e9c"
+      "c448f7eb-cefc-4d85-a49d-95b49f8f3924",
+      "f01a195b-5975-4c47-9556-f9d5f53be80a",
+      "8c695845-84e6-43e1-a090-c6e44faaf5cc",
+      "d934d054-5217-4ae6-8366-7475a1d3e470"
      ],
      "selected": [
-      "5009f58d-e0b5-4624-bc23-9fed80633e9c",
-      "94767220-19f3-471a-96d5-767123637a9c",
-      "44dd61ac-cdb9-4be1-a02a-fe3406311646",
-      "4e97c997-8c55-4d93-a725-e9a301b01742"
+      "d934d054-5217-4ae6-8366-7475a1d3e470",
+      "8c695845-84e6-43e1-a090-c6e44faaf5cc",
+      "f01a195b-5975-4c47-9556-f9d5f53be80a",
+      "c448f7eb-cefc-4d85-a49d-95b49f8f3924"
      ]
     }
    }
@@ -234,10 +238,21 @@
        "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
        "75'-10\"",
        "101'-1 1/2\"",
+       "10'-4 1/8\"",
        "69'-6 1/8\"",
        "92'-1 3/8\""
       ],
-      "status_box": 1
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "10'-4 1/8\""
+      ]
      }
     }
    },
@@ -256,10 +271,21 @@
        "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
        "75'-10\"",
        "101'-1 1/2\"",
+       "10'-4 1/8\"",
        "69'-6 1/8\"",
        "92'-1 3/8\""
       ],
-      "status_box": 1
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "10'-4 1/8\""
+      ]
      },
      "frames": {
       "scale_neighbourhood": 7,
@@ -267,7 +293,7 @@
      }
     }
    },
-   "7 zoomed to the lot: the labels are back": {
+   "7 zoomed to the lot: every edge's length is back, the yards' too": {
     "ok": true,
     "detail": {
      "neighbourhood": {
@@ -282,10 +308,54 @@
        "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
        "75'-10\"",
        "101'-1 1/2\"",
+       "10'-4 1/8\"",
        "69'-6 1/8\"",
        "92'-1 3/8\""
       ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "10'-4 1/8\""
+      ]
+     }
+    }
+   },
+   "7 106's short 10'-4 1/8\" edge keeps its length, led to it": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
       "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "✓ Front yard 27'-6 3/8\" (approx.)",
+       "✕ Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "✓ Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "10'-4 1/8\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "10'-4 1/8\""
+      ]
      }
     }
    }

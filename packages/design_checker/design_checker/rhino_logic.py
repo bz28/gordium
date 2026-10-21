@@ -698,6 +698,19 @@ def street_name_after_pick(name, lines, picked, tolerance=0.5):
     return None
 
 
+def street_lines_after_pick(lines, picked, tolerance=0.5):
+    """The street lines after the architect clicks a lot line as the street side: the whole street as it was when
+    the line is one of its own (a street of several segments, 106's eight: keeping only the one clicked measured the
+    front yard from part of the street, a false pass: review round 3, F4); else the line clicked."""
+    def near(p, q):
+        return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
+
+    a, b = picked
+    if any((near(a, c) and near(b, d)) or (near(a, d) and near(b, c)) for c, d in lines or []):
+        return [list(map(list, line)) for line in lines]
+    return [picked]
+
+
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,

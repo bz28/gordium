@@ -429,8 +429,11 @@ def _while_raised(item, node, worst, raisers, values, measured, facts):
     if not more:
         return None
     low, unit, src = min(more, key=lambda x: x[0])
+    raise_ = next(c for c, s in raisers.get(node.left.id) or [] if s is src and
+                  min((r["margin"] for r in readings(c, ast.unparse(c), values, measured, facts)), default=None) == low)
     return {"text": f"{_gap(low, unit)} if it stays {src['proposed']} tall (the {src['name'].lower()} rule's other "
-                    "way raises this yard)", "changes": {node.left.id: _step(-low, unit)}}
+                    "way raises this yard)", "changes": {node.left.id: _step(-low, unit)},
+            "also": [[src["rule"], ast.unparse(raise_)]]}     # confirmed against the raised minimum itself
 
 
 def _step(amount: float, unit: str) -> float:
@@ -438,6 +441,33 @@ def _step(amount: float, unit: str) -> float:
     hundredth of a percent)."""
     k = {"ft": 96, "sf": 1, "%": 100}.get(unit, 1)
     return math.ceil(amount * k - 1e-9) / k
+
+
+OPPOSITE = {"front_yard": "rear_yard", "rear_yard": "front_yard", "side_yard_smaller": "side_yard_larger",
+            "side_yard_larger": "side_yard_smaller"}    # moving the building away from one line, toward this one
+
+
+def _drawn_advice(hint, node, margin, numbers, values) -> dict | None:
+    """The as-drawn "To comply" (_hint: the row's margin as drawn; coverage in sf) as advice, for the checker to
+    confirm like any other (review round 3: without it, "lower the building 1'-6"" on a 36'-6" house was dropped,
+    though lowering it makes the row comply)."""
+    if not (hint or "").startswith("To comply: ") or node is None or margin is None:
+        return None
+    m, sign = node.left.id, numbers[4]
+    if m == "building_area":
+        allowed = _evaluate(ast.unparse(node.comparators[0]), values)
+        if not isinstance(allowed, (int, float)) or not isinstance(values.get("building_area"), (int, float)):
+            return None
+        change = -_step(values["building_area"] - allowed, "sf")
+    elif numbers[3] == "%":
+        return None
+    else:
+        change = _step(-margin, numbers[3]) * (1 if sign in ("≥", ">") else -1)
+    way = {"text": hint[len("To comply: "):-1], "changes": {m: change}}
+    if m in OPPOSITE and way["text"].startswith("move the building "):
+        way.update(opposite=OPPOSITE[m], keep=way["text"].replace("move the building ", "make this yard ", 1)
+                   .replace(" farther from that lot line", " deeper, keeping the other yards", 1))
+    return {"head": "To comply", "ways": [way]}
 
 
 def advice_text(advice: dict | None) -> str | None:
@@ -476,17 +506,19 @@ def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx:
         change = _step(need, unit) * (1 if sign in ("≥", ">") else -1)
         if name.split(",")[0].endswith("yard"):
             verb = lambda x: f"move the building {amount(x)} farther from that lot line"     # noqa: E731
+            keep = lambda x: f"make this yard {amount(x)} deeper, keeping the other yards"   # noqa: E731
         elif m == "building_height":
             verb = lambda x: f"lower the building {amount(x)}"                       # noqa: E731
         else:
             verb = lambda x: f"{'increase' if sign in ('≥', '>') else 'reduce'} it by {amount(x)}"   # noqa: E731
     several = len({round(r["margin"], 9) for r in rs}) > 1
-    if not several:
-        return {"head": "To comply", "ways": [{"text": verb(need), "changes": {m: change}}]}
     whatever = "whatever the survey shows" if approx else "under every reading"
-    drawn_part = f" ({amount(as_drawn)} as drawn)" if as_drawn and as_drawn > 0 and amount(as_drawn) != amount(need) \
-        else ""
-    return {"head": "To comply " + whatever, "ways": [{"text": verb(need) + drawn_part, "changes": {m: change}}]}
+    drawn_part = f" ({amount(as_drawn)} as drawn)" if several and as_drawn and as_drawn > 0 and \
+        amount(as_drawn) != amount(need) else ""
+    way = {"text": verb(need) + drawn_part, "changes": {m: change}}
+    if m in OPPOSITE and name.split(",")[0].endswith("yard"):    # moving it brings the opposite line closer:
+        way.update(opposite=OPPOSITE[m], keep=keep(need) + drawn_part)   # check.confirm_advice decides which words
+    return {"head": "To comply " + whatever if several else "To comply", "ways": [way]}
 
 
 def _gap(margin: float, unit: str) -> str:
@@ -735,6 +767,9 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
                 i["hint"], i["_advice"] = None, None
         elif span[0] < 0 and one_way and not stuck and (not i.get("hint") or i["hint"].startswith("To comply")):
             advice = comply_hint(i["name"], node, rs, values, measured, approx)
+            if advice and isinstance(i.get("_raised"), tuple):   # a raised yard: the raise must hold too
+                for way in advice["ways"]:
+                    way["also"] = [list(i["_raised"])]
             clause = _while_raised(i, node, span[0], raisers, values, measured, facts) if advice else None
             if clause:
                 advice["clauses"] = [clause]
@@ -908,6 +943,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             allowed = _evaluate(ast.unparse(node.comparators[0]), values)
             if isinstance(allowed, (int, float)) and values.get("building_area") is not None:
                 hint = f"To comply: reduce the footprint by at least {_area(values['building_area'] - allowed, 'up')}."
+        advice = _drawn_advice(hint, node, margin, numbers, values)
         if raised and st == FAILS:               # fails anyway: nothing to raise
             raised = []
         if raised and st == COMPLIES:            # (on a tax-map lot the reason stays the tax map: the yards still rise)
@@ -965,7 +1001,6 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 elif limit_q and not complying:
                     why = (f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): ask the "
                            "zoning office" + (f"; also open: {'; '.join(rest)}" if rest else ""))
-        advice = None
         alts = _alternatives(check, values, measured, facts) if st == FAILS and not why and not splits else []
         shown = [[x for x in alt if x[6]] for alt in alts]          # the reason: what fails as drawn
         if len(alts) > 1 and all(shown):                # several ways to comply, none met: say each one
@@ -1178,7 +1213,7 @@ def _raise_yards(items, measured, values, facts):
                     continue
                 t["required"], t["margin"], t["hint"] = value_text(req, unit, sign, False), margin_text(margin, unit), None
                 t["_node"] = c                           # its Delta and colours are the raised minimum's
-                t["_raised"] = True                      # (and its "To comply": settle)
+                t["_raised"] = (i["rule"], expr)         # (and its "To comply", confirmed against it: settle)
                 t["_expr"] = f"({t['_expr']}) and ({expr})" if t.get("_expr") else expr
                 if worst is not None:                    # the raised minimum fails at the tax-map worst case
                     w = _display(*_numbers(c, worst, measured, t["name"]))

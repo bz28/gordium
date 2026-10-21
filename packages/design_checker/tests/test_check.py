@@ -1724,7 +1724,9 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     assert logic.leader_end((0, 0), (10, 40, 80, 20)) == (10, 40)     # its corner
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
-    assert '    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, getattr(o, "lot_outline", None)))' in draw
+    assert ('    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, lot_points or getattr(o, "lot_outline", None)))'
+            in draw)                                  # judged from the lot's edges: a lot with arcs too (round 3, F5)
+    assert '    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]' in draw
     assert "        if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw
     assert ('    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:'
             in draw)
@@ -1763,4 +1765,22 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     assert pick.index('name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),') \
         < pick.index("ask.GetLiteralString()") < pick.index('saved_ui["street_name"] = name')
     assert "RhinoGet.GetString(" not in pick        # a space would end it: "Cayuga St" saved as "Cayuga" (R3)
-    assert 'street_name=sample.get("street_name"),' in rhino and '"street_name": saved_ui.get("street_name"),' in rhino
+    assert 'street_name=sample.get("street_name"),' in rhino
+    # the name only with its street line (round 3, F6), and the whole street kept when one of its lines is picked
+    assert '"street_name": saved_ui.get("street_name") if facts.get("street_line") else None,' in rhino
+    assert 'facts["street_line"] = logic.street_lines_after_pick(facts.get("street_line"), picked)' in pick
+    assert logic.street_lines_after_pick(lines, lines[3]) == [list(map(list, x)) for x in lines]   # round 3, F4
+    assert logic.street_lines_after_pick(lines, list(reversed(lines[3]))) == [list(map(list, x)) for x in lines]
+    assert logic.street_lines_after_pick(lines, side) == [side]
+    # the 106 front yard measured from the whole street, not one segment: fails, as before the pick (a false pass)
+    from design_checker.check import check_site
+    import sys
+    sys.path.insert(0, str(REPO / "packages/design_checker/tests"))
+    from test_measure import lot as lot_of
+    from test_present import _plot, box
+    front = {}
+    for street in (lines, logic.street_lines_after_pick(lines, lines[3]), [lines[3]]):
+        r = check_site(_plot(box(3, 24.2, 30, 60, 0, 30), lot_=lot_of(sample["lot"])),
+                       {**sample["facts"], "lot_surveyed": True, "street_line": street})
+        front[len(street)] = next(i for i in r["view"]["items"] if i["name"] == "Front yard")["status"]
+    assert front[len(lines)] == "does_not_comply" and front[1] == "complies", front

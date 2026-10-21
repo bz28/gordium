@@ -199,6 +199,12 @@ def confirm_advice(items: list[dict], by_id: dict, measured: dict, allowed: dict
     only if the row then complies. None left: no hint. A "To comply" that says no change the checker can try is
     dropped (never advice that leaves a row in review: the architect's review, pass 2; review round 2, R1: a rear
     yard on 106, its limit waiting on which lines are side or rear, was told to move the building)."""
+    rows = {i.get("measure"): by_id.get(i.get("rule")) for i in items if i.get("measure") and by_id.get(i.get("rule"))}
+
+    def verdict(rule, measure, changes):
+        return row_verdict(rule, _changed(measured, changes), allowed, facts,
+                           check=side_checks(rule).get(measure))
+
     for i in items:
         advice = i.pop("_advice", None)
         if not (i.get("hint") or "").startswith("To comply"):
@@ -207,14 +213,27 @@ def confirm_advice(items: list[dict], by_id: dict, measured: dict, allowed: dict
         if advice is None or rule is None:
             i["hint"] = None
             continue
-        side = side_checks(rule).get(i.get("measure"))
 
-        def complies(changes):
-            return bool(changes) and row_verdict(rule, _changed(measured, changes), allowed, facts,
-                                                 check=side) == present.COMPLIES
+        def complies(part):
+            """The row complies with the change made, and so does each raise it answers to (a yard the height
+            bonus raises: review round 3, F3, else any change at all confirmed against the yard's own minimum)."""
+            return bool(part["changes"]) and verdict(rule, i.get("measure"), part["changes"]) == present.COMPLIES \
+                and all(row_verdict(by_id[r], _changed(measured, part["changes"]), allowed, facts, check=e)
+                        == present.COMPLIES for r, e in part.get("also") or [] if r in by_id)
 
-        ways = [w for w in advice["ways"] if complies(w["changes"])]
-        clauses = [c for c in advice.get("clauses") or [] if ways and complies(c["changes"])]
+        ways = []
+        ways = [w for w in advice["ways"] if complies(w)]
+        clauses = [c for c in advice.get("clauses") or [] if ways and complies(c)]
+        for k, w in enumerate(ways):
+            opp = w.get("opposite")
+            if opp and rows.get(opp) is not None:   # moving the building brings that line closer (round 3, F2):
+                # "move the building" only while the opposite yard complies and still would at the largest figure
+                # the hint names (its "…if it stays that tall" too); else the advice keeps the other yards (an
+                # opposite yard already short has nothing to give: over its line, even)
+                most = max([w["changes"][i["measure"]]] + [c["changes"].get(i["measure"], 0) for c in clauses])
+                moved = verdict(rows[opp], opp, {opp: -most})
+                if verdict(rows[opp], opp, {}) != present.COMPLIES or moved != present.COMPLIES:
+                    ways[k] = dict(w, text=w["keep"])
         i["hint"] = present.advice_text(dict(advice, ways=ways, clauses=clauses))
 
 
