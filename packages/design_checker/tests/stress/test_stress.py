@@ -99,7 +99,7 @@ def _rear_overhang_words(v):
 
 
 MATCHERS["F6"], MATCHERS["F7"] = _typed_below_drawn, _rear_overhang_words
-KNOWN = {"F6": _typed_below_drawn, "F7": _rear_overhang_words}
+KNOWN = {}                       # F6 and F7 fixed in #18 (ca4f6c3, 4ce81b3): a return fails CI
 
 
 def known(v):
