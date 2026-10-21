@@ -1,6 +1,6 @@
 """docs/questions_for_architects.md is the complete, true list of what the architects must answer:
 
-- every open question recorded anywhere (the same list as the workbook's Questions tab) is cited there by its
+- every researched open question recorded anywhere (the workbook's Questions tab, less those still pending research) is cited there by its
   tag, `[<id>#<n>]`, the n-th open question of that rule, definition or label, and nothing else is;
 - every result-changing (🔴) item in docs/discrepancies_with_architects.md is cited as `[discrepancy <number>]`;
 - what it says Gordium does is true of the code; its lot numbers match their sources (the County outline,
@@ -20,7 +20,7 @@ from openpyxl import load_workbook
 
 from rule_export.workbook import tables
 from rule_format.formula import evaluate
-from rule_format.rulebook import MEASURE_KINDS, MEASURES_FILE, REPO, load
+from rule_format.rulebook import MEASURE_KINDS, MEASURES_FILE, PENDING, REPO, load
 
 ITHACA = REPO / "regulations/jurisdictions/new_york/ithaca_city"
 DOC = (REPO / "docs/questions_for_architects.md").read_text(encoding="utf-8")
@@ -35,13 +35,25 @@ CITY_STATEMENT = ("Data contained in this product was amended by the GIS Program
                   "information portrayed by the data.")
 
 
-def recorded_questions() -> list[str]:
-    """`<id>#<n>` for every open question, in the Questions tab's order (the one list of them)."""
+def recorded_questions(pending: bool = False) -> list[str]:
+    """`<id>#<n>` for every researched open question, in the Questions tab's order (the one list of them); with
+    pending=True, the ones not researched yet instead. Resolve before asking (CLAUDE.md): a question the drafting
+    script raises is recorded with research "pending" and waits in the Questions tab until it is researched; only
+    then can it reach the architects' page. The n counts every question of the entry, pending or not."""
     seen, tags = Counter(), []
     for row in tables(ITHACA)["Questions"]["rows"]:
         seen[row[2]] += 1
-        tags.append(f"{row[2]}#{seen[row[2]]}")
+        if str(row[5]).startswith(PENDING) == pending:
+            tags.append(f"{row[2]}#{seen[row[2]]}")
     return tags
+
+
+def test_a_question_waits_for_research_before_it_reaches_the_page():
+    """Stage 1 of drafting (2026-10-20) raised hundreds of questions, each recorded as pending research. They are in the
+    Questions tab but not asked of the architects yet, and none of them is on the page."""
+    waiting = recorded_questions(pending=True)
+    assert waiting and not set(waiting) & set(recorded_questions())
+    assert not set(waiting) & set(re.findall(r"`\[([^\]`\s]+#\d+)\]`", DOC))
 
 
 def test_every_recorded_question_is_on_the_page_and_nothing_else():

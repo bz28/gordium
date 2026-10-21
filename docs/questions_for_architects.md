@@ -21,7 +21,7 @@ From a model, where a question below lists readings, Gordium will check the desi
 - **Options:** the readings we can see. Pick one, or tell us another.
 - 🔴 **Blocks R-1b today:** the question affects a check Gordium already runs on R-1b single-family houses (like 106 Ithaca Rd). Unmarked questions matter for other uses, other districts, or rules not built yet.
 
-The tags in square brackets (for example lot_depth#1, the first question about lot depth) say where each question is recorded in Gordium's files. A test fails if a recorded question is missing from this page, so this page is always the complete list. The same questions are in the **Questions** tab of the rules spreadsheet (`ithaca_city_rules.xlsx`), with what was searched for each; what research settled is in its **Findings** tab.
+The tags in square brackets (for example lot_depth#1, the first question about lot depth) say where each question is recorded in Gordium's files. A test fails if a researched question is missing from this page, so this page is always the complete list of what is asked of you. Questions the AI drafting script raises wait in the Questions tab, marked "pending", until they are researched; only what research can't settle comes here. The same questions are in the **Questions** tab of the rules spreadsheet (`ithaca_city_rules.xlsx`), with what was searched for each; what research settled is in its **Findings** tab.
 
 Links to Chapter 325 open our stored copy of the city's PDF (for people with access to the Gordium repository); links to the zoning charts open the city's own website.
 
