@@ -477,3 +477,9 @@ def test_document_listed_twice_is_reported(tmp_path):
     ctx = Context.for_jurisdiction(j)
     assert "listed more than once in sources.yaml" in ctx.file_problems["doc.pdf"]
     assert "doc.pdf" not in ctx.pages                                         # its text isn't trusted
+
+
+def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):
+    """Compile, then freeze: an ill-typed formula is a validation problem, so no frozen rule can be ill-typed."""
+    assert any("compare values of one kind" in p for p in validate(rulebook(check='rear_yard >= 20 or use == 5'), ctx))
+    assert not any("kind" in p for p in validate(rulebook(), ctx))

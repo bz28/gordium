@@ -42,7 +42,8 @@ MEASURE_KINDS = {name: "text" if m["unit"] == "text" else "number"
 def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
     """allowed: the values each text measure may take, e.g. {"use": the city's use names}.
     Required, so no caller can forget it. A value outside the list, or a text measure with
-    no list, is unrecognized, so the rule needs review."""
+    no list, is unrecognized. A missing or unusable measure is unknown: the result is pass or fail only if it is
+    the same whatever that measure turns out to be (three-valued logic, formula.evaluate); else needs review."""
     kinds = MEASURE_KINDS | {k: frozenset(v) for k, v in allowed.items()}
     try:
         if "applies_when" in rule and not _condition(rule["applies_when"], values, kinds):
@@ -272,8 +273,11 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         try:
             if not formula.is_condition(f):
                 p.append(f"{f!r} must be a true/false test (a comparison, and/or, or not)")
-            p += [f"unknown measure '{n}' in {f!r}" for n in sorted(formula.names(f) - ctx.measures)]
+            unknown = sorted(formula.names(f) - ctx.measures)
+            p += [f"unknown measure '{n}' in {f!r}" for n in unknown]
             p += [f"unknown use '{u}' in {f!r}" for u in sorted(formula.strings(f) - ctx.uses)]
+            if not unknown:                 # well-typed for every value, or it is no rule (formula.type_of)
+                formula.type_of(f, MEASURE_KINDS | {n: "text" for n in formula.names(f) if n not in MEASURE_KINDS})
         except FormulaError as e:
             p.append(str(e))
 
