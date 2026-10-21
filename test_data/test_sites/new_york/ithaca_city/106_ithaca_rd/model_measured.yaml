@@ -55,6 +55,9 @@ measurements:
   conversion:
     value: null
     from: 'not measured: enter the dwelling units, the rooms let for profit, and whether it is a conversion'
+  occupants:
+    value: null
+    from: 'not measured: enter the occupants (§325-3B OCCUPANT: in R-2c, every person with the right to occupy)'
   front_yard_eaves:
     value: null
     from: 'not measured: a building isn''t on the lot (is it part of this design?)'

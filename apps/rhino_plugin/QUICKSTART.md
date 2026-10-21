@@ -2,7 +2,8 @@
 
 For an architect who has just opened Rhino. About 10 minutes the first time, then 1 minute per project.
 
-Gordium checks your massing against the City of Ithaca zoning rules (the R-1a, R-1b and R-3a districts, for now;
+Gordium checks your massing against the City of Ithaca zoning rules (the R-1a, R-1b, R-2a, R-2b, R-2c and R-3a
+districts, for now;
 the sample project below is an R-1b one-family house) while you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 
@@ -233,7 +234,7 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
      `GordiumStart`.
 3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
    - **Address**: recorded on the project and the report. (Look up from the City's map is coming soon.)
-   - **Zoning district**: R-1b, "entered by you" (R-1a and R-3a can be picked too). Tick **I confirm**: Draw
+   - **Zoning district**: R-1b, "entered by you" (R-1a, R-2a, R-2b, R-2c and R-3a can be picked too). Tick **I confirm**: Draw
      stays off until you do, on every new
      project, because Gordium doesn't look up the zoning map yet.
    - **Use**: one-family dwelling, detached.

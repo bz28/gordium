@@ -6,7 +6,7 @@
 
 Gordium checks a design against the city's exact words. In the places below, the words can be read more than one way, and Gordium can't decide them on its own.
 
-**Researched first.** Before a question reaches you, Gordium reads the whole law for it (every section that uses the word, or a word that means the same, from the term index), then the City's own decisions (zoning board records), then the building codes, then other cities. That research, on 2026-10-20, settled 20 of the 37 questions this page used to ask, narrowed 4 more to the part still open, and found 2 new ones (19 then left). The R-1a and R-3a answer keys (2026-10-20) raise 4 questions of their own (§5.3 to §5.6) and carry 3 law-wide ones into their own rules, each tagged where it is recorded, so 29 are left (23 different questions). What it settled is listed in §6, with its sources, and recorded with each rule or definition (the full report is `docs/research/2026-10-20_architect_questions.md`). What is left below is what research couldn't settle. Each question says what was searched and why it is still open, and a test fails if a recorded question has no research behind it.
+**Researched first.** Before a question reaches you, Gordium reads the whole law for it (every section that uses the word, or a word that means the same, from the term index), then the City's own decisions (zoning board records), then the building codes, then other cities. That research, on 2026-10-20, settled 20 of the 37 questions this page used to ask, narrowed 4 more to the part still open, and found 2 new ones (19 then left). The R-1a and R-3a answer keys (2026-10-20) raise 4 questions of their own (§5.3 to §5.6) and carry 3 law-wide ones into their own rules; the R-2a, R-2b and R-2c answer keys (2026-10-21) raise 2 more (§5.7, §5.8) and carry the same 3 into theirs, each tagged where it is recorded, so 40 are left (25 different questions). What it settled is listed in §6, with its sources, and recorded with each rule or definition (the full report is `docs/research/2026-10-20_architect_questions.md`). What is left below is what research couldn't settle. Each question says what was searched and why it is still open, and a test fails if a recorded question has no research behind it.
 
 **Please note, until these are answered:** each question below says what Gordium does **today** and what it will do **from a model**, once it measures a Rhino model itself (being built now). There are three cases:
 - **NEEDS REVIEW:** Gordium can't decide, so it says so instead of guessing.
@@ -62,7 +62,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 
 ### 1.2 Lot depth on a lot with more than four sides: one detail of the City's method 🔴
-`[lot_depth#1]` `[R-1b.rear_yard#1]` `[R-1a.rear_yard#1]` `[R-3a.rear_yard#1]`
+`[lot_depth#1]` `[R-1b.rear_yard#1]` `[R-1a.rear_yard#1]` `[R-2a.rear_yard#1]` `[R-2b.rear_yard#1]` `[R-2c.rear_yard#1]` `[R-3a.rear_yard#1]`
 
 - **The city's words:** "Such percentage shall be taken of the lot depth. If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths." ([Chapter 325 §325-8A(14), p.25](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=25))
 - **What research found:** the City has a method. On a five-sided lot (BZA Appeal #3202, 815 S. Aurora St, 2019–2022), the Zoning Administrator swore that "side lot lines should be drawn at a 90-degree angle perpendicular to the front lot line to determine the average lot depth", from each end of the front lot line "to the furthest rear line" ([staff memo and affidavit](https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_02012022-2446)). Gordium now uses that method (§6): on the County outline, (92.01 + 100.28) ÷ 2 = 96.15 ft, so the rear yard must be 24.04 ft and the 25 ft design passes. The one detail left: the perpendicular from the long-side end first meets the jog. The affidavit's own drawing stops at the first rear-facing line, but "the furthest rear line" could mean the main rear line, and the zoning board's written decision wasn't found online.
@@ -88,7 +88,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Options:** (a) the perpendicular stops at the first rear-facing line it meets (the jog); (b) it continues to the main rear line, extended; (c) another rule you use. If you can, ask the City for the zoning board's written resolution on Appeal #3202 (February 2022).
 
 ### 1.3 What "lot area" should be used, especially without a survey? 🔴
-`[lot#1]` `[R-1b.lot_coverage#1]` `[R-1a.lot_coverage#1]` `[R-3a.lot_coverage#1]`
+`[lot#1]` `[R-1b.lot_coverage#1]` `[R-1a.lot_coverage#1]` `[R-2a.lot_coverage#1]` `[R-2b.lot_coverage#1]` `[R-2c.lot_coverage#1]` `[R-3a.lot_coverage#1]`
 
 - **The city's words:** "LOT — A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building or a group of buildings…" (§325-3, [p.14](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=14)). Chapter 325 never defines "lot area" itself.
 - **What research found:** "lot area" is never defined and the word "survey" never appears in Chapter 325. The City works from surveys when it has them (the 2026 Sears St cases turned on an as-built survey), but no City document says what to use without one. Coverage also waits on §3.1 (eaves); garages count (§6).
@@ -173,7 +173,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Options:** for "at any point" in the basement definition: (a) more than half above ground at one point is enough; (b) at every point around the building. For a space that fits both: (a) a basement (it counts as a story if the floor above meets the 6 ft or 12 ft test); (b) a cellar. And for the cellar test, the curb level or the average adjoining grade when they differ?
 
 ### 4.5 A parapet on top of the height bonus?
-`[R-1b.height#1]` `[R-1a.height#1]` `[R-3a.height#1]`
+`[R-1b.height#1]` `[R-1a.height#1]` `[R-2a.height#1]` `[R-2b.height#1]` `[R-2c.height#1]` `[R-3a.height#1]`
 
 - **The city's words:** "a parapet wall or cornice for ornament extending above such height five feet or less" (§325-16B, [p.47](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47)).
 - **What research found:** the exemptions for chimneys, spires and parapets change what may stand above the limit, not how height is measured (§6). Whether "such height" means the chart's limit or the bonus height §325-16C allows isn't said, nor whether a parapet that guards a roof deck (not "for ornament") counts. No City record was found.
@@ -183,7 +183,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 ---
 
-## 5. Accessory buildings, accessory dwelling units, and the R-3a district
+## 5. Accessory buildings, accessory dwelling units, and the R-3a and R-2c districts
 
 ### 5.1 An accessory building that isn't frame; a height limit?
 `[325-25C#1]`
@@ -238,6 +238,24 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Why it matters:** a row of five townhouses on an R-3a lot next to R-1 houses may be held to 35 ft and 26.25% coverage, or to R-3a's 40 ft and 35%.
 - **Until you answer:** Today and from a model, attached houses in R-3a get NEEDS REVIEW on §325-19E (R-3a.abutting_r1), as every use it may cover does.
 - **Options:** (a) exempt, as a one-family configuration; (b) covered, as a multiple dwelling.
+
+### 5.7 R-2c: an attached house with more than five occupants in one unit
+`[R-2c.lot_area_one_family_attached#1]`
+
+- **The city's words:** chart note 6, for R-2C's attached houses: "(6) For the first occupant in each dwelling unit; +300 sf for each additional occupant in each dwelling unit; +500 sf for each additional occupant in each dwelling unit in excess of five occupants." (zoning charts, April 2026, p.3). "Occupant" is defined for R-2c only: a person with the right to occupy (§325-3, [p.16](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=16)).
+- **What research found:** the note lists both additions with "+" and never says "instead"; every occupant past five is also an "additional occupant", so the 300 sf can be read to apply to them too. Nothing else in Chapter 325 says which, and no City record was found (2026-10-21).
+- **Why it matters:** a three-unit row house with seven occupants in one unit and one in each of the others needs 4,500 + 4 × 300 + 2 × 500 = 6,700 sf if the two occupants past five cost 500 sf instead of 300 sf, or 4,500 + 6 × 300 + 2 × 500 = 7,300 sf if they cost both.
+- **Until you answer:** Today and from a model, whenever one unit could hold more than five occupants (the building's occupants minus its units is 5 or more) and the lot meets every reading's least, the row gets NEEDS REVIEW (R-2c.lot_area_one_family_attached); the use needs a special permit in R-2c anyway.
+- **Options:** (a) each occupant past five adds 500 sf instead of 300 sf; (b) it adds 500 sf on top of the 300 sf (800 sf).
+
+### 5.8 R-2c: the narrow side yard of a semi-detached or attached building
+`[R-2c.side_yards#1]`
+
+- **The city's words:** chart notes 14 and 15, for R-2C's side yards ("10 ft /15 ft" one side, "0 ft /5 ft / 10 ft" the other): "(14) The first number applies to one-family detached dwellings, one-family semi-detached dwellings (unattached sides only), one-family attached dwelling (unattached sides only), two-family dwellings, and other uses; the second number applies to one-family detached zero lot line dwellings." "(15) The first number applies to one-family detached zero lot line dwellings and one-family semi-detached dwellings with attached sides; the second number applies to one-family detached dwellings, two-family dwellings, and other uses; …" (zoning charts, April 2026, p.3).
+- **What research found:** note 14 gives every unattached side of a semi-detached or attached building 10 ft (Column 12: "one side yard"), and note 15 gives a semi-detached house's attached side 0 ft; but the 5 ft is given only to detached and two-family houses and other uses, and the attached building isn't in note 15 at all. So a semi-detached building standing whole on one lot (two unattached sides), or an attached building's sides, have no stated "other side" figure. No City record was found (2026-10-21).
+- **Why it matters:** a semi-detached building on one R-2c lot with 10 ft on one side and 5 ft on the other complies if the second side is 5 ft or 0 ft, and not if every unattached side needs 10 ft.
+- **Until you answer:** Today and from a model, a semi-detached or attached building in R-2c complies on side yards only with 10 ft on both sides; under 10 ft on its narrower side gets NEEDS REVIEW (R-2c.side_yards), as it also does because Gordium can't tell which side is the party wall. Under 10 ft on the wider side does not comply.
+- **Options:** (a) every unattached side 10 ft; (b) the second side 5 ft, as for a two-family house; (c) 0 ft, note 15's figure for semi-detached dwellings.
 
 ---
 
