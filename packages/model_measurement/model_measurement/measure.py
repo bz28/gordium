@@ -598,7 +598,8 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     architect's statement for the whole building, and only if it is at least the floors counted on any part and
     the solids stacked in any plain part (each might be a story); else,
     or with none typed, needs review. A part below the ground is the §325-3 basement question: needs review,
-    whatever was typed. Parts one over another in plan with a real gap between them (a floor deleted, a block
+    whatever was typed. A plain part starting above the ground (beside the roof or over it) may be another
+    story: needs review, whatever its plan relation. Parts one over another in plan with a real gap between them (a floor deleted, a block
     lifted, a room floating over the roof) are a question: a floor not drawn, or a space open to below. With only floor blocks, the most
     counted on any part, the count typed a reading beside it
     (a question if they disagree). Each reason says what is drawn."""
@@ -609,6 +610,11 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     low = [b for b in plain if _extent(b)[0] is not None and _extent(b)[0] < grade - TOL]
     if low:
         return _missing("stories", stop("basement_part", what=", ".join(b["id"] for b in low)))
+    # a plain part starting above the ground (beside the roof or over it, touching in plan or not) may be another
+    # story: no seam in plan decides it, so the count typed stands only when every plain part starts at the ground
+    raised = [b for b in plain if _extent(b)[0] is not None and _extent(b)[0] > grade + TOL]
+    if raised:
+        return _missing("stories", stop("part_raised", what=", ".join(b["id"] for b in raised)))
     floored = [b for b in parts if b not in plain]
     for kind, lower, upper in _apart_in_one_plan(parts):    # over a gap (a floor not drawn?), or partly inside
         if kind == "gap":
