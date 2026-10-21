@@ -903,3 +903,89 @@ def test_a_starting_house_is_drawn_on_existing_spot_grades_placed_at_the_lot(fac
                         "grade_from": "spot", "grade_is": "existing", "grade_points": spots})
     assert len(got["floors"]) == 3 and any("drawn on the ground as it is" in n for n in got["notes"])
     assert got["floors"][0]["base"] == pytest.approx(2.5, abs=0.01)          # the spots' plane: their average
+
+
+# ---- the plugin and the worker stay in step (audit P1-1) -----------------------------------------------------
+
+def test_a_stray_line_on_the_workers_stdout_never_reaches_the_plugin(facts):
+    """A library print() or C code writing to file descriptor 1 inside the worker once put every later answer
+    one request behind (a check could show the previous check's result). Answers now have their own channel."""
+    import subprocess
+    import sys
+    noisy = ("import os, design_checker.__main__ as m\n"
+             "real = m.answer\n"
+             "def answer(r):\n"
+             "    print('a library says hello')\n"
+             "    os.write(1, b'C code says hello\\n')\n"
+             "    return real(r)\n"
+             "m.answer = answer\n"
+             "m.main(['serve'])\n")
+    requests = [{"id": 1, "cmd": "facts", "facts": {"lot_area_sqft": 1}}, {"id": 2, "cmd": "facts", "facts": {}}]
+    run = subprocess.run([sys.executable, "-u", "-c", noisy], input="".join(json.dumps(r) + "\n" for r in requests),
+                         capture_output=True, text=True, encoding="utf-8", timeout=120)
+    replies = [json.loads(line) for line in run.stdout.splitlines()]
+    assert [r["id"] for r in replies] == [1, 2]
+    assert replies[0]["result"]["problems"] and replies[1]["result"]["problems"] == []
+    assert "a library says hello" in run.stderr and "C code says hello" in run.stderr
+
+
+def test_the_plugin_takes_only_this_requests_answer_and_never_waits_forever():
+    import queue
+    from design_checker import rhino_logic as logic
+
+    def lines(*items):
+        q = queue.Queue()
+        for item in items:
+            q.put(item)
+        return q
+
+    assert logic.answer_for(lines('{"id": 7, "ok": true, "result": 1}\n'), 7, 1) == {"id": 7, "ok": True, "result": 1}
+    assert logic.answer_for(lines(None), 7, 1) is None                              # the checker stopped
+    for wrong in ('{"id": 6, "ok": true, "result": "the last check"}\n', "a library says hello\n", "[1]\n"):
+        with pytest.raises(logic.CheckerOutOfStep):                                 # never an earlier answer
+            logic.answer_for(lines(wrong, '{"id": 7, "ok": true}\n'), 7, 1)
+    with pytest.raises(logic.CheckerOutOfStep, match="no answer in"):               # a hung check: not forever
+        logic.answer_for(lines(), 7, 0.05)
+    assert logic.ask_limit("check") >= 60
+    assert logic.ask_limit("start") >= 120          # the largest building takes work in step with the lot's depth
+
+
+def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_checker():
+    """The Rhino side can't run in CI: its source must use the tested logic (no bare readline on the pipe)."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ask = src[src.index("def ask("):src.index("\n\n\n", src.index("def ask("))]
+    assert "logic.answer_for(" in ask and "_stop_worker()" in ask and "readline" not in ask
+    assert "threading.Thread(target=_read_lines" in src
+
+
+# ---- the starting building is proven with the checker's own verdict (audit P1-3) -----------------------------
+
+def _jogged_unsurveyed():
+    import sys
+    sys.path.insert(0, str(REPO / "packages/envelope_builder/tests"))
+    from test_start import FACTS, JOGGED, RULES, lot
+    facts = {**FACTS, "lot_surveyed": False, "street_line": [[[0, 0], [73, 0]]]}
+    return {"units": "ft", "lot": lot(JOGGED), "buildings": [], "problems": []}, facts, RULES
+
+
+def test_the_generators_proof_counts_a_rule_that_fails_with_the_lot_as_drawn():
+    """A 51 x 36 ft house on 106 Ithaca Rd's jogged lot, not yet surveyed: 27.5% of the lot as drawn, over 25%.
+    The check says lot coverage fails with the lot as drawn; plain outcome() says only needs review, so the
+    generator's proof once accepted it."""
+    from design_checker.check import verdict
+    from envelope_builder.start import _failing
+    site, facts, rules = _jogged_unsurveyed()
+    floors = [{"outline": [[11, 28], [62, 28], [62, 64], [11, 64]], "base": 0, "top": 10}]
+    assert _failing(site, facts, floors, rules, None) == []                      # plain outcome(): accepted
+    assert _failing(site, facts, floors, rules, None, verdict) == ["R-1b.lot_coverage"]
+
+
+def test_the_checker_proves_every_starting_building_with_its_own_verdict(monkeypatch):
+    from design_checker import check as checker
+    from envelope_builder import start as generator
+    seen = []
+    real = generator._failing
+    monkeypatch.setattr(generator, "_failing", lambda *a: seen.append(a[-1]) or real(*a))
+    site, facts, rules = _jogged_unsurveyed()
+    out = checker.largest_legal_building(site, facts, checker.measure(site, facts), rules)
+    assert out["floors"] and seen == [checker.verdict]

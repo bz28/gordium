@@ -2,6 +2,9 @@
 Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
+import json
+import queue
+
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
 FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew: "<story>;<height drawn, ft>"
@@ -464,3 +467,39 @@ def is_plan_view(parallel, direction_z, tolerance=0.99):
     down. Not a perspective (labels sit on the massing) and not an elevation (Front, Right: every plan label piles
     up on the ground line)."""
     return bool(parallel) and direction_z <= -tolerance
+
+
+ASK_LIMIT_S = 60          # s: the longest the plugin waits for one answer (the first also starts Python, loads rules)
+ASK_LIMITS_S = {"start": 120}   # s, per command that can take longer: the largest building, on a deep lot
+
+
+def ask_limit(cmd):
+    """How long the plugin waits for the checker's answer to one `cmd` request."""
+    return ASK_LIMITS_S.get(cmd, ASK_LIMIT_S)
+
+
+class CheckerOutOfStep(RuntimeError):
+    """The checker's next line can't be trusted to be this request's answer: the plugin restarts the checker and
+    shows nothing from it."""
+
+
+def answer_for(lines, request_id, limit):
+    """The checker's answer to request `request_id`, from `lines` (a queue the plugin's reader thread fills with
+    every line the checker writes, then None when it stops); None if it stopped. Raises CheckerOutOfStep when no
+    line comes within `limit` seconds, when the line isn't an answer, or when it is another request's answer:
+    then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever showing
+    an earlier check's result as this one's."""
+    try:
+        line = lines.get(timeout=limit)
+    except queue.Empty:
+        raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
+    if line is None:
+        return None
+    try:
+        answer = json.loads(line)
+    except ValueError:
+        answer = None
+    if not isinstance(answer, dict) or answer.get("id") != request_id:
+        raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
+                               "nothing from it is shown")
+    return answer

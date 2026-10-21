@@ -13,9 +13,11 @@ GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts), GordiumOf
 
 import json
 import os
+import queue
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
 import Eto.Drawing as ed
@@ -95,9 +97,29 @@ def _worker():
         p = subprocess.Popen([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
                              universal_newlines=True, encoding="utf-8")
-        STATE["worker"] = p
+        lines = queue.Queue()
+        threading.Thread(target=_read_lines, args=(p.stdout, lines), daemon=True).start()
+        STATE["worker"], STATE["worker_lines"] = p, lines
         STATE["worker_code"] = now
     return p
+
+
+def _read_lines(stream, lines):
+    """The reader thread: every line the checker writes, then None when it stops. It lets ask() wait with a time
+    limit (select() can't wait on a pipe on Windows). It never touches Rhino."""
+    try:
+        for line in stream:
+            lines.put(line)
+    finally:
+        lines.put(None)
+
+
+def _stop_worker():
+    """Stop the checker and forget it (the next request starts a fresh one)."""
+    p = STATE.pop("worker", None)
+    STATE.pop("worker_lines", None)
+    if p is not None and p.poll() is None:
+        p.kill()
 
 
 def ask(request):
@@ -107,11 +129,14 @@ def ask(request):
     request = dict(request, id=STATE["next_id"])
     p.stdin.write(json.dumps(request) + "\n")
     p.stdin.flush()
-    line = p.stdout.readline()
-    if not line:
-        STATE.pop("worker", None)
+    try:                                     # only this request's answer, within its time limit (rhino_logic)
+        answer = logic.answer_for(STATE["worker_lines"], request["id"], logic.ask_limit(request.get("cmd")))
+    except logic.CheckerOutOfStep as e:
+        _stop_worker()
+        raise RuntimeError(str(e) + " (see gordium_worker.log in the temp folder)")
+    if answer is None:
+        _stop_worker()
         raise RuntimeError("the Gordium checker stopped (see gordium_worker.log in the temp folder)")
-    answer = json.loads(line)
     if not answer.get("ok"):
         raise ValueError(answer.get("error"))
     return answer["result"]
