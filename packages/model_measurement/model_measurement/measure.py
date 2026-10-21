@@ -795,7 +795,9 @@ def _candidate_grades(assemblies, buildings: list[dict], facts: dict, grade, why
     the building"), (grade, reason): from spot grades, the walls of that candidate's own solids, a point at another
     solid's walls being that solid's ground, never this one's (review round 18). The main building alone keeps the
     grade already found. Flat ground or one level given: the same level for every candidate."""
-    if not facts.get("grade_points"):
+    if why_grade or not facts.get("grade_points"):
+        # a stop on the site's ground (no ground, the ground off the building, a solid buried under it, ...) holds
+        # for every candidate, never only the main building's (review round 19)
         return [(grade, why_grade)] * len(assemblies)
     out = []
     for _, members in assemblies:
@@ -804,7 +806,10 @@ def _candidate_grades(assemblies, buildings: list[dict], facts: dict, grade, why
             continue
         rest = [b for b in buildings if not any(b is c for c in members)]
         g, why = _grade_from_points(members, facts["grade_points"], rest)
-        out.append((g, stop("grade_with_others") if why else None))
+        off, buried = _against_ground(members, g) if not why else (None, None)
+        out.append((g, stop("grade_with_others") if why else
+                    stop("ground_off_building", ground=_r(g), bottom=_r(off[0]), top=_r(off[1])) if off else
+                    stop("buried_solid", ground=_r(g), bottom=_r(buried[0]), top=_r(buried[1])) if buried else None))
     return out
 
 
@@ -1097,6 +1102,36 @@ def _grade_from_points(buildings: list[dict], points: list, others: list = ()) -
     return sum(sum(v) / len(v) for v in levels.values()) / len(levels), None
 
 
+def _against_ground(buildings: list[dict], grade) -> tuple:
+    """(off, buried) for a grade plane and the solids it is the ground of: off, (bottom, top) when the ground
+    misses them (at or above all of them, or under the lowest of them); buried, (bottom, top) of a solid wholly
+    under the ground and not joined directly under the building. Both None when the ground meets them."""
+    zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
+    lo, hi = (min(zs), max(zs)) if zs else (None, None)
+    off = (lo, hi) if zs and grade is not None and (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None
+    # a solid wholly under the ground is a basement only if it is joined directly under the building: its top
+    # meets the bottom of a solid above it (the building, or a basement already joined to it) and it lies within
+    # that solid's plan. Any other (left at z = 0 when the rest was moved to a survey level, or a part left at its
+    # old level) can't be told from a mistake, and its height (below zero) would drop out of every reading unseen.
+    buried = None
+    if grade is not None and not off:
+        spans = {b["id"]: (min(p[2] for f in b["faces"] for p in f["points"]),
+                           max(p[2] for f in b["faces"] for p in f["points"])) for b in buildings if b.get("faces")}
+        plans = {b["id"]: _projection(b) for b in buildings if b["id"] in spans}
+        joined = {i for i, (lo_, hi_) in spans.items() if hi_ > grade + TOL or hi_ - lo_ <= TOL}   # above, or a slab
+        waiting = [i for i in spans if i not in joined]
+        while True:                     # from the top down: a sub-basement joins under a joined basement
+            found = [i for i in waiting
+                     if ops.unary_union([plans[j] for j in joined if abs(spans[j][0] - spans[i][1]) <= TOL])
+                     .buffer(TOL).contains(plans[i])]
+            if not found:
+                break
+            joined |= set(found)
+            waiting = [i for i in waiting if i not in found]
+        buried = spans[waiting[0]] if waiting else None
+    return off, buried
+
+
 def measure(site: dict, facts: dict) -> dict[str, dict]:
     """Every measurement in measures.yaml, in its order, each with its working, for one site and its lot facts."""
     _SKY.clear()
@@ -1137,27 +1172,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         grade, why_spots = grade_plane(buildings, facts)
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
-    off = (lo, hi) if zs and grade is not None and (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None
-    # a solid wholly under the ground is a basement only if it is joined directly under the building: its top
-    # meets the bottom of a solid above it (the building, or a basement already joined to it) and it lies within
-    # that solid's plan. Any other (left at z = 0 when the rest was moved to a survey level, or a part left at its
-    # old level) can't be told from a mistake, and its height (below zero) would drop out of every reading unseen.
-    buried = None
-    if grade is not None and not off:
-        spans = {b["id"]: (min(p[2] for f in b["faces"] for p in f["points"]),
-                           max(p[2] for f in b["faces"] for p in f["points"])) for b in buildings if b.get("faces")}
-        plans = {b["id"]: _projection(b) for b in buildings if b["id"] in spans}
-        joined = {i for i, (lo_, hi_) in spans.items() if hi_ > grade + TOL or hi_ - lo_ <= TOL}   # above, or a slab
-        waiting = [i for i in spans if i not in joined]
-        while True:                     # from the top down: a sub-basement joins under a joined basement
-            found = [i for i in waiting
-                     if ops.unary_union([plans[j] for j in joined if abs(spans[j][0] - spans[i][1]) <= TOL])
-                     .buffer(TOL).contains(plans[i])]
-            if not found:
-                break
-            joined |= set(found)
-            waiting = [i for i in waiting if i not in found]
-        buried = spans[waiting[0]] if waiting else None
+    off, buried = _against_ground(buildings, grade)
     why_grade = (why_spots if why_spots else stop("no_ground") if grade is None else
                  stop("ground_off_building", ground=_r(grade), bottom=_r(off[0]), top=_r(off[1])) if off else
                  stop("buried_solid", ground=_r(grade), bottom=_r(buried[0]), top=_r(buried[1])) if buried else
@@ -1572,7 +1587,11 @@ def _two_sides(found: list) -> list:
     if abs(a[0] - b[0]) > TOL:
         return [a, b] if a[0] < b[0] else [b, a]
     key = lambda f: (round(f[1][0][0], 6), round(f[1][0][1], 6))    # noqa: E731  (the lot-line end of the reading)
-    return sorted([a, b], key=key)
+    first, second = sorted([a, b], key=key)
+    # the lines by position, the values still in order: the smaller side yard is never more than the larger
+    # (review round 19; the two differ by at most TOL here)
+    low, high = sorted((a[0], b[0]))
+    return [(low, *first[1:]), (high, *second[1:])]
 
 
 def _turn(a, b) -> float:

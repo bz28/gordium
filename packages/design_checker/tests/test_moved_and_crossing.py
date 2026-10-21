@@ -561,3 +561,21 @@ def test_an_interior_row_is_named_by_its_rule_and_asks_for_the_facts_it_waits_fo
     assert both["needs"] == ["parking_spaces", "sleeping_rooms"]
     assert both["reason"] == "Needs parking spaces and bedrooms, which the model doesn't show"
 
+
+def test_a_side_yards_own_verdict_is_the_checkers_and_never_looser_than_named_result():
+    """Review round 19, P2: one side yard with readings of its own, in a rule the other side fails: its verdict is
+    the checker's (check.side_verdicts), by the same rule as a whole rule. Eave readings named, but two values under
+    each (11 / 12 as an eave, 10.5 / 11.5 not: which lot lines are side lines, an unnamed question): never complies
+    (named_result is None for it); passes under every reading, so provisional, needs review."""
+    from design_checker.check import named_result, side_verdicts
+    measured = {"side_yard_smaller": {"value": None, "readings": [
+        {"reading": "a", "value": 11.0, "named": {"model#eave": "eave"}},
+        {"reading": "b", "value": 12.0, "named": {"model#eave": "eave"}},
+        {"reading": "a", "value": 10.5, "named": {"model#eave": "not_eave"}},
+        {"reading": "b", "value": 11.5, "named": {"model#eave": "not_eave"}}]},
+        "side_yard_larger": {"value": 8.0, "readings": []}}
+    rule = {"id": "R-1b.side_yards", "kind": "rule", "check": "side_yard_smaller >= 10 and side_yard_larger >= 10"}
+    assert named_result({**rule, "check": "side_yard_smaller >= 10"}, measured, {}) is None
+    got = side_verdicts(rule, measured, {})
+    assert set(got) == {"side_yard_smaller"} and got["side_yard_smaller"]["named"] is False
+    assert got["side_yard_smaller"]["result"] == "pass" and "every reading" in got["side_yard_smaller"]["text"]

@@ -1312,3 +1312,44 @@ def test_adding_a_detached_solid_never_lowers_the_first_candidates_height_or_sto
             assert all(v == b["value"] for v in first), (name, b, a)
             if a["value"] is None and a["readings"]:
                 assert first, (name, b, a)                       # the house's own reading is always listed
+
+
+def test_a_stop_on_the_sites_ground_holds_for_every_candidate_building():
+    """Review round 19, P0: two floor blocks at a survey level (400 to 420 ft) with a wing touching them, on spot
+    grades at 400, and a leftover solid still at 0 to 10 ft elsewhere on the lot: wholly under the ground, not
+    joined under the building (buried_solid). The height waited; the stories took 2 from the house-and-wing
+    candidate, whose own grade ignored that stop. A stop on the site's ground holds for every candidate."""
+    floors_ = [floor(10, 25, 35, 65, z0=400 + 10 * i, z1=410 + 10 * i, id=f"floor {i + 1}") for i in range(2)]
+    wing = box(35, 30, 45, 50, 400, 410, id="wing")
+    leftover = box(15, 75, 25, 85, 0, 10, id="leftover")
+    spots = _ring_points(10, 25, 35, 65, 400) + _ring_points(35, 30, 45, 50, 400)
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "main_building": "floor 1",
+             "grade_points": spots, "stories": 2}
+    m = measure(site(RECT, *floors_, wing, leftover), facts)
+    for name in ("building_height", "stories"):
+        assert m[name]["value"] is None and "under the ground" in (m[name]["reason"] or ""), (name, m[name])
+
+
+def test_each_candidates_own_grade_is_checked_against_its_solids():
+    """Round 19, P0 (the second half): a candidate's own grade plane, found from the spot grades at its walls, is
+    checked against its own solids as the site's is: spot grades at 30 ft around a house and wing that stand at 0
+    to 20 ft put the ground above the building: never a count."""
+    house = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"floor {i + 1}") for i in range(2)]
+    wing = box(35, 30, 45, 50, 0, 10, id="wing")
+    from model_measurement.measure import _assemblies, _candidate_grades, _stacks
+    stacks = _stacks(house + [wing])
+    main = next(b for b in stacks if b.get("parts"))
+    cands = _assemblies(main, [b for b in stacks if b is not main])
+    facts = {"grade_points": _ring_points(10, 25, 35, 65, 30) + _ring_points(35, 30, 45, 50, 30)}
+    (g, why), = _candidate_grades(cands, stacks, facts, 0.0, None)
+    assert why and "doesn't meet the buildings" in why, why
+
+
+def test_two_side_yards_within_the_tie_band_keep_the_smaller_no_larger_than_the_larger():
+    """Review round 19, P2: walls 10.005 ft from the west line and 9.997 ft from the east (on the 50 ft lot): within
+    0.01 ft, so the lines go by position (west first), but the values stay in order: smaller 9.997 <= larger
+    10.005, never the other way round."""
+    m = measure(site(RECT, box(10.005, 25, 40.003, 65)), FACTS)
+    assert m["side_yard_smaller"]["value"] <= m["side_yard_larger"]["value"], (m["side_yard_smaller"]["value"],
+                                                                               m["side_yard_larger"]["value"])
+    assert m["side_yard_smaller"]["points"][0][0] == 0.0          # the west line: by position, whatever the values

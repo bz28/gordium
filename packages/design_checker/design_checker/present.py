@@ -603,16 +603,20 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             holds = _holds(expr, values, row)
             st = COMPLIES if holds is True else FAILS if holds is False else REVIEW
             m = measured.get(node.left.id) or {}
-            if st == REVIEW and m.get("value") is None and m.get("readings") and (status != COMPLIES or not why):
-                # this side has readings of its own while the rule was decided another way (the other side fails):
-                # the every-reading rule for this side alone, and always a reason (stress F12)
-                here = [dict(values, **{node.left.id: r["value"]}) for r in m["readings"]]
-                got = {_evaluate(expr, c) for c in here}
-                named = all(r.get("named") for r in m["readings"])
-                if named and got == {True}:
-                    st, why = COMPLIES, "Complies under every reading of the open question"
-                elif named and got == {False}:
-                    st, why = FAILS, "Does not comply under any reading of the open question"
+            side = (row.get("Sides") or {}).get(node.left.id)
+            if st == REVIEW and side and (status != COMPLIES or not why):
+                # this side has readings of its own while the rule was decided another way (the other side
+                # fails): the checker's verdict for this side (check.side_verdicts), and always a reason (F12)
+                here = side.get("combos") or None
+                if side["named"] and side["result"] == "pass":
+                    st, why = COMPLIES, _user_text(side["text"][:1].upper() + side["text"][1:])
+                elif side["named"] and side["result"] == "fail":
+                    st, why = FAILS, _user_text(side["text"][:1].upper() + side["text"][1:])
+                elif side["named"]:
+                    why = _user_text("Needs review: " + side["text"] + " · confirm with the zoning office")
+                elif side["text"]:              # every reading of an unnamed question: provisional, review
+                    why = _user_text(("Complies " if side["result"] == "pass" else "Fails ") +
+                                     side["text"].split(" ", 1)[1] + " the law allows; confirm with the zoning office")
                 else:
                     why = _user_text(m.get("reason") or "the readings give different values")
         raised = []                 # the rule complies another way it allows (the §325-16C height bonus): its

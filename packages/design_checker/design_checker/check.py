@@ -269,6 +269,38 @@ def waits_on_interior(row: dict, rule: dict, measured: dict, allowed: dict) -> b
             and not fails_whatever(rule, measured, allowed))
 
 
+SIDES = ("side_yard_smaller", "side_yard_larger")
+
+
+def side_verdicts(rule: dict, measured: dict, allowed: dict) -> dict:
+    """Each side yard's own verdict, for a rule that limits both (the panel shows each on its own row), when that
+    side has readings instead of a value: the checker decides it, never the panel (review round 19). The same rule
+    as for a whole rule: over named readings only (named_result) it complies or fails; over any other reading
+    (which lot lines are side lines) it is provisional, needs review, "passes / fails under every reading"
+    (every_reading). {measure: {"result", "text", "named", "combos"}}; a side with a value isn't listed."""
+    if not rule.get("check") or rule.get("kind") != "rule":
+        return {}
+    body = formula.parse(rule["check"]).body
+    compares = [n for n in ast.walk(body) if isinstance(n, ast.Compare) and isinstance(n.left, ast.Name)
+                and n.left.id in SIDES]
+    out = {}
+    for c in compares:
+        m = measured.get(c.left.id) or {}
+        if m.get("value") is not None or not m.get("readings") or c.left.id in out:
+            continue
+        side = {"id": rule["id"], "kind": "rule", "check": ast.unparse(c)}
+        named = named_result(side, measured, allowed)
+        if named:
+            out[c.left.id] = {"result": named["result"], "text": named["text"], "named": True,
+                              "combos": named["combos"]}
+            continue
+        found = every_reading(side, measured, allowed)
+        out[c.left.id] = {"result": "mixed" if not found else found[0], "named": False,
+                          "text": found[1] if found else None,
+                          "combos": (readings_of(side, measured, allowed) or {}).get("combos")}
+    return out
+
+
 def crossing(rule: dict, measured: dict) -> str | None:
     """"The main building crosses the side lot line" when a building this rule measures stands partly off the lot
     (its measurements' `crossings`, each building its own): the rule does not comply whatever the readings or
@@ -497,6 +529,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                          f"{'is' if len(gone) == 1 else 'are'}")
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
+        r["Sides"] = side_verdicts(by_id[r["Rule id"]], measured, allowed)
         r["Crossing"] = crossing(by_id[r["Rule id"]], measured)
         if r["Crossing"]:            # a building on the neighbour's land: no reading or answer can clear it
             r["Fails"], r["Line"] = True, f"{short(r['Requirement'])}: {r['Crossing']}"
