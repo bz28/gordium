@@ -8,7 +8,7 @@ output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper
 (2 ft per line everywhere, carried up in d43e11f); F4 in #12 (the same_id stop, b5a899b); F6, F7 in #18 (ca4f6c3,
-4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). Open: F10 (for #14), F11 and F12 (for #18).
+4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). None is open.
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -253,15 +253,13 @@ def test_F9_the_spot_grade_reason_is_the_same_whichever_way_the_outlines_run():
     assert reasons[0] == reasons[1] == reasons[2], reasons
 
 
-# ---- F10 (P0): a floor block above a gap isn't counted, so a typed count below the blocks drawn stands ----------
+# ---- F10 (P0, fixed by #14's stories definition): a floor block above a gap isn't counted, so a typed count below the blocks drawn stands ----------
 
 F10_CASE = ("sample_survey", [{"op": "delete_floor", "which": "middle"},
                               {"op": "floor_wing", "heights": [9.0], "face": 1, "depth": 10, "below": 0.0,
                                "typed": "below"}])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F10 (for #14's stories definition): blocks above a gap aren't counted; a typed count below them stands")
 def test_F10_a_typed_count_below_the_floor_blocks_drawn_never_complies_even_with_a_gap():
     """Two edits: the surveyed sample lot's starting house with its middle floor block deleted (floor 1 at 0-11'-8",
     floor 3 left where it was, 23'-4" to 35'-0"), and a 9 ft plain wing on its rear wall with 1 typed. Two floor
@@ -280,15 +278,13 @@ def test_the_oracle_on_F10_two_blocks_drawn_and_one_typed_can_not_pass():
     assert oracle.verdicts(d)["R-1b.stories"]["verdict"] == oracle.NOT_PASS
 
 
-# ---- F11 (P3, for #18): a rotated house's side yard rows are named by compass one way, narrower/wider the other -
+# ---- F11 (P3, fixed in #18 a36ccff): a rotated house's side yard rows are named by compass one way, narrower/wider the other -
 
 F11_CASE = ("sample_survey", [{"op": "rotate", "deg": 4.7},
                               {"op": "add_roof", "kind": "roof", "axis": 1, "over": 1.0, "fascia": 1.0, "inset": 3.0,
                                "rise": 8.0}])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F11: side yard row names (compass or narrower/wider) depend on the outline order")
 def test_F11_the_side_yard_rows_are_named_the_same_whichever_way_the_outlines_run():
     """The surveyed sample lot's starting house rotated 4.7 degrees, a gable roof solid on it with eaves 1 ft past
     the side walls. Drawn as given, the side yard rows are "Side yard, narrower" and "Side yard, wider"; with each
@@ -300,15 +296,13 @@ def test_F11_the_side_yard_rows_are_named_the_same_whichever_way_the_outlines_ru
     assert names[0] == names[1] == names[2], names
 
 
-# ---- F12 (P2, for #18): a side yard row needs review and gives no reason ------------------------------------------
+# ---- F12 (P2, fixed in #18 a36ccff): a side yard row needs review and gives no reason ------------------------------------------
 
 F12_CASE = ("sample_tax", [{"op": "move_floor", "k": 1, "dx": -3.0, "dy": -3.75},
                            {"op": "add_roof", "kind": "mansard", "axis": 1, "over": 0.5, "fascia": 0.5, "inset": 3.5,
                             "rise": 6.75}])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F12: 'Side yard, East' needs review with no reason (a moved floor and a mansard)")
 def test_F12_every_side_yard_row_that_needs_review_says_why():
     """Two edits on the tax-map sample lot: floor 2 moved on its own 3 ft west and 3'-9" toward the street, then a
     mansard on the top floor reaching 6 in. past its walls. "Side yard, East" says needs review, 11'-6" to 12'-0",

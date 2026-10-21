@@ -141,9 +141,9 @@ def test_the_windows_commands_are_the_real_ones():
     assert "Add python.exe to PATH" in WINDOWS and "git-scm.com" in WINDOWS
 
 
-def test_the_five_rhino_commands_match_install_py():
+def test_the_six_rhino_commands_match_install_py():
     commands = _installed_commands()
-    assert len(commands) == 5
+    assert len(commands) == 6 and "GordiumPanel" in commands      # the sixth: for Rhino's startup commands
     for alias, script in commands.items():
         assert f"Gordium: {alias} -> {script}" in INSTALL, alias       # the exact line install.py prints
     named = set(re.findall(r"\bGordium[A-Z]\w+", GUIDE))

@@ -154,7 +154,6 @@ def _side_row_names(v):
 
 
 MATCHERS["F11"] = _side_row_names
-# open: F10 (#14), F11 (#18); F6-F9 fixed in #18: a return of those fails CI
 def _side_review_no_reason(v):
     """F12 (open, for #18): a side yard row needs review with no reason, on a house with a roof solid."""
     return v["invariant"] == "f" and v["rule"] == "R-1b.side_yards" and v.get("what") == \
@@ -162,7 +161,7 @@ def _side_review_no_reason(v):
 
 
 MATCHERS["F12"] = _side_review_no_reason
-KNOWN = {"F10": _gapped_floor_blocks, "F11": _side_row_names, "F12": _side_review_no_reason}
+KNOWN = {}        # every finding (F1-F12) is fixed: a return of any of them fails CI
 
 
 def known(v):

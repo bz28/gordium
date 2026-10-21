@@ -98,7 +98,7 @@ C4 [both] **Grade recomputed after every footprint change** from the terrain, or
 
 C5 [code] **"Existing grade" selected** → Height and Stories need review: "Measured from existing grade; code uses finished grade".
 
-C6 [code] **Roof not flat** → Height needs review: "Roof not flat; this roof's height rule isn't checked in this release".
+C6 [code] **Pitched and mansard roofs** (PR #18) → the height is measured as §325-3 defines it for each (a pitched roof: midway between eave and ridge; a mansard: its highest level) under every reading of which eave counts; it complies only if it complies under every reading, does not comply only if it fails under every one, and otherwise needs review naming the readings.
 
 C7 [code] **Height** follows §325-3 verbatim. It is measured from the grade plane (the average of finished ground level at the exterior walls, per the GRADE PLANE definition) to the highest level of a flat roof. Where roof sections vary, the highest section counts.
 
@@ -138,8 +138,8 @@ D3 [code] **Summary rule.** One function produces the summary used by the panel,
 - Examples: "7 need review · 3 comply · 3 not checked" (board 2) and "1 does not comply · 2 need review · 7 comply · 3 not checked" (board 4).
 
 D4 [both] **Columns.**
-- Mark | Item | Proposed | Req. ≥/≤ | Margin.
-- The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Margins read like "+11'-7"", "−2'-6"", "at limit", "+0.06%". Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns.
+- Mark | Item | Proposed | Req. ≥/≤ | Delta (renamed from Margin, MVP list 2026-10-20).
+- The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Deltas read like "+11'-7"", "−2'-6"", "at limit", "+0.06%". Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns.
 - The value columns are sized to their content and never truncated; only Item truncates. Minimum panel width 320.
 
 D5 [code] **Groups,** in order: Does not comply · Needs review · Complies (Site rows included, labelled "Site · …") · Not checked · Not covered by this rulebook. Section headers aren't selectable.

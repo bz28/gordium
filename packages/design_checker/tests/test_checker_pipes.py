@@ -91,6 +91,18 @@ def test_the_plugin_never_touches_a_pipe_or_a_rhino_event_directly():
     assert "logic.sweep(LEFTOVERS, STATE, _release)" in src and json.dumps("gordium_leftovers") in src
 
 
+def test_clearing_the_notice_never_turns_the_document_hooks_back_on():
+    """off() turns the document hooks off, then clears the notice; overlay() turns them back on when they're off,
+    so clearing the notice through it left them attached after every off() (Rhino, 2026-10-21:
+    no_freeze_in_rhino.py claim 5 counts the handlers)."""
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    for name in ("_clear_toast", "_toast_tick"):
+        body = src.split("def %s(" % name, 1)[1].split("\ndef ", 1)[0]
+        assert "= overlay()" not in body and 'STATE.get("overlay")' in body, name
+    overlay = src.split("def overlay(", 1)[1].split("\ndef ", 1)[0]
+    assert "documents(True)" in overlay           # why: the reason clearing must not go through it
+
+
 def test_the_sweep_forgets_the_plugins_handles_but_keeps_what_the_architect_asked_for():
     """Review round 1 (P1): after a reload that keeps the plugin's state, the state must not say a detached hook
     is attached (live mode would look on while edits go unchecked, an old PASS staying on the panel)."""
@@ -183,3 +195,90 @@ def test_releasing_a_later_copys_panel_closes_its_form():
     assert form.closed
     ns["_release"]("panel_parts", None)                     # nothing there: nothing to do, never an error
     ns["_release"]("panel_parts", {})
+
+
+def test_a_floating_panel_is_placed_once_never_on_every_check():
+    """Round 1: panel() resized and moved the floating panel to the right edge on every check (live mode: after
+    every edit), so the architect couldn't move it. The real panel(), run twice with stand-ins for Rhino: the
+    window is placed the first time only."""
+    import ast
+    import types
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "panel")
+    fits = []
+    host = object()
+    form = types.SimpleNamespace(host=host, Visible=True, Close=lambda: None)
+    ui = types.SimpleNamespace(open_dock=lambda dock: None, DockHost=lambda dock, h: None,
+                               make_panel=lambda actions, dock_host: {"form": form},
+                               fit_floating=lambda h, window: fits.append(h) or "floating")
+    doc = types.SimpleNamespace(RuntimeSerialNumber=1)
+    rhino = types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc),
+                                  UI=types.SimpleNamespace(RhinoEtoApp=types.SimpleNamespace(
+                                      MainWindowForDocument=lambda d: None)))
+    ns = {"STATE": {}, "LEFTOVERS": {}, "ui": ui, "logic": logic, "Rhino": rhino, "_actions": lambda: None,
+          "register_dock": lambda: "dock", "sc": types.SimpleNamespace(sticky={"gordium_dock_hosts": {1: host}})}
+    exec(compile(ast.Module([fn], []), "gordium_rhino", "exec"), ns)
+    first = ns["panel"]()
+    second = ns["panel"]()
+    assert first is second and first["placed"] == "floating"
+    assert fits == [host]                                    # placed once; the second check leaves it where it is
+    assert logic.place_panel_now(None) and not logic.place_panel_now("floating")
+    assert not logic.place_panel_now("docked")
+
+
+def _bad_calls(src: str) -> list:
+    """Every call in `src` to one of its own top-level functions that its definition can't take: bound against a
+    stub with the same signature (positional and keyword arguments, defaults), so a misspelt keyword or a wrong
+    number of arguments is found. Only calls that unpack *args or **kwargs are left out (their arity is unknown)."""
+    import ast
+    import inspect
+    tree = ast.parse(src)
+    stubs = {}
+    for f in (n for n in tree.body if isinstance(n, ast.FunctionDef)):
+        stub = ast.FunctionDef(name=f.name, args=f.args, body=[ast.Pass()], decorator_list=[], returns=None,
+                               type_params=[])
+        stub.args = ast.arguments(posonlyargs=f.args.posonlyargs, args=f.args.args, vararg=f.args.vararg,
+                                  kwonlyargs=f.args.kwonlyargs, kw_defaults=[None if d is None else ast.Constant(0)
+                                                                            for d in f.args.kw_defaults],
+                                  kwarg=f.args.kwarg, defaults=[ast.Constant(0) for _ in f.args.defaults])
+        for a in stub.args.posonlyargs + stub.args.args + stub.args.kwonlyargs:
+            a.annotation = None
+        for a in (stub.args.vararg, stub.args.kwarg):
+            if a is not None:
+                a.annotation = None
+        space = {}
+        exec(compile(ast.fix_missing_locations(ast.Module([stub], [])), "<stub>", "exec"), space)
+        stubs[f.name] = inspect.signature(space[f.name])
+    bad = []
+    for call in (c for c in ast.walk(tree) if isinstance(c, ast.Call) and isinstance(c.func, ast.Name)):
+        sig = stubs.get(call.func.id)
+        if sig is None or any(isinstance(a, ast.Starred) for a in call.args) or any(k.arg is None for k in call.keywords):
+            continue
+        try:
+            sig.bind(*[None] * len(call.args), **{k.arg: None for k in call.keywords})
+        except TypeError as e:
+            bad.append((call.func.id, call.lineno, str(e)))
+    return bad
+
+
+def test_a_call_with_a_misspelt_keyword_or_too_many_arguments_is_found():
+    """enter-needs review round 2: the arity check skipped every call with keywords."""
+    assert _bad_calls("def run_check(doc, report=True):\n    pass\nrun_check(reprt=False)\n")
+    assert _bad_calls("def f(a, *, b=1):\n    pass\nf(1, 2)\n")
+    assert not _bad_calls("def run_check(doc, report=True):\n    pass\nrun_check(1, report=False)\n")
+    assert not _bad_calls("def f(*a, **k):\n    pass\nf(1, 2, x=3)\n")
+
+
+def test_the_plugin_has_no_two_top_level_definitions_with_one_name():
+    """enter-needs review round 1: a second `_yes_no(prompt)` replaced the existing `_yes_no(prompt, current)`, so
+    Edit site…'s "Corner lot?" prompt raised TypeError. No top-level name is defined twice, and every call to one of
+    the plugin's own top-level functions binds to its definition (positional and keyword arguments)."""
+    import ast
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    defs = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
+    names = [n.name for n in defs]
+    assert len(names) == len(set(names)), sorted(n for n in set(names) if names.count(n) > 1)
+    assert not _bad_calls(src), _bad_calls(src)
+
+

@@ -683,6 +683,9 @@ def test_a_one_sided_overhang_is_named_by_how_far_it_reaches_wherever_the_house_
     # the roof solid stands 1.5 ft in from one wall, its soffit 1.5 ft past its own walls: 3 ft past that wall
     walls, roof_x = ((10.5, 48), (12, 49.5)) if not mirror else ((12, 49.5), (10.5, 48))
     res = run(floors(walls[0], 30, walls[1], 70, 2) + [roof(roof_x[0], 30, roof_x[1], 70, 20, 30, 1.5, 0.0)])
-    reasons = [i["reason"] or "" for i in rows(res, "R-1b.side_yards")]
+    # (each side yard is its own row with the checker's own verdict for it: the side the overhang reaches toward
+    # needs the confirmation; the other complies to the full outline either way)
+    got = rows(res, "R-1b.side_yards")
+    reasons = [i["reason"] or "" for i in got if i["status"] == present.REVIEW]
     assert reasons and all("3'-0\" past the walls toward the side yard" in t for t in reasons), reasons
-    assert not any("1'-6\"" in t for t in reasons), reasons
+    assert not any("1'-6\"" in (i["reason"] or "") for i in got), got

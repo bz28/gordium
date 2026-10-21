@@ -74,6 +74,7 @@ def test_a_design_using_the_height_bonus_shows_the_bonus_limit_and_the_raised_ya
     assert "Front yard ≥ 27'-0\"; Side yards ≥ 12'-0\"; Rear yard ≥ 32'-0\"" in h["reason"]
     for name, req in (("Front yard", "27'-0\""), ("Side yard, West", "12'-0\""), ("Rear yard", "32'-0\"")):
         assert (v[name]["required"], v[name]["margin"]) == (req, "at limit"), name   # not "+2'-0"": the bonus needs it
+        assert v[name]["delta"] == "at limit", name             # round 1: the Delta is the raised one's too
 
 
 def test_a_fix_is_never_rounded_short():
@@ -129,6 +130,7 @@ def test_raised_yards_keep_their_detail_and_on_a_tax_map_lot_need_review_and_say
     assert t["Building height"]["status"] == present.REVIEW
     assert "at worst Front yard 25'-0\" against 27'-0\"" in t["Building height"]["reason"]   # the part that fails
     assert t["Front yard"]["status"] == present.REVIEW and t["Front yard"]["required"] == "27'-0\""
+    assert t["Front yard"]["delta"] == "up to 2'-0\" short"     # round 1: the raised 27'-0", the line ±2'-0"
 
 
 def test_a_chart_heading_row_is_quoted_in_its_own_words():
@@ -175,6 +177,7 @@ def test_a_yard_already_in_review_is_raised_too():
     v = _bonus_at([[14, 26.5], [46, 26.5], [46, 85], [38, 85], [38, 46.5], [14, 46.5]], [12, 12, 12])   # 36 ft
     f = v["Front yard"]
     assert f["status"] == present.REVIEW and f["required"] == "26'-0\"" and f["margin"] == "+0'-6\""
+    assert f["delta"] == "up to 1'-6\" short"                   # round 1: 26'-6" against the raised 26'-0", ±2'-0"
     assert "against 26'-0\"" in f["reason"]
 
 
