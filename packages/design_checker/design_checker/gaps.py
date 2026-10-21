@@ -59,42 +59,62 @@ def chart_gaps(j: Path, zone: str, rules: list[dict]) -> list[dict]:
     return out
 
 
+LEFT_OUT = re.compile(r"^it points to (\S+), which was left out of the drafter's input for length")
+
+
 def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[dict]:
-    """For an AI-drafted zone: the law pieces the drafting run couldn't draft (failed, or no rule with a reason), and
-    every entry the drafting log sends to a person that concerns this zone: one for this district, for every district
-    (general), or for the unit as a whole (a template rejected everywhere, a section left out for length). An entry
-    about chart cells is left to chart_gaps only when chart_gaps lists every one of its cells (none is cited): a
-    cited cell doesn't mean the entry's own requirement (§325-19E's 75% of that coverage) is checked."""
+    """For an AI-drafted zone: one item per drafting unit that leaves something for a person here, so the list stays
+    readable (it grew to 134 near-identical lines) and nothing drops out. In each: the unit couldn't be drafted
+    (failed, or no rule with a reason); and the drafting log's entries for a person about this zone (its district,
+    every district, or the unit as a whole), with the sections left out of the drafter's input for length named once.
+    A law piece that names its own districts (the log's scope) lists nothing outside them. A chart unit's entry about
+    a cell that a rule of the same unit cites is a template that didn't fit where a sibling did: left out. A law
+    piece's entry about a cited cell is kept (§325-19E's 75% of the coverage the chart rule checks is its own
+    requirement). An entry about cells no rule cites is chart_gaps' item."""
     log_file = j / "5_zoning_rules/drafted/records/drafting_log.yaml"
     if not (is_ai_drafted(j, zone) and log_file.is_file()):
         return []
     units = (load(log_file) or {}).get("units") or {}
-    sources = [s for r in rules or [] for s in r.get("sources") or [] if isinstance(s, dict)]
-    out, seen = [], set()
+    sources = [(r["id"], s) for r in rules or [] for s in r.get("sources") or [] if isinstance(s, dict) and "cell" in s]
+
+    def cited(cell, by=None):
+        c = {"file": "zoning_charts_2026-04.pdf", "page": cell[0], "section": cell[1], "row": cell[2], "column": cell[3],
+             "row_lines": []}
+        return any(_cites(s, c) for rid, s in sources if by is None or rid in by)
+    out = []
     for unit, e in units.items():
-        if not unit.startswith("chart-"):
-            if e.get("failed"):
-                out.append({"id": f"drafting.{unit}", "section": f"§{unit}", "name": "not drafted",
-                            "why": f"The AI draft failed ({e['failed']}): check by hand"})
-            elif not e.get("rules") and e.get("reason"):
-                out.append({"id": f"drafting.{unit}", "section": f"§{unit}", "name": "no rule drafted",
-                            "why": " ".join(str(e["reason"]).split()) + " Check by hand."})
-        for n, x in enumerate(e.get("unresolved") or []):
-            rule = str(x.get("rule", ""))
+        if e.get("scope") and zone not in e["scope"]:
+            continue                                    # the law piece doesn't reach this district
+        chart = unit.startswith("chart-")
+        lines, left_out, seen = [], [], set()
+        if not chart and e.get("failed"):
+            lines.append(f"The AI draft failed ({e['failed']}): check by hand.")
+        elif not chart and not e.get("rules") and e.get("reason"):
+            lines.append("No rule drafted: " + " ".join(str(e["reason"]).split()) + " Check by hand.")
+        for x in e.get("unresolved") or []:
+            rule, why = str(x.get("rule", "")), " ".join(str(x.get("why", "")).split())
             if not (rule.split(".")[0] in (zone, "general") or rule == unit or rule.startswith(f"{unit}.")):
                 continue
-            if str(x.get("why", "")).startswith("chart page"):
+            if why.startswith("chart page"):
                 continue                                # an uncited cell: chart_gaps lists it while it is uncited
-            cells = [c for c in x.get("cells") or [] if district_name(str(c[3])) == zone] if x.get("cells") else None
-            if cells and not any(_cites(s, {"file": "zoning_charts_2026-04.pdf", "page": c[0], "section": c[1], "row": c[2],
-                                            "column": c[3], "row_lines": []}) for c in cells for s in sources if "cell" in s):
+            cells = [c for c in x.get("cells") or [] if district_name(str(c[3])) == zone]
+            if cells and not any(cited(c) for c in cells):
                 continue                                # every cell uncited: chart_gaps lists them
-            why = " ".join(str(x.get("why", "")).split())
-            if (rule, why) in seen:
+            if cells and chart and any(cited(c, set(e.get("rules") or [])) for c in cells):
+                continue                                # a sibling template of the same chart unit checks the cell
+            if m := LEFT_OUT.match(why):
+                left_out.append(m.group(1))
                 continue
-            seen.add((rule, why))
-            out.append({"id": f"drafting.{unit}.{n}", "section": f"§{unit}" if not unit.startswith("chart-") else unit,
-                        "name": rule, "why": why})
+            if (rule, why) not in seen:
+                seen.add((rule, why))
+                lines.append(f"{rule}: {why}")
+        if left_out:
+            lines.append(f"It points to {len(left_out)} section{'s' if len(left_out) != 1 else ''} left out of the "
+                         f"drafter's input for length (a person checks them): {', '.join(sorted(set(left_out)))}.")
+        if lines:
+            out.append({"id": f"drafting.{unit}", "section": unit if chart else f"§{unit}",
+                        "name": f"{len(lines)} thing{'s' if len(lines) != 1 else ''} for a person",
+                        "why": " · ".join(lines)})
     return out
 
 

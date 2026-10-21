@@ -140,13 +140,22 @@ def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_check
     """Review round 1: only entries named "<zone>." without cells were listed. §325-19E's 75% coverage for R-3a carries
     the coverage cell, which R-3a's own 35% rule cites, so it vanished; the template rejected for every district
     (the footnoted lot-size rows: multiple family, group house) and the sections left out for length are named for
-    the unit, so they vanished in every zone."""
+    the unit, so they vanished in every zone. Review round 2: listing each entry grew the list to 134 lines (97 for
+    §325-20D's left-out sections), with chart templates that didn't fit a cell a sibling rule checks, and §325-19E in
+    districts it doesn't reach. Now: one item per unit, nothing dropped."""
     from design_checker.gaps import drafting_gaps
     from rule_format.rulebook import zone_rules
-    names = {g["name"] for g in drafting_gaps(J, "R-3a", zone_rules(J, "R-3a"))}
-    assert "R-3a.325_19e_r3_abut_r1_max_coverage" in names                  # its cell is cited by another rule
-    assert "325-19E.325_19e_r3_abut_r1_min_lot_area_footnoted_rows" in names  # rejected for every district
-    assert "325-20D" in names                                               # a section left out for length
-    whys = [g["why"] for g in drafting_gaps(J, "R-3a", zone_rules(J, "R-3a"))]
-    assert any("fraternity_sorority_group_house" in w for w in whys)        # a group house next to R-1: not checked
+    r3a = {g["id"]: g for g in drafting_gaps(J, "R-3a", zone_rules(J, "R-3a"))}
+    assert "R-3a.325_19e_r3_abut_r1_max_coverage" in r3a["drafting.325-19E"]["why"]     # its cell is cited elsewhere
+    assert "325_19e_r3_abut_r1_min_lot_area_footnoted_rows" in r3a["drafting.325-19E"]["why"]
+    assert "fraternity_sorority_group_house" in r3a["drafting.325-19E"]["why"]   # a group house next to R-1
+    assert "97 sections left out" in r3a["drafting.325-20D"]["why"]               # named once, in one item
+    for zone in ("R-1a", "R-2a", "RU"):
+        items = drafting_gaps(J, zone, zone_rules(J, zone))
+        ids = [g["id"] for g in items]
+        assert len(ids) == len(set(ids)) <= 15, (zone, len(ids))                 # one item per unit
+        assert "drafting.325-19E" not in ids                                      # §325-19E doesn't reach it
+        assert not any("max_lot_coverage_first" in g["why"] for g in items)        # a sibling checks that cell
     assert drafting_gaps(J, "R-1b", zone_rules(J, "R-1b")) == []          # the hand R-1b: not the drafting log's
+
+
