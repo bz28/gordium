@@ -97,3 +97,48 @@ def test_fails_closed_without_measure_descriptions():
         evaluate("rear_yard <= 50", {"rear_yard": 5}, {})              # undescribed measure = unusable
     with pytest.raises(MissingMeasure):
         evaluate('use == "church"', {"use": "church"}, {"use": "text"})  # text with no allowed list
+
+
+# ---- at the limit complies: exact decimals, and float noise from the geometry is not a violation -------------
+
+@pytest.mark.parametrize("text, values, expected", [
+    ("rear_yard >= 0.2 * lot_depth", {"rear_yard": 26.4, "lot_depth": 132}, True),       # 0.2*132 in floats: 26.400000000000002
+    ("rear_yard >= 0.2 * lot_depth", {"rear_yard": 26.39, "lot_depth": 132}, False),
+    ("rear_yard >= 0.2 * lot_depth", {"rear_yard": 26.4 - 1e-5, "lot_depth": 132}, False),  # a hundred-thousandth short
+    ("building_area <= 0.35 * lot_area", {"building_area": 1750.7, "lot_area": 5002}, True),
+    ("building_area <= 0.35 * lot_area", {"building_area": 1750.71, "lot_area": 5002}, False),
+    ("building_height <= 35 + 0.1 * 30", {"building_height": 38.0}, True),
+    ("building_height <= 35 + 0.1 * 30", {"building_height": 38.01}, False),
+    ("rear_yard >= 0.1 + 0.2", {"rear_yard": 0.3}, True),
+    ("rear_yard >= 26.4", {"rear_yard": 26.399999999999995}, True),                       # geometry's float noise
+    ("rear_yard > 26.4", {"rear_yard": 26.4}, False),                                     # "more than": not at the limit
+    ("rear_yard < 26.4", {"rear_yard": 26.400000000000002}, False),
+    ("rear_yard > 26.4", {"rear_yard": 26.41}, True),
+])
+def test_a_design_exactly_at_a_limit_complies_and_anything_measurably_over_fails(text, values, expected):
+    assert evaluate(text, values, KINDS) is expected
+
+
+def test_at_the_limit_complies_for_every_whole_depth_and_area():
+    """For every whole lot depth and area, a design measured exactly at the limit (as the float nearest it, the
+    way the geometry hands it over) complies, and one a hundredth over fails."""
+    from fractions import Fraction
+    for n in range(1, 3001):
+        for share, text, over in ((Fraction("0.2"), "rear_yard >= 0.2 * lot_depth", -0.01),
+                                  (Fraction("0.25"), "rear_yard >= max(min(0.25 * lot_depth, 50), 0)", -0.01),
+                                  (Fraction("0.35"), "building_area <= 0.35 * lot_area", 0.01)):
+            name = "rear_yard" if "rear" in text else "building_area"
+            at = float(share * n) if "50" not in text else float(min(share * n, 50))
+            other = {"lot_depth": n, "lot_area": n}
+            assert evaluate(text, {name: at, **other}, KINDS) is True, (text, n)
+            assert evaluate(text, {name: at + over, **other}, KINDS) is False, (text, n)
+            assert evaluate(text, {name: 0.2 * n if "0.2 " in text else 0.35 * n if "0.35" in text else at, **other},
+                            KINDS) is True, (text, n)                      # the float product itself, too
+
+
+def test_numbers_come_back_as_plain_python_would_give_them():
+    assert evaluate("0.2 * lot_depth", {"lot_depth": 132}, KINDS) == 26.4
+    assert type(evaluate("0.2 * lot_depth", {"lot_depth": 132}, KINDS)) is float
+    assert type(evaluate("max(a, 2)", {"a": 1}, KINDS)) is int
+    assert type(evaluate("max(a, 2)", {"a": 1.0}, KINDS)) is float
+    assert evaluate("a / 4", {"a": 2}, KINDS) == 0.5
