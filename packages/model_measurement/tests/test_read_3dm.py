@@ -292,9 +292,9 @@ def test_a_single_precision_mesh_reads_as_the_numbers_typed(tmp_path):
 
 @pytest.mark.parametrize("x0, y0", [(40000.1, 50000.9), (20000.5, 22000.25), (152.2131319706377, 194.70395691601078)])
 def test_a_single_precision_meshed_gable_is_two_roof_planes_near_and_far(tmp_path, x0, y0):
-    """Reading single-precision points as typed decimals is only meaningful near the origin: 40,000 ft out, a
-    float32 step is 1/250 ft, and rounding each point to its shortest decimal tilted the small triangles, so one
-    slope split into two planes (256 + 256 + 512, read by PR #18 as a second eave). Each slope is one plane."""
+    """A computed (not typed) single-precision gable is read as stored: 40,000 ft out, rounding each point to a
+    decimal tilted the small triangles, so one slope split into two planes (256 + 256 + 512, read by PR #18 as a
+    second eave). Each slope is one plane. The 40,000 ft case pins it; 20,000 and 152 ft are regression guards."""
     from model_measurement import measure as M
     mesh, w, depth, eave, ridge = gable_mesh(x0, y0, 16, double=False)
     m = model()
@@ -305,3 +305,52 @@ def test_a_single_precision_meshed_gable_is_two_roof_planes_near_and_far(tmp_pat
     faces = read_site(write(m, tmp_path), facts)["buildings"][0]["faces"]
     slopes = [g for g in M._planes(faces) if 0.2 < abs(M._unit_normal(g[0]["points"])[2]) < 0.99]
     assert sorted(len(g) for g in slopes) == [512, 512]
+
+
+
+@pytest.mark.parametrize("units, k, x0, y0, what", [
+    (r.UnitSystem.Feet, 1.0, 2000, 3000, "front_yard"),
+    (r.UnitSystem.Millimeters, 304.8, 1000, 0, "building_height"),
+])
+def test_a_typed_single_precision_box_reads_exactly_anywhere_below_far(tmp_path, units, k, x0, y0, what):
+    """Review of 44c2466: a 1,024 ft gate brought back false fails between 1,024 and 131,072 ft (a 15.7 ft yard read
+    15.699951; 35.1 ft in millimetres read 35.100002). What tells typed from computed is the numbers themselves:
+    every coordinate is the single-precision value of a short decimal. Such a box reads exactly, and at its limit
+    complies."""
+    from rule_format.rulebook import outcome
+    m = model(units=units)
+    rect(m, x0 * k, y0 * k, (x0 + 50) * k, (y0 + 100) * k)
+    yard, height = (15.7, 30) if what == "front_yard" else (25, 35.1)
+    mesh = r.Mesh()
+    for x, y, z in [(10, yard, 0), (35, yard, 0), (35, 65, 0), (10, 65, 0),
+                    (10, yard, height), (35, yard, height), (35, 65, height), (10, 65, height)]:
+        mesh.Vertices.Add((x0 + x) * k, (y0 + y) * k, z * k)
+    for f in [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]:
+        mesh.Faces.AddFace(*f)
+    m.Objects.AddMesh(mesh, on(1))
+    facts = {**FACTS, "street_line": [[[x0, y0], [x0 + 50, y0]]]}
+    got = measure(read_site(write(m, tmp_path), facts), facts)
+    limit = yard if what == "front_yard" else height
+    assert abs(got[what]["value"] - limit) < 1e-9, got[what]["value"]
+    sign = ">=" if what == "front_yard" else "<="
+    assert outcome({"id": "x", "kind": "rule", "check": f"{what} {sign} {limit}"}, {what: got[what]["value"]}, {}) == "pass"
+
+
+
+def test_where_single_precision_cant_show_the_typed_decimal_the_box_reads_within_one_step(tmp_path):
+    """The limit of reading typed decimals: in millimetres 3,000 ft out (919,208 mm) a single-precision step is
+    0.0625 mm, so 15.7 ft (919,208.36 mm) can't be told from 919,208.375: it reads within that one step (2e-4 ft),
+    never further, and nothing there is rounded on a guess."""
+    m = model(units=r.UnitSystem.Millimeters)
+    k, x0, y0 = 304.8, 2000, 3000
+    rect(m, x0 * k, y0 * k, (x0 + 50) * k, (y0 + 100) * k)
+    mesh = r.Mesh()
+    for x, y, z in [(10, 15.7, 0), (35, 15.7, 0), (35, 65, 0), (10, 65, 0),
+                    (10, 15.7, 30), (35, 15.7, 30), (35, 65, 30), (10, 65, 30)]:
+        mesh.Vertices.Add((x0 + x) * k, (y0 + y) * k, z * k)
+    for f in [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]:
+        mesh.Faces.AddFace(*f)
+    m.Objects.AddMesh(mesh, on(1))
+    facts = {**FACTS, "street_line": [[[x0, y0], [x0 + 50, y0]]]}
+    got = measure(read_site(write(m, tmp_path), facts), facts)
+    assert abs(got["front_yard"]["value"] - 15.7) <= 0.0625 / 304.8
