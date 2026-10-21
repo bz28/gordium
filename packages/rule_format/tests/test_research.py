@@ -260,3 +260,20 @@ def test_an_answer_may_only_pick_one_of_its_questions_readings_or_a_finding():
     assert _answer_problems([{**base, "reading": "pitched_roof_midpoint"}], ctx, entry)
     assert _answer_problems([{**base, "question": "Midpoint?", "reading": "pitched_roof_midpoint"}], ctx, entry) == []
     assert _answer_problems([{**base, "reading": "wall_plat"}], ctx, entry)
+
+
+def test_a_drafted_rulebooks_questions_are_never_charged_to_the_hand_rulebook_of_the_same_name(tmp_path):
+    """drafted/R-1b.yaml (AI) and the hand R-1b.yaml share rule ids (R-1b.use). Stage 1 of drafting found the drafted
+    rule's open question charged to the hand rule's findings ("its entry still has open questions"), because both
+    files were named "R-1b.yaml"; each is named by its path under 5_zoning_rules/."""
+    import yaml
+    rules = tmp_path / "5_zoning_rules"
+    (rules / "drafted").mkdir(parents=True)
+    hand = {"id": "R-1b.use", "findings": [{"id": "f", "kind": "law", "answer": "A.", "sources": []}]}
+    q = "Which mark is which?"
+    drafted = {"id": "R-1b.use", "open_questions": [q], "research": [pending_research(q, "raised by the drafting script")]}
+    (rules / "R-1b.yaml").write_text(yaml.safe_dump({"rules": [hand]}), encoding="utf-8")
+    (rules / "drafted/R-1b.yaml").write_text(yaml.safe_dump({"rules": [drafted]}), encoding="utf-8")
+    found = research_entries(tmp_path)
+    assert [w for w, _ in found] == ["R-1b.yaml R-1b.use", "drafted/R-1b.yaml R-1b.use"]
+    assert finding_conflicts(found) == []

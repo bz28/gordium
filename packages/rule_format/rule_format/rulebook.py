@@ -902,8 +902,11 @@ def research_entries(jurisdiction) -> list[tuple[str, dict]]:
     definitions = j / "4_term_definitions/definitions.yaml"
     if definitions.exists():
         out += [(f"definitions.yaml {k}", e) for k, e in (load(definitions) or {}).items() if isinstance(e, dict)]
+    # Named by the path under 5_zoning_rules/, so the AI-drafted drafted/R-1b.yaml is never taken for the hand R-1b.yaml
+    # (the two share rule ids, like R-1b.use, and one's open questions mustn't be charged to the other's findings).
     for path in rulebook_paths(j / "5_zoning_rules"):
-        out += [(f"{path.name} {r.get('id')}", r) for r in (load(path) or {}).get("rules") or [] if isinstance(r, dict)]
+        name = path.relative_to(j / "5_zoning_rules").as_posix()
+        out += [(f"{name} {r.get('id')}", r) for r in (load(path) or {}).get("rules") or [] if isinstance(r, dict)]
     for path in sorted((j / "3_section_labels").glob("*.yaml")):
         book = load(path) or {}
         out += [(f"{path.name} {k}", e) for k, e in (book.get("labels") or {}).items() if isinstance(e, dict)]
