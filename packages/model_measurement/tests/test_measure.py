@@ -589,9 +589,11 @@ def test_a_meshed_gable_is_read_like_a_whole_one():
 
 
 def test_a_gently_curved_roof_is_not_one_plane():
-    # a 20 ft wide roof curving with a 2000 ft radius, in 40 strips: no group's corners stray beyond 0.01 ft of
-    # its anchor's plane, whatever order the faces come in
-    from model_measurement.measure import TOL, _planes, _unit_normal
+    # a 20 ft wide roof curving with a 2000 ft radius (0.025 ft off flat across it), in 40 strips: never one plane,
+    # and no group's corners stray beyond 0.01 ft of the plane fitted over that group, whatever order the faces
+    # come in (a plane is fitted over its whole group, so one triangle's rounding noise can't tilt it)
+    import numpy as np
+    from model_measurement.measure import TOL, _planes
     radius, faces = 2000.0, []
     xs = [i * 20 / 40 for i in range(41)]
     z = [math.sqrt(radius ** 2 - (x - 10) ** 2) - radius + 30 for x in xs]
@@ -599,10 +601,13 @@ def test_a_gently_curved_roof_is_not_one_plane():
         faces.append({"points": [[xs[i], 0, z[i]], [xs[i + 1], 0, z[i + 1]], [xs[i + 1], 20, z[i + 1]]]})
         faces.append({"points": [[xs[i], 0, z[i]], [xs[i + 1], 20, z[i + 1]], [xs[i], 20, z[i]]]})
     for order in (faces, faces[::-1]):
-        for group in _planes(order):
-            for g in group:
-                n, p0 = _unit_normal(g["points"]), g["points"][0]
-                assert all(abs(sum(n[c] * (q[c] - p0[c]) for c in range(3))) <= TOL for f in group for q in f["points"])
+        groups = _planes(order)
+        assert len(groups) > 1
+        for group in groups:
+            pts = np.array([q for f in group for q in f["points"]], dtype=float)
+            c = pts.mean(0)
+            n = np.linalg.eigh((pts - c).T @ (pts - c))[1][:, 0]
+            assert np.abs((pts - c) @ n).max() <= TOL
 
 
 def test_a_ground_level_that_doesnt_meet_the_building_stops_height_area_and_yards():
