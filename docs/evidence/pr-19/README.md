@@ -1,5 +1,9 @@
 # PR #19 evidence: the start box and live mode, in Rhino 8 (Mac)
 
+**Purpose:** what PR #19's in-Rhino scripts proved (the start box, the address lookup, live mode), with their results and screenshots.\
+**For:** reviewers checking PR #19; engineers.\
+**Kept current by:** never (a dated record); a new in-Rhino run gets its own folder.
+
 Recorded 2026-10-21 on start-box-lookup at d6cd34f, plus this commit's test fixes. Each script asserts every claim it
 makes and fails loudly otherwise; each closes the documents it opens.
 
