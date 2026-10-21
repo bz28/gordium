@@ -800,6 +800,13 @@ def recover_held(table, live=None):
     return len(removed), len(back)
 
 
+def should_recheck(dirty_at, now, running, box_open, wait):
+    """Live mode's re-check after an edit: only once the model has been still for `wait` seconds, no check is running,
+    and no start box is open (its own edits mark the model changed; the check waits for the box to close, then runs:
+    verification round of PR #19)."""
+    return bool(dirty_at) and now - dirty_at >= wait and not running and not box_open
+
+
 def gate_actions(actions, box_open, say, open_ok=("legend",)):
     """The panel's actions, each doing nothing but saying BOX_BUSY while a start box is open (one choke point: none of
     them writes to the model, runs a check or opens another box under an open one; verification round of PR #19).

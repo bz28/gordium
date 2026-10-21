@@ -237,6 +237,13 @@ def current_facts(doc):
 
 
 def save_facts(doc, facts):
+    if _box_open():                     # nothing writes the facts under an open start box (Draw writes its own)
+        say(logic.BOX_BUSY)
+        return
+    _save_facts(doc, facts)
+
+
+def _save_facts(doc, facts):
     doc.Strings.SetString(SECTION, ENTRY, json.dumps(facts))
 
 
@@ -1182,6 +1189,8 @@ def confirm(doc, facts, options, mode="check"):
     finally:
         gate.leave()
         ui.set_box_open(STATE.get("panel_parts"), False)
+        if STATE.get("dirty"):          # edits made while the box was open: live mode checks them at the next idle
+            STATE["dirty"] = time.time() - IDLE_SECONDS
 
 
 def _confirm(doc, facts, options, mode):
@@ -1580,8 +1589,10 @@ def _draw_plan(doc, o, result, facts):
 
 def run_check(doc, report=True):
     """Measure and check the model now; draw the result; update the panel. If the check can't run, the old
-    result is cleared from the view and the panel says why, with Retry (H2): never left showing."""
-    if STATE.get("running"):
+    result is cleared from the view and the panel says why, with Retry (H2): never left showing. While a start box
+    is open it does nothing at all (its overlay, the panel and the "before" statuses stay): the box's own edits
+    would otherwise be checked mid-box; live mode checks once the box closes."""
+    if STATE.get("running") or _box_open():
         return None
     o = overlay()
     facts = {}
@@ -1717,7 +1728,7 @@ def _idle(sender, e):
         STATE["stale_shown"] = t
         ui.show(p, None, checking=True)
         Rhino.RhinoDoc.ActiveDoc.Views.Redraw()
-    if t and time.time() - t >= IDLE_SECONDS and not STATE.get("running"):
+    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc
         if doc is not None and doc.Strings.GetValue(SECTION, ENTRY):    # checked before: run_check says why

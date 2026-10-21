@@ -836,4 +836,37 @@ def test_while_a_start_box_is_open_no_panel_action_does_anything_but_say_so():
         gated[n]("an argument")
     assert sorted(calls) == sorted(["legend"] + names)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert "form.Content.Enabled = not is_open" in ui
+    assert "for control in parts.get(\"greyed\") or []:" in ui and "control.Enabled = not is_open" in ui
+
+
+
+def test_live_mode_never_rechecks_under_an_open_start_box():
+    """Verification round 2: the box's own edits marked the model changed and an idle re-check during a pick wiped the
+    box's overlay and the "before" statuses. The decision, by behaviour:"""
+    wait = 0.5
+    assert logic.should_recheck(10.0, 11.0, False, False, wait)
+    assert not logic.should_recheck(10.0, 11.0, False, True, wait)        # a box open: wait for it
+    assert not logic.should_recheck(10.0, 11.0, True, False, wait)        # a check running
+    assert not logic.should_recheck(10.0, 10.2, False, False, wait)       # the model not still long enough
+    assert not logic.should_recheck(None, 11.0, False, False, wait)       # nothing changed
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    idle = rhino[rhino.index("def _idle("):rhino.index("def documents(")]
+    assert 'logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS)' in idle
+    assert idle.index("should_recheck") < idle.index('STATE["dirty"] = None')   # the pending edit kept until then
+    check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert 'if STATE.get("running") or _box_open():\n        return None' in check      # every caller refused
+    save = rhino[rhino.index("def save_facts("):rhino.index("def _save_facts(")]
+    assert "if _box_open():" in save and "_save_facts(doc, facts)" in save
+    conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
+    assert conf.index("gate.leave()") < conf.index('STATE["dirty"] = time.time() - IDLE_SECONDS')
+
+
+def test_the_legend_stays_usable_while_a_box_is_open():
+    """Verification round 2: greying the whole form also turned off the legend the gate keeps."""
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    greyed = ui[ui.index('parts["greyed"] = ['):].split("\n", 1)[0]
+    assert "tree" in greyed and "ticks" in greyed and "footer.Items[0]" in greyed and "footer.Items[1]" in greyed
+    assert "footer.Items[2]" not in greyed                                   # the "?" legend button
+    assert "form.Content.Enabled" not in ui
+    gated = logic.gate_actions({"legend": lambda: "shown"}, lambda: True, lambda m: None)
+    assert gated["legend"]() == "shown"

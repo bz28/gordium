@@ -168,12 +168,15 @@ def make_panel(actions):
     footer = row(button("Zoom to", lambda: actions["zoom"](parts["by_id"].get(parts["selected"]))),
                  button("Zoning report…", actions["report"]), button("?", actions["legend"]))
     parts["zoom_button"] = footer.Items[0].Control
+    ticks = row(_envelope_box(actions), _massing_box(actions))
+    # while a start box is open these are off; the legend ("?") is not among them: it only shows something
+    parts["greyed"] = [tree, detail_scroll, ticks, footer.Items[0].Control, footer.Items[1].Control]
     layout = ef.DynamicLayout()
     layout.Padding = ed.Padding(10)
     layout.Spacing = ed.Size(6, 6)
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
-    layout.Add(row(_envelope_box(actions), _massing_box(actions)))
+    layout.Add(ticks)
     parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
     layout.Add(parts["message"])
     layout.Add(footer)
@@ -299,9 +302,8 @@ def set_box_open(parts, is_open):
     parts["box_open"] = bool(is_open)
     for b in parts.get("box_buttons") or []:
         b.Enabled = not is_open
-    form = parts.get("form")
-    if form is not None and form.Content is not None:      # the whole panel greyed: no button, tick or cell acts
-        form.Content.Enabled = not is_open
+    for control in parts.get("greyed") or []:       # every button, tick and cell but the legend
+        control.Enabled = not is_open
 
 
 def show_detail(parts):
