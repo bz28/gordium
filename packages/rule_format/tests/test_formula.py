@@ -1,3 +1,4 @@
+import re
 import math
 
 import pytest
@@ -38,16 +39,53 @@ def test_rejects_anything_outside_the_language(text):
         evaluate(text, {"lot_area": 1, "x": 1, "a": 1, "use": "one_family_detached"}, KINDS)
 
 
-@pytest.mark.parametrize("text", [
-    "stories <= 3 or building_height <= 35",   # 'or' must not hide a missing measure
-    "stories <= 0 and building_height <= 35",  # nor 'and'
-    "0 > stories < building_height",           # nor a chained comparison
+@pytest.mark.parametrize("text, known", [
+    ("stories <= 3 or building_height <= 35", True),    # True or unknown: True, whatever the height is
+    ("stories <= 0 and building_height <= 35", False),  # False and unknown: False
+    ("0 > stories < building_height", False),           # a chain is an and: its false link decides it
+    ("stories <= 0 or building_height <= 35", None),    # False or unknown: unknown
+    ("stories <= 3 and building_height <= 35", None),   # True and unknown: unknown
+    ("not building_height <= 35", None),
+    ("stories < building_height", None),
+    ("stories <= (1 if building_height > 30 else 1)", False),  # the same either way: known
+    ("stories <= (3 if building_height > 30 else 2)", None),
+    ("max(stories, building_height) >= 3", None),
 ])
 @pytest.mark.parametrize("bad", [None, math.nan, math.inf, -math.inf, True, 10**400, -5, "35"])
-def test_missing_or_unusable_measure_is_never_hidden(text, bad):
-    with pytest.raises(MissingMeasure) as e:
-        evaluate(text, {"stories": 3, "building_height": bad}, KINDS)
-    assert e.value.name == "building_height"
+def test_a_missing_measure_is_unknown_and_follows_three_valued_logic(text, known, bad):
+    """A missing or unusable measure is never hidden where it could change the result (MissingMeasure, so the rule
+    needs review), and never makes a result unknown where it can't (Kleene: True or unknown is True; False and
+    unknown is False)."""
+    values = {"stories": 3, "building_height": bad}
+    if known is None:
+        with pytest.raises(MissingMeasure) as e:
+            evaluate(text, values, KINDS)
+        assert e.value.name == "building_height"
+    else:
+        assert evaluate(text, values, KINDS) is known
+
+
+def test_three_valued_results_agree_with_every_value_the_missing_measure_could_take():
+    """Exhaustive over formula shapes and substituted values: wherever the evaluation says True or False with a
+    measure missing, every value that measure could take gives that same answer (so it is never a guess)."""
+    import itertools
+    atoms = ["a <= 3", "a >= 5", "b <= 4", "b > 2", "not a <= 3", "a < b", "1 <= a <= 6"]
+    shapes = [f"{x} or {y}" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"{x} and {y}" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"({x} or {y}) and {z}" for x, y, z in itertools.permutations(atoms[:5], 3)]
+    shapes += [f"not ({x} and {y})" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"{x} or ({y} and {z})" for x, y, z in itertools.permutations(atoms[:5], 3)]
+    grid = [0, 1, 2, 3, 3.5, 4, 5, 6, 7.25, 10]
+    for text in shapes:
+        for missing in ("a", "b"):
+            for known in grid:
+                values = {"a": known, "b": known} | {missing: None}
+                try:
+                    got = evaluate(text, values, KINDS)
+                except MissingMeasure:
+                    continue
+                every = {evaluate(text, values | {missing: v}, KINDS) for v in grid}
+                assert every == {got}, (text, missing, known, got, every)
 
 
 @pytest.mark.parametrize("text, values", [
@@ -154,3 +192,165 @@ def test_a_margin_at_the_limit_is_zero_exactly_where_the_comparison_complies():
         at = 0.2 * n
         assert (margin(at, evaluate("0.2 * lot_depth", {"lot_depth": n}, KINDS), True) == 0.0) is \
             evaluate("rear_yard >= 0.2 * lot_depth", {"rear_yard": at, "lot_depth": n}, KINDS)
+
+
+def test_a_number_used_as_true_false_is_refused_by_its_type_whatever_its_value():
+    for value in (50, None):
+        with pytest.raises(EvaluationError, match=r"'not' needs a true/false test"):
+            evaluate("not lot_width", {"lot_width": value}, KINDS)
+
+
+@pytest.mark.parametrize("text, problem", [
+    ('use == 5', "== and != compare two numbers or two texts"),
+    ("(a > 1) == (b < 2)", "== and != compare two numbers or two texts"),
+    ("(a > 1) in [b > 1]", "a list holds numbers, or texts"),
+    ("(1 if a > 1 else b > 2) or a > 1", "both branches of an if must give two numbers or two texts"),
+    ("stories or building_height <= 35", "and/or need true/false tests"),
+    ("(stories <= 3) + 1 > 0", "arithmetic needs numbers"),
+    ("not stories", "'not' needs a true/false test"),
+    ('use > 3', "<, <=, >, >= compare numbers"),
+    ('use in [1, 2]', "'in' needs a number or text and a list of the same kind"),
+    ("stories <= (1 if use else 2)", "an if needs a true/false test"),
+    ("ghost > 1", "unknown measure 'ghost'"),
+])
+def test_an_ill_typed_formula_is_refused_before_any_value(text, problem):
+    """Review of 0582c65 (P1): a formula that errors for every value is caught by its types, at validation."""
+    from rule_format.formula import FormulaError, type_of
+    with pytest.raises(FormulaError, match=re.escape(problem)):
+        type_of(text, KINDS)
+
+
+def test_a_well_typed_formula_has_its_type():
+    from rule_format.formula import type_of
+    assert type_of("rear_yard >= max(min(0.25 * lot_depth, 50), 20)", KINDS) == "bool"
+    assert type_of('use in ["church"] and (1 if stories > 2 else 2) <= 3', KINDS) == "bool"
+    assert type_of("max(a, b) / 2", KINDS) == "number"
+
+
+@pytest.mark.parametrize("text, values", [
+    ("lot_area >= 1 and (use == 5 or building_height < 5)", {"lot_area": 10, "building_height": 1}),
+    ("stories or building_height <= 35", {"building_height": 3}),
+    ("(stories <= 3) + 1 > 0 or a > 0", {"a": 1}),
+    ("a / b > 1 or stories <= 3", {"a": 1, "b": 0, "stories": 1}),
+    ("stories / b > 1 or a > 0", {"b": 0, "a": 1}),
+])
+def test_an_error_every_value_would_give_is_never_hidden_under_an_unknown(text, values):
+    """Review of 0582c65 (P1, P2): with the measure missing, Kleene must not resolve a formula that would raise for
+    every value of it (wrong types, division by a known zero): it raises (needs review), as complete data does."""
+    with pytest.raises(EvaluationError):
+        evaluate(text, values, KINDS | {"use": frozenset({"church"})})
+
+
+def test_known_answers_agree_with_every_substitution_including_ill_typed_atoms_and_division():
+    """Exhaustive: for formula shapes mixing well-typed and ill-typed atoms, division and if/else, wherever the
+    evaluation with a measure missing gives an answer, every value of that measure gives that same answer and
+    never an error; and wherever it raises an error, some value raises it too."""
+    import itertools
+    kinds = KINDS | {"use": frozenset({"a", "ab"})}
+    atoms = ["a <= 3", "b > 2", "a / b > 1", "a / (b - 4) >= 0", '(1 if a > 2 else 0) <= b', 'use == "a"',
+             "max(a, b) >= 4", "-a < -2"]
+    shapes = [f"{x} or {y}" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"{x} and {y}" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"not ({x} or {y})" for x, y in itertools.combinations(atoms, 2)]
+    grid = {"a": [0, 1, 2, 3, 4, 5, 7.5], "b": [0, 1, 2, 3, 4, 5, 7.5], "use": ["a", "ab"]}
+
+    def answer(text, values):
+        try:
+            return evaluate(text, values, kinds)
+        except EvaluationError:
+            return "error"
+
+    for text in shapes:
+        for missing in ("a", "b", "use"):
+            for base in itertools.product(*(grid[n] for n in ("a", "b", "use"))):
+                values = dict(zip(("a", "b", "use"), base)) | {missing: None}
+                try:
+                    got = evaluate(text, values, kinds)
+                except MissingMeasure:
+                    continue
+                except EvaluationError:
+                    assert "error" in {answer(text, values | {missing: v}) for v in grid[missing]}, (text, values)
+                    continue
+                every = {answer(text, values | {missing: v}) for v in grid[missing]}
+                assert every == {got}, (text, missing, values, got, every)
+
+
+def _random_formula(rnd, depth, want="bool"):
+    """A random expression over the whole grammar (numbers, text, true/false, lists, every operator, min/max, if,
+    chains, in / not in), grown towards a kind (`want`) but often given operands of a random kind, and every
+    operator tried on every kind (true/false compared, true/false in a list...): so many are well-typed and deep,
+    and many are wrong in every way type_of must refuse."""
+    if rnd.random() < 0.15:
+        want = rnd.choice(["number", "text", "bool"])            # an operand of any kind: often ill-typed
+
+    def g(kind):
+        return _random_formula(rnd, depth - 1, kind)
+    if depth == 0 or rnd.random() < 0.15:
+        return rnd.choice({"number": ["a", "b", "0", "1", "2.5", "35"], "text": ["u", '"x"', '"y"'],
+                           "bool": ["(a > 1)", '(u == "x")', "(b <= 2.5)", "y"]}[want])
+    any_kind = rnd.choice(["number", "text", "bool"])
+    shapes = {
+        "number": [lambda: f"({g('number')} {rnd.choice('+-*/')} {g('number')})", lambda: f"(-{g('number')})",
+                   lambda: f"{rnd.choice(['min', 'max'])}({g('number')}, {g('number')})",
+                   lambda: f"({g('number')} if {g('bool')} else {g('number')})"],
+        "text": [lambda: f"({g('text')} if {g('bool')} else {g('text')})"],
+        "bool": [lambda: f"(not {g('bool')})",
+                 lambda: "(" + f" {rnd.choice(['and', 'or'])} ".join(g("bool") for _ in range(rnd.randint(2, 3))) + ")",
+                 lambda: "(" + g("number") + "".join(f" {rnd.choice(['<', '<=', '>', '>='])} {g('number')}"
+                                                      for _ in range(rnd.randint(1, 2))) + ")",
+                 lambda: f"({g(any_kind)} {rnd.choice(['==', '!='])} {g(any_kind)})",
+                 lambda: f"({g(any_kind)} {rnd.choice(['in', 'not in'])} "
+                         f"[{', '.join(g(any_kind) for _ in range(rnd.randint(0, 2)))}])",
+                 lambda: f"({g('bool')} if {g('bool')} else {g('bool')})"],
+    }
+    return rnd.choice(shapes[want])()
+
+
+def test_the_type_rules_and_three_valued_logic_are_sound_over_the_whole_grammar():
+    """Generative (fixed seeds, thousands of random formulas of depth up to 4, random missing measures):
+    (a) a formula type_of accepts never gives a type error for any complete set of values (only a value's own
+    error, a division by zero, is left); (b) whenever an evaluation with measures missing gives an answer, every
+    way of filling them in (a grid with the formulas' own numbers and values either side) gives that same answer,
+    never an error. And no message ever shows a value as Fraction(...)."""
+    import itertools
+    import random
+    from rule_format.formula import FormulaError, type_of
+    kinds = {"a": "number", "b": "number", "u": frozenset({"x", "z"}), "y": "boolean"}     # y: a yes/no measure
+    grid = {"a": [0, 1, 2.5, 3, 35, 36], "b": [0, 1, 2.5, 35, 36], "u": ["x", "z"], "y": [True, False]}
+
+    def run(text, values):
+        try:
+            return ("value", evaluate(text, values, kinds))
+        except MissingMeasure:
+            return ("missing", None)
+        except EvaluationError as e:
+            assert "Fraction(" not in str(e), (text, e)
+            return ("error", str(e))
+
+    accepted = resolved = 0
+    for seed in range(4):
+        rnd = random.Random(seed)
+        for _ in range(1500):
+            text = _random_formula(rnd, 4, rnd.choice(["bool", "bool", "number"]))
+            if len(text) > 500:                      # longer than a formula may be (MAX_LENGTH)
+                continue
+            try:
+                type_of(text, kinds)
+                typed = True
+            except FormulaError:
+                typed = False
+            if typed:
+                accepted += 1
+                for combo in itertools.product(*grid.values()):
+                    got = run(text, dict(zip(grid, combo)))
+                    assert got[0] != "error" or got[1] == "division by zero", (text, combo, got)
+            for _ in range(2):
+                missing = rnd.sample(sorted(grid), rnd.randint(1, 2))
+                base = {n: rnd.choice(v) for n, v in grid.items()}
+                got = run(text, {**base, **{n: None for n in missing}})
+                if got[0] != "value":
+                    continue
+                resolved += 1
+                for fill in itertools.product(*(grid[n] for n in missing)):
+                    assert run(text, {**base, **dict(zip(missing, fill))}) == got, (text, missing, base, fill, got)
+    assert accepted > 300 and resolved > 300, (accepted, resolved)        # the test really exercises both
