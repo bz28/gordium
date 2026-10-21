@@ -108,15 +108,17 @@ def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[d
             if (rule, why) not in seen:
                 seen.add((rule, why))
                 lines.append(f"{rule}: {why}")
-        # the name says what is counted: "97 sections left out for length", "2 notes for a person", or both
+        # the name says, in an architect's words, what is counted: "97 linked sections the AI drafter didn't read (too
+        # long): check by hand", "2 notes to check by hand", or both
         n = len(set(left_out))
-        parts = [f"{n} section{'s' if n != 1 else ''} left out for length"] if n else []
-        parts += [f"{len(lines)} note{'s' if len(lines) != 1 else ''} for a person"] if lines else []
+        parts = [f"{n} linked section{'s' if n != 1 else ''} the AI drafter didn't read (too long)"] if n else []
+        parts += [f"{len(lines)} note{'s' if len(lines) != 1 else ''}"] if lines else []
         if n:
-            lines.append(f"It points to {n} section{'s' if n != 1 else ''} left out of the drafter's input for length "
-                         f"(a person checks them): {', '.join(sorted(set(left_out)))}.")
+            lines.append(f"It links to {n} section{'s' if n != 1 else ''} the AI drafter didn't read because they were "
+                         f"too long; check them by hand: {', '.join(sorted(set(left_out)))}.")
         if lines:
-            out.append({"id": f"drafting.{unit}", "section": unit if chart else f"§{unit}", "name": " and ".join(parts),
+            out.append({"id": f"drafting.{unit}", "section": unit if chart else f"§{unit}",
+                        "name": " and ".join(parts) + (": check by hand" if n else " to check by hand"),
                         "why": " · ".join(lines)})
     return out
 

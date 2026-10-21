@@ -87,6 +87,9 @@ def test_a_missing_rule_shows_as_a_not_checked_item_on_the_panel(drafts_on):
     loading = [i for k, i in items.items() if k.startswith("gap.chart.p14.minimum_loading_requirement")]
     assert loading and all(i["status"] == "not_checked" and i["group"] == "not_covered" for i in loading)
     assert "gap.drafting.325-19A" in items              # a law piece the drafting run gave no rule: listed
+    # round 4: the section and what is counted are set apart, never run together ("§325-20D 97 sections...")
+    assert items["gap.drafting.325-20D"]["name"] == ("§325-20D: 97 linked sections the AI drafter didn't read (too long): "
+                                                    "check by hand")
 
 
 def test_the_start_box_offers_drafted_zones_only_behind_bens_setting_labeled_draft_and_never_general():
@@ -149,9 +152,11 @@ def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_check
     assert "R-3a.325_19e_r3_abut_r1_max_coverage" in r3a["drafting.325-19E"]["why"]     # its cell is cited elsewhere
     assert "325_19e_r3_abut_r1_min_lot_area_footnoted_rows" in r3a["drafting.325-19E"]["why"]
     assert "fraternity_sorority_group_house" in r3a["drafting.325-19E"]["why"]   # a group house next to R-1
-    assert "97 sections left out" in r3a["drafting.325-20D"]["why"]               # named once, in one item
-    assert r3a["drafting.325-20D"]["name"] == "97 sections left out for length"   # round 3: the name counts them
-    assert r3a["drafting.325-19E"]["name"] == "4 notes for a person"
+    assert "97 sections the AI drafter didn't read" in r3a["drafting.325-20D"]["why"]   # named once, in one item
+    # rounds 3-4: the name counts them, in an architect's words ("for length" read as a lot or building dimension)
+    assert r3a["drafting.325-20D"]["name"] == "97 linked sections the AI drafter didn't read (too long): check by hand"
+    assert r3a["drafting.325-19E"]["name"] == "4 notes to check by hand"
+    assert not any("for length" in g["name"] + g["why"] for g in r3a.values())
     for zone in ("R-1a", "R-2a", "RU"):
         items = drafting_gaps(J, zone, zone_rules(J, zone))
         ids = [g["id"] for g in items]
