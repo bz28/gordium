@@ -890,3 +890,16 @@ def test_a_report_write_that_fails_half_way_leaves_no_broken_report(facts, tmp_p
     got = check(MODEL, facts, tmp_path / "r.xlsx")
     assert "No space left on device" in got["report_error"] and got["view"]["items"]
     assert sorted(p.name for p in tmp_path.iterdir()) == []          # no report, no leftover part file
+
+
+def test_a_starting_house_is_drawn_on_existing_spot_grades_placed_at_the_lot(facts):
+    """Found in Rhino (PR #19's lookup; reachable here with hand-placed spot grades): with existing spot grades away
+    from where the house goes, the generator measured the house it had just drawn from those spots, found its
+    height "not measurable" and drew nothing. Their plane sets the drawing level; the check still says the ground
+    is existing."""
+    from design_checker.check import start
+    spots = [[0.0, 0.0, 1.0], [73.0, 0.0, 2.0], [73.0, 90.0, 4.0], [0.0, 90.0, 3.0], [36.5, 45.0, 2.5]]
+    got = start(MODEL, {**{k: v for k, v in facts.items() if k not in ("ground_is_flat", "grade_elevation")},
+                        "grade_from": "spot", "grade_is": "existing", "grade_points": spots})
+    assert len(got["floors"]) == 3 and any("drawn on the ground as it is" in n for n in got["notes"])
+    assert got["floors"][0]["base"] == pytest.approx(2.5, abs=0.01)          # the spots' plane: their average

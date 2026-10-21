@@ -465,13 +465,21 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     # (the spots themselves aren't at the new building's walls: it's drawn on their plane, and the check that follows
     # judges the spots as they are)
     drawing = facts
-    if facts.get("grade_points"):
-        drawing = {k: v for k, v in _envelope_facts(site, facts).items() if k not in ("grade_points", "grade_from")}
+    if facts.get("grade_points"):       # their plane sets the drawing level, existing ground too (the check that
+        # follows still says existing ground needs review); the points themselves never go on to measure the house
+        # drawn (they are at the lot, not at its walls: its height would be "not measurable" and nothing drawn,
+        # found in Rhino with the address lookup's ground, 2026-10-20)
+        drawing = {k: v for k, v in _envelope_facts(site, {**facts, "grade_is": "finished"}).items()
+                   if k not in ("grade_points", "grade_from")}
+        drawing["grade_is"] = facts.get("grade_is")
+        if drawing["grade_is"] is None:
+            drawing.pop("grade_is")
     no_grade = not (drawing.get("ground_is_flat") and drawing.get("grade_elevation") is not None)
     if no_grade:                        # drawn at the lot's level; the check still has no grade
         lot_z = min((p[2] for e in (site.get("lot") or {}).get("edges", []) for p in e["points"] if len(p) > 2),
                     default=0.0)
-        drawing = {**facts, "ground_is_flat": True, "grade_elevation": lot_z}
+        drawing = {**{k: v for k, v in drawing.items() if k not in ("grade_points", "grade_from")},
+                   "ground_is_flat": True, "grade_elevation": lot_z}
     existing = drawing.get("grade_is") == "existing"
     if existing:                        # drawn standing on the ground shown; the check still says it is existing
         drawing = {**drawing, "grade_is": "finished"}
