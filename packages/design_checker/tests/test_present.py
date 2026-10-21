@@ -1190,7 +1190,114 @@ def test_a_degenerate_building_object_never_raises_and_never_passes(kind):
                     f.update(ground_is_flat=None, grade_elevation=None,
                              grade_points=_walls_spots(12, 30, 36, 60, 0) + _walls_spots(40, 70, 48, 80, 0))
                 m = measure(_plot(*blds, lot_=lot), f)
-                check_site(_plot(*blds, lot_=lot), f)
-                if problem:
-                    for name in ("building_height", "front_yard"):
-                        assert m[name]["value"] is None and "isn't a closed solid" in m[name]["reason"], (name, m[name])
+                view = check_site(_plot(*blds, lot_=lot), f)["view"]
+                # with or without the reader's problem (round 4: the measuring finds it itself), the degenerate
+                # object stops the building measurements, and no building row complies
+                for name in ("building_height", "front_yard"):
+                    assert m[name]["value"] is None and "isn't a closed solid" in (m[name]["reason"] or "") or \
+                        kind == "none" and "nothing to measure" in (m[name]["reason"] or ""), (name, problem, m[name])
+                built = [i for i in view["items"] if i.get("group") == "building" and i["status"] == present.COMPLIES]
+                assert not built, (kind, house, spots, problem, [i["name"] for i in built])
+
+
+
+def test_the_ground_work_waits_for_buildings_that_can_be_measured(monkeypatch):
+    """Main-building round 4 (P3): the guards keeping the grade plane and the ground check off a building the
+    reading refused were unpinned. With them raising, a problem building's measurement still returns."""
+    import model_measurement.measure as M
+    from test_measure import floor
+
+    def boom(*a, **k):
+        raise AssertionError("ran on a building that can't be measured")
+    monkeypatch.setattr(M, "grade_plane", boom)
+    monkeypatch.setattr(M, "_floating", boom)
+    monkeypatch.setattr(M, "_meets_ground", boom)
+    lot, facts = _sample106()
+    f = {**facts, "lot_surveyed": True, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+         "grade_points": _walls_spots(12, 30, 36, 60, 0)}
+    m = M.measure(_plot(_degenerate("walls", True), lot_=lot), f)
+    assert "isn't a closed solid" in m["building_height"]["reason"]
+
+
+def _slope_house(dx, dy, bottom):
+    """A three-floor house on a lot falling toward the street, and its four spot grades as first placed: front 1.0,
+    rear 3.0, sides 2.0 (stress F15). The house drawn from `bottom`, moved by (dx, dy) from where they were placed."""
+    from test_measure import floor
+    house = [floor(10 + dx, 30 + dy, 35 + dx, 60 + dy, z0=bottom + 10 * i, z1=bottom + 10 * (i + 1), id=f"f{i}")
+             for i in range(3)]
+    spots = [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0]]
+    facts = {**FACTS, "jurisdiction": CITY, "ground_is_flat": None, "grade_elevation": None, "grade_points": spots,
+             "stories": 3, "lot_surveyed": True}
+    return _plot(*house), facts
+
+
+def test_raised_or_moved_the_ground_is_judged_by_one_test():
+    """Stress F15 (the move case): a house raised 9 in. (bottom 2.75) on the slope was stopped by the grade plane's
+    average ("the ground level (2.0 ft) doesn't meet the buildings"); moved 2'-2" back, the spot grades left the
+    walls, the footprint path found the ground under it, and the rear yard went from needs review to complies while
+    getting smaller. One test now, at the footprint: its rear corners stand in the ground (3.0), so it meets it in
+    both places, and the rear yard's verdict doesn't change. Raised 3.25 ft it floats in both places."""
+    from design_checker.check import check_site
+    for bottom, meets in ((2.75, True), (3.25, False)):
+        verdicts = []
+        for dy in (0, 26 / 12):
+            r = check_site(*_slope_house(0, dy, bottom))
+            rear = items(r["view"])["Rear yard"]
+            said = "doesn't meet the buildings" in (rear.get("reason") or "")
+            assert said == (not meets), (bottom, dy, rear)
+            verdicts.append(rear["status"])
+        assert verdicts[0] == verdicts[1] or not meets and present.COMPLIES not in verdicts, (bottom, verdicts)
+
+
+def test_moving_along_the_slope_never_turns_a_ground_stop_into_complies():
+    """Property: moving the house along the contours (sideways: the ground under it doesn't change) in small steps,
+    while its spot grades fall off the side walls, never turns a row stopped by the ground into one that complies:
+    the ground is judged at the footprint, never by whether the points sit at the walls."""
+    from design_checker.check import check_site
+    for bottom in (2.0, 2.75, 3.0, 3.25, 4.0):
+        before = None
+        for step in range(0, 9):
+            r = check_site(*_slope_house(-0.5 * step, 0, bottom))
+            now = {i["name"]: i for i in r["view"]["items"]}
+            if before:
+                for name, i in now.items():
+                    was = before.get(name)
+                    if was and was["status"] == present.REVIEW and "meet the buildings" in (was.get("reason") or ""):
+                        assert i["status"] != present.COMPLIES, (bottom, step, name, was["reason"])
+            before = now
+
+
+def test_the_stories_row_asks_for_the_whole_buildings_count_and_takes_it():
+    """Demo fact-check (2), and Ben: read the geometry before ever asking. A plain solid h tall can hold at most
+    floor(h / 7 ft) stories (R305.1). A 12 ft garage beside the starting house holds one: the Stories row never asks
+    for a count (with the main building picked it complies). A 30 ft plain house could hold one to four in R-1b
+    (3 allowed): the row says why and its own Enter button asks; 3 entered complies; 5 (more than 30 ft could
+    hold) is refused with the measuring's words."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    base = {**facts, "lot_surveyed": True}
+    base.pop("stories", None)
+    house = [floor(12, 30, 36, 60, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(40, 66, 50, 86, 0, 12, "garage")
+    st = items(check_site(_plot(*house, garage, lot_=lot), base)["view"])["Stories"]
+    assert "stories" not in st["needs"] and "enter the count" not in (st["reason"] or "")
+    st = items(check_site(_plot(*house, garage, lot_=lot), {**base, "main_building": "f0"})["view"])["Stories"]
+    assert st["status"] == present.COMPLIES, st
+    big = box(12, 30, 36, 60, 0, 30, "house")
+    st = items(check_site(_plot(big, lot_=lot), base)["view"])["Stories"]
+    assert st["status"] == present.REVIEW and "stories" in st["needs"]
+    assert st["reason"] == "A 30 ft solid (the building) could hold up to 4 stories: draw its floors or enter the count."
+    assert logic.enter_words(st["needs"]) == "Enter the number of stories"
+    view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 3}))["view"]
+    assert items(view)["Stories"]["status"] == present.COMPLIES and logic.refused_stories(view["items"]) is None
+    view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 5}))["view"]
+    kept = [{k: i.get(k) for k in ("id", "name", "status", "reason")} for i in view["items"]]   # as the plugin keeps
+    said = logic.refused_stories(kept)
+    assert said and "more than the drawing could hold" in said and "at most 4" in said and "wasn't kept" in said
+    view = check_site(_plot(*house, lot_=lot), logic.update_counts(base, {"stories": 2}))["view"]
+    assert "fewer than the floor blocks drawn (3)" in (logic.refused_stories(
+        [{k: i.get(k) for k in ("name", "reason")} for i in view["items"]]) or "")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.refused_stories(" in rhino
