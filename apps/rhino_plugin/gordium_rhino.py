@@ -1642,6 +1642,7 @@ def run_check(doc, report=True):
                          "header": head, "interior": [r["Rule id"] for r in result.get("interior", [])],
                          "encroach": len(o.encroach), "plan_encroach": len((result.get("plan") or {}).get("encroach") or []),
                          "envelope": result.get("envelope"), "at": time.time()}
+        STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()     # a real check, of this document
         if result.get("notice"):
             STATE.setdefault("toasts", []).append([result["notice"]])
             if not STATE.get("headless"):
@@ -1731,7 +1732,8 @@ def _opened(sender, e):
 
 def _idle(sender, e):
     t = STATE.get("dirty")
-    last_at = (STATE.get("last") or {}).get("at")
+    front = Rhino.RhinoDoc.ActiveDoc
+    last_at = logic.last_check_at(STATE.get("checked_at"), front.RuntimeSerialNumber if front is not None else None)
     if t and last_at is not None and last_at >= t and not _box_open():   # a check since the edit covered it
         STATE["dirty"] = t = None
     p = STATE.get("panel_parts")
@@ -1740,8 +1742,7 @@ def _idle(sender, e):
         STATE["stale_shown"] = t
         ui.show(p, None, checking=True)
         Rhino.RhinoDoc.ActiveDoc.Views.Redraw()
-    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS,
-                            (STATE.get("last") or {}).get("at")):
+    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS, last_at):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc
         if doc is not None and doc.Strings.GetValue(SECTION, ENTRY):    # checked before: run_check says why

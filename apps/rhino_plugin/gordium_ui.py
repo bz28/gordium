@@ -316,8 +316,12 @@ def set_box_open(parts, is_open):
     if bool(is_open) == bool(parts.get("box_open")):
         return
     parts["box_open"] = bool(is_open)
-    controls = list(parts.get("box_buttons") or []) + list(parts.get("greyed") or [])   # all but the legend
-    parts["_was_enabled"] = logic.grey_for_box(controls, is_open, parts.get("_was_enabled"))
+    zoom_ok = parts.get("selected") in (parts.get("by_id") or {}) and not parts.get("stale")
+    others, zoom = logic.controls_enabled(is_open, zoom_ok)
+    for c in list(parts.get("box_buttons") or []) + list(parts.get("greyed") or []):   # all but the legend
+        c.Enabled = others
+    if parts.get("zoom_button") is not None:
+        parts["zoom_button"].Enabled = zoom
 
 
 def show_detail(parts):
