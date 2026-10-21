@@ -199,3 +199,30 @@ def test_a_left_out_object_spreading_over_the_lot_still_makes_coverage_need_revi
     v = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}
     assert v["Lot coverage"]["status"] == present.REVIEW
     assert v["Objects on the lot not included"]["status"] == present.REVIEW
+
+
+def test_the_comparison_fails_on_a_crash_a_missing_scenario_or_an_unlisted_disagreement(tmp_path, capsys):
+    """eval-integrity P1-4: a crashed Rhino run once printed an empty table, "0 disagreement(s)" and exited 0."""
+    import json
+    crashed = tmp_path / "crashed.json"
+    crashed.write_text(json.dumps({"trace": "Traceback: boom", "scenarios": {}}), encoding="utf-8")
+    assert scenarios.main(["rhino", str(crashed)]) == 1
+    out = capsys.readouterr().out
+    assert "the run crashed" in out and "no result for 'as drawn'" in out
+    empty = tmp_path / "empty.json"
+    empty.write_text(json.dumps({"scenarios": {}}), encoding="utf-8")
+    assert scenarios.main(["rhino", str(empty)]) == 1
+    every = {p.stem: scenarios.load(p) for p in PATHS}
+    name = PATHS[0].stem
+    row = {"rule": "R-1b.front_yard", "expected": "complies", "gordium": "does not comply", "match": False, "why": ""}
+    results = {n: [{"step": s, "rows": [{**row, "match": True}]} for s in scenarios.steps_expected(sc)]
+               for n, sc in every.items()}
+    assert scenarios.failures(results, every) == []
+    results[name][0]["rows"] = [row]
+    assert scenarios.failures(results, every) == [f"{name} as drawn: R-1b.front_yard expected complies, "
+                                                  "Gordium does not comply"]
+
+
+def test_the_code_comparison_passes_with_only_investigated_disagreements(capsys):
+    assert scenarios.main([]) == 0
+    assert "OK: every scenario and step ran and agrees" in capsys.readouterr().out
