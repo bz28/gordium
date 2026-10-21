@@ -137,7 +137,7 @@ STATED_FACTS = {
     # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
     "stories": ("Stories of the whole building", "count", "the number of stories"),
 }
-STORIES_ASKED = ("enter the number of stories",)      # the measuring's own words when it waits for the count
+STORIES_ASKED = ("enter the number of stories", "enter the count")      # the measuring's own words when it waits for the count
 
 
 def stories_needed(record):
@@ -149,7 +149,8 @@ def refused_stories(items):
     """The message when a count entered is fewer than the floors drawn (the measuring refuses it), else None."""
     i = next((i for i in items or [] if i.get("measure") == "stories" or i.get("name") == "Stories"), None)
     why = (i or {}).get("reason") or ""
-    return (why[0].upper() + why[1:] + ". The count wasn't kept.") if "fewer than the floor blocks drawn" in why else None
+    refused = "fewer than the floor blocks drawn" in why or "more than the drawing could hold" in why
+    return (why[0].upper() + why[1:] + ". The count wasn't kept.") if refused else None
 
 
 def needs_of(names, values):
