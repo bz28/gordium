@@ -304,16 +304,34 @@ def test_clearing_reaches_hidden_and_locked_context_layers_and_only_gordiums_obj
     assert "for i in indexes:" in vis                                                    # every sublayer too
 
 
-def test_the_tick_starts_as_it_was_last_set():
+def test_the_tick_is_kept_per_file_like_the_labels_tick():
+    """Coordinator's decision (2026-10-21): Show neighbourhood is kept per file, in the document's Gordium settings,
+    like Show on-screen labels (an architect reopening a file expects the same view); it was per Rhino session."""
+    assert logic.context_shown({}) is True and logic.context_shown(None) is True          # on unless unticked
+    assert logic.context_shown({"show_context": False}) is False
+    assert logic.storable_ui({"show_context": False})["show_context"] is False            # it is written to the file
+    show = RHINO[RHINO.index("def show_context("):RHINO.index("def _doc_name(")]
+    assert "_save_ui_state(doc, dict(_ui_state(doc), show_context=bool(on)))" in show
+    on = RHINO[RHINO.index("def _context_on("):RHINO.index("def _context_visible(")]
+    assert "logic.context_shown(_ui_state(doc))" in on
+    assert 'STATE["context_on"]' not in RHINO and 'STATE.get("context_on"' not in RHINO   # never per session again
+    # the panel, both ways it is made (docked, the default; floating when it can't be), and every check after a
+    # document switch or a reopen: the tick as this document has it
+    assert 'ui.make_panel(_actions(), ui.DockHost(dock, host), context_on=_context_on(doc))' in RHINO
+    assert 'ui.make_panel(_actions(), context_on=_context_on(doc))' in RHINO and RHINO.count("ui.make_panel(") == 2
+    assert 'ui.set_context_tick(STATE.get("panel_parts"), _context_on(doc))' in RHINO
+    scene = RHINO[RHINO.index("def draw_scene("):RHINO.index("def draw_screen(")]
+    assert '(STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True)' in scene
+    sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_on(")]
+    assert "on = _context_on(doc)" in sync
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    box = ui[ui.index("def _context_box("):ui.index("def _envelope_box(")]
+    box = ui[ui.index("def _context_box("):ui.index("def set_context_tick(")]
     assert "box.Checked = bool(on)" in box and box.index("box.Checked") < box.index("CheckedChanged")
-    assert "_context_box(actions, context_on)" in ui and "def make_panel(actions, host=None, context_on=True):" in ui
-    # both ways the panel is made (docked, the default since the MVP panel; floating when it can't be) start the tick
-    # as it was last set
-    assert 'ui.make_panel(_actions(), ui.DockHost(dock, host), context_on=STATE.get("context_on", True))' in RHINO
-    assert 'ui.make_panel(_actions(), context_on=STATE.get("context_on", True))' in RHINO
-    assert RHINO.count("ui.make_panel(") == 2
+    assert 'if not parts.get("_setting_context"):' in box                                # set from the file: no fetch
+    tick = ui[ui.index("def set_context_tick("):].split("\ndef ", 1)[0]
+    assert 'parts["_setting_context"] = True' in tick and 'parts["_setting_context"] = False' in tick
+    check = (REPO / "apps/rhino_plugin/tests/context_tick_in_rhino.py").read_text(encoding="utf-8")
+    assert "5 the tick is kept in the file" in check and "g.logic.context_shown(g._ui_state(doc))" in check
 
 
 def test_the_quickstart_says_how_footprints_come_back_after_reopening():
@@ -617,10 +635,11 @@ def test_the_plugin_draws_the_context_after_a_box_draw_guarded_and_has_a_tick():
     assert "draw_context(doc, frame)" in sync
     assert '"context": show_context' in RHINO
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert re.search(r'CheckedChanged \+= logic\.guard\(lambda s, e: actions\["context"\]', ui)
+    assert 'box.CheckedChanged += logic.guard(changed, "show or hide the neighbourhood")' in ui
+    assert 'actions["context"](bool(box.Checked))' in ui
     greyed = ui[ui.index('parts["greyed"] = ['):].split("\n", 1)[0]
     ticks = ui[ui.index("    ticks = ["):].split("\n    # while", 1)[0]
-    assert "row(_context_box(actions, context_on))" in ticks and "*ticks" in greyed   # off while a box is open
+    assert "row(_context_box(actions, parts, context_on))" in ticks and "*ticks" in greyed   # off while a box is open
 
 
 def test_the_panel_says_what_was_drawn():

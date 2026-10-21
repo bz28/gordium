@@ -117,6 +117,13 @@ def labels_on(ui_state):
     return bool((ui_state or {}).get("show_labels", False))
 
 
+def context_shown(ui_state):
+    """Whether the neighbourhood (the context map) is shown: on unless the architect unticked Show neighbourhood in
+    this document. Kept per file, like Show on-screen labels (coordinator's decision, 2026-10-21: an architect
+    reopening a file expects the same view)."""
+    return bool((ui_state or {}).get("show_context", True))
+
+
 def yard_label_shown(labels, status):
     """A yard's label in plan: with Show on-screen labels on, every one; off, still a failing yard's shortfall
     ("✕ Rear yard 21'-2", needs 22'-6""): it is the live feedback (coordinator, 2026-10-20)."""

@@ -216,7 +216,8 @@ def test_a_floating_panel_is_placed_once_never_on_every_check():
                                   UI=types.SimpleNamespace(RhinoEtoApp=types.SimpleNamespace(
                                       MainWindowForDocument=lambda d: None)))
     ns = {"STATE": {}, "LEFTOVERS": {}, "ui": ui, "logic": logic, "Rhino": rhino, "_actions": lambda: None,
-          "register_dock": lambda: "dock", "sc": types.SimpleNamespace(sticky={"gordium_dock_hosts": {1: host}})}
+          "register_dock": lambda: "dock", "sc": types.SimpleNamespace(sticky={"gordium_dock_hosts": {1: host}}),
+          "_context_on": lambda doc: True}       # PR #23: the panel starts its Show neighbourhood tick as the file has it
     exec(compile(ast.Module([fn], []), "gordium_rhino", "exec"), ns)
     first = ns["panel"]()
     second = ns["panel"]()

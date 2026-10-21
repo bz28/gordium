@@ -302,7 +302,7 @@ def make_panel(actions, host=None, context_on=True):
                  button("Zoning report…", actions["report"]), button("?", actions["legend"]))
     parts["zoom_button"] = footer.Items[0].Control
     ticks = [row(_envelope_box(actions)), row(_massing_box(actions)), row(_labels_box(actions, parts)),
-             row(_context_box(actions, context_on))]
+             row(_context_box(actions, parts, context_on))]
     # while a start box is open these are off; the legend ("?") is not among them: it only shows something
     parts["greyed"] = [tree, detail_scroll, *ticks, footer.Items[0].Control, footer.Items[1].Control]
     layout = ef.DynamicLayout()
@@ -339,16 +339,33 @@ def _massing_box(actions):
     return box
 
 
-def _context_box(actions, on=True):
+def _context_box(actions, parts, on=True):
     """Show neighbourhood: the context map (parcels, streets and footprints 1500 ft around a looked-up lot) on or
-    off. Drawing only: the check never measures it. Starts as it was last set (a rebuilt panel included), set before
-    the handler is attached so building the panel never fetches anything."""
+    off. Drawing only: the check never measures it. Starts as this document has it (saved in the file, like Show
+    on-screen labels), set before the handler is attached so building the panel never fetches anything."""
     box = ef.CheckBox()
     box.Text = "Show neighbourhood"
     box.ToolTip = "The parcels, streets and building footprints within 750 ft of the lot (drawing only, never checked)"
     box.Checked = bool(on)
-    box.CheckedChanged += logic.guard(lambda s, e: actions["context"](bool(box.Checked)), "show or hide the neighbourhood")
+
+    def changed(s, e):
+        if not parts.get("_setting_context"):       # set from the document (set_context_tick): not a change
+            actions["context"](bool(box.Checked))
+
+    box.CheckedChanged += logic.guard(changed, "show or hide the neighbourhood")
+    parts["context_box"] = box
     return box
+
+
+def set_context_tick(parts, shown):
+    """The Show neighbourhood tick as this document has it."""
+    if parts is None or parts.get("context_box") is None:
+        return
+    parts["_setting_context"] = True
+    try:
+        parts["context_box"].Checked = bool(shown)
+    finally:
+        parts["_setting_context"] = False
 
 
 def _labels_box(actions, parts):

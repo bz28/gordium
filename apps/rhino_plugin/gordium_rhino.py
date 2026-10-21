@@ -449,7 +449,8 @@ def draw_scene(o, e):
         pts = o.lot_outline
         d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
     context = STATE.get("context_guides") or {}
-    if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) and STATE.get("context_on", True):
+    if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
+            and (STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True):
         for line in context.get("lines") or []:          # the neighbouring footprints: live only, never in the file
             d.DrawPolyline(line, CONTEXT_GUIDE, 1)
     guide = STATE.get("lookup_guide")
@@ -740,14 +741,14 @@ def panel():
         host = logic.dock_host(sc.sticky.get("gordium_dock_hosts") or {}, doc.RuntimeSerialNumber if doc else None)
         if host is not None:
             if p is None or getattr(p["form"], "host", None) is not host or not p["form"].Visible:
-                p = ui.make_panel(_actions(), ui.DockHost(dock, host), context_on=STATE.get("context_on", True))
+                p = ui.make_panel(_actions(), ui.DockHost(dock, host), context_on=_context_on(doc))
                 STATE["panel_parts"] = p
                 LEFTOVERS["panel"] = p["form"].Close
             if logic.place_panel_now(p.get("placed")):          # once: then where the architect puts it
                 p["placed"] = ui.fit_floating(host, Rhino.UI.RhinoEtoApp.MainWindowForDocument(doc) if doc else None)
             return p
     if p is None or not p["form"].Visible:
-        p = ui.make_panel(_actions(), context_on=STATE.get("context_on", True))
+        p = ui.make_panel(_actions(), context_on=_context_on(doc))
         STATE["panel_parts"] = p
         LEFTOVERS["panel"] = p["form"].Close
         p["form"].Show()
@@ -1892,6 +1893,7 @@ def run_check(doc, report=True):
         if not STATE.get("headless"):
             ui.show(panel(), view)
             ui.set_labels_tick(STATE.get("panel_parts"), shown)
+            ui.set_context_tick(STATE.get("panel_parts"), _context_on(doc))
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
             say(logic.report_message(path, False, result["report_error"], stale=had_report))
@@ -2424,7 +2426,7 @@ def draw_context(doc, frame):
             doc.Objects.AddCurve(rg.PolylineCurve(pts + [pts[0]] if o["kind"] == "closed" else pts), attrs)
     _lock_context(doc, True)
     STATE["dirty"] = dirty
-    _context_visible(doc, STATE.get("context_on", True))
+    _context_visible(doc, _context_on(doc))
     # the snapshot (records, never data) with the frame it was drawn around: sync_context compares the lot's frame
     # (layer by layer: a failed layer's entries carried over, rhino_logic.context_merge)
     doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(record))
@@ -2447,7 +2449,7 @@ def sync_context(doc, facts):
     same lot keeps what is drawn (review round 2: an Edit site… lookup left the earlier address's neighbourhood)."""
     drawn = (_context_record(doc) or {}).get("frame")
     frame = logic.context_frame(facts, _ui_state(doc))
-    on = STATE.get("context_on", True)
+    on = _context_on(doc)
     step = logic.context_step(frame, drawn, on)
     refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
     if step == "keep" and frame and on and refetch:
@@ -2467,6 +2469,16 @@ def sync_context(doc, facts):
         _context_visible(doc, True)    # as the tick says (a file saved with it off opens hidden)
 
 
+def _context_on(doc):
+    """This document's Show neighbourhood (rhino_logic.context_shown: its Gordium settings, on unless unticked), also
+    kept per document for the drawing (draw_scene runs every frame). On when there is no document."""
+    if doc is None:
+        return True
+    on = logic.context_shown(_ui_state(doc))
+    STATE.setdefault("context_by_doc", {})[doc.RuntimeSerialNumber] = on
+    return on
+
+
 def _context_visible(doc, on):
     """Every context layer on or off (a sublayer hidden in the Layers panel too). Whether there is one."""
     indexes = _context_layer_indexes(doc)
@@ -2479,7 +2491,11 @@ def show_context(on):
     """The panel's "Show neighbourhood": the context layers and the live footprints on or off. Turned on in a file
     whose footprints aren't on screen (they are never saved: a reopened file), the neighbourhood is fetched again."""
     doc = Rhino.RhinoDoc.ActiveDoc
-    STATE["context_on"] = bool(on)
+    if doc is None:
+        say(logic.NO_DOCUMENT)
+        return
+    _save_ui_state(doc, dict(_ui_state(doc), show_context=bool(on)))     # per file (coordinator, 2026-10-21)
+    STATE.setdefault("context_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
     drawn = _context_visible(doc, on)
     refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
     loaded = not refetch
