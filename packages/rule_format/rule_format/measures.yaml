@@ -1,0 +1,19 @@
+# Every name a rule formula may use. Same names in every city; what each one
+# means in a given city is in that city's 4_term_definitions/.
+# Units are fixed so formulas carry plain numbers: ft, sf, count, text, yes_no (a yes/no fact
+# measured from the model, e.g. "the accessory dwelling unit has a separate entrance").
+
+use:               {unit: text,  meaning: "Proposed use of the lot, as one of the city's use names (4_term_definitions/uses.yaml)"}
+district:          {unit: text,  meaning: "Zoning district of the lot, as the city writes it (R-1b, R-3aa, ...)"}
+lot_area:          {unit: sf,    meaning: Area of the lot}
+lot_width:         {unit: ft,    meaning: Width of the lot}
+lot_depth:         {unit: ft,    meaning: Depth of the lot}
+building_area:     {unit: sf,    meaning: "Ground area covered by buildings, as the city counts it for lot coverage"}
+building_height:   {unit: ft,    meaning: "Height of the building, measured as the city defines it"}
+stories:           {unit: count, meaning: "Number of stories, as the city defines a story"}
+front_yard:        {unit: ft,    meaning: Depth of the front yard}
+side_yard_smaller: {unit: ft,    meaning: Width of the narrower side yard}
+side_yard_larger:  {unit: ft,    meaning: Width of the wider side yard}
+rear_yard:         {unit: ft,    meaning: Depth of the rear yard}
+sleeping_rooms:    {unit: count, meaning: Bed or sleeping rooms in the dwelling unit}
+parking_spaces:    {unit: count, meaning: Off-street parking spaces provided}

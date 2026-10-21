@@ -1,0 +1,491 @@
+{"file": "zoning_maps_2026-05.pdf", "sha256": "1a2a542c9004a123e91d24ea2b35ff05926f2bbee3feebc3080f5ec39b3c0d5f", "pages": 9, "extractor": "pdfplumber 0.11.10 + pdfminer.six 20260107 (dedupe_chars, level text only, extract_text_lines, footnotes as [fnN])", "rotated_chars_skipped": 7266}
+{"page": 1, "line": 1, "text": "City of Ithaca", "x0": 536.5, "top": 71.3, "x1": 724.3, "bottom": 101.3}
+{"page": 1, "line": 2, "text": "Zoning Map", "x0": 566.4, "top": 112.8, "x1": 724.4, "bottom": 142.8}
+{"page": 1, "line": 3, "text": "May 2026", "x0": 653.7, "top": 149.6, "x1": 724.4, "bottom": 165.4}
+{"page": 1, "line": 4, "text": "STE", "x0": 329.9, "top": 272.6, "x1": 341.5, "bottom": 279.0}
+{"page": 1, "line": 5, "text": "RAM", "x0": 216.9, "top": 343.1, "x1": 230.5, "bottom": 349.6}
+{"page": 1, "line": 6, "text": "CORN", "x0": 608.5, "top": 362.6, "x1": 626.1, "bottom": 369.5}
+{"page": 1, "line": 7, "text": "AVE", "x0": 585.9, "top": 370.0, "x1": 598.2, "bottom": 377.0}
+{"page": 1, "line": 8, "text": "RRD", "x0": 333.6, "top": 376.4, "x1": 348.3, "bottom": 382.5}
+{"page": 1, "line": 9, "text": "YORK ST THURSTO", "x0": 375.8, "top": 386.1, "x1": 596.7, "bottom": 393.8}
+{"page": 1, "line": 10, "text": "W FALLS ST FALLS ST FALL", "x0": 351.8, "top": 397.5, "x1": 545.4, "bottom": 406.4}
+{"page": 1, "line": 11, "text": "DITFARMDR", "x0": 642.9, "top": 394.4, "x1": 680.4, "bottom": 400.8}
+{"page": 1, "line": 12, "text": "T E LINCOLN ST", "x0": 380.4, "top": 408.8, "x1": 432.7, "bottom": 416.8}
+{"page": 1, "line": 13, "text": "QUEEN ST", "x0": 403.1, "top": 420.3, "x1": 433.8, "bottom": 427.5}
+{"page": 1, "line": 14, "text": "E JAY ST FORESTHO", "x0": 384.9, "top": 430.8, "x1": 651.2, "bottom": 439.4}
+{"page": 1, "line": 15, "text": "D UNI", "x0": 223.7, "top": 455.8, "x1": 521.8, "bottom": 465.0}
+{"page": 1, "line": 16, "text": "E YATES ST", "x0": 390.9, "top": 486.3, "x1": 425.4, "bottom": 493.0}
+{"page": 1, "line": 17, "text": "E MARSHALL ST LLAVE", "x0": 396.8, "top": 504.0, "x1": 493.7, "bottom": 511.8}
+{"page": 1, "line": 18, "text": "FARM ST CAMPUSRD", "x0": 405.1, "top": 523.1, "x1": 600.1, "bottom": 529.9}
+{"page": 1, "line": 19, "text": "CASCADILLA ST", "x0": 250.6, "top": 531.3, "x1": 297.1, "bottom": 538.2}
+{"page": 1, "line": 20, "text": "SUNRISE RD", "x0": 60.3, "top": 535.9, "x1": 97.6, "bottom": 543.7}
+{"page": 1, "line": 21, "text": "ISERD", "x0": 160.1, "top": 540.4, "x1": 180.6, "bottom": 547.6}
+{"page": 1, "line": 22, "text": "ESTY ST DILLA", "x0": 318.7, "top": 547.8, "x1": 509.2, "bottom": 555.1}
+{"page": 1, "line": 23, "text": "W COURT ST", "x0": 323.8, "top": 562.6, "x1": 361.7, "bottom": 569.4}
+{"page": 1, "line": 24, "text": "LIFF WILLIAMS ST", "x0": 90.4, "top": 568.6, "x1": 530.0, "bottom": 574.9}
+{"page": 1, "line": 25, "text": "BUFFALO ST", "x0": 460.6, "top": 580.3, "x1": 497.8, "bottom": 587.1}
+{"page": 1, "line": 26, "text": "D", "x0": 600.7, "top": 589.6, "x1": 605.1, "bottom": 595.6}
+{"page": 1, "line": 27, "text": "SENECA ST WSENECASTNY79 SENECA ST CATHERINE ST", "x0": 245.2, "top": 594.8, "x1": 565.4, "bottom": 608.1}
+{"page": 1, "line": 28, "text": "W STATE ST D MILLER ST", "x0": 322.7, "top": 610.0, "x1": 670.8, "bottom": 619.0}
+{"page": 1, "line": 29, "text": "TABE", "x0": 184.5, "top": 618.9, "x1": 199.9, "bottom": 625.2}
+{"page": 1, "line": 30, "text": "GREEN ST - NY79 SB/EB RTHST", "x0": 269.7, "top": 625.8, "x1": 670.2, "bottom": 634.6}
+{"page": 1, "line": 31, "text": "PROSPECT ST I MITCHELL ST", "x0": 439.2, "top": 641.6, "x1": 660.0, "bottom": 649.7}
+{"page": 1, "line": 32, "text": "ST", "x0": 588.4, "top": 647.7, "x1": 596.5, "bottom": 654.0}
+{"page": 1, "line": 33, "text": "CECILAMALONERD LINTONSTW PLEASANT ST RD", "x0": 193.4, "top": 654.8, "x1": 630.8, "bottom": 665.0}
+{"page": 1, "line": 34, "text": "RD", "x0": 623.3, "top": 667.8, "x1": 631.7, "bottom": 673.8}
+{"page": 1, "line": 35, "text": "COLUMBIA", "x0": 451.9, "top": 671.4, "x1": 483.1, "bottom": 678.2}
+{"page": 1, "line": 36, "text": "HILLVIEW PL", "x0": 428.3, "top": 686.8, "x1": 465.4, "bottom": 693.8}
+{"page": 1, "line": 37, "text": "AVE", "x0": 328.6, "top": 694.0, "x1": 340.9, "bottom": 701.0}
+{"page": 1, "line": 38, "text": "SOUTH ST HYERS ST CR", "x0": 272.6, "top": 702.4, "x1": 493.0, "bottom": 714.8}
+{"page": 1, "line": 39, "text": "RESTAVE", "x0": 695.6, "top": 713.2, "x1": 725.6, "bottom": 720.0}
+{"page": 1, "line": 40, "text": "WOOD ST", "x0": 324.1, "top": 719.2, "x1": 352.8, "bottom": 725.7}
+{"page": 1, "line": 41, "text": "PARK ST VIEWCT", "x0": 328.4, "top": 735.4, "x1": 472.9, "bottom": 741.8}
+{"page": 1, "line": 42, "text": "TONRD", "x0": 447.8, "top": 773.6, "x1": 470.4, "bottom": 779.9}
+{"page": 1, "line": 43, "text": "MERCI", "x0": 169.2, "top": 853.8, "x1": 188.7, "bottom": 860.1}
+{"page": 1, "line": 44, "text": "Zoning Districts CBD-60 Medium-Density Mixed Use R-U", "x0": 231.6, "top": 899.3, "x1": 658.4, "bottom": 914.5}
+{"page": 1, "line": 45, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 229.2, "top": 915.0, "x1": 256.9, "bottom": 933.0}
+{"page": 1, "line": 46, "text": "B-1a", "x0": 259.2, "top": 921.4, "x1": 278.4, "bottom": 930.5}
+{"page": 1, "line": 47, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 349.2, "top": 912.9, "x1": 376.9, "bottom": 931.1}
+{"page": 1, "line": 48, "text": "CBD-85 Newman D Residential Transition", "x0": 379.5, "top": 919.0, "x1": 730.4, "bottom": 928.1}
+{"page": 1, "line": 49, "text": "B-1b CR-1 P-1 SW-1", "x0": 259.2, "top": 938.7, "x1": 664.8, "bottom": 950.2}
+{"page": 1, "line": 50, "text": "B-2a CR-2 PUD SW-2", "x0": 259.2, "top": 958.4, "x1": 664.8, "bottom": 969.9}
+{"page": 1, "line": 51, "text": "B-2d CR-3 R-1a SW-3", "x0": 259.2, "top": 978.0, "x1": 664.8, "bottom": 989.6}
+{"page": 1, "line": 52, "text": "B-4 CR-4 R-1b Traditional Residential", "x0": 259.2, "top": 997.7, "x1": 733.1, "bottom": 1009.2}
+{"page": 1, "line": 53, "text": "B-5 Cherry Street District R-2a U-1", "x0": 259.2, "top": 1017.4, "x1": 656.9, "bottom": 1028.9}
+{"page": 1, "line": 54, "text": "C-SU Urban Mixed Use R-2b WE/WF", "x0": 259.2, "top": 1037.1, "x1": 673.7, "bottom": 1048.6}
+{"page": 1, "line": 55, "text": "CBD-100 MH-1", "x0": 259.2, "top": 1056.8, "x1": 401.8, "bottom": 1068.3}
+{"page": 1, "line": 56, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 467.3, "top": 1050.9, "x1": 494.7, "bottom": 1067.2}
+{"page": 1, "line": 57, "text": "R-2c WEDZ-1a", "x0": 497.3, "top": 1056.8, "x1": 682.4, "bottom": 1065.9}
+{"page": 1, "line": 58, "text": "CBD-120 MU-1 R-3a WEDZ-1b", "x0": 259.2, "top": 1076.4, "x1": 682.4, "bottom": 1088.0}
+{"page": 1, "line": 59, "text": "I", "x0": 134.2, "top": 1102.5, "x1": 201.0, "bottom": 1189.3}
+{"page": 1, "line": 60, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 229.2, "top": 1092.9, "x1": 256.9, "bottom": 1109.2}
+{"page": 1, "line": 61, "text": "C", "x0": 259.2, "top": 1098.3, "x1": 265.8, "bottom": 1107.4}
+{"page": 1, "line": 62, "text": "C", "x0": 259.2, "top": 1118.0, "x1": 265.8, "bottom": 1127.1}
+{"page": 1, "line": 63, "text": "B", "x0": 265.7, "top": 1098.3, "x1": 271.8, "bottom": 1107.4}
+{"page": 1, "line": 64, "text": "B", "x0": 265.7, "top": 1118.0, "x1": 271.8, "bottom": 1127.1}
+{"page": 1, "line": 65, "text": "D", "x0": 271.9, "top": 1098.3, "x1": 278.5, "bottom": 1107.4}
+{"page": 1, "line": 66, "text": "D", "x0": 271.9, "top": 1118.0, "x1": 278.5, "bottom": 1127.1}
+{"page": 1, "line": 67, "text": "-", "x0": 278.4, "top": 1098.3, "x1": 281.4, "bottom": 1107.4}
+{"page": 1, "line": 68, "text": "-", "x0": 278.4, "top": 1118.0, "x1": 281.4, "bottom": 1127.1}
+{"page": 1, "line": 69, "text": "1", "x0": 281.5, "top": 1098.3, "x1": 286.6, "bottom": 1107.4}
+{"page": 1, "line": 70, "text": "5", "x0": 281.5, "top": 1118.0, "x1": 286.6, "bottom": 1127.1}
+{"page": 1, "line": 71, "text": "4", "x0": 286.6, "top": 1098.3, "x1": 291.6, "bottom": 1107.4}
+{"page": 1, "line": 72, "text": "0", "x0": 286.6, "top": 1118.0, "x1": 291.6, "bottom": 1127.1}
+{"page": 1, "line": 73, "text": "0 M", "x0": 291.8, "top": 1096.1, "x1": 387.0, "bottom": 1107.4}
+{"page": 1, "line": 74, "text": "M", "x0": 379.5, "top": 1115.8, "x1": 387.0, "bottom": 1124.9}
+{"page": 1, "line": 75, "text": "U", "x0": 386.9, "top": 1096.1, "x1": 393.5, "bottom": 1105.2}
+{"page": 1, "line": 76, "text": "ar", "x0": 386.9, "top": 1115.8, "x1": 395.2, "bottom": 1124.9}
+{"page": 1, "line": 77, "text": "-", "x0": 393.6, "top": 1096.1, "x1": 396.6, "bottom": 1105.2}
+{"page": 1, "line": 78, "text": "k", "x0": 395.3, "top": 1115.8, "x1": 399.8, "bottom": 1124.9}
+{"page": 1, "line": 79, "text": "2", "x0": 396.7, "top": 1096.1, "x1": 401.8, "bottom": 1105.2}
+{"page": 1, "line": 80, "text": "et District", "x0": 399.8, "top": 1115.8, "x1": 438.1, "bottom": 1124.9}
+{"page": 1, "line": 81, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 467.3, "top": 1108.9, "x1": 494.7, "bottom": 1127.2}
+{"page": 1, "line": 82, "text": "R", "x0": 497.3, "top": 1096.1, "x1": 503.9, "bottom": 1105.2}
+{"page": 1, "line": 83, "text": "R", "x0": 497.3, "top": 1115.8, "x1": 503.9, "bottom": 1124.9}
+{"page": 1, "line": 84, "text": "-", "x0": 503.8, "top": 1096.1, "x1": 506.8, "bottom": 1105.2}
+{"page": 1, "line": 85, "text": "-", "x0": 503.8, "top": 1115.8, "x1": 506.8, "bottom": 1124.9}
+{"page": 1, "line": 86, "text": "3", "x0": 506.9, "top": 1096.1, "x1": 512.0, "bottom": 1105.2}
+{"page": 1, "line": 87, "text": "3", "x0": 506.9, "top": 1115.8, "x1": 512.0, "bottom": 1124.9}
+{"page": 1, "line": 88, "text": "a", "x0": 511.9, "top": 1096.1, "x1": 517.0, "bottom": 1105.2}
+{"page": 1, "line": 89, "text": "b", "x0": 511.9, "top": 1115.8, "x1": 517.0, "bottom": 1124.9}
+{"page": 1, "line": 90, "text": "a", "x0": 517.2, "top": 1096.1, "x1": 522.3, "bottom": 1105.2}
+{"page": 1, "line": 91, "text": "0 0.25 0.5 1 1.5 2", "x0": 219.8, "top": 1150.6, "x1": 696.7, "bottom": 1166.5}
+{"page": 1, "line": 92, "text": "Miles", "x0": 696.0, "top": 1165.7, "x1": 733.0, "bottom": 1181.6}
+{"page": 2, "line": 1, "text": "City of Ithaca", "x0": 582.5, "top": 57.7, "x1": 732.6, "bottom": 81.7}
+{"page": 2, "line": 2, "text": "Overlay/Reference Map", "x0": 416.7, "top": 94.1, "x1": 732.6, "bottom": 124.1}
+{"page": 2, "line": 3, "text": "May 2026", "x0": 661.8, "top": 136.8, "x1": 732.5, "bottom": 152.7}
+{"page": 2, "line": 4, "text": "STE", "x0": 328.2, "top": 266.8, "x1": 339.8, "bottom": 273.2}
+{"page": 2, "line": 5, "text": "HRA", "x0": 210.9, "top": 339.3, "x1": 224.9, "bottom": 345.8}
+{"page": 2, "line": 6, "text": "E D", "x0": 450.7, "top": 352.9, "x1": 464.8, "bottom": 361.1}
+{"page": 2, "line": 7, "text": "CORN", "x0": 614.5, "top": 359.0, "x1": 632.1, "bottom": 366.2}
+{"page": 2, "line": 8, "text": "W", "x0": 596.5, "top": 367.4, "x1": 602.5, "bottom": 373.7}
+{"page": 2, "line": 9, "text": "RRD", "x0": 331.2, "top": 373.3, "x1": 345.7, "bottom": 379.4}
+{"page": 2, "line": 10, "text": "YORK ST TH", "x0": 374.6, "top": 383.5, "x1": 600.9, "bottom": 390.0}
+{"page": 2, "line": 11, "text": "W FALLS ST FALLS ST", "x0": 350.6, "top": 394.8, "x1": 419.4, "bottom": 402.6}
+{"page": 2, "line": 12, "text": "E LINCOLN ST", "x0": 390.8, "top": 406.6, "x1": 432.0, "bottom": 413.8}
+{"page": 2, "line": 13, "text": "QUEEN ST IVERSITYAVE", "x0": 402.1, "top": 418.4, "x1": 591.9, "bottom": 428.9}
+{"page": 2, "line": 14, "text": "E JAY ST FORESTH", "x0": 383.4, "top": 429.4, "x1": 656.9, "bottom": 437.7}
+{"page": 2, "line": 15, "text": "KING ST", "x0": 415.9, "top": 436.5, "x1": 440.0, "bottom": 442.9}
+{"page": 2, "line": 16, "text": "E YATES ST", "x0": 389.9, "top": 486.1, "x1": 424.4, "bottom": 492.7}
+{"page": 2, "line": 17, "text": "E MARSHALL ST LLAVE", "x0": 392.9, "top": 504.5, "x1": 494.9, "bottom": 512.3}
+{"page": 2, "line": 18, "text": "FARM ST CORNELL - CAMPUS RD", "x0": 405.3, "top": 523.8, "x1": 690.1, "bottom": 530.9}
+{"page": 2, "line": 19, "text": "CASCADILLA ST", "x0": 247.3, "top": 532.5, "x1": 293.8, "bottom": 539.4}
+{"page": 2, "line": 20, "text": "SUNRISE RD", "x0": 53.9, "top": 537.2, "x1": 91.1, "bottom": 544.8}
+{"page": 2, "line": 21, "text": "ISERD EDGEMOOR LN", "x0": 152.9, "top": 541.8, "x1": 544.8, "bottom": 551.4}
+{"page": 2, "line": 22, "text": "ESTY ST", "x0": 302.8, "top": 550.0, "x1": 327.7, "bottom": 556.5}
+{"page": 2, "line": 23, "text": "W COURT ST", "x0": 322.0, "top": 564.5, "x1": 359.9, "bottom": 571.3}
+{"page": 2, "line": 24, "text": "LIF WILLIAMS ST", "x0": 82.5, "top": 570.4, "x1": 531.7, "bottom": 576.9}
+{"page": 2, "line": 25, "text": "BUFFALO ST", "x0": 387.2, "top": 584.4, "x1": 424.3, "bottom": 591.2}
+{"page": 2, "line": 26, "text": "MAPLE AVE", "x0": 655.1, "top": 590.8, "x1": 688.8, "bottom": 598.2}
+{"page": 2, "line": 27, "text": "SENECA ST WSENECASTNY79 SENECA ST CATHERINE ST", "x0": 240.0, "top": 597.4, "x1": 569.0, "bottom": 611.1}
+{"page": 2, "line": 28, "text": "W STATE ST MILLER ST", "x0": 259.1, "top": 613.8, "x1": 676.3, "bottom": 623.3}
+{"page": 2, "line": 29, "text": "TABE", "x0": 180.4, "top": 622.2, "x1": 195.9, "bottom": 628.7}
+{"page": 2, "line": 30, "text": "GREEN ST - NY79 SB/EB THST", "x0": 267.8, "top": 629.4, "x1": 675.7, "bottom": 638.2}
+{"page": 2, "line": 31, "text": "MITCHELL ST", "x0": 637.8, "top": 646.1, "x1": 677.0, "bottom": 654.2}
+{"page": 2, "line": 32, "text": "LS", "x0": 591.4, "top": 651.8, "x1": 600.9, "bottom": 658.0}
+{"page": 2, "line": 33, "text": "CECILAMALONERD LINTONSTW PLEASANT ST ERD", "x0": 191.2, "top": 658.9, "x1": 637.0, "bottom": 669.3}
+{"page": 2, "line": 34, "text": "RD", "x0": 630.0, "top": 672.4, "x1": 638.5, "bottom": 678.6}
+{"page": 2, "line": 35, "text": "COLUMBIA", "x0": 453.1, "top": 676.1, "x1": 484.1, "bottom": 683.0}
+{"page": 2, "line": 36, "text": "HILLVIEW PL", "x0": 428.8, "top": 691.8, "x1": 465.9, "bottom": 698.8}
+{"page": 2, "line": 37, "text": "SOUTH ST", "x0": 270.0, "top": 708.0, "x1": 300.3, "bottom": 714.3}
+{"page": 2, "line": 38, "text": "H", "x0": 329.6, "top": 714.2, "x1": 334.1, "bottom": 720.3}
+{"page": 2, "line": 39, "text": "S", "x0": 330.1, "top": 707.1, "x1": 334.3, "bottom": 713.2}
+{"page": 2, "line": 40, "text": "Y", "x0": 333.9, "top": 714.1, "x1": 338.0, "bottom": 720.2}
+{"page": 2, "line": 41, "text": "T", "x0": 336.1, "top": 706.8, "x1": 340.0, "bottom": 712.9}
+{"page": 2, "line": 42, "text": "ERS ST CR", "x0": 337.7, "top": 711.2, "x1": 494.2, "bottom": 720.1}
+{"page": 2, "line": 43, "text": "TAVE", "x0": 704.1, "top": 719.4, "x1": 721.2, "bottom": 725.8}
+{"page": 2, "line": 44, "text": "WOOD ST", "x0": 321.9, "top": 725.4, "x1": 350.6, "bottom": 731.9}
+{"page": 2, "line": 45, "text": "PARK ST VIEWCT", "x0": 326.2, "top": 741.8, "x1": 473.6, "bottom": 748.3}
+{"page": 2, "line": 46, "text": "GTONRD", "x0": 444.0, "top": 780.7, "x1": 471.2, "bottom": 787.8}
+{"page": 2, "line": 47, "text": "ERCIA", "x0": 164.9, "top": 863.4, "x1": 182.8, "bottom": 869.7}
+{"page": 2, "line": 48, "text": "Overlay Districts Gorge Protection Zones", "x0": 194.9, "top": 1034.0, "x1": 730.2, "bottom": 1051.5}
+{"page": 2, "line": 49, "text": "Active street-level uses required GP-A", "x0": 228.7, "top": 1058.0, "x1": 605.9, "bottom": 1077.4}
+{"page": 2, "line": 50, "text": "Adult Use Overlay Zone GP-B", "x0": 228.7, "top": 1085.8, "x1": 605.9, "bottom": 1103.3}
+{"page": 2, "line": 51, "text": "I", "x0": 114.0, "top": 1103.2, "x1": 180.8, "bottom": 1190.1}
+{"page": 2, "line": 52, "text": "Street Level Active Use Overlay Zone GP-C", "x0": 228.7, "top": 1111.7, "x1": 606.9, "bottom": 1129.3}
+{"page": 2, "line": 53, "text": "0 0.25 0.5 1 1.5 2", "x0": 195.8, "top": 1148.8, "x1": 686.2, "bottom": 1167.0}
+{"page": 2, "line": 54, "text": "Miles", "x0": 685.7, "top": 1166.3, "x1": 728.4, "bottom": 1184.5}
+{"page": 3, "line": 1, "text": "City of Ithaca", "x0": 582.5, "top": 57.7, "x1": 732.6, "bottom": 81.7}
+{"page": 3, "line": 2, "text": "Flood Zones Map", "x0": 499.7, "top": 97.2, "x1": 732.6, "bottom": 127.2}
+{"page": 3, "line": 3, "text": "May 2026", "x0": 661.8, "top": 136.8, "x1": 732.5, "bottom": 152.7}
+{"page": 3, "line": 4, "text": "STE", "x0": 328.2, "top": 266.8, "x1": 339.8, "bottom": 273.2}
+{"page": 3, "line": 5, "text": "HRA", "x0": 210.9, "top": 339.3, "x1": 224.9, "bottom": 345.8}
+{"page": 3, "line": 6, "text": "E D", "x0": 450.7, "top": 352.9, "x1": 464.8, "bottom": 361.1}
+{"page": 3, "line": 7, "text": "CORN", "x0": 614.5, "top": 359.0, "x1": 632.1, "bottom": 366.2}
+{"page": 3, "line": 8, "text": "W", "x0": 596.5, "top": 367.4, "x1": 602.5, "bottom": 373.7}
+{"page": 3, "line": 9, "text": "RRD", "x0": 331.2, "top": 373.3, "x1": 345.7, "bottom": 379.4}
+{"page": 3, "line": 10, "text": "YORK ST TH", "x0": 374.6, "top": 383.5, "x1": 600.9, "bottom": 390.0}
+{"page": 3, "line": 11, "text": "W FALLS ST FALLS ST", "x0": 350.6, "top": 394.8, "x1": 419.4, "bottom": 402.6}
+{"page": 3, "line": 12, "text": "E LINCOLN ST", "x0": 390.8, "top": 406.6, "x1": 432.0, "bottom": 413.8}
+{"page": 3, "line": 13, "text": "QUEEN ST IVERSITYAVE", "x0": 402.1, "top": 418.4, "x1": 592.0, "bottom": 428.9}
+{"page": 3, "line": 14, "text": "E JAY ST FORESTH", "x0": 383.4, "top": 429.4, "x1": 656.9, "bottom": 437.7}
+{"page": 3, "line": 15, "text": "KING ST", "x0": 415.9, "top": 436.5, "x1": 440.0, "bottom": 442.9}
+{"page": 3, "line": 16, "text": "E YATES ST", "x0": 389.9, "top": 486.1, "x1": 424.4, "bottom": 492.7}
+{"page": 3, "line": 17, "text": "E MARSHALL ST LLAVE", "x0": 392.9, "top": 504.5, "x1": 494.9, "bottom": 512.3}
+{"page": 3, "line": 18, "text": "FARM ST CORNELL - CAMPUS RD", "x0": 405.3, "top": 523.8, "x1": 690.1, "bottom": 530.9}
+{"page": 3, "line": 19, "text": "CASCADILLA ST", "x0": 247.3, "top": 532.5, "x1": 293.8, "bottom": 539.4}
+{"page": 3, "line": 20, "text": "SUNRISE RD", "x0": 53.9, "top": 537.2, "x1": 91.1, "bottom": 544.8}
+{"page": 3, "line": 21, "text": "ISERD EDGEMOOR LN", "x0": 152.9, "top": 541.8, "x1": 544.8, "bottom": 551.4}
+{"page": 3, "line": 22, "text": "ESTY ST", "x0": 302.8, "top": 550.0, "x1": 327.7, "bottom": 556.5}
+{"page": 3, "line": 23, "text": "W COURT ST", "x0": 322.0, "top": 564.5, "x1": 359.9, "bottom": 571.3}
+{"page": 3, "line": 24, "text": "LIF WILLIAMS ST", "x0": 82.5, "top": 570.4, "x1": 531.7, "bottom": 576.9}
+{"page": 3, "line": 25, "text": "BUFFALO ST", "x0": 387.2, "top": 584.4, "x1": 424.3, "bottom": 591.2}
+{"page": 3, "line": 26, "text": "MAPLE AVE", "x0": 655.1, "top": 590.8, "x1": 688.8, "bottom": 598.2}
+{"page": 3, "line": 27, "text": "SENECA ST WSENECASTNY79 SENECA ST CATHERINE ST", "x0": 240.0, "top": 597.4, "x1": 569.0, "bottom": 611.1}
+{"page": 3, "line": 28, "text": "W STATE ST MILLER ST", "x0": 259.1, "top": 613.8, "x1": 676.3, "bottom": 623.3}
+{"page": 3, "line": 29, "text": "TABE", "x0": 180.4, "top": 622.2, "x1": 195.9, "bottom": 628.7}
+{"page": 3, "line": 30, "text": "GREEN ST - NY79 SB/EB THST", "x0": 267.8, "top": 629.4, "x1": 675.7, "bottom": 638.2}
+{"page": 3, "line": 31, "text": "MITCHELL ST", "x0": 637.8, "top": 646.1, "x1": 677.0, "bottom": 654.2}
+{"page": 3, "line": 32, "text": "LS", "x0": 591.4, "top": 651.8, "x1": 600.9, "bottom": 658.0}
+{"page": 3, "line": 33, "text": "CECILAMALONERD LINTONSTW PLEASANT ST ERD", "x0": 191.2, "top": 658.9, "x1": 637.0, "bottom": 669.3}
+{"page": 3, "line": 34, "text": "RD", "x0": 630.0, "top": 672.4, "x1": 638.5, "bottom": 678.6}
+{"page": 3, "line": 35, "text": "COLUMBIA", "x0": 453.1, "top": 676.2, "x1": 484.1, "bottom": 683.0}
+{"page": 3, "line": 36, "text": "HILLVIEW PL", "x0": 428.8, "top": 691.8, "x1": 465.9, "bottom": 698.8}
+{"page": 3, "line": 37, "text": "SOUTH ST", "x0": 270.0, "top": 708.0, "x1": 300.3, "bottom": 714.3}
+{"page": 3, "line": 38, "text": "H", "x0": 329.6, "top": 714.2, "x1": 334.1, "bottom": 720.3}
+{"page": 3, "line": 39, "text": "S", "x0": 330.1, "top": 707.1, "x1": 334.3, "bottom": 713.2}
+{"page": 3, "line": 40, "text": "Y", "x0": 333.9, "top": 714.1, "x1": 338.0, "bottom": 720.2}
+{"page": 3, "line": 41, "text": "T", "x0": 336.1, "top": 706.8, "x1": 340.0, "bottom": 713.0}
+{"page": 3, "line": 42, "text": "ERS ST CR", "x0": 337.7, "top": 711.2, "x1": 494.2, "bottom": 720.1}
+{"page": 3, "line": 43, "text": "TAVE", "x0": 704.1, "top": 719.4, "x1": 721.2, "bottom": 725.8}
+{"page": 3, "line": 44, "text": "WOOD ST", "x0": 321.9, "top": 725.4, "x1": 350.6, "bottom": 731.9}
+{"page": 3, "line": 45, "text": "PARK ST VIEWCT", "x0": 326.2, "top": 741.8, "x1": 473.6, "bottom": 748.3}
+{"page": 3, "line": 46, "text": "GTONRD", "x0": 444.0, "top": 780.7, "x1": 471.2, "bottom": 787.8}
+{"page": 3, "line": 47, "text": "ERCIA", "x0": 164.9, "top": 863.4, "x1": 182.8, "bottom": 869.7}
+{"page": 3, "line": 48, "text": "FEMA Flood Zones", "x0": 458.2, "top": 1017.4, "x1": 728.6, "bottom": 1047.2}
+{"page": 3, "line": 49, "text": "I", "x0": 369.4, "top": 1044.1, "x1": 436.2, "bottom": 1131.0}
+{"page": 3, "line": 50, "text": "Zone AE", "x0": 514.1, "top": 1061.5, "x1": 585.7, "bottom": 1080.0}
+{"page": 3, "line": 51, "text": "Zone X", "x0": 514.1, "top": 1101.6, "x1": 574.4, "bottom": 1120.1}
+{"page": 3, "line": 52, "text": "0 0.25 0.5 1 1.5 2", "x0": 195.8, "top": 1148.8, "x1": 686.2, "bottom": 1167.0}
+{"page": 3, "line": 53, "text": "Miles", "x0": 685.7, "top": 1166.3, "x1": 728.4, "bottom": 1184.5}
+{"page": 4, "line": 1, "text": "City of Ithaca", "x0": 582.5, "top": 57.7, "x1": 732.6, "bottom": 81.7}
+{"page": 4, "line": 2, "text": "Historic Districts Map", "x0": 451.6, "top": 97.2, "x1": 732.5, "bottom": 127.2}
+{"page": 4, "line": 3, "text": "May 2026", "x0": 661.8, "top": 136.8, "x1": 732.5, "bottom": 152.7}
+{"page": 4, "line": 4, "text": "STE", "x0": 328.2, "top": 266.8, "x1": 339.8, "bottom": 273.2}
+{"page": 4, "line": 5, "text": "HRA", "x0": 210.9, "top": 339.3, "x1": 224.9, "bottom": 345.8}
+{"page": 4, "line": 6, "text": "E D", "x0": 450.7, "top": 352.9, "x1": 464.8, "bottom": 361.1}
+{"page": 4, "line": 7, "text": "CORN", "x0": 614.5, "top": 359.0, "x1": 632.1, "bottom": 366.2}
+{"page": 4, "line": 8, "text": "W", "x0": 596.5, "top": 367.4, "x1": 602.5, "bottom": 373.7}
+{"page": 4, "line": 9, "text": "RRD", "x0": 331.2, "top": 373.3, "x1": 345.7, "bottom": 379.4}
+{"page": 4, "line": 10, "text": "YORK ST TH", "x0": 374.6, "top": 383.5, "x1": 600.9, "bottom": 390.0}
+{"page": 4, "line": 11, "text": "W FALLS ST FALLS ST", "x0": 350.6, "top": 394.8, "x1": 419.4, "bottom": 402.6}
+{"page": 4, "line": 12, "text": "E LINCOLN ST", "x0": 390.8, "top": 406.6, "x1": 432.0, "bottom": 413.8}
+{"page": 4, "line": 13, "text": "QUEEN ST IVERSITYAVE", "x0": 402.1, "top": 418.4, "x1": 591.9, "bottom": 428.9}
+{"page": 4, "line": 14, "text": "E JAY ST FORESTH", "x0": 383.4, "top": 429.4, "x1": 656.9, "bottom": 437.7}
+{"page": 4, "line": 15, "text": "KING ST", "x0": 415.9, "top": 436.5, "x1": 440.0, "bottom": 442.9}
+{"page": 4, "line": 16, "text": "E YATES ST", "x0": 389.9, "top": 486.1, "x1": 424.4, "bottom": 492.7}
+{"page": 4, "line": 17, "text": "E MARSHALL ST LLAVE", "x0": 392.9, "top": 504.5, "x1": 494.9, "bottom": 512.3}
+{"page": 4, "line": 18, "text": "FARM ST CORNELL - CAMPUS RD", "x0": 405.3, "top": 523.8, "x1": 690.1, "bottom": 530.9}
+{"page": 4, "line": 19, "text": "CASCADILLA ST", "x0": 247.3, "top": 532.5, "x1": 293.8, "bottom": 539.4}
+{"page": 4, "line": 20, "text": "SUNRISE RD", "x0": 53.9, "top": 537.2, "x1": 91.1, "bottom": 544.8}
+{"page": 4, "line": 21, "text": "ISERD EDGEMOOR LN", "x0": 152.9, "top": 541.8, "x1": 544.8, "bottom": 551.4}
+{"page": 4, "line": 22, "text": "ESTY ST", "x0": 302.8, "top": 550.0, "x1": 327.7, "bottom": 556.5}
+{"page": 4, "line": 23, "text": "W COURT ST", "x0": 322.0, "top": 564.5, "x1": 359.9, "bottom": 571.3}
+{"page": 4, "line": 24, "text": "LIF WILLIAMS ST", "x0": 82.5, "top": 570.4, "x1": 531.7, "bottom": 576.9}
+{"page": 4, "line": 25, "text": "BUFFALO ST", "x0": 387.2, "top": 584.4, "x1": 424.3, "bottom": 591.2}
+{"page": 4, "line": 26, "text": "MAPLE AVE", "x0": 655.1, "top": 590.8, "x1": 688.8, "bottom": 598.2}
+{"page": 4, "line": 27, "text": "SENECA ST WSENECASTNY79 SENECA ST CATHERINE ST", "x0": 240.0, "top": 597.4, "x1": 569.0, "bottom": 611.1}
+{"page": 4, "line": 28, "text": "W STATE ST MILLER ST", "x0": 259.1, "top": 613.8, "x1": 676.3, "bottom": 623.3}
+{"page": 4, "line": 29, "text": "TABE", "x0": 180.4, "top": 622.2, "x1": 195.9, "bottom": 628.7}
+{"page": 4, "line": 30, "text": "GREEN ST - NY79 SB/EB THST", "x0": 267.8, "top": 629.4, "x1": 675.7, "bottom": 638.2}
+{"page": 4, "line": 31, "text": "MITCHELL ST", "x0": 637.8, "top": 646.1, "x1": 677.0, "bottom": 654.2}
+{"page": 4, "line": 32, "text": "LS", "x0": 591.4, "top": 651.8, "x1": 600.9, "bottom": 658.0}
+{"page": 4, "line": 33, "text": "CECILAMALONERD LINTONSTW PLEASANT ST ERD", "x0": 191.2, "top": 658.9, "x1": 637.0, "bottom": 669.3}
+{"page": 4, "line": 34, "text": "RD", "x0": 630.0, "top": 672.4, "x1": 638.5, "bottom": 678.6}
+{"page": 4, "line": 35, "text": "COLUMBIA", "x0": 453.1, "top": 676.1, "x1": 484.1, "bottom": 683.0}
+{"page": 4, "line": 36, "text": "HILLVIEW PL", "x0": 428.8, "top": 691.8, "x1": 465.9, "bottom": 698.8}
+{"page": 4, "line": 37, "text": "SOUTH ST", "x0": 270.0, "top": 708.0, "x1": 300.3, "bottom": 714.3}
+{"page": 4, "line": 38, "text": "H", "x0": 329.6, "top": 714.2, "x1": 334.1, "bottom": 720.3}
+{"page": 4, "line": 39, "text": "S", "x0": 330.1, "top": 707.1, "x1": 334.3, "bottom": 713.2}
+{"page": 4, "line": 40, "text": "Y", "x0": 333.9, "top": 714.1, "x1": 338.0, "bottom": 720.2}
+{"page": 4, "line": 41, "text": "T", "x0": 336.1, "top": 706.8, "x1": 340.0, "bottom": 712.9}
+{"page": 4, "line": 42, "text": "ERS ST CR", "x0": 337.7, "top": 711.2, "x1": 494.2, "bottom": 720.1}
+{"page": 4, "line": 43, "text": "TAVE", "x0": 704.1, "top": 719.4, "x1": 721.2, "bottom": 725.8}
+{"page": 4, "line": 44, "text": "WOOD ST", "x0": 321.9, "top": 725.4, "x1": 350.6, "bottom": 731.9}
+{"page": 4, "line": 45, "text": "PARK ST VIEWCT", "x0": 326.2, "top": 741.8, "x1": 473.6, "bottom": 748.3}
+{"page": 4, "line": 46, "text": "GTONRD", "x0": 444.0, "top": 780.7, "x1": 471.2, "bottom": 787.8}
+{"page": 4, "line": 47, "text": "ERCIA", "x0": 164.9, "top": 863.4, "x1": 182.8, "bottom": 869.7}
+{"page": 4, "line": 48, "text": "Historic Districts National Ithaca Downtown", "x0": 242.9, "top": 900.5, "x1": 727.7, "bottom": 925.1}
+{"page": 4, "line": 49, "text": "Clinton Block", "x0": 296.2, "top": 941.3, "x1": 404.3, "bottom": 959.8}
+{"page": 4, "line": 50, "text": "Local DeWitt Park", "x0": 512.4, "top": 944.4, "x1": 660.9, "bottom": 962.9}
+{"page": 4, "line": 51, "text": "Cornell Arts Quad", "x0": 296.2, "top": 981.5, "x1": 442.5, "bottom": 1000.0}
+{"page": 4, "line": 52, "text": "Local East Hill", "x0": 512.4, "top": 984.6, "x1": 630.1, "bottom": 1003.1}
+{"page": 4, "line": 53, "text": "Cornell Heights", "x0": 296.2, "top": 1021.6, "x1": 422.7, "bottom": 1040.1}
+{"page": 4, "line": 54, "text": "National DeWitt Park", "x0": 512.4, "top": 1024.7, "x1": 684.6, "bottom": 1043.2}
+{"page": 4, "line": 55, "text": "Downtown West", "x0": 296.2, "top": 1061.8, "x1": 430.0, "bottom": 1080.2}
+{"page": 4, "line": 56, "text": "National East Hill", "x0": 512.4, "top": 1064.8, "x1": 653.8, "bottom": 1083.3}
+{"page": 4, "line": 57, "text": "I Henry St. John University Hill", "x0": 112.6, "top": 1101.9, "x1": 624.6, "bottom": 1191.7}
+{"page": 4, "line": 58, "text": "0 0.25 0.5 1 1.5 2", "x0": 195.8, "top": 1148.8, "x1": 686.2, "bottom": 1167.0}
+{"page": 4, "line": 59, "text": "Miles", "x0": 685.7, "top": 1166.3, "x1": 728.4, "bottom": 1184.5}
+{"page": 5, "line": 1, "text": "W COURT ST", "x0": 77.1, "top": 33.4, "x1": 153.1, "bottom": 47.0}
+{"page": 5, "line": 2, "text": "City of Ithaca", "x0": 64.3, "top": 49.3, "x1": 214.5, "bottom": 73.3}
+{"page": 5, "line": 3, "text": "UN PL", "x0": 1149.4, "top": 71.3, "x1": 1185.1, "bottom": 83.9}
+{"page": 5, "line": 4, "text": "CBD District Map", "x0": 64.3, "top": 88.8, "x1": 293.6, "bottom": 118.8}
+{"page": 5, "line": 5, "text": "BUFFALO ST", "x0": 621.0, "top": 121.7, "x1": 695.5, "bottom": 135.4}
+{"page": 5, "line": 6, "text": "May 2026", "x0": 64.4, "top": 128.2, "x1": 135.2, "bottom": 144.0}
+{"page": 5, "line": 7, "text": "SENECA ST", "x0": 967.2, "top": 186.6, "x1": 1034.9, "bottom": 199.1}
+{"page": 5, "line": 8, "text": "W SENECA STNY 79", "x0": 424.6, "top": 196.3, "x1": 547.0, "bottom": 211.6}
+{"page": 5, "line": 9, "text": "SENECA ST", "x0": 52.3, "top": 207.9, "x1": 120.1, "bottom": 221.0}
+{"page": 5, "line": 10, "text": "W STATE ST", "x0": 314.3, "top": 268.9, "x1": 386.5, "bottom": 282.8}
+{"page": 5, "line": 11, "text": "NN", "x0": 964.6, "top": 279.2, "x1": 982.1, "bottom": 291.8}
+{"page": 5, "line": 12, "text": "E STATE ST", "x0": 1083.7, "top": 291.1, "x1": 1152.2, "bottom": 303.4}
+{"page": 5, "line": 13, "text": "GREEN ST - NY79 SB/EB", "x0": 390.6, "top": 337.2, "x1": 531.8, "bottom": 352.4}
+{"page": 5, "line": 14, "text": "CLEVELAND AVE PROSPECT ST", "x0": 196.4, "top": 414.3, "x1": 1004.0, "bottom": 430.1}
+{"page": 5, "line": 15, "text": "CLINTON ST E", "x0": 686.3, "top": 470.6, "x1": 768.8, "bottom": 483.3}
+{"page": 5, "line": 16, "text": "CLINTON ST W", "x0": 388.1, "top": 476.6, "x1": 474.2, "bottom": 490.8}
+{"page": 5, "line": 17, "text": "PLEASANT ST", "x0": 876.7, "top": 490.3, "x1": 958.2, "bottom": 504.0}
+{"page": 5, "line": 18, "text": "A Zoning Districts", "x0": 98.7, "top": 556.0, "x1": 802.9, "bottom": 570.9}
+{"page": 5, "line": 19, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 805.2, "top": 549.0, "x1": 832.8, "bottom": 567.0}
+{"page": 5, "line": 20, "text": "CBD-140 COLUMB PU IAD ST Residential Transition", "x0": 835.4, "top": 555.7, "x1": 1125.3, "bottom": 571.9}
+{"page": 5, "line": 21, "text": "RD CENTER ST !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! B-1a CBD-50 R-1a SW-2", "x0": 98.5, "top": 570.8, "x1": 1059.8, "bottom": 589.1}
+{"page": 5, "line": 22, "text": "B-1b CBD-60 R-1b Street Level Active Use Overlay Zone", "x0": 715.4, "top": 595.0, "x1": 1190.1, "bottom": 606.3}
+{"page": 5, "line": 23, "text": "B-2a", "x0": 715.4, "top": 616.9, "x1": 734.6, "bottom": 626.0}
+{"page": 5, "line": 24, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 805.2, "top": 609.0, "x1": 832.8, "bottom": 625.1}
+{"page": 5, "line": 25, "text": "CBD-85 R-2a Traditional Residential", "x0": 835.4, "top": 614.7, "x1": 1128.1, "bottom": 623.8}
+{"page": 5, "line": 26, "text": "B-2d HILCLhVerIrEy SWtrePet LDistrict R-2b WE/WF", "x0": 715.4, "top": 634.4, "x1": 1068.7, "bottom": 648.6}
+{"page": 5, "line": 27, "text": "B-4 Urban Mixed Use R-3a WEDZ-1a", "x0": 715.4, "top": 654.1, "x1": 1077.4, "bottom": 665.3}
+{"page": 5, "line": 28, "text": "S AVE", "x0": 376.5, "top": 670.2, "x1": 413.8, "bottom": 682.9}
+{"page": 5, "line": 29, "text": "I CBD-100 Medium-Density Mixed Use R-3aa WEDZ-1b", "x0": 599.7, "top": 673.7, "x1": 1077.4, "bottom": 763.3}
+{"page": 5, "line": 30, "text": "CBD-120 P-1", "x0": 715.4, "top": 693.4, "x1": 849.6, "bottom": 704.7}
+{"page": 5, "line": 31, "text": "!!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!! !!!!!!!!!", "x0": 951.3, "top": 687.0, "x1": 976.8, "bottom": 705.0}
+{"page": 5, "line": 32, "text": "R-3b", "x0": 980.1, "top": 693.4, "x1": 999.8, "bottom": 702.5}
+{"page": 5, "line": 33, "text": "SOUTH ST", "x0": 157.0, "top": 707.5, "x1": 218.0, "bottom": 720.2}
+{"page": 5, "line": 34, "text": "0 0.05 0.1 0.2 0.3 CRESC0E.4", "x0": 686.6, "top": 722.0, "x1": 1158.2, "bottom": 740.7}
+{"page": 5, "line": 35, "text": "HYERS ST", "x0": 415.6, "top": 734.1, "x1": 476.0, "bottom": 747.8}
+{"page": 5, "line": 36, "text": "Miles", "x0": 1151.0, "top": 740.2, "x1": 1188.0, "bottom": 756.1}
+{"page": 6, "line": 1, "text": "City of Ithaca BUFFALO ST", "x0": 73.7, "top": 64.0, "x1": 752.2, "bottom": 88.2}
+{"page": 6, "line": 2, "text": "Southwest District Map", "x0": 73.8, "top": 104.4, "x1": 379.7, "bottom": 134.4}
+{"page": 6, "line": 3, "text": "ECA ST SENECA ST", "x0": 463.2, "top": 108.1, "x1": 637.3, "bottom": 123.2}
+{"page": 6, "line": 4, "text": "May 2026 W STATE ST", "x0": 73.8, "top": 144.8, "x1": 637.9, "bottom": 160.6}
+{"page": 6, "line": 5, "text": "T", "x0": 435.4, "top": 160.4, "x1": 443.2, "bottom": 172.7}
+{"page": 6, "line": 6, "text": "T", "x0": 483.7, "top": 176.0, "x1": 491.4, "bottom": 188.3}
+{"page": 6, "line": 7, "text": "GREEN ST - NY79 SB/EB", "x0": 598.7, "top": 184.6, "x1": 739.9, "bottom": 200.1}
+{"page": 6, "line": 8, "text": "ELM", "x0": 57.2, "top": 258.1, "x1": 81.9, "bottom": 270.1}
+{"page": 6, "line": 9, "text": "ST CECIL A MALONE RD", "x0": 61.9, "top": 268.8, "x1": 594.6, "bottom": 283.8}
+{"page": 6, "line": 10, "text": "EXT", "x0": 57.9, "top": 285.7, "x1": 81.1, "bottom": 297.7}
+{"page": 6, "line": 11, "text": "SOUTH ST", "x0": 673.0, "top": 392.9, "x1": 734.0, "bottom": 405.6}
+{"page": 6, "line": 12, "text": "WOOD ST", "x0": 676.8, "top": 442.7, "x1": 734.5, "bottom": 455.6}
+{"page": 6, "line": 13, "text": "MERCIAL", "x0": 355.4, "top": 814.9, "x1": 408.8, "bottom": 827.4}
+{"page": 6, "line": 14, "text": "Zoning Districts R-2b", "x0": 506.9, "top": 901.7, "x1": 680.7, "bottom": 917.9}
+{"page": 6, "line": 15, "text": "B-2a", "x0": 537.1, "top": 923.8, "x1": 552.8, "bottom": 931.2}
+{"page": 6, "line": 16, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 633.4, "top": 912.9, "x1": 660.8, "bottom": 929.2}
+{"page": 6, "line": 17, "text": "R-2c", "x0": 664.6, "top": 919.2, "x1": 680.3, "bottom": 926.7}
+{"page": 6, "line": 18, "text": "R-3a", "x0": 664.6, "top": 936.8, "x1": 680.7, "bottom": 944.2}
+{"page": 6, "line": 19, "text": "B-2d", "x0": 537.1, "top": 941.3, "x1": 552.8, "bottom": 948.8}
+{"page": 6, "line": 20, "text": "R-3aa", "x0": 664.6, "top": 954.5, "x1": 685.0, "bottom": 962.0}
+{"page": 6, "line": 21, "text": "B-5", "x0": 537.1, "top": 959.1, "x1": 548.7, "bottom": 966.5}
+{"page": 6, "line": 22, "text": "CBD-50", "x0": 537.1, "top": 976.6, "x1": 563.8, "bottom": 984.0}
+{"page": 6, "line": 23, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 633.4, "top": 964.9, "x1": 660.8, "bottom": 981.0}
+{"page": 6, "line": 24, "text": "R-3b", "x0": 664.6, "top": 972.0, "x1": 680.7, "bottom": 979.5}
+{"page": 6, "line": 25, "text": "Residential Transition", "x0": 664.6, "top": 989.8, "x1": 736.6, "bottom": 997.2}
+{"page": 6, "line": 26, "text": "Cherry Street District", "x0": 537.1, "top": 994.1, "x1": 607.1, "bottom": 1001.6}
+{"page": 6, "line": 27, "text": "SW-1", "x0": 664.6, "top": 1007.3, "x1": 683.1, "bottom": 1014.8}
+{"page": 6, "line": 28, "text": "Urban Mixed Use", "x0": 537.1, "top": 1011.9, "x1": 595.3, "bottom": 1019.3}
+{"page": 6, "line": 29, "text": "SW-2", "x0": 664.6, "top": 1024.8, "x1": 683.1, "bottom": 1032.3}
+{"page": 6, "line": 30, "text": "MH-1", "x0": 537.1, "top": 1029.4, "x1": 555.4, "bottom": 1036.8}
+{"page": 6, "line": 31, "text": "SW-3", "x0": 664.6, "top": 1042.6, "x1": 683.1, "bottom": 1050.0}
+{"page": 6, "line": 32, "text": "Medium-Density Mixed Use", "x0": 537.1, "top": 1047.2, "x1": 629.1, "bottom": 1054.6}
+{"page": 6, "line": 33, "text": "I", "x0": 426.7, "top": 1050.6, "x1": 493.5, "bottom": 1137.5}
+{"page": 6, "line": 34, "text": "Traditional Residential", "x0": 664.6, "top": 1060.1, "x1": 738.9, "bottom": 1067.6}
+{"page": 6, "line": 35, "text": "P-1", "x0": 537.1, "top": 1064.7, "x1": 548.7, "bottom": 1072.1}
+{"page": 6, "line": 36, "text": "WE/WF", "x0": 664.6, "top": 1077.6, "x1": 690.2, "bottom": 1085.1}
+{"page": 6, "line": 37, "text": "PUD", "x0": 537.1, "top": 1082.2, "x1": 552.8, "bottom": 1089.6}
+{"page": 6, "line": 38, "text": "WEDZ-1a", "x0": 664.6, "top": 1095.4, "x1": 697.5, "bottom": 1102.8}
+{"page": 6, "line": 39, "text": "R-1a", "x0": 537.1, "top": 1100.0, "x1": 553.3, "bottom": 1107.4}
+{"page": 6, "line": 40, "text": "WEDZ-1b", "x0": 664.6, "top": 1112.9, "x1": 697.5, "bottom": 1120.4}
+{"page": 6, "line": 41, "text": "R-2a", "x0": 537.1, "top": 1117.5, "x1": 553.3, "bottom": 1124.9}
+{"page": 6, "line": 42, "text": "0 0.050.1 0.2 0.3 0.4", "x0": 425.5, "top": 1148.8, "x1": 704.0, "bottom": 1167.0}
+{"page": 6, "line": 43, "text": "Miles", "x0": 696.0, "top": 1166.3, "x1": 738.7, "bottom": 1184.5}
+{"page": 7, "line": 1, "text": "City of Ithaca", "x0": 61.0, "top": 56.3, "x1": 211.1, "bottom": 80.3}
+{"page": 7, "line": 2, "text": "City of Ithaca", "x0": 73.7, "top": 64.2, "x1": 223.8, "bottom": 88.2}
+{"page": 7, "line": 3, "text": "RRD", "x0": 561.8, "top": 85.4, "x1": 591.0, "bottom": 98.0}
+{"page": 7, "line": 4, "text": "Waterfront District Map", "x0": 61.2, "top": 95.8, "x1": 366.1, "bottom": 125.8}
+{"page": 7, "line": 5, "text": "YORK ST", "x0": 673.8, "top": 110.2, "x1": 726.7, "bottom": 122.9}
+{"page": 7, "line": 6, "text": "May 2026 W FALLS ST FALLS ST", "x0": 60.8, "top": 135.2, "x1": 750.0, "bottom": 152.8}
+{"page": 7, "line": 7, "text": "ELINCOLN", "x0": 687.2, "top": 166.7, "x1": 749.2, "bottom": 180.4}
+{"page": 7, "line": 8, "text": "ST", "x0": 710.7, "top": 182.1, "x1": 726.5, "bottom": 194.5}
+{"page": 7, "line": 9, "text": "E JAY ST", "x0": 696.2, "top": 218.7, "x1": 748.3, "bottom": 232.3}
+{"page": 7, "line": 10, "text": "LEWIS ST", "x0": 692.5, "top": 264.3, "x1": 748.8, "bottom": 277.4}
+{"page": 7, "line": 11, "text": "TOMPKINS ST", "x0": 667.5, "top": 309.2, "x1": 748.9, "bottom": 322.7}
+{"page": 7, "line": 12, "text": "E YATES", "x0": 699.7, "top": 339.6, "x1": 749.0, "bottom": 352.4}
+{"page": 7, "line": 13, "text": "ST", "x0": 718.0, "top": 354.7, "x1": 733.9, "bottom": 366.8}
+{"page": 7, "line": 14, "text": "CASCADILLA ST", "x0": 415.4, "top": 462.9, "x1": 508.7, "bottom": 476.7}
+{"page": 7, "line": 15, "text": "RD", "x0": 141.0, "top": 487.6, "x1": 158.7, "bottom": 500.5}
+{"page": 7, "line": 16, "text": "ESTY ST", "x0": 498.6, "top": 505.0, "x1": 548.6, "bottom": 518.1}
+{"page": 7, "line": 17, "text": "CLIFF BUFFALO ST", "x0": 59.5, "top": 588.8, "x1": 633.1, "bottom": 603.6}
+{"page": 7, "line": 18, "text": "PARK", "x0": 59.5, "top": 602.5, "x1": 91.5, "bottom": 614.6}
+{"page": 7, "line": 19, "text": "RD", "x0": 59.5, "top": 616.4, "x1": 76.8, "bottom": 628.5}
+{"page": 7, "line": 20, "text": "W SENECA STNY 79", "x0": 535.1, "top": 625.4, "x1": 657.4, "bottom": 640.4}
+{"page": 7, "line": 21, "text": "SENECA ST", "x0": 330.2, "top": 631.6, "x1": 398.0, "bottom": 645.0}
+{"page": 7, "line": 22, "text": "W STATE ST", "x0": 393.8, "top": 664.3, "x1": 465.6, "bottom": 676.7}
+{"page": 7, "line": 23, "text": "TA", "x0": 223.8, "top": 677.1, "x1": 237.6, "bottom": 689.5}
+{"page": 7, "line": 24, "text": "GREEN ST - NY79 SB/EB", "x0": 435.5, "top": 696.7, "x1": 576.7, "bottom": 711.9}
+{"page": 7, "line": 25, "text": "CLEVELAND AVE", "x0": 452.3, "top": 733.2, "x1": 550.8, "bottom": 747.8}
+{"page": 7, "line": 26, "text": "CLINTON", "x0": 697.6, "top": 747.1, "x1": 748.4, "bottom": 759.9}
+{"page": 7, "line": 27, "text": "STE", "x0": 710.1, "top": 762.2, "x1": 736.0, "bottom": 774.6}
+{"page": 7, "line": 28, "text": "CECIL A MALONE RD", "x0": 254.3, "top": 771.8, "x1": 376.7, "bottom": 786.1}
+{"page": 7, "line": 29, "text": "CLINTON ST W", "x0": 486.0, "top": 766.7, "x1": 572.0, "bottom": 781.0}
+{"page": 7, "line": 30, "text": "Zoning Districts Newman D", "x0": 459.1, "top": 792.8, "x1": 653.9, "bottom": 808.9}
+{"page": 7, "line": 31, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 809.0, "x1": 484.9, "bottom": 825.0}
+{"page": 7, "line": 32, "text": "BC-1EaNTER ST", "x0": 489.1, "top": 813.9, "x1": 559.0, "bottom": 827.4}
+{"page": 7, "line": 33, "text": "P-1", "x0": 616.8, "top": 810.3, "x1": 628.4, "bottom": 817.7}
+{"page": 7, "line": 34, "text": "PUD", "x0": 616.8, "top": 828.0, "x1": 632.5, "bottom": 835.5}
+{"page": 7, "line": 35, "text": "B-1b", "x0": 489.1, "top": 832.6, "x1": 504.8, "bottom": 840.0}
+{"page": 7, "line": 36, "text": "R-1a", "x0": 616.8, "top": 845.6, "x1": 633.0, "bottom": 853.0}
+{"page": 7, "line": 37, "text": "B-2a", "x0": 489.1, "top": 850.1, "x1": 504.8, "bottom": 857.6}
+{"page": 7, "line": 38, "text": "E R-1b", "x0": 558.7, "top": 860.7, "x1": 633.0, "bottom": 873.2}
+{"page": 7, "line": 39, "text": "B-2d", "x0": 489.1, "top": 867.6, "x1": 504.8, "bottom": 875.1}
+{"page": 7, "line": 40, "text": "S", "x0": 577.5, "top": 877.8, "x1": 585.9, "bottom": 890.0}
+{"page": 7, "line": 41, "text": "R-2a", "x0": 616.8, "top": 880.8, "x1": 633.0, "bottom": 888.3}
+{"page": 7, "line": 42, "text": "B-4", "x0": 489.1, "top": 885.4, "x1": 500.7, "bottom": 892.8}
+{"page": 7, "line": 43, "text": "HYERS ST", "x0": 572.6, "top": 893.5, "x1": 633.0, "bottom": 907.2}
+{"page": 7, "line": 44, "text": "R-2b", "x0": 616.8, "top": 898.4, "x1": 633.0, "bottom": 905.8}
+{"page": 7, "line": 45, "text": "B-5", "x0": 489.1, "top": 902.9, "x1": 500.7, "bottom": 910.4}
+{"page": 7, "line": 46, "text": "C-SU WOOD ST", "x0": 489.1, "top": 920.7, "x1": 579.0, "bottom": 935.2}
+{"page": 7, "line": 47, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 585.4, "top": 909.0, "x1": 612.8, "bottom": 925.1}
+{"page": 7, "line": 48, "text": "R-2c", "x0": 616.8, "top": 916.1, "x1": 632.5, "bottom": 923.6}
+{"page": 7, "line": 49, "text": "R-3a", "x0": 616.8, "top": 933.6, "x1": 633.0, "bottom": 941.1}
+{"page": 7, "line": 50, "text": "CBD-100", "x0": 489.1, "top": 938.2, "x1": 519.9, "bottom": 945.6}
+{"page": 7, "line": 51, "text": "R-3aa", "x0": 616.8, "top": 951.2, "x1": 637.3, "bottom": 958.6}
+{"page": 7, "line": 52, "text": "CBD-120", "x0": 489.1, "top": 955.7, "x1": 519.9, "bottom": 963.2}
+{"page": 7, "line": 53, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 966.9, "x1": 484.9, "bottom": 983.2}
+{"page": 7, "line": 54, "text": "CBD-140", "x0": 489.1, "top": 973.5, "x1": 519.9, "bottom": 980.9}
+{"page": 7, "line": 55, "text": "PA !!!!!!!! !!!!!!!! !!!!!!!!R !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!K !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!S", "x0": 575.0, "top": 960.5, "x1": 619.6, "bottom": 979.1}
+{"page": 7, "line": 56, "text": "R-3b", "x0": 616.8, "top": 968.9, "x1": 633.0, "bottom": 976.4}
+{"page": 7, "line": 57, "text": "Residential Transition", "x0": 616.8, "top": 986.4, "x1": 688.9, "bottom": 993.9}
+{"page": 7, "line": 58, "text": "CBD-50", "x0": 489.1, "top": 991.0, "x1": 515.8, "bottom": 998.4}
+{"page": 7, "line": 59, "text": "SW-1", "x0": 616.8, "top": 1004.2, "x1": 635.4, "bottom": 1011.6}
+{"page": 7, "line": 60, "text": "CBD-60", "x0": 489.1, "top": 1008.5, "x1": 515.8, "bottom": 1016.0}
+{"page": 7, "line": 61, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 1020.9, "x1": 484.9, "bottom": 1037.2}
+{"page": 7, "line": 62, "text": "CBD-85", "x0": 489.1, "top": 1026.3, "x1": 515.8, "bottom": 1033.7}
+{"page": 7, "line": 63, "text": "SW-2", "x0": 616.8, "top": 1021.7, "x1": 635.4, "bottom": 1029.2}
+{"page": 7, "line": 64, "text": "Street Level Active Use Overlay Zone", "x0": 616.8, "top": 1039.2, "x1": 742.1, "bottom": 1046.7}
+{"page": 7, "line": 65, "text": "Cherry Street District", "x0": 489.1, "top": 1043.8, "x1": 559.1, "bottom": 1051.2}
+{"page": 7, "line": 66, "text": "Traditional Residential", "x0": 616.8, "top": 1057.0, "x1": 691.2, "bottom": 1064.4}
+{"page": 7, "line": 67, "text": "Urban Mixed Use", "x0": 489.1, "top": 1061.6, "x1": 547.3, "bottom": 1069.0}
+{"page": 7, "line": 68, "text": "WE/WF", "x0": 616.8, "top": 1074.5, "x1": 642.5, "bottom": 1082.0}
+{"page": 7, "line": 69, "text": "MH-1", "x0": 489.1, "top": 1079.1, "x1": 507.4, "bottom": 1086.5}
+{"page": 7, "line": 70, "text": "WEDZ-1a", "x0": 616.8, "top": 1092.0, "x1": 649.8, "bottom": 1099.5}
+{"page": 7, "line": 71, "text": "Market District", "x0": 489.1, "top": 1096.6, "x1": 537.3, "bottom": 1104.0}
+{"page": 7, "line": 72, "text": "I", "x0": 377.3, "top": 1103.2, "x1": 444.1, "bottom": 1190.1}
+{"page": 7, "line": 73, "text": "WEDZ-1b", "x0": 616.8, "top": 1109.8, "x1": 649.8, "bottom": 1117.2}
+{"page": 7, "line": 74, "text": "Medium-Density Mixed Use", "x0": 489.1, "top": 1114.4, "x1": 581.1, "bottom": 1121.8}
+{"page": 7, "line": 75, "text": "0 0.050.1 0.2 0.3 0.4", "x0": 460.8, "top": 1148.8, "x1": 706.4, "bottom": 1167.0}
+{"page": 7, "line": 76, "text": "Miles", "x0": 698.4, "top": 1166.3, "x1": 741.1, "bottom": 1184.5}
+{"page": 8, "line": 1, "text": "CiEtDyG EoMOf O I R t L h N aca", "x0": 64.3, "top": 46.6, "x1": 214.5, "bottom": 74.8}
+{"page": 8, "line": 2, "text": "Collegetown District Map", "x0": 64.4, "top": 90.2, "x1": 395.3, "bottom": 120.2}
+{"page": 8, "line": 3, "text": "May 2026", "x0": 64.4, "top": 129.6, "x1": 135.2, "bottom": 145.5}
+{"page": 8, "line": 4, "text": "H", "x0": 126.4, "top": 155.8, "x1": 135.6, "bottom": 168.1}
+{"page": 8, "line": 5, "text": "WILLIAMS ST", "x0": 87.3, "top": 212.4, "x1": 163.6, "bottom": 225.1}
+{"page": 8, "line": 6, "text": "BUFFALO ST", "x0": 88.3, "top": 285.8, "x1": 162.6, "bottom": 299.5}
+{"page": 8, "line": 7, "text": "MAPLE AVE", "x0": 1049.7, "top": 346.5, "x1": 1117.2, "bottom": 359.8}
+{"page": 8, "line": 8, "text": "SENECA ST", "x0": 92.9, "top": 381.2, "x1": 160.6, "bottom": 394.2}
+{"page": 8, "line": 9, "text": "HARVAR", "x0": 564.4, "top": 399.5, "x1": 613.9, "bottom": 413.4}
+{"page": 8, "line": 10, "text": "CATHERINE ST", "x0": 252.0, "top": 427.7, "x1": 340.1, "bottom": 440.9}
+{"page": 8, "line": 11, "text": "MILLER ST", "x0": 1027.6, "top": 485.3, "x1": 1089.9, "bottom": 498.9}
+{"page": 8, "line": 12, "text": "COOK", "x0": 275.2, "top": 504.4, "x1": 310.7, "bottom": 517.1}
+{"page": 8, "line": 13, "text": "BOOL ST", "x0": 398.4, "top": 530.0, "x1": 450.3, "bottom": 543.0}
+{"page": 8, "line": 14, "text": "Zoning Districts CR-1 MU-1 R-2a", "x0": 847.9, "top": 610.6, "x1": 1194.9, "bottom": 626.9}
+{"page": 8, "line": 15, "text": "Active street-level uses required CR-2 MU-2 R-2b", "x0": 878.1, "top": 632.0, "x1": 1194.9, "bottom": 644.5}
+{"page": 8, "line": 16, "text": "B-2d CR-3 P-1 R-3a", "x0": 878.1, "top": 653.4, "x1": 1194.9, "bottom": 665.9}
+{"page": 8, "line": 17, "text": "I B-4 CR-4 R-1b", "x0": 760.1, "top": 675.0, "x1": 1135.6, "bottom": 764.8}
+{"page": 8, "line": 18, "text": "!!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!! !!!!!!!!!!", "x0": 1141.2, "top": 666.9, "x1": 1168.8, "bottom": 687.0}
+{"page": 8, "line": 19, "text": "R-3b", "x0": 1173.3, "top": 675.0, "x1": 1194.9, "bottom": 684.8}
+{"page": 8, "line": 20, "text": "MITCHELL", "x0": 879.1, "top": 690.8, "x1": 939.2, "bottom": 706.8}
+{"page": 8, "line": 21, "text": "ST U-1", "x0": 941.3, "top": 695.1, "x1": 1189.3, "bottom": 708.1}
+{"page": 8, "line": 22, "text": "0 0.0250.05 0.1 0.15 0.2", "x0": 845.5, "top": 724.9, "x1": 1165.0, "bottom": 740.7}
+{"page": 8, "line": 23, "text": "Miles", "x0": 1157.7, "top": 740.2, "x1": 1194.7, "bottom": 756.1}
+{"page": 9, "line": 1, "text": "BUFFALO ST", "x0": 116.3, "top": 36.7, "x1": 190.8, "bottom": 50.4}
+{"page": 9, "line": 2, "text": "CCiittyy ooff IItthhaaccaa", "x0": 73.7, "top": 64.2, "x1": 223.8, "bottom": 89.9}
+{"page": 9, "line": 3, "text": "W SENECA STNY 79", "x0": 419.1, "top": 98.8, "x1": 541.3, "bottom": 114.1}
+{"page": 9, "line": 4, "text": "Southside Form District Map", "x0": 74.0, "top": 105.4, "x1": 451.4, "bottom": 135.4}
+{"page": 9, "line": 5, "text": "May 2026", "x0": 73.8, "top": 144.8, "x1": 144.5, "bottom": 160.6}
+{"page": 9, "line": 6, "text": "W STATE ST", "x0": 313.6, "top": 171.0, "x1": 385.8, "bottom": 184.9}
+{"page": 9, "line": 7, "text": "GREEN ST - NY79 SB/EB", "x0": 328.7, "top": 240.2, "x1": 469.9, "bottom": 255.4}
+{"page": 9, "line": 8, "text": "CLEVELAND AVE", "x0": 197.1, "top": 315.2, "x1": 295.6, "bottom": 329.7}
+{"page": 9, "line": 9, "text": "CLINTON ST E", "x0": 666.6, "top": 371.1, "x1": 749.2, "bottom": 384.2}
+{"page": 9, "line": 10, "text": "CLINTON ST W", "x0": 345.8, "top": 378.4, "x1": 431.8, "bottom": 392.7}
+{"page": 9, "line": 11, "text": "A", "x0": 100.4, "top": 456.6, "x1": 109.1, "bottom": 469.1}
+{"page": 9, "line": 12, "text": "RD", "x0": 98.4, "top": 471.0, "x1": 116.0, "bottom": 483.7}
+{"page": 9, "line": 13, "text": "CENTER ST", "x0": 290.5, "top": 474.6, "x1": 358.8, "bottom": 488.0}
+{"page": 9, "line": 14, "text": "S AV", "x0": 376.8, "top": 569.9, "x1": 404.8, "bottom": 582.4}
+{"page": 9, "line": 15, "text": "SOUTH ST", "x0": 158.2, "top": 606.7, "x1": 219.2, "bottom": 619.4}
+{"page": 9, "line": 16, "text": "HYERS ST", "x0": 415.4, "top": 633.3, "x1": 475.8, "bottom": 647.0}
+{"page": 9, "line": 17, "text": "WOOD ST", "x0": 312.2, "top": 690.3, "x1": 369.7, "bottom": 703.4}
+{"page": 9, "line": 18, "text": "PARK ST", "x0": 422.0, "top": 765.6, "x1": 473.4, "bottom": 778.3}
+{"page": 9, "line": 19, "text": "Zoning Districts P-1", "x0": 459.1, "top": 863.3, "x1": 628.4, "bottom": 879.5}
+{"page": 9, "line": 20, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 879.0, "x1": 484.9, "bottom": 895.1}
+{"page": 9, "line": 21, "text": "B-1a", "x0": 489.1, "top": 885.4, "x1": 504.8, "bottom": 892.8}
+{"page": 9, "line": 22, "text": "PUD", "x0": 616.8, "top": 880.8, "x1": 632.5, "bottom": 888.3}
+{"page": 9, "line": 23, "text": "R-1b", "x0": 616.8, "top": 898.4, "x1": 633.0, "bottom": 905.8}
+{"page": 9, "line": 24, "text": "B-2a", "x0": 489.1, "top": 902.9, "x1": 504.8, "bottom": 910.4}
+{"page": 9, "line": 25, "text": "R-2a", "x0": 616.8, "top": 916.1, "x1": 633.0, "bottom": 923.6}
+{"page": 9, "line": 26, "text": "B-2d", "x0": 489.1, "top": 920.7, "x1": 504.8, "bottom": 928.1}
+{"page": 9, "line": 27, "text": "R-2b", "x0": 616.8, "top": 933.6, "x1": 633.0, "bottom": 941.1}
+{"page": 9, "line": 28, "text": "B-4", "x0": 489.1, "top": 938.2, "x1": 500.7, "bottom": 945.6}
+{"page": 9, "line": 29, "text": "R-3a", "x0": 616.8, "top": 951.4, "x1": 633.0, "bottom": 958.8}
+{"page": 9, "line": 30, "text": "B-5", "x0": 489.1, "top": 955.7, "x1": 500.7, "bottom": 963.2}
+{"page": 9, "line": 31, "text": "R-3aa", "x0": 616.8, "top": 968.9, "x1": 637.3, "bottom": 976.4}
+{"page": 9, "line": 32, "text": "CBD-100", "x0": 489.1, "top": 973.5, "x1": 519.9, "bottom": 980.9}
+{"page": 9, "line": 33, "text": "CBD-120", "x0": 489.1, "top": 991.0, "x1": 519.9, "bottom": 998.4}
+{"page": 9, "line": 34, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 585.4, "top": 981.0, "x1": 612.8, "bottom": 997.1}
+{"page": 9, "line": 35, "text": "R-3b", "x0": 616.8, "top": 986.4, "x1": 633.0, "bottom": 993.9}
+{"page": 9, "line": 36, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 1002.9, "x1": 484.9, "bottom": 1019.2}
+{"page": 9, "line": 37, "text": "CBD-140", "x0": 489.1, "top": 1008.5, "x1": 519.9, "bottom": 1016.0}
+{"page": 9, "line": 38, "text": "Residential Transition", "x0": 616.8, "top": 1004.2, "x1": 688.9, "bottom": 1011.6}
+{"page": 9, "line": 39, "text": "SW-2", "x0": 616.8, "top": 1021.7, "x1": 635.4, "bottom": 1029.2}
+{"page": 9, "line": 40, "text": "CBD-50", "x0": 489.1, "top": 1026.3, "x1": 515.8, "bottom": 1033.7}
+{"page": 9, "line": 41, "text": "Street Level Active Use Overlay Zone", "x0": 616.8, "top": 1039.2, "x1": 742.1, "bottom": 1046.7}
+{"page": 9, "line": 42, "text": "CBD-60", "x0": 489.1, "top": 1043.8, "x1": 515.8, "bottom": 1051.2}
+{"page": 9, "line": 43, "text": "!!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!! !!!!!!!!", "x0": 457.2, "top": 1054.9, "x1": 484.9, "bottom": 1071.0}
+{"page": 9, "line": 44, "text": "CBD-85", "x0": 489.1, "top": 1061.6, "x1": 515.8, "bottom": 1069.0}
+{"page": 9, "line": 45, "text": "Traditional Residential", "x0": 616.8, "top": 1057.0, "x1": 691.2, "bottom": 1064.4}
+{"page": 9, "line": 46, "text": "WE/WF", "x0": 616.8, "top": 1074.5, "x1": 642.5, "bottom": 1082.0}
+{"page": 9, "line": 47, "text": "Cherry Street District", "x0": 489.1, "top": 1079.1, "x1": 559.1, "bottom": 1086.5}
+{"page": 9, "line": 48, "text": "WEDZ-1a", "x0": 616.8, "top": 1092.3, "x1": 649.8, "bottom": 1099.7}
+{"page": 9, "line": 49, "text": "Urban Mixed Use", "x0": 489.1, "top": 1096.6, "x1": 547.3, "bottom": 1104.0}
+{"page": 9, "line": 50, "text": "I", "x0": 377.3, "top": 1103.2, "x1": 444.1, "bottom": 1190.1}
+{"page": 9, "line": 51, "text": "WEDZ-1b", "x0": 616.8, "top": 1109.8, "x1": 649.8, "bottom": 1117.2}
+{"page": 9, "line": 52, "text": "Medium-Density Mixed Use", "x0": 489.1, "top": 1114.4, "x1": 581.1, "bottom": 1121.8}
+{"page": 9, "line": 53, "text": "0 0.05 0.1 0.2", "x0": 460.8, "top": 1148.8, "x1": 705.0, "bottom": 1167.0}
+{"page": 9, "line": 54, "text": "Miles", "x0": 697.0, "top": 1166.3, "x1": 739.7, "bottom": 1184.5}

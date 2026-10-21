@@ -17,14 +17,14 @@ A hypothetical new single-family house the architects worked through by hand. (T
 | Existing use | 1-family residence |
 | Official lot area | ~7,034 sf (0.1615 acres) |
 
-Note: the lot in the architects' model is **6,674.7 sf**, about 5% smaller than the official parcel. The official parcel's street side is curved; the model draws it as one straight 73 ft line. Tax maps are not surveys, so neither is exact; a survey would settle it. This matters because coverage (25% of lot area) depends on it.
+Note: the lot in the architects' model is **6,674.5 sf** (their spreadsheet types 6,674), about 5% smaller than the official parcel. The official parcel's street side is curved; the model draws it as one straight 73 ft line. Tax maps are not surveys, so neither is exact; a survey would settle it. This matters because coverage (25% of lot area) depends on it.
 
 ## What's in the model
 
 | Layer | Contents |
 |---|---|
 | Map | 94 outlines of neighbouring buildings (named with OpenStreetMap-style IDs) |
-| Site | The lot (5 sides: 73.00 front, 90.28 and 99.37 sides, 67.72 rear, 10.47 jog; 6,674.7 sf), **plus** the buildable-area outline (~53.3 × 40.8 ft, 2,169.5 sf) and one loose line |
+| Site | The lot (5 sides: 73.00 front, 90.28 and 99.37 sides, 67.72 rear, 10.47 jog; 6,674.5 sf), **plus** the buildable-area outline (~53.3 × 40.8 ft, 2,169.2 sf) and one loose line |
 | Setback | 3 loose construction lines (the setbacks used were 30 front / 10 / 10 / 20 rear) |
 | Building | One 35 ft tall solid |
 
@@ -32,4 +32,7 @@ Note: the lot in the architects' model is **6,674.7 sf**, about 5% smaller than 
 
 The model has several errors (building off the lot, rear setback too small, over coverage). They're useful as checker test cases. See `docs/discrepancies_with_architects.md` (sections 1 and 4).
 
-Expected results will be added once the answer key is agreed with the architects.
+`spreadsheet_design.yaml` is the architects' spreadsheet version of this house as our measurements; `packages/rule_format/tests/test_answer_keys.py` checks our draft R-1b gives their PASS/FAIL on every row. Expected results for the Rhino model itself come once models can be measured.
+
+`spreadsheet_design_report.xlsx` is Gordium's own report for this design, in the architects' format
+(`python -m project_report spreadsheet_design.yaml`; generated, never hand-edited; CI checks it is current).
