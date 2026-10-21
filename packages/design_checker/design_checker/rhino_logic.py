@@ -548,6 +548,41 @@ def settle(saved_ui, row):
     return saved_ui
 
 
+UNDER_A_BOX = ("check", "save_facts", "open_box")   # what may not happen while a start box is open
+
+
+def allowed(action, box_open):
+    """Whether `action` may run now: a check, writing the lot facts and opening a second start box never happen while
+    a start box is open (its own edits wait for it to close); anything else may."""
+    return not (box_open and action in UNDER_A_BOX)
+
+
+def pick_effect(what, outcome, facts, saved_ui):
+    """(facts, saved_ui) after one of the start box's picks, from what the pick gave (the Rhino side only gathers it):
+    street: the lot line [a, b] clicked; lot (Use my survey…): the outline picked; draw_lot: the outline drawn;
+    terrain: the surface picked; spot / regrade: the points placed. Esc, Enter or nothing picked (`outcome` empty):
+    nothing changes, every doubt stays (eval-integrity audit: Esc on Place spot grades wiped the ground's doubt)."""
+    facts, saved_ui = dict(facts), dict(saved_ui)
+    if not outcome:
+        return facts, saved_ui
+    if what == "street":
+        facts["street_line"] = [outcome]
+        saved_ui["street_source"] = ENTERED
+        saved_ui = settle(saved_ui, "street")
+    elif what in ("lot", "draw_lot"):
+        facts = after_lot_pick(facts, outcome) if outcome != facts.get("lot_id") else facts
+        facts["lot_surveyed"] = what == "lot"          # Use my survey…: a survey; drawn over the guide: not
+        saved_ui = settle(saved_ui, "lot")
+        if what == "draw_lot":
+            saved_ui["lot_source"] = "drawn by you"
+    elif what == "terrain":
+        saved_ui.update(terrain_id=outcome, ground_kind="terrain")
+        saved_ui = settle(saved_ui, "ground")
+    elif what in ("spot", "regrade"):
+        saved_ui = after_ground_pick(saved_ui, what, len(outcome))
+    return facts, saved_ui
+
+
 def after_ground_pick(saved_ui, what, placed):
     """Place spot grades / I'll regrade, with `placed` points actually added: the ground is the architect's only
     then. Esc or Enter with none placed changes nothing (review round 1: it settled a doubtful ground)."""

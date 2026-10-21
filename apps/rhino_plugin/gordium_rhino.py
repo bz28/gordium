@@ -237,7 +237,7 @@ def current_facts(doc):
 
 
 def save_facts(doc, facts):
-    if _box_open():                     # nothing writes the facts under an open start box (Draw writes its own)
+    if not logic.allowed("save_facts", _box_open()):   # nothing writes the facts under an open box (Draw writes its own)
         say(logic.BOX_BUSY)
         return
     _save_facts(doc, facts)
@@ -1131,48 +1131,43 @@ def _one_pick(doc, what, facts, saved_ui, session):
         saved_ui = _lookup_start(facts, saved_ui)
     elif what == "lookup_done":
         facts, saved_ui = _lookup_done(doc, facts, saved_ui, session)
-    elif what == "street":
+    else:                                      # the pick's outcome only; rhino_logic.pick_effect decides the rest
+        facts, saved_ui = logic.pick_effect(what, _pick_outcome(doc, what, facts, session), facts, saved_ui)
+    _highlight(doc, facts)
+    return facts, saved_ui
+
+
+def _pick_outcome(doc, what, facts, session):
+    """What one pick gave, or None (Esc, Enter, nothing picked). Drawn objects go through the session."""
+    if what == "street":
         lot = _find(doc, facts.get("lot_id") or "")
-        if lot is not None:
-            rc, point = Rhino.Input.RhinoGet.GetPoint("Click the lot line on the street", True)
-            if rc == Rhino.Commands.Result.Success:
-                a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
-                facts["street_line"] = [[_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]]
-                saved_ui["street_source"] = logic.ENTERED
-                saved_ui = logic.settle(saved_ui, "street")
-    elif what == "lot":                          # Use my survey: the surveyed outline
-        lots = _lot_candidates(doc)
-        picked = _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
-                       lots, "Lot", Rhino.DocObjects.ObjectType.Curve)
-        if picked:
-            facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
-            facts["lot_surveyed"] = True
-            saved_ui = logic.settle(saved_ui, "lot")
-    elif what == "draw_lot":                     # over the City's outline (a guide, never kept)
+        if lot is None:
+            return None
+        rc, point = Rhino.Input.RhinoGet.GetPoint("Click the lot line on the street", True)
+        if rc != Rhino.Commands.Result.Success:
+            return None
+        a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+        return [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+    if what == "lot":                            # Use my survey: the surveyed outline
+        return _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
+                     _lot_candidates(doc), "Lot", Rhino.DocObjects.ObjectType.Curve)
+    if what == "draw_lot":                       # over the City's outline (a guide, never kept)
         drawn = _draw_lot(doc)
-        if drawn:
-            session.add([drawn])
-            facts = logic.after_lot_pick(facts, drawn)
-            facts["lot_surveyed"] = False
-            saved_ui = logic.settle(saved_ui, "lot")
-            saved_ui["lot_source"] = "drawn by you"
-    elif what == "terrain":
+        session.add([drawn])
+        return drawn
+    if what == "terrain":
         go = Rhino.Input.Custom.GetObject()
         go.SetCommandPrompt("Click the terrain surface or mesh")
         go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter | \
             Rhino.DocObjects.ObjectType.Mesh
-        if go.Get() == Rhino.Input.GetResult.Object:
-            saved_ui["terrain_id"] = str(go.Object(0).ObjectId)
-            saved_ui["ground_kind"] = "terrain"
-            saved_ui = logic.settle(saved_ui, "ground")
-    elif what in ("spot", "regrade"):
+        return str(go.Object(0).ObjectId) if go.Get() == Rhino.Input.GetResult.Object else None
+    if what in ("spot", "regrade"):
         placed = _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
                               "Click the finished ground you'll grade to, at each wall (Enter when done)",
                               GRADE_LAYER if what == "spot" else FINISHED_LAYER)
         session.add(placed)
-        saved_ui = logic.after_ground_pick(saved_ui, what, len(placed))   # none placed: nothing changes
-    _highlight(doc, facts)
-    return facts, saved_ui
+        return placed
+    return None
 
 
 def confirm(doc, facts, options, mode="check"):
@@ -1180,7 +1175,7 @@ def confirm(doc, facts, options, mode="check"):
     from (saved beside them); a pick closes the box, picks in the model, and shows the box again with the result;
     closing it (or Esc) saves nothing (None)."""
     gate = STATE.setdefault("box_gate", logic.BoxGate())
-    if not gate.enter():                # one start box at a time (Edit site… from the panel during a pick)
+    if not logic.allowed("open_box", _box_open()) or not gate.enter():   # one start box at a time
         say(logic.BOX_BUSY)
         return None
     try:
@@ -1592,7 +1587,7 @@ def run_check(doc, report=True):
     result is cleared from the view and the panel says why, with Retry (H2): never left showing. While a start box
     is open it does nothing at all (its overlay, the panel and the "before" statuses stay): the box's own edits
     would otherwise be checked mid-box; live mode checks once the box closes."""
-    if STATE.get("running") or _box_open():
+    if STATE.get("running") or not logic.allowed("check", _box_open()):
         return None
     o = overlay()
     facts = {}
