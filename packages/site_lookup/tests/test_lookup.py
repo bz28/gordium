@@ -26,6 +26,7 @@ REPO = Path(__file__).parents[3]
 # Stand-ins for the City layers (test values, not the City's):
 STAND_IN_ROW_FT = 60                       # every street's right-of-way width
 STAND_IN_MAP_EDITED = "2025-01-01"         # the zoning map's last edit (before Ord. 2025-12)
+STAND_IN_BUILDINGS_DATE = "1999"           # the stand-in footprints' date (the State's here are 2014)
 # 106 Ithaca Rd's district from Gordium's own test site (architect-checked, and the May 2026 PDF map), not the
 # City's online layer:
 STAND_IN_ZONE = yaml.safe_load((REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/model_facts.yaml")
@@ -44,14 +45,16 @@ class Fake:
     """Answers like the services would. Recorded answers for the public sources (matched on the exact
     request); stand-ins for the City and County layers; any piece can be overridden per test."""
 
-    def __init__(self, fixture: dict, zones=None, historic=(), county=None, offline=False, city_parcels=None):
+    def __init__(self, fixture: dict, zones=None, historic=(), county=None, offline=False, city_parcels=None,
+                 context=None):
         self.fx, self.offline = fixture, offline
         self.zones, self.historic, self.county, self.city_parcels = zones, list(historic), county, city_parcels
+        self.context = context or {"answers": []}        # the context map's recorded answers (<name>_context.json)
         self.asked: list[str] = []
 
     def _recorded(self, key, params):
         want = json.dumps(params, sort_keys=True)
-        for a in self.fx["answers"]:
+        for a in self.fx["answers"] + self.context["answers"]:
             if a["source"] == key and json.dumps(a["params"], sort_keys=True) == want:
                 return a["body"]
         if key == "state_parcels":                   # a point the capture didn't ask about: no parcel there
@@ -85,6 +88,8 @@ class Fake:
             body = {"features": [{"attributes": {"DISTRICT": n}} for n in self.historic]}
         elif key == "gorge_zones":
             body = {"features": []}
+        elif key == "state_buildings":               # stand-in (store: none, never recorded): a house per parcel
+            body = {"features": self.stand_in_buildings()}
         else:
             body = self._recorded(key, params)
         return body, json.dumps(body, sort_keys=True).encode()
@@ -97,6 +102,19 @@ class Fake:
                                         "SWIS": f["attributes"]["SWIS"]}, "geometry": f["geometry"]}
                         for f in a["body"].get("features", [])]
         return []
+
+    def stand_in_buildings(self):
+        """Synthetic footprints (test values, not the State's): a 30 × 40 ft rectangle at the centre of each recorded
+        context parcel, dated STAND_IN_BUILDINGS_DATE."""
+        out = []
+        for a in self.context["answers"]:
+            if a["source"] != "state_parcels":
+                continue
+            for f in a["body"].get("features", []):
+                cx, cy = g.centroid(g.open_ring(f["geometry"]["rings"][0]))
+                ring = [[cx - 15, cy - 20], [cx + 15, cy - 20], [cx + 15, cy + 20], [cx - 15, cy + 20], [cx - 15, cy - 20]]
+                out.append({"attributes": {"SourceDate": STAND_IN_BUILDINGS_DATE}, "geometry": {"rings": [ring]}})
+        return out
 
     def square(self, zone, x0=840000, y0=880000, x1=850000, y1=890000):
         return {"attributes": {"ZONE": zone}, "geometry": {"rings": [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]]}}
