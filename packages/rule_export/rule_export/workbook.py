@@ -17,9 +17,11 @@ from openpyxl import Workbook
 from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from openpyxl.styles import Alignment, Font, PatternFill
 
+from document_extraction.sections import piece_text
 from rule_format.labels import LABEL_FIELDS, load_pieces, revision_steps
 from rule_format.rulebook import (APPROVAL_FIELDS, REPO, RULE_FIELDS, SOURCE_FIELDS, TERM_SCHEMAS, Context, _cell, load,
-                                  rulebook_paths)
+                                  read_jsonl, rulebook_paths)
+from section_labeling.term_index import INDEX_NAME, related
 
 FONT = "Arial"                                   # like the architects' spreadsheet: 16 title, 12 headers, 11 body
 INK = "243746"                                   # their text color, on every cell they wrote
@@ -124,6 +126,39 @@ def _answers(answers) -> str:
                     for a in answers or [])
 
 
+def _readings(readings) -> str:
+    return " / ".join(f"{g.get('id')}: {g.get('reading')}" for g in readings or [])
+
+
+def _research(research) -> str:
+    """Why each open question is still open: what was searched, why it's unsettled, the readings in play."""
+    return _bullets(f"{_text(x.get('question'))} — searched: {', '.join(x.get('searched') or []) or 'nothing yet'}. "
+                    f"{_text(x.get('why_open'))}" + (f" Readings: {_readings(x.get('readings'))}." if x.get("readings")
+                                                     else "") + (f" ({x['report']})" if x.get("report") else "")
+                    for x in research or [])
+
+
+def finding_text(f: dict) -> str:
+    """A finding as the architects see it: the law's own answer, or Gordium's reading and who should confirm it
+    (an architect's or the City's answer, in `answers`, outranks a reading)."""
+    head = ("The law" if f.get("kind") == "law" else
+            f"Gordium's reading ({str(f.get('strength', '')).replace('_', ' ')}) · confirm with {f.get('confirm_with')}")
+    still = f" Still open: {', '.join(f['still_open'])}." if f.get("still_open") else ""
+    return f"{head}: {_text(f.get('answer'))}{still}"
+
+
+def _source_text(s: dict) -> str:
+    if "file" in s:
+        return f"{s['file']} p.{s.get('page')} l.{_lines(s)}: {s.get('quote')}"
+    return f"rank {s.get('rank')}: {s.get('cite')}" + (f" ({s['url']})" if s.get("url") else "") + \
+        (f": \"{s['quote']}\"" if s.get("quote") else "")
+
+
+def _findings(findings) -> str:
+    return _bullets(f"{_text(f.get('question'))} → {finding_text(f)}" + (f" ({f['report']})" if f.get("report") else "")
+                    for f in findings or [])
+
+
 def _examples(examples) -> str:
     return _bullets(f"{', '.join(f'{k} = {v}' for k, v in (e.get('given') or {}).items())} → {e.get('expect')}"
                     + (f" ({e['note']})" if e.get("note") else "") for e in examples or [])
@@ -180,7 +215,10 @@ def _source_cols(quote_width):
 
 
 _QUESTIONS = [Col("Open questions", 50, "open_questions", _get("open_questions", _bullets), every=False),
+              Col("Research (why still open)", 60, "research", _get("research", _research), every=False),
+              Col("Findings (research settled)", 60, "findings", _get("findings", _findings), every=False),
               Col("Answers", 40, "answers", _get("answers", _answers), every=False)]
+_RELATED = Col("Related sections", 30)          # by the term index: the requirement sections that use its words
 _NOTES = Col("Notes", 40, "notes", _get("notes", _text), every=False)
 _WHO = [Col("Status", 8, "status", _get("status")), Col("Drafted by", 18, "drafted_by", _get("drafted_by"))]
 
@@ -193,10 +231,10 @@ COLUMNS = {
              Col("Needs review when", 34, "review_when", _get("review_when", lambda v: _bullets(
                  f"{r.get('when')}: {r.get('reason')}" for r in v or [])), every=False),
              Col("Worked examples", 40, "examples", _get("examples", _examples), every=False),
-             *_source_cols(60), *_QUESTIONS, _NOTES],
+             *_source_cols(60), _RELATED, *_QUESTIONS, _NOTES],
     "definitions": [Col("Id", 24), Col("Term", 26, "term", _get("term")), *_WHO,
                     Col("Measures", 22, "measures", _get("measures", lambda v: ", ".join(v or [])), every=False),
-                    *_source_cols(70), *_QUESTIONS, _NOTES],
+                    *_source_cols(70), _RELATED, *_QUESTIONS, _NOTES],
     "uses": [Col("Id", 30), Col("Name", 40, "name", _get("name")), *_WHO, *_source_cols(50), _NOTES],
     # One row per piece of the law (so the tab proves nothing was skipped); each quote says its own page.
     "label": [Col("Document", 26), Col("Piece", 22), Col("Title", 40), Col("Pages", 8),
@@ -253,6 +291,38 @@ def tables(j: Path) -> dict[str, dict]:
         return NOT_VERIFIED if s.get("file") else ""       # never a blank that looks like an empty cell
     out = {}
 
+    # Related sections, by the term index: for a definition, every piece that uses its term; for a rule, the
+    # requirement sections (labeled rule or flag) that use the words it quotes, densest first, less its own.
+    index_file = j / "4_term_definitions" / INDEX_NAME
+    index = load(index_file) if index_file.exists() else None
+    label_files = [load(p) for p in sorted((j / "3_section_labels").glob("*.yaml"))]
+    requires = {pid for b in label_files if isinstance(b, dict) for pid, e in (b.get("labels") or {}).items()
+                if e.get("label") in ("rule", "flag")}
+    texts, where = {}, {}                          # where: (file, page, line) -> the piece that line is in
+    for sections in sorted((j / "2_extracted_text").glob("*.sections.jsonl")):
+        header, pieces = load_pieces(sections)
+        law_rows = read_jsonl(sections.with_name(sections.name.removesuffix(".sections.jsonl") + ".jsonl"))
+        texts |= {pid: piece_text(law_rows, piece) for pid, piece in pieces.items() if pid in requires}
+        where |= {(header["file"], pg, n): pid for pid, piece in pieces.items() for pg, a, b in piece["lines"]
+                  for n in range(a, b + 1)}
+    def first_row(e):
+        first = (e.get("sources") or [{}])[0]
+        return lambda s: s is first
+    def related_to_rule(e):
+        if not index:
+            return ""
+        words = " ".join([e.get("title") or ""] + [s.get("quote", "") for s in e.get("sources") or []])
+        own = {where.get((s["file"], s["page"], s["lines"][0])) for s in e.get("sources") or []
+               if s.get("file") and s.get("lines")}
+        return ", ".join(p for p in related(index, words, texts) if p not in own)
+    def related_to_term(key):
+        return ", ".join(p["piece"] for p in index["terms"].get(key, {}).get("pieces", [])) if index else ""
+    def once(e, value):                              # on an entry's first source row only (long text)
+        if not e.get("sources"):
+            return lambda s: value                   # one row in all
+        is_first = first_row(e)
+        return lambda s: value if is_first(s) else ""
+
     def per_source(entries, cols):                  # [(entry, fixed)] -> rows, links: one row per source
         rows, links = [], []
         for e, fixed in entries:
@@ -261,7 +331,8 @@ def tables(j: Path) -> dict[str, dict]:
         return rows, links
 
     out["Rules"] = _tab("GORDIUM | Zoning rules (drafts, checked by code)", COLUMNS["rule"], *per_source(
-        [(r, {"Zone": book.get("district", ""), "Rulebook": path, "Citation": cite, "City's exact words": words})
+        [(r, {"Zone": book.get("district", ""), "Rulebook": path, "Citation": cite, "City's exact words": words,
+              "Related sections": once(r, related_to_rule(r))})
          for path, book in rulebooks(j) for r in book.get("rules") or []], COLUMNS["rule"]))
 
     terms = {schema: load(j / f"4_term_definitions/{schema}.yaml") or {} for schema in TERM_SCHEMAS
@@ -269,7 +340,8 @@ def tables(j: Path) -> dict[str, dict]:
     for schema, tab, title in [("definitions", "Definitions", "GORDIUM | Definitions (the city's own words)"),
                                ("uses", "Uses", "GORDIUM | Use names (the only values a rule's `use` may take)")]:
         out[tab] = _tab(title, COLUMNS[schema], *per_source(
-            [(e, {"Id": key, "Citation": cite, "City's exact words": words})
+            [(e, {"Id": key, "Citation": cite, "City's exact words": words,
+                  "Related sections": once(e, related_to_term(key))})
              for key, e in terms.get(schema, {}).items()], COLUMNS[schema]))
 
     labels_by_doc = {}                                 # document -> (its labels file, the labels)
@@ -279,13 +351,26 @@ def tables(j: Path) -> dict[str, dict]:
             labels_by_doc[book["document"]] = (path.relative_to(j).as_posix(), book["labels"])
 
     # Questions: every open question anywhere, one row each, with the file it is written in.
-    rows, links = [], []
+    # With each: what was searched, why it's still open, and the readings still in play (the design is checked
+    # under every one). Findings: what research settled, with its sources, one row each.
+    rows, links, found, found_links = [], [], [], []
     def ask(kind, where, ident, entry):
         s = (entry.get("sources") or [{}])[0]
+        research = {x.get("question"): x for x in entry.get("research") or []}
         for q in entry.get("open_questions") or []:
-            rows.append([kind, where, ident, _text(q), cite(s), s.get("page", ""),
+            x = research.get(q, {})
+            rows.append([kind, where, ident, _text(q), ", ".join(x.get("searched") or []), _text(x.get("why_open")),
+                         _readings(x.get("readings")), x.get("report", ""), cite(s), s.get("page", ""),
                          f"Open p.{s.get('page')}" if s.get("file") else ""])
             links.append(link(s))
+        for f in entry.get("findings") or []:
+            code = next((c for c in f.get("sources") or [] if c.get("file")), {})
+            found.append([kind, where, ident, f.get("id", ""), f.get("kind", ""), f.get("strength", ""),
+                          f.get("confirm_with", ""), _text(f.get("question")), finding_text(f),
+                          ", ".join(f.get("still_open") or []),
+                          _bullets(_source_text(c) for c in f.get("sources") or []), f.get("report", ""),
+                          f"Open p.{code.get('page')}" if code else ""])
+            found_links.append(link(code) if code else None)
     for path, book in rulebooks(j):
         for rule in book.get("rules") or []:
             ask("Rule", f"5_zoning_rules/{path}", rule.get("id", ""), rule)
@@ -295,9 +380,16 @@ def tables(j: Path) -> dict[str, dict]:
     for labels_path, labels in labels_by_doc.values():
         for pid, e in labels.items():
             ask("Section label", labels_path, pid, e)
-    out["Questions"] = {"title": "GORDIUM | Open questions", "rows": rows, "links": {"Link": links},
-                        "columns": [("About", 14), ("In", 40), ("Id", 30), ("Question", 90), ("Citation", 34),
-                                    ("Page", 6), ("Link", 10)]}
+    out["Questions"] = {"title": "GORDIUM | Open questions (researched first: what was searched, why still open)",
+                        "rows": rows, "links": {"Link": links},
+                        "columns": [("About", 14), ("In", 40), ("Id", 30), ("Question", 90), ("Searched", 30),
+                                    ("Why still open", 60), ("Readings in play", 50), ("Research report", 30),
+                                    ("Citation", 34), ("Page", 6), ("Link", 10)]}
+    out["Findings"] = {"title": "GORDIUM | What research settled (the law's answer, or Gordium's reading to confirm)",
+                       "rows": found, "links": {"Link": found_links},
+                       "columns": [("About", 14), ("In", 40), ("Id", 30), ("Finding", 28), ("Kind", 9),
+                                   ("Strength", 13), ("Confirm with", 30), ("Question", 60), ("Answer", 80),
+                                   ("Still open", 24), ("Sources", 80), ("Research report", 30), ("Link", 10)]}
 
     # Coverage: every piece of every cut document, in the law's order, with its label. The link opens the
     # page of the label's first quote (where its reason points), else the piece's first page.
