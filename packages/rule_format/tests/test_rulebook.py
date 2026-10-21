@@ -816,3 +816,11 @@ def test_a_chart_row_listing_every_district_is_not_held_to_it(chart_ctx):
     """A chart row's quote lists every district's numbers; the rule uses its own column's."""
     problems = validate(rulebook(check="rear_yard >= max(0.25 * lot_depth, 20)", sources=[SOURCE, *NOTES]), chart_ctx)
     assert not any("number 50 in the quote" in p for p in problems)
+
+
+def test_a_flag_isnt_held_to_the_numbers_in_its_quote(ctx):
+    """A flag always needs review: the limits its quote states are for the person to apply, so they need no
+    not_limits (R-3a's abutting and loading flags); a rule quoting the same note is still held to them."""
+    flag = rulebook(kind="flag", check=None, review_when=None, examples=None)
+    assert not any("is never used" in p for p in validate(flag, ctx))
+    assert any("number 20 in the quote" in p for p in validate(rulebook(check="rear_yard >= min(0.25 * lot_depth, 50)"), ctx))
