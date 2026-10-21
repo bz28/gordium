@@ -30,10 +30,8 @@ ORDER = [FAILS, REVIEW, COMPLIES, NOT_CHECKED]
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
           ("not_checked", "Not checked"), ("not_covered", "Not covered by this rulebook")]
 
-from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
-LOT_LENGTHS = {"lot_width", "lot_depth", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard",
-               "front_yard_eaves", "side_yard_smaller_eaves", "side_yard_larger_eaves", "rear_yard_eaves",
-               "accessory_front_yard", "accessory_side_yard", "accessory_rear_yard"}
+from model_measurement.measure import TAX_MAP_SLACK, TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
+LOT_LENGTHS = set(TAX_MAP_SLACK)          # every lot-dependent length: the one table in measure.py
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
 INTERIOR = {"sleeping_rooms", "parking_spaces"}
 EIGHTH = 1 / 96                           # 1/8 in, in feet
@@ -390,13 +388,13 @@ def _numbers(node, values: dict, measured: dict, name: str):
         return proposed / lot * 100, required / lot * 100, None, "%", sign
     if not isinstance(proposed, (int, float)) or not isinstance(required, (int, float)):
         return proposed, required, None, unit, sign
-    margin = proposed - required if sign in ("≥", ">") else required - proposed
+    margin = formula.margin(proposed, required, sign in ("≥", ">"))     # exact, as the comparison: never disagree
     return proposed, required, margin, unit, sign
 
 
 def _display(proposed, required, margin, unit, sign):
     if unit == "%":
-        margin = (required - proposed) if sign in ("≤", "<") else (proposed - required)
+        margin = formula.margin(proposed, required, sign not in ("≤", "<"))
         places = 2 if abs(margin) < 0.5 else 1
         return (_pct(proposed, _toward(sign, True), places), _pct(required, _toward(sign, False), places),
                 margin_text(margin, "%"), margin)
@@ -405,11 +403,12 @@ def _display(proposed, required, margin, unit, sign):
 
 
 def _worst_case(expr: str, values: dict, names: set) -> dict | None:
-    """The values that make `expr` false when each lot length is off by up to TOLERANCE, or None if it holds
-    for every combination (2 ** n combinations, n ≤ 6)."""
+    """The values that make `expr` false when every lot line is off by up to TOLERANCE the unlucky way (a yard
+    by TOLERANCE, a lot width or depth, between two lines, by twice that: measure.TAX_MAP_SLACK), or None if it
+    holds for every combination (2 ** n combinations, n ≤ 6)."""
     lengths = sorted(n for n in names & LOT_LENGTHS if isinstance(values.get(n), (int, float)))
     for signs in itertools.product((-1, 1), repeat=len(lengths)):
-        trial = dict(values, **{n: values[n] + s * TOLERANCE for n, s in zip(lengths, signs)})
+        trial = dict(values, **{n: values[n] + s * TAX_MAP_SLACK[n] for n, s in zip(lengths, signs)})
         if _evaluate(expr, trial) is not True:
             return trial
     return None
@@ -683,7 +682,8 @@ def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict 
     """The city's words for one source, as the panel shows them (E1, E4). A chart row is quoted as its section and
     row label and the district's own cell ("Minimum Lot Size · One-family dwelling, detached · R-1B: "6,000 sf""),
     never the whole row of every district; the bare row of district names (it only says which column) is left
-    out. Law text and footnotes are quoted as they are."""
+    out. Law text and footnotes are quoted as they are. A cell source is quoted as exactly that cell; if the chart
+    has no such cell, as the source's own words (its section, row and column), never a neighbouring cell."""
     text = " ".join(str(source.get("quote", "")).split())
     if _is_chart(source, documents) and not re.match(r"^\(\d+\)", text):
         if text and all(re.fullmatch(r"R-\w+|\[fn\d+\]", w) for w in text.split()):
@@ -692,11 +692,13 @@ def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict 
         cell = next((c for c in _chart_cells(j) if c["file"] == source.get("file") and c["page"] == source.get("page")
                      and c["column"].upper() == district.upper() and lines and lines[0] in (c.get("row_lines") or [])),
                     None)
-        if cell is None and source.get("cell"):
+        if cell is None and isinstance(source.get("cell"), dict):
+            # exactly the cell cited, by the key the rule checks use (rule_format.rulebook._cell: page, section,
+            # row stripped, column): never a near match, which once quoted a lot-width rule as the lot-size cell
             want = source["cell"]
-            cell = next((c for c in _chart_cells(j) if c["file"] == source.get("file") and c["page"] == source.get("page")
-                         and c["column"].upper() == str(want.get("column", "")).upper()
-                         and c["row"].startswith(str(want.get("row", ""))[:20])), None)
+            key = (source.get("page"), want.get("section"), str(want.get("row", "")).strip(), want.get("column"))
+            cell = next((c for c in _chart_cells(j) if c["file"] == source.get("file")
+                         and (c["page"], c.get("section"), c["row"].strip(), c["column"]) == key), None)
         if cell is not None and str(cell.get("value") or "").strip():   # a heading row has no value: its own words
             section = re.sub(r"\s*\[fn[\d,]+\]", "", cell.get("section") or "")
             row = re.sub(r"\s*\[fn[\d,]+\]", "", cell["row"])

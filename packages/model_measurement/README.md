@@ -169,7 +169,7 @@ Every reason the code gives today comes from the table:
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
   together, or draw the overhang as part of its floor".
-- **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a building isn't on the lot (is it part of this design?)" (a building
+- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the measurements"; "more than one building: pick the main building"; "a building isn't on the lot (is it part of this design?)" (a building
   wholly off the lot: only the rules that would measure it wait: the main yards for the main building, the accessory
   rule for an accessory building, coverage for any. A building partly off the lot is measured, and every rule that
   measures it does not comply, whatever the readings or answers: the main yards, the eaves, the height and the

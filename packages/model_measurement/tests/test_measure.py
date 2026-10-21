@@ -860,3 +860,13 @@ def test_a_corner_lot_address_with_too_many_lines_stops_the_whole_reading():
     m = measure(site(lot(pts), box(15, 30, 40, 70)), {**FACTS, "corner_lot": True, "street_line": street})
     assert m["lot_depth"]["value"] is None and m["lot_depth"]["readings"] == []
     assert "too many readings to list" in m["lot_depth"]["reason"]
+
+
+def test_two_building_objects_with_one_id_are_never_measured_as_one():
+    """Stress test F4: two floor blocks sharing an id; one was dropped from the story count while the height
+    still counted it. Nothing is ever dropped silently: every building measurement needs review, saying why."""
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)), FACTS)
+    for name in ("building_height", "building_area", "front_yard", "rear_yard"):
+        assert m[name]["value"] is None and "share the id house" in (m[name]["reason"] or ""), name
+    ok = measure(site(RECT, box(10, 25, 35, 65, 0, 10, id="f1"), box(10, 25, 35, 65, 10, 20, id="f2")), FACTS)
+    assert "share the id" not in str(ok)

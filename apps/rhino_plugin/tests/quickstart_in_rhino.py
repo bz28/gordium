@@ -122,7 +122,7 @@ try:
 
     check(doc, 0, "The starting house", {
         "Front yard": {"proposed": "27'-0\""}, "Side yard, East": {"proposed": "12'-0\""},
-        "Rear yard": {"proposed": "31'-2\""}, "Lot coverage": {"proposed": "23.8%", "status": "complies"},
+        "Rear yard": {"proposed": "32'-9\""}, "Lot coverage": {"proposed": "22.6%", "status": "complies"},
         "Building height": {"proposed": "35'-0\"", "status": "needs_review"}})
 
     setfacts(doc, grade_is="finished")                         # 1. No regrading near the house, ticked
@@ -131,16 +131,16 @@ try:
     t = rg.Transform.Translation(north * 5)
     xf(ids, t)
     check(doc, 2, "2 Move back 5 ft", {"Front yard": {"proposed": "32'-0\""},
-                                       "Rear yard": {"proposed": "26'-2\"", "status": "complies"}})
+                                       "Rear yard": {"proposed": "27'-9\"", "status": "complies"}})
     undo(ids, t)
-    t = rg.Transform.Translation(north * 10)
+    t = rg.Transform.Translation(north * 11)
     xf(ids, t)
-    check(doc, 3, "3 Move back 10 ft", {"Rear yard": {"status": "does_not_comply", "proposed": "21'-2\"",
-                                                      "required": "22'-6\"", "margin": "−1'-4\""}})
+    check(doc, 3, "3 Move back 11 ft", {"Rear yard": {"status": "does_not_comply", "proposed": "21'-9\"",
+                                                      "required": "22'-6\"", "margin": "−0'-9\""}})
     undo(ids, t)
     t = stretch(ids, 1, None, 6)
     xf(ids, t)
-    check(doc, 4, "4 Pull the rear wall 6 ft", {"Lot coverage": {"status": "does_not_comply", "proposed": "28.3%"}})
+    check(doc, 4, "4 Pull the rear wall 6 ft", {"Lot coverage": {"status": "does_not_comply", "proposed": "27.1%"}})
     undo(ids, t)
     base = g.STATE["start"]["floors"][-1]
     roof = rg.Transform.Scale(rg.Plane(rg.Point3d(0, 0, base["base"] * ft), rg.Vector3d.ZAxis), 1, 1,
@@ -153,10 +153,10 @@ try:
     xf(ids, t)
     check(doc, 6, "6 Widen 4 ft to the east", {"Side yard, East": {"status": "does_not_comply", "proposed": "8'-0\"",
                                                                    "margin": "−2'-0\""},
-                                               "Lot coverage": {"status": "does_not_comply", "proposed": "25.7%"}})
+                                               "Lot coverage": {"status": "needs_review", "proposed": "24.5%"}})
     undo(ids, t)
-    check(doc, 7, "7 Undo: back to the start", {"Rear yard": {"proposed": "31'-2\"", "status": "complies"},
-                                                "Lot coverage": {"proposed": "23.8%", "status": "complies"}})
+    check(doc, 7, "7 Undo: back to the start", {"Rear yard": {"proposed": "32'-9\"", "status": "complies"},
+                                                "Lot coverage": {"proposed": "22.6%", "status": "complies"}})
 
     rear = max(p[1] for p in ring)                             # 8. a garage on the Default layer, behind the house
     garage = doc.Objects.AddBrep(rg.Box(rg.Plane(rg.Point3d(40 * ft, (rear + 6) * ft, 0), rg.Vector3d.ZAxis),
@@ -189,7 +189,7 @@ try:
     a = Rhino.DocObjects.ObjectAttributes()
     a.LayerIndex = layer
     spots = [doc.Objects.AddPoint(g._model_point(doc, p), a)
-             for p in ([36.5, 26.5, 0.0], [36.5, 59.4, 0.0], [11.5, 43.0, 0.0], [61.5, 43.0, 0.0])]
+             for p in ([36.5, 26.5, 0.0], [36.5, 57.75, 0.0], [11.5, 42.1, 0.0], [61.5, 42.1, 0.0])]   # walls y 27..57.25
     setfacts(doc, grade_from="finished_spots", grade_is="finished", ground_is_flat=None, grade_elevation=None)
     check(doc, 11, "11 Spot grades at the walls", {"Building height": {"status": "complies"}})
     t = rg.Transform.Translation(north * 5)
