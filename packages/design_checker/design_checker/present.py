@@ -1110,7 +1110,10 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
     law = next((d for d in documents.values() if "chapter 325" in d.get("title", "").lower()), {})
     chart = next((d for d in documents.values() if "chart" in d.get("title", "").lower()), {})
     through = re.search(r"amendments through (Ord\. No\. [\w-]+(?: \([^)]*\))?)", " ".join(str(law.get("notes", "")).split()))
-    code = "Ch. 325" + (f" as amended through {through.group(1)}" if through else "") + (
+    # the ordinance and its date only ("Ord. No. 2026-02 (May 6, 2026)"): the sources' note on what it changed
+    # ("PUDs only") read as if the code applied only to PUDs
+    amended = re.sub(r"\s*\(([^;)]*)[^)]*\)", r" (\1)", through.group(1)) if through else ""
+    code = "Ch. 325" + (f" as amended through {amended}" if through else "") + (
         " · District Regulations Chart, " + re.sub(r".*\((.*)\).*", r"\1", chart["title"]) if chart else "")
     use = facts.get("use") or ""
     lot = ("Lot lines: survey" if facts.get("lot_surveyed") else

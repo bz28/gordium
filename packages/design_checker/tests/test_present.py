@@ -228,9 +228,10 @@ def test_the_report_never_shows_pass_for_a_rule_the_panel_says_needs_review(surv
     result = check(MODEL, {**surveyed, "lot_surveyed": False}, report)
     out = openpyxl.load_workbook(report)["Output"]
     header = [c.value for c in out[2]]
-    rid, err = header.index("Rule id"), header.index("Error")
-    errors = {row[rid]: row[err] for row in out.iter_rows(min_row=3, values_only=True) if row[rid]}
-    assert errors["R-1b.side_yards"] == "NEEDS REVIEW"                       # the panel's side yards need review
+    req, err = header.index("Requirement"), header.index("Error")
+    errors = {row[req]: row[err] for row in out.iter_rows(min_row=3, values_only=True) if row[req]}
+    side = next(k for k in errors if k.startswith("Side yards"))
+    assert errors[side] == "NEEDS REVIEW"                                     # the panel's side yards need review
     check_tab = openpyxl.load_workbook(report)["Check"]
     text = " ".join(str(c.value) for row in check_tab.iter_rows() for c in row if c.value)
     assert "Draft rulebook" in text and "tax map" in text and "Overlays" in text and "§325-8" in text
@@ -888,3 +889,30 @@ def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
     assert {"Side yard, Northeast", "Side yard, Southwest"} <= names
     names = {i["name"] for i in check_site(s, f, extras=extras)["view"]["items"]}
     assert {"Side yard, East", "Side yard, West"} <= names
+
+
+
+def test_the_report_opens_on_the_check_sheet_and_every_tab_says_what_the_panel_says(surveyed, tmp_path):
+    """Architect review in Rhino (P1-4): the report opened on Inputs, its Output showed PASS beside "Can't check:
+    lot_area missing" and "not given" beside the panel's 7,033 sf, its title was the model's file name and its code
+    line read "PUDs only". Now it opens on the Check sheet; each Output row's Error, Why and Proposed come from the
+    panel's items; an input the measurement left open shows the panel's reading; the code line names the
+    ordinance and its date only."""
+    import openpyxl
+    report = tmp_path / "r.xlsx"
+    check(MODEL, {**surveyed, "lot_surveyed": False, "address": "106 Ithaca Rd, Ithaca, NY"}, report)
+    wb = openpyxl.load_workbook(report)
+    assert wb.sheetnames[0] == "Check" and wb.active.title == "Check"
+    out = wb["Output"]
+    head = [c.value for c in out[2]]
+    rows = [r for r in out.iter_rows(min_row=3, values_only=True) if r[0] and r[head.index("Error")]]
+    for r in rows:
+        if r[head.index("Error")] == "PASS":
+            assert not r[head.index("Why it needs review")], r
+            assert r[head.index("Proposed")] not in (None, "", "not given", "—"), r
+    assert "106 Ithaca Rd" in str(out["A1"].value)
+    text = " ".join(str(c.value) for c in wb["Check"]["A"] if c.value)
+    assert "PUDs" not in text and "Ord. No." in text
+    from design_checker import rhino_logic as logic
+    assert logic.street_name({"address": "106 Ithaca Rd, Ithaca, NY 14850"}) == "Ithaca Rd"
+    assert logic.street_name({}) == "the highlighted line"
