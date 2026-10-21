@@ -154,7 +154,8 @@ def _side_row_names(v):
 
 
 MATCHERS["F11"] = _side_row_names
-KNOWN = {"F8": _plain_part_under_8_ft, "F9": _wall_count_words, "F10": _gapped_floor_blocks, "F11": _side_row_names}   # F6, F7 fixed in #18 (ca4f6c3, 4ce81b3): a return of those fails CI
+# open: F10 (#14), F11 (#18); F6-F9 fixed in #18: a return of those fails CI
+KNOWN = {"F10": _gapped_floor_blocks, "F11": _side_row_names}
 
 
 def known(v):

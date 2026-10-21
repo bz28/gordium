@@ -19,7 +19,7 @@ from pathlib import Path
 
 from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, load, read_jsonl
+from rule_format.rulebook import MEASURE_KINDS, REPO, load, outcome, read_jsonl
 
 COMPLIES, FAILS, REVIEW, NOT_CHECKED = "complies", "does_not_comply", "needs_review", "not_checked"
 MARK = {FAILS: "✕", REVIEW: "?", COMPLIES: "✓", NOT_CHECKED: "–"}
@@ -226,8 +226,9 @@ def link(source: dict, j: Path, documents: dict) -> str:
 # ---- the item for one rule -------------------------------------------------------------------------------
 
 def _user_text(text: str) -> str:
-    """The measuring's own words for a reader of the panel: no internal phrasing (C11), no measure tags."""
-    text = re.sub(r"\s*\(([a-z_]+)\)", "", text or "")
+    """The measuring's own words for a reader of the panel: no internal phrasing (C11), no question tags (only
+    those: "(overhangs)" stays)."""
+    text = re.sub(r"\s*\((?:" + "|".join(sorted(QUESTION_TAGS)) + r")\)", "", text or "")
     text = re.sub(r"(is|are) (an )?open questions? for the architects",
                   lambda m: ("aren't" if m.group(1) == "are" else "isn't") + " settled yet: confirm with the zoning office",
                   text)
@@ -275,23 +276,68 @@ def _holds(expr: str, values: dict, row: dict):
     return True if got == {True} else False if got == {False} else None
 
 
-QUESTION_NAMES = {"lot_depth": "which lot lines count as side and which as rear",
-                  "height_of_building": "how the height of a pitched roof is taken",
-                  "yard_projections": "whether a yard is measured to the wall or to overhangs, and what counts as "
-                                      "part of the building"}
+from model_measurement import measure as _measuring  # noqa: E402  (its open questions, by name)
+
+# Every open question the measuring asks, each with a short name for the panel: by its tag ("(lot_depth)"), or by
+# its own words where it has none. A test checks that every question the measuring can ask is here.
+QUESTION_NAMES = {
+    "lot_depth": "which lot lines count as side and which as rear",
+    "height_of_building": "how the height of a pitched roof is taken",
+    "yard_projections": "whether a yard is measured to the wall or to overhangs, and what counts as part of the "
+                        "building",
+    "building_area": "whether parts above the ground floor that stick out count in coverage",
+    "lot_width": "whether frontage on a curved street is measured along the curve or straight across",
+    "story": "how many stories the blocks drawn hold",
+    _measuring.ROOF_KIND: "whether the roof is a mansard roof or a pitched one",
+    _measuring.ABOVE_ROOF: "whether what rises above the main roof counts in the height",
+    _measuring.ACCESSORY: "whether another solid is part of the building or an accessory building",
+}
+QUESTION_TAGS = {k for k in QUESTION_NAMES if re.fullmatch(r"[a-z_]+", k)}
 
 
-def _open_questions(why: str) -> list[str]:
-    """The open questions a row's reason names, each by a short name: the measuring's own subject of "... is an
-    open question for the architects", or its plain name when the question is tagged (lot_depth ...)."""
+def question_name(question: str) -> str | None:
+    """The short name of one open question the measuring asked (its tag's, or its own words'), or None."""
+    tag = re.search(r"\(([a-z_]+)\)\s*$", question)
+    return QUESTION_NAMES.get(tag.group(1) if tag else "") or QUESTION_NAMES.get(question.strip())
+
+
+def _questions_of(record: dict) -> list[str]:
+    """The open questions one measurement's own readings leave, by short name."""
+    reason = (record or {}).get("reason") or ""
+    if not reason.startswith("the readings give different values; "):
+        return []
+    labels = " ".join(r.get("reading") or "" for r in record.get("readings") or [])
     out = []
-    for part in re.split(r";\s+|, and |, (?=whether)", why or ""):
-        m = re.match(r"\s*(?:the readings give different values\s*)?(.*?) (?:is|are) (?:an )?open questions? for the "
-                     r"architects(?:\s*\(([a-z_]+)\))?", part)
-        if m:
-            name = QUESTION_NAMES.get(m.group(2) or "") or _user_text(m.group(1)).strip(" :")
-            if name and name not in out:
-                out.append(name)
+    for q in reason.split("; ")[1:]:
+        if q.rstrip().endswith("(lot_depth)") and "lot line" not in labels:
+            continue                        # its readings don't differ in which lines are side lines
+        name = question_name(q) or _user_text(q)
+        if name and name not in out:
+            out.append(name)
+    return out
+
+
+def _turns_on(rule: dict, measured: dict, values: dict, allowed: dict) -> list[str] | None:
+    """The open measurements the rule's result turns on: each one whose readings it needs (with it unknown and
+    every other open one at any of its readings, the result can't be told). None if too many to work out."""
+    names = set()
+    for key in ("applies_when", "check"):
+        if rule.get(key):
+            names |= formula.names(rule[key])
+    for r in rule.get("review_when") or []:
+        names |= formula.names(r["when"])
+    open_ = sorted(n for n in names if (measured.get(n) or {}).get("value") is None
+                   and (measured.get(n) or {}).get("readings"))
+    out = []
+    for n in open_:
+        others = [m for m in open_ if m != n]
+        choices = [[r["value"] for r in measured[m]["readings"]] for m in others]
+        if math.prod(len(c) for c in choices) > 200:
+            return None
+        for combo in itertools.product(*choices):
+            if outcome(rule, dict(values, **dict(zip(others, combo)), **{n: None}), allowed) == "needs_review":
+                out.append(n)
+                break
     return out
 
 
@@ -307,12 +353,6 @@ def _reason(row: dict) -> str | None:
         word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
         return f"{word} with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…"
     if row.get("Provisional"):
-        questions = _open_questions(row.get("Why") or "")
-        if questions:                       # name what it depends on, so the zoning office knows what to answer
-            word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
-            which = "an open question" if len(questions) == 1 else "open questions"
-            return (f"{word} under every reading, but it depends on {which}: {'; '.join(questions)}; "
-                    "confirm with the zoning office")
         return _user_text(("Complies " if row["Provisional"].startswith("passes") else "Fails ") +
                           row["Provisional"].split(" ", 1)[1] + " the law allows; confirm with the zoning office")
     return _user_text(row.get("Why") or "")
@@ -528,6 +568,19 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         name = "Use"
     site = bool(names) and names <= SITE_MEASURES
     status, reason = _status(row), _reason(row)
+    if row.get("Provisional") and not row.get("Survey"):
+        # name only the open questions the result turns on (from each measurement's own reason); if it turns on
+        # none, every reading gives the same answer and that is simply the answer
+        turns = _turns_on(rule, measured, values, {"use": set(use_names)})
+        if turns is not None:
+            asked = list(dict.fromkeys(q for n in turns for q in _questions_of(measured.get(n))))
+            word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
+            if not turns:
+                status, reason = (COMPLIES if word == "Complies" else FAILS), None
+            elif asked:
+                which = "an open question" if len(asked) == 1 else "open questions"
+                reason = (f"{word} under every reading, but it depends on {which}: {'; '.join(asked)}; "
+                          "confirm with the zoning office")
     splits = [c for c in compares if c.left.id in ("side_yard_smaller", "side_yard_larger")] if measure in (
         "side_yard_smaller", "side_yard_larger") else []
     # two side yards: always in the same order (by name), so equal yards never swap with the model's units

@@ -6,8 +6,9 @@ strict xfail turns that into a failure, and the mark is taken off (the test then
 raises=AssertionError: only the finding's own assertion counts as "still reproduces", never a crash or a changed
 output shape.
 
-Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper on
-F4 (a repeated id) in #12 (the same_id stop; in measurement-2 at b5a899b). F6 and F7 in #18 (ca4f6c3, 4ce81b3). Open: F8, F9, F10, F11.
+Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper
+(2 ft per line everywhere, carried up in d43e11f); F4 in #12 (the same_id stop, b5a899b); F6, F7 in #18 (ca4f6c3,
+4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). Open: F10 (for #14), F11 (for #18).
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -210,13 +211,11 @@ def test_F7_a_side_eave_gable_names_the_same_overhangs_whichever_way_the_outline
         assert texts[0] == texts[1] == texts[2], case[1][0]["kind"]
 
 
-# ---- F8 (P0, for #18): a plain wing 7 to 8 ft tall, nothing typed: stories complies from the floors alone --------
+# ---- F8 (P0, fixed in #18 1729590): a plain wing 7 to 8 ft tall, nothing typed, complied from the floors alone
 
 F8_CASE = ("jog", [{"op": "floor_wing", "heights": [7.5], "face": 0, "depth": 8.5, "below": 0.0, "typed": "none"}])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F8: #18's own 8 ft line, until it takes #14's definition (7 ft, NYS R305.1) via term-index")
 def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_never_complies():
     """One edit: the jog lot's starting house (3 floor blocks, 35'-0") with a plain solid wing 7'-6" tall joined to
     its east wall. The agreed rule (coordinator, 2026-10-21): stories are counted only from floor blocks; a plain
@@ -234,15 +233,13 @@ def test_the_oracle_on_F8_a_7_ft_6_plain_wing_opens_the_count():
     assert oracle.verdicts(d)["R-1b.stories"]["verdict"] == oracle.NOT_PASS
 
 
-# ---- F9 (P3, for #18): the spot-grade reason counts the walls differently by outline order -----------------------
+# ---- F9 (P3, fixed in #18 1729590): the spot-grade reason counted the walls differently by outline order ----
 
 F9_CASE = ("sloped", [{"op": "move_floor", "k": 0, "dx": 0.0, "dy": -5.75}, {"op": "rotate", "deg": -0.9},
                       {"op": "add_roof", "kind": "roof", "axis": 0, "over": 0.0, "fascia": 0.0, "inset": 3.5,
                        "rise": 7.25}])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F9: 'N walls without one' (spot grades) depends on the outline order")
 def test_F9_the_spot_grade_reason_is_the_same_whichever_way_the_outlines_run():
     """The sloped lot's starting house (on its four spot grades), floor 1 moved 5'-9" toward the street, the house
     rotated 0.9 degrees, a gable roof solid on top. Height and stories need review either way ("spot grades no
