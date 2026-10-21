@@ -45,6 +45,26 @@ def missing(facts):
     return [k for k in REQUIRED if facts.get(k) is None or facts.get(k) == []]
 
 
+def zone_not_offered(facts, options):
+    """["zone"] when the saved zone isn't one the start box offers (an AI-drafted zone with Ben's setting off): the
+    confirm box opens again instead of checking with rules that are turned off."""
+    zone = (facts or {}).get("zone")
+    return ["zone"] if zone is not None and zone not in (options or {}).get("zones", []) else []
+
+
+def preselect_zone(saved_zone, options):
+    """(the zone the start box pre-selects, whether "I confirm" may stay ticked). The saved zone when it is offered;
+    the looked-up or sample zone only when nothing is saved; never another zone in place of a saved one that isn't
+    offered (that would label a guess as confirmed): none, and "I confirm" unticked."""
+    zones = (options or {}).get("zones", [])
+    if saved_zone in zones:
+        return saved_zone, True
+    if saved_zone:
+        return None, False
+    default = (options or {}).get("default_zone")
+    return (default if default in zones else None), True
+
+
 def with_suggestions(saved, suggested):
     """The facts to confirm: what is saved, with suggestions only for what is missing."""
     out = dict(suggested)

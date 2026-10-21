@@ -34,6 +34,13 @@ FACTS = {"jurisdiction": ITHACA, "street_line": [[[0, 0], [50, 0]]], "corner_lot
          "main_building": "house", "accessory_buildings": ["shed"]}
 
 
+@pytest.fixture
+def drafts_on(monkeypatch):
+    """Ben's setting turned on, as checking a drafted zone needs."""
+    from design_checker import check
+    monkeypatch.setattr(check, "offer_ai_drafted_zones", lambda: True)
+
+
 def test_general_rules_come_with_a_drafted_district_and_never_with_a_hand_rulebook():
     assert is_ai_drafted(J, "R-1a") and not is_ai_drafted(J, "R-1b")
     assert [p.name for p in zone_rulebooks(J, "R-1a")] == ["R-1a.yaml", "general.yaml"]
@@ -41,7 +48,7 @@ def test_general_rules_come_with_a_drafted_district_and_never_with_a_hand_rulebo
     assert rulebook_for(J, "general") is None and zone_rulebooks(J, "general") == []   # never a zone
 
 
-def test_a_shed_4_ft_from_an_r1_side_line_in_a_drafted_only_district_does_not_comply():
+def test_a_shed_4_ft_from_an_r1_side_line_in_a_drafted_only_district_does_not_comply(drafts_on):
     """§325-25C: in R-1 districts an accessory building may not be less than 6 ft from a side lot line. R-1a has no
     hand rulebook; the rule is in drafted/general.yaml. Without it the shed's only row was the front-yard rule
     (drafted/R-1a.yaml), which passes: the shed was shown as complying."""
@@ -74,7 +81,7 @@ def test_every_chart_row_the_zone_states_is_checked_by_a_rule_or_listed_as_not_c
     assert any(g.startswith("chart.p14.minimum_loading_requirement") for g in gaps)     # not drafted: listed
 
 
-def test_a_missing_rule_shows_as_a_not_checked_item_on_the_panel():
+def test_a_missing_rule_shows_as_a_not_checked_item_on_the_panel(drafts_on):
     got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-1a", "accessory_buildings": []})
     items = {i["id"]: i for i in got["view"]["items"]}
     loading = [i for k, i in items.items() if k.startswith("gap.chart.p14.minimum_loading_requirement")]
@@ -103,5 +110,43 @@ def test_the_zone_is_never_preselected_alphabetically(monkeypatch):
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "zones[0]" not in rhino and '"zone": default_zone if default_zone in zones else None' in rhino
     assert rhino.count('suggested_facts(doc, options["zones"], options.get("default_zone"))') == 4
-    assert "zone.SelectedIndex = 0" not in ui and 'options.get("default_zone")' in ui
+    assert "zone.SelectedIndex = 0" not in ui and 'logic.preselect_zone(' in ui
     assert "zone_of.get(zone.SelectedValue.Text)" in ui            # the label "(draft)" never reaches the facts
+
+
+def test_with_the_setting_off_a_saved_drafted_zone_is_never_checked_and_never_swapped():
+    """Review round 1: the setting only filtered the zone list. A model saved as R-2a (while drafts were offered) was
+    still checked with the AI's R-2a rules, and Edit site pre-selected R-1b in its place with "I confirm" still
+    ticked. Now the checker refuses it with a clear message, the check command asks for the zone again, and the
+    start box selects nothing and unticks "I confirm"."""
+    from design_checker import check, rhino_logic as logic
+    assert check.offer_ai_drafted_zones() is False
+    with pytest.raises(ValueError, match="R-2a's rules are AI drafts, not yet verified, and are turned off"):
+        check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-2a", "accessory_buildings": []})
+    options = check.options(ITHACA)
+    assert logic.zone_not_offered({"zone": "R-2a"}, options) == ["zone"]
+    assert logic.zone_not_offered({"zone": "R-1b"}, options) == [] and logic.zone_not_offered({}, options) == []
+    assert logic.preselect_zone("R-2a", options) == (None, False)          # never R-1b in its place, unticked
+    assert logic.preselect_zone("R-1b", options) == ("R-1b", True)
+    assert logic.preselect_zone(None, options) == ("R-1b", True)            # nothing saved: the sample zone
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "if logic.missing(facts) or logic.zone_not_offered(facts, options):" in rhino
+    assert 'wanted, keep_confirmed = logic.preselect_zone(state.get("zone"), options)' in ui
+    assert 'confirm.Checked = bool(state.get("district_confirmed")) and keep_confirmed' in ui
+
+
+def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_checked():
+    """Review round 1: only entries named "<zone>." without cells were listed. §325-19E's 75% coverage for R-3a carries
+    the coverage cell, which R-3a's own 35% rule cites, so it vanished; the template rejected for every district
+    (the footnoted lot-size rows: multiple family, group house) and the sections left out for length are named for
+    the unit, so they vanished in every zone."""
+    from design_checker.gaps import drafting_gaps
+    from rule_format.rulebook import zone_rules
+    names = {g["name"] for g in drafting_gaps(J, "R-3a", zone_rules(J, "R-3a"))}
+    assert "R-3a.325_19e_r3_abut_r1_max_coverage" in names                  # its cell is cited by another rule
+    assert "325-19E.325_19e_r3_abut_r1_min_lot_area_footnoted_rows" in names  # rejected for every district
+    assert "325-20D" in names                                               # a section left out for length
+    whys = [g["why"] for g in drafting_gaps(J, "R-3a", zone_rules(J, "R-3a"))]
+    assert any("fraternity_sorority_group_house" in w for w in whys)        # a group house next to R-1: not checked
+    assert drafting_gaps(J, "R-1b", zone_rules(J, "R-1b")) == []          # the hand R-1b: not the drafting log's

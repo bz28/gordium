@@ -1538,7 +1538,7 @@ def gordium_check():
         facts = current_facts(doc)
     except ValueError:                  # unreadable: confirm again from the suggestions
         facts = {}
-    if logic.missing(facts):
+    if logic.missing(facts) or logic.zone_not_offered(facts, options):     # a turned-off drafted zone: ask again
         facts = confirm(doc, logic.with_suggestions(facts, suggested_facts(doc, options["zones"], options.get("default_zone"))), options)
         if facts is None:               # closed or Esc: nothing saved, nothing checked
             Rhino.RhinoApp.WriteLine("Gordium: the lot facts weren't confirmed; nothing was saved")

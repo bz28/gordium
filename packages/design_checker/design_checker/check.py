@@ -342,6 +342,7 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     it sent (scope), objects on the lot it didn't send (each makes the check need review), the grade source."""
     problems = fact_problems(facts)            # the same check as a facts file: a plain refusal, never a crash
     problems += [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
+    problems += drafted_zone_problems(facts)
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
     model_path = Path(model_path)
@@ -351,11 +352,22 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     return check_site(site, facts, model_path.name, report_path, extras)
 
 
+def drafted_zone_problems(facts: dict) -> list[str]:
+    """A zone whose rules are only the AI's drafts is checked only while Ben's setting offers them."""
+    zone = facts.get("zone")
+    if zone and facts.get("jurisdiction") and is_ai_drafted(REPO / facts["jurisdiction"], zone) \
+            and not offer_ai_drafted_zones():
+        return [f"{zone}'s rules are AI drafts, not yet verified, and are turned off (offer_ai_drafted_zones in "
+                "design_checker/settings.yaml): pick another zone, or ask Ben to turn drafted zones on"]
+    return []
+
+
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
                extras: dict | None = None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
     generator builds. Exactly the same measuring, rules and presentation as a model read from a file."""
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
+    problems += drafted_zone_problems(facts)
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
     model_path = Path(name)
@@ -564,6 +576,7 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     standing at the lot's own level (and said so): the check then says height and stories need review until the
     grade is set, so nothing about the height is taken as settled."""
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
+    problems += drafted_zone_problems(facts)
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
     site = {**read_site(Path(model_path), facts), "buildings": []}

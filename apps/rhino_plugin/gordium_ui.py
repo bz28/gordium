@@ -441,12 +441,13 @@ def start_box(state, options, mode):
     zone_of = {labels.get(z, z): z for z in options["zones"]}       # the list shows "R-2a (draft)"; facts keep "R-2a"
     for z in options["zones"]:
         zone.Items.Add(labels.get(z, z))
-    # the stated zone, else the looked-up or sample one; never the first in the list (that was alphabetical: R-1a)
-    wanted = state.get("zone") if state.get("zone") in options["zones"] else options.get("default_zone")
+    # the stated zone, else the looked-up or sample one; never the first in the list (that was alphabetical: R-1a), and
+    # never another zone in place of a saved one that isn't offered (then none, and "I confirm" unticked)
+    wanted, keep_confirmed = logic.preselect_zone(state.get("zone"), options)
     zone.SelectedValue = next((x for x in zone.Items if zone_of.get(x.Text) == wanted), None)
     first_zone = zone_of.get(zone.SelectedValue.Text) if zone.SelectedValue else None
     confirm = ef.CheckBox()
-    confirm.Checked = bool(state.get("district_confirmed"))
+    confirm.Checked = bool(state.get("district_confirmed")) and keep_confirmed
     use = ef.DropDown()
     names = list(options["uses"].items())
     for _, n in names:
