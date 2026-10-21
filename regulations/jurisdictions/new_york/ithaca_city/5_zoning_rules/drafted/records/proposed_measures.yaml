@@ -20,13 +20,6 @@ abutting_r1_height_limit:
   - R-3a.325_19e_r3_abut_r1_max_height
   - R-3b.325_19e_r3_abut_r1_max_height
   unit: ft
-accessory_is_frame:
-  meaning: The accessory building is a frame accessory building
-  needed_by:
-  - general.325_25c_frame_accessory_rear_setback
-  - general.325_25c_frame_accessory_side_setback
-  - general.325_25c_frame_accessory_side_setback_r1
-  unit: yes_no
 additional_primary_building:
   meaning: The lot has an additional primary use in a separate building besides the initial primary use (§325-8B(1))
   needed_by:
@@ -327,19 +320,6 @@ lot_width_at_street_line:
   - general.325_20e_front_yard_parking_area_cap
   - general.325_20e_front_yard_parking_driveway_narrow_lot
   unit: ft
-multiple_dwelling_units:
-  meaning: The lot has more than one dwelling unit
-  needed_by:
-  - R-1a.parking_by_sleeping_rooms
-  - R-1b.parking_by_sleeping_rooms
-  - R-2a.parking_by_sleeping_rooms
-  - R-2b.parking_by_sleeping_rooms
-  - R-2c.parking_by_sleeping_rooms
-  - R-3a.parking_by_sleeping_rooms
-  - R-3aa.parking_by_sleeping_rooms
-  - R-3b.parking_by_sleeping_rooms
-  - RU.parking_by_sleeping_rooms
-  unit: yes_no
 new_primary_structures:
   meaning: Number of primary structures the design proposes to construct on the parcel
   needed_by:

@@ -927,8 +927,12 @@ def test_an_other_use_row_sends_a_use_the_law_calls_a_dwelling_to_review(inputs)
     "a multiple dwelling", so the multiple-family row (with note 7) may be the one that applies; the answer key says
     needs review. Code adds the review to any chart rule from an "Other use" row, whatever the AI wrote."""
     from rule_format.rulebook import outcome
-    assert set(drafter.dwelling_kind_uses(inputs.law, inputs.ctx.uses)) == {"dormitory", "adult_day_care_home",
-                                                                             "bed_and_breakfast_inn"}
+    kinds = drafter.dwelling_kind_uses(inputs.law, inputs.ctx)
+    # found by definition (round 8's free fix): a nursing home is named by MULTIPLE DWELLING's item (4), though its
+    # chart label isn't a defined term's wording; a dormitory and a B&B inn by their own definitions
+    assert {"dormitory", "bed_and_breakfast_inn", "nursing_home"} <= set(kinds)
+    assert "convalescent, old-age or nursing home" in kinds["nursing_home"]
+    assert not {"church", "school", "library_or_fire_station"} & set(kinds)
     cell = {"file": "zoning_charts_2026-04.pdf", "page": 3,
             "cell": {"section": "Minimum Lot Size", "row": "Other use", "column": "R-3A"}}
     rule = {"id": "R-3a.x", "kind": "rule", "applies_when": 'use not in ["one_family_detached", "multiple_family"]',
@@ -1230,3 +1234,42 @@ def test_no_saved_draft_keeps_one_end_of_a_range(inputs):
             if drafter.unenforced_lower_bound(r, units.get(unit_of.get(r["id"], ""), {}), inputs.law, inputs.ctx) is not r:
                 flagged.append(r["id"])
     assert flagged == []
+
+
+OLD_PARKING = {   # stage 1's R-3a.parking_by_sleeping_rooms, as drafted (a false pass: a church, a two-family house)
+    "id": "R-3a.parking_by_sleeping_rooms", "kind": "rule",
+    "check": "parking_spaces >= (1 if sleeping_rooms <= 3 else (2 if sleeping_rooms <= 5 else 2 + (sleeping_rooms - 5) * 1))",
+    "review_when": [{"when": "multiple_dwelling_units", "reason": "x"}],
+    "sources": [{"file": "zoning_charts_2026-04.pdf", "page": 14,
+                 "cell": {"section": "Residential", "row": "First three bed or sleeping rooms per dwelling unit", "column": "R-3A"}}],
+    "examples": [{"given": {"sleeping_rooms": 3, "parking_spaces": 1, "multiple_dwelling_units": False}, "expect": "pass"}]}
+OLD_ACCESSORY = {   # stage 1's §325-25C R-1 side distance, as drafted (frame buildings only)
+    "id": "general.325_25c_frame_accessory_side_setback_r1", "kind": "rule",
+    "applies_when": 'accessory_is_frame and accessory_distances_apply and district in ["R-1a", "R-1b"]',
+    "check": "accessory_side_yard >= 6", "sources": [],
+    "examples": [{"given": {"accessory_is_frame": True, "accessory_distances_apply": True, "district": "R-1b",
+                            "accessory_side_yard": 6}, "expect": "pass"}]}
+
+
+def test_each_old_false_pass_draft_fails_the_new_verifier(inputs, monkeypatch):
+    """The re-draft (Ben approved, 2026-10-21) fixed the causes in code first: each of stage 1's false-pass drafts is
+    refused by today's checks, so a re-draft that repeats it is sent back (and then to a person), never saved."""
+    # the old drafts' own new measures, as they are while an answer is checked
+    monkeypatch.setattr(inputs.ctx, "proposed", inputs.ctx.proposed | {
+        "multiple_dwelling_units": {"unit": "yes_no", "meaning": "The lot has more than one dwelling unit"},
+        "accessory_is_frame": {"unit": "yes_no", "meaning": "The accessory building is a frame accessory building"}})
+    assert drafter.residential_parking_problems(OLD_PARKING, inputs.law, inputs.ctx)          # church, two-family
+    dwelling_only = OLD_PARKING | {"applies_when": 'use == "one_family_detached"'}
+    assert drafter.residential_parking_problems(dwelling_only, inputs.law, inputs.ctx) == []
+    assert drafter.narrowing_problems(OLD_ACCESSORY, inputs.ctx)                              # frame narrows distances
+    fixed = OLD_ACCESSORY | {"applies_when": 'accessory_distances_apply and district in ["R-1a", "R-1b"]'}
+    assert drafter.narrowing_problems(fixed, inputs.ctx) == []
+    # an exception is all or nothing per district: R-2c's §325-16C kept height, front and rear without its side yards
+    u = unit(inputs, "325-16C")
+    context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
+    side = template("side", "side_yard_larger >= {s}", [slot("s", "Side (one side minimum)")],
+                    [({"side_yard_larger": "{s}"}, "pass"), ({"side_yard_larger": "{s} - 1"}, "fail")])
+    got = drafter.check_answer({"templates": [FRONT, side], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
+                               inputs.columns, inputs.cells, inputs.notes, "test")
+    assert "R-2c" not in got["rules"] and "R-1b" in got["rules"] and len(got["rules"]["R-1b"]) == 2
+    assert any(g["rule"].startswith("R-2c.") and "none of its parts is kept" in g["why"] for g in got["unresolved"])

@@ -318,362 +318,6 @@ rules:
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-2c.parking_by_sleeping_rooms
-  kind: rule
-  topic: parking_and_loading
-  title: Residential parking by bed or sleeping rooms (chart p.14)
-  check: parking_spaces >= (1 if sleeping_rooms <= 3 else (2 if sleeping_rooms <= 5 else 2 + (sleeping_rooms - 5)
-    * 1))
-  review_when:
-  - when: multiple_dwelling_units
-    reason: The chart sets spaces per dwelling unit, but parking_spaces counts the spaces on the whole lot and sleeping_rooms
-      counts one unit; a person must check each unit.
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 14
-    cell:
-      section: Residential
-      row: First three bed or sleeping rooms per dwelling unit
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 14
-    cell:
-      section: Residential
-      row: 4-5 bed or sleeping rooms per dwelling unit
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 14
-    cell:
-      section: Residential
-      row: Each additional bed or sleeping room
-      column: R-2C
-  examples:
-  - given:
-      multiple_dwelling_units: false
-      sleeping_rooms: 3
-      parking_spaces: 1
-    expect: pass
-  - given:
-      multiple_dwelling_units: false
-      sleeping_rooms: 3
-      parking_spaces: 0
-    expect: fail
-  - given:
-      multiple_dwelling_units: false
-      sleeping_rooms: 4
-      parking_spaces: 2
-    expect: pass
-  - given:
-      multiple_dwelling_units: false
-      sleeping_rooms: 5
-      parking_spaces: 1
-    expect: fail
-  - given:
-      multiple_dwelling_units: false
-      sleeping_rooms: 6
-      parking_spaces: 3
-    expect: pass
-  - given:
-      multiple_dwelling_units: false
-      sleeping_rooms: 6
-      parking_spaces: 2
-    expect: fail
-  - given:
-      multiple_dwelling_units: true
-      sleeping_rooms: 3
-      parking_spaces: 1
-    expect: needs_review
-  open_questions:
-  - Does the 4-5 row's 2 spaces per dwelling unit replace the 1 space of the first row (a total of 2) or add to
-    it? The formula treats it as the total.
-  - Is the 'each additional' space added to the 2 spaces for each room beyond five? The formula treats it so.
-  - Which uses count as a 'dwelling unit' for this section; do bed-and-breakfast inns, fraternity or group houses
-    and nursing homes fall under it? The rule is applied to every lot in the district.
-  research:
-  - question: Does the 4-5 row's 2 spaces per dwelling unit replace the 1 space of the first row (a total of 2)
-      or add to it? The formula treats it as the total.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Is the 'each additional' space added to the 2 spaces for each room beyond five? The formula treats
-      it so.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Which uses count as a 'dwelling unit' for this section; do bed-and-breakfast inns, fraternity or group
-      houses and nursing homes fall under it? The rule is applied to every lot in the district.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.325_16c_extra_height_limit_10_percent
-  kind: rule
-  topic: dimensions
-  title: Added height at most 10% of district maximum (325-16C(3))
-  check: building_height <= 35 + 0.1 * 35
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Maximum Building Height [fn10]
-      row: Height in feet
-      column: R-2C
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 6
-    - 7
-    quote: 'C. Height and open space. In any district, any main building may be erected to a height in excess of
-      that specified for the district, provided that:'
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 11
-    - 12
-    quote: (3) In each district, the number of additional feet may not exceed 10% of the maximum building height
-      allowed in that district.
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 56
-    - 56
-    quote: See §325-16.
-  examples:
-  - given:
-      building_height: 36.75
-    expect: pass
-  - given:
-      building_height: 42
-    expect: fail
-  open_questions:
-  - Does 325-16C(3) cap total height at 110% of the district maximum, as drafted? The text does not say whether
-    the extra height may also exceed the 5-foot limit or the other limits in 325-16B.
-  - Height of building is measured per 325-3B (average height of a pitched roof); the meaning of 'average height'
-    is unsettled.
-  research:
-  - question: Does 325-16C(3) cap total height at 110% of the district maximum, as drafted? The text does not say
-      whether the extra height may also exceed the 5-foot limit or the other limits in 325-16B.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Height of building is measured per 325-3B (average height of a pitched roof); the meaning of 'average
-      height' is unsettled.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.325_16c_extra_height_stories_not_exceeded
-  kind: rule
-  topic: dimensions
-  title: Stories not exceeded when height is added (325-16C(2))
-  check: stories <= 3
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Maximum Building Height [fn10]
-      row: Number of stories
-      column: R-2C
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 6
-    - 7
-    quote: 'C. Height and open space. In any district, any main building may be erected to a height in excess of
-      that specified for the district, provided that:'
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 10
-    - 10
-    quote: (2) In all districts, the number of stories permitted may not be exceeded.
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 56
-    - 56
-    quote: See §325-16.
-  examples:
-  - given:
-      stories: 3
-    expect: pass
-  - given:
-      stories: 4
-    expect: fail
-  open_questions:
-  - R-3aa's cell reads 3/2 (maximum/minimum stories, footnote 11) and gets no rule from this template; a person
-    must handle it.
-  research:
-  - question: R-3aa's cell reads 3/2 (maximum/minimum stories, footnote 11) and gets no rule from this template;
-      a person must handle it.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.325_16c_extra_height_front_yard
-  kind: rule
-  topic: dimensions
-  title: Front yard increased with added height (325-16C(1))
-  applies_when: building_height > 35
-  check: front_yard >= 10 + (building_height - 35)
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Maximum Building Height [fn10]
-      row: Height in feet
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Yard Dimensions
-      row: Front (minimum)
-      column: R-2C
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 6
-    - 7
-    quote: 'C. Height and open space. In any district, any main building may be erected to a height in excess of
-      that specified for the district, provided that:'
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 8
-    - 9
-    quote: (1) Each required front, side and rear yard is increased one foot on the ground for each one foot of
-      such additional height.
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 56
-    - 56
-    quote: See §325-16.
-  examples:
-  - given:
-      building_height: 37
-      front_yard: 12
-    expect: pass
-  - given:
-      building_height: 37
-      front_yard: 11
-    expect: fail
-  - given:
-      building_height: 35
-      front_yard: 0
-    expect: not_applicable
-  open_questions:
-  - Corner lots have two front yards (325-19C); does the increase apply to both?
-  research:
-  - question: Corner lots have two front yards (325-19C); does the increase apply to both?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.325_16c_extra_height_rear_yard
-  kind: rule
-  topic: dimensions
-  title: Rear yard increased with added height (325-16C(1))
-  applies_when: building_height > 35
-  check: rear_yard >= max(20, min(0.25 * lot_depth, 50)) + (building_height - 35)
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Maximum Building Height [fn10]
-      row: Height in feet
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Yard Dimensions
-      row: Rear (minimum, % of depth or feet, whichever is less)
-      column: R-2C
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 6
-    - 7
-    quote: 'C. Height and open space. In any district, any main building may be erected to a height in excess of
-      that specified for the district, provided that:'
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 8
-    - 9
-    quote: (1) Each required front, side and rear yard is increased one foot on the ground for each one foot of
-      such additional height.
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 66
-    - 66
-    quote: But not less than 20 ft.
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 56
-    - 56
-    quote: See §325-16.
-  examples:
-  - given:
-      building_height: 37
-      lot_depth: 40
-      rear_yard: 22
-    expect: pass
-  - given:
-      building_height: 37
-      lot_depth: 40
-      rear_yard: 21
-    expect: fail
-  - given:
-      building_height: 37
-      lot_depth: 400
-      rear_yard: 52
-    expect: pass
-  - given:
-      building_height: 37
-      lot_depth: 400
-      rear_yard: 51
-    expect: fail
-  - given:
-      building_height: 37
-      lot_depth: 150
-      rear_yard: 39.5
-    expect: pass
-  - given:
-      building_height: 37
-      lot_depth: 150
-      rear_yard: 38.5
-    expect: fail
-  - given:
-      building_height: 35
-      lot_depth: 150
-      rear_yard: 0
-    expect: not_applicable
-  open_questions:
-  - Is the 20-ft floor of footnote 16 applied before the added yard, as drafted?
-  - RU's rear cell carries footnote 17 (30 ft) and gets no rule from this template.
-  research:
-  - question: Is the 20-ft floor of footnote 16 applied before the added yard, as drafted?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: RU's rear cell carries footnote 17 (30 ft) and gets no rule from this template.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
 - id: R-2c.325_19c_corner_lot_street_yards
   kind: rule
   topic: dimensions
@@ -1043,6 +687,10 @@ rules:
     reason: '§325-3 defines this use as ''A multiple dwelling which provides sleeping accommodations and domestic
       facilities and ser'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
       a dwelling row, with its notes) is unclear: a person decides.'
+  - when: use == "nursing_home"
+    reason: '§325-3 defines this use as ''a multiple dwelling: A building used or occupied as a convalescent, old-age
+      or nursing hom'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or a dwelling
+      row, with its notes) is unclear: a person decides.'
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1084,6 +732,12 @@ rules:
     - 16
     - 16
     quote: Dormitory - - - - - • - • •[fn5]
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines:
+    - 26
+    - 26
+    quote: Nursing, convalescent or rest home
   examples:
   - given:
       use: church
@@ -1348,6 +1002,12 @@ rules:
     - 16
     - 16
     quote: Dormitory - - - - - • - • •[fn5]
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines:
+    - 26
+    - 26
+    quote: Nursing, convalescent or rest home
   examples:
   - given:
       use: church
@@ -1391,3 +1051,7 @@ rules:
     reason: '§325-3 defines this use as ''A multiple dwelling which provides sleeping accommodations and domestic
       facilities and ser'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
       a dwelling row, with its notes) is unclear: a person decides.'
+  - when: use == "nursing_home"
+    reason: '§325-3 defines this use as ''a multiple dwelling: A building used or occupied as a convalescent, old-age
+      or nursing hom'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or a dwelling
+      row, with its notes) is unclear: a person decides.'

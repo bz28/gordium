@@ -125,6 +125,12 @@ it has slots) or one rule for every district (when it has none).
   a slot, so a chart row whose section has no footnote is drafted with quotes: [] (no quote needed; never quote
   the row itself, a definition or a related section to have one). Never leave a chart row undrafted because
   there is nothing to quote.
+- Conditions: carry each rule's conditions from the text, and only those. Where an existing measure already decides
+  whether a requirement applies (accessory_distances_apply for §325-25C's distances), use it alone; never narrow
+  it with a new measure (a building "frame" or not). A chart row "per dwelling unit" applies to a dwelling unit:
+  limit it to the chart's dwelling uses, send other uses to §325-20 (review), and for a building of several units
+  add up every unit or send it to review; one unit's sleeping rooms don't count them all.
+- Exceptions: draft every part of an exception (every yard it enlarges) for a district, or none.
 - Ranges: when the text sets a minimum or a range ("three or more", "at least", "not less than", "between 3 and
   6"), the formula enforces every end of it, even when the ends are in different sentences ("a building
   containing three or more dwellings" and "a maximum of six may be attached" are one rule: quote both sentences
@@ -460,20 +466,35 @@ def v_close(v: float, values) -> bool:
 CATCH_ALL_ROW = re.compile(r"^\s*other use\b", re.IGNORECASE)
 
 
-def dwelling_kind_uses(law: dict, uses) -> dict[str, str]:
-    """{use id: its definition's opening words} for each use whose own §325-3 definition (piece 325-3B:<use id>) says it
-    is a kind of dwelling: DORMITORY "A multiple dwelling ...", BED-AND-BREAKFAST INN "... single dwelling unit ...".
-    The chart's lot-size and lot-width rows name dwelling types, so for these uses its catch-all "Other use" row may
-    not be the row that applies."""
+GENERIC = {"or", "and", "related", "building", "buildings", "use", "other", "except", "office", "structure"}
+
+
+def dwelling_kind_uses(law: dict, ctx: Context) -> dict[str, str]:
+    """{use id: the words of §325-3B that make it a kind of dwelling}, found by definition, never guessed from the use
+    id or the label's wording: (1) its own definition (the defined term with its chart label's words) says it is a
+    dwelling (DORMITORY "A multiple dwelling ..."; BED-AND-BREAKFAST INN "... single dwelling unit ..."); or (2) an item
+    of the MULTIPLE DWELLING definition names it ("(4) A building used or occupied as a convalescent, old-age or nursing
+    home": the chart's "Nursing, convalescent or rest home"; two of the label's own words in one item). The chart's
+    lot-size and lot-width rows name dwelling types, so for these uses its catch-all "Other use" row may not apply."""
     out = {}
-    for use in sorted(uses):
-        piece = law.get("pieces", {}).get(f"325-3B:{use}")
-        if piece is None:
-            continue
-        text = " ".join(piece_text(law["rows"], piece).split())
-        genus = text.split("—", 1)[-1].split(".", 1)[0]
-        if re.search(r"\bdwelling\b", genus, re.IGNORECASE):
-            out[use] = genus.strip()
+    multiple = next((p for pid, p in law.get("pieces", {}).items() if pid.startswith("325-3B:")
+                     and {"dwelling", "multiple"} <= set(_words(p.get("title", "")))), None)
+    items = []
+    if multiple is not None:
+        text = " ".join(piece_text(law["rows"], multiple).split())
+        items = [x.strip() for x in re.split(r"\(\d+\)", text.split("—", 1)[-1]) if x.strip()]
+    for use in sorted(ctx.uses):
+        found = use_definition(use, law, ctx)
+        if found:
+            genus = found[1]["definition"].split("—", 1)[-1].split(".", 1)[0]
+            if re.search(r"\bdwelling\b", genus, re.IGNORECASE):
+                out[use] = genus.strip()
+                continue
+        words = set(_words(use_label(use, ctx))) - GENERIC
+        for item in items:
+            if len(words & set(_words(item))) >= 2:
+                out[use] = f"a multiple dwelling: {item.rstrip('.')}"
+                break
     return out
 
 
@@ -493,7 +514,7 @@ def unclear_catch_all(rule: dict, law: dict, ctx: Context) -> dict:
     add = [{"when": f'use == "{u}"',
             "reason": f"§325-3 defines this use as {genus[:90]!r}, a kind of dwelling, so which row of the chart applies to "
                       "it (this \"Other use\" row or a dwelling row, with its notes) is unclear: a person decides."}
-           for u, genus in dwelling_kind_uses(law, ctx.uses).items() if u not in named and f'"{u}"' not in already]
+           for u, genus in dwelling_kind_uses(law, ctx).items() if u not in named and f'"{u}"' not in already]
     if not add:
         return rule
     rows = [copy_of(r) for x in add for r in ctx.use_rows.get(x["when"].split('"')[1], [])[:1]]   # each use's own row
@@ -649,6 +670,66 @@ def unenforced_lower_bound(rule: dict, unit: dict, law: dict, ctx: Context) -> d
     return rule if len(review) == len(rule.get("review_when") or []) else rule | {"review_when": review, "sources": sources}
 
 
+SEVERAL_UNITS = re.compile(r"\b(?:two|three|four|\d+)\b[^.]{0,30}\b(?:dwelling units|one-family dwellings)\b", re.IGNORECASE)
+
+
+def several_units(use: str, law: dict, ctx: Context) -> bool:
+    """The use is a building of more than one dwelling unit, by its definition (TWO-FAMILY "two dwelling units";
+    SEMIDETACHED "two one-family dwellings"; ATTACHED "three or more") or its chart label (Multiple family dwelling)."""
+    found = use_definition(use, law, ctx)
+    text = found[1]["definition"].split("—", 1)[-1] if found else ""
+    one = re.search(r"not more than one\s+(?:\[page \d+\]\s+)?dwelling unit", text, re.IGNORECASE)
+    return bool(SEVERAL_UNITS.search(text)) and not one or "multiple" in use_label(use, ctx).lower()
+
+
+def residential_parking_problems(rule: dict, law: dict, ctx: Context) -> list[str]:
+    """A rule from the chart's residential parking rows ("... bed or sleeping rooms per dwelling unit") applies to a
+    dwelling unit: a use the chart doesn't call a dwelling goes to §325-20 ("For all other uses see §325-20"), and a
+    building of several units needs every unit counted, which one unit's sleeping rooms can't do. Such a rule that
+    passes either is refused (the drafted bedroom formula passed a church and a two-family house)."""
+    from rule_format.rulebook import outcome
+    rows = [s_["cell"] for s_ in rule.get("sources") or [] if isinstance(s_.get("cell"), dict)]
+    if not any(c.get("section", "").startswith("Residential") and "per dwelling unit" in c.get("row", "") for c in rows):
+        return []
+    passing = next((ex["given"] for ex in rule.get("examples") or [] if ex.get("expect") == "pass"), None)
+    if passing is None:
+        return []
+    out = []
+    for use in sorted(ctx.uses):
+        dwelling = "dwelling" in use_label(use, ctx).lower()
+        if dwelling and not several_units(use, law, ctx):
+            continue
+        if outcome(rule, passing | {"use": use}, ctx.allowed()) == "pass":
+            why = ("isn't a dwelling: other uses go to §325-20" if not dwelling else
+                   "is a building of several dwelling units: every unit's requirement is added up")
+            out.append(f"it passes {use} ({why}); limit applies_when, or send that use to review")
+    return out[:2]
+
+
+def narrowing_problems(rule: dict, ctx: Context) -> list[str]:
+    """A rule may not narrow a measured fact with an unmeasured one about the same thing: §325-25C's drafts required
+    accessory_is_frame on top of accessory_distances_apply (which already decides whether the distances apply, under
+    every reading), so a building not stated as frame escaped the distances once that fact existed."""
+    from rule_format import formula
+    from rule_format.rulebook import MEASURES_FILE, load as load_yaml
+    when = rule.get("applies_when")
+    if not when:
+        return []
+    known = (load_yaml(MEASURES_FILE) or {}) if MEASURES_FILE.exists() else {}
+    names = formula.names(when)
+    measured = {n: known[n] for n in names if n in known and isinstance(known[n], dict)}
+    out = []
+    for n in sorted(names - set(measured)):
+        meaning = (ctx.proposed.get(n) or {}).get("meaning", "")
+        if not meaning or ctx.kinds().get(n) != "boolean":
+            continue
+        for m, entry in measured.items():
+            stem = lambda t: {w[:-1] if w.endswith("s") else w for w in _content(t)}       # building(s)
+            if len(stem(meaning) & stem(entry.get("meaning", ""))) >= 2:
+                out.append(f"{n} narrows {m}, which already decides this; use {m} alone")
+    return out
+
+
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
                  cells: dict, notes: dict[int, dict], drafted_by: str) -> dict:
     """Turn an answer into rules, every one checked by the inspector. Returns {rules: {district: [rule]},
@@ -687,6 +768,8 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                     rule, why = unclear_exemption(unclear_catch_all(rule, law, ctx), unit, law, ctx)
                 if why is None:
                     rule = unenforced_lower_bound(rule, unit, law, ctx)
+                if why is None and (bad := residential_parking_problems(rule, law, ctx) + narrowing_problems(rule, ctx)):
+                    why = "; ".join(bad)
                 if why is None and unread:
                     why = (f"the text names districts its scope can't be read from ({', '.join(unread)}): a person "
                            "decides which districts this rule applies to")
@@ -720,6 +803,15 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
         else:                                   # it works nowhere: the drafter is told why and tries again
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}",
                                     "why": "; ".join(f"{g['rule']}: {g['why']}" for g in gaps[:3])})
+    if unit.get("piece") and len([t for t in out["templates"] if t["slots"]]) > 1:
+        # an exception drafted as several rules on chart cells is all or nothing per district: a district where one part
+        # couldn't be filled gets none (R-2c's §325-16C kept its height and front and rear parts without the side yards)
+        missing = {g["rule"].split(".")[0] for g in out["unresolved"] if g.get("cells")}
+        for d in sorted(missing & set(out["rules"])):
+            dropped = out["rules"].pop(d)
+            out["unresolved"] += [{"rule": r["id"], "why": "another part of this exception couldn't be drafted for this "
+                                                           "district, so none of its parts is kept: a person checks it"}
+                                  for r in dropped]
     out["unresolved"] += exemption_gaps(unit, out, ctx)
     out["problems"] = [f"{r['rule']}: {r['why']}" for r in out["rejected"]]
     if scope is not None:
@@ -775,6 +867,15 @@ def _words(text: str) -> tuple[str, ...]:
     return tuple(sorted(re.sub(r"[^a-z]", "", w) for w in re.split(r"[\s,]+", clean.lower()) if re.sub(r"[^a-z]", "", w)))
 
 
+def _same_words(a: tuple, b: tuple) -> bool:
+    """The same words, a hyphen joining two of them aside ("DAY-CARE" and "day care", "SEMIDETACHED" and "semi-detached")."""
+    def joined(t):
+        t = list(t)
+        return {tuple(sorted(t))} | {tuple(sorted(t[:i] + [t[i] + t[i + 1]] + t[i + 2:])) for i in range(len(t) - 1)} | \
+            {tuple(sorted(t[:i] + [t[i + 1] + t[i]] + t[i + 2:])) for i in range(len(t) - 1)}
+    return bool(joined(a) & joined(b))
+
+
 def use_label(use: str, ctx: Context) -> str:
     """A use's own chart row label, from the row uses.yaml cites ("One-family dwelling, attached [fn4] - - ..."):
     the words before the marks."""
@@ -787,7 +888,7 @@ def use_definition(use: str, law: dict, ctx: Context) -> tuple[str, dict] | None
     words (ONE-FAMILY ATTACHED DWELLING for "One-family dwelling, attached"), never guessed from the use id."""
     label = _words(use_label(use, ctx))
     for pid, piece in law.get("pieces", {}).items():
-        if pid.startswith("325-3B:") and label and _words(piece.get("title", "")) == label:
+        if pid.startswith("325-3B:") and label and _same_words(_words(piece.get("title", "")), label):
             text = " ".join(piece_text(law["rows"], piece).split())
             sentence = re.split(r"(?<=[.;])\s", text, maxsplit=1)[0]
             source, _why = find_quote(sentence, piece, law["file"], ctx)
