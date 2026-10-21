@@ -1,8 +1,9 @@
 # R-1b design scenarios: hand-worked results
 
 **Who worked them:** Claude (the AI that also helps build Gordium), by hand from the code's own words, before
-Gordium was run on them. **Not yet verified by an architect**: until an architect reviews them (and is recorded
-here with the date), they are a careful second reading, not an outside check.
+Gordium was run on them. **Not yet verified by an architect** (architect review is deferred for now, as rule
+approval is): they are a careful second reading, not an outside check. When that deferred review happens, who
+and when is recorded here.
 
 Ten designs an architect really draws on a City of Ithaca R-1b lot, each with the result **worked out by hand
 from the code's own words before Gordium was run on it**. The expected results are never changed to match
