@@ -12,7 +12,6 @@ GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts), GordiumOf
 """
 
 import json
-import math
 import os
 import subprocess
 import sys
@@ -516,7 +515,8 @@ def draw_screen(o, e):
                                                          e.Viewport.WorldToClient(line.To))
                                                         for line in getattr(o, "plan_lines", None) or [])]
     obstacles = on_screen if plan else []
-    lot_px = _screen_size(e.Viewport, getattr(o, "lot_outline", None))   # zoomed out, the labels give way
+    # zoomed out to the neighbourhood (the lot under LABEL_MIN_LOT_PX on screen), the lot's plan labels give way
+    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, getattr(o, "lot_outline", None)))
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
@@ -530,15 +530,13 @@ def draw_screen(o, e):
             d.Draw2dLine(System.Drawing.PointF(p.X - 5, p.Y + 5), System.Drawing.PointF(p.X + 5, p.Y - 5), color, 2)
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
-        if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):
+        if plan and logic.yard_label_shown(labels, status) and zoomed_in:
             ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
                         along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
-    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels else []:   # each edge's length
-        ends = [e.Viewport.WorldToClient(q) for q in (edge.From, edge.To)]
-        if not logic.label_fits(text, 11, lot_px, math.hypot(ends[1].X - ends[0].X, ends[1].Y - ends[0].Y)):
-            continue
-        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,
-                    along=(edge.From, edge.To), obstacles=obstacles)          # beside its edge, off every line
+    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
+        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
+                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
+        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
@@ -1292,9 +1290,12 @@ def _box_pick(doc, what, facts, saved_ui):
                     name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
                                                         picked)            # still the street the lookup named?
                     if name is None:                                       # else asked, never guessed
-                        got, typed = Rhino.Input.RhinoGet.GetString(
-                            "Which street is this lot line on? (Enter leaves it unnamed)", True, "")
-                        name = (typed or "").strip() or None if got == Rhino.Commands.Result.Success else None
+                        ask = Rhino.Input.Custom.GetString()   # literal: a street's name has spaces ("Cayuga
+                        ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")   # St")
+                        ask.AcceptNothing(True)
+                        got = ask.GetLiteralString()
+                        name = (ask.StringResult() or "").strip() or None \
+                            if got == Rhino.Input.GetResult.String else None
                     facts["street_line"] = [picked]
                     saved_ui["street_name"] = name
                     saved_ui["street_source"] = logic.ENTERED

@@ -179,6 +179,45 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
     return present.COMPLIES if got == {"pass"} and not open_ else present.REVIEW
 
 
+def _changed(measured: dict, changes: dict) -> dict:
+    """The measurements with each named one changed by its amount (its value and every reading of it): the design
+    as a "To comply" would leave it."""
+    out = dict(measured)
+    for m, d in changes.items():
+        rec = dict(measured.get(m) or {})
+        if isinstance(rec.get("value"), (int, float)):
+            rec["value"] = rec["value"] + d
+        rec["readings"] = [dict(r, value=r["value"] + d) if isinstance(r.get("value"), (int, float)) else r
+                           for r in rec.get("readings") or []]
+        out[m] = rec
+    return out
+
+
+def confirm_advice(items: list[dict], by_id: dict, measured: dict, allowed: dict, facts: dict) -> None:
+    """Every "To comply" is the checker's to confirm: each way it names (and each "…if it stays that tall"
+    clause), applied to the measurements, decided again by row_verdict (a side yard: its own side's check), is kept
+    only if the row then complies. None left: no hint. A "To comply" that says no change the checker can try is
+    dropped (never advice that leaves a row in review: the architect's review, pass 2; review round 2, R1: a rear
+    yard on 106, its limit waiting on which lines are side or rear, was told to move the building)."""
+    for i in items:
+        advice = i.pop("_advice", None)
+        if not (i.get("hint") or "").startswith("To comply"):
+            continue
+        rule = by_id.get(i.get("rule"))
+        if advice is None or rule is None:
+            i["hint"] = None
+            continue
+        side = side_checks(rule).get(i.get("measure"))
+
+        def complies(changes):
+            return bool(changes) and row_verdict(rule, _changed(measured, changes), allowed, facts,
+                                                 check=side) == present.COMPLIES
+
+        ways = [w for w in advice["ways"] if complies(w["changes"])]
+        clauses = [c for c in advice.get("clauses") or [] if ways and complies(c["changes"])]
+        i["hint"] = present.advice_text(dict(advice, ways=ways, clauses=clauses))
+
+
 def side_lines(site: dict, facts: dict) -> list[str] | None:
     """The true compass names of the lot's two side lines, each from the lot's middle to the line: what a side yard
     is called when it couldn't be measured. Only when the measuring itself knows which lines are sides: the lot not
@@ -423,6 +462,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
     extras = {**(extras or {}), "side_lines": side_lines(site, facts)}   # compass names when a side isn't measured
     v = present.view(rows, waiting, by_id, measured, facts, extras)
+    confirm_advice(v["items"], by_id, measured, allowed, facts)   # each "To comply" the checker's, or none
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:

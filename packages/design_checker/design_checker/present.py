@@ -361,8 +361,10 @@ def _alternatives(check: str, values: dict, measured: dict, facts: dict | None =
                 moved = worst is not None and margin is not None and _gap(min(worst, margin), unit) != gap
                 if moved:
                     gap = _gap(min(worst, margin), unit) + (f" ({gap} as drawn)" if margin < 0 else "")
+                need = -min(worst if worst is not None else margin, margin) if margin is not None else None
+                change = {c.left.id: _step(need, unit) * (1 if sign in ("≥", ">") else -1)} if need else {}
                 failing.append((NAMES.get(c.left.id, c.left.id.replace("_", " ")), value_text(proposed, unit, sign),
-                                sign, value_text(required, unit, sign, False), gap, moved, drawn))
+                                sign, value_text(required, unit, sign, False), gap, moved, drawn, change))
         out.append(failing)
     return out
 
@@ -397,20 +399,27 @@ def _raisers(items: list[dict], values: dict) -> dict:
         if _evaluate(ast.unparse(body.values[0]), values) is not False:
             continue
         for alt in body.values[1:]:
-            for c in ([alt] if isinstance(alt, ast.Compare) else getattr(alt, "values", [])):
-                if isinstance(c, ast.Compare) and len(c.ops) == 1 and isinstance(c.left, ast.Name) \
-                        and type(c.ops[0]) in SIGNS:
+            comps = [c for c in ([alt] if isinstance(alt, ast.Compare) else getattr(alt, "values", []))
+                     if isinstance(c, ast.Compare) and len(c.ops) == 1 and isinstance(c.left, ast.Name)
+                     and type(c.ops[0]) in SIGNS]
+            # a way the building can't take as drawn (over the bonus's own cap, 38'-6"): it raises nothing (the
+            # review, R6: "…if it stays 60'-0" tall" offered a yard no 60 ft house could use)
+            if any(c.left.id not in YARD_MEASURES and _evaluate(ast.unparse(c), values) is False for c in comps):
+                continue
+            for c in comps:
+                if c.left.id in YARD_MEASURES:
                     out.setdefault(c.left.id, []).append((c, i))
     return out
 
 
-def _while_raised(hint, item, node, worst, raisers, values, measured, facts):
+def _while_raised(item, node, worst, raisers, values, measured, facts):
     """A yard's "To comply", with what it needs while the building keeps the height another rule's other way
     allows only with larger yards (the review, F4: moving by the yard's own shortfall left it in review, the
     height bonus then raising it): "…; 10'-1 3/4" if it stays 36'-6" tall (the height rule's other way raises
-    this yard)". That figure from the same reading set, its worst reading, rounded up."""
-    if not hint or item.get("measure") is None:
-        return hint
+    this yard)". That figure from the same reading set, its worst reading, rounded up. As advice ({"text",
+    "changes"}: what it says and the change it means, for the checker to confirm: check.confirm_advice), or None."""
+    if item.get("measure") is None:
+        return None
     more = []
     for c, src in raisers.get(node.left.id) or []:
         rs = readings(c, ast.unparse(c), values, measured, facts)
@@ -418,17 +427,34 @@ def _while_raised(hint, item, node, worst, raisers, values, measured, facts):
         if low is not None and low < worst - 1e-9:
             more.append((low, rs[0]["unit"], src))
     if not more:
-        return hint
+        return None
     low, unit, src = min(more, key=lambda x: x[0])
-    return (f"{hint[:-1]}; {_gap(low, unit)} if it stays {src['proposed']} tall "
-            f"(the {src['name'].lower()} rule's other way raises this yard).")
+    return {"text": f"{_gap(low, unit)} if it stays {src['proposed']} tall (the {src['name'].lower()} rule's other "
+                    "way raises this yard)", "changes": {node.left.id: _step(-low, unit)}}
 
 
-def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx: bool) -> str | None:
+def _step(amount: float, unit: str) -> float:
+    """The change a hint names, as a number: `amount` rounded up the way its words are (to 1/8 in., a whole sf, a
+    hundredth of a percent)."""
+    k = {"ft": 96, "sf": 1, "%": 100}.get(unit, 1)
+    return math.ceil(amount * k - 1e-9) / k
+
+
+def advice_text(advice: dict | None) -> str | None:
+    """A "To comply" sentence from its advice: "<head>: <way>, or <way>; <clause>." (None without a way)."""
+    if not advice or not advice.get("ways"):
+        return None
+    tail = "".join("; " + c["text"] for c in advice.get("clauses") or [])
+    return advice["head"] + ": " + ", or ".join(w["text"] for w in advice["ways"]) + tail + "."
+
+
+def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx: bool) -> dict | None:
     """What to change so the row complies, from THE reading set (the verdict's own): the shortfall under its worst
     reading, rounded up, so the advised change makes it comply under every reading, never one that leaves it in
     review (the architect's review: "move 2'-11 3/8"" left a tax-map side yard needing review). On a tax-map lot
-    it says so and gives the as-drawn figure too; on a survey, the one number."""
+    it says so and gives the as-drawn figure too; on a survey, the one number. As advice: {"head", "ways": [{"text",
+    "changes": {measure: signed change}}]} (advice_text says it; check.confirm_advice keeps only what the checker
+    finds makes the row comply)."""
     sign = SIGNS[type(node.ops[0])]
     m = node.left.id
     worst = min(r["margin"] for r in rs)
@@ -443,9 +469,11 @@ def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx:
         need, as_drawn = have - min(limits), have - (_evaluate(ast.unparse(node.comparators[0]), values) or have)
         amount = lambda x: _area(x, "up")                                            # noqa: E731
         verb = lambda x: f"reduce the footprint by at least {amount(x)}"             # noqa: E731
+        change = -_step(need, "sf")
     else:
         need, as_drawn = -worst, (-drawn if isinstance(drawn, (int, float)) else None)
         amount = lambda x: _gap(-x, unit)                                            # noqa: E731
+        change = _step(need, unit) * (1 if sign in ("≥", ">") else -1)
         if name.split(",")[0].endswith("yard"):
             verb = lambda x: f"move the building {amount(x)} farther from that lot line"     # noqa: E731
         elif m == "building_height":
@@ -454,11 +482,11 @@ def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx:
             verb = lambda x: f"{'increase' if sign in ('≥', '>') else 'reduce'} it by {amount(x)}"   # noqa: E731
     several = len({round(r["margin"], 9) for r in rs}) > 1
     if not several:
-        return f"To comply: {verb(need)}."
+        return {"head": "To comply", "ways": [{"text": verb(need), "changes": {m: change}}]}
     whatever = "whatever the survey shows" if approx else "under every reading"
     drawn_part = f" ({amount(as_drawn)} as drawn)" if as_drawn and as_drawn > 0 and amount(as_drawn) != amount(need) \
         else ""
-    return f"To comply {whatever}: {verb(need)}{drawn_part}."
+    return {"head": "To comply " + whatever, "ways": [{"text": verb(need) + drawn_part, "changes": {m: change}}]}
 
 
 def _gap(margin: float, unit: str) -> str:
@@ -702,11 +730,16 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
         i.update(delta=delta_words(i["status"], span, unit, approx), approx=approx)
         body = ast.parse(expr or ast.unparse(node), mode="eval").body
         one_way = not isinstance(body, ast.BoolOp) or (i.get("_raised") and isinstance(body.op, ast.And))
-        if span[0] < 0 and one_way and not stuck and node.left.id not in SITE_MEASURES \
-                and (not i.get("hint") or i["hint"].startswith("To comply")):
-            # (a lot's own size is no design change: its rows keep the as-drawn words; the review, F1)
-            hint = comply_hint(i["name"], node, rs, values, measured, approx)
-            i["hint"] = _while_raised(hint, i, node, span[0], raisers, values, measured, facts) or i.get("hint")
+        if node.left.id in SITE_MEASURES:            # a lot's own size is no design change (the review, F1, R4)
+            if (i.get("hint") or "").startswith("To comply"):
+                i["hint"], i["_advice"] = None, None
+        elif span[0] < 0 and one_way and not stuck and (not i.get("hint") or i["hint"].startswith("To comply")):
+            advice = comply_hint(i["name"], node, rs, values, measured, approx)
+            clause = _while_raised(i, node, span[0], raisers, values, measured, facts) if advice else None
+            if clause:
+                advice["clauses"] = [clause]
+            if advice:                               # (the checker confirms each part: check.confirm_advice)
+                i["hint"], i["_advice"] = advice_text(advice), advice
         i.pop("_raised", None)
         if approx and i["detail"].get("line"):
             i["detail"]["line"] = (f"{i['proposed']} proposed, {i['required']} required as drawn · with the tax map's "
@@ -932,15 +965,17 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 elif limit_q and not complying:
                     why = (f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): ask the "
                            "zoning office" + (f"; also open: {'; '.join(rest)}" if rest else ""))
+        advice = None
         alts = _alternatives(check, values, measured, facts) if st == FAILS and not why and not splits else []
         shown = [[x for x in alt if x[6]] for alt in alts]          # the reason: what fails as drawn
         if len(alts) > 1 and all(shown):                # several ways to comply, none met: say each one
             why = "Does not comply either way the rule allows: " + "; or ".join(
                 ", ".join(f"{n} {p}, needs {s} {r}" for n, p, s, r, *_ in alt) for alt in shown)
             ways = [alt[0] for alt in alts if len(alt) == 1]
-            fixes = [_fix(*w[:5]) for w in ways]
-            hint = ("To comply" + (" whatever the survey shows" if any(w[5] for w in ways) else "") + ": " +
-                    ", or ".join(fixes) + "." if fixes else hint)
+            if ways:
+                advice = {"head": "To comply" + (" whatever the survey shows" if any(w[5] for w in ways) else ""),
+                          "ways": [{"text": _fix(*w[:5]), "changes": w[7]} for w in ways]}
+                hint = advice_text(advice)
         out.append({
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],
@@ -953,6 +988,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             # the stated facts it reads that aren't set (R-3a's lot size: dwelling units…): its own "Enter …" button
             "needs": rhino_logic.needs_of(reading_set.rule_names(rule), values) if st != COMPLIES else [],
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
+            "_advice": advice if hint and advice and hint == advice_text(advice) else None,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
             "objects": (measured.get(node.left.id) or {}).get("objects", []) if node is not None else [],

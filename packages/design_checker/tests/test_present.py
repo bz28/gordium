@@ -1279,3 +1279,78 @@ def test_the_with_every_other_solid_height_is_read_from_its_own_grade_not_the_la
     assumed = items(check_site(site_, base)["view"])["Building height"]
     assert picked["status"] != present.COMPLIES, picked
     assert present.RANK[assumed["status"]] <= present.RANK[picked["status"]], (assumed, picked)
+
+
+def test_every_to_comply_is_confirmed_by_the_checker_on_the_real_106_lot_too():
+    """Review round 2: the advice is the checker's to confirm (check.confirm_advice: each change re-decided by
+    row_verdict; kept only if the row then complies).
+    R1: on 106 a rear yard's limit waits on which lines are side or rear (the lot depth), so no move makes it
+    comply: it is never told to move. Doing what any other row on 106 says (the front yard: the house moved back
+    from the street; the height: the roof lowered) makes it comply, measured again from the moved house, not by
+    the checker's own arithmetic.
+    R4: a lot's own size gets no "To comply", on the tax map or a survey.
+    R6: a house over the height bonus's own cap (38'-6") is not told what a yard needs "if it stays that tall".
+    The side finding: a height row that complies under every reading but turns on open questions isn't told to
+    lower the building unless lowering it makes it comply."""
+    import random
+    import re
+    from shapely.geometry import Polygon, box as rect
+    from design_checker.check import check_site, sample_site
+    from test_measure import lot as lot_of
+    sample = sample_site()
+    ring = sample["lot"]
+    lot106 = lot_of(ring)
+    r = check_site(_plot(box(4.232, 29.235, 59.558, 77.162, 0, 30), lot_=lot106), {**sample["facts"], "lot_surveyed": True})
+    rear = next(i for i in r["view"]["items"] if i["name"] == "Rear yard")
+    assert rear["status"] == present.FAILS and rear.get("hint") is None, rear.get("hint")
+    rnd, followed = random.Random(3), {"front": 0, "lower": 0}
+    for k in range(80):
+        x0, y0 = rnd.uniform(2, 30), rnd.uniform(10, 40)
+        x1, y1 = rnd.uniform(x0 + 15, 74), rnd.uniform(y0 + 15, 99)
+        if not Polygon(ring).buffer(-1).contains(rect(x0, y0, x1, y1)):
+            continue
+        h = rnd.choice((30, 36.5))
+        facts = {**sample["facts"], "lot_surveyed": k % 2 == 0}
+        items = {i["name"]: i for i in check_site(_plot(box(x0, y0, x1, y1, 0, h), lot_=lot106), facts)["view"]["items"]}
+        assert not (items["Rear yard"].get("hint") or "").startswith("To comply"), (k, items["Rear yard"]["hint"])
+        front = items["Front yard"].get("hint") or ""
+        m = re.match(r"To comply[^:]*: move the building (\d+'-\d+(?: \d/\d)?\") farther", front)
+        if m and items["Front yard"].get("points"):          # moved straight away from that line, as measured
+            (ax, ay), (bx, by) = items["Front yard"]["points"][:2]
+            mid = ((x0 + x1) / 2, (y0 + y1) / 2)
+            if (ax - mid[0]) ** 2 + (ay - mid[1]) ** 2 > (bx - mid[0]) ** 2 + (by - mid[1]) ** 2:
+                (ax, ay), (bx, by) = (bx, by), (ax, ay)          # a: on the wall, b: on the street line
+            n = ((ax - bx) ** 2 + (ay - by) ** 2) ** 0.5
+            dx, dy = (ax - bx) / n * _feet(m.group(1)), (ay - by) / n * _feet(m.group(1))
+            again = check_site(_plot(box(x0 + dx, y0 + dy, x1 + dx, y1 + dy, 0, h), lot_=lot106), facts)
+            got = next(i for i in again["view"]["items"] if i["name"] == "Front yard")
+            if Polygon(ring).buffer(-1).contains(rect(x0 + dx, y0 + dy, x1 + dx, y1 + dy)):
+                assert got["status"] == present.COMPLIES or "other way needs" in (got["reason"] or ""), \
+                    (k, front, got["status"], got["reason"])
+                followed["front"] += 1
+        height = items["Building height"].get("hint") or ""
+        m = re.match(r"To comply[^:]*: lower the building (\d+'-\d+(?: \d/\d)?\")", height)
+        if m:
+            again = check_site(_plot(box(x0, y0, x1, y1, 0, h - _feet(m.group(1))), lot_=lot106), facts)
+            got = next(i for i in again["view"]["items"] if i["name"] == "Building height")
+            assert got["status"] == present.COMPLIES, (k, height, got["reason"])
+            followed["lower"] += 1
+    assert followed["front"] >= 3 and followed["lower"] >= 3, followed
+    # the side finding: surveyed 106, 36'-6", complies under every reading but turns on open questions
+    r = check_site(_plot(box(16, 28, 40, 52, 0, 36.5), lot_=lot106), {**sample["facts"], "lot_surveyed": True})
+    hgt = next(i for i in r["view"]["items"] if i["name"] == "Building height")
+    m = re.match(r"To comply[^:]*: lower the building (\d+'-\d+(?: \d/\d)?\")", hgt.get("hint") or "")
+    if m:
+        again = check_site(_plot(box(16, 28, 40, 52, 0, 36.5 - _feet(m.group(1))), lot_=lot106),
+                           {**sample["facts"], "lot_surveyed": True})
+        assert next(i for i in again["view"]["items"] if i["name"] == "Building height")["status"] == present.COMPLIES
+    # R4
+    small = lot_of([(0, 0), (50, 0), (50, 100), (0, 100)])
+    for surveyed in (False, True):
+        r = check_site(_plot(box(12, 26, 38, 70, 0, 30), lot_=small), {**FACTS, "jurisdiction": CITY, "lot_surveyed": surveyed})
+        area = next(i for i in r["view"]["items"] if i["name"] == "Lot area")
+        assert area["status"] == present.FAILS and not (area.get("hint") or "").startswith("To comply"), area.get("hint")
+    # R6
+    r = check_site(_plot(box(12, 20, 38, 66, 0, 60), lot_=small), {**FACTS, "jurisdiction": CITY, "lot_surveyed": True})
+    fy = next(i for i in r["view"]["items"] if i["name"] == "Front yard")
+    assert fy["hint"] == "To comply: move the building 5'-0\" farther from that lot line.", fy["hint"]

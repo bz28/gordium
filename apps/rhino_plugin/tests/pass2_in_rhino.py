@@ -3,7 +3,8 @@
 otherwise). Run in Rhino, not in CI, one step per run (sc.sticky["gordium_pass2_step"]); a driver captures Rhino's
 own windows by window id after each step (the step writes <temp>/gordium_pass2/ready.json). Steps, in order:
 - "open": Rhino brought to the front; GordiumStart on the sample (106 Ithaca Rd, its lot from the tax map); its
-  Street side reads "Ithaca Rd", the street the lookup found (the address set aside), sourced to the tax map.
+  Street side reads "Ithaca Rd", the street the lookup found (not the address's, which is there too), sourced to
+  the tax map.
 - "side_yard" (1): the house moved toward a side lot line until that yard is 3'-0" short as drawn; the row's
   "To comply" says "whatever the survey shows" and gives the move under every reading, the as-drawn one after it.
 - "apply_move" (1): the house moved by exactly what it said: that row complies.
@@ -15,7 +16,8 @@ own windows by window id after each step (the step writes <temp>/gordium_pass2/r
 - "labels" (4, 5): labels on, every view redrawn: the "Height limit" label is drawn at 13 pt; the status box is drawn
   in the active view only (and every view was drawn).
 - "scale" (Ben, on #23): labels on, Top zoomed out to a 1,500 ft square round the lot: no plan label is drawn and the
-  status box stays; zoomed back to the lot: the labels are back.
+  status box stays; zoomed back to the lot: every edge's length and the yards' labels are back, 106's short
+  10'-4 1/8" edge with a leader to its label (nothing hidden at working zoom).
 - "box" (6): a new empty file's start box (the real dialog): no "Use my survey…" or "Change…" button; it closes
   itself after 10 s and the file is closed.
 - "close": closes the documents this run opened.
@@ -152,9 +154,9 @@ try:
         log["surveyed"] = bool(g.current_facts(doc).get("lot_surveyed"))
         claim("0 the sample's lot is from the tax map", not log["surveyed"], log["surveyed"])
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
-        facts = dict(g.current_facts(doc))
-        facts.pop("address", None)                       # the name is the street's own fact, not the address's
+        facts = dict(g.current_facts(doc))               # (the address kept: the name must not come from it)
         state = g._box_state(doc, facts, options, g._ui_state(doc), "check")
+        claim("8 the address is there too", bool(state.get("address")), state.get("address"))
         street = next(r for r in g.logic.box_rows(state) if r["key"] == "street")
         log["street"] = {"text": street["text"], "source": state.get("street_source")}
         claim("8 the sample's Street side reads Ithaca Rd, from the lookup", street["text"] == "Ithaca Rd" and
@@ -280,8 +282,14 @@ try:
         put, draw_box = g.ui.label_at, g.ui.draw_text_box
         rows = list(g._status_rows(o, g.stale(o)))
 
+        leaders = []
+
         def record_label(d, viewport, point, text, *rest, **kw):
             placed.append(text)
+            if kw.get("leader") and kw.get("along") is not None:   # an edge shorter than its label: led to it
+                a, b = (viewport.WorldToClient(q) for q in kw["along"])
+                if g.logic.needs_leader(((b.X - a.X) ** 2 + (b.Y - a.Y) ** 2) ** 0.5, g.logic.label_width(text, 11)):
+                    leaders.append(text)
             return put(d, viewport, point, text, *rest, **kw)
 
         def record_box(d, rows_, *rest):
@@ -300,7 +308,7 @@ try:
         def drawn(box, name):
             top.ActiveViewport.ZoomBoundingBox(box)
             quiet(g)
-            del placed[:], boxes[:], frames[:]
+            del placed[:], boxes[:], frames[:], leaders[:]
             g.ui.label_at, g.ui.draw_text_box, g._here = record_label, record_box, record_here
             try:
                 for _ in range(20):                      # until Top has really drawn a frame at this zoom
@@ -322,11 +330,16 @@ try:
         near = rg.BoundingBox(lot.Min, lot.Max)
         near.Inflate(lot.Diagonal.Length * 0.15)
         in_labels, in_box = drawn(near, "scale_lot")
+        led = sorted(set(leaders))
+        edges = sorted({t for _, t, _ in o.edge_labels})
         log["scale"] = {"neighbourhood": {"labels": out_labels, "status_box": out_box},
-                        "lot": {"labels": in_labels, "status_box": in_box}}
+                        "lot": {"labels": in_labels, "status_box": in_box, "edges": edges, "led": led}}
         claim("7 zoomed out to the 1,500 ft square: no plan labels drawn", out_labels == [], log["scale"])
         claim("7 the status box stays", out_box >= 1 and in_box >= 1, dict(log["scale"], frames=log["frames"]))
-        claim("7 zoomed to the lot: the labels are back", len(in_labels) >= 4, log["scale"])
+        claim("7 zoomed to the lot: every edge's length is back, the yards' too", set(edges) <= set(in_labels)
+              and len(set(in_labels) - set(edges)) >= 3, log["scale"])
+        claim("7 106's short 10'-4 1/8\" edge keeps its length, led to it", "10'-4 1/8\"" in edges and
+              "10'-4 1/8\"" in led, log["scale"])
     elif step == "box":
         A["box_serial"] = None
         empty = TestDocs("pass2box").open("Large Objects - Feet")

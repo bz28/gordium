@@ -1048,8 +1048,8 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
     assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
-    assert "if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):" in draw and "    if not boxed:\n        return" in draw
-    assert "if plan and labels else []" in draw                                   # lot-edge labels: only when on
+    assert "if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw and "    if not boxed:\n        return" in draw
+    assert "if plan and labels and zoomed_in else []" in draw                                   # lot-edge labels: only when on
     assert "d.Draw2dLine(System.Drawing.PointF(a.X, a.Y)" in draw.split("yard_label_shown")[0]   # lines regardless
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
     assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
@@ -1075,7 +1075,7 @@ def test_with_labels_off_a_failing_yards_shortfall_still_shows():
     labels = [y["label"] for y in got["yards"]]
     assert "✕ Rear yard 21'-2\", needs 22'-6\"" in labels and "✓ Side yard, West 12'-0\"" in labels
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):" in rhino
+    assert "if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in rhino
 
 
 def test_the_code_edition_line_is_in_the_legend_and_the_report_not_the_panel(facts, tmp_path):
@@ -1708,36 +1708,32 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
 
 def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_zoomed_in():
     """Ben, on #23's zoomed-out capture: with labels on and the view out at the neighbourhood, the lot's edge and
-    yard labels piled into a column with long leaders. A label is drawn only when the lot on screen is at least
-    LABEL_MIN_LOT_PX (120 px) and no smaller than the label, and a lot edge's label only when that edge on screen is
-    at least as long as the label; zoomed in they show again. The status box isn't a plan label: it stays."""
+    yard labels piled into a column with long leaders. Below LABEL_MIN_LOT_PX (120 px) of lot on screen, every plan
+    label gives way, together; at or above it, every one is drawn: nothing is hidden at working zoom for being
+    long (review round 2, R5, and the coordinator: a short edge's length sits beside it with a short leader, as a
+    dimension too short for its text is drawn; 106's 10'-4 1/8" edge keeps its length). The status box stays."""
     from design_checker import rhino_logic as logic
-    edge, yard = "69'-6 1/8\"", "✕ 7'-0\", needs 10'-0\""
-    w_edge, w_yard = logic.label_width(edge, 11), logic.label_width(yard, 11)
-    assert 60 < w_edge < 90 and w_yard > 120
-    # the 1,500 ft square in a ~900 px view: a 70 x 120 ft lot is ~70 px; its edges ~40-70 px
-    assert not logic.label_fits(edge, 11, lot_px=72, line_px=70)
-    assert not logic.label_fits(yard, 11, lot_px=72)
-    # zoomed to the lot: it fills the view; the labels are back (a yard's short line doesn't hide its label)
-    assert logic.label_fits(edge, 11, lot_px=600, line_px=350)
-    assert logic.label_fits(yard, 11, lot_px=600)
-    # the edges: hidden while shorter than the label, shown once longer; the threshold is the lot's
-    assert not logic.label_fits(edge, 11, lot_px=600, line_px=w_edge - 1)
-    assert logic.label_fits(edge, 11, lot_px=600, line_px=w_edge)
-    assert not logic.label_fits(edge, 11, lot_px=logic.LABEL_MIN_LOT_PX - 1, line_px=500)
-    assert logic.label_fits(edge, 11, lot_px=logic.LABEL_MIN_LOT_PX, line_px=500)
-    assert not logic.label_fits(yard, 11, lot_px=w_yard - 1)                  # the lot shorter than the label
-    assert logic.label_fits(yard, 11, lot_px=None)                            # no lot drawn: nothing to judge by
-    # wired in: each yard label and each edge label asks, with the lot's size on screen this frame
+    assert not logic.labels_shown(logic.LABEL_MIN_LOT_PX - 1) and not logic.labels_shown(72)   # the 1,500 ft square
+    assert logic.labels_shown(logic.LABEL_MIN_LOT_PX) and logic.labels_shown(250) and logic.labels_shown(600)
+    assert logic.labels_shown(None)                                   # no lot drawn: nothing to judge by
+    short = "10'-4 1/8\""                                            # 106's short edge, ~61 px at a 600 px lot
+    w = logic.label_width(short, 11)
+    assert logic.needs_leader(61, w) and not logic.needs_leader(w, w) and not logic.needs_leader(350, w)
+    assert logic.leader_end((0, 50), (10, 40, 80, 20)) == (10, 50)    # to the box's near side
+    assert logic.leader_end((50, 0), (10, 40, 80, 20)) == (50, 40)
+    assert logic.leader_end((0, 0), (10, 40, 80, 20)) == (10, 40)     # its corner
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
-    assert '    lot_px = _screen_size(e.Viewport, getattr(o, "lot_outline", None))' in draw
-    assert "if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):" in draw
-    assert ("        if not logic.label_fits(text, 11, lot_px, math.hypot(ends[1].X - ends[0].X, ends[1].Y - ends[0].Y)):\n"
-            "            continue\n        ui.label_at(") in draw
+    assert '    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, getattr(o, "lot_outline", None)))' in draw
+    assert "        if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw
+    assert ('    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:'
+            in draw)
+    assert "along=(edge.From, edge.To), obstacles=obstacles, leader=True)" in draw
+    assert draw.index("zoomed_in = ") < draw.index("    if not boxed:")         # the status box isn't gated by it
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert "    width = logic.label_width(text, size)\n" in ui            # placed at the width it was judged by
-
+    at = ui[ui.index("def label_at("):ui.index("def _signed(")]
+    assert "        if logic.needs_leader(((b.X - a.X) ** 2 + (b.Y - a.Y) ** 2) ** 0.5, width):" in at
+    assert "            end = logic.leader_end(mid, (left, top, width, h))" in at
 
 def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps_it_only_on_that_street():
     """The stack-keeper's review: the panel and report name the street only when the highlighted street line's own
@@ -1749,9 +1745,13 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     sample = sample_site()
     assert sample["street_name"] == "Ithaca Rd" and "street_name" not in sample["facts"]   # the box's, not the checker's
     assert sample["street_source"] == "the State tax map (the sample's lookup)"
-    state = {"street_name": sample["street_name"], "street_source": sample["street_source"], "has_lot": True}
-    rows = {r["key"]: r for r in logic.box_rows(state)}               # no address: the name is the fact's own
+    state = {"street_name": sample["street_name"], "street_source": sample["street_source"], "has_lot": True,
+             "address": sample["address"]}
+    rows = {r["key"]: r for r in logic.box_rows(state)}
     assert rows["street"]["text"] == "Ithaca Rd"
+    # review round 2, R2: a re-picked line left unnamed reads as the line, never the address's street
+    unnamed = {r["key"]: r for r in logic.box_rows(dict(state, street_name=None))}
+    assert unnamed["street"]["text"] == "the highlighted line"
     lines = sample["facts"]["street_line"]
     assert logic.street_name_after_pick("Ithaca Rd", lines, lines[2]) == "Ithaca Rd"
     assert logic.street_name_after_pick("Ithaca Rd", lines, list(reversed(lines[2]))) == "Ithaca Rd"   # either way round
@@ -1761,5 +1761,6 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     pick = rhino[rhino.index('        if what == "street":'):rhino.index('        elif what == "lot":')]
     assert pick.index('name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),') \
-        < pick.index("RhinoGet.GetString(") < pick.index('saved_ui["street_name"] = name')
+        < pick.index("ask.GetLiteralString()") < pick.index('saved_ui["street_name"] = name')
+    assert "RhinoGet.GetString(" not in pick        # a space would end it: "Cayuga St" saved as "Cayuga" (R3)
     assert 'street_name=sample.get("street_name"),' in rhino and '"street_name": saved_ui.get("street_name"),' in rhino

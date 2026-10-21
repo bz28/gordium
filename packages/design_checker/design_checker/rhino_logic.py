@@ -354,17 +354,28 @@ def label_width(text, size):
     return len(text) * size * 0.58 + 14
 
 
-def label_fits(text, size, lot_px, line_px=None):
-    """Whether a plan label is drawn at this zoom (Ben, on #23's zoomed-out capture: zoomed out to the
-    neighbourhood the lot's labels piled into a column with long leaders). Not when the lot on screen (`lot_px`,
-    its larger side, pixels; None: no lot drawn) is under LABEL_MIN_LOT_PX or shorter than the label; nor when the
-    label's own line (`line_px`: a lot edge's on-screen length) is shorter than the label. A yard's dimension line
-    is short by nature (a 10 ft side yard beside a 150 px label), so a yard label is judged by the lot. Zoomed back
-    in, they show again; the status box always stays."""
-    w = label_width(text, size)
-    if lot_px is not None and lot_px < max(LABEL_MIN_LOT_PX, w):
-        return False
-    return line_px is None or line_px >= w
+def labels_shown(lot_px):
+    """Whether the lot's plan labels (its edge lengths, its yards) are drawn at this zoom: not when the lot on
+    screen (`lot_px`, its larger side, pixels; None: no lot drawn, nothing to judge by) is under LABEL_MIN_LOT_PX,
+    zoomed out to the neighbourhood (Ben, on #23's capture: there they piled into a column with long leaders).
+    Every one of them, together; zoomed back in, all of them again. The status box isn't a plan label: it stays.
+    At working zoom nothing is hidden for being long (review round 2, R5: judged label by label, a four-view lot
+    lost its yard labels, a failing shortfall with them, and 106's 10'-4" edge its length): a short edge's label
+    sits beside it with a leader (needs_leader)."""
+    return lot_px is None or lot_px >= LABEL_MIN_LOT_PX
+
+
+def needs_leader(line_px, width):
+    """A lot edge shorter on screen than its label: the label goes beside it, off the other lines, with a short
+    leader back to the edge's middle (as a dimension too short for its text is drawn)."""
+    return line_px < width
+
+
+def leader_end(point, box):
+    """Where a leader from `point` (x, y) meets a label's `box` (left, top, width, height): the box's nearest
+    point (on its edge, or `point` itself if inside)."""
+    left, top, w, h = box
+    return (min(max(point[0], left), left + w), min(max(point[1], top), top + h))
 
 
 def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
