@@ -1,5 +1,9 @@
 # PR 15 build spec: Gordium in Rhino, UI
 
+**Purpose:** the approved build spec for Gordium's Rhino screens (start box, panel, viewport): each acceptance criterion and how it is verified.\
+**For:** engineers building the Rhino side, and designers reviewing it.\
+**Kept current by:** the engineer who changes the Rhino UI, in that PR; a change of design needs a new critique round first.
+
 Status: approved by Claude on Ben's delegation (2026-10-20), after three critique rounds (each round: a practicing architect and a pro-tools product designer, both cold). Mockup: https://claude.ai/artifact/E18rXU59kG8rLUZa1hgktQ (boards 1–8). Example throughout: 106 Ithaca Rd, R-1b, one-family dwelling.
 
 **How to read this.** Each item is one acceptance criterion. The tag says how it is verified:
@@ -59,12 +63,12 @@ B1 [code] **All numbers come from the drawn lot.** No figure is typed in from el
 - coverage allowance 25% = 1,642.5 sf;
 - envelope 53'-0" × 42'-6" = 2,252 sf;
 - on a survey: massing 53'-0" × 30'-11" = 1,639 sf (24.94%), placed at the 25'-0" front yard; rear yard 34'-1";
-- from the tax map (the sample): massing 49'-0" × 31'-10" = 1,560 sf (23.74%), at 27'-0" from the street, side
-  yards 12'-0", rear yard 31'-2" (see B7).
+- from the tax map (the sample): massing 49'-0" × 30'-3" = 1,482 sf (22.56%), at 27'-0" from the street, side
+  yards 12'-0", rear yard 32'-9" (see B7).
 
 B2 [both] **The starting massing is legal by construction.** It is the largest box inside every yard, no taller than 35'-0", at or under the coverage limit, with stories = floor count. A code test asserts every rule result is complies or needs review, never does not comply, for the generated massing on any test lot.
 
-B7 [both] **Kept back on a tax-map lot (Ben, 2026-10-20).** On a lot not from a survey, the starting house keeps the tax-map tolerance (2'-0") inside every yard line and its coverage under the limit for the smallest lot the tax map allows (25% of 71' × 88' = 1,562 sf), so every item complies at the worst case: nothing about it needs review because of the tax map (a code test proves it, and steps it back 3 in. more if a rule that grows with the lot, like the rear yard, would still need it). Only height and stories may need review, while the ground is existing grade. On a survey it goes exactly to the limits. An optional **Design buffer** (Advanced in the GordiumStart box, default 0'-0"; Draw stays off if it can't be read) is added on top of either, and the note then says how much is which. The note says: "Starting house keeps 2'-0" back from each limit because the lot is from the tax map; use a survey for the full area."; the panel's Site facts show it as "Starting house: as first drawn, it keeps 2'-0" back … · suggested by Gordium · not confirmed" (Gordium's figure, never "confirmed by you"; about the house as drawn, which the architect may since have changed), cleared when GordiumStart runs again and saved only once the house is drawn.
+B7 [both] **Kept back on a tax-map lot (Ben, 2026-10-20).** On a lot not from a survey, the starting house keeps the tax-map tolerance (2'-0") inside every yard line and its coverage under the limit for the smallest lot the tax map allows (every lot line 2'-0" in: 25% of 69' × 86' = 1,483.5 sf; Ben, 2026-10-21), so every item about the house complies at the worst case: nothing about it needs review because of the tax map (the lot's own size may: 106 Ithaca Rd's lot area is 5,934 sf at worst, under 6,000 sf) (a code test proves it, and steps it back 3 in. more if a rule that grows with the lot, like the rear yard, would still need it). Only height and stories may need review, while the ground is existing grade. On a survey it goes exactly to the limits. An optional **Design buffer** (Advanced in the GordiumStart box, default 0'-0"; Draw stays off if it can't be read) is added on top of either, and the note then says how much is which. The note says: "Starting house keeps 2'-0" back from each limit because the lot is from the tax map; use a survey for the full area."; the panel's Site facts show it as "Starting house: as first drawn, it keeps 2'-0" back … · suggested by Gordium · not confirmed" (Gordium's figure, never "confirmed by you"; about the house as drawn, which the architect may since have changed), cleared when GordiumStart runs again and saved only once the house is drawn.
 
 B3 [rhino] **One group.** The massing is a single group of N floor solids on layer `Gordium::Massing`, so a Move moves the house, and the command line reports "Moved 1 group".
 
@@ -83,9 +87,9 @@ B6 [rhino] **Command line.** GordiumStart prints one line: "created 1 group (3 f
 C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gives needs review, never complies.
 
 C2 [code] **Tax-map tolerance** of ±2'-0".
-- Each lot-dependent value is evaluated at the worst case over ±2'-0": lengths directly, and areas and percentages by offsetting the lot outline.
+- Each lot-dependent value is evaluated at the worst case, with every lot line up to 2'-0" the unlucky way (Ben, 2026-10-21): a yard (to one line) ±2'-0", a lot width or depth (between two lines) ±4'-0", and areas and percentages from the outline offset 2'-0" (73' × 90' → 69' × 86' = 5,934 sf at the smallest). One definition: `model_measurement.measure.TAX_MAP_SLACK` and `tax_map_lot_area`, used by the measurement, the checker and the starting house.
 - If the item would not comply at that worst case, it needs review, with the reason "Lot lines are from the tax map (±2'-0")…" plus the worst-case value.
-- On the example lot this flags Front yard, both Side yards and Lot coverage; Rear yard (+11'-7"), Lot width (+23'-0") and Lot area (6,570 sf; 6,248 sf at the worst case, 71' × 88') still comply. (Corrected 2026-10-20: lot area was listed by mistake; the worst-case method applies to every lot-dependent item, areas and percentages as well as lengths.)
+- On the example lot this flags Front yard, both Side yards and Lot coverage; Rear yard (+11'-7"), Lot width (+23'-0") still comply; Lot area (6,570 sf; 5,934 sf at the worst case, 69' × 86', under 6,000 sf) needs review until a survey (2026-10-21). (Corrected 2026-10-20: lot area was listed by mistake; the worst-case method applies to every lot-dependent item, areas and percentages as well as lengths.)
 
 C3 [code] **Grade not set** → Building height and Stories need review ("no grade").
 

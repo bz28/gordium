@@ -759,3 +759,13 @@ def test_terrain_samples_under_an_attached_wing_are_ground_beneath_not_off_the_w
              "grade_points": house_walls + wing_walls + extra}
     h = measure(site(RECT, house, wing), facts)["building_height"]
     assert h["value"] == 30.0, h                       # was "with the other solids … needs spot grades": never checked
+
+
+def test_two_building_objects_with_one_id_are_never_measured_as_one():
+    """Stress test F4: two floor blocks sharing an id; one was dropped from the story count while the height
+    still counted it. Nothing is ever dropped silently: every building measurement needs review, saying why."""
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)), FACTS)
+    for name in ("building_height", "building_area", "front_yard", "rear_yard"):
+        assert m[name]["value"] is None and "share the id house" in (m[name]["reason"] or ""), name
+    ok = measure(site(RECT, box(10, 25, 35, 65, 0, 10, id="f1"), box(10, 25, 35, 65, 10, 20, id="f2")), FACTS)
+    assert "share the id" not in str(ok)

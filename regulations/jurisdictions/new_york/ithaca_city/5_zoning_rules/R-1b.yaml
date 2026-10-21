@@ -308,6 +308,7 @@ rules:
         page: 47
         lines: [8, 9]
         quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 47
         lines: [11, 12]
@@ -324,6 +325,10 @@ rules:
       - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 24, lot_depth: 94.8, stories: 3}
         expect: fail
       - given: {building_height: 39, front_yard: 40, side_yard_smaller: 20, side_yard_larger: 20, rear_yard: 40, lot_depth: 94.8, stories: 3}
+        expect: fail
+      - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 22, lot_depth: 60}
+        expect: pass                                 # a 60 ft lot: the 20 ft floor, plus 2 ft for 2 ft of extra height
+      - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 21.99, lot_depth: 60}
         expect: fail
     open_questions:
     - '§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height, or allowed
@@ -425,6 +430,7 @@ rules:
         page: 25
         lines: [7, 9]
         quote: "For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
+        not_limits: {2: "what building_area counts (balconies projecting more than two feet): a measuring rule, not this formula's limit"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 25
         lines: [9, 10]
@@ -533,6 +539,7 @@ rules:
         page: 25
         lines: [24, 26]
         quote: "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
+        not_limits: {2: "the two side lot lines: how lot depth is measured (measures.yaml lot_depth), not a limit"}
     examples:
       - given: {rear_yard: 25, lot_depth: 94.8}
         expect: pass
@@ -540,6 +547,8 @@ rules:
         expect: fail
       - given: {rear_yard: 20, lot_depth: 60}
         expect: pass
+      - given: {rear_yard: 19.99, lot_depth: 60}     # under 80 ft deep, 25% is under 20 ft: note 16's floor decides
+        expect: fail
     notes: >-
       Lot depth is the average of the two side lot lines if they differ (§325-8A(14)(a)).
       106 Ithaca Rd: side lot lines 90.28 and 99.37 ft → lot depth 94.8 ft → 23.7 ft required; the

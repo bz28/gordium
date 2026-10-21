@@ -169,6 +169,31 @@ def after_corner_answer(facts, was_corner):
     return out
 
 
+def suggested_facts(jurisdiction, zones, lots, buildings):
+    """The start box's prefilled lot facts, in the model's units (the plugin converts them to feet), for the
+    architect to confirm. `lots`: the Site layer's closed outlines, each {"id", "area", "bottom" (its lowest
+    level), "segments": [((x, y), (x, y)), ...]}; `buildings`: each {"id", "bottom", "volume" (of its box)}.
+    The largest outline is the lot, its lowest line on screen the street side; the ground is flat at the
+    buildings' lowest point (or the lot's level); the lot is not from a survey; the first zone with rules; a
+    detached one-family house; the largest solid the main building. The corner-lot question is never answered
+    here: always None, so the box asks it and the yards wait for the answer."""
+    facts = {"jurisdiction": jurisdiction, "zone": zones[0] if zones else None, "use": "one_family_detached",
+             "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}
+    lot = max(lots, key=lambda l: l["area"]) if lots else None
+    if lot is not None:
+        facts["lot_id"] = lot["id"]
+        if lot["segments"]:
+            a, b = min(lot["segments"], key=lambda s: (s[0][1] + s[1][1]) / 2)
+            facts["street_line"] = [[[a[0], a[1]], [b[0], b[1]]]]
+    ground = suggested_ground([b["bottom"] for b in buildings], lot["bottom"] if lot is not None else None)
+    if ground is not None:
+        facts["grade_elevation"] = ground
+    if len(buildings) > 1:
+        facts["main_building"] = max(buildings, key=lambda b: b["volume"])["id"]
+    facts["corner_lot"] = None                     # never guessed, whatever came before
+    return facts
+
+
 def suggested_ground(building_bottoms, lot_bottom):
     """The ground level to suggest (feet or model units, as given): the lowest point of the buildings, or with no
     building yet (a new project on the architect's own lot) the lot outline's level. Shown in the dialog, never
@@ -300,13 +325,25 @@ def _clip(subject, convex):
     return out
 
 
-def reaches_into_lot(lot_ring, points, reach):
+def box_near_lot(box, lot_box, reach):
+    """Whether a plan box (x0, y0, x1, y1) comes within `reach` of the lot's plan box: a quick test before any
+    outline work. Exact in the cautious direction: an object whose box misses the lot's box grown by `reach`
+    can't reach into the lot (its footprint lies inside its box, and the lot inside the lot's)."""
+    x0, y0, x1, y1 = box
+    a0, b0, a1, b1 = lot_box
+    return x0 <= a1 + reach and a0 - reach <= x1 and y0 <= b1 + reach and b0 - reach <= y1
+
+
+def reaches_into_lot(lot_ring, points, reach, box=None):
     """Whether an object whose plan points (any (x, y) of it: vertices, points along its edges) are `points`
     reaches into the lot (`lot_ring`, its outline's points) by more than `reach` (model units): the part of its
     plan footprint (their convex hull) inside the lot, averaged across (twice its area over its perimeter), is
     wider than `reach`. Wholly on the lot, straddling a lot line or mostly past it: on the lot. Touching the
     line from outside, a hair over it, or off the lot but inside the lot's bounding box (a rotated or jogged
-    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction."""
+    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction.
+    `box`, the object's plan bounding box (x0, y0, x1, y1), is its footprint whenever the points don't outline
+    one (fewer than 3, or all in a line, as a sphere's seam is): a solid always covers some ground, so such
+    points under-describe it."""
     lot = [(float(x), float(y)) for x, y in lot_ring]
     if len(lot) > 1 and lot[0] == lot[-1]:
         lot = lot[:-1]
@@ -315,6 +352,9 @@ def reaches_into_lot(lot_ring, points, reach):
     if _ring_area(lot) < 0:
         lot.reverse()
     hull = _hull(points)
+    if (len(hull) < 3 or _ring_area(hull) <= 1e-12) and box is not None:
+        x0, y0, x1, y1 = box
+        hull = _hull([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
     if len(hull) < 3 or _ring_area(hull) <= 1e-12:
         return False
     part = _clip(lot, hull)

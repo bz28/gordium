@@ -1,9 +1,16 @@
-# R-1b design scenarios: an architect's answer key
+# R-1b design scenarios: hand-worked results
+
+**Who worked them:** Claude (the AI that also helps build Gordium), by hand from the code's own words, before
+Gordium was run on them. **Not yet verified by an architect**: until an architect reviews them (and is recorded
+here with the date), they are a careful second reading, not an outside check.
 
 Ten designs an architect really draws on a City of Ithaca R-1b lot, each with the result **worked out by hand
 from the code's own words before Gordium was run on it**. The expected results are never changed to match
 Gordium. When Gordium disagrees, the disagreement is investigated: either the code is fixed, or the question goes
-to the architects (written up under `disagreements` in the scenario).
+to the architects (written up under `disagreements` in the scenario). A disagreement where Gordium is less
+cautious than the hand-worked result (it says complies, the hand says needs review) must list `relies_on`: what
+Gordium has to have evaluated for its answer to hold (a smaller lot it is re-checked on, or a measurement worked
+under every lot-line reading); the test re-checks each one, so a justification can't rest on hand work alone.
 
 Each `<name>.yaml` holds:
 

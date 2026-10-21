@@ -1,5 +1,9 @@
 # How Gordium is built
 
+**Purpose:** the code-level map: which package and file does each step, and how the pull requests build on each other.\
+**For:** engineers joining the project.\
+**Kept current by:** every PR that adds a package or changes a step.
+
 A five-minute read on what each piece does, why it exists, and how the pieces connect. Start here. Updated in every PR.
 
 ## The goal in one line
