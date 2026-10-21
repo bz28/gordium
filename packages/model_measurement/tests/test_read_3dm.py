@@ -292,9 +292,11 @@ def test_a_single_precision_mesh_reads_as_the_numbers_typed(tmp_path):
 
 @pytest.mark.parametrize("x0, y0", [(40000.1, 50000.9), (20000.5, 22000.25), (152.2131319706377, 194.70395691601078)])
 def test_a_single_precision_meshed_gable_is_two_roof_planes_near_and_far(tmp_path, x0, y0):
-    """A computed (not typed) single-precision gable is read as stored: 40,000 ft out, rounding each point to a
-    decimal tilted the small triangles, so one slope split into two planes (256 + 256 + 512, read by PR #18 as a
-    second eave). Each slope is one plane. The 40,000 ft case pins it; 20,000 and 152 ft are regression guards."""
+    """A computed single-precision gable, its points read as their shortest decimals: each slope is one plane at
+    every distance. 40,000 ft out those decimals move each point by up to half a float32 step (0.002 ft), and
+    planes grouped from one small triangle's normal split a slope in two (256 + 256 + 512, read by PR #18 as a
+    second eave); planes fitted over their whole group don't. The 40,000 ft case pins the grouping; 20,000 and
+    152 ft are regression guards."""
     from model_measurement import measure as M
     mesh, w, depth, eave, ridge = gable_mesh(x0, y0, 16, double=False)
     m = model()
@@ -337,10 +339,10 @@ def test_a_typed_single_precision_box_reads_exactly_anywhere_below_far(tmp_path,
 
 
 
-def test_where_single_precision_cant_show_the_typed_decimal_the_box_reads_within_one_step(tmp_path):
-    """The limit of reading typed decimals: in millimetres 3,000 ft out (919,208 mm) a single-precision step is
-    0.0625 mm, so 15.7 ft (919,208.36 mm) can't be told from 919,208.375: it reads within that one step (2e-4 ft),
-    never further, and nothing there is rounded on a guess."""
+def test_where_single_precision_cant_hold_the_typed_decimal_the_box_reads_within_one_step(tmp_path):
+    """A documented limit, not a fix: in millimetres 3,000 ft out the street side is at y = 3,015.7 ft =
+    919,208.36 mm, where a single-precision step is 0.0625 mm, so the stored 919,208.375 can't tell .36 from .40:
+    the yard reads within that one step (2e-4 ft) of 15.7, never further (a raw reading would too)."""
     m = model(units=r.UnitSystem.Millimeters)
     k, x0, y0 = 304.8, 2000, 3000
     rect(m, x0 * k, y0 * k, (x0 + 50) * k, (y0 + 100) * k)
@@ -354,3 +356,44 @@ def test_where_single_precision_cant_show_the_typed_decimal_the_box_reads_within
     facts = {**FACTS, "street_line": [[[x0, y0], [x0 + 50, y0]]]}
     got = measure(read_site(write(m, tmp_path), facts), facts)
     assert abs(got["front_yard"]["value"] - 15.7) <= 0.0625 / 304.8
+
+
+
+@pytest.mark.parametrize("x0, y0", [(300, 400), (2000, 3000)])
+def test_a_typed_box_with_a_computed_apex_reads_its_typed_walls_exactly(tmp_path, x0, y0):
+    """Round 2 of 44c2466's review: one computed vertex (a hip apex at 10/3 ft) vetoed reading the mesh's typed
+    decimals, so typed walls read 15.700012 / 15.699951 and failed at their limit. Each value is read on its own."""
+    from rule_format.rulebook import outcome
+    m = model()
+    rect(m, x0, y0, x0 + 50, y0 + 100)
+    mesh = r.Mesh()
+    corners = [(10, 15.7, 0), (35, 15.7, 0), (35, 65, 0), (10, 65, 0), (10, 15.7, 30), (35, 15.7, 30), (35, 65, 30),
+               (10, 65, 30), (22.5, 40.35, 30 + 10 / 3)]
+    for x, y, z in corners:
+        mesh.Vertices.Add(x0 + x, y0 + y, z)
+    for f in [(0, 3, 2, 1), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]:
+        mesh.Faces.AddFace(*f)
+    for a, b in ((4, 5), (5, 6), (6, 7), (7, 4)):               # a hip roof to the computed apex
+        mesh.Faces.AddFace(a, b, 8)
+    m.Objects.AddMesh(mesh, on(1))
+    facts = {**FACTS, "street_line": [[[x0, y0], [x0 + 50, y0]]]}
+    got = measure(read_site(write(m, tmp_path), facts), facts)
+    assert abs(got["front_yard"]["value"] - 15.7) < 1e-9, got["front_yard"]["value"]
+    assert outcome({"id": "x", "kind": "rule", "check": "front_yard >= 15.7"}, {"front_yard": got["front_yard"]["value"]}, {}) == "pass"
+
+
+def test_a_genuinely_different_slope_is_still_its_own_plane():
+    """Tolerant to rounding noise, not to real shape: two halves of a 20 ft roof whose slopes differ by 1 in 100
+    (0.1 ft over each half) stay two planes."""
+    from model_measurement.measure import _planes
+    faces = []
+    for i in range(20):
+        for half, rise in ((0, 0.25), (10, 0.26)):
+            x0, x1 = half + i * 0.5, half + (i + 1) * 0.5
+            z0 = 30 + (x0 - half) * rise + (2.5 if half else 0)
+            z1 = 30 + (x1 - half) * rise + (2.5 if half else 0)
+            faces += [{"points": [[x0, 0, z0], [x1, 0, z1], [x1, 20, z1]]},
+                      {"points": [[x0, 0, z0], [x1, 20, z1], [x0, 20, z0]]}]
+    groups = _planes(faces)
+    # a triangle at the crease may go either way (0.5 ft from it, the slopes differ by 0.005 ft): never one plane
+    assert len(groups) == 2 and min(len(g) for g in groups) >= 38, sorted(len(g) for g in groups)

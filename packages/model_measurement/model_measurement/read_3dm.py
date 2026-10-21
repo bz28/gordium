@@ -83,7 +83,6 @@ def _brep_faces(brep, s):
 
 
 FLOAT_SAFE = 2.0 ** 17      # ft from the origin: beyond this, single-precision points are coarser than 0.01 ft
-TYPED_PLACES = 6            # the most decimal places (in the model's units) a typed coordinate is taken to have
 
 
 def _single(x: float) -> bool:
@@ -91,39 +90,16 @@ def _single(x: float) -> bool:
     return struct.unpack("f", struct.pack("f", x))[0] == x
 
 
-def _ulp32(x: float) -> float:
-    """The step between neighbouring single-precision numbers at x."""
-    return 2.0 ** (math.frexp(x)[1] - 24) if x else 0.0
-
-
-def _typed_places(values) -> int | None:
-    """The fewest decimal places P at which the coordinates read as typed decimals: every value fine enough in
-    single precision to show P decimals (the P-decimal grid at least twice its step there) is exactly the
-    single-precision number of its P-decimal rounding, and there is at least one such value. That means they were
-    typed to P decimals and stored in single precision (rhino3dm's Vertices.Add): 27 ft drawn in millimetres,
-    8229.6, was stored 8229.599609375. Values too coarse to show P decimals say nothing either way (40,000 ft
-    out every value matches 3 places trivially). None when there is no such P (computed coordinates)."""
-    values = list(values)
-    for places in range(TYPED_PLACES + 1):
-        shown = [v for v in values if _shows(v, places)]
-        if shown and all(_single_of(round(v, places)) == v for v in shown):
-            return places
-    return None
-
-
-def _shows(v: float, places: int) -> bool:
-    """Whether single precision at v is fine enough to tell P-decimal numbers apart."""
-    return 10.0 ** -places >= 2 * _ulp32(v)
-
-
-def _as_typed(v: float, places: int) -> float:
-    """v as the P-decimal number typed, where single precision can show it; else as stored (rounding a value
-    too coarse to show P decimals would only move it inside its own step, and tilt small triangles)."""
-    return round(v, places) if _shows(v, places) else v
-
-
-def _single_of(x: float) -> float:
-    return struct.unpack("f", struct.pack("f", x))[0]
+def _as_typed(x: float) -> float:
+    """A single-precision number as the shortest decimal stored as it (8229.599609375 -> 8229.6): the number
+    typed, where single precision can hold it. Each value on its own: where it can't (a computed point, or one far
+    out), this moves it by less than its own single-precision step, which plane grouping tolerates (measure._planes
+    fits each plane over its whole group)."""
+    for places in range(10):
+        y = round(x, places)
+        if struct.unpack("f", struct.pack("f", y))[0] == x:
+            return y
+    return x
 
 
 class _Point:
@@ -142,11 +118,10 @@ def _mesh_faces(mesh, s):
     problems = []
     far = any(max(abs(p.X), abs(p.Y), abs(p.Z)) * s > FLOAT_SAFE for p in points)
     single = all(_single(c) for p in points for c in (p.X, p.Y, p.Z))
-    places = _typed_places(c for p in points for c in (p.X, p.Y, p.Z)) if single and not far else None
     if far and single:                                   # only single-precision points held, too coarse out there
         problems.append(stop("single_precision"))
-    elif places is not None:                             # typed to `places` decimals: read as the numbers typed
-        points = [_Point(_as_typed(p.X, places), _as_typed(p.Y, places), _as_typed(p.Z, places)) for p in points]
+    elif single:                                         # read as the numbers typed (rhino3dm's Vertices.Add)
+        points = [_Point(_as_typed(p.X), _as_typed(p.Y), _as_typed(p.Z)) for p in points]
     faces = []
     for i in range(len(mesh.Faces)):
         a, b, c, d = mesh.Faces[i]
