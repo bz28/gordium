@@ -171,9 +171,12 @@ CASES = {
     "no_use": _plain(use=None),
     "no_district": _plain(zone=None),
     "no_stories": _plain(stories=None),
-    "part_stories_not_drawn": _plain(stories=None, main_building="floor 1", buildings=[
+    "stories_plain_part": _plain(stories=None, main_building="floor 1", buildings=[
         floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35, 25, 45, 45, 0, 32, id="wing")]),
-    "part_below_ground": _plain(main_building="floor 1", buildings=[
+    "stories_below_floors": _plain(stories=1, main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
+        box(35, 25, 45, 45, 0, 32, id="wing")]),
+    "basement_part": _plain(main_building="floor 1", buildings=[
         floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35, 25, 45, 45, -10, 10.5, id="wing")]),
     "floors_misaligned": _plain(stories=None, buildings=[floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
                                                          floor(13, 25, 38, 65, z0=11, z1=22, id="floor 2")]),
