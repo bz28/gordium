@@ -1775,7 +1775,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     # the 106 front yard measured from the whole street, not one segment: fails, as before the pick (a false pass)
     from design_checker.check import check_site
     import sys
-    sys.path.insert(0, str(REPO / "packages/design_checker/tests"))
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
     from test_measure import lot as lot_of
     from test_present import _plot, box
     front = {}
