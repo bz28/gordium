@@ -888,3 +888,16 @@ def test_two_building_objects_with_one_id_are_never_measured_as_one():
         assert m[name]["value"] is None and "share the id house" in (m[name]["reason"] or ""), name
     ok = measure(site(RECT, box(10, 25, 35, 65, 0, 10, id="f1"), box(10, 25, 35, 65, 10, 20, id="f2")), FACTS)
     assert "share the id" not in str(ok)
+
+
+def test_a_fourth_floor_block_sharing_an_id_never_lets_the_stories_comply():
+    """Stress test: the starting house plus a 4th floor block on top with the id 'floor 2'. Every building
+    measurement needed review except stories, which counted 3 (one 'floor 2' dropped): 4 floors > 3 allowed
+    must never comply. Every measurement read from building objects needs review, naming the shared id."""
+    fourth = floor(10, 25, 35, 65, z0=33, z1=44, id="floor 2")
+    m = measure(site(RECT, *FLOORS, fourth), {**FACTS, "stories": None})
+    assert m["stories"]["value"] is None and "share the id floor 2" in m["stories"]["reason"]
+    lot_only = {"lot_area", "lot_width", "lot_depth", "district", "use", "sleeping_rooms", "parking_spaces"}
+    read_from_buildings = [k for k in m if k not in lot_only]
+    assert read_from_buildings and all(m[k]["value"] is None and "share the id" in (m[k]["reason"] or "")
+                                       for k in read_from_buildings), {k: m[k]["value"] for k in read_from_buildings}

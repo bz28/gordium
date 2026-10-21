@@ -311,3 +311,20 @@ def test_a_single_precision_mesh_reads_as_the_numbers_typed(tmp_path):
     assert abs(height - 27) < 1e-9, height
     assert outcome({"id": "h", "kind": "rule", "check": "building_height <= 27"}, {"building_height": height}, {}) == "pass"
     assert abs(got["front_yard"]["value"] - 25) < 1e-9 and abs(got["building_area"]["value"] - 1000) < 1e-6
+
+
+@pytest.mark.parametrize("x0, y0", [(40000.1, 50000.9), (20000.5, 22000.25), (152.2131319706377, 194.70395691601078)])
+def test_a_single_precision_meshed_gable_is_two_roof_planes_near_and_far(tmp_path, x0, y0):
+    """Reading single-precision points as typed decimals is only meaningful near the origin: 40,000 ft out, a
+    float32 step is 1/250 ft, and rounding each point to its shortest decimal tilted the small triangles, so one
+    slope split into two planes (256 + 256 + 512, read by PR #18 as a second eave). Each slope is one plane."""
+    from model_measurement import measure as M
+    mesh, w, depth, eave, ridge = gable_mesh(x0, y0, 16, double=False)
+    m = model()
+    lot = [(x0 - 20, y0 - 30), (x0 + w + 20, y0 - 30), (x0 + w + 20, y0 + depth + 30), (x0 - 20, y0 + depth + 30)]
+    m.Objects.AddPolyline(r.Polyline([r.Point3d(x, y, 0) for x, y in lot + lot[:1]]), on(0))
+    m.Objects.AddMesh(mesh, on(1))
+    facts = {**FACTS, "street_line": [[list(lot[0]), list(lot[1])]]}
+    faces = read_site(write(m, tmp_path), facts)["buildings"][0]["faces"]
+    slopes = [g for g in M._planes(faces) if 0.2 < abs(M._unit_normal(g[0]["points"])[2]) < 0.99]
+    assert sorted(len(g) for g in slopes) == [512, 512]

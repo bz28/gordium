@@ -979,7 +979,12 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
     main = _pick_main(buildings, facts)
-    if main is not None and main.get("parts"):
+    drawn_floors = any(b.get("floor") for b in site.get("buildings") or [])
+    if why_building and (drawn_floors or facts.get("stories") is None):
+        # read from the building objects (floor blocks): whatever stops the other building measurements stops it
+        # too (a shared id would drop a floor from the count); only a typed count with no floors drawn stands
+        out["stories"] = _missing("stories", why_building)
+    elif main is not None and main.get("parts"):
         out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
     why_main = None if main else stop("no_main_building")
     why = why_building or why_grade or why_main
