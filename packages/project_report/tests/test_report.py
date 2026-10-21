@@ -171,10 +171,10 @@ def test_the_reason_names_every_measure_the_checker_needs():
     rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= (1 if sleeping_rooms <= 3 else lot_width)"}
     assert report.needs_review_reason(rule, {"parking_spaces": 1}, kinds) == \
         "Can't check: missing measurement: sleeping_rooms."
-    # A test that isn't true/false: the formula can't be worked out at all, whatever is missing, so that's the reason.
+    # A test that isn't true/false: the formula is wrong for every value (its types), whatever is missing: the reason.
     rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= (1 if lot_width else sleeping_rooms)"}
     assert report.needs_review_reason(rule, {"lot_width": 50}, kinds) == \
-        "Can't check: can't be worked out (expected true/false, got 50)."
+        "Can't check: can't be worked out (an if needs a true/false test)."
 
 
 def test_every_shown_limit_uses_one_symbol_style():
