@@ -134,8 +134,9 @@ EXACT = ("pass", "fail")                   # a limit's usual meaning: it passes 
 # R-2C's cells state several figures, each for its own uses (chart p.3 notes 4-6, 12, 14, 15), and its lot sizes
 # grow with the occupants. Each figure is one limit for one use, with the stated facts that make the figure itself
 # the limit: one occupant (note 4); one dwelling unit on the lot, a semi-detached house split along its party wall
-# (note 5); two units with one occupant each, so twice the figure (a two-family house, note 5); three units with
-# one occupant each, three times the figure (attached, note 6). The 5th element, when given, is what the rule says
+# (note 5); one occupant in a two-family house's two units, so twice the figure (note 5); one occupant in three
+# units, three times the figure (attached, note 6). With one occupant there is no split of occupants between units
+# to choose, so the figure is exact. The 5th element, when given, is what the rule says
 # at the figure and just past it where the law's figure holds only on a side Gordium can't identify: the strictest
 # reading's 10 ft passes and just under it needs review ("pass", "needs_review"); the most lenient reading's 0 ft
 # needs review and just under it fails ("needs_review", "fail"), tested where the height bonus (38 ft: 0 + 3 ft, its
@@ -151,9 +152,9 @@ R2C = {
         [("lot_area", "min", {"use": _Z, "occupants": 1}, lambda n: n[0])],
     (*LOT_SIZE, "One-family dwelling, semi-detached"):
         [("lot_area", "min", {"use": _S, "dwelling_units": 1, "occupants": 1}, lambda n: n[0])],
-    (*LOT_SIZE, "Two-family dwelling"): [("lot_area", "min", {"use": "two_family", "occupants": 2}, lambda n: 2 * n[0])],
+    (*LOT_SIZE, "Two-family dwelling"): [("lot_area", "min", {"use": "two_family", "occupants": 1}, lambda n: 2 * n[0])],
     **{(*LOT_SIZE, f"One-family dwelling, attached, {how}"):
-       [("lot_area", "min", {"use": _A, "dwelling_units": 3, "occupants": 3}, lambda n: 3 * n[0])]
+       [("lot_area", "min", {"use": _A, "dwelling_units": 3, "occupants": 1}, lambda n: 3 * n[0])]
        for how in ("new construction", "by conversion")},
     (3, "Maximum lot coverage by buildings", "Percent of lot area"): [
         ("building_area", "max", {"lot_area": 10_000, "use": use}, lambda n, i=i: n[i] * 10_000)

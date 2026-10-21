@@ -148,8 +148,12 @@ def _compares(check: str) -> list[ast.Compare]:
 
 
 def _evaluate(text: str, values: dict):
+    """A rule's expression at these values. A limit that depends on the use (R-2c's side yards, coverage: "15 if use
+    == ...") is worked out for the stated use, as envelope._known_true does; with no use stated it can't be (None)."""
+    use = values.get("use")
+    kinds = MEASURE_KINDS | ({"use": frozenset([use])} if isinstance(use, str) else {})
     try:
-        return formula.evaluate(text, values, MEASURE_KINDS)
+        return formula.evaluate(text, values, kinds)
     except (formula.EvaluationError, formula.MissingMeasure, ArithmeticError):
         return None
 

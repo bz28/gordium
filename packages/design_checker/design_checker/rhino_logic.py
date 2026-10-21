@@ -129,12 +129,13 @@ def with_suggestions(saved, suggested):
 STATED_FACTS = {
     "sleeping_rooms": ("Bedrooms", "count", "bedrooms"),
     "parking_spaces": ("Off-street parking spaces", "count", "parking spaces"),
-    "dwelling_units": ("Dwelling units", "count", "dwelling units"),
+    "dwelling_units": ("Dwelling units on this lot (a semi-detached or attached building split along its party walls: "
+                       "this lot's units only)", "count", "dwelling units"),
     "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
     "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
                    "whether it is a conversion"),
-    "occupants": ("Occupants, all dwelling units together (§325-3B OCCUPANT: in R-2c, every person with the right to "
-                  "occupy)", "count", "occupants"),
+    "occupants": ("Occupants on this lot, all dwelling units together (§325-3B OCCUPANT: in R-2c, every person with the "
+                  "right to occupy, living there yet or not)", "count", "occupants"),
 }
 
 
