@@ -39,6 +39,8 @@ STOPS = {
     # the ground
     "no_ground": "the ground level isn't given: enter it (the grade plane)",
     "ground_unknown": "say whether the ground is flat",
+    "ground_unclear": "the spot grades don't show the ground under the building (too few, or in a line): place "
+                      "spot grades around the building",
     "ground_off_building": "the ground level ({ground} ft) doesn't meet the buildings (they run from {bottom} to "
                            "{top} ft): check the ground level",
     "buried_solid": "a solid lies wholly under the ground ({ground} ft; it runs from {bottom} to {top} ft) and isn't "
