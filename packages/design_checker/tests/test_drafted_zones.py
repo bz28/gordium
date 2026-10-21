@@ -150,6 +150,8 @@ def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_check
     assert "325_19e_r3_abut_r1_min_lot_area_footnoted_rows" in r3a["drafting.325-19E"]["why"]
     assert "fraternity_sorority_group_house" in r3a["drafting.325-19E"]["why"]   # a group house next to R-1
     assert "97 sections left out" in r3a["drafting.325-20D"]["why"]               # named once, in one item
+    assert r3a["drafting.325-20D"]["name"] == "97 sections left out for length"   # round 3: the name counts them
+    assert r3a["drafting.325-19E"]["name"] == "4 notes for a person"
     for zone in ("R-1a", "R-2a", "RU"):
         items = drafting_gaps(J, zone, zone_rules(J, zone))
         ids = [g["id"] for g in items]
