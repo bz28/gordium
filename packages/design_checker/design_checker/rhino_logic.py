@@ -1085,6 +1085,53 @@ def context_record(payload, frame):
     return dict((payload or {}).get("snapshot") or {}, frame=frame)
 
 
+DREW = ("found", "partial")             # a context layer whose service answered (its objects are replaced)
+
+
+def context_replaces(payload):
+    """The sources whose saved objects a fetch replaces: each layer whose service answered (found or partial), and
+    Gordium's own marks when any did. A layer whose service failed keeps what was saved (review of PR #23: one
+    service down deleted every layer's objects, and the record then said they had failed)."""
+    layers = (payload or {}).get("layers") or {}
+    out = set(v.get("source") for v in layers.values() if v.get("status") in DREW and v.get("source"))
+    return out | ({"gordium"} if out else set())
+
+
+def context_merge(payload, old_record, frame):
+    """(payload, record) for drawing a fetch over a neighbourhood already in the file. Around the same frame, each
+    layer whose service failed keeps its saved objects (context_replaces), and its record entries (the layer, its
+    requests, its credit line) are carried over, so the record still says what is drawn; the Sources dot lists every
+    layer drawn. Around another frame (or none saved) nothing is carried over: the earlier address's go."""
+    record = context_record(payload, frame)
+    old = old_record or {}
+    if not old or old.get("frame") != frame:
+        return payload, record
+    kept = [n for n, v in ((payload or {}).get("layers") or {}).items()
+            if v.get("status") not in DREW and ((old.get("layers") or {}).get(n) or {}).get("status") in DREW]
+    if not kept:
+        return payload, record
+    sources = set(old["layers"][n]["source"] for n in kept)
+    record["layers"] = dict(record.get("layers") or {}, **{n: old["layers"][n] for n in kept})
+    record["sources"] = list(record.get("sources") or []) + [r for r in old.get("sources") or []
+                                                              if r.get("source") in sources]
+    credits = list(record.get("credits") or [])
+    credits += [c for c in old.get("credits") or [] if c not in credits]
+    record["credits"] = credits
+    record["kept_from"] = dict(old.get("kept_from") or {},          # when each kept layer was really fetched
+                               **{n: (old.get("kept_from") or {}).get(n) or old.get("fetched") for n in kept})
+    objects = []
+    for o in payload.get("objects") or []:
+        if o.get("source") == "gordium" and o.get("name") == "Sources":
+            o = dict(o, text="\n".join(credits))
+        objects.append(o)
+    note = "Kept the %s drawn earlier (the service didn't answer)." % " and ".join(kept)
+    counts = dict(payload.get("counts") or {}, **{n: old["layers"][n]["count"] for n in kept
+                                                    if "count" in old["layers"][n]})
+    payload = dict(payload, objects=objects, counts=counts,
+                   message=((payload.get("message") or "") + " " + note).strip())
+    return payload, record
+
+
 def context_objects(payload):
     """What may be written into the .3dm: objects from a source whose store is raw (the payload's layers say which),
     and Gordium's own marks (frame, north arrow, scale bar, credits). Anything else is never written, whatever the

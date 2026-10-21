@@ -2104,11 +2104,13 @@ def _lock_context(doc, locked):
         doc.Layers[i].IsLocked = locked
 
 
-def _clear_context(doc):
+def _clear_context(doc, sources=None):
     """Every object Gordium drew on the context layers (each carries its source in CONTEXT_KEY) deleted, whatever the
     layers' state: a hidden or locked layer's objects aren't deleted (Delete without ignoring modes), so each layer
     is shown and unlocked for it, then put back as it was and locked (review round 1: a context hidden in an earlier
-    session was drawn twice). The live footprints and the saved snapshot go with it."""
+    session was drawn twice). The live footprints and the saved snapshot go with it. With `sources`
+    (rhino_logic.context_replaces), only those sources' objects go, and the caller rewrites the record and the
+    footprints: a layer whose service failed keeps what was saved."""
     dirty = STATE.get("dirty")             # deleting the context changes nothing the check reads (see draw_context)
     indexes = _context_layer_indexes(doc)
     parents = []                           # a locked or hidden parent ("Gordium") holds its sublayers' objects too
@@ -2127,7 +2129,8 @@ def _clear_context(doc):
         doc.Layers[i].IsLocked = False
     for i in indexes:
         for o in list(doc.Objects.FindByLayer(doc.Layers[i]) or []):
-            if o.Attributes.GetUserString(logic.CONTEXT_KEY):
+            source = o.Attributes.GetUserString(logic.CONTEXT_KEY)
+            if source and (sources is None or source in sources):
                 doc.Objects.Delete(o, True)
     for i, was in shown:
         doc.Layers[i].IsVisible = was
@@ -2135,10 +2138,19 @@ def _clear_context(doc):
     for k, was_visible, was_locked in parents:
         doc.Layers[k].IsVisible = was_visible
         doc.Layers[k].IsLocked = was_locked
-    if (STATE.get("context_guides") or {}).get("doc") == doc.RuntimeSerialNumber:
-        STATE.pop("context_guides", None)
-    doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)
+    if sources is None:
+        if (STATE.get("context_guides") or {}).get("doc") == doc.RuntimeSerialNumber:
+            STATE.pop("context_guides", None)
+        doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)
     STATE["dirty"] = dirty
+
+
+def _context_record(doc):
+    """The record of the neighbourhood in this file (rhino_logic.context_record), or None."""
+    try:
+        return json.loads(doc.Strings.GetValue(SECTION, logic.CONTEXT_ENTRY) or "null")
+    except (ValueError, AttributeError):
+        return None
 
 
 def _context_payload(frame):
@@ -2172,12 +2184,18 @@ def draw_context(doc, frame):
     if payload is None:
         say(logic.NO_CONTEXT)
         return None
-    STATE.pop("context_guides", None)
-    if payload.get("status") != "found":
+    if payload.get("status") != "found":   # nothing answered: what is saved stays as it is
         say(logic.context_says(payload))
         return payload
+    old = _context_record(doc)
+    payload, record = logic.context_merge(payload, old, frame)
+    same = bool(old) and old.get("frame") == frame
+    sources = logic.context_replaces(payload) if same else None     # another frame: the earlier address's all go
+    held = STATE.get("context_guides") or {}
+    keep_guides = same and "state_buildings" not in (sources or ()) and held.get("doc") == doc.RuntimeSerialNumber
+    STATE.pop("context_guides", None)
     dirty = STATE.get("dirty")             # live mode hears every add: the context changes nothing the check reads,
-    _clear_context(doc)                    # so the model's "changed since the check" mark is put back after
+    _clear_context(doc, sources)           # so the model's "changed since the check" mark is put back after
     _lock_context(doc, False)
     layers = {logic.CONTEXT + "::" + name: _context_layer(doc, name) for name in CONTEXT_GREYS}
     for o in logic.context_objects(payload):
@@ -2194,12 +2212,16 @@ def draw_context(doc, frame):
     STATE["dirty"] = dirty
     _context_visible(doc, STATE.get("context_on", True))
     # the snapshot (records, never data) with the frame it was drawn around: sync_context compares the lot's frame
-    doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(logic.context_record(payload, frame)))
-    guides = [rg.Polyline([_model_point(doc, p) for p in pts + [pts[0]]]) for pts in logic.context_guides(payload)]
-    box = rg.BoundingBox.Empty
-    for line in guides:
-        box.Union(line.BoundingBox)
-    STATE["context_guides"] = {"doc": doc.RuntimeSerialNumber, "lines": guides, "box": box}
+    # (layer by layer: a failed layer's entries carried over, rhino_logic.context_merge)
+    doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(record))
+    if keep_guides:                        # the footprint service didn't answer: the ones on screen stay
+        STATE["context_guides"] = held
+    else:
+        guides = [rg.Polyline([_model_point(doc, p) for p in pts + [pts[0]]]) for pts in logic.context_guides(payload)]
+        box = rg.BoundingBox.Empty
+        for line in guides:
+            box.Union(line.BoundingBox)
+        STATE["context_guides"] = {"doc": doc.RuntimeSerialNumber, "lines": guides, "box": box}
     doc.Views.Redraw()
     say(logic.context_says(payload))
     return payload
@@ -2209,10 +2231,7 @@ def sync_context(doc, facts):
     """After a box's Draw (GordiumStart or Edit site…): the neighbourhood follows the lot (rhino_logic.context_step).
     A lot the lookup drew gets its own, an earlier one (another address, a lot since drawn or picked) is cleared, the
     same lot keeps what is drawn (review round 2: an Edit site… lookup left the earlier address's neighbourhood)."""
-    try:
-        drawn = (json.loads(doc.Strings.GetValue(SECTION, logic.CONTEXT_ENTRY) or "null") or {}).get("frame")
-    except (ValueError, AttributeError):
-        drawn = None
+    drawn = (_context_record(doc) or {}).get("frame")
     frame = logic.context_frame(facts, _ui_state(doc))
     on = STATE.get("context_on", True)
     step = logic.context_step(frame, drawn, on)

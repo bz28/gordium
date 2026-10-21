@@ -249,7 +249,7 @@ def test_a_draw_on_the_same_lot_brings_back_what_a_reopened_file_lost_and_says_e
     keep = sync[sync.index('if step == "keep" and frame and on and not loaded:'):sync.index('if step in ("clear"')]
     assert "draw_context(doc, frame)" in keep and "_clear_context" not in keep    # offline keeps what is saved
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
-    assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc)")
+    assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc, sources)")
     assert 'say("Neighbourhood removed: it is drawn only around a lot the start box looked up.")' in sync
     assert "_context_visible(doc, True)" in sync
 
@@ -298,7 +298,7 @@ def test_clearing_reaches_hidden_and_locked_context_layers_and_only_gordiums_obj
     show, unlock, delete = (body.index(s) for s in ("IsVisible = True", "IsLocked = False", "doc.Objects.Delete("))
     assert show < delete and unlock < delete
     assert body.index("IsVisible = was") > delete and body.index("IsLocked = True") > delete
-    assert "if o.Attributes.GetUserString(logic.CONTEXT_KEY):" in body                  # never the architect's own
+    assert "if source and (sources is None or source in sources):" in body            # never the architect's own
     assert "doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)" in body and 'STATE.pop("context_guides"' in body
     vis = RHINO[RHINO.index("def _context_visible("):RHINO.index("def show_context(")]
     assert "for i in indexes:" in vis                                                    # every sublayer too
@@ -329,6 +329,80 @@ def test_clearing_also_opens_a_locked_or_hidden_parent_layer_and_says_before_wai
     assert fetch.index('say("Fetching the neighbourhood') < fetch.index("subprocess.run(")
 
 
+# ---- review of PR #23 (coordinator's round): one service down must not delete the other layers -------------------
+
+def redraw(model, record, payload, frame):
+    """What gordium_rhino.draw_context does to the file, step by step with the same rhino_logic calls (the model is
+    a list of (source, object) as the context layers hold them): merge with the saved record, delete the replaced
+    sources' objects (all of them around another frame), add the new objects."""
+    payload, new_record = logic.context_merge(payload, record, frame)
+    same = bool(record) and record.get("frame") == frame
+    sources = logic.context_replaces(payload) if same else None
+    kept = [(s, o) for s, o in model if not (sources is None or s in sources)]
+    return kept + [(o["source"], o) for o in logic.context_objects(payload)], new_record, payload
+
+
+class Down(T.Fake):
+    def __init__(self, *a, down=(), **kw):
+        super().__init__(*a, **kw)
+        self.down = set(down)
+
+    def post(self, url, params):
+        from site_lookup.http import Offline
+        if T.key_of(url) in self.down:
+            raise Offline(url)
+        return super().post(url, params)
+
+
+def fetch_with(frame, down=()):
+    return cb.fetch(frame, Down(T.load("106_ithaca_rd"), context=T.load("106_ithaca_rd_context"), down=down), now=T.NOW)
+
+
+def test_one_service_down_keeps_that_layer_and_replaces_the_others():
+    """Parcels offline, streets answering, the same lot: the saved parcels stay (and the record still says they are
+    drawn, with their requests and credit line), the streets are replaced, not doubled."""
+    frame = looked_up()["writes"]["frame"]
+    first = fetch_with(frame)
+    model, record, _ = redraw([], None, first, frame)
+    parcels_before = [o for s, o in model if s == "state_parcels"]
+    assert len(parcels_before) == 229
+    again = fetch_with(frame, down={"state_parcels"})
+    assert again["status"] == "found" and again["layers"]["parcels"]["status"] == "offline"
+    assert logic.context_replaces(again) == {"state_streets", "state_buildings", "gordium"}
+    model2, record2, shown = redraw(model, record, again, frame)
+    assert [o for s, o in model2 if s == "state_parcels"] == parcels_before          # kept, untouched
+    assert len([o for s, o in model2 if s == "state_streets"]) == 38                 # replaced, not doubled
+    assert len([o for s, o in model2 if s == "gordium"]) == 6
+    assert record2["layers"]["parcels"] == record["layers"]["parcels"]               # still drawn, count 229
+    assert any(r["source"] == "state_parcels" for r in record2["sources"])           # its requests carried over
+    assert record2["kept_from"] == {"parcels": record["fetched"]}
+    dot = next(o for s, o in model2 if s == "gordium" and o.get("name") == "Sources")
+    assert "Tax parcels: NYS Tax Parcels Public" in dot["text"]                       # still credited
+    said = logic.context_says(shown)
+    assert "229 neighbouring parcels" in said and "Kept the parcels drawn earlier" in said
+
+
+def test_around_another_lot_nothing_of_the_earlier_one_is_kept():
+    frame = looked_up()["writes"]["frame"]
+    model, record, _ = redraw([], None, fetch_with(frame), frame)
+    other = dict(frame, rotation_deg=frame["rotation_deg"] + 90)          # another placement: another frame
+    model2, record2, _ = redraw(model, record, fetch_with(other, down={"state_parcels"}), other)
+    assert not [o for s, o in model2 if s == "state_parcels"] and "kept_from" not in record2
+    assert record2["layers"]["parcels"]["status"] == "offline"
+
+
+def test_nothing_answering_leaves_the_saved_neighbourhood_alone_and_the_plugin_passes_the_sources():
+    assert logic.context_replaces({"layers": {"parcels": {"source": "state_parcels", "status": "offline"}}}) == set()
+    draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
+    assert "payload, record = logic.context_merge(payload, old, frame)" in draw
+    assert "sources = logic.context_replaces(payload) if same else None" in draw
+    assert "_clear_context(doc, sources)" in draw and "json.dumps(record)" in draw
+    assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc, sources)")
+    clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _context_record(")]
+    assert "if source and (sources is None or source in sources):" in clear
+    assert clear.index("if sources is None:") < clear.index("doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)")
+
+
 # ---- the Rhino side, by its code (it can't run in CI) ------------------------------------------------------------
 
 def test_the_plugin_writes_only_context_objects_and_keeps_guides_on_screen():
@@ -336,11 +410,12 @@ def test_the_plugin_writes_only_context_objects_and_keeps_guides_on_screen():
     assert "for o in logic.context_objects(payload):" in body
     assert body.count("doc.Objects.Add") == 2                            # a dot or a curve, per context object
     assert 'STATE["context_guides"] = ' in body and "logic.context_guides(payload)" in body
-    assert "doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(logic.context_record(payload, frame)))" in body
+    assert "doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(record))" in body
+    assert "payload, record = logic.context_merge(payload, old, frame)" in body
     assert "attrs.SetUserString(logic.CONTEXT_KEY, o[\"source\"])" in body
     assert "_lock_context(doc, True)" in body                            # locked: not selectable, can't be moved
     # live mode hears each add; the context changes nothing checked, so no re-check is set off by it
-    assert body.index('dirty = STATE.get("dirty")') < body.index("_clear_context(doc)") < \
+    assert body.index('dirty = STATE.get("dirty")') < body.index("_clear_context(doc, sources)") < \
         body.index('STATE["dirty"] = dirty')
     scene = RHINO[RHINO.index("def draw_scene("):RHINO.index("def draw_screen(")]
     assert 'STATE.get("context_guides")' in scene and "DrawPolyline" in scene
