@@ -11,19 +11,47 @@
     "Finish or cancel the open start box first."
    ]
   },
+  "1 every gated panel action was exercised": {
+   "ok": true,
+   "detail": [
+    "add",
+    "enter",
+    "envelope",
+    "grade",
+    "ground",
+    "massing",
+    "not_ground",
+    "report",
+    "retry",
+    "survey",
+    "zoom"
+   ]
+  },
   "1 every gated panel action only says so": {
    "ok": true,
    "detail": {
+    "add": [
+     "Finish or cancel the open start box first."
+    ],
     "enter": [
      "Finish or cancel the open start box first."
     ],
-    "add": [
+    "envelope": [
+     "Finish or cancel the open start box first."
+    ],
+    "grade": [
      "Finish or cancel the open start box first."
     ],
     "ground": [
      "Finish or cancel the open start box first."
     ],
+    "massing": [
+     "Finish or cancel the open start box first."
+    ],
     "not_ground": [
+     "Finish or cancel the open start box first."
+    ],
+    "report": [
      "Finish or cancel the open start box first."
     ],
     "retry": [
@@ -32,10 +60,7 @@
     "survey": [
      "Finish or cancel the open start box first."
     ],
-    "grade": [
-     "Finish or cancel the open start box first."
-    ],
-    "report": [
+    "zoom": [
      "Finish or cancel the open start box first."
     ]
    }
@@ -64,16 +89,28 @@
      "Finish or cancel the open start box first."
     ],
     "gated": {
+     "add": [
+      "Finish or cancel the open start box first."
+     ],
      "enter": [
       "Finish or cancel the open start box first."
      ],
-     "add": [
+     "envelope": [
+      "Finish or cancel the open start box first."
+     ],
+     "grade": [
       "Finish or cancel the open start box first."
      ],
      "ground": [
       "Finish or cancel the open start box first."
      ],
+     "massing": [
+      "Finish or cancel the open start box first."
+     ],
      "not_ground": [
+      "Finish or cancel the open start box first."
+     ],
+     "report": [
       "Finish or cancel the open start box first."
      ],
      "retry": [
@@ -82,13 +119,23 @@
      "survey": [
       "Finish or cancel the open start box first."
      ],
-     "grade": [
-      "Finish or cancel the open start box first."
-     ],
-     "report": [
+     "zoom": [
       "Finish or cancel the open start box first."
      ]
     },
+    "expected": [
+     "add",
+     "enter",
+     "envelope",
+     "grade",
+     "ground",
+     "massing",
+     "not_ground",
+     "report",
+     "retry",
+     "survey",
+     "zoom"
+    ],
     "legend_ran": true,
     "greyed": [
      false,
@@ -107,7 +154,7 @@
   "3 exactly one check after it closes": {
    "ok": true,
    "detail": [
-    268435490
+    268435494
    ]
   },
   "4 Zoom to stays off with nothing selected": {
@@ -125,7 +172,7 @@
   "5 the document in front is re-checked": {
    "ok": true,
    "detail": [
-    268435490
+    268435494
    ]
   }
  },

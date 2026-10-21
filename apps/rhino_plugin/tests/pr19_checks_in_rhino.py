@@ -81,11 +81,14 @@ try:
             g._actions()["edit_site"]()                    # 1. Edit site… from the panel
             inside["refused"] = (g.STATE.get("said") or [])[said_before:]
             inside["gated"] = {}
-            for name in ("enter", "add", "ground", "not_ground", "retry", "survey", "grade", "report"):
+            # every action the panel has (new ones exercised automatically) but the legend (it only shows something)
+            # and Edit site… (checked above); the gate stops each before it runs, so no arguments are needed: an action
+            # that got through would raise or act, and the claim fails
+            inside["expected"] = sorted(set(g.PANEL_ACTIONS()) - {"legend", "edit_site"})
+            for name in inside["expected"]:
                 before = len(g.STATE.get("said") or [])
                 try:
-                    g._actions()[name]() if name in ("retry", "survey", "grade", "report") else \
-                        g._actions()[name]([]) if name in ("add", "ground") else g._actions()[name]()
+                    g._actions()[name]()
                 except Exception as e:
                     inside["gated"][name] = "raised " + str(e)[:80]
                     continue
@@ -107,6 +110,8 @@ try:
         g.confirm(doc, g.current_facts(doc), options, "check")    # Edit site's box (auto: ticks and Draws)
         claim("1 a second box refused with the message",
               inside.get("refused") == [g.logic.BOX_BUSY], inside.get("refused"))
+        claim("1 every gated panel action was exercised",
+              sorted(inside["gated"]) == inside["expected"] and len(inside["expected"]) >= 11, inside["expected"])
         claim("1 every gated panel action only says so",
               all(v == [g.logic.BOX_BUSY] for v in inside["gated"].values()), inside["gated"])
         claim("1 the legend still runs", inside["legend_ran"])
