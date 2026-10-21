@@ -318,6 +318,17 @@ def test_the_quickstart_says_how_footprints_come_back_after_reopening():
     assert "untick and tick **Show neighbourhood** to fetch them again" in guide
 
 
+def test_clearing_also_opens_a_locked_or_hidden_parent_layer_and_says_before_waiting():
+    """Review round 4: a locked or hidden "Gordium" layer holds its sublayers' objects too (the delete skipped them,
+    and the neighbourhood was drawn twice); and Rhino waited for the fetch without a word."""
+    body = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _context_payload(")]
+    assert "ParentLayerId" in body and "for i in indexes + [k for k, _, _ in parents]:" in body
+    assert body.index("for i in indexes + [k for k, _, _ in parents]:") < body.index("doc.Objects.Delete(")
+    assert body.index("doc.Objects.Delete(") < body.index("doc.Layers[k].IsLocked = was_locked")
+    fetch = RHINO[RHINO.index("def _context_payload("):RHINO.index("def draw_context(")]
+    assert fetch.index('say("Fetching the neighbourhood') < fetch.index("subprocess.run(")
+
+
 # ---- the Rhino side, by its code (it can't run in CI) ------------------------------------------------------------
 
 def test_the_plugin_writes_only_context_objects_and_keeps_guides_on_screen():

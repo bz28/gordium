@@ -2067,8 +2067,18 @@ def _clear_context(doc):
     session was drawn twice). The live footprints and the saved snapshot go with it."""
     dirty = STATE.get("dirty")             # deleting the context changes nothing the check reads (see draw_context)
     indexes = _context_layer_indexes(doc)
+    parents = []                           # a locked or hidden parent ("Gordium") holds its sublayers' objects too
+    for i in indexes:                      # (review round 4): shown and unlocked for the delete, then put back
+        parent = doc.Layers[i].ParentLayerId
+        while parent != System.Guid.Empty:
+            j = doc.Layers.FindId(parent)
+            if j is None:
+                break
+            if j.Index not in indexes and j.Index not in [k for k, _, _ in parents]:
+                parents.append((j.Index, j.IsVisible, j.IsLocked))
+            parent = j.ParentLayerId
     shown = [(i, doc.Layers[i].IsVisible) for i in indexes]
-    for i in indexes:
+    for i in indexes + [k for k, _, _ in parents]:
         doc.Layers[i].IsVisible = True
         doc.Layers[i].IsLocked = False
     for i in indexes:
@@ -2078,6 +2088,9 @@ def _clear_context(doc):
     for i, was in shown:
         doc.Layers[i].IsVisible = was
         doc.Layers[i].IsLocked = True
+    for k, was_visible, was_locked in parents:
+        doc.Layers[k].IsVisible = was_visible
+        doc.Layers[k].IsLocked = was_locked
     if (STATE.get("context_guides") or {}).get("doc") == doc.RuntimeSerialNumber:
         STATE.pop("context_guides", None)
     doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)
@@ -2090,6 +2103,8 @@ def _context_payload(frame):
     args = logic.context_command(_python(), frame, STATE.get("lookup_fixture"))
     if args is None:
         return None
+    say("Fetching the neighbourhood (up to %d s)…" % logic.CONTEXT_LIMIT_S)   # Rhino waits: say why first (round 4)
+    Rhino.RhinoApp.Wait()
     packages = os.path.join(REPO, "packages")
     env = dict(os.environ)
     env["PYTHONUTF8"] = "1"
