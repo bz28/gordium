@@ -58,6 +58,12 @@ def row_name(item):
     return name + (" · " + item["note"] if item.get("note") else "")
 
 
+def highlight(status):
+    """The colour a part of the model is shaded, from its rule's result only (never from the envelope): red for
+    does not comply (under every reading), amber for needs review, nothing for complies or anything else."""
+    return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
+
+
 def labels_on(ui_state):
     """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
     unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the
@@ -89,7 +95,10 @@ def legend_text(code=None):
             "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
             "measured distance. Red marks only the part of the building inside a required yard or above the height "
             "limit. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
-            "Delta: how far over or under each limit (+ to spare, − short).")
+            "Delta: how far over or under each limit (+ to spare, − short).\n\n"
+            "In the model: RED is the part of the building that does not comply (under every reading); AMBER is the "
+            "part a rule that needs review is about (for example inside the 2'-0\" tax-map caution zone of a yard). "
+            "The buildable envelope is only a see-through guide: colours come from the rules' results.")
     return text + ("\n\nChecked against: " + code if code else "")
 
 

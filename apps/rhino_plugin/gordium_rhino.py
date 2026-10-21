@@ -390,9 +390,10 @@ def draw_scene(o, e):
     dark = ui.viewport_dark()
     old = stale(o)
     if not old:
-        for g in getattr(o, "encroach", None) or []:   # only the part inside a yard or above the height (F5)
-            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(ui.status_color("does_not_comply", dark), 0.35))
-            d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+        for g, status in getattr(o, "encroach", None) or []:   # only the part over (F5): red fails, amber review
+            colour = ui.status_color(status, dark)
+            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, 0.35))
+            d.DrawBrepWires(g, colour, 2)
     for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
         if isinstance(g, rg.Mesh):
             d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
@@ -1301,8 +1302,9 @@ def _draw_plan(doc, o, result, facts):
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
     o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
-    o.encroach = [b for b in (_prism(doc, e["outline"], e["base"], e["top"]) for e in plan.get("encroach") or [])
-                  if b is not None]
+    o.encroach = [(b, status) for b, status in ((_prism(doc, e["outline"], e["base"], e["top"]),
+                                                 e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
+                  if b is not None and logic.highlight(status)]          # coloured from the rule's result only
     o.yards_zone = None
     if lot is not None and plan.get("buildable"):
         inner = rg.PolylineCurve([_model_point(doc, p) for p in plan["buildable"] + plan["buildable"][:1]])

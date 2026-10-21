@@ -377,13 +377,28 @@ def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
         strip = footprint.difference(buildable) if yard_fail else None
         # outlines simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude;
         # without a grade the strip stands on the building's own base, never at 0
+        base = env["base"] if env.get("base") is not None else min(tops)
         for g in getattr(strip, "geoms", [strip]) if strip is not None and not strip.is_empty else []:
             if g.area > 1e-3:
-                encroach.append({"outline": _ring(g), "base": env["base"] if env.get("base") is not None else min(tops),
-                                 "top": max(tops), "why": "yard"})
-        if statuses.get("building_height") == present.FAILS and env.get("top") is not None and max(tops) > env["top"]:
+                encroach.append({"outline": _ring(g), "base": base, "top": max(tops), "why": "yard",
+                                 "status": present.FAILS})
+        # amber: the part a yard that NEEDS REVIEW is about, with the same geometry. On a tax-map lot the caution
+        # zone runs the tolerance (2'-0") inside every yard line; otherwise (a reading the code leaves open) it is the
+        # part outside the buildable area. Never where it is already red.
+        if any(s == present.REVIEW for m, s in statuses.items() if m in YARD_MEASURES):
+            tol = TAX_MAP_TOLERANCE if (measured.get("lot_area") or {}).get("tolerance") else 0.0
+            caution = footprint.difference(buildable.buffer(-tol, join_style=2) if tol else buildable)
+            if strip is not None and not strip.is_empty:
+                caution = caution.difference(strip)
+            for g in getattr(caution, "geoms", [caution]) if not caution.is_empty else []:
+                if g.area > 1e-3:
+                    encroach.append({"outline": _ring(g), "base": base, "top": max(tops), "why": "yard",
+                                     "status": present.REVIEW})
+        height = statuses.get("building_height")
+        if height in (present.FAILS, present.REVIEW) and env.get("top") is not None and max(tops) > env["top"]:
             for g in getattr(footprint, "geoms", [footprint]):
-                encroach.append({"outline": _ring(g), "base": env["top"], "top": max(tops), "why": "height"})
+                encroach.append({"outline": _ring(g), "base": env["top"], "top": max(tops), "why": "height",
+                                 "status": height})
     return {"edges": edges, "yards": yards, "encroach": encroach,
             "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
 
