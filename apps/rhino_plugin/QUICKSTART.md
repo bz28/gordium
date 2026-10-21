@@ -69,7 +69,7 @@ below:
    - `python3.14: command not found`: go back to step 4 (or use the version you installed: `python3.12`,
      `python3.13`).
    - `requires a different Python`, or pip tries to build something and fails: the `.venv` was made with an
-     unsupported Python. Delete it and make it again with a supported one:
+     unsupported Python. Delete it and make it again with a supported one (the **start-over lines**):
 
      ```
      cd ~/Documents/gordium
@@ -151,7 +151,8 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
    `py list` shows the Pythons installed; one of them must be `3.14` (or `3.13` / `3.12`). A newer one (3.15) can
    be there too, but Gordium can't use it yet, so step 6 asks for 3.14 by name. (Running the website's installer
    again only says the latest version is already installed: `py install 3.14` is how to add 3.14.)
-   - If `py install` isn't recognised (an older setup): from the same page download the **Python 3.14.x**
+   - If `py install 3.14` says *can't open file '…\install'* (an older Python launcher) or that `py` is not
+     recognized: from the same page download the **Python 3.14.x**
      "Windows installer (64-bit)" (not 3.15), tick **"Add python.exe to PATH"** on its first screen, click
      **Install Now**, and check with `py --list`.
 5. **Download Gordium** into your Documents folder (this makes `Documents\gordium`):
@@ -179,7 +180,8 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
    `git pull` alone won't add it. To check which version you have, run `git branch --show-current`: it should
    say `rhino-ui`.
    - `requires a different Python`, or `Microsoft Visual C++ 14.0 or greater is required`: the `.venv` was made
-     with an unsupported Python (usually 3.15, picked by a plain `py`). Delete it and make it again:
+     with an unsupported Python (usually 3.15, picked by a plain `py`). Delete it and make it again (the
+     **start-over lines**):
 
      ```
      cd $HOME\Documents\gordium
@@ -377,8 +379,10 @@ Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading
   [What you need](#what-you-need-once) from the repository folder, then the command again.
 - **"Microsoft Visual C++ 14.0 or greater is required"** or **"requires a different Python"** while setting up:
   the wrong Python version made the `.venv` (Gordium needs 3.12 to 3.14; 3.15 not yet supported). Delete the
-  `.venv` and make it again with 3.14: the four lines under step 6 ([Mac](#what-you-need-once),
-  [Windows](#on-windows)). On Windows, if `py list` doesn't show 3.14, run `py install 3.14` first.
+  `.venv` and make it again with 3.14: run the **start-over lines** in step 6 (the block that begins with
+  `rm -rf .venv` on a [Mac](#what-you-need-once), `Remove-Item -Recurse -Force .venv` on
+  [Windows](#on-windows)), not the first set-up block. On Windows, if `py list` doesn't show 3.14,
+  run `py install 3.14` first.
 - **Nothing happens / the commands aren't found**: run the install step again. If the ScriptEditor hasn't been
   opened in this Rhino session, open it once (Tools → ScriptEditor). That starts Rhino's Python.
 - **I can't see the panel**: it is a floating window and may be behind Rhino or on another desktop (Mission

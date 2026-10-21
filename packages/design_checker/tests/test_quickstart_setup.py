@@ -158,3 +158,31 @@ def test_every_link_inside_the_guide_goes_to_a_real_heading():
     assert len(re.findall(r"\]\(#([\w-]+)\)", contents)) == 6
     for link in re.findall(r"\]\(#([\w-]+)\)", GUIDE):
         assert link in anchors, link
+
+
+def test_troubleshooting_names_the_start_over_block_not_the_first_setup_block():
+    # step 6 has two four-line blocks; only the start-over one deletes .venv, so Troubleshooting must name it
+    trouble = _section("Troubleshooting")
+    assert "the four lines under step 6" not in trouble
+    assert "**start-over lines**" in trouble
+    assert "`rm -rf .venv`" in trouble and "`Remove-Item -Recurse -Force .venv`" in trouble
+    for section, delete in ((SETUP, "rm -rf .venv"), (WINDOWS, "Remove-Item -Recurse -Force .venv")):
+        label = section.index("**start-over lines**")
+        block = section.index(delete)
+        assert label < block and "-m venv" not in section[label:block], section[label:block]    # labels that block
+
+
+def test_the_py_install_fallback_names_both_symptoms():
+    # the old py launcher reads `install` as a script name: "can't open file '...\install'"; no launcher: not recognized
+    fallback = WINDOWS[WINDOWS.index("If `py install 3.14` says"):WINDOWS.index("5. **Download Gordium**")]
+    fallback = " ".join(fallback.split())                              # the guide wraps lines anywhere
+    assert "can't open file '…\\install'" in fallback and "is not recognized" in fallback
+    assert "Add python.exe to PATH" in fallback and "py --list" in fallback
+
+
+def test_the_readme_python_range_is_pyprojects():
+    readme = (PLUGIN / "README.md").read_text(encoding="utf-8")
+    versions = _supported()
+    found = re.findall(r"Python (3\.\d+) to (3\.\d+)", readme)
+    assert found == [(versions[0], versions[-1])], found
+    assert "or newer" not in readme
