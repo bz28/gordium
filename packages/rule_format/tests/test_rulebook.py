@@ -643,5 +643,8 @@ def test_approved_rule_needs_reapproval_after_answer_or_title_edit(ctx, edit):
 
 def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):
     """Compile, then freeze: an ill-typed formula is a validation problem, so no frozen rule can be ill-typed."""
-    assert any("compare values of one kind" in p for p in validate(rulebook(check='rear_yard >= 20 or use == 5'), ctx))
+    assert any("compare two numbers or two texts" in p
+               for p in validate(rulebook(check='rear_yard >= 20 or use == 5'), ctx))
+    assert any("compare two numbers or two texts" in p
+               for p in validate(rulebook(check='(rear_yard >= 20) == (lot_depth > 1)'), ctx))
     assert not any("kind" in p for p in validate(rulebook(), ctx))
