@@ -1,6 +1,8 @@
 # How Gordium keeps its rules trustworthy
 
-For architects, shareholders and new engineers. No coding knowledge needed.
+**Purpose:** the promises Gordium makes about its rules, and the check and test that enforce each one.\
+**For:** architects, shareholders and new engineers; no coding knowledge needed.\
+**Kept current by:** the engineer who adds or changes a rule check (`packages/rule_format`), in that same PR.
 
 ## The idea in one minute
 

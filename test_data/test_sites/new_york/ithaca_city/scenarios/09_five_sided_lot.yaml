@@ -46,10 +46,11 @@ fixed:
   R-1b.rear_yard: >-
     Until 2026-10-21 Gordium read both short back lines only as the rear lot line (each runs 26.6° from the
     street, within the 30° it then read as "about parallel") and said complies: depth (110 + 110) / 2 = 110 ft,
-    27'-6" required, the house 33'-6 3/8" away. The eval-integrity audit (P1-2) showed the reading the answer key
+    27'-6" required, the house 33'-6 3/8" away. The eval-integrity audit (P1-2) showed the reading the hand-worked result
     worried about, one short line as part of a side lot line, was never evaluated: with the house 4 ft further back
     it is a false pass (29'-11 1/2" against 31'-8 5/16" under that reading: depth (110 + 143.54) / 2 = 126.77 ft).
-    Fixed in code (model_measurement Lot.readings): a lot line next to a side lot line is read as either a side
-    or a rear line unless it runs within 5° of the street. Gordium now evaluates every reading and says needs
-    review here, as the key does (complies under each, but the readings are the open question); the moved case is
-    pinned in packages/design_checker/tests/test_moved_and_crossing.py.
+    Fixed in code (model_measurement Lot.readings, review rounds 7-8): every reading the lot's geometry allows is
+    measured (from each end of the street the side line runs on for one or more lines, the rear is what is left; no
+    angle prunes a reading). Gordium now says needs review here, as the hand-worked result does (complies under
+    each, but the readings are the open question); the moved case is pinned in
+    packages/design_checker/tests/test_moved_and_crossing.py.

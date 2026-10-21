@@ -61,7 +61,9 @@ def test_an_at_limit_yard_needs_review_on_a_tax_map_lot_but_complies_on_a_survey
     tm = items(tax_map["view"])
     assert tm["Side yard, West"]["status"] == present.REVIEW
     assert "tax map" in tm["Side yard, West"]["reason"] and "8'-0\"" in tm["Side yard, West"]["reason"]
-    assert tm["Rear yard"]["status"] == present.COMPLIES          # +2'-6" > 2'-0" even at the worst case
+    # +2'-6" is less than the tax map can take: 2'-0" nearer the rear line, and 1'-0" more required from a lot depth
+    # 4'-0" more (each side lot line 2'-0" longer, Ben 2026-10-21)
+    assert tm["Rear yard"]["status"] == present.REVIEW and "tax map" in tm["Rear yard"]["reason"]
     assert tm["Lot width"]["status"] == present.COMPLIES
     sv = items(check(MODEL, surveyed)["view"])
     assert sv["Side yard, West"]["status"] == present.COMPLIES      # a survey: no tolerance
@@ -76,7 +78,7 @@ def test_complies_only_when_the_checker_passed_or_it_holds_at_the_tax_map_worst_
             assert rows[i["rule"]]["Provisional"] == present.SURVEY_ONLY, i["name"]
             assert "worst case" in i["reason"], i["name"]
     area = items(tax_map["view"])["Lot area"]                      # the 73 × 90 lot of 106 Ithaca Rd
-    assert area["status"] == present.COMPLIES and "worst case (lot area 6,248 sf)" in area["reason"]   # 71 × 88
+    assert area["status"] == present.REVIEW and "at worst 5,934 sf against 6,000 sf" in area["reason"]  # 69 × 86
 
 
 # ---- C3–C6: the grade, the roof ---------------------------------------------------------------------------------
@@ -305,3 +307,131 @@ def test_the_envelope_height_plane_comes_from_spot_grades_and_never_from_existin
     r = check_site(_plot(house), base)
     assert r["envelope"]["base"] == pytest.approx(2) and r["envelope"]["top"] == pytest.approx(37)
     assert check_site(_plot(house), {**base, "grade_is": "existing"})["envelope"]["top"] is None
+
+
+# ---- E1: a cited chart cell is quoted as exactly that cell --------------------------------------------------
+
+def _expected_cell_text(cell):
+    section = re.sub(r"\s*\[fn[\d,]+\]", "", cell.get("section") or "")
+    row = re.sub(r"\s*\[fn[\d,]+\]", "", cell["row"])
+    return f"{section} · {row} · {cell['column']}: {cell['value']}"
+
+
+def test_every_cited_chart_cell_is_quoted_as_exactly_its_own_cell():
+    """Every cell source in every rulebook (hand-made and drafted): the panel's quote is that cell, found by the
+    same key the rule checks use, never a cell whose row merely starts the same way in another section (a
+    lot-width rule was once quoted as the lot-size cell's 10,000 sf)."""
+    import yaml
+    from rule_format.rulebook import Context, _cell
+    j = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    ctx, documents = Context.for_jurisdiction(j), present._documents(j)
+    seen = 0
+    for path in sorted((j / "5_zoning_rules").rglob("*.yaml")):
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        for rule in (data or {}).get("rules") or []:
+            for s in rule.get("sources") or []:
+                if not isinstance(s.get("cell"), dict) or s.get("lines"):
+                    continue
+                cell = _cell(s, ctx)
+                q = present._quote(s, j, documents, s["cell"].get("column", ""), lambda src: "")
+                want = _expected_cell_text(cell) if cell and str(cell.get("value") or "").strip() else present._cell_words(s)
+                assert q["text"] == want, (path.name, rule["id"], s["cell"], q["text"])
+                seen += 1
+    assert seen > 0
+
+
+def test_two_sections_with_the_same_row_are_never_mixed_up(monkeypatch, tmp_path):
+    """The chart's Minimum Lot Size and Minimum Lot Width sections both have a "One-family dwelling, detached"
+    row: a source citing the width cell is quoted as the width cell, and a cell the chart doesn't have is quoted
+    as its own words, never as a near match."""
+    cells = ({"file": "c.pdf", "page": 3, "section": "Minimum Lot Size", "row": "One-family dwelling, detached",
+              "column": "R-1A", "value": "10,000 sf", "row_lines": [10]},
+             {"file": "c.pdf", "page": 3, "section": "Minimum Lot Width", "row": "One-family dwelling, detached",
+              "column": "R-1A", "value": "75 ft", "row_lines": [20]})
+    monkeypatch.setattr(present, "_chart_cells", lambda j: cells)
+    documents = {"c.pdf": {"title": "Zoning charts"}}
+
+    def quote(section, row):
+        source = {"file": "c.pdf", "page": 3, "cell": {"section": section, "row": row, "column": "R-1A"}}
+        return present._quote(source, tmp_path, documents, "R-1A", lambda s: "")["text"]
+
+    assert quote("Minimum Lot Width", "One-family dwelling, detached") == \
+        "Minimum Lot Width · One-family dwelling, detached · R-1A: 75 ft"
+    assert quote("Minimum Lot Width", "One-family dwelling, detached, by conversion") == \
+        "Minimum Lot Width · One-family dwelling, detached, by conversion · R-1A"
+
+
+def test_the_tax_map_worst_case_moves_every_lot_line_2_ft_the_unlucky_way():
+    """Ben, 2026-10-21 (stress test F2): one rule for every lot-dependent item, worked by hand on 106 Ithaca Rd's
+    73 x 90 lot: lot area at worst 69 x 86 = 5,934 sf (was 71 x 88 = 6,248, 1 ft per line), a lot width or depth
+    off by 4 ft (two lines), a yard by 2 ft (one line). One definition, used by measurement, checker and generator."""
+    from shapely.geometry import Polygon
+    from model_measurement.measure import TAX_MAP_SLACK, tax_map_lot_area
+    area = tax_map_lot_area(Polygon([(0, 0), (73, 0), (73, 90), (0, 90)]))
+    assert (area["low"], area["high"]) == (69 * 86, 77 * 94) == (5934, 7238)
+    assert TAX_MAP_SLACK["lot_width"] == TAX_MAP_SLACK["lot_depth"] == 4.0 and TAX_MAP_SLACK["rear_yard"] == 2.0
+    assert present.TAX_MAP_SLACK is TAX_MAP_SLACK                                   # the checker reads the same one
+    worst = present._worst_case("lot_width >= 70", {"lot_width": 73.0}, {"lot_width"})
+    assert worst == {"lot_width": 69.0}                                             # 73 − 4: fails 70 at worst
+
+
+def test_at_the_limit_and_complies_never_disagree():
+    """PR #20 review: margins were worked out in floats (26.4 − 0.2 × 132 = −3.6e-15), so a rear yard exactly at
+    its limit could show "−0'-0 1/8"" beside "complies". The margin now comes from formula.margin, the same exact
+    arithmetic and tolerance as the comparison."""
+    import ast as _ast
+    node = _ast.parse("rear_yard >= 0.2 * lot_depth", mode="eval").body
+    values = {"rear_yard": 26.4, "lot_depth": 132}
+    numbers = present._numbers(node, values, {"rear_yard": {"unit": "ft"}}, "Rear yard")
+    assert numbers[2] == 0.0 and present._display(*numbers)[2] == "at limit"
+    assert present.formula.evaluate("rear_yard >= 0.2 * lot_depth", values, present.MEASURE_KINDS) is True
+    noisy = {"rear_yard": 26.399999999999995, "lot_depth": 132}          # the geometry's float noise: complies
+    assert present.formula.evaluate("rear_yard >= 0.2 * lot_depth", noisy, present.MEASURE_KINDS) is True
+    assert present._display(*present._numbers(node, noisy, {"rear_yard": {"unit": "ft"}}, "Rear yard"))[2] == "at limit"
+    short = present._numbers(node, {"rear_yard": 26.39, "lot_depth": 132}, {"rear_yard": {"unit": "ft"}}, "Rear yard")
+    assert short[2] < 0 and present._display(*short)[2].startswith("−")
+    cov = _ast.parse("building_area <= 0.35 * lot_area", mode="eval").body
+    pct = present._numbers(cov, {"building_area": 1750.7, "lot_area": 5002}, {"building_area": {"unit": "sf"}}, "x")
+    assert present._display(*pct)[2] == "at limit"
+
+
+def test_a_row_complying_under_every_reading_names_the_open_question_it_depends_on():
+    """The zoning office is told what to answer: "Complies under every reading, but it depends on an open
+    question: which lot lines count as side and which as rear; confirm with the zoning office"."""
+    row = {"Error": "NEEDS REVIEW", "Provisional": "passes under every reading",
+           "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open "
+                  "question for the architects (lot_depth)"}
+    assert present._reason(row) == ("Complies under every reading, but it depends on an open question: which lot "
+                                    "lines count as side and which as rear; confirm with the zoning office")
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    # PR #18 settles scenario 10's overhang (the law: yards_to_nearest_part), so its side yard complies outright;
+    # scenario 09's rear yard still depends on the lot-line question, and two questions are named together
+    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "09_five_sided_lot.yaml"))
+    rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
+    assert rear["reason"] == ("Complies under every reading, but it depends on an open question: which lot lines "
+                              "count as side and which as rear; confirm with the zoning office")
+    two = dict(row, Why=row["Why"] + "; whether the overhang counts is an open question for the architects "
+                                     "(yard_projections)")
+    assert present._reason(two).startswith("Complies under every reading, but it depends on open questions: which "
+                                           "lot lines count as side and which as rear; whether a yard is measured "
+                                           "to the wall")
+
+
+def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
+    """A looked-up lot is drawn turned so its street runs along the bottom (106 Ithaca Rd: 306.38 degrees), so
+    "East" in the plan isn't east: its side yards face northeast and southwest. A hand-drawn lot (no turn) keeps
+    East/West."""
+    sides = {"side_yard_smaller": {"points": [[73.0, 40.0], [61.0, 40.0]]},     # lot line end, building end
+             "side_yard_larger": {"points": [[0.0, 40.0], [12.0, 40.0]]}}
+    assert present._side_name("side_yard_smaller", sides) == "Side yard, East"
+    assert present._side_name("side_yard_larger", sides) == "Side yard, West"
+    assert present._side_name("side_yard_smaller", sides, 306.38) == "Side yard, Northeast"
+    assert present._side_name("side_yard_larger", sides, 306.38) == "Side yard, Southwest"
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "01_every_limit_at_the_line.yaml"))
+    names = {i["name"] for i in check_site(s, {**f, "plan_north_deg": 306.38}, extras=extras)["view"]["items"]}
+    assert {"Side yard, Northeast", "Side yard, Southwest"} <= names
+    names = {i["name"] for i in check_site(s, f, extras=extras)["view"]["items"]}
+    assert {"Side yard, East", "Side yard, West"} <= names

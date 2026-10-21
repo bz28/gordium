@@ -16,7 +16,7 @@ from .read_3dm import read_site
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
-               "eaves_confirmed"}
+               "eaves_confirmed", "plan_north_deg"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 
 
@@ -34,6 +34,8 @@ def fact_problems(facts: dict) -> list[str]:
     text = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "main_building"}
     problems += [f"{k} must be text" for k in sorted(text & set(facts))
                  if facts[k] is not None and not isinstance(facts[k], str)]
+    if facts.get("plan_north_deg") is not None and not _number(facts["plan_north_deg"]):
+        problems.append("plan_north_deg must be a number (degrees the plan is turned from true north)")
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
     for k in ("stories", "sleeping_rooms", "parking_spaces"):

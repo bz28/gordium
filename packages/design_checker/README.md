@@ -31,6 +31,11 @@ What it adds for the Rhino command, never changing a result:
   "Complies" when nothing fails and every open question about how the law reads passes whichever way it is
   answered. A rule that passes only with the lot as drawn (no survey yet) stays amber, needs review: a missing
   survey is a missing fact, so it never shows as complying.
+- **Unknown:** a NEEDS REVIEW rule waiting on one number that isn't measured at all (the height, with no ground
+  given) fails whatever that number is when the formula is provably truest at 0 (`formula.truth_direction`:
+  only +, −, max/min and positive multiples of it, compared with < ≤ > ≥) and the rule fails at 0. The eaves rule
+  is one: front eaves ≥ 25 + max(height − 35, 0) − 2 is at least 23 ft at any height, so eaves 15 ft back don't
+  comply. Never the other way: a missing number never makes a rule comply (24 ft stays needs review).
 
 The worker stays running, so a re-check after an edit doesn't pay for starting Python again. A bad request gets a
 plain error answer; the worker keeps serving.

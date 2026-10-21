@@ -1,5 +1,9 @@
 # Research answers to the open zoning questions (City of Ithaca, Chapter 325)
 
+**Purpose:** the research report behind every finding and still-open question recorded with the rules and definitions on 2026-10-20: what was searched, the sources, and what each settled.\
+**For:** anyone checking why Gordium reads the law the way it does; architects reviewing a reading.\
+**Kept current by:** nobody: a dated record kept as written (only this header was added). New research gets its own dated report.
+
 > **Filed 2026-10-20** as the evidence behind the `research` and `findings` recorded in
 > `4_term_definitions/definitions.yaml`, `5_zoning_rules/R-1b.yaml` and the section labels (each one names its
 > section here, e.g. `report: docs/research/2026-10-20_architect_questions.md §2.1`). The report is kept as

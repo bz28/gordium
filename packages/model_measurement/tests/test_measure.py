@@ -660,9 +660,11 @@ def test_a_meshed_gable_is_read_like_a_whole_one():
 
 
 def test_a_gently_curved_roof_is_not_one_plane():
-    # a 20 ft wide roof curving with a 2000 ft radius, in 40 strips: no group's corners stray beyond 0.01 ft of
-    # its anchor's plane, whatever order the faces come in
-    from model_measurement.measure import TOL, _planes, _unit_normal
+    # a 20 ft wide roof curving with a 2000 ft radius (0.025 ft off flat across it), in 40 strips: never one plane,
+    # and no group's corners stray beyond 0.01 ft of the plane fitted over that group, whatever order the faces
+    # come in (a plane is fitted over its whole group, so one triangle's rounding noise can't tilt it)
+    import numpy as np
+    from model_measurement.measure import TOL, _planes
     radius, faces = 2000.0, []
     xs = [i * 20 / 40 for i in range(41)]
     z = [math.sqrt(radius ** 2 - (x - 10) ** 2) - radius + 30 for x in xs]
@@ -670,10 +672,13 @@ def test_a_gently_curved_roof_is_not_one_plane():
         faces.append({"points": [[xs[i], 0, z[i]], [xs[i + 1], 0, z[i + 1]], [xs[i + 1], 20, z[i + 1]]]})
         faces.append({"points": [[xs[i], 0, z[i]], [xs[i + 1], 20, z[i + 1]], [xs[i], 20, z[i]]]})
     for order in (faces, faces[::-1]):
-        for group in _planes(order):
-            for g in group:
-                n, p0 = _unit_normal(g["points"]), g["points"][0]
-                assert all(abs(sum(n[c] * (q[c] - p0[c]) for c in range(3))) <= TOL for f in group for q in f["points"])
+        groups = _planes(order)
+        assert len(groups) > 1
+        for group in groups:
+            pts = np.array([q for f in group for q in f["points"]], dtype=float)
+            c = pts.mean(0)
+            n = np.linalg.eigh((pts - c).T @ (pts - c))[1][:, 0]
+            assert np.abs((pts - c) @ n).max() <= TOL
 
 
 def test_a_ground_level_that_doesnt_meet_the_building_stops_height_area_and_yards():
@@ -860,3 +865,156 @@ def test_a_corner_lot_address_with_too_many_lines_stops_the_whole_reading():
     m = measure(site(lot(pts), box(15, 30, 40, 70)), {**FACTS, "corner_lot": True, "street_line": street})
     assert m["lot_depth"]["value"] is None and m["lot_depth"]["readings"] == []
     assert "too many readings to list" in m["lot_depth"]["reason"]
+    # round 10, P2: only what depends on the side and rear lines waits. The house (x 15-40, y 30-70) is 30 ft from
+    # the south street, 20 ft from the east one (x = 60): front yard 20 ft. Each address's frontage is measured:
+    # south 50, chamfer + east 14.14 + 90 = 104.14, south + chamfer 64.14, east 90
+    assert m["front_yard"]["value"] == 20.0 and m["front_yard_eaves"]["value"] == 20.0
+    assert sorted(r["value"] for r in m["lot_width"]["readings"]) == [50.0, 64.142136, 90.0, 104.142136]
+    for name in ("rear_yard", "side_yard_smaller", "side_yard_larger"):
+        assert m[name]["value"] is None and "too many readings to list" in m[name]["reason"], name
+
+
+def test_a_lot_with_too_many_back_lines_still_measures_its_frontage_and_front_yard():
+    """Round 10, P2: a one-street lot 50 ft wide with a nine-line zigzag back (test_stop_list ZIGZAG): the side and
+    rear lines can't all be listed, so the depth and the side and rear yards wait; the frontage (50 ft, the
+    street line) and the front yard (the house 25 ft back) don't depend on them and are measured."""
+    from test_stop_list import ZIGZAG
+    m = measure(site(ZIGZAG), FACTS)
+    assert m["lot_width"]["value"] == 50.0 and m["front_yard"]["value"] == 25.0
+    for name in ("lot_depth", "rear_yard", "side_yard_smaller", "side_yard_larger"):
+        assert m[name]["value"] is None and "too many readings to list" in m[name]["reason"], name
+
+
+def test_two_building_objects_with_one_id_are_never_measured_as_one():
+    """Stress test F4: two floor blocks sharing an id; one was dropped from the story count while the height
+    still counted it. Nothing is ever dropped silently: every building measurement needs review, saying why."""
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)), FACTS)
+    for name in ("building_height", "building_area", "front_yard", "rear_yard"):
+        assert m[name]["value"] is None and "share the id house" in (m[name]["reason"] or ""), name
+    ok = measure(site(RECT, box(10, 25, 35, 65, 0, 10, id="f1"), box(10, 25, 35, 65, 10, 20, id="f2")), FACTS)
+    assert "share the id" not in str(ok)
+
+
+def test_a_fourth_floor_block_sharing_an_id_never_lets_the_stories_comply():
+    """Stress test: the starting house plus a 4th floor block on top with the id 'floor 2'. Every building
+    measurement needed review except stories, which counted 3 (one 'floor 2' dropped): 4 floors > 3 allowed
+    must never comply. Every measurement read from building objects needs review, naming the shared id."""
+    fourth = floor(10, 25, 35, 65, z0=33, z1=44, id="floor 2")
+    m = measure(site(RECT, *FLOORS, fourth), {**FACTS, "stories": None})
+    assert m["stories"]["value"] is None and "share the id floor 2" in m["stories"]["reason"]
+    lot_only = {"lot_area", "lot_width", "lot_depth", "district", "use", "sleeping_rooms", "parking_spaces"}
+    read_from_buildings = [k for k in m if k not in lot_only]
+    assert read_from_buildings and all(m[k]["value"] is None and "share the id" in (m[k]["reason"] or "")
+                                       for k in read_from_buildings), {k: m[k]["value"] for k in read_from_buildings}
+
+
+def test_on_existing_grade_with_no_ground_the_height_says_why_it_isnt_measured():
+    """Found by PR #18: with the ground as it is (grade_is existing) and no ground level given, the height's
+    reason began "measured from existing grade", though nothing was measured. The reason comes from what was
+    measured: no ground level, so not measured."""
+    m = measure(site(), {**FACTS, "grade_is": "existing", "grade_elevation": None})
+    h = m["building_height"]
+    assert h["value"] is None and "measured from existing grade" not in h["reason"]
+    assert "ground level isn't given" in h["reason"] and "measured_as_is" not in h
+    measured = measure(site(), {**FACTS, "grade_is": "existing"})["building_height"]      # measured: said so
+    assert measured["value"] is None and "measured from existing grade" in measured["reason"]
+    assert measured["measured_as_is"] == 30.0
+
+
+def _planar_roof(n):
+    faces = []
+    for i in range(n):
+        for j in range(n):
+            x0, x1, y0, y1 = i * 0.5, (i + 1) * 0.5, j * 0.5, (j + 1) * 0.5
+            faces += [{"points": [[x0, y0, 30 + 0.5 * x0], [x1, y0, 30 + 0.5 * x1], [x1, y1, 30 + 0.5 * x1]]},
+                      {"points": [[x0, y0, 30 + 0.5 * x0], [x1, y1, 30 + 0.5 * x1], [x0, y1, 30 + 0.5 * x0]]}]
+    return faces
+
+
+def test_plane_grouping_grows_about_in_step_with_the_faces():
+    """Review rounds 3 and 4 of the mesh fix: refitting every corner at every join made grouping quadratic (55 s
+    for 28,800 triangles), then copying the group's corner list at every join kept it near n^2.3 (115,200 faces:
+    54 s). Deterministic: the corner blocks moved and corners gathered stay under 20 per face at 12,800 faces
+    (about n log n). And by the clock, in the same run: 16 times the faces take under 25 times as long (in place:
+    about 17; copying the list: about 31)."""
+    import time
+    from model_measurement.measure import _planes
+    work = {}
+    faces = _planar_roof(80)
+    assert len(_planes(faces, work)) == 1
+    assert work["blocks_moved"] + work["corners_gathered"] <= 20 * len(faces), work
+
+    def clock(n):
+        f = _planar_roof(n)
+        start = time.perf_counter()
+        assert len(_planes(f)) == 1
+        return time.perf_counter() - start
+
+    clock(20)
+    small = clock(40)
+    big = clock(160)
+    small = (small + clock(40)) / 2
+    assert big < 25 * small, f"16x the faces took {big / small:.1f}x as long"
+    assert big < 120
+
+
+@pytest.mark.parametrize("blocks", [
+    [box(10, 25, 35, 65, 0, 10, id="b1"), box(10, 25, 35, 65, 10, 20, id="b2"), box(10, 25, 35, 65, 20, 30, id="b3"),
+     box(10, 25, 35, 65, 30, 40, id="b2")],                                                     # plain solids
+    FLOORS + [floor(10, 25, 35, 65, z0=33, z1=44, id="floor 2")],                               # floor blocks
+])
+def test_a_typed_story_count_never_stands_beside_solids_sharing_an_id(blocks):
+    """Review of 0b56ec9 (P0): plain stacked solids, a typed 3 and a shared id: the stacking split the stack and
+    the typed 3 stood with no reason (unique ids correctly said: typed 3, 4 blocks). Whatever was typed, stories
+    needs review, naming the shared id."""
+    m = measure(site(RECT, *blocks), {**FACTS, "stories": 3})
+    shared = blocks[-1]["id"]
+    assert m["stories"]["value"] is None and f"share the id {shared}" in m["stories"]["reason"]
+
+
+@pytest.mark.parametrize("main", [None, "gone"])
+def test_counted_floors_with_no_main_building_never_let_a_typed_count_stand(main):
+    """Review round 2 of the stories fix (P0): four floor blocks and a garage, no main building (or one no longer
+    in the model), typed 3: stories said 3 'stated by the architect' while the height said pick the main building.
+    The drawing can be counted, so stories stop exactly as the height does."""
+    garage = floor(40, 70, 48, 90, z0=0, z1=11, id="g1")
+    fourth = floor(10, 25, 35, 65, z0=33, z1=44, id="floor 4")
+    m = measure(site(RECT, *FLOORS, fourth, garage), {**FACTS, "stories": 3, "main_building": main})
+    assert m["stories"]["value"] is None and "pick the main building" in m["stories"]["reason"]
+    assert m["building_height"]["value"] is None and "pick the main building" in m["building_height"]["reason"]
+
+
+def test_a_single_plain_solid_keeps_the_typed_count_stated_by_the_architect():
+    """Nothing drawn can be counted (one solid, no floor marks): the typed count stands, labelled as stated."""
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 40, id="h")), {**FACTS, "stories": 3})["stories"]
+    assert m["value"] == 3 and "stated by the architect" in m["how"]
+
+
+def test_stories_never_comply_with_fewer_than_the_floors_drawn_unless_a_main_building_is_measured():
+    """A property over random drawings: stacks of 1 to 5 solids (floor blocks or plain), a garage, shared ids, a
+    main building picked, missing or stale, any typed count. Stories never take a value below the most floors
+    drawn on any stack, unless a main building was picked, every id is distinct and its own count is that value."""
+    import random
+    rnd = random.Random(21)
+    for _ in range(150):
+        blocks, stacks = [], []
+        for k, (x0, x1) in enumerate(((5, 20), (25, 40))[:rnd.randint(1, 2)]):
+            n, marked = rnd.randint(1, 5), rnd.random() < 0.5
+            ids = [f"s{k}f{i}" for i in range(n)]
+            stacks.append(ids)
+            for i, bid in enumerate(ids):
+                b = floor(x0, 25, x1, 65, z0=i * 10, z1=(i + 1) * 10, id=bid) if marked else \
+                    box(x0, 25, x1, 65, z0=i * 10, z1=(i + 1) * 10, id=bid)
+                blocks.append(b)
+        if rnd.random() < 0.3:                                          # a shared id somewhere
+            other = rnd.choice(blocks)
+            rnd.choice(blocks)["id"] = other["id"]
+        pick = rnd.choice([None, "stale", rnd.choice(blocks)["id"]])
+        typed = rnd.randint(1, 4)
+        m = measure(site(RECT, *blocks), {**FACTS, "stories": typed, "main_building": pick})["stories"]
+        most = max(len(s) for s in stacks)
+        ids = [b["id"] for b in blocks]
+        if m["value"] is None or m["value"] >= most:
+            continue
+        own = next((s for s in stacks if pick in s), None)
+        assert len(set(ids)) == len(ids) and own is not None and m["value"] == len(own), (stacks, pick, typed, m)

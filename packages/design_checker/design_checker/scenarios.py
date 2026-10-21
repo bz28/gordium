@@ -1,5 +1,5 @@
-"""The architect's answer key (test_data/test_sites/new_york/ithaca_city/scenarios/): each scenario built as a
-site, checked, and compared with the result worked out by hand. The expected results are never changed to match
+"""The hand-worked scenarios (test_data/test_sites/new_york/ithaca_city/scenarios/; hand-worked by Claude before Gordium ran, not yet verified by an architect):
+each scenario built as a site, checked, and compared with the result worked out by hand. The expected results are never changed to match
 Gordium; a disagreement is investigated (a code fix, or a question for the architects).
 
     python -m design_checker.scenarios               the table: scenario · expected · Gordium · match
@@ -162,21 +162,48 @@ def table(results: dict) -> str:
     return "\n".join(lines)
 
 
+def steps_expected(scenario: dict) -> list[str]:
+    """The steps a scenario must have results for: as drawn, and after its edit if it has one."""
+    return ["as drawn"] + (["after the edit"] if (scenario.get("then") or {}).get("expected") else [])
+
+
+def failures(results: dict, scenarios_: dict, trace: str | None = None) -> list[str]:
+    """Why a comparison run fails, or [] when it passes: a crash (a trace), a scenario or step with no result, or
+    any disagreement the scenario doesn't list as investigated (with the same Gordium answer). A listed
+    disagreement is allowed and counted apart."""
+    out = [f"the run crashed: {trace.strip().splitlines()[-1] if trace.strip() else 'trace'}"] if trace else []
+    for name, sc in scenarios_.items():
+        got = {st["step"]: st for st in results.get(name) or []}
+        out += [f"{name}: no result for '{step}'" for step in steps_expected(sc) if step not in got]
+        known = sc.get("disagreements") or {}
+        for st in got.values():
+            if not st["rows"]:
+                out.append(f"{name} {st['step']}: no rows")
+            for r in st["rows"]:
+                if not r["match"] and (known.get(r["rule"]) or {}).get("gordium") != r["gordium"]:
+                    out.append(f"{name} {st['step']}: {r['rule']} expected {r['expected']}, Gordium {r['gordium']}")
+    return out
+
+
 def main(argv):
+    """Prints the table; exits 1 (with every reason) on a crash, a missing scenario or step, or any
+    disagreement not already investigated; 0 only when the run is complete and agrees."""
     if argv[:1] == ["dump"]:
         sc = load(argv[1])
         print(json.dumps({"scenario": sc, "solids": solids(sc), "moved": solids(sc, True) if sc.get("then") else None,
                           "facts": facts(sc)}))
         return 0
+    every = {p.stem: load(p) for p in paths()}
+    trace = None
     if argv[:1] == ["rhino"]:               # the Rhino run's views, judged by the same comparison
         ran = json.loads(Path(argv[1]).read_text(encoding="utf-8"))
-        if ran.get("trace"):
-            print(ran["trace"])
+        trace = ran.get("trace")
+        if trace:
+            print(trace)
         results = {}
-        for p in paths():
-            sc = load(p)
+        for name, sc in every.items():
             steps = []
-            for st in ran["scenarios"].get(p.stem) or []:
+            for st in (ran.get("scenarios") or {}).get(name) or []:
                 moved = st["step"] != "as drawn"
                 expected = (sc.get("then") or {}).get("expected") if moved else sc["expected"]
                 if st.get("view") is None:
@@ -185,12 +212,20 @@ def main(argv):
                     continue
                 steps.append({"step": st["step"], "rows": compare(st["view"], st.get("plan"), expected,
                                                                   None if moved else sc.get("plan"))})
-            results[p.stem] = steps
+            results[name] = steps
     else:
-        results = {p.stem: run(load(p)) for p in paths()}
+        results = {name: run(sc) for name, sc in every.items()}
     print(table(results))
-    bad = sum(1 for steps in results.values() for st in steps for r in st["rows"] if not r["match"])
-    print(f"\n{bad} disagreement(s)")
+    known = sum(1 for name, steps in results.items() for st in steps for r in st["rows"]
+                if not r["match"] and r["rule"] in (every[name].get("disagreements") or {}))
+    bad = failures(results, every, trace)
+    print(f"\n{known} investigated disagreement(s) (listed in the scenarios)")
+    if bad:
+        print(f"FAILED: {len(bad)} problem(s)")
+        for b in bad:
+            print("  " + b)
+        return 1
+    print("OK: every scenario and step ran and agrees")
     return 0
 
 

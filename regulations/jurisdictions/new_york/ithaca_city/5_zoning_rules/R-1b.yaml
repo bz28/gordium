@@ -308,6 +308,7 @@ rules:
         page: 47
         lines: [8, 9]
         quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 47
         lines: [11, 12]
@@ -324,6 +325,10 @@ rules:
       - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 24, lot_depth: 94.8, stories: 3}
         expect: fail
       - given: {building_height: 39, front_yard: 40, side_yard_smaller: 20, side_yard_larger: 20, rear_yard: 40, lot_depth: 94.8, stories: 3}
+        expect: fail
+      - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 22, lot_depth: 60}
+        expect: pass                                 # a 60 ft lot: the 20 ft floor, plus 2 ft for 2 ft of extra height
+      - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 21.99, lot_depth: 60}
         expect: fail
     open_questions:
     - '§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height, or allowed
@@ -425,6 +430,7 @@ rules:
         page: 25
         lines: [7, 9]
         quote: "For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
+        not_limits: {2: "what building_area counts (balconies projecting more than two feet): a measuring rule, not this formula's limit"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 25
         lines: [9, 10]
@@ -489,6 +495,7 @@ rules:
         page: 50
         lines: [7, 9]
         quote: "C. Corner lot transition. On corner lots in residential districts; buildings must be erected so that yards facing public streets shall conform to the minimum front yard requirements of said residential district. Such lots shall be deemed to have two adjoining front yards."
+        not_limits: {2: "two adjoining front yards: which yards are front yards on a corner lot (measured to every street line), not a limit"}
     examples:
       - given: {front_yard: 30}
         expect: pass
@@ -544,6 +551,7 @@ rules:
         page: 25
         lines: [24, 26]
         quote: "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
+        not_limits: {2: "the two side lot lines: how lot depth is measured (measures.yaml lot_depth), not a limit"}
     examples:
       - given: {rear_yard: 25, lot_depth: 94.8}
         expect: pass
@@ -551,6 +559,8 @@ rules:
         expect: fail
       - given: {rear_yard: 20, lot_depth: 60}
         expect: pass
+      - given: {rear_yard: 19.99, lot_depth: 60}     # under 80 ft deep, 25% is under 20 ft: note 16's floor decides
+        expect: fail
     notes: >-
       Lot depth is the average of the two side lot lines if they differ (§325-8A(14)(a)).
       106 Ithaca Rd: side lot lines 90.28 and 99.37 ft → lot depth 94.8 ft → 23.7 ft required; the
@@ -611,6 +621,7 @@ rules:
         page: 47
         lines: [8, 9]
         quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
       - file: zoning_charts_2026-04.pdf
         page: 3
         lines: [31, 31]
@@ -664,10 +675,12 @@ rules:
         page: 66
         lines: [37, 40]
         quote: "A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or partially above finished grade are permitted in any side or rear yard but not in a required front yard, except as permitted under the further provisions of this section. Corner lots shall be considered to have two front yards."
+        not_limits: {2: "two front yards on a corner lot: which yards are front yards (the accessory front yard is measured to every street line), not a limit"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 67
         lines: [6, 9]
         quote: "C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this section."
+        not_limits: {1: "the district name R-1, not a number of feet"}
       - file: zoning_charts_2026-04.pdf
         page: 3
         cell: {section: Yard Dimensions, row: Front (minimum), column: R-1B}

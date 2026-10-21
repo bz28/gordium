@@ -318,8 +318,9 @@ def test_the_massing_layer_holds_building_objects():
 
 
 def test_the_sample_lot_gives_the_spec_massing():
-    """73'-0" x 90'-0" (6,570 sf, from the tax map) -> kept 2'-0" back: 49'-0" x 31'-10" = 1,560 sf, 23.74% of the lot as
-    drawn (25% of the smallest lot the tax map allows, 71 x 88), at 27'-0" from the street."""
+    """73'-0" x 90'-0" (6,570 sf, from the tax map) -> kept 2'-0" back: 49'-0" x 30'-3" = 1,482 sf, 22.56% of the lot as
+    drawn (25% of the smallest lot the tax map allows: every line 2 ft in, 69 x 86 = 5,934 sf, so at most 1,483.5
+    sf), at 27'-0" from the street."""
     import math
     import tempfile
     from pathlib import Path
@@ -343,8 +344,8 @@ def test_the_sample_lot_gives_the_spec_massing():
     outline = Polygon(got["floors"][0]["outline"])
     x0, y0, x1, y1 = outline.bounds
     assert Polygon(s["lot"]).area == 6570 and s["facts"]["lot_surveyed"] is False
-    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (49, 31 * 12 + 10)
-    assert round(outline.area) == 1560 and round(outline.area / 6570 * 100, 2) == 23.74
+    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (49, 30 * 12 + 3)
+    assert round(outline.area) == 1482 and round(outline.area / 6570 * 100, 2) == 22.56 and outline.area <= 0.25 * 5934
     assert y0 == 27 and len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
 
 
@@ -385,11 +386,11 @@ def test_the_start_preview_and_the_panel_say_the_same_coverage(facts):
     from design_checker.check import start
     got = start(MODEL, {**facts, "lot_surveyed": False})
     # tax-map lot, kept 2'-0" back (worked by hand): width 73 − 2 × (10 + 2) = 49'-0"; coverage for the smallest lot
-    # the tax map allows, 25% × 71 × 88 = 1,562 sf, so depth 1,562 / 49 = 31.88 → 31'-10" (whole inches, down);
-    # 49 × 31.833 = 1,559.8 sf = 23.74% of the drawn 6,570 sf: the panel shows it to 0.1% (margin over 0.5%), up
-    assert got["preview"]["coverage"] == "23.8%"
+    # the tax map allows (every line 2 ft in), 25% × 69 × 86 = 1,483.5 sf, so depth 1,483.5 / 49 = 30.28 → 30'-3"
+    # (whole inches, down); 49 × 30.25 = 1,482.25 sf = 22.56% of the drawn 6,570 sf: shown to 0.1%, up
+    assert got["preview"]["coverage"] == "22.6%"
     assert got["preview"]["coverage"] == present._display(got["area"] / 6570 * 100, 25.0, None, "%", "≤")[0]
-    assert got["preview"]["size"] == "49'-0\" × 31'-10\"" and got["preview"]["height"] == "35'-0\""
+    assert got["preview"]["size"] == "49'-0\" × 30'-3\"" and got["preview"]["height"] == "35'-0\""
     assert got["preview"]["limit"] == "25%"                 # the limit beside it (A11), a maximum rounded down
 
 
@@ -406,7 +407,10 @@ def test_on_a_tax_map_lot_the_starting_house_complies_even_at_the_worst_case(fac
     assert not any("NEEDS REVIEW for coverage" in n for n in tax["notes"])
     site = {**read_site(MODEL, facts), "buildings": floor_solids(tax["floors"])}
     view = check_site(site, {**facts, "lot_surveyed": False})["view"]
-    assert not [i["name"] for i in view["items"] if i["status"] == present.REVIEW and "tax map" in (i["reason"] or "")]
+    assert not [i["name"] for i in view["items"] if i["status"] == present.REVIEW and "tax map" in (i["reason"] or "")
+                and i.get("measure") not in ("lot_area", "lot_width", "lot_depth")]
+    lot_area = next(i for i in view["items"] if i["name"] == "Lot area")    # the lot's own size, not the house's:
+    assert lot_area["status"] == present.REVIEW and "at worst 5,934 sf against 6,000 sf" in lot_area["reason"]
     surveyed = start(MODEL, {**facts, "lot_surveyed": True})
     assert surveyed["kept_back"] == 0.0 and TAX_MAP_NOTE not in surveyed["notes"]
     xs = [p[0] for p in surveyed["floors"][0]["outline"]]
@@ -603,7 +607,7 @@ def test_a_corner_lot_is_never_guessed_the_box_asks_and_the_yards_wait(facts):
     assert logic.uncertain(_box(corner_lot=False)) is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     suggested = rhino.split("def suggested_facts(", 1)[1].split("\ndef ", 1)[0]
-    assert '"corner_lot": None' in suggested and '"corner_lot": False' not in suggested   # never guessed
+    assert "logic.suggested_facts(" in suggested and "corner_lot" not in suggested   # the tested logic decides
     got = check(MODEL, {k: v for k, v in facts.items() if k != "corner_lot"})          # unanswered
     yards = {i["name"]: i for i in got["view"]["items"]}
     assert yards["Front yard"]["status"] == present.REVIEW
@@ -963,8 +967,8 @@ def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_
     """The Rhino side can't run in CI: its source must use the tested logic (no bare readline on the pipe)."""
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     ask = src[src.index("def ask("):src.index("\n\n\n", src.index("def ask("))]
-    assert "logic.answer_for(" in ask and "_stop_worker()" in ask and "readline" not in ask
-    assert "threading.Thread(target=_read_lines" in src
+    assert "logic.exchange(" in ask and "_stop_worker()" in ask and "readline" not in ask and "stdin" not in ask
+    assert "logic.pipes(p)" in src                  # the pipes served by threads (test_checker_pipes.py)
 
 
 # ---- the starting building is proven with the checker's own verdict (audit P1-3) -----------------------------
@@ -1040,3 +1044,62 @@ def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
     assert "logic.reaches_into_lot(" in body and ".Center" not in body
+
+
+def test_the_suggested_facts_never_answer_the_corner_lot_question():
+    """eval-integrity P1-5: the guarantee was pinned only by the plugin's source text (setting corner_lot to False
+    in suggested_facts passed). Now the decisions are plain logic, run here on every kind of model."""
+    from design_checker import rhino_logic as logic
+    square = {"id": "lot", "area": 6570.0, "bottom": 0.0,
+              "segments": [((0, 0), (73, 0)), ((73, 0), (73, 90)), ((73, 90), (0, 90)), ((0, 90), (0, 0))]}
+    corner_like = {"id": "corner", "area": 9000.0, "bottom": 0.0,           # two street-facing sides, low on screen
+                   "segments": [((0, 0), (90, 0)), ((90, 0), (90, 100)), ((90, 100), (0, 100)), ((0, 100), (0, 0))]}
+    houses = [{"id": "house", "bottom": 1.0, "volume": 30000.0}, {"id": "shed", "bottom": 0.5, "volume": 900.0}]
+    for lots in ([], [square], [square, corner_like], [{**square, "segments": []}]):
+        for buildings in ([], houses[:1], houses):
+            for zones in ([], ["R-1b"], ["R-1a", "R-1b"]):
+                got = logic.suggested_facts("j", zones, lots, buildings)
+                assert "corner_lot" in got and got["corner_lot"] is None, (lots, buildings, zones)
+                assert got["lot_surveyed"] is False                   # the safe answer: size waits for a survey
+    got = logic.suggested_facts("j", ["R-1b"], [square, corner_like], houses)
+    assert got["lot_id"] == "corner" and got["street_line"] == [[[0, 0], [90, 0]]]
+    assert got["main_building"] == "house" and got["grade_elevation"] == 0.5 and got["zone"] == "R-1b"
+    assert logic.suggested_facts("j", [], [square], [])["grade_elevation"] == 0.0     # no building: the lot's level
+
+
+def test_a_solid_whose_points_dont_outline_it_counts_by_its_box():
+    """Review of the P1-2 fix: a sphere's vertices and seam points lie on one meridian, a straight line in plan,
+    so their hull has no area and the sphere was left out. A solid always covers some ground: its plan box
+    stands in for the outline whenever the points don't give one."""
+    import math
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+    lot = [(0, 0), (73, 0), (73, 90), (0, 90)]
+    seam = [(30 + 5 * math.sin(t * math.pi / 8), 40) for t in range(9)]          # pole to pole, in plan
+    assert reaches_into_lot(lot, seam, ON_LOT_REACH, box=(25, 35, 35, 45))
+    assert reaches_into_lot(lot, [(30, 40)], ON_LOT_REACH, box=(25, 35, 35, 45))
+    assert not reaches_into_lot(lot, [(100, 40), (110, 40)], ON_LOT_REACH, box=(95, 35, 115, 45))   # off the lot
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
+    assert "logic.reaches_into_lot(ring, _plan_points(g), reach, box)" in body
+    assert "f.PointAt(" in src[src.index("def _plan_points("):]
+
+
+def test_the_box_pre_filter_never_drops_an_object_that_reaches_the_lot():
+    """Review of the P1-2 fix: only objects whose box comes near the lot's get outlined. Any footprint that
+    reaches into the lot has a box near the lot's, so the pre-filter can't change an answer."""
+    import random
+    from design_checker.rhino_logic import ON_LOT_REACH, box_near_lot, reaches_into_lot
+    lot = [(0, 0), (73, 0), (73, 90), (0, 90)]
+    lot_box = (0, 0, 73, 90)
+    rnd = random.Random(7)
+    for _ in range(3000):
+        pts = [(rnd.uniform(-150, 220), rnd.uniform(-150, 240)) for _ in range(rnd.randint(3, 6))]
+        pts = [(x, y) for x, y in pts]
+        box = (min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts), max(p[1] for p in pts))
+        if reaches_into_lot(lot, pts, ON_LOT_REACH, box):
+            assert box_near_lot(box, lot_box, ON_LOT_REACH), pts
+    assert not box_near_lot((100, 0, 120, 20), lot_box, ON_LOT_REACH)
+    assert box_near_lot((73, 0, 90, 20), lot_box, ON_LOT_REACH)                  # touching: still outlined
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
+    assert body.index("logic.box_near_lot(") < body.index("_plan_points(g)")
