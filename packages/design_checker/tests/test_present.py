@@ -283,6 +283,72 @@ def test_red_above_the_height_limit_is_only_the_part_above_it():
     assert top["why"] == "height" and top["base"] == pytest.approx(35) and top["top"] == pytest.approx(38)
 
 
+def _regions(r):
+    """Each coloured region: (status, its x from, x to, area in sf)."""
+    from shapely.geometry import Polygon
+    return sorted(((e["status"], round(min(p[0] for p in e["outline"]), 2), round(max(p[0] for p in e["outline"]), 2),
+                    round(Polygon(e["outline"]).area, 1)) for e in r["plan"]["encroach"]), key=lambda t: t[1])
+
+
+def test_amber_is_the_part_of_the_building_in_a_tax_map_yards_caution_zone():
+    """West wall 11 ft from the line, the side yard needs 10 (front 30 ft back, rear 35: well clear): on a survey
+    it complies (no colour); on the tax map (±2 ft) it needs review, and amber is exactly the part within 2 ft of
+    the yard line: x 11 to 12, the house's 35 ft depth (35 sf). Never red."""
+    from design_checker.check import check_site
+    house = box(11, 30, 35, 65)
+    surveyed = check_site(_plot(house), {**FACTS, "jurisdiction": CITY})
+    assert items(surveyed["view"])["Side yard, West"]["status"] == present.COMPLIES and _regions(surveyed) == []
+    tax = check_site(_plot(house), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
+    assert items(tax["view"])["Side yard, West"]["status"] == present.REVIEW
+    assert items(tax["view"])["Front yard"]["status"] == present.COMPLIES
+    assert _regions(tax) == [(present.REVIEW, 11, pytest.approx(12, abs=0.02), pytest.approx(35, abs=0.8))]
+
+
+def test_amber_follows_every_yard_in_doubt():
+    """The same house with its front wall at exactly 25 ft (the requirement): the front yard needs review too, so
+    amber is the L of both caution strips: x 11 to 12 the full 40 ft depth (40 sf) plus y 25 to 27 the remaining
+    23 ft of width (46 sf): 86 sf."""
+    from design_checker.check import check_site
+    tax = check_site(_plot(box(11, 25, 35, 65)), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
+    assert items(tax["view"])["Front yard"]["status"] == present.REVIEW
+    assert _regions(tax) == [(present.REVIEW, 11, 35, pytest.approx(86, abs=1.5))]
+
+
+def test_on_the_tax_map_red_is_over_under_every_reading_and_amber_is_the_rest_of_the_doubt():
+    """West wall 6 ft from the drawn line, the side yard needs 10, the line is ±2 ft: the yard line is really
+    somewhere from x 8 to 12. Red is over under every reading (x 6 to 8: 2 x 35 = 70 sf); amber is the doubt
+    (x 8 to 12: 4 x 35 = 140 sf). They never overlap. On a survey the same wall is red 6 to 10, no amber."""
+    from design_checker.check import check_site
+    house = box(6, 30, 35, 65)
+    r = check_site(_plot(house), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
+    assert items(r["view"])["Side yard, West"]["status"] == present.FAILS
+    assert _regions(r) == [(present.FAILS, 6, pytest.approx(8, abs=0.02), pytest.approx(70, abs=1.5)),
+                           (present.REVIEW, pytest.approx(8, abs=0.02), pytest.approx(12, abs=0.02),
+                            pytest.approx(140, abs=1.5))]
+    survey = check_site(_plot(house), {**FACTS, "jurisdiction": CITY})
+    assert _regions(survey) == [(present.FAILS, 6, pytest.approx(10, abs=0.02), pytest.approx(140, abs=1.5))]
+
+
+def test_a_height_that_needs_review_is_amber_above_the_limit():
+    from design_checker.check import plan
+    site = _plot(box(10, 25, 35, 65, 0, 38))
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    for status in (present.REVIEW, present.FAILS):
+        (top,) = plan(site, env, {"items": [{"measure": "building_height", "status": status}]}, {})["encroach"]
+        assert (top["why"], top["status"], top["base"], top["top"]) == ("height", status, 35, 38)
+    assert plan(site, env, {"items": [{"measure": "building_height", "status": present.COMPLIES}]}, {})["encroach"] == []
+
+
+def test_the_colour_comes_from_the_result_only():
+    """rhino_logic.highlight: the one place a result becomes a colour (the conduit draws only what it names)."""
+    sys.path.insert(0, str(REPO / "packages/design_checker/design_checker"))
+    import rhino_logic
+    assert [rhino_logic.highlight(s) for s in (present.FAILS, present.REVIEW, present.COMPLIES, "not_checked", None)] \
+        == ["red", "amber", None, None, None]
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.highlight(status)" in src and 'ui.status_color(status, dark)' in src
+
+
 def test_the_plan_labels_each_lot_edge_and_each_measured_yard():
     from design_checker.check import check_site
     r = check_site(_plot(box(10, 25, 35, 65)), {**FACTS, "jurisdiction": CITY})

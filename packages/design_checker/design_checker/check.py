@@ -373,27 +373,26 @@ def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
         # the envelope sits MARGIN inside every yard (so it is never illegal); grown back by twice that, a wall
         # exactly at its limit leaves no hairline of red
         buildable = Polygon(env["outline"], env.get("holes") or []).buffer(2 * MARGIN, join_style=2)
-        yard_fail = any(s == present.FAILS for m, s in statuses.items() if m in YARD_MEASURES)
-        strip = footprint.difference(buildable) if yard_fail else None
+        yard = {s for m, s in statuses.items() if m in YARD_MEASURES}
+        # where the lot line may really be: on a tax-map lot anywhere within its tolerance (2'-0") of the drawn one.
+        # RED is over the yard line under every reading (outside the buildable area grown by the tolerance); AMBER
+        # is the rest of the doubt (outside it shrunk by the tolerance). On a survey the tolerance is 0: red is
+        # what is outside, and a yard that needs review for another reason is amber where it is outside.
+        tol = TAX_MAP_TOLERANCE if (measured.get("lot_area") or {}).get("tolerance") else 0.0
+        red = footprint.difference(buildable.buffer(tol, join_style=2)) if present.FAILS in yard else None
+        doubt = None
+        if yard & {present.FAILS, present.REVIEW} and (tol or present.REVIEW in yard):
+            doubt = footprint.difference(buildable.buffer(-tol, join_style=2) if tol else buildable)
+            if red is not None and not red.is_empty:
+                doubt = doubt.difference(red)
         # outlines simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude;
         # without a grade the strip stands on the building's own base, never at 0
         base = env["base"] if env.get("base") is not None else min(tops)
-        for g in getattr(strip, "geoms", [strip]) if strip is not None and not strip.is_empty else []:
-            if g.area > 1e-3:
-                encroach.append({"outline": _ring(g), "base": base, "top": max(tops), "why": "yard",
-                                 "status": present.FAILS})
-        # amber: the part a yard that NEEDS REVIEW is about, with the same geometry. On a tax-map lot the caution
-        # zone runs the tolerance (2'-0") inside every yard line; otherwise (a reading the code leaves open) it is the
-        # part outside the buildable area. Never where it is already red.
-        if any(s == present.REVIEW for m, s in statuses.items() if m in YARD_MEASURES):
-            tol = TAX_MAP_TOLERANCE if (measured.get("lot_area") or {}).get("tolerance") else 0.0
-            caution = footprint.difference(buildable.buffer(-tol, join_style=2) if tol else buildable)
-            if strip is not None and not strip.is_empty:
-                caution = caution.difference(strip)
-            for g in getattr(caution, "geoms", [caution]) if not caution.is_empty else []:
+        for region, status in ((red, present.FAILS), (doubt, present.REVIEW)):
+            for g in getattr(region, "geoms", [region]) if region is not None and not region.is_empty else []:
                 if g.area > 1e-3:
                     encroach.append({"outline": _ring(g), "base": base, "top": max(tops), "why": "yard",
-                                     "status": present.REVIEW})
+                                     "status": status})
         height = statuses.get("building_height")
         if height in (present.FAILS, present.REVIEW) and env.get("top") is not None and max(tops) > env["top"]:
             for g in getattr(footprint, "geoms", [footprint]):
