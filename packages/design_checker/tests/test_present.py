@@ -1108,8 +1108,9 @@ def test_the_report_opens_on_the_check_sheet_and_every_tab_says_what_the_panel_s
     text = " ".join(str(c.value) for c in wb["Check"]["A"] if c.value)
     assert "PUDs" not in text and "Ord. No." in text
     from design_checker import rhino_logic as logic
-    assert logic.street_name({"address": "106 Ithaca Rd, Ithaca, NY 14850"}) == "Ithaca Rd"
-    assert logic.street_name({}) == "the highlighted line"
+    # the street line's own street only: the address's street may not be the line highlighted (review of P1-4)
+    assert logic.street_name({"address": "106 Ithaca Rd, Ithaca, NY 14850"}) == "the highlighted line"
+    assert logic.street_name({"street_name": "Ithaca Rd"}) == "Ithaca Rd"
 
 
 
@@ -1148,3 +1149,133 @@ def test_coverage_that_turns_on_the_overhang_question_says_both_ways():
     r = check_site(_plot(ground, box(12, 30, 52, 70, 10, 20, "b"), lot_=lot),
                    {**facts, "lot_surveyed": True, "main_building": "a"})
     assert items(r["view"])["Lot coverage"]["reason"].startswith("Complies under every reading")
+
+
+def test_an_assumed_main_building_is_said_on_the_panel_and_the_check_sheet(tmp_path):
+    """Review of the main-building default (P1): the assumption reached only the report's Inputs tab; height,
+    stories and yards read COMPLIES with no caveat. The header says "Main building: the starting house (assumed)"
+    and every row measured from it carries the note, on the Check sheet too."""
+    import openpyxl
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 70, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(45, 75, 55, 90, 0, 10, "garage")
+    r = check_site(_plot(*house, garage, lot_=lot), {**facts, "lot_surveyed": True, "stories": 3},
+                   report_path=tmp_path / "r.xlsx")
+    assert r["view"]["header"]["main"] == present.ASSUMED_MAIN
+    by = items(r["view"])
+    for name in ("Building height", "Stories", "Front yard"):
+        assert present.ASSUMED_MAIN_NOTE in (by[name].get("note") or ""), (name, by[name])
+    text = " ".join(str(c.value) for row in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows()
+                    for c in row if c.value)
+    assert present.ASSUMED_MAIN in text and present.ASSUMED_MAIN_NOTE in text
+
+
+
+def test_the_report_keeps_each_rows_units_and_the_panels_words(surveyed, tmp_path):
+    """Review of P1-4 (P2): the coverage item's percentage went into the Building area input and the coverage
+    row, both in sf. A row taken from the panel takes its limit and units with it; an input only in its own unit."""
+    import openpyxl
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    ground = box(12, 30, 40, 70, 0, 10, "a")
+    check_site(_plot(ground, box(12, 30, 62, 70, 10, 20, "b"), lot_=lot),
+               {**facts, "lot_surveyed": True, "main_building": "a"}, report_path=tmp_path / "r.xlsx")
+    wb = openpyxl.load_workbook(tmp_path / "r.xlsx")
+    out, ins = wb["Output"], wb["Inputs"]
+    head = [c.value for c in out[2]]
+    cov = next(r for r in out.iter_rows(min_row=3, values_only=True) if r[0] and "coverage" in r[0].lower())
+    assert "%" in str(cov[head.index("Proposed")]) and "%" in str(cov[head.index("Table limit")])
+    assert cov[head.index("Units")] == "% of lot area"
+    area = next(r for r in ins.iter_rows(min_row=3, values_only=True) if r[0] == "Building area")
+    assert "%" not in str(area[1])
+
+
+def test_wording_never_sends_the_architect_to_ask_when_the_answer_cant_change_the_result():
+    """Review of P1-3 and P2-10: a rear yard complying under every lot-depth reading lost "Complies under every
+    reading" for "Needs … ask the zoning office"; coverage failing both ways still said "an open question … ask"."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(12, 30, 40, 50, 0, 30), lot_=lot), {**facts, "lot_surveyed": False})
+    rear = items(r["view"])["Rear yard"]
+    assert rear["required"] == "21'-1 5/8\" to 25'-5 1/2\"" and rear["reason"].startswith("Complies under every reading"), rear
+    r = check_site(_plot(box(12, 30, 48, 85, 0, 10, "a"), box(10, 28, 50, 90, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    assert cov["reason"].startswith("Does not comply either way: coverage is") and "ask" not in cov["reason"], cov
+
+
+def _walls_spots(x0, y0, x1, y1, z):
+    """A spot grade at the middle of each wall of a rectangle, just outside it, at level z."""
+    mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+    return [[mx, y0 - 0.5, z], [mx, y1 + 0.5, z], [x0 - 0.5, my, z], [x1 + 0.5, my, z]]
+
+
+def test_an_assumed_main_building_is_never_kinder_than_picking_the_starting_house():
+    """Round 2 of the main-building fixes (P0): the candidates were read by position, so the "with every other
+    solid" height came from the last other building's own (higher) ground: with the main building assumed, a
+    height complied that picking the starting house fails. Property, over random layouts on the sample lot
+    (a starting house and one or two other buildings, each on its own ground, spot grades at every wall): with
+    the starting house assumed, no row is ever kinder than with it picked."""
+    import random
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    rnd = random.Random(5)
+    compared = 0
+    for _ in range(30):
+        floors, h = rnd.choice([2, 3, 3]), rnd.choice([11, 11.6])        # 3 x 11.6 = 34.8 ft: near the limit
+        house = [floor(12, 30, 36, 60, z0=h * i, z1=h * (i + 1), id=f"f{i}") for i in range(floors)]
+        points = _walls_spots(12, 30, 36, 60, 0)
+        others = []
+        for k in range(rnd.choice([1, 2, 2])):           # two: one on lower ground, one on higher, often
+            x0, y0 = rnd.choice([(40, 30), (14, 66), (40, 66)])
+            if any(o["id"].startswith(f"o{x0}{y0}") for o in others):
+                continue
+            ground, top = rnd.choice([-8, -6, -3, 0, 3, 5, 8]), rnd.choice([8, 12, 20, 30])
+            others.append(box(x0, y0, x0 + 8, y0 + 10, ground, ground + top, f"o{x0}{y0}"))
+            points += _walls_spots(x0, y0, x0 + 8, y0 + 10, ground)
+        base = {**facts, "lot_surveyed": True, "stories": floors, "ground_is_flat": None, "grade_elevation": None,
+                "grade_points": points}
+        site_ = _plot(*house, *others, lot_=lot)
+        assumed = items(check_site(site_, base)["view"])
+        picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])
+        from model_measurement.measure import measure
+        m_a, m_p = measure(site_, base), measure(site_, {**base, "main_building": "f0"})
+        for name in ("building_height", "stories"):     # the pick's every reading is among the assumption's
+            def vals(r):
+                return {round(x["value"], 3) for x in r["readings"]} or ({round(r["value"], 3)} if r["value"] is not None else set())
+            assert vals(m_p[name]) <= vals(m_a[name]) or not vals(m_a[name]), (name, m_p[name], m_a[name])
+        for name, i in picked.items():
+            if name in assumed and i["status"] in present.RANK and assumed[name]["status"] in present.RANK:
+                compared += 1
+                assert present.RANK[assumed[name]["status"]] <= present.RANK[i["status"]], \
+                    (name, assumed[name]["status"], i["status"], assumed[name]["reason"], [o["id"] for o in others])
+    assert compared > 150
+
+
+
+def test_the_with_every_other_solid_height_is_read_from_its_own_grade_not_the_last_buildings():
+    """Round 2 (P0), the reviewer's case: a 34.8 ft starting house on ground 0, a garage on lower ground (-8) and
+    one on higher ground (+5). Read by position, the "with every other solid" height took the last garage's own
+    ground (+5) and the assumed house complied; picking the house reads it from the ground at all their walls
+    (lower) and it doesn't. Assumed, it is never kinder."""
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 60, z0=11.6 * i, z1=11.6 * (i + 1), id=f"f{i}") for i in range(3)]
+    low, high = box(40, 30, 48, 40, -8, 4, "low"), box(40, 66, 48, 76, 5, 15, "high")
+    points = _walls_spots(12, 30, 36, 60, 0) + _walls_spots(40, 30, 48, 40, -8) + _walls_spots(40, 66, 48, 76, 5)
+    base = {**facts, "lot_surveyed": True, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+            "grade_points": points}
+    site_ = _plot(*house, low, high, lot_=lot)
+    from model_measurement.measure import measure
+    def with_others(f):
+        return next(r["value"] for r in measure(site_, f)["building_height"]["readings"]
+                    if r["reading"].startswith("with every other solid"))
+    assert with_others(base) == pytest.approx(with_others({**base, "main_building": "f0"})) == pytest.approx(35.8)
+    picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])["Building height"]
+    assumed = items(check_site(site_, base)["view"])["Building height"]
+    assert picked["status"] != present.COMPLIES, picked
+    assert present.RANK[assumed["status"]] <= present.RANK[picked["status"]], (assumed, picked)

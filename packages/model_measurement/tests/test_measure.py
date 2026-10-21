@@ -976,7 +976,7 @@ def test_height_and_stories_report_over_the_same_candidate_buildings():
     main = box(10, 25, 35, 65, 0, 20, id="house")
     wing = [floor(35, 25, 45, 45, z0=i * 10, z1=(i + 1) * 10, id=f"w{i}") for i in range(4)]
     m = measure(site(RECT, main, *wing), {**FACTS, "stories": 4, "main_building": "house"})
-    words = [w for w, _ in _assemblies({"id": "x"}, [{"id": "y"}])]
+    words = [c["words"] for c in _assemblies({"id": "x"}, [{"id": "y"}])]
 
     def over(record):
         return {next(w for w in words if r["reading"].startswith(w)) for r in record["readings"]
@@ -1225,7 +1225,12 @@ def test_the_starting_house_is_the_main_building_when_none_is_picked():
         r = m[name]
         assert r["value"] is not None or r["readings"], (name, r)
         assert "pick the main building" not in (r.get("reason") or "")
-        assert "assumed: the starting house" in r["how"], (name, r["how"])
+        assert r.get("main_assumed") is True and "assumed" not in r["how"], (name, r)     # a marker, not words
+    height = m["building_height"]
+    assert {r["value"] for r in height["readings"]} >= {10.0} and \
+        any(r["reading"].startswith("if garage were the main building") for r in height["readings"])
+    assert "(main_building)" in height["reason"] and any(
+        r["reading"].startswith("if garage were the main building") for r in m["stories"]["readings"])
     other = [floor(36, 70, 48, 90, z0=0, z1=11, id="g0")]
     m = measure(site(RECT, *house, *other), {**FACTS, "stories": 3})
     assert "pick the main building" in m["building_height"]["reason"]
@@ -1244,3 +1249,78 @@ def test_a_building_outside_the_lot_is_named_and_waits_only_what_it_touches():
         assert m[name]["value"] is not None or m[name]["readings"], (name, m[name])
     m = measure(site(RECT, box(40, 25, 65, 65, id="house")), FACTS)
     assert m["front_yard"]["reason"] == "a building isn't inside the lot: the building"
+
+
+def test_an_assumed_starting_house_never_passes_a_height_the_other_buildings_pick_would_fail():
+    """Review of the main-building default (P2): with spot grades the grade plane kept its own pick and still asked;
+    made to share the default naively, a plain building on lower ground, 40 ft from its own walls, would never be
+    read as the main building, so the assumed house (33 ft) would pass. Each other building is read as the main
+    one from its own grade plane: 40 ft is among the readings, so it never passes."""
+    house = [floor(10, 25, 35, 55, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    other = box(40, 70, 48, 90, -8, 32, id="other")
+    points = [[22, 24, 0], [22, 56, 0], [9, 40, 0], [36, 40, 0],
+              [44, 69, -8], [44, 91, -8], [39, 80, -8], [49, 80, -8]]
+    facts = {**FACTS, "stories": 3, "ground_is_flat": None, "grade_elevation": None, "grade_points": points}
+    m = measure(site(RECT, *house, other), facts)
+    h = m["building_height"]
+    assert h["value"] is None and h.get("main_assumed"), h
+    assert max(r["value"] for r in h["readings"]) >= 40 - 0.01, h["readings"]
+    assert any(r["reading"].startswith("if other were the main building") for r in h["readings"])
+
+
+def test_a_house_off_the_ground_asks_whether_or_not_the_spot_grades_sit_at_its_walls():
+    """Stress F15 (P3): on a sloped lot, floor 1 raised 3.25 ft (nothing reaches the ground): every yard needs
+    review ("doesn't meet"). Pull the west wall in 1.94 ft and the spot grades no longer sit at the walls, so that
+    stop wasn't read and the floating house's yards complied. Whether the building reaches the ground is now read
+    from the spot grades' ground under its footprint: both drawings give the same yard verdicts."""
+    points = [[22, 24, 0.0], [22, 66, 2.0], [9, 45, 1.0], [36, 45, 1.0]]       # a slope from the street up
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "grade_points": points}
+    verdicts = []
+    for west in (10, 11.94):
+        house = [floor(west, 25, 35, 65, z0=3.25 + 11 * i, z1=3.25 + 11 * (i + 1), id=f"f{i}") for i in range(3)]
+        m = measure(site(RECT, *house), {**facts, "stories": 3})
+        verdicts.append({n: m[n]["value"] for n in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")})
+        assert all(v is None for v in verdicts[-1].values()), (west, verdicts[-1])
+        assert all("doesn't meet the buildings" in m[n]["reason"] for n in ("front_yard", "rear_yard")), west
+    assert verdicts[0] == verdicts[1]
+
+
+def test_too_many_roofs_with_the_main_building_assumed_keeps_its_own_stop():
+    """Round 2 of the main-building fixes (P1): with eight pitched-roof sheds (too many roof readings to list)
+    _with_others gave its stop, and reading each shed as the main one then crashed on it. The stop stands."""
+    house = [floor(2, 2, 20, 20, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    sheds = [sloped_roof_box(24 + 13 * (k % 2), 4 + 12 * (k // 2), 34 + 13 * (k % 2), 14 + 12 * (k // 2), 8, 12, f"s{k}")
+             for k in range(8)]
+    m = measure(site(RECT, *house, *sheds), {**FACTS, "stories": 3})
+    h = m["building_height"]
+    assert h["value"] is None and not h["readings"] and "too many" in h["reason"], h
+
+
+def test_only_a_possible_principal_building_is_read_as_the_main_one():
+    """Round 2 (P2): with the main building assumed, a deck slab, a balcony or a small shed was read as the main
+    building on its own, asking a spurious main-building question. Only a solid that could be a principal
+    building (enclosed, 7 ft or more, at least 70 sf: a habitable room, R304.1) is."""
+    house = [floor(10, 25, 35, 55, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    deck = box(10, 55, 35, 65, 0, 2, id="deck")
+    porch = box(10, 20, 35, 25, 0, 1, id="porch")
+    shed = box(40, 80, 46, 86, 0, 8, id="shed")                      # 36 sf: too small for a room
+    m = measure(site(RECT, *house, deck, porch, shed), {**FACTS, "stories": 3})
+    for name in ("building_height", "stories"):
+        assert not any("were the main building" in r["reading"] for r in m[name]["readings"]), (name, m[name])
+        assert "(main_building)" not in (m[name]["reason"] or "")
+    garage = box(38, 70, 48, 90, 0, 10, id="garage")                 # 200 sf, 10 ft: it could be
+    m = measure(site(RECT, *house, garage), {**FACTS, "stories": 3})
+    assert any("if garage were the main building" in r["reading"] for r in m["building_height"]["readings"])
+
+
+
+@pytest.mark.parametrize("points", [[[22, 24, 0.0], [22, 200, 8.0]],                     # two points, one far off
+                                    [[22, 24, 0.0], [22.05, 45, 3.0], [22, 66, 0.0]]])   # near a line: a wild plane
+def test_a_floating_house_is_found_however_few_or_lined_up_the_spot_grades(points):
+    """Round 2 (P2): with two spot grades (their mean) or three nearly in a line (a wild plane), the ground fit
+    missed a house drawn 3.25 ft above the ground. Then the nearest spot grade's level is used: clearly above it
+    everywhere, the ground doesn't meet the buildings."""
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "grade_points": points, "stories": 3}
+    house = [floor(10, 25, 35, 65, z0=3.25 + 11 * i, z1=3.25 + 11 * (i + 1), id=f"f{i}") for i in range(3)]
+    m = measure(site(RECT, *house), facts)
+    assert m["front_yard"]["value"] is None and "doesn't meet the buildings" in m["front_yard"]["reason"]
