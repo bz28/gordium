@@ -619,7 +619,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
     assert by["zone"]["text"] == "R-1b · entered by you"
     assert by["lot"]["text"] == "6,570 sf · from the tax map (±2 ft, approximate)"
     assert by["lot"]["actions"] == [("lot", "Use my survey…", True)]
-    assert by["street"]["text"] == "the highlighted line"
+    assert by["street"]["text"] == "Ithaca Rd"                          # the street of the address (P1-4)
     assert by["ground"]["text"] == "flat at the lot level · as drawn"
     assert by["ground"]["tick"] == ("No regrading near the house", False)
     assert [a for a, _, _ in by["ground"]["actions"]] == ["spot", "terrain", "regrade"]
@@ -1731,8 +1731,9 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
     assert '    lot_px = _screen_size(e.Viewport, getattr(o, "lot_outline", None))' in draw
-    assert "if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):" in draw
+    assert "if plan and logic.yard_label_shown(labels, status):" in draw
     assert ("        if not logic.label_fits(text, 11, lot_px, math.hypot(ends[1].X - ends[0].X, ends[1].Y - ends[0].Y)):\n"
             "            continue\n        ui.label_at(") in draw
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "    width = logic.label_width(text, size)\n" in ui            # placed at the width it was judged by
+

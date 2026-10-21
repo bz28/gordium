@@ -661,6 +661,16 @@ def ground_text(ground):
     return what + (", " + span if span else "") + " · " + ("picked by you" if kind == "terrain" else "placed by you")
 
 
+def street_name(state):
+    """The street the lot faces, by name: the one found, else the street of the address ("106 Ithaca Rd, Ithaca"
+    -> "Ithaca Rd"), else the line itself."""
+    import re
+    if state.get("street_name"):
+        return state["street_name"]
+    m = re.match(r"\s*\d+[A-Za-z]?\s+([^,]+)", state.get("address") or "")
+    return m.group(1).strip() if m else "the highlighted line"
+
+
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,
@@ -677,8 +687,8 @@ def box_rows(state, flat=None):
         {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed"))
          if has_lot else NO_LOT,
          "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot else [], "tick": None},
-        {"key": "street", "label": "Street side", "text": state.get("street_name") or (
-            "the highlighted line" if has_lot else "set from the lot, once there is one"),
+        {"key": "street", "label": "Street side", "text": street_name(state) if (state.get("street_name") or has_lot)
+            else "set from the lot, once there is one",
          "actions": [("street", "Change…", True)] if has_lot else [], "tick": None,   # nothing to change yet: hidden
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
@@ -814,7 +824,7 @@ def fact_sources(state, today, confirmed):
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
         # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
         "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"))),
-        "street": fact(state.get("street_name") or "the highlighted line",
+        "street": fact(street_name(state),
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
