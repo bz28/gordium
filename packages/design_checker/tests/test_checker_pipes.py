@@ -91,6 +91,18 @@ def test_the_plugin_never_touches_a_pipe_or_a_rhino_event_directly():
     assert "logic.sweep(LEFTOVERS, STATE, _release)" in src and json.dumps("gordium_leftovers") in src
 
 
+def test_clearing_the_notice_never_turns_the_document_hooks_back_on():
+    """off() turns the document hooks off, then clears the notice; overlay() turns them back on when they're off,
+    so clearing the notice through it left them attached after every off() (Rhino, 2026-10-21:
+    no_freeze_in_rhino.py claim 5 counts the handlers)."""
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    for name in ("_clear_toast", "_toast_tick"):
+        body = src.split("def %s(" % name, 1)[1].split("\ndef ", 1)[0]
+        assert "= overlay()" not in body and 'STATE.get("overlay")' in body, name
+    overlay = src.split("def overlay(", 1)[1].split("\ndef ", 1)[0]
+    assert "documents(True)" in overlay           # why: the reason clearing must not go through it
+
+
 def test_the_sweep_forgets_the_plugins_handles_but_keeps_what_the_architect_asked_for():
     """Review round 1 (P1): after a reload that keeps the plugin's state, the state must not say a detached hook
     is attached (live mode would look on while edits go unchecked, an old PASS staying on the panel)."""
@@ -183,3 +195,32 @@ def test_releasing_a_later_copys_panel_closes_its_form():
     assert form.closed
     ns["_release"]("panel_parts", None)                     # nothing there: nothing to do, never an error
     ns["_release"]("panel_parts", {})
+
+
+def test_a_floating_panel_is_placed_once_never_on_every_check():
+    """Round 1: panel() resized and moved the floating panel to the right edge on every check (live mode: after
+    every edit), so the architect couldn't move it. The real panel(), run twice with stand-ins for Rhino: the
+    window is placed the first time only."""
+    import ast
+    import types
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "panel")
+    fits = []
+    host = object()
+    form = types.SimpleNamespace(host=host, Visible=True, Close=lambda: None)
+    ui = types.SimpleNamespace(open_dock=lambda dock: None, DockHost=lambda dock, h: None,
+                               make_panel=lambda actions, dock_host: {"form": form},
+                               fit_floating=lambda h, window: fits.append(h) or "floating")
+    doc = types.SimpleNamespace(RuntimeSerialNumber=1)
+    rhino = types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc),
+                                  UI=types.SimpleNamespace(RhinoEtoApp=types.SimpleNamespace(
+                                      MainWindowForDocument=lambda d: None)))
+    ns = {"STATE": {}, "LEFTOVERS": {}, "ui": ui, "logic": logic, "Rhino": rhino, "_actions": lambda: None,
+          "register_dock": lambda: "dock", "sc": types.SimpleNamespace(sticky={"gordium_dock_hosts": {1: host}})}
+    exec(compile(ast.Module([fn], []), "gordium_rhino", "exec"), ns)
+    first = ns["panel"]()
+    second = ns["panel"]()
+    assert first is second and first["placed"] == "floating"
+    assert fits == [host]                                    # placed once; the second check leaves it where it is
+    assert logic.place_panel_now(None) and not logic.place_panel_now("floating")
+    assert not logic.place_panel_now("docked")

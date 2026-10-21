@@ -138,8 +138,8 @@ D3 [code] **Summary rule.** One function produces the summary used by the panel,
 - Examples: "7 need review · 3 comply · 3 not checked" (board 2) and "1 does not comply · 2 need review · 7 comply · 3 not checked" (board 4).
 
 D4 [both] **Columns.**
-- Mark | Item | Proposed | Req. ≥/≤ | Margin.
-- The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Margins read like "+11'-7"", "−2'-6"", "at limit", "+0.06%". Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns.
+- Mark | Item | Proposed | Req. ≥/≤ | Delta (renamed from Margin, MVP list 2026-10-20).
+- The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Deltas read like "+11'-7"", "−2'-6"", "at limit", "+0.06%". Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns.
 - The value columns are sized to their content and never truncated; only Item truncates. Minimum panel width 320.
 
 D5 [code] **Groups,** in order: Does not comply · Needs review · Complies (Site rows included, labelled "Site · …") · Not checked · Not covered by this rulebook. Section headers aren't selectable.
