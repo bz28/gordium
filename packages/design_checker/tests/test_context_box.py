@@ -331,15 +331,19 @@ def test_clearing_also_opens_a_locked_or_hidden_parent_layer_and_says_before_wai
 
 # ---- review of PR #23 (coordinator's round): one service down must not delete the other layers -------------------
 
-def redraw(model, record, payload, frame):
-    """What gordium_rhino.draw_context does to the file, step by step with the same rhino_logic calls (the model is
-    a list of (source, object) as the context layers hold them): merge with the saved record, delete the replaced
-    sources' objects (all of them around another frame), add the new objects."""
-    payload, new_record = logic.context_merge(payload, record, frame)
+def redraw(model, record, payload, frame, guides=None):
+    """What gordium_rhino.draw_context does to the file and the screen, step by step with the same rhino_logic calls
+    (the model is a list of (source, object) as the context layers hold them; `guides` the footprints on screen for
+    this document, None after a reopen): merge with the saved record (JSON round-tripped, as the file keeps it),
+    delete the replaced sources' objects (all of them around another frame), add the new objects; the footprints on
+    screen stay only if the merge kept their layer. (model, record, payload shown, guides on screen)."""
+    record = json.loads(json.dumps(record)) if record is not None else None
+    payload, new_record, kept = logic.context_merge(payload, record, frame, live_on_screen=bool(guides))
     same = bool(record) and record.get("frame") == frame
     sources = logic.context_replaces(payload) if same else None
-    kept = [(s, o) for s, o in model if not (sources is None or s in sources)]
-    return kept + [(o["source"], o) for o in logic.context_objects(payload)], new_record, payload
+    kept_objects = [(s, o) for s, o in model if not (sources is None or s in sources)]
+    shown = guides if logic.keeps_live(kept, record) else logic.context_guides(payload)
+    return kept_objects + [(o["source"], o) for o in logic.context_objects(payload)], new_record, payload, shown
 
 
 class Down(T.Fake):
@@ -363,13 +367,13 @@ def test_one_service_down_keeps_that_layer_and_replaces_the_others():
     drawn, with their requests and credit line), the streets are replaced, not doubled."""
     frame = looked_up()["writes"]["frame"]
     first = fetch_with(frame)
-    model, record, _ = redraw([], None, first, frame)
+    model, record, _, _ = redraw([], None, first, frame)
     parcels_before = [o for s, o in model if s == "state_parcels"]
     assert len(parcels_before) == 229
     again = fetch_with(frame, down={"state_parcels"})
     assert again["status"] == "found" and again["layers"]["parcels"]["status"] == "offline"
     assert logic.context_replaces(again) == {"state_streets", "state_buildings", "gordium"}
-    model2, record2, shown = redraw(model, record, again, frame)
+    model2, record2, shown, _ = redraw(model, record, again, frame)
     assert [o for s, o in model2 if s == "state_parcels"] == parcels_before          # kept, untouched
     assert len([o for s, o in model2 if s == "state_streets"]) == 38                 # replaced, not doubled
     assert len([o for s, o in model2 if s == "gordium"]) == 6
@@ -382,11 +386,44 @@ def test_one_service_down_keeps_that_layer_and_replaces_the_others():
     assert "229 neighbouring parcels" in said and "Kept the parcels drawn earlier" in said
 
 
+def test_footprints_down_in_a_reopened_file_are_never_said_or_recorded_as_kept():
+    """Review round 6: with no footprints on screen (a reopened file) and their service down, the panel said "Kept the
+    buildings drawn earlier" and the record still said "found". One decision now: a live-only layer is kept only
+    when its guides are on screen."""
+    frame = looked_up()["writes"]["frame"]
+    model, record, _, guides = redraw([], None, fetch_with(frame), frame)
+    assert guides                                                              # drawn, this session
+    # the same file reopened: nothing on screen
+    _, record2, shown, on_screen = redraw(model, record, fetch_with(frame, down={"state_buildings"}), frame, None)
+    assert "Kept the buildings" not in logic.context_says(shown)
+    assert record2["layers"]["buildings"]["status"] == "offline" and not on_screen
+    assert not any("Building Footprints" in c for c in record2["credits"]) and "kept_from" not in record2
+    # the same session, footprints still on screen: they are kept, and said so
+    _, record3, shown3, on3 = redraw(model, record, fetch_with(frame, down={"state_buildings"}), frame, guides)
+    assert on3 == guides and "Kept the buildings" in logic.context_says(shown3)
+    assert record3["layers"]["buildings"]["status"] == "found" and set(record3["kept_from"]) == {"buildings"}
+    draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
+    assert "keep_guides = logic.keeps_live(kept, old)" in draw and '"state_buildings" not in' not in draw
+    from site_lookup.context import LIVE_ONLY
+    assert logic.LIVE_ONLY == LIVE_ONLY                    # the mark that tells a live-only credit line apart
+
+
+def test_kept_from_names_only_the_layers_kept_in_this_fetch():
+    """Review round 6: parcels down, then streets down (parcels answering again): kept_from said both."""
+    frame = looked_up()["writes"]["frame"]
+    model, record, _, guides = redraw([], None, fetch_with(frame), frame)
+    model, record, _, guides = redraw(model, record, fetch_with(frame, down={"state_parcels"}), frame, guides)
+    assert set(record["kept_from"]) == {"parcels"}
+    model, record, _, guides = redraw(model, record, fetch_with(frame, down={"state_streets"}), frame, guides)
+    assert set(record["kept_from"]) == {"streets"}
+    assert record["layers"]["parcels"]["status"] == "found" and len([1 for s, _ in model if s == "state_parcels"]) == 229
+
+
 def test_around_another_lot_nothing_of_the_earlier_one_is_kept():
     frame = looked_up()["writes"]["frame"]
-    model, record, _ = redraw([], None, fetch_with(frame), frame)
+    model, record, _, _ = redraw([], None, fetch_with(frame), frame)
     other = dict(frame, rotation_deg=frame["rotation_deg"] + 90)          # another placement: another frame
-    model2, record2, _ = redraw(model, record, fetch_with(other, down={"state_parcels"}), other)
+    model2, record2, _, _ = redraw(model, record, fetch_with(other, down={"state_parcels"}), other)
     assert not [o for s, o in model2 if s == "state_parcels"] and "kept_from" not in record2
     assert record2["layers"]["parcels"]["status"] == "offline"
 
@@ -394,7 +431,7 @@ def test_around_another_lot_nothing_of_the_earlier_one_is_kept():
 def test_nothing_answering_leaves_the_saved_neighbourhood_alone_and_the_plugin_passes_the_sources():
     assert logic.context_replaces({"layers": {"parcels": {"source": "state_parcels", "status": "offline"}}}) == set()
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
-    assert "payload, record = logic.context_merge(payload, old, frame)" in draw
+    assert "payload, record, kept = logic.context_merge(payload, old, frame, live_on_screen=on_screen)" in draw
     assert "sources = logic.context_replaces(payload) if same else None" in draw
     assert "_clear_context(doc, sources)" in draw and "json.dumps(record)" in draw
     assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc, sources)")
@@ -411,7 +448,7 @@ def test_the_plugin_writes_only_context_objects_and_keeps_guides_on_screen():
     assert body.count("doc.Objects.Add") == 2                            # a dot or a curve, per context object
     assert 'STATE["context_guides"] = ' in body and "logic.context_guides(payload)" in body
     assert "doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(record))" in body
-    assert "payload, record = logic.context_merge(payload, old, frame)" in body
+    assert "payload, record, kept = logic.context_merge(payload, old, frame, live_on_screen=on_screen)" in body
     assert "attrs.SetUserString(logic.CONTEXT_KEY, o[\"source\"])" in body
     assert "_lock_context(doc, True)" in body                            # locked: not selectable, can't be moved
     # live mode hears each add; the context changes nothing checked, so no re-check is set off by it

@@ -1097,28 +1097,37 @@ def context_replaces(payload):
     return out | ({"gordium"} if out else set())
 
 
-def context_merge(payload, old_record, frame):
-    """(payload, record) for drawing a fetch over a neighbourhood already in the file. Around the same frame, each
-    layer whose service failed keeps its saved objects (context_replaces), and its record entries (the layer, its
-    requests, its credit line) are carried over, so the record still says what is drawn; the Sources dot lists every
-    layer drawn. Around another frame (or none saved) nothing is carried over: the earlier address's go."""
+LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.context's mark on a live-only layer's credit line
+
+
+def context_merge(payload, old_record, frame, live_on_screen=False):
+    """(payload, record, kept) for drawing a fetch over a neighbourhood already in the file: the one decision the
+    panel's message, the record and the screen all follow. Around the same frame, each layer whose service failed
+    and that is still there is kept: a stored layer (store raw) is in the file; a live-only one (the footprints,
+    never saved) only when its guides are on screen for this document (`live_on_screen`: review round 6, a reopened
+    file said "Kept the buildings" with none shown). A kept layer's record entries (the layer, its requests, its
+    credit line, when it was fetched) are carried over and the Sources dot still lists it. Around another frame (or
+    none saved) nothing is carried over: the earlier address's go."""
     record = context_record(payload, frame)
     old = old_record or {}
     if not old or old.get("frame") != frame:
-        return payload, record
+        return payload, record, []
+    was = old.get("layers") or {}
     kept = [n for n, v in ((payload or {}).get("layers") or {}).items()
-            if v.get("status") not in DREW and ((old.get("layers") or {}).get(n) or {}).get("status") in DREW]
+            if v.get("status") not in DREW and (was.get(n) or {}).get("status") in DREW
+            and ((was.get(n) or {}).get("store") == "raw" or live_on_screen)]
     if not kept:
-        return payload, record
-    sources = set(old["layers"][n]["source"] for n in kept)
-    record["layers"] = dict(record.get("layers") or {}, **{n: old["layers"][n] for n in kept})
+        return payload, record, []
+    sources = set(was[n]["source"] for n in kept)
+    live_kept = any(was[n].get("store") != "raw" for n in kept)
+    record["layers"] = dict(record.get("layers") or {}, **{n: was[n] for n in kept})
     record["sources"] = list(record.get("sources") or []) + [r for r in old.get("sources") or []
                                                               if r.get("source") in sources]
     credits = list(record.get("credits") or [])
-    credits += [c for c in old.get("credits") or [] if c not in credits]
+    credits += [c for c in old.get("credits") or [] if c not in credits and (live_kept or LIVE_ONLY not in c)]
     record["credits"] = credits
-    record["kept_from"] = dict(old.get("kept_from") or {},          # when each kept layer was really fetched
-                               **{n: (old.get("kept_from") or {}).get(n) or old.get("fetched") for n in kept})
+    # when each layer kept in THIS fetch was really fetched (review round 6: never a layer fetched again since)
+    record["kept_from"] = {n: (old.get("kept_from") or {}).get(n) or old.get("fetched") for n in kept}
     objects = []
     for o in payload.get("objects") or []:
         if o.get("source") == "gordium" and o.get("name") == "Sources":
@@ -1129,7 +1138,13 @@ def context_merge(payload, old_record, frame):
                                                     if "count" in old["layers"][n]})
     payload = dict(payload, objects=objects, counts=counts,
                    message=((payload.get("message") or "") + " " + note).strip())
-    return payload, record
+    return payload, record, kept
+
+
+def keeps_live(kept, old_record):
+    """Whether the merge kept a live-only layer (its guides on screen stay): from context_merge's own kept list."""
+    layers = (old_record or {}).get("layers") or {}
+    return any((layers.get(n) or {}).get("store") != "raw" for n in kept or [])
 
 
 def context_objects(payload):

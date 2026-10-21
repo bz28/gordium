@@ -2188,11 +2188,13 @@ def draw_context(doc, frame):
         say(logic.context_says(payload))
         return payload
     old = _context_record(doc)
-    payload, record = logic.context_merge(payload, old, frame)
+    held = STATE.get("context_guides") or {}
+    on_screen = held.get("doc") == doc.RuntimeSerialNumber and bool(held.get("lines"))
+    # one decision for the message, the record and the screen (review round 6): what the merge keeps
+    payload, record, kept = logic.context_merge(payload, old, frame, live_on_screen=on_screen)
     same = bool(old) and old.get("frame") == frame
     sources = logic.context_replaces(payload) if same else None     # another frame: the earlier address's all go
-    held = STATE.get("context_guides") or {}
-    keep_guides = same and "state_buildings" not in (sources or ()) and held.get("doc") == doc.RuntimeSerialNumber
+    keep_guides = logic.keeps_live(kept, old)
     STATE.pop("context_guides", None)
     dirty = STATE.get("dirty")             # live mode hears every add: the context changes nothing the check reads,
     _clear_context(doc, sources)           # so the model's "changed since the check" mark is put back after
