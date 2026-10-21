@@ -102,9 +102,17 @@ def covering(hand_rule, drafted, ctx, from_law=None):
     def names(rule):
         return {n for t in rule_formulas(rule) for n in formula.names(t)} - {"district"}
 
+    def measured(rule):                  # use and district pick which number applies; they aren't what is checked
+        return names(rule) - {"use"}
+
     def covers(r):
         mine = lines(r, quotes_only=r["id"] in from_law)
-        return bool(mine & quoted) or bool(mine & wanted and names(r) & names(hand_rule))
+        if mine & quoted:
+            return True
+        # a cell match needs a measure in common; two use rules match on use (R-2c's side yards cite the use rows
+        # as inputs: the permitted-use rule doesn't cover them, so they count as undrafted, never as a pass)
+        same = measured(r) & measured(hand_rule) if measured(hand_rule) else not measured(r) and names(r) & names(hand_rule)
+        return bool(mine & wanted and same)
     return [r for r in drafted if covers(r)]
 
 
@@ -552,3 +560,19 @@ def test_a_drafted_rule_that_doesnt_apply_where_the_key_fails_is_a_false_pass(ct
     assert len(g["false_pass"]) == 1 and g["false_pass"][0]["got"] == "not_applicable"
     nothing = grade_hand_key(key, ctx, drafted=[])         # no drafted rule: counted as undrafted, never left out
     assert nothing["total"] == 1 and len(nothing["undrafted"]) == 1
+
+
+def test_a_rule_citing_use_rows_as_inputs_isnt_covered_by_the_permitted_use_rule(ctx):
+    """The blind R-2 keys: R-2c's side-yard minimums depend on the use, so the key cites the use rows; the harness
+    matched the drafted permitted-use rule (use in [...]) and judged the side yards as passing: a false pass of the
+    grader. Use picks which number applies; a cell match needs a measure in common."""
+    use_cell = {"file": CHART, "page": 2, "cell": {"section": "Primary Uses", "row": "One-family dwelling, semi-detached [fn4]",
+                                                   "column": "R-2C"}}
+    side = {"file": CHART, "page": 3, "cell": {"section": "Yard Dimensions", "row": "Side (other side minimum)",
+                                               "column": "R-2C"}}
+    hand = {"id": "h", "check": 'side_yard_smaller >= (10 if use == "one_family_semi_detached" else 5)',
+            "sources": [use_cell, side]}
+    use_rule = {"id": "R-2c.use", "check": 'use in ["one_family_semi_detached"]', "sources": [use_cell]}
+    assert covering(hand, [use_rule], ctx, from_law=set()) == []
+    hand_use = {"id": "hu", "kind": "flag", "applies_when": 'use in ["one_family_semi_detached"]', "sources": [use_cell]}
+    assert covering(hand_use, [use_rule], ctx, from_law=set()) == [use_rule]      # two use rules still match
