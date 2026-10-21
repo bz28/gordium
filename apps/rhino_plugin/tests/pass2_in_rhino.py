@@ -7,7 +7,8 @@ own windows by window id after each step (the step writes <temp>/gordium_pass2/r
   the tax map.
 - "side_yard" (1): the house moved toward a side lot line until that yard is 3'-0" short as drawn; the row's
   "To comply" says "whatever the survey shows" and gives the move under every reading, the as-drawn one after it.
-- "apply_move" (1): the house moved by exactly what it said: that row complies.
+- "apply_move" (1): that side wall pulled back by exactly what it said ("this yard needs … more — e.g. pull the side
+  wall back that far; other yards unchanged"): that row complies and no other row is worse.
 - "zoom" (3): Zoom to on that row selects its objects.
 - "button" (2): the row waiting on stated facts (Parking): its "Enter …" button comes right after the reason, on
   screen without scrolling, and its words aren't repeated as text (with the merged measuring the one starting house
@@ -118,6 +119,34 @@ def move_house(g, doc, vector):
     quiet(g)
 
 
+def pull_wall(g, doc, out, gap):
+    """The house's wall nearest a lot line pulled back `gap` ft along `out` (away from that line), its far side kept:
+    the house scaled along `out` only, anchored at its far side, what "pull the side wall back that far" means.
+    With out None, the last pull undone."""
+    if out is None:
+        plane, s = A.pop("pull")
+        plane = rg.Plane(rg.Point3d(*plane[0]), rg.Vector3d(*plane[1]), rg.Vector3d(*plane[2]))
+        xform = rg.Transform.Scale(plane, 1.0 / s, 1.0, 1.0)
+    else:
+        box = rg.BoundingBox.Empty
+        for o in g._buildings(doc):
+            box.Union(o.Geometry.GetBoundingBox(True))
+        corners = list(box.GetCorners())
+        proj = [rg.Vector3d(q) * out for q in corners]
+        far = corners[proj.index(max(proj))]
+        side = rg.Vector3d.CrossProduct(rg.Vector3d.ZAxis, out)
+        plane = rg.Plane(far, out, side)
+        width = max(proj) - min(proj)
+        s = (width - gap / g._scale(doc)) / width
+        A["pull"] = ([far.X, far.Y, far.Z], [out.X, out.Y, out.Z], [side.X, side.Y, side.Z]), s
+        xform = rg.Transform.Scale(plane, s, 1.0, 1.0)
+    for o in g._buildings(doc):
+        doc.Objects.Transform(o.Id, xform, True)
+    quiet(g)
+    g.run_check(doc, report=False)
+    quiet(g)
+
+
 def capture(doc, view_name, name, frame=True):
     view = doc.Views.Find(view_name, False)
     if frame:
@@ -176,8 +205,9 @@ try:
         A.update(side=side["name"], out=[out.X, out.Y, out.Z], have=have, need=need)
         select(g, now)
         hint = now.get("hint") or ""
-        m = re.fullmatch(r"To comply whatever the survey shows: move the building (\S+(?: \d/\d)?\") farther from "
-                         r"that lot line \((\S+(?: \d/\d)?\") as drawn\)\.", hint)
+        m = re.fullmatch(r"To comply whatever the survey shows: this yard needs (\S+(?: \d/\d)?\") more "
+                         r"\((\S+(?: \d/\d)?\") as drawn\) — e\.g\. pull the side wall back that far"
+                         r"(?: at its closest point)?; other yards unchanged\.", hint)
         log["row"] = {"name": now["name"], "status": now["status"], "hint": hint, "reason": now.get("reason")}
         claim("1 on the tax map: the move under every reading, then the as-drawn one", m is not None and
               abs(feet(m.group(2)) - 3.0) < 0.02 and feet(m.group(1)) > feet(m.group(2)), log["row"])
@@ -186,12 +216,16 @@ try:
         claim("1 the panel shows it", hint in shown, shown[:12])
         capture(doc, "Top", "side_yard")
     elif step == "apply_move":
-        out = rg.Vector3d(*A["out"])
-        move_house(g, doc, out * (A["gap"] / g._scale(doc)))
+        before = {n: i["status"] for n, i in items(g).items()}
+        pull_wall(g, doc, rg.Vector3d(*A["out"]), A["gap"])          # that side wall pulled back, the rest kept
         now = items(g)[A["side"]]
         select(g, now)
         log["row"] = {"name": now["name"], "status": now["status"], "reason": now.get("reason"), "delta": now.get("delta")}
         claim("1 doing exactly what it said: the row complies", now["status"] == "complies", log["row"])
+        rank = {"does_not_comply": 0, "needs_review": 1, "complies": 2}
+        worse = [(n, before[n], i["status"]) for n, i in items(g).items()
+                 if n in before and before[n] in rank and i["status"] in rank and rank[i["status"]] < rank[before[n]]]
+        claim("1 and no other row worse", not worse, worse)
     elif step == "zoom":
         now = items(g)[A["side"]]
         g.zoom_to(now)
@@ -202,7 +236,7 @@ try:
               if now.get("objects") else False, log["zoom"])
         capture(doc, "Top", "zoom", frame=False)
     elif step == "button":
-        move_house(g, doc, rg.Vector3d(*A["out"]) * (-A["gap"] / g._scale(doc)))     # back where it started
+        pull_wall(g, doc, None, None)                    # the wall back where it was (the pull undone)
         row_ = next(i for i in g.STATE["panel_parts"]["view"]["items"] if i.get("needs"))   # waits on stated facts
         select(g, row_)
         import Eto.Forms as ef

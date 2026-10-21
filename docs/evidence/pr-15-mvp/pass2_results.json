@@ -27,7 +27,7 @@
     "detail": {
      "name": "Side yard, Northeast",
      "status": "does_not_comply",
-     "hint": "To comply whatever the survey shows: move the building 5'-0\" farther from that lot line (3'-0\" as drawn).",
+     "hint": "To comply whatever the survey shows: this yard needs 5'-0\" more (3'-0\" as drawn) — e.g. pull the side wall back that far at its closest point; other yards unchanged.",
      "reason": null
     }
    },
@@ -36,7 +36,7 @@
     "detail": [
      "✕ Side yard, Northeast · Does not comply",
      "7'-0\" proposed, 10'-0\" required as drawn · with the tax map's ±2'-0\": at least 1'-0\" short",
-     "To comply whatever the survey shows: move the building 5'-0\" farther from that lot line (3'-0\" as drawn).",
+     "To comply whatever the survey shows: this yard needs 5'-0\" more (3'-0\" as drawn) — e.g. pull the side wall back that far at its closest point; other yards unchanged.",
      "In the model: red is the part over the yard line whichever way the tax map's lot lines (±2'-0\") really lie (certain); amber is the part that depends on where a survey puts them.",
      "Measured: 1 group, 3 solids on Gordium::Massing · footprint 1,341 sf",
      "“Yard Dimensions · Side (one side minimum) · R-1B: 10 ft”",
@@ -60,6 +60,10 @@
      "reason": null,
      "delta": "at the limit at worst"
     }
+   },
+   "1 and no other row worse": {
+    "ok": true,
+    "detail": []
    }
   }
  },
@@ -70,16 +74,16 @@
     "ok": true,
     "detail": {
      "objects": [
-      "7945bd6b-b434-4ac8-9b9b-1e3e0f61a9d4",
-      "d93cbf78-0f0a-4819-809a-cd0e7dd1f91d",
-      "bdd27b33-4a4e-4150-bbb9-6b36912467fe",
-      "939180cb-1f0d-45ce-8525-e17c4951f415"
+      "3b5060fe-4098-438f-8cac-c1b44944b9f2",
+      "25f29b59-c6f8-4f49-9562-f3240f7e03e6",
+      "cb3a1a19-6603-45ac-af92-403308db9d52",
+      "95d42efa-0192-45a2-af46-f11b7428ae84"
      ],
      "selected": [
-      "939180cb-1f0d-45ce-8525-e17c4951f415",
-      "bdd27b33-4a4e-4150-bbb9-6b36912467fe",
-      "d93cbf78-0f0a-4819-809a-cd0e7dd1f91d",
-      "7945bd6b-b434-4ac8-9b9b-1e3e0f61a9d4"
+      "95d42efa-0192-45a2-af46-f11b7428ae84",
+      "cb3a1a19-6603-45ac-af92-403308db9d52",
+      "25f29b59-c6f8-4f49-9562-f3240f7e03e6",
+      "3b5060fe-4098-438f-8cac-c1b44944b9f2"
      ]
     }
    }

@@ -193,47 +193,112 @@ def _changed(measured: dict, changes: dict) -> dict:
     return out
 
 
-def confirm_advice(items: list[dict], by_id: dict, measured: dict, allowed: dict, facts: dict) -> None:
-    """Every "To comply" is the checker's to confirm: each way it names (and each "…if it stays that tall"
-    clause), applied to the measurements, decided again by row_verdict (a side yard: its own side's check), is kept
-    only if the row then complies. None left: no hint. A "To comply" that says no change the checker can try is
-    dropped (never advice that leaves a row in review: the architect's review, pass 2; review round 2, R1: a rear
-    yard on 106, its limit waiting on which lines are side or rear, was told to move the building)."""
-    rows = {i.get("measure"): by_id.get(i.get("rule")) for i in items if i.get("measure") and by_id.get(i.get("rule"))}
+def _raised_by(rules: list, values: dict) -> dict:
+    """measure -> [(rule, comparison)]: the yards a rule with several ways to comply raises as the design stands
+    (`values`): its first way not met, another way met, that way's comparison on the yard (the height bonus), as
+    present._raise_yards shows them on the panel."""
+    out = {}
+    for rule in rules:
+        body = formula.parse(rule["check"]).body if rule.get("check") else None
+        if not (isinstance(body, ast.BoolOp) and isinstance(body.op, ast.Or)):
+            continue
+        if present._evaluate(ast.unparse(body.values[0]), values) is not False:
+            continue
+        for alt in body.values[1:]:
+            if present._evaluate(ast.unparse(alt), values) is not True:
+                continue
+            for c in [alt] if isinstance(alt, ast.Compare) else getattr(alt, "values", []):
+                if isinstance(c, ast.Compare) and isinstance(c.left, ast.Name) and c.left.id in present.YARD_MEASURES:
+                    out.setdefault(c.left.id, []).append((rule, ast.unparse(c)))
+            break
+    return out
 
-    def verdict(rule, measure, changes):
-        return row_verdict(rule, _changed(measured, changes), allowed, facts,
-                           check=side_checks(rule).get(measure))
 
+def _at_closest(site: dict | None, points) -> bool:
+    """Whether a yard's wall isn't parallel to the lot line it is measured to, so pulling it back by the figure is
+    said "at its closest point" to stay exact (the coordinator, review round 4): the measured wall point on no wall
+    edge parallel to a lot edge through the lot-line point. Without the geometry, the exact wording (True)."""
+    if not site or not points or len(points) < 2:
+        return True
+    p, w = points[0][:2], points[1][:2]
+
+    def on(q, a, b):
+        ax, ay, bx, by = a[0], a[1], b[0], b[1]
+        L2 = (bx - ax) ** 2 + (by - ay) ** 2
+        t = 0 if L2 == 0 else max(0.0, min(1.0, ((q[0] - ax) * (bx - ax) + (q[1] - ay) * (by - ay)) / L2))
+        return ((q[0] - ax - t * (bx - ax)) ** 2 + (q[1] - ay - t * (by - ay)) ** 2) ** 0.5 < 1e-3
+
+    def unit(a, b):
+        n = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+        return ((b[0] - a[0]) / n, (b[1] - a[1]) / n) if n else None
+
+    lot = [unit(*e["points"][k:k + 2]) for e in (site.get("lot") or {}).get("edges") or []
+           for k in range(len(e["points"]) - 1) if on(p, *e["points"][k:k + 2])]
+    walls = []
+    for b in site.get("buildings") or []:
+        faces = [f["points"] for f in b.get("faces") or [] if f.get("points")]
+        low = min((q[2] for f in faces for q in f), default=None)
+        for f in faces:
+            if low is not None and all(abs(q[2] - low) < 1e-6 for q in f):          # its footprint
+                ring = [q[:2] for q in f] + [f[0][:2]]
+                walls += [unit(ring[k], ring[k + 1]) for k in range(len(ring) - 1) if on(w, ring[k], ring[k + 1])]
+    return not any(u and v and abs(u[0] * v[1] - u[1] * v[0]) < 0.0087 for u in lot for v in walls)   # 0.5°
+
+
+def confirm_advice(items: list[dict], by_id: dict, measured: dict, allowed: dict, facts: dict,
+                   site: dict | None = None) -> None:
+    """Every "To comply" is the checker's to confirm. Each piece (each way, each "…if it stays that tall" clause) is
+    applied to the measurements and every row decided again by row_verdict, a yard with any raise the height bonus
+    then puts on it, as the panel shows it: the piece is kept only if its row then complies, every rule it answers
+    to complies (a clause: the whole height rule), and no other row is worse than it is now (review round 4: a move
+    re-checked against its own row and its opposite yard alone newly failed side yards on a narrowing lot, and a
+    raised rear yard; the "if it stays tall" figure, other raised yards). Pieces only ever change one measurement,
+    one wall pulled back, so the re-decision is exact. Nothing left: no hint. A "To comply" with no change the
+    checker can try is dropped (the architect's review, pass 2; round 2, R1: 106's rear yard told to move)."""
+    rules = [by_id[i["rule"]] for i in items if by_id.get(i.get("rule"))]
+    rules = list({r["id"]: r for r in rules}.values())
+
+    def statuses(changes):
+        changed = _changed(measured, changes)
+        raised = _raised_by(rules, {k: m.get("value") for k, m in changed.items()})
+        out = {}
+        for it in items:
+            rule = by_id.get(it.get("rule"))
+            if rule is None:
+                continue
+            m = it.get("measure")
+            st = row_verdict(rule, changed, allowed, facts, check=side_checks(rule).get(m))
+            for r, e in raised.get(m) or []:
+                got = row_verdict(r, changed, allowed, facts, check=e)
+                st = got if present.RANK[got] < present.RANK[st] else st
+            out[it["id"]] = st
+        return out
+
+    before = None
     for i in items:
         advice = i.pop("_advice", None)
         if not (i.get("hint") or "").startswith("To comply"):
             continue
-        rule = by_id.get(i.get("rule"))
-        if advice is None or rule is None:
+        if advice is None or by_id.get(i.get("rule")) is None:
             i["hint"] = None
             continue
+        before = before or statuses({})
 
-        def complies(part):
-            """The row complies with the change made, and so does each raise it answers to (a yard the height
-            bonus raises: review round 3, F3, else any change at all confirmed against the yard's own minimum)."""
-            return bool(part["changes"]) and verdict(rule, i.get("measure"), part["changes"]) == present.COMPLIES \
-                and all(row_verdict(by_id[r], _changed(measured, part["changes"]), allowed, facts, check=e)
-                        == present.COMPLIES for r, e in part.get("also") or [] if r in by_id)
+        def holds(part):
+            if not part["changes"]:
+                return False
+            after = statuses(part["changes"])
+            changed = _changed(measured, part["changes"])
+            return after.get(i["id"]) == present.COMPLIES \
+                and all(row_verdict(by_id[r], changed, allowed, facts, check=e) == present.COMPLIES
+                        for r, e in part.get("also") or [] if r in by_id) \
+                and all(present.RANK[after[k]] >= present.RANK[v] for k, v in before.items() if k in after)
 
-        ways = []
-        ways = [w for w in advice["ways"] if complies(w)]
-        clauses = [c for c in advice.get("clauses") or [] if ways and complies(c)]
-        for k, w in enumerate(ways):
-            opp = w.get("opposite")
-            if opp and rows.get(opp) is not None:   # moving the building brings that line closer (round 3, F2):
-                # "move the building" only while the opposite yard complies and still would at the largest figure
-                # the hint names (its "…if it stays that tall" too); else the advice keeps the other yards (an
-                # opposite yard already short has nothing to give: over its line, even)
-                most = max([w["changes"][i["measure"]]] + [c["changes"].get(i["measure"], 0) for c in clauses])
-                moved = verdict(rows[opp], opp, {opp: -most})
-                if verdict(rows[opp], opp, {}) != present.COMPLIES or moved != present.COMPLIES:
-                    ways[k] = dict(w, text=w["keep"])
+        ways = [w for w in advice["ways"] if holds(w)]
+        clauses = [c for c in advice.get("clauses") or [] if holds(c)]
+        if advice.get("action"):
+            advice["action"] = dict(advice["action"],
+                                    closest=_at_closest(site, (measured.get(i.get("measure")) or {}).get("points")))
         i["hint"] = present.advice_text(dict(advice, ways=ways, clauses=clauses))
 
 
@@ -481,7 +546,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
     extras = {**(extras or {}), "side_lines": side_lines(site, facts)}   # compass names when a side isn't measured
     v = present.view(rows, waiting, by_id, measured, facts, extras)
-    confirm_advice(v["items"], by_id, measured, allowed, facts)   # each "To comply" the checker's, or none
+    confirm_advice(v["items"], by_id, measured, allowed, facts, site)   # each "To comply" the checker's, or none
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
