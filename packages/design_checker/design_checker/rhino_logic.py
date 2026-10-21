@@ -944,6 +944,8 @@ def context_frame(facts, saved_ui):
     saved_ui = saved_ui or {}
     lot = (facts or {}).get("lot_id")
     frame = saved_ui.get("lookup_frame")
+    if saved_ui.get("from_sample"):      # the sample lot (review round 3: it kept an earlier lookup's frame)
+        return None
     return frame if frame and lot and lot == saved_ui.get("replaceable_lot") else None
 
 

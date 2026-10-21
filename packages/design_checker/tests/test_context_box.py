@@ -238,6 +238,20 @@ def test_the_neighbourhood_is_drawn_only_around_the_lot_the_lookup_drew():
     assert logic.context_frame({"lot_id": "lot-1"}, logic.settle(saved, "lot")) is None   # the architect's own
     assert logic.context_frame({"lot_id": "lot-1"}, dict(saved, lookup_frame=None)) is None
     assert logic.context_frame({}, saved) is None and logic.context_frame(None, None) is None
+    # review round 3: the sample lot added to an emptied model kept an earlier lookup's frame
+    assert logic.context_frame({"lot_id": "lot-1"}, dict(saved, from_sample=True)) is None
+
+
+def test_a_draw_on_the_same_lot_brings_back_what_a_reopened_file_lost_and_says_every_removal():
+    """Review round 3: in a reopened file the footprints (never saved) weren't fetched again on Draw, and a hidden
+    context layer stayed hidden with the tick on; the "clear" step removed the neighbourhood without a word."""
+    sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_visible(")]
+    keep = sync[sync.index('if step == "keep" and frame and on and not loaded:'):sync.index('if step in ("clear"')]
+    assert "draw_context(doc, frame)" in keep and "_clear_context" not in keep    # offline keeps what is saved
+    draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
+    assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc)")
+    assert 'say("Neighbourhood removed: it is drawn only around a lot the start box looked up.")' in sync
+    assert "_context_visible(doc, True)" in sync
 
 
 def test_every_draw_of_a_box_brings_the_neighbourhood_in_line_with_the_lot():
@@ -249,7 +263,7 @@ def test_every_draw_of_a_box_brings_the_neighbourhood_in_line_with_the_lot():
     start = RHINO[RHINO.index("def gordium_start("):RHINO.index("\n# ---- the context map")]
     assert "_clear_context" not in start and "draw_context" not in start      # one way only: through the box
     sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_visible(")]
-    assert "logic.context_step(frame, drawn, STATE.get(\"context_on\", True))" in sync
+    assert "step = logic.context_step(frame, drawn, on)" in sync
     assert "frame = logic.context_frame(facts, _ui_state(doc))" in sync
     assert 'say("Neighbourhood not drawn: Show neighbourhood is off' in sync                 # never silently skipped
     show = RHINO[RHINO.index("def show_context("):RHINO.index("def _doc_name(")]

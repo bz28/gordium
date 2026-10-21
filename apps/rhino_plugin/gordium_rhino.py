@@ -2155,13 +2155,24 @@ def sync_context(doc, facts):
     except (ValueError, AttributeError):
         drawn = None
     frame = logic.context_frame(facts, _ui_state(doc))
-    step = logic.context_step(frame, drawn, STATE.get("context_on", True))
+    on = STATE.get("context_on", True)
+    step = logic.context_step(frame, drawn, on)
+    loaded = (STATE.get("context_guides") or {}).get("doc") == doc.RuntimeSerialNumber
+    if step == "keep" and frame and on and not loaded:
+        # the same lot in a reopened file: its footprints (never saved) fetched again. draw_context replaces what is
+        # drawn only once the fetch has worked, so offline the saved parcels and streets stay (review round 3)
+        draw_context(doc, frame)
+        return
     if step in ("clear", "draw", "off"):
         _clear_context(doc)
     if step == "draw":
-        draw_context(doc, frame)
+        draw_context(doc, frame)       # says what it drew, or why not
     elif step == "off":
         say("Neighbourhood not drawn: Show neighbourhood is off in the panel (tick it to draw it).")
+    elif step == "clear":
+        say("Neighbourhood removed: it is drawn only around a lot the start box looked up.")
+    elif frame and on:
+        _context_visible(doc, True)    # as the tick says (a file saved with it off opens hidden)
 
 
 def _context_visible(doc, on):
