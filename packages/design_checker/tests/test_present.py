@@ -61,7 +61,9 @@ def test_an_at_limit_yard_needs_review_on_a_tax_map_lot_but_complies_on_a_survey
     tm = items(tax_map["view"])
     assert tm["Side yard, West"]["status"] == present.REVIEW
     assert "tax map" in tm["Side yard, West"]["reason"] and "8'-0\"" in tm["Side yard, West"]["reason"]
-    assert tm["Rear yard"]["status"] == present.COMPLIES          # +2'-6" > 2'-0" even at the worst case
+    # +2'-6" is less than the tax map can take: 2'-0" nearer the rear line, and 1'-0" more required from a lot depth
+    # 4'-0" more (each side lot line 2'-0" longer, Ben 2026-10-21)
+    assert tm["Rear yard"]["status"] == present.REVIEW and "tax map" in tm["Rear yard"]["reason"]
     assert tm["Lot width"]["status"] == present.COMPLIES
     sv = items(check(MODEL, surveyed)["view"])
     assert sv["Side yard, West"]["status"] == present.COMPLIES      # a survey: no tolerance
@@ -76,7 +78,7 @@ def test_complies_only_when_the_checker_passed_or_it_holds_at_the_tax_map_worst_
             assert rows[i["rule"]]["Provisional"] == present.SURVEY_ONLY, i["name"]
             assert "worst case" in i["reason"], i["name"]
     area = items(tax_map["view"])["Lot area"]                      # the 73 × 90 lot of 106 Ithaca Rd
-    assert area["status"] == present.COMPLIES and "worst case (lot area 6,248 sf)" in area["reason"]   # 71 × 88
+    assert area["status"] == present.REVIEW and "at worst 5,934 sf against 6,000 sf" in area["reason"]  # 69 × 86
 
 
 # ---- C3–C6: the grade, the roof ---------------------------------------------------------------------------------
@@ -353,3 +355,17 @@ def test_two_sections_with_the_same_row_are_never_mixed_up(monkeypatch, tmp_path
         "Minimum Lot Width · One-family dwelling, detached · R-1A: 75 ft"
     assert quote("Minimum Lot Width", "One-family dwelling, detached, by conversion") == \
         "Minimum Lot Width · One-family dwelling, detached, by conversion · R-1A"
+
+
+def test_the_tax_map_worst_case_moves_every_lot_line_2_ft_the_unlucky_way():
+    """Ben, 2026-10-21 (stress test F2): one rule for every lot-dependent item, worked by hand on 106 Ithaca Rd's
+    73 x 90 lot: lot area at worst 69 x 86 = 5,934 sf (was 71 x 88 = 6,248, 1 ft per line), a lot width or depth
+    off by 4 ft (two lines), a yard by 2 ft (one line). One definition, used by measurement, checker and generator."""
+    from shapely.geometry import Polygon
+    from model_measurement.measure import TAX_MAP_SLACK, tax_map_lot_area
+    area = tax_map_lot_area(Polygon([(0, 0), (73, 0), (73, 90), (0, 90)]))
+    assert (area["low"], area["high"]) == (69 * 86, 77 * 94) == (5934, 7238)
+    assert TAX_MAP_SLACK["lot_width"] == TAX_MAP_SLACK["lot_depth"] == 4.0 and TAX_MAP_SLACK["rear_yard"] == 2.0
+    assert present.TAX_MAP_SLACK is TAX_MAP_SLACK                                   # the checker reads the same one
+    worst = present._worst_case("lot_width >= 70", {"lot_width": 73.0}, {"lot_width"})
+    assert worst == {"lot_width": 69.0}                                             # 73 − 4: fails 70 at worst

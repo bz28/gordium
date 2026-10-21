@@ -84,7 +84,7 @@ def test_a_fix_is_never_rounded_short():
 def test_the_tax_map_worst_case_applies_to_the_lot_area_too():
     v = _items("08_tax_map_lot_front_yard_within_two_feet.yaml")
     assert v["Lot area"]["status"] == present.COMPLIES
-    assert "worst case (lot area 6,844 sf)" in v["Lot area"]["reason"]          # 58 × 118
+    assert "worst case (lot area 6,496 sf)" in v["Lot area"]["reason"]          # every line 2 ft in: 56 × 116
     assert v["Front yard"]["status"] == present.REVIEW                         # 26 ft: at worst 24 ft
 
 
@@ -164,8 +164,9 @@ def _bonus_at(outline, floors=None):
 
 
 def test_a_raised_rear_yard_gets_the_full_tax_map_worst_case_lot_depth_too():
-    v = _bonus_at([[14, 30], [46, 30], [46, 85.8], [38, 85.8], [38, 50], [14, 50]])     # rear 34.2, needs 32 (+0.5)
-    assert v["Rear yard"]["status"] == present.REVIEW and "32'-6\"" in v["Rear yard"]["reason"]
+    v = _bonus_at([[14, 30], [46, 30], [46, 85.8], [38, 85.8], [38, 50], [14, 50]])     # rear 34.2, needs 32
+    # at worst: 2 ft nearer the rear line (32.2) and the lot 4 ft deeper (each side line 2 ft longer): needs 33
+    assert v["Rear yard"]["status"] == present.REVIEW and "33'-0\"" in v["Rear yard"]["reason"]
 
 
 def test_a_yard_already_in_review_is_raised_too():

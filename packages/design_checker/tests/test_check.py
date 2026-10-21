@@ -309,8 +309,9 @@ def test_the_massing_layer_holds_building_objects():
 
 
 def test_the_sample_lot_gives_the_spec_massing():
-    """73'-0" x 90'-0" (6,570 sf, from the tax map) -> kept 2'-0" back: 49'-0" x 31'-10" = 1,560 sf, 23.74% of the lot as
-    drawn (25% of the smallest lot the tax map allows, 71 x 88), at 27'-0" from the street."""
+    """73'-0" x 90'-0" (6,570 sf, from the tax map) -> kept 2'-0" back: 49'-0" x 30'-3" = 1,482 sf, 22.56% of the lot as
+    drawn (25% of the smallest lot the tax map allows: every line 2 ft in, 69 x 86 = 5,934 sf, so at most 1,483.5
+    sf), at 27'-0" from the street."""
     import math
     import tempfile
     from pathlib import Path
@@ -334,8 +335,8 @@ def test_the_sample_lot_gives_the_spec_massing():
     outline = Polygon(got["floors"][0]["outline"])
     x0, y0, x1, y1 = outline.bounds
     assert Polygon(s["lot"]).area == 6570 and s["facts"]["lot_surveyed"] is False
-    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (49, 31 * 12 + 10)
-    assert round(outline.area) == 1560 and round(outline.area / 6570 * 100, 2) == 23.74
+    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (49, 30 * 12 + 3)
+    assert round(outline.area) == 1482 and round(outline.area / 6570 * 100, 2) == 22.56 and outline.area <= 0.25 * 5934
     assert y0 == 27 and len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
 
 
@@ -376,11 +377,11 @@ def test_the_start_preview_and_the_panel_say_the_same_coverage(facts):
     from design_checker.check import start
     got = start(MODEL, {**facts, "lot_surveyed": False})
     # tax-map lot, kept 2'-0" back (worked by hand): width 73 − 2 × (10 + 2) = 49'-0"; coverage for the smallest lot
-    # the tax map allows, 25% × 71 × 88 = 1,562 sf, so depth 1,562 / 49 = 31.88 → 31'-10" (whole inches, down);
-    # 49 × 31.833 = 1,559.8 sf = 23.74% of the drawn 6,570 sf: the panel shows it to 0.1% (margin over 0.5%), up
-    assert got["preview"]["coverage"] == "23.8%"
+    # the tax map allows (every line 2 ft in), 25% × 69 × 86 = 1,483.5 sf, so depth 1,483.5 / 49 = 30.28 → 30'-3"
+    # (whole inches, down); 49 × 30.25 = 1,482.25 sf = 22.56% of the drawn 6,570 sf: shown to 0.1%, up
+    assert got["preview"]["coverage"] == "22.6%"
     assert got["preview"]["coverage"] == present._display(got["area"] / 6570 * 100, 25.0, None, "%", "≤")[0]
-    assert got["preview"]["size"] == "49'-0\" × 31'-10\"" and got["preview"]["height"] == "35'-0\""
+    assert got["preview"]["size"] == "49'-0\" × 30'-3\"" and got["preview"]["height"] == "35'-0\""
     assert got["preview"]["limit"] == "25%"                 # the limit beside it (A11), a maximum rounded down
 
 
@@ -397,7 +398,10 @@ def test_on_a_tax_map_lot_the_starting_house_complies_even_at_the_worst_case(fac
     assert not any("NEEDS REVIEW for coverage" in n for n in tax["notes"])
     site = {**read_site(MODEL, facts), "buildings": floor_solids(tax["floors"])}
     view = check_site(site, {**facts, "lot_surveyed": False})["view"]
-    assert not [i["name"] for i in view["items"] if i["status"] == present.REVIEW and "tax map" in (i["reason"] or "")]
+    assert not [i["name"] for i in view["items"] if i["status"] == present.REVIEW and "tax map" in (i["reason"] or "")
+                and i.get("measure") not in ("lot_area", "lot_width", "lot_depth")]
+    lot_area = next(i for i in view["items"] if i["name"] == "Lot area")    # the lot's own size, not the house's:
+    assert lot_area["status"] == present.REVIEW and "at worst 5,934 sf against 6,000 sf" in lot_area["reason"]
     surveyed = start(MODEL, {**facts, "lot_surveyed": True})
     assert surveyed["kept_back"] == 0.0 and TAX_MAP_NOTE not in surveyed["notes"]
     xs = [p[0] for p in surveyed["floors"][0]["outline"]]

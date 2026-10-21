@@ -138,15 +138,17 @@ def test_6_widen_4_ft_to_the_east(house):
     got, facts = house
     floors = copy.deepcopy(got["floors"])
     east = max(p[0] for p in floors[0]["outline"])
-    feet, proposed, margin, coverage = said(r"widen the house (\d+) ft to the east\*\* \(the east face\). Side yard,"
-                                            r" East " + LEN + r": \*\*does not comply, (−\d+'-\d+\")\*\*, and lot"
-                                            r" coverage (\d+\.\d%)")
+    feet, proposed, margin, coverage, worst = said(
+        r"widen the house (\d+) ft to the east\*\* \(the east face\). Side yard, East " + LEN
+        + r": \*\*does not comply, (−\d+'-\d+\")\*\*, and lot coverage (\d+\.\d%) needs review: at the tax map's"
+        r" worst case it would be (\d+\.\d%)")
     for f in floors:
         f["outline"] = [[x + float(feet) if x == east else x, y] for x, y in f["outline"]]
     items = _check(floors, facts, grade_is="finished")
     side = items["Side yard, East"]
     assert (side["status"], side["proposed"], side["margin"]) == (present.FAILS, proposed, margin)
-    assert items["Lot coverage"]["status"] == present.FAILS and items["Lot coverage"]["proposed"] == coverage
+    assert items["Lot coverage"]["status"] == present.REVIEW and items["Lot coverage"]["proposed"] == coverage
+    assert f"at worst {worst}" in items["Lot coverage"]["reason"]
 
 
 def test_8_a_garage_not_on_the_building_layer(house):
@@ -171,7 +173,7 @@ def test_10_the_height_bonus_done_right(house):
     assert feet == "3"                        # the edits below are the guide's: 3 ft back and 3 ft in on each side
     floors[-1]["top"] += 3                                         # 38'-0": every yard must be 3 ft larger
     # on a tax-map lot, 2 ft more than that (the worst case): 3 ft back (front 30'-0" ≥ 28 + 2) and 3 ft in on each
-    # side (15'-0" ≥ 13 + 2); the rear, 28'-2", is at worst 26'-2" ≥ 23 + 3 (the lot 2 ft deeper)
+    # side (15'-0" ≥ 13 + 2); the rear, 29'-9", is at worst 27'-9" ≥ 24 + 1.5 (the lot 4 ft deeper: 25'-6")
     for f in floors:
         f["outline"] = [[x + (3 if x == 12.0 else -3 if x == 61.0 else 0), y + 3] for x, y in f["outline"]]
     items = _check(floors, facts, grade_is="finished")
@@ -182,7 +184,11 @@ def test_10_the_height_bonus_done_right(house):
 
 def test_11_spot_grades_then_the_house_moves(house):
     got, facts = house
-    spots = [[36.5, 26.5, 0.0], [36.5, 59.4, 0.0], [11.5, 43.0, 0.0], [61.5, 43.0, 0.0]]
+    o = got["floors"][0]["outline"]
+    x0, x1 = min(p[0] for p in o), max(p[0] for p in o)
+    y0, y1 = min(p[1] for p in o), max(p[1] for p in o)
+    mx, my = (x0 + x1) / 2, (y0 + y1) / 2               # one point just outside each wall, as the guide says
+    spots = [[mx, y0 - 0.5, 0.0], [mx, y1 + 0.5, 0.0], [x0 - 0.5, my, 0.0], [x1 + 0.5, my, 0.0]]
     grade = {k: v for k, v in facts.items() if k not in ("ground_is_flat", "grade_elevation")}
     on = _check(got["floors"], grade, grade_is="finished", grade_from="finished_spots", grade_points=spots)
     assert on["Building height"]["status"] == present.COMPLIES
@@ -227,9 +233,9 @@ def test_the_quickstart_test_reads_the_guide():
     global GUIDE
     real = GUIDE
     try:
-        GUIDE = real.replace("coverage 23.8%", "coverage 99.9%")
+        GUIDE = re.sub(r"coverage \d+\.\d% \(the limit", "coverage 99.9% (the limit", real)
         assert said(r"coverage (\d+\.\d%) \(the limit") == ("99.9%",)
-        GUIDE = real.replace("rear yard 31'-2\"", "rear yard twenty")
+        GUIDE = re.sub(r"rear yard \d+'-\d+\" \(needs", "rear yard twenty (needs", real)
         with _p.raises(AssertionError, match="QUICKSTART no longer says"):
             said("rear yard " + LEN + r" \(needs")
     finally:

@@ -30,7 +30,7 @@ ORDER = [FAILS, REVIEW, COMPLIES, NOT_CHECKED]
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
           ("not_checked", "Not checked"), ("not_covered", "Not covered by this rulebook")]
 
-from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
+from model_measurement.measure import TAX_MAP_SLACK, TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = {"lot_width", "lot_depth", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard"}
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
 INTERIOR = {"sleeping_rooms", "parking_spaces"}
@@ -381,11 +381,12 @@ def _display(proposed, required, margin, unit, sign):
 
 
 def _worst_case(expr: str, values: dict, names: set) -> dict | None:
-    """The values that make `expr` false when each lot length is off by up to TOLERANCE, or None if it holds
-    for every combination (2 ** n combinations, n ≤ 6)."""
+    """The values that make `expr` false when every lot line is off by up to TOLERANCE the unlucky way (a yard
+    by TOLERANCE, a lot width or depth, between two lines, by twice that: measure.TAX_MAP_SLACK), or None if it
+    holds for every combination (2 ** n combinations, n ≤ 6)."""
     lengths = sorted(n for n in names & LOT_LENGTHS if isinstance(values.get(n), (int, float)))
     for signs in itertools.product((-1, 1), repeat=len(lengths)):
-        trial = dict(values, **{n: values[n] + s * TOLERANCE for n, s in zip(lengths, signs)})
+        trial = dict(values, **{n: values[n] + s * TAX_MAP_SLACK[n] for n, s in zip(lengths, signs)})
         if _evaluate(expr, trial) is not True:
             return trial
     return None
