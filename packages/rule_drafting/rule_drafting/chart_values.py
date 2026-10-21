@@ -115,10 +115,12 @@ def notes_under_table(rows: list[dict], page: int, table_bottom: float) -> dict[
 
 def section_refs(text: str) -> list[str]:
     """The sections of Chapter 325 a text points to, as piece ids: "§325-8(B)(1)" -> "325-8B",
-    "§ 325-16" -> "325-16", "§325-29.1" -> "325-29.1". In order, once each."""
+    "§ 325-16" -> "325-16", "§325-29.1" -> "325-29.1". In order, once each. A subsection letter counts only
+    in brackets ("§ 325-8 (B)") or written right against the number ("§325-8B"); the capital that starts the
+    next word is not one ("§325-22 Minimum Building Height" -> "325-22", never "325-22M")."""
     out = []
-    for num, letter in re.findall(r"§\s*325-(\d+(?:\.\d+)*)(?:\s*\(?([A-Z])\)?)?", text):
-        pid = f"325-{num}{letter}"
+    for num, bracketed, attached in re.findall(r"§\s*325-(\d+(?:\.\d+)*)(?:\s*\(([A-Z])\)|([A-Z])(?![A-Za-z]))?", text):
+        pid = f"325-{num}{bracketed or attached}"
         if pid not in out:
             out.append(pid)
     return out
