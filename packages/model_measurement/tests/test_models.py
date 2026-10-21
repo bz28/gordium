@@ -110,11 +110,12 @@ def test_their_model_with_the_house_on_its_outline_against_their_spreadsheet(the
     assert got["rear_yard"] == 20.0 and cells["rear_yard"] == 25
     assert got["lot_depth"] is None and cells["lot_depth"] == 90                         # the jog: two readings, neither 90
     assert sorted(round(r["value"], 2) for r in m["lot_depth"]["readings"]) == [94.82, 100.06]
-    # results: never a PASS where they don't agree. The two rules that need the lot depth need review, and so
-    # do the two that need the lot area: their model's lot is drawn from the map, not a survey
+    # results: never a PASS where they don't agree. The rear yard needs the lot depth, so it needs review; so do the
+    # two that need the lot area: their model's lot is drawn from the map, not a survey. The height complies as
+    # theirs does: 35 ft is within 35 ft whatever the lot depth (its bonus way is the only part that needs it)
     mine = ours(m, rules, allowed, results)
     assert {k: v for k, v in mine.items() if v != results[k]} == {
-        "R-1b.height": "needs_review", "R-1b.rear_yard": "needs_review",
+        "R-1b.rear_yard": "needs_review",
         "R-1b.lot_area_one_family_detached": "needs_review", "R-1b.lot_coverage": "needs_review"}
 
 
