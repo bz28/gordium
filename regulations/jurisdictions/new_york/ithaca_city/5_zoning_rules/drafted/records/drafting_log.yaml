@@ -1512,10 +1512,93 @@ units:
       apply to residential lots. Drafting it would need new measures and a rule for business and industrial districts,
       so it is not drafted for the residential districts listed.'
   325-19E:
-    rules: []
-    unresolved: []
+    rules:
+    - R-1a.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-1a.325_19e_r3_abut_r1_max_coverage
+    - R-1a.325_19e_r3_abut_r1_side_yard_larger
+    - R-1a.325_19e_r3_abut_r1_side_yard_smaller
+    - R-1b.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-1b.325_19e_r3_abut_r1_max_coverage
+    - R-1b.325_19e_r3_abut_r1_side_yard_larger
+    - R-1b.325_19e_r3_abut_r1_side_yard_smaller
+    - R-2a.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-2a.325_19e_r3_abut_r1_max_coverage
+    - R-2a.325_19e_r3_abut_r1_side_yard_larger
+    - R-2a.325_19e_r3_abut_r1_side_yard_smaller
+    - R-2b.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-2b.325_19e_r3_abut_r1_side_yard_larger
+    - R-2b.325_19e_r3_abut_r1_side_yard_smaller
+    - R-2c.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-3a.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-3a.325_19e_r3_abut_r1_side_yard_larger
+    - R-3a.325_19e_r3_abut_r1_side_yard_smaller
+    - R-3aa.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-3aa.325_19e_r3_abut_r1_side_yard_larger
+    - R-3aa.325_19e_r3_abut_r1_side_yard_smaller
+    - R-3b.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-3b.325_19e_r3_abut_r1_max_coverage
+    - R-3b.325_19e_r3_abut_r1_side_yard_larger
+    - R-3b.325_19e_r3_abut_r1_side_yard_smaller
+    - RU.325_19e_r3_abut_r1_min_lot_area_other_use
+    - RU.325_19e_r3_abut_r1_side_yard_larger
+    - RU.325_19e_r3_abut_r1_side_yard_smaller
+    - general.325_19e_r3_abut_r1_max_height
+    - general.325_19e_r3_abut_r1_rear_yard
+    unresolved:
+    - rule: R-2b.325_19e_r3_abut_r1_max_coverage
+      why: 'R-2b.325_19e_r3_abut_r1_max_coverage: example 1: expected pass, got fail'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2B
+    - rule: R-2c.325_19e_r3_abut_r1_max_coverage
+      why: '''Percent of lot area'': the cell ''35%/40% /50% [fn12]'' has 3 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2C
+    - rule: R-3a.325_19e_r3_abut_r1_max_coverage
+      why: 'R-3a.325_19e_r3_abut_r1_max_coverage: example 1: expected pass, got fail'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3A
+    - rule: R-3aa.325_19e_r3_abut_r1_max_coverage
+      why: 'R-3aa.325_19e_r3_abut_r1_max_coverage: example 1: expected pass, got fail'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3AA
+    - rule: RU.325_19e_r3_abut_r1_max_coverage
+      why: '''Percent of lot area'': the cell ''25% [fn13]'' has footnotes [''13''], the rule expects none'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - RU
+    - rule: R-2c.325_19e_r3_abut_r1_side_yard_larger
+      why: '''Side (one side minimum)'': the cell ''10 ft /15 ft [fn14]'' has 2 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Side (one side minimum)
+        - R-2C
+    - rule: R-2c.325_19e_r3_abut_r1_side_yard_smaller
+      why: '''Side (other side minimum)'': the cell ''0 ft /5 ft / 10 ft [fn15]'' has 3 numbers, the rule expects
+        1'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Side (other side minimum)
+        - R-2C
+    - rule: 325-19E.325_19e_r3_abut_r1_min_lot_area_footnoted_rows
+      why: 'general.325_19e_r3_abut_r1_min_lot_area_footnoted_rows: general.325_19e_r3_abut_r1_min_lot_area_footnoted_rows:
+        ''title'' is a one-line label of at most 80 characters; the rule is its quotes and check'
     problems: []
-    failed: stopped early (max_tokens)
   325-20D:
     rules:
     - general.325_20d_driveway_min_width
