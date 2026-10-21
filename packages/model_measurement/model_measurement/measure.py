@@ -258,26 +258,28 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
     single-precision mesh far from the origin: a tenth of a degree over a 1.4 ft triangle, 0.04 ft across a
     roof), and a plane fitted over the whole group doesn't. Faces that share an edge (two corners within TOL)
     join when every corner of the smaller group's faces lies within TOL of the larger group's plane, and every
-    corner of the joined group lies within TOL of the plane fitted over it, so a group never drifts. So a roof drawn as many
-    triangles (a mesh, with rounding noise) is one roof plane, two separate roofs at the same level stay two,
-    and a curved roof isn't one plane. A distance, not an angle: the same tolerance as everywhere else here."""
+    corner of the joined group lies within TOL of the plane fitted over it, so a group never drifts. So a roof
+    drawn as many triangles (a mesh, with rounding noise) is one roof plane, two separate roofs at the same level
+    stay two, and a curved roof isn't one plane. A distance, not an angle: the same tolerance as everywhere else.
+
+    In about n log n: a group keeps its corners' moments (count, sum, sum of outer products), so a joined plane is
+    one 3 x 3 fit; and a bound on how far its corners can be from its plane (grown at each join by how far the
+    plane moved, times the group's reach), so all of its corners are checked again only when that bound passes
+    TOL (and then the exact distance replaces the bound)."""
     area = [_plan(f).area for f in faces]
     parent = list(range(len(faces)))
     members = {i: [i] for i in range(len(faces))}
-    anchor = {i: i for i in range(len(faces))}
     size = {i: area[i] for i in range(len(faces))}
     origin = np.array(faces[0]["points"][0], dtype=float) if faces else np.zeros(3)
-    corners = {i: np.array(f["points"], dtype=float) - origin for i, f in enumerate(faces)}   # per group
-    plane = {}
-
-    def fitted(pts):                        # (unit normal, a point on it) of the best plane through the corners
-        c = pts.mean(0)
-        _, vectors = np.linalg.eigh((pts - c).T @ (pts - c))
-        return vectors[:, 0], c
-
+    chunks, moments, plane, reach, off = {}, {}, {}, {}, {}
     for i, f in enumerate(faces):
-        n = _unit_normal(f["points"])
-        plane[i] = (np.array(n), np.array(f["points"][0], dtype=float) - origin)
+        pts = np.array(f["points"], dtype=float) - origin          # near the origin: no cancellation in the sums
+        c = pts.mean(0)
+        n = np.array(_unit_normal(f["points"]))
+        chunks[i], moments[i] = [pts], (len(pts), pts.sum(0), pts.T @ pts)
+        plane[i] = (n, c)
+        reach[i] = float(np.linalg.norm(pts - c, axis=1).max())
+        off[i] = float(np.abs((pts - c) @ n).max())               # a bound: how far a corner can be off the plane
 
     def root(i):
         while parent[i] != i:
@@ -286,8 +288,29 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
         return i
 
     def near_plane(g, face):                # every corner of `face` within TOL of group g's plane
-        n, p0 = plane[g]
-        return all(abs(float(n @ (np.array(q, dtype=float) - origin - p0))) <= TOL for q in face["points"])
+        n, c = plane[g]
+        return all(abs(float(n @ (np.array(q, dtype=float) - origin - c))) <= TOL for q in face["points"])
+
+    def join(big, small):                   # the joined group's plane, reach and bound; None if it would drift
+        (k1, s1, q1), (k2, s2, q2) = moments[big], moments[small]
+        k, total, outer = k1 + k2, s1 + s2, q1 + q2
+        c = total / k
+        n = np.linalg.eigh(outer / k - np.outer(c, c))[1][:, 0]
+        nb, cb = plane[big]
+        if n @ nb < 0:
+            n = -n
+        ps = np.concatenate(chunks[small])
+        bound = max(off[big] + float(np.linalg.norm(n - nb)) * reach[big] + abs(float(n @ (cb - c))),
+                    float(np.abs((ps - c) @ n).max()))
+        far = max(reach[big] + float(np.linalg.norm(cb - c)), float(np.linalg.norm(ps - c, axis=1).max()))
+        kept = chunks[big] + chunks[small]
+        if bound > TOL:                     # the bound can't tell: every corner, exactly
+            allp = np.concatenate(kept)
+            bound = float(np.abs((allp - c) @ n).max())
+            if bound > TOL:
+                return None
+            far, kept = float(np.linalg.norm(allp - c, axis=1).max()), [allp]
+        return (k, total, outer), (n, c), far, bound, kept
 
     def cell(p):
         return tuple(math.floor(c / TOL) for c in p)
@@ -311,16 +334,15 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
             big, small = (a, b) if size[a] >= size[b] else (b, a)
             if not all(near_plane(big, faces[k]) for k in members[small]):
                 continue
-            pts = np.concatenate([corners[big], corners[small]])
-            n, c = fitted(pts)
-            if np.abs((pts - c) @ n).max() > TOL:       # some corner off the joined plane: it would drift
+            joined = join(big, small)
+            if joined is None:              # some corner off the joined plane: it would drift
                 continue
-            plane[big] = (n, c)
+            moments[big], plane[big], reach[big], off[big], chunks[big] = joined
             parent[small] = big
             members[big] += members.pop(small)
             size[big] += size.pop(small)
-            corners[big] = pts
-            corners.pop(small)
+            for d in (moments, plane, reach, off, chunks):
+                d.pop(small)
     return [[faces[k] for k in group] for group in members.values()]
 
 
