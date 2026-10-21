@@ -38,16 +38,53 @@ def test_rejects_anything_outside_the_language(text):
         evaluate(text, {"lot_area": 1, "x": 1, "a": 1, "use": "one_family_detached"}, KINDS)
 
 
-@pytest.mark.parametrize("text", [
-    "stories <= 3 or building_height <= 35",   # 'or' must not hide a missing measure
-    "stories <= 0 and building_height <= 35",  # nor 'and'
-    "0 > stories < building_height",           # nor a chained comparison
+@pytest.mark.parametrize("text, known", [
+    ("stories <= 3 or building_height <= 35", True),    # True or unknown: True, whatever the height is
+    ("stories <= 0 and building_height <= 35", False),  # False and unknown: False
+    ("0 > stories < building_height", False),           # a chain is an and: its false link decides it
+    ("stories <= 0 or building_height <= 35", None),    # False or unknown: unknown
+    ("stories <= 3 and building_height <= 35", None),   # True and unknown: unknown
+    ("not building_height <= 35", None),
+    ("stories < building_height", None),
+    ("stories <= (1 if building_height > 30 else 1)", False),  # the same either way: known
+    ("stories <= (3 if building_height > 30 else 2)", None),
+    ("max(stories, building_height) >= 3", None),
 ])
 @pytest.mark.parametrize("bad", [None, math.nan, math.inf, -math.inf, True, 10**400, -5, "35"])
-def test_missing_or_unusable_measure_is_never_hidden(text, bad):
-    with pytest.raises(MissingMeasure) as e:
-        evaluate(text, {"stories": 3, "building_height": bad}, KINDS)
-    assert e.value.name == "building_height"
+def test_a_missing_measure_is_unknown_and_follows_three_valued_logic(text, known, bad):
+    """A missing or unusable measure is never hidden where it could change the result (MissingMeasure, so the rule
+    needs review), and never makes a result unknown where it can't (Kleene: True or unknown is True; False and
+    unknown is False)."""
+    values = {"stories": 3, "building_height": bad}
+    if known is None:
+        with pytest.raises(MissingMeasure) as e:
+            evaluate(text, values, KINDS)
+        assert e.value.name == "building_height"
+    else:
+        assert evaluate(text, values, KINDS) is known
+
+
+def test_three_valued_results_agree_with_every_value_the_missing_measure_could_take():
+    """Exhaustive over formula shapes and substituted values: wherever the evaluation says True or False with a
+    measure missing, every value that measure could take gives that same answer (so it is never a guess)."""
+    import itertools
+    atoms = ["a <= 3", "a >= 5", "b <= 4", "b > 2", "not a <= 3", "a < b", "1 <= a <= 6"]
+    shapes = [f"{x} or {y}" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"{x} and {y}" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"({x} or {y}) and {z}" for x, y, z in itertools.permutations(atoms[:5], 3)]
+    shapes += [f"not ({x} and {y})" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"{x} or ({y} and {z})" for x, y, z in itertools.permutations(atoms[:5], 3)]
+    grid = [0, 1, 2, 3, 3.5, 4, 5, 6, 7.25, 10]
+    for text in shapes:
+        for missing in ("a", "b"):
+            for known in grid:
+                values = {"a": known, "b": known} | {missing: None}
+                try:
+                    got = evaluate(text, values, KINDS)
+                except MissingMeasure:
+                    continue
+                every = {evaluate(text, values | {missing: v}, KINDS) for v in grid}
+                assert every == {got}, (text, missing, known, got, every)
 
 
 @pytest.mark.parametrize("text, values", [
@@ -154,3 +191,8 @@ def test_a_margin_at_the_limit_is_zero_exactly_where_the_comparison_complies():
         at = 0.2 * n
         assert (margin(at, evaluate("0.2 * lot_depth", {"lot_depth": n}, KINDS), True) == 0.0) is \
             evaluate("rear_yard >= 0.2 * lot_depth", {"rear_yard": at, "lot_depth": n}, KINDS)
+
+
+def test_an_error_names_the_value_as_written():
+    with pytest.raises(EvaluationError, match=r"expected true/false, got 50$"):
+        evaluate("not lot_width", {"lot_width": 50}, KINDS)
