@@ -8,7 +8,7 @@ output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper
 (2 ft per line everywhere, carried up in d43e11f); F4 in #12 (the same_id stop, b5a899b); F6, F7 in #18 (ca4f6c3,
-4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). Open: F10 (for #14), F11 (for #18).
+4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). Open: F10 (for #14), F11 and F12 (for #18).
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -298,6 +298,23 @@ def test_F11_the_side_yard_rows_are_named_the_same_whichever_way_the_outlines_ru
     names = [sorted(i["name"] for i in harness.items_by_rule(harness.gordium(d, order))["R-1b.side_yards"])
              for order in ("as_drawn", "reversed", "shifted")]
     assert names[0] == names[1] == names[2], names
+
+
+# ---- F12 (P2, for #18): a side yard row needs review and gives no reason ------------------------------------------
+
+F12_CASE = ("sample_tax", [{"op": "move_floor", "k": 1, "dx": -3.0, "dy": -3.75},
+                           {"op": "add_roof", "kind": "mansard", "axis": 1, "over": 0.5, "fascia": 0.5, "inset": 3.5,
+                            "rise": 6.75}])
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F12: 'Side yard, East' needs review with no reason (a moved floor and a mansard)")
+def test_F12_every_side_yard_row_that_needs_review_says_why():
+    """Two edits on the tax-map sample lot: floor 2 moved on its own 3 ft west and 3'-9" toward the street, then a
+    mansard on the top floor reaching 6 in. past its walls. "Side yard, East" says needs review, 11'-6" to 12'-0",
+    with no reason at all (the West row does give one). A needs-review row must say what it waits for."""
+    rows = harness.items_by_rule(harness.gordium(generate.build(*F12_CASE)[0]))["R-1b.side_yards"]
+    assert all((i["reason"] or "").strip() for i in rows if i["status"] == REVIEW), [i["name"] for i in rows]
 
 
 # ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------

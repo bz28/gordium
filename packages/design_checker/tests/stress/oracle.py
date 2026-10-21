@@ -284,7 +284,7 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
             sections.append((p["z1"], p["z1"], p["z1"]))
     top = max(s[0] for s in sections)
     h_low = min(s[1] for s in sections if s[0] >= top - EPS)          # the highest section, read lowest
-    h_high = max([s[2] for s in sections] + [p["z1"] for g in unlisted for p in g])   # any section, read highest
+    h_high = max([s[2] for s in sections] + [p.get("z1", p.get("ridge", 0.0)) for g in unlisted for p in g])  # any, highest
     height = None if grade is None else (h_high - grade[0], h_low - grade[1])
     floors = sorted((p for p in main if p["kind"] == "floor"), key=lambda p: p["z0"])
     stacked = all(abs(b["z0"] - a["z1"]) <= EPS for a, b in zip(floors, floors[1:]))
