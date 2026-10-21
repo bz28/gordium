@@ -1,0 +1,69 @@
+{
+ "phase": "run",
+ "claims": {
+  "1 docked in Rhino's panels, not a floating window": {
+   "ok": true,
+   "detail": "GordiumDock.Panel"
+  },
+  "1 docked in the document's own window (beside Rhino's panels), not floating": {
+   "ok": true,
+   "detail": "dock_Large_Objects_-_Feet.3dm"
+  },
+  "1 its document's panel": {
+   "ok": true,
+   "detail": null
+  },
+  "1 its text left aligned (the docked panel had turned it right aligned)": {
+   "ok": true,
+   "detail": [
+    "Left"
+   ]
+  },
+  "1 holding the rows": {
+   "ok": true,
+   "detail": [
+    "\u2713  Use (site)",
+    "\u2713  Lot area (site)",
+    "\u2713  Lot width (site)",
+    "\u2713  Stories \u00b7 assuming flat ground",
+    "\u2713  Building height \u00b7 assuming flat ground",
+    "\u2713  Lot coverage",
+    "\u2713  Front yard",
+    "\u2713  Side yard, East"
+   ]
+  },
+  "3 a reload refills the same docked panel with the new copy's controls": {
+   "ok": true,
+   "detail": null
+  },
+  "4 GordiumOff closes it": {
+   "ok": true,
+   "detail": null
+  },
+  "4 the next command opens it again, filled": {
+   "ok": true,
+   "detail": null
+  }
+ },
+ "parent": "dock_Large_Objects_-_Feet.3dm",
+ "rows": [
+  "\u2713  Use (site)",
+  "\u2713  Lot area (site)",
+  "\u2713  Lot width (site)",
+  "\u2713  Stories \u00b7 assuming flat ground",
+  "\u2713  Building height \u00b7 assuming flat ground",
+  "\u2713  Lot coverage",
+  "\u2713  Front yard",
+  "\u2713  Side yard, East",
+  "\u2713  Side yard, West",
+  "\u2713  Rear yard",
+  "\u2013  Parking \u00b7 needs input",
+  "\u2013  Overlays \u00b7 not in this release",
+  "  \u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+  "  \u00a7325-18 Projections into yards (porches, decks, eaves)",
+  "  \u00a7325-19C Corner lots",
+  "  \u00a7325-25 Accessory structures (garages, sheds)",
+  "  \u00a7325-28 Accessory dwelling units"
+ ],
+ "ok": true
+}

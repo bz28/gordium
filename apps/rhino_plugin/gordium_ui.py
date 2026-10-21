@@ -81,9 +81,12 @@ def label(text, color=None, bold=False, size=None, wrap=True, width=None):
     lab = ef.Label()
     lab.Text = text or ""
     lab.Wrap = ef.WrapMode.Word if wrap else getattr(ef.WrapMode, "None")
-    if width is not None:               # wraps at this width, left aligned (an unbounded label ran off the panel)
+    lab.TextAlignment = ef.TextAlignment.Left
+    if DOCKED:                          # Rhino's docked panel on the Mac turns it right aligned as it lays the label
+        lab.LoadComplete += logic.guard(  # out (read back in Rhino, 2026-10-21): left again once it is in place
+            lambda sender, e: setattr(sender, "TextAlignment", ef.TextAlignment.Left), "align a label")
+    if width is not None:               # wraps at this width (an unbounded label ran off the floating window)
         lab.Width = width
-        lab.TextAlignment = ef.TextAlignment.Left
     if color is not None:
         lab.TextColor = color
     if bold or size:
@@ -91,9 +94,14 @@ def label(text, color=None, bold=False, size=None, wrap=True, width=None):
     return lab
 
 
+DOCKED = False                  # set by make_panel: docked, labels stretch with Rhino's panel (no fixed width)
+
+
+
 def _wide(text, color=None, bold=False, size=None):
-    """A label the width of the panel's content, wrapping there."""
-    return label(text, color, bold, size, True, PANEL_WIDTH - 48)
+    """A label the width of the panel's content, wrapping there: the floating window's fixed width, or docked,
+    whatever width the architect gives Rhino's panel."""
+    return label(text, color, bold, size, True, None if DOCKED else PANEL_WIDTH - 48)
 
 
 def button(text, action, enabled=True):
@@ -117,16 +125,57 @@ def row(*controls):
 
 # ---- the panel (D1–D10) ------------------------------------------------------------------------------------
 
-def make_panel(actions):
+def open_dock(panel_id):
+    """Show the Gordium panel. Not showing yet: docked as a tab beside Rhino's Layers panel (Rhino's own first
+    choice is a small floating window, which cut the list off); showing already (where the architect put it, or
+    where Rhino restored it): left there."""
+    if Rhino.UI.Panels.IsPanelVisible(panel_id):
+        return
+    for beside in (Rhino.UI.PanelIds.ObjectProperties, Rhino.UI.PanelIds.Layers):
+        if Rhino.UI.Panels.IsPanelVisible(beside):   # only beside one that is showing (else Rhino does nothing)
+            Rhino.UI.Panels.OpenPanelAsSibling(panel_id, beside)
+            if Rhino.UI.Panels.IsPanelVisible(panel_id):
+                return
+    Rhino.UI.Panels.OpenPanel(panel_id)          # neither showing: Rhino's own choice (sized by the panel)
+
+
+class DockHost:
+    """The docked panel, seen as the floating window was (Visible, Show, Close, BringToFront), so the rest of the
+    plugin needs no change: Rhino's own panel system shows it, docked or floating as the architect leaves it."""
+
+    def __init__(self, panel_id, host):
+        self.panel_id, self.host = panel_id, host
+
+    @property
+    def Visible(self):
+        return bool(Rhino.UI.Panels.IsPanelVisible(self.panel_id))
+
+    def Show(self):
+        open_dock(self.panel_id)
+
+    BringToFront = Show
+
+    def Close(self):
+        self.host.Content = None             # no stale rows if Rhino shows the tab again before a check
+        Rhino.UI.Panels.ClosePanel(self.panel_id)
+
+
+def make_panel(actions, host=None):
     """The Gordium panel: a header, the item list (a TreeGridView), a splitter, the selected item's detail, and a
     footer. `actions` maps names to functions (zoom, report, envelope, edit_site, survey, grade, enter, add,
-    retry). Returns a dict of its parts; `show(panel, …)` fills it."""
-    form = ef.Form()
-    form.Title = "Gordium · Zoning"
-    form.ClientSize = ed.Size(PANEL_WIDTH, 720)
-    form.MinimumSize = ed.Size(PANEL_WIDTH, 420)
-    form.Resizable = True
-    form.Topmost = True
+    retry). In `host` (a DockHost: a docked Rhino panel), or a floating window when there is none. Returns a dict
+    of its parts; `show(panel, …)` fills it."""
+    global DOCKED
+    DOCKED = host is not None
+    if host is not None:
+        form = host
+    else:
+        form = ef.Form()
+        form.Title = "Gordium · Zoning"
+        form.ClientSize = ed.Size(PANEL_WIDTH, 720)
+        form.MinimumSize = ed.Size(PANEL_WIDTH, 420)
+        form.Resizable = True
+        form.Topmost = True
     tree = ef.TreeGridView()
     tree.ShowHeader = True
     tree.AllowMultipleSelection = False
@@ -187,7 +236,11 @@ def make_panel(actions):
     parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
     layout.Add(parts["message"])
     layout.Add(footer)
-    form.Content = layout
+    if host is not None:
+        host.host.Content = layout
+        host.host.MinimumSize = ed.Size(PANEL_WIDTH, 420)
+    else:
+        form.Content = layout
     return parts
 
 

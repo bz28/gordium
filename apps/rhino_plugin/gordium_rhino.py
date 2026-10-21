@@ -623,9 +623,85 @@ def _actions():
             "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels}
 
 
+DOCK_ID = "7c3e9a51-2d84-4b6f-9e17-5a0c8d2f4b63"   # the Gordium panel's id: Rhino remembers where it is docked
+
+
+def register_dock():
+    """Register the Gordium panel with Rhino (once per Rhino session; every Gordium command calls this, and the
+    setup's startup command does, so a tab Rhino restores at launch is filled, never empty). A docked panel
+    needs a .NET type carrying a Guid attribute, which a Python class can't: one is made here with
+    Reflection.Emit, an Eto Panel whose constructor hands itself and its document's number to Python (the
+    current copy of this script, through a static field). The type outlives reloads (sticky, outside
+    gordium_state). Returns the panel id, or None (then the floating window is used; why is logged, said once)."""
+    return logic.guard(_register_dock, "make the docked panel (the floating window is used)", fallback=None)()
+
+
+def _register_dock():
+    made = sc.sticky.get("gordium_dock")
+    if made is None:
+        made = sc.sticky["gordium_dock"] = _emit_dock_type()
+    made.GetField("Build").SetValue(None, System.Action[ef.Panel, System.UInt32](
+        logic.guard(_fill_dock, "fill the Gordium panel")))
+    if not sc.sticky.get("gordium_dock_registered"):
+        host = Rhino.PlugIns.PlugIn.Find(Rhino.PlugIns.PlugIn.IdFromName("RhinoCodePlugin"))
+        Rhino.UI.Panels.RegisterPanel(host, made, "Gordium", System.Drawing.SystemIcons.Information)
+        sc.sticky["gordium_dock_registered"] = True
+    return made.GUID
+
+
+def _emit_dock_type():
+    from System.Reflection import AssemblyName, CallingConventions, FieldAttributes, MethodAttributes, TypeAttributes
+    from System.Reflection.Emit import AssemblyBuilder, AssemblyBuilderAccess, CustomAttributeBuilder, OpCodes
+    asm = AssemblyBuilder.DefineDynamicAssembly(AssemblyName("GordiumDock"), AssemblyBuilderAccess.Run)
+    tb = asm.DefineDynamicModule("GordiumDock").DefineType("GordiumDock.Panel", TypeAttributes.Public, ef.Panel)
+    guid = System.Type.GetType("System.Runtime.InteropServices.GuidAttribute")
+    tb.SetCustomAttribute(CustomAttributeBuilder(guid.GetConstructor(System.Array[System.Type]([System.String])),
+                                                 System.Array[System.Object]([DOCK_ID])))
+    action = System.Type.GetType("System.Action`2").MakeGenericType(
+        System.Array[System.Type]([System.Type.GetType("Eto.Forms.Panel, Eto"), System.UInt32]))
+    build = tb.DefineField("Build", action, FieldAttributes.Public | FieldAttributes.Static)
+    base = System.Type.GetType("Eto.Forms.Panel, Eto").GetConstructor(System.Type.EmptyTypes)
+    for args in ([], [System.UInt32]):      # Rhino makes it with the document's number (or none)
+        il = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard,
+                                  System.Array[System.Type](args)).GetILGenerator()
+        skip = il.DefineLabel()
+        il.Emit(OpCodes.Ldarg_0)
+        il.Emit(OpCodes.Call, base)
+        il.Emit(OpCodes.Ldsfld, build)
+        il.Emit(OpCodes.Brfalse_S, skip)
+        il.Emit(OpCodes.Ldsfld, build)
+        il.Emit(OpCodes.Ldarg_0)
+        il.Emit(OpCodes.Ldarg_1 if args else OpCodes.Ldc_I4_0)
+        il.Emit(OpCodes.Callvirt, action.GetMethod("Invoke"))
+        il.MarkLabel(skip)
+        il.Emit(OpCodes.Ret)
+    return tb.CreateType()
+
+
+def _fill_dock(host, serial):
+    """Rhino made the panel for a document window: remember it; it is filled when Gordium shows its results."""
+    sc.sticky.setdefault("gordium_dock_hosts", {})[int(serial)] = host
+    host.MinimumSize = ed.Size(ui.PANEL_WIDTH, 420)      # floating, Rhino sizes it by this (not 200 x 200)
+    label = ef.Label()
+    label.Text = "Gordium: run GordiumStart or GordiumCheck to check this model."
+    host.Content = label
+
+
 def panel():
-    """The Gordium panel, made once and shown. (A floating panel: a docked one needs a Rhino plugin package.)"""
+    """The Gordium panel, made once and shown: docked in Rhino's own panels (Mac and Windows), or a floating
+    window if the panel couldn't be registered."""
     p = STATE.get("panel_parts")
+    doc = Rhino.RhinoDoc.ActiveDoc
+    dock = register_dock()
+    if dock is not None:
+        ui.open_dock(dock)
+        host = logic.dock_host(sc.sticky.get("gordium_dock_hosts") or {}, doc.RuntimeSerialNumber if doc else None)
+        if host is not None:
+            if p is None or getattr(p["form"], "host", None) is not host or not p["form"].Visible:
+                p = ui.make_panel(_actions(), ui.DockHost(dock, host))
+                STATE["panel_parts"] = p
+                LEFTOVERS["panel"] = p["form"].Close
+            return p
     if p is None or not p["form"].Visible:
         p = ui.make_panel(_actions())
         STATE["panel_parts"] = p

@@ -59,6 +59,14 @@ def row_name(item):
     return name + (" · " + item["note"] if item.get("note") else "")
 
 
+def dock_host(hosts, serial):
+    """The docked panel to fill for the document in front: Rhino makes one per document window (keyed by the
+    document's number); a panel made without one (key 0) serves when the front document has none."""
+    if serial is not None and serial in hosts:
+        return hosts[serial]
+    return hosts.get(0)
+
+
 def highlight(status):
     """The colour a part of the model is shaded, from its rule's result only (never from the envelope): red for
     does not comply (under every reading), amber for needs review, nothing for complies or anything else."""
