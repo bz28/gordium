@@ -989,3 +989,45 @@ def test_the_checker_proves_every_starting_building_with_its_own_verdict(monkeyp
     site, facts, rules = _jogged_unsurveyed()
     out = checker.largest_legal_building(site, facts, checker.measure(site, facts), rules)
     assert out["floors"] and seen == [checker.verdict]
+
+
+# ---- an object off the Building layer counts as on the lot when it reaches into it (audit P1-2) ---------------
+
+def test_an_object_reaching_into_the_lot_counts_as_on_it_and_a_neighbour_does_not():
+    """The plugin once counted an unmeasured solid only when its bounding box's centre was in the lot's bounding
+    box: an addition mostly past the rear line, or a garage straddling a side line, wasn't reported, so lot
+    coverage could show COMPLIES. Now its footprint is tested against the lot's outline."""
+    import math
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+
+    def rect(x0, y0, x1, y1):
+        return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+    lot = rect(0, 0, 73, 90)
+    on = {"shed wholly on the lot": rect(5, 70, 15, 80),
+          "addition 23 x 20 ft on the lot, its centre past the rear line": rect(50, 70, 80, 130),
+          "garage straddling the side line, centre outside": rect(65, 20, 85, 40),
+          "a neighbour's garage 1 ft over the line": rect(72, 20, 93, 40),
+          "a site mesh covering the whole lot": rect(-50, -50, 150, 150)}
+    off = {"the neighbour's house touching the side line": rect(73, 20, 93, 40),
+           "a neighbour drawn a hair over the line": rect(72.95, 20, 93, 40),
+           "the house across the street": rect(10, -60, 40, -20)}
+    for name, footprint in on.items():
+        assert reaches_into_lot(lot, footprint, ON_LOT_REACH), name
+    for name, footprint in off.items():
+        assert not reaches_into_lot(lot, footprint, ON_LOT_REACH), name
+    turn = math.radians(30)                                  # a rotated lot: its bounding box is far bigger
+    rotated = [(x * math.cos(turn) - y * math.sin(turn), x * math.sin(turn) + y * math.cos(turn)) for x, y in lot]
+    neighbour = rect(45, 95, 60, 110)       # inside the lot's bounding box (x -45..63, y 0..114), off the lot
+    assert not reaches_into_lot(rotated, neighbour, ON_LOT_REACH)
+    assert reaches_into_lot(rotated, [(x + 1, y + 1) for x, y in rect(0, 0, 10, 10)], ON_LOT_REACH)
+    jogged = [(0, 0), (73, 0), (73, 99.4), (10.5, 99.4), (10.5, 90.3), (0, 90.3)]
+    assert not reaches_into_lot(jogged, rect(0, 91, 10, 99), ON_LOT_REACH)       # in the jog's notch: off the lot
+    assert reaches_into_lot(jogged, rect(5, 85, 20, 98), ON_LOT_REACH)
+
+
+def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
+    """The Rhino side can't run in CI: its source must use the tested logic, not the bounding-box centre."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
+    assert "logic.reaches_into_lot(" in body and ".Center" not in body

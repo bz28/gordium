@@ -248,6 +248,84 @@ def looks_like_ground(kind, closed, extents, lot_extents, reach=1.0):
     return x0 <= a0 + reach and y0 <= b0 + reach and x1 >= a1 - reach and y1 >= b1 - reach
 
 
+ON_LOT_REACH = 0.1        # ft: how far into the lot an object must reach to count as on it (a neighbour drawn
+                          # touching the lot line, or a hair over it, stays off)
+
+
+def _ring_area(ring):
+    """The signed area of a closed ring of (x, y) points (counterclockwise: positive)."""
+    return sum(ring[i - 1][0] * ring[i][1] - ring[i][0] * ring[i - 1][1] for i in range(len(ring))) / 2
+
+
+def _hull(points):
+    """The convex hull of (x, y) points, counterclockwise (Andrew's monotone chain)."""
+    pts = sorted(set((float(x), float(y)) for x, y in points))
+    if len(pts) < 3:
+        return pts
+
+    def turn(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and turn(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and turn(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+def _clip(subject, convex):
+    """The part of the ring `subject` (any simple polygon) inside the counterclockwise convex ring `convex`
+    (Sutherland-Hodgman). Its area is the overlap's area."""
+    out = list(subject)
+    for i in range(len(convex)):
+        a, b = convex[i - 1], convex[i]
+        inside = [(b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]) >= 0 for p in out]
+        nxt = []
+        for k in range(len(out)):
+            p, q, pin, qin = out[k - 1], out[k], inside[k - 1], inside[k]
+            if pin != qin:
+                dx, dy = q[0] - p[0], q[1] - p[1]
+                den = (b[0] - a[0]) * dy - (b[1] - a[1]) * dx
+                t = ((b[1] - a[1]) * (p[0] - a[0]) - (b[0] - a[0]) * (p[1] - a[1])) / den if den else 0.0
+                nxt.append((p[0] + t * dx, p[1] + t * dy))
+            if qin:
+                nxt.append(q)
+        out = nxt
+        if not out:
+            break
+    return out
+
+
+def reaches_into_lot(lot_ring, points, reach):
+    """Whether an object whose plan points (any (x, y) of it: vertices, points along its edges) are `points`
+    reaches into the lot (`lot_ring`, its outline's points) by more than `reach` (model units): the part of its
+    plan footprint (their convex hull) inside the lot, averaged across (twice its area over its perimeter), is
+    wider than `reach`. Wholly on the lot, straddling a lot line or mostly past it: on the lot. Touching the
+    line from outside, a hair over it, or off the lot but inside the lot's bounding box (a rotated or jogged
+    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction."""
+    lot = [(float(x), float(y)) for x, y in lot_ring]
+    if len(lot) > 1 and lot[0] == lot[-1]:
+        lot = lot[:-1]
+    if len(lot) < 3:
+        return False
+    if _ring_area(lot) < 0:
+        lot.reverse()
+    hull = _hull(points)
+    if len(hull) < 3 or _ring_area(hull) <= 1e-12:
+        return False
+    part = _clip(lot, hull)
+    if len(part) < 3:
+        return False
+    area = abs(_ring_area(part))
+    perimeter = sum(((part[i][0] - part[i - 1][0]) ** 2 + (part[i][1] - part[i - 1][1]) ** 2) ** 0.5
+                    for i in range(len(part)))
+    return perimeter > 0 and 2 * area / perimeter > reach
+
+
 # ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------
 # On the Mac an exception that escapes a callback into native code (a view's paint, a cell formatting event, a
 # display conduit's draw, an idle or document event) aborts Rhino outright (seen 2026-10-20: an Eto paint handler

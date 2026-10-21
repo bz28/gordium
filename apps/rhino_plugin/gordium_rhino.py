@@ -735,14 +735,16 @@ def add_to_check(ids):
 
 
 def _not_included(doc, lot):
-    """Anything on the lot that could be a building and isn't measured (rhino_logic.could_be_building: solids,
+    """Anything on the lot (its footprint reaching more than 0.1 ft into the lot's outline, partly or wholly:
+    rhino_logic.reaches_into_lot) that could be a building and isn't measured (rhino_logic.could_be_building: solids,
     polysurfaces, meshes, SubD, blocks; not the picked terrain, what the architect marked as the ground, the
     Building layer or Gordium's own layers): each one makes the check need review (C8). Nothing is ever left out
     on a guess: a topography mesh stays here (marked as looking like the ground, see _ground_like) until the
     architect says "This is the ground"."""
     if lot is None:
         return []
-    box = lot.Geometry.GetBoundingBox(True)
+    ring = _plan_points(lot.Geometry)
+    reach = _model_length(doc, logic.ON_LOT_REACH)              # ft -> model units
     out = []
     every = Rhino.DocObjects.ObjectEnumeratorSettings()          # hidden and locked too, as for the Building layer:
     every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # a hidden shed still counts
@@ -757,10 +759,32 @@ def _not_included(doc, lot):
         if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or logic.on_layer(layer, "Gordium"):
             continue
-        c = g.GetBoundingBox(True).Center
-        if box.Min.X <= c.X <= box.Max.X and box.Min.Y <= c.Y <= box.Max.Y:
+        if logic.reaches_into_lot(ring, _plan_points(g), reach):   # its footprint, against the lot's outline
             out.append(str(o.Id))
     return out
+
+
+def _plan_points(g):
+    """Points of an object in plan, (x, y), enough to outline it: a curve's points along it; a mesh's vertices; a
+    solid's vertices and points along its edges (curved walls too); anything else (a block, a SubD), its bounding
+    box's corners (bigger than the object: the cautious direction), as for a mesh of over 50,000 vertices."""
+    if isinstance(g, rg.Curve):
+        ok, poly = g.TryGetPolyline()
+        pts = list(poly) if ok else [g.PointAt(t) for t in g.DivideByCount(64, True)]
+    elif isinstance(g, rg.Mesh):
+        pts = list(g.Vertices)
+    else:
+        brep = g if isinstance(g, rg.Brep) else (g.ToBrep() if isinstance(g, rg.Extrusion) else None)
+        if brep is not None:
+            pts = [v.Location for v in brep.Vertices]
+            for e in brep.Edges:
+                pts += [e.PointAt(t) for t in (e.DivideByCount(8, True) or [])]
+        else:
+            pts = []
+    if not pts or len(pts) > 50000:          # nothing to outline it by, or a huge mesh (a terrain): its box's corners
+        b = g.GetBoundingBox(True)
+        pts = [b.Min, b.Max, rg.Point3d(b.Min.X, b.Max.Y, 0), rg.Point3d(b.Max.X, b.Min.Y, 0)]
+    return [(p.X, p.Y) for p in pts]
 
 
 def _ground_like(doc, ids, lot):
