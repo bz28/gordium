@@ -8,8 +8,10 @@ then checked against a strict whitelist. Anything not listed here is rejected.
     parking_spaces >= (1 if sleeping_rooms <= 3 else 2)
 
 Allowed: numbers, quoted text, measure names, + - * / (numbers only), comparisons
-(< <= > >= between numbers; == != between anything), `in` / `not in` a [list],
-and / or / not, `a if condition else b`, min() and max() of two or more numbers.
+(< <= > >= between numbers; == != between two numbers or two texts), `in` / `not in` a [list]
+of numbers or texts, and / or / not (true/false tests combine only with these), `a if condition else b`
+(two numbers or two texts), min() and max() of two or more numbers. The kinds each operator takes are one
+table, result_type, used both to check rule files (type_of) and when a formula is worked out.
 
 Numbers are worked out exactly, as the decimals they are written as (0.2 * 132 is 26.4, not the binary
 26.400000000000002), and a comparison treats two numbers within AT_LIMIT of each other as equal: a design
