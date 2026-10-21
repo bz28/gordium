@@ -55,6 +55,9 @@ measurements:
   conversion:
     value: null
     from: 'not measured: enter the dwelling units, the rooms let for profit, and whether it is a conversion'
+  abuts_r1_district:
+    value: null
+    from: 'not measured: say whether the lot abuts R-1a or R-1b land, sharing a lot line or across a street (§325-19E)'
   front_yard_eaves:
     value: 30.0
     from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building, eaves included; between (10, 0) and (10, 30)'
