@@ -959,6 +959,26 @@ rules:
       sources: []
       why_open: It depends on the lot and building_area questions, which are still open; see their research.
       report: docs/research/2026-10-20_architect_questions.md §3.2
+    findings:
+    - id: below_ground_not_counted
+      question: '"Above ground": are parts of a building below grade (e.g. a buried garage under a deck) left out of
+        building_area?'
+      kind: reading
+      answer: Parts wholly below ground don't count (Column 10 counts what is covered "above ground"; §325-25B lets
+        wholly below-grade accessory structures go anywhere). A deck on top of a buried garage does count.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [6, 7]
+        quote: covered by principal and accessory buildings above ground
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [4, 4]
+        quote: entirely below the finished grade
+      still_open: []
+      strength: strong
+      confirm_with: the City zoning office
+      report: docs/research/2026-10-20_architect_questions.md §3.2
     examples:
       - given: {building_area: 2310, lot_area: 6600}
         expect: pass
@@ -1233,7 +1253,7 @@ rules:
     title: "Lots abutting R-1a or R-1b land: stricter limits (§325-19E)"
     applies_when: >-
       use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
-      "one_family_attached", "two_family"]
+      "two_family"]
     sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 50
@@ -1275,16 +1295,18 @@ rules:
       - given: {use: two_family}
         expect: not_applicable
       - given: {use: one_family_attached}
+        expect: needs_review
+        note: whether an attached building of 3-6 houses is exempt is the second open question, so it is not exempted
+      - given: {use: one_family_semi_detached}
         expect: not_applicable
-        note: a one-family dwelling in the attached configuration (the one_family_includes_attached finding)
     findings:
-    - id: one_family_includes_attached
-      question: '§325-19E exempts "a one-family or two-family dwelling". Does that include the semi-detached, attached
-        and zero-lot-line configurations, which the chart lists as uses of their own?'
+    - id: one_family_configurations_exempt
+      question: '§325-19E exempts "a one-family or two-family dwelling". Does that include the semi-detached and
+        zero-lot-line configurations, which the chart lists as uses of their own?'
       kind: reading
-      answer: 'Yes: §325-3B defines a one-family dwelling and lists detached, zero lot line, semidetached and attached
-        as its configurations, so all four are exempt. (A row house or townhouse is also named in the definition of a
-        multiple dwelling; the chart''s "One-family dwelling, attached" use is read as the one-family configuration.)'
+      answer: 'Yes: §325-3B defines a one-family dwelling and lists detached, zero lot line and semidetached (a building
+        of at most two one-family dwellings) among its configurations, so they are exempt with the two-family dwelling.
+        The attached configuration (3 to 6 dwellings) is the second open question, still open.'
       sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 7
@@ -1293,13 +1315,10 @@ rules:
           zoning districts
       - file: chapter_325_zoning_2026-10.pdf
         page: 8
-        lines: [11, 12]
-        quote: ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings
-      - file: chapter_325_zoning_2026-10.pdf
-        page: 7
-        lines: [33, 33]
-        quote: row house, townhouse, or garden apartment housing as defined in this section
-      still_open: []
+        lines: [7, 7]
+        quote: ONE-FAMILY SEMIDETACHED DWELLING — A building containing not more than two
+      still_open:
+      - R-3a.abutting_r1#2
       strength: strong
       confirm_with: the City zoning office
     - id: cross_reference_points_elsewhere
@@ -1322,6 +1341,9 @@ rules:
     open_questions:
     - '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does land across
       a street count, or only land sharing a lot line with the R-3a lot?'
+    - 'A one-family attached dwelling is "a building containing three or more one-family dwellings" (§325-3B), and
+      §325-3B also calls a building of three or more dwelling units, a row house or a townhouse a multiple dwelling.
+      Is it the "one-family ... dwelling" §325-19E exempts, or a multiple dwelling §325-19E covers?'
     research:
     - question: '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does
         land across a street count, or only land sharing a lot line with the R-3a lot?'
@@ -1358,11 +1380,49 @@ rules:
         reading: only R-1a or R-1b land sharing a lot line with the lot counts
       - id: across_a_street_counts
         reading: R-1a or R-1b land across a street counts too
+    - question: 'A one-family attached dwelling is "a building containing three or more one-family dwellings" (§325-3B), and
+      §325-3B also calls a building of three or more dwelling units, a row house or a townhouse a multiple dwelling.
+      Is it the "one-family ... dwelling" §325-19E exempts, or a multiple dwelling §325-19E covers?'
+      searched:
+      - 325-19E
+      - 325-3B:dwelling_one_family
+      - 325-3B:one_family_attached_dwelling
+      - 325-3B:dwelling_multiple_or_multiple_residence
+      - 325-3B:row_house
+      - 325-3B:townhouse
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [40, 41]
+        quote: A one-family dwelling may be constructed in any of the following configurations, as permitted in specific
+          zoning districts
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 8
+        lines: [11, 12]
+        quote: ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [24, 24]
+        quote: (1) A building containing three or more dwelling units.
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [33, 33]
+        quote: row house, townhouse, or garden apartment housing as defined in this section
+      why_open: The one-family definition lists "attached" as one of its configurations, which points to exempt; but
+        the same building of 3 to 6 dwellings is a multiple dwelling under definitions (1) and (5), and §325-19E's
+        exemption names a "dwelling", which for one family is "a dwelling unit". The code reads both ways and no City
+        record was found, so Gordium doesn't exempt it (never a false pass).
+      readings:
+      - id: attached_is_exempt
+        reading: an attached building of one-family dwellings is exempt, as a one-family configuration
+      - id: attached_is_covered
+        reading: it is a multiple dwelling, so §325-19E applies
     notes: >-
       A flag: Gordium doesn't know the zoning of the land next to the lot, so for every use §325-19E covers it sends the
       lot to review. Worked by hand for R-3a, if the lot abuts R-1 land: lot size 150% of the chart's (multiple dwelling,
       new construction, 1-3 units: 1.5 × 6,000 = 9,000 sf; other use 9,000 sf; fraternity 37,500 sf); height R-1a's or
-      R-1b's 35 ft instead of 40 ft (both R-1 columns say 35 ft, so the bonus would be 3.5 ft, not 4); coverage 75% ×
+      R-1b's 35 ft instead of 40 ft (both R-1 columns say 35 ft, so the bonus would be 3.5 ft, not 4), and, since the
+      chart's "Maximum Building Height" covers both its rows, likely R-1's 3 stories instead of 4; coverage 75% ×
       35% = 26.25%; a side or rear yard that abuts R-1 land 150% of the chart's: side 15 ft and 7.5 ft, rear 150% of 20%
       of the lot depth (at most 50, at least 20 ft) — 39.6 ft on a 132 ft deep lot. The front yard is unchanged.
     drafted_by: claude
@@ -1508,7 +1568,9 @@ rules:
     kind: flag
     topic: parking_and_loading
     title: "Off-street loading (chart p.14, §325-21)"
-    applies_when: use in ["multiple_family", "nursing_home", "hospital_or_sanitarium", "neighborhood_commercial_facility"]
+    applies_when: >-
+      use in ["multiple_family", "dormitory", "fraternity_sorority_group_house", "nursing_home",
+      "hospital_or_sanitarium", "neighborhood_commercial_facility"]
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 14
@@ -1542,7 +1604,8 @@ rules:
       The R-3A, R-3AA and R-3B columns share one cell per row. Multiple dwelling with 25+ units: 1 space per 10,000 sf
       of floor space, plus 1 for each additional 15,000 sf or major fraction (note 3); nursing home, hospital or
       sanitarium: 1 space; neighborhood commercial facility: see §325-21. Each space at least 450 sf (§325-21A).
-      Gordium counts neither units nor floor space, so these are NEEDS REVIEW, worked out by hand. The chart says "25 +" units;
+      A dormitory and a fraternity house are multiple dwellings by §325-3B, so they are included. Gordium counts
+      neither units nor floor space, so these are NEEDS REVIEW, worked out by hand. The chart says "25 +" units;
       §325-21B says "more than 25 units" (a 25-unit building is covered by the chart's words, not the code's). Worked
       by hand: a 30-unit building of 22,000 sf needs 1 + 1 (12,000 sf over 10,000 is a major fraction of 15,000) = 2.
     drafted_by: claude

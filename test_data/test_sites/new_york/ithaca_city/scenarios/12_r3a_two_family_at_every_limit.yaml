@@ -5,7 +5,7 @@ what: >-
   5 ft from the west side line and 10 ft from the east. Its footprint, 2,187.5 sf, is exactly 35% of the lot. Every
   limit is R-3a's own (R-1b would fail the use, the height, the stories, the front yard, the west side yard and
   the coverage), and each is exactly at the line, so each complies. §325-19E (lots abutting R-1) doesn't apply to a
-  two-family dwelling, so it shows no row.
+  two-family dwelling (not compared here).
 district: R-3a
 use: two_family
 lot: {points: [[0, 0], [50, 0], [50, 125], [0, 125]], surveyed: true}
