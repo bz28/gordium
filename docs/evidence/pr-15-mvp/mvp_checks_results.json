@@ -22,7 +22,7 @@
    "ok": true,
    "detail": {
     "Building height": [
-     "needs_review",
+     "complies",
      "at limit"
     ],
     "Stories": [
@@ -34,12 +34,12 @@
   "5 the rows say assuming flat ground": {
    "ok": true,
    "detail": [
-    "?  Building height \u00b7 assuming flat ground",
     "?  Rear yard",
     "\u2713  Use (site)",
     "\u2713  Lot area (site)",
     "\u2713  Lot width (site)",
     "\u2713  Stories \u00b7 assuming flat ground",
+    "\u2713  Building height \u00b7 assuming flat ground",
     "\u2713  Lot coverage",
     "\u2713  Front yard",
     "\u2713  Side yard, Northeast",
@@ -72,11 +72,11 @@
   "3 Delta in words": {
    "ok": true,
    "detail": [
-    "at limit",
     "up to 0'-11 1/4\" short",
     "",
     "at least 357 sf to spare",
     "at least 21'-10\" to spare",
+    "at limit",
     "at limit",
     "at least 3.9% to spare",
     "at least 0'-0 3/4\" to spare",

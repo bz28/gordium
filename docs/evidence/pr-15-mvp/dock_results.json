@@ -9,13 +9,13 @@
    "ok": true,
    "detail": {
     "window": [
-     956,
+     1014,
      111,
      400,
      720
     ],
     "document": [
-     188,
+     246,
      51,
      1192,
      814
@@ -35,12 +35,12 @@
   "1 holding the rows": {
    "ok": true,
    "detail": [
-    "?  Building height \u00b7 assuming flat ground",
     "?  Rear yard",
     "\u2713  Use (site)",
     "\u2713  Lot area (site)",
     "\u2713  Lot width (site)",
     "\u2713  Stories \u00b7 assuming flat ground",
+    "\u2713  Building height \u00b7 assuming flat ground",
     "\u2713  Lot coverage",
     "\u2713  Front yard"
    ]
@@ -62,25 +62,25 @@
  "parent": "TabPanelDockBarFloatingForm()",
  "floating": {
   "window": [
-   956,
+   1014,
    111,
    400,
    720
   ],
   "document": [
-   188,
+   246,
    51,
    1192,
    814
   ]
  },
  "rows": [
-  "?  Building height \u00b7 assuming flat ground",
   "?  Rear yard",
   "\u2713  Use (site)",
   "\u2713  Lot area (site)",
   "\u2713  Lot width (site)",
   "\u2713  Stories \u00b7 assuming flat ground",
+  "\u2713  Building height \u00b7 assuming flat ground",
   "\u2713  Lot coverage",
   "\u2713  Front yard",
   "\u2713  Side yard, Northeast",

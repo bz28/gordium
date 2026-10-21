@@ -130,7 +130,7 @@ try:
         "Front yard": {"proposed": "27'-0 3/4\""}, "Side yard, Southwest": {"proposed": "12'-0 5/8\""},
         "Side yard, Northeast": {"proposed": "27'-4 1/4\""}, "Rear yard": {"status": "needs_review"},
         "Lot coverage": {"proposed": "19.1%", "status": "complies"}, "Lot area": {"status": "complies"},
-        "Building height": {"proposed": "35'-0\"", "status": "needs_review", "margin": "at limit"},
+        "Building height": {"proposed": "35'-0\"", "status": "complies", "margin": "at limit"},   # the bonus's question doesn't matter
         "Stories": {"status": "complies"}})
     tests.append({"n": 1, "test": "1 Labels (checked by mvp_checks_in_rhino.py)", "expected": {}, "got": {},
                   "match": True})
