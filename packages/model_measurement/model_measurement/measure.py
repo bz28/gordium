@@ -34,7 +34,7 @@ MEASURES = list(load(MEASURES_FILE))
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
 PARALLEL, PERPENDICULAR = 30, 60   # degrees from the street: clearly a rear line / clearly a side line
-SQUARE = 5                # degrees from the street: a line next to a side line only this close is surely a rear line
+SQUARE = 5                # degrees from the street: a back line that slants more may continue the side line
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 4     # more lot lines than this of unclear kind: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
@@ -173,14 +173,20 @@ class Lot:
         rest = [(chain[-1] + k) % n for k in range(1, n - len(chain) + 1)]     # from the street's end, around
         ends = {rest[0], rest[-1]}
         kinds = {}
-        beside = {rest[1], rest[-2]} if len(rest) > 2 else set()     # next to a line from the street's ends
+        # a line next to a side lot line could continue it: when it slants (a short back line: more than SQUARE
+        # from the street) or it is a step (the line after it turns back alongside the lot, square to the street).
+        # Both readings then; those that leave no rear line drop out. Otherwise, about parallel: a rear line
+        beside = {}
+        if len(rest) > 2:
+            beside = {rest[1]: rest[2], rest[-2]: rest[-3]}
+        def continues(i):
+            return (_angle(_chord(self.edges[i]), front) > SQUARE or
+                    _angle(_chord(self.edges[beside[i]]), front) >= PERPENDICULAR)
         for i in rest:
             a = _angle(_chord(self.edges[i]), front)
             if i in ends and a >= PERPENDICULAR:
                 kinds[i] = ("side",)
-            elif i not in ends and a <= (SQUARE if i in beside else PARALLEL):
-                # a line next to a side lot line could continue it unless it runs square to the side (parallel to
-                # the street): then only the rear; one farther along is a rear line when about parallel
+            elif i not in ends and a <= PARALLEL and not (i in beside and continues(i)):
                 kinds[i] = ("rear",)
             else:
                 kinds[i] = ("side", "rear")
@@ -444,8 +450,7 @@ def _height_of(building: dict, grade: float, facts: dict) -> dict:
         return _missing("building_height", stop("no_roof"))
     how = "from the ground level (grade plane) to the top of the roof"
     # the main roof: the largest roof plane seen from above (its faces together, so a meshed roof counts whole)
-    main_roof = max(_planes(roof), key=lambda g: (ops.unary_union([_plan(f) for f in g]).area,
-                                                  max(p[2] for f in g for p in f["points"])))
+    main_roof = _main_roof(_planes(roof))
     roof_top = max(p[2] for f in main_roof for p in f["points"])
     if roof_top >= top - TOL:
         readings, question, basis = _roof_readings(roof, top, grade, building, facts)
@@ -458,6 +463,21 @@ def _height_of(building: dict, grade: float, facts: dict) -> dict:
     basis = list({b["id"]: b for b in low_basis + high_basis}.values())
     return _decide("building_height", readings, how, _parts(building),
                    "; ".join(dict.fromkeys(q for q in (ABOVE_ROOF, low_question, high_question) if q)), basis)
+
+
+def _main_roof(groups: list[list[dict]]) -> list[dict]:
+    """The main roof: the roof plane that shows the most from above (its plan less what any higher roof plane
+    covers: a lower floor's top under the floor above shows only where that floor doesn't cover it), the higher
+    of two that show the same (to 0.01 sf, so rounding in a rotated or reordered drawing never decides it)."""
+    plans = [ops.unary_union([_plan(f) for f in g]) for g in groups]
+    lows = [min(p[2] for f in g for p in f["points"]) for g in groups]
+    highs = [max(p[2] for f in g for p in f["points"]) for g in groups]
+
+    def shows(k):
+        above = [plans[j] for j in range(len(groups)) if j != k and lows[j] > highs[k] + TOL]
+        return plans[k].difference(ops.unary_union(above)).area if above else plans[k].area
+    best = max(range(len(groups)), key=lambda k: (round(shows(k), 2), round(highs[k], 4)))
+    return groups[best]
 
 
 def _roof_readings(roof: list[dict], top: float, grade: float, building: dict, facts: dict) -> tuple[list, str, list]:
@@ -542,8 +562,7 @@ def _pitched_section(building: dict) -> list:
     if not roof:
         return []
     groups = _planes(roof)
-    main_roof = max(groups, key=lambda g: (ops.unary_union([_plan(f) for f in g]).area,
-                                          max(p[2] for f in g for p in f["points"])))
+    main_roof = _main_roof(groups)
     top = max(p[2] for f in main_roof for p in f["points"])
     return [g for g in groups if _normal_z(g[0]["points"]) < FLAT
             and any(abs(p[2] - top) <= TOL for f in g for p in f["points"])
@@ -1315,6 +1334,14 @@ def _lot_lines(lot: Lot, facts: dict):
             "candidates": candidates}
 
 
+def _side_order(found) -> tuple:
+    """The two side yards, the narrower first; two equal ones (within SAME) in a fixed order by where their lot line
+    is (west, then south, first), so which is "smaller" never depends on the order the outlines were drawn in."""
+    d, points = found
+    (x, y), _ = points
+    return (round(d / SAME) * SAME if SAME else d, round(x, 6), round(y, 6))
+
+
 def _turn(a, b) -> float:
     """How far the lot outline turns, in degrees (0-180), from one lot line to the next (end to end)."""
     (ax, ay), (bx, by) = _chord(a), _chord(b)
@@ -1424,9 +1451,9 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
         for words, r in lines["readings"]:
             for w, s, n in group:
                 found = [_distance(lot.line(g), s) for g in r["sides"]]
-                (a, pa), (b, pb) = (found * 2)[:2]
-                small.append((_both(words, w), min(a, b), {"points": pa if a <= b else pb, "named": n}))
-                large.append((_both(words, w), max(a, b), {"points": pb if a <= b else pa, "named": n}))
+                (a, pa), (b, pb) = sorted((found * 2)[:2], key=_side_order)
+                small.append((_both(words, w), a, {"points": pa, "named": n}))
+                large.append((_both(words, w), b, {"points": pb, "named": n}))
                 d, p = _distance(lot.line(r["rear"]), s)
                 rear.append((_both(words, w), d, {"points": p, "named": n}))
         eaves = ", eaves included" if suffix else ""
