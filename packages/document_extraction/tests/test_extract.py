@@ -65,7 +65,7 @@ def _jurisdiction(tmp_path, sha=None):
     src = tmp_path / "regulations/jurisdictions/ny/town/1_source_documents"
     src.mkdir(parents=True)
     shutil.copy(CHARTS, src / CHARTS.name)
-    (src / "sources.yaml").write_text(f"documents:\n  - file: {CHARTS.name}\n    sha256: {sha or sha256(CHARTS)}\n")
+    (src / "sources.yaml").write_text(f"documents:\n  - file: {CHARTS.name}\n    sha256: {sha or sha256(CHARTS)}\n", encoding="utf-8")
     return src.parent / "2_extracted_text" / f"{CHARTS.stem}.jsonl"
 
 
@@ -73,9 +73,9 @@ def test_check_catches_a_hand_edited_file(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "REPO", tmp_path)
     out = _jurisdiction(tmp_path)
     assert cli.main([]) == 0 and cli.main(["--check"]) == 0
-    rows = out.read_text().splitlines()
+    rows = out.read_text(encoding="utf-8").splitlines()
     edited = json.loads(rows[5]) | {"text": "25%/ 50 ft"}
-    out.write_text("\n".join([*rows[:5], json.dumps(edited), *rows[6:]]) + "\n")
+    out.write_text("\n".join([*rows[:5], json.dumps(edited), *rows[6:]]) + "\n", encoding="utf-8")
     assert cli.main(["--check"]) == 1
 
 
@@ -151,8 +151,8 @@ def test_real_not_quotable_documents_are_refused(file, page, quote):
 def test_docs_describe_the_extraction_check_ci_runs():
     """CI re-extracts every PDF (document_extraction --check); no doc may still say that's to come."""
     from rule_format.rulebook import REPO
-    assert "python -m document_extraction --check" in (REPO / ".github/workflows/ci.yml").read_text()
+    assert "python -m document_extraction --check" in (REPO / ".github/workflows/ci.yml").read_text(encoding="utf-8")
     files = [p for p in REPO.rglob("*") if p.suffix in (".md", ".py") and p.is_file()
              and not {".git", ".claude", ".venv"} & set(p.relative_to(REPO).parts) and p.name != "test_extract.py"]
-    stale = [p.relative_to(REPO) for p in files if "text-extraction step is merged" in p.read_text(errors="ignore")]
+    stale = [p.relative_to(REPO) for p in files if "text-extraction step is merged" in p.read_text(encoding="utf-8", errors="ignore")]
     assert not stale, stale

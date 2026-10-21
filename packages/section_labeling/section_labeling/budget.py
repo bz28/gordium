@@ -16,11 +16,35 @@ assumes every input token is billed at the highest input price (no caching) and 
 full max_tokens.
 """
 
-import fcntl
 import json
 import os
 from contextlib import contextmanager
 from pathlib import Path
+
+if os.name == "nt":      # Windows has no fcntl: msvcrt locks the lock file's first byte instead
+    import msvcrt
+else:
+    import fcntl
+
+
+@contextmanager
+def _exclusive(lock):
+    """Hold an exclusive lock on an open file until the block ends (the other runs wait)."""
+    if os.name == "nt":
+        while True:
+            try:
+                msvcrt.locking(lock.fileno(), msvcrt.LK_LOCK, 1)   # waits up to 10 s, then raises: try again
+                break
+            except OSError:
+                continue
+        try:
+            yield
+        finally:
+            lock.seek(0)
+            msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+    else:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        yield                                                       # released when the file closes
 
 
 class BudgetExceeded(Exception):
@@ -36,13 +60,12 @@ class Budget:
     def _locked(self):
         """The ledger's contents ({spent_usd, calls}), read under an exclusive lock and written back atomically."""
         self.ledger.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.ledger.with_suffix(".lock"), "w") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
-            data = json.loads(self.ledger.read_text()) if self.ledger.exists() else {}
+        with open(self.ledger.with_suffix(".lock"), "w", encoding="utf-8") as lock, _exclusive(lock):
+            data = json.loads(self.ledger.read_text(encoding="utf-8")) if self.ledger.exists() else {}
             data = {"spent_usd": max(float(data.get("spent_usd", 0.0)), self.recorded), "calls": int(data.get("calls", 0))}
             yield data
             tmp = self.ledger.with_suffix(".tmp")
-            tmp.write_text(json.dumps({"spent_usd": data["spent_usd"], "calls": data["calls"]}) + "\n")   # unrounded: no drift
+            tmp.write_text(json.dumps({"spent_usd": data["spent_usd"], "calls": data["calls"]}) + "\n", encoding="utf-8")   # unrounded: no drift
             os.replace(tmp, self.ledger)
 
     @property

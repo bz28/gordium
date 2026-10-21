@@ -126,7 +126,7 @@ def test_only_shareable_data_is_stored_and_it_is_what_was_downloaded():
                                                                  "county_parcel_2026-10-20.json"]
     county = SITE / "gis/county_parcel_2026-10-20.json"
     assert f"SHA-256: `{hashlib.sha256(county.read_bytes()).hexdigest()}`" in readme
-    assert set(json.loads(county.read_text())["features"][0]["attributes"]) == {
+    assert set(json.loads(county.read_text(encoding="utf-8"))["features"][0]["attributes"]) == {
         "SWISPRINTK", "LOCADDR", "ZONING", "FRONTAGE", "DEPTH", "PROPCLASS"}        # nothing personal
     assert re.fullmatch(r"[0-9a-f]{64}", CITY["sha256"]) and CITY["url"].startswith("https://")
     # Why the City's data isn't stored, with its sources: the parcel layer's terms, and the zoning layer's
@@ -137,7 +137,7 @@ def test_only_shareable_data_is_stored_and_it_is_what_was_downloaded():
                   "may not be reproduced or redistributed without the express written consent of the originator"):
         assert cited in city_part, cited
     assert "https://www.arcgis.com/sharing/rest/content/items/505beb987c93401b8445777a8bb9bda6?f=json" in readme
-    header = " ".join(line.lstrip("# ").strip() for line in (SITE / "gis/city_tax_parcel_measurements.yaml").read_text().splitlines())
+    header = " ".join(line.lstrip("# ").strip() for line in (SITE / "gis/city_tax_parcel_measurements.yaml").read_text(encoding="utf-8").splitlines())
     assert CITY_STATEMENT in header
     assert CITY_STATEMENT in DOC
 
@@ -159,7 +159,7 @@ def _model_lot() -> tuple[list[float], float]:
 def _sides(file: str) -> tuple[list[float], float, int]:
     """A stored parcel outline as its sides (consecutive edges within 8 degrees of each other are one side, so
     a curve drawn as short edges is one side), its area, and how many edges make up the first side."""
-    ring = json.loads((SITE / "gis" / file).read_text())["features"][0]["geometry"]["rings"][0]
+    ring = json.loads((SITE / "gis" / file).read_text(encoding="utf-8"))["features"][0]["geometry"]["rings"][0]
     area = abs(sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(ring, ring[1:]))) / 2
     sides, edges, heading = [], [], None
     for a, b in zip(ring, ring[1:]):
@@ -198,7 +198,7 @@ def test_the_rear_yard_tables_follow_the_r1b_rule():
     city = [CITY["sides_ft"][k]["length"] for k in ("front", "long_side", "jog", "rear", "side_toward_104")]
     (_, side, _, jog, long_side), _ = _model_lot()
     typed_depth = load_workbook(ANSWER_KEY, data_only=True)["Inputs"]["B4"].value          # their "Lot depth"
-    county = json.loads((SITE / "gis/county_parcel_2026-10-20.json").read_text())
+    county = json.loads((SITE / "gis/county_parcel_2026-10-20.json").read_text(encoding="utf-8"))
     assessor_depth = county["features"][0]["attributes"]["DEPTH"]
     a, b, c = (side + long_side) / 2, (side + long_side + jog) / 2, (side + jog + long_side) / 3
     rows = {f"| (a) the {side:.2f} and {long_side:.2f} ft lines | {a:.1f} ft": a,
