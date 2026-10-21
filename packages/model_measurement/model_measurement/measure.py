@@ -597,8 +597,12 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     grade = facts.get("grade_elevation")
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if b["id"] == facts.get("main_building")), None))
+    # objects are told apart by id below (spans, outlines): two with one id would leave one out silently
+    ids = [b["id"] for b in buildings]
+    same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
     why_building = (stop("no_building") if not buildings else
-                    "; ".join(p for b in buildings for p in b.get("problems") or []) or None)
+                    "; ".join([p for b in buildings for p in b.get("problems") or []]
+                              + [stop("same_id", id=i) for i in same]) or None)
     # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
     # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty

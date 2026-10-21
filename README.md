@@ -1,36 +1,32 @@
 # Gordium
 
-A co-pilot inside Rhino for architects. It knows the zoning rules a building must follow and checks each design edit against them: **pass**, **fail**, or **needs review**.
+**Purpose:** the front door: what Gordium is, where to start reading, and how to run the tests.\
+**For:** anyone new: engineers, architects, shareholders.\
+**Kept current by:** whoever changes the reading path, the repository layout or how tests are run, in that same PR.
 
-**Try it in Rhino:** [Gordium in Rhino: from scratch](apps/rhino_plugin/QUICKSTART.md), install once, then your first project step by step.
+Gordium is a co-pilot inside Rhino (the 3D design program many architects use). It knows the zoning rules a building must follow and checks every design edit against them: **complies**, **does not comply**, or **needs review** when it can't be sure. Every answer points to the City's exact words. First city: the City of Ithaca, NY, residential districts first.
 
-First city: **City of Ithaca, NY** (residential districts first).
+## Start here
+
+Read these in order. Words you don't know are in the [glossary](docs/glossary.md).
+
+1. **[The System Map](https://claude.ai/artifact/BMkp3eyrgemdqcwhi9oFxf)** (online, about 10 minutes): Gordium at a glance, from the City's law to a checked design, with the key decisions in one line each.
+2. **[How Gordium works, step by step](https://claude.ai/artifact/5LAxAN2qpWFUMDBBDpLQrh)** (online, about 20 minutes): the same flow as plain-English pseudocode, step by step, with what is built and what isn't.
+3. **[The docs index](docs/README.md)** (5 minutes to scan): every document in this repository, what it is for and who it is for.
+4. **[How we work](CLAUDE.md)** (10 minutes): the principles Gordium never breaks, the repository layout, and how changes are made and reviewed.
 
 ## How the repository is organized
 
-| Folder | What's in it |
-|---|---|
-| `regulations/` | **Data.** The city's original documents and the rulebooks made from them. No code. |
-| `packages/` | **Logic.** One package per job (reading documents, measuring models, checking designs…). Created as each is written. |
-| `apps/` | **Products** people use (command line, rule review app; later the Rhino plugin). Created as each is written. |
-| `test_data/` | Architects' hand-checked rules (answer keys) and real test sites with expected results. |
-| `docs/` | Project notes: decisions and open questions. |
+Four top-level folders: `regulations/` (the City's documents and the rules made from them; data, no code), `packages/` (the code, one folder per job), `apps/` (what people use) and `test_data/` (hand-checked answers to grade Gordium against). Notes and decisions live in `docs/`. The full layout, with what each numbered step folder holds, is in [CLAUDE.md](CLAUDE.md#repository-layout).
 
-## The ground rules
+## Running the tests
 
-1. Documents are turned into rules once per code version, then frozen.
-2. AI drafts rules; code checks every draft (exact quotes, valid formulas, worked examples). Architect approval is deferred for now (decided 2026-10-19): rules stay marked draft, and the approval fields wait unused until it is switched on.
-3. The checker never uses AI. Same design + same rulebook = same answer.
-4. Never a false pass. Anything uncertain is "needs review".
-5. Every rule traces back to its exact source.
-6. Measurement code is written and tested by engineers.
-
-Full design doc: https://claude.ai/code/artifact/d980dd22-6b2e-4090-bcc4-d02c871b8a7b
-
-## Running it
+You need Python 3.12 or newer. From the repository folder:
 
 ```bash
-python3.12 -m venv .venv && .venv/bin/pip install -e ".[dev]"
-.venv/bin/pytest                      # all tests
-.venv/bin/python -m rule_format       # check every rule file
+python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"   # once: set up and install
+.venv/bin/pytest                                             # every test
+.venv/bin/python -m rule_format                              # check every rule file
 ```
+
+The full list of automatic checks that run on every change is in [.github/workflows/ci.yml](.github/workflows/ci.yml).
