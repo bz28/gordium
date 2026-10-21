@@ -355,7 +355,7 @@ F15_CASE = ("sloped", [{"op": "shift_floor", "k": 3, "dz": 3.25, "carry": False}
 
 
 @pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F15: 'the ground doesn't meet the buildings' holds the yards only while the spots are at the walls")
+                   reason="F15: fixed on #15 acc21a7 (_floating against the ground under the footprint); arrives via term-index f220429+")
 def test_F15_the_yards_of_a_floating_house_do_not_wait_on_the_ground_only_sometimes():
     """The sloped lot's starting house (on its four spot grades, ground 2.0 ft) with floor 1 raised 3'-3" on its
     own: nothing reaches the ground (5'-3" to 37'-0"). Gordium stops every yard and the coverage ("the ground level
