@@ -1252,3 +1252,63 @@ def test_a_plain_stacked_garage_beside_the_floor_blocks_is_a_plain_part():
     assert "one solid with no floors" not in got[None]["reason"]
     assert got[1]["value"] is None and "fewer than" in got[1]["reason"], got[1]
 
+
+def _ring_points(x0, y0, x1, y1, level, step=2.0):
+    """Spot grades every `step` ft along a rectangle's walls, just outside them, at `level` (a number or a
+    function of the point)."""
+    out = []
+    for (ax, ay), (bx, by) in (((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0))):
+        n = max(1, int(math.dist((ax, ay), (bx, by)) // step))
+        for i in range(n + 1):
+            x, y = ax + (bx - ax) * i / n, ay + (by - ay) * i / n
+            out.append([x, y, level(x, y) if callable(level) else level])
+    return out
+
+
+def test_a_detached_garage_on_higher_ground_never_lowers_the_houses_height():
+    """Review round 18, P0: a 37 ft house, a wing touching it (one building, §325-18A) and a detached garage on
+    ground 12 ft higher. The house's candidate building was measured from the grade plane of every solid, the
+    garage's walls included: 33.0 ft, complies. Each candidate has its own grade plane (§325-3, the ground at
+    the walls of THAT building): the house and wing are 37 ft from theirs; only read with the garage as part of
+    the building does its ground count. Never a value below 37."""
+    house, wing = box(10, 25, 35, 65, 0, 37, id="house"), box(35, 30, 45, 50, 0, 20, id="wing")
+    garage = box(30, 78, 45, 95, 12, 22, id="garage")
+    spots = _ring_points(10, 25, 35, 65, 0) + _ring_points(35, 30, 45, 50, 0) + _ring_points(30, 78, 45, 95, 12)
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "main_building": "house", "grade_points": spots}
+    h = measure(site(RECT, house, wing, garage), facts)["building_height"]
+    assert h["value"] is None or h["value"] >= 37.0, h
+    first = [r["value"] for r in h["readings"] if r["reading"].startswith("the main building and the solids touching")]
+    assert first and all(v == 37.0 for v in first), h
+
+
+def test_adding_a_detached_solid_never_lowers_the_first_candidates_height_or_stories():
+    """Property (round 18): the house (floor blocks) with a wing touching it, on spot grades at random levels
+    around their walls. Adding a detached solid anywhere on the lot, on ground of any level, never lowers the
+    height or the stories: a value is never below the one before, and the reading for the house and what touches
+    it is unchanged. (Read with the new solid as part of the building, its count may be open: needs review.)"""
+    import random
+    rnd = random.Random(18)
+    for _ in range(40):
+        n = rnd.randint(1, 3)
+        house = [floor(10, 25, 30, 55, z0=10 * i, z1=10 * (i + 1), id=f"floor {i + 1}") for i in range(n)]
+        wing = box(30, 30, 38, 45, 0, rnd.choice([6, 12, 25]), id="wing")
+        tilt = rnd.uniform(-0.1, 0.1)
+        spots = _ring_points(10, 25, 30, 55, lambda x, y: round(tilt * x, 2)) + \
+            _ring_points(30, 30, 38, 45, lambda x, y: round(tilt * x, 2))
+        facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "main_building": "floor 1",
+                 "grade_points": spots, "stories": rnd.choice([None, n, n + 1])}
+        before = measure(site(RECT, *house, wing), facts)
+        x0, y0 = rnd.uniform(5, 30), rnd.uniform(68, 80)
+        z = rnd.uniform(-5, 15)
+        shed = box(x0, y0, x0 + 8, y0 + 8, z, z + rnd.uniform(5, 20), id="shed")
+        after = measure(site(RECT, *house, wing, shed),
+                        {**facts, "grade_points": spots + _ring_points(x0, y0, x0 + 8, y0 + 8, round(z, 2))})
+        for name in ("building_height", "stories"):
+            b, a = before[name], after[name]
+            if b["value"] is None:
+                continue
+            first = [r["value"] for r in a["readings"] if r["reading"].startswith("the main building and the solids")]
+            assert a["value"] is None or a["value"] >= b["value"], (name, b, a)
+            assert all(v == b["value"] for v in first), (name, b, a)
+            if a["value"] is None and a["readings"]:
+                assert first, (name, b, a)                       # the house's own reading is always listed
