@@ -99,7 +99,8 @@ Every reason the code gives today comes from the table:
   "sloped ground: the grade plane (§325-3) needs the ground levels around the walls, which aren't measured yet".
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "enter the number of
   stories"; "enter bedrooms / parking spaces".
-- **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
+- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
+  measurements"; "more than one building: pick the main building"; "a
   building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
