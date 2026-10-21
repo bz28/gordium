@@ -671,9 +671,11 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
     raisers = _raisers(items, values)
     for i in items:
         node, expr = i.pop("_node", None), i.pop("_expr", None)
-        turns_on = i.pop("_turns_on", None)
-        if turns_on and (i.get("hint") or "").startswith("To comply"):
-            i["hint"] = None             # it turns on an open question: no move makes it comply (the review, F5)
+        # its own measurement is an open question (to the wall or to the overhangs?): the checker never lets it
+        # comply, whatever is moved, so no "To comply" (the review, F5). An open question it turns on only through
+        # its limit (the lot depth) goes away with the right change (lower the roof: the bonus no longer applies).
+        # (Its own value is then unknown, so it has no as-drawn hint either.)
+        stuck = node is not None and node.left.id in (i.pop("_turns_on", None) or [])
         i.update(delta="", approx=False, colour="none", limits=[])
         i["detail"].setdefault("colours", None)
         if node is None:
@@ -697,7 +699,7 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
         i.update(delta=delta_words(i["status"], span, unit, approx), approx=approx)
         body = ast.parse(expr or ast.unparse(node), mode="eval").body
         one_way = not isinstance(body, ast.BoolOp) or (i.get("_raised") and isinstance(body.op, ast.And))
-        if span[0] < 0 and one_way and not turns_on and node.left.id not in SITE_MEASURES \
+        if span[0] < 0 and one_way and not stuck and node.left.id not in SITE_MEASURES \
                 and (not i.get("hint") or i["hint"].startswith("To comply")):
             # (a lot's own size is no design change: its rows keep the as-drawn words; the review, F1)
             hint = comply_hint(i["name"], node, rs, values, measured, approx)

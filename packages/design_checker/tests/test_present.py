@@ -1001,6 +1001,15 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
         assert site and all(not (i.get("hint") or "").startswith("To comply") for i in site.values()), \
             {n: (i["status"], i.get("hint")) for n, i in site.items()}
         assert any(i["status"] == present.REVIEW for i in site.values())         # the case really arose
+    # a yard the height bonus raises (a 36'-6" house using the other way), complying as drawn but not at the tax
+    # map's worst: its own "To comply" from the raised minimum, and doing it makes the row comply
+    raised = {}
+    for y0 in (27, 28.5):
+        r = check_site(_plot(box(15, y0, 35, 66, 0, 36.5), lot_=plain), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
+        raised[y0] = next(i for i in r["view"]["items"] if i["name"] == "Front yard")
+    assert raised[27]["status"] == present.REVIEW and "other way needs" in raised[27]["reason"]
+    assert raised[27]["hint"] == "To comply whatever the survey shows: move the building 1'-6\" farther from that lot line."
+    assert raised[28.5]["status"] == present.COMPLIES                          # 27 + 1'-6"
 
 
 def test_a_row_that_turns_on_an_open_question_is_never_told_how_to_comply():
@@ -1029,6 +1038,51 @@ def test_a_row_that_turns_on_an_open_question_is_never_told_how_to_comply():
                 seen += i["name"] == "Side yard, East"
                 assert not (i.get("hint") or "").startswith("To comply"), (shift, i["name"], turns, i.get("hint"))
     assert seen == 3
+    # but an open question a row turns on only through its limit goes away with the right change: a 36'-6" house
+    # on 106 (its back lines side or rear: the lot depth the bonus's rear yard reads is open) keeps "lower the
+    # building 1'-6"", and lowering it makes the row comply
+    import random
+    from shapely.geometry import Polygon, box as rect
+    from design_checker.check import sample_site
+    from test_measure import lot as lot_of
+    sample = sample_site()
+    ring = sample["lot"]
+    xs, ys = [p[0] for p in ring], [p[1] for p in ring]
+    rnd, kept = random.Random(5), 0
+    for k in range(120):
+        x0, y0 = rnd.uniform(min(xs) + 1, 40), rnd.uniform(min(ys) + 5, 40)
+        x1, y1 = rnd.uniform(x0 + 8, max(xs) - 1), rnd.uniform(y0 + 10, max(ys) - 2)
+        h = rnd.choice((30, 36.5))
+        if not Polygon(ring).buffer(-2).contains(rect(x0, y0, x1, y1)):
+            continue                     # a house over a lot line is in review for that, whatever its height
+        facts = {**sample["facts"], "lot_surveyed": k % 2 == 0}
+        r = check_site(_plot(box(x0, y0, x1, y1, 0, h), lot_=lot_of(ring)), facts)
+        rows = {x["Rule id"]: x for x in r["rows"]}
+        item = next(i for i in r["view"]["items"] if i["name"] == "Building height")
+        if rows[item["rule"]].get("Turns on") and (item.get("hint") or "").startswith("To comply: lower the building"):
+            gap = _feet(item["hint"].split("lower the building ")[1].split(",")[0].rstrip("."))
+            r2 = check_site(_plot(box(x0, y0, x1, y1, 0, h - gap), lot_=lot_of(ring)), facts)
+            again = next(i for i in r2["view"]["items"] if i["name"] == "Building height")
+            assert again["status"] == present.COMPLIES, (k, item["hint"], again["reason"])
+            kept += 1
+    assert kept >= 3, kept
+    # and coverage on a tax-map lot, which lists the lot area as what it turns on (scenario 08): "reduce the
+    # footprint by at least 76 sf", and taking 76 sf off makes it comply
+    from shapely.geometry import Polygon as Shape
+    sc08 = scenarios.load(scenarios.FOLDER / "08_tax_map_lot_front_yard_within_two_feet.yaml")
+    cov = {}
+    for cut in (0, 76):
+        sc = copy.deepcopy(sc08)
+        b = sc["buildings"][0]
+        xs = [p[0] for p in b["outline"]]
+        dx = cut / (Shape(b["outline"]).area / (max(xs) - min(xs)))          # the east side trimmed by `cut` sf
+        b["outline"] = [[x - dx if abs(x - max(xs)) < 1e-9 else x, y] for x, y in b["outline"]]
+        s, f, extras = scenarios.site(sc)
+        r = check_site(s, f, extras=extras)
+        cov[cut] = next(i for i in r["view"]["items"] if i["name"] == "Lot coverage")
+        assert next(x for x in r["rows"] if x["Rule id"] == cov[cut]["rule"]).get("Turns on") == ["lot_area"]
+    assert cov[0]["hint"] == "To comply whatever the survey shows: reduce the footprint by at least 76 sf."
+    assert cov[76]["status"] == present.COMPLIES, cov[76]["reason"]
 
 
 
