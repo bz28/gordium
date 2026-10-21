@@ -246,7 +246,7 @@ def test_a_draw_on_the_same_lot_brings_back_what_a_reopened_file_lost_and_says_e
     """Review round 3: in a reopened file the footprints (never saved) weren't fetched again on Draw, and a hidden
     context layer stayed hidden with the tick on; the "clear" step removed the neighbourhood without a word."""
     sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_visible(")]
-    keep = sync[sync.index('if step == "keep" and frame and on and not loaded:'):sync.index('if step in ("clear"')]
+    keep = sync[sync.index('if step == "keep" and frame and on and refetch:'):sync.index('if step in ("clear"')]
     assert "draw_context(doc, frame)" in keep and "_clear_context" not in keep    # offline keeps what is saved
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
     assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc, sources)")
@@ -436,14 +436,43 @@ def test_a_failed_footprint_fetch_is_not_on_screen_so_the_next_tick_fetches_agai
     assert len(shown) == 212 and logic.guides_on_screen({"doc": DOC, "lines": shown}, DOC)
 
 
+def test_a_fetch_that_worked_but_found_no_footprints_is_not_fetched_again_and_a_failed_one_is():
+    """Review round 8: "on screen" (something to draw) also decided "fetch again", so a fetch that worked and found no
+    footprints was fetched again (a wait of up to 20 s and a redraw) on every Draw and tick. needs_refetch is its
+    own question: nothing held for this document, or a live-only layer whose last fetch failed."""
+    frame = looked_up()["writes"]["frame"]
+
+    class NoFootprints(Down):
+        def post(self, url, params):
+            if T.key_of(url) == "state_buildings":
+                return {"features": []}, b"{}"
+            return super().post(url, params)
+    empty = cb.fetch(frame, NoFootprints(T.load("106_ithaca_rd"), context=T.load("106_ithaca_rd_context")), now=T.NOW)
+    assert empty["layers"]["buildings"]["status"] == "found" and empty["counts"]["buildings"] == 0
+    _, record, _, shown = redraw([], None, empty, frame)
+    held = {"doc": DOC, "lines": shown}
+    assert shown == [] and not logic.guides_on_screen(held, DOC)          # nothing to draw ...
+    assert not logic.needs_refetch(held, record, DOC)                      # ... and nothing to fetch again
+    _, record, _, shown = redraw([], None, fetch_with(frame, down={"state_buildings"}), frame)
+    assert logic.needs_refetch({"doc": DOC, "lines": shown}, record, DOC)  # the footprints' service failed
+    assert logic.needs_refetch(None, record, DOC)                          # a reopened file: nothing held
+    _, record, _, shown = redraw([], None, fetch_with(frame), frame)
+    assert not logic.needs_refetch({"doc": DOC, "lines": shown}, record, DOC)
+    assert logic.needs_refetch({"doc": DOC + 1, "lines": shown}, record, DOC)   # another document's
+
+
 def test_every_state_of_the_context_has_one_definition():
     """Review round 7, swept: on screen, belongs to this document, same frame, stored, the live layer kept, what is
     replaced: each decided by one rhino_logic function, used everywhere."""
     import inspect
     assert not re.search(r'get\("doc"\)\s*==', RHINO)                         # never a document match of its own
-    for fn in ("def draw_context(", "def sync_context(", "def show_context(", "def draw_scene(", "def bounds("):
+    for fn in ("def draw_context(", "def draw_scene(", "def bounds("):          # on screen: drawing and the merge
         body = RHINO[RHINO.index(fn):].split("\ndef ", 1)[0]
         assert "logic.guides_on_screen(" in body, fn
+    for fn in ("def sync_context(", "def show_context("):                      # fetch again: round 8
+        body = RHINO[RHINO.index(fn):].split("\ndef ", 1)[0]
+        assert "logic.needs_refetch(STATE.get(\"context_guides\"), _context_record(doc), doc.RuntimeSerialNumber)" \
+            in body and "guides_on_screen" not in body, fn
     assert not re.search(r"loaded = \(STATE", RHINO)
     assert "logic.guides_of(STATE.get(\"context_guides\"), doc.RuntimeSerialNumber)" in RHINO     # _clear_context
     assert 'get("frame") ==' not in RHINO and 'get("frame") !=' not in RHINO and "same = " not in RHINO

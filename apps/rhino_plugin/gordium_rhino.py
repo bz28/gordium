@@ -2235,8 +2235,8 @@ def sync_context(doc, facts):
     frame = logic.context_frame(facts, _ui_state(doc))
     on = STATE.get("context_on", True)
     step = logic.context_step(frame, drawn, on)
-    loaded = logic.guides_on_screen(STATE.get("context_guides"), doc.RuntimeSerialNumber)
-    if step == "keep" and frame and on and not loaded:
+    refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
+    if step == "keep" and frame and on and refetch:
         # the same lot in a reopened file: its footprints (never saved) fetched again. draw_context replaces what is
         # drawn only once the fetch has worked, so offline the saved parcels and streets stay (review round 3)
         draw_context(doc, frame)
@@ -2267,8 +2267,9 @@ def show_context(on):
     doc = Rhino.RhinoDoc.ActiveDoc
     STATE["context_on"] = bool(on)
     drawn = _context_visible(doc, on)
-    loaded = logic.guides_on_screen(STATE.get("context_guides"), doc.RuntimeSerialNumber)
-    if on and not loaded:                  # draw_context says what it drew, or why it couldn't
+    refetch = logic.needs_refetch(STATE.get("context_guides"), _context_record(doc), doc.RuntimeSerialNumber)
+    loaded = not refetch
+    if on and refetch:                     # draw_context says what it drew, or why it couldn't
         try:
             facts = current_facts(doc)
         except ValueError:

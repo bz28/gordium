@@ -1083,11 +1083,22 @@ def guides_of(held, doc_serial):
 
 
 def guides_on_screen(held, doc_serial):
-    """Whether this document's footprints are on screen: held for it AND with something to draw. A failed footprint
-    fetch leaves an empty entry, which is not on screen, so the tick or the next Draw fetches again (review round 7:
-    "loaded" was the document match alone there, so a failure could never be retried). The one definition the
-    merge, Draw, the tick and the drawing all use."""
+    """Whether this document's footprints are on screen: held for it AND with something to draw. The drawing's and
+    the merge's question (keep the ones on screen?). Whether to fetch again is needs_refetch's (review round 8: a
+    fetch that worked and found none is not a failure)."""
     return guides_of(held, doc_serial) and bool(held.get("lines"))
+
+
+def needs_refetch(held, record, doc_serial):
+    """Whether the tick or a Draw on the same lot should fetch the neighbourhood again: nothing held for this
+    document (a reopened file: the footprints are never saved), or a live-only layer whose last fetch failed
+    (the record says so). A fetch that worked and found no footprints is not fetched again (review round 8: it was,
+    on every Draw and tick, because "on screen" also meant "something to draw"). guides_on_screen stays the
+    drawing's and the merge's question."""
+    if not guides_of(held, doc_serial):
+        return True
+    return any(not is_stored(v) and (v or {}).get("status") not in DREW
+               for v in ((record or {}).get("layers") or {}).values())
 
 
 def context_step(frame, drawn, on):
