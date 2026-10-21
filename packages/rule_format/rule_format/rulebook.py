@@ -36,7 +36,7 @@ RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_
                "approved_hash"}
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
-ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell"},
+ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
                "examples": {"given", "expect", "note"}}
 CELL_FIELDS = {"section", "row", "column"}   # a chart cell source: {file, page, cell: {section, row, column}}
 APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "answers")
@@ -349,6 +349,54 @@ def _number_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[st
     return p
 
 
+def _unused_number_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[str]:
+    """The other direction: every number a cited footnote or law quote states must be used by the rule's
+    formulas, or be declared by that source in `not_limits` ({number: why it isn't a limit here}). "(16) But not
+    less than 20 ft." with a formula that drops the 20 is then a problem, not a silent false pass. Checked: the
+    law (a city code chapter: sources.yaml layout ecode360) and numbered notes ("(16) ..."). Left out: chart
+    rows (a row lists every district's number; the rule uses its own column's) and cited cells. Not yet for
+    rules the drafting scripts wrote (drafted_by "rule_drafting/..."): their quotes can't declare not_limits yet;
+    the drafting job turns it on for them."""
+    if str(rule.get("drafted_by", "")).startswith("rule_drafting/"):
+        return []
+    used = [0.0]
+    for key in ("applies_when", "check"):
+        if isinstance(rule.get(key), str):
+            try:
+                used += formula.numbers(rule[key])
+            except FormulaError:
+                return []                                     # reported with the formula
+    for r in _list_of_dicts(rule, "review_when") or []:
+        if isinstance(r.get("when"), str):
+            try:
+                used += formula.numbers(r["when"])
+            except FormulaError:
+                return []
+    p = []
+    for s in sources:
+        declared = s.get("not_limits")
+        if declared is not None and not (isinstance(declared, dict) and all(
+                type(k) in (int, float) and isinstance(v, str) and v.strip() for k, v in declared.items())):
+            p.append(f"source {s.get('file')}: not_limits must map each number to why it isn't a limit here")
+            declared = {}
+        declared = declared or {}
+        quote = s.get("quote")
+        if not isinstance(quote, str) or _cell(s, ctx) is not None:
+            continue
+        law = isinstance(s.get("file"), str) and (ctx.sources.get(s["file"]) or {}).get("layout") == "ecode360"
+        if not law and not re.match(r"^\s*\(\d+\)", quote):
+            continue                                          # not the law, nor a note: a chart row lists every district
+        stated = source_numbers(quote, percent_as_number=False)
+        for n in sorted(declared):
+            if not any(abs(n - x) < 1e-9 for x in stated):
+                p.append(f"source {s.get('file')}: not_limits names {n:g}, which its quote doesn't state")
+        for n in sorted(stated):
+            if not any(abs(n - u) < 1e-9 for u in used) and not any(abs(n - d) < 1e-9 for d in declared):
+                p.append(f"number {n:g} in the quote \"{quote[:60]}…\" is never used by the rule's formulas "
+                         "(use it, or declare it in that source's not_limits with why it isn't a limit here)")
+    return p
+
+
 def _cell_source_problems(s: dict, ctx: "Context", district: str | None = None) -> list[str]:
     """A chart cell cited by its page, section, row and district column, exactly as the chart reader read
     it (2_extracted_text/<chart>.cells.jsonl). The cell's value is what's cited; there is no quote. In a
@@ -539,6 +587,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     p += _source_problems(sources, ctx, district) if sources is not None else []
     p += _use_row_problems(rule, sources or [], ctx)
     p += _number_problems(rule, sources or [], ctx)
+    p += _unused_number_problems(rule, sources or [], ctx)
 
     expects = {ex.get("expect") for ex in examples or [] if isinstance(ex.get("expect"), str)}
     if rule.get("kind") == "rule" and not {"pass", "fail"} <= expects:

@@ -638,3 +638,13 @@ def test_a_solid_under_the_house_but_not_joined_to_it_is_never_dropped():
     basement, sub = box(10, 25, 35, 65, 802, 812, id="basement"), box(15, 30, 30, 60, 792, 802, id="sub-basement")
     m = measure(site(RECT, house, basement, sub), facts)
     assert m["building_height"]["value"] == 30.0 and m["front_yard"]["value"] == 25.0
+
+
+def test_two_building_objects_with_one_id_are_never_measured_as_one():
+    """Stress test F4: two floor blocks sharing an id; one was dropped from the story count while the height
+    still counted it. Nothing is ever dropped silently: every building measurement needs review, saying why."""
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)), FACTS)
+    for name in ("building_height", "building_area", "front_yard", "rear_yard"):
+        assert m[name]["value"] is None and "share the id house" in (m[name]["reason"] or ""), name
+    ok = measure(site(RECT, box(10, 25, 35, 65, 0, 10, id="f1"), box(10, 25, 35, 65, 10, 20, id="f2")), FACTS)
+    assert "share the id" not in str(ok)

@@ -52,6 +52,7 @@ STOPS = {
     "no_rooms": "enter bedrooms / parking spaces",
     # the buildings
     "no_building": "no building on the Building layer",
+    "same_id": "two building objects share the id {id}: one would be left out of the measurements",
     "no_main_building": "more than one building: pick the main building",
     "outside_lot": "a building isn't inside the lot",
     "open_solid": "a building isn't a closed solid",

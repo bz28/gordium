@@ -1,5 +1,9 @@
 # Methods
 
+**Purpose:** every technique Gordium uses to turn the law into checkable rules and check designs: what it does, why it was chosen, what else was considered, its weak spots and how it is tested.\
+**For:** engineers and reviewers who want to evaluate or challenge a choice.\
+**Kept current by:** the engineer who adds or changes a technique, in that same PR.
+
 Every technique Gordium uses to turn a city's zoning documents into checkable rules: what it does, how, why it was chosen, what else was considered, its known weaknesses, how it's tested, and ideas to improve it. Written so the choices can be evaluated and challenged later. Numbers are from the City of Ithaca run (2026-10).
 
 Who does each step: **code** (plain, deterministic, no AI), **AI** (a recorded API call; drafts only), **people** (reviewers, architects).
