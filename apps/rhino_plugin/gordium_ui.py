@@ -15,11 +15,12 @@ import Rhino.Geometry as rg
 
 import rhino_logic as logic  # plain Python, tested in CI (on the path: gordium_rhino puts it there first)
 
-PANEL_WIDTH = 480          # wide enough that Proposed, Required and Delta never truncate (D4)
+PANEL_WIDTH = 540          # wide enough that Item (230: "Overlays · not in this release") and Delta ("+11'-7\" to spare")
+                           # never truncate (D4; Rhino, 2026-10-21: at 480 with Delta in words, Item truncated)
 # fixed widths that fit the panel: an Item column sized to its text pushed the numbers out of sight (seen in the
 # Rhino window capture). The mark is the first thing in the Item cell: on the Mac the tree's expand arrows take
 # the first column, which hid a column of its own.
-COLUMNS = [("Item", 196), ("Proposed", 84), ("Required", 72), (logic.COLUMN_DELTA, 96)]   # "−1'-4" short"
+COLUMNS = [("Item", 230), ("Proposed", 84), ("Required", 72), (logic.COLUMN_DELTA, 110)]   # "−1'-4" short"
 STALE_SECONDS = 0.3        # results older than an edit by this long are shown as out of date (F7, H1)
 
 
@@ -173,7 +174,8 @@ def make_panel(actions):
     layout.Spacing = ed.Size(6, 6)
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
-    layout.Add(row(_envelope_box(actions), _massing_box(actions), _labels_box(actions, parts)))
+    layout.Add(row(_envelope_box(actions), _massing_box(actions)))
+    layout.Add(row(_labels_box(actions, parts)))     # its own row: beside the others it ran off the panel
     parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
     layout.Add(parts["message"])
     layout.Add(footer)

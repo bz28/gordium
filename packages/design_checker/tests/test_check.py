@@ -935,7 +935,7 @@ def test_the_delta_column_is_named_delta_in_the_panel_and_the_report(facts, tmp_
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
     assert logic.COLUMN_DELTA == "Delta" and "Delta" in cells and "Margin" not in cells
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert '(logic.COLUMN_DELTA, 96)' in ui and '"Margin"' not in ui
+    assert '(logic.COLUMN_DELTA, 110)' in ui and '"Margin"' not in ui
 
 
 def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_document():
@@ -1159,3 +1159,20 @@ def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
     assert "logic.reaches_into_lot(" in body and ".Center" not in body
+
+
+
+def test_the_panel_columns_fit_and_the_labels_tick_has_its_own_row():
+    """Seen in Rhino (2026-10-21): with Delta in words, the Item column was narrowed to 196 and truncated "Overlays ·
+    not in this release"; the labels tick ran off the panel beside the other two. Item keeps the 230 its text needs,
+    every column fits the panel, and the labels tick is on its own row."""
+    import ast
+    import re
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    width = int(re.search(r"^PANEL_WIDTH = (\d+)", ui, re.M).group(1))
+    columns = re.search(r"^COLUMNS = (\[.*\])", ui, re.M).group(1).replace("logic.COLUMN_DELTA", "'Delta'")
+    cols = dict(ast.literal_eval(columns))
+    assert cols["Item"] >= 230 and cols["Delta"] >= 110
+    assert sum(cols.values()) + 40 <= width                 # the panel's padding and the tree's own margin
+    assert "    layout.Add(row(_labels_box(actions, parts)))" in ui
+    assert "_massing_box(actions), _labels_box(" not in ui
