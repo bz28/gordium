@@ -489,8 +489,7 @@ def show_detail(parts):
         d.Create()
         return
     det = i["detail"]
-    words = {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
-             "not_checked": "Not checked"}[i["status"]]
+    words = logic.status_words(i)
     d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.row_name(i) + " · " + words,   # the row's own name, whole
                    eto_status_color(i["status"]), bold=True, size=13))
     if parts.get("stale"):

@@ -14,6 +14,8 @@ own windows by window id after each step (the step writes <temp>/gordium_pass2/r
   screen without scrolling, and its words aren't repeated as text (with the merged measuring the one starting house
   is the main building, assumed, so "Pick the main building…" no longer comes up from a garage alone; the order is
   the same code for every button).
+- "grey" (Ben): a rule not in Gordium yet, selected: its group reads "Not checked yet" and its detail "Not in Gordium
+  yet — coming in a later version. Check this by hand for now: <section>".
 - "labels" (4, 5): labels on, every view redrawn: the "Height limit" label is drawn at 13 pt; the status box is drawn
   in the active view only (and every view was drawn).
 - "scale" (Ben, on #23): labels on, Top zoomed out to a 1,500 ft square round the lot: no plan label is drawn and the
@@ -262,6 +264,18 @@ try:
                          "button_height": kids[b].Height}
         claim("2 the button is on screen without scrolling", s0.Y <= b0.Y and b0.Y + kids[b].Height <= s0.Y + scroll.Height,
               log["screen"])
+    elif step == "grey":
+        grey = next(i for i in g.STATE["panel_parts"]["view"]["items"] if i["group"] == "not_covered")
+        p = g.STATE["panel_parts"]
+        p["expanded"] = dict(p.get("expanded") or {}, not_covered=True)
+        select(g, grey)
+        shown = [lab.Text for lab in labels_in(p["detail"])]
+        heads = [gr["title"] for gr in p["view"]["groups"]]
+        want = "Not in Gordium yet — coming in a later version. Check this by hand for now: " + grey["detail"]["citation"]
+        log["grey"] = {"groups": heads, "row": grey["name"], "detail": shown[:6]}
+        claim("9 the rules not in Gordium yet are grouped as Not checked yet", "Not checked yet" in heads, heads)
+        claim("9 the row says it's not in Gordium yet and which section to check by hand", want in shown, log["grey"])
+        claim("9 its detail is headed Not checked yet", shown and shown[0].endswith(" · Not checked yet"), shown[:1])
     elif step == "labels":
         g._actions()["labels"](True)
         quiet(g)                                         # (turning labels on re-checks)

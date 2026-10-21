@@ -52,6 +52,15 @@ def panel_header(head):
             "below": [head.get("draft") or "Draft rulebook", head.get("lot") or "", head.get("grade") or ""]}
 
 
+def status_words(item):
+    """The status a row's detail is headed with: "Does not comply", "Needs review", "Complies", "Not checked"; a rule
+    not in Gordium yet, "Not checked yet" (Ben, 2026-10-21: its group's name)."""
+    if item.get("group") == "not_covered":
+        return "Not checked yet"
+    return {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
+            "not_checked": "Not checked"}[item["status"]]
+
+
 def row_name(item):
     """A panel row's Item text: the name, "(site)" for a site fact, and its note ("Building height · assuming flat
     ground")."""

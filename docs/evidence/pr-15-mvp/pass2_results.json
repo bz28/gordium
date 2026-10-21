@@ -74,16 +74,16 @@
     "ok": true,
     "detail": {
      "objects": [
-      "98e743de-ce5b-4c0e-aa05-5a69d3468c88",
-      "53f7a945-0f1c-423c-a0b8-5213277308ba",
-      "cf0e911c-f2e9-4908-b5fd-8b19f35f5a92",
-      "c183f684-26db-4aec-b862-a7ebc84ec1fd"
+      "36d76e67-13e0-4cab-bbee-785e3a30dfdb",
+      "35244795-46db-4b1e-94af-741f231838b4",
+      "1fecd445-0822-43f8-89b3-f025d819be5d",
+      "f2dcf18a-4810-404b-aeb7-6adc7718706f"
      ],
      "selected": [
-      "c183f684-26db-4aec-b862-a7ebc84ec1fd",
-      "cf0e911c-f2e9-4908-b5fd-8b19f35f5a92",
-      "53f7a945-0f1c-423c-a0b8-5213277308ba",
-      "98e743de-ce5b-4c0e-aa05-5a69d3468c88"
+      "f2dcf18a-4810-404b-aeb7-6adc7718706f",
+      "1fecd445-0822-43f8-89b3-f025d819be5d",
+      "35244795-46db-4b1e-94af-741f231838b4",
+      "36d76e67-13e0-4cab-bbee-785e3a30dfdb"
      ]
     }
    }
@@ -153,6 +153,45 @@
      "button_top": 655.0,
      "button_height": 20
     }
+   }
+  }
+ },
+ "grey": {
+  "ok": true,
+  "claims": {
+   "9 the rules not in Gordium yet are grouped as Not checked yet": {
+    "ok": true,
+    "detail": [
+     "Does not comply",
+     "Needs review",
+     "Complies",
+     "Not checked",
+     "Not checked yet"
+    ]
+   },
+   "9 the row says it's not in Gordium yet and which section to check by hand": {
+    "ok": true,
+    "detail": {
+     "groups": [
+      "Does not comply",
+      "Needs review",
+      "Complies",
+      "Not checked",
+      "Not checked yet"
+     ],
+     "row": "§325-16A, §325-16B Height exceptions (chimneys, spires, parapets)",
+     "detail": [
+      "§325-16A, §325-16B Height exceptions (chimneys, spires, parapets) · Not checked yet",
+      "Not in Gordium yet — coming in a later version. Check this by hand for now: §325-16A, §325-16B",
+      "§325-16A, §325-16B"
+     ]
+    }
+   },
+   "9 its detail is headed Not checked yet": {
+    "ok": true,
+    "detail": [
+     "§325-16A, §325-16B Height exceptions (chimneys, spires, parapets) · Not checked yet"
+    ]
    }
   }
  },

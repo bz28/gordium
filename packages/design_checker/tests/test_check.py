@@ -1784,3 +1784,42 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
                        {**sample["facts"], "lot_surveyed": True, "street_line": street})
         front[len(street)] = next(i for i in r["view"]["items"] if i["name"] == "Front yard")["status"]
     assert front[len(lines)] == "does_not_comply" and front[1] == "complies", front
+
+
+def test_rules_not_in_gordium_yet_read_not_checked_yet_in_the_panel_and_the_report(tmp_path):
+    """Ben (2026-10-21): the grey group for the rules not in the rulebook is "Not checked yet", and each row says
+    "Not in Gordium yet — coming in a later version. Check this by hand for now: <section>"; the report's Check sheet
+    says the same, group and row."""
+    import openpyxl
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import present
+    from design_checker.check import check_site, sample_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box
+    sample = sample_site()
+    report = tmp_path / "report.xlsx"
+    r = check_site(_plot(box(10, 25, 50, 70, 0, 30), lot_=lot_of(sample["lot"])), {**sample["facts"], "lot_surveyed": True},
+                   report_path=report)
+    grey = [i for i in r["view"]["items"] if i["group"] == "not_covered"]
+    assert grey, "the rulebook has sections not in Gordium yet"
+    titles = {g["key"]: g["title"] for g in present.grouped(r["view"]["items"])}
+    assert titles["not_covered"] == "Not checked yet"
+    for i in grey:
+        section = i["detail"]["citation"]
+        assert section and i["reason"] == ("Not in Gordium yet — coming in a later version. Check this by hand for "
+                                           "now: " + section), i["reason"]
+    ws = openpyxl.load_workbook(report)["Check"]
+    rows = [[c.value for c in row] for row in ws.iter_rows()]
+    sheet = [row for row in rows if row and row[0] == "Not checked yet"]
+    assert len(sheet) == len(grey), (len(sheet), len(grey))
+    assert all(str(row[6]).startswith("Not in Gordium yet — coming in a later version. Check this by hand for now: §")
+               for row in sheet), sheet[:2]
+    assert not any("Not covered by this rulebook" in str(c) for row in rows for c in row if c)
+    # the detail's heading: "Not checked yet", the group's name (the other rows keep theirs)
+    from design_checker import rhino_logic as logic
+    assert {logic.status_words(i) for i in grey} == {"Not checked yet"}
+    assert logic.status_words({"status": "not_checked", "group": "not_checked"}) == "Not checked"
+    assert logic.status_words({"status": "needs_review", "group": "building"}) == "Needs review"
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "    words = logic.status_words(i)\n" in ui

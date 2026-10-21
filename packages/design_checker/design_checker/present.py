@@ -28,8 +28,12 @@ SETUP_MARK = "⚠"                          # a setup or system problem: never a
 WORDS = {FAILS: ("does not comply", "do not comply"), REVIEW: ("needs review", "need review"),
          COMPLIES: ("complies", "comply"), NOT_CHECKED: ("not checked", "not checked")}
 ORDER = [FAILS, REVIEW, COMPLIES, NOT_CHECKED]
+# the rules not in the rulebook yet (Ben, 2026-10-21): the grey group's name, and each row's words, in the panel and
+# the report's Check sheet alike
+NOT_YET = "Not checked yet"
+NOT_YET_WHY = "Not in Gordium yet — coming in a later version. Check this by hand for now: {}"
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
-          ("not_checked", "Not checked"), ("not_covered", "Not covered by this rulebook")]
+          ("not_checked", "Not checked"), ("not_covered", NOT_YET)]
 
 from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = reading_set.LOT_LENGTHS
@@ -1346,7 +1350,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         items.append({"id": "gap." + g["id"], "rule": None, "name": f"{g['section']} {g['name']}",
                       "group": "not_covered", "status": NOT_CHECKED, "mark": "", "proposed": "", "required": "",
                       "margin": "", "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
-                      "hint": None, "reason": "Not encoded in this rulebook yet: check by hand",
+                      "hint": None, "reason": NOT_YET_WHY.format(g["section"]),
                       "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
                                  "scope": "", "precision": "", "at_limit": None}})
     return {"items": items, "summary": summary(items), "state": state(items),

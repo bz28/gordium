@@ -306,7 +306,8 @@ usually what fixes it:
   garage). Lot coverage counts every building on the lot, so it needs review until you **Add to check…**.
 
 "– not checked" means Gordium doesn't check it yet (parking needs bedroom and parking counts; overlays come in a
-later release). "Not covered by this rulebook" lists code sections still to be checked by hand.
+later release). "Not checked yet" lists the code sections not in Gordium yet (coming in a later version): check
+those by hand for now; each row names its section.
 
 The rules are a **draft**, not yet reviewed by a licensed professional; the panel says so at the top.
 
