@@ -2223,15 +2223,12 @@ def _context_text(doc, o, anchor):
     a = math.radians(o.get("rotation_deg") or 0.0)
     plane = rg.Plane(anchor, rg.Vector3d(math.cos(a), math.sin(a), 0), rg.Vector3d(-math.sin(a), math.cos(a), 0))
     text = rg.TextEntity.Create(o.get("text") or "", plane, doc.DimStyles.Current, False, 0, 0)
+    # the note's own scale, not the document's: a template's dimension style can carry a model-space scale (the feet
+    # template's "Feet Decimal": 12, with annotation scaling on), which multiplied the text to ~30 ft letters (Rhino
+    # job's probe, PR #23). At 1 the note is NOTE_HEIGHT_FT high as drawn, whatever the template.
+    text.DimensionScale = 1.0
     text.TextHeight = _model_length(doc, o.get("height_ft") or logic.NOTE_HEIGHT_FT)
     text.Justification = rg.TextJustification.BottomLeft
-    # measured as drawn, in its own plane: a document's dimension style can scale text (Rhino run of da9025b: letters
-    # tens of feet tall), so the note is brought down to its intended size about its anchor
-    box = text.GetBoundingBox(plane)
-    lines = len((o.get("text") or "").splitlines())
-    factor = logic.note_shrink(_feet_length(doc, box.Max.Y - box.Min.Y), lines)
-    if factor < 1.0:
-        text.Transform(rg.Transform.Scale(anchor, factor))
     return text
 
 

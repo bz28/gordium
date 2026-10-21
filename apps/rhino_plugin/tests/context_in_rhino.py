@@ -77,7 +77,7 @@ def notes_inside_square(g, doc):
     index = next(i for i in g._context_layer_indexes(doc) if doc.Layers[i].FullPath.endswith("::Notes"))
     objs = list(doc.Objects.FindByLayer(doc.Layers[index]) or [])
     square = next(o for o in objs if (o.Attributes.Name or "").startswith("Context square"))
-    outside, longest, kind, line_ft = [], 0, None, None
+    outside, longest, kind, line_ft, dim_scale, text_ft = [], 0, None, None, None, None
     for o in objs:
         if o.Id == square.Id:
             continue
@@ -99,10 +99,15 @@ def notes_inside_square(g, doc):
             lines = text.splitlines()
             longest = max(len(line) for line in lines) if lines else 0
             if isinstance(geom, rg.TextEntity) and lines:
+                # as displayed: a bounding box is the unscaled text; with annotation scaling on, Rhino draws it at
+                # the text's DimensionScale times that (the Rhino job's probe: the template's 12 made ~30 ft letters)
                 box = geom.GetBoundingBox(geom.Plane)
-                line_ft = round(g._feet_length(doc, box.Max.Y - box.Min.Y) / len(lines), 2)
+                scaling = bool(getattr(doc, "ModelSpaceAnnotationScalingEnabled", False))
+                shown = geom.DimensionScale if scaling else 1.0
+                line_ft = round(g._feet_length(doc, box.Max.Y - box.Min.Y) * shown / len(lines), 2)
+                dim_scale, text_ft = geom.DimensionScale, round(g._feet_length(doc, geom.TextHeight), 3)
     return {"outside": outside, "longest_line": longest, "sources_kind": kind, "line_height_ft": line_ft,
-            "notes": len(objs)}
+            "dimension_scale": dim_scale, "text_height_ft": text_ft, "notes": len(objs)}
 
 
 docs = TestDocs("context").__enter__()
@@ -143,10 +148,12 @@ try:
     claim("1 every note lies inside the neighbourhood square (the sources wrapped, at most 60 characters a line)",
           not log["notes_inside"]["outside"] and log["notes_inside"]["longest_line"] <= g.logic.NOTE_WIDTH
           and log["notes_inside"]["sources_kind"] == "TextEntity", log["notes_inside"])
-    claim("1 the sources note is small: at most %.2f ft a line (text %.1f ft high, about the scale bar label's)"
-          % (g.logic.NOTE_LINE_FT, g.logic.NOTE_HEIGHT_FT),
-          log["notes_inside"]["line_height_ft"] is not None
-          and 0 < log["notes_inside"]["line_height_ft"] <= g.logic.NOTE_LINE_FT + 0.01, log["notes_inside"])
+    n = log["notes_inside"]
+    claim("1 the sources note is small: its own scale 1, %.1f ft text, at most %.2f ft a line as displayed"
+          % (g.logic.NOTE_HEIGHT_FT, g.logic.NOTE_LINE_FT),
+          n["dimension_scale"] == 1.0 and n["text_height_ft"] is not None
+          and abs(n["text_height_ft"] - g.logic.NOTE_HEIGHT_FT) < 0.01
+          and n["line_height_ft"] is not None and 0 < n["line_height_ft"] <= g.logic.NOTE_LINE_FT + 0.01, n)
     claim("2 the building footprints are on screen (live: claim 5 checks they are never saved)",
           log["footprints_on_screen"] > 0, {"on_screen": log["footprints_on_screen"]})
     claim("3 the checker never measures the context: one lot", log["checker_sees"]["lot_candidates"] == 1,

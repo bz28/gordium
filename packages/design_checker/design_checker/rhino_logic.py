@@ -1178,15 +1178,7 @@ def context_replaces(payload):
 LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.context's mark on a live-only layer's credit line
 NOTE_WIDTH = 60                          # characters per line of the Sources note (it sits inside the square)
 NOTE_HEIGHT_FT = 2.5                     # its text height (about the scale bar label's): ~95 ft wide at 60 characters
-NOTE_LINE_FT = 1.7 * NOTE_HEIGHT_FT      # the most one line may take, spacing included (Rhino run of da9025b: the
-                                         # document's dimension style made 12 ft text tens of feet tall)
-
-
-def note_shrink(measured_height, lines):
-    """The factor that brings a drawn note down to NOTE_LINE_FT a line (1.0 when it is already within): whatever a
-    document's dimension style does to text height, the note ends at its intended size."""
-    want = NOTE_LINE_FT * max(int(lines or 1), 1)
-    return want / measured_height if measured_height and measured_height > want else 1.0
+NOTE_LINE_FT = 1.7 * NOTE_HEIGHT_FT      # the most one displayed line may take, spacing included (the in-Rhino claim)
 
 
 def note_text(credits):

@@ -550,22 +550,24 @@ def test_the_sources_note_is_wrapped_model_text_inside_the_square_clear_of_the_s
     assert all(len(ln) <= logic.NOTE_WIDTH for ln in placed["text"].split("\n"))
 
 
-def test_the_note_ends_small_whatever_the_document_does_to_text_height():
-    """Rhino run of da9025b: letters tens of feet tall (the template's dimension style scaled the 12 ft text),
-    corners up to ~179 ft outside the square. Now 2.5 ft text, and whatever is drawn is scaled to at most
-    NOTE_LINE_FT a line: the measured case brought back, a note already small left alone."""
+def test_the_note_is_small_text_at_its_own_scale_not_the_templates():
+    """Root cause, proven in Rhino by the Rhino job (PR #23): the feet template's current dimension style ("Feet
+    Decimal") has a model-space scale of 12 and annotation scaling is on, so text made from it displays at 12 × its
+    height (~30 ft letters). A bounding box measures the unscaled text, so a measure-and-shrink guard never fired.
+    The note now sets its own DimensionScale to 1, right after it is made and before its height."""
     assert logic.NOTE_HEIGHT_FT <= 3.0 and logic.NOTE_LINE_FT == pytest.approx(1.7 * logic.NOTE_HEIGHT_FT)
-    lines = 6
-    drawn = 6 * 1.7 * 12.0 * 10                     # 12 ft text that a ×10 dimension style made ten times taller
-    factor = logic.note_shrink(drawn, lines)
-    assert drawn * factor == pytest.approx(lines * logic.NOTE_LINE_FT)
-    assert logic.note_shrink(lines * logic.NOTE_LINE_FT * 0.8, lines) == 1.0      # already within: untouched
-    assert logic.note_shrink(0, lines) == 1.0 and logic.note_shrink(None, 0) == 1.0
-    # the whole block: 60 characters at 0.7 × the height, 6 lines, deep inside a 1500 ft square
+    lines = 6                                       # the whole block: deep inside a 1500 ft square
     assert logic.NOTE_WIDTH * 0.7 * logic.NOTE_HEIGHT_FT < 150 and lines * logic.NOTE_LINE_FT < 40
+    body = RHINO[RHINO.index("def _context_text("):RHINO.index("def draw_context(")]
+    made = body.index("rg.TextEntity.Create(")
+    assert made < body.index("text.DimensionScale = 1.0") < body.index("text.TextHeight = ")
+    assert "note_shrink" not in RHINO and not hasattr(logic, "note_shrink")    # the guard that never fired: gone
+    # every annotation Gordium makes (swept): this note is the only one, the labels are drawn by the overlay
+    assert RHINO.count("rg.TextEntity.Create(") == 1 and "AddLinearDimension" not in RHINO and "AddLeader" not in RHINO
     check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
     assert "ok, polyline = geom.TryGetPolyline()" in check      # curves by their own points, not a world box
     assert "the sources note is small" in check and "line_height_ft" in check
+    assert "geom.DimensionScale" in check and "dimension_scale" in check and "text_height_ft" in check
 
 
 def test_a_kept_layers_note_is_wrapped_the_same_way():
@@ -580,10 +582,6 @@ def test_the_plugin_writes_the_note_as_bottom_left_model_text():
     body = RHINO[RHINO.index("def _context_text("):RHINO.index("def draw_context(")]
     assert "rg.TextEntity.Create(" in body and "rg.TextJustification.BottomLeft" in body
     assert "_model_length(doc, o.get(\"height_ft\")" in body and "rotation_deg" in body
-    # Rhino run of da9025b: the document's dimension style made the text tens of feet tall; the note is measured as
-    # drawn and brought down to its size about its anchor
-    assert "box = text.GetBoundingBox(plane)" in body and "logic.note_shrink(_feet_length(doc, box.Max.Y - box.Min.Y), lines)" in body
-    assert "text.Transform(rg.Transform.Scale(anchor, factor))" in body
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
     assert 'elif o["kind"] == "text":' in draw and "doc.Objects.AddText(_context_text(doc, o, pts[0]), attrs)" in draw
     check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
