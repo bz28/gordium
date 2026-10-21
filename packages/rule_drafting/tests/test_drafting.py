@@ -1149,6 +1149,11 @@ def test_an_exemption_doesnt_quietly_cover_a_building_of_several_dwellings(input
         assert reason.startswith("§325-3B defines ONE-FAMILY ATTACHED DWELLING as") and "325-3B:" not in reason
         cited = [x for x in got["sources"] if x.get("file") == "chapter_325_zoning_2026-10.pdf"]
         assert cited and cited[0]["page"] == 8 and "three or more one-family dwellings" in cited[0]["quote"]
+    # round 6: the exemption as the whole condition: the rule then applies to every use (no applies_when), not ''
+    for whole in ('use != "one_family_attached"', 'use not in ["one_family_attached"]'):
+        got, why = drafter.unclear_exemption(base | {"applies_when": whole}, u, inputs.law, inputs.ctx)
+        assert why is None and "applies_when" not in got, whole
+        assert outcome(got, attached, allowed) == "needs_review"
     # a positive list that leaves it out can't be rewritten by code: a person decides, nothing is saved
     got, why = drafter.unclear_exemption(base | {"applies_when": 'use in ["church", "school"]'}, u, inputs.law, inputs.ctx)
     assert got is None and "a person decides" in why

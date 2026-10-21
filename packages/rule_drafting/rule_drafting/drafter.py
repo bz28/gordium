@@ -698,7 +698,8 @@ def _exempted(rule: dict, use: str, ctx: Context) -> bool:
 def _drop_from_exemption(when: str, use: str) -> str | None:
     """applies_when with `use` taken out of the exemption, rewritten on its parsed form: a `use not in [...]` (or
     (...)) list loses the use, a `use != "use"` test is dropped from the `and`. None for any other form: a person
-    decides. The text is rebuilt from the parsed pieces, never edited as a string."""
+    decides; "" when the exemption was the whole condition (nothing is left: the rule applies to every use). The text
+    is rebuilt from the parsed pieces, never edited as a string."""
     import ast
     from rule_format import formula
     tree = formula.parse(when).body
@@ -745,7 +746,10 @@ def unclear_exemption(rule: dict, unit: dict, law: dict, ctx: Context) -> tuple[
             continue
         term, source = found
         when = _drop_from_exemption(rule["applies_when"], use)
-        candidate = rule | {"applies_when": when} if when else None
+        if when == "":                          # the exemption was the whole condition: the rule applies to every use
+            candidate = {k: v for k, v in rule.items() if k != "applies_when"}
+        else:
+            candidate = rule | {"applies_when": when} if when else None
         if candidate is None or _exempted(candidate, use, ctx):
             return None, (f"the exemption ({m.group(0)!r}) may not cover {use}, which §325-3B defines as a building of "
                           "several dwellings, and this rule's condition can't be rewritten by code: a person decides")
