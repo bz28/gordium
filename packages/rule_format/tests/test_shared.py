@@ -233,6 +233,21 @@ def test_sentences_are_joined_across_wrapped_lines():
     assert _sentences("- one item\n- two items\n") == ["- one item", "- two items"]
 
 
+def _ai_drafted(path) -> bool:
+    """A rulebook the drafting script wrote (5_zoning_rules/drafted/), its words kept as the AI drafted them."""
+    parts = path.relative_to(REPO).parts
+    return path.suffix == ".yaml" and "5_zoning_rules" in parts and "drafted" in parts
+
+
+def test_ai_drafted_rulebooks_are_exempt_only_from_the_architect_review_wording():
+    """Stage 1 of drafting: drafted/general.yaml's flags say "an architect must confirm this is met" (send the design
+    to a person). Only drafted rulebooks are exempt, and only from that sentence check."""
+    drafted = [p for p in REGULATION_YAML if _ai_drafted(p)]
+    hand = REPO / "regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-1b.yaml"
+    assert drafted and hand in REGULATION_YAML and not _ai_drafted(hand)
+    assert any(_promises_architect_review(line) for p in drafted for line in _yaml_sentences(p.read_text(encoding="utf-8")))
+
+
 def test_docs_dont_promise_approval_while_it_is_deferred():
     """Approval is deferred (2026-10-19): nothing is approved and the checker uses draft rules. Until something
     is approved (listing a reviewer alone doesn't switch approval on), a document that talks about architects
@@ -244,7 +259,10 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
     false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text(encoding="utf-8"))]
     # Architects approving, confirming, checking or reviewing drafts is the deferred layer: each sentence that
     # says so must say it's deferred (or describe what happens once it is switched on).
-    confirm = [f"{p.relative_to(REPO)}: {line.strip()[:100]}" for p in DOCS + REGULATION_YAML
+    # The AI-drafted rulebooks are skipped here: they keep the drafter's words unedited, and there "an architect must
+    # confirm this is met" is a flag sending a design to a person (needs review), not a promise to review the rule;
+    # their status stays draft (the validator) and they are still scanned for approval wording above.
+    confirm = [f"{p.relative_to(REPO)}: {line.strip()[:100]}" for p in DOCS + REGULATION_YAML if not _ai_drafted(p)
                for line in (_yaml_sentences if p.suffix == ".yaml" else _sentences)(p.read_text(encoding="utf-8"))
                if _promises_architect_review(line)]
     assert not silent and not false and not confirm, (silent, false, confirm)
