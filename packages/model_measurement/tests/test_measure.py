@@ -939,3 +939,17 @@ def test_a_plain_house_with_a_three_floor_wing_against_its_rear_wall_never_compl
     wing = [floor(10, 55, 35, 65, z0=i * 11, z1=(i + 1) * 11, id=f"w{i}") for i in range(3)]
     m = measure(site(RECT, house, *wing), {**FACTS, "stories": typed, "main_building": "house"})["stories"]
     assert m["value"] is None and 3 in {r["value"] for r in m["readings"]}
+
+
+def test_height_and_stories_report_over_the_same_candidate_buildings():
+    """One list of candidate buildings (_assemblies) is read by both: their readings start with the same words."""
+    from model_measurement.measure import _assemblies
+    main = box(10, 25, 35, 65, 0, 20, id="house")
+    wing = [floor(35, 25, 45, 45, z0=i * 10, z1=(i + 1) * 10, id=f"w{i}") for i in range(4)]
+    m = measure(site(RECT, main, *wing), {**FACTS, "stories": 2, "main_building": "house"})
+    words = [w for w, _ in _assemblies({"id": "x"}, [{"id": "y"}])]
+
+    def over(record):
+        return {next(w for w in words if r["reading"].startswith(w)) for r in record["readings"]
+                if any(r["reading"].startswith(w) for w in words)}
+    assert over(m["building_height"]) == over(m["stories"]) == set(words)
