@@ -95,7 +95,7 @@ below:
 
    (Or click your way there: Documents → gordium → apps → rhino_plugin → `install.py`.)
 4. **Run it:** click the **Run** button (▶) in the ScriptEditor.
-5. Rhino's command line shows five lines:
+5. Rhino's command line shows six lines, then one more step:
 
    ```
    Gordium: GordiumStart -> gordium_start.py
@@ -103,9 +103,15 @@ below:
    Gordium: GordiumLive -> gordium_live.py
    Gordium: GordiumFacts -> gordium_facts.py
    Gordium: GordiumOff -> gordium_off.py
+   Gordium: GordiumPanel -> gordium_panel.py
    ```
 
-   These five are now Rhino commands, kept between sessions. You can close the ScriptEditor.
+   These six are now Rhino commands, kept between sessions. You can close the ScriptEditor.
+6. **Once: let the Gordium panel come back with Rhino.** Gordium's results appear in a panel docked beside
+   Rhino's own (Properties, Layers). Rhino remembers where you put it, and reopens it at launch, but only Gordium
+   can fill it. So: **Rhino → Settings… → General**, and in **"Run these commands every time Rhino starts"** add
+   the line `GordiumPanel`. (It only sets up the panel: no check runs, nothing in the model changes.) Without it,
+   a Gordium tab Rhino reopens shows "container is empty" until you run a Gordium command.
 
 Used to Rhino's command line? Instead of steps 3 and 4, type
 `_-RunPythonScript "/Users/<your Mac username>/Documents/gordium/apps/rhino_plugin/install.py"` (the full path; in
@@ -203,9 +209,10 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
    It prints something like `C:\Users\<you>\Documents\gordium\apps\rhino_plugin\install.py`: select it and copy
    it (Ctrl+C). (`explorer .` opens this gordium folder in File Explorer, if you want to see it.) Then open Rhino 8,
    type `ScriptEditor` and press Enter. In the ScriptEditor, **File → Open…**, paste the path into the
-   **File name** box, press Enter, then click **Run** (▶). Rhino's command line shows the same five
+   **File name** box, press Enter, then click **Run** (▶). Rhino's command line shows the same six
    `Gordium: …` lines as [on the Mac](#install-in-rhino-once). As on the Mac, open the ScriptEditor once in every
-   Rhino session before using Gordium.
+   Rhino session before using Gordium. Then, once: **Tools → Options → General**, and in **"Run these commands
+   every time Rhino starts"** add the line `GordiumPanel`, so the Gordium panel Rhino reopens at launch is filled.
 8. **Getting updates:** in PowerShell,
 
    ```

@@ -1324,3 +1324,19 @@ def test_the_notice_never_hides_the_model_when_there_is_room():
     x, y = notice_spot(1000, 640, 690, 32, roomy, [status])
     assert (x, y) == (12, 640 - 32 - 64) and not covers(x, y, roomy) and not covers(x, y, (518, 12, 985, 68))
     assert notice_spot(1000, 640, 690, 32, None) == (12, 34)                    # no model on screen: top left
+
+
+def test_the_setup_brings_the_panel_back_with_rhino():
+    """A Gordium tab Rhino reopens at launch is empty until something registers the panel: GordiumPanel does only
+    that (no check, no checker), install.py adds it, and the guide says, for Mac and Windows, to put it in Rhino's
+    startup commands (no setting a script can change). startup_panel_in_rhino.py runs it in Rhino."""
+    app = REPO / "apps/rhino_plugin"
+    import ast
+    tree = ast.parse((app / "gordium_panel.py").read_text(encoding="utf-8"))
+    calls = [ast.unparse(n) for n in tree.body[1:] if isinstance(n, ast.Expr)]        # after the docstring
+    assert calls == ["sys.path.insert(0, HERE)", "gordium_rhino.register_dock()"], calls   # nothing else runs
+    install = (app / "install.py").read_text(encoding="utf-8")
+    assert '"GordiumPanel": "gordium_panel.py"' in install and "Run these commands every time Rhino starts" in install
+    guide = " ".join((app / "QUICKSTART.md").read_text(encoding="utf-8").split())        # the guide wraps its lines
+    assert "Rhino → Settings… → General" in guide and "Tools → Options → General" in guide
+    assert guide.count("add the line `GordiumPanel`") == 2 and "Gordium: GordiumPanel -> gordium_panel.py" in guide
