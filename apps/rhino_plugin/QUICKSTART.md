@@ -174,6 +174,10 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
 
    (Installed 3.13 or 3.12 instead? Type `py -3.13` or `py -3.12`.) The last line ends with
    `Successfully installed …` (a list that includes `gordium-0.1.0`).
+
+   The `git checkout rhino-ui` line is needed: the main version has no Rhino part yet (no `apps` folder), and
+   `git pull` alone won't add it. To check which version you have, run `git branch --show-current`: it should
+   say `rhino-ui`.
    - `requires a different Python`, or `Microsoft Visual C++ 14.0 or greater is required`: the `.venv` was made
      with an unsupported Python (usually 3.15, picked by a plain `py`). Delete it and make it again:
 
@@ -185,10 +189,21 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
      ```
 
    - Any other red `ERROR`: send Ben the last 20 lines it printed.
-7. **Install in Rhino:** open Rhino 8, type `ScriptEditor` and press Enter. In the ScriptEditor, **File → Open…**,
-   go to Documents → gordium → apps → rhino_plugin, pick `install.py`, click **Open**, then **Run** (▶). Rhino's
-   command line shows the same five `Gordium: …` lines as [on the Mac](#install-in-rhino-once). As on the Mac,
-   open the ScriptEditor once in every Rhino session before using Gordium.
+7. **Install in Rhino.** File Explorer's "Documents" is often your OneDrive Documents, which is a different
+   folder from the one PowerShell cloned into, so don't look for gordium there. Instead, in PowerShell, get the
+   installer's full path:
+
+   ```
+   cd $HOME\Documents\gordium
+   Resolve-Path apps\rhino_plugin\install.py
+   ```
+
+   It prints something like `C:\Users\<you>\Documents\gordium\apps\rhino_plugin\install.py`: select it and copy
+   it (Ctrl+C). (`explorer .` opens this gordium folder in File Explorer, if you want to see it.) Then open Rhino 8,
+   type `ScriptEditor` and press Enter. In the ScriptEditor, **File → Open…**, paste the path into the
+   **File name** box, press Enter, then click **Run** (▶). Rhino's command line shows the same five
+   `Gordium: …` lines as [on the Mac](#install-in-rhino-once). As on the Mac, open the ScriptEditor once in every
+   Rhino session before using Gordium.
 8. **Getting updates:** in PowerShell,
 
    ```

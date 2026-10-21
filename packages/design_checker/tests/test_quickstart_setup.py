@@ -64,9 +64,13 @@ def test_every_repository_path_the_guide_names_exists():
         assert (ROOT / p.lstrip("/")).exists(), p
     # the click-through routes ("Documents → gordium → apps → rhino_plugin → `install.py`"), Mac and Windows
     routes = re.findall(r"Documents → gordium((?: → \w+)+)(?:, pick| →) `([\w.]+)`", GUIDE)
-    assert len(routes) == 2
+    assert len(routes) == 1
     for folders, name in routes:
         assert (ROOT.joinpath(*folders.split(" → ")[1:]) / name).exists(), (folders, name)
+    # Windows: the full path printed by Resolve-Path (Explorer's "Documents" may be OneDrive's, not the clone's)
+    win = re.findall(r"Resolve-Path ([\w\\.]+)", GUIDE)
+    assert win == [r"apps\rhino_plugin\install.py"]
+    assert (ROOT.joinpath(*win[0].split("\\"))).exists()
     for script in _installed_commands().values():
         assert (PLUGIN / script).exists(), script
 
@@ -127,6 +131,10 @@ def test_the_windows_commands_are_the_real_ones():
     assert lines[k:k + 4] == [f"cd {WIN_CLONE_TO}", "Remove-Item -Recurse -Force .venv", f"py -{newest} -m venv .venv",
                               rf".\.venv\Scripts\{PIP}"]
     assert "Microsoft Visual C++ 14.0 or greater is required" in WINDOWS
+    k = lines.index(f"cd {WIN_CLONE_TO}", k + 1)                       # the installer's full path, from the clone
+    assert lines[k:k + 2] == [f"cd {WIN_CLONE_TO}", r"Resolve-Path apps\rhino_plugin\install.py"]
+    assert "OneDrive" in WINDOWS and "`explorer .`" in WINDOWS
+    assert "`git branch --show-current`" in WINDOWS and "say `rhino-ui`" in WINDOWS
     # the venv's Python is where the plugin looks for it on Windows
     assert venv_python("C:\\gordium", "nt") == "C:\\gordium\\.venv\\Scripts\\python.exe"
     assert f"cd {WIN_CLONE_TO}; git pull" in WINDOWS and "File → Exit" in WINDOWS
