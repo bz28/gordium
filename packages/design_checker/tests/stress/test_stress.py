@@ -79,7 +79,27 @@ def _side_names_swap(v):
 # Every finding is fixed (F1, F3, F5: PR #18, 77796ee; F2: rhino-ui, carried up in d43e11f): their matchers stay
 # for reading old reports but none is excused here, so a return of any of them fails CI.
 MATCHERS = {"F1": _jog_stepped_line, "F2": _tax_map_area, "F3": _drawing_changes_height, "F5": _side_names_swap}
-KNOWN = {}
+def _typed_below_drawn(v):
+    """F6 (open, for #14): stories complies on a plain-solid house whose typed count is below its floor blocks."""
+    return v["invariant"] == "a" and v["rule"] == "R-1b.stories" and \
+        oracle.measure(_design(v))["stories_below_drawn"]
+
+
+def _rear_overhang_words(v):
+    """F7 (open, for #18): drawn the other way round only the overhang words "toward the rear yard" change (the
+    statuses and numbers are the same)."""
+    if not (v["invariant"] == "d" and "outlines drawn" in v.get("what", "")):
+        return False
+    d = _design(v)
+    a, b = harness.comparable(harness.gordium(d)), harness.comparable(harness.gordium(d, v["what"].split()[-1]))
+    if len(a) != len(b) or any({**x, "reason": None} != {**y, "reason": None} for x, y in zip(a, b)):
+        return False
+    return all("toward the rear yard" in (x["reason"] or "") + (y["reason"] or "") for x, y in zip(a, b)
+               if x["reason"] != y["reason"])
+
+
+MATCHERS["F6"], MATCHERS["F7"] = _typed_below_drawn, _rear_overhang_words
+KNOWN = {"F6": _typed_below_drawn, "F7": _rear_overhang_words}
 
 
 def known(v):

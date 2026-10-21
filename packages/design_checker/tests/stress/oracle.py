@@ -279,6 +279,14 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
     stacked = all(abs(b["z0"] - a["z1"]) <= EPS for a, b in zip(floors, floors[1:]))
     attic = any(p["kind"] in ROOF_KINDS for p in main)                  # an attic may be a story (STORY, §325-3)
     stories = (len(floors) + (1 if attic else 0), len(floors)) if stacked and floors and grade is not None else None
+    # a main part drawn as a plain solid (no floor marks): its stories aren't drawn. The floor blocks drawn are a
+    # floor under any reading (STORY, §325-3), so a typed count below them can't be the building's: never complies
+    # until that is resolved; otherwise at least the floor blocks, at most unknown
+    plain = [p for p in main if p["kind"] == "solid"]
+    typed = design.get("typed_stories")
+    stories_below_drawn = bool(plain) and typed is not None and floors and typed < len(floors)
+    if plain and grade is not None:
+        stories = (math.inf, len(floors)) if floors else None
     accessories = []
     for g in acc:
         shape = _union(g)
@@ -291,6 +299,7 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
     return {"yards": yards, "off": off, "area": area, "lot_area": lot_area, "width": (width - 2 * tol, width + 2 * tol),
             "depth": (lot["depth"][1], lot["depth"][0]), "height": height, "stories": stories,
             "accessories": accessories, "unlisted": len(unlisted), "frame": design.get("frame"),
+            "stories_below_drawn": stories_below_drawn,
             "where": {"main": _where(full, lot_poly), **{",".join(p["id"] for p in g): _where(_union(g), lot_poly)
                                                          for g in detached}}}
 
@@ -322,6 +331,10 @@ def verdicts(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE) -> dict:
         why = ""
         if rule in ("R-1b.height", "R-1b.yard_projections") and m["height"] is None:
             out[rule] = {"verdict": UNDECIDED, "slack": None, "why": "grade plane not decidable"}
+            continue
+        if rule == "R-1b.stories" and m["stories_below_drawn"]:
+            out[rule] = {"verdict": NOT_PASS, "slack": None,
+                         "why": "the typed story count is lower than the floor blocks drawn"}
             continue
         if rule == "R-1b.stories" and m["stories"] is None:
             out[rule] = {"verdict": UNDECIDED, "slack": None, "why": "grade unknown or floors not stacked"}
