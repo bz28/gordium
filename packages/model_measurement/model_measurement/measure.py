@@ -1021,10 +1021,21 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
 
     footprints = {b["id"]: _projection(b) for b in buildings}
     everything = ops.unary_union(list(footprints.values())) if footprints else Polygon()
-    why_inside = (why_building or
-                  (None if everything.within(lot.polygon.buffer(TOL)) else stop("outside_lot")))
+    # which buildings aren't inside the lot, by name: coverage counts every building, so it waits; the yards wait
+    # only if the main building is one of them (the others are still in the yards' "any solid" reading)
+    outside = [b for b in buildings if not footprints[b["id"]].within(lot.polygon.buffer(TOL))]
+    main_out = any(b is main for b in outside)
+    others_out = len(outside) - main_out
+    what = " and ".join(([] if not main_out else ["the main building" if len(buildings) > 1 else "the building"]) +
+                        ([] if not others_out else [f"{others_out} other building{'s' if others_out > 1 else ''}"
+                                                    if main_out or main is not None else
+                                                    f"{others_out} building{'s' if others_out > 1 else ''}"]))
+    why_inside = why_building or (stop("outside_lot", what=what) if outside else None)
+    why_main_inside = why_building or (why_inside if main_out else None)
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
+        if why_inside and outside and not why_building:     # which ones: the panel shows them
+            out["building_area"]["objects"] = [i for b in outside for i in b.get("parts") or [b["id"]]]
     else:
         cut = ops.unary_union([_section(b, plan_level + TOL) for b in buildings])
         out["building_area"] = _decide(
@@ -1045,7 +1056,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                 "the average length of the two side lot lines", [lot.id], sides))
 
     yards = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
-    why_yards = why_inside or why_plan or why_main or (why_grade if plan_level is None else None)
+    why_yards = why_main_inside or why_plan or why_main or (why_grade if plan_level is None else None)
     if why_yards:
         for name in yards:
             out[name] = _missing(name, why_yards)
