@@ -133,6 +133,8 @@ STATED_FACTS = {
     "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
     "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
                    "whether it is a conversion"),
+    "occupants": ("Occupants, all dwelling units together (§325-3B OCCUPANT: in R-2c, every person with the right to "
+                  "occupy)", "count", "occupants"),
 }
 
 
@@ -160,7 +162,7 @@ def update_counts(facts, answers):
     whether the building is a conversion (yes / no) from the Lot facts prompts. An answer of None means the prompt
     was skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0 or no."""
     out = dict(facts or {})
-    for key in ("sleeping_rooms", "parking_spaces", "stories", "dwelling_units", "rooms_let_for_profit"):
+    for key in ("sleeping_rooms", "parking_spaces", "stories", "dwelling_units", "rooms_let_for_profit", "occupants"):
         if answers.get(key) is not None:
             n = int(answers[key])
             if n < 0 or n != answers[key]:

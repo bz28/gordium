@@ -85,6 +85,7 @@ STOPS = {
                       "measured yet: an open question for the architects",
     "no_rooms": "enter bedrooms / parking spaces",
     "no_units": "enter the dwelling units, the rooms let for profit, and whether it is a conversion",
+    "no_occupants": "enter the occupants (§325-3B OCCUPANT: in R-2c, every person with the right to occupy)",
     # the buildings
     "no_building": "no building on the Building layer",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
