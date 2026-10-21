@@ -183,7 +183,7 @@ def _floating_ground_stop(v):
 
 
 MATCHERS.update(F13=_off_lot_height_no_reason, F14=_geos_crash, F15=_floating_ground_stop)
-KNOWN = {"F13": _off_lot_height_no_reason, "F14": _geos_crash, "F15": _floating_ground_stop}   # F1-F12 fixed
+KNOWN = {"F15": _floating_ground_stop}   # F1-F14 fixed: a return of any of them fails CI
 
 
 def known(v):

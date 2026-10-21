@@ -368,6 +368,14 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
         lot = names & (reading_set.LOT_LENGTHS | {SURVEY})
         if got == "needs_review" and every is not None and fails_whatever(rule, measured, allowed, facts):
             return present.FAILS                    # fails whatever the values not measured are (decided 2026-10-21)
+        if got == "fail" and tax and lot:
+            # fails as drawn with a value unknown: on the tax map it fails only if it fails with the lines off
+            # either way too, over what is known (the unknown values stay unknown: a fail here doesn't need them,
+            # as a 45 ft house is over the most the height bonus allows whatever its yards: stress F13)
+            known = {n for n in names if values.get(n) is not None or (measured.get(n) or {}).get("readings")}
+            rest = reading_set.combos(known, values, measured, facts)
+            if rest and all(outcome(rule, trial, allowed) == "fail" for trial, _ in rest):
+                return present.FAILS
         return present.FAILS if got == "fail" and not (tax and lot) else \
             present.COMPLIES if got == "pass" and not (tax and lot) else present.REVIEW
     got = {outcome(rule, trial, allowed) for trial, _ in every}
@@ -383,6 +391,29 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
         if named and named["result"] == "pass" and set(named["open"]) >= open_:
             return present.COMPLIES
     return present.COMPLIES if got == {"pass"} and not open_ else present.REVIEW
+
+
+def side_lines(site: dict, facts: dict) -> list[str] | None:
+    """The true compass names of the lot's two side lines, each from the lot's middle to the line: what a side yard
+    is called when it couldn't be measured. Only when the measuring itself knows which lines are sides: the lot not
+    a corner lot (unknown counts as maybe), and every reading of its lines giving the same two names (review round
+    1). None otherwise, or without a lot."""
+    from model_measurement.measure import Lot
+    if facts.get("corner_lot") is not False or not (site.get("lot") or {}).get("edges") or not facts.get("street_line"):
+        return None
+    lot = Lot(site, facts)
+    readings = None if lot.problems or lot.street_problem else lot.readings()
+    if not readings:
+        return None
+    middle = lot.polygon.centroid
+    pairs = set()
+    for _, left, right, _ in readings:
+        names = [present.compass(lot.line(g).centroid.x - middle.x, lot.line(g).centroid.y - middle.y,
+                                 facts.get("plan_north_deg") or 0.0) for g in (left, right)]
+        if not all(names):
+            return None
+        pairs.add(tuple(sorted(names)))
+    return list(pairs.pop()) if len(pairs) == 1 else None
 
 
 def side_checks(rule: dict) -> dict:
@@ -415,10 +446,14 @@ def summary(rows: list[dict]) -> dict:
     law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
     with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
     missing fact, not a reading, so it is never shown as complying."""
-    fails = [r for r in rows if r.get("Fails") or r["Error"] == "FAIL"]
-    named = [r for r in rows if (r.get("Named") or {}).get("result") == "pass" and r not in fails]   # counted once
-    review = [r for r in rows if r["Error"] == "NEEDS REVIEW" and r not in fails and r not in named]
-    passes = [r for r in rows if r["Error"] == "PASS" and r not in fails] + named     # a rule counted once
+    # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
+    # whatever its named readings say (review round 20); a row without a verdict, by its outcome
+    def verdict_of(r):
+        return r.get("Verdict") or (present.FAILS if r.get("Fails") or r["Error"] == "FAIL" else
+                                    present.COMPLIES if r["Error"] == "PASS" else present.REVIEW)
+    fails = [r for r in rows if verdict_of(r) == present.FAILS or r.get("Fails")]
+    review = [r for r in rows if verdict_of(r) == present.REVIEW and r not in fails]
+    passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):
@@ -466,23 +501,39 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     from rule_export.workbook import title, write_block
     word = {present.FAILS: ("FAIL", "Outside table limit"), present.REVIEW: ("NEEDS REVIEW", "Needs review"),
             present.COMPLIES: ("PASS", "Within table limit"), present.NOT_CHECKED: ("NOT CHECKED", "Needs input")}
-    worst = {}
+    worst, shown = {}, {}
     for i in view["items"]:
         if i["rule"] and i["status"] in word:
             rank = present.ORDER.index(i["status"])
             if i["rule"] not in worst or rank < present.ORDER.index(worst[i["rule"]][0]):
                 worst[i["rule"]] = (i["status"], i.get("reason") or "")
+            shown.setdefault(i["rule"], []).append(i)
     col = {h: n for n, h in enumerate(COLUMNS)}
     rows = []
     for r in t["output"]:
         r = list(r)
         found = worst.get(r[col["Rule id"]])
         if found:
+            # every column of the row from the panel's items (the same verdicts): its Error, Comparison and Why,
+            # and what it shows as Proposed, so a PASS never sits beside "Can't check: … missing"
             r[col["Error"]], r[col["Comparison"]] = word[found[0]]
-            if found[0] == present.REVIEW and found[1]:
-                r[col["Why it needs review"]] = found[1]
+            r[col["Why it needs review"]] = found[1] if found[0] == present.REVIEW else ""
+            items = [i for i in shown[r[col["Rule id"]]] if i.get("proposed")]
+            if len(items) == 1:
+                r[col["Proposed"]] = items[0]["proposed"]
+            elif items:
+                r[col["Proposed"]] = "; ".join(f"{i['name']}: {i['proposed']}" for i in items)
         rows.append(r)
-    wb = build({**t, "output": rows})
+    # an input the measurement couldn't settle (a tax-map lot's area) shows what the panel shows, said as drawn
+    by_measure = {i.get("measure"): i for i in view["items"] if i.get("measure") and i.get("proposed")}
+    inputs = []
+    for r in t["inputs"]:
+        r = list(r)
+        i = by_measure.get(r[0].lower().replace(" ", "_"))
+        if r[1] is None and i is not None:
+            r[1], r[3] = i["proposed"], "as drawn (the panel's reading); " + str(r[3])
+        inputs.append(r)
+    wb = build({**t, "output": rows, "inputs": inputs, "title": view["header"].get("place") or t["title"]})
     ws = wb.create_sheet("Check")
     h = view["header"]
     title(ws, f"GORDIUM | {view['summary']}")
@@ -501,6 +552,10 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
                                      (COLUMN_DELTA, 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
+    wb.move_sheet("Check", offset=-wb.sheetnames.index("Check"))     # the architect's sheet first, open on it
+    wb.active = 0
+    for ws_ in wb.worksheets:
+        ws_.sheet_view.tabSelected = ws_.title == "Check"
     # written beside it, then moved into place: a write that fails half way never leaves a broken report there
     report_path = Path(report_path)
     part = report_path.with_name("." + report_path.name + ".part")
@@ -566,7 +621,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         r["Provisional"] = found[1] if found else None
         # the readings it was worked out under (their values, the open measurements): the panel's tax-map best and
         # worst cases run over each of them, as for a row decided over named readings (review round 14)
-        r["Readings"] = readings_of(by_id[r["Rule id"]], measured, allowed) if found else None
+        r["Readings"] = readings_of(by_id[r["Rule id"]], measured, allowed) if review else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
         rule = by_id[r["Rule id"]]
         r["Verdict"] = row_verdict(rule, measured, allowed, facts)          # the ONE decision (round 3)
@@ -596,6 +651,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                   if o != lot_id})
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
+    extras = {**(extras or {}), "side_lines": side_lines(site, facts)}   # compass names when a side isn't measured
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it

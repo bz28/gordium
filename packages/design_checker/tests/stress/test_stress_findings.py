@@ -8,7 +8,7 @@ output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper
 (2 ft per line everywhere, carried up in d43e11f); F4 in #12 (the same_id stop, b5a899b); F6, F7 in #18 (ca4f6c3,
-4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). Open: F13, F14, F15 (found after a98149b).
+4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). F13, F14 in #18 (1262820). Open: F15.
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -16,7 +16,6 @@ import sys
 from pathlib import Path
 
 import pytest
-from shapely.errors import GEOSException
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -312,14 +311,12 @@ def test_F12_every_side_yard_row_that_needs_review_says_why():
     assert all((i["reason"] or "").strip() for i in rows if i["status"] == REVIEW), [i["name"] for i in rows]
 
 
-# ---- F13 (P1): on a tax-map lot, a 45 ft house wholly off the lot: height needs review, with no reason ----------
+# ---- F13 (P1, fixed in #18 1262820): on a tax-map lot, a 45 ft house wholly off the lot: height needs review, with no reason ----------
 
 F13_CASE = ("sample_tax", [{"op": "off_lot", "target": "house", "line": 1, "amount": 9.25},
                            {"op": "add_floor", "h": 10.0}])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F13: a house over the height limit, wholly off a tax-map lot: needs review, no reason")
 def test_F13_a_45_ft_house_wholly_off_a_tax_map_lot_does_not_comply_on_height_and_says_why():
     """Two edits on the tax-map sample lot: the starting house dragged wholly off the lot past its east line, then
     a fourth floor block (45'-0"). The height doesn't depend on the lot: 45 ft is over 35 ft, and over the 38'-6"
@@ -336,15 +333,13 @@ def test_the_oracle_on_F13_the_45_ft_house_fails_height_anywhere():
     assert len(done) == 2 and oracle.verdicts(d)["R-1b.height"]["verdict"] == oracle.FAIL
 
 
-# ---- F14 (P0, a crash): a rotated house with a gable roof solid: the check raises a GEOS error ----------------------
+# ---- F14 (P0, a crash, fixed in #18 1262820): a rotated house with a gable roof solid: the check raises a GEOS error ----------------------
 
 F14_CASE = ("sample_survey", [{"op": "rotate", "deg": -8.7},
                               {"op": "add_roof", "kind": "roof", "axis": 0, "over": 0.0, "fascia": 0.0, "inset": 3.25,
                                "rise": 13.75}])
 
 
-@pytest.mark.xfail(strict=True, raises=GEOSException,
-                   reason="F14: check_site raises TopologyException in measure._projection_now (a rotated gable)")
 def test_F14_a_rotated_house_with_a_gable_roof_is_checked_without_crashing():
     """Two edits on the surveyed sample lot: the starting house rotated 8.7 degrees, then a gable roof solid on it
     (no overhang, ridge 13'-9" above the walls). The check stops with "TopologyException: side location conflict"
