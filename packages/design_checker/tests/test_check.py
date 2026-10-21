@@ -932,4 +932,69 @@ def test_the_delta_column_is_named_delta_in_the_panel_and_the_report(facts, tmp_
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
     assert logic.COLUMN_DELTA == "Delta" and "Delta" in cells and "Margin" not in cells
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert '(logic.COLUMN_DELTA, 62)' in ui and '"Margin"' not in ui
+    assert '(logic.COLUMN_DELTA, 96)' in ui and '"Margin"' not in ui
+
+
+def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_document():
+    """MVP list (Ben's team): the yard and lot-edge labels and the viewport's status box are off unless the
+    architect ticks Show on-screen labels, which this document remembers. The yard lines and the red stay."""
+    from design_checker import rhino_logic as logic
+    assert logic.labels_on({}) is False and logic.labels_on(None) is False
+    assert logic.labels_on({"show_labels": True}) is True and logic.labels_on({"show_labels": False}) is False
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
+    assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
+    assert "if plan and logic.yard_label_shown(labels, status):" in draw and "if not o.message or not labels:" in draw
+    assert "if plan and labels else []" in draw                                   # lot-edge labels: only when on
+    assert "d.Draw2dLine(System.Drawing.PointF(a.X, a.Y)" in draw.split("yard_label_shown")[0]   # lines regardless
+    tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
+    assert "show_labels=bool(on)" in tick and "_save_ui_state(doc, state)" in tick
+    check_code = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert "logic.labels_on(_ui_state(doc))" in check_code and "ui.set_labels_tick(" in check_code
+    assert '"labels": set_labels' in rhino
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'box.Text = "Show on-screen labels"' in ui and "box.Checked = False" in ui.split("def _labels_box(")[1]
+
+
+def test_with_labels_off_a_failing_yards_shortfall_still_shows():
+    """Coordinator refinement (a): labels off hides passing and neutral labels and the status box, never a failing
+    yard's shortfall ("✕ Rear yard 21'-2", needs 22'-6""): it is the live feedback."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import plan
+    assert logic.yard_label_shown(False, "does_not_comply") and logic.yard_label_shown(True, "complies")
+    assert not logic.yard_label_shown(False, "complies") and not logic.yard_label_shown(False, "needs_review")
+    items = [{"points": [[0, 0], [0, 21.17]], "status": "does_not_comply", "mark": "✕", "name": "Rear yard",
+              "proposed": "21'-2\"", "required": "22'-6\"", "measure": "rear_yard", "reason": ""},
+             {"points": [[0, 0], [12, 0]], "status": "complies", "mark": "✓", "name": "Side yard, West",
+              "proposed": "12'-0\"", "required": "10'-0\"", "measure": "side_yard_smaller", "reason": ""}]
+    got = plan({"lot": {"edges": []}, "buildings": []}, {"outline": [], "holes": []}, {"items": items}, {})
+    labels = [y["label"] for y in got["yards"]]
+    assert "✕ Rear yard 21'-2\", needs 22'-6\"" in labels and "✓ Side yard, West 12'-0\"" in labels
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "if plan and logic.yard_label_shown(labels, status):" in rhino
+
+
+def test_the_code_edition_line_is_in_the_legend_and_the_report_not_the_panel(facts, tmp_path):
+    """Coordinator refinement (b): which version of the law was checked stays traceable: the legend ("?") says it."""
+    from design_checker import rhino_logic as logic
+    head = check(MODEL, facts, tmp_path / "r.xlsx")["view"]["header"]
+    assert logic.legend_text(head["code"]).endswith("Checked against: " + head["code"])
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert '"legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code"))' in rhino
+
+
+def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
+    """Coordinator refinement (c): the sign unmistakable beside the colour, in the panel and the report; the value
+    itself (and the answer key's) unchanged."""
+    import openpyxl
+    from design_checker import rhino_logic as logic
+    assert logic.delta_text("+2'-0\"") == "+2'-0\" to spare" and logic.delta_text("−1'-4\"") == "−1'-4\" short"
+    assert logic.delta_text("at limit") == "at limit" and logic.delta_text("") == ""
+    got = check(MODEL, facts, tmp_path / "r.xlsx")
+    margins = [i["margin"] for i in got["view"]["items"] if i["margin"]]
+    assert margins and not any(m.endswith(("to spare", "short")) for m in margins)        # the data as it was
+    cells = [c for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
+             for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
+    assert any(c.endswith(" to spare") for c in cells)
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'logic.delta_text(i["margin"])' in ui

@@ -48,6 +48,41 @@ def panel_header(head):
             "below": [head.get("draft") or "Draft rulebook", head.get("lot") or "", head.get("grade") or ""]}
 
 
+def labels_on(ui_state):
+    """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
+    unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the
+    red stay either way."""
+    return bool((ui_state or {}).get("show_labels", False))
+
+
+def yard_label_shown(labels, status):
+    """A yard's label in plan: with Show on-screen labels on, every one; off, still a failing yard's shortfall
+    ("✕ Rear yard 21'-2", needs 22'-6""): it is the live feedback (coordinator, 2026-10-20)."""
+    return bool(labels) or status == "does_not_comply"
+
+
+def delta_text(margin):
+    """The Delta column's words: the sign made unmistakable beside the colour ("+2'-0" to spare", "−1'-4" short");
+    "at limit", a blank or anything else as it is. The value itself (and the answer key's) is unchanged."""
+    margin = margin or ""
+    if margin.startswith("+"):
+        return margin + " to spare"
+    if margin.startswith("−") or margin.startswith("-"):
+        return margin + " short"
+    return margin
+
+
+def legend_text(code=None):
+    """The legend ("?"): the marks, what the plan shows, the precision, and which version of the law was checked
+    (the code-edition line, no longer in the panel's header)."""
+    text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
+            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
+            "measured distance. Red marks only the part of the building inside a required yard or above the height "
+            "limit. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "Delta: how far over or under each limit (+ to spare, − short).")
+    return text + ("\n\nChecked against: " + code if code else "")
+
+
 COLUMN_DELTA = "Delta"          # the panel's and the report's column for how far over or under (was "Margin")
 
 

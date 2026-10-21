@@ -19,7 +19,7 @@ PANEL_WIDTH = 480          # wide enough that Proposed, Required and Delta never
 # fixed widths that fit the panel: an Item column sized to its text pushed the numbers out of sight (seen in the
 # Rhino window capture). The mark is the first thing in the Item cell: on the Mac the tree's expand arrows take
 # the first column, which hid a column of its own.
-COLUMNS = [("Item", 230), ("Proposed", 84), ("Required", 72), (logic.COLUMN_DELTA, 62)]
+COLUMNS = [("Item", 196), ("Proposed", 84), ("Required", 72), (logic.COLUMN_DELTA, 96)]   # "−1'-4" short"
 STALE_SECONDS = 0.3        # results older than an edit by this long are shown as out of date (F7, H1)
 
 
@@ -173,7 +173,7 @@ def make_panel(actions):
     layout.Spacing = ed.Size(6, 6)
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
-    layout.Add(row(_envelope_box(actions), _massing_box(actions)))
+    layout.Add(row(_envelope_box(actions), _massing_box(actions), _labels_box(actions, parts)))
     parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
     layout.Add(parts["message"])
     layout.Add(footer)
@@ -195,6 +195,33 @@ def _massing_box(actions):
     box.Checked = False
     box.CheckedChanged += logic.guard(lambda s, e: actions["massing"](bool(box.Checked)), "hide the starting house")
     return box
+
+
+def _labels_box(actions, parts):
+    """Show on-screen labels: each yard's and lot edge's label and the status box, off by default; remembered in the
+    document."""
+    box = ef.CheckBox()
+    box.Text = "Show on-screen labels"
+    box.Checked = False
+
+    def changed(s, e):
+        if not parts.get("_setting_labels"):        # set from the document (set_labels_tick): not a change
+            actions["labels"](bool(box.Checked))
+
+    box.CheckedChanged += logic.guard(changed, "show or hide the on-screen labels")
+    parts["labels_box"] = box
+    return box
+
+
+def set_labels_tick(parts, shown):
+    """The tick as this document has it."""
+    if parts is None or parts.get("labels_box") is None:
+        return
+    parts["_setting_labels"] = True
+    try:
+        parts["labels_box"].Checked = bool(shown)
+    finally:
+        parts["_setting_labels"] = False
 
 
 def _envelope_box(actions):
@@ -239,7 +266,7 @@ def show(parts, view, stale=False, error=None, checking=False):
             values = [("" if stale_row else i["mark"] + "  ") + i["name"] + ("" if i["group"] != "site" else " (site)"),
                       "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else "needs input"
                                              if i["id"].startswith("R-") else ""),
-                      "" if stale_row else i["required"], "" if stale_row else i["margin"]]
+                      "" if stale_row else i["required"], "" if stale_row else logic.delta_text(i["margin"])]
             ci = ef.TreeGridItem()
             ci.Tag = item_id
             ci.Values = System.Array[System.Object](values)
@@ -408,12 +435,9 @@ def _open(url):
         return False
 
 
-def legend():
-    Rhino.UI.Dialogs.ShowMessage(
-        "✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
-        "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
-        "measured distance. Red marks only the part of the building inside a required yard or above the height "
-        "limit. Values are measured to 1/8 in. and never rounded toward compliance.", "Gordium · legend")
+def legend(code=None):
+    """The legend, with which version of the law was checked (rhino_logic.legend_text)."""
+    Rhino.UI.Dialogs.ShowMessage(logic.legend_text(code), "Gordium · legend")
 
 
 # ---- the start box (A1–A13) ----------------------------------------------------------------------------------

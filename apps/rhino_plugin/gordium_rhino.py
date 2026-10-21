@@ -407,8 +407,9 @@ def draw_screen(o, e):
         d.Draw2dText(text, BLUE, rg.Point2d(p.X - width // 2 + 8, p.Y - 8), False, 14)
     dark = ui.viewport_dark()
     old = stale(o)
+    labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))     # Show on-screen labels (off by default)
     taken = []                               # labels drawn this frame: none covers another, nor the status box
-    if o.message:
+    if o.message and labels:
         taken.append(logic.status_box(e.Viewport.Bounds.Width, _status_rows(o, stale(o))))
     # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
     # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
@@ -421,9 +422,9 @@ def draw_screen(o, e):
             d.Draw2dLine(System.Drawing.PointF(p.X - 5, p.Y + 5), System.Drawing.PointF(p.X + 5, p.Y - 5), color, 2)
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
-        if plan:
+        if plan and logic.yard_label_shown(labels, status):     # a failing yard's shortfall always shows
             ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken)
-    for point, text in (getattr(o, "edge_labels", None) or []) if plan else []:   # each lot edge's length
+    for point, text in (getattr(o, "edge_labels", None) or []) if plan and labels else []:   # each edge's length
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken)
     toast = getattr(o, "toast", None)
     active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
@@ -431,7 +432,7 @@ def draw_screen(o, e):
         lines = ["✕ " + line for line in toast[0]]           # bottom left, active view only (G1)
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), 14,
                          int(e.Viewport.Bounds.Height) - (22 * len(lines) + 12) - 64, dark, 13)
-    if not o.message:
+    if not o.message or not labels:
         return
     state = "stale" if old else o.message[0]
     color = ui.status_color({"does_not_comply": "does_not_comply", "needs_review": "needs_review"}.get(state, "complies"),
@@ -538,9 +539,10 @@ def _prism(doc, outline, base, top):
 def _actions():
     """What the panel's buttons do (gordium_ui.make_panel)."""
     return {"zoom": zoom_to, "report": open_report, "envelope": set_envelope, "edit_site": edit_facts,
-            "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check, "legend": ui.legend,
+            "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check,
+            "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
-            "massing": hide_massing, "not_ground": not_the_ground}
+            "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels}
 
 
 def panel():
@@ -580,6 +582,18 @@ def zoom_to(item):
     doc.Views.ActiveView = view
     view.ActiveViewport.ZoomBoundingBox(box)
     view.Redraw()
+
+
+def set_labels(on):
+    """Show on-screen labels: the viewport's labels and status box, on or off, saved in this document."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:
+        say(logic.NO_DOCUMENT)
+        return
+    state = dict(_ui_state(doc), show_labels=bool(on))
+    _save_ui_state(doc, state)
+    STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(state)
+    doc.Views.Redraw()
 
 
 def set_envelope(on):
@@ -1296,8 +1310,11 @@ def run_check(doc, report=True):
             STATE.setdefault("toasts", []).append([result["notice"]])
             if not STATE.get("headless"):
                 _toast([result["notice"]])
+        shown = logic.labels_on(_ui_state(doc))       # this document's Show on-screen labels
+        STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = shown
         if not STATE.get("headless"):
             ui.show(panel(), view)
+            ui.set_labels_tick(STATE.get("panel_parts"), shown)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
             say(logic.report_message(path, False, result["report_error"], stale=had_report))
