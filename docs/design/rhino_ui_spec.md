@@ -98,7 +98,7 @@ C4 [both] **Grade recomputed after every footprint change** from the terrain, or
 
 C5 [code] **"Existing grade" selected** → Height and Stories need review: "Measured from existing grade; code uses finished grade".
 
-C6 [code] **Roof not flat** → Height needs review: "Roof not flat; this roof's height rule isn't checked in this release".
+C6 [code] **Pitched and mansard roofs** (PR #18) → the height is measured as §325-3 defines it for each (a pitched roof: midway between eave and ridge; a mansard: its highest level) under every reading of which eave counts; it complies only if it complies under every reading, does not comply only if it fails under every one, and otherwise needs review naming the readings.
 
 C7 [code] **Height** follows §325-3 verbatim. It is measured from the grade plane (the average of finished ground level at the exterior walls, per the GRADE PLANE definition) to the highest level of a flat roof. Where roof sections vary, the highest section counts.
 

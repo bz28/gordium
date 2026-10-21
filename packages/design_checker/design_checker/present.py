@@ -733,6 +733,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             st = row["Sides"][node.left.id]                 # each side yard: the checker's verdict for it, and
             side_row = {"Verdict": st, "Provisional": (row.get("Side provisional") or {}).get(node.left.id),
                         "Turns on": (row.get("Side turns on") or {}).get(node.left.id),
+                        "Named": (row.get("Side named") or {}).get(node.left.id),
                         "Why": (measured.get(node.left.id) or {}).get("reason") or row.get("Why")}
             why = _depends(side_row, st, measured) or _reason(side_row)   # that verdict alone, never the pair's
                                                             # (complies: none; review: its open question)
@@ -765,9 +766,6 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if name == "Use":
             proposed = use_names.get(values.get("use"), values.get("use") or "—")
             required = {COMPLIES: "permitted", FAILS: "not permitted"}.get(st, "—")
-        if measure == "building_height" and st != FAILS and (measured.get("building_height") or {}).get("readings"):
-            if any("pitched" in r["reading"] or "mansard" in r["reading"] for r in measured["building_height"]["readings"]):
-                st, why = REVIEW, ROOF_NOT_FLAT
         if st in (COMPLIES, REVIEW) and drawn is True and clean and tax and names & LOT_LENGTHS:
             worst = _worst_case(expr, values, names, measured, facts)   # complies as drawn: say how it may not
             if worst is not None:
@@ -813,7 +811,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if st == FAILS and own.get("Provisional") and (side_row or not row.get("Error") == "FAIL"):
             why = ("Does not comply with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…"
                    if "confirm the survey" in own["Provisional"] else
-                   "Fails under every reading considered (" + _user_text(own["Provisional"]) + ")")
+                   "Fails under every reading considered (" + ", ".join(dict.fromkeys(
+                       NAMES.get(n, n.replace("_", " ")).lower() for n in sorted(formula.names(expr) if expr else names)
+                       if (measured.get(n) or {}).get("value") is None and (measured.get(n) or {}).get("readings")))
+                   + ")")             # what was read (never the doubled "fails under every reading")
         line = _detail_line(proposed, required, margin_t, numbers[4] if node is not None else "", margin)
         hint = _hint(label, numbers[4], margin, numbers[3]) if node is not None and margin is not None else None
         if node is not None and node.left.id == "building_area" and margin is not None and margin < 0:

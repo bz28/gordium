@@ -3,7 +3,7 @@
 import math
 
 import pytest
-from shapely.geometry import LineString, Polygon
+from shapely.geometry import LineString, MultiLineString, Polygon
 
 from model_measurement.measure import measure
 
@@ -1476,10 +1476,57 @@ def test_the_stories_read_each_candidate_building_from_its_own_grade_plane():
 
 def test_each_candidate_buildings_ground_is_checked_against_its_own_solids():
     """#18 round 19 (P0), one definition: the ground is checked against each candidate building, not only the
-    whole site. A house drawn 5 ft above the ground beside a wing on it: the site's solids meet the ground, the
-    house alone doesn't, so its stories (2 typed) and height need review, never the typed count."""
+    whole site. A house drawn 5 ft above the ground beside a garage standing apart on it (#18: a solid touching
+    the house would be one building with it, §325-18A, whose ground it meets): the site's solids meet the ground,
+    the house alone doesn't, so its stories (2 typed) and height need review, never the typed count."""
     house = box(10, 25, 35, 65, 5, 30, id="house")
-    wing = box(35, 25, 45, 45, 0, 10, id="wing")
+    wing = box(38, 25, 48, 45, 0, 10, id="wing")
     m = measure(site(RECT, house, wing), {**FACTS, "stories": 2, "main_building": "house"})
     for name in ("stories", "building_height"):
         assert m[name]["value"] is None and "doesn't meet the buildings" in m[name]["reason"], (name, m[name])
+
+
+def _sample_106_site():
+    from design_checker.check import sample_site
+    s = sample_site()
+    return site(lot(s["lot"])), dict(s["facts"])
+
+
+def test_106s_tax_map_outline_is_cleaned_within_a_quarter_foot_before_its_lines_are_read():
+    """Decided 2026-10-21: clean the data, not the law. 106 Ithaca Rd's tax-map outline has 15 lines: a 0.14 ft and
+    a 0.24 ft one at the back corners, a 24 ft piece in line (within 0.006 ft) with the 68 ft east side, and the
+    street in eight pieces. Removing a vertex that moves the outline by no more than 0.25 ft (far inside the 2 ft per
+    line every verdict tries both ways) leaves 9 lines: the tiny lines gone, the east side one line; the 10.2 ft
+    chamfer at the back west corner stays, and its two readings (a side or a rear line) are still read. The lot area
+    is the outline drawn."""
+    from model_measurement.measure import Lot
+    s, facts = _sample_106_site()
+    lt = Lot(s, facts)
+    assert lt.outline_note == "tax-map outline simplified within 0.25 ft: 15 lines → 9"
+    lengths = sorted(round(LineString(e).length, 1) for e in lt.edges)
+    assert min(lengths) > 9 and any(abs(x - 10.3) < 0.1 for x in lengths), lengths   # the chamfer stays (10.3 ft
+    # once the 0.14 ft line at its end is gone)
+    assert max(lengths) > 91.9                                                      # the east side, one line
+    m = measure(s, {**facts, "ground_is_flat": True, "grade_elevation": 0.0})
+    assert m["lot_depth"]["outline"] == lt.outline_note and len(m["lot_depth"]["readings"]) == 3
+    assert m["lot_area"]["value"] is None or abs(m["lot_area"]["readings"][0]["value"] - Polygon(
+        [p for e in s["lot"]["edges"] for p in e["points"][:-1]]).area) < 0.01
+
+
+def test_a_surveyed_outline_is_read_as_drawn_within_a_hundredth_of_a_foot():
+    """On a survey the outline is read as drawn: only lines in line (within 0.01 ft) merge. The same 106 outline
+    surveyed: every corner it drops lies within 0.01 ft of the lines left (in line with them: never a line the
+    survey shows, only the joints between pieces of one line), and the corners more than 0.01 ft off stay."""
+    from model_measurement.measure import Lot
+    from shapely.geometry import Point
+    s, facts = _sample_106_site()
+    lt = Lot(s, {**facts, "lot_surveyed": True})
+    assert lt.outline_note and lt.outline_note.startswith("survey outline simplified within 0.01 ft")
+    left = MultiLineString([LineString(e) for e in lt.edges])
+    original = [tuple(e["points"][0][:2]) for e in s["lot"]["edges"]]
+    assert all(left.distance(Point(p)) <= 0.01 + 1e-9 for p in original)
+    kept = {tuple(e[0]) for e in lt.edges}
+    assert all(p in kept for p in original if MultiLineString(
+        [LineString(e) for e in lt.edges]).distance(Point(p)) > 0.01)
+    rect = Lot(site(), FACTS)
+    assert rect.outline_note is None and len(rect.edges) == 4                       # nothing to clean

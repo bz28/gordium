@@ -51,8 +51,8 @@ def lot(name: str) -> dict:
     the perpendicular method); corner: 80 x 100, streets along the south (the address) and the east; sloped: 60 x
     120 with four spot grades of finished ground at the starting house's walls (front 1.0, rear 3.0, sides 2.0)."""
     if name in ("sample_tax", "sample_survey"):
-        pts = _sample_points()
-        assert pts == [(0.0, 0.0), (73.0, 0.0), (73.0, 90.0), (0.0, 90.0)], pts
+        # (the 73 x 90 rectangle the sample lot was until term-index made it 106 Ithaca Rd's real tax-map outline;
+        # kept as its own lot here, so the stress cases mean what they meant; the stress job re-bases on the new one)
         return _rect_lot(name, 73.0, 90.0, surveyed=name == "sample_survey")
     if name == "narrow":
         return _rect_lot(name, 52.0, 130.0, True)

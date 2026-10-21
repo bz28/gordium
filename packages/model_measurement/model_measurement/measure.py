@@ -118,6 +118,10 @@ def _same_point(p, q) -> bool:
     return math.dist(p[:2], q[:2]) <= TOL
 
 
+OUTLINE_SURVEY = 0.01     # ft: a surveyed outline is read as drawn, its lines in line and of no length merged
+OUTLINE_TAX_MAP = 0.25    # ft: a tax-map outline is cleaned within this (inside its 2 ft per line)
+
+
 class Lot:
     """The lot outline, its edges in order, and which edges are on the street."""
 
@@ -147,6 +151,55 @@ class Lot:
             self.street_problem = stop("street_lines_apart")
         elif len(street) == n:
             self.street_problem = stop("all_street")
+        self.outline_note = None
+        if not self.problems and not self.street_problem:
+            self._simplify(OUTLINE_SURVEY if facts.get("lot_surveyed") else OUTLINE_TAX_MAP,
+                           "survey" if facts.get("lot_surveyed") else "tax-map")
+
+    def _simplify(self, tol: float, kind: str):
+        """The lot lines read from the outline cleaned within its own accuracy (decided 2026-10-21): a vertex goes
+        when taking it out moves the outline by no more than `tol` (0.01 ft on a survey: lines in line, lines of
+        no length; 0.25 ft on the tax map, far inside the 2 ft per line every verdict already tries both ways).
+        A vertex where the street meets the other lines, or at a curved line, always stays. The data is cleaned,
+        never the law: every reading the lines left allow is still read. The lot's area stays the outline drawn."""
+        n = len(self.edges)
+        street = set(self.street)
+        pts = [self.edges[i][0] for i in range(n)]
+        keep = [i for i in range(n) if self.curved[i] or self.curved[i - 1] or ((i in street) != ((i - 1) % n in street))]
+        alive = list(range(n))
+
+        def cost(k):                    # removing alive[k]: how far the outline moves (every vertex it spans)
+            m = len(alive)
+            a_, b_ = alive[k - 1], alive[(k + 1) % m]
+            chord = LineString([pts[a_], pts[b_]])
+            span = []
+            j = (a_ + 1) % n
+            while j != b_:
+                span.append(j)
+                j = (j + 1) % n
+            return max(chord.distance(Point(pts[j])) for j in span)
+
+        while len(alive) > 3:
+            best = min(((cost(k), k) for k in range(len(alive)) if alive[k] not in keep), default=None)
+            if best is None or best[0] > tol:
+                break
+            alive.pop(best[1])
+        if len(alive) == n:
+            return
+        old = n
+        edges, curved, new_street = [], [], []
+        for k, i in enumerate(alive):
+            j = alive[(k + 1) % len(alive)]
+            run = [(i + t) % n for t in range(((j - i) % n) or n)]
+            if len(run) == 1:
+                edges.append(self.edges[i])
+            else:
+                edges.append([pts[i], pts[j]])
+            curved.append(any(self.curved[r] for r in run))
+            if all(r in street for r in run):
+                new_street.append(k)
+        self.edges, self.curved, self.street = edges, curved, new_street
+        self.outline_note = f"{kind} outline simplified within {tol:g} ft: {old} lines → {len(edges)}"
 
     def _contiguous(self, idx) -> bool:
         n = len(self.edges)
@@ -1214,6 +1267,12 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
         _SKY.clear()
         _PLANES.clear()
         _PLAN_OF.clear()
+    if site.get("lot") and site["lot"].get("edges"):
+        # the decision line: how the lot lines read were cleaned from the outline drawn (its own accuracy)
+        note = Lot(site, facts).outline_note
+        for name in LOT_LINE_MEASURES if note else ():
+            if name in out:
+                out[name]["outline"] = note
     return {name: out[name] for name in MEASURES}
 
 

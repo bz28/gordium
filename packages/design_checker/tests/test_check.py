@@ -411,8 +411,10 @@ def test_the_sample_lot_gives_the_spec_massing():
     from rule_format.rulebook import load
     stored = load(REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/lot_outline_tax_map.yaml")
     assert abs(lot.area - stored["area_sf"]) < 1 and s["facts"]["lot_surveyed"] is False   # placed points rounded
-    assert (present.feet_inches(x1 - x0), present.feet_inches(y1 - y0)) == ("35'-11\"", "37'-4\"")
-    assert round(outline.area / lot.area * 100, 1) == 19.1 and outline.area <= 0.25 * 6357
+    # (PR 18: legal under every reading of which of 106's lot lines are side and rear lines, its tax-map outline
+    # cleaned within 0.25 ft: 15 lines -> 9; the strictest rear line sets the depth, so the house is wide and shallow)
+    assert (present.feet_inches(x1 - x0), present.feet_inches(y1 - y0)) == ("51'-4\"", "29'-9\"")
+    assert round(outline.area / lot.area * 100, 1) == 21.7 and outline.area <= 0.25 * 6357
     assert len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
     from design_checker.check import check_site
     from envelope_builder.start import floor_solids
@@ -422,7 +424,7 @@ def test_the_sample_lot_gives_the_spec_massing():
     view = check_site({"units": "ft", "lot": lot_site, "buildings": floor_solids(got["floors"]), "problems": []},
                       {**s["facts"], "jurisdiction": s["facts"]["jurisdiction"]})["view"]
     front = {i["name"]: i for i in view["items"]}["Front yard"]
-    assert front["proposed"] == "27'-0 3/4\"" and front["status"] == present.COMPLIES     # 25'-0" + 2'-0", and more
+    assert front["proposed"] == "27'-0 5/8\"" and front["status"] == present.COMPLIES     # 25'-0" + 2'-0", and more
 
 
 def test_a_flag_needing_review_never_crashes_the_check(facts):

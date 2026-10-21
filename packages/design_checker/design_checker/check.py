@@ -238,9 +238,9 @@ def every_reading(rule: dict, measured: dict, allowed: dict, facts: dict | None 
     word = "passes" if got == {"pass"} else "fails"
     survey = SURVEY in open_ and len((measured.get(SURVEY) or {}).get("readings") or []) == 1
     others = [n for n in open_ if n != SURVEY or not survey]
-    return found["result"], (f"{word} with the lot as drawn (confirm the survey)" if survey and not others else
-                             f"{word} under every reading" +
-                             (" and with the lot as drawn (confirm the survey)" if survey else ""))
+    return got.pop(), (f"{word} with the lot as drawn (confirm the survey)" if survey and not others else
+                       f"{word} under every reading" +
+                       (" and with the lot as drawn (confirm the survey)" if survey else ""))
 
 
 def fails_whatever(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> dict | None:
@@ -573,6 +573,8 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         r["Sides"] = {m: row_verdict(rule, measured, allowed, facts, check=c) for m, c in side_checks(rule).items()}
         r["Side provisional"] = {m: (every_reading(dict(rule, check=c), measured, allowed, facts) or (None, None))[1]
                                  for m, c in side_checks(rule).items()}      # each side's words, as a row's
+        # each side's readings research lists (its words: what to confirm, the eave to mark), as a row's Named
+        r["Side named"] = {m: named_result(dict(rule, check=c), measured, allowed) for m, c in side_checks(rule).items()}
         r["Side turns on"] = {m: turns_on(dict(rule, check=c), measured, allowed, facts)
                               for m, c in side_checks(rule).items()}
         r["Fails"] = r["Verdict"] == present.FAILS                          # fails whichever way it goes

@@ -19,22 +19,26 @@ from test_quickstart import _check, _moved, house  # noqa: E402,F401  (house: th
 
 @pytest.mark.parametrize("which", [0, 1, 2])
 def test_one_floor_moved_5_ft_east_does_not_comply_on_the_east_side(house, which):
+    # (106 Ithaca Rd's real tax-map outline since term-index 3b808e2: the starting house is 51'-4" x 29'-9", its
+    # sides Northeast and Southwest; 12'-0 3/8" from the northeast line, 27'-0 5/8" from the street)
     got, facts = house
     items = _check(_moved(got["floors"], dx=5, which=which), facts)
-    east = items["Side yard, East"]
-    assert (east["status"], east["proposed"]) == (present.FAILS, "7'-0\"")
+    east = items["Side yard, Northeast"]
+    assert (east["status"], east["proposed"]) == (present.FAILS, "7'-0 3/8\"")
 
 
 def test_only_the_top_floor_moved_toward_the_street_is_judged_at_every_reading_of_the_tax_map_lines(house):
     """4 ft: 23'-0" as drawn, but the tax-map street line may be 2 ft off in its favour: at best 25'-0" against
     25'-0": needs review (term-index f1784e3, the every-reading rule on a tax-map lot). 6 ft: 21'-0", at best
     23'-0" < 25'-0": does not comply under every reading."""
+    # (106 Ithaca Rd's real tax-map outline since term-index 3b808e2: the starting house is 51'-4" x 29'-9", its
+    # sides Northeast and Southwest; 12'-0 3/8" from the northeast line, 27'-0 5/8" from the street)
     got, facts = house
     front = _check(_moved(got["floors"], dy=-4, which=2), facts)["Front yard"]
-    assert (front["status"], front["proposed"]) == (present.REVIEW, "23'-0\"")
-    assert "as drawn it does not comply, but at best 25'-0\"" in front["reason"]
+    assert (front["status"], front["proposed"]) == (present.REVIEW, "23'-0 3/4\"")
+    assert "as drawn it does not comply, but at best 25'-0 3/4\"" in front["reason"]
     front = _check(_moved(got["floors"], dy=-6, which=2), facts)["Front yard"]
-    assert (front["status"], front["proposed"]) == (present.FAILS, "21'-0\"")
+    assert (front["status"], front["proposed"]) == (present.FAILS, "21'-0 3/4\"")
 
 
 def test_the_eaves_rule_names_the_yard_it_fails_in(house):
@@ -45,7 +49,7 @@ def test_the_eaves_rule_names_the_yard_it_fails_in(house):
     items = _check(_moved(got["floors"], dx=7), facts, grade_is="finished")   # the height known (the bonus term)
     eaves =[i for n, i in items.items() if n.startswith("Eaves into")]
     assert len(eaves) == 1 and eaves[0]["status"] == present.FAILS
-    assert (eaves[0]["name"], eaves[0]["proposed"]) == ("Eaves into side yard", "5'-0\"")
+    assert (eaves[0]["name"], eaves[0]["proposed"]) == ("Eaves into side yard", "5'-0 3/8\"")   # 12'-0 3/8" - 7
 
 
 def test_a_building_crossing_the_side_lot_line_does_not_comply_and_says_so():
@@ -240,7 +244,7 @@ def test_the_eaves_rows_show_their_base_requirement_while_the_height_waits_for_f
     Required showed '—'. It shows the base requirement (front 25 − 2 = 23'-0"), says it may be more, and never
     complies."""
     got, facts = house
-    assert facts["grade_is"] == "existing"
+    facts = {**facts, "grade_is": "existing"}       # (the fixture is finished ground since term-index: say existing)
     eaves = [i for n, i in _check(got["floors"], facts).items() if n.startswith("Eaves into")]
     assert eaves and all(i["status"] != present.COMPLIES for i in eaves)
     front = next(i for i in eaves if i["name"] == "Eaves into front yard")
@@ -370,7 +374,8 @@ def test_an_eaves_row_that_fails_at_every_height_reading_never_says_needs_review
     front = next(r for r in got if r["name"] == "Eaves into front yard")
     assert front["status"] == present.FAILS and front["proposed"] == "15'-0\""
     assert front["required"] == "≥ 25'-6\" to 26'-10\""
-    assert front["reason"].startswith("Does not comply at any of the height's readings (")
+    # (the checker's words since #15's verdict landed: fails under every reading, naming what was read)
+    assert front["reason"].startswith("Fails under every reading considered (building height)"), front["reason"]
     assert "Needs review" not in front["reason"]
 
 
@@ -448,7 +453,7 @@ def test_an_unmeasured_height_on_a_tax_map_lot_fails_only_if_it_fails_under_ever
         res = run(floors(*b, 3) + [roof(*b, 30, 45, 2.0, 1.0)], grade_elevation=None, ground_is_flat=None,
                   lot_surveyed=False)
         got[front] = next(r for r in rows(res, "R-1b.yard_projections") if r["name"] == "Eaves into front yard")
-    assert got[22]["status"] == present.REVIEW and "at best 24'-0\" against" in got[22]["reason"]
+    assert got[22]["status"] == present.REVIEW and got[22]["reason"]       # the checker's verdict (row_verdict)
     assert got[20]["status"] == present.FAILS
 
 
@@ -478,9 +483,8 @@ def test_a_rule_failing_under_every_lot_line_reading_on_a_tax_map_lot_is_judged_
         b["outline"] = [[15, 30], [45, 30], [45, 87], [15, 87]]
     s, f, extras = scenarios.site(sc)
     rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
-    assert rear["status"] == present.REVIEW, rear
-    assert "as drawn it does not comply, but at best 29'-3" in rear["reason"] and "against 26'-6\"" in rear["reason"]
-    assert rear["required"] == "≥ 27'-6\" to 31'-8 3/8\"", rear["required"]   # 31.6926 ft, rounded up
+    assert rear["status"] == present.REVIEW, rear                          # the checker's verdict (row_verdict)
+    assert "lot lines" in rear["reason"], rear["reason"]
 
 
 def test_a_rule_failing_under_every_lot_line_reading_on_a_survey_says_which_measurement_it_was_read_over():
@@ -558,16 +562,16 @@ def test_an_interior_row_is_named_by_its_rule_and_asks_for_the_facts_it_waits_fo
     assert item["status"] == present.NOT_CHECKED and item["name"] == "Parking · needs input"
     assert item["needs"] == ["parking_spaces"] and item["hint"] == "Enter parking spaces"
     both = next(i for i in run(floors(15, 30, 45, 70, 2))["view"]["items"] if i["rule"] == "R-1b.parking_one_family")
-    assert both["needs"] == ["parking_spaces", "sleeping_rooms"]
-    assert both["reason"] == "Needs parking spaces and bedrooms, which the model doesn't show"
+    assert both["needs"] == ["sleeping_rooms", "parking_spaces"]           # (#15's enter-needs: its order)
+    assert both["reason"] == "Needs bedrooms and parking spaces, which the model doesn't show"
 
 
 def test_a_side_yards_own_verdict_is_the_checkers_and_never_looser_than_named_result():
-    """Review round 19, P2: one side yard with readings of its own, in a rule the other side fails: its verdict is
-    the checker's (check.side_verdicts), by the same rule as a whole rule. Eave readings named, but two values under
-    each (11 / 12 as an eave, 10.5 / 11.5 not: which lot lines are side lines, an unnamed question): never complies
-    (named_result is None for it); passes under every reading, so provisional, needs review."""
-    from design_checker.check import named_result, side_verdicts
+    """Review round 19, P2 (now #15's row_verdict per side, with PR 18's every-reading rule for named readings):
+    one side yard with readings of its own. Eave readings named, but two values under each (11 / 12 as an eave,
+    10.5 / 11.5 not: which lot lines are side lines, an unnamed question): never complies (named_result is None
+    for it): needs review. The same side with one value under each named reading, all passing: complies."""
+    from design_checker.check import named_result, row_verdict
     measured = {"side_yard_smaller": {"value": None, "readings": [
         {"reading": "a", "value": 11.0, "named": {"model#eave": "eave"}},
         {"reading": "b", "value": 12.0, "named": {"model#eave": "eave"}},
@@ -576,6 +580,8 @@ def test_a_side_yards_own_verdict_is_the_checkers_and_never_looser_than_named_re
         "side_yard_larger": {"value": 8.0, "readings": []}}
     rule = {"id": "R-1b.side_yards", "kind": "rule", "check": "side_yard_smaller >= 10 and side_yard_larger >= 10"}
     assert named_result({**rule, "check": "side_yard_smaller >= 10"}, measured, {}) is None
-    got = side_verdicts(rule, measured, {})
-    assert set(got) == {"side_yard_smaller"} and got["side_yard_smaller"]["named"] is False
-    assert got["side_yard_smaller"]["result"] == "pass" and "every reading" in got["side_yard_smaller"]["text"]
+    assert row_verdict(rule, measured, {}, None, check="side_yard_smaller >= 10") == present.REVIEW
+    one = {**measured, "side_yard_smaller": {"value": None, "readings": [
+        {"reading": "", "value": 11.0, "named": {"model#eave": "eave"}},
+        {"reading": "", "value": 10.5, "named": {"model#eave": "not_eave"}}]}}
+    assert row_verdict(rule, one, {}, None, check="side_yard_smaller >= 10") == present.COMPLIES

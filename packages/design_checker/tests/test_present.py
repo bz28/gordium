@@ -707,7 +707,9 @@ def test_an_unmeasured_porch_touching_the_house_keeps_a_side_yard_in_review():
     lot, facts = _sample106()
     r = check_site(_plot(box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30), lot_=lot), {**facts, "lot_surveyed": True},
                    extras={"not_included": ["porch-1"], "touching": ["porch-1"]})
-    side = items(r["view"])["Side yard, Northeast"]
+    # (#18 reads every lot-line reading of 106's real outline: the wider side is the one whose value is the open
+    # question; the narrower is 9'-4 3/4" from the west line under every reading and fails)
+    side = items(r["view"])["Side yard, wider"]
     assert side["status"] == present.REVIEW, (side["status"], side["reason"])
     assert "touching" in side["reason"] or "depends on" in side["reason"]
     _never_above_the_checker(r)
@@ -730,7 +732,9 @@ def test_a_side_yard_that_complies_only_under_every_reading_of_an_open_question_
     from design_checker.check import check_site
     lot, facts = _sample106()
     r = check_site(_plot(box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30), lot_=lot), {**facts, "lot_surveyed": True})
-    side = items(r["view"])["Side yard, Northeast"]
+    # (#18 reads every lot-line reading of 106's real outline: the wider side is the one whose value is the open
+    # question; the narrower is 9'-4 3/4" from the west line under every reading and fails)
+    side = items(r["view"])["Side yard, wider"]
     assert side["status"] == present.REVIEW and (side["reason"] or "").startswith("Complies under every reading, but it depends on"), (
         side["status"], side["reason"])
     assert "if confirmed" in side["delta"] and "to spare" not in side["delta"]
