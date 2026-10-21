@@ -106,10 +106,14 @@ Every reason the code gives today comes from the table:
   they disagree it's a question, never an override. "a floor block below the ground: whether a
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
-  together, or draw the overhang as part of its floor". Floor blocks one over another in plan are the same
-  building's floors even when they don't touch, and then: "floor blocks drawn one over another don't stand on each
-  other (from {low} ft to {high} ft): a floor not drawn, or a space open to below? draw the missing floor, or check
-  the blocks". Stories are counted only from floor blocks: a part drawn as a plain solid
+  together, or draw the overhang as part of its floor". Every solid one over another in plan (plain or floor
+  blocks) is the same building whatever the gap between them (a tolerance never decides what the building is), and
+  a real gap between its levels asks: "parts of the building drawn one over another don't stand on each other (from
+  {low} ft to {high} ft): a floor not drawn, or a space open to below? draw the missing floor, or check the
+  blocks". Parts at the same level (an L-shaped house of two stacks) are no gap. One starting partly inside the one below
+  (a floor moved down into it, a room sunk into the roof) asks too: "part of the building ({what}) starts partly
+  inside the one below it (from {low} ft to {high} ft): move it to stand on the one below, or join them". So moving
+  a part a tenth of a foot never turns one count into another. Stories are counted only from floor blocks: a part drawn as a plain solid
   (or plain solids stacked) never has its stories guessed from its height or its blocks. Only a plain part standing
   on the ground and lower than 7 ft (the lowest ceiling a habitable room may have, NYS Residential Code R305.1: a
   porch slab or steps) fits inside the first story and is left out; any other (raised, on a roof, reaching below

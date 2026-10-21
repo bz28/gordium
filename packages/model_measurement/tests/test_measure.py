@@ -1015,6 +1015,10 @@ def test_a_short_part_off_the_ground_is_never_left_out_of_the_stories(z0, z1, ty
     m = measure(site(RECT, *floors, part), {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
     if z0 < 0:
         assert m["value"] is None and "part of the building (room) is below the ground" in m["reason"]
+    elif z0 > 33:                       # round 6: floating over the roof is a gap, never the typed count alone
+        assert m["value"] is None and "don't stand on each other" in m["reason"]
+    elif z0 > 0:                        # round 6: sunk into the roof asks too, as touching and floating do
+        assert m["value"] is None and "starts partly inside the one below" in m["reason"]
     elif typed is None:
         assert m["value"] is None and "part of the building (room) isn't drawn as floor blocks" in m["reason"]
     else:
@@ -1033,4 +1037,65 @@ def test_a_floor_block_over_a_deleted_floor_is_still_counted_and_asks(fourth):
         blocks.append(floor(10, 25, 35, 65, z0=3 * h, z1=4 * h, id="floor 4"))
     blocks.append(box(35, 25, 45, 45, 0, 9, id="wing"))
     m = measure(site(RECT, *blocks), {**FACTS, "stories": 2 if fourth else 1, "main_building": "floor 1"})["stories"]
-    assert m["value"] is None and "floor blocks drawn one over another don't stand on each other" in m["reason"]
+    assert m["value"] is None and "parts of the building drawn one over another don't stand on each other" in m["reason"]
+
+
+@pytest.mark.parametrize("shape, typed", [("podium", 1), ("roof room", 3)])
+def test_a_plain_solid_over_or_under_floor_blocks_with_a_gap_asks(shape, typed):
+    """Round 6 (P0): a plain podium (0 to 9 ft) under a floor block (20 to 30 ft), 1 typed, complied with 1; a room
+    0.05 ft above the roof of three floor blocks, 3 typed, complied with 3; touching, both asked. Every solid one
+    over another in plan is one building whatever the gap, and a real gap between its levels asks."""
+    if shape == "podium":
+        blocks = [box(10, 25, 35, 65, 0, 9, id="podium"), floor(10, 25, 35, 65, z0=20, z1=30, id="floor")]
+        main = "floor"
+    else:
+        blocks = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+        blocks.append(box(12, 30, 20, 40, 33.05, 39.55, id="room"))
+        main = "f0"
+    m = measure(site(RECT, *blocks), {**FACTS, "stories": typed, "main_building": main})["stories"]
+    assert m["value"] is None and "don't stand on each other" in m["reason"]
+
+
+def test_an_l_shaped_house_of_two_floor_blocks_at_one_level_is_no_gap():
+    """Round 6 (P2): two one-story floor blocks overlapping in plan at the same level (an L-shaped house) got a
+    floors_apart question. They are one building's floor at one level: 1 typed, 1. (Two-story L-shapes whose
+    blocks touch across the levels are joined by _stacks and asked as misaligned floors, as before.)"""
+    a = floor(10, 25, 30, 65, z0=0, z1=10, id="a")
+    b = floor(25, 25, 45, 40, z0=0, z1=10, id="b")
+    m = measure(site(RECT, a, b), {**FACTS, "stories": 1, "main_building": "a"})["stories"]
+    assert m["value"] == 1, m
+
+
+def _lifted(block, dz):
+    """A copy of a solid moved up (or down) by dz feet."""
+    import copy
+    out = copy.deepcopy(block)
+    for f in out["faces"]:
+        for pt in f["points"]:
+            pt[2] += dz
+        for h in f.get("holes") or []:
+            for pt in h:
+                pt[2] += dz
+    return out
+
+
+def test_a_tenth_of_a_foot_up_or_down_never_changes_one_story_count_into_another():
+    """Metamorphic (round 6): moving any one solid up or down by up to 0.1 ft (touching, a small gap, a small
+    overlap) never turns a story count into a different count: the result is the same, or needs review. Fixed
+    seeds; the drawings of the property test."""
+    import random
+    rnd = random.Random(11)
+    checked = 0
+    for _ in range(200):
+        blocks, stacks, pick, typed = _drawing(rnd)
+        facts = {**FACTS, "stories": typed, "main_building": pick}
+        before = measure(site(RECT, *blocks), facts)["stories"]["value"]
+        if before is None:
+            continue
+        i = rnd.randrange(len(blocks))
+        for dz in rnd.sample([-0.1, -0.05, -0.02, 0.02, 0.05, 0.1], 2):
+            moved = blocks[:i] + [_lifted(blocks[i], dz)] + blocks[i + 1:]
+            after = measure(site(RECT, *moved), facts)["stories"]["value"]
+            checked += 1
+            assert after is None or after == before, (blocks[i]["id"], dz, before, after, stacks, pick, typed)
+    assert checked > 60

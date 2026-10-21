@@ -178,6 +178,8 @@ CASES = {
     "floors_apart": _plain(stories=2, buildings=[floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
                                                  floor(10, 25, 35, 65, z0=22, z1=33, id="floor 3")],
                            main_building="floor 1"),
+    "parts_overlap": _plain(stories=2, main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=10.5, z1=21.5, id="floor 2")]),
     "stories_below_blocks": _plain(stories=1, buildings=[box(10, 25, 35, 65, 0, 17, id="podium"),
                                                          box(10, 25, 35, 65, 17, 34, id="upper")]),
     "basement_part": _plain(main_building="floor 1", buildings=[
