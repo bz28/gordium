@@ -131,10 +131,12 @@ rules:
         page: 30
         lines: [29, 30]
         quote: "(f) Neighborhood retail or service commercial facilities in R-2, R-3, CR-2, CR-3, and CR-4 Districts."
+        not_limits: {2: "district names (R-2, CR-2), not numbers", 3: "district names (R-3, CR-3), not numbers", 4: "a district name (CR-4), not a number"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 30
         lines: [31, 31]
         quote: "(g) Hospitals or sanatoriums in R-3, CR-3, and CR-4 Districts."
+        not_limits: {3: "district names (R-3, CR-3), not numbers", 4: "a district name (CR-4), not a number"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 31
         lines: [36, 36]
@@ -320,6 +322,7 @@ rules:
         page: 3
         lines: [53, 53]
         quote: "(7) For the first 1-3 units; +750 sf for each additional unit; +500 sf per room let for profit."
+        not_limits: {1: "the first 1-3 units: the base lot area (6,000 sf) covers up to 3 units", 3: "the first 1-3 units: the base lot area (6,000 sf) covers up to 3 units", 750: "the amounts for more than 3 units and for rooms let for profit: not applied by this rule's formula (the number of units isn't measured); the flag R-3a.lot_area_note_7 asks the reviewer to apply them", 500: "the amounts for more than 3 units and for rooms let for profit: not applied by this rule's formula (the number of units isn't measured); the flag R-3a.lot_area_note_7 asks the reviewer to apply them"}
     examples:
       - given: {use: one_family_attached, lot_area: 6000}
         expect: pass
@@ -355,6 +358,7 @@ rules:
         page: 3
         lines: [53, 53]
         quote: "(7) For the first 1-3 units; +750 sf for each additional unit; +500 sf per room let for profit."
+        not_limits: {1: "the first 1-3 units: the base lot area (6,000 sf) covers up to 3 units", 3: "the first 1-3 units: the base lot area (6,000 sf) covers up to 3 units", 750: "the amounts for more than 3 units and for rooms let for profit: not applied by this rule's formula (the number of units isn't measured); the flag R-3a.lot_area_note_7 asks the reviewer to apply them", 500: "the amounts for more than 3 units and for rooms let for profit: not applied by this rule's formula (the number of units isn't measured); the flag R-3a.lot_area_note_7 asks the reviewer to apply them"}
     examples:
       - given: {use: multiple_family, lot_area: 6600}
         expect: pass
@@ -379,6 +383,7 @@ rules:
         page: 3
         lines: [53, 53]
         quote: "(7) For the first 1-3 units; +750 sf for each additional unit; +500 sf per room let for profit."
+        not_limits: {1: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)", 3: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)", 750: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)", 500: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)"}
       - file: zoning_charts_2026-04.pdf
         page: 3
         cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, attached, by conversion", column: R-3A}
@@ -537,6 +542,7 @@ rules:
         page: 26
         lines: [22, 25]
         quote: "(4) Where a variance or special permit is required or where special conditions apply to allow in one district a use which is permitted by right in another district, the regulations applying to such use shall be those of whichever district has the stricter regulations, unless otherwise determined by the Board of Zoning Appeals."
+        not_limits: {1: "\"in one district\": not a number"}
     examples:
       - given: {use: one_family_detached_zero_lot_line}
         expect: needs_review
@@ -822,6 +828,7 @@ rules:
         page: 47
         lines: [8, 9]
         quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 40) to each yard, one to one"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 47
         lines: [11, 12]
@@ -942,6 +949,7 @@ rules:
         page: 25
         lines: [7, 9]
         quote: "For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
+        not_limits: {2: "what building_area counts (balconies projecting more than two feet): a measuring rule, not this formula's limit"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 25
         lines: [9, 10]
@@ -1014,6 +1022,7 @@ rules:
         page: 50
         lines: [7, 9]
         quote: "C. Corner lot transition. On corner lots in residential districts; buildings must be erected so that yards facing public streets shall conform to the minimum front yard requirements of said residential district. Such lots shall be deemed to have two adjoining front yards."
+        not_limits: {2: "two adjoining front yards: which yards are front yards on a corner lot (measured to every street line), not a limit"}
     examples:
       - given: {front_yard: 15}
         expect: pass
@@ -1043,10 +1052,12 @@ rules:
         page: 25
         lines: [15, 17]
         quote: "(12) Column 12: Yard Dimensions, Side, One Side at Least. Buildings hereafter altered or erected in each district must be located so that one side yard will be at least as wide as specified in this column, subject to the further regulations of Column 13."
+        not_limits: {1: "one side yard: which yard this column's number is for, not a limit"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 25
         lines: [18, 20]
         quote: "(13) Column 13: Yard Dimensions, Side, Other at Least. Buildings hereafter erected in each use district must have two side yards as specified in this column and Column 12. One side yard shall be at least as wide as specified in this column, subject to the further regulations of Column 12."
+        not_limits: {1: "one side yard: which yard this column's number is for, not a limit", 2: "two side yards: how many side yards there are, not a limit"}
     examples:
       - given: {side_yard_smaller: 5, side_yard_larger: 10}
         expect: pass
@@ -1088,6 +1099,7 @@ rules:
         page: 25
         lines: [24, 26]
         quote: "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
+        not_limits: {2: "the two side lot lines: how lot depth is measured (measures.yaml lot_depth), not a limit"}
     examples:
       - given: {rear_yard: 25, lot_depth: 125}
         expect: pass
@@ -1163,6 +1175,7 @@ rules:
         page: 47
         lines: [8, 9]
         quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 40) to each yard, one to one"}
       - file: zoning_charts_2026-04.pdf
         page: 3
         cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-3A}
@@ -1212,10 +1225,12 @@ rules:
         page: 66
         lines: [37, 40]
         quote: "A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or partially above finished grade are permitted in any side or rear yard but not in a required front yard, except as permitted under the further provisions of this section. Corner lots shall be considered to have two front yards."
+        not_limits: {2: "two front yards on a corner lot: which yards are front yards (the accessory front yard is measured to every street line), not a limit"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 67
         lines: [6, 9]
         quote: "C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this section."
+        not_limits: {1: "the district name R-1, not a number of feet", 6: "six feet applies in R-1 districts only; in R-3a it is three feet (accessory_side_yard >= 3)"}
       - file: zoning_charts_2026-04.pdf
         page: 3
         cell: {section: Yard Dimensions, row: Front (minimum), column: R-3A}
@@ -1259,14 +1274,17 @@ rules:
         page: 50
         lines: [12, 15]
         quote: "E. Development in R-3 Districts which abut R-1 Districts. The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling, shall be subject to the following special conditions if the land on which the development occurs directly abuts land in either the R-1a or R-1b Zoning District:"
+        not_limits: {1: "district names (R-1a, R-1b), not numbers", 3: "district names (R-3, R-3a, R-3b), not numbers"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 50
         lines: [16, 18]
         quote: "(1) Minimum lot size (area in square feet): The required area in square feet needed to satisfy the minimum lot size requirement shall be 150% of the requirement shown on the District Regulations Chart for the R-3a or R-3b District."
+        not_limits: {1.5: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)", 3: "district names (R-3a, R-3b), not numbers"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 50
         lines: [19, 20]
         quote: "(2) Maximum building height: The maximum building height requirement shall be the same as the requirement for the abutting R-1a or R-1b District."
+        not_limits: {1: "district names (R-1a, R-1b), not numbers"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 50
         lines: [21, 21]
@@ -1275,10 +1293,12 @@ rules:
         page: 51
         lines: [3, 4]
         quote: "buildings shall be 75% of the requirement shown on the District Regulations Chart for the R-3a or R-3b District."
+        not_limits: {0.75: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)", 3: "district names (R-3a, R-3b), not numbers"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 51
         lines: [5, 7]
         quote: "(4) Yard dimensions, side or rear yards: The minimum required side or rear yard requirement shall be 150% of the requirement shown on the District Regulations Chart for the R-3a or R-3b District if the side or rear yard abuts land in the R-1a or R-1b District."
+        not_limits: {1: "district names (R-1a, R-1b), not numbers", 1.5: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)", 3: "district names (R-3a, R-3b), not numbers"}
       - file: zoning_charts_2026-04.pdf
         page: 3
         lines: [44, 44]
@@ -1287,6 +1307,7 @@ rules:
         page: 27
         lines: [9, 9]
         quote: "(9) For special conditions on development of property in R-3 that directly abuts R-1, § 325-9B(1)."
+        not_limits: {1: "district name R-1 and section 325-9B(1), not limits", 3: "the district name R-3, not a number"}
     examples:
       - given: {use: multiple_family}
         expect: needs_review
@@ -1579,6 +1600,7 @@ rules:
         page: 14
         lines: [26, 26]
         quote: "(3) Plus 1 space for each additional 15,000 sf of floor space or major fraction thereof."
+        not_limits: {1: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)", 15000: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)"}
       - file: zoning_charts_2026-04.pdf
         page: 14
         cell: {section: Minimum Loading Requirement, row: "Nursing home, hospital, or sanitarium", column: R-3A}
@@ -1589,10 +1611,12 @@ rules:
         page: 63
         lines: [41, 42]
         quote: "A. Size requirements. An off-street loading space shall have a minimum of 450 square feet plus necessary additional space for entrance, exit and aisle space."
+        not_limits: {450: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 64
         lines: [3, 4]
         quote: "and industrial land uses and multiple dwelling structures having more than 25 units, except for properties located in any CBD district:"
+        not_limits: {25: "a limit this flag asks the reviewer to apply by hand: no formula checks it, so the flag always needs review (never a pass)"}
     examples:
       - given: {use: multiple_family}
         expect: needs_review
