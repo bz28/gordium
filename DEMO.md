@@ -35,44 +35,37 @@ When Ben says the preview has been updated:
 ```
 cd $HOME\Documents\gordium
 git pull
-```
-
-Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
-
-Only if Gordium then says a module is missing (for example `No module named ...`), also run:
-
-```
 .\.venv\Scripts\pip install -e ".[dev]"
 ```
 
-## What's new in this preview
+The last line is **needed for this update** (2026-10-21 evening): Gordium now uses one more measuring library,
+`numpy`, to fit roof planes. It ends with `Successfully installed …`.
 
-- **Moving one floor into a yard** now says **does not comply** (before, it said "needs review"). An overhanging
-  floor is part of the building, so it must stay out of the yard like the rest of it.
-- **A building that crosses a lot line fails**, and the message names the building and the line, for example
-  "The main building crosses the side lot line".
-- **More of the real world is measured:** pitched roofs, eaves (the roof edge that overhangs the wall; the law
-  lets eaves reach up to 2'-0" into a yard, and Gordium never decides on its own that an overhang is eaves),
-  garages and other accessory buildings (they count toward lot coverage), and corner lots (the second street side
-  gets a front-type yard).
-- Where the law has more than one reasonable reading, Gordium checks **every reading**: it says complies only if
-  all of them pass, does not comply only if all of them fail, and needs review otherwise.
-- **Address lookup in the start box:** type the address and press **Look up**. Gordium fills in the lot from the
-  City tax map, the street side, whether it's a corner lot, and a suggested zoning district, each with where it
-  came from (this takes up to about 45 seconds). Anything doubtful is shown in amber with the reason. You still
-  tick **I confirm** for the zoning district. **Cancel** puts everything back exactly as it was.
-- **One start box at a time:** opening a second one while one is open does nothing.
+Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
+
+## What's new in this preview (2026-10-21 evening)
+
+The full guide for this version is the PDF Ben sends with it (*Gordium demo guide*): what Gordium knows, what it
+assumes, what it doesn't cover yet, and how it works. The short version:
+
+- **Three districts:** R-1a, R-1b and R-3a, each hand-written from the law and checked.
+- **Address lookup** fills in the lot (State tax-parcel map), the street side, corner lot and a *suggested* zoning
+  district (City zoning map); you tick **I confirm**.
+- **The largest legal starting house** is drawn for the lot (2 ft back from every limit on a tax-map lot).
+- **Every reading** where the law or the data allows more than one (tax-map lines ±2 ft, eaves, which line is the
+  rear, which building is the main one): complies only if all pass.
+- **Neighbouring building footprints** shown around the lot, on screen only.
+- **Zoning report…** opens on a *Check* sheet that matches the panel row for row, with citations and links.
+- **Ground is taken as flat** at the lot's level in this version (the panel says so).
 
 ## Known limits
 
-- **Windows is not fully tested yet.** Most of this was built and tried on a Mac. If something looks wrong or a
-  window shows an error, take a screenshot and send it to Ben.
-- **Ground details are still rough:** how the ground is drawn, and the ground levels the lookup finds (an
-  estimate from a national elevation map), are simple for now, so height and story results on a sloped lot may
-  say needs review. Treating the ground as flat for this first version is decided but not in this preview yet.
-- **No "These are eaves" button yet:** a yard that is wide enough only when a roof overhang is left out shows
-  needs review, because there is no way in Rhino yet to confirm the overhang is eaves.
-- **AI-drafted zones are not included.** Only the hand-checked R-1b rules are in this preview; the other
-  districts drafted by AI are still being checked and are left out on purpose.
+- **Look up only addresses in R-1a, R-1b or R-3a for now.** For an address in another district (say R-2a) the
+  zone menu wrongly falls back to R-1a; a fix is coming in the next update.
+- **Stories:** draw buildings with Gordium's floor blocks (the starting house uses them). A building drawn as one
+  plain solid makes the Stories row ask you to enter the number of stories, and there is no box for it yet; a fix
+  is coming in the next update.
+- **Windows is not fully tested yet.** If something looks wrong or a window shows an error, take a screenshot and
+  send it to Ben.
+- **AI-drafted zones are not included** (left out on purpose while they are checked).
 - The address lookup needs the internet and works only for addresses in the **City** of Ithaca (not the Town).
-  If it can't help, the box says why and you fill it in by hand.

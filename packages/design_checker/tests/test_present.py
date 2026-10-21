@@ -61,7 +61,9 @@ def test_an_at_limit_yard_needs_review_on_a_tax_map_lot_but_complies_on_a_survey
     tm = items(tax_map["view"])
     assert tm["Side yard, West"]["status"] == present.REVIEW
     assert "tax map" in tm["Side yard, West"]["reason"] and "8'-0\"" in tm["Side yard, West"]["reason"]
-    assert tm["Rear yard"]["status"] == present.COMPLIES          # +2'-6" > 2'-0" even at the worst case
+    # +2'-6" is less than the tax map can take: 2'-0" nearer the rear line, and 1'-0" more required from a lot depth
+    # 4'-0" more (each side lot line 2'-0" longer, Ben 2026-10-21)
+    assert tm["Rear yard"]["status"] == present.REVIEW and "tax map" in tm["Rear yard"]["reason"]
     assert tm["Lot width"]["status"] == present.COMPLIES
     sv = items(check(MODEL, surveyed)["view"])
     assert sv["Side yard, West"]["status"] == present.COMPLIES      # a survey: no tolerance
@@ -76,7 +78,7 @@ def test_complies_only_when_the_checker_passed_or_it_holds_at_the_tax_map_worst_
             assert rows[i["rule"]]["Provisional"] == present.SURVEY_ONLY, i["name"]
             assert "worst case" in i["reason"], i["name"]
     area = items(tax_map["view"])["Lot area"]                      # the 73 × 90 lot of 106 Ithaca Rd
-    assert area["status"] == present.COMPLIES and "worst case (lot area 6,248 sf)" in area["reason"]   # 71 × 88
+    assert area["status"] == present.REVIEW and "at worst 5,934 sf against 6,000 sf" in area["reason"]  # 69 × 86
 
 
 # ---- C3–C6: the grade, the roof ---------------------------------------------------------------------------------
@@ -208,11 +210,11 @@ def test_side_yards_are_two_rows_west_and_east(tax_map):
 
 def test_the_notice_is_one_line_for_newly_failing_items_and_none_on_the_first_check():
     a = [{"id": "x", "name": "Rear yard", "status": present.FAILS, "proposed": "20'-0\"", "required": "22'-6\"",
-          "margin": "−2'-6\""}]
+          "margin": "−2'-6\"", "delta": "−2'-6\" short"}]                       # settle's words (the only writer)
     now, text = present.notice(None, a)
     assert text is None
     _, text = present.notice({"x": present.COMPLIES}, a)
-    assert text == "Rear yard no longer complies · 20'-0\" proposed · 22'-6\" required · −2'-6\""
+    assert text == "Rear yard no longer complies · 20'-0\" proposed · 22'-6\" required · −2'-6\" short"
     b = a + [{"id": "y", "name": "Lot coverage", "status": present.FAILS, "proposed": "", "required": "", "margin": ""}]
     _, text = present.notice({"x": present.COMPLIES, "y": present.COMPLIES}, b)
     assert text == "2 items no longer comply: Rear yard; Lot coverage"     # "; ": names have commas
@@ -230,9 +232,10 @@ def test_the_report_never_shows_pass_for_a_rule_the_panel_says_needs_review(surv
     result = check(MODEL, {**surveyed, "lot_surveyed": False}, report)
     out = openpyxl.load_workbook(report)["Output"]
     header = [c.value for c in out[2]]
-    rid, err = header.index("Rule id"), header.index("Error")
-    errors = {row[rid]: row[err] for row in out.iter_rows(min_row=3, values_only=True) if row[rid]}
-    assert errors["R-1b.side_yards"] == "NEEDS REVIEW"                       # the panel's side yards need review
+    req, err = header.index("Requirement"), header.index("Error")
+    errors = {row[req]: row[err] for row in out.iter_rows(min_row=3, values_only=True) if row[req]}
+    side = next(k for k in errors if k.startswith("Side yards"))
+    assert errors[side] == "NEEDS REVIEW"                                     # the panel's side yards need review
     check_tab = openpyxl.load_workbook(report)["Check"]
     text = " ".join(str(c.value) for row in check_tab.iter_rows() for c in row if c.value)
     assert "Draft rulebook" in text and "tax map" in text and "Overlays" in text and "§325-8" in text
@@ -287,6 +290,141 @@ def test_red_above_the_height_limit_is_only_the_part_above_it():
     assert top["why"] == "height" and top["base"] == pytest.approx(35) and top["top"] == pytest.approx(38)
 
 
+def _regions(r):
+    """Each coloured region: (status, its x from, x to, area in sf)."""
+    from shapely.geometry import Polygon
+    return sorted(((e["status"], round(min(p[0] for p in e["outline"]), 2), round(max(p[0] for p in e["outline"]), 2),
+                    round(Polygon(e["outline"]).area, 1)) for e in r["plan"]["encroach"]), key=lambda t: t[1])
+
+
+def test_amber_is_the_part_of_the_building_in_a_tax_map_yards_caution_zone():
+    """West wall 11 ft from the line, the side yard needs 10 (front 30 ft back, rear 35: well clear): on a survey
+    it complies (no colour); on the tax map (±2 ft) it needs review, and amber is exactly the part within 2 ft of
+    the yard line: x 11 to 12, the house's 35 ft depth (35 sf). Never red."""
+    from design_checker.check import check_site
+    house = box(11, 30, 35, 65)
+    surveyed = check_site(_plot(house), {**FACTS, "jurisdiction": CITY})
+    assert items(surveyed["view"])["Side yard, West"]["status"] == present.COMPLIES and _regions(surveyed) == []
+    tax = check_site(_plot(house), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
+    assert items(tax["view"])["Side yard, West"]["status"] == present.REVIEW
+    assert items(tax["view"])["Front yard"]["status"] == present.COMPLIES
+    assert _regions(tax) == [(present.REVIEW, 11, pytest.approx(12, abs=0.02), pytest.approx(35, abs=0.8))]
+
+
+def test_amber_follows_every_yard_in_doubt():
+    """The same house with its front wall at exactly 25 ft (the requirement): the front yard needs review too, so
+    amber is the L of both caution strips: x 11 to 12 the full 40 ft depth (40 sf) plus y 25 to 27 the remaining
+    23 ft of width (46 sf): 86 sf."""
+    from design_checker.check import check_site
+    tax = check_site(_plot(box(11, 25, 35, 65)), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
+    assert items(tax["view"])["Front yard"]["status"] == present.REVIEW
+    assert _regions(tax) == [(present.REVIEW, 11, 35, pytest.approx(86, abs=1.5))]
+
+
+def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
+    """Architect's review (2026-10-21): "−3'-0" short" while red was only 1 ft. Worked by hand (lot 50 x 100, side
+    yards need 10 ft, the tax map ±2 ft on each lot length the rule reads):
+    - West wall 7 ft from the line: the yard is really 5 to 9 ft, so 1 to 5 ft short: "at least 1'-0" short"
+      (the red part), never "−3'-0" short";
+    - 11 ft: really 9 to 13: "up to 1'-0" short" (amber, no red); 16 ft: really 14 to 18: "at least 4'-0" to spare";
+    - the same walls on a survey: the margin itself."""
+    from design_checker.check import check_site
+    tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
+    words = {x: items(check_site(_plot(box(x, 30, 35, 65)), tax)["view"])["Side yard, West"] for x in (7, 11, 16)}
+    assert [(words[x]["delta"], words[x]["approx"]) for x in (7, 11, 16)] == [
+        ("at least 1'-0\" short", True), ("up to 1'-0\" short", True), ("at least 4'-0\" to spare", True)]
+    assert words[7]["margin"] == "−3'-0\"" and words[7]["status"] == present.FAILS     # as drawn, unchanged
+    assert "as drawn" in words[7]["detail"]["line"] and "at least 1'-0\" short" in words[7]["detail"]["line"]
+    survey = items(check_site(_plot(box(7, 30, 35, 65)), {**FACTS, "jurisdiction": CITY})["view"])["Side yard, West"]
+    assert (survey["delta"], survey["approx"]) == ("−3'-0\" short", False)
+    # the notice and the report say the same words as the panel
+    before = {i["id"]: i["status"] for i in check_site(_plot(box(16, 30, 35, 65)), tax)["view"]["items"]}
+    now = check_site(_plot(box(7, 30, 35, 65)), tax)["view"]["items"]
+    assert present.notice(before, now)[1].endswith("· at least 1'-0\" short")
+    # round 2: settle is the ONLY writer of the Delta; nothing falls back to the as-drawn margin's words
+    for path in ("packages/design_checker/design_checker/check.py", "packages/design_checker/design_checker/present.py",
+                 "apps/rhino_plugin/gordium_ui.py"):
+        assert "delta_text" not in (REPO / path).read_text(encoding="utf-8"), path
+
+
+def test_delta_words_never_overstate():
+    C, R, F = present.COMPLIES, present.REVIEW, present.FAILS
+    assert present.delta_words(F, (-5.0, -1.0), "ft", True) == "at least 1'-0\" short"
+    assert present.delta_words(F, (-5.0, -1.0 - 1 / 200), "ft", True) == "at least 1'-0\" short"   # rounded down
+    assert present.delta_words(R, (-3.25, 1.75), "ft", True) == "up to 3'-3\" short"
+    assert present.delta_words(R, (-3.25 + 1 / 200, 1.75), "ft", True) == "up to 3'-3\" short"    # rounded up
+    assert present.delta_words(C, (0.0, 4.0), "ft", True) == "at the limit at worst"
+    assert present.delta_words(C, (5.0, 9.0), "ft", True) == "at least 5'-0\" to spare"
+    assert present.delta_words(C, (7.0, 7.0), "ft", False) == "+7'-0\" to spare"            # one reading: the margin
+    assert present.delta_words(F, (-1.25, -1.25), "ft", False) == "−1'-3\" short"
+    assert present.delta_words(C, None, "ft", False) == ""
+    # never kinder than the status: room on a row that needs review is "if confirmed", never "to spare"
+    assert present.delta_words(R, (7.0, 7.0), "ft", False) == "+7'-0\" if confirmed"
+    assert present.delta_words(R, (5.0, 9.0), "ft", True) == "at least 5'-0\" if confirmed"
+    # round 2: the certain words ("at least … short") only on a row that fails; one in review says to see why
+    assert present.delta_words(R, (-5.0, -1.0), "ft", True) == "at least 1'-0\" short; see why"
+    assert present.delta_words(R, (-1.0, -1.0), "ft", False) == "−1'-0\" short; see why"
+    assert "to spare" not in present.delta_words(F, (1.0, 2.0), "ft", False)
+    # every unit: lot area in sf, coverage in % (round 1: "+570 sf to spare" on a lot area that needs review)
+    assert present.delta_words(R, (-66.2, 570.4), "sf", True) == "up to 67 sf short"
+    assert present.delta_words(F, (-1000.0, -384.6), "sf", True) == "at least 384 sf short"
+    assert present.delta_words(C, (0.937, 6.2), "%", True) == "at least 0.93% to spare"
+    assert present.delta_words(F, (-6.2, -0.004), "%", True) == "less than 0.01% short"
+
+
+def test_on_the_tax_map_red_is_over_under_every_reading_and_amber_is_the_rest_of_the_doubt():
+    """West wall 6 ft from the drawn line, the side yard needs 10, the line is ±2 ft: the yard line is really
+    somewhere from x 8 to 12. Red is over under every reading (x 6 to 8: 2 x 35 = 70 sf); amber is the doubt
+    (x 8 to 12: 4 x 35 = 140 sf). They never overlap. On a survey the same wall is red 6 to 10, no amber."""
+    from design_checker.check import check_site
+    house = box(6, 30, 35, 65)
+    r = check_site(_plot(house), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
+    assert items(r["view"])["Side yard, West"]["status"] == present.FAILS
+    assert _regions(r) == [(present.FAILS, 6, pytest.approx(8, abs=0.02), pytest.approx(70, abs=1.5)),
+                           (present.REVIEW, pytest.approx(8, abs=0.02), pytest.approx(12, abs=0.02),
+                            pytest.approx(140, abs=1.5))]
+    survey = check_site(_plot(house), {**FACTS, "jurisdiction": CITY})
+    assert _regions(survey) == [(present.FAILS, 6, pytest.approx(10, abs=0.02), pytest.approx(140, abs=1.5))]
+
+
+def test_a_yard_in_red_or_amber_says_what_the_colours_mean_in_its_detail():
+    from design_checker.check import check_site
+    tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
+    r = items(check_site(_plot(box(6, 30, 35, 65)), tax)["view"])
+    assert r["Side yard, West"]["detail"]["colours"] == present.COLOURS_NOTE      # fails: red and amber
+    assert "certain" in present.COLOURS_NOTE and "2'-0\"" in present.COLOURS_NOTE
+    assert r["Side yard, East"]["detail"]["colours"] is None                       # complies: no colour
+    review = items(check_site(_plot(box(11, 30, 35, 65)), tax)["view"])
+    assert review["Side yard, West"]["detail"]["colours"] == present.COLOURS_NOTE  # needs review: amber
+    survey = items(check_site(_plot(box(6, 30, 35, 65)), {**FACTS, "jurisdiction": CITY})["view"])
+    assert survey["Side yard, West"]["detail"]["colours"] is None                  # a survey: red only, nothing to say
+
+
+def test_a_height_that_needs_review_is_amber_above_the_limit():
+    from design_checker.check import plan
+    site = _plot(box(10, 25, 35, 65, 0, 38))
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    for status in (present.REVIEW, present.FAILS):
+        (top,) = plan(site, env, {"items": [{"measure": "building_height", "status": status}]}, {})["encroach"]
+        assert (top["why"], top["status"], top["base"], top["top"]) == ("height", status, 35, 38)
+    assert plan(site, env, {"items": [{"measure": "building_height", "status": present.COMPLIES}]}, {})["encroach"] == []
+
+
+def test_the_colour_comes_from_the_result_only():
+    """rhino_logic.highlight: the one place a result becomes a colour (the conduit draws only what it names)."""
+    sys.path.insert(0, str(REPO / "packages/design_checker/design_checker"))
+    import rhino_logic
+    assert [rhino_logic.highlight(s) for s in (present.FAILS, present.REVIEW, present.COMPLIES, "not_checked", None)] \
+        == ["red", "amber", None, None, None]
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    scene = src.split("def draw_scene(", 1)[1].split("\ndef ", 1)[0]
+    assert "name = logic.highlight(status)" in scene and "colour = ui.HIGHLIGHT[name]" in scene
+    # drawn after the translucent envelope, so its blue never tints them (seen muddy in Rhino, 2026-10-21)
+    assert scene.index("o.envelope, Rhino.Display.DisplayMaterial") < scene.index("ui.HIGHLIGHT[name]")
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "FromArgb(215, 38, 61)" in ui and "FromArgb(242, 169, 0)" in ui      # #D7263D, #F2A900
+
+
 def test_the_plan_labels_each_lot_edge_and_each_measured_yard():
     from design_checker.check import check_site
     r = check_site(_plot(box(10, 25, 35, 65)), {**FACTS, "jurisdiction": CITY})
@@ -305,3 +443,754 @@ def test_the_envelope_height_plane_comes_from_spot_grades_and_never_from_existin
     r = check_site(_plot(house), base)
     assert r["envelope"]["base"] == pytest.approx(2) and r["envelope"]["top"] == pytest.approx(37)
     assert check_site(_plot(house), {**base, "grade_is": "existing"})["envelope"]["top"] is None
+
+
+# ---- E1: a cited chart cell is quoted as exactly that cell --------------------------------------------------
+
+def _expected_cell_text(cell):
+    section = re.sub(r"\s*\[fn[\d,]+\]", "", cell.get("section") or "")
+    row = re.sub(r"\s*\[fn[\d,]+\]", "", cell["row"])
+    return f"{section} · {row} · {cell['column']}: {cell['value']}"
+
+
+def test_every_cited_chart_cell_is_quoted_as_exactly_its_own_cell():
+    """Every cell source in every rulebook (hand-made and drafted): the panel's quote is that cell, found by the
+    same key the rule checks use, never a cell whose row merely starts the same way in another section (a
+    lot-width rule was once quoted as the lot-size cell's 10,000 sf)."""
+    import yaml
+    from rule_format.rulebook import Context, _cell
+    j = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    ctx, documents = Context.for_jurisdiction(j), present._documents(j)
+    seen = 0
+    for path in sorted((j / "5_zoning_rules").rglob("*.yaml")):
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        for rule in (data or {}).get("rules") or []:
+            for s in rule.get("sources") or []:
+                if not isinstance(s.get("cell"), dict) or s.get("lines"):
+                    continue
+                cell = _cell(s, ctx)
+                q = present._quote(s, j, documents, s["cell"].get("column", ""), lambda src: "")
+                want = _expected_cell_text(cell) if cell and str(cell.get("value") or "").strip() else present._cell_words(s)
+                assert q["text"] == want, (path.name, rule["id"], s["cell"], q["text"])
+                seen += 1
+    assert seen > 0
+
+
+def test_two_sections_with_the_same_row_are_never_mixed_up(monkeypatch, tmp_path):
+    """The chart's Minimum Lot Size and Minimum Lot Width sections both have a "One-family dwelling, detached"
+    row: a source citing the width cell is quoted as the width cell, and a cell the chart doesn't have is quoted
+    as its own words, never as a near match."""
+    cells = ({"file": "c.pdf", "page": 3, "section": "Minimum Lot Size", "row": "One-family dwelling, detached",
+              "column": "R-1A", "value": "10,000 sf", "row_lines": [10]},
+             {"file": "c.pdf", "page": 3, "section": "Minimum Lot Width", "row": "One-family dwelling, detached",
+              "column": "R-1A", "value": "75 ft", "row_lines": [20]})
+    monkeypatch.setattr(present, "_chart_cells", lambda j: cells)
+    documents = {"c.pdf": {"title": "Zoning charts"}}
+
+    def quote(section, row):
+        source = {"file": "c.pdf", "page": 3, "cell": {"section": section, "row": row, "column": "R-1A"}}
+        return present._quote(source, tmp_path, documents, "R-1A", lambda s: "")["text"]
+
+    assert quote("Minimum Lot Width", "One-family dwelling, detached") == \
+        "Minimum Lot Width · One-family dwelling, detached · R-1A: 75 ft"
+    assert quote("Minimum Lot Width", "One-family dwelling, detached, by conversion") == \
+        "Minimum Lot Width · One-family dwelling, detached, by conversion · R-1A"
+
+
+def test_the_tax_map_worst_case_moves_every_lot_line_2_ft_the_unlucky_way():
+    """Ben, 2026-10-21 (stress test F2): one rule for every lot-dependent item, worked by hand on 106 Ithaca Rd's
+    73 x 90 lot: lot area at worst 69 x 86 = 5,934 sf (was 71 x 88 = 6,248, 1 ft per line), a lot width or depth
+    off by 4 ft (two lines), a yard by 2 ft (one line). One definition, used by measurement, checker and generator."""
+    from shapely.geometry import Polygon
+    from model_measurement.measure import TAX_MAP_SLACK, tax_map_lot_area
+    area = tax_map_lot_area(Polygon([(0, 0), (73, 0), (73, 90), (0, 90)]))
+    assert (area["low"], area["high"]) == (69 * 86, 77 * 94) == (5934, 7238)
+    assert TAX_MAP_SLACK["lot_width"] == TAX_MAP_SLACK["lot_depth"] == 4.0 and TAX_MAP_SLACK["rear_yard"] == 2.0
+    from design_checker import reading_set
+    assert reading_set.TAX_MAP_SLACK is TAX_MAP_SLACK                               # the checker reads the same one
+    tax = {"lot_area": {"tolerance": area}}                  # a tax-map lot (its area's tolerance), not surveyed
+    worst = present._worst_case("lot_width >= 70", {"lot_width": 73.0}, {"lot_width"}, tax, {"lot_surveyed": False})
+    assert worst == {"lot_width": 69.0}                                             # 73 − 4: fails 70 at worst
+
+
+def test_at_the_limit_and_complies_never_disagree():
+    """PR #20 review: margins were worked out in floats (26.4 − 0.2 × 132 = −3.6e-15), so a rear yard exactly at
+    its limit could show "−0'-0 1/8"" beside "complies". The margin now comes from formula.margin, the same exact
+    arithmetic and tolerance as the comparison."""
+    import ast as _ast
+    node = _ast.parse("rear_yard >= 0.2 * lot_depth", mode="eval").body
+    values = {"rear_yard": 26.4, "lot_depth": 132}
+    numbers = present._numbers(node, values, {"rear_yard": {"unit": "ft"}}, "Rear yard")
+    assert numbers[2] == 0.0 and present._display(*numbers)[2] == "at limit"
+    assert present.formula.evaluate("rear_yard >= 0.2 * lot_depth", values, present.MEASURE_KINDS) is True
+    noisy = {"rear_yard": 26.399999999999995, "lot_depth": 132}          # the geometry's float noise: complies
+    assert present.formula.evaluate("rear_yard >= 0.2 * lot_depth", noisy, present.MEASURE_KINDS) is True
+    assert present._display(*present._numbers(node, noisy, {"rear_yard": {"unit": "ft"}}, "Rear yard"))[2] == "at limit"
+    short = present._numbers(node, {"rear_yard": 26.39, "lot_depth": 132}, {"rear_yard": {"unit": "ft"}}, "Rear yard")
+    assert short[2] < 0 and present._display(*short)[2].startswith("−")
+    cov = _ast.parse("building_area <= 0.35 * lot_area", mode="eval").body
+    pct = present._numbers(cov, {"building_area": 1750.7, "lot_area": 5002}, {"building_area": {"unit": "sf"}}, "x")
+    assert present._display(*pct)[2] == "at limit"
+
+
+def test_lot_area_and_coverage_deltas_use_the_tax_map_lot_area_like_their_verdict(tax_map):
+    """Round 1: a Lot area that needs review read "+570 sf to spare". Its Delta and coverage's are taken over the
+    lot area's own tax-map range (low to high), the same readings as the verdict."""
+    r = tax_map
+    v = items(r["view"])
+    tol = r["measurements"]["lot_area"]["tolerance"]
+    area = v["Lot area"]
+    assert area["status"] == present.REVIEW and area["approx"]
+    assert area["delta"] == "up to " + present._area(6000 - tol["low"], "up") + " short"     # never "to spare"
+    cov = v["Lot coverage"]
+    assert cov["approx"] and cov["status"] == present.FAILS and cov["delta"].startswith("at least ")
+    assert cov["delta"] != cov["margin"] + " short"                   # the certain shortfall, not the as-drawn one
+
+
+def test_the_height_row_is_never_marked_tax_map_approximate(tax_map):
+    """Round 1: the height's own comparison reads no lot length (only its bonus clause does): its Delta is its
+    margin, and it is not "(approx.)"."""
+    r = tax_map
+    h = items(r["view"])["Building height"]
+    assert h["approx"] is False and h["delta"] in ("at limit", h["margin"] + " to spare", h["margin"] + " short")
+    assert "tax map" not in h["detail"]["line"]
+
+
+def test_red_and_amber_agree_with_the_rear_yards_own_readings():
+    """Round 1: red and amber were the footprint against all yards grown by a flat 2'-0", while the rear verdict
+    also moves the lot depth 4'-0" (its minimum by 1'-0"). Each yard's colours are now its own readings'."""
+    from design_checker.check import check_site
+    tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
+    r = check_site(_plot(box(10, 30, 35, 78.5)), tax)                 # rear wall 3'-6" over the drawn 25'-0"
+    rear = items(r["view"])["Rear yard"]
+    assert (rear["status"], rear["delta"]) == (present.FAILS, "at least 0'-6\" short")
+    red = [g for g in r["plan"]["encroach"] if g["status"] == present.FAILS]
+    (strip,) = red
+    ys = [p[1] for p in strip["outline"]]
+    assert min(ys) == pytest.approx(78.0, abs=0.01) and max(ys) == pytest.approx(78.5, abs=0.01)   # 0'-6" deep
+    r = check_site(_plot(box(10, 30, 35, 72.5)), tax)                 # 2'-6" clear: needs review, "up to 0'-6" short"
+    rear = items(r["view"])["Rear yard"]
+    assert (rear["status"], rear["delta"], rear["colour"]) == (present.REVIEW, "up to 0'-6\" short", "amber")
+    amber = [p for g in r["plan"]["encroach"] if g["status"] == present.REVIEW for p in g["outline"]]
+    assert max(p[1] for p in amber) == pytest.approx(72.5, abs=0.01)      # the rear doubt (69.5 to 72.5 deep) shows
+
+
+def test_red_is_only_for_a_yard_that_fails_never_one_that_needs_review():
+    """Round 1: whenever any yard failed, red was the footprint over every yard, so a yard that only needs review
+    was painted red. West wall 4 ft over (fails), rear wall 2'-6" over (needs review)."""
+    from design_checker.check import check_site
+    r = check_site(_plot(box(6, 30, 35, 77.5)), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
+    v = items(r["view"])
+    assert v["Side yard, West"]["status"] == present.FAILS and v["Rear yard"]["status"] == present.REVIEW
+    from shapely.geometry import Polygon
+    red = [Polygon(g["outline"]) for g in r["plan"]["encroach"] if g["status"] == present.FAILS]
+    xs = [p[0] for g in red for p in g.exterior.coords]
+    assert max(xs) == pytest.approx(8, abs=0.01) and min(xs) == pytest.approx(6)
+    # only the side yard's certain strip, x 6 to 8 the house's whole depth (2 x 47.5 = 95 sf): never the rear strip
+    # (y 77 to 77.5 across the house) of a yard that only needs review
+    assert sum(g.area for g in red) == pytest.approx(95, abs=0.5)
+
+
+def _shown_agrees(i):
+    """The invariants between a row's status, the Delta the architect sees (settle's words, the only ones) and its
+    colour: "to spare" only on a row that complies; the certain words ("at least … short", "less than … short", a
+    survey's "−… short") only on a row that fails, and on a yard always with red; a row that complies never says
+    "short"; red only on a row that fails."""
+    d, st = i.get("delta") or "", i["status"]
+    certain = d.endswith(" short") and d.startswith(("at least ", "less than ", "−"))
+    assert "to spare" not in d or st == present.COMPLIES, (i["name"], st, d)
+    assert not certain or st == present.FAILS, (i["name"], st, d)
+    assert not (certain and i["measure"] in present.YARD_MEASURES) or i["colour"] == "red", (i["name"], i["colour"], d)
+    assert st != present.COMPLIES or "short" not in d, (i["name"], st, d)
+    assert i["colour"] != "red" or st == present.FAILS, (i["name"], st)
+    assert i["colour"] == "none" or i["measure"] in present.YARD_MEASURES, i["name"]
+
+
+def _oracle(x0, y0, x1, y1, slack):
+    """By hand, on the plain 50 x 100 lot (street along y = 0): each yard's verdict over every reading (its line off
+    by `slack` either way, the lot depth by twice that), and the strip of the house short under every reading."""
+    from shapely.geometry import box as rect
+    rear_low, rear_high = 0.25 * (100 - 2 * slack), 0.25 * (100 + 2 * slack)     # max(min(.25 d, 50), 20): 24..26
+    yards = {"Front yard": (y0, 25, 25, rect(-1, -1, 51, 25 - slack)),
+             "Side yard, West": (x0, 10, 10, rect(-1, -1, 10 - slack, 101)),
+             "Side yard, East": (50 - x1, 10, 10, rect(40 + slack, -1, 51, 101)),
+             "Rear yard": (100 - y1, rear_low, rear_high, rect(-1, 100 - (rear_low - slack), 51, 101))}
+    out = {}
+    for name, (v, need_low, need_high, strip) in yards.items():
+        status = (present.COMPLIES if v - slack >= need_high else present.FAILS if v + slack < need_low
+                  else present.REVIEW)
+        out[name] = (status, strip)
+    return out
+
+
+def test_verdict_delta_and_colour_never_disagree_for_any_design():
+    """Review rounds 1 and 2: random houses on (a) the plain 50 x 100 lot, checked against a hand oracle: each yard's
+    verdict and the red area (the footprint inside the failing yards' certain strips, holes included: a house
+    failing all four yards is a ring of red round a complying core); (b) the real 106 Ithaca Rd lot, whose back
+    lines are an open question (side or rear: real readings); (c) a corner lot. On the tax map and on a survey,
+    every row's shown Delta, status and colour agree (_shown_agrees)."""
+    import random
+    from shapely.geometry import Polygon, box as rect
+    from shapely.ops import unary_union
+    from design_checker.check import check_site, sample_site
+    from test_measure import lot as lot_of
+    rnd = random.Random(15)
+    plain = [(0, 0), (50, 0), (50, 100), (0, 100)]
+    for k in range(60):
+        x0, y0 = rnd.uniform(1, 18), rnd.uniform(8, 40)
+        x1, y1 = rnd.uniform(x0 + 8, 49), rnd.uniform(y0 + 10, 99)
+        surveyed = k % 2 == 0
+        r = check_site(_plot(box(x0, y0, x1, y1, 0, rnd.choice((30, 34.99, 35))), lot_=lot_of(plain)),
+                       {**FACTS, "jurisdiction": CITY, "lot_surveyed": surveyed})
+        rows = {i["name"]: i for i in r["view"]["items"]}
+        for i in rows.values():
+            if i.get("measure"):
+                _shown_agrees(i)
+        oracle = _oracle(x0, y0, x1, y1, 0.0 if surveyed else 2.0)
+        for name, (status, _) in oracle.items():
+            assert rows[name]["status"] == status, (k, name, rows[name]["status"], status, rows[name]["delta"])
+        house = rect(x0, y0, x1, y1)
+        want = house.intersection(unary_union([strip for st, strip in oracle.values() if st == present.FAILS] or [rect(0, 0, 0, 0)]))
+        red = sum(Polygon(e["outline"]).area for e in r["plan"]["encroach"]
+                  if e["why"] == "yard" and e["status"] == present.FAILS)
+        assert abs(red - want.area) < 0.5, (k, red, want.area)
+    # (b) the real 106 lot: its back lines are side or rear (an open question): real readings, grouped by lot reading
+    sample = sample_site()
+    ring, facts = sample["lot"], {**sample["facts"], "jurisdiction": sample["facts"]["jurisdiction"]}
+    xs, ys = [p[0] for p in ring], [p[1] for p in ring]
+    open_seen = 0
+    for k in range(40):
+        x0, y0 = rnd.uniform(min(xs) + 1, 40), rnd.uniform(min(ys) + 5, 40)
+        x1, y1 = rnd.uniform(x0 + 8, max(xs) - 1), rnd.uniform(y0 + 10, max(ys) - 2)
+        r = check_site(_plot(box(x0, y0, x1, y1, 0, rnd.choice((30, 35))), lot_=lot_of(ring)),
+                       {**facts, "lot_surveyed": k % 2 == 0})
+        open_seen += any(m.get("value") is None and m.get("readings") for m in r["measurements"].values())
+        for i in r["view"]["items"]:
+            if i.get("measure"):
+                _shown_agrees(i)
+        reds = [i for i in r["view"]["items"] if i.get("colour") == "red"]
+        assert not [e for e in r["plan"]["encroach"] if e["why"] == "yard" and e["status"] == present.FAILS] or reds
+    assert open_seen >= 10                                  # the open question really was exercised
+    # (c) a corner lot: the yards can't be read; nothing says "to spare" or the certain words unless it should
+    for k in range(10):
+        r = check_site(_plot(box(rnd.uniform(1, 15), rnd.uniform(5, 30), rnd.uniform(30, 49), rnd.uniform(60, 95),
+                                 0, rnd.choice((30, 34, 37)))),
+                       {**FACTS, "jurisdiction": CITY, "corner_lot": True, "lot_surveyed": k % 2 == 0})
+        for i in r["view"]["items"]:
+            if i.get("measure"):
+                _shown_agrees(i)
+
+
+def _never_above_the_checker(r):
+    """Review round 3: the checker (check.row_verdict over the reading set) is the only place a row complies or
+    fails; every panel item is its row's verdict (a side yard: its side's) or more cautious, never more
+    favourable."""
+    rows = {x["Rule id"]: x for x in r["rows"]}
+    for i in r["view"]["items"]:
+        row = rows.get(i.get("rule"))
+        if row is None:
+            continue
+        verdict = (row.get("Sides") or {}).get(i.get("measure")) or row["Verdict"]
+        assert present.RANK[i["status"]] <= present.RANK[verdict], (i["name"], i["status"], verdict, i["reason"])
+
+
+def _sample106():
+    from design_checker.check import sample_site
+    from test_measure import lot as lot_of
+    sample = sample_site()
+    return lot_of(sample["lot"]), dict(sample["facts"])
+
+
+def test_an_unmeasured_porch_touching_the_house_keeps_a_side_yard_in_review():
+    """Review round 3 (P0): a side yard whose value is an open question was raised to complies after the left-out
+    caution had run, so a porch touching the house (part of it for yards, §325-18A) no longer mattered."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30), lot_=lot), {**facts, "lot_surveyed": True},
+                   extras={"not_included": ["porch-1"], "touching": ["porch-1"]})
+    # (#18 reads every lot-line reading of 106's real outline: the wider side is the one whose value is the open
+    # question; the narrower is 9'-4 3/4" from the west line under every reading and fails)
+    side = items(r["view"])["Side yard, wider"]
+    assert side["status"] == present.REVIEW, (side["status"], side["reason"])
+    assert "touching" in side["reason"] or "depends on" in side["reason"]
+    _never_above_the_checker(r)
+
+
+def test_an_unknown_use_keeps_the_lot_area_in_review_with_its_reason():
+    """Review round 3 (P1): with the use unknown the checker leaves the lot area needing review ("choose the use");
+    the panel's survey step ignored applies_when and showed complies."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(12, 30, 60, 80, 0, 30), lot_=lot), {**facts, "use": None, "lot_surveyed": False})
+    area = next(i for i in r["view"]["items"] if i["rule"] == "R-1b.lot_area_one_family_detached")
+    assert area["status"] == present.REVIEW and "choose the use" in area["reason"], (area["status"], area["reason"])
+    _never_above_the_checker(r)
+
+
+def test_a_side_yard_that_complies_only_under_every_reading_of_an_open_question_needs_review():
+    """Review round 3 (P2): like every other row that passes under every reading of an open question, the side
+    yard needs review and names the question; it never shows a green "complies" with no reason."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30), lot_=lot), {**facts, "lot_surveyed": True})
+    # (#18 reads every lot-line reading of 106's real outline: the wider side is the one whose value is the open
+    # question; the narrower is 9'-4 3/4" from the west line under every reading and fails)
+    side = items(r["view"])["Side yard, wider"]
+    assert side["status"] == present.REVIEW and (side["reason"] or "").startswith("Complies under every reading, but it depends on"), (
+        side["status"], side["reason"])
+    assert "if confirmed" in side["delta"] and "to spare" not in side["delta"]
+    _never_above_the_checker(r)
+
+
+def test_a_side_yard_says_only_its_own_verdicts_reason_never_the_pairs():
+    """Review round 4: a side the checker passes inherited the pair row's needs-review reason (a green "complies"
+    saying "depends on open questions"). Each side's reason comes from its own verdict: complies, none; needs
+    review, its own open question; fails, its own words."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    for surveyed in (True, False):
+        r = check_site(_plot(box(14, 24.0480, 39.2642, 73.2738, 0, 30), lot_=lot), {**facts, "lot_surveyed": surveyed})
+        rows = {x["Rule id"]: x for x in r["rows"]}
+        sides = [i for i in r["view"]["items"] if i["name"].startswith("Side yard")]
+        assert len(sides) == 2
+        for i in sides:
+            verdict = rows[i["rule"]]["Sides"][i["measure"]]
+            if i["status"] == present.COMPLIES:
+                assert not i["reason"], (surveyed, i["name"], i["reason"])
+            if i["status"] == present.REVIEW and verdict == present.REVIEW:
+                assert i["reason"] and "depends on" in i["reason"] or "tax map" in i["reason"], (surveyed, i["reason"])
+        assert any(i["status"] == present.COMPLIES for i in sides) or not surveyed, [(i["name"], i["status"]) for i in sides]
+
+
+def test_the_guard_only_lowers_it_never_undoes_the_panels_caution():
+    """Round 3's guard caps a row at the checker's verdict; it never lifts a row the panel made more cautious. A
+    complying house on a surveyed lot with an unmeasured porch touching it: the checker passes the yards (it
+    measures only the house), the panel makes them need review (§325-18A), and that stands."""
+    from design_checker.check import check_site
+    r = check_site(_plot(box(12, 30, 38, 65)), {**FACTS, "jurisdiction": CITY},
+                   extras={"not_included": ["porch"], "touching": ["porch"]})
+    rows = {x["Rule id"]: x for x in r["rows"]}
+    front = items(r["view"])["Front yard"]
+    assert rows[front["rule"]]["Verdict"] == present.COMPLIES
+    assert front["status"] == present.REVIEW and "touching" in front["reason"]
+
+
+def test_the_panel_is_never_above_the_checker_for_any_design():
+    """Review round 3's property: random houses on the plain lot, the real 106 lot (open questions) and a corner
+    lot, on the tax map and on a survey, with unmeasured objects (touching or not) and an unknown use: no panel
+    item is ever more favourable than its row's verdict from the checker."""
+    import random
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    rnd = random.Random(3)
+    lot106, facts106 = _sample106()
+    plain = ({**FACTS, "jurisdiction": CITY}, lot_of([(0, 0), (50, 0), (50, 100), (0, 100)]), (50, 100))
+    lots = [plain, (facts106, lot106, (76, 92)), ({**FACTS, "jurisdiction": CITY, "corner_lot": True}, plain[1], (50, 100))]
+    for k in range(60):
+        facts, lot, (w, d) = lots[k % 3]
+        x0, y0 = rnd.uniform(1, w * 0.4), rnd.uniform(5, d * 0.4)
+        x1, y1 = rnd.uniform(x0 + 8, w - 1), rnd.uniform(y0 + 10, d - 2)
+        extras = rnd.choice([None, {"not_included": ["porch"], "touching": ["porch"]}, {"not_included": ["shed"],
+                                                                                        "touching": []}])
+        over = {"lot_surveyed": k % 2 == 0, **({"use": None} if k % 7 == 0 else {})}
+        r = check_site(_plot(box(x0, y0, x1, y1, 0, rnd.choice((30, 35, 38))), lot_=lot), {**facts, **over},
+                       extras=extras)
+        _never_above_the_checker(r)
+        for i in r["view"]["items"]:
+            if i.get("measure"):
+                _shown_agrees(i)
+
+
+def test_red_with_a_complying_core_is_drawn_without_the_core():
+    """Review round 2: a house failing all four yards: its red is a ring round the complying core (a polygon with
+    a hole), drawn as the whole footprint (only the outline was kept). Each piece is now hole-free and the red is
+    exactly the strips: 1,368.06 sf of the 2,868.06 sf footprint."""
+    from shapely.geometry import Polygon
+    from design_checker.check import check_site, hole_free
+    r = check_site(_plot(box(7.252, 12.068, 41.783, 95.125, 0, 36)), {**FACTS, "jurisdiction": CITY})
+    red = [Polygon(e["outline"]) for e in r["plan"]["encroach"] if e["why"] == "yard" and e["status"] == present.FAILS]
+    assert sum(g.area for g in red) == pytest.approx(1368.06, abs=0.5)
+    ring = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)], [[(3, 3), (7, 3), (7, 7), (3, 7)]])
+    pieces = hole_free(ring)
+    assert all(not g.interiors for g in pieces) and sum(g.area for g in pieces) == pytest.approx(84)
+
+
+def test_a_margin_that_rounds_to_nothing_is_at_the_limit_never_plus_zero():
+    """106 Ithaca Rd's survey house (2026-10-21): a side yard 10'-0" and a hair read "+0'-0" to spare". A margin to
+    spare that rounds down to nothing is "at limit"; a shortfall is never zero (at least the smallest step); the
+    tax-map words never say "at least 0'-0"". Every unit, at and around each step."""
+    e = present.EIGHTH
+    cases = {
+        ("ft", 0.0): "at limit", ("ft", e * 0.3): "at limit", ("ft", e * 0.5): "at limit", ("ft", e * 0.99): "at limit",
+        ("ft", e): "+0'-0 1/8\"", ("ft", e * 1.5): "+0'-0 1/8\"", ("ft", -e * 0.3): "−0'-0 1/8\"",
+        ("ft", -e * 1.5): "−0'-0 1/4\"",
+        ("sf", 0.4): "at limit", ("sf", 0.6): "at limit", ("sf", 1.0): "+1 sf", ("sf", 1.7): "+1 sf",
+        ("sf", -0.2): "−1 sf",
+        ("%", 0.004): "at limit", ("%", 0.007): "at limit", ("%", 0.01): "+0.01%", ("%", 0.019): "+0.01%",
+        ("%", -0.003): "−0.01%",
+    }
+    got = {k: present.margin_text(k[1], k[0]) for k in cases}
+    assert got == cases
+    C, F = present.COMPLIES, present.FAILS
+    assert present.delta_words(C, (e * 0.7, 4.0), "ft", True) == "at the limit at worst"
+    assert present.delta_words(F, (-5.0, -e * 0.7), "ft", True) == "less than 0'-0 1/8\" short"
+    assert present.delta_words(F, (-5.0, -e), "ft", True) == "at least 0'-0 1/8\" short"
+    zeros = ("+0'-0\"", "−0'-0\"", "+0 sf", "−0 sf", "+0%", "−0%", "at least 0'-0\"")
+    for k in range(-400, 401):                                  # a fine sweep across the steps of every unit
+        for unit, step in (("ft", e / 8), ("sf", 1 / 8), ("%", 0.01 / 8)):
+            text = present.margin_text(k * step, unit)
+            assert not any(z in text for z in zeros), (unit, k * step, text)
+        for low, high in ((k * e / 8, 4.0), (-5.0, k * e / 8 - 1e-9)):
+            if low <= high:
+                for status in (present.COMPLIES, present.REVIEW, present.FAILS):
+                    for approx in (True, False):
+                        text = present.delta_words(status, (low, high), "ft", approx)
+                        assert not any(z in text for z in zeros), (low, high, text)
+
+
+def test_a_row_complying_under_every_reading_names_only_the_questions_it_turns_on():
+    """Review of e949a01: the wording named every question in the joined reason. Now only the open measurements
+    the result turns on (with one unknown and the others at any reading, the result can't be told), each by its
+    own reason's short name. (PR #18 settles scenario 10's overhang in law, yards_to_nearest_part, so its side
+    yard complies outright; scenario 09's rear yard turns on the lot-line question only.)"""
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "09_five_sided_lot.yaml"))
+    rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
+    assert rear["reason"] == ("Complies under every reading, but it depends on an open question: which lot lines "
+                              "count as side and which as rear; confirm with the zoning office")
+    rule = {"id": "x", "kind": "rule", "check": "side_yard_smaller >= 10 or side_yard_larger >= 10"}
+    measured = {"side_yard_smaller": {"value": None, "readings": [{"reading": "r", "value": 12}, {"reading": "s", "value": 15}]},
+                "side_yard_larger": {"value": None, "readings": [{"reading": "r", "value": 12}, {"reading": "s", "value": 15}]}}
+    from design_checker.check import turns_on
+    assert turns_on(rule, measured, {}) == []                    # either one decides it: it turns on neither
+
+
+def test_every_open_question_the_measuring_asks_has_a_short_name():
+    """One table: every tagged question in the measuring code, and every untagged one it keeps as a constant."""
+    import re
+    from pathlib import Path
+    from model_measurement import measure
+    src = Path(measure.__file__).read_text(encoding="utf-8")
+    tags = set(re.findall(r"open questions? for the architects \(([a-z_]+)\)", src)) | set(re.findall(r"\((story)\)\"", src))
+    assert tags and all(t in present.QUESTION_NAMES for t in tags), tags - set(present.QUESTION_NAMES)
+    for constant in (measure.ROOF_KIND, measure.ABOVE_ROOF, measure.ACCESSORY, measure.PITCHED):
+        assert present.question_name(constant), constant
+    assert present._user_text("parts that stick out (overhangs) count (building_area)") == \
+        "parts that stick out (overhangs) count"                    # only tags are stripped
+
+def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
+    """A looked-up lot is drawn turned so its street runs along the bottom (106 Ithaca Rd: 306.38 degrees), so
+    "East" in the plan isn't east: its side yards face northeast and southwest. A hand-drawn lot (no turn) keeps
+    East/West."""
+    sides = {"side_yard_smaller": {"points": [[73.0, 40.0], [61.0, 40.0]]},     # lot line end, building end
+             "side_yard_larger": {"points": [[0.0, 40.0], [12.0, 40.0]]}}
+    assert present._side_name("side_yard_smaller", sides) == "Side yard, East"
+    assert present._side_name("side_yard_larger", sides) == "Side yard, West"
+    assert present._side_name("side_yard_smaller", sides, 306.38) == "Side yard, Northeast"
+    assert present._side_name("side_yard_larger", sides, 306.38) == "Side yard, Southwest"
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "01_every_limit_at_the_line.yaml"))
+    names = {i["name"] for i in check_site(s, {**f, "plan_north_deg": 306.38}, extras=extras)["view"]["items"]}
+    assert {"Side yard, Northeast", "Side yard, Southwest"} <= names
+    names = {i["name"] for i in check_site(s, f, extras=extras)["view"]["items"]}
+    assert {"Side yard, East", "Side yard, West"} <= names
+
+
+
+def test_the_report_opens_on_the_check_sheet_and_every_tab_says_what_the_panel_says(surveyed, tmp_path):
+    """Architect review in Rhino (P1-4): the report opened on Inputs, its Output showed PASS beside "Can't check:
+    lot_area missing" and "not given" beside the panel's 7,033 sf, its title was the model's file name and its code
+    line read "PUDs only". Now it opens on the Check sheet; each Output row's Error, Why and Proposed come from the
+    panel's items; an input the measurement left open shows the panel's reading; the code line names the
+    ordinance and its date only."""
+    import openpyxl
+    report = tmp_path / "r.xlsx"
+    check(MODEL, {**surveyed, "lot_surveyed": False, "address": "106 Ithaca Rd, Ithaca, NY"}, report)
+    wb = openpyxl.load_workbook(report)
+    assert wb.sheetnames[0] == "Check" and wb.active.title == "Check"
+    out = wb["Output"]
+    head = [c.value for c in out[2]]
+    rows = [r for r in out.iter_rows(min_row=3, values_only=True) if r[0] and r[head.index("Error")]]
+    for r in rows:
+        if r[head.index("Error")] == "PASS":
+            assert not r[head.index("Why it needs review")], r
+            assert r[head.index("Proposed")] not in (None, "", "not given", "—"), r
+    assert "106 Ithaca Rd" in str(out["A1"].value)
+    text = " ".join(str(c.value) for c in wb["Check"]["A"] if c.value)
+    assert "PUDs" not in text and "Ord. No." in text
+    from design_checker import rhino_logic as logic
+    # the street line's own street only: the address's street may not be the line highlighted (review of P1-4)
+    assert logic.street_name({"address": "106 Ithaca Rd, Ithaca, NY 14850"}) == "the highlighted line"
+    assert logic.street_name({"street_name": "Ithaca Rd"}) == "Ithaca Rd"
+
+
+
+def test_a_limit_waiting_on_the_lot_depth_shows_its_range_and_says_once_why():
+    """Architect review in Rhino (P1-3): on the sample 106 lot the rear yard's detail repeated "the readings give
+    different values … isn't settled yet" two or three times and showed "—" as Required. Now Required is the
+    limit's range over the lot depth's readings, and the reason is one sentence saying what it depends on."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    house = box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30)
+    # (PR 18: 106's lot lines read from its outline cleaned within 0.25 ft, every reading of which are side and
+    # rear: the limit runs 24'-1 7/8" to 32'-10 1/8"; the rear wall is 19'-6" to 20'-3 1/2" back, short even with
+    # the tax map's lines 2 ft in its favour: does not comply on the tax map too)
+    for surveyed, status in ((False, present.FAILS), (True, present.FAILS)):
+        r = check_site(_plot(house, lot_=lot), {**facts, "lot_surveyed": surveyed})
+        rear = items(r["view"])["Rear yard"]
+        assert rear["status"] == status and rear["required"] == "24'-1 7/8\" to 32'-10 1/8\"", rear
+        assert rear["reason"].count("which lot lines") == 1, rear["reason"]
+        assert "readings give different values" not in rear["reason"] and "isn't settled" not in rear["reason"]
+    assert rear["reason"].startswith("Does not comply whichever way it is read: needs 24'-1 7/8\"")
+
+
+def test_coverage_with_an_upper_floor_overhang_is_read_as_seen_from_above_and_says_the_reading():
+    """Architect review in Rhino (P2-10) asked that coverage turning on the overhang question say it once. PR 18
+    settles that question: research reads coverage as everything above ground seen from above
+    (coverage_seen_from_above), cantilevered upper floors included. So a floor block overhanging the one below
+    counts: 28.5% does not comply, 22.8% complies, each saying the reading it applied (Gordium's reading, to
+    confirm)."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    ground = box(12, 30, 40, 70, 0, 10, "a")
+    r = check_site(_plot(ground, box(12, 30, 62, 70, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    # (PR 18: research settled it as Gordium's reading coverage_seen_from_above, everything above ground seen from
+    # above, cantilevered upper floors included: 28.5%, over 25%, does not comply, saying the reading it applied)
+    assert cov["status"] == present.FAILS and cov["proposed"] == "28.5%", cov
+    assert "Gordium's reading" in cov["reason"] and "seen from above" in cov["reason"], cov["reason"]
+    r = check_site(_plot(ground, box(12, 30, 52, 70, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    assert cov["status"] == present.COMPLIES and "Gordium's reading" in cov["reason"], cov
+
+
+def test_an_assumed_main_building_is_said_on_the_panel_and_the_check_sheet(tmp_path):
+    """Review of the main-building default (P1): the assumption reached only the report's Inputs tab; height,
+    stories and yards read COMPLIES with no caveat. The header says "Main building: the starting house (assumed)"
+    and every row measured from it carries the note, on the Check sheet too."""
+    import openpyxl
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 70, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(45, 75, 55, 90, 0, 10, "garage")
+    r = check_site(_plot(*house, garage, lot_=lot), {**facts, "lot_surveyed": True, "stories": 3},
+                   report_path=tmp_path / "r.xlsx")
+    assert r["view"]["header"]["main"] == present.ASSUMED_MAIN
+    by = items(r["view"])
+    for name in ("Building height", "Stories", "Front yard"):
+        assert present.ASSUMED_MAIN_NOTE in (by[name].get("note") or ""), (name, by[name])
+    text = " ".join(str(c.value) for row in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows()
+                    for c in row if c.value)
+    assert present.ASSUMED_MAIN in text and present.ASSUMED_MAIN_NOTE in text
+
+
+
+def test_the_report_keeps_each_rows_units_and_the_panels_words(surveyed, tmp_path):
+    """Review of P1-4 (P2): the coverage item's percentage went into the Building area input and the coverage
+    row, both in sf. A row taken from the panel takes its limit and units with it; an input only in its own unit."""
+    import openpyxl
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    ground = box(12, 30, 40, 70, 0, 10, "a")
+    check_site(_plot(ground, box(12, 30, 62, 70, 10, 20, "b"), lot_=lot),
+               {**facts, "lot_surveyed": True, "main_building": "a"}, report_path=tmp_path / "r.xlsx")
+    wb = openpyxl.load_workbook(tmp_path / "r.xlsx")
+    out, ins = wb["Output"], wb["Inputs"]
+    head = [c.value for c in out[2]]
+    cov = next(r for r in out.iter_rows(min_row=3, values_only=True) if r[0] and "coverage" in r[0].lower())
+    assert "%" in str(cov[head.index("Proposed")]) and "%" in str(cov[head.index("Table limit")])
+    assert cov[head.index("Units")] == "% of lot area"
+    area = next(r for r in ins.iter_rows(min_row=3, values_only=True) if r[0] == "Building area")
+    assert "%" not in str(area[1])
+
+
+def test_wording_never_sends_the_architect_to_ask_when_the_answer_cant_change_the_result():
+    """Review of P1-3 and P2-10: a rear yard complying under every lot-depth reading lost "Complies under every
+    reading" for "Needs … ask the zoning office"; coverage failing both ways still said "an open question … ask".
+    (PR 18: the sample lot's depth readings are 96.62, 131.37 and 101.79 ft, so the limit, 25% of the depth, runs
+    24'-1 7/8" to 32'-10 1/8", as in the rear-yard test above; coverage is read as seen from above, its overhang
+    question settled, so a coverage failing has no question left to ask about.)"""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(12, 30, 40, 50, 0, 30), lot_=lot), {**facts, "lot_surveyed": False})
+    rear = items(r["view"])["Rear yard"]
+    assert rear["required"] == "24'-1 7/8\" to 32'-10 1/8\"" and rear["reason"].startswith("Complies under every reading"), rear
+    r = check_site(_plot(box(12, 30, 48, 85, 0, 10, "a"), box(10, 28, 50, 90, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    assert cov["status"] == present.FAILS and "ask" not in cov["reason"], cov
+
+
+
+def _walls_spots(x0, y0, x1, y1, z):
+    """A spot grade at the middle of each wall of a rectangle, just outside it, at level z."""
+    mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+    return [[mx, y0 - 0.5, z], [mx, y1 + 0.5, z], [x0 - 0.5, my, z], [x1 + 0.5, my, z]]
+
+
+def test_an_assumed_main_building_is_never_kinder_than_picking_the_starting_house():
+    """Round 2 of the main-building fixes (P0): the candidates were read by position, so the "with every other
+    solid" height came from the last other building's own (higher) ground: with the main building assumed, a
+    height complied that picking the starting house fails. Property, over random layouts on the sample lot
+    (a starting house and one or two other buildings, each on its own ground, spot grades at every wall): with
+    the starting house assumed, no row is ever kinder than with it picked."""
+    import random
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    rnd = random.Random(5)
+    compared = 0
+    for _ in range(30):
+        floors, h = rnd.choice([2, 3, 3]), rnd.choice([11, 11.6])        # 3 x 11.6 = 34.8 ft: near the limit
+        house = [floor(12, 30, 36, 60, z0=h * i, z1=h * (i + 1), id=f"f{i}") for i in range(floors)]
+        points = _walls_spots(12, 30, 36, 60, 0)
+        others = []
+        for k in range(rnd.choice([1, 2, 2])):           # two: one on lower ground, one on higher, often
+            x0, y0 = rnd.choice([(40, 30), (14, 66), (40, 66)])
+            if any(o["id"].startswith(f"o{x0}{y0}") for o in others):
+                continue
+            ground, top = rnd.choice([-8, -6, -3, 0, 3, 5, 8]), rnd.choice([8, 12, 20, 30])
+            others.append(box(x0, y0, x0 + 8, y0 + 10, ground, ground + top, f"o{x0}{y0}"))
+            points += _walls_spots(x0, y0, x0 + 8, y0 + 10, ground)
+        base = {**facts, "lot_surveyed": True, "stories": floors, "ground_is_flat": None, "grade_elevation": None,
+                "grade_points": points}
+        site_ = _plot(*house, *others, lot_=lot)
+        assumed = items(check_site(site_, base)["view"])
+        picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])
+        from model_measurement.measure import measure
+        m_a, m_p = measure(site_, base), measure(site_, {**base, "main_building": "f0"})
+        for name in ("building_height", "stories"):     # the pick's every reading is among the assumption's
+            def vals(r):
+                return {round(x["value"], 3) for x in r["readings"]} or ({round(r["value"], 3)} if r["value"] is not None else set())
+            assert vals(m_p[name]) <= vals(m_a[name]) or not vals(m_a[name]), (name, m_p[name], m_a[name])
+        for name, i in picked.items():
+            if name in assumed and i["status"] in present.RANK and assumed[name]["status"] in present.RANK:
+                compared += 1
+                assert present.RANK[assumed[name]["status"]] <= present.RANK[i["status"]], \
+                    (name, assumed[name]["status"], i["status"], assumed[name]["reason"], [o["id"] for o in others])
+    assert compared > 150
+
+
+
+def test_the_with_every_other_solid_height_is_read_from_its_own_grade_not_the_last_buildings():
+    """Round 2 (P0), the reviewer's case: a 34.8 ft starting house on ground 0, a garage on lower ground (-8) and
+    one on higher ground (+5). Read by position, the "with every other solid" height took the last garage's own
+    ground (+5) and the assumed house complied; picking the house reads it from the ground at all their walls
+    (lower) and it doesn't. Assumed, it is never kinder."""
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 60, z0=11.6 * i, z1=11.6 * (i + 1), id=f"f{i}") for i in range(3)]
+    low, high = box(40, 30, 48, 40, -8, 4, "low"), box(40, 66, 48, 76, 5, 15, "high")
+    points = _walls_spots(12, 30, 36, 60, 0) + _walls_spots(40, 30, 48, 40, -8) + _walls_spots(40, 66, 48, 76, 5)
+    base = {**facts, "lot_surveyed": True, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+            "grade_points": points}
+    site_ = _plot(*house, low, high, lot_=lot)
+    from model_measurement.measure import measure
+    def with_others(f):
+        return next(r["value"] for r in measure(site_, f)["building_height"]["readings"]
+                    if r["reading"].startswith("with every other solid"))
+    assert with_others(base) == pytest.approx(with_others({**base, "main_building": "f0"})) == pytest.approx(35.8)
+    picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])["Building height"]
+    assumed = items(check_site(site_, base)["view"])["Building height"]
+    assert picked["status"] != present.COMPLIES, picked
+    assert present.RANK[assumed["status"]] <= present.RANK[picked["status"]], (assumed, picked)
+
+
+def test_never_kinder_than_picking_the_starting_house_with_solids_touching_it():
+    """The main-building property (round 2) with #18's touching candidates in it (§325-18A: a solid touching the
+    house is part of it, one main_only candidate). Random layouts on the sample lot: the starting house, and one or
+    two other solids, each on its own ground with spot grades at every wall, often touching the house (on its east
+    or north wall) and often standing apart. Left to Gordium, no row is ever kinder than with the starting house
+    picked, and the pick's every height and story reading is among Gordium's own."""
+    import random
+    from design_checker.check import check_site
+    from model_measurement.measure import measure
+    from test_measure import floor
+    lot, facts = _sample106()
+    rnd = random.Random(18)
+    compared = touching = 0
+    for _ in range(30):
+        floors, h = rnd.choice([2, 3, 3]), rnd.choice([11, 11.6])
+        house = [floor(12, 30, 36, 60, z0=h * i, z1=h * (i + 1), id=f"f{i}") for i in range(floors)]
+        points = _walls_spots(12, 30, 36, 60, 0)
+        others, spots = [], []
+        for _k in range(rnd.choice([1, 2, 2])):
+            x0, y0 = rnd.choice([(36, 30), (36, 48), (14, 60), (26, 60), (40, 30), (14, 66), (40, 66)])
+            if any(not (x0 + 8 <= o[0] or o[0] + 8 <= x0 or y0 + 10 <= o[1] or o[1] + 10 <= y0) for o in spots):
+                continue                                # never overlapping another solid
+            ground, top = (0 if (x0 == 36 or y0 == 60) and rnd.random() < 0.5 else
+                           rnd.choice([-8, -6, -3, 0, 3, 5, 8])), rnd.choice([8, 12, 20, 30, 40])
+            spots.append((x0, y0))
+            touching += x0 == 36 or y0 == 60
+            others.append(box(x0, y0, x0 + 8, y0 + 10, ground, ground + top, f"o{x0}_{y0}"))
+            points += _walls_spots(x0, y0, x0 + 8, y0 + 10, ground)
+        base = {**facts, "lot_surveyed": True, "stories": floors, "ground_is_flat": None, "grade_elevation": None,
+                "grade_points": points}
+        site_ = _plot(*house, *others, lot_=lot)
+        m_a, m_p = measure(site_, base), measure(site_, {**base, "main_building": "f0"})
+        for name in ("building_height", "stories"):
+
+            def vals(r):
+                return {round(x["value"], 3) for x in r["readings"]} or (
+                    {round(r["value"], 3)} if r["value"] is not None else set())
+            assert vals(m_p[name]) <= vals(m_a[name]) or not vals(m_a[name]), (name, m_p[name], m_a[name])
+        assumed = items(check_site(site_, base)["view"])
+        picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])
+        for name, i in picked.items():
+            if name in assumed and i["status"] in present.RANK and assumed[name]["status"] in present.RANK:
+                compared += 1
+                assert present.RANK[assumed[name]["status"]] <= present.RANK[i["status"]], \
+                    (name, assumed[name]["status"], i["status"], assumed[name]["reason"], spots)
+    assert compared > 150 and touching >= 10, (compared, touching)
+
+
+def _degenerate(kind, problem):
+    """A building object as a model can hold one: walls only (an open polysurface), a single face, a face of no
+    area, points in a line, or no faces; with the reading's own problem, or (a defence) without one."""
+    b = box(40, 70, 48, 80, 0, 10, "odd")
+    if kind == "walls":
+        b["faces"] = [f for f in b["faces"] if len({round(p[2], 6) for p in f["points"]}) > 1]
+    elif kind == "one_face":
+        b["faces"] = b["faces"][:1]
+    elif kind == "zero_area":
+        b["faces"] = [{"points": [[40, 70, 0], [40, 70, 0], [40, 70, 0]]}] + b["faces"][1:]
+    elif kind == "collinear":
+        b["faces"] = [{"points": [[40, 70, 0], [44, 70, 0], [48, 70, 0]]}]
+    elif kind == "none":
+        b["faces"] = []
+    if problem:
+        b["problems"] = ["a building isn't a closed solid"]
+    return b
+
+
+@pytest.mark.parametrize("kind", ["walls", "one_face", "zero_area", "collinear", "none"])
+def test_a_degenerate_building_object_never_raises_and_never_passes(kind):
+    """Main-building round 3 (P1): a building object of walls only crashed the ground check (an empty convex
+    hull) when spot grades were set, before its own problem could stop the building measurements. Fuzz: every
+    degenerate object, alone or beside a good house, with or without spot grades and with or without its
+    reading's problem, goes through measure() and check_site without an exception, and with its problem, the
+    building measurements wait with that reason."""
+    from design_checker.check import check_site
+    from model_measurement.measure import measure
+    from test_measure import floor
+    lot, facts = _sample106()
+    for house in (False, True):
+        for spots in (False, True):
+            for problem in (False, True):
+                blds = ([floor(12, 30, 36, 60, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+                        if house else []) + [_degenerate(kind, problem)]
+                f = {**facts, "lot_surveyed": True, "stories": 3}
+                if spots:
+                    f.update(ground_is_flat=None, grade_elevation=None,
+                             grade_points=_walls_spots(12, 30, 36, 60, 0) + _walls_spots(40, 70, 48, 80, 0))
+                m = measure(_plot(*blds, lot_=lot), f)
+                check_site(_plot(*blds, lot_=lot), f)
+                if problem:
+                    for name in ("building_height", "front_yard"):
+                        assert m[name]["value"] is None and "isn't a closed solid" in m[name]["reason"], (name, m[name])

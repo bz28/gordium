@@ -15,8 +15,9 @@ from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
+               "dwelling_units", "rooms_let_for_profit", "conversion",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
-               "eaves_confirmed", "unsettled"}
+               "eaves_confirmed", "ground_assumed", "plan_north_deg", "unsettled", "ground_fall"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).
@@ -37,12 +38,14 @@ def fact_problems(facts: dict) -> list[str]:
     text = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "main_building"}
     problems += [f"{k} must be text" for k in sorted(text & set(facts))
                  if facts[k] is not None and not isinstance(facts[k], str)]
+    if facts.get("plan_north_deg") is not None and not _number(facts["plan_north_deg"]):
+        problems.append("plan_north_deg must be a number (degrees the plan is turned from true north)")
     if facts.get("grade_elevation") is not None and not _number(facts["grade_elevation"]):
         problems.append("grade_elevation must be a number (the ground level, in feet)")
-    for k in ("stories", "sleeping_rooms", "parking_spaces"):
+    for k in ("stories", "sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit"):
         if facts.get(k) is not None and not (type(facts[k]) is int and facts[k] >= 0):
             problems.append(f"{k} must be a whole number, 0 or more")
-    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame"):
+    for k in ("corner_lot", "lot_surveyed", "ground_is_flat", "accessory_frame", "conversion"):
         if facts.get(k) is not None and not isinstance(facts[k], bool):
             problems.append(f"{k} must be yes or no (true / false)")
     points = facts.get("grade_points")
@@ -51,6 +54,8 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("grade_points must be a list of spot grades, each [x, y, z] in feet")
     if facts.get("grade_from") not in (None, "spot", "terrain", "finished_spots"):
         problems.append("grade_from must be spot, terrain or finished_spots")
+    if facts.get("ground_assumed") not in (None, "flat"):
+        problems.append("ground_assumed must be flat (or not given)")
     if facts.get("grade_is") not in (None, "finished", "existing"):
         problems.append("grade_is must be finished or existing")
     unsettled = facts.get("unsettled")
@@ -106,6 +111,8 @@ def working(record: dict, model: str) -> str:
     if record["readings"]:
         shown = "; ".join(f"{r['reading']} = {_num(r['value'])}" for r in record["readings"])
         text += f" [readings: {shown}]"
+    if record.get("outline"):           # the lot lines read from a cleaned outline: said, so it can be traced
+        text += f" ({record['outline']})"
     return text
 
 

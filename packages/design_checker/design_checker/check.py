@@ -1,8 +1,13 @@
 """Check a design: measure the model, run the zone's rules, build the envelope, and say it in one line.
 
-Every result comes from the project report (PR 10), which takes them only from the checker's `outcome()` and
-refuses a rulebook that fails the rule checks. This module adds nothing to a result; it only gathers what the
-Rhino panel and the viewport message show: the rows, a short summary, the objects to show in red, the envelope.
+Every result comes from the checker's `outcome()` (the project report, PR 10, refuses a rulebook that fails the
+rule checks). row_verdict decides each row, and each side yard of a pair, over THE reading set (reading_set: the
+open questions' readings, and on a tax-map lot the lines' slack and the lot area's ends): fails if it fails under
+every reading, complies if it passes under every one and its result turns on no open question (turns_on), else
+needs review. That verdict
+is the single source of truth: the panel (present) shows it or something more cautious, never more favourable.
+This module also gathers what the Rhino panel and the viewport show: the rows, a short summary, the objects to
+show in red, the envelope and the plan.
 """
 
 import ast
@@ -13,11 +18,14 @@ import re
 import tempfile
 from pathlib import Path
 
+import shapely
 import yaml
 
-from design_checker import present
-from envelope_builder.envelope import MARGIN, envelope
-from envelope_builder.start import largest_legal_building
+from design_checker import present, reading_set
+from design_checker import rhino_logic as logic
+from design_checker.rhino_logic import COLUMN_DELTA
+from envelope_builder import start as generator
+from envelope_builder.envelope import envelope
 from model_measurement.measure import TAX_MAP_TOLERANCE, measure
 from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
@@ -29,6 +37,9 @@ COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # Facts about the inside of a building (rooms, parking spaces). This phase checks the outside only: a rule waiting
 # on one of these goes in its own group, "not checked yet: interior", out of the counts. A rule they decide once
 # entered (a FAIL included) is shown like any other: nothing that fails is ever hidden.
+# What sets a row aside as "not checked yet: interior" (out of the counts): only these, inside the building. Every
+# other stated fact (rhino_logic.STATED_FACTS: what can be ASKED, such as R-3a's dwelling units) leaves its row a
+# review row, with its own "Enter …" button from `needs` (PR #20 round 2: never hidden, even when it fails).
 INTERIOR = {"sleeping_rooms", "parking_spaces"}
 NUMBER = re.compile(r"^([≥≤<>=]) (-?[\d,]+(?:\.\d+)?)$")
 
@@ -89,7 +100,7 @@ def _n(x) -> str:
 
 def _why(row: dict, rules: dict, measured: dict) -> dict:
     """The row, plus "Why": for a NEEDS REVIEW row whose measurements are missing, why each is missing (the
-    measuring's own reason: "a building isn't inside the lot", "enter bedrooms / parking spaces"), else the
+    measuring's own reason: "a building isn't on the lot (is it part of this design?)", "enter bedrooms / parking spaces"), else the
     report's reason."""
     reasons = []
     if row["Error"] == "NEEDS REVIEW":
@@ -101,8 +112,8 @@ def _why(row: dict, rules: dict, measured: dict) -> dict:
     return {**row, "Why": "; ".join(reasons) or row["Why it needs review"]}
 
 
-MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked out (stays a plain NEEDS REVIEW)
 SURVEY = "lot_area"        # a lot not yet surveyed: its one reading is the lot as drawn
+MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked out (stays a plain NEEDS REVIEW)
 
 
 MODEL_WORDS = {"model#eave": {"eave": "what reaches past the walls an eave",
@@ -129,11 +140,24 @@ def _eave_text(found: dict, measured: dict) -> str | None:
     if any(MODEL_WORDS["model#eave"]["eave"] in w for w in found["fails_under"]):
         return None                         # it fails even with the overhang an eave: not just a confirmation
     reach = []
-    for name, yard in EAVE_YARD_WORDS.items():
-        m = measured.get(name) or {}
-        by = {r["named"].get("model#eave"): r["value"] for r in m.get("readings") or [] if r.get("named")}
-        if by.get("eave") is not None and by.get("not_eave") is not None and by["eave"] - by["not_eave"] > 1e-6:
-            reach.append(f"{present.feet_inches(by['eave'] - by['not_eave'], 'up')} past the walls toward the {yard}")
+    for yard in dict.fromkeys(EAVE_YARD_WORDS.values()):
+        # each reading read with the overhang an eave, against the same reading (the same lot lines, the same
+        # other answers) with it not, to the same lot line: the most it reaches, over every reading, never one
+        # reading picked by the order the readings came in (stress F7), never the narrower side yard under one
+        # reading against the other side's under another (review round 15: the two side yards are paired by line)
+        pairs = {}
+        for name in (n for n, y in EAVE_YARD_WORDS.items() if y == yard):
+            for r in (measured.get(name) or {}).get("readings") or []:
+                side = (r.get("named") or {}).get("model#eave")
+                if side in ("eave", "not_eave") and r.get("value") is not None:
+                    rest = tuple(sorted((t, v) for t, v in r["named"].items() if t != "model#eave"))
+                    words = "; ".join(w for w in r["reading"].split("; ")
+                                      if not w.startswith("what reaches past the walls"))
+                    line = tuple(r["line"]) if r.get("line") is not None else name
+                    pairs.setdefault((rest, words, line), {})[side] = r["value"]
+        gaps = [p["eave"] - p["not_eave"] for p in pairs.values() if "eave" in p and "not_eave" in p]
+        if gaps and max(gaps) > 1e-6:
+            reach.append(f"{present.feet_inches(max(gaps), 'up')} past the walls toward the {yard}")
     where = ("the part reaching " + "; ".join(dict.fromkeys(reach))) if reach else "what the roof reaches past the walls"
     return (f"it complies only if {where} is an eave (§325-18B allows eaves up to 2 ft into a required yard). "
             "Gordium will ask you to confirm it in the panel in the next release; until then this stays needs review")
@@ -195,22 +219,80 @@ def readings_of(rule: dict, measured: dict, allowed: dict) -> dict | None:
             "combos": combos, "open": open_}
 
 
-def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] | None:
+def every_reading(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> tuple[str, str] | None:
     """For a rule that needs review only because measurements have readings instead of a value: ("pass", how) if
-    it passes under every combination of their readings, ("fail", how) if it fails under every one, else None
-    (or when a measurement has no reading, or there are too many). Results come only from outcome(); this says
-    the design complies, or doesn't, whichever way the open question is answered. Whether that is shown as a
-    result depends on the readings (named_result)."""
-    found = readings_of(rule, measured, allowed)
-    if found is None or found["result"] == "mixed":
+    it passes under every reading, ("fail", how) if it fails under every one, else None (or when a measurement
+    has no reading, or there are too many). The readings are THE reading set (reading_set.combos: those of one
+    lot reading together; with `facts` on a tax-map lot, also the lot lines' slack and the lot area's low and
+    high), the same set the panel's words and colours come from (present.settle). Never a result: the row stays
+    NEEDS REVIEW (only outcome() decides results); this says the design complies, or doesn't, whichever way the
+    open question is answered."""
+    names = reading_set.rule_names(rule)
+    open_ = sorted(n for n in names if (measured.get(n) or {}).get("value") is None)
+    values = {k: m["value"] for k, m in measured.items()}
+    every = reading_set.combos(names, values, measured, facts) if open_ else None
+    if not every:
         return None
-    word = "passes" if found["result"] == "pass" else "fails"
-    open_ = found["open"]
+    got = {outcome(rule, trial, allowed) for trial, _ in every}
+    if got not in ({"pass"}, {"fail"}):
+        return None
+    word = "passes" if got == {"pass"} else "fails"
     survey = SURVEY in open_ and len((measured.get(SURVEY) or {}).get("readings") or []) == 1
     others = [n for n in open_ if n != SURVEY or not survey]
-    return found["result"], (f"{word} with the lot as drawn (confirm the survey)" if survey and not others else
-                             f"{word} under every reading" +
-                             (" and with the lot as drawn (confirm the survey)" if survey else ""))
+    return got.pop(), (f"{word} with the lot as drawn (confirm the survey)" if survey and not others else
+                       f"{word} under every reading" +
+                       (" and with the lot as drawn (confirm the survey)" if survey else ""))
+
+
+def fails_whatever(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> dict | None:
+    """The every-reading rule for values that aren't measured or given at all (decided 2026-10-21): a rule that
+    fails for every value they could take does not comply. Returns {"names": the unknown measurements, "settings":
+    the values it was proven under}, or None.
+
+    Proven, never sampled. Each unknown number (no value, no readings) is one the rule's check is provably truest
+    at when it is 0 (formula.truth_direction -1: only +, -, max/min and positive multiples of it, compared with
+    < <= > >=; the §325-16C height bonus is one): it is taken at 0 (measures are never negative). Each unknown
+    yes/no fact is tried both ways. None of them is in the rule's applies_when or review_when. The rule fails
+    under every one of those settings: then it fails whatever they are. Any other unknown (a text, a number not
+    proven), or a pass under any setting, and it is None. Never the other way: missing data never makes a rule
+    comply (principle 4)."""
+    if rule.get("kind") != "rule" or not rule.get("check"):
+        return None
+    side = formula.names(rule["applies_when"]) if rule.get("applies_when") else set()
+    for r in rule.get("review_when") or []:
+        side |= formula.names(r["when"])
+    names = reading_set.rule_names(rule)
+    unknown = sorted(n for n in names if (measured.get(n) or {}).get("value") is None
+                     and not (measured.get(n) or {}).get("readings"))
+    if not unknown or any(n in side for n in unknown):
+        return None
+    numbers = [n for n in unknown if MEASURE_KINDS.get(n) == "number"]
+    yes_no = [n for n in unknown if MEASURE_KINDS.get(n) == "boolean"]
+    if len(numbers) + len(yes_no) != len(unknown) or any(
+            formula.truth_direction(rule["check"], n) != -1 for n in numbers):
+        return None
+    values = {k: m["value"] for k, m in measured.items()}
+    settings = [{**{n: 0 for n in numbers}, **dict(zip(yes_no, ways))}
+                for ways in itertools.product((False, True), repeat=len(yes_no))]
+    # the rest over THE reading set (each reading of what has readings; on a tax-map lot the lines' slack and the
+    # lot area's low and high): it fails whatever the unknown values are only if it fails under every one of them
+    every = reading_set.combos(names - set(unknown), values, measured, facts)
+    if every is None:
+        return None
+    trials = [t for t, _ in every] or [values]
+    if all(outcome(rule, {**t, **s}, allowed) == "fail" for t in trials for s in settings):
+        return {"names": unknown, "settings": settings}
+    return None
+
+
+def waits_on_interior(row: dict, rule: dict, measured: dict, allowed: dict) -> bool:
+    """Whether a row goes in its own group, "not checked yet: interior": it needs review only because a fact about
+    the inside of the building (INTERIOR) isn't given, and it isn't already proven to fail whatever that fact is
+    (fails_whatever, run first: nothing that fails is ever hidden; #20 review round 2)."""
+    names = formula.names(rule["check"]) if rule.get("check") else set()      # a flag has no check
+    return (row["Error"] == "NEEDS REVIEW"
+            and any((measured.get(n) or {}).get("value") is None for n in names & INTERIOR)
+            and not fails_whatever(rule, measured, allowed))
 
 
 def crossing(rule: dict, measured: dict) -> str | None:
@@ -227,8 +309,11 @@ def crossing(rule: dict, measured: dict) -> str | None:
             found.setdefault(c["who"], set()).update(c["lines"])
     if not found:
         return None
-    text = "; ".join(f"{who} crosses the {' and '.join(sorted(lines))} lot line{'s' if len(lines) > 1 else ''}"
-                     for who, lines in found.items())
+    def where(lines):
+        if not lines:                                   # past a corner, or a line that can't be named
+            return "it reaches past the lot line"
+        return f"it crosses the {' and '.join(sorted(lines))} lot line{'s' if len(lines) > 1 else ''}"
+    text = "; ".join(f"{who} is not entirely on the lot ({where(lines)})" for who, lines in found.items())
     return text[:1].upper() + text[1:]
 
 
@@ -252,15 +337,124 @@ def named_result(rule: dict, measured: dict, allowed: dict) -> dict | None:
     return {**found, "text": text}
 
 
+def turns_on(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> list[str] | None:
+    """The open measurements a rule's result turns on: each whose readings it needs (with it unknown and everything
+    else at any of its readings from THE reading set, the result can't be told). An open question it doesn't turn
+    on doesn't hold it back (either answer gives the same result). None if there are too many readings."""
+    names = reading_set.rule_names(rule)
+    values = {k: m["value"] for k, m in measured.items()}
+    out = []
+    for n in sorted(n for n in names if values.get(n) is None and (measured.get(n) or {}).get("readings")):
+        every = reading_set.combos(names - {n}, values, measured, facts)
+        if every is None:
+            return None
+        if any(outcome(rule, dict(trial, **{n: None}), allowed) == "needs_review" for trial, _ in every or [(values, None)]):
+            out.append(n)
+    return out
+
+
+def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = None, check: str | None = None) -> str:
+    """THE verdict of a rule (or, with `check`, of one of its comparisons: a side yard of a pair, with the rule's
+    applies_when and review_when) over THE reading set (reading_set.combos): fails if it fails under every reading;
+    complies if it passes under every one and turns on no open question (turns_on; the lot area of a tax-map lot
+    is read at its low and high ends, so it counts as known); otherwise needs review. The ONLY place a row is
+    decided: the panel shows this or something more cautious, never more favourable (review round 3)."""
+    rule = dict(rule, check=check) if check else rule
+    names = reading_set.rule_names(rule)
+    values = {k: m["value"] for k, m in measured.items()}
+    tax = reading_set.tax_map(measured, facts)
+    every = reading_set.combos(names, values, measured, facts)
+    if not every:                                   # a value unknown, or too many: as drawn, never kinder
+        got = outcome(rule, values, allowed)
+        lot = names & (reading_set.LOT_LENGTHS | {SURVEY})
+        if got == "needs_review" and every is not None and fails_whatever(rule, measured, allowed, facts):
+            return present.FAILS                    # fails whatever the values not measured are (decided 2026-10-21)
+        if got == "fail" and tax and lot:
+            # fails as drawn with a value unknown: on the tax map it fails only if it fails with the lines off
+            # either way too, over what is known (the unknown values stay unknown: a fail here doesn't need them,
+            # as a 45 ft house is over the most the height bonus allows whatever its yards: stress F13)
+            known = {n for n in names if values.get(n) is not None or (measured.get(n) or {}).get("readings")}
+            rest = reading_set.combos(known, values, measured, facts)
+            if rest and all(outcome(rule, trial, allowed) == "fail" for trial, _ in rest):
+                return present.FAILS
+        return present.FAILS if got == "fail" and not (tax and lot) else \
+            present.COMPLIES if got == "pass" and not (tax and lot) else present.REVIEW
+    got = {outcome(rule, trial, allowed) for trial, _ in every}
+    if got == {"fail"}:
+        return present.FAILS
+    turns = turns_on(rule, measured, allowed, facts)
+    open_ = (set(turns) if turns is not None else {n for n in names if values.get(n) is None}) - \
+        ({SURVEY} if tax else set())
+    if got == {"pass"} and open_:
+        # every reading research lists for the open questions (named, kind: reading): complies only if it passes
+        # under all of them, and nothing else is open (PR 18's every-reading rule)
+        named = named_result(rule, measured, allowed)
+        if named and named["result"] == "pass" and set(named["open"]) >= open_:
+            return present.COMPLIES
+    return present.COMPLIES if got == {"pass"} and not open_ else present.REVIEW
+
+
+def side_lines(site: dict, facts: dict) -> list[str] | None:
+    """The true compass names of the lot's two side lines, each from the lot's middle to the line: what a side yard
+    is called when it couldn't be measured. Only when the measuring itself knows which lines are sides: the lot not
+    a corner lot (unknown counts as maybe), and every reading of its lines giving the same two names (review round
+    1). None otherwise, or without a lot."""
+    from model_measurement.measure import Lot
+    if facts.get("corner_lot") is not False or not (site.get("lot") or {}).get("edges") or not facts.get("street_line"):
+        return None
+    lot = Lot(site, facts)
+    readings = None if lot.problems or lot.street_problem else lot.readings()
+    if not readings:
+        return None
+    middle = lot.polygon.centroid
+    pairs = set()
+    for _, left, right, _ in readings:
+        names = [present.compass(lot.line(g).centroid.x - middle.x, lot.line(g).centroid.y - middle.y,
+                                 facts.get("plan_north_deg") or 0.0) for g in (left, right)]
+        if not all(names):
+            return None
+        pairs.add(tuple(sorted(names)))
+    return list(pairs.pop()) if len(pairs) == 1 else None
+
+
+def side_checks(rule: dict) -> dict:
+    """A rule's comparisons of the two side yards, each as its own check (the panel shows each side as a row)."""
+    if not rule.get("check"):
+        return {}
+    return {c.left.id: ast.unparse(c) for c in present._compares(rule["check"])
+            if c.left.id in ("side_yard_smaller", "side_yard_larger")}
+
+
+def verdict(rule: dict, measured: dict, allowed: dict) -> str:
+    """The checker's own result for one rule, as its rows mark it: outcome(), except that a needs review that fails
+    under every reading (or with the lot as drawn) is a "fail" (the row's "Fails")."""
+    got = outcome(rule, {k: m["value"] for k, m in measured.items()}, allowed)
+    if got == "needs_review":
+        found = every_reading(rule, measured, allowed)
+        if found and found[0] == "fail" or fails_whatever(rule, measured, allowed):
+            return "fail"
+    return got
+
+
+def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], **options) -> dict:
+    """envelope_builder's largest legal building, proven with the checker's own verdict (above) before it is
+    placed: never a building the check that follows shows as not complying (audit P1-3)."""
+    return generator.largest_legal_building(site, facts, measured, rules, verdict=verdict, **options)
+
+
 def summary(rows: list[dict]) -> dict:
     """One line for the viewport corner: all pass; it complies under every reading (rules waiting only on how the
     law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
     with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
     missing fact, not a reading, so it is never shown as complying."""
-    fails = [r for r in rows if r.get("Fails") or r["Error"] == "FAIL"]
-    named = [r for r in rows if (r.get("Named") or {}).get("result") == "pass"]   # complies under every reading
-    review = [r for r in rows if r["Error"] == "NEEDS REVIEW" and r not in fails and r not in named]
-    passes = [r for r in rows if r["Error"] == "PASS"] + named
+    # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
+    # whatever its named readings say (review round 20); a row without a verdict, by its outcome
+    def verdict_of(r):
+        return r.get("Verdict") or (present.FAILS if r.get("Fails") or r["Error"] == "FAIL" else
+                                    present.COMPLIES if r["Error"] == "PASS" else present.REVIEW)
+    fails = [r for r in rows if verdict_of(r) == present.FAILS or r.get("Fails")]
+    review = [r for r in rows if verdict_of(r) == present.REVIEW and r not in fails]
+    passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):
@@ -308,27 +502,51 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     from rule_export.workbook import title, write_block
     word = {present.FAILS: ("FAIL", "Outside table limit"), present.REVIEW: ("NEEDS REVIEW", "Needs review"),
             present.COMPLIES: ("PASS", "Within table limit"), present.NOT_CHECKED: ("NOT CHECKED", "Needs input")}
-    worst = {}
+    worst, shown = {}, {}
     for i in view["items"]:
         if i["rule"] and i["status"] in word:
             rank = present.ORDER.index(i["status"])
             if i["rule"] not in worst or rank < present.ORDER.index(worst[i["rule"]][0]):
                 worst[i["rule"]] = (i["status"], i.get("reason") or "")
+            shown.setdefault(i["rule"], []).append(i)
     col = {h: n for n, h in enumerate(COLUMNS)}
     rows = []
     for r in t["output"]:
         r = list(r)
         found = worst.get(r[col["Rule id"]])
         if found:
+            # every column of the row from the panel's items (the same verdicts): its Error, Comparison and Why,
+            # and what it shows as Proposed, so a PASS never sits beside "Can't check: … missing"
             r[col["Error"]], r[col["Comparison"]] = word[found[0]]
-            if found[0] == present.REVIEW and found[1]:
-                r[col["Why it needs review"]] = found[1]
+            r[col["Why it needs review"]] = found[1] if found[0] == present.REVIEW else ""
+            items = [i for i in shown[r[col["Rule id"]]] if i.get("proposed")]
+            if len(items) == 1:         # the row as the panel shows it, in one unit: limit, proposed, units
+                r[col["Proposed"]] = items[0]["proposed"]
+                if items[0].get("required") and items[0].get("sign"):
+                    r[col["Table limit"]] = f"{items[0]['sign']} {items[0]['required']}"
+                if "%" in str(items[0]["proposed"]):            # coverage: a share of the lot area, not sf
+                    r[col["Units"]] = "% of lot area"
+            elif items:
+                r[col["Proposed"]] = "; ".join(f"{i['name']}: {i['proposed']}" for i in items)
         rows.append(r)
-    wb = build({**t, "output": rows})
+    # an input the measurement couldn't settle (a tax-map lot's area) shows what the panel shows, said as drawn
+    by_measure = {i.get("measure"): i for i in view["items"] if i.get("measure") and i.get("proposed")}
+    inputs = []
+    for r in t["inputs"]:
+        r = list(r)
+        i = by_measure.get(r[0].lower().replace(" ", "_"))
+        if r[1] is None and i is not None and "%" not in str(i["proposed"]):     # only in the input's own unit
+            r[1], r[3] = i["proposed"], "as drawn (the panel's reading); " + str(r[3])
+        inputs.append(r)
+    wb = build({**t, "output": rows, "inputs": inputs, "title": view["header"].get("place") or t["title"]})
     ws = wb.create_sheet("Check")
     h = view["header"]
     title(ws, f"GORDIUM | {view['summary']}")
-    lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + (h.get("sources") or [])   # where each fact came from
+    lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + ([h["main"]] if h.get("main") else []) + \
+        (h.get("sources") or [])   # where each fact came from
+    note = next((i["detail"]["outline"] for i in view["items"] if (i.get("detail") or {}).get("outline")), None)
+    if note:                            # the lot lines read from a cleaned outline: said once, with the lot (PR 18)
+        lines.append("Lot lines: " + note)
     for n, text in enumerate(lines, start=2):
         ws.cell(row=n, column=1, value=text)
     by_id = {i["id"]: i for i in view["items"]}
@@ -336,11 +554,17 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     for g in present.grouped(view["items"]):
         for item_id in g["items"]:
             i = by_id[item_id]
-            out.append([g["title"], i["mark"], i["name"], i["proposed"], i["required"], i["margin"],
-                        i.get("reason") or "", i["detail"].get("citation") or "",
+            # the note ("assuming flat ground") with the item, as the panel shows it; that column is reasons only
+            out.append([g["title"], i["mark"], i["name"] + (" · " + i["note"] if i.get("note") else ""), i["proposed"],
+                        i["required"], i.get("delta") or "", i.get("reason") or "",
+                        i["detail"].get("citation") or "",
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
-                                     ("Margin", 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
+                                     (COLUMN_DELTA, 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
+    wb.move_sheet("Check", offset=-wb.sheetnames.index("Check"))     # the architect's sheet first, open on it
+    wb.active = 0
+    for ws_ in wb.worksheets:
+        ws_.sheet_view.tabSelected = ws_.title == "Check"
     # written beside it, then moved into place: a write that fails half way never leaves a broken report there
     report_path = Path(report_path)
     part = report_path.with_name("." + report_path.name + ".part")
@@ -388,27 +612,43 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}
     every = [_why(dict(zip(COLUMNS, r)), by_id, measured) for r in t["output"]]
-    def checks(rule):                   # a flag has no check
-        return formula.names(rule["check"]) if rule.get("check") else set()
-
-    waiting = [r for r in every if r["Error"] == "NEEDS REVIEW" and any(
-        (measured.get(n) or {}).get("value") is None for n in checks(by_id[r["Rule id"]]) & INTERIOR)]
+    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
+    waiting = [r for r in every if waits_on_interior(r, by_id[r["Rule id"]], measured, allowed)]
+    for r in waiting:                   # exactly which stated facts each one waits for (its "Enter …" asks those)
+        r["needs"] = logic.needs_of(reading_set.rule_names(by_id[r["Rule id"]]), {k: m.get("value") for k, m in measured.items()})
     rows = [{**r, "Line": _amount(r, by_id[r["Rule id"]], measured)} if r["Error"] == "FAIL" else r
             for r in every if r not in waiting]
     for r in rows:
         r["Short"] = short(r["Requirement"])
-    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
     for r in rows:
+        found = every_reading(by_id[r["Rule id"]], measured, allowed, facts) if r["Error"] == "NEEDS REVIEW" else None
         review = r["Error"] == "NEEDS REVIEW"
-        named = named_result(by_id[r["Rule id"]], measured, allowed) if review else None
-        found = every_reading(by_id[r["Rule id"]], measured, allowed) if review and not named else None
-        r["Named"] = named              # every reading research lists: complies / does not comply / needs review
+        # every reading research lists (its words: what to confirm), and values not measured under which the rule
+        # fails whatever they are: what the row's line says (the verdict itself is row_verdict's)
+        r["Named"] = named_result(by_id[r["Rule id"]], measured, allowed) if review else None
+        r["Unknown"] = fails_whatever(by_id[r["Rule id"]], measured, allowed, facts) if review and not found else None
         r["Provisional"] = found[1] if found else None
+        # the readings it was worked out under (their values, the open measurements): the panel's tax-map best and
+        # worst cases run over each of them, as for a row decided over named readings (review round 14)
+        r["Readings"] = readings_of(by_id[r["Rule id"]], measured, allowed) if review else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
-        r["Fails"] = r["Error"] == "FAIL" or bool(found and found[0] == "fail") or bool(
-            named and named["result"] == "fail")   # fails whichever way it goes
-        if r["Fails"] and named and not r.get("Line"):
-            r["Line"] = f"{short(r['Requirement'])}: {named['text']}"
+        rule = by_id[r["Rule id"]]
+        r["Verdict"] = row_verdict(rule, measured, allowed, facts)          # the ONE decision (round 3)
+        r["Sides"] = {m: row_verdict(rule, measured, allowed, facts, check=c) for m, c in side_checks(rule).items()}
+        r["Side provisional"] = {m: (every_reading(dict(rule, check=c), measured, allowed, facts) or (None, None))[1]
+                                 for m, c in side_checks(rule).items()}      # each side's words, as a row's
+        # each side's readings research lists (its words: what to confirm, the eave to mark), as a row's Named
+        r["Side named"] = {m: named_result(dict(rule, check=c), measured, allowed) for m, c in side_checks(rule).items()}
+        r["Side turns on"] = {m: turns_on(dict(rule, check=c), measured, allowed, facts)
+                              for m, c in side_checks(rule).items()}
+        r["Fails"] = r["Verdict"] == present.FAILS                          # fails whichever way it goes
+        r["Turns on"] = turns_on(rule, measured, allowed, facts)            # the open questions its result needs
+        if r["Fails"] and r["Named"] and not r.get("Line"):
+            r["Line"] = f"{short(r['Requirement'])}: {r['Named']['text']}"
+        if r["Fails"] and r["Unknown"] and not r.get("Line"):
+            gone = [plain_name(n) for n in r["Unknown"]["names"]]
+            r["Line"] = (f"{short(r['Requirement'])}: does not comply whatever the {' and the '.join(gone)} "
+                         f"{'is' if len(gone) == 1 else 'are'}")
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
         r["Crossing"] = crossing(by_id[r["Rule id"]], measured)
@@ -420,6 +660,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                   if o != lot_id})
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
+    extras = {**(extras or {}), "side_lines": side_lines(site, facts)}   # compass names when a side isn't measured
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
@@ -427,12 +668,26 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             _report(t, v, report_path)
         except OSError as e:
             report_error = f"{e.strerror or e} ({report_path})"
-    env = envelope(site, _envelope_facts(site, facts), measured, rules)
+    # one guard for the whole check (review round 21): geometry the measuring couldn't work out draws nothing
+    # from it (no envelope, no overlays), and a geometry failure here does the same, never a crash
+    geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)
+    try:
+        env = envelope(site, _envelope_facts(site, facts), measured, rules) if not geo else None
+    except shapely.errors.GEOSException as e:
+        geo = f"the drawing's geometry couldn't be worked out ({str(e).split(':')[0][:80]})"
+        env = None
+    if env is None:
+        env = {"outline": None, "holes": [], "base": None, "top": None, "yards": {}, "height": None,
+               "coverage": None, "notes": [geo] if geo else []}
+    try:
+        drawn = plan(site, env, v, measured, facts, overlays=not geo)
+    except shapely.errors.GEOSException:
+        drawn = plan(site, env, v, measured, facts, overlays=False)
     # the notice (spec G): the items that don't comply now and did at the last check the command sent ("before")
     statuses, notice_text = present.notice((extras or {}).get("before"), v["items"])
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
             "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
-            "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": plan(site, env, v, measured),
+            "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": drawn,
             "report_error": report_error,
             "statuses": statuses, "notice": notice_text}
 
@@ -455,49 +710,139 @@ def _ring(polygon) -> list:
     return [list(p) for p in polygon.simplify(0.001).exterior.coords[:-1]]
 
 
-YARD_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
 SHORTEST_LABELLED_EDGE = 1.0          # ft: lot edges shorter than this get no length label in plan
 
 
-def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
+def hole_free(region) -> list:
+    """A region as pieces without holes (each drawn by its outline alone): a polygon with a hole is cut in two
+    by the vertical line through the hole's middle, again until none is left (review round 2: strips all round
+    a house, a ring with the complying core as its hole, were drawn as the whole footprint)."""
+    from shapely.geometry import box
+    out, todo = [], [g for g in getattr(region, "geoms", [region]) if region is not None and not region.is_empty]
+    while todo:
+        g = todo.pop()
+        if g.geom_type != "Polygon":
+            todo += [p for p in getattr(g, "geoms", []) if p.geom_type in ("Polygon", "MultiPolygon")]
+            continue
+        if not g.interiors:
+            out.append(g)
+            continue
+        x = g.interiors[0].centroid.x
+        x0, y0, x1, y1 = g.bounds
+        for half in (g.intersection(box(x0 - 1, y0 - 1, x, y1 + 1)), g.intersection(box(x, y0 - 1, x1 + 1, y1 + 1))):
+            todo += [p for p in getattr(half, "geoms", [half]) if p.geom_type in ("Polygon", "MultiPolygon")]
+    return out
+
+
+YARD_MEASURES = present.YARD_MEASURES
+
+
+RUN_TURN_DEG = 20      # lot edges turning less than this from one to the next are one run, labelled once
+
+
+def edge_runs(edges: list[dict]) -> list[tuple[list, float]]:
+    """The lot's edges as runs to label (display only; the measurements use every edge): consecutive edges that
+    carry on in nearly the same direction (turning less than RUN_TURN_DEG) are one run, a curve drawn as short
+    segments labelled once with its whole length, as an architect would dimension it (the real 106 Ithaca Rd: its
+    front, eight segments of about 10 ft along Ithaca Road, crowded the plan with eight labels). Each run: (its
+    points, its length in feet). The caller leaves out runs under 1 ft (a tax map's jog of an inch or two)."""
+    pieces = []
+    for e in edges:
+        pts = [list(p[:2]) for p in e["points"]]
+        for a, b in zip(pts, pts[1:]):
+            if math.dist(a, b) > 1e-9:
+                pieces.append((a, b))
+    if not pieces:
+        return []
+
+    def heading(a, b):
+        return math.atan2(b[1] - a[1], b[0] - a[0])
+
+    def turn(p, q):
+        d = abs(heading(*p) - heading(*q)) % (2 * math.pi)
+        return math.degrees(min(d, 2 * math.pi - d))
+    # a run turns less than RUN_TURN_DEG in all, not just from piece to piece: a rounded corner drawn as short
+    # pieces (each turning a little) is a corner, never one run joining two sides on a chord across the lot
+    runs = [[pieces[0]]]
+    for piece in pieces[1:]:
+        if turn(runs[-1][-1], piece) < RUN_TURN_DEG and turn(runs[-1][0], piece) < RUN_TURN_DEG:
+            runs[-1].append(piece)
+        else:
+            runs.append([piece])
+    if (len(runs) > 1 and turn(runs[-1][-1], runs[0][0]) < RUN_TURN_DEG
+            and turn(runs[-1][0], runs[0][-1]) < RUN_TURN_DEG):                # the ring closes inside a run
+        runs[0] = runs.pop() + runs[0]
+    return [([r[0][0]] + [b for _, b in r], sum(math.dist(a, b) for a, b in r)) for r in runs]
+
+
+def _yard_lines(lot, measure: str, point):
+    """The lot lines a yard is measured from, as the measurement takes them: every group (the street lines, a
+    side, the rear lines, under each reading of the lot) that the yard's lot-line point lies on."""
+    from shapely.geometry import Point
+    groups = [lot.ordered_street()] if measure == "front_yard" else [
+        g for _, left, right, back in (lot.readings() or []) for g in ((left, right) if measure != "rear_yard" else (back,))]
+    hit = sorted({i for g in groups if lot.line(g).distance(Point(point)) < 0.01 for i in g})
+    return lot.line(hit) if hit else None
+
+
+def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = None, overlays: bool = True) -> dict:
     """What the viewport draws in plan (feet): each lot edge with its length, the yard lines measured (each with
     its item's status), and where the building breaks a limit: the strip of its footprint inside a required yard,
-    or the part above the height limit (spec F2, F4, F5). The building itself stays neutral."""
-    from model_measurement.measure import _projection
-    from shapely.geometry import Polygon
-    from shapely.ops import unary_union
+    or the part above the height limit (spec F2, F4, F5). The building itself stays neutral.
+    Each yard's red and amber are its own row's (present.settle: from the row's readings, after every status
+    change), never another yard's: red where its wall is short under every reading, amber under some."""
+    from model_measurement.measure import Lot, _projection, union as unary_union
 
     lot = site.get("lot") or {}
-    edges = []
-    for e in lot.get("edges") or []:
-        a, b = e["points"][0], e["points"][-1]
-        length = sum(math.dist(p[:2], q[:2]) for p, q in zip(e["points"], e["points"][1:]))
-        if length < SHORTEST_LABELLED_EDGE:   # a tax-map sliver (0'-1 5/8"): no label of its own, it only clutters
-            continue
-        edges.append({"points": [list(a[:2]), list(b[:2])], "length": present.feet_inches(length)})
+    edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
+             for r, length in edge_runs(lot.get("edges") or [])
+             if length >= SHORTEST_LABELLED_EDGE]   # a tax-map sliver (0'-1 5/8"): no label, it only clutters
     yards = [{"points": i["points"], "status": i["status"], "label": f"{i['mark']} {i['name']} {i['proposed']}" +
-              ("" if i["status"] != present.REVIEW or "tax map" not in (i.get("reason") or "") else " (approx.)")}
+              (f", needs {i['required']}" if i["status"] == present.FAILS and i.get("required") else "") +
+              (" (approx.)" if i.get("approx") else "")}
              for i in v["items"] if i.get("points") and i.get("measure") in YARD_MEASURES]
     encroach = []
-    plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")]
+    plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")] if overlays else []
     footprint = unary_union(plans) if plans else None
     tops = [p[2] for b in site.get("buildings") or [] for f in b.get("faces") or [] for p in f["points"]]
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
     if footprint is not None and not footprint.is_empty and env and env.get("outline") and tops:
-        # the envelope sits MARGIN inside every yard (so it is never illegal); grown back by twice that, a wall
-        # exactly at its limit leaves no hairline of red
-        buildable = Polygon(env["outline"], env.get("holes") or []).buffer(2 * MARGIN, join_style=2)
-        yard_fail = any(s == present.FAILS for m, s in statuses.items() if m in YARD_MEASURES)
-        strip = footprint.difference(buildable) if yard_fail else None
+        shape = Lot(site, facts or {}) if lot.get("edges") and facts and facts.get("street_line") else None
+        reds, ambers = [], []
+        for i in v["items"]:
+            if i.get("colour") not in ("red", "amber") or shape is None:
+                continue
+            near, far = [], []
+            for limit in i.get("limits") or []:
+                lines = _yard_lines(shape, i["measure"], limit["points"][0])
+                if lines is None:
+                    continue
+                strip = (lambda d: footprint.intersection(lines.buffer(d, quad_segs=32)) if d > 0 else None)
+                near.append(strip(limit["near"]))
+                far.append(strip(limit["far"]))
+            if i["colour"] == "red" and near and all(g is not None for g in near):
+                red = near[0]
+                for g in near[1:]:                          # short under EVERY reading: where every one says so
+                    red = red.intersection(g)
+                reds.append(red)
+            ambers += [g for g in far if g is not None]
+        red = unary_union(reds) if reds else None
+        doubt = unary_union(ambers) if ambers else None
+        if doubt is not None and red is not None:
+            doubt = doubt.difference(red)
         # outlines simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude;
         # without a grade the strip stands on the building's own base, never at 0
-        for g in getattr(strip, "geoms", [strip]) if strip is not None and not strip.is_empty else []:
-            if g.area > 1e-3:
-                encroach.append({"outline": _ring(g), "base": env["base"] if env.get("base") is not None else min(tops),
-                                 "top": max(tops), "why": "yard"})
-        if statuses.get("building_height") == present.FAILS and env.get("top") is not None and max(tops) > env["top"]:
+        base = env["base"] if env.get("base") is not None else min(tops)
+        for region, status in ((red, present.FAILS), (doubt, present.REVIEW)):
+            for g in hole_free(region):
+                if g.area > 1e-3:
+                    encroach.append({"outline": _ring(g), "base": base, "top": max(tops), "why": "yard",
+                                     "status": status})
+        height = statuses.get("building_height")
+        if height in (present.FAILS, present.REVIEW) and env.get("top") is not None and max(tops) > env["top"]:
             for g in getattr(footprint, "geoms", [footprint]):
-                encroach.append({"outline": _ring(g), "base": env["top"], "top": max(tops), "why": "height"})
+                encroach.append({"outline": _ring(g), "base": env["top"], "top": max(tops), "why": "height",
+                                 "status": height})
     return {"edges": edges, "yards": yards, "encroach": encroach,
             "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
 
@@ -545,6 +890,9 @@ def margin_note(keep, buffer, tax, proven):
     return "Starting house goes to the limits (the lot is from a survey)."
 
 
+LOT_ONLY = {"lot_area", "lot_width", "lot_depth"}   # items about the lot itself, whatever the house
+
+
 def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer):
     """The starting house, kept back from the limits so that it complies even at the tax-map worst case (Ben,
     2026-10-20): on a lot not from a survey, every yard line moves in by the tax-map tolerance and coverage is sized
@@ -566,7 +914,7 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
             break
         view = check_site({**site, "buildings": floor_solids(out["floors"])}, drawing)["view"]
         if not any(i["status"] == present.REVIEW and "tax map" in (i.get("reason") or "") for i in view["items"]
-                   if i.get("measure")):
+                   if i.get("measure") and i["measure"] not in LOT_ONLY):   # the lot's own size: no house fixes it
             proven = True
             break
         keep += 0.25
@@ -617,6 +965,9 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     if existing:                        # drawn standing on the ground shown; the check still says it is existing
         drawing = {**drawing, "grade_is": "finished"}
     measured = measure(site, drawing)
+    geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)
+    if geo:                             # nothing drawn from geometry the measuring couldn't work out
+        return {"floors": [], "notes": [geo], "preview": None}
     out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer)
     if existing and out.get("floors"):
         out["notes"].append("drawn on the ground as it is: building height and stories need review until you tick "
@@ -631,18 +982,26 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
 SAMPLE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 
 
+SAMPLE_OUTLINE = SAMPLE / "lot_outline_tax_map.yaml"
+
+
 def sample_site() -> dict:
-    """The sample project GordiumStart offers: 106 Ithaca Rd's lot as the architects' spreadsheet gives it,
-    73'-0" x 90'-0" (their model of it; not a survey, so lot size and coverage wait for one), and its facts,
-    prefilled for the architect to confirm. Points in feet."""
-    facts = {**load_facts(SAMPLE / "spreadsheet_design_model_facts.yaml"), "lot_surveyed": False}
-    site = read_site(SAMPLE / "spreadsheet_design_model.3dm", facts)
-    lot = site.get("lot") or {}
-    points = [e["points"][0] for e in lot.get("edges") or []]
+    """The sample project GordiumStart offers: 106 Ithaca Rd's real lot, as the State tax map draws it (parcel
+    84.-2-6), placed exactly as the address lookup places it (lot_outline_tax_map.yaml: its source, the frame, made
+    by code from a recorded lookup), so the sample and a looked-up 106 are the same drawing and the neighbourhood
+    map lines up around it. A tax-map outline: each lot line may be 2'-0" off, so the lot size and every yard are
+    checked under every reading of where the lines are. Its facts (zone, use) prefilled for the architect to
+    confirm. Points in feet."""
+    outline = load(SAMPLE_OUTLINE)
+    facts = {**load_facts(SAMPLE / "spreadsheet_design_model_facts.yaml"), "lot_surveyed": False,
+             "street_line": outline["street_line"], "corner_lot": bool(outline.get("corner_lot")),
+             "plan_north_deg": outline["frame"]["rotation_deg"]}     # the plan's turn from true north: compass names
     keep = {"jurisdiction", "zone", "use", "street_line", "corner_lot", "ground_is_flat", "grade_elevation",
-            "lot_surveyed"}
-    return {"address": "106 Ithaca Rd, Ithaca, NY", "lot": points,
-            "lot_name": "Lot · 106 Ithaca Rd · 73'-0\" x 90'-0\" from the architects' spreadsheet, not a survey",
+            "lot_surveyed", "plan_north_deg"}
+    return {"address": "106 Ithaca Rd, Ithaca, NY", "lot": [list(p) for p in outline["ring"]],
+            "lot_name": "Lot · 106 Ithaca Rd · from the State tax map (parcel " + outline["source"]["print_key"]
+                        + "), each line ±2'-0\", not a survey",
+            "frame": outline["frame"],
             "facts": {k: v for k, v in facts.items() if k in keep}}
 
 

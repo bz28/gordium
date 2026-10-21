@@ -1,6 +1,8 @@
 # How Gordium keeps its rules trustworthy
 
-For architects, shareholders and new engineers. No coding knowledge needed.
+**Purpose:** the promises Gordium makes about its rules, and the check and test that enforce each one.\
+**For:** architects, shareholders and new engineers; no coding knowledge needed.\
+**Kept current by:** the engineer who adds or changes a rule check (`packages/rule_format`), in that same PR.
 
 ## The idea in one minute
 
@@ -47,7 +49,7 @@ For each rule, in this order:
 3. A reason for caution (e.g. irregular lot) → **needs review**
 4. Otherwise the yes/no question → **pass** or **fail**
 
-At any step, if a measurement is missing or unusable (no value, not a real number, negative, text where a number belongs, a use name the city doesn't have), or the math can't be done (like dividing by zero) → **needs review**. Only a clean "yes" can ever become **pass**.
+If a measurement is missing or unusable (no value, not a real number, negative, text where a number belongs, a use name the city doesn't have), it is treated as unknown: the answer is **pass** or **fail** only if it would be the same whatever that measurement turns out to be (a 30 ft house complies with "at most 35 ft, or more with larger yards" whatever its yards are); otherwise → **needs review**. If the math can't be done (like dividing by zero, or comparing a number with text) → **needs review**. A rule file whose formula couldn't make sense for any value (a number compared with text) is refused when the rules are checked, before it is ever used.
 
 ## How we know the checks themselves work
 

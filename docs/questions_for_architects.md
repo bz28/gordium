@@ -1,8 +1,12 @@
 # Questions for the architects
 
+**Purpose:** the questions about the law that Gordium can't decide on its own, waiting on the architects or the City.\
+**For:** the architects.\
+**Kept current by:** whoever adds, researches or answers a question, in that same PR.
+
 Gordium checks a design against the city's exact words. In the places below, the words can be read more than one way, and Gordium can't decide them on its own.
 
-**Researched first.** Before a question reaches you, Gordium reads the whole law for it (every section that uses the word, or a word that means the same, from the term index), then the City's own decisions (zoning board records), then the building codes, then other cities. That research, on 2026-10-20, settled 20 of the 37 questions this page used to ask, narrowed 4 more to the part still open, and found 2 new ones, so 19 are left. What it settled is listed in §6, with its sources, and recorded with each rule or definition (the full report is `docs/research/2026-10-20_architect_questions.md`). What is left below is what research couldn't settle. Each question says what was searched and why it is still open, and a test fails if a recorded question has no research behind it.
+**Researched first.** Before a question reaches you, Gordium reads the whole law for it (every section that uses the word, or a word that means the same, from the term index), then the City's own decisions (zoning board records), then the building codes, then other cities. That research, on 2026-10-20, settled 20 of the 37 questions this page used to ask, narrowed 4 more to the part still open, and found 2 new ones (19 then left). The R-1a and R-3a answer keys (2026-10-20) raise 4 questions of their own (§5.3 to §5.6) and carry 3 law-wide ones into their own rules, each tagged where it is recorded, so 29 are left (23 different questions). What it settled is listed in §6, with its sources, and recorded with each rule or definition (the full report is `docs/research/2026-10-20_architect_questions.md`). What is left below is what research couldn't settle. Each question says what was searched and why it is still open, and a test fails if a recorded question has no research behind it.
 
 **Please note, until these are answered:** each question below says what Gordium does **today** and what it will do **from a model**, once it measures a Rhino model itself (being built now). There are three cases:
 - **NEEDS REVIEW:** Gordium can't decide, so it says so instead of guessing.
@@ -58,7 +62,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 
 ### 1.2 Lot depth on a lot with more than four sides: one detail of the City's method 🔴
-`[lot_depth#1]` `[R-1b.rear_yard#1]`
+`[lot_depth#1]` `[R-1b.rear_yard#1]` `[R-1a.rear_yard#1]` `[R-3a.rear_yard#1]`
 
 - **The city's words:** "Such percentage shall be taken of the lot depth. If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths." ([Chapter 325 §325-8A(14), p.25](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=25))
 - **What research found:** the City has a method. On a five-sided lot (BZA Appeal #3202, 815 S. Aurora St, 2019–2022), the Zoning Administrator swore that "side lot lines should be drawn at a 90-degree angle perpendicular to the front lot line to determine the average lot depth", from each end of the front lot line "to the furthest rear line" ([staff memo and affidavit](https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_02012022-2446)). Gordium now uses that method (§6): on the County outline, (92.01 + 100.28) ÷ 2 = 96.15 ft, so the rear yard must be 24.04 ft and the 25 ft design passes. The one detail left: the perpendicular from the long-side end first meets the jog. The affidavit's own drawing stops at the first rear-facing line, but "the furthest rear line" could mean the main rear line, and the zoning board's written decision wasn't found online.
@@ -84,7 +88,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Options:** (a) the perpendicular stops at the first rear-facing line it meets (the jog); (b) it continues to the main rear line, extended; (c) another rule you use. If you can, ask the City for the zoning board's written resolution on Appeal #3202 (February 2022).
 
 ### 1.3 What "lot area" should be used, especially without a survey? 🔴
-`[lot#1]` `[R-1b.lot_coverage#1]`
+`[lot#1]` `[R-1b.lot_coverage#1]` `[R-1a.lot_coverage#1]` `[R-3a.lot_coverage#1]`
 
 - **The city's words:** "LOT — A portion or parcel of land, considered as a unit, devoted to a certain use or occupied by a building or a group of buildings…" (§325-3, [p.14](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=14)). Chapter 325 never defines "lot area" itself.
 - **What research found:** "lot area" is never defined and the word "survey" never appears in Chapter 325. The City works from surveys when it has them (the 2026 Sears St cases turned on an as-built survey), but no City document says what to use without one. Coverage also waits on §3.1 (eaves); garages count (§6).
@@ -169,7 +173,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Options:** for "at any point" in the basement definition: (a) more than half above ground at one point is enough; (b) at every point around the building. For a space that fits both: (a) a basement (it counts as a story if the floor above meets the 6 ft or 12 ft test); (b) a cellar. And for the cellar test, the curb level or the average adjoining grade when they differ?
 
 ### 4.5 A parapet on top of the height bonus?
-`[R-1b.height#1]`
+`[R-1b.height#1]` `[R-1a.height#1]` `[R-3a.height#1]`
 
 - **The city's words:** "a parapet wall or cornice for ornament extending above such height five feet or less" (§325-16B, [p.47](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47)).
 - **What research found:** the exemptions for chimneys, spires and parapets change what may stand above the limit, not how height is measured (§6). Whether "such height" means the chart's limit or the bonus height §325-16C allows isn't said, nor whether a parapet that guards a roof deck (not "for ornament") counts. No City record was found.
@@ -179,7 +183,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 ---
 
-## 5. Accessory buildings and accessory dwelling units
+## 5. Accessory buildings, accessory dwelling units, and the R-3a district
 
 ### 5.1 An accessory building that isn't frame; a height limit?
 `[325-25C#1]`
@@ -198,6 +202,42 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Why it matters:** on a corner lot, it decides where an ADU may go.
 - **Until you answer:** Today, ADUs are not checked yet: check them by hand. The same applies from a model until ADU rules are built.
 - **Options:** (a) the front yard on the street the address is on; (b) the one the designer names.
+
+### 5.3 R-3a: lot size for a dormitory or a nursing home
+`[R-3a.lot_area_other_use#1]`
+
+- **The city's words:** "DORMITORY — A multiple dwelling which provides sleeping accommodations…" and "(4) A building used or occupied as a convalescent, old-age or nursing home" under DWELLING, MULTIPLE (§325-3, [p.7](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=7)). The chart's lot-size rows (p.3) have "Multiple family dwelling" (6,000 sf, note 7: "+750 sf for each additional unit; +500 sf per room let for profit") and "Other use" (6,000 sf), but no dormitory or nursing-home row.
+- **What research found:** the definitions make both multiple dwellings, but the chart lists them as uses of their own and gives the fraternity house (also a multiple dwelling) its own row, which suggests a use with no row is an "Other use". No City record found.
+- **Why it matters:** a 40-bed dormitory on a 7,000 sf R-3a lot passes as an "Other use" but may need far more under note 7.
+- **Until you answer:** Today and from a model, a dormitory or nursing home on a lot under 6,000 sf fails (both readings agree), and on a larger lot gets NEEDS REVIEW (R-3a.lot_area_other_use).
+- **Options:** (a) the multiple-family row and note 7 apply; (b) "Other use" applies (6,000 sf).
+
+### 5.4 R-3a: lot size and width for a zero-lot-line house
+`[R-3a.lot_size_zero_lot_line#1]`
+
+- **The city's words:** the chart marks "One-family dwelling, detached, zero lot line" SP for R-3A (p.2), but its R-3A lot-size and lot-width cells are "-" (p.3). §325-8B(4): a special-permit use takes "the regulations … of whichever district has the stricter regulations" where it "is permitted by right in another district" ([p.26](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=26)).
+- **What research found:** no residential district permits the use by right (R-2C, R-3A, R-3AA and R-3B mark it SP; the rest "-"), so §325-8B(4) has nothing to borrow, and §325-9B(1) doesn't list it. No City record found.
+- **Why it matters:** it decides whether a zero-lot-line house on a 4,000 sf, 35 ft wide R-3a lot can even be proposed.
+- **Until you answer:** Today and from a model, a zero-lot-line house in R-3a gets NEEDS REVIEW (it needs a special permit anyway).
+- **Options:** (a) no minimum; (b) the "Other use" rows (6,000 sf, 50 ft); (c) whatever the Planning and Development Board sets with the special permit.
+
+### 5.5 R-3a next to R-1: does land across a street "directly abut"?
+`[R-3a.abutting_r1#1]`
+
+- **The city's words:** "E. Development in R-3 Districts which abut R-1 Districts. The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling, shall be subject to the following special conditions if the land on which the development occurs directly abuts land in either the R-1a or R-1b Zoning District" (§325-19E, [p.50](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=50)): 150% lot size, R-1's height, 75% coverage, 150% side and rear yards where they abut R-1 land.
+- **What research found:** §325-9B(1)(j) says "abutting or across a street", treating the two as different; §325-11B says "abuts land, other than a public right-of-way", implying street land can abut; a district boundary may follow a street's center line or its edge (§325-6A). "Directly" isn't defined. No City record found.
+- **Why it matters:** an apartment building on an R-3a lot facing R-1 houses across the street is limited to 35 ft instead of 40 ft (and likely 3 stories instead of 4) and 26.25% coverage instead of 35%, or not, depending on the answer.
+- **Until you answer:** Today and from a model, every R-3a use §325-19E covers gets NEEDS REVIEW (R-3a.abutting_r1), since Gordium doesn't know the zoning of the land next to the lot.
+- **Options:** (a) only R-1a or R-1b land sharing a lot line counts; (b) R-1a or R-1b land across a street counts too.
+
+### 5.6 R-3a next to R-1: is a row of attached houses exempt from §325-19E?
+`[R-3a.abutting_r1#2]`
+
+- **The city's words:** §325-19E exempts "a one-family or two-family dwelling" ([p.50](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=50)). §325-3: "A one-family dwelling may be constructed in any of the following configurations", including "ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings"; but also "DWELLING, MULTIPLE … (1) A building containing three or more dwelling units … (5) … row house, townhouse" ([p.7](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=7), [p.8](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=8)).
+- **What research found:** the definitions point both ways, and no City record was found. Semi-detached and zero-lot-line houses (at most two dwellings) are clearly one-family configurations and are exempt.
+- **Why it matters:** a row of five townhouses on an R-3a lot next to R-1 houses may be held to 35 ft and 26.25% coverage, or to R-3a's 40 ft and 35%.
+- **Until you answer:** Today and from a model, attached houses in R-3a get NEEDS REVIEW on §325-19E (R-3a.abutting_r1), as every use it may cover does.
+- **Options:** (a) exempt, as a one-family configuration; (b) covered, as a multiple dwelling.
 
 ---
 

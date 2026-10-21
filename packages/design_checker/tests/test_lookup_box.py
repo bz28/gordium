@@ -19,6 +19,14 @@ TESTS = REPO / "packages/site_lookup/tests"
 ZONES = ["R-1a", "R-1b", "R-2a", "R-3a"]
 
 
+
+
+@pytest.fixture
+def ground_from_the_lookup(monkeypatch):
+    """The ground as the lookup reads it (spot grades, their doubts): off in the MVP (FLAT_GROUND), kept for when
+    it comes back; these tests run with it on."""
+    monkeypatch.setattr(logic, "FLAT_GROUND", False)
+
 def _rules():
     from rule_format.rulebook import load, rulebook_for
     return {r["id"]: r for r in load(rulebook_for(REPO / "regulations/jurisdictions/new_york/ithaca_city", "R-1b"))
@@ -77,7 +85,8 @@ def test_106_fills_the_box_with_suggestions_and_never_confirms_the_district():
     assert saved["street_source"] == "suggested by Gordium · City of Ithaca roads, used live"
     assert not state.get("district_confirmed") and not logic.can_draw(state)       # I confirm: still the architect's
     rows = {r["key"]: r for r in logic.box_rows(state)}
-    assert rows["lot"]["text"] == "7,034 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public"
+    # whole square feet rounded down, as the checker's Lot area row says it (the MVP list, #15)
+    assert rows["lot"]["text"] == "7,033 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public"
     assert all(r["review"] is None for r in rows.values()) and logic.unsettled(saved) == {}
     assert "zones_found" not in facts and "street_name" not in facts                # box choices, not lot facts
     from model_measurement.project import fact_problems
@@ -292,16 +301,20 @@ def test_a_starting_house_is_drawn_on_the_looked_up_ground_as_it_is(tmp_path):
 
 def test_tax_map_slivers_get_no_length_label():
     """Seen in Rhino on 106 Ithaca Rd: its tax-map outline has edges of 0.14 and 0.24 ft, each labelled
-    (0'-1 5/8"), cluttering the plan. Edges under SHORTEST_LABELLED_EDGE get none; every other edge keeps its own."""
-    from design_checker.check import SHORTEST_LABELLED_EDGE, plan
+    (0'-1 5/8"), cluttering the plan. With #15's runs (edges carrying on in nearly one direction labelled once),
+    no label is shorter than SHORTEST_LABELLED_EDGE and every run that long keeps one."""
+    from design_checker.check import SHORTEST_LABELLED_EDGE, edge_runs, plan
     p = looked_up("106_ithaca_rd")
     ring = p["writes"]["lot_ring"]
     n = len(ring)
     site = {"lot": {"edges": [{"points": [ring[i] + [0.0], ring[(i + 1) % n] + [0.0]]} for i in range(n)]},
             "buildings": []}
     got = plan(site, {"outline": [], "holes": []}, {"items": []}, {})
-    long_edges = [i for i in range(n) if math.dist(ring[i], ring[(i + 1) % n]) >= SHORTEST_LABELLED_EDGE]
-    assert len(got["edges"]) == len(long_edges) == n - 2
+    runs = [length for _, length in edge_runs(site["lot"]["edges"])]
+    short = [i for i in range(n) if math.dist(ring[i], ring[(i + 1) % n]) < SHORTEST_LABELLED_EDGE]
+    assert len(short) == 2                                  # the two slivers of the real outline
+    assert len(got["edges"]) == sum(r >= SHORTEST_LABELLED_EDGE for r in runs) and len(got["edges"]) < n - 2
+    assert all(not e["length"].startswith("0'") for e in got["edges"])          # no sliver labelled
 
 
 # ---- review round 1 of PR #19 (2026-10-20): each finding pinned ------------------------------------------------
@@ -362,6 +375,7 @@ def test_every_r1b_rule_reading_an_unsettled_measurement_needs_review(key):
                 assert i["status"] == plain[name]["status"], (path.name, name)
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_p1_esc_on_place_spot_grades_settles_nothing():
     """Esc or Enter with no point placed: the ground's doubt and its looked-up source stay."""
     facts, saved, _ = box(_doubtful_106())
@@ -371,7 +385,8 @@ def test_p1_esc_on_place_spot_grades_settles_nothing():
     placed = logic.after_ground_pick({**saved, "doubts": {"ground": "x"}}, "spot", 3)
     assert "ground" not in logic.unsettled(placed) and "ground_source" not in placed
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "logic.after_ground_pick(saved_ui, what, len(placed))" in rhino and "    return placed" in rhino
+    assert "logic.pick_effect(what, _pick_outcome(doc, what, facts, session), facts, saved_ui)" in rhino
+    assert "        return placed" in rhino                       # the points placed are the pick's outcome
 
 
 def test_p1_nothing_from_a_source_that_cant_be_kept_is_written():
@@ -440,7 +455,7 @@ def test_p2_the_guide_case_offers_draw_my_lot_and_keeps_draw_off_until_there_is_
     assert rows["lot"]["actions"][0] == ("draw_lot", "Draw my lot…", True)
     assert logic.draw_reason({"district_confirmed": True, "lot_missing": True}) == "Draw or pick the lot to continue."
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert 'elif what == "draw_lot":' in rhino and '"lot_missing": lot is None' in rhino
+    assert 'if what == "draw_lot":' in rhino and '"lot_missing": lot is None' in rhino
 
 
 def test_p2_after_a_lookup_the_district_must_be_ticked_again():
@@ -556,6 +571,7 @@ def sample_model():
     return table, {"lot_id": "sample"}, {"from_sample": True, "replaceable_lot": "sample"}
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_cancel_after_a_lookup_leaves_the_model_exactly_as_it_was():
     """Round 1 and 2 (and seen in Rhino): Cancel didn't bring the sample lot back. Held, not deleted: the same
     object, the same id, on its own layer; the lookup's lot and spot grades gone; the layer it made removed; the
@@ -571,6 +587,7 @@ def test_cancel_after_a_lookup_leaves_the_model_exactly_as_it_was():
     assert table.snapshot() == before
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_draw_after_a_lookup_deletes_what_was_replaced_and_keeps_the_new():
     table, facts, saved = sample_model()
     session = logic.BoxSession(table)
@@ -580,6 +597,7 @@ def test_draw_after_a_lookup_deletes_what_was_replaced_and_keeps_the_new():
     assert logic.HOLDING_LAYER not in table.layers and len(table.ground_points()) == 14
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_a_re_lookup_sets_aside_every_spot_grade_of_the_lot_it_replaces():
     """Round 2: the architect's own spot grades for the replaced lot stayed and mixed with the new lot's."""
     table, facts, saved = sample_model()
@@ -696,6 +714,7 @@ def test_the_overlays_gap_says_what_the_lookup_does():
 
 # ---- review round 3 of PR #19 ------------------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_crash_recovery_leaves_the_model_as_it_was_before_the_box():
     """Round 3: recovery put back what was held but left what the session drew (the looked-up lot and its USGS spot
     grades carried no mark), so grades mixed after a crash. Each drawn object carries the session's mark until
@@ -760,6 +779,7 @@ def test_recovery_never_touches_a_start_box_still_open():
     assert session.token not in logic.OPEN_SESSIONS
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_a_dead_sessions_objects_are_recovered_while_another_box_is_open():
     table, facts, saved = sample_model()
     dead = logic.BoxSession(table)
@@ -780,9 +800,9 @@ def test_only_one_start_box_at_a_time():
     assert gate.enter()
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
-    assert "if not gate.enter():" in conf and "say(logic.BOX_BUSY)" in conf and "gate.leave()" in conf
+    assert "or not gate.enter():" in conf and "say(logic.BOX_BUSY)" in conf and "gate.leave()" in conf
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'parts["box_buttons"] = buttons' in ui and "logic.grey_for_box(controls, is_open" in ui
+    assert 'parts["box_buttons"] = buttons' in ui and "logic.controls_enabled(is_open, zoom_ok)" in ui
 
 
 def test_the_recovery_message_says_what_it_did():
@@ -836,7 +856,7 @@ def test_while_a_start_box_is_open_no_panel_action_does_anything_but_say_so():
         gated[n]("an argument")
     assert sorted(calls) == sorted(["legend"] + names)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'list(parts.get("greyed") or [])' in ui and "logic.grey_for_box(controls, is_open" in ui
+    assert 'list(parts.get("greyed") or [])' in ui and "logic.controls_enabled(is_open, zoom_ok)" in ui
 
 
 
@@ -854,9 +874,9 @@ def test_live_mode_never_rechecks_under_an_open_start_box():
     assert 'logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS,' in idle
     assert idle.index("should_recheck") < idle.index('STATE["dirty"] = None')   # the pending edit kept until then
     check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert 'if STATE.get("running") or _box_open():\n        return None' in check      # every caller refused
+    assert 'if STATE.get("running") or not logic.allowed("check", _box_open()):\n        return None' in check
     save = rhino[rhino.index("def save_facts("):rhino.index("def _save_facts(")]
-    assert "if _box_open():" in save and "_save_facts(doc, facts)" in save
+    assert 'if not logic.allowed("save_facts", _box_open()):' in save and "_save_facts(doc, facts)" in save
     conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
     assert conf.index("gate.leave()") < conf.index('STATE["dirty"] = time.time() - IDLE_SECONDS')
 
@@ -878,16 +898,19 @@ class _Control:
         self.Enabled = enabled
 
 
-def test_closing_the_box_puts_each_panel_control_back_as_it_was():
-    """Verification round 3: closing the box turned Zoom to on even with nothing selected. Each control's state is
-    saved when the box opens and restored when it closes."""
-    zoom, report, tick = _Control(False), _Control(True), _Control(True)    # Zoom to off: nothing selected
-    saved = logic.grey_for_box([zoom, report, tick], True)
-    assert [c.Enabled for c in (zoom, report, tick)] == [False, False, False]
-    logic.grey_for_box([zoom, report, tick], False, saved)
-    assert [c.Enabled for c in (zoom, report, tick)] == [False, True, True]
+def test_closing_the_box_works_out_each_panel_control_from_the_panel_as_it_is_now():
+    """Verification rounds 3-4: closing turned Zoom to on with nothing selected; then restoring a saved list put
+    states on the wrong buttons after the header was rebuilt mid-box (a document switch). Now nothing is remembered:
+    on closing, every control is on and Zoom to follows the panel's own rule."""
+    assert logic.controls_enabled(True, True) == (False, False)              # box open: all off
+    assert logic.controls_enabled(False, False) == (True, False)             # nothing selected: Zoom to stays off
+    assert logic.controls_enabled(False, True) == (True, True)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'parts["_was_enabled"] = logic.grey_for_box(controls, is_open, parts.get("_was_enabled"))' in ui
+    body = ui[ui.index("def set_box_open("):ui.index("def show_detail(")]
+    assert "_was_enabled" not in body and "saved" not in body                # nothing remembered by position
+    assert 'zoom_ok = parts.get("selected") in (parts.get("by_id") or {}) and not parts.get("stale")' in body
+    show = ui[ui.index("def show("):ui.index("def _header(")]
+    assert 'parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]' in show   # same rule
 
 
 def test_a_box_that_edited_is_checked_once_not_twice():
@@ -898,4 +921,167 @@ def test_a_box_that_edited_is_checked_once_not_twice():
     assert logic.should_recheck(10.0, 11.0, False, False, 0.5)                     # no check yet
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     idle = rhino[rhino.index("def _idle("):rhino.index("def documents(")]
-    assert '(STATE.get("last") or {}).get("at"))' in idle and 'STATE["dirty"] = t = None' in idle
+    assert "logic.last_check_at(STATE.get(\"checked_at\")" in idle and 'STATE["dirty"] = t = None' in idle
+
+
+
+def test_switching_documents_with_a_pending_edit_still_rechecks_the_one_in_front():
+    """Verification round 4: the new document's "no check yet" placeholder carried a time, so the pending re-check
+    of the document now in front was dropped. Only a completed check of that same document counts."""
+    checked_at = {"doc A": 12.0}                         # A was checked after the edit; B, now in front, never
+    assert logic.last_check_at(checked_at, "doc B") is None
+    assert logic.should_recheck(10.0, 13.0, False, False, 0.5, logic.last_check_at(checked_at, "doc B"))
+    assert not logic.should_recheck(10.0, 13.0, False, False, 0.5, logic.last_check_at(checked_at, "doc A"))
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert 'STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()' in check
+    assert check.index('"envelope": result.get("envelope"), "at": time.time()}') < check.index('"checked_at"') < \
+        check.index("except Exception")                  # only after a completed check, never on an error
+    new_doc = rhino.index("def _new_document(")
+    assert '"checked_at"' not in rhino[new_doc:rhino.index("\ndef ", new_doc + 10)]
+
+
+
+# ---- eval-integrity audit (P1-5) and the gate by behaviour --------------------------------------------------------
+
+@pytest.mark.parametrize("what", ["street", "lot", "draw_lot", "terrain", "spot", "regrade"])
+@pytest.mark.usefixtures("ground_from_the_lookup")
+def test_esc_at_any_pick_changes_nothing_and_keeps_every_doubt(what):
+    """The audit: making Esc on Place spot grades wipe the ground's doubt still passed the source-text pin. Every
+    pick's effect is decided in rhino_logic from what the pick gave; Esc, Enter or nothing picked changes nothing."""
+    facts, saved, _ = box(_doubtful_106())
+    saved = dict(saved, doubts={"lot": "x", "street": "y", "ground": "z"}, checked=[])
+    for nothing in (None, [], ""):
+        f2, s2 = logic.pick_effect(what, nothing, facts, saved)
+        assert (f2, s2) == (facts, saved)
+        assert logic.unsettled(s2) == {"lot": "x", "street": "y", "ground": "z"}
+
+
+@pytest.mark.parametrize("what, outcome, row", [("street", [[0, 0], [10, 0]], "street"), ("lot", "survey-id", "lot"),
+                                                 ("draw_lot", "drawn-id", "lot"), ("terrain", "terrain-id", "ground"),
+                                                 ("spot", ["p1", "p2"], "ground"), ("regrade", ["p1"], "ground")])
+@pytest.mark.usefixtures("ground_from_the_lookup")
+def test_a_real_pick_settles_only_its_own_row(what, outcome, row):
+    saved = {"doubts": {"lot": "x", "street": "y", "ground": "z"}, "checked": []}
+    facts, after = logic.pick_effect(what, outcome, {"lot_id": "sample", "lot_surveyed": False}, saved)
+    assert set(logic.unsettled(after)) == {"lot", "street", "ground"} - {row}
+    if what == "lot":
+        assert facts["lot_id"] == "survey-id" and facts["lot_surveyed"] is True
+    if what == "draw_lot":
+        assert facts["lot_surveyed"] is False and after["lot_source"] == "drawn by you"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    pick = rhino[rhino.index("def _one_pick("):rhino.index("def confirm(")]
+    assert "logic.pick_effect(what, _pick_outcome(doc, what, facts, session), facts, saved_ui)" in pick
+    assert "logic.settle(" not in pick and "logic.after_ground_pick(" not in pick      # decided only in rhino_logic
+
+
+def test_nothing_checks_writes_facts_or_opens_a_box_while_one_is_open():
+    for action in ("check", "save_facts", "open_box"):
+        assert not logic.allowed(action, True) and logic.allowed(action, False)
+    assert logic.allowed("legend", True)
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert 'not logic.allowed("check", _box_open())' in rhino[rhino.index("def run_check("):]
+    assert 'not logic.allowed("save_facts", _box_open())' in rhino[rhino.index("def save_facts("):]
+    assert 'not logic.allowed("open_box", _box_open())' in rhino[rhino.index("def confirm("):]
+
+
+def test_a_looked_up_lot_says_how_its_plan_is_turned_and_its_sides_get_true_compass_names():
+    """The lot is drawn turned (its street along the bottom: 106 Ithaca Rd 306.38 degrees from true north): the
+    facts carry plan_north_deg from the frame, so the panel names 106's side yards Northeast and Southwest, not
+    East and West. Picking another lot drops it."""
+    table, facts, saved = sample_model()
+    f, sv, _ = logic.apply_lookup(table, logic.BoxSession(table), looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    assert abs(f["plan_north_deg"] - sv["lookup_frame"]["rotation_deg"]) < 1e-9
+    assert round(f["plan_north_deg"], 2) == 306.38
+    assert "plan_north_deg" not in logic.after_lot_pick(f, "another lot")
+    from design_checker import present
+    sides = {"side_yard_smaller": {"points": [[73.0, 40.0], [61.0, 40.0]]},
+             "side_yard_larger": {"points": [[0.0, 40.0], [12.0, 40.0]]}}
+    assert {present._side_name(k, sides, f["plan_north_deg"]) for k in sides} == \
+        {"Side yard, Northeast", "Side yard, Southwest"}
+
+
+# ---- merge review round 1 of #19 with #15's MVP (FLAT_GROUND): the ground is never the lookup's ----------------
+
+def test_with_flat_ground_the_ground_fact_is_an_assumption_credited_to_no_one():
+    """P1: the saved Ground fact read "assumed flat" but was credited to USGS (or "placed by you") and confirmed by
+    you, after a lookup drew spot grades. With FLAT_GROUND it is the MVP's assumption, confirmed by no one."""
+    assert logic.FLAT_GROUND
+    state = {"ground": {"kind": "spot", "count": 14, "source": "suggested by Gordium · USGS 3DEP elevation"}}
+    got = logic.fact_sources(state, "2026-10-21", confirmed=True)["ground"]
+    assert got["value"] == "assumed flat" and got["source"] == logic.ASSUMED_SOURCE and got["confirmed_by"] is None
+
+
+def test_with_flat_ground_a_lookup_keeps_no_ground_doubt_and_draws_no_spot_grades():
+    """P2: with the elevation service down the lookup kept a "ground" doubt, which held height and stories at
+    needs review with no box row to clear it. With FLAT_GROUND the ground isn't the lookup's: no ground doubt, no
+    looked-up ground kind or source, and no spot grades drawn."""
+    assert logic.FLAT_GROUND
+    payload = {"status": "found", "facts": {"lot": {"value": {"area_sf": 7033}}},
+               "details": {"ground": {"status": "needs_review",
+                                      "reason": "Couldn't reach the elevation service: set the ground by hand."}},
+               "writes": {"lot_ring": [[0, 0], [50, 0], [50, 100], [0, 100]], "spots": [[1, 1, 0], [2, 2, 0]]}}
+    facts, saved = logic.lookup_choices(payload, {}, {})
+    assert "ground" not in (saved.get("doubts") or {}) and "ground" not in logic.unsettled(saved)
+    assert "ground" not in (saved.get("_live") or {}) and saved.get("ground_kind") != "spot"
+    assert not saved.get("ground_source")
+    table, facts, saved = sample_model()
+    session = logic.BoxSession(table)
+    logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    session.commit()
+    assert table.ground_points() == []
+
+
+def test_every_tick_row_is_greyed_while_a_box_is_open():
+    """P3: the greyed list must hold each of the three tick rows (envelope, massing, labels), spread in: a list
+    inside it (ticks, not *ticks) or a row left out would leave a control live while a box is open."""
+    import ast
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    tree = ast.parse(ui)
+    ticks = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
+                 and any(isinstance(t, ast.Name) and t.id == "ticks" for t in n.targets))
+    boxes = [ast.unparse(e.args[0]) for e in ticks.elts]
+    assert boxes == ["_envelope_box(actions)", "_massing_box(actions)", "_labels_box(actions, parts)",
+                     "_context_box(actions, parts, context_on)"]          # + Show neighbourhood (PR #23)
+    greyed = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
+                  and any(ast.unparse(t) == "parts['greyed']" for t in n.targets))
+    assert any(isinstance(e, ast.Starred) and ast.unparse(e.value) == "ticks" for e in greyed.elts)
+
+
+def test_the_yard_measures_are_defined_once():
+    """P3: check.py defined YARD_MEASURES twice (the first dead); it is present's."""
+    from design_checker import check as checking
+    from design_checker import present
+    src = (REPO / "packages/design_checker/design_checker/check.py").read_text(encoding="utf-8")
+    assert src.count("YARD_MEASURES = ") == 1 and checking.YARD_MEASURES is present.YARD_MEASURES
+
+
+
+def test_with_flat_ground_the_looked_up_fall_is_said_plainly_never_used():
+    """Architect review in Rhino (P1-5): "Ground: assumed flat" said nothing of the ground the lookup found. Under
+    FLAT_GROUND the spot grades are still never drawn or used, but their fall is said: "assumed flat (the looked-up
+    ground falls about 3.5 ft across the lot; height is checked as if flat)", in the header and the Ground fact."""
+    from design_checker import present
+    payload = {"status": "found", "facts": {"lot": {"value": {"area_sf": 7033}}},
+               "writes": {"lot_ring": [[0, 0], [50, 0], [50, 100], [0, 100]],
+                          "spots": [[1, 1, 0.2], [2, 2, 3.7], [3, 3, 1.0]]}}
+    _, saved = logic.lookup_choices(payload, {}, {})
+    assert saved["ground_fall"] == 3.5 and saved.get("ground_kind") != "spot"
+    facts = logic.ground_facts({"ground_fall": saved["ground_fall"]}, 0.0)
+    assert facts["ground_assumed"] == "flat" and facts["ground_fall"] == 3.5 and not facts.get("grade_points")
+    said = "assumed flat (the looked-up ground falls about 3.5 ft across the lot; height is checked as if flat)"
+    assert present.grade_label(facts) == said
+    assert logic.fact_sources({"ground_fall": 3.5}, "2026-10-21", True)["ground"]["value"] == said
+    _, saved = logic.lookup_choices({**payload, "writes": {**payload["writes"], "spots": []}}, {}, saved)
+    assert "ground_fall" not in saved                        # a lookup with no ground found says none
+
+
+@pytest.mark.usefixtures("ground_from_the_lookup")
+def test_with_the_lookups_ground_its_fact_names_where_the_ground_came_from():
+    """#19 round 2 (P3): with FLAT_GROUND off, the Ground fact names its source and is confirmed by you: spot
+    grades from the lookup say USGS; spot grades with no source say placed by you."""
+    state = {"ground": {"kind": "spot", "count": 14, "source": "suggested by Gordium · USGS 3DEP elevation"}}
+    got = logic.fact_sources(state, "2026-10-21", confirmed=True)["ground"]
+    assert got["source"] == "suggested by Gordium · USGS 3DEP elevation" and got["confirmed_by"] == "you"
+    got = logic.fact_sources({"ground": {"kind": "spot", "count": 3}}, "2026-10-21", confirmed=True)["ground"]
+    assert got["source"] == "placed by you" and got["confirmed_by"] == "you"

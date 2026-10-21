@@ -8,7 +8,7 @@ Each step: viewport capture, the corner status, the newly-failing note (toast) i
 Writes <temp>/gordium_start_flow/flow_out.json and frames/NN.png.
 
 How to run: in Rhino, make a new empty document first (File > New, no template), then RunPythonScript this
-file. The demo in docs/demo/start/ is these frames."""
+file. (The current demo pictures are in docs/demo/.)"""
 import json
 import os
 import sys
@@ -30,6 +30,9 @@ log = {"steps": steps}
 
 
 def fresh_module():
+    loaded = sys.modules.get("gordium_rhino")
+    if loaded is not None:                # its hooks, drawing and panel off before it is dropped
+        loaded.off()
     state = sc.sticky.setdefault("gordium_state", {})
     w = state.pop("worker", None)
     if w is not None:

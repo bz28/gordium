@@ -1,0 +1,54 @@
+{
+ "phase": "run",
+ "before": {
+  "objects": 1,
+  "sample_lot": "e889e304-f36c-4281-baad-2d8ba6f6f41a"
+ },
+ "after_cancel": {
+  "result": null,
+  "objects_same": true,
+  "sample_lot_there": true,
+  "sample_on_site": true,
+  "spot_grades": 0,
+  "layers_same": true
+ },
+ "after_A": {
+  "objects": 15,
+  "sample_held": true,
+  "spot_grades": 14,
+  "lots": 1
+ },
+ "after_B": {
+  "spot_grades": 6,
+  "lot": true,
+  "lots": 1
+ },
+ "after_B_cancel": {
+  "objects_same": true
+ },
+ "after_crash_recovery": {
+  "objects_same": true,
+  "sample_on_site": true
+ },
+ "guide": {
+  "guide_shown": true,
+  "lot_id": null,
+  "lot_actions": [
+   [
+    "draw_lot",
+    "Draw my lot\u2026",
+    true
+   ],
+   [
+    "lot",
+    "Use my survey\u2026",
+    true
+   ]
+  ],
+  "lot_text": "no lot yet: draw it, or pick a closed outline on the Site layer",
+  "lot_review": "? The State's tax map didn't answer; the City's outline is shown as a dashed guide only (it can't be kept): Draw my lot\u2026 over it, or pick your own outline.",
+  "draw_reason": "Draw or pick the lot to continue.",
+  "objects_added": 0
+ },
+ "ok": true
+}

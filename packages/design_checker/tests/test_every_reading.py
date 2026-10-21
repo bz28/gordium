@@ -414,11 +414,15 @@ def test_a_dormer_on_floor_2_reaching_past_the_front_wall_counts():
 def test_a_bay_window_and_a_balcony_touching_the_house_count():
     """A bay window (a solid from 3 to 12 ft, 2 ft deep) and a balcony slab (10 to 10.5 ft, 3 ft deep) touching
     the front wall: part of the building (§325-18A; the balcony projects more than 2 ft): front 30 − 3 = 27; both
-    counted in coverage: 1,200 + 2 × 8 + 3 × 6 = 1,234 sf."""
+    counted in coverage: 1,200 + 2 × 8 + 3 × 6 = 1,234 sf. They stick out past the walls at the ground, as a bump
+    drawn on the house's own solid would: the same projection question (§325-18B), the same two readings, 27 as
+    part of the building and 30 to the walls at ground level, however it is drawn (one solid or touching ones) and
+    whichever solid is called the main one."""
     bay = prism(rect(18, 28, 26, 30), 3, 12, "bay")
     balcony = prism(rect(32, 27, 38, 30), 10, 10.5, "balcony")
     res = run(floors(*HOUSE, 2) + [roof(*HOUSE, 20, 30, 0.0, 0), bay, balcony])
-    assert res["measurements"]["front_yard"]["value"] == 27.0
+    front = res["measurements"]["front_yard"]
+    assert sorted(r["value"] for r in front["readings"]) == [27.0, 30.0] and "bay window" in front["reason"], front
     assert res["measurements"]["building_area"]["value"] == 1234.0
 
 
@@ -671,3 +675,21 @@ def test_the_item_carries_the_candidates_and_says_what_it_waits_for():
     assert side and all(i["detail"]["eave_candidates"] for i in side)
     assert all("next release" in i["reason"] and "These are eaves" not in i["reason"] for i in side)
     assert side[0]["detail"]["eave_candidates"] == res["measurements"]["side_yard_smaller"]["eave_candidates"]
+
+
+@pytest.mark.parametrize("mirror", [False, True])
+def test_a_one_sided_overhang_is_named_by_how_far_it_reaches_wherever_the_house_sits(mirror):
+    """Review round 15, P2. Walls 10.5 ft from the west line and 12 ft from the east (on the 60 ft lot: 10.5..48),
+    a gable roof reaching 3 ft past the east wall and nothing past the west. The narrower side yard is the west one
+    measured to the walls (10.5) but the east one to the roof (9.0): paired by rank the gaps were 1.5 each, and the
+    architect was asked to confirm a 1'-6" eave. Paired by lot line: 12 - 9 = 3'-0" (east), 0 (west). Mirrored
+    (12 west, 10.5 east, the overhang on the west), the same 3'-0"."""
+    # the roof solid stands 1.5 ft in from one wall, its soffit 1.5 ft past its own walls: 3 ft past that wall
+    walls, roof_x = ((10.5, 48), (12, 49.5)) if not mirror else ((12, 49.5), (10.5, 48))
+    res = run(floors(walls[0], 30, walls[1], 70, 2) + [roof(roof_x[0], 30, roof_x[1], 70, 20, 30, 1.5, 0.0)])
+    # (each side yard is its own row with the checker's own verdict for it: the side the overhang reaches toward
+    # needs the confirmation; the other complies to the full outline either way)
+    got = rows(res, "R-1b.side_yards")
+    reasons = [i["reason"] or "" for i in got if i["status"] == present.REVIEW]
+    assert reasons and all("3'-0\" past the walls toward the side yard" in t for t in reasons), reasons
+    assert not any("1'-6\"" in (i["reason"] or "") for i in got), got

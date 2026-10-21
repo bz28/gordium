@@ -51,10 +51,11 @@ def test_same_pass_fail_as_the_architects_on_all_11_rows(t, theirs):
 
 def test_tab_names_and_headers_are_theirs_with_ours_after(t, theirs):
     wb = build(t)
-    assert wb.sheetnames == theirs.sheetnames == ["Inputs", "Output"]
+    assert theirs.sheetnames == ["Inputs", "Output"] and wb.sheetnames == ["Inputs", "Output", report.TRACE_TAB]
     header = [c.value for c in wb["Output"][2]]
     assert header[:7] == [c.value for c in theirs["Output"][2]][:7]
-    assert header[7:] == OUTPUT_EXTRA
+    assert header[7:] == report.OUTPUT_SHOWN               # the rule ids and formulas: on the last tab
+    assert [c.value for c in wb[report.TRACE_TAB][2]] == report.TRACE_HEADERS
     assert [c.value for c in wb["Inputs"][2]][:3] == [c.value for c in theirs["Inputs"][2]][:3]
     ws = wb["Inputs"]
     at = next(r for r in range(1, ws.max_row + 1) if ws.cell(r, 1).value == "Table parameters")
@@ -109,9 +110,11 @@ def test_a_missing_measurement_needs_review_with_a_reason(tmp_path):
     measurements = load(SITE)["measurements"]
     del measurements["rear_yard"]
     rows = rows_by_id(tables(write_project(tmp_path, measurements=measurements)))
-    for rid in ("R-1b.rear_yard", "R-1b.height"):
-        assert rows[rid][COL["Error"]] == "NEEDS REVIEW"
-        assert "rear_yard" in rows[rid][COL["Why it needs review"]]
+    assert rows["R-1b.rear_yard"][COL["Error"]] == "NEEDS REVIEW"
+    assert "rear_yard" in rows["R-1b.rear_yard"][COL["Why it needs review"]]
+    # the height rule is `building_height <= 35 or (the bonus's raised yards ...)`: 35 ft is within 35 ft, so it
+    # complies whatever the rear yard is (three-valued logic: true or unknown is true), with no reason needed
+    assert rows["R-1b.height"][COL["Error"]] == "PASS" and not rows["R-1b.height"][COL["Why it needs review"]]
 
 
 def test_every_needs_review_row_has_a_reason(tmp_path):
@@ -169,10 +172,10 @@ def test_the_reason_names_every_measure_the_checker_needs():
     rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= (1 if sleeping_rooms <= 3 else lot_width)"}
     assert report.needs_review_reason(rule, {"parking_spaces": 1}, kinds) == \
         "Can't check: missing measurement: sleeping_rooms."
-    # A test that isn't true/false: the checker reads neither branch, so neither is blamed.
+    # A test that isn't true/false: the formula is wrong for every value (its types), whatever is missing: the reason.
     rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= (1 if lot_width else sleeping_rooms)"}
     assert report.needs_review_reason(rule, {"lot_width": 50}, kinds) == \
-        "Can't check: missing measurement: parking_spaces."
+        "Can't check: can't be worked out (an if needs a true/false test)."
 
 
 def test_every_shown_limit_uses_one_symbol_style():
@@ -358,3 +361,23 @@ def test_the_report_looks_like_the_architects_sheet(t):
         assert color not in their_key or their_key[color] == "hard-code" and "typed" in meaning, (color, meaning)
     # the table parameters keep the inputs' widths; only their Link column (E) gets its own
     assert [ins.column_dimensions[c].width for c in "ABCDE"] == [*report.INPUT_WIDTHS, 10]
+
+
+def test_the_workbook_is_in_an_architects_words(t):
+    """Architect review in Rhino (P1-4): the report read as an engineering file. Its Inputs and Output tabs now
+    show titles, not measure names; lengths in feet and inches and areas in square feet (rounded never in the
+    design's favour: a proposed value toward failing its limit); no file names; no "a column Gordium adds"."""
+    import re
+    wb = build(t)
+    text = [str(c.value) for tab in ("Inputs", "Output") for r in wb[tab].iter_rows() for c in r if c.value is not None]
+    snake = [x for x in text if re.search(r"\b[a-z]+_[a-z_]+\b", x) and "http" not in x]
+    assert not snake, snake[:5]
+    assert not [x for x in text if re.search(r"\d\.\d{3,}", x)], "long decimals"
+    assert not [x for x in text if ".3dm" in x or ".yaml" in x or "a column Gordium adds" in x]
+    out = wb["Output"]
+    head = [c.value for c in out[2]]
+    rear = next(r for r in out.iter_rows(min_row=3, values_only=True) if r[0] and r[0].startswith("Rear yard"))
+    assert rear[head.index("Table limit")] == "≥ 22'-6\"" and rear[head.index("Proposed")] == "25'-0\""
+    from project_report import plain
+    assert plain.proposed(24.9999, "ft", "≥ 25") == "24'-11 7/8\""      # never rounded up to 25'-0"
+    assert plain.proposed(35.0001, "ft", "≤ 35") == "35'-0 1/8\""       # never rounded down to 35'-0"

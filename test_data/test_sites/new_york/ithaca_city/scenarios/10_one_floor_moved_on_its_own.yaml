@@ -38,10 +38,10 @@ fixed:
     the ground-floor wall, 15'-0") and said needs review. Research settled it as the law (definitions.yaml
     yard_projections, finding yards_to_nearest_part: each yard to the nearest part of the building, cantilevered
     upper floors included), and the part sticking out here is one of Gordium's own floor blocks, a story, never a
-    bay window: Gordium now says complies at 12'-0", the answer key's result.
+    bay window: Gordium now says complies at 12'-0", the hand-worked result.
   R-1b.lot_coverage: >-
     Until PR 18, read with and without the overhang (1,320 / 1,200 sf). Research settled it (building_area,
-    finding coverage_seen_from_above: everything above ground seen from above): 1,320 sf, complies, as the key says.
+    finding coverage_seen_from_above: everything above ground seen from above): 1,320 sf, complies, as the hand-worked result says.
   R-1b.height: >-
     The height rule names every yard (the §325-16C bonus), so it followed the side yard's two readings; with the
-    side yard settled it complies (30 ft), as the key says.
+    side yard settled it complies (30 ft), as the hand-worked result says.

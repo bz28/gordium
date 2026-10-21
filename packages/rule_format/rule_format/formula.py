@@ -8,22 +8,39 @@ then checked against a strict whitelist. Anything not listed here is rejected.
     parking_spaces >= (1 if sleeping_rooms <= 3 else 2)
 
 Allowed: numbers, quoted text, measure names, + - * / (numbers only), comparisons
-(< <= > >= between numbers; == != between anything), `in` / `not in` a [list],
-and / or / not, `a if condition else b`, min() and max() of two or more numbers.
+(< <= > >= between numbers; == != between two numbers or two texts), `in` / `not in` a [list]
+of numbers or texts, and / or / not (true/false tests combine only with these), `a if condition else b`
+(two numbers or two texts), min() and max() of two or more numbers. The kinds each operator takes are one
+table, result_type, used both to check rule files (type_of) and when a formula is worked out.
 A yes/no measure is used on its own: `adu_separate_entrance`, `not accessory_in_front_yard`.
+
+Numbers are worked out exactly, as the decimals they are written as (0.2 * 132 is 26.4, not the binary
+26.400000000000002), and a comparison treats two numbers within AT_LIMIT of each other as equal: a design
+exactly at a limit complies with "at least" / "at most" (and not with "more than" / "less than"), even when
+its measurement carries float noise from the geometry. AT_LIMIT is a millionth of a foot (or a billionth of
+the number, if larger): far below anything measurable, so a real violation always fails.
 """
 
 import ast
 import math
+from fractions import Fraction
 from functools import lru_cache
 
 MAX_LENGTH = 500
 FUNCTIONS = {"min": min, "max": max}
+AT_LIMIT_ABSOLUTE = Fraction(1, 10 ** 6)       # two numbers this close count as equal (ft, sq ft, counts)
+AT_LIMIT_RELATIVE = Fraction(1, 10 ** 9)       # ... or this close relative to the larger, for big numbers
 
 _ARITHMETIC = {ast.Add: lambda a, b: a + b, ast.Sub: lambda a, b: a - b,
                ast.Mult: lambda a, b: a * b, ast.Div: lambda a, b: a / b}
-_ORDERING = {ast.Lt: lambda a, b: a < b, ast.LtE: lambda a, b: a <= b,
-             ast.Gt: lambda a, b: a > b, ast.GtE: lambda a, b: a >= b}
+
+
+def _at_limit(a, b) -> Fraction:
+    return max(AT_LIMIT_ABSOLUTE, AT_LIMIT_RELATIVE * max(abs(a), abs(b)))
+
+
+_ORDERING = {ast.Lt: lambda a, b: b - a > _at_limit(a, b), ast.LtE: lambda a, b: a - b <= _at_limit(a, b),
+             ast.Gt: lambda a, b: a - b > _at_limit(a, b), ast.GtE: lambda a, b: b - a <= _at_limit(a, b)}
 _EQUALITY = {ast.Eq: lambda a, b: a == b, ast.NotEq: lambda a, b: a != b}
 _MEMBERSHIP = {ast.In: lambda a, b: a in b, ast.NotIn: lambda a, b: a not in b}
 _ALLOWED = (ast.Expression, ast.Constant, ast.Name, ast.Load, ast.List, ast.Tuple,
@@ -77,6 +94,139 @@ def parse(text: str) -> ast.Expression:
                 if type(op) in _MEMBERSHIP and not isinstance(right, (ast.List, ast.Tuple)):
                     raise FormulaError(f"'in' needs a [list] on its right: {text!r}")
     return tree
+
+
+NUMBER, TEXT, BOOL = "number", "text", "bool"       # the three kinds of value a formula works with
+ANY_LIST = "list"                                     # an empty [list]: of no kind yet
+
+
+class _Mismatch(Exception):
+    """An operator given operands of kinds it doesn't take (wrong for every value)."""
+
+
+class _Undescribed(Exception):
+    """A measure with no description: nothing about it can be told."""
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.name = name
+
+
+def _kind_type(kind) -> str | None:
+    """A measure's description as a formula type: number, text or bool (None: no description)."""
+    if kind == "number":
+        return NUMBER
+    if kind == "boolean":
+        return BOOL
+    if kind == "text" or isinstance(kind, (set, frozenset)):
+        return TEXT
+    return None
+
+
+def result_type(rule: str, operands: list[str]) -> str:
+    """THE type rules of the language, one place, used by both the rule-file check (type_of) and the evaluation:
+    given an operator and its operands' kinds, the kind of its result, or _Mismatch. The language is kept small:
+    true/false tests combine only with and / or / not (never ==, !=, in, arithmetic or an if's branches).
+
+        arithmetic (+ - * /), minus, min(), max()    numbers            -> number
+        <  <=  >  >=                                  two numbers        -> true/false
+        ==  !=                                        two numbers, or two texts -> true/false
+        in / not in [list]                            a number or text, and a list of that kind -> true/false
+        not, and, or                                  true/false tests   -> true/false
+        a if test else b                              a true/false test, and two numbers or two texts -> that kind
+        [a, b, ...]                                   numbers, or texts  -> a list of that kind
+    """
+    def need(ok, why):
+        if not ok:
+            raise _Mismatch(why)
+
+    if rule in ("arithmetic", "minus", "min/max"):
+        need(all(t == NUMBER for t in operands),
+             {"arithmetic": "arithmetic needs numbers", "minus": "a minus sign needs a number",
+              "min/max": "min() and max() take numbers"}[rule])
+        return NUMBER
+    if rule == "ordering":
+        need(operands == [NUMBER, NUMBER], "<, <=, >, >= compare numbers")
+        return BOOL
+    if rule == "equality":
+        need(operands[0] in (NUMBER, TEXT) and operands[0] == operands[1],
+             "== and != compare two numbers or two texts (true/false tests combine with and/or/not)")
+        return BOOL
+    if rule == "membership":
+        need(operands[0] in (NUMBER, TEXT) and operands[1] in ("list of " + operands[0], ANY_LIST),
+             "'in' needs a number or text and a list of the same kind")
+        return BOOL
+    if rule in ("not", "and/or"):
+        need(all(t == BOOL for t in operands),
+             "'not' needs a true/false test" if rule == "not" else "and/or need true/false tests")
+        return BOOL
+    if rule == "if":
+        need(operands[0] == BOOL, "an if needs a true/false test")
+        need(operands[1] in (NUMBER, TEXT) and operands[1] == operands[2],
+             "both branches of an if must give two numbers or two texts")
+        return operands[1]
+    if rule == "list":
+        need(all(t in (NUMBER, TEXT) for t in operands) and len(set(operands)) <= 1,
+             "a list holds numbers, or texts, not a mix")
+        return "list of " + operands[0] if operands else ANY_LIST
+    raise _Mismatch(f"unsupported expression {rule}")
+
+
+def _rule_of(node, op=None) -> str:
+    """Which of the type rules an expression (or one comparison of a chain, `op`) follows."""
+    op = op if op is not None else getattr(node, "op", None)
+    if isinstance(node, ast.BinOp):
+        return "arithmetic"
+    if isinstance(node, ast.UnaryOp):
+        return "minus" if isinstance(op, ast.USub) else "not"
+    if isinstance(node, ast.BoolOp):
+        return "and/or"
+    if isinstance(node, ast.Call):
+        return "min/max"
+    if isinstance(node, ast.IfExp):
+        return "if"
+    if isinstance(node, (ast.List, ast.Tuple)):
+        return "list"
+    return ("ordering" if type(op) in _ORDERING else "equality" if type(op) in _EQUALITY else "membership")
+
+
+def type_of(text: str, kinds: dict) -> str:
+    """The formula's kind (number, text, bool), worked out from the measures' descriptions without any values,
+    by the language's type rules (result_type). Raises FormulaError where it is wrong for every value (a number
+    compared with text, a number used as true/false, true/false compared or in arithmetic) or names a measure with
+    no description. Rule files are checked with it, so no frozen rule can be ill-typed; evaluate() checks it too,
+    before any value is looked at, so no error every value would give can hide behind a missing measure."""
+    try:
+        return _type(parse(text).body, kinds)
+    except _Undescribed as e:
+        raise FormulaError(f"unknown measure '{e.name}' in {text!r}") from None
+    except _Mismatch as e:
+        raise FormulaError(f"{e}: {text!r}") from None
+
+
+def _type(node, kinds) -> str:
+    match node:
+        case ast.Constant(value=v):
+            return TEXT if type(v) is str else NUMBER
+        case ast.Name(id=name):
+            t = _kind_type(kinds.get(name))
+            if t is None:
+                raise _Undescribed(name)
+            return t
+        case ast.Compare(left=l, ops=ops, comparators=rights):
+            types = [_type(x, kinds) for x in (l, *rights)]
+            for op, a, b in zip(ops, types, types[1:]):
+                result_type(_rule_of(node, op), [a, b])
+            return BOOL
+        case ast.List(elts=parts) | ast.Tuple(elts=parts) | ast.Call(args=parts) | ast.BoolOp(values=parts):
+            return result_type(_rule_of(node), [_type(x, kinds) for x in parts])
+        case ast.BinOp(left=l, right=r):
+            return result_type("arithmetic", [_type(l, kinds), _type(r, kinds)])
+        case ast.UnaryOp(operand=x):
+            return result_type(_rule_of(node), [_type(x, kinds)])
+        case ast.IfExp(test=t, body=a, orelse=b):
+            return result_type("if", [_type(t, kinds), _type(a, kinds), _type(b, kinds)])
+    raise _Mismatch(f"unsupported expression {type(node).__name__}")
 
 
 def is_condition(text: str) -> bool:
@@ -137,8 +287,100 @@ def evaluate(text: str, values: dict, kinds: dict):
     lengths, areas, counts), "boolean" (a yes/no fact: True or False), or the set of text values
     allowed (e.g. the city's use names).
     Fails closed: a measure with no description, or a value that doesn't fit, is unusable.
+    Worked out exactly (see the module docstring); a number comes back as a float (an int where plain Python
+    arithmetic would have given one).
+
+    First the formula's types are checked against the measures' descriptions (result_type, the same rules the
+    rule files are checked by): one that is wrong for every value is an EvaluationError before any value is looked
+    at, and a measure with no description is missing. Then a missing or unusable measure is unknown, and unknowns
+    follow three-valued (Kleene) logic: True or unknown is True, False and unknown is False (the result is the same
+    whatever the measure turns out to be), and anything else that depends on an unknown is unknown, raised as
+    MissingMeasure. Every part is worked out, so an error a value gives (division by zero) is never hidden. A
+    division by an unknown is MissingMeasure: it could be by zero.
     """
-    return _eval(parse(text).body, values, kinds)
+    body = parse(text).body
+    try:
+        _type(body, kinds)
+    except _Undescribed as e:
+        raise MissingMeasure(e.name) from None
+    except _Mismatch as e:
+        raise EvaluationError(str(e)) from None
+    result = _eval(body, values, kinds)
+    if isinstance(result, _Unknown):
+        raise MissingMeasure(result.name)
+    return _plain(result, _floats_in(body, values))
+
+
+class _Unknown:
+    """A value that depends on a missing or unusable measure (the first one named), and its kind (by the type
+    rules, as every value's)."""
+
+    def __init__(self, name, kind):
+        self.name, self.kind = name, kind
+
+
+def _value_type(x) -> str:
+    """A value's kind, for the type rules: the same kinds type_of works with."""
+    if isinstance(x, _Unknown):
+        if x.kind is None:
+            raise MissingMeasure(x.name)
+        return x.kind
+    if type(x) is bool:
+        return BOOL
+    if type(x) in (int, float, Fraction):
+        return NUMBER
+    if type(x) is str:
+        return TEXT
+    if isinstance(x, list):
+        return result_type("list", [_value_type(i) for i in x])
+    raise EvaluationError(f"not a value: {_shown(x)!r}")
+
+
+def _checked(rule: str, operands: list):
+    """The result kind of `rule` on these operand values, by the type rules (a defence: type_of has checked
+    them); EvaluationError if they don't fit."""
+    try:
+        return result_type(rule, [_value_type(x) for x in operands])
+    except _Mismatch as e:
+        raise EvaluationError(str(e)) from None
+
+
+def _shown(x):
+    """A value as written in a message: an exact number as a plain one (50, 0.25), anything else as it is."""
+    if isinstance(x, Fraction):
+        return _plain(x, x.denominator != 1)
+    if isinstance(x, list):
+        return [_shown(i) for i in x]
+    return x
+
+
+def _unknown(*xs):
+    return next((x for x in xs if isinstance(x, _Unknown)), None)
+
+
+def _exact(x):
+    """A number as the decimal it is written as (a float by its shortest repr: 0.2 -> 1/5), else as it is."""
+    if type(x) is float:
+        return Fraction(repr(x))
+    if type(x) is int:
+        return Fraction(x)
+    return x
+
+
+def _floats_in(body, values) -> bool:
+    """Whether plain Python would have given a float: a float number or measurement, or a division, anywhere."""
+    return any(isinstance(n, ast.Constant) and type(n.value) is float
+               or isinstance(n, ast.BinOp) and isinstance(n.op, ast.Div)
+               or isinstance(n, ast.Name) and type(values.get(n.id)) is float for n in ast.walk(body))
+
+
+def _plain(x, floats: bool):
+    """A result as callers use it: an exact number back to a float, or to an int where plain Python gave one."""
+    if isinstance(x, Fraction):
+        return int(x) if not floats and x.denominator == 1 else float(x)
+    if isinstance(x, list):
+        return [_plain(i, floats) for i in x]
+    return x
 
 
 def _finite(x) -> bool:
@@ -149,73 +391,167 @@ def _finite(x) -> bool:
 
 
 def _number(x):
-    if type(x) not in (int, float):
-        raise EvaluationError(f"expected a number, got {x!r}")
+    if type(x) not in (int, float, Fraction):
+        raise EvaluationError(f"expected a number, got {_shown(x)!r}")
     if not _finite(x):
-        raise EvaluationError(f"not a finite number: {x!r}")
+        raise EvaluationError(f"not a finite number: {_shown(x)!r}")
     return x
-
-
-def _kind(x):
-    return "text" if type(x) is str else "number" if type(x) in (int, float) else None
 
 
 def _measure(name, values, kinds):
     """Usable only if present and fitting its description: a finite, non-negative number,
-    or one of the allowed text values. Anything else (including no description) is unusable."""
+    or one of the allowed text values. Anything else is unknown, of the kind its description gives."""
     v, kind = values.get(name), kinds.get(name)
-    if kind == "number" and _kind(v) == "number" and _finite(v) and v >= 0:
-        return v
+    if kind == "number" and type(v) in (int, float) and _finite(v) and v >= 0:
+        return _exact(v)
     if kind == "boolean" and type(v) is bool:
         return v
-    if isinstance(kind, (set, frozenset)) and _kind(v) == "text" and v in kind:
+    if isinstance(kind, (set, frozenset)) and type(v) is str and v in kind:
         return v
-    raise MissingMeasure(name)
+    return _Unknown(name, _kind_type(kind))
 
 
 def _eval(node, values, kinds):
     match node:
         case ast.Constant(value=v):
-            return v
+            return _exact(v)
         case ast.Name(id=name):
             return _measure(name, values, kinds)
         case ast.List(elts=items) | ast.Tuple(elts=items):
-            return [_eval(i, values, kinds) for i in items]
+            out = [_eval(i, values, kinds) for i in items]
+            kind = _checked("list", out)
+            return _Unknown(u.name, kind) if (u := _unknown(*out)) else out
         case ast.BinOp(left=l, op=op, right=r):
-            a, b = _number(_eval(l, values, kinds)), _number(_eval(r, values, kinds))
-            if isinstance(op, ast.Div) and b == 0:
-                raise EvaluationError("division by zero")
+            a, b = _eval(l, values, kinds), _eval(r, values, kinds)
+            _checked("arithmetic", [a, b])
+            if isinstance(op, ast.Div) and not isinstance(b, _Unknown) and b == 0:
+                raise EvaluationError("division by zero")         # whatever the numerator is
+            if isinstance(op, ast.Div) and isinstance(b, _Unknown):
+                raise MissingMeasure(b.name)    # it could be zero: no answer can be sure without it
+            if u := _unknown(a, b):
+                return _Unknown(u.name, NUMBER)
             return _number(_ARITHMETIC[type(op)](a, b))
-        case ast.UnaryOp(op=ast.USub(), operand=x):
-            return -_number(_eval(x, values, kinds))
-        case ast.UnaryOp(op=ast.Not(), operand=x):
-            return not _boolean(_eval(x, values, kinds))
+        case ast.UnaryOp(op=op, operand=x):
+            a = _eval(x, values, kinds)
+            kind = _checked(_rule_of(node), [a])
+            if isinstance(a, _Unknown):
+                return _Unknown(a.name, kind)
+            return -a if isinstance(op, ast.USub) else not a
         case ast.BoolOp(op=op, values=parts):
-            # Evaluate every part so a missing measure is never hidden by short-circuiting.
-            results = [_boolean(_eval(p, values, kinds)) for p in parts]
-            return all(results) if isinstance(op, ast.And) else any(results)
+            # Every part is worked out (an error is never hidden); unknowns follow Kleene's logic.
+            results = [_eval(p, values, kinds) for p in parts]
+            _checked("and/or", results)
+            known = [r for r in results if not isinstance(r, _Unknown)]
+            decisive = isinstance(op, ast.Or)        # True decides an or, False an and
+            if decisive in known:
+                return decisive
+            u = _unknown(*results)
+            return _Unknown(u.name, BOOL) if u else (not decisive)
         case ast.Compare(left=l, ops=ops, comparators=rights):
             operands = [_eval(x, values, kinds) for x in (l, *rights)]
-            # Check every link, so a bad value can't hide behind an earlier false one.
-            results = [_compare(op, a, b) for op, a, b in zip(ops, operands, operands[1:])]
-            return all(results)
+            # A chain is an and of its links: every link checked, so a bad value can't hide behind a false one.
+            links = [_link(node, op, a, b) for op, a, b in zip(ops, operands, operands[1:])]
+            if False in [x for x in links if not isinstance(x, _Unknown)]:
+                return False
+            u = _unknown(*links)
+            return _Unknown(u.name, BOOL) if u else True
         case ast.IfExp(test=t, body=a, orelse=b):
-            return _eval(a, values, kinds) if _boolean(_eval(t, values, kinds)) else _eval(b, values, kinds)
+            test = _eval(t, values, kinds)
+            if not isinstance(test, _Unknown):         # only the branch taken is worked out, as plain logic does
+                chosen = _eval(a if test is True else b, values, kinds)
+                _checked("if", [test, chosen, chosen])
+                return chosen
+            yes, no = _eval(a, values, kinds), _eval(b, values, kinds)
+            kind = _checked("if", [test, yes, no])
+            if not _unknown(yes, no) and yes == no:   # the same either way: known
+                return yes
+            return _Unknown(test.name, kind)
         case ast.Call(func=ast.Name(id=f), args=args):
-            return FUNCTIONS[f](*(_number(_eval(a, values, kinds)) for a in args))
+            out = [_eval(a, values, kinds) for a in args]
+            _checked("min/max", out)
+            if u := _unknown(*out):
+                return _Unknown(u.name, NUMBER)
+            return FUNCTIONS[f](*out)
     raise FormulaError(f"unsupported expression: {ast.dump(node)}")
 
 
-def _compare(op, a, b):
+def _link(node, op, a, b):
+    """One comparison of a chain: true, false, or the unknown it depends on, its kinds checked by the type
+    rules first (whatever is unknown)."""
+    _checked(_rule_of(node, op), [a, b])
+    if _unknown(a, b):
+        return _Unknown(_unknown(a, b).name, BOOL)
     if type(op) in _ORDERING:
-        return _ORDERING[type(op)](_number(a), _number(b))
-    others = b if type(op) in _MEMBERSHIP else [b]
-    if _kind(a) is None or any(_kind(x) != _kind(a) for x in others):
-        raise EvaluationError(f"can't compare {a!r} with {b!r}: different kinds")
+        return _ORDERING[type(op)](a, b)
     return (_EQUALITY | _MEMBERSHIP)[type(op)](a, b)
 
 
-def _boolean(x):
-    if type(x) is not bool:
-        raise EvaluationError(f"expected true/false, got {x!r}")
-    return x
+def margin(proposed, required, at_least: bool) -> float:
+    """How far a measured value is on the complying side of its limit: proposed − required for "at least"
+    (>=, >), required − proposed for "at most" (<=, <); negative when it falls short. Worked out exactly, as
+    comparisons are, and 0.0 when the two are equal within AT_LIMIT: so a margin shown as "at the limit" and a
+    comparison that says it complies can never disagree."""
+    a, b = _exact(_number(proposed)), _exact(_number(required))
+    if abs(a - b) <= _at_limit(a, b):
+        return 0.0
+    return float(a - b if at_least else b - a)
+
+
+def _together(signs):
+    """Directions combined (a sum, a max/min, an and/or): None if any is unknown or two disagree."""
+    if any(s is None for s in signs):
+        return None
+    moving = {s for s in signs if s}
+    return None if len(moving) > 1 else (moving.pop() if moving else 0)
+
+
+def _flip(s):
+    return None if s is None else -s
+
+
+def _slope(node, name: str):
+    """How a number moves as `name` grows: +1 never down, -1 never up, 0 not at all, None not proven. Proven only
+    from the formula's structure: + and - of such parts, max/min of them, a part times or divided by a positive
+    number written in the formula, and a minus sign."""
+    if name not in {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}:
+        return 0
+    match node:
+        case ast.Name(id=n):
+            return 1 if n == name else 0
+        case ast.UnaryOp(op=ast.USub(), operand=x):
+            return _flip(_slope(x, name))
+        case ast.BinOp(left=l, op=ast.Add(), right=r):
+            return _together([_slope(l, name), _slope(r, name)])
+        case ast.BinOp(left=l, op=ast.Sub(), right=r):
+            return _together([_slope(l, name), _flip(_slope(r, name))])
+        case ast.BinOp(left=l, op=ast.Mult() | ast.Div() as op, right=ast.Constant(value=c)) \
+                if type(c) in (int, float) and c > 0:
+            return _slope(l, name)
+        case ast.BinOp(left=ast.Constant(value=c), op=ast.Mult(), right=r) if type(c) in (int, float) and c > 0:
+            return _slope(r, name)
+        case ast.Call(func=ast.Name(id="max" | "min"), args=args):
+            return _together([_slope(a, name) for a in args])
+    return None
+
+
+def _truth(node, name: str):
+    """How a condition's truth moves as `name` grows: +1 once true stays true, -1 once false stays false, 0 not
+    at all, None not proven (an == or !=, an if-else, a yes/no measure, a chain of comparisons)."""
+    if name not in {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}:
+        return 0
+    match node:
+        case ast.Compare(left=l, ops=[op], comparators=[r]) if isinstance(op, (ast.Lt, ast.LtE, ast.Gt, ast.GtE)):
+            gap = _together([_slope(l, name), _flip(_slope(r, name))])      # left - right
+            return gap if isinstance(op, (ast.Gt, ast.GtE)) else _flip(gap)
+        case ast.BoolOp(values=parts):
+            return _together([_truth(p, name) for p in parts])
+        case ast.UnaryOp(op=ast.Not(), operand=x):
+            return _flip(_truth(x, name))
+    return None
+
+
+def truth_direction(text: str, name: str):
+    """How a condition's truth moves as the measure `name` grows from 0 (+1, -1, 0, or None when that can't be
+    proven from the formula's structure). With -1 the condition is truest at `name` = 0: false there, it is false
+    for every value `name` can take (measures are never negative)."""
+    return _truth(parse(text).body, name)

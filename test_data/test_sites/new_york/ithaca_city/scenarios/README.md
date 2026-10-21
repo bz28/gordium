@@ -1,12 +1,23 @@
-# R-1b design scenarios: an architect's answer key
+# Design scenarios: hand-worked results
 
-Ten designs an architect really draws on a City of Ithaca R-1b lot, each with the result **worked out by hand
+**Who worked them:** Claude (the AI that also helps build Gordium), by hand from the code's own words, before
+Gordium was run on them. **Not yet verified by an architect** (architect review is deferred for now, as rule
+approval is): they are a careful second reading, not an outside check. When that deferred review happens, who
+and when is recorded here.
+
+Twelve designs an architect really draws on a City of Ithaca lot (ten in R-1b, one in R-1a, one in R-3a), each with the result **worked out by hand
 from the code's own words before Gordium was run on it**. The expected results are never changed to match
 Gordium. When Gordium disagrees, the disagreement is investigated: either the code is fixed, or the question goes
-to the architects (written up under `disagreements` in the scenario).
+to the architects (written up under `disagreements` in the scenario). A disagreement where Gordium is less
+cautious than the hand-worked result (it says complies, the hand says needs review) must list `relies_on`: what
+Gordium has to have evaluated for its answer to hold (a smaller lot it is re-checked on, or a measurement worked
+under every lot-line reading); the test re-checks each one, so a justification can't rest on hand work alone.
 
 Each `<name>.yaml` holds:
 
+- `district` and `use` (optional): the district and use the architect states (not `zone`: a file with `zone` is a project); an R-1b one-family detached house
+  when left out. `11_…` is an R-1a house legal in R-1b but over R-1a's 20% coverage; `12_…` is an R-3a
+  two-family house at its height, stories, coverage, front and side-yard limits (each one R-1b would fail).
 - `lot`: the lot corners (feet; the street runs along the first edge), whether it's from a survey
 - `buildings`: each solid on the Building layer. A building with `floors` is stacked floor blocks, each one story,
   the way GordiumStart draws them. `others`: solids on the lot that are **not** on the Building layer.

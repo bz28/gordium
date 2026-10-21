@@ -56,10 +56,30 @@ def capture(address: str, http) -> dict:
             "live_status": result["status"]}
 
 
+CONTEXT = {"106_ithaca_rd_context": "106 Ithaca Rd, Ithaca, NY 14850"}
+
+
+def capture_context(address: str, http) -> dict:
+    """The context map's storable answers (the State's parcels and streets in the square around the lot). The
+    building footprints (store: none) pass through unrecorded: the tests' stand-ins for them are synthetic."""
+    from site_lookup.context import context
+    from site_lookup.lookup import US_SURVEY_FT
+    lot = lookup(address, http)["facts"]["lot"]["value"]
+    ox, oy = lot["origin_epsg2261_us_survey_ft"]
+    ring = [(ox + x / US_SURVEY_FT, oy + y / US_SURVEY_FT) for x, y in lot["outline_ft"]]
+    rec = Recording(http)
+    context(ring, rec, origin=(ox, oy))
+    return {"address": address, "captured": dt.date.today().isoformat(), "answers": rec.saved}
+
+
 def main():
     for name, address in ADDRESSES.items():
         fixture = capture(address, Http())
         (HERE / f"{name}.json").write_text(json.dumps(fixture, indent=1), encoding="utf-8")
+        print(name, len(fixture["answers"]), "answers saved")
+    for name, address in CONTEXT.items():
+        fixture = capture_context(address, Http())
+        (HERE / f"{name}.json").write_text(json.dumps(fixture, separators=(",", ":")), encoding="utf-8")
         print(name, len(fixture["answers"]), "answers saved")
 
 
