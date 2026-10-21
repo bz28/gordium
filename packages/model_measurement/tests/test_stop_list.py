@@ -169,6 +169,20 @@ ZIGZAG = lot([(0, 0), (50, 0), (50, 100), (45, 110), (40, 100), (35, 110), (30, 
               (15, 110), (10, 100), (0, 110)])     # nine back lines between the two side lines: too many
 SHEDS = [sloped_roof_box(2 + 6 * i, 70, 6 + 6 * i, 74, 20, 30, f"shed {i}") for i in range(8)]
 
+def _geos_error(tmp_path):
+    """Any shapely / GEOS failure while measuring: a stop with its reason, never a crash (stress F14)."""
+    import shapely
+    from model_measurement import measure as m
+
+    def broken(building):
+        raise shapely.errors.GEOSException("TopologyException: side location conflict at 1 2")
+    real, m._projection_now = m._projection_now, broken
+    try:
+        return _plain()(tmp_path)
+    finally:
+        m._projection_now = real
+
+
 CASES = {
     "unreadable_file": _unreadable_file,
     "units": _units,
@@ -241,6 +255,7 @@ CASES = {
                                   grade_points=[[22, 36, 0]]),
     "sloped_ground": _plain(ground_is_flat=False),
     "no_building": _plain(buildings=[]),
+    "geometry_error": _geos_error,
     "same_id": _plain(buildings=[box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)]),   # both "house"
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
     "outside_lot": _plain(buildings=[box(60, 25, 80, 65)]),      # wholly off the lot (crossing it is measured)

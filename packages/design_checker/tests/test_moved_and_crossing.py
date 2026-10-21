@@ -290,10 +290,12 @@ def test_the_eaves_rows_show_the_requirement_at_each_height_reading_when_they_di
     26'-0", inside that span: needs review, saying the readings disagree, never 'isn't measured'."""
     front = next(r for r in _gable_with_overhang() if r["name"] == "Eaves into front yard")
     assert front["status"] == present.REVIEW and front["proposed"] == "26'-0\""
-    assert front["required"] == "≥ 25'-6\" to 26'-10\""
-    for text in (front["reason"], front["detail"]["calc"], front["detail"]["line"]):
-        assert "37'-6\" to 38'-9 7/8\"" in text and "isn't measured" not in text and "before the" not in text, text
-    assert "at each reading of the height" in front["detail"]["calc"]
+    assert front["required"] == "25'-6\" to 26'-10\""             # (the one range block's words, term-index)
+    # the one range block's sentence (term-index, architect review P1-3): what it needs, depending on how the
+    # height is taken; never "isn't measured" or "before the bonus"
+    assert front["reason"].startswith("Needs 25'-6\" to 26'-10\", depending on how the height of a pitched roof"), \
+        front["reason"]
+    assert "isn't measured" not in front["reason"] and "before the" not in front["reason"]
 
 
 def test_the_eaves_rows_on_existing_grade_say_so_only_when_the_ground_as_it_is_was_measured():
@@ -373,9 +375,10 @@ def test_an_eaves_row_that_fails_at_every_height_reading_never_says_needs_review
     got = rows(run(floors(*b, 3) + [roof(*b, 30, 45, 2.0, 1.0)]), "R-1b.yard_projections")
     front = next(r for r in got if r["name"] == "Eaves into front yard")
     assert front["status"] == present.FAILS and front["proposed"] == "15'-0\""
-    assert front["required"] == "≥ 25'-6\" to 26'-10\""
+    assert front["required"] == "25'-6\" to 26'-10\""
     # (the checker's words since #15's verdict landed: fails under every reading, naming what was read)
-    assert front["reason"].startswith("Fails under every reading considered (building height)"), front["reason"]
+    assert front["reason"].startswith("Does not comply whichever way it is read: needs 25'-6\" to 26'-10\""), \
+        front["reason"]
     assert "Needs review" not in front["reason"]
 
 
@@ -485,7 +488,7 @@ def test_a_rule_failing_under_every_lot_line_reading_on_a_tax_map_lot_is_judged_
     rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
     assert rear["status"] == present.REVIEW, rear                          # the checker's verdict (row_verdict)
     assert "as drawn it does not comply, but at best 29'-3" in rear["reason"] and "against 26'-6\"" in rear["reason"]
-    assert rear["required"] == "≥ 27'-6\" to 31'-8 3/8\"", rear["required"]   # 31.6926 ft, rounded up
+    assert rear["required"] == "27'-6\" to 31'-8 3/8\"", rear["required"]   # 31.6926 ft, rounded up
 
 
 def test_a_rule_failing_under_every_lot_line_reading_on_a_survey_says_which_measurement_it_was_read_over():
@@ -500,7 +503,10 @@ def test_a_rule_failing_under_every_lot_line_reading_on_a_survey_says_which_meas
     s, f, extras = scenarios.site(sc)
     rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
     assert rear["status"] == present.FAILS
-    assert rear["reason"].startswith("Fails under every reading considered (lot depth)"), rear["reason"]
+    # (the one range block's words: what it needs, and what that depends on, never the doubled phrase)
+    assert rear["reason"].startswith("Does not comply whichever way it is read: needs 27'-6\" to 31'-8 3/8\" (the "
+                                     "lot depth depends on"), rear["reason"]
+    assert "fails under every reading" not in rear["reason"]
 
 
 def test_fails_whatever_with_several_unknowns_numbers_at_zero_and_yes_no_both_ways():

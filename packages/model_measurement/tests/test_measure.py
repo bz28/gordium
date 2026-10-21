@@ -1657,11 +1657,12 @@ def test_a_building_outside_the_lot_is_named_and_waits_only_what_it_touches():
     """Architect review in Rhino (P2-12): "a building isn't inside the lot" named none, and blanked every yard even
     when the main building was inside. It names the building; coverage (every building) waits; the yards are
     measured from a main building inside the lot, the other solid in their "any solid" reading."""
-    m = measure(site(RECT, box(10, 25, 35, 65, id="house"), box(45, 70, 60, 80, id="shed")),
+    # (the shed wholly outside: one crossing the lot line is measured and fails what measures it, PR 18 round 7)
+    m = measure(site(RECT, box(10, 25, 35, 65, id="house"), box(55, 70, 65, 80, id="shed")),
                 {**FACTS, "main_building": "house"})
     assert m["building_area"]["value"] is None and m["building_area"]["reason"] == "a building isn't inside the lot: 1 other building"
     assert m["building_area"]["objects"] == ["shed"]
     for name in ("front_yard", "side_yard_smaller", "rear_yard"):
         assert m[name]["value"] is not None or m[name]["readings"], (name, m[name])
-    m = measure(site(RECT, box(40, 25, 65, 65, id="house")), FACTS)
+    m = measure(site(RECT, box(55, 25, 80, 65, id="house")), FACTS)       # wholly outside (crossing: measured)
     assert m["front_yard"]["reason"] == "a building isn't inside the lot: the building"

@@ -775,16 +775,6 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 raised = [c for c in way if c.left.id != node.left.id]
         numbers = _numbers(node, values, measured, label) if node is not None else (None, None, None, "", "")
         proposed, required, margin_t, margin = (*_display(*numbers),) if node is not None else ("—", "—", "", None)
-        if (node is not None and required in ("—", None) and len(_combos(row, values)) > 1
-                and (values.get("building_height") is not None
-                     or "building_height" not in formula.names(ast.unparse(node.comparators[0])))):
-            # (a limit raised by the height bonus while the height is unknown is said below, with why it waits)
-            # decided over readings: the requirement under each (the strictest is part of it), never a dash
-            at = [_evaluate(ast.unparse(node.comparators[0]), c) for c in _combos(row, values)]
-            if at and all(isinstance(a, (int, float)) for a in at):
-                unit = (measured.get(node.left.id) or {}).get("unit") or ""
-                low, high = (value_text(a, unit, numbers[4], False) for a in (min(at), max(at)))
-                required = f"{numbers[4]} {low}" + (f" to {high}" if high != low else "")
         if name == "Use":
             proposed = use_names.get(values.get("use"), values.get("use") or "—")
             required = {COMPLIES: "permitted", FAILS: "not permitted"}.get(st, "—")
@@ -841,7 +831,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it does not comply, "
                        f"but {could} · Pick survey lot lines…")
         own = side_row or row                               # a side yard: its own words, never the pair's
-        if st == FAILS and own.get("Provisional") and (side_row or not row.get("Error") == "FAIL"):
+        if st == FAILS and own.get("Provisional") and (side_row or not row.get("Error") == "FAIL") and \
+                not (why or "").startswith("Does not comply whichever way it is read"):
             why = ("Does not comply with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…"
                    if "confirm the survey" in own["Provisional"] else
                    "Fails under every reading considered (" + ", ".join(dict.fromkeys(
@@ -907,7 +898,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 if limit_q and st == FAILS:
                     why = (f"Does not comply whichever way it is read: needs {required} (the {sets} depends on "
                            f"{'; '.join(limit_q)})")
-                elif limit_q:
+                elif limit_q and not (why or "").startswith("Lot lines are from the tax map") and \
+                        not ((side_row or row).get("Provisional") or "").startswith("passes"):
+                    # (the tax map's own sentence, and "complies under every reading, but it depends on …", say more)
                     why = (f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): ask the "
                            "zoning office" + (f"; also open: {'; '.join(rest)}" if rest else ""))
         alts = _alternatives(check, values, measured) if st == FAILS and not why and not splits else []
@@ -926,28 +919,17 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             height = measured.get("building_height") or {}
             # why the bonus can't be worked out, read from the height's own measurement (review rounds 10-11)
             as_is = height.get("measured_as_is") is not None or bool(height.get("measured_as_is_readings"))
-            heights = sorted({r["value"] for r in height.get("readings") or [] if r.get("value") is not None})
-            at_each = [_evaluate(limit, dict(values, building_height=v)) for v in heights]
-            if not as_is and len(heights) > 1 and all(isinstance(a, (int, float)) for a in at_each):
-                # measured, but its readings disagree: the limit at each reading's height (the bonus may apply)
-                low, high = (value_text(a, unit, numbers[4], False) for a in (min(at_each), max(at_each)))
-                required = f"{numbers[4]} {low} to {high}"
-                span = f"{value_text(heights[0], 'ft')} to {value_text(heights[-1], 'ft')}"
-                more = f"the requirement depends on the height, whose readings disagree ({span})"
-                why = f"{why} ({more})" if why else f"{_bonus_waits(st, True)} ({more})"
-                line = f"{proposed} proposed · {required} required, across the height's readings ({span})"
-                base_calc = (f"Required: {required}: {limit} at each reading of the height ({span}; the readings "
-                             f"disagree)")
-            else:
-                base = _evaluate(limit, dict(values, building_height=0.0))
-                if isinstance(base, (int, float)):
-                    required = f"{numbers[4]} {value_text(base, unit, numbers[4], False)}".strip()
-                    waits = ("the height is measured from existing grade only; the bonus needs it from finished grade"
-                             if as_is else "the height isn't measured yet")
-                    more = f"more if the §325-16C height bonus applies; {waits}"
-                    why = f"{why} ({more})" if why else f"{_bonus_waits(st, False)} ({more})"
-                    line = f"{proposed} proposed · {required} required before the §325-16C height bonus"
-                    base_calc = f"Required: {required} before the §325-16C height bonus ({waits})"
+            # (a height measured with readings that disagree: the limit's range over them, said by the
+            # one range block above; here the height isn't measured at all, or only on existing grade)
+            base = _evaluate(limit, dict(values, building_height=0.0))
+            if isinstance(base, (int, float)):
+                required = f"{numbers[4]} {value_text(base, unit, numbers[4], False)}".strip()
+                waits = ("the height is measured from existing grade only; the bonus needs it from finished grade"
+                         if as_is else "the height isn't measured yet")
+                more = f"more if the §325-16C height bonus applies; {waits}"
+                why = f"{why} ({more})" if why else f"{_bonus_waits(st, False)} ({more})"
+                line = f"{proposed} proposed · {required} required before the §325-16C height bonus"
+                base_calc = f"Required: {required} before the §325-16C height bonus ({waits})"
         applied = _applied(names, measured)
         if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
             why = f"{why} · {applied['note']}" if why else applied["note"]
@@ -1033,6 +1015,7 @@ def _height_detail(j: Path, facts: dict, values: dict, node, numbers) -> dict:
 
 
 COMPASS = ("North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest")
+MIXED = "mixed"             # a side yard's readings measured toward different lines: no one name is true
 
 
 def compass(dx: float, dy: float, plan_north_deg: float = 0.0) -> str | None:
@@ -1063,11 +1046,13 @@ def _side_name(measure: str, measured: dict, plan_north_deg: float = 0.0, side_l
         reading the narrower yard is to one side line, under another to the other: no compass name is true)."""
         m = measured.get(name) or {}
         found = {facing(r.get("points")) for r in m.get("readings") or []} or {facing(m.get("points"))}
-        return found.pop() if len(found) == 1 else None
+        return found.pop() if len(found) == 1 else MIXED
     a, b = faces("side_yard_smaller"), faces("side_yard_larger")
-    if a and b and a != b:
+    if a and b and a != b and MIXED not in (a, b):
         return "Side yard, " + (a if measure == "side_yard_smaller" else b)
-    if not (a or b) and same_minimum and side_lines and len(set(side_lines)) == 2:
+    # the lot's side lines' names only when no reading says where the yard was measured to; never when the readings
+    # point different ways (the narrower yard is to one line under one reading, to the other under another: F5)
+    if a is None and b is None and same_minimum and side_lines and len(set(side_lines)) == 2:
         return "Side yard, " + (sorted(side_lines)[0] if measure == "side_yard_smaller" else sorted(side_lines)[1])
     return "Side yard, " + ("narrower" if measure == "side_yard_smaller" else "wider")
 
@@ -1250,6 +1235,10 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         if checker is not None and RANK[i["status"]] > RANK[checker]:
             i.update(status=checker, mark=MARK[checker])
     settle(items, values, measured, facts)          # Delta, colours, approx: from each row's readings, last
+    for i in items:                                  # a row that needs review always says why (stress F12, F13)
+        if i["status"] == REVIEW and not (i.get("reason") or "").strip():
+            i["reason"] = ("Needs review: the checker can't settle it from the drawing as it is" +
+                           (f" ({i['delta']})" if i.get("delta") else ""))
     for i in items:                                  # waiting on the main building: the row says how to pick it
         if PICK_MAIN_WHY in (i.get("reason") or "") and not i.get("hint"):
             i["hint"] = PICK_MAIN

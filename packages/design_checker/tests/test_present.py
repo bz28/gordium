@@ -933,17 +933,16 @@ def test_a_limit_waiting_on_the_lot_depth_shows_its_range_and_says_once_why():
     from design_checker.check import check_site
     lot, facts = _sample106()
     house = box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30)
-    for surveyed, status in ((False, present.REVIEW), (True, present.FAILS)):
+    # (PR 18: 106's lot lines read from its outline cleaned within 0.25 ft, every reading of which are side and
+    # rear: the limit runs 24'-1 7/8" to 32'-10 1/8"; the rear wall is 19'-6" to 20'-3 1/2" back, short even with
+    # the tax map's lines 2 ft in its favour: does not comply on the tax map too)
+    for surveyed, status in ((False, present.FAILS), (True, present.FAILS)):
         r = check_site(_plot(house, lot_=lot), {**facts, "lot_surveyed": surveyed})
         rear = items(r["view"])["Rear yard"]
-        assert rear["status"] == status and rear["required"] == "21'-1 5/8\" to 25'-5 1/2\"", rear
+        assert rear["status"] == status and rear["required"] == "24'-1 7/8\" to 32'-10 1/8\"", rear
         assert rear["reason"].count("which lot lines") == 1, rear["reason"]
         assert "readings give different values" not in rear["reason"] and "isn't settled" not in rear["reason"]
-    assert rear["reason"].startswith("Does not comply whichever way it is read: needs 21'-1 5/8\"")
-    r = check_site(_plot(house, lot_=lot), {**facts, "lot_surveyed": False})
-    assert items(r["view"])["Rear yard"]["reason"].startswith(
-        "Needs 21'-1 5/8\" to 25'-5 1/2\", depending on which lot lines count as side and which as rear "
-        "(it sets the lot depth): ask the zoning office")
+    assert rear["reason"].startswith("Does not comply whichever way it is read: needs 24'-1 7/8\"")
 
 
 def test_coverage_that_turns_on_the_overhang_question_says_both_ways():
@@ -956,8 +955,11 @@ def test_coverage_that_turns_on_the_overhang_question_says_both_ways():
     r = check_site(_plot(ground, box(12, 30, 62, 70, 10, 20, "b"), lot_=lot),
                    {**facts, "lot_surveyed": True, "main_building": "a"})
     cov = items(r["view"])["Lot coverage"]
-    assert cov["reason"] == ("If overhangs count (an open question), coverage is 28.5%, over 25%; if not, 16%: "
-                             "ask the zoning office"), cov["reason"]
+    # (PR 18: research settled it as Gordium's reading coverage_seen_from_above, everything above ground seen from
+    # above, cantilevered upper floors included: 28.5%, over 25%, does not comply, saying the reading it applied)
+    assert cov["status"] == present.FAILS and cov["proposed"] == "28.5%", cov
+    assert "Gordium's reading" in cov["reason"] and "seen from above" in cov["reason"], cov["reason"]
     r = check_site(_plot(ground, box(12, 30, 52, 70, 10, 20, "b"), lot_=lot),
                    {**facts, "lot_surveyed": True, "main_building": "a"})
-    assert items(r["view"])["Lot coverage"]["reason"].startswith("Complies under every reading")
+    cov = items(r["view"])["Lot coverage"]
+    assert cov["status"] == present.COMPLIES and "Gordium's reading" in cov["reason"], cov

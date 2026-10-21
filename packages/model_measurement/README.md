@@ -201,7 +201,7 @@ Every reason the code gives today comes from the table:
   stories of the whole building". Any part reaching below the ground, whatever was typed: "part of the building
   ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
   question for the architects".
-- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the measurements"; "more than one building: pick the main building"; "a building isn't inside the lot: {what}" (which one) (a building
+- **The buildings:** "no building on the Building layer"; "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "two building objects share the id {id}: one would be left out of the measurements"; "more than one building: pick the main building"; "a building isn't inside the lot: {what}" (which one) (a building
   wholly off the lot: only the rules that would measure it wait: the main yards for the main building, the accessory
   rule for an accessory building, coverage for any. A building partly off the lot is measured, and every rule that
   measures it does not comply, whatever the readings or answers: the main yards, the eaves, the height and the

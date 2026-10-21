@@ -88,6 +88,8 @@ STOPS = {
     "no_rooms": "enter bedrooms / parking spaces",
     # the buildings
     "no_building": "no building on the Building layer",
+    "geometry_error": "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines "
+                      "for faces meeting at slivers",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
     "no_main_building": "more than one building: pick the main building",
     "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",

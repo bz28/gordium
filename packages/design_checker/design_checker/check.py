@@ -368,6 +368,14 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
         lot = names & (reading_set.LOT_LENGTHS | {SURVEY})
         if got == "needs_review" and every is not None and fails_whatever(rule, measured, allowed, facts):
             return present.FAILS                    # fails whatever the values not measured are (decided 2026-10-21)
+        if got == "fail" and tax and lot:
+            # fails as drawn with a value unknown: on the tax map it fails only if it fails with the lines off
+            # either way too, over what is known (the unknown values stay unknown: a fail here doesn't need them,
+            # as a 45 ft house is over the most the height bonus allows whatever its yards: stress F13)
+            known = {n for n in names if values.get(n) is not None or (measured.get(n) or {}).get("readings")}
+            rest = reading_set.combos(known, values, measured, facts)
+            if rest and all(outcome(rule, trial, allowed) == "fail" for trial, _ in rest):
+                return present.FAILS
         return present.FAILS if got == "fail" and not (tax and lot) else \
             present.COMPLIES if got == "pass" and not (tax and lot) else present.REVIEW
     got = {outcome(rule, trial, allowed) for trial, _ in every}

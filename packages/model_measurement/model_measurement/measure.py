@@ -278,10 +278,17 @@ def _projection_now(building: dict):
     for f in building["faces"]:
         shell = [tuple(p[:2]) for p in f["points"]]
         holes = [[tuple(p[:2]) for p in h] for h in f.get("holes") or []]
-        poly = Polygon(shell, holes).buffer(0)
+        poly = shapely.make_valid(Polygon(shell, holes)).buffer(0)
         if poly.area > 1e-9:
             parts.append(poly)
-    return ops.unary_union(parts) if parts else Polygon()
+    if not parts:
+        return Polygon()
+    try:
+        return ops.unary_union(parts).buffer(0)
+    except shapely.errors.GEOSException:
+        # faces meeting at slivers too thin for the overlay (a rotated gable: stress F14): the same union with
+        # every point on a 1e-6 ft grid, far below anything measured (TOL is 0.01 ft)
+        return shapely.union_all(parts, grid_size=1e-6).buffer(0)
 
 
 def _section(building: dict, z: float):
@@ -1282,7 +1289,19 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
     _PLANES.clear()
     _PLAN_OF.clear()
     try:
-        out = _measure(site, facts)
+        try:
+            out = _measure(site, facts)
+        except shapely.errors.GEOSException as e:
+            # the drawing's geometry couldn't be worked out: every measurement needs review, saying why; never a
+            # crash (no answer at all in Rhino) and never a guess (stress F14)
+            why = stop("geometry_error", what=str(e).split(":")[0][:80])
+            out = {name: (_record(name, "text", reason=why) if name == "district" else _missing(name, why))
+                   for name in MEASURES}
+            for name, unit in STATED.items():           # what the architect stated still stands
+                if facts.get(name) is not None:
+                    out[name] = _record(name, unit, facts[name], "stated by the architect (not measured from the model)")
+            if facts.get("zone"):
+                out["district"] = _record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
     finally:
         _SKY.clear()
         _PLANES.clear()
@@ -1469,6 +1488,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                   else None)    # coverage
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
+        outside = [b for b in buildings if place.get(b["id"]) == "off"]
         if why_inside and outside and not why_building:     # which ones: the panel shows them
             out["building_area"]["objects"] = [i for b in outside for i in b.get("parts") or [b["id"]]]
     else:
