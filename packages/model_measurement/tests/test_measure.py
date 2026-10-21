@@ -1159,3 +1159,16 @@ def test_a_tenth_of_a_foot_up_or_down_never_changes_one_story_count_into_another
             checked += 1
             assert after is None or after == before, (blocks[i]["id"], dz, before, after, stacks, pick, typed)
     assert checked > 60
+
+
+def test_the_stories_read_each_candidate_building_from_its_own_grade_plane():
+    """#18 round 18's candidate grades, one definition: with spot grades only at the house's walls and a wing of
+    floor blocks beside it, the "with every other solid" candidate's grade plane can't be found, so the stories
+    need review for that reason, as the height does (before, the stories read the house's grade for both)."""
+    house = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"h{i}") for i in range(2)]
+    wing = [floor(40, 75, 48, 90, z0=0, z1=10, id="w0")]
+    facts = {**FACTS, "stories": 2, "main_building": "h0", "ground_is_flat": None, "grade_elevation": None,
+             "grade_points": [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]]}
+    m = measure(site(RECT, *house, *wing), facts)
+    assert m["stories"]["value"] is None and m["stories"]["reason"] == m["building_height"]["reason"]
+    assert "spot grades at their walls too" in m["stories"]["reason"]
