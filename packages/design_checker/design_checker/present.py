@@ -426,6 +426,23 @@ def _worst_reading(node, measured: dict, values: dict):
     return shown[0], shown[1]
 
 
+def _coverage_either_way(node, measured: dict, values: dict) -> str | None:
+    """Lot coverage when only the overhang question is open, both ways in words: "If overhangs count (an open
+    question), coverage is 28.3%, over 25%; if not, 24.3%." None when the readings aren't those two."""
+    by = {r["reading"]: r["value"] for r in (measured.get("building_area") or {}).get("readings") or []}
+    over, ground = by.get("covered from above"), by.get("at the main grade level")
+    if over is None or ground is None or len(by) != 2 or not values.get("lot_area"):
+        return None
+    shown = {}
+    for key, x in (("over", over), ("ground", ground)):
+        trial = dict(values, building_area=x)
+        text, limit = _display(*_numbers(node, trial, measured, ""))[:2]
+        shown[key] = (text, limit, _evaluate(ast.unparse(node), trial))
+    (a, limit, a_ok), (b, _, b_ok) = shown["over"], shown["ground"]
+    return (f"If overhangs count (an open question), coverage is {a}, {'within' if a_ok else 'over'} {limit}; "
+            f"if not, {b}" + ("" if b_ok else f", also over {limit}") + ": ask the zoning office")
+
+
 def _numbers(node, values: dict, measured: dict, name: str):
     """(proposed, required, margin, unit, sign) for one comparison; coverage as a percentage of lot area."""
     m = node.left.id
@@ -769,9 +786,42 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     if isinstance(allowed, (int, float)):
                         required = _pct(allowed / values["lot_area"] * 100, _toward(numbers[4], False), 1)
                 worst = _worst_reading(node, measured, values)
-                if worst is not None:                   # say the bad one first: "probably fine" it isn't
+                said = (_coverage_either_way(node, measured, values)          # it fails one way: say both
+                        if node.left.id == "building_area" and worst is not None else None)
+                if said:                                # both ways, in words (architect review P2-10)
+                    why = said
+                elif worst is not None:                 # say the bad one first: "probably fine" it isn't
                     why = (f"At worst {worst[0]} against {worst[1]}: does not comply under that reading. " +
                            (why or ""))
+        if node is not None and required == "—" and st in (REVIEW, FAILS):
+            # the limit waits on an open measurement (the lot depth, on which lines are side or rear): show the
+            # limit's range over its readings, and say once what it depends on (architect review P1-3)
+            limit_expr = ast.unparse(node.comparators[0])
+            open_ = [n for n in sorted(formula.names(limit_expr))
+                     if values.get(n) is None and (measured.get(n) or {}).get("readings")]
+            got = []
+            if open_:
+                import itertools
+                for combo in itertools.product(*[[r["value"] for r in measured[n]["readings"]] for n in open_]):
+                    x = _evaluate(limit_expr, dict(values, **dict(zip(open_, combo))))
+                    if isinstance(x, (int, float)):
+                        got.append(x)
+            if got:
+                unit = (measured.get(node.left.id) or {}).get("unit") or ""
+                lo, hi = min(got), max(got)
+                required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
+                            f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
+                limit_q = list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
+                rest = list(dict.fromkeys(q for n in sorted(every - set(open_)) if values.get(n) is None
+                                          and (measured.get(n) or {}).get("readings")
+                                          for q in _questions_of(measured[n]) if q not in limit_q))
+                sets = " and ".join(NAMES.get(n, n.replace("_", " ").capitalize()).lower() for n in open_)
+                if limit_q and st == FAILS:
+                    why = (f"Does not comply whichever way it is read: needs {required} (the {sets} depends on "
+                           f"{'; '.join(limit_q)})")
+                elif limit_q:
+                    why = (f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): ask the "
+                           "zoning office" + (f"; also open: {'; '.join(rest)}" if rest else ""))
         alts = _alternatives(check, values, measured) if st == FAILS and not why and not splits else []
         if len(alts) > 1 and all(alts):                 # several ways to comply, none met: say each one
             why = "Does not comply either way the rule allows: " + "; or ".join(
@@ -1110,7 +1160,10 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
     law = next((d for d in documents.values() if "chapter 325" in d.get("title", "").lower()), {})
     chart = next((d for d in documents.values() if "chart" in d.get("title", "").lower()), {})
     through = re.search(r"amendments through (Ord\. No\. [\w-]+(?: \([^)]*\))?)", " ".join(str(law.get("notes", "")).split()))
-    code = "Ch. 325" + (f" as amended through {through.group(1)}" if through else "") + (
+    # the ordinance and its date only ("Ord. No. 2026-02 (May 6, 2026)"): the sources' note on what it changed
+    # ("PUDs only") read as if the code applied only to PUDs
+    amended = re.sub(r"\s*\(([^;)]*)[^)]*\)", r" (\1)", through.group(1)) if through else ""
+    code = "Ch. 325" + (f" as amended through {amended}" if through else "") + (
         " · District Regulations Chart, " + re.sub(r".*\((.*)\).*", r"\1", chart["title"]) if chart else "")
     use = facts.get("use") or ""
     lot = ("Lot lines: survey" if facts.get("lot_surveyed") else
