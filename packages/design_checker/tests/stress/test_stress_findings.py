@@ -10,6 +10,7 @@ strict xfail turns that into a failure, and the mark is taken off (the test then
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
+import random
 import sys
 from pathlib import Path
 
@@ -295,4 +296,64 @@ def test_F14_a_rotated_house_with_a_gable_roof_is_checked_without_crashing():
     res = harness.gordium(generate.build(*F14_CASE)[0])
     assert harness.statuses(res)
     assert all((i["reason"] or "").strip() for i in res["view"]["items"] if i["status"] == REVIEW)
+
+
+# ---- F16 (#18): nothing measured depends on the order the outlines were drawn in -----------------------------------
+
+F16_CASE = ("corner", [{"op": "rotate", "deg": -5.3}, {"op": "move_house", "dx": 10.0, "dy": 7.75},
+                       {"op": "add_roof", "kind": "roof", "axis": 1, "over": 0.5, "fascia": 1.0, "inset": 4.75,
+                        "rise": 10.75}])
+
+
+def test_F16_the_eaves_not_counted_coverage_leaves_out_both_eaves_whichever_way_the_outlines_run():
+    """Stress F16 (P2): the corner lot's 40 x 35 house rotated 5.3 degrees, moved 10 ft east and 7'-9" back, a
+    gable roof solid with eaves 6 in. past its two 35 ft side walls. Seen from above: walls 40 x 35 = 1,400 sf,
+    with both eaves 1,440 sf (independently: the oracle, below). 'Eaves not counted' was 1,420 sf drawn as given
+    or starting elsewhere (one eave strip dropped by a second overlay along nearly the same edges), 1,400 sf
+    reversed. Now 1,400 every way."""
+    d = generate.build(*F16_CASE)[0]
+    for order in ("as_drawn", "reversed", "shifted"):
+        m = harness.gordium(d, order)["measurements"]["building_area"]
+        low = {r["named"].get("building_area#1"): r["value"] for r in m["readings"]}["eaves_not_counted"]
+        assert low == pytest.approx(1400.0, abs=0.5), (order, low)
+
+
+def test_the_oracle_on_F16_walls_1400_and_with_both_eaves_1440():
+    d, done = generate.build(*F16_CASE)
+    assert len(done) == 3
+    assert oracle.measure(d)["area"] == (pytest.approx(1440.0), pytest.approx(1400.0))
+
+
+def _measured(design, order):
+    """Every measurement as order-free facts: its value and each reading's value with its named answers (the
+    reading's words name lot lines by the drawn numbering, which a different start point renumbers)."""
+    from model_measurement.measure import measure
+    out = {}
+    for name, r in measure(generate.gordium_site(design, order), generate.gordium_facts(design)).items():
+        value = round(r["value"], 2) if isinstance(r.get("value"), (int, float)) else r.get("value")
+        readings = sorted((round(x["value"], 2), tuple(sorted((x.get("named") or {}).items())))
+                          for x in r.get("readings") or [])
+        out[name] = (value, readings, r.get("value") is None and not r.get("readings"))
+    return out
+
+
+def test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outlines_are_drawn():
+    """Metamorphic (F16): the same design drawn with every outline and face the other way round, or starting at
+    its next point, measures the same: every measurement's value, and every reading's value with its named
+    answers. Every lot (the 106 Ithaca Rd sample, on the tax map and on a survey, and the others), as drawn and
+    after random architect's edits (rotations, roofs and eaves, mansards, dormers, porches, wings, accessory
+    buildings, moved lines)."""
+    rng = random.Random(16)
+    cases = [(lt, []) for lt in generate.LOTS] + [F16_CASE]
+    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(40))]
+    checked = 0
+    for lt, edits in cases:
+        d, _done = generate.build(lt, edits)
+        base = _measured(d, "as_drawn")
+        for order in ("reversed", "shifted"):
+            other = _measured(d, order)
+            diff = {n: (base[n], other[n]) for n in base if base[n] != other[n]}
+            assert not diff, (lt, edits, order, diff)
+            checked += 1
+    assert checked == 2 * len(cases)
 

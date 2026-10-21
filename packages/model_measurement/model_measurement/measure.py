@@ -287,14 +287,16 @@ def _projection_now(building: dict):
 def union(parts):
     """The one union rule for plans (measuring, the plan drawn, the envelope): the shapes together, made valid;
     where faces meet at slivers too thin for the overlay (a rotated gable: stress F14), the same union with every
-    point on a 1e-6 ft grid, far below anything measured (TOL is 0.01 ft)."""
+    point on a 1e-6 ft grid, far below anything measured (TOL is 0.01 ft). Always in one canonical form
+    (shapely.normalize: each ring oriented one way, starting at its lowest point), so nothing derived from it
+    depends on the order the outlines were drawn in (stress F16)."""
     parts = [p for p in parts if p is not None and not p.is_empty]
     if not parts:
         return Polygon()
     try:
-        return ops.unary_union(parts).buffer(0)
+        return shapely.normalize(ops.unary_union(parts).buffer(0))
     except shapely.errors.GEOSException:
-        return shapely.union_all(parts, grid_size=1e-6).buffer(0)
+        return shapely.normalize(shapely.union_all(parts, grid_size=1e-6).buffer(0))
 
 
 def _section(building: dict, z: float):
@@ -312,7 +314,7 @@ def _section(building: dict, z: float):
                 hits.sort(key=lambda h: h[0] * d[0] + h[1] * d[1])
                 lines += [LineString(hits[i:i + 2]) for i in range(0, len(hits) - 1, 2)]
     polys = list(ops.polygonize(ops.unary_union(lines))) if lines else []
-    return ops.unary_union(polys) if polys else Polygon()
+    return union(polys)                 # canonical, whichever way the faces run (stress F16)
 
 
 def _normal_z(points) -> float:
@@ -741,9 +743,10 @@ def _eave_candidate(building: dict, sloped: list | None = None) -> dict | None:
         walls, faces, others = _body(building, bottom, edge), None, []
         reach = ops.unary_union([_plan(f) for g in sloped for f in g])
         makers = list(zip(building.get("parts") or [building["id"]], building.get("part_faces") or [building["faces"]]))
-    zone = reach.difference(walls.buffer(TOL))
-    if others:
-        zone = zone.difference(ops.unary_union(others).buffer(TOL))
+    # what reaches past the walls and past every other part, in ONE overlay: subtracting the other parts after
+    # the walls cut along nearly the same edges twice, and GEOS then dropped one whole eave strip, or kept it, by
+    # the order the outlines were drawn in (stress F16: 1,420 sf for 1,400)
+    zone = reach.difference(union([walls, *others]).buffer(TOL))
     if zone.area <= 1e-6:
         return {"walls": walls, "faces": faces, "zone": None, "overhang": None}
     return {"walls": walls, "faces": faces, "zone": zone, "overhang": _fingerprint(makers, zone)}
