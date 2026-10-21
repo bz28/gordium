@@ -1006,6 +1006,10 @@ def _release(key, value):
         value.Enabled = False
     elif key == "panel":
         value.Close()
+    elif key == "panel_parts":                 # a later copy's floating panel ({"form": ...}): updating from it
+        form = (value or {}).get("form")
+        if form is not None:
+            form.Close()
     elif key == "toast_timer":
         value.Stop()
     elif key == "worker":
