@@ -73,7 +73,8 @@ def covering(hand_rule, drafted, ctx, from_law=None):
         notes = {(s["file"], s["page"], n) for s in sources if s.get("quote", "").startswith("(")
                  and s["file"] == CHART for n in range(s["lines"][0], s["lines"][1] + 1)}
         return _cited_lines(sources, ctx) - notes
-    wanted = lines(hand_rule, quotes_only=True)
+    # a hand rule that quotes nothing (a key citing only chart cells, like a hand R-3a) is about its cells
+    wanted = lines(hand_rule, quotes_only=True) or lines(hand_rule)
     return [r for r in drafted if lines(r, quotes_only=r["id"] in from_law) & wanted]
 
 
@@ -124,6 +125,59 @@ def judge_r1b_example(rules, given, ctx):
     """An answer-key example judged by the drafted rules covering it, as an R-1b lot (the checker always knows
     the lot's district; the spreadsheet comparison gives it too)."""
     return combined(rules, R1B | given, ctx, set(ctx.proposed))
+
+
+def hand_keys() -> list[Path]:
+    """Every hand-written rulebook (5_zoning_rules/<district>.yaml, not drafted/): each is an answer key."""
+    return sorted(p for p in (ITHACA / "5_zoning_rules").glob("*.yaml"))
+
+
+def drafted_rules_for(district: str) -> list[dict]:
+    """The drafted rules the checker would use for a district with no hand rulebook: its own and general.yaml's."""
+    books = [DRAFTED / f"{district}.yaml", DRAFTED / "general.yaml"]
+    return [r for b in books if b.exists() for r in load(b)["rules"]]
+
+
+def grade_hand_key(path, ctx) -> dict:
+    """Every worked example of one hand key, each counted once: agree, disagree (with the drafted outcome), or
+    undrafted (no drafted rule covers its hand rule: a miss, reported apart, never left out of the total). A false
+    pass is a drafted PASS where the key doesn't say pass."""
+    book = load(path)
+    district = book["district"]
+    drafted = drafted_rules_for(district)
+    out = {"district": district, "total": 0, "agree": [], "disagree": [], "undrafted": [], "false_pass": []}
+    for h in book["rules"]:
+        cov = covering(h, drafted, ctx)
+        for ex in h.get("examples", []):
+            out["total"] += 1
+            item = {"hand": h["id"], "given": ex["given"], "expect": ex["expect"]}
+            if not cov:
+                out["undrafted"].append(item)
+                continue
+            got, notes = combined(cov, {"district": district} | ex["given"], ctx, set(ctx.proposed))
+            item |= {"got": got, "drafted": [r["id"] for r in cov], "notes": notes}
+            (out["agree"] if got == ex["expect"] else out["disagree"]).append(item)
+            if got == "pass" and ex["expect"] != "pass":
+                out["false_pass"].append(item)
+    return out
+
+
+def test_every_hand_example_of_every_hand_key_is_counted(ctx):
+    """Eval integrity (2026-10-20): 32/39 left out the 4 lot-width examples no drafted rule covered. Every example of
+    every hand key now counts: agree + disagree + undrafted is its total."""
+    if not (DRAFTED / "general.yaml").exists():
+        pytest.skip("nothing drafted yet")
+    for path in hand_keys():
+        g = grade_hand_key(path, ctx)
+        assert g["total"] == sum(len(r.get("examples", [])) for r in load(path)["rules"]) > 0
+        assert len(g["agree"]) + len(g["disagree"]) + len(g["undrafted"]) == g["total"], path.name
+
+
+def test_no_drafted_rule_passes_what_any_hand_key_does_not(ctx):
+    """Never a false pass, against every hand key present: a drafted PASS where the key says fail or needs review."""
+    if not (DRAFTED / "general.yaml").exists():
+        pytest.skip("nothing drafted yet")
+    assert {p.name: grade_hand_key(p, ctx)["false_pass"] for p in hand_keys()} == {p.name: [] for p in hand_keys()}
 
 
 def test_drafted_r1b_agrees_with_the_hand_drafted_r1b(hand, drafted_r1b, ctx):
