@@ -1075,3 +1075,19 @@ def test_a_plain_house_with_a_plain_garage_keeps_the_stories_typed():
     m = measure(site(RECT, box(10, 25, 35, 65, 0, 30, id="house"), box(35, 30, 45, 50, 0, 10, id="garage")),
                 {**FACTS, "stories": 2})["stories"]
     assert m["value"] == 2 and "floors are drawn" not in str(m), m
+
+
+def test_a_plain_stacked_garage_beside_the_floor_blocks_is_a_plain_part():
+    """Review round 17, P2: three 10 ft floor blocks and a garage drawn as two plain solids stacked (9 ft each)
+    touching them. The garage is a plain part: its two blocks may be stories, but the count typed is the whole
+    building's, never one that must equal the garage's blocks. Typed 3: 3, as stated (at least the 3 floors and
+    the 2 blocks). Nothing typed: the plain-part reason (not 'one solid with no floors'). Typed 1: below both:
+    a question."""
+    floors_ = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"floor {i + 1}") for i in range(3)]
+    garage = [box(35, 25, 45, 45, 0, 9, id="garage 1"), box(35, 25, 45, 45, 9, 18, id="garage 2")]
+    got = {t: measure(site(RECT, *floors_, *garage), {**FACTS, "stories": t})["stories"] for t in (3, None, 1)}
+    assert got[3]["value"] == 3 and "for the whole building" in got[3]["how"], got[3]
+    assert got[None]["value"] is None and "isn't drawn as floor blocks" in got[None]["reason"], got[None]
+    assert "one solid with no floors" not in got[None]["reason"]
+    assert got[1]["value"] is None and "fewer than" in got[1]["reason"], got[1]
+

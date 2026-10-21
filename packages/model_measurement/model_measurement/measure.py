@@ -1252,15 +1252,16 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
             readings.append(("as stated by the architect", stated, {}))
         return _decide("stories", readings, "the floor blocks of the building counted (the most on any of its "
                        "joined parts)", ids, "the count typed disagrees with the floors drawn: a question (story)")
-    for stack in (b for b in plain if b.get("parts")):
-        # plain solids stacked one on another: the count typed against every stacked block a story, as for a
-        # building on its own (a question when they disagree, never the typed count over the blocks drawn)
-        got = _stories(stack, grade, None, stated)
-        if got["value"] is None:
-            return got
     what = ", ".join(b["id"] for b in plain)
     if stated is None:
         return _record("stories", "count", reason=stop("stories_plain_part", what=what))
+    for stack in (b for b in plain if b.get("parts")):
+        # plain solids stacked one on another are a plain part too: each block might be a story, so a count typed
+        # below the blocks is a question; never one that must equal them (the count is the whole building's;
+        # review round 17)
+        if stated < len(stack["parts"]):
+            return _record("stories", "count", reason=stop("stories_below_blocks", typed=stated, what=stack["id"],
+                                                           blocks=len(stack["parts"])))
     if counted is not None and stated < counted:
         return _record("stories", "count", reason=stop("stories_below_floors", typed=stated, drawn=counted))
     return _record("stories", "count", stated, "stated by the architect for the whole building (part of it isn't "

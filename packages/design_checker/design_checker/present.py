@@ -984,7 +984,9 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         items.append({"id": rule["id"], "rule": rule["id"], "name": f"{label} · needs input", "group": "not_checked",
                       "status": NOT_CHECKED, "mark": MARK[NOT_CHECKED], "proposed": "", "required": "", "margin": "",
                       "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
-                      "needs": list(needs),         # the facts to ask for (the Rhino 'enter' button prompts these)
+                      # the facts to ask for: the Rhino plugin will prompt for exactly these (its prompt for a
+                      # row's needs is #15's work, pending; today its button asks for bedrooms and parking)
+                      "needs": list(needs),
                       "hint": f"Enter {words}",
                       "reason": f"Needs {words}, which the model doesn't show",
                       "detail": {"line": "", "quotes": [{"text": " ".join(str(s.get("quote", "")).split()),

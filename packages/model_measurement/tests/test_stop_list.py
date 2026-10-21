@@ -233,6 +233,10 @@ CASES = {
     "stories_below_floors": _plain(buildings=[box(10, 25, 35, 65, 0, 34, id="stair"),
                  dict(box(35, 25, 45, 65, 0, 10, id="wing 1"), floor=10.0),
                  dict(box(35, 25, 45, 65, 10, 20, id="wing 2"), floor=10.0)], stories=1),
+    "stories_below_blocks": _plain(buildings=[*(dict(box(10, 25, 35, 65, 10 * i, 10 * (i + 1), id=f"floor {i}"),
+                                                     floor=10.0) for i in range(3)),
+                                               box(35, 25, 45, 45, 0, 9, id="garage 1"),
+                                               box(35, 25, 45, 45, 9, 18, id="garage 2")], stories=1),
     "basement_part": _plain(buildings=[box(10, 25, 35, 65, 0, 30), box(35, 25, 45, 65, -10, 10, id="walk-out")]),
     "outside_lot": _plain(buildings=[box(60, 25, 80, 65)]),      # wholly off the lot (crossing it is measured)
     "open_solid": _file(_open_brep),
