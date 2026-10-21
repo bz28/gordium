@@ -68,6 +68,17 @@ def context_layers(g, doc):
     return out
 
 
+def _own_box(geom):
+    """A text's box on its own axes: a copy turned from its plane onto the world's, boxed, then its corners put back
+    (GetBoundingBox(geom.Plane) on turned text is no box of the letters: 116 x 113 ft for the 94 x 23 ft Sources
+    note at 306 degrees, Rhino job's probe 2026-10-21)."""
+    rg = Rhino.Geometry
+    flat = geom.Duplicate()
+    flat.Transform(rg.Transform.ChangeBasis(rg.Plane.WorldXY, geom.Plane))
+    box = flat.GetBoundingBox(True)
+    return box, [geom.Plane.PointAt(c.X, c.Y) for c in list(box.GetCorners())[:4]]
+
+
 def notes_inside_square(g, doc):
     """Every object on the Notes layer, besides the square itself, measured inside the square by its own points: a
     text by the corners of its box in its own plane (turned with the square), a curve by its vertices, a dot by its
@@ -83,8 +94,7 @@ def notes_inside_square(g, doc):
             continue
         geom = o.Geometry
         if isinstance(geom, rg.TextEntity):
-            box = geom.GetBoundingBox(geom.Plane)
-            pts = [geom.Plane.PointAt(c.X, c.Y) for c in list(box.GetCorners())[:4]]
+            box, pts = _own_box(geom)
         elif isinstance(geom, rg.TextDot):
             pts = [geom.Point]
         else:
@@ -101,7 +111,7 @@ def notes_inside_square(g, doc):
             if isinstance(geom, rg.TextEntity) and lines:
                 # as displayed: a bounding box is the unscaled text; with annotation scaling on, Rhino draws it at
                 # the text's DimensionScale times that (the Rhino job's probe: the template's 12 made ~30 ft letters)
-                box = geom.GetBoundingBox(geom.Plane)
+                box = _own_box(geom)[0]
                 scaling = bool(getattr(doc, "ModelSpaceAnnotationScalingEnabled", False))
                 shown = geom.DimensionScale if scaling else 1.0
                 line_ft = round(g._feet_length(doc, box.Max.Y - box.Min.Y) * shown / len(lines), 2)
