@@ -1784,12 +1784,12 @@ def gordium_start():
             saved = {}
         facts = logic.with_suggestions(saved or {}, suggested_facts(doc, options["zones"]))
     path = os.path.join(tempfile.gettempdir(), "gordium_start_" + str(doc.RuntimeSerialNumber) + ".3dm")
-    export(doc, path)
     facts = confirm(doc, facts, options, "start")
     if facts is None:
         Rhino.RhinoApp.WriteLine("Gordium: nothing was started (the facts weren't confirmed)")
         return None
     save_facts(doc, facts)
+    export(doc, path)                   # the model as the box left it (a lookup may have drawn a new lot)
     _set_source(doc, "starting_house", None, None)           # an earlier start's margin is gone with its house
     saved_ui = _ui_state(doc)
     # always the envelope and the 3-floor starting house (hide it from the panel); floor to floor 11'-8" unless

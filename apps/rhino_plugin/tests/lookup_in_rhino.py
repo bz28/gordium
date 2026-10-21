@@ -6,7 +6,8 @@ address typed and Look up pressed (the lookup runs in its own process: recorded 
 services with sc.sticky["gordium_lookup_live"] = True); records what the box then shows (each row, its source,
 its amber line, the box's one amber line), what was written into the model (the lot curve, the spot grades),
 the starting house and the panel's summary, and a Top-view capture. Writes <temp>/gordium_lookup/out.json and
-frames/*.png; closes its documents (keep another document open while it runs)."""
+frames/*.png; closes its documents (keep another document open while it runs). With
+sc.sticky["gordium_lookup_only"] = "106_ithaca_rd" it runs that one and leaves its document open for a capture."""
 import json
 import os
 import sys
@@ -27,7 +28,10 @@ os.makedirs(FRAMES, exist_ok=True)
 LIVE = bool(sc.sticky.pop("gordium_lookup_live", False))
 CASES = [("106 Ithaca Rd, Ithaca, NY 14850", "106_ithaca_rd"), ("109 Ithaca Rd, Ithaca, NY 14850", "109_ithaca_rd"),
          ("96 Ithaca Rd, Ithaca, NY 14850", "96_ithaca_rd")]
-log = {"live": LIVE, "cases": []}
+ONLY = sc.sticky.pop("gordium_lookup_only", None)    # one address, its document left open for the window capture
+if ONLY:                                              # (then closed by the caller through the document's window)
+    CASES = [c for c in CASES if c[1] == ONLY]
+log = {"live": LIVE, "cases": [], "only": ONLY}
 
 
 def fresh_module():
@@ -93,9 +97,10 @@ try:
 except Exception:
     log["trace"] = traceback.format_exc()
 finally:
-    for d in opened:
+    for d in ([] if ONLY and "trace" not in log else opened):
         try:
             close(d)
         except Exception:
             pass
     json.dump(log, open(S + "out.json", "w", encoding="utf-8"), default=str, indent=1)
+    json.dump({"ready": True}, open(S + "ready.json", "w", encoding="utf-8"))

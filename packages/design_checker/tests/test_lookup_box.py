@@ -234,3 +234,53 @@ def test_from_the_106_lookup_to_a_starting_house_that_complies_at_the_worst_case
     items = check_site(site, facts)["view"]["items"]
     assert not [i["name"] for i in items if i["status"] == present.FAILS]
     assert not [i["name"] for i in items if i["status"] == present.REVIEW and "tax map" in (i.get("reason") or "")]
+
+
+def test_gordium_start_copies_the_model_for_the_checker_after_the_box():
+    """Found in Rhino (106, 109, 96 Ithaca Rd): the model was copied before the box, so the lot the lookup drew
+    wasn't in the copy and no starting house was drawn ("the lot picked isn't a closed outline")."""
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = rhino[rhino.index("def gordium_start():"):]
+    assert body.index('facts = confirm(doc, facts, options, "start")') < body.index("export(doc, path)")
+
+
+def test_a_starting_house_is_drawn_on_the_looked_up_ground_as_it_is(tmp_path):
+    """Found in Rhino (106 Ithaca Rd): with the lookup's spot grades as existing ground, the generator measured the
+    house it had just drawn from spot grades at the lot's corners (not at its walls), found its height "not
+    measurable" and drew nothing. Their plane sets the drawing level; the check still says the ground is existing."""
+    import rhino3dm as r
+
+    from design_checker.check import start
+    p = looked_up("106_ithaca_rd")
+    facts, _, _ = box(p)
+    ring = p["writes"]["lot_ring"]
+    m = r.File3dm()
+    m.Settings.ModelUnitSystem = r.UnitSystem.Feet
+    layer = r.Layer()
+    layer.Name = "Site"
+    m.Layers.Add(layer)
+    attrs = r.ObjectAttributes()
+    attrs.LayerIndex = 0
+    m.Objects.AddPolyline([r.Point3d(x, y, 0) for x, y in ring + ring[:1]], attrs)
+    m.Write(str(tmp_path / "lot.3dm"), 8)
+    got = start(tmp_path / "lot.3dm", {**facts, "jurisdiction": "regulations/jurisdictions/new_york/ithaca_city",
+                                       "use": "one_family_detached", "street_line": p["writes"]["street_line"],
+                                       "grade_from": "spot", "grade_is": "existing",
+                                       "grade_points": p["writes"]["spots"]})
+    assert len(got["floors"]) == 3 and any("drawn on the ground as it is" in n for n in got["notes"])
+    spots = p["writes"]["spots"]
+    assert got["floors"][0]["base"] == pytest.approx(sum(z for *_, z in spots) / len(spots), abs=0.01)
+
+
+def test_tax_map_slivers_get_no_length_label():
+    """Seen in Rhino on 106 Ithaca Rd: its tax-map outline has edges of 0.14 and 0.24 ft, each labelled
+    (0'-1 5/8"), cluttering the plan. Edges under SHORTEST_LABELLED_EDGE get none; every other edge keeps its own."""
+    from design_checker.check import SHORTEST_LABELLED_EDGE, plan
+    p = looked_up("106_ithaca_rd")
+    ring = p["writes"]["lot_ring"]
+    n = len(ring)
+    site = {"lot": {"edges": [{"points": [ring[i] + [0.0], ring[(i + 1) % n] + [0.0]]} for i in range(n)]},
+            "buildings": []}
+    got = plan(site, {"outline": [], "holes": []}, {"items": []}, {})
+    long_edges = [i for i in range(n) if math.dist(ring[i], ring[(i + 1) % n]) >= SHORTEST_LABELLED_EDGE]
+    assert len(got["edges"]) == len(long_edges) == n - 2
