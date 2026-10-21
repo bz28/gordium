@@ -651,18 +651,17 @@ def _with_each_as_main(record: dict, candidates: list[dict]) -> dict:
     return _decide("building_height", readings, record.get("how") or "", list(dict.fromkeys(objects)), question)
 
 
-def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
+def _stories_whole(parts: list[dict], grade, why_grade, stated, called: str | None = None) -> dict:
     """STORY of one building made of parts (the main building first; with #18, the parts touching it, §325-18A),
-    by one rule: stories are counted only from Gordium's floor blocks. A part that isn't floor blocks (one plain
-    solid, or plain solids stacked) is never counted from its height or its blocks: the count typed stands as the
-    architect's statement for the whole building, and only if it is at least the floors counted on any part and
-    the solids stacked in any plain part (each might be a story); else,
-    or with none typed, needs review. A part below the ground is the §325-3 basement question: needs review,
-    whatever was typed. A plain part starting above the ground (beside the roof or over it) may be another
-    story: needs review, whatever its plan relation. Parts one over another in plan with a real gap between them (a floor deleted, a block
-    lifted, a room floating over the roof) are a question: a floor not drawn, or a space open to below. With only floor blocks, the most
-    counted on any part, the count typed a reading beside it
-    (a question if they disagree). Each reason says what is drawn."""
+    read from the drawing as far as it allows. Gordium's floor blocks are counted; a part drawn as a plain solid (or
+    plain solids stacked) h tall holds at most floor(h / 7 ft) stories (the lowest habitable ceiling, R305.1), and
+    every building holds at least a first story (§325-3). The building's least is the floors counted (or one), its
+    most the most any part could hold: equal, it is read; between, it asks (the count entered stands only within
+    them). A part below the ground is the §325-3 basement question; a plain part starting above the ground may be
+    another story; parts one over another in plan with a real gap, or one sunk into another, are a question: each
+    needs review whatever was typed. With only floor blocks, the most counted on any part, a count typed beside it
+    (fewer is refused; more is a question). `called`: how the building is named in the words ("the building"),
+    else by the part's id. Each reason says what is drawn."""
     ids = [i for b in parts for i in _parts(b)]
     if why_grade:
         return _missing("stories", why_grade)
@@ -701,11 +700,9 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     # building's least is the floors counted (or that one), its most the most any part could hold
     could = {b["id"]: math.floor((_rise(b) + TOL) / STORY_ROOM) for b in plain}
     tallest = max(plain, key=_rise)
-    least = max([counted or 0] + [1 for v in could.values() if v >= 1])
-    most = max([counted or 0] + list(could.values()))
-    if most == 0:                       # nothing drawn could hold a story: draw its floors, or say how many
-        return _missing("stories", stop("no_stories"))
-    name = "the building" if len(parts) == 1 else tallest["id"]          # by id only beside other parts
+    least = max([counted or 0, 1])      # every building has a first story (§325-3: from a floor to the roof)
+    most = max([counted or 0, 1] + list(could.values()))
+    name = called or tallest["id"]      # the building by name, never the main one's words for another solid
     holds = (f"{name}, {_r(_rise(tallest)):g} ft tall, could hold up to {could[tallest['id']]} "
              f"stor{'y' if could[tallest['id']] == 1 else 'ies'} (7 ft a story, R305.1)")
     if stated is not None:              # the architect's count for the whole building: only within what's drawn
@@ -714,8 +711,8 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
         if stated > most:
             return _missing("stories", stop("stories_above_drawn", typed=f"{stated:g}", what=name,
                                             height=f"{_r(_rise(tallest)):g}", most=most))
-        if stated < least:
-            return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=least))
+        if stated < least:              # (no floor blocks drawn: fewer than the first story every building has)
+            return _missing("stories", stop("stories_below_one", typed=f"{stated:g}"))
         return _record("stories", "count", _r(stated), "stated by the architect for the whole building, within what "
                        f"the drawing allows ({least} to {most}: {holds})", ids)
     if least == most:                   # the drawing allows one count only: read, nothing to ask
@@ -860,12 +857,17 @@ def _stories_over(assemblies, grade, why_grade, stated) -> dict:
         parts = _one_vertical_building(members, everyone)
         parts = parts[:1] + [b for b in parts[1:] if not _fits_in_the_first_story(b, g)]
         # the count typed is the main building's: another building read as the main one has only its own drawing
-        r = _stories_whole(parts, g, why_g, None if c["kind"] == "as_main" else stated)
+        r = _stories_whole(parts, g, why_g, None if c["kind"] == "as_main" else stated,
+                           "the building" if c["kind"] == "main_only" and len(parts) == 1 else None)
         if r["value"] is None and not r["readings"]:
             return r
         found.append((words, r, c["kind"]))
+    # whether a count entered could settle it: only if every candidate still open is one the count is for (never
+    # another building read as the main one: pick the main building first)
+    ranged = [kind for _, r, kind in found if r["value"] is None and "could hold up to" in (r["reason"] or "")]
+    settles = bool(ranged) and "as_main" not in ranged
     if len(found) == 1:
-        return found[0][1]
+        return dict(found[0][1], count_settles=settles)
     readings, questions, objects = [], [], []
     for words, r, _ in found:
         objects += r["objects"]
@@ -877,8 +879,8 @@ def _stories_over(assemblies, grade, why_grade, stated) -> dict:
         questions.append(ACCESSORY)
         if any(kind == "as_main" for _, _, kind in found):
             questions.append(MAIN_QUESTION)
-    return _decide("stories", readings, "the stories of the building, read over its candidate buildings",
-                   list(dict.fromkeys(objects)), "; ".join(dict.fromkeys(questions)))
+    return dict(_decide("stories", readings, "the stories of the building, read over its candidate buildings",
+                        list(dict.fromkeys(objects)), "; ".join(dict.fromkeys(questions))), count_settles=settles)
 
 
 # ---- measuring -------------------------------------------------------------------------------------------

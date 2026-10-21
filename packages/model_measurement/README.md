@@ -134,7 +134,9 @@ Every reason the code gives today comes from the table:
   inside the one below it (from {low} ft to {high} ft): move it to stand on the one below, or join them". So moving
   a part a tenth of a foot never turns one count into another. Stories are read from the drawing as far as it allows: floor blocks are
   counted, and a part drawn as a plain solid (or plain solids stacked) h tall can hold at most floor(h / 7 ft)
-  stories (7 ft: the lowest ceiling a habitable room may have, NYS Residential Code R305.1) and at least one. So a
+  stories (7 ft: the lowest ceiling a habitable room may have, NYS Residential Code R305.1), and every
+  building at least a first story (§325-3; a count of 0: "the stories typed ({typed}) are fewer than one: every
+  building has at least a first story (§325-3): check the count"). So a
   12 ft garage holds one, and a 30 ft plain house one to four: then the count is a question ("a 30 ft solid could
   hold up to 4 stories: draw its floors or enter the count"), and the count entered stands for the whole building
   only within what the drawing allows: "the stories typed ({typed}) are fewer than the floor blocks drawn
