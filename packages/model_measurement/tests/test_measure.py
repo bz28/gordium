@@ -918,3 +918,30 @@ def test_a_plain_solid_joined_to_a_floor_stack_leaves_its_stories_to_the_count_t
         assert "wing has no floors drawn" in m["reason"]
     if typed == 2:
         assert {r["value"] for r in m["readings"]} == {2, 3} and "(story)" in m["reason"]
+
+
+def test_the_faces_open_to_the_sky_are_found_point_by_point():
+    """The open-to-the-sky test runs all its point checks at once; it finds the same faces as checking each sample
+    point against each other face's grown outline one by one (random overlapping boxes and sloped roofs)."""
+    import random
+    from model_measurement.measure import TOL, _normal_z, _open_to_the_sky, _plan, _plane_z, _samples
+    rnd = random.Random(7)
+    for _ in range(60):
+        faces = []
+        for k in range(rnd.randint(1, 4)):
+            x, y, z0 = rnd.uniform(0, 20), rnd.uniform(0, 20), rnd.choice([0, 0, 10])
+            make = rnd.choice([lambda: box(x, y, x + rnd.uniform(4, 15), y + rnd.uniform(4, 15), z0, z0 + 10, f"b{k}"),
+                               lambda: sloped_roof_box(x, y, x + 10, y + 12, z0 + 10, z0 + 16, f"b{k}")])
+            faces += make()["faces"]
+        flat = [(f, _plan(f)) for f in faces if _normal_z(f["points"]) > 0.001]
+        expect = []
+        for i, (f, shape) in enumerate(flat):
+            if shape.area <= 1e-9:
+                continue
+            for p in _samples(shape):
+                z = _plane_z(f, p.x, p.y)
+                if not any((h := _plane_z(g, p.x, p.y)) is not None and h > z + TOL
+                           for j, (g, s) in enumerate(flat) if j != i and s.buffer(TOL).contains(p)):
+                    expect.append(f)
+                    break
+        assert [id(f) for f in _open_to_the_sky(faces)] == [id(f) for f in expect]
