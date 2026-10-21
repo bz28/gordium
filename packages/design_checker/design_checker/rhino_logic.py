@@ -136,12 +136,18 @@ STATED_FACTS = {
                    "whether it is a conversion"),
     "occupants": ("Occupants on this lot, all dwelling units together (§325-3B OCCUPANT: in R-2c, every person with the "
                   "right to occupy, living there yet or not)", "count", "occupants"),
+    "occupants_most_in_one_unit": ("Most occupants in any one dwelling unit (optional: how they are split)", "count",
+                                   "the most occupants in one unit"),
 }
+# Facts a row can be decided without: asked only when the row needs review (they could settle it), never otherwise.
+OPTIONAL = {"occupants_most_in_one_unit"}
 
 
-def needs_of(names, values):
-    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
-    return [k for k in STATED_FACTS if k in names and (values or {}).get(k) is None]
+def needs_of(names, values, status=None):
+    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked. An
+    optional one (OPTIONAL) only for a row that needs review (`status`), where it could settle the row."""
+    return [k for k in STATED_FACTS if k in names and (values or {}).get(k) is None
+            and (k not in OPTIONAL or status == "needs_review")]
 
 
 def _and(words):
@@ -169,6 +175,11 @@ def update_counts(facts, answers):
             if n < 0 or n != answers[key]:
                 raise ValueError(f"{key} must be a whole number, 0 or more")
             out[key] = n
+    if answers.get("occupants_most_in_one_unit") is not None:
+        n = int(answers["occupants_most_in_one_unit"])
+        if n < 1 or n != answers["occupants_most_in_one_unit"]:
+            raise ValueError("occupants_most_in_one_unit must be a whole number, 1 or more")
+        out["occupants_most_in_one_unit"] = n
     if answers.get("conversion") is not None:
         out["conversion"] = bool(answers["conversion"])
     return out

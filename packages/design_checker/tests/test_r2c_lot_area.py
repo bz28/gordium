@@ -72,6 +72,30 @@ def test_occupants_all_in_one_unit_are_never_assumed_away():
         present.COMPLIES]
 
 
+def test_the_most_occupants_in_one_unit_settles_a_two_family_lot_and_is_asked_only_when_it_could():
+    """Coordinator follow-up: an ordinary two-family house (one occupant in each unit) on 40 x 100 = 4,000 sf needed
+    review with the split unknown. The most occupants in one unit, optional, settles it both ways; it is asked only
+    by a row that needs review, never by one already decided."""
+    rule = "R-2c.lot_area_two_family"
+    unknown = _r2c("two_family", 40, 100, rule, occupants=2)
+    assert [(i["status"], i["needs"]) for i in unknown] == [(present.REVIEW, ["occupants_most_in_one_unit"])], unknown
+    assert [i["status"] for i in _r2c("two_family", 40, 100, rule, occupants=2, occupants_most_in_one_unit=1)] == [
+        present.COMPLIES]
+    assert [i["status"] for i in _r2c("two_family", 40, 100, rule, occupants=2, occupants_most_in_one_unit=2)] == [
+        present.FAILS]                                                     # both in one unit: 4,400 sf
+    decided = _r2c("two_family", 30, 100, rule, occupants=2)               # 3,000 sf: short however they are split
+    assert [(i["status"], i["needs"]) for i in decided] == [(present.FAILS, [])], decided
+
+
+def test_the_most_occupants_in_one_unit_is_one_or_more():
+    from design_checker.rhino_logic import update_counts
+    from model_measurement.project import fact_problems
+    assert update_counts({}, {"occupants_most_in_one_unit": 1}) == {"occupants_most_in_one_unit": 1}
+    with pytest.raises(ValueError):
+        update_counts({}, {"occupants_most_in_one_unit": 0})
+    assert any("1 or more" in p for p in fact_problems({"occupants_most_in_one_unit": 0}))
+
+
 def test_a_limit_that_depends_on_the_use_is_shown_for_the_stated_use():
     """Review round 1 (P2): R-2c's side yards and coverage depend on the use; the panel showed '—' as required."""
     items = _r2c("one_family_detached", 40, 100, "R-2c.side_yards", occupants=1)

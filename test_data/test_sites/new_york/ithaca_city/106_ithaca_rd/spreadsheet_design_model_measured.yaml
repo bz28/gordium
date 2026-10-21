@@ -58,6 +58,9 @@ measurements:
   occupants:
     value: null
     from: 'not measured: enter the occupants (§325-3B OCCUPANT: in R-2c, every person with the right to occupy)'
+  occupants_most_in_one_unit:
+    value: null
+    from: 'not measured: optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that depends on how the occupants are split)'
   front_yard_eaves:
     value: 30.0
     from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building, eaves included; between (63, 0) and (63, 30)'

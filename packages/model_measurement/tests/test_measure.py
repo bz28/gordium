@@ -50,7 +50,7 @@ def test_a_plain_rectangular_lot():
                          # stated by the architect (R-3a's note 7): not given here
                          "dwelling_units": None, "rooms_let_for_profit": None, "conversion": None,
                          # stated by the architect (R-2c's notes 4-6): not given here
-                         "occupants": None,
+                         "occupants": None, "occupants_most_in_one_unit": None,
                          # a flat roof: nothing sticks out, the yards to the eaves are the yards
                          "front_yard_eaves": 25.0, "side_yard_smaller_eaves": 10.0, "side_yard_larger_eaves": 15.0,
                          "rear_yard_eaves": 35.0,
@@ -921,7 +921,8 @@ def test_a_fourth_floor_block_sharing_an_id_never_lets_the_stories_comply():
     m = measure(site(RECT, *FLOORS, fourth), {**FACTS, "stories": None})
     assert m["stories"]["value"] is None and "share the id floor 2" in m["stories"]["reason"]
     lot_only = {"lot_area", "lot_width", "lot_depth", "district", "use", "sleeping_rooms", "parking_spaces",
-                "dwelling_units", "rooms_let_for_profit", "conversion", "occupants"}
+                "dwelling_units", "rooms_let_for_profit", "conversion", "occupants",
+                "occupants_most_in_one_unit"}
     read_from_buildings = [k for k in m if k not in lot_only]
     assert read_from_buildings and all(m[k]["value"] is None and "share the id" in (m[k]["reason"] or "")
                                        for k in read_from_buildings), {k: m[k]["value"] for k in read_from_buildings}
