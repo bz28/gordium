@@ -241,7 +241,23 @@ def test_the_eaves_rows_show_their_base_requirement_while_the_height_waits_for_f
     # the detail says the same: the base before the bonus, never a formula with the height unknown (round 9)
     assert "23'-0\"" in front["detail"]["line"] and "—" not in front["detail"]["line"].split("proposed")[1]
     assert "before the §325-16C height bonus" in front["detail"]["calc"] and "—" not in front["detail"]["calc"]
-    assert "more if the §325-16C height bonus applies; the height needs finished grade" in front["reason"]
+    # round 10, P3: the calc keeps the sign, and says why the bonus waits as it is here: the ground as it is was
+    # measured, but the law measures the height from finished grade (not "the height isn't measured")
+    assert front["detail"]["calc"].startswith("Required: ≥ 23'-0\" before the §325-16C height bonus")
+    for text in (front["reason"], front["detail"]["calc"]):
+        assert "measured from existing grade only; the bonus needs it from finished grade" in text, text
+        assert "isn't measured yet" not in text, text
+
+
+def test_the_eaves_rows_say_the_height_isnt_measured_when_there_is_no_ground(house):
+    """Round 10, P3: finished grade ticked but no ground given: the height isn't measured at all, and the eaves
+    rows say that (with the base ≥ 23'-0" before the bonus), never 'existing grade'."""
+    got, facts = house
+    items = _check(got["floors"], facts, grade_is="finished", grade_elevation=None, grade_points=None)
+    front = items["Eaves into front yard"]
+    assert front["status"] != present.COMPLIES and front["required"] == "≥ 23'-0\""
+    assert front["detail"]["calc"] == "Required: ≥ 23'-0\" before the §325-16C height bonus (the height isn't measured yet)"
+    assert "existing grade" not in front["reason"] and "the height isn't measured yet" in front["reason"]
 
 
 # ---- review round 8: every lot-line reading the geometry allows ---------------------------------------------------

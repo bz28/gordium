@@ -137,7 +137,9 @@ Every reason the code gives today comes from the table:
   without naming the reading, or removed): the measuring can't follow it" (any finding or open question the code
   follows, named in the reason); "a reading research lists (a_reading, an_entry) has no measuring code yet".
 - **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 6 lot lines could be
-  either: too many readings to list)"; "no reading of the lot lines gives two side lot lines and a rear lot line
+  either: too many readings to list)" (the lot depth and the side and rear yards wait, on a corner lot whatever
+  the other address streets give; the frontage and the front yards don't depend on those lines and are still
+  measured); "no reading of the lot lines gives two side lot lines and a rear lot line
   (a triangular lot, for one): an open question for the architects".
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top

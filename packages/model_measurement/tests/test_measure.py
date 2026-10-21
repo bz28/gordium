@@ -860,6 +860,24 @@ def test_a_corner_lot_address_with_too_many_lines_stops_the_whole_reading():
     m = measure(site(lot(pts), box(15, 30, 40, 70)), {**FACTS, "corner_lot": True, "street_line": street})
     assert m["lot_depth"]["value"] is None and m["lot_depth"]["readings"] == []
     assert "too many readings to list" in m["lot_depth"]["reason"]
+    # round 10, P2: only what depends on the side and rear lines waits. The house (x 15-40, y 30-70) is 30 ft from
+    # the south street, 20 ft from the east one (x = 60): front yard 20 ft. Each address's frontage is measured:
+    # south 50, chamfer + east 14.14 + 90 = 104.14, south + chamfer 64.14, east 90
+    assert m["front_yard"]["value"] == 20.0 and m["front_yard_eaves"]["value"] == 20.0
+    assert sorted(r["value"] for r in m["lot_width"]["readings"]) == [50.0, 64.142136, 90.0, 104.142136]
+    for name in ("rear_yard", "side_yard_smaller", "side_yard_larger"):
+        assert m[name]["value"] is None and "too many readings to list" in m[name]["reason"], name
+
+
+def test_a_lot_with_too_many_back_lines_still_measures_its_frontage_and_front_yard():
+    """Round 10, P2: a one-street lot 50 ft wide with a nine-line zigzag back (test_stop_list ZIGZAG): the side and
+    rear lines can't all be listed, so the depth and the side and rear yards wait; the frontage (50 ft, the
+    street line) and the front yard (the house 25 ft back) don't depend on them and are measured."""
+    from test_stop_list import ZIGZAG
+    m = measure(site(ZIGZAG), FACTS)
+    assert m["lot_width"]["value"] == 50.0 and m["front_yard"]["value"] == 25.0
+    for name in ("lot_depth", "rear_yard", "side_yard_smaller", "side_yard_larger"):
+        assert m[name]["value"] is None and "too many readings to list" in m[name]["reason"], name
 
 
 def test_two_building_objects_with_one_id_are_never_measured_as_one():

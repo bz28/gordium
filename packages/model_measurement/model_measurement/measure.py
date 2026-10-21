@@ -1279,7 +1279,8 @@ def _eave_basis(confirmation: dict) -> dict:
 def _lot_lines(lot: Lot, facts: dict):
     """Which lot lines are front, side and rear, every way they can be read: {"readings": [(words, {"left",
     "right": the two side lot lines (lot depth), "sides": the side lines that aren't on a street (the side yards),
-    "rear", "address": the street the address is on})], "question", "basis", "problem"}, or a reason (text).
+    "rear", "address": the street the address is on})], "question", "basis", "problem", "candidates"}, or a reason
+    (text) when the lot's streets themselves can't be read (no lot line is measured then).
 
     A lot on one street: the street is the front. A corner lot (§325-19C, the law: corner_lot_two_front_yards):
     every yard facing a street is a front yard; the rear yard is opposite the street the lot's address is on
@@ -1311,17 +1312,23 @@ def _lot_lines(lot: Lot, facts: dict):
             candidates = [c for k in range(1, len(chain)) for c in (chain[:k], chain[k:])]
             question.append("which street the lot's address is on decides which yard is the rear yard (§325-8A(14)(d)): "
                             "pick the address street (address_street_line)")
-        if len(candidates) > MAX_UNCLEAR_EDGES * 2:
-            return stop("lines_unclear", limit=MAX_UNCLEAR_EDGES)
     else:
         candidates = [lot.ordered_street()]
+
+    def unclear() -> dict:
+        # too many to list: the side and rear lines wait, whatever other addresses give (never fewer readings
+        # silently); the frontage and the front yards don't depend on them and are still measured (review round 10)
+        return {"readings": [], "question": "; ".join(question), "basis": basis,
+                "problem": stop("lines_unclear", limit=MAX_UNCLEAR_EDGES), "candidates": candidates}
+    if len(candidates) > MAX_UNCLEAR_EDGES * 2:
+        return unclear()
     found, problems = [], []
     for address in candidates:
         view = copy.copy(lot)
         view.street = list(address)
         readings = view.readings()
-        if readings is None:            # too many to list: never fewer readings silently, whatever the others give
-            return stop("lines_unclear", limit=MAX_UNCLEAR_EDGES)
+        if readings is None:
+            return unclear()
         for words, left, right, rear in readings:
             sides = [g for g in ([i for i in left if i not in streets], [i for i in right if i not in streets]) if g]
             if any(i in streets for i in rear):

@@ -561,12 +561,14 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             if isinstance(base, (int, float)):
                 unit = (measured.get(node.left.id) or {}).get("unit") or ""
                 required = f"{numbers[4]} {value_text(base, unit, numbers[4], False)}".strip()
-                more = "more if the §325-16C height bonus applies; the height needs " + (
-                    "finished grade" if facts.get("grade_is") == "existing" else "to be measured")
+                # why the bonus can't be worked out, as it is (review round 10): the ground as it is was measured
+                # but the law measures from finished grade, or the height isn't measured at all
+                waits = ("the height is measured from existing grade only; the bonus needs it from finished grade"
+                         if facts.get("grade_is") == "existing" else "the height isn't measured yet")
+                more = f"more if the §325-16C height bonus applies; {waits}"
                 why = f"{why} ({more})" if why else f"Needs review ({more})"
-                base_text = value_text(base, unit, numbers[4], False)
                 line = f"{proposed} proposed · {required} required before the §325-16C height bonus"
-                base_calc = f"Required: {base_text} before the §325-16C height bonus (the height isn't measured yet)"
+                base_calc = f"Required: {required} before the §325-16C height bonus ({waits})"
         applied = _applied(names, measured)
         if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
             why = f"{why} · {applied['note']}" if why else applied["note"]
