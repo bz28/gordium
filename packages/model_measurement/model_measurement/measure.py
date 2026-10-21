@@ -695,15 +695,20 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     buildings = _stacks(buildings)
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None))
-    if why_building and site.get("buildings"):
-        # any building object can feed a stories reading (stacked solids are counted, a typed count is only one
-        # reading beside them): whatever stops the other building measurements (a shared id would drop a solid
-        # from the stack) stops it too, whatever was typed. A typed count stands only with no building drawn.
-        out["stories"] = _missing("stories", why_building)
+    why_main = None if main else stop("no_main_building")
+    # One decision for every building measurement: which building, and can it be measured (why_which). Stories
+    # follow the rule of the fact model: a typed count is a stated fact and stands only when nothing drawn could be
+    # counted (no building, or a main building that is one plain solid). Whenever the drawing can produce a count
+    # (floor blocks or stacked solids on any building; or building objects with a problem, which might be either),
+    # the stories come from the drawing, with the typed count as a cross-check reading, and every stop that
+    # applies to the height applies to them identically (the grade is checked inside _stories).
+    why_which = why_building or why_main
+    countable = any(b.get("parts") for b in buildings) or bool(why_building and site.get("buildings"))
+    if countable and why_which:
+        out["stories"] = _missing("stories", why_which)
     elif main is not None and main.get("parts"):
         out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
-    why_main = None if main else stop("no_main_building")
-    why = why_building or why_grade or why_main
+    why = why_which or why_grade
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
     others = [b for b in buildings if b is not main]
     if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):
