@@ -284,11 +284,17 @@ def test_what_a_draw_does_to_the_neighbourhood():
     assert rec["frame"] == p["writes"]["frame"] and rec["fingerprint"] == payload["snapshot"]["fingerprint"]
 
 
-def test_the_footprints_carry_their_source_line_when_shown():
+def test_the_footprints_are_credited_on_the_drawing_and_their_date_said_on_screen_only():
+    """Architect review of PR #23: the panel's line listed agencies and storage rules. Who made the footprints is on
+    the drawing's Sources note (Gordium's own attribution text, endpoints.yaml: it may be kept); their date is said in
+    the panel's short line only, never in the file (it is the live source's data: store none)."""
     payload, _ = context_for()
+    note = " ".join(next(o for o in payload["objects"] if o["name"] == "Sources")["text"].split("\n"))
+    assert "%s: %s" % (ENDPOINTS["state_buildings"]["attribution"], logic.LIVE_ONLY) in note
+    assert T.STAND_IN_BUILDINGS_DATE not in note                         # the date never reaches the saved note
     said = logic.context_says(payload)
-    assert "Building footprints: NYS ITS Geospatial Services (NYSERDA/CIESIN; Tompkins County ITS GIS Division)" in said
-    assert payload["live_credits"] and all("Building footprints" in c for c in payload["live_credits"])
+    assert "NYSERDA" not in said and "Geospatial" not in said and "kept in this file" not in said
+    assert "(footprints from %s, shown only)" % T.STAND_IN_BUILDINGS_DATE in said
 
 
 def test_clearing_reaches_hidden_and_locked_context_layers_and_only_gordiums_objects():
@@ -408,7 +414,7 @@ def test_one_service_down_keeps_that_layer_and_replaces_the_others():
     dot = next(o for s, o in model2 if s == "gordium" and o.get("name") == "Sources")
     assert "Tax parcels: NYS Tax Parcels Public" in dot["text"]                       # still credited
     said = logic.context_says(shown)
-    assert "229 neighbouring parcels" in said and "Kept the parcels drawn earlier" in said
+    assert "229 parcels" in said and "Kept the parcels drawn earlier" in said
 
 
 def test_footprints_down_in_a_reopened_file_are_never_said_or_recorded_as_kept():
@@ -645,8 +651,9 @@ def test_the_plugin_draws_the_context_after_a_box_draw_guarded_and_has_a_tick():
 def test_the_panel_says_what_was_drawn():
     payload, _ = context_for()
     said = logic.context_says(payload)
-    assert said.startswith("Neighbourhood drawn: 229 neighbouring parcels and 38 street lines")
-    assert "212 building footprints shown live (not saved)" in said
+    assert said == "Neighbourhood drawn: 229 parcels, 38 streets, 212 buildings (footprints from %s, shown only)." \
+        % T.STAND_IN_BUILDINGS_DATE                                       # what an architect needs, nothing more
+    assert len(said) < 100
     assert logic.context_says({"status": "offline", "message": "Couldn't fetch the neighbourhood: x"}).endswith(": x")
     assert logic.context_says(None).startswith("Couldn't fetch")
 

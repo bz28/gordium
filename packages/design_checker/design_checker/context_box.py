@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from rule_format.rulebook import utf8_console
-from site_lookup.context import HALF_SIZE_FT, context, credits
+from site_lookup.context import HALF_SIZE_FT, context
 from site_lookup.http import Http
 
 from .rhino_logic import NOTE_HEIGHT_FT, is_stored, note_text     # one definition for both sides
@@ -88,11 +88,10 @@ def payload(ctx: dict, frame: dict) -> dict:
                 o["rotation_deg"] = frame["rotation_deg"]
             objects.append(o)
     counts = {n: len(v["items"]) for n, v in ctx["layers"].items()}
-    # a layer shown only live carries its source line on screen (the panel's message), never in the file
-    live = [line for n, line in credits(ctx).items() if not is_stored(ctx["layers"][n])]
     return {"status": ctx["status"], "message": ctx.get("message") or "", "objects": objects, "guides": guides,
-            "credits": ctx.get("credits") or [], "live_credits": live, "counts": counts, "snapshot": ctx.get("snapshot"),
-            "layers": {n: {"status": v["status"], "store": v["store"], "name": v["name"], "source": v["source"]}
+            "credits": ctx.get("credits") or [], "counts": counts, "snapshot": ctx.get("snapshot"),
+            "layers": {n: {"status": v["status"], "store": v["store"], "name": v["name"], "source": v["source"],
+                           "dates": v.get("dates") or []}
                        for n, v in ctx["layers"].items()}}
 
 

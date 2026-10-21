@@ -133,6 +133,13 @@ def credits(out: dict) -> dict[str, str]:
     return lines
 
 
+def live_credit(layer: dict) -> str:
+    """A live-only layer's credit line as the drawing's Sources note keeps it: its attribution from endpoints.yaml
+    (Gordium's own words, so it may be kept), never anything from its answers (the footprints' date is the source's
+    data: store none, so it is said on screen only)."""
+    return ENDPOINTS[layer["source"]].get("attribution") or layer["name"]
+
+
 def snapshot(out: dict, f: Fetcher) -> dict:
     """What a project keeps of the context besides the drawn objects: per layer its source, status and count, and
     for every request the URL, date and SHA-256 (never an answer). A layer's credit line is kept only if its source
@@ -141,7 +148,7 @@ def snapshot(out: dict, f: Fetcher) -> dict:
     layers = {n: {"source": v["source"], "status": v["status"], "store": v["store"],
                   **({"count": len(v["items"])} if v["store"] == "raw" else {})}
               for n, v in out["layers"].items()}
-    kept = [line if out["layers"][n]["store"] == "raw" else f"{out['layers'][n]['name']}: {LIVE_ONLY}"
+    kept = [line if out["layers"][n]["store"] == "raw" else f"{live_credit(out['layers'][n])}: {LIVE_ONLY}"
             for n, line in credits(out).items()]
     body = {"half_size_ft": out["half_size_ft"], "origin_epsg2261_us_survey_ft": out["origin_epsg2261_us_survey_ft"],
             "status": out["status"], "layers": layers, "sources": f.records, "fetched": out["fetched"],

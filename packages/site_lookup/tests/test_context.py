@@ -149,7 +149,7 @@ def test_the_snapshot_keeps_records_and_counts_never_a_live_sources_data():
     assert s["layers"]["parcels"]["count"] == 229 and s["layers"]["streets"]["count"] == 38
     text = json.dumps(s)
     assert T.STAND_IN_BUILDINGS_DATE not in text      # the footprints' own data (their date) isn't kept
-    assert "NYS Building Footprints: " + LIVE_ONLY in s["credits"]
+    assert ENDPOINTS["state_buildings"]["attribution"] + ": " + LIVE_ONLY in s["credits"]   # who made them: kept
     assert "ring" not in text and "path" not in text   # no geometry at all: the drawn objects are the record
     assert len(s["fingerprint"]) == 64
     a, _ = run()

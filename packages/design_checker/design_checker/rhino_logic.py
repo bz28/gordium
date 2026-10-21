@@ -1450,17 +1450,20 @@ def context_guides(payload):
 
 
 def context_says(payload):
-    """The line after the neighbourhood is drawn (or why it isn't)."""
+    """The line after the neighbourhood is drawn (or why it isn't): what an architect needs, as "Neighbourhood drawn:
+    229 parcels, 38 streets, 212 buildings (footprints from 2014, shown only)." (architect review of PR #23: the
+    line listed agencies and storage rules). Who made the data is on the drawing's Sources note; what a failed
+    service left out follows (the payload's message)."""
     payload = payload or {}
     if payload.get("status") not in ("found",):
         return payload.get("message") or "Couldn't fetch the neighbourhood: the lot is drawn without it."
     n = payload.get("counts") or {}
-    kept = "%d neighbouring parcels and %d street lines (State tax map and streets, kept in this file)" % (
-        n.get("parcels", 0), n.get("streets", 0))
-    live = "; %d building footprints shown live (not saved)" % n["buildings"] if n.get("buildings") else ""
-    sources = " ".join(payload.get("live_credits") or []) if n.get("buildings") else ""
-    return "Neighbourhood drawn: " + kept + live + "." + (" " + payload["message"] if payload.get("message") else "") + \
-        (" " + sources if sources else "")
+    said = "%d parcels, %d streets" % (n.get("parcels", 0), n.get("streets", 0))
+    if n.get("buildings"):
+        dates = ", ".join(((payload.get("layers") or {}).get("buildings") or {}).get("dates") or [])
+        said += ", %d buildings (footprints %s, shown only)" % (n["buildings"], "from " + dates if dates else
+                                                                 "of unknown date")
+    return "Neighbourhood drawn: " + said + "." + (" " + payload["message"] if payload.get("message") else "")
 
 
 ASK_LIMIT_S = 60          # s: the longest the plugin waits for one answer (the first also starts Python, loads rules)
