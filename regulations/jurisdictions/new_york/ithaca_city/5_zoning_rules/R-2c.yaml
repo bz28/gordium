@@ -644,22 +644,31 @@ rules:
     topic: dimensions
     title: "Lot size by units and occupants, one-family attached (chart p.3, note 6)"
     applies_when: use == "one_family_attached"
-    # Each open reading, written alone (the generative test in test_r2c_lot_area.py works every one out unit by unit
-    # and checks this row is their every-reading combination):
+    # Each open reading, written alone (the generative test in test_r2c_lot_size_readings.py works every one out unit
+    # by unit, and a hand table there checks both against the law's boundary cases; this row is their every-reading
+    # combination):
     #   own lot, the least:      1500 * max(units here, 1) + 300 per occupant past one to each unit + 200 per
     #                            occupant past five a unit (note 6's 500 instead of the 300)
     #   building's lot, the most: 1500 * max(units here, units in the building, 3) + 300 per occupant past the first,
-    #                            all in one unit, + 500 per occupant past five on top; only when the lot holds the
-    #                            whole building (else the other lots' occupants aren't stated)
+    #                            all in one unit, + 500 per occupant past five on top; only when this lot's units are
+    #                            exactly the building's (fewer: the rest of the building and its occupants are on
+    #                            other lots; more: part of another building may be here, or a count is off)
     # Complies only if the most passes (every reading passes); does not comply only if the least fails (every
     # reading fails); else NEEDS REVIEW.
     check: >-
       lot_area >= 1500 * max(dwelling_units, 1) + 300 * max(occupants - max(dwelling_units, 1), 0)
       + (500 - 300) * max(occupants - 5 * max(dwelling_units, 1), 0)
-      and dwelling_units >= attached_units_in_building
+      and dwelling_units == attached_units_in_building
       and lot_area >= 1500 * max(dwelling_units, attached_units_in_building, 3) + 300 * max(occupants - 1, 0)
       + 500 * max(occupants - 5, 0)
     review_when:
+      - when: >-
+          dwelling_units > attached_units_in_building
+          and lot_area >= 1500 * max(dwelling_units, 1) + 300 * max(occupants - max(dwelling_units, 1), 0)
+          + (500 - 300) * max(occupants - 5 * max(dwelling_units, 1), 0)
+        reason: >-
+          More units on this lot than in the attached building stated: part of another building may be here, or a
+          count is off. Check the units on this lot and in the building.
       - when: >-
           lot_area >= 1500 * max(dwelling_units, 1) + 300 * max(occupants - max(dwelling_units, 1), 0)
           + (500 - 300) * max(occupants - 5 * max(dwelling_units, 1), 0)
@@ -708,6 +717,12 @@ rules:
         expect: needs_review
         note: round 4's case; one unit of a six-unit building -> its own lot 1,500 sf, the building's lot 9,000 sf
           plus the other five units' occupants, which aren't stated
+      - given: {use: one_family_attached, lot_area: 6000, dwelling_units: 4, occupants: 1, attached_units_in_building: 3}
+        expect: needs_review
+        note: round 5's case; four units here, three in the building -> part of another building, or a count is off
+      - given: {use: one_family_attached, lot_area: 5999, dwelling_units: 4, occupants: 1, attached_units_in_building: 3}
+        expect: fail
+        note: short even for its own four units (4 x 1,500 = 6,000 sf)
       - given: {use: one_family_attached, lot_area: 50000, dwelling_units: 1, occupants: 1, attached_units_in_building: 3}
         expect: needs_review
         note: one unit of three on this lot -> never a pass, however large, under the building's-lot reading
@@ -842,8 +857,8 @@ rules:
         reading: each lot is held to its own units, at least one (1,500 sf x max(this lot's units, 1) + the occupants)
       - id: building_lot
         reading: the lot holds the whole attached building (1,500 sf x the building's units, at least three, + all its
-          occupants); a lot holding only some of the building's units can't pass, since the other lots' occupants
-          aren't stated
+          occupants); it can pass only when this lot's units are exactly the building's (fewer, and the rest and their
+          occupants are on other lots; more, and part of another building may be here)
     - question: 'Note 6: "+300 sf for each additional occupant in each dwelling unit; +500 sf for each additional occupant
         in each dwelling unit in excess of five occupants". For a unit with more than five occupants, does each
         occupant past five add 500 sf instead of 300 sf, or 500 sf on top of the 300 sf?'

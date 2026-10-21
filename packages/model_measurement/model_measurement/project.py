@@ -30,6 +30,17 @@ def _point(p) -> bool:
     return isinstance(p, list) and len(p) == 2 and all(_number(v) for v in p)
 
 
+def fact_conflicts(facts: dict) -> list[str]:
+    """Lot facts that are each well formed but disagree with each other. Not a refusal (the check runs; the rows they
+    decide need review): the panel shows each one, so the architect can correct the count."""
+    out = []
+    here, building = facts.get("dwelling_units"), facts.get("attached_units_in_building")
+    if facts.get("use") == "one_family_attached" and type(here) is int and type(building) is int and here > building:
+        out.append(f"{here} dwelling units on this lot but {building} in the attached building: part of another "
+                   "building may be on this lot, or one of the counts is off")
+    return out
+
+
 def fact_problems(facts: dict) -> list[str]:
     """What's wrong with lot facts, by field. One check for every way facts arrive (a file, the Rhino command)."""
     problems = [f"unknown lot fact {k!r}" for k in sorted(set(facts) - FACT_FIELDS)]

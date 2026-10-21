@@ -31,6 +31,7 @@ ORDER = [FAILS, REVIEW, COMPLIES, NOT_CHECKED]
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
           ("not_checked", "Not checked"), ("not_covered", "Not covered by this rulebook")]
 
+from model_measurement.project import fact_conflicts  # noqa: E402  (lot facts that disagree: shown)
 from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = reading_set.LOT_LENGTHS
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
@@ -1189,6 +1190,13 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         for i in items:
             if i.get("measure") in ("building_height", "stories"):
                 i["note"] = "assuming flat ground"
+    for k, conflict in enumerate(fact_conflicts(facts)):     # facts that disagree (r2 round 5): said, not hidden
+        items.append({"id": f"facts.conflict#{k + 1}", "rule": None, "name": "Lot facts disagree", "group": "site",
+                      "status": REVIEW, "mark": MARK[REVIEW], "proposed": "", "required": "", "margin": "", "sign": "",
+                      "zoom": None, "measure": None, "objects": [], "points": None, "hint": "Lot facts…",
+                      "reason": conflict, "needs": [],
+                      "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
+                                 "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     if left_out:
         n = len(left_out)
         items.append({"id": "scope.not_included", "rule": None, "name": "Objects on the lot not included",

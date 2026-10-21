@@ -67,7 +67,10 @@ def attached_verdict(lot, du, n, building):
             reqs.append((note_6(s, on_top), False))
     for b in ([building] if building is not None else range(1, 9)):
         whole = max(du, b, 3)
-        holds_all = du >= b                                     # else other lots' occupants aren't stated
+        # The lot holds the whole building exactly when its units are that building's units: fewer, and the rest of
+        # the building (with occupants nobody stated) is on other lots; more, and the extra units belong to some
+        # other building, whose other parts and occupants are elsewhere. Only then is every occupant counted.
+        holds_all = du == b
         for s in splits(n, whole):                              # the building's lot (others' occupants at least 0)
             for on_top in (False, True):
                 reqs.append((note_6(s, on_top), not holds_all))
@@ -122,3 +125,38 @@ def test_the_attached_row_is_the_every_reading_combination():
         assert outcome(rule, given, USES) == want, given
         tried, seen = tried + 1, seen | {want}
     assert tried == 3000 and seen == {"pass", "fail", "needs_review"}
+
+
+# Boundary cases written straight from the law (chart p.3 notes 5 and 6, §325-3B), worked by hand, not from the rule
+# or the model above: a third check, so a mistake the rule and the model share is still caught.
+#   (use, lot area, dwelling units on this lot, occupants, units in the building, most in one unit) -> verdict
+LAW = [
+    # one-family attached (note 6: 1,500 sf a unit, +300 sf per further occupant in a unit, +500 sf past five)
+    ("one_family_attached", 4500, 3, 1, 3, None, "pass"),          # the whole 3-unit building, 1 occupant: 3 x 1,500
+    ("one_family_attached", 4499, 3, 1, 3, None, "fail"),          # short of the three units' first occupants
+    ("one_family_attached", 1500, 1, 1, 3, None, "needs_review"),  # its own unit fits; the building isn't all here
+    ("one_family_attached", 1499, 1, 1, 3, None, "fail"),          # short even for its own unit
+    ("one_family_attached", 6000, 4, 1, 3, None, "needs_review"),  # round 5: 4 units here, 3 in the building
+    ("one_family_attached", 11000, 6, 6, 6, None, "pass"),         # 6 units, 6 all in one: 9,000 + 5 x 300 + 500
+    ("one_family_attached", 10999, 6, 6, 6, None, "needs_review"),
+    ("one_family_attached", 8999, 6, 6, 6, None, "fail"),          # under 6 x 1,500 however they are split
+    # two-family (note 5: 2,000 sf for the first occupant in each of its two units, +400 sf per further occupant)
+    ("two_family", 4000, None, 2, None, 1, "pass"),                # one in each unit: 2 x 2,000
+    ("two_family", 4000, None, 2, None, None, "needs_review"),     # both may be in one unit: 4,400 sf
+    ("two_family", 4399, None, 2, None, 2, "fail"),                # both in one unit
+    ("two_family", 3999, None, 2, None, None, "fail"),             # under 4,000 however they are split
+    # semi-detached, one half on its own lot
+    ("one_family_semi_detached", 2000, 1, 1, None, None, "pass"),
+    ("one_family_semi_detached", 1999, 1, 1, None, None, "fail"),
+]
+
+
+@pytest.mark.parametrize("use, lot, du, n, building, most, want", LAW)
+def test_the_rule_and_the_model_both_match_the_law_at_its_boundaries(use, lot, du, n, building, most, want):
+    given = {"use": use, "lot_area": lot, "occupants": n}
+    given |= {k: v for k, v in (("dwelling_units", du), ("attached_units_in_building", building),
+                                ("occupants_most_in_one_unit", most)) if v is not None}
+    assert outcome(RULES[f"R-2c.lot_area_{use}"], given, USES) == want
+    model = (attached_verdict(lot, du, n, building) if use == "one_family_attached"
+             else two_unit_verdict(lot, du or 2, n, most))
+    assert model == want
