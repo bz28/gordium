@@ -350,7 +350,8 @@ lot the tax map allows:
 One row needs review from the start, and that is Gordium being honest about this lot, not a mistake:
 - **Rear yard**: which of the short lines at the back count as side lot lines and which as the rear lot line is an
   open question for the architects (it decides the lot's depth, and so the rear yard's requirement), so the rear
-  yard shows two readings and "confirm with the zoning office".
+  yard's Required shows the range it can take, and the reason says so once: "Needs … to …, depending on which lot
+  lines count as side and which as rear (it sets the lot depth): ask the zoning office".
 
 **Building height**: 35'-0" is at the limit and complies. The height rule's taller-house bonus reads the rear yard,
 but at 35 ft or under the bonus never comes into it, so the open question doesn't matter.

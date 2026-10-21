@@ -258,23 +258,39 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     from rule_export.workbook import title, write_block
     word = {present.FAILS: ("FAIL", "Outside table limit"), present.REVIEW: ("NEEDS REVIEW", "Needs review"),
             present.COMPLIES: ("PASS", "Within table limit"), present.NOT_CHECKED: ("NOT CHECKED", "Needs input")}
-    worst = {}
+    worst, shown = {}, {}
     for i in view["items"]:
         if i["rule"] and i["status"] in word:
             rank = present.ORDER.index(i["status"])
             if i["rule"] not in worst or rank < present.ORDER.index(worst[i["rule"]][0]):
                 worst[i["rule"]] = (i["status"], i.get("reason") or "")
+            shown.setdefault(i["rule"], []).append(i)
     col = {h: n for n, h in enumerate(COLUMNS)}
     rows = []
     for r in t["output"]:
         r = list(r)
         found = worst.get(r[col["Rule id"]])
         if found:
+            # every column of the row from the panel's items (the same verdicts): its Error, Comparison and Why,
+            # and what it shows as Proposed, so a PASS never sits beside "Can't check: … missing"
             r[col["Error"]], r[col["Comparison"]] = word[found[0]]
-            if found[0] == present.REVIEW and found[1]:
-                r[col["Why it needs review"]] = found[1]
+            r[col["Why it needs review"]] = found[1] if found[0] == present.REVIEW else ""
+            items = [i for i in shown[r[col["Rule id"]]] if i.get("proposed")]
+            if len(items) == 1:
+                r[col["Proposed"]] = items[0]["proposed"]
+            elif items:
+                r[col["Proposed"]] = "; ".join(f"{i['name']}: {i['proposed']}" for i in items)
         rows.append(r)
-    wb = build({**t, "output": rows})
+    # an input the measurement couldn't settle (a tax-map lot's area) shows what the panel shows, said as drawn
+    by_measure = {i.get("measure"): i for i in view["items"] if i.get("measure") and i.get("proposed")}
+    inputs = []
+    for r in t["inputs"]:
+        r = list(r)
+        i = by_measure.get(r[0].lower().replace(" ", "_"))
+        if r[1] is None and i is not None:
+            r[1], r[3] = i["proposed"], "as drawn (the panel's reading); " + str(r[3])
+        inputs.append(r)
+    wb = build({**t, "output": rows, "inputs": inputs, "title": view["header"].get("place") or t["title"]})
     ws = wb.create_sheet("Check")
     h = view["header"]
     title(ws, f"GORDIUM | {view['summary']}")
@@ -293,6 +309,10 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
                                      (COLUMN_DELTA, 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
+    wb.move_sheet("Check", offset=-wb.sheetnames.index("Check"))     # the architect's sheet first, open on it
+    wb.active = 0
+    for ws_ in wb.worksheets:
+        ws_.sheet_view.tabSelected = ws_.title == "Check"
     # written beside it, then moved into place: a write that fails half way never leaves a broken report there
     report_path = Path(report_path)
     part = report_path.with_name("." + report_path.name + ".part")

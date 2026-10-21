@@ -122,7 +122,10 @@ Every reason the code gives today comes from the table:
   blocks) is the same building whatever the gap between them (a tolerance never decides what the building is), and
   a real gap between its levels asks: "parts of the building drawn one over another don't stand on each other (from
   {low} ft to {high} ft): a floor not drawn, or a space open to below? draw the missing floor, or check the
-  blocks". Parts at the same level (an L-shaped house of two stacks) are no gap. One starting partly inside the one below
+  blocks". Parts at the same level (an L-shaped house of two stacks) are no gap. A plain part starting above the ground
+  (a room beside the roof edge or over it, touching in plan or not) asks, whatever was typed: "part of the
+  building ({what}) starts above the ground: it may be another story: draw its stories as floor blocks, or check
+  the count". One starting partly inside the one below
   (a floor moved down into it, a room sunk into the roof) asks too: "part of the building ({what}) starts partly
   inside the one below it (from {low} ft to {high} ft): move it to stand on the one below, or join them". So moving
   a part a tenth of a foot never turns one count into another. Stories are counted only from floor blocks: a part drawn as a plain solid
@@ -139,7 +142,7 @@ Every reason the code gives today comes from the table:
   question for the architects".
 - **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
   measurements"; "more than one building: pick the main building"; "a
-  building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  building isn't inside the lot: {what}" (which one; the yards wait only if it is the main building); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

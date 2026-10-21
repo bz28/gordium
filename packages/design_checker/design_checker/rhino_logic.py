@@ -658,6 +658,16 @@ def ground_text(ground):
                                                          ("picked by you" if kind == "terrain" else "placed by you"))
 
 
+def street_name(state):
+    """The street the lot faces, by name: the one found, else the street of the address ("106 Ithaca Rd, Ithaca"
+    -> "Ithaca Rd"), else the line itself."""
+    import re
+    if state.get("street_name"):
+        return state["street_name"]
+    m = re.match(r"\s*\d+[A-Za-z]?\s+([^,]+)", state.get("address") or "")
+    return m.group(1).strip() if m else "the highlighted line"
+
+
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None, review (an amber line) or None, check ("I checked this", ticked) or None}.
@@ -692,7 +702,7 @@ def box_rows(state, flat=None):
          "text": ("no lot yet: draw it, or pick a closed outline on the Site layer" if state.get("lot_missing") else
                   lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))),
          "actions": lot_actions, "tick": None},
-        {"key": "street", "label": "Street side", "text": state.get("street_name") or "the highlighted line",
+        {"key": "street", "label": "Street side", "text": street_name(state),
          "actions": [("street", "Change…", True)], "tick": None,
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
@@ -1061,9 +1071,10 @@ def fact_sources(state, today, confirmed):
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
         # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
         "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"), state.get("lot_source"))),
-        # the street's name only when it may be kept (the City's roads may not: "street_name_saved" then None)
-        "street": fact((state.get("street_name_saved") if "street_name_saved" in state else state.get("street_name"))
-                       or "the highlighted line",
+        # the street's name only when it may be kept (the City's roads may not: "street_name_saved" then None, and
+        # the address's street, a kept fact, says it instead)
+        "street": fact(street_name({**state, "street_name": state.get("street_name_saved")})
+                       if "street_name_saved" in state else street_name(state),
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
