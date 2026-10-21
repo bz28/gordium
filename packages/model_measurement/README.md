@@ -109,21 +109,26 @@ Every reason the code gives today comes from the table:
   instead". Measured from existing ground instead of finished: "measured from existing
   grade; the code's grade plane is finished ground level (§325-3): tick No regrading near the house, or set the
   finished ground" (height and stories).
-- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "the building is one
-  solid with no floors: draw each story as its own solid standing on the one below (as Gordium's starting building
-  is), or enter the number of stories"; "enter bedrooms / parking spaces".
+- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
+  are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
+  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces".
 - **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
-  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked (a podium, a bulkhead, a
+  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked on them (a podium, a bulkhead, a
   roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
   they disagree it's a question, never an override. "a floor block below the ground: whether a
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
-  together, or draw the overhang as part of its floor". A plain solid read as part of the building (no floors drawn)
-  that rises more than 7 ft above the grade (the lowest ceiling a habitable room may have, NYS Residential Code
-  R305.1) or above the main building's first floor could hold a story: the count typed stands for the whole
-  building only if no part drawn with floors has more, and with none typed: "{part} has no floors drawn, so how
-  many stories it holds can't be counted: draw its stories as floor blocks, or enter the number of stories of the
-  whole building". A lower one (a porch slab, steps, a deck) isn't counted.
+  together, or draw the overhang as part of its floor". Stories are counted only from floor blocks: a part drawn as a plain solid
+  (or plain solids stacked) never has its stories guessed from its height or its blocks. With one at least 7 ft
+  tall (the lowest ceiling a habitable room may have, NYS Residential Code R305.1; a porch slab or steps is lower),
+  the count typed stands for the whole building, and only if no part's floor blocks count more: "the stories typed
+  ({typed}) are fewer than the floor blocks drawn ({drawn}): check the count, or the floors", nor the solids stacked
+  in a plain part: "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), which may
+  each be a story: check the count"; with none typed:
+  "part of the building ({what}) isn't drawn as floor blocks, so its stories can't be counted: enter the number of
+  stories of the whole building". Any part reaching below the ground, whatever was typed: "part of the building
+  ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
+  question for the architects".
 - **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
   measurements"; "more than one building: pick the main building"; "a
   building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building

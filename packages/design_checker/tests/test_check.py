@@ -142,6 +142,13 @@ def test_rhino_decisions():
     assert classify("Default", "Brep") is None
     assert update_counts({"stories": 2}, {"stories": None, "sleeping_rooms": 3}) == {"stories": 2, "sleeping_rooms": 3}
     assert "sleeping_rooms" not in update_counts({}, {"sleeping_rooms": None})       # skipped: never 0
+    # R-3a note 7's facts (#20 round 3): whole numbers 0 or more, a yes/no; skipped stays unset, never 0 or no
+    got = update_counts({}, {"dwelling_units": 5, "rooms_let_for_profit": 0, "conversion": False})
+    assert got == {"dwelling_units": 5, "rooms_let_for_profit": 0, "conversion": False}
+    assert update_counts({"conversion": True}, {"dwelling_units": None, "conversion": None}) == {"conversion": True}
+    for bad in ({"dwelling_units": -1}, {"rooms_let_for_profit": 2.5}):
+        with pytest.raises(ValueError):
+            update_counts({}, bad)
     assert missing({"sleeping_rooms": 3}) == ["jurisdiction", "zone", "use", "street_line",
                                               "lot_surveyed"]   # no grade, no corner answer: checked, they wait
     assert with_suggestions({"stories": 3, "zone": None}, {"zone": "R-1b"}) == {"zone": "R-1b", "stories": 3}

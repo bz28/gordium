@@ -124,12 +124,18 @@ def with_suggestions(saved, suggested):
 
 
 def update_counts(facts, answers):
-    """Bedrooms, parking spaces and stories from the Lot facts prompts. An answer of None means the prompt was
-    skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0."""
+    """Bedrooms, parking spaces, stories, dwelling units and rooms let for profit (whole numbers, 0 or more) and
+    whether the building is a conversion (yes / no) from the Lot facts prompts. An answer of None means the prompt
+    was skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0 or no."""
     out = dict(facts or {})
-    for key in ("sleeping_rooms", "parking_spaces", "stories"):
+    for key in ("sleeping_rooms", "parking_spaces", "stories", "dwelling_units", "rooms_let_for_profit"):
         if answers.get(key) is not None:
-            out[key] = int(answers[key])
+            n = int(answers[key])
+            if n < 0 or n != answers[key]:
+                raise ValueError(f"{key} must be a whole number, 0 or more")
+            out[key] = n
+    if answers.get("conversion") is not None:
+        out["conversion"] = bool(answers["conversion"])
     return out
 
 
