@@ -405,10 +405,17 @@ def test_a_row_complying_under_every_reading_names_the_open_question_it_depends_
                                     "lines count as side and which as rear; confirm with the zoning office")
     from design_checker import scenarios
     from design_checker.check import check_site
-    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "10_one_floor_moved_on_its_own.yaml"))
-    side = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Side yard, East"]
-    assert side["reason"].startswith("Complies under every reading, but it depends on open questions: which lot "
-                                     "lines count as side and which as rear; whether a yard is measured to the wall")
+    # PR #18 settles scenario 10's overhang (the law: yards_to_nearest_part), so its side yard complies outright;
+    # scenario 09's rear yard still depends on the lot-line question, and two questions are named together
+    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "09_five_sided_lot.yaml"))
+    rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
+    assert rear["reason"] == ("Complies under every reading, but it depends on an open question: which lot lines "
+                              "count as side and which as rear; confirm with the zoning office")
+    two = dict(row, Why=row["Why"] + "; whether the overhang counts is an open question for the architects "
+                                     "(yard_projections)")
+    assert present._reason(two).startswith("Complies under every reading, but it depends on open questions: which "
+                                           "lot lines count as side and which as rear; whether a yard is measured "
+                                           "to the wall")
 
 
 def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
