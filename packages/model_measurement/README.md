@@ -118,7 +118,12 @@ Every reason the code gives today comes from the table:
   they disagree it's a question, never an override. "a floor block below the ground: whether a
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
-  together, or draw the overhang as part of its floor".
+  together, or draw the overhang as part of its floor". A plain solid read as part of the building (no floors drawn)
+  that rises more than 7 ft above the grade (the lowest ceiling a habitable room may have, NYS Residential Code
+  R305.1) or above the main building's first floor could hold a story: the count typed stands for the whole
+  building only if no part drawn with floors has more, and with none typed: "{part} has no floors drawn, so how
+  many stories it holds can't be counted: draw its stories as floor blocks, or enter the number of stories of the
+  whole building". A lower one (a porch slab, steps, a deck) isn't counted.
 - **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
   measurements"; "more than one building: pick the main building"; "a
   building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
