@@ -1327,7 +1327,7 @@ rules:
     title: "Lots abutting R-1a or R-1b land: stricter limits (§325-19E)"
     applies_when: >-
       use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
-      "two_family"]
+      "two_family"] and abuts_r1_district
     sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 50
@@ -1368,16 +1368,28 @@ rules:
         quote: "(9) For special conditions on development of property in R-3 that directly abuts R-1, § 325-9B(1)."
         not_limits: {1: "district name R-1 and section 325-9B(1), not limits", 3: "the district name R-3, not a number"}
     examples:
+      - given: {use: multiple_family, abuts_r1_district: true}
+        expect: needs_review
+      - given: {use: multiple_family, abuts_r1_district: false}
+        expect: not_applicable
+        note: 'the conditions apply only "if the land ... directly abuts land in either the R-1a or R-1b" district'
       - given: {use: multiple_family}
         expect: needs_review
-      - given: {use: church}
+        note: whether the lot abuts R-1 land is not stated yet, so the conditions may apply
+      - given: {use: church, abuts_r1_district: true}
         expect: needs_review
+      - given: {use: church, abuts_r1_district: false}
+        expect: not_applicable
+      - given: {use: two_family, abuts_r1_district: true}
+        expect: not_applicable
+        note: '"except a one-family or two-family dwelling": exempt even on a lot abutting R-1 land'
       - given: {use: two_family}
         expect: not_applicable
-      - given: {use: one_family_attached}
+        note: exempt whether or not the lot abuts R-1 land, so nothing to ask
+      - given: {use: one_family_attached, abuts_r1_district: true}
         expect: needs_review
         note: whether an attached building of 3-6 houses is exempt is the second open question, so it is not exempted
-      - given: {use: one_family_semi_detached}
+      - given: {use: one_family_semi_detached, abuts_r1_district: true}
         expect: not_applicable
     findings:
     - id: one_family_configurations_exempt
@@ -1454,7 +1466,10 @@ rules:
         different (so "abuts" alone would not reach across a street); but §325-11B says "abuts land, other than a public
         right-of-way", which implies land in a street can be abutting land. Whether R-1 land begins at the street's
         center line or at its far edge depends on the zoning map (§325-6A allows either), and "directly" is not
-        defined. No City record found (searched the City's agenda center and the web, 2026-10-20).
+        defined. No City record found (searched the City's agenda center and the web, 2026-10-20). Until it is
+        answered, the stated fact abuts_r1_district asks it the cautious way (Gordium's reading, to confirm), yes
+        when the lot shares a lot line with R-1a or R-1b land or faces it across a street, so the conditions are
+        never left out on the narrower reading.
       readings:
       - id: shares_a_lot_line
         reading: only R-1a or R-1b land sharing a lot line with the lot counts

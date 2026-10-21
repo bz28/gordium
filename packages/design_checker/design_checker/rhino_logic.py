@@ -133,6 +133,8 @@ STATED_FACTS = {
     "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
     "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
                    "whether it is a conversion"),
+    "abuts_r1_district": ("Does the lot abut R-1a or R-1b land, sharing a lot line or across a street? (§325-19E)",
+                          "yes_no", "whether the lot abuts R-1 land"),
 }
 
 
@@ -157,7 +159,7 @@ def needs_reason(needs):
 
 def update_counts(facts, answers):
     """Bedrooms, parking spaces, stories, dwelling units and rooms let for profit (whole numbers, 0 or more) and
-    whether the building is a conversion (yes / no) from the Lot facts prompts. An answer of None means the prompt
+    whether the building is a conversion and whether the lot abuts R-1 land (yes / no) from the Lot facts prompts. An answer of None means the prompt
     was skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0 or no."""
     out = dict(facts or {})
     for key in ("sleeping_rooms", "parking_spaces", "stories", "dwelling_units", "rooms_let_for_profit"):
@@ -166,8 +168,9 @@ def update_counts(facts, answers):
             if n < 0 or n != answers[key]:
                 raise ValueError(f"{key} must be a whole number, 0 or more")
             out[key] = n
-    if answers.get("conversion") is not None:
-        out["conversion"] = bool(answers["conversion"])
+    for key in ("conversion", "abuts_r1_district"):
+        if answers.get(key) is not None:
+            out[key] = bool(answers[key])
     return out
 
 

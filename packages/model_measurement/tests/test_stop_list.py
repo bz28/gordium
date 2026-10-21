@@ -247,6 +247,7 @@ CASES = {
                                                       floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2")]),
     "no_rooms": _plain(),
     "no_units": _plain(),
+    "no_abuts_r1": _plain(),
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
