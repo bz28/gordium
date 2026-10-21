@@ -438,8 +438,10 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
     return readings, PITCHED
 
 
-# A part drawn without floor blocks at least this tall could hold a story: the lowest ceiling a habitable room may
-# have (7 ft, NYS Residential Code R305.1). Lower (a porch slab, steps, a deck) it can't.
+# A plain part standing on the ground and lower than this fits inside the first story every building has, so it
+# can't add one: the lowest ceiling a habitable room may have (7 ft, NYS Residential Code R305.1). A porch slab,
+# steps or a deck. §325-3's STORY has no least height, so anywhere else (raised, on a roof, below the ground) a
+# part of any height might be a story.
 STORY_ROOM = 7.0            # ft
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
@@ -601,7 +603,9 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     architect's statement for the whole building, and only if it is at least the floors counted on any part and
     the solids stacked in any plain part (each might be a story); else,
     or with none typed, needs review. A part below the ground is the §325-3 basement question: needs review,
-    whatever was typed. With only floor blocks, the most counted on any part, the count typed a reading beside it
+    whatever was typed. Floor blocks one over another in plan that don't stand on each other (a floor deleted,
+    a block lifted) are a question: a floor not drawn, or a space open to below. With only floor blocks, the most
+    counted on any part, the count typed a reading beside it
     (a question if they disagree). Each reason says what is drawn."""
     ids = [i for b in parts for i in _parts(b)]
     if why_grade:
@@ -610,8 +614,12 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     low = [b for b in plain if _extent(b)[0] is not None and _extent(b)[0] < grade - TOL]
     if low:
         return _missing("stories", stop("basement_part", what=", ".join(b["id"] for b in low)))
+    floored = [b for b in parts if b not in plain]
+    for lower, upper in _apart_in_one_plan(floored):        # floor blocks over a gap: a floor not drawn?
+        return _missing("stories", stop("floors_apart", low=_r(lower["spans"][-1][1]),
+                                        high=_r(upper["spans"][0][0])))
     counts = []
-    for stack in (b for b in parts if b not in plain):
+    for stack in floored:
         got = _stories(stack, grade, None, None)
         if got["value"] is None:        # its own reason: a floor block below the ground, misaligned, a bulkhead
             return got
@@ -643,14 +651,58 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
                    ids)
 
 
+def _footprint(building: dict):
+    """A building seen from above (a stack: its blocks' plans together)."""
+    return ops.unary_union(building["plans"]) if building.get("plans") else _projection(building)
+
+
+def _apart_in_one_plan(stacks: list[dict]) -> list[tuple[dict, dict]]:
+    """Stacks of floor blocks one over another in plan that don't stand on each other (a floor deleted between
+    them, or a block lifted): each such pair, lower first. _stacks joins only blocks that touch, so these are
+    still one building's floors, never a separate building."""
+    out = []
+    for i, a in enumerate(stacks):
+        for b in stacks[i + 1:]:
+            if _footprint(a).intersection(_footprint(b)).area > 1e-6:
+                out.append(tuple(sorted((a, b), key=lambda s: s["spans"][0][0])))
+    return out
+
+
+def _with_floors_above_or_below(parts: list[dict], everyone: list[dict]) -> list[dict]:
+    """parts, with every stack of floor blocks drawn over or under one of its floor blocks in plan (vertically
+    apart or not): they are this building's floors, whichever candidate building is read."""
+    out = list(parts)
+    grew = True
+    while grew:
+        grew = False
+        for b in everyone:
+            if any(b is o for o in out) or not (b.get("parts") and any(b["floor"])):
+                continue
+            if any(p.get("parts") and any(p["floor"]) and _footprint(p).intersection(_footprint(b)).area > 1e-6 for p in out):
+                out.append(b)
+                grew = True
+    return out
+
+
+def _fits_in_the_first_story(part: dict, grade) -> bool:
+    """A plain part standing on the ground (its bottom at the grade) and lower than STORY_ROOM: it can't add a
+    story. Not knowing the grade, or anything else (raised, on a roof, below the ground, stacked), it might."""
+    lo, _ = _extent(part)
+    return (not part.get("parts") and grade is not None and lo is not None and abs(lo - grade) <= TOL
+            and _rise(part) < STORY_ROOM - TOL)
+
+
 def _stories_over(assemblies, grade, why_grade, stated) -> dict:
     """STORY over the same candidate buildings as the height (_assemblies): each one's stories by the one rule
-    (_stories_whole; its parts are the main building and every other part that could hold a story, STORY_ROOM
-    tall, or is stacked: a porch slab or steps can't). A count that can't be read for any of them needs review
-    with its reason; if they differ, it is the accessory question."""
+    (_stories_whole; its parts are the main building and every other part, except a plain one standing on the
+    ground and lower than STORY_ROOM, which fits inside the first story: a porch slab or steps. A part raised off
+    the ground, on a roof or reaching below it stays in, whatever its height). A count that can't be read for any
+    of them needs review with its reason; if they differ, it is the accessory question."""
     found = []
+    everyone = list({id(b): b for _, members in assemblies for b in members}.values())
     for words, members in assemblies:
-        parts = members[:1] + [b for b in members[1:] if b.get("parts") or _rise(b) >= STORY_ROOM - TOL]
+        parts = members[:1] + [b for b in members[1:] if not _fits_in_the_first_story(b, grade)]
+        parts = _with_floors_above_or_below(parts, everyone)
         r = _stories_whole(parts, grade, why_grade, stated)
         if r["value"] is None and not r["readings"]:
             return r
