@@ -1052,3 +1052,41 @@ def test_the_suggested_facts_never_answer_the_corner_lot_question():
     assert got["lot_id"] == "corner" and got["street_line"] == [[[0, 0], [90, 0]]]
     assert got["main_building"] == "house" and got["grade_elevation"] == 0.5 and got["zone"] == "R-1b"
     assert logic.suggested_facts("j", [], [square], [])["grade_elevation"] == 0.0     # no building: the lot's level
+
+
+def test_a_solid_whose_points_dont_outline_it_counts_by_its_box():
+    """Review of the P1-2 fix: a sphere's vertices and seam points lie on one meridian, a straight line in plan,
+    so their hull has no area and the sphere was left out. A solid always covers some ground: its plan box
+    stands in for the outline whenever the points don't give one."""
+    import math
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+    lot = [(0, 0), (73, 0), (73, 90), (0, 90)]
+    seam = [(30 + 5 * math.sin(t * math.pi / 8), 40) for t in range(9)]          # pole to pole, in plan
+    assert reaches_into_lot(lot, seam, ON_LOT_REACH, box=(25, 35, 35, 45))
+    assert reaches_into_lot(lot, [(30, 40)], ON_LOT_REACH, box=(25, 35, 35, 45))
+    assert not reaches_into_lot(lot, [(100, 40), (110, 40)], ON_LOT_REACH, box=(95, 35, 115, 45))   # off the lot
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
+    assert "logic.reaches_into_lot(ring, _plan_points(g), reach, box)" in body
+    assert "f.PointAt(" in src[src.index("def _plan_points("):]
+
+
+def test_the_box_pre_filter_never_drops_an_object_that_reaches_the_lot():
+    """Review of the P1-2 fix: only objects whose box comes near the lot's get outlined. Any footprint that
+    reaches into the lot has a box near the lot's, so the pre-filter can't change an answer."""
+    import random
+    from design_checker.rhino_logic import ON_LOT_REACH, box_near_lot, reaches_into_lot
+    lot = [(0, 0), (73, 0), (73, 90), (0, 90)]
+    lot_box = (0, 0, 73, 90)
+    rnd = random.Random(7)
+    for _ in range(3000):
+        pts = [(rnd.uniform(-150, 220), rnd.uniform(-150, 240)) for _ in range(rnd.randint(3, 6))]
+        pts = [(x, y) for x, y in pts]
+        box = (min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts), max(p[1] for p in pts))
+        if reaches_into_lot(lot, pts, ON_LOT_REACH, box):
+            assert box_near_lot(box, lot_box, ON_LOT_REACH), pts
+    assert not box_near_lot((100, 0, 120, 20), lot_box, ON_LOT_REACH)
+    assert box_near_lot((73, 0, 90, 20), lot_box, ON_LOT_REACH)                  # touching: still outlined
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
+    assert body.index("logic.box_near_lot(") < body.index("_plan_points(g)")

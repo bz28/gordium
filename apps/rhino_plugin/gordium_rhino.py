@@ -736,6 +736,7 @@ def _not_included(doc, lot):
         return []
     ring = _plan_points(lot.Geometry)
     reach = _model_length(doc, logic.ON_LOT_REACH)              # ft -> model units
+    lot_box = _plan_box(lot.Geometry)
     out = []
     every = Rhino.DocObjects.ObjectEnumeratorSettings()          # hidden and locked too, as for the Building layer:
     every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # a hidden shed still counts
@@ -750,9 +751,18 @@ def _not_included(doc, lot):
         if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or logic.on_layer(layer, "Gordium"):
             continue
-        if logic.reaches_into_lot(ring, _plan_points(g), reach):   # its footprint, against the lot's outline
+        box = _plan_box(g)
+        if not logic.box_near_lot(box, lot_box, reach):             # far from the lot: no outline work
+            continue
+        if logic.reaches_into_lot(ring, _plan_points(g), reach, box):   # its footprint, against the lot's outline
             out.append(str(o.Id))
     return out
+
+
+def _plan_box(g):
+    """An object's plan bounding box, (x0, y0, x1, y1), in the model's units."""
+    b = g.GetBoundingBox(True)
+    return (b.Min.X, b.Min.Y, b.Max.X, b.Max.Y)
 
 
 def _plan_points(g):
@@ -770,6 +780,9 @@ def _plan_points(g):
             pts = [v.Location for v in brep.Vertices]
             for e in brep.Edges:
                 pts += [e.PointAt(t) for t in (e.DivideByCount(8, True) or [])]
+            for f in brep.Faces:                 # a dome or a revolved solid: its surface gives its outline
+                u, v = f.Domain(0), f.Domain(1)
+                pts += [f.PointAt(u.ParameterAt(i / 6.0), v.ParameterAt(k / 6.0)) for i in range(7) for k in range(7)]
         else:
             pts = []
     if not pts or len(pts) > 50000:          # nothing to outline it by, or a huge mesh (a terrain): its box's corners
