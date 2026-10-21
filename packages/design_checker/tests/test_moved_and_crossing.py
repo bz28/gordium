@@ -238,7 +238,26 @@ def test_the_eaves_rows_show_their_base_requirement_while_the_height_waits_for_f
     assert eaves and all(i["status"] != present.COMPLIES for i in eaves)
     front = next(i for i in eaves if i["name"] == "Eaves into front yard")
     assert front["required"] == "≥ 23'-0\""
-    assert "more if the §325-16C height bonus applies; the height needs finished grade" in front["reason"]
+    # the detail says the same: the base before the bonus, never a formula with the height unknown (round 9)
+    assert "23'-0\"" in front["detail"]["line"] and "—" not in front["detail"]["line"].split("proposed")[1]
+    assert "before the §325-16C height bonus" in front["detail"]["calc"] and "—" not in front["detail"]["calc"]
+    # round 10, P3: the calc keeps the sign, and says why the bonus waits as it is here: the ground as it is was
+    # measured, but the law measures the height from finished grade (not "the height isn't measured")
+    assert front["detail"]["calc"].startswith("Required: ≥ 23'-0\" before the §325-16C height bonus")
+    for text in (front["reason"], front["detail"]["calc"]):
+        assert "measured from existing grade only; the bonus needs it from finished grade" in text, text
+        assert "isn't measured yet" not in text, text
+
+
+def test_the_eaves_rows_say_the_height_isnt_measured_when_there_is_no_ground(house):
+    """Round 10, P3: finished grade ticked but no ground given: the height isn't measured at all, and the eaves
+    rows say that (with the base ≥ 23'-0" before the bonus), never 'existing grade'."""
+    got, facts = house
+    items = _check(got["floors"], facts, grade_is="finished", grade_elevation=None, grade_points=None)
+    front = items["Eaves into front yard"]
+    assert front["status"] != present.COMPLIES and front["required"] == "≥ 23'-0\""
+    assert front["detail"]["calc"] == "Required: ≥ 23'-0\" before the §325-16C height bonus (the height isn't measured yet)"
+    assert "existing grade" not in front["reason"] and "the height isn't measured yet" in front["reason"]
 
 
 # ---- review round 8: every lot-line reading the geometry allows ---------------------------------------------------
@@ -264,11 +283,15 @@ def test_a_double_jog_is_also_read_as_one_stepped_side_line():
 
 
 def test_the_sample_lot_and_scenario_09_keep_their_answers():
-    """106 Ithaca Rd's sample (a 73 x 90 rectangle) is unchanged: one reading, no 'line ... as a rear lot line'
-    words; scenario 09 still needs review on its rear yard, and its moved-4-ft case never complies."""
+    """106 Ithaca Rd's sample (a 73 x 90 rectangle) is unchanged: one reading, depth 90, no 'line ... as a rear lot
+    line' words, the rear yard complies; scenario 09 still needs review on its rear yard, and its house moved 4 ft
+    back never complies."""
     res = run(floors(12, 27, 61, 59, 3), lot=[(0, 0), (73, 0), (73, 90), (0, 90)], street_line=[[[0, 0], [73, 0]]])
-    assert res["measurements"]["lot_depth"]["value"] == 90.0
+    depth = res["measurements"]["lot_depth"]
+    assert depth["value"] == 90.0 and depth["readings"] == [] and "as a rear lot line" not in depth["how"]
     assert status(res, "R-1b.rear_yard") == present.COMPLIES
+    assert status(run(floors(15, 30, 45, 80, 2), lot=FIVE_SIDED), "R-1b.rear_yard") == present.REVIEW
+    assert status(run(floors(15, 34, 45, 84, 2), lot=FIVE_SIDED), "R-1b.rear_yard") != present.COMPLIES
 
 
 def test_a_main_building_off_the_lot_leaves_an_accessory_building_on_it_measured():
@@ -279,3 +302,13 @@ def test_a_main_building_off_the_lot_leaves_an_accessory_building_on_it_measured
     assert res["measurements"]["accessory_side_yard"]["value"] == 20.0
     assert status(res, "R-1b.accessory_buildings") == present.COMPLIES
     assert status(res, "R-1b.front_yard") == present.REVIEW
+
+
+def test_an_accessory_building_beside_an_off_lot_house_still_waits_for_trustworthy_ground():
+    """Round 9, P1 (complies on befd63e): the house off the lot, a listed frame shed on it, and the ground level
+    above every building (500 ft: it contradicts the model). With the house on the lot the shed's distances wait;
+    with the house off it they must wait too."""
+    res = run(floors(15, 150, 45, 190, 2) + [prism(rect(20, 90, 30, 100), 0, 10, "shed")],
+              accessory_buildings=["shed"], accessory_frame=True, grade_elevation=500)
+    assert res["measurements"]["accessory_side_yard"]["value"] is None
+    assert status(res, "R-1b.accessory_buildings") != present.COMPLIES

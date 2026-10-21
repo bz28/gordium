@@ -137,7 +137,9 @@ Every reason the code gives today comes from the table:
   without naming the reading, or removed): the measuring can't follow it" (any finding or open question the code
   follows, named in the reason); "a reading research lists (a_reading, an_entry) has no measuring code yet".
 - **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 6 lot lines could be
-  either: too many readings to list)"; "no reading of the lot lines gives two side lot lines and a rear lot line
+  either: too many readings to list)" (the lot depth and the side and rear yards wait, on a corner lot whatever
+  the other address streets give; the frontage and the front yards don't depend on those lines and are still
+  measured); "no reading of the lot lines gives two side lot lines and a rear lot line
   (a triangular lot, for one): an open question for the architects".
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
@@ -169,7 +171,7 @@ Every reason the code gives today comes from the table:
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
   together, or draw the overhang as part of its floor".
-- **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a building isn't on the lot (is it part of this design?)" (a building
+- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the measurements"; "more than one building: pick the main building"; "a building isn't on the lot (is it part of this design?)" (a building
   wholly off the lot: only the rules that would measure it wait: the main yards for the main building, the accessory
   rule for an accessory building, coverage for any. A building partly off the lot is measured, and every rule that
   measures it does not comply, whatever the readings or answers: the main yards, the eaves, the height and the

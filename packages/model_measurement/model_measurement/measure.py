@@ -812,6 +812,24 @@ def _distance(line, shape):
 
 
 TAX_MAP_TOLERANCE = 2.0   # ft: a lot line from the tax map is taken as right to within this (spec C2)
+# How far each lot measurement can be off on a tax-map lot, with every lot line up to TAX_MAP_TOLERANCE the unlucky
+# way (Ben, 2026-10-21): a yard runs to one line; a lot width or depth runs between two. The one definition: the
+# checker's worst case (design_checker.present) and the starting house (design_checker.check) read it from here.
+TAX_MAP_SLACK = {"front_yard": TAX_MAP_TOLERANCE, "side_yard_smaller": TAX_MAP_TOLERANCE,
+                 "side_yard_larger": TAX_MAP_TOLERANCE, "rear_yard": TAX_MAP_TOLERANCE,
+                 "lot_width": 2 * TAX_MAP_TOLERANCE, "lot_depth": 2 * TAX_MAP_TOLERANCE,
+                 # the same yards to the eaves, and an accessory building's distances: each to one line
+                 **{name: TAX_MAP_TOLERANCE for name in ("front_yard_eaves", "side_yard_smaller_eaves",
+                                                         "side_yard_larger_eaves", "rear_yard_eaves",
+                                                         "accessory_front_yard", "accessory_side_yard",
+                                                         "accessory_rear_yard")}}
+
+
+def tax_map_lot_area(polygon) -> dict:
+    """The smallest and largest lot area the tax map allows: every lot line moved TAX_MAP_TOLERANCE in, or out
+    (73 x 90 -> 69 x 86 = 5,934 sf at the smallest). The one definition of the worst-case lot area."""
+    return {"ft": TAX_MAP_TOLERANCE, "low": _r(polygon.buffer(-TAX_MAP_TOLERANCE, join_style=2).area),
+            "high": _r(polygon.buffer(TAX_MAP_TOLERANCE, join_style=2).area)}
 SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall
 
 
@@ -908,8 +926,12 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                        if facts.get("zone") else _record("district", "text", reason=stop("no_district")))
     buildings = site.get("buildings") or []
     grade = facts.get("grade_elevation")
+    # objects are told apart by id below (spans, outlines): two with one id would leave one out silently
+    ids = [b["id"] for b in buildings]
+    same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
     why_building = (stop("no_building") if not buildings else
-                    "; ".join(p for b in buildings for p in b.get("problems") or []) or None)
+                    "; ".join([p for b in buildings for p in b.get("problems") or []]
+                              + [stop("same_id", id=i) for i in same]) or None)
     # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
     # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
@@ -1004,13 +1026,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         out["lot_area"] = _record("lot_area", "sf", None, "the area inside the lot lines", [lot.id], None,
                                   [{"reading": "the lot as drawn", "value": _r(lot.polygon.area)}],
                                   stop("survey_unknown") if facts.get("lot_surveyed") is None else stop("not_surveyed"))
-        # tax-map lot lines can each be off by up to TAX_MAP_TOLERANCE: every length longer or shorter by that much
-        # is the outline moved half of it out or in (73 × 90 → 71 × 88 at the smallest). Not a value: the area
-        # still waits for a survey; this only lets a result that holds at both ends be said (spec C2)
-        out["lot_area"]["tolerance"] = {
-            "ft": TAX_MAP_TOLERANCE,
-            "low": _r(lot.polygon.buffer(-TAX_MAP_TOLERANCE / 2, join_style=2).area),
-            "high": _r(lot.polygon.buffer(TAX_MAP_TOLERANCE / 2, join_style=2).area)}
+        # tax-map lot lines can each be off by up to TAX_MAP_TOLERANCE: the outline moved that much in or out
+        # (73 × 90 → 69 × 86 at the smallest). Not a value: the area still waits for a survey; this only lets a
+        # result that holds at both ends be said (spec C2)
+        out["lot_area"]["tolerance"] = tax_map_lot_area(lot.polygon)
 
     # where the street is decides the lot width, the yards and the lot depth. Whether the lot is a corner lot
     # (two streets, §325-19C) is stated by the architect, never guessed from the drawing (the city's definition
@@ -1063,11 +1082,13 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                    "the average length of the two side lot lines", [lot.id], lines["question"],
                                    lines["basis"]["depth"])
 
-    why_yards = why_building or why_main_off or why_plan or why_main or (why_grade if plan_level is None else None)
+    # every other reason the plan can't be trusted, on its own (never read off an `or` chain: review round 9)
+    why_rest = why_building or why_plan or why_main or (why_grade if plan_level is None else None)
+    why_yards = why_building or why_main_off or why_rest
     if why_yards:
         for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
             out[name] = _missing(name, why_yards)
-        if why_yards == why_main_off and not why_acc_off and detached:
+        if why_main_off and not why_rest and not why_acc_off and detached:
             # only the main building is off the lot: an accessory building on it is still measured on its own
             _accessory_yards(out, lot, lines, facts, detached, views)
         return out
@@ -1258,7 +1279,8 @@ def _eave_basis(confirmation: dict) -> dict:
 def _lot_lines(lot: Lot, facts: dict):
     """Which lot lines are front, side and rear, every way they can be read: {"readings": [(words, {"left",
     "right": the two side lot lines (lot depth), "sides": the side lines that aren't on a street (the side yards),
-    "rear", "address": the street the address is on})], "question", "basis", "problem"}, or a reason (text).
+    "rear", "address": the street the address is on})], "question", "basis", "problem", "candidates"}, or a reason
+    (text) when the lot's streets themselves can't be read (no lot line is measured then).
 
     A lot on one street: the street is the front. A corner lot (§325-19C, the law: corner_lot_two_front_yards):
     every yard facing a street is a front yard; the rear yard is opposite the street the lot's address is on
@@ -1290,18 +1312,23 @@ def _lot_lines(lot: Lot, facts: dict):
             candidates = [c for k in range(1, len(chain)) for c in (chain[:k], chain[k:])]
             question.append("which street the lot's address is on decides which yard is the rear yard (§325-8A(14)(d)): "
                             "pick the address street (address_street_line)")
-        if len(candidates) > MAX_UNCLEAR_EDGES * 2:
-            return stop("lines_unclear", limit=MAX_UNCLEAR_EDGES)
     else:
         candidates = [lot.ordered_street()]
+
+    def unclear() -> dict:
+        # too many to list: the side and rear lines wait, whatever other addresses give (never fewer readings
+        # silently); the frontage and the front yards don't depend on them and are still measured (review round 10)
+        return {"readings": [], "question": "; ".join(question), "basis": basis,
+                "problem": stop("lines_unclear", limit=MAX_UNCLEAR_EDGES), "candidates": candidates}
+    if len(candidates) > MAX_UNCLEAR_EDGES * 2:
+        return unclear()
     found, problems = [], []
     for address in candidates:
         view = copy.copy(lot)
         view.street = list(address)
         readings = view.readings()
         if readings is None:
-            problems.append(stop("lines_unclear", limit=MAX_UNCLEAR_EDGES))
-            continue
+            return unclear()
         for words, left, right, rear in readings:
             sides = [g for g in ([i for i in left if i not in streets], [i for i in right if i not in streets]) if g]
             if any(i in streets for i in rear):
@@ -1313,6 +1340,8 @@ def _lot_lines(lot: Lot, facts: dict):
                          f"{', '.join(str(i + 1) for i in address)}") if len(candidates) > 1 else ""
                 found.append((_both(where, words), {"left": left, "right": right, "sides": sides, "rear": rear,
                                                     "address": address}))
+    # a reading the law excludes (its rear on a street, or no side line left) is dropped; if none is left, the
+    # first reason says why. An address with too many lines stopped above (review round 9)
     problem = None if found else (problems[0] if problems else stop("no_rear_line"))
     return {"readings": found, "question": "; ".join(question), "basis": basis, "problem": problem,
             "candidates": candidates}
