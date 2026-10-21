@@ -154,9 +154,38 @@ def evaluate(text: str, values: dict, kinds: dict):
     Fails closed: a measure with no description, or a value that doesn't fit, is unusable.
     Worked out exactly (see the module docstring); a number comes back as a float (an int where plain Python
     arithmetic would have given one).
+
+    A missing or unusable measure is unknown, and unknowns follow three-valued (Kleene) logic: True or unknown is
+    True, False and unknown is False (the result is the same whatever the measure turns out to be), and anything
+    else that depends on an unknown is unknown, raised as MissingMeasure. So a missing measure can never be hidden
+    where it could change the result, and never makes a result unknown where it can't.
     """
     body = parse(text).body
-    return _plain(_eval(body, values, kinds), _floats_in(body, values))
+    result = _eval(body, values, kinds)
+    if isinstance(result, _Unknown):
+        raise MissingMeasure(result.name)
+    return _plain(result, _floats_in(body, values))
+
+
+class _Unknown:
+    """A value that depends on a missing or unusable measure (the first one named), and what kind of value that
+    measure holds ("number", or text): a number compared with a text measure is wrong whatever its value."""
+
+    def __init__(self, name, kind=None):
+        self.name, self.kind = name, kind
+
+
+def _as_number(x):
+    """x as a number, or the unknown it is; an unknown text measure where a number belongs is an error."""
+    if isinstance(x, _Unknown):
+        if x.kind is not None and x.kind != "number":
+            raise EvaluationError(f"{x.name} isn't a number")
+        return x
+    return _number(x)
+
+
+def _unknown(*xs):
+    return next((x for x in xs if isinstance(x, _Unknown)), None)
 
 
 def _exact(x):
@@ -213,7 +242,7 @@ def _measure(name, values, kinds):
         return v
     if isinstance(kind, (set, frozenset)) and _kind(v) == "text" and v in kind:
         return v
-    raise MissingMeasure(name)
+    return _Unknown(name, "number" if kind == "number" else "text" if isinstance(kind, (set, frozenset)) else None)
 
 
 def _eval(node, values, kinds):
@@ -223,30 +252,60 @@ def _eval(node, values, kinds):
         case ast.Name(id=name):
             return _measure(name, values, kinds)
         case ast.List(elts=items) | ast.Tuple(elts=items):
-            return [_eval(i, values, kinds) for i in items]
+            out = [_eval(i, values, kinds) for i in items]
+            return _unknown(*out) or out
         case ast.BinOp(left=l, op=op, right=r):
-            a, b = _number(_eval(l, values, kinds)), _number(_eval(r, values, kinds))
+            a, b = _as_number(_eval(l, values, kinds)), _as_number(_eval(r, values, kinds))
+            if u := _unknown(a, b):
+                return u
             if isinstance(op, ast.Div) and b == 0:
                 raise EvaluationError("division by zero")
             return _number(_ARITHMETIC[type(op)](a, b))
         case ast.UnaryOp(op=ast.USub(), operand=x):
-            return -_number(_eval(x, values, kinds))
+            a = _as_number(_eval(x, values, kinds))
+            return a if isinstance(a, _Unknown) else -a
         case ast.UnaryOp(op=ast.Not(), operand=x):
-            return not _boolean(_eval(x, values, kinds))
+            a = _eval(x, values, kinds)
+            return a if isinstance(a, _Unknown) else not _boolean(a)
         case ast.BoolOp(op=op, values=parts):
-            # Evaluate every part so a missing measure is never hidden by short-circuiting.
-            results = [_boolean(_eval(p, values, kinds)) for p in parts]
-            return all(results) if isinstance(op, ast.And) else any(results)
+            # Every part is evaluated (a value that can't be evaluated is never hidden); unknowns are Kleene's.
+            results = [_eval(p, values, kinds) for p in parts]
+            known = [_boolean(r) for r in results if not isinstance(r, _Unknown)]
+            decisive = isinstance(op, ast.Or)        # True decides an or, False an and
+            if decisive in known:
+                return decisive
+            return _unknown(*results) or (not decisive)
         case ast.Compare(left=l, ops=ops, comparators=rights):
             operands = [_eval(x, values, kinds) for x in (l, *rights)]
-            # Check every link, so a bad value can't hide behind an earlier false one.
-            results = [_compare(op, a, b) for op, a, b in zip(ops, operands, operands[1:])]
-            return all(results)
+            # A chain is an and of its links: every link checked, so a bad value can't hide behind a false one.
+            links = [_link(op, a, b) for op, a, b in zip(ops, operands, operands[1:])]
+            if False in [x for x in links if not isinstance(x, _Unknown)]:
+                return False
+            return _unknown(*links) or True
         case ast.IfExp(test=t, body=a, orelse=b):
-            return _eval(a, values, kinds) if _boolean(_eval(t, values, kinds)) else _eval(b, values, kinds)
+            test = _eval(t, values, kinds)
+            if not isinstance(test, _Unknown):
+                return _eval(a, values, kinds) if _boolean(test) else _eval(b, values, kinds)
+            yes, no = _eval(a, values, kinds), _eval(b, values, kinds)     # the same either way: known
+            if not _unknown(yes, no) and _kind(yes) == _kind(no) and yes == no:
+                return yes
+            return test
         case ast.Call(func=ast.Name(id=f), args=args):
-            return FUNCTIONS[f](*(_number(_eval(a, values, kinds)) for a in args))
+            out = [_as_number(_eval(a, values, kinds)) for a in args]
+            if u := _unknown(*out):
+                return u
+            return FUNCTIONS[f](*out)
     raise FormulaError(f"unsupported expression: {ast.dump(node)}")
+
+
+def _link(op, a, b):
+    """One comparison of a chain: true, false, or the unknown it depends on (after checking an unknown's kind
+    fits: a number ordered against a text measure is an error whatever the text)."""
+    if type(op) in _ORDERING:
+        a, b = _as_number(a), _as_number(b)
+    if u := _unknown(a, b):
+        return u
+    return _compare(op, a, b)
 
 
 def _compare(op, a, b):
@@ -260,7 +319,7 @@ def _compare(op, a, b):
 
 def _boolean(x):
     if type(x) is not bool:
-        raise EvaluationError(f"expected true/false, got {x!r}")
+        raise EvaluationError(f"expected true/false, got {_plain(x, x.denominator != 1) if isinstance(x, Fraction) else x!r}")
     return x
 
 
