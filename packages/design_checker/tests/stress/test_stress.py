@@ -81,13 +81,13 @@ def _side_names_swap(v):
 # for reading old reports but none is excused here, so a return of any of them fails CI.
 MATCHERS = {"F1": _jog_stepped_line, "F2": _tax_map_area, "F3": _drawing_changes_height, "F5": _side_names_swap}
 def _typed_below_drawn(v):
-    """F6 (open, for #14): stories complies on a plain-solid house whose typed count is below its floor blocks."""
+    """F6 (fixed; recognises a return): stories complies on a plain-solid house whose typed count is below its floor blocks."""
     return v["invariant"] == "a" and v["rule"] == "R-1b.stories" and \
         oracle.measure(_design(v))["stories_typed_short"]
 
 
 def _rear_overhang_words(v):
-    """F7 (open, for #18): drawn the other way round only the overhang words "toward the rear yard" change (the
+    """F7 (fixed; recognises a return): drawn the other way round only the overhang words "toward the rear yard" change (the
     statuses and numbers are the same)."""
     if not (v["invariant"] == "d" and "outlines drawn" in v.get("what", "")):
         return False
@@ -101,7 +101,7 @@ def _rear_overhang_words(v):
 
 MATCHERS["F6"], MATCHERS["F7"] = _typed_below_drawn, _rear_overhang_words
 def _plain_part_under_8_ft(v):
-    """F8 (open, until #18 takes #14's definition): stories complies where every plain part that opens the count
+    """F8 (fixed; recognises a return): stories complies where every plain part that opens the count
     (#14: 7 ft or taller, or shorter but not at the ground) is under 8 ft (#18's own line), nothing standing typed."""
     if not (v["invariant"] == "a" and v["rule"] == "R-1b.stories"):
         return False
@@ -116,7 +116,7 @@ def _plain_part_under_8_ft(v):
 
 
 def _wall_count_words(v):
-    """F9 (open, for #18): drawn another way, only the number in "N walls without one" changes."""
+    """F9 (fixed; recognises a return): drawn another way, only the number in "N walls without one" changes."""
     import re
     if not (v["invariant"] == "d" and "outlines drawn" in v.get("what", "")):
         return False
@@ -130,7 +130,7 @@ def _wall_count_words(v):
 
 
 def _gapped_floor_blocks(v):
-    """F10 (open): stories complies with a typed count below the floor blocks drawn, the blocks not one stack from
+    """F10 (fixed; recognises a return): stories complies with a typed count below the floor blocks drawn, the blocks not one stack from
     the ground (a gap: the blocks above it aren't counted)."""
     if not (v["invariant"] == "a" and v["rule"] == "R-1b.stories"):
         return False
@@ -143,7 +143,7 @@ def _gapped_floor_blocks(v):
 
 MATCHERS["F8"], MATCHERS["F9"], MATCHERS["F10"] = _plain_part_under_8_ft, _wall_count_words, _gapped_floor_blocks
 def _side_row_names(v):
-    """F11 (open, for #18): drawn another way, only the side yard rows' names change (compass or narrower/wider)."""
+    """F11 (fixed; recognises a return): drawn another way, only the side yard rows' names change (compass or narrower/wider)."""
     if not (v["invariant"] == "d" and v["rule"] == "R-1b.side_yards" and "outlines drawn" in v.get("what", "")):
         return False
     d = _design(v)
@@ -156,20 +156,20 @@ def _side_row_names(v):
 
 MATCHERS["F11"] = _side_row_names
 def _side_review_no_reason(v):
-    """F12 (open, for #18): a side yard row needs review with no reason, on a house with a roof solid."""
+    """F12 (fixed; recognises a return): a side yard row needs review with no reason, on a house with a roof solid."""
     return v["invariant"] == "f" and v["rule"] == "R-1b.side_yards" and v.get("what") == \
         "needs review with no reason" and any(p["kind"] in ("roof", "mansard") for p in _design(v)["parts"])
 
 
 MATCHERS["F12"] = _side_review_no_reason
 def _off_lot_height_no_reason(v):
-    """F13 (open): height needs review with no reason, the main building wholly off a tax-map lot."""
+    """F13 (fixed; recognises a return): height needs review with no reason, the main building wholly off a tax-map lot."""
     return v["invariant"] == "f" and v["rule"] == "R-1b.height" and v.get("what") == "needs review with no reason" \
         and oracle.measure(_design(v))["off"]
 
 
 def _geos_crash(v):
-    """F14 (open): the check raises a GEOS TopologyException."""
+    """F14 (fixed; recognises a return): the check raises a GEOS TopologyException."""
     return v["invariant"] == "crash" and "TopologyException" in v.get("what", "")
 
 
@@ -185,7 +185,7 @@ def _floating_ground_stop(v):
 
 MATCHERS.update(F13=_off_lot_height_no_reason, F14=_geos_crash, F15=_floating_ground_stop)
 def _coverage_range_by_order(v):
-    """F16 (open, for #18): drawn another way, only the coverage row's range changes (a reading's area)."""
+    """F16 (fixed; recognises a return): drawn another way, only the coverage row's range changes (a reading's area)."""
     if not (v["invariant"] == "d" and v["rule"] == "R-1b.lot_coverage" and "outlines drawn" in v.get("what", "")):
         return False
     d = _design(v)
@@ -195,7 +195,7 @@ def _coverage_range_by_order(v):
 
 MATCHERS["F16"] = _coverage_range_by_order
 def _crossing_by_drawing(v):
-    """F17 (open): drawn as one solid or meshes, coverage complies where the floor-block drawing fails it for a
+    """F17 (fixed in #18 2b29efd; recognises a return): drawn as one solid or meshes, coverage complies where the floor-block drawing fails it for a
     building across a lot line."""
     if not (v["invariant"] == "d" and v["rule"] == "R-1b.lot_coverage" and "instead of floor blocks" in v.get("what", "")
             and v.get("before") == harness.FAILS and v.get("after") == harness.COMPLIES):
@@ -204,7 +204,7 @@ def _crossing_by_drawing(v):
 
 
 MATCHERS["F17"] = _crossing_by_drawing
-KNOWN = {"F15": _floating_ground_stop}   # F1-F14, F16, F17 fixed: a return of any of them fails CI   # F1-F14, F16 fixed: a return of any of them fails CI   # F1-F14 fixed: a return of any of them fails CI
+KNOWN = {"F15": _floating_ground_stop}   # F1-F14, F16, F17 fixed: a return of any of them fails CI
 
 
 def known(v):

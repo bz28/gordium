@@ -14,7 +14,7 @@ a rule complies where the oracle says it fails under every reading, that is a fa
 | `test_stress.py` | the random sample; each known finding recognised by its cause |
 | `test_stress_findings.py` | every finding (F1-F17) shrunk to its fewest edits, as a named test; open ones strict-xfail |
 | `explain.py`, `compare.py` | one case side by side (oracle vs Gordium; one drawing vs another) |
-| `conftest.py` | the two sizes below |
+| `conftest.py` | skips the full sizes unless asked (the option and marker are in the repository's root `conftest.py`) |
 
 ## Two sizes
 
@@ -22,7 +22,7 @@ Every sampled test has a small, fixed CI size and a full size marked `slow`. CI 
 folder in under a minute of CPU); the full one runs only when asked:
 
 ```
-pytest packages/design_checker/tests/stress --runslow            # or GORDIUM_STRESS_SLOW=1
+pytest --runslow          # from anywhere (registered in the root conftest.py); or GORDIUM_STRESS_SLOW=1
 ```
 
 | test | CI | full (`slow`) |

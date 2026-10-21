@@ -351,9 +351,11 @@ def test_F14_a_rotated_house_with_a_gable_roof_is_checked_without_crashing():
     """Two edits on the surveyed sample lot: the starting house rotated 8.7 degrees, then a gable roof solid on it
     (no overhang, ridge 13'-9" above the walls). The check stops with "TopologyException: side location conflict"
     (shapely unary_union in measure._projection_now, from _attached in _assemblies): no answer at all in Rhino.
-    Whatever it can't read should need review with a reason, never crash."""
+    Fixed (#18 1262820): an outline GEOS can't overlay is made valid, and any geometry failure while measuring is
+    a stop with its reason. This guards that: an answer, and every row that needs review says why."""
     res = harness.gordium(generate.build(*F14_CASE)[0])
     assert harness.statuses(res)
+    assert all((i["reason"] or "").strip() for i in res["view"]["items"] if i["status"] == REVIEW)
 
 
 # ---- F15 (P3): the 'ground doesn't meet the buildings' stop comes and goes with the spot grades -------------------
@@ -423,11 +425,13 @@ def test_F17_a_garage_across_the_lot_line_gives_coverage_the_same_answer_however
     comply. With the house drawn as floor blocks (the starting house is the main building), coverage does not
     comply: "garage 4 is not entirely on the lot". The same house drawn as one plain solid (or meshes): "more than
     one building: pick the main building" on the yards, and coverage complies, 12%, though it measures the same
-    garage across the same line. The drawing must not decide whether the crossing counts."""
+    garage across the same line. The drawing must not decide whether the crossing counts. Fixed (#18 2b29efd):
+    coverage does not comply every way it is drawn."""
     d = generate.build(*F17_CASE)[0]
     got = {style: harness.statuses(harness.gordium_file(d, "ft", style))["R-1b.lot_coverage"]
            for style in ("blocks", "one_solid", "mesh")}
     assert COMPLIES not in got.values(), got
+    assert set(got.values()) == {FAILS}, got
 
 
 # ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------
@@ -500,9 +504,8 @@ def test_F5_a_side_yard_named_by_compass_only_holds_distances_to_that_line(size)
 
 @_sizes(20, 60)
 def test_every_row_that_needs_review_says_why_over_a_stress_sample(size):
-    """The invariant behind F12: a needs-review row always says what it waits for, on any design. 60 random
-    designs from the stress generator (its lots and edits)."""
-    import random
+    """The invariant behind F12: a needs-review row always says what it waits for, on any design. `size` random
+    designs from the stress generator, its lots and edits (20 in CI, 60 full)."""
     rng = random.Random(1812)
     for _ in range(size):
         case = generate.random_case(rng)
@@ -530,8 +533,8 @@ def test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outli
     """Metamorphic (F16): the same design drawn with every outline and face the other way round, or starting at
     its next point, measures the same: every measurement's value, and every reading's value with its named
     answers. Every lot (the 106 Ithaca Rd sample, on the tax map and on a survey, and the others), as drawn and
-    after random architect's edits (rotations, roofs and eaves, mansards, dormers, porches, wings, accessory
-    buildings, moved lines)."""
+    after `size` random architect's edit sequences, 12 in CI and 40 full (rotations, roofs and eaves, mansards,
+    dormers, porches, wings, accessory buildings, moved lines)."""
     rng = random.Random(16)
     cases = [(lt, []) for lt in generate.LOTS] + [F16_CASE]
     cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(size))]
@@ -552,7 +555,7 @@ def test_drawing_the_house_as_floor_blocks_a_solid_or_a_mesh_never_flips_a_row_b
     """Metamorphic (F17): the same design written to Rhino with the house as Gordium's floor blocks, as one plain
     solid, or as meshes may change what can be read (stories from floor blocks, the main building assumed or to
     pick), so a row may move to or from needs review; but never from does not comply to complies or back. Every
-    lot as drawn, the F17 case, and 15 random architect's edit sequences."""
+    lot as drawn, the F17 case, and `size` random architect's edit sequences (5 in CI, 15 full)."""
     rng = random.Random(17)
     cases = [(lt, []) for lt in generate.LOTS] + [F17_CASE]
     cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(size))]
