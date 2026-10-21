@@ -29,7 +29,8 @@ COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # Facts about the inside of a building (rooms, parking spaces). This phase checks the outside only: a rule waiting
 # on one of these goes in its own group, "not checked yet: interior", out of the counts. A rule they decide once
 # entered (a FAIL included) is shown like any other: nothing that fails is ever hidden.
-INTERIOR = {"sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "conversion"}
+INTERIOR = {"sleeping_rooms", "parking_spaces"}   # (note 7's units, rooms let and conversion decide a site
+# rule, the lot size: its row stays a review row with its own prompt; #20 review round 2)
 NUMBER = re.compile(r"^([≥≤<>=]) (-?[\d,]+(?:\.\d+)?)$")
 
 
@@ -129,11 +130,24 @@ def _eave_text(found: dict, measured: dict) -> str | None:
     if any(MODEL_WORDS["model#eave"]["eave"] in w for w in found["fails_under"]):
         return None                         # it fails even with the overhang an eave: not just a confirmation
     reach = []
-    for name, yard in EAVE_YARD_WORDS.items():
-        m = measured.get(name) or {}
-        by = {r["named"].get("model#eave"): r["value"] for r in m.get("readings") or [] if r.get("named")}
-        if by.get("eave") is not None and by.get("not_eave") is not None and by["eave"] - by["not_eave"] > 1e-6:
-            reach.append(f"{present.feet_inches(by['eave'] - by['not_eave'], 'up')} past the walls toward the {yard}")
+    for yard in dict.fromkeys(EAVE_YARD_WORDS.values()):
+        # each reading read with the overhang an eave, against the same reading (the same lot lines, the same
+        # other answers) with it not, to the same lot line: the most it reaches, over every reading, never one
+        # reading picked by the order the readings came in (stress F7), never the narrower side yard under one
+        # reading against the other side's under another (review round 15: the two side yards are paired by line)
+        pairs = {}
+        for name in (n for n, y in EAVE_YARD_WORDS.items() if y == yard):
+            for r in (measured.get(name) or {}).get("readings") or []:
+                side = (r.get("named") or {}).get("model#eave")
+                if side in ("eave", "not_eave") and r.get("value") is not None:
+                    rest = tuple(sorted((t, v) for t, v in r["named"].items() if t != "model#eave"))
+                    words = "; ".join(w for w in r["reading"].split("; ")
+                                      if not w.startswith("what reaches past the walls"))
+                    line = tuple(r["line"]) if r.get("line") is not None else name
+                    pairs.setdefault((rest, words, line), {})[side] = r["value"]
+        gaps = [p["eave"] - p["not_eave"] for p in pairs.values() if "eave" in p and "not_eave" in p]
+        if gaps and max(gaps) > 1e-6:
+            reach.append(f"{present.feet_inches(max(gaps), 'up')} past the walls toward the {yard}")
     where = ("the part reaching " + "; ".join(dict.fromkeys(reach))) if reach else "what the roof reaches past the walls"
     return (f"it complies only if {where} is an eave (§325-18B allows eaves up to 2 ft into a required yard). "
             "Gordium will ask you to confirm it in the panel in the next release; until then this stays needs review")
@@ -213,29 +227,47 @@ def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] 
                              (" and with the lot as drawn (confirm the survey)" if survey else ""))
 
 
-def fails_whatever(rule: dict, measured: dict, allowed: dict) -> str | None:
-    """The every-reading rule for a value that isn't measured at all (decided 2026-10-21): a rule that fails for
-    every value that measurement could take does not comply. Returns the measurement's name, or None.
+def fails_whatever(rule: dict, measured: dict, allowed: dict) -> dict | None:
+    """The every-reading rule for values that aren't measured or given at all (decided 2026-10-21): a rule that
+    fails for every value they could take does not comply. Returns {"names": the unknown measurements, "settings":
+    the values it was proven under}, or None.
 
-    Proven, never sampled: exactly one number the rule needs is unmeasured (no value, no readings); the rule's
-    check is provably truest when that number is 0 (formula.truth_direction -1: only +, -, max/min and positive
-    multiples of it, compared with < <= > >=; the §325-16C height bonus is one), it isn't in the rule's
-    applies_when or review_when, and the rule fails at 0 (measures are never negative). Then it fails at every
-    value. Never the other way: missing data never makes a rule comply (principle 4)."""
+    Proven, never sampled. Each unknown number (no value, no readings) is one the rule's check is provably truest
+    at when it is 0 (formula.truth_direction -1: only +, -, max/min and positive multiples of it, compared with
+    < <= > >=; the §325-16C height bonus is one): it is taken at 0 (measures are never negative). Each unknown
+    yes/no fact is tried both ways. None of them is in the rule's applies_when or review_when. The rule fails
+    under every one of those settings: then it fails whatever they are. Any other unknown (a text, a number not
+    proven), or a pass under any setting, and it is None. Never the other way: missing data never makes a rule
+    comply (principle 4)."""
     if rule.get("kind") != "rule" or not rule.get("check"):
         return None
     side = formula.names(rule["applies_when"]) if rule.get("applies_when") else set()
     for r in rule.get("review_when") or []:
         side |= formula.names(r["when"])
     unknown = sorted(n for n in formula.names(rule["check"]) | side if (measured.get(n) or {}).get("value") is None)
-    if len(unknown) != 1:
+    if not unknown or any(n in side or (measured.get(n) or {}).get("readings") for n in unknown):
         return None
-    name = unknown[0]
-    if (name in side or (measured.get(name) or {}).get("readings") or MEASURE_KINDS.get(name) != "number"
-            or formula.truth_direction(rule["check"], name) != -1):
+    numbers = [n for n in unknown if MEASURE_KINDS.get(n) == "number"]
+    yes_no = [n for n in unknown if MEASURE_KINDS.get(n) == "boolean"]
+    if len(numbers) + len(yes_no) != len(unknown) or any(
+            formula.truth_direction(rule["check"], n) != -1 for n in numbers):
         return None
     values = {k: m["value"] for k, m in measured.items()}
-    return name if outcome(rule, {**values, name: 0}, allowed) == "fail" else None
+    settings = [{**{n: 0 for n in numbers}, **dict(zip(yes_no, ways))}
+                for ways in itertools.product((False, True), repeat=len(yes_no))]
+    if all(outcome(rule, {**values, **s}, allowed) == "fail" for s in settings):
+        return {"names": unknown, "settings": settings}
+    return None
+
+
+def waits_on_interior(row: dict, rule: dict, measured: dict, allowed: dict) -> bool:
+    """Whether a row goes in its own group, "not checked yet: interior": it needs review only because a fact about
+    the inside of the building (INTERIOR) isn't given, and it isn't already proven to fail whatever that fact is
+    (fails_whatever, run first: nothing that fails is ever hidden; #20 review round 2)."""
+    names = formula.names(rule["check"]) if rule.get("check") else set()      # a flag has no check
+    return (row["Error"] == "NEEDS REVIEW"
+            and any((measured.get(n) or {}).get("value") is None for n in names & INTERIOR)
+            and not fails_whatever(rule, measured, allowed))
 
 
 def crossing(rule: dict, measured: dict) -> str | None:
@@ -433,16 +465,16 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}
     every = [_why(dict(zip(COLUMNS, r)), by_id, measured) for r in t["output"]]
-    def checks(rule):                   # a flag has no check
-        return formula.names(rule["check"]) if rule.get("check") else set()
-
-    waiting = [r for r in every if r["Error"] == "NEEDS REVIEW" and any(
-        (measured.get(n) or {}).get("value") is None for n in checks(by_id[r["Rule id"]]) & INTERIOR)]
+    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
+    waiting = [r for r in every if waits_on_interior(r, by_id[r["Rule id"]], measured, allowed)]
+    for r in waiting:                   # the facts each one waits for, so the panel asks for exactly those
+        rule = by_id[r["Rule id"]]
+        r["Needs"] = [n for n in sorted(formula.names(rule["check"]) & INTERIOR)
+                      if (measured.get(n) or {}).get("value") is None]
     rows = [{**r, "Line": _amount(r, by_id[r["Rule id"]], measured)} if r["Error"] == "FAIL" else r
             for r in every if r not in waiting]
     for r in rows:
         r["Short"] = short(r["Requirement"])
-    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
     for r in rows:
         review = r["Error"] == "NEEDS REVIEW"
         named = named_result(by_id[r["Rule id"]], measured, allowed) if review else None
@@ -452,13 +484,18 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         r["Unknown"] = fails_whatever(by_id[r["Rule id"]], measured, allowed) if review and not named and not found \
             else None
         r["Provisional"] = found[1] if found else None
+        # the readings it was worked out under (their values, the open measurements): the panel's tax-map best and
+        # worst cases run over each of them, as for a row decided over named readings (review round 14)
+        r["Readings"] = readings_of(by_id[r["Rule id"]], measured, allowed) if found else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
         r["Fails"] = r["Error"] == "FAIL" or bool(found and found[0] == "fail") or bool(
             named and named["result"] == "fail") or bool(r["Unknown"])   # fails whichever way it goes
         if r["Fails"] and named and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {named['text']}"
         if r["Fails"] and r["Unknown"] and not r.get("Line"):
-            r["Line"] = f"{short(r['Requirement'])}: does not comply whatever the {plain_name(r['Unknown'])} is"
+            gone = [plain_name(n) for n in r["Unknown"]["names"]]
+            r["Line"] = (f"{short(r['Requirement'])}: does not comply whatever the {' and the '.join(gone)} "
+                         f"{'is' if len(gone) == 1 else 'are'}")
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
         r["Crossing"] = crossing(by_id[r["Rule id"]], measured)

@@ -414,8 +414,8 @@ def test_fails_whatever_needs_proof_and_one_unknown():
     from design_checker.check import fails_whatever
     rule = {"id": "t", "kind": "rule", "check": "front_yard_eaves >= 25 + max(building_height - 35, 0) - 2"}
     unknown = {"value": None, "readings": []}
-    assert fails_whatever(rule, {"front_yard_eaves": {"value": 15.0}, "building_height": unknown}, {}) == \
-        "building_height"
+    assert fails_whatever(rule, {"front_yard_eaves": {"value": 15.0}, "building_height": unknown}, {})["names"] == \
+        ["building_height"]
     assert fails_whatever(rule, {"front_yard_eaves": {"value": 24.0}, "building_height": unknown}, {}) is None
     assert fails_whatever(rule, {"front_yard_eaves": unknown, "building_height": unknown}, {}) is None
     readings = {"value": None, "readings": [{"reading": "a", "value": 40.0}, {"reading": "b", "value": 50.0}]}
@@ -461,3 +461,103 @@ def test_fails_whatever_never_uses_a_number_that_decides_whether_the_rule_applie
     rule = {"id": "t", "kind": "rule", "check": "front_yard_eaves >= 25 + max(building_height - 35, 0) - 2", **extra}
     measured = {"front_yard_eaves": {"value": 15.0}, "building_height": {"value": None, "readings": []}}
     assert fails_whatever(rule, measured, {}) is None
+
+
+def test_a_rule_failing_under_every_lot_line_reading_on_a_tax_map_lot_is_judged_with_the_lucky_lines_too():
+    """Round 14, P1. Scenario 09's five-sided lot from the tax map, the house's rear wall at y = 87: rear yard
+    27.28 ft against 27'-6" (depth 110) or 31.69 ft (depth 126.77): it fails under every reading of the lot
+    lines. With the lines 2 ft in its favour (rear yard 29.28, depth 110 - 4 = 106, 26'-6" required) it complies:
+    on a tax-map lot that is needs review ('at best'), never does not comply; the requirement is shown under each
+    reading, never a dash."""
+    import copy
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "09_five_sided_lot.yaml"))
+    sc["lot"]["surveyed"] = False
+    for b in sc["buildings"]:
+        b["outline"] = [[15, 30], [45, 30], [45, 87], [15, 87]]
+    s, f, extras = scenarios.site(sc)
+    rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
+    assert rear["status"] == present.REVIEW, rear
+    assert "as drawn it does not comply, but at best 29'-3" in rear["reason"] and "against 26'-6\"" in rear["reason"]
+    assert rear["required"] == "≥ 27'-6\" to 31'-8 3/8\"", rear["required"]   # 31.6926 ft, rounded up
+
+
+def test_a_rule_failing_under_every_lot_line_reading_on_a_survey_says_which_measurement_it_was_read_over():
+    """Round 14, P1: the same house on the surveyed lot fails under every reading: the reason names what was read
+    (the lot depth), never the doubled 'Fails under every reading considered (fails under every reading)'."""
+    import copy
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "09_five_sided_lot.yaml"))
+    for b in sc["buildings"]:
+        b["outline"] = [[15, 30], [45, 30], [45, 87], [15, 87]]
+    s, f, extras = scenarios.site(sc)
+    rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
+    assert rear["status"] == present.FAILS
+    assert rear["reason"].startswith("Fails under every reading considered (lot depth)"), rear["reason"]
+
+
+def test_fails_whatever_with_several_unknowns_numbers_at_zero_and_yes_no_both_ways():
+    """#20 review round 2: several unknown values. Each number provably truest at 0 is taken at 0, each yes/no
+    tried both ways; the rule does not comply only if it fails under every one of those settings. The shape of
+    R-3a note 7 (lot_area >= (7000 if conversion else 6000) + 750 * max(units - 3, 0) + 500 * rooms), written with
+    measures this branch has: a yes/no (accessory_distances_apply) and two counts."""
+    from design_checker.check import fails_whatever
+    rule = {"id": "t", "kind": "rule", "check": "lot_area >= (7000 if accessory_distances_apply else 6000) + 750 * "
+                                                "max(sleeping_rooms - 3, 0) + 500 * parking_spaces"}
+    unknown = {"value": None, "readings": []}
+    # 3,000 sf: fails at 0 past 3, 0, and the yes/no either way: whatever they are
+    got = fails_whatever(rule, {"lot_area": {"value": 3000.0}, "sleeping_rooms": unknown,
+                                "parking_spaces": unknown, "accessory_distances_apply": unknown}, {})
+    assert got["names"] == ["accessory_distances_apply", "parking_spaces", "sleeping_rooms"]
+    assert len(got["settings"]) == 2 and {s["accessory_distances_apply"] for s in got["settings"]} == {False, True}
+    # the counts given (3, 0), the yes/no not: 5,999 fails both ways (6,000 / 7,000)
+    assert fails_whatever(rule, {"lot_area": {"value": 5999.0}, "sleeping_rooms": {"value": 3},
+                                 "parking_spaces": {"value": 0}, "accessory_distances_apply": unknown}, {})
+    # 6,500 sf: one way it would pass: never 'does not comply' (and never a pass)
+    assert fails_whatever(rule, {"lot_area": {"value": 6500.0}, "sleeping_rooms": unknown,
+                                 "parking_spaces": {"value": 0}, "accessory_distances_apply": {"value": False}},
+                          {}) is None
+    assert fails_whatever(rule, {"lot_area": {"value": 6500.0}, "sleeping_rooms": {"value": 3},
+                                 "parking_spaces": {"value": 0}, "accessory_distances_apply": unknown}, {}) is None
+    # a number the formula can't be proven truest at 0 for: never decided
+    odd = {"id": "t", "kind": "rule", "check": "lot_area >= 6000 + 750 * sleeping_rooms * parking_spaces"}
+    assert fails_whatever(odd, {"lot_area": {"value": 10.0}, "sleeping_rooms": unknown,
+                                "parking_spaces": unknown}, {}) is None
+
+
+def test_a_rule_waiting_on_an_interior_fact_that_fails_whatever_it_is_is_never_hidden():
+    """#20 review round 2: a row waiting on an interior fact went to 'not checked' before fails_whatever ran, so a
+    proven fail was hidden. A rule shaped like parking: at least 1 + max(bedrooms - 3, 0) spaces, truest at 0
+    bedrooms. With 0 spaces and the bedrooms not given it fails whatever they are: shown, never 'not checked'. With
+    1 space it could comply (3 bedrooms or fewer): it waits for the bedrooms."""
+    from design_checker.check import waits_on_interior
+    rule = {"id": "t", "kind": "rule", "check": "parking_spaces >= 1 + max(sleeping_rooms - 3, 0)"}
+    row = {"Error": "NEEDS REVIEW"}
+    rooms = {"value": None, "readings": []}
+    assert not waits_on_interior(row, rule, {"parking_spaces": {"value": 0}, "sleeping_rooms": rooms}, {})
+    assert waits_on_interior(row, rule, {"parking_spaces": {"value": 1}, "sleeping_rooms": rooms}, {})
+    assert not waits_on_interior({"Error": "PASS"}, rule, {"parking_spaces": {"value": 1}, "sleeping_rooms": rooms}, {})
+
+
+def test_the_interior_facts_have_one_definition():
+    """#20 review round 2, P3: present.py kept a second, unused copy of check.INTERIOR, edited by hand alongside
+    it. One definition only (check.INTERIOR)."""
+    from design_checker import check
+    text = (REPO / "packages/design_checker/design_checker/present.py").read_text(encoding="utf-8")
+    assert "INTERIOR =" not in text and not hasattr(present, "INTERIOR") and check.INTERIOR
+
+
+def test_an_interior_row_is_named_by_its_rule_and_asks_for_the_facts_it_waits_for():
+    """#20 review round 2, P2: every interior row was 'Parking · needs input', asking for bedrooms and parking
+    whatever it waited for. Now named from its own rule, listing the facts it needs. R-1b's one-family parking with
+    the bedrooms given and the spaces not: 'Parking · needs input', asking for the parking spaces only."""
+    res = run(floors(15, 30, 45, 70, 2), sleeping_rooms=3)
+    item = next(i for i in res["view"]["items"] if i["rule"] == "R-1b.parking_one_family")
+    assert item["status"] == present.NOT_CHECKED and item["name"] == "Parking · needs input"
+    assert item["needs"] == ["parking_spaces"] and item["hint"] == "Enter parking spaces"
+    both = next(i for i in run(floors(15, 30, 45, 70, 2))["view"]["items"] if i["rule"] == "R-1b.parking_one_family")
+    assert both["needs"] == ["parking_spaces", "sleeping_rooms"]
+    assert both["reason"] == "Needs parking spaces and bedrooms, which the model doesn't show"
+

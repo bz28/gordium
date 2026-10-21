@@ -8,14 +8,13 @@ Missing data normally gives **needs review** ([principle 4](../../CLAUDE.md): ne
 
 ## Decision
 
-1. **The rule does not comply** when all of these hold:
-   - exactly one number the rule needs is unmeasured (no value, no readings);
-   - the rule is provably truest when that number is 0;
-   - the rule fails at 0.
+1. **The rule does not comply** when every value it needs that is missing (no value, no readings) is one of these, and the rule fails under every setting of them:
+   - a number the rule is provably truest at when it is 0: it is taken at 0 (measures are never negative);
+   - a yes/no fact: tried both ways.
 
-   Measures are never negative, so it then fails at every value.
+   Then it fails whatever the missing values are. Any other missing value (a text, a number not proven) leaves it needs review.
 2. **"Provably truest at 0" is proven from the formula's structure, never sampled** (`formula.truth_direction`). It is proven only for +, −, max/min, and multiplying or dividing by a positive number, compared with < ≤ > ≥ and combined with and/or/not. Anything else is left to needs review: equality, two measures multiplied together, if-else, a chain like `20 <= h <= 35`, or opposite directions in one rule.
-3. **The missing number may not appear in the rule's applies_when or review_when.** Those decide whether the rule applies at all, so the answer can't be known without the number.
+3. **No missing value may appear in the rule's applies_when or review_when.** Those decide whether the rule applies at all, so the answer can't be known without the number.
 4. **Never the other way.** Missing data never makes a rule comply.
 5. **On a lot from the tax map**, the rule must also fail when the lot lines are 2 ft off in its favour. There the missing number is taken at 0, where the rule is truest.
 
@@ -42,4 +41,5 @@ The eaves rule for the front yard: eaves ≥ 25 + max(height − 35, 0) − 2. T
 ## Consequences
 
 - An eaves row whose design misses even the base requirement now shows red with the height unknown.
-- Pinned in `packages/design_checker/tests/test_moved_and_crossing.py` (the eaves cases, the guard) and `packages/rule_format/tests/test_formula.py` (the proof).
+- It runs before a rule waiting on an interior fact (bedrooms, parking) is set aside as "not checked yet": a rule proven to fail is never hidden there.
+- Pinned in `packages/design_checker/tests/test_moved_and_crossing.py` (the eaves cases, the guard, several unknowns, interior rows) and `packages/rule_format/tests/test_formula.py` (the proof).

@@ -33,7 +33,6 @@ GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies",
 from model_measurement.measure import TAX_MAP_SLACK, TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = set(TAX_MAP_SLACK)          # every lot-dependent length: the one table in measure.py
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
-INTERIOR = {"sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "conversion"}
 EIGHTH = 1 / 96                           # 1/8 in, in feet
 PRECISION = ("Measured to 1/8 in.; values are never rounded toward compliance; near a limit they are shown with "
              "one more decimal.")
@@ -243,6 +242,27 @@ def _status(row: dict) -> str:
     if (row.get("Named") or {}).get("result") == "pass":      # complies under every reading research lists
         return COMPLIES
     return COMPLIES if row.get("Error") == "PASS" else REVIEW
+
+
+def _fails_whatever_part(expr: str, values: dict, unknown: dict) -> bool:
+    """One limit of a rule that fails whatever its unknown values are (check.fails_whatever): it fails too, under
+    every setting it was proven under (each unknown number in it provably truest at 0)."""
+    numbers = [n for n in unknown["names"] if MEASURE_KINDS.get(n) == "number" and n in formula.names(expr)]
+    return all(formula.truth_direction(expr, n) == -1 for n in numbers) and all(
+        _evaluate(expr, dict(values, **s)) is False for s in unknown["settings"])
+
+
+FACT_WORDS = {"sleeping_rooms": "bedrooms", "parking_spaces": "parking spaces"}   # interior facts, as asked
+
+
+def _and(words: list[str]) -> str:
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1] if words else ""
+
+
+def _combos(row: dict, values: dict) -> list[dict]:
+    """The values a row was decided under: every combination of its readings (named, or every reading of an open
+    measurement), else the measured values alone."""
+    return ((row.get("Named") or {}).get("combos") or (row.get("Readings") or {}).get("combos") or [values])
 
 
 def _holds(expr: str, values: dict, row: dict):
@@ -499,10 +519,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     if (_status(row) == FAILS and isinstance(body, ast.BoolOp) and isinstance(body.op, ast.And)
             and all(isinstance(v, ast.Compare) for v in body.values)):
         # a rule that is several limits at once (the eaves into every yard): name and show the one that fails
-        unknown = row.get("Unknown")        # not measured: a limit that fails at every value it could take
+        unknown = row.get("Unknown")        # not measured: a limit that fails at every value they could take
         primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False
-                        or unknown and formula.truth_direction(ast.unparse(c), unknown) == -1
-                        and _evaluate(ast.unparse(c), dict(values, **{unknown: 0})) is False), primary)
+                        or unknown and _fails_whatever_part(ast.unparse(c), values, unknown)), primary)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
@@ -537,6 +556,16 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 raised = [c for c in way if c.left.id != node.left.id]
         numbers = _numbers(node, values, measured, label) if node is not None else (None, None, None, "", "")
         proposed, required, margin_t, margin = (*_display(*numbers),) if node is not None else ("—", "—", "", None)
+        if (node is not None and required in ("—", None) and len(_combos(row, values)) > 1
+                and (values.get("building_height") is not None
+                     or "building_height" not in formula.names(ast.unparse(node.comparators[0])))):
+            # (a limit raised by the height bonus while the height is unknown is said below, with why it waits)
+            # decided over readings: the requirement under each (the strictest is part of it), never a dash
+            at = [_evaluate(ast.unparse(node.comparators[0]), c) for c in _combos(row, values)]
+            if at and all(isinstance(a, (int, float)) for a in at):
+                unit = (measured.get(node.left.id) or {}).get("unit") or ""
+                low, high = (value_text(a, unit, numbers[4], False) for a in (min(at), max(at)))
+                required = f"{numbers[4]} {low}" + (f" to {high}" if high != low else "")
         if name == "Use":
             proposed = use_names.get(values.get("use"), values.get("use") or "—")
             required = {COMPLIES: "permitted", FAILS: "not permitted"}.get(st, "—")
@@ -570,8 +599,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             # them (each line up to TOLERANCE either way); else it needs review (the same slack as for a pass)
             # a value not measured at all that fails the rule whatever it is (check.fails_whatever) is taken where
             # the rule is truest, 0 (proven), so the lucky lines are judged at the rule's best too
-            drawn = dict(values, **{row["Unknown"]: 0}) if row.get("Unknown") else values
-            ends = [drawn] + ([dict(drawn, lot_area=tol["high"])] if tol and "lot_area" in names else [])
+            # under each reading the row was decided over (a fail under every reading, too: round 14)
+            drawn = [dict(c, **s) for c in _combos(row, values)
+                     for s in ((row.get("Unknown") or {}).get("settings") or [{}])]
+            ends = [e for d in drawn for e in [d] + ([dict(d, lot_area=tol["high"])] if tol and "lot_area" in names
+                                                       else [])]
             best = next((v if _evaluate(expr, v) is True else b for v in ends
                          for b in [_best_case(expr, v, names)] if _evaluate(expr, v) is True or b is not None), None)
             if best is not None:
@@ -586,7 +618,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if st == FAILS and row.get("Provisional") and not row.get("Error") == "FAIL":
             why = ("Does not comply with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…"
                    if "confirm the survey" in row["Provisional"] else
-                   "Fails under every reading considered (" + _user_text(row["Provisional"]) + ")")
+                   "Fails under every reading considered (" + ", ".join(
+                       NAMES.get(n, n.replace("_", " ")).lower() for n in (row.get("Readings") or {}).get("open") or []
+                   ) + ")")
         line = _detail_line(proposed, required, margin_t, numbers[4] if node is not None else "", margin)
         hint = _hint(label, numbers[4], margin, numbers[3]) if node is not None and margin is not None else None
         if node is not None and node.left.id == "building_area" and margin is not None and margin < 0:
@@ -942,11 +976,17 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                                  "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     for row in interior:
         rule = rules_by_id[row["Rule id"]]
-        items.append({"id": rule["id"], "rule": rule["id"], "name": "Parking · needs input", "group": "not_checked",
+        # named from its own rule, asking for the facts it waits for (#20 review round 2), never every row parking
+        compares = _compares(rule["check"]) if rule.get("check") else []
+        label = (NAMES.get(compares[0].left.id) if compares else None) or row.get("Short") or rule["id"]
+        needs = row.get("Needs") or []
+        words = _and([FACT_WORDS.get(n, n.replace("_", " ")) for n in needs]) or "the facts it needs"
+        items.append({"id": rule["id"], "rule": rule["id"], "name": f"{label} · needs input", "group": "not_checked",
                       "status": NOT_CHECKED, "mark": MARK[NOT_CHECKED], "proposed": "", "required": "", "margin": "",
                       "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
-                      "hint": "Enter bedrooms and parking spaces",
-                      "reason": "Needs bedrooms and parking spaces, which the model doesn't show",
+                      "needs": list(needs),         # the facts to ask for (the Rhino 'enter' button prompts these)
+                      "hint": f"Enter {words}",
+                      "reason": f"Needs {words}, which the model doesn't show",
                       "detail": {"line": "", "quotes": [{"text": " ".join(str(s.get("quote", "")).split()),
                                                          "where": cite(s)} for s in rule.get("sources") or []],
                                  "citation": "", "links": [], "calc": None, "scope": "", "precision": "",

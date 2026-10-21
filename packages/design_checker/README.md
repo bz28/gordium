@@ -31,9 +31,11 @@ What it adds for the Rhino command, never changing a result:
   "Complies" when nothing fails and every open question about how the law reads passes whichever way it is
   answered. A rule that passes only with the lot as drawn (no survey yet) stays amber, needs review: a missing
   survey is a missing fact, so it never shows as complying.
-- **Unknown:** a NEEDS REVIEW rule waiting on one number that isn't measured at all (the height, with no ground
-  given) fails whatever that number is when the formula is provably truest at 0 (`formula.truth_direction`:
-  only +, −, max/min and positive multiples of it, compared with < ≤ > ≥) and the rule fails at 0. The eaves rule
+- **Unknown:** a NEEDS REVIEW rule waiting on values that aren't measured or given at all (the height, with no
+  ground given) fails whatever they are when each missing number is provably truest at 0 (`formula.truth_direction`:
+  only +, −, max/min and positive multiples of it, compared with < ≤ > ≥), each missing yes/no is tried both ways,
+  and the rule fails under every one of those settings (`check.fails_whatever`; run before a rule waiting on an
+  interior fact is set aside, so a proven fail is never hidden). The eaves rule
   is one: front eaves ≥ 25 + max(height − 35, 0) − 2 is at least 23 ft at any height, so eaves 15 ft back don't
   comply. Never the other way: a missing number never makes a rule comply (24 ft stays needs review).
 

@@ -75,6 +75,12 @@ STOPS = {
     "no_building": "no building on the Building layer",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
     "no_main_building": "more than one building: pick the main building",
+    "stories_plain_part": "part of the building ({what}) isn't drawn as floor blocks, so its stories can't be "
+                          "counted: enter the number of stories of the whole building",
+    "stories_below_floors": "the stories typed ({typed}) are fewer than the floor blocks drawn ({drawn}): check the "
+                            "count, or the floors",
+    "basement_part": "part of the building ({what}) is below the ground: whether a basement or cellar counts as a "
+                     "story (§325-3) isn't measured yet: an open question for the architects",
     "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
     "outside_lot": "a building isn't on the lot (is it part of this design?)",
     "open_solid": "a building isn't a closed solid",

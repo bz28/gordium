@@ -413,6 +413,25 @@ def _off_lot(d, e):
     return _push(d, e, past=True)
 
 
+def _plain_wing(d, e):
+    """The main house redrawn as ONE plain solid (no floor marks: its stories can't be counted from the drawing),
+    with a wing of `n` Gordium floor blocks stacked against one of its walls, and a typed story count (the
+    architect's `stories` fact), often lower than the floor blocks drawn."""
+    fl = _floors(d)
+    if not fl or any(p["kind"] == "solid" for p in d["parts"]):
+        return False
+    main = {"id": _new_id(d, "house"), "kind": "solid", "group": "house", "outline": copy.deepcopy(fl[0]["outline"]),
+            "z0": fl[0]["z0"], "z1": fl[-1]["z1"]}
+    d["parts"] = [p for p in d["parts"] if p["kind"] != "floor"] + [main]
+    a, b, n = _face(main["outline"], e["face"])
+    wing = _rect_on(a, b, n, 0.2, 0.7, e["depth"])
+    for k in range(e["n"]):
+        d["parts"].append({"id": _new_id(d, "floor"), "kind": "floor", "group": "house",
+                           "outline": copy.deepcopy(wing), "z0": main["z0"] + k * e["h"],
+                           "z1": main["z0"] + (k + 1) * e["h"]})
+    d["typed_stories"] = e["typed"]
+
+
 def _grade(d, e):
     d["grade_is"] = e["value"]
 
@@ -440,7 +459,7 @@ def _offset_rect(c, o):
 OPS = {"move_house": _move_house, "move_floor": _move_floor, "stretch": _stretch, "raise_roof": _raise_roof,
        "add_floor": _add_floor, "delete_floor": _delete_floor, "add_accessory": _add_accessory,
        "add_porch": _add_porch, "add_roof": _add_roof, "add_dormer": _add_dormer, "rotate": _rotate,
-       "cross_line": _cross_line, "off_lot": _off_lot, "grade": _grade}
+       "cross_line": _cross_line, "off_lot": _off_lot, "grade": _grade, "plain_wing": _plain_wing}
 
 
 def apply(design: dict, edit: dict):
@@ -505,6 +524,10 @@ def random_edit(rng: random.Random) -> dict:
     if op in ("cross_line", "off_lot"):
         return {"op": op, "target": rng.choice(["house", "house", "accessory"]), "line": rng.randrange(6),
                 "amount": q(u(0.5, 10))}
+    if op == "plain_wing":
+        n = rng.randint(1, 4)
+        return {"op": op, "n": n, "face": rng.randrange(4), "depth": q(u(8, 16)), "h": 10.0,
+                "typed": rng.choice([None, rng.randint(1, n), max(1, n - 1), n + 1])}
     if op == "grade":
         return {"op": op, "value": rng.choice(["finished", "existing"])}
     raise KeyError(op)
@@ -512,7 +535,7 @@ def random_edit(rng: random.Random) -> dict:
 
 WEIGHTS = {"move_house": 12, "move_floor": 8, "stretch": 12, "raise_roof": 8, "add_floor": 6, "delete_floor": 4,
            "add_accessory": 10, "add_porch": 8, "add_roof": 10, "add_dormer": 4, "rotate": 5, "cross_line": 3,
-           "off_lot": 2, "grade": 2}
+           "off_lot": 2, "grade": 2, "plain_wing": 4}
 
 
 def random_case(rng: random.Random) -> dict:
@@ -606,6 +629,8 @@ def gordium_facts(design: dict) -> dict:
         f["accessory_buildings"] = list(design["listed"])
     if design["frame"] is not None and design["listed"]:
         f["accessory_frame"] = design["frame"]
+    if design.get("typed_stories") is not None:
+        f["stories"] = design["typed_stories"]
     return f
 
 
