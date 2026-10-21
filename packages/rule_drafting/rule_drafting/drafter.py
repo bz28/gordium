@@ -235,6 +235,9 @@ def unit_message(unit: dict, context: dict) -> str:
     if context.get("dropped"):
         parts.append("It also points to these sections, left out for length (don't draft from them; a person checks "
                      "them): " + ", ".join(context["dropped"]))
+    if context.get("unfound"):
+        parts.append("It also points to these sections, which match no section of the law it was given (don't draft "
+                     "from them; a person checks them): " + ", ".join(context["unfound"]))
     if context["definitions"]:
         parts.append("Definitions used (for meaning; quote them only if a rule rests on them):\n" + "\n".join(
             f"- {d}" for d in context["definitions"]))
@@ -245,17 +248,21 @@ def gather_context(unit: dict, law: dict, chart: dict, definitions: dict) -> dic
     """Footnotes, sections and definitions the unit's text points to. law: {file, pieces, rows};
     chart: {notes: {page: {n: note}}}. A reference to §325-29 takes 325-29 and its lettered subsections
     (325-29A, 325-29B ...), never 325-29.1, a section of its own. The sections stop at 20,000 characters;
-    whatever doesn't fit is named in "dropped" (and in the message), never left out silently."""
+    whatever doesn't fit is named in "dropped" (and in the message), never left out silently. A reference that
+    matches no section of the law is named in "unfound" the same way."""
     text = unit["text"]
     markers = sorted({n for m in re.findall(r"\[fn([^\]]*)\]", text) for n in m.split(",") if n.strip()}, key=int)
     notes = [{"page": unit["page"], **chart["notes"][unit["page"]][n]} for n in markers
              if unit.get("page") in chart["notes"] and n in chart["notes"][unit["page"]]]
     refs = section_refs(text + " " + " ".join(n["text"] for n in notes))
-    pieces, dropped, size = [], [], 0
+    pieces, dropped, unfound, size = [], [], [], 0
     for ref in refs:
-        for pid, piece in law["pieces"].items():
-            if (pid == ref or pid.startswith(ref) and pid[len(ref):len(ref) + 1].isalpha()) \
-                    and pid != unit.get("piece") and all(p["id"] != pid for p in pieces) and pid not in dropped:
+        matches = [pid for pid in law["pieces"] if pid == ref or pid.startswith(ref) and pid[len(ref):len(ref) + 1].isalpha()]
+        if not matches:
+            unfound.append(ref)
+        for pid in matches:
+            piece = law["pieces"][pid]
+            if pid != unit.get("piece") and all(p["id"] != pid for p in pieces) and pid not in dropped:
                 body = piece_text(law["rows"], piece)
                 if size + len(body) > 20_000:
                     dropped.append(pid)
@@ -265,7 +272,7 @@ def gather_context(unit: dict, law: dict, chart: dict, definitions: dict) -> dic
     lower = text.lower()
     defs = [f"{v['term']}: " + " ".join(_sentences(s["quote"]) for s in v["sources"])
             for v in definitions.values() if v["term"].split("(")[0].strip().lower() in lower]
-    return {"notes": notes, "pieces": pieces, "dropped": dropped, "definitions": defs}
+    return {"notes": notes, "pieces": pieces, "dropped": dropped, "unfound": unfound, "definitions": defs}
 
 
 def _within(lines: list[int], span: list[int]) -> bool:
@@ -515,7 +522,9 @@ def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dic
         result["problems"] = []
     result["unresolved"] += requirement_gaps(unit, result) + chart_gaps(unit, result, cells, columns) + [
         {"rule": unit["id"], "why": f"it points to {pid}, which was left out of the drafter's input for length "
-                                    "(a person checks it)"} for pid in context.get("dropped", [])]
+                                    "(a person checks it)"} for pid in context.get("dropped", [])] + [
+        {"rule": unit["id"], "why": f"it points to {pid}, which matches no section of the law, so the drafter never "
+                                    "saw it (a person checks it)"} for pid in context.get("unfound", [])]
     return result
 
 
@@ -567,7 +576,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
                 "model": settings["model"], "effort": settings["effort"], "max_tokens": settings["max_tokens"],
                 "system_sha256": sha(system), "input_sha256": sha(json.dumps(messages, sort_keys=True, default=str)),
                 "request_id": getattr(response, "_request_id", None), "stop_reason": response.stop_reason,
-                "context_dropped": context.get("dropped", []),
+                "context_dropped": context.get("dropped", []), "context_unfound": context.get("unfound", []),
                 "answer": text, "problem": why, "usage": usage, "cost_usd": round(spent, 6),
                 "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None})
         if crash is not None:
