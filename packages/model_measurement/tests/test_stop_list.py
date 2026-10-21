@@ -208,6 +208,7 @@ CASES = {
     "no_building": _plain(buildings=[]),
     "same_id": _plain(buildings=[box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)]),   # both "house"
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
+    "empty_building": _plain(buildings=[{"id": "house", "faces": [], "problems": []}]),
     "outside_lot": _plain(buildings=[box(40, 25, 60, 65)]),
     "open_solid": _file(_open_brep),
     "open_mesh": _file(_open_mesh),
