@@ -8,10 +8,11 @@ output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper
 (2 ft per line everywhere, carried up in d43e11f); F4 in #12 (the same_id stop, b5a899b); F6, F7 in #18 (ca4f6c3,
-4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). F13, F14 in #18 (1262820). F16 in #18 (44b185d). Open: F15 (the rest), F17.
+4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). F13, F14 in #18 (1262820). F16 in #18 (44b185d). F17 in #18 (2b29efd). Open: F15 (the rest).
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
+import random
 import sys
 from pathlib import Path
 
@@ -404,14 +405,12 @@ def test_the_oracle_on_F16_walls_1400_and_with_both_eaves_1440():
     assert oracle.measure(d)["area"] == (pytest.approx(1440.0), pytest.approx(1400.0))
 
 
-# ---- F17 (P2): a building across a lot line: coverage fails with floor blocks, complies drawn as one solid -------
+# ---- F17 (P2, fixed in #18 2b29efd): a building across a lot line: coverage fails with floor blocks, complies drawn as one solid -------
 
 F17_CASE = ("jog", [{"op": "add_accessory", "kind": "garage", "w": 8.25, "d": 12.5, "h": 13.0, "where": "side",
                      "face": 2, "fx": 0.79, "fy": 0.75, "gap": 2.0, "listed": False, "frame": None}])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F17: the crossing rule reaches coverage only when a main building is known (floor blocks)")
 def test_F17_a_garage_across_the_lot_line_gives_coverage_the_same_answer_however_the_house_is_drawn():
     """One edit on the jog lot: an unlisted 8'-3" x 12'-6" garage at x 59.75..68, y 88..100.6, across the stepped
     side line x = 62. Gordium's rule (PR 18): a building across a lot line makes every rule that measures it not
@@ -488,3 +487,76 @@ def test_F5_a_side_yard_named_by_compass_only_holds_distances_to_that_line():
                 assert {facing(p) for p in pts} == {direction}, (deg, order, i["name"])
             assert len(names) == 2, names
 
+
+# ---- invariants pinned by PR 18 (2b29efd) over stress samples; kept here so there is one copy -------------------
+
+
+def test_every_row_that_needs_review_says_why_over_a_stress_sample():
+    """The invariant behind F12: a needs-review row always says what it waits for, on any design. 60 random
+    designs from the stress generator (its lots and edits)."""
+    import random
+    rng = random.Random(1812)
+    for _ in range(60):
+        case = generate.random_case(rng)
+        d = generate.build(case["lot"], case["edits"])[0]
+        for i in harness.gordium(d)["view"]["items"]:
+            if i["status"] == REVIEW:
+                assert (i["reason"] or "").strip(), (case["lot"], case["edits"], i["name"])
+
+
+def _measured(design, order):
+    """Every measurement as order-free facts: its value and each reading's value with its named answers (the
+    reading's words name lot lines by the drawn numbering, which a different start point renumbers)."""
+    from model_measurement.measure import measure
+    out = {}
+    for name, r in measure(generate.gordium_site(design, order), generate.gordium_facts(design)).items():
+        value = round(r["value"], 2) if isinstance(r.get("value"), (int, float)) else r.get("value")
+        readings = sorted((round(x["value"], 2), tuple(sorted((x.get("named") or {}).items())))
+                          for x in r.get("readings") or [])
+        out[name] = (value, readings, r.get("value") is None and not r.get("readings"))
+    return out
+
+
+def test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outlines_are_drawn():
+    """Metamorphic (F16): the same design drawn with every outline and face the other way round, or starting at
+    its next point, measures the same: every measurement's value, and every reading's value with its named
+    answers. Every lot (the 106 Ithaca Rd sample, on the tax map and on a survey, and the others), as drawn and
+    after random architect's edits (rotations, roofs and eaves, mansards, dormers, porches, wings, accessory
+    buildings, moved lines)."""
+    rng = random.Random(16)
+    cases = [(lt, []) for lt in generate.LOTS] + [F16_CASE]
+    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(40))]
+    checked = 0
+    for lt, edits in cases:
+        d, _done = generate.build(lt, edits)
+        base = _measured(d, "as_drawn")
+        for order in ("reversed", "shifted"):
+            other = _measured(d, order)
+            diff = {n: (base[n], other[n]) for n in base if base[n] != other[n]}
+            assert not diff, (lt, edits, order, diff)
+            checked += 1
+    assert checked == 2 * len(cases)
+
+
+def test_drawing_the_house_as_floor_blocks_a_solid_or_a_mesh_never_flips_a_row_between_fails_and_complies():
+    """Metamorphic (F17): the same design written to Rhino with the house as Gordium's floor blocks, as one plain
+    solid, or as meshes may change what can be read (stories from floor blocks, the main building assumed or to
+    pick), so a row may move to or from needs review; but never from does not comply to complies or back. Every
+    lot as drawn, the F17 case, and 15 random architect's edit sequences."""
+    rng = random.Random(17)
+    cases = [(lt, []) for lt in generate.LOTS] + [F17_CASE]
+    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(15))]
+    compared = []
+    for lt, edits in cases:
+        d, _done = generate.build(lt, edits)
+        got = {}
+        for style in ("blocks", "one_solid", "mesh"):
+            try:
+                got[style] = harness.statuses(harness.gordium_file(d, "ft", style))
+            except ValueError as e:         # a house whose floors don't stack on one outline has no one-solid form
+                assert "don't stack" in str(e), e
+        compared.append(len(got))
+        for rule in set().union(*got.values()):
+            seen = {got[style].get(rule) for style in got}
+            assert not {FAILS, COMPLIES} <= seen, (lt, edits, rule, {k: v.get(rule) for k, v in got.items()})
+    assert sum(n >= 2 for n in compared) >= 15, compared

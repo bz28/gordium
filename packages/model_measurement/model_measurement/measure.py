@@ -1584,29 +1584,33 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                for i, s in place.items() if s == "partly"}
     crosses = bool(crossed)
     group = [main, *parts_of] if main is not None else []
-    def off_named(bs):              # which buildings are wholly outside the lot, by name (term-index's words)
-        off = [b for b in bs if place.get(b["id"]) == "off"]
+    def off_named(bs, how="off"):   # which buildings are wholly outside the lot (or flat), by name (term-index's words)
+        off = [b for b in bs if place.get(b["id"]) == how]
         main_off = any(b is main for b in off)
         n = len(off) - main_off
         return " and ".join((["the main building" if len(buildings) > 1 else "the building"] if main_off else []) +
                             ([f"{n} other building{'s' if n > 1 else ''}" if main_off or main is not None else
                               f"{n} building{'s' if n > 1 else ''}"] if n else []))
-    def unplaced(bs):               # wholly off the lot, or covering nothing seen from above: the rules wait
-        if any(place.get(b["id"]) == "flat" for b in bs):
-            return stop("flat_building")
-        return stop("outside_lot", what=off_named(bs)) if any(place.get(b["id"]) == "off" for b in bs) else None
+    def unplaced(bs):               # wholly off the lot, or covering nothing seen from above: the rules wait,
+        # saying every reason that applies, each naming its own buildings (review round 22)
+        return "; ".join([stop("flat_building", what=off_named(bs, "flat"))] * any(place.get(b["id"]) == "flat"
+                                                                                  for b in bs) +
+                         [stop("outside_lot", what=off_named(bs))] * any(place.get(b["id"]) == "off" for b in bs)
+                         ) or None
+
+    def unplaced_ids(bs):           # the objects those reasons are about: the panel shows them
+        return [i for b in bs if place.get(b["id"]) in ("flat", "off") for i in _parts(b)]
     why_main_off = unplaced(group)
     why_acc_off = unplaced(detached)
     why_inside = why_building or unplaced(buildings)    # coverage
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
-        outside = [b for b in buildings if place.get(b["id"]) == "off"]
-        if why_inside and outside and not why_building:     # which ones: the panel shows them
-            out["building_area"]["objects"] = [i for b in outside for i in b.get("parts") or [b["id"]]]
+        if why_inside and unplaced_ids(buildings) and not why_building:     # which ones: the panel shows them
+            out["building_area"]["objects"] = unplaced_ids(buildings)
     else:
         out["building_area"] = _coverage(buildings, views, facts, main)
     if crosses:                         # coverage, the height and the accessory count: whatever else follows
-        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached)
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached, buildings)
 
     if why_street:
         return out
@@ -1624,16 +1628,22 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     if why_yards:
         for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
             out[name] = _missing(name, why_yards)
-        if why_main_off and not why_rest and not why_acc_off and detached:
+        if why_main_off and not why_building and not why_rest:      # the unplaced buildings named (round 22)
+            for name in YARDS + EAVE_YARDS:
+                out[name]["objects"] = unplaced_ids(group)
+        if why_main_off and not why_building and not why_rest and why_acc_off:
+            for name in ACCESSORY_YARDS:        # an accessory building unplaced too: its own reason, its own ids
+                out[name] = dict(_missing(name, why_acc_off), objects=unplaced_ids(detached))
+        elif why_main_off and not why_rest and detached:
             # only the main building is off the lot: an accessory building on it is still measured on its own
             _accessory_yards(out, lot, lines, facts, detached, views)
         return out
     _yards(out, lot, lines, facts, main, parts_of, detached, views)
     if why_acc_off:                              # an accessory building wholly off the lot: its own rule waits
         for name in ACCESSORY_YARDS:
-            out[name] = _missing(name, why_acc_off)
+            out[name] = dict(_missing(name, why_acc_off), objects=unplaced_ids(detached))
     if crosses:
-        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached)
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached, buildings)
     return out
 
 
@@ -1646,12 +1656,15 @@ def _crossed(lot: Lot, plan) -> set:
     return {i for i, e in enumerate(lot.edges) if reach.intersection(LineString(e)).length > 4 * TOL}
 
 
-def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict, parts_of: list, detached: list):
+def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict, parts_of: list, detached: list,
+                    buildings: list):
     """A building that crosses a lot line stands partly on another lot: it fails every rule that measures it,
     whatever the readings or answers (the checker does that, check.crossing). Each measurement of a building
     records that building's own crossings, `crossings`: [{"who", "lines": street / side / rear}]: the main
     building's on the main yards, the eaves and the height; each accessory building's on the accessory
-    measurements; every building's on the coverage."""
+    measurements; every building's on the coverage, whichever is the main building, or with none known yet
+    (coverage counts every building on the lot: stress F17, a garage across a line failed coverage with the house
+    drawn as floor blocks and complied with it drawn as one solid, the main building then unpicked)."""
     sides = {i for _w, r in lines["readings"] for g in r["sides"] for i in g} if lines and not isinstance(lines, str) else set()
     rears = {i for _w, r in lines["readings"] for i in r["rear"]} if lines and not isinstance(lines, str) else set()
 
@@ -1670,8 +1683,11 @@ def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict,
     for name in ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply"):
         if entries_acc and name in out:
             out[name]["crossings"] = entries_acc
-    if (entries_main or entries_acc) and "building_area" in out:
-        out["building_area"]["crossings"] = entries_main + entries_acc
+    known = {id(b) for b in group + list(detached)}
+    entries_any = [{"who": f'building "{_parts(b)[0]}"', "lines": kinds(crossed[b["id"]])}
+                   for b in buildings if b["id"] in crossed and id(b) not in known]
+    if (entries_main or entries_acc or entries_any) and "building_area" in out:
+        out["building_area"]["crossings"] = entries_main + entries_acc + entries_any
 
 
 def _attached(main: dict, buildings: list[dict]) -> list[dict]:
@@ -2048,9 +2064,12 @@ def _accessory_yards(out: dict, lot: Lot, lines: dict, facts: dict, detached: li
         for name in ACCESSORY_YARDS:
             out[name] = _missing(name, stop("law_missing", what="§325-25's finding (side_yard)"))
         return
-    if any(views[b["id"]]["above"].is_empty for b in detached):   # nothing to place against the lot lines
+    flat = [b for b in detached if views[b["id"]]["above"].is_empty]
+    if flat:                            # nothing to place against the lot lines (_measure says so first: a defence)
+        n = len(flat)
         for name in ACCESSORY_YARDS:
-            out[name] = _missing(name, stop("flat_building"))
+            out[name] = dict(_missing(name, stop("flat_building", what=f"{n} other building{'s' if n > 1 else ''}")),
+                             objects=[i for b in flat for i in _parts(b)])
         return
     shape = ops.unary_union([views[b["id"]]["above"] for b in detached])
     objects = [lot.id, *[i for b in detached for i in _parts(b)]]

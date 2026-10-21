@@ -94,8 +94,8 @@ STOPS = {
                       "for faces meeting at slivers",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
     "empty_building": "a building object has nothing to measure (no faces): check it on the Building layer",
-    "flat_building": "a building covers no area seen from above (walls only, or faces in a line): check it on "
-                     "the Building layer",
+    "flat_building": "a building covers no area seen from above: {what} (walls only, or faces in a line); check "
+                     "it on the Building layer",
     "no_main_building": "more than one building: pick the main building",
     "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
     "outside_lot": "a building isn't inside the lot: {what}",
