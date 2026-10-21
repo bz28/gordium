@@ -1,0 +1,2209 @@
+district: general
+rules:
+- id: general.green_space_ru
+  kind: flag
+  topic: dimensions
+  title: RU green space on developable lot area (chart p.3, fn13)
+  applies_when: district == "RU"
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 60
+    - 60
+    quote: 50% of the developable lot area, after the required setbacks have been calculated, must be retained as
+      green space.
+  examples: []
+  open_questions:
+  - How is developable lot area measured after the required setbacks, and what counts as green space?
+  research:
+  - question: How is developable lot area measured after the required setbacks, and what counts as green space?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_accessory_dwelling_unit_adu_separate_entrance
+  kind: rule
+  topic: definitions
+  title: ADU separate entrance (325-3B)
+  applies_when: is_adu
+  check: adu_separate_entrance
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 4
+    lines:
+    - 8
+    - 10
+    quote: An ADU must have a separate entrance from the outside of the building or through a common hall and must
+      provide living, cooking, sanitary, and sleeping facilities.
+  examples:
+  - given:
+      is_adu: true
+      adu_separate_entrance: true
+    expect: pass
+  - given:
+      is_adu: true
+      adu_separate_entrance: false
+    expect: fail
+  - given:
+      is_adu: false
+      adu_separate_entrance: false
+    expect: not_applicable
+  open_questions:
+  - Does a 'common hall' have to be a hall shared only with other units, and can it be an interior hall of the primary
+    structure? The definition does not say.
+  - Section 325-28C sets further ADU requirements; they are drafted from that section, not here.
+  research:
+  - question: Does a 'common hall' have to be a hall shared only with other units, and can it be an interior hall
+      of the primary structure? The definition does not say.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Section 325-28C sets further ADU requirements; they are drafted from that section, not here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_accessory_dwelling_unit_adu_required_facilities
+  kind: rule
+  topic: definitions
+  title: ADU living, cooking, sanitary, sleeping facilities
+  applies_when: is_adu
+  check: adu_living_facilities and adu_cooking_facilities and adu_sanitary_facilities and adu_sleeping_facilities
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 4
+    lines:
+    - 8
+    - 10
+    quote: An ADU must have a separate entrance from the outside of the building or through a common hall and must
+      provide living, cooking, sanitary, and sleeping facilities.
+  examples:
+  - given:
+      is_adu: true
+      adu_living_facilities: true
+      adu_cooking_facilities: true
+      adu_sanitary_facilities: true
+      adu_sleeping_facilities: true
+    expect: pass
+  - given:
+      is_adu: true
+      adu_living_facilities: true
+      adu_cooking_facilities: false
+      adu_sanitary_facilities: true
+      adu_sleeping_facilities: true
+    expect: fail
+  - given:
+      is_adu: false
+      adu_living_facilities: false
+      adu_cooking_facilities: false
+      adu_sanitary_facilities: false
+      adu_sleeping_facilities: false
+    expect: not_applicable
+  open_questions:
+  - The law does not define what counts as living, cooking, sanitary or sleeping facilities (for example, whether
+    a full kitchen is required).
+  research:
+  - question: The law does not define what counts as living, cooking, sanitary or sleeping facilities (for example,
+      whether a full kitchen is required).
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_accessory_dwelling_unit_adu_residential_building_code
+  kind: flag
+  topic: definitions
+  title: ADU must meet residential building code (flag)
+  applies_when: is_adu
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 4
+    lines:
+    - 10
+    - 11
+    quote: All ADUs must adhere to building code regulations for residential use.
+  examples: []
+  open_questions:
+  - Which building code provisions apply is not stated here, and compliance is not a measurement on the design;
+    an architect must judge it.
+  research:
+  - question: Which building code provisions apply is not stated here, and compliance is not a measurement on the
+      design; an architect must judge it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_building_area_pergola_terrace_patio_not_in_required_yard
+  kind: rule
+  topic: site_features
+  title: Pergolas, terraces and patios above grade not in a required yard (325-3B)
+  check: not pergola_in_required_yard and not terrace_or_patio_above_grade_in_required_yard
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 5
+    lines:
+    - 28
+    - 29
+    quote: However, neither pergolas or terraces and patios above grade shall be located in a required yard.
+  examples:
+  - given:
+      pergola_in_required_yard: false
+      terrace_or_patio_above_grade_in_required_yard: false
+    expect: pass
+  - given:
+      pergola_in_required_yard: true
+      terrace_or_patio_above_grade_in_required_yard: false
+    expect: fail
+  - given:
+      pergola_in_required_yard: false
+      terrace_or_patio_above_grade_in_required_yard: true
+    expect: fail
+  open_questions:
+  - Does "above grade" modify only "terraces and patios" or also "pergolas"? The formula treats any pergola in a
+    required yard as a failure; please confirm whether a pergola at or below grade is allowed in a required yard.
+  - The definition of TERRACE OR PATIO covers surfaces less than 18 inches above grade. Does "above grade" in this
+    sentence mean any height above grade, or the 18-inch threshold of that definition?
+  - The sentence exempting pergolas, terraces and patios from total lot coverage, and the exclusion of parking areas
+    and parking spaces from building area, are not drafted here because they change how building_area is measured
+    rather than set a limit. Please confirm they are handled when the building_area measurement is set up.
+  - Pergolas are not defined in the law given. Does a pergola's location in a yard count by its posts, its roof,
+    or its overhang?
+  research:
+  - question: Does "above grade" modify only "terraces and patios" or also "pergolas"? The formula treats any pergola
+      in a required yard as a failure; please confirm whether a pergola at or below grade is allowed in a required
+      yard.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The definition of TERRACE OR PATIO covers surfaces less than 18 inches above grade. Does "above grade"
+      in this sentence mean any height above grade, or the 18-inch threshold of that definition?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The sentence exempting pergolas, terraces and patios from total lot coverage, and the exclusion of
+      parking areas and parking spaces from building area, are not drafted here because they change how building_area
+      is measured rather than set a limit. Please confirm they are handled when the building_area measurement is
+      set up.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Pergolas are not defined in the law given. Does a pergola's location in a yard count by its posts,
+      its roof, or its overhang?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_story_basement_counts_as_story
+  kind: flag
+  topic: dimensions
+  title: 'Basement deemed a story: floor over 6 ft above grade plane or 12 ft above ground'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 19
+    lines:
+    - 15
+    - 17
+    quote: A basement shall be deemed to be a story when the finished surface of the floor next above is 1) more
+      than six feet above grade plane or 2) more than 12 feet above the finished ground level at any point.
+  examples: []
+  open_questions:
+  - Whether a basement counts as a story depends on the measure of its floor above grade plane and above finished
+    ground level at any point. Neither is among the available measures. An architect must decide each case and add
+    the basement to the story count used against the chart's maximum stories.
+  - The two tests (1 and 2) are joined by 'or'. Should a basement be a story if either test is met? An architect
+    should confirm.
+  - Grade plane is defined in a separate definition and the story limit is set in the chart's maximum stories row.
+    This text does not say how the two are combined, so each is drafted from its own text.
+  research:
+  - question: Whether a basement counts as a story depends on the measure of its floor above grade plane and above
+      finished ground level at any point. Neither is among the available measures. An architect must decide each
+      case and add the basement to the story count used against the chart's maximum stories.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The two tests (1 and 2) are joined by 'or'. Should a basement be a story if either test is met? An
+      architect should confirm.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Grade plane is defined in a separate definition and the story limit is set in the chart's maximum
+      stories row. This text does not say how the two are combined, so each is drafted from its own text.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_16a_rooftop_feature_area_limit
+  kind: rule
+  topic: dimensions
+  title: Rooftop feature area limit (325-16A(2))
+  applies_when: has_exempt_height_feature
+  check: rooftop_feature_area <= min(0.2 * building_ground_floor_area, 0.3 * roof_plane_area)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 46
+    lines:
+    - 33
+    - 35
+    quote: In no case shall the horizontal surface area covered or occupied by such feature exceed 20% of the total
+      ground floor area of the building or 30% of the area of the roof plane on which it is located, whichever is
+      less.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 46
+    lines:
+    - 39
+    - 41
+    quote: In all cases, the surface area occupied by such feature shall be computed as the total area encompassed
+      by a line enclosing the feature and any structural or supporting members on a horizontal plane at the point
+      of attachment to the main building or to the ground.
+  examples:
+  - given:
+      has_exempt_height_feature: true
+      rooftop_feature_area: 150
+      building_ground_floor_area: 1000
+      roof_plane_area: 500
+    expect: pass
+  - given:
+      has_exempt_height_feature: true
+      rooftop_feature_area: 160
+      building_ground_floor_area: 1000
+      roof_plane_area: 500
+    expect: fail
+  - given:
+      has_exempt_height_feature: true
+      rooftop_feature_area: 200
+      building_ground_floor_area: 1000
+      roof_plane_area: 2000
+    expect: pass
+  - given:
+      has_exempt_height_feature: true
+      rooftop_feature_area: 201
+      building_ground_floor_area: 1000
+      roof_plane_area: 2000
+    expect: fail
+  - given:
+      has_exempt_height_feature: false
+      rooftop_feature_area: 0
+      building_ground_floor_area: 1000
+      roof_plane_area: 500
+    expect: not_applicable
+  open_questions:
+  - 'Which features does the limit cover: only the features listed in 325-16A(1)(a)-(e) that are exempt from the
+    height limits, or any rooftop feature? The text says ''such feature''.'
+  - Is the roof plane a single plane of a pitched roof or the whole roof, and how is its area measured when a feature
+    sits on a roof with several planes?
+  - Does 'total ground floor area of the building' mean the main building only, or does it include accessory buildings?
+  - The feature area is computed on a horizontal plane at the point of attachment, as the area enclosed by a line
+    around the feature and its supporting members; the measure rooftop_feature_area is assumed to follow that method.
+  research:
+  - question: 'Which features does the limit cover: only the features listed in 325-16A(1)(a)-(e) that are exempt
+      from the height limits, or any rooftop feature? The text says ''such feature''.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is the roof plane a single plane of a pitched roof or the whole roof, and how is its area measured
+      when a feature sits on a roof with several planes?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'total ground floor area of the building' mean the main building only, or does it include accessory
+      buildings?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The feature area is computed on a horizontal plane at the point of attachment, as the area enclosed
+      by a line around the feature and its supporting members; the measure rooftop_feature_area is assumed to follow
+      that method.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_16a_separate_feature_area_regs
+  kind: flag
+  topic: site_features
+  title: 'Separate feature structure: area regulations (325-16A(2))'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 46
+    lines:
+    - 35
+    - 39
+    quote: If erected as a structure separate from a building existing on the premises, such structure shall conform
+      to the area regulations of this chapter (§ 325-8 above) as to coverage (combined with other structures), lot
+      size and yard dimensions, which shall be computed from the nearest point of any structural or supporting member,
+      pole or guy wire to lot lines.
+  examples: []
+  open_questions:
+  - A separate tower or structure must meet the 325-8 coverage, lot size and yard rules, with yards measured from
+    the nearest structural or supporting member, pole or guy wire. An architect must confirm this is met, since
+    coverage and yard measures are for buildings and accessory structures.
+  - Does this separate structure fall under the accessory structure location rules of 325-25 or under the district
+    yard rules in the chart? The text points to 325-8 only.
+  research:
+  - question: A separate tower or structure must meet the 325-8 coverage, lot size and yard rules, with yards measured
+      from the nearest structural or supporting member, pole or guy wire. An architect must confirm this is met,
+      since coverage and yard measures are for buildings and accessory structures.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does this separate structure fall under the accessory structure location rules of 325-25 or under
+      the district yard rules in the chart? The text points to 325-8 only.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_16a_commercial_and_electric_towers_permit
+  kind: flag
+  topic: site_features
+  title: Towers needing special permit (325-16A(1)(d),(e))
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 46
+    lines:
+    - 23
+    - 29
+    quote: Towers or structures for the transmission or receipt of electronic communications signals in connection
+      with any commercial or business enterprise under conditions which meet with any supplementary safety regulations
+      thereto, except, further, that such towers or structures shall require special permits for accessory uses
+      as provided in § 325-9 above except for those towers or structures subject to Article V-A of this chapter
+      entitled "Telecommunications Facilities and Services" which shall not be required to obtain a special permit.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 46
+    lines:
+    - 30
+    - 32
+    quote: Towers or structures intended for use in the generation of electricity for the premises on which such
+      tower is located, except, further, that such structures shall require special permits as provided in § 325-9.
+  examples: []
+  open_questions:
+  - The height exemption for commercial communications towers and electricity-generating towers depends on a special
+    permit under 325-9 (not for Article V-A facilities). Whether the permit is obtained is a procedure for a person
+    to check.
+  - Which supplementary safety regulations apply to commercial towers is not stated.
+  research:
+  - question: The height exemption for commercial communications towers and electricity-generating towers depends
+      on a special permit under 325-9 (not for Article V-A facilities). Whether the permit is obtained is a procedure
+      for a person to check.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Which supplementary safety regulations apply to commercial towers is not stated.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_16b_ornamental_parapet_cornice_extension
+  kind: rule
+  topic: dimensions
+  title: Ornamental parapet or cornice above height limit, 5 ft or less (325-16B)
+  applies_when: ornamental_parapet_or_cornice
+  check: ornamental_extension_above_height_limit <= 5
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines:
+    - 3
+    - 5
+    quote: The provisions of this chapter shall not apply to prevent the erection above the building height limit
+      of a parapet wall or cornice for ornament extending above such height five feet or less.
+  examples:
+  - given:
+      ornamental_parapet_or_cornice: true
+      ornamental_extension_above_height_limit: 5
+    expect: pass
+  - given:
+      ornamental_parapet_or_cornice: true
+      ornamental_extension_above_height_limit: 6
+    expect: fail
+  - given:
+      ornamental_parapet_or_cornice: false
+      ornamental_extension_above_height_limit: 0
+    expect: not_applicable
+  open_questions:
+  - Is a parapet wall or cornice 'for ornament' decided by the architect's judgment? What distinguishes an ornamental
+    parapet from a structural or functional one?
+  - Five feet is measured above 'such height' (the building height limit). Is that the district's height limit,
+    or the building's actual height measured by the height-of-building definition (average height for pitched roofs)?
+  - If the parapet or cornice extends above the limit by more than five feet, does the whole feature count toward
+    building height, or only the part above five feet?
+  - Does section 325-16C (extra height with larger yards) combine with this allowance, so that the five feet is
+    added above the 325-16C height?
+  research:
+  - question: Is a parapet wall or cornice 'for ornament' decided by the architect's judgment? What distinguishes
+      an ornamental parapet from a structural or functional one?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Five feet is measured above 'such height' (the building height limit). Is that the district's height
+      limit, or the building's actual height measured by the height-of-building definition (average height for pitched
+      roofs)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: If the parapet or cornice extends above the limit by more than five feet, does the whole feature count
+      toward building height, or only the part above five feet?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does section 325-16C (extra height with larger yards) combine with this allowance, so that the five
+      feet is added above the 325-16C height?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_18a_porches_structures_counted_in_yards_coverage
+  kind: flag
+  topic: dimensions
+  title: Porches, decks, balconies, ramps, landings count as building (325-18A)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 9
+    - 11
+    quote: All porches, attached or freestanding decks, balconies projecting more than two feet from a building
+      or structure, ramps, and/or landings shall be considered a part of the building in both the determination
+      of required yards and lot coverage.
+  examples: []
+  open_questions:
+  - This sentence changes how the yard and lot coverage measures are taken rather than setting its own limit. Do
+    the measures front_yard, side_yard_smaller, side_yard_larger, rear_yard and building_area already include porches,
+    attached or freestanding decks, balconies projecting more than two feet, ramps and landings? The chart's yard
+    and coverage limits depend on it.
+  - The text says balconies 'projecting more than two feet from a building or structure'. Does the two-foot projection
+    limit apply only to balconies, or to every item in the list?
+  - Does 'considered a part of the building' for required yards mean these items must themselves stay out of required
+    yards, and how does that interact with the exceptions for ordinary projections in 325-18B and for accessibility
+    improvements in 325-35A(3)?
+  - The 325-3B building area definition exempts terraces and patios and pergolas from lot coverage, and also covers
+    'landings' and 'ramps'. Does a landing at grade count the same way as a patio?
+  research:
+  - question: This sentence changes how the yard and lot coverage measures are taken rather than setting its own
+      limit. Do the measures front_yard, side_yard_smaller, side_yard_larger, rear_yard and building_area already
+      include porches, attached or freestanding decks, balconies projecting more than two feet, ramps and landings?
+      The chart's yard and coverage limits depend on it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text says balconies 'projecting more than two feet from a building or structure'. Does the two-foot
+      projection limit apply only to balconies, or to every item in the list?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'considered a part of the building' for required yards mean these items must themselves stay
+      out of required yards, and how does that interact with the exceptions for ordinary projections in 325-18B
+      and for accessibility improvements in 325-35A(3)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The 325-3B building area definition exempts terraces and patios and pergolas from lot coverage, and
+      also covers 'landings' and 'ramps'. Does a landing at grade count the same way as a patio?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_18b_architectural_feature_projection_limit
+  kind: rule
+  topic: dimensions
+  title: 'Architectural features: projection into required yard (325-18B)'
+  check: architectural_feature_projection <= 2
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 13
+    - 16
+    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
+      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
+      not project more than two feet into any required yard.
+  examples:
+  - given:
+      architectural_feature_projection: 1.5
+    expect: pass
+  - given:
+      architectural_feature_projection: 2
+    expect: pass
+  - given:
+      architectural_feature_projection: 3
+    expect: fail
+  open_questions:
+  - The text does not define which features are 'ordinary projections' or 'other architectural features'. Should
+    porches, decks, balconies and ramps be excluded here because 325-18A treats them as part of the building?
+  - Does the two-foot limit apply to every required yard (front, side and rear), measured from the building wall
+    or from the yard line?
+  - 'How are eaves counted: does the 2 ft limit apply to the eave projection alone, or to the eave''s distance into
+    the yard? The eaves-included yard measures may be relevant.'
+  research:
+  - question: The text does not define which features are 'ordinary projections' or 'other architectural features'.
+      Should porches, decks, balconies and ramps be excluded here because 325-18A treats them as part of the building?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the two-foot limit apply to every required yard (front, side and rear), measured from the building
+      wall or from the yard line?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'How are eaves counted: does the 2 ft limit apply to the eave projection alone, or to the eave''s
+      distance into the yard? The eaves-included yard measures may be relevant.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_18b_required_yard_open_unobstructed
+  kind: flag
+  topic: dimensions
+  title: Required yard open and unobstructed (325-18B)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 13
+    - 16
+    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
+      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
+      not project more than two feet into any required yard.
+  examples: []
+  open_questions:
+  - Whether anything other than ordinary architectural projections (for example structures, accessory buildings,
+    or items allowed elsewhere in the code) obstructs a required yard needs an architect's judgment. Which other
+    sections allow items in a required yard?
+  research:
+  - question: Whether anything other than ordinary architectural projections (for example structures, accessory
+      buildings, or items allowed elsewhere in the code) obstructs a required yard needs an architect's judgment.
+      Which other sections allow items in a required yard?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_dwelling_one_family_one_family_occupancy_unrelated_individuals
+  kind: flag
+  topic: density_and_occupancy
+  title: 'One-family dwelling: unrelated occupants (325-3B)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines:
+    - 36
+    - 37
+    quote: DWELLING, ONE-FAMILY — A dwelling unit occupied exclusively for residential purposes by an individual
+      or family and not more than one unrelated individual or a functional family unit.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines:
+    - 37
+    - 39
+    quote: In the R-1 Zones, occupancy by an individual or a family and not more than two unrelated individuals
+      is permitted if the dwelling is owner-occupied.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines:
+    - 39
+    - 40
+    quote: In the R-2 and R-3 Zones, occupancy by an individual or a family and not more than two unrelated individuals
+      is permitted.
+  examples: []
+  open_questions:
+  - The occupancy limits depend on who lives in the dwelling (family, unrelated individuals, functional family unit,
+    owner-occupancy), which no design measurement captures. Should occupancy be checked at design review or at permit/occupancy
+    stage?
+  - The general definition allows 'not more than one unrelated individual or a functional family unit', while the
+    R-1, R-2 and R-3 sentences allow 'not more than two unrelated individuals'. Which governs in each zone, and
+    does the R-1 owner-occupancy condition replace the general limit?
+  - '''Functional family unit'' is not defined in this text. What counts as one?'
+  - Does RU (not named in the R-1, R-2 or R-3 sentences) fall under the general definition's limit?
+  research:
+  - question: The occupancy limits depend on who lives in the dwelling (family, unrelated individuals, functional
+      family unit, owner-occupancy), which no design measurement captures. Should occupancy be checked at design
+      review or at permit/occupancy stage?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The general definition allows 'not more than one unrelated individual or a functional family unit',
+      while the R-1, R-2 and R-3 sentences allow 'not more than two unrelated individuals'. Which governs in each
+      zone, and does the R-1 owner-occupancy condition replace the general limit?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: '''Functional family unit'' is not defined in this text. What counts as one?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does RU (not named in the R-1, R-2 or R-3 sentences) fall under the general definition's limit?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_one_family_attached_dwelling_max_attached_units_per_building
+  kind: rule
+  topic: density_and_occupancy
+  title: Maximum six one-family attached units per building (325-3B)
+  applies_when: use == "one_family_attached"
+  check: attached_units_in_building <= 6
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 14
+    - 14
+    quote: A maximum of six one-family dwelling units may be attached to form a single building.
+  examples:
+  - given:
+      use: one_family_attached
+      attached_units_in_building: 6
+    expect: pass
+  - given:
+      use: one_family_attached
+      attached_units_in_building: 7
+    expect: fail
+  - given:
+      use: two_family
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_row_house_row_house_module_facade_length
+  kind: rule
+  topic: form_and_design_standards
+  title: Row house module facade length (325-3B)
+  applies_when: row_house_modules > 0
+  check: row_house_module_facade_length <= 25
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 18
+    lines:
+    - 14
+    - 15
+    quote: 'ROW HOUSE — A residential structure composed of three or more attached modules with shared
+
+      sidewalls, the facade of each module measuring no more than 25 feet in length.'
+  examples:
+  - given:
+      row_house_modules: 3
+      row_house_module_facade_length: 25
+    expect: pass
+  - given:
+      row_house_modules: 3
+      row_house_module_facade_length: 26
+    expect: fail
+  - given:
+      row_house_modules: 0
+      row_house_module_facade_length: 40
+    expect: not_applicable
+  open_questions:
+  - Does 'facade ... in length' mean the street-facing facade width of each module? Is it measured at the building
+    wall or including eaves?
+  - Which residential districts and uses does this definition apply to? The chart treats attached dwellings separately.
+  research:
+  - question: Does 'facade ... in length' mean the street-facing facade width of each module? Is it measured at
+      the building wall or including eaves?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Which residential districts and uses does this definition apply to? The chart treats attached dwellings
+      separately.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_row_house_row_house_module_street_entry
+  kind: rule
+  topic: form_and_design_standards
+  title: Row house module street-facing entry (325-3B)
+  applies_when: row_house_modules > 0
+  check: row_house_min_street_entries_per_module == 1 and row_house_max_street_entries_per_module == 1
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 18
+    lines:
+    - 17
+    - 17
+    quote: Each module must have one street-facing entry.
+  examples:
+  - given:
+      row_house_modules: 3
+      row_house_min_street_entries_per_module: 1
+      row_house_max_street_entries_per_module: 1
+    expect: pass
+  - given:
+      row_house_modules: 3
+      row_house_min_street_entries_per_module: 0
+      row_house_max_street_entries_per_module: 1
+    expect: fail
+  - given:
+      row_house_modules: 3
+      row_house_min_street_entries_per_module: 1
+      row_house_max_street_entries_per_module: 2
+    expect: fail
+  - given:
+      row_house_modules: 0
+      row_house_min_street_entries_per_module: 0
+      row_house_max_street_entries_per_module: 0
+    expect: not_applicable
+  open_questions:
+  - Does 'one street-facing entry' mean exactly one or at least one? Can a module with multiple stacked units have
+    a shared entry?
+  - How is an entry on a corner module facing two streets treated?
+  research:
+  - question: Does 'one street-facing entry' mean exactly one or at least one? Can a module with multiple stacked
+      units have a shared entry?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: How is an entry on a corner module facing two streets treated?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_terrace_or_patio_terrace_patio_above_grade_no_required_yard
+  kind: rule
+  topic: site_features
+  title: Terraces and patios above grade not in required yards (325-3B)
+  applies_when: terrace_patio_above_grade
+  check: not terrace_patio_in_required_yard
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 19
+    lines:
+    - 24
+    - 25
+    quote: Terraces and patios above grade shall not encroach into required yards.
+  examples:
+  - given:
+      terrace_patio_above_grade: true
+      terrace_patio_in_required_yard: false
+    expect: pass
+  - given:
+      terrace_patio_above_grade: true
+      terrace_patio_in_required_yard: true
+    expect: fail
+  - given:
+      terrace_patio_above_grade: false
+    expect: not_applicable
+  open_questions:
+  - The definition calls a surfaced patio 'less than 18 inches above grade' a terrace or patio, yet the last sentence
+    restricts those 'above grade'. Does 'above grade' here mean any height above grade, or only 18 inches or more?
+    Until answered, the measure terrace_patio_above_grade is true only when the architect marks it so.
+  - Which yards count as 'required yards' (front, side, rear, and the corner lot's second front yard under 325-19C)?
+    Does the required yard depend on other sections, such as 325-18B projecting features and 325-18A porches and
+    decks?
+  - Section 325-3B:building_area says terraces and patios are exempt from lot coverage but that those 'above grade'
+    must not be in a required yard. Does that agree with this sentence?
+  research:
+  - question: The definition calls a surfaced patio 'less than 18 inches above grade' a terrace or patio, yet the
+      last sentence restricts those 'above grade'. Does 'above grade' here mean any height above grade, or only
+      18 inches or more? Until answered, the measure terrace_patio_above_grade is true only when the architect marks
+      it so.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Which yards count as 'required yards' (front, side, rear, and the corner lot's second front yard under
+      325-19C)? Does the required yard depend on other sections, such as 325-18B projecting features and 325-18A
+      porches and decks?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Section 325-3B:building_area says terraces and patios are exempt from lot coverage but that those
+      'above grade' must not be in a required yard. Does that agree with this sentence?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_7b_yard_not_shared_between_buildings
+  kind: flag
+  topic: dimensions
+  title: Required yard not shared with another building (325-7B)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines:
+    - 8
+    - 10
+    quote: No part of a yard or other open space about any building required for the purposes of complying with
+      the provisions of this chapter shall be included as a part of a yard or other open space similarly required
+      for another building.
+  examples: []
+  open_questions:
+  - The available measures describe one building's yards on a lot. Can a design be checked for overlap between the
+    required yard or open space of one building and that of another building from them, or does an architect need
+    to judge each case (for example, several buildings on one lot or on adjoining lots)?
+  - Does 'another building' include accessory buildings on the same lot, whose yards are governed by 325-25, as
+    well as buildings on adjoining lots?
+  - Does 'yard or other open space' also cover open space required by sections other than the yard rules (for example
+    green space under chart footnote 13 on page 3)?
+  research:
+  - question: The available measures describe one building's yards on a lot. Can a design be checked for overlap
+      between the required yard or open space of one building and that of another building from them, or does an
+      architect need to judge each case (for example, several buildings on one lot or on adjoining lots)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'another building' include accessory buildings on the same lot, whose yards are governed by 325-25,
+      as well as buildings on adjoining lots?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'yard or other open space' also cover open space required by sections other than the yard rules
+      (for example green space under chart footnote 13 on page 3)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_8e_south_hill_no_added_primary_on_built_parcel
+  kind: rule
+  topic: site_features
+  title: 'South Hill R-1/R-2: no new primary structure on built parcel (325-8E)'
+  applies_when: in_south_hill_overlay and district in ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c"] and existing_primary_structures
+    >= 1
+  check: new_primary_structures == 0
+  review_when:
+  - when: alters_existing_primary_structure
+    reason: The law says the prohibition does not impact future changes to primary structures existing before the
+      effective date; whether this work is such a change needs a person's judgment.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 29
+    lines:
+    - 31
+    - 35
+    quote: After the date of this amendment, any property located within the South Hill Overlay District with a
+      zoning designation of R-1 or R-2 is prohibited from constructing a primary structure on any parcel already
+      containing one or more primary structures, and is prohibited from constructing more than one primary structure
+      on a parcel containing no primary structures.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 29
+    lines:
+    - 35
+    - 36
+    quote: The preceding sentence shall not impact future changes to primary structures existing prior to the effective
+      date of this subsection.
+  examples:
+  - given:
+      in_south_hill_overlay: true
+      district: R-1a
+      existing_primary_structures: 1
+      new_primary_structures: 0
+      alters_existing_primary_structure: false
+    expect: pass
+  - given:
+      in_south_hill_overlay: true
+      district: R-2b
+      existing_primary_structures: 2
+      new_primary_structures: 1
+      alters_existing_primary_structure: false
+    expect: fail
+  - given:
+      in_south_hill_overlay: true
+      district: R-2a
+      existing_primary_structures: 0
+      new_primary_structures: 1
+      alters_existing_primary_structure: false
+    expect: not_applicable
+  - given:
+      in_south_hill_overlay: true
+      district: R-1b
+      existing_primary_structures: 1
+      new_primary_structures: 1
+      alters_existing_primary_structure: true
+    expect: needs_review
+  open_questions:
+  - The law says zoning designation of R-1 or R-2; confirm this covers R-1a, R-1b, R-2a, R-2b and R-2c.
+  - Does 'after the date of this amendment' (Ord. 2017-14, 11-1-2017) need any check, given all new designs are
+    after that date?
+  - What counts as a 'future change' to an existing primary structure (addition, replacement, demolition and rebuild)
+    that is exempt from the prohibition?
+  - How does the South Hill Overlay District boundary relate to the zoning map; who determines that a lot is inside
+    it?
+  research:
+  - question: The law says zoning designation of R-1 or R-2; confirm this covers R-1a, R-1b, R-2a, R-2b and R-2c.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'after the date of this amendment' (Ord. 2017-14, 11-1-2017) need any check, given all new designs
+      are after that date?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What counts as a 'future change' to an existing primary structure (addition, replacement, demolition
+      and rebuild) that is exempt from the prohibition?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: How does the South Hill Overlay District boundary relate to the zoning map; who determines that a
+      lot is inside it?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_8e_south_hill_one_primary_on_empty_parcel
+  kind: rule
+  topic: site_features
+  title: 'South Hill R-1/R-2: one primary structure on empty parcel (325-8E)'
+  applies_when: in_south_hill_overlay and district in ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c"] and existing_primary_structures
+    == 0
+  check: new_primary_structures <= 1
+  review_when:
+  - when: alters_existing_primary_structure
+    reason: The law says the prohibition does not impact future changes to primary structures existing before the
+      effective date; whether this work is such a change needs a person's judgment.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 29
+    lines:
+    - 31
+    - 35
+    quote: After the date of this amendment, any property located within the South Hill Overlay District with a
+      zoning designation of R-1 or R-2 is prohibited from constructing a primary structure on any parcel already
+      containing one or more primary structures, and is prohibited from constructing more than one primary structure
+      on a parcel containing no primary structures.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 29
+    lines:
+    - 35
+    - 36
+    quote: The preceding sentence shall not impact future changes to primary structures existing prior to the effective
+      date of this subsection.
+  examples:
+  - given:
+      in_south_hill_overlay: true
+      district: R-1a
+      existing_primary_structures: 0
+      new_primary_structures: 1
+      alters_existing_primary_structure: false
+    expect: pass
+  - given:
+      in_south_hill_overlay: true
+      district: R-2c
+      existing_primary_structures: 0
+      new_primary_structures: 2
+      alters_existing_primary_structure: false
+    expect: fail
+  - given:
+      in_south_hill_overlay: true
+      district: R-1b
+      existing_primary_structures: 1
+      new_primary_structures: 2
+      alters_existing_primary_structure: false
+    expect: not_applicable
+  - given:
+      in_south_hill_overlay: true
+      district: R-2a
+      existing_primary_structures: 0
+      new_primary_structures: 2
+      alters_existing_primary_structure: true
+    expect: needs_review
+  open_questions:
+  - The law says zoning designation of R-1 or R-2; confirm this covers R-1a, R-1b, R-2a, R-2b and R-2c.
+  - Is a parcel with a primary structure being demolished treated as 'containing no primary structures'?
+  - Footnote 3 on chart page 2 allows more than one primary use on large properties if approved by ILPC and Planning
+    Board; how does that relate to this prohibition?
+  research:
+  - question: The law says zoning designation of R-1 or R-2; confirm this covers R-1a, R-1b, R-2a, R-2b and R-2c.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is a parcel with a primary structure being demolished treated as 'containing no primary structures'?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Footnote 3 on chart page 2 allows more than one primary use on large properties if approved by ILPC
+      and Planning Board; how does that relate to this prohibition?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_17a_reduced_lot_area_yards
+  kind: flag
+  topic: dimensions
+  title: No lot reduced so a required yard is smaller than district minimum (325-17A)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 48
+    lines:
+    - 21
+    - 22
+    quote: 'No lot shall be so reduced in area that any required yard will be smaller than that
+
+      prescribed in the regulations for the district in which said lot is located.'
+  examples: []
+  open_questions:
+  - This sentence applies when a lot is reduced in area (for example by subdivision or lot-line change). The measures
+    given describe only the lot as it now stands, not a before/after change, so code cannot decide whether a reduction
+    has made a yard too small. Should it be handled as a flag for the architect, or should the yard minimums be
+    checked on the reduced lot through the chart's yard rows (front, side, rear), which are drafted from the chart
+    section?
+  - The chart's rear yard minimum depends on a percentage of lot depth, with a footnote minimum; the yard rows are
+    drafted separately, and this text depends on them. Please confirm no separate formula is needed here.
+  - Does 'required yard' include the additional yard requirements of other sections (e.g. §325-19 transitions, §325-19E
+    in R-3 abutting R-1, §325-16C extra height with larger yards)?
+  research:
+  - question: This sentence applies when a lot is reduced in area (for example by subdivision or lot-line change).
+      The measures given describe only the lot as it now stands, not a before/after change, so code cannot decide
+      whether a reduction has made a yard too small. Should it be handled as a flag for the architect, or should
+      the yard minimums be checked on the reduced lot through the chart's yard rows (front, side, rear), which are
+      drafted from the chart section?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The chart's rear yard minimum depends on a percentage of lot depth, with a footnote minimum; the yard
+      rows are drafted separately, and this text depends on them. Please confirm no separate formula is needed here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'required yard' include the additional yard requirements of other sections (e.g. §325-19 transitions,
+      §325-19E in R-3 abutting R-1, §325-16C extra height with larger yards)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_17b_corner_visibility_triangle
+  kind: flag
+  topic: site_features
+  title: 'Visibility triangle at corner lot: nothing over two feet high (325-17B)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 48
+    lines:
+    - 23
+    - 27
+    quote: 'On a corner lot in any residential district, no fence, wall, grading, hedge or
+
+      other structure or planting more than two feet in height shall be erected, placed or maintained within
+
+      the triangular area formed by the intersecting street right-of-way lines and a straight line adjoining
+
+      said street right-of-way lines at points which are 20 feet distant from the point of intersection,
+
+      measured along said street right-of-way.'
+  examples: []
+  open_questions:
+  - The limit depends on the height of every fence, wall, grading, hedge, structure or planting inside a 20-foot
+    sight triangle at the street corner. The available measures hold no site-feature heights or triangle geometry,
+    so an architect must check this on the site plan. Is a flag acceptable until such measures are added?
+  - Does 'more than two feet in height' measure from the finished grade, the street grade, or the curb? The law
+    does not say, and 'grading' is also listed as an item that cannot exceed two feet.
+  - The text refers to an illustration below that is not in the extracted text. Does it change how the triangle
+    is measured?
+  - Does 'corner lot' here match the corner-lot treatment in 325-19C (two adjoining front yards)? The definition
+    of corner lot is not given.
+  research:
+  - question: The limit depends on the height of every fence, wall, grading, hedge, structure or planting inside
+      a 20-foot sight triangle at the street corner. The available measures hold no site-feature heights or triangle
+      geometry, so an architect must check this on the site plan. Is a flag acceptable until such measures are added?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'more than two feet in height' measure from the finished grade, the street grade, or the curb?
+      The law does not say, and 'grading' is also listed as an item that cannot exceed two feet.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text refers to an illustration below that is not in the extracted text. Does it change how the
+      triangle is measured?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'corner lot' here match the corner-lot treatment in 325-19C (two adjoining front yards)? The
+      definition of corner lot is not given.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20d_driveway_min_width
+  kind: rule
+  topic: parking_and_loading
+  title: Minimum driveway width, residential districts (325-20D(2)(e)[2])
+  check: driveway_width >= 8
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 53
+    lines:
+    - 19
+    - 21
+    quote: Driveways must be at least eight feet wide in residential zoning districts and at least 10 feet wide
+      in nonresidential zoning districts, and must have clear visibility to the street.
+  examples:
+  - given:
+      driveway_width: 8
+    expect: pass
+  - given:
+      driveway_width: 7
+    expect: fail
+  open_questions:
+  - The sentence also requires that driveways have clear visibility to the street. This cannot be decided from the
+    measures we have and needs a person to judge it.
+  research:
+  - question: The sentence also requires that driveways have clear visibility to the street. This cannot be decided
+      from the measures we have and needs a person to judge it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20d_parking_space_size_10_or_fewer
+  kind: rule
+  topic: parking_and_loading
+  title: Parking space size, areas with 10 or fewer spaces (325-20D(5)(a))
+  applies_when: parking_area_spaces <= 10
+  check: parking_space_width >= 8 and parking_space_length >= 18
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 56
+    lines:
+    - 33
+    - 33
+    quote: Parking space size requirements for parking areas with 10 or fewer parking spaces.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 56
+    lines:
+    - 33
+    - 36
+    quote: For such parking areas, a parking space shall have a minimum dimension of eight feet by 18 feet, exclusive
+      of pedestrianways, maneuvering space and driveways appurtenant thereto and giving access thereto.
+  examples:
+  - given:
+      parking_area_spaces: 10
+      parking_space_width: 8
+      parking_space_length: 18
+    expect: pass
+  - given:
+      parking_area_spaces: 10
+      parking_space_width: 7.5
+      parking_space_length: 18
+    expect: fail
+  - given:
+      parking_area_spaces: 10
+      parking_space_width: 8
+      parking_space_length: 17
+    expect: fail
+  - given:
+      parking_area_spaces: 11
+      parking_space_width: 7
+      parking_space_length: 17
+    expect: not_applicable
+  open_questions:
+  - The law allows the edge of the parking space pavement to be up to two feet inside the outermost line of the
+    space where unobstructed vehicle overhang is available. Does the space size then still count the overhang area?
+  - Which side of the space is the width and which is the length (eight feet by 18 feet) when spaces are angled
+    or parallel?
+  research:
+  - question: The law allows the edge of the parking space pavement to be up to two feet inside the outermost line
+      of the space where unobstructed vehicle overhang is available. Does the space size then still count the overhang
+      area?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Which side of the space is the width and which is the length (eight feet by 18 feet) when spaces are
+      angled or parallel?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20d_driveway_aisle_width
+  kind: rule
+  topic: parking_and_loading
+  title: Driveway aisle width, one-way and two-way (325-20D(2)(e)[3])
+  check: (driveway_aisle_two_way and driveway_aisle_width >= 20 and driveway_aisle_width <= 24) or (not driveway_aisle_two_way
+    and driveway_aisle_width >= 10 and driveway_aisle_width <= 12)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 53
+    lines:
+    - 28
+    - 30
+    quote: Where permitted, one-way driveway aisles shall have a minimum width of 10 feet and a maximum width of
+      12 feet. Two-way driveway aisles shall have a minimum width of 20 feet and a maximum width of 24 feet.
+  examples:
+  - given:
+      driveway_aisle_two_way: false
+      driveway_aisle_width: 10
+    expect: pass
+  - given:
+      driveway_aisle_two_way: false
+      driveway_aisle_width: 13
+    expect: fail
+  - given:
+      driveway_aisle_two_way: true
+      driveway_aisle_width: 22
+    expect: pass
+  - given:
+      driveway_aisle_two_way: true
+      driveway_aisle_width: 19
+    expect: fail
+  open_questions:
+  - The law says 'Where permitted'. It does not say where driveway aisles are permitted. Does this apply to every
+    residential lot with a driveway aisle?
+  - Section 325-22D separately sets a minimum two-way driveway width of 22 feet. How do the two sections interact?
+  research:
+  - question: The law says 'Where permitted'. It does not say where driveway aisles are permitted. Does this apply
+      to every residential lot with a driveway aisle?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Section 325-22D separately sets a minimum two-way driveway width of 22 feet. How do the two sections
+      interact?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20d_driveway_entry_grade
+  kind: rule
+  topic: parking_and_loading
+  title: Maximum driveway entry grade, 3 or more vehicles (325-20D(2)(e)[2][a])
+  applies_when: parking_spaces >= 3
+  check: driveway_entry_grade <= 0.08
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 53
+    lines:
+    - 23
+    - 25
+    quote: Driveways to areas containing parking spaces for three or more vehicles shall be graded to form a street
+      entry with a maximum grade of 8% for a distance of 25 feet from the curbline.
+  examples:
+  - given:
+      parking_spaces: 3
+      driveway_entry_grade: 0.08
+    expect: pass
+  - given:
+      parking_spaces: 3
+      driveway_entry_grade: 0.09
+    expect: fail
+  - given:
+      parking_spaces: 2
+      driveway_entry_grade: 0.12
+    expect: not_applicable
+  open_questions:
+  - Is the number of parking spaces provided the right count for 'parking spaces for three or more vehicles'?
+  research:
+  - question: Is the number of parking spaces provided the right count for 'parking spaces for three or more vehicles'?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20d_parking_space_size_11_or_more
+  kind: flag
+  topic: parking_and_loading
+  title: Parking space size, areas with 11 or more spaces (325-20D(5)(b))
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 56
+    lines:
+    - 39
+    - 39
+    quote: Parking space size requirements for parking areas with 11 or more parking spaces.
+  examples: []
+  open_questions:
+  - Perpendicular spaces are eight feet six inches by 18 feet, parallel spaces eight feet six inches by 20 feet,
+    and angle spaces at least 255 square feet measured at the angle of parking. An architect must check these; the
+    layout type and angle are not among our measures.
+  - Section 325-20D(5)(c) lets the Planning and Development Board vary these sizes under site plan review.
+  research:
+  - question: Perpendicular spaces are eight feet six inches by 18 feet, parallel spaces eight feet six inches by
+      20 feet, and angle spaces at least 255 square feet measured at the angle of parking. An architect must check
+      these; the layout type and angle are not among our measures.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Section 325-20D(5)(c) lets the Planning and Development Board vary these sizes under site plan review.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20e_front_yard_parking_orientation_15ft
+  kind: rule
+  topic: parking_and_loading
+  title: Front yard parking orientation within 15 ft (325-20E(1))
+  check: not front_yard_parking_within_15ft_off_perpendicular
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 19
+    - 20
+    quote: (1) In all residential districts, all front yard parking within 15 feet of the front property line is
+      restricted to a motor vehicle orientation that is within 10° of perpendicular to the street.
+  examples:
+  - given:
+      front_yard_parking_within_15ft_off_perpendicular: false
+    expect: pass
+  - given:
+      front_yard_parking_within_15ft_off_perpendicular: true
+    expect: fail
+  open_questions:
+  - How is a vehicle's orientation measured for a design (parking stall angle versus vehicle axis)?
+  research:
+  - question: How is a vehicle's orientation measured for a design (parking stall angle versus vehicle axis)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20e_front_yard_parking_driveway_narrow_lot
+  kind: rule
+  topic: parking_and_loading
+  title: Front yard parking in near-perpendicular driveway, lots 50 ft or less
+  applies_when: lot_width_at_street_line <= 50
+  check: not front_yard_parking_outside_driveway and not front_yard_driveway_off_perpendicular
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 21
+    - 23
+    quote: (2) In all residential districts, parking in the front yard of lots which have a width at the street
+      line of 50 feet or less shall be restricted to parking within a driveway that is perpendicular to the street
+      or that is within 10° of perpendicular to the street.
+  examples:
+  - given:
+      lot_width_at_street_line: 50
+      front_yard_parking_outside_driveway: false
+      front_yard_driveway_off_perpendicular: false
+    expect: pass
+  - given:
+      lot_width_at_street_line: 50
+      front_yard_parking_outside_driveway: true
+      front_yard_driveway_off_perpendicular: false
+    expect: fail
+  - given:
+      lot_width_at_street_line: 50
+      front_yard_parking_outside_driveway: false
+      front_yard_driveway_off_perpendicular: true
+    expect: fail
+  - given:
+      lot_width_at_street_line: 51
+      front_yard_parking_outside_driveway: true
+      front_yard_driveway_off_perpendicular: true
+    expect: not_applicable
+  open_questions:
+  - The law says 'width at street line'; confirm how it is measured on irregular or corner lots.
+  research:
+  - question: The law says 'width at street line'; confirm how it is measured on irregular or corner lots.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20e_front_yard_driveway_width_narrow_lot
+  kind: rule
+  topic: parking_and_loading
+  title: Driveway width through front yard, lots 50 ft or less
+  applies_when: lot_width_at_street_line <= 50
+  check: front_yard_driveway_width <= 12
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 21
+    - 23
+    quote: (2) In all residential districts, parking in the front yard of lots which have a width at the street
+      line of 50 feet or less shall be restricted to parking within a driveway that is perpendicular to the street
+      or that is within 10° of perpendicular to the street.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 23
+    - 24
+    quote: Such driveway shall not be more than 12 feet wide for the portion that passes through the front yard.
+  examples:
+  - given:
+      lot_width_at_street_line: 40
+      front_yard_driveway_width: 12
+    expect: pass
+  - given:
+      lot_width_at_street_line: 40
+      front_yard_driveway_width: 13
+    expect: fail
+  - given:
+      lot_width_at_street_line: 51
+      front_yard_driveway_width: 13
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20e_front_yard_parking_area_cap
+  kind: rule
+  topic: parking_and_loading
+  title: Front yard parking area at most 25% of front yard, lots over 50 ft
+  applies_when: lot_width_at_street_line > 50
+  check: front_yard_parking_area <= 0.25 * front_yard_area
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 25
+    - 28
+    quote: (3) In all residential districts, parking in the front yard of lots which have a width at the street
+      line of more than 50 feet shall be restricted to an area not greater than 25% of the total area of the front
+      yard, including turnaround and other vehicle maneuvering areas and driveways leading to garages and parking
+      areas.
+  examples:
+  - given:
+      lot_width_at_street_line: 60
+      front_yard_parking_area: 250
+      front_yard_area: 1000
+    expect: pass
+  - given:
+      lot_width_at_street_line: 60
+      front_yard_parking_area: 251
+      front_yard_area: 1000
+    expect: fail
+  - given:
+      lot_width_at_street_line: 50
+      front_yard_parking_area: 500
+      front_yard_area: 1000
+    expect: not_applicable
+  open_questions:
+  - Parking area must include turnaround, maneuvering areas and driveways to garages and parking; confirm the measure
+    counts all of these.
+  research:
+  - question: Parking area must include turnaround, maneuvering areas and driveways to garages and parking; confirm
+      the measure counts all of these.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20e_corner_lot_front_yard_parking
+  kind: rule
+  topic: parking_and_loading
+  title: Corner lot front yard parking on one front yard only
+  applies_when: corner_lot_with_multiple_front_yards
+  check: not front_yard_parking_on_multiple_front_yards
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 31
+    - 33
+    quote: (4) In all residential districts, on corner lots with more than one front yard as defined in this Code,
+      front yard parking according to the above provisions shall only be permitted on one of the front yards.
+  examples:
+  - given:
+      corner_lot_with_multiple_front_yards: true
+      front_yard_parking_on_multiple_front_yards: false
+    expect: pass
+  - given:
+      corner_lot_with_multiple_front_yards: true
+      front_yard_parking_on_multiple_front_yards: true
+    expect: fail
+  - given:
+      corner_lot_with_multiple_front_yards: false
+      front_yard_parking_on_multiple_front_yards: true
+    expect: not_applicable
+  open_questions:
+  - Relies on § 325-19C (corner lots deemed to have two adjoining front yards).
+  research:
+  - question: Relies on § 325-19C (corner lots deemed to have two adjoining front yards).
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20e_front_yard_landscaped_remainder
+  kind: flag
+  topic: parking_and_loading
+  title: Front yard remainder landscaped, other limits apply
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 34
+    - 37
+    quote: (5) In all residential districts, where a parking area will use a front yard, the use of the front yard
+      for parking and associated maneuvering space shall not exceed the amounts permitted by this section nor the
+      amounts permitted by any other applicable provisions of this Code, including § 325-20D(3)(c).
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 37
+    - 39
+    quote: Any permitted front yard parking area shall have a clearly defined boundary as required by § 325-20D(2)(b),
+      and the remainder of the front yard shall be landscaped as a green area in keeping with the surrounding neighborhood.
+  examples: []
+  open_questions:
+  - Depends on § 325-20D(3)(c) and § 325-20D(2)(b), which are checked separately.
+  - '''In keeping with the surrounding neighborhood'' needs an architect''s judgment.'
+  research:
+  - question: Depends on § 325-20D(3)(c) and § 325-20D(2)(b), which are checked separately.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: '''In keeping with the surrounding neighborhood'' needs an architect''s judgment.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_20e_parking_on_lot_without_building
+  kind: flag
+  topic: parking_and_loading
+  title: Front yard equivalent kept free of parking, lot without building
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 40
+    - 42
+    quote: (6) In all districts, when a parking area is established on a lot that does not contain a building, an
+      area equivalent to the front yard that would be required if a building did stand on the site shall be kept
+      free of parking (except for an access drive to the parking area).
+  examples: []
+  open_questions:
+  - Landscaping and fence or barrier requirements in the following sentence are judgment items for an architect.
+  - The subsection says 'all districts'; confirm treatment for residential districts.
+  research:
+  - question: Landscaping and fence or barrier requirements in the following sentence are judgment items for an
+      architect.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The subsection says 'all districts'; confirm treatment for residential districts.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_25b_below_grade_accessory_light_air
+  kind: flag
+  topic: site_features
+  title: 'Below-grade accessory structure: light and air (325-25B)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines:
+    - 3
+    - 5
+    quote: 'B. Accessory structures below grade. Any accessory structure may be placed anywhere on a building lot
+
+      if it is entirely below the finished grade or entirely below the first-floor level, provided that it does
+
+      not obstruct light and air from adjacent property, subject to the further provisions of this section.'
+  examples: []
+  open_questions:
+  - Does the below-grade accessory structure obstruct light and air from adjacent property? The law gives no measurable
+    test, so an architect must judge this.
+  - The text says 'entirely below the finished grade or entirely below the first-floor level'. Is the second alternative
+    (below the first-floor level) enough on its own even if the structure is above finished grade? The code has
+    no measure for either alternative.
+  - Does 'anywhere on a building lot' override the front, side and rear yard and setback requirements of the District
+    Regulations Chart and of 325-25A, 325-25C and 325-19C? The text says it is 'subject to the further provisions
+    of this section'.
+  - Which 'further provisions of this section' limit this allowance? The related pieces 325-25, 325-25A, 325-25C
+    and 325-25D are not drafted here.
+  research:
+  - question: Does the below-grade accessory structure obstruct light and air from adjacent property? The law gives
+      no measurable test, so an architect must judge this.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text says 'entirely below the finished grade or entirely below the first-floor level'. Is the
+      second alternative (below the first-floor level) enough on its own even if the structure is above finished
+      grade? The code has no measure for either alternative.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'anywhere on a building lot' override the front, side and rear yard and setback requirements
+      of the District Regulations Chart and of 325-25A, 325-25C and 325-19C? The text says it is 'subject to the
+      further provisions of this section'.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Which 'further provisions of this section' limit this allowance? The related pieces 325-25, 325-25A,
+      325-25C and 325-25D are not drafted here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_25c_frame_accessory_side_setback
+  kind: rule
+  topic: site_features
+  title: Frame accessory building side setback, non-R-1 (325-25C)
+  applies_when: accessory_is_frame and accessory_distances_apply and district not in ["R-1a", "R-1b"]
+  check: accessory_side_yard >= 3
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines:
+    - 6
+    - 9
+    quote: 'C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from
+
+      any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may
+
+      not be placed less than six feet from any side lot line nor less than three feet from any rear lot line,
+
+      subject to further provisions of this section.'
+  examples:
+  - given:
+      district: R-2a
+      accessory_is_frame: true
+      accessory_distances_apply: true
+      accessory_side_yard: 3
+    expect: pass
+  - given:
+      district: R-2a
+      accessory_is_frame: true
+      accessory_distances_apply: true
+      accessory_side_yard: 2
+    expect: fail
+  - given:
+      district: R-1a
+      accessory_is_frame: true
+      accessory_distances_apply: true
+      accessory_side_yard: 2
+    expect: not_applicable
+  open_questions:
+  - Does 'R-1 Districts' mean R-1a and R-1b?
+  - What are the 'further provisions of this section' that qualify this setback (325-25A, 325-25B, 325-25D)? The
+    result may change under them.
+  - Does 325-25's exemption of accessory structures from chart side yards interact with this setback?
+  - Is a 'frame' accessory building one of wood-frame construction? The measure accessory_is_frame needs that definition.
+  research:
+  - question: Does 'R-1 Districts' mean R-1a and R-1b?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What are the 'further provisions of this section' that qualify this setback (325-25A, 325-25B, 325-25D)?
+      The result may change under them.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 325-25's exemption of accessory structures from chart side yards interact with this setback?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is a 'frame' accessory building one of wood-frame construction? The measure accessory_is_frame needs
+      that definition.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_25c_frame_accessory_side_setback_r1
+  kind: rule
+  topic: site_features
+  title: Accessory building side setback in R-1 Districts (325-25C)
+  applies_when: accessory_is_frame and accessory_distances_apply and district in ["R-1a", "R-1b"]
+  check: accessory_side_yard >= 6
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines:
+    - 6
+    - 9
+    quote: 'C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from
+
+      any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may
+
+      not be placed less than six feet from any side lot line nor less than three feet from any rear lot line,
+
+      subject to further provisions of this section.'
+  examples:
+  - given:
+      district: R-1a
+      accessory_is_frame: true
+      accessory_distances_apply: true
+      accessory_side_yard: 6
+    expect: pass
+  - given:
+      district: R-1b
+      accessory_is_frame: true
+      accessory_distances_apply: true
+      accessory_side_yard: 5
+    expect: fail
+  - given:
+      district: R-2a
+      accessory_is_frame: true
+      accessory_distances_apply: true
+      accessory_side_yard: 5
+    expect: not_applicable
+  open_questions:
+  - Does 'R-1 Districts' mean R-1a and R-1b?
+  - The R-1 clause says 'accessory buildings', not 'frame accessory buildings'. Does the six-foot side setback apply
+    to all accessory buildings in R-1, or only frame ones?
+  - What are the 'further provisions of this section' that qualify this setback (325-25A, 325-25B, 325-25D)? The
+    result may change under them.
+  research:
+  - question: Does 'R-1 Districts' mean R-1a and R-1b?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The R-1 clause says 'accessory buildings', not 'frame accessory buildings'. Does the six-foot side
+      setback apply to all accessory buildings in R-1, or only frame ones?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What are the 'further provisions of this section' that qualify this setback (325-25A, 325-25B, 325-25D)?
+      The result may change under them.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_25c_frame_accessory_rear_setback
+  kind: rule
+  topic: site_features
+  title: Frame accessory building rear setback (325-25C)
+  applies_when: accessory_is_frame and accessory_distances_apply
+  check: accessory_rear_yard >= 3
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines:
+    - 6
+    - 9
+    quote: 'C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from
+
+      any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may
+
+      not be placed less than six feet from any side lot line nor less than three feet from any rear lot line,
+
+      subject to further provisions of this section.'
+  examples:
+  - given:
+      accessory_is_frame: true
+      accessory_distances_apply: true
+      accessory_rear_yard: 3
+    expect: pass
+  - given:
+      accessory_is_frame: true
+      accessory_distances_apply: true
+      accessory_rear_yard: 2
+    expect: fail
+  - given:
+      accessory_is_frame: false
+      accessory_distances_apply: true
+      accessory_rear_yard: 2
+    expect: not_applicable
+  open_questions:
+  - What are the 'further provisions of this section' that qualify this setback (325-25A, 325-25B, 325-25D)? The
+    result may change under them.
+  - Is a 'frame' accessory building one of wood-frame construction? The measure accessory_is_frame needs that definition.
+  - The R-1 clause says 'accessory buildings' for the rear setback. Does the three-foot rear setback apply to all
+    accessory buildings in R-1, or only frame ones?
+  research:
+  - question: What are the 'further provisions of this section' that qualify this setback (325-25A, 325-25B, 325-25D)?
+      The result may change under them.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is a 'frame' accessory building one of wood-frame construction? The measure accessory_is_frame needs
+      that definition.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The R-1 clause says 'accessory buildings' for the rear setback. Does the three-foot rear setback apply
+      to all accessory buildings in R-1, or only frame ones?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_max_one_per_parcel
+  kind: rule
+  topic: uses
+  title: Maximum one ADU per parcel (325-28C(1))
+  check: adu_count <= 1
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 8
+    - 8
+    quote: (1) A maximum of one ADU is allowed per parcel.
+  examples:
+  - given:
+      adu_count: 1
+    expect: pass
+  - given:
+      adu_count: 2
+    expect: fail
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_max_two_bedrooms
+  kind: rule
+  topic: density_and_occupancy
+  title: ADU maximum two bedrooms (325-28C(3))
+  check: adu_bedrooms <= 2
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 10
+    - 10
+    quote: (3) An ADU may have a maximum of two bedrooms.
+  examples:
+  - given:
+      adu_bedrooms: 2
+    expect: pass
+  - given:
+      adu_bedrooms: 3
+    expect: fail
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_not_in_primary_front_yard
+  kind: rule
+  topic: site_features
+  title: ADU not in primary front yard (325-28C(4))
+  check: not adu_in_primary_front_yard
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 11
+    - 11
+    quote: (4) ADUs may not be located in the primary front yard.
+  examples:
+  - given:
+      adu_in_primary_front_yard: false
+    expect: pass
+  - given:
+      adu_in_primary_front_yard: true
+    expect: fail
+  open_questions:
+  - The law does not say which front yard is the 'primary' front yard on a corner lot.
+  research:
+  - question: The law does not say which front yard is the 'primary' front yard on a corner lot.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_not_sold_separately
+  kind: rule
+  topic: uses
+  title: ADU not sold separately (325-28C(5))
+  check: not adu_sold_separately
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 12
+    - 12
+    quote: (5) An ADU may be leased separately but may not be sold separately from the primary structure.
+  examples:
+  - given:
+      adu_sold_separately: false
+    expect: pass
+  - given:
+      adu_sold_separately: true
+    expect: fail
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_no_subdivision
+  kind: rule
+  topic: uses
+  title: No subdivision to separate ADU (325-28C(6))
+  check: not adu_parcel_subdivided
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 13
+    - 14
+    quote: (6) A parcel may not be subdivided to separate an ADU from the primary structure with which it is associated.
+  examples:
+  - given:
+      adu_parcel_subdivided: false
+    expect: pass
+  - given:
+      adu_parcel_subdivided: true
+    expect: fail
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_attached_size
+  kind: rule
+  topic: dimensions
+  title: Attached ADU maximum 40% of primary floor area
+  applies_when: adu_attached
+  check: adu_floor_area <= 0.4 * primary_floor_area
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 16
+    - 16
+    quote: '(a) Attached ADU: The ADU shall not exceed 40% of the floor area of the primary structure.'
+  examples:
+  - given:
+      adu_attached: true
+      adu_floor_area: 400
+      primary_floor_area: 1000
+    expect: pass
+  - given:
+      adu_attached: true
+      adu_floor_area: 401
+      primary_floor_area: 1000
+    expect: fail
+  - given:
+      adu_attached: false
+    expect: not_applicable
+  open_questions:
+  - Does the primary structure's floor area include the ADU, and is it gross or habitable floor area?
+  research:
+  - question: Does the primary structure's floor area include the ADU, and is it gross or habitable floor area?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_new_detached_footprint
+  kind: rule
+  topic: dimensions
+  title: New detached ADU footprint maximum 800 sf
+  applies_when: adu_detached_new
+  check: adu_footprint <= 800
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 21
+    - 21
+    quote: '[1] 800 SF maximum building footprint.'
+  examples:
+  - given:
+      adu_detached_new: true
+      adu_footprint: 800
+    expect: pass
+  - given:
+      adu_detached_new: true
+      adu_footprint: 801
+    expect: fail
+  - given:
+      adu_detached_new: false
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_new_detached_height
+  kind: rule
+  topic: dimensions
+  title: New detached ADU max two stories and 20 ft
+  applies_when: adu_detached_new
+  check: adu_stories <= 2 and adu_height <= 20
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 22
+    - 22
+    quote: '[2] Maximum height of two stories and 20''.'
+  examples:
+  - given:
+      adu_detached_new: true
+      adu_stories: 2
+      adu_height: 20
+    expect: pass
+  - given:
+      adu_detached_new: true
+      adu_stories: 3
+      adu_height: 20
+    expect: fail
+  - given:
+      adu_detached_new: true
+      adu_stories: 2
+      adu_height: 21
+    expect: fail
+  - given:
+      adu_detached_new: false
+    expect: not_applicable
+  open_questions:
+  - Is the 20' measured as the city's height of building?
+  research:
+  - question: Is the 20' measured as the city's height of building?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_existing_accessory_size_flag
+  kind: flag
+  topic: dimensions
+  title: Existing accessory building ADU size (325-28C(7)(b))
+  applies_when: adu_detached_existing
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 18
+    - 19
+    quote: '[1] An existing accessory building may be altered or expanded, provided that it does not exceed the
+      size limitations for new construction.'
+  examples: []
+  open_questions:
+  - Is an altered or expanded existing accessory building held to the new-construction footprint and height limits?
+  research:
+  - question: Is an altered or expanded existing accessory building held to the new-construction footprint and height
+      limits?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_attached_setback_flag
+  kind: flag
+  topic: dimensions
+  title: Attached ADU setbacks same as primary structure
+  applies_when: adu_attached
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 24
+    - 24
+    quote: '(a) Attached ADU: same as primary structure.'
+  examples: []
+  open_questions:
+  - Confirm the attached ADU meets the district's yard rules for the primary structure.
+  research:
+  - question: Confirm the attached ADU meets the district's yard rules for the primary structure.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_existing_setback_flag
+  kind: flag
+  topic: dimensions
+  title: Existing accessory building ADU setback (325-28C(8)(b))
+  applies_when: adu_detached_existing
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 26
+    - 27
+    quote: '[1] An existing accessory building may be altered or expanded, provided that it does not further encroach
+      upon any setback requirement for new construction.'
+  examples: []
+  open_questions:
+  - How is further encroachment measured against the new-construction setbacks?
+  research:
+  - question: How is further encroachment measured against the new-construction setbacks?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_new_side_rear_setback_flag
+  kind: flag
+  topic: dimensions
+  title: New detached ADU side and rear setback
+  applies_when: adu_detached_new
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 29
+    - 30
+    quote: '[a] Side and rear setback: 5'' or setback required for primary structure, whichever is less.'
+  examples: []
+  open_questions:
+  - Which primary-structure side setback applies (one side or other side) and how is the rear setback compared with
+    5'?
+  research:
+  - question: Which primary-structure side setback applies (one side or other side) and how is the rear setback
+      compared with 5'?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_28c_adu_new_secondary_front_flag
+  kind: flag
+  topic: dimensions
+  title: New detached ADU secondary front yard setback
+  applies_when: adu_detached_new
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 72
+    lines:
+    - 31
+    - 31
+    quote: '[b] Front setback, secondary front yard: same as primary structure.'
+  examples: []
+  open_questions:
+  - Which yard is the secondary front yard, and which primary-structure setback applies?
+  research:
+  - question: Which yard is the secondary front yard, and which primary-structure setback applies?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft

@@ -1,0 +1,47 @@
+# Stage 1 drafting units (42). One line of reason each.
+# --- the 10 prompt-A eval units (evals/2026-10-20_prompt_a) ---
+chart-p2-primary_uses                       | eval unit: permitted uses per district (built by code, free)
+chart-p3-minimum_lot_size                   | eval unit: lot area per use (one-, two-, multi-family)
+chart-p3-minimum_lot_width                  | eval unit: lot width at street
+chart-p3-maximum_building_height            | eval unit: height and stories limits
+chart-p3-maximum_lot_coverage_by_buildings  | eval unit: lot coverage
+chart-p3-yard_dimensions                    | eval unit: front, side, rear yards
+chart-p14-residential                       | eval unit: residential parking by bedrooms
+325-16C                                     | eval unit: height bonus with larger yards
+325-18A                                     | eval unit: porches/decks count as building in yards
+325-19C                                     | eval unit: corner lot transition
+# --- added for houses' dimensional/use checks ---
+chart-p2-accessory_uses                     | accessory uses (code; records why not drafted yet, free)
+325-3B:height_of_building                   | defines how height is measured (every height check)
+325-3B:story                                | defines a story (the stories limit)
+325-3B:building_area                        | defines building area (lot coverage)
+325-3B:accessory_dwelling_unit              | defines an ADU (ADU checks)
+325-3B:dwelling_one_family                  | defines one-family house (use + lot size row)
+325-3B:dwelling_two_family                  | defines two-family house (use + lot size row)
+325-3B:one_family_attached_dwelling         | defines attached house (multi-family lot size rows)
+325-3B:dwelling_unit                        | defines a dwelling unit (unit counts, parking)
+325-3B:row_house                            | defines row house (multi-family rows)
+325-3B:terrace_or_patio                     | terraces/patios and yards/coverage
+325-8A                                      | chart column definitions (frontage, lot size, yards wording)
+325-8B                                      | general chart notes: lot area per additional primary building
+325-8E                                      | South Hill: one primary structure per R-1/R-2 parcel
+325-7B                                      | a yard can't count for two buildings
+325-16A                                     | height exceptions (chimneys etc.; rooftop feature limits)
+325-16B                                     | ornamental features and height
+325-17A                                     | lot can't be reduced below yard minimums
+325-17B                                     | corner-lot visibility triangle (fences/walls > 2 ft)
+325-18B                                     | eaves/projections into yards (<= 2 ft)
+325-19A                                     | side/rear yard transition between districts
+325-19B                                     | front yard transition between districts
+325-19E                                     | R-3 next to R-1: bigger lot, lower height, less coverage, bigger yards
+325-20D                                     | parking general requirements (space and driveway sizes)
+325-20E                                     | parking in front yards
+325-25                                      | accessory structures: location, side-yard exemption
+325-25A                                     | accessory structures above grade: yards/height
+325-25B                                     | accessory structures below grade
+325-25C                                     | frame accessory buildings: distance to other buildings
+325-25D                                     | garage or carport location
+325-28B                                     | ADU applicability (area rules for new ADUs)
+325-28C                                     | ADU requirements (size, parking exemption, owner occupancy)
+# Left out on purpose: 325-19D (B-2d only), 325-7A (generic "comply"), 325-15A (grading permits, not a design check),
+# 325-20F (3+ space lots), 325-20G-J and the CBD/U-1/WEDZ/Collegetown pieces (not residential house districts).

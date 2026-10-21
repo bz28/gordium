@@ -1,0 +1,1050 @@
+{
+ "hand_examples": [
+  {
+   "hand": "R-1b.use",
+   "given": {
+    "use": "one_family_detached"
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.use"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.use",
+   "given": {
+    "use": "two_family"
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.use"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.use",
+   "given": {
+    "use": "school"
+   },
+   "expect": "needs_review",
+   "got": "needs_review",
+   "agree": true,
+   "drafted": [
+    "R-1b.use"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.lot_area_one_family_detached",
+   "given": {
+    "use": "one_family_detached",
+    "lot_area": 6674
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.min_lot_area_one_family_detached"
+   ],
+   "notes": [
+    "R-1b.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.lot_area_one_family_detached",
+   "given": {
+    "use": "one_family_detached",
+    "lot_area": 5999
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.min_lot_area_one_family_detached"
+   ],
+   "notes": [
+    "R-1b.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.lot_area_one_family_detached",
+   "given": {
+    "use": "church",
+    "lot_area": 5000
+   },
+   "expect": "not_applicable",
+   "got": "not_applicable",
+   "agree": true,
+   "drafted": [
+    "R-1b.min_lot_area_one_family_detached"
+   ],
+   "notes": [
+    "R-1b.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.lot_area_other_use",
+   "given": {
+    "use": "church",
+    "lot_area": 8000
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.min_lot_area_other_use"
+   ],
+   "notes": [
+    "R-1b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.lot_area_other_use",
+   "given": {
+    "use": "church",
+    "lot_area": 7000
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.min_lot_area_other_use"
+   ],
+   "notes": [
+    "R-1b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.stories",
+   "given": {
+    "stories": 3
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_stories",
+    "R-1b.325_16c_extra_height_stories_not_exceeded"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.stories",
+   "given": {
+    "stories": 4
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_stories",
+    "R-1b.325_16c_extra_height_stories_not_exceeded"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.height",
+   "given": {
+    "building_height": 35,
+    "front_yard": 25,
+    "side_yard_smaller": 10,
+    "side_yard_larger": 10,
+    "rear_yard": 24,
+    "lot_depth": 94.8
+   },
+   "expect": "pass",
+   "got": "needs_review",
+   "agree": false,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_limit_10_percent",
+    "R-1b.325_16c_extra_height_stories_not_exceeded",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard"
+   ],
+   "notes": [
+    "R-1b.325_16c_extra_height_stories_not_exceeded needs ['stories'], which the hand example doesn't give"
+   ]
+  },
+  {
+   "hand": "R-1b.height",
+   "given": {
+    "building_height": 37,
+    "front_yard": 27,
+    "side_yard_smaller": 12,
+    "side_yard_larger": 12,
+    "rear_yard": 26,
+    "lot_depth": 94.8,
+    "stories": 3
+   },
+   "expect": "pass",
+   "got": "fail",
+   "agree": false,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_limit_10_percent",
+    "R-1b.325_16c_extra_height_stories_not_exceeded",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.height",
+   "given": {
+    "building_height": 37,
+    "front_yard": 25,
+    "side_yard_smaller": 12,
+    "side_yard_larger": 12,
+    "rear_yard": 26,
+    "lot_depth": 94.8,
+    "stories": 3
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_limit_10_percent",
+    "R-1b.325_16c_extra_height_stories_not_exceeded",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.height",
+   "given": {
+    "building_height": 37,
+    "front_yard": 27,
+    "side_yard_smaller": 10,
+    "side_yard_larger": 12,
+    "rear_yard": 26,
+    "lot_depth": 94.8,
+    "stories": 3
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_limit_10_percent",
+    "R-1b.325_16c_extra_height_stories_not_exceeded",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.height",
+   "given": {
+    "building_height": 37,
+    "front_yard": 27,
+    "side_yard_smaller": 12,
+    "side_yard_larger": 12,
+    "rear_yard": 24,
+    "lot_depth": 94.8,
+    "stories": 3
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_limit_10_percent",
+    "R-1b.325_16c_extra_height_stories_not_exceeded",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.height",
+   "given": {
+    "building_height": 39,
+    "front_yard": 40,
+    "side_yard_smaller": 20,
+    "side_yard_larger": 20,
+    "rear_yard": 40,
+    "lot_depth": 94.8,
+    "stories": 3
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_limit_10_percent",
+    "R-1b.325_16c_extra_height_stories_not_exceeded",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.lot_coverage",
+   "given": {
+    "building_area": 1500,
+    "lot_area": 6674
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_lot_coverage"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.lot_coverage",
+   "given": {
+    "building_area": 1855,
+    "lot_area": 6674
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_lot_coverage"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.front_yard",
+   "given": {
+    "front_yard": 30
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.front_yard_minimum",
+    "R-1b.325_19c_corner_lot_street_yards"
+   ],
+   "notes": [
+    "R-1b.325_19c_corner_lot_street_yards given {'corner_lot': True, 'corner_lot_other_street_yard': 25} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.front_yard",
+   "given": {
+    "front_yard": 24
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.front_yard_minimum",
+    "R-1b.325_19c_corner_lot_street_yards"
+   ],
+   "notes": [
+    "R-1b.325_19c_corner_lot_street_yards given {'corner_lot': True, 'corner_lot_other_street_yard': 25} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.side_yards",
+   "given": {
+    "side_yard_smaller": 10,
+    "side_yard_larger": 10
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.side_yard_one_side_minimum",
+    "R-1b.side_yard_other_side_minimum"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.side_yards",
+   "given": {
+    "side_yard_smaller": 9.5,
+    "side_yard_larger": 12
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.side_yard_one_side_minimum",
+    "R-1b.side_yard_other_side_minimum"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.rear_yard",
+   "given": {
+    "rear_yard": 25,
+    "lot_depth": 94.8
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.rear_yard_minimum"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.rear_yard",
+   "given": {
+    "rear_yard": 20,
+    "lot_depth": 94.8
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.rear_yard_minimum"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.rear_yard",
+   "given": {
+    "rear_yard": 20,
+    "lot_depth": 60
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.rear_yard_minimum"
+   ],
+   "notes": []
+  },
+  {
+   "hand": "R-1b.yard_projections",
+   "given": {
+    "front_yard_eaves": 30,
+    "side_yard_smaller_eaves": 10,
+    "side_yard_larger_eaves": 12,
+    "rear_yard_eaves": 48,
+    "lot_depth": 100,
+    "building_height": 30
+   },
+   "expect": "pass",
+   "got": "needs_review",
+   "agree": false,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard",
+    "general.325_18b_architectural_feature_projection_limit",
+    "general.325_18b_required_yard_open_unobstructed"
+   ],
+   "notes": [
+    "R-1b.325_16c_extra_height_front_yard needs ['front_yard'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_side_yards needs ['side_yard_larger', 'side_yard_smaller'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_rear_yard needs ['rear_yard'], which the hand example doesn't give",
+    "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.yard_projections",
+   "given": {
+    "front_yard_eaves": 23,
+    "side_yard_smaller_eaves": 8,
+    "side_yard_larger_eaves": 12,
+    "rear_yard_eaves": 23,
+    "lot_depth": 100,
+    "building_height": 30
+   },
+   "expect": "pass",
+   "got": "needs_review",
+   "agree": false,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard",
+    "general.325_18b_architectural_feature_projection_limit",
+    "general.325_18b_required_yard_open_unobstructed"
+   ],
+   "notes": [
+    "R-1b.325_16c_extra_height_front_yard needs ['front_yard'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_side_yards needs ['side_yard_larger', 'side_yard_smaller'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_rear_yard needs ['rear_yard'], which the hand example doesn't give",
+    "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.yard_projections",
+   "given": {
+    "front_yard_eaves": 23,
+    "side_yard_smaller_eaves": 7.5,
+    "side_yard_larger_eaves": 12,
+    "rear_yard_eaves": 30,
+    "lot_depth": 100,
+    "building_height": 30
+   },
+   "expect": "fail",
+   "got": "needs_review",
+   "agree": false,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard",
+    "general.325_18b_architectural_feature_projection_limit",
+    "general.325_18b_required_yard_open_unobstructed"
+   ],
+   "notes": [
+    "R-1b.325_16c_extra_height_front_yard needs ['front_yard'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_side_yards needs ['side_yard_larger', 'side_yard_smaller'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_rear_yard needs ['rear_yard'], which the hand example doesn't give",
+    "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.yard_projections",
+   "given": {
+    "front_yard_eaves": 25,
+    "side_yard_smaller_eaves": 10,
+    "side_yard_larger_eaves": 10,
+    "rear_yard_eaves": 27,
+    "lot_depth": 100,
+    "building_height": 37
+   },
+   "expect": "pass",
+   "got": "fail",
+   "agree": false,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard",
+    "general.325_18b_architectural_feature_projection_limit",
+    "general.325_18b_required_yard_open_unobstructed"
+   ],
+   "notes": [
+    "R-1b.325_16c_extra_height_front_yard needs ['front_yard'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_side_yards needs ['side_yard_larger', 'side_yard_smaller'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_rear_yard needs ['rear_yard'], which the hand example doesn't give",
+    "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.yard_projections",
+   "given": {
+    "front_yard_eaves": 24,
+    "side_yard_smaller_eaves": 10,
+    "side_yard_larger_eaves": 10,
+    "rear_yard_eaves": 27,
+    "lot_depth": 100,
+    "building_height": 37
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard",
+    "general.325_18b_architectural_feature_projection_limit",
+    "general.325_18b_required_yard_open_unobstructed"
+   ],
+   "notes": [
+    "R-1b.325_16c_extra_height_front_yard needs ['front_yard'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_side_yards needs ['side_yard_larger', 'side_yard_smaller'], which the hand example doesn't give",
+    "R-1b.325_16c_extra_height_rear_yard needs ['rear_yard'], which the hand example doesn't give",
+    "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.accessory_buildings",
+   "given": {
+    "accessory_buildings": 1,
+    "accessory_front_yard": 90,
+    "accessory_distances_apply": true,
+    "accessory_side_yard": 6,
+    "accessory_rear_yard": 3
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.325_25a_accessory_not_in_required_front_yard",
+    "general.325_25c_frame_accessory_side_setback",
+    "general.325_25c_frame_accessory_side_setback_r1",
+    "general.325_25c_frame_accessory_rear_setback"
+   ],
+   "notes": [
+    "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.accessory_buildings",
+   "given": {
+    "accessory_buildings": 1,
+    "accessory_front_yard": 90,
+    "accessory_distances_apply": true,
+    "accessory_side_yard": 4,
+    "accessory_rear_yard": 3
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.325_25a_accessory_not_in_required_front_yard",
+    "general.325_25c_frame_accessory_side_setback",
+    "general.325_25c_frame_accessory_side_setback_r1",
+    "general.325_25c_frame_accessory_rear_setback"
+   ],
+   "notes": [
+    "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.accessory_buildings",
+   "given": {
+    "accessory_buildings": 1,
+    "accessory_front_yard": 20,
+    "accessory_distances_apply": true,
+    "accessory_side_yard": 6,
+    "accessory_rear_yard": 3
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.325_25a_accessory_not_in_required_front_yard",
+    "general.325_25c_frame_accessory_side_setback",
+    "general.325_25c_frame_accessory_side_setback_r1",
+    "general.325_25c_frame_accessory_rear_setback"
+   ],
+   "notes": [
+    "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.accessory_buildings",
+   "given": {
+    "accessory_buildings": 1,
+    "accessory_front_yard": 25,
+    "accessory_distances_apply": true,
+    "accessory_side_yard": 6,
+    "accessory_rear_yard": 3
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.325_25a_accessory_not_in_required_front_yard",
+    "general.325_25c_frame_accessory_side_setback",
+    "general.325_25c_frame_accessory_side_setback_r1",
+    "general.325_25c_frame_accessory_rear_setback"
+   ],
+   "notes": [
+    "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.accessory_buildings",
+   "given": {
+    "accessory_buildings": 1,
+    "accessory_front_yard": 90,
+    "accessory_distances_apply": false,
+    "accessory_side_yard": 1,
+    "accessory_rear_yard": 1
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.325_25a_accessory_not_in_required_front_yard",
+    "general.325_25c_frame_accessory_side_setback",
+    "general.325_25c_frame_accessory_side_setback_r1",
+    "general.325_25c_frame_accessory_rear_setback"
+   ],
+   "notes": [
+    "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.accessory_buildings",
+   "given": {
+    "accessory_buildings": 0
+   },
+   "expect": "not_applicable",
+   "got": "needs_review",
+   "agree": false,
+   "drafted": [
+    "R-1b.325_25a_accessory_not_in_required_front_yard",
+    "general.325_25c_frame_accessory_side_setback",
+    "general.325_25c_frame_accessory_side_setback_r1",
+    "general.325_25c_frame_accessory_rear_setback"
+   ],
+   "notes": [
+    "R-1b.325_25a_accessory_not_in_required_front_yard needs ['accessory_front_yard'], which the hand example doesn't give",
+    "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_side_setback needs ['accessory_distances_apply', 'accessory_side_yard'], which the hand example doesn't give",
+    "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_side_setback_r1 needs ['accessory_distances_apply', 'accessory_side_yard'], which the hand example doesn't give",
+    "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example",
+    "general.325_25c_frame_accessory_rear_setback needs ['accessory_distances_apply', 'accessory_rear_yard'], which the hand example doesn't give"
+   ]
+  },
+  {
+   "hand": "R-1b.parking_one_family",
+   "given": {
+    "use": "one_family_detached",
+    "sleeping_rooms": 3,
+    "parking_spaces": 1
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.parking_by_sleeping_rooms"
+   ],
+   "notes": [
+    "R-1b.parking_by_sleeping_rooms given {'multiple_dwelling_units': False} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.parking_one_family",
+   "given": {
+    "use": "one_family_detached",
+    "sleeping_rooms": 4,
+    "parking_spaces": 1
+   },
+   "expect": "fail",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.parking_by_sleeping_rooms"
+   ],
+   "notes": [
+    "R-1b.parking_by_sleeping_rooms given {'multiple_dwelling_units': False} from its own passing example"
+   ]
+  },
+  {
+   "hand": "R-1b.parking_one_family",
+   "given": {
+    "use": "one_family_detached",
+    "sleeping_rooms": 6,
+    "parking_spaces": 3
+   },
+   "expect": "pass",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.parking_by_sleeping_rooms"
+   ],
+   "notes": [
+    "R-1b.parking_by_sleeping_rooms given {'multiple_dwelling_units': False} from its own passing example"
+   ]
+  }
+ ],
+ "spreadsheet": [
+  {
+   "row": "Detached one-family use",
+   "theirs": "PASS",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.use"
+   ],
+   "notes": []
+  },
+  {
+   "row": "Minimum lot size",
+   "theirs": "PASS",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.min_lot_area_one_family_detached"
+   ],
+   "notes": [
+    "R-1b.min_lot_area_one_family_detached given {'additional_primary_building': False} from its own passing example"
+   ]
+  },
+  {
+   "row": "Minimum lot width",
+   "theirs": "PASS",
+   "got": "not drafted",
+   "agree": null
+  },
+  {
+   "row": "Maximum stories",
+   "theirs": "PASS",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_stories",
+    "R-1b.325_16c_extra_height_stories_not_exceeded"
+   ],
+   "notes": []
+  },
+  {
+   "row": "Maximum height",
+   "theirs": "PASS",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_height_ft",
+    "R-1b.325_16c_extra_height_limit_10_percent",
+    "R-1b.325_16c_extra_height_stories_not_exceeded",
+    "R-1b.325_16c_extra_height_front_yard",
+    "R-1b.325_16c_extra_height_side_yards",
+    "R-1b.325_16c_extra_height_rear_yard"
+   ],
+   "notes": []
+  },
+  {
+   "row": "Percent of lot area",
+   "theirs": "FAIL",
+   "got": "fail",
+   "agree": true,
+   "drafted": [
+    "R-1b.max_lot_coverage"
+   ],
+   "notes": []
+  },
+  {
+   "row": "Minimum front yard (offset)",
+   "theirs": "PASS",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.front_yard_minimum",
+    "R-1b.325_19c_corner_lot_street_yards"
+   ],
+   "notes": [
+    "R-1b.325_19c_corner_lot_street_yards given {'corner_lot': True, 'corner_lot_other_street_yard': 25} from its own passing example"
+   ]
+  },
+  {
+   "row": "Minimum left side yard (offset)",
+   "theirs": "PASS",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.side_yard_one_side_minimum",
+    "R-1b.side_yard_other_side_minimum"
+   ],
+   "notes": []
+  },
+  {
+   "row": "Minimum right side yard (offset)",
+   "theirs": "PASS",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.side_yard_one_side_minimum",
+    "R-1b.side_yard_other_side_minimum"
+   ],
+   "notes": []
+  },
+  {
+   "row": "Minimum rear yard (offset)",
+   "theirs": "PASS",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.rear_yard_minimum"
+   ],
+   "notes": []
+  },
+  {
+   "row": "Minimum parking",
+   "theirs": "PASS",
+   "got": "pass",
+   "agree": true,
+   "drafted": [
+    "R-1b.parking_by_sleeping_rooms"
+   ],
+   "notes": [
+    "R-1b.parking_by_sleeping_rooms given {'multiple_dwelling_units': False} from its own passing example"
+   ]
+  }
+ ],
+ "chart_values": {
+  "cited": [
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Height in feet"
+   ],
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Number of stories"
+   ],
+   [
+    3,
+    "Maximum lot coverage by buildings",
+    "Percent of lot area"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "Other use"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Front (minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Rear (minimum, % of depth or feet, whichever is less)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (one side minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (other side minimum)"
+   ],
+   [
+    14,
+    "Residential",
+    "4-5 bed or sleeping rooms per dwelling unit"
+   ],
+   [
+    14,
+    "Residential",
+    "Each additional bed or sleeping room"
+   ],
+   [
+    14,
+    "Residential",
+    "First three bed or sleeping rooms per dwelling unit"
+   ]
+  ],
+  "enforced": [
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Height in feet"
+   ],
+   [
+    3,
+    "Maximum Building Height [fn10]",
+    "Number of stories"
+   ],
+   [
+    3,
+    "Maximum lot coverage by buildings",
+    "Percent of lot area"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "One-family dwelling, detached"
+   ],
+   [
+    3,
+    "Minimum Lot Size [fn3]",
+    "Other use"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Front (minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Rear (minimum, % of depth or feet, whichever is less)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (one side minimum)"
+   ],
+   [
+    3,
+    "Yard Dimensions",
+    "Side (other side minimum)"
+   ],
+   [
+    14,
+    "Residential",
+    "4-5 bed or sleeping rooms per dwelling unit"
+   ],
+   [
+    14,
+    "Residential",
+    "Each additional bed or sleeping room"
+   ],
+   [
+    14,
+    "Residential",
+    "First three bed or sleeping rooms per dwelling unit"
+   ]
+  ],
+  "wrong": []
+ },
+ "inspector": {
+  "R-1a.yaml": [],
+  "R-1b.yaml": [],
+  "R-2a.yaml": [],
+  "R-2b.yaml": [],
+  "R-2c.yaml": [],
+  "R-3a.yaml": [],
+  "R-3aa.yaml": [],
+  "R-3b.yaml": [],
+  "RU.yaml": [],
+  "general.yaml": []
+ },
+ "foreign_cells": [],
+ "uncovered_hand_rules": [
+  "R-1b.lot_width_one_family_detached",
+  "R-1b.lot_width_other_use",
+  "R-1b.parking_other_uses"
+ ],
+ "exception_false_passes": [],
+ "idle_chart_numbers": [],
+ "summary": {
+  "rules_saved": 251,
+  "r1b_rules": 72,
+  "hand_examples_agree": "32/39",
+  "spreadsheet_agree": "10/10 (of 11 rows)",
+  "chart_rows_enforced_exactly": "12/12",
+  "chart_values_wrong": 0,
+  "exception_false_passes": 0,
+  "idle_chart_numbers": 0,
+  "inspector_clean": true,
+  "foreign_cells": 0,
+  "uncovered_hand_rules": [
+   "R-1b.lot_width_one_family_detached",
+   "R-1b.lot_width_other_use",
+   "R-1b.parking_other_uses"
+  ]
+ }
+}

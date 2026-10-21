@@ -794,7 +794,9 @@ rear_yard:
       main building''s setback, whichever is less (§325-28C); sills, cornices and eaves up to 2 ft (§325-18B); terraces
       and patios at grade (§325-3); parking under §325-20F. Porches, decks, balconies over 2 ft, ramps and landings
       are part of the building (§325-18A). Fences (§325-17D) and stream setbacks (§325-26) also apply. Each is a rule
-      of its own. (Whether eaves count toward lot coverage is still open.)'
+      of its own. (Whether eaves count toward lot coverage is still open. So is what "above grade" covers in §325-3''s
+      pergola, terrace and patio sentence, raised by the AI drafting run and not researched yet: whether it also
+      applies to pergolas, and whether it means any height or the height in the TERRACE OR PATIO definition.)'
     sources:
     - file: chapter_325_zoning_2026-10.pdf
       page: 66
@@ -842,6 +844,8 @@ rear_yard:
     still_open:
     - 325-25C#1
     - building_area#1
+    - general.325_3b_building_area_pergola_terrace_patio_not_in_required_yard#1
+    - general.325_3b_building_area_pergola_terrace_patio_not_in_required_yard#2
     strength: strong
     report: docs/research/2026-10-20_architect_questions.md §2.5
   drafted_by: claude

@@ -1,0 +1,1782 @@
+units:
+  chart-p2-primary_uses:
+    rules:
+    - R-1a.use
+    - R-1b.use
+    - R-2a.use
+    - R-2b.use
+    - R-2c.use
+    - R-3aa.use
+    - RU.use
+    unresolved:
+    - rule: R-1a.use
+      why: 'chart p.2 footnote 1, on the R-1A column heading, may limit these uses and no rule checks it (a person
+        does): ''(1) In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall
+        be excluded in determining the number of unrelated occupants.'''
+    - rule: R-1a.use
+      why: 'chart p.2 footnote 2, on the R-1A column heading, may limit these uses and no rule checks it (a person
+        does): ''(2) Properties in the South Hill Overlay District with a zoning designation of R-1 or R-2, see
+        §325-8(E).'''
+    - rule: R-1a.use
+      why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', may limit these uses and no rule
+        checks it (a person does): ''(4) See §325-3 for occupancy restrictions.'''
+    - rule: R-1b.use
+      why: 'chart p.2 footnote 1, on the R-1B column heading, may limit these uses and no rule checks it (a person
+        does): ''(1) In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall
+        be excluded in determining the number of unrelated occupants.'''
+    - rule: R-1b.use
+      why: 'chart p.2 footnote 2, on the R-1B column heading, may limit these uses and no rule checks it (a person
+        does): ''(2) Properties in the South Hill Overlay District with a zoning designation of R-1 or R-2, see
+        §325-8(E).'''
+    - rule: R-1b.use
+      why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', may limit these uses and no rule
+        checks it (a person does): ''(4) See §325-3 for occupancy restrictions.'''
+    - rule: R-2a.use
+      why: 'chart p.2 footnote 1, on the R-2A column heading, may limit these uses and no rule checks it (a person
+        does): ''(1) In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall
+        be excluded in determining the number of unrelated occupants.'''
+    - rule: R-2a.use
+      why: 'chart p.2 footnote 2, on the R-2A column heading, may limit these uses and no rule checks it (a person
+        does): ''(2) Properties in the South Hill Overlay District with a zoning designation of R-1 or R-2, see
+        §325-8(E).'''
+    - rule: R-2a.use
+      why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', ''One-family dwelling, semi-detached'',
+        ''Two-family dwelling'', may limit these uses and no rule checks it (a person does): ''(4) See §325-3 for
+        occupancy restrictions.'''
+    - rule: R-2b.use
+      why: 'chart p.2 footnote 1, on the R-2B column heading, may limit these uses and no rule checks it (a person
+        does): ''(1) In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall
+        be excluded in determining the number of unrelated occupants.'''
+    - rule: R-2b.use
+      why: 'chart p.2 footnote 2, on the R-2B column heading, may limit these uses and no rule checks it (a person
+        does): ''(2) Properties in the South Hill Overlay District with a zoning designation of R-1 or R-2, see
+        §325-8(E).'''
+    - rule: R-2b.use
+      why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', ''One-family dwelling, semi-detached'',
+        ''Two-family dwelling'', may limit these uses and no rule checks it (a person does): ''(4) See §325-3 for
+        occupancy restrictions.'''
+    - rule: R-2c.use
+      why: 'chart p.2 footnote 1, on the R-2C column heading, may limit these uses and no rule checks it (a person
+        does): ''(1) In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall
+        be excluded in determining the number of unrelated occupants.'''
+    - rule: R-2c.use
+      why: 'chart p.2 footnote 2, on the R-2C column heading, may limit these uses and no rule checks it (a person
+        does): ''(2) Properties in the South Hill Overlay District with a zoning designation of R-1 or R-2, see
+        §325-8(E).'''
+    - rule: R-2c.use
+      why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', ''One-family dwelling, detached,
+        zero lot line'', ''One-family dwelling, semi-detached'', ''One-family dwelling, attached'', ''Two-family
+        dwelling'', may limit these uses and no rule checks it (a person does): ''(4) See §325-3 for occupancy restrictions.'''
+    - rule: R-3a.use
+      why: 'R-3A: every use is permitted or SP, so the rule has no failing example'
+    - rule: R-3aa.use
+      why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', ''One-family dwelling, detached,
+        zero lot line'', ''One-family dwelling, semi-detached'', ''One-family dwelling, attached'', ''Two-family
+        dwelling'', ''Multiple family dwelling'', may limit these uses and no rule checks it (a person does): ''(4)
+        See §325-3 for occupancy restrictions.'''
+    - rule: R-3b.use
+      why: 'R-3B: every use is permitted or SP, so the rule has no failing example'
+    - rule: RU.use
+      why: 'chart p.2 footnote 3, on the RU column heading, may limit these uses and no rule checks it (a person
+        does): ''(3) Properties less than 60,000 SF may only have one primary structure. Properties greater than
+        60,000 SF may have two primary uses, if approved by ILPC and Planning Board. Properties with at least 90,000
+        SF can have as many as three primary uses if approved by ILPC and Planning Board.'''
+    - rule: RU.use
+      why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', ''One-family dwelling, semi-detached'',
+        ''One-family dwelling, attached'', ''Two-family dwelling'', ''Multiple family dwelling'', may limit these
+        uses and no rule checks it (a person does): ''(4) See §325-3 for occupancy restrictions.'''
+    problems: []
+  chart-p2-accessory_uses:
+    rules: []
+    unresolved: []
+    problems: []
+    reason: 'Not drafted: accessory uses need a measure of which accessory uses a design has (the use measure is
+      the primary use). An engineer adds it, then this unit is drafted.'
+  chart-p3-minimum_lot_size:
+    rules:
+    - R-1a.min_lot_area_one_family_detached
+    - R-1a.min_lot_area_other_use
+    - R-1b.min_lot_area_one_family_detached
+    - R-1b.min_lot_area_other_use
+    - R-2a.min_lot_area_one_family_detached
+    - R-2a.min_lot_area_one_family_semi_detached
+    - R-2a.min_lot_area_two_family
+    - R-2a.min_lot_area_other_use
+    - R-2b.min_lot_area_one_family_detached
+    - R-2b.min_lot_area_one_family_semi_detached
+    - R-2b.min_lot_area_two_family
+    - R-2b.min_lot_area_other_use
+    - R-3a.min_lot_area_one_family_detached
+    - R-3a.min_lot_area_one_family_semi_detached
+    - R-3a.min_lot_area_two_family
+    - R-3a.min_lot_area_group_house
+    - R-3a.min_lot_area_other_use
+    - R-3aa.min_lot_area_one_family_detached
+    - R-3aa.min_lot_area_one_family_semi_detached
+    - R-3aa.min_lot_area_two_family
+    - R-3aa.min_lot_area_group_house
+    - R-3aa.min_lot_area_other_use
+    - R-3b.min_lot_area_one_family_detached
+    - R-3b.min_lot_area_one_family_semi_detached
+    - R-3b.min_lot_area_two_family
+    - R-3b.min_lot_area_group_house
+    - R-3b.min_lot_area_other_use
+    - RU.min_lot_area_one_family_detached
+    - RU.min_lot_area_one_family_semi_detached
+    - RU.min_lot_area_two_family
+    - RU.min_lot_area_group_house
+    - RU.min_lot_area_other_use
+    - R-2c.min_lot_area_other_use
+    unresolved:
+    - rule: R-2c.min_lot_area_one_family_detached
+      why: '''One-family dwelling, detached'': the cell ''2,500 sf [fn4]'' has footnotes [''4''], the rule expects
+        none'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached
+        - R-2C
+    - rule: R-1a.min_lot_area_one_family_semi_detached
+      why: '''One-family dwelling, semi-detached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, semi-detached
+        - R-1A
+    - rule: R-1b.min_lot_area_one_family_semi_detached
+      why: '''One-family dwelling, semi-detached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, semi-detached
+        - R-1B
+    - rule: R-2c.min_lot_area_one_family_semi_detached
+      why: '''One-family dwelling, semi-detached'': the cell ''2,000 sf [fn5]'' has footnotes [''5''], the rule
+        expects none'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, semi-detached
+        - R-2C
+    - rule: R-1a.min_lot_area_two_family
+      why: '''Two-family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Two-family dwelling
+        - R-1A
+    - rule: R-1b.min_lot_area_two_family
+      why: '''Two-family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Two-family dwelling
+        - R-1B
+    - rule: R-2c.min_lot_area_two_family
+      why: '''Two-family dwelling'': the cell ''2,000 sf [fn5]'' has footnotes [''5''], the rule expects none'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Two-family dwelling
+        - R-2C
+    - rule: R-1a.min_lot_area_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Fraternity, sorority, or group house
+        - R-1A
+    - rule: R-1b.min_lot_area_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Fraternity, sorority, or group house
+        - R-1B
+    - rule: R-2a.min_lot_area_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Fraternity, sorority, or group house
+        - R-2A
+    - rule: R-2b.min_lot_area_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Fraternity, sorority, or group house
+        - R-2B
+    - rule: R-2c.min_lot_area_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Fraternity, sorority, or group house
+        - R-2C
+    - rule: R-2c.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, detached, zero lot line'': the
+        R-2C cell ''2,500 sf [fn4]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
+        R-2C cell ''1,500 sf [fn6]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
+        R-3A cell ''7,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
+        R-3AA cell ''7,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
+        R-3B cell ''4,000 sf [fn8]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
+        RU cell ''16,500 sf [fn9]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
+        R-2C cell ''1,500 sf [fn6]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
+        R-3A cell ''6,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
+        R-3AA cell ''6,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
+        R-3B cell ''3,500 sf [fn8]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
+        RU cell ''16,500 sf [fn9]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, by conversion'': the R-3A
+        cell ''7,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, by conversion'': the R-3AA
+        cell ''7,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, by conversion'': the R-3B
+        cell ''4,000 sf [fn8]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, by conversion'': the RU cell
+        ''16,500 sf [fn9]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, new construction'': the R-3A
+        cell ''6,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, new construction'': the R-3AA
+        cell ''6,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, new construction'': the R-3B
+        cell ''3,500 sf [fn8]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_size
+      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, new construction'': the RU
+        cell ''16,500 sf [fn9]'' has no drafted rule (a person checks the requirement it sets)'
+    problems: []
+  chart-p3-minimum_lot_width:
+    rules: []
+    unresolved:
+    - rule: R-1a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-1A cell ''75 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-1b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-1B cell ''50 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-2A cell ''45 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-2B cell ''35 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-2C cell ''40 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-3A cell ''40 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-3AA cell ''50 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-3B cell ''30 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the RU cell ''75 ft'' has
+        no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached, zero lot line'': the R-2C
+        cell ''40 ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-2A cell ''45
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-2B cell ''35
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-2C cell ''50
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-3A cell ''40
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-3AA cell ''50
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-3B cell ''30
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the RU cell ''100 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the R-2C cell ''50 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the R-3A cell ''50 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the R-3AA cell ''50 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the R-3B cell ''40 ft''
+        has no drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the RU cell ''125 ft'' has
+        no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-2A cell ''45 ft'' has no drafted
+        rule (a person checks the requirement it sets)'
+    - rule: R-2b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-2B cell ''35 ft'' has no drafted
+        rule (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-2C cell ''50 ft'' has no drafted
+        rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-3A cell ''40 ft'' has no drafted
+        rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-3AA cell ''50 ft'' has no drafted
+        rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-3B cell ''30 ft'' has no drafted
+        rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the RU cell ''100 ft'' has no drafted
+        rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Multiple family dwelling'': the R-3A cell ''50 ft'' has no
+        drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Multiple family dwelling'': the R-3AA cell ''50 ft'' has
+        no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Multiple family dwelling'': the R-3B cell ''40 ft'' has no
+        drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Multiple family dwelling'': the RU cell ''125 ft'' has no
+        drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Fraternity, sorority, or group house'': the R-3A cell ''100
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Fraternity, sorority, or group house'': the R-3AA cell ''50
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Fraternity, sorority, or group house'': the R-3B cell ''100
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Fraternity, sorority, or group house'': the RU cell ''125
+        ft'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-1a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-1A cell ''75 ft'' has no drafted rule
+        (a person checks the requirement it sets)'
+    - rule: R-1b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-1B cell ''60 ft'' has no drafted rule
+        (a person checks the requirement it sets)'
+    - rule: R-2a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-2A cell ''50 ft'' has no drafted rule
+        (a person checks the requirement it sets)'
+    - rule: R-2b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-2B cell ''40 ft'' has no drafted rule
+        (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-2C cell ''40 ft'' has no drafted rule
+        (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-3A cell ''50 ft'' has no drafted rule
+        (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-3AA cell ''50 ft'' has no drafted rule
+        (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-3B cell ''40 ft'' has no drafted rule
+        (a person checks the requirement it sets)'
+    - rule: RU.chart-p3-minimum_lot_width
+      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the RU cell ''125 ft'' has no drafted rule (a
+        person checks the requirement it sets)'
+    problems: []
+    reason: 'The Minimum Lot Width rows cannot be drafted as checkable rules from the material given. The chart
+      has no footnote under this section, and the only quotable law text is the LOT WIDTH definition, which is not
+      a piece of the law that may be quoted here. A rule must have at least one quote, and the drafting rules say
+      a chart row is never quoted; its numbers can only be slots. In addition, the use measure ids do not cleanly
+      match several rows: "attached" does not separate conversion from new construction, and "Other use" has no
+      single use id. Lot width is also measured as frontage on a public right-of-way, and the measures list defines
+      lot_width only as the width of the lot, so a reviewer should confirm it equals the frontage the definition
+      requires. These rows should be drafted by hand with cell citations, or the extraction should supply a quotable
+      source.'
+  chart-p3-maximum_building_height:
+    rules:
+    - R-1a.max_stories
+    - R-1a.max_height_ft
+    - R-1b.max_stories
+    - R-1b.max_height_ft
+    - R-2a.max_stories
+    - R-2a.max_height_ft
+    - R-2b.max_stories
+    - R-2b.max_height_ft
+    - R-2c.max_stories
+    - R-2c.max_height_ft
+    - R-3a.max_stories
+    - R-3a.max_height_ft
+    - R-3b.max_stories
+    - R-3b.max_height_ft
+    - RU.max_stories
+    - RU.max_height_ft
+    - R-3aa.max_stories_with_minimum
+    - R-3aa.min_stories
+    - R-3aa.max_height_ft
+    unresolved:
+    - rule: R-3aa.max_stories
+      why: '''Number of stories'': the cell ''3/2 [fn11]'' has 2 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-3AA
+    - rule: R-1a.max_stories_with_minimum
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-1A
+    - rule: R-1b.max_stories_with_minimum
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-1B
+    - rule: R-2a.max_stories_with_minimum
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-2A
+    - rule: R-2b.max_stories_with_minimum
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-2B
+    - rule: R-2c.max_stories_with_minimum
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-2C
+    - rule: R-3a.max_stories_with_minimum
+      why: '''Number of stories'': the cell ''4'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-3A
+    - rule: R-3b.max_stories_with_minimum
+      why: '''Number of stories'': the cell ''4'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-3B
+    - rule: RU.max_stories_with_minimum
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - RU
+    - rule: R-1a.min_stories
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-1A
+    - rule: R-1b.min_stories
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-1B
+    - rule: R-2a.min_stories
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-2A
+    - rule: R-2b.min_stories
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-2B
+    - rule: R-2c.min_stories
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-2C
+    - rule: R-3a.min_stories
+      why: '''Number of stories'': the cell ''4'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-3A
+    - rule: R-3b.min_stories
+      why: '''Number of stories'': the cell ''4'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-3B
+    - rule: RU.min_stories
+      why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - RU
+    problems: []
+  chart-p3-maximum_lot_coverage_by_buildings:
+    rules:
+    - R-1a.max_lot_coverage
+    - R-1b.max_lot_coverage
+    - R-2a.max_lot_coverage
+    - R-2b.max_lot_coverage
+    - R-3a.max_lot_coverage
+    - R-3aa.max_lot_coverage
+    - R-3b.max_lot_coverage
+    - RU.max_lot_coverage_ru
+    - general.green_space_ru
+    - R-2c.max_lot_coverage_first
+    - R-2c.max_lot_coverage_second
+    - R-2c.max_lot_coverage_third
+    unresolved:
+    - rule: R-2c.max_lot_coverage
+      why: '''Percent of lot area'': the cell ''35%/40% /50% [fn12]'' has 3 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2C
+    - rule: RU.max_lot_coverage
+      why: '''Percent of lot area'': the cell ''25% [fn13]'' has footnotes [''13''], the rule expects none'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - RU
+    - rule: R-1a.max_lot_coverage_ru
+      why: '''Percent of lot area'': the cell ''20%'' has footnotes none, the rule expects [''13'']'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-1A
+    - rule: R-1b.max_lot_coverage_ru
+      why: '''Percent of lot area'': the cell ''25%'' has footnotes none, the rule expects [''13'']'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-1B
+    - rule: R-2a.max_lot_coverage_ru
+      why: '''Percent of lot area'': the cell ''30%'' has footnotes none, the rule expects [''13'']'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2A
+    - rule: R-2b.max_lot_coverage_ru
+      why: '''Percent of lot area'': the cell ''35%'' has footnotes none, the rule expects [''13'']'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2B
+    - rule: R-2c.max_lot_coverage_ru
+      why: '''Percent of lot area'': the cell ''35%/40% /50% [fn12]'' has 3 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2C
+    - rule: R-3a.max_lot_coverage_ru
+      why: '''Percent of lot area'': the cell ''35%'' has footnotes none, the rule expects [''13'']'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3A
+    - rule: R-3aa.max_lot_coverage_ru
+      why: '''Percent of lot area'': the cell ''35%'' has footnotes none, the rule expects [''13'']'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3AA
+    - rule: R-3b.max_lot_coverage_ru
+      why: '''Percent of lot area'': the cell ''40%'' has footnotes none, the rule expects [''13'']'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3B
+    - rule: R-1a.max_lot_coverage_first
+      why: '''Percent of lot area'': the cell ''20%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-1A
+    - rule: R-1b.max_lot_coverage_first
+      why: '''Percent of lot area'': the cell ''25%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-1B
+    - rule: R-2a.max_lot_coverage_first
+      why: '''Percent of lot area'': the cell ''30%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2A
+    - rule: R-2b.max_lot_coverage_first
+      why: '''Percent of lot area'': the cell ''35%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2B
+    - rule: R-3a.max_lot_coverage_first
+      why: '''Percent of lot area'': the cell ''35%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3A
+    - rule: R-3aa.max_lot_coverage_first
+      why: '''Percent of lot area'': the cell ''35%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3AA
+    - rule: R-3b.max_lot_coverage_first
+      why: '''Percent of lot area'': the cell ''40%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3B
+    - rule: RU.max_lot_coverage_first
+      why: '''Percent of lot area'': the cell ''25% [fn13]'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - RU
+    - rule: R-1a.max_lot_coverage_second
+      why: '''Percent of lot area'': the cell ''20%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-1A
+    - rule: R-1b.max_lot_coverage_second
+      why: '''Percent of lot area'': the cell ''25%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-1B
+    - rule: R-2a.max_lot_coverage_second
+      why: '''Percent of lot area'': the cell ''30%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2A
+    - rule: R-2b.max_lot_coverage_second
+      why: '''Percent of lot area'': the cell ''35%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2B
+    - rule: R-3a.max_lot_coverage_second
+      why: '''Percent of lot area'': the cell ''35%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3A
+    - rule: R-3aa.max_lot_coverage_second
+      why: '''Percent of lot area'': the cell ''35%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3AA
+    - rule: R-3b.max_lot_coverage_second
+      why: '''Percent of lot area'': the cell ''40%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3B
+    - rule: RU.max_lot_coverage_second
+      why: '''Percent of lot area'': the cell ''25% [fn13]'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - RU
+    - rule: R-1a.max_lot_coverage_third
+      why: '''Percent of lot area'': the cell ''20%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-1A
+    - rule: R-1b.max_lot_coverage_third
+      why: '''Percent of lot area'': the cell ''25%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-1B
+    - rule: R-2a.max_lot_coverage_third
+      why: '''Percent of lot area'': the cell ''30%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2A
+    - rule: R-2b.max_lot_coverage_third
+      why: '''Percent of lot area'': the cell ''35%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-2B
+    - rule: R-3a.max_lot_coverage_third
+      why: '''Percent of lot area'': the cell ''35%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3A
+    - rule: R-3aa.max_lot_coverage_third
+      why: '''Percent of lot area'': the cell ''35%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3AA
+    - rule: R-3b.max_lot_coverage_third
+      why: '''Percent of lot area'': the cell ''40%'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - R-3B
+    - rule: RU.max_lot_coverage_third
+      why: '''Percent of lot area'': the cell ''25% [fn13]'' has 1 numbers, the rule expects 3'
+      cells:
+      - - 3
+        - Maximum lot coverage by buildings
+        - Percent of lot area
+        - RU
+    problems: []
+  chart-p3-yard_dimensions:
+    rules:
+    - R-1a.front_yard_minimum
+    - R-1a.side_yard_one_side_minimum
+    - R-1a.side_yard_other_side_minimum
+    - R-1a.rear_yard_minimum
+    - R-1b.front_yard_minimum
+    - R-1b.side_yard_one_side_minimum
+    - R-1b.side_yard_other_side_minimum
+    - R-1b.rear_yard_minimum
+    - R-2a.front_yard_minimum
+    - R-2a.side_yard_one_side_minimum
+    - R-2a.side_yard_other_side_minimum
+    - R-2a.rear_yard_minimum
+    - R-2b.front_yard_minimum
+    - R-2b.side_yard_one_side_minimum
+    - R-2b.side_yard_other_side_minimum
+    - R-2b.rear_yard_minimum
+    - R-2c.front_yard_minimum
+    - R-2c.rear_yard_minimum
+    - R-3a.front_yard_minimum
+    - R-3a.side_yard_one_side_minimum
+    - R-3a.side_yard_other_side_minimum
+    - R-3a.rear_yard_minimum
+    - R-3aa.front_yard_minimum
+    - R-3aa.side_yard_one_side_minimum
+    - R-3aa.side_yard_other_side_minimum
+    - R-3aa.rear_yard_minimum
+    - R-3b.front_yard_minimum
+    - R-3b.side_yard_one_side_minimum
+    - R-3b.side_yard_other_side_minimum
+    - R-3b.rear_yard_minimum
+    - RU.front_yard_minimum
+    - RU.side_yard_one_side_minimum
+    - RU.side_yard_other_side_minimum
+    - RU.rear_yard_minimum_fn17
+    unresolved:
+    - rule: R-2c.side_yard_one_side_minimum
+      why: '''Side (one side minimum)'': the cell ''10 ft /15 ft [fn14]'' has 2 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Side (one side minimum)
+        - R-2C
+    - rule: R-2c.side_yard_other_side_minimum
+      why: '''Side (other side minimum)'': the cell ''0 ft /5 ft / 10 ft [fn15]'' has 3 numbers, the rule expects
+        1'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Side (other side minimum)
+        - R-2C
+    - rule: RU.rear_yard_minimum
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25% / 50 ft [fn17]'' has footnotes
+        [''17''], the rule expects [''16'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - RU
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - RU
+    - rule: R-1a.rear_yard_minimum_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-1A
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-1A
+    - rule: R-1b.rear_yard_minimum_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-1B
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-1B
+    - rule: R-2a.rear_yard_minimum_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-2A
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-2A
+    - rule: R-2b.rear_yard_minimum_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-2B
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-2B
+    - rule: R-2c.rear_yard_minimum_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-2C
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-2C
+    - rule: R-3a.rear_yard_minimum_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''20%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3A
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3A
+    - rule: R-3aa.rear_yard_minimum_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3AA
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3AA
+    - rule: R-3b.rear_yard_minimum_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''20%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3B
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3B
+    problems: []
+  chart-p14-residential:
+    rules:
+    - R-1a.parking_by_sleeping_rooms
+    - R-1b.parking_by_sleeping_rooms
+    - R-2a.parking_by_sleeping_rooms
+    - R-2b.parking_by_sleeping_rooms
+    - R-2c.parking_by_sleeping_rooms
+    - R-3a.parking_by_sleeping_rooms
+    - R-3a.parking_dormitory
+    - R-3aa.parking_by_sleeping_rooms
+    - R-3b.parking_by_sleeping_rooms
+    - R-3b.parking_dormitory
+    - RU.parking_by_sleeping_rooms
+    - RU.parking_dormitory
+    unresolved:
+    - rule: R-1a.parking_dormitory
+      why: '''Dormitory'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Residential
+        - Dormitory
+        - R-1A
+      - - 14
+        - Residential
+        - Dormitory
+        - R-1A
+    - rule: R-1b.parking_dormitory
+      why: '''Dormitory'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Residential
+        - Dormitory
+        - R-1B
+      - - 14
+        - Residential
+        - Dormitory
+        - R-1B
+    - rule: R-2a.parking_dormitory
+      why: '''Dormitory'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Residential
+        - Dormitory
+        - R-2A
+      - - 14
+        - Residential
+        - Dormitory
+        - R-2A
+    - rule: R-2b.parking_dormitory
+      why: '''Dormitory'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Residential
+        - Dormitory
+        - R-2B
+      - - 14
+        - Residential
+        - Dormitory
+        - R-2B
+    - rule: R-2c.parking_dormitory
+      why: '''Dormitory'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Residential
+        - Dormitory
+        - R-2C
+      - - 14
+        - Residential
+        - Dormitory
+        - R-2C
+    - rule: R-3aa.parking_dormitory
+      why: '''Dormitory'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Residential
+        - Dormitory
+        - R-3AA
+      - - 14
+        - Residential
+        - Dormitory
+        - R-3AA
+    problems: []
+  325-3B:accessory_dwelling_unit:
+    rules:
+    - general.325_3b_accessory_dwelling_unit_adu_separate_entrance
+    - general.325_3b_accessory_dwelling_unit_adu_required_facilities
+    - general.325_3b_accessory_dwelling_unit_adu_residential_building_code
+    unresolved: []
+    problems: []
+  325-3B:building_area:
+    rules:
+    - general.325_3b_building_area_pergola_terrace_patio_not_in_required_yard
+    unresolved: []
+    problems: []
+  325-3B:height_of_building:
+    rules: []
+    unresolved:
+    - rule: 325-3B:height_of_building.requirement_p12_l22
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Where a building
+        contains sections of a roof of varying heights, the height of that building shall be measured using that
+        section of the roof that has the highest elevation from grade plane.'''
+    problems: []
+    reason: 'This piece defines how building height is measured; it sets no limit of its own. Its ''shall'' sentence
+      (with varying roof sections, measure using the section with the highest elevation from grade plane) is a measuring
+      instruction, not a pass/fail test. The existing measure building_height already means ''height of the building,
+      measured as the city defines it'', so the highest-section rule is part of how that measure is taken. The limit
+      itself (chart page 3, Maximum Building Height row) is drafted from the chart. Open points for architects,
+      with no rule to attach them to: the definition does not say what ''average height'' of a pitched, gabled,
+      hip or gambrel roof means, nor how a building mixing flat and pitched sections is measured; it depends on
+      the GRADE PLANE definition.'
+  325-3B:story:
+    rules:
+    - general.325_3b_story_basement_counts_as_story
+    unresolved: []
+    problems: []
+  325-8A:
+    rules: []
+    unresolved:
+    - rule: 325-8A.requirement_p24_l35
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Buildings
+        hereafter erected shall be limited to the number of stories herein specified, computed at the main entrance
+        side.'''
+    - rule: 325-8A
+      why: it points to 325-20D, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-8A
+      why: it points to 325-20H, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-8A
+      why: it points to 325-20J, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-8A
+      why: it points to 325-21B, which was left out of the drafter's input for length (a person checks it)
+    problems: []
+    reason: 'Piece 325-8A only describes the District Regulations Chart columns and defers every figure to the chart.
+      Its operative sentences cannot be drafted as rules here without folding in other sections or settling open
+      questions in a formula. The chart-figure requirements (lot size, lot width, stories, height, lot coverage,
+      yards, rear yard, parking, loading) are drafted from the chart sections themselves, where each slot is filled
+      from the district''s own cell. Several items here depend on matters this text leaves unsettled: how the stories
+      are ''computed at the main entrance side''; the lot depth to use when side lot lines are unequal; which stories
+      limit governs when feet would allow more; the minimum height column, which has no chart row among the rows
+      given; and the 500 sf footprint exemption. They need an architect''s review rather than a formula here.'
+  325-8B:
+    rules:
+    - R-1a.325_8b_one_family_detached_area_per_primary_building
+    - R-1b.325_8b_one_family_detached_area_per_primary_building
+    - R-2a.325_8b_one_family_detached_area_per_primary_building
+    - R-2a.325_8b_two_family_area_per_primary_building
+    - R-2b.325_8b_one_family_detached_area_per_primary_building
+    - R-2b.325_8b_two_family_area_per_primary_building
+    - R-3a.325_8b_one_family_detached_area_per_primary_building
+    - R-3a.325_8b_two_family_area_per_primary_building
+    - R-3aa.325_8b_one_family_detached_area_per_primary_building
+    - R-3aa.325_8b_two_family_area_per_primary_building
+    - R-3b.325_8b_one_family_detached_area_per_primary_building
+    - R-3b.325_8b_two_family_area_per_primary_building
+    - RU.325_8b_one_family_detached_area_per_primary_building
+    - RU.325_8b_two_family_area_per_primary_building
+    unresolved:
+    - rule: R-2c.325_8b_one_family_detached_area_per_primary_building
+      why: '''One-family dwelling, detached'': the cell ''2,500 sf [fn4]'' has footnotes [''4''], the rule expects
+        none'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached
+        - R-2C
+    - rule: R-1a.325_8b_two_family_area_per_primary_building
+      why: '''Two-family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Two-family dwelling
+        - R-1A
+    - rule: R-1b.325_8b_two_family_area_per_primary_building
+      why: '''Two-family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Two-family dwelling
+        - R-1B
+    - rule: R-2c.325_8b_two_family_area_per_primary_building
+      why: '''Two-family dwelling'': the cell ''2,000 sf [fn5]'' has footnotes [''5''], the rule expects none'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Two-family dwelling
+        - R-2C
+    problems: []
+  325-16A:
+    rules:
+    - general.325_16a_rooftop_feature_area_limit
+    - general.325_16a_separate_feature_area_regs
+    - general.325_16a_commercial_and_electric_towers_permit
+    unresolved:
+    - rule: 325-16A
+      why: it points to 325-8B, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-16A
+      why: it points to 325-8C, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-16A
+      why: it points to 325-8D, which was left out of the drafter's input for length (a person checks it)
+    problems: []
+  325-16B:
+    rules:
+    - general.325_16b_ornamental_parapet_cornice_extension
+    unresolved: []
+    problems: []
+  325-16C:
+    rules:
+    - R-1a.325_16c_extra_height_limit_10_percent
+    - R-1a.325_16c_extra_height_stories_not_exceeded
+    - R-1a.325_16c_extra_height_front_yard
+    - R-1a.325_16c_extra_height_side_yards
+    - R-1a.325_16c_extra_height_rear_yard
+    - R-1b.325_16c_extra_height_limit_10_percent
+    - R-1b.325_16c_extra_height_stories_not_exceeded
+    - R-1b.325_16c_extra_height_front_yard
+    - R-1b.325_16c_extra_height_side_yards
+    - R-1b.325_16c_extra_height_rear_yard
+    - R-2a.325_16c_extra_height_limit_10_percent
+    - R-2a.325_16c_extra_height_stories_not_exceeded
+    - R-2a.325_16c_extra_height_front_yard
+    - R-2a.325_16c_extra_height_side_yards
+    - R-2a.325_16c_extra_height_rear_yard
+    - R-2b.325_16c_extra_height_limit_10_percent
+    - R-2b.325_16c_extra_height_stories_not_exceeded
+    - R-2b.325_16c_extra_height_front_yard
+    - R-2b.325_16c_extra_height_side_yards
+    - R-2b.325_16c_extra_height_rear_yard
+    - R-2c.325_16c_extra_height_limit_10_percent
+    - R-2c.325_16c_extra_height_stories_not_exceeded
+    - R-2c.325_16c_extra_height_front_yard
+    - R-2c.325_16c_extra_height_rear_yard
+    - R-3a.325_16c_extra_height_limit_10_percent
+    - R-3a.325_16c_extra_height_stories_not_exceeded
+    - R-3a.325_16c_extra_height_front_yard
+    - R-3a.325_16c_extra_height_side_yards
+    - R-3a.325_16c_extra_height_rear_yard
+    - R-3aa.325_16c_extra_height_limit_10_percent
+    - R-3aa.325_16c_extra_height_front_yard
+    - R-3aa.325_16c_extra_height_side_yards
+    - R-3aa.325_16c_extra_height_rear_yard
+    - R-3b.325_16c_extra_height_limit_10_percent
+    - R-3b.325_16c_extra_height_stories_not_exceeded
+    - R-3b.325_16c_extra_height_front_yard
+    - R-3b.325_16c_extra_height_side_yards
+    - R-3b.325_16c_extra_height_rear_yard
+    - RU.325_16c_extra_height_limit_10_percent
+    - RU.325_16c_extra_height_stories_not_exceeded
+    - RU.325_16c_extra_height_front_yard
+    - RU.325_16c_extra_height_side_yards
+    unresolved:
+    - rule: R-3aa.325_16c_extra_height_stories_not_exceeded
+      why: '''Number of stories'': the cell ''3/2 [fn11]'' has 2 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Number of stories
+        - R-3AA
+    - rule: R-2c.325_16c_extra_height_side_yards
+      why: '''Side (one side minimum)'': the cell ''10 ft /15 ft [fn14]'' has 2 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-2C
+      - - 3
+        - Yard Dimensions
+        - Side (one side minimum)
+        - R-2C
+      - - 3
+        - Yard Dimensions
+        - Side (other side minimum)
+        - R-2C
+    - rule: RU.325_16c_extra_height_rear_yard
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25% / 50 ft [fn17]'' has footnotes
+        [''17''], the rule expects [''16'']'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - RU
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - RU
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - RU
+    problems: []
+  325-18A:
+    rules:
+    - general.325_18a_porches_structures_counted_in_yards_coverage
+    unresolved: []
+    problems: []
+  325-18B:
+    rules:
+    - general.325_18b_architectural_feature_projection_limit
+    - general.325_18b_required_yard_open_unobstructed
+    unresolved: []
+    problems: []
+  325-19C:
+    rules:
+    - R-1a.325_19c_corner_lot_street_yards
+    - R-1b.325_19c_corner_lot_street_yards
+    - R-2a.325_19c_corner_lot_street_yards
+    - R-2b.325_19c_corner_lot_street_yards
+    - R-2c.325_19c_corner_lot_street_yards
+    - R-3a.325_19c_corner_lot_street_yards
+    - R-3aa.325_19c_corner_lot_street_yards
+    - R-3b.325_19c_corner_lot_street_yards
+    - RU.325_19c_corner_lot_street_yards
+    unresolved: []
+    problems: []
+  325-25A:
+    rules:
+    - R-1a.325_25a_accessory_not_in_required_front_yard
+    - R-1b.325_25a_accessory_not_in_required_front_yard
+    - R-2a.325_25a_accessory_not_in_required_front_yard
+    - R-2b.325_25a_accessory_not_in_required_front_yard
+    - R-2c.325_25a_accessory_not_in_required_front_yard
+    - R-3a.325_25a_accessory_not_in_required_front_yard
+    - R-3aa.325_25a_accessory_not_in_required_front_yard
+    - R-3b.325_25a_accessory_not_in_required_front_yard
+    - RU.325_25a_accessory_not_in_required_front_yard
+    unresolved: []
+    problems: []
+  325-25D:
+    rules: []
+    unresolved:
+    - rule: 325-25D.requirement_p67_l10
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Erection of
+        a detached garage or carport for the accommodation of private passenger vehicles across a common lot line
+        by mutual agreement between adjoining property owners shall be permitted.'''
+    problems: []
+    reason: '325-25D is a permissive sentence: a detached garage or carport for private passenger vehicles across
+      a common lot line by mutual agreement between adjoining property owners ''shall be permitted''. It sets no
+      limit, minimum or prohibition on a design. Whether the owners have a mutual agreement is a legal fact, not
+      a listed measure, and a rule on it would say nothing that code could fail. It is an exception to the accessory-structure
+      placement and yard rules in 325-25 and 325-25C, which are drafted from those sections. The related sections
+      325-25 and 325-25C cover the placement limits this permission relaxes, and that interaction is left to them.'
+  325-3B:dwelling_one_family:
+    rules:
+    - general.325_3b_dwelling_one_family_one_family_occupancy_unrelated_individuals
+    unresolved: []
+    problems: []
+  325-3B:one_family_attached_dwelling:
+    rules:
+    - general.325_3b_one_family_attached_dwelling_max_attached_units_per_building
+    unresolved: []
+    problems: []
+  325-3B:dwelling_two_family:
+    rules: []
+    unresolved:
+    - rule: 325-3B:dwelling_two_family.requirement_p9_l8
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''In R-2 and
+        CR-2 Zones, each unit of a two-family dwelling may be occupied by an individual or family and not more than
+        two unrelated individuals.'''
+    problems: []
+    reason: The occupancy limits here (unrelated individuals per unit, the 50% floor-area cap for a unit, and the
+      R-2 limit) cannot be checked with the available measures. None of them covers the number of unrelated occupants,
+      whether a unit is owner-occupied, or unit floor areas. The limits are also stated as what a unit "may be occupied
+      by", and the text does not say whether they are caps, so any formula would settle a question the law leaves
+      open. Writing a rule would also require new measures, and I cannot attach a quote and number trail that I
+      can verify for them. A flag would only restate the definition, so I return no templates. An architect should
+      handle these occupancy limits separately.
+  325-3B:dwelling_unit:
+    rules: []
+    unresolved:
+    - rule: 325-3B:dwelling_unit.requirement_p9_l10
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''DWELLING UNIT
+        — One or more rooms designed or used for living quarters by one household, including provisions for living,
+        cooking, sanitary and sleeping facilities, and having a separate entrance from the outside of the building
+        or through a common hall.'''
+    problems: []
+    reason: 325-3B:dwelling_unit is a definition. It sets no limit, minimum, prohibition or condition on a design
+      for the residential districts. It also says nothing numeric. Whether a space qualifies as a dwelling unit
+      (living, cooking, sanitary and sleeping facilities; a separate entrance from outside or through a common hall)
+      is a question of category. Other rules use that category, such as the use rows and the parking rows per dwelling
+      unit. Drafting it as a pass/fail rule would need an unlisted measure and an interpretation the law leaves
+      open, for example whether a shared entrance or a common hall qualifies. That is for the architects to decide,
+      and it belongs with the definition.
+  325-3B:row_house:
+    rules:
+    - general.325_3b_row_house_row_house_module_facade_length
+    - general.325_3b_row_house_row_house_module_street_entry
+    unresolved: []
+    problems: []
+  325-3B:terrace_or_patio:
+    rules:
+    - general.325_3b_terrace_or_patio_terrace_patio_above_grade_no_required_yard
+    unresolved: []
+    problems: []
+  325-7B:
+    rules:
+    - general.325_7b_yard_not_shared_between_buildings
+    unresolved: []
+    problems: []
+  325-8E:
+    rules:
+    - general.325_8e_south_hill_no_added_primary_on_built_parcel
+    - general.325_8e_south_hill_one_primary_on_empty_parcel
+    unresolved: []
+    problems: []
+  325-17A:
+    rules:
+    - general.325_17a_reduced_lot_area_yards
+    unresolved: []
+    problems: []
+  325-17B:
+    rules:
+    - general.325_17b_corner_visibility_triangle
+    unresolved: []
+    problems: []
+  325-19A:
+    rules: []
+    unresolved:
+    - rule: 325-19A.requirement_p49_l24
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''there shall
+        be provided along such abutting lines a yard equal in width or depth to that required in the residential
+        district.'''
+    problems: []
+    reason: '325-19A sets its requirement for a lot in a business or industrial district that abuts a residential
+      district. The yard it requires on that lot is the same width or depth as the abutting residential district''s
+      chart yard. The residential districts listed (R-1a through RU) are not the lots it binds, so it sets nothing
+      for a lot in those districts. A rule for it would need measures this system does not have: the lot''s business
+      or industrial district, the abutting residential district, and the yard measured along the abutting line.
+      Gordium cannot check those from the measures listed. No template is drafted, so no residential lot gets a
+      false pass or fail from it.'
+  325-19B:
+    rules: []
+    unresolved:
+    - rule: 325-19B.requirement_p50_l4
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''the front
+        yard depth in the business or industrial district shall be equal to 1/2 the required front yard depth of
+        the residential district for a distance of at least 50 feet into the business or industrial district'''
+    problems: []
+    reason: '325-19B sets a front yard depth only for the part of a frontage that lies in a business or industrial
+      district: 1/2 the residential district''s required front yard, for at least 50 feet into that district. It
+      sets nothing for a lot in a residential district. The available measures describe one lot in one district.
+      They cannot express frontage split between districts, the distance measured into the business or industrial
+      part, or the front yard depth in that part. A per-district rule filled from the residential chart would wrongly
+      apply to residential lots. Drafting it would need new measures and a rule for business and industrial districts,
+      so it is not drafted for the residential districts listed.'
+  325-19E:
+    rules: []
+    unresolved: []
+    problems: []
+    failed: stopped early (max_tokens)
+  325-20D:
+    rules:
+    - general.325_20d_driveway_min_width
+    - general.325_20d_parking_space_size_10_or_fewer
+    - general.325_20d_driveway_aisle_width
+    - general.325_20d_driveway_entry_grade
+    - general.325_20d_parking_space_size_11_or_more
+    unresolved:
+    - rule: 325-20D
+      why: it points to 325-3B:functional_family_unit, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:green_area, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:green_space, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:habitable_space, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:health_care_facility, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:heavy_industrial, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:height_of_building, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:home_occupation, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:hotel, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:human_service_agency, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:infestation, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:junkyard, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:kitchen, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:landmark, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:landmark_district, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:large_beverage_producer, which was left out of the drafter's input for length (a
+        person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:light_industrial, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:long_term_rental, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:lot, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:lot_building, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:lumberyard, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:mezzanine, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:mixed_occupancy, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:mixed_use, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:mobile_home, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:mobile_home_park, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:motel_or_boatel, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:municipality_or_city, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:neighborhood_commercial_facility, which was left out of the drafter's input for length
+        (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:neighborhood_garden, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:neighborhood_house_or_center, which was left out of the drafter's input for length
+        (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:nonconforming_building_structure_or_lot, which was left out of the drafter's input
+        for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:nonconforming_use, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:nonhabitable_space, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:nursery_school, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:occupant, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:occupiable_space, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:owner, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:parking_area, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:parking_garage, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:parking_space, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:pedestrianway, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:pergola, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:plumbing_system, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:porch, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:potable_water, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:premises, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:previously_developed_vacant_lot_or_parcel, which was left out of the drafter's input
+        for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:primary_residence, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:primary_structure, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:public_space, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:redemption_center, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:rooming_house, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:rooming_unit, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:row_house, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:school, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:service_area, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:sewage, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:short_term_rental, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:short_term_rental_advertisement, which was left out of the drafter's input for length
+        (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:sign_advertising, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:special_permit, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:standard_canopy, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:standard_awning, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:story, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:structure, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:tavern, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:terrace_or_patio, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:theater, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:toilet_room, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:townhouse, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:trailer_camp, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:trailer_or_travel_trailer, which was left out of the drafter's input for length (a
+        person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:transfer_station_for_recyclable_materials, which was left out of the drafter's input
+        for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:urban_beverage_producer, which was left out of the drafter's input for length (a
+        person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:use, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:variance, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:ventilation, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:ventilation_mechanical, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:ventilation_natural, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:water_dependent_activity, which was left out of the drafter's input for length (a
+        person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:water_dependent_facilities, which was left out of the drafter's input for length
+        (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:yard, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-3B:front_yard, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:side_yard, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:rear_yard, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-3B:zoning_permit, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-20D
+      why: it points to 325-20, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-20A, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-20B, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-20C, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-20E, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-20F, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-20G, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-20H, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-20I, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-20D
+      why: it points to 325-20J, which was left out of the drafter's input for length (a person checks it)
+    problems: []
+  325-20E:
+    rules:
+    - general.325_20e_front_yard_parking_orientation_15ft
+    - general.325_20e_front_yard_parking_driveway_narrow_lot
+    - general.325_20e_front_yard_driveway_width_narrow_lot
+    - general.325_20e_front_yard_parking_area_cap
+    - general.325_20e_corner_lot_front_yard_parking
+    - general.325_20e_front_yard_landscaped_remainder
+    - general.325_20e_parking_on_lot_without_building
+    - R-1a.325_20e_front_yard_parking_setback
+    - R-1b.325_20e_front_yard_parking_setback
+    - R-2a.325_20e_front_yard_parking_setback
+    - R-2b.325_20e_front_yard_parking_setback
+    - R-2c.325_20e_front_yard_parking_setback
+    - R-3a.325_20e_front_yard_parking_setback
+    - R-3aa.325_20e_front_yard_parking_setback
+    - R-3b.325_20e_front_yard_parking_setback
+    - RU.325_20e_front_yard_parking_setback
+    unresolved:
+    - rule: 325-20E
+      why: it points to 325-20D, which was left out of the drafter's input for length (a person checks it)
+    problems: []
+  325-25:
+    rules: []
+    unresolved:
+    - rule: 325-25.requirement_p66_l34
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Accessory
+        structures, including private garages, storage sheds, toolhouses, garden houses, playhouses or similar structures,
+        shall be exempt from side yard requirements contained in the District Regulations Chart'''
+    problems: []
+    reason: Piece 325-25 is only a heading and lead-in. It exempts accessory structures from the chart's side yard
+      requirements and says they are governed by the requirements below. The exemption sets no limit a design must
+      meet. It only removes the chart's side yard rule from accessory structures, and that is handled when the chart's
+      side yard rows are drafted. The actual location requirements are in 325-25A (no accessory structures in a
+      required front yard), 325-25B (below-grade structures), 325-25C (3 ft and 6 ft setbacks for frame accessory
+      buildings) and 325-25D (garages across a common lot line). Those pieces are drafted on their own and not folded
+      into this one.
+  325-25B:
+    rules:
+    - general.325_25b_below_grade_accessory_light_air
+    unresolved: []
+    problems: []
+  325-25C:
+    rules:
+    - general.325_25c_frame_accessory_side_setback
+    - general.325_25c_frame_accessory_side_setback_r1
+    - general.325_25c_frame_accessory_rear_setback
+    unresolved: []
+    problems: []
+  325-28B:
+    rules: []
+    unresolved:
+    - rule: 325-28B.requirement_p72_l5
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Area requirements
+        for new construction shall apply to any ADU that is permitted on or after the effective date of this section.'''
+    problems: []
+    reason: 'Piece 325-28B only states the scope of section 325-28: it applies to all ADUs in the City of Ithaca,
+      and the ''area requirements for new construction'' apply to any ADU permitted on or after the section''s effective
+      date. It sets no limit, minimum, prohibition or condition of its own that can be checked against a design.
+      The area requirements themselves (footprint, height, setbacks) are in 325-28C and are drafted from that piece.
+      The effective date and permit date are not measures available here, and the residential-district measures
+      do not cover ADUs. Drafting a rule from this applicability statement would require inventing a permit-date
+      measure and settling an interpretation of the law, so no template is produced.'
+  325-28C:
+    rules:
+    - general.325_28c_adu_max_one_per_parcel
+    - general.325_28c_adu_max_two_bedrooms
+    - general.325_28c_adu_not_in_primary_front_yard
+    - general.325_28c_adu_not_sold_separately
+    - general.325_28c_adu_no_subdivision
+    - general.325_28c_adu_attached_size
+    - general.325_28c_adu_new_detached_footprint
+    - general.325_28c_adu_new_detached_height
+    - general.325_28c_adu_existing_accessory_size_flag
+    - general.325_28c_adu_attached_setback_flag
+    - general.325_28c_adu_existing_setback_flag
+    - general.325_28c_adu_new_side_rear_setback_flag
+    - general.325_28c_adu_new_secondary_front_flag
+    unresolved: []
+    problems: []
+complete: false
