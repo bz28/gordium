@@ -276,3 +276,32 @@ def test_F5_a_side_yard_named_by_compass_only_holds_distances_to_that_line():
                 pts = [r["points"] for r in rec["readings"] if r.get("points")] or [rec["points"]]
                 assert {facing(p) for p in pts} == {direction}, (deg, order, i["name"])
             assert len(names) == 2, names
+
+
+# ---- F7 (P2, for #18; stress-tests d32d437): the overhangs named depend on the outline order --------------------
+
+F7_GABLE = ("jog", [{"op": "add_roof", "kind": "roof", "axis": 1, "over": 0.5, "fascia": 0.0, "inset": 4.25,
+                     "rise": 8.25}])
+F7_MANSARD = ("jog", [{"op": "add_roof", "kind": "mansard", "axis": 0, "over": 3.0, "fascia": 1.0, "inset": 3.5,
+                       "rise": 6.25}])
+
+
+def _eave_texts(case):
+    d = generate.build(*case)[0]
+    out = []
+    for order in ("as_drawn", "reversed", "shifted"):
+        rows = harness.items_by_rule(harness.gordium(d, order))
+        out.append(sorted((i["name"], i["status"], i["reason"]) for r in ("R-1b.front_yard", "R-1b.side_yards")
+                          for i in rows[r]))
+    return out
+
+
+def test_F7_a_side_eave_gable_names_the_same_overhangs_whichever_way_the_outlines_run():
+    """The jog lot's starting house with a gable roof solid whose eaves reach 6 in. past the two side walls (axis 1):
+    nothing reaches past the front or rear wall. Drawn as given, the side yard rows ask to confirm "0'-6" past the
+    walls toward the side yard". With every outline written the other way round they also asked about "0'-0 3/8"
+    past the walls toward the rear yard", an overhang that isn't there. The same with a mansard 3 ft past every
+    wall: 3'-0" toward the rear yard one way, 3'-0 3/4" the other. Same design, same rows."""
+    for case in (F7_GABLE, F7_MANSARD):
+        texts = _eave_texts(case)
+        assert texts[0] == texts[1] == texts[2], case[1][0]["kind"]

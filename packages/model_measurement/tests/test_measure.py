@@ -878,6 +878,9 @@ def test_a_lot_with_too_many_back_lines_still_measures_its_frontage_and_front_ya
     """Round 10, P2: a one-street lot 50 ft wide with a nine-line zigzag back (test_stop_list ZIGZAG): the side and
     rear lines can't all be listed, so the depth and the side and rear yards wait; the frontage (50 ft, the
     street line) and the front yard (the house 25 ft back) don't depend on them and are measured."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent))     # run on its own too, not only after the stop list
     from test_stop_list import ZIGZAG
     m = measure(site(ZIGZAG), FACTS)
     assert m["lot_width"]["value"] == 50.0 and m["front_yard"]["value"] == 25.0
@@ -998,7 +1001,8 @@ def test_stories_never_comply_with_fewer_than_the_floors_drawn_unless_a_main_bui
     rnd = random.Random(21)
     for _ in range(150):
         blocks, stacks = [], []
-        for k, (x0, x1) in enumerate(((5, 20), (25, 40))[:rnd.randint(1, 2)]):
+        layout = rnd.choice((((5, 20), (25, 40)), ((5, 20), (20, 35))))     # apart, or touching (round 14)
+        for k, (x0, x1) in enumerate(layout[:rnd.randint(1, 2)]):
             n, marked = rnd.randint(1, 5), rnd.random() < 0.5
             ids = [f"s{k}f{i}" for i in range(n)]
             stacks.append(ids)
@@ -1018,3 +1022,72 @@ def test_stories_never_comply_with_fewer_than_the_floors_drawn_unless_a_main_bui
             continue
         own = next((s for s in stacks if pick in s), None)
         assert len(set(ids)) == len(ids) and own is not None and m["value"] == len(own), (stacks, pick, typed, m)
+
+
+def test_stories_are_never_one_part_of_a_joined_building():
+    """Review round 14, P0. Solids that touch are one building (§325-18A); the main building picked from them
+    is one part. (a) Four 8 ft floor blocks and a plain 34 ft stair solid touching them, 2 stories typed: the
+    stair solid is picked (the tallest), and the typed 2 stood with 4 floors drawn: complies. (b) Nothing typed: a
+    3-floor stack (11 ft floors, 33 ft) touching a 4-floor stack (8 ft floors, 32 ft): the 3-floor stack was
+    picked and counted, 3, with 4 floors on the wing. Each is never below 4: the stories need review."""
+    four = [floor(35, 25, 45, 65, z0=8 * i, z1=8 * (i + 1), id=f"wing {i + 1}") for i in range(4)]
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 34, id="stair"), *four), {**FACTS, "stories": 2})["stories"]
+    assert m["value"] is None and "fewer than the floor blocks drawn (4)" in m["reason"], m
+    # (round 16's one rule) floor blocks on every part: counted over all of them, the most on any part
+    m = measure(site(RECT, *FLOORS, *four), {**FACTS, "stories": None})["stories"]
+    assert m["value"] == 4, m
+
+
+def test_a_plain_solid_joined_to_the_floor_stack_stops_the_story_count():
+    """Review round 15, P0. Three 11 ft floor blocks (33 ft) with a plain 32 ft solid touching them (a wing drawn
+    as one box): part of the same building (§325-18A), and it could hold 4 stories of 8 ft. Counted as 3 from the
+    stack alone it complied. With nothing typed, or 3 typed: the stories need review. A 6 ft porch slab touching
+    the stack holds no story: the count stands."""
+    stack = [floor(15, 30, 35, 70, z0=11 * i, z1=11 * (i + 1), id=f"floor {i + 1}") for i in range(3)]
+    wing = box(35, 30, 45, 70, 0, 32, id="wing")
+    for typed in (None, 2):     # round 16: nothing typed, or fewer than the 3 floor blocks: needs review
+        m = measure(site(RECT, *stack, wing), {**FACTS, "stories": typed})["stories"]
+        assert m["value"] is None and m["reason"], typed
+        assert ("isn't drawn as floor blocks" if typed is None else "fewer than the floor blocks drawn (3)") in m["reason"]
+    m = measure(site(RECT, *stack, wing), {**FACTS, "stories": 3})["stories"]
+    assert m["value"] == 3 and "stated by the architect for the whole building" in m["how"], m
+    porch = measure(site(RECT, *stack, box(35, 30, 45, 70, 0, 6, id="porch")), {**FACTS, "stories": None})
+    assert porch["stories"]["value"] == 3
+
+
+def test_a_walk_out_wing_below_the_ground_is_the_basement_question():
+    """Round 16, P0: the 3-block stack with a plain wing reaching 10 ft below its base (a walk-out): the wing is
+    below the ground at its walls, on flat ground and with spot grades stepping down to -10 there: whether that
+    level is a story (§325-3 basement) is an open question: needs review, typed or not."""
+    stack = [floor(15, 30, 35, 70, z0=11 * i, z1=11 * (i + 1), id=f"floor {i + 1}") for i in range(3)]
+    wing = box(35, 40, 45, 60, -10, 10.5, id="wing")
+    steps = [[25, 29, 0], [25, 71, 0], [14, 50, 0], [36, 35, 0], [36, 65, 0], [40, 39, -10], [40, 61, -10],
+             [46, 50, -10]]
+    for extra in ({}, {"ground_is_flat": None, "grade_elevation": None, "grade_points": steps}):
+        for typed in (None, 3):
+            m = measure(site(RECT, *stack, wing), {**FACTS, **extra, "stories": typed})["stories"]
+            assert m["value"] is None and "below the ground" in (m["reason"] or ""), (extra, typed, m)
+
+
+def test_a_plain_house_with_a_plain_garage_keeps_the_stories_typed():
+    """Round 16, P2: a plain 30 ft house and a plain 10 ft garage touching it, 2 stories typed: nothing is floor
+    blocks, so the typed count is the architect's statement for the whole building: 2, never 'floors are drawn'."""
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 30, id="house"), box(35, 30, 45, 50, 0, 10, id="garage")),
+                {**FACTS, "stories": 2})["stories"]
+    assert m["value"] == 2 and "floors are drawn" not in str(m), m
+
+
+def test_a_plain_stacked_garage_beside_the_floor_blocks_is_a_plain_part():
+    """Review round 17, P2: three 10 ft floor blocks and a garage drawn as two plain solids stacked (9 ft each)
+    touching them. The garage is a plain part: its two blocks may be stories, but the count typed is the whole
+    building's, never one that must equal the garage's blocks. Typed 3: 3, as stated (at least the 3 floors and
+    the 2 blocks). Nothing typed: the plain-part reason (not 'one solid with no floors'). Typed 1: below both:
+    a question."""
+    floors_ = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"floor {i + 1}") for i in range(3)]
+    garage = [box(35, 25, 45, 45, 0, 9, id="garage 1"), box(35, 25, 45, 45, 9, 18, id="garage 2")]
+    got = {t: measure(site(RECT, *floors_, *garage), {**FACTS, "stories": t})["stories"] for t in (3, None, 1)}
+    assert got[3]["value"] == 3 and "for the whole building" in got[3]["how"], got[3]
+    assert got[None]["value"] is None and "isn't drawn as floor blocks" in got[None]["reason"], got[None]
+    assert "one solid with no floors" not in got[None]["reason"]
+    assert got[1]["value"] is None and "fewer than" in got[1]["reason"], got[1]
+
