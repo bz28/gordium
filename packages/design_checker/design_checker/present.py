@@ -50,6 +50,8 @@ NAMES = {"front_yard": "Front yard", "rear_yard": "Rear yard", "side_yard_smalle
          "accessory_front_yard": "Accessory building", "accessory_side_yard": "Accessory building, side",
          "accessory_rear_yard": "Accessory building, rear", "accessory_buildings": "Accessory building"}
 ZOOM = {"building_height": "front", "stories": "front"}
+YARD_ROWS = {"front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "front_yard_eaves",
+             "side_yard_smaller_eaves", "side_yard_larger_eaves", "rear_yard_eaves"}   # the main building's yards
 SIGNS = {ast.GtE: "≥", ast.Gt: ">", ast.LtE: "≤", ast.Lt: "<", ast.Eq: "=", ast.NotEq: "≠"}
 
 
@@ -554,9 +556,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         applied = _applied(names, measured)
         if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
             why = f"{why} · {applied['note']}" if why else applied["note"]
-        crossing = node is not None and (measured.get(node.left.id) or {}).get("crosses_lot_line")
-        if crossing and st == FAILS:
-            why = "Does not comply: the building crosses the lot line" + (f" · {why}" if why else "")
+        if row.get("Crossing"):                 # a building partly on another lot: fails, whatever else
+            st, why = FAILS, "Does not comply: " + row["Crossing"]
+            hint = "To comply: move it back onto the lot."
+            if node is None or node.left.id not in YARD_ROWS:     # the failing fact is the crossing, not a distance
+                proposed, required, margin_t = "crosses the lot line", "on the lot", ""
         out.append({
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],

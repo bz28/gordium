@@ -158,8 +158,9 @@ def test_a_building_outside_the_lot():
     assert m["building_height"]["value"] == 30
     # crossing the side lot line (x = 50): measured, the yard to that line is 0 and it says it crosses it
     m = measure(site(RECT, box(40, 25, 65, 65)), FACTS)
-    assert m["side_yard_smaller"]["value"] == 0.0 and m["side_yard_smaller"]["crosses_lot_line"]
-    assert m["front_yard"]["value"] == 25.0 and not m["front_yard"].get("crosses_lot_line")
+    assert m["side_yard_smaller"]["value"] == 0.0
+    assert m["side_yard_smaller"]["crossings"] == [{"who": "the main building", "lines": ["side"]}]
+    assert m["building_area"]["crossings"] and m["front_yard"]["value"] == 25.0
 
 
 def test_two_buildings_need_the_main_one_picked():

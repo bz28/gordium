@@ -199,8 +199,22 @@ class Lot:
 
 # ---- buildings -------------------------------------------------------------------------------------------
 
+_PLAN_OF = {}         # id of a faces list -> (that list, its projection), for one measure() call
+
+
 def _projection(building: dict):
-    """The building seen from above: the union of its faces projected flat (vertical faces add nothing)."""
+    """The building seen from above: the union of its faces projected flat (vertical faces add nothing). Worked
+    out once per solid and measure() call."""
+    faces = building["faces"]
+    held = _PLAN_OF.get(id(faces))
+    if held is not None and held[0] is faces:
+        return held[1]
+    found = _projection_now(building)
+    _PLAN_OF[id(faces)] = (faces, found)
+    return found
+
+
+def _projection_now(building: dict):
     parts = []
     for f in building["faces"]:
         shell = [tuple(p[:2]) for p in f["points"]]
@@ -290,7 +304,20 @@ def _unit_normal(points) -> tuple:
     return nx / n, ny / n, nz / n
 
 
+_PLANES = {}         # the same faces (by identity) -> their plane groups, for one measure() call
+
+
 def _planes(faces: list[dict]) -> list[list[dict]]:
+    """_planes_now, read once per set of faces and measure() call (the height and the eaves both ask)."""
+    key = tuple(id(f) for f in faces)
+    held = _PLANES.get(key)
+    if held is None or any(a is not b for a, b in zip(held[0], faces)):
+        held = (list(faces), _planes_now(faces))
+        _PLANES[key] = held
+    return held[1]
+
+
+def _planes_now(faces: list[dict]) -> list[list[dict]]:
     """The faces grouped into planes. Each group has an anchor face (the face it started from; when two groups
     join, the larger group's anchor), and every corner of every face in the group lies within TOL of the anchor's
     plane, so a group never drifts. Faces that share an edge (two
@@ -345,6 +372,20 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
 _SKY = {}            # id of a faces list -> (that list, its faces open to the sky), for one measure() call
 
 
+def _roof_faces(building: dict) -> list[dict]:
+    """The faces open to the sky, the building's own base left out (a floor at the bottom is never a roof, and
+    can't cover anything above it, so it is left out before the sky is read: the same result, much faster on a
+    meshed floor). Read once per solid and measure() call."""
+    faces = building["faces"]
+    held = _SKY.get(("roof", id(faces)))
+    if held is not None and held[0] is faces:
+        return held[1]
+    bottom = min(p[2] for f in faces for p in f["points"])
+    found = _open_to_the_sky([f for f in faces if not all(abs(p[2] - bottom) <= TOL for p in f["points"])])
+    _SKY[("roof", id(faces))] = (faces, found)
+    return found
+
+
 def _open_to_the_sky(faces: list[dict]) -> list[dict]:
     """The faces of a solid that aren't wholly covered by the solid itself (read once per solid and measure() call:
     the height, the eaves and the yards all ask)."""
@@ -394,7 +435,7 @@ def _height_of(building: dict, grade: float, facts: dict) -> dict:
     zs = [p[2] for f in building["faces"] for p in f["points"]]
     top = max(zs)
     bottom = min(zs)
-    roof = [f for f in _open_to_the_sky(building["faces"]) if not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
+    roof = _roof_faces(building)
     if not roof:
         return _missing("building_height", stop("no_roof"))
     how = "from the ground level (grade plane) to the top of the roof"
@@ -493,7 +534,7 @@ def _pitched_section(building: dict) -> list:
     if not zs:
         return []
     bottom = min(zs)
-    roof = [f for f in _open_to_the_sky(building["faces"]) if not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
+    roof = _roof_faces(building)
     if not roof:
         return []
     groups = _planes(roof)
@@ -841,10 +882,14 @@ def _grade_from_points(buildings: list[dict], points: list, others: list = ()) -
 def measure(site: dict, facts: dict) -> dict[str, dict]:
     """Every measurement in measures.yaml, in its order, each with its working, for one site and its lot facts."""
     _SKY.clear()
+    _PLANES.clear()
+    _PLAN_OF.clear()
     try:
         out = _measure(site, facts)
     finally:
         _SKY.clear()
+        _PLANES.clear()
+        _PLAN_OF.clear()
     return {name: out[name] for name in MEASURES}
 
 
@@ -980,22 +1025,22 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
              else {})
     # each building on its own (each stack, each detached building): one wholly off the lot can't be measured
     # against it (outside_lot, whatever the others do); one that crosses a lot line is measured, and the yard to
-    # each line it actually crosses is marked (crosses_lot_line): never a pass
+    # its own crossings are recorded (_mark_crossings): it fails every rule that measures it, never a pass
     plans = [_projection(b) for b in buildings]
     within = [p.within(lot.polygon.buffer(TOL)) for p in plans]
     off = [not w and p.intersection(lot.polygon).area <= 1e-6 for p, w in zip(plans, within)]
-    outside = ops.unary_union([p.difference(lot.polygon.buffer(TOL)) for p, w in zip(plans, within) if not w]) \
-        if not all(within) else Polygon()
-    # a line is crossed where the part outside the lot runs along it (shares a stretch of it, not just a corner)
-    reach = outside.buffer(2 * TOL) if outside.area > 1e-6 else None
-    crossed = {i for i, e in enumerate(lot.edges)
-               if reach is not None and reach.intersection(LineString(e)).length > 4 * TOL}
+    # each building's own crossings (never pooled): the lot lines its part outside the lot runs along (a stretch
+    # of the line, not just a corner)
+    crossed = {b["id"]: _crossed(lot, p) for b, p, w in zip(buildings, plans, within) if not w}
+    crossed = {k: v for k, v in crossed.items() if v}
     crosses = bool(crossed) and not any(off)
     why_inside = why_building or (stop("outside_lot") if any(off) or (not all(within) and not crosses) else None)
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
     else:
         out["building_area"] = _coverage(buildings, views, facts, main)
+    if crosses:                         # coverage, the height and the accessory count: whatever else follows
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached)
 
     if why_street:
         return out
@@ -1013,15 +1058,45 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
             out[name] = _missing(name, why_yards)
         return out
     _yards(out, lot, lines, facts, main, parts_of, detached, views)
-    if crosses:                                  # each yard measured to a line the building crosses: marked
-        sides = {i for _w, r in lines["readings"] for g in r["sides"] for i in g}
-        rears = {i for _w, r in lines["readings"] for i in r["rear"]}
-        to = {"front": set(lot.street), "side": sides, "rear": rears}
-        for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
-            kind = "front" if "front" in name else "side" if "side" in name else "rear"
-            if crossed & to[kind] and name in out:
-                out[name]["crosses_lot_line"] = True
+    if crosses:
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached)
     return out
+
+
+def _crossed(lot: Lot, plan) -> set:
+    """The lot lines (by index) one building crosses: those its part outside the lot runs along."""
+    outside = plan.difference(lot.polygon.buffer(TOL))
+    if outside.area <= 1e-6:
+        return set()
+    reach = outside.buffer(2 * TOL)
+    return {i for i, e in enumerate(lot.edges) if reach.intersection(LineString(e)).length > 4 * TOL}
+
+
+def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict, parts_of: list, detached: list):
+    """A building that crosses a lot line stands partly on another lot: it fails every rule that measures it,
+    whatever the readings or answers (the checker does that, check.crossing). Each measurement of a building
+    records that building's own crossings, `crossings`: [{"who", "lines": street / side / rear}]: the main
+    building's on the main yards, the eaves and the height; each accessory building's on the accessory
+    measurements; every building's on the coverage."""
+    sides = {i for _w, r in lines["readings"] for g in r["sides"] for i in g} if lines and not isinstance(lines, str) else set()
+    rears = {i for _w, r in lines["readings"] for i in r["rear"]} if lines and not isinstance(lines, str) else set()
+
+    def kinds(idx):
+        return sorted({"street" if i in lot.street else "side" if i in sides else "rear" if i in rears else "lot"
+                       for i in idx})
+    group = [main, *parts_of] if main is not None else []
+    mine = set().union(*(crossed.get(b["id"], set()) for b in group)) if group else set()
+    entries_main = [{"who": "the main building", "lines": kinds(mine)}] if mine else []
+    entries_acc = [{"who": f'accessory building "{_parts(b)[0]}"', "lines": kinds(crossed[b["id"]])}
+                   for b in detached if crossed.get(b["id"])]
+    for name in YARDS + EAVE_YARDS + ("building_height",):
+        if entries_main and name in out:
+            out[name]["crossings"] = entries_main
+    for name in ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply"):
+        if entries_acc and name in out:
+            out[name]["crossings"] = entries_acc
+    if (entries_main or entries_acc) and "building_area" in out:
+        out["building_area"]["crossings"] = entries_main + entries_acc
 
 
 def _attached(main: dict, buildings: list[dict]) -> list[dict]:

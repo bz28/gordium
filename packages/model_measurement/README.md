@@ -169,7 +169,7 @@ Every reason the code gives today comes from the table:
   together, or draw the overhang as part of its floor".
 - **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
   building isn't inside the lot" (wholly off it: a building that crosses a lot line is measured, the yard to the
-  line it crosses is 0 and marked `crosses_lot_line`, so it does not comply); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  line it crosses is 0, and each of its measurements records that building's own `crossings`: every rule that measures it does not comply, whatever the readings or answers); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

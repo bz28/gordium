@@ -213,6 +213,25 @@ def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] 
                              (" and with the lot as drawn (confirm the survey)" if survey else ""))
 
 
+def crossing(rule: dict, measured: dict) -> str | None:
+    """"The main building crosses the side lot line" when a building this rule measures stands partly off the lot
+    (its measurements' `crossings`, each building its own): the rule does not comply whatever the readings or
+    answers. None otherwise."""
+    names = set()
+    for key in ("applies_when", "check"):
+        if rule.get(key):
+            names |= formula.names(rule[key])
+    found = {}
+    for n in sorted(names):
+        for c in (measured.get(n) or {}).get("crossings") or []:
+            found.setdefault(c["who"], set()).update(c["lines"])
+    if not found:
+        return None
+    text = "; ".join(f"{who} crosses the {' and '.join(sorted(lines))} lot line{'s' if len(lines) > 1 else ''}"
+                     for who, lines in found.items())
+    return text[:1].upper() + text[1:]
+
+
 def named_result(rule: dict, measured: dict, allowed: dict) -> dict | None:
     """The "every reading" rule for open questions research has named readings for: when every reading a
     rule's open measurements have is one of those (nothing else unknown: no survey waiting, no model question),
@@ -392,6 +411,9 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             r["Line"] = f"{short(r['Requirement'])}: {named['text']}"
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
+        r["Crossing"] = crossing(by_id[r["Rule id"]], measured)
+        if r["Crossing"]:            # a building on the neighbour's land: no reading or answer can clear it
+            r["Fails"], r["Line"] = True, f"{short(r['Requirement'])}: {r['Crossing']}"
     lot_id = (site.get("lot") or {}).get("id")
     red = sorted({o for r in rows if r["Fails"]
                   for name in formula.names(by_id[r["Rule id"]]["check"]) for o in measured.get(name, {}).get("objects", [])
