@@ -69,31 +69,40 @@ def context_layers(g, doc):
 
 
 def notes_inside_square(g, doc):
-    """Every object on the Notes layer, besides the square itself, measured inside the square: the corners of its
-    bounding box in its own plane (a text's plane, turned with the square; the world's for the rest), each tested
-    against the square's curve. A world-aligned box of a turned text would poke past a turned square's edge."""
+    """Every object on the Notes layer, besides the square itself, measured inside the square by its own points: a
+    text by the corners of its box in its own plane (turned with the square), a curve by its vertices, a dot by its
+    point, each tested against the square's curve. (A world-aligned bounding box of a turned object pokes past a
+    turned square's edge: the first run failed the scale bar that way.) Also the sources note's line height, feet."""
     rg = Rhino.Geometry
     index = next(i for i in g._context_layer_indexes(doc) if doc.Layers[i].FullPath.endswith("::Notes"))
     objs = list(doc.Objects.FindByLayer(doc.Layers[index]) or [])
     square = next(o for o in objs if (o.Attributes.Name or "").startswith("Context square"))
-    outside, longest, kind = [], 0, None
+    outside, longest, kind, line_ft = [], 0, None, None
     for o in objs:
         if o.Id == square.Id:
             continue
         geom = o.Geometry
-        plane = geom.Plane if isinstance(geom, rg.TextEntity) else rg.Plane.WorldXY
-        box = geom.GetBoundingBox(plane)
-        for c in list(box.GetCorners())[:4]:
-            pt = plane.PointAt(c.X, c.Y)
-            if square.Geometry.Contains(rg.Point3d(pt.X, pt.Y, 0), rg.Plane.WorldXY,
-                                        doc.ModelAbsoluteTolerance) != rg.PointContainment.Inside:
-                outside.append(o.Attributes.Name or type(geom).__name__)
-                break
+        if isinstance(geom, rg.TextEntity):
+            box = geom.GetBoundingBox(geom.Plane)
+            pts = [geom.Plane.PointAt(c.X, c.Y) for c in list(box.GetCorners())[:4]]
+        elif isinstance(geom, rg.TextDot):
+            pts = [geom.Point]
+        else:
+            ok, polyline = geom.TryGetPolyline()
+            pts = list(polyline) if ok else [geom.PointAtStart, geom.PointAtEnd]
+        if any(square.Geometry.Contains(rg.Point3d(p.X, p.Y, 0), rg.Plane.WorldXY, doc.ModelAbsoluteTolerance)
+               != rg.PointContainment.Inside for p in pts):
+            outside.append(o.Attributes.Name or type(geom).__name__)
         if (o.Attributes.Name or "") == "Sources":
             kind = type(geom).__name__
             text = getattr(geom, "PlainText", None) or getattr(geom, "Text", "") or ""
-            longest = max(len(line) for line in text.splitlines()) if text else 0
-    return {"outside": outside, "longest_line": longest, "sources_kind": kind, "notes": len(objs)}
+            lines = text.splitlines()
+            longest = max(len(line) for line in lines) if lines else 0
+            if isinstance(geom, rg.TextEntity) and lines:
+                box = geom.GetBoundingBox(geom.Plane)
+                line_ft = round(g._feet_length(doc, box.Max.Y - box.Min.Y) / len(lines), 2)
+    return {"outside": outside, "longest_line": longest, "sources_kind": kind, "line_height_ft": line_ft,
+            "notes": len(objs)}
 
 
 docs = TestDocs("context").__enter__()
@@ -134,6 +143,10 @@ try:
     claim("1 every note lies inside the neighbourhood square (the sources wrapped, at most 60 characters a line)",
           not log["notes_inside"]["outside"] and log["notes_inside"]["longest_line"] <= g.logic.NOTE_WIDTH
           and log["notes_inside"]["sources_kind"] == "TextEntity", log["notes_inside"])
+    claim("1 the sources note is small: at most %.2f ft a line (text %.1f ft high, about the scale bar label's)"
+          % (g.logic.NOTE_LINE_FT, g.logic.NOTE_HEIGHT_FT),
+          log["notes_inside"]["line_height_ft"] is not None
+          and 0 < log["notes_inside"]["line_height_ft"] <= g.logic.NOTE_LINE_FT + 0.01, log["notes_inside"])
     claim("2 the building footprints are on screen (live: claim 5 checks they are never saved)",
           log["footprints_on_screen"] > 0, {"on_screen": log["footprints_on_screen"]})
     claim("3 the checker never measures the context: one lot", log["checker_sees"]["lot_candidates"] == 1,

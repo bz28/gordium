@@ -550,6 +550,24 @@ def test_the_sources_note_is_wrapped_model_text_inside_the_square_clear_of_the_s
     assert all(len(ln) <= logic.NOTE_WIDTH for ln in placed["text"].split("\n"))
 
 
+def test_the_note_ends_small_whatever_the_document_does_to_text_height():
+    """Rhino run of da9025b: letters tens of feet tall (the template's dimension style scaled the 12 ft text),
+    corners up to ~179 ft outside the square. Now 2.5 ft text, and whatever is drawn is scaled to at most
+    NOTE_LINE_FT a line: the measured case brought back, a note already small left alone."""
+    assert logic.NOTE_HEIGHT_FT <= 3.0 and logic.NOTE_LINE_FT == pytest.approx(1.7 * logic.NOTE_HEIGHT_FT)
+    lines = 6
+    drawn = 6 * 1.7 * 12.0 * 10                     # 12 ft text that a ×10 dimension style made ten times taller
+    factor = logic.note_shrink(drawn, lines)
+    assert drawn * factor == pytest.approx(lines * logic.NOTE_LINE_FT)
+    assert logic.note_shrink(lines * logic.NOTE_LINE_FT * 0.8, lines) == 1.0      # already within: untouched
+    assert logic.note_shrink(0, lines) == 1.0 and logic.note_shrink(None, 0) == 1.0
+    # the whole block: 60 characters at 0.7 × the height, 6 lines, deep inside a 1500 ft square
+    assert logic.NOTE_WIDTH * 0.7 * logic.NOTE_HEIGHT_FT < 150 and lines * logic.NOTE_LINE_FT < 40
+    check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
+    assert "ok, polyline = geom.TryGetPolyline()" in check      # curves by their own points, not a world box
+    assert "the sources note is small" in check and "line_height_ft" in check
+
+
 def test_a_kept_layers_note_is_wrapped_the_same_way():
     frame = looked_up()["writes"]["frame"]
     model, record, _, shown = redraw([], None, fetch_with(frame), frame)
@@ -562,6 +580,10 @@ def test_the_plugin_writes_the_note_as_bottom_left_model_text():
     body = RHINO[RHINO.index("def _context_text("):RHINO.index("def draw_context(")]
     assert "rg.TextEntity.Create(" in body and "rg.TextJustification.BottomLeft" in body
     assert "_model_length(doc, o.get(\"height_ft\")" in body and "rotation_deg" in body
+    # Rhino run of da9025b: the document's dimension style made the text tens of feet tall; the note is measured as
+    # drawn and brought down to its size about its anchor
+    assert "box = text.GetBoundingBox(plane)" in body and "logic.note_shrink(_feet_length(doc, box.Max.Y - box.Min.Y), lines)" in body
+    assert "text.Transform(rg.Transform.Scale(anchor, factor))" in body
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
     assert 'elif o["kind"] == "text":' in draw and "doc.Objects.AddText(_context_text(doc, o, pts[0]), attrs)" in draw
     check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")

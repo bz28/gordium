@@ -2225,6 +2225,13 @@ def _context_text(doc, o, anchor):
     text = rg.TextEntity.Create(o.get("text") or "", plane, doc.DimStyles.Current, False, 0, 0)
     text.TextHeight = _model_length(doc, o.get("height_ft") or logic.NOTE_HEIGHT_FT)
     text.Justification = rg.TextJustification.BottomLeft
+    # measured as drawn, in its own plane: a document's dimension style can scale text (Rhino run of da9025b: letters
+    # tens of feet tall), so the note is brought down to its intended size about its anchor
+    box = text.GetBoundingBox(plane)
+    lines = len((o.get("text") or "").splitlines())
+    factor = logic.note_shrink(_feet_length(doc, box.Max.Y - box.Min.Y), lines)
+    if factor < 1.0:
+        text.Transform(rg.Transform.Scale(anchor, factor))
     return text
 
 
