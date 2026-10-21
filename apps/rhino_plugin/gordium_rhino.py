@@ -712,6 +712,7 @@ def panel():
                 p = ui.make_panel(_actions(), ui.DockHost(dock, host))
                 STATE["panel_parts"] = p
                 LEFTOVERS["panel"] = p["form"].Close
+            p["placed"] = ui.fit_floating(host, Rhino.UI.RhinoEtoApp.MainWindowForDocument(doc) if doc else None)
             return p
     if p is None or not p["form"].Visible:
         p = ui.make_panel(_actions())

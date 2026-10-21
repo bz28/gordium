@@ -137,8 +137,25 @@ def open_dock(panel_id):
         if Rhino.UI.Panels.IsPanelVisible(beside):   # only beside one that is showing (else Rhino does nothing)
             Rhino.UI.Panels.OpenPanelAsSibling(panel_id, beside)
             if Rhino.UI.Panels.IsPanelVisible(panel_id):
+                Rhino.UI.Panels.OpenPanel(panel_id)  # its tab the selected one
                 return
-    Rhino.UI.Panels.OpenPanel(panel_id)          # neither showing: Rhino's own choice (sized by the panel)
+    Rhino.UI.Panels.OpenPanel(panel_id)          # no dock showing: Rhino floats it (fit_floating sizes it)
+
+
+def fit_floating(host, doc_window):
+    """When Rhino shows the panel floating (no dock showing to join: Rhino makes a 200 x 200 window), that window
+    is made the panel's size and placed at the right edge of the document's window. Docked, nothing changes.
+    Returns "docked", "floating" or None (not shown yet)."""
+    window = host.ParentWindow
+    if window is None:
+        return None
+    if doc_window is not None and (window.Equals(doc_window) or window.Title == doc_window.Title):
+        return "docked"
+    window.ClientSize = ed.Size(PANEL_WIDTH, 720)
+    if doc_window is not None:
+        b = doc_window.Bounds
+        window.Location = ed.Point(b.X + b.Width - PANEL_WIDTH - 24, b.Y + 60)
+    return "floating"
 
 
 class DockHost:

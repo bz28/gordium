@@ -4,7 +4,7 @@ not in CI. From a fresh document: GordiumStart on the sample, then:
 - flat ground (item 5): the start box has no Ground row; the lot facts say the ground is assumed flat; Building height
   and Stories comply, their rows reading "… · assuming flat ground";
 - labels off by default (item 1): the document's setting is off and the panel's tick unticked; a failing yard (the
-  house moved 10 ft back) still has its shortfall label; ticking turns the labels on, saved in the document;
+  house moved 14 ft back, QUICKSTART test 3: short under every reading) still has its shortfall label; ticking turns the labels on, saved in the document;
 - the panel (items 2, 3): no code-edition line in its header (it is in the legend's text), the column is "Delta" and
   its cells say "to spare" / "short".
 Captures: Top view with labels off (the failing shortfall only) and on; the panel. Writes <temp>/gordium_mvp/out.json
@@ -108,10 +108,10 @@ try:
         claim("3 the column is Delta", [c.HeaderText for c in parts["tree"].Columns][3] == "Delta",
               [c.HeaderText for c in parts["tree"].Columns])
         claim("3 Delta in words", any(r[3].endswith(" to spare") for r in rows), [r[3] for r in rows])
-        # a failing yard: the house 10 ft back (rear yard short); labels still off
+        # a failing yard: the house 14 ft back (QUICKSTART test 3: the rear yard short under every reading); labels off
         ft = 1.0 / g._scale(doc)
         for o in g._buildings(doc):
-            doc.Objects.Transform(o.Id, rg.Transform.Translation(0, 10 * ft, 0), True)
+            doc.Objects.Transform(o.Id, rg.Transform.Translation(0, 14 * ft, 0), True)
         g.run_check(doc, report=False)
         rows = panel_rows(g)
         rear = next(r for r in rows if "Rear yard" in r[0])

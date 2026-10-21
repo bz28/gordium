@@ -71,9 +71,17 @@ try:
               Rhino.UI.Panels.IsPanelVisible(dock) and isinstance(p["form"], g.ui.DockHost) and
               not isinstance(p["form"], ef.Form) and host.GetType().FullName == "GordiumDock.Panel",
               str(host.GetType().FullName))
-        log["parent"] = str(getattr(host.ParentWindow, "Title", None))     # a floating container has no title
-        claim("1 docked in the document's own window (beside Rhino's panels), not floating",
-              log["parent"] == doc.Name, log["parent"])
+        log["placed"] = p.get("placed")
+        window, doc_window = host.ParentWindow, Rhino.UI.RhinoEtoApp.MainWindowForDocument(doc)
+        log["parent"] = str(getattr(window, "Title", None))
+        if log["placed"] == "docked":           # beside Rhino's panels (Properties or Layers showing)
+            claim("1 docked in the document's own window", log["parent"] == doc.Name, log["parent"])
+        else:                                   # no dock showing: Rhino floats it; sized to the panel, at the right
+            b, d = window.Bounds, doc_window.Bounds
+            log["floating"] = {"window": [b.X, b.Y, b.Width, b.Height], "document": [d.X, d.Y, d.Width, d.Height]}
+            claim("1 floating (no dock showing): the panel's size, at the document window's right edge",
+                  log["placed"] == "floating" and window.ClientSize.Width >= g.ui.PANEL_WIDTH and
+                  window.ClientSize.Height >= 420 and abs((b.X + b.Width) - (d.X + d.Width)) <= 60, log["floating"])
         claim("1 its document's panel", g.logic.dock_host(sc.sticky["gordium_dock_hosts"],
                                                           doc.RuntimeSerialNumber).Equals(host))
         log["rows"] = rows(p)

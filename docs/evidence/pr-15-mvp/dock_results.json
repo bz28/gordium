@@ -5,9 +5,22 @@
    "ok": true,
    "detail": "GordiumDock.Panel"
   },
-  "1 docked in the document's own window (beside Rhino's panels), not floating": {
+  "1 floating (no dock showing): the panel's size, at the document window's right edge": {
    "ok": true,
-   "detail": "dock_Large_Objects_-_Feet.3dm"
+   "detail": {
+    "window": [
+     1029,
+     111,
+     400,
+     720
+    ],
+    "document": [
+     261,
+     51,
+     1192,
+     814
+    ]
+   }
   },
   "1 its document's panel": {
    "ok": true,
@@ -22,8 +35,8 @@
   "1 holding the rows": {
    "ok": true,
    "detail": [
+    "?  Lot area (site)",
     "\u2713  Use (site)",
-    "\u2713  Lot area (site)",
     "\u2713  Lot width (site)",
     "\u2713  Stories \u00b7 assuming flat ground",
     "\u2713  Building height \u00b7 assuming flat ground",
@@ -45,10 +58,25 @@
    "detail": null
   }
  },
- "parent": "dock_Large_Objects_-_Feet.3dm",
+ "placed": "floating",
+ "parent": "TabPanelDockBarFloatingForm()",
+ "floating": {
+  "window": [
+   1029,
+   111,
+   400,
+   720
+  ],
+  "document": [
+   261,
+   51,
+   1192,
+   814
+  ]
+ },
  "rows": [
+  "?  Lot area (site)",
   "\u2713  Use (site)",
-  "\u2713  Lot area (site)",
   "\u2713  Lot width (site)",
   "\u2713  Stories \u00b7 assuming flat ground",
   "\u2713  Building height \u00b7 assuming flat ground",
