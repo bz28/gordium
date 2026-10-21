@@ -51,6 +51,7 @@ doc = None
 try:
     g = fresh_module()
     doc = docs.open("Large Objects - Feet")
+    g.panel()                       # the panel first: "controls off while the box is open" needs one to grey
     seen = {}
 
     def on_confirm(doc_, facts, text, state):
@@ -65,8 +66,8 @@ try:
     log["box"] = seen
     claim("the start box has no Ground row (flat ground assumed)", "ground" not in (seen.get("keys") or ["ground"]),
           seen.get("keys"))
-    claim("while the box is open, the panel's controls are off (when the panel is already there)",
-          seen.get("greyed") is None or not any(seen["greyed"]), seen)
+    claim("while the box is open, the panel's controls are off", isinstance(seen.get("greyed"), list) and
+          len(seen["greyed"]) > 0 and not any(seen["greyed"]), seen)
     facts = g.current_facts(doc)
     log["facts"] = {k: facts.get(k) for k in ("address", "zone", "lot_surveyed", "plan_north_deg", "ground_assumed",
                                               "grade_elevation", "corner_lot")}

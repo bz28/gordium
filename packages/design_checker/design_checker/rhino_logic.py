@@ -650,6 +650,9 @@ def lot_source(surveyed, source=None):
     return "your survey" if surveyed else "the tax map (±2 ft, approximate)" + (" · " + source if source else "")
 
 
+NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+
+
 def lot_text(area, surveyed, source=None):
     """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"; with the map
     service the lookup read it from ("… · NYS Tax Parcels Public")."""
@@ -667,6 +670,16 @@ def ground_text(ground):
             "regrade": f"finished ground you set ({ground.get('count', 0)} spot grades)"}[kind]
     return what + (", " + span if span else "") + " · " + (ground.get("source") or
                                                          ("picked by you" if kind == "terrain" else "placed by you"))
+
+
+def street_name(state):
+    """The street the lot faces, by name: the one found, else the street of the address ("106 Ithaca Rd, Ithaca"
+    -> "Ithaca Rd"), else the line itself."""
+    import re
+    if state.get("street_name"):
+        return state["street_name"]
+    m = re.match(r"\s*\d+[A-Za-z]?\s+([^,]+)", state.get("address") or "")
+    return m.group(1).strip() if m else "the highlighted line"
 
 
 def box_rows(state, flat=None):
@@ -701,9 +714,13 @@ def box_rows(state, flat=None):
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot",
          "text": ("no lot yet: draw it, or pick a closed outline on the Site layer" if state.get("lot_missing") else
-                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))),
+                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))
+                  if state.get("has_lot") or state.get("lot_area") is not None or state.get("lot_surveyed")
+                  else NO_LOT),
          "actions": lot_actions, "tick": None},
-        {"key": "street", "label": "Street side", "text": state.get("street_name") or "the highlighted line",
+        {"key": "street", "label": "Street side", "text": street_name(state) if (
+            state.get("street_name") or state.get("has_lot") or state.get("lot_area") is not None
+            or state.get("lot_surveyed")) else "set from the lot, once there is one",
          "actions": [("street", "Change…", True)], "tick": None,
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
@@ -844,6 +861,11 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     if writes.get("spots") and not FLAT_GROUND:  # the MVP assumes flat ground: the lookup's ground is never used
         saved_ui["ground_kind"] = "spot"
         saved_ui["ground_source"] = SUGGESTED + " · " + label("ground", "ground")
+    zs = [p[2] for p in writes.get("spots") or []]
+    if FLAT_GROUND and zs:                       # said, never used: how much the ground the lookup found falls
+        saved_ui["ground_fall"] = round(max(zs) - min(zs), 1)
+    else:
+        saved_ui.pop("ground_fall", None)
     if lot and not writes.get("lot_ring"):      # the City's parcels: a guide only, never kept
         look["guide"] = True
         live["lot"] = GUIDE + (" " + live["lot"] if live.get("lot") else "")
@@ -1042,7 +1064,7 @@ def ground_facts(state, lot_level, flat=None):
     only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
     if FLAT_GROUND if flat is None else flat:
         return {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": lot_level, "grade_from": None,
-                "ground_assumed": "flat"}
+                "ground_assumed": "flat", **({"ground_fall": state["ground_fall"]} if state.get("ground_fall") else {})}
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
     finished = kind == "regrade" or bool(state.get("no_regrading"))
@@ -1072,14 +1094,17 @@ def fact_sources(state, today, confirmed):
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
         # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
         "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"), state.get("lot_source"))),
-        # the street's name only when it may be kept (the City's roads may not: "street_name_saved" then None)
-        "street": fact((state.get("street_name_saved") if "street_name_saved" in state else state.get("street_name"))
-                       or "the highlighted line",
+        # the street's name only when it may be kept (the City's roads may not: "street_name_saved" then None, and
+        # the address's street, a kept fact, says it instead)
+        "street": fact(street_name({**state, "street_name": state.get("street_name_saved")})
+                       if "street_name_saved" in state else street_name(state),
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
         # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
-        "ground": (fact("assumed flat", ASSUMED_SOURCE, None) if FLAT_GROUND else
+        "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
+                        "lot; height is checked as if flat)" if state.get("ground_fall") else ""),
+                        ASSUMED_SOURCE, None) if FLAT_GROUND else
                    fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
                         "as drawn" if kind == "flat" else ground.get("source") or
                         ("picked by you" if kind == "terrain" else "placed by you"))),
@@ -1091,6 +1116,67 @@ def district_confirmed(mode, zone_fact, zone):
     same district was confirmed at an earlier Draw (its saved source says who confirmed it)."""
     zone_fact = zone_fact or {}
     return mode != "start" and bool(zone_fact.get("confirmed_by")) and zone_fact.get("value") == zone
+
+
+def is_elevation_view(parallel, direction_z, tolerance=0.01):
+    """Whether a viewport is an elevation (Front, Right, Back, Left): a parallel projection looking level, where the
+    height limit is labelled."""
+    return bool(parallel) and abs(direction_z) <= tolerance
+
+
+def north_vector(plan_north_deg):
+    """True north as a direction in the plan (x, y): plan north (+y) when the plan isn't turned; a looked-up lot
+    is drawn turned `plan_north_deg` (lookup_box.frame), and its north arrow turns with it."""
+    import math
+    t = math.radians(plan_north_deg or 0.0)
+    return (-math.sin(t), math.cos(t))
+
+
+def shorten(text, most):
+    """`text` in at most `most` characters, cut at a word and ended "…" when longer (a link can't wrap: the
+    architect's review found one pushing the docked panel's text off its right edge)."""
+    text = text or ""
+    if len(text) <= most:
+        return text
+    cut = text[:max(1, most - 1)].rsplit(" ", 1)[0].rstrip(" ,·;:")
+    return (cut or text[:max(1, most - 1)]) + "…"
+
+
+def building_name(layer, name, grouped):
+    """What the panel calls a building: the starting house Gordium drew (its floors grouped on the massing layer),
+    else the object's name, else its layer ("a solid on Building")."""
+    if layer == MASSING:
+        return "the starting house"
+    if name:
+        return name + (" (and its group)" if grouped else "")
+    return ("a group on " if grouped else "a solid on ") + layer
+
+
+def link_text(citation, most):
+    """A citation link's words in at most `most` characters, keeping what tells it apart: "District Regulations
+    Chart" said "chart", and if still too long its front cut, never its end (district, column, note: review round
+    1, eight links read "Open §325-8, District Regulations Chart…")."""
+    text = "Open " + (citation or "").replace("District Regulations Chart", "chart")
+    if len(text) <= most:
+        return text
+    tail = text[len(text) - (most - 7):]
+    tail = tail.split(" ", 1)[1] if " " in tail[1:] else tail
+    return "Open …" + tail.lstrip(" ,·;")
+
+
+def height_limit_text(checker_top, height):
+    """The height limit's label in an elevation: plain when the checker has the grade plane (its top), else said to
+    be shown from the lot's level, a drawing aid ("height" is the limit as text, 35'-0")."""
+    if checker_top is not None:
+        return "Height limit " + height
+    return "Height limit " + height + " (no grade plane yet: shown from the lot's level)"
+
+
+def prune_hosts(hosts, open_serials):
+    """The docked panel's hosts for documents still open (and the one made without a document, key 0): a closed
+    document's panel is never kept (review: 125 of them after a day of tests)."""
+    keep = set(open_serials) | {0}
+    return {k: v for k, v in (hosts or {}).items() if k in keep}
 
 
 def is_plan_view(parallel, direction_z, tolerance=0.99):

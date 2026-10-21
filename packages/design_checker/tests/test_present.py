@@ -228,9 +228,10 @@ def test_the_report_never_shows_pass_for_a_rule_the_panel_says_needs_review(surv
     result = check(MODEL, {**surveyed, "lot_surveyed": False}, report)
     out = openpyxl.load_workbook(report)["Output"]
     header = [c.value for c in out[2]]
-    rid, err = header.index("Rule id"), header.index("Error")
-    errors = {row[rid]: row[err] for row in out.iter_rows(min_row=3, values_only=True) if row[rid]}
-    assert errors["R-1b.side_yards"] == "NEEDS REVIEW"                       # the panel's side yards need review
+    req, err = header.index("Requirement"), header.index("Error")
+    errors = {row[req]: row[err] for row in out.iter_rows(min_row=3, values_only=True) if row[req]}
+    side = next(k for k in errors if k.startswith("Side yards"))
+    assert errors[side] == "NEEDS REVIEW"                                     # the panel's side yards need review
     check_tab = openpyxl.load_workbook(report)["Check"]
     text = " ".join(str(c.value) for row in check_tab.iter_rows() for c in row if c.value)
     assert "Draft rulebook" in text and "tax map" in text and "Overlays" in text and "§325-8" in text
@@ -888,3 +889,68 @@ def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
     assert {"Side yard, Northeast", "Side yard, Southwest"} <= names
     names = {i["name"] for i in check_site(s, f, extras=extras)["view"]["items"]}
     assert {"Side yard, East", "Side yard, West"} <= names
+
+
+
+def test_the_report_opens_on_the_check_sheet_and_every_tab_says_what_the_panel_says(surveyed, tmp_path):
+    """Architect review in Rhino (P1-4): the report opened on Inputs, its Output showed PASS beside "Can't check:
+    lot_area missing" and "not given" beside the panel's 7,033 sf, its title was the model's file name and its code
+    line read "PUDs only". Now it opens on the Check sheet; each Output row's Error, Why and Proposed come from the
+    panel's items; an input the measurement left open shows the panel's reading; the code line names the
+    ordinance and its date only."""
+    import openpyxl
+    report = tmp_path / "r.xlsx"
+    check(MODEL, {**surveyed, "lot_surveyed": False, "address": "106 Ithaca Rd, Ithaca, NY"}, report)
+    wb = openpyxl.load_workbook(report)
+    assert wb.sheetnames[0] == "Check" and wb.active.title == "Check"
+    out = wb["Output"]
+    head = [c.value for c in out[2]]
+    rows = [r for r in out.iter_rows(min_row=3, values_only=True) if r[0] and r[head.index("Error")]]
+    for r in rows:
+        if r[head.index("Error")] == "PASS":
+            assert not r[head.index("Why it needs review")], r
+            assert r[head.index("Proposed")] not in (None, "", "not given", "—"), r
+    assert "106 Ithaca Rd" in str(out["A1"].value)
+    text = " ".join(str(c.value) for c in wb["Check"]["A"] if c.value)
+    assert "PUDs" not in text and "Ord. No." in text
+    from design_checker import rhino_logic as logic
+    assert logic.street_name({"address": "106 Ithaca Rd, Ithaca, NY 14850"}) == "Ithaca Rd"
+    assert logic.street_name({}) == "the highlighted line"
+
+
+
+def test_a_limit_waiting_on_the_lot_depth_shows_its_range_and_says_once_why():
+    """Architect review in Rhino (P1-3): on the sample 106 lot the rear yard's detail repeated "the readings give
+    different values … isn't settled yet" two or three times and showed "—" as Required. Now Required is the
+    limit's range over the lot depth's readings, and the reason is one sentence saying what it depends on."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    house = box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30)
+    for surveyed, status in ((False, present.REVIEW), (True, present.FAILS)):
+        r = check_site(_plot(house, lot_=lot), {**facts, "lot_surveyed": surveyed})
+        rear = items(r["view"])["Rear yard"]
+        assert rear["status"] == status and rear["required"] == "21'-1 5/8\" to 25'-5 1/2\"", rear
+        assert rear["reason"].count("which lot lines") == 1, rear["reason"]
+        assert "readings give different values" not in rear["reason"] and "isn't settled" not in rear["reason"]
+    assert rear["reason"].startswith("Does not comply whichever way it is read: needs 21'-1 5/8\"")
+    r = check_site(_plot(house, lot_=lot), {**facts, "lot_surveyed": False})
+    assert items(r["view"])["Rear yard"]["reason"].startswith(
+        "Needs 21'-1 5/8\" to 25'-5 1/2\", depending on which lot lines count as side and which as rear "
+        "(it sets the lot depth): ask the zoning office")
+
+
+def test_coverage_that_turns_on_the_overhang_question_says_both_ways():
+    """Architect review in Rhino (P2-10): "At worst 28.5% against 25%: does not comply under that reading. the
+    readings give different values; whether parts … count isn't settled yet" said one way, twice. Now both ways in
+    one sentence; complying either way keeps its own words."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    ground = box(12, 30, 40, 70, 0, 10, "a")
+    r = check_site(_plot(ground, box(12, 30, 62, 70, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    assert cov["reason"] == ("If overhangs count (an open question), coverage is 28.5%, over 25%; if not, 16%: "
+                             "ask the zoning office"), cov["reason"]
+    r = check_site(_plot(ground, box(12, 30, 52, 70, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    assert items(r["view"])["Lot coverage"]["reason"].startswith("Complies under every reading")

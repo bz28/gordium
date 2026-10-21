@@ -426,15 +426,33 @@ def _worst_reading(node, measured: dict, values: dict):
     return shown[0], shown[1]
 
 
+def _coverage_either_way(node, measured: dict, values: dict) -> str | None:
+    """Lot coverage when only the overhang question is open, both ways in words: "If overhangs count (an open
+    question), coverage is 28.3%, over 25%; if not, 24.3%." None when the readings aren't those two."""
+    by = {r["reading"]: r["value"] for r in (measured.get("building_area") or {}).get("readings") or []}
+    over, ground = by.get("covered from above"), by.get("at the main grade level")
+    if over is None or ground is None or len(by) != 2 or not values.get("lot_area"):
+        return None
+    shown = {}
+    for key, x in (("over", over), ("ground", ground)):
+        trial = dict(values, building_area=x)
+        text, limit = _display(*_numbers(node, trial, measured, ""))[:2]
+        shown[key] = (text, limit, _evaluate(ast.unparse(node), trial))
+    (a, limit, a_ok), (b, _, b_ok) = shown["over"], shown["ground"]
+    return (f"If overhangs count (an open question), coverage is {a}, {'within' if a_ok else 'over'} {limit}; "
+            f"if not, {b}" + ("" if b_ok else f", also over {limit}") + ": ask the zoning office")
+
+
 def _numbers(node, values: dict, measured: dict, name: str):
     """(proposed, required, margin, unit, sign) for one comparison; coverage as a percentage of lot area."""
     m = node.left.id
     sign = SIGNS[type(node.ops[0])]
     unit = (measured.get(m) or {}).get("unit") or ""
     proposed, required = values.get(m), _evaluate(ast.unparse(node.comparators[0]), values)
-    if m == "building_area" and isinstance(required, (int, float)) and proposed is not None and values.get("lot_area"):
-        lot = values["lot_area"]
-        return proposed / lot * 100, required / lot * 100, None, "%", sign
+    if m == "building_area" and isinstance(required, (int, float)) and values.get("lot_area"):
+        lot = values["lot_area"]                 # coverage in %, its own unit, even with the footprint unknown
+        return (proposed / lot * 100 if isinstance(proposed, (int, float)) else None), required / lot * 100, None, \
+            "%", sign
     if not isinstance(proposed, (int, float)) or not isinstance(required, (int, float)):
         return proposed, required, None, unit, sign
     margin = formula.margin(proposed, required, sign in ("≥", ">"))     # exact, as the comparison: never disagree
@@ -442,6 +460,8 @@ def _numbers(node, values: dict, measured: dict, name: str):
 
 
 def _display(proposed, required, margin, unit, sign):
+    if unit == "%" and not isinstance(proposed, (int, float)):
+        return "—", _pct(required, _toward(sign, False), 1), "", None
     if unit == "%":
         margin = formula.margin(proposed, required, sign not in ("≤", "<"))
         places = 2 if abs(margin) < 0.5 else 1
@@ -653,7 +673,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     splits = [c for c in compares if c.left.id in ("side_yard_smaller", "side_yard_larger")] if measure in (
         "side_yard_smaller", "side_yard_larger") else []
     # two side yards: always in the same order (by name), so equal yards never swap with the model's units
-    parts = sorted(((c, _side_name(c.left.id, measured, facts.get("plan_north_deg") or 0.0)) for c in splits),
+    same = len(splits) == 2 and len({ast.unparse(c.comparators[0]) for c in splits}) == 1
+    parts = sorted(((c, _side_name(c.left.id, measured, facts.get("plan_north_deg") or 0.0, extras.get("side_lines"),
+                                   same)) for c in splits),
                    key=lambda p: p[1]) \
         if len(splits) == 2 else [(primary, name)]
     district = facts.get("zone") or ""
@@ -769,9 +791,42 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     if isinstance(allowed, (int, float)):
                         required = _pct(allowed / values["lot_area"] * 100, _toward(numbers[4], False), 1)
                 worst = _worst_reading(node, measured, values)
-                if worst is not None:                   # say the bad one first: "probably fine" it isn't
+                said = (_coverage_either_way(node, measured, values)          # it fails one way: say both
+                        if node.left.id == "building_area" and worst is not None else None)
+                if said:                                # both ways, in words (architect review P2-10)
+                    why = said
+                elif worst is not None:                 # say the bad one first: "probably fine" it isn't
                     why = (f"At worst {worst[0]} against {worst[1]}: does not comply under that reading. " +
                            (why or ""))
+        if node is not None and required == "—" and st in (REVIEW, FAILS):
+            # the limit waits on an open measurement (the lot depth, on which lines are side or rear): show the
+            # limit's range over its readings, and say once what it depends on (architect review P1-3)
+            limit_expr = ast.unparse(node.comparators[0])
+            open_ = [n for n in sorted(formula.names(limit_expr))
+                     if values.get(n) is None and (measured.get(n) or {}).get("readings")]
+            got = []
+            if open_:
+                import itertools
+                for combo in itertools.product(*[[r["value"] for r in measured[n]["readings"]] for n in open_]):
+                    x = _evaluate(limit_expr, dict(values, **dict(zip(open_, combo))))
+                    if isinstance(x, (int, float)):
+                        got.append(x)
+            if got:
+                unit = (measured.get(node.left.id) or {}).get("unit") or ""
+                lo, hi = min(got), max(got)
+                required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
+                            f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
+                limit_q = list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
+                rest = list(dict.fromkeys(q for n in sorted(every - set(open_)) if values.get(n) is None
+                                          and (measured.get(n) or {}).get("readings")
+                                          for q in _questions_of(measured[n]) if q not in limit_q))
+                sets = " and ".join(NAMES.get(n, n.replace("_", " ").capitalize()).lower() for n in open_)
+                if limit_q and st == FAILS:
+                    why = (f"Does not comply whichever way it is read: needs {required} (the {sets} depends on "
+                           f"{'; '.join(limit_q)})")
+                elif limit_q:
+                    why = (f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): ask the "
+                           "zoning office" + (f"; also open: {'; '.join(rest)}" if rest else ""))
         alts = _alternatives(check, values, measured) if st == FAILS and not why and not splits else []
         if len(alts) > 1 and all(alts):                 # several ways to comply, none met: say each one
             why = "Does not comply either way the rule allows: " + "; or ".join(
@@ -833,27 +888,35 @@ def _height_detail(j: Path, facts: dict, values: dict, node, numbers) -> dict:
 COMPASS = ("North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest")
 
 
-def _side_name(measure: str, measured: dict, plan_north_deg: float = 0.0) -> str:
+def compass(dx: float, dy: float, plan_north_deg: float = 0.0) -> str | None:
+    """The true compass point (8 of them) a plan direction (dx, dy) faces, the plan turned `plan_north_deg` from
+    true north; None for no direction."""
+    if abs(dx) < 1e-6 and abs(dy) < 1e-6:
+        return None
+    turn = math.radians(plan_north_deg or 0.0)
+    east = dx * math.cos(turn) + dy * math.sin(turn)            # back from the plan to true north
+    north = -dx * math.sin(turn) + dy * math.cos(turn)
+    return COMPASS[int((math.degrees(math.atan2(east, north)) % 360 + 22.5) // 45) % 8]
+
+
+def _side_name(measure: str, measured: dict, plan_north_deg: float = 0.0, side_lines=None,
+               same_minimum: bool = False) -> str:
     """Side yard, East/Northeast/...: the true compass direction, on 8 points, from the building to the lot line the
     yard was measured to. `plan_north_deg` is how far the plan is turned from true north (a looked-up lot is drawn
     turned so its street runs along the bottom: lookup_box.frame's rotation); 0 for a lot drawn by hand (plan north
-    = +y). Without a measured line, or if both point the same way, narrower or wider."""
-    turn = math.radians(plan_north_deg or 0.0)
-
+    = +y). Without a measured line: when both sides need the same minimum, the compass names of the lot's two
+    side lines (`side_lines`, from the checker: which row is which can't mislead then); otherwise, or if both point
+    the same way, narrower or wider."""
     def facing(pts):
         if not pts:
             return None
-        dx, dy = pts[0][0] - pts[-1][0], pts[0][1] - pts[-1][1]      # lot-line end minus building end
-        if abs(dx) < 1e-6 and abs(dy) < 1e-6:          # a yard of 0: no direction to name it by
-            return None
-        east = dx * math.cos(turn) + dy * math.sin(turn)            # back from the plan to true north
-        north = -dx * math.sin(turn) + dy * math.cos(turn)
-        bearing = math.degrees(math.atan2(east, north)) % 360
-        return COMPASS[int((bearing + 22.5) // 45) % 8]
+        return compass(pts[0][0] - pts[-1][0], pts[0][1] - pts[-1][1], plan_north_deg)   # lot line minus building
     a = facing((measured.get("side_yard_smaller") or {}).get("points"))
     b = facing((measured.get("side_yard_larger") or {}).get("points"))
     if a and b and a != b:
         return "Side yard, " + (a if measure == "side_yard_smaller" else b)
+    if not (a or b) and same_minimum and side_lines and len(set(side_lines)) == 2:
+        return "Side yard, " + (sorted(side_lines)[0] if measure == "side_yard_smaller" else sorted(side_lines)[1])
     return "Side yard, " + ("narrower" if measure == "side_yard_smaller" else "wider")
 
 
@@ -935,6 +998,12 @@ def state(items: list[dict]) -> str:
         if any(i["status"] == st for i in counted):
             return st
     return COMPLIES
+
+
+from model_measurement.stops import stop as _stop  # noqa: E402
+
+PICK_MAIN_WHY = _stop("no_main_building")        # the measuring's exact words when several buildings could be it
+PICK_MAIN = "Pick the main building…"            # the row's hint, and the panel's button
 
 
 BUILDING_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_height", "stories")
@@ -1066,6 +1135,9 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         if checker is not None and RANK[i["status"]] > RANK[checker]:
             i.update(status=checker, mark=MARK[checker])
     settle(items, values, measured, facts)          # Delta, colours, approx: from each row's readings, last
+    for i in items:                                  # waiting on the main building: the row says how to pick it
+        if PICK_MAIN_WHY in (i.get("reason") or "") and not i.get("hint"):
+            i["hint"] = PICK_MAIN
     if facts.get("ground_assumed") == "flat":                 # on the rows the ground decides (MVP, Ben 2026-10-20)
         for i in items:
             if i.get("measure") in ("building_height", "stories"):
@@ -1115,7 +1187,9 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
                                  "scope": "", "precision": "", "at_limit": None}})
     return {"items": items, "summary": summary(items), "state": state(items),
-            "header": header(facts, extras, documents, use_names), "groups": grouped(items)}
+            "header": header(facts, dict(extras, waiting_main=any(
+                PICK_MAIN_WHY in (m.get("reason") or "") for m in measured.values())), documents, use_names),
+            "groups": grouped(items)}
 
 
 def grouped(items: list[dict]) -> list[dict]:
@@ -1133,6 +1207,9 @@ def grade_label(facts: dict) -> str:
     elevation 0'-0"", or "not set"."""
     kind = "existing" if facts.get("grade_is") == "existing" else "finished"
     if facts.get("ground_assumed") == "flat":                 # the MVP's assumption, said wherever the grade is
+        if facts.get("ground_fall"):                          # a lookup found the ground: say plainly how it falls
+            return (f"assumed flat (the looked-up ground falls about {facts['ground_fall']:g} ft across the lot; "
+                    "height is checked as if flat)")
         return f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)})"   # the team's words
     points = facts.get("grade_points") or []
     if points:
@@ -1147,7 +1224,10 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
     law = next((d for d in documents.values() if "chapter 325" in d.get("title", "").lower()), {})
     chart = next((d for d in documents.values() if "chart" in d.get("title", "").lower()), {})
     through = re.search(r"amendments through (Ord\. No\. [\w-]+(?: \([^)]*\))?)", " ".join(str(law.get("notes", "")).split()))
-    code = "Ch. 325" + (f" as amended through {through.group(1)}" if through else "") + (
+    # the ordinance and its date only ("Ord. No. 2026-02 (May 6, 2026)"): the sources' note on what it changed
+    # ("PUDs only") read as if the code applied only to PUDs
+    amended = re.sub(r"\s*\(([^;)]*)[^)]*\)", r" (\1)", through.group(1)) if through else ""
+    code = "Ch. 325" + (f" as amended through {amended}" if through else "") + (
         " · District Regulations Chart, " + re.sub(r".*\((.*)\).*", r"\1", chart["title"]) if chart else "")
     use = facts.get("use") or ""
     lot = ("Lot lines: survey" if facts.get("lot_surveyed") else
@@ -1155,9 +1235,13 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
     grade = ("Ground: " if facts.get("ground_assumed") == "flat" else "Grade: ") + grade_label(facts)
     actions = (["Pick survey lot lines…"] if not facts.get("lot_surveyed") else []) + (
         ["Set grade…"] if grade_label(facts) == "not set" or facts.get("grade_is") == "existing" else [])
+    # several buildings: which one the yards, height and stories are measured to, said, with a way to change it.
+    # The checker's word decides it (its measuring asked for a pick), never a count made in Rhino (review round 1)
+    main = ("Main building: not picked yet" if extras.get("waiting_main") else
+            "Main building: " + extras["main_name"] if facts.get("main_building") and extras.get("main_name") else None)
     return {"place": " · ".join(p for p in [facts.get("address") or "", facts.get("zone") or "",
                                             use_names.get(use, use.replace("_", " "))] if p),
-            "code": code, "draft": DRAFT, "lot": lot, "grade": grade, "actions": actions,
+            "code": code, "draft": DRAFT, "lot": lot, "grade": grade, "actions": actions, "main": main,
             "sources": source_lines(extras.get("sources") or {})}
 
 
