@@ -34,6 +34,14 @@ def _site(floors, extra=()):
             "problems": []}
 
 
+# PR 18 reads every reading of which of 106's lot lines are side and rear lines (its real tax-map outline, cleaned
+# within 0.25 ft: 15 lines -> 9): the starting house is legal under every one, 51'-4" x 29'-8" (was 35'-11" x
+# 37'-4"), and the rear yard needs review on 106. The guide's numbers and these walkthrough steps are re-derived by
+# the Rhino job once #18 lands (coordinator, 2026-10-21); strict, so each fails the moment it holds again.
+REDERIVE = pytest.mark.xfail(strict=True, reason="QUICKSTART walkthrough to be re-derived for PR 18's lot-line "
+                                                 "readings of 106 (the Rhino job, once #18 lands)")
+
+
 @pytest.fixture(scope="module")
 def house(tmp_path_factory):
     import rhino3dm as r
@@ -88,6 +96,7 @@ def _wall_out(floors, feet, side="left"):
     return out
 
 
+@REDERIVE
 def test_the_starting_house_on_the_sample_lot(house):
     got, facts = house
     xs = [p[0] for p in got["floors"][0]["outline"]]
@@ -137,6 +146,7 @@ def test_2_move_back_5_ft(house):
     assert items["Rear yard"]["status"] == present.REVIEW                       # "the rear yard still needs review"
 
 
+@REDERIVE
 def test_3_short_only_under_some_readings_needs_review_short_under_all_fails(house):
     """A rule fails only if it fails under every reading (of the tax map's lines, and of an open question of the
     law); short under only some, it needs review (Ben, 2026-10-21)."""
@@ -161,6 +171,7 @@ def test_3_short_only_under_some_readings_needs_review_short_under_all_fails(hou
         assert not row["Fails"], (dy, row["Provisional"])        # the checker itself: one reading set (round 2)
 
 
+@REDERIVE
 def test_4_pull_the_rear_wall_back_coverage_fails_on_every_tax_map_lot(house):
     got, facts = house
     floors = copy.deepcopy(got["floors"])
@@ -184,6 +195,7 @@ def test_5_raise_the_roof_fails(house):
     assert ("height", present.FAILS) in _regions(floors, facts)                 # "the part above 35'-0" turns red"
 
 
+@REDERIVE
 def test_6_the_left_side_wall_out(house):
     got, facts = house
     feet, proposed, up_to = said(r"move the southwest wall (\d+) ft out\*\*.*?Side yard, Southwest (\d+'-\d+(?: \d/\d)?\"):"
@@ -225,6 +237,7 @@ def test_10_the_height_bonus_waits_for_the_open_question(house):
     assert h["status"] == present.REVIEW and "side and rear lot lines" in h["reason"]
 
 
+@REDERIVE
 def test_11_delta_in_words(house):
     from design_checker import rhino_logic as logic
     got, facts = house
@@ -266,6 +279,7 @@ def test_12_a_corner_lot_makes_the_yards_wait(house):
     assert items["Front yard"]["status"] == present.REVIEW
 
 
+@REDERIVE
 def test_13_on_a_survey_the_starting_house_goes_to_the_limits(house, tmp_path):
     got, facts = house
     surveyed = {**facts, "lot_surveyed": True, "grade_is": "finished"}
@@ -306,6 +320,7 @@ def test_the_quickstart_test_reads_the_guide():
         GUIDE = real
 
 
+@REDERIVE
 def test_on_a_survey_the_tax_maps_slack_is_gone(house):
     """The tax-map slack is the tax map's: with surveyed lot lines, the left wall 3 ft out (9'-0 5/8" against
     10'-0") is simply short; on the tax map it needed review (test 6)."""
@@ -314,6 +329,7 @@ def test_on_a_survey_the_tax_maps_slack_is_gone(house):
     assert side["status"] == present.FAILS and side["proposed"] == "9'-0 5/8\""
 
 
+@REDERIVE
 def test_coverage_over_only_on_some_tax_map_lots_needs_review(house):
     """The rear wall 12 ft back: 25.2% of the lot as drawn, but 22.9% of the largest lot the tax map allows (every
     line 2 ft out): it fails only under some readings, so it needs review."""
@@ -326,6 +342,7 @@ def test_coverage_over_only_on_some_tax_map_lots_needs_review(house):
     assert cov["status"] == present.REVIEW and cov["proposed"] == "25.2%" and "at best 22.9%" in cov["reason"]
 
 
+@REDERIVE
 def test_a_side_yard_short_under_every_reading_fails_in_the_checker_itself(house):
     """Review round 2: the house moved 26 ft right and 18 ft back on 106 is about 1'-2" from its Northeast line,
     short by at least 8'-8" whichever lines are the sides. The checker gave up (18 x 18 readings, over its 200) and
