@@ -45,15 +45,19 @@ def floors(x0, y0, x1, y1, n, h=10.0):
 def roof(x0, y0, x1, y1, base, ridge, over, fascia, id="roof"):
     """A gable roof drawn as its own solid, standing at `base` on walls x0..x1, y0..y1: its level underside (the
     soffit) reaches `over` past the walls on the two eave sides (x), with a vertical fascia `fascia` deep; the
-    roof slopes up from the top of the fascia to the ridge, which runs along y over the middle."""
+    roof slopes up from the top of the fascia to the ridge, which runs along y over the middle. With no fascia
+    (0) the soffit meets the roof surface at its edge: nothing hangs below the roof edge, a proven eave."""
     xa, xb, xm, lo = x0 - over, x1 + over, (x0 + x1) / 2, base + fascia
     faces = [[(xa, y0, base), (xb, y0, base), (xb, y1, base), (xa, y1, base)],
-             [(xa, y0, base), (xa, y1, base), (xa, y1, lo), (xa, y0, lo)],
-             [(xb, y0, base), (xb, y1, base), (xb, y1, lo), (xb, y0, lo)],
              [(xa, y0, lo), (xm, y0, ridge), (xm, y1, ridge), (xa, y1, lo)],
-             [(xm, y0, ridge), (xb, y0, lo), (xb, y1, lo), (xm, y1, ridge)],
-             [(xa, y0, base), (xb, y0, base), (xb, y0, lo), (xm, y0, ridge), (xa, y0, lo)],
-             [(xa, y1, base), (xb, y1, base), (xb, y1, lo), (xm, y1, ridge), (xa, y1, lo)]]
+             [(xm, y0, ridge), (xb, y0, lo), (xb, y1, lo), (xm, y1, ridge)]]
+    if fascia:
+        faces += [[(xa, y0, base), (xa, y1, base), (xa, y1, lo), (xa, y0, lo)],
+                  [(xb, y0, base), (xb, y1, base), (xb, y1, lo), (xb, y0, lo)],
+                  [(xa, y0, base), (xb, y0, base), (xb, y0, lo), (xm, y0, ridge), (xa, y0, lo)],
+                  [(xa, y1, base), (xb, y1, base), (xb, y1, lo), (xm, y1, ridge), (xa, y1, lo)]]
+    else:
+        faces += [[(xa, y0, base), (xb, y0, base), (xm, y0, ridge)], [(xa, y1, base), (xb, y1, base), (xm, y1, ridge)]]
     return {"id": id, "faces": [{"points": [list(p) for p in f]} for f in faces], "problems": []}
 
 
@@ -160,15 +164,25 @@ def test_Y1_eaves_may_reach_two_feet_into_a_required_yard_and_no_more():
       overhang 2.0: eaves at 12 − 2 = 10 ≥ 8: complies; the side yard itself is to the walls: 12 ≥ 10.
       overhang 4.5: eaves at 12 − 4.5 = 7.5 < 8: does not comply (the side yard, to the walls, still complies)."""
     house = (12, 30, 42, 70)
-    ok = run(floors(*house, 2) + [roof(*house, 20, 28, 2.0, 0.5)])
+    # no fascia: nothing past the walls hangs below the roof edge, so the overhang is proven an eave
+    ok = run(floors(*house, 2) + [roof(*house, 20, 28, 2.0, 0)])
     assert ok["measurements"]["side_yard_smaller"]["value"] == 12.0
     assert ok["measurements"]["side_yard_smaller_eaves"]["value"] == 10.0
     assert status(ok, "R-1b.yard_projections") == present.COMPLIES
     assert status(ok, "R-1b.side_yards") == present.COMPLIES
-    over = run(floors(*house, 2) + [roof(*house, 20, 28, 4.5, 0.5)])
+    over = run(floors(*house, 2) + [roof(*house, 20, 28, 4.5, 0)])
     assert over["measurements"]["side_yard_smaller_eaves"]["value"] == 7.5
     assert status(over, "R-1b.yard_projections") == present.FAILS
     assert status(over, "R-1b.side_yards") == present.COMPLIES
+    # a 0.5 ft fascia hangs below the roof edge: most likely the eave, but it could be a shallow story, so the
+    # side yard is also read to the whole outline (12 − 2 = 10, still ≥ 10: complies under both; with the
+    # 4.5 ft overhang, 7.5 < 10 as a story: needs review, never a pass)
+    judged = run(floors(*house, 2) + [roof(*house, 20, 28, 2.0, 0.5)])
+    side = judged["measurements"]["side_yard_smaller"]
+    assert {r["named"]["model#overhang"]: r["value"] for r in side["readings"]} == {"eave": 12.0, "story": 10.0}
+    assert status(judged, "R-1b.side_yards") == present.COMPLIES
+    judged_over = run(floors(*house, 2) + [roof(*house, 20, 28, 4.5, 0.5)])
+    assert status(judged_over, "R-1b.side_yards") == present.REVIEW
 
 
 def test_Y2_porch_steps_count_in_the_front_yard():
@@ -332,20 +346,134 @@ def test_a_story_cantilevered_beside_an_overhanging_roof_solid_stays_in_every_co
     cantilevered floor; eaves left out: 30 × 44 + 30 × 1.5 = 1,365 sf."""
     third = prism(rect(15, 24.5, 45, 36), 20, 30, "floor 3", floor=10.0)
     res = run(floors(15, 26, 45, 70, 2) + [third, roof(15, 36, 45, 70, 20, 33, 1.5, 0.5)])
-    area = {r["named"]["building_area#1"]: r["value"] for r in res["measurements"]["building_area"]["readings"]}
+    area = {r["named"].get("building_area#1", "story"): r["value"]
+            for r in res["measurements"]["building_area"]["readings"]}
     assert area["eaves_not_counted"] == 1365.0
     assert res["measurements"]["front_yard"]["value"] == 24.5
 
 
 def test_a_tower_standing_on_the_roofs_base_past_the_walls_stays_part_of_the_building():
-    """A flat-roofed tower (a plain solid, not a Gordium floor) standing at the roof's base level and reaching
-    2 ft past the front wall: never an eave. The front yard is read to it (30 − 2 = 28) and, since it isn't one
-    of Gordium's floor blocks, also to the walls at the ground (a bay window?), never only to the walls."""
+    """Round 2 rebuild, so it reaches the eave code: the gable roof solid covers all of floor 2 and has real eaves
+    (1 ft past the side walls, proven: no fascia); a flat-roofed tower (a plain solid) stands on floor 2 beside
+    it, reaching 2 ft past the front wall. The tower is never an eave: the front yard is read to it, 30 − 2 = 28
+    (and, since it isn't a Gordium floor block, also to the walls at the ground)."""
     tower = prism(rect(20, 28, 28, 36), 20, 34, "tower")
-    res = run(floors(*HOUSE, 2) + [roof(15, 36, 45, 70, 20, 30, 1.0, 0.5), tower])
+    res = run(floors(*HOUSE, 2) + [roof(*HOUSE, 20, 30, 1.0, 0), tower])
+    m = res["measurements"]
+    assert any("building_area#1" in (r.get("named") or {}) for r in m["building_area"]["readings"])   # eaves exist
+    assert min(r["value"] for r in m["front_yard"]["readings"] or [m["front_yard"]]) == 28.0
+    assert m["front_yard_eaves"]["value"] == 28.0
+    assert m["side_yard_smaller"]["value"] == 15.0 and m["side_yard_smaller_eaves"]["value"] == 14.0
+
+
+def gable_story(x0, y0, x1, y1, z0, eave, ridge, id="upper"):
+    """A story and its gable drawn as ONE plain solid (not a Gordium floor block): walls z0..eave, a ridge along
+    y over the middle, no overhang."""
+    xm = (x0 + x1) / 2
+    faces = [[(x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0)],
+             [(x0, y0, z0), (x0, y1, z0), (x0, y1, eave), (x0, y0, eave)],
+             [(x1, y0, z0), (x1, y1, z0), (x1, y1, eave), (x1, y0, eave)],
+             [(x0, y0, eave), (xm, y0, ridge), (xm, y1, ridge), (x0, y1, eave)],
+             [(xm, y0, ridge), (x1, y0, eave), (x1, y1, eave), (xm, y1, ridge)],
+             [(x0, y0, z0), (x1, y0, z0), (x1, y0, eave), (xm, y0, ridge), (x0, y0, eave)],
+             [(x0, y1, z0), (x1, y1, z0), (x1, y1, eave), (xm, y1, ridge), (x0, y1, eave)]]
+    return {"id": id, "faces": [{"points": [list(p) for p in f]} for f in faces], "problems": []}
+
+
+# ---- review round 2: nothing is left out of the building unless proven an eave ---------------------------------
+
+def test_a_story_and_its_gable_in_one_solid_cantilevering_past_floor_1_is_never_an_eave():
+    """Round 2, P0 (a false pass on 3db8e70: front yard 26.0, complies). Floor 1 a Gordium floor block at
+    15..45 x 26..70; the second story and its gable one plain solid at 15..45 x 24.5..70 (walls z 10-20, ridge 30).
+    Past floor 1 the solid's walls reach down to z 10, far below its roof edge (20): a story, not an eave. The
+    front yard is read to it, 24.5 < 25: never complies."""
+    res = run([prism(rect(15, 26, 45, 70), 0, 10, "floor 1", floor=10.0), gable_story(15, 24.5, 45, 70, 10, 20, 30)])
     front = res["measurements"]["front_yard"]
-    assert min(r["value"] for r in front["readings"]) == 28.0
-    assert res["measurements"]["front_yard_eaves"]["value"] == 28.0
+    assert min(r["value"] for r in front["readings"] or [front]) == 24.5
+    assert status(res, "R-1b.front_yard") != present.COMPLIES
+    assert res["measurements"]["building_area"]["value"] == 30 * 45.5          # all of it, seen from above
+
+
+def test_a_dormer_on_floor_2_reaching_past_the_front_wall_counts():
+    """A dormer block (a plain solid) on floor 2 beside the roof solid, 1 ft past the front wall: 30 − 1 = 29."""
+    dormer = prism(rect(25, 29, 32, 34), 20, 26, "dormer")
+    res = run(floors(*HOUSE, 2) + [roof(*HOUSE, 20, 30, 1.0, 0), dormer])
+    front = res["measurements"]["front_yard"]
+    assert min(r["value"] for r in front["readings"] or [front]) == 29.0
+
+
+def test_a_bay_window_and_a_balcony_touching_the_house_count():
+    """A bay window (a solid from 3 to 12 ft, 2 ft deep) and a balcony slab (10 to 10.5 ft, 3 ft deep) touching
+    the front wall: part of the building (§325-18A; the balcony projects more than 2 ft): front 30 − 3 = 27; both
+    counted in coverage: 1,200 + 2 × 8 + 3 × 6 = 1,234 sf."""
+    bay = prism(rect(18, 28, 26, 30), 3, 12, "bay")
+    balcony = prism(rect(32, 27, 38, 30), 10, 10.5, "balcony")
+    res = run(floors(*HOUSE, 2) + [roof(*HOUSE, 20, 30, 0.0, 0), bay, balcony])
+    assert res["measurements"]["front_yard"]["value"] == 27.0
+    assert res["measurements"]["building_area"]["value"] == 1234.0
+
+
+def test_a_roof_that_doesnt_stand_on_the_floors_counts_whole():
+    """A roof solid floating 1 ft above floor 2 (not standing on it) and reaching 1 ft past every wall: it
+    touches the house in plan, so it is part of it, and nothing proves its overhang an eave: the yards are to its
+    edge: front 30 − 1 = 29."""
+    floating = roof(14, 29, 46, 71, 21, 31, 0.0, 0)
+    res = run(floors(*HOUSE, 2) + [floating])
+    front = res["measurements"]["front_yard"]
+    assert min(r["value"] for r in front["readings"] or [front]) == 29.0
+
+
+def test_a_roof_on_a_roof_never_drops_the_lower_roof():
+    """A second gable roof solid standing on the first one's ridge level, both on the house: the lower roof (on
+    the floors, no overhang) is a part the upper one stands on, so nothing of it is ever an eave; the front yard
+    is at most the floors' 30."""
+    low = roof(*HOUSE, 20, 30, 0.0, 0, id="roof 1")
+    high = roof(20, 35, 40, 65, 30, 36, 0.5, 0, id="roof 2")
+    res = run(floors(*HOUSE, 2) + [low, high])
+    front = res["measurements"]["front_yard"]
+    assert max(r["value"] for r in front["readings"] or [front]) <= 30.0
+    assert res["measurements"]["building_area"]["value"] == 1200.0 or any(
+        r["value"] >= 1200.0 for r in res["measurements"]["building_area"]["readings"])
+
+
+def test_a_hip_roof_solid_with_eaves_all_round_is_a_proven_eave():
+    """A hip roof solid on floor 2: soffit at 20 reaching 1 ft past every wall, sloping from its edge (20) to a
+    point at 30, nothing below its edge: proven eaves. Yards to the walls (front 30), eaves 1 ft into them
+    (front 29)."""
+    x0, y0, x1, y1 = HOUSE
+    e = [(x0 - 1, y0 - 1), (x1 + 1, y0 - 1), (x1 + 1, y1 + 1), (x0 - 1, y1 + 1)]
+    apex = [(x0 + x1) / 2, (y0 + y1) / 2, 30]
+    hip = {"id": "hip", "problems": [], "faces": [{"points": [[x, y, 20] for x, y in e]}] +
+           [{"points": [[*e[i], 20], [*e[(i + 1) % 4], 20], apex]} for i in range(4)]}
+    res = run(floors(*HOUSE, 2) + [hip])
+    m = res["measurements"]
+    assert (m["front_yard"]["value"], m["front_yard_eaves"]["value"]) == (30.0, 29.0)
+
+
+def test_an_answer_with_no_reading_to_the_eave_question_replaces_every_reading(monkeypatch):
+    """Round 2, P3: the City answers height_of_building's open eave question without naming a reading: every
+    reading is replaced, and the code can't follow the answer, so the height stops (needs review), never the
+    readings shown as still open. The same for the eave coverage question."""
+    real = interpretations.research_entries
+
+    def answered(jurisdiction):
+        entries = copy.deepcopy(real(jurisdiction))
+        for where, e in entries:
+            if where.endswith(" height_of_building") or where.endswith(" building_area"):
+                q = e["open_questions"][0]
+                e["answers"] = [{"question": q, "answer": "We decide case by case.",
+                                 "answered_by": "the City zoning office", "answered_on": "2026-11-01"}]
+        return entries
+    monkeypatch.setattr(interpretations, "research_entries", answered)
+    interpretations.clear_cache()
+    try:
+        res = run(floors(*HOUSE, 2) + [roof(*HOUSE, 20, 30, 1.5, 0)])
+        h, area = res["measurements"]["building_height"], res["measurements"]["building_area"]
+        assert h["value"] is None and h["readings"] == [] and status(res, "R-1b.height") == present.REVIEW
+        assert area["value"] is None and area["readings"] == []
+    finally:
+        monkeypatch.undo()
+        interpretations.clear_cache()
 
 
 def test_a_roof_drawn_in_one_solid_with_its_walls_never_drops_its_overhang_from_the_yards():

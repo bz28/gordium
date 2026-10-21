@@ -251,10 +251,12 @@ def test_an_answer_may_only_pick_one_of_its_questions_readings_or_a_finding():
     ctx = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/ithaca_city")
     entry = {"research": [{"question": "Which eave?", "readings": [{"id": "wall_plate", "reading": "w"},
                                                                    {"id": "drip_edge", "reading": "d"}]}],
-             "findings": [{"id": "pitched_roof_midpoint"}]}
+             "findings": [{"id": "pitched_roof_midpoint", "question": "Midpoint?"}]}
     ctx.reviewers = {"the City zoning office"}
     who = "the City zoning office"
     base = {"question": "Which eave?", "answer": "x", "answered_by": who, "answered_on": datetime.date(2026, 11, 1)}
     assert _answer_problems([{**base, "reading": "wall_plate"}], ctx, entry) == []
-    assert _answer_problems([{**base, "reading": "pitched_roof_midpoint"}], ctx, entry) == []
+    # a finding may be picked only by an answer to its own question (round 2)
+    assert _answer_problems([{**base, "reading": "pitched_roof_midpoint"}], ctx, entry)
+    assert _answer_problems([{**base, "question": "Midpoint?", "reading": "pitched_roof_midpoint"}], ctx, entry) == []
     assert _answer_problems([{**base, "reading": "wall_plat"}], ctx, entry)

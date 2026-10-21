@@ -104,7 +104,12 @@ MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked
 SURVEY = "lot_area"        # a lot not yet surveyed: its one reading is the lot as drawn
 
 
+OVERHANG_WORDS = {"eave": "the overhang an eave", "story": "the overhang part of a story"}   # measure.OVERHANG
+
+
 def _reading_words(tag: str, rid: str) -> str:
+    if tag == "model#overhang":
+        return OVERHANG_WORDS.get(rid, rid)
     return rid.replace("_", " ")
 
 

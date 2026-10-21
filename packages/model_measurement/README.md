@@ -50,10 +50,13 @@ format report from it.
 
 The yards are measured to the nearest part of the building with its eaves left out (the finding yards_to_nearest_part:
 §325-3 YARD, §325-18A): cantilevered floors, porches, decks and steps count (a solid touching the main building is
-part of it: steps by Gordium's reading steps_count). Eaves are only a pitched roof's own overhang: for a roof drawn
-as its own solid standing on the building (on Gordium's floor blocks), what of that roof solid reaches past the parts
-it stands on, less anything another part covers (a story beside it or cantilevered above its base, a tower, always
-stays part of the building). A roof drawn in one solid with the walls, or a flat roof: nothing is told apart as an
+part of it: steps by Gordium's reading steps_count). Nothing is ever left out of the building unless it is proven
+an eave: a pitched roof drawn as its own solid standing on the building, and what of that roof solid reaches past
+the parts it stands on (less anything another part covers: a story beside it, a tower) is only roof, with no point of
+it there below the roof's own lowest edge. A fascia or soffit hanging below that edge by at most 1 ft is most likely
+the eave but could be a shallow story: then the yards and coverage are also read to the whole outline (reading
+`model#overhang`: eave / story), so that judgement can only lead to needs review, never a pass. Anything hanging
+lower past the walls (the walls of a story drawn in one solid with its roof) is building. A roof drawn in one solid with the walls, or a flat roof: nothing is told apart as an
 eave (an overhang can't be told from a story under the same roof), so it all counts as the building; anything that
 sticks out past the walls at the ground and isn't one of Gordium's floor blocks is also read to the walls (it may be
 a bay window or other projection).

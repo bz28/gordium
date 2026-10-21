@@ -776,8 +776,9 @@ APPROVAL_FIELDS = {"drafted_by", "status", "approved_by", "approved_on", "approv
 
 
 def _pickable(entry: dict, question) -> set:
-    """What an answer to `question` may pick: its research readings' ids, or a finding's id in the entry."""
-    ids = {f.get("id") for f in entry.get("findings") or [] if isinstance(f, dict)}
+    """What an answer to `question` may pick: that question's research readings' ids, or the id of the finding
+    that answers that same question (never a finding about another question)."""
+    ids = {f.get("id") for f in entry.get("findings") or [] if isinstance(f, dict) and f.get("question") == question}
     for x in entry.get("research") or []:
         if isinstance(x, dict) and x.get("question") == question:
             ids |= {g.get("id") for g in x.get("readings") or [] if isinstance(g, dict)}

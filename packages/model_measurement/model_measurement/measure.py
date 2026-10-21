@@ -495,13 +495,23 @@ def _roof_part(building: dict, sloped: list) -> tuple | None:
     return (ops.unary_union(under), base, parts[k], k) if under else None
 
 
+FASCIA_BAND = 1.0         # ft: how far a fascia or soffit may hang below a roof's edge and still be read as its eave
+OVERHANG = "model#overhang"   # the reading of an overhang whose fascia hangs below the roof edge: eave or story
+
+
 def _eave_zone(building: dict):
-    """The eaves, seen from above: only a pitched roof's own overhang past the walls under it, never anything
-    else. Told apart only for a roof drawn as its own solid standing on the building: what of that solid
-    reaches past the parts it stands on, less anything another part covers (a story beside it or cantilevered
-    above the roof's base, a tower, stays part of the building). A roof drawn in one solid with the walls: None,
-    as for a flat roof: an overhang can't be told from a story, a dormer or a tower under the same roof, so
-    everything counts as the building (the yards then also read the walls at the ground: _yards)."""
+    """The eaves, seen from above, only where they are proven to be eaves; None otherwise, and then everything
+    counts as the building (the default: nothing is ever left out of the building unless proven an eave).
+
+    Proven means: the pitched roof is drawn as its own solid standing on the building, and what of that solid
+    reaches past the parts it stands on (less anything another part covers: a story or tower beside it) is
+    only roof: no point of it there lies below the roof's own lowest edge (the drip line). Then it is
+    {"zone", "proof": "proven"}. If a fascia or soffit hangs below that edge by no more than FASCIA_BAND, it is
+    most likely the eave's construction but could be a shallow story: {"zone", "proof": "judged"}, and the
+    yards and coverage are also read to the whole outline (_yards, _coverage), so that judgement can only ever
+    lead to needs review, never a pass. Anything lower past the walls (walls of a story drawn in one solid with
+    its roof, the solid's own base past the walls under it): not an eave. A roof drawn in one solid with all the
+    walls, or a flat roof: None."""
     if not building.get("part_faces"):        # one solid: no roof solid of its own (and no need to read the roof)
         return None
     sloped = _pitched_section(building)
@@ -509,9 +519,23 @@ def _eave_zone(building: dict):
     if not part:
         return None
     walls, _base, faces, k = part
-    zone = _projection({"faces": faces}).difference(walls.buffer(TOL))
+    grown = walls.buffer(TOL)
+    zone = _projection({"faces": faces}).difference(grown)
     others = [p for i, p in enumerate(building["plans"]) if i != k]
-    return zone.difference(ops.unary_union(others).buffer(TOL)) if others else zone
+    if others:
+        zone = zone.difference(ops.unary_union(others).buffer(TOL))
+    if zone.area <= 1e-6:
+        return None
+    drip = min(p[2] for g in sloped for f in g for p in f["points"])
+    reach = zone.buffer(TOL)
+    past = [p[2] for f in faces for p in f["points"]
+            if reach.contains(Point(p[0], p[1])) and not grown.contains(Point(p[0], p[1]))]
+    low = min(past, default=drip)
+    if low >= drip - TOL:
+        return {"zone": zone, "proof": "proven"}
+    if low >= drip - FASCIA_BAND:
+        return {"zone": zone, "proof": "judged"}
+    return None
 
 
 def _eaves(building: dict, sloped: list[list[dict]]) -> dict:
@@ -552,7 +576,7 @@ def _eaves(building: dict, sloped: list[list[dict]]) -> dict:
                   if reach.contains(Point(p[0], p[1])) and not grown.contains(Point(p[0], p[1]))]
         if plan.difference(grown).area <= 1e-6:
             under.append(low)                   # no overhang: the eave is the roof edge at the wall
-        elif faces is not None or min(beyond + [low]) >= low - TOL:
+        elif min(beyond + [low]) >= low - (FASCIA_BAND if faces is not None else TOL):
             under.append(min(beyond + [low]))   # the roof solid's own lowest point past the walls; or, drawn in one
         else:                                   # solid, nothing hangs below the roof edge
             under.append(None)                  # something hangs below it in one solid: a fascia or an upper floor?
@@ -1004,6 +1028,8 @@ NOT_FRAME_WORDS = {"frame_distances_apply": "the frame distances apply to every 
                                                                     "to every accessory building",
                    "front_yard_rule_only": "only \"not in a required front yard\" applies"}
 EAVE_COVERAGE = ("eaves_not_counted", "eaves_over_2ft_counted", "eaves_counted")   # building_area's open question
+OVERHANG_QUESTION = ("whether a roof solid's overhang whose fascia hangs below the roof's edge is an eave or part "
+                     "of a story can't be told for sure from the model")
 PROJECTION = 2.0          # ft: eaves and similar features may project this far into a required yard (§325-18B)
 
 
@@ -1012,13 +1038,14 @@ def _views(building: dict, level: float) -> dict:
     but the pitched roof's own overhang (_eave_zone: every story, cantilever, tower and dormer stays in it);
     `ground`, its walls at ground level."""
     above = _projection(building)
-    zone = _eave_zone(building)
+    found = _eave_zone(building)
     # the zone starts TOL past the walls; grown back by TOL (square corners) it meets them exactly
-    body = above.difference(zone.buffer(TOL, join_style=2)) if zone is not None and zone.area > 1e-6 else above
+    body = above.difference(found["zone"].buffer(TOL, join_style=2)) if found else above
     if body.is_empty:
         body = above
-    return {"above": above, "body": body, "ground": _section(building, level + TOL),
-            "eaves": above.difference(body.buffer(TOL)).area > 1e-6}
+    eaves = above.difference(body.buffer(TOL)).area > 1e-6
+    return {"above": above, "body": body, "ground": _section(building, level + TOL), "eaves": eaves,
+            "judged": eaves and found["proof"] == "judged"}
 
 
 def _coverage(buildings: list[dict], views: dict, facts: dict, main: dict | None) -> dict:
@@ -1049,9 +1076,14 @@ def _coverage(buildings: list[dict], views: dict, facts: dict, main: dict | None
             return _missing(name, stop("reading_unknown", reading=rid, entry="building_area"))
         words = {"eaves_not_counted": "eaves left out", "eaves_counted": "eaves counted in full",
                  "eaves_over_2ft_counted": "the part of the eaves beyond 2 ft counted"}[rid]
-        readings.append((words, shapes[rid].area, {"named": {q["tag"]: rid}}))
-    return _decide(name, readings, how, objects, "whether roof eaves count toward lot coverage is an open question "
-                   "for the architects (building_area)", basis)
+        readings.append((words, shapes[rid].area, {"named": {q["tag"]: rid, OVERHANG: "eave"}}))
+    question = "whether roof eaves count toward lot coverage is an open question for the architects (building_area)"
+    if any(v.get("judged") for v in views.values()):       # the eave proof is a judgement: the whole outline too
+        readings.append(("the overhang read as part of a story", above.area, {"named": {OVERHANG: "story"}}))
+        question += "; " + OVERHANG_QUESTION
+    else:
+        readings = [(w, v, {"named": {k: r for k, r in x["named"].items() if k != OVERHANG}}) for w, v, x in readings]
+    return _decide(name, readings, how, objects, question, basis)
 
 
 def _lot_lines(lot: Lot, facts: dict):
@@ -1174,7 +1206,11 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
     body, ground, above = joined("body"), joined("ground"), joined("above")
     decks = ops.unary_union([views[b["id"]]["above"] for b in unlisted]) if unlisted else None
     questions = []
-    shapes = [("", body)]
+    if any(views[b["id"]].get("judged") for b in [main, *parts_of]):     # the eave proof is a judgement
+        shapes = [("", body, {OVERHANG: "eave"}), ("the overhang read as part of a story", above, {OVERHANG: "story"})]
+        questions.append(OVERHANG_QUESTION)
+    else:
+        shapes = [("", body, {})]
     # what sticks out past the walls at the ground: a Gordium floor block is a story (part of the building, the
     # law); anything else could be an upper floor or a bay window
     stories = ([p for p, is_floor in zip(main.get("plans") or [], main["floor"]) if is_floor]
@@ -1182,14 +1218,15 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
     known = ops.unary_union([ground] + stories) if stories else ground
     if not ground.is_empty and body.difference(known.buffer(TOL)).area > 1e-6:
         shapes.append(("to its walls at ground level, what sticks out above being a bay window or other projection",
-                       ground))
+                       ground, {}))
         questions.append("whether a part below the roof that sticks out past the walls at the ground is an upper floor "
                          "(part of the building) or a bay window (a projection, §325-18B) can't be told from the model "
                          "(yard_projections)")
-    eave_shapes = [("", above)]
+    eave_shapes = [("", above, {})]
     if decks is not None:
-        shapes += [(_both(w, "the solids standing apart read as freestanding decks"), s.union(decks)) for w, s in shapes]
-        eave_shapes += [("the solids standing apart read as freestanding decks", above.union(decks))]
+        shapes += [(_both(w, "the solids standing apart read as freestanding decks"), s.union(decks), n)
+                   for w, s, n in shapes]
+        eave_shapes += [("the solids standing apart read as freestanding decks", above.union(decks), {})]
         questions.append("whether a solid standing apart from the main building is an accessory building (§325-25) or "
                          "a freestanding deck (part of the building, §325-18A): list the accessory buildings "
                          "(accessory_buildings)")
@@ -1198,9 +1235,9 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
     lot_question = lines["question"]
     for suffix, group in (("", shapes), ("_eaves", eave_shapes)):
         q = "; ".join([lot_question] + questions)
-        front = [(w, *_distance(streets, s)) for w, s in group]
+        front = [(w, *_distance(streets, s), n) for w, s, n in group]
         out["front_yard" + suffix] = _decide(
-            "front_yard" + suffix, [(w, d, {"points": p}) for w, d, p in front],
+            "front_yard" + suffix, [(w, d, {"points": p, "named": n}) for w, d, p, n in front],
             "the least distance from the street lot line(s) to the main building" + (", eaves included" if suffix else ""),
             objects, "; ".join(questions) or q, basis["front"])
         if lines["problem"]:
@@ -1209,13 +1246,13 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
             continue
         small, large, rear = [], [], []
         for words, r in lines["readings"]:
-            for w, s in group:
+            for w, s, n in group:
                 found = [_distance(lot.line(g), s) for g in r["sides"]]
                 (a, pa), (b, pb) = (found * 2)[:2]
-                small.append((_both(words, w), min(a, b), {"points": pa if a <= b else pb}))
-                large.append((_both(words, w), max(a, b), {"points": pb if a <= b else pa}))
+                small.append((_both(words, w), min(a, b), {"points": pa if a <= b else pb, "named": n}))
+                large.append((_both(words, w), max(a, b), {"points": pb if a <= b else pa, "named": n}))
                 d, p = _distance(lot.line(r["rear"]), s)
-                rear.append((_both(words, w), d, {"points": p}))
+                rear.append((_both(words, w), d, {"points": p, "named": n}))
         eaves = ", eaves included" if suffix else ""
         out["side_yard_smaller" + suffix] = _decide("side_yard_smaller" + suffix, small,
                                                     "the least distance from the nearer side lot line to the building"

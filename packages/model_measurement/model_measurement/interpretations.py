@@ -74,7 +74,7 @@ def finding(facts: dict, entry: str, finding_id: str) -> dict | None:
     found = next((f for e in by_id.get(entry, []) for f in e.get("findings") or []
                   if isinstance(f, dict) and f.get("id") == finding_id), None)
     for a in _answers(by_id, entry):
-        if a.get("reading") == finding_id:
+        if a.get("reading") == finding_id and found is not None and a.get("question") == found.get("question"):
             return {"id": finding_id, "entry": entry, "kind": "answer", "confirm_with": None, "still_open": [],
                     "answer": a.get("answer"), "text": f"{a.get('answer')} ({_who(a)})"}
         if found is not None and a.get("question") == found.get("question"):
