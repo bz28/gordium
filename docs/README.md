@@ -82,6 +82,7 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 | [model_measurement](../packages/model_measurement/README.md) | Measures a Rhino model the way the City defines each measurement (lot, yards, building area, height) | Engineers | A measurement is added or changes |
 | [envelope_builder](../packages/envelope_builder/README.md) | The largest building the rules allow on a lot (the envelope) | Engineers | The envelope changes |
 | [design_checker](../packages/design_checker/README.md) | Checks a design in one call: measure, run the zone's rules, work out the envelope | Engineers | The check changes |
+| [the architect stress test](../packages/design_checker/tests/stress/README.md) | Random architect edits checked against an independent answer key (never a false pass); its two sample sizes | Engineers | The stress test changes |
 
 **Regulation steps** (the data for each city, in numbered steps):
 
