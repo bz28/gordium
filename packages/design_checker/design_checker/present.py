@@ -988,6 +988,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 elif worst is not None:                 # say the bad one first: "probably fine" it isn't
                     why = (f"At worst {worst[0]} against {worst[1]}: does not comply under that reading. " +
                            (why or ""))
+        bound = ((measured.get("stories") or {}).get("reason") or "") if measure == "stories" else ""
+        if st == REVIEW and "could hold up to" in bound:     # the drawing allows a range: say why, once, plainly
+            q = bound.split("; ")[-1].replace(" (story)", "")
+            why = q[0].upper() + q[1:] + "."
         if node is not None and required == "—" and st in (REVIEW, FAILS):
             # the limit waits on an open measurement (the lot depth, on which lines are side or rear): show the
             # limit's range over its readings, and say once what it depends on (architect review P1-3)
@@ -1038,7 +1042,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             # the open questions that verdict turns on: while there are any, no change to the design makes it comply
             "_turns_on": (side_row if side_row is not None else row).get("Turns on") or [],
             # the stated facts it reads that aren't set (R-3a's lot size: dwelling units…): its own "Enter …" button
-            "needs": rhino_logic.needs_of(reading_set.rule_names(rule), values) if st != COMPLIES else [],
+            "needs": (rhino_logic.needs_of(reading_set.rule_names(rule), values) + (
+                ["stories"] if "stories" in reading_set.rule_names(rule)
+                and rhino_logic.stories_needed(measured.get("stories")) else [])) if st != COMPLIES else [],
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_advice": advice if hint and advice and hint == advice_text(advice) else None,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped

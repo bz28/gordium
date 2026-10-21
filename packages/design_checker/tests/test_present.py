@@ -1588,3 +1588,39 @@ def test_moving_along_the_slope_never_turns_a_ground_stop_into_complies():
                     if was and was["status"] == present.REVIEW and "meet the buildings" in (was.get("reason") or ""):
                         assert i["status"] != present.COMPLIES, (bottom, step, name, was["reason"])
             before = now
+
+
+def test_the_stories_row_asks_for_the_whole_buildings_count_and_takes_it():
+    """Demo fact-check (2), and Ben: read the geometry before ever asking. A plain solid h tall can hold at most
+    floor(h / 7 ft) stories (R305.1). A 12 ft garage beside the starting house holds one: the Stories row never asks
+    for a count (with the main building picked it complies). A 30 ft plain house could hold one to four in R-1b
+    (3 allowed): the row says why and its own Enter button asks; 3 entered complies; 5 (more than 30 ft could
+    hold) is refused with the measuring's words."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    base = {**facts, "lot_surveyed": True}
+    base.pop("stories", None)
+    house = [floor(12, 30, 36, 60, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(40, 66, 50, 86, 0, 12, "garage")
+    st = items(check_site(_plot(*house, garage, lot_=lot), base)["view"])["Stories"]
+    assert "stories" not in st["needs"] and "enter the count" not in (st["reason"] or "")
+    st = items(check_site(_plot(*house, garage, lot_=lot), {**base, "main_building": "f0"})["view"])["Stories"]
+    assert st["status"] == present.COMPLIES, st
+    big = box(12, 30, 36, 60, 0, 30, "house")
+    st = items(check_site(_plot(big, lot_=lot), base)["view"])["Stories"]
+    assert st["status"] == present.REVIEW and "stories" in st["needs"]
+    assert st["reason"] == "A 30 ft solid (the building) could hold up to 4 stories: draw its floors or enter the count."
+    assert logic.enter_words(st["needs"]) == "Enter the number of stories"
+    view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 3}))["view"]
+    assert items(view)["Stories"]["status"] == present.COMPLIES and logic.refused_stories(view["items"]) is None
+    view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 5}))["view"]
+    kept = [{k: i.get(k) for k in ("id", "name", "status", "reason")} for i in view["items"]]   # as the plugin keeps
+    said = logic.refused_stories(kept)
+    assert said and "more than the drawing could hold" in said and "at most 4" in said and "wasn't kept" in said
+    view = check_site(_plot(*house, lot_=lot), logic.update_counts(base, {"stories": 2}))["view"]
+    assert "fewer than the floor blocks drawn (3)" in (logic.refused_stories(
+        [{k: i.get(k) for k in ("name", "reason")} for i in view["items"]]) or "")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.refused_stories(" in rhino

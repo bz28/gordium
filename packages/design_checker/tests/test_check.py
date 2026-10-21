@@ -1886,3 +1886,22 @@ def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert ('            if r.get("help"):          # what that row is, in a sentence (the front lot line\'s)\n'
             '                layout.AddRow(None, row(label(r["help"], size=11)))') in ui
+
+
+def test_the_envelope_never_uses_a_grade_the_measuring_refused():
+    """Round 5 (P3): the envelope's guard copied only the reader's problems: an open building found by the
+    measuring, or one not meeting the ground, still got a grade plane. It now uses the measuring's own refusal."""
+    import sys
+    from design_checker.check import _envelope_facts
+    sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
+    from test_measure import box
+    walls = box(10, 25, 35, 65, 0, 30)
+    walls["faces"] = [f for f in walls["faces"] if len({round(p[2], 6) for p in f["points"]}) > 1]
+    spots = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]]
+    got = _envelope_facts({"buildings": [walls]}, {"grade_points": spots})
+    assert got["ground_is_flat"] is None and "grade_elevation" not in got or got.get("grade_elevation") is None
+    floating = box(10, 25, 35, 65, 5, 30)
+    got = _envelope_facts({"buildings": [floating]}, {"grade_points": spots})
+    assert got["ground_is_flat"] is None
+    good = _envelope_facts({"buildings": [box(10, 25, 35, 65, 0, 30)]}, {"grade_points": spots})
+    assert good["ground_is_flat"] is True and good["grade_elevation"] == pytest.approx(0.0)
