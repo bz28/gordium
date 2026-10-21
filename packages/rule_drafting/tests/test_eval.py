@@ -278,18 +278,19 @@ def grade_mapped(book: dict, entries: dict, drafted: list[dict], ctx) -> dict:
         units = [[by_id[i] for i in u] for u in e.get("judge") or []]
         parts = [by_id[i] for i in e.get("parts") or []]
         every = [r for u in units for r in u] + parts
+        same = e.get("same_measures") or {}             # a drafted measure that is the key's under another name
         for ex in h.get("examples", []):
             out["total"] += 1
             item = {"hand": h["id"], "given": ex["given"], "expect": ex["expect"]}
             if not every:
                 out["undrafted"].append(item)
                 continue
-            got, notes = combined(every, {"district": district} | ex["given"], ctx, set(ctx.proposed))
+            given = ex["given"] | {d: ex["given"][k] for d, k in same.items() if k in ex["given"]}
+            got, notes = combined(every, {"district": district} | given, ctx, set(ctx.proposed) - set(same))
             item |= {"got": got, "drafted": [r["id"] for r in every], "notes": notes}
             (out["agree"] if got == ex["expect"] else out["disagree"]).append(item)
         groups = [[r for r in u if r.get("kind") != "flag"] for u in units] + [[r] for u in units for r in u
                                                                              if r.get("kind") == "flag"] + [parts]
-        same = e.get("same_measures") or {}             # a drafted measure that is the key's under another name
         # a measure only the hand key uses (described on the key's own branch) is evaluated as a number, as there
         own = {n: {"unit": "count", "meaning": "the hand key's own measure"} for n in _formula_names([h])
                if n not in ctx.kinds() and n not in ("use", "district")}
@@ -848,3 +849,22 @@ def test_a_dropped_special_permit_use_is_a_false_pass_whatever_else_cites_the_us
     g = grade_mapped({"district": "R-3a", "rules": [hand_flag]}, entries, [dropped, lot], ctx)
     assert [x["got"] for x in g["false_pass"]] == ["not_applicable"]
     assert grade_mapped({"district": "R-3a", "rules": [hand_flag]}, entries, [use, lot], ctx)["false_pass"] == []
+
+
+def test_a_measure_declared_the_same_is_given_one_value_on_the_keys_own_examples_too(ctx, monkeypatch):
+    """Review round 9: same_measures was applied only to the false-pass designs; on the key's own examples the draft's
+    measure was filled from its own passing example (4 units), so the right 3-to-6 rule showed passing 2 and 7."""
+    monkeypatch.setattr(ctx, "proposed", ctx.proposed | {
+        "dwelling_units_in_building": {"unit": "count", "meaning": "dwelling units in the building"},
+        "attached_units_in_building": {"unit": "count", "meaning": "attached units in the building"}})
+    hand = {"id": "R-2c.k", "kind": "rule", "applies_when": 'use == "one_family_attached"',
+            "check": "attached_units_in_building >= 3 and attached_units_in_building <= 6",
+            "examples": [{"given": {"use": "one_family_attached", "attached_units_in_building": n}, "expect": e}
+                         for n, e in ((2, "fail"), (4, "pass"), (7, "fail"))]}
+    drafted = {"id": "general.d", "kind": "rule", "applies_when": 'use == "one_family_attached"',
+               "check": "dwelling_units_in_building >= 3 and dwelling_units_in_building <= 6", "sources": [],
+               "examples": [{"given": {"use": "one_family_attached", "dwelling_units_in_building": 4}, "expect": "pass"}]}
+    entries = {"R-2c.k": {"judge": [["general.d"]], "reason": "x",
+                          "same_measures": {"dwelling_units_in_building": "attached_units_in_building"}}}
+    g = grade_mapped({"district": "R-2c", "rules": [hand]}, entries, [drafted], ctx)
+    assert len(g["agree"]) == 3 and g["disagree"] == [] and g["false_pass"] == []

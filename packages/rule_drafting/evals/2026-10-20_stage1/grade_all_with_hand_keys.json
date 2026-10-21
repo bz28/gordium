@@ -4773,9 +4773,7 @@
     "drafted": [
      "general.325_3b_one_family_attached_dwelling_attached_units_per_building"
     ],
-    "notes": [
-     "general.325_3b_one_family_attached_dwelling_attached_units_per_building given {'dwelling_units_in_building': 4} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-2c.attached_units_per_building",
@@ -4788,8 +4786,46 @@
     "drafted": [
      "general.325_3b_one_family_attached_dwelling_attached_units_per_building"
     ],
+    "notes": []
+   },
+   {
+    "hand": "R-2c.attached_units_per_building",
+    "given": {
+     "use": "one_family_attached",
+     "attached_units_in_building": 2
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "general.325_3b_one_family_attached_dwelling_attached_units_per_building"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-2c.attached_units_per_building",
+    "given": {
+     "use": "one_family_attached",
+     "attached_units_in_building": 7
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "general.325_3b_one_family_attached_dwelling_attached_units_per_building"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-2c.attached_units_per_building",
+    "given": {
+     "use": "one_family_attached"
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "general.325_3b_one_family_attached_dwelling_attached_units_per_building"
+    ],
     "notes": [
-     "general.325_3b_one_family_attached_dwelling_attached_units_per_building given {'dwelling_units_in_building': 4} from its own passing example"
+     "general.325_3b_one_family_attached_dwelling_attached_units_per_building needs ['dwelling_units_in_building'], which the hand example doesn't give"
     ]
    },
    {
@@ -4803,9 +4839,7 @@
     "drafted": [
      "general.325_3b_one_family_attached_dwelling_attached_units_per_building"
     ],
-    "notes": [
-     "general.325_3b_one_family_attached_dwelling_attached_units_per_building given {'dwelling_units_in_building': 4} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-2c.lot_area_other_use",
@@ -5819,50 +5853,6 @@
    }
   ],
   "disagree": [
-   {
-    "hand": "R-2c.attached_units_per_building",
-    "given": {
-     "use": "one_family_attached",
-     "attached_units_in_building": 2
-    },
-    "expect": "fail",
-    "got": "pass",
-    "drafted": [
-     "general.325_3b_one_family_attached_dwelling_attached_units_per_building"
-    ],
-    "notes": [
-     "general.325_3b_one_family_attached_dwelling_attached_units_per_building given {'dwelling_units_in_building': 4} from its own passing example"
-    ]
-   },
-   {
-    "hand": "R-2c.attached_units_per_building",
-    "given": {
-     "use": "one_family_attached",
-     "attached_units_in_building": 7
-    },
-    "expect": "fail",
-    "got": "pass",
-    "drafted": [
-     "general.325_3b_one_family_attached_dwelling_attached_units_per_building"
-    ],
-    "notes": [
-     "general.325_3b_one_family_attached_dwelling_attached_units_per_building given {'dwelling_units_in_building': 4} from its own passing example"
-    ]
-   },
-   {
-    "hand": "R-2c.attached_units_per_building",
-    "given": {
-     "use": "one_family_attached"
-    },
-    "expect": "needs_review",
-    "got": "pass",
-    "drafted": [
-     "general.325_3b_one_family_attached_dwelling_attached_units_per_building"
-    ],
-    "notes": [
-     "general.325_3b_one_family_attached_dwelling_attached_units_per_building given {'dwelling_units_in_building': 4} from its own passing example"
-    ]
-   },
    {
     "hand": "R-2c.height",
     "given": {
@@ -7450,12 +7440,12 @@
   "false_pass": [],
   "summary": {
    "examples": 224,
-   "agree": 78,
-   "disagree": 31,
+   "agree": 81,
+   "disagree": 28,
    "undrafted": 115,
    "false_pass": 0,
-   "agree_of_all": "78/224",
-   "agree_of_drafted": "78/109"
+   "agree_of_all": "81/224",
+   "agree_of_drafted": "81/109"
   }
  },
  "R-3a.yaml": {

@@ -9,5 +9,5 @@ R-1b.yaml: 35       # of 48
 R-1a.yaml: 57       # of 74
 R-2a.yaml: 73       # of 98
 R-2b.yaml: 73       # of 99
-R-2c.yaml: 78       # of 224
+R-2c.yaml: 81       # of 224 (78 before round 9: the attached-units examples were judged with a substituted value)
 R-3a.yaml: 79       # of 141

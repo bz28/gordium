@@ -86,12 +86,12 @@ keys:
           the draft applies its bedroom formula to every use, so it answers this question (wrongly where it passes a non-residential
           use)), so it is listed for a person'
     unmatched:
-      R-1b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
-        no key rule asks it'
-      R-1b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
-      R-1b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
       R-1b.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
         rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
+      R-1b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
+      R-1b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-1b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
+        no key rule asks it'
     known_false_passes: {}
   R-1a.yaml:
     district: R-1a
@@ -169,12 +169,12 @@ keys:
           the draft applies its bedroom formula to every use, so it answers this question (wrongly where it passes a non-residential
           use)), so it is listed for a person'
     unmatched:
-      R-1a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
-        no key rule asks it'
-      R-1a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
-      R-1a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
       R-1a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
         rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
+      R-1a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
+      R-1a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-1a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
+        no key rule asks it'
     known_false_passes: {}
   R-2a.yaml:
     district: R-2a
@@ -276,14 +276,14 @@ keys:
         judge: []
         reason: 'not drafted: loading is not in stage 1'
     unmatched:
+      R-2a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
+        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
+      R-2a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
+      R-2a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
       R-2a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
       R-2a.325_8b_two_family_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building; no
         key rule asks it'
-      R-2a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
-      R-2a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
-      R-2a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
-        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
     known_false_passes: {}
   R-2b.yaml:
     district: R-2b
@@ -385,14 +385,14 @@ keys:
         judge: []
         reason: 'not drafted: loading is not in stage 1'
     unmatched:
+      R-2b.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
+        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
+      R-2b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
+      R-2b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
       R-2b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
       R-2b.325_8b_two_family_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building; no
         key rule asks it'
-      R-2b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
-      R-2b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
-      R-2b.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
-        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
     known_false_passes: {}
   R-2c.yaml:
     district: R-2c
@@ -658,14 +658,14 @@ keys:
         judge: []
         reason: 'not drafted: loading is not in stage 1'
     unmatched:
+      R-3a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
+        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
+      R-3a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
+      R-3a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
       R-3a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
       R-3a.325_8b_two_family_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building; no
         key rule asks it'
-      R-3a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
-      R-3a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
-      R-3a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
-        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
     known_false_passes:
       R-3a.abutting_r1: 'where the lot doesn''t abut R-1 land the draft says §325-19E doesn''t apply, as the law says; the
         key''s flag always reviews because adjacency isn''t measured. Not demoted: the question is with the key''s owner (2026-10-21);
