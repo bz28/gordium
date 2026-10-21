@@ -632,3 +632,60 @@ def test_a_malformed_eave_confirmation_is_refused():
     assert fact_problems({"eaves_confirmed": [{"overhang": "x", "value": True}]})
     assert not fact_problems({"eaves_confirmed": [{"overhang": "x", "value": True, "source": "entered by you",
                                                    "confirmed_by": "the architect", "date": "2026-10-21"}]})
+
+
+# ---- review round 4: the confirmation names everything that makes the overhang -------------------------------
+
+def _built(fascia=0.0, roof_id="roof"):
+    return floors(*CONFIRMED_HOUSE, 2) + [roof(*CONFIRMED_HOUSE, 20, 36, 2.0, fascia, id=roof_id)]
+
+
+def test_deepening_the_fascia_after_it_was_confirmed_asks_again():
+    """Round 4, P0 (a false pass on 6524519): the overhang confirmed with no fascia, then an 8 ft fascia (a knee
+    wall, really) added under the same plan outline. The old fingerprint (plan bounds and area) didn't change, so
+    the confirmation still applied: complies. Now any edit to the roof solid asks again."""
+    first = run(_built())
+    res = run(_built(fascia=8.0), eaves_confirmed=_confirm(first))
+    assert status(res, "R-1b.side_yards") != present.COMPLIES
+
+
+def test_swapping_the_roof_solid_for_another_with_the_same_shape_asks_again():
+    first = run(_built())
+    res = run(_built(roof_id="another roof"), eaves_confirmed=_confirm(first))
+    assert status(res, "R-1b.side_yards") != present.COMPLIES
+
+
+def test_a_confirmation_holds_while_nothing_changes():
+    first = run(_built())
+    again = run(_built(), eaves_confirmed=_confirm(first))
+    assert status(again, "R-1b.side_yards") == present.COMPLIES
+    assert again["measurements"]["side_yard_smaller"]["eave_candidates"] == \
+        first["measurements"]["side_yard_smaller"]["eave_candidates"]
+
+
+def test_the_item_carries_the_candidates_and_says_what_it_waits_for():
+    """Round 4, P2: no panel button yet, so the reason says the truth (asked in a later release; needs review
+    until then), and each item carries the fingerprints a future confirm will name."""
+    res = run(_built())
+    side = [i for i in rows(res, "R-1b.side_yards") if i["status"] == present.REVIEW]
+    assert side and all(i["detail"]["eave_candidates"] for i in side)
+    assert all("next release" in i["reason"] and "These are eaves" not in i["reason"] for i in side)
+    assert side[0]["detail"]["eave_candidates"] == res["measurements"]["side_yard_smaller"]["eave_candidates"]
+
+
+@pytest.mark.parametrize("mirror", [False, True])
+def test_a_one_sided_overhang_is_named_by_how_far_it_reaches_wherever_the_house_sits(mirror):
+    """Review round 15, P2. Walls 10.5 ft from the west line and 12 ft from the east (on the 60 ft lot: 10.5..48),
+    a gable roof reaching 3 ft past the east wall and nothing past the west. The narrower side yard is the west one
+    measured to the walls (10.5) but the east one to the roof (9.0): paired by rank the gaps were 1.5 each, and the
+    architect was asked to confirm a 1'-6" eave. Paired by lot line: 12 - 9 = 3'-0" (east), 0 (west). Mirrored
+    (12 west, 10.5 east, the overhang on the west), the same 3'-0"."""
+    # the roof solid stands 1.5 ft in from one wall, its soffit 1.5 ft past its own walls: 3 ft past that wall
+    walls, roof_x = ((10.5, 48), (12, 49.5)) if not mirror else ((12, 49.5), (10.5, 48))
+    res = run(floors(walls[0], 30, walls[1], 70, 2) + [roof(roof_x[0], 30, roof_x[1], 70, 20, 30, 1.5, 0.0)])
+    # (each side yard is its own row with the checker's own verdict for it: the side the overhang reaches toward
+    # needs the confirmation; the other complies to the full outline either way)
+    got = rows(res, "R-1b.side_yards")
+    reasons = [i["reason"] or "" for i in got if i["status"] == present.REVIEW]
+    assert reasons and all("3'-0\" past the walls toward the side yard" in t for t in reasons), reasons
+    assert not any("1'-6\"" in (i["reason"] or "") for i in got), got

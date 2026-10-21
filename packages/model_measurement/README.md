@@ -27,7 +27,7 @@ format report from it.
   | `address_street_line` | on a corner lot: the lot line(s) on the street the lot's address is on (it decides which yard is the rear yard). Not given, each street is read as it, and the yards it changes need review |
   | `accessory_buildings` | the ids of the solids that are accessory buildings (a garage, a shed). A solid standing apart from the main building that isn't listed could be a freestanding deck (part of the building, §325-18A), so both are read. Listing them also picks the main building (the one left) |
   | `accessory_frame` | yes or no: the accessory buildings are frame. Frame ones keep §325-25C's distances by law; for others it is an open question (325-25C#1), read every way |
-  | `eaves_confirmed` | a lot fact entered in the panel ("These are eaves") for one overhang: [{overhang (its fingerprint, from the check), value: true, source, confirmed_by, date}]. Without it, a yard that meets its minimum only to the walls needs review; a later edit to the overhang asks again |
+  | `eaves_confirmed` | a lot fact for one overhang (the panel will ask for it in a later release): [{overhang (its fingerprint, from the check), value: true, source, confirmed_by, date}]. Without it, a yard that meets its minimum only to the walls needs review; a later edit to the overhang asks again |
   | `grade_elevation` | the ground level heights are measured from (a flat site) |
   | `ground_is_flat` | yes or no. Sloped ground needs the ground levels around the walls (the grade plane), not measured yet: without a yes, height, building area and the yards say "needs review" |
   | `lot_surveyed` | yes or no: the lot outline is from a survey. A drawn lot (from a map) isn't: without a yes, the lot area, and so lot size and coverage, say "needs review" (the drawn area is listed as a reading) |
@@ -58,10 +58,13 @@ one helper the height, the yards and coverage share, only suggests what might be
 past the walls under it. Where there is such a candidate, each yard is also read to the walls (the `model#eave`
 reading: eave / not_eave): if the full outline meets the requirement, that is the result; if only the walls do, the
 item needs review and asks whether the part reaching that far past the walls is an eave (§325-18B lets eaves
-reach up to 2 ft into a required yard; `R-1b.yard_projections` checks that). The answer is a lot fact entered in
-the panel ("These are eaves"), `eaves_confirmed`: [{overhang, value: true, source, confirmed_by, date}], naming the
-candidate's fingerprint (`eave_candidates` on the yard, height and coverage records). It applies to that overhang
-only: an edit that moves or resizes it gives a new fingerprint, and the question is asked again. The height's eave
+reach up to 2 ft into a required yard; `R-1b.yard_projections` checks that). The answer is a lot fact,
+`eaves_confirmed`: [{overhang, value: true, source, confirmed_by, date}], naming the candidate's fingerprint
+(`eave_candidates` on the yard, height and coverage records, and in each item's detail). The panel will ask for it
+in a later release; until then such an item stays needs review. The fingerprint is a sha256 over the ids of the
+solids whose faces make the overhang, every vertex of those solids (to 0.01 ft) and the overhang's outline (to 0.01
+ft): any edit to those solids (a deeper fascia, a knee wall, another solid swapped in) gives a new one, and the
+question is asked again; the same model gives the same one. The height's eave
 readings follow the same rule (unconfirmed, each is also read with the roof edge as the eave). Anything that sticks
 out past the walls at the ground and is neither one of Gordium's floor blocks nor a candidate eave is also read to
 the walls at the ground (`model#projection`: it may be a bay window or other projection).
@@ -78,8 +81,10 @@ both: only that reading is measured. The code finds a question by its entry and 
 measure, so a renumbered question is still found; a question or finding the files no longer have stops the
 measurement.
 
-Side and rear lot lines follow from the street: lines next to the street lines and about square to them
-(60° or more) are side lines; lines not next to them and about parallel (30° or less) are rear lines.
+Side and rear lot lines follow from the street, every way the geometry allows (no angle decides it): walking out
+from each end of the street lines, the lines run on as that side lot line for one or more lines, and the rear lot
+line is what is left. The line at each end of the street touches the street, so it is a side line, never the rear;
+a reading with no rear line isn't one. More than 6 lines that could be either: too many to list (needs review).
 
 ## Never a guess
 
@@ -131,8 +136,10 @@ Every reason the code gives today comes from the table:
 - **What research settled** (`interpretations.py`): "the city's files no longer have that finding (answered
   without naming the reading, or removed): the measuring can't follow it" (any finding or open question the code
   follows, named in the reason); "a reading research lists (a_reading, an_entry) has no measuring code yet".
-- **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 4 lot lines could be
-  either: too many readings to list)"; "no reading of the lot lines gives two side lot lines and a rear lot line
+- **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 6 lot lines could be
+  either: too many readings to list)" (the lot depth and the side and rear yards wait, on a corner lot whatever
+  the other address streets give; the frontage and the front yards don't depend on those lines and are still
+  measured); "no reading of the lot lines gives two side lot lines and a rear lot line
   (a triangular lot, for one): an open question for the architects".
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
@@ -154,18 +161,40 @@ Every reason the code gives today comes from the table:
   instead". Measured from existing ground instead of finished: "measured from existing
   grade; the code's grade plane is finished ground level (§325-3): tick No regrading near the house, or set the
   finished ground" (height and stories).
-- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "the building is one
-  solid with no floors: draw each story as its own solid standing on the one below (as Gordium's starting building
-  is), or enter the number of stories"; "enter bedrooms / parking spaces".
+- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
+  are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
+  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces".
 - **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
-  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked (a podium, a bulkhead, a
+  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked on them (a podium, a bulkhead, a
   roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
   they disagree it's a question, never an override. "a floor block below the ground: whether a
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
-  together, or draw the overhang as part of its floor".
-- **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
-  building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  together, or draw the overhang as part of its floor". Every solid one over another in plan (plain or floor
+  blocks) is the same building whatever the gap between them (a tolerance never decides what the building is), and
+  a real gap between its levels asks: "parts of the building drawn one over another don't stand on each other (from
+  {low} ft to {high} ft): a floor not drawn, or a space open to below? draw the missing floor, or check the
+  blocks". Parts at the same level (an L-shaped house of two stacks) are no gap. One starting partly inside the one below
+  (a floor moved down into it, a room sunk into the roof) asks too: "part of the building ({what}) starts partly
+  inside the one below it (from {low} ft to {high} ft): move it to stand on the one below, or join them". So moving
+  a part a tenth of a foot never turns one count into another. Stories are counted only from floor blocks: a part drawn as a plain solid
+  (or plain solids stacked) never has its stories guessed from its height or its blocks. Only a plain part standing
+  on the ground and lower than 7 ft (the lowest ceiling a habitable room may have, NYS Residential Code R305.1: a
+  porch slab or steps) fits inside the first story and is left out; any other (raised, on a roof, reaching below
+  the ground: §325-3's STORY has no least height) is a plain part, and with one the count typed stands for the whole building, and only if no part's floor blocks count more: "the stories typed
+  ({typed}) are fewer than the floor blocks drawn ({drawn}): check the count, or the floors", nor the solids stacked
+  in a plain part: "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), which may
+  each be a story: check the count"; with none typed:
+  "part of the building ({what}) isn't drawn as floor blocks, so its stories can't be counted: enter the number of
+  stories of the whole building". Any part reaching below the ground, whatever was typed: "part of the building
+  ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
+  question for the architects".
+- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the measurements"; "more than one building: pick the main building"; "a building isn't on the lot (is it part of this design?)" (a building
+  wholly off the lot: only the rules that would measure it wait: the main yards for the main building, the accessory
+  rule for an accessory building, coverage for any. A building partly off the lot is measured, and every rule that
+  measures it does not comply, whatever the readings or answers: the main yards, the eaves, the height and the
+  stories for the main building, the accessory rule for an accessory building, coverage for any; each building is
+  placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

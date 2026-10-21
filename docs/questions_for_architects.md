@@ -1,5 +1,9 @@
 # Questions for the architects
 
+**Purpose:** the questions about the law that Gordium can't decide on its own, waiting on the architects or the City.\
+**For:** the architects.\
+**Kept current by:** whoever adds, researches or answers a question, in that same PR.
+
 Gordium checks a design against the city's exact words. In the places below, the words can be read more than one way, and Gordium can't decide them on its own.
 
 **Researched first.** Before a question reaches you, Gordium reads the whole law for it (every section that uses the word, or a word that means the same, from the term index), then the City's own decisions (zoning board records), then the building codes, then other cities. That research, on 2026-10-20, settled 20 of the 37 questions this page used to ask, narrowed 4 more to the part still open, and found 2 new ones, so 19 are left. What it settled is listed in §6, with its sources, and recorded with each rule or definition (the full report is `docs/research/2026-10-20_architect_questions.md`). What is left below is what research couldn't settle. Each question says what was searched and why it is still open, and a test fails if a recorded question has no research behind it.

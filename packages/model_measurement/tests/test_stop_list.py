@@ -165,7 +165,8 @@ def _a_reading_without_code(tmp_path):
 
 
 STREETS3 = [[[0, 0], [50, 0]], [[50, 0], [50, 100]], [[50, 100], [0, 100]]]
-ZIGZAG = lot([(0, 0), (50, 0), (50, 100), (40, 110), (30, 100), (20, 110), (10, 100), (0, 110)])
+ZIGZAG = lot([(0, 0), (50, 0), (50, 100), (45, 110), (40, 100), (35, 110), (30, 100), (25, 110), (20, 100),
+              (15, 110), (10, 100), (0, 110)])     # nine back lines between the two side lines: too many
 SHEDS = [sloped_roof_box(2 + 6 * i, 70, 6 + 6 * i, 74, 20, 30, f"shed {i}") for i in range(8)]
 
 CASES = {
@@ -207,6 +208,20 @@ CASES = {
     "no_use": _plain(use=None),
     "no_district": _plain(zone=None),
     "no_stories": _plain(stories=None),
+    "stories_plain_part": _plain(stories=None, main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35, 25, 45, 45, 0, 32, id="wing")]),
+    "stories_below_floors": _plain(stories=1, main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
+        box(35, 25, 45, 45, 0, 32, id="wing")]),
+    "floors_apart": _plain(stories=2, buildings=[floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
+                                                 floor(10, 25, 35, 65, z0=22, z1=33, id="floor 3")],
+                           main_building="floor 1"),
+    "parts_overlap": _plain(stories=2, main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=10.5, z1=21.5, id="floor 2")]),
+    "stories_below_blocks": _plain(stories=1, buildings=[box(10, 25, 35, 65, 0, 17, id="podium"),
+                                                         box(10, 25, 35, 65, 17, 34, id="upper")]),
+    "basement_part": _plain(main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35, 25, 45, 45, -10, 10.5, id="wing")]),
     "floors_misaligned": _plain(stories=None, buildings=[floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
                                                          floor(13, 25, 38, 65, z0=11, z1=22, id="floor 2")]),
     "basement_story": _plain(stories=None, buildings=[floor(10, 25, 35, 65, z0=-9, z1=0, id="basement"),
@@ -224,8 +239,9 @@ CASES = {
                                   grade_points=[[22, 36, 0]]),
     "sloped_ground": _plain(ground_is_flat=False),
     "no_building": _plain(buildings=[]),
+    "same_id": _plain(buildings=[box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)]),   # both "house"
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
-    "outside_lot": _plain(buildings=[box(40, 25, 60, 65)]),
+    "outside_lot": _plain(buildings=[box(60, 25, 80, 65)]),      # wholly off the lot (crossing it is measured)
     "open_solid": _file(_open_brep),
     "open_mesh": _file(_open_mesh),
     "curved_surface": _file(_cylinder),

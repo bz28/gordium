@@ -2,6 +2,10 @@
 Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
+import json
+import queue
+import threading
+
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
 FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew: "<story>;<height drawn, ft>"
@@ -39,6 +43,73 @@ def classify(full_path, kind, holds_building=False):
     return "a " + kind + " on the Building layer can't be measured yet (explode it or turn it into a solid)"
 
 
+def panel_header(head):
+    """The panel's header lines above the summary and below it, from the check's header: where (place), then the
+    draft notice, the lot and the grade. The code's edition line ("Ch. 325 as amended through Ord. No. …") is the
+    report's, not the panel's (Ben's team, MVP list, 2026-10-20)."""
+    head = head or {}
+    return {"above": [head.get("place") or "Gordium"],
+            "below": [head.get("draft") or "Draft rulebook", head.get("lot") or "", head.get("grade") or ""]}
+
+
+def row_name(item):
+    """A panel row's Item text: the name, "(site)" for a site fact, and its note ("Building height · assuming flat
+    ground")."""
+    name = item["name"] + (" (site)" if item.get("group") == "site" else "")
+    return name + (" · " + item["note"] if item.get("note") else "")
+
+
+def dock_host(hosts, serial):
+    """The docked panel to fill for the document in front: Rhino makes one per document window (keyed by the
+    document's number); a panel made without one (key 0) serves when the front document has none."""
+    if serial is not None and serial in hosts:
+        return hosts[serial]
+    return hosts.get(0)
+
+
+def place_panel_now(placed):
+    """Whether to size and place the panel's floating window: only until it has been seen shown (Rhino's own
+    200 x 200 window), never again after ("docked" or "floating"): the architect's own size and place stay
+    (round 1: it jumped back to the right edge on every live re-check)."""
+    return placed is None
+
+
+def highlight(status):
+    """The colour a part of the model is shaded, from its rule's result only (never from the envelope): red for
+    does not comply (under every reading), amber for needs review, nothing for complies or anything else."""
+    return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
+
+
+def labels_on(ui_state):
+    """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
+    unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the
+    red stay either way."""
+    return bool((ui_state or {}).get("show_labels", False))
+
+
+def yard_label_shown(labels, status):
+    """A yard's label in plan: with Show on-screen labels on, every one; off, still a failing yard's shortfall
+    ("✕ Rear yard 21'-2", needs 22'-6""): it is the live feedback (coordinator, 2026-10-20)."""
+    return bool(labels) or status == "does_not_comply"
+
+
+def legend_text(code=None):
+    """The legend ("?"): the marks, what the plan shows, the precision, and which version of the law was checked
+    (the code-edition line, no longer in the panel's header)."""
+    text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
+            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
+            "measured distance. Red marks only the part of the building inside a required yard or above the height "
+            "limit. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "Delta: how far over or under each limit (+ to spare, − short).\n\n"
+            "In the model: RED is the part of the building that does not comply (under every reading); AMBER is the "
+            "part a rule that needs review is about (for example inside the 2'-0\" tax-map caution zone of a yard). "
+            "The buildable envelope is only a see-through guide: colours come from the rules' results.")
+    return text + ("\n\nChecked against: " + code if code else "")
+
+
+COLUMN_DELTA = "Delta"          # the panel's and the report's column for how far over or under (was "Margin")
+
+
 def missing(facts):
     """The required lot facts not yet given: the confirm dialog shows whenever any is missing."""
     facts = facts or {}
@@ -72,13 +143,51 @@ def with_suggestions(saved, suggested):
     return out
 
 
+# The facts only the architect can state (the model can't show them), in the order they are asked: each with its
+# prompt, its kind (a whole number 0 or more, or yes / no) and its name in a row's words. A row waiting on any of
+# them says which, and its "Enter …" button asks for exactly those (needs_of, enter_words).
+STATED_FACTS = {
+    "sleeping_rooms": ("Bedrooms", "count", "bedrooms"),
+    "parking_spaces": ("Off-street parking spaces", "count", "parking spaces"),
+    "dwelling_units": ("Dwelling units", "count", "dwelling units"),
+    "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
+    "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
+                   "whether it is a conversion"),
+}
+
+
+def needs_of(names, values):
+    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
+    return [k for k in STATED_FACTS if k in names and (values or {}).get(k) is None]
+
+
+def _and(words):
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
+
+
+def enter_words(needs):
+    """The button's words for a row waiting on `needs`: "Enter bedrooms and parking spaces"."""
+    return "Enter " + _and([STATED_FACTS[k][2] for k in needs]) if needs else None
+
+
+def needs_reason(needs):
+    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show"."""
+    return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show" if needs else None
+
+
 def update_counts(facts, answers):
-    """Bedrooms, parking spaces and stories from the Lot facts prompts. An answer of None means the prompt was
-    skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0."""
+    """Bedrooms, parking spaces, stories, dwelling units and rooms let for profit (whole numbers, 0 or more) and
+    whether the building is a conversion (yes / no) from the Lot facts prompts. An answer of None means the prompt
+    was skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0 or no."""
     out = dict(facts or {})
-    for key in ("sleeping_rooms", "parking_spaces", "stories"):
+    for key in ("sleeping_rooms", "parking_spaces", "stories", "dwelling_units", "rooms_let_for_profit"):
         if answers.get(key) is not None:
-            out[key] = int(answers[key])
+            n = int(answers[key])
+            if n < 0 or n != answers[key]:
+                raise ValueError(f"{key} must be a whole number, 0 or more")
+            out[key] = n
+    if answers.get("conversion") is not None:
+        out["conversion"] = bool(answers["conversion"])
     return out
 
 
@@ -186,6 +295,32 @@ def after_corner_answer(facts, was_corner):
     return out
 
 
+def suggested_facts(jurisdiction, zones, lots, buildings, default_zone=None):
+    """The start box's prefilled lot facts, in the model's units (the plugin converts them to feet), for the
+    architect to confirm. `lots`: the Site layer's closed outlines, each {"id", "area", "bottom" (its lowest
+    level), "segments": [((x, y), (x, y)), ...]}; `buildings`: each {"id", "bottom", "volume" (of its box)}.
+    The largest outline is the lot, its lowest line on screen the street side; the ground is flat at the
+    buildings' lowest point (or the lot's level); the lot is not from a survey; the looked-up or sample zone
+    (`default_zone`, never the first in alphabetical order: none leaves it to the architect); a
+    detached one-family house; the largest solid the main building. The corner-lot question is never answered
+    here: always None, so the box asks it and the yards wait for the answer."""
+    facts = {"jurisdiction": jurisdiction, "zone": default_zone if default_zone in zones else None, "use": "one_family_detached",
+             "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}
+    lot = max(lots, key=lambda l: l["area"]) if lots else None
+    if lot is not None:
+        facts["lot_id"] = lot["id"]
+        if lot["segments"]:
+            a, b = min(lot["segments"], key=lambda s: (s[0][1] + s[1][1]) / 2)
+            facts["street_line"] = [[[a[0], a[1]], [b[0], b[1]]]]
+    ground = suggested_ground([b["bottom"] for b in buildings], lot["bottom"] if lot is not None else None)
+    if ground is not None:
+        facts["grade_elevation"] = ground
+    if len(buildings) > 1:
+        facts["main_building"] = max(buildings, key=lambda b: b["volume"])["id"]
+    facts["corner_lot"] = None                     # never guessed, whatever came before
+    return facts
+
+
 def suggested_ground(building_bottoms, lot_bottom):
     """The ground level to suggest (feet or model units, as given): the lowest point of the buildings, or with no
     building yet (a new project on the architect's own lot) the lot outline's level. Shown in the dialog, never
@@ -193,13 +328,97 @@ def suggested_ground(building_bottoms, lot_bottom):
     return min(building_bottoms) if building_bottoms else lot_bottom
 
 
-def clear_spot(taken, x, y, w, h):
+def crosses(segment, x, y, w, h):
+    """Whether the segment ((x1, y1), (x2, y2)) touches the w × h box at (x, y) (screen pixels): clipped to the
+    box's slab in x, then in y (Liang–Barsky)."""
+    (x1, y1), (x2, y2) = segment
+    t0, t1, dx, dy = 0.0, 1.0, x2 - x1, y2 - y1
+    for p, q in ((-dx, x1 - x), (dx, x + w - x1), (-dy, y1 - y), (dy, y + h - y1)):
+        if abs(p) < 1e-12:
+            if q < 0:
+                return False
+            continue
+        t = q / p
+        if p < 0:
+            t0 = max(t0, t)
+        else:
+            t1 = min(t1, t)
+        if t0 > t1:
+            return False
+    return True
+
+
+def beside_line(a, b, w, h, gap=6):
+    """Where a w × h label for the dimension line a–b goes (its top left, screen pixels): beside the line, never on
+    it. A mostly horizontal line has it above, centred; a mostly vertical one to its right, centred."""
+    (xa, ya), (xb, yb) = a, b
+    if abs(xb - xa) >= abs(yb - ya):
+        return (xa + xb) / 2 - w / 2, min(ya, yb) - gap - h
+    return max(xa, xb) + gap, (ya + yb) / 2 - h / 2
+
+
+def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
+    """Where a w × h label for the dimension `line` ((x1, y1), (x2, y2), screen pixels) goes: (left, top, clear).
+    The spots beside its line are tried in turn (a mostly horizontal line: above, below, each centred, then
+    shifted to either end; a mostly vertical one: right, left, then shifted up or down); the first that crosses
+    no line in `obstacles` (other dimensions, the lot's and the house's edges; its own line always) and covers
+    no box in `taken` is used. With `view` (its width and height), only spots wholly on screen are tried (seen in
+    Rhino: "Side yard, Southwest …, needs 10'-0" (approx.)" went 15 px off the left edge). If none is clear, the
+    first spot, kept on screen, and False (the caller moves it off the others)."""
+    (xa, ya), (xb, yb) = line
+    x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
+    # nearest the line's middle first: centred on either side, then shifted along it (a label far along its line
+    # reads as another edge's: seen in Rhino, the west edge's length ended up under the front edge)
+    if x1 - x0 >= y1 - y0:
+        xs = [(x0 + x1) / 2 - w / 2, x1 - w, x0, x0 - w - gap, x1 + gap]
+        spots = [(x, top) for x in xs for top in (y0 - gap - h, y1 + gap)]
+    else:
+        ys = [(y0 + y1) / 2 - h / 2, y0, y1 - h, y0 - h - gap, y1 + gap]
+        spots = [(left, y) for y in ys for left in (x1 + gap, x0 - gap - w)]
+    lines = list(obstacles) + [line]
+    on_screen = [(x, y) for x, y in spots if view is None or (0 <= x and x + w <= view[0] and 0 <= y and y + h <= view[1])]
+    for left, top in on_screen:
+        if not any(crosses(s, left, top, w, h) for s in lines) and \
+                not any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken):
+            return left, top, True
+    left, top = (on_screen or spots)[0]
+    if view is not None:                     # nowhere beside it on screen: the first spot, moved onto the screen
+        left, top = min(max(left, 0), max(view[0] - w, 0)), min(max(top, 0), max(view[1] - h, 0))
+    return left, top, False
+
+
+def label_lines(text):
+    """A plan label as two lines, for when it won't fit beside its line on one: its name, then its numbers
+    ("✕ Side yard, Southwest" / "7'-0 5/8", needs 10'-0" (approx.)"). One line when it has no name before a number
+    (a lot edge's length)."""
+    words = text.split(" ")
+    k = next((i for i, w in enumerate(words) if i and w[:1].isdigit()), None)
+    return [text] if k is None else [" ".join(words[:k]), " ".join(words[k:])]
+
+
+def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
+    """Where the "no longer complies" notice (w × h) goes in a view (screen pixels): (left, top). The corners are
+    tried in turn (top left under the view's name, bottom left above the axes, top right, bottom right); the first
+    that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken`
+    (the status box) is used; if every corner covers some of the model, the one covering least (architect's
+    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions)."""
+    spots = [(gap, 34), (gap, view_h - h - 64), (view_w - w - gap, 34), (view_w - w - gap, view_h - h - 40)]
+
+    def overlap(x, y, box):
+        a, b, c, e = box
+        return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
+    free = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)] or spots
+    return min(free, key=lambda s: (overlap(s[0], s[1], model) if model else 0.0, free.index(s)))
+
+
+def clear_spot(taken, x, y, w, h, avoid=()):
     """Where a w × h label wanted at (x, y) (its top left, in screen pixels) covers none already drawn this frame
     (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn, never
     moved up off the top of the view; the spot is then taken. If none is free within four steps (a tall box such as
     the status box in the way), the label goes just below everything it would cover."""
     def hits(top):
-        return any(x < a + c and a < x + w and top < b + e and b < top + h for a, b, c, e in taken)
+        return any(x < a + c and a < x + w and top < b + e and b < top + h for a, b, c, e in taken) or \
+            any(crosses(s, x, top, w, h) for s in avoid)       # nor any line it must stay off (its dimension)
     top = None
     for k in range(9):
         trial = y + (k + 1) // 2 * (h + 3) * (1 if k % 2 else -1)
@@ -265,6 +484,99 @@ def looks_like_ground(kind, closed, extents, lot_extents, reach=1.0):
     return x0 <= a0 + reach and y0 <= b0 + reach and x1 >= a1 - reach and y1 >= b1 - reach
 
 
+ON_LOT_REACH = 0.1        # ft: how far into the lot an object must reach to count as on it (a neighbour drawn
+                          # touching the lot line, or a hair over it, stays off)
+
+
+def _ring_area(ring):
+    """The signed area of a closed ring of (x, y) points (counterclockwise: positive)."""
+    return sum(ring[i - 1][0] * ring[i][1] - ring[i][0] * ring[i - 1][1] for i in range(len(ring))) / 2
+
+
+def _hull(points):
+    """The convex hull of (x, y) points, counterclockwise (Andrew's monotone chain)."""
+    pts = sorted(set((float(x), float(y)) for x, y in points))
+    if len(pts) < 3:
+        return pts
+
+    def turn(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and turn(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and turn(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+def _clip(subject, convex):
+    """The part of the ring `subject` (any simple polygon) inside the counterclockwise convex ring `convex`
+    (Sutherland-Hodgman). Its area is the overlap's area."""
+    out = list(subject)
+    for i in range(len(convex)):
+        a, b = convex[i - 1], convex[i]
+        inside = [(b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]) >= 0 for p in out]
+        nxt = []
+        for k in range(len(out)):
+            p, q, pin, qin = out[k - 1], out[k], inside[k - 1], inside[k]
+            if pin != qin:
+                dx, dy = q[0] - p[0], q[1] - p[1]
+                den = (b[0] - a[0]) * dy - (b[1] - a[1]) * dx
+                t = ((b[1] - a[1]) * (p[0] - a[0]) - (b[0] - a[0]) * (p[1] - a[1])) / den if den else 0.0
+                nxt.append((p[0] + t * dx, p[1] + t * dy))
+            if qin:
+                nxt.append(q)
+        out = nxt
+        if not out:
+            break
+    return out
+
+
+def box_near_lot(box, lot_box, reach):
+    """Whether a plan box (x0, y0, x1, y1) comes within `reach` of the lot's plan box: a quick test before any
+    outline work. Exact in the cautious direction: an object whose box misses the lot's box grown by `reach`
+    can't reach into the lot (its footprint lies inside its box, and the lot inside the lot's)."""
+    x0, y0, x1, y1 = box
+    a0, b0, a1, b1 = lot_box
+    return x0 <= a1 + reach and a0 - reach <= x1 and y0 <= b1 + reach and b0 - reach <= y1
+
+
+def reaches_into_lot(lot_ring, points, reach, box=None):
+    """Whether an object whose plan points (any (x, y) of it: vertices, points along its edges) are `points`
+    reaches into the lot (`lot_ring`, its outline's points) by more than `reach` (model units): the part of its
+    plan footprint (their convex hull) inside the lot, averaged across (twice its area over its perimeter), is
+    wider than `reach`. Wholly on the lot, straddling a lot line or mostly past it: on the lot. Touching the
+    line from outside, a hair over it, or off the lot but inside the lot's bounding box (a rotated or jogged
+    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction.
+    `box`, the object's plan bounding box (x0, y0, x1, y1), is its footprint whenever the points don't outline
+    one (fewer than 3, or all in a line, as a sphere's seam is): a solid always covers some ground, so such
+    points under-describe it."""
+    lot = [(float(x), float(y)) for x, y in lot_ring]
+    if len(lot) > 1 and lot[0] == lot[-1]:
+        lot = lot[:-1]
+    if len(lot) < 3:
+        return False
+    if _ring_area(lot) < 0:
+        lot.reverse()
+    hull = _hull(points)
+    if (len(hull) < 3 or _ring_area(hull) <= 1e-12) and box is not None:
+        x0, y0, x1, y1 = box
+        hull = _hull([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+    if len(hull) < 3 or _ring_area(hull) <= 1e-12:
+        return False
+    part = _clip(lot, hull)
+    if len(part) < 3:
+        return False
+    area = abs(_ring_area(part))
+    perimeter = sum(((part[i][0] - part[i - 1][0]) ** 2 + (part[i][1] - part[i - 1][1]) ** 2) ** 0.5
+                    for i in range(len(part)))
+    return perimeter > 0 and 2 * area / perimeter > reach
+
+
 # ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------
 # On the Mac an exception that escapes a callback into native code (a view's paint, a cell formatting event, a
 # display conduit's draw, an idle or document event) aborts Rhino outright (seen 2026-10-20: an Eto paint handler
@@ -309,10 +621,20 @@ GROUND_CHOICES = [("spot", "Place spot grades…"), ("terrain", "Pick terrain…
                   ("regrade", "I'll regrade: set finished ground…")]
 
 
+def lot_size(area):
+    """The lot's area as the site facts say it: whole square feet rounded down, as the checker's Lot area row does
+    (never in the architect's favour; to the nearest, 106 Ithaca Rd read 7,034 sf here and 7,033 sf in the row)."""
+    import math
+    return f"{math.floor(area + 1e-9):,} sf" if isinstance(area, (int, float)) else "area not known"
+
+
+def lot_source(surveyed):
+    return "your survey" if surveyed else "the tax map (±2 ft, approximate)"
+
+
 def lot_text(area, surveyed):
     """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"."""
-    size = f"{area:,.0f} sf" if isinstance(area, (int, float)) else "area not known"
-    return size + " · from " + ("your survey" if surveyed else "the tax map (±2 ft, approximate)")
+    return lot_size(area) + " · from " + lot_source(surveyed)
 
 
 def ground_text(ground):
@@ -327,11 +649,11 @@ def ground_text(ground):
     return what + (", " + span if span else "") + " · " + ("picked by you" if kind == "terrain" else "placed by you")
 
 
-def box_rows(state):
+def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,
     lot_area, lot_surveyed, street_name, ground {kind, count, range}, no_regrading."""
-    return [
+    rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
          "actions": [("lookup", "Look up (coming soon)", False)], "tick": None},
         {"key": "zone", "label": "Zoning district",
@@ -348,6 +670,9 @@ def box_rows(state):
          "actions": [(k, t, True) for k, t in GROUND_CHOICES],
          "tick": ("No regrading near the house", bool(state.get("no_regrading")))},
     ]
+    if FLAT_GROUND if flat is None else flat:      # the MVP: no Ground row (flat ground is assumed)
+        rows = [r for r in rows if r["key"] != "ground"]
+    return rows
 
 
 def parse_feet(text):
@@ -430,14 +755,25 @@ def uncertain(state):
     return None
 
 
-def ground_facts(state, lot_level):
-    """The facts the checker gets from the Ground row (the checker never sees where a fact came from). Ground you
-    set as finished, or ticked "No regrading near the house", counts as the finished grade the code measures
-    from; ground only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
+# The MVP assumes flat ground (Ben, 2026-10-20): flat at the lot level and finished, so height and stories are
+# checked (with "assuming flat ground" on their rows and in the report). The spot-grade, terrain and regrade paths
+# stay, behind this one switch: set it to False to bring the Ground row back.
+FLAT_GROUND = True
+ASSUMED_FLAT = "assuming flat ground"
+
+
+def ground_facts(state, lot_level, flat=None):
+    """The facts the checker gets from the Ground row (the checker never sees where a fact came from). With the MVP's
+    flat-ground switch on: flat at the lot level, finished, and said to be assumed. Otherwise: ground you set as
+    finished, or ticked "No regrading near the house", counts as the finished grade the code measures from; ground
+    only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
+    if FLAT_GROUND if flat is None else flat:
+        return {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": lot_level, "grade_from": None,
+                "ground_assumed": "flat"}
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
     finished = kind == "regrade" or bool(state.get("no_regrading"))
-    out = {"grade_is": "finished" if finished else "existing"}
+    out = {"grade_is": "finished" if finished else "existing", "ground_assumed": None}
     if kind == "flat":
         out.update(ground_is_flat=True, grade_elevation=lot_level, grade_from=None)
     else:
@@ -461,13 +797,14 @@ def fact_sources(state, today, confirmed):
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
-        "lot": fact(lot_text(state.get("lot_area"), state.get("lot_surveyed")),
-                    "your survey" if state.get("lot_surveyed") else "the tax map (±2 ft)"),
+        # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
+        "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"))),
         "street": fact(state.get("street_name") or "the highlighted line",
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
-        "ground": fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
+        "ground": fact("assumed flat" if FLAT_GROUND else
+                       ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
                        "as drawn" if kind == "flat" else ("picked by you" if kind == "terrain" else "placed by you")),
     }
 
@@ -484,3 +821,128 @@ def is_plan_view(parallel, direction_z, tolerance=0.99):
     down. Not a perspective (labels sit on the massing) and not an elevation (Front, Right: every plan label piles
     up on the ground line)."""
     return bool(parallel) and direction_z <= -tolerance
+
+
+ASK_LIMIT_S = 60          # s: the longest the plugin waits for one answer (the first also starts Python, loads rules)
+ASK_LIMITS_S = {"start": 120}   # s, per command that can take longer: the largest building, on a deep lot
+
+
+def ask_limit(cmd):
+    """How long the plugin waits for the checker's answer to one `cmd` request."""
+    return ASK_LIMITS_S.get(cmd, ASK_LIMIT_S)
+
+
+class CheckerOutOfStep(RuntimeError):
+    """The checker's next line can't be trusted to be this request's answer: the plugin restarts the checker and
+    shows nothing from it."""
+
+
+def pipes(process):
+    """The checker's two pipes, each served by its own thread: (sends, lines). Rhino's thread never reads or writes
+    a pipe, so a checker that stops answering (or stops reading a large request) can never freeze Rhino; the
+    plugin only puts on `sends` and waits on `lines` with a time limit (answer_for). Put None on `sends` to end
+    the writer."""
+    sends, lines = queue.Queue(), queue.Queue()
+    threading.Thread(target=_read_lines, args=(process.stdout, lines), daemon=True,
+                     name="gordium-reader-%s" % getattr(process, "pid", "")).start()
+    threading.Thread(target=_write_lines, args=(process.stdin, sends, process), daemon=True,
+                     name="gordium-writer-%s" % getattr(process, "pid", "")).start()
+    return sends, lines
+
+
+def _read_lines(stream, lines):
+    """The reader thread: every line the checker writes, then None when it stops."""
+    try:
+        for line in stream:
+            lines.put(line)
+    except (OSError, ValueError):            # the pipe closed under it (the checker was stopped)
+        pass
+    finally:
+        lines.put(None)
+
+
+def _write_lines(stream, sends, process=None):
+    """The writer thread: each request, in order, until None, the checker stops reading (then the reader sees it
+    stop, or ask's time limit runs out), or the checker process ends (however it was stopped)."""
+    try:
+        while True:
+            try:
+                text = sends.get(timeout=1)
+            except queue.Empty:
+                if process is not None and process.poll() is not None:
+                    return
+                continue
+            if text is None:
+                return
+            stream.write(text)
+            stream.flush()
+    except (OSError, ValueError):
+        pass
+
+
+def exchange(sends, lines, request, limit):
+    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for)."""
+    sends.put(json.dumps(request) + "\n")
+    return answer_for(lines, request["id"], limit)
+
+
+HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer",
+           "worker", "worker_sends", "worker_lines")
+
+
+def sweep(leftovers, state=None, release=None):
+    """Undo everything an earlier copy of the plugin left attached to Rhino (event handlers, its drawing, its
+    panel, its checker): `leftovers` maps a name to its undo, kept outside the plugin's state so clearing the
+    state can't lose it. Each undo runs even if another fails; returns how many ran. Given the plugin's `state`,
+    its handles to those things are forgotten too (so it never says a detached hook is attached), each RELEASED
+    first through `release(key, value)`: a copy from before LEFTOVERS existed recorded nothing there, so without
+    this its handlers, drawing, panel and checker would stay attached with nothing left to undo them (review
+    round 2). Releasing twice is harmless. What the architect asked for (live mode on, the choices) stays."""
+    n = 0
+    for key in list(leftovers):
+        undo = leftovers.pop(key, None)
+        try:
+            undo()
+            n += 1
+        except Exception:                      # noqa: BLE001  (already gone: nothing to undo)
+            pass
+    for key in HANDLES if state is not None else ():
+        if key in state and release is not None:
+            try:
+                release(key, state[key])
+            except Exception:                  # noqa: BLE001  (already gone: nothing to release)
+                pass
+        state.pop(key, None)
+    return n
+
+
+def current_only(fn, is_current):
+    """fn, run only while is_current() (this copy of the plugin is the loaded one): an older copy's handler that
+    is still attached does nothing, so it can never act on, or wait on, the current copy's checker."""
+    def run(*args):
+        if not is_current():
+            return None
+        return fn(*args)
+    return run
+
+
+def answer_for(lines, request_id, limit):
+    """The checker's answer to request `request_id`, from `lines` (a queue the plugin's reader thread fills with
+    every line the checker writes, then None when it stops); None if it stopped. Raises CheckerOutOfStep when no
+    line comes within `limit` seconds, when the line isn't an answer, or when it is another request's answer:
+    then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever showing
+    an earlier check's result as this one's."""
+    try:
+        line = lines.get(timeout=limit)
+    except queue.Empty:
+        raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
+    if line is None:
+        return None
+    try:
+        answer = json.loads(line)
+    except ValueError:
+        answer = None
+    if not isinstance(answer, dict) or answer.get("id") != request_id:
+        raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
+                               "nothing from it is shown")
+    return answer

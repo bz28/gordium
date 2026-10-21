@@ -57,6 +57,9 @@ def run(name, docs):
 def fresh_modules():
     """This copy's code as it is on disk now (the same steps as the other in-Rhino tests): a module loaded
     earlier in the session would otherwise keep running."""
+    loaded = sys.modules.get("gordium_rhino")
+    if loaded is not None:                # its hooks, drawing and panel off before it is dropped
+        loaded.off()
     state = sc.sticky.setdefault("gordium_state", {})
     worker = state.pop("worker", None)
     if worker is not None:

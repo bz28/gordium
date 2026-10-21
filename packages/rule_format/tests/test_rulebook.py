@@ -793,3 +793,54 @@ def test_one_definition_of_a_district_column():
     assert charts.DISTRICT is DISTRICT_COLUMN
     names = ["R-1A", "R-1B", "R-3AA", "RU", "NOTES", "SP", "ADU", "Additional Regulations"]
     assert [n for n in names if DISTRICT_COLUMN.fullmatch(n)] == ["R-1A", "R-1B", "R-3AA", "RU"]
+
+
+# ---- every number a cited footnote or law quote states is used, or declared not a limit ----------------------
+
+def test_a_number_a_cited_note_states_but_the_formula_drops_is_rejected(ctx):
+    """eval-integrity P1-1: dropping note 16's 20 ft floor from the formula left every check passing."""
+    dropped = rulebook(check="rear_yard >= min(0.25 * lot_depth, 50)")
+    assert any('number 20 in the quote "(16) But not less than 20 ft.' in p for p in validate(dropped, ctx))
+    assert not any("is never used" in p for p in validate(rulebook(), ctx))          # the real rule uses it
+
+
+def test_a_number_that_isnt_a_limit_is_declared_with_why(ctx):
+    sources = [SOURCE, NOTES[0] | {"not_limits": {20: "for this test"}}, NOTES[1]]
+    assert not any("is never used" in p for p in validate(rulebook(check="rear_yard >= min(0.25 * lot_depth, 50)",
+                                                                   sources=sources), ctx))
+    stale = [SOURCE, NOTES[0] | {"not_limits": {30: "not in the quote"}}, NOTES[1]]
+    assert any("not_limits names 30, which its quote doesn't state" in p for p in validate(rulebook(sources=stale), ctx))
+    for bad in ({20: ""}, [20], {"20": "a text key"}):
+        broken = [SOURCE, NOTES[0] | {"not_limits": bad}, NOTES[1]]
+        assert any("not_limits must map each number" in p for p in validate(rulebook(sources=broken), ctx)), bad
+
+
+def test_a_chart_row_listing_every_district_is_not_held_to_it(chart_ctx):
+    """A chart row's quote lists every district's numbers; the rule uses its own column's."""
+    problems = validate(rulebook(check="rear_yard >= max(0.25 * lot_depth, 20)", sources=[SOURCE, *NOTES]), chart_ctx)
+    assert not any("number 50 in the quote" in p for p in problems)
+
+
+def test_a_flag_isnt_held_to_the_numbers_in_its_quote(ctx):
+    """A flag always needs review: the limits its quote states are for the person to apply, so they need no
+    not_limits (R-3a's abutting and loading flags); a rule quoting the same note is still held to them."""
+    flag = rulebook(kind="flag", check=None, review_when=None, examples=None)
+    assert not any("is never used" in p for p in validate(flag, ctx))
+    assert any("number 20 in the quote" in p for p in validate(rulebook(check="rear_yard >= min(0.25 * lot_depth, 50)"), ctx))
+
+
+def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):
+    """Compile, then freeze: an ill-typed formula is a validation problem, so no frozen rule can be ill-typed."""
+    assert any("compare two numbers or two texts" in p
+               for p in validate(rulebook(check='rear_yard >= 20 or use == 5'), ctx))
+    assert any("compare two numbers or two texts" in p
+               for p in validate(rulebook(check='(rear_yard >= 20) == (lot_depth > 1)'), ctx))
+    assert not any("kind" in p for p in validate(rulebook(), ctx))
+
+
+def test_an_unreadable_formula_needs_review_never_a_crash():
+    """Review round 3 of 0582c65: rulebook.outcome on a formula that can't be read (too long, not the language)
+    is needs review, not an exception."""
+    from rule_format.rulebook import outcome
+    for check in ("rear_yard >= " + " + ".join(["1"] * 300), "rear_yard >= 20 if"):
+        assert outcome({"kind": "rule", "check": check}, {"rear_yard": 30}, {}) == "needs_review"

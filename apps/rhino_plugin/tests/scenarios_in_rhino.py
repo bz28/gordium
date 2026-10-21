@@ -1,12 +1,12 @@
 #! python3
-"""The architect's answer key, drawn and checked in Rhino 8 (test_data/test_sites/new_york/ithaca_city/scenarios/;
+"""The hand-worked scenarios (hand-worked by Claude before Gordium ran, not yet verified by an architect), drawn and checked in Rhino 8 (test_data/test_sites/new_york/ithaca_city/scenarios/;
 run in Rhino, not in CI). Each scenario is drawn the way an architect draws it: the lot as a closed polyline on
 the Site layer, each story a floor block on the Building layer (marked as GordiumStart marks its floors), other
 solids on Default, spot grades as points on Gordium::Grade. Then the same check live mode runs; then the
 scenario's edit (the house moved) and the check again. Records each step's panel view, plan and viewport
 captures (Top and Perspective) to <temp>/gordium_scenarios/rhino_out.json and frames/.
 
-Compare with the answer key (in the repo's .venv):  python -m design_checker.scenarios rhino <rhino_out.json>
+Compare with the hand-worked results (in the repo's .venv):  python -m design_checker.scenarios rhino <rhino_out.json>
 
 How to run: RunPythonScript this file (it opens its own test document from Rhino's feet template)."""
 import json
@@ -33,6 +33,9 @@ log = {"scenarios": {}}
 
 
 def fresh_module():
+    loaded = sys.modules.get("gordium_rhino")
+    if loaded is not None:                # its hooks, drawing and panel off before it is dropped
+        loaded.off()
     state = sc.sticky.setdefault("gordium_state", {})
     w = state.pop("worker", None)
     if w is not None:

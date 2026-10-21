@@ -1,5 +1,9 @@
 # PR 15 build spec: Gordium in Rhino, UI
 
+**Purpose:** the approved build spec for Gordium's Rhino screens (start box, panel, viewport): each acceptance criterion and how it is verified.\
+**For:** engineers building the Rhino side, and designers reviewing it.\
+**Kept current by:** the engineer who changes the Rhino UI, in that PR; a change of design needs a new critique round first.
+
 Status: approved by Claude on Ben's delegation (2026-10-20), after three critique rounds (each round: a practicing architect and a pro-tools product designer, both cold). Mockup: https://claude.ai/artifact/E18rXU59kG8rLUZa1hgktQ (boards 1–8). Example throughout: 106 Ithaca Rd, R-1b, one-family dwelling.
 
 **How to read this.** Each item is one acceptance criterion. The tag says how it is verified:
@@ -59,12 +63,12 @@ B1 [code] **All numbers come from the drawn lot.** No figure is typed in from el
 - coverage allowance 25% = 1,642.5 sf;
 - envelope 53'-0" × 42'-6" = 2,252 sf;
 - on a survey: massing 53'-0" × 30'-11" = 1,639 sf (24.94%), placed at the 25'-0" front yard; rear yard 34'-1";
-- from the tax map (the sample): massing 49'-0" × 31'-10" = 1,560 sf (23.74%), at 27'-0" from the street, side
-  yards 12'-0", rear yard 31'-2" (see B7).
+- from the tax map (the sample): massing 49'-0" × 30'-3" = 1,482 sf (22.56%), at 27'-0" from the street, side
+  yards 12'-0", rear yard 32'-9" (see B7).
 
 B2 [both] **The starting massing is legal by construction.** It is the largest box inside every yard, no taller than 35'-0", at or under the coverage limit, with stories = floor count. A code test asserts every rule result is complies or needs review, never does not comply, for the generated massing on any test lot.
 
-B7 [both] **Kept back on a tax-map lot (Ben, 2026-10-20).** On a lot not from a survey, the starting house keeps the tax-map tolerance (2'-0") inside every yard line and its coverage under the limit for the smallest lot the tax map allows (25% of 71' × 88' = 1,562 sf), so every item complies at the worst case: nothing about it needs review because of the tax map (a code test proves it, and steps it back 3 in. more if a rule that grows with the lot, like the rear yard, would still need it). Only height and stories may need review, while the ground is existing grade. On a survey it goes exactly to the limits. An optional **Design buffer** (Advanced in the GordiumStart box, default 0'-0"; Draw stays off if it can't be read) is added on top of either, and the note then says how much is which. The note says: "Starting house keeps 2'-0" back from each limit because the lot is from the tax map; use a survey for the full area."; the panel's Site facts show it as "Starting house: as first drawn, it keeps 2'-0" back … · suggested by Gordium · not confirmed" (Gordium's figure, never "confirmed by you"; about the house as drawn, which the architect may since have changed), cleared when GordiumStart runs again and saved only once the house is drawn.
+B7 [both] **Kept back on a tax-map lot (Ben, 2026-10-20).** On a lot not from a survey, the starting house keeps the tax-map tolerance (2'-0") inside every yard line and its coverage under the limit for the smallest lot the tax map allows (every lot line 2'-0" in: 25% of 69' × 86' = 1,483.5 sf; Ben, 2026-10-21), so every item about the house complies at the worst case: nothing about it needs review because of the tax map (the lot's own size may: 106 Ithaca Rd's lot area is 5,934 sf at worst, under 6,000 sf) (a code test proves it, and steps it back 3 in. more if a rule that grows with the lot, like the rear yard, would still need it). Only height and stories may need review, while the ground is existing grade. On a survey it goes exactly to the limits. An optional **Design buffer** (Advanced in the GordiumStart box, default 0'-0"; Draw stays off if it can't be read) is added on top of either, and the note then says how much is which. The note says: "Starting house keeps 2'-0" back from each limit because the lot is from the tax map; use a survey for the full area."; the panel's Site facts show it as "Starting house: as first drawn, it keeps 2'-0" back … · suggested by Gordium · not confirmed" (Gordium's figure, never "confirmed by you"; about the house as drawn, which the architect may since have changed), cleared when GordiumStart runs again and saved only once the house is drawn.
 
 B3 [rhino] **One group.** The massing is a single group of N floor solids on layer `Gordium::Massing`, so a Move moves the house, and the command line reports "Moved 1 group".
 
@@ -80,12 +84,13 @@ B6 [rhino] **Command line.** GordiumStart prints one line: "created 1 group (3 f
 
 ## C. Measurement honesty (needs-review triggers)
 
-C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gives needs review, never complies.
+C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gives needs review, never complies — unless the rule provably fails at every value the missing number could take (`check.fails_whatever`): then does not comply ([decision](../decisions/2026-10-21_fails_whatever_the_missing_number.md)). Missing data never complies.
 
 C2 [code] **Tax-map tolerance** of ±2'-0".
-- Each lot-dependent value is evaluated at the worst case over ±2'-0": lengths directly, and areas and percentages by offsetting the lot outline.
+- Each lot-dependent value is evaluated at the worst case, with every lot line up to 2'-0" the unlucky way (Ben, 2026-10-21): a yard (to one line) ±2'-0", a lot width or depth (between two lines) ±4'-0", and areas and percentages from the outline offset 2'-0" (73' × 90' → 69' × 86' = 5,934 sf at the smallest). One definition: `model_measurement.measure.TAX_MAP_SLACK` and `tax_map_lot_area`, used by the measurement, the checker and the starting house.
 - If the item would not comply at that worst case, it needs review, with the reason "Lot lines are from the tax map (±2'-0")…" plus the worst-case value.
-- On the example lot this flags Front yard, both Side yards and Lot coverage; Rear yard (+11'-7"), Lot width (+23'-0") and Lot area (6,570 sf; 6,248 sf at the worst case, 71' × 88') still comply. (Corrected 2026-10-20: lot area was listed by mistake; the worst-case method applies to every lot-dependent item, areas and percentages as well as lengths.)
+- The same both ways (Ben, 2026-10-21): an item that does not comply as drawn but would comply with the lines off in its favour needs review ("as drawn it does not comply, but at best …"); it does not comply only if it fails under every tax-map reading. A survey removes both.
+- On the example lot this flags Front yard, both Side yards and Lot coverage; Rear yard (+11'-7"), Lot width (+23'-0") still comply; Lot area (6,570 sf; 5,934 sf at the worst case, 69' × 86', under 6,000 sf) needs review until a survey (2026-10-21). (Corrected 2026-10-20: lot area was listed by mistake; the worst-case method applies to every lot-dependent item, areas and percentages as well as lengths.)
 
 C3 [code] **Grade not set** → Building height and Stories need review ("no grade").
 
@@ -93,7 +98,7 @@ C4 [both] **Grade recomputed after every footprint change** from the terrain, or
 
 C5 [code] **"Existing grade" selected** → Height and Stories need review: "Measured from existing grade; code uses finished grade".
 
-C6 [code] **Roof not flat** → Height needs review: "Roof not flat; this roof's height rule isn't checked in this release".
+C6 [code] **Pitched and mansard roofs** (PR #18) → the height is measured as §325-3 defines it for each (a pitched roof: midway between eave and ridge; a mansard: its highest level) under every reading of which eave counts; it complies only if it complies under every reading, does not comply only if it fails under every one, and otherwise needs review naming the readings.
 
 C7 [code] **Height** follows §325-3 verbatim. It is measured from the grade plane (the average of finished ground level at the exterior walls, per the GRADE PLANE definition) to the highest level of a flat roof. Where roof sections vary, the highest section counts.
 
@@ -133,8 +138,8 @@ D3 [code] **Summary rule.** One function produces the summary used by the panel,
 - Examples: "7 need review · 3 comply · 3 not checked" (board 2) and "1 does not comply · 2 need review · 7 comply · 3 not checked" (board 4).
 
 D4 [both] **Columns.**
-- Mark | Item | Proposed | Req. ≥/≤ | Margin.
-- The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Margins read like "+11'-7"", "−2'-6"", "at limit", "+0.06%". Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns.
+- Mark | Item | Proposed | Req. ≥/≤ | Delta (renamed from Margin, MVP list 2026-10-20).
+- The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Deltas read like "+11'-7"", "−2'-6"", "at limit", "+0.06%". Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns.
 - The value columns are sized to their content and never truncated; only Item truncates. Minimum panel width 320.
 
 D5 [code] **Groups,** in order: Does not comply · Needs review · Complies (Site rows included, labelled "Site · …") · Not checked · Not covered by this rulebook. Section headers aren't selectable.

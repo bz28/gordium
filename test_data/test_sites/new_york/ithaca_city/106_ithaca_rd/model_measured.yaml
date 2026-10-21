@@ -18,28 +18,28 @@ measurements:
     from: 'measured from model.3dm: the length of the lot line(s) on the street (frontage) (along the street line)'
   lot_depth:
     value: null
-    from: 'not measured: the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth) [readings: line 4 as a side lot line = 100.06; line 4 as a rear lot line = 94.82]'
+    from: 'not measured: the readings give different values; which lot lines count as side and rear lot lines is an open question for the architects (lot_depth) [readings: line 3 as a rear lot line, line 4 as a rear lot line = 94.82; line 3 as a rear lot line, line 4 as a side lot line = 100.06; line 3 as a side lot line, line 4 as a rear lot line = 128.69]'
   building_area:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   building_height:
     value: 35.0
     from: 'measured from model.3dm: from the ground level (grade plane) to the top of the roof (a flat roof, to its highest level)'
   stories:
-    value: 3
-    from: stated by the architect (not measured from the model) (lot facts)
+    value: 3.0
+    from: 'stated by the architect (not measured from the model: no floor blocks are drawn) (lot facts)'
   front_yard:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   side_yard_smaller:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   side_yard_larger:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   rear_yard:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   sleeping_rooms:
     value: 3
     from: stated by the architect (not measured from the model) (lot facts)
@@ -48,28 +48,28 @@ measurements:
     from: stated by the architect (not measured from the model) (lot facts)
   front_yard_eaves:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   side_yard_smaller_eaves:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   side_yard_larger_eaves:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   rear_yard_eaves:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   accessory_buildings:
     value: 0
     from: 'measured from model.3dm: the solids on the Building layer standing apart from the main building (§325-25)'
   accessory_front_yard:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   accessory_side_yard:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   accessory_rear_yard:
     value: null
-    from: 'not measured: a building isn''t inside the lot'
+    from: 'not measured: a building isn''t on the lot (is it part of this design?)'
   accessory_distances_apply:
     value: null
     from: 'not measured: no accessory building on the lot (every solid is the main building or touches it)'

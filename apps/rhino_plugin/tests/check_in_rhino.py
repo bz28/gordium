@@ -124,7 +124,9 @@ try:
         def poll(self):
             return None
     real, code = st.get("worker"), st.get("worker_code")
+    pipes = st.get("worker_sends"), st.get("worker_lines")
     st["worker"], st["worker_code"] = Stub(), g.logic.code_fingerprint(g.os.path.join(g.REPO, "packages"))
+    st["worker_sends"], st["worker_lines"] = g.logic.pipes(st["worker"])     # its pipes served as the real one's
     try:
         g.current_facts(doc)
         problems.append("a failing checker's answer was accepted")
@@ -134,6 +136,7 @@ try:
         problems.append("a failing checker made the saved facts look unreadable")
     finally:
         st["worker"], st["worker_code"] = real, code
+        st["worker_sends"], st["worker_lines"] = pipes
     expect(g.load_facts(doc).get("sleeping_rooms") == saved.get("sleeping_rooms"), "saved facts changed")
 
     # Esc at a prompt cancels the whole edit: nothing is saved
