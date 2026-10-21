@@ -152,6 +152,7 @@ class Lot:
         elif len(street) == n:
             self.street_problem = stop("all_street")
         self.outline_note = None
+        self.drawn, self.pieces = self.edges, None
         if not self.problems and not self.street_problem:
             self._simplify(OUTLINE_SURVEY if facts.get("lot_surveyed") else OUTLINE_TAX_MAP,
                            "survey" if facts.get("lot_surveyed") else "tax-map")
@@ -187,19 +188,31 @@ class Lot:
         if len(alive) == n:
             return
         old = n
-        edges, curved, new_street = [], [], []
+        edges, curved, new_street, pieces = [], [], [], []
         for k, i in enumerate(alive):
             j = alive[(k + 1) % len(alive)]
             run = [(i + t) % n for t in range(((j - i) % n) or n)]
-            if len(run) == 1:
-                edges.append(self.edges[i])
-            else:
-                edges.append([pts[i], pts[j]])
+            # the line is the DRAWN pieces it groups, run end to end: the cleaned outline only decides which pieces
+            # form one lot line (street, side, rear; the readings); every distance is to the pieces drawn, never
+            # to a chord across them (review round 20: a chord over a dent moved the line outward)
+            edges.append([q for r in run for q in (self.edges[r] if r == run[0] else self.edges[r][1:])])
             curved.append(any(self.curved[r] for r in run))
+            pieces.append(run)
             if all(r in street for r in run):
                 new_street.append(k)
+        self.drawn, self.pieces = self.edges, pieces
         self.edges, self.curved, self.street = edges, curved, new_street
-        self.outline_note = f"{kind} outline simplified within {tol:g} ft: {old} lines → {len(edges)}"
+        self.outline_note = (f"{kind} outline cleaned within {tol:g} ft: its {old} drawn lines read as {len(edges)} "
+                             f"lot lines (distances still to the lines drawn)")
+
+    def label(self, i: int) -> str:
+        """Lot line i in the architect's own numbering (the lines drawn): "9", or "9 to 11" for pieces read as one."""
+        run = self.pieces[i] if self.pieces else [i]
+        return str(run[0] + 1) if len(run) == 1 else f"{run[0] + 1} to {run[-1] + 1}"
+
+    def line_of_piece(self, p: int) -> int:
+        """The lot line a drawn piece is part of."""
+        return next(k for k, run in enumerate(self.pieces) if p in run) if self.pieces else p
 
     def _contiguous(self, idx) -> bool:
         n = len(self.edges)
@@ -239,7 +252,7 @@ class Lot:
                 found.append((left, right, rear))
         middle = rest[1:-1]
         varies = [i for i in middle if len({i in r for _l, _r, r in found}) == 2]
-        return [(", ".join(f"line {i + 1} as a {'rear' if i in rear else 'side'} lot line" for i in varies),
+        return [(", ".join(f"line {self.label(i)} as a {'rear' if i in rear else 'side'} lot line" for i in varies),
                  left, right, rear) for left, right, rear in found]
 
 
@@ -1661,10 +1674,11 @@ def _lot_lines(lot: Lot, facts: dict):
             return stop("corner_one_street")    # stated a corner lot, but the lines given never turn a corner
         given = facts.get("address_street_line")
         if given:
-            idx = [i for i in chain if any(_same_point(lot.edges[i][0], a) and _same_point(lot.edges[i][-1], b) or
-                                           _same_point(lot.edges[i][0], b) and _same_point(lot.edges[i][-1], a)
-                                           for a, b in given)]
-            if len(idx) != len(given) or not lot._contiguous(idx):
+            # the picks are drawn pieces: each matched to a drawn piece, then to the lot line it is part of
+            hits = [next((q for q, e in enumerate(lot.drawn) if _same_point(e[0], a) and _same_point(e[-1], b) or
+                          _same_point(e[0], b) and _same_point(e[-1], a)), None) for a, b in given]
+            idx = sorted({lot.line_of_piece(q) for q in hits if q is not None} & set(chain))
+            if None in hits or not idx or not lot._contiguous(idx) or any(lot.line_of_piece(q) not in chain for q in hits):
                 return stop("address_not_a_street")
             candidates = [idx]
         else:
@@ -1696,7 +1710,7 @@ def _lot_lines(lot: Lot, facts: dict):
                 problems.append(stop("no_side_line"))
             else:
                 where = (f"the address on lot line{'s' if len(address) > 1 else ''} "
-                         f"{', '.join(str(i + 1) for i in address)}") if len(candidates) > 1 else ""
+                         f"{', '.join(lot.label(i) for i in address)}") if len(candidates) > 1 else ""
                 found.append((_both(where, words), {"left": left, "right": right, "sides": sides, "rear": rear,
                                                     "address": address}))
     # a reading the law excludes (its rear on a street, or no side line left) is dropped; if none is left, the
@@ -1740,7 +1754,7 @@ def _width(lot: Lot, facts: dict, lines) -> dict:
         groups = [g for k, g in enumerate(groups) if g and g not in groups[:k]]
     width = []
     for g in groups:
-        on = f" (lot line{'s' if len(g) > 1 else ''} {', '.join(str(i + 1) for i in g)})" if len(groups) > 1 else ""
+        on = f" (lot line{'s' if len(g) > 1 else ''} {', '.join(lot.label(i) for i in g)})" if len(groups) > 1 else ""
         width.append(("along the street line" + on, lot.length(g), {}))
         if any(lot.curved[i] for i in g):
             ends = [lot.edges[g[0]][0], lot.edges[g[-1]][-1]]

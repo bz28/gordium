@@ -776,6 +776,16 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 st = REVIEW
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst "
                        f"{what}{_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
+        own_named = (side_row or row).get("Named")
+        if st == REVIEW and tax and node is not None and (own_named or {}).get("result") == "pass" and \
+                formula.names(expr) & LOT_LENGTHS:
+            # complies under every reading research lists as drawn; only the tax map's lines hold it back: say so,
+            # and how (never "confirm with the zoning office": a survey settles it; review round 20)
+            worst = _worst_case(expr, values, formula.names(expr), measured, facts)
+            if worst is not None:
+                w = _numbers(node, worst, measured, label)
+                why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it complies under "
+                       f"every reading; at worst {_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
         tol = (measured.get("lot_area") or {}).get("tolerance")
         every = reading_set.rule_names(rule)
         survey_only = "lot_area" in every and (measured.get("lot_area") or {}).get("value") is None and all(
@@ -796,7 +806,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 w = _numbers(node, bad, measured, label)
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst {_display(*w)[0]} "
                        f"against {_display(*w)[1]} · Pick survey lot lines…")
-        if st == REVIEW and drawn is False and clean and tax and node is not None and (names & LOT_LENGTHS or tol):
+        as_drawn_fails = (drawn is False and clean) or (not side_row and (row.get("Readings") or {}).get("result") == "fail")
+        if st == REVIEW and as_drawn_fails and tax and node is not None and (names & LOT_LENGTHS or tol):
             # fails as drawn, but the checker found a reading of the tax-map lines under which it complies: say how
             best = _best_case(expr, values, names, measured, facts)
             if best is not None:
@@ -912,6 +923,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 "cited": [{"citation": c, "link": u} for c, u in dict.fromkeys(cited)],
                 "calc": base_calc or _calc(node, values, measured, required),
                 "scope": _scope(extras, measured),
+                # how the lot lines were read from the outline drawn, when it was cleaned (decided 2026-10-21)
+                "outline": next((measured[n]["outline"] for n in sorted(names)
+                                 if (measured.get(n) or {}).get("outline")), None),
                 "precision": PRECISION,
                 "at_limit": (f"At the limit: {proposed} exact" if margin_t == "at limit" else None),
                 "basis": applied["all"],

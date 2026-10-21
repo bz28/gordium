@@ -1502,7 +1502,8 @@ def test_106s_tax_map_outline_is_cleaned_within_a_quarter_foot_before_its_lines_
     from model_measurement.measure import Lot
     s, facts = _sample_106_site()
     lt = Lot(s, facts)
-    assert lt.outline_note == "tax-map outline simplified within 0.25 ft: 15 lines → 9"
+    assert lt.outline_note == ("tax-map outline cleaned within 0.25 ft: its 15 drawn lines read as 9 lot lines "
+                               "(distances still to the lines drawn)")
     lengths = sorted(round(LineString(e).length, 1) for e in lt.edges)
     assert min(lengths) > 9 and any(abs(x - 10.3) < 0.1 for x in lengths), lengths   # the chamfer stays (10.3 ft
     # once the 0.14 ft line at its end is gone)
@@ -1521,7 +1522,7 @@ def test_a_surveyed_outline_is_read_as_drawn_within_a_hundredth_of_a_foot():
     from shapely.geometry import Point
     s, facts = _sample_106_site()
     lt = Lot(s, {**facts, "lot_surveyed": True})
-    assert lt.outline_note and lt.outline_note.startswith("survey outline simplified within 0.01 ft")
+    assert lt.outline_note and lt.outline_note.startswith("survey outline cleaned within 0.01 ft")
     left = MultiLineString([LineString(e) for e in lt.edges])
     original = [tuple(e["points"][0][:2]) for e in s["lot"]["edges"]]
     assert all(left.distance(Point(p)) <= 0.01 + 1e-9 for p in original)
@@ -1530,3 +1531,80 @@ def test_a_surveyed_outline_is_read_as_drawn_within_a_hundredth_of_a_foot():
         [LineString(e) for e in lt.edges]).distance(Point(p)) > 0.01)
     rect = Lot(site(), FACTS)
     assert rect.outline_note is None and len(rect.edges) == 4                       # nothing to clean
+
+
+def _drawn_only(monkeypatch):
+    """Lot lines read from the outline exactly as drawn (no cleaning): the comparison for the pins below."""
+    from model_measurement.measure import Lot
+    monkeypatch.setattr(Lot, "_simplify", lambda self, tol, kind: None)
+
+
+def test_cleaning_the_outline_never_moves_a_distance_outward(monkeypatch):
+    """Review round 20, P0: the cleaned outline put a chord across the street's dent at (59.09, 0.30), 0.22 ft
+    outside the drawn line: a 1 ft house there read 27.12 ft back (complies) where the drawn street line is 26.9 ft
+    away (on the tax map: at worst 24'-10 3/4", needs review). The cleaned outline only says which drawn pieces form
+    each lot line; every distance is to the pieces drawn: 26.9 ft, the same as with no cleaning."""
+    s0, facts = _sample_106_site()
+    house = box(58.6, 27.2022, 59.6, 47.2022, 0, 25)
+    s = {**s0, "buildings": [house]}
+    f = {**facts, "ground_is_flat": True, "grade_elevation": 0.0}
+    cleaned = measure(s, f)["front_yard"]["value"]
+    _drawn_only(monkeypatch)
+    drawn = measure(s, f)["front_yard"]["value"]
+    assert cleaned == drawn and abs(drawn - 26.9) < 1e-6, (cleaned, drawn)
+
+
+@pytest.mark.parametrize("surveyed", [False, True])
+def test_no_yard_measured_on_a_cleaned_outline_exceeds_the_same_yard_on_the_outline_drawn(monkeypatch, surveyed):
+    """Property (round 20): houses placed across 106 on the tax map and on a survey. Every value a yard is read
+    as with the cleaned outline is a value it is read as on the outline drawn: the cleaning never moves a distance,
+    it only drops readings the drawn pieces' noise made (the 24 ft piece in line with the east side read as a rear
+    line, say). Never a kinder distance."""
+    import random
+    from model_measurement.measure import Lot
+    s0, facts = _sample_106_site()
+    f = {**facts, "ground_is_flat": True, "grade_elevation": 0.0, "lot_surveyed": surveyed}
+    rnd = random.Random(20)
+    names = ("front_yard", "side_yard_smaller", "side_yard_larger", "front_yard_eaves")
+    runs = []
+    for _ in range(12):
+        x0, y0 = rnd.uniform(8, 30), rnd.uniform(25, 40)
+        runs.append({**s0, "buildings": [box(x0, y0, x0 + rnd.uniform(15, 35), y0 + rnd.uniform(15, 35), 0, 25)]})
+    cleaned = [measure(s, f) for s in runs]
+    real = Lot._simplify
+    monkeypatch.setattr(Lot, "_simplify", lambda self, tol, kind: None)
+    drawn = [measure(s, f) for s in runs]
+    monkeypatch.setattr(Lot, "_simplify", real)
+    for c, d in zip(cleaned, drawn):
+        for n in names:
+            had = [r["value"] for r in d[n]["readings"]] + [d[n]["value"]]
+            got = [r["value"] for r in c[n]["readings"]] or [c[n]["value"]]
+            assert all(g is None or any(h is not None and abs(g - h) < 1e-6 for h in had) for g in got), (n, got, had)
+
+
+@pytest.mark.parametrize("surveyed", [True, False])
+def test_a_corner_lot_whose_address_street_is_drawn_in_pieces_is_still_read(surveyed):
+    """Review round 20, P1: the address street drawn as two pieces in line (0,0)-(30,0)-(60,0) and picked as both
+    pieces: the cleaned outline reads them as one lot line, and the picks are matched to the drawn pieces, then to
+    that line. Front 25 (to the south street), the one side yard 10, never 'pick the address street again'."""
+    pts = [(0, 0), (30, 0), (60, 0), (60, 120), (0, 120)]
+    street = [[[0, 0], [30, 0]], [[30, 0], [60, 0]], [[60, 0], [60, 120]]]
+    m = measure(site(lot(pts), box(10, 25, 40, 65)),
+                {**FACTS, "corner_lot": True, "street_line": street, "lot_surveyed": surveyed,
+                 "address_street_line": [[[0, 0], [30, 0]], [[30, 0], [60, 0]]]})
+    assert m["front_yard"]["value"] == 20.0 and m["side_yard_smaller"]["value"] == 10.0, (
+        m["front_yard"], m["side_yard_smaller"])
+
+
+def test_reading_words_name_the_lines_the_architect_drew_and_say_the_outline_was_cleaned():
+    """Review round 20, P2: on 106 the readings named lines of the cleaned outline ('line 7'), which the architect
+    never drew. They are named by the drawn lines ('line 10 to 11' for two drawn pieces read as one), and the
+    measurement's `from` text says the outline was cleaned."""
+    from model_measurement.project import working
+    s0, facts = _sample_106_site()
+    m = measure({**s0, "buildings": [box(20, 30, 50, 60, 0, 25)]},
+                {**facts, "ground_is_flat": True, "grade_elevation": 0.0})
+    words = " ".join(r["reading"] for r in m["lot_depth"]["readings"])
+    assert "line 10 to 11 as a" in words and "line 12 as a" in words and "line 7 " not in words, words
+    assert "outline cleaned within 0.25 ft" in working(m["lot_depth"], "model.3dm")
+

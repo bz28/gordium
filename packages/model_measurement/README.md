@@ -36,6 +36,15 @@ format report from it.
 
 ## How each number is found
 
+**Which drawn lines form each lot line (decided 2026-10-21, review round 20).** A drawn outline's pieces are grouped
+into lot lines by cleaning it within its own accuracy: a corner goes when leaving it out moves the outline by no
+more than 0.01 ft on a survey, 0.25 ft on the tax map (pieces in line, slivers). A corner where the street meets
+the other lines, or at a curved line, always stays. The cleaned outline only decides which drawn pieces form each
+line (street, side, rear; the readings of which are which), so it can only drop readings the drawing's noise made.
+Every distance is still measured to the pieces drawn, never to a chord across them, and the lot area is the
+outline drawn. Lines are named by the architect's own numbering ("line 10 to 11" for two drawn pieces read as
+one), and each lot-line measurement says the outline was cleaned (its `from` text and the panel's detail).
+
 | Measure | How | The city's words (4_term_definitions/definitions.yaml) |
 |---|---|---|
 | Lot area | area inside the lot lines | |

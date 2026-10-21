@@ -415,10 +415,14 @@ def summary(rows: list[dict]) -> dict:
     law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
     with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
     missing fact, not a reading, so it is never shown as complying."""
-    fails = [r for r in rows if r.get("Fails") or r["Error"] == "FAIL"]
-    named = [r for r in rows if (r.get("Named") or {}).get("result") == "pass" and r not in fails]   # counted once
-    review = [r for r in rows if r["Error"] == "NEEDS REVIEW" and r not in fails and r not in named]
-    passes = [r for r in rows if r["Error"] == "PASS" and r not in fails] + named     # a rule counted once
+    # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
+    # whatever its named readings say (review round 20); a row without a verdict, by its outcome
+    def verdict_of(r):
+        return r.get("Verdict") or (present.FAILS if r.get("Fails") or r["Error"] == "FAIL" else
+                                    present.COMPLIES if r["Error"] == "PASS" else present.REVIEW)
+    fails = [r for r in rows if verdict_of(r) == present.FAILS or r.get("Fails")]
+    review = [r for r in rows if verdict_of(r) == present.REVIEW and r not in fails]
+    passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):
@@ -566,7 +570,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         r["Provisional"] = found[1] if found else None
         # the readings it was worked out under (their values, the open measurements): the panel's tax-map best and
         # worst cases run over each of them, as for a row decided over named readings (review round 14)
-        r["Readings"] = readings_of(by_id[r["Rule id"]], measured, allowed) if found else None
+        r["Readings"] = readings_of(by_id[r["Rule id"]], measured, allowed) if review else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
         rule = by_id[r["Rule id"]]
         r["Verdict"] = row_verdict(rule, measured, allowed, facts)          # the ONE decision (round 3)

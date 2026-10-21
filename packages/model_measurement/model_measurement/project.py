@@ -103,6 +103,8 @@ def working(record: dict, model: str) -> str:
     if record["readings"]:
         shown = "; ".join(f"{r['reading']} = {_num(r['value'])}" for r in record["readings"])
         text += f" [readings: {shown}]"
+    if record.get("outline"):           # the lot lines read from a cleaned outline: said, so it can be traced
+        text += f" ({record['outline']})"
     return text
 
 

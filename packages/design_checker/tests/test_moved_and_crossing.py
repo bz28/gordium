@@ -19,8 +19,8 @@ from test_quickstart import _check, _moved, house  # noqa: E402,F401  (house: th
 
 @pytest.mark.parametrize("which", [0, 1, 2])
 def test_one_floor_moved_5_ft_east_does_not_comply_on_the_east_side(house, which):
-    # (106 Ithaca Rd's real tax-map outline since term-index 3b808e2: the starting house is 51'-4" x 29'-9", its
-    # sides Northeast and Southwest; 12'-0 3/8" from the northeast line, 27'-0 5/8" from the street)
+    # (106 Ithaca Rd's real tax-map outline since term-index 3b808e2: the starting house is 51'-4" x 29'-8", its
+    # sides Northeast and Southwest; 12'-0 3/8" from the northeast line, 27'-0 3/4" from the street)
     got, facts = house
     items = _check(_moved(got["floors"], dx=5, which=which), facts)
     east = items["Side yard, Northeast"]
@@ -31,14 +31,14 @@ def test_only_the_top_floor_moved_toward_the_street_is_judged_at_every_reading_o
     """4 ft: 23'-0" as drawn, but the tax-map street line may be 2 ft off in its favour: at best 25'-0" against
     25'-0": needs review (term-index f1784e3, the every-reading rule on a tax-map lot). 6 ft: 21'-0", at best
     23'-0" < 25'-0": does not comply under every reading."""
-    # (106 Ithaca Rd's real tax-map outline since term-index 3b808e2: the starting house is 51'-4" x 29'-9", its
-    # sides Northeast and Southwest; 12'-0 3/8" from the northeast line, 27'-0 5/8" from the street)
+    # (106 Ithaca Rd's real tax-map outline since term-index 3b808e2: the starting house is 51'-4" x 29'-8", its
+    # sides Northeast and Southwest; 12'-0 3/8" from the northeast line, 27'-0 3/4" from the street)
     got, facts = house
     front = _check(_moved(got["floors"], dy=-4, which=2), facts)["Front yard"]
-    assert (front["status"], front["proposed"]) == (present.REVIEW, "23'-0 3/4\"")
-    assert "as drawn it does not comply, but at best 25'-0 3/4\"" in front["reason"]
+    assert (front["status"], front["proposed"]) == (present.REVIEW, "23'-0 7/8\"")
+    assert "as drawn it does not comply, but at best 25'-0 7/8\"" in front["reason"]
     front = _check(_moved(got["floors"], dy=-6, which=2), facts)["Front yard"]
-    assert (front["status"], front["proposed"]) == (present.FAILS, "21'-0 3/4\"")
+    assert (front["status"], front["proposed"]) == (present.FAILS, "21'-1\"")
 
 
 def test_the_eaves_rule_names_the_yard_it_fails_in(house):
@@ -484,7 +484,8 @@ def test_a_rule_failing_under_every_lot_line_reading_on_a_tax_map_lot_is_judged_
     s, f, extras = scenarios.site(sc)
     rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
     assert rear["status"] == present.REVIEW, rear                          # the checker's verdict (row_verdict)
-    assert "lot lines" in rear["reason"], rear["reason"]
+    assert "as drawn it does not comply, but at best 29'-3" in rear["reason"] and "against 26'-6\"" in rear["reason"]
+    assert rear["required"] == "≥ 27'-6\" to 31'-8 3/8\"", rear["required"]   # 31.6926 ft, rounded up
 
 
 def test_a_rule_failing_under_every_lot_line_reading_on_a_survey_says_which_measurement_it_was_read_over():
@@ -585,3 +586,17 @@ def test_a_side_yards_own_verdict_is_the_checkers_and_never_looser_than_named_re
         {"reading": "", "value": 11.0, "named": {"model#eave": "eave"}},
         {"reading": "", "value": 10.5, "named": {"model#eave": "not_eave"}}]}}
     assert row_verdict(rule, one, {}, None, check="side_yard_smaller >= 10") == present.COMPLIES
+
+
+def test_a_row_held_back_only_by_the_tax_maps_lines_says_so_and_never_counts_as_passing():
+    """Review round 20, P2: eaves 1'-6" past side walls 11'-6" from each line, on the tax map: as drawn it complies
+    under every eave reading (the yards to the eaves 10'-0" against 8'-0"), but with each line 2 ft in it may not.
+    The row says that (the tax map, at worst, a survey settles it), never 'complies ... confirm with the zoning
+    office'; and the summary never counts it as passing (it counts from the checker's verdict only)."""
+    from test_every_reading import roof
+    res = run(floors(11.5, 30, 44.5, 70, 2) + [roof(11.5, 30, 44.5, 70, 20, 28, 1.5, 1.0)], lot_surveyed=False)
+    side = [i for i in rows(res, "R-1b.side_yards") if i["status"] == present.REVIEW]
+    assert side and all("tax map" in i["reason"] and "zoning office" not in i["reason"] for i in side), side
+    assert res["summary"]["state"] != "pass"
+    assert any("Side yard" in line for line in res["summary"]["lines"]), res["summary"]
+

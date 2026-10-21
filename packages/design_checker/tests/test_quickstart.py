@@ -35,7 +35,7 @@ def _site(floors, extra=()):
 
 
 # PR 18 reads every reading of which of 106's lot lines are side and rear lines (its real tax-map outline, cleaned
-# within 0.25 ft: 15 lines -> 9): the starting house is legal under every one, 51'-4" x 29'-9" (was 35'-11" x
+# within 0.25 ft: 15 lines -> 9): the starting house is legal under every one, 51'-4" x 29'-8" (was 35'-11" x
 # 37'-4"), and the rear yard needs review on 106. The guide's numbers and these walkthrough steps are re-derived by
 # the Rhino job once #18 lands (coordinator, 2026-10-21); strict, so each fails the moment it holds again.
 REDERIVE = pytest.mark.xfail(strict=True, reason="QUICKSTART walkthrough to be re-derived for PR 18's lot-line "
@@ -137,7 +137,6 @@ def test_1_on_screen_labels_are_off_until_ticked():
     assert logic.yard_label_shown(False, present.FAILS) and not logic.yard_label_shown(False, present.COMPLIES)
 
 
-@REDERIVE
 def test_2_move_back_5_ft(house):
     got, facts = house
     dy, front = said(r"Move the house (\d+) ft back.\*\* Front yard (\d+'-\d+(?: \d/\d)?\"): complies")
