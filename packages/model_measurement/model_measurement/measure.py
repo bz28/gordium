@@ -439,7 +439,11 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
 # steps or a deck. §325-3's STORY has no least height, so anywhere else (raised, on a roof, below the ground) a
 # part of any height might be a story.
 STORY_ROOM = 7.0            # ft
-ASSUMED_MAIN = "the main building assumed: the starting house (change it in Edit site)"
+# With no main building picked and exactly one starting house, it is the main building, assumed (a marker on
+# every measurement made from it: "main_assumed"); every other building is also read as if it were the main one.
+MAIN_IF = "if {} were the main building"
+MAIN_QUESTION = ("which building is the main building (the starting house is assumed, not picked) is a question "
+                 "(main_building)")
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
 
@@ -581,14 +585,34 @@ def _rise(building: dict) -> float:
     return hi - lo if lo is not None else 0.0
 
 
-def _assemblies(main: dict, others: list[dict]) -> list[tuple[str, list[dict]]]:
+def _assemblies(main: dict, others: list[dict], assumed: bool = False) -> list[tuple[str, list[dict]]]:
     """The candidate buildings the height is read over (_with_others), for every building measurement read from
     the drawing: the main building only, and, with other solids drawn, the main building with every other solid as
-    part of it (a wing drawn as its own solid is part of the building; an accessory building isn't, §325-25)."""
+    part of it (a wing drawn as its own solid is part of the building; an accessory building isn't, §325-25). With
+    the main building assumed (pick_main), each other building alone too, as if it were the main one: the pick
+    the architect may make, so the assumption never gives a pass that pick wouldn't."""
     out = [("the main building only", [main])]
     if others:
         out.append(("with every other solid as part of it", [main] + list(others)))
+    if assumed:
+        out += [(MAIN_IF.format(_parts(b)[0]), [b]) for b in others]
     return out
+
+
+def _with_each_as_main(record: dict, extra, grades) -> dict:
+    """The height read with each other building as the main one (_assemblies with the main building assumed), each
+    from its own grade plane, beside the readings already found; the main-building question if they differ."""
+    readings = [(r["reading"], r["value"], {}) for r in record["readings"]] or \
+        [("the starting house as the main building", record["value"], {})]
+    objects = list(record.get("objects") or [])
+    for (words, (b,)), (g, why) in zip(extra, grades):
+        h = _height(b, g) if not why else _missing("building_height", why)
+        if h["value"] is None and not h["readings"]:
+            return _missing("building_height", h["reason"])
+        readings += [(_both(words, r["reading"]), r["value"], {}) for r in h["readings"]] or [(words, h["value"], {})]
+        objects += _parts(b)
+    question = "; ".join(q for q in [record.get("reason") and record["reason"].split("; ", 1)[-1], MAIN_QUESTION] if q)
+    return _decide("building_height", readings, record.get("how") or "", list(dict.fromkeys(objects)), question)
 
 
 def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
@@ -783,6 +807,8 @@ def _stories_over(assemblies, grade, why_grade, stated, grades=None) -> dict:
             readings.append((_both(words, x["reading"]), x["value"], {}))
     if len({max(x["value"] for x in r["readings"] or [r]) for _, r in found}) > 1:
         questions.append(ACCESSORY)
+        if any(words.startswith(MAIN_IF.split("{")[0]) for words, _ in found):
+            questions.append(MAIN_QUESTION)
     return _decide("stories", readings, "the stories of the building, read over its candidate buildings",
                    list(dict.fromkeys(objects)), "; ".join(dict.fromkeys(questions)))
 
@@ -802,12 +828,26 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
     """Every measurement in measures.yaml, in its order, each with its working, for one site and its lot facts."""
     out = _measure(site, facts)
     assumed = out.pop("_assumed_main", None)
-    if assumed:                         # every measurement made from the starting house says it was assumed
+    if assumed:                         # every measurement made from the starting house carries the marker
         for name in MEASURES:
             r = out[name]
             if set(r.get("objects") or []) & set(assumed) and (r.get("value") is not None or r.get("readings")):
-                out[name] = dict(r, how=_both(r.get("how") or "", ASSUMED_MAIN))
+                out[name] = dict(r, main_assumed=True)
     return {name: out[name] for name in MEASURES}
+
+
+def pick_main(buildings: list[dict], facts: dict) -> tuple:
+    """THE main-building pick, (main, assumed), for every measurement (and the grade plane): the only building;
+    else the one picked (main_building names one of its blocks); else, with none picked, Gordium's own starting
+    house if exactly one building is all floor blocks GordiumStart drew (assumed: every other building is then
+    also read as if it were the main one, _assemblies); else none. `buildings`: as _stacks joins them."""
+    if len(buildings) == 1:
+        return buildings[0], False
+    picked = next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None)
+    if picked is not None or facts.get("main_building"):
+        return picked, False
+    starting = [b for b in buildings if b.get("parts") and all(b["floor"])]
+    return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
 def _measure(site: dict, facts: dict) -> dict[str, dict]:
@@ -840,16 +880,9 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
-    main = (buildings[0] if len(buildings) == 1 else
-            next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None))
-    if main is None and len(buildings) > 1 and not facts.get("main_building"):
-        # no main building picked: if exactly one building is Gordium's own starting house (all its blocks the
-        # floor blocks GordiumStart drew), it is the main one, said as assumed; every other is then read as a
-        # possible accessory building (the candidates below), so this never gives a pass the pick wouldn't
-        starting = [b for b in buildings if b.get("parts") and all(b["floor"])]
-        if len(starting) == 1:
-            main = starting[0]
-            out["_assumed_main"] = list(main["parts"])
+    main, assumed = pick_main(buildings, facts)
+    if assumed:                         # every other building is also read as if it were the main one
+        out["_assumed_main"] = list(main["parts"])
     why_main = None if main else stop("no_main_building")
     others = [b for b in buildings if b is not main]
     # One decision for every building measurement: which building (why_which), over which candidate buildings
@@ -861,7 +894,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     why_which = why_building or why_main
     countable = bool(buildings) or bool(why_building and site.get("buildings"))   # every drawn part is checked
     # the candidate buildings, each with its own grade plane: the one list the stories and the height read
-    candidates = _assemblies(main, others) if not why_which else []
+    candidates = _assemblies(main, others, assumed) if not why_which else []
     grades = _candidate_grades(candidates, buildings, facts, grade, why_grade)
     if countable:
         out["stories"] = (_missing("stories", why_which) if why_which else
@@ -873,6 +906,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         out["building_height"] = (_missing("building_height", why_g) if why_g else
                                   _with_others(out["building_height"], [_height(b, grade) for b in others],
                                                candidates))
+        if assumed and not why_g:       # and each other building as the main one, from its own grade plane
+            out["building_height"] = _with_each_as_main(out["building_height"], candidates[2:], grades[2:])
 
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None

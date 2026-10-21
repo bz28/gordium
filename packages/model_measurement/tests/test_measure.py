@@ -1152,7 +1152,12 @@ def test_the_starting_house_is_the_main_building_when_none_is_picked():
         r = m[name]
         assert r["value"] is not None or r["readings"], (name, r)
         assert "pick the main building" not in (r.get("reason") or "")
-        assert "assumed: the starting house" in r["how"], (name, r["how"])
+        assert r.get("main_assumed") is True and "assumed" not in r["how"], (name, r)     # a marker, not words
+    height = m["building_height"]
+    assert {r["value"] for r in height["readings"]} >= {10.0} and \
+        any(r["reading"].startswith("if garage were the main building") for r in height["readings"])
+    assert "(main_building)" in height["reason"] and any(
+        r["reading"].startswith("if garage were the main building") for r in m["stories"]["readings"])
     other = [floor(36, 70, 48, 90, z0=0, z1=11, id="g0")]
     m = measure(site(RECT, *house, *other), {**FACTS, "stories": 3})
     assert "pick the main building" in m["building_height"]["reason"]

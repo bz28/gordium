@@ -129,7 +129,9 @@ Every reason the code gives today comes from the table:
   ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
   question for the architects".
 - **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
-  measurements"; "more than one building: pick the main building"; "a
+  measurements"; "more than one building: pick the main building" (with none picked and exactly one starting house, it is
+  the main building, assumed: every measurement from it carries `main_assumed`, and every other building is also
+  read as if it were the main one, so the assumption never passes what a pick wouldn't); "a
   building isn't inside the lot: {what}" (which one; the yards wait only if it is the main building); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
