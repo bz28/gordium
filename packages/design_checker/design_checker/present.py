@@ -245,6 +245,12 @@ def _status(row: dict) -> str:
     return COMPLIES if row.get("Error") == "PASS" else REVIEW
 
 
+def _combos(row: dict, values: dict) -> list[dict]:
+    """The values a row was decided under: every combination of its readings (named, or every reading of an open
+    measurement), else the measured values alone."""
+    return ((row.get("Named") or {}).get("combos") or (row.get("Readings") or {}).get("combos") or [values])
+
+
 def _holds(expr: str, values: dict, row: dict):
     """True / False / None for a comparison, and under every reading research lists for a row decided that way
     (check.named_result): True only if it holds under all of them, False only if under none."""
@@ -537,6 +543,16 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 raised = [c for c in way if c.left.id != node.left.id]
         numbers = _numbers(node, values, measured, label) if node is not None else (None, None, None, "", "")
         proposed, required, margin_t, margin = (*_display(*numbers),) if node is not None else ("—", "—", "", None)
+        if (node is not None and required in ("—", None) and len(_combos(row, values)) > 1
+                and (values.get("building_height") is not None
+                     or "building_height" not in formula.names(ast.unparse(node.comparators[0])))):
+            # (a limit raised by the height bonus while the height is unknown is said below, with why it waits)
+            # decided over readings: the requirement under each (the strictest is part of it), never a dash
+            at = [_evaluate(ast.unparse(node.comparators[0]), c) for c in _combos(row, values)]
+            if at and all(isinstance(a, (int, float)) for a in at):
+                unit = (measured.get(node.left.id) or {}).get("unit") or ""
+                low, high = (value_text(a, unit, numbers[4], False) for a in (min(at), max(at)))
+                required = f"{numbers[4]} {low}" + (f" to {high}" if high != low else "")
         if name == "Use":
             proposed = use_names.get(values.get("use"), values.get("use") or "—")
             required = {COMPLIES: "permitted", FAILS: "not permitted"}.get(st, "—")
@@ -570,8 +586,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             # them (each line up to TOLERANCE either way); else it needs review (the same slack as for a pass)
             # a value not measured at all that fails the rule whatever it is (check.fails_whatever) is taken where
             # the rule is truest, 0 (proven), so the lucky lines are judged at the rule's best too
-            drawn = dict(values, **{row["Unknown"]: 0}) if row.get("Unknown") else values
-            ends = [drawn] + ([dict(drawn, lot_area=tol["high"])] if tol and "lot_area" in names else [])
+            # under each reading the row was decided over (a fail under every reading, too: round 14)
+            drawn = [dict(c, **{row["Unknown"]: 0}) if row.get("Unknown") else c for c in _combos(row, values)]
+            ends = [e for d in drawn for e in [d] + ([dict(d, lot_area=tol["high"])] if tol and "lot_area" in names
+                                                       else [])]
             best = next((v if _evaluate(expr, v) is True else b for v in ends
                          for b in [_best_case(expr, v, names)] if _evaluate(expr, v) is True or b is not None), None)
             if best is not None:
@@ -586,7 +604,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if st == FAILS and row.get("Provisional") and not row.get("Error") == "FAIL":
             why = ("Does not comply with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…"
                    if "confirm the survey" in row["Provisional"] else
-                   "Fails under every reading considered (" + _user_text(row["Provisional"]) + ")")
+                   "Fails under every reading considered (" + ", ".join(
+                       NAMES.get(n, n.replace("_", " ")).lower() for n in (row.get("Readings") or {}).get("open") or []
+                   ) + ")")
         line = _detail_line(proposed, required, margin_t, numbers[4] if node is not None else "", margin)
         hint = _hint(label, numbers[4], margin, numbers[3]) if node is not None and margin is not None else None
         if node is not None and node.left.id == "building_area" and margin is not None and margin < 0:

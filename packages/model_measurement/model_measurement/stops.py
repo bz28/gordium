@@ -74,6 +74,8 @@ STOPS = {
     "no_building": "no building on the Building layer",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
     "no_main_building": "more than one building: pick the main building",
+    "stories_joined": "floors are drawn on a part joined to the main building (one building with it, §325-18A): "
+                      "the stories of the whole building aren't counted yet",
     "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
     "outside_lot": "a building isn't on the lot (is it part of this design?)",
     "open_solid": "a building isn't a closed solid",

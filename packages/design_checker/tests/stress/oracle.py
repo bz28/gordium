@@ -219,7 +219,7 @@ def _where(shape: Polygon, lot: Polygon) -> str:
     return "crossing" if shape.intersects(lot) and shape.intersection(lot).area > EPS else "off"
 
 
-def measure(design, tolerance=False):
+def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
     """Every number, as a (worst, best) pair for the rules above, plus what each building is and where."""
     lot = design["lot"]
     lot_poly = Polygon(lot["points"])
@@ -237,7 +237,7 @@ def measure(design, tolerance=False):
         walls = full
     maybe_main = unary_union([full] + [_union(g) for g in unlisted])    # an unlisted building read as a main one
     sides_all = [s for segs in lot["sides"].values() for s in segs] + lot.get("unsure", [])
-    tol = TAX_MAP_TOLERANCE if tolerance and not lot["surveyed"] else 0.0
+    tol = tolerance_ft if tolerance and not lot["surveyed"] else 0.0
 
     def side_hi(shape):
         return min(_dist(shape, segs) for segs in lot["sides"].values())
@@ -279,6 +279,14 @@ def measure(design, tolerance=False):
     stacked = all(abs(b["z0"] - a["z1"]) <= EPS for a, b in zip(floors, floors[1:]))
     attic = any(p["kind"] in ROOF_KINDS for p in main)                  # an attic may be a story (STORY, §325-3)
     stories = (len(floors) + (1 if attic else 0), len(floors)) if stacked and floors and grade is not None else None
+    # a main part drawn as a plain solid (no floor marks): its stories aren't drawn. The floor blocks drawn are a
+    # floor under any reading (STORY, §325-3), so a typed count below them can't be the building's: never complies
+    # until that is resolved; otherwise at least the floor blocks, at most unknown
+    plain = [p for p in main if p["kind"] == "solid"]
+    typed = design.get("typed_stories")
+    stories_below_drawn = bool(plain) and typed is not None and floors and typed < len(floors)
+    if plain and grade is not None:
+        stories = (math.inf, len(floors)) if floors else None
     accessories = []
     for g in acc:
         shape = _union(g)
@@ -291,6 +299,7 @@ def measure(design, tolerance=False):
     return {"yards": yards, "off": off, "area": area, "lot_area": lot_area, "width": (width - 2 * tol, width + 2 * tol),
             "depth": (lot["depth"][1], lot["depth"][0]), "height": height, "stories": stories,
             "accessories": accessories, "unlisted": len(unlisted), "frame": design.get("frame"),
+            "stories_below_drawn": stories_below_drawn,
             "where": {"main": _where(full, lot_poly), **{",".join(p["id"] for p in g): _where(_union(g), lot_poly)
                                                          for g in detached}}}
 
@@ -313,15 +322,19 @@ RULE_FUNCTIONS = {"R-1b.front_yard": front_rule, "R-1b.side_yards": side_rule, "
                   "R-1b.lot_width_one_family_detached": lot_width_rule}
 
 
-def verdicts(design, tolerance=False) -> dict:
+def verdicts(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE) -> dict:
     """Per rule: {"verdict", "slack" (at the worst; ft, or a fraction of the lot for coverage), "why"}."""
-    m = measure(design, tolerance)
+    m = measure(design, tolerance, tolerance_ft)
     worst, best = _world(m, 0), _world(m, 1)
     out = {}
     for rule, f in RULE_FUNCTIONS.items():
         why = ""
         if rule in ("R-1b.height", "R-1b.yard_projections") and m["height"] is None:
             out[rule] = {"verdict": UNDECIDED, "slack": None, "why": "grade plane not decidable"}
+            continue
+        if rule == "R-1b.stories" and m["stories_below_drawn"]:
+            out[rule] = {"verdict": NOT_PASS, "slack": None,
+                         "why": "the typed story count is lower than the floor blocks drawn"}
             continue
         if rule == "R-1b.stories" and m["stories"] is None:
             out[rule] = {"verdict": UNDECIDED, "slack": None, "why": "grade unknown or floors not stacked"}

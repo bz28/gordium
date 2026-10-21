@@ -998,7 +998,8 @@ def test_stories_never_comply_with_fewer_than_the_floors_drawn_unless_a_main_bui
     rnd = random.Random(21)
     for _ in range(150):
         blocks, stacks = [], []
-        for k, (x0, x1) in enumerate(((5, 20), (25, 40))[:rnd.randint(1, 2)]):
+        layout = rnd.choice((((5, 20), (25, 40)), ((5, 20), (20, 35))))     # apart, or touching (round 14)
+        for k, (x0, x1) in enumerate(layout[:rnd.randint(1, 2)]):
             n, marked = rnd.randint(1, 5), rnd.random() < 0.5
             ids = [f"s{k}f{i}" for i in range(n)]
             stacks.append(ids)
@@ -1018,3 +1019,16 @@ def test_stories_never_comply_with_fewer_than_the_floors_drawn_unless_a_main_bui
             continue
         own = next((s for s in stacks if pick in s), None)
         assert len(set(ids)) == len(ids) and own is not None and m["value"] == len(own), (stacks, pick, typed, m)
+
+
+def test_stories_are_never_one_part_of_a_joined_building():
+    """Review round 14, P0. Solids that touch are one building (§325-18A); the main building picked from them
+    is one part. (a) Four 8 ft floor blocks and a plain 34 ft stair solid touching them, 2 stories typed: the
+    stair solid is picked (the tallest), and the typed 2 stood with 4 floors drawn: complies. (b) Nothing typed: a
+    3-floor stack (11 ft floors, 33 ft) touching a 4-floor stack (8 ft floors, 32 ft): the 3-floor stack was
+    picked and counted, 3, with 4 floors on the wing. Each is never below 4: the stories need review."""
+    four = [floor(35, 25, 45, 65, z0=8 * i, z1=8 * (i + 1), id=f"wing {i + 1}") for i in range(4)]
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 34, id="stair"), *four), {**FACTS, "stories": 2})["stories"]
+    assert m["value"] is None and "joined to the main building" in m["reason"], m
+    m = measure(site(RECT, *FLOORS, *four), {**FACTS, "stories": None})["stories"]
+    assert m["value"] is None and "joined to the main building" in m["reason"], m

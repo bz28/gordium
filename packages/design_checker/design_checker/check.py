@@ -130,10 +130,19 @@ def _eave_text(found: dict, measured: dict) -> str | None:
         return None                         # it fails even with the overhang an eave: not just a confirmation
     reach = []
     for name, yard in EAVE_YARD_WORDS.items():
-        m = measured.get(name) or {}
-        by = {r["named"].get("model#eave"): r["value"] for r in m.get("readings") or [] if r.get("named")}
-        if by.get("eave") is not None and by.get("not_eave") is not None and by["eave"] - by["not_eave"] > 1e-6:
-            reach.append(f"{present.feet_inches(by['eave'] - by['not_eave'], 'up')} past the walls toward the {yard}")
+        # each reading read with the overhang an eave, against the same reading (the same lot lines, the same
+        # other answers) with it not: the most it reaches, over every reading, never one reading picked by the
+        # order the readings came in (stress F7: outline order changed the words)
+        pairs = {}
+        for r in (measured.get(name) or {}).get("readings") or []:
+            side = (r.get("named") or {}).get("model#eave")
+            if side in ("eave", "not_eave") and r.get("value") is not None:
+                rest = tuple(sorted((t, v) for t, v in r["named"].items() if t != "model#eave"))
+                words = "; ".join(w for w in r["reading"].split("; ") if not w.startswith("what reaches past the walls"))
+                pairs.setdefault((rest, words), {})[side] = r["value"]
+        gaps = [p["eave"] - p["not_eave"] for p in pairs.values() if "eave" in p and "not_eave" in p]
+        if gaps and max(gaps) > 1e-6:
+            reach.append(f"{present.feet_inches(max(gaps), 'up')} past the walls toward the {yard}")
     where = ("the part reaching " + "; ".join(dict.fromkeys(reach))) if reach else "what the roof reaches past the walls"
     return (f"it complies only if {where} is an eave (§325-18B allows eaves up to 2 ft into a required yard). "
             "Gordium will ask you to confirm it in the panel in the next release; until then this stays needs review")
@@ -452,6 +461,9 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         r["Unknown"] = fails_whatever(by_id[r["Rule id"]], measured, allowed) if review and not named and not found \
             else None
         r["Provisional"] = found[1] if found else None
+        # the readings it was worked out under (their values, the open measurements): the panel's tax-map best and
+        # worst cases run over each of them, as for a row decided over named readings (review round 14)
+        r["Readings"] = readings_of(by_id[r["Rule id"]], measured, allowed) if found else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
         r["Fails"] = r["Error"] == "FAIL" or bool(found and found[0] == "fail") or bool(
             named and named["result"] == "fail") or bool(r["Unknown"])   # fails whichever way it goes

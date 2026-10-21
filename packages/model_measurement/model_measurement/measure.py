@@ -1046,8 +1046,15 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # applies to the height applies to them identically (the grade is checked inside _stories).
     why_which = why_building or why_main
     countable = any(b.get("parts") for b in buildings) or bool(why_building and site.get("buildings"))
+    # solids touching the main building are one building with it (§325-18A): its stories are the whole joined
+    # building's, never one part's. Until they are counted over every part (one candidate building, as the height
+    # will be), floors drawn on any other part stop the count; never a typed value (review round 14)
+    joined = [b for b in (_attached(main, buildings) if main is not None and not why_which else [])
+              if b.get("parts") or b.get("floor")]
     if countable and why_which:
         out["stories"] = _missing("stories", why_which)
+    elif joined:
+        out["stories"] = _missing("stories", stop("stories_joined"))
     elif main is not None and main.get("parts"):
         out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
     why = why_which or why_grade

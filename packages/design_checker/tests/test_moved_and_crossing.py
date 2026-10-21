@@ -461,3 +461,38 @@ def test_fails_whatever_never_uses_a_number_that_decides_whether_the_rule_applie
     rule = {"id": "t", "kind": "rule", "check": "front_yard_eaves >= 25 + max(building_height - 35, 0) - 2", **extra}
     measured = {"front_yard_eaves": {"value": 15.0}, "building_height": {"value": None, "readings": []}}
     assert fails_whatever(rule, measured, {}) is None
+
+
+def test_a_rule_failing_under_every_lot_line_reading_on_a_tax_map_lot_is_judged_with_the_lucky_lines_too():
+    """Round 14, P1. Scenario 09's five-sided lot from the tax map, the house's rear wall at y = 87: rear yard
+    27.28 ft against 27'-6" (depth 110) or 31.69 ft (depth 126.77): it fails under every reading of the lot
+    lines. With the lines 2 ft in its favour (rear yard 29.28, depth 110 - 4 = 106, 26'-6" required) it complies:
+    on a tax-map lot that is needs review ('at best'), never does not comply; the requirement is shown under each
+    reading, never a dash."""
+    import copy
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "09_five_sided_lot.yaml"))
+    sc["lot"]["surveyed"] = False
+    for b in sc["buildings"]:
+        b["outline"] = [[15, 30], [45, 30], [45, 87], [15, 87]]
+    s, f, extras = scenarios.site(sc)
+    rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
+    assert rear["status"] == present.REVIEW, rear
+    assert "as drawn it does not comply, but at best 29'-3" in rear["reason"] and "against 26'-6\"" in rear["reason"]
+    assert rear["required"] == "≥ 27'-6\" to 31'-8 3/8\"", rear["required"]   # 31.6926 ft, rounded up
+
+
+def test_a_rule_failing_under_every_lot_line_reading_on_a_survey_says_which_measurement_it_was_read_over():
+    """Round 14, P1: the same house on the surveyed lot fails under every reading: the reason names what was read
+    (the lot depth), never the doubled 'Fails under every reading considered (fails under every reading)'."""
+    import copy
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    sc = copy.deepcopy(scenarios.load(scenarios.FOLDER / "09_five_sided_lot.yaml"))
+    for b in sc["buildings"]:
+        b["outline"] = [[15, 30], [45, 30], [45, 87], [15, 87]]
+    s, f, extras = scenarios.site(sc)
+    rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
+    assert rear["status"] == present.FAILS
+    assert rear["reason"].startswith("Fails under every reading considered (lot depth)"), rear["reason"]
