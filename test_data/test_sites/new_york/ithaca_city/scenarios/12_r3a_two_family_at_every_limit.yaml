@@ -1,0 +1,56 @@
+title: "R-3a: a four-story two-family house at every R-3a limit"
+what: >-
+  A surveyed 50 ft × 125 ft lot in R-3a (6,250 sf; a two-family dwelling needs 5,000 sf and 40 ft of width) with a
+  two-family house 35 ft wide and 62.5 ft deep: four 10 ft stories to a 40 ft flat roof, 10 ft from the street,
+  5 ft from the west side line and 10 ft from the east. Its footprint, 2,187.5 sf, is exactly 35% of the lot. Every
+  limit is R-3a's own (R-1b would fail the use, the height, the stories, the front yard, the west side yard and
+  the coverage), and each is exactly at the line, so each complies. §325-19E (lots abutting R-1) doesn't apply to a
+  two-family dwelling, so it shows no row.
+district: R-3a
+use: two_family
+lot: {points: [[0, 0], [50, 0], [50, 125], [0, 125]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[5, 10], [40, 10], [40, 72.5], [5, 72.5]]
+    base: 0
+    floors: [10, 10, 10, 10]
+grade: {elevation: 0}
+expected:
+  R-3a.lot_area_two_family:
+    status: complies
+    working: "lot area = 50 × 125 = 6,250 sf; required ≥ 5,000 sf"
+    cites: "§325-8 chart p.3, R-3A, Minimum Lot Size, two-family dwelling: 5,000 sf"
+  R-3a.lot_width_two_family:
+    status: complies
+    working: "frontage 50 ft; required ≥ 40 ft (§325-8A(7))"
+    cites: "§325-8 chart p.3, R-3A, Minimum Lot Width, two-family dwelling: 40 ft"
+  R-3a.stories:
+    status: complies
+    working: "4 floor blocks, each one story = 4; limit 4 (R-1's is 3)"
+    cites: "§325-8 chart p.3, R-3A, Number of stories: 4"
+  R-3a.height:
+    status: complies
+    at_limit: true
+    working: "flat roof at 10 + 10 + 10 + 10 = 40 ft above the flat grade; limit 40 ft (no bonus used)"
+    cites: "§325-3 HEIGHT OF BUILDING; §325-8 chart p.3, R-3A, Height in feet: 40 ft"
+  R-3a.lot_coverage:
+    status: complies
+    working: "footprint = 35 × 62.5 = 2,187.5 sf; allowed 35% × 6,250 = 2,187.5 sf; exactly 35%"
+    cites: "§325-8 chart p.3, R-3A, Percent of lot area: 35%; §325-8A(10)"
+    measured: {building_area: 2187.5}
+  R-3a.front_yard:
+    status: complies
+    at_limit: true
+    working: "street line y = 0 to the front wall at y = 10: 10 ft; required 10 ft (R-1's is 25)"
+    cites: "§325-8 chart p.3, R-3A, Front (minimum): 10 ft"
+  R-3a.side_yards:
+    status: complies
+    at_limit: true
+    working: "west 5 − 0 = 5 ft, the narrower, required ≥ 5 ft (Column 13); east 50 − 40 = 10 ft, the wider, required ≥ 10 ft (Column 12)"
+    cites: "§325-8 chart p.3, R-3A, Side (one side minimum) 10 ft, (other side minimum) 5 ft; §325-8A(12), (13)"
+  R-3a.rear_yard:
+    status: complies
+    working: "rear line y = 125 to the rear wall at y = 72.5: 52.5 ft; required max(min(20% × 125, 50), 20) = 25 ft"
+    cites: "§325-8 chart p.3, R-3A, Rear 20%/50 ft, note 16 (not less than 20 ft); §325-8A(14)"
+plan:
+  encroach: 0
