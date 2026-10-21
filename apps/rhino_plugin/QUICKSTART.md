@@ -234,8 +234,8 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
 3. **The start box** opens, filled in from the lot as drawn. Read it top to bottom:
    - **Address**: type it and press **Look up** (or Enter). Gordium asks the public map services (it takes up to
      45 seconds; the box says "Looking up…"). It fills in the lot from the tax map (drawn with its street at the
-     bottom of Top view), the street side, whether it's a corner lot, today's ground levels, and a suggested
-     zoning district, each with where it came from. Anything doubtful is amber with the reason: tick **I checked
+     bottom of Top view), the street side, whether it's a corner lot, and a suggested zoning district, each with
+     where it came from (not the ground: for now it is assumed flat, see **Ground** below). Anything doubtful is amber with the reason: tick **I checked
      this** once you have, or change it; until then the items that depend on it need review. If the lookup
      can't help (offline, not found, outside the City of Ithaca), the box says why and you fill it in by hand.
    - **Zoning district**: "entered by you", or after Look up "suggested by Gordium · City of Ithaca zoning map,

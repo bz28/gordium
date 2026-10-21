@@ -19,6 +19,14 @@ TESTS = REPO / "packages/site_lookup/tests"
 ZONES = ["R-1a", "R-1b", "R-2a", "R-3a"]
 
 
+
+
+@pytest.fixture
+def ground_from_the_lookup(monkeypatch):
+    """The ground as the lookup reads it (spot grades, their doubts): off in the MVP (FLAT_GROUND), kept for when
+    it comes back; these tests run with it on."""
+    monkeypatch.setattr(logic, "FLAT_GROUND", False)
+
 def _rules():
     from rule_format.rulebook import load, rulebook_for
     return {r["id"]: r for r in load(rulebook_for(REPO / "regulations/jurisdictions/new_york/ithaca_city", "R-1b"))
@@ -367,6 +375,7 @@ def test_every_r1b_rule_reading_an_unsettled_measurement_needs_review(key):
                 assert i["status"] == plain[name]["status"], (path.name, name)
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_p1_esc_on_place_spot_grades_settles_nothing():
     """Esc or Enter with no point placed: the ground's doubt and its looked-up source stay."""
     facts, saved, _ = box(_doubtful_106())
@@ -562,6 +571,7 @@ def sample_model():
     return table, {"lot_id": "sample"}, {"from_sample": True, "replaceable_lot": "sample"}
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_cancel_after_a_lookup_leaves_the_model_exactly_as_it_was():
     """Round 1 and 2 (and seen in Rhino): Cancel didn't bring the sample lot back. Held, not deleted: the same
     object, the same id, on its own layer; the lookup's lot and spot grades gone; the layer it made removed; the
@@ -577,6 +587,7 @@ def test_cancel_after_a_lookup_leaves_the_model_exactly_as_it_was():
     assert table.snapshot() == before
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_draw_after_a_lookup_deletes_what_was_replaced_and_keeps_the_new():
     table, facts, saved = sample_model()
     session = logic.BoxSession(table)
@@ -586,6 +597,7 @@ def test_draw_after_a_lookup_deletes_what_was_replaced_and_keeps_the_new():
     assert logic.HOLDING_LAYER not in table.layers and len(table.ground_points()) == 14
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_a_re_lookup_sets_aside_every_spot_grade_of_the_lot_it_replaces():
     """Round 2: the architect's own spot grades for the replaced lot stayed and mixed with the new lot's."""
     table, facts, saved = sample_model()
@@ -702,6 +714,7 @@ def test_the_overlays_gap_says_what_the_lookup_does():
 
 # ---- review round 3 of PR #19 ------------------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_crash_recovery_leaves_the_model_as_it_was_before_the_box():
     """Round 3: recovery put back what was held but left what the session drew (the looked-up lot and its USGS spot
     grades carried no mark), so grades mixed after a crash. Each drawn object carries the session's mark until
@@ -766,6 +779,7 @@ def test_recovery_never_touches_a_start_box_still_open():
     assert session.token not in logic.OPEN_SESSIONS
 
 
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_a_dead_sessions_objects_are_recovered_while_another_box_is_open():
     table, facts, saved = sample_model()
     dead = logic.BoxSession(table)
@@ -931,6 +945,7 @@ def test_switching_documents_with_a_pending_edit_still_rechecks_the_one_in_front
 # ---- eval-integrity audit (P1-5) and the gate by behaviour --------------------------------------------------------
 
 @pytest.mark.parametrize("what", ["street", "lot", "draw_lot", "terrain", "spot", "regrade"])
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_esc_at_any_pick_changes_nothing_and_keeps_every_doubt(what):
     """The audit: making Esc on Place spot grades wipe the ground's doubt still passed the source-text pin. Every
     pick's effect is decided in rhino_logic from what the pick gave; Esc, Enter or nothing picked changes nothing."""
@@ -945,6 +960,7 @@ def test_esc_at_any_pick_changes_nothing_and_keeps_every_doubt(what):
 @pytest.mark.parametrize("what, outcome, row", [("street", [[0, 0], [10, 0]], "street"), ("lot", "survey-id", "lot"),
                                                  ("draw_lot", "drawn-id", "lot"), ("terrain", "terrain-id", "ground"),
                                                  ("spot", ["p1", "p2"], "ground"), ("regrade", ["p1"], "ground")])
+@pytest.mark.usefixtures("ground_from_the_lookup")
 def test_a_real_pick_settles_only_its_own_row(what, outcome, row):
     saved = {"doubts": {"lot": "x", "street": "y", "ground": "z"}, "checked": []}
     facts, after = logic.pick_effect(what, outcome, {"lot_id": "sample", "lot_surveyed": False}, saved)
@@ -983,3 +999,57 @@ def test_a_looked_up_lot_says_how_its_plan_is_turned_and_its_sides_get_true_comp
              "side_yard_larger": {"points": [[0.0, 40.0], [12.0, 40.0]]}}
     assert {present._side_name(k, sides, f["plan_north_deg"]) for k in sides} == \
         {"Side yard, Northeast", "Side yard, Southwest"}
+
+
+# ---- merge review round 1 of #19 with #15's MVP (FLAT_GROUND): the ground is never the lookup's ----------------
+
+def test_with_flat_ground_the_ground_fact_is_an_assumption_credited_to_no_one():
+    """P1: the saved Ground fact read "assumed flat" but was credited to USGS (or "placed by you") and confirmed by
+    you, after a lookup drew spot grades. With FLAT_GROUND it is the MVP's assumption, confirmed by no one."""
+    assert logic.FLAT_GROUND
+    state = {"ground": {"kind": "spot", "count": 14, "source": "suggested by Gordium · USGS 3DEP elevation"}}
+    got = logic.fact_sources(state, "2026-10-21", confirmed=True)["ground"]
+    assert got["value"] == "assumed flat" and got["source"] == logic.ASSUMED_SOURCE and got["confirmed_by"] is None
+
+
+def test_with_flat_ground_a_lookup_keeps_no_ground_doubt_and_draws_no_spot_grades():
+    """P2: with the elevation service down the lookup kept a "ground" doubt, which held height and stories at
+    needs review with no box row to clear it. With FLAT_GROUND the ground isn't the lookup's: no ground doubt, no
+    looked-up ground kind or source, and no spot grades drawn."""
+    assert logic.FLAT_GROUND
+    payload = {"status": "found", "facts": {"lot": {"value": {"area_sf": 7033}}},
+               "details": {"ground": {"status": "needs_review",
+                                      "reason": "Couldn't reach the elevation service: set the ground by hand."}},
+               "writes": {"lot_ring": [[0, 0], [50, 0], [50, 100], [0, 100]], "spots": [[1, 1, 0], [2, 2, 0]]}}
+    facts, saved = logic.lookup_choices(payload, {}, {})
+    assert "ground" not in (saved.get("doubts") or {}) and "ground" not in logic.unsettled(saved)
+    assert "ground" not in (saved.get("_live") or {}) and saved.get("ground_kind") != "spot"
+    assert not saved.get("ground_source")
+    table, facts, saved = sample_model()
+    session = logic.BoxSession(table)
+    logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    session.commit()
+    assert table.ground_points() == []
+
+
+def test_every_tick_row_is_greyed_while_a_box_is_open():
+    """P3: the greyed list must hold each of the three tick rows (envelope, massing, labels), spread in: a list
+    inside it (ticks, not *ticks) or a row left out would leave a control live while a box is open."""
+    import ast
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    tree = ast.parse(ui)
+    ticks = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
+                 and any(isinstance(t, ast.Name) and t.id == "ticks" for t in n.targets))
+    boxes = [ast.unparse(e.args[0]) for e in ticks.elts]
+    assert boxes == ["_envelope_box(actions)", "_massing_box(actions)", "_labels_box(actions, parts)"]
+    greyed = next(n.value for n in ast.walk(tree) if isinstance(n, ast.Assign)
+                  and any(ast.unparse(t) == "parts['greyed']" for t in n.targets))
+    assert any(isinstance(e, ast.Starred) and ast.unparse(e.value) == "ticks" for e in greyed.elts)
+
+
+def test_the_yard_measures_are_defined_once():
+    """P3: check.py defined YARD_MEASURES twice (the first dead); it is present's."""
+    from design_checker import check as checking
+    from design_checker import present
+    src = (REPO / "packages/design_checker/design_checker/check.py").read_text(encoding="utf-8")
+    assert src.count("YARD_MEASURES = ") == 1 and checking.YARD_MEASURES is present.YARD_MEASURES

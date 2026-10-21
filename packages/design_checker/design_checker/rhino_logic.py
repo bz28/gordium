@@ -160,6 +160,38 @@ def with_suggestions(saved, suggested):
     return out
 
 
+# The facts only the architect can state (the model can't show them), in the order they are asked: each with its
+# prompt, its kind (a whole number 0 or more, or yes / no) and its name in a row's words. A row waiting on any of
+# them says which, and its "Enter …" button asks for exactly those (needs_of, enter_words).
+STATED_FACTS = {
+    "sleeping_rooms": ("Bedrooms", "count", "bedrooms"),
+    "parking_spaces": ("Off-street parking spaces", "count", "parking spaces"),
+    "dwelling_units": ("Dwelling units", "count", "dwelling units"),
+    "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
+    "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
+                   "whether it is a conversion"),
+}
+
+
+def needs_of(names, values):
+    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
+    return [k for k in STATED_FACTS if k in names and (values or {}).get(k) is None]
+
+
+def _and(words):
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
+
+
+def enter_words(needs):
+    """The button's words for a row waiting on `needs`: "Enter bedrooms and parking spaces"."""
+    return "Enter " + _and([STATED_FACTS[k][2] for k in needs]) if needs else None
+
+
+def needs_reason(needs):
+    """Why the row isn't checked: "Needs bedrooms and parking spaces, which the model doesn't show"."""
+    return "Needs " + _and([STATED_FACTS[k][2] for k in needs]) + ", which the model doesn't show" if needs else None
+
+
 def update_counts(facts, answers):
     """Bedrooms, parking spaces, stories, dwelling units and rooms let for profit (whole numbers, 0 or more) and
     whether the building is a conversion (yes / no) from the Lot facts prompts. An answer of None means the prompt
@@ -809,15 +841,15 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         facts["lot_surveyed"] = False            # the tax map: ±2'-0" and the 2'-0" starting-house margin apply
         saved_ui["lot_source"] = label("lot", "lot")
         saved_ui["lot_area"] = lot.get("area_sf")
-    if writes.get("spots"):
+    if writes.get("spots") and not FLAT_GROUND:  # the MVP assumes flat ground: the lookup's ground is never used
         saved_ui["ground_kind"] = "spot"
         saved_ui["ground_source"] = SUGGESTED + " · " + label("ground", "ground")
     if lot and not writes.get("lot_ring"):      # the City's parcels: a guide only, never kept
         look["guide"] = True
         live["lot"] = GUIDE + (" " + live["lot"] if live.get("lot") else "")
     # the doubts about what is now drawn: this lookup's, for the rows it replaced; earlier ticks don't carry over
-    saved_ui["doubts"] = {k: v for k, v in keep.items() if k in CHECKABLE}
-    saved_ui["_live"].update({k: v for k, v in live.items() if k in CHECKABLE})
+    saved_ui["doubts"] = {k: v for k, v in keep.items() if k in checkable()}
+    saved_ui["_live"].update({k: v for k, v in live.items() if k in checkable()})
     saved_ui["checked"] = []
     return facts, saved_ui
 
@@ -833,7 +865,13 @@ def unsettled(saved_ui, checked=None):
     """The checker's facts["unsettled"]: each doubt about what is drawn the architect hasn't ticked I checked this
     for (or changed). Empty when there are none. Only kept-safe wording (the doubts saved)."""
     done = set(checked if checked is not None else (saved_ui or {}).get("checked") or [])
-    return {k: v for k, v in ((saved_ui or {}).get("doubts") or {}).items() if k in CHECKABLE and k not in done}
+    return {k: v for k, v in ((saved_ui or {}).get("doubts") or {}).items() if k in checkable() and k not in done}
+
+
+def checkable():
+    """The rows "I checked this" settles, and so the doubts kept: with the MVP's flat ground the ground is not the
+    lookup's, so it has no doubt to keep (it would hold height and stories at needs review with no row to clear)."""
+    return tuple(k for k in CHECKABLE if not (FLAT_GROUND and k == "ground"))
 
 
 def settle(saved_ui, row):
@@ -994,6 +1032,7 @@ def _question(state):
 # stay, behind this one switch: set it to False to bring the Ground row back.
 FLAT_GROUND = True
 ASSUMED_FLAT = "assuming flat ground"
+ASSUMED_SOURCE = "assumed (flat ground, the MVP's rule)"
 
 
 def ground_facts(state, lot_level, flat=None):
@@ -1039,10 +1078,11 @@ def fact_sources(state, today, confirmed):
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
-        "ground": fact("assumed flat" if FLAT_GROUND else
-                       ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
-                       "as drawn" if kind == "flat" else ground.get("source") or
-                       ("picked by you" if kind == "terrain" else "placed by you")),
+        # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
+        "ground": (fact("assumed flat", ASSUMED_SOURCE, None) if FLAT_GROUND else
+                   fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
+                        "as drawn" if kind == "flat" else ground.get("source") or
+                        ("picked by you" if kind == "terrain" else "placed by you"))),
     }
 
 
@@ -1253,7 +1293,7 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
             facts["street_line"] = w["street_line"]
         if (w.get("frame") or {}).get("rotation_deg") is not None:   # the plan is turned: name sides by true north
             facts["plan_north_deg"] = w["frame"]["rotation_deg"]
-        spots = [table.add_spot(p) for p in w.get("spots") or []]
+        spots = [] if FLAT_GROUND else [table.add_spot(p) for p in w.get("spots") or []]   # flat: none drawn
         session.add(spots)
         saved_ui.update(replaceable_lot=lot_id, lookup_frame=w.get("frame"), lookup_spots=spots)
         if spots:
