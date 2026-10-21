@@ -644,24 +644,33 @@ rules:
     topic: dimensions
     title: "Lot size by units and occupants, one-family attached (chart p.3, note 6)"
     applies_when: use == "one_family_attached"
+    # Each open reading, written alone (the generative test in test_r2c_lot_area.py works every one out unit by unit
+    # and checks this row is their every-reading combination):
+    #   own lot, the least:      1500 * max(units here, 1) + 300 per occupant past one to each unit + 200 per
+    #                            occupant past five a unit (note 6's 500 instead of the 300)
+    #   building's lot, the most: 1500 * max(units here, units in the building, 3) + 300 per occupant past the first,
+    #                            all in one unit, + 500 per occupant past five on top; only when the lot holds the
+    #                            whole building (else the other lots' occupants aren't stated)
+    # Complies only if the most passes (every reading passes); does not comply only if the least fails (every
+    # reading fails); else NEEDS REVIEW.
     check: >-
-      lot_area >= 1500 * max(dwelling_units, 3) + 300 * max(occupants - 1, 0) + 500 * max(occupants - 5, 0)
+      lot_area >= 1500 * max(dwelling_units, 1) + 300 * max(occupants - max(dwelling_units, 1), 0)
+      + (500 - 300) * max(occupants - 5 * max(dwelling_units, 1), 0)
+      and dwelling_units >= attached_units_in_building
+      and lot_area >= 1500 * max(dwelling_units, attached_units_in_building, 3) + 300 * max(occupants - 1, 0)
+      + 500 * max(occupants - 5, 0)
     review_when:
       - when: >-
           lot_area >= 1500 * max(dwelling_units, 1) + 300 * max(occupants - max(dwelling_units, 1), 0)
           + (500 - 300) * max(occupants - 5 * max(dwelling_units, 1), 0)
-          and lot_area < 1500 * max(dwelling_units, 3) + 300 * max(occupants - 1, 0) + 500 * max(occupants - 5, 0)
+          and (dwelling_units < attached_units_in_building
+          or lot_area < 1500 * max(dwelling_units, attached_units_in_building, 3) + 300 * max(occupants - 1, 0)
+          + 500 * max(occupants - 5, 0))
         reason: >-
-          Enough on some readings, not all: whether the lot must hold the whole attached building (three units at
-          least) or only its own row house's units, how the occupants are split (all in one unit is the most), and
-          whether note 6's 500 sf past five occupants in a unit replaces the 300 sf or comes on top (this rule's open
-          questions). Worked out by hand.
-      - when: >-
-          dwelling_units == 0
-          and lot_area >= 1500 * 3 + 300 * max(occupants - 1, 0) + 500 * max(occupants - 5, 0)
-        reason: >-
-          No dwelling unit stated: an attached building's lot holds at least one unit. Check the count; never a pass
-          until then.
+          Enough on some readings, not all: whether the lot must hold the whole attached building or only its own row
+          house's units (and, if the building runs onto other lots, their occupants aren't stated), how the
+          occupants are split (all in one unit is the most), and whether note 6's 500 sf past five occupants in a unit
+          replaces the 300 sf or comes on top (this rule's open questions). Worked out by hand.
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 3
@@ -685,7 +694,7 @@ rules:
         page: 9
         lines: [10, 10]
         quote: "DWELLING UNIT — One or more rooms designed or used for living quarters by one household"
-      - file: chapter_325_zoning_2026-10.pdf     # the building_lot reading: at least three units
+      - file: chapter_325_zoning_2026-10.pdf     # the building_lot reading: the whole building, at least three units
         page: 8
         lines: [11, 11]
         quote: "(4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family"
@@ -695,13 +704,17 @@ rules:
       # on the building's lot (at least three units), every occupant in one unit, the 500 sf on top of the 300 sf;
       # does not comply only if short on the row house's own lot (its units, at least one), the occupants spread one
       # to each unit first, the 500 sf instead of the 300 sf; NEEDS REVIEW between
-      - given: {use: one_family_attached, lot_area: 4500, dwelling_units: 1, occupants: 1}
-        expect: pass
-        note: a row house's lot big enough for a whole building of three units -> 3 x 1,500 = 4,500 sf
+      - given: {use: one_family_attached, lot_area: 4500, dwelling_units: 1, occupants: 1, attached_units_in_building: 6}
+        expect: needs_review
+        note: round 4's case; one unit of a six-unit building -> its own lot 1,500 sf, the building's lot 9,000 sf
+          plus the other five units' occupants, which aren't stated
+      - given: {use: one_family_attached, lot_area: 50000, dwelling_units: 1, occupants: 1, attached_units_in_building: 3}
+        expect: needs_review
+        note: one unit of three on this lot -> never a pass, however large, under the building's-lot reading
       - given: {use: one_family_attached, lot_area: 4499, dwelling_units: 1, occupants: 1}
         expect: needs_review
-        note: enough for its own unit (1,500 sf), not for three (the open question)
-      - given: {use: one_family_attached, lot_area: 2000, dwelling_units: 1, occupants: 1}
+        note: enough for its own unit (1,500 sf); the building's units not given
+      - given: {use: one_family_attached, lot_area: 2000, dwelling_units: 1, occupants: 1, attached_units_in_building: 3}
         expect: needs_review
         note: round 2's row house on its own 2,000 sf lot -> complies on its own lot, not as the building's lot
       - given: {use: one_family_attached, lot_area: 1500, dwelling_units: 1, occupants: 1}
@@ -710,29 +723,23 @@ rules:
       - given: {use: one_family_attached, lot_area: 1499, dwelling_units: 1, occupants: 1}
         expect: fail
         note: short even for its own unit
-      - given: {use: one_family_attached, lot_area: 5100, dwelling_units: 1, occupants: 3}
-        expect: pass
-        note: 4,500 + 2 x 300 = 5,100 sf
       - given: {use: one_family_attached, lot_area: 2100, dwelling_units: 1, occupants: 3}
         expect: needs_review
         note: its own unit, three occupants -> 1,500 + 2 x 300 = 2,100 sf
       - given: {use: one_family_attached, lot_area: 2099, dwelling_units: 1, occupants: 3}
         expect: fail
-      - given: {use: one_family_attached, lot_area: 7300, dwelling_units: 1, occupants: 7}
-        expect: pass
-        note: 4,500 + 6 x 300 + 2 x 500 = 7,300 sf
       - given: {use: one_family_attached, lot_area: 3700, dwelling_units: 1, occupants: 7}
         expect: needs_review
         note: its own unit, the 500 sf instead of the 300 sf -> 1,500 + 4 x 300 + 2 x 500 = 3,700 sf
       - given: {use: one_family_attached, lot_area: 3699, dwelling_units: 1, occupants: 7}
         expect: fail
         note: short under every reading
-      - given: {use: one_family_attached, lot_area: 4500, dwelling_units: 3, occupants: 1}
+      - given: {use: one_family_attached, lot_area: 4500, dwelling_units: 3, occupants: 1, attached_units_in_building: 3}
         expect: pass
         note: the whole building of three units on one lot, one occupant -> 4,500 sf (both lot readings agree)
       - given: {use: one_family_attached, lot_area: 4499, dwelling_units: 3, occupants: 1}
         expect: fail
-      - given: {use: one_family_attached, lot_area: 5100, dwelling_units: 3, occupants: 3}
+      - given: {use: one_family_attached, lot_area: 5100, dwelling_units: 3, occupants: 3, attached_units_in_building: 3}
         expect: pass
         note: three occupants all in one unit -> 4,500 + 2 x 300 = 5,100 sf
       - given: {use: one_family_attached, lot_area: 5099, dwelling_units: 3, occupants: 3}
@@ -740,13 +747,18 @@ rules:
       - given: {use: one_family_attached, lot_area: 4500, dwelling_units: 3, occupants: 3}
         expect: needs_review
         note: exactly enough one to each unit
-      - given: {use: one_family_attached, lot_area: 7300, dwelling_units: 3, occupants: 7}
+      - given: {use: one_family_attached, lot_area: 7300, dwelling_units: 3, occupants: 7, attached_units_in_building: 3}
         expect: pass
       - given: {use: one_family_attached, lot_area: 5700, dwelling_units: 3, occupants: 7}
         expect: needs_review
         note: exactly enough spread one to each unit first (4,500 + 4 x 300); no unit past five
       - given: {use: one_family_attached, lot_area: 5699, dwelling_units: 3, occupants: 7}
         expect: fail
+      - given: {use: one_family_attached, lot_area: 11000, dwelling_units: 6, occupants: 6, attached_units_in_building: 6}
+        expect: pass
+        note: the whole six-unit building on one lot; all six occupants in one unit -> 9,000 + 5 x 300 + 500 = 11,000 sf
+      - given: {use: one_family_attached, lot_area: 10999, dwelling_units: 6, occupants: 6, attached_units_in_building: 6}
+        expect: needs_review
       - given: {use: one_family_attached, lot_area: 9000, dwelling_units: 6, occupants: 6}
         expect: needs_review
         note: one to each of six units -> 9,000 sf; all six in one -> 9,000 + 5 x 300 + 500 = 11,000 sf
@@ -755,9 +767,9 @@ rules:
       - given: {use: one_family_attached, lot_area: 1499, dwelling_units: 0, occupants: 0}
         expect: fail
         note: no units stated, but under one unit's 1,500 sf whatever the count
-      - given: {use: one_family_attached, lot_area: 4500, dwelling_units: 0, occupants: 0}
+      - given: {use: one_family_attached, lot_area: 4500, dwelling_units: 0, occupants: 0, attached_units_in_building: 3}
         expect: needs_review
-        note: no units stated -> never a pass
+        note: no units stated -> never a pass (a lot holding none of the building's units can't hold the whole building)
       - given: {use: one_family_attached, lot_area: 20000, occupants: 3}
         expect: needs_review
         note: the units on this lot not given
@@ -784,11 +796,17 @@ rules:
       - 325-8A
       - 325-8B
       - 325-11B
+      - 325-45.2F
+      - 325-45.2G
       sources:
       - file: zoning_charts_2026-04.pdf
         page: 3
         lines: [24, 24]
         quote: One-family dwelling, attached - - - - 50 ft 50 ft 50 ft 40 ft 125 ft
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 149
+        lines: [21, 22]
+        quote: Side setback, minimum 1. Row house 0 feet
       - file: zoning_charts_2026-04.pdf
         page: 3
         lines: [61, 62]
@@ -813,8 +831,9 @@ rules:
         attached lot width is 50 ft, which a single row-house lot can''t meet (a row-house module''s facade is at most 25
         ft, §325-3B ROW HOUSE); note 15 gives the semi-detached house 0 ft on its "attached sides" but gives the attached
         house no such figure, as if its units don''t sit on lot lines; §325-8B(1) applies a lot-size figure to each
-        primary building on the property; and the form districts that do put row houses on their own lots say so ("Row
-        house 0 feet" side setback, §325-45). For each row house''s own lot: note 14 limits the attached house''s 10 ft
+        primary building on the property; and where the code means row houses to stand on lot lines it says so: the
+        Collegetown form districts give "Row house 0 feet" side setback (§325-45.2, p.149), which R-2c''s chart doesn''t
+        (that lets a row house stand on its side lot lines; it doesn''t by itself say each has its own lot). For each row house''s own lot: note 14 limits the attached house''s 10 ft
         side yard to its "unattached sides only", as if its other sides were lot lines. Chapter 290 (subdivision) isn''t
         among our documents, and no City record or zoning board decision was found (web search, 2026-10-21). So
         Gordium complies only if both readings pass, fails only if both fail, and needs review between.'
@@ -822,8 +841,9 @@ rules:
       - id: per_row_house_lot
         reading: each lot is held to its own units, at least one (1,500 sf x max(this lot's units, 1) + the occupants)
       - id: building_lot
-        reading: the lot holds the whole attached building, at least three units (1,500 sf x max(this lot's units, 3)
-          + the occupants)
+        reading: the lot holds the whole attached building (1,500 sf x the building's units, at least three, + all its
+          occupants); a lot holding only some of the building's units can't pass, since the other lots' occupants
+          aren't stated
     - question: 'Note 6: "+300 sf for each additional occupant in each dwelling unit; +500 sf for each additional occupant
         in each dwelling unit in excess of five occupants". For a unit with more than five occupants, does each
         occupant past five add 500 sf instead of 300 sf, or 500 sf on top of the 300 sf?'

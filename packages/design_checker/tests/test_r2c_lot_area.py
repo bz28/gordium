@@ -155,3 +155,11 @@ def test_every_counted_facts_prompt_accepts_exactly_what_its_checks_accept():
     assert "_count(prompt, logic.minimum(key))" in plugin and "gi.SetLowerLimit(least, False)" in plugin
     enter = plugin[plugin.index("def enter_rooms("):plugin.index("\ndef ", plugin.index("def enter_rooms(") + 1)]
     assert "except ValueError" in enter and enter.index("except ValueError") < enter.index("save_facts(")
+
+
+def test_round_4s_case_one_unit_of_a_six_unit_building_never_complies():
+    """Review round 4 (P0): one unit of a stated six-unit building on 4,500 sf complied (the building's-lot reading
+    used a floor of three units, not the building's six; and the other lots' occupants aren't stated)."""
+    got = _r2c("one_family_attached", 45, 100, "R-2c.lot_area_one_family_attached", dwelling_units=1, occupants=1,
+               attached_units_in_building=6)
+    assert [i["status"] for i in got] == [present.REVIEW], got

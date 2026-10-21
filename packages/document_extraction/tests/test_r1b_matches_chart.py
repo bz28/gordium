@@ -154,7 +154,7 @@ R2C = {
         [("lot_area", "min", {"use": _S, "dwelling_units": 1, "occupants": 1}, lambda n: n[0])],
     (*LOT_SIZE, "Two-family dwelling"): [("lot_area", "min", {"use": "two_family", "occupants": 1}, lambda n: 2 * n[0])],
     **{(*LOT_SIZE, f"One-family dwelling, attached, {how}"):
-       [("lot_area", "min", {"use": _A, "dwelling_units": 3, "occupants": 1}, lambda n: 3 * n[0])]
+       [("lot_area", "min", {"use": _A, "dwelling_units": 3, "occupants": 1, "attached_units_in_building": 3}, lambda n: 3 * n[0])]
        for how in ("new construction", "by conversion")},
     (3, "Maximum lot coverage by buildings", "Percent of lot area"): [
         ("building_area", "max", {"lot_area": 10_000, "use": use}, lambda n, i=i: n[i] * 10_000)
