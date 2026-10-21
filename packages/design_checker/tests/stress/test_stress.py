@@ -76,10 +76,10 @@ def _side_names_swap(v):
 
 
 # finding id -> how to recognise it (test_stress_findings.py has each one's regression test)
-# F1, F3 and F5 are fixed (PR #18, 77796ee): their matchers stay for reading old reports but are not excused here,
-# so a return of any of them fails CI.
+# Every finding is fixed (F1, F3, F5: PR #18, 77796ee; F2: rhino-ui, carried up in d43e11f): their matchers stay
+# for reading old reports but none is excused here, so a return of any of them fails CI.
 MATCHERS = {"F1": _jog_stepped_line, "F2": _tax_map_area, "F3": _drawing_changes_height, "F5": _side_names_swap}
-KNOWN = {"F2": _tax_map_area}
+KNOWN = {}
 
 
 def known(v):
@@ -156,17 +156,18 @@ def test_a_new_false_pass_is_never_merged_into_a_known_findings_entry(fast, monk
 
 
 def test_f2_is_recognised_by_its_cause_not_by_its_rule(fast, monkeypatch):
-    """Round 2, P2: the tax-map lot's starting house widened 1.5 ft (1,633 sf). With each lot line 1 ft in (Gordium's
-    area worst case, F2) it already fails: 1,633 > 25% of 71 x 88 = 1,562. A 'complies' there is not F2 (Gordium
-    losing its tolerance altogether would look like this): it must not be excused as F2."""
-    case = {"lot": "sample_tax", "edits": [{"op": "stretch", "face": 1, "amount": 1.5}]}
+    """Round 2, P2: the tax-map lot's starting house (49'-0" x 30'-3") pulled 2 ft back (1,580 sf). With each lot
+    line 1 ft in (the old area worst case, F2) it already fails: 1,580 > 25% of 71 x 88 = 1,562. A 'complies' there
+    is not F2 (Gordium losing its tolerance altogether would look like this): it must not be taken for F2. The same
+    house 3 in. back instead (1,494.5 sf) is F2's cause exactly: passes at 1 ft per line, fails at 2 ft."""
+    case = {"lot": "sample_tax", "edits": [{"op": "stretch", "face": 1, "amount": 2.0}]}
     d, _ = generate.build(case["lot"], case["edits"])
     _forced(monkeypatch, "R-1b.lot_coverage")
     found = [v for v in harness.check_answers(d, harness.gordium(d))
              if v["invariant"] == "a2" and v["rule"] == "R-1b.lot_coverage"]
     assert found
+    assert _tax_map_area({**found[0], "lot": case["lot"], "case": case}) is False
     assert known({**found[0], "lot": case["lot"], "case": case}) is None
-    plain = generate.starting_design("sample_tax")               # F2 itself: passes at 1 ft, fails at 2 ft
+    just_over = [{"op": "stretch", "face": 1, "amount": 0.25}]     # F2 itself: passes at 1 ft, fails at 2 ft
     assert _tax_map_area({"invariant": "a2", "rule": "R-1b.lot_coverage", "lot": "sample_tax",
-                          "case": {"edits": []}}) is True
-    assert oracle.verdicts(plain, tolerance=True, tolerance_ft=1.0)["R-1b.lot_coverage"]["verdict"] == oracle.PASS
+                          "case": {"edits": just_over}}) is True

@@ -6,8 +6,9 @@ strict xfail turns that into a failure, and the mark is taken off (the test then
 raises=AssertionError: only the finding's own assertion counts as "still reproduces", never a crash or a changed
 output shape.
 
-Fixed (the marks are off; the tests guard the fixes): F1, F3, F5, fixed in PR #18 (77796ee). Still open: F2 (the
-tax-map tolerance for area; Ben decided 2 ft per line everywhere, being fixed), F4 (a repeated id).
+Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper on
+rhino-ui (2 ft per line everywhere, model_measurement.measure.TAX_MAP_SLACK; carried up in d43e11f). Still open: F4
+(a repeated id).
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -69,19 +70,32 @@ def test_F1_the_house_moved_toward_the_stepped_side_line_does_not_comply_on_that
     assert got["R-1b.side_yards"] != COMPLIES
 
 
-# ---- F2 (P1, needs a decision): the tax map's 2 ft is taken off each dimension for area, off each line for yards -
+# ---- F2 (P1, fixed): the tax map's 2 ft was taken off each dimension for area, off each line for yards ------
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F2: the tax-map worst case moves each lot line 1 ft for area (2 ft for yards)")
-def test_F2_the_starting_house_on_the_sample_lot_with_each_line_2_ft_closer():
-    """No edits: 106 Ithaca Rd from the tax map (73 x 90) and Gordium's starting house (49'-0" x 31'-10",
-    1,559.8 sf). Gordium keeps the house 2'-0" back from every yard limit because each lot line may be 2 ft off.
-    With each line 2 ft closer the lot is (73 - 4) x (90 - 4) = 5,934 sf: coverage 1,559.8 / 5,934 = 26.3% > 25%,
-    and the lot is under the 6,000 sf minimum. Gordium's worst case is (73 - 2) x (90 - 2) = 6,248 sf (each line
-    1 ft): "Complies even at the tax-map worst case", 25.0%, and lot area complies. Either the yards' worst case or
-    the area's is wrong: they can't both be the tax map 2 ft off."""
-    got, items = _check(generate.starting_design("sample_tax"))
+OLD_TAX_HOUSE = ("sample_tax", [{"op": "stretch", "face": 1, "amount": 58.833333333333336 - 57.25}])
+JUST_OVER = ("sample_tax", [{"op": "stretch", "face": 1, "amount": 0.25}])
+
+
+def test_F2_the_old_starting_house_with_each_line_2_ft_closer_never_complies():
+    """106 Ithaca Rd from the tax map (73 x 90) and the starting house Gordium drew before the fix (49'-0" x
+    31'-10", 1,559.8 sf). Each lot line may be 2 ft off: (73 - 4) x (90 - 4) = 5,934 sf, coverage 26.3% > 25%, and
+    the lot is under the 6,000 sf minimum. Gordium used (73 - 2) x (90 - 2) = 6,248 sf (1 ft per line) and said
+    both comply. Neither may comply."""
+    got, _ = _check(generate.build(*OLD_TAX_HOUSE)[0])
     assert got["R-1b.lot_coverage"] != COMPLIES and got["R-1b.lot_area_one_family_detached"] != COMPLIES
+
+
+def test_F2_the_new_starting_house_complies_with_each_line_2_ft_closer_and_a_quarter_foot_more_does_not():
+    """Today's starting house (49'-0" x 30'-3", 1,482.25 sf) fits 25% of 5,934 = 1,483.5 sf: Gordium says complies,
+    and the oracle agrees with each line 2 ft in. Pulled 3 in. further back (1,494.5 sf) it still passes with each
+    line 1 ft in (the old worst case) but not 2 ft in: never complies."""
+    start = generate.starting_design("sample_tax")
+    assert oracle.verdicts(start, tolerance=True)["R-1b.lot_coverage"]["verdict"] == oracle.PASS
+    assert _check(start)[0]["R-1b.lot_coverage"] == COMPLIES
+    over = generate.build(*JUST_OVER)[0]
+    assert oracle.verdicts(over, tolerance=True, tolerance_ft=1.0)["R-1b.lot_coverage"]["verdict"] == oracle.PASS
+    assert oracle.verdicts(over, tolerance=True)["R-1b.lot_coverage"]["slack"] < 0
+    assert _check(over)[0]["R-1b.lot_coverage"] != COMPLIES
 
 
 # ---- F3 (P2): one floor moved: a height reading at a lower floor's top, and it comes and goes with the drawing ---
@@ -155,7 +169,7 @@ def test_the_oracle_on_F1_the_shed_and_the_house_fail_on_the_stepped_side_line()
 
 
 def test_the_oracle_on_F2_each_line_2_ft_closer_fails_coverage_and_lot_area():
-    t = oracle.verdicts(generate.starting_design("sample_tax"), tolerance=True)
+    t = oracle.verdicts(generate.build(*OLD_TAX_HOUSE)[0], tolerance=True)
     assert t["R-1b.lot_coverage"]["slack"] < 0 and t["R-1b.lot_area_one_family_detached"]["slack"] < 0
     assert t["_measured"]["lot_area"][0] == pytest.approx(69 * 86)
 

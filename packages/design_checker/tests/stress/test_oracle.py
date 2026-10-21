@@ -57,11 +57,18 @@ def test_every_rule_the_stress_test_judges_has_examples():
     assert set(oracle.RULE_FUNCTIONS) <= ids
 
 
-def test_the_starting_house_on_the_sample_lot_by_hand():
-    """106 Ithaca Rd, 73 x 90, the starting house 12..61 x 27..58'-10" (49'-0" x 31'-10"), 3 floors to 35'-0":
+# The tax-map starting house as Gordium drew it before F2 was fixed (49'-0" x 31'-10"): the starting house now
+# drawn (49'-0" x 30'-3") pulled 1'-7" back at the rear. A fixed shape, so these hand-worked numbers don't move
+# when GordiumStart's house does.
+OLD_TAX_HOUSE = ("sample_tax", [{"op": "stretch", "face": 1, "amount": 58.833333333333336 - 57.25}])
+
+
+def test_the_old_tax_map_starting_house_by_hand():
+    """106 Ithaca Rd, 73 x 90, a house 12..61 x 27..58'-10" (49'-0" x 31'-10"), 3 floors to 35'-0":
     front 27, sides 12, rear 90 - 58.8333 = 31.1667 (needs 25% of 90 = 22.5); coverage 49 x 31.8333 = 1559.83 sf of
     6,570 = 23.74%; height 35 <= 35 (at the limit); 3 stories."""
-    d = generate.starting_design("sample_tax")
+    d, done = generate.build(*OLD_TAX_HOUSE)
+    assert len(done) == 1
     m = oracle.measure(d)
     assert m["yards"]["front"] == (27.0, 27.0) and m["yards"]["side"] == (12.0, 12.0)
     assert m["yards"]["rear"][0] == pytest.approx(90 - 58.833333, abs=1e-5)
@@ -77,7 +84,7 @@ def test_the_starting_house_on_the_sample_lot_by_hand():
 def test_the_tax_map_tolerance_by_hand():
     """Each line 2 ft closer: yards 2 ft less (front 25, sides 10: still pass, at the limit), the lot
     (73 - 4) x (90 - 4) = 5,934 sf: under the 6,000 sf minimum, and coverage 1,559.83 / 5,934 = 26.3% > 25%."""
-    t = oracle.verdicts(generate.starting_design("sample_tax"), tolerance=True)
+    t = oracle.verdicts(generate.build(*OLD_TAX_HOUSE)[0], tolerance=True)
     assert t["_measured"]["lot_area"][0] == pytest.approx(69 * 86)
     assert t["R-1b.front_yard"]["slack"] == pytest.approx(0.0) and t["R-1b.side_yards"]["slack"] == pytest.approx(0)
     assert t["R-1b.lot_area_one_family_detached"]["verdict"] != oracle.PASS
