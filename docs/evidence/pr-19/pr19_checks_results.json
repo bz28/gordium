@@ -1,0 +1,180 @@
+{
+ "phase": "run",
+ "claims": {
+  "a starting house and a panel": {
+   "ok": true,
+   "detail": null
+  },
+  "1 a second box refused with the message": {
+   "ok": true,
+   "detail": [
+    "Finish or cancel the open start box first."
+   ]
+  },
+  "1 every gated panel action was exercised": {
+   "ok": true,
+   "detail": [
+    "add",
+    "enter",
+    "envelope",
+    "grade",
+    "ground",
+    "massing",
+    "not_ground",
+    "report",
+    "retry",
+    "survey",
+    "zoom"
+   ]
+  },
+  "1 every gated panel action only says so": {
+   "ok": true,
+   "detail": {
+    "add": [
+     "Finish or cancel the open start box first."
+    ],
+    "enter": [
+     "Finish or cancel the open start box first."
+    ],
+    "envelope": [
+     "Finish or cancel the open start box first."
+    ],
+    "grade": [
+     "Finish or cancel the open start box first."
+    ],
+    "ground": [
+     "Finish or cancel the open start box first."
+    ],
+    "massing": [
+     "Finish or cancel the open start box first."
+    ],
+    "not_ground": [
+     "Finish or cancel the open start box first."
+    ],
+    "report": [
+     "Finish or cancel the open start box first."
+    ],
+    "retry": [
+     "Finish or cancel the open start box first."
+    ],
+    "survey": [
+     "Finish or cancel the open start box first."
+    ],
+    "zoom": [
+     "Finish or cancel the open start box first."
+    ]
+   }
+  },
+  "1 the legend still runs": {
+   "ok": true,
+   "detail": null
+  },
+  "1 the panel's controls are off while the box is open": {
+   "ok": true,
+   "detail": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  "3 no check while the box is open, the edit kept": {
+   "ok": true,
+   "detail": {
+    "refused": [
+     "Finish or cancel the open start box first."
+    ],
+    "gated": {
+     "add": [
+      "Finish or cancel the open start box first."
+     ],
+     "enter": [
+      "Finish or cancel the open start box first."
+     ],
+     "envelope": [
+      "Finish or cancel the open start box first."
+     ],
+     "grade": [
+      "Finish or cancel the open start box first."
+     ],
+     "ground": [
+      "Finish or cancel the open start box first."
+     ],
+     "massing": [
+      "Finish or cancel the open start box first."
+     ],
+     "not_ground": [
+      "Finish or cancel the open start box first."
+     ],
+     "report": [
+      "Finish or cancel the open start box first."
+     ],
+     "retry": [
+      "Finish or cancel the open start box first."
+     ],
+     "survey": [
+      "Finish or cancel the open start box first."
+     ],
+     "zoom": [
+      "Finish or cancel the open start box first."
+     ]
+    },
+    "expected": [
+     "add",
+     "enter",
+     "envelope",
+     "grade",
+     "ground",
+     "massing",
+     "not_ground",
+     "report",
+     "retry",
+     "survey",
+     "zoom"
+    ],
+    "legend_ran": true,
+    "greyed": [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    "checks_while_open": 0,
+    "dirty_kept": true
+   }
+  },
+  "3 exactly one check after it closes": {
+   "ok": true,
+   "detail": [
+    268435494
+   ]
+  },
+  "4 Zoom to stays off with nothing selected": {
+   "ok": true,
+   "detail": null
+  },
+  "4 the other controls are back on": {
+   "ok": true,
+   "detail": null
+  },
+  "5 the new document is in front": {
+   "ok": true,
+   "detail": null
+  },
+  "5 the document in front is re-checked": {
+   "ok": true,
+   "detail": [
+    268435494
+   ]
+  }
+ },
+ "ok": true
+}
