@@ -819,7 +819,7 @@ def test_a_plain_main_building_with_a_floor_block_wing_never_keeps_the_typed_cou
     main = box(10, 25, 35, 65, 0, 20, id="house")
     wing = [floor(35, 25, 45, 45, z0=i * 10, z1=(i + 1) * 10, id=f"w{i}") for i in range(4)]
     m = measure(site(RECT, main, *wing), {**FACTS, "stories": 2, "main_building": "house"})["stories"]
-    assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [2, 4]
+    assert m["value"] is None and {r["value"] for r in m["readings"]} == {2, 4}
     assert "accessory building" in m["reason"]
 
 
@@ -838,7 +838,12 @@ def _drawing(rnd):
         for i, bid in enumerate(ids):
             blocks.append(floor(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid) if marked else
                           box(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid))
-        stacks.append({"ids": ids, "countable": marked or high > 1, "floors": high})
+        stacks.append({"ids": ids, "countable": marked or high > 1, "floors": high,
+                       "tall": not marked and high == 1})          # one plain 10 ft solid: could hold a story
+    if rnd.random() < 0.35:            # a plain wing behind the first stack: a porch slab up to a tall wing
+        h = rnd.choice([3, 6, 7, 8, 12, 32])
+        blocks.append(box(5, 60, 17, 70, 0, h, id="wing"))
+        stacks.append({"ids": ["wing"], "countable": False, "floors": 0, "tall": h > 7})   # > 7 ft: R305.1
     if rnd.random() < 0.2:
         rnd.choice(blocks)["id"] = rnd.choice(blocks)["id"]
     pick = rnd.choice([None, "stale"] + [b["id"] for b in blocks])
@@ -868,6 +873,10 @@ def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
             alone = main["floors"] if main["countable"] else typed
             together = max(s["floors"] for s in stacks if s["countable"])
             assert m["value"] >= together and (alone is None or m["value"] >= alone), (seed, stacks, pick, typed, m)
+            for members in ([main], stacks):    # a plain part that could hold a story: only the count typed covers it
+                most = max((s["floors"] for s in members if s["countable"]), default=None)
+                if most is not None and any(s["tall"] and not s["countable"] for s in members):
+                    assert typed is not None and m["value"] == typed >= most, (seed, stacks, pick, typed, m)
 
 
 @pytest.mark.parametrize("typed", [1, 2])
@@ -893,3 +902,19 @@ def test_height_and_stories_report_over_the_same_candidate_buildings():
         return {next(w for w in words if r["reading"].startswith(w)) for r in record["readings"]
                 if any(r["reading"].startswith(w) for w in words)}
     assert over(m["building_height"]) == over(m["stories"]) == set(words)
+
+
+@pytest.mark.parametrize("typed, porch, expect", [(None, False, None), (3, False, 3), (2, False, None),
+                                                   (None, True, 3)])
+def test_a_plain_solid_joined_to_a_floor_stack_leaves_its_stories_to_the_count_typed(typed, porch, expect):
+    """#18 round 15 (P0): three 11 ft floor blocks with a plain 32 ft solid against them. The solid's stories
+    aren't drawn: with no count typed, needs review; 3 typed covers the whole building; 2 typed is fewer than the
+    floors drawn (a question). A 3 ft porch slab can't hold a story (7 ft, R305.1): the floors drawn are the count."""
+    floors = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    other = box(10, 15, 35, 25, 0, 3, id="porch") if porch else box(35, 25, 45, 45, 0, 32, id="wing")
+    m = measure(site(RECT, *floors, other), {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
+    assert m["value"] == expect, m
+    if typed is None and not porch:
+        assert "wing has no floors drawn" in m["reason"]
+    if typed == 2:
+        assert {r["value"] for r in m["readings"]} == {2, 3} and "(story)" in m["reason"]
