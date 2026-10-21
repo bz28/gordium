@@ -36,6 +36,13 @@ class FakeClient:
         return SimpleNamespace(content=[SimpleNamespace(type="text", text=text)], stop_reason=self.stop,
                                usage=SimpleNamespace(**USAGE), _request_id="req_test")
 
+    def stream(self, **request):
+        """A large output limit is streamed (the SDK refuses it plain); the final message is the same answer."""
+        self.streamed = getattr(self, "streamed", 0) + 1
+        message = self.create(**request)
+        import contextlib
+        return contextlib.nullcontext(SimpleNamespace(get_final_message=lambda: message))
+
     def count_tokens(self, model, messages, system="", output_config=None):
         self.counted = getattr(self, "counted", []) + [{"system": system, "output_config": output_config}]
         return SimpleNamespace(input_tokens=(len(system) + sum(len(m["content"]) for m in messages)) // 4)
@@ -979,6 +986,7 @@ def test_a_unit_with_its_own_output_limit_is_called_reserved_and_estimated_with_
     client = FakeClient({"templates": [], "no_rule_reason": "Only for R-3 lots next to R-1 lots."})
     _, records = run(inputs, client, uid="325-19E", budget=budget)
     assert client.requests[0]["max_tokens"] == 32000 and records[0]["max_tokens"] == 32000
+    assert getattr(client, "streamed", 0) == 1          # streamed: the SDK refused it as a plain request (stage 1 re-run)
     small = worst_case(10, drafter.SETTINGS, drafter.PRICES)
     assert reserved[0] > small + (32000 - 8192) * 10 / 1e6 * 0.99          # the output part at 32,000 tokens
     e = cli.estimate(inputs, [unit(inputs, "325-19E")], drafter.SETTINGS["model"])

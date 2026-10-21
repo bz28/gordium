@@ -596,6 +596,18 @@ def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dic
     return result
 
 
+STREAM_ABOVE = 16000   # the SDK refuses a plain request it expects to run past 10 minutes (32,000 output tokens did)
+
+
+def send(client, **request):
+    """One API call: streamed when its output limit is large (the SDK requires it; the answer is the same message),
+    else a plain request."""
+    if request["max_tokens"] > STREAM_ABOVE:
+        with client.messages.stream(**request) as stream:
+            return stream.get_final_message()
+    return client.messages.create(**request)
+
+
 def max_tokens_for(unit_id: str, settings: dict = SETTINGS) -> int:
     """The output limit for one unit: its own (settings' max_tokens_by_unit) or the default."""
     return int((settings.get("max_tokens_by_unit") or {}).get(unit_id, settings["max_tokens"]))
@@ -616,7 +628,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
         worst = worst_case(len(system) + len(json.dumps(messages, default=str)), settings, PRICES)
         if budget is not None:
             budget.reserve(worst)
-        response = client.messages.create(                   # if this raises, the worst case stays charged
+        response = send(client,                              # if this raises, the worst case stays charged
             model=settings["model"], max_tokens=settings["max_tokens"],
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             messages=messages,
