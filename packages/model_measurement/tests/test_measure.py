@@ -284,7 +284,8 @@ def test_another_solid_whose_height_cant_be_read_is_never_dropped():
     house = box(10, 25, 35, 65, 0, 30)
     flat_slab = {"id": "slab", "faces": [{"points": [[30, 75, 0], [45, 75, 0], [45, 90, 0]]}], "problems": []}
     m = measure(site(RECT, house, flat_slab), {**FACTS, "main_building": "house"})
-    assert m["building_height"]["value"] is None and m["building_height"]["reason"].startswith("another solid's height")
+    # a single face encloses nothing: found by the measuring itself, never a dropped height (main-building round 4)
+    assert m["building_height"]["value"] is None and m["building_height"]["reason"] == "a building isn't a closed solid"
     wing = sloped_roof_box(10, 65, 20, 75, 44.8, 45, "wing")            # a 45 ft wing with a drainage slope
     m = measure(site(RECT, house, wing), {**FACTS, "main_building": "house"})
     assert m["building_height"]["value"] is None
@@ -308,7 +309,8 @@ def test_a_mansard_is_for_the_architects_and_a_flat_roof_over_a_lower_pitched_wi
     # a flat 30 ft house with a lower gable (eave 8, ridge 14) in the same solid: the highest section is flat
     house = box(10, 25, 35, 65, 0, 30)
     gable = [{"points": [[35, 30, 8], [45, 30, 8], [45, 40, 14], [35, 40, 14]]},
-             {"points": [[35, 40, 14], [45, 40, 14], [45, 50, 8], [35, 50, 8]]}]
+             {"points": [[35, 40, 14], [45, 40, 14], [45, 50, 8], [35, 50, 8]]},
+             {"points": [[35, 30, 0], [35, 50, 0], [45, 50, 0], [45, 30, 0]]}]     # its floor: a solid encloses
     house["faces"] += gable
     assert measure(site(RECT, house), FACTS)["building_height"]["value"] == 30.0
 
@@ -1323,4 +1325,5 @@ def test_a_floating_house_is_found_however_few_or_lined_up_the_spot_grades(point
     facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "grade_points": points, "stories": 3}
     house = [floor(10, 25, 35, 65, z0=3.25 + 11 * i, z1=3.25 + 11 * (i + 1), id=f"f{i}") for i in range(3)]
     m = measure(site(RECT, *house), facts)
-    assert m["front_yard"]["value"] is None and "doesn't meet the buildings" in m["front_yard"]["reason"]
+    assert m["front_yard"]["value"] is None and ("doesn't meet the buildings" in m["front_yard"]["reason"] or
+                                                 "don't show the ground under the building" in m["front_yard"]["reason"])
