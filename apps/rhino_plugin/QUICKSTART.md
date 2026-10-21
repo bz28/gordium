@@ -208,6 +208,12 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
      `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
      lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
      on a survey it goes to the limits. **Advanced → Design buffer** in the GordiumStart box keeps it further back;
+   - on a looked-up lot, the **neighbourhood** 750 ft around it, like a site context drawing: the neighbouring
+     tax parcels and the street centerlines in grey on the locked `Gordium::Context` layers (kept in the file),
+     a north arrow, a 100 ft scale bar and the sources; and the neighbouring building footprints, drawn on screen
+     only (their source may not be kept in your file yet, so a reopened file shows the parcels and streets but not
+     the footprints: untick and tick **Show neighbourhood** to fetch them again). The check never measures any of
+     it. **Show neighbourhood** in the panel turns it off and on;
    - top right, the **status box**: one line such as "? 6 need review · 4 comply · 2 not checked";
    - the **Gordium panel** (a floating window): every item, bad news first.
 5. **Make an edit.** Move, stretch or add solids as you normally would. Half a second after you stop, Gordium

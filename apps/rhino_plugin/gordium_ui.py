@@ -108,7 +108,7 @@ def row(*controls):
 
 # ---- the panel (D1–D10) ------------------------------------------------------------------------------------
 
-def make_panel(actions):
+def make_panel(actions, context_on=True):
     """The Gordium panel: a header, the item list (a TreeGridView), a splitter, the selected item's detail, and a
     footer. `actions` maps names to functions (zoom, report, envelope, edit_site, survey, grade, enter, add,
     retry). Returns a dict of its parts; `show(panel, …)` fills it."""
@@ -169,14 +169,16 @@ def make_panel(actions):
                  button("Zoning report…", actions["report"]), button("?", actions["legend"]))
     parts["zoom_button"] = footer.Items[0].Control
     ticks = row(_envelope_box(actions), _massing_box(actions))
+    context_tick = row(_context_box(actions, context_on))   # its own row: three ticks don't fit the panel's width
     # while a start box is open these are off; the legend ("?") is not among them: it only shows something
-    parts["greyed"] = [tree, detail_scroll, ticks, footer.Items[0].Control, footer.Items[1].Control]
+    parts["greyed"] = [tree, detail_scroll, ticks, context_tick, footer.Items[0].Control, footer.Items[1].Control]
     layout = ef.DynamicLayout()
     layout.Padding = ed.Padding(10)
     layout.Spacing = ed.Size(6, 6)
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
     layout.Add(ticks)
+    layout.Add(context_tick)
     parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
     layout.Add(parts["message"])
     layout.Add(footer)
@@ -197,6 +199,18 @@ def _massing_box(actions):
     box.Text = "Hide starting house"
     box.Checked = False
     box.CheckedChanged += logic.guard(lambda s, e: actions["massing"](bool(box.Checked)), "hide the starting house")
+    return box
+
+
+def _context_box(actions, on=True):
+    """Show neighbourhood: the context map (parcels, streets and footprints 1500 ft around a looked-up lot) on or
+    off. Drawing only: the check never measures it. Starts as it was last set (a rebuilt panel included), set before
+    the handler is attached so building the panel never fetches anything."""
+    box = ef.CheckBox()
+    box.Text = "Show neighbourhood"
+    box.ToolTip = "The parcels, streets and building footprints within 750 ft of the lot (drawing only, never checked)"
+    box.Checked = bool(on)
+    box.CheckedChanged += logic.guard(lambda s, e: actions["context"](bool(box.Checked)), "show or hide the neighbourhood")
     return box
 
 
