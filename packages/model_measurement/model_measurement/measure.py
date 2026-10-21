@@ -701,19 +701,28 @@ def _fits_in_the_first_story(part: dict, grade) -> bool:
             and _rise(part) < STORY_ROOM - TOL)
 
 
-def _stories_over(assemblies, grade, why_grade, stated) -> dict:
+def _candidate_grades(assemblies, buildings: list[dict], facts: dict, grade, why_grade) -> list[tuple]:
+    """Each candidate building's own grade plane, (grade, reason), one per assembly (§325-3: "the average of
+    finished ground level on each side of the building"). With one ground level given, or flat ground, it is the
+    same for every candidate; spot grades (where the model has them) are read at each candidate's own walls."""
+    return [(grade, why_grade)] * len(assemblies)
+
+
+def _stories_over(assemblies, grade, why_grade, stated, grades=None) -> dict:
     """STORY over the same candidate buildings as the height (_assemblies): each one's stories by the one rule
     (_stories_whole; its parts are the main building and every other part, with every solid over or under one
     of them in plan (_one_vertical_building), except a plain one standing on the
     ground and lower than STORY_ROOM, which fits inside the first story: a porch slab or steps. A part raised off
     the ground, on a roof or reaching below it stays in, whatever its height). A count that can't be read for any
-    of them needs review with its reason; if they differ, it is the accessory question."""
+    of them needs review with its reason; if they differ, it is the accessory question. `grades`: each
+    candidate's own grade plane (_candidate_grades), the same list the height reads; else `grade` for all."""
     found = []
     everyone = list({id(b): b for _, members in assemblies for b in members}.values())
-    for words, members in assemblies:
+    for k, (words, members) in enumerate(assemblies):
+        g, why_g = grades[k] if grades else (grade, why_grade)
         parts = _one_vertical_building(members, everyone)
-        parts = parts[:1] + [b for b in parts[1:] if not _fits_in_the_first_story(b, grade)]
-        r = _stories_whole(parts, grade, why_grade, stated)
+        parts = parts[:1] + [b for b in parts[1:] if not _fits_in_the_first_story(b, g)]
+        r = _stories_whole(parts, g, why_g, stated)
         if r["value"] is None and not r["readings"]:
             return r
         found.append((words, r))
@@ -815,14 +824,17 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # beside them, and every stop that applies to the height applies to them.
     why_which = why_building or why_main
     countable = bool(buildings) or bool(why_building and site.get("buildings"))   # every drawn part is checked
+    # the candidate buildings, each with its own grade plane: the one list the stories and the height read
+    candidates = _assemblies(main, others) if not why_which else []
+    grades = _candidate_grades(candidates, buildings, facts, grade, why_grade)
     if countable:
         out["stories"] = (_missing("stories", why_which) if why_which else
-                          _stories_over(_assemblies(main, others), grade, why_grade, facts.get("stories")))
+                          _stories_over(candidates, grade, why_grade, facts.get("stories"), grades))
     why = why_which or why_grade
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
     if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):
         out["building_height"] = _with_others(out["building_height"], [_height(b, grade) for b in others],
-                                              _assemblies(main, others))
+                                              candidates)
 
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None
