@@ -1203,3 +1203,29 @@ def test_moving_along_the_slope_never_turns_a_ground_stop_into_complies():
                     if was and was["status"] == present.REVIEW and "meet the buildings" in (was.get("reason") or ""):
                         assert i["status"] != present.COMPLIES, (bottom, step, name, was["reason"])
             before = now
+
+
+def test_the_stories_row_asks_for_the_whole_buildings_count_and_takes_it():
+    """Demo fact-check (2): the Stories row said "enter the number of stories of the whole building" with no way to
+    enter it. Its own "Enter …" button now asks for it; 3 stories beside the starting house's 3 floors complies, and
+    2 (fewer than the floors drawn) is refused with the measuring's own words."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 60, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(40, 66, 50, 86, 0, 12, "garage")
+    base = {**facts, "lot_surveyed": True}
+    base.pop("stories", None)
+    stories = items(check_site(_plot(*house, garage, lot_=lot), base)["view"])["Stories"]
+    assert stories["status"] != present.COMPLIES and "stories" in stories["needs"]
+    assert logic.enter_words(stories["needs"]) == "Enter the number of stories"
+    after = logic.update_counts(base, {"stories": 3})
+    view = check_site(_plot(*house, garage, lot_=lot), after)["view"]
+    assert items(view)["Stories"]["status"] == present.COMPLIES and logic.refused_stories(view["items"]) is None
+    view = check_site(_plot(*house, garage, lot_=lot), logic.update_counts(base, {"stories": 2}))["view"]
+    kept = [{k: i.get(k) for k in ("id", "name", "status", "reason")} for i in view["items"]]   # as the plugin keeps
+    said = logic.refused_stories(kept)
+    assert said and "fewer than the floor blocks drawn (3)" in said and "wasn't kept" in said
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.refused_stories(" in rhino

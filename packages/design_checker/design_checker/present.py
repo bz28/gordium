@@ -845,7 +845,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "_expr": expr,                        # and its whole expression (settle reads both)
             "_checker": checker,                  # the checker's verdict for it: the most it may show (view)
             # the stated facts it reads that aren't set (R-3a's lot size: dwelling units…): its own "Enter …" button
-            "needs": rhino_logic.needs_of(reading_set.rule_names(rule), values) if st != COMPLIES else [],
+            "needs": (rhino_logic.needs_of(reading_set.rule_names(rule), values) + (
+                ["stories"] if "stories" in reading_set.rule_names(rule)
+                and rhino_logic.stories_needed(measured.get("stories")) else [])) if st != COMPLIES else [],
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
