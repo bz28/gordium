@@ -19,6 +19,7 @@ import math
 
 import numpy as np
 
+import shapely
 from shapely import STRtree, ops
 from shapely.geometry import LineString, MultiLineString, Point, Polygon
 from shapely.validation import explain_validity
@@ -242,8 +243,9 @@ def _plan(face: dict):
 def _samples(shape, n: int = 7) -> list:
     """Points spread over a shape (a grid inside it, and one point surely inside)."""
     x0, y0, x1, y1 = shape.bounds
-    grid = [Point(x0 + (x1 - x0) * (i + 0.5) / n, y0 + (y1 - y0) * (j + 0.5) / n) for i in range(n) for j in range(n)]
-    return [p for p in grid if shape.contains(p)] + [shape.representative_point()]
+    grid = [(x0 + (x1 - x0) * (i + 0.5) / n, y0 + (y1 - y0) * (j + 0.5) / n) for i in range(n) for j in range(n)]
+    inside = shapely.contains_xy(shape, [x for x, _ in grid], [y for _, y in grid])      # all at once
+    return [Point(x, y) for (x, y), yes in zip(grid, inside) if yes] + [shape.representative_point()]
 
 
 def _unit_normal(points) -> tuple:
@@ -373,13 +375,18 @@ def _open_to_the_sky(faces: list[dict]) -> list[dict]:
     for i, (f, shape) in enumerate(flat):
         if shape.area <= 1e-9:
             continue
-        for point in _samples(shape):
-            z = _plane_z(f, point.x, point.y)
-            above = [_plane_z(flat[j][0], point.x, point.y) for j in index.query(point)
-                     if j != i and grown[j].contains(point)]
-            if not any(h is not None and h > z + TOL for h in above):
-                open_.append(f)
-                break
+        points = _samples(shape)
+        xy = shapely.get_coordinates(points)
+        covered = set()
+        # every (point, other face whose grown outline contains it) pair at once: the same test as contains
+        for k, j in zip(*index.query(points, predicate="within")):
+            if j != i and k not in covered:
+                h = _plane_z(flat[j][0], xy[k][0], xy[k][1])
+                z = _plane_z(f, xy[k][0], xy[k][1])
+                if h is not None and h > z + TOL:
+                    covered.add(k)
+        if len(covered) < len(points):
+            open_.append(f)
     return open_
 
 
@@ -431,6 +438,10 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
     return readings, PITCHED
 
 
+# A plain solid (no floors drawn) whose top is more than this above the grade could hold a story: the lowest ceiling
+# a habitable room may have (7 ft, NYS Residential Code R305.1). Lower (a porch slab, steps, a deck) it can't.
+STORY_ROOM = 7.0            # ft
+WHOLE = "as stated by the architect for the whole building (a joined part's stories aren't drawn)"
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
 
@@ -562,6 +573,15 @@ def _stories(building: dict, grade, why_grade, stated) -> dict:
                    "count typed, disagrees with the floors drawn: a question (story)")
 
 
+def _holds_a_story(solid: dict, grade, first_floor_top) -> bool:
+    """Whether a plain solid (no floors drawn) could hold a story: its top more than STORY_ROOM above the grade, or
+    above the top of the main building's first floor. Not knowing the grade or its top, it could."""
+    top = max((p[2] for f in solid.get("faces") or [] for p in f["points"]), default=None)
+    if top is None or grade is None:
+        return True
+    return top - grade > STORY_ROOM or (first_floor_top is not None and top > first_floor_top + TOL)
+
+
 def _assemblies(main: dict, others: list[dict]) -> list[tuple[str, list[dict]]]:
     """The candidate buildings the height is read over (_with_others), for every building measurement read from
     the drawing: the main building only, and, with other solids drawn, the main building with every other solid as
@@ -575,9 +595,14 @@ def _assemblies(main: dict, others: list[dict]) -> list[tuple[str, list[dict]]]:
 def _stories_over(assemblies, grade, why_grade, stated) -> dict:
     """STORY over the same candidate buildings as the height: each assembly's count is the most stories of any
     building in it that can be counted (its floor blocks, or its stacked solids beside the typed count, _stories);
-    an assembly with nothing countable in it is the typed count, as a reading only. If the assemblies' counts
-    differ, it is the accessory question; if any count can't be read, stories need review with its reason."""
+    an assembly with nothing countable in it is the typed count, as a reading only. A plain solid (no floors drawn)
+    tall enough to hold a story (_holds_a_story) has an unknown count, so an assembly with one and something
+    countable is the count typed for the whole building, and only if no countable part has more floors (else the
+    readings disagree: the story question); with no count typed it needs review. If the assemblies' counts differ,
+    it is the accessory question; if any count can't be read, stories need review with its reason."""
     readings, questions, objects = [], [], []
+    main = assemblies[0][1][0]
+    first = (main["spans"][main["floor"].index(True)][1] if main.get("parts") and any(main["floor"]) else None)
     for words, members in assemblies:
         # a stack of floor blocks is counted on its own; plain stacked solids only beside the typed count
         counted = [_stories(b, grade, why_grade, None if any(b["floor"]) else stated)
@@ -594,9 +619,19 @@ def _stories_over(assemblies, grade, why_grade, stated) -> dict:
             readings.append((_both(words, "as stated by the architect"), stated, {}))
             continue
         choices = [[(x["reading"], x["value"]) for x in r["readings"]] or [("", r["value"])] for r in counted]
+        plain = [b for b in members if not b.get("parts") and _holds_a_story(b, grade, first)]
+        if plain:                       # its stories aren't drawn: only the count typed covers the whole building
+            if stated is None:
+                return _missing("stories", stop("joined_part_stories", part=plain[0]["id"]))
+            readings.append((_both(words, WHOLE), stated, {}))
+            for picks in itertools.product(*choices):
+                if max(v for _, v in picks) > stated:          # a part has more floors than the count typed
+                    readings.append((_both(words, *[w for w, _ in picks]), max(v for _, v in picks), {}))
+                    questions.append("the count typed disagrees with the floors drawn: a question (story)")
+            continue
         for picks in itertools.product(*choices):
             readings.append((_both(words, *[w for w, _ in picks]), max(v for _, v in picks), {}))
-    if stated is not None and not any(w.endswith("as stated by the architect") for w, _, _ in readings):
+    if stated is not None and not any("as stated by the architect" in w for w, _, _ in readings):
         readings.append(("as stated by the architect", stated, {}))      # the typed count: a reading beside them
         if any(v != stated for _, v, _ in readings):
             questions.append("the count typed disagrees with the floors drawn: a question (story)")

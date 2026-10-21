@@ -59,6 +59,8 @@ STOPS = {
     "no_district": "enter the lot's zoning district (zone)",
     "no_stories": "the building is one solid with no floors: draw each story as its own solid standing on the one "
                   "below (as Gordium's starting building is), or enter the number of stories",
+    "joined_part_stories": "{part} has no floors drawn, so how many stories it holds can't be counted: draw its "
+                           "stories as floor blocks, or enter the number of stories of the whole building",
     "floors_misaligned": "floors misaligned: a floor block sticks out past the one below it (one floor moved on its "
                          "own?): move the floors together, or draw the overhang as part of its floor",
     "basement_story": "a floor block below the ground: whether a basement or cellar counts as a story (§325-3) isn't "
