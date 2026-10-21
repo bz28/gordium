@@ -73,6 +73,11 @@ def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
     half = check(MODEL, {**facts, "sleeping_rooms": 3, "parking_spaces": None})
     item = next(i for i in half["view"]["items"] if i["rule"] == "R-1b.parking_one_family")
     assert item["needs"] == ["parking_spaces"] and item["hint"] == "Enter parking spaces"
+    # two concepts (review round 1): what can be ASKED (every stated fact) and what sets a row aside as "not
+    # checked yet: interior" (only these two): a row reading R-3a's facts stays a review row, never hidden
+    import design_checker.check as check_mod
+    assert check_mod.INTERIOR == {"sleeping_rooms", "parking_spaces"}
+    assert set(logic.STATED_FACTS) > check_mod.INTERIOR
     # R-3a's lot size (PR #20): a needs-review row whose condition reads dwelling units, rooms let for profit and
     # whether it is a conversion: its own button asks those three, a count, a count and a yes / no
     names = {"lot_area", "dwelling_units", "rooms_let_for_profit", "conversion", "use"}
@@ -85,7 +90,7 @@ def test_each_row_waiting_on_stated_facts_asks_for_exactly_those(facts):
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert 'a["enter"](i["needs"])' in ui and "Enter bedrooms and parking spaces…" not in ui
-    assert "for key in needs or" in rhino and "logic.update_counts(facts, answers)" in rhino
+    assert "for key in needs:" in rhino and "logic.update_counts(facts, answers)" in rhino
 
 
 def test_an_interior_rule_that_fails_is_never_hidden(facts):

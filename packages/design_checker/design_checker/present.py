@@ -34,7 +34,6 @@ GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies",
 from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = reading_set.LOT_LENGTHS
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
-INTERIOR = set(rhino_logic.STATED_FACTS)   # facts only the architect can state
 EIGHTH = 1 / 96                           # 1/8 in, in feet
 PRECISION = ("Measured to 1/8 in.; values are never rounded toward compliance; near a limit they are shown with "
              "one more decimal.")
@@ -709,8 +708,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst "
                        f"{what}{_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
         tol = (measured.get("lot_area") or {}).get("tolerance")
-        every = set().union(*(formula.names(rule[k]) for k in ("applies_when", "check") if rule.get(k)),
-                            *(formula.names(r["when"]) for r in rule.get("review_when") or []))
+        every = reading_set.rule_names(rule)
         survey_only = "lot_area" in every and (measured.get("lot_area") or {}).get("value") is None and all(
             values.get(n) is not None for n in every - {"lot_area"})        # nothing else it reads is open
         if st == COMPLIES and tol and tax and node is not None and row.get("Provisional") == SURVEY_ONLY:
@@ -788,10 +786,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "_expr": expr,                        # and its whole expression (settle reads both)
             "_checker": checker,                  # the checker's verdict for it: the most it may show (view)
             # the stated facts it reads that aren't set (R-3a's lot size: dwelling units…): its own "Enter …" button
-            "needs": rhino_logic.needs_of(set().union(*(formula.names(rule[k]) for k in ("applies_when", "check")
-                                                        if rule.get(k)), *(formula.names(r["when"]) for r in
-                                                                           rule.get("review_when") or [])), values)
-            if st != COMPLIES else [],
+            "needs": rhino_logic.needs_of(reading_set.rule_names(rule), values) if st != COMPLIES else [],
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
@@ -1053,11 +1048,11 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                                  "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     for row in interior:
         rule = rules_by_id[row["Rule id"]]
-        needs = row.get("needs") or ["sleeping_rooms", "parking_spaces"]
-        parking = set(needs) <= {"sleeping_rooms", "parking_spaces"}
+        needs = row.get("needs") or rhino_logic.needs_of(reading_set.rule_names(rule), values)
+        measure = next((c.left.id for c in _compares(rule["check"])), None) if rule.get("check") else None
         items.append({"id": rule["id"], "rule": rule["id"],
-                      "name": ("Parking" if parking else (row.get("Short") or row.get("Requirement") or rule["id"]))
-                      + " · needs input", "group": "not_checked",
+                      "name": (NAMES.get(measure) or row.get("Requirement") or rule["id"]) + " · needs input",
+                      "group": "not_checked",
                       "status": NOT_CHECKED, "mark": MARK[NOT_CHECKED], "proposed": "", "required": "", "margin": "",
                       "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
                       "needs": list(needs),               # exactly what its "Enter …" asks for

@@ -861,17 +861,19 @@ def set_grade():
     edit_facts()
 
 
-def enter_rooms(needs=None):
-    """A row's "Enter …" button: one prompt for each fact it waits for (`needs`, the row's own list; bedrooms and
-    parking spaces when none is given), a whole number or yes / no. Enter skips one: it stays unset (never 0 or no),
-    so its rule stays not checked."""
+def enter_rooms(needs):
+    """A row's "Enter …" button: one prompt for each fact it waits for (`needs`, the row's own list), a whole number
+    or yes / no. Enter skips one: it stays unset (never 0 or no), so its rule keeps waiting."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if not needs:
+        say("This row isn't waiting for anything you can enter.")
+        return
     try:
         facts = current_facts(doc)
         answers = {}
-        for key in needs or ["sleeping_rooms", "parking_spaces"]:
+        for key in needs:
             prompt, kind, _ = logic.STATED_FACTS[key]
-            answers[key] = _count(prompt) if kind == "count" else _yes_no(prompt)
+            answers[key] = _count(prompt) if kind == "count" else _ask_yes_no_or_skip(prompt)
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
@@ -1286,8 +1288,9 @@ def _count(prompt):
     return gi.Number() if got == Rhino.Input.GetResult.Number else None
 
 
-def _yes_no(prompt):
-    """Yes (True) or No (False), or None when the prompt is skipped (never a default)."""
+def _ask_yes_no_or_skip(prompt):
+    """Yes (True) or No (False), or None when the prompt is skipped (never a default; _yes_no keeps a current
+    answer instead)."""
     go = Rhino.Input.Custom.GetOption()
     go.SetCommandPrompt(prompt + " (Enter to skip)")
     yes, no = go.AddOption("Yes"), go.AddOption("No")

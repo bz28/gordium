@@ -35,7 +35,10 @@ COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # Facts about the inside of a building (rooms, parking spaces). This phase checks the outside only: a rule waiting
 # on one of these goes in its own group, "not checked yet: interior", out of the counts. A rule they decide once
 # entered (a FAIL included) is shown like any other: nothing that fails is ever hidden.
-INTERIOR = set(logic.STATED_FACTS)       # facts only the architect can state: a rule waiting on one isn't checked
+# What sets a row aside as "not checked yet: interior" (out of the counts): only these, inside the building. Every
+# other stated fact (rhino_logic.STATED_FACTS: what can be ASKED, such as R-3a's dwelling units) leaves its row a
+# review row, with its own "Enter …" button from `needs` (PR #20 round 2: never hidden, even when it fails).
+INTERIOR = {"sleeping_rooms", "parking_spaces"}
 NUMBER = re.compile(r"^([≥≤<>=]) (-?[\d,]+(?:\.\d+)?)$")
 
 
@@ -118,12 +121,7 @@ def every_reading(rule: dict, measured: dict, allowed: dict, facts: dict | None 
     high), the same set the panel's words and colours come from (present.settle). Never a result: the row stays
     NEEDS REVIEW (only outcome() decides results); this says the design complies, or doesn't, whichever way the
     open question is answered."""
-    names = set()
-    for key in ("applies_when", "check"):
-        if rule.get(key):
-            names |= formula.names(rule[key])
-    for r in rule.get("review_when") or []:
-        names |= formula.names(r["when"])
+    names = reading_set.rule_names(rule)
     open_ = sorted(n for n in names if (measured.get(n) or {}).get("value") is None)
     values = {k: m["value"] for k, m in measured.items()}
     every = reading_set.combos(names, values, measured, facts) if open_ else None
@@ -140,21 +138,11 @@ def every_reading(rule: dict, measured: dict, allowed: dict, facts: dict | None 
                        (" and with the lot as drawn (confirm the survey)" if survey else ""))
 
 
-def _names(rule: dict) -> set:
-    names = set()
-    for key in ("applies_when", "check"):
-        if rule.get(key):
-            names |= formula.names(rule[key])
-    for r in rule.get("review_when") or []:
-        names |= formula.names(r["when"])
-    return names
-
-
 def turns_on(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> list[str] | None:
     """The open measurements a rule's result turns on: each whose readings it needs (with it unknown and everything
     else at any of its readings from THE reading set, the result can't be told). An open question it doesn't turn
     on doesn't hold it back (either answer gives the same result). None if there are too many readings."""
-    names = _names(rule)
+    names = reading_set.rule_names(rule)
     values = {k: m["value"] for k, m in measured.items()}
     out = []
     for n in sorted(n for n in names if values.get(n) is None and (measured.get(n) or {}).get("readings")):
@@ -173,7 +161,7 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
     is read at its low and high ends, so it counts as known); otherwise needs review. The ONLY place a row is
     decided: the panel shows this or something more cautious, never more favourable (review round 3)."""
     rule = dict(rule, check=check) if check else rule
-    names = _names(rule)
+    names = reading_set.rule_names(rule)
     values = {k: m["value"] for k, m in measured.items()}
     tax = reading_set.tax_map(measured, facts)
     every = reading_set.combos(names, values, measured, facts)
@@ -358,7 +346,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     waiting = [r for r in every if r["Error"] == "NEEDS REVIEW" and any(
         (measured.get(n) or {}).get("value") is None for n in checks(by_id[r["Rule id"]]) & INTERIOR)]
     for r in waiting:                   # exactly which stated facts each one waits for (its "Enter …" asks those)
-        r["needs"] = logic.needs_of(_names(by_id[r["Rule id"]]), {k: m.get("value") for k, m in measured.items()})
+        r["needs"] = logic.needs_of(reading_set.rule_names(by_id[r["Rule id"]]), {k: m.get("value") for k, m in measured.items()})
     rows = [{**r, "Line": _amount(r, by_id[r["Rule id"]], measured)} if r["Error"] == "FAIL" else r
             for r in every if r not in waiting]
     for r in rows:

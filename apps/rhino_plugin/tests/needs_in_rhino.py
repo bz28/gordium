@@ -96,7 +96,7 @@ try:
     asked = []
     answers = {"Bedrooms": 3, "Off-street parking spaces": None}     # parking skipped
     g._count = lambda prompt: asked.append(prompt) or answers[prompt]
-    g._yes_no = lambda prompt: asked.append(prompt) or None
+    g._ask_yes_no_or_skip = lambda prompt: asked.append(prompt) or None
     found[texts[0]].PerformClick()                       # the button itself
     claim("clicking it asks exactly those, in order", asked == ["Bedrooms", "Off-street parking spaces"], list(asked))
     facts = g.current_facts(doc)
