@@ -88,5 +88,98 @@ def test_the_plugin_never_touches_a_pipe_or_a_rhino_event_directly():
     src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert not re.search(r"\.std(in|out)\.(write|read|readline|flush)|for line in .*stdout", src)
     assert not re.search(r"Rhino\.[\w.]+ [+-]= ", src)
-    assert "logic.sweep(LEFTOVERS)" in src and json.dumps("gordium_leftovers") in src
+    assert "logic.sweep(LEFTOVERS, STATE, _release)" in src and json.dumps("gordium_leftovers") in src
 
+
+def test_the_sweep_forgets_the_plugins_handles_but_keeps_what_the_architect_asked_for():
+    """Review round 1 (P1): after a reload that keeps the plugin's state, the state must not say a detached hook
+    is attached (live mode would look on while edits go unchecked, an old PASS staying on the panel)."""
+    ran = []
+    state = {k: object() for k in logic.HANDLES}
+    state.update({"live": True, "repo": "/the/repo", "envelope_on": False, "labels_by_doc": {1: True}})
+    leftovers = {"hook": lambda: ran.append("hook"), "worker": lambda: ran.append("worker")}
+    assert logic.sweep(leftovers, state) == 2 and sorted(ran) == ["hook", "worker"]
+    assert not any(k in state for k in logic.HANDLES)
+    assert state == {"live": True, "repo": "/the/repo", "envelope_on": False, "labels_by_doc": {1: True}}
+    assert {"hooks", "doc_hooks", "overlay", "worker", "worker_sends", "worker_lines"} <= set(logic.HANDLES)
+
+
+def test_the_writer_thread_ends_when_its_checker_is_stopped_any_way():
+    """Review round 1 (P3): a checker killed without the writer's sentinel (a restart, a sweep) used to leave its
+    writer blocked for the rest of the Rhino session."""
+    p = start(SILENT)
+    logic.pipes(p)
+    name = "gordium-writer-%d" % p.pid
+    assert any(t.name == name for t in threading.enumerate())
+    p.kill()
+    p.wait()
+    deadline = time.monotonic() + 5
+    while any(t.name == name for t in threading.enumerate()) and time.monotonic() < deadline:
+        time.sleep(0.1)
+    assert not any(t.name == name for t in threading.enumerate())
+
+
+def test_the_plugin_keeps_its_state_true_across_a_reload():
+    """Review round 1 (P1, P2, P3) on the Rhino side, which CI can't run (no_freeze_in_rhino.py proves it there):
+    the sweep is given STATE; live mode comes back after the module loads; the drawing is registered every time
+    it is turned on; every checker restart goes through _stop_worker."""
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "\nlogic.sweep(LEFTOVERS, STATE, _release)\nif STATE.get(\"live\"):" in src   # last: after _release
+    assert src.rstrip().endswith('if STATE.get("live"):                        # live mode was on before this copy '
+                                 'loaded: its hooks back on\n    live(True)')
+    overlay = src.split("def overlay(", 1)[1].split("\ndef ", 1)[0]
+    created = overlay.split("if o is None:", 1)[1].split("\n    o.Enabled = True", 1)[0]
+    assert overlay.index('LEFTOVERS["overlay"]') < overlay.index("o.Enabled = True")
+    assert '\n    LEFTOVERS["overlay"]' in created and '\n        LEFTOVERS["overlay"]' not in created  # every enable
+    worker = src.split("def _worker(", 1)[1].split("\ndef ", 1)[0]
+    assert "_stop_worker()" in worker and ".terminate()" not in worker
+    assert 'LEFTOVERS["worker"] = _stop_worker' in worker
+
+
+def test_the_sweep_releases_every_handle_before_forgetting_it():
+    """Review round 2: a copy from before LEFTOVERS existed registered nothing there; forgetting its STATE handles
+    without releasing them left its handlers, drawing, panel and checker attached for good. Every handle is
+    released (while STATE still holds it) before it is forgotten; one release failing doesn't stop the others."""
+    state = {k: "handle " + k for k in logic.HANDLES}
+    state["live"] = True
+    seen = []
+
+    def release(key, value):
+        seen.append((key, value, key in state))           # still in STATE when released
+        if key == "overlay":
+            raise RuntimeError("already gone")
+    assert logic.sweep({}, state, release) == 0               # no LEFTOVERS at all (the old copy registered none)
+    assert sorted(k for k, _, _ in seen) == sorted(logic.HANDLES)
+    assert all(v == "handle " + k and held for k, v, held in seen)
+    assert state == {"live": True}
+
+
+def test_the_plugin_releases_each_kind_of_handle():
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    release = src.split("def _release(", 1)[1].split("\n\n\n", 1)[0]
+    kinds = set(logic.HANDLES) - {"worker_lines"}             # a queue: nothing to release
+    for key in kinds:                                         # every handle any copy keeps, this one's or not
+        assert 'key == "%s"' % key in release, key
+    assert "_unhook()" in release and "documents(False)" in release and "_stop_worker()" in release
+
+
+
+def test_releasing_a_later_copys_panel_closes_its_form():
+    """Round 3 on the freeze fix: rhino-ui and demo copies keep their panel as STATE["panel_parts"] = {"form": ...};
+    updating from them must close that form, or its buttons keep calling the old copy."""
+    import ast
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "_release")
+    ns = {}
+    exec(compile(ast.Module([fn], []), "gordium_rhino", "exec"), ns)
+
+    class Form:
+        closed = False
+
+        def Close(self):
+            self.closed = True
+    form = Form()
+    ns["_release"]("panel_parts", {"form": form})
+    assert form.closed
+    ns["_release"]("panel_parts", None)                     # nothing there: nothing to do, never an error
+    ns["_release"]("panel_parts", {})

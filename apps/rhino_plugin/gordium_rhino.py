@@ -54,7 +54,8 @@ def _conduit(name, o, e):
     and is logged and said once, never raised into Rhino's drawing)."""
     logic.guard(globals().get(name) or (lambda *a: None), CONDUIT_WORDS.get(name, name))(o, e)
 
-logic.sweep(LEFTOVERS)                       # an earlier copy's handlers, drawing, panel and checker: undone
+# an earlier copy's handlers, drawing, panel and checker are undone, released and forgotten at the end of this
+# file (logic.sweep, once the functions that release them exist)
 
 
 def _is_current():
@@ -69,8 +70,12 @@ def _on(owner, name, handler):
 
 
 def _off(owner, name, handler):
+    """Detach it if attached (a sweep, or an older copy's state, may already have: pythonnet then raises)."""
     event = getattr(owner, name)
-    event -= handler
+    try:
+        event -= handler
+    except ValueError:                       # "unknown event handler": already detached
+        pass
     LEFTOVERS.pop("%s.%s:%d" % (owner.__name__, name, id(handler)), None)
 
 
@@ -120,8 +125,7 @@ def _worker():
     packages = os.path.join(REPO, "packages")
     now = logic.code_fingerprint(packages)
     if p is not None and logic.restart_checker(p.poll() is None, STATE.get("worker_code"), now):
-        if p.poll() is None:
-            p.terminate()
+        _stop_worker()                               # the process and its writer thread
         p = None
     if p is None:
         env = dict(os.environ)
@@ -136,7 +140,7 @@ def _worker():
         STATE["worker_sends"], STATE["worker_lines"] = logic.pipes(p)
         STATE["worker"] = p
         STATE["worker_code"] = now
-        LEFTOVERS["worker"] = p.kill                     # a later copy of this script stops it
+        LEFTOVERS["worker"] = _stop_worker               # a later copy of this script stops it, writer too
     return p
 
 
@@ -501,7 +505,7 @@ def overlay():
     if o is None:
         o = Overlay()
         STATE["overlay"] = o
-        LEFTOVERS["overlay"] = lambda: setattr(o, "Enabled", False)
+    LEFTOVERS["overlay"] = lambda: setattr(o, "Enabled", False)    # on every enable (a reused one too)
     o.Enabled = True
     if not STATE.get("doc_hooks"):          # whatever turned drawing on: another document clears it
         documents(True)
@@ -1789,3 +1793,35 @@ def frame_site(doc, facts):
         for i in picked:
             doc.Objects.Select(i)
     doc.Views.Redraw()
+
+
+
+def _release(key, value):
+    """Release one handle an earlier copy left in STATE, through this copy's tolerant undo (a copy from before
+    LEFTOVERS registered nothing there): its hooks (old tuple shapes too), its drawing, panel, timer, checker."""
+    if key == "hooks":
+        _unhook()
+    elif key == "doc_hooks":
+        documents(False)
+    elif key == "command_hook":
+        _off(Rhino.Commands.Command, "BeginCommand", value)
+    elif key == "overlay":
+        value.Enabled = False
+    elif key == "panel":                       # an older copy's panel (a form)
+        value.Close()
+    elif key == "panel_parts":                 # this PR's (or a later copy's) floating panel ({"form": ...}): updating from it
+        form = (value or {}).get("form")
+        if form is not None:
+            form.Close()
+    elif key == "toast_timer":
+        value.Stop()
+    elif key == "worker":
+        _stop_worker()
+    elif key == "worker_sends":
+        value.put(None)
+
+
+# an earlier copy's handlers, drawing, panel and checker: undone (LEFTOVERS), released and forgotten (STATE)
+logic.sweep(LEFTOVERS, STATE, _release)
+if STATE.get("live"):                        # live mode was on before this copy loaded: its hooks back on
+    live(True)

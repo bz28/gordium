@@ -213,6 +213,31 @@ def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] 
                              (" and with the lot as drawn (confirm the survey)" if survey else ""))
 
 
+def fails_whatever(rule: dict, measured: dict, allowed: dict) -> str | None:
+    """The every-reading rule for a value that isn't measured at all (decided 2026-10-21): a rule that fails for
+    every value that measurement could take does not comply. Returns the measurement's name, or None.
+
+    Proven, never sampled: exactly one number the rule needs is unmeasured (no value, no readings); the rule's
+    check is provably truest when that number is 0 (formula.truth_direction -1: only +, -, max/min and positive
+    multiples of it, compared with < <= > >=; the §325-16C height bonus is one), it isn't in the rule's
+    applies_when or review_when, and the rule fails at 0 (measures are never negative). Then it fails at every
+    value. Never the other way: missing data never makes a rule comply (principle 4)."""
+    if rule.get("kind") != "rule" or not rule.get("check"):
+        return None
+    side = formula.names(rule["applies_when"]) if rule.get("applies_when") else set()
+    for r in rule.get("review_when") or []:
+        side |= formula.names(r["when"])
+    unknown = sorted(n for n in formula.names(rule["check"]) | side if (measured.get(n) or {}).get("value") is None)
+    if len(unknown) != 1:
+        return None
+    name = unknown[0]
+    if (name in side or (measured.get(name) or {}).get("readings") or MEASURE_KINDS.get(name) != "number"
+            or formula.truth_direction(rule["check"], name) != -1):
+        return None
+    values = {k: m["value"] for k, m in measured.items()}
+    return name if outcome(rule, {**values, name: 0}, allowed) == "fail" else None
+
+
 def crossing(rule: dict, measured: dict) -> str | None:
     """"The main building crosses the side lot line" when a building this rule measures stands partly off the lot
     (its measurements' `crossings`, each building its own): the rule does not comply whatever the readings or
@@ -261,7 +286,7 @@ def verdict(rule: dict, measured: dict, allowed: dict) -> str:
     got = outcome(rule, {k: m["value"] for k, m in measured.items()}, allowed)
     if got == "needs_review":
         found = every_reading(rule, measured, allowed)
-        if found and found[0] == "fail":
+        if found and found[0] == "fail" or fails_whatever(rule, measured, allowed):
             return "fail"
     return got
 
@@ -423,12 +448,17 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         named = named_result(by_id[r["Rule id"]], measured, allowed) if review else None
         found = every_reading(by_id[r["Rule id"]], measured, allowed) if review and not named else None
         r["Named"] = named              # every reading research lists: complies / does not comply / needs review
+        # a value not measured at all, under which the rule fails whatever it is: does not comply
+        r["Unknown"] = fails_whatever(by_id[r["Rule id"]], measured, allowed) if review and not named and not found \
+            else None
         r["Provisional"] = found[1] if found else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
         r["Fails"] = r["Error"] == "FAIL" or bool(found and found[0] == "fail") or bool(
-            named and named["result"] == "fail")   # fails whichever way it goes
+            named and named["result"] == "fail") or bool(r["Unknown"])   # fails whichever way it goes
         if r["Fails"] and named and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {named['text']}"
+        if r["Fails"] and r["Unknown"] and not r.get("Line"):
+            r["Line"] = f"{short(r['Requirement'])}: does not comply whatever the {plain_name(r['Unknown'])} is"
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
         r["Crossing"] = crossing(by_id[r["Rule id"]], measured)

@@ -101,9 +101,10 @@ def _single(x: float) -> bool:
 
 
 def _as_typed(x: float) -> float:
-    """A single-precision number as the shortest decimal that is stored as it (8229.599609375 -> 8229.6): the
-    number that was typed, whatever the units. A mesh stored in single precision (rhino3dm's Vertices.Add) would
-    otherwise read 27 ft drawn in millimetres as 26.999999 ft, and a design exactly at a limit would fail."""
+    """A single-precision number as the shortest decimal stored as it (8229.599609375 -> 8229.6): the number
+    typed, where single precision can hold it. Each value on its own: where it can't (a computed point, or one far
+    out), this moves it by less than its own single-precision step, which plane grouping tolerates (measure._planes
+    fits each plane over its whole group)."""
     for places in range(10):
         y = round(x, places)
         if struct.unpack("f", struct.pack("f", y))[0] == x:
@@ -129,7 +130,7 @@ def _mesh_faces(mesh, s):
     single = all(_single(c) for p in points for c in (p.X, p.Y, p.Z))
     if far and single:                                   # only single-precision points held, too coarse out there
         problems.append(stop("single_precision"))
-    elif single:                                         # near the origin: read as the numbers that were typed
+    elif single:                                         # read as the numbers typed (rhino3dm's Vertices.Add)
         points = [_Point(_as_typed(p.X), _as_typed(p.Y), _as_typed(p.Z)) for p in points]
     faces = []
     for i in range(len(mesh.Faces)):

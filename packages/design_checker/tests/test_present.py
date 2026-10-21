@@ -393,3 +393,45 @@ def test_at_the_limit_and_complies_never_disagree():
     cov = _ast.parse("building_area <= 0.35 * lot_area", mode="eval").body
     pct = present._numbers(cov, {"building_area": 1750.7, "lot_area": 5002}, {"building_area": {"unit": "sf"}}, "x")
     assert present._display(*pct)[2] == "at limit"
+
+
+def test_a_row_complying_under_every_reading_names_the_open_question_it_depends_on():
+    """The zoning office is told what to answer: "Complies under every reading, but it depends on an open
+    question: which lot lines count as side and which as rear; confirm with the zoning office"."""
+    row = {"Error": "NEEDS REVIEW", "Provisional": "passes under every reading",
+           "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open "
+                  "question for the architects (lot_depth)"}
+    assert present._reason(row) == ("Complies under every reading, but it depends on an open question: which lot "
+                                    "lines count as side and which as rear; confirm with the zoning office")
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    # PR #18 settles scenario 10's overhang (the law: yards_to_nearest_part), so its side yard complies outright;
+    # scenario 09's rear yard still depends on the lot-line question, and two questions are named together
+    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "09_five_sided_lot.yaml"))
+    rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
+    assert rear["reason"] == ("Complies under every reading, but it depends on an open question: which lot lines "
+                              "count as side and which as rear; confirm with the zoning office")
+    two = dict(row, Why=row["Why"] + "; whether the overhang counts is an open question for the architects "
+                                     "(yard_projections)")
+    assert present._reason(two).startswith("Complies under every reading, but it depends on open questions: which "
+                                           "lot lines count as side and which as rear; whether a yard is measured "
+                                           "to the wall")
+
+
+def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
+    """A looked-up lot is drawn turned so its street runs along the bottom (106 Ithaca Rd: 306.38 degrees), so
+    "East" in the plan isn't east: its side yards face northeast and southwest. A hand-drawn lot (no turn) keeps
+    East/West."""
+    sides = {"side_yard_smaller": {"points": [[73.0, 40.0], [61.0, 40.0]]},     # lot line end, building end
+             "side_yard_larger": {"points": [[0.0, 40.0], [12.0, 40.0]]}}
+    assert present._side_name("side_yard_smaller", sides) == "Side yard, East"
+    assert present._side_name("side_yard_larger", sides) == "Side yard, West"
+    assert present._side_name("side_yard_smaller", sides, 306.38) == "Side yard, Northeast"
+    assert present._side_name("side_yard_larger", sides, 306.38) == "Side yard, Southwest"
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "01_every_limit_at_the_line.yaml"))
+    names = {i["name"] for i in check_site(s, {**f, "plan_north_deg": 306.38}, extras=extras)["view"]["items"]}
+    assert {"Side yard, Northeast", "Side yard, Southwest"} <= names
+    names = {i["name"] for i in check_site(s, f, extras=extras)["view"]["items"]}
+    assert {"Side yard, East", "Side yard, West"} <= names

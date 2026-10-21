@@ -19,6 +19,7 @@ import hashlib
 import itertools
 import math
 
+import numpy as np
 import shapely
 from shapely import STRtree, ops
 from shapely.geometry import LineString, MultiLineString, Point, Polygon
@@ -298,8 +299,11 @@ def _unit_normal(points) -> tuple:
 _PLANES = {}         # the same faces (by identity) -> their plane groups, for one measure() call
 
 
-def _planes(faces: list[dict]) -> list[list[dict]]:
-    """_planes_now, read once per set of faces and measure() call (the height and the eaves both ask)."""
+def _planes(faces: list[dict], work: dict | None = None) -> list[list[dict]]:
+    """_planes_now, read once per set of faces and measure() call (the height and the eaves both ask). With
+    `work` (the test that counts the grouping's work), always grouped afresh."""
+    if work is not None:
+        return _planes_now(faces, work)
     key = tuple(id(f) for f in faces)
     held = _PLANES.get(key)
     if held is None or any(a is not b for a, b in zip(held[0], faces)):
@@ -308,20 +312,39 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
     return held[1]
 
 
-def _planes_now(faces: list[dict]) -> list[list[dict]]:
-    """The faces grouped into planes. Each group has an anchor face (the face it started from; when two groups
-    join, the larger group's anchor), and every corner of every face in the group lies within TOL of the anchor's
-    plane, so a group never drifts. Faces that share an edge (two
-    corners within TOL) join when that stays true: the smaller group's faces are checked against the larger
-    group's anchor, which anchors the joined group. So a roof drawn as many triangles (a mesh, with rounding
-    noise) is one roof plane, two separate roofs at the same level stay two, and a curved roof isn't one plane.
-    A distance, not an angle: the same tolerance as everywhere else here."""
-    normals = [_unit_normal(f["points"]) for f in faces]
+def _planes_now(faces: list[dict], work: dict | None = None) -> list[list[dict]]:
+    """The faces grouped into planes. Each group's plane is fitted over every corner of every face in it (least
+    squares), not taken from one face: a small triangle's own normal carries its corners' rounding noise (a
+    single-precision mesh far from the origin: a tenth of a degree over a 1.4 ft triangle, 0.04 ft across a
+    roof), and a plane fitted over the whole group doesn't. Faces that share an edge (two corners within TOL)
+    join when every corner of the smaller group's faces lies within TOL of the larger group's plane, and every
+    corner of the joined group lies within TOL of the plane fitted over it, so a group never drifts. So a roof
+    drawn as many triangles (a mesh, with rounding noise) is one roof plane, two separate roofs at the same level
+    stay two, and a curved roof isn't one plane. A distance, not an angle: the same tolerance as everywhere else.
+
+    About n log n: a group keeps its corners' moments (count, sum, sum of outer products), so a joined plane is one
+    3 x 3 fit; its corners as a list of blocks, the smaller group's appended to the larger's in place (union by
+    size); and a bound on how far its corners can be from its plane (grown at each join by how far the plane
+    moved, times the group's reach), so all of its corners are gathered and checked again only when that bound
+    passes TOL (and then the exact distance replaces the bound). `work`, if given, counts the corner blocks moved
+    and the corners gathered (for the test that keeps this about n log n)."""
+    work = work if work is not None else {}
+    work.setdefault("blocks_moved", 0)
+    work.setdefault("corners_gathered", 0)
     area = [_plan(f).area for f in faces]
     parent = list(range(len(faces)))
     members = {i: [i] for i in range(len(faces))}
-    anchor = {i: i for i in range(len(faces))}
     size = {i: area[i] for i in range(len(faces))}
+    origin = np.array(faces[0]["points"][0], dtype=float) if faces else np.zeros(3)
+    chunks, moments, plane, reach, off = {}, {}, {}, {}, {}
+    for i, f in enumerate(faces):
+        pts = np.array(f["points"], dtype=float) - origin          # near the origin: no cancellation in the sums
+        c = pts.mean(0)
+        n = np.array(_unit_normal(f["points"]))
+        chunks[i], moments[i] = [pts], (len(pts), pts.sum(0), pts.T @ pts)
+        plane[i] = (n, c)
+        reach[i] = float(np.linalg.norm(pts - c, axis=1).max())
+        off[i] = float(np.abs((pts - c) @ n).max())               # a bound: how far a corner can be off the plane
 
     def root(i):
         while parent[i] != i:
@@ -329,9 +352,31 @@ def _planes_now(faces: list[dict]) -> list[list[dict]]:
             i = parent[i]
         return i
 
-    def near_plane(k, face):                # every corner of `face` within TOL of face k's plane
-        n, p0 = normals[k], faces[k]["points"][0]
-        return all(abs(sum(n[c] * (q[c] - p0[c]) for c in range(3))) <= TOL for q in face["points"])
+    def near_plane(g, face):                # every corner of `face` within TOL of group g's plane
+        n, c = plane[g]
+        return all(abs(float(n @ (np.array(q, dtype=float) - origin - c))) <= TOL for q in face["points"])
+
+    def join(big, small):                   # the joined group's plane, reach and bound; None if it would drift
+        (k1, s1, q1), (k2, s2, q2) = moments[big], moments[small]
+        k, total, outer = k1 + k2, s1 + s2, q1 + q2
+        c = total / k
+        n = np.linalg.eigh(outer / k - np.outer(c, c))[1][:, 0]
+        nb, cb = plane[big]
+        if n @ nb < 0:
+            n = -n
+        ps = np.concatenate(chunks[small])
+        bound = max(off[big] + float(np.linalg.norm(n - nb)) * reach[big] + abs(float(n @ (cb - c))),
+                    float(np.abs((ps - c) @ n).max()))
+        far = max(reach[big] + float(np.linalg.norm(cb - c)), float(np.linalg.norm(ps - c, axis=1).max()))
+        whole = None
+        if bound > TOL:                     # the bound can't tell: every corner, exactly
+            whole = np.concatenate(chunks[big] + chunks[small])
+            work["corners_gathered"] += len(whole)
+            bound = float(np.abs((whole - c) @ n).max())
+            if bound > TOL:
+                return None
+            far = float(np.linalg.norm(whole - c, axis=1).max())
+        return (k, total, outer), (n, c), far, bound, whole
 
     def cell(p):
         return tuple(math.floor(c / TOL) for c in p)
@@ -353,10 +398,23 @@ def _planes_now(faces: list[dict]) -> list[list[dict]]:
             if count < 2 or a == b:
                 continue
             big, small = (a, b) if size[a] >= size[b] else (b, a)
-            if all(near_plane(anchor[big], faces[k]) for k in members[small]):
-                parent[small] = big
-                members[big] += members.pop(small)
-                size[big] += size.pop(small)
+            if not all(near_plane(big, faces[k]) for k in members[small]):
+                continue
+            joined = join(big, small)
+            if joined is None:              # some corner off the joined plane: it would drift
+                continue
+            moments[big], plane[big], reach[big], off[big], whole = joined
+            if whole is not None:           # checked exactly: its corners, as one block from now on
+                chunks[big] = [whole]
+                chunks.pop(small)
+            else:                           # in place: the smaller group's corners join the larger's list
+                work["blocks_moved"] += len(chunks[small])
+                chunks[big].extend(chunks.pop(small))
+            parent[small] = big
+            members[big] += members.pop(small)
+            size[big] += size.pop(small)
+            for d in (moments, plane, reach, off):
+                d.pop(small)
     return [[faces[k] for k in group] for group in members.values()]
 
 
@@ -978,11 +1036,21 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
-    main = _pick_main(buildings, facts)
-    if main is not None and main.get("parts"):
-        out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
+    main = _pick_main(buildings, facts)      # the one main-building pick
     why_main = None if main else stop("no_main_building")
-    why = why_building or why_grade or why_main
+    # One decision for every building measurement: which building, and can it be measured (why_which). Stories
+    # follow the rule of the fact model: a typed count is a stated fact and stands only when nothing drawn could be
+    # counted (no building, or a main building that is one plain solid). Whenever the drawing can produce a count
+    # (floor blocks or stacked solids on any building; or building objects with a problem, which might be either),
+    # the stories come from the drawing, with the typed count as a cross-check reading, and every stop that
+    # applies to the height applies to them identically (the grade is checked inside _stories).
+    why_which = why_building or why_main
+    countable = any(b.get("parts") for b in buildings) or bool(why_building and site.get("buildings"))
+    if countable and why_which:
+        out["stories"] = _missing("stories", why_which)
+    elif main is not None and main.get("parts"):
+        out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
+    why = why_which or why_grade
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade, facts)
     others = [b for b in buildings if b is not main]
     if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):
@@ -996,10 +1064,15 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                                _height(main, with_grade, facts)))
     if facts.get("grade_is") == "existing":     # the grade plane is finished ground: existing ground can't decide
         for name in ("building_height", "stories"):
+            if out[name].get("value") is None and not out[name].get("readings"):
+                continue                       # nothing measured: its own reason (no ground, ...) says why
             as_is = out[name].get("value")     # what the ground as it is gives: shown, never decides (no reading)
+            as_is_readings = sorted({r["value"] for r in out[name].get("readings") or [] if r.get("value") is not None})
             out[name] = _missing(name, stop("existing_grade"))
             if as_is is not None:
                 out[name]["measured_as_is"] = as_is
+            elif as_is_readings:               # its readings disagree: kept, so what waits is said as it is
+                out[name]["measured_as_is_readings"] = as_is_readings
 
     # the accessory buildings (§325-25): every solid standing apart from the main building (one touching it, a
     # porch, deck, steps or an attached garage, is part of it). Counted even without a lot outline.
