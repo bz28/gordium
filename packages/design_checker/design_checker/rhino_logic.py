@@ -707,6 +707,34 @@ def street_name_after_pick(name, lines, picked, tolerance=0.5):
     return None
 
 
+STREET_LABEL = "Front lot line (on the street)"      # the box's row, in an architect's words (Ben, 2026-10-21)
+STREET_HELP = "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it"
+ZONE_TICK = "This is the lot's district"
+
+
+def street_pick_prompt(corner, picked):
+    """What the command line asks while the architect picks the street side: on a corner lot, every lot line on a
+    street, one click each, Enter when done (as Edit site lets it); otherwise the one line."""
+    if corner:
+        return ("Click each lot line on a street (" + str(picked) + " picked); Enter when done")
+    return "Click the lot line on the street"
+
+
+def street_lines_after_picks(lines, picks, corner):
+    """The street lines after the architect's clicks: on a corner lot every line clicked, once each, in order (the
+    yards wait for the front to be settled whatever they are: §325-19C); otherwise as street_lines_after_pick. No
+    clicks (Esc, or Enter at once): the lines as they were."""
+    if not picks:
+        return lines
+    if not corner:
+        return street_lines_after_pick(lines, picks[0])
+    out = []
+    for p in picks:
+        if not any(street_lines_after_pick([q], p) == [list(map(list, q))] for q in out):
+            out.append(p)
+    return out
+
+
 def street_lines_after_pick(lines, picked, tolerance=0.5):
     """The street lines after the architect clicks a lot line as the street side: the whole street as it was when
     the line is one of its own (a street of several segments, 106's eight: keeping only the one clicked measured the
@@ -730,13 +758,13 @@ def box_rows(state, flat=None):
          "actions": [("lookup", "Look up (coming soon)", False)], "tick": None},
         {"key": "zone", "label": "Zoning district",
          "text": (state.get("zone") or "—") + " · " + (state.get("zone_source") or ENTERED),
-         "actions": [("zone", "Change", True)], "tick": ("I confirm", bool(state.get("district_confirmed")))},
+         "actions": [("zone", "Change", True)], "tick": (ZONE_TICK, bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed"))
          if has_lot else NO_LOT,
          "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))] if has_lot else [], "tick": None},
-        {"key": "street", "label": "Street side", "text": street_name(state) if (state.get("street_name") or has_lot)
+        {"key": "street", "label": STREET_LABEL, "help": STREET_HELP, "text": street_name(state) if (state.get("street_name") or has_lot)
             else "set from the lot, once there is one",
          "actions": [("street", "Change…", True)] if has_lot else [], "tick": None,   # nothing to change yet: hidden
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
@@ -821,7 +849,7 @@ def starting_house_fact(note, today):
 def uncertain(state):
     """The one amber line for a case the box can't settle by itself, with what to do; None when there's none."""
     if state.get("corner_lot") is None:          # never guessed: unanswered, the yards wait for it (§325-19C)
-        return "Does this lot face two streets? Answer Corner lot? under Street side"
+        return "Does this lot face two streets? Answer Corner lot? under " + STREET_LABEL
     if state.get("corner_lot"):
         return "This lot faces two streets: pick the front"
     if len(state.get("zones_found") or []) > 1:

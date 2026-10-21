@@ -74,16 +74,16 @@
     "ok": true,
     "detail": {
      "objects": [
-      "36d76e67-13e0-4cab-bbee-785e3a30dfdb",
-      "35244795-46db-4b1e-94af-741f231838b4",
-      "1fecd445-0822-43f8-89b3-f025d819be5d",
-      "f2dcf18a-4810-404b-aeb7-6adc7718706f"
+      "d9c30b63-d025-4603-8543-1c82f420502a",
+      "d35338fc-2254-4d86-b15b-9afe3fc07d51",
+      "b8f289a1-ed99-4093-ab67-f0ea82864f6a",
+      "7576e1e2-c8d0-4e73-ba77-2fd19a8e3981"
      ],
      "selected": [
-      "f2dcf18a-4810-404b-aeb7-6adc7718706f",
-      "1fecd445-0822-43f8-89b3-f025d819be5d",
-      "35244795-46db-4b1e-94af-741f231838b4",
-      "36d76e67-13e0-4cab-bbee-785e3a30dfdb"
+      "7576e1e2-c8d0-4e73-ba77-2fd19a8e3981",
+      "b8f289a1-ed99-4093-ab67-f0ea82864f6a",
+      "d35338fc-2254-4d86-b15b-9afe3fc07d51",
+      "d9c30b63-d025-4603-8543-1c82f420502a"
      ]
     }
    }
@@ -192,6 +192,44 @@
     "detail": [
      "§325-16A, §325-16B Height exceptions (chimneys, spires, parapets) · Not checked yet"
     ]
+   }
+  }
+ },
+ "corner": {
+  "ok": true,
+  "claims": {
+   "10 a corner lot's street side takes every line clicked, Enter when done": {
+    "ok": true,
+    "detail": {
+     "prompts": [
+      "Click each lot line on a street (0 picked); Enter when done",
+      "Click each lot line on a street (1 picked); Enter when done",
+      "Click each lot line on a street (2 picked); Enter when done"
+     ],
+     "lines": [
+      [
+       [
+        76.916,
+        0.2317
+       ],
+       [
+        67.113,
+        0.1516
+       ]
+      ],
+      [
+       [
+        10.7167,
+        0.8339
+       ],
+       [
+        1.1492,
+        0.2317
+       ]
+      ]
+     ],
+     "name": null
+    }
    }
   }
  },
@@ -416,11 +454,12 @@
      "Use",
      "Lot",
      "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)",
-     "Street side",
+     "Front lot line (on the street)",
      "set from the lot, once there is one",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
      "Corner lot?",
      "Not checked yet: overlays (historic, gorge, flood)",
-     "?  Does this lot face two streets? Answer Corner lot? under Street side",
+     "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
      "Confirm the district to continue."
     ]
    },
@@ -431,6 +470,29 @@
      "Cancel",
      "Draw"
     ]
+   },
+   "11 the box says Front lot line (on the street), what it is, and This is the lot's district": {
+    "ok": true,
+    "detail": {
+     "labels": [
+      "Address",
+      "Zoning district",
+      "entered by you",
+      "Use",
+      "Lot",
+      "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)",
+      "Front lot line (on the street)",
+      "set from the lot, once there is one",
+      "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+      "Corner lot?",
+      "Not checked yet: overlays (historic, gorge, flood)",
+      "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+      "Confirm the district to continue."
+     ],
+     "ticks": [
+      "This is the lot's district"
+     ]
+    }
    }
   }
  }

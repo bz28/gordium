@@ -1170,7 +1170,7 @@ def _describe(facts, uses):
     ground = facts.get("grade_elevation")
     return ((facts["address"] + "\n" if facts.get("address") else "") +
             CITY + " · zone " + str(facts.get("zone")) + " · " + uses.get(facts.get("use"), str(facts.get("use"))) +
-            "\nStreet side = the highlighted blue line · " +
+            "\n" + logic.STREET_LABEL + " = the highlighted blue line · " +
             ("a corner lot (two streets)" if facts.get("corner_lot") else "not a corner lot") +
             ("\nMain building = the one outlined in blue" if facts.get("main_building") else "") +
             "\nGround: " + ("flat" if facts.get("ground_is_flat") else "sloped") + " at z = " +
@@ -1281,13 +1281,31 @@ def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
         doc.Views.Redraw()
 
 
+def _get_point(prompt):
+    """A point clicked at the command line (Enter accepted as done): the box's picks, one place to stand in for."""
+    return Rhino.Input.RhinoGet.GetPoint(prompt, True)
+
+
 def _box_pick(doc, what, facts, saved_ui):
     """One pick the start box asked for, with the box hidden. Esc or Enter: nothing changes."""
     try:
-        if what == "street":
+        if what == "street" and facts.get("corner_lot") is True:   # a corner lot: every line on a street
+            lot = _find(doc, facts.get("lot_id") or "")
+            picks = []
+            while lot is not None:
+                rc, point = _get_point(logic.street_pick_prompt(True, len(picks)))
+                if rc != Rhino.Commands.Result.Success:              # Enter: done (Esc: done too)
+                    break
+                a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+                picks.append([_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]])
+            if picks:
+                facts["street_line"] = logic.street_lines_after_picks(facts.get("street_line"), picks, True)
+                saved_ui.pop("street_name", None)                    # two streets: no one name for them
+                saved_ui["street_source"] = logic.ENTERED
+        elif what == "street":
             lot = _find(doc, facts.get("lot_id") or "")
             if lot is not None:
-                rc, point = Rhino.Input.RhinoGet.GetPoint("Click the lot line on the street", True)
+                rc, point = _get_point(logic.street_pick_prompt(False, 0))
                 if rc == Rhino.Commands.Result.Success:
                     a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
                     picked = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]

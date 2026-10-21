@@ -264,6 +264,29 @@ try:
                          "button_height": kids[b].Height}
         claim("2 the button is on screen without scrolling", s0.Y <= b0.Y and b0.Y + kids[b].Height <= s0.Y + scroll.Height,
               log["screen"])
+    elif step == "corner":
+        lot = g._find(doc, g.current_facts(doc).get("lot_id") or "")
+        segs = list(g._segments(lot.Geometry))
+        mids = [(s[0] + s[1]) / 2 for s in (segs[0], segs[len(segs) // 2])]      # two different lot lines
+        clicks = [(Rhino.Commands.Result.Success, m) for m in mids] + [(Rhino.Commands.Result.Nothing, None)]
+        prompts = []
+        real = g._get_point
+
+        def click(prompt):                              # the architect's clicks, then Enter
+            prompts.append(prompt)
+            return clicks.pop(0)
+
+        facts = dict(g.current_facts(doc), corner_lot=True)
+        saved = dict(g._ui_state(doc))
+        g._get_point = click
+        try:
+            g._box_pick(doc, "street", facts, saved)
+        finally:
+            g._get_point = real
+        log["corner"] = {"prompts": prompts, "lines": facts.get("street_line"), "name": saved.get("street_name")}
+        claim("10 a corner lot's street side takes every line clicked, Enter when done",
+              len(facts.get("street_line") or []) == 2 and prompts[0].startswith("Click each lot line on a street")
+              and "(2 picked); Enter when done" in prompts[-1], log["corner"])
     elif step == "grey":
         grey = next(i for i in g.STATE["panel_parts"]["view"]["items"] if i["group"] == "not_covered")
         p = g.STATE["panel_parts"]
@@ -398,6 +421,7 @@ try:
             import Eto.Forms as ef
             seen["buttons"] = [c.Text for c in dialog.Children if isinstance(c, ef.Button)]
             seen["labels"] = [c.Text for c in dialog.Children if isinstance(c, ef.Label)]
+            seen["ticks"] = [c.Text for c in dialog.Children if isinstance(c, ef.CheckBox)]
             timer = ef.UITimer()
             timer.Interval = 10
             timer.Elapsed += g.logic.guard(lambda s, e: (timer.Stop(), dialog.Close(False)), "close the start box")
@@ -417,6 +441,10 @@ try:
         claim("6 no Use my survey… or Change… until a lot exists",
               seen.get("buttons") and "Use my survey…" not in seen["buttons"] and "Change…" not in seen["buttons"],
               seen.get("buttons"))
+        claim("11 the box says Front lot line (on the street), what it is, and This is the lot's district",
+              "Front lot line (on the street)" in (seen.get("labels") or []) and
+              g.logic.STREET_HELP in (seen.get("labels") or []) and "This is the lot's district" in (seen.get("ticks") or []),
+              {"labels": seen.get("labels"), "ticks": seen.get("ticks")})
         ready["title"] = None                            # already written (the box is gone by now)
     elif step == "close":
         log["closed"] = [str(d.Path) for d in leftovers() if "pass2" in os.path.basename(d.Path or "") and close(d)]

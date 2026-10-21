@@ -1411,7 +1411,7 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
             "sources": source_lines(extras.get("sources") or {})}
 
 
-SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Street side",
+SOURCE_NAMES = {"address": "Address", "zone": "Zoning district", "use": "Use", "lot": "Lot", "street": "Front lot line (on the street)",
                 "corner_lot": "Corner lot", "ground_marked": "Marked as the ground", "starting_house": "Starting house",
                 "ground": "Ground"}
 

@@ -606,7 +606,7 @@ def test_i_confirm_is_unticked_on_a_new_project_and_draw_waits_for_it():
     assert not logic.district_confirmed("check", confirmed, "R-2a")             # changed since: confirm again
     assert not logic.district_confirmed("check", {}, "R-1b")
     rows = {r["key"]: r for r in logic.box_rows(_box(), flat=False)}
-    assert rows["zone"]["tick"] == ("I confirm", False) and not logic.can_draw(_box())
+    assert rows["zone"]["tick"] == ("This is the lot's district", False) and not logic.can_draw(_box())
     assert logic.can_draw(_box(district_confirmed=True))
 
 
@@ -690,7 +690,7 @@ def test_a_corner_lot_is_never_guessed_the_box_asks_and_the_yards_wait(facts):
     unanswered = _box(corner_lot=None)
     street = {r["key"]: r for r in logic.box_rows(unanswered)}["street"]
     assert street["choice"] == ("Corner lot?", ["Not answered", "No: one street", "Yes: two streets"], 0)
-    assert logic.uncertain(unanswered) == "Does this lot face two streets? Answer Corner lot? under Street side"
+    assert logic.uncertain(unanswered) == "Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)"
     assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: pick the front"
     assert logic.uncertain(_box(corner_lot=False)) is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
@@ -1761,7 +1761,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     assert logic.street_name_after_pick("Ithaca Rd", lines, side) is None
     assert logic.street_name_after_pick(None, lines, lines[0]) is None              # no name known: nothing to keep
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    pick = rhino[rhino.index('        if what == "street":'):rhino.index('        elif what == "lot":')]
+    pick = rhino[rhino.index('        elif what == "street":'):rhino.index('        elif what == "lot":')]
     assert pick.index('name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),') \
         < pick.index("ask.GetLiteralString()") < pick.index('saved_ui["street_name"] = name')
     assert "RhinoGet.GetString(" not in pick        # a space would end it: "Cayuga St" saved as "Cayuga" (R3)
@@ -1823,3 +1823,66 @@ def test_rules_not_in_gordium_yet_read_not_checked_yet_in_the_panel_and_the_repo
     assert logic.status_words({"status": "needs_review", "group": "building"}) == "Needs review"
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "    words = logic.status_words(i)\n" in ui
+
+
+def test_a_corner_lot_picks_every_street_line_and_never_passes_a_yard_on_fewer_than_two():
+    """The coordinator (2026-10-21): on a corner lot the start box's street side takes every lot line on a street,
+    one click each, Enter when done (as Edit site does), not one line. And whatever lines it has, fewer than two
+    included, no yard row on a corner lot ever complies (the front is the architect's to settle, §325-19C): checked
+    through check_site for random houses, tax map and survey, with none, one or two street lines."""
+    import random
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    plain = lot_of([(0, 0), (50, 0), (50, 100), (0, 100)])
+    rnd = random.Random(19)
+    seen = 0
+    for k in range(24):
+        streets = [[[[0, 0], [50, 0]]], [], [[[0, 0], [50, 0]], [[0, 0], [0, 100]]]][k % 3]
+        facts = {**FACTS, "jurisdiction": CITY, "lot_surveyed": k % 2 == 0, "corner_lot": True}
+        facts.pop("street_line", None)
+        if streets:
+            facts["street_line"] = streets
+        x0, y0 = rnd.uniform(12, 20), rnd.uniform(27, 35)      # roomy: every yard would comply on an inside lot
+        r = check_site(_plot(box(x0, y0, x0 + 14, y0 + 30, 0, 30), lot_=plain), facts)
+        yards = [i for i in r["view"]["items"] if i.get("measure") in ("front_yard", "side_yard_smaller",
+                                                                       "side_yard_larger", "rear_yard")]
+        assert yards and all(i["status"] != "complies" for i in yards), (k, len(streets), [(i["name"], i["status"])
+                                                                                          for i in yards])
+        seen += len(streets) < 2
+    assert seen >= 12
+    # the clicks: each line once, in order; Enter at once keeps what was there; an inside lot takes its one line
+    a, b, c = [[0, 0], [50, 0]], [[0, 0], [0, 100]], [[50, 0], [50, 100]]
+    assert logic.street_lines_after_picks([a], [b, c, b], True) == [b, c]
+    assert logic.street_lines_after_picks([a], [list(reversed(b)), b], True) == [list(reversed(b))]
+    assert logic.street_lines_after_picks([a], [], True) == [a]
+    assert logic.street_lines_after_picks([a], [b], False) == [b]
+    assert logic.street_pick_prompt(True, 1) == "Click each lot line on a street (1 picked); Enter when done"
+    assert logic.street_pick_prompt(False, 0) == "Click the lot line on the street"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    corner = rhino[rhino.index('        if what == "street" and facts.get("corner_lot") is True:'):
+                   rhino.index('        elif what == "street":')]
+    assert "            while lot is not None:" in corner and "_get_point(logic.street_pick_prompt(True, len(picks)))" in corner
+    assert 'facts["street_line"] = logic.street_lines_after_picks(facts.get("street_line"), picks, True)' in corner
+
+
+def test_the_start_box_speaks_an_architects_words_for_the_front_lot_line_and_the_district():
+    """Ben (2026-10-21): "Street side" is "Front lot line (on the street)", with the line under it "the highlighted
+    blue line is the lot line on the street; Gordium measures the front yard from it"; the district's tick is
+    "This is the lot's district". The confirm text, the amber question and the report's source names alike."""
+    from design_checker import present, rhino_logic as logic
+    rows = {r["key"]: r for r in logic.box_rows({"has_lot": True, "zone": "R-1b"})}
+    assert rows["street"]["label"] == "Front lot line (on the street)"
+    assert rows["street"]["help"] == ("the highlighted blue line is the lot line on the street; Gordium measures the "
+                                      "front yard from it")
+    assert rows["zone"]["tick"][0] == "This is the lot's district"
+    assert logic.uncertain({"corner_lot": None}).endswith("under Front lot line (on the street)")
+    assert present.SOURCE_NAMES["street"] == "Front lot line (on the street)"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert '"\\n" + logic.STREET_LABEL + " = the highlighted blue line · " +' in rhino
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert ('            if r.get("help"):          # what that row is, in a sentence (the front lot line\'s)\n'
+            '                layout.AddRow(None, row(label(r["help"], size=11)))') in ui

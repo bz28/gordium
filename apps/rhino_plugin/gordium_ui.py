@@ -704,6 +704,8 @@ def start_box(state, options, mode):
         else:                          # lot, street side: what it is, and the one way to change it
             layout.AddRow(title, row(label(r["text"], size=12),
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
+            if r.get("help"):          # what that row is, in a sentence (the front lot line's)
+                layout.AddRow(None, row(label(r["help"], size=11)))
             if r.get("choice"):        # the street side's question: Corner lot?
                 layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
     if buffer is not None:               # Advanced: a design buffer kept back from every limit, on top of the tax map's
