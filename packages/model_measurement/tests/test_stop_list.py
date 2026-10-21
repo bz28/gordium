@@ -166,7 +166,7 @@ CASES = {
     "no_ground": _plain(grade_elevation=None),
     "ground_off_building": _plain(grade_elevation=812),
     "ground_unclear": _plain(ground_is_flat=None, grade_elevation=None, buildings=[
-        floor(10, 25, 35, 65, z0=1, z1=12, id="floor 1")], grade_points=[[60, 0, 0], [61, 1, 2.0]]),
+        floor(10, 25, 35, 65, z0=1, z1=12, id="floor 1")], grade_points=[[60, 0, 0], [61, 1, 0.0]]),
     "buried_solid": _plain(buildings=[box(10, 25, 25, 65, 812, 842, id="house"), box(26, 25, 35, 65, 0, 45, id="tower")],
                            grade_elevation=812, main_building="house"),
     "readings_differ": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house")]),
@@ -208,6 +208,7 @@ CASES = {
     "no_building": _plain(buildings=[]),
     "same_id": _plain(buildings=[box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)]),   # both "house"
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
+    "empty_building": _plain(buildings=[{"id": "house", "faces": [], "problems": []}]),
     "outside_lot": _plain(buildings=[box(40, 25, 60, 65)]),
     "open_solid": _file(_open_brep),
     "open_mesh": _file(_open_mesh),
