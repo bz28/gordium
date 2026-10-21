@@ -16,6 +16,7 @@ rule; together they fail if any fails, need review if any does, and pass if one 
 
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -73,9 +74,38 @@ def covering(hand_rule, drafted, ctx, from_law=None):
         notes = {(s["file"], s["page"], n) for s in sources if s.get("quote", "").startswith("(")
                  and s["file"] == CHART for n in range(s["lines"][0], s["lines"][1] + 1)}
         return _cited_lines(sources, ctx) - notes
-    # a hand rule that quotes nothing (a key citing only chart cells, like a hand R-3a) is about its cells
-    wanted = lines(hand_rule, quotes_only=True) or lines(hand_rule)
-    return [r for r in drafted if lines(r, quotes_only=r["id"] in from_law) & wanted]
+    # A hand rule that quotes a chart row's text (the hand R-1b) is about those rows, and its cells are inputs. One that
+    # quotes no chart text (only law, footnotes, or the bare row of district names) and cites cells, like the hand
+    # R-3a's yards, coverage and use, is about its cells: they are matched too, so a drafted rule citing them covers it.
+    def chart_text(s):
+        words = str(s.get("quote", "")).split()
+        return (s.get("file") == CHART and "lines" in s and not str(s.get("quote", "")).startswith("(")
+                and not all(re.fullmatch(r"R-\w+|RU|\[fn[\d,]+\]", w) for w in words))
+    # ... or quotes chart text of the same section as its cells (the hand R-1a's use rule quotes use rows, some
+    # refused, and cites the use cells). The R-1b height rule quotes the height row and cites yard cells: inputs.
+    chart_cells = ctx.cells.get(CHART, {})
+
+    def section_of(line_page):
+        page, n = line_page
+        return {re.sub(r"\s*\[fn[\d,]+\]", "", k[1]) for k, c in chart_cells.items() if k[0] == page and n in c["row_lines"]}
+    quoted_sections = set().union(*(section_of((s["page"], n)) for s in hand_rule["sources"] if chart_text(s)
+                                    for n in range(s["lines"][0], s["lines"][1] + 1))) if any(
+        chart_text(s) for s in hand_rule["sources"]) else set()
+    cell_sections = {re.sub(r"\s*\[fn[\d,]+\]", "", s["cell"]["section"]) for s in hand_rule["sources"] if "cell" in s}
+    about_cells = not quoted_sections or bool(cell_sections) and cell_sections <= quoted_sections
+    quoted = lines(hand_rule, quotes_only=True)
+    wanted = lines(hand_rule, quotes_only=not about_cells)
+    # a match made only through a cell must also measure the same thing (the accessory rule cites the front-yard cell
+    # as an input; the drafted front-yard rule doesn't cover it)
+    from rule_format import formula
+
+    def names(rule):
+        return {n for t in rule_formulas(rule) for n in formula.names(t)} - {"district"}
+
+    def covers(r):
+        mine = lines(r, quotes_only=r["id"] in from_law)
+        return bool(mine & quoted) or bool(mine & wanted and names(r) & names(hand_rule))
+    return [r for r in drafted if covers(r)]
 
 
 def rule_formulas(rule):
@@ -463,3 +493,23 @@ def test_every_drafted_rulebook_passes_the_inspector(ctx):
     if not books:
         pytest.skip("nothing drafted yet")
     assert {p.name: validate(load(p), ctx) for p in books} == {p.name: [] for p in books}
+
+
+def test_a_hand_rule_about_its_cells_is_matched_by_a_drafted_rule_citing_them(ctx):
+    """The hand R-3a cites chart cells as its subject (with the law's column definitions), and stage 1's grade counted
+    its yards, coverage and use rules as undrafted although drafted rules cite the same cells. A cell match also
+    needs a shared measure (a cell cited as an input isn't the subject), and a rule quoting another section's chart
+    row (the R-1b height rule, citing yard cells as inputs) keeps matching only by its quotes."""
+    side = {"file": CHART, "page": 3, "cell": {"section": "Yard Dimensions", "row": "Side (one side minimum)",
+                                               "column": "R-3A"}}
+    law = {"file": "chapter_325_zoning_2026-10.pdf", "page": 25, "lines": [15, 17], "quote": "Column 12"}
+    drafted = {"id": "R-3a.side", "check": "side_yard_larger >= 10", "sources": [side]}
+    hand = {"id": "h", "check": "side_yard_larger >= 10", "sources": [side, law]}
+    assert covering(hand, [drafted], ctx, from_law=set()) == [drafted]
+    as_input = hand | {"check": "accessory_side_yard >= 3"}
+    assert covering(as_input, [drafted], ctx, from_law=set()) == []
+    height = next(c for (pg, sec, row, col), c in ctx.cells[CHART].items() if pg == 3 and sec.startswith("Maximum Building")
+                  and col == "R-3A")
+    quoted = {"file": CHART, "page": 3, "lines": [height["row_lines"][0]] * 2, "quote": "Feet 35 35 35"}
+    other = hand | {"check": "building_height <= 40 and side_yard_larger >= 10", "sources": [quoted, side]}
+    assert covering(other, [drafted], ctx, from_law=set()) == []
