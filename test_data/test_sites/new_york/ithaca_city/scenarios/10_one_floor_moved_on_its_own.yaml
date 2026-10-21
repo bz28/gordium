@@ -40,7 +40,7 @@ disagreements:
       Investigated 2026-10-20. Gordium measures the yard two ways: to the overhanging second floor (12'-0") and to
       the ground-floor wall (15'-0"), because whether an overhang counts is an open question (definitions.yaml
       yard_projections). Both readings comply, and the panel says "Complies under every reading the law allows;
-      confirm with the zoning office". Not a false pass. The answer key reads "unobstructed from the ground
+      confirm with the zoning office". Not a false pass. The hand-worked result reads "unobstructed from the ground
       upward" (§325-3) as settling it: the overhang counts, and 12'-0" complies.
     question_for_architects: >-
       Does an upper floor that overhangs the floor below count for the side yard (measured to the overhang)? If

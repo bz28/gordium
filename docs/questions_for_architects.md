@@ -1,5 +1,9 @@
 # Questions for the architects
 
+**Purpose:** the questions about the law that Gordium can't decide on its own, waiting on the architects or the City.\
+**For:** the architects.\
+**Kept current by:** whoever adds, researches or answers a question, in that same PR.
+
 Open questions. Remove each one once answered (and record the answer where it belongs).
 
 ## About their 106 Ithaca Road example

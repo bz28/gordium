@@ -43,16 +43,11 @@ disagreements:
     direction: gordium_less_cautious
     finding: >-
       2026-10-20, after the spec's C2 was corrected (the tax-map worst case applies to every lot-dependent item,
-      areas included; docs/design/rhino_ui_spec.md C2). The answer key followed the old rule that a lot area
-      always waits for a survey. Worked by hand at the worst case: each lot length 2 ft short, 58 × 118 =
-      6,844 sf ≥ 6,000 sf. Complies under every lot the tax map allows; Gordium says so and names 6,844 sf.
+      areas included; docs/design/rhino_ui_spec.md C2). The hand-worked result followed the old rule that a lot area
+      always waits for a survey. Worked by hand at the worst case (Ben, 2026-10-21: every lot line 2 ft in): 56 × 116 =
+      6,496 sf ≥ 6,000 sf. Complies under every lot the tax map allows; Gordium says so and names 6,496 sf.
+    relies_on:                          # checked by test_scenarios: the smallest lot the tax map allows, surveyed
+      - {lot: [[0, 0], [56, 0], [56, 116], [0, 116]], why: "every tax-map lot line 2 ft in"}
     question_for_architects: >-
       Is a lot area that complies even with every tax-map length 2 ft short acceptable without a survey, or does
       the zoning office require a survey for any lot-area finding?
-  R-1b.lot_coverage:
-    gordium: complies
-    direction: gordium_less_cautious
-    finding: >-
-      Same correction. By hand at the worst case (the smallest lot, 6,844 sf): 25% = 1,711 sf ≥ the 1,700 sf
-      footprint (24.84%). Complies at the worst case.
-    question_for_architects: "Same as lot area: is the worst case over the tax-map tolerance enough for coverage?"

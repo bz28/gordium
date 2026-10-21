@@ -515,6 +515,19 @@ def _distance(line, shape):
 
 
 TAX_MAP_TOLERANCE = 2.0   # ft: a lot line from the tax map is taken as right to within this (spec C2)
+# How far each lot measurement can be off on a tax-map lot, with every lot line up to TAX_MAP_TOLERANCE the unlucky
+# way (Ben, 2026-10-21): a yard runs to one line; a lot width or depth runs between two. The one definition: the
+# checker's worst case (design_checker.present) and the starting house (design_checker.check) read it from here.
+TAX_MAP_SLACK = {"front_yard": TAX_MAP_TOLERANCE, "side_yard_smaller": TAX_MAP_TOLERANCE,
+                 "side_yard_larger": TAX_MAP_TOLERANCE, "rear_yard": TAX_MAP_TOLERANCE,
+                 "lot_width": 2 * TAX_MAP_TOLERANCE, "lot_depth": 2 * TAX_MAP_TOLERANCE}
+
+
+def tax_map_lot_area(polygon) -> dict:
+    """The smallest and largest lot area the tax map allows: every lot line moved TAX_MAP_TOLERANCE in, or out
+    (73 x 90 -> 69 x 86 = 5,934 sf at the smallest). The one definition of the worst-case lot area."""
+    return {"ft": TAX_MAP_TOLERANCE, "low": _r(polygon.buffer(-TAX_MAP_TOLERANCE, join_style=2).area),
+            "high": _r(polygon.buffer(TAX_MAP_TOLERANCE, join_style=2).area)}
 SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall
 
 
@@ -584,8 +597,12 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     grade = facts.get("grade_elevation")
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if b["id"] == facts.get("main_building")), None))
+    # objects are told apart by id below (spans, outlines): two with one id would leave one out silently
+    ids = [b["id"] for b in buildings]
+    same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
     why_building = (stop("no_building") if not buildings else
-                    "; ".join(p for b in buildings for p in b.get("problems") or []) or None)
+                    "; ".join([p for b in buildings for p in b.get("problems") or []]
+                              + [stop("same_id", id=i) for i in same]) or None)
     # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
     # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
@@ -670,13 +687,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         out["lot_area"] = _record("lot_area", "sf", None, "the area inside the lot lines", [lot.id], None,
                                   [{"reading": "the lot as drawn", "value": _r(lot.polygon.area)}],
                                   stop("survey_unknown") if facts.get("lot_surveyed") is None else stop("not_surveyed"))
-        # tax-map lot lines can each be off by up to TAX_MAP_TOLERANCE: every length longer or shorter by that much
-        # is the outline moved half of it out or in (73 × 90 → 71 × 88 at the smallest). Not a value: the area
-        # still waits for a survey; this only lets a result that holds at both ends be said (spec C2)
-        out["lot_area"]["tolerance"] = {
-            "ft": TAX_MAP_TOLERANCE,
-            "low": _r(lot.polygon.buffer(-TAX_MAP_TOLERANCE / 2, join_style=2).area),
-            "high": _r(lot.polygon.buffer(TAX_MAP_TOLERANCE / 2, join_style=2).area)}
+        # tax-map lot lines can each be off by up to TAX_MAP_TOLERANCE: the outline moved that much in or out
+        # (73 × 90 → 69 × 86 at the smallest). Not a value: the area still waits for a survey; this only lets a
+        # result that holds at both ends be said (spec C2)
+        out["lot_area"]["tolerance"] = tax_map_lot_area(lot.polygon)
 
     # where the street is decides the lot width, the yards and the lot depth. Whether the lot is a corner lot
     # (two streets, §325-19C) is stated by the architect, never guessed from the drawing (the city's definition

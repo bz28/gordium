@@ -323,14 +323,17 @@ so the guide and Gordium can't drift apart.
 ### The starting house on the sample lot
 
 The sample lot is 106 Ithaca Rd: 73'-0" × 90'-0", from the tax map. The starting house is 49'-0" wide and
-31'-10" deep, 35'-0" tall, in three floors of 11'-8".
+30'-3" deep, 35'-0" tall, in three floors of 11'-8".
 
-It keeps 2'-0" back from every limit because the lot lines are from the tax map, so it complies even if the
-tax map is 2 ft off:
+The lot lines are from the tax map, so each one could be up to 2 ft off the unlucky way. The house is drawn to
+comply even then: it keeps 2'-0" back from every limit, and its footprint is at most 25% of the smallest lot the
+tax map allows (69'-0" × 86'-0" = 5,934 sf):
 - front yard 27'-0" (needs 25'-0");
 - side yards 12'-0" (need 10'-0");
-- rear yard 31'-2" (needs 22'-6");
-- coverage 23.8% (the limit is 25%).
+- rear yard 32'-9" (needs 22'-6");
+- coverage 22.6% (the limit is 25%).
+
+Lot area needs review: 6,570 sf as drawn, but at worst 5,934 sf against the 6,000 sf minimum. A survey settles it.
 
 Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading near the house**.
 
@@ -338,16 +341,16 @@ Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading
 
 1. **Edit site… → tick No regrading near the house → Draw.** Building height 35'-0" complies, at limit;
    Stories 3 complies.
-2. **Move the house 5 ft back (away from the street).** Front yard 32'-0", rear yard 26'-2": both comply.
-3. **Move it 10 ft back instead.** Rear yard 21'-2" against 22'-6" required: **does not comply, −1'-4"**.
+2. **Move the house 5 ft back (away from the street).** Front yard 32'-0", rear yard 27'-9": both comply.
+3. **Move it 11 ft back instead.** Rear yard 21'-9" against 22'-6" required: **does not comply, −0'-9"**.
    A note appears bottom left, and only the strip of the house inside the rear yard turns red.
-4. **Undo, then pull the rear wall 6 ft back** (Cmd+Shift+click the rear face, Gumball 6). Lot coverage 28.3%
+4. **Undo, then pull the rear wall 6 ft back** (Cmd+Shift+click the rear face, Gumball 6). Lot coverage 27.1%
    against 25%: **does not comply**, with "reduce the footprint by at least …".
 5. **Undo, then raise the roof 3 ft** (the top face of Floor 3). Building height 38'-0": **does not comply either
    way**. Over 35'-0", and the height bonus (§325-16C) would need every yard 3 ft larger: "Front yard 27'-0",
    needs ≥ 28'-0"". Only the part above 35'-0" turns red.
 6. **Undo, then widen the house 4 ft to the east** (the east face). Side yard, East 8'-0": **does not comply,
-   −2'-0"**, and lot coverage 25.7% also doesn't: one note, "2 items no longer comply".
+   −2'-0"**, and lot coverage 24.5% needs review: at the tax map's worst case it would be 27.1%.
 7. **Undo.** Everything is back to the starting results.
 
 ### Harder tests
