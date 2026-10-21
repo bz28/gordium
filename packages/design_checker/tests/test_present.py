@@ -914,8 +914,9 @@ def test_the_report_opens_on_the_check_sheet_and_every_tab_says_what_the_panel_s
     text = " ".join(str(c.value) for c in wb["Check"]["A"] if c.value)
     assert "PUDs" not in text and "Ord. No." in text
     from design_checker import rhino_logic as logic
-    assert logic.street_name({"address": "106 Ithaca Rd, Ithaca, NY 14850"}) == "Ithaca Rd"
-    assert logic.street_name({}) == "the highlighted line"
+    # the street line's own street only: the address's street may not be the line highlighted (review of P1-4)
+    assert logic.street_name({"address": "106 Ithaca Rd, Ithaca, NY 14850"}) == "the highlighted line"
+    assert logic.street_name({"street_name": "Ithaca Rd"}) == "Ithaca Rd"
 
 
 
@@ -954,3 +955,58 @@ def test_coverage_that_turns_on_the_overhang_question_says_both_ways():
     r = check_site(_plot(ground, box(12, 30, 52, 70, 10, 20, "b"), lot_=lot),
                    {**facts, "lot_surveyed": True, "main_building": "a"})
     assert items(r["view"])["Lot coverage"]["reason"].startswith("Complies under every reading")
+
+
+def test_an_assumed_main_building_is_said_on_the_panel_and_the_check_sheet(tmp_path):
+    """Review of the main-building default (P1): the assumption reached only the report's Inputs tab; height,
+    stories and yards read COMPLIES with no caveat. The header says "Main building: the starting house (assumed)"
+    and every row measured from it carries the note, on the Check sheet too."""
+    import openpyxl
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 70, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(45, 75, 55, 90, 0, 10, "garage")
+    r = check_site(_plot(*house, garage, lot_=lot), {**facts, "lot_surveyed": True, "stories": 3},
+                   report_path=tmp_path / "r.xlsx")
+    assert r["view"]["header"]["main"] == present.ASSUMED_MAIN
+    by = items(r["view"])
+    for name in ("Building height", "Stories", "Front yard"):
+        assert present.ASSUMED_MAIN_NOTE in (by[name].get("note") or ""), (name, by[name])
+    text = " ".join(str(c.value) for row in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows()
+                    for c in row if c.value)
+    assert present.ASSUMED_MAIN in text and present.ASSUMED_MAIN_NOTE in text
+
+
+
+def test_the_report_keeps_each_rows_units_and_the_panels_words(surveyed, tmp_path):
+    """Review of P1-4 (P2): the coverage item's percentage went into the Building area input and the coverage
+    row, both in sf. A row taken from the panel takes its limit and units with it; an input only in its own unit."""
+    import openpyxl
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    ground = box(12, 30, 40, 70, 0, 10, "a")
+    check_site(_plot(ground, box(12, 30, 62, 70, 10, 20, "b"), lot_=lot),
+               {**facts, "lot_surveyed": True, "main_building": "a"}, report_path=tmp_path / "r.xlsx")
+    wb = openpyxl.load_workbook(tmp_path / "r.xlsx")
+    out, ins = wb["Output"], wb["Inputs"]
+    head = [c.value for c in out[2]]
+    cov = next(r for r in out.iter_rows(min_row=3, values_only=True) if r[0] and "coverage" in r[0].lower())
+    assert "%" in str(cov[head.index("Proposed")]) and "%" in str(cov[head.index("Table limit")])
+    assert cov[head.index("Units")] == "% of lot area"
+    area = next(r for r in ins.iter_rows(min_row=3, values_only=True) if r[0] == "Building area")
+    assert "%" not in str(area[1])
+
+
+def test_wording_never_sends_the_architect_to_ask_when_the_answer_cant_change_the_result():
+    """Review of P1-3 and P2-10: a rear yard complying under every lot-depth reading lost "Complies under every
+    reading" for "Needs … ask the zoning office"; coverage failing both ways still said "an open question … ask"."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(12, 30, 40, 50, 0, 30), lot_=lot), {**facts, "lot_surveyed": False})
+    rear = items(r["view"])["Rear yard"]
+    assert rear["required"] == "21'-1 5/8\" to 25'-5 1/2\"" and rear["reason"].startswith("Complies under every reading"), rear
+    r = check_site(_plot(box(12, 30, 48, 85, 0, 10, "a"), box(10, 28, 50, 90, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    assert cov["reason"].startswith("Does not comply either way: coverage is") and "ask" not in cov["reason"], cov
