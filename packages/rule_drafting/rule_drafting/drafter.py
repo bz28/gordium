@@ -35,7 +35,7 @@ from .templates import (CHART_FILE, fill_template, formula_slots, number_places,
 
 HERE = Path(__file__).parent
 GUIDE_FILE = REPO / "regulations/document_extraction_guide/drafting_rules.md"
-SETTINGS = yaml.safe_load((HERE / "settings.yaml").read_text())
+SETTINGS = yaml.safe_load((HERE / "settings.yaml").read_text(encoding="utf-8"))
 UNITS = ("ft", "sf", "count", "text", "yes_no")
 OUTCOMES = ["pass", "fail", "needs_review", "not_applicable"]
 
@@ -193,9 +193,9 @@ def chart_notes(notes: dict[int, dict]) -> str:
 
 def system_prompt(ctx: Context, uses: dict, districts: list[str], table: str, notes: dict[int, dict]) -> str:
     """The fixed instructions: identical for every unit, so they're cached after the first call."""
-    measures = yaml.safe_load(MEASURES_FILE.read_text())
-    topics = yaml.safe_load(VOCABULARY_FILE.read_text())["topics"]
-    return (f"{GUIDE_FILE.read_text()}\n{FORMAT}\n## Measures (with units)\n"
+    measures = yaml.safe_load(MEASURES_FILE.read_text(encoding="utf-8"))
+    topics = yaml.safe_load(VOCABULARY_FILE.read_text(encoding="utf-8"))["topics"]
+    return (f"{GUIDE_FILE.read_text(encoding="utf-8")}\n{FORMAT}\n## Measures (with units)\n"
             + "\n".join(f"- {n} ({m['unit']}): {m['meaning']}" for n, m in measures.items())
             + "\n\n## Use ids (for the use measure)\n" + "\n".join(f"- {k}: {v['name']}" for k, v in uses.items())
             + "\n\n## Residential districts (for the district measure: write them like this)\n"

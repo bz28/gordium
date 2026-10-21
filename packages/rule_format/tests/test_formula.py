@@ -32,7 +32,7 @@ def test_evaluate(text, values, expected):
     "-" * 100_000 + "1", "not " * 5_000 + "x",
     "rear_yard <= 1e999",                                       # infinity written as a number
     "rear_yard <= 1" + "0" * 400,                               # integer too large to be real
-])
+], ids=lambda t: t if len(t) <= 60 else f"{t[:20]}...({len(t)} chars)")   # Windows caps a test's name at 32,767
 def test_rejects_anything_outside_the_language(text):
     with pytest.raises(FormulaError):
         evaluate(text, {"lot_area": 1, "x": 1, "a": 1, "use": "one_family_detached"}, KINDS)

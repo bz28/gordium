@@ -140,4 +140,4 @@ try:
          "Widen the house 4 ft past the side setback", "Pull the side wall back in", 7)
 except Exception:
     log["trace"] = traceback.format_exc()
-json.dump(log, open(S + "flow_out.json", "w"), default=str, indent=1)
+json.dump(log, open(S + "flow_out.json", "w", encoding="utf-8"), default=str, indent=1)

@@ -206,4 +206,4 @@ try:
                   "Floor 3"), "roof_graded", "With the grade set: raise the roof 3 ft", "Bring it back down", 14)
 except Exception:
     log["trace"] = traceback.format_exc()
-json.dump(log, open(S + "flow_out.json", "w"), default=str, indent=1)
+json.dump(log, open(S + "flow_out.json", "w", encoding="utf-8"), default=str, indent=1)

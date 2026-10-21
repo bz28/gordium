@@ -16,7 +16,7 @@ from pathlib import Path
 
 from .labels import load_pieces, validate_labels
 from .rulebook import (REPO, Context, jurisdictions, load, locate, not_quotable, rulebook_file_problems, rulebook_paths,
-                       term_file_problems)
+                       term_file_problems, utf8_console)
 
 
 def main() -> int:
@@ -98,4 +98,5 @@ def cite(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(cite(sys.argv[2:]) if sys.argv[1:2] == ["cite"] else main())
