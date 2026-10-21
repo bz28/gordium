@@ -1,0 +1,491 @@
+{
+ "tests": [
+  {
+   "n": 0,
+   "test": "The starting house",
+   "expected": {
+    "Front yard": {
+     "proposed": "27'-0 3/4\""
+    },
+    "Side yard, West": {
+     "proposed": "12'-0 5/8\""
+    },
+    "Side yard, East": {
+     "proposed": "27'-4 1/4\""
+    },
+    "Rear yard": {
+     "status": "needs_review"
+    },
+    "Lot coverage": {
+     "proposed": "19.1%",
+     "status": "complies"
+    },
+    "Lot area": {
+     "status": "complies"
+    },
+    "Building height": {
+     "proposed": "35'-0\"",
+     "status": "needs_review",
+     "margin": "at limit"
+    },
+    "Stories": {
+     "status": "complies"
+    }
+   },
+   "got": {
+    "Front yard": {
+     "proposed": "27'-0 3/4\""
+    },
+    "Side yard, West": {
+     "proposed": "12'-0 5/8\""
+    },
+    "Side yard, East": {
+     "proposed": "27'-4 1/4\""
+    },
+    "Rear yard": {
+     "status": "needs_review"
+    },
+    "Lot coverage": {
+     "proposed": "19.1%",
+     "status": "complies"
+    },
+    "Lot area": {
+     "status": "complies"
+    },
+    "Building height": {
+     "proposed": "35'-0\"",
+     "status": "needs_review",
+     "margin": "at limit"
+    },
+    "Stories": {
+     "status": "complies"
+    }
+   },
+   "match": true,
+   "summary": "2 need review \u00b7 8 comply \u00b7 2 not checked",
+   "toasts": []
+  },
+  {
+   "n": 1,
+   "test": "1 Labels (checked by mvp_checks_in_rhino.py)",
+   "expected": {},
+   "got": {},
+   "match": true
+  },
+  {
+   "n": 2,
+   "test": "2 Move back 5 ft",
+   "expected": {
+    "Front yard": {
+     "proposed": "32'-0 5/8\"",
+     "status": "complies"
+    },
+    "Rear yard": {
+     "status": "needs_review"
+    }
+   },
+   "got": {
+    "Front yard": {
+     "proposed": "32'-0 5/8\"",
+     "status": "complies"
+    },
+    "Rear yard": {
+     "status": "needs_review"
+    }
+   },
+   "match": true,
+   "summary": "4 need review \u00b7 6 comply \u00b7 2 not checked",
+   "toasts": []
+  },
+  {
+   "n": 3,
+   "test": "3 Move back 6 ft",
+   "expected": {
+    "Rear yard": {
+     "status": "needs_review",
+     "proposed": "21'-6 1/8\""
+    }
+   },
+   "got": {
+    "Rear yard": {
+     "status": "needs_review",
+     "proposed": "21'-6 1/8\""
+    }
+   },
+   "match": true,
+   "summary": "4 need review \u00b7 6 comply \u00b7 2 not checked",
+   "toasts": []
+  },
+  {
+   "n": 3,
+   "test": "3 Move back 7 ft",
+   "expected": {
+    "Rear yard": {
+     "status": "does_not_comply",
+     "proposed": "20'-6 1/8\""
+    }
+   },
+   "got": {
+    "Rear yard": {
+     "status": "does_not_comply",
+     "proposed": "20'-6 1/8\""
+    }
+   },
+   "match": true,
+   "summary": "1 does not comply \u00b7 3 need review \u00b7 6 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Rear yard no longer complies \u00b7 20'-6 1/8\" proposed"
+    ]
+   ]
+  },
+  {
+   "n": 4,
+   "test": "4 Pull the rear wall 17 ft",
+   "expected": {
+    "Lot coverage": {
+     "status": "does_not_comply",
+     "proposed": "27.8%"
+    }
+   },
+   "got": {
+    "Lot coverage": {
+     "status": "does_not_comply",
+     "proposed": "27.8%"
+    }
+   },
+   "match": true,
+   "summary": "2 do not comply \u00b7 3 need review \u00b7 5 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Lot coverage no longer complies \u00b7 27.8% proposed \u00b7 25% required \u00b7 \u22122.75% short"
+    ]
+   ]
+  },
+  {
+   "n": 5,
+   "test": "5 Raise the roof 4 ft",
+   "expected": {
+    "Building height": {
+     "status": "does_not_comply",
+     "proposed": "39'-0\"",
+     "delta": "at least 4'-0\" short"
+    }
+   },
+   "got": {
+    "Building height": {
+     "status": "does_not_comply",
+     "proposed": "39'-0\"",
+     "delta": "at least 4'-0\" short"
+    }
+   },
+   "match": true,
+   "summary": "1 does not comply \u00b7 2 need review \u00b7 7 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Building height no longer complies \u00b7 39'-0\" proposed \u00b7 35'-0\" required \u00b7 at least 4'-0\" short"
+    ]
+   ]
+  },
+  {
+   "n": 6,
+   "test": "6 The left side wall 3 ft out",
+   "expected": {
+    "Side yard, West": {
+     "status": "needs_review",
+     "proposed": "9'-0 5/8\"",
+     "delta": "up to 2'-11 3/8\" short"
+    }
+   },
+   "got": {
+    "Side yard, West": {
+     "status": "needs_review",
+     "proposed": "9'-0 5/8\"",
+     "delta": "up to 2'-11 3/8\" short"
+    }
+   },
+   "match": true,
+   "summary": "4 need review \u00b7 6 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Building height no longer complies \u00b7 39'-0\" proposed \u00b7 35'-0\" required \u00b7 at least 4'-0\" short"
+    ]
+   ]
+  },
+  {
+   "n": 6,
+   "test": "6 The left side wall 5 ft out",
+   "expected": {
+    "Side yard, West": {
+     "status": "does_not_comply",
+     "proposed": "7'-0 5/8\"",
+     "delta": "at least 0'-11 1/4\" short"
+    }
+   },
+   "got": {
+    "Side yard, West": {
+     "status": "does_not_comply",
+     "proposed": "7'-0 5/8\"",
+     "delta": "at least 0'-11 1/4\" short"
+    }
+   },
+   "match": true,
+   "summary": "1 does not comply \u00b7 3 need review \u00b7 6 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Side yard, West no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ]
+   ]
+  },
+  {
+   "n": 7,
+   "test": "7 Undo: back to the start",
+   "expected": {
+    "Front yard": {
+     "proposed": "27'-0 3/4\""
+    },
+    "Lot coverage": {
+     "proposed": "19.1%",
+     "status": "complies"
+    }
+   },
+   "got": {
+    "Front yard": {
+     "proposed": "27'-0 3/4\""
+    },
+    "Lot coverage": {
+     "proposed": "19.1%",
+     "status": "complies"
+    }
+   },
+   "match": true,
+   "summary": "2 need review \u00b7 8 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Side yard, West no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ]
+   ]
+  },
+  {
+   "n": 8,
+   "test": "8 A garage on the Default layer",
+   "expected": {
+    "Objects on the lot not included": {
+     "status": "needs_review"
+    },
+    "Lot coverage": {
+     "status": "needs_review"
+    }
+   },
+   "got": {
+    "Objects on the lot not included": {
+     "status": "needs_review"
+    },
+    "Lot coverage": {
+     "status": "needs_review"
+    }
+   },
+   "match": true,
+   "summary": "4 need review \u00b7 7 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Side yard, West no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ]
+   ]
+  },
+  {
+   "n": 9,
+   "test": "9 One floor moved on its own",
+   "expected": {
+    "Stories": {
+     "status": "needs_review",
+     "reason": "floors misaligned"
+    }
+   },
+   "got": {
+    "Stories": {
+     "status": "needs_review",
+     "reason": "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors together, or draw the overhang as part of its floor"
+    }
+   },
+   "match": true,
+   "summary": "6 need review \u00b7 4 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Side yard, West no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ]
+   ]
+  },
+  {
+   "n": 10,
+   "test": "10 The height bonus waits",
+   "expected": {
+    "Building height": {
+     "status": "needs_review",
+     "reason": "side and rear lot lines"
+    }
+   },
+   "got": {
+    "Building height": {
+     "status": "needs_review",
+     "reason": "the readings give different values; which lot lines count as side and rear lot lines isn't settled yet: confirm with the zoning office; the readings give different values; which lot lines count as side and rear lot lines isn't settled yet: confirm with the zoning office; whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid is a porch or deck (part of the building, \u00a7325-18A) or an accessory building (\u00a7325-25), aren't settled yet: confirm with the zoning office"
+    }
+   },
+   "match": true,
+   "summary": "5 need review \u00b7 5 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Side yard, West no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ]
+   ]
+  },
+  {
+   "n": 11,
+   "test": "11 Delta in words",
+   "expected": {
+    "Front yard": {
+     "delta": "at least 5'-0 5/8\" to spare"
+    }
+   },
+   "got": {
+    "Front yard": {
+     "delta": "at least 5'-0 5/8\" to spare"
+    }
+   },
+   "match": true,
+   "summary": "4 need review \u00b7 6 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Side yard, West no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ]
+   ]
+  },
+  {
+   "n": 12,
+   "test": "12 Corner lot Yes",
+   "expected": {
+    "Front yard": {
+     "status": "needs_review"
+    }
+   },
+   "got": {
+    "Front yard": {
+     "status": "needs_review"
+    }
+   },
+   "match": true,
+   "summary": "6 need review \u00b7 4 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Side yard, West no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ]
+   ]
+  },
+  {
+   "n": 13,
+   "test": "13 A survey: to the limits",
+   "expected": {
+    "Side yard, West": {
+     "proposed": "10'-0\"",
+     "status": "complies"
+    }
+   },
+   "got": {
+    "Side yard, West": {
+     "proposed": "10'-0\"",
+     "status": "complies"
+    }
+   },
+   "match": true,
+   "summary": "2 need review \u00b7 8 comply \u00b7 2 not checked",
+   "toasts": [
+    [
+     "Side yard, West no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    ]
+   ]
+  },
+  {
+   "n": 14,
+   "test": "14 Millimeter template: same results",
+   "expected": {
+    "Front yard": {
+     "proposed": "27'-0 3/4\""
+    },
+    "Side yard, West": {
+     "proposed": "12'-0 5/8\""
+    },
+    "Side yard, East": {
+     "proposed": "27'-4 1/4\""
+    },
+    "Rear yard": {
+     "status": "needs_review"
+    },
+    "Lot coverage": {
+     "proposed": "19.1%",
+     "status": "complies"
+    },
+    "Lot area": {
+     "status": "complies"
+    },
+    "Building height": {
+     "proposed": "35'-0\"",
+     "status": "needs_review",
+     "margin": "at limit"
+    },
+    "Stories": {
+     "status": "complies"
+    }
+   },
+   "got": {
+    "Front yard": {
+     "proposed": "27'-0 3/4\""
+    },
+    "Side yard, West": {
+     "proposed": "12'-0 5/8\""
+    },
+    "Side yard, East": {
+     "proposed": "27'-4 1/4\""
+    },
+    "Rear yard": {
+     "status": "needs_review"
+    },
+    "Lot coverage": {
+     "proposed": "19.1%",
+     "status": "complies"
+    },
+    "Lot area": {
+     "status": "complies"
+    },
+    "Building height": {
+     "proposed": "35'-0\"",
+     "status": "needs_review",
+     "margin": "at limit"
+    },
+    "Stories": {
+     "status": "complies"
+    }
+   },
+   "match": true
+  }
+ ],
+ "house": [
+  [
+   48.80835591868967,
+   27.819238961156874
+  ],
+  [
+   48.80835591868967,
+   65.1525722944902
+  ],
+  [
+   12.891689252023008,
+   65.1525722944902
+  ],
+  [
+   12.891689252023008,
+   27.819238961156874
+  ]
+ ],
+ "survey_width": 39.83333333333333,
+ "all_match": true
+}

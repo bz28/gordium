@@ -169,7 +169,8 @@ try:
     claim("6 an edit is noticed by the new copy's live hook", g.STATE.get("dirty") is not None)
     g.STATE["dirty"] = time.time() - 2 * g.IDLE_SECONDS  # as if Rhino went idle after the edit
     g._idle(None, None)
-    claim("6 and re-checked", (before, west(g)["proposed"]) == ("12'-0\"", "11'-0\""), (before, west(g)["proposed"]))
+    claim("6 and re-checked", (before, west(g)["proposed"]) == ("12'-0 5/8\"", "11'-0 5/8\""),
+          (before, west(g)["proposed"]))
     # 7 (review round 2): an update over a copy from before LEFTOVERS existed (9303d10: what a cofounder has
     # before git pull), with that copy on and STATE kept, the new copy imported WITHOUT off()
     g.off()

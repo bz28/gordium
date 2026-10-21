@@ -18,26 +18,32 @@
     "grade_is": "finished"
    }
   },
-  "5 height and stories comply": {
+  "5 stories comply; the height is at the limit (it needs review on this lot: the open question of which back lines are rear lines)": {
    "ok": true,
    "detail": {
-    "Building height": "complies",
-    "Stories": "complies"
+    "Building height": [
+     "needs_review",
+     "at limit"
+    ],
+    "Stories": [
+     "complies",
+     "at limit"
+    ]
    }
   },
   "5 the rows say assuming flat ground": {
    "ok": true,
    "detail": [
+    "?  Building height \u00b7 assuming flat ground",
+    "?  Rear yard",
     "\u2713  Use (site)",
     "\u2713  Lot area (site)",
     "\u2713  Lot width (site)",
     "\u2713  Stories \u00b7 assuming flat ground",
-    "\u2713  Building height \u00b7 assuming flat ground",
     "\u2713  Lot coverage",
     "\u2713  Front yard",
     "\u2713  Side yard, East",
     "\u2713  Side yard, West",
-    "\u2713  Rear yard",
     "\u2013  Parking \u00b7 needs input",
     "\u2013  Overlays \u00b7 not in this release"
    ]
@@ -66,16 +72,16 @@
   "3 Delta in words": {
    "ok": true,
    "detail": [
+    "at the limit at worst",
     "",
-    "+570 sf to spare",
-    "+23'-0\" to spare",
+    "",
+    "+1,033 sf to spare",
+    "at least 21'-10\" to spare",
     "at limit",
-    "at limit",
-    "+1.25% to spare",
-    "+2'-0\" to spare",
-    "+2'-0\" to spare",
-    "+2'-0\" to spare",
-    "+8'-8\" to spare",
+    "+5.93% to spare",
+    "at least 0'-0 3/4\" to spare",
+    "at least 15'-4 1/4\" to spare",
+    "at least 0'-0 5/8\" to spare",
     "",
     "",
     "",
@@ -88,16 +94,16 @@
   "3 a shortfall says short": {
    "ok": true,
    "detail": [
-    "\u2715  Rear yard",
-    "21'-2\"",
-    "22'-6\"",
-    "\u22121'-4\" short"
+    "\u2715  Side yard, West",
+    "7'-0 5/8\"",
+    "10'-0\"",
+    "at least 0'-11 1/4\" short"
    ]
   },
   "1 labels off: a failing yard's shortfall still labelled": {
    "ok": true,
    "detail": [
-    "\u2715 Rear yard 21'-2\", needs 22'-6\""
+    "\u2715 Side yard, West 7'-0 5/8\", needs 10'-0\" (approx.)"
    ]
   },
   "1 labels off: the others not": {

@@ -1,9 +1,9 @@
 #! python3
 """Red/amber highlighting in Rhino 8, each claim asserted (the run fails loudly otherwise). Run in Rhino, not in CI.
-GordiumStart on the sample (a tax-map lot: lot lines ±2'-0"), then the house moved 5 ft west, so the west side yard
-is 7'-0" against the 10'-0" required. The lot line may really be up to 2 ft either way, so the yard line is
-really 8 to 12 ft from the wall's drawn line:
-- red: over under every reading, 1 ft wide (7 + 2 = 9 < 10);
+GordiumStart on the sample (106 Ithaca Rd's tax-map lot: lot lines ±2'-0"), then the house moved 5 ft to the left
+(seen from the street), so that side yard is 7'-0 5/8" against the 10'-0" required. The lot line may really be up
+to 2 ft either way:
+- red: over under every reading, 10 - 2 - the yard wide (about 0.95 ft: worked from the measured yard);
 - amber: the rest of the doubt, 4 ft wide (within 12 ft, less the red);
 - before the move nothing is coloured red (the start house complies); the colours drawn are the status colours.
 Captures Top and Perspective. Writes <temp>/gordium_highlight/run_out.json and frames/*.png; phase "close"
@@ -69,8 +69,8 @@ try:
         doc = TestDocs("highlight").__enter__().open("Large Objects - Feet")
         g.gordium_check()                                    # GordiumStart's flow on the sample
         items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
-        claim("the sample is a tax-map lot, the west side yard 12'-0\" of 10'-0\"",
-              items["Side yard, West"]["proposed"] == "12'-0\"" and items["Side yard, West"]["required"] == "10'-0\"",
+        claim("the sample is 106's tax-map lot, the left side yard 12'-0 5/8\" of 10'-0\"",
+              items["Side yard, West"]["proposed"] == "12'-0 5/8\"" and items["Side yard, West"]["required"] == "10'-0\"",
               items["Side yard, West"])
         claim("the start house: nothing red", not any(s == "does_not_comply" for _, s in g.overlay().encroach),
               [s for _, s in g.overlay().encroach])
@@ -80,19 +80,41 @@ try:
         g.run_check(doc, report=False)
         items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
         west = items["Side yard, West"]
-        claim("moved: the west side yard 7'-0\", does not comply", west["proposed"] == "7'-0\"" and
+        claim("moved: the left side yard 7'-0 5/8\", does not comply", west["proposed"] == "7'-0 5/8\"" and
               west["status"] == "does_not_comply", west)
+        import math
+        yard = math.dist(west["points"][0][:2], west["points"][-1][:2])   # the measured yard, feet
+        log["yard_ft"] = round(yard, 4)
         regions = [(s, b.GetBoundingBox(True)) for b, s in g.overlay().encroach]
         log["regions"] = [(s, round((bb.Max.X - bb.Min.X) * g._scale(doc), 3)) for s, bb in regions]
         red = [bb for s, bb in regions if s == "does_not_comply"]
         amber = [bb for s, bb in regions if s == "needs_review"]
         width = lambda bb: (bb.Max.X - bb.Min.X) * g._scale(doc)        # noqa: E731  (feet)
         proud = 2 * g.ui.HIGHLIGHT_PROUD_FT                 # drawn a hair proud of the house on each side
-        claim("red: 1 ft wide, at the wall", len(red) == 1 and abs(width(red[0]) - (1.0 + proud)) < 0.01,
-              log["regions"])
-        claim("amber: 4 ft wide, beside the red", len(amber) >= 1 and
-              any(abs(width(a) - (4.0 + proud)) < 0.01 and abs(a.Min.X - (red[0].Max.X - proud * ft)) < 0.01 * ft
-                  for a in amber), log["regions"])
+        # each region measured from the lot's own left line (the real lot's is slightly slanted, so a region's x-width
+        # is not its width): red is over even if the line is 2 ft out, so within 10 - 2 = 8 ft of it (and no nearer
+        # than the wall); amber is the rest of the doubt, 8 to 12 ft from it. Allowing the 0.02 ft drawn proud.
+        ring = g.ask({"cmd": "sample_site"})["lot"]
+        edges = [(ring[i], ring[(i + 1) % len(ring)]) for i in range(len(ring))]
+        a_, b_ = min((e for e in edges if math.dist(e[0], e[1]) > 50), key=lambda e: e[0][0] + e[1][0])
+
+        def to_line(p):                                     # feet from the left lot line (a segment, plan)
+            ax, ay, bx, by = a_[0], a_[1], b_[0], b_[1]
+            t = max(0.0, min(1.0, ((p[0] - ax) * (bx - ax) + (p[1] - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2)))
+            return math.dist(p, (ax + t * (bx - ax), ay + t * (by - ay)))
+
+        def span(brep):
+            d = [to_line((v.Location.X * g._scale(doc), v.Location.Y * g._scale(doc))) for v in brep.Vertices]
+            return round(min(d), 3), round(max(d), 3)
+        red_b = [b for b, st in g.overlay().encroach if st == "does_not_comply"]
+        amber_b = [b for b, st in g.overlay().encroach if st == "needs_review"]
+        log["bands"] = {"yard": round(yard, 3), "red": [span(b) for b in red_b], "amber": [span(b) for b in amber_b]}
+        e = 0.05                                            # proud by scaling about the box centre: a slanted corner moves a bit more
+        claim("red: from the wall to 8 ft from the lot line (over even if the line is 2 ft out)", len(red_b) == 1 and
+              all(yard - e <= lo and hi <= 8 + e and hi >= 8 - e for lo, hi in log["bands"]["red"]), log["bands"])
+        claim("amber: 8 to 12 ft from the lot line, beside the red", len(amber_b) >= 1 and
+              all(8 - e <= lo and hi <= 12 + e for lo, hi in log["bands"]["amber"]) and
+              any(abs(lo - 8) <= e and abs(hi - 12) <= e for lo, hi in log["bands"]["amber"]), log["bands"])
         claim("each colour from the result", [g.logic.highlight(s) for s in ("does_not_comply", "needs_review")] ==
               ["red", "amber"])
         # the architect's polish (2026-10-21), each as the screen has it
@@ -101,12 +123,12 @@ try:
               (hl["red"].R, hl["red"].G, hl["red"].B, hl["amber"].R, hl["amber"].G, hl["amber"].B) ==
               (215, 38, 61, 242, 169, 0) and g.ui.HIGHLIGHT_EDGE["red"] > g.ui.HIGHLIGHT_EDGE["amber"])
         toast = (getattr(g.overlay(), "toast", None) or [[]])[0]
-        claim("1 the notice says what holds however the lot lines lie: at least 1'-0\" short (the red part)",
-              any(t.endswith("· at least 1'-0\" short") for t in toast), toast)
+        claim("1 the notice says what holds however the lot lines lie: at least 0'-11 1/4\" short (the red part)",
+              any(t.endswith("· at least 0'-11 1/4\" short") for t in toast), toast)
         cells = [[str(v) for v in grp.Children[k].Values] for grp in g.STATE["panel_parts"].get("groups") or []
                  for k in range(grp.Children.Count)]
         west_row = next(c for c in cells if "Side yard, West" in c[0])
-        claim("1 the panel's Delta says the same", west_row[3] == "at least 1'-0\" short", west_row)
+        claim("1 the panel's Delta says the same", west_row[3] == "at least 0'-11 1/4\" short", west_row)
         top_vp = doc.Views.Find("Top", False).ActiveViewport
         doc.Views.ActiveView = doc.Views.Find("Top", False)
         model = g._model_on_screen(g.overlay(), top_vp)
@@ -147,8 +169,10 @@ try:
               {"labels": log["labels"], "view": (vp.Bounds.Width, vp.Bounds.Height)})
         sources = ((g.STATE.get("last") or {}).get("header") or {}).get("sources") or []
         lot = [t for t in sources if t.startswith("Lot: ")]
-        claim("4 the lot's source said once", len(lot) == 1 and lot[0].count("tax map") == 1 and
-              lot[0].startswith("Lot: 6,570 sf · the tax map (±2 ft, approximate) · "), lot)
+        area = items["Lot area"]["proposed"]                    # the row's own figure: the fact must say the same
+        claim("4 the lot's source said once, its size the Lot area row's", len(lot) == 1 and
+              lot[0].count("tax map") == 1 and lot[0].startswith("Lot: " + area + " · the tax map (±2 ft, approximate) · "),
+              {"fact": lot, "row": area})
         parts = g.STATE["panel_parts"]
         parts["selected"] = west["id"]
         g.ui.show_detail(parts)

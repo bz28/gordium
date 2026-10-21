@@ -23,7 +23,7 @@
    "ok": true,
    "detail": {
     "error": "the Gordium checker gave no answer in 3 s, so it was restarted (see gordium_worker.log in the temp folder)",
-    "seconds": 3.02
+    "seconds": 3.01
    }
   },
   "2 the silent checker was stopped": {
@@ -82,9 +82,41 @@
   "6 and re-checked": {
    "ok": true,
    "detail": [
-    "12'-0\"",
-    "11'-0\""
+    "12'-0 5/8\"",
+    "11'-0 5/8\""
    ]
+  },
+  "7 the old copy is the pre-LEFTOVERS one": {
+   "ok": true,
+   "detail": "/var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_no_freeze/old_9303d10/apps/rhino_plugin/gordium_rhino.py"
+  },
+  "7 after the update: one copy's handlers attached (baseline + 1)": {
+   "ok": true,
+   "detail": {
+    "baseline": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    },
+    "old_on": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    },
+    "after": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    }
+   }
+  },
+  "7 the old copy's drawing is off": {
+   "ok": true,
+   "detail": null
+  },
+  "7 the old copy's checker is stopped": {
+   "ok": true,
+   "detail": null
   }
  },
  "baseline": {
@@ -108,6 +140,16 @@
   "EndOpenDocument": 0
  },
  "kept_state_reload": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "old_on": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "after_update": {
   "Idle": 1,
   "AddRhinoObject": 1,
   "EndOpenDocument": 1

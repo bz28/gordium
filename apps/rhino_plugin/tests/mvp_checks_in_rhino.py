@@ -4,7 +4,7 @@ not in CI. From a fresh document: GordiumStart on the sample, then:
 - flat ground (item 5): the start box has no Ground row; the lot facts say the ground is assumed flat; Building height
   and Stories comply, their rows reading "… · assuming flat ground";
 - labels off by default (item 1): the document's setting is off and the panel's tick unticked; a failing yard (the
-  house moved 14 ft back, QUICKSTART test 3: short under every reading) still has its shortfall label; ticking turns the labels on, saved in the document;
+  house moved 5 ft to the left, QUICKSTART test 6's failing yard) still has its shortfall label; ticking turns the labels on, saved in the document;
 - the panel (items 2, 3): no code-edition line in its header (it is in the legend's text), the column is "Delta" and
   its cells say "to spare" / "short".
 Captures: Top view with labels off (the failing shortfall only) and on; the panel. Writes <temp>/gordium_mvp/out.json
@@ -91,8 +91,11 @@ try:
         claim("5 the ground is assumed flat, finished", facts.get("ground_assumed") == "flat" and
               facts.get("grade_is") == "finished", {k: facts.get(k) for k in ("ground_assumed", "grade_is")})
         items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
-        claim("5 height and stories comply", items["Building height"]["status"] == "complies" and
-              items["Stories"]["status"] == "complies", {n: items[n]["status"] for n in ("Building height", "Stories")})
+        claim("5 stories comply; the height is at the limit (it needs review on this lot: the open question of "
+              "which back lines are rear lines)", items["Stories"]["status"] == "complies" and
+              items["Building height"]["margin"] == "at limit" and items["Building height"]["status"] in
+              ("complies", "needs_review"),
+              {n: (items[n]["status"], items[n]["margin"]) for n in ("Building height", "Stories")})
         rows = panel_rows(g)
         claim("5 the rows say assuming flat ground",
               any("Building height · assuming flat ground" in r[0] for r in rows) and
@@ -108,13 +111,13 @@ try:
         claim("3 the column is Delta", [c.HeaderText for c in parts["tree"].Columns][3] == "Delta",
               [c.HeaderText for c in parts["tree"].Columns])
         claim("3 Delta in words", any(r[3].endswith(" to spare") for r in rows), [r[3] for r in rows])
-        # a failing yard: the house 14 ft back (QUICKSTART test 3: the rear yard short under every reading); labels off
+        # a failing yard: the house 5 ft to the left (the left side yard short under every reading); labels off
         ft = 1.0 / g._scale(doc)
         for o in g._buildings(doc):
-            doc.Objects.Transform(o.Id, rg.Transform.Translation(0, 14 * ft, 0), True)
+            doc.Objects.Transform(o.Id, rg.Transform.Translation(-5 * ft, 0, 0), True)
         g.run_check(doc, report=False)
         rows = panel_rows(g)
-        rear = next(r for r in rows if "Rear yard" in r[0])
+        rear = next(r for r in rows if "Side yard, West" in r[0])
         claim("3 a shortfall says short", rear[3].endswith(" short"), rear)
         o = g.overlay()
         failing = [t for _, t, st in o.yard_dims if st == "does_not_comply"]

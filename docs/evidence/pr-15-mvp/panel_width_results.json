@@ -62,14 +62,14 @@
   "the long Delta words are among them": {
    "ok": true,
    "detail": [
-    "+2.43% to spare",
-    "+570 sf to spare",
-    "at least 1'-0\" short",
-    "at least 21'-0\" to spare",
-    "at least 5'-0\" to spare",
-    "at least 7'-9\" to spare",
+    "+1,033 sf to spare",
+    "+5.93% to spare",
+    "at least 0'-11 1/4\" short",
+    "at least 20'-4 1/4\" to spare",
+    "at least 21'-10\" to spare",
     "at limit",
-    "at the limit at worst"
+    "at the limit at worst",
+    "up to 0'-0 1/4\" short"
    ]
   }
  },
@@ -87,9 +87,10 @@
   "tree": 360,
   "item": 110.0,
   "shortened": [
+   "?  Building height \u00b7 assuming flat ground",
    "One-family dwelling, detached",
+   "at least 21'-10\" to spare",
    "\u2713  Stories \u00b7 assuming flat ground",
-   "\u2713  Building height \u00b7 assuming flat ground",
    "  \u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
    "  \u00a7325-18 Projections into yards (porches, decks, eaves)",
    "  \u00a7325-25 Accessory structures (garages, sheds)",
@@ -97,14 +98,14 @@
   ],
   "rows": 22,
   "deltas": [
-   "+2.43% to spare",
-   "+570 sf to spare",
-   "at least 1'-0\" short",
-   "at least 21'-0\" to spare",
-   "at least 5'-0\" to spare",
-   "at least 7'-9\" to spare",
+   "+1,033 sf to spare",
+   "+5.93% to spare",
+   "at least 0'-11 1/4\" short",
+   "at least 20'-4 1/4\" to spare",
+   "at least 21'-10\" to spare",
    "at limit",
-   "at the limit at worst"
+   "at the limit at worst",
+   "up to 0'-0 1/4\" short"
   ]
  },
  "w540_painted": {
@@ -121,18 +122,19 @@
   "tree": 520,
   "item": 270.0,
   "shortened": [
-   "One-family dwelling, detached"
+   "One-family dwelling, detached",
+   "at least 21'-10\" to spare"
   ],
   "rows": 22,
   "deltas": [
-   "+2.43% to spare",
-   "+570 sf to spare",
-   "at least 1'-0\" short",
-   "at least 21'-0\" to spare",
-   "at least 5'-0\" to spare",
-   "at least 7'-9\" to spare",
+   "+1,033 sf to spare",
+   "+5.93% to spare",
+   "at least 0'-11 1/4\" short",
+   "at least 20'-4 1/4\" to spare",
+   "at least 21'-10\" to spare",
    "at limit",
-   "at the limit at worst"
+   "at the limit at worst",
+   "up to 0'-0 1/4\" short"
   ]
  },
  "ok": true

@@ -346,6 +346,41 @@ def _ring(polygon) -> list:
 YARD_MEASURES = present.YARD_MEASURES
 
 
+RUN_TURN_DEG = 20      # lot edges turning less than this from one to the next are one run, labelled once
+
+
+def edge_runs(edges: list[dict]) -> list[tuple[list, float]]:
+    """The lot's edges as runs to label (display only; the measurements use every edge): consecutive edges that
+    carry on in nearly the same direction (turning less than RUN_TURN_DEG) are one run, a curve drawn as short
+    segments labelled once with its whole length, as an architect would dimension it (the real 106 Ithaca Rd: its
+    front, eight segments of about 10 ft along Ithaca Road, crowded the plan with eight labels). Each run: (its
+    points, its length in feet). The caller leaves out runs under 1 ft (a tax map's jog of an inch or two)."""
+    pieces = []
+    for e in edges:
+        pts = [list(p[:2]) for p in e["points"]]
+        for a, b in zip(pts, pts[1:]):
+            if math.dist(a, b) > 1e-9:
+                pieces.append((a, b))
+    if not pieces:
+        return []
+
+    def heading(a, b):
+        return math.atan2(b[1] - a[1], b[0] - a[0])
+
+    def turn(p, q):
+        d = abs(heading(*p) - heading(*q)) % (2 * math.pi)
+        return math.degrees(min(d, 2 * math.pi - d))
+    runs = [[pieces[0]]]
+    for piece in pieces[1:]:
+        if turn(runs[-1][-1], piece) < RUN_TURN_DEG:
+            runs[-1].append(piece)
+        else:
+            runs.append([piece])
+    if len(runs) > 1 and turn(runs[-1][-1], runs[0][0]) < RUN_TURN_DEG:   # the ring closes inside a run
+        runs[0] = runs.pop() + runs[0]
+    return [([r[0][0]] + [b for _, b in r], sum(math.dist(a, b) for a, b in r)) for r in runs]
+
+
 def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
     """What the viewport draws in plan (feet): each lot edge with its length, the yard lines measured (each with
     its item's status), and where the building breaks a limit: the strip of its footprint inside a required yard,
@@ -355,11 +390,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
     from shapely.ops import unary_union
 
     lot = site.get("lot") or {}
-    edges = []
-    for e in lot.get("edges") or []:
-        a, b = e["points"][0], e["points"][-1]
-        length = sum(math.dist(p[:2], q[:2]) for p, q in zip(e["points"], e["points"][1:]))
-        edges.append({"points": [list(a[:2]), list(b[:2])], "length": present.feet_inches(length)})
+    edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
+             for r, length in edge_runs(lot.get("edges") or []) if length >= 1.0]
     yards = [{"points": i["points"], "status": i["status"], "label": f"{i['mark']} {i['name']} {i['proposed']}" +
               (f", needs {i['required']}" if i["status"] == present.FAILS and i.get("required") else "") +
               (" (approx.)" if i.get("approx") else "")}

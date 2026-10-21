@@ -309,9 +309,10 @@ def test_the_massing_layer_holds_building_objects():
 
 
 def test_the_sample_lot_gives_the_spec_massing():
-    """73'-0" x 90'-0" (6,570 sf, from the tax map) -> kept 2'-0" back: 49'-0" x 30'-3" = 1,482 sf, 22.56% of the lot as
-    drawn (25% of the smallest lot the tax map allows: every line 2 ft in, 69 x 86 = 5,934 sf, so at most 1,483.5
-    sf), at 27'-0" from the street."""
+    """106 Ithaca Rd as the State tax map draws it (7,033.8 sf; 7,033.5 as placed, its points rounded to 1/10,000 ft) -> the starting house
+    kept 2'-0" back from every limit: 35'-11" x 37'-4", three floors to 35'-0", 27'-0 3/4" from the street. Here the
+    left side yard binds, not coverage: 19.1% of the lot as drawn, well under 25% of the smallest lot the tax map
+    allows (6,357 sf, the checker's own worst case)."""
     import math
     import tempfile
     from pathlib import Path
@@ -334,10 +335,23 @@ def test_the_sample_lot_gives_the_spec_massing():
     got = start(path, s["facts"])
     outline = Polygon(got["floors"][0]["outline"])
     x0, y0, x1, y1 = outline.bounds
-    assert Polygon(s["lot"]).area == 6570 and s["facts"]["lot_surveyed"] is False
-    assert (x1 - x0, round((y1 - y0) * 12, 6)) == (49, 30 * 12 + 3)
-    assert round(outline.area) == 1482 and round(outline.area / 6570 * 100, 2) == 22.56 and outline.area <= 0.25 * 5934
-    assert y0 == 27 and len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
+    from design_checker import present
+    lot = Polygon(s["lot"])
+    from rule_format.rulebook import load
+    stored = load(REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/lot_outline_tax_map.yaml")
+    assert abs(lot.area - stored["area_sf"]) < 1 and s["facts"]["lot_surveyed"] is False   # placed points rounded
+    assert (present.feet_inches(x1 - x0), present.feet_inches(y1 - y0)) == ("35'-11\"", "37'-4\"")
+    assert round(outline.area / lot.area * 100, 1) == 19.1 and outline.area <= 0.25 * 6357
+    assert len(got["floors"]) == 3 and got["floors"][-1]["top"] == 35
+    from design_checker.check import check_site
+    from envelope_builder.start import floor_solids
+    n = len(s["lot"])
+    lot_site = {"id": "lot", "edges": [{"points": [list(s["lot"][i]) + [0.0], list(s["lot"][(i + 1) % n]) + [0.0]],
+                                        "curved": False} for i in range(n)]}
+    view = check_site({"units": "ft", "lot": lot_site, "buildings": floor_solids(got["floors"]), "problems": []},
+                      {**s["facts"], "jurisdiction": s["facts"]["jurisdiction"]})["view"]
+    front = {i["name"]: i for i in view["items"]}["Front yard"]
+    assert front["proposed"] == "27'-0 3/4\"" and front["status"] == present.COMPLIES     # 25'-0" + 2'-0", and more
 
 
 def test_a_flag_needing_review_never_crashes_the_check(facts):
@@ -1245,6 +1259,8 @@ def test_a_yard_label_stays_off_every_dimension_and_edge_not_only_its_own():
     # boxed in on every side: says so, and the caller falls back to moving it off the other labels
     cage = [((0, y), (1000, y)) for y in range(0, 640, 10)]
     assert place_label(own, w, h, cage)[2] is False
+
+
 def test_the_suggested_facts_never_answer_the_corner_lot_question():
     """eval-integrity P1-5: the guarantee was pinned only by the plugin's source text (setting corner_lot to False
     in suggested_facts passed). Now the decisions are plain logic, run here on every kind of model."""
@@ -1340,3 +1356,25 @@ def test_the_setup_brings_the_panel_back_with_rhino():
     guide = " ".join((app / "QUICKSTART.md").read_text(encoding="utf-8").split())        # the guide wraps its lines
     assert "Rhino → Settings… → General" in guide and "Tools → Options → General" in guide
     assert guide.count("add the line `GordiumPanel`") == 2 and "Gordium: GordiumPanel -> gordium_panel.py" in guide
+
+
+def test_lot_edges_are_labelled_as_an_architect_dimensions_them():
+    """The real 106 Ithaca Rd (Rhino, 2026-10-21): sixteen labels, eight of them for the ~10 ft pieces of its curved
+    front, crowded the plan and one couldn't find room. Edges carrying on in nearly the same direction are one run,
+    labelled with its whole length; a jog under 1 ft isn't labelled. The measurements still use every edge."""
+    from design_checker.check import edge_runs, sample_site
+    from design_checker import present
+    ring = sample_site()["lot"]
+    runs = edge_runs([{"points": [ring[i], ring[(i + 1) % len(ring)]]} for i in range(len(ring))])
+    assert [(len(pts) - 1, present.feet_inches(length)) for pts, length in runs] == [
+        (8, "75'-10\""), (1, "101'-1 1/2\""), (2, "10'-4 1/8\""), (1, "69'-6 1/8\""), (3, "92'-1 3/8\"")]
+    rect = [[0, 0], [50, 0], [50, 100], [0, 100]]
+    assert [round(length, 6) for _, length in edge_runs([{"points": [rect[i], rect[(i + 1) % 4]]} for i in range(4)])] \
+        == [50, 100, 50, 100]
+
+
+def test_the_lot_fact_rounds_its_area_down_like_the_lot_area_row():
+    """106 Ithaca Rd in Rhino (2026-10-21): the site facts said 7,034 sf (to the nearest) while the Lot area row said
+    7,033 sf (rounded down, never in the architect's favour). One rounding for both."""
+    from design_checker import rhino_logic as logic
+    assert logic.lot_size(7033.5) == "7,033 sf" and logic.lot_size(6570.0) == "6,570 sf"

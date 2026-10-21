@@ -552,7 +552,10 @@ GROUND_CHOICES = [("spot", "Place spot grades…"), ("terrain", "Pick terrain…
 
 
 def lot_size(area):
-    return f"{area:,.0f} sf" if isinstance(area, (int, float)) else "area not known"
+    """The lot's area as the site facts say it: whole square feet rounded down, as the checker's Lot area row does
+    (never in the architect's favour; to the nearest, 106 Ithaca Rd read 7,034 sf here and 7,033 sf in the row)."""
+    import math
+    return f"{math.floor(area + 1e-9):,} sf" if isinstance(area, (int, float)) else "area not known"
 
 
 def lot_source(surveyed):

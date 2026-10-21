@@ -1524,7 +1524,8 @@ def run_check(doc, report=True):
                                                           "Error", "Rule id", "Why", "Provisional")}
                                   for r in result["rows"]],
                          "items": [{k: i.get(k) for k in ("id", "name", "status", "proposed", "required", "margin",
-                                                          "reason", "group")} for i in view["items"]],
+                                                          "delta", "approx", "note", "points", "reason", "group")}
+                                   for i in view["items"]],
                          "header": head, "interior": [r["Rule id"] for r in result.get("interior", [])],
                          "encroach": len(o.encroach), "plan_encroach": len((result.get("plan") or {}).get("encroach") or []),
                          "envelope": result.get("envelope"), "at": time.time()}
