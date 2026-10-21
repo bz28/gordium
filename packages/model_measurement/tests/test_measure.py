@@ -746,7 +746,8 @@ def test_the_grade_plane_is_the_main_buildings_own_walls_never_a_detached_garage
     assert h["value"] is None                                    # the readings differ: never a pass at 35
     # spots only at the house: the reading with the garage as part of the building has no ground at its walls
     h = measure(site(RECT, house, garage), {**facts, "grade_points": at_house})["building_height"]
-    assert h["value"] is None and h["reason"].startswith("with the other solids as part of the building")
+    # (round 5: the garage has no spot grade of its own, so the ground under it can't be told: it asks)
+    assert h["value"] is None and h["reason"].startswith("the spot grades don't show the ground under the building")
 
 
 def test_a_wing_on_lower_ground_lowers_the_grade_plane_of_the_reading_that_includes_it():
@@ -1207,7 +1208,7 @@ def test_the_stories_read_each_candidate_building_from_its_own_grade_plane():
     house = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"h{i}") for i in range(2)]
     wing = [floor(40, 75, 48, 90, z0=0, z1=10, id="w0")]
     facts = {**FACTS, "stories": 2, "main_building": "h0", "ground_is_flat": None, "grade_elevation": None,
-             "grade_points": [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]]}
+             "grade_points": [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [44, 74.5, 0]]}   # one at the wing
     m = measure(site(RECT, *house, *wing), facts)
     assert m["stories"]["value"] is None and m["stories"]["reason"] == m["building_height"]["reason"]
     assert "spot grades at their walls too" in m["stories"]["reason"]
@@ -1336,3 +1337,45 @@ def test_a_floating_house_is_found_however_few_or_lined_up_the_spot_grades(point
     m = measure(site(RECT, *house), facts)
     assert m["front_yard"]["value"] is None and ("doesn't meet the buildings" in m["front_yard"]["reason"] or
                                                  "don't show the ground under the building" in m["front_yard"]["reason"])
+
+
+@pytest.mark.parametrize("at", [26, 50])                  # near a spot grade, and 15 ft further along the wall
+def test_a_balcony_against_the_house_is_part_of_it_for_the_ground_wherever_the_spot_grades_are(at):
+    """#15 round 5 (P2): a balcony drawn as its own solid against the house's side, at 10 ft, was judged by itself:
+    it "floated" (every yard stopped) when a spot grade happened to be near it, and passed 15 ft along the wall.
+    Buildings touching in plan are one group for the ground: the house meets the ground, so the balcony does."""
+    house = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    balcony = box(35, at, 40, at + 8, 10, 10.5, id="balcony")
+    spots = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [36, 27, 0]]
+    m = measure(site(RECT, *house, balcony), {**FACTS, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+                                               "grade_points": spots})
+    assert m["front_yard"]["value"] is not None or m["front_yard"]["readings"], m["front_yard"]
+    assert "doesn't meet the buildings" not in (m["front_yard"]["reason"] or "")
+
+
+def test_a_slab_above_the_grade_plane_on_a_slope_is_cut_at_its_own_bottom():
+    """Round 5 (P2): a house whose slab sits above the average of its wall grades (2.75 against 2.0) was cut below
+    its own bottom: building area 0 sf "at the main grade level" and a made-up overhang question. Each building is
+    cut at the higher of the grade plane and its own bottom."""
+    house = [floor(10, 30, 35, 60, z0=2.75 + 10 * i, z1=2.75 + 10 * (i + 1), id=f"f{i}") for i in range(3)]
+    spots = [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0]]
+    m = measure(site(RECT, *house), {**FACTS, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+                                     "grade_points": spots})
+    assert m["building_area"]["value"] == pytest.approx(750.0), m["building_area"]
+    assert any(r["reading"] == "to its walls at ground level" for r in m["front_yard"]["readings"]) or \
+        m["front_yard"]["value"] is not None
+
+
+def test_a_closed_solid_a_hair_off_plumb_is_closed_and_one_missing_a_wall_is_open():
+    """Round 5 (P3): a wall leaning by a few hundredths of a foot was left out of the coverage, so a closed solid
+    read as open; a box missing a wall read as closed. Every face counts as drawn, seen along each axis."""
+    from model_measurement.measure import _unenclosed
+    lean = box(10, 25, 35, 65, 0, 30, id="house")
+    for f in lean["faces"]:
+        for p in f["points"]:
+            if p[0] == 35 and p[2] == 30:
+                p[0] = 35.02                    # the east wall's top 0.02 ft out (and the roof with it)
+    assert _unenclosed(lean) is None
+    missing = box(10, 25, 35, 65, 0, 30, id="house")
+    missing["faces"] = [f for f in missing["faces"] if not all(p[0] == 35 for p in f["points"])]
+    assert _unenclosed(missing) is not None
