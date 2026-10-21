@@ -389,3 +389,19 @@ def test_at_the_limit_and_complies_never_disagree():
     cov = _ast.parse("building_area <= 0.35 * lot_area", mode="eval").body
     pct = present._numbers(cov, {"building_area": 1750.7, "lot_area": 5002}, {"building_area": {"unit": "sf"}}, "x")
     assert present._display(*pct)[2] == "at limit"
+
+
+def test_a_row_complying_under_every_reading_names_the_open_question_it_depends_on():
+    """The zoning office is told what to answer: "Complies under every reading, but it depends on an open
+    question: which lot lines count as side and which as rear; confirm with the zoning office"."""
+    row = {"Error": "NEEDS REVIEW", "Provisional": "passes under every reading",
+           "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open "
+                  "question for the architects (lot_depth)"}
+    assert present._reason(row) == ("Complies under every reading, but it depends on an open question: which lot "
+                                    "lines count as side and which as rear; confirm with the zoning office")
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "10_one_floor_moved_on_its_own.yaml"))
+    side = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Side yard, East"]
+    assert side["reason"].startswith("Complies under every reading, but it depends on open questions: which lot "
+                                     "lines count as side and which as rear; whether a yard is measured to the wall")

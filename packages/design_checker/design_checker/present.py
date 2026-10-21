@@ -238,6 +238,26 @@ def _status(row: dict) -> str:
     return COMPLIES if row.get("Error") == "PASS" else REVIEW
 
 
+QUESTION_NAMES = {"lot_depth": "which lot lines count as side and which as rear",
+                  "height_of_building": "how the height of a pitched roof is taken",
+                  "yard_projections": "whether a yard is measured to the wall or to overhangs, and what counts as "
+                                      "part of the building"}
+
+
+def _open_questions(why: str) -> list[str]:
+    """The open questions a row's reason names, each by a short name: the measuring's own subject of "... is an
+    open question for the architects", or its plain name when the question is tagged (lot_depth ...)."""
+    out = []
+    for part in re.split(r";\s+|, and |, (?=whether)", why or ""):
+        m = re.match(r"\s*(?:the readings give different values\s*)?(.*?) (?:is|are) (?:an )?open questions? for the "
+                     r"architects(?:\s*\(([a-z_]+)\))?", part)
+        if m:
+            name = QUESTION_NAMES.get(m.group(2) or "") or _user_text(m.group(1)).strip(" :")
+            if name and name not in out:
+                out.append(name)
+    return out
+
+
 def _reason(row: dict) -> str | None:
     if _status(row) != REVIEW:
         return None
@@ -245,6 +265,12 @@ def _reason(row: dict) -> str | None:
         word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
         return f"{word} with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…"
     if row.get("Provisional"):
+        questions = _open_questions(row.get("Why") or "")
+        if questions:                       # name what it depends on, so the zoning office knows what to answer
+            word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
+            which = "an open question" if len(questions) == 1 else "open questions"
+            return (f"{word} under every reading, but it depends on {which}: {'; '.join(questions)}; "
+                    "confirm with the zoning office")
         return _user_text(("Complies " if row["Provisional"].startswith("passes") else "Fails ") +
                           row["Provisional"].split(" ", 1)[1] + " the law allows; confirm with the zoning office")
     return _user_text(row.get("Why") or "")
