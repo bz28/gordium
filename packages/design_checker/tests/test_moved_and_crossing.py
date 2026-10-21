@@ -450,3 +450,14 @@ def test_an_unmeasured_height_on_a_tax_map_lot_fails_only_if_it_fails_under_ever
         got[front] = next(r for r in rows(res, "R-1b.yard_projections") if r["name"] == "Eaves into front yard")
     assert got[22]["status"] == present.REVIEW and "at best 24'-0\" against" in got[22]["reason"]
     assert got[20]["status"] == present.FAILS
+
+
+@pytest.mark.parametrize("extra", [{"applies_when": "building_height < 50"},
+                                   {"review_when": [{"when": "building_height > 60", "why": "t"}]}])
+def test_fails_whatever_never_uses_a_number_that_decides_whether_the_rule_applies(extra):
+    """Round 13, P3: the check alone fails at h = 0 (15 < 23), but whether the rule applies (or must be
+    reviewed) depends on the same unknown height: not known, so never 'does not comply'."""
+    from design_checker.check import fails_whatever
+    rule = {"id": "t", "kind": "rule", "check": "front_yard_eaves >= 25 + max(building_height - 35, 0) - 2", **extra}
+    measured = {"front_yard_eaves": {"value": 15.0}, "building_height": {"value": None, "readings": []}}
+    assert fails_whatever(rule, measured, {}) is None

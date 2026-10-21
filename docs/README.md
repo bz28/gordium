@@ -46,6 +46,7 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 |---|---|---|---|
 | [decisions/2026-10-20_rhino_talks_to_python.md](decisions/2026-10-20_rhino_talks_to_python.md) | Decision: all measuring and checking runs in Gordium's own Python; Rhino only copies the model across and draws the answer | Engineers | The Rhino–Python connection changes |
 | [design/rhino_ui_spec.md](design/rhino_ui_spec.md) | The approved build spec for the Rhino screens: every acceptance criterion and how it is verified | Engineers, designers | The Rhino UI's design changes |
+| [decisions/2026-10-21_fails_whatever_the_missing_number.md](decisions/2026-10-21_fails_whatever_the_missing_number.md) | Decision: a rule that fails for every value a missing number could take does not comply (proven from the formula, never sampled); missing data never complies | Architects, engineers | Rule-checking changes |
 | [decisions/2026-10-21_eaves_need_confirmation.md](decisions/2026-10-21_eaves_need_confirmation.md) | Decision: Gordium never decides on its own that an overhang is an eave; one inside a required yard needs review until the architect marks it as eaves | Architects, engineers | Overhang measurement changes |
 | [questions_for_architects.md](questions_for_architects.md) | The questions about the law research couldn't settle | Architects | A question is added, researched or answered |
 
