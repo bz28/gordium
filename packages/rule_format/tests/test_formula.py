@@ -1,3 +1,4 @@
+import re
 import math
 
 import pytest
@@ -196,3 +197,75 @@ def test_a_margin_at_the_limit_is_zero_exactly_where_the_comparison_complies():
 def test_an_error_names_the_value_as_written():
     with pytest.raises(EvaluationError, match=r"expected true/false, got 50$"):
         evaluate("not lot_width", {"lot_width": 50}, KINDS)
+
+
+@pytest.mark.parametrize("text, problem", [
+    ('use == 5', "== and != compare values of one kind"),
+    ("stories or building_height <= 35", "and/or need true/false tests"),
+    ("(stories <= 3) + 1 > 0", "arithmetic needs numbers"),
+    ("not stories", "'not' needs a true/false test"),
+    ('use > 3', "<, <=, >, >= compare numbers"),
+    ('use in [1, 2]', "'in' needs a list of the same kind"),
+    ("stories <= (1 if use else 2)", "an if needs a true/false test"),
+    ("ghost > 1", "unknown measure 'ghost'"),
+])
+def test_an_ill_typed_formula_is_refused_before_any_value(text, problem):
+    """Review of 0582c65 (P1): a formula that errors for every value is caught by its types, at validation."""
+    from rule_format.formula import FormulaError, type_of
+    with pytest.raises(FormulaError, match=re.escape(problem)):
+        type_of(text, KINDS)
+
+
+def test_a_well_typed_formula_has_its_type():
+    from rule_format.formula import type_of
+    assert type_of("rear_yard >= max(min(0.25 * lot_depth, 50), 20)", KINDS) == "bool"
+    assert type_of('use in ["church"] and (1 if stories > 2 else 2) <= 3', KINDS) == "bool"
+    assert type_of("max(a, b) / 2", KINDS) == "number"
+
+
+@pytest.mark.parametrize("text, values", [
+    ("lot_area >= 1 and (use == 5 or building_height < 5)", {"lot_area": 10, "building_height": 1}),
+    ("stories or building_height <= 35", {"building_height": 3}),
+    ("(stories <= 3) + 1 > 0 or a > 0", {"a": 1}),
+    ("a / b > 1 or stories <= 3", {"a": 1, "b": 0, "stories": 1}),
+    ("stories / b > 1 or a > 0", {"b": 0, "a": 1}),
+])
+def test_an_error_every_value_would_give_is_never_hidden_under_an_unknown(text, values):
+    """Review of 0582c65 (P1, P2): with the measure missing, Kleene must not resolve a formula that would raise for
+    every value of it (wrong types, division by a known zero): it raises (needs review), as complete data does."""
+    with pytest.raises(EvaluationError):
+        evaluate(text, values, KINDS | {"use": frozenset({"church"})})
+
+
+def test_known_answers_agree_with_every_substitution_including_ill_typed_atoms_and_division():
+    """Exhaustive: for formula shapes mixing well-typed and ill-typed atoms, division and if/else, wherever the
+    evaluation with a measure missing gives an answer, every value of that measure gives that same answer and
+    never an error; and wherever it raises an error, some value raises it too."""
+    import itertools
+    kinds = KINDS | {"use": frozenset({"a", "ab"})}
+    atoms = ["a <= 3", "b > 2", "a / b > 1", "a / (b - 4) >= 0", '(1 if a > 2 else 0) <= b', 'use == "a"',
+             "max(a, b) >= 4", "-a < -2"]
+    shapes = [f"{x} or {y}" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"{x} and {y}" for x, y in itertools.combinations(atoms, 2)]
+    shapes += [f"not ({x} or {y})" for x, y in itertools.combinations(atoms, 2)]
+    grid = {"a": [0, 1, 2, 3, 4, 5, 7.5], "b": [0, 1, 2, 3, 4, 5, 7.5], "use": ["a", "ab"]}
+
+    def answer(text, values):
+        try:
+            return evaluate(text, values, kinds)
+        except EvaluationError:
+            return "error"
+
+    for text in shapes:
+        for missing in ("a", "b", "use"):
+            for base in itertools.product(*(grid[n] for n in ("a", "b", "use"))):
+                values = dict(zip(("a", "b", "use"), base)) | {missing: None}
+                try:
+                    got = evaluate(text, values, kinds)
+                except MissingMeasure:
+                    continue
+                except EvaluationError:
+                    assert "error" in {answer(text, values | {missing: v}) for v in grid[missing]}, (text, values)
+                    continue
+                every = {answer(text, values | {missing: v}) for v in grid[missing]}
+                assert every == {got}, (text, missing, values, got, every)
