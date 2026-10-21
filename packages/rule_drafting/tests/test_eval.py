@@ -289,15 +289,24 @@ def grade_mapped(book: dict, entries: dict, drafted: list[dict], ctx) -> dict:
             (out["agree"] if got == ex["expect"] else out["disagree"]).append(item)
         groups = [[r for r in u if r.get("kind") != "flag"] for u in units] + [[r] for u in units for r in u
                                                                              if r.get("kind") == "flag"] + [parts]
-        for group in (g for g in groups if g):
-            for point in design_points(h, group, district, ctx, uses=allowed):
-                key = outcome(h, point, ctx.allowed())
-                got = _judge(group, point, ctx)
-                if kinder(got, key):
-                    out["false_pass"].append({"hand": h["id"], "given": point, "expect": key, "got": got,
-                                              "drafted": [r["id"] for r in group],
-                                              "parts": group is parts})
-                    break                               # one design per group is enough to show it
+        same = e.get("same_measures") or {}             # a drafted measure that is the key's under another name
+        # a measure only the hand key uses (described on the key's own branch) is evaluated as a number, as there
+        own = {n: {"unit": "count", "meaning": "the hand key's own measure"} for n in _formula_names([h])
+               if n not in ctx.kinds() and n not in ("use", "district")}
+        saved, ctx.proposed = ctx.proposed, ctx.proposed | own
+        try:
+            for group in (g for g in groups if g):
+                for point in design_points(h, group, district, ctx, uses=allowed):
+                    point = point | {d: point[k] for d, k in same.items() if k in point}
+                    key = outcome(h, point, ctx.allowed())
+                    got = _judge(group, point, ctx)
+                    if kinder(got, key):
+                        out["false_pass"].append({"hand": h["id"], "given": point, "expect": key, "got": got,
+                                                  "drafted": [r["id"] for r in group],
+                                                  "parts": group is parts})
+                        break                           # one design per group is enough to show it
+        finally:
+            ctx.proposed = saved
     return out
 
 
@@ -711,11 +720,12 @@ def test_a_rule_citing_use_rows_as_inputs_isnt_covered_by_the_permitted_use_rule
     assert covering(hand_use, [use_rule], ctx, from_law=set()) == [use_rule]      # two use rules still match
 
 
-def test_a_hand_flag_is_covered_by_a_numeric_draft_on_its_cell_and_a_wrong_pass_shows(ctx, tmp_path):
+def test_a_hand_flag_is_covered_by_a_numeric_draft_on_its_cell_and_a_wrong_pass_shows(ctx, tmp_path, monkeypatch):
     """Review round 6: a hand rule that measures nothing (a use flag) required the draft to measure nothing too, so a
     numeric drafted rule on the same cell was filed undrafted, and its pass against the key's needs review never
     reached false_pass."""
     import yaml
+    monkeypatch.setattr(ctx, "proposed", ctx.proposed | {"persons_housed": {"unit": "count", "meaning": "persons housed"}})
     cell = {"file": CHART, "page": 14, "cell": {"section": "Residential", "row": "Dormitory", "column": "R-3A"}}
     if not any(k[1] == "Residential" and k[2] == "Dormitory" for k in ctx.cells.get(CHART, {})):
         cell = {"file": CHART, "page": 2, "cell": {"section": "Primary Uses", "row": "Dormitory", "column": "R-3A"}}

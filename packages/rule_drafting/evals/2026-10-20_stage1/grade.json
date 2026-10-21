@@ -174,8 +174,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.max_stories",
-     "R-1b.325_16c_extra_height_stories_not_exceeded"
+     "R-1b.max_stories"
     ],
     "notes": []
    },
@@ -187,8 +186,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_stories",
-     "R-1b.325_16c_extra_height_stories_not_exceeded"
+     "R-1b.max_stories"
     ],
     "notes": []
    },
@@ -206,7 +204,7 @@
     "got": "pass",
     "drafted": [
      "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_limit",
      "R-1b.325_16c_extra_height_front_yard",
      "R-1b.325_16c_extra_height_side_yards",
      "R-1b.325_16c_extra_height_rear_yard"
@@ -228,7 +226,7 @@
     "got": "fail",
     "drafted": [
      "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_limit",
      "R-1b.325_16c_extra_height_front_yard",
      "R-1b.325_16c_extra_height_side_yards",
      "R-1b.325_16c_extra_height_rear_yard"
@@ -250,7 +248,7 @@
     "got": "fail",
     "drafted": [
      "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_limit",
      "R-1b.325_16c_extra_height_front_yard",
      "R-1b.325_16c_extra_height_side_yards",
      "R-1b.325_16c_extra_height_rear_yard"
@@ -272,7 +270,7 @@
     "got": "fail",
     "drafted": [
      "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_limit",
      "R-1b.325_16c_extra_height_front_yard",
      "R-1b.325_16c_extra_height_side_yards",
      "R-1b.325_16c_extra_height_rear_yard"
@@ -294,7 +292,7 @@
     "got": "fail",
     "drafted": [
      "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_limit",
      "R-1b.325_16c_extra_height_front_yard",
      "R-1b.325_16c_extra_height_side_yards",
      "R-1b.325_16c_extra_height_rear_yard"
@@ -315,7 +313,7 @@
     "got": "fail",
     "drafted": [
      "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_limit",
      "R-1b.325_16c_extra_height_front_yard",
      "R-1b.325_16c_extra_height_side_yards",
      "R-1b.325_16c_extra_height_rear_yard"
@@ -465,15 +463,10 @@
     "got": "pass",
     "drafted": [
      "R-1b.325_25a_accessory_not_in_required_front_yard",
-     "general.325_25c_frame_accessory_side_setback",
      "general.325_25c_frame_accessory_side_setback_r1",
      "general.325_25c_frame_accessory_rear_setback"
     ],
-    "notes": [
-     "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.accessory_buildings",
@@ -488,15 +481,10 @@
     "got": "fail",
     "drafted": [
      "R-1b.325_25a_accessory_not_in_required_front_yard",
-     "general.325_25c_frame_accessory_side_setback",
      "general.325_25c_frame_accessory_side_setback_r1",
      "general.325_25c_frame_accessory_rear_setback"
     ],
-    "notes": [
-     "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.accessory_buildings",
@@ -511,15 +499,10 @@
     "got": "fail",
     "drafted": [
      "R-1b.325_25a_accessory_not_in_required_front_yard",
-     "general.325_25c_frame_accessory_side_setback",
      "general.325_25c_frame_accessory_side_setback_r1",
      "general.325_25c_frame_accessory_rear_setback"
     ],
-    "notes": [
-     "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.accessory_buildings",
@@ -534,15 +517,10 @@
     "got": "pass",
     "drafted": [
      "R-1b.325_25a_accessory_not_in_required_front_yard",
-     "general.325_25c_frame_accessory_side_setback",
      "general.325_25c_frame_accessory_side_setback_r1",
      "general.325_25c_frame_accessory_rear_setback"
     ],
-    "notes": [
-     "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.accessory_buildings",
@@ -557,63 +535,10 @@
     "got": "pass",
     "drafted": [
      "R-1b.325_25a_accessory_not_in_required_front_yard",
-     "general.325_25c_frame_accessory_side_setback",
      "general.325_25c_frame_accessory_side_setback_r1",
      "general.325_25c_frame_accessory_rear_setback"
     ],
-    "notes": [
-     "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example"
-    ]
-   },
-   {
-    "hand": "R-1b.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 3,
-     "parking_spaces": 1
-    },
-    "expect": "pass",
-    "got": "pass",
-    "drafted": [
-     "R-1b.parking_by_sleeping_rooms"
-    ],
-    "notes": [
-     "R-1b.parking_by_sleeping_rooms given {'multiple_dwelling_units': False} from its own passing example"
-    ]
-   },
-   {
-    "hand": "R-1b.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 4,
-     "parking_spaces": 1
-    },
-    "expect": "fail",
-    "got": "fail",
-    "drafted": [
-     "R-1b.parking_by_sleeping_rooms"
-    ],
-    "notes": [
-     "R-1b.parking_by_sleeping_rooms given {'multiple_dwelling_units': False} from its own passing example"
-    ]
-   },
-   {
-    "hand": "R-1b.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 6,
-     "parking_spaces": 3
-    },
-    "expect": "pass",
-    "got": "pass",
-    "drafted": [
-     "R-1b.parking_by_sleeping_rooms"
-    ],
-    "notes": [
-     "R-1b.parking_by_sleeping_rooms given {'multiple_dwelling_units': False} from its own passing example"
-    ]
+    "notes": []
    }
   ],
   "disagree": [
@@ -632,7 +557,7 @@
     "got": "fail",
     "drafted": [
      "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_limit",
      "R-1b.325_16c_extra_height_front_yard",
      "R-1b.325_16c_extra_height_side_yards",
      "R-1b.325_16c_extra_height_rear_yard"
@@ -653,7 +578,7 @@
     "got": "fail",
     "drafted": [
      "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_limit",
      "R-1b.325_16c_extra_height_front_yard",
      "R-1b.325_16c_extra_height_side_yards",
      "R-1b.325_16c_extra_height_rear_yard"
@@ -788,69 +713,54 @@
     "got": "needs_review",
     "drafted": [
      "R-1b.325_25a_accessory_not_in_required_front_yard",
-     "general.325_25c_frame_accessory_side_setback",
      "general.325_25c_frame_accessory_side_setback_r1",
      "general.325_25c_frame_accessory_rear_setback"
     ],
     "notes": [
      "R-1b.325_25a_accessory_not_in_required_front_yard needs ['accessory_front_yard'], which the hand example doesn't give",
-     "general.325_25c_frame_accessory_side_setback given {'accessory_is_frame': True} from its own passing example",
-     "general.325_25c_frame_accessory_side_setback needs ['accessory_distances_apply', 'accessory_side_yard'], which the hand example doesn't give",
-     "general.325_25c_frame_accessory_side_setback_r1 given {'accessory_is_frame': True} from its own passing example",
      "general.325_25c_frame_accessory_side_setback_r1 needs ['accessory_distances_apply', 'accessory_side_yard'], which the hand example doesn't give",
-     "general.325_25c_frame_accessory_rear_setback given {'accessory_is_frame': True} from its own passing example",
      "general.325_25c_frame_accessory_rear_setback needs ['accessory_distances_apply', 'accessory_rear_yard'], which the hand example doesn't give"
     ]
    }
   ],
-  "undrafted": [],
-  "false_pass": [
+  "undrafted": [
    {
-    "hand": "R-1b.accessory_buildings",
+    "hand": "R-1b.parking_one_family",
     "given": {
-     "district": "R-1b",
-     "accessory_buildings": 1,
-     "accessory_distances_apply": true,
-     "accessory_front_yard": 90,
-     "accessory_is_frame": false,
-     "accessory_rear_yard": 0.0,
-     "accessory_side_yard": 6
+     "use": "one_family_detached",
+     "sleeping_rooms": 3,
+     "parking_spaces": 1
     },
-    "expect": "fail",
-    "got": "pass",
-    "drafted": [
-     "R-1b.325_25a_accessory_not_in_required_front_yard",
-     "general.325_25c_frame_accessory_side_setback",
-     "general.325_25c_frame_accessory_side_setback_r1",
-     "general.325_25c_frame_accessory_rear_setback"
-    ],
-    "parts": false
+    "expect": "pass"
    },
    {
-    "hand": "R-1b.parking_other_uses",
+    "hand": "R-1b.parking_one_family",
     "given": {
-     "district": "R-1b",
-     "multiple_dwelling_units": false,
-     "parking_spaces": 1.0,
-     "sleeping_rooms": 0.0,
-     "use": "cemetery"
+     "use": "one_family_detached",
+     "sleeping_rooms": 4,
+     "parking_spaces": 1
     },
-    "expect": "needs_review",
-    "got": "pass",
-    "drafted": [
-     "R-1b.parking_by_sleeping_rooms"
-    ],
-    "parts": false
+    "expect": "fail"
+   },
+   {
+    "hand": "R-1b.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 6,
+     "parking_spaces": 3
+    },
+    "expect": "pass"
    }
   ],
+  "false_pass": [],
   "summary": {
    "examples": 48,
-   "agree": 38,
+   "agree": 35,
    "disagree": 10,
-   "undrafted": 0,
-   "false_pass": 2,
-   "agree_of_all": "38/48",
-   "agree_of_drafted": "38/48"
+   "undrafted": 3,
+   "false_pass": 0,
+   "agree_of_all": "35/48",
+   "agree_of_drafted": "35/45"
   }
  }
 }

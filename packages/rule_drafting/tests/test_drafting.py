@@ -1186,7 +1186,7 @@ def test_a_use_left_out_in_any_form_is_listed_when_nothing_else_checks_it(inputs
     assert drafter.exemption_gaps(u, {"rules": {"R-3a": [lot, coverage, other]}}, inputs.ctx) == []
 
 
-def test_a_range_the_law_sets_is_never_kept_by_one_end_only(inputs):
+def test_a_range_the_law_sets_is_never_kept_by_one_end_only(inputs, monkeypatch):
     """The R-2 keys (2026-10-21) found a real drafted false pass: §325-3B's attached dwelling is "A building containing
     three or more one-family dwellings" and "A maximum of six" may be attached; the draft checked only <= 6, so a
     two-unit building passed. It quoted only the sentence with the maximum. Code reads the rule's quotes and the
@@ -1194,6 +1194,8 @@ def test_a_range_the_law_sets_is_never_kept_by_one_end_only(inputs):
     passing example, and if the rule still passes, sends that case to review (citing the sentence) until re-drafted."""
     from rule_format.rulebook import outcome
     assert "Ranges: when the text sets a minimum or a range" in inputs.system()      # the instruction for re-drafts
+    monkeypatch.setattr(inputs.ctx, "proposed", inputs.ctx.proposed | {   # stage 1's own new measure, as when checked
+        "attached_units_in_building": {"unit": "count", "meaning": "One-family dwelling units attached in the building"}})
     allowed = inputs.ctx.allowed()
     u = unit(inputs, "325-3B:one_family_attached_dwelling")
     quote = {"file": "chapter_325_zoning_2026-10.pdf", "page": 8, "lines": [14, 14],

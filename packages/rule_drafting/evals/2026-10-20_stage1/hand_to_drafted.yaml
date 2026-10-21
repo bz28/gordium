@@ -6,6 +6,7 @@
 #   parts: pieces of an exception (§325-16C), compared with the hand rule as their own group
 #   judge: [] means nothing drafted answers it (counted undrafted), with the reason
 #   not_same: a drafted rule on the same chart cell that answers a different question, with the reason
+#   same_measures: a drafted measure that is the hand key's measure under another name (given one value)
 #   unmatched / general_unmatched: drafted rules no key question asks, with the reason
 #   known_false_passes: the real drafted false passes the grader finds, with their cause, until re-drafted
 keys:
@@ -35,13 +36,12 @@ keys:
       R-1b.stories:
         judge:
         - - R-1b.max_stories
-        - - R-1b.325_16c_extra_height_stories_not_exceeded
         reason: the chart's stories row, and §325-16C(2)'s 'stories may not be exceeded' (the same limit)
       R-1b.height:
         judge:
         - - R-1b.max_height_ft
         parts:
-        - R-1b.325_16c_extra_height_limit_10_percent
+        - R-1b.325_16c_extra_height_limit
         - R-1b.325_16c_extra_height_front_yard
         - R-1b.325_16c_extra_height_side_yards
         - R-1b.325_16c_extra_height_rear_yard
@@ -73,30 +73,26 @@ keys:
       R-1b.accessory_buildings:
         judge:
         - - R-1b.325_25a_accessory_not_in_required_front_yard
-          - general.325_25c_frame_accessory_side_setback
           - general.325_25c_frame_accessory_side_setback_r1
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-1b.parking_one_family:
-        judge:
-        - - R-1b.parking_by_sleeping_rooms
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-1b.parking_other_uses:
-        judge:
-        - - R-1b.parking_by_sleeping_rooms
-        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
-          question (wrongly where it passes a non-residential use)
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft applies its bedroom formula to every use, so it answers this question (wrongly where it passes a non-residential
+          use)), so it is listed for a person'
     unmatched:
       R-1b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
       R-1b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-1b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
-    known_false_passes:
-      R-1b.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
-        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
-        the checker shows needs review today'
-      R-1b.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
-        passes by it, where the chart sends other uses to §325-20
+      R-1b.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
+        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
+    known_false_passes: {}
   R-1a.yaml:
     district: R-1a
     rules:
@@ -123,13 +119,12 @@ keys:
       R-1a.stories:
         judge:
         - - R-1a.max_stories
-        - - R-1a.325_16c_extra_height_stories_not_exceeded
         reason: the chart's stories row, and §325-16C(2)'s 'stories may not be exceeded' (the same limit)
       R-1a.height:
         judge:
         - - R-1a.max_height_ft
         parts:
-        - R-1a.325_16c_extra_height_limit_10_percent
+        - R-1a.325_16c_extra_height_limit
         - R-1a.325_16c_extra_height_front_yard
         - R-1a.325_16c_extra_height_side_yards
         - R-1a.325_16c_extra_height_rear_yard
@@ -161,30 +156,26 @@ keys:
       R-1a.accessory_buildings:
         judge:
         - - R-1a.325_25a_accessory_not_in_required_front_yard
-          - general.325_25c_frame_accessory_side_setback
           - general.325_25c_frame_accessory_side_setback_r1
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-1a.parking_one_family:
-        judge:
-        - - R-1a.parking_by_sleeping_rooms
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-1a.parking_other_uses:
-        judge:
-        - - R-1a.parking_by_sleeping_rooms
-        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
-          question (wrongly where it passes a non-residential use)
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft applies its bedroom formula to every use, so it answers this question (wrongly where it passes a non-residential
+          use)), so it is listed for a person'
     unmatched:
       R-1a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
       R-1a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-1a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
-    known_false_passes:
-      R-1a.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
-        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
-        the checker shows needs review today'
-      R-1a.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
-        passes by it, where the chart sends other uses to §325-20
+      R-1a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
+        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
+    known_false_passes: {}
   R-2a.yaml:
     district: R-2a
     rules:
@@ -227,13 +218,12 @@ keys:
       R-2a.stories:
         judge:
         - - R-2a.max_stories
-        - - R-2a.325_16c_extra_height_stories_not_exceeded
         reason: the chart's stories row, and §325-16C(2)'s 'stories may not be exceeded' (the same limit)
       R-2a.height:
         judge:
         - - R-2a.max_height_ft
         parts:
-        - R-2a.325_16c_extra_height_limit_10_percent
+        - R-2a.325_16c_extra_height_limit
         - R-2a.325_16c_extra_height_front_yard
         - R-2a.325_16c_extra_height_side_yards
         - R-2a.325_16c_extra_height_rear_yard
@@ -265,24 +255,23 @@ keys:
       R-2a.accessory_buildings:
         judge:
         - - R-2a.325_25a_accessory_not_in_required_front_yard
-          - general.325_25c_frame_accessory_side_setback
-          - general.325_25c_frame_accessory_side_setback_r1
+          - general.325_25c_frame_accessory_side_setback_other
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-2a.parking_one_family:
-        judge:
-        - - R-2a.parking_by_sleeping_rooms
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-2a.parking_dwelling_units:
-        judge:
-        - - R-2a.parking_by_sleeping_rooms
-        reason: 'the chart''s residential parking, which the draft applies to every dwelling: the same question (the key sends
-          these uses to review)'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking, which
+          the draft applies to every dwelling: the same question (the key sends these uses to review)), so it is listed for
+          a person'
       R-2a.parking_other_uses:
-        judge:
-        - - R-2a.parking_by_sleeping_rooms
-        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
-          question (wrongly where it passes a non-residential use)
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft applies its bedroom formula to every use, so it answers this question (wrongly where it passes a non-residential
+          use)), so it is listed for a person'
       R-2a.loading:
         judge: []
         reason: 'not drafted: loading is not in stage 1'
@@ -293,14 +282,9 @@ keys:
         key rule asks it'
       R-2a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
-    known_false_passes:
-      R-2a.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
-        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
-        the checker shows needs review today'
-      R-2a.parking_dwelling_units: the draft counts a two-family or semi-detached house's parking from one unit's bedrooms;
-        the key sends dwellings with several units to review
-      R-2a.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
-        passes by it, where the chart sends other uses to §325-20
+      R-2a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
+        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
+    known_false_passes: {}
   R-2b.yaml:
     district: R-2b
     rules:
@@ -343,13 +327,12 @@ keys:
       R-2b.stories:
         judge:
         - - R-2b.max_stories
-        - - R-2b.325_16c_extra_height_stories_not_exceeded
         reason: the chart's stories row, and §325-16C(2)'s 'stories may not be exceeded' (the same limit)
       R-2b.height:
         judge:
         - - R-2b.max_height_ft
         parts:
-        - R-2b.325_16c_extra_height_limit_10_percent
+        - R-2b.325_16c_extra_height_limit
         - R-2b.325_16c_extra_height_front_yard
         - R-2b.325_16c_extra_height_side_yards
         - R-2b.325_16c_extra_height_rear_yard
@@ -381,24 +364,23 @@ keys:
       R-2b.accessory_buildings:
         judge:
         - - R-2b.325_25a_accessory_not_in_required_front_yard
-          - general.325_25c_frame_accessory_side_setback
-          - general.325_25c_frame_accessory_side_setback_r1
+          - general.325_25c_frame_accessory_side_setback_other
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-2b.parking_one_family:
-        judge:
-        - - R-2b.parking_by_sleeping_rooms
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-2b.parking_dwelling_units:
-        judge:
-        - - R-2b.parking_by_sleeping_rooms
-        reason: 'the chart''s residential parking, which the draft applies to every dwelling: the same question (the key sends
-          these uses to review)'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking, which
+          the draft applies to every dwelling: the same question (the key sends these uses to review)), so it is listed for
+          a person'
       R-2b.parking_other_uses:
-        judge:
-        - - R-2b.parking_by_sleeping_rooms
-        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
-          question (wrongly where it passes a non-residential use)
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft applies its bedroom formula to every use, so it answers this question (wrongly where it passes a non-residential
+          use)), so it is listed for a person'
       R-2b.loading:
         judge: []
         reason: 'not drafted: loading is not in stage 1'
@@ -409,14 +391,9 @@ keys:
         key rule asks it'
       R-2b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
-    known_false_passes:
-      R-2b.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
-        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
-        the checker shows needs review today'
-      R-2b.parking_dwelling_units: the draft counts a two-family or semi-detached house's parking from one unit's bedrooms;
-        the key sends dwellings with several units to review
-      R-2b.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
-        passes by it, where the chart sends other uses to §325-20
+      R-2b.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
+        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
+    known_false_passes: {}
   R-2c.yaml:
     district: R-2c
     rules:
@@ -446,7 +423,9 @@ keys:
           cell); it is listed as not checked'
       R-2c.attached_units_per_building:
         judge:
-        - - general.325_3b_one_family_attached_dwelling_max_attached_units_per_building
+        - - general.325_3b_one_family_attached_dwelling_attached_units_per_building
+        same_measures:
+          dwelling_units_in_building: attached_units_in_building
         reason: '§325-3B: an attached dwelling is a building of three to six one-family dwellings: the same question'
       R-2c.lot_area_other_use:
         judge:
@@ -479,15 +458,11 @@ keys:
       R-2c.stories:
         judge:
         - - R-2c.max_stories
-        - - R-2c.325_16c_extra_height_stories_not_exceeded
         reason: the chart's stories row, and §325-16C(2)'s 'stories may not be exceeded' (the same limit)
       R-2c.height:
         judge:
         - - R-2c.max_height_ft
-        parts:
-        - R-2c.325_16c_extra_height_limit_10_percent
-        - R-2c.325_16c_extra_height_front_yard
-        - R-2c.325_16c_extra_height_rear_yard
+        parts: []
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
           rules: parts of the answer, compared with the hand rule as their own group'
       R-2c.lot_coverage:
@@ -517,40 +492,30 @@ keys:
       R-2c.accessory_buildings:
         judge:
         - - R-2c.325_25a_accessory_not_in_required_front_yard
-          - general.325_25c_frame_accessory_side_setback
-          - general.325_25c_frame_accessory_side_setback_r1
+          - general.325_25c_frame_accessory_side_setback_other
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-2c.parking_one_family:
-        judge:
-        - - R-2c.parking_by_sleeping_rooms
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-2c.parking_dwelling_units:
-        judge:
-        - - R-2c.parking_by_sleeping_rooms
-        reason: 'the chart''s residential parking, which the draft applies to every dwelling: the same question (the key sends
-          these uses to review)'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking, which
+          the draft applies to every dwelling: the same question (the key sends these uses to review)), so it is listed for
+          a person'
       R-2c.parking_other_uses:
-        judge:
-        - - R-2c.parking_by_sleeping_rooms
-        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
-          question (wrongly where it passes a non-residential use)
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft applies its bedroom formula to every use, so it answers this question (wrongly where it passes a non-residential
+          use)), so it is listed for a person'
       R-2c.loading:
         judge: []
         reason: 'not drafted: loading is not in stage 1'
     unmatched:
       R-2c.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2c.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
-    known_false_passes:
-      R-2c.height: R-2c's §325-16C extra height has no side-yard rule (the two-number side-yard cell didn't fit a template),
-        so the drafted bonus lets a taller house through without wider side yards
-      R-2c.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
-        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
-        the checker shows needs review today'
-      R-2c.parking_dwelling_units: the draft counts a two-family or semi-detached house's parking from one unit's bedrooms;
-        the key sends dwellings with several units to review
-      R-2c.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
-        passes by it, where the chart sends other uses to §325-20
+    known_false_passes: {}
   R-3a.yaml:
     district: R-3a
     rules:
@@ -622,13 +587,12 @@ keys:
       R-3a.stories:
         judge:
         - - R-3a.max_stories
-        - - R-3a.325_16c_extra_height_stories_not_exceeded
         reason: the chart's stories row, and §325-16C(2)'s 'stories may not be exceeded' (the same limit)
       R-3a.height:
         judge:
         - - R-3a.max_height_ft
         parts:
-        - R-3a.325_16c_extra_height_limit_10_percent
+        - R-3a.325_16c_extra_height_limit
         - R-3a.325_16c_extra_height_front_yard
         - R-3a.325_16c_extra_height_side_yards
         - R-3a.325_16c_extra_height_rear_yard
@@ -660,8 +624,7 @@ keys:
       R-3a.accessory_buildings:
         judge:
         - - R-3a.325_25a_accessory_not_in_required_front_yard
-          - general.325_25c_frame_accessory_side_setback
-          - general.325_25c_frame_accessory_side_setback_r1
+          - general.325_25c_frame_accessory_side_setback_other
           - general.325_25c_frame_accessory_rear_setback
         reason: '§325-25A (not in the required front yard) and §325-25C (side and rear distances): judged together'
       R-3a.abutting_r1:
@@ -674,23 +637,23 @@ keys:
           - R-3a.325_19e_r3_abut_r1_rear_yard
         reason: '§325-19E''s conditions for R-3 lots next to R-1 land: judged together'
       R-3a.parking_one_family:
-        judge:
-        - - R-3a.parking_by_sleeping_rooms
-        reason: the chart's residential parking by bedrooms
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking by bedrooms),
+          so it is listed for a person'
       R-3a.parking_dwelling_units:
-        judge:
-        - - R-3a.parking_by_sleeping_rooms
-        reason: 'the chart''s residential parking, which the draft applies to every dwelling: the same question (the key sends
-          these uses to review)'
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart''s residential parking, which
+          the draft applies to every dwelling: the same question (the key sends these uses to review)), so it is listed for
+          a person'
       R-3a.parking_dormitory:
         judge:
         - - R-3a.parking_dormitory
         reason: the chart's dormitory parking row
       R-3a.parking_other_uses:
-        judge:
-        - - R-3a.parking_by_sleeping_rooms
-        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
-          question (wrongly where it passes a non-residential use)
+        judge: []
+        reason: 'not drafted: the re-draft (2026-10-21) was refused by the checks (the chart sends other uses to §325-20;
+          the draft applies its bedroom formula to every use, so it answers this question (wrongly where it passes a non-residential
+          use)), so it is listed for a person'
       R-3a.loading:
         judge: []
         reason: 'not drafted: loading is not in stage 1'
@@ -701,19 +664,12 @@ keys:
         key rule asks it'
       R-3a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-3a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-3a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
+        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
     known_false_passes:
-      R-3a.lot_area_other_use: a nursing home is a multiple dwelling by §325-3, so note 7 may apply (the key's open question);
-        the drafting check that sends such uses to review didn't recognise it (its chart label isn't a defined term's words)
-      R-3a.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
-        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
-        the checker shows needs review today'
-      R-3a.abutting_r1: where the lot doesn't abut R-1 land the draft says §325-19E doesn't apply, as the law says; the key's
-        flag always reviews because adjacency isn't measured
-      R-3a.parking_dwelling_units: the draft counts a two-family or semi-detached house's parking from one unit's bedrooms;
-        the key sends dwellings with several units to review
-      R-3a.parking_dormitory: the draft checks 1 space per 4 persons; the key sends dormitory parking to review
-      R-3a.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
-        passes by it, where the chart sends other uses to §325-20
+      R-3a.abutting_r1: 'where the lot doesn''t abut R-1 land the draft says §325-19E doesn''t apply, as the law says; the
+        key''s flag always reviews because adjacency isn''t measured. Not demoted: the question is with the key''s owner (2026-10-21);
+        in the product abuts_r1_district isn''t measured, so these rules show needs review'
 general_unmatched:
   general.325_16a_commercial_and_electric_towers_permit: '§325-16A height exceptions (rooftop features, towers): not in the
     keys'
