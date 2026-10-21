@@ -14,7 +14,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 from rule_export.workbook import contents
-from rule_format.rulebook import REPO, load
+from rule_format.rulebook import REPO, load, utf8_console
 
 from .report import build, output_path, tables
 
@@ -57,4 +57,5 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

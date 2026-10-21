@@ -301,7 +301,7 @@ def test_an_unverified_chart_cell_says_so_instead_of_a_blank(monkeypatch):
 
 
 def test_the_readme_says_how_chart_cells_are_cited():
-    readme = (REPO / "packages/rule_export/README.md").read_text()
+    readme = (REPO / "packages/rule_export/README.md").read_text(encoding="utf-8")
     assert "section, row and district column" in readme and "(not verified" in readme
 
 

@@ -23,7 +23,7 @@ from test_read_3dm import box as file_box  # noqa: E402
 from test_read_3dm import model, on, rect, write  # noqa: E402
 
 CODE = HERE.parent / "model_measurement"
-README = " ".join((HERE.parent / "README.md").read_text().split())     # as one line: wrapping doesn't matter
+README = " ".join((HERE.parent / "README.md").read_text(encoding="utf-8").split())     # as one line: wrapping doesn't matter
 # the blanks whose words are fixed by the code: the README must quote them as they are
 FIXED_BLANKS = {"limit": str(MAX_UNCLEAR_EDGES)}
 
@@ -264,7 +264,7 @@ def test_the_measuring_gives_reasons_only_from_the_table():
     would be missed by the README and the cases. (conftest.py also checks every reason the tests make.)"""
     found = []
     for name in ("read_3dm.py", "measure.py"):
-        tree = ast.parse((CODE / name).read_text())
+        tree = ast.parse((CODE / name).read_text(encoding="utf-8"))
         bound = {}                      # module-level names (constants, tables); a local why_... is checked itself
         for node in tree.body:
             if isinstance(node, ast.Assign):

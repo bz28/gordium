@@ -8,6 +8,7 @@ Rhino panel and the viewport message show: the rows, a short summary, the object
 import ast
 import itertools
 import math
+import os
 import re
 import tempfile
 from pathlib import Path
@@ -219,7 +220,15 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
                                      ("Margin", 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
-    wb.save(report_path)
+    # written beside it, then moved into place: a write that fails half way never leaves a broken report there
+    report_path = Path(report_path)
+    part = report_path.with_name("." + report_path.name + ".part")
+    try:
+        wb.save(part)
+        os.replace(part, report_path)
+    finally:
+        if part.exists():
+            part.unlink()
 
 
 def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None,
@@ -253,7 +262,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                "measurements": {k: {"value": m["value"], "from": working(m, model_path.name)} for k, m in measured.items()}}
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "project.yaml"
-        path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True))
+        path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True), encoding="utf-8")
         t = tables(path)              # refuses a project or rulebook that fails its checks (ValueError)
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}
@@ -282,14 +291,19 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
     v = present.view(rows, waiting, by_id, measured, facts, extras)
-    if report_path is not None:
-        _report(t, v, report_path)
+    report_error = None
+    if report_path is not None:      # a report that can't be written never takes the check's result with it
+        try:
+            _report(t, v, report_path)
+        except OSError as e:
+            report_error = f"{e.strerror or e} ({report_path})"
     env = envelope(site, _envelope_facts(site, facts), measured, rules)
     # the notice (spec G): the items that don't comply now and did at the last check the command sent ("before")
     statuses, notice_text = present.notice((extras or {}).get("before"), v["items"])
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
             "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
             "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": plan(site, env, v, measured),
+            "report_error": report_error,
             "statuses": statuses, "notice": notice_text}
 
 
@@ -451,13 +465,21 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     # (the spots themselves aren't at the new building's walls: it's drawn on their plane, and the check that follows
     # judges the spots as they are)
     drawing = facts
-    if facts.get("grade_points"):
-        drawing = {k: v for k, v in _envelope_facts(site, facts).items() if k not in ("grade_points", "grade_from")}
+    if facts.get("grade_points"):       # their plane sets the drawing level, existing ground too (the check that
+        # follows still says existing ground needs review); the points themselves never go on to measure the house
+        # drawn (they are at the lot, not at its walls: its height would be "not measurable" and nothing drawn,
+        # found in Rhino with the address lookup's ground, 2026-10-20)
+        drawing = {k: v for k, v in _envelope_facts(site, {**facts, "grade_is": "finished"}).items()
+                   if k not in ("grade_points", "grade_from")}
+        drawing["grade_is"] = facts.get("grade_is")
+        if drawing["grade_is"] is None:
+            drawing.pop("grade_is")
     no_grade = not (drawing.get("ground_is_flat") and drawing.get("grade_elevation") is not None)
     if no_grade:                        # drawn at the lot's level; the check still has no grade
         lot_z = min((p[2] for e in (site.get("lot") or {}).get("edges", []) for p in e["points"] if len(p) > 2),
                     default=0.0)
-        drawing = {**facts, "ground_is_flat": True, "grade_elevation": lot_z}
+        drawing = {**{k: v for k, v in drawing.items() if k not in ("grade_points", "grade_from")},
+                   "ground_is_flat": True, "grade_elevation": lot_z}
     existing = drawing.get("grade_is") == "existing"
     if existing:                        # drawn standing on the ground shown; the check still says it is existing
         drawing = {**drawing, "grade_is": "finished"}

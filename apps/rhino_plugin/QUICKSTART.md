@@ -6,31 +6,169 @@ Gordium checks your massing against the City of Ithaca zoning rules (R-1b, one-f
 you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 
+**Contents:** [Set up (once)](#what-you-need-once) · [Your first project](#your-first-project-step-by-step) ·
+[Test it yourself](#test-it-yourself) · [Troubleshooting](#troubleshooting) · [Getting updates](#getting-updates) ·
+[On Windows](#on-windows)
+
 ## What you need (once)
 
-1. **Rhino 8** (tested on a Mac; Windows should work but hasn't been tried).
-2. **This repository** on your computer, with its Python environment. In Terminal, from the repository folder:
+About 20 minutes on a new Mac. (On a Windows PC, follow [On Windows](#on-windows) instead.) Three words used
+below:
+
+- **Terminal**: the Mac app where you type commands. To open it: press **Cmd+Space**, type `Terminal`, press
+  **Enter**. To run a command, paste it in and press **Enter**.
+- **Repository**: Gordium's project folder, kept on GitHub (a website that stores code).
+- **Branch**: a version of that folder still being worked on. Until it is finished and merged, the Rhino part of
+  Gordium is on the branch `rhino-ui`; after that it is on `main`, and you skip the `git checkout rhino-ui` line.
+
+1. **Get access.** The Gordium repository is private. Make a free account at [github.com](https://github.com) and
+   send Ben your GitHub username. He adds you; GitHub emails you an invitation: click **Accept invitation**.
+2. **Make a GitHub token** (the password Terminal uses for GitHub; your normal password doesn't work there). On
+   github.com: your picture (top right) → **Settings** → **Developer settings** → **Personal access tokens** →
+   **Tokens (classic)** → **Generate new token (classic)**. Tick **repo**, click **Generate token**, and copy the
+   token (it starts with `ghp_`). Keep it for step 5.
+3. **Install Rhino 8.**
+4. **Install Python 3.12 or newer** (3.12, 3.13 and 3.14 all work; Python is the language Gordium's checking is
+   written in). Already have one of those? Skip to the check. Otherwise, from
+   [python.org/downloads/macos](https://www.python.org/downloads/macos/), download the newest
+   "macOS 64-bit universal2 installer", open it and click through. Check in a **new** Terminal window:
 
    ```
-   python3.12 -m venv .venv
+   python3 --version
+   ```
+
+   You should see `Python 3.12`, `3.13` or `3.14` and a number. If it shows a lower number (such as `3.9`, the
+   Mac's own old Python), type `python3.14` (or the version you installed) wherever step 6 says `python3`.
+5. **Download Gordium** into your Documents folder. This makes the folder `Documents/gordium`; every path below
+   assumes it is there.
+
+   ```
+   cd ~/Documents && git clone https://github.com/bz28/gordium.git
+   ```
+
+   It asks for your **Username** (your GitHub username) and **Password**: paste the token from step 2 (nothing
+   shows as you paste; that's normal) and press Enter. You should see `Cloning into 'gordium'...` and then
+   `done.` Your Mac remembers the token, so it won't ask again.
+   - `Repository not found` or `Authentication failed`: accept the invitation (step 1), or make the token
+     again with **repo** ticked (step 2), then run the line again.
+   - If a box says *"The git command requires the command line developer tools"*, click **Install**, wait for it
+     to finish, then run the line again. (Or run `xcode-select --install` first.)
+6. **Set up Gordium's Python.** Paste all four lines at once:
+
+   ```
+   cd ~/Documents/gordium
+   git checkout rhino-ui
+   python3 -m venv .venv
    .venv/bin/pip install -e ".[dev]"
    ```
 
-   Gordium's checking runs in this `.venv` Python, in the background; Rhino only draws what it says. No AI
-   runs while you design.
+   The second line says `Switched to a new branch 'rhino-ui'`. The last one prints a lot for a minute or two and
+   ends with `Successfully installed …` (a list that includes `gordium-0.1.0`). Gordium's checking runs in this
+   `.venv` Python (a private copy of Python inside the gordium folder), in the background; Rhino only draws what
+   it says. No AI runs while you design.
+   - `python3: command not found`, or a version below 3.12: go back to step 4.
+   - The last line ends with a red `ERROR`: check you are online and run it again. If it still fails, send Ben
+     the last 20 lines it printed.
 
 ## Install in Rhino (once)
 
-1. Open Rhino.
-2. Type this in Rhino's command line, with your repository's folder in place of `<repo>`, and press Enter:
+1. **Open Rhino 8** and start a new file.
+2. **Open the ScriptEditor:** type `ScriptEditor` in Rhino's command line and press Enter (or Tools →
+   ScriptEditor). A script window opens. This also starts Rhino's Python, which Gordium needs: in every Rhino
+   session, open the ScriptEditor once before using Gordium.
+3. **Open the installer:** in the ScriptEditor, **File → Open…**. In the file window press **Cmd+Shift+G**, paste
+   the line below, press Enter, then click **Open**:
 
    ```
-   _-RunPythonScript "<repo>/apps/rhino_plugin/install.py"
+   ~/Documents/gordium/apps/rhino_plugin/install.py
    ```
 
-   Or: **ScriptEditor** → open `apps/rhino_plugin/install.py` → **Run**.
-3. The command line says `Gordium: GordiumStart -> gordium_start.py`, and the same for `GordiumCheck`,
-   `GordiumLive`, `GordiumFacts` and `GordiumOff`. These are now Rhino commands, kept between sessions.
+   (Or click your way there: Documents → gordium → apps → rhino_plugin → `install.py`.)
+4. **Run it:** click the **Run** button (▶) in the ScriptEditor.
+5. Rhino's command line shows five lines:
+
+   ```
+   Gordium: GordiumStart -> gordium_start.py
+   Gordium: GordiumCheck -> gordium_check.py
+   Gordium: GordiumLive -> gordium_live.py
+   Gordium: GordiumFacts -> gordium_facts.py
+   Gordium: GordiumOff -> gordium_off.py
+   ```
+
+   These five are now Rhino commands, kept between sessions. You can close the ScriptEditor.
+
+Used to Rhino's command line? Instead of steps 3 and 4, type
+`_-RunPythonScript "/Users/<your Mac username>/Documents/gordium/apps/rhino_plugin/install.py"` (the full path; in
+Terminal, `echo ~` prints the `/Users/…` part).
+
+## Getting updates
+
+When Ben says there is a new version:
+
+1. In Terminal:
+
+   ```
+   cd ~/Documents/gordium && git pull
+   ```
+
+   It lists the files that changed (or says `Already up to date.`).
+2. **Quit Rhino completely (Cmd+Q) and open it again.** Rhino keeps the old Gordium loaded until it is quit;
+   closing the window is not enough. You don't need to install in Rhino again.
+3. If Gordium then says a module is missing (`No module named …`), run step 6's last line again:
+   `cd ~/Documents/gordium && .venv/bin/pip install -e ".[dev]"`.
+
+## On Windows
+
+**Windows hasn't been tested yet: please report anything that goes wrong.** The steps are the same as on a Mac,
+typed in **PowerShell** (the Windows app where you type commands: click **Start**, type `PowerShell`, press
+**Enter**) instead of Terminal.
+
+1. **Get access**, as on the Mac ([step 1](#what-you-need-once): a GitHub account; accept Ben's invitation). You
+   don't need a token on Windows: Git asks you to sign in to GitHub in your browser instead.
+2. **Install Rhino 8.**
+3. **Install Git** (the tool that downloads Gordium and its updates) from
+   [git-scm.com](https://git-scm.com/downloads/win): run the installer and keep every default.
+4. **Install Python 3.12 or newer** (3.12, 3.13 and 3.14 all work) from
+   [python.org/downloads/windows](https://www.python.org/downloads/windows/). On the installer's first screen,
+   **tick "Add python.exe to PATH"**, then click **Install Now**. Check in a new PowerShell window:
+
+   ```
+   py --version
+   ```
+
+   You should see `Python 3.12`, `3.13` or `3.14` and a number.
+5. **Download Gordium** into your Documents folder (this makes `Documents\gordium`):
+
+   ```
+   cd $HOME\Documents
+   git clone https://github.com/bz28/gordium.git
+   ```
+
+   If a window asks you to sign in to GitHub, choose **Sign in with your browser** and approve it. You should see
+   `Cloning into 'gordium'...` and then `done.`
+6. **Set up Gordium's Python.** Paste these four lines:
+
+   ```
+   cd $HOME\Documents\gordium
+   git checkout rhino-ui
+   py -m venv .venv
+   .\.venv\Scripts\pip install -e ".[dev]"
+   ```
+
+   The last one ends with `Successfully installed …` (a list that includes `gordium-0.1.0`). If it ends with a red
+   `ERROR`, send Ben the last 20 lines it printed.
+7. **Install in Rhino:** open Rhino 8, type `ScriptEditor` and press Enter. In the ScriptEditor, **File → Open…**,
+   go to Documents → gordium → apps → rhino_plugin, pick `install.py`, click **Open**, then **Run** (▶). Rhino's
+   command line shows the same five `Gordium: …` lines as [on the Mac](#install-in-rhino-once). As on the Mac,
+   open the ScriptEditor once in every Rhino session before using Gordium.
+8. **Getting updates:** in PowerShell,
+
+   ```
+   cd $HOME\Documents\gordium; git pull
+   ```
+
+   then **close Rhino completely (File → Exit) and open it again**: Rhino keeps the old Gordium loaded until it
+   is closed. If Gordium says a module is missing, run step 6's last line again from the gordium folder.
 
 ## Your first project, step by step
 
@@ -77,14 +215,18 @@ never says "complies" unless it is sure (see [What "needs review" means](#what-n
    ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, how it was
    measured and worked out, and what to change ("To comply: move the building 0'-6" farther from that lot
    line."). **Zoom to** (or a double-click) frames the item: yards in Top, height in a front elevation.
-7. **Zoning report…** writes `<your model>_gordium_report.xlsx` next to the model (in Documents if the model
-   isn't saved yet), with the same statuses as the panel.
+7. **Zoning report…** checks the model as it is now and writes the report: `<your model>_gordium_report.xlsx`,
+   next to your model file, or in your **Documents** folder (`untitled_gordium_report.xlsx`) if the model isn't
+   saved yet. It has the same results as the panel. The line above the buttons says "Report saved to …" with the
+   full path, and the report opens in your spreadsheet app. That's Excel, or Numbers (free from the App Store), or
+   any app that opens .xlsx. If none is set up, open the file yourself from that folder. If the report can't be
+   written, the same line says why.
 
 ## The other commands
 
 | Command | What it does |
 |---|---|
-| `GordiumCheck` | Check the model now: your own design, or (on an empty file) the start flow. Writes the report. |
+| `GordiumCheck` | Check the model now: your own design, or (on an empty file) the start flow. Writes the report (so does **Zoning report…** in the panel). |
 | `GordiumLive` | Turn live re-checking after each edit on or off. |
 | `GordiumFacts` | Open the start box again to change the site facts (the panel's **Edit site…** does the same). |
 | `GordiumOff` | Stop Gordium and clear its drawing. Nothing in your model is changed. |
@@ -196,6 +338,8 @@ Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading
   Control). Run `GordiumCheck` again to bring it back.
 - **"Gordium: ⚠ couldn't … (it was skipped; details in …gordium_errors.log)"**: one drawing or panel step failed
   and was skipped; the check itself is unaffected. Please send that log file.
+- **A check refuses with "â€”" in a quote** (Windows): your copy of Gordium reads files the old way. Update
+  Gordium (`git pull`) and restart Rhino. (Older versions needed `PYTHONUTF8=1` set before starting Rhino.)
 - **Rhino closed unexpectedly**: please send
   1. the newest `Rhinoceros-….ips` in `~/Library/Logs/DiagnosticReports/`;
   2. `gordium_errors.log` and `gordium_worker.log` from your temporary folder (in Terminal: `open $TMPDIR`);

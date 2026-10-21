@@ -18,6 +18,7 @@ import traceback
 from pathlib import Path
 
 from model_measurement.project import fact_problems, load_facts
+from rule_format.rulebook import utf8_console
 
 from .check import check, options, sample_site, start
 
@@ -84,4 +85,5 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

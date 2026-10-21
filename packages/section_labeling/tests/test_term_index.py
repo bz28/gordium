@@ -95,5 +95,5 @@ def test_the_review_list_reads_definitions_not_the_index(tmp_path):
     """cited_by reads definitions.yaml and uses.yaml only: the generated index is not a list of terms."""
     (tmp_path / "4_term_definitions").mkdir()
     (tmp_path / "5_zoning_rules").mkdir()
-    (tmp_path / "4_term_definitions" / term_index.INDEX_NAME).write_text("documents: []\nterms: {}\n")
+    (tmp_path / "4_term_definitions" / term_index.INDEX_NAME).write_text("documents: []\nterms: {}\n", encoding="utf-8")
     assert coverage.cited_by(tmp_path, "law.pdf", {}) == {}

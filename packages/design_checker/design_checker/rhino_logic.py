@@ -175,18 +175,48 @@ def suggested_ground(building_bottoms, lot_bottom):
 
 def clear_spot(taken, x, y, w, h):
     """Where a w × h label wanted at (x, y) (its top left, in screen pixels) covers none already drawn this frame
-    (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn; the
-    spot is then taken. If none is free within four steps, the label stays where it was wanted."""
+    (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn, never
+    moved up off the top of the view; the spot is then taken. If none is free within four steps (a tall box such as
+    the status box in the way), the label goes just below everything it would cover."""
     def hits(top):
         return any(x < a + c and a < x + w and top < b + e and b < top + h for a, b, c, e in taken)
-    top = y
+    top = None
     for k in range(9):
         trial = y + (k + 1) // 2 * (h + 3) * (1 if k % 2 else -1)
-        if not hits(trial):
+        if (trial >= 0 or trial >= y) and not hits(trial):        # never moved up off the top of the view
             top = trial
             break
+    if top is None:                   # a tall box in the way (the status box): just below whatever it covers
+        below = y
+        for _ in range(len(taken) + 1):
+            over = [b + e for a, b, c, e in taken if x < a + c and a < x + w and below < b + e and b < below + h]
+            if not over:
+                top = below
+                break
+            below = max(over) + 3
+    top = y if top is None else top
     taken.append((x, top, w, h))
     return top
+
+
+def status_box(viewport_width, rows, size=13):
+    """Where the status box goes (top right of a view): (x, y, w, h) in screen pixels, the same size
+    gordium_ui.draw_text_box draws it. Reserved before the labels, so no label is drawn under it."""
+    width = max(len(r) for r in rows) * (size * 0.6) + 22
+    height = len(rows) * (size + 9) + 10
+    return (viewport_width - width - 14, 14, width, height)
+
+
+def survey_pick(n_lots, picked, outlined):
+    """Pick survey lot lines…: (the lot to mark as surveyed, or None; what to say, or None). Enter, with lots to
+    choose from, keeps the one outlined (as the prompt says); no lot at all says how to draw one."""
+    if n_lots == 0:
+        return None, "No lot outline to pick: draw the surveyed lot as one closed polyline on the Site layer."
+    if picked:
+        return picked, None
+    if outlined:
+        return outlined, None
+    return None, "No lot is outlined yet: run Pick survey lot lines… again and click the surveyed lot outline."
 
 
 def could_be_building(kind, solid=False, faces=0):
@@ -238,7 +268,7 @@ def guard(fn, where, fallback=None):
             import traceback
             path = ERROR_LOG or os.path.join(tempfile.gettempdir(), "gordium_errors.log")
             try:
-                with open(path, "a") as log:
+                with open(path, "a", encoding="utf-8") as log:
                     log.write(time.strftime("%Y-%m-%d %H:%M:%S") + " " + where + "\n" + traceback.format_exc() + "\n")
                 if REPORT is not None and where not in _reported:
                     _reported.add(where)
@@ -320,6 +350,23 @@ def parse_feet(text):
     if m:
         return float(m.group(1)) / 12
     return None
+
+
+def report_message(path, written, error=None, opened=True, open_error=None, stale=False):
+    """What the panel says after a report was asked for (Zoning report… or GordiumCheck): never nothing (Ben's
+    test, 2026-10-20: the button did nothing after GordiumStart, because only GordiumCheck wrote the report).
+    `stale`: an earlier report is still at that path, so it is said to be out of date."""
+    if not written:
+        return ("Zoning report not saved: " + (error or "the check could not run") + "." +
+                (" The report already at " + path + " is from an earlier check: out of date." if stale else ""))
+    if opened:
+        return "Report saved to " + path + " (opened)."
+    return ("Report saved to " + path + ". It couldn't be opened here" + (": " + open_error if open_error else "") +
+            "; open it with Excel, Numbers or any spreadsheet app.")
+
+
+BUSY = "A check is running: try again in a moment."
+NO_DOCUMENT = "Open a Rhino model first."
 
 
 BUFFER_UNREAD = "Design buffer not understood: type it like 1'-6\" or 6\""

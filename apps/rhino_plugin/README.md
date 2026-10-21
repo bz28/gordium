@@ -6,9 +6,10 @@ saved next to the model. With live mode on (the default), it re-checks after eve
 
 ## Set up (once)
 
-1. Rhino 8 (tested on Mac; Windows should work but is untested) and this repository with its `.venv` (`python3.12 -m venv .venv && .venv/bin/pip install -e .`).
-2. In Rhino: `RunPythonScript`, pick `apps/rhino_plugin/install.py`. That adds the commands `GordiumCheck`,
-   `GordiumLive`, `GordiumFacts` and `GordiumOff`.
+Step by step, from a new Mac or Windows PC (untested): [QUICKSTART.md](QUICKSTART.md#what-you-need-once) (access, Python 3.12 or newer, the
+repository in `~/Documents/gordium` with its `.venv`, then `install.py` run once in Rhino's ScriptEditor, which adds
+`GordiumStart`, `GordiumCheck`, `GordiumLive`, `GordiumFacts` and `GordiumOff`). After `git pull`, quit and reopen
+Rhino: it keeps the old code loaded until then.
 
 ## What happens
 

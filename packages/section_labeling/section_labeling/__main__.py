@@ -24,7 +24,7 @@ from pathlib import Path
 import yaml
 
 from rule_format.labels import load_pieces
-from rule_format.rulebook import REPO, Context, jurisdictions, load, read_jsonl
+from rule_format.rulebook import REPO, Context, jurisdictions, load, read_jsonl, utf8_console
 
 from . import coverage, labeler, term_index
 from .budget import Budget, BudgetExceeded
@@ -307,4 +307,5 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))
