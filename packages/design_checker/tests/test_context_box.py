@@ -439,7 +439,8 @@ def test_a_failed_footprint_fetch_is_not_on_screen_so_the_next_tick_fetches_agai
 def test_a_fetch_that_worked_but_found_no_footprints_is_not_fetched_again_and_a_failed_one_is():
     """Review round 8: "on screen" (something to draw) also decided "fetch again", so a fetch that worked and found no
     footprints was fetched again (a wait of up to 20 s and a redraw) on every Draw and tick. needs_refetch is its
-    own question: nothing held for this document, or a live-only layer whose last fetch failed."""
+    own question: nothing held for this document, or any layer whose last fetch failed (stored ones too since
+    round 9: see the next test)."""
     frame = looked_up()["writes"]["frame"]
 
     class NoFootprints(Down):
