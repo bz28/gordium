@@ -684,6 +684,8 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
         counts.append(int(got["value"]))
     counted = max(counts) if counts else None
     if not plain:
+        if stated is not None and stated < counted:     # fewer than the floors drawn: refused, never a reading
+            return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
         readings = [("Gordium's floor blocks" + (", the most on any part" if len(counts) > 1 else ""), counted, {})]
         if stated is not None:
             readings.append(("as stated by the architect", stated, {}))
