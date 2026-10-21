@@ -20,6 +20,7 @@ def on_layer(full_path, layer):
 
 HOLDING_LAYER = "Gordium::Replaced (Cancel restores)"   # objects a start box replaced, until Draw (BoxSession)
 HELD_FROM = "gordium_held_from"                          # on each held object: the layer it came from
+ADDED_BY = "gordium_added"                               # on each object a start box drew: its session, until Draw
 
 
 def classify(full_path, kind, holds_building=False):
@@ -705,14 +706,20 @@ class Cancelled(Exception):
 
 class BoxSession:
     def __init__(self, table):
+        import uuid
         self.table = table
+        self.token = uuid.uuid4().hex                  # marks what this session draws (crash recovery deletes it)
         self.added, self.held = [], []
         self.layers_before = set(table.layer_names())
         self.views = table.save_views()
 
     def add(self, ids):
-        """Objects this session drew (Cancel deletes them)."""
-        self.added += [i for i in ids if i]
+        """Objects this session drew: Cancel deletes them, and so does crash recovery (each carries the session's
+        mark in the model until Draw)."""
+        for i in ids:
+            if i:
+                self.table.mark_added(i, self.token)
+                self.added.append(i)
 
     def hold(self, object_id):
         """Take an object out of the model for this session: one it drew is simply deleted; any other is held (Cancel
@@ -741,22 +748,36 @@ class BoxSession:
         self.added, self.held = [], []
 
     def commit(self):
-        """Draw: what was replaced goes for good."""
+        """Draw: what was replaced goes for good, and what was drawn is kept (its session mark cleared)."""
         for i, _ in self.held:
             if self.table.exists(i):
                 self.table.delete(i)
+        for i in self.added:
+            if self.table.exists(i):
+                self.table.clear_mark(i)
         self.table.remove_layer_if_empty(HOLDING_LAYER)
         self.added, self.held = [], []
 
 
 def recover_held(table):
-    """Objects still held from a box session Rhino didn't finish (it closed): each back on the layer it came from.
-    How many."""
+    """A box session Rhino didn't finish (it closed): what it drew deleted, what it held back on the layer it came
+    from, so the model is as it was before that box opened. How many objects were put right."""
+    added = list(table.added_objects())
+    for i in added:
+        table.delete(i)
     held = list(table.held_objects())
     for i, layer in held:
         table.release(i, layer)
     table.remove_layer_if_empty(HOLDING_LAYER)
-    return len(held)
+    return len(added) + len(held)
+
+
+def draw_then_commit(session, save):
+    """Draw: everything that can fail first (the facts, the box's choices, the sources: `save`), the session's
+    commit last, so a failure leaves the session to be rolled back (run_box) with nothing lost."""
+    result = save()
+    session.commit()
+    return result
 
 
 def run_box(session, loop):

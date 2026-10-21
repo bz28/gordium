@@ -1006,6 +1006,24 @@ class RhinoTable:
     def release(self, object_id, layer_path):
         self._move(object_id, layer_path, None)
 
+    def mark_added(self, object_id, token):
+        self._mark(object_id, logic.ADDED_BY, token)
+
+    def clear_mark(self, object_id):
+        self._mark(object_id, logic.ADDED_BY, None)
+
+    def _mark(self, object_id, key, value):
+        o = _find(self.doc, object_id)
+        if o is not None:
+            attrs = o.Attributes.Duplicate()
+            attrs.SetUserString(key, value)
+            self.doc.Objects.ModifyAttributes(o, attrs, True)
+
+    def added_objects(self):
+        every = Rhino.DocObjects.ObjectEnumeratorSettings()
+        every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True
+        return [str(o.Id) for o in self.doc.Objects.GetObjectList(every) if o.Attributes.GetUserString(logic.ADDED_BY)]
+
     def held_objects(self):
         index = self.doc.Layers.FindByFullPath(logic.HOLDING_LAYER, -1)
         if index < 0:
@@ -1299,14 +1317,17 @@ def _lookup_done(doc, facts, saved_ui, session):
 def _drawn(doc, facts, state, saved_ui, session=None):
     """Draw: the facts for the checker, and every fact's source and confirmation saved in the .3dm; what the box
     replaced goes for good."""
-    if session is not None:
-        session.commit()
-    facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
-    _save_ui_state(doc, saved_ui)
-    sources = fact_sources(doc)            # what the box doesn't set (the ground marking) is kept
-    sources.update(logic.fact_sources(state, time.strftime("%Y-%m-%d"), confirmed=True))
-    doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
-    return facts
+    def save():
+        out, ui_state = _apply_box(doc, facts, state, saved_ui)
+        _save_ui_state(doc, ui_state)
+        sources = fact_sources(doc)        # what the box doesn't set (the ground marking) is kept
+        sources.update(logic.fact_sources(state, time.strftime("%Y-%m-%d"), confirmed=True))
+        doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
+        return out
+
+    if session is None:
+        return save()
+    return logic.draw_then_commit(session, save)     # the commit last: a failure before it is rolled back
 
 
 def hide_massing(hidden):

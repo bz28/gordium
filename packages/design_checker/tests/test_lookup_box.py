@@ -507,6 +507,15 @@ class FakeTable:
     def held_objects(self):
         return [(i, o["held_from"]) for i, o in self.objects.items() if o["layer"] == logic.HOLDING_LAYER]
 
+    def mark_added(self, i, token):
+        self.objects[i]["added_by"] = token
+
+    def clear_mark(self, i):
+        self.objects[i].pop("added_by", None)
+
+    def added_objects(self):
+        return [i for i, o in self.objects.items() if o.get("added_by")]
+
     def layer_names(self):
         return sorted(self.layers)
 
@@ -681,3 +690,52 @@ def test_the_architects_street_line_keeps_no_looked_up_name():
 def test_the_overlays_gap_says_what_the_lookup_does():
     text = (REPO / "regulations/jurisdictions/new_york/ithaca_city/not_checked_yet.yaml").read_text(encoding="utf-8")
     assert "doesn't look them up" not in text and "shows the ones it finds" in text
+
+
+
+# ---- review round 3 of PR #19 ------------------------------------------------------------------------------------
+
+def test_crash_recovery_leaves_the_model_as_it_was_before_the_box():
+    """Round 3: recovery put back what was held but left what the session drew (the looked-up lot and its USGS spot
+    grades carried no mark), so grades mixed after a crash. Each drawn object carries the session's mark until
+    Draw; recovery deletes those and releases the held."""
+    table, facts, saved = sample_model()
+    table._new("Gordium::Grade", "point")                       # an architect's spot grade
+    before = table.snapshot()
+    session = logic.BoxSession(table)
+    logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    session.add([table._new("Gordium::Grade", "point")])         # one placed in the box too
+    # Rhino closes here: no rollback, no commit. The next GordiumStart:
+    assert logic.recover_held(table) > 0
+    assert table.snapshot() == before
+
+
+def test_draw_keeps_what_it_drew_unmarked():
+    table, facts, saved = sample_model()
+    session = logic.BoxSession(table)
+    f, _, _ = logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    session.commit()
+    assert table.added_objects() == [] and logic.recover_held(table) == 0 and f["lot_id"] in table.objects
+
+
+def test_draw_commits_last_so_a_failure_before_it_is_rolled_back():
+    """Round 3: Draw committed (deleting what was held) before the facts and sources were saved; a failure there
+    lost the replaced lot for good. The save runs first; if it raises, nothing is committed and run_box rolls back."""
+    table, facts, saved = sample_model()
+    before = table.snapshot()
+    session = logic.BoxSession(table)
+
+    def loop():
+        logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+
+        def save():
+            raise OSError("the file couldn't be written")
+        return logic.draw_then_commit(session, save)
+
+    with pytest.raises(OSError):
+        logic.run_box(session, loop)
+    assert table.snapshot() == before
+    calls = []
+    s2 = logic.BoxSession(FakeTable({}))
+    s2.commit = lambda: calls.append("commit")
+    assert logic.draw_then_commit(s2, lambda: calls.append("save") or "facts") == "facts" and calls == ["save", "commit"]

@@ -131,6 +131,13 @@ try:
                           "lots": len(g._lot_candidates(doc))}
         session.rollback()
         log["after_B_cancel"] = {"objects_same": objects(doc) == before}
+        # Rhino "closes" mid-session (no Cancel, no Draw): the next GordiumStart's recovery puts the model back
+        session = g.logic.BoxSession(g.RhinoTable(doc))
+        look_up(g, doc, session, facts, g._ui_state(doc), "106 Ithaca Rd, Ithaca, NY 14850", "106_ithaca_rd")
+        g._recover(doc)
+        log["after_crash_recovery"] = {"objects_same": objects(doc) == before,
+                                       "sample_on_site": doc.Layers[g._find(doc, sample_lot).Attributes.LayerIndex]
+                                       .FullPath == g.LAYERS["lot"]}
         # the guide case, from the sample
         session = g.logic.BoxSession(g.RhinoTable(doc))
         fc, sc_ui = look_up(g, doc, session, facts, g._ui_state(doc), "106 Ithaca Rd, Ithaca, NY 14850",
@@ -149,7 +156,8 @@ try:
         log["ok"] = (log["after_cancel"]["objects_same"] and log["after_cancel"]["sample_on_site"] and
                      log["after_cancel"]["layers_same"] and log["after_A"]["sample_held"] and
                      log["after_A"]["lots"] == 1 and log["after_B"]["spot_grades"] == 6 and
-                     log["after_B_cancel"]["objects_same"] and log["guide"]["lot_id"] is None and
+                     log["after_B_cancel"]["objects_same"] and log["after_crash_recovery"]["objects_same"] and
+                     log["guide"]["lot_id"] is None and
                      log["guide"]["guide_shown"])
     elif phase == "box":
         g = sys.modules["gordium_rhino"]
