@@ -592,7 +592,8 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     """STORY of one building made of parts (the main building first; with #18, the parts touching it, §325-18A),
     by one rule: stories are counted only from Gordium's floor blocks. A part that isn't floor blocks (one plain
     solid, or plain solids stacked) is never counted from its height or its blocks: the count typed stands as the
-    architect's statement for the whole building, and only if it is at least the floors counted on any part; else,
+    architect's statement for the whole building, and only if it is at least the floors counted on any part and
+    the solids stacked in any plain part (each might be a story); else,
     or with none typed, needs review. A part below the ground is the §325-3 basement question: needs review,
     whatever was typed. With only floor blocks, the most counted on any part, the count typed a reading beside it
     (a question if they disagree). Each reason says what is drawn."""
@@ -620,6 +621,12 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
         if len(parts) == 1:             # one building drawn as plain solids: draw its floors, or say how many
             return _missing("stories", stop("no_stories"))
         return _missing("stories", stop("stories_plain_part", what=", ".join(b["id"] for b in plain)))
+    for stack in (b for b in plain if b.get("parts")):
+        # plain solids stacked one on another are a plain part too: each block might be a story, so a count typed
+        # below the blocks is a question; never one that must equal them (the count is the whole building's)
+        if stated < len(stack["parts"]):
+            return _missing("stories", stop("stories_below_blocks", typed=f"{stated:g}", what=stack["id"],
+                                            blocks=len(stack["parts"])))
     if counted is not None and stated < counted:
         return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
     if len(parts) == 1:

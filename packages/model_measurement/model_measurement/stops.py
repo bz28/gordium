@@ -55,6 +55,8 @@ STOPS = {
                           "counted: enter the number of stories of the whole building",
     "stories_below_floors": "the stories typed ({typed}) are fewer than the floor blocks drawn ({drawn}): check the "
                             "count, or the floors",
+    "stories_below_blocks": "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), "
+                            "which may each be a story: check the count",
     "basement_part": "part of the building ({what}) is below the ground: whether a basement or cellar counts as a "
                      "story (§325-3) isn't measured yet: an open question for the architects",
     "floors_misaligned": "floors misaligned: a floor block sticks out past the one below it (one floor moved on its "

@@ -840,12 +840,13 @@ def _drawing(rnd):
         for i, bid in enumerate(ids):
             blocks.append(floor(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid) if marked else
                           box(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid))
-        stacks.append({"ids": ids, "countable": marked, "floors": high, "tall": not marked, "below": False})
+        stacks.append({"ids": ids, "countable": marked, "floors": high, "tall": not marked, "below": False,
+                       "blocks": 0 if marked else high})          # plain solids stacked: each may be a story
     if rnd.random() < 0.35:            # a plain wing behind the first stack: a porch slab, a tall wing, a walk-out
         z0, z1 = rnd.choice([(0, 3), (0, 6), (0, 7), (0, 8), (0, 12), (0, 32), (-10, 10.5)])
         blocks.append(box(5, 60, 17, 70, z0, z1, id="wing"))
         stacks.append({"ids": ["wing"], "countable": False, "floors": 0, "tall": z1 - z0 >= 7,   # R305.1: 7 ft
-                       "below": z0 < 0})
+                       "below": z0 < 0, "blocks": 0})
     if rnd.random() < 0.2:
         rnd.choice(blocks)["id"] = rnd.choice(blocks)["id"]
     pick = rnd.choice([None, "stale"] + [b["id"] for b in blocks])
@@ -874,6 +875,7 @@ def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
                 most = max((s["floors"] for s in members if s["countable"]), default=None)
                 if most is None or any(s["tall"] for s in members):   # stories not all drawn: only the count typed
                     assert typed is not None and m["value"] == typed >= (most or 0), (seed, stacks, pick, typed, m)
+                    assert all(typed >= s["blocks"] for s in members), (seed, stacks, pick, typed, m)
                 else:
                     assert m["value"] >= most, (seed, stacks, pick, typed, m)
 
@@ -985,7 +987,9 @@ def test_a_wing_of_two_stacked_plain_solids_beside_three_floor_blocks_takes_only
     wing = [box(35, 25, 45, 45, 0, 20, id="w0"), box(35, 25, 45, 45, 20, 40, id="w1")]
     m = measure(site(RECT, *floors, *wing), {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
     assert m["value"] == expect, m
-    if expect is None:
+    if typed == 1:                      # fewer than the wing's two stacked solids, each maybe a story
+        assert "fewer than the solids stacked on w0 (2)" in m["reason"]
+    elif expect is None:
         assert "fewer than the floor blocks drawn (3)" in m["reason"]
     else:
         assert "for the whole building" in m["how"] or any("for the whole building" in r["reading"] for r in m["readings"])
