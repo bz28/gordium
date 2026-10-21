@@ -176,6 +176,8 @@ CASES = {
     "stories_below_floors": _plain(stories=1, main_building="floor 1", buildings=[
         floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
         box(35, 25, 45, 45, 0, 32, id="wing")]),
+    "stories_below_blocks": _plain(stories=1, buildings=[box(10, 25, 35, 65, 0, 17, id="podium"),
+                                                         box(10, 25, 35, 65, 17, 34, id="upper")]),
     "basement_part": _plain(main_building="floor 1", buildings=[
         floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35, 25, 45, 45, -10, 10.5, id="wing")]),
     "floors_misaligned": _plain(stories=None, buildings=[floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
