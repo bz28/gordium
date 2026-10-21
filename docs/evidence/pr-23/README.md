@@ -23,10 +23,11 @@ at 0e88250.
 | 5 A saved file keeps no live-only source | No footprint (store: none) in the saved .3dm |
 | 6 A second address clears the first neighbourhood | Edit site…, 109 Ithaca Rd: the frame changed, nothing of 106's left (109 has no recorded neighbourhood, so none is drawn and Gordium says why) |
 
-## The docked panel's tick, clicked (2526115, the MVP panel merged in)
+## The docked panel's tick, clicked (64d1425: the MVP panel merged in, the tick kept per file)
 
 `apps/rhino_plugin/tests/context_tick_in_rhino.py` (written by the Rhino job) clicks the docked panel's own "Show
-neighbourhood" checkbox (its handler runs as a click's does): **9 of 9 claims true** (`context_tick_results.json`).
+neighbourhood" checkbox (its handler runs as a click's does): **10 of 10 claims true** at 64d1425
+(`context_tick_results.json`). The first run, at 2526115 before the tick was kept per file, was 9 of 9.
 
 | Claim | Result |
 |---|---|
@@ -36,10 +37,10 @@ neighbourhood" checkbox (its handler runs as a click's does): **9 of 9 claims tr
 | 3 A rebuilt panel starts the tick as last set | Off after unticking |
 | 4 While a start box is open the tick is greyed, and a change to it does nothing | Greyed; the change said "Finish or cancel the open start box first." and left the layers as they were |
 | 4 After the box closes the tick is back on | Enabled, layers visible |
+| 5 The tick is kept in the file: a saved copy has it off | The saved .3dm's Gordium settings: `show_context` false |
 
-Since that run the tick is kept per file, in the document's Gordium settings like Show on-screen labels (it was per
-Rhino session). The script now reads the setting from the document and has a claim 5, "the tick is kept in the file:
-a saved copy has it off"; the Rhino job re-runs it.
+The tick is kept per file, in the document's Gordium settings like Show on-screen labels (it was per Rhino session
+until 64d1425); the script reads the setting from the document.
 
 | File | What it shows |
 |---|---|

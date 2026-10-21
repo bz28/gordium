@@ -28,6 +28,13 @@
     false
    ]
   },
+  "5 the tick is kept in the file: a saved copy has it off": {
+   "ok": true,
+   "detail": {
+    "show_context": false,
+    "show_labels": null
+   }
+  },
   "3 a rebuilt panel starts the tick as last set (off)": {
    "ok": true,
    "detail": [
@@ -92,6 +99,10 @@
   false,
   false
  ],
+ "saved_ui": {
+  "show_context": false,
+  "show_labels": null
+ },
  "after_on": [
   true,
   true,
