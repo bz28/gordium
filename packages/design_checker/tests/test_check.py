@@ -517,7 +517,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
     rows = logic.box_rows(_box())
     assert [r["key"] for r in rows] == ["address", "zone", "use", "lot", "street", "ground"]
     by = {r["key"]: r for r in rows}
-    assert by["address"]["actions"] == [("lookup", "Look up (coming soon)", False)]      # lookup: a later PR
+    assert by["address"]["actions"] == [("lookup", "Look up", True)]          # the address lookup (PR #19)
     assert by["zone"]["text"] == "R-1b · entered by you"
     assert by["lot"]["text"] == "6,570 sf · from the tax map (±2 ft, approximate)"
     assert by["lot"]["actions"] == [("lot", "Use my survey…", True)]
@@ -625,7 +625,7 @@ def test_finished_ground_and_existing_spot_grades_are_never_mixed():
 
 def test_the_confirm_tick_survives_a_pick_and_ground_marking_can_be_undone():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    loop = rhino.split("def confirm(", 1)[1].split("\ndef ", 1)[0]
+    loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0]
     assert "dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)" in loop
     assert '"district_confirmed"' in loop.split("ticked = {k: state[k]", 1)[1].split(")", 1)[0]
     assert "def not_the_ground(" in rhino and '"not_ground": not_the_ground' in rhino
@@ -651,7 +651,7 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     check_facts = rhino.split("def check_facts(", 1)[1].split("\ndef ", 1)[0]
     assert "_ui_state" not in check_facts.split("elif", 1)[0]                   # the points from the facts alone
-    loop = rhino.split("def confirm(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
+    loop = rhino.split("def _box_loop(", 1)[1].split("\ndef ", 1)[0].split("while True:", 1)[1]
     assert "_save_ui_state" not in loop                                         # Cancel saves nothing
     drawn = rhino.split("def _drawn(", 1)[1].split("\ndef ", 1)[0]
     assert "sources = fact_sources(doc)" in drawn and "sources.update(" in drawn  # the ground marking is kept
@@ -766,7 +766,7 @@ def test_the_design_buffer_is_set_when_starting_not_in_edit_site():
 def test_frame_site_frames_the_lot_and_house_not_the_whole_file():
     """Review round 7: Zoom All Extents undid the per-view framing and took in anything far away in the file."""
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    start = rhino.index("def frame_site")
+    start = rhino.index("def frame_site(doc, facts):")
     body = rhino[start:start + 1800]
     assert "_Extents" not in body and '"_-Zoom _All _Selected"' in body and "doc.Objects.Select(i)" in body
 
@@ -782,7 +782,7 @@ def test_spec_item_ids_are_unique():
 def _panel_actions(rhino):
     """The functions the panel's buttons call (gordium_rhino._actions), by name."""
     import re
-    body = rhino[rhino.index("def _actions():"):rhino.index("\ndef panel():")]
+    body = rhino[rhino.index("def PANEL_ACTIONS():"):rhino.index("\ndef _box_open(")]
     return sorted(set(re.findall(r'"\w+": (\w+)[,}]', body)) - {"ui"})
 
 
@@ -905,3 +905,14 @@ def test_a_starting_house_is_drawn_on_existing_spot_grades_placed_at_the_lot(fac
                         "grade_from": "spot", "grade_is": "existing", "grade_points": spots})
     assert len(got["floors"]) == 3 and any("drawn on the ground as it is" in n for n in got["notes"])
     assert got["floors"][0]["base"] == pytest.approx(2.5, abs=0.01)          # the spots' plane: their average
+
+
+
+def test_no_backup_or_copy_files_are_committed():
+    """Verification round of PR #19: an 870-line rhino_logic.py.bak had been committed (left by a revert check)."""
+    import re
+    import subprocess
+    files = subprocess.run(["git", "ls-files", "packages", "apps"], cwd=REPO, capture_output=True, text=True,
+                           encoding="utf-8", check=True).stdout.splitlines()
+    junk = [f for f in files if re.search(r"(\.bak|\.orig|\.swp|~|[ _]copy|_backup|\.backup)(\.\w+)?$", f, re.I)]
+    assert files and junk == [], junk

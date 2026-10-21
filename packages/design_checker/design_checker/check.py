@@ -456,6 +456,7 @@ def _ring(polygon) -> list:
 
 
 YARD_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
+SHORTEST_LABELLED_EDGE = 1.0          # ft: lot edges shorter than this get no length label in plan
 
 
 def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
@@ -471,6 +472,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
     for e in lot.get("edges") or []:
         a, b = e["points"][0], e["points"][-1]
         length = sum(math.dist(p[:2], q[:2]) for p, q in zip(e["points"], e["points"][1:]))
+        if length < SHORTEST_LABELLED_EDGE:   # a tax-map sliver (0'-1 5/8"): no label of its own, it only clutters
+            continue
         edges.append({"points": [list(a[:2]), list(b[:2])], "length": present.feet_inches(length)})
     yards = [{"points": i["points"], "status": i["status"], "label": f"{i['mark']} {i['name']} {i['proposed']}" +
               ("" if i["status"] != present.REVIEW or "tax map" not in (i.get("reason") or "") else " (approx.)")}

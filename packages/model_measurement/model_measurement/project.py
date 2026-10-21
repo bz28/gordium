@@ -16,8 +16,11 @@ from .read_3dm import read_site
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
-               "eaves_confirmed"}
+               "eaves_confirmed", "unsettled"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
+# Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
+# measured from one of them needs review (never a false pass on a lot that may be the wrong one).
+UNSETTLED = ("lot", "street", "ground")
 
 
 def _number(x) -> bool:
@@ -50,6 +53,10 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("grade_from must be spot, terrain or finished_spots")
     if facts.get("grade_is") not in (None, "finished", "existing"):
         problems.append("grade_is must be finished or existing")
+    unsettled = facts.get("unsettled")
+    if unsettled is not None and not (isinstance(unsettled, dict) and all(
+            k in UNSETTLED and isinstance(v, str) and v for k, v in unsettled.items())):
+        problems.append("unsettled must map lot, street or ground to the reason it needs review")
     for k in ("street_line", "address_street_line"):
         street = facts.get(k)
         if street is not None and not (isinstance(street, list) and street and all(

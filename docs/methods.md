@@ -177,9 +177,41 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
 - **Tested by:** the index lists §325-18B for "yard" and §325-16A/B/C for height; a synonym alone is found; every definition has a synonyms entry; CI rebuilds the index and fails on any difference. The check refuses each kind of missing or overclaimed research (one test each), every committed open question has real research (none pending), and every finding's quote is verified on its page.
 - **Improve:** grow the synonym list from each review's misses; research each new drafted question before it reaches the questions page.
 
-## 18. What's not decided or not built
+## 18. Looking up a site from its address (code, `packages/site_lookup`)
+
+- **What:** `python -m site_lookup "<address>"` turns an address into start-box facts, each
+  exactly `{value, source, confirmed_by, date}` (source "from tax map" for the lot, "suggested by Gordium"
+  otherwise), with a status beside each (suggested / needs review / ask) and the service it came from. EPSG:2261
+  is US survey feet; lengths are converted to Gordium's international feet (× 1200/3937 ÷ 0.3048 = 1.000002).
+  No AI.
+- **How:** the NYS Geocoder's address point (the County's address points as a cross-check) → the tax parcel
+  containing it, outline asked for in EPSG:2261 (NY State Plane, feet) and measured by our own code (never the
+  service's area field) → the parcel's SWIS code must be the City of Ithaca's (500700), otherwise refused → lot
+  lines that run along a street centerline (within 30°) and sit within half the right-of-way + 10 ft of it are
+  street lines; two streets is a corner lot, and Gordium asks for the front → USGS 3DEP elevations at the
+  corners (today's ground, an estimate) → the City zoning map's zone under the lot, always a suggestion, with
+  rezonings the online map may not show yet (`amendments.yaml`: a padded box around each ordinance's map
+  area; Ord. 2025-12 Southside from the May 2026 Southside Form District Map) flagged for lots touching them,
+  until someone has checked the online map shows the rezoning (`map_shows_since`, set by hand; the map's own
+  edit date never clears one, since any edit moves it).
+- **Never a false pass:** two zones, two streets, a mismatched street, a far County point, an overlay, a
+  failing service, or incomplete evidence (missing elevations, unknown road widths, a match with no parcel,
+  City flags unavailable): each becomes ask or needs review with a plain reason, never a silent choice. The
+  strongest status wins (ask > needs review > suggested).
+- **Licensing:** City and County layers are used live and never stored; a project's snapshot keeps each fact
+  value, reason and note only as far as the strictest source it was worked out from allows (`store` in
+  `endpoints.yaml`), plus each source's URL, date and SHA-256. Test fixtures hold State and USGS answers only; the City stand-ins are synthetic.
+- **Tested by:** recorded State and USGS answers for 106, 109 and 96 Ithaca Rd, a Town of Ithaca address and
+  an unknown one, with synthetic stand-in City layers (106: parcel 84.-2-6, 7,033.7 sf, 75.8
+  ft on Ithaca Rd, interior, ground 735–749 ft, R-1b suggested; 109 and 96: corner lots, ask). A live check
+  runs with `GORDIUM_LIVE=1`.
+- **Weakness:** the tax map is approximate (about ±2 ft); the Southside area is a padded box, not the
+  districts' own outline, and an amendment stays flagged until someone checks the online map shows it
+  (`map_shows_since`); overlays are found but not checked.
+
+## 19. What's not decided or not built
 
 - How model objects are identified beyond the layers (names, or asking every time).
-- Site facts: zone lookup from the address, lot lines and area (survey vs city records), ground levels.
+- Site facts: wiring the address lookup into the start box; survey vs city records for the lot lines.
 - Measuring curved walls and roofs, sloped ground, and stories from floors in the model.
 - Human approval: deferred (rules stay drafts, checked by code); the approval fields stay in the formats, unused.
