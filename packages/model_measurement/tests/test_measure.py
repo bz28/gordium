@@ -121,7 +121,7 @@ def test_a_street_line_that_isnt_a_lot_line():
 def test_a_building_outside_the_lot():
     m = measure(site(RECT, box(40, 25, 65, 65)), FACTS)
     for name in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_area"):
-        assert m[name]["value"] is None and m[name]["reason"] == "a building isn't inside the lot"
+        assert m[name]["value"] is None and m[name]["reason"].startswith("a building isn't inside the lot: ")
     assert m["building_height"]["value"] == 30
 
 
@@ -717,3 +717,18 @@ def test_the_faces_open_to_the_sky_are_found_point_by_point():
                     expect.append(f)
                     break
         assert [id(f) for f in _open_to_the_sky(faces)] == [id(f) for f in expect]
+
+
+
+def test_a_building_outside_the_lot_is_named_and_waits_only_what_it_touches():
+    """Architect review in Rhino (P2-12): "a building isn't inside the lot" named none, and blanked every yard even
+    when the main building was inside. It names the building; coverage (every building) waits; the yards are
+    measured from a main building inside the lot, the other solid in their "any solid" reading."""
+    m = measure(site(RECT, box(10, 25, 35, 65, id="house"), box(45, 70, 60, 80, id="shed")),
+                {**FACTS, "main_building": "house"})
+    assert m["building_area"]["value"] is None and m["building_area"]["reason"] == "a building isn't inside the lot: 1 other building"
+    assert m["building_area"]["objects"] == ["shed"]
+    for name in ("front_yard", "side_yard_smaller", "rear_yard"):
+        assert m[name]["value"] is not None or m[name]["readings"], (name, m[name])
+    m = measure(site(RECT, box(40, 25, 65, 65, id="house")), FACTS)
+    assert m["front_yard"]["reason"] == "a building isn't inside the lot: the building"
