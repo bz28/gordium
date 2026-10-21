@@ -83,6 +83,7 @@ try:
             g.ui.show(p, view)
             p["form"].Show()
             forms.append(p["form"])
+            sc.sticky["gordium_width_forms"] = forms        # at once: a run that fails later still closes them
             tree = p["tree"]
             Rhino.RhinoApp.Wait()                                  # let it lay out and paint once
             painted = p.get("painted") or {}
@@ -137,8 +138,12 @@ try:
         sc.sticky["gordium_width_forms"] = forms
         log["ok"] = all(c["ok"] for c in log["claims"].values())
     else:
+        import Eto.Forms as ef
         for f in sc.sticky.pop("gordium_width_forms", None) or []:
             f.Close()
+        for w in list(ef.Application.Instance.Windows):   # and any left by an earlier run (by its title)
+            if w.Title in ("Gordium 380", "Gordium 540"):
+                w.Close()
         g = sys.modules.get("gordium_rhino")
         if g is not None:
             g.off()

@@ -611,6 +611,9 @@ def lot_source(surveyed):
     return "your survey" if surveyed else "the tax map (±2 ft, approximate)"
 
 
+NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+
+
 def lot_text(area, surveyed):
     """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"."""
     return lot_size(area) + " · from " + lot_source(surveyed)
@@ -640,9 +643,12 @@ def box_rows(state, flat=None):
          "actions": [("zone", "Change", True)], "tick": ("I confirm", bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
-        {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed")),
+        {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed"))
+         if state.get("lot_area") is not None or state.get("lot_surveyed") else NO_LOT,
          "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))], "tick": None},
-        {"key": "street", "label": "Street side", "text": state.get("street_name") or "the highlighted line",
+        {"key": "street", "label": "Street side", "text": state.get("street_name") or (
+            "the highlighted line" if state.get("lot_area") is not None or state.get("lot_surveyed")
+            else "set from the lot, once there is one"),
          "actions": [("street", "Change…", True)], "tick": None,
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
@@ -793,6 +799,47 @@ def district_confirmed(mode, zone_fact, zone):
     same district was confirmed at an earlier Draw (its saved source says who confirmed it)."""
     zone_fact = zone_fact or {}
     return mode != "start" and bool(zone_fact.get("confirmed_by")) and zone_fact.get("value") == zone
+
+
+def is_elevation_view(parallel, direction_z, tolerance=0.01):
+    """Whether a viewport is an elevation (Front, Right, Back, Left): a parallel projection looking level, where the
+    height limit is labelled."""
+    return bool(parallel) and abs(direction_z) <= tolerance
+
+
+def north_vector(plan_north_deg):
+    """True north as a direction in the plan (x, y): plan north (+y) when the plan isn't turned; a looked-up lot
+    is drawn turned `plan_north_deg` (lookup_box.frame), and its north arrow turns with it."""
+    import math
+    t = math.radians(plan_north_deg or 0.0)
+    return (-math.sin(t), math.cos(t))
+
+
+def shorten(text, most):
+    """`text` in at most `most` characters, cut at a word and ended "…" when longer (a link can't wrap: the
+    architect's review found one pushing the docked panel's text off its right edge)."""
+    text = text or ""
+    if len(text) <= most:
+        return text
+    cut = text[:max(1, most - 1)].rsplit(" ", 1)[0].rstrip(" ,·;:")
+    return (cut or text[:max(1, most - 1)]) + "…"
+
+
+def building_name(layer, name, grouped):
+    """What the panel calls a building: the starting house Gordium drew (its floors grouped on the massing layer),
+    else the object's name, else its layer ("a solid on Building")."""
+    if layer == MASSING:
+        return "the starting house"
+    if name:
+        return name + (" (and its group)" if grouped else "")
+    return ("a group on " if grouped else "a solid on ") + layer
+
+
+def prune_hosts(hosts, open_serials):
+    """The docked panel's hosts for documents still open (and the one made without a document, key 0): a closed
+    document's panel is never kept (review: 125 of them after a day of tests)."""
+    keep = set(open_serials) | {0}
+    return {k: v for k, v in (hosts or {}).items() if k in keep}
 
 
 def is_plan_view(parallel, direction_z, tolerance=0.99):

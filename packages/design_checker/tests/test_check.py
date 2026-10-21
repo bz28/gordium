@@ -1524,3 +1524,50 @@ def test_the_module_docs_say_how_a_row_is_decided():
     assert "turns_on" in checking.__doc__ and "nothing it reads open" not in checking.__doc__
     quick = " ".join((checking.REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8").split())
     assert "the row simply complies" in quick and "it still needs review, because only the zoning office" not in quick
+
+
+def test_the_architects_review_fixes_in_the_panel_and_the_plan():
+    """The architect's-eye review of the whole flow (2026-10-21), #15's items: a north arrow turned to true north,
+    a closed document's panel let go, the height limit labelled in elevations only, the empty file's start box
+    honest about the lot, several buildings saying which is measured with a way to pick it, coverage in % even
+    with the footprint unknown, compass names kept when a side couldn't be measured, edge lengths without
+    "(approx.)", "needs input" said once, and docked labels wrapping at the panel's width."""
+    import ast as ast_
+    from design_checker import rhino_logic as logic
+    assert logic.north_vector(0) == (pytest.approx(0), 1)
+    for turn in (0, 90, 306.3799):                      # whatever the plan's turn, the arrow points to true north
+        assert present.compass(*logic.north_vector(turn), turn) == "North", turn
+    x, y = logic.north_vector(306.3799)
+    assert (round(x, 3), round(y, 3)) == (0.805, 0.593)             # up and to the right on 106 Ithaca Rd's plan
+    assert logic.prune_hosts({0: "a", 5: "b", 7: "c"}, [7]) == {0: "a", 7: "c"}
+    assert logic.is_elevation_view(True, 0.0) and not logic.is_elevation_view(True, -1.0)
+    assert not logic.is_elevation_view(False, 0.0)
+    rows = {r["key"]: r for r in logic.box_rows({}, flat=True)}
+    assert rows["lot"]["text"] == logic.NO_LOT and rows["lot"]["text"].startswith("no lot yet: draw it")
+    assert rows["street"]["text"] == "set from the lot, once there is one"
+    drawn = {r["key"]: r for r in logic.box_rows({"lot_area": 7033.8}, flat=True)}
+    assert drawn["lot"]["text"].startswith("7,033 sf") and drawn["street"]["text"] == "the highlighted line"
+    # coverage keeps its unit (%) with the footprint unknown; a side keeps its compass name when both need the same
+    node = ast_.parse("building_area <= 0.25 * lot_area", mode="eval").body
+    numbers = present._numbers(node, {"building_area": None, "lot_area": 7033.8}, {}, "")
+    assert present._display(*numbers)[:2] == ("—", "25%")
+    assert present._side_name("side_yard_smaller", {}, 0, ["Southwest", "Northeast"], True) == "Side yard, Northeast"
+    assert present._side_name("side_yard_larger", {}, 0, ["Southwest", "Northeast"], True) == "Side yard, Southwest"
+    assert present._side_name("side_yard_smaller", {}, 0, ["Southwest", "Northeast"], False) == "Side yard, narrower"
+    # several buildings: the header says which is measured, the waiting rows how to pick it
+    head = present.header({"lot_surveyed": True}, {"buildings": 2, "main_name": None}, {}, {})
+    assert head["main"] == "Main building: not picked yet"
+    assert present.header({"lot_surveyed": True}, {"buildings": 1}, {}, {})["main"] is None
+    assert logic.building_name(logic.MASSING, "Floor 3", True) == "the starting house"   # never one of its floors
+    assert logic.building_name("Building", "Garage", False) == "Garage"
+    assert logic.building_name("Building", "", False) == "a solid on Building"
+    assert logic.shorten("Open §325-8, District Regulations Chart, R-1b", 20) == "Open §325-8…"
+    assert logic.shorten("short", 20) == "short"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert '"main": pick_main_building' in rhino and 'button("Main building…", a["main"])' in ui
+    assert ')), e["length"],' in rhino and '" (approx.)"' not in rhino        # the length alone, no "(approx.)"
+    assert '"needs input"' not in ui
+    assert "return label(text, color, bold, size, True, (WRAP_AT or PANEL_WIDTH - 48) if DOCKED" in ui
+    assert "WRAP_AT = _wrap_width(parts) if DOCKED" in ui
+    assert "d.DrawBrepWires(o.envelope" not in rhino                # its outline only: no isocurve bands

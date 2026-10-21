@@ -179,6 +179,23 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
     return present.COMPLIES if got == {"pass"} and not open_ else present.REVIEW
 
 
+def side_lines(site: dict, facts: dict) -> list[str] | None:
+    """The true compass names of the lot's two side lines (its first reading of which lines are sides), each from
+    the lot's middle to the line: what a side yard is called when it couldn't be measured. None without a lot."""
+    from model_measurement.measure import Lot
+    if not (site.get("lot") or {}).get("edges") or not facts.get("street_line"):
+        return None
+    lot = Lot(site, facts)
+    readings = None if lot.problems or lot.street_problem else lot.readings()
+    if not readings:
+        return None
+    _, left, right, _ = readings[0]
+    middle = lot.polygon.centroid
+    names = [present.compass(lot.line(g).centroid.x - middle.x, lot.line(g).centroid.y - middle.y,
+                             facts.get("plan_north_deg") or 0.0) for g in (left, right)]
+    return names if all(names) else None
+
+
 def side_checks(rule: dict) -> dict:
     """A rule's comparisons of the two side yards, each as its own check (the panel shows each side as a row)."""
     if not rule.get("check"):
@@ -373,6 +390,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                   if o != lot_id})
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
+    extras = {**(extras or {}), "side_lines": side_lines(site, facts)}   # compass names when a side isn't measured
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
