@@ -196,7 +196,8 @@ CASES = {
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
     "grade_with_others": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(40, 75, 48, 90, 0, 12, id="shed")],
-                                grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]], main_building="house",
+                                grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [44, 74.5, 0]],
+                                main_building="house",          # one spot grade at the shed: not at all its walls
                                 ground_is_flat=None, grade_elevation=None),
     "grade_walls_unclear": _plain(buildings=[prism([(22 + 8 * math.cos(k * math.pi / 32), 45 + 8 * math.sin(k * math.pi / 32))
                                                     for k in range(64)], 0, 30)],      # a round tower: 0.8 ft sides
