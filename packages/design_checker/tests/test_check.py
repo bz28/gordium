@@ -849,7 +849,7 @@ def test_a_design_buffer_is_read_or_draw_stays_off():
     from design_checker import rhino_logic as logic
     assert logic.parse_feet('6"') == 0.5 and logic.parse_feet("6 in") == 0.5 and logic.parse_feet("1'-6\"") == 1.5
     assert logic.parse_feet("") == 0.0 and logic.parse_feet("abc") is None and logic.parse_feet("-1") is None
-    state = {"district_confirmed": True, "design_buffer": "abc"}
+    state = {"zone": "R-1b", "district_confirmed": True, "design_buffer": "abc"}
     assert not logic.can_draw(state) and logic.draw_reason(state) == logic.BUFFER_UNREAD
     assert logic.can_draw({**state, "design_buffer": '6"'})
 

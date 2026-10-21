@@ -731,6 +731,7 @@ def box_rows(state, flat=None):
 #   City's zones and street name, the model edits to undo on Cancel) and are never written to the .3dm
 #   (storable_ui, the one write boundary).
 
+NO_RULES = "The City map says {zone}; Gordium doesn't have {zone}'s rules yet: pick a district only if you know it applies."
 LOOKUP_LIMIT_S = 45                               # the whole lookup; the box says so, the Rhino side stops it then
 LOOKING = "Looking up {}… (up to %d s)" % LOOKUP_LIMIT_S
 CHECKABLE = ("lot", "street", "ground")          # what "I checked this" settles (the district has its own tick)
@@ -809,14 +810,23 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         saved_ui["address_source"] = SUGGESTED + " · " + label("address", "address")
     zone = value("zone")
     names = {z.lower(): z for z in zones} if zones else {}
-    if isinstance(zone, list):                   # two zones: the box asks which applies
-        found = [names.get(z.lower(), z) for z in zone]
-        saved_ui["_zones_found"] = found
-        facts["zone"] = found[0]
-    elif zone:
-        facts["zone"] = names.get(zone.lower(), zone)
+    said = zone if isinstance(zone, list) else [zone] if zone else []
+    known = [names[z.lower()] for z in said if z.lower() in names] if zones else list(said)
+    unknown = [z for z in said if zones and z.lower() not in names]
+    if unknown and not known:
+        # the City map names a district Gordium has no rules for: never a district it didn't give, preselected or
+        # called suggested; none is set until the architect picks one deliberately
+        facts.pop("zone", None)
         saved_ui.pop("_zones_found", None)
-    if zone:
+        saved_ui.pop("zone_source", None)
+        live["zone"] = _merged(live.get("zone"), NO_RULES.format(zone=" or ".join(unknown)))
+    elif len(known) > 1:                         # two zones: the box asks which applies
+        saved_ui["_zones_found"] = known
+        facts["zone"] = known[0]
+    elif known:
+        facts["zone"] = known[0]
+        saved_ui.pop("_zones_found", None)
+    if known:
         saved_ui["zone_source"] = SUGGESTED + " · " + label("zone", "zone")
     saved_ui["_reconfirm"] = True                # a looked-up district is the architect's only once ticked again
     saved_ui["_live"] = {k: v for k, v in live.items() if k in ("zone", "overlays")}
@@ -989,6 +999,8 @@ BUFFER_UNREAD = "Design buffer not understood: type it like 1'-6\" or 6\""
 
 def draw_reason(state):
     """Why Draw is off, in one line; "" when it is on."""
+    if not state.get("zone"):
+        return "Pick the district to continue."
     if not state.get("district_confirmed"):
         return "Confirm the district to continue."
     if parse_feet(state.get("design_buffer")) is None:

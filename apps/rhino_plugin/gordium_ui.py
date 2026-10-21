@@ -642,8 +642,7 @@ def start_box(state, options, mode):
     for z in options["zones"]:
         zone.Items.Add(z)
     zone.SelectedValue = next((x for x in zone.Items if x.Text == state.get("zone")), None)
-    if zone.SelectedIndex < 0 and zone.Items.Count:
-        zone.SelectedIndex = 0
+    # no district set (the City map named one Gordium has no rules for): none preselected, Draw waits for a pick
     first_zone = zone.SelectedValue.Text if zone.SelectedValue else None
     confirm = ef.CheckBox()
     confirm.Checked = bool(state.get("district_confirmed"))
