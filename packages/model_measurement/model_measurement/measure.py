@@ -1048,14 +1048,13 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     why_which = why_building or why_main
     countable = any(b.get("parts") for b in buildings) or bool(why_building and site.get("buildings"))
     # solids touching the main building are one building with it (§325-18A): its stories are the whole joined
-    # building's, never one part's. Until they are counted over every part (one candidate building, as the height
-    # will be), floors drawn on any other part stop the count; never a typed value (review round 14)
+    # building's, never one part's (review rounds 14-16; #14's _stories_over will take this rule's place)
     joined = [b for b in (_attached(main, buildings) if main is not None and not why_which else [])
-              if b.get("parts") or b.get("floor") or _holds_a_story(b, main)]
+              if b.get("parts") or _rise(b) >= STORY_ROOM]
     if countable and why_which:
         out["stories"] = _missing("stories", why_which)
     elif joined:
-        out["stories"] = _missing("stories", stop("stories_joined"))
+        out["stories"] = _stories_whole([main] + joined, grade, why_grade, facts.get("stories"))
     elif main is not None and main.get("parts"):
         out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
     why = why_which or why_grade
@@ -1219,19 +1218,54 @@ def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict,
         out["building_area"]["crossings"] = entries_main + entries_acc
 
 
-STORY_ROOM = 8.0     # ft: a plain solid reaching this high above its base could hold a story (a porch or steps don't)
+STORY_ROOM = 8.0     # ft: a plain solid this tall could hold a story (a porch slab or steps don't)
 
 
-def _holds_a_story(part: dict, main: dict) -> bool:
-    """Whether a plain solid joined to the main building could hold a story of its own (its stories aren't drawn):
-    it rises above the main building's first floor (or, the main building plain too, above its base) and is at
-    least STORY_ROOM tall. Porches, steps and low landings don't (review round 15)."""
-    zs = [p[2] for f in part.get("faces") or [] for p in f["points"]]
-    if not zs or max(zs) - min(zs) < STORY_ROOM:
-        return False
-    first_top = main["spans"][0][1] if main.get("spans") else min(
-        p[2] for f in main.get("faces") or [] for p in f["points"])
-    return max(zs) > first_top + 1e-6
+def _rise(b: dict) -> float:
+    zs = [p[2] for f in b.get("faces") or [] for p in f["points"]]
+    return max(zs) - min(zs) if zs else 0.0
+
+
+def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
+    """STORY for a building of several joined parts (§325-18A; the main building first), by one rule: stories are
+    counted only from Gordium's floor blocks. A part that isn't floor blocks and could hold a story (STORY_ROOM or
+    more) can't be counted, so the count typed stands as the architect's statement for the whole building, and
+    only if it is at least the floors counted; else it needs review. A part below the ground is the §325-3
+    basement question: needs review. Each reason says what is drawn."""
+    ids = [i for b in parts for i in b.get("parts") or [b["id"]]]
+    if why_grade:
+        return _record("stories", "count", reason=why_grade)
+    plain = [b for b in parts if not (b.get("parts") and any(b.get("floor") or []))]
+    low = [b for b in plain if min(p[2] for f in b["faces"] for p in f["points"]) < grade - TOL]
+    if low:
+        return _record("stories", "count", reason=stop("basement_part", what=", ".join(b["id"] for b in low)))
+    counts = []
+    for stack in (b for b in parts if b not in plain):
+        got = _stories(stack, grade, None, None)
+        if got["value"] is None:        # its own reason: a floor block below the ground, misaligned, a bulkhead
+            return got
+        counts.append(int(got["value"]))
+    counted = max(counts) if counts else None
+    if not plain:
+        readings = [("Gordium's floor blocks, the most on any part", counted, {})]
+        if stated is not None:
+            readings.append(("as stated by the architect", stated, {}))
+        return _decide("stories", readings, "the floor blocks of the building counted (the most on any of its "
+                       "joined parts)", ids, "the count typed disagrees with the floors drawn: a question (story)")
+    for stack in (b for b in plain if b.get("parts")):
+        # plain solids stacked one on another: the count typed against every stacked block a story, as for a
+        # building on its own (a question when they disagree, never the typed count over the blocks drawn)
+        got = _stories(stack, grade, None, stated)
+        if got["value"] is None:
+            return got
+    what = ", ".join(b["id"] for b in plain)
+    if stated is None:
+        return _record("stories", "count", reason=stop("stories_plain_part", what=what))
+    if counted is not None and stated < counted:
+        return _record("stories", "count", reason=stop("stories_below_floors", typed=stated, drawn=counted))
+    return _record("stories", "count", stated, "stated by the architect for the whole building (part of it isn't "
+                   "drawn as floor blocks" + (f"; at least the {counted} floor blocks drawn" if counted else "") + ")",
+                   ids)
 
 
 def _attached(main: dict, buildings: list[dict]) -> list[dict]:
