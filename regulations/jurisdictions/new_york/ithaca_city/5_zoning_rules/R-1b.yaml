@@ -251,6 +251,7 @@ rules:
         page: 47
         lines: [8, 9]
         quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 47
         lines: [11, 12]
@@ -300,6 +301,7 @@ rules:
         page: 25
         lines: [7, 9]
         quote: "For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
+        not_limits: {2: "what building_area counts (balconies projecting more than two feet): a measuring rule, not this formula's limit"}
       - file: chapter_325_zoning_2026-10.pdf
         page: 25
         lines: [9, 10]
@@ -374,6 +376,7 @@ rules:
         page: 25
         lines: [24, 26]
         quote: "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
+        not_limits: {2: "the two side lot lines: how lot depth is measured (measures.yaml lot_depth), not a limit"}
     examples:
       - given: {rear_yard: 25, lot_depth: 94.8}
         expect: pass
