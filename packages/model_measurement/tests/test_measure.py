@@ -813,26 +813,30 @@ def _planar_roof(n):
 
 
 def test_plane_grouping_grows_about_in_step_with_the_faces():
-    """Review round 3 of the mesh fix: refitting every corner at every join made grouping quadratic (a 28,800-
-    triangle roof took 55 s). A joined plane is now one 3 x 3 fit from the groups' moments: four times the faces
-    take under 10 times as long (quadratic: about 16), measured in the same run, and the roof is one plane."""
+    """Review rounds 3 and 4 of the mesh fix: refitting every corner at every join made grouping quadratic (55 s
+    for 28,800 triangles), then copying the group's corner list at every join kept it near n^2.3 (115,200 faces:
+    54 s). Deterministic: the corner blocks moved and corners gathered stay under 20 per face at 12,800 faces
+    (about n log n). And by the clock, in the same run: 16 times the faces take under 25 times as long (in place:
+    about 17; copying the list: about 31)."""
     import time
     from model_measurement.measure import _planes
+    work = {}
+    faces = _planar_roof(80)
+    assert len(_planes(faces, work)) == 1
+    assert work["blocks_moved"] + work["corners_gathered"] <= 20 * len(faces), work
 
     def clock(n):
-        faces = _planar_roof(n)
+        f = _planar_roof(n)
         start = time.perf_counter()
-        groups = _planes(faces)
-        took = time.perf_counter() - start
-        assert len(groups) == 1
-        return took
+        assert len(_planes(f)) == 1
+        return time.perf_counter() - start
 
     clock(20)
     small = clock(40)
-    big = clock(80)
+    big = clock(160)
     small = (small + clock(40)) / 2
-    assert big < 10 * small, f"4x the faces took {big / small:.1f}x as long"
-    assert big < 60
+    assert big < 25 * small, f"16x the faces took {big / small:.1f}x as long"
+    assert big < 120
 
 
 @pytest.mark.parametrize("blocks", [
@@ -847,3 +851,51 @@ def test_a_typed_story_count_never_stands_beside_solids_sharing_an_id(blocks):
     m = measure(site(RECT, *blocks), {**FACTS, "stories": 3})
     shared = blocks[-1]["id"]
     assert m["stories"]["value"] is None and f"share the id {shared}" in m["stories"]["reason"]
+
+
+@pytest.mark.parametrize("main", [None, "gone"])
+def test_counted_floors_with_no_main_building_never_let_a_typed_count_stand(main):
+    """Review round 2 of the stories fix (P0): four floor blocks and a garage, no main building (or one no longer
+    in the model), typed 3: stories said 3 'stated by the architect' while the height said pick the main building.
+    The drawing can be counted, so stories stop exactly as the height does."""
+    garage = floor(40, 70, 48, 90, z0=0, z1=11, id="g1")
+    fourth = floor(10, 25, 35, 65, z0=33, z1=44, id="floor 4")
+    m = measure(site(RECT, *FLOORS, fourth, garage), {**FACTS, "stories": 3, "main_building": main})
+    assert m["stories"]["value"] is None and "pick the main building" in m["stories"]["reason"]
+    assert m["building_height"]["value"] is None and "pick the main building" in m["building_height"]["reason"]
+
+
+def test_a_single_plain_solid_keeps_the_typed_count_stated_by_the_architect():
+    """Nothing drawn can be counted (one solid, no floor marks): the typed count stands, labelled as stated."""
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 40, id="h")), {**FACTS, "stories": 3})["stories"]
+    assert m["value"] == 3 and "stated by the architect" in m["how"]
+
+
+def test_stories_never_comply_with_fewer_than_the_floors_drawn_unless_a_main_building_is_measured():
+    """A property over random drawings: stacks of 1 to 5 solids (floor blocks or plain), a garage, shared ids, a
+    main building picked, missing or stale, any typed count. Stories never take a value below the most floors
+    drawn on any stack, unless a main building was picked, every id is distinct and its own count is that value."""
+    import random
+    rnd = random.Random(21)
+    for _ in range(150):
+        blocks, stacks = [], []
+        for k, (x0, x1) in enumerate(((5, 20), (25, 40))[:rnd.randint(1, 2)]):
+            n, marked = rnd.randint(1, 5), rnd.random() < 0.5
+            ids = [f"s{k}f{i}" for i in range(n)]
+            stacks.append(ids)
+            for i, bid in enumerate(ids):
+                b = floor(x0, 25, x1, 65, z0=i * 10, z1=(i + 1) * 10, id=bid) if marked else \
+                    box(x0, 25, x1, 65, z0=i * 10, z1=(i + 1) * 10, id=bid)
+                blocks.append(b)
+        if rnd.random() < 0.3:                                          # a shared id somewhere
+            other = rnd.choice(blocks)
+            rnd.choice(blocks)["id"] = other["id"]
+        pick = rnd.choice([None, "stale", rnd.choice(blocks)["id"]])
+        typed = rnd.randint(1, 4)
+        m = measure(site(RECT, *blocks), {**FACTS, "stories": typed, "main_building": pick})["stories"]
+        most = max(len(s) for s in stacks)
+        ids = [b["id"] for b in blocks]
+        if m["value"] is None or m["value"] >= most:
+            continue
+        own = next((s for s in stacks if pick in s), None)
+        assert len(set(ids)) == len(ids) and own is not None and m["value"] == len(own), (stacks, pick, typed, m)
