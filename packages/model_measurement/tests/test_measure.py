@@ -813,26 +813,30 @@ def _planar_roof(n):
 
 
 def test_plane_grouping_grows_about_in_step_with_the_faces():
-    """Review round 3 of the mesh fix: refitting every corner at every join made grouping quadratic (a 28,800-
-    triangle roof took 55 s). A joined plane is now one 3 x 3 fit from the groups' moments: four times the faces
-    take under 10 times as long (quadratic: about 16), measured in the same run, and the roof is one plane."""
+    """Review rounds 3 and 4 of the mesh fix: refitting every corner at every join made grouping quadratic (55 s
+    for 28,800 triangles), then copying the group's corner list at every join kept it near n^2.3 (115,200 faces:
+    54 s). Deterministic: the corner blocks moved and corners gathered stay under 20 per face at 12,800 faces
+    (about n log n). And by the clock, in the same run: 16 times the faces take under 25 times as long (in place:
+    about 17; copying the list: about 31)."""
     import time
     from model_measurement.measure import _planes
+    work = {}
+    faces = _planar_roof(80)
+    assert len(_planes(faces, work)) == 1
+    assert work["blocks_moved"] + work["corners_gathered"] <= 20 * len(faces), work
 
     def clock(n):
-        faces = _planar_roof(n)
+        f = _planar_roof(n)
         start = time.perf_counter()
-        groups = _planes(faces)
-        took = time.perf_counter() - start
-        assert len(groups) == 1
-        return took
+        assert len(_planes(f)) == 1
+        return time.perf_counter() - start
 
     clock(20)
     small = clock(40)
-    big = clock(80)
+    big = clock(160)
     small = (small + clock(40)) / 2
-    assert big < 10 * small, f"4x the faces took {big / small:.1f}x as long"
-    assert big < 60
+    assert big < 25 * small, f"16x the faces took {big / small:.1f}x as long"
+    assert big < 120
 
 
 @pytest.mark.parametrize("blocks", [
