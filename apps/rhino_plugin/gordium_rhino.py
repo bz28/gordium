@@ -13,11 +13,9 @@ GordiumOff (stop and clear the drawing).
 
 import json
 import os
-import queue
 import subprocess
 import sys
 import tempfile
-import threading
 import time
 
 import Eto.Drawing as ed
@@ -29,11 +27,48 @@ import System
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATE = sc.sticky.setdefault("gordium_state", {})
+# what this copy attaches to Rhino (event handlers, the drawing, the panel, the checker), each with its undo: kept
+# OUTSIDE STATE, so a reload that clears STATE can't orphan them; every import first undoes the previous copy's
+# (2026-10-21: 23 orphaned copies' handlers were found attached; one, from before the reader thread, read the
+# checker's pipe on Rhino's thread and froze Rhino)
+LEFTOVERS = sc.sticky.setdefault("gordium_leftovers", {})
+_MODULE = sys.modules.get(__name__)
 REPO = STATE.get("repo") or os.path.dirname(os.path.dirname(HERE))   # apps/rhino_plugin -> the repo
 JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
 CITY = "City of Ithaca"
 sys.path.insert(0, os.path.join(REPO, "packages", "design_checker", "design_checker"))
 import rhino_logic as logic  # noqa: E402  (plain Python, tested in CI: which objects, which facts)
+
+logic.sweep(LEFTOVERS)                       # an earlier copy's handlers, drawing, panel and checker: undone
+
+
+def _is_current():
+    return sys.modules.get(__name__) is _MODULE
+
+
+def _on(owner, name, handler):
+    """Attach a handler to a Rhino event, remembered in LEFTOVERS so a later copy can always detach it."""
+    event = getattr(owner, name)
+    event += handler
+    LEFTOVERS["%s.%s:%d" % (owner.__name__, name, id(handler))] = lambda: _off(owner, name, handler)
+
+
+def _off(owner, name, handler):
+    event = getattr(owner, name)
+    event -= handler
+    LEFTOVERS.pop("%s.%s:%d" % (owner.__name__, name, id(handler)), None)
+
+
+def _handler(kind, fn):
+    """An event handler, inert once another copy of this script is loaded."""
+    return kind(logic.current_only(fn, _is_current))
+
+
+def _redraw():
+    """Redraw the front document's views; nothing when no document is open (Rhino's start screen)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is not None:
+        doc.Views.Redraw()
 
 LAYERS = logic.LAYERS
 ID_KEY = "gordium:id"
@@ -76,40 +111,34 @@ def _worker():
         log = open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a")
         p = subprocess.Popen([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log, universal_newlines=True)
-        lines = queue.Queue()
-        threading.Thread(target=_read_lines, args=(p.stdout, lines), daemon=True).start()
-        STATE["worker"], STATE["worker_lines"] = p, lines
+        # its pipes served by threads: Rhino's thread never reads or writes one (rhino_logic.pipes)
+        STATE["worker_sends"], STATE["worker_lines"] = logic.pipes(p)
+        STATE["worker"] = p
         STATE["worker_code"] = now
+        LEFTOVERS["worker"] = p.kill                     # a later copy of this script stops it
     return p
-
-
-def _read_lines(stream, lines):
-    """The reader thread: every line the checker writes, then None when it stops. It lets ask() wait with a time
-    limit (select() can't wait on a pipe on Windows). It never touches Rhino."""
-    try:
-        for line in stream:
-            lines.put(line)
-    finally:
-        lines.put(None)
 
 
 def _stop_worker():
     """Stop the checker and forget it (the next request starts a fresh one)."""
     p = STATE.pop("worker", None)
     STATE.pop("worker_lines", None)
+    sends = STATE.pop("worker_sends", None)
+    if sends is not None:
+        sends.put(None)
+    LEFTOVERS.pop("worker", None)
     if p is not None and p.poll() is None:
         p.kill()
 
 
 def ask(request):
     """Send one request to the checker and wait for its answer."""
-    p = _worker()
+    _worker()
     STATE["next_id"] = STATE.get("next_id", 0) + 1
     request = dict(request, id=STATE["next_id"])
-    p.stdin.write(json.dumps(request) + "\n")
-    p.stdin.flush()
-    try:                                     # only this request's answer, within its time limit (rhino_logic)
-        answer = logic.answer_for(STATE["worker_lines"], request["id"], logic.ask_limit(request.get("cmd")))
+    try:                                     # only this request's answer, within its time limit; no pipe I/O here
+        answer = logic.exchange(STATE["worker_sends"], STATE["worker_lines"], request,
+                                logic.ask_limit(request.get("cmd")))
     except logic.CheckerOutOfStep as e:
         _stop_worker()
         raise RuntimeError(str(e) + " (see gordium_worker.log in the temp folder)")
@@ -391,6 +420,7 @@ def overlay():
     if o is None:
         o = Overlay()
         STATE["overlay"] = o
+        LEFTOVERS["overlay"] = lambda: setattr(o, "Enabled", False)
     o.Enabled = True
     if not STATE.get("doc_hooks"):          # whatever turned drawing on: another document clears it
         documents(True)
@@ -509,6 +539,7 @@ def panel():
     if p is None or not p.Visible:
         p = Panel()
         STATE["panel"] = p
+        LEFTOVERS["panel"] = p.Close
         p.Show()
     return p
 
@@ -847,16 +878,16 @@ def documents(on):
     hooks = STATE.pop("doc_hooks", None)
     if hooks:
         new_doc, opened, active = hooks
-        Rhino.RhinoDoc.NewDocument -= new_doc
-        Rhino.RhinoDoc.EndOpenDocument -= opened
-        Rhino.RhinoDoc.ActiveDocumentChanged -= active
+        _off(Rhino.RhinoDoc, "NewDocument", new_doc)
+        _off(Rhino.RhinoDoc, "EndOpenDocument", opened)
+        _off(Rhino.RhinoDoc, "ActiveDocumentChanged", active)
     if on:
-        new_doc = System.EventHandler[Rhino.DocumentEventArgs](_new_document)
-        opened = System.EventHandler[Rhino.DocumentOpenEventArgs](_opened)
-        active = System.EventHandler[Rhino.DocumentEventArgs](_new_document)
-        Rhino.RhinoDoc.NewDocument += new_doc
-        Rhino.RhinoDoc.EndOpenDocument += opened
-        Rhino.RhinoDoc.ActiveDocumentChanged += active
+        new_doc = _handler(System.EventHandler[Rhino.DocumentEventArgs], _new_document)
+        opened = _handler(System.EventHandler[Rhino.DocumentOpenEventArgs], _opened)
+        active = _handler(System.EventHandler[Rhino.DocumentEventArgs], _new_document)
+        _on(Rhino.RhinoDoc, "NewDocument", new_doc)
+        _on(Rhino.RhinoDoc, "EndOpenDocument", opened)
+        _on(Rhino.RhinoDoc, "ActiveDocumentChanged", active)
         STATE["doc_hooks"] = (new_doc, opened, active)
 
 
@@ -867,18 +898,17 @@ def _unhook():
     if hooks and len(hooks) == 6:            # also an earlier version: the document hooks were here
         objects, replaced, attributes, new_doc, opened, idle = hooks
         if attributes is not None:
-            Rhino.RhinoDoc.NewDocument -= new_doc
-            Rhino.RhinoDoc.EndOpenDocument -= opened
+            _off(Rhino.RhinoDoc, "NewDocument", new_doc)
+            _off(Rhino.RhinoDoc, "EndOpenDocument", opened)
         hooks = (objects, replaced, attributes, idle)
     if hooks:
         objects, replaced, attributes, idle = hooks
         if attributes is not None:
-            Rhino.RhinoDoc.ModifyObjectAttributes -= attributes
-        Rhino.RhinoDoc.AddRhinoObject -= objects
-        Rhino.RhinoDoc.DeleteRhinoObject -= objects
-        Rhino.RhinoDoc.UndeleteRhinoObject -= objects
-        Rhino.RhinoDoc.ReplaceRhinoObject -= replaced
-        Rhino.RhinoApp.Idle -= idle
+            _off(Rhino.RhinoDoc, "ModifyObjectAttributes", attributes)
+        for name in ("AddRhinoObject", "DeleteRhinoObject", "UndeleteRhinoObject"):
+            _off(Rhino.RhinoDoc, name, objects)
+        _off(Rhino.RhinoDoc, "ReplaceRhinoObject", replaced)
+        _off(Rhino.RhinoApp, "Idle", idle)
 
 
 def live(on):
@@ -888,16 +918,15 @@ def live(on):
     STATE["live"] = on
     if not on:
         return
-    objects = System.EventHandler[Rhino.DocObjects.RhinoObjectEventArgs](_changed)
-    replaced = System.EventHandler[Rhino.DocObjects.RhinoReplaceObjectEventArgs](_changed)
-    attributes = System.EventHandler[Rhino.DocObjects.RhinoModifyObjectAttributesEventArgs](_changed)
-    idle = System.EventHandler(_idle)
-    Rhino.RhinoDoc.AddRhinoObject += objects
-    Rhino.RhinoDoc.DeleteRhinoObject += objects
-    Rhino.RhinoDoc.UndeleteRhinoObject += objects
-    Rhino.RhinoDoc.ReplaceRhinoObject += replaced
-    Rhino.RhinoDoc.ModifyObjectAttributes += attributes
-    Rhino.RhinoApp.Idle += idle
+    objects = _handler(System.EventHandler[Rhino.DocObjects.RhinoObjectEventArgs], _changed)
+    replaced = _handler(System.EventHandler[Rhino.DocObjects.RhinoReplaceObjectEventArgs], _changed)
+    attributes = _handler(System.EventHandler[Rhino.DocObjects.RhinoModifyObjectAttributesEventArgs], _changed)
+    idle = _handler(System.EventHandler, _idle)
+    for name in ("AddRhinoObject", "DeleteRhinoObject", "UndeleteRhinoObject"):
+        _on(Rhino.RhinoDoc, name, objects)
+    _on(Rhino.RhinoDoc, "ReplaceRhinoObject", replaced)
+    _on(Rhino.RhinoDoc, "ModifyObjectAttributes", attributes)
+    _on(Rhino.RhinoApp, "Idle", idle)
     STATE["hooks"] = (objects, replaced, attributes, idle)
 
 
@@ -933,7 +962,7 @@ def off():
     if p is not None:
         p.Close()
         STATE.pop("panel", None)
-    Rhino.RhinoDoc.ActiveDoc.Views.Redraw()
+    _redraw()
 
 
 # ---- GordiumCheck ----------------------------------------------------------------------------------------

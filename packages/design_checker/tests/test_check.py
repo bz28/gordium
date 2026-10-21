@@ -257,5 +257,5 @@ def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_
     """The Rhino side can't run in CI: its source must use the tested logic (no bare readline on the pipe)."""
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     ask = src[src.index("def ask("):src.index("\n\n\n", src.index("def ask("))]
-    assert "logic.answer_for(" in ask and "_stop_worker()" in ask and "readline" not in ask
-    assert "threading.Thread(target=_read_lines" in src
+    assert "logic.exchange(" in ask and "_stop_worker()" in ask and "readline" not in ask and "stdin" not in ask
+    assert "logic.pipes(p)" in src                  # the pipes served by threads (test_checker_pipes.py)
