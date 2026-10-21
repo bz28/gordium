@@ -461,7 +461,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     if (_status(row) == FAILS and isinstance(body, ast.BoolOp) and isinstance(body.op, ast.And)
             and all(isinstance(v, ast.Compare) for v in body.values)):
         # a rule that is several limits at once (the eaves into every yard): name and show the one that fails
-        primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False), primary)
+        unknown = row.get("Unknown")        # not measured: a limit that fails at every value it could take
+        primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False
+                        or unknown and formula.truth_direction(ast.unparse(c), unknown) == -1
+                        and _evaluate(ast.unparse(c), dict(values, **{unknown: 0})) is False), primary)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted

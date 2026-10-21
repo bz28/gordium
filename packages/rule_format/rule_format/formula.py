@@ -273,3 +273,63 @@ def margin(proposed, required, at_least: bool) -> float:
     if abs(a - b) <= _at_limit(a, b):
         return 0.0
     return float(a - b if at_least else b - a)
+
+
+def _together(signs):
+    """Directions combined (a sum, a max/min, an and/or): None if any is unknown or two disagree."""
+    if any(s is None for s in signs):
+        return None
+    moving = {s for s in signs if s}
+    return None if len(moving) > 1 else (moving.pop() if moving else 0)
+
+
+def _flip(s):
+    return None if s is None else -s
+
+
+def _slope(node, name: str):
+    """How a number moves as `name` grows: +1 never down, -1 never up, 0 not at all, None not proven. Proven only
+    from the formula's structure: + and - of such parts, max/min of them, a part times or divided by a positive
+    number written in the formula, and a minus sign."""
+    if name not in {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}:
+        return 0
+    match node:
+        case ast.Name(id=n):
+            return 1 if n == name else 0
+        case ast.UnaryOp(op=ast.USub(), operand=x):
+            return _flip(_slope(x, name))
+        case ast.BinOp(left=l, op=ast.Add(), right=r):
+            return _together([_slope(l, name), _slope(r, name)])
+        case ast.BinOp(left=l, op=ast.Sub(), right=r):
+            return _together([_slope(l, name), _flip(_slope(r, name))])
+        case ast.BinOp(left=l, op=ast.Mult() | ast.Div() as op, right=ast.Constant(value=c)) \
+                if type(c) in (int, float) and c > 0:
+            return _slope(l, name)
+        case ast.BinOp(left=ast.Constant(value=c), op=ast.Mult(), right=r) if type(c) in (int, float) and c > 0:
+            return _slope(r, name)
+        case ast.Call(func=ast.Name(id="max" | "min"), args=args):
+            return _together([_slope(a, name) for a in args])
+    return None
+
+
+def _truth(node, name: str):
+    """How a condition's truth moves as `name` grows: +1 once true stays true, -1 once false stays false, 0 not
+    at all, None not proven (an == or !=, an if-else, a yes/no measure, a chain of comparisons)."""
+    if name not in {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}:
+        return 0
+    match node:
+        case ast.Compare(left=l, ops=[op], comparators=[r]) if isinstance(op, (ast.Lt, ast.LtE, ast.Gt, ast.GtE)):
+            gap = _together([_slope(l, name), _flip(_slope(r, name))])      # left - right
+            return gap if isinstance(op, (ast.Gt, ast.GtE)) else _flip(gap)
+        case ast.BoolOp(values=parts):
+            return _together([_truth(p, name) for p in parts])
+        case ast.UnaryOp(op=ast.Not(), operand=x):
+            return _flip(_truth(x, name))
+    return None
+
+
+def truth_direction(text: str, name: str):
+    """How a condition's truth moves as the measure `name` grows from 0 (+1, -1, 0, or None when that can't be
+    proven from the formula's structure). With -1 the condition is truest at `name` = 0: false there, it is false
+    for every value `name` can take (measures are never negative)."""
+    return _truth(parse(text).body, name)

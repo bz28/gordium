@@ -372,3 +372,59 @@ def test_the_bonus_wait_prefix_follows_the_status():
     assert present._bonus_waits(present.FAILS, True) == "Does not comply at any of the height's readings"
     assert present._bonus_waits(present.FAILS, False) == "Does not comply even before the §325-16C height bonus"
     assert present._bonus_waits(present.REVIEW, True) == present._bonus_waits(present.REVIEW, False) == "Needs review"
+
+
+# ---- round 12 decision: a rule that fails at every value an unmeasured number could take does not comply ---------
+
+def test_an_eaves_row_that_misses_even_the_base_fails_whatever_the_height():
+    """Ben/coordinator 2026-10-21: front_yard_eaves >= 25 + max(h - 35, 0) - 2 is at least 23 ft for every
+    height. The gable's front eaves are 15 ft back: with no ground (nothing measured) or on existing grade only,
+    the height is unknown, yet 15 < 23 fails at every height: does not comply, never needs review."""
+    from test_every_reading import roof
+    b = (15, 15, 45, 55)
+    for facts in ({"grade_elevation": None, "ground_is_flat": None}, {"grade_is": "existing"}):
+        res = run(floors(*b, 3) + [roof(*b, 30, 45, 2.0, 1.0)], **facts)
+        assert res["measurements"]["building_height"]["value"] is None
+        front = next(r for r in rows(res, "R-1b.yard_projections") if r["name"] == "Eaves into front yard")
+        assert front["status"] == present.FAILS and front["required"] == "≥ 23'-0\"", facts
+        assert front["reason"].startswith("Does not comply even before the §325-16C height bonus"), front["reason"]
+        assert "R-1b.yard_projections" in {r["Rule id"] for r in res["rows"] if r["Fails"]}
+
+
+def test_an_eaves_row_that_meets_the_base_stays_needs_review_with_the_height_unknown():
+    """Never a false pass: the front eaves 24 ft back meet the base 23 ft, but the bonus could raise it past 24
+    (any height over 36 ft): with the height unknown, needs review, never complies, never fails."""
+    from test_every_reading import roof
+    b = (15, 24, 45, 64)
+    res = run(floors(*b, 3) + [roof(*b, 30, 45, 2.0, 1.0)], grade_elevation=None, ground_is_flat=None)
+    front = next(r for r in rows(res, "R-1b.yard_projections") if r["name"] == "Eaves into front yard")
+    assert front["proposed"] == "24'-0\"" and front["status"] == present.REVIEW
+
+
+def test_fails_whatever_needs_proof_and_one_unknown():
+    """The rule fails whatever only when it is proven truest at 0 and fails there; a rule truest for a large
+    value, two unknown values, or a value with readings are left to needs review."""
+    from design_checker.check import fails_whatever
+    rule = {"id": "t", "kind": "rule", "check": "front_yard_eaves >= 25 + max(building_height - 35, 0) - 2"}
+    unknown = {"value": None, "readings": []}
+    assert fails_whatever(rule, {"front_yard_eaves": {"value": 15.0}, "building_height": unknown}, {}) == \
+        "building_height"
+    assert fails_whatever(rule, {"front_yard_eaves": {"value": 24.0}, "building_height": unknown}, {}) is None
+    assert fails_whatever(rule, {"front_yard_eaves": unknown, "building_height": unknown}, {}) is None
+    readings = {"value": None, "readings": [{"reading": "a", "value": 40.0}, {"reading": "b", "value": 50.0}]}
+    assert fails_whatever(rule, {"front_yard_eaves": {"value": 15.0}, "building_height": readings}, {}) is None
+    taller = {"id": "t", "kind": "rule", "check": "building_height >= 40"}     # truest when tall: never failed
+    assert fails_whatever(taller, {"building_height": unknown}, {}) is None
+
+
+def test_the_eaves_row_names_the_yard_that_fails_whatever_the_height():
+    """The eaves rule is four limits at once; with the height unknown none can be evaluated as it stands, so the
+    row named the first (front). The house 15..45 x 30..100 on the 60 x 120 lot: front eaves 30 ft (base 23: may
+    pass), rear eaves 20 ft against at least max(min(0.25 x 120, 50), 20) - 2 = 28 ft at any height: the rear
+    fails whatever the height, and the row is that one."""
+    from test_every_reading import roof
+    b = (15, 30, 45, 100)
+    res = run(floors(*b, 3) + [roof(*b, 30, 45, 2.0, 1.0)], grade_elevation=None, ground_is_flat=None)
+    got = rows(res, "R-1b.yard_projections")
+    assert [r["name"] for r in got] == ["Eaves into rear yard"] and got[0]["status"] == present.FAILS
+    assert got[0]["proposed"] == "20'-0\"" and got[0]["required"] == "≥ 28'-0\""
