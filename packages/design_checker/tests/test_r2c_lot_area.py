@@ -56,8 +56,8 @@ def _r2c(use, lot_w, lot_d, rule, outline=SMALL, **facts):
                                        ("one_family_attached", "R-2c.lot_area_one_family_attached")])
 def test_a_lot_with_no_dwelling_units_stated_never_complies(use, rule):
     """Review round 1 (P0): 2,000 (1,500) sf x units made 0 sf required with 0 units entered, so a 20 x 20 ft lot
-    complied. A semi-detached lot holds at least one unit, an attached building three: 400 sf fails, and a lot big
-    enough for that least needs review until the count is right."""
+    complied. A semi-detached or attached lot holds at least one unit: 400 sf fails, and a lot big enough for one
+    unit's least needs review until the count is right."""
     small = _r2c(use, 20, 20, rule, outline=[[5, 5], [15, 5], [15, 12], [5, 12]], dwelling_units=0, occupants=0)
     assert [i["status"] for i in small] == [present.FAILS], small
     big = _r2c(use, 60, 100, rule, dwelling_units=0, occupants=0)
@@ -105,13 +105,21 @@ def test_a_limit_that_depends_on_the_use_is_shown_for_the_stated_use():
     assert cover and cover[0]["required"] not in ("", "—", None), cover
 
 
-def test_a_row_house_on_its_own_lot_is_held_to_its_own_unit():
-    """Review round 2 (P1): dwelling_units counts this lot's units, so a row house on its own 20 x 100 = 2,000 sf lot
-    (one unit, one occupant: 1,500 sf) complies; it was held to three units' 4,500 sf. The building's 3 to 6 units
-    are their own row, on their own stated fact."""
+def test_a_row_house_on_its_own_lot_is_checked_under_both_lot_readings():
+    """Review rounds 2 and 3: a row house on its own 20 x 100 = 2,000 sf lot (one unit, one occupant) is enough for
+    its own unit (1,500 sf) but not for a building of three (4,500 sf); whose lot the chart means is an open question
+    (both readings recorded), so the row needs review, never a definite pass or fail. 1,400 sf is short either way.
+    The building's 3 to 6 units are their own row, on their own stated fact."""
+    from rule_format.rulebook import REPO, load
+    rules = load(REPO / "regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-2c.yaml")["rules"]
+    attached = next(r for r in rules if r["id"] == "R-2c.lot_area_one_family_attached")
+    assert {g["id"] for x in attached["research"] for g in x["readings"]} >= {"per_row_house_lot", "building_lot"}
     lot = _r2c("one_family_attached", 20, 100, "R-2c.lot_area_one_family_attached",
                outline=[[2, 30], [18, 30], [18, 50], [2, 50]], dwelling_units=1, occupants=1)
-    assert [i["status"] for i in lot] == [present.COMPLIES], lot
+    assert [i["status"] for i in lot] == [present.REVIEW], lot
+    short = _r2c("one_family_attached", 20, 70, "R-2c.lot_area_one_family_attached",
+                 outline=[[2, 30], [18, 30], [18, 50], [2, 50]], dwelling_units=1, occupants=1)
+    assert [i["status"] for i in short] == [present.FAILS], short
     rule = "R-2c.attached_units_per_building"
     unknown = _r2c("one_family_attached", 20, 100, rule, outline=[[2, 30], [18, 30], [18, 50], [2, 50]])
     assert [(i["status"], i["needs"]) for i in unknown] == [(present.REVIEW, ["attached_units_in_building"])], unknown
