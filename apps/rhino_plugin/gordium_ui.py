@@ -299,6 +299,9 @@ def set_box_open(parts, is_open):
     parts["box_open"] = bool(is_open)
     for b in parts.get("box_buttons") or []:
         b.Enabled = not is_open
+    form = parts.get("form")
+    if form is not None and form.Content is not None:      # the whole panel greyed: no button, tick or cell acts
+        form.Content.Enabled = not is_open
 
 
 def show_detail(parts):

@@ -539,11 +539,21 @@ def _prism(doc, outline, base, top):
 
 
 def _actions():
-    """What the panel's buttons do (gordium_ui.make_panel)."""
+    """What the panel's buttons do (gordium_ui.make_panel): each one gated, so while a start box is open none of them
+    touches the model (rhino_logic.gate_actions)."""
+    return logic.gate_actions(PANEL_ACTIONS(), _box_open, say)
+
+
+def PANEL_ACTIONS():
     return {"zoom": zoom_to, "report": open_report, "envelope": set_envelope, "edit_site": edit_facts,
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check, "legend": ui.legend,
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
             "massing": hide_massing, "not_ground": not_the_ground}
+
+
+def _box_open():
+    gate = STATE.get("box_gate")
+    return bool(gate is not None and gate.open)
 
 
 def panel():

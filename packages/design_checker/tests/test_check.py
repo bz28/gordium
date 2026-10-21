@@ -780,7 +780,7 @@ def test_spec_item_ids_are_unique():
 def _panel_actions(rhino):
     """The functions the panel's buttons call (gordium_rhino._actions), by name."""
     import re
-    body = rhino[rhino.index("def _actions():"):rhino.index("\ndef panel():")]
+    body = rhino[rhino.index("def PANEL_ACTIONS():"):rhino.index("\ndef _box_open(")]
     return sorted(set(re.findall(r'"\w+": (\w+)[,}]', body)) - {"ui"})
 
 
@@ -903,3 +903,14 @@ def test_a_starting_house_is_drawn_on_existing_spot_grades_placed_at_the_lot(fac
                         "grade_from": "spot", "grade_is": "existing", "grade_points": spots})
     assert len(got["floors"]) == 3 and any("drawn on the ground as it is" in n for n in got["notes"])
     assert got["floors"][0]["base"] == pytest.approx(2.5, abs=0.01)          # the spots' plane: their average
+
+
+
+def test_no_backup_or_copy_files_are_committed():
+    """Verification round of PR #19: an 870-line rhino_logic.py.bak had been committed (left by a revert check)."""
+    import re
+    import subprocess
+    files = subprocess.run(["git", "ls-files", "packages", "apps"], cwd=REPO, capture_output=True, text=True,
+                           encoding="utf-8", check=True).stdout.splitlines()
+    junk = [f for f in files if re.search(r"(\.bak|\.orig|\.swp|~|[ _]copy|_backup|\.backup)(\.\w+)?$", f, re.I)]
+    assert files and junk == [], junk

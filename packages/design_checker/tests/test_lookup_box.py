@@ -790,3 +790,50 @@ def test_the_recovery_message_says_what_it_did():
         "removed 15 objects an unfinished start box drew and put back 1 object it had set aside"
     assert logic.recovery_message(0, 2) == "put back 2 objects it had set aside"
     assert logic.recovery_message(0, 0) is None
+
+
+
+# ---- verification round of PR #19 ---------------------------------------------------------------------------------
+
+def test_a_rollback_that_fails_still_closes_its_session_so_recovery_finishes_the_job():
+    """The reviewer's repro: a rollback that raised left its token live, so its held objects stayed on the holding
+    layer until Rhino restarted. The token is dropped in a finally; the next start recovers what it left."""
+    table, facts, saved = sample_model()
+    before = table.snapshot()
+    session = logic.BoxSession(table)
+    logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    release = table.release
+
+    def broken(i, layer):
+        raise RuntimeError("Rhino refused to move it")
+    table.release = broken
+    with pytest.raises(RuntimeError):
+        session.rollback()
+    assert session.token not in logic.OPEN_SESSIONS
+    table.release = release
+    logic.recover_held(table)
+    assert table.snapshot()[0] == before[0]          # every object back as it was (the layers it made may stay)
+
+
+def test_while_a_start_box_is_open_no_panel_action_does_anything_but_say_so():
+    """Verification round: the detail pane's buttons (Enter bedrooms…, This is the ground, Not the ground, Add to
+    check…, Retry) wrote to the model mid-box and Draw overwrote them silently. Every action of the panel goes
+    through one gate."""
+    import re
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = rhino[rhino.index("def PANEL_ACTIONS():"):rhino.index("\ndef _box_open(")]
+    names = re.findall(r'"(\w+)": ', body)
+    assert {"enter", "add", "ground", "not_ground", "retry", "edit_site", "survey", "grade", "report", "envelope",
+            "massing", "zoom"} <= set(names)
+    assert "return logic.gate_actions(PANEL_ACTIONS(), _box_open, say)" in rhino
+    calls, said, box = [], [], {"open": True}
+    gated = logic.gate_actions({n: (lambda *a, n=n: calls.append(n)) for n in names}, lambda: box["open"], said.append)
+    for n in names:
+        gated[n]("an argument")
+    assert calls == ["legend"] and said == [logic.BOX_BUSY] * (len(names) - 1)   # only the legend shows
+    box["open"] = False
+    for n in names:
+        gated[n]("an argument")
+    assert sorted(calls) == sorted(["legend"] + names)
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "form.Content.Enabled = not is_open" in ui

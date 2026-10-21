@@ -754,19 +754,23 @@ class BoxSession:
         self.table.hold(object_id, self.token)
 
     def rollback(self):
-        """Cancel, Esc or an error: the model as the box found it (objects, the layers it made, the views)."""
-        for i in self.added:
-            if self.table.exists(i):
-                self.table.delete(i)
-        for i, layer in self.held:
-            if self.table.exists(i):
-                self.table.release(i, layer)
-        made = set(self.table.layer_names()) - self.layers_before
-        for name in sorted(made, key=lambda n: -n.count("::")):      # sublayers first
-            self.table.remove_layer_if_empty(name)
-        self.table.restore_views(self.views)
-        self.added, self.held = [], []
-        OPEN_SESSIONS.discard(self.token)
+        """Cancel, Esc or an error: the model as the box found it (objects, the layers it made, the views). Even if
+        a step fails, the session is closed (no longer live), so whatever it left is recovered at the next start
+        (verification round of PR #19: a raising rollback left its held objects stranded until Rhino restarted)."""
+        try:
+            for i in self.added:
+                if self.table.exists(i):
+                    self.table.delete(i)
+            for i, layer in self.held:
+                if self.table.exists(i):
+                    self.table.release(i, layer)
+            made = set(self.table.layer_names()) - self.layers_before
+            for name in sorted(made, key=lambda n: -n.count("::")):      # sublayers first
+                self.table.remove_layer_if_empty(name)
+            self.table.restore_views(self.views)
+            self.added, self.held = [], []
+        finally:
+            OPEN_SESSIONS.discard(self.token)
 
     def commit(self):
         """Draw: what was replaced goes for good, and what was drawn is kept (its session mark cleared)."""
@@ -794,6 +798,20 @@ def recover_held(table, live=None):
         table.release(i, layer)
     table.remove_layer_if_empty(HOLDING_LAYER)
     return len(removed), len(back)
+
+
+def gate_actions(actions, box_open, say, open_ok=("legend",)):
+    """The panel's actions, each doing nothing but saying BOX_BUSY while a start box is open (one choke point: none of
+    them writes to the model, runs a check or opens another box under an open one; verification round of PR #19).
+    `open_ok`: the ones that only show something (the legend)."""
+    def gated(name, fn):
+        def run(*args, **kwargs):
+            if box_open() and name not in open_ok:
+                say(BOX_BUSY)
+                return None
+            return fn(*args, **kwargs)
+        return run
+    return {name: gated(name, fn) for name, fn in actions.items()}
 
 
 def recovery_message(removed, back):
