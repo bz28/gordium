@@ -31,7 +31,7 @@ from . import plain
 from rule_format import formula
 from rule_format.formula import EvaluationError, MissingMeasure
 from rule_format.rulebook import (MEASURE_KINDS, MEASURES_FILE, REPO, Context, load, outcome, rulebook_file_problems,
-                                  rulebook_for, term_file_problems, zone_rulebooks)
+                                  rulebook_for, term_file_problems, zone_rulebooks, apply_relaxes)
 
 # The architects' tab names and headers, copied from their file, in their order.
 INPUTS_TAB, OUTPUT_TAB = "Inputs", "Output"
@@ -292,7 +292,8 @@ def tables(project_path: Path) -> dict:
               for k, m in project["measurements"].items()]
 
     rows, links, params, param_links, later = [], [], [], [], []
-    for which, rule in ((w, r) for w, book in books for r in book.get("rules") or []):
+    composed = iter(apply_relaxes([r for _, book in books for r in book.get("rules") or []]))   # relaxes links
+    for which, rule in ((w, next(composed)) for w, book in books for _ in book.get("rules") or []):
         result = outcome(rule, values, allowed)
         sources = rule.get("sources") or [{}]
         first = sources[0]

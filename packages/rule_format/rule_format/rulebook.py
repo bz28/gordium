@@ -34,8 +34,8 @@ STATUSES = ("draft", "approved")
 # meaning is the `check` and its `examples`. (Retellings kept dropping or adding words.)
 RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "examples",
                "notes", "open_questions", "research", "findings", "answers", "drafted_by", "status", "approved_by", "approved_on",
-               "approved_hash"}
-TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
+               "approved_hash", "relaxes"}
+TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by", "relaxes")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
                "examples": {"given", "expect", "note"}}
@@ -66,6 +66,63 @@ def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
         return "pass" if _condition(rule["check"], values, kinds) else "fail"
     except (MissingMeasure, EvaluationError, FormulaError, ArithmeticError):
         return "needs_review"         # a formula that can't be read (never frozen so) is never a crash
+
+
+def apply_relaxes(rules: list[dict]) -> list[dict]:
+    """An exception that widens another rule (`relaxes: <rule id>`: §325-16C's extra height relaxes the chart's height
+    limit), applied by composing the relaxed rule, so every verdict path (outcome, the every-reading check) reads it
+    unchanged. The relaxed rule passes if its own check passes, or if a rule relaxing it applies and passes its
+    own check: `base or (when_1 and check_1) or ... or (when_n and check_n)`, worked out in three-valued logic, so an
+    unknown relaxer can only make a failing base need review, never pass. A relaxer's review_when becomes the relaxed
+    rule's, where the relaxation is what decides. A relaxer is never widened by this; it stays its own rule too. Rules
+    with no relaxer are returned as they are (validate checks relaxes: same rulebook, a rule with a condition, no cycle)."""
+    by_target: dict[str, list[dict]] = {}
+    for r in rules:
+        if isinstance(r.get("relaxes"), str):
+            by_target.setdefault(r["relaxes"], []).append(r)
+    if not by_target:
+        return rules
+    out = []
+    for r in rules:
+        relaxers = by_target.get(r.get("id"))
+        if not relaxers or r.get("kind") != "rule" or not r.get("check"):
+            out.append(r)
+            continue
+        widen = " or ".join(f"(({x['applies_when']}) and ({x['check']}))" for x in relaxers)
+        review = list(r.get("review_when") or []) + [
+            {"when": f"not ({r['check']}) and ({x['applies_when']}) and ({w['when']})", "reason": w.get("reason", "")}
+            for x in relaxers for w in x.get("review_when") or []]
+        out.append(r | {"check": f"({r['check']}) or ({widen})", "review_when": review,
+                        "relaxed_by": [x["id"] for x in relaxers]})
+    return out
+
+
+def _relaxes_problems(rules: list[dict]) -> list[str]:
+    """`relaxes` names a rule of the same rulebook (so the same district), from a rule with a condition and a check
+    (an exception holds only when all its conditions are met), never itself, never a flag, and never in a cycle."""
+    ids = {r.get("id"): r for r in rules if isinstance(r, dict)}
+    p = []
+    for r in rules:
+        target = r.get("relaxes") if isinstance(r, dict) else None
+        if target is None:
+            continue
+        rid = r.get("id")
+        if target == rid:
+            p.append(f"{rid}: relaxes itself")
+        elif target not in ids:
+            p.append(f"{rid}: relaxes {target!r}, which isn't a rule of this rulebook")
+        elif ids[target].get("kind") != "rule" or not ids[target].get("check"):
+            p.append(f"{rid}: relaxes {target!r}, which has no check to widen")
+        if r.get("kind") != "rule" or not r.get("check") or not r.get("applies_when"):
+            p.append(f"{rid}: a relaxing rule needs its condition (applies_when) and its own check")
+        seen, at = {rid}, target
+        while at in ids and isinstance(ids[at].get("relaxes"), str):
+            at = ids[at]["relaxes"]
+            if at in seen:
+                p.append(f"{rid}: relaxes in a cycle")
+                break
+            seen.add(at)
+    return p
 
 
 def _condition(text: str, values: dict, kinds: dict) -> bool:
@@ -134,8 +191,8 @@ def is_ai_drafted(jurisdiction, zone: str) -> bool:
 
 
 def zone_rules(jurisdiction, zone: str) -> list[dict]:
-    """The rules of every file in `zone_rulebooks`, in that order."""
-    return [r for p in zone_rulebooks(jurisdiction, zone) for r in (load(p) or {}).get("rules") or []]
+    """The rules of every file in `zone_rulebooks`, in that order, each `relaxes` link applied (apply_relaxes)."""
+    return apply_relaxes([r for p in zone_rulebooks(jurisdiction, zone) for r in (load(p) or {}).get("rules") or []])
 
 
 def utf8_console() -> None:
@@ -569,16 +626,18 @@ def validate(rulebook, ctx: Context) -> list[str]:
     if not isinstance(rules, list) or not rules:
         return ["'rules' must be a non-empty list"]
     district, problems, seen = rulebook["district"], [], set()
+    linked = _relaxes_problems(rules)
+    composed = {} if linked else {r.get("id"): r for r in apply_relaxes(rules) if r.get("relaxed_by")}
     for i, rule in enumerate(rules, 1):
         if not isinstance(rule, dict):
             problems.append(f"rule #{i}: must be a mapping")
             continue
         rid = rule["id"] if isinstance(rule.get("id"), str) else f"rule #{i}"
-        problems += [f"{rid}: {p}" for p in _rule_problems(rule, district, ctx)]
+        problems += [f"{rid}: {p}" for p in _rule_problems(rule, district, ctx, composed.get(rid))]
         if rid in seen:
             problems.append(f"{rid}: duplicate id")
         seen.add(rid)
-    return problems
+    return problems + linked
 
 
 def _list_of_dicts(rule, key):
@@ -586,7 +645,8 @@ def _list_of_dicts(rule, key):
     return value if isinstance(value, list) and all(isinstance(v, dict) for v in value) else None
 
 
-def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
+def _rule_problems(rule: dict, district: str, ctx: Context, relaxed: dict | None = None) -> list[str]:
+    """relaxed: the rule as the checker reads it with its `relaxes` links applied; its worked examples are judged so."""
     p = [f"unknown field '{k}'" for k in rule.keys() - RULE_FIELDS]
     p += [f"'{k}' must be text" for k in TEXT_FIELDS if k in rule and not isinstance(rule[k], str)]
     if p:
@@ -658,7 +718,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append(f"example {n}: unknown district {given['district']!r}")
         elif ex.get("expect") not in OUTCOMES:
             p.append(f"example {n}: expect must be one of {OUTCOMES}")
-        elif not p and (got := outcome(rule, given, ctx.allowed())) != ex["expect"]:
+        elif not p and (got := outcome(relaxed or rule, given, ctx.allowed())) != ex["expect"]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
 
     p += _approval_problems(rule, ctx, APPROVED_FIELDS)

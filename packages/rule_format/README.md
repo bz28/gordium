@@ -45,6 +45,28 @@ Everyday math notation, read by a strict parser that rejects anything else: numb
 3. any `review_when` true → **needs review**
 4. `check` true / false → **pass** / **fail**
 
+### An exception that widens a rule (`relaxes`)
+
+Some law is a limit plus an exception that allows more under conditions: the chart's 35 ft height, and §325-16C's extra 10% when every yard is increased by the extra height. The exception can be its own rule that names the rule it widens:
+
+```yaml
+- id: R-1b.height_chart
+  check: building_height <= 35
+- id: R-1b.height_bonus
+  relaxes: R-1b.height_chart        # a rule of the same rulebook (same district)
+  applies_when: front_yard >= 25 + (building_height - 35) and ...   # the exception's conditions, all of them
+  check: building_height <= 35 + 0.1 * 35
+```
+
+The checker reads the widened rule as `its own check or (each relaxing rule's applies_when and its check)`, in the same three-valued logic, so:
+
+- it passes if its own check passes, or if a relaxing rule's conditions are **all** met **and** that rule's check passes; never otherwise;
+- an unknown condition can only turn a fail into **needs review**, never into a pass;
+- each relaxing rule widens on its own; a relaxing rule's `review_when` applies where the widening is what decides;
+- the relaxing rule is still its own rule too, and is never widened itself.
+
+The composition is `apply_relaxes(rules)`, applied where rules are read for checking (`zone_rules`, the project report), and a widened rule's worked examples are judged as the checker reads it. Rule-file checks refuse a `relaxes` that names no rule of the same rulebook, names itself, names a flag (nothing to widen), comes from a rule with no `applies_when` or `check`, or forms a cycle. `test_relaxes.py` shows the hand R-1b height (one combined formula) and the relaxes version give the same verdict for every design in a grid of heights, yards and missing values.
+
 Fails closed: `outcome(rule, values, allowed)` requires the city's allowed text values (e.g. `{"use": uses}`). A measurement that is missing or unusable (none, NaN, infinite, negative, wrong kind, a `use` not in the list) is unknown, and unknowns follow three-valued logic: the result is pass or fail only if it is the same for every value that measurement could take (true or unknown is true; false and unknown is false), else **needs review**. A value the formula can't evaluate (divide by zero, a non-finite result) → **needs review**, never hidden under an unknown. A measure with no description can't be type-checked, so any formula using it → **needs review** (never three-valued), as does a formula that can't be read. Every formula is type-checked when rule files are validated (`formula.type_of`): one that is wrong for every value (text vs number, a number as true/false) is refused.
 
 ## Checking rule files

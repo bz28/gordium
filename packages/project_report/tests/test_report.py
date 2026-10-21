@@ -381,3 +381,16 @@ def test_the_workbook_is_in_an_architects_words(t):
     from project_report import plain
     assert plain.proposed(24.9999, "ft", "≥ 25") == "24'-11 7/8\""      # never rounded up to 25'-0"
     assert plain.proposed(35.0001, "ft", "≤ 35") == "35'-0 1/8\""       # never rounded down to 35'-0"
+
+
+def test_the_report_reads_every_rule_with_its_relaxes_links_applied(monkeypatch):
+    """`relaxes` (an exception widening another rule) is applied where the checker reads rules (zone_rules); the report
+    reads the files itself, so it must apply the same composition or it could show FAIL where the checker passes."""
+    real = report.apply_relaxes
+
+    def tagged(rules):
+        return [r | {"id": "relaxed:" + r["id"]} for r in real(rules)]
+    monkeypatch.setattr(report, "apply_relaxes", tagged)
+    t = tables(SITE)
+    ids = list(rows_by_id(t))
+    assert ids and all(i.startswith("relaxed:") for i in ids)
