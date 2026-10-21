@@ -153,7 +153,9 @@ Every reason the code gives today comes from the table:
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
   of all the buildings, or under the lowest point of all of them, as when a survey elevation is typed for a model
-  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual); "a solid lies wholly under the
+  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual; with spot grades,
+  read from the ground under the footprint whether or not they sit at the walls); "the spot grades don't show the
+  ground under the building (too few, or in a line): place spot grades around the building"; "a solid lies wholly under the
   ground (<ground> ft; it runs from <bottom> to <top> ft) and isn't joined directly under the building: check the
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
   it lies within that solid's plan; a sub-basement under it too); "say whether the ground is flat";
@@ -203,8 +205,11 @@ Every reason the code gives today comes from the table:
   question for the architects".
 - **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
   measurements"; "more than one building: pick the main building" (with none picked and exactly one starting house, it is
-  the main building, assumed: every measurement from it carries `main_assumed`, and every other building is also
-  read as if it were the main one, so the assumption never passes what a pick wouldn't); "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "a building isn't inside the lot: {what}" (a building wholly off the lot: only the rules that would measure it wait. A building partly off the lot is measured, and every rule that measures it does not comply, whatever the readings or answers; each building is placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  the main building, assumed: every measurement from it carries `main_assumed`, and every other building that
+  could be a principal one (enclosed, at least 7 ft tall and 70 sf: NYS Residential Code R305.1, R304.1) is also
+  read as if it were the main one, so the assumption never passes what a pick wouldn't); "a building object has
+  nothing to measure (no faces): check it on the Building layer"; "a building covers no area seen from above (walls only, or faces in a line): check it on the
+  Building layer" (it can't be placed on the lot: the rules that would measure it wait, as for one off the lot); "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "a building isn't inside the lot: {what}" (a building wholly off the lot: only the rules that would measure it wait. A building partly off the lot is measured, and every rule that measures it does not comply, whatever the readings or answers; each building is placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it
