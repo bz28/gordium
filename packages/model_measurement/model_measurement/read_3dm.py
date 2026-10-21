@@ -93,6 +93,9 @@ def _brep_faces(brep, s):
 
 
 FLOAT_SAFE = 2.0 ** 17      # ft from the origin: beyond this, single-precision points are coarser than 0.01 ft
+TYPED_NEAR = 2.0 ** 10      # ft from the origin: within this, a single-precision point's steps are under 1/8000 ft,
+                            # fine enough to tell the decimal that was typed; beyond it they aren't (40,000 ft out
+                            # a step is 1/250 ft), and "recovering" decimals there moves each point on its own
 
 
 def _single(x: float) -> bool:
@@ -127,9 +130,10 @@ def _mesh_faces(mesh, s):
     problems = []
     far = any(max(abs(p.X), abs(p.Y), abs(p.Z)) * s > FLOAT_SAFE for p in points)
     single = all(_single(c) for p in points for c in (p.X, p.Y, p.Z))
+    near = all(max(abs(p.X), abs(p.Y), abs(p.Z)) * s <= TYPED_NEAR for p in points)
     if far and single:                                   # only single-precision points held, too coarse out there
         problems.append(stop("single_precision"))
-    elif single:                                         # near the origin: read as the numbers that were typed
+    elif single and near:                                # near the origin: read as the numbers that were typed
         points = [_Point(_as_typed(p.X), _as_typed(p.Y), _as_typed(p.Z)) for p in points]
     faces = []
     for i in range(len(mesh.Faces)):
