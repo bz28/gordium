@@ -12,8 +12,9 @@ Read these in order. Words you don't know are in the [glossary](docs/glossary.md
 
 1. **[The System Map](https://claude.ai/artifact/BMkp3eyrgemdqcwhi9oFxf)** (online, about 10 minutes): Gordium at a glance, from the City's law to a checked design, with the key decisions in one line each.
 2. **[How Gordium works, step by step](https://claude.ai/artifact/5LAxAN2qpWFUMDBBDpLQrh)** (online, about 20 minutes): the same flow as plain-English pseudocode, step by step, with what is built and what isn't.
-3. **[The docs index](docs/README.md)** (5 minutes to scan): every document in this repository, what it is for and who it is for.
-4. **[How we work](CLAUDE.md)** (10 minutes): the principles Gordium never breaks, the repository layout, and how changes are made and reviewed.
+3. **[Try it](apps/rhino_plugin/QUICKSTART.md)** (about 10 minutes the first time): install Gordium in Rhino and check your first design, step by step. Or look at the [pictures](docs/demo/README.md) first.
+4. **[The docs index](docs/README.md)** (5 minutes to scan): every document in this repository, what it is for and who it is for.
+5. **[How we work](CLAUDE.md)** (10 minutes): the principles Gordium never breaks, the repository layout, and how changes are made and reviewed.
 
 ## How the repository is organized
 

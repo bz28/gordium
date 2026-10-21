@@ -1,5 +1,9 @@
 # PR 15 build spec: Gordium in Rhino, UI
 
+**Purpose:** the approved build spec for Gordium's Rhino screens (start box, panel, viewport): each acceptance criterion and how it is verified.\
+**For:** engineers building the Rhino side, and designers reviewing it.\
+**Kept current by:** the engineer who changes the Rhino UI, in that PR; a change of design needs a new critique round first.
+
 Status: approved by Claude on Ben's delegation (2026-10-20), after three critique rounds (each round: a practicing architect and a pro-tools product designer, both cold). Mockup: https://claude.ai/artifact/E18rXU59kG8rLUZa1hgktQ (boards 1–8). Example throughout: 106 Ithaca Rd, R-1b, one-family dwelling.
 
 **How to read this.** Each item is one acceptance criterion. The tag says how it is verified:
