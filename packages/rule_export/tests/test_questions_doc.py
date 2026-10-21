@@ -122,7 +122,7 @@ def test_only_shareable_data_is_stored_and_it_is_what_was_downloaded():
     redistributed, so no City file is stored: only our measurements, with the URL and the raw response's
     fingerprint, and the statement the City asks derived products (the page) to carry."""
     readme = (SITE / "gis/README.md").read_text(encoding="utf-8")
-    assert [f.name for f in sorted((SITE / "gis").iterdir())] == ["README.md", "city_tax_parcel_measurements.yaml",
+    assert sorted(f.name for f in (SITE / "gis").iterdir()) == ["README.md", "city_tax_parcel_measurements.yaml",
                                                                  "county_parcel_2026-10-20.json"]
     county = SITE / "gis/county_parcel_2026-10-20.json"
     assert f"SHA-256: `{hashlib.sha256(county.read_bytes()).hexdigest()}`" in readme

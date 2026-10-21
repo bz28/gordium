@@ -58,9 +58,11 @@ def test_no_point_of_the_envelope_is_inside_a_required_yard():
     assert front.distance(shape) >= 25
     for side in (LineString(points[1:3]), LineString([points[4], points[0]])):
         assert side.distance(shape) >= 10
-    # the rear requirement under every reading of the jog: 25% of the lot depth with the jog as a rear line
-    # ((99 + 90) / 2 = 94.5) or as part of a side line ((99 + 12.04 + 90) / 2 = 100.52): the larger wins
-    assert env["yards"]["rear"] == pytest.approx(0.25 * (99 + math.hypot(8, 9) + 90) / 2)
+    # the rear requirement under every reading of the lot lines: 25% of the lot depth with the jog and the back
+    # line as the rear ((99 + 90) / 2 = 94.5), the jog as part of the west side line ((99 + 12.04 + 90) / 2 =
+    # 100.52) or the back line as part of the east side line, the jog the rear ((90 + 65 + 99) / 2 = 127): the
+    # largest wins (review round 8: every reading the geometry allows)
+    assert env["yards"]["rear"] == pytest.approx(0.25 * (90 + 65 + 99) / 2)
     assert LineString(points[2:4]).distance(shape) >= env["yards"]["rear"]
     assert LineString(points[3:5]).distance(shape) >= env["yards"]["side"]
 

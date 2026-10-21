@@ -33,9 +33,9 @@ MEASURES = list(load(MEASURES_FILE))
 
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
-PARALLEL, PERPENDICULAR = 30, 60   # degrees from the street: clearly a rear line / clearly a side line
+PARALLEL = 30             # degrees: street lines turning more than this between them turn a corner
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
-MAX_UNCLEAR_EDGES = 4     # more lot lines than this of unclear kind: too many readings to list
+MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
@@ -164,43 +164,48 @@ class Lot:
 
     def readings(self):
         """Every way to read which lot lines are side lines and which are rear lines: a list of
-        (description, left side edges, right side edges, rear edges). Lines next to the street lines and
-        about square to the street are side lines; lines not next to it and about parallel are rear lines;
-        any other line could be either, so both are tried."""
+        (description, left side edges, right side edges, rear edges), or None when there are too many to list.
+
+        Every reading the geometry allows, none pruned by angle (review round 8): walking out from each end of the
+        street lines, the lines run on as that side lot line for one or more lines, and the rear lot line is what
+        is left between the two sides. Excluded only where the law excludes it: a line touching the street is a
+        side line, never the rear (so each side starts with the line at the street's end), and a reading with
+        no rear line isn't one. More than MAX_UNCLEAR_EDGES lines that could be either: too many to list, so
+        the measuring stops (needs review), never fewer readings silently."""
         n, chain = len(self.edges), self.ordered_street()
-        front = _chord([p for i in chain for p in (self.edges[i][0], self.edges[i][-1])])
         rest = [(chain[-1] + k) % n for k in range(1, n - len(chain) + 1)]     # from the street's end, around
-        ends = {rest[0], rest[-1]}
-        kinds = {}
-        for i in rest:
-            a = _angle(_chord(self.edges[i]), front)
-            if i in ends and a >= PERPENDICULAR:
-                kinds[i] = ("side",)
-            elif i not in ends and a <= PARALLEL:
-                kinds[i] = ("rear",)
-            else:
-                kinds[i] = ("side", "rear")
-        unclear = [i for i in rest if len(kinds[i]) == 2]
-        if len(unclear) > MAX_UNCLEAR_EDGES:
+        if len(rest) - 2 > MAX_UNCLEAR_EDGES:          # the lines between the two lines at the street's ends
             return None
         found = []
-        for choice in itertools.product(*(kinds[i] for i in rest)):
-            k = dict(zip(rest, choice))
-            # side lines run from each end of the street lines; the rear lines are what is left between them
-            right = list(itertools.takewhile(lambda i: k[i] == "side", rest))
-            left = list(itertools.takewhile(lambda i: k[i] == "side", reversed(rest)))
-            rear = [i for i in rest if i not in right and i not in left]
-            if not right or not left or not rear or any(k[i] != "rear" for i in rear):
-                continue
-            words = ", ".join(f"line {i + 1} as a {k[i]} lot line" for i in unclear)
-            found.append((words, left, right, rear))
-        return found
+        for k1 in range(1, len(rest)):
+            for k2 in range(1, len(rest) - k1):
+                right, left = rest[:k1], list(reversed(rest))[:k2]
+                rear = rest[k1:len(rest) - k2]
+                found.append((left, right, rear))
+        middle = rest[1:-1]
+        varies = [i for i in middle if len({i in r for _l, _r, r in found}) == 2]
+        return [(", ".join(f"line {i + 1} as a {'rear' if i in rear else 'side'} lot line" for i in varies),
+                 left, right, rear) for left, right, rear in found]
 
 
 # ---- buildings -------------------------------------------------------------------------------------------
 
+_PLAN_OF = {}         # id of a faces list -> (that list, its projection), for one measure() call
+
+
 def _projection(building: dict):
-    """The building seen from above: the union of its faces projected flat (vertical faces add nothing)."""
+    """The building seen from above: the union of its faces projected flat (vertical faces add nothing). Worked
+    out once per solid and measure() call."""
+    faces = building["faces"]
+    held = _PLAN_OF.get(id(faces))
+    if held is not None and held[0] is faces:
+        return held[1]
+    found = _projection_now(building)
+    _PLAN_OF[id(faces)] = (faces, found)
+    return found
+
+
+def _projection_now(building: dict):
     parts = []
     for f in building["faces"]:
         shell = [tuple(p[:2]) for p in f["points"]]
@@ -290,7 +295,20 @@ def _unit_normal(points) -> tuple:
     return nx / n, ny / n, nz / n
 
 
+_PLANES = {}         # the same faces (by identity) -> their plane groups, for one measure() call
+
+
 def _planes(faces: list[dict]) -> list[list[dict]]:
+    """_planes_now, read once per set of faces and measure() call (the height and the eaves both ask)."""
+    key = tuple(id(f) for f in faces)
+    held = _PLANES.get(key)
+    if held is None or any(a is not b for a, b in zip(held[0], faces)):
+        held = (list(faces), _planes_now(faces))
+        _PLANES[key] = held
+    return held[1]
+
+
+def _planes_now(faces: list[dict]) -> list[list[dict]]:
     """The faces grouped into planes. Each group has an anchor face (the face it started from; when two groups
     join, the larger group's anchor), and every corner of every face in the group lies within TOL of the anchor's
     plane, so a group never drifts. Faces that share an edge (two
@@ -345,6 +363,20 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
 _SKY = {}            # id of a faces list -> (that list, its faces open to the sky), for one measure() call
 
 
+def _roof_faces(building: dict) -> list[dict]:
+    """The faces open to the sky, the building's own base left out (a floor at the bottom is never a roof, and
+    can't cover anything above it, so it is left out before the sky is read: the same result, much faster on a
+    meshed floor). Read once per solid and measure() call."""
+    faces = building["faces"]
+    held = _SKY.get(("roof", id(faces)))
+    if held is not None and held[0] is faces:
+        return held[1]
+    bottom = min(p[2] for f in faces for p in f["points"])
+    found = _open_to_the_sky([f for f in faces if not all(abs(p[2] - bottom) <= TOL for p in f["points"])])
+    _SKY[("roof", id(faces))] = (faces, found)
+    return found
+
+
 def _open_to_the_sky(faces: list[dict]) -> list[dict]:
     """The faces of a solid that aren't wholly covered by the solid itself (read once per solid and measure() call:
     the height, the eaves and the yards all ask)."""
@@ -394,13 +426,12 @@ def _height_of(building: dict, grade: float, facts: dict) -> dict:
     zs = [p[2] for f in building["faces"] for p in f["points"]]
     top = max(zs)
     bottom = min(zs)
-    roof = [f for f in _open_to_the_sky(building["faces"]) if not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
+    roof = _roof_faces(building)
     if not roof:
         return _missing("building_height", stop("no_roof"))
     how = "from the ground level (grade plane) to the top of the roof"
     # the main roof: the largest roof plane seen from above (its faces together, so a meshed roof counts whole)
-    main_roof = max(_planes(roof), key=lambda g: (ops.unary_union([_plan(f) for f in g]).area,
-                                                  max(p[2] for f in g for p in f["points"])))
+    main_roof = _main_roof(_planes(roof))
     roof_top = max(p[2] for f in main_roof for p in f["points"])
     if roof_top >= top - TOL:
         readings, question, basis = _roof_readings(roof, top, grade, building, facts)
@@ -413,6 +444,21 @@ def _height_of(building: dict, grade: float, facts: dict) -> dict:
     basis = list({b["id"]: b for b in low_basis + high_basis}.values())
     return _decide("building_height", readings, how, _parts(building),
                    "; ".join(dict.fromkeys(q for q in (ABOVE_ROOF, low_question, high_question) if q)), basis)
+
+
+def _main_roof(groups: list[list[dict]]) -> list[dict]:
+    """The main roof: the roof plane that shows the most from above (its plan less what any higher roof plane
+    covers: a lower floor's top under the floor above shows only where that floor doesn't cover it), the higher
+    of two that show the same (to 0.01 sf, so rounding in a rotated or reordered drawing never decides it)."""
+    plans = [ops.unary_union([_plan(f) for f in g]) for g in groups]
+    lows = [min(p[2] for f in g for p in f["points"]) for g in groups]
+    highs = [max(p[2] for f in g for p in f["points"]) for g in groups]
+
+    def shows(k):
+        above = [plans[j] for j in range(len(groups)) if j != k and lows[j] > highs[k] + TOL]
+        return plans[k].difference(ops.unary_union(above)).area if above else plans[k].area
+    best = max(range(len(groups)), key=lambda k: (round(shows(k), 2), round(highs[k], 4)))
+    return groups[best]
 
 
 def _roof_readings(roof: list[dict], top: float, grade: float, building: dict, facts: dict) -> tuple[list, str, list]:
@@ -493,12 +539,11 @@ def _pitched_section(building: dict) -> list:
     if not zs:
         return []
     bottom = min(zs)
-    roof = [f for f in _open_to_the_sky(building["faces"]) if not all(abs(p[2] - bottom) <= TOL for p in f["points"])]
+    roof = _roof_faces(building)
     if not roof:
         return []
     groups = _planes(roof)
-    main_roof = max(groups, key=lambda g: (ops.unary_union([_plan(f) for f in g]).area,
-                                          max(p[2] for f in g for p in f["points"])))
+    main_roof = _main_roof(groups)
     top = max(p[2] for f in main_roof for p in f["points"])
     return [g for g in groups if _normal_z(g[0]["points"]) < FLAT
             and any(abs(p[2] - top) <= TOL for f in g for p in f["points"])
@@ -841,10 +886,14 @@ def _grade_from_points(buildings: list[dict], points: list, others: list = ()) -
 def measure(site: dict, facts: dict) -> dict[str, dict]:
     """Every measurement in measures.yaml, in its order, each with its working, for one site and its lot facts."""
     _SKY.clear()
+    _PLANES.clear()
+    _PLAN_OF.clear()
     try:
         out = _measure(site, facts)
     finally:
         _SKY.clear()
+        _PLANES.clear()
+        _PLAN_OF.clear()
     return {name: out[name] for name in MEASURES}
 
 
@@ -980,22 +1029,29 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
              else {})
     # each building on its own (each stack, each detached building): one wholly off the lot can't be measured
     # against it (outside_lot, whatever the others do); one that crosses a lot line is measured, and the yard to
-    # each line it actually crosses is marked (crosses_lot_line): never a pass
-    plans = [_projection(b) for b in buildings]
-    within = [p.within(lot.polygon.buffer(TOL)) for p in plans]
-    off = [not w and p.intersection(lot.polygon).area <= 1e-6 for p, w in zip(plans, within)]
-    outside = ops.unary_union([p.difference(lot.polygon.buffer(TOL)) for p, w in zip(plans, within) if not w]) \
-        if not all(within) else Polygon()
-    # a line is crossed where the part outside the lot runs along it (shares a stretch of it, not just a corner)
-    reach = outside.buffer(2 * TOL) if outside.area > 1e-6 else None
-    crossed = {i for i, e in enumerate(lot.edges)
-               if reach is not None and reach.intersection(LineString(e)).length > 4 * TOL}
-    crosses = bool(crossed) and not any(off)
-    why_inside = why_building or (stop("outside_lot") if any(off) or (not all(within) and not crosses) else None)
+    # its own crossings are recorded (_mark_crossings): it fails every rule that measures it, never a pass
+    # one rule for each building on its own (each stack, each detached building), whatever the others are:
+    # within the lot: measured as usual; partly outside: every rule that measures it does not comply
+    # (_mark_crossings, naming the lines it crosses where they can be told); wholly outside: the rules that would
+    # measure it need review (outside_lot: is it part of this design?)
+    place = {}
+    for b in buildings:
+        p = _projection(b)
+        place[b["id"]] = ("on" if p.within(lot.polygon.buffer(TOL)) else
+                          "off" if p.intersection(lot.polygon).area <= 1e-6 else "partly")
+    crossed = {i: _crossed(lot, _projection(next(b for b in buildings if b["id"] == i)))
+               for i, s in place.items() if s == "partly"}
+    crosses = bool(crossed)
+    group = [main, *parts_of] if main is not None else []
+    why_main_off = stop("outside_lot") if any(place.get(b["id"]) == "off" for b in group) else None
+    why_acc_off = stop("outside_lot") if any(place.get(b["id"]) == "off" for b in detached) else None
+    why_inside = why_building or (stop("outside_lot") if "off" in place.values() else None)    # coverage
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
     else:
         out["building_area"] = _coverage(buildings, views, facts, main)
+    if crosses:                         # coverage, the height and the accessory count: whatever else follows
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached)
 
     if why_street:
         return out
@@ -1007,21 +1063,60 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                    "the average length of the two side lot lines", [lot.id], lines["question"],
                                    lines["basis"]["depth"])
 
-    why_yards = why_inside or why_plan or why_main or (why_grade if plan_level is None else None)
+    # every other reason the plan can't be trusted, on its own (never read off an `or` chain: review round 9)
+    why_rest = why_building or why_plan or why_main or (why_grade if plan_level is None else None)
+    why_yards = why_building or why_main_off or why_rest
     if why_yards:
         for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
             out[name] = _missing(name, why_yards)
+        if why_main_off and not why_rest and not why_acc_off and detached:
+            # only the main building is off the lot: an accessory building on it is still measured on its own
+            _accessory_yards(out, lot, lines, facts, detached, views)
         return out
     _yards(out, lot, lines, facts, main, parts_of, detached, views)
-    if crosses:                                  # each yard measured to a line the building crosses: marked
-        sides = {i for _w, r in lines["readings"] for g in r["sides"] for i in g}
-        rears = {i for _w, r in lines["readings"] for i in r["rear"]}
-        to = {"front": set(lot.street), "side": sides, "rear": rears}
-        for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
-            kind = "front" if "front" in name else "side" if "side" in name else "rear"
-            if crossed & to[kind] and name in out:
-                out[name]["crosses_lot_line"] = True
+    if why_acc_off:                              # an accessory building wholly off the lot: its own rule waits
+        for name in ACCESSORY_YARDS:
+            out[name] = _missing(name, why_acc_off)
+    if crosses:
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached)
     return out
+
+
+def _crossed(lot: Lot, plan) -> set:
+    """The lot lines (by index) one building crosses: those its part outside the lot runs along."""
+    outside = plan.difference(lot.polygon.buffer(TOL))
+    if outside.area <= 1e-6:
+        return set()
+    reach = outside.buffer(2 * TOL)
+    return {i for i, e in enumerate(lot.edges) if reach.intersection(LineString(e)).length > 4 * TOL}
+
+
+def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict, parts_of: list, detached: list):
+    """A building that crosses a lot line stands partly on another lot: it fails every rule that measures it,
+    whatever the readings or answers (the checker does that, check.crossing). Each measurement of a building
+    records that building's own crossings, `crossings`: [{"who", "lines": street / side / rear}]: the main
+    building's on the main yards, the eaves and the height; each accessory building's on the accessory
+    measurements; every building's on the coverage."""
+    sides = {i for _w, r in lines["readings"] for g in r["sides"] for i in g} if lines and not isinstance(lines, str) else set()
+    rears = {i for _w, r in lines["readings"] for i in r["rear"]} if lines and not isinstance(lines, str) else set()
+
+    def kinds(idx):                  # the lines that can be named: street, side, rear (an unclear one isn't)
+        return sorted({"street" if i in lot.street else "side" if i in sides else "rear" if i in rears else ""
+                       for i in idx} - {""})
+    group = [main, *parts_of] if main is not None else []
+    partly = [b for b in group if b["id"] in crossed]
+    mine = set().union(*(crossed[b["id"]] for b in partly)) if partly else set()
+    entries_main = [{"who": "the main building", "lines": kinds(mine)}] if partly else []
+    entries_acc = [{"who": f'accessory building "{_parts(b)[0]}"', "lines": kinds(crossed[b["id"]])}
+                   for b in detached if b["id"] in crossed]
+    for name in YARDS + EAVE_YARDS + ("building_height", "stories"):
+        if entries_main and name in out:
+            out[name]["crossings"] = entries_main
+    for name in ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply"):
+        if entries_acc and name in out:
+            out[name]["crossings"] = entries_acc
+    if (entries_main or entries_acc) and "building_area" in out:
+        out["building_area"]["crossings"] = entries_main + entries_acc
 
 
 def _attached(main: dict, buildings: list[dict]) -> list[dict]:
@@ -1206,9 +1301,8 @@ def _lot_lines(lot: Lot, facts: dict):
         view = copy.copy(lot)
         view.street = list(address)
         readings = view.readings()
-        if readings is None:
-            problems.append(stop("lines_unclear", limit=MAX_UNCLEAR_EDGES))
-            continue
+        if readings is None:            # too many to list: never fewer readings silently, whatever the others give
+            return stop("lines_unclear", limit=MAX_UNCLEAR_EDGES)
         for words, left, right, rear in readings:
             sides = [g for g in ([i for i in left if i not in streets], [i for i in right if i not in streets]) if g]
             if any(i in streets for i in rear):
@@ -1220,9 +1314,19 @@ def _lot_lines(lot: Lot, facts: dict):
                          f"{', '.join(str(i + 1) for i in address)}") if len(candidates) > 1 else ""
                 found.append((_both(where, words), {"left": left, "right": right, "sides": sides, "rear": rear,
                                                     "address": address}))
+    # a reading the law excludes (its rear on a street, or no side line left) is dropped; if none is left, the
+    # first reason says why. An address with too many lines stopped above (review round 9)
     problem = None if found else (problems[0] if problems else stop("no_rear_line"))
     return {"readings": found, "question": "; ".join(question), "basis": basis, "problem": problem,
             "candidates": candidates}
+
+
+def _side_order(found) -> tuple:
+    """The two side yards, the narrower first; two equal ones (within SAME) in a fixed order by where their lot line
+    is (west, then south, first), so which is "smaller" never depends on the order the outlines were drawn in."""
+    d, points = found
+    (x, y), _ = points
+    return (round(d / SAME) * SAME if SAME else d, round(x, 6), round(y, 6))
 
 
 def _turn(a, b) -> float:
@@ -1334,9 +1438,9 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
         for words, r in lines["readings"]:
             for w, s, n in group:
                 found = [_distance(lot.line(g), s) for g in r["sides"]]
-                (a, pa), (b, pb) = (found * 2)[:2]
-                small.append((_both(words, w), min(a, b), {"points": pa if a <= b else pb, "named": n}))
-                large.append((_both(words, w), max(a, b), {"points": pb if a <= b else pa, "named": n}))
+                (a, pa), (b, pb) = sorted((found * 2)[:2], key=_side_order)
+                small.append((_both(words, w), a, {"points": pa, "named": n}))
+                large.append((_both(words, w), b, {"points": pb, "named": n}))
                 d, p = _distance(lot.line(r["rear"]), s)
                 rear.append((_both(words, w), d, {"points": p, "named": n}))
         eaves = ", eaves included" if suffix else ""

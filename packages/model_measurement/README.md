@@ -81,8 +81,10 @@ both: only that reading is measured. The code finds a question by its entry and 
 measure, so a renumbered question is still found; a question or finding the files no longer have stops the
 measurement.
 
-Side and rear lot lines follow from the street: lines next to the street lines and about square to them
-(60° or more) are side lines; lines not next to them and about parallel (30° or less) are rear lines.
+Side and rear lot lines follow from the street, every way the geometry allows (no angle decides it): walking out
+from each end of the street lines, the lines run on as that side lot line for one or more lines, and the rear lot
+line is what is left. The line at each end of the street touches the street, so it is a side line, never the rear;
+a reading with no rear line isn't one. More than 6 lines that could be either: too many to list (needs review).
 
 ## Never a guess
 
@@ -134,7 +136,7 @@ Every reason the code gives today comes from the table:
 - **What research settled** (`interpretations.py`): "the city's files no longer have that finding (answered
   without naming the reading, or removed): the measuring can't follow it" (any finding or open question the code
   follows, named in the reason); "a reading research lists (a_reading, an_entry) has no measuring code yet".
-- **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 4 lot lines could be
+- **Side and rear lot lines:** "the side and rear lot lines can't be told apart (more than 6 lot lines could be
   either: too many readings to list)"; "no reading of the lot lines gives two side lot lines and a rear lot line
   (a triangular lot, for one): an open question for the architects".
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
@@ -167,9 +169,12 @@ Every reason the code gives today comes from the table:
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
   together, or draw the overhang as part of its floor".
-- **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
-  building isn't inside the lot" (wholly off it: a building that crosses a lot line is measured, the yard to the
-  line it crosses is 0 and marked `crosses_lot_line`, so it does not comply); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+- **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a building isn't on the lot (is it part of this design?)" (a building
+  wholly off the lot: only the rules that would measure it wait: the main yards for the main building, the accessory
+  rule for an accessory building, coverage for any. A building partly off the lot is measured, and every rule that
+  measures it does not comply, whatever the readings or answers: the main yards, the eaves, the height and the
+  stories for the main building, the accessory rule for an accessory building, coverage for any; each building is
+  placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

@@ -131,7 +131,7 @@ def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_
 
 def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], uses=None,
                            floor_to_floor: float | None = None, keep_back: float = 0.0,
-                           coverage_scale: float = 1.0) -> dict:
+                           coverage_scale: float = 1.0, verdict=None) -> dict:
     """{"floors": [{"outline": [[x, y], ...], "base": z, "top": z}, ...], "stories", "height", "area",
     "coverage_allowed", "notes"}: the starting building, or no floors and the notes that say why.
 
@@ -139,7 +139,9 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     passes or needs review), or no building is returned and the notes say "Gordium can't generate..." (`CANT`).
     `uses`: the city's use names (read from the jurisdiction in the facts when not given). `keep_back` (ft) moves
     every yard line that much further in (the tax-map tolerance, a design buffer); `coverage_scale` scales the
-    coverage allowed (below 1: sized for the smallest lot the tax map allows)."""
+    coverage allowed (below 1: sized for the smallest lot the tax map allows). `verdict`: the checker's own result
+    for one rule (design_checker.check.verdict, which also counts a rule that fails under every reading); the
+    checker passes it, since this package can't import the checker."""
     out = {"floors": [], "stories": None, "height": None, "area": None, "coverage_allowed": None, "notes": []}
     notes = out["notes"]
     sized, drawn = _as_drawn(measured)       # coverage on a lot not yet surveyed: from the lot as drawn (said below)
@@ -149,6 +151,8 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     notes += env["notes"]
     if not env["outline"]:
         notes.append("no buildable area to start from")
+        if any("leave no room" in n for n in env["notes"]):     # the yards close the lot: the architect draws one
+            notes.append(CANT)
         return out
     if env["height"] is None or env["base"] is None:
         notes.append("no height limit or ground level: the building's height can't be set")
@@ -207,7 +211,7 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     out["floors"] = [{"outline": ring, "base": base + i * story, "top": top if i == stories - 1 else base + (i + 1) * story}
                      for i in range(stories)]
     out.update(stories=stories, height=top - base, area=outline.area, coverage_allowed=allowed)
-    failing = _failing(site, facts, out["floors"], rules, uses)
+    failing = _failing(site, facts, out["floors"], rules, uses, verdict)
     if failing:                          # never a wrong building: it is proven with the checker's own rules first
         notes.append(f"{CANT} (the rectangle found would break: {', '.join(failing)})")
         out.update(floors=[], stories=None, height=None, area=None)
@@ -228,9 +232,10 @@ def floor_solids(floors: list[dict]) -> list[dict]:
     return solids
 
 
-def _failing(site: dict, facts: dict, floors: list[dict], rules: list[dict], uses) -> list[str]:
+def _failing(site: dict, facts: dict, floors: list[dict], rules: list[dict], uses, verdict=None) -> list[str]:
     """The ids of the rules the building breaks, measured and checked exactly as the checker does (measure, then
-    outcome). A FAIL counts, and so does a building the measuring code can't read (no footprint or no height):
+    the checker's verdict: a FAIL, or a needs review that fails under every reading, the lot as drawn included;
+    plain outcome() when no verdict is given). A FAIL counts, and so does a building the measuring code can't read (no footprint or no height):
     its rules would only say "needs review", which proves nothing. Any other needs review (no survey yet, the
     bedrooms not drawn) is the architect's to answer, and the check says so. A rule the lot itself already fails,
     with no building on it (a frontage narrower than the lot-width rule), is the lot's, not the building's: the
@@ -239,9 +244,15 @@ def _failing(site: dict, facts: dict, floors: list[dict], rules: list[dict], use
         j = facts.get("jurisdiction")
         uses = Context.for_jurisdiction(REPO / j).uses if j and (REPO / j).is_dir() else set()
 
+    def judged(rule, measured):
+        if verdict is not None:
+            return verdict(rule, measured, {"use": uses})
+        return outcome(rule, {k: v["value"] for k, v in measured.items()}, {"use": uses})
+
     def fails(buildings):
-        values = {k: v["value"] for k, v in measure({**site, "buildings": buildings}, facts).items()}
-        return [r["id"] for r in rules if outcome(r, values, {"use": uses}) == "fail"], values
+        measured = measure({**site, "buildings": buildings}, facts)
+        values = {k: v["value"] for k, v in measured.items()}
+        return [r["id"] for r in rules if judged(r, measured) == "fail"], values
 
     lot_own = set(fails([])[0])
     failing, values = fails(floor_solids(floors))

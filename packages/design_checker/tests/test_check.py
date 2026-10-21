@@ -687,7 +687,7 @@ UNITS_PATTERN = r"_scale\(|\* k\b|\* scale\b|/ scale\b|\* k\)"     # any use of 
 
 
 def test_the_units_scan_catches_a_conversion_inside_a_call():
-    """Review round 7: `_scale\(doc\)(?!\))` let `foo(y / _scale(doc))` through."""
+    r"""Review round 7: `_scale\(doc\)(?!\))` let `foo(y / _scale(doc))` through."""
     import re
     assert re.search(UNITS_PATTERN, "    x = foo(y / _scale(doc))")
     assert re.search(UNITS_PATTERN, "    x = y * _scale(doc)")
@@ -912,3 +912,131 @@ def test_a_starting_house_is_drawn_on_existing_spot_grades_placed_at_the_lot(fac
                         "grade_from": "spot", "grade_is": "existing", "grade_points": spots})
     assert len(got["floors"]) == 3 and any("drawn on the ground as it is" in n for n in got["notes"])
     assert got["floors"][0]["base"] == pytest.approx(2.5, abs=0.01)          # the spots' plane: their average
+
+
+# ---- the plugin and the worker stay in step (audit P1-1) -----------------------------------------------------
+
+def test_a_stray_line_on_the_workers_stdout_never_reaches_the_plugin(facts):
+    """A library print() or C code writing to file descriptor 1 inside the worker once put every later answer
+    one request behind (a check could show the previous check's result). Answers now have their own channel."""
+    import subprocess
+    import sys
+    noisy = ("import os, design_checker.__main__ as m\n"
+             "real = m.answer\n"
+             "def answer(r):\n"
+             "    print('a library says hello')\n"
+             "    os.write(1, b'C code says hello\\n')\n"
+             "    return real(r)\n"
+             "m.answer = answer\n"
+             "m.main(['serve'])\n")
+    requests = [{"id": 1, "cmd": "facts", "facts": {"lot_area_sqft": 1}}, {"id": 2, "cmd": "facts", "facts": {}}]
+    run = subprocess.run([sys.executable, "-u", "-c", noisy], input="".join(json.dumps(r) + "\n" for r in requests),
+                         capture_output=True, text=True, encoding="utf-8", timeout=120)
+    replies = [json.loads(line) for line in run.stdout.splitlines()]
+    assert [r["id"] for r in replies] == [1, 2]
+    assert replies[0]["result"]["problems"] and replies[1]["result"]["problems"] == []
+    assert "a library says hello" in run.stderr and "C code says hello" in run.stderr
+
+
+def test_the_plugin_takes_only_this_requests_answer_and_never_waits_forever():
+    import queue
+    from design_checker import rhino_logic as logic
+
+    def lines(*items):
+        q = queue.Queue()
+        for item in items:
+            q.put(item)
+        return q
+
+    assert logic.answer_for(lines('{"id": 7, "ok": true, "result": 1}\n'), 7, 1) == {"id": 7, "ok": True, "result": 1}
+    assert logic.answer_for(lines(None), 7, 1) is None                              # the checker stopped
+    for wrong in ('{"id": 6, "ok": true, "result": "the last check"}\n', "a library says hello\n", "[1]\n"):
+        with pytest.raises(logic.CheckerOutOfStep):                                 # never an earlier answer
+            logic.answer_for(lines(wrong, '{"id": 7, "ok": true}\n'), 7, 1)
+    with pytest.raises(logic.CheckerOutOfStep, match="no answer in"):               # a hung check: not forever
+        logic.answer_for(lines(), 7, 0.05)
+    assert logic.ask_limit("check") >= 60
+    assert logic.ask_limit("start") >= 120          # the largest building takes work in step with the lot's depth
+
+
+def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_checker():
+    """The Rhino side can't run in CI: its source must use the tested logic (no bare readline on the pipe)."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ask = src[src.index("def ask("):src.index("\n\n\n", src.index("def ask("))]
+    assert "logic.answer_for(" in ask and "_stop_worker()" in ask and "readline" not in ask
+    assert "threading.Thread(target=_read_lines" in src
+
+
+# ---- the starting building is proven with the checker's own verdict (audit P1-3) -----------------------------
+
+def _jogged_unsurveyed():
+    import sys
+    sys.path.insert(0, str(REPO / "packages/envelope_builder/tests"))
+    from test_start import FACTS, JOGGED, RULES, lot
+    facts = {**FACTS, "lot_surveyed": False, "street_line": [[[0, 0], [73, 0]]]}
+    return {"units": "ft", "lot": lot(JOGGED), "buildings": [], "problems": []}, facts, RULES
+
+
+def test_the_generators_proof_counts_a_rule_that_fails_with_the_lot_as_drawn():
+    """A 51 x 36 ft house on 106 Ithaca Rd's jogged lot, not yet surveyed: 27.5% of the lot as drawn, over 25%.
+    The check says lot coverage fails with the lot as drawn; plain outcome() says only needs review, so the
+    generator's proof once accepted it."""
+    from design_checker.check import verdict
+    from envelope_builder.start import _failing
+    site, facts, rules = _jogged_unsurveyed()
+    floors = [{"outline": [[11, 28], [62, 28], [62, 64], [11, 64]], "base": 0, "top": 10}]
+    assert _failing(site, facts, floors, rules, None) == []                      # plain outcome(): accepted
+    assert _failing(site, facts, floors, rules, None, verdict) == ["R-1b.lot_coverage"]
+
+
+def test_the_checker_proves_every_starting_building_with_its_own_verdict(monkeypatch):
+    from design_checker import check as checker
+    from envelope_builder import start as generator
+    seen = []
+    real = generator._failing
+    monkeypatch.setattr(generator, "_failing", lambda *a: seen.append(a[-1]) or real(*a))
+    site, facts, rules = _jogged_unsurveyed()
+    out = checker.largest_legal_building(site, facts, checker.measure(site, facts), rules)
+    assert out["floors"] and seen == [checker.verdict]
+
+
+# ---- an object off the Building layer counts as on the lot when it reaches into it (audit P1-2) ---------------
+
+def test_an_object_reaching_into_the_lot_counts_as_on_it_and_a_neighbour_does_not():
+    """The plugin once counted an unmeasured solid only when its bounding box's centre was in the lot's bounding
+    box: an addition mostly past the rear line, or a garage straddling a side line, wasn't reported, so lot
+    coverage could show COMPLIES. Now its footprint is tested against the lot's outline."""
+    import math
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+
+    def rect(x0, y0, x1, y1):
+        return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+    lot = rect(0, 0, 73, 90)
+    on = {"shed wholly on the lot": rect(5, 70, 15, 80),
+          "addition 23 x 20 ft on the lot, its centre past the rear line": rect(50, 70, 80, 130),
+          "garage straddling the side line, centre outside": rect(65, 20, 85, 40),
+          "a neighbour's garage 1 ft over the line": rect(72, 20, 93, 40),
+          "a site mesh covering the whole lot": rect(-50, -50, 150, 150)}
+    off = {"the neighbour's house touching the side line": rect(73, 20, 93, 40),
+           "a neighbour drawn a hair over the line": rect(72.95, 20, 93, 40),
+           "the house across the street": rect(10, -60, 40, -20)}
+    for name, footprint in on.items():
+        assert reaches_into_lot(lot, footprint, ON_LOT_REACH), name
+    for name, footprint in off.items():
+        assert not reaches_into_lot(lot, footprint, ON_LOT_REACH), name
+    turn = math.radians(30)                                  # a rotated lot: its bounding box is far bigger
+    rotated = [(x * math.cos(turn) - y * math.sin(turn), x * math.sin(turn) + y * math.cos(turn)) for x, y in lot]
+    neighbour = rect(45, 95, 60, 110)       # inside the lot's bounding box (x -45..63, y 0..114), off the lot
+    assert not reaches_into_lot(rotated, neighbour, ON_LOT_REACH)
+    assert reaches_into_lot(rotated, [(x + 1, y + 1) for x, y in rect(0, 0, 10, 10)], ON_LOT_REACH)
+    jogged = [(0, 0), (73, 0), (73, 99.4), (10.5, 99.4), (10.5, 90.3), (0, 90.3)]
+    assert not reaches_into_lot(jogged, rect(0, 91, 10, 99), ON_LOT_REACH)       # in the jog's notch: off the lot
+    assert reaches_into_lot(jogged, rect(5, 85, 20, 98), ON_LOT_REACH)
+
+
+def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
+    """The Rhino side can't run in CI: its source must use the tested logic, not the bounding-box centre."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
+    assert "logic.reaches_into_lot(" in body and ".Center" not in body

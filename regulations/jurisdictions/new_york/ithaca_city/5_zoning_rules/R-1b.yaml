@@ -625,6 +625,12 @@ rules:
       - given: {front_yard_eaves: 23, side_yard_smaller_eaves: 7.5, side_yard_larger_eaves: 12, rear_yard_eaves: 30, lot_depth: 100, building_height: 30}
         expect: fail
         note: an eave 2.5 ft into the 10 ft side yard (more than 2 ft)
+      - given: {front_yard_eaves: 30, side_yard_smaller_eaves: 10, side_yard_larger_eaves: 12, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: pass
+        note: a 60 ft deep lot, 25% = 15 ft, so the rear yard floor of 20 ft applies; eaves 2 ft into it (20 − 2 = 18)
+      - given: {front_yard_eaves: 30, side_yard_smaller_eaves: 10, side_yard_larger_eaves: 12, rear_yard_eaves: 17.5, lot_depth: 60, building_height: 30}
+        expect: fail
+        note: the same lot, the eave 2.5 ft into the 20 ft rear yard
       - given: {front_yard_eaves: 25, side_yard_smaller_eaves: 10, side_yard_larger_eaves: 10, rear_yard_eaves: 27, lot_depth: 100, building_height: 37}
         expect: pass
         note: with the height bonus every required yard grows 2 ft (§325-16C), so an eave may reach 2 ft into the larger yards

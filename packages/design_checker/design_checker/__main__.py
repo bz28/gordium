@@ -13,6 +13,7 @@ check after an edit doesn't pay for starting Python and loading the rules again.
 """
 
 import json
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -63,7 +64,14 @@ def serve(stdin=sys.stdin, stdout=sys.stdout) -> None:
 
 def main(argv: list[str]) -> int:
     if argv == ["serve"]:
-        serve()
+        # The plugin reads one answer per line. Anything else written to stdout (a library's print, C code writing
+        # to file descriptor 1) would put every later answer one request behind, so answers go out on a copy of
+        # the real stdout, and stdout itself, at the file-descriptor level, now goes to the log (stderr).
+        replies = os.fdopen(os.dup(1), "w", encoding="utf-8")
+        sys.stdout.flush()
+        os.dup2(2, 1)
+        sys.stdout = sys.stderr
+        serve(stdout=replies)
         return 0
     if len(argv) != 2:
         print(__doc__)

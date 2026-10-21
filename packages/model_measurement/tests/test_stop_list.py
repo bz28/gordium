@@ -165,7 +165,8 @@ def _a_reading_without_code(tmp_path):
 
 
 STREETS3 = [[[0, 0], [50, 0]], [[50, 0], [50, 100]], [[50, 100], [0, 100]]]
-ZIGZAG = lot([(0, 0), (50, 0), (50, 100), (40, 110), (30, 100), (20, 110), (10, 100), (0, 110)])
+ZIGZAG = lot([(0, 0), (50, 0), (50, 100), (45, 110), (40, 100), (35, 110), (30, 100), (25, 110), (20, 100),
+              (15, 110), (10, 100), (0, 110)])     # nine back lines between the two side lines: too many
 SHEDS = [sloped_roof_box(2 + 6 * i, 70, 6 + 6 * i, 74, 20, 30, f"shed {i}") for i in range(8)]
 
 CASES = {

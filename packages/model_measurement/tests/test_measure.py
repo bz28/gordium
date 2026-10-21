@@ -94,14 +94,17 @@ def test_a_curved_street_line_gives_two_readings_of_the_width():
     assert m["front_yard"]["value"] == round(LineString(arc).distance(house), 6)
 
 
-def test_a_jog_gives_two_readings_of_the_side_lot_lines():
-    # a 10 ft jog at the back left: is it a side lot line or part of the rear lot line?
+def test_a_jog_gives_every_reading_of_the_side_lot_lines():
+    # a 10 ft jog at the back left: is it a side lot line or part of the rear lot line? And the back line itself
+    # could run on as the east side line (review round 8: every reading the geometry allows, none pruned by angle)
     jog = lot([(0, 0), (50, 0), (50, 90), (8, 90), (0, 96)])
     m = measure(site(jog), FACTS)
     assert m["lot_depth"]["value"] is None
-    assert sorted(r["value"] for r in m["lot_depth"]["readings"]) == [93.0, 98.0]
+    # the jog and the back line the rear: (90 + 96) / 2 = 93; the jog part of the west side: (90 + 106) / 2 = 98;
+    # the back line part of the east side, the jog the rear: (90 + 42 + 96) / 2 = 114
+    assert sorted(r["value"] for r in m["lot_depth"]["readings"]) == [93.0, 98.0, 114.0]
     assert "open question" in m["lot_depth"]["reason"]
-    assert m["rear_yard"]["value"] == 25.0         # the nearest rear line is the same under both readings
+    assert min(r["value"] for r in m["rear_yard"]["readings"]) == 25.0
     assert m["side_yard_smaller"]["value"] == 10.0
 
 
@@ -154,12 +157,13 @@ def test_a_building_outside_the_lot():
     # wholly off the lot: nothing can be measured against it
     m = measure(site(RECT, box(60, 25, 85, 65)), FACTS)
     for name in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_area"):
-        assert m[name]["value"] is None and m[name]["reason"] == "a building isn't inside the lot"
+        assert m[name]["value"] is None and m[name]["reason"] == "a building isn't on the lot (is it part of this design?)"
     assert m["building_height"]["value"] == 30
     # crossing the side lot line (x = 50): measured, the yard to that line is 0 and it says it crosses it
     m = measure(site(RECT, box(40, 25, 65, 65)), FACTS)
-    assert m["side_yard_smaller"]["value"] == 0.0 and m["side_yard_smaller"]["crosses_lot_line"]
-    assert m["front_yard"]["value"] == 25.0 and not m["front_yard"].get("crosses_lot_line")
+    assert m["side_yard_smaller"]["value"] == 0.0
+    assert m["side_yard_smaller"]["crossings"] == [{"who": "the main building", "lines": ["side"]}]
+    assert m["building_area"]["crossings"] and m["front_yard"]["value"] == 25.0
 
 
 def test_two_buildings_need_the_main_one_picked():
@@ -582,11 +586,10 @@ def test_a_lower_roof_partly_under_an_overhang_is_open_to_the_sky():
     assert low in _open_to_the_sky([low, slab])
 
 
-def test_a_meshed_building_is_measured_quickly():
-    import time
-    n = 30                                                  # a 30 x 30 grid of triangles on top and bottom
+def _meshed_house(n):
+    """A 25 x 40 ft, 30 ft high house whose top and bottom are each an n x n grid of triangles (as imported)."""
     faces = []
-    for k, z in ((0, 0.0), (1, 30.0)):
+    for z in (0.0, 30.0):
         for i in range(n):
             for j in range(n):
                 x0, y0, x1, y1 = 10 + i * 25 / n, 25 + j * 40 / n, 10 + (i + 1) * 25 / n, 25 + (j + 1) * 40 / n
@@ -594,11 +597,30 @@ def test_a_meshed_building_is_measured_quickly():
                           {"points": [[x0, y0, z], [x1, y1, z], [x0, y1, z]]}]
     walls = box(10, 25, 35, 65, 0, 30)["faces"]
     faces += [f for f in walls if not all(p[2] in (0, 30) for p in f["points"])]
-    measure(site(), FACTS)        # the city's files are read once per run (interpretations.py): not the mesh's time
-    start = time.perf_counter()
-    m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)
-    assert m["building_height"]["value"] == 30.0
-    assert time.perf_counter() - start < 10
+    return site(RECT, {"id": "house", "faces": faces, "problems": []})
+
+
+def test_a_meshed_building_is_measured_quickly():
+    """Measuring time grows about in step with a mesh's faces, never with their square (an imported house has
+    thousands of faces: a step that compares every face with every other would take minutes). Timed against the
+    same work on a mesh a quarter the size, in the same run and around it, so a slow or busy machine doesn't
+    matter: four times the faces must take under 8 times as long (in step: about 4; every face against every
+    other: about 16). 60 s is only a ceiling for a hang. (A fixed 10 s limit failed on a slow Windows runner.)"""
+    import time
+
+    def clock(n):
+        start = time.perf_counter()
+        m = measure(_meshed_house(n), FACTS)
+        took = time.perf_counter() - start
+        assert m["building_height"]["value"] == 30.0
+        return took
+
+    clock(10)                                               # warm up (imports, first-call caches)
+    before = clock(10)
+    big = clock(20)
+    small = (before + clock(10)) / 2                        # around the big one: the same machine load
+    assert big < 8 * small, f"4x the faces took {big / small:.1f}x as long ({small:.2f}s -> {big:.2f}s)"
+    assert big < 60
 
 
 def meshed_box_top(n, z, x0=10, y0=25, x1=35, y1=65):
@@ -818,3 +840,23 @@ def test_the_eave_fingerprint_doesnt_depend_on_how_the_outline_is_ordered():
     a = _fingerprint(makers, Polygon(ring))
     assert a == _fingerprint(makers, Polygon(ring[2:] + ring[:2])) == _fingerprint(makers, Polygon(ring[::-1]))
     assert a != _fingerprint(makers, Polygon([(0, 0), (10, 0), (10, 2.5), (0, 2.5)]))
+
+
+def test_a_four_sided_lot_has_one_reading_and_no_words():
+    """Round 8, P3: a rectangle's back line is its rear line, with nothing to say about it."""
+    from model_measurement.measure import Lot
+    m = measure(site(), FACTS)
+    assert m["lot_depth"]["readings"] == [] and "as a rear lot line" not in m["lot_depth"]["how"]
+    readings = Lot(site(), FACTS).readings()
+    assert len(readings) == 1 and readings[0][0] == ""
+
+
+def test_a_corner_lot_address_with_too_many_lines_stops_the_whole_reading():
+    """Round 9, P1: a corner lot with a chamfered corner (three street lines) and a zigzag back. Read with only the
+    first street as the address, nine lines are left, seven between the two side lines: more than the six that can
+    be listed. Those readings can't be dropped while the other addresses give theirs: the lot depth stops."""
+    pts = [(0, 0), (50, 0), (60, 10), (60, 100), (50, 110), (40, 100), (30, 110), (20, 100), (10, 110), (0, 100)]
+    street = [[[0, 0], [50, 0]], [[50, 0], [60, 10]], [[60, 10], [60, 100]]]
+    m = measure(site(lot(pts), box(15, 30, 40, 70)), {**FACTS, "corner_lot": True, "street_line": street})
+    assert m["lot_depth"]["value"] is None and m["lot_depth"]["readings"] == []
+    assert "too many readings to list" in m["lot_depth"]["reason"]
