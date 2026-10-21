@@ -589,6 +589,7 @@ def test_a_meshed_building_is_measured_quickly():
                           {"points": [[x0, y0, z], [x1, y1, z], [x0, y1, z]]}]
     walls = box(10, 25, 35, 65, 0, 30)["faces"]
     faces += [f for f in walls if not all(p[2] in (0, 30) for p in f["points"])]
+    measure(site(), FACTS)        # the city's files are read once per run (interpretations.py): not the mesh's time
     start = time.perf_counter()
     m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)
     assert m["building_height"]["value"] == 30.0

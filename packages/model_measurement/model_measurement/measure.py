@@ -502,6 +502,8 @@ def _eave_zone(building: dict):
     above the roof's base, a tower, stays part of the building). A roof drawn in one solid with the walls: None,
     as for a flat roof: an overhang can't be told from a story, a dormer or a tower under the same roof, so
     everything counts as the building (the yards then also read the walls at the ground: _yards)."""
+    if not building.get("part_faces"):        # one solid: no roof solid of its own (and no need to read the roof)
+        return None
     sloped = _pitched_section(building)
     part = _roof_part(building, sloped) if sloped else None
     if not part:
