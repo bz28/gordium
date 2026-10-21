@@ -475,6 +475,9 @@ def draw_screen(o, e):
     # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
     # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
     plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+    obstacles = [((a.X, a.Y), (b.X, b.Y)) for a, b in ((e.Viewport.WorldToClient(line.From),
+                                                         e.Viewport.WorldToClient(line.To))
+                                                        for line in getattr(o, "plan_lines", None) or [])] if plan else []
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
@@ -485,9 +488,10 @@ def draw_screen(o, e):
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status):     # a failing yard's shortfall always shows
             ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                        along=(line.From, line.To))                 # beside its dimension line, never on it
-    for point, text in (getattr(o, "edge_labels", None) or []) if plan and labels else []:   # each edge's length
-        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken)
+                        along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
+    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels else []:   # each edge's length
+        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,
+                    along=(edge.From, edge.To), obstacles=obstacles)          # beside its edge, off every line
     toast = getattr(o, "toast", None)
     active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
     if toast and time.time() < toast[1] and active is not None and e.Viewport.Id == active.ActiveViewportID:
@@ -1316,6 +1320,7 @@ def _clear(o):
     """Nothing from an earlier check is left on screen."""
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
+    o.plan_lines = []
     o.confirm, o.labels = None, []
     o.doc = None
 
@@ -1337,6 +1342,17 @@ def check_facts(doc, facts):
     return out
 
 
+def _plan_edges(geometry):
+    """A building's edges as straight lines (a curved edge by its chord), for labels to stay off."""
+    brep = geometry if isinstance(geometry, rg.Brep) else (
+        geometry.ToBrep() if isinstance(geometry, rg.Extrusion) else None)
+    if brep is not None:
+        return [rg.Line(e.PointAtStart, e.PointAtEnd) for e in brep.Edges]
+    box = geometry.GetBoundingBox(True)
+    c = box.GetCorners()
+    return [rg.Line(c[i], c[(i + 1) % 4]) for i in range(4)]
+
+
 def _draw_plan(doc, o, result, facts):
     """What the viewport shows for a result (F): the property line, each lot edge's length, the required yards
     shaded, the envelope (dashed, see-through), each yard as measured with its status, and red only on the part
@@ -1347,13 +1363,18 @@ def _draw_plan(doc, o, result, facts):
         ok, poly = lot.Geometry.TryGetPolyline()
         o.lot_outline = list(poly) if ok else None
     approx = "" if facts.get("lot_surveyed") else " (approx.)"
-    o.edge_labels = [(_model_point(doc, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), e["length"] + approx)
+    o.edge_labels = [(_model_point(doc, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), e["length"] + approx,
+                      rg.Line(_model_point(doc, a), _model_point(doc, b)))         # the edge: labelled beside it
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
     o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
     o.encroach = [(_proud(doc, b), status) for b, status in ((_prism(doc, e["outline"], e["base"], e["top"]),
                                                  e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
                   if b is not None and logic.highlight(status)]          # coloured from the rule's result only
+    # every line a label must stay off (model space): the yard dimensions, the lot's edges, the house's edges
+    pts = o.lot_outline or []
+    o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
+        [line for b in _buildings(doc) for line in _plan_edges(b.Geometry)]
     o.yards_zone = None
     if lot is not None and plan.get("buildable"):
         inner = rg.PolylineCurve([_model_point(doc, p) for p in plan["buildable"] + plan["buildable"][:1]])

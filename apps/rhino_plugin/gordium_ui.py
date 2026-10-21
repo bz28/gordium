@@ -596,28 +596,33 @@ def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=
     return width, height
 
 
-def label_box(viewport, point, text, size=12, taken=None, along=None):
+def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=()):
     """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted). Takes its spot in
-    `taken`. The in-Rhino checks measure this very placement."""
+    `taken`. With `along` (its dimension line) it goes beside that line, off every line in `obstacles` (the other
+    dimensions, the lot's and the house's edges) and every label already placed. The in-Rhino checks measure this
+    very placement."""
     p = viewport.WorldToClient(point)
     width = len(text) * size * 0.58 + 14
-    avoid = ()
-    left, want = p.X - width / 2, p.Y - 10
     if along is not None:
         a, b = (viewport.WorldToClient(q) for q in along)
-        avoid = (((a.X, a.Y), (b.X, b.Y)),)
-        left, want = logic.beside_line(avoid[0][0], avoid[0][1], width, 20)
-    top = want if taken is None and not avoid else logic.clear_spot(taken if taken is not None else [], left, want,
-                                                                    width, 20, avoid)
+        own = ((a.X, a.Y), (b.X, b.Y))
+        left, top, clear = logic.place_label(own, width, 20, obstacles, taken or [])
+        if not clear:                        # nowhere clear: at least off its own line and the other labels
+            top = logic.clear_spot(taken if taken is not None else [], left, top, width, 20, (own,))
+        elif taken is not None:
+            taken.append((left, top, width, 20))
+        return left, top, width, top
+    left, want = p.X - width / 2, p.Y - 10
+    top = want if taken is None else logic.clear_spot(taken, left, want, width, 20)
     return left, top, width, want
 
 
-def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None):
+def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=()):
     """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
     already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
     `along` (a dimension line's two model points), it sits beside that line, never on it."""
     p = viewport.WorldToClient(point)
-    left, top, width, want = label_box(viewport, point, text, size, taken, along)
+    left, top, width, want = label_box(viewport, point, text, size, taken, along, obstacles)
     if abs(top - want) > 1:
         d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(p.X, top + (20 if top < p.Y else 0)),
                      color, 1)

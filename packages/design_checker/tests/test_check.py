@@ -1205,3 +1205,32 @@ def test_a_yard_label_sits_beside_its_dimension_line_never_on_it():
         taken = [(x - 20, y - 5, w + 40, h + 10)]                                      # another label there first
         top = clear_spot(taken, x, y, w, h, avoid=[(a, b)])
         assert not crosses((a, b), x, top, w, h), (a, b, top)
+
+
+def test_a_yard_label_stays_off_every_dimension_and_edge_not_only_its_own():
+    """The Top view in Rhino (2026-10-21, after the first fix): the West yard's label sat above its own short
+    dimension but across the front yard's vertical dimension. Placement tries the spots beside its line and takes
+    the first that crosses no line: other dimensions, the lot's edges, the house's edges."""
+    from design_checker.rhino_logic import crosses, place_label
+    own = ((265, 230), (310, 230))                          # the West yard, lot line to wall (screen pixels)
+    obstacles = [((310, 30), (310, 230)),                    # the front yard's dimension, vertical
+                 ((265, 30), (265, 610)), ((265, 30), (735, 30)),   # the lot's west and front edges
+                 ((310, 230), (625, 230)), ((310, 230), (310, 435)), ((310, 435), (625, 435))]   # the house
+    w, h = 250, 20
+    left, top, clear = place_label(own, w, h, obstacles)
+    assert clear and not any(crosses(s, left, top, w, h) for s in obstacles + [own]), (left, top)
+    assert abs(top + h / 2 - 230) < 40                     # still beside its own line
+    # the centred spot (the first tried) crosses the vertical dimension: it was not the one used
+    assert crosses(obstacles[0], (265 + 310) / 2 - w / 2, 230 - 6 - h, w, h)
+    # another label already there: the next clear spot
+    left2, top2, clear2 = place_label(own, w, h, obstacles, taken=[(left, top, w, h)])
+    assert clear2 and (left2, top2) != (left, top)
+    # a vertical lot edge whose right side is the house: centred on its left, not shifted along its right (Rhino:
+    # the west edge's length went under the front edge, where it read as the front edge's)
+    edge = ((265, 30), (265, 610))
+    house = [((310, 230), (625, 230)), ((310, 230), (310, 435)), ((310, 435), (625, 435))]
+    left3, top3, clear3 = place_label(edge, 115, h, house)
+    assert clear3 and left3 + 115 <= 265 and abs(top3 + h / 2 - 320) < 1, (left3, top3)
+    # boxed in on every side: says so, and the caller falls back to moving it off the other labels
+    cage = [((0, y), (1000, y)) for y in range(0, 640, 10)]
+    assert place_label(own, w, h, cage)[2] is False

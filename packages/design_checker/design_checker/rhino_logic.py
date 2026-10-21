@@ -269,6 +269,30 @@ def beside_line(a, b, w, h, gap=6):
     return max(xa, xb) + gap, (ya + yb) / 2 - h / 2
 
 
+def place_label(line, w, h, obstacles=(), taken=(), gap=6):
+    """Where a w × h label for the dimension `line` ((x1, y1), (x2, y2), screen pixels) goes: (left, top, clear).
+    The spots beside its line are tried in turn (a mostly horizontal line: above, below, each centred, then
+    shifted to either end; a mostly vertical one: right, left, then shifted up or down); the first that crosses
+    no line in `obstacles` (other dimensions, the lot's edges, the house's edges; its own line always) and covers
+    no box in `taken` is used. If none is clear, the first spot and False (the caller moves it off the others)."""
+    (xa, ya), (xb, yb) = line
+    x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
+    # nearest the line's middle first: centred on either side, then shifted along it (a label far along its line
+    # reads as another edge's: seen in Rhino, the west edge's length ended up under the front edge)
+    if x1 - x0 >= y1 - y0:
+        xs = [(x0 + x1) / 2 - w / 2, x1 - w, x0, x0 - w - gap, x1 + gap]
+        spots = [(x, top) for x in xs for top in (y0 - gap - h, y1 + gap)]
+    else:
+        ys = [(y0 + y1) / 2 - h / 2, y0, y1 - h, y0 - h - gap, y1 + gap]
+        spots = [(left, y) for y in ys for left in (x1 + gap, x0 - gap - w)]
+    lines = list(obstacles) + [line]
+    for left, top in spots:
+        if not any(crosses(s, left, top, w, h) for s in lines) and \
+                not any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken):
+            return left, top, True
+    return spots[0][0], spots[0][1], False
+
+
 def clear_spot(taken, x, y, w, h, avoid=()):
     """Where a w × h label wanted at (x, y) (its top left, in screen pixels) covers none already drawn this frame
     (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn, never
