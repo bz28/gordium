@@ -560,7 +560,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             st, why = FAILS, "Does not comply: " + row["Crossing"]
             hint = "To comply: move it back onto the lot."
             if node is None or node.left.id not in YARD_ROWS:     # the failing fact is the crossing, not a distance
-                proposed, required, margin_t = "crosses the lot line", "on the lot", ""
+                proposed, required, margin_t = "partly off the lot", "on the lot", ""
         out.append({
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],

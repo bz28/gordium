@@ -16,8 +16,8 @@ from pathlib import Path
 import yaml
 
 from design_checker import present
+from envelope_builder import start as generator
 from envelope_builder.envelope import MARGIN, envelope
-from envelope_builder.start import largest_legal_building
 from model_measurement.measure import TAX_MAP_TOLERANCE, measure
 from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
@@ -89,7 +89,7 @@ def _n(x) -> str:
 
 def _why(row: dict, rules: dict, measured: dict) -> dict:
     """The row, plus "Why": for a NEEDS REVIEW row whose measurements are missing, why each is missing (the
-    measuring's own reason: "a building isn't inside the lot", "enter bedrooms / parking spaces"), else the
+    measuring's own reason: "a building isn't on the lot (is it part of this design?)", "enter bedrooms / parking spaces"), else the
     report's reason."""
     reasons = []
     if row["Error"] == "NEEDS REVIEW":
@@ -227,8 +227,11 @@ def crossing(rule: dict, measured: dict) -> str | None:
             found.setdefault(c["who"], set()).update(c["lines"])
     if not found:
         return None
-    text = "; ".join(f"{who} crosses the {' and '.join(sorted(lines))} lot line{'s' if len(lines) > 1 else ''}"
-                     for who, lines in found.items())
+    def where(lines):
+        if not lines:                                   # past a corner, or a line that can't be named
+            return "it reaches past the lot line"
+        return f"it crosses the {' and '.join(sorted(lines))} lot line{'s' if len(lines) > 1 else ''}"
+    text = "; ".join(f"{who} is not entirely on the lot ({where(lines)})" for who, lines in found.items())
     return text[:1].upper() + text[1:]
 
 
@@ -252,15 +255,32 @@ def named_result(rule: dict, measured: dict, allowed: dict) -> dict | None:
     return {**found, "text": text}
 
 
+def verdict(rule: dict, measured: dict, allowed: dict) -> str:
+    """The checker's own result for one rule, as its rows mark it: outcome(), except that a needs review that fails
+    under every reading (or with the lot as drawn) is a "fail" (the row's "Fails")."""
+    got = outcome(rule, {k: m["value"] for k, m in measured.items()}, allowed)
+    if got == "needs_review":
+        found = every_reading(rule, measured, allowed)
+        if found and found[0] == "fail":
+            return "fail"
+    return got
+
+
+def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], **options) -> dict:
+    """envelope_builder's largest legal building, proven with the checker's own verdict (above) before it is
+    placed: never a building the check that follows shows as not complying (audit P1-3)."""
+    return generator.largest_legal_building(site, facts, measured, rules, verdict=verdict, **options)
+
+
 def summary(rows: list[dict]) -> dict:
     """One line for the viewport corner: all pass; it complies under every reading (rules waiting only on how the
     law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
     with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
     missing fact, not a reading, so it is never shown as complying."""
     fails = [r for r in rows if r.get("Fails") or r["Error"] == "FAIL"]
-    named = [r for r in rows if (r.get("Named") or {}).get("result") == "pass"]   # complies under every reading
+    named = [r for r in rows if (r.get("Named") or {}).get("result") == "pass" and r not in fails]   # counted once
     review = [r for r in rows if r["Error"] == "NEEDS REVIEW" and r not in fails and r not in named]
-    passes = [r for r in rows if r["Error"] == "PASS"] + named
+    passes = [r for r in rows if r["Error"] == "PASS" and r not in fails] + named     # a rule counted once
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):

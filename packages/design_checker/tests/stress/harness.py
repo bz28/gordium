@@ -389,8 +389,11 @@ def shrink(case, v) -> dict:
     return {**case, "edits": edits}
 
 
-def run(designs, seed, workers=1, shrink_each=True, log=None) -> dict:
-    """Runs `designs` random cases from `seed`. Returns the counts and every distinct violation, shrunk."""
+def run(designs, seed, workers=1, shrink_each=True, known=None) -> dict:
+    """Runs `designs` random cases from `seed`. Returns the counts and every distinct violation, shrunk.
+    `known(violation)` names the known finding a violation is (or None). It is asked of EVERY violation before any
+    are merged, and violations are merged only with ones it names the same, so a new bug is never folded into a
+    known finding's entry (each kept violation carries its "known" name)."""
     fast_reads()
     rng = random.Random(seed)
     cases = [generate.random_case(rng) for _ in range(designs)]
@@ -407,11 +410,12 @@ def run(designs, seed, workers=1, shrink_each=True, log=None) -> dict:
         for k, ran in res["checks"].items():
             counts[k] += bool(ran)
         for v in res["violations"]:
-            found.setdefault(signature(v), (v, res["case"]))
+            name = known({**v, "case": res["case"]}) if known else None
+            found.setdefault((signature(v), name), (v, res["case"], name))
     shrunk = []
-    for sig, (v, case) in sorted(found.items(), key=lambda kv: str(kv[0])):
+    for _, (v, case, name) in sorted(found.items(), key=lambda kv: str(kv[0])):
         small = shrink(case, v) if shrink_each else case
-        shrunk.append({**v, "case": small, "found_in": case})
+        shrunk.append({**v, "case": small, "found_in": case, "known": name})
     agree = _agreement(results)
     return {"designs": designs, "seed": seed, "seconds": round(time.time() - t, 1), "checks_run": counts,
             "violations": shrunk, "violating_designs": sum(1 for r in results if r["violations"]),

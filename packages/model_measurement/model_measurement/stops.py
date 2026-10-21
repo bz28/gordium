@@ -74,7 +74,7 @@ STOPS = {
     "no_building": "no building on the Building layer",
     "no_main_building": "more than one building: pick the main building",
     "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
-    "outside_lot": "a building isn't inside the lot",
+    "outside_lot": "a building isn't on the lot (is it part of this design?)",
     "open_solid": "a building isn't a closed solid",
     "open_mesh": "a building mesh isn't closed",
     "curved_surface": "a building has a curved surface (not measured yet)",

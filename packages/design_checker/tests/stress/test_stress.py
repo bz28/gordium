@@ -46,8 +46,14 @@ def _jog_stepped_line(v):
 
 
 def _tax_map_area(v):
-    """F2: on the tax-map lot, coverage or lot area complies with each line 1 ft in, fails with each 2 ft in."""
-    return v["invariant"] == "a2" and v["rule"] in ("R-1b.lot_coverage", "R-1b.lot_area_one_family_detached")
+    """F2, by its cause: on a tax-map lot, coverage or lot area passes with each line 1 ft in (Gordium's worst case
+    for area) and fails with each line 2 ft in. One that fails even at 1 ft is a new bug, not F2."""
+    if not (v["invariant"] == "a2" and v["rule"] in ("R-1b.lot_coverage", "R-1b.lot_area_one_family_detached")):
+        return False
+    d = _design(v)
+    one_ft = oracle.verdicts(d, tolerance=True, tolerance_ft=1.0)[v["rule"]]["slack"]
+    two_ft = oracle.verdicts(d, tolerance=True)[v["rule"]]["slack"]
+    return one_ft >= -oracle.EPS and two_ft < -oracle.EPS
 
 
 def _drawing_changes_height(v):
@@ -70,7 +76,10 @@ def _side_names_swap(v):
 
 
 # finding id -> how to recognise it (test_stress_findings.py has each one's regression test)
-KNOWN = {"F1": _jog_stepped_line, "F2": _tax_map_area, "F3": _drawing_changes_height, "F5": _side_names_swap}
+# F1, F3 and F5 are fixed (PR #18, 77796ee): their matchers stay for reading old reports but are not excused here,
+# so a return of any of them fails CI.
+MATCHERS = {"F1": _jog_stepped_line, "F2": _tax_map_area, "F3": _drawing_changes_height, "F5": _side_names_swap}
+KNOWN = {"F2": _tax_map_area}
 
 
 def known(v):
@@ -100,17 +109,64 @@ def test_reading_the_citys_files_once_changes_no_result():
 
 
 def test_the_architect_stress_sample(fast, capsys):
-    out = harness.run(DESIGNS, SEED, workers=1, shrink_each=False)
-    unknown = [v for v in out["violations"] if not known(v)]
+    out = harness.run(DESIGNS, SEED, workers=1, shrink_each=False, known=known)
+    unknown = [v for v in out["violations"] if not v["known"]]
     with capsys.disabled():
         print(f"\nstress test: {out['designs']} designs (seed {out['seed']}) in {out['seconds']} s; invariants run: "
               f"{out['checks_run']}; designs with a violation: {out['violating_designs']}; oracle undecided by rule: "
               f"{out['undecided']}")
         for v in out["violations"]:
-            print(f"  {known(v) or 'NEW'} {v['severity']} {v['invariant']} {v['rule']} {v.get('what', '')} "
+            print(f"  {v['known'] or 'NEW'} {v['severity']} {v['invariant']} {v['rule']} {v.get('what', '')} "
                   f"{v['lot']} {json.dumps(v['case']['edits'])}")
     if os.environ.get("GORDIUM_STRESS_OUT"):
         Path(os.environ["GORDIUM_STRESS_OUT"]).write_text(json.dumps(out, indent=1, default=str), encoding="utf-8")
     assert out["checks_run"]["a"] == DESIGNS and out["checks_run"]["f"] == DESIGNS
     assert min(out["checks_run"][k] for k in ("c", "d", "e")) > 0
     assert not unknown, "new violations (not a known finding): " + json.dumps(unknown, default=str)[:4000]
+
+
+# ---- review round 2 pins ------------------------------------------------------------------------------------------
+
+def _forced(monkeypatch, rule):
+    """Gordium made to say `rule` complies on every row (a planted false pass)."""
+    real = harness.run_site
+
+    def run_site(site, facts, extras=None):
+        res = real(site, facts, extras)
+        for item in res["view"]["items"]:
+            if item.get("rule") == rule:
+                item["status"] = harness.COMPLIES
+        return res
+    monkeypatch.setattr(harness, "run_site", run_site)
+
+
+def test_a_new_false_pass_is_never_merged_into_a_known_findings_entry(fast, monkeypatch):
+    """Round 2, P1: two jog-lot designs, each a false pass on the side yards (planted). The first is a known
+    finding, the second is not: it must come back as its own, unrecognised violation (merging first and asking
+    'known?' only of the kept one hid it)."""
+    first = {"op": "move_house", "dx": 19, "dy": 0}
+    second = {"op": "move_house", "dx": -6, "dy": 0}
+    cases = iter([{"lot": "jog", "edits": [e], "deep": {}, "probe": {}} for e in (first, second)])
+    monkeypatch.setattr(generate, "random_case", lambda rng: next(cases))
+    _forced(monkeypatch, "R-1b.side_yards")
+    out = harness.run(2, 0, shrink_each=False, known=lambda v: "FX" if v["case"]["edits"] == [first] else None)
+    side = [v for v in out["violations"] if v["invariant"] == "a" and v["rule"] == "R-1b.side_yards"]
+    assert [v["known"] for v in side if v["case"]["edits"] == [second]] == [None]
+    assert [v["known"] for v in side if v["case"]["edits"] == [first]] == ["FX"]
+
+
+def test_f2_is_recognised_by_its_cause_not_by_its_rule(fast, monkeypatch):
+    """Round 2, P2: the tax-map lot's starting house widened 1.5 ft (1,633 sf). With each lot line 1 ft in (Gordium's
+    area worst case, F2) it already fails: 1,633 > 25% of 71 x 88 = 1,562. A 'complies' there is not F2 (Gordium
+    losing its tolerance altogether would look like this): it must not be excused as F2."""
+    case = {"lot": "sample_tax", "edits": [{"op": "stretch", "face": 1, "amount": 1.5}]}
+    d, _ = generate.build(case["lot"], case["edits"])
+    _forced(monkeypatch, "R-1b.lot_coverage")
+    found = [v for v in harness.check_answers(d, harness.gordium(d))
+             if v["invariant"] == "a2" and v["rule"] == "R-1b.lot_coverage"]
+    assert found
+    assert known({**found[0], "lot": case["lot"], "case": case}) is None
+    plain = generate.starting_design("sample_tax")               # F2 itself: passes at 1 ft, fails at 2 ft
+    assert _tax_map_area({"invariant": "a2", "rule": "R-1b.lot_coverage", "lot": "sample_tax",
+                          "case": {"edits": []}}) is True
+    assert oracle.verdicts(plain, tolerance=True, tolerance_ft=1.0)["R-1b.lot_coverage"]["verdict"] == oracle.PASS

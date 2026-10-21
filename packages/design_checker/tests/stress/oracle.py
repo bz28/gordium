@@ -219,7 +219,7 @@ def _where(shape: Polygon, lot: Polygon) -> str:
     return "crossing" if shape.intersects(lot) and shape.intersection(lot).area > EPS else "off"
 
 
-def measure(design, tolerance=False):
+def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
     """Every number, as a (worst, best) pair for the rules above, plus what each building is and where."""
     lot = design["lot"]
     lot_poly = Polygon(lot["points"])
@@ -237,7 +237,7 @@ def measure(design, tolerance=False):
         walls = full
     maybe_main = unary_union([full] + [_union(g) for g in unlisted])    # an unlisted building read as a main one
     sides_all = [s for segs in lot["sides"].values() for s in segs] + lot.get("unsure", [])
-    tol = TAX_MAP_TOLERANCE if tolerance and not lot["surveyed"] else 0.0
+    tol = tolerance_ft if tolerance and not lot["surveyed"] else 0.0
 
     def side_hi(shape):
         return min(_dist(shape, segs) for segs in lot["sides"].values())
@@ -313,9 +313,9 @@ RULE_FUNCTIONS = {"R-1b.front_yard": front_rule, "R-1b.side_yards": side_rule, "
                   "R-1b.lot_width_one_family_detached": lot_width_rule}
 
 
-def verdicts(design, tolerance=False) -> dict:
+def verdicts(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE) -> dict:
     """Per rule: {"verdict", "slack" (at the worst; ft, or a fraction of the lot for coverage), "why"}."""
-    m = measure(design, tolerance)
+    m = measure(design, tolerance, tolerance_ft)
     worst, best = _world(m, 0), _world(m, 1)
     out = {}
     for rule, f in RULE_FUNCTIONS.items():

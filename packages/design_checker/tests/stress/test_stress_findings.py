@@ -2,7 +2,12 @@
 
 A finding is a bug in Gordium's own code: it is fixed in the PR that owns that code, not here. Until then its test
 is marked xfail(strict=True) with the finding's id: CI stays green, and the day the fix lands the test passes,
-strict xfail turns that into a failure, and the mark is taken off (the test then guards the fix).
+strict xfail turns that into a failure, and the mark is taken off (the test then guards the fix). Each xfail names
+raises=AssertionError: only the finding's own assertion counts as "still reproduces", never a crash or a changed
+output shape.
+
+Fixed (the marks are off; the tests guard the fixes): F1, F3, F5, fixed in PR #18 (77796ee). Still open: F2 (the
+tax-map tolerance for area; Ben decided 2 ft per line everywhere, being fixed), F4 (a repeated id).
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -44,7 +49,6 @@ def _with_shed(lot_name, outline, listed=True, frame=True):
 JOG_SHED = [[48.0, 95.0], [58.0, 95.0], [58.0, 105.0], [48.0, 105.0]]
 
 
-@pytest.mark.xfail(strict=True, reason="F1: the jog lot's stepped side line (x = 62) is measured as a rear lot line")
 def test_F1_a_frame_shed_4_ft_from_the_jog_lots_stepped_side_line_does_not_comply():
     """The jog lot: 70 ft at the street, its east line stepping in 8 ft at 80 ft back and running on to the rear at
     x = 62. A listed frame shed at x 48..58, y 95..105: 4 ft from that line. The line runs back alongside the lot,
@@ -56,7 +60,6 @@ def test_F1_a_frame_shed_4_ft_from_the_jog_lots_stepped_side_line_does_not_compl
     assert got["R-1b.accessory_buildings"] != COMPLIES
 
 
-@pytest.mark.xfail(strict=True, reason="F1: the jog lot's stepped side line (x = 62) is measured as a rear lot line")
 def test_F1_the_house_moved_toward_the_stepped_side_line_does_not_comply_on_that_side():
     """One edit: Gordium's starting house on the jog lot (10..37 x 25..95) moved 19 ft east (29..56). Its east wall
     is 6 ft from the stepped side line x = 62 (from 80 to 95 ft back): side yard 6 < 10, does not comply. Gordium:
@@ -68,7 +71,8 @@ def test_F1_the_house_moved_toward_the_stepped_side_line_does_not_comply_on_that
 
 # ---- F2 (P1, needs a decision): the tax map's 2 ft is taken off each dimension for area, off each line for yards -
 
-@pytest.mark.xfail(strict=True, reason="F2: the tax-map worst case moves each lot line 1 ft for area (2 ft for yards)")
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F2: the tax-map worst case moves each lot line 1 ft for area (2 ft for yards)")
 def test_F2_the_starting_house_on_the_sample_lot_with_each_line_2_ft_closer():
     """No edits: 106 Ithaca Rd from the tax map (73 x 90) and Gordium's starting house (49'-0" x 31'-10",
     1,559.8 sf). Gordium keeps the house 2'-0" back from every yard limit because each lot line may be 2 ft off.
@@ -85,7 +89,6 @@ def test_F2_the_starting_house_on_the_sample_lot_with_each_line_2_ft_closer():
 F3_CASE = ("sample_tax", [{"op": "move_floor", "k": 2, "dx": -3.25, "dy": 6.0}, {"op": "rotate", "deg": 7.3}])
 
 
-@pytest.mark.xfail(strict=True, reason="F3: a moved floor gives a height reading at a lower floor's top, by drawing order")
 def test_F3_the_same_house_drawn_the_other_way_round_keeps_its_height():
     """Gordium's starting house on the sample lot (3 floors, 35'-0"), the top floor moved on its own (3'-3" west,
     6'-0" back), then the house rotated 7.3 degrees. Its height is 35'-0" whichever way its outlines run: the top
@@ -113,7 +116,6 @@ F5_CASE = ("sample_tax", [{"op": "add_roof", "kind": "mansard", "axis": 0, "over
                            "face": 0, "fx": 0.15, "fy": 0.76, "gap": 7.25, "listed": False, "frame": None}])
 
 
-@pytest.mark.xfail(strict=True, reason="F5: with readings, which side yard is East or West depends on outline order")
 def test_F5_the_west_side_yard_stays_west_whichever_way_the_outlines_run():
     """The sample lot's starting house with a mansard reaching 3 ft past every wall (9 ft from each side line at
     its base, 12 to the walls), and an unlisted 23'-3" x 21'-9" shed in the front yard 9'-6 3/4" from the WEST line.
@@ -130,7 +132,8 @@ def test_F5_the_west_side_yard_stays_west_whichever_way_the_outlines_run():
 
 # ---- F4 (P2): two solids with the same id: one is dropped from the story count -----------------------------------
 
-@pytest.mark.xfail(strict=True, reason="F4: a solid sharing another's id is dropped from the stories count")
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F4: a solid sharing another's id is dropped from the stories count")
 def test_F4_four_floors_with_a_repeated_id_never_comply_as_three_stories():
     """Gordium's starting house on the surveyed sample lot plus a fourth floor block whose id repeats floor 2's (the
     site as check_site takes it; Rhino's exported copies carry unique ids, an API caller or a scenario may not).
