@@ -876,6 +876,9 @@ def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
             ids = [b["id"] for b in blocks]
             assert len(set(ids)) == len(ids), (seed, ids, m)
             main = next((s for s in stacks if pick in s["ids"]), stacks[0] if len(stacks) == 1 else None)
+            starting = [s for s in stacks if s["countable"]]        # Gordium's own floor blocks (a gap: two of them)
+            if main is None and pick is None and sum(2 if s.get("gap") else 1 for s in starting) == 1:
+                main = starting[0]                                  # no pick: the starting house, assumed
             assert main is not None, (seed, stacks, pick, m)       # no main building: never a value
             assert not any(s.get("gap") for s in stacks), (seed, stacks, m)   # floors over a gap: a question
             for members in ([main], stacks):    # each candidate building: the main one alone, and with every part
@@ -1110,3 +1113,21 @@ def test_each_candidate_buildings_ground_is_checked_against_its_own_solids():
     m = measure(site(RECT, house, wing), {**FACTS, "stories": 2, "main_building": "house"})
     for name in ("stories", "building_height"):
         assert m[name]["value"] is None and "doesn't meet the buildings" in m[name]["reason"], (name, m[name])
+
+
+def test_the_starting_house_is_the_main_building_when_none_is_picked():
+    """Architect review in Rhino (P1-2): adding a detached garage to the starting house blanked height, stories and
+    yards with "pick the main building". When exactly one building is Gordium's starting house (its floor blocks),
+    it is the main building, said as assumed; the garage is read as a possible accessory building. Two such houses,
+    or a pick that names something else, still ask."""
+    house = [floor(10, 25, 35, 55, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(38, 70, 48, 90, 0, 10, id="garage")
+    m = measure(site(RECT, *house, garage), {**FACTS, "stories": 3})
+    for name in ("building_height", "stories", "front_yard", "rear_yard"):
+        r = m[name]
+        assert r["value"] is not None or r["readings"], (name, r)
+        assert "pick the main building" not in (r.get("reason") or "")
+        assert "assumed: the starting house" in r["how"], (name, r["how"])
+    other = [floor(36, 70, 48, 90, z0=0, z1=11, id="g0")]
+    m = measure(site(RECT, *house, *other), {**FACTS, "stories": 3})
+    assert "pick the main building" in m["building_height"]["reason"]

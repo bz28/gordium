@@ -439,6 +439,7 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
 # steps or a deck. §325-3's STORY has no least height, so anywhere else (raised, on a roof, below the ground) a
 # part of any height might be a story.
 STORY_ROOM = 7.0            # ft
+ASSUMED_MAIN = "the main building assumed: the starting house (change it in Edit site)"
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
 
@@ -794,6 +795,12 @@ def _distance(line, shape):
 def measure(site: dict, facts: dict) -> dict[str, dict]:
     """Every measurement in measures.yaml, in its order, each with its working, for one site and its lot facts."""
     out = _measure(site, facts)
+    assumed = out.pop("_assumed_main", None)
+    if assumed:                         # every measurement made from the starting house says it was assumed
+        for name in MEASURES:
+            r = out[name]
+            if set(r.get("objects") or []) & set(assumed) and (r.get("value") is not None or r.get("readings")):
+                out[name] = dict(r, how=_both(r.get("how") or "", ASSUMED_MAIN))
     return {name: out[name] for name in MEASURES}
 
 
@@ -829,6 +836,14 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     buildings = _stacks(buildings)
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None))
+    if main is None and len(buildings) > 1 and not facts.get("main_building"):
+        # no main building picked: if exactly one building is Gordium's own starting house (all its blocks the
+        # floor blocks GordiumStart drew), it is the main one, said as assumed; every other is then read as a
+        # possible accessory building (the candidates below), so this never gives a pass the pick wouldn't
+        starting = [b for b in buildings if b.get("parts") and all(b["floor"])]
+        if len(starting) == 1:
+            main = starting[0]
+            out["_assumed_main"] = list(main["parts"])
     why_main = None if main else stop("no_main_building")
     others = [b for b in buildings if b is not main]
     # One decision for every building measurement: which building (why_which), over which candidate buildings
