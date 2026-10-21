@@ -226,9 +226,12 @@ def estimate(i: Inputs, todo: list[dict], model: str, client=None) -> dict:
         tokens = sum(count(m) - system_tokens for m in messages)
     else:
         system_tokens, tokens = len(system) // 4, sum(len(m) // 4 for m in messages)
-    out_each = _measured_output(i, model) or drafter.SETTINGS["max_tokens"]
+    measured = _measured_output(i, model)
+    # a unit with its own output limit (max_tokens_by_unit) is counted at that limit, its worst case
+    out = sum(drafter.max_tokens_for(u["id"]) if u["id"] in (drafter.SETTINGS.get("max_tokens_by_unit") or {})
+              else (measured or drafter.SETTINGS["max_tokens"]) for u in ai)
     usage = {"input_tokens": tokens, "cache_creation_input_tokens": system_tokens if ai else 0,
-             "cache_read_input_tokens": system_tokens * max(len(ai) - 1, 0), "output_tokens": int(out_each * len(ai))}
+             "cache_read_input_tokens": system_tokens * max(len(ai) - 1, 0), "output_tokens": int(out)}
     return {"units": len(todo), "ai_calls": len(ai), "exact_input": client is not None, "usage": usage,
             "measured_output": _measured_output(i, model) is not None, "cost_usd": drafter.cost(usage, model)}
 
@@ -374,6 +377,72 @@ def draft_uses(i: Inputs) -> dict:
     return result
 
 
+def last_recorded_attempts(i: Inputs, unit_id: str) -> list[dict]:
+    """The unit's most recent drafting session from the run records: its last attempt 1 and the attempts after it."""
+    calls = [c for c in run_records(i) if c.get("unit") == unit_id]
+    starts = [k for k, c in enumerate(calls) if c.get("attempt") == 1]
+    return calls[starts[-1]:] if starts else []
+
+
+def replay_unit(i: Inputs, unit: dict, attempts: list[dict]) -> dict:
+    """Judge a unit's recorded answers again with today's code, exactly as draft_unit judges them (the first usable
+    answer is kept; else the last one with working rules, its rejections for a person; else failed). No API call: a
+    change to how rules are built or checked reaches the saved drafts without paying for new answers."""
+    context = drafter.gather_context(unit, i.law, {"notes": i.notes}, i.definitions)
+    why, last = "no recorded answer", None
+    for rec in attempts:
+        if rec.get("stop_reason") != "end_turn":
+            why = f"stopped early ({rec.get('stop_reason')})"
+            continue
+        try:
+            answer = json.loads(rec["answer"])
+            result = drafter.check_answer(answer, unit, context, i.law, i.ctx, i.columns, i.cells, i.notes,
+                                          f"rule_drafting/{rec['model']}")
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as e:
+            why = f"unreadable answer ({type(e).__name__})"
+            continue
+        if result["problems"]:
+            why, last = "; ".join(result["problems"][:6]), (result if result["rules"] else last)
+        elif result["rules"] or answer["no_rule_reason"].strip():
+            result["reason"] = "" if result["rules"] else answer["no_rule_reason"].strip()
+            return drafter.keep(result, unit, i.cells, i.columns, context)
+        else:
+            why = "no rules and no reason given"
+    if last is not None:
+        return drafter.keep(last, unit, i.cells, i.columns, context, last_attempt=True)
+    return {"failed": why, "rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}
+
+
+def cmd_replay(args) -> int:
+    i = Inputs()
+    log = read_log(i)
+    units = {u["id"]: u for u in i.units()}
+    if missing := sorted(set(args.only) - set(units)):
+        raise SystemExit(f"no such unit: {', '.join(missing)}")
+    for uid in args.only:
+        if owned_rules_approved(i, log, uid):
+            print(f"  {uid}: skipped, an architect approved its rules")
+            continue
+        u = units[uid]
+        if u.get("code"):
+            result = draft_uses(i) if uid == USES_UNIT else draft_accessory()
+        else:
+            attempts = last_recorded_attempts(i, uid)
+            if not attempts:
+                print(f"  {uid}: no recorded answer to replay (draft it first)")
+                continue
+            result = replay_unit(i, u, attempts)
+        save_result(i, log, uid, result)
+        print(f"  {uid}: {sum(len(r) for r in result['rules'].values())} rules, "
+              f"{len(result.get('unresolved', []))} for a person (replayed, no API call)"
+              + (f", FAILED: {result['failed']}" if result.get("failed") else ""))
+    refresh_review_list(i)
+    log["complete"] = all(u in log["units"] for u in units)
+    (i.records / "drafting_log.yaml").write_text(yaml.safe_dump(log, sort_keys=False, allow_unicode=True, width=110),
+                                                 encoding="utf-8")
+    return 0
+
+
 def cmd_cost(args) -> int:
     i = Inputs()
     calls = run_records(i)
@@ -384,8 +453,10 @@ def cmd_cost(args) -> int:
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(prog="python -m rule_drafting")
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("status", "estimate", "draft", "cost"):
+    for name in ("status", "estimate", "draft", "cost", "replay"):
         sub.add_parser(name)
+    sub.choices["replay"].add_argument("--only", nargs="+", required=True,
+                                       help="these unit ids: judge their recorded answers again, no API call")
     for name in ("estimate", "draft"):
         p = sub.choices[name]
         p.add_argument("--limit", type=int, help="only the next N undrafted units")
@@ -395,7 +466,8 @@ def main(argv: list[str]) -> int:
     sub.choices["estimate"].add_argument("--model", help="estimate another model (doesn't change settings.yaml)")
     sub.choices["draft"].add_argument("--yes", action="store_true", help="spend money: actually call the API")
     args = parser.parse_args(argv)
-    return {"status": cmd_status, "estimate": cmd_estimate, "draft": cmd_draft, "cost": cmd_cost}[args.command](args)
+    return {"status": cmd_status, "estimate": cmd_estimate, "draft": cmd_draft, "cost": cmd_cost,
+            "replay": cmd_replay}[args.command](args)
 
 
 if __name__ == "__main__":

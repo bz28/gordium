@@ -6,7 +6,9 @@ units:
     - R-2a.use
     - R-2b.use
     - R-2c.use
+    - R-3a.use
     - R-3aa.use
+    - R-3b.use
     - RU.use
     unresolved:
     - rule: R-1a.use
@@ -68,14 +70,20 @@ units:
         zero lot line'', ''One-family dwelling, semi-detached'', ''One-family dwelling, attached'', ''Two-family
         dwelling'', may limit these uses and no rule checks it (a person does): ''(4) See §325-3 for occupancy restrictions.'''
     - rule: R-3a.use
-      why: 'R-3A: every use is permitted or SP, so the rule has no failing example'
+      why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', ''One-family dwelling, detached,
+        zero lot line'', ''One-family dwelling, semi-detached'', ''One-family dwelling, attached'', ''Two-family
+        dwelling'', ''Multiple family dwelling'', may limit these uses and no rule checks it (a person does): ''(4)
+        See §325-3 for occupancy restrictions.'''
     - rule: R-3aa.use
       why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', ''One-family dwelling, detached,
         zero lot line'', ''One-family dwelling, semi-detached'', ''One-family dwelling, attached'', ''Two-family
         dwelling'', ''Multiple family dwelling'', may limit these uses and no rule checks it (a person does): ''(4)
         See §325-3 for occupancy restrictions.'''
     - rule: R-3b.use
-      why: 'R-3B: every use is permitted or SP, so the rule has no failing example'
+      why: 'chart p.2 footnote 4, on the rows ''One-family dwelling, detached'', ''One-family dwelling, detached,
+        zero lot line'', ''One-family dwelling, semi-detached'', ''One-family dwelling, attached'', ''Two-family
+        dwelling'', ''Multiple family dwelling'', may limit these uses and no rule checks it (a person does): ''(4)
+        See §325-3 for occupancy restrictions.'''
     - rule: RU.use
       why: 'chart p.2 footnote 3, on the RU column heading, may limit these uses and no rule checks it (a person
         does): ''(3) Properties less than 60,000 SF may only have one primary structure. Properties greater than

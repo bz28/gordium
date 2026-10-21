@@ -202,10 +202,17 @@ def test_permitted_use_rules_follow_the_chart_marks(inputs):
     r1b = result["rules"]["R-1b"][0]
     hand = next(r for r in cli.load(cli.PLACE / "5_zoning_rules/R-1b.yaml")["rules"] if r["id"] == "R-1b.use")
     assert r1b["check"] == hand["check"]                                       # same allowed uses as the hand draft
-    no_rule = {cli.district_name(c) for c in inputs.columns} - set(result["rules"])
-    assert no_rule == {"R-3a", "R-3b"}                                          # nothing there fails: for a person
-    assert all(any(g["rule"] == f"{d}.use" and "no failing example" in g["why"] for g in result["unresolved"])
-               for d in no_rule)
+    assert set(result["rules"]) == {cli.district_name(c) for c in inputs.columns}      # every district has one
+    # R-3a and R-3b mark every use • or SP, so nothing fails: no permitted-use rule, but a flag (built by code) for the
+    # SP uses, which need a special permit; stage 1 had none, so an SP use there showed no row at all (grade, 2026-10-20)
+    from rule_format.rulebook import outcome
+    for d in ("R-3a", "R-3b"):
+        flag = result["rules"][d][0]
+        assert flag["kind"] == "flag" and "\"school\"" in flag["applies_when"]
+        assert outcome(flag, {"use": "school"}, {"use": inputs.ctx.uses}) == "needs_review"
+        assert outcome(flag, {"use": "one_family_detached"}, {"use": inputs.ctx.uses}) == "not_applicable"
+        assert all(s.get("cell", {}).get("column", d.upper()) == d.upper() for s in flag["sources"])
+    assert result["rules"]["R-1b"][0]["kind"] == "rule"
 
 
 def test_a_drafted_question_says_it_is_not_researched_yet(inputs):
@@ -881,3 +888,114 @@ def test_without_a_term_index_the_drafter_still_runs(inputs):
     u = unit(inputs, "chart-p3-yard_dimensions")
     context = drafter.gather_context(u, inputs.law | {"terms": None}, {"notes": inputs.notes}, inputs.definitions)
     assert context["related"] == [] and context["related_dropped"] == []
+
+
+def test_an_other_use_row_sends_a_use_the_law_calls_a_dwelling_to_review(inputs):
+    """Stage 1 grade (2026-10-20): R-3a's "Other use" lot size (6,000 sf) passed a dormitory, which §325-3 defines as
+    "a multiple dwelling", so the multiple-family row (with note 7) may be the one that applies; the answer key says
+    needs review. Code adds the review to any chart rule from an "Other use" row, whatever the AI wrote."""
+    from rule_format.rulebook import outcome
+    assert set(drafter.dwelling_kind_uses(inputs.law, inputs.ctx.uses)) == {"dormitory", "adult_day_care_home",
+                                                                             "bed_and_breakfast_inn"}
+    cell = {"file": "zoning_charts_2026-04.pdf", "page": 3,
+            "cell": {"section": "Minimum Lot Size", "row": "Other use", "column": "R-3A"}}
+    rule = {"id": "R-3a.x", "kind": "rule", "applies_when": 'use not in ["one_family_detached", "multiple_family"]',
+            "check": "lot_area >= 6000", "sources": [cell]}
+    got = drafter.unclear_catch_all(rule, inputs.law, inputs.ctx)
+    allowed = inputs.ctx.allowed()
+    assert outcome(got, {"use": "dormitory", "lot_area": 20000}, allowed) == "needs_review"
+    assert outcome(got, {"use": "church", "lot_area": 20000}, allowed) == "pass"
+    assert inputs.ctx.use_rows["dormitory"][0] in got["sources"]         # the use it decides about is cited
+    named = rule | {"sources": [dict(cell, cell=dict(cell["cell"], row="Two-family dwelling"))]}
+    assert drafter.unclear_catch_all(named, inputs.law, inputs.ctx) == named      # a named row is left alone
+
+
+def test_the_saved_r3a_other_use_lot_size_never_passes_a_dormitory(inputs):
+    """The saved draft, rebuilt from its recorded answer by `python -m rule_drafting replay` (no API call)."""
+    from rule_format.rulebook import outcome
+    rules = cli.load(inputs.drafted / "R-3a.yaml")["rules"]
+    rule = next(r for r in rules if r["id"] == "R-3a.min_lot_area_other_use")
+    for area in (6000, 20000):
+        assert outcome(rule, {"use": "dormitory", "lot_area": area, "additional_primary_building": False},
+                       inputs.ctx.allowed()) == "needs_review"
+
+
+def test_replay_judges_the_last_recorded_session_like_a_draft_and_calls_nothing(inputs, monkeypatch):
+    """A recorded answer is judged again by today's code; a cut-off attempt is skipped like draft_unit skips it."""
+    calls = [{"unit": "u", "attempt": 1, "stop_reason": "max_tokens"}, {"unit": "u", "attempt": 1, "stop_reason": "x"},
+             {"unit": "u", "attempt": 2, "stop_reason": "max_tokens"}, {"unit": "v", "attempt": 1}]
+    monkeypatch.setattr(cli, "run_records", lambda i: calls)
+    assert cli.last_recorded_attempts(inputs, "u") == calls[1:3]
+    got = cli.replay_unit(inputs, unit(inputs, "325-18A"), calls[1:3])
+    assert got["failed"] == "stopped early (max_tokens)" and got["rules"] == {}
+
+
+def test_no_chart_row_is_blocked_by_the_quote_requirement(inputs):
+    """Stage 1 (2026-10-20): minimum lot width came back with no rule. The AI read "quotes: the exact words that support
+    the rule" (none: the section has no footnote, a chart row is never quoted, related sections and definitions may
+    not be quoted) as "no rule can be written". A chart rule's source is its cell, cited by code, so quotes: [] is a
+    complete answer. The instructions say so, and code accepts it on every chart row of every district whose cell
+    is one plain number."""
+    import re
+    system = inputs.system()
+    assert "quotes: [] (no quote needed" in system and "Never leave a chart row undrafted" in system
+    plain = re.compile(r"^\s*[\d,]+(\.\d+)?\s*(sf|ft|%)?\s*$")
+    tried = []
+    for page, section in inputs.chart_sections:
+        u = unit(inputs, f"chart-p{page}-{cli.slug(section)}")
+        context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
+        for row, by_column in inputs.rows_of(page, section).items():
+            head = cli.chart_values.heading(inputs.cells_list, page, section)
+            fits = [c for c, cell in by_column.items() if plain.match(cell["value"])]
+            if not fits or "[fn" in row or "[fn" in section or (head and "[fn" in head["row"]):   # a note: quoted
+                continue
+            pct = "%" in by_column[fits[0]]["value"]
+            t = {"id_suffix": "probe", "title": "probe", "topic": "dimensions", "kind": "rule", "applies_when": "",
+                 "check": "lot_area >= {v}", "review_when": [], "quotes": [], "numbers": [], "open_questions": [],
+                 "new_measures": [],
+                 "slots": [{"name": "v", "page": page, "section": section, "row": row.strip(), "number": 1,
+                            "numbers_in_cell": 1, "percent": pct, "footnotes": []}],
+                 "examples": [{"given": [{"measure": "lot_area", "value": "{v}"}], "expect": "pass"},
+                              {"given": [{"measure": "lot_area", "value": "{v} - 0.001"}], "expect": "fail"}]}
+            got = drafter.check_answer({"templates": [t], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
+                                       inputs.columns, inputs.cells, inputs.notes, "test")
+            assert not got["problems"], (section, row, got["problems"])
+            assert {d for d in got["rules"]} == {cli.district_name(c) for c in fits}, (section, row)
+            tried.append(section)
+    assert len(tried) >= 12 and "Minimum Lot Width" in tried          # every lot width row among them
+
+
+def test_a_unit_with_its_own_output_limit_is_called_reserved_and_estimated_with_it(inputs, tmp_path):
+    """Stage 1: §325-19E's three answers stopped at exactly 8,192 output tokens (max_tokens), mostly thinking. It gets
+    its own limit (settings max_tokens_by_unit), used for the call, its record, the worst case the budget reserves
+    before sending, and the estimate."""
+    from section_labeling.budget import worst_case
+    assert drafter.SETTINGS["max_tokens_by_unit"]["325-19E"] == 32000
+    assert drafter.max_tokens_for("325-19E") == 32000 and drafter.max_tokens_for("325-18A") == drafter.SETTINGS["max_tokens"]
+    reserved = []
+    budget = Budget(5.0, tmp_path / "ledger.json")
+    real = budget.reserve
+    budget.reserve = lambda worst: (reserved.append(worst), real(worst))[1]
+    client = FakeClient({"templates": [], "no_rule_reason": "Only for R-3 lots next to R-1 lots."})
+    _, records = run(inputs, client, uid="325-19E", budget=budget)
+    assert client.requests[0]["max_tokens"] == 32000 and records[0]["max_tokens"] == 32000
+    small = worst_case(10, drafter.SETTINGS, drafter.PRICES)
+    assert reserved[0] > small + (32000 - 8192) * 10 / 1e6 * 0.99          # the output part at 32,000 tokens
+    e = cli.estimate(inputs, [unit(inputs, "325-19E")], drafter.SETTINGS["model"])
+    assert e["usage"]["output_tokens"] == 32000
+
+
+def test_every_drafted_other_use_rule_gets_the_dwelling_review_whatever_the_ai_wrote(inputs):
+    """The review is added by check_answer, the one path every AI answer takes (drafting and replays)."""
+    from rule_format.rulebook import outcome
+    u = unit(inputs, "chart-p3-minimum_lot_size")
+    context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
+    t = template("other_use", "lot_area >= {v}", [slot("v", "Other use", page=3, section="Minimum Lot Size [fn3]")],
+                 [({"use": "church", "lot_area": "{v}"}, "pass"), ({"use": "church", "lot_area": "{v} - 1"}, "fail")],
+                 quotes=[{"document": "chart", "page": 3, "piece": "", "text": "(3) See §325-8(B)(1)."}],
+                 applies_when='use not in ["one_family_detached", "multiple_family"]')
+    got = drafter.check_answer({"templates": [t], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
+                               inputs.columns, inputs.cells, inputs.notes, "test")
+    assert not got["problems"], got["problems"]
+    r3a = got["rules"]["R-3a"][0]
+    assert outcome(r3a, {"use": "dormitory", "lot_area": 99999}, inputs.ctx.allowed()) == "needs_review"

@@ -121,7 +121,10 @@ it has slots) or one rule for every district (when it has none).
 - quotes: the exact words that support the rule, as whole sentences, copied character for character
   (footnote markers like [fn11] included). document "chart" only for a footnote under a chart table, with
   its page; document "law" with the piece id for text from a piece of the law given here (page 0). A quote
-  must occur once.
+  must occur once. A chart rule's source is its chart cell: code cites each district's own cell when it fills
+  a slot, so a chart row whose section has no footnote is drafted with quotes: [] (no quote needed; never quote
+  the row itself, a definition or a related section to have one). Never leave a chart row undrafted because
+  there is nothing to quote.
 - examples: for a rule, at least one that passes and one that fails, chosen so they exercise the whole
   formula: both sides of every `if` and of every comparison in applies_when; for min or max, an example
   where each part decides; for a tiered rule (parking by bedrooms: up to 3, 4 to 5, more than 5), an example
@@ -443,6 +446,50 @@ def v_close(v: float, values) -> bool:
     return any(abs(v - x) < 1e-9 for x in values)
 
 
+CATCH_ALL_ROW = re.compile(r"^\s*other use\b", re.IGNORECASE)
+
+
+def dwelling_kind_uses(law: dict, uses) -> dict[str, str]:
+    """{use id: its definition's opening words} for each use whose own §325-3 definition (piece 325-3B:<use id>) says it
+    is a kind of dwelling: DORMITORY "A multiple dwelling ...", BED-AND-BREAKFAST INN "... single dwelling unit ...".
+    The chart's lot-size and lot-width rows name dwelling types, so for these uses its catch-all "Other use" row may
+    not be the row that applies."""
+    out = {}
+    for use in sorted(uses):
+        piece = law.get("pieces", {}).get(f"325-3B:{use}")
+        if piece is None:
+            continue
+        text = " ".join(piece_text(law["rows"], piece).split())
+        genus = text.split("—", 1)[-1].split(".", 1)[0]
+        if re.search(r"\bdwelling\b", genus, re.IGNORECASE):
+            out[use] = genus.strip()
+    return out
+
+
+def unclear_catch_all(rule: dict, law: dict, ctx: Context) -> dict:
+    """A chart rule filled from an "Other use" row that applies by `use not in [...]` reaches every use the row doesn't
+    name, among them uses the law defines as a kind of dwelling (a dormitory is "a multiple dwelling", so the
+    multiple-family row, with its note 7, may be the one that applies). The law doesn't settle which row, so such a
+    use needs review, never a pass (stage 1 grade, 2026-10-20: R-3a dormitory lot size passed where the answer key
+    says needs review). Applied by code to every drafted chart rule, whatever the AI wrote."""
+    if not any(CATCH_ALL_ROW.match(str((s.get("cell") or {}).get("row", ""))) for s in rule.get("sources") or []):
+        return rule
+    named = set(re.findall(r'"([a-z0-9_]+)"', str(rule.get("applies_when", "")))) \
+        if "use not in" in str(rule.get("applies_when", "")) else None
+    if named is None:
+        return rule
+    already = " ".join(str(r.get("when", "")) for r in rule.get("review_when") or [])
+    add = [{"when": f'use == "{u}"',
+            "reason": f"§325-3 defines this use as {genus[:90]!r}, a kind of dwelling, so which row of the chart applies to "
+                      "it (this \"Other use\" row or a dwelling row, with its notes) is unclear: a person decides."}
+           for u, genus in dwelling_kind_uses(law, ctx.uses).items() if u not in named and f'"{u}"' not in already]
+    if not add:
+        return rule
+    rows = [dict(r) for x in add for r in ctx.use_rows.get(x["when"].split('"')[1], [])[:1]]   # each use's own row
+    return rule | {"review_when": list(rule.get("review_when") or []) + add,
+                   "sources": list(rule.get("sources") or []) + [r for r in rows if r not in rule.get("sources", [])]}
+
+
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
                  cells: dict, notes: dict[int, dict], drafted_by: str) -> dict:
     """Turn an answer into rules, every one checked by the inspector. Returns {rules: {district: [rule]},
@@ -473,6 +520,8 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
         try:
             for column in (columns if t["slots"] else [None]):
                 rule, why = fill_template(t, column, cells, sources, drafted_by)
+                if why is None:
+                    rule = unclear_catch_all(rule, law, ctx)
                 if why is None and (problems := validate({"district": rule["id"].split(".")[0], "rules": [rule]}, ctx)):
                     why = "; ".join(problems[:3])
                 if why is None:
@@ -547,12 +596,18 @@ def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dic
     return result
 
 
+def max_tokens_for(unit_id: str, settings: dict = SETTINGS) -> int:
+    """The output limit for one unit: its own (settings' max_tokens_by_unit) or the default."""
+    return int((settings.get("max_tokens_by_unit") or {}).get(unit_id, settings["max_tokens"]))
+
+
 def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: Context, columns: list[str],
                cells: dict, notes: dict[int, dict], record, settings: dict = SETTINGS, budget=None) -> dict:
     """Draft one unit. Every template that works nowhere sends the answer back with the reasons (keeping
     nothing from it) until max_attempts; after the last attempt, the rules that work are kept and every
     rejected template and every requirement no rule cites goes to a person. Returns check_answer's result
     plus "reason" (no rules, and why) or "failed" (no usable answer)."""
+    settings = settings | {"max_tokens": max_tokens_for(unit["id"], settings)}   # its worst case and its call
     topics = sorted(ctx.topics)
     drafted_by = f"rule_drafting/{settings['model']}"
     messages = [{"role": "user", "content": unit_message(unit, context)}]

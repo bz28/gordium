@@ -100,6 +100,20 @@ def use_rule(column: str, rows: dict[str, dict[str, dict]], uses: dict, notes: d
                       "• uses go to review, uses marked - fail.",
              "drafted_by": drafted_by, "status": "draft"}
     if not refused:
-        problems.append(f"{column}: every use is permitted or SP, so the rule has no failing example")
-        return None, problems, []
+        # Every use is • or SP (R-3a, R-3b): a rule can't fail, so no permitted-use rule. But a use marked SP still needs
+        # a special permit (or a footnoted • its condition): a flag for those, so they are never silently passed.
+        held = special + list(footnoted)
+        if not held:
+            problems.append(f"{column}: every use is permitted, so the rule has no failing example")
+            return None, problems, []
+        flag = {"id": f"{district}.use", "kind": "flag", "topic": "uses",
+                "title": "Uses needing a special permit or a footnote's condition (chart p.2)",
+                "applies_when": f"use in {held!r}".replace("'", '"'), "sources": sources,
+                "examples": [{"given": {"use": held[0]}, "expect": "needs_review"},
+                             {"given": {"use": allowed[0]}, "expect": "not_applicable"}],
+                "open_questions": [MARK_QUESTION], "research": [pending_research(MARK_QUESTION, MARK_RESEARCH)],
+                "notes": f"Built by code from the {column} column of chart p.2: every use is marked • or SP, so no use "
+                         "fails; the SP uses (and any • with a footnote) go to a person.",
+                "drafted_by": drafted_by, "status": "draft"}
+        return flag, problems, unresolved
     return rule, problems, unresolved
