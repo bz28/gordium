@@ -74,16 +74,16 @@
     "ok": true,
     "detail": {
      "objects": [
-      "3b5060fe-4098-438f-8cac-c1b44944b9f2",
-      "25f29b59-c6f8-4f49-9562-f3240f7e03e6",
-      "cb3a1a19-6603-45ac-af92-403308db9d52",
-      "95d42efa-0192-45a2-af46-f11b7428ae84"
+      "98e743de-ce5b-4c0e-aa05-5a69d3468c88",
+      "53f7a945-0f1c-423c-a0b8-5213277308ba",
+      "cf0e911c-f2e9-4908-b5fd-8b19f35f5a92",
+      "c183f684-26db-4aec-b862-a7ebc84ec1fd"
      ],
      "selected": [
-      "95d42efa-0192-45a2-af46-f11b7428ae84",
-      "cb3a1a19-6603-45ac-af92-403308db9d52",
-      "25f29b59-c6f8-4f49-9562-f3240f7e03e6",
-      "3b5060fe-4098-438f-8cac-c1b44944b9f2"
+      "c183f684-26db-4aec-b862-a7ebc84ec1fd",
+      "cf0e911c-f2e9-4908-b5fd-8b19f35f5a92",
+      "53f7a945-0f1c-423c-a0b8-5213277308ba",
+      "98e743de-ce5b-4c0e-aa05-5a69d3468c88"
      ]
     }
    }
@@ -292,8 +292,8 @@
       ]
      },
      "frames": {
-      "scale_neighbourhood": 3,
-      "scale_lot": 3
+      "scale_neighbourhood": 7,
+      "scale_lot": 7
      }
     }
    },
@@ -380,7 +380,7 @@
      "Street side",
      "set from the lot, once there is one",
      "Corner lot?",
-     "Not checked yet: overlays (historic, gorge, flood) · pitched roofs",
+     "Not checked yet: overlays (historic, gorge, flood)",
      "?  Does this lot face two streets? Answer Corner lot? under Street side",
      "Confirm the district to continue."
     ]
