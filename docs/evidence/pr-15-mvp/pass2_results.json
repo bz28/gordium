@@ -70,16 +70,16 @@
     "ok": true,
     "detail": {
      "objects": [
-      "c448f7eb-cefc-4d85-a49d-95b49f8f3924",
-      "f01a195b-5975-4c47-9556-f9d5f53be80a",
-      "8c695845-84e6-43e1-a090-c6e44faaf5cc",
-      "d934d054-5217-4ae6-8366-7475a1d3e470"
+      "7945bd6b-b434-4ac8-9b9b-1e3e0f61a9d4",
+      "d93cbf78-0f0a-4819-809a-cd0e7dd1f91d",
+      "bdd27b33-4a4e-4150-bbb9-6b36912467fe",
+      "939180cb-1f0d-45ce-8525-e17c4951f415"
      ],
      "selected": [
-      "d934d054-5217-4ae6-8366-7475a1d3e470",
-      "8c695845-84e6-43e1-a090-c6e44faaf5cc",
-      "f01a195b-5975-4c47-9556-f9d5f53be80a",
-      "c448f7eb-cefc-4d85-a49d-95b49f8f3924"
+      "939180cb-1f0d-45ce-8525-e17c4951f415",
+      "bdd27b33-4a4e-4150-bbb9-6b36912467fe",
+      "d93cbf78-0f0a-4819-809a-cd0e7dd1f91d",
+      "7945bd6b-b434-4ac8-9b9b-1e3e0f61a9d4"
      ]
     }
    }
@@ -288,7 +288,7 @@
       ]
      },
      "frames": {
-      "scale_neighbourhood": 7,
+      "scale_neighbourhood": 3,
       "scale_lot": 3
      }
     }
