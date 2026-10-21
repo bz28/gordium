@@ -210,7 +210,7 @@ def test_only_what_each_source_allows_is_written_into_the_model():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = rhino[rhino.index("def _lookup_done("):rhino.index("def _drawn(")]
     assert 'answer["facts"]' not in body and "answer.get(\"facts\")" not in body     # geometry only from writes
-    assert 'STATE["lookup_guide"]' in body and "AddCurve" not in body.split('elif w.get("guide_ring")')[1]
+    assert 'STATE["lookup_guide"]' in body and "logic.apply_lookup(RhinoTable(doc), session" in body and "AddCurve" not in body
 
 
 def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
@@ -219,7 +219,8 @@ def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
     assert len(out) == 1 and json.loads(out[0])["status"] == "found"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert '"-m", "design_checker.lookup_box", address' in rhino and "logic.LOOKUP_LIMIT_S" in rhino
-    assert "p.kill()" in rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_stop(")]
+    assert "_lookup_kill(run)" in rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
+    assert 'run["proc"].kill()' in rhino[rhino.index("def _lookup_kill("):rhino.index("def _lookup_done(")]
 
 
 # ---- the whole chain: the looked-up lot to the starting house ----------------------------------------------------
@@ -393,35 +394,6 @@ def test_p1_nothing_from_a_source_that_cant_be_kept_is_written():
     assert rhino.count("SetString(SECTION, UI_ENTRY") == 1 and "json.dumps(logic.storable_ui(state))" in rhino
 
 
-def test_p1_a_lookup_never_replaces_the_architects_own_lot():
-    """(C) Only the lot a lookup or the sample drew may be replaced; a survey picked, or a lot drawn or picked by the
-    architect, never (its id is no longer the replaceable one)."""
-    saved = {"replaceable_lot": "sample-lot"}
-    assert logic.lookup_may_replace({"lot_id": "sample-lot"}, saved)
-    assert logic.lookup_may_replace({}, saved)
-    picked = logic.settle(saved, "lot")                 # Use my survey… / Draw my lot… / Pick survey lot lines…
-    assert not logic.lookup_may_replace({"lot_id": "survey"}, picked)
-    assert not logic.lookup_may_replace({"lot_id": "sample-lot"}, picked)
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "replaceable_lot=sample_lot" in rhino and 'saved_ui = logic.settle(_ui_state(doc), "lot")' in rhino
-
-
-def test_p1_the_start_box_is_one_transaction():
-    """(C) Every model edit the box makes is recorded (added, or removed with its serial number), and Cancel undoes
-    them all; nothing in the lookup or a pick deletes an object any other way."""
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    done = rhino[rhino.index("def _lookup_done("):rhino.index("def _drawn(")]
-    assert "doc.Objects.Delete(" not in done and "_session_remove(doc, saved_ui, old)" in done
-    assert done.count("_session_add(saved_ui, ") == 2                 # the lot and its spot grades
-    pick = rhino[rhino.index("def _box_pick("):rhino.index("def confirm(")]
-    assert "doc.Objects.Delete(" not in pick and "_session_add(saved_ui, placed)" in pick
-    assert "_session_add(saved_ui, [drawn])" in pick
-    conf = rhino[rhino.index("def confirm("):rhino.index("def _lookup_start(")]
-    assert conf.index("_rollback(doc, saved_ui)") < conf.index("return None")
-    rb = rhino[rhino.index("def _rollback("):rhino.index("def _draw_lot(")]
-    assert "doc.Objects.Undelete(serial)" in rb
-
-
 def test_p2_overlays_found_and_ask_reasons_are_shown():
     """(F) A historic district the lookup found is shown under the district; a zone that is both asked and doubtful
     keeps its doubt."""
@@ -502,3 +474,210 @@ def test_p3_the_lookups_files_are_closed_one_time_limit_and_no_silent_failure():
     assert "doesn't look up the zoning map" not in guide
     assert "doesn't look the zoning map up yet" not in (REPO / "packages/design_checker/design_checker/rhino_logic.py"
                                                        ).read_text(encoding="utf-8")
+
+
+# ---- the start box as one transaction, by behaviour (review round 2): the real session and lookup logic on a fake
+# model (rhino_logic.BoxSession, apply_lookup; gordium_rhino.RhinoTable is only the adapter to Rhino's) ---------------
+
+class FakeTable:
+    """A model: objects {id: {"layer", "kind", "held_from"}}, its layers, and its views."""
+
+    def __init__(self, objects, layers=("Site", "Gordium")):
+        self.objects = {k: dict(v, held_from=None) for k, v in objects.items()}
+        self.layers = set(layers) | {o["layer"] for o in objects.values()}
+        self.views, self.n = "the architect's views", 0
+
+    def exists(self, i):
+        return i in self.objects
+
+    def delete(self, i):
+        del self.objects[i]
+
+    def layer_of(self, i):
+        return self.objects[i]["layer"]
+
+    def hold(self, i):
+        self.layers.add(logic.HOLDING_LAYER)
+        self.objects[i].update(held_from=self.objects[i]["layer"], layer=logic.HOLDING_LAYER)
+
+    def release(self, i, layer):
+        self.layers.add(layer)
+        self.objects[i].update(layer=layer, held_from=None)
+
+    def held_objects(self):
+        return [(i, o["held_from"]) for i, o in self.objects.items() if o["layer"] == logic.HOLDING_LAYER]
+
+    def layer_names(self):
+        return sorted(self.layers)
+
+    def remove_layer_if_empty(self, name):
+        if not any(o["layer"] == name for o in self.objects.values()) and \
+                not any(n.startswith(name + "::") for n in self.layers):
+            self.layers.discard(name)
+
+    def save_views(self):
+        return self.views
+
+    def restore_views(self, saved):
+        self.views = saved
+
+    def _new(self, layer, kind):
+        self.n += 1
+        self.layers.add(layer)
+        self.objects["new%d" % self.n] = {"layer": layer, "kind": kind, "held_from": None}
+        return "new%d" % self.n
+
+    def add_lot(self, ring, name):
+        return self._new("Site", "lot")
+
+    def add_spot(self, p):
+        return self._new("Gordium::Grade", "point")
+
+    def ground_points(self):
+        return [i for i, o in self.objects.items() if o["kind"] == "point"
+                and o["layer"] in ("Gordium::Grade", "Gordium::Grade::Finished")]
+
+    def snapshot(self):
+        return {i: (o["layer"], o["kind"]) for i, o in self.objects.items()}, sorted(self.layers), self.views
+
+
+def sample_model():
+    table = FakeTable({"sample": {"layer": "Site", "kind": "lot"}})
+    return table, {"lot_id": "sample"}, {"from_sample": True, "replaceable_lot": "sample"}
+
+
+def test_cancel_after_a_lookup_leaves_the_model_exactly_as_it_was():
+    """Round 1 and 2 (and seen in Rhino): Cancel didn't bring the sample lot back. Held, not deleted: the same
+    object, the same id, on its own layer; the lookup's lot and spot grades gone; the layer it made removed; the
+    architect's views back."""
+    table, facts, saved = sample_model()
+    before = table.snapshot()
+    session = logic.BoxSession(table)
+    f, sv, guide = logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    assert table.objects["sample"]["layer"] == logic.HOLDING_LAYER and len(table.ground_points()) == 14
+    assert f["lot_id"] != "sample" and guide is None
+    table.views = "framed on the looked-up lot"
+    session.rollback()
+    assert table.snapshot() == before
+
+
+def test_draw_after_a_lookup_deletes_what_was_replaced_and_keeps_the_new():
+    table, facts, saved = sample_model()
+    session = logic.BoxSession(table)
+    f, sv, _ = logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    session.commit()
+    assert "sample" not in table.objects and f["lot_id"] in table.objects
+    assert logic.HOLDING_LAYER not in table.layers and len(table.ground_points()) == 14
+
+
+def test_a_re_lookup_sets_aside_every_spot_grade_of_the_lot_it_replaces():
+    """Round 2: the architect's own spot grades for the replaced lot stayed and mixed with the new lot's."""
+    table, facts, saved = sample_model()
+    session = logic.BoxSession(table)
+    f, sv, _ = logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    mine = [table._new("Gordium::Grade", "point"), table._new("Gordium::Grade::Finished", "point")]
+    session.add(mine)                                               # placed with Place spot grades… in this box
+    keep = table._new("Gordium::Grade", "point")                    # one placed before the box opened
+    f2, sv2, _ = logic.apply_lookup(table, session, looked_up("109_ithaca_rd"), f, sv, ZONES)
+    assert len(table.ground_points()) == 6                          # 109's six, nothing of 106's lot
+    assert table.objects[keep]["layer"] == logic.HOLDING_LAYER and not any(m in table.objects for m in mine)
+    session.rollback()
+    assert table.objects[keep]["layer"] == "Gordium::Grade" and table.objects["sample"]["layer"] == "Site"
+
+
+def test_a_lookup_never_touches_the_architects_own_lot():
+    """Round 1 (behaviour, round 2): a lot the architect picked, surveyed or drew is never held or replaced."""
+    table = FakeTable({"survey": {"layer": "Site", "kind": "lot"}, "spot": {"layer": "Gordium::Grade", "kind": "point"}})
+    before = table.snapshot()
+    saved = logic.settle({"replaceable_lot": "survey"}, "lot")       # Use my survey… on it
+    f, sv, guide = logic.apply_lookup(table, logic.BoxSession(table), _doubtful_106(),
+                                      {"lot_id": "survey", "lot_surveyed": True}, saved, ZONES)
+    assert table.snapshot() == before and f["lot_id"] == "survey" and f["lot_surveyed"] is True
+    assert sv["_lookup"]["says"].startswith("Your own lot is kept") and logic.unsettled(sv) == {}
+
+
+def test_esc_or_an_error_anywhere_in_the_box_rolls_it_back():
+    """Round 2: Esc inside a pick (Cancelled) or any error escaped the box with its edits left in the model."""
+    for raised in (logic.Cancelled(), RuntimeError("a pick failed"), KeyboardInterrupt()):
+        table, facts, saved = sample_model()
+        before = table.snapshot()
+        session = logic.BoxSession(table)
+
+        def loop():
+            logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts, saved, ZONES)
+            raise raised
+
+        with pytest.raises(type(raised)):
+            logic.run_box(session, loop)
+        assert table.snapshot() == before
+    table, facts, saved = sample_model()
+    before = table.snapshot()
+    session = logic.BoxSession(table)
+    assert logic.run_box(session, lambda: (logic.apply_lookup(table, session, looked_up("106_ithaca_rd"), facts,
+                                                              saved, ZONES), None)[1]) is None     # Cancel
+    assert table.snapshot() == before
+
+
+def test_esc_at_a_picks_prompt_changes_nothing():
+    def pick():
+        raise logic.Cancelled()
+    assert logic.pick_or_nothing(pick, {"a": 1}, {"b": 2}) == ({"a": 1}, {"b": 2})
+    assert logic.pick_or_nothing(lambda: ({"a": 9}, {}), {"a": 1}, {}) == ({"a": 9}, {})
+
+
+def test_objects_held_when_rhino_closed_are_put_back_and_never_measured():
+    """A box Rhino didn't finish: what it held goes back to its own layer at the next GordiumStart or GordiumCheck;
+    meanwhile nothing on the holding layer is a lot, a building or a problem for the checker."""
+    table = FakeTable({"sample": {"layer": "Site", "kind": "lot"}, "spot": {"layer": "Gordium::Grade", "kind": "point"}})
+    table.hold("sample")
+    table.hold("spot")
+    assert logic.recover_held(table) == 2
+    assert table.objects["sample"]["layer"] == "Site" and table.objects["spot"]["layer"] == "Gordium::Grade"
+    assert logic.HOLDING_LAYER not in table.layers
+    for kind, holds in (("PolylineCurve", False), ("Brep", False), ("InstanceReferenceGeometry", True)):
+        assert logic.classify(logic.HOLDING_LAYER, kind, holds) is None
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    for command in ("def gordium_start():", "def gordium_check():", "def confirm("):
+        body = rhino[rhino.index(command):]
+        assert body.index("_recover(doc)") < body.index("\ndef ")
+
+
+def test_the_city_outline_guide_holds_the_sample_lot_until_cancel():
+    table, facts, saved = sample_model()
+    before = table.snapshot()
+    p = looked_up("106_ithaca_rd")
+    from design_checker.lookup_box import frame
+    p["details"]["lot"]["source_keys"] = ["city_parcels"]
+    p["writes"] = writes({"facts": p["facts"], "details": p["details"]}, frame({"facts": p["facts"]}))
+    session = logic.BoxSession(table)
+    f, sv, guide = logic.apply_lookup(table, session, p, facts, saved, ZONES)
+    assert guide and "lot_id" not in f and not [o for o in table.objects.values() if o["layer"] == "Site"]
+    session.rollback()
+    assert table.snapshot() == before
+
+
+def test_cancel_during_a_lookup_never_raises_before_the_rollback():
+    """Round 2 (Windows): the output file was removed right after kill(); a PermissionError there skipped the
+    rollback. The process is waited for, removal can't raise, the answer is set first, and run_box rolls back in
+    its own handler before confirm's finally stops the lookup."""
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    kill = rhino[rhino.index("def _lookup_kill("):rhino.index("def _lookup_done(")]
+    assert 'run["proc"].wait(timeout=5)' in kill
+    files = rhino[rhino.index("def _lookup_files_done("):rhino.index("def _lookup_stop(")]
+    assert "except OSError:" in files
+    poll = rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
+    assert poll.index('run["answer"] = {"status": "timeout"') < poll.index("_lookup_kill(run)")
+    conf = rhino[rhino.index("def confirm("):rhino.index("def _box_loop(")]
+    assert conf.index("logic.run_box(session") < conf.index("finally:") < conf.index("_lookup_stop()")
+
+
+def test_the_architects_street_line_keeps_no_looked_up_name():
+    """Round 2: after Change… the looked-up (NYS Streets) name was saved as "entered by you"."""
+    saved = logic.settle({"street_name": "Mitchell St", "_street_name": "Mitchell St"}, "street")
+    assert "street_name" not in saved and "_street_name" not in saved
+    assert logic.fact_sources({"street_source": logic.ENTERED}, "d", True)["street"]["value"] == "the highlighted line"
+
+
+def test_the_overlays_gap_says_what_the_lookup_does():
+    text = (REPO / "regulations/jurisdictions/new_york/ithaca_city/not_checked_yet.yaml").read_text(encoding="utf-8")
+    assert "doesn't look them up" not in text and "shows the ones it finds" in text

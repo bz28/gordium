@@ -18,12 +18,18 @@ def on_layer(full_path, layer):
     return full_path == layer or full_path.startswith(layer + "::")
 
 
+HOLDING_LAYER = "Gordium::Replaced (Cancel restores)"   # objects a start box replaced, until Draw (BoxSession)
+HELD_FROM = "gordium_held_from"                          # on each held object: the layer it came from
+
+
 def classify(full_path, kind, holds_building=False):
     """What the Rhino command does with one object, from its layer's full path and its geometry's type name:
     "lot" (a curve on the lot layer: a possible lot outline), "building" (a solid or mesh on the building layer),
     None (anything else, ignored), or a problem sentence. Nothing that could be part of a building is dropped:
     a block on the building layer, or a block holding building objects wherever it is placed, and any other
     geometry on the building layer, are problems, so the checker says NEEDS REVIEW."""
+    if on_layer(full_path, HOLDING_LAYER):           # held by an open start box: never measured or sent
+        return None
     if on_layer(full_path, MASSING):
         full_path = LAYERS["building"]
     if kind.startswith("InstanceReference") and (on_layer(full_path, LAYERS["building"]) or holds_building):
@@ -516,8 +522,9 @@ def settle(saved_ui, row):
     if row == "lot":
         saved_ui["replaceable_lot"] = None           # never replaced by a later lookup
         saved_ui.pop("lot_source", None)
-    if row == "street":
+    if row == "street":                          # the architect's own line: no looked-up name stays on it
         saved_ui.pop("_street_name", None)
+        saved_ui.pop("street_name", None)
     return saved_ui
 
 
@@ -681,3 +688,129 @@ def is_plan_view(parallel, direction_z, tolerance=0.99):
     down. Not a perspective (labels sit on the massing) and not an elevation (Front, Right: every plan label piles
     up on the ground line)."""
     return bool(parallel) and direction_z <= -tolerance
+
+
+# ---- the start box as one transaction (review rounds 1-2 of PR #19) ----------------------------------------------
+#
+# The box's model edits go through one BoxSession, owned by the box (gordium_rhino.confirm) and never copied. An object
+# the session replaces is never deleted while the box is open: it is HELD, moved to a hidden holding layer with the
+# layer it came from written on it, so Cancel (or Esc, or any error) puts the very same object back, and so does the
+# next GordiumStart if Rhino closed in between (recover_held). Draw deletes what is held. Nothing on the holding layer
+# is ever measured or sent to the checker (classify). `table` is the model, as a few plain calls (gordium_rhino's
+# RhinoTable; a fake in the tests).
+
+class Cancelled(Exception):
+    """Esc at a prompt: the whole edit is cancelled and nothing is saved (Enter keeps what is there)."""
+
+
+class BoxSession:
+    def __init__(self, table):
+        self.table = table
+        self.added, self.held = [], []
+        self.layers_before = set(table.layer_names())
+        self.views = table.save_views()
+
+    def add(self, ids):
+        """Objects this session drew (Cancel deletes them)."""
+        self.added += [i for i in ids if i]
+
+    def hold(self, object_id):
+        """Take an object out of the model for this session: one it drew is simply deleted; any other is held (Cancel
+        brings it back as it was)."""
+        if not object_id or not self.table.exists(object_id):
+            return
+        if object_id in self.added:
+            self.added.remove(object_id)
+            self.table.delete(object_id)
+            return
+        self.held.append((object_id, self.table.layer_of(object_id)))
+        self.table.hold(object_id)
+
+    def rollback(self):
+        """Cancel, Esc or an error: the model as the box found it (objects, the layers it made, the views)."""
+        for i in self.added:
+            if self.table.exists(i):
+                self.table.delete(i)
+        for i, layer in self.held:
+            if self.table.exists(i):
+                self.table.release(i, layer)
+        made = set(self.table.layer_names()) - self.layers_before
+        for name in sorted(made, key=lambda n: -n.count("::")):      # sublayers first
+            self.table.remove_layer_if_empty(name)
+        self.table.restore_views(self.views)
+        self.added, self.held = [], []
+
+    def commit(self):
+        """Draw: what was replaced goes for good."""
+        for i, _ in self.held:
+            if self.table.exists(i):
+                self.table.delete(i)
+        self.table.remove_layer_if_empty(HOLDING_LAYER)
+        self.added, self.held = [], []
+
+
+def recover_held(table):
+    """Objects still held from a box session Rhino didn't finish (it closed): each back on the layer it came from.
+    How many."""
+    held = list(table.held_objects())
+    for i, layer in held:
+        table.release(i, layer)
+    table.remove_layer_if_empty(HOLDING_LAYER)
+    return len(held)
+
+
+def run_box(session, loop):
+    """The box's loop: any way out but Draw's (Cancel returns None from it; Esc, an error) rolls the session back."""
+    try:
+        result = loop()
+    except BaseException:
+        session.rollback()
+        raise
+    if result is None:
+        session.rollback()
+    return result
+
+
+def pick_or_nothing(pick, facts, saved_ui):
+    """One pick the box asked for: Esc at its prompt changes nothing."""
+    try:
+        return pick()
+    except Cancelled:
+        return facts, saved_ui
+
+
+def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
+    """(facts, saved_ui, guide ring or None) after a lookup's answer, with its model edits made through the session:
+    the lot it may replace (lookup_may_replace) and every spot grade drawn for that lot (a lookup's or the
+    architect's: grades never mix across lots) held; the State's outline drawn as the lot curve and USGS ground as
+    spot grades (only what lookup_box.writes allows); the City's outline only as a guide. The architect's own lot,
+    its street side and ground are never touched."""
+    replaces = lookup_may_replace(facts, saved_ui)
+    facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=replaces)
+    if (answer or {}).get("status") != "found":
+        return facts, saved_ui, None
+    if not replaces:
+        saved_ui["_lookup"]["says"] = "Your own lot is kept: the lookup filled in the address and the district only."
+        return facts, saved_ui, None
+    w = answer.get("writes") or {}
+    for old in [facts.get("lot_id")] + list(table.ground_points()):
+        session.hold(old)
+    for k in ("lot_id", "street_line"):
+        facts.pop(k, None)
+    saved_ui.update(from_sample=False, replaceable_lot=None, lookup_frame=None, ground_kind="flat", lookup_spots=[])
+    guide = None
+    if w.get("lot_ring"):
+        lot_id = table.add_lot(w["lot_ring"], "Lot · " + (facts.get("address") or "looked up"))
+        session.add([lot_id])
+        facts["lot_id"] = lot_id
+        if w.get("street_line"):
+            facts["street_line"] = w["street_line"]
+        spots = [table.add_spot(p) for p in w.get("spots") or []]
+        session.add(spots)
+        saved_ui.update(replaceable_lot=lot_id, lookup_frame=w.get("frame"), lookup_spots=spots)
+        if spots:
+            saved_ui["ground_kind"] = "spot"
+    elif w.get("guide_ring"):
+        guide = w["guide_ring"]
+    saved_ui["lookup_snapshot"] = w.get("snapshot")
+    return facts, saved_ui, guide
