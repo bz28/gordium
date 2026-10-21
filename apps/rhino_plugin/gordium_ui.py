@@ -729,38 +729,53 @@ def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=
     return width, height
 
 
+LINE_H = 16                              # one line of a plan label (11-12 px text), in screen pixels
+
+
 def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=()):
-    """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted). Takes its spot in
-    `taken`. With `along` (its dimension line) it goes beside that line, off every line in `obstacles` (the other
-    dimensions, the lot's and the house's edges) and every label already placed. The in-Rhino checks measure this
-    very placement."""
+    """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted, its lines). Takes its spot
+    in `taken`. With `along` (its dimension line) it goes beside that line, off every line in `obstacles` (the
+    other dimensions, the lot's and the house's edges) and every label already placed, on screen; when no spot
+    beside the line is clear for it on one line, on two (its name, then its numbers: logic.label_lines). Its height
+    is 4 + LINE_H per line. The in-Rhino checks measure this very placement."""
     p = viewport.WorldToClient(point)
     width = len(text) * size * 0.58 + 14
     if along is not None:
         a, b = (viewport.WorldToClient(q) for q in along)
         own = ((a.X, a.Y), (b.X, b.Y))
-        left, top, clear = logic.place_label(own, width, 20, obstacles, taken or [])
+        view = (viewport.Size.Width, viewport.Size.Height)
+        left, top, clear = logic.place_label(own, width, 20, obstacles, taken or [], view=view)
+        rows = [text]
+        two = logic.label_lines(text)
+        if not clear and len(two) == 2:          # too long to sit clear beside its line: name, then numbers
+            w2 = max(len(t) for t in two) * size * 0.58 + 14
+            l2, t2, c2 = logic.place_label(own, w2, 4 + 2 * LINE_H, obstacles, taken or [], view=view)
+            if c2:
+                left, top, width, clear, rows = l2, t2, w2, True, two
+        h = 4 + LINE_H * len(rows)
         if not clear:                        # nowhere clear: at least off its own line and the other labels
-            top = logic.clear_spot(taken if taken is not None else [], left, top, width, 20, (own,))
+            top = logic.clear_spot(taken if taken is not None else [], left, top, width, h, (own,))
         elif taken is not None:
-            taken.append((left, top, width, 20))
-        return left, top, width, top
+            taken.append((left, top, width, h))
+        return left, top, width, top, rows
     left, want = p.X - width / 2, p.Y - 10
     top = want if taken is None else logic.clear_spot(taken, left, want, width, 20)
-    return left, top, width, want
+    return left, top, width, want, [text]
 
 
 def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=()):
     """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
     already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
-    `along` (a dimension line's two model points), it sits beside that line, never on it."""
+    `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must)."""
     p = viewport.WorldToClient(point)
-    left, top, width, want = label_box(viewport, point, text, size, taken, along, obstacles)
+    left, top, width, want, rows = label_box(viewport, point, text, size, taken, along, obstacles)
+    h = 4 + LINE_H * len(rows)
     if abs(top - want) > 1:
-        d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(p.X, top + (20 if top < p.Y else 0)),
+        d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(p.X, top + (h if top < p.Y else 0)),
                      color, 1)
-    d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), 20), color, 1, backing(dark))
-    d.Draw2dText(text, color, rg.Point2d(left + 7, top + 3), False, size)
+    d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), int(h)), color, 1, backing(dark))
+    for k, row in enumerate(rows):
+        d.Draw2dText(row, color, rg.Point2d(left + 7, top + 3 + LINE_H * k), False, size)
 
 
 def _signed(bits):

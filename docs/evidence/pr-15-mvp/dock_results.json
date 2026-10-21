@@ -9,14 +9,14 @@
    "ok": true,
    "detail": {
     "window": [
-     927,
-     97,
+     956,
+     111,
      400,
      720
     ],
     "document": [
-     159,
-     37,
+     188,
+     51,
      1192,
      814
     ]
@@ -62,14 +62,14 @@
  "parent": "TabPanelDockBarFloatingForm()",
  "floating": {
   "window": [
-   927,
-   97,
+   956,
+   111,
    400,
    720
   ],
   "document": [
-   159,
-   37,
+   188,
+   51,
    1192,
    814
   ]
@@ -83,8 +83,8 @@
   "\u2713  Stories \u00b7 assuming flat ground",
   "\u2713  Lot coverage",
   "\u2713  Front yard",
-  "\u2713  Side yard, East",
-  "\u2713  Side yard, West",
+  "\u2713  Side yard, Northeast",
+  "\u2713  Side yard, Southwest",
   "\u2013  Parking \u00b7 needs input",
   "\u2013  Overlays \u00b7 not in this release",
   "  \u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",

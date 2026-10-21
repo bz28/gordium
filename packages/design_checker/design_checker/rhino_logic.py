@@ -309,12 +309,14 @@ def beside_line(a, b, w, h, gap=6):
     return max(xa, xb) + gap, (ya + yb) / 2 - h / 2
 
 
-def place_label(line, w, h, obstacles=(), taken=(), gap=6):
+def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     """Where a w × h label for the dimension `line` ((x1, y1), (x2, y2), screen pixels) goes: (left, top, clear).
     The spots beside its line are tried in turn (a mostly horizontal line: above, below, each centred, then
     shifted to either end; a mostly vertical one: right, left, then shifted up or down); the first that crosses
-    no line in `obstacles` (other dimensions, the lot's edges, the house's edges; its own line always) and covers
-    no box in `taken` is used. If none is clear, the first spot and False (the caller moves it off the others)."""
+    no line in `obstacles` (other dimensions, the lot's and the house's edges; its own line always) and covers
+    no box in `taken` is used. With `view` (its width and height), only spots wholly on screen are tried (seen in
+    Rhino: "Side yard, Southwest …, needs 10'-0" (approx.)" went 15 px off the left edge). If none is clear, the
+    first spot, kept on screen, and False (the caller moves it off the others)."""
     (xa, ya), (xb, yb) = line
     x0, x1, y0, y1 = min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)
     # nearest the line's middle first: centred on either side, then shifted along it (a label far along its line
@@ -326,11 +328,24 @@ def place_label(line, w, h, obstacles=(), taken=(), gap=6):
         ys = [(y0 + y1) / 2 - h / 2, y0, y1 - h, y0 - h - gap, y1 + gap]
         spots = [(left, y) for y in ys for left in (x1 + gap, x0 - gap - w)]
     lines = list(obstacles) + [line]
-    for left, top in spots:
+    on_screen = [(x, y) for x, y in spots if view is None or (0 <= x and x + w <= view[0] and 0 <= y and y + h <= view[1])]
+    for left, top in on_screen:
         if not any(crosses(s, left, top, w, h) for s in lines) and \
                 not any(left < a + c and a < left + w and top < b + e and b < top + h for a, b, c, e in taken):
             return left, top, True
-    return spots[0][0], spots[0][1], False
+    left, top = (on_screen or spots)[0]
+    if view is not None:                     # nowhere beside it on screen: the first spot, moved onto the screen
+        left, top = min(max(left, 0), max(view[0] - w, 0)), min(max(top, 0), max(view[1] - h, 0))
+    return left, top, False
+
+
+def label_lines(text):
+    """A plan label as two lines, for when it won't fit beside its line on one: its name, then its numbers
+    ("✕ Side yard, Southwest" / "7'-0 5/8", needs 10'-0" (approx.)"). One line when it has no name before a number
+    (a lot edge's length)."""
+    words = text.split(" ")
+    k = next((i for i, w in enumerate(words) if i and w[:1].isdigit()), None)
+    return [text] if k is None else [" ".join(words[:k]), " ".join(words[k:])]
 
 
 def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):

@@ -4,7 +4,8 @@ GordiumStart on the sample (106 Ithaca Rd's tax-map lot: lot lines ±2'-0"), the
 (seen from the street), so that side yard is 7'-0 5/8" against the 10'-0" required. The lot line may really be up
 to 2 ft either way:
 - red: over under every reading, 10 - 2 - the yard wide (about 0.95 ft: worked from the measured yard);
-- amber: the rest of the doubt, 4 ft wide (within 12 ft, less the red);
+- amber: the rest of the doubt, 4 ft wide (within 12 ft, less the red); anything amber past 12 ft is the rear
+  yard's own (it needs review: its minimum moves with the lot depth's ±4'-0" too, review round 1);
 - before the move nothing is coloured red (the start house complies); the colours drawn are the status colours.
 Captures Top and Perspective. Writes <temp>/gordium_highlight/run_out.json and frames/*.png; phase "close"
 (sc.sticky["gordium_highlight_phase"]) closes its document."""
@@ -103,8 +104,11 @@ try:
             t = max(0.0, min(1.0, ((p[0] - ax) * (bx - ax) + (p[1] - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2)))
             return math.dist(p, (ax + t * (bx - ax), ay + t * (by - ay)))
 
+        def dists(brep):
+            return [to_line((v.Location.X * g._scale(doc), v.Location.Y * g._scale(doc))) for v in brep.Vertices]
+
         def span(brep):
-            d = [to_line((v.Location.X * g._scale(doc), v.Location.Y * g._scale(doc))) for v in brep.Vertices]
+            d = dists(brep)
             return round(min(d), 3), round(max(d), 3)
         red_b = [b for b, st in g.overlay().encroach if st == "does_not_comply"]
         amber_b = [b for b, st in g.overlay().encroach if st == "needs_review"]
@@ -112,9 +116,18 @@ try:
         e = 0.05                                            # proud by scaling about the box centre: a slanted corner moves a bit more
         claim("red: from the wall to 8 ft from the lot line (over even if the line is 2 ft out)", len(red_b) == 1 and
               all(yard - e <= lo and hi <= 8 + e and hi >= 8 - e for lo, hi in log["bands"]["red"]), log["bands"])
-        claim("amber: 8 to 12 ft from the lot line, beside the red", len(amber_b) >= 1 and
-              all(8 - e <= lo and hi <= 12 + e for lo, hi in log["bands"]["amber"]) and
-              any(abs(lo - 8) <= e and abs(hi - 12) <= e for lo, hi in log["bands"]["amber"]), log["bands"])
+        corners = sorted(round(d, 3) for b in amber_b for d in dists(b))
+        log["bands"]["amber_corners"] = corners
+        claim("amber: from 8 ft from the lot line, beside the red, its side band to 12 ft", len(amber_b) >= 1 and
+              all(8 - e <= lo for lo, hi in log["bands"]["amber"]) and
+              any(abs(lo - 8) <= e for lo, hi in log["bands"]["amber"]) and
+              any(abs(d - 12) <= e for d in corners), log["bands"])
+        rows = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
+        rear = rows.get("Rear yard") or {}
+        claim("amber past 12 ft is the rear yard's own: it needs review, short under some reading",
+              all(hi <= 12 + e for lo, hi in log["bands"]["amber"]) or
+              (rear.get("status"), rear.get("colour")) == ("needs_review", "amber")
+              and (rear.get("delta") or "").startswith("up to "), {"rear": rear, "bands": log["bands"]})
         claim("each colour from the result", [g.logic.highlight(s) for s in ("does_not_comply", "needs_review")] ==
               ["red", "amber"])
         # the architect's polish (2026-10-21), each as the screen has it
@@ -149,17 +162,19 @@ try:
         every = [(line, text) for line, text, _ in g.overlay().yard_dims] + \
             [(edge, text) for _, text, edge in g.overlay().edge_labels]
         for line, text in every:      # every label, in the order the screen draws them (yards, then edge lengths)
-            left, top, w, _ = g.ui.label_box(vp, (line.From + line.To) / 2, text, 11, taken,
-                                             along=(line.From, line.To), obstacles=obstacles)
-            hits = [o for o in obstacles if g.logic.crosses(o, left, top, w, 20)]
-            others = [b for b in placed if left < b[0] + b[2] and b[0] < left + w and top < b[1] + 20 and b[1] < top + 20]
-            placed.append((left, top, w))
-            inside = 0 <= left and left + w <= vp.Bounds.Width and 0 <= top and top + 20 <= vp.Bounds.Height
+            left, top, w, _, rows = g.ui.label_box(vp, (line.From + line.To) / 2, text, 11, taken,
+                                                   along=(line.From, line.To), obstacles=obstacles)
+            h = 4 + g.ui.LINE_H * len(rows)                   # one line or two (name, then numbers)
+            hits = [o for o in obstacles if g.logic.crosses(o, left, top, w, h)]
+            others = [b for b in placed if left < b[0] + b[2] and b[0] < left + w and top < b[1] + b[3] and b[1] < top + h]
+            placed.append((left, top, w, h))
+            inside = 0 <= left and left + w <= vp.Bounds.Width and 0 <= top and top + h <= vp.Bounds.Height
             (ax, ay), (bx, by) = screen(line)                 # next to its own line: the gap between them
-            near = min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - 20) ** 2) ** 0.5)
+            near = min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5)
                        for x, y in ((ax + (bx - ax) * k / 50, ay + (by - ay) * k / 50) for k in range(51)))
             log.setdefault("labels", []).append((text, round(left), round(top), len(hits), len(others), inside,
                                                  round(near, 1)))
+            log.setdefault("label_rows", []).append(len(rows))
         claim("2 no label crosses a dimension, a lot edge or the house, nor covers another label",
               len(log["labels"]) >= 8 and all(n == 0 and m == 0 for *_, n, m, _, _ in log["labels"]) and
               len(obstacles) >= 4 + 4 + 4, {"labels": log["labels"], "lines": len(obstacles)})

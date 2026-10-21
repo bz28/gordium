@@ -42,8 +42,8 @@
     "\u2713  Stories \u00b7 assuming flat ground",
     "\u2713  Lot coverage",
     "\u2713  Front yard",
-    "\u2713  Side yard, East",
-    "\u2713  Side yard, West",
+    "\u2713  Side yard, Northeast",
+    "\u2713  Side yard, Southwest",
     "\u2013  Parking \u00b7 needs input",
     "\u2013  Overlays \u00b7 not in this release"
    ]
@@ -72,13 +72,13 @@
   "3 Delta in words": {
    "ok": true,
    "detail": [
-    "at the limit at worst",
+    "at limit",
+    "up to 0'-11 1/4\" short",
     "",
-    "",
-    "+1,033 sf to spare",
+    "at least 357 sf to spare",
     "at least 21'-10\" to spare",
     "at limit",
-    "+5.93% to spare",
+    "at least 3.9% to spare",
     "at least 0'-0 3/4\" to spare",
     "at least 15'-4 1/4\" to spare",
     "at least 0'-0 5/8\" to spare",
@@ -94,7 +94,7 @@
   "3 a shortfall says short": {
    "ok": true,
    "detail": [
-    "\u2715  Side yard, West",
+    "\u2715  Side yard, Southwest",
     "7'-0 5/8\"",
     "10'-0\"",
     "at least 0'-11 1/4\" short"
@@ -103,7 +103,7 @@
   "1 labels off: a failing yard's shortfall still labelled": {
    "ok": true,
    "detail": [
-    "\u2715 Side yard, West 7'-0 5/8\", needs 10'-0\" (approx.)"
+    "\u2715 Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)"
    ]
   },
   "1 labels off: the others not": {

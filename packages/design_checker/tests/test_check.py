@@ -1239,6 +1239,27 @@ def test_a_yard_label_sits_beside_its_dimension_line_never_on_it():
         assert not crosses((a, b), x, top, w, h), (a, b, top)
 
 
+def test_a_yard_label_is_never_placed_off_the_screen():
+    """Seen in Rhino (2026-10-21, the highlight check): with its compass name the label "✕ Side yard, Southwest
+    7'-0 5/8", needs 10'-0" (approx.)" (about 400 px) beside a short dimension near the view's left edge went 15 px
+    off it. Spots off the screen are never used; with none clear, the first is moved onto it."""
+    from design_checker.rhino_logic import place_label
+    own = ((150, 411), (205, 411))                          # lot line to wall, near the left of a 1062 x 668 view
+    w, h, view = 400, 20, (1062, 668)
+    left, top, clear = place_label(own, w, h, view=view)
+    assert 0 <= left and left + w <= view[0] and 0 <= top and top + h <= view[1] and clear
+    wall = [((0, 380), (1062, 380)), ((0, 440), (1062, 440)), ((420, 0), (420, 668))]   # nowhere beside it is clear
+    left, top, clear = place_label(own, w, h, wall, view=view)
+    assert 0 <= left and left + w <= view[0] and 0 <= top and top + h <= view[1]
+    assert place_label(own, w, h)[0] < 0                    # without the view's size it would have gone off it
+    # with no room for it on one line, it goes on two: its name, then its numbers (half as wide, so it fits)
+    from design_checker.rhino_logic import label_lines
+    assert label_lines("✕ Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)") == [
+        "✕ Side yard, Southwest", "7'-0 5/8\", needs 10'-0\" (approx.)"]
+    assert label_lines("75'-10\" (approx.)") == ["75'-10\" (approx.)"]          # a lot edge's length: one line
+    assert label_lines("? Rear yard 27'-6 7/8\"") == ["? Rear yard", "27'-6 7/8\""]
+
+
 def test_a_yard_label_stays_off_every_dimension_and_edge_not_only_its_own():
     """The Top view in Rhino (2026-10-21, after the first fix): the West yard's label sat above its own short
     dimension but across the front yard's vertical dimension. Placement tries the spots beside its line and takes

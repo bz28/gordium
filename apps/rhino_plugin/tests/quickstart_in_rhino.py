@@ -143,9 +143,15 @@ try:
     xf(ids, t)
     check(doc, 3, "3 Move back 6 ft", {"Rear yard": {"status": "needs_review", "proposed": "21'-6 1/8\""}})
     undo(ids, t)
-    t = rg.Transform.Translation(north * 7)
+    t = rg.Transform.Translation(north * 7)       # short under some readings only (the depth's ±4'-0"): review
     xf(ids, t)
-    check(doc, 3, "3 Move back 7 ft", {"Rear yard": {"status": "does_not_comply", "proposed": "20'-6 1/8\""}})
+    check(doc, 3, "3 Move back 7 ft", {"Rear yard": {"status": "needs_review", "proposed": "20'-6 1/8\"",
+                                                     "delta": "up to 7'-11 1/4\" short"}})
+    undo(ids, t)
+    t = rg.Transform.Translation(north * 10)
+    xf(ids, t)
+    check(doc, 3, "3 Move back 10 ft", {"Rear yard": {"status": "does_not_comply", "proposed": "17'-6 1/8\"",
+                                                      "delta": "at least 0'-7 1/4\" short"}})
     undo(ids, t)
     t = stretch(ids, 1, None, 17)
     xf(ids, t)
@@ -156,7 +162,7 @@ try:
                               (base["top"] - base["base"] + 4) / (base["top"] - base["base"]))
     xf(top_floor, roof)
     check(doc, 5, "5 Raise the roof 4 ft", {"Building height": {"status": "does_not_comply", "proposed": "39'-0\"",
-                                                                "delta": "at least 4'-0\" short"}})
+                                                                "delta": "−4'-0\" short"}})
     undo(top_floor, roof)
     t = stretch(ids, 0, None, 3, low=True)
     xf(ids, t)

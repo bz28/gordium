@@ -4,14 +4,15 @@
   "the sample is 106's tax-map lot, the left side yard 12'-0 5/8\" of 10'-0\"": {
    "ok": true,
    "detail": {
-    "id": "R-1b.side_yards#west",
-    "name": "Side yard, West",
+    "id": "R-1b.side_yards#southwest",
+    "name": "Side yard, Southwest",
     "status": "complies",
     "proposed": "12'-0 5/8\"",
     "required": "10'-0\"",
     "margin": "+2'-0 5/8\"",
     "delta": "at least 0'-0 5/8\" to spare",
     "approx": true,
+    "colour": "none",
     "note": null,
     "points": [
      [
@@ -29,19 +30,22 @@
   },
   "the start house: nothing red": {
    "ok": true,
-   "detail": []
+   "detail": [
+    "needs_review"
+   ]
   },
   "moved: the left side yard 7'-0 5/8\", does not comply": {
    "ok": true,
    "detail": {
-    "id": "R-1b.side_yards#west",
-    "name": "Side yard, West",
+    "id": "R-1b.side_yards#southwest",
+    "name": "Side yard, Southwest",
     "status": "does_not_comply",
     "proposed": "7'-0 5/8\"",
     "required": "10'-0\"",
     "margin": "\u22122'-11 3/8\"",
     "delta": "at least 0'-11 1/4\" short",
     "approx": true,
+    "colour": "red",
     "note": null,
     "points": [
      [
@@ -64,33 +68,119 @@
     "red": [
      [
       7.035,
-      8.019
+      8.02
      ]
     ],
     "amber": [
      [
-      7.979,
-      12.036
+      7.98,
+      43.414
      ]
+    ],
+    "amber_corners": [
+     7.98,
+     7.98,
+     7.98,
+     7.98,
+     11.985,
+     11.985,
+     11.985,
+     11.985,
+     43.404,
+     43.404,
+     43.414,
+     43.414
     ]
    }
   },
-  "amber: 8 to 12 ft from the lot line, beside the red": {
+  "amber: from 8 ft from the lot line, beside the red, its side band to 12 ft": {
    "ok": true,
    "detail": {
     "yard": 7.056,
     "red": [
      [
       7.035,
-      8.019
+      8.02
      ]
     ],
     "amber": [
      [
-      7.979,
-      12.036
+      7.98,
+      43.414
      ]
+    ],
+    "amber_corners": [
+     7.98,
+     7.98,
+     7.98,
+     7.98,
+     11.985,
+     11.985,
+     11.985,
+     11.985,
+     43.404,
+     43.404,
+     43.414,
+     43.414
     ]
+   }
+  },
+  "amber past 12 ft is the rear yard's own: it needs review, short under some reading": {
+   "ok": true,
+   "detail": {
+    "rear": {
+     "id": "R-1b.rear_yard",
+     "name": "Rear yard",
+     "status": "needs_review",
+     "proposed": "27'-6 7/8\"",
+     "required": "\u2014",
+     "margin": "",
+     "delta": "up to 0'-10 1/2\" short",
+     "approx": true,
+     "colour": "amber",
+     "note": null,
+     "points": [
+      [
+       44.141016,
+       92.726788
+      ],
+      [
+       43.808356,
+       65.152572
+      ]
+     ],
+     "reason": "Complies under every reading, but it depends on an open question: which lot lines count as side and which as rear; confirm with the zoning office",
+     "group": "building"
+    },
+    "bands": {
+     "yard": 7.056,
+     "red": [
+      [
+       7.035,
+       8.02
+      ]
+     ],
+     "amber": [
+      [
+       7.98,
+       43.414
+      ]
+     ],
+     "amber_corners": [
+      7.98,
+      7.98,
+      7.98,
+      7.98,
+      11.985,
+      11.985,
+      11.985,
+      11.985,
+      43.404,
+      43.404,
+      43.414,
+      43.414
+     ]
+    }
    }
   },
   "each colour from the result": {
@@ -104,13 +194,13 @@
   "1 the notice says what holds however the lot lines lie: at least 0'-11 1/4\" short (the red part)": {
    "ok": true,
    "detail": [
-    "Side yard, West no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
+    "Side yard, Southwest no longer complies \u00b7 7'-0 5/8\" proposed \u00b7 10'-0\" required \u00b7 at least 0'-11 1/4\" short"
    ]
   },
   "1 the panel's Delta says the same": {
    "ok": true,
    "detail": [
-    "\u2715  Side yard, West",
+    "\u2715  Side yard, Southwest",
     "7'-0 5/8\"",
     "10'-0\"",
     "at least 0'-11 1/4\" short"
@@ -122,7 +212,7 @@
     "notice": [
      12,
      34,
-     825.4,
+     864.4,
      32
     ],
     "model": [
@@ -140,7 +230,7 @@
     "notice": [
      12,
      572,
-     825.4,
+     864.4,
      32
     ],
     "model": [
@@ -173,7 +263,7 @@
       6.0
      ],
      [
-      "\u2713 Side yard, East 32'-4 1/4\" (approx.)",
+      "\u2713 Side yard, Northeast 32'-4 1/4\" (approx.)",
       706,
       241,
       0,
@@ -182,22 +272,22 @@
       8.5
      ],
      [
-      "\u2715 Side yard, West 7'-0 5/8\", needs 10'-0\" (approx.)",
-      17,
-      411,
+      "\u2715 Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)",
+      131,
+      395,
       0,
       0,
       true,
       8.7
      ],
      [
-      "? Rear yard 27'-6 7/8\"",
-      395,
-      197,
+      "? Rear yard 27'-6 7/8\" (approx.)",
+      563,
+      119,
       0,
       0,
       true,
-      6.6
+      8.5
      ],
      [
       "75'-10\" (approx.)",
@@ -229,11 +319,11 @@
      [
       "69'-6 1/8\" (approx.)",
       557,
-      117,
+      153,
       0,
       0,
       true,
-      8.1
+      6.0
      ],
      [
       "92'-1 3/8\" (approx.)",
@@ -261,7 +351,7 @@
      6.0
     ],
     [
-     "\u2713 Side yard, East 32'-4 1/4\" (approx.)",
+     "\u2713 Side yard, Northeast 32'-4 1/4\" (approx.)",
      706,
      241,
      0,
@@ -270,22 +360,22 @@
      8.5
     ],
     [
-     "\u2715 Side yard, West 7'-0 5/8\", needs 10'-0\" (approx.)",
-     17,
-     411,
+     "\u2715 Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)",
+     131,
+     395,
      0,
      0,
      true,
      8.7
     ],
     [
-     "? Rear yard 27'-6 7/8\"",
-     395,
-     197,
+     "? Rear yard 27'-6 7/8\" (approx.)",
+     563,
+     119,
      0,
      0,
      true,
-     6.6
+     8.5
     ],
     [
      "75'-10\" (approx.)",
@@ -317,11 +407,11 @@
     [
      "69'-6 1/8\" (approx.)",
      557,
-     117,
+     153,
      0,
      0,
      true,
-     8.1
+     6.0
     ],
     [
      "92'-1 3/8\" (approx.)",
@@ -348,7 +438,7 @@
       6.0
      ],
      [
-      "\u2713 Side yard, East 32'-4 1/4\" (approx.)",
+      "\u2713 Side yard, Northeast 32'-4 1/4\" (approx.)",
       706,
       241,
       0,
@@ -357,22 +447,22 @@
       8.5
      ],
      [
-      "\u2715 Side yard, West 7'-0 5/8\", needs 10'-0\" (approx.)",
-      17,
-      411,
+      "\u2715 Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)",
+      131,
+      395,
       0,
       0,
       true,
       8.7
      ],
      [
-      "? Rear yard 27'-6 7/8\"",
-      395,
-      197,
+      "? Rear yard 27'-6 7/8\" (approx.)",
+      563,
+      119,
       0,
       0,
       true,
-      6.6
+      8.5
      ],
      [
       "75'-10\" (approx.)",
@@ -404,11 +494,11 @@
      [
       "69'-6 1/8\" (approx.)",
       557,
-      117,
+      153,
       0,
       0,
       true,
-      8.1
+      6.0
      ],
      [
       "92'-1 3/8\" (approx.)",
@@ -438,10 +528,10 @@
   "5 the selected yard's detail says what red and amber mean": {
    "ok": true,
    "detail": [
-    "\u2715 Side yard, West \u00b7 Does not comply",
+    "\u2715 Side yard, Southwest \u00b7 Does not comply",
     "7'-0 5/8\" proposed, 10'-0\" required as drawn \u00b7 with the tax map's \u00b12'-0\": at least 0'-11 1/4\" short",
     "To comply: move the building 2'-11 3/8\" farther from that lot line.",
-    "In the model: red is the part over the yard line even if the tax map's lot line is 2'-0\" out (certain); amber is the part that depends on where a survey puts the line.",
+    "In the model: red is the part over the yard line whichever way the tax map's lot lines (\u00b12'-0\") really lie (certain); amber is the part that depends on where a survey puts them.",
     "Measured: 1 group, 3 solids on Gordium::Massing \u00b7 footprint 1,341 sf",
     "\u201cYard Dimensions \u00b7 Side (one side minimum) \u00b7 R-1B: 10 ft\u201d",
     "City of Ithaca Zoning Charts (April 2026), p.3, line 38",
@@ -465,11 +555,11 @@
  "regions": [
   [
    "does_not_comply",
-   0.983
+   0.984
   ],
   [
    "needs_review",
-   4.482
+   35.436
   ]
  ],
  "bands": {
@@ -477,14 +567,28 @@
   "red": [
    [
     7.035,
-    8.019
+    8.02
    ]
   ],
   "amber": [
    [
-    7.979,
-    12.036
+    7.98,
+    43.414
    ]
+  ],
+  "amber_corners": [
+   7.98,
+   7.98,
+   7.98,
+   7.98,
+   11.985,
+   11.985,
+   11.985,
+   11.985,
+   43.404,
+   43.404,
+   43.414,
+   43.414
   ]
  },
  "labels": [
@@ -498,7 +602,7 @@
    6.0
   ],
   [
-   "\u2713 Side yard, East 32'-4 1/4\" (approx.)",
+   "\u2713 Side yard, Northeast 32'-4 1/4\" (approx.)",
    706,
    241,
    0,
@@ -507,22 +611,22 @@
    8.5
   ],
   [
-   "\u2715 Side yard, West 7'-0 5/8\", needs 10'-0\" (approx.)",
-   17,
-   411,
+   "\u2715 Side yard, Southwest 7'-0 5/8\", needs 10'-0\" (approx.)",
+   131,
+   395,
    0,
    0,
    true,
    8.7
   ],
   [
-   "? Rear yard 27'-6 7/8\"",
-   395,
-   197,
+   "? Rear yard 27'-6 7/8\" (approx.)",
+   563,
+   119,
    0,
    0,
    true,
-   6.6
+   8.5
   ],
   [
    "75'-10\" (approx.)",
@@ -554,11 +658,11 @@
   [
    "69'-6 1/8\" (approx.)",
    557,
-   117,
+   153,
    0,
    0,
    true,
-   8.1
+   6.0
   ],
   [
    "92'-1 3/8\" (approx.)",
@@ -570,11 +674,22 @@
    8.3
   ]
  ],
+ "label_rows": [
+  1,
+  1,
+  2,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
  "detail": [
-  "\u2715 Side yard, West \u00b7 Does not comply",
+  "\u2715 Side yard, Southwest \u00b7 Does not comply",
   "7'-0 5/8\" proposed, 10'-0\" required as drawn \u00b7 with the tax map's \u00b12'-0\": at least 0'-11 1/4\" short",
   "To comply: move the building 2'-11 3/8\" farther from that lot line.",
-  "In the model: red is the part over the yard line even if the tax map's lot line is 2'-0\" out (certain); amber is the part that depends on where a survey puts the line.",
+  "In the model: red is the part over the yard line whichever way the tax map's lot lines (\u00b12'-0\") really lie (certain); amber is the part that depends on where a survey puts them.",
   "Measured: 1 group, 3 solids on Gordium::Massing \u00b7 footprint 1,341 sf",
   "\u201cYard Dimensions \u00b7 Side (one side minimum) \u00b7 R-1B: 10 ft\u201d",
   "City of Ithaca Zoning Charts (April 2026), p.3, line 38",
@@ -584,10 +699,10 @@
   "Open \u00a7325-8, District Regulations Chart, R-1b, Side yard, one side column",
   "Open \u00a7325-8, District Regulations Chart, R-1b, Side yard, other side column",
   "Measured to 1/8 in.; values are never rounded toward compliance; near a limit they are shown with one more decimal.",
-  "\u2715 Side yard, West \u00b7 Does not comply",
+  "\u2715 Side yard, Southwest \u00b7 Does not comply",
   "7'-0 5/8\" proposed, 10'-0\" required as drawn \u00b7 with the tax map's \u00b12'-0\": at least 0'-11 1/4\" short",
   "To comply: move the building 2'-11 3/8\" farther from that lot line.",
-  "In the model: red is the part over the yard line even if the tax map's lot line is 2'-0\" out (certain); amber is the part that depends on where a survey puts the line.",
+  "In the model: red is the part over the yard line whichever way the tax map's lot lines (\u00b12'-0\") really lie (certain); amber is the part that depends on where a survey puts them.",
   "Measured: 1 group, 3 solids on Gordium::Massing \u00b7 footprint 1,341 sf",
   "\u201cYard Dimensions \u00b7 Side (one side minimum) \u00b7 R-1B: 10 ft\u201d",
   "City of Ithaca Zoning Charts (April 2026), p.3, line 38"

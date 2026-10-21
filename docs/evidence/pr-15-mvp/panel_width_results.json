@@ -62,14 +62,14 @@
   "the long Delta words are among them": {
    "ok": true,
    "detail": [
-    "+1,033 sf to spare",
-    "+5.93% to spare",
     "at least 0'-11 1/4\" short",
     "at least 20'-4 1/4\" to spare",
     "at least 21'-10\" to spare",
+    "at least 3.9% to spare",
+    "at least 357 sf to spare",
     "at limit",
-    "at the limit at worst",
-    "up to 0'-0 1/4\" short"
+    "up to 0'-0 1/4\" short",
+    "up to 0'-10 1/2\" short"
    ]
   }
  },
@@ -98,14 +98,14 @@
   ],
   "rows": 22,
   "deltas": [
-   "+1,033 sf to spare",
-   "+5.93% to spare",
    "at least 0'-11 1/4\" short",
    "at least 20'-4 1/4\" to spare",
    "at least 21'-10\" to spare",
+   "at least 3.9% to spare",
+   "at least 357 sf to spare",
    "at limit",
-   "at the limit at worst",
-   "up to 0'-0 1/4\" short"
+   "up to 0'-0 1/4\" short",
+   "up to 0'-10 1/2\" short"
   ]
  },
  "w540_painted": {
@@ -127,14 +127,14 @@
   ],
   "rows": 22,
   "deltas": [
-   "+1,033 sf to spare",
-   "+5.93% to spare",
    "at least 0'-11 1/4\" short",
    "at least 20'-4 1/4\" to spare",
    "at least 21'-10\" to spare",
+   "at least 3.9% to spare",
+   "at least 357 sf to spare",
    "at limit",
-   "at the limit at worst",
-   "up to 0'-0 1/4\" short"
+   "up to 0'-0 1/4\" short",
+   "up to 0'-10 1/2\" short"
   ]
  },
  "ok": true
