@@ -70,7 +70,7 @@ def test_their_model_as_sent_measures_the_lot_but_not_the_yards(their_model):
     assert round(m["lot_area"]["readings"][0]["value"]) == 6675 and m["lot_width"]["value"] == 73.0
     assert m["building_height"]["value"] == 35.0
     for name in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_area"):
-        assert m[name]["value"] is None and m[name]["reason"] == "a building isn't inside the lot"
+        assert m[name]["value"] is None and m[name]["reason"].startswith("a building isn't inside the lot: ")
 
 
 def _on_its_outline(site):
