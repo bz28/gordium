@@ -41,9 +41,24 @@ def _cites(source: dict, cell: dict) -> bool:
     return len(lines) == 2 and any(lines[0] <= n <= lines[1] for n in cell.get("row_lines") or [])
 
 
+def law_rule_ids(j: Path, zone: str) -> set[str]:
+    """For an AI-drafted zone, the rules drafted from a piece of the law, not from the chart (the drafting log): they
+    cite chart cells as inputs (the height bonus cites the side-yard minimums it enlarges), so citing a cell doesn't
+    mean they check it."""
+    log_file = j / "5_zoning_rules/drafted/records/drafting_log.yaml"
+    if not (is_ai_drafted(j, zone) and log_file.is_file()):
+        return set()
+    units = (load(log_file) or {}).get("units") or {}
+    return {rid for unit, e in units.items() if not unit.startswith("chart-") for rid in e.get("rules") or []}
+
+
 def chart_gaps(j: Path, zone: str, rules: list[dict]) -> list[dict]:
-    """One entry per chart row of the zone's column that states something no rule cites."""
-    sources = [s for r in rules for s in r.get("sources") or [] if isinstance(s, dict)]
+    """One entry per chart row of the zone's column that states something no rule checks: every cell ends as a rule
+    citing it, or a visible not-checked item, never silent. In an AI-drafted zone only a rule drafted from the chart
+    counts; a law piece's rule citing the cell as an input doesn't (R-2c's side yards, which no chart rule checks,
+    stay listed whatever §325-16C's height bonus cites)."""
+    inputs_only = law_rule_ids(j, zone)
+    sources = [s for r in rules if r.get("id") not in inputs_only for s in r.get("sources") or [] if isinstance(s, dict)]
     out, seen = [], set()
     for c in _cells(j):
         if district_name(c["column"]) != zone or str(c.get("value") or "").strip() in EMPTY:

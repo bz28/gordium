@@ -174,3 +174,18 @@ def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_check
     assert drafting_gaps(J, "R-1b", zone_rules(J, "R-1b")) == []          # the hand R-1b: not the drafting log's
 
 
+
+
+def test_a_chart_cell_no_chart_rule_checks_is_never_silent():
+    """The blind R-2 keys (2026-10-21): R-2c's side yards ("10 ft /15 ft [fn14]", "0 ft /5 ft / 10 ft [fn15]", use-
+    dependent) got no drafted rule. They must show as not checked, and a law piece's rule citing a cell only as an
+    input (§325-16C's height bonus cites the yard minimums it enlarges) must never count as checking it."""
+    from design_checker.gaps import chart_gaps
+    from rule_format.rulebook import zone_rules
+    rules = zone_rules(J, "R-2c")
+    names = [g["name"] for g in chart_gaps(J, "R-2c", rules)]
+    assert any(n.startswith("Yard Dimensions: Side (one side minimum)") for n in names)
+    assert any(n.startswith("Yard Dimensions: Side (other side minimum)") for n in names)
+    without = [r for r in rules if r["id"] != "R-2c.rear_yard_minimum"]         # the bonus still cites the rear cell
+    assert any("325_16c" in r["id"] and "rear" in r["id"] for r in without)
+    assert any(n.startswith("Yard Dimensions: Rear") for n in (g["name"] for g in chart_gaps(J, "R-2c", without)))
