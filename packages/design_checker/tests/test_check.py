@@ -1678,6 +1678,7 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
     # button is on the left-out row: review round 1, F2); any other hint shows beside a button (F3)
     assert logic.hint_text("Pick the main building…", ["Pick the main building…"]) is None
     assert logic.hint_text("Enter bedrooms…", ["Enter bedrooms…"]) is None
+    assert logic.hint_text("Enter bedrooms and parking spaces", ["Enter bedrooms and parking spaces…"]) is None   # Rhino
     assert logic.hint_text("Add to check…", []) is None
     assert logic.hint_text("To comply: lower the building 1'-6\".", ["Enter bedrooms…"]) == "To comply: lower the building 1'-6\"."
     assert logic.hint_text("To comply: lower the building 1'-6\".", []) == "To comply: lower the building 1'-6\"."

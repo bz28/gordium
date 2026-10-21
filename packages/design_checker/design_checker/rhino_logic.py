@@ -340,7 +340,8 @@ def hint_text(hint, buttons):
     """The detail pane's hint as words, or None: never the words of a button it already shows ("Pick the main
     building…", "Enter …"), nor "Add to check…" (a row a left-out solid makes cautious names it in its reason; the
     one button is on the left-out row itself: the review, F2)."""
-    if not hint or hint in buttons or hint == "Add to check…":
+    if not hint or hint.rstrip("…") in {b.rstrip("…") for b in buttons} or hint == "Add to check…":
+        # (a button's words end in "…" where the hint's may not: "Enter bedrooms and parking spaces")
         return None
     return hint
 

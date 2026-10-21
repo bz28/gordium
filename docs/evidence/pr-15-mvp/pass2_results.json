@@ -5,6 +5,13 @@
    "0 the sample's lot is from the tax map": {
     "ok": true,
     "detail": false
+   },
+   "8 the sample's Street side reads Ithaca Rd, from the lookup": {
+    "ok": true,
+    "detail": {
+     "text": "Ithaca Rd",
+     "source": "the State tax map (the sample's lookup)"
+    }
    }
   }
  },
@@ -59,28 +66,24 @@
     "ok": true,
     "detail": {
      "objects": [
-      "3a90870a-0472-43f9-8c8f-74ce8a628e7c",
-      "baffe5f5-73e5-473d-b802-2aebc9d3f7dd",
-      "d50755a6-33c8-4ee6-858a-a89c1f19d4e9",
-      "076ad63a-70ca-47d8-9df4-fae3cddefe8e"
+      "4e97c997-8c55-4d93-a725-e9a301b01742",
+      "44dd61ac-cdb9-4be1-a02a-fe3406311646",
+      "94767220-19f3-471a-96d5-767123637a9c",
+      "5009f58d-e0b5-4624-bc23-9fed80633e9c"
      ],
      "selected": [
-      "076ad63a-70ca-47d8-9df4-fae3cddefe8e",
-      "d50755a6-33c8-4ee6-858a-a89c1f19d4e9",
-      "baffe5f5-73e5-473d-b802-2aebc9d3f7dd",
-      "3a90870a-0472-43f9-8c8f-74ce8a628e7c"
+      "5009f58d-e0b5-4624-bc23-9fed80633e9c",
+      "94767220-19f3-471a-96d5-767123637a9c",
+      "44dd61ac-cdb9-4be1-a02a-fe3406311646",
+      "4e97c997-8c55-4d93-a725-e9a301b01742"
      ]
     }
    }
   }
  },
- "garage": {
+ "button": {
   "ok": true,
   "claims": {
-   "2 the row waits on the main building": {
-    "ok": true,
-    "detail": "Pick the main building…"
-   },
    "2 the button comes right after the reason": {
     "ok": true,
     "detail": {
@@ -94,11 +97,11 @@
     "detail": [
      [
       "Label",
-      "? Front yard · Needs review"
+      "– Parking · needs input · Not checked"
      ],
      [
       "Label",
-      "more than one building: pick the main building"
+      "Needs bedrooms and parking spaces, which the model doesn't show"
      ],
      [
       "StackLayout",
@@ -106,39 +109,39 @@
      ],
      [
       "Button",
-      "Pick the main building…"
+      "Enter bedrooms and parking spaces…"
      ],
      [
       "Label",
-      "Measured: 1 group, 4 solids on Building, Gordium::Massing · footprint 1,581 sf"
+      "“First three bed or sleeping rooms per dwelling 1 space per dwelling unit”"
      ],
      [
       "Label",
-      "“Yard Dimensions · Front (minimum) · R-1B: 25 ft”"
+      "City of Ithaca Zoning Charts (April 2026), p.14, lines 9–10"
      ],
      [
       "Label",
-      "City of Ithaca Zoning Charts (April 2026), p.3, line 37"
+      "“4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit”"
      ],
      [
       "Label",
-      "§325-8, District Regulations Chart, R-1b, Front yard column"
-     ],
-     [
-      "LinkButton",
-      "Open §325-8, chart, R-1b, Front yard column"
+      "City of Ithaca Zoning Charts (April 2026), p.14, line 12"
      ],
      [
       "Label",
-      "Measured to 1/8 in.; values are never rounded toward compliance; near a limit they are shown with one more decimal."
+      "“Each additional bed or sleeping room + 1 space per room”"
+     ],
+     [
+      "Label",
+      "City of Ithaca Zoning Charts (April 2026), p.14, line 13"
      ]
     ]
    },
    "2 the button is on screen without scrolling": {
     "ok": true,
     "detail": {
-     "scroll_top": 637.0,
-     "scroll_height": 71,
+     "scroll_top": 623.0,
+     "scroll_height": 85,
      "button_top": 655.0,
      "button_height": 20
     }
@@ -206,9 +209,84 @@
       "c44270f9-f702-4de2-887d-8c2fad8bf5be"
      ],
      "status_rows": [
-      "Gordium · ? 6 need review · 4 comply · 2 not checked",
+      "Gordium · ✕ 1 does not comply · 1 needs review · 8 comply · 2 not checked",
       "Draft rulebook · Lot lines: tax map, approximate (±2'-0\")"
      ]
+    }
+   }
+  }
+ },
+ "scale": {
+  "ok": true,
+  "claims": {
+   "7 zoomed out to the 1,500 ft square: no plan labels drawn": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "✓ Front yard 27'-6 3/8\" (approx.)",
+       "✕ Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "✓ Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1
+     }
+    }
+   },
+   "7 the status box stays": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "✓ Front yard 27'-6 3/8\" (approx.)",
+       "✕ Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "✓ Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1
+     },
+     "frames": {
+      "scale_neighbourhood": 7,
+      "scale_lot": 3
+     }
+    }
+   },
+   "7 zoomed to the lot: the labels are back": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "✓ Front yard 27'-6 3/8\" (approx.)",
+       "✕ Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "✓ Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1
+     }
     }
    }
   }
