@@ -7,8 +7,10 @@ name = "gordium"
 version = "0.1.0"
 requires-python = ">=3.12"
 # pdfplumber and pdfminer.six are pinned exactly: a different version could extract text differently.
-# shapely and rhino3dm are pinned too: measuring a model must give the same numbers on every machine.
-dependencies = ["pyyaml>=6", "pdfplumber==0.11.10", "pdfminer.six==20260107", "shapely==2.1.2", "rhino3dm==8.35.0"]
+# shapely, numpy and rhino3dm are pinned too: measuring a model must give the same numbers on every machine
+# (numpy fits the roof planes, model_measurement.measure._planes).
+dependencies = ["pyyaml>=6", "pdfplumber==0.11.10", "pdfminer.six==20260107", "shapely==2.1.2", "numpy==2.5.4",
+                "rhino3dm==8.35.0"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "openpyxl==3.1.5"]   # openpyxl reads the architects' spreadsheets and writes the rules workbook
