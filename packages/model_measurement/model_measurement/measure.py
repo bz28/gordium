@@ -283,13 +283,19 @@ def _projection_now(building: dict):
         poly = shapely.make_valid(Polygon(shell, holes)).buffer(0)
         if poly.area > 1e-9:
             parts.append(poly)
+    return union(parts)
+
+
+def union(parts):
+    """The one union rule for plans (measuring, the plan drawn, the envelope): the shapes together, made valid;
+    where faces meet at slivers too thin for the overlay (a rotated gable: stress F14), the same union with every
+    point on a 1e-6 ft grid, far below anything measured (TOL is 0.01 ft)."""
+    parts = [p for p in parts if p is not None and not p.is_empty]
     if not parts:
         return Polygon()
     try:
         return ops.unary_union(parts).buffer(0)
     except shapely.errors.GEOSException:
-        # faces meeting at slivers too thin for the overlay (a rotated gable: stress F14): the same union with
-        # every point on a 1e-6 ft grid, far below anything measured (TOL is 0.01 ft)
         return shapely.union_all(parts, grid_size=1e-6).buffer(0)
 
 
@@ -811,7 +817,11 @@ def _eaves(building: dict, sloped: list[list[dict]], candidate: dict) -> dict:
 # steps or a deck. §325-3's STORY has no least height, so anywhere else (raised, on a roof, below the ground) a
 # part of any height might be a story.
 STORY_ROOM = 7.0            # ft
-ASSUMED_MAIN = "the main building assumed: the starting house (change it in Edit site)"
+# With no main building picked and exactly one starting house, it is the main building, assumed (a marker on
+# every measurement made from it: "main_assumed"); every other building is also read as if it were the main one.
+MAIN_IF = "if {} were the main building"
+MAIN_QUESTION = ("which building is the main building (the starting house is assumed, not picked) is a question "
+                 "(main_building)")
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
 
@@ -962,19 +972,45 @@ def _rise(building: dict) -> float:
     return hi - lo if lo is not None else 0.0
 
 
-def _assemblies(main: dict, others: list[dict]) -> list[tuple[str, list[dict]]]:
+def _assemblies(main: dict, others: list[dict], assumed: bool = False) -> list[tuple[str, list[dict]]]:
     """The candidate buildings every building measurement read from the drawing is read over (the height,
     _with_others; the stories, _stories_over): the main building with every solid touching it (one building,
     §325-18A: a wing, a porch or an attached garage drawn as its own solid is part of it), and, with other solids
     drawn, the main building with every other solid as part of it too (one standing apart may be an accessory
-    building, §325-25: the accessory question)."""
+    building, §325-25: the accessory question). With the main building assumed (pick_main), each other building
+    alone too, as if it were the main one (the pick the architect may make: never a pass that pick wouldn't),
+    always after the others (_base_count)."""
     drawn = [main] + list(others)
     joined = _attached(main, drawn) if all(b.get("faces") for b in drawn) else []
     out = [("the main building only" if not joined else "the main building and the solids touching it (§325-18A)",
             [main] + joined)]
     if len(joined) < len(others):       # solids standing apart: the accessory question
         out.append(("with every other solid as part of it", [main] + list(others)))
+    if assumed:
+        out += [(MAIN_IF.format(_parts(b)[0]), [b]) for b in others]
     return out
+
+
+def _base_count(candidates, assumed: bool) -> int:
+    """How many of the candidates are the main building's own (alone or with what touches it, with every other
+    solid); the rest are each other building as the main one (only with the main building assumed)."""
+    return sum(1 for words, _ in candidates if not words.startswith(MAIN_IF.split("{")[0]))
+
+
+def _with_each_as_main(record: dict, extra, grades, facts: dict) -> dict:
+    """The height read with each other building as the main one (_assemblies with the main building assumed), each
+    from its own grade plane, beside the readings already found; the main-building question if they differ."""
+    readings = [(r["reading"], r["value"], {}) for r in record["readings"]] or \
+        [("the starting house as the main building", record["value"], {})]
+    objects = list(record.get("objects") or [])
+    for (words, (b,)), (g, why) in zip(extra, grades):
+        h = _height(b, g, facts) if not why else _missing("building_height", why)
+        if h["value"] is None and not h["readings"]:
+            return _missing("building_height", h["reason"])
+        readings += [(_both(words, r["reading"]), r["value"], {}) for r in h["readings"]] or [(words, h["value"], {})]
+        objects += _parts(b)
+    question = "; ".join(q for q in [record.get("reason") and record["reason"].split("; ", 1)[-1], MAIN_QUESTION] if q)
+    return _decide("building_height", readings, record.get("how") or "", list(dict.fromkeys(objects)), question)
 
 
 def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
@@ -1138,9 +1174,10 @@ def _candidate_grades(assemblies, buildings: list[dict], facts: dict, grade, why
     whole-site grade stop holds for every candidate; and each candidate's ground is checked against its own
     solids at its own grade (_ground_against: off them, or a solid buried under them)."""
     out = []
+    main = assemblies[0][1][0] if assemblies else None
     for _, members in assemblies:
-        if why_grade or not facts.get("grade_points") or len(members) == 1:
-            g, why = grade, why_grade
+        if why_grade or not facts.get("grade_points") or (len(members) == 1 and members[0] is main):
+            g, why = grade, why_grade               # (another building alone, as the main one: its own walls)
         else:
             rest = [b for b in buildings if not any(b is c for c in members)]
             g, why = _grade_from_points(members, facts["grade_points"], rest)
@@ -1178,6 +1215,8 @@ def _stories_over(assemblies, grade, why_grade, stated, grades=None) -> dict:
             readings.append((_both(words, x["reading"]), x["value"], {}))
     if len({max(x["value"] for x in r["readings"] or [r]) for _, r in found}) > 1:
         questions.append(ACCESSORY)
+        if any(words.startswith(MAIN_IF.split("{")[0]) for words, _ in found):
+            questions.append(MAIN_QUESTION)
     return _decide("stories", readings, "the stories of the building, read over its candidate buildings",
                    list(dict.fromkeys(objects)), "; ".join(dict.fromkeys(questions)))
 
@@ -1215,34 +1254,34 @@ def tax_map_lot_area(polygon) -> dict:
 SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall
 
 
-def _pick_main(stacks: list[dict], facts: dict) -> dict | None:
-    """The main building: the only one; the one named main_building; or the only one the architect hasn't
-    listed as an accessory building (accessory_buildings). Else None: it's asked, never guessed."""
-    def named(b, ids):
-        return any(i in b.get("parts", [b["id"]]) for i in ids)
-    if len(stacks) == 1:
-        return stacks[0]
-    if facts.get("main_building"):
-        return next((b for b in stacks if named(b, [facts["main_building"]])), None)
-    rest = [b for b in stacks if not named(b, facts.get("accessory_buildings") or [])]
-    if len(rest) == 1 or not rest:
-        return rest[0] if rest else None
-    # solids that touch are one building (a porch, steps, a wing: part of it, §325-18A): when everything left
-    # touches together, the main building is its tallest part (the cautious one for the height), then the largest
-    plans = {b["id"]: _projection(b) for b in rest if b.get("faces")}
-    if len(plans) != len(rest):
+def _floating(buildings: list[dict], points: list) -> str | None:
+    """ground_off_building when nothing drawn reaches the ground: the ground under the buildings' footprint, from
+    the spot grades' best-fit plane at its corners (one level if fewer than three points), is below their lowest
+    point everywhere. Read from the points themselves, so a point drifting off a wall never hides it."""
+    zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
+    if not zs or not points:
         return None
-    if len(_touching(rest[0], rest, plans)) != len(rest) - 1:
+    pts = np.array([p[:3] for p in points], dtype=float)
+    if len(pts) >= 3 and np.linalg.matrix_rank(np.c_[pts[:, :2], np.ones(len(pts))]) == 3:
+        coef, *_ = np.linalg.lstsq(np.c_[pts[:, :2], np.ones(len(pts))], pts[:, 2], rcond=None)
+        ground = lambda x, y: coef[0] * x + coef[1] * y + coef[2]   # noqa: E731
+    else:
+        ground = lambda x, y: float(pts[:, 2].mean())                # noqa: E731
+    corners = [c for b in buildings if b.get("faces") for c in _projection(b).convex_hull.exterior.coords]
+    if not corners:
         return None
-    return max(rest, key=lambda b: (max(p[2] for f in b["faces"] for p in f["points"]), plans[b["id"]].area))
+    top_ground = max(ground(x, y) for x, y in corners)
+    if min(zs) > top_ground + TOL:
+        return stop("ground_off_building", ground=_r(top_ground), bottom=_r(min(zs)), top=_r(max(zs)))
+    return None
 
 
 def grade_plane(buildings: list[dict], facts: dict) -> tuple:
     """(grade, None) or (None, reason): the grade plane from the spot grades in `facts`, at the main building's own
-    walls (§325-3 GRADE PLANE: "on each side of the building"). The main building is the one stack of floor
-    blocks, or the one named main_building; with several and none named, it's a question, as for the height."""
+    walls (§325-3 GRADE PLANE: "on each side of the building"). The main building is pick_main's, as for every
+    measurement (an assumed starting house too); with none, it's a question, as for the height."""
     stacks = _stacks(buildings)
-    main = _pick_main(stacks, facts)
+    main, _ = pick_main(stacks, facts)          # THE pick (an assumed starting house too: the others are read too)
     if stacks and main is None:
         return None, stop("no_main_building")
     return _grade_from_points([main] if main else [], facts["grade_points"], [b for b in stacks if b is not main])
@@ -1293,12 +1332,21 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
     try:
         try:
             out = _measure(site, facts)
+            if site.get("lot") and site["lot"].get("edges"):
+                # the decision line: how the lot lines read were cleaned from the outline drawn (its own accuracy);
+                # inside the one guard, so a lot whose geometry can't be worked out stops here too (round 21)
+                note = Lot(site, facts).outline_note
+                for name in LOT_LINE_MEASURES if note else ():
+                    if name in out:
+                        out[name]["outline"] = note
         except shapely.errors.GEOSException as e:
             # the drawing's geometry couldn't be worked out: every measurement needs review, saying why; never a
             # crash (no answer at all in Rhino) and never a guess (stress F14)
             why = stop("geometry_error", what=str(e).split(":")[0][:80])
             out = {name: (_record(name, "text", reason=why) if name == "district" else _missing(name, why))
                    for name in MEASURES}
+            for r in out.values():          # the flag the rest of the check reads: no overlays drawn from it
+                r["geometry_error"] = why
             for name, unit in STATED.items():           # what the architect stated still stands
                 if facts.get(name) is not None:
                     out[name] = _record(name, unit, facts[name], "stated by the architect (not measured from the model)")
@@ -1309,18 +1357,37 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
         _PLANES.clear()
         _PLAN_OF.clear()
     assumed = out.pop("_assumed_main", None)
-    if assumed:                         # every measurement made from the starting house says it was assumed
+    if assumed:                         # every measurement made from the starting house carries the marker
         for name in MEASURES:
             r = out[name]
             if set(r.get("objects") or []) & set(assumed) and (r.get("value") is not None or r.get("readings")):
-                out[name] = dict(r, how=_both(r.get("how") or "", ASSUMED_MAIN))
-    if site.get("lot") and site["lot"].get("edges"):
-        # the decision line: how the lot lines read were cleaned from the outline drawn (its own accuracy)
-        note = Lot(site, facts).outline_note
-        for name in LOT_LINE_MEASURES if note else ():
-            if name in out:
-                out[name]["outline"] = note
+                out[name] = dict(r, main_assumed=True)
     return {name: out[name] for name in MEASURES}
+
+
+def pick_main(buildings: list[dict], facts: dict) -> tuple:
+    """THE main-building pick, (main, assumed), for every measurement (and the grade plane): the only building;
+    else the one picked (main_building names one of its blocks); else, with none picked, Gordium's own starting
+    house if exactly one building is all floor blocks GordiumStart drew (assumed: every other building is then
+    also read as if it were the main one, _assemblies); else none. `buildings`: as _stacks joins them."""
+    if len(buildings) == 1:
+        return buildings[0], False
+    picked = next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None)
+    if picked is not None or facts.get("main_building"):
+        return picked, False
+    def named(b, ids):
+        return any(i in b.get("parts", [b["id"]]) for i in ids)
+    # (PR 18) the only one the architect hasn't listed as an accessory building; or, when everything left touches
+    # together (one building, §325-18A: a porch, steps, a wing), its tallest part, then the largest
+    rest = [b for b in buildings if not named(b, facts.get("accessory_buildings") or [])]
+    if len(rest) == 1:
+        return rest[0], False
+    plans = {b["id"]: _projection(b) for b in rest if b.get("faces")}
+    if rest and len(plans) == len(rest) and len(_touching(rest[0], rest, plans)) == len(rest) - 1:
+        return max(rest, key=lambda b: (max(p[2] for f in b["faces"] for p in f["points"]),
+                                        plans[b["id"]].area)), False
+    starting = [b for b in buildings if b.get("parts") and all(b["floor"])]
+    return (starting[0], True) if len(starting) == 1 else (None, False)
 
 
 def _measure(site: dict, facts: dict) -> dict[str, dict]:
@@ -1350,6 +1417,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
     ground_problem = _ground_against(buildings, grade) if grade is not None else None
+    if ground_problem is None and facts.get("grade_points"):
+        # whether the buildings reach the ground never depends on the spot grades sitting at their walls: the
+        # ground under their footprint (the spot grades' plane), against their own lowest point (stress F15)
+        ground_problem = _floating(buildings, facts["grade_points"])
     why_grade = (why_spots if why_spots else stop("no_ground") if grade is None else
                  ground_problem if ground_problem else
                  None if facts.get("grade_points") else
@@ -1364,15 +1435,9 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
-    main = _pick_main(buildings, facts)      # the one main-building pick
-    if main is None and len(buildings) > 1 and not facts.get("main_building"):
-        # no main building picked: if exactly one building is Gordium's own starting house (all its blocks the
-        # floor blocks GordiumStart drew), it is the main one, said as assumed; every other is then read as a
-        # possible accessory building (the candidates below), so this never gives a pass the pick wouldn't
-        starting = [b for b in buildings if b.get("parts") and all(b["floor"])]
-        if len(starting) == 1:
-            main = starting[0]
-            out["_assumed_main"] = list(main["parts"])
+    main, assumed = pick_main(buildings, facts)
+    if assumed:                         # every other building is also read as if it were the main one
+        out["_assumed_main"] = list(main["parts"])
     why_main = None if main else stop("no_main_building")
     others = [b for b in buildings if b is not main]
     # One decision for every building measurement: which building (why_which), over which candidate buildings
@@ -1384,7 +1449,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     why_which = why_building or why_main
     countable = bool(buildings) or bool(why_building and site.get("buildings"))   # every drawn part is checked
     # the candidate buildings, each with its own grade plane: the one list the stories and the height read
-    candidates = _assemblies(main, others) if not why_which else []
+    candidates = _assemblies(main, others, assumed) if not why_which else []
     grades = _candidate_grades(candidates, buildings, facts, grade, why_grade)
     if countable:
         out["stories"] = (_missing("stories", why_which) if why_which else
@@ -1399,10 +1464,14 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
             out["building_height"] = _missing("building_height", next(why_g for _, why_g in grades if why_g))
         else:
             cands = []
-            for (words, members), (g, _) in zip(candidates, grades):
+            base = _base_count(candidates, assumed)
+            for (words, members), (g, _) in zip(candidates[:base], grades[:base]):
                 cands.append((words, out["building_height"] if len(members) == 1 else _height(main, g, facts),
                               [_height(b, g, facts) if any(b is c for c in members) else None for b in others]))
             out["building_height"] = _with_others(cands, [_parts(b)[0] for b in others])
+        if assumed and not any(why_g for _, why_g in grades):   # each other building as the main one
+            base = _base_count(candidates, assumed)
+            out["building_height"] = _with_each_as_main(out["building_height"], candidates[base:], grades[base:], facts)
     if facts.get("grade_is") == "existing":     # the grade plane is finished ground: existing ground can't decide
         for name in ("building_height", "stories"):
             if out[name].get("value") is None and not out[name].get("readings"):

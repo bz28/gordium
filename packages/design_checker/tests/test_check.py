@@ -630,7 +630,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
     assert by["zone"]["text"] == "R-1b · entered by you"
     assert by["lot"]["text"] == "6,570 sf · from the tax map (±2 ft, approximate)"
     assert by["lot"]["actions"] == [("lot", "Use my survey…", True)]
-    assert by["street"]["text"] == "Ithaca Rd"                          # the street of the address (P1-4)
+    assert by["street"]["text"] == "the highlighted line"     # never the address's street alone (review of P1-4)
     assert by["ground"]["text"] == "flat at the lot level · as drawn"
     assert by["ground"]["tick"] == ("No regrading near the house", False)
     assert [a for a, _, _ in by["ground"]["actions"]] == ["spot", "terrain", "regrade"]

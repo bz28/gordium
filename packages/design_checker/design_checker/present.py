@@ -276,12 +276,6 @@ def _and(words: list[str]) -> str:
     return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1] if words else ""
 
 
-def _combos(row: dict, values: dict) -> list[dict]:
-    """The values a row was decided under: every combination of its readings (named, or every reading of an open
-    measurement), else the measured values alone."""
-    return ((row.get("Named") or {}).get("combos") or (row.get("Readings") or {}).get("combos") or [values])
-
-
 def _holds(expr: str, values: dict, row: dict):
     """True / False / None for a comparison, and under every reading research lists for a row decided that way
     (check.named_result): True only if it holds under all of them, False only if under none."""
@@ -307,6 +301,7 @@ QUESTION_NAMES = {
     _measuring.ROOF_KIND: "whether the roof is a mansard roof or a pitched one",
     _measuring.ABOVE_ROOF: "whether what rises above the main roof counts in the height",
     _measuring.ACCESSORY: "whether another solid is part of the building or an accessory building",
+    "main_building": "which building is the main building (the starting house is assumed, not picked)",
 }
 QUESTION_TAGS = {k for k in QUESTION_NAMES if re.fullmatch(r"[a-z_]+", k)}
 
@@ -477,23 +472,6 @@ def _worst_reading(node, measured: dict, values: dict):
         return None
     shown = _display(*_numbers(node, trial, measured, ""))
     return shown[0], shown[1]
-
-
-def _coverage_either_way(node, measured: dict, values: dict) -> str | None:
-    """Lot coverage when only the overhang question is open, both ways in words: "If overhangs count (an open
-    question), coverage is 28.3%, over 25%; if not, 24.3%." None when the readings aren't those two."""
-    by = {r["reading"]: r["value"] for r in (measured.get("building_area") or {}).get("readings") or []}
-    over, ground = by.get("covered from above"), by.get("at the main grade level")
-    if over is None or ground is None or len(by) != 2 or not values.get("lot_area"):
-        return None
-    shown = {}
-    for key, x in (("over", over), ("ground", ground)):
-        trial = dict(values, building_area=x)
-        text, limit = _display(*_numbers(node, trial, measured, ""))[:2]
-        shown[key] = (text, limit, _evaluate(ast.unparse(node), trial))
-    (a, limit, a_ok), (b, _, b_ok) = shown["over"], shown["ground"]
-    return (f"If overhangs count (an open question), coverage is {a}, {'within' if a_ok else 'over'} {limit}; "
-            f"if not, {b}" + ("" if b_ok else f", also over {limit}") + ": ask the zoning office")
 
 
 def _numbers(node, values: dict, measured: dict, name: str):
@@ -865,11 +843,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     if isinstance(allowed, (int, float)):
                         required = _pct(allowed / values["lot_area"] * 100, _toward(numbers[4], False), 1)
                 worst = _worst_reading(node, measured, values)
-                said = (_coverage_either_way(node, measured, values)          # it fails one way: say both
-                        if node.left.id == "building_area" and worst is not None else None)
-                if said:                                # both ways, in words (architect review P2-10)
-                    why = said
-                elif worst is not None:                 # say the bad one first: "probably fine" it isn't
+                # (the overhang question in coverage is settled in PR 18: coverage_seen_from_above, so
+                # term-index's "both ways" words for it have nothing left to say)
+                if worst is not None:                   # say the bad one first: "probably fine" it isn't
                     why = (f"At worst {worst[0]} against {worst[1]}: does not comply under that reading. " +
                            (why or ""))
         if node is not None and required == "—" and st in (REVIEW, FAILS):
@@ -895,10 +871,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                                           and (measured.get(n) or {}).get("readings")
                                           for q in _questions_of(measured[n]) if q not in limit_q))
                 sets = " and ".join(NAMES.get(n, n.replace("_", " ").capitalize()).lower() for n in open_)
+                complying = (why or "").startswith("Complies")    # every reading complies: its own words stay
                 if limit_q and st == FAILS:
                     why = (f"Does not comply whichever way it is read: needs {required} (the {sets} depends on "
                            f"{'; '.join(limit_q)})")
-                elif limit_q and not (why or "").startswith("Lot lines are from the tax map") and \
+                elif limit_q and not complying and not (why or "").startswith("Lot lines are from the tax map") and \
                         not ((side_row or row).get("Provisional") or "").startswith("passes"):
                     # (the tax map's own sentence, and "complies under every reading, but it depends on …", say more)
                     why = (f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): ask the "
@@ -1141,6 +1118,8 @@ from model_measurement.stops import stop as _stop  # noqa: E402
 
 PICK_MAIN_WHY = _stop("no_main_building")        # the measuring's exact words when several buildings could be it
 PICK_MAIN = "Pick the main building…"            # the row's hint, and the panel's button
+ASSUMED_MAIN_NOTE = "assuming the starting house is the main building"      # a Gordium reading: to confirm
+ASSUMED_MAIN = "Main building: the starting house (assumed) · change it with Main building…"
 
 
 BUILDING_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_height", "stories")
@@ -1246,6 +1225,9 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
         for i in items:
             if i.get("measure") in ("building_height", "stories"):
                 i["note"] = "assuming flat ground"
+    for i in items:                                  # measured from an assumed main building: said on the row
+        if (measured.get(i.get("measure")) or {}).get("main_assumed"):
+            i["note"] = "; ".join(n for n in (i.get("note"), ASSUMED_MAIN_NOTE) if n)
     if left_out:
         n = len(left_out)
         items.append({"id": "scope.not_included", "rule": None, "name": "Objects on the lot not included",
@@ -1292,7 +1274,8 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                                  "scope": "", "precision": "", "at_limit": None}})
     return {"items": items, "summary": summary(items), "state": state(items),
             "header": header(facts, dict(extras, waiting_main=any(
-                PICK_MAIN_WHY in (m.get("reason") or "") for m in measured.values())), documents, use_names),
+                PICK_MAIN_WHY in (m.get("reason") or "") for m in measured.values()),
+                main_assumed=any(m.get("main_assumed") for m in measured.values())), documents, use_names),
             "groups": grouped(items)}
 
 
@@ -1339,6 +1322,7 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
     # several buildings: which one the yards, height and stories are measured to, said, with a way to change it.
     # The checker's word decides it (its measuring asked for a pick), never a count made in Rhino (review round 1)
     main = ("Main building: not picked yet" if extras.get("waiting_main") else
+            ASSUMED_MAIN if extras.get("main_assumed") else
             "Main building: " + extras["main_name"] if facts.get("main_building") and extras.get("main_name") else None)
     return {"place": " · ".join(p for p in [facts.get("address") or "", facts.get("zone") or "",
                                             use_names.get(use, use.replace("_", " "))] if p),
