@@ -64,8 +64,11 @@ STOPS = {
                           "counted: enter the number of stories of the whole building",
     "stories_below_floors": "the stories typed ({typed}) are fewer than the floor blocks drawn ({drawn}): check the "
                             "count, or the floors",
-    "floors_apart": "floor blocks drawn one over another don't stand on each other (from {low} ft to {high} ft): "
-                    "a floor not drawn, or a space open to below? draw the missing floor, or check the blocks",
+    "floors_apart": "parts of the building drawn one over another don't stand on each other (from {low} ft to "
+                    "{high} ft): a floor not drawn, or a space open to below? draw the missing floor, or check the "
+                    "blocks",
+    "parts_overlap": "part of the building ({what}) starts partly inside the one below it (from {low} ft to {high} "
+                     "ft): move it to stand on the one below, or join them",
     "stories_below_blocks": "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), "
                             "which may each be a story: check the count",
     "basement_part": "part of the building ({what}) is below the ground: whether a basement or cellar counts as a "

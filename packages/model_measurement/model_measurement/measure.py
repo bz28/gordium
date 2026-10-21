@@ -603,8 +603,8 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     architect's statement for the whole building, and only if it is at least the floors counted on any part and
     the solids stacked in any plain part (each might be a story); else,
     or with none typed, needs review. A part below the ground is the §325-3 basement question: needs review,
-    whatever was typed. Floor blocks one over another in plan that don't stand on each other (a floor deleted,
-    a block lifted) are a question: a floor not drawn, or a space open to below. With only floor blocks, the most
+    whatever was typed. Parts one over another in plan with a real gap between them (a floor deleted, a block
+    lifted, a room floating over the roof) are a question: a floor not drawn, or a space open to below. With only floor blocks, the most
     counted on any part, the count typed a reading beside it
     (a question if they disagree). Each reason says what is drawn."""
     ids = [i for b in parts for i in _parts(b)]
@@ -615,9 +615,11 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     if low:
         return _missing("stories", stop("basement_part", what=", ".join(b["id"] for b in low)))
     floored = [b for b in parts if b not in plain]
-    for lower, upper in _apart_in_one_plan(floored):        # floor blocks over a gap: a floor not drawn?
-        return _missing("stories", stop("floors_apart", low=_r(lower["spans"][-1][1]),
-                                        high=_r(upper["spans"][0][0])))
+    for kind, lower, upper in _apart_in_one_plan(parts):    # over a gap (a floor not drawn?), or partly inside
+        if kind == "gap":
+            return _missing("stories", stop("floors_apart", low=_r(_extent(lower)[1]), high=_r(_extent(upper)[0])))
+        return _missing("stories", stop("parts_overlap", what=upper["id"], low=_r(_extent(upper)[0]),
+                                        high=_r(_extent(lower)[1])))
     counts = []
     for stack in floored:
         got = _stories(stack, grade, None, None)
@@ -656,29 +658,42 @@ def _footprint(building: dict):
     return ops.unary_union(building["plans"]) if building.get("plans") else _projection(building)
 
 
-def _apart_in_one_plan(stacks: list[dict]) -> list[tuple[dict, dict]]:
-    """Stacks of floor blocks one over another in plan that don't stand on each other (a floor deleted between
-    them, or a block lifted): each such pair, lower first. _stacks joins only blocks that touch, so these are
-    still one building's floors, never a separate building."""
+def _overlap_in_plan(a: dict, b: dict) -> bool:
+    return _footprint(a).intersection(_footprint(b)).area > 1e-6
+
+
+def _apart_in_one_plan(parts: list[dict]) -> list[tuple[str, dict, dict]]:
+    """Parts of one building one over another in plan that don't stand on each other or side by side: each such
+    pair ("gap" or "overlap", lower, upper). A gap: no overlap in height, more than TOL apart (a floor deleted, a
+    block lifted, a room floating over the roof). An overlap: one starts partly inside the other (a floor moved
+    down into the one below, a room sunk into the roof). Parts that touch (TOL), or start at one level (an
+    L-shaped house), are neither. So moving a part a little never turns one count into another."""
     out = []
-    for i, a in enumerate(stacks):
-        for b in stacks[i + 1:]:
-            if _footprint(a).intersection(_footprint(b)).area > 1e-6:
-                out.append(tuple(sorted((a, b), key=lambda s: s["spans"][0][0])))
+    for i, a in enumerate(parts):
+        for b in parts[i + 1:]:
+            (lo_a, hi_a), (lo_b, hi_b) = _extent(a), _extent(b)
+            if None in (lo_a, lo_b) or not _overlap_in_plan(a, b):
+                continue
+            lower, upper = (a, b) if lo_a <= lo_b else (b, a)
+            top, bottom = _extent(lower)[1], _extent(upper)[0]
+            if bottom > top + TOL:
+                out.append(("gap", lower, upper))
+            elif abs(bottom - top) > TOL and abs(lo_a - lo_b) > TOL:
+                out.append(("overlap", lower, upper))
     return out
 
 
-def _with_floors_above_or_below(parts: list[dict], everyone: list[dict]) -> list[dict]:
-    """parts, with every stack of floor blocks drawn over or under one of its floor blocks in plan (vertically
-    apart or not): they are this building's floors, whichever candidate building is read."""
+def _one_vertical_building(parts: list[dict], everyone: list[dict]) -> list[dict]:
+    """parts, with every solid drawn over or under one of them in plan (plain or floor blocks, touching or not):
+    a building is everything one over another in plan, whatever the vertical gap (a tolerance never decides what
+    the building is); whichever candidate building is read."""
     out = list(parts)
     grew = True
     while grew:
         grew = False
         for b in everyone:
-            if any(b is o for o in out) or not (b.get("parts") and any(b["floor"])):
-                continue
-            if any(p.get("parts") and any(p["floor"]) and _footprint(p).intersection(_footprint(b)).area > 1e-6 for p in out):
+            if not any(b is o for o in out) and b.get("faces") and \
+                    any(p.get("faces") and _overlap_in_plan(p, b) for p in out):
                 out.append(b)
                 grew = True
     return out
@@ -692,18 +707,39 @@ def _fits_in_the_first_story(part: dict, grade) -> bool:
             and _rise(part) < STORY_ROOM - TOL)
 
 
-def _stories_over(assemblies, grade, why_grade, stated) -> dict:
+def _candidate_grades(assemblies, buildings: list[dict], facts: dict, grade, why_grade) -> list[tuple]:
+    """Each candidate building's own grade plane, (grade, reason), one per assembly (§325-3: "the average of
+    finished ground level on each side of the building"). With one ground level given, or flat ground, it is the
+    same for every candidate; from spot grades, the walls of that candidate's own solids, a point at another
+    solid's walls being that solid's ground, never this one's. The main building alone keeps the grade found."""
+    if not facts.get("grade_points"):
+        return [(grade, why_grade)] * len(assemblies)
+    out = []
+    for _, members in assemblies:
+        if len(members) == 1:
+            out.append((grade, why_grade))
+            continue
+        rest = [b for b in buildings if not any(b is c for c in members)]
+        g, why = _grade_from_points(members, facts["grade_points"], rest)
+        out.append((g, stop("grade_with_others") if why else None))
+    return out
+
+
+def _stories_over(assemblies, grade, why_grade, stated, grades=None) -> dict:
     """STORY over the same candidate buildings as the height (_assemblies): each one's stories by the one rule
-    (_stories_whole; its parts are the main building and every other part, except a plain one standing on the
+    (_stories_whole; its parts are the main building and every other part, with every solid over or under one
+    of them in plan (_one_vertical_building), except a plain one standing on the
     ground and lower than STORY_ROOM, which fits inside the first story: a porch slab or steps. A part raised off
     the ground, on a roof or reaching below it stays in, whatever its height). A count that can't be read for any
-    of them needs review with its reason; if they differ, it is the accessory question."""
+    of them needs review with its reason; if they differ, it is the accessory question. `grades`: each
+    candidate's own grade plane (_candidate_grades), the same list the height reads; else `grade` for all."""
     found = []
     everyone = list({id(b): b for _, members in assemblies for b in members}.values())
-    for words, members in assemblies:
-        parts = members[:1] + [b for b in members[1:] if not _fits_in_the_first_story(b, grade)]
-        parts = _with_floors_above_or_below(parts, everyone)
-        r = _stories_whole(parts, grade, why_grade, stated)
+    for k, (words, members) in enumerate(assemblies):
+        g, why_g = grades[k] if grades else (grade, why_grade)
+        parts = _one_vertical_building(members, everyone)
+        parts = parts[:1] + [b for b in parts[1:] if not _fits_in_the_first_story(b, g)]
+        r = _stories_whole(parts, g, why_g, stated)
         if r["value"] is None and not r["readings"]:
             return r
         found.append((words, r))
@@ -880,20 +916,23 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # beside them, and every stop that applies to the height applies to them.
     why_which = why_building or why_main
     countable = bool(buildings) or bool(why_building and site.get("buildings"))   # every drawn part is checked
+    # the candidate buildings, each with its own grade plane: the one list the stories and the height read
+    candidates = _assemblies(main, others) if not why_which else []
+    grades = _candidate_grades(candidates, buildings, facts, grade, why_grade)
     if countable:
         out["stories"] = (_missing("stories", why_which) if why_which else
-                          _stories_over(_assemblies(main, others), grade, why_grade, facts.get("stories")))
+                          _stories_over(candidates, grade, why_grade, facts.get("stories"), grades))
     why = why_which or why_grade
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
     if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):
         # read with the other solids as part of the building, the grade plane is the ground at the walls of all of
         # them (§325-3: "each side of the building"), not the main building's alone: a wing on lower ground
         # lowers it. Spot grades that don't reach those walls leave that reading, and so the height, unknown.
-        with_grade, why_with = (_grade_from_points([main] + others, facts["grade_points"])
-                                if facts.get("grade_points") else (grade, None))
-        out["building_height"] = (_missing("building_height", stop("grade_with_others")) if why_with else
+        # (the candidate's own grade plane, _candidate_grades: the one the stories read too)
+        with_grade, why_with = grades[-1]
+        out["building_height"] = (_missing("building_height", why_with) if why_with else
                                   _with_others(out["building_height"], [_height(b, with_grade) for b in others],
-                                               _assemblies(main, others), _height(main, with_grade)))
+                                               candidates, _height(main, with_grade)))
     if facts.get("grade_is") == "existing":     # the grade plane is finished ground: existing ground can't decide
         for name in ("building_height", "stories"):
             if out[name].get("value") is None and not out[name].get("readings"):
