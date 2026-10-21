@@ -13,9 +13,11 @@ GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts), GordiumOf
 
 import json
 import os
+import queue
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
 import Eto.Drawing as ed
@@ -96,9 +98,29 @@ def _worker():
         p = subprocess.Popen([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
                              universal_newlines=True, encoding="utf-8")
-        STATE["worker"] = p
+        lines = queue.Queue()
+        threading.Thread(target=_read_lines, args=(p.stdout, lines), daemon=True).start()
+        STATE["worker"], STATE["worker_lines"] = p, lines
         STATE["worker_code"] = now
     return p
+
+
+def _read_lines(stream, lines):
+    """The reader thread: every line the checker writes, then None when it stops. It lets ask() wait with a time
+    limit (select() can't wait on a pipe on Windows). It never touches Rhino."""
+    try:
+        for line in stream:
+            lines.put(line)
+    finally:
+        lines.put(None)
+
+
+def _stop_worker():
+    """Stop the checker and forget it (the next request starts a fresh one)."""
+    p = STATE.pop("worker", None)
+    STATE.pop("worker_lines", None)
+    if p is not None and p.poll() is None:
+        p.kill()
 
 
 def ask(request):
@@ -108,11 +130,14 @@ def ask(request):
     request = dict(request, id=STATE["next_id"])
     p.stdin.write(json.dumps(request) + "\n")
     p.stdin.flush()
-    line = p.stdout.readline()
-    if not line:
-        STATE.pop("worker", None)
+    try:                                     # only this request's answer, within its time limit (rhino_logic)
+        answer = logic.answer_for(STATE["worker_lines"], request["id"], logic.ask_limit(request.get("cmd")))
+    except logic.CheckerOutOfStep as e:
+        _stop_worker()
+        raise RuntimeError(str(e) + " (see gordium_worker.log in the temp folder)")
+    if answer is None:
+        _stop_worker()
         raise RuntimeError("the Gordium checker stopped (see gordium_worker.log in the temp folder)")
-    answer = json.loads(line)
     if not answer.get("ok"):
         raise ValueError(answer.get("error"))
     return answer["result"]
@@ -238,7 +263,7 @@ def current_facts(doc):
 
 
 def save_facts(doc, facts):
-    if _box_open():                     # nothing writes the facts under an open start box (Draw writes its own)
+    if not logic.allowed("save_facts", _box_open()):   # nothing writes the facts under an open box (Draw writes its own)
         say(logic.BOX_BUSY)
         return
     _save_facts(doc, facts)
@@ -747,14 +772,16 @@ def add_to_check(ids):
 
 
 def _not_included(doc, lot):
-    """Anything on the lot that could be a building and isn't measured (rhino_logic.could_be_building: solids,
+    """Anything on the lot (its footprint reaching more than 0.1 ft into the lot's outline, partly or wholly:
+    rhino_logic.reaches_into_lot) that could be a building and isn't measured (rhino_logic.could_be_building: solids,
     polysurfaces, meshes, SubD, blocks; not the picked terrain, what the architect marked as the ground, the
     Building layer or Gordium's own layers): each one makes the check need review (C8). Nothing is ever left out
     on a guess: a topography mesh stays here (marked as looking like the ground, see _ground_like) until the
     architect says "This is the ground"."""
     if lot is None:
         return []
-    box = lot.Geometry.GetBoundingBox(True)
+    ring = _plan_points(lot.Geometry)
+    reach = _model_length(doc, logic.ON_LOT_REACH)              # ft -> model units
     out = []
     every = Rhino.DocObjects.ObjectEnumeratorSettings()          # hidden and locked too, as for the Building layer:
     every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # a hidden shed still counts
@@ -769,10 +796,32 @@ def _not_included(doc, lot):
         if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or logic.on_layer(layer, "Gordium"):
             continue
-        c = g.GetBoundingBox(True).Center
-        if box.Min.X <= c.X <= box.Max.X and box.Min.Y <= c.Y <= box.Max.Y:
+        if logic.reaches_into_lot(ring, _plan_points(g), reach):   # its footprint, against the lot's outline
             out.append(str(o.Id))
     return out
+
+
+def _plan_points(g):
+    """Points of an object in plan, (x, y), enough to outline it: a curve's points along it; a mesh's vertices; a
+    solid's vertices and points along its edges (curved walls too); anything else (a block, a SubD), its bounding
+    box's corners (bigger than the object: the cautious direction), as for a mesh of over 50,000 vertices."""
+    if isinstance(g, rg.Curve):
+        ok, poly = g.TryGetPolyline()
+        pts = list(poly) if ok else [g.PointAt(t) for t in g.DivideByCount(64, True)]
+    elif isinstance(g, rg.Mesh):
+        pts = list(g.Vertices)
+    else:
+        brep = g if isinstance(g, rg.Brep) else (g.ToBrep() if isinstance(g, rg.Extrusion) else None)
+        if brep is not None:
+            pts = [v.Location for v in brep.Vertices]
+            for e in brep.Edges:
+                pts += [e.PointAt(t) for t in (e.DivideByCount(8, True) or [])]
+        else:
+            pts = []
+    if not pts or len(pts) > 50000:          # nothing to outline it by, or a huge mesh (a terrain): its box's corners
+        b = g.GetBoundingBox(True)
+        pts = [b.Min, b.Max, rg.Point3d(b.Min.X, b.Max.Y, 0), rg.Point3d(b.Max.X, b.Min.Y, 0)]
+    return [(p.X, p.Y) for p in pts]
 
 
 def _ground_like(doc, ids, lot):
@@ -1140,48 +1189,43 @@ def _one_pick(doc, what, facts, saved_ui, session):
         saved_ui = _lookup_start(facts, saved_ui)
     elif what == "lookup_done":
         facts, saved_ui = _lookup_done(doc, facts, saved_ui, session)
-    elif what == "street":
+    else:                                      # the pick's outcome only; rhino_logic.pick_effect decides the rest
+        facts, saved_ui = logic.pick_effect(what, _pick_outcome(doc, what, facts, session), facts, saved_ui)
+    _highlight(doc, facts)
+    return facts, saved_ui
+
+
+def _pick_outcome(doc, what, facts, session):
+    """What one pick gave, or None (Esc, Enter, nothing picked). Drawn objects go through the session."""
+    if what == "street":
         lot = _find(doc, facts.get("lot_id") or "")
-        if lot is not None:
-            rc, point = Rhino.Input.RhinoGet.GetPoint("Click the lot line on the street", True)
-            if rc == Rhino.Commands.Result.Success:
-                a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
-                facts["street_line"] = [[_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]]
-                saved_ui["street_source"] = logic.ENTERED
-                saved_ui = logic.settle(saved_ui, "street")
-    elif what == "lot":                          # Use my survey: the surveyed outline
-        lots = _lot_candidates(doc)
-        picked = _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
-                       lots, "Lot", Rhino.DocObjects.ObjectType.Curve)
-        if picked:
-            facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
-            facts["lot_surveyed"] = True
-            saved_ui = logic.settle(saved_ui, "lot")
-    elif what == "draw_lot":                     # over the City's outline (a guide, never kept)
+        if lot is None:
+            return None
+        rc, point = Rhino.Input.RhinoGet.GetPoint("Click the lot line on the street", True)
+        if rc != Rhino.Commands.Result.Success:
+            return None
+        a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+        return [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+    if what == "lot":                            # Use my survey: the surveyed outline
+        return _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
+                     _lot_candidates(doc), "Lot", Rhino.DocObjects.ObjectType.Curve)
+    if what == "draw_lot":                       # over the City's outline (a guide, never kept)
         drawn = _draw_lot(doc)
-        if drawn:
-            session.add([drawn])
-            facts = logic.after_lot_pick(facts, drawn)
-            facts["lot_surveyed"] = False
-            saved_ui = logic.settle(saved_ui, "lot")
-            saved_ui["lot_source"] = "drawn by you"
-    elif what == "terrain":
+        session.add([drawn])
+        return drawn
+    if what == "terrain":
         go = Rhino.Input.Custom.GetObject()
         go.SetCommandPrompt("Click the terrain surface or mesh")
         go.GeometryFilter = Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.PolysrfFilter | \
             Rhino.DocObjects.ObjectType.Mesh
-        if go.Get() == Rhino.Input.GetResult.Object:
-            saved_ui["terrain_id"] = str(go.Object(0).ObjectId)
-            saved_ui["ground_kind"] = "terrain"
-            saved_ui = logic.settle(saved_ui, "ground")
-    elif what in ("spot", "regrade"):
+        return str(go.Object(0).ObjectId) if go.Get() == Rhino.Input.GetResult.Object else None
+    if what in ("spot", "regrade"):
         placed = _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
                               "Click the finished ground you'll grade to, at each wall (Enter when done)",
                               GRADE_LAYER if what == "spot" else FINISHED_LAYER)
         session.add(placed)
-        saved_ui = logic.after_ground_pick(saved_ui, what, len(placed))   # none placed: nothing changes
-    _highlight(doc, facts)
-    return facts, saved_ui
+        return placed
+    return None
 
 
 def confirm(doc, facts, options, mode="check"):
@@ -1189,7 +1233,7 @@ def confirm(doc, facts, options, mode="check"):
     from (saved beside them); a pick closes the box, picks in the model, and shows the box again with the result;
     closing it (or Esc) saves nothing (None)."""
     gate = STATE.setdefault("box_gate", logic.BoxGate())
-    if not gate.enter():                # one start box at a time (Edit site… from the panel during a pick)
+    if not logic.allowed("open_box", _box_open()) or not gate.enter():   # one start box at a time
         say(logic.BOX_BUSY)
         return None
     result = None
@@ -1605,7 +1649,7 @@ def run_check(doc, report=True):
     result is cleared from the view and the panel says why, with Retry (H2): never left showing. While a start box
     is open it does nothing at all (its overlay, the panel and the "before" statuses stay): the box's own edits
     would otherwise be checked mid-box; live mode checks once the box closes."""
-    if STATE.get("running") or _box_open():
+    if STATE.get("running") or not logic.allowed("check", _box_open()):
         return None
     o = overlay()
     facts = {}

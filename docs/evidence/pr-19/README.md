@@ -1,0 +1,15 @@
+# PR #19 evidence: the start box and live mode, in Rhino 8 (Mac)
+
+Recorded 2026-10-21 on start-box-lookup at d6cd34f, plus this commit's test fixes. Each script asserts every claim it
+makes and fails loudly otherwise; each closes the documents it opens.
+
+| File | What it proves |
+|---|---|
+| `pr19_checks_results.json` | `apps/rhino_plugin/tests/pr19_checks_in_rhino.py`: 11 claims, all true. (1) While a start box is open, Edit site… only says "Finish or cancel the open start box first", every gated panel action does nothing, the legend still runs, the panel's controls are off. (3) No check runs while the box is open (live mode's idle re-check keeps the pending edit) and exactly one runs after it closes. (4) After closing with nothing selected, Zoom to stays off and the other controls are back on. (5) With a pending edit, the document in front is re-checked even though another document was checked after the edit. |
+| `1_one_box_panel_greyed_legend_on.png` | The panel while a real start box is open: buttons, ticks, the detail pane, Zoom to and Zoning report… greyed; the "?" legend on. |
+| `1_after_the_box_panel_back.png` | The same panel after the box closed: controls back. |
+| `box_transaction_results.json` | `apps/rhino_plugin/tests/box_transaction_in_rhino.py`, all true: Cancel through the real box leaves the same objects, ids and layers; a looked-up lot sets the sample lot aside (held, never deleted); a re-lookup keeps only the new lot's spot grades; Cancel after it restores everything; after a session Rhino never finished, recovery puts the model back; the City-outline guide case writes no lot. |
+| `2_lookup_106_sample_lot_set_aside.png` | Top view after looking up 106 Ithaca Rd: the looked-up lot and its USGS spot grades; the sample lot held. |
+| `2_cancel_model_exactly_as_before.png` | Top view after Cancel: only the sample lot, exactly as before. |
+| `2_relookup_109_only_its_spot_grades.png` | Top view after looking up 109 Ithaca Rd in the same session: its lot and only its 6 spot grades. |
+| `2_city_outline_guide_only.png` | Top view when the State's parcels didn't answer: the City's outline as a dashed guide only, no lot written. |

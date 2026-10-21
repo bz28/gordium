@@ -371,7 +371,8 @@ def test_p1_esc_on_place_spot_grades_settles_nothing():
     placed = logic.after_ground_pick({**saved, "doubts": {"ground": "x"}}, "spot", 3)
     assert "ground" not in logic.unsettled(placed) and "ground_source" not in placed
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "logic.after_ground_pick(saved_ui, what, len(placed))" in rhino and "    return placed" in rhino
+    assert "logic.pick_effect(what, _pick_outcome(doc, what, facts, session), facts, saved_ui)" in rhino
+    assert "        return placed" in rhino                       # the points placed are the pick's outcome
 
 
 def test_p1_nothing_from_a_source_that_cant_be_kept_is_written():
@@ -440,7 +441,7 @@ def test_p2_the_guide_case_offers_draw_my_lot_and_keeps_draw_off_until_there_is_
     assert rows["lot"]["actions"][0] == ("draw_lot", "Draw my lot…", True)
     assert logic.draw_reason({"district_confirmed": True, "lot_missing": True}) == "Draw or pick the lot to continue."
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert 'elif what == "draw_lot":' in rhino and '"lot_missing": lot is None' in rhino
+    assert 'if what == "draw_lot":' in rhino and '"lot_missing": lot is None' in rhino
 
 
 def test_p2_after_a_lookup_the_district_must_be_ticked_again():
@@ -780,7 +781,7 @@ def test_only_one_start_box_at_a_time():
     assert gate.enter()
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
-    assert "if not gate.enter():" in conf and "say(logic.BOX_BUSY)" in conf and "gate.leave()" in conf
+    assert "or not gate.enter():" in conf and "say(logic.BOX_BUSY)" in conf and "gate.leave()" in conf
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert 'parts["box_buttons"] = buttons' in ui and "logic.controls_enabled(is_open, zoom_ok)" in ui
 
@@ -854,9 +855,9 @@ def test_live_mode_never_rechecks_under_an_open_start_box():
     assert 'logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS,' in idle
     assert idle.index("should_recheck") < idle.index('STATE["dirty"] = None')   # the pending edit kept until then
     check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert 'if STATE.get("running") or _box_open():\n        return None' in check      # every caller refused
+    assert 'if STATE.get("running") or not logic.allowed("check", _box_open()):\n        return None' in check
     save = rhino[rhino.index("def save_facts("):rhino.index("def _save_facts(")]
-    assert "if _box_open():" in save and "_save_facts(doc, facts)" in save
+    assert 'if not logic.allowed("save_facts", _box_open()):' in save and "_save_facts(doc, facts)" in save
     conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
     assert conf.index("gate.leave()") < conf.index('STATE["dirty"] = time.time() - IDLE_SECONDS')
 
@@ -919,3 +920,45 @@ def test_switching_documents_with_a_pending_edit_still_rechecks_the_one_in_front
         check.index("except Exception")                  # only after a completed check, never on an error
     new_doc = rhino.index("def _new_document(")
     assert '"checked_at"' not in rhino[new_doc:rhino.index("\ndef ", new_doc + 10)]
+
+
+
+# ---- eval-integrity audit (P1-5) and the gate by behaviour --------------------------------------------------------
+
+@pytest.mark.parametrize("what", ["street", "lot", "draw_lot", "terrain", "spot", "regrade"])
+def test_esc_at_any_pick_changes_nothing_and_keeps_every_doubt(what):
+    """The audit: making Esc on Place spot grades wipe the ground's doubt still passed the source-text pin. Every
+    pick's effect is decided in rhino_logic from what the pick gave; Esc, Enter or nothing picked changes nothing."""
+    facts, saved, _ = box(_doubtful_106())
+    saved = dict(saved, doubts={"lot": "x", "street": "y", "ground": "z"}, checked=[])
+    for nothing in (None, [], ""):
+        f2, s2 = logic.pick_effect(what, nothing, facts, saved)
+        assert (f2, s2) == (facts, saved)
+        assert logic.unsettled(s2) == {"lot": "x", "street": "y", "ground": "z"}
+
+
+@pytest.mark.parametrize("what, outcome, row", [("street", [[0, 0], [10, 0]], "street"), ("lot", "survey-id", "lot"),
+                                                 ("draw_lot", "drawn-id", "lot"), ("terrain", "terrain-id", "ground"),
+                                                 ("spot", ["p1", "p2"], "ground"), ("regrade", ["p1"], "ground")])
+def test_a_real_pick_settles_only_its_own_row(what, outcome, row):
+    saved = {"doubts": {"lot": "x", "street": "y", "ground": "z"}, "checked": []}
+    facts, after = logic.pick_effect(what, outcome, {"lot_id": "sample", "lot_surveyed": False}, saved)
+    assert set(logic.unsettled(after)) == {"lot", "street", "ground"} - {row}
+    if what == "lot":
+        assert facts["lot_id"] == "survey-id" and facts["lot_surveyed"] is True
+    if what == "draw_lot":
+        assert facts["lot_surveyed"] is False and after["lot_source"] == "drawn by you"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    pick = rhino[rhino.index("def _one_pick("):rhino.index("def confirm(")]
+    assert "logic.pick_effect(what, _pick_outcome(doc, what, facts, session), facts, saved_ui)" in pick
+    assert "logic.settle(" not in pick and "logic.after_ground_pick(" not in pick      # decided only in rhino_logic
+
+
+def test_nothing_checks_writes_facts_or_opens_a_box_while_one_is_open():
+    for action in ("check", "save_facts", "open_box"):
+        assert not logic.allowed(action, True) and logic.allowed(action, False)
+    assert logic.allowed("legend", True)
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert 'not logic.allowed("check", _box_open())' in rhino[rhino.index("def run_check("):]
+    assert 'not logic.allowed("save_facts", _box_open())' in rhino[rhino.index("def save_facts("):]
+    assert 'not logic.allowed("open_box", _box_open())' in rhino[rhino.index("def confirm("):]

@@ -134,6 +134,7 @@ try:
         # Rhino "closes" mid-session (no Cancel, no Draw): the next GordiumStart's recovery puts the model back
         session = g.logic.BoxSession(g.RhinoTable(doc))
         look_up(g, doc, session, facts, g._ui_state(doc), "106 Ithaca Rd, Ithaca, NY 14850", "106_ithaca_rd")
+        g.logic.OPEN_SESSIONS.discard(session.token)    # Rhino closed: after a restart no session is open
         g._recover(doc)
         log["after_crash_recovery"] = {"objects_same": objects(doc) == before,
                                        "sample_on_site": doc.Layers[g._find(doc, sample_lot).Attributes.LayerIndex]
@@ -159,6 +160,7 @@ try:
                      log["after_B_cancel"]["objects_same"] and log["after_crash_recovery"]["objects_same"] and
                      log["guide"]["lot_id"] is None and
                      log["guide"]["guide_shown"])
+        assert log["ok"], "the box is not one transaction in Rhino: " + json.dumps(log, default=str)[:600]
     elif phase == "box":
         g = sys.modules["gordium_rhino"]
         t = sc.sticky["gordium_txn"]
@@ -187,5 +189,6 @@ try:
         log["closed"] = [d.Path for d in leftovers() if "txn" in (d.Path or "") and close(d)]
 except Exception:
     log["trace"] = traceback.format_exc()
+    raise                               # a failed claim fails the run loudly (the standing rule)
 finally:
     json.dump(log, open(S + phase + "_out.json", "w", encoding="utf-8"), default=str, indent=1)

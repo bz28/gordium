@@ -2,6 +2,9 @@
 Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
+import json
+import queue
+
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
 FLOOR_KEY = "gordium:floor"            # user text on a floor block GordiumStart drew: "<story>;<height drawn, ft>"
@@ -273,6 +276,84 @@ def looks_like_ground(kind, closed, extents, lot_extents, reach=1.0):
     x0, y0, x1, y1 = extents
     a0, b0, a1, b1 = lot_extents
     return x0 <= a0 + reach and y0 <= b0 + reach and x1 >= a1 - reach and y1 >= b1 - reach
+
+
+ON_LOT_REACH = 0.1        # ft: how far into the lot an object must reach to count as on it (a neighbour drawn
+                          # touching the lot line, or a hair over it, stays off)
+
+
+def _ring_area(ring):
+    """The signed area of a closed ring of (x, y) points (counterclockwise: positive)."""
+    return sum(ring[i - 1][0] * ring[i][1] - ring[i][0] * ring[i - 1][1] for i in range(len(ring))) / 2
+
+
+def _hull(points):
+    """The convex hull of (x, y) points, counterclockwise (Andrew's monotone chain)."""
+    pts = sorted(set((float(x), float(y)) for x, y in points))
+    if len(pts) < 3:
+        return pts
+
+    def turn(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts:
+        while len(lower) >= 2 and turn(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts):
+        while len(upper) >= 2 and turn(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
+def _clip(subject, convex):
+    """The part of the ring `subject` (any simple polygon) inside the counterclockwise convex ring `convex`
+    (Sutherland-Hodgman). Its area is the overlap's area."""
+    out = list(subject)
+    for i in range(len(convex)):
+        a, b = convex[i - 1], convex[i]
+        inside = [(b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]) >= 0 for p in out]
+        nxt = []
+        for k in range(len(out)):
+            p, q, pin, qin = out[k - 1], out[k], inside[k - 1], inside[k]
+            if pin != qin:
+                dx, dy = q[0] - p[0], q[1] - p[1]
+                den = (b[0] - a[0]) * dy - (b[1] - a[1]) * dx
+                t = ((b[1] - a[1]) * (p[0] - a[0]) - (b[0] - a[0]) * (p[1] - a[1])) / den if den else 0.0
+                nxt.append((p[0] + t * dx, p[1] + t * dy))
+            if qin:
+                nxt.append(q)
+        out = nxt
+        if not out:
+            break
+    return out
+
+
+def reaches_into_lot(lot_ring, points, reach):
+    """Whether an object whose plan points (any (x, y) of it: vertices, points along its edges) are `points`
+    reaches into the lot (`lot_ring`, its outline's points) by more than `reach` (model units): the part of its
+    plan footprint (their convex hull) inside the lot, averaged across (twice its area over its perimeter), is
+    wider than `reach`. Wholly on the lot, straddling a lot line or mostly past it: on the lot. Touching the
+    line from outside, a hair over it, or off the lot but inside the lot's bounding box (a rotated or jogged
+    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction."""
+    lot = [(float(x), float(y)) for x, y in lot_ring]
+    if len(lot) > 1 and lot[0] == lot[-1]:
+        lot = lot[:-1]
+    if len(lot) < 3:
+        return False
+    if _ring_area(lot) < 0:
+        lot.reverse()
+    hull = _hull(points)
+    if len(hull) < 3 or _ring_area(hull) <= 1e-12:
+        return False
+    part = _clip(lot, hull)
+    if len(part) < 3:
+        return False
+    area = abs(_ring_area(part))
+    perimeter = sum(((part[i][0] - part[i - 1][0]) ** 2 + (part[i][1] - part[i - 1][1]) ** 2) ** 0.5
+                    for i in range(len(part)))
+    return perimeter > 0 and 2 * area / perimeter > reach
 
 
 # ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------
@@ -550,6 +631,41 @@ def settle(saved_ui, row):
         saved_ui.pop("_street_name", None)
         saved_ui.pop("street_name", None)
     return saved_ui
+
+
+UNDER_A_BOX = ("check", "save_facts", "open_box")   # what may not happen while a start box is open
+
+
+def allowed(action, box_open):
+    """Whether `action` may run now: a check, writing the lot facts and opening a second start box never happen while
+    a start box is open (its own edits wait for it to close); anything else may."""
+    return not (box_open and action in UNDER_A_BOX)
+
+
+def pick_effect(what, outcome, facts, saved_ui):
+    """(facts, saved_ui) after one of the start box's picks, from what the pick gave (the Rhino side only gathers it):
+    street: the lot line [a, b] clicked; lot (Use my survey…): the outline picked; draw_lot: the outline drawn;
+    terrain: the surface picked; spot / regrade: the points placed. Esc, Enter or nothing picked (`outcome` empty):
+    nothing changes, every doubt stays (eval-integrity audit: Esc on Place spot grades wiped the ground's doubt)."""
+    facts, saved_ui = dict(facts), dict(saved_ui)
+    if not outcome:
+        return facts, saved_ui
+    if what == "street":
+        facts["street_line"] = [outcome]
+        saved_ui["street_source"] = ENTERED
+        saved_ui = settle(saved_ui, "street")
+    elif what in ("lot", "draw_lot"):
+        facts = after_lot_pick(facts, outcome) if outcome != facts.get("lot_id") else facts
+        facts["lot_surveyed"] = what == "lot"          # Use my survey…: a survey; drawn over the guide: not
+        saved_ui = settle(saved_ui, "lot")
+        if what == "draw_lot":
+            saved_ui["lot_source"] = "drawn by you"
+    elif what == "terrain":
+        saved_ui.update(terrain_id=outcome, ground_kind="terrain")
+        saved_ui = settle(saved_ui, "ground")
+    elif what in ("spot", "regrade"):
+        saved_ui = after_ground_pick(saved_ui, what, len(outcome))
+    return facts, saved_ui
 
 
 def after_ground_pick(saved_ui, what, placed):
@@ -996,3 +1112,39 @@ def context_says(payload):
     sources = " ".join(payload.get("live_credits") or []) if n.get("buildings") else ""
     return "Neighbourhood drawn: " + kept + live + "." + (" " + payload["message"] if payload.get("message") else "") + \
         (" " + sources if sources else "")
+
+
+ASK_LIMIT_S = 60          # s: the longest the plugin waits for one answer (the first also starts Python, loads rules)
+ASK_LIMITS_S = {"start": 120}   # s, per command that can take longer: the largest building, on a deep lot
+
+
+def ask_limit(cmd):
+    """How long the plugin waits for the checker's answer to one `cmd` request."""
+    return ASK_LIMITS_S.get(cmd, ASK_LIMIT_S)
+
+
+class CheckerOutOfStep(RuntimeError):
+    """The checker's next line can't be trusted to be this request's answer: the plugin restarts the checker and
+    shows nothing from it."""
+
+
+def answer_for(lines, request_id, limit):
+    """The checker's answer to request `request_id`, from `lines` (a queue the plugin's reader thread fills with
+    every line the checker writes, then None when it stops); None if it stopped. Raises CheckerOutOfStep when no
+    line comes within `limit` seconds, when the line isn't an answer, or when it is another request's answer:
+    then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever showing
+    an earlier check's result as this one's."""
+    try:
+        line = lines.get(timeout=limit)
+    except queue.Empty:
+        raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
+    if line is None:
+        return None
+    try:
+        answer = json.loads(line)
+    except ValueError:
+        answer = None
+    if not isinstance(answer, dict) or answer.get("id") != request_id:
+        raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
+                               "nothing from it is shown")
+    return answer
