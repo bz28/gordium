@@ -67,6 +67,9 @@ coverage "35%/40% /50% [fn12]" depends on the use, so a one-number template can'
    undrafted (a miss, reported apart). Never a false pass: no drafted pass, or drafted "doesn't apply", where
    a key says fail or needs review. Agreement is a reported metric (`evals/2026-10-20_stage1/grade.json`) that
    may not fall below its recorded floor (`agreement_floors.yaml`).
+   Which drafted rules answer each hand rule's question is a frozen file reviewed by hand from the law
+   (`evals/2026-10-20_stage1/hand_to_drafted.yaml`); a false pass is judged on each reviewed pair alone, and a
+   mutation test makes every mapped rule pass or not apply and checks the grade reports it.
 2. They pass at each R-1B chart value they cite and fail just past it, and every number of every cell they cite
    is used in the formula and decides something (changing it changes an outcome).
 3. The architects' 106 Ithaca Rd spreadsheet still comes out the same on every row.

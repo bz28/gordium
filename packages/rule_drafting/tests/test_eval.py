@@ -184,6 +184,48 @@ def drafted_rules_for(district: str) -> list[dict]:
     return [r for b in books if b.exists() for r in load(b)["rules"]]
 
 
+MAPPING = REPO / "packages/rule_drafting/evals/2026-10-20_stage1/hand_to_drafted.yaml"
+
+
+def mapping() -> dict:
+    """The reviewed hand-to-drafted mapping (evals/2026-10-20_stage1/hand_to_drafted.yaml)."""
+    return load(MAPPING) if MAPPING.exists() else {"keys": {}, "general_unmatched": {}}
+
+
+def kinder(got: str, expect: str) -> bool:
+    """The drafted answer lets through what the key doesn't: a pass, or "doesn't apply" (nothing shown), where the
+    key says fail or needs review."""
+    return got in ("pass", "not_applicable") and expect in ("fail", "needs_review")
+
+
+def grade_mapped(book: dict, entries: dict, drafted: list[dict], ctx) -> dict:
+    """Every worked example of a hand key, graded by its reviewed pairs. Agreement: the mapped rules together (judge
+    units and exception parts). False pass: each judge unit on its own, its missing inputs left missing (never taken
+    from the draft's own example), so neither an unrelated rule nor a supplied value can hide a pass."""
+    district = book["district"]
+    by_id = {r["id"]: r for r in drafted}
+    out = {"district": district, "total": 0, "agree": [], "disagree": [], "undrafted": [], "false_pass": []}
+    for h in book["rules"]:
+        e = entries[h["id"]]
+        units = [[by_id[i] for i in u] for u in e.get("judge") or []]
+        every = [r for u in units for r in u] + [by_id[i] for i in e.get("parts") or []]
+        for ex in h.get("examples", []):
+            out["total"] += 1
+            item = {"hand": h["id"], "given": ex["given"], "expect": ex["expect"]}
+            if not every:
+                out["undrafted"].append(item)
+                continue
+            values = {"district": district} | ex["given"]
+            got, notes = combined(every, values, ctx, set(ctx.proposed))
+            item |= {"got": got, "drafted": [r["id"] for r in every], "notes": notes}
+            (out["agree"] if got == ex["expect"] else out["disagree"]).append(item)
+            for u in units:
+                alone, _ = combined(u, values, ctx, frozenset())
+                if kinder(alone, ex["expect"]):
+                    out["false_pass"].append(item | {"got": alone, "drafted": [r["id"] for r in u]})
+    return out
+
+
 def grade_hand_key(path, ctx, drafted=None) -> dict:
     """Every worked example of one hand key, each counted once: agree, disagree (with the drafted outcome), or
     undrafted (no drafted rule covers its hand rule: a miss, reported apart, never left out of the total). A false
@@ -191,6 +233,9 @@ def grade_hand_key(path, ctx, drafted=None) -> dict:
     says fail or needs review. drafted: the drafted rules (default: the district's and general.yaml's)."""
     book = load(path)
     district = book["district"]
+    entries = mapping()["keys"].get(Path(path).name, {}).get("rules")
+    if drafted is None and entries is not None:           # a key in the reviewed mapping: graded by its pairs
+        return grade_mapped(book, entries, drafted_rules_for(district), ctx)
     drafted = drafted_rules_for(district) if drafted is None else drafted
     out = {"district": district, "total": 0, "agree": [], "disagree": [], "undrafted": [], "false_pass": []}
     for h in book["rules"]:
@@ -624,10 +669,93 @@ def test_no_example_counted_undrafted_has_a_draft_on_its_cell_doing_the_same_job
         g = grade_hand_key(path, ctx)
         book = {r["id"]: r for r in load(path)["rules"]}
         drafted = drafted_rules_for(g["district"])
+        notes = mapping()["keys"].get(path.name, {}).get("rules", {})
         for hid in {x["hand"] for x in g["undrafted"]}:
             h = book[hid]
             for r in drafted:
-                if not cells(h) & cells(r):
+                if not cells(h) & cells(r) or r["id"] in (notes.get(hid, {}).get("not_same") or {}):
                     continue
                 job = measured(h) & measured(r) if measured(h) else selected_uses(h) & selected_uses(r)
                 assert not job, (path.name, hid, r["id"])
+
+
+def test_every_hand_and_drafted_rule_is_in_the_reviewed_mapping(ctx):
+    """Review round 7: matching by citations opened a new blind spot each time it was tuned. The pairs are now a frozen
+    file reviewed by hand from the law; a hand rule or a drafted rule it doesn't account for fails here, so a new
+    draft or a new key forces a new review."""
+    if not (DRAFTED / "general.yaml").exists():
+        pytest.skip("nothing drafted yet")
+    m = mapping()
+    general = {r["id"] for r in load(DRAFTED / "general.yaml")["rules"]}
+    general_mapped = set()
+    for path in hand_keys():
+        assert path.name in m["keys"], f"{path.name}: not in hand_to_drafted.yaml (review its rules)"
+        k = m["keys"][path.name]
+        hand = {r["id"] for r in load(path)["rules"]}
+        assert set(k["rules"]) == hand, (path.name, sorted(hand ^ set(k["rules"])))
+        drafted = {r["id"] for r in drafted_rules_for(k["district"])}
+        named = {i for e in k["rules"].values() for u in e.get("judge") or [] for i in u} | \
+            {i for e in k["rules"].values() for i in e.get("parts") or []}
+        assert named <= drafted, (path.name, sorted(named - drafted))            # no stale id
+        assert all(e.get("reason") for e in k["rules"].values())
+        own = {i for i in drafted if not i.startswith("general.")}
+        assert own - named == set(k["unmatched"]), (path.name, sorted((own - named) ^ set(k["unmatched"])))
+        general_mapped |= named & general
+    assert general - general_mapped == set(m["general_unmatched"]), sorted((general - general_mapped) ^ set(m["general_unmatched"]))
+    # and every key in the mapping is graded by its pairs: each graded example names only its hand rule's mapped rules
+    for path in hand_keys():
+        rules = m["keys"][path.name]["rules"]
+        g = grade_hand_key(path, ctx)
+        for x in g["agree"] + g["disagree"]:
+            e = rules[x["hand"]]
+            mapped = {i for u in e.get("judge") or [] for i in u} | set(e.get("parts") or [])
+            assert set(x["drafted"]) <= mapped, (path.name, x["hand"], sorted(set(x["drafted"]) - mapped))
+
+
+def _mutated(rule: dict, how: str) -> dict:
+    """The rule made to always pass, or never apply."""
+    base = {k: v for k, v in rule.items() if k not in ("applies_when", "check", "review_when")}
+    if how == "pass":
+        return base | {"kind": "rule", "check": "0 <= 0"}
+    return base | {"kind": "rule", "applies_when": "0 > 1", "check": "0 <= 0"}
+
+
+def test_the_grader_catches_every_mapped_rule_turned_into_a_false_pass(ctx):
+    """Mutation test (review round 7): every judge unit of every mapped hand rule, made to always pass or never apply,
+    must be reported as a false pass on that hand rule (when the key has an example that fails or needs review): the
+    grader has no blind spot left, the way the type table is mutation-tested."""
+    if not (DRAFTED / "general.yaml").exists():
+        pytest.skip("nothing drafted yet")
+    m = mapping()
+    missed, tried = [], 0
+    for path in hand_keys():
+        book, entries = load(path), m["keys"][path.name]["rules"]
+        drafted = drafted_rules_for(book["district"])
+        for h in book["rules"]:
+            if not any(ex["expect"] in ("fail", "needs_review") for ex in h.get("examples", [])):
+                continue
+            for unit in entries[h["id"]].get("judge") or []:
+                for how in ("pass", "not_applicable"):
+                    tried += 1
+                    flipped = [_mutated(r, how) if r["id"] in unit else r for r in drafted]
+                    g = grade_mapped(book | {"rules": [h]}, entries, flipped, ctx)
+                    if not g["false_pass"]:
+                        missed.append((path.name, h["id"], unit, how))
+    assert tried and missed == []
+
+
+def test_a_dropped_special_permit_use_is_a_false_pass_whatever_else_cites_the_use_rows(ctx):
+    """Review round 7 (P0): drafted R-3a.use with 'school' taken out of its special-permit list shows nothing for a
+    school, a false pass. The citation matcher also paired the hand flag with numeric rules that only quote the use
+    rows as inputs, whose missing lot area gave needs review and hid it. Judged by the reviewed pair on its own, it
+    shows."""
+    hand_flag = {"id": "R-3a.use", "kind": "flag", "applies_when": 'use in ["school"]',
+                 "examples": [{"given": {"use": "school"}, "expect": "needs_review"}]}
+    use = next(r for r in load(DRAFTED / "R-3a.yaml")["rules"] if r["id"] == "R-3a.use")
+    dropped = use | {"applies_when": use["applies_when"].replace('"school", ', "").replace(', "school"', "")}
+    assert '"school"' not in dropped["applies_when"]
+    lot = next(r for r in load(DRAFTED / "R-3a.yaml")["rules"] if r["id"] == "R-3a.min_lot_area_other_use")
+    entries = {"R-3a.use": {"judge": [["R-3a.use"]], "reason": "x"}}
+    g = grade_mapped({"district": "R-3a", "rules": [hand_flag]}, entries, [dropped, lot], ctx)
+    assert [x["got"] for x in g["false_pass"]] == ["not_applicable"]
+    assert grade_mapped({"district": "R-3a", "rules": [hand_flag]}, entries, [use, lot], ctx)["false_pass"] == []
