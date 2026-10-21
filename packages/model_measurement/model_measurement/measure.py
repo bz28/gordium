@@ -19,6 +19,7 @@ import math
 
 import numpy as np
 
+import shapely
 from shapely import STRtree, ops
 from shapely.geometry import LineString, MultiLineString, Point, Polygon
 from shapely.validation import explain_validity
@@ -238,8 +239,9 @@ def _plan(face: dict):
 def _samples(shape, n: int = 7) -> list:
     """Points spread over a shape (a grid inside it, and one point surely inside)."""
     x0, y0, x1, y1 = shape.bounds
-    grid = [Point(x0 + (x1 - x0) * (i + 0.5) / n, y0 + (y1 - y0) * (j + 0.5) / n) for i in range(n) for j in range(n)]
-    return [p for p in grid if shape.contains(p)] + [shape.representative_point()]
+    grid = [(x0 + (x1 - x0) * (i + 0.5) / n, y0 + (y1 - y0) * (j + 0.5) / n) for i in range(n) for j in range(n)]
+    inside = shapely.contains_xy(shape, [x for x, _ in grid], [y for _, y in grid])      # all at once
+    return [Point(x, y) for (x, y), yes in zip(grid, inside) if yes] + [shape.representative_point()]
 
 
 def _unit_normal(points) -> tuple:
@@ -369,13 +371,18 @@ def _open_to_the_sky(faces: list[dict]) -> list[dict]:
     for i, (f, shape) in enumerate(flat):
         if shape.area <= 1e-9:
             continue
-        for point in _samples(shape):
-            z = _plane_z(f, point.x, point.y)
-            above = [_plane_z(flat[j][0], point.x, point.y) for j in index.query(point)
-                     if j != i and grown[j].contains(point)]
-            if not any(h is not None and h > z + TOL for h in above):
-                open_.append(f)
-                break
+        points = _samples(shape)
+        xy = shapely.get_coordinates(points)
+        covered = set()
+        # every (point, other face whose grown outline contains it) pair at once: the same test as contains
+        for k, j in zip(*index.query(points, predicate="within")):
+            if j != i and k not in covered:
+                h = _plane_z(flat[j][0], xy[k][0], xy[k][1])
+                z = _plane_z(f, xy[k][0], xy[k][1])
+                if h is not None and h > z + TOL:
+                    covered.add(k)
+        if len(covered) < len(points):
+            open_.append(f)
     return open_
 
 
