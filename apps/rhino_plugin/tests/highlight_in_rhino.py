@@ -70,8 +70,8 @@ try:
         g.gordium_check()                                    # GordiumStart's flow on the sample
         items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
         claim("the sample is 106's tax-map lot, the left side yard 12'-0 5/8\" of 10'-0\"",
-              items["Side yard, West"]["proposed"] == "12'-0 5/8\"" and items["Side yard, West"]["required"] == "10'-0\"",
-              items["Side yard, West"])
+              items["Side yard, Southwest"]["proposed"] == "12'-0 5/8\"" and items["Side yard, Southwest"]["required"] == "10'-0\"",
+              items["Side yard, Southwest"])
         claim("the start house: nothing red", not any(s == "does_not_comply" for _, s in g.overlay().encroach),
               [s for _, s in g.overlay().encroach])
         ft = 1.0 / g._scale(doc)
@@ -79,7 +79,7 @@ try:
             doc.Objects.Transform(o.Id, rg.Transform.Translation(-5 * ft, 0, 0), True)
         g.run_check(doc, report=False)
         items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
-        west = items["Side yard, West"]
+        west = items["Side yard, Southwest"]
         claim("moved: the left side yard 7'-0 5/8\", does not comply", west["proposed"] == "7'-0 5/8\"" and
               west["status"] == "does_not_comply", west)
         import math
@@ -127,7 +127,7 @@ try:
               any(t.endswith("· at least 0'-11 1/4\" short") for t in toast), toast)
         cells = [[str(v) for v in grp.Children[k].Values] for grp in g.STATE["panel_parts"].get("groups") or []
                  for k in range(grp.Children.Count)]
-        west_row = next(c for c in cells if "Side yard, West" in c[0])
+        west_row = next(c for c in cells if "Side yard, Southwest" in c[0])
         claim("1 the panel's Delta says the same", west_row[3] == "at least 0'-11 1/4\" short", west_row)
         top_vp = doc.Views.Find("Top", False).ActiveViewport
         doc.Views.ActiveView = doc.Views.Find("Top", False)

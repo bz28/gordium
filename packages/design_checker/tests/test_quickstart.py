@@ -99,12 +99,13 @@ def test_the_starting_house_on_the_sample_lot(house):
     assert len(got["floors"]) == {"two": 2, "three": 3, "four": 4}[floors]
     items = _check(got["floors"], facts)
     front, = said(r"front yard (\d+'-\d+(?: \d/\d)?\") \(needs")
-    left, right = said(r"the side yard on the left (\d+'-\d+(?: \d/\d)?\") \(needs 10'-0\"\); on the right, "
+    left, right = said(r"side yard, southwest (\d+'-\d+(?: \d/\d)?\") \(needs 10'-0\"\); northeast, "
                        r"(\d+'-\d+(?: \d/\d)?\")")
     coverage, = said(r"coverage (\d+\.\d%) \(the limit")
     sides = sorted((i for i in items.values() if i["name"].startswith("Side yard")),
                    key=lambda i: min(p[0] for p in i["points"]))
     assert (items["Front yard"]["proposed"], sides[0]["proposed"], sides[1]["proposed"]) == (front, left, right)
+    assert [s["name"] for s in sides] == ["Side yard, Southwest", "Side yard, Northeast"]   # true north, as looked up
     assert items["Lot coverage"]["proposed"] == coverage and items["Lot coverage"]["status"] == present.COMPLIES
     said(r"\*\*Rear yard\*\*: which of the short lines at the back count as side lot lines")
     rear, height = items["Rear yard"], items["Building height"]
@@ -171,7 +172,7 @@ def test_5_raise_the_roof_fails(house):
 
 def test_6_the_left_side_wall_out(house):
     got, facts = house
-    feet, proposed, up_to = said(r"move the left side wall (\d+) ft out\*\*.*?That side yard (\d+'-\d+(?: \d/\d)?\"):"
+    feet, proposed, up_to = said(r"move the southwest wall (\d+) ft out\*\*.*?Side yard, Southwest (\d+'-\d+(?: \d/\d)?\"):"
                                  r" \*\*needs review\*\*, up to (\d+'-\d+(?: \d/\d)?\") short")
     side = _left_side(_check(_wall_out(got["floors"], float(feet)), facts))
     assert (side["status"], side["proposed"], side["delta"]) == (present.REVIEW, proposed, "up to " + up_to + " short")
@@ -192,7 +193,7 @@ def test_8_a_garage_not_on_the_building_layer(house):
 
 def test_9_one_floor_moved_on_its_own(house):
     got, facts = house
-    said(r"Move one floor on its own\*\* \(Floor 2, 3 ft to the right\)")
+    said(r"Move one floor on its own\*\* \(Floor 2, 3 ft to the right, seen from the street\)")
     items = _check(_moved(got["floors"], dx=3, which=1), facts)
     assert items["Stories"]["status"] == present.REVIEW and "floors misaligned" in items["Stories"]["reason"]
 
@@ -214,8 +215,8 @@ def test_11_delta_in_words(house):
     from design_checker import rhino_logic as logic
     got, facts = house
     front_words, up_words, least_words, survey_words = (" ".join(w.split()) for w in said(
-        r'after test 2 the Front yard row reads "(at least \d+\'-\d+(?: \d/\d)?" to\s+spare)"; in test 6 the side '
-        r'yard reads "(up to \d+\'-\d+(?: \d/\d)?" short)" \(3 ft out: it may comply\) and "(at least\s+'
+        r'after test 2 the Front yard row reads "(at least \d+\'-\d+(?: \d/\d)?" to\s+spare)"; in test 6 the Southwest\s+'
+        r'side yard reads "(up to \d+\'-\d+(?: \d/\d)?" short)" \(3 ft out: it may comply\) and "(at least\s+'
         r'\d+\'-\d+(?: \d/\d)?" short)" \(5 ft out: the red strip\).*?With a survey it reads the\s+margin itself: '
         r'after test 2, "(\+\d+\'-\d+(?: \d/\d)?" to spare)"'))
     back, = said(r"Move the house (\d+) ft back")
@@ -267,11 +268,12 @@ def test_13_on_a_survey_the_starting_house_goes_to_the_limits(house, tmp_path):
     full = start(tmp_path / "lot.3dm", surveyed)
     xs = [p[0] for p in full["floors"][0]["outline"]]
     wide, deep, left = said("a new starting house goes exactly to the limits: " + LEN + " × " + LEN
-                            + r", its left\s+side yard at " + LEN)
+                            + r", its southwest\s+side yard at " + LEN + ", at limit, complying")
     ys = [p[1] for p in full["floors"][0]["outline"]]
     assert (present.feet_inches(max(xs) - min(xs)), present.feet_inches(max(ys) - min(ys))) == (wide, deep)
     side = _left_side(_check(full["floors"], surveyed))
-    assert (side["proposed"], side["status"]) == (left, present.COMPLIES)
+    assert (side["name"], side["proposed"], side["margin"], side["status"]) == (
+        "Side yard, Southwest", left, "at limit", present.COMPLIES)
 
 
 def test_the_quickstart_test_reads_the_guide():

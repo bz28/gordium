@@ -117,7 +117,7 @@ try:
             doc.Objects.Transform(o.Id, rg.Transform.Translation(-5 * ft, 0, 0), True)
         g.run_check(doc, report=False)
         rows = panel_rows(g)
-        rear = next(r for r in rows if "Side yard, West" in r[0])
+        rear = next(r for r in rows if "Side yard, Southwest" in r[0])
         claim("3 a shortfall says short", rear[3].endswith(" short"), rear)
         o = g.overlay()
         failing = [t for _, t, st in o.yard_dims if st == "does_not_comply"]

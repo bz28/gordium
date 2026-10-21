@@ -127,8 +127,8 @@ try:
         return rg.Transform.Scale(plane, f if axis == 0 else 1, f if axis == 1 else 1, 1)
 
     check(doc, 0, "The starting house", {
-        "Front yard": {"proposed": "27'-0 3/4\""}, "Side yard, West": {"proposed": "12'-0 5/8\""},
-        "Side yard, East": {"proposed": "27'-4 1/4\""}, "Rear yard": {"status": "needs_review"},
+        "Front yard": {"proposed": "27'-0 3/4\""}, "Side yard, Southwest": {"proposed": "12'-0 5/8\""},
+        "Side yard, Northeast": {"proposed": "27'-4 1/4\""}, "Rear yard": {"status": "needs_review"},
         "Lot coverage": {"proposed": "19.1%", "status": "complies"}, "Lot area": {"status": "complies"},
         "Building height": {"proposed": "35'-0\"", "status": "needs_review", "margin": "at limit"},
         "Stories": {"status": "complies"}})
@@ -160,12 +160,12 @@ try:
     undo(top_floor, roof)
     t = stretch(ids, 0, None, 3, low=True)
     xf(ids, t)
-    check(doc, 6, "6 The left side wall 3 ft out", {"Side yard, West": {"status": "needs_review", "proposed": "9'-0 5/8\"",
+    check(doc, 6, "6 The left side wall 3 ft out", {"Side yard, Southwest": {"status": "needs_review", "proposed": "9'-0 5/8\"",
                                                                          "delta": "up to 2'-11 3/8\" short"}})
     undo(ids, t)
     t = stretch(ids, 0, None, 5, low=True)
     xf(ids, t)
-    check(doc, 6, "6 The left side wall 5 ft out", {"Side yard, West": {"status": "does_not_comply",
+    check(doc, 6, "6 The left side wall 5 ft out", {"Side yard, Southwest": {"status": "does_not_comply",
                                                                          "proposed": "7'-0 5/8\"",
                                                                          "delta": "at least 0'-11 1/4\" short"}})
     undo(ids, t)
@@ -218,7 +218,7 @@ try:
     xs = [p[0] for p in start["floors"][0]["outline"]]
     log["survey_width"] = max(xs) - min(xs)
     g.add_floors(doc, start)
-    check(doc, 13, "13 A survey: to the limits", {"Side yard, West": {"proposed": "10'-0\"", "status": "complies"}})
+    check(doc, 13, "13 A survey: to the limits", {"Side yard, Southwest": {"proposed": "10'-0\"", "status": "complies"}})
     tests[-1]["match"] = tests[-1]["match"] and round(log["survey_width"] * 12) == 39 * 12 + 10   # 39'-10" wide
 
     # 14. other units: a millimeter template, the same start, the same rows as the feet run's starting house

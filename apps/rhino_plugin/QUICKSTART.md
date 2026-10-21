@@ -328,15 +328,16 @@ so the guide and Gordium can't drift apart.
 
 The sample lot is 106 Ithaca Rd as the State tax map draws it (parcel 84.-2-6): 7,033 sf, 75'-10" wide along
 Ithaca Road (its front is a gentle curve) and about 101 ft deep, with a short jog at the back. In Top view the
-street is along the bottom; "back" below means away from the street (up in Top view), and "left" and "right" are as
-you see the lot from the street. The starting house is 35'-11" wide and 37'-4" deep, 35'-0" tall, in three floors
+street is along the bottom (the lot faces south-east); "back" below means away from the street (up in Top view).
+The side yards are named by compass, as on a site plan: the southwest one is on your left as you face the lot from
+the street, the northeast one on your right. The starting house is 35'-11" wide and 37'-4" deep, 35'-0" tall, in three floors
 of 11'-8".
 
 The lot lines are from the tax map, so each one could be up to 2 ft off the unlucky way. The house is drawn to
 comply even then: it keeps at least 2'-0" back from every limit, and its footprint is at most 25% of the smallest
 lot the tax map allows:
 - front yard 27'-0 3/4" (needs 25'-0");
-- the side yard on the left 12'-0 5/8" (needs 10'-0"); on the right, 27'-4 1/4";
+- side yard, southwest 12'-0 5/8" (needs 10'-0"); northeast, 27'-4 1/4";
 - coverage 19.1% (the limit is 25%).
 
 Two rows need review from the start, and that is Gordium being honest about this lot, not a mistake:
@@ -361,8 +362,8 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
    against 25%: **does not comply**, even on the largest lot the tax map allows.
 5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply**, at
    least 4'-0" short. Only the part above 35'-0" turns red.
-6. **Undo, then move the left side wall 3 ft out** (Cmd+Shift+click the face on your left, seen from the street).
-   That side yard 9'-0 5/8": **needs review**, up to 2'-11 3/8" short (it complies if the tax map's line is out
+6. **Undo, then move the southwest wall 3 ft out** (Cmd+Shift+click the face on your left, seen from the street).
+   Side yard, Southwest 9'-0 5/8": **needs review**, up to 2'-11 3/8" short (it complies if the tax map's line is out
    the lucky way). **Move it 5 ft out instead:** 7'-0 5/8": **does not comply**, at least 0'-11 1/4" short (rounded
    down: never more than certain), and that strip turns red.
 7. **Undo.** Everything is back to the starting results.
@@ -372,18 +373,18 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
 8. **A garage: `Box` 12 × 20 × 10 ft on the Default layer**, behind the house. "Objects on the lot not included"
    and Lot coverage need review: coverage counts every building on the lot. **Add to check…** puts it on the
    Building layer, and it is measured.
-9. **Move one floor on its own** (Floor 2, 3 ft to the right). Stories needs review: "floors misaligned".
+9. **Move one floor on its own** (Floor 2, 3 ft to the right, seen from the street). Stories needs review: "floors misaligned".
 10. **The height bonus** (§325-16C: a taller house if every yard is larger): raise the roof 3 ft (38'-0"), move the
     house 3 ft back, and pull each side wall 3 ft in. On this lot Building height **needs review**: the bonus needs
     the rear yard larger too, and which lines are the rear lot line is the open question above.
 11. **Delta in words, true however the lot lines lie:** after test 2 the Front yard row reads "at least 5'-0 5/8" to
-    spare"; in test 6 the side yard reads "up to 2'-11 3/8" short" (3 ft out: it may comply) and "at least
+    spare"; in test 6 the Southwest side yard reads "up to 2'-11 3/8" short" (3 ft out: it may comply) and "at least
     0'-11 1/4" short" (5 ft out: the red strip). The same in the report and the note. With a survey it reads the
     margin itself: after test 2, "+7'-0 5/8" to spare".
 12. **Corner lot:** Edit site… → Corner lot? Yes: two streets. The yards need review (which yard is the front is
     an open question for a corner lot).
-13. **A survey:** with a surveyed lot, a new starting house goes exactly to the limits: 39'-10" × 41'-4", its left
-    side yard at 10'-0", complying.
+13. **A survey:** with a surveyed lot, a new starting house goes exactly to the limits: 39'-10" × 41'-4", its southwest
+    side yard at 10'-0", at limit, complying.
 14. **Other units:** start in a Millimeters, Meters or Inches template. The results are the same: Gordium works
     in feet and converts at Rhino's edge.
 

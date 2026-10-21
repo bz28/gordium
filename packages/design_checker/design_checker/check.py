@@ -578,9 +578,10 @@ def sample_site() -> dict:
     confirm. Points in feet."""
     outline = load(SAMPLE_OUTLINE)
     facts = {**load_facts(SAMPLE / "spreadsheet_design_model_facts.yaml"), "lot_surveyed": False,
-             "street_line": outline["street_line"], "corner_lot": bool(outline.get("corner_lot"))}
+             "street_line": outline["street_line"], "corner_lot": bool(outline.get("corner_lot")),
+             "plan_north_deg": outline["frame"]["rotation_deg"]}     # the plan's turn from true north: compass names
     keep = {"jurisdiction", "zone", "use", "street_line", "corner_lot", "ground_is_flat", "grade_elevation",
-            "lot_surveyed"}
+            "lot_surveyed", "plan_north_deg"}
     return {"address": "106 Ithaca Rd, Ithaca, NY", "lot": [list(p) for p in outline["ring"]],
             "lot_name": "Lot · 106 Ithaca Rd · from the State tax map (parcel " + outline["source"]["print_key"]
                         + "), each line ±2'-0\", not a survey",

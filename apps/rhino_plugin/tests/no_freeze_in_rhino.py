@@ -149,7 +149,7 @@ try:
     g = load_the_bad_way()
     g.gordium_check()                                    # GordiumStart: live mode on, the drawing, the panel
     first_overlay = g.STATE["overlay"]
-    west = lambda m: {i["name"]: i for i in (m.STATE.get("last") or {}).get("items", [])}["Side yard, West"]  # noqa
+    west = lambda m: {i["name"]: i for i in (m.STATE.get("last") or {}).get("items", [])}["Side yard, Southwest"]  # noqa
     before = west(g)["proposed"]
     for name in ("gordium_rhino", "rhino_logic", "gordium_ui"):
         sys.modules.pop(name, None)
