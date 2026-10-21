@@ -118,7 +118,8 @@ def test_the_starting_house_on_the_sample_lot(house):
     assert items["Lot coverage"]["proposed"] == coverage and items["Lot coverage"]["status"] == present.COMPLIES
     said(r"\*\*Rear yard\*\*: which of the short lines at the back count as side lot lines")
     rear, height = items["Rear yard"], items["Building height"]
-    assert rear["status"] == present.REVIEW and "confirm with the zoning office" in rear["reason"]
+    assert rear["status"] == present.REVIEW and "ask the zoning office" in rear["reason"]
+    said(r"depending on which lot\s+lines count as side and which as rear \(it sets the lot depth\)")
     tall_at, = said(r"\*\*Building height\*\*: (\d+'-\d+\") is at the limit and complies")
     assert (height["proposed"], height["status"], height["margin"], height["note"]) == (
         tall_at, present.COMPLIES, "at limit", "assuming flat ground")   # the bonus's open question doesn't matter

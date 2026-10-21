@@ -623,7 +623,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
     assert by["zone"]["text"] == "R-1b · entered by you"
     assert by["lot"]["text"] == "6,570 sf · from the tax map (±2 ft, approximate)"
     assert by["lot"]["actions"] == [("lot", "Use my survey…", True)]
-    assert by["street"]["text"] == "the highlighted line"
+    assert by["street"]["text"] == "Ithaca Rd"                          # the street of the address (P1-4)
     assert by["ground"]["text"] == "flat at the lot level · as drawn"
     assert by["ground"]["tick"] == ("No regrading near the house", False)
     assert [a for a, _, _ in by["ground"]["actions"]] == ["spot", "terrain", "regrade"]
@@ -1528,3 +1528,135 @@ def test_the_module_docs_say_how_a_row_is_decided():
     assert "turns_on" in checking.__doc__ and "nothing it reads open" not in checking.__doc__
     quick = " ".join((checking.REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8").split())
     assert "the row simply complies" in quick and "it still needs review, because only the zoning office" not in quick
+
+
+def test_the_architects_review_fixes_in_the_panel_and_the_plan():
+    """The architect's-eye review of the whole flow (2026-10-21), #15's items: a north arrow turned to true north,
+    a closed document's panel let go, the height limit labelled in elevations only, the empty file's start box
+    honest about the lot, several buildings saying which is measured with a way to pick it, coverage in % even
+    with the footprint unknown, compass names kept when a side couldn't be measured, edge lengths without
+    "(approx.)", "needs input" said once, and docked labels wrapping at the panel's width."""
+    import ast as ast_
+    from design_checker import rhino_logic as logic
+    assert logic.north_vector(0) == (pytest.approx(0), 1)
+    for turn in (0, 90, 306.3799):                      # whatever the plan's turn, the arrow points to true north
+        assert present.compass(*logic.north_vector(turn), turn) == "North", turn
+    x, y = logic.north_vector(306.3799)
+    assert (round(x, 3), round(y, 3)) == (0.805, 0.593)             # up and to the right on 106 Ithaca Rd's plan
+    assert logic.prune_hosts({0: "a", 5: "b", 7: "c"}, [7]) == {0: "a", 7: "c"}
+    assert logic.is_elevation_view(True, 0.0) and not logic.is_elevation_view(True, -1.0)
+    assert not logic.is_elevation_view(False, 0.0)
+    rows = {r["key"]: r for r in logic.box_rows({}, flat=True)}
+    assert rows["lot"]["text"] == logic.NO_LOT and rows["lot"]["text"].startswith("no lot yet: draw it")
+    assert rows["street"]["text"] == "set from the lot, once there is one"
+    drawn = {r["key"]: r for r in logic.box_rows({"lot_area": 7033.8}, flat=True)}
+    assert drawn["lot"]["text"].startswith("7,033 sf") and drawn["street"]["text"] == "the highlighted line"
+    # coverage keeps its unit (%) with the footprint unknown; a side keeps its compass name when both need the same
+    node = ast_.parse("building_area <= 0.25 * lot_area", mode="eval").body
+    numbers = present._numbers(node, {"building_area": None, "lot_area": 7033.8}, {}, "")
+    assert present._display(*numbers)[:2] == ("—", "25%")
+    assert present._side_name("side_yard_smaller", {}, 0, ["Southwest", "Northeast"], True) == "Side yard, Northeast"
+    assert present._side_name("side_yard_larger", {}, 0, ["Southwest", "Northeast"], True) == "Side yard, Southwest"
+    assert present._side_name("side_yard_smaller", {}, 0, ["Southwest", "Northeast"], False) == "Side yard, narrower"
+    # several buildings: the header says which is measured, the waiting rows how to pick it
+    head = present.header({"lot_surveyed": True}, {"waiting_main": True}, {}, {})
+    assert head["main"] == "Main building: not picked yet"
+    assert present.header({"lot_surveyed": True}, {}, {}, {})["main"] is None
+    assert present.header({"lot_surveyed": True, "main_building": "x"}, {"main_name": "Garage"}, {}, {})["main"] == \
+        "Main building: Garage"
+    assert logic.building_name(logic.MASSING, "Floor 3", True) == "the starting house"   # never one of its floors
+    assert logic.building_name("Building", "Garage", False) == "Garage"
+    assert logic.building_name("Building", "", False) == "a solid on Building"
+    assert logic.shorten("short", 20) == "short"
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert '"main": pick_main_building' in rhino and 'button("Main building…", a["main"])' in ui
+    assert ')), e["length"],' in rhino and '" (approx.)"' not in rhino        # the length alone, no "(approx.)"
+    assert '"needs input"' not in ui
+    assert "return label(text, color, bold, size, True, (WRAP_AT or PANEL_WIDTH - 48) if DOCKED" in ui
+    assert "WRAP_AT = _wrap_width(parts) if DOCKED" in ui
+    assert "d.DrawBrepWires(o.envelope" not in rhino                # its outline only: no isocurve bands
+
+
+def test_review_round_1_of_the_architects_fixes():
+    """arch-fixes review round 1: (1) a side yard is named by compass only when the measuring knows which lines are
+    sides (no corner lot, every reading the same pair); (2) citation links keep what tells them apart; (3) a failed
+    check clears every overlay field; (4) "Main building" comes from the checker's own stop; (5) the pick hint
+    matches that stop exactly; (6) "no lot yet" only without a lot; (7) the height limit qualified without a grade
+    plane."""
+    import ast as ast_
+    from design_checker import rhino_logic as logic, scenarios
+    from design_checker.check import check_site, side_lines
+    from model_measurement.stops import stop
+    sc = scenarios.load(scenarios.paths()[0])
+    site, facts, extras = scenarios.site(sc)
+    for corner in (True, None):
+        f = dict(facts, corner_lot=corner)
+        assert side_lines(site, f) is None, corner
+        names = sorted(i["name"] for i in check_site(site, f, extras=extras)["view"]["items"]
+                       if i["name"].startswith("Side yard"))
+        assert names == ["Side yard, narrower", "Side yard, wider"], (corner, names)
+    from model_measurement import measure as measuring
+    rect = [(0, 0), (50, 0), (50, 100), (0, 100)]           # edges: 0 front, 1 east, 2 back, 3 west
+    plain = {**site, "lot": {"id": "lot", "edges": [{"points": [list(rect[i]), list(rect[(i + 1) % 4])]}
+                                                    for i in range(4)]}}
+    flat = dict(facts, corner_lot=False, street_line=[[[0, 0], [50, 0]]], plan_north_deg=0)
+    assert side_lines(plain, flat) == ["East", "West"]
+    real = measuring.Lot.readings
+    try:                                                     # two readings that name the sides differently: none
+        measuring.Lot.readings = lambda self: [("a", [3], [1], [2]), ("b", [3], [2], [1])]
+        assert side_lines(plain, flat) is None
+    finally:
+        measuring.Lot.readings = real
+    # (2) every scenario item's links: distinct words for distinct citations, at both panel widths
+    for path in scenarios.paths():
+        s_, f_, e_ = scenarios.site(scenarios.load(path))
+        for item in check_site(s_, f_, extras=e_)["view"]["items"]:
+            cites = list(dict.fromkeys(c["citation"] for c in item["detail"].get("cited") or []))
+            for room in (352, 192):
+                texts = [logic.link_text(c, int(room / 7.5)) for c in cites]
+                assert len(set(texts)) == len(texts), (item["name"], room, texts)
+                assert all(len(t) <= int(room / 7.5) for t in texts), texts
+    assert logic.link_text("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16", 40).endswith("note 16")
+    # (3) every overlay field a check sets is reset by _clear
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    tree = ast_.parse(src)
+    fn = {n.name: n for n in tree.body if isinstance(n, ast_.FunctionDef)}
+
+    def assigned(node):
+        return {t.attr for a in ast_.walk(node) if isinstance(a, ast_.Assign)
+                for t in ([*a.targets[0].elts] if isinstance(a.targets[0], ast_.Tuple) else [a.targets[0]])
+                if isinstance(t, ast_.Attribute) and isinstance(t.value, ast_.Name) and t.value.id == "o"}
+    set_by_check = assigned(fn["run_check"]) | assigned(fn["_draw_plan"])
+    cleared = assigned(fn["_clear"])
+    assert {"envelope_lines", "height_limit", "north", "unmeasured"} <= cleared
+    assert not (set_by_check - cleared - {"doc", "message", "toast"}), set_by_check - cleared
+    # (4) the header follows the checker: a detached second building asks for a pick; two solids stacked on one
+    # outline are one building to the measuring, so no pick is asked and none is said
+    import copy
+    house = site["buildings"][0]
+
+    def moved(b, dx=0.0, dz=0.0, bid="b2"):
+        b = copy.deepcopy(b)
+        b["id"] = bid
+        for face in b["faces"]:
+            face["points"] = [[x + dx, y, z + dz] for x, y, z in face["points"]]
+            face["holes"] = [[[x + dx, y, z + dz] for x, y, z in h] for h in face.get("holes") or []]
+        return b
+    zs = [p_[2] for face in house["faces"] for p_ in face["points"]]
+    xs = [p_[0] for face in house["faces"] for p_ in face["points"]]
+    one_more = {"detached": moved(house, dx=-(max(xs) - min(xs)) - 3), "stacked": moved(house, dz=max(zs) - min(zs))}
+    got = {}
+    for name, b2 in one_more.items():
+        v = check_site({**site, "buildings": [house, b2]}, dict(facts, corner_lot=False), extras=extras)["view"]
+        got[name] = (v["header"]["main"], any(present.PICK_MAIN_WHY in (i.get("reason") or "") for i in v["items"]))
+    assert got == {"detached": ("Main building: not picked yet", True), "stacked": (None, False)}, got
+    # (5) the hint only for the exact stop
+    assert present.PICK_MAIN_WHY == stop("no_main_building") and present.PICK_MAIN_WHY not in stop("too_many_roofs")
+    # (6) a lot whose area couldn't be worked out is still a lot
+    rows = {r["key"]: r for r in logic.box_rows({"lot_area": None, "has_lot": True}, flat=True)}
+    assert rows["lot"]["text"] != logic.NO_LOT and rows["lot"]["text"].startswith("area not known")
+    # (7) the height limit, qualified without the checker's grade plane
+    assert logic.height_limit_text(35.0, "35'-0\"") == "Height limit 35'-0\""
+    assert "no grade plane yet" in logic.height_limit_text(None, "35'-0\"")
+    assert "logic.height_limit_text(" in src

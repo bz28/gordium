@@ -802,6 +802,7 @@ def _eaves(building: dict, sloped: list[list[dict]], candidate: dict) -> dict:
 # steps or a deck. §325-3's STORY has no least height, so anywhere else (raised, on a roof, below the ground) a
 # part of any height might be a story.
 STORY_ROOM = 7.0            # ft
+ASSUMED_MAIN = "the main building assumed: the starting house (change it in Edit site)"
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
 
@@ -974,7 +975,8 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     architect's statement for the whole building, and only if it is at least the floors counted on any part and
     the solids stacked in any plain part (each might be a story); else,
     or with none typed, needs review. A part below the ground is the §325-3 basement question: needs review,
-    whatever was typed. Parts one over another in plan with a real gap between them (a floor deleted, a block
+    whatever was typed. A plain part starting above the ground (beside the roof or over it) may be another
+    story: needs review, whatever its plan relation. Parts one over another in plan with a real gap between them (a floor deleted, a block
     lifted, a room floating over the roof) are a question: a floor not drawn, or a space open to below. With only floor blocks, the most
     counted on any part, the count typed a reading beside it
     (a question if they disagree). Each reason says what is drawn."""
@@ -985,6 +987,11 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     low = [b for b in plain if _extent(b)[0] is not None and _extent(b)[0] < grade - TOL]
     if low:
         return _missing("stories", stop("basement_part", what=", ".join(b["id"] for b in low)))
+    # a plain part starting above the ground (beside the roof or over it, touching in plan or not) may be another
+    # story: no seam in plan decides it, so the count typed stands only when every plain part starts at the ground
+    raised = [b for b in plain if _extent(b)[0] is not None and _extent(b)[0] > grade + TOL]
+    if raised:
+        return _missing("stories", stop("part_raised", what=", ".join(b["id"] for b in raised)))
     floored = [b for b in parts if b not in plain]
     for kind, lower, upper in _apart_in_one_plan(parts):    # over a gap (a floor not drawn?), or partly inside
         if kind == "gap":
@@ -1280,6 +1287,12 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
         _SKY.clear()
         _PLANES.clear()
         _PLAN_OF.clear()
+    assumed = out.pop("_assumed_main", None)
+    if assumed:                         # every measurement made from the starting house says it was assumed
+        for name in MEASURES:
+            r = out[name]
+            if set(r.get("objects") or []) & set(assumed) and (r.get("value") is not None or r.get("readings")):
+                out[name] = dict(r, how=_both(r.get("how") or "", ASSUMED_MAIN))
     if site.get("lot") and site["lot"].get("edges"):
         # the decision line: how the lot lines read were cleaned from the outline drawn (its own accuracy)
         note = Lot(site, facts).outline_note
@@ -1331,6 +1344,14 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
     main = _pick_main(buildings, facts)      # the one main-building pick
+    if main is None and len(buildings) > 1 and not facts.get("main_building"):
+        # no main building picked: if exactly one building is Gordium's own starting house (all its blocks the
+        # floor blocks GordiumStart drew), it is the main one, said as assumed; every other is then read as a
+        # possible accessory building (the candidates below), so this never gives a pass the pick wouldn't
+        starting = [b for b in buildings if b.get("parts") and all(b["floor"])]
+        if len(starting) == 1:
+            main = starting[0]
+            out["_assumed_main"] = list(main["parts"])
     why_main = None if main else stop("no_main_building")
     others = [b for b in buildings if b is not main]
     # One decision for every building measurement: which building (why_which), over which candidate buildings
@@ -1434,11 +1455,22 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                for i, s in place.items() if s == "partly"}
     crosses = bool(crossed)
     group = [main, *parts_of] if main is not None else []
-    why_main_off = stop("outside_lot") if any(place.get(b["id"]) == "off" for b in group) else None
-    why_acc_off = stop("outside_lot") if any(place.get(b["id"]) == "off" for b in detached) else None
-    why_inside = why_building or (stop("outside_lot") if "off" in place.values() else None)    # coverage
+    def off_named(bs):              # which buildings are wholly outside the lot, by name (term-index's words)
+        off = [b for b in bs if place.get(b["id"]) == "off"]
+        main_off = any(b is main for b in off)
+        n = len(off) - main_off
+        return " and ".join((["the main building" if len(buildings) > 1 else "the building"] if main_off else []) +
+                            ([f"{n} other building{'s' if n > 1 else ''}" if main_off or main is not None else
+                              f"{n} building{'s' if n > 1 else ''}"] if n else []))
+    why_main_off = stop("outside_lot", what=off_named(group)) if any(place.get(b["id"]) == "off" for b in group) else None
+    why_acc_off = (stop("outside_lot", what=off_named(detached))
+                   if any(place.get(b["id"]) == "off" for b in detached) else None)
+    why_inside = why_building or (stop("outside_lot", what=off_named(buildings)) if "off" in place.values()
+                                  else None)    # coverage
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
+        if why_inside and outside and not why_building:     # which ones: the panel shows them
+            out["building_area"]["objects"] = [i for b in outside for i in b.get("parts") or [b["id"]]]
     else:
         out["building_area"] = _coverage(buildings, views, facts, main)
     if crosses:                         # coverage, the height and the accessory count: whatever else follows
