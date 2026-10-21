@@ -445,7 +445,8 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
 STORY_ROOM = 7.0            # ft
 ROOM_AREA = 70.0            # sf: the least floor area of a habitable room (NYS Residential Code R304.1)
 # With no main building picked and exactly one starting house, it is the main building, assumed (a marker on
-# every measurement made from it: "main_assumed"); every other building is also read as if it were the main one.
+# every measurement made from it: "main_assumed"); every other building that could be a principal one (enclosed,
+# at least STORY_ROOM tall, at least ROOM_AREA: R305.1, R304.1) is also read as if it were the main one.
 MAIN_IF = "if {} were the main building"
 MAIN_QUESTION = ("which building is the main building (the starting house is assumed, not picked) is a question "
                  "(main_building)")
@@ -891,7 +892,7 @@ def _floating(buildings: list[dict], points: list) -> str | None:
     clear at every corner; touching if clear at one; between, it can't be told: ground_unclear (it asks). Read from
     the points themselves, so a point drifting off a wall never hides it (stress F15)."""
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
-    corners = [c[:2] for b in buildings if b.get("faces") for c in _projection(b).convex_hull.exterior.coords]
+    corners = [p[:2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]    # never empty
     if not zs or not points or not corners:
         return None
     pts = np.array([p[:3] for p in points], dtype=float)
@@ -971,8 +972,9 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
 def pick_main(buildings: list[dict], facts: dict) -> tuple:
     """THE main-building pick, (main, assumed), for every measurement (and the grade plane): the only building;
     else the one picked (main_building names one of its blocks); else, with none picked, Gordium's own starting
-    house if exactly one building is all floor blocks GordiumStart drew (assumed: every other building is then
-    also read as if it were the main one, _assemblies); else none. `buildings`: as _stacks joins them."""
+    house if exactly one building is all floor blocks GordiumStart drew (assumed: every other building that could
+    be a principal one, _could_be_principal, is then also read as if it were the main one, _assemblies); else
+    none. `buildings`: as _stacks joins them."""
     if len(buildings) == 1:
         return buildings[0], False
     picked = next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None)
@@ -1000,18 +1002,20 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
     why_building = (stop("no_building") if not buildings else
                     "; ".join([p for b in buildings for p in b.get("problems") or []]
-                              + [stop("same_id", id=i) for i in same]) or None)
+                              + [stop("same_id", id=i) for i in same]
+                              + [stop("empty_building") for b in buildings[:1]
+                                 if any(not b_.get("faces") and not b_.get("problems") for b_ in buildings)]) or None)
     # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
     # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
     # cut at the ground blamed on overhangs.
     why_spots = None
-    if facts.get("grade_points"):       # spot grades (or terrain sampled at the walls): the grade plane from them
-        grade, why_spots = grade_plane(buildings, facts)
+    if facts.get("grade_points") and not why_building:     # spot grades (or terrain sampled at the walls): the
+        grade, why_spots = grade_plane(buildings, facts)        # grade plane, once the buildings can be measured
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
     ground_problem = _ground_against(buildings, grade) if grade is not None else None
-    if ground_problem is None and facts.get("grade_points"):
+    if ground_problem is None and facts.get("grade_points") and not why_building:
         # whether the buildings reach the ground never depends on the spot grades sitting at their walls: the
         # ground under their footprint (the spot grades' plane), against their own lowest point (stress F15)
         ground_problem = _floating(buildings, facts["grade_points"])
@@ -1030,7 +1034,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
     main, assumed = pick_main(buildings, facts)
-    if assumed:                         # every other building is also read as if it were the main one
+    if assumed:                         # every other possible principal building is also read as the main one
         out["_assumed_main"] = list(main["parts"])
     why_main = None if main else stop("no_main_building")
     others = [b for b in buildings if b is not main]
