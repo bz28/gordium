@@ -1048,7 +1048,7 @@ def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_docume
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
     assert 'labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))' in draw
-    assert "if plan and logic.yard_label_shown(labels, status):" in draw and "    if not boxed:\n        return" in draw
+    assert "if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):" in draw and "    if not boxed:\n        return" in draw
     assert "if plan and labels else []" in draw                                   # lot-edge labels: only when on
     assert "d.Draw2dLine(System.Drawing.PointF(a.X, a.Y)" in draw.split("yard_label_shown")[0]   # lines regardless
     tick = rhino[rhino.index("def set_labels("):rhino.index("def set_envelope(")]
@@ -1075,7 +1075,7 @@ def test_with_labels_off_a_failing_yards_shortfall_still_shows():
     labels = [y["label"] for y in got["yards"]]
     assert "✕ Rear yard 21'-2\", needs 22'-6\"" in labels and "✓ Side yard, West 12'-0\"" in labels
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "if plan and logic.yard_label_shown(labels, status):" in rhino
+    assert "if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):" in rhino
 
 
 def test_the_code_edition_line_is_in_the_legend_and_the_report_not_the_panel(facts, tmp_path):
@@ -1731,7 +1731,7 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
     assert '    lot_px = _screen_size(e.Viewport, getattr(o, "lot_outline", None))' in draw
-    assert "if plan and logic.yard_label_shown(labels, status):" in draw
+    assert "if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):" in draw
     assert ("        if not logic.label_fits(text, 11, lot_px, math.hypot(ends[1].X - ends[0].X, ends[1].Y - ends[0].Y)):\n"
             "            continue\n        ui.label_at(") in draw
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
