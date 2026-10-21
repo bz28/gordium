@@ -653,3 +653,36 @@ def test_two_building_objects_with_one_id_are_never_measured_as_one():
         assert m[name]["value"] is None and "share the id house" in (m[name]["reason"] or ""), name
     ok = measure(site(RECT, box(10, 25, 35, 65, 0, 10, id="f1"), box(10, 25, 35, 65, 10, 20, id="f2")), FACTS)
     assert "share the id" not in str(ok)
+
+
+def _planar_roof(n):
+    faces = []
+    for i in range(n):
+        for j in range(n):
+            x0, x1, y0, y1 = i * 0.5, (i + 1) * 0.5, j * 0.5, (j + 1) * 0.5
+            faces += [{"points": [[x0, y0, 30 + 0.5 * x0], [x1, y0, 30 + 0.5 * x1], [x1, y1, 30 + 0.5 * x1]]},
+                      {"points": [[x0, y0, 30 + 0.5 * x0], [x1, y1, 30 + 0.5 * x1], [x0, y1, 30 + 0.5 * x0]]}]
+    return faces
+
+
+def test_plane_grouping_grows_about_in_step_with_the_faces():
+    """Review round 3 of the mesh fix: refitting every corner at every join made grouping quadratic (a 28,800-
+    triangle roof took 55 s). A joined plane is now one 3 x 3 fit from the groups' moments: four times the faces
+    take under 10 times as long (quadratic: about 16), measured in the same run, and the roof is one plane."""
+    import time
+    from model_measurement.measure import _planes
+
+    def clock(n):
+        faces = _planar_roof(n)
+        start = time.perf_counter()
+        groups = _planes(faces)
+        took = time.perf_counter() - start
+        assert len(groups) == 1
+        return took
+
+    clock(20)
+    small = clock(40)
+    big = clock(80)
+    small = (small + clock(40)) / 2
+    assert big < 10 * small, f"4x the faces took {big / small:.1f}x as long"
+    assert big < 60
