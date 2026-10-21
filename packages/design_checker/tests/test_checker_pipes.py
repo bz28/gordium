@@ -170,8 +170,28 @@ def test_the_plugin_releases_each_kind_of_handle():
     src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     release = src.split("def _release(", 1)[1].split("\n\n\n", 1)[0]
     kinds = set(logic.HANDLES) - {"worker_lines"}             # a queue: nothing to release
-    if '"panel_parts"' not in src.split("def _release(", 1)[0]:
-        kinds.discard("panel_parts")                          # #13 has only the floating "panel"
-    for key in kinds:
+    for key in kinds:                                         # every handle any copy keeps, this one's or not
         assert 'key == "%s"' % key in release, key
     assert "_unhook()" in release and "documents(False)" in release and "_stop_worker()" in release
+
+
+
+def test_releasing_a_later_copys_panel_closes_its_form():
+    """Round 3 on the freeze fix: rhino-ui and demo copies keep their panel as STATE["panel_parts"] = {"form": ...};
+    updating from them must close that form, or its buttons keep calling the old copy."""
+    import ast
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "_release")
+    ns = {}
+    exec(compile(ast.Module([fn], []), "gordium_rhino", "exec"), ns)
+
+    class Form:
+        closed = False
+
+        def Close(self):
+            self.closed = True
+    form = Form()
+    ns["_release"]("panel_parts", {"form": form})
+    assert form.closed
+    ns["_release"]("panel_parts", None)                     # nothing there: nothing to do, never an error
+    ns["_release"]("panel_parts", {})

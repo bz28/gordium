@@ -1969,8 +1969,10 @@ def _release(key, value):
         value.Enabled = False
     elif key == "panel":                       # an older copy's panel (a form)
         value.Close()
-    elif key == "panel_parts":                 # this PR's panel: its parts, the form among them
-        value["form"].Close()
+    elif key == "panel_parts":                 # this PR's (or a later copy's) floating panel ({"form": ...}): updating from it
+        form = (value or {}).get("form")
+        if form is not None:
+            form.Close()
     elif key == "toast_timer":
         value.Stop()
     elif key == "worker":
