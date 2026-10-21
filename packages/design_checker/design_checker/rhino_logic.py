@@ -179,6 +179,7 @@ def after_lot_pick(facts, picked_lot):
     if picked_lot and picked_lot != out.get("lot_id"):
         out["lot_id"] = picked_lot
         out.pop("street_line", None)
+        out.pop("plan_north_deg", None)      # the looked-up lot's turn belonged to it
     return out
 
 
@@ -1048,7 +1049,7 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
     w = answer.get("writes") or {}
     for old in [facts.get("lot_id")] + list(table.ground_points()):
         session.hold(old)
-    for k in ("lot_id", "street_line"):
+    for k in ("lot_id", "street_line", "plan_north_deg"):
         facts.pop(k, None)
     saved_ui.update(from_sample=False, replaceable_lot=None, lookup_frame=None, ground_kind="flat", lookup_spots=[])
     guide = None
@@ -1058,6 +1059,8 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         facts["lot_id"] = lot_id
         if w.get("street_line"):
             facts["street_line"] = w["street_line"]
+        if (w.get("frame") or {}).get("rotation_deg") is not None:   # the plan is turned: name sides by true north
+            facts["plan_north_deg"] = w["frame"]["rotation_deg"]
         spots = [table.add_spot(p) for p in w.get("spots") or []]
         session.add(spots)
         saved_ui.update(replaceable_lot=lot_id, lookup_frame=w.get("frame"), lookup_spots=spots)
