@@ -4,9 +4,10 @@
 **For:** reviewers, engineers, Ben.\
 **Kept current by:** never changed (a dated record); a later run is added beside it.
 
-`apps/rhino_plugin/tests/context_in_rhino.py` at b908e99 (with its own-axes measurement of turned text), with the
-recorded answers for 106 Ithaca Rd (no live calls): **11 of 11 claims true** (`context_results.json`). This run
-replaces the first one (9 of 9, before the sources note was fixed).
+The test as run: this commit's `apps/rhino_plugin/tests/context_in_rhino.py` (b8322b6, with its own-axes measurement
+of turned text), with the plugin at b908e99 and the recorded answers for 106 Ithaca Rd (no live calls): **11 of 11
+claims true** (`context_results.json`). The first run (9 of 9, before the sources note was fixed) is in git history
+at 0e88250.
 
 | Claim | Result |
 |---|---|
