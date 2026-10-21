@@ -434,13 +434,16 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
 
-def _with_others(main: dict, others: list[dict], main_with: dict | None = None) -> dict:
-    """The main building's height read with the other solids: alone, and with every other solid as part of it
-    (a wing or tower drawn as its own solid is part of the building; an accessory building may have its own
-    limit, §325-25). `main_with` is the main building's height from the grade plane of the whole building (when
-    the grade comes from spot grades, the walls of every solid; `others` are measured from it too). Every
-    combination of each roof's own readings is listed. A question is named only if two readings that differ in
-    that answer alone have different values: each solid's roof question on its own, and the accessory question."""
+def _with_others(main: dict, others: list[dict], assemblies, main_with: dict | None = None) -> dict:
+    """The main building's height read over the candidate buildings (_assemblies, the same list the stories are
+    read over: alone, and with every other solid as part of it; a wing or tower drawn as its own solid is part of
+    the building, an accessory building may have its own limit, §325-25), labelled with the assemblies' own words.
+    `main` and `others` are the height records of the first assembly's building and of the others in the second.
+    `main_with` is the main building's height from the grade plane of the whole building (when the grade comes from
+    spot grades, the walls of every solid; `others` are measured from it too). Every combination of each roof's own
+    readings is listed. A question is named only if two readings that differ in that answer alone have different
+    values: each solid's roof question on its own, and the accessory question."""
+    (alone_words, _), (with_words, _) = assemblies[0], assemblies[1]
     unread = [o for o in others if o["value"] is None and not o["readings"]]
     if unread:                          # never dropped: it could be the tallest part
         return _missing("building_height", stop("other_height", reason=unread[0]["reason"]))
@@ -471,7 +474,7 @@ def _with_others(main: dict, others: list[dict], main_with: dict | None = None) 
         questions += roof_questions(o) if matters(2 + j) else []
     readings = []
     for choice, v in combos:
-        words = "the main building only" if choice[1] == "alone" else "with every other solid as part of it" + "".join(
+        words = alone_words if choice[1] == "alone" else with_words + "".join(
             f"; {n}: {lbl}" for n, lbl in zip(names, choice[2:]) if lbl)
         readings.append((_both(choice[0], words), v, {}))
     return _decide("building_height", readings, main["how"], main["objects"] + names,
@@ -776,7 +779,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                 if facts.get("grade_points") else (grade, None))
         out["building_height"] = (_missing("building_height", stop("grade_with_others")) if why_with else
                                   _with_others(out["building_height"], [_height(b, with_grade) for b in others],
-                                               _height(main, with_grade)))
+                                               _assemblies(main, others), _height(main, with_grade)))
     if facts.get("grade_is") == "existing":     # the grade plane is finished ground: existing ground can't decide
         for name in ("building_height", "stories"):
             if out[name].get("value") is None and not out[name].get("readings"):

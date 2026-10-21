@@ -367,8 +367,9 @@ def _unused_number_problems(rule: dict, sources: list[dict], ctx: "Context") -> 
     law (a city code chapter: sources.yaml layout ecode360) and numbered notes ("(16) ..."). Left out: chart
     rows (a row lists every district's number; the rule uses its own column's) and cited cells. Not yet for
     rules the drafting scripts wrote (drafted_by "rule_drafting/..."): their quotes can't declare not_limits yet;
-    the drafting job turns it on for them."""
-    if str(rule.get("drafted_by", "")).startswith("rule_drafting/"):
+    the drafting job turns it on for them. Not for a flag: it always needs review, and the numbers in its quote
+    are the limits it asks a person to apply by hand, shown to them with the quote."""
+    if str(rule.get("drafted_by", "")).startswith("rule_drafting/") or rule.get("kind") == "flag":
         return []
     used = [0.0]
     for key in ("applies_when", "check"):
