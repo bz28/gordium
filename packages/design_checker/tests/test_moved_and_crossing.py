@@ -225,3 +225,17 @@ def test_the_five_sided_lots_short_back_line_is_also_read_as_part_of_a_side_line
     depth = res["measurements"]["lot_depth"]
     assert sorted({round(r["value"], 2) for r in depth["readings"]}) == [110.0, 126.77]
     assert status(res, "R-1b.rear_yard") != present.COMPLIES
+
+
+def test_the_eaves_rows_show_their_base_requirement_while_the_height_waits_for_finished_grade(house):
+    """Seen on a demo: the sample starting house with the ground as it is (No regrading not ticked, grade
+    existing). The eaves rule's limits grow with the §325-16C height bonus, and the height can't be measured, so
+    Required showed '—'. It shows the base requirement (front 25 − 2 = 23'-0"), says it may be more, and never
+    complies."""
+    got, facts = house
+    assert facts["grade_is"] == "existing"
+    eaves = [i for n, i in _check(got["floors"], facts).items() if n.startswith("Eaves into")]
+    assert eaves and all(i["status"] != present.COMPLIES for i in eaves)
+    front = next(i for i in eaves if i["name"] == "Eaves into front yard")
+    assert front["required"] == "≥ 23'-0\""
+    assert "more if the §325-16C height bonus applies; the height needs finished grade" in front["reason"]
