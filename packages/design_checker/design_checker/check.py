@@ -534,18 +534,25 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
 SAMPLE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 
 
+SAMPLE_OUTLINE = SAMPLE / "lot_outline_tax_map.yaml"
+
+
 def sample_site() -> dict:
-    """The sample project GordiumStart offers: 106 Ithaca Rd's lot as the architects' spreadsheet gives it,
-    73'-0" x 90'-0" (their model of it; not a survey, so lot size and coverage wait for one), and its facts,
-    prefilled for the architect to confirm. Points in feet."""
-    facts = {**load_facts(SAMPLE / "spreadsheet_design_model_facts.yaml"), "lot_surveyed": False}
-    site = read_site(SAMPLE / "spreadsheet_design_model.3dm", facts)
-    lot = site.get("lot") or {}
-    points = [e["points"][0] for e in lot.get("edges") or []]
+    """The sample project GordiumStart offers: 106 Ithaca Rd's real lot, as the State tax map draws it (parcel
+    84.-2-6), placed exactly as the address lookup places it (lot_outline_tax_map.yaml: its source, the frame, made
+    by code from a recorded lookup), so the sample and a looked-up 106 are the same drawing and the neighbourhood
+    map lines up around it. A tax-map outline: each lot line may be 2'-0" off, so the lot size and every yard are
+    checked under every reading of where the lines are. Its facts (zone, use) prefilled for the architect to
+    confirm. Points in feet."""
+    outline = load(SAMPLE_OUTLINE)
+    facts = {**load_facts(SAMPLE / "spreadsheet_design_model_facts.yaml"), "lot_surveyed": False,
+             "street_line": outline["street_line"], "corner_lot": bool(outline.get("corner_lot"))}
     keep = {"jurisdiction", "zone", "use", "street_line", "corner_lot", "ground_is_flat", "grade_elevation",
             "lot_surveyed"}
-    return {"address": "106 Ithaca Rd, Ithaca, NY", "lot": points,
-            "lot_name": "Lot · 106 Ithaca Rd · 73'-0\" x 90'-0\" from the architects' spreadsheet, not a survey",
+    return {"address": "106 Ithaca Rd, Ithaca, NY", "lot": [list(p) for p in outline["ring"]],
+            "lot_name": "Lot · 106 Ithaca Rd · from the State tax map (parcel " + outline["source"]["print_key"]
+                        + "), each line ±2'-0\", not a survey",
+            "frame": outline["frame"],
             "facts": {k: v for k, v in facts.items() if k in keep}}
 
 
