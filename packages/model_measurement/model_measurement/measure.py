@@ -1001,6 +1001,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                                _height(main, with_grade, facts)))
     if facts.get("grade_is") == "existing":     # the grade plane is finished ground: existing ground can't decide
         for name in ("building_height", "stories"):
+            if out[name].get("value") is None and not out[name].get("readings"):
+                continue                       # nothing measured: its own reason (no ground, ...) says why
             as_is = out[name].get("value")     # what the ground as it is gives: shown, never decides (no reading)
             as_is_readings = sorted({r["value"] for r in out[name].get("readings") or [] if r.get("value") is not None})
             out[name] = _missing(name, stop("existing_grade"))

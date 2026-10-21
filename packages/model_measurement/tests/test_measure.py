@@ -901,3 +901,16 @@ def test_a_fourth_floor_block_sharing_an_id_never_lets_the_stories_comply():
     read_from_buildings = [k for k in m if k not in lot_only]
     assert read_from_buildings and all(m[k]["value"] is None and "share the id" in (m[k]["reason"] or "")
                                        for k in read_from_buildings), {k: m[k]["value"] for k in read_from_buildings}
+
+
+def test_on_existing_grade_with_no_ground_the_height_says_why_it_isnt_measured():
+    """Found by PR #18: with the ground as it is (grade_is existing) and no ground level given, the height's
+    reason began "measured from existing grade", though nothing was measured. The reason comes from what was
+    measured: no ground level, so not measured."""
+    m = measure(site(), {**FACTS, "grade_is": "existing", "grade_elevation": None})
+    h = m["building_height"]
+    assert h["value"] is None and "measured from existing grade" not in h["reason"]
+    assert "ground level isn't given" in h["reason"] and "measured_as_is" not in h
+    measured = measure(site(), {**FACTS, "grade_is": "existing"})["building_height"]      # measured: said so
+    assert measured["value"] is None and "measured from existing grade" in measured["reason"]
+    assert measured["measured_as_is"] == 30.0

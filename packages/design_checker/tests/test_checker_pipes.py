@@ -88,7 +88,7 @@ def test_the_plugin_never_touches_a_pipe_or_a_rhino_event_directly():
     src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert not re.search(r"\.std(in|out)\.(write|read|readline|flush)|for line in .*stdout", src)
     assert not re.search(r"Rhino\.[\w.]+ [+-]= ", src)
-    assert "logic.sweep(LEFTOVERS, STATE)" in src and json.dumps("gordium_leftovers") in src
+    assert "logic.sweep(LEFTOVERS, STATE, _release)" in src and json.dumps("gordium_leftovers") in src
 
 
 def test_the_sweep_forgets_the_plugins_handles_but_keeps_what_the_architect_asked_for():
@@ -124,7 +124,7 @@ def test_the_plugin_keeps_its_state_true_across_a_reload():
     the sweep is given STATE; live mode comes back after the module loads; the drawing is registered every time
     it is turned on; every checker restart goes through _stop_worker."""
     src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "\nlogic.sweep(LEFTOVERS, STATE)\n" in src
+    assert "\nlogic.sweep(LEFTOVERS, STATE, _release)\nif STATE.get(\"live\"):" in src   # last: after _release
     assert src.rstrip().endswith('if STATE.get("live"):                        # live mode was on before this copy '
                                  'loaded: its hooks back on\n    live(True)')
     overlay = src.split("def overlay(", 1)[1].split("\ndef ", 1)[0]
@@ -134,3 +134,32 @@ def test_the_plugin_keeps_its_state_true_across_a_reload():
     worker = src.split("def _worker(", 1)[1].split("\ndef ", 1)[0]
     assert "_stop_worker()" in worker and ".terminate()" not in worker
     assert 'LEFTOVERS["worker"] = _stop_worker' in worker
+
+
+def test_the_sweep_releases_every_handle_before_forgetting_it():
+    """Review round 2: a copy from before LEFTOVERS existed registered nothing there; forgetting its STATE handles
+    without releasing them left its handlers, drawing, panel and checker attached for good. Every handle is
+    released (while STATE still holds it) before it is forgotten; one release failing doesn't stop the others."""
+    state = {k: "handle " + k for k in logic.HANDLES}
+    state["live"] = True
+    seen = []
+
+    def release(key, value):
+        seen.append((key, value, key in state))           # still in STATE when released
+        if key == "overlay":
+            raise RuntimeError("already gone")
+    assert logic.sweep({}, state, release) == 0               # no LEFTOVERS at all (the old copy registered none)
+    assert sorted(k for k, _, _ in seen) == sorted(logic.HANDLES)
+    assert all(v == "handle " + k and held for k, v, held in seen)
+    assert state == {"live": True}
+
+
+def test_the_plugin_releases_each_kind_of_handle():
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    release = src.split("def _release(", 1)[1].split("\n\n\n", 1)[0]
+    kinds = set(logic.HANDLES) - {"worker_lines"}             # a queue: nothing to release
+    if '"panel_parts"' not in src.split("def _release(", 1)[0]:
+        kinds.discard("panel_parts")                          # #13 has only the floating "panel"
+    for key in kinds:
+        assert 'key == "%s"' % key in release, key
+    assert "_unhook()" in release and "documents(False)" in release and "_stop_worker()" in release

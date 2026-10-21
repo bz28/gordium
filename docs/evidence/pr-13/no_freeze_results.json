@@ -23,7 +23,7 @@
    "ok": true,
    "detail": {
     "error": "the Gordium checker gave no answer in 3 s, so it was restarted (see gordium_worker.log in the temp folder)",
-    "seconds": 3.01
+    "seconds": 3.02
    }
   },
   "2 the silent checker was stopped": {
@@ -34,7 +34,7 @@
    "ok": true,
    "detail": {
     "answer": "late",
-    "seconds": 1.52
+    "seconds": 1.53
    }
   },
   "4 the real checker answers afterwards": {
@@ -85,8 +85,40 @@
    "ok": true,
    "detail": {
     "error": "lot facts missing: street_line, grade_elevation (run GordiumCheck)",
-    "at": 1792561165.320343
+    "at": 1792563689.757681
    }
+  },
+  "7 the old copy is the pre-LEFTOVERS one": {
+   "ok": true,
+   "detail": "/var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_no_freeze/old_9303d10/apps/rhino_plugin/gordium_rhino.py"
+  },
+  "7 after the update: one copy's handlers attached (baseline + 1)": {
+   "ok": true,
+   "detail": {
+    "baseline": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    },
+    "old_on": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    },
+    "after": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    }
+   }
+  },
+  "7 the old copy's drawing is off": {
+   "ok": true,
+   "detail": null
+  },
+  "7 the old copy's checker is stopped": {
+   "ok": true,
+   "detail": null
   }
  },
  "baseline": {
@@ -115,6 +147,16 @@
   "EndOpenDocument": 1
  },
  "buildings": 0,
+ "old_on": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "after_update": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
  "ok": true,
  "left_attached": {
   "Idle": 0,
