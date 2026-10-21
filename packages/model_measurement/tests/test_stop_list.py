@@ -225,7 +225,7 @@ CASES = {
     "sloped_ground": _plain(ground_is_flat=False),
     "no_building": _plain(buildings=[]),
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
-    "outside_lot": _plain(buildings=[box(40, 25, 60, 65)]),
+    "outside_lot": _plain(buildings=[box(60, 25, 80, 65)]),      # wholly off the lot (crossing it is measured)
     "open_solid": _file(_open_brep),
     "open_mesh": _file(_open_mesh),
     "curved_surface": _file(_cylinder),

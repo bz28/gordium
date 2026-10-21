@@ -151,10 +151,15 @@ def test_a_street_line_that_isnt_a_lot_line():
 
 
 def test_a_building_outside_the_lot():
-    m = measure(site(RECT, box(40, 25, 65, 65)), FACTS)
+    # wholly off the lot: nothing can be measured against it
+    m = measure(site(RECT, box(60, 25, 85, 65)), FACTS)
     for name in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "building_area"):
         assert m[name]["value"] is None and m[name]["reason"] == "a building isn't inside the lot"
     assert m["building_height"]["value"] == 30
+    # crossing the side lot line (x = 50): measured, the yard to that line is 0 and it says it crosses it
+    m = measure(site(RECT, box(40, 25, 65, 65)), FACTS)
+    assert m["side_yard_smaller"]["value"] == 0.0 and m["side_yard_smaller"]["crosses_lot_line"]
+    assert m["front_yard"]["value"] == 25.0 and not m["front_yard"].get("crosses_lot_line")
 
 
 def test_two_buildings_need_the_main_one_picked():
@@ -803,3 +808,13 @@ def test_terrain_samples_under_an_attached_wing_are_ground_beneath_not_off_the_w
              "grade_points": house_walls + wing_walls + extra}
     h = measure(site(RECT, house, wing), facts)["building_height"]
     assert h["value"] == 30.0, h                       # was "with the other solids … needs spot grades": never checked
+
+
+def test_the_eave_fingerprint_doesnt_depend_on_how_the_outline_is_ordered():
+    """Verification round: the same overhang, its ring started elsewhere or run the other way, is the same."""
+    from model_measurement.measure import _fingerprint
+    makers = [("roof", box(0, 0, 10, 10)["faces"])]
+    ring = [(0, 0), (10, 0), (10, 2), (0, 2)]
+    a = _fingerprint(makers, Polygon(ring))
+    assert a == _fingerprint(makers, Polygon(ring[2:] + ring[:2])) == _fingerprint(makers, Polygon(ring[::-1]))
+    assert a != _fingerprint(makers, Polygon([(0, 0), (10, 0), (10, 2.5), (0, 2.5)]))

@@ -27,7 +27,7 @@ format report from it.
   | `address_street_line` | on a corner lot: the lot line(s) on the street the lot's address is on (it decides which yard is the rear yard). Not given, each street is read as it, and the yards it changes need review |
   | `accessory_buildings` | the ids of the solids that are accessory buildings (a garage, a shed). A solid standing apart from the main building that isn't listed could be a freestanding deck (part of the building, §325-18A), so both are read. Listing them also picks the main building (the one left) |
   | `accessory_frame` | yes or no: the accessory buildings are frame. Frame ones keep §325-25C's distances by law; for others it is an open question (325-25C#1), read every way |
-  | `eaves_confirmed` | a lot fact entered in the panel ("These are eaves") for one overhang: [{overhang (its fingerprint, from the check), value: true, source, confirmed_by, date}]. Without it, a yard that meets its minimum only to the walls needs review; a later edit to the overhang asks again |
+  | `eaves_confirmed` | a lot fact for one overhang (the panel will ask for it in a later release): [{overhang (its fingerprint, from the check), value: true, source, confirmed_by, date}]. Without it, a yard that meets its minimum only to the walls needs review; a later edit to the overhang asks again |
   | `grade_elevation` | the ground level heights are measured from (a flat site) |
   | `ground_is_flat` | yes or no. Sloped ground needs the ground levels around the walls (the grade plane), not measured yet: without a yes, height, building area and the yards say "needs review" |
   | `lot_surveyed` | yes or no: the lot outline is from a survey. A drawn lot (from a map) isn't: without a yes, the lot area, and so lot size and coverage, say "needs review" (the drawn area is listed as a reading) |
@@ -58,10 +58,13 @@ one helper the height, the yards and coverage share, only suggests what might be
 past the walls under it. Where there is such a candidate, each yard is also read to the walls (the `model#eave`
 reading: eave / not_eave): if the full outline meets the requirement, that is the result; if only the walls do, the
 item needs review and asks whether the part reaching that far past the walls is an eave (§325-18B lets eaves
-reach up to 2 ft into a required yard; `R-1b.yard_projections` checks that). The answer is a lot fact entered in
-the panel ("These are eaves"), `eaves_confirmed`: [{overhang, value: true, source, confirmed_by, date}], naming the
-candidate's fingerprint (`eave_candidates` on the yard, height and coverage records). It applies to that overhang
-only: an edit that moves or resizes it gives a new fingerprint, and the question is asked again. The height's eave
+reach up to 2 ft into a required yard; `R-1b.yard_projections` checks that). The answer is a lot fact,
+`eaves_confirmed`: [{overhang, value: true, source, confirmed_by, date}], naming the candidate's fingerprint
+(`eave_candidates` on the yard, height and coverage records, and in each item's detail). The panel will ask for it
+in a later release; until then such an item stays needs review. The fingerprint is a sha256 over the ids of the
+solids whose faces make the overhang, every vertex of those solids (to 0.01 ft) and the overhang's outline (to 0.01
+ft): any edit to those solids (a deeper fascia, a knee wall, another solid swapped in) gives a new one, and the
+question is asked again; the same model gives the same one. The height's eave
 readings follow the same rule (unconfirmed, each is also read with the roof edge as the eave). Anything that sticks
 out past the walls at the ground and is neither one of Gordium's floor blocks nor a candidate eave is also read to
 the walls at the ground (`model#projection`: it may be a bay window or other projection).
@@ -165,7 +168,8 @@ Every reason the code gives today comes from the table:
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
   together, or draw the overhang as part of its floor".
 - **The buildings:** "no building on the Building layer"; "more than one building: pick the main building"; "a
-  building isn't inside the lot"; "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  building isn't inside the lot" (wholly off it: a building that crosses a lot line is measured, the yard to the
+  line it crosses is 0 and marked `crosses_lot_line`, so it does not comply); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

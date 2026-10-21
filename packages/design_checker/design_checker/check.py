@@ -135,8 +135,8 @@ def _eave_text(found: dict, measured: dict) -> str | None:
         if by.get("eave") is not None and by.get("not_eave") is not None and by["eave"] - by["not_eave"] > 1e-6:
             reach.append(f"{present.feet_inches(by['eave'] - by['not_eave'], 'up')} past the walls toward the {yard}")
     where = ("the part reaching " + "; ".join(dict.fromkeys(reach))) if reach else "what the roof reaches past the walls"
-    return (f"confirm {where} is an eave (§325-18B allows eaves up to 2 ft into a required yard): it complies only if "
-            "it is · These are eaves…")
+    return (f"it complies only if {where} is an eave (§325-18B allows eaves up to 2 ft into a required yard). "
+            "Gordium will ask you to confirm it in the panel in the next release; until then this stays needs review")
 
 
 def readings_of(rule: dict, measured: dict, allowed: dict) -> dict | None:
