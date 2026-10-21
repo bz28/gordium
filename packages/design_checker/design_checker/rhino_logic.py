@@ -4,6 +4,7 @@ Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 
 import json
 import queue
+import threading
 
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
@@ -199,6 +200,31 @@ def after_corner_answer(facts, was_corner):
     return out
 
 
+def suggested_facts(jurisdiction, zones, lots, buildings):
+    """The start box's prefilled lot facts, in the model's units (the plugin converts them to feet), for the
+    architect to confirm. `lots`: the Site layer's closed outlines, each {"id", "area", "bottom" (its lowest
+    level), "segments": [((x, y), (x, y)), ...]}; `buildings`: each {"id", "bottom", "volume" (of its box)}.
+    The largest outline is the lot, its lowest line on screen the street side; the ground is flat at the
+    buildings' lowest point (or the lot's level); the lot is not from a survey; the first zone with rules; a
+    detached one-family house; the largest solid the main building. The corner-lot question is never answered
+    here: always None, so the box asks it and the yards wait for the answer."""
+    facts = {"jurisdiction": jurisdiction, "zone": zones[0] if zones else None, "use": "one_family_detached",
+             "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}
+    lot = max(lots, key=lambda l: l["area"]) if lots else None
+    if lot is not None:
+        facts["lot_id"] = lot["id"]
+        if lot["segments"]:
+            a, b = min(lot["segments"], key=lambda s: (s[0][1] + s[1][1]) / 2)
+            facts["street_line"] = [[[a[0], a[1]], [b[0], b[1]]]]
+    ground = suggested_ground([b["bottom"] for b in buildings], lot["bottom"] if lot is not None else None)
+    if ground is not None:
+        facts["grade_elevation"] = ground
+    if len(buildings) > 1:
+        facts["main_building"] = max(buildings, key=lambda b: b["volume"])["id"]
+    facts["corner_lot"] = None                     # never guessed, whatever came before
+    return facts
+
+
 def suggested_ground(building_bottoms, lot_bottom):
     """The ground level to suggest (feet or model units, as given): the lowest point of the buildings, or with no
     building yet (a new project on the architect's own lot) the lot outline's level. Shown in the dialog, never
@@ -330,13 +356,25 @@ def _clip(subject, convex):
     return out
 
 
-def reaches_into_lot(lot_ring, points, reach):
+def box_near_lot(box, lot_box, reach):
+    """Whether a plan box (x0, y0, x1, y1) comes within `reach` of the lot's plan box: a quick test before any
+    outline work. Exact in the cautious direction: an object whose box misses the lot's box grown by `reach`
+    can't reach into the lot (its footprint lies inside its box, and the lot inside the lot's)."""
+    x0, y0, x1, y1 = box
+    a0, b0, a1, b1 = lot_box
+    return x0 <= a1 + reach and a0 - reach <= x1 and y0 <= b1 + reach and b0 - reach <= y1
+
+
+def reaches_into_lot(lot_ring, points, reach, box=None):
     """Whether an object whose plan points (any (x, y) of it: vertices, points along its edges) are `points`
     reaches into the lot (`lot_ring`, its outline's points) by more than `reach` (model units): the part of its
     plan footprint (their convex hull) inside the lot, averaged across (twice its area over its perimeter), is
     wider than `reach`. Wholly on the lot, straddling a lot line or mostly past it: on the lot. Touching the
     line from outside, a hair over it, or off the lot but inside the lot's bounding box (a rotated or jogged
-    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction."""
+    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction.
+    `box`, the object's plan bounding box (x0, y0, x1, y1), is its footprint whenever the points don't outline
+    one (fewer than 3, or all in a line, as a sphere's seam is): a solid always covers some ground, so such
+    points under-describe it."""
     lot = [(float(x), float(y)) for x, y in lot_ring]
     if len(lot) > 1 and lot[0] == lot[-1]:
         lot = lot[:-1]
@@ -345,6 +383,9 @@ def reaches_into_lot(lot_ring, points, reach):
     if _ring_area(lot) < 0:
         lot.reverse()
     hull = _hull(points)
+    if (len(hull) < 3 or _ring_area(hull) <= 1e-12) and box is not None:
+        x0, y0, x1, y1 = box
+        hull = _hull([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
     if len(hull) < 3 or _ring_area(hull) <= 1e-12:
         return False
     part = _clip(lot, hull)
@@ -1230,6 +1271,88 @@ def ask_limit(cmd):
 class CheckerOutOfStep(RuntimeError):
     """The checker's next line can't be trusted to be this request's answer: the plugin restarts the checker and
     shows nothing from it."""
+
+
+def pipes(process):
+    """The checker's two pipes, each served by its own thread: (sends, lines). Rhino's thread never reads or writes
+    a pipe, so a checker that stops answering (or stops reading a large request) can never freeze Rhino; the
+    plugin only puts on `sends` and waits on `lines` with a time limit (answer_for). Put None on `sends` to end
+    the writer."""
+    sends, lines = queue.Queue(), queue.Queue()
+    threading.Thread(target=_read_lines, args=(process.stdout, lines), daemon=True,
+                     name="gordium-reader-%s" % getattr(process, "pid", "")).start()
+    threading.Thread(target=_write_lines, args=(process.stdin, sends, process), daemon=True,
+                     name="gordium-writer-%s" % getattr(process, "pid", "")).start()
+    return sends, lines
+
+
+def _read_lines(stream, lines):
+    """The reader thread: every line the checker writes, then None when it stops."""
+    try:
+        for line in stream:
+            lines.put(line)
+    except (OSError, ValueError):            # the pipe closed under it (the checker was stopped)
+        pass
+    finally:
+        lines.put(None)
+
+
+def _write_lines(stream, sends, process=None):
+    """The writer thread: each request, in order, until None, the checker stops reading (then the reader sees it
+    stop, or ask's time limit runs out), or the checker process ends (however it was stopped)."""
+    try:
+        while True:
+            try:
+                text = sends.get(timeout=1)
+            except queue.Empty:
+                if process is not None and process.poll() is not None:
+                    return
+                continue
+            if text is None:
+                return
+            stream.write(text)
+            stream.flush()
+    except (OSError, ValueError):
+        pass
+
+
+def exchange(sends, lines, request, limit):
+    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for)."""
+    sends.put(json.dumps(request) + "\n")
+    return answer_for(lines, request["id"], limit)
+
+
+HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer",
+           "worker", "worker_sends", "worker_lines")
+
+
+def sweep(leftovers, state=None):
+    """Undo everything an earlier copy of the plugin left attached to Rhino (event handlers, its drawing, its
+    panel, its checker): `leftovers` maps a name to its undo, kept outside the plugin's state so clearing the
+    state can't lose it. Each undo runs even if another fails; returns how many ran. Given the plugin's `state`,
+    its handles to those things are forgotten too (so it never says a detached hook is attached); what the
+    architect asked for (live mode on, the choices) stays, for the new copy to put back."""
+    n = 0
+    for key in list(leftovers):
+        undo = leftovers.pop(key, None)
+        try:
+            undo()
+            n += 1
+        except Exception:                      # noqa: BLE001  (already gone: nothing to undo)
+            pass
+    for key in HANDLES if state is not None else ():
+        state.pop(key, None)
+    return n
+
+
+def current_only(fn, is_current):
+    """fn, run only while is_current() (this copy of the plugin is the loaded one): an older copy's handler that
+    is still attached does nothing, so it can never act on, or wait on, the current copy's checker."""
+    def run(*args):
+        if not is_current():
+            return None
+        return fn(*args)
+    return run
 
 
 def answer_for(lines, request_id, limit):

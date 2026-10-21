@@ -53,13 +53,13 @@ The report (`<model>_gordium_report.xlsx`) is written next to the model by `Gord
   the height limit, under every reading of the lot.
 - `packages/design_checker/tests/test_check.py::test_rhino_decisions`: which objects are sent, which facts are
   missing, skipped prompts, feet (the Rhino command's decisions, `design_checker/rhino_logic.py`, run in CI).
-- `packages/design_checker/tests/test_scenarios.py`: the architect's answer key
+- `packages/design_checker/tests/test_scenarios.py`: the hand-worked scenarios (hand-worked by Claude before Gordium ran, not yet verified by an architect)
   (`test_data/test_sites/new_york/ithaca_city/scenarios/`), ten designs with the results worked out by hand
   before Gordium ran; every row matches or is an investigated disagreement, and a "does not comply" is never
   shown as complies.
 - In Rhino 8 (Mac), driven by scripts (run in Rhino, not CI): `tests/ui_flow_in_rhino.py` (from an empty file:
   the start box, the starting building, then each realistic edit and its fix, with viewport captures and the
-  panel's rows); `tests/scenarios_in_rhino.py` (the answer key drawn in Rhino; compare with
+  panel's rows); `tests/scenarios_in_rhino.py` (the hand-worked scenarios drawn in Rhino; compare with
   `python -m design_checker.scenarios rhino <rhino_out.json>`); `tests/windows_in_rhino.py` (puts the panel or
   the start box on show for a window capture, `screencapture -l<window id>`); `tests/check_in_rhino.py`.
 

@@ -93,11 +93,30 @@ def _brep_faces(brep, s):
 
 
 FLOAT_SAFE = 2.0 ** 17      # ft from the origin: beyond this, single-precision points are coarser than 0.01 ft
+TYPED_NEAR = 2.0 ** 10      # ft from the origin: within this, a single-precision point's steps are under 1/8000 ft,
+                            # fine enough to tell the decimal that was typed; beyond it they aren't (40,000 ft out
+                            # a step is 1/250 ft), and "recovering" decimals there moves each point on its own
 
 
 def _single(x: float) -> bool:
     """Whether a number is exactly a single-precision value (as a mesh point stored only in single precision is)."""
     return struct.unpack("f", struct.pack("f", x))[0] == x
+
+
+def _as_typed(x: float) -> float:
+    """A single-precision number as the shortest decimal that is stored as it (8229.599609375 -> 8229.6): the
+    number that was typed, whatever the units. A mesh stored in single precision (rhino3dm's Vertices.Add) would
+    otherwise read 27 ft drawn in millimetres as 26.999999 ft, and a design exactly at a limit would fail."""
+    for places in range(10):
+        y = round(x, places)
+        if struct.unpack("f", struct.pack("f", y))[0] == x:
+            return y
+    return x
+
+
+class _Point:
+    def __init__(self, x, y, z):
+        self.X, self.Y, self.Z = x, y, z
 
 
 def _mesh_faces(mesh, s):
@@ -110,8 +129,12 @@ def _mesh_faces(mesh, s):
     points = [v.Point3dAt(k) for k in range(len(v))]
     problems = []
     far = any(max(abs(p.X), abs(p.Y), abs(p.Z)) * s > FLOAT_SAFE for p in points)
-    if far and all(_single(c) for p in points for c in (p.X, p.Y, p.Z)):   # only single-precision points held
+    single = all(_single(c) for p in points for c in (p.X, p.Y, p.Z))
+    near = all(max(abs(p.X), abs(p.Y), abs(p.Z)) * s <= TYPED_NEAR for p in points)
+    if far and single:                                   # only single-precision points held, too coarse out there
         problems.append(stop("single_precision"))
+    elif single and near:                                # near the origin: read as the numbers that were typed
+        points = [_Point(_as_typed(p.X), _as_typed(p.Y), _as_typed(p.Z)) for p in points]
     faces = []
     for i in range(len(mesh.Faces)):
         a, b, c, d = mesh.Faces[i]

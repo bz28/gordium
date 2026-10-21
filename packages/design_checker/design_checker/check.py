@@ -432,6 +432,9 @@ def margin_note(keep, buffer, tax, proven):
     return "Starting house goes to the limits (the lot is from a survey)."
 
 
+LOT_ONLY = {"lot_area", "lot_width", "lot_depth"}   # items about the lot itself, whatever the house
+
+
 def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer):
     """The starting house, kept back from the limits so that it complies even at the tax-map worst case (Ben,
     2026-10-20): on a lot not from a survey, every yard line moves in by the tax-map tolerance and coverage is sized
@@ -453,7 +456,7 @@ def _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_b
             break
         view = check_site({**site, "buildings": floor_solids(out["floors"])}, drawing)["view"]
         if not any(i["status"] == present.REVIEW and "tax map" in (i.get("reason") or "") for i in view["items"]
-                   if i.get("measure")):
+                   if i.get("measure") and i["measure"] not in LOT_ONLY):   # the lot's own size: no house fixes it
             proven = True
             break
         keep += 0.25

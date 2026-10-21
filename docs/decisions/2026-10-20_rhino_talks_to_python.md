@@ -1,5 +1,9 @@
 # How Rhino talks to Gordium's code (2026-10-20)
 
+**Purpose:** why all measuring and checking runs in Gordium's own Python, with Rhino only copying the model across and drawing the answer.\
+**For:** engineers, and anyone choosing how the Rhino plugin is built.\
+**Kept current by:** the engineer who changes how Rhino and the Python worker talk, in that PR.
+
 **Decision:** all measuring and checking runs in Gordium's own Python (3.12, the repo's packages). Inside
 Rhino, a thin script only (1) copies the lot and building objects into a small temporary .3dm file and (2)
 sends it, with the lot facts, to that Python running in the background, then shows what comes back.
