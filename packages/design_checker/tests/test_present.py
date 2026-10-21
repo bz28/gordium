@@ -11,7 +11,6 @@ import pytest
 
 from design_checker import present
 from design_checker.check import check
-from design_checker.rhino_logic import delta_text
 from model_measurement.measure import measure
 from model_measurement.project import fact_problems, load_facts
 from rule_format.rulebook import REPO, load
@@ -207,7 +206,7 @@ def test_side_yards_are_two_rows_west_and_east(tax_map):
 
 def test_the_notice_is_one_line_for_newly_failing_items_and_none_on_the_first_check():
     a = [{"id": "x", "name": "Rear yard", "status": present.FAILS, "proposed": "20'-0\"", "required": "22'-6\"",
-          "margin": "−2'-6\""}]
+          "margin": "−2'-6\"", "delta": "−2'-6\" short"}]                       # settle's words (the only writer)
     now, text = present.notice(None, a)
     assert text is None
     _, text = present.notice({"x": present.COMPLIES}, a)
@@ -337,11 +336,10 @@ def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
     before = {i["id"]: i["status"] for i in check_site(_plot(box(16, 30, 35, 65)), tax)["view"]["items"]}
     now = check_site(_plot(box(7, 30, 35, 65)), tax)["view"]["items"]
     assert present.notice(before, now)[1].endswith("· at least 1'-0\" short")
-    import design_checker.check as check_mod
-    src = (REPO / "packages/design_checker/design_checker/check.py").read_text(encoding="utf-8")
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'i.get("delta") or delta_text(i["margin"])' in src and 'i.get("delta") or logic.delta_text(' in ui
-    assert check_mod.delta_text is present.delta_text
+    # round 2: settle is the ONLY writer of the Delta; nothing falls back to the as-drawn margin's words
+    for path in ("packages/design_checker/design_checker/check.py", "packages/design_checker/design_checker/present.py",
+                 "apps/rhino_plugin/gordium_ui.py"):
+        assert "delta_text" not in (REPO / path).read_text(encoding="utf-8"), path
 
 
 def test_delta_words_never_overstate():
@@ -358,6 +356,9 @@ def test_delta_words_never_overstate():
     # never kinder than the status: room on a row that needs review is "if confirmed", never "to spare"
     assert present.delta_words(R, (7.0, 7.0), "ft", False) == "+7'-0\" if confirmed"
     assert present.delta_words(R, (5.0, 9.0), "ft", True) == "at least 5'-0\" if confirmed"
+    # round 2: the certain words ("at least … short") only on a row that fails; one in review says to see why
+    assert present.delta_words(R, (-5.0, -1.0), "ft", True) == "at least 1'-0\" short; see why"
+    assert present.delta_words(R, (-1.0, -1.0), "ft", False) == "−1'-0\" short; see why"
     assert "to spare" not in present.delta_words(F, (1.0, 2.0), "ft", False)
     # every unit: lot area in sf, coverage in % (round 1: "+570 sf to spare" on a lot area that needs review)
     assert present.delta_words(R, (-66.2, 570.4), "sf", True) == "up to 67 sf short"
@@ -500,8 +501,10 @@ def test_the_tax_map_worst_case_moves_every_lot_line_2_ft_the_unlucky_way():
     area = tax_map_lot_area(Polygon([(0, 0), (73, 0), (73, 90), (0, 90)]))
     assert (area["low"], area["high"]) == (69 * 86, 77 * 94) == (5934, 7238)
     assert TAX_MAP_SLACK["lot_width"] == TAX_MAP_SLACK["lot_depth"] == 4.0 and TAX_MAP_SLACK["rear_yard"] == 2.0
-    assert present.TAX_MAP_SLACK is TAX_MAP_SLACK                                   # the checker reads the same one
-    worst = present._worst_case("lot_width >= 70", {"lot_width": 73.0}, {"lot_width"})
+    from design_checker import reading_set
+    assert reading_set.TAX_MAP_SLACK is TAX_MAP_SLACK                               # the checker reads the same one
+    tax = {"lot_area": {"tolerance": area}}                  # a tax-map lot (its area's tolerance), not surveyed
+    worst = present._worst_case("lot_width >= 70", {"lot_width": 73.0}, {"lot_width"}, tax, {"lot_surveyed": False})
     assert worst == {"lot_width": 69.0}                                             # 73 − 4: fails 70 at worst
 
 
@@ -536,7 +539,7 @@ def test_lot_area_and_coverage_deltas_use_the_tax_map_lot_area_like_their_verdic
     assert area["delta"] == "up to " + present._area(6000 - tol["low"], "up") + " short"     # never "to spare"
     cov = v["Lot coverage"]
     assert cov["approx"] and cov["status"] == present.FAILS and cov["delta"].startswith("at least ")
-    assert cov["delta"] != delta_text(cov["margin"])                  # the certain shortfall, not the as-drawn one
+    assert cov["delta"] != cov["margin"] + " short"                   # the certain shortfall, not the as-drawn one
 
 
 def test_the_height_row_is_never_marked_tax_map_approximate(tax_map):
@@ -583,43 +586,108 @@ def test_red_is_only_for_a_yard_that_fails_never_one_that_needs_review():
     assert sum(g.area for g in red) == pytest.approx(95, abs=0.5)
 
 
-JOG = [(0, 0), (50, 0), (50, 100), (30, 100), (30, 90), (0, 90)]     # a jog at the back: side or rear? both read
+def _shown_agrees(i):
+    """The invariants between a row's status, the Delta the architect sees (settle's words, the only ones) and its
+    colour: "to spare" only on a row that complies; the certain words ("at least … short", "less than … short", a
+    survey's "−… short") only on a row that fails, and on a yard always with red; a row that complies never says
+    "short"; red only on a row that fails."""
+    d, st = i.get("delta") or "", i["status"]
+    certain = d.endswith(" short") and d.startswith(("at least ", "less than ", "−"))
+    assert "to spare" not in d or st == present.COMPLIES, (i["name"], st, d)
+    assert not certain or st == present.FAILS, (i["name"], st, d)
+    assert not (certain and i["measure"] in present.YARD_MEASURES) or i["colour"] == "red", (i["name"], i["colour"], d)
+    assert st != present.COMPLIES or "short" not in d, (i["name"], st, d)
+    assert i["colour"] != "red" or st == present.FAILS, (i["name"], st)
+    assert i["colour"] == "none" or i["measure"] in present.YARD_MEASURES, i["name"]
+
+
+def _oracle(x0, y0, x1, y1, slack):
+    """By hand, on the plain 50 x 100 lot (street along y = 0): each yard's verdict over every reading (its line off
+    by `slack` either way, the lot depth by twice that), and the strip of the house short under every reading."""
+    from shapely.geometry import box as rect
+    rear_low, rear_high = 0.25 * (100 - 2 * slack), 0.25 * (100 + 2 * slack)     # max(min(.25 d, 50), 20): 24..26
+    yards = {"Front yard": (y0, 25, 25, rect(-1, -1, 51, 25 - slack)),
+             "Side yard, West": (x0, 10, 10, rect(-1, -1, 10 - slack, 101)),
+             "Side yard, East": (50 - x1, 10, 10, rect(40 + slack, -1, 51, 101)),
+             "Rear yard": (100 - y1, rear_low, rear_high, rect(-1, 100 - (rear_low - slack), 51, 101))}
+    out = {}
+    for name, (v, need_low, need_high, strip) in yards.items():
+        status = (present.COMPLIES if v - slack >= need_high else present.FAILS if v + slack < need_low
+                  else present.REVIEW)
+        out[name] = (status, strip)
+    return out
 
 
 def test_verdict_delta_and_colour_never_disagree_for_any_design():
-    """Round 1's property: for random houses on a plain lot and on a lot with a jog at the back (whose lines are
-    an open question), on the tax map and on a survey: "to spare" only on a row that complies; a row that
-    complies never reads "short"; a row that fails always does; red only on a yard that fails (short under every
-    reading), and every red region inside a failing yard's own limits; amber only where some reading is short."""
+    """Review rounds 1 and 2: random houses on (a) the plain 50 x 100 lot, checked against a hand oracle: each yard's
+    verdict and the red area (the footprint inside the failing yards' certain strips, holes included: a house
+    failing all four yards is a ring of red round a complying core); (b) the real 106 Ithaca Rd lot, whose back
+    lines are an open question (side or rear: real readings); (c) a corner lot. On the tax map and on a survey,
+    every row's shown Delta, status and colour agree (_shown_agrees)."""
     import random
-    from design_checker.check import check_site
+    from shapely.geometry import Polygon, box as rect
+    from shapely.ops import unary_union
+    from design_checker.check import check_site, sample_site
     from test_measure import lot as lot_of
     rnd = random.Random(15)
-    seen = set()
-    for k in range(80):
-        shape = JOG if k % 2 else [(0, 0), (50, 0), (50, 100), (0, 100)]
+    plain = [(0, 0), (50, 0), (50, 100), (0, 100)]
+    for k in range(60):
         x0, y0 = rnd.uniform(1, 18), rnd.uniform(8, 40)
-        x1, y1 = rnd.uniform(x0 + 8, 49), rnd.uniform(y0 + 10, 99 if shape is not JOG else 89)
-        house = box(x0, y0, x1, y1, 0, rnd.choice((30, 34.99, 35, 37, 41)))
-        facts = {**FACTS, "jurisdiction": CITY, "lot_surveyed": bool(k % 3 == 0)}
-        r = check_site(_plot(house, lot_=lot_of(shape)), facts)
-        rows = [i for i in r["view"]["items"] if i.get("measure")]
-        for i in rows:
-            d, st = i.get("delta") or "", i["status"]
-            seen.add((st, d.split(" ")[0] if d else ""))
-            assert "to spare" not in d or st == present.COMPLIES, (k, i["name"], st, d)
-            assert st != present.COMPLIES or "short" not in d, (k, i["name"], st, d)
-            assert st != present.FAILS or not d or "short" in d or "does not comply" in d, (k, i["name"], st, d)
-            assert i["colour"] != "red" or st == present.FAILS, (k, i["name"], st)
-            assert i["colour"] == "none" or i["measure"] in present.YARD_MEASURES
-            if i["colour"] == "red" or st == present.FAILS and i["measure"] in present.YARD_MEASURES:
-                assert d.startswith(("at least", "less than", "−")) and i["colour"] == "red", (k, i["name"], d)
-        yard_red = [g for g in r["plan"]["encroach"] if g["why"] == "yard" and g["status"] == present.FAILS]
-        assert not yard_red or any(i["colour"] == "red" for i in rows), k
-        yard_amber = [g for g in r["plan"]["encroach"] if g["why"] == "yard" and g["status"] == present.REVIEW]
-        assert not yard_amber or any(i["colour"] in ("red", "amber") for i in rows), k
-    # the sample really covered each kind of answer
-    assert {s for s, _ in seen} >= {present.COMPLIES, present.REVIEW, present.FAILS}
+        x1, y1 = rnd.uniform(x0 + 8, 49), rnd.uniform(y0 + 10, 99)
+        surveyed = k % 2 == 0
+        r = check_site(_plot(box(x0, y0, x1, y1, 0, rnd.choice((30, 34.99, 35))), lot_=lot_of(plain)),
+                       {**FACTS, "jurisdiction": CITY, "lot_surveyed": surveyed})
+        rows = {i["name"]: i for i in r["view"]["items"]}
+        for i in rows.values():
+            if i.get("measure"):
+                _shown_agrees(i)
+        oracle = _oracle(x0, y0, x1, y1, 0.0 if surveyed else 2.0)
+        for name, (status, _) in oracle.items():
+            assert rows[name]["status"] == status, (k, name, rows[name]["status"], status, rows[name]["delta"])
+        house = rect(x0, y0, x1, y1)
+        want = house.intersection(unary_union([strip for st, strip in oracle.values() if st == present.FAILS] or [rect(0, 0, 0, 0)]))
+        red = sum(Polygon(e["outline"]).area for e in r["plan"]["encroach"]
+                  if e["why"] == "yard" and e["status"] == present.FAILS)
+        assert abs(red - want.area) < 0.5, (k, red, want.area)
+    # (b) the real 106 lot: its back lines are side or rear (an open question): real readings, grouped by lot reading
+    sample = sample_site()
+    ring, facts = sample["lot"], {**sample["facts"], "jurisdiction": sample["facts"]["jurisdiction"]}
+    xs, ys = [p[0] for p in ring], [p[1] for p in ring]
+    open_seen = 0
+    for k in range(40):
+        x0, y0 = rnd.uniform(min(xs) + 1, 40), rnd.uniform(min(ys) + 5, 40)
+        x1, y1 = rnd.uniform(x0 + 8, max(xs) - 1), rnd.uniform(y0 + 10, max(ys) - 2)
+        r = check_site(_plot(box(x0, y0, x1, y1, 0, rnd.choice((30, 35))), lot_=lot_of(ring)),
+                       {**facts, "lot_surveyed": k % 2 == 0})
+        open_seen += any(m.get("value") is None and m.get("readings") for m in r["measurements"].values())
+        for i in r["view"]["items"]:
+            if i.get("measure"):
+                _shown_agrees(i)
+        reds = [i for i in r["view"]["items"] if i.get("colour") == "red"]
+        assert not [e for e in r["plan"]["encroach"] if e["why"] == "yard" and e["status"] == present.FAILS] or reds
+    assert open_seen >= 10                                  # the open question really was exercised
+    # (c) a corner lot: the yards can't be read; nothing says "to spare" or the certain words unless it should
+    for k in range(10):
+        r = check_site(_plot(box(rnd.uniform(1, 15), rnd.uniform(5, 30), rnd.uniform(30, 49), rnd.uniform(60, 95),
+                                 0, rnd.choice((30, 34, 37)))),
+                       {**FACTS, "jurisdiction": CITY, "corner_lot": True, "lot_surveyed": k % 2 == 0})
+        for i in r["view"]["items"]:
+            if i.get("measure"):
+                _shown_agrees(i)
+
+
+def test_red_with_a_complying_core_is_drawn_without_the_core():
+    """Review round 2: a house failing all four yards: its red is a ring round the complying core (a polygon with
+    a hole), drawn as the whole footprint (only the outline was kept). Each piece is now hole-free and the red is
+    exactly the strips: 1,368.06 sf of the 2,868.06 sf footprint."""
+    from shapely.geometry import Polygon
+    from design_checker.check import check_site, hole_free
+    r = check_site(_plot(box(7.252, 12.068, 41.783, 95.125, 0, 36)), {**FACTS, "jurisdiction": CITY})
+    red = [Polygon(e["outline"]) for e in r["plan"]["encroach"] if e["why"] == "yard" and e["status"] == present.FAILS]
+    assert sum(g.area for g in red) == pytest.approx(1368.06, abs=0.5)
+    ring = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)], [[(3, 3), (7, 3), (7, 7), (3, 7)]])
+    pieces = hole_free(ring)
+    assert all(not g.interiors for g in pieces) and sum(g.area for g in pieces) == pytest.approx(84)
 
 
 def test_a_margin_that_rounds_to_nothing_is_at_the_limit_never_plus_zero():

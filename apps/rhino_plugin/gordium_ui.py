@@ -405,7 +405,7 @@ def show(parts, view, stale=False, error=None, checking=False):
             values = [("" if stale_row else i["mark"] + "  ") + logic.row_name(i),
                       "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else "needs input"
                                              if i["id"].startswith("R-") else ""),
-                      "" if stale_row else i["required"], "" if stale_row else (i.get("delta") or logic.delta_text(i["margin"]))]
+                      "" if stale_row else i["required"], "" if stale_row else (i.get("delta") or "")]
             ci = ef.TreeGridItem()
             ci.Tag = item_id
             ci.Values = System.Array[System.Object](values)

@@ -11,7 +11,6 @@ writes one summary used everywhere (D3).
 
 import ast
 import functools
-import itertools
 import math
 import re
 import urllib.parse
@@ -21,7 +20,7 @@ from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
 from rule_format.rulebook import MEASURE_KINDS, REPO, load, read_jsonl
 
-from design_checker.rhino_logic import delta_text  # one formatter: the panel, the report, the notice
+from design_checker import reading_set
 
 COMPLIES, FAILS, REVIEW, NOT_CHECKED = "complies", "does_not_comply", "needs_review", "not_checked"
 MARK = {FAILS: "✕", REVIEW: "?", COMPLIES: "✓", NOT_CHECKED: "–"}
@@ -32,8 +31,8 @@ ORDER = [FAILS, REVIEW, COMPLIES, NOT_CHECKED]
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
           ("not_checked", "Not checked"), ("not_covered", "Not covered by this rulebook")]
 
-from model_measurement.measure import TAX_MAP_SLACK, TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
-LOT_LENGTHS = {"lot_width", "lot_depth", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard"}
+from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
+LOT_LENGTHS = reading_set.LOT_LENGTHS
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
 INTERIOR = {"sleeping_rooms", "parking_spaces"}
 EIGHTH = 1 / 96                           # 1/8 in, in feet
@@ -439,66 +438,26 @@ def _margin_of(node, trial: dict, measured: dict):
     return margin, unit
 
 
-MAX_READINGS = 20000          # more combinations than this: not worked out (the row keeps its status, no Delta)
-
-
-def _lot_reading(words: str | None) -> str | None:
-    """Which reading of the lot's side and rear lines a measurement's reading is under ("line 13 as a rear lot
-    line, ..."), or None when it doesn't depend on one: readings of two measurements under different lot
-    readings are never combined (the lot depth of one reading with the rear yard of another isn't a real case)."""
-    first = (words or "").split("; ")[0]
-    return first if " lot line" in first else None
-
-
-def _choices(n: str, values: dict, measured: dict, facts: dict) -> list[tuple]:
-    """Every value measure `n` could take: (value as measured, its points, its lot reading, value in the trial).
-    A measure with a value: that value; else each of its readings. On a tax-map lot a lot length is also off by
-    its TAX_MAP_SLACK either way, and the lot area is at the low or high end of its tolerance."""
-    rec = measured.get(n) or {}
-    tol = rec.get("tolerance") if n == "lot_area" else None
-    if n == "lot_area" and tol and not facts.get("lot_surveyed"):
-        return [(tol["low"], None, None, tol["low"]), (tol["high"], None, None, tol["high"])]
-    if isinstance(values.get(n), (int, float)):
-        base = [(values[n], rec.get("points"), None)]
-    else:
-        base = list(dict.fromkeys((r["value"], tuple(map(tuple, r.get("points") or rec.get("points") or [])) or None,
-                                   _lot_reading(r.get("reading")))
-                                  for r in rec.get("readings") or [] if isinstance(r.get("value"), (int, float))))
-    if n in LOT_LENGTHS and not facts.get("lot_surveyed"):
-        return [(v, p, k, v + d * TAX_MAP_SLACK[n]) for v, p, k in base for d in (-1, 1)]
-    return [(v, p, k, v) for v, p, k in base]
-
-
 def readings(node, expr: str, values: dict, measured: dict, facts: dict) -> list[dict]:
-    """THE set of readings of one row: every way each value its expression and its comparison read could be (the
-    readings of an open question, the tax map's lot lines off by their slack, the lot area at either end of its
-    tolerance), the readings of one lot reading kept together. Only the names the row itself reads count (a
-    height row reads no yard unless its own expression does). Each reading: {"margin", "unit" (the comparison
-    `node`'s, as the row shows it), "holds" (the expression `expr`: True, False or None), "value" (the row's own
-    measure before any slack), "points" (that measure's points under that reading)}. Empty when a value is
-    unknown, a margin can't be worked out, or there are more than MAX_READINGS."""
-    names = sorted(formula.names(ast.unparse(node)) | formula.names(expr))
-    per = [_choices(n, values, measured, facts) for n in names]
-    if any(not c for c in per):
-        return []
-    keys = sorted({c[2] for cs in per for c in cs if c[2] is not None}) or [None]
-    groups = []
-    for key in keys:
-        options = [[c for c in cs if c[2] in (None, key)] for cs in per]
-        if all(options):
-            groups.append(options)
-    if sum(math.prod(len(o) for o in g) for g in groups) > MAX_READINGS:
+    """One row's readings: THE reading set (reading_set.combos, the checker's own: its verdict is decided over the
+    same set) of every name its expression and its comparison read, each with the comparison `node`'s margin as
+    the row shows it ("margin", "unit"), whether `expr` holds ("holds": True, False or None), and the row's own
+    measure before any slack ("value") and its points ("points"). Empty when a value is unknown, a margin can't be
+    worked out, or there are too many."""
+    names = formula.names(ast.unparse(node)) | formula.names(expr)
+    every = reading_set.combos(names, values, measured, facts)
+    if not every:
         return []
     m, out = node.left.id, []
-    for options in groups:
-        for combo in itertools.product(*options):
-            trial = dict(values, **{n: c[3] for n, c in zip(names, combo)})
-            own = next(((c[0], c[1]) for n, c in zip(names, combo) if n == m), (values.get(m), None))
-            margin, unit = _margin_of(node, trial, measured)
-            if margin is None:
-                return []
-            out.append({"margin": margin, "unit": unit, "holds": _evaluate(expr, trial), "value": own[0],
-                        "points": [list(p) for p in own[1]] if own[1] else None})
+    for trial, picks in every:
+        margin, unit = _margin_of(node, trial, measured)
+        if margin is None:
+            return []
+        value, points, raised = picks.get(m, (values.get(m), None, 0.0))
+        if raised and isinstance(node.ops[0], (ast.GtE, ast.Gt)):    # its own margin with the slack's full depth
+            margin -= raised                                          # (the trial is kept at 0 for the verdict)
+        out.append({"margin": margin, "unit": unit, "holds": _evaluate(expr, trial), "value": value,
+                    "points": points})
     return out
 
 
@@ -516,10 +475,13 @@ def delta_words(status: str, span, unit: str, approx: bool) -> str:
     one = not approx and low == high
     if high < 0:                       # short under every reading
         if one:
-            return margin_text(high, unit) + " short"
-        if _rounds_to_nothing(-high, unit):
-            return "less than " + _amount(least, unit, "up") + " short"     # never "at least 0'-0" short"
-        return "at least " + _amount(-high, unit, "down") + " short"
+            words = margin_text(high, unit) + " short"
+        elif _rounds_to_nothing(-high, unit):
+            words = "less than " + _amount(least, unit, "up") + " short"     # never "at least 0'-0" short"
+        else:
+            words = "at least " + _amount(-high, unit, "down") + " short"
+        # the certain words only on a row that fails; one in review (it may comply another way) says to see why
+        return words if status == FAILS else words + "; see why"
     if low < 0:                        # short under some
         return "up to " + _amount(max(-low, least), unit, "up") + " short"
     if _rounds_to_nothing(low, unit):
@@ -528,16 +490,14 @@ def delta_words(status: str, span, unit: str, approx: bool) -> str:
     return room + {COMPLIES: " to spare", REVIEW: " if confirmed"}.get(status, " here, but it does not comply")
 
 
-def _worst_case(expr: str, values: dict, names: set) -> dict | None:
-    """The values that make `expr` false when every lot line is off by up to TOLERANCE the unlucky way (a yard
-    by TOLERANCE, a lot width or depth, between two lines, by twice that: measure.TAX_MAP_SLACK), or None if it
-    holds for every combination (2 ** n combinations, n ≤ 6)."""
-    lengths = sorted(n for n in names & LOT_LENGTHS if isinstance(values.get(n), (int, float)))
-    for signs in itertools.product((-1, 1), repeat=len(lengths)):
-        trial = dict(values, **{n: values[n] + s * TAX_MAP_SLACK[n] for n, s in zip(lengths, signs)})
-        if _evaluate(expr, trial) is not True:
-            return trial
-    return None
+def _worst_case(expr: str, values: dict, names: set, measured: dict, facts: dict) -> dict | None:
+    """The values (a reading of THE reading set, reading_set.combos: the open questions, and on the tax map each
+    lot line off by up to TOLERANCE, the lot area at either end) under which `expr` doesn't hold, or None if it
+    holds under every one. Too many to work out, or a value unknown: the values as drawn (never a pass)."""
+    every = reading_set.combos(names, values, measured, facts)
+    if not every:
+        return dict(values)
+    return next((trial for trial, _ in every if _evaluate(expr, trial) is not True), None)
 
 
 YARD_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
@@ -566,14 +526,16 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
     margin. Red is short under every reading, amber under some (check.plan draws them)."""
     tax = bool((measured.get("lot_area") or {}).get("tolerance")) and not facts.get("lot_surveyed")
     for i in items:
-        node, expr = i.pop("_node", None), i.pop("_expr", None)
-        i.update(delta=delta_text(i.get("margin") or "") if i["status"] == COMPLIES else "", approx=False,
-                 colour="none", limits=[])
+        node, expr, split_open = i.pop("_node", None), i.pop("_expr", None), i.pop("_split_open", False)
+        i.update(delta="", approx=False, colour="none", limits=[])
         i["detail"].setdefault("colours", None)
         if node is None:
             continue
         rs = readings(node, expr or ast.unparse(node), values, measured, facts)
-        if not rs:
+        if not rs:                       # no reading set (a value unknown): the margin as drawn, if it has one
+            margin, unit = _margin_of(node, values, measured)
+            if margin is not None:
+                i["delta"] = delta_words(i["status"], (margin, margin), unit, False)
             continue
         span, unit = (min(r["margin"] for r in rs), max(r["margin"] for r in rs)), rs[0]["unit"]
         reads = formula.names(ast.unparse(node)) | formula.names(expr or "")
@@ -581,7 +543,11 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
         approx = tax and bool(formula.names(ast.unparse(node)) & (LOT_LENGTHS | {"lot_area"}))  # its own margin's
         open_ = any(values.get(n) is None for n in reads)
         holds = {r["holds"] for r in rs}
-        if i["status"] == FAILS and True in holds:          # complies under some reading: never a certain fail
+        if split_open and holds in ({False}, {True}):     # the checker failed the pair under every reading:
+            fails = holds == {False}                      # this side, read on its own, fails or holds under all
+            i.update(status=FAILS if fails else COMPLIES, mark=MARK[FAILS if fails else COMPLIES], reason=(
+                f"Does not comply under every reading of {_which(lot, open_)}" if fails else None))
+        elif i["status"] == FAILS and True in holds:          # complies under some reading: never a certain fail
             i.update(status=REVIEW, mark=MARK[REVIEW], reason=(
                 f"Does not comply as drawn, but complies under some readings of {_which(lot, open_)}: it fails "
                 "only if it fails under every one · Pick survey lot lines…"))
@@ -607,16 +573,12 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
             i["detail"]["colours"] = COLOURS_NOTE
 
 
-def _best_case(expr: str, values: dict, names: set) -> dict | None:
-    """The values that make `expr` hold when every lot line is off by up to TOLERANCE the lucky way (the same
-    slack as _worst_case), or None if it fails for every combination: on a tax-map lot a rule fails only if it
-    fails under every reading of where the lines are (Ben, 2026-10-21)."""
-    lengths = sorted(n for n in names & LOT_LENGTHS if isinstance(values.get(n), (int, float)))
-    for signs in itertools.product((-1, 1), repeat=len(lengths)):
-        trial = dict(values, **{n: values[n] + s * TAX_MAP_SLACK[n] for n, s in zip(lengths, signs)})
-        if _evaluate(expr, trial) is True:
-            return trial
-    return None
+def _best_case(expr: str, values: dict, names: set, measured: dict, facts: dict) -> dict | None:
+    """The values (a reading of THE reading set, as _worst_case's) under which `expr` holds, or None if it fails
+    under every one: on a tax-map lot a rule fails only if it fails under every reading of where the lines are
+    (Ben, 2026-10-21)."""
+    return next((trial for trial, _ in reading_set.combos(names, values, measured, facts) or []
+                 if _evaluate(expr, trial) is True), None)
 
 
 def _scope(extras: dict, measured: dict) -> str:
@@ -675,9 +637,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     for node, label in parts:
         st, why = status, reason
         expr = ast.unparse(node) if splits else check
+        split_open = False
         if splits and node is not None and status != REVIEW:      # each side yard on its own comparison
             holds = _evaluate(expr, values)
             st = COMPLIES if holds is True else FAILS if holds is False else REVIEW
+            split_open = holds is None and status == FAILS          # a reading per side: settle decides it
         raised = []                 # the rule complies another way it allows (the §325-16C height bonus): its
         if node is not None and st == COMPLIES and not splits and _evaluate(ast.unparse(node), values) is False:
             way = _holding_way(check, values)          # numbers are that way's, and the yards it raises
@@ -693,7 +657,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             if any("pitched" in r["reading"] or "mansard" in r["reading"] for r in measured["building_height"]["readings"]):
                 st, why = REVIEW, ROOF_NOT_FLAT
         if st == COMPLIES and not facts.get("lot_surveyed") and names & LOT_LENGTHS:
-            worst = _worst_case(expr, values, names)
+            worst = _worst_case(expr, values, names, measured, facts)
             if worst is not None:
                 bad = next((c for c in ([node] + raised if raised else _compares(expr))     # the way it uses
                             if _evaluate(ast.unparse(c), worst) is False), node)
@@ -703,14 +667,18 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst "
                        f"{what}{_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
         tol = (measured.get("lot_area") or {}).get("tolerance")
-        if st == REVIEW and tol and node is not None and row.get("Provisional") == SURVEY_ONLY:
-            # waiting only on the survey: the same worst case as the lot lengths, for the lot area (spec C2)
-            ends = [dict(values, lot_area=tol["low"]), dict(values, lot_area=tol["high"])]
-            bad = next((v for v in ends if _evaluate(expr, v) is not True), None) or next(
-                (w for v in ends for w in [_worst_case(expr, v, names)] if w is not None), None)
+        survey_only = "lot_area" in names and (measured.get("lot_area") or {}).get("value") is None and all(
+            (measured.get(n) or {}).get("value") is not None for n in names - {"lot_area"} if n in measured)
+        if st == REVIEW and tol and node is not None and not facts.get("lot_surveyed") and survey_only:
+            # waiting only on the survey: decided over the reading set (the lot area at its ends, spec C2)
+            bad = _worst_case(expr, values, names, measured, facts)
             if bad is None:
                 st, why = COMPLIES, (f"Complies even at the tax-map worst case (lot area {_area(tol['low'], 'down')})"
                                      " · Pick survey lot lines…")
+            elif _evaluate(expr, values) is False and _best_case(expr, values, names, measured, facts) is not None:
+                w = _numbers(node, _best_case(expr, values, names, measured, facts), measured, label)
+                why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it does not comply, "
+                       f"but at best {_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
             else:
                 w = _numbers(node, bad, measured, label)
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst {_display(*w)[0]} "
@@ -718,9 +686,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if st == FAILS and not facts.get("lot_surveyed") and node is not None and (names & LOT_LENGTHS or tol):
             # fails as drawn, but the tax-map lines could be off: it fails only if it fails under every reading of
             # them (each line up to TOLERANCE either way); else it needs review (the same slack as for a pass)
-            ends = [values] + ([dict(values, lot_area=tol["high"])] if tol and "lot_area" in names else [])
-            best = next((v if _evaluate(expr, v) is True else b for v in ends
-                         for b in [_best_case(expr, v, names)] if _evaluate(expr, v) is True or b is not None), None)
+            best = _best_case(expr, values, names, measured, facts)
             if best is not None:
                 st = REVIEW
                 if _evaluate(ast.unparse(node), best) is True:      # its own comparison holds at best: say how
@@ -775,6 +741,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "proposed": proposed, "required": required, "margin": margin_t if st != REVIEW or margin_t else "",
             "_node": node,                        # the comparison it was decided on (a raise replaces it); popped
             "_expr": expr,                        # and its whole expression (settle reads both)
+            "_split_open": split_open,            # one of two side yards of a rule failing under every reading
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
@@ -943,7 +910,7 @@ def _raise_yards(items, measured, values, facts):
             unit = (measured.get(m) or {}).get("unit") or ""
             margin = v - req if sign in ("≥", ">") else req - v
             expr = ast.unparse(c)
-            worst = _worst_case(expr, values, formula.names(expr)) if not facts.get("lot_surveyed") else None
+            worst = _worst_case(expr, values, formula.names(expr), measured, facts) if not facts.get("lot_surveyed") else None
             for t in items:
                 if t is i or t.get("measure") != m or t["status"] == FAILS:
                     continue
@@ -1137,6 +1104,6 @@ def notice(before: dict | None, items: list[dict]) -> tuple[dict, str | None]:
         i = new[0]
         detail = " · ".join(p for p in [f"{i['proposed']} proposed" if i["proposed"] not in ("", "—") else "",
                                          f"{i['required']} required" if i["required"] not in ("", "—") else "",
-                                         i.get("delta") or delta_text(i["margin"])] if p)
+                                         i.get("delta") or ""] if p)
         return now, f"{i['name']} no longer complies" + (" · " + detail if detail else "")
     return now, f"{len(new)} items no longer comply: " + "; ".join(i["name"] for i in new)   # names hold commas

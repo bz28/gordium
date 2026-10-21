@@ -93,17 +93,6 @@ def yard_label_shown(labels, status):
     return bool(labels) or status == "does_not_comply"
 
 
-def delta_text(margin):
-    """The Delta column's words: the sign made unmistakable beside the colour ("+2'-0" to spare", "−1'-4" short");
-    "at limit", a blank or anything else as it is. The value itself (and the answer key's) is unchanged."""
-    margin = margin or ""
-    if margin.startswith("+"):
-        return margin + " to spare"
-    if margin.startswith("−") or margin.startswith("-"):
-        return margin + " short"
-    return margin
-
-
 def legend_text(code=None):
     """The legend ("?"): the marks, what the plan shows, the precision, and which version of the law was checked
     (the code-edition line, no longer in the panel's header)."""

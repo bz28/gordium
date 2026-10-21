@@ -6,7 +6,6 @@ Rhino panel and the viewport message show: the rows, a short summary, the object
 """
 
 import ast
-import itertools
 import math
 import os
 import re
@@ -15,8 +14,8 @@ from pathlib import Path
 
 import yaml
 
-from design_checker import present
-from design_checker.rhino_logic import COLUMN_DELTA, delta_text
+from design_checker import present, reading_set
+from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder import start as generator
 from envelope_builder.envelope import envelope
 from model_measurement.measure import TAX_MAP_TOLERANCE, measure
@@ -102,16 +101,17 @@ def _why(row: dict, rules: dict, measured: dict) -> dict:
     return {**row, "Why": "; ".join(reasons) or row["Why it needs review"]}
 
 
-MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked out (stays a plain NEEDS REVIEW)
 SURVEY = "lot_area"        # a lot not yet surveyed: its one reading is the lot as drawn
 
 
-def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] | None:
+def every_reading(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> tuple[str, str] | None:
     """For a rule that needs review only because measurements have readings instead of a value: ("pass", how) if
-    it passes under every combination of their readings (taken independently, which covers every real
-    combination), ("fail", how) if it fails under every one, else None (or when a measurement has no reading, or
-    there are too many). Never a result: the row stays NEEDS REVIEW (only outcome() decides results); this says
-    the design complies, or doesn't, whichever way the open question is answered."""
+    it passes under every reading, ("fail", how) if it fails under every one, else None (or when a measurement
+    has no reading, or there are too many). The readings are THE reading set (reading_set.combos: those of one
+    lot reading together; with `facts` on a tax-map lot, also the lot lines' slack and the lot area's low and
+    high), the same set the panel's words and colours come from (present.settle). Never a result: the row stays
+    NEEDS REVIEW (only outcome() decides results); this says the design complies, or doesn't, whichever way the
+    open question is answered."""
     names = set()
     for key in ("applies_when", "check"):
         if rule.get(key):
@@ -119,15 +119,15 @@ def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] 
     for r in rule.get("review_when") or []:
         names |= formula.names(r["when"])
     open_ = sorted(n for n in names if (measured.get(n) or {}).get("value") is None)
-    choices = [[x["value"] for x in (measured.get(n) or {}).get("readings") or []] for n in open_]
-    if not open_ or any(not c for c in choices) or math.prod(len(c) for c in choices) > MAX_COMBINATIONS:
-        return None
     values = {k: m["value"] for k, m in measured.items()}
-    got = {outcome(rule, {**values, **dict(zip(open_, combo))}, allowed) for combo in itertools.product(*choices)}
+    every = reading_set.combos(names, values, measured, facts) if open_ else None
+    if not every:
+        return None
+    got = {outcome(rule, trial, allowed) for trial, _ in every}
     if got not in ({"pass"}, {"fail"}):
         return None
     word = "passes" if got == {"pass"} else "fails"
-    survey = SURVEY in open_ and len(choices[open_.index(SURVEY)]) == 1
+    survey = SURVEY in open_ and len((measured.get(SURVEY) or {}).get("readings") or []) == 1
     others = [n for n in open_ if n != SURVEY or not survey]
     return got.pop(), (f"{word} with the lot as drawn (confirm the survey)" if survey and not others else
                        f"{word} under every reading" +
@@ -235,7 +235,7 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
             i = by_id[item_id]
             # the note ("assuming flat ground") with the item, as the panel shows it; that column is reasons only
             out.append([g["title"], i["mark"], i["name"] + (" · " + i["note"] if i.get("note") else ""), i["proposed"],
-                        i["required"], i.get("delta") or delta_text(i["margin"]), i.get("reason") or "",
+                        i["required"], i.get("delta") or "", i.get("reason") or "",
                         i["detail"].get("citation") or "",
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
@@ -298,7 +298,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         r["Short"] = short(r["Requirement"])
     allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
     for r in rows:
-        found = every_reading(by_id[r["Rule id"]], measured, allowed) if r["Error"] == "NEEDS REVIEW" else None
+        found = every_reading(by_id[r["Rule id"]], measured, allowed, facts) if r["Error"] == "NEEDS REVIEW" else None
         r["Provisional"] = found[1] if found else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
         r["Fails"] = r["Error"] == "FAIL" or bool(found and found[0] == "fail")   # fails whichever way it goes
@@ -343,6 +343,27 @@ def _envelope_facts(site: dict, facts: dict) -> dict:
 def _ring(polygon) -> list:
     """A polygon's outline as [[x, y], ...], without edges shorter than 0.001 ft."""
     return [list(p) for p in polygon.simplify(0.001).exterior.coords[:-1]]
+
+
+def hole_free(region) -> list:
+    """A region as pieces without holes (each drawn by its outline alone): a polygon with a hole is cut in two
+    by the vertical line through the hole's middle, again until none is left (review round 2: strips all round
+    a house, a ring with the complying core as its hole, were drawn as the whole footprint)."""
+    from shapely.geometry import box
+    out, todo = [], [g for g in getattr(region, "geoms", [region]) if region is not None and not region.is_empty]
+    while todo:
+        g = todo.pop()
+        if g.geom_type != "Polygon":
+            todo += [p for p in getattr(g, "geoms", []) if p.geom_type in ("Polygon", "MultiPolygon")]
+            continue
+        if not g.interiors:
+            out.append(g)
+            continue
+        x = g.interiors[0].centroid.x
+        x0, y0, x1, y1 = g.bounds
+        for half in (g.intersection(box(x0 - 1, y0 - 1, x, y1 + 1)), g.intersection(box(x, y0 - 1, x1 + 1, y1 + 1))):
+            todo += [p for p in getattr(half, "geoms", [half]) if p.geom_type in ("Polygon", "MultiPolygon")]
+    return out
 
 
 YARD_MEASURES = present.YARD_MEASURES
@@ -445,8 +466,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
         # without a grade the strip stands on the building's own base, never at 0
         base = env["base"] if env.get("base") is not None else min(tops)
         for region, status in ((red, present.FAILS), (doubt, present.REVIEW)):
-            for g in getattr(region, "geoms", [region]) if region is not None and not region.is_empty else []:
-                if g.geom_type == "Polygon" and g.area > 1e-3:
+            for g in hole_free(region):
+                if g.area > 1e-3:
                     encroach.append({"outline": _ring(g), "base": base, "top": max(tops), "why": "yard",
                                      "status": status})
         height = statuses.get("building_height")

@@ -154,6 +154,8 @@ def test_3_short_only_under_some_readings_needs_review_short_under_all_fails(hou
         rear = _check(moved, facts)["Rear yard"]
         assert rear["status"] == present.REVIEW and rear["delta"].startswith("up to "), (dy, rear["delta"])
         assert ("yard", present.FAILS) not in _regions(moved, facts), dy
+        row = next(x for x in check_site(_site(moved), facts)["rows"] if x["Rule id"] == "R-1b.rear_yard")
+        assert not row["Fails"], (dy, row["Provisional"])        # the checker itself: one reading set (round 2)
 
 
 def test_4_pull_the_rear_wall_back_coverage_fails_on_every_tax_map_lot(house):
@@ -234,7 +236,7 @@ def test_11_delta_in_words(house):
     assert _left_side(_check(_wall_out(got["floors"], 3), facts))["delta"] == up_words
     assert _left_side(_check(_wall_out(got["floors"], 5), facts))["delta"] == least_words
     surveyed = _check(_moved(got["floors"], dy=float(back)), facts, lot_surveyed=True)["Front yard"]
-    assert surveyed["delta"] == survey_words == logic.delta_text(surveyed["margin"])
+    assert surveyed["delta"] == survey_words == surveyed["margin"] + " to spare"
 
 
 def test_spot_grades_when_flat_ground_is_switched_off(house):
@@ -319,3 +321,42 @@ def test_coverage_over_only_on_some_tax_map_lots_needs_review(house):
         f["outline"] = [[x, y + 12 if y == top else y] for x, y in f["outline"]]
     cov = _check(floors, facts)["Lot coverage"]
     assert cov["status"] == present.REVIEW and cov["proposed"] == "25.2%" and "at best 22.9%" in cov["reason"]
+
+
+def test_a_side_yard_short_under_every_reading_fails_in_the_checker_itself(house):
+    """Review round 2: the house moved 26 ft right and 18 ft back on 106 is about 1'-2" from its Northeast line,
+    short by at least 8'-8" whichever lines are the sides. The checker gave up (18 x 18 readings, over its 200) and
+    said needs review while the panel's own set said "at least … short": one reading set now decides both."""
+    got, facts = house
+    moved = _moved(got["floors"], dx=26.0, dy=18.0)
+    for surveyed in (True, False):
+        r = check_site(_site(moved), {**facts, "lot_surveyed": surveyed})
+        row = next(x for x in r["rows"] if x["Rule id"] == "R-1b.side_yards")
+        assert row["Fails"], (surveyed, row["Provisional"])                      # the checker's own verdict
+        side = next(i for i in r["view"]["items"] if i["name"] == "Side yard, Northeast")
+        assert (side["status"], side["colour"]) == (present.FAILS, "red"), (surveyed, side["status"], side["delta"])
+        assert side["delta"].startswith("at least ") and side["delta"].endswith(" short")
+        assert any(e["why"] == "yard" and e["status"] == present.FAILS for e in r["plan"]["encroach"])
+
+
+def test_a_row_with_no_reading_set_never_says_to_spare_unless_it_complies(house, tmp_path):
+    """Review round 2: with no reading set (a corner lot: the yards can't be read, so neither can the height's
+    bonus clause), a needs-review height row fell back to "+1'-0" to spare". Settle is the only writer of the
+    Delta: "+1'-0" if confirmed"; the panel, the report and the notice show only its words."""
+    import openpyxl
+    from design_checker.check import _report
+    got, facts = house
+    floors = copy.deepcopy(got["floors"])
+    floors[-1]["top"] -= 1.0
+    for over in ({"corner_lot": True}, {"street_line": None}):
+        r = check_site(_site(floors), {**facts, **over})
+        h = next(i for i in r["view"]["items"] if i["name"] == "Building height")
+        assert h["status"] == present.REVIEW and "to spare" not in (h.get("delta") or ""), (over, h["delta"])
+        assert h["delta"] == h["margin"] + " if confirmed", (over, h["delta"])
+    report = tmp_path / "r.xlsx"
+    check_site(_site(floors), {**facts, "corner_lot": True}, report_path=report)
+    sheet = openpyxl.load_workbook(report)["Check"]
+    rows = list(sheet.iter_rows(values_only=True))
+    head = next(x for x in rows if x and "Item" in x)
+    cell = next(x for x in rows if x and str(x[head.index("Item")]).startswith("Building height"))
+    assert "to spare" not in str(cell[head.index(next(c for c in head if c and "Delta" in str(c)))])

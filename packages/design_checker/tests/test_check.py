@@ -267,6 +267,32 @@ def test_a_lot_not_yet_surveyed_is_the_lot_as_drawn_and_said_so():
     assert every_reading(COVER, over, {}) == ("fail", "fails with the lot as drawn (confirm the survey)")
 
 
+def test_the_checker_and_the_panel_read_one_reading_set():
+    """Review round 2: the checker took its readings independently and gave up past 200 combinations, while the
+    panel's set kept each lot reading's measurements together: they disagreed. Both now read reading_set.combos:
+    the readings of one lot reading together (2 + 2, not 2 x 2 here), a word (the use, read by applies_when)
+    taken as it is, and on a tax-map lot the slack, a yard never below 0."""
+    from design_checker import reading_set
+    from design_checker.check import every_reading
+    a, b = "line 10 as a side lot line", "line 10 as a rear lot line"
+    measured = {"rear_yard": {"value": None, "readings": [{"reading": a + "; to the wall", "value": 23},
+                                                          {"reading": b + "; to the wall", "value": 27}]},
+                "lot_depth": {"value": None, "readings": [{"reading": a, "value": 100}, {"reading": b, "value": 90}]},
+                "use": {"value": "one_family_detached"}}
+    values = {k: m["value"] for k, m in measured.items()}
+    every = reading_set.combos({"rear_yard", "lot_depth"}, values, measured)
+    assert sorted((t["rear_yard"], t["lot_depth"]) for t, _ in every) == [(23, 100), (27, 90)]   # never 23 with 90
+    rule, uses = dict(REAR, applies_when='use == "one_family_detached"'), {"use": {"one_family_detached"}}
+    assert every_reading(rule, measured, uses) is None               # 23 < 25 under one reading, 27 >= 22.5 the other
+    fails = {**measured, "rear_yard": {"value": None, "readings": [{"reading": a + "; to the wall", "value": 20},
+                                                                   {"reading": b + "; to the wall", "value": 21}]}}
+    assert every_reading(rule, fails, uses) == ("fail", "fails under every reading")   # the use read as a word
+    tax = {"side_yard_smaller": {"value": 1.0}, "lot_area": {"value": None, "tolerance": {"low": 5000, "high": 6000},
+                                                             "readings": [{"reading": "as drawn", "value": 5500}]}}
+    trials = reading_set.combos({"side_yard_smaller"}, {"side_yard_smaller": 1.0}, tax, {"lot_surveyed": False})
+    assert sorted(t["side_yard_smaller"] for t, _ in trials) == [0.0, 3.0]          # 1 − 2 kept at 0
+
+
 def test_a_measurement_with_no_reading_at_all_is_never_worked_out():
     from design_checker.check import every_reading
     assert every_reading(COVER, {"building_area": _m(1600), "lot_area": _m(None)}, {}) is None
@@ -1024,8 +1050,9 @@ def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
     itself (and the answer key's) unchanged."""
     import openpyxl
     from design_checker import rhino_logic as logic
-    assert logic.delta_text("+2'-0\"") == "+2'-0\" to spare" and logic.delta_text("−1'-4\"") == "−1'-4\" short"
-    assert logic.delta_text("at limit") == "at limit" and logic.delta_text("") == ""
+    assert present.delta_words(present.COMPLIES, (2.0, 2.0), "ft", False) == "+2'-0\" to spare"
+    assert present.delta_words(present.FAILS, (-1 - 1 / 3, -1 - 1 / 3), "ft", False) == "−1'-4\" short"
+    assert present.delta_words(present.COMPLIES, (0.0, 0.0), "ft", False) == "at limit"
     got = check(MODEL, facts, tmp_path / "r.xlsx")
     margins = [i["margin"] for i in got["view"]["items"] if i["margin"]]
     assert margins and not any(m.endswith(("to spare", "short")) for m in margins)        # the data as it was
@@ -1033,7 +1060,7 @@ def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
     assert any(c.endswith(" to spare") for c in cells)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'logic.delta_text(i["margin"])' in ui
+    assert '(i.get("delta") or "")' in ui and "delta_text" not in ui          # settle's words only (round 2)
 
 
 
