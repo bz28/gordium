@@ -153,7 +153,9 @@ Every reason the code gives today comes from the table:
 - **The ground:** "the ground level isn't given: enter it (the grade plane)"; "the ground level (<ground> ft)
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
   of all the buildings, or under the lowest point of all of them, as when a survey elevation is typed for a model
-  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual); "a solid lies wholly under the
+  drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual; with spot grades,
+  read from the ground under the footprint whether or not they sit at the walls); "the spot grades don't show the
+  ground under the building (too few, or in a line): place spot grades around the building"; "a solid lies wholly under the
   ground (<ground> ft; it runs from <bottom> to <top> ft) and isn't joined directly under the building: check the
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
   it lies within that solid's plan; a sub-basement under it too); "say whether the ground is flat";

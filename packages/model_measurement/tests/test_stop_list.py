@@ -216,6 +216,8 @@ CASES = {
     "no_rear_line": _plain(lot([(0, 0), (50, 0), (25, 100)]), buildings=[box(20, 10, 30, 30)]),
     "no_ground": _plain(grade_elevation=None),
     "ground_off_building": _plain(grade_elevation=812),
+    "ground_unclear": _plain(ground_is_flat=None, grade_elevation=None, buildings=[
+        floor(10, 25, 35, 65, z0=1, z1=12, id="floor 1")], grade_points=[[60, 0, 0], [61, 1, 2.0]]),
     "buried_solid": _plain(buildings=[box(10, 25, 25, 65, 812, 842, id="house"), box(26, 25, 35, 65, 0, 45, id="tower")],
                            grade_elevation=812, main_building="house"),
     "readings_differ": _plain(lot([(0, 0), (50, 0), (50, 90), (8, 90), (0, 96)])),     # a jog: side or rear line
