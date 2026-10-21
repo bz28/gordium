@@ -1053,3 +1053,34 @@ def test_the_yard_measures_are_defined_once():
     from design_checker import present
     src = (REPO / "packages/design_checker/design_checker/check.py").read_text(encoding="utf-8")
     assert src.count("YARD_MEASURES = ") == 1 and checking.YARD_MEASURES is present.YARD_MEASURES
+
+
+
+def test_with_flat_ground_the_looked_up_fall_is_said_plainly_never_used():
+    """Architect review in Rhino (P1-5): "Ground: assumed flat" said nothing of the ground the lookup found. Under
+    FLAT_GROUND the spot grades are still never drawn or used, but their fall is said: "assumed flat (the looked-up
+    ground falls about 3.5 ft across the lot; height is checked as if flat)", in the header and the Ground fact."""
+    from design_checker import present
+    payload = {"status": "found", "facts": {"lot": {"value": {"area_sf": 7033}}},
+               "writes": {"lot_ring": [[0, 0], [50, 0], [50, 100], [0, 100]],
+                          "spots": [[1, 1, 0.2], [2, 2, 3.7], [3, 3, 1.0]]}}
+    _, saved = logic.lookup_choices(payload, {}, {})
+    assert saved["ground_fall"] == 3.5 and saved.get("ground_kind") != "spot"
+    facts = logic.ground_facts({"ground_fall": saved["ground_fall"]}, 0.0)
+    assert facts["ground_assumed"] == "flat" and facts["ground_fall"] == 3.5 and not facts.get("grade_points")
+    said = "assumed flat (the looked-up ground falls about 3.5 ft across the lot; height is checked as if flat)"
+    assert present.grade_label(facts) == said
+    assert logic.fact_sources({"ground_fall": 3.5}, "2026-10-21", True)["ground"]["value"] == said
+    _, saved = logic.lookup_choices({**payload, "writes": {**payload["writes"], "spots": []}}, {}, saved)
+    assert "ground_fall" not in saved                        # a lookup with no ground found says none
+
+
+@pytest.mark.usefixtures("ground_from_the_lookup")
+def test_with_the_lookups_ground_its_fact_names_where_the_ground_came_from():
+    """#19 round 2 (P3): with FLAT_GROUND off, the Ground fact names its source and is confirmed by you: spot
+    grades from the lookup say USGS; spot grades with no source say placed by you."""
+    state = {"ground": {"kind": "spot", "count": 14, "source": "suggested by Gordium · USGS 3DEP elevation"}}
+    got = logic.fact_sources(state, "2026-10-21", confirmed=True)["ground"]
+    assert got["source"] == "suggested by Gordium · USGS 3DEP elevation" and got["confirmed_by"] == "you"
+    got = logic.fact_sources({"ground": {"kind": "spot", "count": 3}}, "2026-10-21", confirmed=True)["ground"]
+    assert got["source"] == "placed by you" and got["confirmed_by"] == "you"

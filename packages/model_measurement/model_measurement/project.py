@@ -15,7 +15,7 @@ from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
-               "grade_points", "grade_from", "grade_is", "unsettled", "ground_assumed",
+               "grade_points", "grade_from", "grade_is", "unsettled", "ground_assumed", "ground_fall",
                "plan_north_deg"}
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).

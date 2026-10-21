@@ -1183,6 +1183,9 @@ def grade_label(facts: dict) -> str:
     elevation 0'-0"", or "not set"."""
     kind = "existing" if facts.get("grade_is") == "existing" else "finished"
     if facts.get("ground_assumed") == "flat":                 # the MVP's assumption, said wherever the grade is
+        if facts.get("ground_fall"):                          # a lookup found the ground: say plainly how it falls
+            return (f"assumed flat (the looked-up ground falls about {facts['ground_fall']:g} ft across the lot; "
+                    "height is checked as if flat)")
         return f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)})"   # the team's words
     points = facts.get("grade_points") or []
     if points:

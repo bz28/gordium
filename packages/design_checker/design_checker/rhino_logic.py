@@ -843,6 +843,11 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     if writes.get("spots") and not FLAT_GROUND:  # the MVP assumes flat ground: the lookup's ground is never used
         saved_ui["ground_kind"] = "spot"
         saved_ui["ground_source"] = SUGGESTED + " · " + label("ground", "ground")
+    zs = [p[2] for p in writes.get("spots") or []]
+    if FLAT_GROUND and zs:                       # said, never used: how much the ground the lookup found falls
+        saved_ui["ground_fall"] = round(max(zs) - min(zs), 1)
+    else:
+        saved_ui.pop("ground_fall", None)
     if lot and not writes.get("lot_ring"):      # the City's parcels: a guide only, never kept
         look["guide"] = True
         live["lot"] = GUIDE + (" " + live["lot"] if live.get("lot") else "")
@@ -1041,7 +1046,7 @@ def ground_facts(state, lot_level, flat=None):
     only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
     if FLAT_GROUND if flat is None else flat:
         return {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": lot_level, "grade_from": None,
-                "ground_assumed": "flat"}
+                "ground_assumed": "flat", **({"ground_fall": state["ground_fall"]} if state.get("ground_fall") else {})}
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
     finished = kind == "regrade" or bool(state.get("no_regrading"))
@@ -1079,7 +1084,9 @@ def fact_sources(state, today, confirmed):
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
         # with the MVP's flat ground, an assumption, credited to no service and confirmed by no one
-        "ground": (fact("assumed flat", ASSUMED_SOURCE, None) if FLAT_GROUND else
+        "ground": (fact("assumed flat" + (f" (the looked-up ground falls about {state['ground_fall']:g} ft across the "
+                        "lot; height is checked as if flat)" if state.get("ground_fall") else ""),
+                        ASSUMED_SOURCE, None) if FLAT_GROUND else
                    fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
                         "as drawn" if kind == "flat" else ground.get("source") or
                         ("picked by you" if kind == "terrain" else "placed by you"))),
