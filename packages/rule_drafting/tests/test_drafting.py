@@ -1036,21 +1036,26 @@ def test_a_law_piece_that_names_its_districts_gets_rules_only_there(inputs):
                                       "the abutting R-1a or R-1b District."}])
     got = drafter.check_answer({"templates": [every], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
                                inputs.columns, inputs.cells, inputs.notes, "test")
-    assert "general" in got["rules"], got["problems"]
-    g = got["rules"]["general"][0]
-    assert g["applies_when"] == 'district in ["R-3a", "R-3b"]'
-    assert outcome(g, {"district": "R-1b", "side_yard_larger": 1, "side_yard_smaller": 9}, inputs.ctx.allowed()) \
-        == "not_applicable"
+    # review round 2: a rule for every district is saved in each scope district's own rulebook, never as a general
+    # rule with `district in [...]` (the checker works out every part of an `and`: still needs review elsewhere)
+    assert set(got["rules"]) == {"R-3a", "R-3b"}, got["problems"]
+    assert [r["id"] for r in got["rules"]["R-3a"]] == ["R-3a.325_19e_h"]
+    assert [r["id"] for r in got["rules"]["R-3b"]] == ["R-3b.325_19e_h"]
+    assert not got["rules"]["R-3a"][0].get("applies_when")              # no district formula: where it is saved
 
 
 def test_the_saved_325_19e_rules_apply_only_in_r3a_and_r3b(inputs):
     """Rebuilt by replay (no API call): no §325-19E rule in any other district's rulebook."""
     for book in inputs.drafted.glob("*.yaml"):
         rules = [r for r in cli.load(book)["rules"] if "325_19e" in r["id"]]
-        if book.stem == "general":
-            assert rules and all(r["applies_when"].startswith('district in ["R-3a", "R-3b"]') for r in rules)
-        elif book.stem not in ("R-3a", "R-3b"):
-            assert rules == [], book.name
+        if book.stem in ("R-3a", "R-3b"):
+            assert rules, book.name
+        else:
+            assert rules == [], book.name                     # general.yaml too: scope is where a rule is saved
+    from rule_format.rulebook import zone_rules
+    for zone in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3aa", "RU"):   # the rules the checker uses for a lot there
+        assert not [r["id"] for r in zone_rules(cli.PLACE, zone) if "325_19e" in r["id"]], zone
+    assert cli.load(inputs.records / "drafting_log.yaml")["units"]["325-19E"]["scope"] == ["R-3a", "R-3b"]
     # and nothing is listed for a person in a district the law doesn't reach (R-2c's 3-number cells, RU's footnote)
     log = cli.load(inputs.records / "drafting_log.yaml")["units"]["325-19E"]
     assert all(g["rule"].split(".")[0] in ("R-3a", "R-3b", "325-19E") for g in log["unresolved"]), log["unresolved"]
@@ -1070,3 +1075,24 @@ def test_a_use_the_law_doesnt_exempt_is_never_left_out_unchecked(inputs):
     log = cli.load(inputs.records / "drafting_log.yaml")["units"]["325-19E"]
     assert any(g["rule"] == "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use" and "fraternity_sorority_group_house"
                in g["why"] for g in log["unresolved"])
+
+
+@pytest.mark.parametrize("text, scope, unread", [
+    ("Any permitted use in the R-3a or R-3b Zoning District shall", {"R-3a", "R-3b"}, False),
+    ("A lot in the R-2a District that abuts land in the R-1a District", {"R-2a"}, False),
+    ("A lot in the R-2a District adjacent to land in the R-1a District", {"R-2a"}, False),
+    ("A lot in the R-2a District that adjoins land in the R-1a District", {"R-2a"}, False),
+    ("A lot in the R-2a District next to land in the R-1a District", {"R-2a"}, False),
+    ("A lot in the R-2a District across the street from land in the R-1a District", {"R-2a"}, False),
+    ("Any lot, except in the R-1a Zoning District, shall", None, True),
+    ("Any lot other than in the R-1a District shall", None, True),
+    ("Any lot not located in the R-1a District shall", None, True),
+    ("Any lot outside the R-1a District shall", None, False),           # "outside the" reads no "in the": no scope
+    ("Any lot, excluding those in the R-1a District, shall", None, True),
+])
+def test_text_scope_reads_only_the_pieces_own_districts(inputs, text, scope, unread):
+    """Review round 2: only "abut..." was skipped, so "except in the R-1a District" read as the scope R-1a and would
+    have dropped every other district's rules (a silent pass there). A neighbor is never the scope; a district the
+    text leaves out makes the scope unreadable: a person decides."""
+    got, why = drafter.text_scope(text, inputs.ctx.districts)
+    assert got == scope and bool(why) == unread, (got, why)

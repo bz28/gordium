@@ -2057,6 +2057,55 @@ rules:
     reason: '§325-3 defines this use as ''A multiple dwelling which provides sleeping accommodations and domestic
       facilities and ser'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
       a dwelling row, with its notes) is unclear: a person decides.'
+- id: R-3a.325_19e_r3_abut_r1_max_height
+  kind: rule
+  topic: dimensions
+  title: 'R-3 abutting R-1: height same as abutting R-1 district (325-19E(2))'
+  applies_when: abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+    "one_family_attached", "two_family"]
+  check: building_height <= abutting_r1_height_limit
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 50
+    lines:
+    - 19
+    - 20
+    quote: The maximum building height requirement shall be the same as the requirement for the abutting R-1a or
+      R-1b District.
+  examples:
+  - given:
+      abuts_r1_district: true
+      use: multiple_family
+      abutting_r1_height_limit: 35
+      building_height: 35
+    expect: pass
+  - given:
+      abuts_r1_district: true
+      use: multiple_family
+      abutting_r1_height_limit: 35
+      building_height: 36
+    expect: fail
+  - given:
+      abuts_r1_district: true
+      use: two_family
+      abutting_r1_height_limit: 35
+      building_height: 50
+    expect: not_applicable
+  open_questions:
+  - If the land abuts both R-1a and R-1b, or R-1 land with different limits, which district's height governs?
+  - Does the 'height requirement' include the story limit as well as the height in feet?
+  research:
+  - question: If the land abuts both R-1a and R-1b, or R-1 land with different limits, which district's height governs?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the 'height requirement' include the story limit as well as the height in feet?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
 - id: R-3a.325_19e_r3_abut_r1_side_yard_larger
   kind: rule
   topic: dimensions
@@ -2167,5 +2216,37 @@ rules:
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-3a cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-3a.325_19e_r3_abut_r1_rear_yard
+  kind: flag
+  topic: dimensions
+  title: 'R-3 abutting R-1: rear yard 150% of chart (needs review)'
+  applies_when: abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+    "one_family_attached", "two_family"]
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 51
+    lines:
+    - 5
+    - 7
+    quote: The minimum required side or rear yard requirement shall be 150% of the requirement shown on the District
+      Regulations Chart for the R-3a or R-3b District if the side or rear yard abuts land in the R-1a or R-1b District.
+  examples: []
+  open_questions:
+  - The chart rear yard is a percent of depth or feet, whichever is less, and not less than 20 ft (footnote 16).
+    Is 150% applied to the final result including the 20 ft floor, or to each part?
+  - Does the rear yard abut R-1 land (all or part of the rear lot line)?
+  research:
+  - question: The chart rear yard is a percent of depth or feet, whichever is less, and not less than 20 ft (footnote
+      16). Is 150% applied to the final result including the 20 ft floor, or to each part?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the rear yard abut R-1 land (all or part of the rear lot line)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft

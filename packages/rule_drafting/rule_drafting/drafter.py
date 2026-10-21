@@ -492,18 +492,25 @@ def unclear_catch_all(rule: dict, law: dict, ctx: Context) -> dict:
 
 SCOPE_PHRASE = re.compile(r"\b(?:in|within)\s+(?:either\s+)?the\s+((?:R-[\w-]+|RU)(?:(?:\s*,\s*(?:or\s+|and\s+)?|\s+or\s+|"
                           r"\s+and\s+)(?:R-[\w-]+|RU))*)\s+(?:Zoning\s+)?Districts?\b", re.IGNORECASE)
-ABUTS = re.compile(r"\babut\w*\b[^.;]{0,40}$", re.IGNORECASE)
+NEIGHBOR = re.compile(r"\b(?:abut\w*|adjacent|adjoin\w*|next\s+to|across)\b[^.;]{0,40}$", re.IGNORECASE)
+EXCLUDES = re.compile(r"\b(?:except|other\s+than|not|outside|excluding)\b[^.;]{0,25}$", re.IGNORECASE)
 
 
 def text_scope(text: str, districts) -> tuple[set[str] | None, list[str]]:
     """The districts a law piece names as its own scope ("any permitted use in the R-3a or R-3b Zoning District"), or
-    None when it names none. A phrase after "abut" names the neighbor, not the scope ("abuts land in either the R-1a
-    or R-1b Zoning District"). A family name stands for its districts (R-1: R-1a, R-1b; R-U: RU). Returns (scope,
-    names it couldn't read): a name that is no district makes the scope unreadable, for a person."""
+    None when it names none. A phrase after "abut", "adjacent", "adjoins", "next to" or "across" names the neighbor,
+    not the scope ("abuts land in either the R-1a or R-1b Zoning District"). A phrase after "except", "other than",
+    "not", "outside" or "excluding" names districts the piece leaves out: read as a scope it would drop the rules
+    everywhere else (a silent pass), so the scope is unreadable and a person decides. A family name stands for its
+    districts (R-1: R-1a, R-1b; R-U: RU). Returns (scope, what it couldn't read)."""
     flat = " ".join(text.split())
     scope, unread = set(), []
     for m in SCOPE_PHRASE.finditer(flat):
-        if ABUTS.search(flat[max(0, m.start() - 60):m.start()]):
+        before = flat[max(0, m.start() - 60):m.start()]
+        if EXCLUDES.search(before):
+            unread.append(f"{m.group(0)!r} (a district the text leaves out)")
+            continue
+        if NEIGHBOR.search(before):
             continue
         for name in re.split(r"\s*,\s*(?:or\s+|and\s+)?|\s+or\s+|\s+and\s+", m.group(1)):
             key = name.replace("-", "").upper()
@@ -517,18 +524,15 @@ def text_scope(text: str, districts) -> tuple[set[str] | None, list[str]]:
     return (scope or None) if not unread else None, unread
 
 
-def in_scope(rule: dict, scope: set[str], ctx: Context) -> tuple[dict | None, str | None]:
-    """A rule drafted from a law piece whose text names its districts applies only there. A district's rule outside
-    the scope is dropped (the law doesn't apply there: (None, None)); a rule for every district (general) gets
-    `district in [...]` in applies_when and the first scope district in each worked example that doesn't give one."""
-    district = rule["id"].split(".")[0]
+def in_scope(rule: dict, scope: set[str]) -> list[dict]:
+    """A rule drafted from a law piece whose text names its districts applies only there, by where it is saved, never
+    by a formula (the checker works out every part of an `and`, so `district in [...] and abuts_r1_district` still
+    needs review where abuts_r1_district isn't measured). A district's rule outside the scope is dropped; a rule for
+    every district (general) is saved instead in each scope district's own rulebook, with that district's id."""
+    district, rest = rule["id"].split(".", 1)
     if district != "general":
-        return (rule, None) if district in scope else (None, None)
-    names = sorted(scope)
-    when = f"district in {names!r}".replace("'", '"')
-    rule = rule | {"applies_when": f"{when} and ({rule['applies_when']})" if rule.get("applies_when") else when,
-                   "examples": [ex | {"given": {"district": names[0]} | ex["given"]} for ex in rule.get("examples") or []]}
-    return rule, None
+        return [rule] if district in scope else []
+    return [rule | {"id": f"{d}.{rest}"} for d in sorted(scope)]
 
 
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
@@ -571,9 +575,13 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                     why = (f"the text names districts its scope can't be read from ({', '.join(unread)}): a person "
                            "decides which districts this rule applies to")
                 elif why is None and scope is not None:
-                    rule, why = in_scope(rule, scope, ctx)
-                    if rule is None:
-                        continue                # the law doesn't apply in this district: no rule, nothing to list
+                    placed = in_scope(rule, scope)
+                    for r in placed:            # each scope district's own copy, checked in its own rulebook
+                        if problems := validate({"district": r["id"].split(".")[0], "rules": [r]}, ctx):
+                            gaps.append({"rule": r["id"], "why": "; ".join(problems[:3])})
+                        else:
+                            good.append((column, r))
+                    continue                    # outside the scope: the law doesn't apply there, nothing to list
                 if why is None and (problems := validate({"district": rule["id"].split(".")[0], "rules": [rule]}, ctx)):
                     why = "; ".join(problems[:3])
                 if why is None:
@@ -597,6 +605,8 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}",
                                     "why": "; ".join(f"{g['rule']}: {g['why']}" for g in gaps[:3])})
     out["problems"] = [f"{r['rule']}: {r['why']}" for r in out["rejected"]]
+    if scope is not None:
+        out["scope"] = sorted(scope)
     return out
 
 

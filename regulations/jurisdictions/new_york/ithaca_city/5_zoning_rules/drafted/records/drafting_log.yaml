@@ -1514,25 +1514,24 @@ units:
   325-19E:
     rules:
     - R-3a.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-3a.325_19e_r3_abut_r1_max_height
     - R-3a.325_19e_r3_abut_r1_side_yard_larger
     - R-3a.325_19e_r3_abut_r1_side_yard_smaller
+    - R-3a.325_19e_r3_abut_r1_rear_yard
     - R-3b.325_19e_r3_abut_r1_min_lot_area_other_use
+    - R-3b.325_19e_r3_abut_r1_max_height
     - R-3b.325_19e_r3_abut_r1_max_coverage
     - R-3b.325_19e_r3_abut_r1_side_yard_larger
     - R-3b.325_19e_r3_abut_r1_side_yard_smaller
-    - general.325_19e_r3_abut_r1_max_height
-    - general.325_19e_r3_abut_r1_rear_yard
+    - R-3b.325_19e_r3_abut_r1_rear_yard
     unresolved:
     - rule: R-3a.325_19e_r3_abut_r1_max_coverage
       why: 'R-3a.325_19e_r3_abut_r1_max_coverage: example 1: expected pass, got fail'
-      cells:
-      - - 3
-        - Maximum lot coverage by buildings
-        - Percent of lot area
-        - R-3A
     - rule: 325-19E.325_19e_r3_abut_r1_min_lot_area_footnoted_rows
-      why: 'general.325_19e_r3_abut_r1_min_lot_area_footnoted_rows: general.325_19e_r3_abut_r1_min_lot_area_footnoted_rows:
-        ''title'' is a one-line label of at most 80 characters; the rule is its quotes and check'
+      why: 'R-3a.325_19e_r3_abut_r1_min_lot_area_footnoted_rows: R-3a.325_19e_r3_abut_r1_min_lot_area_footnoted_rows:
+        ''title'' is a one-line label of at most 80 characters; the rule is its quotes and check; R-3b.325_19e_r3_abut_r1_min_lot_area_footnoted_rows:
+        R-3b.325_19e_r3_abut_r1_min_lot_area_footnoted_rows: ''title'' is a one-line label of at most 80 characters;
+        the rule is its quotes and check'
     - rule: R-3a.325_19e_r3_abut_r1_min_lot_area_other_use
       why: 'the law exempts only one-family or two-family dwellings, but this rule leaves out multiple_family and
         no other rule of 325-19E covers it here: a person checks it'
@@ -1546,6 +1545,9 @@ units:
       why: 'the law exempts only one-family or two-family dwellings, but this rule leaves out fraternity_sorority_group_house
         and no other rule of 325-19E covers it here: a person checks it'
     problems: []
+    scope:
+    - R-3a
+    - R-3b
   325-20D:
     rules:
     - general.325_20d_driveway_min_width

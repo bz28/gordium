@@ -3247,21 +3247,21 @@
     "got": "needs_review",
     "drafted": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
-     "general.325_19e_r3_abut_r1_max_height",
-     "general.325_19e_r3_abut_r1_rear_yard"
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
     ],
     "notes": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
-     "general.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
     ]
    },
    {
@@ -3273,21 +3273,21 @@
     "got": "needs_review",
     "drafted": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
-     "general.325_19e_r3_abut_r1_max_height",
-     "general.325_19e_r3_abut_r1_rear_yard"
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
     ],
     "notes": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
-     "general.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
     ]
    },
    {
@@ -3299,21 +3299,21 @@
     "got": "needs_review",
     "drafted": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
-     "general.325_19e_r3_abut_r1_max_height",
-     "general.325_19e_r3_abut_r1_rear_yard"
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
     ],
     "notes": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
-     "general.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
     ]
    },
    {
@@ -3851,21 +3851,21 @@
     "got": "needs_review",
     "drafted": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
-     "general.325_19e_r3_abut_r1_max_height",
-     "general.325_19e_r3_abut_r1_rear_yard"
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
     ],
     "notes": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
-     "general.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
     ]
    },
    {
@@ -3877,21 +3877,21 @@
     "got": "needs_review",
     "drafted": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
-     "general.325_19e_r3_abut_r1_max_height",
-     "general.325_19e_r3_abut_r1_rear_yard"
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
     ],
     "notes": [
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
      "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
-     "general.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
-     "general.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
     ]
    },
    {

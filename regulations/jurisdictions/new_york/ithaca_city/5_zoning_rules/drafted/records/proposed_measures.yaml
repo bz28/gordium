@@ -1,20 +1,23 @@
 abuts_r1_district:
   meaning: The lot is in the R-3a or R-3b District and the land directly abuts land in the R-1a or R-1b District.
   needed_by:
+  - R-3a.325_19e_r3_abut_r1_max_height
   - R-3a.325_19e_r3_abut_r1_min_lot_area_other_use
+  - R-3a.325_19e_r3_abut_r1_rear_yard
   - R-3a.325_19e_r3_abut_r1_side_yard_larger
   - R-3a.325_19e_r3_abut_r1_side_yard_smaller
   - R-3b.325_19e_r3_abut_r1_max_coverage
+  - R-3b.325_19e_r3_abut_r1_max_height
   - R-3b.325_19e_r3_abut_r1_min_lot_area_other_use
+  - R-3b.325_19e_r3_abut_r1_rear_yard
   - R-3b.325_19e_r3_abut_r1_side_yard_larger
   - R-3b.325_19e_r3_abut_r1_side_yard_smaller
-  - general.325_19e_r3_abut_r1_max_height
-  - general.325_19e_r3_abut_r1_rear_yard
   unit: yes_no
 abutting_r1_height_limit:
   meaning: Maximum building height in feet in the chart for the R-1a or R-1b District that the land abuts.
   needed_by:
-  - general.325_19e_r3_abut_r1_max_height
+  - R-3a.325_19e_r3_abut_r1_max_height
+  - R-3b.325_19e_r3_abut_r1_max_height
   unit: ft
 accessory_is_frame:
   meaning: The accessory building is a frame accessory building

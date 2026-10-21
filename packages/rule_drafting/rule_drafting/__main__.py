@@ -160,6 +160,8 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
         entry["reason"] = result["reason"]
     if result.get("failed"):
         entry["failed"] = result["failed"]
+    if result.get("scope"):                     # the districts the law piece names as its own (text_scope)
+        entry["scope"] = result["scope"]
     log["units"][unit_id] = entry
     # The engineers' to-do list is rebuilt from the saved rules every time: a measure is needed by exactly the
     # rules whose formulas name it (by name, not by substring), and one no rule uses any more is dropped.
