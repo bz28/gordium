@@ -90,6 +90,7 @@ def _conduit(name, o, e):
     and is logged and said once, never raised into Rhino's drawing)."""
     logic.guard(globals().get(name) or (lambda *a: None), CONDUIT_WORDS.get(name, name))(o, e)
 
+
 LAYERS = logic.LAYERS
 ID_KEY = "gordium:id"
 SECTION, ENTRY = "Gordium", "lot_facts"
@@ -249,24 +250,15 @@ def suggested_facts(doc, zones):
     of the buildings, the lot not from a survey (the safe answer:
     lot size and coverage wait for one), the first zone with rules, a detached one-family house, and the largest
     solid as the main building. Every one is shown in the dialog; nothing is used until the architect says OK.
-    In feet, whatever the model's units."""
-    facts = {"jurisdiction": JURISDICTION, "zone": zones[0] if zones else None, "use": "one_family_detached",
-             "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}   # corner lot: never guessed
+    In feet, whatever the model's units. The decisions are rhino_logic.suggested_facts (tested in CI); this only
+    reads the model."""
     lots, buildings, _ = _sorted_objects(doc)
-    if lots:
-        lot = max(lots, key=lambda o: _area(o.Geometry))
-        facts["lot_id"] = str(lot.Id)
-        a, b = min(_segments(lot.Geometry), key=lambda s: (s[0].Y + s[1].Y) / 2)
-        facts["street_line"] = [[[a.X, a.Y], [b.X, b.Y]]]
+    lot_data = [{"id": str(o.Id), "area": _area(o.Geometry), "bottom": o.Geometry.GetBoundingBox(True).Min.Z,
+                 "segments": [((a.X, a.Y), (b.X, b.Y)) for a, b in _segments(o.Geometry)]} for o in lots]
     boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
-    lot_z = max(lots, key=lambda o: _area(o.Geometry)).Geometry.GetBoundingBox(True).Min.Z if lots else None
-    ground = logic.suggested_ground([b.Min.Z for b in boxes], lot_z)
-    if ground is not None:
-        facts["grade_elevation"] = ground
-    if buildings:
-        if len(buildings) > 1:
-            big = max(zip(buildings, boxes), key=lambda ob: ob[1].Diagonal.X * ob[1].Diagonal.Y * ob[1].Diagonal.Z)
-            facts["main_building"] = str(big[0].Id)
+    building_data = [{"id": str(o.Id), "bottom": b.Min.Z, "volume": b.Diagonal.X * b.Diagonal.Y * b.Diagonal.Z}
+                     for o, b in zip(buildings, boxes)]
+    facts = logic.suggested_facts(JURISDICTION, zones, lot_data, building_data)
     return logic.to_feet(facts, _scale(doc))
 
 
@@ -888,6 +880,7 @@ def _not_included(doc, lot):
         return []
     ring = _plan_points(lot.Geometry)
     reach = _model_length(doc, logic.ON_LOT_REACH)              # ft -> model units
+    lot_box = _plan_box(lot.Geometry)
     out = []
     every = Rhino.DocObjects.ObjectEnumeratorSettings()          # hidden and locked too, as for the Building layer:
     every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # a hidden shed still counts
@@ -902,9 +895,18 @@ def _not_included(doc, lot):
         if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or logic.on_layer(layer, "Gordium"):
             continue
-        if logic.reaches_into_lot(ring, _plan_points(g), reach):   # its footprint, against the lot's outline
+        box = _plan_box(g)
+        if not logic.box_near_lot(box, lot_box, reach):             # far from the lot: no outline work
+            continue
+        if logic.reaches_into_lot(ring, _plan_points(g), reach, box):   # its footprint, against the lot's outline
             out.append(str(o.Id))
     return out
+
+
+def _plan_box(g):
+    """An object's plan bounding box, (x0, y0, x1, y1), in the model's units."""
+    b = g.GetBoundingBox(True)
+    return (b.Min.X, b.Min.Y, b.Max.X, b.Max.Y)
 
 
 def _plan_points(g):
@@ -922,6 +924,9 @@ def _plan_points(g):
             pts = [v.Location for v in brep.Vertices]
             for e in brep.Edges:
                 pts += [e.PointAt(t) for t in (e.DivideByCount(8, True) or [])]
+            for f in brep.Faces:                 # a dome or a revolved solid: its surface gives its outline
+                u, v = f.Domain(0), f.Domain(1)
+                pts += [f.PointAt(u.ParameterAt(i / 6.0), v.ParameterAt(k / 6.0)) for i in range(7) for k in range(7)]
         else:
             pts = []
     if not pts or len(pts) > 50000:          # nothing to outline it by, or a huge mesh (a terrain): its box's corners

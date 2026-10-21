@@ -1,4 +1,5 @@
-"""The architect's answer key (test_data/test_sites/new_york/ithaca_city/scenarios/), checked in code. The same
+"""The hand-worked scenarios (test_data/test_sites/new_york/ithaca_city/scenarios/; hand-worked by Claude before Gordium ran, not yet verified by an architect),
+checked in code. The same
 scenarios are drawn and checked in Rhino by apps/rhino_plugin/tests/scenarios_in_rhino.py."""
 import copy
 
@@ -35,7 +36,7 @@ def test_gordium_gives_the_answer_key_or_a_disagreement_already_investigated(pat
 
 @pytest.mark.parametrize("path", PATHS, ids=[p.stem for p in PATHS])
 def test_never_a_false_pass(path):
-    """Where the answer key says a rule does not comply, Gordium never says it complies: no exceptions."""
+    """Where the hand-worked result says a rule does not comply, Gordium never says it complies: no exceptions."""
     sc = scenarios.load(path)
     for step in scenarios.run(sc):
         for r in step["rows"]:
@@ -83,7 +84,7 @@ def test_a_fix_is_never_rounded_short():
 def test_the_tax_map_worst_case_applies_to_the_lot_area_too():
     v = _items("08_tax_map_lot_front_yard_within_two_feet.yaml")
     assert v["Lot area"]["status"] == present.COMPLIES
-    assert "worst case (lot area 6,844 sf)" in v["Lot area"]["reason"]          # 58 × 118
+    assert "worst case (lot area 6,496 sf)" in v["Lot area"]["reason"]          # every line 2 ft in: 56 × 116
     assert v["Front yard"]["status"] == present.REVIEW                         # 26 ft: at worst 24 ft
 
 
@@ -163,8 +164,9 @@ def _bonus_at(outline, floors=None):
 
 
 def test_a_raised_rear_yard_gets_the_full_tax_map_worst_case_lot_depth_too():
-    v = _bonus_at([[14, 30], [46, 30], [46, 85.8], [38, 85.8], [38, 50], [14, 50]])     # rear 34.2, needs 32 (+0.5)
-    assert v["Rear yard"]["status"] == present.REVIEW and "32'-6\"" in v["Rear yard"]["reason"]
+    v = _bonus_at([[14, 30], [46, 30], [46, 85.8], [38, 85.8], [38, 50], [14, 50]])     # rear 34.2, needs 32
+    # at worst: 2 ft nearer the rear line (32.2) and the lot 4 ft deeper (each side line 2 ft longer): needs 33
+    assert v["Rear yard"]["status"] == present.REVIEW and "33'-0\"" in v["Rear yard"]["reason"]
 
 
 def test_a_yard_already_in_review_is_raised_too():
@@ -199,3 +201,79 @@ def test_a_left_out_object_spreading_over_the_lot_still_makes_coverage_need_revi
     v = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}
     assert v["Lot coverage"]["status"] == present.REVIEW
     assert v["Objects on the lot not included"]["status"] == present.REVIEW
+
+
+def test_the_comparison_fails_on_a_crash_a_missing_scenario_or_an_unlisted_disagreement(tmp_path, capsys):
+    """eval-integrity P1-4: a crashed Rhino run once printed an empty table, "0 disagreement(s)" and exited 0."""
+    import json
+    crashed = tmp_path / "crashed.json"
+    crashed.write_text(json.dumps({"trace": "Traceback: boom", "scenarios": {}}), encoding="utf-8")
+    assert scenarios.main(["rhino", str(crashed)]) == 1
+    out = capsys.readouterr().out
+    assert "the run crashed" in out and "no result for 'as drawn'" in out
+    empty = tmp_path / "empty.json"
+    empty.write_text(json.dumps({"scenarios": {}}), encoding="utf-8")
+    assert scenarios.main(["rhino", str(empty)]) == 1
+    every = {p.stem: scenarios.load(p) for p in PATHS}
+    name = PATHS[0].stem
+    row = {"rule": "R-1b.front_yard", "expected": "complies", "gordium": "does not comply", "match": False, "why": ""}
+    results = {n: [{"step": s, "rows": [{**row, "match": True}]} for s in scenarios.steps_expected(sc)]
+               for n, sc in every.items()}
+    assert scenarios.failures(results, every) == []
+    results[name][0]["rows"] = [row]
+    assert scenarios.failures(results, every) == [f"{name} as drawn: R-1b.front_yard expected complies, "
+                                                  "Gordium does not comply"]
+
+
+def test_the_code_comparison_passes_with_only_investigated_disagreements(capsys):
+    assert scenarios.main([]) == 0
+    assert "OK: every scenario and step ran and agrees" in capsys.readouterr().out
+
+
+def test_the_scenarios_are_never_called_an_architects_answer_key():
+    """eval-integrity P1-3: the scenarios were worked by Claude, not an architect; every place that describes them
+    says so, and nothing calls them an architect's answer key until an architect has reviewed them."""
+    from rule_format.rulebook import REPO
+    folder = REPO / "test_data/test_sites/new_york/ithaca_city/scenarios"
+    readme = (folder / "README.md").read_text(encoding="utf-8")
+    assert "Not yet verified by an architect" in readme and "Claude" in readme
+    places = [folder / "README.md", *sorted(folder.glob("*.yaml")), REPO / "packages/design_checker/design_checker/scenarios.py",
+              REPO / "packages/design_checker/tests/test_scenarios.py", REPO / "apps/rhino_plugin/README.md",
+              REPO / "apps/rhino_plugin/tests/scenarios_in_rhino.py", REPO / "docs/README.md"]
+    for p in places:
+        text = p.read_text(encoding="utf-8").lower().split("def test_the_scenarios_are_never_called")[0]
+        for phrase in ("architect's answer key", "architects' answer key", "the answer key"):
+            assert phrase not in text, (p.name, phrase)
+
+
+LESS_CAUTIOUS = [(p, rule) for p in PATHS for rule, d in (scenarios.load(p).get("disagreements") or {}).items()
+                 if d.get("direction") == "gordium_less_cautious"]
+NOT_YET = {("09_five_sided_lot", "R-1b.rear_yard"):
+           "PR #18: lot depth under every reading of which lot lines are side lines (the finding's hand reading)"}
+
+
+@pytest.mark.parametrize("path, rule", [
+    pytest.param(p, r, marks=pytest.mark.xfail(strict=True, reason=NOT_YET[(p.stem, r)]) if (p.stem, r) in NOT_YET else ())
+    for p, r in LESS_CAUTIOUS], ids=[f"{p.stem}:{r}" for p, r in LESS_CAUTIOUS])
+def test_a_less_cautious_disagreement_rests_on_what_gordium_evaluated(path, rule):
+    """eval-integrity P1-2: where the hand-worked result says needs review and Gordium says complies, a written
+    justification isn't enough (09's worked a reading by hand that Gordium never evaluates). Each must list
+    relies_on, and each item is re-checked here: a smaller lot (Gordium must still say complies there, surveyed),
+    or a measurement Gordium must have worked out under every lot-line reading."""
+    sc = scenarios.load(path)
+    relies = (sc["disagreements"][rule] or {}).get("relies_on")
+    assert relies, f"{path.stem} {rule}: Gordium is less cautious here; list what it relies_on"
+    s, f, extras = scenarios.site(sc)
+    measured = check_site(s, f, extras=extras)["measurements"]
+    for item in relies:
+        assert item.get("why"), item
+        if "lot" in item:
+            smaller = copy.deepcopy(sc)
+            smaller["lot"] = {"points": item["lot"], "surveyed": True}
+            s2, f2, e2 = scenarios.site(smaller)
+            rows = scenarios.rule_rows(check_site(s2, f2, extras=e2)["view"], rule)
+            assert rows and all(r["status"] == present.COMPLIES for r in rows), (path.stem, rule, item["why"])
+        else:
+            m = measured.get(item["measure"]) or {}
+            assert item.get("every_lot_line_reading") and len(m.get("readings") or []) >= 2, \
+                f"{path.stem} {rule}: Gordium doesn't work {item['measure']} under every reading ({item['why']})"

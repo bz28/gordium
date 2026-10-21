@@ -1,5 +1,9 @@
 # MVP UI: evidence from Rhino 8 (Mac), 2026-10-21
 
+**Purpose:** what each scripted Rhino check of the MVP screens proved, with its results and screenshots.\
+**For:** engineers, Ben, and architects who want to see the screens.\
+**Kept current by:** the MVP PR, each time a Rhino check is run again.
+
 Each file below comes from a scripted run in Rhino that **asserts** its claims (the run fails loudly otherwise) and
 closes its documents. Scripts live in `apps/rhino_plugin/tests/`.
 
