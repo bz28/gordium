@@ -101,7 +101,25 @@ try:
               (hl["red"].R, hl["red"].G, hl["red"].B, hl["amber"].R, hl["amber"].G, hl["amber"].B) ==
               (215, 38, 61, 242, 169, 0) and g.ui.HIGHLIGHT_EDGE["red"] > g.ui.HIGHLIGHT_EDGE["amber"])
         toast = (getattr(g.overlay(), "toast", None) or [[]])[0]
-        claim("1 the notice says Delta in words", any(t.endswith("−3'-0\" short") for t in toast), toast)
+        claim("1 the notice says what holds however the lot lines lie: at least 1'-0\" short (the red part)",
+              any(t.endswith("· at least 1'-0\" short") for t in toast), toast)
+        cells = [[str(v) for v in grp.Children[k].Values] for grp in g.STATE["panel_parts"].get("groups") or []
+                 for k in range(grp.Children.Count)]
+        west_row = next(c for c in cells if "Side yard, West" in c[0])
+        claim("1 the panel's Delta says the same", west_row[3] == "at least 1'-0\" short", west_row)
+        top_vp = doc.Views.Find("Top", False).ActiveViewport
+        doc.Views.ActiveView = doc.Views.Find("Top", False)
+        model = g._model_on_screen(g.overlay(), top_vp)
+        for labels_on in (False, True):
+            taken = [g.logic.status_box(top_vp.Bounds.Width, g._status_rows(g.overlay(), False))] if labels_on else []
+            status = list(taken)
+            box = g._notice_box(g.overlay(), top_vp, taken)
+            claim("1b the notice covers neither the model nor the status box (labels %s)" % ("on" if labels_on else "off"),
+                  box is not None and not any(min(box[1] + box[3], a + c) > max(box[1], a) and
+                                              min(box[2] + box[4], b + e) > max(box[2], b)
+                                              for a, b, c, e in [(model[0], model[1], model[2] - model[0],
+                                                                  model[3] - model[1])] + status),
+                  {"notice": box[1:] if box else None, "model": model, "status": status})
         vp = doc.Views.Find("Top", False).ActiveViewport
         screen = lambda line: tuple((p.X, p.Y) for p in (vp.WorldToClient(line.From), vp.WorldToClient(line.To)))  # noqa
         obstacles = [screen(line) for line in g.overlay().plan_lines]

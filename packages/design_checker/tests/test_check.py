@@ -1042,7 +1042,7 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     assert "assumed" in got["view"]["header"]["grade"]
     text = " ".join(str(c) for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
                     for row in ws.iter_rows(values_only=True) for c in row if c)
-    assert "assuming flat ground" in text and "flat at the lot level, assumed" in text
+    assert "assuming flat ground" in text and "assumed flat (elevation 2'-0\")" in text      # the lot level here
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "logic.row_name(i)" in ui
 
@@ -1295,3 +1295,25 @@ def test_the_box_pre_filter_never_drops_an_object_that_reaches_the_lot():
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
     assert body.index("logic.box_near_lot(") < body.index("_plan_points(g)")
+
+
+def test_the_notice_never_hides_the_model_when_there_is_room():
+    """Architect's review (2026-10-21): bottom left, the "no longer complies" notice hid the lot's lower edge and
+    dimensions. Screen numbers from that Top view (1000 x 640, the lot from y 30 to 610, x 265 to 735); the notice
+    690 x 32; the status box top right."""
+    from design_checker.rhino_logic import notice_spot
+    status = (518, 12, 467, 56)
+
+    def covers(x, y, box, w=690, h=32):
+        a, b, c, e = box
+        return min(x + w, c) > max(x, a) and min(y + h, e) > max(y, b)
+    # framed tight (as it was): every corner covers some of the lot; never the status box
+    x, y = notice_spot(1000, 640, 690, 32, (265, 30, 735, 610), [status])
+    assert not covers(x, y, (518, 12, 985, 68))
+    # framed with room (FRAME_ROOM 0.75: the lot from y 102 to 538): top left is clear of the lot; with the status
+    # box there too, bottom left; nothing covered either way
+    roomy = (324, 102, 676, 538)
+    assert notice_spot(1000, 640, 690, 32, roomy) == (12, 34)
+    x, y = notice_spot(1000, 640, 690, 32, roomy, [status])
+    assert (x, y) == (12, 640 - 32 - 64) and not covers(x, y, roomy) and not covers(x, y, (518, 12, 985, 68))
+    assert notice_spot(1000, 640, 690, 32, None) == (12, 34)                    # no model on screen: top left

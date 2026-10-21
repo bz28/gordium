@@ -316,6 +316,43 @@ def test_amber_follows_every_yard_in_doubt():
     assert _regions(tax) == [(present.REVIEW, 11, 35, pytest.approx(86, abs=1.5))]
 
 
+def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
+    """Architect's review (2026-10-21): "−3'-0" short" while red was only 1 ft. Worked by hand (lot 50 x 100, side
+    yards need 10 ft, the tax map ±2 ft on each lot length the rule reads):
+    - West wall 7 ft from the line: the yard is really 5 to 9 ft, so 1 to 5 ft short: "at least 1'-0" short"
+      (the red part), never "−3'-0" short";
+    - 11 ft: really 9 to 13: "up to 1'-0" short" (amber, no red); 16 ft: really 14 to 18: "at least 4'-0" to spare";
+    - the same walls on a survey: the margin itself."""
+    from design_checker.check import check_site
+    tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
+    words = {x: items(check_site(_plot(box(x, 30, 35, 65)), tax)["view"])["Side yard, West"] for x in (7, 11, 16)}
+    assert [(words[x]["delta"], words[x]["approx"]) for x in (7, 11, 16)] == [
+        ("at least 1'-0\" short", True), ("up to 1'-0\" short", True), ("at least 4'-0\" to spare", True)]
+    assert words[7]["margin"] == "−3'-0\"" and words[7]["status"] == present.FAILS     # as drawn, unchanged
+    assert "as drawn" in words[7]["detail"]["line"] and "at least 1'-0\" short" in words[7]["detail"]["line"]
+    survey = items(check_site(_plot(box(7, 30, 35, 65)), {**FACTS, "jurisdiction": CITY})["view"])["Side yard, West"]
+    assert (survey["delta"], survey["approx"]) == ("−3'-0\" short", False)
+    # the notice and the report say the same words as the panel
+    before = {i["id"]: i["status"] for i in check_site(_plot(box(16, 30, 35, 65)), tax)["view"]["items"]}
+    now = check_site(_plot(box(7, 30, 35, 65)), tax)["view"]["items"]
+    assert present.notice(before, now)[1].endswith("· at least 1'-0\" short")
+    import design_checker.check as check_mod
+    src = (REPO / "packages/design_checker/design_checker/check.py").read_text(encoding="utf-8")
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'i.get("delta") or delta_text(i["margin"])' in src and 'i.get("delta") or logic.delta_text(' in ui
+    assert check_mod.delta_text is present.delta_text
+
+
+def test_delta_words_never_overstate():
+    assert present.delta_words("−3'-0\"", (-5.0, -1.0)) == "at least 1'-0\" short"
+    assert present.delta_words("−3'-0\"", (-5.0, -1.0 - 1 / 200)) == "at least 1'-0\" short"   # rounded down
+    assert present.delta_words("−0'-9\"", (-3.25, 1.75)) == "up to 3'-3\" short"
+    assert present.delta_words("−0'-9\"", (-3.25 + 1 / 200, 1.75)) == "up to 3'-3\" short"    # rounded up
+    assert present.delta_words("+2'-0\"", (0.0, 4.0)) == "at the limit at worst"
+    assert present.delta_words("+7'-0\"", (5.0, 9.0)) == "at least 5'-0\" to spare"
+    assert present.delta_words("+7'-0\"", None) == "+7'-0\" to spare"
+
+
 def test_on_the_tax_map_red_is_over_under_every_reading_and_amber_is_the_rest_of_the_doubt():
     """West wall 6 ft from the drawn line, the side yard needs 10, the line is ±2 ft: the yard line is really
     somewhere from x 8 to 12. Red is over under every reading (x 6 to 8: 2 x 35 = 70 sf); amber is the doubt

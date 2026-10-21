@@ -326,6 +326,21 @@ def place_label(line, w, h, obstacles=(), taken=(), gap=6):
     return spots[0][0], spots[0][1], False
 
 
+def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
+    """Where the "no longer complies" notice (w × h) goes in a view (screen pixels): (left, top). The corners are
+    tried in turn (top left under the view's name, bottom left above the axes, top right, bottom right); the first
+    that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken`
+    (the status box) is used; if every corner covers some of the model, the one covering least (architect's
+    review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions)."""
+    spots = [(gap, 34), (gap, view_h - h - 64), (view_w - w - gap, 34), (view_w - w - gap, view_h - h - 40)]
+
+    def overlap(x, y, box):
+        a, b, c, e = box
+        return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
+    free = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)] or spots
+    return min(free, key=lambda s: (overlap(s[0], s[1], model) if model else 0.0, free.index(s)))
+
+
 def clear_spot(taken, x, y, w, h, avoid=()):
     """Where a w × h label wanted at (x, y) (its top left, in screen pixels) covers none already drawn this frame
     (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn, never
@@ -715,7 +730,7 @@ def fact_sources(state, today, confirmed):
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
-        "ground": fact("flat at the lot level, " + ASSUMED_FLAT + " (finished grade)" if FLAT_GROUND else
+        "ground": fact("assumed flat" if FLAT_GROUND else
                        ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
                        "as drawn" if kind == "flat" else ("picked by you" if kind == "terrain" else "placed by you")),
     }

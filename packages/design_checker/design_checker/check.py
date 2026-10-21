@@ -233,7 +233,7 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     for g in present.grouped(view["items"]):
         for item_id in g["items"]:
             i = by_id[item_id]
-            out.append([g["title"], i["mark"], i["name"], i["proposed"], i["required"], delta_text(i["margin"]),
+            out.append([g["title"], i["mark"], i["name"], i["proposed"], i["required"], i.get("delta") or delta_text(i["margin"]),
                         i.get("reason") or i.get("note") or "", i["detail"].get("citation") or "",
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
@@ -362,7 +362,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
         edges.append({"points": [list(a[:2]), list(b[:2])], "length": present.feet_inches(length)})
     yards = [{"points": i["points"], "status": i["status"], "label": f"{i['mark']} {i['name']} {i['proposed']}" +
               (f", needs {i['required']}" if i["status"] == present.FAILS and i.get("required") else "") +
-              ("" if i["status"] != present.REVIEW or "tax map" not in (i.get("reason") or "") else " (approx.)")}
+              (" (approx.)" if i.get("approx") else "")}
              for i in v["items"] if i.get("points") and i.get("measure") in YARD_MEASURES]
     encroach = []
     plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")]

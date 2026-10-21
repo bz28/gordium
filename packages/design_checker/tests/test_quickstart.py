@@ -108,12 +108,14 @@ def test_2_move_back_5_ft(house):
 
 def test_3_move_back_10_ft_the_rear_yard_fails(house):
     got, facts = house
-    dy, proposed, required, margin = said(r"Move it (\d+) ft back instead.\*\* Rear yard " + LEN + " against " + LEN
-                                          + r" required: \*\*does not comply, (−\d+'-\d+\")")
+    dy, proposed, required, margin, words = said(
+        r"Move it (\d+) ft back instead.\*\* Rear yard " + LEN + " against " + LEN
+        + r" required: \*\*does not comply, (−\d+'-\d+\")\*\* as drawn. On this tax-map lot its Delta reads "
+        r'"(up to \d+\'-\d+" short)"')
     items = _check(_moved(got["floors"], dy=float(dy)), facts, grade_is="finished")
     rear = items["Rear yard"]
-    assert (rear["status"], rear["proposed"], rear["required"], rear["margin"]) == \
-        (present.FAILS, proposed, required, margin)
+    assert (rear["status"], rear["proposed"], rear["required"], rear["margin"], rear["delta"]) == \
+        (present.FAILS, proposed, required, margin, " ".join(words.split()))
 
 
 def test_4_pull_the_rear_wall_6_ft_coverage_fails(house):
@@ -189,13 +191,17 @@ def test_10_the_height_bonus_done_right(house):
 def test_11_delta_in_words(house):
     from design_checker import rhino_logic as logic
     got, facts = house
-    front_words, rear_words = said(r'after test 2 the Front yard row reads "(\+\d+\'-\d+" to spare)"; after test 3 '
-                                   r'the Rear yard row reads "(−\d+\'-\d+" short)"')
+    front_words, rear_words, survey_words = said(
+        r'after test 2 the Front yard row reads "(at least \d+\'-\d+" to spare)"; after test 3 the Rear yard row '
+        r'reads "(up to \d+\'-\d+" short)".*?With a survey it reads the margin itself, such as "(\+\d+\'-\d+" to spare)"')
     back2, = said(r"Move the house (\d+) ft back \(away from the street\)")
     back3, = said(r"Move it (\d+) ft back instead")
     front = _check(_moved(got["floors"], dy=float(back2)), facts)["Front yard"]
     rear = _check(_moved(got["floors"], dy=float(back3)), facts)["Rear yard"]
-    assert (logic.delta_text(front["margin"]), logic.delta_text(rear["margin"])) == (front_words, rear_words)
+    front_words, rear_words, survey_words = (" ".join(w.split()) for w in (front_words, rear_words, survey_words))
+    assert (front["delta"], rear["delta"]) == (front_words, rear_words)              # the guide wraps its lines
+    surveyed = _check(_moved(got["floors"], dy=float(back2)), facts, lot_surveyed=True)["Front yard"]
+    assert surveyed["delta"] == survey_words == logic.delta_text(surveyed["margin"])
 
 
 def test_spot_grades_when_flat_ground_is_switched_off(house):

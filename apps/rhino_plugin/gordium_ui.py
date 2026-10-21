@@ -329,7 +329,7 @@ def show(parts, view, stale=False, error=None, checking=False):
             values = [("" if stale_row else i["mark"] + "  ") + logic.row_name(i),
                       "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else "needs input"
                                              if i["id"].startswith("R-") else ""),
-                      "" if stale_row else i["required"], "" if stale_row else logic.delta_text(i["margin"])]
+                      "" if stale_row else i["required"], "" if stale_row else (i.get("delta") or logic.delta_text(i["margin"]))]
             ci = ef.TreeGridItem()
             ci.Tag = item_id
             ci.Values = System.Array[System.Object](values)
@@ -637,10 +637,14 @@ def start_box(state, options, mode):
 
 # ---- the viewport (F, G) -------------------------------------------------------------------------------------
 
+def text_box_size(lines, size=13):
+    """The (width, height) draw_text_box gives these lines, in screen pixels."""
+    return max(len(t) for t in lines) * (size * 0.6) + 22, len(lines) * (size + 9) + 10
+
+
 def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=None):
     """Lines of text on a backing box (F3), at screen point x, y (top left)."""
-    width = max(len(t) for t in lines) * (size * 0.6) + 22
-    height = len(lines) * (size + 9) + 10
+    width, height = text_box_size(lines, size)
     d.Draw2dRectangle(System.Drawing.Rectangle(int(x), int(y), int(width), int(height)),
                       border or color, 1, backing(dark))
     for k, t in enumerate(lines):

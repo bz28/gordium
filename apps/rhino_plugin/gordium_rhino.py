@@ -447,6 +447,26 @@ def draw_scene(o, e):
             d.DrawMeshWires(main, BLUE, 3)
 
 
+def _model_on_screen(o, viewport):
+    """The model's box on screen (x0, y0, x1, y1): the lot's and the house's edges and the yard dimensions."""
+    pts = [viewport.WorldToClient(p) for line in getattr(o, "plan_lines", None) or [] for p in (line.From, line.To)]
+    return (min(p.X for p in pts), min(p.Y for p in pts), max(p.X for p in pts), max(p.Y for p in pts)) if pts else None
+
+
+def _notice_box(o, viewport, taken):
+    """The "no longer complies" notice, if showing in this view (the active one only, G1): (lines, x, y, w, h),
+    placed off the model and off the boxes in `taken` (logic.notice_spot), and then taken itself."""
+    toast = getattr(o, "toast", None)
+    active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
+    if not toast or time.time() >= toast[1] or active is None or viewport.Id != active.ActiveViewportID:
+        return None
+    lines = ["✕ " + line for line in toast[0]]
+    w, h = ui.text_box_size(lines, 13)
+    x, y = logic.notice_spot(viewport.Bounds.Width, viewport.Bounds.Height, w, h, _model_on_screen(o, viewport), taken)
+    taken.append((x, y, w, h))
+    return lines, x, y, w, h
+
+
 def draw_screen(o, e):
     if not _here(o, e):
         return
@@ -466,9 +486,12 @@ def draw_screen(o, e):
     # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
     # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
     plan = logic.is_plan_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
-    obstacles = [((a.X, a.Y), (b.X, b.Y)) for a, b in ((e.Viewport.WorldToClient(line.From),
+    on_screen = [((a.X, a.Y), (b.X, b.Y)) for a, b in ((e.Viewport.WorldToClient(line.From),
                                                          e.Viewport.WorldToClient(line.To))
-                                                        for line in getattr(o, "plan_lines", None) or [])] if plan else []
+                                                        for line in getattr(o, "plan_lines", None) or [])]
+    obstacles = on_screen if plan else []
+    # the notice first (placed off the model and the status box), so no label is drawn under it either
+    notice = _notice_box(o, e.Viewport, taken)
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
         color = ui.status_color("complies" if old else status, dark)
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
@@ -483,12 +506,9 @@ def draw_screen(o, e):
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels else []:   # each edge's length
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,
                     along=(edge.From, edge.To), obstacles=obstacles)          # beside its edge, off every line
-    toast = getattr(o, "toast", None)
-    active = Rhino.RhinoDoc.ActiveDoc.Views.ActiveView
-    if toast and time.time() < toast[1] and active is not None and e.Viewport.Id == active.ActiveViewportID:
-        lines = ["✕ " + line for line in toast[0]]           # bottom left, active view only (G1)
-        ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), 14,
-                         int(e.Viewport.Bounds.Height) - (22 * len(lines) + 12) - 64, dark, 13)
+    if notice is not None:
+        lines, x, y, _, _ = notice
+        ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
     if not o.message or not labels:
         return
     state = "stale" if old else o.message[0]
@@ -1896,6 +1916,11 @@ def _doc_name(doc):
     return os.path.basename(doc.Path) if doc.Path else (doc.Name or "the untitled document")
 
 
+FRAME_ROOM = 0.75      # the model framed in the middle 75% of each view: the status box and the "no longer
+                       # complies" notice sit in the band around it (architect's review, 2026-10-21: framed
+                       # tight, the notice hid the lot's lower edge and dimensions)
+
+
 def frame_site(doc, facts):
     """Every view framed on the lot and the starting house. A new file's template frames a few millimeters (or
     inches) around the origin, so without this the house sat outside every view (seen in a millimeter template,
@@ -1918,6 +1943,8 @@ def frame_site(doc, facts):
         for o in [lot] + list(_buildings(doc)):
             o.Select(True)
         Rhino.RhinoApp.RunScript("_-Zoom _All _Selected", False)
+        for view in doc.Views:               # room around the model for the status box and the notice
+            view.ActiveViewport.Magnify(FRAME_ROOM, False)
     except Exception:
         pass
     finally:

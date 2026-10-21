@@ -382,6 +382,41 @@ def _display(proposed, required, margin, unit, sign):
             margin_text(margin, unit) if margin is not None else "", margin)
 
 
+def _delta_span(node, values: dict, measured: dict, names: set):
+    """(lowest, highest) margin of one comparison over every way the tax map's lot lines could really lie: each
+    lot length the rule reads off by up to TOLERANCE either way (the same combinations as _worst_case, and as the
+    model's red and amber). None when the rule reads no lot length or has no margin in feet."""
+    lengths = sorted(n for n in names & LOT_LENGTHS if isinstance(values.get(n), (int, float)))
+    if not lengths:
+        return None
+    margins = []
+    for signs in itertools.product((-1, 1), repeat=len(lengths)):
+        trial = dict(values, **{n: values[n] + s * TOLERANCE for n, s in zip(lengths, signs)})
+        proposed, required, margin, unit, sign = _numbers(node, trial, measured, "")
+        if margin is None or unit != "ft":
+            return None
+        margins.append(margin)
+    return min(margins), max(margins)
+
+
+def delta_words(margin_t: str, span) -> str:
+    """The Delta, in words, everywhere it is shown (the panel, the notice, the report): on a survey the margin
+    itself ("+2'-0" to spare", "−1'-4" short"); on the tax map (span: the margin's lowest and highest over the lot
+    lines' ±2'-0") what is true however the lines really lie: "at least 1'-0" short" (short under every reading:
+    the red part), "up to 2'-9" short" (short under some: amber), "at least 3'-0" to spare". Never overstated:
+    "at least" rounds down, "up to" rounds up."""
+    if span is None:
+        return delta_text(margin_t)
+    low, high = span
+    if high < 0:
+        return "at least " + feet_inches(-high, "down") + " short"
+    if low >= EIGHTH / 2:
+        return "at least " + feet_inches(low, "down") + " to spare"
+    if low >= 0:
+        return "at the limit at worst"
+    return "up to " + feet_inches(-low, "up") + " short"
+
+
 def _worst_case(expr: str, values: dict, names: set) -> dict | None:
     """The values that make `expr` false when every lot line is off by up to TOLERANCE the unlucky way (a yard
     by TOLERANCE, a lot width or depth, between two lines, by twice that: measure.TAX_MAP_SLACK), or None if it
@@ -506,6 +541,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                    if "confirm the survey" in row["Provisional"] else
                    "Fails under every reading considered (" + _user_text(row["Provisional"]) + ")")
         line = _detail_line(proposed, required, margin_t, numbers[4] if node is not None else "", margin)
+        lot_span = (_delta_span(node, values, measured, names)
+                if node is not None and not facts.get("lot_surveyed") and names & LOT_LENGTHS else None)
+        if lot_span is not None and line:
+            line = (f"{proposed} proposed, {required} required as drawn · with the tax map's "
+                    f"±{feet_inches(TOLERANCE)}: {delta_words(margin_t, lot_span)}")
         hint = _hint(label, numbers[4], margin, numbers[3]) if node is not None and margin is not None else None
         if node is not None and node.left.id == "building_area" and margin is not None and margin < 0:
             allowed = _evaluate(ast.unparse(node.comparators[0]), values)
@@ -544,6 +584,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],
             "proposed": proposed, "required": required, "margin": margin_t if st != REVIEW or margin_t else "",
+            "delta": delta_words(margin_t if st != REVIEW or margin_t else "", lot_span),
+            "approx": lot_span is not None,
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
@@ -834,7 +876,7 @@ def grade_label(facts: dict) -> str:
     elevation 0'-0"", or "not set"."""
     kind = "existing" if facts.get("grade_is") == "existing" else "finished"
     if facts.get("ground_assumed") == "flat":                 # the MVP's assumption, said wherever the grade is
-        return f"flat at the lot level, assumed (finished, elevation {feet_inches(facts.get('grade_elevation') or 0)})"
+        return f"assumed flat (elevation {feet_inches(facts.get('grade_elevation') or 0)})"   # the team's words
     points = facts.get("grade_points") or []
     if points:
         source = "terrain" if facts.get("grade_from") == "terrain" else f"{len(points)} spot grades"
@@ -853,7 +895,7 @@ def header(facts: dict, extras: dict, documents: dict, use_names: dict) -> dict:
     use = facts.get("use") or ""
     lot = ("Lot lines: survey" if facts.get("lot_surveyed") else
            f"Lot lines: tax map, approximate (±{feet_inches(TOLERANCE)})")
-    grade = "Grade: " + grade_label(facts)
+    grade = ("Ground: " if facts.get("ground_assumed") == "flat" else "Grade: ") + grade_label(facts)
     actions = (["Pick survey lot lines…"] if not facts.get("lot_surveyed") else []) + (
         ["Set grade…"] if grade_label(facts) == "not set" or facts.get("grade_is") == "existing" else [])
     return {"place": " · ".join(p for p in [facts.get("address") or "", facts.get("zone") or "",
@@ -895,6 +937,6 @@ def notice(before: dict | None, items: list[dict]) -> tuple[dict, str | None]:
         i = new[0]
         detail = " · ".join(p for p in [f"{i['proposed']} proposed" if i["proposed"] not in ("", "—") else "",
                                          f"{i['required']} required" if i["required"] not in ("", "—") else "",
-                                         delta_text(i["margin"])] if p)
+                                         i.get("delta") or delta_text(i["margin"])] if p)
         return now, f"{i['name']} no longer complies" + (" · " + detail if detail else "")
     return now, f"{len(new)} items no longer comply: " + "; ".join(i["name"] for i in new)   # names hold commas
