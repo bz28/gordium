@@ -21,6 +21,8 @@ from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
 from rule_format.rulebook import MEASURE_KINDS, REPO, load, read_jsonl
 
+from design_checker.rhino_logic import delta_text  # one formatter: the panel, the report, the notice
+
 COMPLIES, FAILS, REVIEW, NOT_CHECKED = "complies", "does_not_comply", "needs_review", "not_checked"
 MARK = {FAILS: "✕", REVIEW: "?", COMPLIES: "✓", NOT_CHECKED: "–"}
 SETUP_MARK = "⚠"                          # a setup or system problem: never an item status
@@ -391,6 +393,18 @@ def _worst_case(expr: str, values: dict, names: set) -> dict | None:
     return None
 
 
+YARD_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
+COLOURS_NOTE = ("In the model: red is the part over the yard line even if the tax map's lot line is "
+                f"{feet_inches(TOLERANCE)} out (certain); amber is the part that depends on where a survey puts the line.")
+
+
+def colours_note(measure: str | None, status: str, measured: dict) -> str | None:
+    """What the red and amber in the model mean for this yard, when its lot lines are from the tax map and it
+    fails or needs review (the "?" legend says it too); otherwise nothing."""
+    tax = bool((measured.get("lot_area") or {}).get("tolerance"))
+    return COLOURS_NOTE if tax and measure in YARD_MEASURES and status in (FAILS, REVIEW) else None
+
+
 def _scope(extras: dict, measured: dict) -> str:
     s = extras.get("scope") or {}
     area = (measured.get("building_area") or {})
@@ -544,6 +558,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 "scope": _scope(extras, measured),
                 "precision": PRECISION,
                 "at_limit": (f"At the limit: {proposed} exact" if margin_t == "at limit" else None),
+                "colours": colours_note(node.left.id if node is not None else None, st, measured),
             }})
         if node is not None and node.left.id == "building_height":
             out[-1]["detail"].update(_height_detail(j, facts, values, node, numbers))
@@ -863,7 +878,8 @@ def source_lines(sources: dict) -> list[str]:
 
 def notice(before: dict | None, items: list[dict]) -> tuple[dict, str | None]:
     """(statuses now, the notice): one line for the items that don't comply now and did at the last check
-    ("Rear yard no longer complies · 20'-0" proposed · 22'-6" required · −2'-6""), several merged ("2 items no
+    ("Rear yard no longer complies · 20'-0" proposed · 22'-6" required · −2'-6" short", Delta in the panel's
+    words), several merged ("2 items no
     longer comply: Rear yard; Lot coverage"). None on the first check or when nothing newly fails."""
     now = {i["id"]: i["status"] for i in items}
     if before is None:
@@ -875,6 +891,6 @@ def notice(before: dict | None, items: list[dict]) -> tuple[dict, str | None]:
         i = new[0]
         detail = " · ".join(p for p in [f"{i['proposed']} proposed" if i["proposed"] not in ("", "—") else "",
                                          f"{i['required']} required" if i["required"] not in ("", "—") else "",
-                                         i["margin"]] if p)
+                                         delta_text(i["margin"])] if p)
         return now, f"{i['name']} no longer complies" + (" · " + detail if detail else "")
     return now, f"{len(new)} items no longer comply: " + "; ".join(i["name"] for i in new)   # names hold commas

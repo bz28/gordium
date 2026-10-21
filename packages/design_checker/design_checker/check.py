@@ -343,7 +343,7 @@ def _ring(polygon) -> list:
     return [list(p) for p in polygon.simplify(0.001).exterior.coords[:-1]]
 
 
-YARD_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
+YARD_MEASURES = present.YARD_MEASURES
 
 
 def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:

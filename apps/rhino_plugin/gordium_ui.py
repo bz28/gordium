@@ -30,6 +30,14 @@ def _dark(color):
     return 0.299 * color.R + 0.587 * color.G + 0.114 * color.B < 128
 
 
+# the model's highlights (rhino_logic.highlight): saturated and distinct on light and dark viewports alike, one
+# transparency; red also gets a solid edge so a 1 ft strip still reads at plan scale (architect's review, 2026-10-21)
+HIGHLIGHT = {"red": System.Drawing.Color.FromArgb(215, 38, 61), "amber": System.Drawing.Color.FromArgb(242, 169, 0)}
+HIGHLIGHT_TRANSPARENCY = 0.45
+HIGHLIGHT_EDGE = {"red": 3, "amber": 1}
+HIGHLIGHT_PROUD_FT = 0.02    # each block stands this far proud of the house, so their shared faces never fight
+
+
 def viewport_dark():
     return _dark(Rhino.ApplicationSettings.AppearanceSettings.ViewportBackgroundColor)
 
@@ -345,7 +353,7 @@ def show_detail(parts):
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))
     for text in (det.get("line"), i.get("reason"), i.get("hint") if i.get("hint") not in ("Add to check…",) else None,
-                 det.get("at_limit"), det.get("calc"), det.get("scope")):
+                 det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
         if text:
             d.AddRow(_wide(text, size=12))
     if i["id"].startswith("R-") and i["status"] == "not_checked":
@@ -588,18 +596,33 @@ def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=
     return width, height
 
 
-def label_at(d, viewport, point, text, color, dark, size=12, taken=None):
-    """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
-    already drawn this frame), it moves off any it would cover and a short leader points back to its spot."""
+def label_box(viewport, point, text, size=12, taken=None, along=None):
+    """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted). Takes its spot in
+    `taken`. The in-Rhino checks measure this very placement."""
     p = viewport.WorldToClient(point)
     width = len(text) * size * 0.58 + 14
-    top = p.Y - 10 if taken is None else logic.clear_spot(taken, p.X - width / 2, p.Y - 10, width, 20)
-    if abs(top - (p.Y - 10)) > 1:
+    avoid = ()
+    left, want = p.X - width / 2, p.Y - 10
+    if along is not None:
+        a, b = (viewport.WorldToClient(q) for q in along)
+        avoid = (((a.X, a.Y), (b.X, b.Y)),)
+        left, want = logic.beside_line(avoid[0][0], avoid[0][1], width, 20)
+    top = want if taken is None and not avoid else logic.clear_spot(taken if taken is not None else [], left, want,
+                                                                    width, 20, avoid)
+    return left, top, width, want
+
+
+def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None):
+    """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
+    already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
+    `along` (a dimension line's two model points), it sits beside that line, never on it."""
+    p = viewport.WorldToClient(point)
+    left, top, width, want = label_box(viewport, point, text, size, taken, along)
+    if abs(top - want) > 1:
         d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(p.X, top + (20 if top < p.Y else 0)),
                      color, 1)
-    d.Draw2dRectangle(System.Drawing.Rectangle(int(p.X - width / 2), int(top), int(width), 20), color, 1,
-                      backing(dark))
-    d.Draw2dText(text, color, rg.Point2d(p.X - width / 2 + 7, top + 3), False, size)
+    d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), 20), color, 1, backing(dark))
+    d.Draw2dText(text, color, rg.Point2d(left + 7, top + 3), False, size)
 
 
 def _signed(bits):

@@ -418,11 +418,6 @@ def draw_scene(o, e):
     d = e.Display
     dark = ui.viewport_dark()
     old = stale(o)
-    if not old:
-        for g, status in getattr(o, "encroach", None) or []:   # only the part over (F5): red fails, amber review
-            colour = ui.status_color(status, dark)
-            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, 0.35))
-            d.DrawBrepWires(g, colour, 2)
     for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
         if isinstance(g, rg.Mesh):
             d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
@@ -433,6 +428,12 @@ def draw_scene(o, e):
     if o.envelope is not None:               # see-through, drawn after the solids so they show through it
         d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
         d.DrawBrepWires(o.envelope, BLUE, 1)
+    if not old:                              # after the envelope, so its blue never tints them (F5)
+        for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
+            name = logic.highlight(status)
+            colour = ui.HIGHLIGHT[name]
+            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
+            d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
     for pt in getattr(o, "grade_points", None) or []:           # spot grades
         d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
     if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
@@ -478,7 +479,8 @@ def draw_screen(o, e):
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status):     # a failing yard's shortfall always shows
-            ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken)
+            ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
+                        along=(line.From, line.To))                 # beside its dimension line, never on it
     for point, text in (getattr(o, "edge_labels", None) or []) if plan and labels else []:   # each edge's length
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken)
     toast = getattr(o, "toast", None)
@@ -573,6 +575,17 @@ def _envelope_brep(doc, env):
 
 
 # ---- the panel -------------------------------------------------------------------------------------------
+
+def _proud(doc, brep):
+    """The block grown by ui.HIGHLIGHT_PROUD_FT on every side (drawing only: the checker's geometry is exact), so
+    it never shares a face with the house it marks."""
+    box = brep.GetBoundingBox(True)
+    eps = _model_length(doc, ui.HIGHLIGHT_PROUD_FT)
+    size = box.Max - box.Min
+    scale = [1 + 2 * eps / v if v > 1e-9 else 1 for v in (size.X, size.Y, size.Z)]
+    brep.Transform(rg.Transform.Scale(rg.Plane(box.Center, rg.Vector3d.ZAxis), *scale))
+    return brep
+
 
 def _prism(doc, outline, base, top):
     """A closed prism (outline in feet, base and top heights in feet) in the model's units, or None."""
@@ -1333,7 +1346,7 @@ def _draw_plan(doc, o, result, facts):
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
     o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
-    o.encroach = [(b, status) for b, status in ((_prism(doc, e["outline"], e["base"], e["top"]),
+    o.encroach = [(_proud(doc, b), status) for b, status in ((_prism(doc, e["outline"], e["base"], e["top"]),
                                                  e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
                   if b is not None and logic.highlight(status)]          # coloured from the rule's result only
     o.yards_zone = None

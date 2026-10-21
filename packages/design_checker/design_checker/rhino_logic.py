@@ -240,13 +240,43 @@ def suggested_ground(building_bottoms, lot_bottom):
     return min(building_bottoms) if building_bottoms else lot_bottom
 
 
-def clear_spot(taken, x, y, w, h):
+def crosses(segment, x, y, w, h):
+    """Whether the segment ((x1, y1), (x2, y2)) touches the w × h box at (x, y) (screen pixels): clipped to the
+    box's slab in x, then in y (Liang–Barsky)."""
+    (x1, y1), (x2, y2) = segment
+    t0, t1, dx, dy = 0.0, 1.0, x2 - x1, y2 - y1
+    for p, q in ((-dx, x1 - x), (dx, x + w - x1), (-dy, y1 - y), (dy, y + h - y1)):
+        if abs(p) < 1e-12:
+            if q < 0:
+                return False
+            continue
+        t = q / p
+        if p < 0:
+            t0 = max(t0, t)
+        else:
+            t1 = min(t1, t)
+        if t0 > t1:
+            return False
+    return True
+
+
+def beside_line(a, b, w, h, gap=6):
+    """Where a w × h label for the dimension line a–b goes (its top left, screen pixels): beside the line, never on
+    it. A mostly horizontal line has it above, centred; a mostly vertical one to its right, centred."""
+    (xa, ya), (xb, yb) = a, b
+    if abs(xb - xa) >= abs(yb - ya):
+        return (xa + xb) / 2 - w / 2, min(ya, yb) - gap - h
+    return max(xa, xb) + gap, (ya + yb) / 2 - h / 2
+
+
+def clear_spot(taken, x, y, w, h, avoid=()):
     """Where a w × h label wanted at (x, y) (its top left, in screen pixels) covers none already drawn this frame
     (`taken`, a list of (x, y, w, h)): the nearest free position a label's height down or up, tried in turn, never
     moved up off the top of the view; the spot is then taken. If none is free within four steps (a tall box such as
     the status box in the way), the label goes just below everything it would cover."""
     def hits(top):
-        return any(x < a + c and a < x + w and top < b + e and b < top + h for a, b, c, e in taken)
+        return any(x < a + c and a < x + w and top < b + e and b < top + h for a, b, c, e in taken) or \
+            any(crosses(s, x, top, w, h) for s in avoid)       # nor any line it must stay off (its dimension)
     top = None
     for k in range(9):
         trial = y + (k + 1) // 2 * (h + 3) * (1 if k % 2 else -1)
@@ -434,10 +464,17 @@ GROUND_CHOICES = [("spot", "Place spot grades…"), ("terrain", "Pick terrain…
                   ("regrade", "I'll regrade: set finished ground…")]
 
 
+def lot_size(area):
+    return f"{area:,.0f} sf" if isinstance(area, (int, float)) else "area not known"
+
+
+def lot_source(surveyed):
+    return "your survey" if surveyed else "the tax map (±2 ft, approximate)"
+
+
 def lot_text(area, surveyed):
     """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"."""
-    size = f"{area:,.0f} sf" if isinstance(area, (int, float)) else "area not known"
-    return size + " · from " + ("your survey" if surveyed else "the tax map (±2 ft, approximate)")
+    return lot_size(area) + " · from " + lot_source(surveyed)
 
 
 def ground_text(ground):
@@ -600,8 +637,8 @@ def fact_sources(state, today, confirmed):
         "zone": fact(state.get("zone"), state.get("zone_source") or ENTERED,
                      by if state.get("district_confirmed") else None),
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
-        "lot": fact(lot_text(state.get("lot_area"), state.get("lot_surveyed")),
-                    "your survey" if state.get("lot_surveyed") else "the tax map (±2 ft)"),
+        # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
+        "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"))),
         "street": fact(state.get("street_name") or "the highlighted line",
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],

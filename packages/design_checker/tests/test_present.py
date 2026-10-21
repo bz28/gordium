@@ -208,7 +208,7 @@ def test_the_notice_is_one_line_for_newly_failing_items_and_none_on_the_first_ch
     now, text = present.notice(None, a)
     assert text is None
     _, text = present.notice({"x": present.COMPLIES}, a)
-    assert text == "Rear yard no longer complies · 20'-0\" proposed · 22'-6\" required · −2'-6\""
+    assert text == "Rear yard no longer complies · 20'-0\" proposed · 22'-6\" required · −2'-6\" short"
     b = a + [{"id": "y", "name": "Lot coverage", "status": present.FAILS, "proposed": "", "required": "", "margin": ""}]
     _, text = present.notice({"x": present.COMPLIES, "y": present.COMPLIES}, b)
     assert text == "2 items no longer comply: Rear yard; Lot coverage"     # "; ": names have commas
@@ -329,6 +329,19 @@ def test_on_the_tax_map_red_is_over_under_every_reading_and_amber_is_the_rest_of
     assert _regions(survey) == [(present.FAILS, 6, pytest.approx(10, abs=0.02), pytest.approx(140, abs=1.5))]
 
 
+def test_a_yard_in_red_or_amber_says_what_the_colours_mean_in_its_detail():
+    from design_checker.check import check_site
+    tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
+    r = items(check_site(_plot(box(6, 30, 35, 65)), tax)["view"])
+    assert r["Side yard, West"]["detail"]["colours"] == present.COLOURS_NOTE      # fails: red and amber
+    assert "certain" in present.COLOURS_NOTE and "2'-0\"" in present.COLOURS_NOTE
+    assert r["Side yard, East"]["detail"]["colours"] is None                       # complies: no colour
+    review = items(check_site(_plot(box(11, 30, 35, 65)), tax)["view"])
+    assert review["Side yard, West"]["detail"]["colours"] == present.COLOURS_NOTE  # needs review: amber
+    survey = items(check_site(_plot(box(6, 30, 35, 65)), {**FACTS, "jurisdiction": CITY})["view"])
+    assert survey["Side yard, West"]["detail"]["colours"] is None                  # a survey: red only, nothing to say
+
+
 def test_a_height_that_needs_review_is_amber_above_the_limit():
     from design_checker.check import plan
     site = _plot(box(10, 25, 35, 65, 0, 38))
@@ -346,7 +359,12 @@ def test_the_colour_comes_from_the_result_only():
     assert [rhino_logic.highlight(s) for s in (present.FAILS, present.REVIEW, present.COMPLIES, "not_checked", None)] \
         == ["red", "amber", None, None, None]
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "logic.highlight(status)" in src and 'ui.status_color(status, dark)' in src
+    scene = src.split("def draw_scene(", 1)[1].split("\ndef ", 1)[0]
+    assert "name = logic.highlight(status)" in scene and "colour = ui.HIGHLIGHT[name]" in scene
+    # drawn after the translucent envelope, so its blue never tints them (seen muddy in Rhino, 2026-10-21)
+    assert scene.index("o.envelope, Rhino.Display.DisplayMaterial") < scene.index("ui.HIGHLIGHT[name]")
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "FromArgb(215, 38, 61)" in ui and "FromArgb(242, 169, 0)" in ui      # #D7263D, #F2A900
 
 
 def test_the_plan_labels_each_lot_edge_and_each_measured_yard():

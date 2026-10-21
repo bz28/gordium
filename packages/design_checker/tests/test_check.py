@@ -563,7 +563,8 @@ def test_every_fact_records_its_source_and_who_confirmed_it_and_the_panel_and_re
     from design_checker.check import check
     sources = logic.fact_sources(_box(district_confirmed=True), "2026-10-20", confirmed=True)
     assert sources["zone"] == {"value": "R-1b", "source": "entered by you", "confirmed_by": "you", "date": "2026-10-20"}
-    assert sources["lot"]["source"] == "the tax map (±2 ft)"
+    assert sources["lot"] == {"value": "6,570 sf", "source": "the tax map (±2 ft, approximate)",
+                              "confirmed_by": "you", "date": "2026-10-20"}       # the source said once
     unticked = logic.fact_sources(_box(), "2026-10-20", confirmed=True)
     assert unticked["zone"]["confirmed_by"] is None                       # the district needs its own tick
     got = check(MODEL, facts, tmp_path / "r.xlsx", extras={"sources": sources})
@@ -1185,3 +1186,22 @@ def test_the_panel_columns_fit_and_the_labels_tick_has_its_own_row():
     assert sum(cols.values()) + 40 <= width                 # the panel's padding and the tree's own margin
     assert "    layout.Add(row(_labels_box(actions, parts)))" in ui
     assert "_massing_box(actions), _labels_box(" not in ui
+
+
+def test_a_yard_label_sits_beside_its_dimension_line_never_on_it():
+    """Seen in Rhino (2026-10-21): "Side yard, West 7'-0", needs 10'-0"" was crossed by its own dimension line. The
+    label goes beside the line (above a horizontal one, right of a vertical one), and moving it off another label
+    never puts it back on the line."""
+    from design_checker.rhino_logic import beside_line, clear_spot, crosses
+    assert crosses(((0, 10), (100, 10)), 40, 0, 30, 20) and not crosses(((0, 10), (100, 10)), 40, 11, 30, 20)
+    assert crosses(((0, 0), (100, 100)), 40, 40, 5, 5) and not crosses(((0, 0), (100, 100)), 60, 0, 30, 20)
+    for a, b in [((0, 300), (200, 300)), ((50, 0), (50, 400)), ((0, 300), (200, 260)), ((50, 0), (90, 400)),
+                 ((200, 300), (0, 300))]:
+        w, h = 180, 20
+        x, y = beside_line(a, b, w, h)
+        assert not crosses((a, b), x, y, w, h), (a, b)
+        mid = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+        assert abs(x + w / 2 - mid[0]) < w and abs(y + h / 2 - mid[1]) < 60           # still next to its line
+        taken = [(x - 20, y - 5, w + 40, h + 10)]                                      # another label there first
+        top = clear_spot(taken, x, y, w, h, avoid=[(a, b)])
+        assert not crosses((a, b), x, top, w, h), (a, b, top)
