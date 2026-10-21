@@ -170,6 +170,50 @@ try:
     g.STATE["dirty"] = time.time() - 2 * g.IDLE_SECONDS  # as if Rhino went idle after the edit
     g._idle(None, None)
     claim("6 and re-checked", (before, west(g)["proposed"]) == ("12'-0\"", "11'-0\""), (before, west(g)["proposed"]))
+    # 7 (review round 2): an update over a copy from before LEFTOVERS existed (9303d10: what a cofounder has
+    # before git pull), with that copy on and STATE kept, the new copy imported WITHOUT off()
+    g.off()
+    old_root = S + "old_9303d10"
+    if not os.path.isdir(old_root + "/apps"):
+        os.makedirs(old_root, exist_ok=True)
+        tar = subprocess.run(["git", "-C", WT, "archive", "9303d10"], capture_output=True, check=True).stdout
+        subprocess.run(["tar", "-x", "-C", old_root], input=tar, check=True)
+    venv = os.path.dirname(os.path.dirname(g._python()))      # .venv/bin/python -> .venv
+    if os.path.realpath(old_root + "/.venv") != os.path.realpath(venv):
+        if os.path.islink(old_root + "/.venv"):
+            os.remove(old_root + "/.venv")
+        os.symlink(venv, old_root + "/.venv")
+    for name in ("gordium_rhino", "rhino_logic", "gordium_ui"):
+        sys.modules.pop(name, None)
+    g.STATE["repo"] = old_root
+    sys.path.insert(0, old_root + "/apps/rhino_plugin")
+    import gordium_rhino as old                          # the old copy, on: live, the document hooks, the drawing
+    claim("7 the old copy is the pre-LEFTOVERS one", not hasattr(old, "LEFTOVERS") and
+          old.__file__.startswith(old_root), old.__file__)
+    old.live(True)
+    old.documents(True)
+    old_overlay = old.overlay()
+    old_worker = old._worker()
+    log["old_on"] = python_handlers()
+    for name in ("gordium_rhino", "rhino_logic", "gordium_ui"):
+        sys.modules.pop(name, None)
+    sys.path[:] = [p for p in sys.path if not p.startswith(old_root)]
+    g.STATE["repo"] = WT                                 # the same repository, updated (git pull)
+    app = WT + "/apps/rhino_plugin"
+    if app in sys.path:
+        sys.path.remove(app)
+    sys.path.insert(0, app)
+    import gordium_rhino as g                            # the new copy: no off(), STATE kept
+    g.overlay()
+    log["after_update"] = upd = python_handlers()
+    claim("7 after the update: one copy's handlers attached (baseline + 1)",
+          all(upd[e] == base[e] + 1 for e in EVENTS), {"baseline": base, "old_on": log["old_on"], "after": upd})
+    claim("7 the old copy's drawing is off", not old_overlay.Enabled)
+    try:
+        old_worker.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        pass
+    claim("7 the old copy's checker is stopped", old_worker.poll() is not None)
     log["ok"] = all(c["ok"] for c in log["claims"].values())
 except Exception:
     log["trace"] = traceback.format_exc()
