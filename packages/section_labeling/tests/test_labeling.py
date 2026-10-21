@@ -220,6 +220,37 @@ def test_relabeling_keeps_a_reviewers_questions_and_counts_skipped_pieces(law, t
     assert "labeled 1, failed 0, skipped 1 already approved" in capsys.readouterr().out
 
 
+HOLDS_THE_LEDGER = """
+import pathlib, sys, time
+from section_labeling.budget import Budget
+with Budget(10.0, pathlib.Path(sys.argv[1]))._locked() as data:
+    pathlib.Path(sys.argv[2]).write_text("held", encoding="utf-8")
+    time.sleep(1.2)
+    data["spent_usd"] += 1.0
+"""
+
+
+def test_a_second_run_waits_for_the_ledger_lock_and_sees_the_first_runs_spending(tmp_path):
+    """Review round 1 (Windows lock): two runs at once never both read the old total. Another process holds the
+    lock ~1 s and adds $1; this run's reserve must wait for it, then add to it (on Windows and Mac/Linux alike)."""
+    import subprocess
+    import time
+    ledger, held = tmp_path / "ledger.json", tmp_path / "held"
+    child = subprocess.Popen([sys.executable, "-c", HOLDS_THE_LEDGER, str(ledger), str(held)])
+    try:
+        deadline = time.monotonic() + 60
+        while not held.exists():
+            assert child.poll() is None and time.monotonic() < deadline, "the other run never took the lock"
+            time.sleep(0.02)
+        start = time.monotonic()
+        Budget(10.0, ledger).reserve(0.5)
+        waited = time.monotonic() - start
+    finally:
+        assert child.wait(timeout=60) == 0
+    assert waited >= 0.8, f"reserve didn't wait for the lock ({waited:.2f} s)"
+    assert Budget(10.0, ledger).spent == pytest.approx(1.5)          # both charges kept, neither overwritten
+
+
 def test_spent_is_never_less_than_the_recorded_runs(tmp_path):
     assert Budget(1.00, tmp_path / "missing.json", recorded_usd=0.4).spent == 0.4
     (tmp_path / "ledger.json").write_text(json.dumps({"spent_usd": 0.7, "calls": 9}), encoding="utf-8")

@@ -107,12 +107,15 @@ def test_every_venv_python_the_plugin_starts_runs_in_utf8_mode():
 
 
 def test_every_command_prints_in_utf8():
-    """Each `python -m <package>` sets its output to UTF-8 first (rulebook.utf8_console), or on Windows a command
-    whose output goes to a file, a pipe or CI crashes on its first ✓ (found by the Windows CI job)."""
-    mains = sorted((REPO / "packages").glob("*/*/__main__.py"))
-    assert len(mains) >= 8
-    missing = [p.relative_to(REPO).as_posix() for p in mains
-               if "utf8_console()" not in p.read_text(encoding="utf-8").split('if __name__ == "__main__":', 1)[-1]]
+    """Every module run as a command (`python -m <package>`, `python -m design_checker.scenarios`...) sets its output
+    to UTF-8 first (rulebook.utf8_console), or on Windows a command whose output goes to a file, a pipe or CI
+    crashes on its first ✓ (found by the Windows CI job)."""
+    guard = 'if __name__ == "__main__":'
+    commands = [p for p in (REPO / "packages").glob("*/*/*.py")
+                if p.parent.name != "tests" and guard in p.read_text(encoding="utf-8")]
+    assert len(commands) >= 9 and any(p.name == "scenarios.py" for p in commands)
+    missing = [p.relative_to(REPO).as_posix() for p in commands
+               if "utf8_console()" not in p.read_text(encoding="utf-8").split(guard, 1)[1]]
     assert missing == [], missing
 
 
@@ -168,6 +171,13 @@ def test_rule_format_passes_when_the_computer_reads_cp1252():
     grade_plane: ... quote isn't at lines 32-33; not on this page: 'GRADE PLANE â€”'"."""
     done = _as_windows("rule_format")
     assert done.returncode == 0, done.stdout[-3000:] + done.stderr[-3000:]
+
+
+def test_the_scenarios_command_prints_on_a_cp1252_pipe():
+    """Review round 1: `python -m design_checker.scenarios` printed its table without utf8_console and crashed."""
+    done = _as_windows("design_checker.scenarios")
+    assert done.returncode == 0, done.stdout[-3000:] + done.stderr[-3000:]
+    assert "disagreement(s)" in done.stdout
 
 
 def test_the_cp1252_probe_really_breaks_code_that_names_no_encoding(tmp_path):

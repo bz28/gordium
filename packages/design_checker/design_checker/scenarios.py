@@ -16,7 +16,7 @@ from pathlib import Path
 import yaml
 
 from design_checker import present
-from rule_format.rulebook import REPO
+from rule_format.rulebook import REPO, utf8_console
 
 FOLDER = REPO / "test_data/test_sites/new_york/ithaca_city/scenarios"
 JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
@@ -193,4 +193,5 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))
