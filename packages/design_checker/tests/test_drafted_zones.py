@@ -58,7 +58,8 @@ ZONES = ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b", "RU"]
 @pytest.mark.parametrize("zone", ZONES)
 def test_every_chart_row_the_zone_states_is_checked_by_a_rule_or_listed_as_not_checked(zone):
     """Stage 1 drafted no minimum lot width rule, and the result simply had no lot-width row. Now every cell of the
-    zone's chart column that states something is cited by one of the zone's rules or listed as not checked."""
+    zone's chart column that states something is cited by one of the zone's rules or listed as not checked (the
+    loading row, never drafted, is listed for every zone)."""
     from design_checker.gaps import _cells, _cites, _clean, EMPTY, chart_gaps
     from rule_format.rulebook import district_name, zone_rules
     rules = zone_rules(J, zone)
@@ -70,16 +71,15 @@ def test_every_chart_row_the_zone_states_is_checked_by_a_rule_or_listed_as_not_c
     for c in stated:
         listed = (c["page"], _clean(c["section"]), _clean(c["row"])) in rows
         assert any(_cites(s, c) for s in sources) or listed, (c["page"], c["section"], c["row"])
-    if zone != "R-1b":                                  # no lot-width rule was drafted: listed for every drafted zone
-        assert any(g.startswith("chart.p3.minimum_lot_width") for g in gaps)
+    assert any(g.startswith("chart.p14.minimum_loading_requirement") for g in gaps)     # not drafted: listed
 
 
 def test_a_missing_rule_shows_as_a_not_checked_item_on_the_panel():
     got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-1a", "accessory_buildings": []})
     items = {i["id"]: i for i in got["view"]["items"]}
-    width = [i for k, i in items.items() if k.startswith("gap.chart.p3.minimum_lot_width")]
-    assert width and all(i["status"] == "not_checked" and i["group"] == "not_covered" for i in width)
-    assert "gap.drafting.325-19E" in items              # the law piece whose AI answer was cut off: not drafted
+    loading = [i for k, i in items.items() if k.startswith("gap.chart.p14.minimum_loading_requirement")]
+    assert loading and all(i["status"] == "not_checked" and i["group"] == "not_covered" for i in loading)
+    assert "gap.drafting.325-19A" in items              # a law piece the drafting run gave no rule: listed
 
 
 def test_the_start_box_offers_drafted_zones_only_behind_bens_setting_labeled_draft_and_never_general():
