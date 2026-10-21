@@ -107,9 +107,11 @@ def test_their_model_with_the_house_on_its_outline_against_their_spreadsheet(the
     # their model's house is about 53.3-53.6 x 40.4-40.8 ft (not quite rectangular); the sheet's is 53 x 35
     assert round(got["building_area"], 1) == 2169.2 and cells["building_area"] == 1855
     # the house is deeper, so the rear yard is the sheet's unused "Back Offset" input (20 ft), not 25 ft
-    assert got["rear_yard"] == 20.0 and cells["rear_yard"] == 25
-    assert got["lot_depth"] is None and cells["lot_depth"] == 90                         # the jog: two readings, neither 90
-    assert sorted(round(r["value"], 2) for r in m["lot_depth"]["readings"]) == [94.82, 100.06]
+    # (with the back line read as part of the east side line, the jog alone is the rear line: every reading the
+    # geometry allows, review round 8; the nearest is still 20 ft)
+    assert min(r["value"] for r in m["rear_yard"]["readings"]) == 20.0 and cells["rear_yard"] == 25
+    assert got["lot_depth"] is None and cells["lot_depth"] == 90              # the jog: three readings, none 90
+    assert sorted(round(r["value"], 2) for r in m["lot_depth"]["readings"]) == [94.82, 100.06, 128.69]
     # results: never a PASS where they don't agree. The two rules that need the lot depth need review, and so
     # do the two that need the lot area: their model's lot is drawn from the map, not a survey
     mine = ours(m, rules, allowed, results)

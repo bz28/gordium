@@ -553,6 +553,17 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 ", ".join(f"{n} {p}, needs {s} {r}" for n, p, s, r, _ in alt) for alt in alts)
             fixes = [_fix(*alt[0]) for alt in alts if len(alt) == 1]
             hint = "To comply: " + ", or ".join(fixes) + "." if fixes else hint
+        if (node is not None and st != COMPLIES and required in ("—", None) and values.get("building_height") is None
+                and "building_height" in formula.names(ast.unparse(node.comparators[0]))):
+            # a limit raised by the §325-16C height bonus, while the height can't be measured: show the base
+            # requirement (no bonus) and say it may be more; never as complying
+            base = _evaluate(ast.unparse(node.comparators[0]), dict(values, building_height=0.0))
+            if isinstance(base, (int, float)):
+                unit = (measured.get(node.left.id) or {}).get("unit") or ""
+                required = f"{numbers[4]} {value_text(base, unit, numbers[4], False)}".strip()
+                more = "more if the §325-16C height bonus applies; the height needs " + (
+                    "finished grade" if facts.get("grade_is") == "existing" else "to be measured")
+                why = f"{why} ({more})" if why else f"Needs review ({more})"
         applied = _applied(names, measured)
         if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
             why = f"{why} · {applied['note']}" if why else applied["note"]
@@ -640,8 +651,13 @@ def _side_name(measure: str, measured: dict) -> str:
         if abs(dx) < 1e-6 and abs(dy) < 1e-6:          # a yard of 0: no direction to name it by
             return None
         return ("East" if dx > 0 else "West") if abs(dx) >= abs(dy) else ("North" if dy > 0 else "South")
-    a = facing((measured.get("side_yard_smaller") or {}).get("points"))
-    b = facing((measured.get("side_yard_larger") or {}).get("points"))
+    def faces(name):
+        """The one direction every reading of a side yard was measured toward, or None if they differ (under one
+        reading the narrower yard is to one side line, under another to the other: no compass name is true)."""
+        m = measured.get(name) or {}
+        found = {facing(r.get("points")) for r in m.get("readings") or []} or {facing(m.get("points"))}
+        return found.pop() if len(found) == 1 else None
+    a, b = faces("side_yard_smaller"), faces("side_yard_larger")
     if a and b and a != b:
         return "Side yard, " + (a if measure == "side_yard_smaller" else b)
     return "Side yard, " + ("narrower" if measure == "side_yard_smaller" else "wider")

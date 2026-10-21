@@ -33,10 +33,9 @@ MEASURES = list(load(MEASURES_FILE))
 
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
-PARALLEL, PERPENDICULAR = 30, 60   # degrees from the street: clearly a rear line / clearly a side line
-SQUARE = 5                # degrees from the street: a back line that slants more may continue the side line
+PARALLEL = 30             # degrees: street lines turning more than this between them turn a corner
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
-MAX_UNCLEAR_EDGES = 4     # more lot lines than this of unclear kind: too many readings to list
+MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
@@ -165,46 +164,28 @@ class Lot:
 
     def readings(self):
         """Every way to read which lot lines are side lines and which are rear lines: a list of
-        (description, left side edges, right side edges, rear edges). Lines next to the street lines and
-        about square to the street are side lines; lines not next to it and about parallel are rear lines;
-        any other line could be either, so both are tried."""
+        (description, left side edges, right side edges, rear edges), or None when there are too many to list.
+
+        Every reading the geometry allows, none pruned by angle (review round 8): walking out from each end of the
+        street lines, the lines run on as that side lot line for one or more lines, and the rear lot line is what
+        is left between the two sides. Excluded only where the law excludes it: a line touching the street is a
+        side line, never the rear (so each side starts with the line at the street's end), and a reading with
+        no rear line isn't one. More than MAX_UNCLEAR_EDGES lines that could be either: too many to list, so
+        the measuring stops (needs review), never fewer readings silently."""
         n, chain = len(self.edges), self.ordered_street()
-        front = _chord([p for i in chain for p in (self.edges[i][0], self.edges[i][-1])])
         rest = [(chain[-1] + k) % n for k in range(1, n - len(chain) + 1)]     # from the street's end, around
-        ends = {rest[0], rest[-1]}
-        kinds = {}
-        # a line next to a side lot line could continue it: when it slants (a short back line: more than SQUARE
-        # from the street) or it is a step (the line after it turns back alongside the lot, square to the street).
-        # Both readings then; those that leave no rear line drop out. Otherwise, about parallel: a rear line
-        beside = {}
-        if len(rest) > 2:
-            beside = {rest[1]: rest[2], rest[-2]: rest[-3]}
-        def continues(i):
-            return (_angle(_chord(self.edges[i]), front) > SQUARE or
-                    _angle(_chord(self.edges[beside[i]]), front) >= PERPENDICULAR)
-        for i in rest:
-            a = _angle(_chord(self.edges[i]), front)
-            if i in ends and a >= PERPENDICULAR:
-                kinds[i] = ("side",)
-            elif i not in ends and a <= PARALLEL and not (i in beside and continues(i)):
-                kinds[i] = ("rear",)
-            else:
-                kinds[i] = ("side", "rear")
-        unclear = [i for i in rest if len(kinds[i]) == 2]
-        if len(unclear) > MAX_UNCLEAR_EDGES:
+        if len(rest) - 2 > MAX_UNCLEAR_EDGES:          # the lines between the two lines at the street's ends
             return None
         found = []
-        for choice in itertools.product(*(kinds[i] for i in rest)):
-            k = dict(zip(rest, choice))
-            # side lines run from each end of the street lines; the rear lines are what is left between them
-            right = list(itertools.takewhile(lambda i: k[i] == "side", rest))
-            left = list(itertools.takewhile(lambda i: k[i] == "side", reversed(rest)))
-            rear = [i for i in rest if i not in right and i not in left]
-            if not right or not left or not rear or any(k[i] != "rear" for i in rear):
-                continue
-            words = ", ".join(f"line {i + 1} as a {k[i]} lot line" for i in unclear)
-            found.append((words, left, right, rear))
-        return found
+        for k1 in range(1, len(rest)):
+            for k2 in range(1, len(rest) - k1):
+                right, left = rest[:k1], list(reversed(rest))[:k2]
+                rear = rest[k1:len(rest) - k2]
+                found.append((left, right, rear))
+        middle = rest[1:-1]
+        varies = [i for i in middle if len({i in r for _l, _r, r in found}) == 2]
+        return [(", ".join(f"line {i + 1} as a {'rear' if i in rear else 'side'} lot line" for i in varies),
+                 left, right, rear) for left, right, rear in found]
 
 
 # ---- buildings -------------------------------------------------------------------------------------------
@@ -1086,6 +1067,9 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     if why_yards:
         for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
             out[name] = _missing(name, why_yards)
+        if why_yards == why_main_off and not why_acc_off and detached:
+            # only the main building is off the lot: an accessory building on it is still measured on its own
+            _accessory_yards(out, lot, lines, facts, detached, views)
         return out
     _yards(out, lot, lines, facts, main, parts_of, detached, views)
     if why_acc_off:                              # an accessory building wholly off the lot: its own rule waits
