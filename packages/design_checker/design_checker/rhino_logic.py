@@ -662,13 +662,10 @@ def ground_text(ground):
 
 
 def street_name(state):
-    """The street the lot faces, by name: the one found, else the street of the address ("106 Ithaca Rd, Ithaca"
-    -> "Ithaca Rd"), else the line itself."""
-    import re
-    if state.get("street_name"):
-        return state["street_name"]
-    m = re.match(r"\s*\d+[A-Za-z]?\s+([^,]+)", state.get("address") or "")
-    return m.group(1).strip() if m else "the highlighted line"
+    """The street the highlighted lot line is on, by name, only when that line's street is known (a lookup's
+    street, or the sample's); else the line itself, so the architect checks which line it is (the street line
+    sets the front, side and rear yards: never named from the address alone)."""
+    return state.get("street_name") or "the highlighted line"
 
 
 def box_rows(state, flat=None):
