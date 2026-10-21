@@ -94,79 +94,137 @@ def parse(text: str) -> ast.Expression:
     return tree
 
 
+NUMBER, TEXT, BOOL = "number", "text", "bool"       # the three kinds of value a formula works with
+ANY_LIST = "list"                                     # an empty [list]: of no kind yet
+
+
+class _Mismatch(Exception):
+    """An operator given operands of kinds it doesn't take (wrong for every value)."""
+
+
+class _Undescribed(Exception):
+    """A measure with no description: nothing about it can be told."""
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.name = name
+
+
 def _kind_type(kind) -> str | None:
     """A measure's description as a formula type: number, text or bool (None: no description)."""
     if kind == "number":
-        return "number"
+        return NUMBER
     if kind == "boolean":
-        return "bool"
+        return BOOL
     if kind == "text" or isinstance(kind, (set, frozenset)):
-        return "text"
+        return TEXT
     return None
 
 
+def result_type(rule: str, operands: list[str]) -> str:
+    """THE type rules of the language, one place, used by both the rule-file check (type_of) and the evaluation:
+    given an operator and its operands' kinds, the kind of its result, or _Mismatch. The language is kept small:
+    true/false tests combine only with and / or / not (never ==, !=, in, arithmetic or an if's branches).
+
+        arithmetic (+ - * /), minus, min(), max()    numbers            -> number
+        <  <=  >  >=                                  two numbers        -> true/false
+        ==  !=                                        two numbers, or two texts -> true/false
+        in / not in [list]                            a number or text, and a list of that kind -> true/false
+        not, and, or                                  true/false tests   -> true/false
+        a if test else b                              a true/false test, and two numbers or two texts -> that kind
+        [a, b, ...]                                   numbers, or texts  -> a list of that kind
+    """
+    def need(ok, why):
+        if not ok:
+            raise _Mismatch(why)
+
+    if rule in ("arithmetic", "minus", "min/max"):
+        need(all(t == NUMBER for t in operands),
+             {"arithmetic": "arithmetic needs numbers", "minus": "a minus sign needs a number",
+              "min/max": "min() and max() take numbers"}[rule])
+        return NUMBER
+    if rule == "ordering":
+        need(operands == [NUMBER, NUMBER], "<, <=, >, >= compare numbers")
+        return BOOL
+    if rule == "equality":
+        need(operands[0] in (NUMBER, TEXT) and operands[0] == operands[1],
+             "== and != compare two numbers or two texts (true/false tests combine with and/or/not)")
+        return BOOL
+    if rule == "membership":
+        need(operands[0] in (NUMBER, TEXT) and operands[1] in ("list of " + operands[0], ANY_LIST),
+             "'in' needs a number or text and a list of the same kind")
+        return BOOL
+    if rule in ("not", "and/or"):
+        need(all(t == BOOL for t in operands),
+             "'not' needs a true/false test" if rule == "not" else "and/or need true/false tests")
+        return BOOL
+    if rule == "if":
+        need(operands[0] == BOOL, "an if needs a true/false test")
+        need(operands[1] in (NUMBER, TEXT) and operands[1] == operands[2],
+             "both branches of an if must give two numbers or two texts")
+        return operands[1]
+    if rule == "list":
+        need(all(t in (NUMBER, TEXT) for t in operands) and len(set(operands)) <= 1,
+             "a list holds numbers, or texts, not a mix")
+        return "list of " + operands[0] if operands else ANY_LIST
+    raise _Mismatch(f"unsupported expression {rule}")
+
+
+def _rule_of(node, op=None) -> str:
+    """Which of the type rules an expression (or one comparison of a chain, `op`) follows."""
+    op = op if op is not None else getattr(node, "op", None)
+    if isinstance(node, ast.BinOp):
+        return "arithmetic"
+    if isinstance(node, ast.UnaryOp):
+        return "minus" if isinstance(op, ast.USub) else "not"
+    if isinstance(node, ast.BoolOp):
+        return "and/or"
+    if isinstance(node, ast.Call):
+        return "min/max"
+    if isinstance(node, ast.IfExp):
+        return "if"
+    if isinstance(node, (ast.List, ast.Tuple)):
+        return "list"
+    return ("ordering" if type(op) in _ORDERING else "equality" if type(op) in _EQUALITY else "membership")
+
+
 def type_of(text: str, kinds: dict) -> str:
-    """The formula's type (number, text, bool), worked out from the measures' descriptions without any values:
-    raises FormulaError where it is ill-typed for every value (a number compared with text, a number used as
-    true/false, true/false in arithmetic, a measure with no description). Rule files are checked with it, so
-    no frozen rule can be ill-typed; the evaluation checks the same at run time as a defence."""
-    return _type(parse(text).body, kinds, text)
+    """The formula's kind (number, text, bool), worked out from the measures' descriptions without any values,
+    by the language's type rules (result_type). Raises FormulaError where it is wrong for every value (a number
+    compared with text, a number used as true/false, true/false compared or in arithmetic) or names a measure with
+    no description. Rule files are checked with it, so no frozen rule can be ill-typed; evaluate() checks it too,
+    before any value is looked at, so no error every value would give can hide behind a missing measure."""
+    try:
+        return _type(parse(text).body, kinds)
+    except _Undescribed as e:
+        raise FormulaError(f"unknown measure '{e.name}' in {text!r}") from None
+    except _Mismatch as e:
+        raise FormulaError(f"{e}: {text!r}") from None
 
 
-def _type(node, kinds, text):
-    def bad(why):
-        raise FormulaError(f"{why}: {text!r}")
+def _type(node, kinds) -> str:
     match node:
         case ast.Constant(value=v):
-            return "text" if type(v) is str else "number"
+            return TEXT if type(v) is str else NUMBER
         case ast.Name(id=name):
             t = _kind_type(kinds.get(name))
             if t is None:
-                bad(f"unknown measure '{name}'")
+                raise _Undescribed(name)
             return t
-        case ast.List(elts=items) | ast.Tuple(elts=items):
-            types = {_type(i, kinds, text) for i in items}
-            if len(types) > 1:
-                bad("a list mixes kinds of values")
-            return "list of " + (types.pop() if types else "number")
-        case ast.BinOp(left=l, right=r):
-            if _type(l, kinds, text) != "number" or _type(r, kinds, text) != "number":
-                bad("arithmetic needs numbers")
-            return "number"
-        case ast.UnaryOp(op=ast.USub(), operand=x):
-            if _type(x, kinds, text) != "number":
-                bad("a minus sign needs a number")
-            return "number"
-        case ast.UnaryOp(op=ast.Not(), operand=x):
-            if _type(x, kinds, text) != "bool":
-                bad("'not' needs a true/false test")
-            return "bool"
-        case ast.BoolOp(values=parts):
-            if any(_type(x, kinds, text) != "bool" for x in parts):
-                bad("and/or need true/false tests")
-            return "bool"
         case ast.Compare(left=l, ops=ops, comparators=rights):
-            types = [_type(x, kinds, text) for x in (l, *rights)]
+            types = [_type(x, kinds) for x in (l, *rights)]
             for op, a, b in zip(ops, types, types[1:]):
-                if type(op) in _ORDERING and (a != "number" or b != "number"):
-                    bad("<, <=, >, >= compare numbers")
-                if type(op) in _EQUALITY and a != b:
-                    bad(f"== and != compare values of one kind ({a} vs {b})")
-                if type(op) in _MEMBERSHIP and b != "list of " + a:
-                    bad(f"'in' needs a list of the same kind ({a})")
-            return "bool"
+                result_type(_rule_of(node, op), [a, b])
+            return BOOL
+        case ast.List(elts=parts) | ast.Tuple(elts=parts) | ast.Call(args=parts) | ast.BoolOp(values=parts):
+            return result_type(_rule_of(node), [_type(x, kinds) for x in parts])
+        case ast.BinOp(left=l, right=r):
+            return result_type("arithmetic", [_type(l, kinds), _type(r, kinds)])
+        case ast.UnaryOp(operand=x):
+            return result_type(_rule_of(node), [_type(x, kinds)])
         case ast.IfExp(test=t, body=a, orelse=b):
-            if _type(t, kinds, text) != "bool":
-                bad("an if needs a true/false test")
-            ta, tb = _type(a, kinds, text), _type(b, kinds, text)
-            if ta != tb:
-                bad("both branches of an if must give one kind of value")
-            return ta
-        case ast.Call(args=args):
-            if any(_type(a, kinds, text) != "number" for a in args):
-                bad("min() and max() take numbers")
-            return "number"
-    bad(f"unsupported expression {type(node).__name__}")
+            return result_type("if", [_type(t, kinds), _type(a, kinds), _type(b, kinds)])
+    raise _Mismatch(f"unsupported expression {type(node).__name__}")
 
 
 def is_condition(text: str) -> bool:
@@ -230,12 +288,21 @@ def evaluate(text: str, values: dict, kinds: dict):
     Worked out exactly (see the module docstring); a number comes back as a float (an int where plain Python
     arithmetic would have given one).
 
-    A missing or unusable measure is unknown, and unknowns follow three-valued (Kleene) logic: True or unknown is
-    True, False and unknown is False (the result is the same whatever the measure turns out to be), and anything
-    else that depends on an unknown is unknown, raised as MissingMeasure. So a missing measure can never be hidden
-    where it could change the result, and never makes a result unknown where it can't.
+    First the formula's types are checked against the measures' descriptions (result_type, the same rules the
+    rule files are checked by): one that is wrong for every value is an EvaluationError before any value is looked
+    at, and a measure with no description is missing. Then a missing or unusable measure is unknown, and unknowns
+    follow three-valued (Kleene) logic: True or unknown is True, False and unknown is False (the result is the same
+    whatever the measure turns out to be), and anything else that depends on an unknown is unknown, raised as
+    MissingMeasure. Every part is worked out, so an error a value gives (division by zero) is never hidden. A
+    division by an unknown is MissingMeasure: it could be by zero.
     """
     body = parse(text).body
+    try:
+        _type(body, kinds)
+    except _Undescribed as e:
+        raise MissingMeasure(e.name) from None
+    except _Mismatch as e:
+        raise EvaluationError(str(e)) from None
     result = _eval(body, values, kinds)
     if isinstance(result, _Unknown):
         raise MissingMeasure(result.name)
@@ -243,27 +310,37 @@ def evaluate(text: str, values: dict, kinds: dict):
 
 
 class _Unknown:
-    """A value that depends on a missing or unusable measure (the first one named), with the type the expression
-    has (number, text or bool; None if the measure has no description): an error every value would give (a
-    number compared with text, a number used as true/false) is raised, never hidden under the unknown."""
+    """A value that depends on a missing or unusable measure (the first one named), and its kind (by the type
+    rules, as every value's)."""
 
-    def __init__(self, name, kind=None):
+    def __init__(self, name, kind):
         self.name, self.kind = name, kind
 
 
-def _typed(x, want: str, what: str):
-    """x, checked to be of type `want` (known, or an unknown of that type); an error otherwise."""
+def _value_type(x) -> str:
+    """A value's kind, for the type rules: the same kinds type_of works with."""
     if isinstance(x, _Unknown):
-        if x.kind is not None and x.kind != want:
-            raise EvaluationError(f"{what} needs a {'true/false test' if want == 'bool' else want}: "
-                                  f"{x.name} gives a {x.kind}")
-        return x
-    return _number(x) if want == "number" else _boolean(x) if want == "bool" else x
+        if x.kind is None:
+            raise MissingMeasure(x.name)
+        return x.kind
+    if type(x) is bool:
+        return BOOL
+    if type(x) in (int, float, Fraction):
+        return NUMBER
+    if type(x) is str:
+        return TEXT
+    if isinstance(x, list):
+        return result_type("list", [_value_type(i) for i in x])
+    raise EvaluationError(f"not a value: {_shown(x)!r}")
 
 
-def _as_number(x):
-    """x as a number, or the unknown it is; an unknown of another type where a number belongs is an error."""
-    return _typed(x, "number", "arithmetic")
+def _checked(rule: str, operands: list):
+    """The result kind of `rule` on these operand values, by the type rules (a defence: type_of has checked
+    them); EvaluationError if they don't fit."""
+    try:
+        return result_type(rule, [_value_type(x) for x in operands])
+    except _Mismatch as e:
+        raise EvaluationError(str(e)) from None
 
 
 def _shown(x):
@@ -319,19 +396,15 @@ def _number(x):
     return x
 
 
-def _kind(x):
-    return "text" if type(x) is str else "number" if type(x) in (int, float, Fraction) else None
-
-
 def _measure(name, values, kinds):
     """Usable only if present and fitting its description: a finite, non-negative number,
-    or one of the allowed text values. Anything else (including no description) is unusable."""
+    or one of the allowed text values. Anything else is unknown, of the kind its description gives."""
     v, kind = values.get(name), kinds.get(name)
     if kind == "number" and type(v) in (int, float) and _finite(v) and v >= 0:
         return _exact(v)
     if kind == "boolean" and type(v) is bool:
         return v
-    if isinstance(kind, (set, frozenset)) and _kind(v) == "text" and v in kind:
+    if isinstance(kind, (set, frozenset)) and type(v) is str and v in kind:
         return v
     return _Unknown(name, _kind_type(kind))
 
@@ -344,85 +417,71 @@ def _eval(node, values, kinds):
             return _measure(name, values, kinds)
         case ast.List(elts=items) | ast.Tuple(elts=items):
             out = [_eval(i, values, kinds) for i in items]
-            return _unknown(*out) or out
+            kind = _checked("list", out)
+            return _Unknown(u.name, kind) if (u := _unknown(*out)) else out
         case ast.BinOp(left=l, op=op, right=r):
-            a, b = _as_number(_eval(l, values, kinds)), _as_number(_eval(r, values, kinds))
+            a, b = _eval(l, values, kinds), _eval(r, values, kinds)
+            _checked("arithmetic", [a, b])
             if isinstance(op, ast.Div) and not isinstance(b, _Unknown) and b == 0:
                 raise EvaluationError("division by zero")         # whatever the numerator is
             if isinstance(op, ast.Div) and isinstance(b, _Unknown):
                 raise MissingMeasure(b.name)    # it could be zero: no answer can be sure without it
             if u := _unknown(a, b):
-                return _Unknown(u.name, "number")
+                return _Unknown(u.name, NUMBER)
             return _number(_ARITHMETIC[type(op)](a, b))
-        case ast.UnaryOp(op=ast.USub(), operand=x):
-            a = _as_number(_eval(x, values, kinds))
-            return a if isinstance(a, _Unknown) else -a
-        case ast.UnaryOp(op=ast.Not(), operand=x):
-            a = _typed(_eval(x, values, kinds), "bool", "'not'")
-            return a if isinstance(a, _Unknown) else not a
+        case ast.UnaryOp(op=op, operand=x):
+            a = _eval(x, values, kinds)
+            kind = _checked(_rule_of(node), [a])
+            if isinstance(a, _Unknown):
+                return _Unknown(a.name, kind)
+            return -a if isinstance(op, ast.USub) else not a
         case ast.BoolOp(op=op, values=parts):
-            # Every part is evaluated (a value that can't be evaluated is never hidden); unknowns are Kleene's.
-            results = [_typed(_eval(p, values, kinds), "bool", "and/or") for p in parts]
+            # Every part is worked out (an error is never hidden); unknowns follow Kleene's logic.
+            results = [_eval(p, values, kinds) for p in parts]
+            _checked("and/or", results)
             known = [r for r in results if not isinstance(r, _Unknown)]
             decisive = isinstance(op, ast.Or)        # True decides an or, False an and
             if decisive in known:
                 return decisive
             u = _unknown(*results)
-            return _Unknown(u.name, "bool") if u else (not decisive)
+            return _Unknown(u.name, BOOL) if u else (not decisive)
         case ast.Compare(left=l, ops=ops, comparators=rights):
             operands = [_eval(x, values, kinds) for x in (l, *rights)]
             # A chain is an and of its links: every link checked, so a bad value can't hide behind a false one.
-            links = [_link(op, a, b) for op, a, b in zip(ops, operands, operands[1:])]
+            links = [_link(node, op, a, b) for op, a, b in zip(ops, operands, operands[1:])]
             if False in [x for x in links if not isinstance(x, _Unknown)]:
                 return False
             u = _unknown(*links)
-            return _Unknown(u.name, "bool") if u else True
+            return _Unknown(u.name, BOOL) if u else True
         case ast.IfExp(test=t, body=a, orelse=b):
-            test = _typed(_eval(t, values, kinds), "bool", "an if")
-            if not isinstance(test, _Unknown):
-                return _eval(a, values, kinds) if test else _eval(b, values, kinds)
-            yes, no = _eval(a, values, kinds), _eval(b, values, kinds)     # the same either way: known
-            if not _unknown(yes, no) and _kind(yes) == _kind(no) and yes == no:
+            test = _eval(t, values, kinds)
+            if not isinstance(test, _Unknown):         # only the branch taken is worked out, as plain logic does
+                chosen = _eval(a if test is True else b, values, kinds)
+                _checked("if", [test, chosen, chosen])
+                return chosen
+            yes, no = _eval(a, values, kinds), _eval(b, values, kinds)
+            kind = _checked("if", [test, yes, no])
+            if not _unknown(yes, no) and yes == no:   # the same either way: known
                 return yes
-            kind = next((x.kind for x in (yes, no) if isinstance(x, _Unknown)), None) or \
-                next((_kind(x) if _kind(x) != "text" else "text" for x in (yes, no) if not isinstance(x, _Unknown)), None)
-            return _Unknown(test.name, "bool" if type(yes) is bool else kind)
+            return _Unknown(test.name, kind)
         case ast.Call(func=ast.Name(id=f), args=args):
-            out = [_as_number(_eval(a, values, kinds)) for a in args]
+            out = [_eval(a, values, kinds) for a in args]
+            _checked("min/max", out)
             if u := _unknown(*out):
-                return _Unknown(u.name, "number")
+                return _Unknown(u.name, NUMBER)
             return FUNCTIONS[f](*out)
     raise FormulaError(f"unsupported expression: {ast.dump(node)}")
 
 
-def _link(op, a, b):
-    """One comparison of a chain: true, false, or the unknown it depends on (after checking the types fit: a
-    number ordered against text, or compared for equality with it, is an error whatever the values are)."""
+def _link(node, op, a, b):
+    """One comparison of a chain: true, false, or the unknown it depends on, its kinds checked by the type
+    rules first (whatever is unknown)."""
+    _checked(_rule_of(node, op), [a, b])
+    if _unknown(a, b):
+        return _Unknown(_unknown(a, b).name, BOOL)
     if type(op) in _ORDERING:
-        a, b = _as_number(a), _as_number(b)
-    if u := _unknown(a, b):
-        kinds_ = {x.kind if isinstance(x, _Unknown) else ("bool" if type(x) is bool else _kind(x))
-                  for x in ([a] + (b if isinstance(b, list) else [b]))}
-        if None not in kinds_ and len(kinds_) > 1:
-            raise EvaluationError(f"can't compare {_shown(a) if not isinstance(a, _Unknown) else a.name} with "
-                                  f"{_shown(b) if not isinstance(b, _Unknown) else b.name}: different kinds")
-        return _Unknown(u.name, "bool")
-    return _compare(op, a, b)
-
-
-def _compare(op, a, b):
-    if type(op) in _ORDERING:
-        return _ORDERING[type(op)](_number(a), _number(b))
-    others = b if type(op) in _MEMBERSHIP else [b]
-    if _kind(a) is None or any(_kind(x) != _kind(a) for x in others):
-        raise EvaluationError(f"can't compare {_shown(a)!r} with {_shown(b)!r}: different kinds")
+        return _ORDERING[type(op)](a, b)
     return (_EQUALITY | _MEMBERSHIP)[type(op)](a, b)
-
-
-def _boolean(x):
-    if type(x) is not bool:
-        raise EvaluationError(f"expected true/false, got {_shown(x)!r}")
-    return x
 
 
 def margin(proposed, required, at_least: bool) -> float:
