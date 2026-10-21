@@ -36,43 +36,56 @@ def _jurisdiction(facts: dict) -> str:
     return facts.get("jurisdiction") or ITHACA
 
 
+def _answers(by_id: dict, entry: str) -> list[dict]:
+    return [a for e in by_id.get(entry, []) for a in e.get("answers") or [] if isinstance(a, dict)]
+
+
+def _who(a: dict) -> str:
+    return f"answered by {a.get('answered_by')}, {a.get('answered_on')}"
+
+
 def question(facts: dict, entry: str, ids: tuple[str, ...]) -> dict:
     """The state of the open question in `entry` whose readings are `ids` (the readings the code measures):
-    {"tag", "state": "open" | "answered" | "missing", "readings": the ids to measure, "by": who answered}."""
+    {"tag", "state": "open" | "answered" | "missing", "readings": the ids to measure, "by": who answered}.
+    An answer comes first: one that picks a reading the code measures decides it; one on this question that
+    picks anything else (or no reading) replaces every reading, and the code can't follow it: missing."""
     by_id, tags = _law(_jurisdiction(facts))
-    for tag, (where, _q, research) in tags.items():
-        if where.rsplit(" ", 1)[-1] != entry:
-            continue
-        listed = tuple(r.get("id") for r in research.get("readings") or [])
+    mine = [(tag, q, tuple(r.get("id") for r in research.get("readings") or []))
+            for tag, (where, q, research) in tags.items() if where.rsplit(" ", 1)[-1] == entry]
+    asked = {q for _tag, q, listed in mine if set(listed) == set(ids)}
+    for a in _answers(by_id, entry):
+        if a.get("reading") in ids:
+            return {"tag": f"{entry}:answered", "state": "answered", "readings": (a["reading"],), "by": _who(a)}
+        if a.get("question") in asked:
+            return {"tag": None, "state": "missing", "readings": (), "by": _who(a)}
+    for tag, _q, listed in mine:
         if set(listed) == set(ids):
             return {"tag": tag, "state": "open", "readings": listed, "by": None}
-    for e in by_id.get(entry, []):
-        for a in e.get("answers") or []:
-            if isinstance(a, dict) and a.get("reading") in ids:
-                return {"tag": f"{entry}:answered", "state": "answered", "readings": (a["reading"],),
-                        "by": f"answered by {a.get('answered_by')}, {a.get('answered_on')}"}
     return {"tag": None, "state": "missing", "readings": (), "by": None}
 
 
 def finding(facts: dict, entry: str, finding_id: str) -> dict | None:
     """A finding the measuring applies: {"id", "entry", "kind" (law | reading | answer), "confirm_with",
-    "still_open", "answer", "text" (how it is shown)}, or None when the data no longer has it. An answer that
-    picks the finding (`reading: <finding id>`) outranks it: shown as answered."""
+    "still_open", "answer", "text" (how it is shown)}, or None when the data no longer has it. An answer outranks
+    it and replaces it: one that picks the finding (`reading: <finding id>`) is shown as answered; one to the
+    finding's question that picks anything else gives None (the measuring stops: Gordium's reading is never
+    applied or shown against an answer)."""
     by_id, _ = _law(_jurisdiction(facts))
-    for e in by_id.get(entry, []):
-        for a in e.get("answers") or []:
-            if isinstance(a, dict) and a.get("reading") == finding_id:
-                return {"id": finding_id, "entry": entry, "kind": "answer", "confirm_with": None, "still_open": [],
-                        "answer": a.get("answer"),
-                        "text": f"{a.get('answer')} (answered by {a.get('answered_by')}, {a.get('answered_on')})"}
-        for f in e.get("findings") or []:
-            if isinstance(f, dict) and f.get("id") == finding_id:
-                kind = f.get("kind")
-                text = (f"the law: {f.get('answer')}" if kind == "law" else
-                        f"Gordium's reading · confirm with {f.get('confirm_with')}: {f.get('answer')}")
-                return {"id": finding_id, "entry": entry, "kind": kind, "confirm_with": f.get("confirm_with"),
-                        "still_open": list(f.get("still_open") or []), "answer": f.get("answer"), "text": text}
-    return None
+    found = next((f for e in by_id.get(entry, []) for f in e.get("findings") or []
+                  if isinstance(f, dict) and f.get("id") == finding_id), None)
+    for a in _answers(by_id, entry):
+        if a.get("reading") == finding_id:
+            return {"id": finding_id, "entry": entry, "kind": "answer", "confirm_with": None, "still_open": [],
+                    "answer": a.get("answer"), "text": f"{a.get('answer')} ({_who(a)})"}
+        if found is not None and a.get("question") == found.get("question"):
+            return None
+    if found is None:
+        return None
+    kind = found.get("kind")
+    text = (f"the law: {found.get('answer')}" if kind == "law" else
+            f"Gordium's reading · confirm with {found.get('confirm_with')}: {found.get('answer')}")
+    return {"id": finding_id, "entry": entry, "kind": kind, "confirm_with": found.get("confirm_with"),
+            "still_open": list(found.get("still_open") or []), "answer": found.get("answer"), "text": text}
 
 
 def basis(found: dict | None) -> dict | None:

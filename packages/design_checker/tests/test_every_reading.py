@@ -311,3 +311,86 @@ def test_the_new_rules_add_nothing_to_the_starting_envelope(rule):
     res = run(floors(*HOUSE, 2))
     assert not any(rule in n for n in res["envelope"]["notes"])
     assert res["envelope"]["outline"]
+
+
+# ---- review round 1 pins ---------------------------------------------------------------------------------------
+
+def test_a_story_cantilevered_beside_a_roof_solid_is_part_of_the_building_never_an_eave():
+    """Round 1, P0 (a false pass). Floors 1-2 at 15..45 x 26..70; a third floor block (z 20-30) at 15..45 x
+    24.5..36, reaching 1.5 ft toward the street; a gable roof solid on floor 2 over y 36..70. The third floor is
+    a story (yards_to_nearest_part: cantilevered floors count): front yard 24.5 < 25, does not comply. Coverage
+    still counts it: 30 × 44 + 30 × 1.5 = 1,365 sf (the roof has no overhang, so no eave reading)."""
+    third = prism(rect(15, 24.5, 45, 36), 20, 30, "floor 3", floor=10.0)
+    res = run(floors(15, 26, 45, 70, 2) + [third, roof(15, 36, 45, 70, 20, 33, 0.0, 0.5)])
+    assert res["measurements"]["front_yard"]["value"] == 24.5
+    assert status(res, "R-1b.front_yard") == present.FAILS
+    assert res["measurements"]["building_area"]["value"] == 1365.0
+
+
+def test_a_story_cantilevered_beside_an_overhanging_roof_solid_stays_in_every_coverage_reading():
+    """The same, with the roof reaching 1.5 ft past the side walls: every eave reading still counts the
+    cantilevered floor; eaves left out: 30 × 44 + 30 × 1.5 = 1,365 sf."""
+    third = prism(rect(15, 24.5, 45, 36), 20, 30, "floor 3", floor=10.0)
+    res = run(floors(15, 26, 45, 70, 2) + [third, roof(15, 36, 45, 70, 20, 33, 1.5, 0.5)])
+    area = {r["named"]["building_area#1"]: r["value"] for r in res["measurements"]["building_area"]["readings"]}
+    assert area["eaves_not_counted"] == 1365.0
+    assert res["measurements"]["front_yard"]["value"] == 24.5
+
+
+def test_a_tower_standing_on_the_roofs_base_past_the_walls_stays_part_of_the_building():
+    """A flat-roofed tower (a plain solid, not a Gordium floor) standing at the roof's base level and reaching
+    2 ft past the front wall: never an eave. The front yard is read to it (30 − 2 = 28) and, since it isn't one
+    of Gordium's floor blocks, also to the walls at the ground (a bay window?), never only to the walls."""
+    tower = prism(rect(20, 28, 28, 36), 20, 34, "tower")
+    res = run(floors(*HOUSE, 2) + [roof(15, 36, 45, 70, 20, 30, 1.0, 0.5), tower])
+    front = res["measurements"]["front_yard"]
+    assert min(r["value"] for r in front["readings"]) == 28.0
+    assert res["measurements"]["front_yard_eaves"]["value"] == 28.0
+
+
+def test_a_roof_drawn_in_one_solid_with_its_walls_never_drops_its_overhang_from_the_yards():
+    """One solid: walls 12..42 to 20 ft, the roof reaching 2 ft past them. Its overhang can't be told from a
+    story under the same roof, so it counts as the building (12 − 2 = 10 to the overhang); the walls at the
+    ground (12) are the other reading."""
+    walls = prism(rect(12, 30, 42, 70), 0, 20, "house")
+    faces = [f for f in walls["faces"] if not all(p[2] == 20 for p in f["points"])]
+    faces += [{"points": [[10, 30, 19], [27, 30, 30], [27, 70, 30], [10, 70, 19]]},
+              {"points": [[27, 30, 30], [44, 30, 19], [44, 70, 19], [27, 70, 30]]}]
+    res = run([{"id": "house", "faces": faces, "problems": []}])
+    side = res["measurements"]["side_yard_smaller"]
+    assert side["value"] is None and sorted(r["value"] for r in side["readings"]) == [10.0, 12.0]
+
+
+def test_an_answer_that_picks_another_reading_replaces_gordiums_reading(monkeypatch):
+    """Round 1, P2. The City answers the pitched-roof question differently from the finding (reading
+    `to_the_ridge`, which the measuring has no code for): Gordium's midpoint reading is never applied or shown;
+    the height stops (needs review), never a guess."""
+    real = interpretations.research_entries
+
+    def answered(jurisdiction):
+        entries = copy.deepcopy(real(jurisdiction))
+        for where, e in entries:
+            if where.endswith(" height_of_building"):
+                f = next(f for f in e["findings"] if f["id"] == "pitched_roof_midpoint")
+                e["answers"] = [{"question": f["question"], "answer": "To the ridge.", "reading": "to_the_ridge",
+                                 "answered_by": "the City zoning office", "answered_on": "2026-11-01"}]
+        return entries
+    monkeypatch.setattr(interpretations, "research_entries", answered)
+    interpretations.clear_cache()
+    try:
+        res = run(floors(*HOUSE, 2) + [roof(*HOUSE, 20, 30, 1.5, 0.5)])
+        h = res["measurements"]["building_height"]
+        assert h["value"] is None and h["readings"] == [] and "no longer have" in h["reason"]
+        assert "Gordium's reading" not in (rows(res, "R-1b.height")[0]["reason"] or "")
+        assert status(res, "R-1b.height") == present.REVIEW
+    finally:
+        monkeypatch.undo()
+        interpretations.clear_cache()
+
+
+def test_corner_lot_front_and_rear_rows_dont_cite_the_side_yard_reading():
+    """Round 1, P3: the Column 13 reading is about the side yard only."""
+    res = run(floors(10, 25, 35, 65, 2), **CORNER)
+    for rule in ("R-1b.front_yard", "R-1b.rear_yard"):
+        assert "Column 13" not in (rows(res, rule)[0]["reason"] or ""), rule
+    assert "Column 13" in rows(res, "R-1b.side_yards")[0]["reason"]

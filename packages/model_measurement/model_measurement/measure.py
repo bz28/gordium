@@ -492,17 +492,24 @@ def _roof_part(building: dict, sloped: list) -> tuple | None:
         return None
     base = building["spans"][k][0]
     under = [building["plans"][i] for i, (_lo, hi) in enumerate(building["spans"]) if i != k and abs(hi - base) <= TOL]
-    return (ops.unary_union(under), base, parts[k]) if under else None
+    return (ops.unary_union(under), base, parts[k], k) if under else None
 
 
-def _eave_cut(building: dict):
-    """The height below which the building is its body (_views): the base of a roof drawn as its own solid, or
-    the lowest roof edge of a pitched roof drawn in one with the walls; None for a flat roof."""
+def _eave_zone(building: dict):
+    """The eaves, seen from above: only a pitched roof's own overhang past the walls under it, never anything
+    else. Told apart only for a roof drawn as its own solid standing on the building: what of that solid
+    reaches past the parts it stands on, less anything another part covers (a story beside it or cantilevered
+    above the roof's base, a tower, stays part of the building). A roof drawn in one solid with the walls: None,
+    as for a flat roof: an overhang can't be told from a story, a dormer or a tower under the same roof, so
+    everything counts as the building (the yards then also read the walls at the ground: _yards)."""
     sloped = _pitched_section(building)
-    if not sloped:
+    part = _roof_part(building, sloped) if sloped else None
+    if not part:
         return None
-    part = _roof_part(building, sloped)
-    return part[1] if part else min(p[2] for g in sloped for f in g for p in f["points"])
+    walls, _base, faces, k = part
+    zone = _projection({"faces": faces}).difference(walls.buffer(TOL))
+    others = [p for i, p in enumerate(building["plans"]) if i != k]
+    return zone.difference(ops.unary_union(others).buffer(TOL)) if others else zone
 
 
 def _eaves(building: dict, sloped: list[list[dict]]) -> dict:
@@ -518,7 +525,7 @@ def _eaves(building: dict, sloped: list[list[dict]]) -> dict:
     under it, so that reading is None (the measuring stops: never a guess)."""
     part = _roof_part(building, sloped)
     if part:
-        walls, _base, faces = part
+        walls, _base, faces, _k = part
     else:
         bottom = min(p[2] for f in building["faces"] for p in f["points"])
         walls, faces = _section(building, bottom + TOL), None
@@ -718,11 +725,7 @@ def _pick_main(stacks: list[dict], facts: dict) -> dict | None:
     plans = {b["id"]: _projection(b) for b in rest if b.get("faces")}
     if len(plans) != len(rest):
         return None
-    group, grown = [rest[0]], plans[rest[0]["id"]]
-    while new := [b for b in rest if b not in group and plans[b["id"]].distance(grown) <= TOUCH]:
-        group += new
-        grown = ops.unary_union([grown] + [plans[b["id"]] for b in new])
-    if len(group) != len(rest):
+    if len(_touching(rest[0], rest, plans)) != len(rest) - 1:
         return None
     return max(rest, key=lambda b: (max(p[2] for f in b["faces"] for p in f["points"]), plans[b["id"]].area))
 
@@ -925,7 +928,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         out["lot_depth"] = _decide("lot_depth", [(w, (lot.length(r["left"]) + lot.length(r["right"])) / 2, {})
                                                  for w, r in lines["readings"]],
                                    "the average length of the two side lot lines", [lot.id], lines["question"],
-                                   lines["basis"])
+                                   lines["basis"]["depth"])
 
     why_yards = why_inside or why_plan or why_main or (why_grade if plan_level is None else None)
     if why_yards:
@@ -940,14 +943,17 @@ def _attached(main: dict, buildings: list[dict]) -> list[dict]:
     """The solids touching the main building in plan (within TOUCH), or touching one that does: a porch, deck,
     steps, ramp or landing (part of the building, §325-18A; steps: Gordium's reading steps_count), or an attached
     garage (Gordium's reading attached_garage_is_main_building)."""
-    plans = {b["id"]: _projection(b) for b in buildings}
-    found, grown = [], plans[main["id"]]
-    while True:
-        new = [b for b in buildings if b is not main and b not in found and plans[b["id"]].distance(grown) <= TOUCH]
-        if not new:
-            return found
+    return _touching(main, buildings, {b["id"]: _projection(b) for b in buildings})
+
+
+def _touching(seed: dict, candidates: list[dict], plans: dict) -> list[dict]:
+    """The candidates joined to `seed` in plan, within TOUCH of it or of one already joined: the one test of
+    "solids that touch are one building", used to pick the main building and to find its parts."""
+    found, grown = [], plans[seed["id"]]
+    while new := [b for b in candidates if b is not seed and b not in found and plans[b["id"]].distance(grown) <= TOUCH]:
         found += new
         grown = ops.unary_union([grown] + [plans[b["id"]] for b in new])
+    return found
 
 
 def _distances_apply(facts: dict, detached: list[dict], why: str | None) -> dict:
@@ -1000,13 +1006,13 @@ PROJECTION = 2.0          # ft: eaves and similar features may project this far 
 
 
 def _views(building: dict, level: float) -> dict:
-    """A building as the yards and coverage see it: `above`, seen from above; `body`, without the eaves of its
-    pitched roof (everything below its lowest roof edge, cantilevered floors included); `ground`, its walls at
-    ground level. On a flat roof nothing can be told apart as an eave: the body is everything seen from above."""
+    """A building as the yards and coverage see it: `above`, seen from above; `body`, everything seen from above
+    but the pitched roof's own overhang (_eave_zone: every story, cantilever, tower and dormer stays in it);
+    `ground`, its walls at ground level."""
     above = _projection(building)
-    edge = _eave_cut(building)
-    bottom = min(p[2] for f in building["faces"] for p in f["points"])
-    body = above if edge is None or edge <= level + TOL else _body(building, max(level, bottom), edge).intersection(above)
+    zone = _eave_zone(building)
+    # the zone starts TOL past the walls; grown back by TOL (square corners) it meets them exactly
+    body = above.difference(zone.buffer(TOL, join_style=2)) if zone is not None and zone.area > 1e-6 else above
     if body.is_empty:
         body = above
     return {"above": above, "body": body, "ground": _section(building, level + TOL),
@@ -1058,14 +1064,14 @@ def _lot_lines(lot: Lot, facts: dict):
     both side measures are that one yard). Which street is the address street is a fact (address_street_line);
     not given, each end of the street lines is read as it."""
     streets = set(lot.street)
-    basis, question = [], [("which lot lines count as side and rear lot lines is an open question for the "
+    basis, question = {"front": [], "side": [], "rear": [], "depth": []}, [("which lot lines count as side and rear lot lines is an open question for the "
                             "architects (lot_depth)")]
     if facts.get("corner_lot"):
         two = law.finding(facts, "front_yard", "corner_lot_two_front_yards")
         one = law.finding(facts, "side_yard", "corner_lot_side_yard_column_13")
         if two is None or one is None:
             return stop("law_missing", what="the corner-lot findings (front_yard, side_yard)")
-        basis = [law.basis(two), law.basis(one)]
+        basis = {"front": [law.basis(two)], "side": [law.basis(one)], "rear": [], "depth": []}
         chain = lot.ordered_street()
         if not any(_turn(lot.edges[a], lot.edges[b]) > PARALLEL for a, b in zip(chain, chain[1:])):
             return stop("corner_one_street")    # stated a corner lot, but the lines given never turn a corner
@@ -1156,7 +1162,8 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
         for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
             out[name] = _missing(name, stop("law_missing", what="the yard findings (yard_projections, side_yard)"))
         return
-    basis = [law.basis(f) for f in (rule, steps, garage) if f] + lines["basis"]
+    found = [law.basis(f) for f in (rule, steps, garage) if f]
+    basis = {k: found + v for k, v in lines["basis"].items()}     # each yard only what applies to it
     listed = facts.get("accessory_buildings") or []
     unlisted = [b for b in detached if not any(i in listed for i in _parts(b))]
 
@@ -1193,7 +1200,7 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
         out["front_yard" + suffix] = _decide(
             "front_yard" + suffix, [(w, d, {"points": p}) for w, d, p in front],
             "the least distance from the street lot line(s) to the main building" + (", eaves included" if suffix else ""),
-            objects, "; ".join(questions) or q, basis)
+            objects, "; ".join(questions) or q, basis["front"])
         if lines["problem"]:
             for name in ("side_yard_smaller", "side_yard_larger", "rear_yard"):
                 out[name + suffix] = _missing(name + suffix, lines["problem"])
@@ -1210,13 +1217,13 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
         eaves = ", eaves included" if suffix else ""
         out["side_yard_smaller" + suffix] = _decide("side_yard_smaller" + suffix, small,
                                                     "the least distance from the nearer side lot line to the building"
-                                                    + eaves, objects, q, basis)
+                                                    + eaves, objects, q, basis["side"])
         out["side_yard_larger" + suffix] = _decide("side_yard_larger" + suffix, large,
                                                    "the least distance from the farther side lot line to the building"
-                                                   + eaves, objects, q, basis)
+                                                   + eaves, objects, q, basis["side"])
         out["rear_yard" + suffix] = _decide("rear_yard" + suffix, rear,
                                             "the least distance from the rear lot line to the main building" + eaves,
-                                            objects, q, basis)
+                                            objects, q, basis["rear"])
     _accessory_yards(out, lot, lines, facts, detached, views)
 
 

@@ -118,8 +118,10 @@ def test_a_corner_lot_has_a_front_yard_on_each_street_and_its_rear_opposite_the_
     assert (m["front_yard"]["value"], m["rear_yard"]["value"]) == (15.0, 35.0)
     assert (m["side_yard_smaller"]["value"], m["side_yard_larger"]["value"]) == (10.0, 10.0)
     assert m["lot_depth"]["value"] == 100.0
-    assert {b["id"] for b in m["side_yard_smaller"]["basis"]} >= {"corner_lot_two_front_yards",
-                                                                    "corner_lot_side_yard_column_13"}
+    # each yard carries only what applies to it (review round 1)
+    assert "corner_lot_two_front_yards" in {b["id"] for b in m["front_yard"]["basis"]}
+    assert "corner_lot_side_yard_column_13" in {b["id"] for b in m["side_yard_smaller"]["basis"]}
+    assert "corner_lot_side_yard_column_13" not in {b["id"] for b in m["front_yard"]["basis"] + m["rear_yard"]["basis"]}
     # which street's frontage is the lot width isn't settled: both are read (50 on y = 0, 100 on x = 50)
     assert m["lot_width"]["value"] is None
     assert sorted(r["value"] for r in m["lot_width"]["readings"]) == [50.0, 100.0]

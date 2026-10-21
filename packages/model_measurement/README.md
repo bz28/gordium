@@ -50,11 +50,13 @@ format report from it.
 
 The yards are measured to the nearest part of the building with its eaves left out (the finding yards_to_nearest_part:
 §325-3 YARD, §325-18A): cantilevered floors, porches, decks and steps count (a solid touching the main building is
-part of it: steps by Gordium's reading steps_count). Eaves are what a pitched roof reaches past the walls under it:
-for a roof drawn as its own solid standing on the building (on Gordium's floor blocks), exactly what of it reaches
-past the floor blocks; for a roof drawn in one solid with the walls, what lies above its lowest roof edge (anything
-lower that sticks out past the walls at the ground, a fascia, an upper floor or a bay window, is read both as part of
-the building and as a projection). On a flat roof nothing can be told apart as an eave.
+part of it: steps by Gordium's reading steps_count). Eaves are only a pitched roof's own overhang: for a roof drawn
+as its own solid standing on the building (on Gordium's floor blocks), what of that roof solid reaches past the parts
+it stands on, less anything another part covers (a story beside it or cantilevered above its base, a tower, always
+stays part of the building). A roof drawn in one solid with the walls, or a flat roof: nothing is told apart as an
+eave (an overhang can't be told from a story under the same roof), so it all counts as the building; anything that
+sticks out past the walls at the ground and isn't one of Gordium's floor blocks is also read to the walls (it may be
+a bay window or other projection).
 
 ## What research settled, and what is still open (`interpretations.py`)
 

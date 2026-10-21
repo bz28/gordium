@@ -240,3 +240,21 @@ def test_a_note_never_says_open_question_once_none_is_open():
     for where, e in entries():
         if not e.get("open_questions"):
             assert "open question" not in str(e.get("notes", "")).lower(), where
+
+
+def test_an_answer_may_only_pick_one_of_its_questions_readings_or_a_finding():
+    """Review round 1: an answer's `reading` names one of its question's research readings, or a finding of the
+    entry; anything else (a typo) is refused, so an answer is never silently ignored."""
+    import datetime
+
+    from rule_format.rulebook import REPO, Context, _answer_problems
+    ctx = Context.for_jurisdiction(REPO / "regulations/jurisdictions/new_york/ithaca_city")
+    entry = {"research": [{"question": "Which eave?", "readings": [{"id": "wall_plate", "reading": "w"},
+                                                                   {"id": "drip_edge", "reading": "d"}]}],
+             "findings": [{"id": "pitched_roof_midpoint"}]}
+    ctx.reviewers = {"the City zoning office"}
+    who = "the City zoning office"
+    base = {"question": "Which eave?", "answer": "x", "answered_by": who, "answered_on": datetime.date(2026, 11, 1)}
+    assert _answer_problems([{**base, "reading": "wall_plate"}], ctx, entry) == []
+    assert _answer_problems([{**base, "reading": "pitched_roof_midpoint"}], ctx, entry) == []
+    assert _answer_problems([{**base, "reading": "wall_plat"}], ctx, entry)
