@@ -878,6 +878,9 @@ def test_a_lot_with_too_many_back_lines_still_measures_its_frontage_and_front_ya
     """Round 10, P2: a one-street lot 50 ft wide with a nine-line zigzag back (test_stop_list ZIGZAG): the side and
     rear lines can't all be listed, so the depth and the side and rear yards wait; the frontage (50 ft, the
     street line) and the front yard (the house 25 ft back) don't depend on them and are measured."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parent))     # run on its own too, not only after the stop list
     from test_stop_list import ZIGZAG
     m = measure(site(ZIGZAG), FACTS)
     assert m["lot_width"]["value"] == 50.0 and m["front_yard"]["value"] == 25.0
@@ -1032,3 +1035,16 @@ def test_stories_are_never_one_part_of_a_joined_building():
     assert m["value"] is None and "joined to the main building" in m["reason"], m
     m = measure(site(RECT, *FLOORS, *four), {**FACTS, "stories": None})["stories"]
     assert m["value"] is None and "joined to the main building" in m["reason"], m
+
+
+def test_a_plain_solid_joined_to_the_floor_stack_stops_the_story_count():
+    """Review round 15, P0. Three 11 ft floor blocks (33 ft) with a plain 32 ft solid touching them (a wing drawn
+    as one box): part of the same building (§325-18A), and it could hold 4 stories of 8 ft. Counted as 3 from the
+    stack alone it complied. With nothing typed, or 3 typed: the stories need review. A 6 ft porch slab touching
+    the stack holds no story: the count stands."""
+    stack = [floor(15, 30, 35, 70, z0=11 * i, z1=11 * (i + 1), id=f"floor {i + 1}") for i in range(3)]
+    for typed in (None, 3):
+        m = measure(site(RECT, *stack, box(35, 30, 45, 70, 0, 32, id="wing")), {**FACTS, "stories": typed})
+        assert m["stories"]["value"] is None and "joined to the main building" in m["stories"]["reason"], typed
+    porch = measure(site(RECT, *stack, box(35, 30, 45, 70, 0, 6, id="porch")), {**FACTS, "stories": None})
+    assert porch["stories"]["value"] == 3

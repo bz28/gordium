@@ -77,7 +77,8 @@ def _decide(name: str, readings: list[tuple[str, float, dict]], how: str, object
     """One value if every reading gives the same number; else None, with the readings and the question."""
     values = [v for _, v, _ in readings]
     shown = [{"reading": r, "value": _r(v), **({"points": x["points"]} if x.get("points") else {}),
-              **({"named": dict(x["named"])} if x.get("named") else {})} for r, v, x in readings]
+              **({"named": dict(x["named"])} if x.get("named") else {}),
+              **({"line": x["line"]} if x.get("line") is not None else {})} for r, v, x in readings]
     if values and max(values) - min(values) <= SAME:
         how = how if len(readings) > 1 or not readings[0][0] else f"{how} ({readings[0][0]})"
         return _record(name, UNITS.get(name) or STATED[name], _r(values[0]), how, objects, readings[0][2].get("points"),
@@ -1050,7 +1051,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # building's, never one part's. Until they are counted over every part (one candidate building, as the height
     # will be), floors drawn on any other part stop the count; never a typed value (review round 14)
     joined = [b for b in (_attached(main, buildings) if main is not None and not why_which else [])
-              if b.get("parts") or b.get("floor")]
+              if b.get("parts") or b.get("floor") or _holds_a_story(b, main)]
     if countable and why_which:
         out["stories"] = _missing("stories", why_which)
     elif joined:
@@ -1216,6 +1217,21 @@ def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict,
             out[name]["crossings"] = entries_acc
     if (entries_main or entries_acc) and "building_area" in out:
         out["building_area"]["crossings"] = entries_main + entries_acc
+
+
+STORY_ROOM = 8.0     # ft: a plain solid reaching this high above its base could hold a story (a porch or steps don't)
+
+
+def _holds_a_story(part: dict, main: dict) -> bool:
+    """Whether a plain solid joined to the main building could hold a story of its own (its stories aren't drawn):
+    it rises above the main building's first floor (or, the main building plain too, above its base) and is at
+    least STORY_ROOM tall. Porches, steps and low landings don't (review round 15)."""
+    zs = [p[2] for f in part.get("faces") or [] for p in f["points"]]
+    if not zs or max(zs) - min(zs) < STORY_ROOM:
+        return False
+    first_top = main["spans"][0][1] if main.get("spans") else min(
+        p[2] for f in main.get("faces") or [] for p in f["points"])
+    return max(zs) > first_top + 1e-6
 
 
 def _attached(main: dict, buildings: list[dict]) -> list[dict]:
@@ -1543,10 +1559,12 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
         small, large, rear = [], [], []
         for words, r in lines["readings"]:
             for w, s, n in group:
-                found = [_distance(lot.line(g), s) for g in r["sides"]]
-                (a, pa), (b, pb) = sorted((found * 2)[:2], key=_side_order)
-                small.append((_both(words, w), a, {"points": pa, "named": n}))
-                large.append((_both(words, w), b, {"points": pb, "named": n}))
+                # each side yard keeps the lot line it was measured to, so one reading (an eave) can be set
+                # against another (not an eave) to the same line, never to the other side's (review round 15)
+                found = [(*_distance(lot.line(g), s), list(g)) for g in r["sides"]]
+                (a, pa, la), (b, pb, lb) = sorted((found * 2)[:2], key=lambda f: _side_order(f[:2]))
+                small.append((_both(words, w), a, {"points": pa, "named": n, "line": la}))
+                large.append((_both(words, w), b, {"points": pb, "named": n, "line": lb}))
                 d, p = _distance(lot.line(r["rear"]), s)
                 rear.append((_both(words, w), d, {"points": p, "named": n}))
         eaves = ", eaves included" if suffix else ""

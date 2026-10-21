@@ -129,17 +129,21 @@ def _eave_text(found: dict, measured: dict) -> str | None:
     if any(MODEL_WORDS["model#eave"]["eave"] in w for w in found["fails_under"]):
         return None                         # it fails even with the overhang an eave: not just a confirmation
     reach = []
-    for name, yard in EAVE_YARD_WORDS.items():
+    for yard in dict.fromkeys(EAVE_YARD_WORDS.values()):
         # each reading read with the overhang an eave, against the same reading (the same lot lines, the same
-        # other answers) with it not: the most it reaches, over every reading, never one reading picked by the
-        # order the readings came in (stress F7: outline order changed the words)
+        # other answers) with it not, to the same lot line: the most it reaches, over every reading, never one
+        # reading picked by the order the readings came in (stress F7), never the narrower side yard under one
+        # reading against the other side's under another (review round 15: the two side yards are paired by line)
         pairs = {}
-        for r in (measured.get(name) or {}).get("readings") or []:
-            side = (r.get("named") or {}).get("model#eave")
-            if side in ("eave", "not_eave") and r.get("value") is not None:
-                rest = tuple(sorted((t, v) for t, v in r["named"].items() if t != "model#eave"))
-                words = "; ".join(w for w in r["reading"].split("; ") if not w.startswith("what reaches past the walls"))
-                pairs.setdefault((rest, words), {})[side] = r["value"]
+        for name in (n for n, y in EAVE_YARD_WORDS.items() if y == yard):
+            for r in (measured.get(name) or {}).get("readings") or []:
+                side = (r.get("named") or {}).get("model#eave")
+                if side in ("eave", "not_eave") and r.get("value") is not None:
+                    rest = tuple(sorted((t, v) for t, v in r["named"].items() if t != "model#eave"))
+                    words = "; ".join(w for w in r["reading"].split("; ")
+                                      if not w.startswith("what reaches past the walls"))
+                    line = tuple(r["line"]) if r.get("line") is not None else name
+                    pairs.setdefault((rest, words, line), {})[side] = r["value"]
         gaps = [p["eave"] - p["not_eave"] for p in pairs.values() if "eave" in p and "not_eave" in p]
         if gaps and max(gaps) > 1e-6:
             reach.append(f"{present.feet_inches(max(gaps), 'up')} past the walls toward the {yard}")
