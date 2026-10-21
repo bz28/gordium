@@ -19,6 +19,19 @@ LOT_LENGTHS = {"lot_width", "lot_depth", "front_yard", "side_yard_smaller", "sid
 MAX_READINGS = 20000          # more combinations than this: not worked out (left for review, never a result)
 
 
+def rule_names(rule: dict) -> set:
+    """Every name a rule reads: its applies_when, its check and each review_when (the one list the verdict, the
+    open questions and a row's "Enter …" all read)."""
+    from rule_format import formula
+    names = set()
+    for key in ("applies_when", "check"):
+        if rule.get(key):
+            names |= formula.names(rule[key])
+    for r in rule.get("review_when") or []:
+        names |= formula.names(r["when"])
+    return names
+
+
 def lot_reading(words: str | None) -> str | None:
     """Which reading of the lot's side and rear lines a measurement's reading is under ("line 13 as a rear lot
     line, ..."), or None when it doesn't depend on one."""

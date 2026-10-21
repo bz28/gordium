@@ -485,8 +485,8 @@ def show_detail(parts):
                  det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
         if text:
             d.AddRow(_wide(text, size=12))
-    if i["id"].startswith("R-") and i["status"] == "not_checked":
-        d.AddRow(row(button("Enter bedrooms and parking spaces…", a["enter"])))
+    if i.get("needs"):                    # exactly the stated facts this row waits for, asked in turn
+        d.AddRow(row(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"]))))
     if i["id"] == "scope.not_included":
         d.AddRow(row(button("Add to check…", lambda: a["add"](i["objects"]))))
         if i.get("ground_like"):              # only the architect's word leaves it out (never a guess)
