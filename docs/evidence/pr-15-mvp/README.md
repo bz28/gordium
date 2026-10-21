@@ -18,6 +18,8 @@ closes its documents. Scripts live in `apps/rhino_plugin/tests/`.
 | `4_red_amber_top.png`, `4_red_amber_perspective.png` | Plan and 3D, light background: a thin red strip with a solid edge at the west wall, the amber band beside it, drawn over the envelope (not tinted by it); the model framed with room, the notice top left, clear of it. |
 | `4_red_amber_top_dark.png`, `4_red_amber_perspective_dark.png` | The same on a dark viewport background. |
 | `2_labels_on_off_every_line.png` | Plan with "Show on-screen labels" ticked: every yard label and lot-edge length beside its own line, none crossing a line or another label. |
+| `dock_results.json`, `6_docked_panel.png` | `dock_in_rhino.py`: 8 of 8. The Gordium panel is a real Rhino panel (a .NET type made at run time with Reflection.Emit, registered under Rhino's script plugin), docked in the document's own window beside Rhino's panels, its text left aligned; a reload refills the same panel; GordiumOff closes it; the next command opens it again. |
+| `panel_width_results.json`, `7_panel_at_380px.png`, `7_panel_at_540px.png` | `panel_width_in_rhino.py`: 9 of 9. At 380 and 540 px, with every group open and a failing yard: measured at the widths the cells are actually drawn, no cell draws beyond itself (each wraps to two lines at most); every cell shortened with "…" is whole in its item's detail; every row of buttons and ticks fits. |
 
 Not yet checked: the red/amber drawing on **Windows** (the display conduit is the same code, but Windows draws through a
 different graphics path; run `highlight_in_rhino.py` there before relying on it).

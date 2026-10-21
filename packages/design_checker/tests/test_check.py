@@ -486,7 +486,11 @@ def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
     handler = rhino.split("def _handler(", 1)[1].split("\ndef ", 1)[0]
     assert "logic.guard(logic.current_only(" in handler
     assert "def _conduit(" in rhino and "logic.guard(" in rhino.split("def _conduit(", 1)[1].split("\ndef ", 1)[0]
-    assert "Paint +=" not in "".join(p.read_text(encoding="utf-8") for p in PLUGIN)    # draw once into a bitmap instead
+    # an error raised while the Mac draws a view aborted Rhino (2026-10-20, before the guard): every paint handler is
+    # guarded (the panel's wrapping cells are drawn); the section diagram is still drawn once into a bitmap
+    import re as _re
+    paints = [m for p in PLUGIN for m in _re.findall(r"\.Paint \+= (.*)", p.read_text(encoding="utf-8"))]
+    assert all(m.startswith("logic.guard(") for m in paints), paints
 
 
 def test_the_dash_patterns_fit_rhinos_signed_int32():
@@ -949,7 +953,7 @@ def test_the_delta_column_is_named_delta_in_the_panel_and_the_report(facts, tmp_
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
     assert logic.COLUMN_DELTA == "Delta" and "Delta" in cells and "Margin" not in cells
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert '(logic.COLUMN_DELTA, 110)' in ui and '"Margin"' not in ui
+    assert '(logic.COLUMN_DELTA, 86)' in ui and '"Margin"' not in ui
 
 
 def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_document():
@@ -1176,20 +1180,23 @@ def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
 
 
 
-def test_the_panel_columns_fit_and_the_labels_tick_has_its_own_row():
-    """Seen in Rhino (2026-10-21): with Delta in words, the Item column was narrowed to 196 and truncated "Overlays ·
-    not in this release"; the labels tick ran off the panel beside the other two. Item keeps the 230 its text needs,
-    every column fits the panel, and the labels tick is on its own row."""
+def test_the_panel_columns_fit_a_rhino_sized_panel_and_wrap():
+    """Architect's review (2026-10-21): the dock was 540-620 px, nearly half the screen; Rhino's own panels are
+    300-400. At 380 px every column fits (the item takes what is left), and every cell wraps to two lines instead
+    of being cut off (drawn cells: a text cell is one line). Each tick has its own row (side by side they ran off).
+    In Rhino, panel_width_in_rhino.py measures every cell's text at 380 and 540."""
     import ast
     import re
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     width = int(re.search(r"^PANEL_WIDTH = (\d+)", ui, re.M).group(1))
     columns = re.search(r"^COLUMNS = (\[.*\])", ui, re.M).group(1).replace("logic.COLUMN_DELTA", "'Delta'")
     cols = dict(ast.literal_eval(columns))
-    assert cols["Item"] >= 230 and cols["Delta"] >= 110
-    assert sum(cols.values()) + 40 <= width                 # the panel's padding and the tree's own margin
-    assert "    layout.Add(row(_labels_box(actions, parts)))" in ui
-    assert "_massing_box(actions), _labels_box(" not in ui
+    assert 380 <= width <= 420 and sum(cols.values()) + 40 <= 380             # fits the narrowest Rhino panel
+    assert "col.Expand = i == 0" in ui and "ef.DrawableCell()" in ui and "ef.TextBoxCell(" not in ui
+    assert int(re.search(r"^ROW_HEIGHT = (\d+)", ui, re.M).group(1)) >= 2 * 16           # two lines
+    assert "ft.Wrap = ed.FormattedTextWrapMode.Word" in ui
+    for tick in ("_envelope_box(actions)", "_massing_box(actions)", "_labels_box(actions, parts)"):
+        assert "    layout.Add(row(%s))" % tick in ui, tick
 
 
 def test_a_yard_label_sits_beside_its_dimension_line_never_on_it():

@@ -1,0 +1,139 @@
+{
+ "phase": "run",
+ "claims": {
+  "380: the cells were painted (widths read from the drawing)": {
+   "ok": true,
+   "detail": {
+    "child": [
+     110.0,
+     63.0,
+     63.0,
+     85.0
+    ],
+    "group": [
+     123.0,
+     63.0,
+     63.0,
+     85.0
+    ]
+   }
+  },
+  "380: no cell draws beyond itself (two lines at most)": {
+   "ok": true,
+   "detail": []
+  },
+  "380: every shortened cell is whole in its item's detail": {
+   "ok": true,
+   "detail": []
+  },
+  "380: every row of buttons and ticks fits the panel": {
+   "ok": true,
+   "detail": []
+  },
+  "540: the cells were painted (widths read from the drawing)": {
+   "ok": true,
+   "detail": {
+    "child": [
+     270.0,
+     63.0,
+     63.0,
+     85.0
+    ],
+    "group": [
+     283.0,
+     63.0,
+     63.0,
+     85.0
+    ]
+   }
+  },
+  "540: no cell draws beyond itself (two lines at most)": {
+   "ok": true,
+   "detail": []
+  },
+  "540: every shortened cell is whole in its item's detail": {
+   "ok": true,
+   "detail": []
+  },
+  "540: every row of buttons and ticks fits the panel": {
+   "ok": true,
+   "detail": []
+  },
+  "the long Delta words are among them": {
+   "ok": true,
+   "detail": [
+    "+2.43% to spare",
+    "+570 sf to spare",
+    "at least 1'-0\" short",
+    "at least 21'-0\" to spare",
+    "at least 5'-0\" to spare",
+    "at least 7'-9\" to spare",
+    "at limit",
+    "at the limit at worst"
+   ]
+  }
+ },
+ "w380_painted": {
+  "(3, False)": 85.0,
+  "(2, False)": 63.0,
+  "(1, False)": 63.0,
+  "(0, False)": 110.0,
+  "(3, True)": 85.0,
+  "(2, True)": 63.0,
+  "(1, True)": 63.0,
+  "(0, True)": 123.0
+ },
+ "w380": {
+  "tree": 360,
+  "item": 110.0,
+  "shortened": [
+   "One-family dwelling, detached",
+   "\u2713  Stories \u00b7 assuming flat ground",
+   "\u2713  Building height \u00b7 assuming flat ground",
+   "  \u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+   "  \u00a7325-18 Projections into yards (porches, decks, eaves)",
+   "  \u00a7325-25 Accessory structures (garages, sheds)",
+   "  \u00a7325-28 Accessory dwelling units"
+  ],
+  "rows": 22,
+  "deltas": [
+   "+2.43% to spare",
+   "+570 sf to spare",
+   "at least 1'-0\" short",
+   "at least 21'-0\" to spare",
+   "at least 5'-0\" to spare",
+   "at least 7'-9\" to spare",
+   "at limit",
+   "at the limit at worst"
+  ]
+ },
+ "w540_painted": {
+  "(3, False)": 85.0,
+  "(2, False)": 63.0,
+  "(1, False)": 63.0,
+  "(0, False)": 270.0,
+  "(3, True)": 85.0,
+  "(2, True)": 63.0,
+  "(1, True)": 63.0,
+  "(0, True)": 283.0
+ },
+ "w540": {
+  "tree": 520,
+  "item": 270.0,
+  "shortened": [
+   "One-family dwelling, detached"
+  ],
+  "rows": 22,
+  "deltas": [
+   "+2.43% to spare",
+   "+570 sf to spare",
+   "at least 1'-0\" short",
+   "at least 21'-0\" to spare",
+   "at least 5'-0\" to spare",
+   "at least 7'-9\" to spare",
+   "at limit",
+   "at the limit at worst"
+  ]
+ },
+ "ok": true
+}

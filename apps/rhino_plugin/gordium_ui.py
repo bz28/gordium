@@ -15,12 +15,14 @@ import Rhino.Geometry as rg
 
 import rhino_logic as logic  # plain Python, tested in CI (on the path: gordium_rhino puts it there first)
 
-PANEL_WIDTH = 540          # wide enough that Item (230: "Overlays · not in this release") and Delta ("+11'-7\" to spare")
-                           # never truncate (D4; Rhino, 2026-10-21: at 480 with Delta in words, Item truncated)
+PANEL_WIDTH = 400          # as wide as Rhino's own panels (architect's review, 2026-10-21: at 540-620 the dock took
+                           # nearly half the screen); every cell wraps to two lines, so nothing is cut off at 380
 # fixed widths that fit the panel: an Item column sized to its text pushed the numbers out of sight (seen in the
 # Rhino window capture). The mark is the first thing in the Item cell: on the Mac the tree's expand arrows take
 # the first column, which hid a column of its own.
-COLUMNS = [("Item", 230), ("Proposed", 84), ("Required", 72), (logic.COLUMN_DELTA, 110)]   # "−1'-4" short"
+COLUMNS = [("Item", 120), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 86)]   # Item takes the rest
+ROW_HEIGHT = 36            # two lines: a long item name or "at least 1'-0" short" wraps instead of being cut off
+CELL_FONT_SIZE = 12
 STALE_SECONDS = 0.3        # results older than an edit by this long are shown as out of date (F7, H1)
 
 
@@ -160,6 +162,71 @@ class DockHost:
         Rhino.UI.Panels.ClosePanel(self.panel_id)
 
 
+def cell_text(text, width, bold=False):
+    """A cell's text laid out as the panel draws it: wrapped by word at the cell's width (Eto FormattedText)."""
+    ft = ed.FormattedText()
+    ft.Text = text or ""
+    ft.Font = ed.Font(ed.SystemFont.Bold if bold else ed.SystemFont.Default, CELL_FONT_SIZE)
+    ft.MaximumSize = ed.SizeF(max(width - 4, 1), 1000)
+    ft.Wrap = ed.FormattedTextWrapMode.Word
+    return ft
+
+
+_FITTED = {}
+
+
+def fit_text(text, width, bold=False):
+    """The text as a cell of `width` shows it: whole when it fits in two lines; otherwise cut at the end of the
+    second line with "…" (the selected item's detail, below the list, always has it whole). Cached: cells paint
+    often."""
+    key = (text, int(width), bold)
+    if key not in _FITTED:
+        limit = ROW_HEIGHT - 2
+        if cell_text(text, width, bold).Measure().Height <= limit:
+            _FITTED[key] = text
+        else:
+            low, high = 0, len(text)
+            while low < high:                # the longest start that fits with its "…"
+                mid = (low + high + 1) // 2
+                if cell_text(text[:mid].rstrip() + "…", width, bold).Measure().Height <= limit:
+                    low = mid
+                else:
+                    high = mid - 1
+            _FITTED[key] = text[:low].rstrip() + "…"
+    return _FITTED[key]
+
+
+def _cell_style(parts, item, index):
+    """(bold, colour) of one cell: a group header bold; an item that doesn't comply or needs review in its status
+    colour (the item with its mark, proposed, Delta); everything else the system's text colour."""
+    tag = item.Tag if item is not None else None
+    if isinstance(tag, str) and tag.startswith("group:"):
+        return True, None
+    found = parts["by_id"].get(tag)
+    if found is not None and not parts.get("stale") and found["status"] in ("does_not_comply", "needs_review") \
+            and index in (0, 1, 3):
+        return False, eto_status_color(found["status"])
+    return False, None
+
+
+def _cell_painter(parts, index):
+    def paint(sender, e):
+        item = e.Item
+        if item is None:
+            return
+        bold, colour = _cell_style(parts, item, index)
+        if getattr(e, "IsSelected", False):
+            colour = ed.SystemColors.HighlightText
+        r = e.ClipRectangle
+        text = str(item.Values[index] or "")
+        shown = fit_text(text, r.Width, bold)
+        parts.setdefault("painted", {})[(index, item.Tag is not None and str(item.Tag).startswith("group:"))] = r.Width
+        ft = cell_text(shown, r.Width, bold)
+        ft.ForegroundBrush = ed.SolidBrush(colour or ed.SystemColors.ControlText)
+        e.Graphics.DrawText(ft, ed.PointF(r.X + 2, r.Y + 2))
+    return paint
+
+
 def make_panel(actions, host=None):
     """The Gordium panel: a header, the item list (a TreeGridView), a splitter, the selected item's detail, and a
     footer. `actions` maps names to functions (zoom, report, envelope, edit_site, survey, grade, enter, add,
@@ -179,31 +246,22 @@ def make_panel(actions, host=None):
     tree = ef.TreeGridView()
     tree.ShowHeader = True
     tree.AllowMultipleSelection = False
+    tree.RowHeight = ROW_HEIGHT
+    parts = {"form": form, "tree": tree, "actions": actions, "by_id": {}, "expanded": {}, "selected": None,
+             "header": ef.DynamicLayout(), "detail": ef.DynamicLayout(), "view": None}
     for i, (title, width) in enumerate(COLUMNS):
         col = ef.GridColumn()
         col.HeaderText = title
-        col.DataCell = ef.TextBoxCell(i)
+        cell = ef.DrawableCell()             # drawn here, wrapping to two lines (a text cell is one line, cut off)
+        cell.Paint += logic.guard(_cell_painter(parts, i), "draw a panel row")
+        col.DataCell = cell
         col.Editable = False
         col.Sortable = False
         col.Width = width
         col.AutoSize = False                # never sized to its text: every column stays in view (D4)
+        col.Expand = i == 0                 # the item takes whatever width the panel has
         col.Resizable = True
         tree.Columns.Add(col)
-    parts = {"form": form, "tree": tree, "actions": actions, "by_id": {}, "expanded": {}, "selected": None,
-             "header": ef.DynamicLayout(), "detail": ef.DynamicLayout(), "view": None}
-
-    def formatting(sender, e):
-        item = e.Item
-        tag = item.Tag if item is not None else None
-        if isinstance(tag, str) and tag.startswith("group:"):
-            e.Font = ed.Font(ed.SystemFont.Bold, 12)
-            return
-        found = parts["by_id"].get(tag)
-        if found is not None and not parts.get("stale") and found["status"] in ("does_not_comply", "needs_review"):
-            if e.Column.DisplayIndex in (0, 1, 3):          # the item (with its mark), proposed, margin
-                e.ForegroundColor = eto_status_color(found["status"])
-
-    tree.CellFormatting += logic.guard(formatting, "color a panel row")
 
     def selected(sender, e):
         item = tree.SelectedItem
@@ -231,7 +289,8 @@ def make_panel(actions, host=None):
     layout.Spacing = ed.Size(6, 6)
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
-    layout.Add(row(_envelope_box(actions), _massing_box(actions)))
+    layout.Add(row(_envelope_box(actions)))         # each tick its own row: side by side they ran off at 380
+    layout.Add(row(_massing_box(actions)))
     layout.Add(row(_labels_box(actions, parts)))     # its own row: beside the others it ran off the panel
     parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
     layout.Add(parts["message"])
@@ -401,7 +460,7 @@ def show_detail(parts):
     det = i["detail"]
     words = {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
              "not_checked": "Not checked"}[i["status"]]
-    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + i["name"] + " · " + words,
+    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.row_name(i) + " · " + words,   # the row's own name, whole
                    eto_status_color(i["status"]), bold=True, size=13))
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))
