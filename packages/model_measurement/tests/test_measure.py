@@ -837,10 +837,15 @@ def _drawing(rnd):
         x0 = 5 + 12 * k
         high, marked = rnd.randint(1, 5), rnd.random() < 0.6
         ids = [f"s{k}b{i}" for i in range(high)]
+        gap = rnd.randrange(1, high - 1) if marked and high > 2 and rnd.random() < 0.2 else None   # a floor deleted
         for i, bid in enumerate(ids):
+            if i == gap:
+                continue
             blocks.append(floor(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid) if marked else
                           box(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid))
+        ids = [b for i, b in enumerate(ids) if i != gap]
         stacks.append({"ids": ids, "countable": marked, "floors": high, "tall": not marked, "below": False,
+                       "gap": gap is not None,
                        "blocks": 0 if marked else high})          # plain solids stacked: each may be a story
     if rnd.random() < 0.35:            # a plain wing behind the first stack: a porch slab, a tall wing, a walk-out
         z0, z1 = rnd.choice([(0, 3), (0, 6), (0, 7), (0, 8), (0, 12), (0, 32), (-10, 10.5),   # on the ground
@@ -872,6 +877,7 @@ def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
             assert len(set(ids)) == len(ids), (seed, ids, m)
             main = next((s for s in stacks if pick in s["ids"]), stacks[0] if len(stacks) == 1 else None)
             assert main is not None, (seed, stacks, pick, m)       # no main building: never a value
+            assert not any(s.get("gap") for s in stacks), (seed, stacks, m)   # floors over a gap: a question
             for members in ([main], stacks):    # each candidate building: the main one alone, and with every part
                 assert not any(s["below"] for s in members), (seed, stacks, m)     # a basement or cellar: asks
                 most = max((s["floors"] for s in members if s["countable"]), default=None)
@@ -1013,3 +1019,18 @@ def test_a_short_part_off_the_ground_is_never_left_out_of_the_stories(z0, z1, ty
         assert m["value"] is None and "part of the building (room) isn't drawn as floor blocks" in m["reason"]
     else:
         assert m["value"] == 3
+
+
+@pytest.mark.parametrize("fourth", [False, True])
+def test_a_floor_block_over_a_deleted_floor_is_still_counted_and_asks(fourth):
+    """Stress F10 (P0): floor 2 deleted, floor 1 at 0 to 11 ft 8 in and floor 3 at 23 ft 4 in to 35 ft. Floor 3 was
+    left out as a separate building, so with a 9 ft plain wing and 1 typed, stories complied; with a fourth floor
+    on floor 3 and 2 typed, too. Floor blocks over one another in plan are the building's floors: the gap is a
+    question (a floor not drawn, or a space open to below), never a smaller count."""
+    h = 35 / 3
+    blocks = [floor(10, 25, 35, 65, z0=0, z1=h, id="floor 1"), floor(10, 25, 35, 65, z0=2 * h, z1=3 * h, id="floor 3")]
+    if fourth:
+        blocks.append(floor(10, 25, 35, 65, z0=3 * h, z1=4 * h, id="floor 4"))
+    blocks.append(box(35, 25, 45, 45, 0, 9, id="wing"))
+    m = measure(site(RECT, *blocks), {**FACTS, "stories": 2 if fourth else 1, "main_building": "floor 1"})["stories"]
+    assert m["value"] is None and "floor blocks drawn one over another don't stand on each other" in m["reason"]
