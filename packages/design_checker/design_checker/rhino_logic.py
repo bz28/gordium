@@ -217,8 +217,10 @@ def pipes(process):
     plugin only puts on `sends` and waits on `lines` with a time limit (answer_for). Put None on `sends` to end
     the writer."""
     sends, lines = queue.Queue(), queue.Queue()
-    threading.Thread(target=_read_lines, args=(process.stdout, lines), daemon=True).start()
-    threading.Thread(target=_write_lines, args=(process.stdin, sends), daemon=True).start()
+    threading.Thread(target=_read_lines, args=(process.stdout, lines), daemon=True,
+                     name="gordium-reader-%s" % getattr(process, "pid", "")).start()
+    threading.Thread(target=_write_lines, args=(process.stdin, sends, process), daemon=True,
+                     name="gordium-writer-%s" % getattr(process, "pid", "")).start()
     return sends, lines
 
 
@@ -233,12 +235,17 @@ def _read_lines(stream, lines):
         lines.put(None)
 
 
-def _write_lines(stream, sends):
-    """The writer thread: each request, in order, until None or the checker stops reading (then the reader sees
-    it stop, or ask's time limit runs out)."""
+def _write_lines(stream, sends, process=None):
+    """The writer thread: each request, in order, until None, the checker stops reading (then the reader sees it
+    stop, or ask's time limit runs out), or the checker process ends (however it was stopped)."""
     try:
         while True:
-            text = sends.get()
+            try:
+                text = sends.get(timeout=1)
+            except queue.Empty:
+                if process is not None and process.poll() is not None:
+                    return
+                continue
             if text is None:
                 return
             stream.write(text)
@@ -253,10 +260,16 @@ def exchange(sends, lines, request, limit):
     return answer_for(lines, request["id"], limit)
 
 
-def sweep(leftovers):
+HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer",
+           "worker", "worker_sends", "worker_lines")
+
+
+def sweep(leftovers, state=None):
     """Undo everything an earlier copy of the plugin left attached to Rhino (event handlers, its drawing, its
     panel, its checker): `leftovers` maps a name to its undo, kept outside the plugin's state so clearing the
-    state can't lose it. Each undo runs even if another fails; returns how many ran."""
+    state can't lose it. Each undo runs even if another fails; returns how many ran. Given the plugin's `state`,
+    its handles to those things are forgotten too (so it never says a detached hook is attached); what the
+    architect asked for (live mode on, the choices) stays, for the new copy to put back."""
     n = 0
     for key in list(leftovers):
         undo = leftovers.pop(key, None)
@@ -265,6 +278,8 @@ def sweep(leftovers):
             n += 1
         except Exception:                      # noqa: BLE001  (already gone: nothing to undo)
             pass
+    for key in HANDLES if state is not None else ():
+        state.pop(key, None)
     return n
 
 

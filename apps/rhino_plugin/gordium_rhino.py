@@ -39,7 +39,9 @@ CITY = "City of Ithaca"
 sys.path.insert(0, os.path.join(REPO, "packages", "design_checker", "design_checker"))
 import rhino_logic as logic  # noqa: E402  (plain Python, tested in CI: which objects, which facts)
 
-logic.sweep(LEFTOVERS)                       # an earlier copy's handlers, drawing, panel and checker: undone
+# an earlier copy's handlers, drawing, panel and checker: undone, and STATE's handles to them forgotten (live
+# mode, if it was on, is put back at the end of this file)
+logic.sweep(LEFTOVERS, STATE)
 
 
 def _is_current():
@@ -54,8 +56,12 @@ def _on(owner, name, handler):
 
 
 def _off(owner, name, handler):
+    """Detach it if attached (a sweep, or an older copy's state, may already have: pythonnet then raises)."""
     event = getattr(owner, name)
-    event -= handler
+    try:
+        event -= handler
+    except ValueError:                       # "unknown event handler": already detached
+        pass
     LEFTOVERS.pop("%s.%s:%d" % (owner.__name__, name, id(handler)), None)
 
 
@@ -102,8 +108,7 @@ def _worker():
     packages = os.path.join(REPO, "packages")
     now = logic.code_fingerprint(packages)
     if p is not None and logic.restart_checker(p.poll() is None, STATE.get("worker_code"), now):
-        if p.poll() is None:
-            p.terminate()
+        _stop_worker()                               # the process and its writer thread
         p = None
     if p is None:
         env = dict(os.environ)
@@ -116,7 +121,7 @@ def _worker():
         STATE["worker_sends"], STATE["worker_lines"] = logic.pipes(p)
         STATE["worker"] = p
         STATE["worker_code"] = now
-        LEFTOVERS["worker"] = p.kill                     # a later copy of this script stops it
+        LEFTOVERS["worker"] = _stop_worker               # a later copy of this script stops it, writer too
     return p
 
 
@@ -437,7 +442,7 @@ def overlay():
     if o is None:
         o = Overlay()
         STATE["overlay"] = o
-        LEFTOVERS["overlay"] = lambda: setattr(o, "Enabled", False)
+    LEFTOVERS["overlay"] = lambda: setattr(o, "Enabled", False)    # on every enable (a reused one too)
     o.Enabled = True
     if not STATE.get("doc_hooks"):          # whatever turned drawing on: another document clears it
         documents(True)
@@ -1185,3 +1190,7 @@ def gordium_start():
     Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
                              logic.MASSING)
     return result
+
+
+if STATE.get("live"):                        # live mode was on before this copy loaded: its hooks back on
+    live(True)
