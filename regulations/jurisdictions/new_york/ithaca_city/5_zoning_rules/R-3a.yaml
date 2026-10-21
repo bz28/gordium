@@ -1370,6 +1370,7 @@ rules:
     examples:
       - given: {use: multiple_family, abuts_r1_district: true}
         expect: needs_review
+        note: R-1 land across a creek, an alley or a railroad, or touching only at a corner, is a yes (the cautious reading of open question 1)
       - given: {use: multiple_family, abuts_r1_district: false}
         expect: not_applicable
         note: 'the conditions apply only "if the land ... directly abuts land in either the R-1a or R-1b" district'
@@ -1391,9 +1392,6 @@ rules:
         note: whether an attached building of 3-6 houses is exempt is the second open question, so it is not exempted
       - given: {use: one_family_semi_detached, abuts_r1_district: true}
         expect: not_applicable
-      - given: {use: multiple_family, abuts_r1_district: true}
-        expect: needs_review
-        note: R-1 land across a creek, an alley or a railroad, or touching only at a corner, is a yes (the cautious reading of open question 1)
     findings:
     - id: one_family_configurations_exempt
       question: '§325-19E exempts "a one-family or two-family dwelling". Does that include the semi-detached and
@@ -1434,20 +1432,24 @@ rules:
         quote: that directly abuts R-1, § 325-9B(1). [Added 6-6-2012 by Ord. No. 2012-03]
       strength: strong
     open_questions:
-    - '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does land across
-      a street count, or only land sharing a lot line with the R-3a lot?'
+    - '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does only land
+      sharing a lot line with the R-3a lot count, or also land across a street, an alley, a creek or other waterway, a
+      railroad or other right-of-way; and does land touching the lot only at a corner count?'
     - 'A one-family attached dwelling is "a building containing three or more one-family dwellings" (§325-3B), and
       §325-3B also calls a building of three or more dwelling units, a row house or a townhouse a multiple dwelling.
       Is it the "one-family ... dwelling" §325-19E exempts, or a multiple dwelling §325-19E covers?'
     research:
     - question: '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does
-        land across a street count, or only land sharing a lot line with the R-3a lot?'
+        only land sharing a lot line with the R-3a lot count, or also land across a street, an alley, a creek or other
+        waterway, a railroad or other right-of-way; and does land touching the lot only at a corner count?'
       searched:
       - 325-19
       - 325-19A
       - 325-19E
       - 325-6
       - 325-6A
+      - 325-6D
+      - 325-6E
       - 325-9B
       - 325-11B
       - 325-8B
@@ -1465,6 +1467,17 @@ rules:
         lines: [26, 27]
         quote: Where district boundaries are indicated as approximately following the center lines of streets or highways,
           street lines or right-of-way lines, such lines shall be construed to be such boundaries
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 23
+        lines: [33, 34]
+        quote: D. Where the boundary of a district follows a railroad line, such boundary shall be deemed to be located
+          in the middle of the main tracts of said railroad.
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 23
+        lines: [35, 37]
+        quote: E. Where the boundary of a district follows a stream, lake or other body of water under public
+          jurisdiction, said boundary line shall be deemed to be at the limit of the jurisdiction, unless otherwise
+          indicated.
       why_open: The code points both ways. §325-9B(1)(j) says "abutting or across a street", which treats the two as
         different (so "abuts" alone would not reach across a street); but §325-11B says "abuts land, other than a public
         right-of-way", which implies land in a street can be abutting land. Whether R-1 land begins at the street's

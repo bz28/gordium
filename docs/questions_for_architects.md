@@ -221,7 +221,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Until you answer:** Today and from a model, a zero-lot-line house in R-3a gets NEEDS REVIEW (it needs a special permit anyway).
 - **Options:** (a) no minimum; (b) the "Other use" rows (6,000 sf, 50 ft); (c) whatever the Planning and Development Board sets with the special permit.
 
-### 5.5 R-3a next to R-1: does land across a street "directly abut"?
+### 5.5 R-3a next to R-1: what land "directly abuts"? Only land sharing a lot line, or also across a street, alley, creek or other waterway, railroad or other right-of-way, or touching only at a corner?
 `[R-3a.abutting_r1#1]`
 
 - **The city's words:** "E. Development in R-3 Districts which abut R-1 Districts. The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling, shall be subject to the following special conditions if the land on which the development occurs directly abuts land in either the R-1a or R-1b Zoning District" (§325-19E, [p.50](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=50)): 150% lot size, R-1's height, 75% coverage, 150% side and rear yards where they abut R-1 land.
