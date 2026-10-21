@@ -287,7 +287,7 @@ def _random_formula(rnd, depth, want="bool"):
         return _random_formula(rnd, depth - 1, kind)
     if depth == 0 or rnd.random() < 0.15:
         return rnd.choice({"number": ["a", "b", "0", "1", "2.5", "35"], "text": ["u", '"x"', '"y"'],
-                           "bool": ["(a > 1)", '(u == "x")', "(b <= 2.5)"]}[want])
+                           "bool": ["(a > 1)", '(u == "x")', "(b <= 2.5)", "y"]}[want])
     any_kind = rnd.choice(["number", "text", "bool"])
     shapes = {
         "number": [lambda: f"({g('number')} {rnd.choice('+-*/')} {g('number')})", lambda: f"(-{g('number')})",
@@ -315,8 +315,8 @@ def test_the_type_rules_and_three_valued_logic_are_sound_over_the_whole_grammar(
     import itertools
     import random
     from rule_format.formula import FormulaError, type_of
-    kinds = {"a": "number", "b": "number", "u": frozenset({"x", "z"})}
-    grid = {"a": [0, 1, 2.5, 3, 35, 36], "b": [0, 1, 2.5, 35, 36], "u": ["x", "z"]}
+    kinds = {"a": "number", "b": "number", "u": frozenset({"x", "z"}), "y": "boolean"}     # y: a yes/no measure
+    grid = {"a": [0, 1, 2.5, 3, 35, 36], "b": [0, 1, 2.5, 35, 36], "u": ["x", "z"], "y": [True, False]}
 
     def run(text, values):
         try:
