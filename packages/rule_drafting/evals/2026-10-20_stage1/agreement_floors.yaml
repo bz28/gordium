@@ -1,11 +1,12 @@
 # The least number of each hand key's worked examples the drafted rules must agree with (tests/test_eval.py). A
 # reported metric, not a pass/fail: it may rise (raise the floor with it), never fall. Recorded 2026-10-21 from the
-# real counts under the reviewed pairs (hand_to_drafted.yaml), which replaced the citation matcher (review round 7):
-# measurement-2 a98149b's R-1b key, #20's R-1a and R-3a keys (2f1535b), r2-hand's R-2a, R-2b, R-2c (5a2c6a1). The keys
-# from other branches apply once they are in this checkout. Every difference is in grade_all_with_hand_keys.json.
+# real counts under the reviewed pairs (hand_to_drafted.yaml): measurement-2 a98149b's R-1b key, #20's R-1a and R-3a
+# keys (2f1535b), r2-hand's R-2a, R-2b, R-2c keys (1983c47). The keys from other branches apply once they are in this
+# checkout. Every difference is in grade_all_with_hand_keys.json; the real false passes are listed, with their causes,
+# in hand_to_drafted.yaml (known_false_passes).
 R-1b.yaml: 38       # of 48
 R-1a.yaml: 63       # of 74
-R-2a.yaml: 81       # of 98 (4 undrafted)
-R-2b.yaml: 81       # of 99 (4 undrafted)
-R-2c.yaml: 83       # of 213 (100 undrafted: the side yards and house lot sizes, shown as not checked)
-R-3a.yaml: 87       # of 141 (40 undrafted)
+R-2a.yaml: 82       # of 98 (2 undrafted)
+R-2b.yaml: 82       # of 99 (2 undrafted)
+R-2c.yaml: 88       # of 224 (103 undrafted: the side yards and house lot sizes, shown as not checked)
+R-3a.yaml: 88       # of 141 (38 undrafted)

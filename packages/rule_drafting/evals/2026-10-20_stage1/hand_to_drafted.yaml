@@ -1,12 +1,13 @@
 # Which drafted rules answer the same question as each hand-written rule (the answer keys), reviewed by hand
 # from the law (2026-10-21), rule by rule. Generated once from the old citation heuristic, then checked; frozen:
 # tests/test_eval.py fails when a hand or drafted rule isn't here, so new drafts or keys force a new review.
-#   judge: units judged on their own for a false pass (a unit: rules that together answer the question; no other
-#          rule is combined with them, so a missing input elsewhere never hides a pass)
-#   parts: pieces of an exception, counted in the agreement number only
+#   judge: units of rules that together answer the question; each unit (its flags one by one) and the parts
+#          are compared with the hand rule on designs with every input filled in (tests/test_eval.py)
+#   parts: pieces of an exception (§325-16C), compared with the hand rule as their own group
 #   judge: [] means nothing drafted answers it (counted undrafted), with the reason
 #   not_same: a drafted rule on the same chart cell that answers a different question, with the reason
 #   unmatched / general_unmatched: drafted rules no key question asks, with the reason
+#   known_false_passes: the real drafted false passes the grader finds, with their cause, until re-drafted
 keys:
   R-1b.yaml:
     district: R-1b
@@ -45,7 +46,7 @@ keys:
         - R-1b.325_16c_extra_height_side_yards
         - R-1b.325_16c_extra_height_rear_yard
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, judged as exceptions (exception_false_passes)'
+          rules: parts of the answer, compared with the hand rule as their own group'
       R-1b.lot_coverage:
         judge:
         - - R-1b.max_lot_coverage
@@ -65,10 +66,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-1b.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-          - general.325_18b_required_yard_open_unobstructed
-        reason: '§325-18B: eaves may project at most 2 ft into a required yard, drafted as a projection limit and an open-yard
-          flag: judged together'
+        - - general.325_18b_required_yard_open_unobstructed
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
+          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
+          different question)'
       R-1b.accessory_buildings:
         judge:
         - - R-1b.325_25a_accessory_not_in_required_front_yard
@@ -81,13 +82,21 @@ keys:
         - - R-1b.parking_by_sleeping_rooms
         reason: the chart's residential parking by bedrooms
       R-1b.parking_other_uses:
-        judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        judge:
+        - - R-1b.parking_by_sleeping_rooms
+        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
+          question (wrongly where it passes a non-residential use)
     unmatched:
       R-1b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
       R-1b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-1b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+    known_false_passes:
+      R-1b.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
+        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
+        the checker shows needs review today'
+      R-1b.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
+        passes by it, where the chart sends other uses to §325-20
   R-1a.yaml:
     district: R-1a
     rules:
@@ -125,7 +134,7 @@ keys:
         - R-1a.325_16c_extra_height_side_yards
         - R-1a.325_16c_extra_height_rear_yard
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, judged as exceptions (exception_false_passes)'
+          rules: parts of the answer, compared with the hand rule as their own group'
       R-1a.lot_coverage:
         judge:
         - - R-1a.max_lot_coverage
@@ -145,10 +154,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-1a.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-          - general.325_18b_required_yard_open_unobstructed
-        reason: '§325-18B: eaves may project at most 2 ft into a required yard, drafted as a projection limit and an open-yard
-          flag: judged together'
+        - - general.325_18b_required_yard_open_unobstructed
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
+          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
+          different question)'
       R-1a.accessory_buildings:
         judge:
         - - R-1a.325_25a_accessory_not_in_required_front_yard
@@ -161,13 +170,21 @@ keys:
         - - R-1a.parking_by_sleeping_rooms
         reason: the chart's residential parking by bedrooms
       R-1a.parking_other_uses:
-        judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        judge:
+        - - R-1a.parking_by_sleeping_rooms
+        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
+          question (wrongly where it passes a non-residential use)
     unmatched:
       R-1a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
       R-1a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-1a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+    known_false_passes:
+      R-1a.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
+        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
+        the checker shows needs review today'
+      R-1a.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
+        passes by it, where the chart sends other uses to §325-20
   R-2a.yaml:
     district: R-2a
     rules:
@@ -221,7 +238,7 @@ keys:
         - R-2a.325_16c_extra_height_side_yards
         - R-2a.325_16c_extra_height_rear_yard
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, judged as exceptions (exception_false_passes)'
+          rules: parts of the answer, compared with the hand rule as their own group'
       R-2a.lot_coverage:
         judge:
         - - R-2a.max_lot_coverage
@@ -241,10 +258,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-2a.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-          - general.325_18b_required_yard_open_unobstructed
-        reason: '§325-18B: eaves may project at most 2 ft into a required yard, drafted as a projection limit and an open-yard
-          flag: judged together'
+        - - general.325_18b_required_yard_open_unobstructed
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
+          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
+          different question)'
       R-2a.accessory_buildings:
         judge:
         - - R-2a.325_25a_accessory_not_in_required_front_yard
@@ -262,11 +279,13 @@ keys:
         reason: 'the chart''s residential parking, which the draft applies to every dwelling: the same question (the key sends
           these uses to review)'
       R-2a.parking_other_uses:
-        judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        judge:
+        - - R-2a.parking_by_sleeping_rooms
+        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
+          question (wrongly where it passes a non-residential use)
       R-2a.loading:
         judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        reason: 'not drafted: loading is not in stage 1'
     unmatched:
       R-2a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
@@ -274,6 +293,14 @@ keys:
         key rule asks it'
       R-2a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+    known_false_passes:
+      R-2a.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
+        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
+        the checker shows needs review today'
+      R-2a.parking_dwelling_units: the draft counts a two-family or semi-detached house's parking from one unit's bedrooms;
+        the key sends dwellings with several units to review
+      R-2a.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
+        passes by it, where the chart sends other uses to §325-20
   R-2b.yaml:
     district: R-2b
     rules:
@@ -327,7 +354,7 @@ keys:
         - R-2b.325_16c_extra_height_side_yards
         - R-2b.325_16c_extra_height_rear_yard
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, judged as exceptions (exception_false_passes)'
+          rules: parts of the answer, compared with the hand rule as their own group'
       R-2b.lot_coverage:
         judge:
         - - R-2b.max_lot_coverage
@@ -347,10 +374,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-2b.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-          - general.325_18b_required_yard_open_unobstructed
-        reason: '§325-18B: eaves may project at most 2 ft into a required yard, drafted as a projection limit and an open-yard
-          flag: judged together'
+        - - general.325_18b_required_yard_open_unobstructed
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
+          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
+          different question)'
       R-2b.accessory_buildings:
         judge:
         - - R-2b.325_25a_accessory_not_in_required_front_yard
@@ -368,11 +395,13 @@ keys:
         reason: 'the chart''s residential parking, which the draft applies to every dwelling: the same question (the key sends
           these uses to review)'
       R-2b.parking_other_uses:
-        judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        judge:
+        - - R-2b.parking_by_sleeping_rooms
+        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
+          question (wrongly where it passes a non-residential use)
       R-2b.loading:
         judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        reason: 'not drafted: loading is not in stage 1'
     unmatched:
       R-2b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
@@ -380,6 +409,14 @@ keys:
         key rule asks it'
       R-2b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+    known_false_passes:
+      R-2b.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
+        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
+        the checker shows needs review today'
+      R-2b.parking_dwelling_units: the draft counts a two-family or semi-detached house's parking from one unit's bedrooms;
+        the key sends dwellings with several units to review
+      R-2b.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
+        passes by it, where the chart sends other uses to §325-20
   R-2c.yaml:
     district: R-2c
     rules:
@@ -407,6 +444,10 @@ keys:
         judge: []
         reason: 'not drafted: the lot area cell for this use didn''t fit a template (a footnote or several numbers in the
           cell); it is listed as not checked'
+      R-2c.attached_units_per_building:
+        judge:
+        - - general.325_3b_one_family_attached_dwelling_max_attached_units_per_building
+        reason: '§325-3B: an attached dwelling is a building of three to six one-family dwellings: the same question'
       R-2c.lot_area_other_use:
         judge:
         - - R-2c.min_lot_area_other_use
@@ -448,7 +489,7 @@ keys:
         - R-2c.325_16c_extra_height_front_yard
         - R-2c.325_16c_extra_height_rear_yard
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, judged as exceptions (exception_false_passes)'
+          rules: parts of the answer, compared with the hand rule as their own group'
       R-2c.lot_coverage:
         judge:
         - - R-2c.max_lot_coverage_first
@@ -469,10 +510,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-2c.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-          - general.325_18b_required_yard_open_unobstructed
-        reason: '§325-18B: eaves may project at most 2 ft into a required yard, drafted as a projection limit and an open-yard
-          flag: judged together'
+        - - general.325_18b_required_yard_open_unobstructed
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
+          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
+          different question)'
       R-2c.accessory_buildings:
         judge:
         - - R-2c.325_25a_accessory_not_in_required_front_yard
@@ -490,14 +531,26 @@ keys:
         reason: 'the chart''s residential parking, which the draft applies to every dwelling: the same question (the key sends
           these uses to review)'
       R-2c.parking_other_uses:
-        judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        judge:
+        - - R-2c.parking_by_sleeping_rooms
+        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
+          question (wrongly where it passes a non-residential use)
       R-2c.loading:
         judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        reason: 'not drafted: loading is not in stage 1'
     unmatched:
       R-2c.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2c.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+    known_false_passes:
+      R-2c.height: R-2c's §325-16C extra height has no side-yard rule (the two-number side-yard cell didn't fit a template),
+        so the drafted bonus lets a taller house through without wider side yards
+      R-2c.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
+        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
+        the checker shows needs review today'
+      R-2c.parking_dwelling_units: the draft counts a two-family or semi-detached house's parking from one unit's bedrooms;
+        the key sends dwellings with several units to review
+      R-2c.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
+        passes by it, where the chart sends other uses to §325-20
   R-3a.yaml:
     district: R-3a
     rules:
@@ -580,7 +633,7 @@ keys:
         - R-3a.325_16c_extra_height_side_yards
         - R-3a.325_16c_extra_height_rear_yard
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, judged as exceptions (exception_false_passes)'
+          rules: parts of the answer, compared with the hand rule as their own group'
       R-3a.lot_coverage:
         judge:
         - - R-3a.max_lot_coverage
@@ -600,10 +653,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-3a.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-          - general.325_18b_required_yard_open_unobstructed
-        reason: '§325-18B: eaves may project at most 2 ft into a required yard, drafted as a projection limit and an open-yard
-          flag: judged together'
+        - - general.325_18b_required_yard_open_unobstructed
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
+          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
+          different question)'
       R-3a.accessory_buildings:
         judge:
         - - R-3a.325_25a_accessory_not_in_required_front_yard
@@ -634,11 +687,13 @@ keys:
         - - R-3a.parking_dormitory
         reason: the chart's dormitory parking row
       R-3a.parking_other_uses:
-        judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        judge:
+        - - R-3a.parking_by_sleeping_rooms
+        reason: the chart sends other uses to §325-20; the draft applies its bedroom formula to every use, so it answers this
+          question (wrongly where it passes a non-residential use)
       R-3a.loading:
         judge: []
-        reason: 'not drafted: other uses'' parking (§325-20) and loading are not in stage 1'
+        reason: 'not drafted: loading is not in stage 1'
     unmatched:
       R-3a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
@@ -646,6 +701,19 @@ keys:
         key rule asks it'
       R-3a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-3a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+    known_false_passes:
+      R-3a.lot_area_other_use: a nursing home is a multiple dwelling by §325-3, so note 7 may apply (the key's open question);
+        the drafting check that sends such uses to review didn't recognise it (its chart label isn't a defined term's words)
+      R-3a.accessory_buildings: '§325-25C is drafted for frame buildings only (accessory_is_frame); the key reads its distances
+        as applying to every accessory building (accessory_distances_apply). Latent: accessory_is_frame isn''t measured, so
+        the checker shows needs review today'
+      R-3a.abutting_r1: where the lot doesn't abut R-1 land the draft says §325-19E doesn't apply, as the law says; the key's
+        flag always reviews because adjacency isn't measured
+      R-3a.parking_dwelling_units: the draft counts a two-family or semi-detached house's parking from one unit's bedrooms;
+        the key sends dwellings with several units to review
+      R-3a.parking_dormitory: the draft checks 1 space per 4 persons; the key sends dormitory parking to review
+      R-3a.parking_other_uses: the drafted bedroom formula applies to every use, so a church or other non-residential use
+        passes by it, where the chart sends other uses to §325-20
 general_unmatched:
   general.325_16a_commercial_and_electric_towers_permit: '§325-16A height exceptions (rooftop features, towers): not in the
     keys'
@@ -656,6 +724,8 @@ general_unmatched:
   general.325_17b_corner_visibility_triangle: '§325-17B corner visibility triangle: not in the keys'
   general.325_18a_porches_structures_counted_in_yards_coverage: '§325-18A porches and decks count as building (a measuring
     matter): not in the keys'
+  general.325_18b_architectural_feature_projection_limit: §325-18B's projection limit measures how far a feature projects;
+    the keys measure eaves' distances to the lot lines
   general.325_20d_driveway_aisle_width: '§325-20D parking space and driveway sizes: not in the keys'
   general.325_20d_driveway_entry_grade: '§325-20D parking space and driveway sizes: not in the keys'
   general.325_20d_driveway_min_width: '§325-20D parking space and driveway sizes: not in the keys'
@@ -691,8 +761,6 @@ general_unmatched:
   general.325_3b_building_area_pergola_terrace_patio_not_in_required_yard: '§325-3B definitions drafted as rules (ADUs, attached
     dwellings, row houses, terraces, stories): not in the keys'
   general.325_3b_dwelling_one_family_one_family_occupancy_unrelated_individuals: '§325-3B definitions drafted as rules (ADUs,
-    attached dwellings, row houses, terraces, stories): not in the keys'
-  general.325_3b_one_family_attached_dwelling_max_attached_units_per_building: '§325-3B definitions drafted as rules (ADUs,
     attached dwellings, row houses, terraces, stories): not in the keys'
   general.325_3b_row_house_row_house_module_facade_length: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
     row houses, terraces, stories): not in the keys'

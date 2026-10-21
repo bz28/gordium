@@ -673,12 +673,9 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit",
      "general.325_18b_required_yard_open_unobstructed"
     ],
-    "notes": [
-     "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.yard_projections",
@@ -693,12 +690,9 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit",
      "general.325_18b_required_yard_open_unobstructed"
     ],
-    "notes": [
-     "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.yard_projections",
@@ -713,12 +707,9 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit",
      "general.325_18b_required_yard_open_unobstructed"
     ],
-    "notes": [
-     "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.yard_projections",
@@ -733,12 +724,9 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit",
      "general.325_18b_required_yard_open_unobstructed"
     ],
-    "notes": [
-     "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.yard_projections",
@@ -753,12 +741,9 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit",
      "general.325_18b_required_yard_open_unobstructed"
     ],
-    "notes": [
-     "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.yard_projections",
@@ -773,12 +758,9 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit",
      "general.325_18b_required_yard_open_unobstructed"
     ],
-    "notes": [
-     "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.yard_projections",
@@ -793,12 +775,9 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit",
      "general.325_18b_required_yard_open_unobstructed"
     ],
-    "notes": [
-     "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
-    ]
+    "notes": []
    },
    {
     "hand": "R-1b.accessory_buildings",
@@ -825,13 +804,51 @@
    }
   ],
   "undrafted": [],
-  "false_pass": [],
+  "false_pass": [
+   {
+    "hand": "R-1b.accessory_buildings",
+    "given": {
+     "district": "R-1b",
+     "accessory_buildings": 1,
+     "accessory_distances_apply": true,
+     "accessory_front_yard": 90,
+     "accessory_is_frame": false,
+     "accessory_rear_yard": 0.0,
+     "accessory_side_yard": 6
+    },
+    "expect": "fail",
+    "got": "pass",
+    "drafted": [
+     "R-1b.325_25a_accessory_not_in_required_front_yard",
+     "general.325_25c_frame_accessory_side_setback",
+     "general.325_25c_frame_accessory_side_setback_r1",
+     "general.325_25c_frame_accessory_rear_setback"
+    ],
+    "parts": false
+   },
+   {
+    "hand": "R-1b.parking_other_uses",
+    "given": {
+     "district": "R-1b",
+     "multiple_dwelling_units": false,
+     "parking_spaces": 1.0,
+     "sleeping_rooms": 0.0,
+     "use": "cemetery"
+    },
+    "expect": "needs_review",
+    "got": "pass",
+    "drafted": [
+     "R-1b.parking_by_sleeping_rooms"
+    ],
+    "parts": false
+   }
+  ],
   "summary": {
    "examples": 48,
    "agree": 38,
    "disagree": 10,
    "undrafted": 0,
-   "false_pass": 0,
+   "false_pass": 2,
    "agree_of_all": "38/48",
    "agree_of_drafted": "38/48"
   }
