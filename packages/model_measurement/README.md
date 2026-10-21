@@ -27,6 +27,7 @@ format report from it.
   | `address_street_line` | on a corner lot: the lot line(s) on the street the lot's address is on (it decides which yard is the rear yard). Not given, each street is read as it, and the yards it changes need review |
   | `accessory_buildings` | the ids of the solids that are accessory buildings (a garage, a shed). A solid standing apart from the main building that isn't listed could be a freestanding deck (part of the building, §325-18A), so both are read. Listing them also picks the main building (the one left) |
   | `accessory_frame` | yes or no: the accessory buildings are frame. Frame ones keep §325-25C's distances by law; for others it is an open question (325-25C#1), read every way |
+  | `eaves_confirmed` | a lot fact entered in the panel ("These are eaves") for one overhang: [{overhang (its fingerprint, from the check), value: true, source, confirmed_by, date}]. Without it, a yard that meets its minimum only to the walls needs review; a later edit to the overhang asks again |
   | `grade_elevation` | the ground level heights are measured from (a flat site) |
   | `ground_is_flat` | yes or no. Sloped ground needs the ground levels around the walls (the grade plane), not measured yet: without a yes, height, building area and the yards say "needs review" |
   | `lot_surveyed` | yes or no: the lot outline is from a survey. A drawn lot (from a map) isn't: without a yes, the lot area, and so lot size and coverage, say "needs review" (the drawn area is listed as a reading) |
@@ -50,16 +51,20 @@ format report from it.
 
 The yards are measured to the nearest part of the building with its eaves left out (the finding yards_to_nearest_part:
 §325-3 YARD, §325-18A): cantilevered floors, porches, decks and steps count (a solid touching the main building is
-part of it: steps by Gordium's reading steps_count). Nothing is ever left out of the building unless it is proven
-an eave: a pitched roof drawn as its own solid standing on the building, and what of that roof solid reaches past
-the parts it stands on (less anything another part covers: a story beside it, a tower) is only roof, with no point of
-it there below the roof's own lowest edge. A fascia or soffit hanging below that edge by at most 1 ft is most likely
-the eave but could be a shallow story: then the yards and coverage are also read to the whole outline (reading
-`model#overhang`: eave / story), so that judgement can only lead to needs review, never a pass. Anything hanging
-lower past the walls (the walls of a story drawn in one solid with its roof) is building. A roof drawn in one solid with the walls, or a flat roof: nothing is told apart as an
-eave (an overhang can't be told from a story under the same roof), so it all counts as the building; anything that
-sticks out past the walls at the ground and isn't one of Gordium's floor blocks is also read to the walls (it may be
-a bay window or other projection).
+part of it: steps by Gordium's reading steps_count). Every yard and lot coverage is measured to the full
+outline: everything the building's solids cover, seen from above. Gordium never decides from the shape that
+something is an eave (a gable volume, a mansard story or a knee wall can look just like one). `_eave_candidate`, the
+one helper the height, the yards and coverage share, only suggests what might be eaves: what a pitched roof reaches
+past the walls under it. Where there is such a candidate, each yard is also read to the walls (the `model#eave`
+reading: eave / not_eave): if the full outline meets the requirement, that is the result; if only the walls do, the
+item needs review and asks whether the part reaching that far past the walls is an eave (§325-18B lets eaves
+reach up to 2 ft into a required yard; `R-1b.yard_projections` checks that). The answer is a lot fact entered in
+the panel ("These are eaves"), `eaves_confirmed`: [{overhang, value: true, source, confirmed_by, date}], naming the
+candidate's fingerprint (`eave_candidates` on the yard, height and coverage records). It applies to that overhang
+only: an edit that moves or resizes it gives a new fingerprint, and the question is asked again. The height's eave
+readings follow the same rule (unconfirmed, each is also read with the roof edge as the eave). Anything that sticks
+out past the walls at the ground and is neither one of Gordium's floor blocks nor a candidate eave is also read to
+the walls at the ground (`model#projection`: it may be a bay window or other projection).
 
 ## What research settled, and what is still open (`interpretations.py`)
 
@@ -168,9 +173,7 @@ Every reason the code gives today comes from the table:
   out, since leaving it out would undercount coverage).
 - **Accessory buildings:** "no accessory building on the lot (every solid is the main building or touches it)".
 - **The height:** "no roof plane of the pitched roof's highest section lies over the walls: the wall plate can't
-  be found"; "the pitched roof is drawn in one solid with the walls and reaches past them: the underside of its
-  eaves (one reading of which eave) can't be told from an upper floor under it; draw the roof as its own solid
-  standing on the building"; "the roof's shape can't be read (no faces open to the sky)"; "another solid's height can't be
+  be found"; "the roof's shape can't be read (no faces open to the sky)"; "another solid's height can't be
   read: …"; "too many solids with open roof questions to list every reading: pick the main building's parts, or
   ask the architects" (more than 200 combinations of readings).
 

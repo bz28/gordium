@@ -105,13 +105,38 @@ MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked
 SURVEY = "lot_area"        # a lot not yet surveyed: its one reading is the lot as drawn
 
 
-OVERHANG_WORDS = {"eave": "the overhang an eave", "story": "the overhang part of a story"}   # measure.OVERHANG
+MODEL_WORDS = {"model#eave": {"eave": "what reaches past the walls an eave",
+                               "not_eave": "what reaches past the walls not an eave"},
+               "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"}}
+EAVE_YARD_WORDS = {"front_yard": "front yard", "side_yard_smaller": "side yard", "side_yard_larger": "side yard",
+                 "rear_yard": "rear yard"}
 
 
 def _reading_words(tag: str, rid: str) -> str:
-    if tag == "model#overhang":
-        return OVERHANG_WORDS.get(rid, rid)
+    for model, words in MODEL_WORDS.items():          # measure.EAVE (per solid for the height), measure.PROJ
+        if tag == model or tag.startswith(model + ":"):
+            return words.get(rid, rid)
     return rid.replace("_", " ")
+
+
+def _eave_text(found: dict, measured: dict) -> str | None:
+    """For a row that needs review only because something might be an eave: what to confirm, in plain words
+    ("confirm the part reaching 1'-6" past the walls toward the front yard is an eave (§325-18B allows up to 2 ft
+    into a required yard)"), or None when the eave question isn't what decides it."""
+    tags = found["tags"]
+    if not any(t == "model#eave" or t.startswith("model#eave:") for t in tags) or found["result"] != "mixed":
+        return None
+    if any(MODEL_WORDS["model#eave"]["eave"] in w for w in found["fails_under"]):
+        return None                         # it fails even with the overhang an eave: not just a confirmation
+    reach = []
+    for name, yard in EAVE_YARD_WORDS.items():
+        m = measured.get(name) or {}
+        by = {r["named"].get("model#eave"): r["value"] for r in m.get("readings") or [] if r.get("named")}
+        if by.get("eave") is not None and by.get("not_eave") is not None and by["eave"] - by["not_eave"] > 1e-6:
+            reach.append(f"{present.feet_inches(by['eave'] - by['not_eave'], 'up')} past the walls toward the {yard}")
+    where = ("the part reaching " + "; ".join(dict.fromkeys(reach))) if reach else "what the roof reaches past the walls"
+    return (f"confirm {where} is an eave (§325-18B allows eaves up to 2 ft into a required yard): it complies only if "
+            "it is · These are eaves…")
 
 
 def readings_of(rule: dict, measured: dict, allowed: dict) -> dict | None:
@@ -202,6 +227,9 @@ def named_result(rule: dict, measured: dict, allowed: dict) -> dict | None:
             "fail": f"does not comply under any reading of the open question ({every})",
             "mixed": (f"does not comply if the open question is answered {' or '.join(found['fails_under'])}; "
                       f"complies if {' or '.join(found['passes_under']) or 'none'}")}[found["result"]]
+    if found["result"] == "pass" and all(t.startswith("model#") for t in found["tags"]):
+        text = "complies to the full outline, whatever reaches past the walls is"    # eaves don't matter here
+    text = _eave_text(found, measured) or text
     return {**found, "text": text}
 
 

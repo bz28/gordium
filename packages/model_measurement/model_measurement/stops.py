@@ -89,9 +89,6 @@ STOPS = {
     # the height
     "eave_unclear": "no roof plane of the pitched roof's highest section lies over the walls: the wall plate can't "
                     "be found",
-    "eave_one_solid": "the pitched roof is drawn in one solid with the walls and reaches past them: the underside of "
-                      "its eaves (one reading of which eave) can't be told from an upper floor under it; draw the roof "
-                      "as its own solid standing on the building",
     "no_roof": "the roof's shape can't be read (no faces open to the sky)",
     "other_height": "another solid's height can't be read: {reason}",
     "too_many_roofs": "too many solids with open roof questions to list every reading: pick the main building's "

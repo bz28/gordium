@@ -136,24 +136,13 @@ def _walls_only(x0, y0, x1, y1, id="house"):
     return b
 
 
-def _overhanging_gable_one_solid():
-    """A gable drawn in one solid with its walls, its roof reaching 2 ft past them with a fascia hanging 0.5 ft
-    below the roof edge: the eave's underside can't be told from an upper floor."""
-    walls = box(10, 25, 35, 65, 0, 20)
-    faces = [f for f in walls["faces"] if not all(p[2] == 20 for p in f["points"])]
-    faces += [{"points": [[8, 25, 19], [22.5, 25, 30], [22.5, 65, 30], [8, 65, 19]]},
-              {"points": [[22.5, 25, 30], [37, 25, 19], [37, 65, 19], [22.5, 65, 30]]},
-              {"points": [[8, 25, 18.5], [8, 65, 18.5], [8, 65, 19], [8, 25, 19]]}]
-    return {"id": "house", "faces": faces, "problems": []}
-
-
 def _gable_over_no_wall():
-    """A pitched top that sits wholly past the walls at the building's base (an upper part over nothing)."""
-    low = box(10, 25, 20, 65, 0, 10)
-    upper = box(20, 25, 35, 65, 10, 20)
-    faces = low["faces"] + [f for f in upper["faces"] if not all(p[2] == 20 for p in f["points"])]
-    faces += [{"points": [[20, 25, 20], [27.5, 25, 30], [27.5, 65, 30], [20, 65, 20]]},
-              {"points": [[27.5, 25, 30], [35, 25, 20], [35, 65, 20], [27.5, 65, 30]]}]
+    """A tent: a gable whose roof planes come down to the ground, with no walls under them at all."""
+    faces = [{"points": [[10, 25, 0], [35, 25, 0], [35, 65, 0], [10, 65, 0]]},
+             {"points": [[10, 25, 0], [22.5, 25, 12], [22.5, 65, 12], [10, 65, 0]]},
+             {"points": [[22.5, 25, 12], [35, 25, 0], [35, 65, 0], [22.5, 65, 12]]},
+             {"points": [[10, 25, 0], [35, 25, 0], [22.5, 25, 12]]},
+             {"points": [[10, 65, 0], [35, 65, 0], [22.5, 65, 12]]}]
     return {"id": "house", "faces": faces, "problems": []}
 
 
@@ -206,7 +195,6 @@ CASES = {
     "no_side_line": _plain(corner_lot=True, street_line=STREETS3, address_street_line=STREETS3[1:2]),
     "law_missing": _plain(jurisdiction="regulations/jurisdictions/nowhere/no_city"),
     "reading_unknown": _a_reading_without_code,
-    "eave_one_solid": _plain(buildings=[_overhanging_gable_one_solid()]),
     "eave_unclear": _plain(buildings=[_gable_over_no_wall()]),
     "no_accessory": _plain(),
     "lines_unclear": _plain(ZIGZAG),

@@ -61,6 +61,12 @@ def roof(x0, y0, x1, y1, base, ridge, over, fascia, id="roof"):
     return {"id": id, "faces": [{"points": [list(p) for p in f]} for f in faces], "problems": []}
 
 
+def eave_readings(h):
+    """A height's readings with the overhang read as an eave, by which eave."""
+    return {r["named"]["height_of_building#1"]: r["value"] for r in h["readings"]
+            if "not_eave" not in r["named"].values()}
+
+
 def run(buildings, lot=LOT, **facts):
     n = len(lot)
     site = {"units": "ft", "problems": [], "buildings": buildings,
@@ -94,12 +100,13 @@ def test_P1_a_pitched_roof_that_complies_under_every_eave_reading():
       lowest eave (the soffit, 20 ft):        (20 + 30) / 2 = 25.0
       drip edge (the roof edge, 20.5 ft):     (20.5 + 30) / 2 = 25.25
       wall plate (over the wall: 20.5 + 1.5 × 0.5758 = 21.3636 ft): (21.3636 + 30) / 2 = 25.68
-    All ≤ 35 ft: complies under every reading."""
+    Whether the 1.5 ft past the walls IS an eave isn't decided by its shape (review round 3): read as not an eave,
+    every reading is the roof edge's (20.5 + 30) / 2 = 25.25. All ≤ 35 ft: complies under every reading."""
     res = run(floors(*HOUSE, 2) + [roof(*HOUSE, 20, 30, 1.5, 0.5)])
     h = res["measurements"]["building_height"]
     assert h["value"] is None
-    assert {r["named"]["height_of_building#1"]: r["value"] for r in h["readings"]} == {
-        "lowest_eave": 25.0, "drip_edge": 25.25, "wall_plate": 25.681818}
+    assert eave_readings(h) == {"lowest_eave": 25.0, "drip_edge": 25.25, "wall_plate": 25.681818}
+    assert {r["value"] for r in h["readings"] if "not_eave" in r["named"].values()} == {25.25}
     item = rows(res, "R-1b.height")[0]
     assert item["status"] == present.COMPLIES
     assert "every reading" in item["reason"] and "Gordium's reading · confirm with the City zoning office" in item["reason"]
@@ -149,7 +156,9 @@ def test_an_answer_outranks_the_readings(monkeypatch):
     try:
         res = run(floors(15, 25, 45, 65, 3) + [roof(15, 25, 45, 65, 30, 40, 1.5, 0.5)])
         h = res["measurements"]["building_height"]
-        assert h["value"] == 35.681818 and h["readings"] == []
+        # only the wall plate is measured (35.68), and, the eave not confirmed, the roof edge's 35.25: both over
+        assert sorted(r["value"] for r in h["readings"]) == [35.25, 35.681818]
+        assert all(r["named"]["height_of_building:answered"] == "wall_plate" for r in h["readings"])
         assert status(res, "R-1b.height") == present.FAILS
     finally:
         monkeypatch.undo()
@@ -160,29 +169,25 @@ def test_an_answer_outranks_the_readings(monkeypatch):
 
 def test_Y1_eaves_may_reach_two_feet_into_a_required_yard_and_no_more():
     """§325-18B: eaves "shall not project more than two feet into any required yard". The house 12 ft from the west
-    line (walls), the 10 ft side yard required, so the eaves must stay 8 ft from the line.
-      overhang 2.0: eaves at 12 − 2 = 10 ≥ 8: complies; the side yard itself is to the walls: 12 ≥ 10.
-      overhang 4.5: eaves at 12 − 4.5 = 7.5 < 8: does not comply (the side yard, to the walls, still complies)."""
+    line (walls), the 10 ft side yard required. Every yard is measured to the full outline (review round 3).
+      overhang 2.0: the full outline is 12 − 2 = 10 ≥ 10: complies, whatever the overhang is; the eaves rule:
+      10 ≥ 10 − 2: complies.
+      overhang 4.5: the full outline 7.5 < 10. To the walls 12 ≥ 10, so it complies only if the 4.5 ft IS an eave,
+      and then it reaches 2.5 ft into the yard, over the 2 ft allowed: yard_projections does not comply (7.5 < 8)
+      and the side yard needs review (confirm the eave)."""
     house = (12, 30, 42, 70)
-    # no fascia: nothing past the walls hangs below the roof edge, so the overhang is proven an eave
     ok = run(floors(*house, 2) + [roof(*house, 20, 28, 2.0, 0)])
-    assert ok["measurements"]["side_yard_smaller"]["value"] == 12.0
+    assert {r["named"]["model#eave"]: r["value"] for r in ok["measurements"]["side_yard_smaller"]["readings"]} == {
+        "not_eave": 10.0, "eave": 12.0}
     assert ok["measurements"]["side_yard_smaller_eaves"]["value"] == 10.0
     assert status(ok, "R-1b.yard_projections") == present.COMPLIES
     assert status(ok, "R-1b.side_yards") == present.COMPLIES
     over = run(floors(*house, 2) + [roof(*house, 20, 28, 4.5, 0)])
     assert over["measurements"]["side_yard_smaller_eaves"]["value"] == 7.5
     assert status(over, "R-1b.yard_projections") == present.FAILS
-    assert status(over, "R-1b.side_yards") == present.COMPLIES
-    # a 0.5 ft fascia hangs below the roof edge: most likely the eave, but it could be a shallow story, so the
-    # side yard is also read to the whole outline (12 − 2 = 10, still ≥ 10: complies under both; with the
-    # 4.5 ft overhang, 7.5 < 10 as a story: needs review, never a pass)
-    judged = run(floors(*house, 2) + [roof(*house, 20, 28, 2.0, 0.5)])
-    side = judged["measurements"]["side_yard_smaller"]
-    assert {r["named"]["model#overhang"]: r["value"] for r in side["readings"]} == {"eave": 12.0, "story": 10.0}
-    assert status(judged, "R-1b.side_yards") == present.COMPLIES
-    judged_over = run(floors(*house, 2) + [roof(*house, 20, 28, 4.5, 0.5)])
-    assert status(judged_over, "R-1b.side_yards") == present.REVIEW
+    side = rows(over, "R-1b.side_yards")
+    assert min(side, key=lambda i: i["status"] != present.REVIEW)["status"] == present.REVIEW
+    assert any("is an eave" in (i["reason"] or "") and "4'-6\"" in (i["reason"] or "") for i in side)
 
 
 def test_Y2_porch_steps_count_in_the_front_yard():
@@ -308,8 +313,7 @@ def test_a_real_rhino_model_with_a_roof_solid_and_a_garage(tmp_path):
     path = _model_with_roof_and_garage(tmp_path / "pitched.3dm")
     res = check(path, {**FACTS, "accessory_buildings": ["garage"]})
     h = res["measurements"]["building_height"]
-    assert {r["named"]["height_of_building#1"]: r["value"] for r in h["readings"]} == {
-        "lowest_eave": 25.0, "drip_edge": 25.25, "wall_plate": 25.681818}
+    assert eave_readings(h) == {"lowest_eave": 25.0, "drip_edge": 25.25, "wall_plate": 25.681818}
     for rule in ("R-1b.height", "R-1b.accessory_buildings", "R-1b.yard_projections", "R-1b.front_yard"):
         assert status(res, rule) == present.COMPLIES, rule
     assert res["measurements"]["side_yard_smaller_eaves"]["value"] == 13.5        # 15 − 1.5
@@ -317,6 +321,7 @@ def test_a_real_rhino_model_with_a_roof_solid_and_a_garage(tmp_path):
     # over 1,800 under that reading only, so it needs review, naming it
     cover = rows(res, "R-1b.lot_coverage")[0]
     assert cover["status"] == present.REVIEW and "eaves counted" in cover["reason"]
+    assert res["measurements"]["side_yard_smaller"]["readings"]          # to the full outline, and to the walls
 
 
 @pytest.mark.parametrize("rule", ["R-1b.yard_projections", "R-1b.accessory_buildings"])
@@ -363,7 +368,8 @@ def test_a_tower_standing_on_the_roofs_base_past_the_walls_stays_part_of_the_bui
     assert any("building_area#1" in (r.get("named") or {}) for r in m["building_area"]["readings"])   # eaves exist
     assert min(r["value"] for r in m["front_yard"]["readings"] or [m["front_yard"]]) == 28.0
     assert m["front_yard_eaves"]["value"] == 28.0
-    assert m["side_yard_smaller"]["value"] == 15.0 and m["side_yard_smaller_eaves"]["value"] == 14.0
+    assert m["side_yard_smaller_eaves"]["value"] == 14.0
+    assert {r["value"] for r in m["side_yard_smaller"]["readings"]} == {14.0, 15.0}   # full outline / walls
 
 
 def gable_story(x0, y0, x1, y1, z0, eave, ridge, id="upper"):
@@ -391,7 +397,10 @@ def test_a_story_and_its_gable_in_one_solid_cantilevering_past_floor_1_is_never_
     front = res["measurements"]["front_yard"]
     assert min(r["value"] for r in front["readings"] or [front]) == 24.5
     assert status(res, "R-1b.front_yard") != present.COMPLIES
-    assert res["measurements"]["building_area"]["value"] == 30 * 45.5          # all of it, seen from above
+    area = res["measurements"]["building_area"]
+    assert max(r["value"] for r in area["readings"] or [area]) == 30 * 45.5   # all of it, seen from above
+    # without a confirmation it never complies; it asks to confirm the 1'-6" is an eave
+    assert "1'-6\" past the walls toward the front yard is an eave" in rows(res, "R-1b.front_yard")[0]["reason"]
 
 
 def test_a_dormer_on_floor_2_reaching_past_the_front_wall_counts():
@@ -447,7 +456,10 @@ def test_a_hip_roof_solid_with_eaves_all_round_is_a_proven_eave():
            [{"points": [[*e[i], 20], [*e[(i + 1) % 4], 20], apex]} for i in range(4)]}
     res = run(floors(*HOUSE, 2) + [hip])
     m = res["measurements"]
-    assert (m["front_yard"]["value"], m["front_yard_eaves"]["value"]) == (30.0, 29.0)
+    # every yard to the full outline (29), and to the walls (30) in case the 1 ft is confirmed an eave
+    assert {r["named"]["model#eave"]: r["value"] for r in m["front_yard"]["readings"]} == {"not_eave": 29.0, "eave": 30.0}
+    assert m["front_yard_eaves"]["value"] == 29.0
+    assert status(res, "R-1b.front_yard") == present.COMPLIES          # 29 ≥ 25 either way
 
 
 def test_an_answer_with_no_reading_to_the_eave_question_replaces_every_reading(monkeypatch):
@@ -522,3 +534,101 @@ def test_corner_lot_front_and_rear_rows_dont_cite_the_side_yard_reading():
     for rule in ("R-1b.front_yard", "R-1b.rear_yard"):
         assert "Column 13" not in (rows(res, rule)[0]["reason"] or ""), rule
     assert "Column 13" in rows(res, "R-1b.side_yards")[0]["reason"]
+
+
+# ---- review round 3: the geometry suggests an eave, never decides it -------------------------------------------
+
+def _front(res):
+    m = res["measurements"]["front_yard"]
+    return min(r["value"] for r in m["readings"] or [m])
+
+
+def test_a_gable_volume_reaching_6_ft_past_the_front_wall_never_complies_unconfirmed():
+    """Round 3, P0 (a false pass on a7072b2: front yard 30, complies). A roof solid whose gable runs 6 ft past the
+    front wall (15 ft tall at its face): it might be an eave, a porch roof or a story, and its shape can't say.
+    To the full outline the front yard is 30 − 6 = 24 < 25: never complies unless confirmed."""
+    res = run(floors(*HOUSE, 2) + [roof(15, 24, 45, 70, 20, 35, 0, 0)])
+    assert _front(res) == 24.0
+    assert status(res, "R-1b.front_yard") != present.COMPLIES
+
+
+def test_a_mansard_story_reaching_past_the_walls_never_complies_unconfirmed():
+    """Round 3, P0: a mansard frustum on floor 2, its base 2 ft past every wall (13..47 x 24..72 at 20 ft, flat
+    top 15..45 x 26..70 at 30 ft), on a house 26 ft back. To the full outline: 24 < 25."""
+    lo, hi = rect(13, 24, 47, 72), rect(15, 26, 45, 70)
+    faces = [{"points": [[x, y, 20] for x, y in lo]}, {"points": [[x, y, 30] for x, y in hi]}]
+    faces += [{"points": [[*lo[i], 20], [*lo[(i + 1) % 4], 20], [*hi[(i + 1) % 4], 30], [*hi[i], 30]]} for i in range(4)]
+    mansard = {"id": "mansard", "faces": faces, "problems": []}
+    res = run(floors(15, 26, 45, 70, 2) + [mansard])
+    assert _front(res) == 24.0
+    assert status(res, "R-1b.front_yard") != present.COMPLIES
+
+
+def test_a_saltbox_knee_wall_past_the_side_wall_never_complies_unconfirmed():
+    """Round 3, P0: a saltbox roof solid on floor 2 whose right side stands 6 ft past the side wall (x = 45) on an
+    8 ft knee wall at x = 51. To the full outline the side yard is 60 − 51 = 9 < 10."""
+    x0, y0, x1, y1 = HOUSE
+    end = lambda y: [[x0, y, 20], [51, y, 20], [51, y, 28], [30, y, 30]]       # noqa: E731
+    faces = [{"points": [[x0, y0, 20], [51, y0, 20], [51, y1, 20], [x0, y1, 20]]},
+             {"points": [[x0, y0, 20], [30, y0, 30], [30, y1, 30], [x0, y1, 20]]},
+             {"points": [[30, y0, 30], [51, y0, 28], [51, y1, 28], [30, y1, 30]]},
+             {"points": [[51, y0, 20], [51, y1, 20], [51, y1, 28], [51, y0, 28]]},
+             {"points": end(y0)}, {"points": end(y1)}]
+    res = run(floors(*HOUSE, 2) + [{"id": "saltbox", "faces": faces, "problems": []}])
+    side = res["measurements"]["side_yard_smaller"]
+    assert min(r["value"] for r in side["readings"] or [side]) == 9.0
+    assert status(res, "R-1b.side_yards") != present.COMPLIES
+
+
+CONFIRMED_HOUSE = (11, 30, 41, 70)        # 11 ft from the west line; a 2 ft overhang reaches 1 ft into the side yard
+
+
+def _confirm(res, name="side_yard_smaller"):
+    return [{"overhang": c, "value": True, "source": "entered by you", "confirmed_by": "the architect",
+             "date": "2026-10-21"} for c in res["measurements"][name]["eave_candidates"]]
+
+
+def test_an_overhang_into_a_yard_needs_review_until_the_architect_confirms_it_is_an_eave():
+    """§325-18B allows eaves up to 2 ft into a required yard. Walls 11 ft from the side line, the roof 2 ft past
+    them: to the full outline 9 < 10, to the walls 11 ≥ 10, the eave reaches 1 ft into the yard (≤ 2 ft: the eaves
+    rule, 9 ≥ 8, complies). Unconfirmed: needs review, asking to confirm the 2'-0" is an eave. Confirmed (the
+    architect's eaves_confirmed naming this overhang): complies, and it says who confirmed it."""
+    built = floors(*CONFIRMED_HOUSE, 2) + [roof(*CONFIRMED_HOUSE, 20, 28, 2.0, 0)]
+    res = run(built)
+    side = rows(res, "R-1b.side_yards")
+    assert max(i["status"] == present.REVIEW for i in side)
+    assert any("the part reaching 2'-0\" past the walls toward the side yard is an eave" in (i["reason"] or "")
+               for i in side)
+    assert status(res, "R-1b.yard_projections") == present.COMPLIES
+    ok = run(built, eaves_confirmed=_confirm(res))
+    assert status(ok, "R-1b.side_yards") == present.COMPLIES
+    assert any("eaves confirmed by the architect" in (i["reason"] or "") or
+               "eaves confirmed by the architect" in " ".join(i["detail"]["basis"]) for i in rows(ok, "R-1b.side_yards"))
+
+
+def test_moving_the_overhang_after_it_was_confirmed_asks_again():
+    """The confirmation names the overhang where it was (its fingerprint): move the house 0.5 ft west and the
+    overhang is a different one: the old confirmation no longer applies (full outline 8.5 < 10: needs review)."""
+    first = run(floors(*CONFIRMED_HOUSE, 2) + [roof(*CONFIRMED_HOUSE, 20, 28, 2.0, 0)])
+    moved = (10.5, 30, 40.5, 70)
+    res = run(floors(*moved, 2) + [roof(*moved, 20, 28, 2.0, 0)], eaves_confirmed=_confirm(first))
+    assert status(res, "R-1b.side_yards") != present.COMPLIES
+    assert res["measurements"]["side_yard_smaller"]["eave_candidates"] != first["measurements"]["side_yard_smaller"][
+        "eave_candidates"]
+
+
+def test_a_confirmation_never_lets_an_eave_reach_more_than_2_ft_into_a_yard():
+    """Confirmed eaves 4.5 ft past walls 12 ft from the side line: the side yard (to the walls, 12) complies, but
+    the eave reaches 2.5 ft into the 10 ft yard: R-1b.yard_projections, 7.5 < 8, does not comply."""
+    house = (12, 30, 42, 70)
+    built = floors(*house, 2) + [roof(*house, 20, 28, 4.5, 0)]
+    res = run(built, eaves_confirmed=_confirm(run(built)))
+    assert status(res, "R-1b.side_yards") == present.COMPLIES
+    assert status(res, "R-1b.yard_projections") == present.FAILS
+
+
+def test_a_malformed_eave_confirmation_is_refused():
+    from model_measurement.project import fact_problems
+    assert fact_problems({"eaves_confirmed": [{"overhang": "x", "value": True}]})
+    assert not fact_problems({"eaves_confirmed": [{"overhang": "x", "value": True, "source": "entered by you",
+                                                   "confirmed_by": "the architect", "date": "2026-10-21"}]})
