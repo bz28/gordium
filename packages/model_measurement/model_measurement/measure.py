@@ -19,6 +19,7 @@ import hashlib
 import itertools
 import math
 
+import numpy as np
 import shapely
 from shapely import STRtree, ops
 from shapely.geometry import LineString, MultiLineString, Point, Polygon
@@ -309,19 +310,31 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
 
 
 def _planes_now(faces: list[dict]) -> list[list[dict]]:
-    """The faces grouped into planes. Each group has an anchor face (the face it started from; when two groups
-    join, the larger group's anchor), and every corner of every face in the group lies within TOL of the anchor's
-    plane, so a group never drifts. Faces that share an edge (two
-    corners within TOL) join when that stays true: the smaller group's faces are checked against the larger
-    group's anchor, which anchors the joined group. So a roof drawn as many triangles (a mesh, with rounding
-    noise) is one roof plane, two separate roofs at the same level stay two, and a curved roof isn't one plane.
-    A distance, not an angle: the same tolerance as everywhere else here."""
-    normals = [_unit_normal(f["points"]) for f in faces]
+    """The faces grouped into planes. Each group's plane is fitted over every corner of every face in it (least
+    squares), not taken from one face: a small triangle's own normal carries its corners' rounding noise (a
+    single-precision mesh far from the origin: a tenth of a degree over a 1.4 ft triangle, 0.04 ft across a
+    roof), and a plane fitted over the whole group doesn't. Faces that share an edge (two corners within TOL)
+    join when every corner of the smaller group's faces lies within TOL of the larger group's plane, and every
+    corner of the joined group lies within TOL of the plane fitted over it, so a group never drifts. So a roof drawn as many
+    triangles (a mesh, with rounding noise) is one roof plane, two separate roofs at the same level stay two,
+    and a curved roof isn't one plane. A distance, not an angle: the same tolerance as everywhere else here."""
     area = [_plan(f).area for f in faces]
     parent = list(range(len(faces)))
     members = {i: [i] for i in range(len(faces))}
     anchor = {i: i for i in range(len(faces))}
     size = {i: area[i] for i in range(len(faces))}
+    origin = np.array(faces[0]["points"][0], dtype=float) if faces else np.zeros(3)
+    corners = {i: np.array(f["points"], dtype=float) - origin for i, f in enumerate(faces)}   # per group
+    plane = {}
+
+    def fitted(pts):                        # (unit normal, a point on it) of the best plane through the corners
+        c = pts.mean(0)
+        _, vectors = np.linalg.eigh((pts - c).T @ (pts - c))
+        return vectors[:, 0], c
+
+    for i, f in enumerate(faces):
+        n = _unit_normal(f["points"])
+        plane[i] = (np.array(n), np.array(f["points"][0], dtype=float) - origin)
 
     def root(i):
         while parent[i] != i:
@@ -329,9 +342,9 @@ def _planes_now(faces: list[dict]) -> list[list[dict]]:
             i = parent[i]
         return i
 
-    def near_plane(k, face):                # every corner of `face` within TOL of face k's plane
-        n, p0 = normals[k], faces[k]["points"][0]
-        return all(abs(sum(n[c] * (q[c] - p0[c]) for c in range(3))) <= TOL for q in face["points"])
+    def near_plane(g, face):                # every corner of `face` within TOL of group g's plane
+        n, p0 = plane[g]
+        return all(abs(float(n @ (np.array(q, dtype=float) - origin - p0))) <= TOL for q in face["points"])
 
     def cell(p):
         return tuple(math.floor(c / TOL) for c in p)
@@ -353,10 +366,18 @@ def _planes_now(faces: list[dict]) -> list[list[dict]]:
             if count < 2 or a == b:
                 continue
             big, small = (a, b) if size[a] >= size[b] else (b, a)
-            if all(near_plane(anchor[big], faces[k]) for k in members[small]):
-                parent[small] = big
-                members[big] += members.pop(small)
-                size[big] += size.pop(small)
+            if not all(near_plane(big, faces[k]) for k in members[small]):
+                continue
+            pts = np.concatenate([corners[big], corners[small]])
+            n, c = fitted(pts)
+            if np.abs((pts - c) @ n).max() > TOL:       # some corner off the joined plane: it would drift
+                continue
+            plane[big] = (n, c)
+            parent[small] = big
+            members[big] += members.pop(small)
+            size[big] += size.pop(small)
+            corners[big] = pts
+            corners.pop(small)
     return [[faces[k] for k in group] for group in members.values()]
 
 
