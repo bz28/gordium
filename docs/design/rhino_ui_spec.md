@@ -91,6 +91,7 @@ C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gi
 C2 [code] **Tax-map tolerance** of ±2'-0".
 - Each lot-dependent value is evaluated at the worst case, with every lot line up to 2'-0" the unlucky way (Ben, 2026-10-21): a yard (to one line) ±2'-0", a lot width or depth (between two lines) ±4'-0", and areas and percentages from the outline offset 2'-0" (73' × 90' → 69' × 86' = 5,934 sf at the smallest). One definition: `model_measurement.measure.TAX_MAP_SLACK` and `tax_map_lot_area`, used by the measurement, the checker and the starting house.
 - If the item would not comply at that worst case, it needs review, with the reason "Lot lines are from the tax map (±2'-0")…" plus the worst-case value.
+- The same both ways (Ben, 2026-10-21): an item that does not comply as drawn but would comply with the lines off in its favour needs review ("as drawn it does not comply, but at best …"); it does not comply only if it fails under every tax-map reading. A survey removes both.
 - On the example lot this flags Front yard, both Side yards and Lot coverage; Rear yard (+11'-7"), Lot width (+23'-0") still comply; Lot area (6,570 sf; 5,934 sf at the worst case, 69' × 86', under 6,000 sf) needs review until a survey (2026-10-21). (Corrected 2026-10-20: lot area was listed by mistake; the worst-case method applies to every lot-dependent item, areas and percentages as well as lengths.)
 
 C3 [code] **Grade not set** → Building height and Stories need review ("no grade").
