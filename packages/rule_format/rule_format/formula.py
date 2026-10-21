@@ -319,7 +319,7 @@ def _compare(op, a, b):
 
 def _boolean(x):
     if type(x) is not bool:
-        raise EvaluationError(f"expected true/false, got {x!r}")
+        raise EvaluationError(f"expected true/false, got {_plain(x, x.denominator != 1) if isinstance(x, Fraction) else x!r}")
     return x
 
 
