@@ -243,3 +243,36 @@ def test_the_scenarios_are_never_called_an_architects_answer_key():
         text = p.read_text(encoding="utf-8").lower().split("def test_the_scenarios_are_never_called")[0]
         for phrase in ("architect's answer key", "architects' answer key", "the answer key"):
             assert phrase not in text, (p.name, phrase)
+
+
+LESS_CAUTIOUS = [(p, rule) for p in PATHS for rule, d in (scenarios.load(p).get("disagreements") or {}).items()
+                 if d.get("direction") == "gordium_less_cautious"]
+NOT_YET = {("09_five_sided_lot", "R-1b.rear_yard"):
+           "PR #18: lot depth under every reading of which lot lines are side lines (the finding's hand reading)"}
+
+
+@pytest.mark.parametrize("path, rule", [
+    pytest.param(p, r, marks=pytest.mark.xfail(strict=True, reason=NOT_YET[(p.stem, r)]) if (p.stem, r) in NOT_YET else ())
+    for p, r in LESS_CAUTIOUS], ids=[f"{p.stem}:{r}" for p, r in LESS_CAUTIOUS])
+def test_a_less_cautious_disagreement_rests_on_what_gordium_evaluated(path, rule):
+    """eval-integrity P1-2: where the hand-worked result says needs review and Gordium says complies, a written
+    justification isn't enough (09's worked a reading by hand that Gordium never evaluates). Each must list
+    relies_on, and each item is re-checked here: a smaller lot (Gordium must still say complies there, surveyed),
+    or a measurement Gordium must have worked out under every lot-line reading."""
+    sc = scenarios.load(path)
+    relies = (sc["disagreements"][rule] or {}).get("relies_on")
+    assert relies, f"{path.stem} {rule}: Gordium is less cautious here; list what it relies_on"
+    s, f, extras = scenarios.site(sc)
+    measured = check_site(s, f, extras=extras)["measurements"]
+    for item in relies:
+        assert item.get("why"), item
+        if "lot" in item:
+            smaller = copy.deepcopy(sc)
+            smaller["lot"] = {"points": item["lot"], "surveyed": True}
+            s2, f2, e2 = scenarios.site(smaller)
+            rows = scenarios.rule_rows(check_site(s2, f2, extras=e2)["view"], rule)
+            assert rows and all(r["status"] == present.COMPLIES for r in rows), (path.stem, rule, item["why"])
+        else:
+            m = measured.get(item["measure"]) or {}
+            assert item.get("every_lot_line_reading") and len(m.get("readings") or []) >= 2, \
+                f"{path.stem} {rule}: Gordium doesn't work {item['measure']} under every reading ({item['why']})"

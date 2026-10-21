@@ -46,6 +46,8 @@ disagreements:
       areas included; docs/design/rhino_ui_spec.md C2). The hand-worked result followed the old rule that a lot area
       always waits for a survey. Worked by hand at the worst case: each lot length 2 ft short, 58 × 118 =
       6,844 sf ≥ 6,000 sf. Complies under every lot the tax map allows; Gordium says so and names 6,844 sf.
+    relies_on:                          # checked by test_scenarios: the smallest lot the tax map allows, surveyed
+      - {lot: [[0, 0], [58, 0], [58, 118], [0, 118]], why: "every tax-map length 2 ft short"}
     question_for_architects: >-
       Is a lot area that complies even with every tax-map length 2 ft short acceptable without a survey, or does
       the zoning office require a survey for any lot-area finding?
@@ -55,4 +57,6 @@ disagreements:
     finding: >-
       Same correction. By hand at the worst case (the smallest lot, 6,844 sf): 25% = 1,711 sf ≥ the 1,700 sf
       footprint (24.84%). Complies at the worst case.
+    relies_on:
+      - {lot: [[0, 0], [58, 0], [58, 118], [0, 118]], why: "every tax-map length 2 ft short"}
     question_for_architects: "Same as lot area: is the worst case over the tax-map tolerance enough for coverage?"

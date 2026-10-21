@@ -44,6 +44,9 @@ disagreements:
       required 31'-8"; the nearest point of the house, its rear corner, is still 33'-6" from that rear line:
       complies. So the answer doesn't depend on the open question here and Gordium's "complies" stands; the answer
       key's needs review was more cautious than the code requires.
+    relies_on:                          # not yet true: Gordium takes one lot depth (110 ft); PR #18 adds the readings
+      - {measure: lot_depth, every_lot_line_reading: true,
+         why: "the finding works the east short line as part of the east side line (depth 126.8 ft) by hand"}
     question_for_architects: >-
       On a lot whose back is two lines meeting at a point, is "the rear lot line" both lines (the rear yard
       measured to the nearer one), or does the city use another convention (e.g. a 10 ft line parallel to the
