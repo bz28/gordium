@@ -730,29 +730,40 @@ def _cautious_for_left_out(items, left_out, touching):
         i.update(status=REVIEW, mark=MARK[REVIEW], hint="Add to check…", reason=why + " · Add to check…")
 
 
-# What each looked-up fact decides (facts["unsettled"]): the lot decides every measurement but the building's own
-# height and stories; the street side decides the yards (which line is the front) and the lot's width and depth;
-# the ground decides height and stories.
+# What each looked-up fact decides (facts["unsettled"]): every measurement worked out from it. The lot outline decides
+# the lot's area, width and depth and every yard; the street side decides which line is the front, so the yards and
+# the lot's width and depth; the ground decides height and stories. An item needs review when ANY name in its rule's
+# formula is one of them, not only its own measurement: the height bonus (§325-16C) complies through the yards and
+# the lot depth (review round 1 of PR #19: it stayed "complies" on a doubtful lot).
+YARDS = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
 UNSETTLED_DECIDES = {
-    "street": ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "lot_width", "lot_depth"),
+    "lot": ("lot_area", "lot_width", "lot_depth") + YARDS,
+    "street": ("lot_width", "lot_depth") + YARDS,
     "ground": ("building_height", "stories"),
 }
 UNSETTLED_NAMES = {"lot": "lot outline", "street": "street side", "ground": "ground levels"}
 
 
-def _cautious_for_unsettled(items, unsettled):
-    """A looked-up fact the lookup found doubtful, not yet confirmed or changed by the architect: every item
-    measured from it needs review, whatever it measures (coordinator, 2026-10-20: never a false pass)."""
+def _formula_names(item, rules_by_id):
+    """Every measurement the item's rule reads (its formula), else its own measurement."""
+    rule = (rules_by_id or {}).get(item.get("rule")) or {}
+    try:
+        return set(formula.names(rule["check"])) if rule.get("check") else {item.get("measure")} - {None}
+    except Exception:                            # a formula that can't be read: its own measurement, at least
+        return {item.get("measure")} - {None}
+
+
+def _cautious_for_unsettled(items, unsettled, rules_by_id=None):
+    """A looked-up fact found doubtful, not yet confirmed or changed by the architect: every item whose rule reads a
+    measurement worked out from it needs review (coordinator, 2026-10-20: never a false pass)."""
     for key, why in (unsettled or {}).items():
-        decides = UNSETTLED_DECIDES.get(key)
+        decides = set(UNSETTLED_DECIDES.get(key) or ())
         for i in items:
-            m = i.get("measure")
-            if i["status"] != COMPLIES or m is None:
+            if i["status"] != COMPLIES or not (_formula_names(i, rules_by_id) & decides):
                 continue
-            if (decides is None and m not in UNSETTLED_DECIDES["ground"]) or (decides and m in decides):
-                i.update(status=REVIEW, mark=MARK[REVIEW], hint="Edit site…",
-                         reason=f"Complies on the looked-up {UNSETTLED_NAMES[key]}, which needs review: {why} · "
-                                "confirm it (I checked this) or change it in Edit site…")
+            i.update(status=REVIEW, mark=MARK[REVIEW], hint="Edit site…",
+                     reason=f"Complies on the looked-up {UNSETTLED_NAMES[key]}, which needs review: {why} · "
+                            "confirm it (I checked this) or change it in Edit site…")
 
 
 def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction=None) -> dict:
@@ -777,7 +788,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
     _cautious_for_left_out(items, left_out, extras.get("touching"))
-    _cautious_for_unsettled(items, facts.get("unsettled"))
+    _cautious_for_unsettled(items, facts.get("unsettled"), rules_by_id)
     if left_out:
         n = len(left_out)
         items.append({"id": "scope.not_included", "rule": None, "name": "Objects on the lot not included",

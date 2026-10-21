@@ -9,15 +9,21 @@ Rhino side may write into the .3dm (`writes`, by each source's store policy in s
 No AI; the map services' own answers, worked out by plain code."""
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
 from rule_format.rulebook import utf8_console
 from site_lookup.http import Http
 from site_lookup.lookup import lookup, strictest
+from site_lookup.sources import ENDPOINTS
 
-TIMEOUT_S, RETRIES = 8.0, 1        # each map request; the Rhino side stops the whole lookup after LOOKUP_LIMIT_S
-LOOKUP_LIMIT_S = 45
+TIMEOUT_S, RETRIES = 8.0, 1        # each map request; the Rhino side stops the whole lookup (rhino_logic.LOOKUP_LIMIT_S)
+OWN_SOURCE = {                     # which of a fact's sources is its own (the others it was only worked out with)
+    "address": ("geocoder",), "parcel": ("state_parcels", "city_parcels"), "lot": ("state_parcels", "city_parcels"),
+    "street_side": ("city_roads", "state_streets"), "corner_lot": ("city_roads", "state_streets"),
+    "ground": ("elevation",), "zone": ("city_zoning",),
+}
 
 
 def _rotate(p, c, s):
@@ -98,12 +104,35 @@ def writes(result: dict, placed: dict | None) -> dict:
     return out
 
 
+def labels(result: dict) -> dict:
+    """Each fact's own service, by name, as the lookup actually used it ("NYS Streets" when the City's roads didn't
+    answer; "City of Ithaca tax parcels" when the State's didn't): never a fixed label."""
+    out = {}
+    for name, d in (result.get("details") or {}).items():
+        keys = [k for k in d.get("source_keys") or [] if k in ENDPOINTS]
+        own = next((k for k in keys if k in OWN_SOURCE.get(name, ())), keys[0] if keys else None)
+        if own:
+            out[name] = re.sub(r"\s*\(.*\)$", "", ENDPOINTS[own]["name"]) + \
+                (", used live" if ENDPOINTS[own]["store"] == "none" else "")
+    return out
+
+
+def kept_reasons(result: dict) -> dict:
+    """Each doubtful fact's reason as far as its sources allow keeping it (site_lookup's snapshot already decided:
+    a reason worked out from a source that may not be kept, like the County's point, isn't there)."""
+    details = ((result.get("snapshot") or {}).get("details") or {})
+    return {k: d.get("reason") for k, d in details.items() if d.get("reason")}
+
+
 def box_payload(result: dict) -> dict:
     """Everything the start box needs from one lookup."""
     placed = frame(result) if result.get("status") == "found" else None
+    side = (result.get("details") or {}).get("street_side") or {}
     return {"status": result.get("status"), "message": result.get("message") or "", "asks": result.get("asks") or [],
             "matches": result.get("matches") or [], "query": result.get("query"),
             "facts": result.get("facts") or {}, "details": result.get("details") or {},
+            "labels": labels(result), "kept_reasons": kept_reasons(result),
+            "street_storable": bool(side.get("source_keys")) and strictest(side["source_keys"]) == "raw",
             "writes": writes(result, placed)}
 
 

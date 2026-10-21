@@ -184,8 +184,9 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
      zoning district, each with where it came from. Anything doubtful is amber with the reason: tick **I checked
      this** once you have, or change it; until then the items that depend on it need review. If the lookup
      can't help (offline, not found, outside the City of Ithaca), the box says why and you fill it in by hand.
-   - **Zoning district**: R-1b, "entered by you". Tick **I confirm**: Draw stays off until you do, on every new
-     project, because Gordium doesn't look up the zoning map yet.
+   - **Zoning district**: "entered by you", or after Look up "suggested by Gordium · City of Ithaca zoning map,
+     used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
+     lookup, because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
    - **Lot**: its area and where it came from: "6,570 sf · from the tax map (±2 ft, approximate)". Gordium treats
      tax-map lines as uncertain by 2 ft: anything that only holds if they're exact needs review. **Use my

@@ -598,7 +598,8 @@ def _ui_state(doc):
 
 
 def _save_ui_state(doc, state):
-    doc.Strings.SetString(SECTION, UI_ENTRY, json.dumps(state))
+    """The box's choices into the .3dm: only what may be kept (rhino_logic.storable_ui: never a session key)."""
+    doc.Strings.SetString(SECTION, UI_ENTRY, json.dumps(logic.storable_ui(state)))
 
 
 def pick_survey():
@@ -619,6 +620,13 @@ def pick_survey():
         return
     facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
     facts["lot_surveyed"] = True
+    saved_ui = logic.settle(_ui_state(doc), "lot")
+    _save_ui_state(doc, saved_ui)
+    left = logic.unsettled(saved_ui)
+    if left:
+        facts["unsettled"] = left
+    else:
+        facts.pop("unsettled", None)
     _set_source(doc, "lot", logic.lot_text(None, True).replace("area not known · ", ""), "your survey")
     save_facts(doc, facts)
     run_check(doc, report=False)
@@ -882,7 +890,7 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
         amp = rg.AreaMassProperties.Compute(lot.Geometry)
         area = _feet_area(doc, amp.Area) if amp else None
     zone_fact = sources.get("zone") or {}
-    confirmed = logic.district_confirmed(mode, zone_fact, facts.get("zone"))
+    confirmed = logic.district_confirmed(mode, zone_fact, facts.get("zone")) and not saved_ui.get("_reconfirm")
     kind = saved_ui.get("ground_kind") or {"spot": "spot", "terrain": "terrain", "finished_spots": "regrade"}.get(
         facts.get("grade_from"), "flat")
     points = _grade_points(doc, kind == "regrade")      # the set the ground row names, never both mixed
@@ -901,15 +909,18 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
             "lot_area": area, "lot_surveyed": bool(facts.get("lot_surveyed")),
-            "street_name": saved_ui.get("street_name") or facts.get("street_name"), "street_source": saved_ui.get("street_source") or source("street"),
+            "street_name": saved_ui.get("_street_name") or saved_ui.get("street_name") or facts.get("street_name"),
+            "street_name_saved": None if saved_ui.get("_street_name") else saved_ui.get("street_name"),
+            "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span, "source": ground_source},
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
             "corner_source": saved_ui.get("corner_source") or source("corner_lot"),
-            "zones_found": saved_ui.get("zones_found") or facts.get("zones_found") or [],
+            "zones_found": saved_ui.get("_zones_found") or [],
             "design_buffer": saved_ui.get("design_buffer") or "0'-0\"",
-            "lot_source": saved_ui.get("lot_source"), "lookup": saved_ui.get("lookup") or {},
-            "checked": list(saved_ui.get("checked") or []),
-            "_poll": _lookup_poll if (saved_ui.get("lookup") or {}).get("looking") else None}
+            "lot_source": saved_ui.get("lot_source"), "lookup": saved_ui.get("_lookup") or {},
+            "doubts": saved_ui.get("doubts") or {}, "live": saved_ui.get("_live") or {},
+            "checked": list(saved_ui.get("checked") or []), "lot_missing": lot is None,
+            "_poll": _lookup_poll if (saved_ui.get("_lookup") or {}).get("looking") else None}
 
 
 def _ft_text(feet):
@@ -946,15 +957,68 @@ def _apply_box(doc, facts, state, saved_ui):
 
 
 def _place_spots(doc, prompt, layer_path=GRADE_LAYER):
+    """Each click places a spot grade; Enter or Esc when done. The ids of the points placed (none: nothing changed)."""
     layer = _layer(doc, layer_path)
-    while True:                                      # each click places a spot grade; Enter when done
+    placed = []
+    while True:
         rc, point = Rhino.Input.RhinoGet.GetPoint(prompt, True)
         if rc != Rhino.Commands.Result.Success:
             break
         attrs = Rhino.DocObjects.ObjectAttributes()
         attrs.LayerIndex = layer
-        doc.Objects.AddPoint(point, attrs)
+        placed.append(str(doc.Objects.AddPoint(point, attrs)))
         doc.Views.Redraw()
+    return placed
+
+
+def _session_add(saved_ui, ids):
+    """Objects this box session added (Cancel deletes them)."""
+    saved_ui["_added"] = list(saved_ui.get("_added") or []) + [i for i in ids if i]
+
+
+def _session_remove(doc, saved_ui, object_id):
+    """Take an object out of the model for this box session: one the session added is simply deleted; any other is
+    deleted and remembered, so Cancel brings the very same object (same id) back."""
+    o = _find(doc, object_id or "")
+    if o is None:
+        return
+    added = list(saved_ui.get("_added") or [])
+    if str(o.Id) in added:
+        added.remove(str(o.Id))
+        saved_ui["_added"] = added
+    else:
+        saved_ui["_removed"] = list(saved_ui.get("_removed") or []) + [o.RuntimeSerialNumber]
+    doc.Objects.Delete(o, True)
+
+
+def _rollback(doc, saved_ui):
+    """Cancel: the model exactly as it was before the box opened (what the session added deleted, what it took out
+    brought back)."""
+    for i in (saved_ui or {}).get("_added") or []:
+        o = _find(doc, i)
+        if o is not None:
+            doc.Objects.Delete(o, True)
+    for serial in (saved_ui or {}).get("_removed") or []:
+        doc.Objects.Undelete(serial)
+    doc.Views.Redraw()
+
+
+def _draw_lot(doc):
+    """Draw my lot…: click each corner (Enter closes it, Esc: nothing drawn). The new closed outline's id, or None."""
+    corners = []
+    while True:
+        rc, point = Rhino.Input.RhinoGet.GetPoint(
+            "Click the next corner of your lot (Enter closes it, at least 3)" if corners else
+            "Click the first corner of your lot (the dashed guide is the City's outline)", True)
+        if rc != Rhino.Commands.Result.Success:
+            break
+        corners.append(point)
+    if len(corners) < 3 or rc == Rhino.Commands.Result.Cancel:
+        return None
+    attrs = Rhino.DocObjects.ObjectAttributes()
+    attrs.LayerIndex = _layer(doc, LAYERS["lot"])
+    attrs.Name = "Lot · drawn by you"
+    return str(doc.Objects.AddCurve(rg.PolylineCurve(corners + [corners[0]]), attrs))
 
 
 def _box_pick(doc, what, facts, saved_ui):
@@ -981,7 +1045,14 @@ def _box_pick(doc, what, facts, saved_ui):
                 facts = logic.after_lot_pick(facts, picked) if picked != facts.get("lot_id") else facts
                 facts["lot_surveyed"] = True
                 saved_ui = logic.settle(saved_ui, "lot")
-                saved_ui.pop("lot_source", None)
+        elif what == "draw_lot":                     # over the City's outline (a guide, never kept)
+            drawn = _draw_lot(doc)
+            if drawn:
+                _session_add(saved_ui, [drawn])
+                facts = logic.after_lot_pick(facts, drawn)
+                facts["lot_surveyed"] = False
+                saved_ui = logic.settle(saved_ui, "lot")
+                saved_ui["lot_source"] = "drawn by you"
         elif what == "terrain":
             go = Rhino.Input.Custom.GetObject()
             go.SetCommandPrompt("Click the terrain surface or mesh")
@@ -992,12 +1063,11 @@ def _box_pick(doc, what, facts, saved_ui):
                 saved_ui["ground_kind"] = "terrain"
                 saved_ui = logic.settle(saved_ui, "ground")
         elif what in ("spot", "regrade"):
-            _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
-                         "Click the finished ground you'll grade to, at each wall (Enter when done)",
-                         GRADE_LAYER if what == "spot" else FINISHED_LAYER)
-            saved_ui["ground_kind"] = what
-            saved_ui = logic.settle(saved_ui, "ground")
-            saved_ui.pop("ground_source", None)          # now placed by the architect
+            placed = _place_spots(doc, "Click a spot grade at a wall (Enter when done)" if what == "spot" else
+                                  "Click the finished ground you'll grade to, at each wall (Enter when done)",
+                                  GRADE_LAYER if what == "spot" else FINISHED_LAYER)
+            _session_add(saved_ui, placed)
+            saved_ui = logic.after_ground_pick(saved_ui, what, len(placed))   # none placed: nothing changes
     finally:
         _highlight(doc, facts)
     return facts, saved_ui
@@ -1020,7 +1090,7 @@ def confirm(doc, facts, options, mode="check"):
                 facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
                 facts, saved_ui = _box_pick(doc, what, facts, saved_ui)
                 started = time.time()
-                while what == "lookup" and _lookup_poll() is None and time.time() - started < LOOKUP_LIMIT_S + 5:
+                while what == "lookup" and _lookup_poll() is None and time.time() - started < logic.LOOKUP_LIMIT_S + 5:
                     time.sleep(0.2)
                 if what == "lookup":
                     facts, saved_ui = _box_pick(doc, "lookup_done", facts, saved_ui)
@@ -1037,6 +1107,7 @@ def confirm(doc, facts, options, mode="check"):
             what = ui.start_box(state, options, mode)
             if what is None:
                 _lookup_stop()
+                _rollback(doc, saved_ui)         # the model as it was: the box is one transaction
                 return None
             if what == "draw":
                 return _drawn(doc, facts, state, saved_ui)
@@ -1061,8 +1132,8 @@ def _lookup_start(facts, saved_ui):
     saying "Looking up…" and closes itself when the answer is in (_lookup_poll)."""
     _lookup_stop()
     address = (facts.get("address") or "").strip()
-    if not address:
-        return dict(saved_ui, lookup={"says": "Type the address first, then Look up."})
+    if not address:                    # nothing else changes: the doubts about what is drawn stay
+        return dict(saved_ui, _lookup={"says": "Type the address first, then Look up."})
     out = os.path.join(tempfile.gettempdir(), "gordium_lookup_%d.json" % int(time.time() * 1000))
     packages = os.path.join(REPO, "packages")
     env = dict(os.environ)
@@ -1073,12 +1144,10 @@ def _lookup_start(facts, saved_ui):
     if STATE.get("lookup_fixture"):                      # the in-Rhino test: recorded answers, no live call
         args += ["--fixture", STATE["lookup_fixture"]]
     sink = open(out, "w", encoding="utf-8")             # to a file: a long answer never fills a pipe
-    STATE["lookup"] = {"proc": subprocess.Popen(args, cwd=REPO, env=env, stdout=sink,
-                                                stderr=open(os.path.join(tempfile.gettempdir(),
-                                                                         "gordium_worker.log"), "a",
-                                                            encoding="utf-8")),
-                       "out": out, "sink": sink, "started": time.time(), "query": address}
-    return dict(saved_ui, lookup={"looking": address})
+    err = open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a", encoding="utf-8")
+    STATE["lookup"] = {"proc": subprocess.Popen(args, cwd=REPO, env=env, stdout=sink, stderr=err),
+                       "out": out, "sink": sink, "err": err, "started": time.time(), "query": address}
+    return dict(saved_ui, _lookup={"looking": address})
 
 
 def _lookup_poll():
@@ -1090,9 +1159,10 @@ def _lookup_poll():
         return run["answer"]
     p = run["proc"]
     if p.poll() is None:
-        if time.time() - run["started"] < LOOKUP_LIMIT_S:
+        if time.time() - run["started"] < logic.LOOKUP_LIMIT_S:
             return None
         p.kill()
+        _lookup_files_done(run)
         run["answer"] = {"status": "timeout", "query": run["query"]}
         return run["answer"]
     run["sink"].close()
@@ -1101,78 +1171,75 @@ def _lookup_poll():
             run["answer"] = json.loads(f.read().strip().splitlines()[-1])
     except Exception as e:
         run["answer"] = {"status": "error", "query": run["query"], "detail": str(e)[:200]}
+    _lookup_files_done(run)
     return run["answer"]
+
+
+def _lookup_files_done(run):
+    """The lookup's output file and log handle: closed, and the output file removed."""
+    for handle in (run.get("sink"), run.get("err")):
+        if handle is not None and not handle.closed:
+            handle.close()
+    if os.path.exists(run.get("out") or ""):
+        os.remove(run["out"])
 
 
 def _lookup_stop():
     run = STATE.pop("lookup", None)
-    if run is not None and run["proc"].poll() is None:
+    if run is None:
+        return
+    if run["proc"].poll() is None:
         run["proc"].kill()
-
-
-LOOKUP_LIMIT_S = 45
+    _lookup_files_done(run)
 
 
 def _lookup_done(doc, facts, saved_ui):
     """The lookup's answer into the box (rhino_logic.lookup_choices) and into the model, writing only what each
     source allows (lookup_box.writes): the State's lot outline as the lot curve, USGS ground as spot grades; the
-    City's outline only as a guide on screen; nothing of the City's zoning, roads or overlays."""
+    City's outline only as a guide on screen; nothing of the City's zoning, roads or overlays. The lot (and its
+    street side and ground) is replaced only when a lookup or the sample drew it (rhino_logic.lookup_may_replace),
+    and every model edit is the box session's: Cancel undoes it."""
     answer = _lookup_poll() or {"status": "error"}
-    STATE.pop("lookup", None)
-    own_lot = facts.get("lot_id") and not (saved_ui.get("from_sample") or saved_ui.get("lot_from_lookup"))
-    facts, saved_ui = logic.lookup_choices(answer, facts, saved_ui, STATE.get("zones") or [])
-    w = answer.get("writes") or {}
+    _lookup_stop()
+    replaces = logic.lookup_may_replace(facts, saved_ui)
+    facts, saved_ui = logic.lookup_choices(answer, facts, saved_ui, STATE.get("zones") or [], replaces=replaces)
     if answer.get("status") != "found":
         return facts, saved_ui
-    if own_lot:                          # the architect's own lot is never replaced by a lookup
-        look = dict(saved_ui["lookup"], says="Your own lot is kept: the lookup filled in the address, district and "
-                                             "corner lot; its lot outline and ground weren't drawn.")
-        for k in ("lot_source", "ground_source", "lot_area"):
-            saved_ui.pop(k, None)
-        look["reviews"] = {k: v for k, v in (look.get("reviews") or {}).items() if k not in ("lot", "ground")}
-        saved_ui["lookup"] = look
-        saved_ui["ground_kind"] = _ui_state(doc).get("ground_kind") or "flat"
+    if not replaces:                     # the architect's own lot: kept, with its street side and ground
+        saved_ui["_lookup"]["says"] = ("Your own lot is kept: the lookup filled in the address and the district "
+                                       "only.")
         return facts, saved_ui
-    old = _find(doc, facts.get("lot_id") or "")      # the sample's lot, or an earlier lookup's
-    if old is not None:
-        doc.Objects.Delete(old, True)
-    for i in saved_ui.pop("lookup_spots", []) or []:
-        found = _find(doc, i)
-        if found is not None:
-            doc.Objects.Delete(found, True)
+    w = answer.get("writes") or {}
+    for old in [facts.get("lot_id")] + list(saved_ui.get("lookup_spots") or []):   # what this lookup replaces
+        _session_remove(doc, saved_ui, old)
+    saved_ui["lookup_spots"] = []
     facts.pop("lot_id", None)
     facts.pop("street_line", None)
     STATE.pop("lookup_guide", None)
+    saved_ui.update(from_sample=False, replaceable_lot=None, lookup_frame=None, ground_kind="flat")
     if w.get("lot_ring"):
-        lot_id = _add_lot(doc, {"lot": w["lot_ring"], "lot_name": "Lot · " + (facts.get("address") or "looked up")})
-        facts["lot_id"] = str(lot_id)
+        lot_id = str(_add_lot(doc, {"lot": w["lot_ring"], "lot_name": "Lot · " + (facts.get("address") or "looked up")}))
+        _session_add(saved_ui, [lot_id])
+        facts["lot_id"] = lot_id
         if w.get("street_line"):
             facts["street_line"] = w["street_line"]
-        saved_ui.update(lot_from_lookup=True, from_sample=False, lookup_frame=w.get("frame"))
+        saved_ui.update(replaceable_lot=lot_id, lookup_frame=w.get("frame"))
         layer = _layer(doc, GRADE_LAYER)
         spots = []
         for p in w.get("spots") or []:
             attrs = Rhino.DocObjects.ObjectAttributes()
             attrs.LayerIndex = layer
             spots.append(str(doc.Objects.AddPoint(_model_point(doc, p[:2], p[2]), attrs)))
+        _session_add(saved_ui, spots)
         saved_ui["lookup_spots"] = spots
-        if not spots:
-            saved_ui["ground_kind"] = "flat"
-    elif w.get("guide_ring"):            # the City's outline (derived): a guide, never kept; the architect draws it
+        if spots:
+            saved_ui["ground_kind"] = "spot"
+    elif w.get("guide_ring"):            # the City's outline (derived): a guide while the box and its picks are up
         pts = [_model_point(doc, p) for p in w["guide_ring"]]
         STATE["lookup_guide"] = pts + [pts[0]]
-        saved_ui.update(lot_from_lookup=False, from_sample=False, ground_kind="flat")
     saved_ui["lookup_snapshot"] = w.get("snapshot")
-    frame_site_box(doc, facts)
+    logic.guard(frame_site, "frame the looked-up lot")(doc, facts)
     return facts, saved_ui
-
-
-def frame_site_box(doc, facts):
-    """The views on the looked-up lot while the box is open (frame_site, once there is a lot)."""
-    try:
-        frame_site(doc, facts)
-    except Exception:
-        pass
 
 
 def _drawn(doc, facts, state, saved_ui):
@@ -1775,8 +1842,9 @@ def gordium_start():
     options = ask({"cmd": "options", "jurisdiction": JURISDICTION})
     if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
         sample = ask({"cmd": "sample_site"})
-        _add_lot(doc, sample)
-        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True))   # its facts are the sample project's
+        sample_lot = str(_add_lot(doc, sample))
+        # its facts are the sample project's; a lookup may replace its lot (never one the architect drew or picked)
+        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True, replaceable_lot=sample_lot))
         facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
                                        suggested_facts(doc, options["zones"]))
         facts["lot_id"] = str(_lot_candidates(doc)[0].Id)

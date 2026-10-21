@@ -19,6 +19,15 @@ TESTS = REPO / "packages/site_lookup/tests"
 ZONES = ["R-1a", "R-1b", "R-2a", "R-3a"]
 
 
+def _rules():
+    from rule_format.rulebook import load, rulebook_for
+    return {r["id"]: r for r in load(rulebook_for(REPO / "regulations/jurisdictions/new_york/ithaca_city", "R-1b"))
+            ["rules"]}
+
+
+RULES = _rules()
+
+
 def _site_lookup_tests():
     spec = importlib.util.spec_from_file_location("site_lookup_recorded", TESTS / "test_lookup.py")
     mod = importlib.util.module_from_spec(spec)
@@ -40,14 +49,20 @@ def area(ring):
     return abs(sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(ring, ring[1:] + ring[:1]))) / 2
 
 
-def box(payload, facts=None, saved=None):
-    facts, saved = logic.lookup_choices(payload, facts or {}, saved or {}, ZONES)
-    state = {"address": facts.get("address"), "zone": facts.get("zone"), "zone_source": saved.get("zone_source"),
-             "corner_lot": facts.get("corner_lot"), "zones_found": saved.get("zones_found") or [],
-             "lookup": saved.get("lookup"), "checked": saved.get("checked"), "street_name": saved.get("street_name"),
-             "lot_area": saved.get("lot_area"), "lot_surveyed": facts.get("lot_surveyed"),
-             "lot_source": saved.get("lot_source")}
-    return facts, saved, state
+def box(payload, facts=None, saved=None, replaces=True):
+    facts, saved = logic.lookup_choices(payload, facts or {}, saved or {}, ZONES, replaces=replaces)
+    return facts, saved, state_of(facts, saved)
+
+
+def state_of(facts, saved):
+    """The box's state as gordium_rhino._box_state builds it from the facts and the box's choices."""
+    return {"address": facts.get("address"), "zone": facts.get("zone"), "zone_source": saved.get("zone_source"),
+            "corner_lot": facts.get("corner_lot"), "zones_found": saved.get("_zones_found") or [],
+            "lookup": saved.get("_lookup") or {}, "doubts": saved.get("doubts") or {}, "live": saved.get("_live") or {},
+            "checked": saved.get("checked"), "street_name": saved.get("_street_name") or saved.get("street_name"),
+            "street_name_saved": None if saved.get("_street_name") else saved.get("street_name"),
+            "lot_area": saved.get("lot_area"), "lot_surveyed": facts.get("lot_surveyed"),
+            "lot_source": saved.get("lot_source")}
 
 
 # ---- found: each fact a suggestion with its source ----------------------------------------------------------
@@ -57,8 +72,9 @@ def test_106_fills_the_box_with_suggestions_and_never_confirms_the_district():
     facts, saved, state = box(p)
     assert p["status"] == "found" and facts["zone"] == "R-1b" and facts["corner_lot"] is False
     assert facts["lot_surveyed"] is False                  # the tax map: ±2'-0" and the starting-house margin apply
-    assert saved["zone_source"] == "suggested by Gordium · City zoning map, used live"
-    assert saved["street_name"] == "Ithaca Rd" and saved["lot_source"] == "NYS Tax Parcels Public"
+    assert saved["zone_source"] == "suggested by Gordium · City of Ithaca zoning map, used live"
+    assert saved["_street_name"] == "Ithaca Rd" and saved["lot_source"] == "NYS Tax Parcels Public"
+    assert saved["street_source"] == "suggested by Gordium · City of Ithaca roads, used live"
     assert not state.get("district_confirmed") and not logic.can_draw(state)       # I confirm: still the architect's
     rows = {r["key"]: r for r in logic.box_rows(state)}
     assert rows["lot"]["text"] == "7,034 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public"
@@ -99,7 +115,7 @@ def test_a_lot_in_two_zones_asks_which():
         "R-2a", x0=847668)
     p = looked_up("106_ithaca_rd", zones=[a, b])
     facts, saved, state = box(p)
-    assert saved["zones_found"] == ["R-1b", "R-2a"] or saved["zones_found"] == ["R-2a", "R-1b"]
+    assert sorted(saved["_zones_found"]) == ["R-1b", "R-2a"]
     assert logic.uncertain(state) == "This lot is in two zones: pick the zone that applies"
 
 
@@ -111,8 +127,8 @@ def test_a_doubtful_lot_is_amber_unsettled_and_settled_by_i_checked_this():
     p = looked_up("106_ithaca_rd", county=(state_pt["x"] + 200, state_pt["y"]))       # County point 200 ft away
     facts, saved, state = box(p)
     rows = {r["key"]: r for r in logic.box_rows(state)}
-    assert rows["lot"]["review"].startswith("? This may be the wrong lot") and rows["lot"]["check"] == \
-        ("I checked this", False)
+    assert rows["lot"]["review"] == "? This may be the wrong lot: The State and County place this address 200 ft " \
+        "apart: check the lot." and rows["lot"]["check"] == ("I checked this", False)
     assert set(logic.unsettled(saved)) >= {"lot"}
     assert logic.unsettled(saved, checked=["lot", "street", "ground"]) == {}
     assert "lot" not in logic.unsettled(logic.settle(saved, "lot"))                # changed by the architect
@@ -126,11 +142,12 @@ def test_an_unsettled_lot_makes_every_item_measured_from_it_need_review_never_co
     plain = {i["name"]: i for i in check(model, facts)["view"]["items"]}
     doubt = {i["name"]: i for i in check(model, {**facts, "unsettled": {"lot": "This may be the wrong lot."}})["view"]
              ["items"]}
-    turned = [n for n, i in plain.items() if i["status"] == present.COMPLIES and i.get("measure")
-              and i["measure"] not in ("building_height", "stories")]
+    decides = set(present.UNSETTLED_DECIDES["lot"])
+    turned = [n for n, i in plain.items() if i["status"] == present.COMPLIES
+              and present._formula_names(i, RULES) & decides]
     assert turned and all(doubt[n]["status"] == present.REVIEW for n in turned)
     assert all("looked-up lot outline, which needs review" in doubt[n]["reason"] for n in turned)
-    assert not any(i["status"] == present.COMPLIES and i.get("measure") not in (None, "building_height", "stories")
+    assert not any(i["status"] == present.COMPLIES and present._formula_names(i, RULES) & decides
                    for i in doubt.values())
     ground = {i["name"]: i for i in check(model, {**facts, "unsettled": {"ground": "Elevations missing."}})["view"]
               ["items"]}
@@ -189,9 +206,9 @@ def test_only_what_each_source_allows_is_written_into_the_model():
     cw = writes(city, frame(city))
     assert cw["lot_ring"] is None and cw["frame"] is None and cw["spots"] == [] and cw["guide_ring"]
     facts, saved, state = box({**city, "writes": cw, "query": p["query"]})
-    assert "shown as a guide only" in saved["lookup"]["reviews"]["lot"]
+    assert "dashed guide only" in saved["_live"]["lot"]
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    body = rhino[rhino.index("def _lookup_done("):rhino.index("def frame_site_box(")]
+    body = rhino[rhino.index("def _lookup_done("):rhino.index("def _drawn(")]
     assert 'answer["facts"]' not in body and "answer.get(\"facts\")" not in body     # geometry only from writes
     assert 'STATE["lookup_guide"]' in body and "AddCurve" not in body.split('elif w.get("guide_ring")')[1]
 
@@ -201,7 +218,7 @@ def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
     out = capsys.readouterr().out.strip().splitlines()
     assert len(out) == 1 and json.loads(out[0])["status"] == "found"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert '"-m", "design_checker.lookup_box", address' in rhino and "LOOKUP_LIMIT_S = 45" in rhino
+    assert '"-m", "design_checker.lookup_box", address' in rhino and "logic.LOOKUP_LIMIT_S" in rhino
     assert "p.kill()" in rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_stop(")]
 
 
@@ -284,3 +301,204 @@ def test_tax_map_slivers_get_no_length_label():
     got = plan(site, {"outline": [], "holes": []}, {"items": []}, {})
     long_edges = [i for i in range(n) if math.dist(ring[i], ring[(i + 1) % n]) >= SHORTEST_LABELLED_EDGE]
     assert len(got["edges"]) == len(long_edges) == n - 2
+
+
+# ---- review round 1 of PR #19 (2026-10-20): each finding pinned ------------------------------------------------
+
+def _doubtful_106():
+    fx = T.load("106_ithaca_rd")
+    pt = next(a for a in fx["answers"] if a["source"] == "geocoder")["body"]["candidates"][0]["location"]
+    return looked_up("106_ithaca_rd", county=(pt["x"] + 200, pt["y"]))
+
+
+@pytest.mark.parametrize("then", [{"status": "timeout"}, {"status": "offline"}, {"status": "not_found"},
+                                  {"status": "multiple", "matches": ["a", "b"], "message": "Several."}])
+def test_p0_a_failed_re_lookup_keeps_the_doubts_about_the_lot_still_drawn(then):
+    """(A) Doubt is the model's: a lookup that didn't replace the lot never erases the doubts about the one drawn."""
+    facts, saved, _ = box(_doubtful_106())
+    before = logic.unsettled(saved)
+    assert "lot" in before
+    facts, saved = logic.lookup_choices({**then, "query": "x"}, facts, saved, ZONES)
+    assert logic.unsettled(saved) == before
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    start = rhino[rhino.index("def _lookup_start("):rhino.index("def _lookup_poll(")]
+    assert 'dict(saved_ui, _lookup={"says"' in start and 'dict(saved_ui, _lookup={"looking": address})' in start
+    assert '"doubts"' not in start and "doubts=" not in start          # starting (or an empty address) touches no doubt
+
+
+@pytest.mark.parametrize("key", ["lot", "street"])
+def test_p0_the_height_bonus_never_complies_on_an_unsettled_lot_or_street_side(key):
+    """(B) Scenario 03 complies only through the §325-16C bonus, which reads the yards and the lot depth: with the
+    lot or the street side unsettled, Building height needs review too."""
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    sc = scenarios.load(next(p for p in scenarios.paths() if p.name.startswith("03_")))
+    sc["lot"]["surveyed"] = True
+    site, facts, extras = scenarios.site(sc)
+    plain = {i["name"]: i for i in check_site(site, facts, extras=extras)["view"]["items"]}
+    assert plain["Building height"]["status"] == present.COMPLIES and "38'-6\"" in plain["Building height"]["required"]
+    doubt = {i["name"]: i for i in check_site(site, {**facts, "unsettled": {key: "x"}}, extras=extras)["view"]["items"]}
+    assert doubt["Building height"]["status"] == present.REVIEW
+
+
+@pytest.mark.parametrize("key", ["lot", "street", "ground"])
+def test_every_r1b_rule_reading_an_unsettled_measurement_needs_review(key):
+    """(B) Across every R-1b rule: any item whose formula reads a measurement the unsettled fact decides never
+    complies; the others are untouched."""
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    decides = set(present.UNSETTLED_DECIDES[key])
+    for path in scenarios.paths():
+        sc = scenarios.load(path)
+        site, facts, extras = scenarios.site(sc)
+        plain = {i["name"]: i for i in check_site(site, facts, extras=extras)["view"]["items"]}
+        doubt = {i["name"]: i for i in check_site(site, {**facts, "unsettled": {key: "x"}}, extras=extras)["view"]
+                 ["items"]}
+        for name, i in doubt.items():
+            reads = present._formula_names(i, RULES) & decides
+            assert not (reads and i["status"] == present.COMPLIES), (path.name, name)
+            if not reads:
+                assert i["status"] == plain[name]["status"], (path.name, name)
+
+
+def test_p1_esc_on_place_spot_grades_settles_nothing():
+    """Esc or Enter with no point placed: the ground's doubt and its looked-up source stay."""
+    facts, saved, _ = box(_doubtful_106())
+    assert "ground" in logic.unsettled(saved) or saved.get("ground_source")
+    same = logic.after_ground_pick(saved, "spot", 0)
+    assert logic.unsettled(same) == logic.unsettled(saved) and same.get("ground_source") == saved.get("ground_source")
+    placed = logic.after_ground_pick({**saved, "doubts": {"ground": "x"}}, "spot", 3)
+    assert "ground" not in logic.unsettled(placed) and "ground_source" not in placed
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.after_ground_pick(saved_ui, what, len(placed))" in rhino and "    return placed" in rhino
+
+
+def test_p1_nothing_from_a_source_that_cant_be_kept_is_written():
+    """(D) Everything the Rhino side writes for the box (its choices, the lot facts with their unsettled reasons,
+    the facts' sources) holds nothing from the County's points, the City's zoning answers or the City's roads:
+    one filter at the write boundary (storable_ui)."""
+    facts, saved, state = box(_doubtful_106())
+    a, b = T.Fake(T.load("106_ithaca_rd")).square("R-1b", x1=847668), T.Fake(T.load("106_ithaca_rd")).square(
+        "R-2a", x0=847668)
+    facts2, saved2, state2 = box(looked_up("106_ithaca_rd", zones=[a, b]))
+    for f, sv, st in ((facts, saved, state), (facts2, saved2, state2)):
+        written = json.dumps({"ui": logic.storable_ui(sv),
+                              "facts": {**f, "unsettled": logic.unsettled(sv)},
+                              "sources": logic.fact_sources(st, "2026-10-20", confirmed=True)})
+        assert "200 ft apart" not in written and "County" not in written      # the County's point (store: none)
+        assert "two zones" not in written and "R-2a" not in written           # the City's zoning answer (store: none)
+        assert "Ithaca Rd" not in written                                     # the City's roads (store: none)
+        assert not any(k.startswith("_") for k in logic.storable_ui(sv))
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert rhino.count("SetString(SECTION, UI_ENTRY") == 1 and "json.dumps(logic.storable_ui(state))" in rhino
+
+
+def test_p1_a_lookup_never_replaces_the_architects_own_lot():
+    """(C) Only the lot a lookup or the sample drew may be replaced; a survey picked, or a lot drawn or picked by the
+    architect, never (its id is no longer the replaceable one)."""
+    saved = {"replaceable_lot": "sample-lot"}
+    assert logic.lookup_may_replace({"lot_id": "sample-lot"}, saved)
+    assert logic.lookup_may_replace({}, saved)
+    picked = logic.settle(saved, "lot")                 # Use my survey… / Draw my lot… / Pick survey lot lines…
+    assert not logic.lookup_may_replace({"lot_id": "survey"}, picked)
+    assert not logic.lookup_may_replace({"lot_id": "sample-lot"}, picked)
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "replaceable_lot=sample_lot" in rhino and 'saved_ui = logic.settle(_ui_state(doc), "lot")' in rhino
+
+
+def test_p1_the_start_box_is_one_transaction():
+    """(C) Every model edit the box makes is recorded (added, or removed with its serial number), and Cancel undoes
+    them all; nothing in the lookup or a pick deletes an object any other way."""
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    done = rhino[rhino.index("def _lookup_done("):rhino.index("def _drawn(")]
+    assert "doc.Objects.Delete(" not in done and "_session_remove(doc, saved_ui, old)" in done
+    assert done.count("_session_add(saved_ui, ") == 2                 # the lot and its spot grades
+    pick = rhino[rhino.index("def _box_pick("):rhino.index("def confirm(")]
+    assert "doc.Objects.Delete(" not in pick and "_session_add(saved_ui, placed)" in pick
+    assert "_session_add(saved_ui, [drawn])" in pick
+    conf = rhino[rhino.index("def confirm("):rhino.index("def _lookup_start(")]
+    assert conf.index("_rollback(doc, saved_ui)") < conf.index("return None")
+    rb = rhino[rhino.index("def _rollback("):rhino.index("def _draw_lot(")]
+    assert "doc.Objects.Undelete(serial)" in rb
+
+
+def test_p2_overlays_found_and_ask_reasons_are_shown():
+    """(F) A historic district the lookup found is shown under the district; a zone that is both asked and doubtful
+    keeps its doubt."""
+    facts, saved, state = box(looked_up("106_ithaca_rd", historic=["East Hill"]))
+    rows = {r["key"]: r for r in logic.box_rows(state)}
+    assert "East Hill" in (rows["zone"]["review"] or "")
+    p = looked_up("106_ithaca_rd")
+    p["details"]["zone"] = {"status": "ask", "reason": "This lot is in R-1b and R-2a: pick the zone that applies. "
+                            "Ord. 2025-12 isn't confirmed to be on the City's online map: check the current zoning map.",
+                            "source_keys": ["city_zoning"]}
+    facts, saved, state = box(p)
+    rows = {r["key"]: r for r in logic.box_rows(state)}
+    assert "check the current zoning map" in rows["zone"]["review"]
+
+
+def test_p2_source_labels_come_from_the_services_actually_used():
+    """(E) The City's parcels when the State's didn't answer; NYS Streets when the City's roads didn't."""
+    from design_checker.lookup_box import labels
+    got = labels({"details": {"lot": {"source_keys": ["city_parcels"]},
+                              "street_side": {"source_keys": ["state_streets", "state_parcels"]},
+                              "corner_lot": {"source_keys": ["state_streets", "state_parcels"]}}})
+    assert got["lot"] == "City of Ithaca tax parcels" and got["street_side"].startswith("NYS Streets")
+    p = looked_up("106_ithaca_rd")
+    p["labels"] = got
+    facts, saved, _ = box(p)
+    assert saved["lot_source"] == "City of Ithaca tax parcels" and "NYS Streets" in saved["street_source"]
+
+
+def test_p2_a_lookup_on_the_architects_own_lot_leaves_its_lot_street_and_ground_alone():
+    facts, saved, state = box(_doubtful_106(), facts={"lot_id": "survey", "lot_surveyed": True},
+                              saved={"doubts": {}, "street_source": "entered by you"}, replaces=False)
+    assert facts["lot_surveyed"] is True and facts["lot_id"] == "survey" and facts["zone"] == "R-1b"
+    assert "_street_name" not in saved and saved["street_source"] == "entered by you" and saved["doubts"] == {}
+    assert "corner_lot" not in facts and "lot_source" not in saved
+
+
+def test_p2_the_guide_case_offers_draw_my_lot_and_keeps_draw_off_until_there_is_a_lot():
+    p = looked_up("106_ithaca_rd")
+    p["details"]["lot"]["source_keys"] = ["city_parcels"]
+    from design_checker.lookup_box import frame
+    p["writes"] = writes({"facts": p["facts"], "details": p["details"]}, frame({"facts": p["facts"]}))
+    facts, saved, state = box(p)
+    rows = {r["key"]: r for r in logic.box_rows({**state, "lot_missing": True})}
+    assert rows["lot"]["actions"][0] == ("draw_lot", "Draw my lot…", True)
+    assert logic.draw_reason({"district_confirmed": True, "lot_missing": True}) == "Draw or pick the lot to continue."
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert 'elif what == "draw_lot":' in rhino and '"lot_missing": lot is None' in rhino
+
+
+def test_p2_after_a_lookup_the_district_must_be_ticked_again():
+    facts, saved, _ = box(looked_up("106_ithaca_rd"))
+    assert saved["_reconfirm"] is True and "_reconfirm" not in logic.storable_ui(saved)
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert 'logic.district_confirmed(mode, zone_fact, facts.get("zone")) and not saved_ui.get("_reconfirm")' in rhino
+
+
+def test_p2_the_lookups_line_never_hides_the_boxs_questions_and_isnt_kept():
+    both = logic.uncertain({"lookup": {"says": "The lookup took too long."}, "corner_lot": None,
+                            "zones_found": ["R-1b", "R-2a"]})
+    assert both.startswith("Does this lot face two streets?") and "two zones" in both and both.endswith("too long.")
+    facts, saved, _ = box({"status": "timeout", "query": "x"})
+    assert "_lookup" in saved and "_lookup" not in logic.storable_ui(saved)
+
+
+def test_p3_the_lookups_files_are_closed_one_time_limit_and_no_silent_failure():
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    files = rhino[rhino.index("def _lookup_files_done("):rhino.index("def _lookup_stop(")]
+    assert "handle.close()" in files and 'os.remove(run["out"])' in files
+    poll = rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
+    assert poll.count("_lookup_files_done(run)") == 2 and "_lookup_files_done(run)" in \
+        rhino[rhino.index("def _lookup_stop("):rhino.index("def _lookup_done(")]
+    assert "LOOKUP_LIMIT_S = " not in rhino and 'logic.guard(frame_site, "frame the looked-up lot")' in rhino
+    assert "frame_site_box" not in rhino
+    assert "LOOKUP_LIMIT_S = " not in (REPO / "packages/design_checker/design_checker/lookup_box.py").read_text(
+        encoding="utf-8")
+    assert "up to %d s" % logic.LOOKUP_LIMIT_S in logic.LOOKING
+    guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8")
+    assert "doesn't look up the zoning map" not in guide
+    assert "doesn't look the zoning map up yet" not in (REPO / "packages/design_checker/design_checker/rhino_logic.py"
+                                                       ).read_text(encoding="utf-8")
