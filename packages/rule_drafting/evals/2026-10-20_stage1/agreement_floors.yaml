@@ -1,7 +1,7 @@
 # The least number of each hand key's worked examples the drafted rules must agree with (tests/test_eval.py). A
-# reported metric, not a pass/fail: it may rise (raise the floor with it), never fall. Recorded 2026-10-21 after the
-# stage-1 re-runs (lot width, §325-19E) and the replays (dwelling review, district scope). R-1a and R-3a apply once
-# their hand keys (PR #20) are in this checkout. Every difference behind these numbers is listed in grade.json.
-R-1b.yaml: 36       # of 43
+# reported metric, not a pass/fail: it may rise (raise the floor with it), never fall. Recorded 2026-10-21 after
+# catching up with measurement-2 (a98149b: its R-1b key has 48 examples) and grading against #20's latest R-1a and
+# R-3a keys (2f1535b). R-1a and R-3a apply once those keys are in this checkout. Every difference is in grade.json.
+R-1b.yaml: 38       # of 48
 R-1a.yaml: 63       # of 74
-R-3a.yaml: 84       # of 118 (15 undrafted: loading, note-7 / attached / multiple-family lot sizes, other uses' parking)
+R-3a.yaml: 85       # of 141 (38 undrafted)

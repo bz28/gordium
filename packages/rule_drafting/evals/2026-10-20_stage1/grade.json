@@ -1,7 +1,7 @@
 {
  "R-1b.yaml": {
   "district": "R-1b",
-  "total": 43,
+  "total": 48,
   "agree": [
    {
     "hand": "R-1b.use",
@@ -285,6 +285,30 @@
     "notes": []
    },
    {
+    "hand": "R-1b.height",
+    "given": {
+     "building_height": 37,
+     "front_yard": 27,
+     "side_yard_smaller": 12,
+     "side_yard_larger": 12,
+     "rear_yard": 21.99,
+     "lot_depth": 60
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_stories_not_exceeded",
+     "R-1b.325_16c_extra_height_front_yard",
+     "R-1b.325_16c_extra_height_side_yards",
+     "R-1b.325_16c_extra_height_rear_yard"
+    ],
+    "notes": [
+     "R-1b.325_16c_extra_height_stories_not_exceeded needs ['stories'], which the hand example doesn't give"
+    ]
+   },
+   {
     "hand": "R-1b.lot_coverage",
     "given": {
      "building_area": 1500,
@@ -402,6 +426,19 @@
     },
     "expect": "pass",
     "got": "pass",
+    "drafted": [
+     "R-1b.rear_yard_minimum"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.rear_yard",
+    "given": {
+     "rear_yard": 19.99,
+     "lot_depth": 60
+    },
+    "expect": "fail",
+    "got": "fail",
     "drafted": [
      "R-1b.rear_yard_minimum"
     ],
@@ -647,6 +684,30 @@
     "notes": []
    },
    {
+    "hand": "R-1b.height",
+    "given": {
+     "building_height": 37,
+     "front_yard": 27,
+     "side_yard_smaller": 12,
+     "side_yard_larger": 12,
+     "rear_yard": 22,
+     "lot_depth": 60
+    },
+    "expect": "pass",
+    "got": "fail",
+    "drafted": [
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_extra_height_limit_10_percent",
+     "R-1b.325_16c_extra_height_stories_not_exceeded",
+     "R-1b.325_16c_extra_height_front_yard",
+     "R-1b.325_16c_extra_height_side_yards",
+     "R-1b.325_16c_extra_height_rear_yard"
+    ],
+    "notes": [
+     "R-1b.325_16c_extra_height_stories_not_exceeded needs ['stories'], which the hand example doesn't give"
+    ]
+   },
+   {
     "hand": "R-1b.yard_projections",
     "given": {
      "front_yard_eaves": 30,
@@ -730,6 +791,60 @@
    {
     "hand": "R-1b.yard_projections",
     "given": {
+     "front_yard_eaves": 30,
+     "side_yard_smaller_eaves": 10,
+     "side_yard_larger_eaves": 12,
+     "rear_yard_eaves": 18,
+     "lot_depth": 60,
+     "building_height": 30
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_extra_height_front_yard",
+     "R-1b.325_16c_extra_height_side_yards",
+     "R-1b.325_16c_extra_height_rear_yard",
+     "general.325_18b_architectural_feature_projection_limit",
+     "general.325_18b_required_yard_open_unobstructed"
+    ],
+    "notes": [
+     "R-1b.325_16c_extra_height_front_yard needs ['front_yard'], which the hand example doesn't give",
+     "R-1b.325_16c_extra_height_side_yards needs ['side_yard_larger', 'side_yard_smaller'], which the hand example doesn't give",
+     "R-1b.325_16c_extra_height_rear_yard needs ['rear_yard'], which the hand example doesn't give",
+     "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
+    ]
+   },
+   {
+    "hand": "R-1b.yard_projections",
+    "given": {
+     "front_yard_eaves": 30,
+     "side_yard_smaller_eaves": 10,
+     "side_yard_larger_eaves": 12,
+     "rear_yard_eaves": 17.5,
+     "lot_depth": 60,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_extra_height_front_yard",
+     "R-1b.325_16c_extra_height_side_yards",
+     "R-1b.325_16c_extra_height_rear_yard",
+     "general.325_18b_architectural_feature_projection_limit",
+     "general.325_18b_required_yard_open_unobstructed"
+    ],
+    "notes": [
+     "R-1b.325_16c_extra_height_front_yard needs ['front_yard'], which the hand example doesn't give",
+     "R-1b.325_16c_extra_height_side_yards needs ['side_yard_larger', 'side_yard_smaller'], which the hand example doesn't give",
+     "R-1b.325_16c_extra_height_rear_yard needs ['rear_yard'], which the hand example doesn't give",
+     "general.325_18b_architectural_feature_projection_limit given {'architectural_feature_projection': 1.5} from its own passing example"
+    ]
+   },
+   {
+    "hand": "R-1b.yard_projections",
+    "given": {
      "front_yard_eaves": 25,
      "side_yard_smaller_eaves": 10,
      "side_yard_larger_eaves": 10,
@@ -781,13 +896,13 @@
   "undrafted": [],
   "false_pass": [],
   "summary": {
-   "examples": 43,
-   "agree": 36,
-   "disagree": 7,
+   "examples": 48,
+   "agree": 38,
+   "disagree": 10,
    "undrafted": 0,
    "false_pass": 0,
-   "agree_of_all": "36/43",
-   "agree_of_drafted": "36/43"
+   "agree_of_all": "38/48",
+   "agree_of_drafted": "38/48"
   }
  }
 }
