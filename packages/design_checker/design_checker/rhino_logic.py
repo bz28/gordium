@@ -639,6 +639,9 @@ def lot_source(surveyed, source=None):
     return "your survey" if surveyed else "the tax map (±2 ft, approximate)" + (" · " + source if source else "")
 
 
+NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+
+
 def lot_text(area, surveyed, source=None):
     """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"; with the map
     service the lookup read it from ("… · NYS Tax Parcels Public")."""
@@ -700,9 +703,13 @@ def box_rows(state, flat=None):
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot",
          "text": ("no lot yet: draw it, or pick a closed outline on the Site layer" if state.get("lot_missing") else
-                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))),
+                  lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))
+                  if state.get("has_lot") or state.get("lot_area") is not None or state.get("lot_surveyed")
+                  else NO_LOT),
          "actions": lot_actions, "tick": None},
-        {"key": "street", "label": "Street side", "text": street_name(state),
+        {"key": "street", "label": "Street side", "text": street_name(state) if (
+            state.get("street_name") or state.get("has_lot") or state.get("lot_area") is not None
+            or state.get("lot_surveyed")) else "set from the lot, once there is one",
          "actions": [("street", "Change…", True)], "tick": None,
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
@@ -1098,6 +1105,67 @@ def district_confirmed(mode, zone_fact, zone):
     same district was confirmed at an earlier Draw (its saved source says who confirmed it)."""
     zone_fact = zone_fact or {}
     return mode != "start" and bool(zone_fact.get("confirmed_by")) and zone_fact.get("value") == zone
+
+
+def is_elevation_view(parallel, direction_z, tolerance=0.01):
+    """Whether a viewport is an elevation (Front, Right, Back, Left): a parallel projection looking level, where the
+    height limit is labelled."""
+    return bool(parallel) and abs(direction_z) <= tolerance
+
+
+def north_vector(plan_north_deg):
+    """True north as a direction in the plan (x, y): plan north (+y) when the plan isn't turned; a looked-up lot
+    is drawn turned `plan_north_deg` (lookup_box.frame), and its north arrow turns with it."""
+    import math
+    t = math.radians(plan_north_deg or 0.0)
+    return (-math.sin(t), math.cos(t))
+
+
+def shorten(text, most):
+    """`text` in at most `most` characters, cut at a word and ended "…" when longer (a link can't wrap: the
+    architect's review found one pushing the docked panel's text off its right edge)."""
+    text = text or ""
+    if len(text) <= most:
+        return text
+    cut = text[:max(1, most - 1)].rsplit(" ", 1)[0].rstrip(" ,·;:")
+    return (cut or text[:max(1, most - 1)]) + "…"
+
+
+def building_name(layer, name, grouped):
+    """What the panel calls a building: the starting house Gordium drew (its floors grouped on the massing layer),
+    else the object's name, else its layer ("a solid on Building")."""
+    if layer == MASSING:
+        return "the starting house"
+    if name:
+        return name + (" (and its group)" if grouped else "")
+    return ("a group on " if grouped else "a solid on ") + layer
+
+
+def link_text(citation, most):
+    """A citation link's words in at most `most` characters, keeping what tells it apart: "District Regulations
+    Chart" said "chart", and if still too long its front cut, never its end (district, column, note: review round
+    1, eight links read "Open §325-8, District Regulations Chart…")."""
+    text = "Open " + (citation or "").replace("District Regulations Chart", "chart")
+    if len(text) <= most:
+        return text
+    tail = text[len(text) - (most - 7):]
+    tail = tail.split(" ", 1)[1] if " " in tail[1:] else tail
+    return "Open …" + tail.lstrip(" ,·;")
+
+
+def height_limit_text(checker_top, height):
+    """The height limit's label in an elevation: plain when the checker has the grade plane (its top), else said to
+    be shown from the lot's level, a drawing aid ("height" is the limit as text, 35'-0")."""
+    if checker_top is not None:
+        return "Height limit " + height
+    return "Height limit " + height + " (no grade plane yet: shown from the lot's level)"
+
+
+def prune_hosts(hosts, open_serials):
+    """The docked panel's hosts for documents still open (and the one made without a document, key 0): a closed
+    document's panel is never kept (review: 125 of them after a day of tests)."""
+    keep = set(open_serials) | {0}
+    return {k: v for k, v in (hosts or {}).items() if k in keep}
 
 
 def is_plan_view(parallel, direction_z, tolerance=0.99):
