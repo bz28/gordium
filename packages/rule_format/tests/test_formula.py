@@ -194,18 +194,22 @@ def test_a_margin_at_the_limit_is_zero_exactly_where_the_comparison_complies():
             evaluate("rear_yard >= 0.2 * lot_depth", {"rear_yard": at, "lot_depth": n}, KINDS)
 
 
-def test_an_error_names_the_value_as_written():
-    with pytest.raises(EvaluationError, match=r"expected true/false, got 50$"):
-        evaluate("not lot_width", {"lot_width": 50}, KINDS)
+def test_a_number_used_as_true_false_is_refused_by_its_type_whatever_its_value():
+    for value in (50, None):
+        with pytest.raises(EvaluationError, match=r"'not' needs a true/false test"):
+            evaluate("not lot_width", {"lot_width": value}, KINDS)
 
 
 @pytest.mark.parametrize("text, problem", [
-    ('use == 5', "== and != compare values of one kind"),
+    ('use == 5', "== and != compare two numbers or two texts"),
+    ("(a > 1) == (b < 2)", "== and != compare two numbers or two texts"),
+    ("(a > 1) in [b > 1]", "a list holds numbers, or texts"),
+    ("(1 if a > 1 else b > 2) or a > 1", "both branches of an if must give two numbers or two texts"),
     ("stories or building_height <= 35", "and/or need true/false tests"),
     ("(stories <= 3) + 1 > 0", "arithmetic needs numbers"),
     ("not stories", "'not' needs a true/false test"),
     ('use > 3', "<, <=, >, >= compare numbers"),
-    ('use in [1, 2]', "'in' needs a list of the same kind"),
+    ('use in [1, 2]', "'in' needs a number or text and a list of the same kind"),
     ("stories <= (1 if use else 2)", "an if needs a true/false test"),
     ("ghost > 1", "unknown measure 'ghost'"),
 ])
@@ -269,3 +273,84 @@ def test_known_answers_agree_with_every_substitution_including_ill_typed_atoms_a
                     continue
                 every = {answer(text, values | {missing: v}) for v in grid[missing]}
                 assert every == {got}, (text, missing, values, got, every)
+
+
+def _random_formula(rnd, depth, want="bool"):
+    """A random expression over the whole grammar (numbers, text, true/false, lists, every operator, min/max, if,
+    chains, in / not in), grown towards a kind (`want`) but often given operands of a random kind, and every
+    operator tried on every kind (true/false compared, true/false in a list...): so many are well-typed and deep,
+    and many are wrong in every way type_of must refuse."""
+    if rnd.random() < 0.15:
+        want = rnd.choice(["number", "text", "bool"])            # an operand of any kind: often ill-typed
+
+    def g(kind):
+        return _random_formula(rnd, depth - 1, kind)
+    if depth == 0 or rnd.random() < 0.15:
+        return rnd.choice({"number": ["a", "b", "0", "1", "2.5", "35"], "text": ["u", '"x"', '"y"'],
+                           "bool": ["(a > 1)", '(u == "x")', "(b <= 2.5)"]}[want])
+    any_kind = rnd.choice(["number", "text", "bool"])
+    shapes = {
+        "number": [lambda: f"({g('number')} {rnd.choice('+-*/')} {g('number')})", lambda: f"(-{g('number')})",
+                   lambda: f"{rnd.choice(['min', 'max'])}({g('number')}, {g('number')})",
+                   lambda: f"({g('number')} if {g('bool')} else {g('number')})"],
+        "text": [lambda: f"({g('text')} if {g('bool')} else {g('text')})"],
+        "bool": [lambda: f"(not {g('bool')})",
+                 lambda: "(" + f" {rnd.choice(['and', 'or'])} ".join(g("bool") for _ in range(rnd.randint(2, 3))) + ")",
+                 lambda: "(" + g("number") + "".join(f" {rnd.choice(['<', '<=', '>', '>='])} {g('number')}"
+                                                      for _ in range(rnd.randint(1, 2))) + ")",
+                 lambda: f"({g(any_kind)} {rnd.choice(['==', '!='])} {g(any_kind)})",
+                 lambda: f"({g(any_kind)} {rnd.choice(['in', 'not in'])} "
+                         f"[{', '.join(g(any_kind) for _ in range(rnd.randint(0, 2)))}])",
+                 lambda: f"({g('bool')} if {g('bool')} else {g('bool')})"],
+    }
+    return rnd.choice(shapes[want])()
+
+
+def test_the_type_rules_and_three_valued_logic_are_sound_over_the_whole_grammar():
+    """Generative (fixed seeds, thousands of random formulas of depth up to 4, random missing measures):
+    (a) a formula type_of accepts never gives a type error for any complete set of values (only a value's own
+    error, a division by zero, is left); (b) whenever an evaluation with measures missing gives an answer, every
+    way of filling them in (a grid with the formulas' own numbers and values either side) gives that same answer,
+    never an error. And no message ever shows a value as Fraction(...)."""
+    import itertools
+    import random
+    from rule_format.formula import FormulaError, type_of
+    kinds = {"a": "number", "b": "number", "u": frozenset({"x", "z"})}
+    grid = {"a": [0, 1, 2.5, 3, 35, 36], "b": [0, 1, 2.5, 35, 36], "u": ["x", "z"]}
+
+    def run(text, values):
+        try:
+            return ("value", evaluate(text, values, kinds))
+        except MissingMeasure:
+            return ("missing", None)
+        except EvaluationError as e:
+            assert "Fraction(" not in str(e), (text, e)
+            return ("error", str(e))
+
+    accepted = resolved = 0
+    for seed in range(4):
+        rnd = random.Random(seed)
+        for _ in range(1500):
+            text = _random_formula(rnd, 4, rnd.choice(["bool", "bool", "number"]))
+            if len(text) > 500:                      # longer than a formula may be (MAX_LENGTH)
+                continue
+            try:
+                type_of(text, kinds)
+                typed = True
+            except FormulaError:
+                typed = False
+            if typed:
+                accepted += 1
+                for combo in itertools.product(*grid.values()):
+                    got = run(text, dict(zip(grid, combo)))
+                    assert got[0] != "error" or got[1] == "division by zero", (text, combo, got)
+            for _ in range(2):
+                missing = rnd.sample(sorted(grid), rnd.randint(1, 2))
+                base = {n: rnd.choice(v) for n, v in grid.items()}
+                got = run(text, {**base, **{n: None for n in missing}})
+                if got[0] != "value":
+                    continue
+                resolved += 1
+                for fill in itertools.product(*(grid[n] for n in missing)):
+                    assert run(text, {**base, **dict(zip(missing, fill))}) == got, (text, missing, base, fill, got)
+    assert accepted > 300 and resolved > 300, (accepted, resolved)        # the test really exercises both
