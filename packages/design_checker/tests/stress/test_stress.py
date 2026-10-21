@@ -24,7 +24,8 @@ import generate  # noqa: E402
 import harness  # noqa: E402
 import oracle  # noqa: E402
 
-DESIGNS = int(os.environ.get("GORDIUM_STRESS_DESIGNS", "150"))
+DESIGNS = int(os.environ.get("GORDIUM_STRESS_DESIGNS", "40"))      # the CI sample; the slow one: FULL
+FULL = 300
 SEED = int(os.environ.get("GORDIUM_STRESS_SEED", "20261020"))
 
 
@@ -232,8 +233,9 @@ def test_reading_the_citys_files_once_changes_no_result():
     assert json.dumps(slow, sort_keys=True, default=str) == json.dumps(quick, sort_keys=True, default=str)
 
 
-def test_the_architect_stress_sample(fast, capsys):
-    out = harness.run(DESIGNS, SEED, workers=1, shrink_each=False, known=known)
+@pytest.mark.parametrize("designs", [pytest.param(DESIGNS, id="ci"), pytest.param(FULL, id="full", marks=pytest.mark.slow)])
+def test_the_architect_stress_sample(fast, capsys, designs):
+    out = harness.run(designs, SEED, workers=1, shrink_each=False, known=known)
     unknown = [v for v in out["violations"] if not v["known"]]
     with capsys.disabled():
         print(f"\nstress test: {out['designs']} designs (seed {out['seed']}) in {out['seconds']} s; invariants run: "
@@ -244,7 +246,7 @@ def test_the_architect_stress_sample(fast, capsys):
                   f"{v['lot']} {json.dumps(v['case']['edits'])}")
     if os.environ.get("GORDIUM_STRESS_OUT"):
         Path(os.environ["GORDIUM_STRESS_OUT"]).write_text(json.dumps(out, indent=1, default=str), encoding="utf-8")
-    assert out["checks_run"]["a"] == DESIGNS and out["checks_run"]["f"] == DESIGNS
+    assert out["checks_run"]["a"] == designs and out["checks_run"]["f"] == designs
     assert min(out["checks_run"][k] for k in ("c", "d", "e")) > 0
     assert not unknown, "new violations (not a known finding): " + json.dumps(unknown, default=str)[:4000]
 

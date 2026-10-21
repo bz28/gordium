@@ -34,6 +34,12 @@ def fast():
     harness.slow_reads()
 
 
+def _sizes(fast, full):
+    """A sampled test's two sizes: `fast` in CI, `full` marked slow (conftest.py: --runslow)."""
+    return pytest.mark.parametrize("size", [pytest.param(fast, id=f"ci-{fast}"),
+                                            pytest.param(full, id=f"full-{full}", marks=pytest.mark.slow)])
+
+
 def _check(design):
     res = harness.gordium(design)
     return harness.statuses(res), harness.items_by_rule(res)
@@ -463,7 +469,8 @@ def _turned(value, deg):
     return value
 
 
-def test_F5_a_side_yard_named_by_compass_only_holds_distances_to_that_line():
+@_sizes(2, 4)
+def test_F5_a_side_yard_named_by_compass_only_holds_distances_to_that_line(size):
     """Round 8, P2: the whole F5 site (lot, buildings, street) turned 0, 90, 180 and 270 degrees, every outline
     order. A row named "Side yard, <direction>" must show only distances measured toward that direction, under
     every reading; where they differ the rows say narrower and wider, never a wrong side."""
@@ -471,7 +478,7 @@ def test_F5_a_side_yard_named_by_compass_only_holds_distances_to_that_line():
         dx, dy = pts[0][0] - pts[-1][0], pts[0][1] - pts[-1][1]
         return ("East" if dx > 0 else "West") if abs(dx) >= abs(dy) else ("North" if dy > 0 else "South")
     d, _ = generate.build(*F5_CASE)
-    for deg in (0, 90, 180, 270):
+    for deg in (0, 90, 180, 270)[:size]:
         for order in ("as_drawn", "reversed", "shifted"):
             res = harness.run_site(_turned(generate.gordium_site(d, order), deg),
                                    _turned(generate.gordium_facts(d), deg))
@@ -491,12 +498,13 @@ def test_F5_a_side_yard_named_by_compass_only_holds_distances_to_that_line():
 # ---- invariants pinned by PR 18 (2b29efd) over stress samples; kept here so there is one copy -------------------
 
 
-def test_every_row_that_needs_review_says_why_over_a_stress_sample():
+@_sizes(20, 60)
+def test_every_row_that_needs_review_says_why_over_a_stress_sample(size):
     """The invariant behind F12: a needs-review row always says what it waits for, on any design. 60 random
     designs from the stress generator (its lots and edits)."""
     import random
     rng = random.Random(1812)
-    for _ in range(60):
+    for _ in range(size):
         case = generate.random_case(rng)
         d = generate.build(case["lot"], case["edits"])[0]
         for i in harness.gordium(d)["view"]["items"]:
@@ -517,7 +525,8 @@ def _measured(design, order):
     return out
 
 
-def test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outlines_are_drawn():
+@_sizes(12, 40)
+def test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outlines_are_drawn(size):
     """Metamorphic (F16): the same design drawn with every outline and face the other way round, or starting at
     its next point, measures the same: every measurement's value, and every reading's value with its named
     answers. Every lot (the 106 Ithaca Rd sample, on the tax map and on a survey, and the others), as drawn and
@@ -525,7 +534,7 @@ def test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outli
     buildings, moved lines)."""
     rng = random.Random(16)
     cases = [(lt, []) for lt in generate.LOTS] + [F16_CASE]
-    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(40))]
+    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(size))]
     checked = 0
     for lt, edits in cases:
         d, _done = generate.build(lt, edits)
@@ -538,14 +547,15 @@ def test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outli
     assert checked == 2 * len(cases)
 
 
-def test_drawing_the_house_as_floor_blocks_a_solid_or_a_mesh_never_flips_a_row_between_fails_and_complies():
+@_sizes(5, 15)
+def test_drawing_the_house_as_floor_blocks_a_solid_or_a_mesh_never_flips_a_row_between_fails_and_complies(size):
     """Metamorphic (F17): the same design written to Rhino with the house as Gordium's floor blocks, as one plain
     solid, or as meshes may change what can be read (stories from floor blocks, the main building assumed or to
     pick), so a row may move to or from needs review; but never from does not comply to complies or back. Every
     lot as drawn, the F17 case, and 15 random architect's edit sequences."""
     rng = random.Random(17)
     cases = [(lt, []) for lt in generate.LOTS] + [F17_CASE]
-    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(15))]
+    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(size))]
     compared = []
     for lt, edits in cases:
         d, _done = generate.build(lt, edits)
@@ -559,7 +569,7 @@ def test_drawing_the_house_as_floor_blocks_a_solid_or_a_mesh_never_flips_a_row_b
         for rule in set().union(*got.values()):
             seen = {got[style].get(rule) for style in got}
             assert not {FAILS, COMPLIES} <= seen, (lt, edits, rule, {k: v.get(rule) for k, v in got.items()})
-    assert sum(n >= 2 for n in compared) >= 15, compared
+    assert sum(n >= 2 for n in compared) >= min(15, len(cases) - 2), compared
 
 
 def test_no_test_or_helper_in_the_stress_folder_is_defined_twice():
