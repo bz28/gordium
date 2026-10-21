@@ -678,7 +678,7 @@ UNITS_PATTERN = r"_scale\(|\* k\b|\* scale\b|/ scale\b|\* k\)"     # any use of 
 
 
 def test_the_units_scan_catches_a_conversion_inside_a_call():
-    """Review round 7: `_scale\(doc\)(?!\))` let `foo(y / _scale(doc))` through."""
+    r"""Review round 7: `_scale\(doc\)(?!\))` let `foo(y / _scale(doc))` through."""
     import re
     assert re.search(UNITS_PATTERN, "    x = foo(y / _scale(doc))")
     assert re.search(UNITS_PATTERN, "    x = y * _scale(doc)")
