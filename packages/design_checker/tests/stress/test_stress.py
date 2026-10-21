@@ -100,13 +100,18 @@ def _rear_overhang_words(v):
 
 MATCHERS["F6"], MATCHERS["F7"] = _typed_below_drawn, _rear_overhang_words
 def _plain_part_under_8_ft(v):
-    """F8 (open, for #18): stories complies where the only plain part 7 ft or taller is under 8 ft and nothing that
-    stands is typed."""
+    """F8 (open, until #18 takes #14's definition): stories complies where every plain part that opens the count
+    (#14: 7 ft or taller, or shorter but not at the ground) is under 8 ft (#18's own line), nothing standing typed."""
     if not (v["invariant"] == "a" and v["rule"] == "R-1b.stories"):
         return False
     d = _design(v)
-    tall = [p["z1"] - p["z0"] for p in d["parts"] if p["kind"] == "solid" and p["z1"] - p["z0"] >= 7 - 1e-6]
-    return bool(tall) and max(tall) < 8 and oracle.measure(d)["stories_typed_short"]
+    m = oracle.measure(d)
+    if not m["stories_typed_short"]:
+        return False
+    ground = min(p["z0"] for p in d["parts"] if p["kind"] == "floor") if any(
+        p["kind"] == "floor" for p in d["parts"]) else 0.0
+    opening = [p for p in d["parts"] if p["kind"] == "solid" and (p["z1"] - p["z0"] >= 7 - 1e-6 or p["z0"] > ground)]
+    return bool(opening) and all(p["z1"] - p["z0"] < 8 for p in opening)
 
 
 def _wall_count_words(v):
@@ -123,8 +128,20 @@ def _wall_count_words(v):
     return a != b and plain(a) == plain(b)
 
 
-MATCHERS["F8"], MATCHERS["F9"] = _plain_part_under_8_ft, _wall_count_words
-KNOWN = {"F8": _plain_part_under_8_ft, "F9": _wall_count_words}   # F6, F7 fixed in #18 (ca4f6c3, 4ce81b3): a return of those fails CI
+def _gapped_floor_blocks(v):
+    """F10 (open): stories complies with a typed count below the floor blocks drawn, the blocks not one stack from
+    the ground (a gap: the blocks above it aren't counted)."""
+    if not (v["invariant"] == "a" and v["rule"] == "R-1b.stories"):
+        return False
+    d = _design(v)
+    fl = sorted((p for p in d["parts"] if p["kind"] == "floor"), key=lambda p: p["z0"])
+    gap = any(abs(b["z0"] - a["z1"]) > 1e-6 for a, b in zip(fl, fl[1:]))
+    typed = d.get("typed_stories")
+    return gap and typed is not None and typed < len(fl) and oracle.measure(d)["stories_typed_short"]
+
+
+MATCHERS["F8"], MATCHERS["F9"], MATCHERS["F10"] = _plain_part_under_8_ft, _wall_count_words, _gapped_floor_blocks
+KNOWN = {"F8": _plain_part_under_8_ft, "F9": _wall_count_words, "F10": _gapped_floor_blocks}   # F6, F7 fixed in #18 (ca4f6c3, 4ce81b3): a return of those fails CI
 
 
 def known(v):

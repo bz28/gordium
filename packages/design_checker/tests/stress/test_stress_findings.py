@@ -7,7 +7,7 @@ raises=AssertionError: only the finding's own assertion counts as "still reprodu
 output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper on
-F4 (a repeated id) in #12 (the same_id stop; in measurement-2 at b5a899b). F6 and F7 in #18 (ca4f6c3, 4ce81b3). Open: F8, F9.
+F4 (a repeated id) in #12 (the same_id stop; in measurement-2 at b5a899b). F6 and F7 in #18 (ca4f6c3, 4ce81b3). Open: F8, F9, F10.
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -216,14 +216,14 @@ F8_CASE = ("jog", [{"op": "floor_wing", "heights": [7.5], "face": 0, "depth": 8.
 
 
 @pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F8: a plain part 7 to 8 ft tall doesn't open the story count (the code's line is 8 ft)")
+                   reason="F8: #18's own 8 ft line, until it takes #14's definition (7 ft, NYS R305.1) via term-index")
 def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_never_complies():
     """One edit: the jog lot's starting house (3 floor blocks, 35'-0") with a plain solid wing 7'-6" tall joined to
     its east wall. The agreed rule (coordinator, 2026-10-21): stories are counted only from floor blocks; a plain
     part 7 ft or taller may hold a story the drawing doesn't show, so only a typed count of at least the floors
     counted (and the plain blocks stacked) stands. Nothing is typed: the count is open, never complies. Gordium:
-    Stories 3, complies; its line is 8 ft (ca4f6c3: 'a part 8 ft or taller'). Either the rule's 7 ft or the code's
-    8 ft is to be settled; until then the 7'-6" wing passes on the floors alone."""
+    Stories 3, complies; #18's line is 8 ft (ca4f6c3). Decided 2026-10-21: 7 ft is right (#14's one definition, cited
+    to NYS R305.1); this passes when #18 swaps its 8 ft copy for #14's definition (arriving via term-index)."""
     got, _ = _check(generate.build(*F8_CASE)[0])
     assert got["R-1b.stories"] != COMPLIES
 
@@ -254,6 +254,33 @@ def test_F9_the_spot_grade_reason_is_the_same_whichever_way_the_outlines_run():
         rows = harness.items_by_rule(harness.gordium(d, order))
         reasons.append([i["reason"] for r in ("R-1b.height", "R-1b.stories") for i in rows[r]])
     assert reasons[0] == reasons[1] == reasons[2], reasons
+
+
+# ---- F10 (P0): a floor block above a gap isn't counted, so a typed count below the blocks drawn stands ----------
+
+F10_CASE = ("sample_survey", [{"op": "delete_floor", "which": "middle"},
+                              {"op": "floor_wing", "heights": [9.0], "face": 1, "depth": 10, "below": 0.0,
+                               "typed": "below"}])
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F10: floor blocks above a gap aren't counted, so a typed count below them stands")
+def test_F10_a_typed_count_below_the_floor_blocks_drawn_never_complies_even_with_a_gap():
+    """Two edits: the surveyed sample lot's starting house with its middle floor block deleted (floor 1 at 0-11'-8",
+    floor 3 left where it was, 23'-4" to 35'-0"), and a 9 ft plain wing on its rear wall with 1 typed. Two floor
+    blocks are drawn, so the building has at least 2 stories (STORY, §325-3); a plain part 7 ft or taller leaves the
+    typed count standing only if at least the floors counted (the agreed rule): 1 < 2, never complies. Gordium:
+    Stories 1, complies (it counts only the block at the ground; the block above the gap is left out of the
+    count, so the typed 1 stands). The same with the fourth floor of a gapped stack and 2 typed (long run, seed 29,
+    corner lot)."""
+    got, _ = _check(generate.build(*F10_CASE)[0])
+    assert got["R-1b.stories"] != COMPLIES
+
+
+def test_the_oracle_on_F10_two_blocks_drawn_and_one_typed_can_not_pass():
+    d, done = generate.build(*F10_CASE)
+    assert len(done) == 2 and d["typed_stories"] == 1
+    assert oracle.verdicts(d)["R-1b.stories"]["verdict"] == oracle.NOT_PASS
 
 
 # ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------

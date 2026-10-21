@@ -214,6 +214,12 @@ def grade_plane(design, walls: Polygon):
     return min(simple, weighted), max(simple, weighted)
 
 
+def opens_count(part, grade) -> bool:
+    """Whether a plain part may hold a story the drawing doesn't show (#14's definition, NYS R305.1, decided
+    2026-10-21): 7 ft or taller, or a shorter part that doesn't sit at the ground (e.g. stacked on another)."""
+    return part["z1"] - part["z0"] >= 7 - EPS or part["z0"] > grade[1] + EPS
+
+
 def _where(shape: Polygon, lot: Polygon) -> str:
     if shape.within(lot.buffer(EPS)):
         return "inside"
@@ -285,7 +291,8 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
     attic = any(p["kind"] in ROOF_KINDS for p in main)                  # an attic may be a story (STORY, §325-3)
     stories = (len(floors) + (1 if attic else 0), len(floors)) if stacked and floors and grade is not None else None
     # Parts drawn as plain solids (no floor marks; the agreed rule, coordinator 2026-10-21): stories are counted only
-    # from floor blocks. A plain part 7 ft or taller may hold stories the drawing doesn't show, so the typed count
+    # from floor blocks. A plain part 7 ft or taller, or a shorter one not at the ground (opens_count), may hold
+    # stories the drawing doesn't show, so the typed count
     # stands only as the whole building's, and only if it is at least the floors counted and the plain blocks
     # stacked; otherwise the count is open (never complies). A plain part reaching below the ground is the basement
     # question (STORY, §325-3: a basement may be a story): never complies.
@@ -297,7 +304,7 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
         counted = len(floors)
         if any(p["z0"] < grade[1] - EPS for p in plain):
             stories_basement = True
-        elif any(p["z1"] - p["z0"] >= 7 - EPS for p in plain):
+        elif any(opens_count(p, grade) for p in plain):
             if typed is not None and typed >= counted and typed >= stacked_plain:
                 stories = (typed, typed)
             else:

@@ -200,6 +200,8 @@ FLOOR_WING = {"op": "floor_wing", "heights": [10.0], "face": 1, "depth": 10, "be
     ({"heights": [6.0]}, oracle.PASS),                           # a 6 ft wing can't hold a story: the 3 floors
     ({"heights": [10.0, 12.0], "typed": "equal"}, oracle.PASS),  # 3 typed >= 3 floors and >= 2 plain blocks
     ({"below": 4.0, "typed": "equal"}, oracle.NOT_PASS),         # a walk-out: the basement question
+    ({"heights": [5.0, 6.0]}, oracle.NOT_PASS),                  # the 6 ft block sits on the 5 ft one, not the
+    #                                                              ground: it opens the count (#14), nothing typed
 ])
 def test_the_agreed_stories_rule_for_a_floor_stack_with_a_plain_wing(wing, verdict):
     """Gordium's starting house on the surveyed sample lot (3 floor blocks) with a plain wing on its rear wall."""
