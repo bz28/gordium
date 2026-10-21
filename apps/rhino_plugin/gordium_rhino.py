@@ -383,8 +383,8 @@ def bounds(o, e):
     if _here(o, e) and o.box.IsValid:
         e.IncludeBoundingBox(o.box)
     context = STATE.get("context_guides") or {}
-    if e.RhinoDoc is not None and context.get("doc") == e.RhinoDoc.RuntimeSerialNumber and context.get("box") is not None \
-            and context["box"].IsValid:
+    if e.RhinoDoc is not None and logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
+            and context.get("box") is not None and context["box"].IsValid:
         e.IncludeBoundingBox(context["box"])         # the live footprints reach past the lot
 
 
@@ -421,7 +421,7 @@ def draw_scene(o, e):
         pts = o.lot_outline
         d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
     context = STATE.get("context_guides") or {}
-    if context.get("doc") == e.RhinoDoc.RuntimeSerialNumber and STATE.get("context_on", True):
+    if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) and STATE.get("context_on", True):
         for line in context.get("lines") or []:          # the neighbouring footprints: live only, never in the file
             d.DrawPolyline(line, CONTEXT_GUIDE, 1)
     guide = STATE.get("lookup_guide")
@@ -2139,7 +2139,7 @@ def _clear_context(doc, sources=None):
         doc.Layers[k].IsVisible = was_visible
         doc.Layers[k].IsLocked = was_locked
     if sources is None:
-        if (STATE.get("context_guides") or {}).get("doc") == doc.RuntimeSerialNumber:
+        if logic.guides_of(STATE.get("context_guides"), doc.RuntimeSerialNumber):
             STATE.pop("context_guides", None)
         doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)
     STATE["dirty"] = dirty
@@ -2189,12 +2189,10 @@ def draw_context(doc, frame):
         return payload
     old = _context_record(doc)
     held = STATE.get("context_guides") or {}
-    on_screen = held.get("doc") == doc.RuntimeSerialNumber and bool(held.get("lines"))
-    # one decision for the message, the record and the screen (review round 6): what the merge keeps
-    payload, record, kept = logic.context_merge(payload, old, frame, live_on_screen=on_screen)
-    same = bool(old) and old.get("frame") == frame
-    sources = logic.context_replaces(payload) if same else None     # another frame: the earlier address's all go
-    keep_guides = logic.keeps_live(kept, old)
+    # one plan for the message, the record, what is deleted and the footprints on screen (review rounds 6-7)
+    plan = logic.context_merge(payload, old, frame,
+                               live_on_screen=logic.guides_on_screen(held, doc.RuntimeSerialNumber))
+    payload, record, sources, keep_guides = plan["payload"], plan["record"], plan["replace"], plan["keep_guides"]
     STATE.pop("context_guides", None)
     dirty = STATE.get("dirty")             # live mode hears every add: the context changes nothing the check reads,
     _clear_context(doc, sources)           # so the model's "changed since the check" mark is put back after
@@ -2237,7 +2235,7 @@ def sync_context(doc, facts):
     frame = logic.context_frame(facts, _ui_state(doc))
     on = STATE.get("context_on", True)
     step = logic.context_step(frame, drawn, on)
-    loaded = (STATE.get("context_guides") or {}).get("doc") == doc.RuntimeSerialNumber
+    loaded = logic.guides_on_screen(STATE.get("context_guides"), doc.RuntimeSerialNumber)
     if step == "keep" and frame and on and not loaded:
         # the same lot in a reopened file: its footprints (never saved) fetched again. draw_context replaces what is
         # drawn only once the fetch has worked, so offline the saved parcels and streets stay (review round 3)
@@ -2269,7 +2267,7 @@ def show_context(on):
     doc = Rhino.RhinoDoc.ActiveDoc
     STATE["context_on"] = bool(on)
     drawn = _context_visible(doc, on)
-    loaded = (STATE.get("context_guides") or {}).get("doc") == doc.RuntimeSerialNumber
+    loaded = logic.guides_on_screen(STATE.get("context_guides"), doc.RuntimeSerialNumber)
     if on and not loaded:                  # draw_context says what it drew, or why it couldn't
         try:
             facts = current_facts(doc)

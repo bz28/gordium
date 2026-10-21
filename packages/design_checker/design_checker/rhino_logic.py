@@ -1065,6 +1065,31 @@ def context_frame(facts, saved_ui):
     return frame if frame and lot and lot == saved_ui.get("replaceable_lot") else None
 
 
+def same_frame(a, b):
+    """Whether two lookup frames are the same placement (one definition for every caller: context_step,
+    context_merge, and through it draw_context; review round 7)."""
+    return bool(a) and bool(b) and a == b
+
+
+def is_stored(layer):
+    """Whether a context layer's source may be kept in the file (store raw): its objects are in the .3dm. One
+    definition for writing (context_objects), keeping (context_merge) and the live footprints (keeps_live)."""
+    return (layer or {}).get("store") == "raw"
+
+
+def guides_of(held, doc_serial):
+    """Whether the live footprints held (STATE["context_guides"]) belong to this document."""
+    return bool(held) and held.get("doc") == doc_serial
+
+
+def guides_on_screen(held, doc_serial):
+    """Whether this document's footprints are on screen: held for it AND with something to draw. A failed footprint
+    fetch leaves an empty entry, which is not on screen, so the tick or the next Draw fetches again (review round 7:
+    "loaded" was the document match alone there, so a failure could never be retried). The one definition the
+    merge, Draw, the tick and the drawing all use."""
+    return guides_of(held, doc_serial) and bool(held.get("lines"))
+
+
 def context_step(frame, drawn, on):
     """What a box's Draw does to the neighbourhood: frame = the lot's (context_frame), drawn = the frame the one in
     the file was drawn around (context_record), on = the panel's tick.
@@ -1074,7 +1099,7 @@ def context_step(frame, drawn, on):
     "off": the same, with Show neighbourhood off: the earlier one goes, and the box says it wasn't drawn."""
     if not frame:
         return "clear" if drawn else "keep"
-    if drawn == frame:
+    if same_frame(drawn, frame):
         return "keep"
     return "draw" if on else "off"
 
@@ -1100,26 +1125,37 @@ def context_replaces(payload):
 LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.context's mark on a live-only layer's credit line
 
 
+def keeps_live(kept, old_record):
+    """Whether a live-only layer is among the kept ones (its guides on screen stay, its credit line is carried)."""
+    layers = (old_record or {}).get("layers") or {}
+    return any(not is_stored(layers.get(n)) for n in kept or [])
+
+
 def context_merge(payload, old_record, frame, live_on_screen=False):
-    """(payload, record, kept) for drawing a fetch over a neighbourhood already in the file: the one decision the
-    panel's message, the record and the screen all follow. Around the same frame, each layer whose service failed
-    and that is still there is kept: a stored layer (store raw) is in the file; a live-only one (the footprints,
-    never saved) only when its guides are on screen for this document (`live_on_screen`: review round 6, a reopened
-    file said "Kept the buildings" with none shown). A kept layer's record entries (the layer, its requests, its
-    credit line, when it was fetched) are carried over and the Sources dot still lists it. Around another frame (or
-    none saved) nothing is carried over: the earlier address's go."""
+    """The plan for drawing a fetch over the neighbourhood already in the file: the ONE decision the panel's message,
+    the record, the objects deleted and the footprints on screen all follow (review rounds 6-7). A dict:
+    payload (what to draw and say), record (what the file keeps), kept (the layers kept), replace (the sources
+    whose objects go: rhino_logic.context_replaces around the same frame; None, every one, around another),
+    keep_guides (the footprints on screen stay).
+    Around the same frame, each layer whose service failed and that is still there is kept: a stored layer is in
+    the file; a live-only one (the footprints, never saved) only when its guides are on screen for this document
+    (`live_on_screen`, from guides_on_screen). A kept layer's record entries (the layer, its requests, its credit
+    line, when it was fetched) are carried over and the Sources dot still lists it. Around another frame (or none
+    saved) nothing is carried over: the earlier address's go."""
     record = context_record(payload, frame)
     old = old_record or {}
-    if not old or old.get("frame") != frame:
-        return payload, record, []
+    plan = {"payload": payload, "record": record, "kept": [], "replace": None, "keep_guides": False}
+    if not same_frame(old.get("frame"), frame):
+        return plan
+    plan["replace"] = context_replaces(payload)
     was = old.get("layers") or {}
     kept = [n for n, v in ((payload or {}).get("layers") or {}).items()
             if v.get("status") not in DREW and (was.get(n) or {}).get("status") in DREW
-            and ((was.get(n) or {}).get("store") == "raw" or live_on_screen)]
+            and (is_stored(was.get(n)) or live_on_screen)]
     if not kept:
-        return payload, record, []
+        return plan
+    live_kept = keeps_live(kept, old)
     sources = set(was[n]["source"] for n in kept)
-    live_kept = any(was[n].get("store") != "raw" for n in kept)
     record["layers"] = dict(record.get("layers") or {}, **{n: was[n] for n in kept})
     record["sources"] = list(record.get("sources") or []) + [r for r in old.get("sources") or []
                                                               if r.get("source") in sources]
@@ -1134,17 +1170,11 @@ def context_merge(payload, old_record, frame, live_on_screen=False):
             o = dict(o, text="\n".join(credits))
         objects.append(o)
     note = "Kept the %s drawn earlier (the service didn't answer)." % " and ".join(kept)
-    counts = dict(payload.get("counts") or {}, **{n: old["layers"][n]["count"] for n in kept
-                                                    if "count" in old["layers"][n]})
-    payload = dict(payload, objects=objects, counts=counts,
-                   message=((payload.get("message") or "") + " " + note).strip())
-    return payload, record, kept
-
-
-def keeps_live(kept, old_record):
-    """Whether the merge kept a live-only layer (its guides on screen stay): from context_merge's own kept list."""
-    layers = (old_record or {}).get("layers") or {}
-    return any((layers.get(n) or {}).get("store") != "raw" for n in kept or [])
+    counts = dict(payload.get("counts") or {}, **{n: was[n]["count"] for n in kept if "count" in was[n]})
+    plan.update(kept=kept, keep_guides=live_kept,
+                payload=dict(payload, objects=objects, counts=counts,
+                             message=((payload.get("message") or "") + " " + note).strip()))
+    return plan
 
 
 def context_objects(payload):
@@ -1152,7 +1182,7 @@ def context_objects(payload):
     and Gordium's own marks (frame, north arrow, scale bar, credits). Anything else is never written, whatever the
     payload's object list holds."""
     payload = payload or {}
-    raw = set(s.get("source") for s in (payload.get("layers") or {}).values() if s.get("store") == "raw")
+    raw = set(s.get("source") for s in (payload.get("layers") or {}).values() if is_stored(s))
     return [o for o in payload.get("objects") or []
             if (o.get("source") in raw or o.get("source") == "gordium") and on_layer(o.get("layer") or "", CONTEXT)]
 

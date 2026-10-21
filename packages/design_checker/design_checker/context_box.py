@@ -18,6 +18,8 @@ from rule_format.rulebook import utf8_console
 from site_lookup.context import HALF_SIZE_FT, context, credits
 from site_lookup.http import Http
 
+from .rhino_logic import is_stored     # one definition of "may be kept in the file" for both sides
+
 TIMEOUT_S, RETRIES = 6.0, 1          # each request; the Rhino side stops the whole fetch at CONTEXT_LIMIT_S
 ROOT = "Gordium::Context"
 LAYER_OF = {"parcels": ROOT + "::Parcels", "streets": ROOT + "::Streets", "buildings": ROOT + "::Buildings"}
@@ -70,7 +72,7 @@ def payload(ctx: dict, frame: dict) -> dict:
     for name, layer in ctx["layers"].items():
         for item in layer["items"]:
             pts = item.get("ring") or item.get("path")
-            if layer["store"] == "raw":
+            if is_stored(layer):
                 objects.append({"layer": LAYER_OF[name], "kind": "closed" if "ring" in item else "open",
                                 "points": [place(p) for p in pts], "name": item.get("id") or item.get("name") or "",
                                 "source": layer["source"]})
@@ -82,7 +84,7 @@ def payload(ctx: dict, frame: dict) -> dict:
             objects.append(dict(o, points=[place(p) for p in o["points"]]))
     counts = {n: len(v["items"]) for n, v in ctx["layers"].items()}
     # a layer shown only live carries its source line on screen (the panel's message), never in the file
-    live = [line for n, line in credits(ctx).items() if ctx["layers"][n]["store"] != "raw"]
+    live = [line for n, line in credits(ctx).items() if not is_stored(ctx["layers"][n])]
     return {"status": ctx["status"], "message": ctx.get("message") or "", "objects": objects, "guides": guides,
             "credits": ctx.get("credits") or [], "live_credits": live, "counts": counts, "snapshot": ctx.get("snapshot"),
             "layers": {n: {"status": v["status"], "store": v["store"], "name": v["name"], "source": v["source"]}

@@ -331,19 +331,22 @@ def test_clearing_also_opens_a_locked_or_hidden_parent_layer_and_says_before_wai
 
 # ---- review of PR #23 (coordinator's round): one service down must not delete the other layers -------------------
 
+DOC = 7                                    # the document's serial in these replays
+
+
 def redraw(model, record, payload, frame, guides=None):
     """What gordium_rhino.draw_context does to the file and the screen, step by step with the same rhino_logic calls
     (the model is a list of (source, object) as the context layers hold them; `guides` the footprints on screen for
     this document, None after a reopen): merge with the saved record (JSON round-tripped, as the file keeps it),
-    delete the replaced sources' objects (all of them around another frame), add the new objects; the footprints on
-    screen stay only if the merge kept their layer. (model, record, payload shown, guides on screen)."""
+    then follow the merge's one plan: delete its `replace` sources' objects (all of them around another frame), add
+    the new objects, keep the footprints on screen only if it says so. (model, record, payload shown, guides held)."""
     record = json.loads(json.dumps(record)) if record is not None else None
-    payload, new_record, kept = logic.context_merge(payload, record, frame, live_on_screen=bool(guides))
-    same = bool(record) and record.get("frame") == frame
-    sources = logic.context_replaces(payload) if same else None
+    held = {"doc": DOC, "lines": guides} if guides is not None else {}
+    plan = logic.context_merge(payload, record, frame, live_on_screen=logic.guides_on_screen(held, DOC))
+    payload, sources = plan["payload"], plan["replace"]
     kept_objects = [(s, o) for s, o in model if not (sources is None or s in sources)]
-    shown = guides if logic.keeps_live(kept, record) else logic.context_guides(payload)
-    return kept_objects + [(o["source"], o) for o in logic.context_objects(payload)], new_record, payload, shown
+    shown = guides if plan["keep_guides"] else logic.context_guides(payload)
+    return kept_objects + [(o["source"], o) for o in logic.context_objects(payload)], plan["record"], payload, shown
 
 
 class Down(T.Fake):
@@ -403,7 +406,7 @@ def test_footprints_down_in_a_reopened_file_are_never_said_or_recorded_as_kept()
     assert on3 == guides and "Kept the buildings" in logic.context_says(shown3)
     assert record3["layers"]["buildings"]["status"] == "found" and set(record3["kept_from"]) == {"buildings"}
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
-    assert "keep_guides = logic.keeps_live(kept, old)" in draw and '"state_buildings" not in' not in draw
+    assert "logic.keeps_live" not in draw and '"state_buildings" not in' not in draw      # the plan decides
     from site_lookup.context import LIVE_ONLY
     assert logic.LIVE_ONLY == LIVE_ONLY                    # the mark that tells a live-only credit line apart
 
@@ -419,6 +422,42 @@ def test_kept_from_names_only_the_layers_kept_in_this_fetch():
     assert record["layers"]["parcels"]["status"] == "found" and len([1 for s, _ in model if s == "state_parcels"]) == 229
 
 
+def test_a_failed_footprint_fetch_is_not_on_screen_so_the_next_tick_fetches_again():
+    """Review round 7: after a footprint fetch that failed, the plugin holds an empty entry for the document, and the
+    tick and Draw took the document match alone as "loaded": the footprints could never be fetched again. One
+    definition now (guides_on_screen): held for this document AND something to draw."""
+    frame = looked_up()["writes"]["frame"]
+    model, record, _, shown = redraw([], None, fetch_with(frame, down={"state_buildings"}), frame)
+    held = {"doc": DOC, "lines": shown}                       # what draw_context stores after that fetch
+    assert shown == [] and logic.guides_of(held, DOC) and not logic.guides_on_screen(held, DOC)
+    assert not logic.guides_on_screen({"doc": DOC + 1, "lines": [[0, 0]]}, DOC) and not logic.guides_on_screen(None, DOC)
+    # so the next tick (or Draw on the same lot) fetches, and this time the footprints come
+    model, record, _, shown = redraw(model, record, fetch_with(frame), frame, shown)
+    assert len(shown) == 212 and logic.guides_on_screen({"doc": DOC, "lines": shown}, DOC)
+
+
+def test_every_state_of_the_context_has_one_definition():
+    """Review round 7, swept: on screen, belongs to this document, same frame, stored, the live layer kept, what is
+    replaced: each decided by one rhino_logic function, used everywhere."""
+    import inspect
+    assert not re.search(r'get\("doc"\)\s*==', RHINO)                         # never a document match of its own
+    for fn in ("def draw_context(", "def sync_context(", "def show_context(", "def draw_scene(", "def bounds("):
+        body = RHINO[RHINO.index(fn):].split("\ndef ", 1)[0]
+        assert "logic.guides_on_screen(" in body, fn
+    assert not re.search(r"loaded = \(STATE", RHINO)
+    assert "logic.guides_of(STATE.get(\"context_guides\"), doc.RuntimeSerialNumber)" in RHINO     # _clear_context
+    assert 'get("frame") ==' not in RHINO and 'get("frame") !=' not in RHINO and "same = " not in RHINO
+    src = inspect.getsource(logic)
+    rest = src.replace(inspect.getsource(logic.is_stored), "")
+    assert '"store") == "raw"' not in rest and '"store") != "raw"' not in rest and '["store"] == "raw"' not in rest
+    box = inspect.getsource(cb)
+    assert '["store"] == "raw"' not in box and '["store"] != "raw"' not in box and "is_stored(" in box
+    merge = inspect.getsource(logic.context_merge)
+    assert "live_kept = keeps_live(kept, old)" in merge and "same_frame(" in merge
+    assert "same_frame(drawn, frame)" in inspect.getsource(logic.context_step)
+    assert "logic.context_replaces(" not in RHINO and "logic.keeps_live(" not in RHINO   # only through the plan
+
+
 def test_around_another_lot_nothing_of_the_earlier_one_is_kept():
     frame = looked_up()["writes"]["frame"]
     model, record, _, _ = redraw([], None, fetch_with(frame), frame)
@@ -431,8 +470,8 @@ def test_around_another_lot_nothing_of_the_earlier_one_is_kept():
 def test_nothing_answering_leaves_the_saved_neighbourhood_alone_and_the_plugin_passes_the_sources():
     assert logic.context_replaces({"layers": {"parcels": {"source": "state_parcels", "status": "offline"}}}) == set()
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
-    assert "payload, record, kept = logic.context_merge(payload, old, frame, live_on_screen=on_screen)" in draw
-    assert "sources = logic.context_replaces(payload) if same else None" in draw
+    assert "plan = logic.context_merge(payload, old, frame," in draw
+    assert 'payload, record, sources, keep_guides = plan["payload"], plan["record"], plan["replace"], plan["keep_guides"]' in draw
     assert "_clear_context(doc, sources)" in draw and "json.dumps(record)" in draw
     assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc, sources)")
     clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _context_record(")]
@@ -448,7 +487,7 @@ def test_the_plugin_writes_only_context_objects_and_keeps_guides_on_screen():
     assert body.count("doc.Objects.Add") == 2                            # a dot or a curve, per context object
     assert 'STATE["context_guides"] = ' in body and "logic.context_guides(payload)" in body
     assert "doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(record))" in body
-    assert "payload, record, kept = logic.context_merge(payload, old, frame, live_on_screen=on_screen)" in body
+    assert "plan = logic.context_merge(payload, old, frame," in body
     assert "attrs.SetUserString(logic.CONTEXT_KEY, o[\"source\"])" in body
     assert "_lock_context(doc, True)" in body                            # locked: not selectable, can't be moved
     # live mode hears each add; the context changes nothing checked, so no re-check is set off by it
