@@ -43,7 +43,7 @@ disagreements:
     direction: gordium_less_cautious
     finding: >-
       2026-10-20, after the spec's C2 was corrected (the tax-map worst case applies to every lot-dependent item,
-      areas included; docs/design/rhino_ui_spec.md C2). The answer key followed the old rule that a lot area
+      areas included; docs/design/rhino_ui_spec.md C2). The hand-worked result followed the old rule that a lot area
       always waits for a survey. Worked by hand at the worst case: each lot length 2 ft short, 58 × 118 =
       6,844 sf ≥ 6,000 sf. Complies under every lot the tax map allows; Gordium says so and names 6,844 sf.
     question_for_architects: >-

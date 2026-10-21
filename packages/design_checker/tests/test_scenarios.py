@@ -1,4 +1,5 @@
-"""The architect's answer key (test_data/test_sites/new_york/ithaca_city/scenarios/), checked in code. The same
+"""The hand-worked scenarios (test_data/test_sites/new_york/ithaca_city/scenarios/; hand-worked by Claude before Gordium ran, not yet verified by an architect),
+checked in code. The same
 scenarios are drawn and checked in Rhino by apps/rhino_plugin/tests/scenarios_in_rhino.py."""
 import copy
 
@@ -35,7 +36,7 @@ def test_gordium_gives_the_answer_key_or_a_disagreement_already_investigated(pat
 
 @pytest.mark.parametrize("path", PATHS, ids=[p.stem for p in PATHS])
 def test_never_a_false_pass(path):
-    """Where the answer key says a rule does not comply, Gordium never says it complies: no exceptions."""
+    """Where the hand-worked result says a rule does not comply, Gordium never says it complies: no exceptions."""
     sc = scenarios.load(path)
     for step in scenarios.run(sc):
         for r in step["rows"]:
@@ -226,3 +227,19 @@ def test_the_comparison_fails_on_a_crash_a_missing_scenario_or_an_unlisted_disag
 def test_the_code_comparison_passes_with_only_investigated_disagreements(capsys):
     assert scenarios.main([]) == 0
     assert "OK: every scenario and step ran and agrees" in capsys.readouterr().out
+
+
+def test_the_scenarios_are_never_called_an_architects_answer_key():
+    """eval-integrity P1-3: the scenarios were worked by Claude, not an architect; every place that describes them
+    says so, and nothing calls them an architect's answer key until an architect has reviewed them."""
+    from rule_format.rulebook import REPO
+    folder = REPO / "test_data/test_sites/new_york/ithaca_city/scenarios"
+    readme = (folder / "README.md").read_text(encoding="utf-8")
+    assert "Not yet verified by an architect" in readme and "Claude" in readme
+    places = [folder / "README.md", *sorted(folder.glob("*.yaml")), REPO / "packages/design_checker/design_checker/scenarios.py",
+              REPO / "packages/design_checker/tests/test_scenarios.py", REPO / "apps/rhino_plugin/README.md",
+              REPO / "apps/rhino_plugin/tests/scenarios_in_rhino.py"]
+    for p in places:
+        text = p.read_text(encoding="utf-8").lower().split("def test_the_scenarios_are_never_called")[0]
+        for phrase in ("architect's answer key", "architects' answer key", "the answer key"):
+            assert phrase not in text, (p.name, phrase)

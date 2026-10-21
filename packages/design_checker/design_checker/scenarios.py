@@ -1,5 +1,5 @@
-"""The architect's answer key (test_data/test_sites/new_york/ithaca_city/scenarios/): each scenario built as a
-site, checked, and compared with the result worked out by hand. The expected results are never changed to match
+"""The hand-worked scenarios (test_data/test_sites/new_york/ithaca_city/scenarios/; hand-worked by Claude before Gordium ran, not yet verified by an architect):
+each scenario built as a site, checked, and compared with the result worked out by hand. The expected results are never changed to match
 Gordium; a disagreement is investigated (a code fix, or a question for the architects).
 
     python -m design_checker.scenarios               the table: scenario · expected · Gordium · match
