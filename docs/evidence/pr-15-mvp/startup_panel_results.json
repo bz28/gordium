@@ -1,0 +1,36 @@
+{
+ "claims": {
+  "the panel is registered": {
+   "ok": true,
+   "detail": null
+  },
+  "no checker started, no check ran": {
+   "ok": true,
+   "detail": {
+    "worker": "None",
+    "last": {}
+   }
+  },
+  "the model untouched": {
+   "ok": true,
+   "detail": {
+    "before": [
+     0,
+     false,
+     0
+    ],
+    "after": [
+     0,
+     false,
+     0
+    ]
+   }
+  },
+  "the reopened tab is filled, not empty": {
+   "ok": true,
+   "detail": "Gordium: run GordiumStart or GordiumCheck to check this model."
+  }
+ },
+ "shows": "Gordium: run GordiumStart or GordiumCheck to check this model.",
+ "ok": true
+}
