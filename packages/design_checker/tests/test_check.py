@@ -143,6 +143,17 @@ def test_rhino_decisions():
     assert "sleeping_rooms" not in update_counts({}, {"sleeping_rooms": None})       # skipped: never 0
     assert missing({"sleeping_rooms": 3}) == ["jurisdiction", "zone", "use", "street_line",
                                               "lot_surveyed"]   # no grade, no corner answer: checked, they wait
+
+
+    # R-3a note 7's facts (#20 round 3): whole numbers 0 or more, a yes/no; skipped stays unset, never 0 or no
+    got = update_counts({}, {"dwelling_units": 5, "rooms_let_for_profit": 0, "conversion": False})
+    assert got == {"dwelling_units": 5, "rooms_let_for_profit": 0, "conversion": False}
+    assert update_counts({"conversion": True}, {"dwelling_units": None, "conversion": None}) == {"conversion": True}
+    for bad in ({"dwelling_units": -1}, {"rooms_let_for_profit": 2.5}):
+        with pytest.raises(ValueError):
+            update_counts({}, bad)
+    assert missing({"sleeping_rooms": 3}) == ["jurisdiction", "zone", "use", "street_line", "corner_lot",
+                                              "grade_elevation", "ground_is_flat", "lot_surveyed"]
     assert with_suggestions({"stories": 3, "zone": None}, {"zone": "R-1b"}) == {"zone": "R-1b", "stories": 3}
     assert to_feet({"street_line": [[[0, 0], [12, 0]]], "grade_elevation": 24}, 1 / 12) == {
         "street_line": [[[0.0, 0.0], [1.0, 0.0]]], "grade_elevation": 2.0}
