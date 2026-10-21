@@ -223,3 +223,45 @@ def test_F9_the_spot_grade_reason_is_the_same_whichever_way_the_outlines_run():
         rows = harness.items_by_rule(harness.gordium(d, order))
         reasons.append([i["reason"] for r in ("R-1b.height", "R-1b.stories") for i in rows[r]])
     assert reasons[0] == reasons[1] == reasons[2], reasons
+
+
+# ---- F11 (P3) and F12 (P2), stress-tests 5e642c9: pinned as passing in #18 ---------------------------------------
+
+F11_CASE = ("sample_survey", [{"op": "rotate", "deg": 4.7},
+                              {"op": "add_roof", "kind": "roof", "axis": 1, "over": 1.0, "fascia": 1.0, "inset": 3.0,
+                               "rise": 8.0}])
+
+
+def test_F11_the_side_yard_rows_are_named_the_same_whichever_way_the_outlines_run():
+    """The surveyed sample lot's starting house rotated 4.7 degrees, a gable roof solid on it with eaves 1 ft past
+    the side walls: the side yard rows were "narrower"/"wider" one way and "East"/"West" the other. One building,
+    one way of naming its side yards."""
+    d = generate.build(*F11_CASE)[0]
+    names = [sorted(i["name"] for i in harness.items_by_rule(harness.gordium(d, order))["R-1b.side_yards"])
+             for order in ("as_drawn", "reversed", "shifted")]
+    assert names[0] == names[1] == names[2], names
+
+
+F12_CASE = ("sample_tax", [{"op": "move_floor", "k": 1, "dx": -3.0, "dy": -3.75},
+                           {"op": "add_roof", "kind": "mansard", "axis": 1, "over": 0.5, "fascia": 0.5, "inset": 3.5,
+                            "rise": 6.75}])
+
+
+def test_F12_every_side_yard_row_that_needs_review_says_why():
+    """Floor 2 moved on its own 3 ft west and 3'-9" toward the street, a mansard on the top floor 6 in. past its
+    walls, on the tax-map sample lot: "Side yard, East" needed review with no reason at all."""
+    rows = harness.items_by_rule(harness.gordium(generate.build(*F12_CASE)[0]))["R-1b.side_yards"]
+    assert all((i["reason"] or "").strip() for i in rows if i["status"] == REVIEW), [i["name"] for i in rows]
+
+
+def test_every_row_that_needs_review_says_why_over_a_stress_sample():
+    """The invariant behind F12: a needs-review row always says what it waits for, on any design. 60 random
+    designs from the stress generator (its lots and edits)."""
+    import random
+    rng = random.Random(1812)
+    for _ in range(60):
+        case = generate.random_case(rng)
+        d = generate.build(case["lot"], case["edits"])[0]
+        for i in harness.gordium(d)["view"]["items"]:
+            if i["status"] == REVIEW:
+                assert (i["reason"] or "").strip(), (case["lot"], case["edits"], i["name"])

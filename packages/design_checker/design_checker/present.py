@@ -597,10 +597,24 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     out = []
     for node, label in parts:
         st, why = status, reason
+        here = None                 # this side yard's own readings, when it was decided by them (below)
         expr = ast.unparse(node) if splits else check
         if splits and node is not None and status != REVIEW:      # each side yard on its own comparison
             holds = _holds(expr, values, row)
             st = COMPLIES if holds is True else FAILS if holds is False else REVIEW
+            m = measured.get(node.left.id) or {}
+            if st == REVIEW and m.get("value") is None and m.get("readings") and (status != COMPLIES or not why):
+                # this side has readings of its own while the rule was decided another way (the other side fails):
+                # the every-reading rule for this side alone, and always a reason (stress F12)
+                here = [dict(values, **{node.left.id: r["value"]}) for r in m["readings"]]
+                got = {_evaluate(expr, c) for c in here}
+                named = all(r.get("named") for r in m["readings"])
+                if named and got == {True}:
+                    st, why = COMPLIES, "Complies under every reading of the open question"
+                elif named and got == {False}:
+                    st, why = FAILS, "Does not comply under any reading of the open question"
+                else:
+                    why = _user_text(m.get("reason") or "the readings give different values")
         raised = []                 # the rule complies another way it allows (the §325-16C height bonus): its
         if node is not None and st == COMPLIES and not splits and _evaluate(ast.unparse(node), values) is False:
             way = _holding_way(check, values)          # numbers are that way's, and the yards it raises
@@ -624,7 +638,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             required = {COMPLIES: "permitted", FAILS: "not permitted"}.get(st, "—")
         if st == COMPLIES and not facts.get("lot_surveyed") and names & LOT_LENGTHS:
             # the tax-map worst case, under every reading research lists when the row was decided that way
-            worst = next((w for c in (row.get("Named") or {}).get("combos") or [values]
+            worst = next((w for c in here or (row.get("Named") or {}).get("combos") or [values]
                           for w in [_worst_case(expr, c, names)] if w is not None), None)
             if worst is not None:
                 bad = next((c for c in ([node] + raised if raised else _compares(expr))     # the way it uses
@@ -653,7 +667,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             # a value not measured at all that fails the rule whatever it is (check.fails_whatever) is taken where
             # the rule is truest, 0 (proven), so the lucky lines are judged at the rule's best too
             # under each reading the row was decided over (a fail under every reading, too: round 14)
-            drawn = [dict(c, **s) for c in _combos(row, values)
+            drawn = [dict(c, **s) for c in (here or _combos(row, values))
                      for s in ((row.get("Unknown") or {}).get("settings") or [{}])]
             ends = [e for d in drawn for e in [d] + ([dict(d, lot_area=tol["high"])] if tol and "lot_area" in names
                                                        else [])]

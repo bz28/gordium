@@ -1563,12 +1563,16 @@ def _lot_lines(lot: Lot, facts: dict):
             "candidates": candidates}
 
 
-def _side_order(found) -> tuple:
-    """The two side yards, the narrower first; two equal ones (within SAME) in a fixed order by where their lot line
-    is (west, then south, first), so which is "smaller" never depends on the order the outlines were drawn in."""
-    d, points = found
-    (x, y), _ = points
-    return (round(d / SAME) * SAME if SAME else d, round(x, 6), round(y, 6))
+def _two_sides(found: list) -> list:
+    """The two side yards (distance, points, ...), the narrower first. Two within TOL of each other (0.01 ft: the
+    same as everywhere else here) are equal, and go in a fixed order by where their lot line is (west, then south,
+    first): never by a difference of float noise, so which is "smaller" never depends on how the outlines were
+    drawn (stress F11: 8.822476 against 8.82251 ft swapped with the outline order)."""
+    a, b = (found * 2)[:2]
+    if abs(a[0] - b[0]) > TOL:
+        return [a, b] if a[0] < b[0] else [b, a]
+    key = lambda f: (round(f[1][0][0], 6), round(f[1][0][1], 6))    # noqa: E731  (the lot-line end of the reading)
+    return sorted([a, b], key=key)
 
 
 def _turn(a, b) -> float:
@@ -1682,7 +1686,7 @@ def _yards(out: dict, lot: Lot, lines: dict, facts: dict, main: dict, parts_of: 
                 # each side yard keeps the lot line it was measured to, so one reading (an eave) can be set
                 # against another (not an eave) to the same line, never to the other side's (review round 15)
                 found = [(*_distance(lot.line(g), s), list(g)) for g in r["sides"]]
-                (a, pa, la), (b, pb, lb) = sorted((found * 2)[:2], key=lambda f: _side_order(f[:2]))
+                (a, pa, la), (b, pb, lb) = _two_sides(found)
                 small.append((_both(words, w), a, {"points": pa, "named": n, "line": la}))
                 large.append((_both(words, w), b, {"points": pb, "named": n, "line": lb}))
                 d, p = _distance(lot.line(r["rear"]), s)

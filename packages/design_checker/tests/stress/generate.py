@@ -451,6 +451,22 @@ def _floor_wing(d, e):
                           "above": counted + 1}[e["typed"]]
 
 
+def _shift_floor(d, e):
+    """One floor block raised or lowered on its own (`dz`), the rest left where they are: a gap above or below it,
+    or an overlap with its neighbour. With `carry`, every block above it moves too (a story made taller or
+    shorter, the stack still touching where it was)."""
+    fl = _floors(d)
+    if not fl:
+        return False
+    k = e["k"] % len(fl)
+    moving = fl[k:] if e.get("carry") else [fl[k]]
+    if e.get("carry"):
+        _lift_above(d, fl[-1]["z1"], e["dz"])
+    for p in moving:
+        p["z0"] += e["dz"]
+        p["z1"] += e["dz"]
+
+
 def _grade(d, e):
     d["grade_is"] = e["value"]
 
@@ -478,7 +494,7 @@ def _offset_rect(c, o):
 OPS = {"move_house": _move_house, "move_floor": _move_floor, "stretch": _stretch, "raise_roof": _raise_roof,
        "add_floor": _add_floor, "delete_floor": _delete_floor, "add_accessory": _add_accessory,
        "add_porch": _add_porch, "add_roof": _add_roof, "add_dormer": _add_dormer, "rotate": _rotate,
-       "cross_line": _cross_line, "off_lot": _off_lot, "grade": _grade, "plain_wing": _plain_wing, "floor_wing": _floor_wing}
+       "cross_line": _cross_line, "off_lot": _off_lot, "grade": _grade, "plain_wing": _plain_wing, "floor_wing": _floor_wing, "shift_floor": _shift_floor}
 
 
 def apply(design: dict, edit: dict):
@@ -547,6 +563,9 @@ def random_edit(rng: random.Random) -> dict:
         n = rng.randint(1, 4)
         return {"op": op, "n": n, "face": rng.randrange(4), "depth": q(u(8, 16)), "h": 10.0,
                 "typed": rng.choice([None, rng.randint(1, n), max(1, n - 1), n + 1])}
+    if op == "shift_floor":
+        return {"op": op, "k": rng.randrange(4), "dz": rng.choice([q(u(-4, -0.25)), q(u(0.25, 6))]),
+                "carry": rng.random() < 0.3}
     if op == "floor_wing":
         k = rng.choice([1, 2])
         return {"op": op, "heights": [q(u(6, 25)) for _ in range(k)], "face": rng.randrange(4),
@@ -559,7 +578,7 @@ def random_edit(rng: random.Random) -> dict:
 
 WEIGHTS = {"move_house": 12, "move_floor": 8, "stretch": 12, "raise_roof": 8, "add_floor": 6, "delete_floor": 4,
            "add_accessory": 10, "add_porch": 8, "add_roof": 10, "add_dormer": 4, "rotate": 5, "cross_line": 3,
-           "off_lot": 2, "grade": 2, "plain_wing": 4, "floor_wing": 5}
+           "off_lot": 2, "grade": 2, "plain_wing": 4, "floor_wing": 5, "shift_floor": 6}
 
 
 def random_case(rng: random.Random) -> dict:
