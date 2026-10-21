@@ -11,7 +11,7 @@ import yaml
 
 from . import geometry as g
 
-ENDPOINTS = yaml.safe_load((Path(__file__).parent / "endpoints.yaml").read_text())
+ENDPOINTS = yaml.safe_load((Path(__file__).parent / "endpoints.yaml").read_text(encoding="utf-8"))
 SR = 2261                                   # NAD83 / New York Central, US survey feet
 M_TO_FT = 1 / 0.3048                        # elevations: metres to international feet
 

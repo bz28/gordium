@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 p = Path(__file__).parent / "953_danby_rd_town.json"
-d = json.loads(p.read_text())
+d = json.loads(p.read_text(encoding="utf-8"))
 point = None
 for a in d["answers"]:
     if a["source"] == "geocoder":
@@ -17,5 +17,5 @@ for a in d["answers"]:
             x, y = point["x"], point["y"]
             feat["geometry"] = {"rings": [[[x - 5, y - 5], [x + 5, y - 5], [x + 5, y + 5], [x - 5, y + 5], [x - 5, y - 5]]]}
 d["trimmed"] = "state_parcels outlines replaced by 10 ft squares at the address point (only SWIS is tested)"
-p.write_text(json.dumps(d, indent=1))
+p.write_text(json.dumps(d, indent=1), encoding="utf-8")
 print(p.stat().st_size)
