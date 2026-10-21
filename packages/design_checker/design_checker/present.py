@@ -752,6 +752,10 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
     _cautious_for_left_out(items, left_out, extras.get("touching"))
+    if facts.get("ground_assumed") == "flat":                 # on the rows the ground decides (MVP, Ben 2026-10-20)
+        for i in items:
+            if i.get("measure") in ("building_height", "stories"):
+                i["note"] = "assuming flat ground"
     if left_out:
         n = len(left_out)
         items.append({"id": "scope.not_included", "rule": None, "name": "Objects on the lot not included",
@@ -810,6 +814,8 @@ def grade_label(facts: dict) -> str:
     """Where the grade comes from, in words: "6 spot grades (finished)", "terrain (finished)", "flat at
     elevation 0'-0"", or "not set"."""
     kind = "existing" if facts.get("grade_is") == "existing" else "finished"
+    if facts.get("ground_assumed") == "flat":                 # the MVP's assumption, said wherever the grade is
+        return f"flat at the lot level, assumed (finished, elevation {feet_inches(facts.get('grade_elevation') or 0)})"
     points = facts.get("grade_points") or []
     if points:
         source = "terrain" if facts.get("grade_from") == "terrain" else f"{len(points)} spot grades"

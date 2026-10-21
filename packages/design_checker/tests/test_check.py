@@ -505,14 +505,14 @@ def test_i_confirm_is_unticked_on_a_new_project_and_draw_waits_for_it():
     assert logic.district_confirmed("check", confirmed, "R-1b")                 # this district, confirmed before
     assert not logic.district_confirmed("check", confirmed, "R-2a")             # changed since: confirm again
     assert not logic.district_confirmed("check", {}, "R-1b")
-    rows = {r["key"]: r for r in logic.box_rows(_box())}
+    rows = {r["key"]: r for r in logic.box_rows(_box(), flat=False)}
     assert rows["zone"]["tick"] == ("I confirm", False) and not logic.can_draw(_box())
     assert logic.can_draw(_box(district_confirmed=True))
 
 
 def test_the_box_has_only_the_approved_rows_with_their_sources():
     from design_checker import rhino_logic as logic
-    rows = logic.box_rows(_box())
+    rows = logic.box_rows(_box(), flat=False)
     assert [r["key"] for r in rows] == ["address", "zone", "use", "lot", "street", "ground"]
     by = {r["key"]: r for r in rows}
     assert by["address"]["actions"] == [("lookup", "Look up (coming soon)", False)]      # lookup: a later PR
@@ -541,11 +541,11 @@ def test_no_regrading_near_the_house_toggles_height_between_checked_and_needs_re
     from design_checker import rhino_logic as logic
     from design_checker.check import check
     for ticked, expected in ((True, {"complies", "does_not_comply"}), (False, {"needs_review"})):
-        ground = logic.ground_facts(_box(no_regrading=ticked), 0.0)
+        ground = logic.ground_facts(_box(no_regrading=ticked), 0.0, flat=False)
         got = check(MODEL, {**facts, **{k: v for k, v in ground.items() if v is not None}})
         height = {i["name"]: i for i in got["view"]["items"]}["Building height"]
         assert height["status"] in expected, (ticked, height["status"], height["reason"])
-    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0)["grade_is"] == "finished"   # set as finished
+    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0, flat=False)["grade_is"] == "finished"   # set as finished
 
 
 def test_every_fact_records_its_source_and_who_confirmed_it_and_the_panel_and_report_show_it(facts, tmp_path):
@@ -644,8 +644,8 @@ def test_an_unanswered_corner_lot_never_stops_the_check_it_makes_the_yards_wait(
 
 def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
     from design_checker import rhino_logic as logic
-    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0)["grade_from"] == "finished_spots"
-    assert logic.ground_facts(_box(ground={"kind": "spot"}), 0.0)["grade_from"] == "spot"
+    assert logic.ground_facts(_box(ground={"kind": "regrade"}), 0.0, flat=False)["grade_from"] == "finished_spots"
+    assert logic.ground_facts(_box(ground={"kind": "spot"}), 0.0, flat=False)["grade_from"] == "spot"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     check_facts = rhino.split("def check_facts(", 1)[1].split("\ndef ", 1)[0]
     assert "_ui_state" not in check_facts.split("elif", 1)[0]                   # the points from the facts alone
@@ -756,9 +756,12 @@ def test_a_design_buffer_is_read_or_draw_stays_off():
 def test_the_design_buffer_is_set_when_starting_not_in_edit_site():
     """Review round 7: Edit site… showed it, but changing it there redrew nothing."""
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'buffer = ef.TextBox() if mode == "start" else None' in ui
+    assert 'buffer = ef.TextBox() if mode == "start" and not logic.FLAT_GROUND else None' in ui
     guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8")
-    assert "Edit site… → Advanced" not in guide and "Advanced → Design buffer** in the GordiumStart box" in guide
+    from design_checker import rhino_logic as logic
+    # (hidden while the MVP assumes flat ground: the box has no Advanced then)
+    assert "Edit site… → Advanced" not in guide and (logic.FLAT_GROUND or
+                                                     "Advanced → Design buffer** in the GordiumStart box" in guide)
 
 
 def test_frame_site_frames_the_lot_and_house_not_the_whole_file():
@@ -998,3 +1001,33 @@ def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
     assert any(c.endswith(" to spare") for c in cells)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert 'logic.delta_text(i["margin"])' in ui
+
+
+
+def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
+    """MVP list (Ben): no Ground section in the start box; the ground is flat at the lot level and finished, so height
+    and stories are checked, each row saying "assuming flat ground", and the report states it. Switched off, the
+    Ground row and the spot-grade paths come back (a switch, not a deletion)."""
+    import openpyxl
+    from design_checker import rhino_logic as logic
+    from model_measurement.project import fact_problems
+    assert logic.FLAT_GROUND is True
+    assert "ground" not in {r["key"] for r in logic.box_rows({})}
+    assert "ground" in {r["key"] for r in logic.box_rows({}, flat=False)}                        # the switch
+    flat = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False}, 2.0)
+    assert flat == {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": 2.0, "grade_from": None,
+                    "ground_assumed": "flat"}
+    assert logic.ground_facts({"ground": {"kind": "spot"}}, 2.0, flat=False)["grade_from"] == "spot"
+    sent = {**facts, **{k: v for k, v in flat.items() if v is not None}}
+    assert fact_problems(sent) == []
+    got = check(MODEL, sent, tmp_path / "r.xlsx")
+    rows = {i["name"]: i for i in got["view"]["items"]}
+    for name in ("Building height", "Stories"):
+        assert rows[name]["status"] == present.COMPLIES and rows[name]["note"] == "assuming flat ground"
+        assert logic.row_name(rows[name]) == name + " · assuming flat ground"
+    assert "assumed" in got["view"]["header"]["grade"]
+    text = " ".join(str(c) for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
+                    for row in ws.iter_rows(values_only=True) for c in row if c)
+    assert "assuming flat ground" in text and "flat at the lot level, assumed" in text
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "logic.row_name(i)" in ui

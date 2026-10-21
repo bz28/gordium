@@ -48,6 +48,13 @@ def panel_header(head):
             "below": [head.get("draft") or "Draft rulebook", head.get("lot") or "", head.get("grade") or ""]}
 
 
+def row_name(item):
+    """A panel row's Item text: the name, "(site)" for a site fact, and its note ("Building height · assuming flat
+    ground")."""
+    name = item["name"] + (" (site)" if item.get("group") == "site" else "")
+    return name + (" · " + item["note"] if item.get("note") else "")
+
+
 def labels_on(ui_state):
     """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
     unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the
@@ -354,11 +361,11 @@ def ground_text(ground):
     return what + (", " + span if span else "") + " · " + ("picked by you" if kind == "terrain" else "placed by you")
 
 
-def box_rows(state):
+def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,
     lot_area, lot_surveyed, street_name, ground {kind, count, range}, no_regrading."""
-    return [
+    rows = [
         {"key": "address", "label": "Address", "text": state.get("address") or "",
          "actions": [("lookup", "Look up (coming soon)", False)], "tick": None},
         {"key": "zone", "label": "Zoning district",
@@ -375,6 +382,9 @@ def box_rows(state):
          "actions": [(k, t, True) for k, t in GROUND_CHOICES],
          "tick": ("No regrading near the house", bool(state.get("no_regrading")))},
     ]
+    if FLAT_GROUND if flat is None else flat:      # the MVP: no Ground row (flat ground is assumed)
+        rows = [r for r in rows if r["key"] != "ground"]
+    return rows
 
 
 def parse_feet(text):
@@ -457,14 +467,25 @@ def uncertain(state):
     return None
 
 
-def ground_facts(state, lot_level):
-    """The facts the checker gets from the Ground row (the checker never sees where a fact came from). Ground you
-    set as finished, or ticked "No regrading near the house", counts as the finished grade the code measures
-    from; ground only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
+# The MVP assumes flat ground (Ben, 2026-10-20): flat at the lot level and finished, so height and stories are
+# checked (with "assuming flat ground" on their rows and in the report). The spot-grade, terrain and regrade paths
+# stay, behind this one switch: set it to False to bring the Ground row back.
+FLAT_GROUND = True
+ASSUMED_FLAT = "assuming flat ground"
+
+
+def ground_facts(state, lot_level, flat=None):
+    """The facts the checker gets from the Ground row (the checker never sees where a fact came from). With the MVP's
+    flat-ground switch on: flat at the lot level, finished, and said to be assumed. Otherwise: ground you set as
+    finished, or ticked "No regrading near the house", counts as the finished grade the code measures from; ground
+    only as it is (existing), unticked, gives height and stories needs review (spec C5)."""
+    if FLAT_GROUND if flat is None else flat:
+        return {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": lot_level, "grade_from": None,
+                "ground_assumed": "flat"}
     ground = state.get("ground") or {}
     kind = ground.get("kind") or "flat"
     finished = kind == "regrade" or bool(state.get("no_regrading"))
-    out = {"grade_is": "finished" if finished else "existing"}
+    out = {"grade_is": "finished" if finished else "existing", "ground_assumed": None}
     if kind == "flat":
         out.update(ground_is_flat=True, grade_elevation=lot_level, grade_from=None)
     else:
@@ -494,7 +515,8 @@ def fact_sources(state, today, confirmed):
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
-        "ground": fact(ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
+        "ground": fact("flat at the lot level, " + ASSUMED_FLAT + " (finished grade)" if FLAT_GROUND else
+                       ground_text(ground) + (" · no regrading near the house" if state.get("no_regrading") else ""),
                        "as drawn" if kind == "flat" else ("picked by you" if kind == "terrain" else "placed by you")),
     }
 

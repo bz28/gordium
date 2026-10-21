@@ -15,7 +15,7 @@ from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
-               "grade_points", "grade_from", "grade_is"}
+               "grade_points", "grade_from", "grade_is", "ground_assumed"}
 
 
 def _number(x) -> bool:
@@ -46,6 +46,8 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("grade_points must be a list of spot grades, each [x, y, z] in feet")
     if facts.get("grade_from") not in (None, "spot", "terrain", "finished_spots"):
         problems.append("grade_from must be spot, terrain or finished_spots")
+    if facts.get("ground_assumed") not in (None, "flat"):
+        problems.append("ground_assumed must be flat (or not given)")
     if facts.get("grade_is") not in (None, "finished", "existing"):
         problems.append("grade_is must be finished or existing")
     street = facts.get("street_line")

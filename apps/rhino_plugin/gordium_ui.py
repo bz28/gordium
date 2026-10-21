@@ -263,7 +263,7 @@ def show(parts, view, stale=False, error=None, checking=False):
         for item_id in g["items"]:
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
-            values = [("" if stale_row else i["mark"] + "  ") + i["name"] + ("" if i["group"] != "site" else " (site)"),
+            values = [("" if stale_row else i["mark"] + "  ") + logic.row_name(i),
                       "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else "needs input"
                                              if i["id"].startswith("R-") else ""),
                       "" if stale_row else i["required"], "" if stale_row else logic.delta_text(i["margin"])]
@@ -508,7 +508,7 @@ def start_box(state, options, mode):
     reason = label(logic.draw_reason(state), size=11)
     draw.Enabled = logic.can_draw(state)
     # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
-    buffer = ef.TextBox() if mode == "start" else None
+    buffer = ef.TextBox() if mode == "start" and not logic.FLAT_GROUND else None   # (Advanced: off with flat ground)
 
     def confirmed(s, e):
         state["district_confirmed"] = bool(confirm.Checked)

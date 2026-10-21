@@ -217,7 +217,7 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
         for item_id in g["items"]:
             i = by_id[item_id]
             out.append([g["title"], i["mark"], i["name"], i["proposed"], i["required"], delta_text(i["margin"]),
-                        i.get("reason") or "", i["detail"].get("citation") or "",
+                        i.get("reason") or i.get("note") or "", i["detail"].get("citation") or "",
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
                                      (COLUMN_DELTA, 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)

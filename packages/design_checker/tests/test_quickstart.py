@@ -33,7 +33,9 @@ def house(tmp_path_factory):
     m.Objects.AddPolyline([r.Point3d(x, y, 0) for x, y in SAMPLE["lot"] + SAMPLE["lot"][:1]], attrs)
     path = tmp_path_factory.mktemp("qs") / "lot.3dm"
     m.Write(str(path), 8)
-    facts = {**SAMPLE["facts"], "address": SAMPLE["address"], "grade_is": "existing"}
+    # the MVP: flat ground assumed, at the lot level, finished (rhino_logic.ground_facts with FLAT_GROUND)
+    facts = {**SAMPLE["facts"], "address": SAMPLE["address"], "grade_is": "finished", "ground_is_flat": True,
+             "grade_elevation": 0.0, "ground_assumed": "flat"}
     return start(path, facts), facts
 
 
@@ -58,15 +60,16 @@ def test_the_starting_house_on_the_sample_lot(house):
     items = _check(got["floors"], facts)
     assert (items["Front yard"]["proposed"], items["Side yard, East"]["proposed"], items["Rear yard"]["proposed"]) \
         == ("27'-0\"", "12'-0\"", "31'-2\"")
-    assert items["Building height"]["proposed"] == "35'-0\"" and items["Building height"]["status"] == present.REVIEW
+    height = items["Building height"]
+    assert (height["proposed"], height["status"], height["margin"]) == ("35'-0\"", present.COMPLIES, "at limit")
+    assert height["note"] == "assuming flat ground" and items["Stories"]["status"] == present.COMPLIES
     assert items["Lot coverage"]["proposed"] == "23.8%" and items["Lot coverage"]["status"] == present.COMPLIES
 
 
-def test_1_no_regrading_ticked_height_and_stories_comply(house):
-    got, facts = house
-    items = _check(got["floors"], facts, grade_is="finished")
-    assert items["Building height"]["status"] == present.COMPLIES and items["Building height"]["margin"] == "at limit"
-    assert items["Stories"]["status"] == present.COMPLIES
+def test_1_on_screen_labels_are_off_until_ticked():
+    from design_checker import rhino_logic as logic
+    assert logic.labels_on({}) is False and logic.labels_on({"show_labels": True}) is True
+    assert logic.yard_label_shown(False, present.FAILS) and not logic.yard_label_shown(False, present.COMPLIES)
 
 
 def test_2_move_back_5_ft(house):
@@ -142,10 +145,20 @@ def test_10_the_height_bonus_done_right(house):
     assert items["Side yard, West"]["required"] == "13'-0\"" and items["Front yard"]["status"] == present.COMPLIES
 
 
-def test_11_spot_grades_then_the_house_moves(house):
+def test_11_delta_in_words(house):
+    from design_checker import rhino_logic as logic
+    got, facts = house
+    front = _check(_moved(got["floors"], dy=5), facts)["Front yard"]
+    rear = _check(_moved(got["floors"], dy=10), facts)["Rear yard"]
+    assert logic.delta_text(front["margin"]) == "+7'-0\" to spare"
+    assert logic.delta_text(rear["margin"]) == "−1'-4\" short"
+
+
+def test_spot_grades_when_flat_ground_is_switched_off(house):
+    """Not in the guide while the MVP assumes flat ground: the spot-grade path behind the switch still works."""
     got, facts = house
     spots = [[36.5, 26.5, 0.0], [36.5, 59.4, 0.0], [11.5, 43.0, 0.0], [61.5, 43.0, 0.0]]
-    grade = {k: v for k, v in facts.items() if k not in ("ground_is_flat", "grade_elevation")}
+    grade = {k: v for k, v in facts.items() if k not in ("ground_is_flat", "grade_elevation", "ground_assumed")}
     on = _check(got["floors"], grade, grade_is="finished", grade_from="finished_spots", grade_points=spots)
     assert on["Building height"]["status"] == present.COMPLIES
     off = _check(_moved(got["floors"], dy=5), grade, grade_is="finished", grade_from="finished_spots",

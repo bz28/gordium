@@ -232,10 +232,9 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
      survey…** to pick your surveyed outline instead.
    - **Street side**: the lot line on the street (highlighted). **Change…** to pick another. **Corner lot?**: answer
      it (one street or two). Gordium never guesses: until you answer, the yards need review.
-   - **Ground**: "flat at the lot level · as drawn", or your spot grades or terrain. **Place spot grades…**,
-     **Pick terrain…**, or **I'll regrade: set finished ground…**.
-   - **No regrading near the house**: tick it if the ground shown is the finished ground. Then height is checked.
-     Unticked, height and stories need review, because the code measures height from *finished* grade.
+   - **Ground**: for now Gordium assumes the ground is **flat at the lot level and finished** (no regrading), so
+     height and stories are checked; their rows say "assuming flat ground", and so does the report. (Spot grades,
+     terrain and regrading come back in a later release.)
    - An amber line appears when the box can't decide something itself, with what to do (for example "This lot
      faces two streets: pick the front").
 
@@ -246,8 +245,10 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
    - the largest legal starting building: three floor blocks (11'-8" floor to floor), one group, on the
      `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
      lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
-     on a survey it goes to the limits. **Advanced → Design buffer** in the GordiumStart box keeps it further back;
-   - top right, the **status box**: one line such as "? 6 need review · 4 comply · 2 not checked";
+     on a survey it goes to the limits;
+   - with **Show on-screen labels** ticked in the panel (off at first): each yard's and lot edge's label, and the
+     status box top right ("? 2 need review · 8 comply · 2 not checked"). Off, a failing yard's shortfall still
+     shows ("✕ Rear yard 21'-2", needs 22'-6"");
    - the **Gordium panel** (a floating window): every item, bad news first.
 5. **Make an edit.** Move, stretch or add solids as you normally would. Half a second after you stop, Gordium
    re-checks:
@@ -326,12 +327,12 @@ tax map is 2 ft off:
 - rear yard 31'-2" (needs 22'-6");
 - coverage 23.8% (the limit is 25%).
 
-Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading near the house**.
+Building height 35'-0" and Stories 3 comply, at the limit, each saying "assuming flat ground".
 
 ### Simple tests
 
-1. **Edit site… → tick No regrading near the house → Draw.** Building height 35'-0" complies, at limit;
-   Stories 3 complies.
+1. **Tick Show on-screen labels** in the panel: each yard's label and the status box appear in Top view. Untick it:
+   they go (the yard lines stay).
 2. **Move the house 5 ft back (away from the street).** Front yard 32'-0", rear yard 26'-2": both comply.
 3. **Move it 10 ft back instead.** Rear yard 21'-2" against 22'-6" required: **does not comply, −1'-4"**.
    A note appears bottom left, and only the strip of the house inside the rear yard turns red.
@@ -353,9 +354,8 @@ Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading
 10. **The height bonus, done right:** raise the roof 3 ft (38'-0"), move the house 3 ft back, and pull each side
     wall 3 ft in. Every yard is then 3 ft larger, plus the 2 ft the tax map needs. Building height complies
     against 38'-6"; the Front yard row shows 28'-0" required, +2'-0".
-11. **Spot grades, then move the house:** Edit site… → I'll regrade: set finished ground…, click one point at each
-    wall, Draw. Height is measured from them. Then move the house 5 ft back: height and stories need review,
-    "spot grades no longer at the building's walls".
+11. **Delta in words:** after test 2 the Front yard row reads "+7'-0" to spare"; after test 3 the Rear yard row
+    reads "−1'-4" short" (the same in the report).
 12. **Corner lot:** Edit site… → Corner lot? Yes: two streets. The yards need review (which yard is the front is
     an open question for a corner lot).
 13. **A survey:** with a surveyed lot, a new starting house goes exactly to the limits: 53'-0" × 30'-11", with
