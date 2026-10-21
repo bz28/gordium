@@ -23,7 +23,7 @@
    "ok": true,
    "detail": {
     "error": "the Gordium checker gave no answer in 3 s, so it was restarted (see gordium_worker.log in the temp folder)",
-    "seconds": 3.03
+    "seconds": 3.02
    }
   },
   "2 the silent checker was stopped": {
@@ -55,6 +55,36 @@
      "EndOpenDocument": 0
     }
    }
+  },
+  "6 a reload that keeps the state: one copy's handlers attached (baseline + 1)": {
+   "ok": true,
+   "detail": {
+    "baseline": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    },
+    "after": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    }
+   }
+  },
+  "6 the old drawing is off; the new one is on and registered": {
+   "ok": true,
+   "detail": null
+  },
+  "6 an edit is noticed by the new copy's live hook": {
+   "ok": true,
+   "detail": null
+  },
+  "6 and re-checked": {
+   "ok": true,
+   "detail": [
+    "12'-0\"",
+    "11'-0\""
+   ]
   }
  },
  "baseline": {
@@ -76,6 +106,11 @@
   "Idle": 0,
   "AddRhinoObject": 0,
   "EndOpenDocument": 0
+ },
+ "kept_state_reload": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
  },
  "ok": true,
  "left_attached": {
