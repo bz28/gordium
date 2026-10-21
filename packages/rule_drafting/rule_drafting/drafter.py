@@ -634,6 +634,36 @@ def chart_gaps(unit: dict, result: dict, cells: dict, columns: list[str]) -> lis
     return out
 
 
+EXCEPT = re.compile(r"\bexcept (?:an? )?((?:[a-z]+-family|[a-z]+)(?: or (?:[a-z]+-family|[a-z]+))*) dwellings?\b", re.IGNORECASE)
+
+
+def exemption_gaps(unit: dict, result: dict) -> list[dict]:
+    """A law piece that exempts named dwellings ("any permitted use ..., except a one-family or two-family dwelling")
+    reaches every other use. A drafted rule that leaves out more uses (`use not in [...]` listing multiple_family or
+    fraternity_sorority_group_house) must have them covered by another of the unit's rules in that district, or each
+    goes to a person: otherwise a group house on an R-3a lot next to R-1 escapes §325-19E's 150% lot area unchecked."""
+    m = EXCEPT.search(" ".join(unit.get("text", "").split()))
+    if not m or not unit.get("piece"):
+        return []
+    prefixes = tuple(w.lower().replace("-", "_") for w in re.split(r"\s+or\s+", m.group(1)))   # one_family, two_family
+    out = []
+    for district, rules in result["rules"].items():
+        named = " ".join(f"{r.get('applies_when', '')} {r.get('check', '')}" for r in rules)
+        for r in rules:
+            when = str(r.get("applies_when", ""))
+            if "use not in" not in when:
+                continue
+            listed = re.findall(r'"([a-z0-9_]+)"', when.split("use not in", 1)[1].split("]", 1)[0])
+            extra = [u for u in listed if not u.startswith(prefixes)]
+            for u in extra:
+                if re.search(rf'use == "{u}"|use in \[[^\]]*"{u}"', named):
+                    continue                    # another rule of the unit covers it in this district
+                out.append({"rule": r["id"], "why": f"the law exempts only {m.group(1)} dwellings, but this rule leaves "
+                                                   f"out {u} and no other rule of {unit['id']} covers it here: a person "
+                                                   "checks it"})
+    return out
+
+
 def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dict, last_attempt: bool = False) -> dict:
     """The answer kept for a unit, with everything it leaves for a person: on the last attempt its rejected
     templates, and always whatever the unit's input states that no saved rule covers (the law lines its
@@ -642,7 +672,8 @@ def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dic
     if last_attempt:
         result["unresolved"] += result["rejected"]
         result["problems"] = []
-    result["unresolved"] += requirement_gaps(unit, result) + chart_gaps(unit, result, cells, columns) + [
+    result["unresolved"] += requirement_gaps(unit, result) + chart_gaps(unit, result, cells, columns) + \
+        exemption_gaps(unit, result) + [
         {"rule": unit["id"], "why": f"it points to {pid}, which was left out of the drafter's input for length "
                                     "(a person checks it)"} for pid in context.get("dropped", [])]
     return result
@@ -656,7 +687,13 @@ def send(client, **request):
     else a plain request."""
     if request["max_tokens"] > STREAM_ABOVE:
         with client.messages.stream(**request) as stream:
-            return stream.get_final_message()
+            message = stream.get_final_message()
+            if getattr(message, "_request_id", None) is None:      # the final message doesn't carry it; the stream does
+                try:
+                    message._request_id = getattr(stream, "request_id", None)
+                except (AttributeError, TypeError, ValueError):
+                    object.__setattr__(message, "_request_id", getattr(stream, "request_id", None))
+            return message
     return client.messages.create(**request)
 
 

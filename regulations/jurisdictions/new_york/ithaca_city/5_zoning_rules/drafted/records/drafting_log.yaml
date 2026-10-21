@@ -1533,6 +1533,18 @@ units:
     - rule: 325-19E.325_19e_r3_abut_r1_min_lot_area_footnoted_rows
       why: 'general.325_19e_r3_abut_r1_min_lot_area_footnoted_rows: general.325_19e_r3_abut_r1_min_lot_area_footnoted_rows:
         ''title'' is a one-line label of at most 80 characters; the rule is its quotes and check'
+    - rule: R-3a.325_19e_r3_abut_r1_min_lot_area_other_use
+      why: 'the law exempts only one-family or two-family dwellings, but this rule leaves out multiple_family and
+        no other rule of 325-19E covers it here: a person checks it'
+    - rule: R-3a.325_19e_r3_abut_r1_min_lot_area_other_use
+      why: 'the law exempts only one-family or two-family dwellings, but this rule leaves out fraternity_sorority_group_house
+        and no other rule of 325-19E covers it here: a person checks it'
+    - rule: R-3b.325_19e_r3_abut_r1_min_lot_area_other_use
+      why: 'the law exempts only one-family or two-family dwellings, but this rule leaves out multiple_family and
+        no other rule of 325-19E covers it here: a person checks it'
+    - rule: R-3b.325_19e_r3_abut_r1_min_lot_area_other_use
+      why: 'the law exempts only one-family or two-family dwellings, but this rule leaves out fraternity_sorority_group_house
+        and no other rule of 325-19E covers it here: a person checks it'
     problems: []
   325-20D:
     rules:

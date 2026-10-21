@@ -39,9 +39,9 @@ class FakeClient:
     def stream(self, **request):
         """A large output limit is streamed (the SDK refuses it plain); the final message is the same answer."""
         self.streamed = getattr(self, "streamed", 0) + 1
-        message = self.create(**request)
-        import contextlib
-        return contextlib.nullcontext(SimpleNamespace(get_final_message=lambda: message))
+        message = SimpleNamespace(**{k: v for k, v in vars(self.create(**request)).items() if k != "_request_id"})
+        import contextlib                    # as the SDK: the final message has no _request_id; the stream has one
+        return contextlib.nullcontext(SimpleNamespace(get_final_message=lambda: message, request_id="req_stream"))
 
     def count_tokens(self, model, messages, system="", output_config=None):
         self.counted = getattr(self, "counted", []) + [{"system": system, "output_config": output_config}]
@@ -987,6 +987,7 @@ def test_a_unit_with_its_own_output_limit_is_called_reserved_and_estimated_with_
     _, records = run(inputs, client, uid="325-19E", budget=budget)
     assert client.requests[0]["max_tokens"] == 32000 and records[0]["max_tokens"] == 32000
     assert getattr(client, "streamed", 0) == 1          # streamed: the SDK refused it as a plain request (stage 1 re-run)
+    assert records[0]["request_id"] == "req_stream"     # review round 1: the streamed records had request_id None
     small = worst_case(10, drafter.SETTINGS, drafter.PRICES)
     assert reserved[0] > small + (32000 - 8192) * 10 / 1e6 * 0.99          # the output part at 32,000 tokens
     e = cli.estimate(inputs, [unit(inputs, "325-19E")], drafter.SETTINGS["model"])
@@ -1053,3 +1054,19 @@ def test_the_saved_325_19e_rules_apply_only_in_r3a_and_r3b(inputs):
     # and nothing is listed for a person in a district the law doesn't reach (R-2c's 3-number cells, RU's footnote)
     log = cli.load(inputs.records / "drafting_log.yaml")["units"]["325-19E"]
     assert all(g["rule"].split(".")[0] in ("R-3a", "R-3b", "325-19E") for g in log["unresolved"]), log["unresolved"]
+
+
+def test_a_use_the_law_doesnt_exempt_is_never_left_out_unchecked(inputs):
+    """Review round 1: §325-19E exempts only "a one-family or two-family dwelling", but the drafted 150% lot-area rule
+    for "Other use" also leaves out multiple family and group houses, and their own template was rejected: a group
+    house on an R-3a lot next to R-1 had no §325-19E check and no entry for a person. Code now lists each such use."""
+    u = unit(inputs, "325-19E")
+    rule = {"id": "R-3a.x", "applies_when": 'abuts_r1_district and use not in ["one_family_detached", "two_family", '
+                                            '"fraternity_sorority_group_house"]', "check": "lot_area >= 9000"}
+    gaps = drafter.exemption_gaps(u, {"rules": {"R-3a": [rule]}})
+    assert [g["rule"] for g in gaps] == ["R-3a.x"] and "fraternity_sorority_group_house" in gaps[0]["why"]
+    covered = {"id": "R-3a.y", "applies_when": 'use == "fraternity_sorority_group_house"', "check": "lot_area >= 37500"}
+    assert drafter.exemption_gaps(u, {"rules": {"R-3a": [rule, covered]}}) == []
+    log = cli.load(inputs.records / "drafting_log.yaml")["units"]["325-19E"]
+    assert any(g["rule"] == "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use" and "fraternity_sorority_group_house"
+               in g["why"] for g in log["unresolved"])
