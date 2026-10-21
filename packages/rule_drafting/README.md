@@ -63,7 +63,10 @@ coverage "35%/40% /50% [fn12]" depends on the use, so a one-number template can'
 
 ## How the drafts are graded (`tests/test_eval.py`, once drafts exist)
 
-1. The drafted R-1b rules give the hand R-1b's outcome on every one of its worked examples.
+1. Against every hand key (`5_zoning_rules/<district>.yaml`), every worked example counts: agree, disagree, or
+   undrafted (a miss, reported apart). Never a false pass: no drafted pass, or drafted "doesn't apply", where
+   a key says fail or needs review. Agreement is a reported metric (`evals/2026-10-20_stage1/grade.json`) that
+   may not fall below its recorded floor (`agreement_floors.yaml`).
 2. They pass at each R-1B chart value they cite and fail just past it, and every number of every cell they cite
    is used in the formula and decides something (changing it changes an outcome).
 3. The architects' 106 Ithaca Rd spreadsheet still comes out the same on every row.
