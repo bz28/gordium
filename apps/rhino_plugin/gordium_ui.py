@@ -15,11 +15,14 @@ import Rhino.Geometry as rg
 
 import rhino_logic as logic  # plain Python, tested in CI (on the path: gordium_rhino puts it there first)
 
-PANEL_WIDTH = 480          # wide enough that Proposed, Required and Margin never truncate (D4)
+PANEL_WIDTH = 400          # as wide as Rhino's own panels (architect's review, 2026-10-21: at 540-620 the dock took
+                           # nearly half the screen); every cell wraps to two lines, so nothing is cut off at 380
 # fixed widths that fit the panel: an Item column sized to its text pushed the numbers out of sight (seen in the
 # Rhino window capture). The mark is the first thing in the Item cell: on the Mac the tree's expand arrows take
 # the first column, which hid a column of its own.
-COLUMNS = [("Item", 230), ("Proposed", 84), ("Required", 72), ("Margin", 62)]
+COLUMNS = [("Item", 120), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 86)]   # Item takes the rest
+ROW_HEIGHT = 36            # two lines: a long item name or "at least 1'-0" short" wraps instead of being cut off
+CELL_FONT_SIZE = 12
 STALE_SECONDS = 0.3        # results older than an edit by this long are shown as out of date (F7, H1)
 
 
@@ -27,6 +30,14 @@ STALE_SECONDS = 0.3        # results older than an edit by this long are shown a
 
 def _dark(color):
     return 0.299 * color.R + 0.587 * color.G + 0.114 * color.B < 128
+
+
+# the model's highlights (rhino_logic.highlight): saturated and distinct on light and dark viewports alike, one
+# transparency; red also gets a solid edge so a 1 ft strip still reads at plan scale (architect's review, 2026-10-21)
+HIGHLIGHT = {"red": System.Drawing.Color.FromArgb(215, 38, 61), "amber": System.Drawing.Color.FromArgb(242, 169, 0)}
+HIGHLIGHT_TRANSPARENCY = 0.45
+HIGHLIGHT_EDGE = {"red": 3, "amber": 1}
+HIGHLIGHT_PROUD_FT = 0.02    # each block stands this far proud of the house, so their shared faces never fight
 
 
 def viewport_dark():
@@ -72,9 +83,12 @@ def label(text, color=None, bold=False, size=None, wrap=True, width=None):
     lab = ef.Label()
     lab.Text = text or ""
     lab.Wrap = ef.WrapMode.Word if wrap else getattr(ef.WrapMode, "None")
-    if width is not None:               # wraps at this width, left aligned (an unbounded label ran off the panel)
+    lab.TextAlignment = ef.TextAlignment.Left
+    if DOCKED:                          # Rhino's docked panel on the Mac turns it right aligned as it lays the label
+        lab.LoadComplete += logic.guard(  # out (read back in Rhino, 2026-10-21): left again once it is in place
+            lambda sender, e: setattr(sender, "TextAlignment", ef.TextAlignment.Left), "align a label")
+    if width is not None:               # wraps at this width (an unbounded label ran off the floating window)
         lab.Width = width
-        lab.TextAlignment = ef.TextAlignment.Left
     if color is not None:
         lab.TextColor = color
     if bold or size:
@@ -82,9 +96,14 @@ def label(text, color=None, bold=False, size=None, wrap=True, width=None):
     return lab
 
 
+DOCKED = False                  # set by make_panel: docked, labels stretch with Rhino's panel (no fixed width)
+
+
+
 def _wide(text, color=None, bold=False, size=None):
-    """A label the width of the panel's content, wrapping there."""
-    return label(text, color, bold, size, True, PANEL_WIDTH - 48)
+    """A label the width of the panel's content, wrapping there: the floating window's fixed width, or docked,
+    whatever width the architect gives Rhino's panel."""
+    return label(text, color, bold, size, True, None if DOCKED else PANEL_WIDTH - 48)
 
 
 def button(text, action, enabled=True):
@@ -108,44 +127,158 @@ def row(*controls):
 
 # ---- the panel (D1–D10) ------------------------------------------------------------------------------------
 
-def make_panel(actions):
+def open_dock(panel_id):
+    """Show the Gordium panel. Not showing yet: docked as a tab beside Rhino's Layers panel (Rhino's own first
+    choice is a small floating window, which cut the list off); showing already (where the architect put it, or
+    where Rhino restored it): left there."""
+    if Rhino.UI.Panels.IsPanelVisible(panel_id):
+        return
+    for beside in (Rhino.UI.PanelIds.ObjectProperties, Rhino.UI.PanelIds.Layers):
+        if Rhino.UI.Panels.IsPanelVisible(beside):   # only beside one that is showing (else Rhino does nothing)
+            Rhino.UI.Panels.OpenPanelAsSibling(panel_id, beside)
+            if Rhino.UI.Panels.IsPanelVisible(panel_id):
+                Rhino.UI.Panels.OpenPanel(panel_id)  # its tab the selected one
+                return
+    Rhino.UI.Panels.OpenPanel(panel_id)          # no dock showing: Rhino floats it (fit_floating sizes it)
+
+
+def fit_floating(host, doc_window):
+    """When Rhino shows the panel floating (no dock showing to join: Rhino makes a 200 x 200 window), that window
+    is made the panel's size and placed at the right edge of the document's window. Docked, nothing changes.
+    Returns "docked", "floating" or None (not shown yet)."""
+    window = host.ParentWindow
+    if window is None:
+        return None
+    if doc_window is not None and (window.Equals(doc_window) or window.Title == doc_window.Title):
+        return "docked"
+    window.ClientSize = ed.Size(PANEL_WIDTH, 720)
+    if doc_window is not None:
+        b = doc_window.Bounds
+        window.Location = ed.Point(b.X + b.Width - PANEL_WIDTH - 24, b.Y + 60)
+    return "floating"
+
+
+class DockHost:
+    """The docked panel, seen as the floating window was (Visible, Show, Close, BringToFront), so the rest of the
+    plugin needs no change: Rhino's own panel system shows it, docked or floating as the architect leaves it."""
+
+    def __init__(self, panel_id, host):
+        self.panel_id, self.host = panel_id, host
+
+    @property
+    def Visible(self):
+        return bool(Rhino.UI.Panels.IsPanelVisible(self.panel_id))
+
+    def Show(self):
+        open_dock(self.panel_id)
+
+    BringToFront = Show
+
+    def Close(self):
+        self.host.Content = None             # no stale rows if Rhino shows the tab again before a check
+        Rhino.UI.Panels.ClosePanel(self.panel_id)
+
+
+def cell_text(text, width, bold=False):
+    """A cell's text laid out as the panel draws it: wrapped by word at the cell's width (Eto FormattedText)."""
+    ft = ed.FormattedText()
+    ft.Text = text or ""
+    ft.Font = ed.Font(ed.SystemFont.Bold if bold else ed.SystemFont.Default, CELL_FONT_SIZE)
+    ft.MaximumSize = ed.SizeF(max(width - 4, 1), 1000)
+    ft.Wrap = ed.FormattedTextWrapMode.Word
+    return ft
+
+
+_FITTED = {}
+
+
+def fit_text(text, width, bold=False):
+    """The text as a cell of `width` shows it: whole when it fits in two lines; otherwise cut at the end of the
+    second line with "…" (the selected item's detail, below the list, always has it whole). Cached: cells paint
+    often."""
+    key = (text, int(width), bold)
+    if key not in _FITTED:
+        limit = ROW_HEIGHT - 2
+        if cell_text(text, width, bold).Measure().Height <= limit:
+            _FITTED[key] = text
+        else:
+            low, high = 0, len(text)
+            while low < high:                # the longest start that fits with its "…"
+                mid = (low + high + 1) // 2
+                if cell_text(text[:mid].rstrip() + "…", width, bold).Measure().Height <= limit:
+                    low = mid
+                else:
+                    high = mid - 1
+            _FITTED[key] = text[:low].rstrip() + "…"
+    return _FITTED[key]
+
+
+def _cell_style(parts, item, index):
+    """(bold, colour) of one cell: a group header bold; an item that doesn't comply or needs review in its status
+    colour (the item with its mark, proposed, Delta); everything else the system's text colour."""
+    tag = item.Tag if item is not None else None
+    if isinstance(tag, str) and tag.startswith("group:"):
+        return True, None
+    found = parts["by_id"].get(tag)
+    if found is not None and not parts.get("stale") and found["status"] in ("does_not_comply", "needs_review") \
+            and index in (0, 1, 3):
+        return False, eto_status_color(found["status"])
+    return False, None
+
+
+def _cell_painter(parts, index):
+    def paint(sender, e):
+        item = e.Item
+        if item is None:
+            return
+        bold, colour = _cell_style(parts, item, index)
+        if getattr(e, "IsSelected", False):
+            colour = ed.SystemColors.HighlightText
+        r = e.ClipRectangle
+        text = str(item.Values[index] or "")
+        shown = fit_text(text, r.Width, bold)
+        parts.setdefault("painted", {})[(index, item.Tag is not None and str(item.Tag).startswith("group:"))] = r.Width
+        ft = cell_text(shown, r.Width, bold)
+        ft.ForegroundBrush = ed.SolidBrush(colour or ed.SystemColors.ControlText)
+        e.Graphics.DrawText(ft, ed.PointF(r.X + 2, r.Y + 2))
+    return paint
+
+
+def make_panel(actions, host=None):
     """The Gordium panel: a header, the item list (a TreeGridView), a splitter, the selected item's detail, and a
     footer. `actions` maps names to functions (zoom, report, envelope, edit_site, survey, grade, enter, add,
-    retry). Returns a dict of its parts; `show(panel, …)` fills it."""
-    form = ef.Form()
-    form.Title = "Gordium · Zoning"
-    form.ClientSize = ed.Size(PANEL_WIDTH, 720)
-    form.MinimumSize = ed.Size(PANEL_WIDTH, 420)
-    form.Resizable = True
-    form.Topmost = True
+    retry). In `host` (a DockHost: a docked Rhino panel), or a floating window when there is none. Returns a dict
+    of its parts; `show(panel, …)` fills it."""
+    global DOCKED
+    DOCKED = host is not None
+    if host is not None:
+        form = host
+    else:
+        form = ef.Form()
+        form.Title = "Gordium · Zoning"
+        form.ClientSize = ed.Size(PANEL_WIDTH, 720)
+        form.MinimumSize = ed.Size(PANEL_WIDTH, 420)
+        form.Resizable = True
+        form.Topmost = True
     tree = ef.TreeGridView()
     tree.ShowHeader = True
     tree.AllowMultipleSelection = False
+    tree.RowHeight = ROW_HEIGHT
+    parts = {"form": form, "tree": tree, "actions": actions, "by_id": {}, "expanded": {}, "selected": None,
+             "header": ef.DynamicLayout(), "detail": ef.DynamicLayout(), "view": None}
     for i, (title, width) in enumerate(COLUMNS):
         col = ef.GridColumn()
         col.HeaderText = title
-        col.DataCell = ef.TextBoxCell(i)
+        cell = ef.DrawableCell()             # drawn here, wrapping to two lines (a text cell is one line, cut off)
+        cell.Paint += logic.guard(_cell_painter(parts, i), "draw a panel row")
+        col.DataCell = cell
         col.Editable = False
         col.Sortable = False
         col.Width = width
         col.AutoSize = False                # never sized to its text: every column stays in view (D4)
+        col.Expand = i == 0                 # the item takes whatever width the panel has
         col.Resizable = True
         tree.Columns.Add(col)
-    parts = {"form": form, "tree": tree, "actions": actions, "by_id": {}, "expanded": {}, "selected": None,
-             "header": ef.DynamicLayout(), "detail": ef.DynamicLayout(), "view": None}
-
-    def formatting(sender, e):
-        item = e.Item
-        tag = item.Tag if item is not None else None
-        if isinstance(tag, str) and tag.startswith("group:"):
-            e.Font = ed.Font(ed.SystemFont.Bold, 12)
-            return
-        found = parts["by_id"].get(tag)
-        if found is not None and not parts.get("stale") and found["status"] in ("does_not_comply", "needs_review"):
-            if e.Column.DisplayIndex in (0, 1, 3):          # the item (with its mark), proposed, margin
-                e.ForegroundColor = eto_status_color(found["status"])
-
-    tree.CellFormatting += logic.guard(formatting, "color a panel row")
 
     def selected(sender, e):
         item = tree.SelectedItem
@@ -173,11 +306,17 @@ def make_panel(actions):
     layout.Spacing = ed.Size(6, 6)
     layout.Add(parts["header"])
     layout.Add(split, yscale=True)
-    layout.Add(row(_envelope_box(actions), _massing_box(actions)))
+    layout.Add(row(_envelope_box(actions)))         # each tick its own row: side by side they ran off at 380
+    layout.Add(row(_massing_box(actions)))
+    layout.Add(row(_labels_box(actions, parts)))     # its own row: beside the others it ran off the panel
     parts["message"] = label("", size=11)          # what the last button did, or why it couldn't (never silent)
     layout.Add(parts["message"])
     layout.Add(footer)
-    form.Content = layout
+    if host is not None:
+        host.host.Content = layout
+        host.host.MinimumSize = ed.Size(PANEL_WIDTH, 420)
+    else:
+        form.Content = layout
     return parts
 
 
@@ -195,6 +334,33 @@ def _massing_box(actions):
     box.Checked = False
     box.CheckedChanged += logic.guard(lambda s, e: actions["massing"](bool(box.Checked)), "hide the starting house")
     return box
+
+
+def _labels_box(actions, parts):
+    """Show on-screen labels: each yard's and lot edge's label and the status box, off by default; remembered in the
+    document."""
+    box = ef.CheckBox()
+    box.Text = "Show on-screen labels"
+    box.Checked = False
+
+    def changed(s, e):
+        if not parts.get("_setting_labels"):        # set from the document (set_labels_tick): not a change
+            actions["labels"](bool(box.Checked))
+
+    box.CheckedChanged += logic.guard(changed, "show or hide the on-screen labels")
+    parts["labels_box"] = box
+    return box
+
+
+def set_labels_tick(parts, shown):
+    """The tick as this document has it."""
+    if parts is None or parts.get("labels_box") is None:
+        return
+    parts["_setting_labels"] = True
+    try:
+        parts["labels_box"].Checked = bool(shown)
+    finally:
+        parts["_setting_labels"] = False
 
 
 def _envelope_box(actions):
@@ -236,10 +402,10 @@ def show(parts, view, stale=False, error=None, checking=False):
         for item_id in g["items"]:
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
-            values = [("" if stale_row else i["mark"] + "  ") + i["name"] + ("" if i["group"] != "site" else " (site)"),
+            values = [("" if stale_row else i["mark"] + "  ") + logic.row_name(i),
                       "—" if stale_row else (i["proposed"] if i["status"] != "not_checked" else "needs input"
                                              if i["id"].startswith("R-") else ""),
-                      "" if stale_row else i["required"], "" if stale_row else i["margin"]]
+                      "" if stale_row else i["required"], "" if stale_row else (i.get("delta") or "")]
             ci = ef.TreeGridItem()
             ci.Tag = item_id
             ci.Values = System.Array[System.Object](values)
@@ -267,8 +433,8 @@ def _header(parts, view, error, out_of_date):
     h.Clear()
     a = parts["actions"]
     head = (view or {}).get("header") or {}
-    h.AddRow(_wide(head.get("place") or "Gordium", bold=True, size=13))
-    h.AddRow(_wide(head.get("code") or "", size=11))
+    lines = logic.panel_header(head)
+    h.AddRow(_wide(lines["above"][0], bold=True, size=13))
     if error is not None:
         h.AddRow(row(_wide("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15),
                      button("Retry", a["retry"])))
@@ -277,9 +443,10 @@ def _header(parts, view, error, out_of_date):
         h.AddRow(_wide("Checking…", bold=True, size=15))
     else:
         h.AddRow(_wide((view or {}).get("summary") or "No check yet", bold=True, size=15))
-    h.AddRow(_wide(head.get("draft") or "Draft rulebook", eto_status_color("needs_review"), size=11))
-    h.AddRow(_wide(head.get("lot") or "", size=11))          # each fact on its line, its buttons below it: a
-    h.AddRow(_wide(head.get("grade") or "", size=11))        # button beside a long line ran off the panel
+    draft, lot, grade = lines["below"]
+    h.AddRow(_wide(draft, eto_status_color("needs_review"), size=11))
+    h.AddRow(_wide(lot, size=11))          # each fact on its line, its buttons below it: a
+    h.AddRow(_wide(grade, size=11))        # button beside a long line ran off the panel
     buttons = [button("Edit site…", a["edit_site"])]
     if "Pick survey lot lines…" in (head.get("actions") or []):
         buttons.append(button("Pick survey lot lines…", a["survey"]))
@@ -310,12 +477,12 @@ def show_detail(parts):
     det = i["detail"]
     words = {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
              "not_checked": "Not checked"}[i["status"]]
-    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + i["name"] + " · " + words,
+    d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.row_name(i) + " · " + words,   # the row's own name, whole
                    eto_status_color(i["status"]), bold=True, size=13))
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))
     for text in (det.get("line"), i.get("reason"), i.get("hint") if i.get("hint") not in ("Add to check…",) else None,
-                 det.get("at_limit"), det.get("calc"), det.get("scope")):
+                 det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
         if text:
             d.AddRow(_wide(text, size=12))
     if i["id"].startswith("R-") and i["status"] == "not_checked":
@@ -407,12 +574,9 @@ def _open(url):
         return False
 
 
-def legend():
-    Rhino.UI.Dialogs.ShowMessage(
-        "✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
-        "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
-        "measured distance. Red marks only the part of the building inside a required yard or above the height "
-        "limit. Values are measured to 1/8 in. and never rounded toward compliance.", "Gordium · legend")
+def legend(code=None):
+    """The legend, with which version of the law was checked (rhino_logic.legend_text)."""
+    Rhino.UI.Dialogs.ShowMessage(logic.legend_text(code), "Gordium · legend")
 
 
 # ---- the start box (A1–A13) ----------------------------------------------------------------------------------
@@ -483,7 +647,7 @@ def start_box(state, options, mode):
     reason = label(logic.draw_reason(state), size=11)
     draw.Enabled = logic.can_draw(state)
     # the design buffer sizes the starting house, so it is set when starting (GordiumStart), not in Edit site…
-    buffer = ef.TextBox() if mode == "start" else None
+    buffer = ef.TextBox() if mode == "start" and not logic.FLAT_GROUND else None   # (Advanced: off with flat ground)
 
     def confirmed(s, e):
         state["district_confirmed"] = bool(confirm.Checked)
@@ -549,10 +713,14 @@ def start_box(state, options, mode):
 
 # ---- the viewport (F, G) -------------------------------------------------------------------------------------
 
+def text_box_size(lines, size=13):
+    """The (width, height) draw_text_box gives these lines, in screen pixels."""
+    return max(len(t) for t in lines) * (size * 0.6) + 22, len(lines) * (size + 9) + 10
+
+
 def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=None):
     """Lines of text on a backing box (F3), at screen point x, y (top left)."""
-    width = max(len(t) for t in lines) * (size * 0.6) + 22
-    height = len(lines) * (size + 9) + 10
+    width, height = text_box_size(lines, size)
     d.Draw2dRectangle(System.Drawing.Rectangle(int(x), int(y), int(width), int(height)),
                       border or color, 1, backing(dark))
     for k, t in enumerate(lines):
@@ -561,18 +729,53 @@ def draw_text_box(d, lines, color, x, y, dark, size=13, bold_first=True, border=
     return width, height
 
 
-def label_at(d, viewport, point, text, color, dark, size=12, taken=None):
-    """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
-    already drawn this frame), it moves off any it would cover and a short leader points back to its spot."""
+LINE_H = 16                              # one line of a plan label (11-12 px text), in screen pixels
+
+
+def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=()):
+    """Where label_at puts a label (screen pixels): (left, top, width, the top it wanted, its lines). Takes its spot
+    in `taken`. With `along` (its dimension line) it goes beside that line, off every line in `obstacles` (the
+    other dimensions, the lot's and the house's edges) and every label already placed, on screen; when no spot
+    beside the line is clear for it on one line, on two (its name, then its numbers: logic.label_lines). Its height
+    is 4 + LINE_H per line. The in-Rhino checks measure this very placement."""
     p = viewport.WorldToClient(point)
     width = len(text) * size * 0.58 + 14
-    top = p.Y - 10 if taken is None else logic.clear_spot(taken, p.X - width / 2, p.Y - 10, width, 20)
-    if abs(top - (p.Y - 10)) > 1:
-        d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(p.X, top + (20 if top < p.Y else 0)),
+    if along is not None:
+        a, b = (viewport.WorldToClient(q) for q in along)
+        own = ((a.X, a.Y), (b.X, b.Y))
+        view = (viewport.Size.Width, viewport.Size.Height)
+        left, top, clear = logic.place_label(own, width, 20, obstacles, taken or [], view=view)
+        rows = [text]
+        two = logic.label_lines(text)
+        if not clear and len(two) == 2:          # too long to sit clear beside its line: name, then numbers
+            w2 = max(len(t) for t in two) * size * 0.58 + 14
+            l2, t2, c2 = logic.place_label(own, w2, 4 + 2 * LINE_H, obstacles, taken or [], view=view)
+            if c2:
+                left, top, width, clear, rows = l2, t2, w2, True, two
+        h = 4 + LINE_H * len(rows)
+        if not clear:                        # nowhere clear: at least off its own line and the other labels
+            top = logic.clear_spot(taken if taken is not None else [], left, top, width, h, (own,))
+        elif taken is not None:
+            taken.append((left, top, width, h))
+        return left, top, width, top, rows
+    left, want = p.X - width / 2, p.Y - 10
+    top = want if taken is None else logic.clear_spot(taken, left, want, width, 20)
+    return left, top, width, want, [text]
+
+
+def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=()):
+    """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
+    already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
+    `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must)."""
+    p = viewport.WorldToClient(point)
+    left, top, width, want, rows = label_box(viewport, point, text, size, taken, along, obstacles)
+    h = 4 + LINE_H * len(rows)
+    if abs(top - want) > 1:
+        d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(p.X, top + (h if top < p.Y else 0)),
                      color, 1)
-    d.Draw2dRectangle(System.Drawing.Rectangle(int(p.X - width / 2), int(top), int(width), 20), color, 1,
-                      backing(dark))
-    d.Draw2dText(text, color, rg.Point2d(p.X - width / 2 + 7, top + 3), False, size)
+    d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), int(h)), color, 1, backing(dark))
+    for k, row in enumerate(rows):
+        d.Draw2dText(row, color, rg.Point2d(left + 7, top + 3 + LINE_H * k), False, size)
 
 
 def _signed(bits):
