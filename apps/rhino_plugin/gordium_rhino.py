@@ -889,12 +889,19 @@ def set_grade():
     edit_facts()
 
 
-def enter_rooms():
-    """Enter bedrooms and parking spaces…: two prompts (Enter skips; never a default)."""
+def enter_rooms(needs):
+    """A row's "Enter …" button: one prompt for each fact it waits for (`needs`, the row's own list), a whole number
+    or yes / no. Enter skips one: it stays unset (never 0 or no), so its rule keeps waiting."""
     doc = Rhino.RhinoDoc.ActiveDoc
+    if not needs:
+        say("This row isn't waiting for anything you can enter.")
+        return
     try:
         facts = current_facts(doc)
-        answers = {k: _count(p) for k, p in (("sleeping_rooms", "Bedrooms"), ("parking_spaces", "Off-street parking spaces"))}
+        answers = {}
+        for key in needs:
+            prompt, kind, _ = logic.STATED_FACTS[key]
+            answers[key] = _count(prompt) if kind == "count" else _ask_yes_no_or_skip(prompt)
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
@@ -1615,6 +1622,18 @@ def _count(prompt):
     return gi.Number() if got == Rhino.Input.GetResult.Number else None
 
 
+def _ask_yes_no_or_skip(prompt):
+    """Yes (True) or No (False), or None when the prompt is skipped (never a default; _yes_no keeps a current
+    answer instead)."""
+    go = Rhino.Input.Custom.GetOption()
+    go.SetCommandPrompt(prompt + " (Enter to skip)")
+    yes, no = go.AddOption("Yes"), go.AddOption("No")
+    go.AcceptNothing(True)
+    got = go.Get()
+    _go_on(got)
+    return (go.OptionIndex() == yes) if got == Rhino.Input.GetResult.Option else None
+
+
 def change_facts(doc, facts, options):
     """Every lot fact, one prompt each (Enter keeps what is there; Esc cancels the whole edit: None, nothing
     saved). Model points become feet."""
@@ -1862,7 +1881,7 @@ def run_check(doc, report=True):
                                   for r in result["rows"]],
                          "items": [{k: i.get(k) for k in ("id", "name", "status", "proposed", "required", "margin",
                                                           "delta", "approx", "colour", "note", "points", "reason",
-                                                          "group")}
+                                                          "group", "needs", "hint")}
                                    for i in view["items"]],
                          "header": head, "interior": [r["Rule id"] for r in result.get("interior", [])],
                          "encroach": len(o.encroach), "plan_encroach": len((result.get("plan") or {}).get("encroach") or []),
