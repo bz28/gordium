@@ -130,6 +130,17 @@ def owned_rules_approved(i: Inputs, log: dict, unit_id: str) -> bool:
     return False
 
 
+class _NoAliases(yaml.SafeDumper):
+    """Every saved mapping written out in full: a rulebook a person reads never says `*id001`."""
+
+    def ignore_aliases(self, data):
+        return True
+
+
+def _dump(data, **kw) -> str:
+    return yaml.dump(data, Dumper=_NoAliases, sort_keys=False, allow_unicode=True, width=110, **kw)
+
+
 def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
     """Replace this unit's earlier drafts with the new ones, and record what happened."""
     old = set(log["units"].get(unit_id, {}).get("rules", []))
@@ -152,7 +163,7 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
     for district, book in books.items():
         path = rulebook_path(i, district)
         if book["rules"]:
-            path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
+            path.write_text(_dump(book), encoding="utf-8")
         elif path.exists():
             path.unlink()
     entry = {"rules": new_ids, "unresolved": result.get("unresolved", []), "problems": result.get("problems", [])}
@@ -180,7 +191,7 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
         proposed_path.write_text(yaml.safe_dump(proposed, sort_keys=True, allow_unicode=True, width=110), encoding="utf-8")
     elif proposed_path.exists():
         proposed_path.unlink()
-    (i.records / "drafting_log.yaml").write_text(yaml.safe_dump(log, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
+    (i.records / "drafting_log.yaml").write_text(_dump(log), encoding="utf-8")
 
 
 def _formula_names(rule: dict) -> set[str]:
@@ -338,7 +349,7 @@ def cmd_draft(args) -> int:
         if saved:                               # however the run ended: what's saved is cited in the review list
             refresh_review_list(i)
     log["complete"] = all(u["id"] in log["units"] for u in i.units())
-    (i.records / "drafting_log.yaml").write_text(yaml.safe_dump(log, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
+    (i.records / "drafting_log.yaml").write_text(_dump(log), encoding="utf-8")
     return 0
 
 
@@ -440,7 +451,7 @@ def cmd_replay(args) -> int:
               + (f", FAILED: {result['failed']}" if result.get("failed") else ""))
     refresh_review_list(i)
     log["complete"] = all(u in log["units"] for u in units)
-    (i.records / "drafting_log.yaml").write_text(yaml.safe_dump(log, sort_keys=False, allow_unicode=True, width=110),
+    (i.records / "drafting_log.yaml").write_text(_dump(log),
                                                  encoding="utf-8")
     return 0
 

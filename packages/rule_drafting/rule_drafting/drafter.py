@@ -492,7 +492,7 @@ def unclear_catch_all(rule: dict, law: dict, ctx: Context) -> dict:
            for u, genus in dwelling_kind_uses(law, ctx.uses).items() if u not in named and f'"{u}"' not in already]
     if not add:
         return rule
-    rows = [dict(r) for x in add for r in ctx.use_rows.get(x["when"].split('"')[1], [])[:1]]   # each use's own row
+    rows = [copy_of(r) for x in add for r in ctx.use_rows.get(x["when"].split('"')[1], [])[:1]]   # each use's own row
     return rule | {"review_when": list(rule.get("review_when") or []) + add,
                    "sources": list(rule.get("sources") or []) + [r for r in rows if r not in rule.get("sources", [])]}
 
@@ -577,7 +577,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                     continue                    # the law doesn't apply in this district: nothing to fill or list
                 rule, why = fill_template(t, column, cells, sources, drafted_by)
                 if why is None:
-                    rule = unclear_exemption(unclear_catch_all(rule, law, ctx), unit, law, ctx)
+                    rule, why = unclear_exemption(unclear_catch_all(rule, law, ctx), unit, law, ctx)
                 if why is None and unread:
                     why = (f"the text names districts its scope can't be read from ({', '.join(unread)}): a person "
                            "decides which districts this rule applies to")
@@ -611,6 +611,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
         else:                                   # it works nowhere: the drafter is told why and tries again
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}",
                                     "why": "; ".join(f"{g['rule']}: {g['why']}" for g in gaps[:3])})
+    out["unresolved"] += exemption_gaps(unit, out, ctx)
     out["problems"] = [f"{r['rule']}: {r['why']}" for r in out["rejected"]]
     if scope is not None:
         out["scope"] = sorted(scope)
@@ -652,67 +653,153 @@ def chart_gaps(unit: dict, result: dict, cells: dict, columns: list[str]) -> lis
 
 
 EXCEPT = re.compile(r"\bexcept (?:an? )?((?:[a-z]+-family|[a-z]+)(?: or (?:[a-z]+-family|[a-z]+))*) dwellings?\b", re.IGNORECASE)
+# A definition that makes a use a building of several dwellings: "A building containing three or more one-family
+# dwellings" (ONE-FAMILY ATTACHED DWELLING), or one calling it a multiple dwelling.
+SEVERAL_DWELLINGS = re.compile(r"\b(?:two|three|four|five|six|\d+)\s+or\s+more\b[^.]{0,40}\bdwellings\b|\bmultiple\s+dwelling",
+                               re.IGNORECASE)
 
 
-SEVERAL_DWELLINGS = re.compile(r"\b(?:two|three|four|five|six|\d+)\s+or\s+more\b[^.]{0,40}\bdwellings\b", re.IGNORECASE)
+def _words(text: str) -> tuple[str, ...]:
+    """A name's words, for matching a use's chart row label to a defined term ("One-family dwelling, semi-detached"
+    and "ONE-FAMILY SEMIDETACHED DWELLING" are the same words)."""
+    clean = re.sub(r"\[fn[\d,]+\]|[•]", " ", text)
+    return tuple(sorted(re.sub(r"[^a-z]", "", w) for w in re.split(r"[\s,]+", clean.lower()) if re.sub(r"[^a-z]", "", w)))
 
 
-def unclear_exemption(rule: dict, unit: dict, law: dict, ctx: Context) -> dict:
-    """A law piece exempting "a one-family or two-family dwelling" doesn't plainly exempt a use the law defines as a
+def use_label(use: str, ctx: Context) -> str:
+    """A use's own chart row label, from the row uses.yaml cites ("One-family dwelling, attached [fn4] - - ..."):
+    the words before the marks."""
+    quote = (ctx.use_rows.get(use) or [{}])[0].get("quote", "")
+    return re.split(r"\s+(?:[•\-]|SP)(?:\s|\[|$)", quote, maxsplit=1)[0].strip()
+
+
+def use_definition(use: str, law: dict, ctx: Context) -> tuple[str, dict] | None:
+    """(the defined term, its source) for a use whose chart label is a term §325-3B defines, found by the term's own
+    words (ONE-FAMILY ATTACHED DWELLING for "One-family dwelling, attached"), never guessed from the use id."""
+    label = _words(use_label(use, ctx))
+    for pid, piece in law.get("pieces", {}).items():
+        if pid.startswith("325-3B:") and label and _words(piece.get("title", "")) == label:
+            text = " ".join(piece_text(law["rows"], piece).split())
+            sentence = re.split(r"(?<=[.;])\s", text, maxsplit=1)[0]
+            source, _why = find_quote(sentence, piece, law["file"], ctx)
+            return piece["title"], (source or {}) | {"definition": text}
+    return None
+
+
+def _exempted(rule: dict, use: str, ctx: Context) -> bool:
+    """The rule's condition leaves this use out, whatever its form (`use not in [...]`, `use != "..."`, a tuple, a
+    positive `use in [...]`): judged by the evaluator, never by reading the formula's text."""
+    from rule_format.rulebook import outcome
+    if not rule.get("applies_when"):
+        return False
+    return outcome({"kind": "flag", "applies_when": rule["applies_when"]}, {"use": use}, ctx.allowed()) == "not_applicable"
+
+
+def _drop_from_exemption(when: str, use: str) -> str | None:
+    """applies_when with `use` taken out of the exemption, rewritten on its parsed form: a `use not in [...]` (or
+    (...)) list loses the use, a `use != "use"` test is dropped from the `and`. None for any other form: a person
+    decides. The text is rebuilt from the parsed pieces, never edited as a string."""
+    import ast
+    from rule_format import formula
+    tree = formula.parse(when).body
+    parts = tree.values if isinstance(tree, ast.BoolOp) and isinstance(tree.op, ast.And) else [tree]
+    out, changed = [], False
+    for part in parts:
+        src = ast.get_source_segment(when, part)
+        if isinstance(part, ast.Compare) and len(part.ops) == 1 and isinstance(part.left, ast.Name) \
+                and part.left.id == "use":
+            op, right = part.ops[0], part.comparators[0]
+            if isinstance(op, ast.NotIn) and isinstance(right, (ast.List, ast.Tuple)):
+                kept = [e.value for e in right.elts if isinstance(e, ast.Constant)]
+                if use in kept:
+                    kept = [u for u in kept if u != use]
+                    changed = True
+                    if kept:
+                        out.append("use not in [" + ", ".join(f'"{u}"' for u in kept) + "]")
+                    continue
+            if isinstance(op, ast.NotEq) and isinstance(right, ast.Constant) and right.value == use:
+                changed = True
+                continue
+        out.append(f"({src})" if isinstance(part, ast.BoolOp) else src)
+    return " and ".join(out) if changed else None
+
+
+def unclear_exemption(rule: dict, unit: dict, law: dict, ctx: Context) -> tuple[dict | None, str | None]:
+    """A law piece exempting "a one-family or two-family dwelling" doesn't plainly exempt a use §325-3B defines as a
     building of several dwellings (ONE-FAMILY ATTACHED DWELLING: "A building containing three or more one-family
-    dwellings"; §325-3B also calls a building of three or more dwelling units a multiple dwelling). A drafted rule
-    that leaves such a use out (`use not in [...]`) says "doesn't apply" where the law is unclear: a false pass. So
-    the use is taken out of the exemption and sent to review: the rule applies to it and needs review."""
+    dwellings"). A drafted rule that leaves such a use out says "doesn't apply" where the law is unclear: a false
+    pass. Judged by meaning (the evaluator says the rule doesn't apply to the use); the use is taken out of the
+    exemption on the formula's parsed form and sent to review, citing the definition. A form that can't be rewritten
+    sends the rule to a person: (None, why). Returns (rule, None) otherwise."""
     m = EXCEPT.search(" ".join(unit.get("text", "").split()))
-    when = str(rule.get("applies_when", ""))
-    if not (m and unit.get("piece") and "use not in" in when):
-        return rule
-    head, rest = when.split("use not in", 1)
-    listed_text, tail = rest.split("]", 1)
-    listed = re.findall(r'"([a-z0-9_]+)"', listed_text)
-    unclear = []
-    for use in listed:
-        piece = next((pid for pid in law.get("pieces", {}) if pid.startswith("325-3B:") and pid[7:].startswith(use)), None)
-        if piece and SEVERAL_DWELLINGS.search(" ".join(piece_text(law["rows"], law["pieces"][piece]).split())):
-            unclear.append((use, piece))
-    if not unclear:
-        return rule
-    keep = [u for u in listed if u not in {u for u, _ in unclear}]
-    names = ", ".join(f'"{u}"' for u in keep)
-    review = list(rule.get("review_when") or []) + [
-        {"when": f'use == "{u}"', "reason": f"Whether the exemption ({m.group(0)!r}) covers this use is unclear: §{pid} "
-                                            "defines it as a building of several dwellings. A person decides."}
-        for u, pid in unclear]
-    rows = [dict(r) for u, _ in unclear for r in ctx.use_rows.get(u, [])[:1]]        # each use's own chart row
-    return rule | {"applies_when": f"{head}use not in [{names}]{tail}" if keep else (head.rstrip(" and") + tail).strip(),
-                   "review_when": review,
-                   "sources": list(rule.get("sources") or []) + [r for r in rows if r not in (rule.get("sources") or [])],
-                   "examples": [ex for ex in rule.get("examples") or [] if ex["given"].get("use") not in {u for u, _ in unclear}]}
+    if not (m and unit.get("piece")):
+        return rule, None
+    family = [w.lower() for w in re.split(r"\s+or\s+", m.group(1))]          # one-family, two-family
+    review, sources, gone = list(rule.get("review_when") or []), list(rule.get("sources") or []), set()
+    for use in sorted(ctx.uses):
+        label = use_label(use, ctx).lower()
+        if not (any(f in label for f in family) and _exempted(rule, use, ctx)):
+            continue
+        found = use_definition(use, law, ctx)
+        if not (found and SEVERAL_DWELLINGS.search(found[1]["definition"])):
+            continue
+        term, source = found
+        when = _drop_from_exemption(rule["applies_when"], use)
+        candidate = rule | {"applies_when": when} if when else None
+        if candidate is None or _exempted(candidate, use, ctx):
+            return None, (f"the exemption ({m.group(0)!r}) may not cover {use}, which §325-3B defines as a building of "
+                          "several dwellings, and this rule's condition can't be rewritten by code: a person decides")
+        quote = " ".join(source["definition"].split())[:160]
+        review.append({"when": f'use == "{use}"',
+                       "reason": f"§325-3B defines {term} as {quote!r}: whether the exemption ({m.group(0)!r}) covers it "
+                                 "is unclear. A person decides."})
+        cite = {k: v for k, v in source.items() if k != "definition"}
+        sources += [copy_of(r) for r in ctx.use_rows.get(use, [])[:1] + ([cite] if cite.get("quote") else [])
+                    if r not in sources]
+        rule, gone = candidate, gone | {use}
+    if not gone:
+        return rule, None
+    return rule | {"review_when": review, "sources": sources,
+                   "examples": [ex for ex in rule.get("examples") or [] if ex["given"].get("use") not in gone]}, None
 
 
-def exemption_gaps(unit: dict, result: dict) -> list[dict]:
+def copy_of(source: dict) -> dict:
+    """A source's own copy, so a saved rulebook never shares one object between rules (no YAML aliases)."""
+    import copy
+    return copy.deepcopy(source)
+
+
+def _checked_names(rule: dict) -> set[str]:
+    """The measures a rule's check is about: the measure each comparison tests (lot_area in `lot_area >= 9000`,
+    building_area in `building_area <= 0.75 * 0.35 * lot_area`, where lot_area is only an input), selectors aside."""
+    import ast
+    from rule_format import formula
+    if not rule.get("check"):
+        return set()
+    return {n.left.id for n in ast.walk(formula.parse(rule["check"]))
+            if isinstance(n, ast.Compare) and isinstance(n.left, ast.Name)} - {"use", "district"}
+
+
+def exemption_gaps(unit: dict, result: dict, ctx: Context) -> list[dict]:
     """A law piece that exempts named dwellings ("any permitted use ..., except a one-family or two-family dwelling")
-    reaches every other use. A drafted rule that leaves out more uses (`use not in [...]` listing multiple_family or
-    fraternity_sorority_group_house) must have them covered by another of the unit's rules in that district, or each
-    goes to a person: otherwise a group house on an R-3a lot next to R-1 escapes §325-19E's 150% lot area unchecked."""
+    reaches every other use. A use a drafted rule leaves out (judged by the evaluator: the rule doesn't apply to it)
+    that the exemption doesn't name, and that no other rule of the unit applies to in that district, goes to a
+    person: otherwise a group house on an R-3a lot next to R-1 escapes §325-19E's 150% lot area unchecked."""
     m = EXCEPT.search(" ".join(unit.get("text", "").split()))
     if not m or not unit.get("piece"):
         return []
-    prefixes = tuple(w.lower().replace("-", "_") for w in re.split(r"\s+or\s+", m.group(1)))   # one_family, two_family
+    family = [w.lower() for w in re.split(r"\s+or\s+", m.group(1))]
     out = []
     for district, rules in result["rules"].items():
-        named = " ".join(f"{r.get('applies_when', '')} {r.get('check', '')}" for r in rules)
         for r in rules:
-            when = str(r.get("applies_when", ""))
-            if "use not in" not in when:
-                continue
-            listed = re.findall(r'"([a-z0-9_]+)"', when.split("use not in", 1)[1].split("]", 1)[0])
-            extra = [u for u in listed if not u.startswith(prefixes)]
-            for u in extra:
-                if re.search(rf'use == "{u}"|use in \[[^\]]*"{u}"', named):
-                    continue                    # another rule of the unit covers it in this district
+            for use in sorted(ctx.uses):
+                if any(f in use_label(use, ctx).lower() for f in family) or not _exempted(r, use, ctx):
+                    continue
+                measured = _checked_names(r)
+                if any(not _exempted(o, use, ctx) and _checked_names(o) & measured for o in rules if o is not r):
+                    continue                    # another rule of the unit checks the same thing for it here
                 out.append({"rule": r["id"], "why": f"the law exempts only {m.group(1)} dwellings, but this rule leaves "
-                                                   f"out {u} and no other rule of {unit['id']} covers it here: a person "
+                                                   f"out {use} and no other rule of {unit['id']} covers it here: a person "
                                                    "checks it"})
     return out
 
@@ -726,7 +813,7 @@ def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dic
         result["unresolved"] += result["rejected"]
         result["problems"] = []
     result["unresolved"] += requirement_gaps(unit, result) + chart_gaps(unit, result, cells, columns) + \
-        exemption_gaps(unit, result) + [
+        [
         {"rule": unit["id"], "why": f"it points to {pid}, which was left out of the drafter's input for length "
                                     "(a person checks it)"} for pid in context.get("dropped", [])] + [
         {"rule": unit["id"], "why": f"it points to {pid}, which matches no section of the law, so the drafter never "

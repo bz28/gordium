@@ -2006,10 +2006,18 @@ rules:
     quote: Dormitory - - - - - • - • •[fn5]
   - file: zoning_charts_2026-04.pdf
     page: 2
-    lines: &id001
+    lines:
     - 12
     - 12
     quote: One-family dwelling, attached [fn4]
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 11
+    - 13
+    quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
+      which shares one or more party walls or structural elements with the other one-family dwellings in the building
+      and which has direct exterior access from the ground floor.
   examples:
   - given:
       abuts_r1_district: true
@@ -2064,8 +2072,9 @@ rules:
       facilities and ser'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
       a dwelling row, with its notes) is unclear: a person decides.'
   - when: use == "one_family_attached"
-    reason: 'Whether the exemption (''except a one-family or two-family dwelling'') covers this use is unclear:
-      §325-3B:one_family_attached_dwelling defines it as a building of several dwellings. A person decides.'
+    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
+      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
+      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
 - id: R-3b.325_19e_r3_abut_r1_max_height
   kind: rule
   topic: dimensions
@@ -2083,8 +2092,18 @@ rules:
       R-1b District.
   - file: zoning_charts_2026-04.pdf
     page: 2
-    lines: *id001
+    lines:
+    - 12
+    - 12
     quote: One-family dwelling, attached [fn4]
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 11
+    - 13
+    quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
+      which shares one or more party walls or structural elements with the other one-family dwellings in the building
+      and which has direct exterior access from the ground floor.
   examples:
   - given:
       abuts_r1_district: true
@@ -2121,8 +2140,9 @@ rules:
   status: draft
   review_when:
   - when: use == "one_family_attached"
-    reason: 'Whether the exemption (''except a one-family or two-family dwelling'') covers this use is unclear:
-      §325-3B:one_family_attached_dwelling defines it as a building of several dwellings. A person decides.'
+    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
+      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
+      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
 - id: R-3b.325_19e_r3_abut_r1_max_coverage
   kind: rule
   topic: dimensions
@@ -2146,8 +2166,18 @@ rules:
       District.
   - file: zoning_charts_2026-04.pdf
     page: 2
-    lines: *id001
+    lines:
+    - 12
+    - 12
     quote: One-family dwelling, attached [fn4]
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 11
+    - 13
+    quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
+      which shares one or more party walls or structural elements with the other one-family dwellings in the building
+      and which has direct exterior access from the ground floor.
   examples:
   - given:
       abuts_r1_district: true
@@ -2181,8 +2211,9 @@ rules:
   status: draft
   review_when:
   - when: use == "one_family_attached"
-    reason: 'Whether the exemption (''except a one-family or two-family dwelling'') covers this use is unclear:
-      §325-3B:one_family_attached_dwelling defines it as a building of several dwellings. A person decides.'
+    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
+      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
+      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
 - id: R-3b.325_19e_r3_abut_r1_side_yard_larger
   kind: rule
   topic: dimensions
@@ -2206,8 +2237,18 @@ rules:
       Regulations Chart for the R-3a or R-3b District if the side or rear yard abuts land in the R-1a or R-1b District.
   - file: zoning_charts_2026-04.pdf
     page: 2
-    lines: *id001
+    lines:
+    - 12
+    - 12
     quote: One-family dwelling, attached [fn4]
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 11
+    - 13
+    quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
+      which shares one or more party walls or structural elements with the other one-family dwellings in the building
+      and which has direct exterior access from the ground floor.
   examples:
   - given:
       abuts_r1_district: true
@@ -2245,8 +2286,9 @@ rules:
   status: draft
   review_when:
   - when: use == "one_family_attached"
-    reason: 'Whether the exemption (''except a one-family or two-family dwelling'') covers this use is unclear:
-      §325-3B:one_family_attached_dwelling defines it as a building of several dwellings. A person decides.'
+    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
+      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
+      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
 - id: R-3b.325_19e_r3_abut_r1_side_yard_smaller
   kind: rule
   topic: dimensions
@@ -2270,8 +2312,18 @@ rules:
       Regulations Chart for the R-3a or R-3b District if the side or rear yard abuts land in the R-1a or R-1b District.
   - file: zoning_charts_2026-04.pdf
     page: 2
-    lines: *id001
+    lines:
+    - 12
+    - 12
     quote: One-family dwelling, attached [fn4]
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 11
+    - 13
+    quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
+      which shares one or more party walls or structural elements with the other one-family dwellings in the building
+      and which has direct exterior access from the ground floor.
   examples:
   - given:
       abuts_r1_district: true
@@ -2309,8 +2361,9 @@ rules:
   status: draft
   review_when:
   - when: use == "one_family_attached"
-    reason: 'Whether the exemption (''except a one-family or two-family dwelling'') covers this use is unclear:
-      §325-3B:one_family_attached_dwelling defines it as a building of several dwellings. A person decides.'
+    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
+      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
+      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
 - id: R-3b.325_19e_r3_abut_r1_rear_yard
   kind: flag
   topic: dimensions
@@ -2327,8 +2380,18 @@ rules:
       Regulations Chart for the R-3a or R-3b District if the side or rear yard abuts land in the R-1a or R-1b District.
   - file: zoning_charts_2026-04.pdf
     page: 2
-    lines: *id001
+    lines:
+    - 12
+    - 12
     quote: One-family dwelling, attached [fn4]
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 11
+    - 13
+    quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
+      which shares one or more party walls or structural elements with the other one-family dwellings in the building
+      and which has direct exterior access from the ground floor.
   examples: []
   open_questions:
   - The chart rear yard is a percent of depth or feet, whichever is less, and not less than 20 ft (footnote 16).
@@ -2349,5 +2412,6 @@ rules:
   status: draft
   review_when:
   - when: use == "one_family_attached"
-    reason: 'Whether the exemption (''except a one-family or two-family dwelling'') covers this use is unclear:
-      §325-3B:one_family_attached_dwelling defines it as a building of several dwellings. A person decides.'
+    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
+      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
+      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'

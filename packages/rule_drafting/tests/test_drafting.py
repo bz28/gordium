@@ -1092,10 +1092,10 @@ def test_a_use_the_law_doesnt_exempt_is_never_left_out_unchecked(inputs):
     u = unit(inputs, "325-19E")
     rule = {"id": "R-3a.x", "applies_when": 'abuts_r1_district and use not in ["one_family_detached", "two_family", '
                                             '"fraternity_sorority_group_house"]', "check": "lot_area >= 9000"}
-    gaps = drafter.exemption_gaps(u, {"rules": {"R-3a": [rule]}})
+    gaps = drafter.exemption_gaps(u, {"rules": {"R-3a": [rule]}}, inputs.ctx)
     assert [g["rule"] for g in gaps] == ["R-3a.x"] and "fraternity_sorority_group_house" in gaps[0]["why"]
     covered = {"id": "R-3a.y", "applies_when": 'use == "fraternity_sorority_group_house"', "check": "lot_area >= 37500"}
-    assert drafter.exemption_gaps(u, {"rules": {"R-3a": [rule, covered]}}) == []
+    assert drafter.exemption_gaps(u, {"rules": {"R-3a": [rule, covered]}}, inputs.ctx) == []
     log = cli.load(inputs.records / "drafting_log.yaml")["units"]["325-19E"]
     assert any(g["rule"] == "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use" and "fraternity_sorority_group_house"
                in g["why"] for g in log["unresolved"])
@@ -1125,21 +1125,53 @@ def test_text_scope_reads_only_the_pieces_own_districts(inputs, text, scope, unr
 def test_an_exemption_doesnt_quietly_cover_a_building_of_several_dwellings(inputs):
     """Catching up with measurement-2 (2026-10-21), #20's latest R-3a key found a false pass: §325-19E exempts "a
     one-family or two-family dwelling", and the drafted rules left out one_family_attached, which §325-3B defines as
-    "A building containing three or more one-family dwellings" (an open question in the key). So they said "doesn't
-    apply" where the key says needs review. Code takes such a use out of the exemption and sends it to review."""
+    "A building containing three or more one-family dwellings" (an open question in the key). Round 5: decided by
+    meaning (the evaluator), rewritten on the parsed formula, the definition cited by its words and location."""
     from rule_format.rulebook import outcome
     u = unit(inputs, "325-19E")
-    rule = {"id": "R-3a.x", "kind": "rule", "applies_when": 'abuts_r1_district and use not in ["one_family_detached", "one_family_attached", '
-                                            '"two_family"]', "check": "building_area <= 0.75 * 0.35 * lot_area",
-            "sources": [], "examples": [{"given": {"use": "one_family_attached"}, "expect": "not_applicable"}]}
-    got = drafter.unclear_exemption(rule, u, inputs.law, inputs.ctx)
-    assert got["applies_when"] == 'abuts_r1_district and use not in ["one_family_detached", "two_family"]'
-    assert [r["when"] for r in got["review_when"]] == ['use == "one_family_attached"']
-    assert inputs.ctx.use_rows["one_family_attached"][0] in got["sources"] and got["examples"] == []
     allowed = inputs.ctx.allowed()
+    base = {"id": "R-3a.x", "kind": "rule", "check": "building_area <= 0.75 * 0.35 * lot_area", "sources": [],
+            "examples": [{"given": {"use": "one_family_attached"}, "expect": "not_applicable"}]}
     attached = {"use": "one_family_attached", "abuts_r1_district": True, "building_area": 1, "lot_area": 10000}
-    assert outcome(got, attached, allowed) == "needs_review"
-    assert outcome(got, attached | {"use": "one_family_detached"}, allowed) == "not_applicable"
+    forms = {   # every form that leaves one_family_attached out, and what it becomes
+        'abuts_r1_district and use not in ["one_family_detached", "one_family_attached", "two_family"]':
+            'abuts_r1_district and use not in ["one_family_detached", "two_family"]',
+        'abuts_r1_district and use not in ("one_family_detached", "one_family_attached")':    # a tuple: no crash
+            'abuts_r1_district and use not in ["one_family_detached"]',
+        'abuts_r1_district and use != "one_family_attached"': "abuts_r1_district",
+    }
+    for when, becomes in forms.items():
+        got, why = drafter.unclear_exemption(base | {"applies_when": when}, u, inputs.law, inputs.ctx)
+        assert why is None and got["applies_when"] == becomes, when
+        assert outcome(got, attached, allowed) == "needs_review", when
+        assert got["examples"] == [] and [r["when"] for r in got["review_when"]] == ['use == "one_family_attached"']
+        reason = got["review_when"][0]["reason"]
+        assert reason.startswith("§325-3B defines ONE-FAMILY ATTACHED DWELLING as") and "325-3B:" not in reason
+        cited = [x for x in got["sources"] if x.get("file") == "chapter_325_zoning_2026-10.pdf"]
+        assert cited and cited[0]["page"] == 8 and "three or more one-family dwellings" in cited[0]["quote"]
+    # a positive list that leaves it out can't be rewritten by code: a person decides, nothing is saved
+    got, why = drafter.unclear_exemption(base | {"applies_when": 'use in ["church", "school"]'}, u, inputs.law, inputs.ctx)
+    assert got is None and "a person decides" in why
+    # the parsed rewrite never mangles a name that ends in "and" (round 5: rstrip(" and") gave 'lot_on_l')
+    assert drafter._drop_from_exemption('lot_on_land and use not in ["a", "b"]', "a") == 'lot_on_land and use not in ["b"]'
+    assert drafter.use_definition("one_family_detached", inputs.law, inputs.ctx)[0] == "ONE-FAMILY DETACHED DWELLING"
     for d in ("R-3a", "R-3b"):                          # the saved drafts, replayed (no API call)
+        text = (inputs.drafted / f"{d}.yaml").read_text(encoding="utf-8")
+        assert "&id0" not in text and "*id0" not in text      # round 5: no YAML aliases in a saved rulebook
         rules = [r for r in cli.load(inputs.drafted / f"{d}.yaml")["rules"] if "325_19e" in r["id"]]
         assert rules and all(outcome(r, {"use": "one_family_attached"}, allowed) != "not_applicable" for r in rules)
+
+
+def test_a_use_left_out_in_any_form_is_listed_when_nothing_else_checks_it(inputs):
+    """Round 5: exemption_gaps read only `use not in [...]` text; a `use != ...` form slipped through. Judged by meaning,
+    and "covered" means another rule of the unit checks the same measure for that use (the coverage rule's formula
+    mentions lot_area as an input; it doesn't check the lot area)."""
+    u = unit(inputs, "325-19E")
+    lot = {"id": "R-3a.lot", "kind": "rule", "applies_when": 'use != "fraternity_sorority_group_house"',
+           "check": "lot_area >= 9000"}
+    coverage = {"id": "R-3a.cov", "kind": "rule", "check": "building_area <= 0.75 * 0.35 * lot_area"}
+    gaps = drafter.exemption_gaps(u, {"rules": {"R-3a": [lot, coverage]}}, inputs.ctx)
+    assert [g["rule"] for g in gaps] == ["R-3a.lot"] and "fraternity_sorority_group_house" in gaps[0]["why"]
+    other = {"id": "R-3a.frat", "kind": "rule", "applies_when": 'use == "fraternity_sorority_group_house"',
+             "check": "lot_area >= 37500"}
+    assert drafter.exemption_gaps(u, {"rules": {"R-3a": [lot, coverage, other]}}, inputs.ctx) == []
