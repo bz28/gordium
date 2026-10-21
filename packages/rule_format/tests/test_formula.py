@@ -191,3 +191,8 @@ def test_a_margin_at_the_limit_is_zero_exactly_where_the_comparison_complies():
         at = 0.2 * n
         assert (margin(at, evaluate("0.2 * lot_depth", {"lot_depth": n}, KINDS), True) == 0.0) is \
             evaluate("rear_yard >= 0.2 * lot_depth", {"rear_yard": at, "lot_depth": n}, KINDS)
+
+
+def test_an_error_names_the_value_as_written():
+    with pytest.raises(EvaluationError, match=r"expected true/false, got 50$"):
+        evaluate("not lot_width", {"lot_width": 50}, KINDS)
