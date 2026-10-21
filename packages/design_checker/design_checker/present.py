@@ -446,6 +446,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     compares = _compares(check) if check else []
     names = formula.names(check) if check else set()
     primary = compares[0] if compares else None
+    body = formula.parse(check).body if check else None
+    if (_status(row) == FAILS and isinstance(body, ast.BoolOp) and isinstance(body.op, ast.And)
+            and all(isinstance(v, ast.Compare) for v in body.values)):
+        # a rule that is several limits at once (the eaves into every yard): name and show the one that fails
+        primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False), primary)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
@@ -549,6 +554,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         applied = _applied(names, measured)
         if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
             why = f"{why} · {applied['note']}" if why else applied["note"]
+        crossing = node is not None and (measured.get(node.left.id) or {}).get("crosses_lot_line")
+        if crossing and st == FAILS:
+            why = "Does not comply: the building crosses the lot line" + (f" · {why}" if why else "")
         out.append({
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],
@@ -569,6 +577,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 "precision": PRECISION,
                 "at_limit": (f"At the limit: {proposed} exact" if margin_t == "at limit" else None),
                 "basis": applied["all"],
+                # what might be eaves (each overhang's fingerprint): what a confirmation (eaves_confirmed) names
+                "eave_candidates": list(dict.fromkeys(c for n in sorted(names)
+                                                      for c in (measured.get(n) or {}).get("eave_candidates") or [])),
             }})
         if node is not None and node.left.id == "building_height":
             out[-1]["detail"].update(_height_detail(j, facts, values, node, numbers))

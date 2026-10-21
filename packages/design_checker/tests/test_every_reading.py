@@ -632,3 +632,42 @@ def test_a_malformed_eave_confirmation_is_refused():
     assert fact_problems({"eaves_confirmed": [{"overhang": "x", "value": True}]})
     assert not fact_problems({"eaves_confirmed": [{"overhang": "x", "value": True, "source": "entered by you",
                                                    "confirmed_by": "the architect", "date": "2026-10-21"}]})
+
+
+# ---- review round 4: the confirmation names everything that makes the overhang -------------------------------
+
+def _built(fascia=0.0, roof_id="roof"):
+    return floors(*CONFIRMED_HOUSE, 2) + [roof(*CONFIRMED_HOUSE, 20, 36, 2.0, fascia, id=roof_id)]
+
+
+def test_deepening_the_fascia_after_it_was_confirmed_asks_again():
+    """Round 4, P0 (a false pass on 6524519): the overhang confirmed with no fascia, then an 8 ft fascia (a knee
+    wall, really) added under the same plan outline. The old fingerprint (plan bounds and area) didn't change, so
+    the confirmation still applied: complies. Now any edit to the roof solid asks again."""
+    first = run(_built())
+    res = run(_built(fascia=8.0), eaves_confirmed=_confirm(first))
+    assert status(res, "R-1b.side_yards") != present.COMPLIES
+
+
+def test_swapping_the_roof_solid_for_another_with_the_same_shape_asks_again():
+    first = run(_built())
+    res = run(_built(roof_id="another roof"), eaves_confirmed=_confirm(first))
+    assert status(res, "R-1b.side_yards") != present.COMPLIES
+
+
+def test_a_confirmation_holds_while_nothing_changes():
+    first = run(_built())
+    again = run(_built(), eaves_confirmed=_confirm(first))
+    assert status(again, "R-1b.side_yards") == present.COMPLIES
+    assert again["measurements"]["side_yard_smaller"]["eave_candidates"] == \
+        first["measurements"]["side_yard_smaller"]["eave_candidates"]
+
+
+def test_the_item_carries_the_candidates_and_says_what_it_waits_for():
+    """Round 4, P2: no panel button yet, so the reason says the truth (asked in a later release; needs review
+    until then), and each item carries the fingerprints a future confirm will name."""
+    res = run(_built())
+    side = [i for i in rows(res, "R-1b.side_yards") if i["status"] == present.REVIEW]
+    assert side and all(i["detail"]["eave_candidates"] for i in side)
+    assert all("next release" in i["reason"] and "These are eaves" not in i["reason"] for i in side)
+    assert side[0]["detail"]["eave_candidates"] == res["measurements"]["side_yard_smaller"]["eave_candidates"]

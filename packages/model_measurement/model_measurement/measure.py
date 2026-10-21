@@ -15,6 +15,7 @@ lot, curved surfaces) also gives None with a reason.
 """
 
 import copy
+import hashlib
 import itertools
 import math
 
@@ -543,25 +544,42 @@ def _eave_candidate(building: dict, sloped: list | None = None) -> dict | None:
         walls, _base, faces, k = part
         reach = _projection({"faces": faces})
         others = [p for i, p in enumerate(building["plans"]) if i != k]
+        makers = [(building["parts"][k], faces)]          # the solid whose faces make the overhang
     else:
         bottom = min(p[2] for f in building["faces"] for p in f["points"])
         edge = min(p[2] for g in sloped for f in g for p in f["points"])
         walls, faces, others = _body(building, bottom, edge), None, []
         reach = ops.unary_union([_plan(f) for g in sloped for f in g])
+        makers = list(zip(building.get("parts") or [building["id"]], building.get("part_faces") or [building["faces"]]))
     zone = reach.difference(walls.buffer(TOL))
     if others:
         zone = zone.difference(ops.unary_union(others).buffer(TOL))
     if zone.area <= 1e-6:
         return {"walls": walls, "faces": faces, "zone": None, "overhang": None}
-    x0, y0, x1, y1 = zone.bounds
-    return {"walls": walls, "faces": faces, "zone": zone,
-            "overhang": f"{building['id']}:{x0:.2f},{y0:.2f},{x1:.2f},{y1:.2f}:{zone.area:.2f}"}
+    return {"walls": walls, "faces": faces, "zone": zone, "overhang": _fingerprint(makers, zone)}
+
+
+def _fingerprint(makers: list, zone) -> str:
+    """What an eave confirmation names: a sha256 over (a) the ids of the solids whose faces make the overhang,
+    (b) every vertex of those solids, to 0.01 ft, and (c) the overhang's own outline, to 0.01 ft. Any edit to those
+    solids (a deeper fascia, a knee wall, a moved ridge, another solid swapped in with the same shape) gives a
+    new one, so the question is asked again; the same model gives the same one."""
+    def r(v):
+        return f"{round(v, 2) + 0.0:.2f}"
+    text = []
+    for solid_id, faces in makers:
+        text.append("solid " + str(solid_id))
+        text += [" ".join(r(c) for p in f["points"] for c in p) for f in faces]
+    for poly in getattr(zone, "geoms", [zone]):
+        if poly.geom_type == "Polygon":
+            text.append("zone " + " ".join(r(c) for x, y in poly.exterior.coords for c in (x, y)))
+    return "eave:" + hashlib.sha256("\n".join(text).encode("utf-8")).hexdigest()[:24]
 
 
 def _confirmed(facts: dict, candidate: dict | None) -> dict | None:
-    """The architect's confirmation that this very overhang is eaves (`eaves_confirmed`, naming its fingerprint),
-    or None. Any edit that moves or resizes the overhang changes the fingerprint, so a confirmation never carries
-    over to a different overhang."""
+    """The confirmation that this very overhang is eaves (`eaves_confirmed`, naming its fingerprint), or None. The
+    fingerprint (_fingerprint) covers the solids that make the overhang, every vertex of them and the overhang's
+    outline: any edit to them asks again; a confirmation never carries over to a different overhang."""
     if not candidate or not candidate["overhang"]:
         return None
     return next((c for c in facts.get("eaves_confirmed") or []
@@ -960,8 +978,11 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     views = ({b["id"]: _views(b, plan_level, facts) for b in buildings} if plan_level is not None and not why_building
              else {})
     everything = ops.unary_union([_projection(b) for b in buildings]) if buildings else Polygon()
-    why_inside = (why_building or
-                  (None if everything.within(lot.polygon.buffer(TOL)) else stop("outside_lot")))
+    # a building wholly off the lot can't be measured against it (outside_lot); one that crosses a lot line is
+    # measured: the yard to the line it crosses is 0, and it is said so (crosses_lot_line): never a pass
+    inside = everything.within(lot.polygon.buffer(TOL))
+    crosses = not inside and everything.intersection(lot.polygon).area > 1e-6
+    why_inside = why_building or (None if inside or crosses else stop("outside_lot"))
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
     else:
@@ -983,6 +1004,12 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
             out[name] = _missing(name, why_yards)
         return out
     _yards(out, lot, lines, facts, main, parts_of, detached, views)
+    if crosses:
+        for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
+            m = out.get(name) or {}
+            values = [m.get("value")] + [r["value"] for r in m.get("readings") or []]
+            if any(v is not None and v <= TOL for v in values):
+                m["crosses_lot_line"] = True
     return out
 
 
