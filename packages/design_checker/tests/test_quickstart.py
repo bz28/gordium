@@ -141,11 +141,19 @@ def test_3_short_only_under_some_readings_needs_review_short_under_all_fails(hou
     dy, proposed = said(r"Move it (\d+) ft back instead.\*\* Rear yard (\d+'-\d+(?: \d/\d)?\"): \*\*needs review")
     rear = _check(_moved(got["floors"], dy=float(dy)), facts)["Rear yard"]
     assert (rear["status"], rear["proposed"]) == (present.REVIEW, proposed)
-    dy, proposed = said(r"Now move it (\d+) ft back:\*\* Rear yard\s+(\d+'-\d+(?: \d/\d)?\"): \*\*does not comply")
+    dy, proposed, short = said(r"Now move it (\d+) ft back:\*\* Rear yard\s+(\d+'-\d+(?: \d/\d)?\"): \*\*does not "
+                               r"comply\*\*, at least (\d+'-\d+(?: \d/\d)?\") short")
     moved = _moved(got["floors"], dy=float(dy))
     rear = _check(moved, facts)["Rear yard"]
-    assert (rear["status"], rear["proposed"]) == (present.FAILS, proposed)
+    assert (rear["status"], rear["proposed"], rear["delta"]) == (present.FAILS, proposed, f"at least {short} short")
     assert ("yard", present.FAILS) in _regions(moved, facts)                    # "the strip ... turns red"
+    # short under only some readings (the depth's 4'-0" slack and the back-line question): needs review, amber only
+    low, high = said(r"From (\d+) to (\d+) ft back it still needs review")
+    for dy in range(int(low), int(high) + 1):
+        moved = _moved(got["floors"], dy=float(dy))
+        rear = _check(moved, facts)["Rear yard"]
+        assert rear["status"] == present.REVIEW and rear["delta"].startswith("up to "), (dy, rear["delta"])
+        assert ("yard", present.FAILS) not in _regions(moved, facts), dy
 
 
 def test_4_pull_the_rear_wall_back_coverage_fails_on_every_tax_map_lot(house):
@@ -163,10 +171,11 @@ def test_5_raise_the_roof_fails(house):
     got, facts = house
     floors = copy.deepcopy(got["floors"])
     feet, height, short = said(r"raise the roof (\d+) ft\*\* \(the top face of Floor 3\). Building height " + LEN
-                               + r": \*\*does not comply\*\*, at\s+least (\d+'-\d+\") short")
+                               + r": \*\*does not comply\*\*,\s+(−\d+'-\d+\") short \(the height doesn't depend on "
+                               r"the lot lines\)")
     floors[-1]["top"] += float(feet)
     h = _check(floors, facts)["Building height"]
-    assert (h["status"], h["proposed"], h["delta"]) == (present.FAILS, height, "at least " + short + " short")
+    assert (h["status"], h["proposed"], h["delta"], h["approx"]) == (present.FAILS, height, short + " short", False)
     assert ("height", present.FAILS) in _regions(floors, facts)                 # "the part above 35'-0" turns red"
 
 

@@ -195,3 +195,32 @@ def test_releasing_a_later_copys_panel_closes_its_form():
     assert form.closed
     ns["_release"]("panel_parts", None)                     # nothing there: nothing to do, never an error
     ns["_release"]("panel_parts", {})
+
+
+def test_a_floating_panel_is_placed_once_never_on_every_check():
+    """Round 1: panel() resized and moved the floating panel to the right edge on every check (live mode: after
+    every edit), so the architect couldn't move it. The real panel(), run twice with stand-ins for Rhino: the
+    window is placed the first time only."""
+    import ast
+    import types
+    src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    fn = next(n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "panel")
+    fits = []
+    host = object()
+    form = types.SimpleNamespace(host=host, Visible=True, Close=lambda: None)
+    ui = types.SimpleNamespace(open_dock=lambda dock: None, DockHost=lambda dock, h: None,
+                               make_panel=lambda actions, dock_host: {"form": form},
+                               fit_floating=lambda h, window: fits.append(h) or "floating")
+    doc = types.SimpleNamespace(RuntimeSerialNumber=1)
+    rhino = types.SimpleNamespace(RhinoDoc=types.SimpleNamespace(ActiveDoc=doc),
+                                  UI=types.SimpleNamespace(RhinoEtoApp=types.SimpleNamespace(
+                                      MainWindowForDocument=lambda d: None)))
+    ns = {"STATE": {}, "LEFTOVERS": {}, "ui": ui, "logic": logic, "Rhino": rhino, "_actions": lambda: None,
+          "register_dock": lambda: "dock", "sc": types.SimpleNamespace(sticky={"gordium_dock_hosts": {1: host}})}
+    exec(compile(ast.Module([fn], []), "gordium_rhino", "exec"), ns)
+    first = ns["panel"]()
+    second = ns["panel"]()
+    assert first is second and first["placed"] == "floating"
+    assert fits == [host]                                    # placed once; the second check leaves it where it is
+    assert logic.place_panel_now(None) and not logic.place_panel_now("floating")
+    assert not logic.place_panel_now("docked")

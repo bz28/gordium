@@ -18,7 +18,7 @@ import yaml
 from design_checker import present
 from design_checker.rhino_logic import COLUMN_DELTA, delta_text
 from envelope_builder import start as generator
-from envelope_builder.envelope import MARGIN, envelope
+from envelope_builder.envelope import envelope
 from model_measurement.measure import TAX_MAP_TOLERANCE, measure
 from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
@@ -233,8 +233,10 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     for g in present.grouped(view["items"]):
         for item_id in g["items"]:
             i = by_id[item_id]
-            out.append([g["title"], i["mark"], i["name"], i["proposed"], i["required"], i.get("delta") or delta_text(i["margin"]),
-                        i.get("reason") or i.get("note") or "", i["detail"].get("citation") or "",
+            # the note ("assuming flat ground") with the item, as the panel shows it; that column is reasons only
+            out.append([g["title"], i["mark"], i["name"] + (" · " + i["note"] if i.get("note") else ""), i["proposed"],
+                        i["required"], i.get("delta") or delta_text(i["margin"]), i.get("reason") or "",
+                        i["detail"].get("citation") or "",
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
                                      (COLUMN_DELTA, 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
@@ -320,7 +322,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     statuses, notice_text = present.notice((extras or {}).get("before"), v["items"])
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
             "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
-            "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": plan(site, env, v, measured),
+            "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": plan(site, env, v, measured, facts),
             "report_error": report_error,
             "statuses": statuses, "notice": notice_text}
 
@@ -370,23 +372,37 @@ def edge_runs(edges: list[dict]) -> list[tuple[list, float]]:
     def turn(p, q):
         d = abs(heading(*p) - heading(*q)) % (2 * math.pi)
         return math.degrees(min(d, 2 * math.pi - d))
+    # a run turns less than RUN_TURN_DEG in all, not just from piece to piece: a rounded corner drawn as short
+    # pieces (each turning a little) is a corner, never one run joining two sides on a chord across the lot
     runs = [[pieces[0]]]
     for piece in pieces[1:]:
-        if turn(runs[-1][-1], piece) < RUN_TURN_DEG:
+        if turn(runs[-1][-1], piece) < RUN_TURN_DEG and turn(runs[-1][0], piece) < RUN_TURN_DEG:
             runs[-1].append(piece)
         else:
             runs.append([piece])
-    if len(runs) > 1 and turn(runs[-1][-1], runs[0][0]) < RUN_TURN_DEG:   # the ring closes inside a run
+    if (len(runs) > 1 and turn(runs[-1][-1], runs[0][0]) < RUN_TURN_DEG
+            and turn(runs[-1][0], runs[0][-1]) < RUN_TURN_DEG):                # the ring closes inside a run
         runs[0] = runs.pop() + runs[0]
     return [([r[0][0]] + [b for _, b in r], sum(math.dist(a, b) for a, b in r)) for r in runs]
 
 
-def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
+def _yard_lines(lot, measure: str, point):
+    """The lot lines a yard is measured from, as the measurement takes them: every group (the street lines, a
+    side, the rear lines, under each reading of the lot) that the yard's lot-line point lies on."""
+    from shapely.geometry import Point
+    groups = [lot.ordered_street()] if measure == "front_yard" else [
+        g for _, left, right, back in (lot.readings() or []) for g in ((left, right) if measure != "rear_yard" else (back,))]
+    hit = sorted({i for g in groups if lot.line(g).distance(Point(point)) < 0.01 for i in g})
+    return lot.line(hit) if hit else None
+
+
+def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = None) -> dict:
     """What the viewport draws in plan (feet): each lot edge with its length, the yard lines measured (each with
     its item's status), and where the building breaks a limit: the strip of its footprint inside a required yard,
-    or the part above the height limit (spec F2, F4, F5). The building itself stays neutral."""
-    from model_measurement.measure import _projection
-    from shapely.geometry import Polygon
+    or the part above the height limit (spec F2, F4, F5). The building itself stays neutral.
+    Each yard's red and amber are its own row's (present.settle: from the row's readings, after every status
+    change), never another yard's: red where its wall is short under every reading, amber under some."""
+    from model_measurement.measure import Lot, _projection
     from shapely.ops import unary_union
 
     lot = site.get("lot") or {}
@@ -402,27 +418,35 @@ def plan(site: dict, env: dict, v: dict, measured: dict) -> dict:
     tops = [p[2] for b in site.get("buildings") or [] for f in b.get("faces") or [] for p in f["points"]]
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
     if footprint is not None and not footprint.is_empty and env and env.get("outline") and tops:
-        # the envelope sits MARGIN inside every yard (so it is never illegal); grown back by twice that, a wall
-        # exactly at its limit leaves no hairline of red
-        buildable = Polygon(env["outline"], env.get("holes") or []).buffer(2 * MARGIN, join_style=2)
-        yard = {s for m, s in statuses.items() if m in YARD_MEASURES}
-        # where the lot line may really be: on a tax-map lot anywhere within its tolerance (2'-0") of the drawn one.
-        # RED is over the yard line under every reading (outside the buildable area grown by the tolerance); AMBER
-        # is the rest of the doubt (outside it shrunk by the tolerance). On a survey the tolerance is 0: red is
-        # what is outside, and a yard that needs review for another reason is amber where it is outside.
-        tol = TAX_MAP_TOLERANCE if (measured.get("lot_area") or {}).get("tolerance") else 0.0
-        red = footprint.difference(buildable.buffer(tol, join_style=2)) if present.FAILS in yard else None
-        doubt = None
-        if yard & {present.FAILS, present.REVIEW} and (tol or present.REVIEW in yard):
-            doubt = footprint.difference(buildable.buffer(-tol, join_style=2) if tol else buildable)
-            if red is not None and not red.is_empty:
-                doubt = doubt.difference(red)
+        shape = Lot(site, facts or {}) if lot.get("edges") and facts and facts.get("street_line") else None
+        reds, ambers = [], []
+        for i in v["items"]:
+            if i.get("colour") not in ("red", "amber") or shape is None:
+                continue
+            near, far = [], []
+            for limit in i.get("limits") or []:
+                lines = _yard_lines(shape, i["measure"], limit["points"][0])
+                if lines is None:
+                    continue
+                strip = (lambda d: footprint.intersection(lines.buffer(d, quad_segs=32)) if d > 0 else None)
+                near.append(strip(limit["near"]))
+                far.append(strip(limit["far"]))
+            if i["colour"] == "red" and near and all(g is not None for g in near):
+                red = near[0]
+                for g in near[1:]:                          # short under EVERY reading: where every one says so
+                    red = red.intersection(g)
+                reds.append(red)
+            ambers += [g for g in far if g is not None]
+        red = unary_union(reds) if reds else None
+        doubt = unary_union(ambers) if ambers else None
+        if doubt is not None and red is not None:
+            doubt = doubt.difference(red)
         # outlines simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude;
         # without a grade the strip stands on the building's own base, never at 0
         base = env["base"] if env.get("base") is not None else min(tops)
         for region, status in ((red, present.FAILS), (doubt, present.REVIEW)):
             for g in getattr(region, "geoms", [region]) if region is not None and not region.is_empty else []:
-                if g.area > 1e-3:
+                if g.geom_type == "Polygon" and g.area > 1e-3:
                     encroach.append({"outline": _ring(g), "base": base, "top": max(tops), "why": "yard",
                                      "status": status})
         height = statuses.get("building_height")

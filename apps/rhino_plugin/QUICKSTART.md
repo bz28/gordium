@@ -355,13 +355,14 @@ Stories 3 complies, at the limit, saying "assuming flat ground". Lot area compli
    they go (the yard lines stay).
 2. **Move the house 5 ft back.** Front yard 32'-0 5/8": complies. The rear yard still needs review (the open
    question above).
-3. **Move it 6 ft back instead.** Rear yard 21'-6 1/8": **needs review**. **Now move it 7 ft back:** Rear yard
-   20'-6 1/8": **does not comply**, short under every reading of the back lines and of the tax map. A note appears,
-   and the strip of the house that is over turns red.
+3. **Move it 6 ft back instead.** Rear yard 21'-6 1/8": **needs review**. **Now move it 10 ft back:** Rear yard
+   17'-6 1/8": **does not comply**, at least 0'-7 1/4" short: short under every reading of the back lines and of
+   the tax map. (From 7 to 9 ft back it still needs review: with the lines out the lucky way, the rear lot line 4 ft
+   further off, it could comply.) A note appears, and the strip of the house that is over turns red.
 4. **Undo, then pull the rear wall 17 ft back** (Cmd+Shift+click the back face, Gumball 17). Lot coverage 27.8%
    against 25%: **does not comply**, even on the largest lot the tax map allows.
-5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply**, at
-   least 4'-0" short. Only the part above 35'-0" turns red.
+5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply**,
+   −4'-0" short (the height doesn't depend on the lot lines). Only the part above 35'-0" turns red.
 6. **Undo, then move the southwest wall 3 ft out** (Cmd+Shift+click the face on your left, seen from the street).
    Side yard, Southwest 9'-0 5/8": **needs review**, up to 2'-11 3/8" short (it complies if the tax map's line is out
    the lucky way). **Move it 5 ft out instead:** 7'-0 5/8": **does not comply**, at least 0'-11 1/4" short (rounded

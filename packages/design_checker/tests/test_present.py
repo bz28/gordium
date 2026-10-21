@@ -11,6 +11,7 @@ import pytest
 
 from design_checker import present
 from design_checker.check import check
+from design_checker.rhino_logic import delta_text
 from model_measurement.measure import measure
 from model_measurement.project import fact_problems, load_facts
 from rule_format.rulebook import REPO, load
@@ -344,13 +345,25 @@ def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
 
 
 def test_delta_words_never_overstate():
-    assert present.delta_words("−3'-0\"", (-5.0, -1.0)) == "at least 1'-0\" short"
-    assert present.delta_words("−3'-0\"", (-5.0, -1.0 - 1 / 200)) == "at least 1'-0\" short"   # rounded down
-    assert present.delta_words("−0'-9\"", (-3.25, 1.75)) == "up to 3'-3\" short"
-    assert present.delta_words("−0'-9\"", (-3.25 + 1 / 200, 1.75)) == "up to 3'-3\" short"    # rounded up
-    assert present.delta_words("+2'-0\"", (0.0, 4.0)) == "at the limit at worst"
-    assert present.delta_words("+7'-0\"", (5.0, 9.0)) == "at least 5'-0\" to spare"
-    assert present.delta_words("+7'-0\"", None) == "+7'-0\" to spare"
+    C, R, F = present.COMPLIES, present.REVIEW, present.FAILS
+    assert present.delta_words(F, (-5.0, -1.0), "ft", True) == "at least 1'-0\" short"
+    assert present.delta_words(F, (-5.0, -1.0 - 1 / 200), "ft", True) == "at least 1'-0\" short"   # rounded down
+    assert present.delta_words(R, (-3.25, 1.75), "ft", True) == "up to 3'-3\" short"
+    assert present.delta_words(R, (-3.25 + 1 / 200, 1.75), "ft", True) == "up to 3'-3\" short"    # rounded up
+    assert present.delta_words(C, (0.0, 4.0), "ft", True) == "at the limit at worst"
+    assert present.delta_words(C, (5.0, 9.0), "ft", True) == "at least 5'-0\" to spare"
+    assert present.delta_words(C, (7.0, 7.0), "ft", False) == "+7'-0\" to spare"            # one reading: the margin
+    assert present.delta_words(F, (-1.25, -1.25), "ft", False) == "−1'-3\" short"
+    assert present.delta_words(C, None, "ft", False) == ""
+    # never kinder than the status: room on a row that needs review is "if confirmed", never "to spare"
+    assert present.delta_words(R, (7.0, 7.0), "ft", False) == "+7'-0\" if confirmed"
+    assert present.delta_words(R, (5.0, 9.0), "ft", True) == "at least 5'-0\" if confirmed"
+    assert "to spare" not in present.delta_words(F, (1.0, 2.0), "ft", False)
+    # every unit: lot area in sf, coverage in % (round 1: "+570 sf to spare" on a lot area that needs review)
+    assert present.delta_words(R, (-66.2, 570.4), "sf", True) == "up to 67 sf short"
+    assert present.delta_words(F, (-1000.0, -384.6), "sf", True) == "at least 384 sf short"
+    assert present.delta_words(C, (0.937, 6.2), "%", True) == "at least 0.93% to spare"
+    assert present.delta_words(F, (-6.2, -0.004), "%", True) == "less than 0.01% short"
 
 
 def test_on_the_tax_map_red_is_over_under_every_reading_and_amber_is_the_rest_of_the_doubt():
@@ -512,6 +525,103 @@ def test_at_the_limit_and_complies_never_disagree():
     assert present._display(*pct)[2] == "at limit"
 
 
+def test_lot_area_and_coverage_deltas_use_the_tax_map_lot_area_like_their_verdict(tax_map):
+    """Round 1: a Lot area that needs review read "+570 sf to spare". Its Delta and coverage's are taken over the
+    lot area's own tax-map range (low to high), the same readings as the verdict."""
+    r = tax_map
+    v = items(r["view"])
+    tol = r["measurements"]["lot_area"]["tolerance"]
+    area = v["Lot area"]
+    assert area["status"] == present.REVIEW and area["approx"]
+    assert area["delta"] == "up to " + present._area(6000 - tol["low"], "up") + " short"     # never "to spare"
+    cov = v["Lot coverage"]
+    assert cov["approx"] and cov["status"] == present.FAILS and cov["delta"].startswith("at least ")
+    assert cov["delta"] != delta_text(cov["margin"])                  # the certain shortfall, not the as-drawn one
+
+
+def test_the_height_row_is_never_marked_tax_map_approximate(tax_map):
+    """Round 1: the height's own comparison reads no lot length (only its bonus clause does): its Delta is its
+    margin, and it is not "(approx.)"."""
+    r = tax_map
+    h = items(r["view"])["Building height"]
+    assert h["approx"] is False and h["delta"] in ("at limit", h["margin"] + " to spare", h["margin"] + " short")
+    assert "tax map" not in h["detail"]["line"]
+
+
+def test_red_and_amber_agree_with_the_rear_yards_own_readings():
+    """Round 1: red and amber were the footprint against all yards grown by a flat 2'-0", while the rear verdict
+    also moves the lot depth 4'-0" (its minimum by 1'-0"). Each yard's colours are now its own readings'."""
+    from design_checker.check import check_site
+    tax = {**FACTS, "jurisdiction": CITY, "lot_surveyed": False}
+    r = check_site(_plot(box(10, 30, 35, 78.5)), tax)                 # rear wall 3'-6" over the drawn 25'-0"
+    rear = items(r["view"])["Rear yard"]
+    assert (rear["status"], rear["delta"]) == (present.FAILS, "at least 0'-6\" short")
+    red = [g for g in r["plan"]["encroach"] if g["status"] == present.FAILS]
+    (strip,) = red
+    ys = [p[1] for p in strip["outline"]]
+    assert min(ys) == pytest.approx(78.0, abs=0.01) and max(ys) == pytest.approx(78.5, abs=0.01)   # 0'-6" deep
+    r = check_site(_plot(box(10, 30, 35, 72.5)), tax)                 # 2'-6" clear: needs review, "up to 0'-6" short"
+    rear = items(r["view"])["Rear yard"]
+    assert (rear["status"], rear["delta"], rear["colour"]) == (present.REVIEW, "up to 0'-6\" short", "amber")
+    amber = [p for g in r["plan"]["encroach"] if g["status"] == present.REVIEW for p in g["outline"]]
+    assert max(p[1] for p in amber) == pytest.approx(72.5, abs=0.01)      # the rear doubt (69.5 to 72.5 deep) shows
+
+
+def test_red_is_only_for_a_yard_that_fails_never_one_that_needs_review():
+    """Round 1: whenever any yard failed, red was the footprint over every yard, so a yard that only needs review
+    was painted red. West wall 4 ft over (fails), rear wall 2'-6" over (needs review)."""
+    from design_checker.check import check_site
+    r = check_site(_plot(box(6, 30, 35, 77.5)), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
+    v = items(r["view"])
+    assert v["Side yard, West"]["status"] == present.FAILS and v["Rear yard"]["status"] == present.REVIEW
+    from shapely.geometry import Polygon
+    red = [Polygon(g["outline"]) for g in r["plan"]["encroach"] if g["status"] == present.FAILS]
+    xs = [p[0] for g in red for p in g.exterior.coords]
+    assert max(xs) == pytest.approx(8, abs=0.01) and min(xs) == pytest.approx(6)
+    # only the side yard's certain strip, x 6 to 8 the house's whole depth (2 x 47.5 = 95 sf): never the rear strip
+    # (y 77 to 77.5 across the house) of a yard that only needs review
+    assert sum(g.area for g in red) == pytest.approx(95, abs=0.5)
+
+
+JOG = [(0, 0), (50, 0), (50, 100), (30, 100), (30, 90), (0, 90)]     # a jog at the back: side or rear? both read
+
+
+def test_verdict_delta_and_colour_never_disagree_for_any_design():
+    """Round 1's property: for random houses on a plain lot and on a lot with a jog at the back (whose lines are
+    an open question), on the tax map and on a survey: "to spare" only on a row that complies; a row that
+    complies never reads "short"; a row that fails always does; red only on a yard that fails (short under every
+    reading), and every red region inside a failing yard's own limits; amber only where some reading is short."""
+    import random
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    rnd = random.Random(15)
+    seen = set()
+    for k in range(80):
+        shape = JOG if k % 2 else [(0, 0), (50, 0), (50, 100), (0, 100)]
+        x0, y0 = rnd.uniform(1, 18), rnd.uniform(8, 40)
+        x1, y1 = rnd.uniform(x0 + 8, 49), rnd.uniform(y0 + 10, 99 if shape is not JOG else 89)
+        house = box(x0, y0, x1, y1, 0, rnd.choice((30, 34.99, 35, 37, 41)))
+        facts = {**FACTS, "jurisdiction": CITY, "lot_surveyed": bool(k % 3 == 0)}
+        r = check_site(_plot(house, lot_=lot_of(shape)), facts)
+        rows = [i for i in r["view"]["items"] if i.get("measure")]
+        for i in rows:
+            d, st = i.get("delta") or "", i["status"]
+            seen.add((st, d.split(" ")[0] if d else ""))
+            assert "to spare" not in d or st == present.COMPLIES, (k, i["name"], st, d)
+            assert st != present.COMPLIES or "short" not in d, (k, i["name"], st, d)
+            assert st != present.FAILS or not d or "short" in d or "does not comply" in d, (k, i["name"], st, d)
+            assert i["colour"] != "red" or st == present.FAILS, (k, i["name"], st)
+            assert i["colour"] == "none" or i["measure"] in present.YARD_MEASURES
+            if i["colour"] == "red" or st == present.FAILS and i["measure"] in present.YARD_MEASURES:
+                assert d.startswith(("at least", "less than", "−")) and i["colour"] == "red", (k, i["name"], d)
+        yard_red = [g for g in r["plan"]["encroach"] if g["why"] == "yard" and g["status"] == present.FAILS]
+        assert not yard_red or any(i["colour"] == "red" for i in rows), k
+        yard_amber = [g for g in r["plan"]["encroach"] if g["why"] == "yard" and g["status"] == present.REVIEW]
+        assert not yard_amber or any(i["colour"] in ("red", "amber") for i in rows), k
+    # the sample really covered each kind of answer
+    assert {s for s, _ in seen} >= {present.COMPLIES, present.REVIEW, present.FAILS}
+
+
 def test_a_margin_that_rounds_to_nothing_is_at_the_limit_never_plus_zero():
     """106 Ithaca Rd's survey house (2026-10-21): a side yard 10'-0" and a hair read "+0'-0" to spare". A margin to
     spare that rounds down to nothing is "at limit"; a shortfall is never zero (at least the smallest step); the
@@ -528,9 +638,10 @@ def test_a_margin_that_rounds_to_nothing_is_at_the_limit_never_plus_zero():
     }
     got = {k: present.margin_text(k[1], k[0]) for k in cases}
     assert got == cases
-    assert present.delta_words("+0'-0\"", (e * 0.7, 4.0)) == "at the limit at worst"
-    assert present.delta_words("−3'-0\"", (-5.0, -e * 0.7)) == "less than 0'-0 1/8\" short"
-    assert present.delta_words("−3'-0\"", (-5.0, -e)) == "at least 0'-0 1/8\" short"
+    C, F = present.COMPLIES, present.FAILS
+    assert present.delta_words(C, (e * 0.7, 4.0), "ft", True) == "at the limit at worst"
+    assert present.delta_words(F, (-5.0, -e * 0.7), "ft", True) == "less than 0'-0 1/8\" short"
+    assert present.delta_words(F, (-5.0, -e), "ft", True) == "at least 0'-0 1/8\" short"
     zeros = ("+0'-0\"", "−0'-0\"", "+0 sf", "−0 sf", "+0%", "−0%", "at least 0'-0\"")
     for k in range(-400, 401):                                  # a fine sweep across the steps of every unit
         for unit, step in (("ft", e / 8), ("sf", 1 / 8), ("%", 0.01 / 8)):
@@ -538,8 +649,12 @@ def test_a_margin_that_rounds_to_nothing_is_at_the_limit_never_plus_zero():
             assert not any(z in text for z in zeros), (unit, k * step, text)
         for low, high in ((k * e / 8, 4.0), (-5.0, k * e / 8 - 1e-9)):
             if low <= high:
-                text = present.delta_words("", (low, high))
-                assert not any(z in text for z in zeros), (low, high, text)
+                for status in (present.COMPLIES, present.REVIEW, present.FAILS):
+                    for approx in (True, False):
+                        text = present.delta_words(status, (low, high), "ft", approx)
+                        assert not any(z in text for z in zeros), (low, high, text)
+
+
 def test_a_row_complying_under_every_reading_names_the_open_question_it_depends_on():
     """The zoning office is told what to answer: "Complies under every reading, but it depends on an open
     question: which lot lines count as side and which as rear; confirm with the zoning office"."""

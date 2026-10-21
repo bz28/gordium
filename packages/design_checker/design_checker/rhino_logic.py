@@ -67,6 +67,13 @@ def dock_host(hosts, serial):
     return hosts.get(0)
 
 
+def place_panel_now(placed):
+    """Whether to size and place the panel's floating window: only until it has been seen shown (Rhino's own
+    200 x 200 window), never again after ("docked" or "floating"): the architect's own size and place stay
+    (round 1: it jumped back to the right edge on every live re-check)."""
+    return placed is None
+
+
 def highlight(status):
     """The colour a part of the model is shaded, from its rule's result only (never from the envelope): red for
     does not comply (under every reading), amber for needs review, nothing for complies or anything else."""

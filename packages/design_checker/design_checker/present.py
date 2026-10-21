@@ -417,40 +417,115 @@ def _display(proposed, required, margin, unit, sign):
             margin_text(margin, unit) if margin is not None else "", margin)
 
 
-def _delta_span(node, values: dict, measured: dict, names: set):
-    """(lowest, highest) margin of one comparison over every way the tax map's lot lines could really lie: each
-    lot length the rule reads off by its TAX_MAP_SLACK either way (the same combinations as _worst_case and the
-    model's red and amber). None when the rule reads no lot length or has no margin in feet."""
-    lengths = sorted(n for n in names & LOT_LENGTHS if isinstance(values.get(n), (int, float)))
-    if not lengths:
-        return None
-    margins = []
-    for signs in itertools.product((-1, 1), repeat=len(lengths)):
-        trial = dict(values, **{n: values[n] + s * TAX_MAP_SLACK[n] for n, s in zip(lengths, signs)})
-        proposed, required, margin, unit, sign = _numbers(node, trial, measured, "")
-        if margin is None or unit != "ft":
-            return None
-        margins.append(margin)
-    return min(margins), max(margins)
+LEAST = {"ft": EIGHTH, "sf": 1.0, "%": 0.01}     # the smallest step each unit is shown in
 
 
-def delta_words(margin_t: str, span) -> str:
-    """The Delta, in words, everywhere it is shown (the panel, the notice, the report): on a survey the margin
-    itself ("+2'-0" to spare", "−1'-4" short"); on the tax map (span: the margin's lowest and highest over the lot
-    lines' ±2'-0") what is true however the lines really lie: "at least 1'-0" short" (short under every reading:
-    the red part), "up to 2'-9" short" (short under some: amber), "at least 3'-0" to spare". Never overstated:
-    "at least" rounds down, "up to" rounds up."""
+def _amount(x: float, unit: str, direction: str) -> str:
+    """An amount (never signed) in the row's unit, rounded in `direction`: 2'-0 5/8", 570 sf, 3.24%."""
+    if unit == "ft":
+        return feet_inches(x, direction)
+    if unit == "sf":
+        return _area(x, direction)
+    if unit == "%":
+        return _pct(x, direction, 2)
+    return f"{x:g}"
+
+
+def _margin_of(node, trial: dict, measured: dict):
+    """(margin, unit) of one comparison for one set of values, exactly as the row shows it (coverage in %)."""
+    proposed, required, margin, unit, sign = _numbers(node, trial, measured, "")
+    if unit == "%" and isinstance(proposed, (int, float)) and isinstance(required, (int, float)):
+        margin = formula.margin(proposed, required, sign not in ("≤", "<"))
+    return margin, unit
+
+
+MAX_READINGS = 20000          # more combinations than this: not worked out (the row keeps its status, no Delta)
+
+
+def _lot_reading(words: str | None) -> str | None:
+    """Which reading of the lot's side and rear lines a measurement's reading is under ("line 13 as a rear lot
+    line, ..."), or None when it doesn't depend on one: readings of two measurements under different lot
+    readings are never combined (the lot depth of one reading with the rear yard of another isn't a real case)."""
+    first = (words or "").split("; ")[0]
+    return first if " lot line" in first else None
+
+
+def _choices(n: str, values: dict, measured: dict, facts: dict) -> list[tuple]:
+    """Every value measure `n` could take: (value as measured, its points, its lot reading, value in the trial).
+    A measure with a value: that value; else each of its readings. On a tax-map lot a lot length is also off by
+    its TAX_MAP_SLACK either way, and the lot area is at the low or high end of its tolerance."""
+    rec = measured.get(n) or {}
+    tol = rec.get("tolerance") if n == "lot_area" else None
+    if n == "lot_area" and tol and not facts.get("lot_surveyed"):
+        return [(tol["low"], None, None, tol["low"]), (tol["high"], None, None, tol["high"])]
+    if isinstance(values.get(n), (int, float)):
+        base = [(values[n], rec.get("points"), None)]
+    else:
+        base = list(dict.fromkeys((r["value"], tuple(map(tuple, r.get("points") or rec.get("points") or [])) or None,
+                                   _lot_reading(r.get("reading")))
+                                  for r in rec.get("readings") or [] if isinstance(r.get("value"), (int, float))))
+    if n in LOT_LENGTHS and not facts.get("lot_surveyed"):
+        return [(v, p, k, v + d * TAX_MAP_SLACK[n]) for v, p, k in base for d in (-1, 1)]
+    return [(v, p, k, v) for v, p, k in base]
+
+
+def readings(node, expr: str, values: dict, measured: dict, facts: dict) -> list[dict]:
+    """THE set of readings of one row: every way each value its expression and its comparison read could be (the
+    readings of an open question, the tax map's lot lines off by their slack, the lot area at either end of its
+    tolerance), the readings of one lot reading kept together. Only the names the row itself reads count (a
+    height row reads no yard unless its own expression does). Each reading: {"margin", "unit" (the comparison
+    `node`'s, as the row shows it), "holds" (the expression `expr`: True, False or None), "value" (the row's own
+    measure before any slack), "points" (that measure's points under that reading)}. Empty when a value is
+    unknown, a margin can't be worked out, or there are more than MAX_READINGS."""
+    names = sorted(formula.names(ast.unparse(node)) | formula.names(expr))
+    per = [_choices(n, values, measured, facts) for n in names]
+    if any(not c for c in per):
+        return []
+    keys = sorted({c[2] for cs in per for c in cs if c[2] is not None}) or [None]
+    groups = []
+    for key in keys:
+        options = [[c for c in cs if c[2] in (None, key)] for cs in per]
+        if all(options):
+            groups.append(options)
+    if sum(math.prod(len(o) for o in g) for g in groups) > MAX_READINGS:
+        return []
+    m, out = node.left.id, []
+    for options in groups:
+        for combo in itertools.product(*options):
+            trial = dict(values, **{n: c[3] for n, c in zip(names, combo)})
+            own = next(((c[0], c[1]) for n, c in zip(names, combo) if n == m), (values.get(m), None))
+            margin, unit = _margin_of(node, trial, measured)
+            if margin is None:
+                return []
+            out.append({"margin": margin, "unit": unit, "holds": _evaluate(expr, trial), "value": own[0],
+                        "points": [list(p) for p in own[1]] if own[1] else None})
+    return out
+
+
+def delta_words(status: str, span, unit: str, approx: bool) -> str:
+    """The Delta, in words, everywhere it is shown (the panel, the notice, the report), from the row's margin over
+    every reading (`span`: lowest, highest) and its final status. On one reading (a survey) the margin itself
+    ("+2'-0" to spare", "−1'-4" short"); over several, what is true whichever is right: "at least 1'-0" short"
+    (short under every one: the red part), "up to 2'-9" short" (short under some: amber), "at least 3'-0" to
+    spare". Never overstated ("at least" rounds down, "up to" up) and never kinder than the status: "to spare"
+    only on a row that complies; a row that needs review for another reason says its room "if confirmed"."""
     if span is None:
-        return delta_text(margin_t)
+        return ""
     low, high = span
+    least = LEAST.get(unit, 0)
+    one = not approx and low == high
     if high < 0:                       # short under every reading
-        if _rounds_to_nothing(-high, "ft"):
-            return "less than 0'-0 1/8\" short"            # never "at least 0'-0" short", never overstated
-        return "at least " + feet_inches(-high, "down") + " short"
-    if low >= 0:                       # to spare under every reading
-        return "at the limit at worst" if _rounds_to_nothing(low, "ft") else \
-            "at least " + feet_inches(low, "down") + " to spare"
-    return "up to " + feet_inches(-low, "up") + " short"
+        if one:
+            return margin_text(high, unit) + " short"
+        if _rounds_to_nothing(-high, unit):
+            return "less than " + _amount(least, unit, "up") + " short"     # never "at least 0'-0" short"
+        return "at least " + _amount(-high, unit, "down") + " short"
+    if low < 0:                        # short under some
+        return "up to " + _amount(max(-low, least), unit, "up") + " short"
+    if _rounds_to_nothing(low, unit):
+        return "at limit" if one else "at the limit at worst"
+    room = margin_text(low, unit) if one else "at least " + _amount(low, unit, "down")
+    return room + {COMPLIES: " to spare", REVIEW: " if confirmed"}.get(status, " here, but it does not comply")
 
 
 def _worst_case(expr: str, values: dict, names: set) -> dict | None:
@@ -466,15 +541,72 @@ def _worst_case(expr: str, values: dict, names: set) -> dict | None:
 
 
 YARD_MEASURES = ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")
-COLOURS_NOTE = ("In the model: red is the part over the yard line even if the tax map's lot line is "
-                f"{feet_inches(TOLERANCE)} out (certain); amber is the part that depends on where a survey puts the line.")
+COLOURS_NOTE = ("In the model: red is the part over the yard line whichever way the tax map's lot lines "
+                f"(±{feet_inches(TOLERANCE)}) really lie (certain); amber is the part that depends on where a survey "
+                "puts them.")
 
 
-def colours_note(measure: str | None, status: str, measured: dict) -> str | None:
-    """What the red and amber in the model mean for this yard, when its lot lines are from the tax map and it
-    fails or needs review (the "?" legend says it too); otherwise nothing."""
-    tax = bool((measured.get("lot_area") or {}).get("tolerance"))
-    return COLOURS_NOTE if tax and measure in YARD_MEASURES and status in (FAILS, REVIEW) else None
+def _which(approx: bool, open_: bool) -> str:
+    return " and ".join(([f"where the tax map's lot lines really are (±{feet_inches(TOLERANCE)})"] if approx else []) +
+                        (["the open questions"] if open_ else [])) or "its readings"
+
+
+def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None:
+    """The ONE place each row's final status, Delta, "approx" mark, colours and tax-map detail line are decided:
+    from its readings (`readings`: its expression and the comparison it was decided on, raised if a raise
+    applies), AFTER every other status change. The panel, the notice, the report, the plan's labels and the red
+    and amber all read only these. A row fails only if it fails under every reading, and complies only if it
+    complies under every one (Ben, 2026-10-21): otherwise it needs review.
+      delta    the words (delta_words) for its final status;
+      approx   whether the tax map's lot lines moved any value it reads;
+      colour   a yard's: "red" (fails: short under every reading), "amber" (short under some), or "none";
+      limits   for a yard in colour, per reading of where its line is: the lot-line point and how deep from the
+               drawn line the wall is short under every ("near") and under some ("far") reading of the rest.
+    A wall `x` from the drawn line has margin (margin + x − value) under a reading: short when x < value −
+    margin. Red is short under every reading, amber under some (check.plan draws them)."""
+    tax = bool((measured.get("lot_area") or {}).get("tolerance")) and not facts.get("lot_surveyed")
+    for i in items:
+        node, expr = i.pop("_node", None), i.pop("_expr", None)
+        i.update(delta=delta_text(i.get("margin") or "") if i["status"] == COMPLIES else "", approx=False,
+                 colour="none", limits=[])
+        i["detail"].setdefault("colours", None)
+        if node is None:
+            continue
+        rs = readings(node, expr or ast.unparse(node), values, measured, facts)
+        if not rs:
+            continue
+        span, unit = (min(r["margin"] for r in rs), max(r["margin"] for r in rs)), rs[0]["unit"]
+        reads = formula.names(ast.unparse(node)) | formula.names(expr or "")
+        lot = tax and bool(reads & (LOT_LENGTHS | {"lot_area"}))
+        approx = tax and bool(formula.names(ast.unparse(node)) & (LOT_LENGTHS | {"lot_area"}))  # its own margin's
+        open_ = any(values.get(n) is None for n in reads)
+        holds = {r["holds"] for r in rs}
+        if i["status"] == FAILS and True in holds:          # complies under some reading: never a certain fail
+            i.update(status=REVIEW, mark=MARK[REVIEW], reason=(
+                f"Does not comply as drawn, but complies under some readings of {_which(lot, open_)}: it fails "
+                "only if it fails under every one · Pick survey lot lines…"))
+        elif i["status"] == COMPLIES and holds != {True}:    # short under some reading: never a pass
+            i.update(status=REVIEW, mark=MARK[REVIEW], reason=(
+                f"Complies as drawn, but not under every reading of {_which(lot, open_)} · Pick survey lot lines…"))
+        i.update(delta=delta_words(i["status"], span, unit, approx), approx=approx)
+        if approx and i["detail"].get("line"):
+            i["detail"]["line"] = (f"{i['proposed']} proposed, {i['required']} required as drawn · with the tax map's "
+                                   f"±{feet_inches(TOLERANCE)}: {i['delta']}")
+        if node.left.id not in YARD_MEASURES or i["status"] not in (FAILS, REVIEW) or span[0] >= 0:
+            continue
+        i["colour"] = "red" if i["status"] == FAILS and span[1] < 0 else "amber"
+        by_line = {}
+        for r in rs:
+            if r["points"] and isinstance(r["value"], (int, float)):
+                depth = r["value"] - r["margin"]
+                key = tuple(map(tuple, r["points"]))
+                near, far = by_line.get(key, (depth, depth))
+                by_line[key] = (min(near, depth), max(far, depth))
+        i["limits"] = [{"points": [list(p) for p in k], "near": n, "far": f} for k, (n, f) in by_line.items()]
+        if approx:
+            i["detail"]["colours"] = COLOURS_NOTE
+
+
 def _best_case(expr: str, values: dict, names: set) -> dict | None:
     """The values that make `expr` hold when every lot line is off by up to TOLERANCE the lucky way (the same
     slack as _worst_case), or None if it fails for every combination: on a tax-map lot a rule fails only if it
@@ -603,11 +735,6 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                    if "confirm the survey" in row["Provisional"] else
                    "Fails under every reading considered (" + _user_text(row["Provisional"]) + ")")
         line = _detail_line(proposed, required, margin_t, numbers[4] if node is not None else "", margin)
-        lot_span = (_delta_span(node, values, measured, names)
-                if node is not None and not facts.get("lot_surveyed") and names & LOT_LENGTHS else None)
-        if lot_span is not None and line:
-            line = (f"{proposed} proposed, {required} required as drawn · with the tax map's "
-                    f"±{feet_inches(TOLERANCE)}: {delta_words(margin_t, lot_span)}")
         hint = _hint(label, numbers[4], margin, numbers[3]) if node is not None and margin is not None else None
         if node is not None and node.left.id == "building_area" and margin is not None and margin < 0:
             allowed = _evaluate(ast.unparse(node.comparators[0]), values)
@@ -646,8 +773,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],
             "proposed": proposed, "required": required, "margin": margin_t if st != REVIEW or margin_t else "",
-            "delta": delta_words(margin_t if st != REVIEW or margin_t else "", lot_span),
-            "approx": lot_span is not None,
+            "_node": node,                        # the comparison it was decided on (a raise replaces it); popped
+            "_expr": expr,                        # and its whole expression (settle reads both)
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
@@ -663,7 +790,6 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 "scope": _scope(extras, measured),
                 "precision": PRECISION,
                 "at_limit": (f"At the limit: {proposed} exact" if margin_t == "at limit" else None),
-                "colours": colours_note(node.left.id if node is not None else None, st, measured),
             }})
         if node is not None and node.left.id == "building_height":
             out[-1]["detail"].update(_height_detail(j, facts, values, node, numbers))
@@ -822,6 +948,8 @@ def _raise_yards(items, measured, values, facts):
                 if t is i or t.get("measure") != m or t["status"] == FAILS:
                     continue
                 t["required"], t["margin"], t["hint"] = value_text(req, unit, sign, False), margin_text(margin, unit), None
+                t["_node"] = c                           # its Delta and colours are the raised minimum's
+                t["_expr"] = f"({t['_expr']}) and ({expr})" if t.get("_expr") else expr
                 if worst is not None:                    # the raised minimum fails at the tax-map worst case
                     w = _display(*_numbers(c, worst, measured, t["name"]))
                     t.update(status=REVIEW, mark=MARK[REVIEW], reason=(
@@ -884,6 +1012,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
     _cautious_for_left_out(items, left_out, extras.get("touching"))
+    settle(items, values, measured, facts)          # Delta, colours, approx: from each row's readings, last
     if facts.get("ground_assumed") == "flat":                 # on the rows the ground decides (MVP, Ben 2026-10-20)
         for i in items:
             if i.get("measure") in ("building_height", "stories"):
