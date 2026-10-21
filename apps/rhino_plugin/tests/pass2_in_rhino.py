@@ -2,7 +2,8 @@
 """The architect's review, pass 2 (2026-10-21): items 1-6, in Rhino 8, each claim asserted (the step fails loudly
 otherwise). Run in Rhino, not in CI, one step per run (sc.sticky["gordium_pass2_step"]); a driver captures Rhino's
 own windows by window id after each step (the step writes <temp>/gordium_pass2/ready.json). Steps, in order:
-- "open": Rhino brought to the front; GordiumStart on the sample (106 Ithaca Rd, its lot from the tax map).
+- "open": Rhino brought to the front; GordiumStart on the sample (106 Ithaca Rd, its lot from the tax map); its
+  Street side reads "Ithaca Rd", the street the lookup found (the address set aside), sourced to the tax map.
 - "side_yard" (1): the house moved toward a side lot line until that yard is 3'-0" short as drawn; the row's
   "To comply" says "whatever the survey shows" and gives the move under every reading, the as-drawn one after it.
 - "apply_move" (1): the house moved by exactly what it said: that row complies.
@@ -134,6 +135,14 @@ try:
             time.sleep(0.1)
         log["surveyed"] = bool(g.current_facts(doc).get("lot_surveyed"))
         claim("0 the sample's lot is from the tax map", not log["surveyed"], log["surveyed"])
+        options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
+        facts = dict(g.current_facts(doc))
+        facts.pop("address", None)                       # the name is the street's own fact, not the address's
+        state = g._box_state(doc, facts, options, g._ui_state(doc), "check")
+        street = next(r for r in g.logic.box_rows(state) if r["key"] == "street")
+        log["street"] = {"text": street["text"], "source": state.get("street_source")}
+        claim("8 the sample's Street side reads Ithaca Rd, from the lookup", street["text"] == "Ithaca Rd" and
+              "tax map" in (state.get("street_source") or ""), log["street"])
     elif step == "side_yard":
         side = next(i for n, i in items(g).items() if n.startswith("Side yard") and i.get("points"))
         a, b = (g._model_point(doc, q) for q in side["points"][:2])

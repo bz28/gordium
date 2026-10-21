@@ -1737,3 +1737,28 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert "    width = logic.label_width(text, size)\n" in ui            # placed at the width it was judged by
 
+
+def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps_it_only_on_that_street():
+    """The stack-keeper's review: the panel and report name the street only when the highlighted street line's own
+    street is known (not from the address). The stored 106 sample carries it, as its lookup found it on the State
+    tax map ("ITHACA RD"): its Street side row reads "Ithaca Rd", with that source. Picking the street side again
+    keeps the name only on one of that street's own lines; any other line is asked about (never carried)."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import sample_site
+    sample = sample_site()
+    assert sample["street_name"] == "Ithaca Rd" and "street_name" not in sample["facts"]   # the box's, not the checker's
+    assert sample["street_source"] == "the State tax map (the sample's lookup)"
+    state = {"street_name": sample["street_name"], "street_source": sample["street_source"], "has_lot": True}
+    rows = {r["key"]: r for r in logic.box_rows(state)}               # no address: the name is the fact's own
+    assert rows["street"]["text"] == "Ithaca Rd"
+    lines = sample["facts"]["street_line"]
+    assert logic.street_name_after_pick("Ithaca Rd", lines, lines[2]) == "Ithaca Rd"
+    assert logic.street_name_after_pick("Ithaca Rd", lines, list(reversed(lines[2]))) == "Ithaca Rd"   # either way round
+    side = [[0.0, 0.0], [0.0, 120.0]]                                 # a line not on Ithaca Rd: asked, not carried
+    assert logic.street_name_after_pick("Ithaca Rd", lines, side) is None
+    assert logic.street_name_after_pick(None, lines, lines[0]) is None              # no name known: nothing to keep
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    pick = rhino[rhino.index('        if what == "street":'):rhino.index('        elif what == "lot":')]
+    assert pick.index('name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),') \
+        < pick.index("RhinoGet.GetString(") < pick.index('saved_ui["street_name"] = name')
+    assert 'street_name=sample.get("street_name"),' in rhino and '"street_name": saved_ui.get("street_name"),' in rhino

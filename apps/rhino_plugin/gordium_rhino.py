@@ -1233,7 +1233,7 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
-            "street_name": facts.get("street_name"), "street_source": saved_ui.get("street_source") or source("street"),
+            "street_name": saved_ui.get("street_name"), "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span},
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
             "corner_source": source("corner_lot"), "zones_found": facts.get("zones_found") or [],
@@ -1288,7 +1288,15 @@ def _box_pick(doc, what, facts, saved_ui):
                 rc, point = Rhino.Input.RhinoGet.GetPoint("Click the lot line on the street", True)
                 if rc == Rhino.Commands.Result.Success:
                     a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
-                    facts["street_line"] = [[_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]]
+                    picked = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+                    name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
+                                                        picked)            # still the street the lookup named?
+                    if name is None:                                       # else asked, never guessed
+                        got, typed = Rhino.Input.RhinoGet.GetString(
+                            "Which street is this lot line on? (Enter leaves it unnamed)", True, "")
+                        name = (typed or "").strip() or None if got == Rhino.Commands.Result.Success else None
+                    facts["street_line"] = [picked]
+                    saved_ui["street_name"] = name
                     saved_ui["street_source"] = logic.ENTERED
         elif what == "lot":                          # Use my survey: the surveyed outline
             lots = _lot_candidates(doc)
@@ -1998,7 +2006,9 @@ def gordium_start():
     if not _lot_candidates(doc):        # an empty model: the sample project, its lot and its facts, prefilled
         sample = ask({"cmd": "sample_site"})
         _add_lot(doc, sample)
-        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True))   # its facts are the sample project's
+        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True,      # its facts are the sample project's
+                                 street_name=sample.get("street_name"),     # its street, as the lookup named it
+                                 street_source=sample.get("street_source")))
         facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
                                        suggested_facts(doc, options["zones"]))
         facts["lot_id"] = str(_lot_candidates(doc)[0].Id)

@@ -671,6 +671,24 @@ def street_name(state):
     return m.group(1).strip() if m else "the highlighted line"
 
 
+def street_name_after_pick(name, lines, picked, tolerance=0.5):
+    """The street's name to keep when the architect picks the street side again (`picked`: the lot line clicked,
+    [[x, y], [x, y]] in feet): `name`, the street's name as found, if the line is one of that street's own `lines`
+    (within `tolerance` ft at each end, either way round); else None, and the architect is asked (a name is never
+    carried to a line it wasn't found on)."""
+    if not name:
+        return None
+
+    def near(p, q):
+        return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
+
+    a, b = picked
+    for c, d in lines or []:
+        if (near(a, c) and near(b, d)) or (near(a, d) and near(b, c)):
+            return name
+    return None
+
+
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,

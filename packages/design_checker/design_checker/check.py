@@ -738,6 +738,10 @@ def sample_site() -> dict:
             "lot_name": "Lot · 106 Ithaca Rd · from the State tax map (parcel " + outline["source"]["print_key"]
                         + "), each line ±2'-0\", not a survey",
             "frame": outline["frame"],
+            # the street its street line is on, as the lookup found it on the State tax map ("ITHACA RD"): the
+            # box's, like a looked-up street (not a checker fact)
+            "street_name": " ".join(w.capitalize() for w in str(outline.get("street") or "").split()) or None,
+            "street_source": "the State tax map (the sample's lookup)",
             "facts": {k: v for k, v in facts.items() if k in keep}}
 
 
