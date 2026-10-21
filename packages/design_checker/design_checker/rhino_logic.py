@@ -1091,14 +1091,15 @@ def guides_on_screen(held, doc_serial):
 
 def needs_refetch(held, record, doc_serial):
     """Whether the tick or a Draw on the same lot should fetch the neighbourhood again: nothing held for this
-    document (a reopened file: the footprints are never saved), or a live-only layer whose last fetch failed
-    (the record says so). A fetch that worked and found no footprints is not fetched again (review round 8: it was,
-    on every Draw and tick, because "on screen" also meant "something to draw"). guides_on_screen stays the
-    drawing's and the merge's question."""
+    document (a reopened file: the footprints are never saved), or any layer, stored or live-only, whose last fetch
+    failed (the record says so: review round 9, parcels down on the first Draw were never fetched again). A layer
+    kept from an earlier fetch that worked carries that fetch's "found" entry (context_merge), so a kept layer
+    doesn't loop. A fetch that worked and found nothing is not fetched again (review round 8: it was, on every Draw
+    and tick, because "on screen" also meant "something to draw"). guides_on_screen stays the drawing's and the
+    merge's question."""
     if not guides_of(held, doc_serial):
         return True
-    return any(not is_stored(v) and (v or {}).get("status") not in DREW
-               for v in ((record or {}).get("layers") or {}).values())
+    return any((v or {}).get("status") not in DREW for v in ((record or {}).get("layers") or {}).values())
 
 
 def context_step(frame, drawn, on):

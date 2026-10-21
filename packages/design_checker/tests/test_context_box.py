@@ -461,6 +461,20 @@ def test_a_fetch_that_worked_but_found_no_footprints_is_not_fetched_again_and_a_
     assert logic.needs_refetch({"doc": DOC + 1, "lines": shown}, record, DOC)   # another document's
 
 
+def test_a_stored_layer_that_failed_is_fetched_again_but_one_kept_from_a_good_fetch_is_not():
+    """Review round 9: needs_refetch retried only live-only layers, so parcels down on the first Draw (footprints
+    answering) stayed at "0 neighbouring parcels" for good."""
+    frame = looked_up()["writes"]["frame"]
+    model, record, _, shown = redraw([], None, fetch_with(frame, down={"state_parcels"}), frame)
+    assert record["layers"]["parcels"]["status"] == "offline" and shown
+    assert logic.needs_refetch({"doc": DOC, "lines": shown}, record, DOC)        # nothing kept: try again
+    # an earlier good draw, then parcels down: they are kept (found, from the earlier fetch), so no loop
+    model, record, _, shown = redraw([], None, fetch_with(frame), frame)
+    model, record, _, shown = redraw(model, record, fetch_with(frame, down={"state_parcels"}), frame, shown)
+    assert record["layers"]["parcels"]["status"] == "found" and set(record["kept_from"]) == {"parcels"}
+    assert not logic.needs_refetch({"doc": DOC, "lines": shown}, record, DOC)
+
+
 def test_every_state_of_the_context_has_one_definition():
     """Review round 7, swept: on screen, belongs to this document, same frame, stored, the live layer kept, what is
     replaced: each decided by one rhino_logic function, used everywhere."""
