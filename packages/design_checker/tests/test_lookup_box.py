@@ -27,9 +27,9 @@ def ground_from_the_lookup(monkeypatch):
     it comes back; these tests run with it on."""
     monkeypatch.setattr(logic, "FLAT_GROUND", False)
 
-def _rules():
+def _rules(zone="R-1b"):
     from rule_format.rulebook import load, rulebook_for
-    return {r["id"]: r for r in load(rulebook_for(REPO / "regulations/jurisdictions/new_york/ithaca_city", "R-1b"))
+    return {r["id"]: r for r in load(rulebook_for(REPO / "regulations/jurisdictions/new_york/ithaca_city", zone))
             ["rules"]}
 
 
@@ -357,7 +357,7 @@ def test_p0_the_height_bonus_never_complies_on_an_unsettled_lot_or_street_side(k
 
 @pytest.mark.parametrize("key", ["lot", "street", "ground"])
 def test_every_r1b_rule_reading_an_unsettled_measurement_needs_review(key):
-    """(B) Across every R-1b rule: any item whose formula reads a measurement the unsettled fact decides never
+    """(B) Across every rule of each scenario's own district: any item whose formula reads a measurement the unsettled fact decides never
     complies; the others are untouched."""
     from design_checker import scenarios
     from design_checker.check import check_site
@@ -368,8 +368,9 @@ def test_every_r1b_rule_reading_an_unsettled_measurement_needs_review(key):
         plain = {i["name"]: i for i in check_site(site, facts, extras=extras)["view"]["items"]}
         doubt = {i["name"]: i for i in check_site(site, {**facts, "unsettled": {key: "x"}}, extras=extras)["view"]
                  ["items"]}
+        rules = _rules(facts.get("zone") or "R-1b")      # each scenario's own district (R-1a, R-3a too)
         for name, i in doubt.items():
-            reads = present._formula_names(i, RULES) & decides
+            reads = present._formula_names(i, rules) & decides
             assert not (reads and i["status"] == present.COMPLIES), (path.name, name)
             if not reads:
                 assert i["status"] == plain[name]["status"], (path.name, name)
@@ -453,7 +454,7 @@ def test_p2_the_guide_case_offers_draw_my_lot_and_keeps_draw_off_until_there_is_
     facts, saved, state = box(p)
     rows = {r["key"]: r for r in logic.box_rows({**state, "lot_missing": True})}
     assert rows["lot"]["actions"][0] == ("draw_lot", "Draw my lot…", True)
-    assert logic.draw_reason({"district_confirmed": True, "lot_missing": True}) == "Draw or pick the lot to continue."
+    assert logic.draw_reason({"zone": "R-1b", "district_confirmed": True, "lot_missing": True}) == "Draw or pick the lot to continue."
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert 'if what == "draw_lot":' in rhino and '"lot_missing": lot is None' in rhino
 
@@ -1085,3 +1086,23 @@ def test_with_the_lookups_ground_its_fact_names_where_the_ground_came_from():
     assert got["source"] == "suggested by Gordium · USGS 3DEP elevation" and got["confirmed_by"] == "you"
     got = logic.fact_sources({"ground": {"kind": "spot", "count": 3}}, "2026-10-21", confirmed=True)["ground"]
     assert got["source"] == "placed by you" and got["confirmed_by"] == "you"
+
+
+
+def test_a_looked_up_district_without_rules_is_never_preselected_or_called_suggested():
+    """Demo fact-check (1): the City map gave R-2a, which has no rulebook; the dropdown fell back to its first
+    entry (R-1a) still labelled "suggested by Gordium", so the lot could be checked against the wrong zone. Now
+    no district is set, the box says the map's district has no rules yet, and Draw waits for a deliberate pick."""
+    payload = {"status": "found", "facts": {"zone": {"value": "R-2a"}}}
+    facts, saved = logic.lookup_choices(payload, {"zone": "R-1b"}, {}, zones=["R-1a", "R-1b", "R-3a"])
+    assert "zone" not in facts and "zone_source" not in saved
+    assert "Gordium doesn't have R-2a's rules yet" in saved["_live"]["zone"]
+    state = {"zone": facts.get("zone"), "district_confirmed": True, "live": saved["_live"]}
+    assert logic.draw_reason(state) == "Pick the district to continue." and not logic.can_draw(state)
+    zone_row = next(r for r in logic.box_rows(state) if r["key"] == "zone")
+    assert "suggested" not in zone_row["text"] and "R-2a's rules" in (zone_row["review"] or "")
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "zone.SelectedIndex = 0" not in ui                    # never the first district by default
+    facts, saved = logic.lookup_choices(payload | {"facts": {"zone": {"value": "R-1b"}}}, {}, {},
+                                        zones=["R-1a", "R-1b", "R-3a"])
+    assert facts["zone"] == "R-1b" and saved["zone_source"].startswith("suggested by Gordium")

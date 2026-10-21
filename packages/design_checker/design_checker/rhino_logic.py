@@ -170,12 +170,29 @@ STATED_FACTS = {
     "rooms_let_for_profit": ("Rooms let for profit", "count", "rooms let for profit"),
     "conversion": ("Made by converting an existing building, not new construction? (§325-3B)", "yes_no",
                    "whether it is a conversion"),
+    # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
+    # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
+    "stories": ("Stories of the whole building", "count", "the number of stories"),
 }
+STORIES_ASKED = ("enter the number of stories", "enter the count")      # the measuring's own words when it waits for the count
+
+
+def stories_needed(record):
+    """Whether the stories measurement waits for the architect's count (its reason asks to enter it)."""
+    return any(w in ((record or {}).get("reason") or "") for w in STORIES_ASKED)
+
+
+def refused_stories(items):
+    """The message when a count entered is fewer than the floors drawn (the measuring refuses it), else None."""
+    i = next((i for i in items or [] if i.get("measure") == "stories" or i.get("name") == "Stories"), None)
+    why = (i or {}).get("reason") or ""
+    refused = "fewer than the floor blocks drawn" in why or "more than the drawing could hold" in why
+    return (why[0].upper() + why[1:] + ". The count wasn't kept.") if refused else None
 
 
 def needs_of(names, values):
     """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
-    return [k for k in STATED_FACTS if k in names and (values or {}).get(k) is None]
+    return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None]
 
 
 def _and(words):
@@ -742,6 +759,7 @@ def box_rows(state, flat=None):
 #   City's zones and street name, the model edits to undo on Cancel) and are never written to the .3dm
 #   (storable_ui, the one write boundary).
 
+NO_RULES = "The City map says {zone}; Gordium doesn't have {zone}'s rules yet: pick a district only if you know it applies."
 LOOKUP_LIMIT_S = 45                               # the whole lookup; the box says so, the Rhino side stops it then
 LOOKING = "Looking up {}… (up to %d s)" % LOOKUP_LIMIT_S
 CHECKABLE = ("lot", "street", "ground")          # what "I checked this" settles (the district has its own tick)
@@ -820,14 +838,23 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         saved_ui["address_source"] = SUGGESTED + " · " + label("address", "address")
     zone = value("zone")
     names = {z.lower(): z for z in zones} if zones else {}
-    if isinstance(zone, list):                   # two zones: the box asks which applies
-        found = [names.get(z.lower(), z) for z in zone]
-        saved_ui["_zones_found"] = found
-        facts["zone"] = found[0]
-    elif zone:
-        facts["zone"] = names.get(zone.lower(), zone)
+    said = zone if isinstance(zone, list) else [zone] if zone else []
+    known = [names[z.lower()] for z in said if z.lower() in names] if zones else list(said)
+    unknown = [z for z in said if zones and z.lower() not in names]
+    if unknown and not known:
+        # the City map names a district Gordium has no rules for: never a district it didn't give, preselected or
+        # called suggested; none is set until the architect picks one deliberately
+        facts.pop("zone", None)
         saved_ui.pop("_zones_found", None)
-    if zone:
+        saved_ui.pop("zone_source", None)
+        live["zone"] = _merged(live.get("zone"), NO_RULES.format(zone=" or ".join(unknown)))
+    elif len(known) > 1:                         # two zones: the box asks which applies
+        saved_ui["_zones_found"] = known
+        facts["zone"] = known[0]
+    elif known:
+        facts["zone"] = known[0]
+        saved_ui.pop("_zones_found", None)
+    if known:
         saved_ui["zone_source"] = SUGGESTED + " · " + label("zone", "zone")
     saved_ui["_reconfirm"] = True                # a looked-up district is the architect's only once ticked again
     saved_ui["_live"] = {k: v for k, v in live.items() if k in ("zone", "overlays")}
@@ -1000,6 +1027,8 @@ BUFFER_UNREAD = "Design buffer not understood: type it like 1'-6\" or 6\""
 
 def draw_reason(state):
     """Why Draw is off, in one line; "" when it is on."""
+    if not state.get("zone"):
+        return "Pick the district to continue."
     if not state.get("district_confirmed"):
         return "Confirm the district to continue."
     if parse_feet(state.get("design_buffer")) is None:

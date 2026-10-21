@@ -27,7 +27,7 @@ measurements:
     from: 'measured from spreadsheet_design_model.3dm: from the ground level (grade plane) to the top of the roof (a flat roof, to its highest level)'
   stories:
     value: 3.0
-    from: 'stated by the architect (not measured from the model: no floor blocks are drawn) (lot facts)'
+    from: 'stated by the architect for the whole building, within what the drawing allows (1 to 5: the building, 35 ft tall, could hold up to 5 stories (7 ft a story, R305.1)) (lot facts)'
   front_yard:
     value: 30.0
     from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line to the main building; between (63, 0) and (63, 30) [readings: to the building seen from above = 30; to its walls at ground level = 30]'
