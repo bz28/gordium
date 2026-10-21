@@ -871,31 +871,137 @@ def test_a_single_plain_solid_keeps_the_typed_count_stated_by_the_architect():
     assert m["value"] == 3 and "stated by the architect" in m["how"]
 
 
-def test_stories_never_comply_with_fewer_than_the_floors_drawn_unless_a_main_building_is_measured():
-    """A property over random drawings: stacks of 1 to 5 solids (floor blocks or plain), a garage, shared ids, a
-    main building picked, missing or stale, any typed count. Stories never take a value below the most floors
-    drawn on any stack, unless a main building was picked, every id is distinct and its own count is that value."""
+def test_a_plain_main_building_with_a_floor_block_wing_never_keeps_the_typed_count():
+    """Review round 3 of the stories fix (P0): the main building picked is one plain solid, and a wing of four floor
+    blocks stands beside it. The height reads both (main alone, and with the wing as part of it: §325-25), but
+    stories kept the typed 2 as the value. Stories are read over the same candidate buildings: 2 as stated for the
+    main building alone, 4 with the wing, so it needs review (the accessory question), never 2."""
+    main = box(10, 25, 35, 65, 0, 20, id="house")
+    wing = [floor(35, 25, 45, 45, z0=i * 10, z1=(i + 1) * 10, id=f"w{i}") for i in range(4)]
+    m = measure(site(RECT, main, *wing), {**FACTS, "stories": 2, "main_building": "house"})["stories"]
+    assert m["value"] is None and {r["value"] for r in m["readings"]} == {2, 4}
+    assert "accessory building" in m["reason"]
+
+
+SEEDS = range(10)                       # fixed: 10 x 200 = 2,000 drawings, the same every run
+
+
+def _drawing(rnd):
+    """A random drawing, and, worked out from the blocks themselves (not by measure.py), each stack's floors:
+    stacks side by side (floor blocks or plain solids, one to five high: a plain main building beside floor-block
+    wings among them), shared ids, a main building picked, missing or stale, any typed count."""
+    blocks, stacks = [], []
+    for k in range(rnd.randint(1, 3)):
+        x0 = 5 + 12 * k
+        high, marked = rnd.randint(1, 5), rnd.random() < 0.6
+        ids = [f"s{k}b{i}" for i in range(high)]
+        for i, bid in enumerate(ids):
+            blocks.append(floor(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid) if marked else
+                          box(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid))
+        stacks.append({"ids": ids, "countable": marked or high > 1, "floors": high,
+                       "tall": not marked and high == 1})          # one plain 10 ft solid: could hold a story
+    if rnd.random() < 0.35:            # a plain wing behind the first stack: a porch slab up to a tall wing
+        h = rnd.choice([3, 6, 7, 8, 12, 32])
+        blocks.append(box(5, 60, 17, 70, 0, h, id="wing"))
+        stacks.append({"ids": ["wing"], "countable": False, "floors": 0, "tall": h > 7})   # > 7 ft: R305.1
+    if rnd.random() < 0.2:
+        rnd.choice(blocks)["id"] = rnd.choice(blocks)["id"]
+    pick = rnd.choice([None, "stale"] + [b["id"] for b in blocks])
+    return blocks, stacks, pick, rnd.choice([None, 1, 2, 3, 4, 5])
+
+
+def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
+    """Property, over 2,000 drawings: a story count is a value only if no id is shared, a main building is known,
+    and it is at least the floors of every candidate building the height reads (the main one alone, and with every
+    other solid), worked out from the blocks; a typed count stands as the value only when no drawn object anywhere
+    can be counted."""
     import random
-    rnd = random.Random(21)
-    for _ in range(150):
-        blocks, stacks = [], []
-        for k, (x0, x1) in enumerate(((5, 20), (25, 40))[:rnd.randint(1, 2)]):
-            n, marked = rnd.randint(1, 5), rnd.random() < 0.5
-            ids = [f"s{k}f{i}" for i in range(n)]
-            stacks.append(ids)
-            for i, bid in enumerate(ids):
-                b = floor(x0, 25, x1, 65, z0=i * 10, z1=(i + 1) * 10, id=bid) if marked else \
-                    box(x0, 25, x1, 65, z0=i * 10, z1=(i + 1) * 10, id=bid)
-                blocks.append(b)
-        if rnd.random() < 0.3:                                          # a shared id somewhere
-            other = rnd.choice(blocks)
-            rnd.choice(blocks)["id"] = other["id"]
-        pick = rnd.choice([None, "stale", rnd.choice(blocks)["id"]])
-        typed = rnd.randint(1, 4)
-        m = measure(site(RECT, *blocks), {**FACTS, "stories": typed, "main_building": pick})["stories"]
-        most = max(len(s) for s in stacks)
-        ids = [b["id"] for b in blocks]
-        if m["value"] is None or m["value"] >= most:
-            continue
-        own = next((s for s in stacks if pick in s), None)
-        assert len(set(ids)) == len(ids) and own is not None and m["value"] == len(own), (stacks, pick, typed, m)
+    for seed in SEEDS:
+        rnd = random.Random(seed)
+        for _ in range(200):
+            blocks, stacks, pick, typed = _drawing(rnd)
+            m = measure(site(RECT, *blocks), {**FACTS, "stories": typed, "main_building": pick})["stories"]
+            if m["value"] is None:
+                continue
+            ids = [b["id"] for b in blocks]
+            if not any(s["countable"] for s in stacks):           # nothing drawn can be counted: the typed count
+                assert m["value"] == typed, (seed, stacks, m)
+                continue
+            assert len(set(ids)) == len(ids), (seed, ids, m)
+            main = next((s for s in stacks if pick in s["ids"]), stacks[0] if len(stacks) == 1 else None)
+            assert main is not None, (seed, stacks, pick, m)       # no main building: never a value
+            alone = main["floors"] if main["countable"] else typed
+            together = max(s["floors"] for s in stacks if s["countable"])
+            assert m["value"] >= together and (alone is None or m["value"] >= alone), (seed, stacks, pick, typed, m)
+            for members in ([main], stacks):    # a plain part that could hold a story: only the count typed covers it
+                most = max((s["floors"] for s in members if s["countable"]), default=None)
+                if most is not None and any(s["tall"] and not s["countable"] for s in members):
+                    assert typed is not None and m["value"] == typed >= most, (seed, stacks, pick, typed, m)
+
+
+@pytest.mark.parametrize("typed", [1, 2])
+def test_a_plain_house_with_a_three_floor_wing_against_its_rear_wall_never_complies_below_three(typed):
+    """Stress test F6 (stress-tests d32d437): a plain-solid house and a wing of three floor blocks against its rear
+    wall, a typed 1 or 2: stories complied. Read over the height's candidate buildings it is the typed count alone
+    and three with the wing: needs review, never a count below three."""
+    house = box(10, 25, 35, 55, 0, 20, id="house")
+    wing = [floor(10, 55, 35, 65, z0=i * 11, z1=(i + 1) * 11, id=f"w{i}") for i in range(3)]
+    m = measure(site(RECT, house, *wing), {**FACTS, "stories": typed, "main_building": "house"})["stories"]
+    assert m["value"] is None and 3 in {r["value"] for r in m["readings"]}
+
+
+def test_height_and_stories_report_over_the_same_candidate_buildings():
+    """One list of candidate buildings (_assemblies) is read by both: their readings start with the same words."""
+    from model_measurement.measure import _assemblies
+    main = box(10, 25, 35, 65, 0, 20, id="house")
+    wing = [floor(35, 25, 45, 45, z0=i * 10, z1=(i + 1) * 10, id=f"w{i}") for i in range(4)]
+    m = measure(site(RECT, main, *wing), {**FACTS, "stories": 2, "main_building": "house"})
+    words = [w for w, _ in _assemblies({"id": "x"}, [{"id": "y"}])]
+
+    def over(record):
+        return {next(w for w in words if r["reading"].startswith(w)) for r in record["readings"]
+                if any(r["reading"].startswith(w) for w in words)}
+    assert over(m["building_height"]) == over(m["stories"]) == set(words)
+
+
+@pytest.mark.parametrize("typed, porch, expect", [(None, False, None), (3, False, 3), (2, False, None),
+                                                   (None, True, 3)])
+def test_a_plain_solid_joined_to_a_floor_stack_leaves_its_stories_to_the_count_typed(typed, porch, expect):
+    """#18 round 15 (P0): three 11 ft floor blocks with a plain 32 ft solid against them. The solid's stories
+    aren't drawn: with no count typed, needs review; 3 typed covers the whole building; 2 typed is fewer than the
+    floors drawn (a question). A 3 ft porch slab can't hold a story (7 ft, R305.1): the floors drawn are the count."""
+    floors = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    other = box(10, 15, 35, 25, 0, 3, id="porch") if porch else box(35, 25, 45, 45, 0, 32, id="wing")
+    m = measure(site(RECT, *floors, other), {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
+    assert m["value"] == expect, m
+    if typed is None and not porch:
+        assert "wing has no floors drawn" in m["reason"]
+    if typed == 2:
+        assert {r["value"] for r in m["readings"]} == {2, 3} and "(story)" in m["reason"]
+
+
+def test_the_faces_open_to_the_sky_are_found_point_by_point():
+    """The open-to-the-sky test runs all its point checks at once; it finds the same faces as checking each sample
+    point against each other face's grown outline one by one (random overlapping boxes and sloped roofs)."""
+    import random
+    from model_measurement.measure import TOL, _normal_z, _open_to_the_sky, _plan, _plane_z, _samples
+    rnd = random.Random(7)
+    for _ in range(60):
+        faces = []
+        for k in range(rnd.randint(1, 4)):
+            x, y, z0 = rnd.uniform(0, 20), rnd.uniform(0, 20), rnd.choice([0, 0, 10])
+            make = rnd.choice([lambda: box(x, y, x + rnd.uniform(4, 15), y + rnd.uniform(4, 15), z0, z0 + 10, f"b{k}"),
+                               lambda: sloped_roof_box(x, y, x + 10, y + 12, z0 + 10, z0 + 16, f"b{k}")])
+            faces += make()["faces"]
+        flat = [(f, _plan(f)) for f in faces if _normal_z(f["points"]) > 0.001]
+        expect = []
+        for i, (f, shape) in enumerate(flat):
+            if shape.area <= 1e-9:
+                continue
+            for p in _samples(shape):
+                z = _plane_z(f, p.x, p.y)
+                if not any((h := _plane_z(g, p.x, p.y)) is not None and h > z + TOL
+                           for j, (g, s) in enumerate(flat) if j != i and s.buffer(TOL).contains(p)):
+                    expect.append(f)
+                    break
+        assert [id(f) for f in _open_to_the_sky(faces)] == [id(f) for f in expect]

@@ -847,13 +847,39 @@ def test_a_row_complying_under_every_reading_names_the_open_question_it_depends_
                   "question for the architects (lot_depth)"}
     assert present._reason(row) == ("Complies under every reading, but it depends on an open question: which lot "
                                     "lines count as side and which as rear; confirm with the zoning office")
+
+
+def test_a_row_complying_under_every_reading_names_only_the_questions_it_turns_on():
+    """Review of e949a01: the wording named every question in the joined reason. Now only the open measurements
+    the result turns on (with one unknown and the others at any reading, the result can't be told), each by its
+    own reason's short name: scenario 10's side yard turns on the overhang question only (its lot lines are clear),
+    never on which lot lines are side lines."""
     from design_checker import scenarios
     from design_checker.check import check_site
     s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "10_one_floor_moved_on_its_own.yaml"))
     side = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Side yard, East"]
-    assert side["reason"].startswith("Complies under every reading, but it depends on open questions: which lot "
-                                     "lines count as side and which as rear; whether a yard is measured to the wall")
+    assert side["reason"] == ("Complies under every reading, but it depends on an open question: whether a yard is "
+                              "measured to the wall or to overhangs, and what counts as part of the building; "
+                              "confirm with the zoning office")
+    rule = {"id": "x", "kind": "rule", "check": "side_yard_smaller >= 10 or side_yard_larger >= 10"}
+    measured = {"side_yard_smaller": {"value": None, "readings": [{"reading": "r", "value": 12}, {"reading": "s", "value": 15}]},
+                "side_yard_larger": {"value": None, "readings": [{"reading": "r", "value": 12}, {"reading": "s", "value": 15}]}}
+    from design_checker.check import turns_on
+    assert turns_on(rule, measured, {}) == []                    # either one decides it: it turns on neither
 
+
+def test_every_open_question_the_measuring_asks_has_a_short_name():
+    """One table: every tagged question in the measuring code, and every untagged one it keeps as a constant."""
+    import re
+    from pathlib import Path
+    from model_measurement import measure
+    src = Path(measure.__file__).read_text(encoding="utf-8")
+    tags = set(re.findall(r"open questions? for the architects \(([a-z_]+)\)", src)) | set(re.findall(r"\((story)\)\"", src))
+    assert tags and all(t in present.QUESTION_NAMES for t in tags), tags - set(present.QUESTION_NAMES)
+    for constant in (measure.ROOF_KIND, measure.ABOVE_ROOF, measure.ACCESSORY, measure.PITCHED):
+        assert present.question_name(constant), constant
+    assert present._user_text("parts that stick out (overhangs) count (building_area)") == \
+        "parts that stick out (overhangs) count"                    # only tags are stripped
 
 def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
     """A looked-up lot is drawn turned so its street runs along the bottom (106 Ithaca Rd: 306.38 degrees), so

@@ -148,10 +148,26 @@ def _names(rule: dict) -> set:
     return names
 
 
+def turns_on(rule: dict, measured: dict, allowed: dict, facts: dict | None = None) -> list[str] | None:
+    """The open measurements a rule's result turns on: each whose readings it needs (with it unknown and everything
+    else at any of its readings from THE reading set, the result can't be told). An open question it doesn't turn
+    on doesn't hold it back (either answer gives the same result). None if there are too many readings."""
+    names = _names(rule)
+    values = {k: m["value"] for k, m in measured.items()}
+    out = []
+    for n in sorted(n for n in names if values.get(n) is None and (measured.get(n) or {}).get("readings")):
+        every = reading_set.combos(names - {n}, values, measured, facts)
+        if every is None:
+            return None
+        if any(outcome(rule, dict(trial, **{n: None}), allowed) == "needs_review" for trial, _ in every or [(values, None)]):
+            out.append(n)
+    return out
+
+
 def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = None, check: str | None = None) -> str:
     """THE verdict of a rule (or, with `check`, of one of its comparisons: a side yard of a pair, with the rule's
     applies_when and review_when) over THE reading set (reading_set.combos): fails if it fails under every reading;
-    complies if it passes under every one and nothing it reads is an open question (the lot area of a tax-map lot
+    complies if it passes under every one and turns on no open question (turns_on; the lot area of a tax-map lot
     is read at its low and high ends, so it counts as known); otherwise needs review. The ONLY place a row is
     decided: the panel shows this or something more cautious, never more favourable (review round 3)."""
     rule = dict(rule, check=check) if check else rule
@@ -167,7 +183,9 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
     got = {outcome(rule, trial, allowed) for trial, _ in every}
     if got == {"fail"}:
         return present.FAILS
-    open_ = {n for n in names if values.get(n) is None} - ({SURVEY} if tax else set())
+    turns = turns_on(rule, measured, allowed, facts)
+    open_ = (set(turns) if turns is not None else {n for n in names if values.get(n) is None}) - \
+        ({SURVEY} if tax else set())
     return present.COMPLIES if got == {"pass"} and not open_ else present.REVIEW
 
 
@@ -352,6 +370,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         r["Side provisional"] = {m: (every_reading(dict(rule, check=c), measured, allowed, facts) or (None, None))[1]
                                  for m, c in side_checks(rule).items()}      # each side's words, as a row's
         r["Fails"] = r["Verdict"] == present.FAILS                          # fails whichever way it goes
+        r["Turns on"] = turns_on(rule, measured, allowed, facts)            # the open questions its result needs
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
     lot_id = (site.get("lot") or {}).get("id")
