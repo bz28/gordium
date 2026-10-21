@@ -207,3 +207,55 @@ def test_a_changed_corner_answer_drops_the_street_lines():
 def test_closing_the_confirm_dialog_saves_nothing():
     from design_checker.rhino_logic import after_confirm
     assert (after_confirm("ok"), after_confirm("change"), after_confirm(None)) == ("keep", "change", "cancel")
+
+
+# ---- the plugin and the worker stay in step (audit P1-1) -----------------------------------------------------
+
+def test_a_stray_line_on_the_workers_stdout_never_reaches_the_plugin(facts):
+    """A library print() or C code writing to file descriptor 1 inside the worker once put every later answer
+    one request behind (a check could show the previous check's result). Answers now have their own channel."""
+    import subprocess
+    import sys
+    noisy = ("import os, design_checker.__main__ as m\n"
+             "real = m.answer\n"
+             "def answer(r):\n"
+             "    print('a library says hello')\n"
+             "    os.write(1, b'C code says hello\\n')\n"
+             "    return real(r)\n"
+             "m.answer = answer\n"
+             "m.main(['serve'])\n")
+    requests = [{"id": 1, "cmd": "facts", "facts": {"lot_area_sqft": 1}}, {"id": 2, "cmd": "facts", "facts": {}}]
+    run = subprocess.run([sys.executable, "-u", "-c", noisy], input="".join(json.dumps(r) + "\n" for r in requests),
+                         capture_output=True, text=True, encoding="utf-8", timeout=120)
+    replies = [json.loads(line) for line in run.stdout.splitlines()]
+    assert [r["id"] for r in replies] == [1, 2]
+    assert replies[0]["result"]["problems"] and replies[1]["result"]["problems"] == []
+    assert "a library says hello" in run.stderr and "C code says hello" in run.stderr
+
+
+def test_the_plugin_takes_only_this_requests_answer_and_never_waits_forever():
+    import queue
+    from design_checker import rhino_logic as logic
+
+    def lines(*items):
+        q = queue.Queue()
+        for item in items:
+            q.put(item)
+        return q
+
+    assert logic.answer_for(lines('{"id": 7, "ok": true, "result": 1}\n'), 7, 1) == {"id": 7, "ok": True, "result": 1}
+    assert logic.answer_for(lines(None), 7, 1) is None                              # the checker stopped
+    for wrong in ('{"id": 6, "ok": true, "result": "the last check"}\n', "a library says hello\n", "[1]\n"):
+        with pytest.raises(logic.CheckerOutOfStep):                                 # never an earlier answer
+            logic.answer_for(lines(wrong, '{"id": 7, "ok": true}\n'), 7, 1)
+    with pytest.raises(logic.CheckerOutOfStep, match="no answer in"):               # a hung check: not forever
+        logic.answer_for(lines(), 7, 0.05)
+    assert logic.ask_limit("check") >= 60
+
+
+def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_checker():
+    """The Rhino side can't run in CI: its source must use the tested logic (no bare readline on the pipe)."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    ask = src[src.index("def ask("):src.index("\n\n\n", src.index("def ask("))]
+    assert "logic.answer_for(" in ask and "_stop_worker()" in ask and "readline" not in ask
+    assert "threading.Thread(target=_read_lines" in src
