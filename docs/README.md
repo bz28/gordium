@@ -46,6 +46,9 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 |---|---|---|---|
 | [decisions/2026-10-20_rhino_talks_to_python.md](decisions/2026-10-20_rhino_talks_to_python.md) | Decision: all measuring and checking runs in Gordium's own Python; Rhino only copies the model across and draws the answer | Engineers | The Rhino–Python connection changes |
 | [design/rhino_ui_spec.md](design/rhino_ui_spec.md) | The approved build spec for the Rhino screens: every acceptance criterion and how it is verified | Engineers, designers | The Rhino UI's design changes |
+| [decisions/2026-10-20_data_sources_and_permissions.md](decisions/2026-10-20_data_sources_and_permissions.md) | Decision: which map services the address lookup asks, what we may store from each, when permission emails are needed; how Gordium compares with an architect's due diligence | Ben, engineers | A source is added or a permission answer arrives |
+| [plans/product_plan_draft.md](plans/product_plan_draft.md) | DRAFT: how Gordium reaches customers (install, sign-in, what runs where, what it takes to build) | Ben | Ben reacts; each choice then becomes a decision |
+| [plans/known_gaps_vs_practice.md](plans/known_gaps_vs_practice.md) | What architects look into on a real project that Gordium doesn't yet, each with a proposed next step | Ben, architects, shareholders | A gap is closed or found |
 | [questions_for_architects.md](questions_for_architects.md) | The questions about the law research couldn't settle | Architects | A question is added, researched or answered |
 
 ## Evidence: how we know it's right
@@ -74,6 +77,7 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 | [rule_drafting](../packages/rule_drafting/README.md) | Step 5: AI drafts rules for every district; code checks every draft | Engineers | Drafting changes |
 | [rule_export](../packages/rule_export/README.md) | The rules spreadsheet people read, with links to the City's words | Engineers | The spreadsheet changes |
 | [project_report](../packages/project_report/README.md) | A project's compliance report in the architects' own spreadsheet format | Engineers | The report changes |
+| [site_lookup](../packages/site_lookup/README.md) | Type an address, get the site: the lot, street side, corner lot, ground and a zoning suggestion, each with its source | Engineers | The lookup changes |
 | [model_measurement](../packages/model_measurement/README.md) | Measures a Rhino model the way the City defines each measurement (lot, yards, building area, height) | Engineers | A measurement is added or changes |
 | [envelope_builder](../packages/envelope_builder/README.md) | The largest building the rules allow on a lot (the envelope) | Engineers | The envelope changes |
 | [design_checker](../packages/design_checker/README.md) | Checks a design in one call: measure, run the zone's rules, work out the envelope | Engineers | The check changes |
