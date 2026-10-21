@@ -1266,3 +1266,20 @@ def test_an_assumed_starting_house_never_passes_a_height_the_other_buildings_pic
     assert h["value"] is None and h.get("main_assumed"), h
     assert max(r["value"] for r in h["readings"]) >= 40 - 0.01, h["readings"]
     assert any(r["reading"].startswith("if other were the main building") for r in h["readings"])
+
+
+def test_a_house_off_the_ground_asks_whether_or_not_the_spot_grades_sit_at_its_walls():
+    """Stress F15 (P3): on a sloped lot, floor 1 raised 3.25 ft (nothing reaches the ground): every yard needs
+    review ("doesn't meet"). Pull the west wall in 1.94 ft and the spot grades no longer sit at the walls, so that
+    stop wasn't read and the floating house's yards complied. Whether the building reaches the ground is now read
+    from the spot grades' ground under its footprint: both drawings give the same yard verdicts."""
+    points = [[22, 24, 0.0], [22, 66, 2.0], [9, 45, 1.0], [36, 45, 1.0]]       # a slope from the street up
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "grade_points": points}
+    verdicts = []
+    for west in (10, 11.94):
+        house = [floor(west, 25, 35, 65, z0=3.25 + 11 * i, z1=3.25 + 11 * (i + 1), id=f"f{i}") for i in range(3)]
+        m = measure(site(RECT, *house), {**facts, "stories": 3})
+        verdicts.append({n: m[n]["value"] for n in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")})
+        assert all(v is None for v in verdicts[-1].values()), (west, verdicts[-1])
+        assert all("doesn't meet the buildings" in m[n]["reason"] for n in ("front_yard", "rear_yard")), west
+    assert verdicts[0] == verdicts[1]

@@ -857,6 +857,28 @@ def tax_map_lot_area(polygon) -> dict:
 SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall
 
 
+def _floating(buildings: list[dict], points: list) -> str | None:
+    """ground_off_building when nothing drawn reaches the ground: the ground under the buildings' footprint, from
+    the spot grades' best-fit plane at its corners (one level if fewer than three points), is below their lowest
+    point everywhere. Read from the points themselves, so a point drifting off a wall never hides it."""
+    zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
+    if not zs or not points:
+        return None
+    pts = np.array([p[:3] for p in points], dtype=float)
+    if len(pts) >= 3 and np.linalg.matrix_rank(np.c_[pts[:, :2], np.ones(len(pts))]) == 3:
+        coef, *_ = np.linalg.lstsq(np.c_[pts[:, :2], np.ones(len(pts))], pts[:, 2], rcond=None)
+        ground = lambda x, y: coef[0] * x + coef[1] * y + coef[2]   # noqa: E731
+    else:
+        ground = lambda x, y: float(pts[:, 2].mean())                # noqa: E731
+    corners = [c for b in buildings if b.get("faces") for c in _projection(b).convex_hull.exterior.coords]
+    if not corners:
+        return None
+    top_ground = max(ground(x, y) for x, y in corners)
+    if min(zs) > top_ground + TOL:
+        return stop("ground_off_building", ground=_r(top_ground), bottom=_r(min(zs)), top=_r(max(zs)))
+    return None
+
+
 def grade_plane(buildings: list[dict], facts: dict) -> tuple:
     """(grade, None) or (None, reason): the grade plane from the spot grades in `facts`, at the main building's own
     walls (§325-3 GRADE PLANE: "on each side of the building"). The main building is pick_main's, as for every
@@ -958,6 +980,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
     ground_problem = _ground_against(buildings, grade) if grade is not None else None
+    if ground_problem is None and facts.get("grade_points"):
+        # whether the buildings reach the ground never depends on the spot grades sitting at their walls: the
+        # ground under their footprint (the spot grades' plane), against their own lowest point (stress F15)
+        ground_problem = _floating(buildings, facts["grade_points"])
     why_grade = (why_spots if why_spots else stop("no_ground") if grade is None else
                  ground_problem if ground_problem else
                  None if facts.get("grade_points") else
