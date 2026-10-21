@@ -667,8 +667,8 @@ def test_stacked_floor_blocks_are_one_building_and_its_stories_are_counted():
 
 
 def test_a_typed_count_that_disagrees_with_the_floors_drawn_is_a_question():
-    m = measure(site(RECT, *FLOORS), {**FACTS, "stories": 2})["stories"]
-    assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [2, 3]
+    m = measure(site(RECT, *FLOORS), {**FACTS, "stories": 2})["stories"]     # fewer than the floors: refused
+    assert m["value"] is None and "the stories typed (2) are fewer than the floor blocks drawn (3)" in m["reason"]
     assert measure(site(RECT, *FLOORS), {**FACTS, "stories": 3})["stories"]["value"] == 3
 
 
@@ -984,7 +984,8 @@ def test_a_walk_out_wing_reaching_below_the_ground_asks_whatever_was_typed(typed
     floors = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
     m = measure(site(RECT, *floors, box(35, 25, 45, 45, -10, 10.5, id="wing")),
                 {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
-    assert m["value"] is None and "part of the building (wing) is below the ground" in m["reason"]
+    assert m["value"] is None and ("part of the building (wing) is below the ground" in m["reason"] or
+                                   typed == 2 and "fewer than the floor blocks drawn (3)" in m["reason"])
 
 
 def test_a_plain_house_and_a_plain_garage_take_the_count_typed():
