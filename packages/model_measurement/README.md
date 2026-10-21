@@ -201,12 +201,10 @@ Every reason the code gives today comes from the table:
   stories of the whole building". Any part reaching below the ground, whatever was typed: "part of the building
   ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
   question for the architects".
-- **The buildings:** "no building on the Building layer"; "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "two building objects share the id {id}: one would be left out of the measurements"; "more than one building: pick the main building"; "a building isn't inside the lot: {what}" (which one) (a building
-  wholly off the lot: only the rules that would measure it wait: the main yards for the main building, the accessory
-  rule for an accessory building, coverage for any. A building partly off the lot is measured, and every rule that
-  measures it does not comply, whatever the readings or answers: the main yards, the eaves, the height and the
-  stories for the main building, the accessory rule for an accessory building, coverage for any; each building is
-  placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
+  measurements"; "more than one building: pick the main building" (with none picked and exactly one starting house, it is
+  the main building, assumed: every measurement from it carries `main_assumed`, and every other building is also
+  read as if it were the main one, so the assumption never passes what a pick wouldn't); "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "a building isn't inside the lot: {what}" (a building wholly off the lot: only the rules that would measure it wait. A building partly off the lot is measured, and every rule that measures it does not comply, whatever the readings or answers; each building is placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

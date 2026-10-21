@@ -18,6 +18,7 @@ import re
 import tempfile
 from pathlib import Path
 
+import shapely
 import yaml
 
 from design_checker import present, reading_set
@@ -519,8 +520,12 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
             r[col["Error"]], r[col["Comparison"]] = word[found[0]]
             r[col["Why it needs review"]] = found[1] if found[0] == present.REVIEW else ""
             items = [i for i in shown[r[col["Rule id"]]] if i.get("proposed")]
-            if len(items) == 1:
+            if len(items) == 1:         # the row as the panel shows it, in one unit: limit, proposed, units
                 r[col["Proposed"]] = items[0]["proposed"]
+                if items[0].get("required") and items[0].get("sign"):
+                    r[col["Table limit"]] = f"{items[0]['sign']} {items[0]['required']}"
+                if "%" in str(items[0]["proposed"]):            # coverage: a share of the lot area, not sf
+                    r[col["Units"]] = "% of lot area"
             elif items:
                 r[col["Proposed"]] = "; ".join(f"{i['name']}: {i['proposed']}" for i in items)
         rows.append(r)
@@ -530,14 +535,18 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     for r in t["inputs"]:
         r = list(r)
         i = by_measure.get(r[0].lower().replace(" ", "_"))
-        if r[1] is None and i is not None:
+        if r[1] is None and i is not None and "%" not in str(i["proposed"]):     # only in the input's own unit
             r[1], r[3] = i["proposed"], "as drawn (the panel's reading); " + str(r[3])
         inputs.append(r)
     wb = build({**t, "output": rows, "inputs": inputs, "title": view["header"].get("place") or t["title"]})
     ws = wb.create_sheet("Check")
     h = view["header"]
     title(ws, f"GORDIUM | {view['summary']}")
-    lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + (h.get("sources") or [])   # where each fact came from
+    lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + ([h["main"]] if h.get("main") else []) + \
+        (h.get("sources") or [])   # where each fact came from
+    note = next((i["detail"]["outline"] for i in view["items"] if (i.get("detail") or {}).get("outline")), None)
+    if note:                            # the lot lines read from a cleaned outline: said once, with the lot (PR 18)
+        lines.append("Lot lines: " + note)
     for n, text in enumerate(lines, start=2):
         ws.cell(row=n, column=1, value=text)
     by_id = {i["id"]: i for i in view["items"]}
@@ -659,12 +668,26 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             _report(t, v, report_path)
         except OSError as e:
             report_error = f"{e.strerror or e} ({report_path})"
-    env = envelope(site, _envelope_facts(site, facts), measured, rules)
+    # one guard for the whole check (review round 21): geometry the measuring couldn't work out draws nothing
+    # from it (no envelope, no overlays), and a geometry failure here does the same, never a crash
+    geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)
+    try:
+        env = envelope(site, _envelope_facts(site, facts), measured, rules) if not geo else None
+    except shapely.errors.GEOSException as e:
+        geo = f"the drawing's geometry couldn't be worked out ({str(e).split(':')[0][:80]})"
+        env = None
+    if env is None:
+        env = {"outline": None, "holes": [], "base": None, "top": None, "yards": {}, "height": None,
+               "coverage": None, "notes": [geo] if geo else []}
+    try:
+        drawn = plan(site, env, v, measured, facts, overlays=not geo)
+    except shapely.errors.GEOSException:
+        drawn = plan(site, env, v, measured, facts, overlays=False)
     # the notice (spec G): the items that don't comply now and did at the last check the command sent ("before")
     statuses, notice_text = present.notice((extras or {}).get("before"), v["items"])
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
             "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
-            "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": plan(site, env, v, measured, facts),
+            "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": drawn,
             "report_error": report_error,
             "statuses": statuses, "notice": notice_text}
 
@@ -759,14 +782,13 @@ def _yard_lines(lot, measure: str, point):
     return lot.line(hit) if hit else None
 
 
-def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = None) -> dict:
+def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = None, overlays: bool = True) -> dict:
     """What the viewport draws in plan (feet): each lot edge with its length, the yard lines measured (each with
     its item's status), and where the building breaks a limit: the strip of its footprint inside a required yard,
     or the part above the height limit (spec F2, F4, F5). The building itself stays neutral.
     Each yard's red and amber are its own row's (present.settle: from the row's readings, after every status
     change), never another yard's: red where its wall is short under every reading, amber under some."""
-    from model_measurement.measure import Lot, _projection
-    from shapely.ops import unary_union
+    from model_measurement.measure import Lot, _projection, union as unary_union
 
     lot = site.get("lot") or {}
     edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
@@ -776,7 +798,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
               (" (approx.)" if i.get("approx") else "")}
              for i in v["items"] if i.get("points") and i.get("measure") in YARD_MEASURES]
     encroach = []
-    plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")]
+    plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")] if overlays else []
     footprint = unary_union(plans) if plans else None
     tops = [p[2] for b in site.get("buildings") or [] for f in b.get("faces") or [] for p in f["points"]]
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
@@ -939,6 +961,9 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     if existing:                        # drawn standing on the ground shown; the check still says it is existing
         drawing = {**drawing, "grade_is": "finished"}
     measured = measure(site, drawing)
+    geo = next((r["geometry_error"] for r in measured.values() if r.get("geometry_error")), None)
+    if geo:                             # nothing drawn from geometry the measuring couldn't work out
+        return {"floors": [], "notes": [geo], "preview": None}
     out = _kept_back_building(site, drawing, measured, rules, floor_to_floor, design_buffer)
     if existing and out.get("floors"):
         out["notes"].append("drawn on the ground as it is: building height and stories need review until you tick "
