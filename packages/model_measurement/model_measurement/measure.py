@@ -154,6 +154,7 @@ class Lot:
         elif len(street) == n:
             self.street_problem = stop("all_street")
         self.outline_note = None
+        self.drawn, self.pieces = self.edges, None
         if not self.problems and not self.street_problem:
             self._simplify(OUTLINE_SURVEY if facts.get("lot_surveyed") else OUTLINE_TAX_MAP,
                            "survey" if facts.get("lot_surveyed") else "tax-map")
@@ -189,19 +190,31 @@ class Lot:
         if len(alive) == n:
             return
         old = n
-        edges, curved, new_street = [], [], []
+        edges, curved, new_street, pieces = [], [], [], []
         for k, i in enumerate(alive):
             j = alive[(k + 1) % len(alive)]
             run = [(i + t) % n for t in range(((j - i) % n) or n)]
-            if len(run) == 1:
-                edges.append(self.edges[i])
-            else:
-                edges.append([pts[i], pts[j]])
+            # the line is the DRAWN pieces it groups, run end to end: the cleaned outline only decides which pieces
+            # form one lot line (street, side, rear; the readings); every distance is to the pieces drawn, never
+            # to a chord across them (review round 20: a chord over a dent moved the line outward)
+            edges.append([q for r in run for q in (self.edges[r] if r == run[0] else self.edges[r][1:])])
             curved.append(any(self.curved[r] for r in run))
+            pieces.append(run)
             if all(r in street for r in run):
                 new_street.append(k)
+        self.drawn, self.pieces = self.edges, pieces
         self.edges, self.curved, self.street = edges, curved, new_street
-        self.outline_note = f"{kind} outline simplified within {tol:g} ft: {old} lines → {len(edges)}"
+        self.outline_note = (f"{kind} outline cleaned within {tol:g} ft: its {old} drawn lines read as {len(edges)} "
+                             f"lot lines (distances still to the lines drawn)")
+
+    def label(self, i: int) -> str:
+        """Lot line i in the architect's own numbering (the lines drawn): "9", or "9 to 11" for pieces read as one."""
+        run = self.pieces[i] if self.pieces else [i]
+        return str(run[0] + 1) if len(run) == 1 else f"{run[0] + 1} to {run[-1] + 1}"
+
+    def line_of_piece(self, p: int) -> int:
+        """The lot line a drawn piece is part of."""
+        return next(k for k, run in enumerate(self.pieces) if p in run) if self.pieces else p
 
     def _contiguous(self, idx) -> bool:
         n = len(self.edges)
@@ -241,7 +254,7 @@ class Lot:
                 found.append((left, right, rear))
         middle = rest[1:-1]
         varies = [i for i in middle if len({i in r for _l, _r, r in found}) == 2]
-        return [(", ".join(f"line {i + 1} as a {'rear' if i in rear else 'side'} lot line" for i in varies),
+        return [(", ".join(f"line {self.label(i)} as a {'rear' if i in rear else 'side'} lot line" for i in varies),
                  left, right, rear) for left, right, rear in found]
 
 
@@ -267,10 +280,17 @@ def _projection_now(building: dict):
     for f in building["faces"]:
         shell = [tuple(p[:2]) for p in f["points"]]
         holes = [[tuple(p[:2]) for p in h] for h in f.get("holes") or []]
-        poly = Polygon(shell, holes).buffer(0)
+        poly = shapely.make_valid(Polygon(shell, holes)).buffer(0)
         if poly.area > 1e-9:
             parts.append(poly)
-    return ops.unary_union(parts) if parts else Polygon()
+    if not parts:
+        return Polygon()
+    try:
+        return ops.unary_union(parts).buffer(0)
+    except shapely.errors.GEOSException:
+        # faces meeting at slivers too thin for the overlay (a rotated gable: stress F14): the same union with
+        # every point on a 1e-6 ft grid, far below anything measured (TOL is 0.01 ft)
+        return shapely.union_all(parts, grid_size=1e-6).buffer(0)
 
 
 def _section(building: dict, z: float):
@@ -791,6 +811,7 @@ def _eaves(building: dict, sloped: list[list[dict]], candidate: dict) -> dict:
 # steps or a deck. §325-3's STORY has no least height, so anywhere else (raised, on a roof, below the ground) a
 # part of any height might be a story.
 STORY_ROOM = 7.0            # ft
+ASSUMED_MAIN = "the main building assumed: the starting house (change it in Edit site)"
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
 
@@ -963,7 +984,8 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     architect's statement for the whole building, and only if it is at least the floors counted on any part and
     the solids stacked in any plain part (each might be a story); else,
     or with none typed, needs review. A part below the ground is the §325-3 basement question: needs review,
-    whatever was typed. Parts one over another in plan with a real gap between them (a floor deleted, a block
+    whatever was typed. A plain part starting above the ground (beside the roof or over it) may be another
+    story: needs review, whatever its plan relation. Parts one over another in plan with a real gap between them (a floor deleted, a block
     lifted, a room floating over the roof) are a question: a floor not drawn, or a space open to below. With only floor blocks, the most
     counted on any part, the count typed a reading beside it
     (a question if they disagree). Each reason says what is drawn."""
@@ -974,6 +996,11 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
     low = [b for b in plain if _extent(b)[0] is not None and _extent(b)[0] < grade - TOL]
     if low:
         return _missing("stories", stop("basement_part", what=", ".join(b["id"] for b in low)))
+    # a plain part starting above the ground (beside the roof or over it, touching in plan or not) may be another
+    # story: no seam in plan decides it, so the count typed stands only when every plain part starts at the ground
+    raised = [b for b in plain if _extent(b)[0] is not None and _extent(b)[0] > grade + TOL]
+    if raised:
+        return _missing("stories", stop("part_raised", what=", ".join(b["id"] for b in raised)))
     floored = [b for b in parts if b not in plain]
     for kind, lower, upper in _apart_in_one_plan(parts):    # over a gap (a floor not drawn?), or partly inside
         if kind == "gap":
@@ -1264,11 +1291,29 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
     _PLANES.clear()
     _PLAN_OF.clear()
     try:
-        out = _measure(site, facts)
+        try:
+            out = _measure(site, facts)
+        except shapely.errors.GEOSException as e:
+            # the drawing's geometry couldn't be worked out: every measurement needs review, saying why; never a
+            # crash (no answer at all in Rhino) and never a guess (stress F14)
+            why = stop("geometry_error", what=str(e).split(":")[0][:80])
+            out = {name: (_record(name, "text", reason=why) if name == "district" else _missing(name, why))
+                   for name in MEASURES}
+            for name, unit in STATED.items():           # what the architect stated still stands
+                if facts.get(name) is not None:
+                    out[name] = _record(name, unit, facts[name], "stated by the architect (not measured from the model)")
+            if facts.get("zone"):
+                out["district"] = _record("district", "text", facts["zone"], "stated by the architect (the lot's zone)")
     finally:
         _SKY.clear()
         _PLANES.clear()
         _PLAN_OF.clear()
+    assumed = out.pop("_assumed_main", None)
+    if assumed:                         # every measurement made from the starting house says it was assumed
+        for name in MEASURES:
+            r = out[name]
+            if set(r.get("objects") or []) & set(assumed) and (r.get("value") is not None or r.get("readings")):
+                out[name] = dict(r, how=_both(r.get("how") or "", ASSUMED_MAIN))
     if site.get("lot") and site["lot"].get("edges"):
         # the decision line: how the lot lines read were cleaned from the outline drawn (its own accuracy)
         note = Lot(site, facts).outline_note
@@ -1320,6 +1365,14 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
     main = _pick_main(buildings, facts)      # the one main-building pick
+    if main is None and len(buildings) > 1 and not facts.get("main_building"):
+        # no main building picked: if exactly one building is Gordium's own starting house (all its blocks the
+        # floor blocks GordiumStart drew), it is the main one, said as assumed; every other is then read as a
+        # possible accessory building (the candidates below), so this never gives a pass the pick wouldn't
+        starting = [b for b in buildings if b.get("parts") and all(b["floor"])]
+        if len(starting) == 1:
+            main = starting[0]
+            out["_assumed_main"] = list(main["parts"])
     why_main = None if main else stop("no_main_building")
     others = [b for b in buildings if b is not main]
     # One decision for every building measurement: which building (why_which), over which candidate buildings
@@ -1423,11 +1476,23 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                for i, s in place.items() if s == "partly"}
     crosses = bool(crossed)
     group = [main, *parts_of] if main is not None else []
-    why_main_off = stop("outside_lot") if any(place.get(b["id"]) == "off" for b in group) else None
-    why_acc_off = stop("outside_lot") if any(place.get(b["id"]) == "off" for b in detached) else None
-    why_inside = why_building or (stop("outside_lot") if "off" in place.values() else None)    # coverage
+    def off_named(bs):              # which buildings are wholly outside the lot, by name (term-index's words)
+        off = [b for b in bs if place.get(b["id"]) == "off"]
+        main_off = any(b is main for b in off)
+        n = len(off) - main_off
+        return " and ".join((["the main building" if len(buildings) > 1 else "the building"] if main_off else []) +
+                            ([f"{n} other building{'s' if n > 1 else ''}" if main_off or main is not None else
+                              f"{n} building{'s' if n > 1 else ''}"] if n else []))
+    why_main_off = stop("outside_lot", what=off_named(group)) if any(place.get(b["id"]) == "off" for b in group) else None
+    why_acc_off = (stop("outside_lot", what=off_named(detached))
+                   if any(place.get(b["id"]) == "off" for b in detached) else None)
+    why_inside = why_building or (stop("outside_lot", what=off_named(buildings)) if "off" in place.values()
+                                  else None)    # coverage
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
+        outside = [b for b in buildings if place.get(b["id"]) == "off"]
+        if why_inside and outside and not why_building:     # which ones: the panel shows them
+            out["building_area"]["objects"] = [i for b in outside for i in b.get("parts") or [b["id"]]]
     else:
         out["building_area"] = _coverage(buildings, views, facts, main)
     if crosses:                         # coverage, the height and the accessory count: whatever else follows
@@ -1663,10 +1728,11 @@ def _lot_lines(lot: Lot, facts: dict):
             return stop("corner_one_street")    # stated a corner lot, but the lines given never turn a corner
         given = facts.get("address_street_line")
         if given:
-            idx = [i for i in chain if any(_same_point(lot.edges[i][0], a) and _same_point(lot.edges[i][-1], b) or
-                                           _same_point(lot.edges[i][0], b) and _same_point(lot.edges[i][-1], a)
-                                           for a, b in given)]
-            if len(idx) != len(given) or not lot._contiguous(idx):
+            # the picks are drawn pieces: each matched to a drawn piece, then to the lot line it is part of
+            hits = [next((q for q, e in enumerate(lot.drawn) if _same_point(e[0], a) and _same_point(e[-1], b) or
+                          _same_point(e[0], b) and _same_point(e[-1], a)), None) for a, b in given]
+            idx = sorted({lot.line_of_piece(q) for q in hits if q is not None} & set(chain))
+            if None in hits or not idx or not lot._contiguous(idx) or any(lot.line_of_piece(q) not in chain for q in hits):
                 return stop("address_not_a_street")
             candidates = [idx]
         else:
@@ -1698,7 +1764,7 @@ def _lot_lines(lot: Lot, facts: dict):
                 problems.append(stop("no_side_line"))
             else:
                 where = (f"the address on lot line{'s' if len(address) > 1 else ''} "
-                         f"{', '.join(str(i + 1) for i in address)}") if len(candidates) > 1 else ""
+                         f"{', '.join(lot.label(i) for i in address)}") if len(candidates) > 1 else ""
                 found.append((_both(where, words), {"left": left, "right": right, "sides": sides, "rear": rear,
                                                     "address": address}))
     # a reading the law excludes (its rear on a street, or no side line left) is dropped; if none is left, the
@@ -1742,7 +1808,7 @@ def _width(lot: Lot, facts: dict, lines) -> dict:
         groups = [g for k, g in enumerate(groups) if g and g not in groups[:k]]
     width = []
     for g in groups:
-        on = f" (lot line{'s' if len(g) > 1 else ''} {', '.join(str(i + 1) for i in g)})" if len(groups) > 1 else ""
+        on = f" (lot line{'s' if len(g) > 1 else ''} {', '.join(lot.label(i) for i in g)})" if len(groups) > 1 else ""
         width.append(("along the street line" + on, lot.length(g), {}))
         if any(lot.curved[i] for i in g):
             ends = [lot.edges[g[0]][0], lot.edges[g[-1]][-1]]

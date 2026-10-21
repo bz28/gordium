@@ -265,3 +265,34 @@ def test_every_row_that_needs_review_says_why_over_a_stress_sample():
         for i in harness.gordium(d)["view"]["items"]:
             if i["status"] == REVIEW:
                 assert (i["reason"] or "").strip(), (case["lot"], case["edits"], i["name"])
+
+
+# ---- F13 (P1) and F14 (P0), stress-tests 3373ba0: pinned as passing in #18 ---------------------------------------
+
+F13_CASE = ("sample_tax", [{"op": "off_lot", "target": "house", "line": 1, "amount": 9.25},
+                           {"op": "add_floor", "h": 10.0}])
+
+
+def test_F13_a_45_ft_house_wholly_off_a_tax_map_lot_does_not_comply_on_height_and_says_why():
+    """The starting house dragged wholly off the tax-map sample lot, then a fourth floor block (45'-0"): 45 ft is
+    over 35 ft and over the 38'-6" the §325-16C bonus can ever reach, whatever the yards or lot lines: does not
+    comply, with its reason (it needed review with no reason at all)."""
+    res = harness.gordium(generate.build(*F13_CASE)[0])
+    h = harness.items_by_rule(res)["R-1b.height"]
+    assert all((i["reason"] or "").strip() or i["status"] == FAILS for i in h), h
+    assert harness.statuses(res)["R-1b.height"] == FAILS
+
+
+F14_CASE = ("sample_survey", [{"op": "rotate", "deg": -8.7},
+                              {"op": "add_roof", "kind": "roof", "axis": 0, "over": 0.0, "fascia": 0.0, "inset": 3.25,
+                               "rise": 13.75}])
+
+
+def test_F14_a_rotated_house_with_a_gable_roof_is_checked_without_crashing():
+    """The surveyed sample lot's starting house rotated 8.7 degrees with a gable roof solid on it: the overlay of
+    its faces raised a GEOS 'side location conflict' and the check gave no answer. The faces are made valid and,
+    if the overlay still fails, unioned on a fine grid; every row has a status, and a needs-review row a reason."""
+    res = harness.gordium(generate.build(*F14_CASE)[0])
+    assert harness.statuses(res)
+    assert all((i["reason"] or "").strip() for i in res["view"]["items"] if i["status"] == REVIEW)
+
