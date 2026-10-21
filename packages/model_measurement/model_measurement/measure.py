@@ -701,11 +701,50 @@ def _fits_in_the_first_story(part: dict, grade) -> bool:
             and _rise(part) < STORY_ROOM - TOL)
 
 
+def _ground_against(solids: list[dict], grade) -> str | None:
+    """What is wrong with this ground level against these solids, or None: the ground must meet them, taken
+    together (stacked floors, a basement or a tower drawn as its own solid sit above or below it), at or above their
+    lowest point and below their top; and a solid wholly under the ground is a basement only if it is joined
+    directly under the building. Checked for the whole site, and again for each candidate building at its own
+    grade (_candidate_grades)."""
+    zs = [p[2] for b in solids for f in b.get("faces") or [] for p in f["points"]]
+    lo, hi = (min(zs), max(zs)) if zs else (None, None)
+    off = (lo, hi) if zs and grade is not None and (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None
+    # a solid wholly under the ground is a basement only if it is joined directly under the building: its top
+    # meets the bottom of a solid above it (the building, or a basement already joined to it) and it lies within
+    # that solid's plan. Any other (left at z = 0 when the rest was moved to a survey level, or a part left at its
+    # old level) can't be told from a mistake, and its height (below zero) would drop out of every reading unseen.
+    buried = None
+    if grade is not None and not off:
+        spans = {b["id"]: (min(p[2] for f in b["faces"] for p in f["points"]),
+                           max(p[2] for f in b["faces"] for p in f["points"])) for b in solids if b.get("faces")}
+        plans = {b["id"]: _projection(b) for b in solids if b["id"] in spans}
+        joined = {i for i, (lo_, hi_) in spans.items() if hi_ > grade + TOL or hi_ - lo_ <= TOL}   # above, or a slab
+        waiting = [i for i in spans if i not in joined]
+        while True:                     # from the top down: a sub-basement joins under a joined basement
+            found = [i for i in waiting
+                     if ops.unary_union([plans[j] for j in joined if abs(spans[j][0] - spans[i][1]) <= TOL])
+                     .buffer(TOL).contains(plans[i])]
+            if not found:
+                break
+            joined |= set(found)
+            waiting = [i for i in waiting if i not in found]
+        buried = spans[waiting[0]] if waiting else None
+    if off:
+        return stop("ground_off_building", ground=_r(grade), bottom=_r(off[0]), top=_r(off[1]))
+    if buried:
+        return stop("buried_solid", ground=_r(grade), bottom=_r(buried[0]), top=_r(buried[1]))
+    return None
+
+
 def _candidate_grades(assemblies, buildings: list[dict], facts: dict, grade, why_grade) -> list[tuple]:
     """Each candidate building's own grade plane, (grade, reason), one per assembly (§325-3: "the average of
     finished ground level on each side of the building"). With one ground level given, or flat ground, it is the
-    same for every candidate; spot grades (where the model has them) are read at each candidate's own walls."""
-    return [(grade, why_grade)] * len(assemblies)
+    same for every candidate; spot grades (where the model has them) are read at each candidate's own walls. A
+    whole-site grade stop holds for every candidate; and each candidate's ground is checked against its own
+    solids (_ground_against: off them, or a solid buried under them)."""
+    return [(grade, why_grade or (_ground_against(members, grade) if grade is not None else None))
+            for _, members in assemblies]
 
 
 def _stories_over(assemblies, grade, why_grade, stated, grades=None) -> dict:
@@ -781,32 +820,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
     # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
     # cut at the ground blamed on overhangs.
-    zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
-    lo, hi = (min(zs), max(zs)) if zs else (None, None)
-    off = (lo, hi) if zs and grade is not None and (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None
-    # a solid wholly under the ground is a basement only if it is joined directly under the building: its top
-    # meets the bottom of a solid above it (the building, or a basement already joined to it) and it lies within
-    # that solid's plan. Any other (left at z = 0 when the rest was moved to a survey level, or a part left at its
-    # old level) can't be told from a mistake, and its height (below zero) would drop out of every reading unseen.
-    buried = None
-    if grade is not None and not off:
-        spans = {b["id"]: (min(p[2] for f in b["faces"] for p in f["points"]),
-                           max(p[2] for f in b["faces"] for p in f["points"])) for b in buildings if b.get("faces")}
-        plans = {b["id"]: _projection(b) for b in buildings if b["id"] in spans}
-        joined = {i for i, (lo_, hi_) in spans.items() if hi_ > grade + TOL or hi_ - lo_ <= TOL}   # above, or a slab
-        waiting = [i for i in spans if i not in joined]
-        while True:                     # from the top down: a sub-basement joins under a joined basement
-            found = [i for i in waiting
-                     if ops.unary_union([plans[j] for j in joined if abs(spans[j][0] - spans[i][1]) <= TOL])
-                     .buffer(TOL).contains(plans[i])]
-            if not found:
-                break
-            joined |= set(found)
-            waiting = [i for i in waiting if i not in found]
-        buried = spans[waiting[0]] if waiting else None
-    why_grade = (stop("no_ground") if grade is None else
-                 stop("ground_off_building", ground=_r(grade), bottom=_r(off[0]), top=_r(off[1])) if off else
-                 stop("buried_solid", ground=_r(grade), bottom=_r(buried[0]), top=_r(buried[1])) if buried else
+    ground_problem = _ground_against(buildings, grade) if grade is not None else None
+    why_grade = (stop("no_ground") if grade is None else ground_problem if ground_problem else
                  stop("ground_unknown") if facts.get("ground_is_flat") is None else
                  None if facts["ground_is_flat"] else stop("sloped_ground"))
     # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
@@ -833,8 +848,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     why = why_which or why_grade
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
     if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):
-        out["building_height"] = _with_others(out["building_height"], [_height(b, grade) for b in others],
-                                              candidates)
+        why_g = next((why for _, why in grades if why), None)    # a candidate's ground that can't be used
+        out["building_height"] = (_missing("building_height", why_g) if why_g else
+                                  _with_others(out["building_height"], [_height(b, grade) for b in others],
+                                               candidates))
 
     problems = list(site.get("problems") or [])
     lot = Lot(site, facts) if site.get("lot") and not problems else None

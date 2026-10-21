@@ -1047,7 +1047,7 @@ def test_a_plain_solid_over_or_under_floor_blocks_with_a_gap_asks(shape, typed):
     over another in plan is one building whatever the gap, and a real gap between its levels asks."""
     if shape == "podium":
         blocks = [box(10, 25, 35, 65, 0, 9, id="podium"), floor(10, 25, 35, 65, z0=20, z1=30, id="floor")]
-        main = "floor"
+        main = "podium"                 # (the floor block picked: the ground doesn't meet it, which asks too)
     else:
         blocks = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
         blocks.append(box(12, 30, 20, 40, 33.05, 39.55, id="room"))
@@ -1099,3 +1099,14 @@ def test_a_tenth_of_a_foot_up_or_down_never_changes_one_story_count_into_another
             checked += 1
             assert after is None or after == before, (blocks[i]["id"], dz, before, after, stacks, pick, typed)
     assert checked > 60
+
+
+def test_each_candidate_buildings_ground_is_checked_against_its_own_solids():
+    """#18 round 19 (P0), one definition: the ground is checked against each candidate building, not only the
+    whole site. A house drawn 5 ft above the ground beside a wing on it: the site's solids meet the ground, the
+    house alone doesn't, so its stories (2 typed) and height need review, never the typed count."""
+    house = box(10, 25, 35, 65, 5, 30, id="house")
+    wing = box(35, 25, 45, 45, 0, 10, id="wing")
+    m = measure(site(RECT, house, wing), {**FACTS, "stories": 2, "main_building": "house"})
+    for name in ("stories", "building_height"):
+        assert m[name]["value"] is None and "doesn't meet the buildings" in m[name]["reason"], (name, m[name])
