@@ -1,5 +1,9 @@
 # Where our findings differ from the architects'
 
+**Purpose:** where Gordium's reading of the law differs from the architects' hand-worked 106 Ithaca Rd example, ranked by whether it changes a result.\
+**For:** the architects and Ben.\
+**Kept current by:** whoever finds or resolves a difference, in that same PR.
+
 Their worked example: a new single-family house at **106 Ithaca Road (R-1b)**, received 2026-10-17 (workflow doc, links doc, spreadsheet, Rhino model).
 Checked by us on 2026-10-19 against the official sources in `regulations/jurisdictions/new_york/ithaca_city/1_source_documents/` and the City's GIS records.
 

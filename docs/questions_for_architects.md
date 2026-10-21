@@ -1,5 +1,9 @@
 # Questions for the architects
 
+**Purpose:** the questions about the law that Gordium can't decide on its own, waiting on the architects or the City.\
+**For:** the architects.\
+**Kept current by:** whoever adds, researches or answers a question, in that same PR.
+
 Gordium checks a design against the city's exact words. In the places below, the words can be read more than one way, and Gordium can't decide them on its own.
 
 **Please note, until these are answered:** each question below says what Gordium does **today** and what it will do **from a model**, once it measures a Rhino model itself (being built now). There are three cases:
