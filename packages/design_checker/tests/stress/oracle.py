@@ -35,6 +35,7 @@ from shapely.ops import unary_union
 
 PASS, FAIL, NOT_PASS, UNDECIDED, NA = "pass", "fail", "not_pass", "undecided", "not_applicable"
 EPS = 1e-6                      # ft: a value within a millionth of a foot of its limit is at the limit (passes)
+NEAR = 0.25                     # ft: closer than this to the main building, a building may be read as joined
 TAX_MAP_TOLERANCE = 2.0         # ft: a tax-map lot line may be this far off (QUICKSTART, "Test it yourself")
 ROOF_KINDS = {"roof", "mansard"}
 RULES = ("R-1b.front_yard", "R-1b.side_yards", "R-1b.rear_yard", "R-1b.lot_coverage", "R-1b.height", "R-1b.stories",
@@ -225,7 +226,11 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
     lot_poly = Polygon(lot["points"])
     main, detached = main_and_detached(design)
     listed = set(design.get("listed") or [])
-    acc = [g for g in detached if all(p["id"] in listed for p in g)]
+    # a building within a drawing tolerance (NEAR) of the main one may be read as joined to it (an attached garage,
+    # the chart's yards) or apart (an accessory building): both readings, like a building not listed
+    house = _union(main)
+    near = [g for g in detached if _union(g).distance(house) <= NEAR]
+    acc = [g for g in detached if all(p["id"] in listed for p in g) and g not in near]
     unlisted = [g for g in detached if g not in acc]
     full = _union(main)                                                 # everything, overhangs too
     # with every overhang an eave and a dormer past the walls a projection (yard_projections#1 is open on bay
@@ -279,14 +284,25 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
     stacked = all(abs(b["z0"] - a["z1"]) <= EPS for a, b in zip(floors, floors[1:]))
     attic = any(p["kind"] in ROOF_KINDS for p in main)                  # an attic may be a story (STORY, §325-3)
     stories = (len(floors) + (1 if attic else 0), len(floors)) if stacked and floors and grade is not None else None
-    # a main part drawn as a plain solid (no floor marks): its stories aren't drawn. The floor blocks drawn are a
-    # floor under any reading (STORY, §325-3), so a typed count below them can't be the building's: never complies
-    # until that is resolved; otherwise at least the floor blocks, at most unknown
+    # Parts drawn as plain solids (no floor marks; the agreed rule, coordinator 2026-10-21): stories are counted only
+    # from floor blocks. A plain part 7 ft or taller may hold stories the drawing doesn't show, so the typed count
+    # stands only as the whole building's, and only if it is at least the floors counted and the plain blocks
+    # stacked; otherwise the count is open (never complies). A plain part reaching below the ground is the basement
+    # question (STORY, §325-3: a basement may be a story): never complies.
     plain = [p for p in main if p["kind"] == "solid"]
     typed = design.get("typed_stories")
-    stories_below_drawn = bool(plain) and typed is not None and floors and typed < len(floors)
+    stories_typed_short = stories_basement = False
     if plain and grade is not None:
-        stories = (math.inf, len(floors)) if floors else None
+        stacked_plain = max(sum(1 for q in plain if plan(q).intersection(plan(p)).area > EPS) for p in plain)
+        counted = len(floors)
+        if any(p["z0"] < grade[1] - EPS for p in plain):
+            stories_basement = True
+        elif any(p["z1"] - p["z0"] >= 7 - EPS for p in plain):
+            if typed is not None and typed >= counted and typed >= stacked_plain:
+                stories = (typed, typed)
+            else:
+                stories_typed_short = True
+                stories = (math.inf, max(counted, stacked_plain))   # fails only if what is drawn is already too many
     accessories = []
     for g in acc:
         shape = _union(g)
@@ -299,7 +315,7 @@ def measure(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE):
     return {"yards": yards, "off": off, "area": area, "lot_area": lot_area, "width": (width - 2 * tol, width + 2 * tol),
             "depth": (lot["depth"][1], lot["depth"][0]), "height": height, "stories": stories,
             "accessories": accessories, "unlisted": len(unlisted), "frame": design.get("frame"),
-            "stories_below_drawn": stories_below_drawn,
+            "stories_typed_short": stories_typed_short, "stories_basement": stories_basement,
             "where": {"main": _where(full, lot_poly), **{",".join(p["id"] for p in g): _where(_union(g), lot_poly)
                                                          for g in detached}}}
 
@@ -332,9 +348,13 @@ def verdicts(design, tolerance=False, tolerance_ft=TAX_MAP_TOLERANCE) -> dict:
         if rule in ("R-1b.height", "R-1b.yard_projections") and m["height"] is None:
             out[rule] = {"verdict": UNDECIDED, "slack": None, "why": "grade plane not decidable"}
             continue
-        if rule == "R-1b.stories" and m["stories_below_drawn"]:
+        if rule == "R-1b.stories" and m["stories_basement"]:
+            out[rule] = {"verdict": NOT_PASS, "slack": None, "why": "a plain part below the ground: the basement question"}
+            continue
+        if rule == "R-1b.stories" and m["stories_typed_short"] and m["stories"][1] <= 3:
             out[rule] = {"verdict": NOT_PASS, "slack": None,
-                         "why": "the typed story count is lower than the floor blocks drawn"}
+                         "why": "a plain part 7 ft or taller and no typed count that stands (at least the floors "
+                                "counted and the plain blocks stacked)"}
             continue
         if rule == "R-1b.stories" and m["stories"] is None:
             out[rule] = {"verdict": UNDECIDED, "slack": None, "why": "grade unknown or floors not stacked"}

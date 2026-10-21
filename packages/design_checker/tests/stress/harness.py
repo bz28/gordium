@@ -223,6 +223,15 @@ def _yard_value(design, rule):
     return y[key]
 
 
+def _grouping(design):
+    """Which parts make the main building and which stand apart (or within reach of it): a move that joins or
+    separates a building changes what is measured, so monotonic checks compare only moves that keep this."""
+    main, detached = oracle.main_and_detached(design)
+    house = oracle._union(main)
+    return (sorted(p["id"] for p in main),
+            sorted((sorted(p["id"] for p in g), oracle._union(g).distance(house) <= oracle.NEAR) for g in detached))
+
+
 def check_monotonic(design, result, probe) -> list:
     """Invariant c: the house moved toward one lot line (it stays on the lot, and the oracle's yard for that rule
     gets no larger: moving toward the east line also moves away from the west one, so only the smaller side
@@ -233,7 +242,7 @@ def check_monotonic(design, result, probe) -> list:
     kind = _kind_of_line(lt, line)
     moved = _toward(design, line, probe["step"])
     if kind and moved and oracle.measure(moved)["where"]["main"] == "inside" and \
-            oracle.measure(design)["where"]["main"] == "inside":
+            oracle.measure(design)["where"]["main"] == "inside" and _grouping(moved) == _grouping(design):
         before, after = statuses(result), statuses(gordium(moved))
         for rule in YARD_OF_LINE[kind]:
             closer = all(b <= a + 1e-9 for a, b in zip(_yard_value(design, rule), _yard_value(moved, rule)))
@@ -285,6 +294,9 @@ def check_drawings(design, result, files=True) -> list:
         # it must never give the other answer (complies for does not comply, or the reverse)
         for rule in sorted(set(base) | set(so)):
             a, b = base.get(rule), so.get(rule)
+            if rule == "R-1b.stories" and design.get("typed_stories") is not None:
+                continue        # drawn without floor blocks, a typed count is the whole building's statement (the
+                # agreed rule): with the blocks drawn the floors are counted instead, so the two may differ
             if a in (COMPLIES, FAILS) and b in (COMPLIES, FAILS) and a != b:
                 out.append(_v("d", rule, what=f"drawn as {style} instead of floor blocks", before=a, after=b))
     if statuses(result) != base:

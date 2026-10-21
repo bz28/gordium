@@ -1062,7 +1062,9 @@ def _grade_from_points(buildings: list[dict], points: list, others: list = ()) -
     plans = [_projection(b) for b in buildings if b.get("faces")]
     if not plans:
         return sum(p[2] for p in points) / len(points), None
-    outline = ops.unary_union(plans)
+    # each wall once, however the outlines were drawn: points along a straight wall (where the union joined the
+    # solids, or where a ring happened to start) are dropped, so one wall is never split in two (stress F9)
+    outline = ops.unary_union(plans).simplify(TOL, preserve_topology=True)
     rings = [g.exterior for g in getattr(outline, "geoms", [outline]) if not g.is_empty]
     walls = [LineString([a, b]) for ring in rings for a, b in zip(ring.coords, ring.coords[1:])
              if math.dist(a, b) > 1.0]

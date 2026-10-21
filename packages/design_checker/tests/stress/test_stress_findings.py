@@ -193,3 +193,33 @@ def test_F7_a_side_eave_gable_names_the_same_overhangs_whichever_way_the_outline
     for case in (F7_GABLE, F7_MANSARD):
         texts = _eave_texts(case)
         assert texts[0] == texts[1] == texts[2], case[1][0]["kind"]
+
+
+# ---- F8 (P0) and F9 (P3), stress-tests 73fc39a: pinned as passing in #18 -----------------------------------------
+
+F8_CASE = ("jog", [{"op": "floor_wing", "heights": [7.5], "face": 0, "depth": 8.5, "below": 0.0, "typed": "none"}])
+
+
+def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_never_complies():
+    """The jog lot's starting house (3 floor blocks) with a plain solid wing 7'-6" tall joined to its east wall,
+    nothing typed. A plain part 7 ft or taller (NYS R305.1, #14's one stories definition) may hold a story the
+    drawing doesn't show: the count is open, never complies (it did with the old 8 ft line)."""
+    got, _ = _check(generate.build(*F8_CASE)[0])
+    assert got["R-1b.stories"] != COMPLIES
+
+
+F9_CASE = ("sloped", [{"op": "move_floor", "k": 0, "dx": 0.0, "dy": -5.75}, {"op": "rotate", "deg": -0.9},
+                      {"op": "add_roof", "kind": "roof", "axis": 0, "over": 0.0, "fascia": 0.0, "inset": 3.5,
+                       "rise": 7.25}])
+
+
+def test_F9_the_spot_grade_reason_is_the_same_whichever_way_the_outlines_run():
+    """The sloped lot's starting house on its spot grades, floor 1 moved 5'-9" toward the street, rotated 0.9
+    degrees, a gable roof solid on top: 'N walls without one' was 7 drawn as given and 9 with each outline started
+    at its next point. The same building has one number of walls, whatever the drawing order."""
+    d = generate.build(*F9_CASE)[0]
+    reasons = []
+    for order in ("as_drawn", "reversed", "shifted"):
+        rows = harness.items_by_rule(harness.gordium(d, order))
+        reasons.append([i["reason"] for r in ("R-1b.height", "R-1b.stories") for i in rows[r]])
+    assert reasons[0] == reasons[1] == reasons[2], reasons

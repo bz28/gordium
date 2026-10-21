@@ -432,6 +432,25 @@ def _plain_wing(d, e):
     d["typed_stories"] = e["typed"]
 
 
+def _floor_wing(d, e):
+    """Gordium's floor stack kept, with a PLAIN wing joined to one of its walls: one plain solid, or two stacked
+    (`heights`, 6 to 25 ft each), its bottom `below` ft under the house's ground (a walk-out) or at it, and a typed
+    story count (none, below, equal to or above the floors)."""
+    fl = _floors(d)
+    if not fl or any(p["kind"] == "solid" for p in d["parts"]):
+        return False
+    a, b, n = _face(fl[0]["outline"], e["face"])
+    wing = _rect_on(a, b, n, 0.2, 0.7, e["depth"])
+    z = fl[0]["z0"] - e["below"]
+    for h in e["heights"]:
+        d["parts"].append({"id": _new_id(d, "wing"), "kind": "solid", "group": "house", "outline": copy.deepcopy(wing),
+                           "z0": z, "z1": z + h})
+        z += h
+    counted = len(fl)
+    d["typed_stories"] = {"none": None, "below": max(1, counted - 1), "equal": counted,
+                          "above": counted + 1}[e["typed"]]
+
+
 def _grade(d, e):
     d["grade_is"] = e["value"]
 
@@ -459,7 +478,7 @@ def _offset_rect(c, o):
 OPS = {"move_house": _move_house, "move_floor": _move_floor, "stretch": _stretch, "raise_roof": _raise_roof,
        "add_floor": _add_floor, "delete_floor": _delete_floor, "add_accessory": _add_accessory,
        "add_porch": _add_porch, "add_roof": _add_roof, "add_dormer": _add_dormer, "rotate": _rotate,
-       "cross_line": _cross_line, "off_lot": _off_lot, "grade": _grade, "plain_wing": _plain_wing}
+       "cross_line": _cross_line, "off_lot": _off_lot, "grade": _grade, "plain_wing": _plain_wing, "floor_wing": _floor_wing}
 
 
 def apply(design: dict, edit: dict):
@@ -528,6 +547,11 @@ def random_edit(rng: random.Random) -> dict:
         n = rng.randint(1, 4)
         return {"op": op, "n": n, "face": rng.randrange(4), "depth": q(u(8, 16)), "h": 10.0,
                 "typed": rng.choice([None, rng.randint(1, n), max(1, n - 1), n + 1])}
+    if op == "floor_wing":
+        k = rng.choice([1, 2])
+        return {"op": op, "heights": [q(u(6, 25)) for _ in range(k)], "face": rng.randrange(4),
+                "depth": q(u(8, 16)), "below": rng.choice([0.0, 0.0, q(u(3, 8))]),
+                "typed": rng.choice(["none", "below", "equal", "above"])}
     if op == "grade":
         return {"op": op, "value": rng.choice(["finished", "existing"])}
     raise KeyError(op)
@@ -535,7 +559,7 @@ def random_edit(rng: random.Random) -> dict:
 
 WEIGHTS = {"move_house": 12, "move_floor": 8, "stretch": 12, "raise_roof": 8, "add_floor": 6, "delete_floor": 4,
            "add_accessory": 10, "add_porch": 8, "add_roof": 10, "add_dormer": 4, "rotate": 5, "cross_line": 3,
-           "off_lot": 2, "grade": 2, "plain_wing": 4}
+           "off_lot": 2, "grade": 2, "plain_wing": 4, "floor_wing": 5}
 
 
 def random_case(rng: random.Random) -> dict:
