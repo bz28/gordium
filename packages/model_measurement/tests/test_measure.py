@@ -1769,3 +1769,26 @@ def test_the_yards_of_one_building_never_depend_on_which_of_its_solids_is_called
                 for n in ("front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard")}
     assert yards("shed") == yards("f1"), (yards("shed"), yards("f1"))
 
+
+def _walls_only(b):
+    """A building object of walls only (an open polysurface): nothing seen from above."""
+    return {**b, "faces": [f for f in b["faces"] if len({round(p[2], 6) for p in f["points"]}) > 1]}
+
+
+def test_a_flat_building_and_one_off_the_lot_are_both_said_each_naming_its_own():
+    """Review round 22 (P2): a walls-only shed on the lot and a shed wholly off it. The flat one's reason hid the
+    off-lot one's, and the coverage row pointed at the off-lot shed as if it were the flat one; the accessory rows
+    named nothing. Every reason that applies is said, each naming its own buildings, and every waiting row
+    points at both."""
+    flat = _walls_only(box(38, 70, 46, 80, 0, 8, id="flat"))
+    off = box(60, 70, 70, 80, 0, 8, id="offlot")
+    m = measure(site(RECT, box(10, 25, 35, 65, 0, 30), flat, off), {**FACTS, "main_building": "house"})
+    area = m["building_area"]
+    assert area["value"] is None and "covers no area" in area["reason"] and "isn't inside the lot" in area["reason"]
+    assert "covers no area seen from above: 1 other building" in area["reason"], area["reason"]
+    assert sorted(area["objects"]) == ["flat", "offlot"], area["objects"]
+    for name in ("accessory_front_yard", "accessory_side_yard", "accessory_rear_yard"):
+        r = m[name]
+        assert r["value"] is None and sorted(r["objects"]) == ["flat", "offlot"], (name, r)
+        assert "covers no area" in r["reason"] and "isn't inside the lot" in r["reason"], (name, r["reason"])
+
