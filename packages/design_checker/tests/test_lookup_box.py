@@ -782,7 +782,7 @@ def test_only_one_start_box_at_a_time():
     conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
     assert "if not gate.enter():" in conf and "say(logic.BOX_BUSY)" in conf and "gate.leave()" in conf
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'parts["box_buttons"] = buttons' in ui and "b.Enabled = not is_open" in ui
+    assert 'parts["box_buttons"] = buttons' in ui and "logic.grey_for_box(controls, is_open" in ui
 
 
 def test_the_recovery_message_says_what_it_did():
@@ -836,7 +836,7 @@ def test_while_a_start_box_is_open_no_panel_action_does_anything_but_say_so():
         gated[n]("an argument")
     assert sorted(calls) == sorted(["legend"] + names)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert "for control in parts.get(\"greyed\") or []:" in ui and "control.Enabled = not is_open" in ui
+    assert 'list(parts.get("greyed") or [])' in ui and "logic.grey_for_box(controls, is_open" in ui
 
 
 
@@ -851,7 +851,7 @@ def test_live_mode_never_rechecks_under_an_open_start_box():
     assert not logic.should_recheck(None, 11.0, False, False, wait)       # nothing changed
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     idle = rhino[rhino.index("def _idle("):rhino.index("def documents(")]
-    assert 'logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS)' in idle
+    assert 'logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS,' in idle
     assert idle.index("should_recheck") < idle.index('STATE["dirty"] = None')   # the pending edit kept until then
     check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
     assert 'if STATE.get("running") or _box_open():\n        return None' in check      # every caller refused
@@ -870,3 +870,32 @@ def test_the_legend_stays_usable_while_a_box_is_open():
     assert "form.Content.Enabled" not in ui
     gated = logic.gate_actions({"legend": lambda: "shown"}, lambda: True, lambda m: None)
     assert gated["legend"]() == "shown"
+
+
+
+class _Control:
+    def __init__(self, enabled):
+        self.Enabled = enabled
+
+
+def test_closing_the_box_puts_each_panel_control_back_as_it_was():
+    """Verification round 3: closing the box turned Zoom to on even with nothing selected. Each control's state is
+    saved when the box opens and restored when it closes."""
+    zoom, report, tick = _Control(False), _Control(True), _Control(True)    # Zoom to off: nothing selected
+    saved = logic.grey_for_box([zoom, report, tick], True)
+    assert [c.Enabled for c in (zoom, report, tick)] == [False, False, False]
+    logic.grey_for_box([zoom, report, tick], False, saved)
+    assert [c.Enabled for c in (zoom, report, tick)] == [False, True, True]
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'parts["_was_enabled"] = logic.grey_for_box(controls, is_open, parts.get("_was_enabled"))' in ui
+
+
+def test_a_box_that_edited_is_checked_once_not_twice():
+    """Verification round 3: GordiumStart's own check after the box, then live mode's idle re-check of the box's
+    edits: twice. A check that finished after the edit covers it."""
+    assert not logic.should_recheck(10.0, 11.0, False, False, 0.5, last_at=10.4)   # checked after the edit
+    assert logic.should_recheck(10.0, 11.0, False, False, 0.5, last_at=9.0)        # the last check was before it
+    assert logic.should_recheck(10.0, 11.0, False, False, 0.5)                     # no check yet
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    idle = rhino[rhino.index("def _idle("):rhino.index("def documents(")]
+    assert '(STATE.get("last") or {}).get("at"))' in idle and 'STATE["dirty"] = t = None' in idle

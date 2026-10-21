@@ -1722,13 +1722,17 @@ def _opened(sender, e):
 
 def _idle(sender, e):
     t = STATE.get("dirty")
+    last_at = (STATE.get("last") or {}).get("at")
+    if t and last_at is not None and last_at >= t and not _box_open():   # a check since the edit covered it
+        STATE["dirty"] = t = None
     p = STATE.get("panel_parts")
     if t and time.time() - t >= ui.STALE_SECONDS and STATE.get("stale_shown") != t and p is not None \
             and p["form"].Visible:          # out of date: no marks until the re-check (H1, F7)
         STATE["stale_shown"] = t
         ui.show(p, None, checking=True)
         Rhino.RhinoDoc.ActiveDoc.Views.Redraw()
-    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS):
+    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS,
+                            (STATE.get("last") or {}).get("at")):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc
         if doc is not None and doc.Strings.GetValue(SECTION, ENTRY):    # checked before: run_check says why

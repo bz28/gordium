@@ -299,11 +299,11 @@ def set_box_open(parts, is_open):
     """While a start box is open, the panel's buttons that would open another (or change the site under it) are off."""
     if parts is None:
         return
+    if bool(is_open) == bool(parts.get("box_open")):
+        return
     parts["box_open"] = bool(is_open)
-    for b in parts.get("box_buttons") or []:
-        b.Enabled = not is_open
-    for control in parts.get("greyed") or []:       # every button, tick and cell but the legend
-        control.Enabled = not is_open
+    controls = list(parts.get("box_buttons") or []) + list(parts.get("greyed") or [])   # all but the legend
+    parts["_was_enabled"] = logic.grey_for_box(controls, is_open, parts.get("_was_enabled"))
 
 
 def show_detail(parts):

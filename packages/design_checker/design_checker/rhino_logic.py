@@ -800,11 +800,27 @@ def recover_held(table, live=None):
     return len(removed), len(back)
 
 
-def should_recheck(dirty_at, now, running, box_open, wait):
+def should_recheck(dirty_at, now, running, box_open, wait, last_at=None):
     """Live mode's re-check after an edit: only once the model has been still for `wait` seconds, no check is running,
-    and no start box is open (its own edits mark the model changed; the check waits for the box to close, then runs:
-    verification round of PR #19)."""
+    no start box is open (its own edits mark the model changed; the check waits for the box to close, then runs:
+    verification round of PR #19), and no check has finished since that edit (`last_at`: GordiumStart's own check
+    after its box already covers the box's edits)."""
+    if last_at is not None and dirty_at and last_at >= dirty_at:
+        return False
     return bool(dirty_at) and now - dirty_at >= wait and not running and not box_open
+
+
+def grey_for_box(controls, is_open, saved=None):
+    """While a start box is open its panel controls are off; on closing, each goes back to what it was (Zoom to
+    stays off with nothing selected). Returns what was saved on opening (pass it back on closing)."""
+    if is_open:
+        saved = [c.Enabled for c in controls]
+        for c in controls:
+            c.Enabled = False
+        return saved
+    for c, was in zip(controls, saved or [True] * len(controls)):
+        c.Enabled = was
+    return None
 
 
 def gate_actions(actions, box_open, say, open_ok=("legend",)):
