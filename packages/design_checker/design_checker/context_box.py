@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from rule_format.rulebook import utf8_console
-from site_lookup.context import HALF_SIZE_FT, context
+from site_lookup.context import HALF_SIZE_FT, context, credits
 from site_lookup.http import Http
 
 TIMEOUT_S, RETRIES = 6.0, 1          # each request; the Rhino side stops the whole fetch at CONTEXT_LIMIT_S
@@ -81,8 +81,10 @@ def payload(ctx: dict, frame: dict) -> dict:
         for o in notes(ctx["half_size_ft"], saved_credits):
             objects.append(dict(o, points=[place(p) for p in o["points"]]))
     counts = {n: len(v["items"]) for n, v in ctx["layers"].items()}
+    # a layer shown only live carries its source line on screen (the panel's message), never in the file
+    live = [line for n, line in credits(ctx).items() if ctx["layers"][n]["store"] != "raw"]
     return {"status": ctx["status"], "message": ctx.get("message") or "", "objects": objects, "guides": guides,
-            "credits": ctx.get("credits") or [], "counts": counts, "snapshot": ctx.get("snapshot"),
+            "credits": ctx.get("credits") or [], "live_credits": live, "counts": counts, "snapshot": ctx.get("snapshot"),
             "layers": {n: {"status": v["status"], "store": v["store"], "name": v["name"], "source": v["source"]}
                        for n, v in ctx["layers"].items()}}
 

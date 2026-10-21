@@ -136,7 +136,7 @@ def write_like_the_plugin(path, lookup_payload, payload):
             m.Objects.AddTextDot(o.get("text") or "", pts[0], a)
         else:
             m.Objects.AddPolyline(r.Polyline(pts + pts[:1] if o["kind"] == "closed" else pts), a)
-    m.Strings["Gordium\\" + logic.CONTEXT_ENTRY] = json.dumps(payload["snapshot"])     # doc.Strings.SetString
+    m.Strings["Gordium\\" + logic.CONTEXT_ENTRY] = json.dumps(logic.context_record(payload, lookup_payload["writes"]["frame"]))
     m.Write(str(path), 8)
     return path
 
@@ -240,14 +240,41 @@ def test_the_neighbourhood_is_drawn_only_around_the_lot_the_lookup_drew():
     assert logic.context_frame({}, saved) is None and logic.context_frame(None, None) is None
 
 
-def test_gordium_start_always_clears_the_earlier_neighbourhood_first():
+def test_every_draw_of_a_box_brings_the_neighbourhood_in_line_with_the_lot():
+    """Review round 2: an Edit site… lookup (the box in check mode) and GordiumStart's early returns replaced the lot
+    and left the earlier address's neighbourhood. Now the box itself, after any Draw, runs sync_context."""
+    conf = RHINO[RHINO.index("def confirm("):RHINO.index("def _confirm(")]
+    assert 'logic.guard(sync_context, "draw the neighbourhood")(doc, result)' in conf
+    assert conf.index("gate.leave()") < conf.index("sync_context")
     start = RHINO[RHINO.index("def gordium_start("):RHINO.index("\n# ---- the context map")]
-    clear = start.index('logic.guard(_clear_context, "clear the earlier neighbourhood")(doc)')
-    assert clear < start.index("frame = logic.context_frame(facts, saved_ui)") < start.index("draw_context")
-    assert "lookup_frame" not in start.split("_clear_context", 1)[1]                    # only through context_frame
-    assert 'say("Neighbourhood not drawn: Show neighbourhood is off' in start            # never silently skipped
+    assert "_clear_context" not in start and "draw_context" not in start      # one way only: through the box
+    sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_visible(")]
+    assert "logic.context_step(frame, drawn, STATE.get(\"context_on\", True))" in sync
+    assert "frame = logic.context_frame(facts, _ui_state(doc))" in sync
+    assert 'say("Neighbourhood not drawn: Show neighbourhood is off' in sync                 # never silently skipped
     show = RHINO[RHINO.index("def show_context("):RHINO.index("def _doc_name(")]
     assert "draw_context(doc, logic.context_frame(facts, _ui_state(doc)))" in show
+
+
+def test_what_a_draw_does_to_the_neighbourhood():
+    a, b = {"origin_epsg2261_us_survey_ft": [1, 2], "shift_ft": [0, 0], "rotation_deg": 0}, \
+        {"origin_epsg2261_us_survey_ft": [3, 4], "shift_ft": [0, 0], "rotation_deg": 0}
+    assert logic.context_step(a, None, True) == "draw"             # a looked-up lot, nothing drawn yet
+    assert logic.context_step(b, a, True) == "draw"                # another address: the earlier one goes
+    assert logic.context_step(a, a, True) == "keep"                # the same lot (Edit site… without a lookup)
+    assert logic.context_step(None, a, True) == "clear"            # the architect's own lot now
+    assert logic.context_step(None, None, True) == "keep"
+    assert logic.context_step(b, a, False) == "off"                # the tick off: cleared, and said
+    payload, p = context_for()
+    rec = logic.context_record(payload, p["writes"]["frame"])
+    assert rec["frame"] == p["writes"]["frame"] and rec["fingerprint"] == payload["snapshot"]["fingerprint"]
+
+
+def test_the_footprints_carry_their_source_line_when_shown():
+    payload, _ = context_for()
+    said = logic.context_says(payload)
+    assert "Building footprints: NYS ITS Geospatial Services (NYSERDA/CIESIN; Tompkins County ITS GIS Division)" in said
+    assert payload["live_credits"] and all("Building footprints" in c for c in payload["live_credits"])
 
 
 def test_clearing_reaches_hidden_and_locked_context_layers_and_only_gordiums_objects():
@@ -284,7 +311,7 @@ def test_the_plugin_writes_only_context_objects_and_keeps_guides_on_screen():
     assert "for o in logic.context_objects(payload):" in body
     assert body.count("doc.Objects.Add") == 2                            # a dot or a curve, per context object
     assert 'STATE["context_guides"] = ' in body and "logic.context_guides(payload)" in body
-    assert 'doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(payload.get("snapshot")))' in body
+    assert "doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(logic.context_record(payload, frame)))" in body
     assert "attrs.SetUserString(logic.CONTEXT_KEY, o[\"source\"])" in body
     assert "_lock_context(doc, True)" in body                            # locked: not selectable, can't be moved
     # live mode hears each add; the context changes nothing checked, so no re-check is set off by it
@@ -294,10 +321,11 @@ def test_the_plugin_writes_only_context_objects_and_keeps_guides_on_screen():
     assert 'STATE.get("context_guides")' in scene and "DrawPolyline" in scene
 
 
-def test_the_plugin_draws_the_context_after_a_looked_up_start_guarded():
-    start = RHINO[RHINO.index("def gordium_start("):RHINO.index("\n# ---- the context map")]
-    assert 'logic.guard(draw_context, "draw the neighbourhood")(doc, frame)' in start
-    assert start.index("frame_site(doc, facts)") < start.index("draw_context")
+def test_the_plugin_draws_the_context_after_a_box_draw_guarded_and_has_a_tick():
+    conf = RHINO[RHINO.index("def confirm("):RHINO.index("def _confirm(")]
+    assert 'logic.guard(sync_context, "draw the neighbourhood")(doc, result)' in conf
+    sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_visible(")]
+    assert "draw_context(doc, frame)" in sync
     assert '"context": show_context' in RHINO
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
     assert re.search(r'CheckedChanged \+= logic\.guard\(lambda s, e: actions\["context"\]', ui)

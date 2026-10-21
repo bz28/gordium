@@ -947,6 +947,26 @@ def context_frame(facts, saved_ui):
     return frame if frame and lot and lot == saved_ui.get("replaceable_lot") else None
 
 
+def context_step(frame, drawn, on):
+    """What a box's Draw does to the neighbourhood: frame = the lot's (context_frame), drawn = the frame the one in
+    the file was drawn around (context_record), on = the panel's tick.
+    "keep": nothing to change (the same lot, or no lot of a lookup's and nothing drawn);
+    "clear": the lot isn't a lookup's any more, so the earlier neighbourhood goes;
+    "draw": a lookup's lot without its neighbourhood: the earlier one goes, this one is drawn;
+    "off": the same, with Show neighbourhood off: the earlier one goes, and the box says it wasn't drawn."""
+    if not frame:
+        return "clear" if drawn else "keep"
+    if drawn == frame:
+        return "keep"
+    return "draw" if on else "off"
+
+
+def context_record(payload, frame):
+    """What the document's strings keep of a drawn neighbourhood: its snapshot (records and the storable layers'
+    counts, never a live-only source's data) and the frame it was drawn around."""
+    return dict((payload or {}).get("snapshot") or {}, frame=frame)
+
+
 def context_objects(payload):
     """What may be written into the .3dm: objects from a source whose store is raw (the payload's layers say which),
     and Gordium's own marks (frame, north arrow, scale bar, credits). Anything else is never written, whatever the
@@ -971,4 +991,6 @@ def context_says(payload):
     kept = "%d neighbouring parcels and %d street lines (State tax map and streets, kept in this file)" % (
         n.get("parcels", 0), n.get("streets", 0))
     live = "; %d building footprints shown live (not saved)" % n["buildings"] if n.get("buildings") else ""
-    return "Neighbourhood drawn: " + kept + live + "." + (" " + payload["message"] if payload.get("message") else "")
+    sources = " ".join(payload.get("live_credits") or []) if n.get("buildings") else ""
+    return "Neighbourhood drawn: " + kept + live + "." + (" " + payload["message"] if payload.get("message") else "") + \
+        (" " + sources if sources else "")

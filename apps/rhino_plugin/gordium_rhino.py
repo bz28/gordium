@@ -1192,14 +1192,18 @@ def confirm(doc, facts, options, mode="check"):
     if not gate.enter():                # one start box at a time (Edit site… from the panel during a pick)
         say(logic.BOX_BUSY)
         return None
+    result = None
     try:
         ui.set_box_open(STATE.get("panel_parts"), True)
-        return _confirm(doc, facts, options, mode)
+        result = _confirm(doc, facts, options, mode)
     finally:
         gate.leave()
         ui.set_box_open(STATE.get("panel_parts"), False)
         if STATE.get("dirty"):          # edits made while the box was open: live mode checks them at the next idle
             STATE["dirty"] = time.time() - IDLE_SECONDS
+    if result is not None:              # Draw (GordiumStart or Edit site…): the neighbourhood follows the lot
+        logic.guard(sync_context, "draw the neighbourhood")(doc, result)
+    return result
 
 
 def _confirm(doc, facts, options, mode):
@@ -2026,13 +2030,6 @@ def gordium_start():
     frame_site(doc, facts)
     Rhino.RhinoApp.WriteLine("Gordium: created 1 group (" + str(len(start["floors"])) + " floor solids) on " +
                              logic.MASSING)
-    # a looked-up lot: its neighbourhood; an earlier one (another address, a lot since drawn or picked) never stays
-    logic.guard(_clear_context, "clear the earlier neighbourhood")(doc)
-    frame = logic.context_frame(facts, saved_ui)
-    if frame and STATE.get("context_on", True):
-        logic.guard(draw_context, "draw the neighbourhood")(doc, frame)
-    elif frame:
-        say("Neighbourhood not drawn: Show neighbourhood is off in the panel (tick it to draw it).")
     return result
 
 
@@ -2137,7 +2134,8 @@ def draw_context(doc, frame):
     _lock_context(doc, True)
     STATE["dirty"] = dirty
     _context_visible(doc, STATE.get("context_on", True))
-    doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(payload.get("snapshot")))
+    # the snapshot (records, never data) with the frame it was drawn around: sync_context compares the lot's frame
+    doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(logic.context_record(payload, frame)))
     guides = [rg.Polyline([_model_point(doc, p) for p in pts + [pts[0]]]) for pts in logic.context_guides(payload)]
     box = rg.BoundingBox.Empty
     for line in guides:
@@ -2146,6 +2144,24 @@ def draw_context(doc, frame):
     doc.Views.Redraw()
     say(logic.context_says(payload))
     return payload
+
+
+def sync_context(doc, facts):
+    """After a box's Draw (GordiumStart or Edit site…): the neighbourhood follows the lot (rhino_logic.context_step).
+    A lot the lookup drew gets its own, an earlier one (another address, a lot since drawn or picked) is cleared, the
+    same lot keeps what is drawn (review round 2: an Edit site… lookup left the earlier address's neighbourhood)."""
+    try:
+        drawn = (json.loads(doc.Strings.GetValue(SECTION, logic.CONTEXT_ENTRY) or "null") or {}).get("frame")
+    except (ValueError, AttributeError):
+        drawn = None
+    frame = logic.context_frame(facts, _ui_state(doc))
+    step = logic.context_step(frame, drawn, STATE.get("context_on", True))
+    if step in ("clear", "draw", "off"):
+        _clear_context(doc)
+    if step == "draw":
+        draw_context(doc, frame)
+    elif step == "off":
+        say("Neighbourhood not drawn: Show neighbourhood is off in the panel (tick it to draw it).")
 
 
 def _context_visible(doc, on):

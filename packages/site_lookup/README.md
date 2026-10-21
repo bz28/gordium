@@ -109,8 +109,9 @@ measured or checked.
 
 Each layer is asked on its own (one service down leaves the others), page by page (`resultOffset`, OBJECTID order,
 a 5,000-feature cap that says so), and clipped to the square. Coordinates are Gordium's feet from the lot's origin,
-so the lookup's placement in the model applies unchanged. The `snapshot` keeps, per layer, its source, status and
-count, and for every request the URL, date and SHA-256, never an answer; a live-only source is only named.
+so the lookup's placement in the model applies unchanged. The `snapshot` keeps, per layer, its source and status (and
+its count only if the source may be kept), and for every request the URL, date and SHA-256, never an answer; a
+live-only source is only named.
 
 106 Ithaca Rd (live, 2026-10-20): 229 neighbouring parcels, 38 street pieces, 322 footprints, 3 requests,
 about 1 s, 160 KB. In CI: `tests/fixtures/106_ithaca_rd_context.json` (the State's parcels and streets, 67 KB, made

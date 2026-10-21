@@ -144,7 +144,9 @@ def test_the_snapshot_keeps_records_and_counts_never_a_live_sources_data():
     c, http = run()
     s = c["snapshot"]
     assert len(s["sources"]) == len(http.asked) and all(len(r["sha256"]) == 64 and "body" not in r for r in s["sources"])
-    assert s["layers"]["buildings"] == {"source": "state_buildings", "status": "found", "count": 212, "store": "none"}
+    # a live-only source keeps no number worked out from it, not even how many (review round 2)
+    assert s["layers"]["buildings"] == {"source": "state_buildings", "status": "found", "store": "none"}
+    assert s["layers"]["parcels"]["count"] == 229 and s["layers"]["streets"]["count"] == 38
     text = json.dumps(s)
     assert T.STAND_IN_BUILDINGS_DATE not in text      # the footprints' own data (their date) isn't kept
     assert "NYS Building Footprints: " + LIVE_ONLY in s["credits"]

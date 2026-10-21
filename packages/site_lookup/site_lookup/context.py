@@ -137,7 +137,9 @@ def snapshot(out: dict, f: Fetcher) -> dict:
     """What a project keeps of the context besides the drawn objects: per layer its source, status and count, and
     for every request the URL, date and SHA-256 (never an answer). A layer's credit line is kept only if its source
     may be kept (the footprints' line carries their dates); one used live is only named."""
-    layers = {n: {"source": v["source"], "status": v["status"], "count": len(v["items"]), "store": v["store"]}
+    # a count is a number worked out from the answer: kept only for a source that may be kept (review round 2)
+    layers = {n: {"source": v["source"], "status": v["status"], "store": v["store"],
+                  **({"count": len(v["items"])} if v["store"] == "raw" else {})}
               for n, v in out["layers"].items()}
     kept = [line if out["layers"][n]["store"] == "raw" else f"{out['layers'][n]['name']}: {LIVE_ONLY}"
             for n, line in credits(out).items()]
