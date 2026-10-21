@@ -109,9 +109,11 @@ def test_a_missing_measurement_needs_review_with_a_reason(tmp_path):
     measurements = load(SITE)["measurements"]
     del measurements["rear_yard"]
     rows = rows_by_id(tables(write_project(tmp_path, measurements=measurements)))
-    for rid in ("R-1b.rear_yard", "R-1b.height"):
-        assert rows[rid][COL["Error"]] == "NEEDS REVIEW"
-        assert "rear_yard" in rows[rid][COL["Why it needs review"]]
+    assert rows["R-1b.rear_yard"][COL["Error"]] == "NEEDS REVIEW"
+    assert "rear_yard" in rows["R-1b.rear_yard"][COL["Why it needs review"]]
+    # the height rule is `building_height <= 35 or (the bonus's raised yards ...)`: 35 ft is within 35 ft, so it
+    # complies whatever the rear yard is (three-valued logic: true or unknown is true), with no reason needed
+    assert rows["R-1b.height"][COL["Error"]] == "PASS" and not rows["R-1b.height"][COL["Why it needs review"]]
 
 
 def test_every_needs_review_row_has_a_reason(tmp_path):
@@ -169,10 +171,10 @@ def test_the_reason_names_every_measure_the_checker_needs():
     rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= (1 if sleeping_rooms <= 3 else lot_width)"}
     assert report.needs_review_reason(rule, {"parking_spaces": 1}, kinds) == \
         "Can't check: missing measurement: sleeping_rooms."
-    # A test that isn't true/false: the checker reads neither branch, so neither is blamed.
+    # A test that isn't true/false: the formula is wrong for every value (its types), whatever is missing: the reason.
     rule = {"id": "x", "kind": "rule", "check": "parking_spaces >= (1 if lot_width else sleeping_rooms)"}
     assert report.needs_review_reason(rule, {"lot_width": 50}, kinds) == \
-        "Can't check: missing measurement: parking_spaces."
+        "Can't check: can't be worked out (an if needs a true/false test)."
 
 
 def test_every_shown_limit_uses_one_symbol_style():

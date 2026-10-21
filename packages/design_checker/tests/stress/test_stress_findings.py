@@ -193,3 +193,75 @@ def test_F7_a_side_eave_gable_names_the_same_overhangs_whichever_way_the_outline
     for case in (F7_GABLE, F7_MANSARD):
         texts = _eave_texts(case)
         assert texts[0] == texts[1] == texts[2], case[1][0]["kind"]
+
+
+# ---- F8 (P0) and F9 (P3), stress-tests 73fc39a: pinned as passing in #18 -----------------------------------------
+
+F8_CASE = ("jog", [{"op": "floor_wing", "heights": [7.5], "face": 0, "depth": 8.5, "below": 0.0, "typed": "none"}])
+
+
+def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_never_complies():
+    """The jog lot's starting house (3 floor blocks) with a plain solid wing 7'-6" tall joined to its east wall,
+    nothing typed. A plain part 7 ft or taller (NYS R305.1, #14's one stories definition) may hold a story the
+    drawing doesn't show: the count is open, never complies (it did with the old 8 ft line)."""
+    got, _ = _check(generate.build(*F8_CASE)[0])
+    assert got["R-1b.stories"] != COMPLIES
+
+
+F9_CASE = ("sloped", [{"op": "move_floor", "k": 0, "dx": 0.0, "dy": -5.75}, {"op": "rotate", "deg": -0.9},
+                      {"op": "add_roof", "kind": "roof", "axis": 0, "over": 0.0, "fascia": 0.0, "inset": 3.5,
+                       "rise": 7.25}])
+
+
+def test_F9_the_spot_grade_reason_is_the_same_whichever_way_the_outlines_run():
+    """The sloped lot's starting house on its spot grades, floor 1 moved 5'-9" toward the street, rotated 0.9
+    degrees, a gable roof solid on top: 'N walls without one' was 7 drawn as given and 9 with each outline started
+    at its next point. The same building has one number of walls, whatever the drawing order."""
+    d = generate.build(*F9_CASE)[0]
+    reasons = []
+    for order in ("as_drawn", "reversed", "shifted"):
+        rows = harness.items_by_rule(harness.gordium(d, order))
+        reasons.append([i["reason"] for r in ("R-1b.height", "R-1b.stories") for i in rows[r]])
+    assert reasons[0] == reasons[1] == reasons[2], reasons
+
+
+# ---- F11 (P3) and F12 (P2), stress-tests 5e642c9: pinned as passing in #18 ---------------------------------------
+
+F11_CASE = ("sample_survey", [{"op": "rotate", "deg": 4.7},
+                              {"op": "add_roof", "kind": "roof", "axis": 1, "over": 1.0, "fascia": 1.0, "inset": 3.0,
+                               "rise": 8.0}])
+
+
+def test_F11_the_side_yard_rows_are_named_the_same_whichever_way_the_outlines_run():
+    """The surveyed sample lot's starting house rotated 4.7 degrees, a gable roof solid on it with eaves 1 ft past
+    the side walls: the side yard rows were "narrower"/"wider" one way and "East"/"West" the other. One building,
+    one way of naming its side yards."""
+    d = generate.build(*F11_CASE)[0]
+    names = [sorted(i["name"] for i in harness.items_by_rule(harness.gordium(d, order))["R-1b.side_yards"])
+             for order in ("as_drawn", "reversed", "shifted")]
+    assert names[0] == names[1] == names[2], names
+
+
+F12_CASE = ("sample_tax", [{"op": "move_floor", "k": 1, "dx": -3.0, "dy": -3.75},
+                           {"op": "add_roof", "kind": "mansard", "axis": 1, "over": 0.5, "fascia": 0.5, "inset": 3.5,
+                            "rise": 6.75}])
+
+
+def test_F12_every_side_yard_row_that_needs_review_says_why():
+    """Floor 2 moved on its own 3 ft west and 3'-9" toward the street, a mansard on the top floor 6 in. past its
+    walls, on the tax-map sample lot: "Side yard, East" needed review with no reason at all."""
+    rows = harness.items_by_rule(harness.gordium(generate.build(*F12_CASE)[0]))["R-1b.side_yards"]
+    assert all((i["reason"] or "").strip() for i in rows if i["status"] == REVIEW), [i["name"] for i in rows]
+
+
+def test_every_row_that_needs_review_says_why_over_a_stress_sample():
+    """The invariant behind F12: a needs-review row always says what it waits for, on any design. 60 random
+    designs from the stress generator (its lots and edits)."""
+    import random
+    rng = random.Random(1812)
+    for _ in range(60):
+        case = generate.random_case(rng)
+        d = generate.build(case["lot"], case["edits"])[0]
+        for i in harness.gordium(d)["view"]["items"]:
+            if i["status"] == REVIEW:
+                assert (i["reason"] or "").strip(), (case["lot"], case["edits"], i["name"])

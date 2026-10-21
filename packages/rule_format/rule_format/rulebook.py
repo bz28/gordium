@@ -51,8 +51,10 @@ PROPOSED_MEASURES = "5_zoning_rules/drafted/records/proposed_measures.yaml"
 def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
     """allowed: the values each text measure may take, e.g. {"use": the city's use names}.
     Required, so no caller can forget it. A value outside the list, or a text measure with
-    no list, is unrecognized, so the rule needs review. A measure that isn't in measures.yaml (one a
-    draft proposed) is described here by its kind instead: "number" or "boolean"."""
+    no list, is unrecognized. A measure that isn't in measures.yaml (one a draft proposed) is described here by
+    its kind instead: "number" or "boolean". A missing or unusable measure is unknown: the result is pass or fail
+    only if it is the same whatever that measure turns out to be (three-valued logic, formula.evaluate); else
+    needs review."""
     kinds = MEASURE_KINDS | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
     try:
         if "applies_when" in rule and not _condition(rule["applies_when"], values, kinds):
@@ -372,8 +374,9 @@ def _unused_number_problems(rule: dict, sources: list[dict], ctx: "Context") -> 
     law (a city code chapter: sources.yaml layout ecode360) and numbered notes ("(16) ..."). Left out: chart
     rows (a row lists every district's number; the rule uses its own column's) and cited cells. Not yet for
     rules the drafting scripts wrote (drafted_by "rule_drafting/..."): their quotes can't declare not_limits yet;
-    the drafting job turns it on for them."""
-    if str(rule.get("drafted_by", "")).startswith("rule_drafting/"):
+    the drafting job turns it on for them. Not for a flag: it always needs review, and the numbers in its quote
+    are the limits it asks a person to apply by hand, shown to them with the quote."""
+    if str(rule.get("drafted_by", "")).startswith("rule_drafting/") or rule.get("kind") == "flag":
         return []
     used = [0.0]
     for key in ("applies_when", "check"):
@@ -595,8 +598,11 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
                 p.append(f"{f!r} must be a true/false test (a comparison, and/or, or not)")
             elif (name := formula.bare_name(f)) and kinds.get(name) != "boolean":
                 p.append(f"{f!r} is just a measure name; only a yes/no measure can be a test on its own")
-            p += [f"unknown measure '{n}' in {f!r}" for n in sorted(formula.names(f) - set(kinds))]
+            unknown = sorted(formula.names(f) - set(kinds))
+            p += [f"unknown measure '{n}' in {f!r}" for n in unknown]
             p += _text_problems(f, {"use": ctx.uses, "district": ctx.districts})
+            if not unknown:                 # well-typed for every value, or it is no rule (formula.type_of)
+                formula.type_of(f, kinds)
         except FormulaError as e:
             p.append(str(e))
 

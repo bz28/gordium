@@ -161,17 +161,27 @@ Every reason the code gives today comes from the table:
   instead". Measured from existing ground instead of finished: "measured from existing
   grade; the code's grade plane is finished ground level (§325-3): tick No regrading near the house, or set the
   finished ground" (height and stories).
-- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "the building is one
-  solid with no floors: draw each story as its own solid standing on the one below (as Gordium's starting building
-  is), or enter the number of stories"; "enter bedrooms / parking spaces"; "enter the dwelling units, the rooms let for profit, and whether it is a conversion" (R-3a chart note 7: the lot size grows with them).
+- **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
+  are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
+  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces"; "enter the dwelling units, the rooms let for profit, and whether it is a conversion" (R-3a chart note 7: the lot size grows with them).
 - **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
-  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked (a podium, a bulkhead, a
+  Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked on them (a podium, a bulkhead, a
   roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
   they disagree it's a question, never an override. "a floor block below the ground: whether a
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
-  together, or draw the overhang as part of its floor".
-- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the measurements"; "more than one building: pick the main building"; for a building of joined parts (§325-18A), stories are counted only from floor blocks: "part of the building ({what}) isn't drawn as floor blocks, so its stories can't be counted: enter the number of stories of the whole building" (a part 8 ft or taller that isn't floor blocks; a count typed then stands for the whole building), "the stories typed ({typed}) are fewer than the floor blocks drawn ({drawn}): check the count, or the floors", "part of the building ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects"; "a building isn't on the lot (is it part of this design?)" (a building
+  together, or draw the overhang as part of its floor". Stories are counted only from floor blocks: a part drawn as a plain solid
+  (or plain solids stacked) never has its stories guessed from its height or its blocks. With one at least 7 ft
+  tall (the lowest ceiling a habitable room may have, NYS Residential Code R305.1; a porch slab or steps is lower),
+  the count typed stands for the whole building, and only if no part's floor blocks count more: "the stories typed
+  ({typed}) are fewer than the floor blocks drawn ({drawn}): check the count, or the floors", nor the solids stacked
+  in a plain part: "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), which may
+  each be a story: check the count"; with none typed:
+  "part of the building ({what}) isn't drawn as floor blocks, so its stories can't be counted: enter the number of
+  stories of the whole building". Any part reaching below the ground, whatever was typed: "part of the building
+  ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
+  question for the architects".
+- **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the measurements"; "more than one building: pick the main building"; "a building isn't on the lot (is it part of this design?)" (a building
   wholly off the lot: only the rules that would measure it wait: the main yards for the main building, the accessory
   rule for an accessory building, coverage for any. A building partly off the lot is measured, and every rule that
   measures it does not comply, whatever the readings or answers: the main yards, the eaves, the height and the

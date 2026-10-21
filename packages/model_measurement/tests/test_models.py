@@ -116,7 +116,7 @@ def test_their_model_with_the_house_on_its_outline_against_their_spreadsheet(the
     # do the two that need the lot area: their model's lot is drawn from the map, not a survey
     mine = ours(m, rules, allowed, results)
     assert {k: v for k, v in mine.items() if v != results[k]} == {
-        "R-1b.height": "needs_review", "R-1b.rear_yard": "needs_review",
+        "R-1b.rear_yard": "needs_review",
         "R-1b.lot_area_one_family_detached": "needs_review", "R-1b.lot_coverage": "needs_review"}
 
 
