@@ -161,7 +161,29 @@ def _side_review_no_reason(v):
 
 
 MATCHERS["F12"] = _side_review_no_reason
-KNOWN = {}        # every finding (F1-F12) is fixed: a return of any of them fails CI
+def _off_lot_height_no_reason(v):
+    """F13 (open): height needs review with no reason, the main building wholly off a tax-map lot."""
+    return v["invariant"] == "f" and v["rule"] == "R-1b.height" and v.get("what") == "needs review with no reason" \
+        and oracle.measure(_design(v))["off"]
+
+
+def _geos_crash(v):
+    """F14 (open): the check raises a GEOS TopologyException."""
+    return v["invariant"] == "crash" and "TopologyException" in v.get("what", "")
+
+
+def _floating_ground_stop(v):
+    """F15 (open): the shrink changes coverage because the 'ground doesn't meet the buildings' stop goes away."""
+    if not (v["invariant"] == "c" and v["rule"] == "R-1b.lot_coverage"):
+        return False
+    d = _design(v)
+    res = harness.gordium(d)
+    return any("doesn't meet the buildings" in (i["reason"] or "")
+               for i in harness.items_by_rule(res).get("R-1b.lot_coverage", []))
+
+
+MATCHERS.update(F13=_off_lot_height_no_reason, F14=_geos_crash, F15=_floating_ground_stop)
+KNOWN = {"F13": _off_lot_height_no_reason, "F14": _geos_crash, "F15": _floating_ground_stop}   # F1-F12 fixed
 
 
 def known(v):

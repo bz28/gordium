@@ -8,7 +8,7 @@ output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper
 (2 ft per line everywhere, carried up in d43e11f); F4 in #12 (the same_id stop, b5a899b); F6, F7 in #18 (ca4f6c3,
-4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). None is open.
+4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). Open: F13, F14, F15 (found after a98149b).
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from shapely.errors import GEOSException
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -309,6 +310,70 @@ def test_F12_every_side_yard_row_that_needs_review_says_why():
     with no reason at all (the West row does give one). A needs-review row must say what it waits for."""
     rows = harness.items_by_rule(harness.gordium(generate.build(*F12_CASE)[0]))["R-1b.side_yards"]
     assert all((i["reason"] or "").strip() for i in rows if i["status"] == REVIEW), [i["name"] for i in rows]
+
+
+# ---- F13 (P1): on a tax-map lot, a 45 ft house wholly off the lot: height needs review, with no reason ----------
+
+F13_CASE = ("sample_tax", [{"op": "off_lot", "target": "house", "line": 1, "amount": 9.25},
+                           {"op": "add_floor", "h": 10.0}])
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F13: a house over the height limit, wholly off a tax-map lot: needs review, no reason")
+def test_F13_a_45_ft_house_wholly_off_a_tax_map_lot_does_not_comply_on_height_and_says_why():
+    """Two edits on the tax-map sample lot: the starting house dragged wholly off the lot past its east line, then
+    a fourth floor block (45'-0"). The height doesn't depend on the lot: 45 ft is over 35 ft, and over the 38'-6"
+    the §325-16C bonus can ever reach, so it does not comply whatever the yards or lot lines. Gordium: needs
+    review, 45'-0", with an empty reason (the same house on a surveyed lot: does not comply, with its reason)."""
+    d = generate.build(*F13_CASE)[0]
+    h = harness.items_by_rule(harness.gordium(d))["R-1b.height"]
+    assert all((i["reason"] or "").strip() for i in h)
+    assert harness.statuses(harness.gordium(d))["R-1b.height"] == FAILS
+
+
+def test_the_oracle_on_F13_the_45_ft_house_fails_height_anywhere():
+    d, done = generate.build(*F13_CASE)
+    assert len(done) == 2 and oracle.verdicts(d)["R-1b.height"]["verdict"] == oracle.FAIL
+
+
+# ---- F14 (P0, a crash): a rotated house with a gable roof solid: the check raises a GEOS error ----------------------
+
+F14_CASE = ("sample_survey", [{"op": "rotate", "deg": -8.7},
+                              {"op": "add_roof", "kind": "roof", "axis": 0, "over": 0.0, "fascia": 0.0, "inset": 3.25,
+                               "rise": 13.75}])
+
+
+@pytest.mark.xfail(strict=True, raises=GEOSException,
+                   reason="F14: check_site raises TopologyException in measure._projection_now (a rotated gable)")
+def test_F14_a_rotated_house_with_a_gable_roof_is_checked_without_crashing():
+    """Two edits on the surveyed sample lot: the starting house rotated 8.7 degrees, then a gable roof solid on it
+    (no overhang, ridge 13'-9" above the walls). The check stops with "TopologyException: side location conflict"
+    (shapely unary_union in measure._projection_now, from _attached in _assemblies): no answer at all in Rhino.
+    Whatever it can't read should need review with a reason, never crash."""
+    res = harness.gordium(generate.build(*F14_CASE)[0])
+    assert harness.statuses(res)
+
+
+# ---- F15 (P3): the 'ground doesn't meet the buildings' stop comes and goes with the spot grades -------------------
+
+F15_CASE = ("sloped", [{"op": "shift_floor", "k": 3, "dz": 3.25, "carry": False}])
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F15: 'the ground doesn't meet the buildings' holds the yards only while the spots are at the walls")
+def test_F15_the_yards_of_a_floating_house_do_not_wait_on_the_ground_only_sometimes():
+    """The sloped lot's starting house (on its four spot grades, ground 2.0 ft) with floor 1 raised 3'-3" on its
+    own: nothing reaches the ground (5'-3" to 37'-0"). Gordium stops every yard and the coverage ("the ground level
+    doesn't meet the buildings"). Pull the west wall in 1'-11" and the spots are no longer at the walls, that stop
+    is no longer read, and the yards and coverage are measured (complies) although the house still floats. The
+    plan yards don't depend on the ground; either way, the same floating house must get the same yard results.
+    (Found as invariant c: with a listed shed in front, shrinking the house turned coverage from needs review to
+    does not comply.)"""
+    d = generate.build(*F15_CASE)[0]
+    pulled = generate.apply(d, {"op": "stretch", "face": 2, "amount": -1.94})
+    a, b = harness.statuses(harness.gordium(d)), harness.statuses(harness.gordium(pulled))
+    for rule in ("R-1b.front_yard", "R-1b.side_yards", "R-1b.rear_yard"):
+        assert a[rule] == b[rule], (rule, a[rule], b[rule])
 
 
 # ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------
