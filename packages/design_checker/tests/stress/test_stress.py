@@ -141,7 +141,20 @@ def _gapped_floor_blocks(v):
 
 
 MATCHERS["F8"], MATCHERS["F9"], MATCHERS["F10"] = _plain_part_under_8_ft, _wall_count_words, _gapped_floor_blocks
-KNOWN = {"F8": _plain_part_under_8_ft, "F9": _wall_count_words, "F10": _gapped_floor_blocks}   # F6, F7 fixed in #18 (ca4f6c3, 4ce81b3): a return of those fails CI
+def _side_row_names(v):
+    """F11 (open, for #18): drawn another way, only the side yard rows' names change (compass or narrower/wider)."""
+    if not (v["invariant"] == "d" and v["rule"] == "R-1b.side_yards" and "outlines drawn" in v.get("what", "")):
+        return False
+    d = _design(v)
+    a, b = harness.comparable(harness.gordium(d)), harness.comparable(harness.gordium(d, v["what"].split()[-1]))
+
+    def plain(rows):
+        return sorted(str({**x, "name": None}) for x in rows)
+    return a != b and plain(a) == plain(b)
+
+
+MATCHERS["F11"] = _side_row_names
+KNOWN = {"F8": _plain_part_under_8_ft, "F9": _wall_count_words, "F10": _gapped_floor_blocks, "F11": _side_row_names}   # F6, F7 fixed in #18 (ca4f6c3, 4ce81b3): a return of those fails CI
 
 
 def known(v):

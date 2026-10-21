@@ -7,7 +7,7 @@ raises=AssertionError: only the finding's own assertion counts as "still reprodu
 output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper on
-F4 (a repeated id) in #12 (the same_id stop; in measurement-2 at b5a899b). F6 and F7 in #18 (ca4f6c3, 4ce81b3). Open: F8, F9, F10.
+F4 (a repeated id) in #12 (the same_id stop; in measurement-2 at b5a899b). F6 and F7 in #18 (ca4f6c3, 4ce81b3). Open: F8, F9, F10, F11.
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -264,7 +264,7 @@ F10_CASE = ("sample_survey", [{"op": "delete_floor", "which": "middle"},
 
 
 @pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F10: floor blocks above a gap aren't counted, so a typed count below them stands")
+                   reason="F10 (for #14's stories definition): blocks above a gap aren't counted; a typed count below them stands")
 def test_F10_a_typed_count_below_the_floor_blocks_drawn_never_complies_even_with_a_gap():
     """Two edits: the surveyed sample lot's starting house with its middle floor block deleted (floor 1 at 0-11'-8",
     floor 3 left where it was, 23'-4" to 35'-0"), and a 9 ft plain wing on its rear wall with 1 typed. Two floor
@@ -281,6 +281,26 @@ def test_the_oracle_on_F10_two_blocks_drawn_and_one_typed_can_not_pass():
     d, done = generate.build(*F10_CASE)
     assert len(done) == 2 and d["typed_stories"] == 1
     assert oracle.verdicts(d)["R-1b.stories"]["verdict"] == oracle.NOT_PASS
+
+
+# ---- F11 (P3, for #18): a rotated house's side yard rows are named by compass one way, narrower/wider the other -
+
+F11_CASE = ("sample_survey", [{"op": "rotate", "deg": 4.7},
+                              {"op": "add_roof", "kind": "roof", "axis": 1, "over": 1.0, "fascia": 1.0, "inset": 3.0,
+                               "rise": 8.0}])
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F11: side yard row names (compass or narrower/wider) depend on the outline order")
+def test_F11_the_side_yard_rows_are_named_the_same_whichever_way_the_outlines_run():
+    """The surveyed sample lot's starting house rotated 4.7 degrees, a gable roof solid on it with eaves 1 ft past
+    the side walls. Drawn as given, the side yard rows are "Side yard, narrower" and "Side yard, wider"; with each
+    outline starting at its next point they are "Side yard, East" and "Side yard, West" (the same numbers and
+    statuses). One building, one way of naming its side yards."""
+    d = generate.build(*F11_CASE)[0]
+    names = [sorted(i["name"] for i in harness.items_by_rule(harness.gordium(d, order))["R-1b.side_yards"])
+             for order in ("as_drawn", "reversed", "shifted")]
+    assert names[0] == names[1] == names[2], names
 
 
 # ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------
