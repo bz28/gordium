@@ -823,3 +823,9 @@ def test_a_flag_isnt_held_to_the_numbers_in_its_quote(ctx):
     flag = rulebook(kind="flag", check=None, review_when=None, examples=None)
     assert not any("is never used" in p for p in validate(flag, ctx))
     assert any("number 20 in the quote" in p for p in validate(rulebook(check="rear_yard >= min(0.25 * lot_depth, 50)"), ctx))
+
+
+def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):
+    """Compile, then freeze: an ill-typed formula is a validation problem, so no frozen rule can be ill-typed."""
+    assert any("compare values of one kind" in p for p in validate(rulebook(check='rear_yard >= 20 or use == 5'), ctx))
+    assert not any("kind" in p for p in validate(rulebook(), ctx))
