@@ -30,6 +30,7 @@ ORDER = [FAILS, REVIEW, COMPLIES, NOT_CHECKED]
 GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies", "Complies"),
           ("not_checked", "Not checked"), ("not_covered", "Not covered by this rulebook")]
 
+from model_measurement.stops import STOPS  # noqa: E402
 from model_measurement.measure import TAX_MAP_SLACK, TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = set(TAX_MAP_SLACK)          # every lot-dependent length: the one table in measure.py
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
@@ -623,6 +624,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                    ) + ")")
         line = _detail_line(proposed, required, margin_t, numbers[4] if node is not None else "", margin)
         hint = _hint(label, numbers[4], margin, numbers[3]) if node is not None and margin is not None else None
+        if st == REVIEW and any((measured.get(n) or {}).get("reason") == STOPS["no_units"] for n in names):
+            # R-3a note 7's facts: the Rhino panel can't ask for them yet (#15's prompt for a row's needs): say where
+            hint = ("Enter the dwelling units, the rooms let for profit and whether it is a conversion in the "
+                    "project's facts file for now (the panel can't ask for them yet)")
         if node is not None and node.left.id == "building_area" and margin is not None and margin < 0:
             allowed = _evaluate(ast.unparse(node.comparators[0]), values)
             if isinstance(allowed, (int, float)) and values.get("building_area") is not None:
