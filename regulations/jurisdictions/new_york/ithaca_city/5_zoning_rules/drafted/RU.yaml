@@ -1509,11 +1509,10 @@ rules:
       or nursing hom'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or a dwelling
       row, with its notes) is unclear: a person decides.'
 - id: RU.parking_dormitory
-  kind: rule
+  kind: flag
   topic: parking_and_loading
-  title: Dormitory parking per persons housed (chart p.14)
+  title: Dormitory off-street parking per persons housed (chart p.14)
   applies_when: use == "dormitory"
-  check: parking_spaces >= persons_housed * 1 / 4
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 14
@@ -1521,31 +1520,17 @@ rules:
       section: Residential
       row: Dormitory
       column: RU
-  examples:
-  - given:
-      use: dormitory
-      persons_housed: 8
-      parking_spaces: 2
-    expect: pass
-  - given:
-      use: dormitory
-      persons_housed: 8
-      parking_spaces: 1
-    expect: fail
-  - given:
-      use: church
-      persons_housed: 8
-      parking_spaces: 0
-    expect: not_applicable
   open_questions:
-  - How is a fractional result rounded (e.g. 10 persons housed at 1 space per 4 persons)? The formula requires the
-    unrounded figure to be met.
+  - The chart gives '1 space per 4 persons housed' without saying how a fraction of a space is treated. The check
+    compares whole spaces against the exact ratio, so a fraction rounds up.
   research:
-  - question: How is a fractional result rounded (e.g. 10 persons housed at 1 space per 4 persons)? The formula
-      requires the unrounded figure to be met.
+  - question: The chart gives '1 space per 4 persons housed' without saying how a fraction of a space is treated.
+      The check compares whole spaces against the exact ratio, so a fraction rounds up.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  notes: 'Demoted until re-drafted: The chart''s 1 space per 4 persons housed depends on how many persons a dormitory
+    houses, which Gordium doesn''t count (and the chart doesn''t say how a fraction rounds): a person checks the
+    parking.'

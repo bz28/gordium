@@ -1280,11 +1280,12 @@ rules:
     reason: '§325-3 defines this use as ''a multiple dwelling: A building used or occupied as a convalescent, old-age
       or nursing hom'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or a dwelling
       row, with its notes) is unclear: a person decides.'
-- id: R-2a.325_16c_extra_height_limit_10_percent
+- id: R-2a.325_16c_extra_height_limit
   kind: rule
   topic: dimensions
-  title: Added height at most 10% of district maximum (325-16C(3))
-  check: building_height <= 35 + 0.1 * 35
+  title: Extra height at most 10% of district maximum (§325-16C(3))
+  applies_when: building_height > 35
+  check: building_height - 35 <= 0.1 * 35
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1314,36 +1315,47 @@ rules:
     quote: See §325-16.
   examples:
   - given:
-      building_height: 36.75
+      building_height: 38.5
     expect: pass
   - given:
-      building_height: 42
+      building_height: 70
     expect: fail
+  - given:
+      building_height: 35
+    expect: not_applicable
   open_questions:
-  - Does 325-16C(3) cap total height at 110% of the district maximum, as drafted? The text does not say whether
-    the extra height may also exceed the 5-foot limit or the other limits in 325-16B.
-  - Height of building is measured per 325-3B (average height of a pitched roof); the meaning of 'average height'
-    is unsettled.
+  - Height of building is measured to the 'average height' of a pitched roof; the code does not say how that average
+    is found. Does that change whether the height exceeds the district maximum or the additional feet?
+  - Does the 10% limit apply when the district maximum is the chart's height in feet (the chart gives both stories
+    and feet)? This draft uses the feet.
   research:
-  - question: Does 325-16C(3) cap total height at 110% of the district maximum, as drafted? The text does not say
-      whether the extra height may also exceed the 5-foot limit or the other limits in 325-16B.
+  - question: Height of building is measured to the 'average height' of a pitched roof; the code does not say how
+      that average is found. Does that change whether the height exceeds the district maximum or the additional
+      feet?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Height of building is measured per 325-3B (average height of a pitched roof); the meaning of 'average
-      height' is unsettled.
+  - question: Does the 10% limit apply when the district maximum is the chart's height in feet (the chart gives
+      both stories and feet)? This draft uses the feet.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-2a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-2a.325_16c_extra_height_stories_not_exceeded
+- id: R-2a.325_16c_extra_height_stories
   kind: rule
   topic: dimensions
-  title: Stories not exceeded when height is added (325-16C(2))
+  title: Stories not exceeded when extra height used (§325-16C(2))
+  applies_when: building_height > 35
   check: stories <= 3
   sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Height in feet
+      column: R-2A
   - file: zoning_charts_2026-04.pdf
     page: 3
     cell:
@@ -1371,17 +1383,21 @@ rules:
     quote: See §325-16.
   examples:
   - given:
+      building_height: 38
       stories: 3
     expect: pass
   - given:
+      building_height: 38
       stories: 4
     expect: fail
+  - given:
+      building_height: 35
+      stories: 3
+    expect: not_applicable
   open_questions:
-  - R-3aa's cell reads 3/2 (maximum/minimum stories, footnote 11) and gets no rule from this template; a person
-    must handle it.
+  - Stories are counted as the city defines a story (basement, attic rules).
   research:
-  - question: R-3aa's cell reads 3/2 (maximum/minimum stories, footnote 11) and gets no rule from this template;
-      a person must handle it.
+  - question: Stories are counted as the city defines a story (basement, attic rules).
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1391,7 +1407,7 @@ rules:
 - id: R-2a.325_16c_extra_height_front_yard
   kind: rule
   topic: dimensions
-  title: Front yard increased with added height (325-16C(1))
+  title: Front yard +1 ft per ft of extra height (§325-16C(1))
   applies_when: building_height > 35
   check: front_yard >= 25 + (building_height - 35)
   sources:
@@ -1429,21 +1445,26 @@ rules:
     quote: See §325-16.
   examples:
   - given:
-      building_height: 37
-      front_yard: 27
+      building_height: 38
+      front_yard: 28
     expect: pass
   - given:
-      building_height: 37
-      front_yard: 26
+      building_height: 38
+      front_yard: 25
     expect: fail
   - given:
       building_height: 35
-      front_yard: 0
+      front_yard: 25
     expect: not_applicable
   open_questions:
-  - Corner lots have two front yards (325-19C); does the increase apply to both?
+  - On a corner lot (two front yards) does the increase apply to both street yards?
+  - Whether eaves/projections count in measuring the increased yard is not stated.
   research:
-  - question: Corner lots have two front yards (325-19C); does the increase apply to both?
+  - question: On a corner lot (two front yards) does the increase apply to both street yards?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Whether eaves/projections count in measuring the increased yard is not stated.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1453,9 +1474,9 @@ rules:
 - id: R-2a.325_16c_extra_height_side_yards
   kind: rule
   topic: dimensions
-  title: Side yards increased with added height (325-16C(1))
+  title: Side yards +1 ft per ft of extra height (§325-16C(1))
   applies_when: building_height > 35
-  check: side_yard_smaller >= 10 + (building_height - 35) and side_yard_larger >= 10 + (building_height - 35)
+  check: side_yard_larger >= 10 + (building_height - 35) and side_yard_smaller >= 10 + (building_height - 35)
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1497,36 +1518,31 @@ rules:
     quote: See §325-16.
   examples:
   - given:
-      building_height: 37
-      side_yard_smaller: 12
-      side_yard_larger: 12
+      building_height: 38
+      side_yard_larger: 13
+      side_yard_smaller: 13
     expect: pass
   - given:
-      building_height: 37
-      side_yard_smaller: 11
-      side_yard_larger: 12
+      building_height: 38
+      side_yard_larger: 10
+      side_yard_smaller: 13
     expect: fail
   - given:
-      building_height: 37
-      side_yard_smaller: 12
-      side_yard_larger: 11
+      building_height: 38
+      side_yard_larger: 13
+      side_yard_smaller: 10
     expect: fail
   - given:
       building_height: 35
-      side_yard_smaller: 0
-      side_yard_larger: 0
+      side_yard_larger: 10
+      side_yard_smaller: 10
     expect: not_applicable
   open_questions:
-  - The narrower side yard is matched to the chart's 'other side' minimum and the wider to 'one side'; the chart
-    does not say so.
-  - Districts whose side cells hold several numbers (R-2C) get no rule and go to a person.
+  - The chart lists 'one side' and 'other side' minimums; this draft pairs the wider yard with the 'one side' minimum
+    and the narrower yard with the 'other side' minimum. Please confirm.
   research:
-  - question: The narrower side yard is matched to the chart's 'other side' minimum and the wider to 'one side';
-      the chart does not say so.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Districts whose side cells hold several numbers (R-2C) get no rule and go to a person.
+  - question: The chart lists 'one side' and 'other side' minimums; this draft pairs the wider yard with the 'one
+      side' minimum and the narrower yard with the 'other side' minimum. Please confirm.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1536,7 +1552,7 @@ rules:
 - id: R-2a.325_16c_extra_height_rear_yard
   kind: rule
   topic: dimensions
-  title: Rear yard increased with added height (325-16C(1))
+  title: Rear yard +1 ft per ft of extra height (§325-16C(1))
   applies_when: building_height > 35
   check: rear_yard >= max(20, min(0.25 * lot_depth, 50)) + (building_height - 35)
   sources:
@@ -1569,60 +1585,47 @@ rules:
   - file: zoning_charts_2026-04.pdf
     page: 3
     lines:
-    - 66
-    - 66
-    quote: But not less than 20 ft.
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
     - 56
     - 56
     quote: See §325-16.
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 66
+    - 66
+    quote: But not less than 20 ft.
   examples:
   - given:
-      building_height: 37
+      building_height: 38
+      lot_depth: 100
+      rear_yard: 28
+    expect: pass
+  - given:
+      building_height: 38
+      lot_depth: 1000
+      rear_yard: 53
+    expect: pass
+  - given:
+      building_height: 38
       lot_depth: 40
-      rear_yard: 22
+      rear_yard: 23
     expect: pass
   - given:
-      building_height: 37
-      lot_depth: 40
-      rear_yard: 21
-    expect: fail
-  - given:
-      building_height: 37
-      lot_depth: 400
-      rear_yard: 52
-    expect: pass
-  - given:
-      building_height: 37
-      lot_depth: 400
-      rear_yard: 51
-    expect: fail
-  - given:
-      building_height: 37
-      lot_depth: 150
-      rear_yard: 39.5
-    expect: pass
-  - given:
-      building_height: 37
-      lot_depth: 150
-      rear_yard: 38.5
+      building_height: 38
+      lot_depth: 100
+      rear_yard: 10
     expect: fail
   - given:
       building_height: 35
-      lot_depth: 150
-      rear_yard: 0
+      lot_depth: 100
+      rear_yard: 10
     expect: not_applicable
   open_questions:
-  - Is the 20-ft floor of footnote 16 applied before the added yard, as drafted?
-  - RU's rear cell carries footnote 17 (30 ft) and gets no rule from this template.
+  - On a corner lot or through-block lot the rear yard is the one opposite the street whose address the lot bears;
+    confirm the rear_yard measure follows that.
   research:
-  - question: Is the 20-ft floor of footnote 16 applied before the added yard, as drafted?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: RU's rear cell carries footnote 17 (30 ft) and gets no rule from this template.
+  - question: On a corner lot or through-block lot the rear yard is the one opposite the street whose address the
+      lot bears; confirm the rear_yard measure follows that.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'

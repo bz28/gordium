@@ -159,11 +159,6 @@ architectural_feature_projection:
   needed_by:
   - general.325_18b_architectural_feature_projection_limit
   unit: ft
-attached_units_in_building:
-  meaning: Number of one-family dwelling units attached to form the single building
-  needed_by:
-  - general.325_3b_one_family_attached_dwelling_max_attached_units_per_building
-  unit: count
 building_ground_floor_area:
   meaning: Total ground floor area of the building on which the feature is located
   needed_by:
@@ -222,6 +217,11 @@ driveway_width:
   needed_by:
   - general.325_20d_driveway_min_width
   unit: ft
+dwelling_units_in_building:
+  meaning: Number of one-family dwelling units attached to form a single building
+  needed_by:
+  - general.325_3b_one_family_attached_dwelling_attached_units_per_building
+  unit: count
 existing_primary_structures:
   meaning: Number of primary structures already on the parcel
   needed_by:
@@ -356,13 +356,6 @@ pergola_in_required_yard:
   needed_by:
   - general.325_3b_building_area_pergola_terrace_patio_not_in_required_yard
   unit: yes_no
-persons_housed:
-  meaning: Number of persons housed in the dormitory
-  needed_by:
-  - R-3a.parking_dormitory
-  - R-3b.parking_dormitory
-  - RU.parking_dormitory
-  unit: count
 primary_building_count:
   meaning: Number of permitted primary uses, each in a separate building, on the property, counting the initial
     primary use

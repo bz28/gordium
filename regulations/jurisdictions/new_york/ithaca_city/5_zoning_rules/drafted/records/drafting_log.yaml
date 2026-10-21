@@ -1141,15 +1141,18 @@ units:
         - Residential
         - Dormitory
         - R-3AA
-    - rule: chart-p14-residential.parking_by_sleeping_rooms
-      why: 'R-1a.parking_by_sleeping_rooms: it passes adult_day_care_home (isn''t a dwelling: other uses go to §325-20);
-        limit applies_when, or send that use to review; it passes bed_and_breakfast_inn (isn''t a dwelling: other
-        uses go to §325-20); limit applies_when, or send that use to review; R-1b.parking_by_sleeping_rooms: it
-        passes adult_day_care_home (isn''t a dwelling: other uses go to §325-20); limit applies_when, or send that
-        use to review; it passes bed_and_breakfast_inn (isn''t a dwelling: other uses go to §325-20); limit applies_when,
-        or send that use to review; R-2a.parking_by_sleeping_rooms: it passes adult_day_care_home (isn''t a dwelling:
-        other uses go to §325-20); limit applies_when, or send that use to review; it passes bed_and_breakfast_inn
-        (isn''t a dwelling: other uses go to §325-20); limit applies_when, or send that use to review'
+    - rule: chart-p14-residential.parking_residential_by_sleeping_rooms
+      why: 'R-1a.parking_residential_by_sleeping_rooms: it passes one_family_attached (is a building of several
+        dwelling units: every unit''s requirement is added up); limit applies_when, or send that use to review;
+        it passes one_family_semi_detached (is a building of several dwelling units: every unit''s requirement is
+        added up); limit applies_when, or send that use to review; R-1b.parking_residential_by_sleeping_rooms: it
+        passes one_family_attached (is a building of several dwelling units: every unit''s requirement is added
+        up); limit applies_when, or send that use to review; it passes one_family_semi_detached (is a building of
+        several dwelling units: every unit''s requirement is added up); limit applies_when, or send that use to
+        review; R-2a.parking_residential_by_sleeping_rooms: it passes one_family_attached (is a building of several
+        dwelling units: every unit''s requirement is added up); limit applies_when, or send that use to review;
+        it passes one_family_semi_detached (is a building of several dwelling units: every unit''s requirement is
+        added up); limit applies_when, or send that use to review'
     - rule: R-1a.chart-p14-residential
       why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the R-1A
         cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
@@ -1356,40 +1359,44 @@ units:
     problems: []
   325-16C:
     rules:
-    - R-1a.325_16c_extra_height_limit_10_percent
-    - R-1a.325_16c_extra_height_stories_not_exceeded
+    - R-1a.325_16c_extra_height_limit
+    - R-1a.325_16c_extra_height_stories
     - R-1a.325_16c_extra_height_front_yard
     - R-1a.325_16c_extra_height_side_yards
     - R-1a.325_16c_extra_height_rear_yard
-    - R-1b.325_16c_extra_height_limit_10_percent
-    - R-1b.325_16c_extra_height_stories_not_exceeded
+    - R-1b.325_16c_extra_height_limit
+    - R-1b.325_16c_extra_height_stories
     - R-1b.325_16c_extra_height_front_yard
     - R-1b.325_16c_extra_height_side_yards
     - R-1b.325_16c_extra_height_rear_yard
-    - R-2a.325_16c_extra_height_limit_10_percent
-    - R-2a.325_16c_extra_height_stories_not_exceeded
+    - R-2a.325_16c_extra_height_limit
+    - R-2a.325_16c_extra_height_stories
     - R-2a.325_16c_extra_height_front_yard
     - R-2a.325_16c_extra_height_side_yards
     - R-2a.325_16c_extra_height_rear_yard
-    - R-2b.325_16c_extra_height_limit_10_percent
-    - R-2b.325_16c_extra_height_stories_not_exceeded
+    - R-2b.325_16c_extra_height_limit
+    - R-2b.325_16c_extra_height_stories
     - R-2b.325_16c_extra_height_front_yard
     - R-2b.325_16c_extra_height_side_yards
     - R-2b.325_16c_extra_height_rear_yard
-    - R-3a.325_16c_extra_height_limit_10_percent
-    - R-3a.325_16c_extra_height_stories_not_exceeded
+    - R-3a.325_16c_extra_height_limit
+    - R-3a.325_16c_extra_height_stories
     - R-3a.325_16c_extra_height_front_yard
     - R-3a.325_16c_extra_height_side_yards
     - R-3a.325_16c_extra_height_rear_yard
-    - R-3b.325_16c_extra_height_limit_10_percent
-    - R-3b.325_16c_extra_height_stories_not_exceeded
+    - R-3b.325_16c_extra_height_limit
+    - R-3b.325_16c_extra_height_stories
     - R-3b.325_16c_extra_height_front_yard
     - R-3b.325_16c_extra_height_side_yards
     - R-3b.325_16c_extra_height_rear_yard
     unresolved:
-    - rule: R-3aa.325_16c_extra_height_stories_not_exceeded
+    - rule: R-3aa.325_16c_extra_height_stories
       why: '''Number of stories'': the cell ''3/2 [fn11]'' has 2 numbers, the rule expects 1'
       cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-3AA
       - - 3
         - Maximum Building Height [fn10]
         - Number of stories
@@ -1425,10 +1432,10 @@ units:
         - Yard Dimensions
         - Rear (minimum, % of depth or feet, whichever is less)
         - RU
-    - rule: R-2c.325_16c_extra_height_limit_10_percent
+    - rule: R-2c.325_16c_extra_height_limit
       why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
         a person checks it'
-    - rule: R-2c.325_16c_extra_height_stories_not_exceeded
+    - rule: R-2c.325_16c_extra_height_stories
       why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
         a person checks it'
     - rule: R-2c.325_16c_extra_height_front_yard
@@ -1437,7 +1444,7 @@ units:
     - rule: R-2c.325_16c_extra_height_rear_yard
       why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
         a person checks it'
-    - rule: R-3aa.325_16c_extra_height_limit_10_percent
+    - rule: R-3aa.325_16c_extra_height_limit
       why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
         a person checks it'
     - rule: R-3aa.325_16c_extra_height_front_yard
@@ -1449,10 +1456,10 @@ units:
     - rule: R-3aa.325_16c_extra_height_rear_yard
       why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
         a person checks it'
-    - rule: RU.325_16c_extra_height_limit_10_percent
+    - rule: RU.325_16c_extra_height_limit
       why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
         a person checks it'
-    - rule: RU.325_16c_extra_height_stories_not_exceeded
+    - rule: RU.325_16c_extra_height_stories
       why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
         a person checks it'
     - rule: RU.325_16c_extra_height_front_yard
@@ -1520,7 +1527,7 @@ units:
     problems: []
   325-3B:one_family_attached_dwelling:
     rules:
-    - general.325_3b_one_family_attached_dwelling_max_attached_units_per_building
+    - general.325_3b_one_family_attached_dwelling_attached_units_per_building
     unresolved: []
     problems: []
   325-3B:dwelling_two_family:
@@ -1967,15 +1974,12 @@ units:
     unresolved: []
     problems: []
   325-25C:
-    rules: []
+    rules:
+    - general.325_25c_frame_accessory_side_setback_r1
+    - general.325_25c_frame_accessory_side_setback_other
+    - general.325_25c_frame_accessory_rear_setback
     unresolved: []
     problems: []
-    failed: '325-25C.325_25c_frame_accessory_side_setback: general.325_25c_frame_accessory_side_setback: accessory_is_frame
-      narrows accessory_distances_apply, which already decides this; use accessory_distances_apply alone; 325-25C.325_25c_frame_accessory_side_setback_r1:
-      general.325_25c_frame_accessory_side_setback_r1: accessory_is_frame narrows accessory_distances_apply, which
-      already decides this; use accessory_distances_apply alone; 325-25C.325_25c_frame_accessory_rear_setback: general.325_25c_frame_accessory_rear_setback:
-      accessory_is_frame narrows accessory_distances_apply, which already decides this; use accessory_distances_apply
-      alone'
   325-28B:
     rules: []
     unresolved:

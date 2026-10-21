@@ -141,6 +141,19 @@ def _dump(data, **kw) -> str:
     return yaml.dump(data, Dumper=_NoAliases, sort_keys=False, allow_unicode=True, width=110, **kw)
 
 
+def demoted(i: Inputs) -> dict[str, str]:
+    """{rule id: cause} of the drafted rules demoted until re-drafted (records/demoted.yaml)."""
+    path = i.records / "demoted.yaml"
+    return (load(path) or {}) if path.exists() else {}
+
+
+def demote(rule: dict, cause: str) -> dict:
+    """The rule as a flag: the checker shows NEEDS REVIEW, with the cause, wherever it applies; never a pass. Its
+    conditions are kept, its check and worked examples dropped (a flag has none)."""
+    keep = {k: v for k, v in rule.items() if k not in ("check", "review_when", "examples", "notes")}
+    return keep | {"kind": "flag", "notes": f"Demoted until re-drafted: {cause}"}
+
+
 def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
     """Replace this unit's earlier drafts with the new ones, and record what happened."""
     old = set(log["units"].get(unit_id, {}).get("rules", []))
@@ -160,6 +173,10 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
             taken.add(rule["id"])
             new_ids.append(rule["id"])
     i.drafted.mkdir(parents=True, exist_ok=True)
+    causes = demoted(i)
+    for book in books.values():                 # every save applies the demotions, to every rulebook
+        book["rules"] = [demote(r, causes[r["id"]]) if r["id"] in causes and r.get("kind") != "flag" else r
+                         for r in book["rules"]]
     for district, book in books.items():
         path = rulebook_path(i, district)
         if book["rules"]:
