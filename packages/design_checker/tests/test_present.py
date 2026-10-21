@@ -510,3 +510,33 @@ def test_at_the_limit_and_complies_never_disagree():
     cov = _ast.parse("building_area <= 0.35 * lot_area", mode="eval").body
     pct = present._numbers(cov, {"building_area": 1750.7, "lot_area": 5002}, {"building_area": {"unit": "sf"}}, "x")
     assert present._display(*pct)[2] == "at limit"
+
+
+def test_a_margin_that_rounds_to_nothing_is_at_the_limit_never_plus_zero():
+    """106 Ithaca Rd's survey house (2026-10-21): a side yard 10'-0" and a hair read "+0'-0" to spare". A margin to
+    spare that rounds down to nothing is "at limit"; a shortfall is never zero (at least the smallest step); the
+    tax-map words never say "at least 0'-0"". Every unit, at and around each step."""
+    e = present.EIGHTH
+    cases = {
+        ("ft", 0.0): "at limit", ("ft", e * 0.3): "at limit", ("ft", e * 0.5): "at limit", ("ft", e * 0.99): "at limit",
+        ("ft", e): "+0'-0 1/8\"", ("ft", e * 1.5): "+0'-0 1/8\"", ("ft", -e * 0.3): "−0'-0 1/8\"",
+        ("ft", -e * 1.5): "−0'-0 1/4\"",
+        ("sf", 0.4): "at limit", ("sf", 0.6): "at limit", ("sf", 1.0): "+1 sf", ("sf", 1.7): "+1 sf",
+        ("sf", -0.2): "−1 sf",
+        ("%", 0.004): "at limit", ("%", 0.007): "at limit", ("%", 0.01): "+0.01%", ("%", 0.019): "+0.01%",
+        ("%", -0.003): "−0.01%",
+    }
+    got = {k: present.margin_text(k[1], k[0]) for k in cases}
+    assert got == cases
+    assert present.delta_words("+0'-0\"", (e * 0.7, 4.0)) == "at the limit at worst"
+    assert present.delta_words("−3'-0\"", (-5.0, -e * 0.7)) == "less than 0'-0 1/8\" short"
+    assert present.delta_words("−3'-0\"", (-5.0, -e)) == "at least 0'-0 1/8\" short"
+    zeros = ("+0'-0\"", "−0'-0\"", "+0 sf", "−0 sf", "+0%", "−0%", "at least 0'-0\"")
+    for k in range(-400, 401):                                  # a fine sweep across the steps of every unit
+        for unit, step in (("ft", e / 8), ("sf", 1 / 8), ("%", 0.01 / 8)):
+            text = present.margin_text(k * step, unit)
+            assert not any(z in text for z in zeros), (unit, k * step, text)
+        for low, high in ((k * e / 8, 4.0), (-5.0, k * e / 8 - 1e-9)):
+            if low <= high:
+                text = present.delta_words("", (low, high))
+                assert not any(z in text for z in zeros), (low, high, text)

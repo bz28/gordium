@@ -103,25 +103,34 @@ def value_text(value, unit: str, sign: str = "", for_proposed: bool = True) -> s
     return str(value)
 
 
+def _rounds_to_nothing(margin: float, unit: str) -> bool:
+    """Whether a margin to spare, rounded down to the unit's step as it is shown, is zero (+0'-0", +0 sf, +0%)."""
+    if unit == "ft":
+        return _eighths(margin, "down") == 0
+    if unit == "sf":
+        return math.floor(margin + 1e-9) == 0
+    if unit == "%":
+        return math.floor(margin * 100 + 1e-9) == 0
+    return margin == 0
+
+
 def margin_text(margin: float, unit: str) -> str:
     """+11'-7", −2'-6", at limit: a margin is never overstated (a positive one rounds down, a shortfall up). A
-    shortfall is never "at limit": however small, it shows as at least the smallest step (−0'-0 1/8", −1 sf)."""
+    shortfall is never "at limit": however small, it shows as at least the smallest step (−0'-0 1/8", −1 sf). A
+    margin to spare that rounds down to nothing is "at limit", never "+0'-0"" (seen on 106 Ithaca Rd's survey
+    house: a side yard 10'-0" and a hair)."""
     if margin < 0 and unit in ("ft", "sf", "%"):
         least = {"ft": EIGHTH, "sf": 1.0, "%": 0.01}[unit]
         gap = max(-margin, least)
         return "−" + (feet_inches(gap, "up") if unit == "ft" else _area(gap, "up") if unit == "sf" else _pct(gap, "up", 2))
+    if unit in ("ft", "sf", "%") and _rounds_to_nothing(margin, unit):     # margin >= 0 here
+        return "at limit"
     if unit == "ft":
-        if abs(margin) < EIGHTH / 2:
-            return "at limit"
-        return ("+" if margin > 0 else "−") + feet_inches(abs(margin), "down" if margin > 0 else "up")
+        return "+" + feet_inches(margin, "down")
     if unit == "sf":
-        if abs(margin) < 0.5:
-            return "at limit"
-        return ("+" if margin > 0 else "−") + _area(abs(margin), "down" if margin > 0 else "up")
+        return "+" + _area(margin, "down")
     if unit == "%":
-        if abs(margin) < 0.005:
-            return "at limit"
-        return ("+" if margin > 0 else "−") + _pct(abs(margin), "down" if margin > 0 else "up", 2)
+        return "+" + _pct(margin, "down", 2)
     return ("+" if margin > 0 else "−" if margin < 0 else "") + (f"{abs(margin):g}" if margin else "at limit")
 
 
@@ -408,12 +417,13 @@ def delta_words(margin_t: str, span) -> str:
     if span is None:
         return delta_text(margin_t)
     low, high = span
-    if high < 0:
+    if high < 0:                       # short under every reading
+        if _rounds_to_nothing(-high, "ft"):
+            return "less than 0'-0 1/8\" short"            # never "at least 0'-0" short", never overstated
         return "at least " + feet_inches(-high, "down") + " short"
-    if low >= EIGHTH / 2:
-        return "at least " + feet_inches(low, "down") + " to spare"
-    if low >= 0:
-        return "at the limit at worst"
+    if low >= 0:                       # to spare under every reading
+        return "at the limit at worst" if _rounds_to_nothing(low, "ft") else \
+            "at least " + feet_inches(low, "down") + " to spare"
     return "up to " + feet_inches(-low, "up") + " short"
 
 
