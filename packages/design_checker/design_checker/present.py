@@ -541,7 +541,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if st == FAILS and not facts.get("lot_surveyed") and node is not None and (names & LOT_LENGTHS or tol):
             # fails as drawn, but the tax-map lines could be off: it fails only if it fails under every reading of
             # them (each line up to TOLERANCE either way); else it needs review (the same slack as for a pass)
-            ends = [values] + ([dict(values, lot_area=tol["high"])] if tol and "lot_area" in names else [])
+            # a value not measured at all that fails the rule whatever it is (check.fails_whatever) is taken where
+            # the rule is truest, 0 (proven), so the lucky lines are judged at the rule's best too
+            drawn = dict(values, **{row["Unknown"]: 0}) if row.get("Unknown") else values
+            ends = [drawn] + ([dict(drawn, lot_area=tol["high"])] if tol and "lot_area" in names else [])
             best = next((v if _evaluate(expr, v) is True else b for v in ends
                          for b in [_best_case(expr, v, names)] if _evaluate(expr, v) is True or b is not None), None)
             if best is not None:

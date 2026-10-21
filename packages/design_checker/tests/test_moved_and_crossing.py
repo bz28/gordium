@@ -2,8 +2,8 @@
 
 The starting house on 106 Ithaca Rd's 73 x 90 lot (from the tax map) sits 12 ft from each side line and 27 ft from
 the street, 3 floor blocks. Moving any one floor block 5 ft east puts it 12 − 5 = 7 ft from the east line (10 ft
-required): the side yard does not comply, whichever floor it is. Moving only the top floor 4 ft toward the street
-puts it 27 − 4 = 23 ft back (25 required): the front yard does not comply."""
+required): the side yard does not comply, whichever floor it is. Moving only the top floor 6 ft toward the street
+puts it 27 − 6 = 21 ft back (25 required, 23 at best on the tax-map lot): the front yard does not comply."""
 
 import sys
 
@@ -25,20 +25,27 @@ def test_one_floor_moved_5_ft_east_does_not_comply_on_the_east_side(house, which
     assert (east["status"], east["proposed"]) == (present.FAILS, "7'-0\"")
 
 
-def test_only_the_top_floor_moved_4_ft_toward_the_street_does_not_comply_in_front(house):
+def test_only_the_top_floor_moved_toward_the_street_is_judged_at_every_reading_of_the_tax_map_lines(house):
+    """4 ft: 23'-0" as drawn, but the tax-map street line may be 2 ft off in its favour: at best 25'-0" against
+    25'-0": needs review (term-index f1784e3, the every-reading rule on a tax-map lot). 6 ft: 21'-0", at best
+    23'-0" < 25'-0": does not comply under every reading."""
     got, facts = house
     front = _check(_moved(got["floors"], dy=-4, which=2), facts)["Front yard"]
-    assert (front["status"], front["proposed"]) == (present.FAILS, "23'-0\"")
+    assert (front["status"], front["proposed"]) == (present.REVIEW, "23'-0\"")
+    assert "as drawn it does not comply, but at best 25'-0\"" in front["reason"]
+    front = _check(_moved(got["floors"], dy=-6, which=2), facts)["Front yard"]
+    assert (front["status"], front["proposed"]) == (present.FAILS, "21'-0\"")
 
 
 def test_the_eaves_rule_names_the_yard_it_fails_in(house):
-    """Review round 4 (found running the floor cases): the house moved 5 ft east fails the eaves rule on the east
-    side (7 < 10 − 2), so its row says the side yard and 7'-0", never 'Eaves into front yard 27'-0"'."""
+    """Review round 4 (found running the floor cases): the house moved 7 ft east fails the eaves rule on the east
+    side (5 ft, and at best 5 + 2 = 7 on the tax-map lot, < 10 − 2), so its row says the side yard and 5'-0", never
+    'Eaves into front yard 27'-0"'. (5 ft east, 7'-0", now needs review: at best 9'-0" ≥ 8'-0", term-index f1784e3.)"""
     got, facts = house
-    items = _check(_moved(got["floors"], dx=5), facts, grade_is="finished")   # the height known (the bonus term)
+    items = _check(_moved(got["floors"], dx=7), facts, grade_is="finished")   # the height known (the bonus term)
     eaves =[i for n, i in items.items() if n.startswith("Eaves into")]
     assert len(eaves) == 1 and eaves[0]["status"] == present.FAILS
-    assert (eaves[0]["name"], eaves[0]["proposed"]) == ("Eaves into side yard", "7'-0\"")
+    assert (eaves[0]["name"], eaves[0]["proposed"]) == ("Eaves into side yard", "5'-0\"")
 
 
 def test_a_building_crossing_the_side_lot_line_does_not_comply_and_says_so():
@@ -428,3 +435,18 @@ def test_the_eaves_row_names_the_yard_that_fails_whatever_the_height():
     got = rows(res, "R-1b.yard_projections")
     assert [r["name"] for r in got] == ["Eaves into rear yard"] and got[0]["status"] == present.FAILS
     assert got[0]["proposed"] == "20'-0\"" and got[0]["required"] == "≥ 28'-0\""
+
+
+def test_an_unmeasured_height_on_a_tax_map_lot_fails_only_if_it_fails_under_every_reading_of_the_lines():
+    """The two every-reading rules together. Height unknown (no ground), the lot from the tax map. Front eaves
+    22 ft: as drawn 22 < 23 (the base, the height at its most favourable, 0), but the street line may be 2 ft off
+    in its favour: 24 >= 23 could comply: needs review. 20 ft: at best 22 < 23: does not comply."""
+    from test_every_reading import roof
+    got = {}
+    for front in (22, 20):
+        b = (15, front, 45, front + 40)
+        res = run(floors(*b, 3) + [roof(*b, 30, 45, 2.0, 1.0)], grade_elevation=None, ground_is_flat=None,
+                  lot_surveyed=False)
+        got[front] = next(r for r in rows(res, "R-1b.yard_projections") if r["name"] == "Eaves into front yard")
+    assert got[22]["status"] == present.REVIEW and "at best 24'-0\" against" in got[22]["reason"]
+    assert got[20]["status"] == present.FAILS
