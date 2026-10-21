@@ -623,7 +623,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
     assert by["ground"]["text"] == "flat at the lot level · as drawn"
     assert by["ground"]["tick"] == ("No regrading near the house", False)
     assert [a for a, _, _ in by["ground"]["actions"]] == ["spot", "terrain", "regrade"]
-    assert logic.NOT_CHECKED_YET == "Not checked yet: overlays (historic, gorge, flood) · pitched roofs"
+    assert logic.NOT_CHECKED_YET == "Not checked yet: overlays (historic, gorge, flood)"   # pitched roofs are measured
     box = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8").split("def start_box(", 1)[1].split("\ndef ", 1)[0]
     for gone in ("Existing building", "Floor to floor", "\"Roof\"", "Ground is", "Envelope only", "Massing"):
         assert gone not in box, gone                                          # removed from the box

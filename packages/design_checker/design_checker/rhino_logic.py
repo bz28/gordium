@@ -633,7 +633,7 @@ def guard(fn, where, fallback=None):
 
 
 # ---- the start box (spec A, as approved 2026-10-20): what it shows, decided here so CI can test it ------------
-NOT_CHECKED_YET = "Not checked yet: overlays (historic, gorge, flood) · pitched roofs"
+NOT_CHECKED_YET = "Not checked yet: overlays (historic, gorge, flood)"   # (pitched roofs are measured)
 ENTERED = "entered by you"
 FLOOR_TO_FLOOR = 11 + 8 / 12                 # ft: the starting house's floor height (editable later in GordiumFacts)
 CORNER_CHOICES = ["Not answered", "No: one street", "Yes: two streets"]   # the Street side row's question
