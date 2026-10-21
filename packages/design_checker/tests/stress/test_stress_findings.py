@@ -28,7 +28,8 @@ def fast():
 
 
 def _check(design):
-    return harness.statuses(harness.gordium(design)), harness.items_by_rule(harness.gordium(design))
+    res = harness.gordium(design)
+    return harness.statuses(res), harness.items_by_rule(res)
 
 
 def _with_shed(lot_name, outline, listed=True, frame=True):
@@ -51,9 +52,7 @@ def test_F1_a_frame_shed_4_ft_from_the_jog_lots_stepped_side_line_does_not_compl
     side lot line": 4 < 6, does not comply. Gordium measures the line as a rear lot line (accessory rear yard 4 ft,
     3 ft required) and the side yard to the corner of the jog (19'-7"): complies. Even if which lines are side and
     which rear on a jog were an open question, a pass under one reading only must be needs review, never complies."""
-    d = _with_shed("jog", JOG_SHED)
-    assert oracle.verdicts(d)["R-1b.accessory_buildings"]["verdict"] == oracle.FAIL
-    got, _ = _check(d)
+    got, _ = _check(_with_shed("jog", JOG_SHED))
     assert got["R-1b.accessory_buildings"] != COMPLIES
 
 
@@ -63,7 +62,6 @@ def test_F1_the_house_moved_toward_the_stepped_side_line_does_not_comply_on_that
     is 6 ft from the stepped side line x = 62 (from 80 to 95 ft back): side yard 6 < 10, does not comply. Gordium:
     side yard East 14'-0" (to x = 70) complies, and reads the 6 ft as a rear yard."""
     d, _ = generate.build("jog", [{"op": "move_house", "dx": 19, "dy": 0}])
-    assert oracle.verdicts(d)["R-1b.side_yards"]["verdict"] == oracle.FAIL
     got, _ = _check(d)
     assert got["R-1b.side_yards"] != COMPLIES
 
@@ -78,10 +76,7 @@ def test_F2_the_starting_house_on_the_sample_lot_with_each_line_2_ft_closer():
     and the lot is under the 6,000 sf minimum. Gordium's worst case is (73 - 2) x (90 - 2) = 6,248 sf (each line
     1 ft): "Complies even at the tax-map worst case", 25.0%, and lot area complies. Either the yards' worst case or
     the area's is wrong: they can't both be the tax map 2 ft off."""
-    d = generate.starting_design("sample_tax")
-    t = oracle.verdicts(d, tolerance=True)
-    assert t["R-1b.lot_coverage"]["slack"] < 0 and t["R-1b.lot_area_one_family_detached"]["slack"] < 0
-    got, items = _check(d)
+    got, items = _check(generate.starting_design("sample_tax"))
     assert got["R-1b.lot_coverage"] != COMPLIES and got["R-1b.lot_area_one_family_detached"] != COMPLIES
 
 
@@ -107,7 +102,6 @@ def test_F3_the_same_house_drawn_the_other_way_round_keeps_its_height():
         got.append(harness.statuses(res)["R-1b.height"])
         h = res["measurements"]["building_height"]
         readings += [h["value"]] if h["value"] is not None else [r["value"] for r in h["readings"]]
-    assert oracle.verdicts(d)["R-1b.height"]["verdict"] == oracle.PASS
     assert min(readings) == pytest.approx(35.0) and len(set(got)) == 1, (readings, got)
 
 
@@ -129,6 +123,7 @@ def test_F5_the_west_side_yard_stays_west_whichever_way_the_outlines_run():
     d, _ = generate.build(*F5_CASE)
     for order in ("as_drawn", "reversed", "shifted"):
         rows = {i["name"]: i for i in harness.items_by_rule(harness.gordium(d, order))["R-1b.side_yards"]}
+        assert {"Side yard, West", "Side yard, East"} <= set(rows) or order != "as_drawn"
         assert rows["Side yard, West"]["proposed"] == "9'-0\" to 9'-6 3/4\"", order
         assert rows["Side yard, East"]["proposed"] == "9'-0\" to 12'-0\"", order
 
@@ -146,3 +141,29 @@ def test_F4_four_floors_with_a_repeated_id_never_comply_as_three_stories():
     site["buildings"][-1]["id"] = "floor 2"
     res = harness.run_site(site, generate.gordium_facts(d))
     assert harness.statuses(res)["R-1b.stories"] != COMPLIES
+
+
+# ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------
+
+def test_the_oracle_on_F1_the_shed_and_the_house_fail_on_the_stepped_side_line():
+    assert oracle.verdicts(_with_shed("jog", JOG_SHED))["R-1b.accessory_buildings"]["verdict"] == oracle.FAIL
+    d, _ = generate.build("jog", [{"op": "move_house", "dx": 19, "dy": 0}])
+    assert oracle.verdicts(d)["R-1b.side_yards"]["verdict"] == oracle.FAIL
+
+
+def test_the_oracle_on_F2_each_line_2_ft_closer_fails_coverage_and_lot_area():
+    t = oracle.verdicts(generate.starting_design("sample_tax"), tolerance=True)
+    assert t["R-1b.lot_coverage"]["slack"] < 0 and t["R-1b.lot_area_one_family_detached"]["slack"] < 0
+    assert t["_measured"]["lot_area"][0] == pytest.approx(69 * 86)
+
+
+def test_the_oracle_on_F3_the_height_is_35_ft():
+    d, _ = generate.build(*F3_CASE)
+    assert oracle.verdicts(d)["R-1b.height"]["verdict"] == oracle.PASS
+    assert oracle.measure(d)["height"] == (pytest.approx(35.0), pytest.approx(35.0))
+
+
+def test_the_regression_cases_still_build_every_edit():
+    """A regression case whose edits stopped applying (the generator changed) would test nothing."""
+    for lot_name, edits in (F3_CASE, F5_CASE, ("jog", [{"op": "move_house", "dx": 19, "dy": 0}])):
+        assert len(generate.build(lot_name, edits)[1]) == len(edits)

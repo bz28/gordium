@@ -155,3 +155,28 @@ def test_spot_grades_give_the_grade_plane_only_at_the_walls():
     assert m["height"] == (pytest.approx(35.0), pytest.approx(35.0))       # (1 + 3 + 2 + 2) / 4 = 2: 37 - 2
     moved = generate.apply(d, {"op": "move_house", "dx": 0, "dy": 5})
     assert oracle.measure(moved)["height"] is None                       # the spots are no longer at its walls
+
+
+def test_a_dormer_past_the_wall_is_a_range_never_a_fail():
+    """Review round 1: a dormer reaching 1.5 ft past the side wall (10 ft from the line), the eaves 2 ft past it:
+    the dormer might be a projection (yard_projections#1, open for bay windows) or part of the building, the eave an
+    eave or not: the side yard is 8 to 10, undecided, never a fail claimed for every reading."""
+    d, done = generate.build("sample_survey", [
+        {"op": "delete_floor", "which": "top"},
+        {"op": "add_roof", "kind": "roof", "axis": 1, "over": 2.0, "fascia": 0.0, "inset": 3, "rise": 10},
+        {"op": "add_dormer", "side": 0, "t0": 0.3, "span": 0.2, "past": 1.5, "h": 6}])
+    assert len(done) == 3
+    assert oracle.measure(d)["yards"]["side"] == (8.0, 10.0)
+    assert oracle.verdicts(d)["R-1b.side_yards"]["verdict"] == oracle.UNDECIDED
+
+
+def test_a_porch_left_standing_apart_is_not_the_house():
+    """A porch on the east wall, then the house's east wall pulled 2 ft in: the porch stands 2 ft off. It is no
+    longer part of the main building: a building not listed (accessory or main?), so the accessory rule is
+    undecided."""
+    d, done = generate.build("narrow", [{"op": "add_porch", "kind": "porch", "face": 0, "t0": 0.2, "span": 0.3,
+                                         "depth": 4, "h": 10}, {"op": "stretch", "face": 0, "amount": -2}])
+    assert len(done) == 2
+    _, detached = oracle.main_and_detached(d)
+    assert [p["kind"] for g in detached for p in g] == ["porch"]
+    assert oracle.verdicts(d)["R-1b.accessory_buildings"]["verdict"] == oracle.UNDECIDED

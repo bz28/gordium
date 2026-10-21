@@ -22,26 +22,51 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import generate  # noqa: E402
 import harness  # noqa: E402
+import oracle  # noqa: E402
 
-DESIGNS = int(os.environ.get("GORDIUM_STRESS_DESIGNS", "100"))
+DESIGNS = int(os.environ.get("GORDIUM_STRESS_DESIGNS", "150"))
 SEED = int(os.environ.get("GORDIUM_STRESS_SEED", "20261020"))
 
 
+def _design(v):
+    return generate.build(v["lot"], v["case"]["edits"])[0]
+
+
 def _jog_stepped_line(v):
-    return v["invariant"] == "a" and v["lot"] == "jog" and v["rule"] in ("R-1b.side_yards",
-                                                                         "R-1b.accessory_buildings")
+    """F1: a false pass on the jog lot that goes away when the stepped line (x = 62) may also be a rear line."""
+    if not (v["invariant"] == "a" and v["lot"] == "jog" and v["rule"] in ("R-1b.side_yards",
+                                                                          "R-1b.accessory_buildings")):
+        return False
+    d = _design(v)
+    lt = dict(d["lot"])
+    stepped = [[62.0, 80.0], [62.0, 120.0]]
+    lt["sides"] = {**lt["sides"], "east": [s for s in lt["sides"]["east"] if s != stepped]}
+    lt["unsure"] = lt["unsure"] + [stepped]
+    return oracle.verdicts({**d, "lot": lt})[v["rule"]]["verdict"] not in (oracle.FAIL, oracle.NOT_PASS)
 
 
 def _tax_map_area(v):
+    """F2: on the tax-map lot, coverage or lot area complies with each line 1 ft in, fails with each 2 ft in."""
     return v["invariant"] == "a2" and v["rule"] in ("R-1b.lot_coverage", "R-1b.lot_area_one_family_detached")
 
 
 def _drawing_changes_height(v):
-    return v["invariant"] == "d" and v["rule"] == "R-1b.height" and "floor blocks" not in v.get("what", "")
+    """F3: the height changes with the drawing, on a house with a floor moved on its own."""
+    if not (v["invariant"] == "d" and v["rule"] == "R-1b.height" and "floor blocks" not in v.get("what", "")):
+        return False
+    floors = [p for p in _design(v)["parts"] if p["kind"] == "floor"]
+    return any(sorted(map(tuple, f["outline"])) != sorted(map(tuple, floors[0]["outline"])) for f in floors)
 
 
 def _side_names_swap(v):
-    return v["invariant"] == "d" and v["rule"] == "R-1b.side_yards" and "outlines drawn" in v.get("what", "")
+    """F5: drawn the other way round, the side yard rows trade names; the rule's status and the numbers stay."""
+    if not (v["invariant"] == "d" and v["rule"] == "R-1b.side_yards" and "outlines drawn" in v.get("what", "")):
+        return False
+    d = _design(v)
+    order = v["what"].split()[-1]
+    a, b = harness.gordium(d), harness.gordium(d, order)
+    rows = [sorted((i["status"], i["proposed"]) for i in harness.items_by_rule(r)["R-1b.side_yards"]) for r in (a, b)]
+    return harness.statuses(a) == harness.statuses(b) and rows[0] == rows[1]
 
 
 # finding id -> how to recognise it (test_stress_findings.py has each one's regression test)

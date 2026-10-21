@@ -164,11 +164,12 @@ def _union(parts):
 # ---- what the design is -----------------------------------------------------------------------------------------
 
 def main_and_detached(design):
-    """The main building (every 'house' part, and any other part touching one in plan, e.g. an attached garage:
+    """The main building (the floor blocks, and every part touching them in plan, e.g. a porch or an attached garage:
     finding attached_garage_is_main_building) and the detached buildings (each group of touching parts left)."""
     parts = design["parts"]
     shapes = [plan(p) for p in parts]
-    main = {i for i, p in enumerate(parts) if p["group"] == "house"}
+    main = {i for i, p in enumerate(parts) if p["kind"] == "floor"} or \
+        {i for i, p in enumerate(parts) if p["group"] == "house"}
     grew = True
     while grew:
         grew = False
@@ -227,7 +228,11 @@ def measure(design, tolerance=False):
     acc = [g for g in detached if all(p["id"] in listed for p in g)]
     unlisted = [g for g in detached if g not in acc]
     full = _union(main)                                                 # everything, overhangs too
-    walls = _union([p for p in main if p["kind"] not in ROOF_KINDS])   # with every overhang an eave
+    # with every overhang an eave and a dormer past the walls a projection (yard_projections#1 is open on bay
+    # windows; a dormer past the walls is read both ways): the floors, porches, decks, steps and attached buildings
+    # (§325-18A: part of the building), and a dormer only where it stands over them
+    floors_etc = _union([p for p in main if p["kind"] not in ROOF_KINDS | {"dormer"}])
+    walls = unary_union([floors_etc] + [plan(p).intersection(floors_etc) for p in main if p["kind"] == "dormer"])
     if walls.is_empty:
         walls = full
     maybe_main = unary_union([full] + [_union(g) for g in unlisted])    # an unlisted building read as a main one
@@ -252,6 +257,8 @@ def measure(design, tolerance=False):
     every = unary_union([full] + [_union(g) for g in detached])
     on_lot = unary_union([walls] + [_union(g) for g in detached]).intersection(lot_poly)
     area = (every.area, on_lot.area)                                    # (worst, best)
+    # with tolerance the lot depth is kept: the worst case for the rear yard is the rear line 2 ft in and the front
+    # line 2 ft out (the yard 2 ft less, the depth the same), each within the tax map's 2 ft
     if tol:
         lot_area = (lot_poly.buffer(-tol, join_style="mitre").area, lot_poly.area)
     else:

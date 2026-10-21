@@ -336,7 +336,7 @@ def run_case(case, deep=None) -> dict:
         result = gordium(design)
     except Exception as ex:                                   # noqa: BLE001  (a crash is a finding)
         out["violations"].append(_v("crash", None, what=f"{type(ex).__name__}: {ex}",
-                                    trace=traceback.format_exc(limit=3)))
+                                    trace=traceback.format_exc(limit=3), lot=case["lot"]))
         return out
     out["oracle"] = {k: v["verdict"] for k, v in oracle.verdicts(design).items() if k != "_measured"}
     out["gordium"] = statuses(result)
@@ -361,8 +361,8 @@ def run_case(case, deep=None) -> dict:
 
 
 def signature(v) -> tuple:
-    return (v["invariant"], v["rule"], v.get("what", "")[:40] if v["invariant"] in ("c", "d", "e", "f", "crash")
-            else "")
+    what = v.get("what", "")[:40] if v["invariant"] in ("c", "d", "e", "f", "crash") else ""
+    return v["invariant"], v["rule"], v.get("lot"), what
 
 
 def still_fails(case, v, deep) -> bool:
