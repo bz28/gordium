@@ -28,17 +28,17 @@ below:
    **Tokens (classic)** → **Generate new token (classic)**. Tick **repo**, click **Generate token**, and copy the
    token (it starts with `ghp_`). Keep it for step 5.
 3. **Install Rhino 8.**
-4. **Install Python 3.12 or newer** (3.12, 3.13 and 3.14 all work; Python is the language Gordium's checking is
-   written in). Already have one of those? Skip to the check. Otherwise, from
-   [python.org/downloads/macos](https://www.python.org/downloads/macos/), download the newest
-   "macOS 64-bit universal2 installer", open it and click through. Check in a **new** Terminal window:
+4. **Install Python 3.12 to 3.14** (3.12, 3.13 or 3.14; 3.15 not yet supported. Python is the language
+   Gordium's checking is written in). Already have one of those? Skip to the check. Otherwise, from
+   [python.org/downloads/macos](https://www.python.org/downloads/macos/), download the newest **Python 3.14.x**
+   "macOS 64-bit universal2 installer" (not 3.15), open it and click through. Check in a **new** Terminal window:
 
    ```
-   python3 --version
+   python3.14 --version
    ```
 
-   You should see `Python 3.12`, `3.13` or `3.14` and a number. If it shows a lower number (such as `3.9`, the
-   Mac's own old Python), type `python3.14` (or the version you installed) wherever step 6 says `python3`.
+   You should see `Python 3.14.` and a number. If you installed 3.12 or 3.13 instead, type `python3.12` or
+   `python3.13` here and in step 6.
 5. **Download Gordium** into your Documents folder. This makes the folder `Documents/gordium`; every path below
    assumes it is there.
 
@@ -58,7 +58,7 @@ below:
    ```
    cd ~/Documents/gordium
    git checkout rhino-ui
-   python3 -m venv .venv
+   python3.14 -m venv .venv
    .venv/bin/pip install -e ".[dev]"
    ```
 
@@ -66,7 +66,17 @@ below:
    ends with `Successfully installed …` (a list that includes `gordium-0.1.0`). Gordium's checking runs in this
    `.venv` Python (a private copy of Python inside the gordium folder), in the background; Rhino only draws what
    it says. No AI runs while you design.
-   - `python3: command not found`, or a version below 3.12: go back to step 4.
+   - `python3.14: command not found`: go back to step 4 (or use the version you installed: `python3.12`,
+     `python3.13`).
+   - `requires a different Python`, or pip tries to build something and fails: the `.venv` was made with an
+     unsupported Python. Delete it and make it again with a supported one (the **start-over lines**):
+
+     ```
+     cd ~/Documents/gordium
+     rm -rf .venv
+     python3.14 -m venv .venv
+     .venv/bin/pip install -e ".[dev]"
+     ```
    - The last line ends with a red `ERROR`: check you are online and run it again. If it still fails, send Ben
      the last 20 lines it printed.
 
@@ -128,15 +138,23 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
 2. **Install Rhino 8.**
 3. **Install Git** (the tool that downloads Gordium and its updates) from
    [git-scm.com](https://git-scm.com/downloads/win): run the installer and keep every default.
-4. **Install Python 3.12 or newer** (3.12, 3.13 and 3.14 all work) from
-   [python.org/downloads/windows](https://www.python.org/downloads/windows/). On the installer's first screen,
-   **tick "Add python.exe to PATH"**, then click **Install Now**. Check in a new PowerShell window:
+4. **Install Python 3.12 to 3.14** (3.12, 3.13 or 3.14; 3.15 not yet supported). From
+   [python.org/downloads/windows](https://www.python.org/downloads/windows/), download and run the **Python
+   Install Manager** (the website's main download; it installs the newest Python, which may be 3.15). Then, in a
+   new PowerShell window, add 3.14 and check:
 
    ```
-   py --version
+   py install 3.14
+   py list
    ```
 
-   You should see `Python 3.12`, `3.13` or `3.14` and a number.
+   `py list` shows the Pythons installed; one of them must be `3.14` (or `3.13` / `3.12`). A newer one (3.15) can
+   be there too, but Gordium can't use it yet, so step 6 asks for 3.14 by name. (Running the website's installer
+   again only says the latest version is already installed: `py install 3.14` is how to add 3.14.)
+   - If `py install 3.14` says *can't open file '…\install'* (an older Python launcher) or that `py` is not
+     recognized: from the same page download the **Python 3.14.x**
+     "Windows installer (64-bit)" (not 3.15), tick **"Add python.exe to PATH"** on its first screen, click
+     **Install Now**, and check with `py --list`.
 5. **Download Gordium** into your Documents folder (this makes `Documents\gordium`):
 
    ```
@@ -151,16 +169,43 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
    ```
    cd $HOME\Documents\gordium
    git checkout rhino-ui
-   py -m venv .venv
+   py -3.14 -m venv .venv
    .\.venv\Scripts\pip install -e ".[dev]"
    ```
 
-   The last one ends with `Successfully installed …` (a list that includes `gordium-0.1.0`). If it ends with a red
-   `ERROR`, send Ben the last 20 lines it printed.
-7. **Install in Rhino:** open Rhino 8, type `ScriptEditor` and press Enter. In the ScriptEditor, **File → Open…**,
-   go to Documents → gordium → apps → rhino_plugin, pick `install.py`, click **Open**, then **Run** (▶). Rhino's
-   command line shows the same five `Gordium: …` lines as [on the Mac](#install-in-rhino-once). As on the Mac,
-   open the ScriptEditor once in every Rhino session before using Gordium.
+   (Installed 3.13 or 3.12 instead? Type `py -3.13` or `py -3.12`.) The last line ends with
+   `Successfully installed …` (a list that includes `gordium-0.1.0`).
+
+   The `git checkout rhino-ui` line is needed: the main version has no Rhino part yet (no `apps` folder), and
+   `git pull` alone won't add it. To check which version you have, run `git branch --show-current`: it should
+   say `rhino-ui`.
+   - `requires a different Python`, or `Microsoft Visual C++ 14.0 or greater is required`: the `.venv` was made
+     with an unsupported Python (usually 3.15, picked by a plain `py`). Delete it and make it again (the
+     **start-over lines**):
+
+     ```
+     cd $HOME\Documents\gordium
+     Remove-Item -Recurse -Force .venv
+     py -3.14 -m venv .venv
+     .\.venv\Scripts\pip install -e ".[dev]"
+     ```
+
+   - Any other red `ERROR`: send Ben the last 20 lines it printed.
+7. **Install in Rhino.** File Explorer's "Documents" is often your OneDrive Documents, which is a different
+   folder from the one PowerShell cloned into, so don't look for gordium there. Instead, in PowerShell, get the
+   installer's full path:
+
+   ```
+   cd $HOME\Documents\gordium
+   Resolve-Path apps\rhino_plugin\install.py
+   ```
+
+   It prints something like `C:\Users\<you>\Documents\gordium\apps\rhino_plugin\install.py`: select it and copy
+   it (Ctrl+C). (`explorer .` opens this gordium folder in File Explorer, if you want to see it.) Then open Rhino 8,
+   type `ScriptEditor` and press Enter. In the ScriptEditor, **File → Open…**, paste the path into the
+   **File name** box, press Enter, then click **Run** (▶). Rhino's command line shows the same five
+   `Gordium: …` lines as [on the Mac](#install-in-rhino-once). As on the Mac, open the ScriptEditor once in every
+   Rhino session before using Gordium.
 8. **Getting updates:** in PowerShell,
 
    ```
@@ -336,8 +381,14 @@ Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading
 
 ## Troubleshooting
 
-- **"no .venv found above …"**: the repository's Python environment is missing. Run the two Terminal lines in
-  [What you need](#what-you-need-once) from the repository folder, then the command again.
+- **"no .venv found above …"**: the repository's Python environment is missing. Paste the four set-up lines of
+  step 6 ([Mac](#what-you-need-once), [Windows](#on-windows)), then run the command again.
+- **"Microsoft Visual C++ 14.0 or greater is required"** or **"requires a different Python"** while setting up:
+  the wrong Python version made the `.venv` (Gordium needs 3.12 to 3.14; 3.15 not yet supported). Delete the
+  `.venv` and make it again with 3.14: run the four **start-over lines** in step 6 (the block with
+  `rm -rf .venv` on a [Mac](#what-you-need-once), `Remove-Item -Recurse -Force .venv` on
+  [Windows](#on-windows)), not the first set-up block; paste all four, starting with the `cd` line. On Windows, if `py list` doesn't show 3.14,
+  run `py install 3.14` first.
 - **Nothing happens / the commands aren't found**: run the install step again. If the ScriptEditor hasn't been
   opened in this Rhino session, open it once (Tools → ScriptEditor). That starts Rhino's Python.
 - **I can't see the panel**: it is a floating window and may be behind Rhino or on another desktop (Mission
