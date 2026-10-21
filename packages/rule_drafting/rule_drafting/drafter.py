@@ -577,7 +577,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                     continue                    # the law doesn't apply in this district: nothing to fill or list
                 rule, why = fill_template(t, column, cells, sources, drafted_by)
                 if why is None:
-                    rule = unclear_catch_all(rule, law, ctx)
+                    rule = unclear_exemption(unclear_catch_all(rule, law, ctx), unit, law, ctx)
                 if why is None and unread:
                     why = (f"the text names districts its scope can't be read from ({', '.join(unread)}): a person "
                            "decides which districts this rule applies to")
@@ -652,6 +652,42 @@ def chart_gaps(unit: dict, result: dict, cells: dict, columns: list[str]) -> lis
 
 
 EXCEPT = re.compile(r"\bexcept (?:an? )?((?:[a-z]+-family|[a-z]+)(?: or (?:[a-z]+-family|[a-z]+))*) dwellings?\b", re.IGNORECASE)
+
+
+SEVERAL_DWELLINGS = re.compile(r"\b(?:two|three|four|five|six|\d+)\s+or\s+more\b[^.]{0,40}\bdwellings\b", re.IGNORECASE)
+
+
+def unclear_exemption(rule: dict, unit: dict, law: dict, ctx: Context) -> dict:
+    """A law piece exempting "a one-family or two-family dwelling" doesn't plainly exempt a use the law defines as a
+    building of several dwellings (ONE-FAMILY ATTACHED DWELLING: "A building containing three or more one-family
+    dwellings"; §325-3B also calls a building of three or more dwelling units a multiple dwelling). A drafted rule
+    that leaves such a use out (`use not in [...]`) says "doesn't apply" where the law is unclear: a false pass. So
+    the use is taken out of the exemption and sent to review: the rule applies to it and needs review."""
+    m = EXCEPT.search(" ".join(unit.get("text", "").split()))
+    when = str(rule.get("applies_when", ""))
+    if not (m and unit.get("piece") and "use not in" in when):
+        return rule
+    head, rest = when.split("use not in", 1)
+    listed_text, tail = rest.split("]", 1)
+    listed = re.findall(r'"([a-z0-9_]+)"', listed_text)
+    unclear = []
+    for use in listed:
+        piece = next((pid for pid in law.get("pieces", {}) if pid.startswith("325-3B:") and pid[7:].startswith(use)), None)
+        if piece and SEVERAL_DWELLINGS.search(" ".join(piece_text(law["rows"], law["pieces"][piece]).split())):
+            unclear.append((use, piece))
+    if not unclear:
+        return rule
+    keep = [u for u in listed if u not in {u for u, _ in unclear}]
+    names = ", ".join(f'"{u}"' for u in keep)
+    review = list(rule.get("review_when") or []) + [
+        {"when": f'use == "{u}"', "reason": f"Whether the exemption ({m.group(0)!r}) covers this use is unclear: §{pid} "
+                                            "defines it as a building of several dwellings. A person decides."}
+        for u, pid in unclear]
+    rows = [dict(r) for u, _ in unclear for r in ctx.use_rows.get(u, [])[:1]]        # each use's own chart row
+    return rule | {"applies_when": f"{head}use not in [{names}]{tail}" if keep else (head.rstrip(" and") + tail).strip(),
+                   "review_when": review,
+                   "sources": list(rule.get("sources") or []) + [r for r in rows if r not in (rule.get("sources") or [])],
+                   "examples": [ex for ex in rule.get("examples") or [] if ex["given"].get("use") not in {u for u, _ in unclear}]}
 
 
 def exemption_gaps(unit: dict, result: dict) -> list[dict]:

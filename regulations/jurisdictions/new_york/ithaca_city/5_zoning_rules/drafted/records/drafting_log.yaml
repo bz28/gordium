@@ -1515,6 +1515,7 @@ units:
     rules:
     - R-3a.325_19e_r3_abut_r1_min_lot_area_other_use
     - R-3a.325_19e_r3_abut_r1_max_height
+    - R-3a.325_19e_r3_abut_r1_max_coverage
     - R-3a.325_19e_r3_abut_r1_side_yard_larger
     - R-3a.325_19e_r3_abut_r1_side_yard_smaller
     - R-3a.325_19e_r3_abut_r1_rear_yard
@@ -1525,8 +1526,6 @@ units:
     - R-3b.325_19e_r3_abut_r1_side_yard_smaller
     - R-3b.325_19e_r3_abut_r1_rear_yard
     unresolved:
-    - rule: R-3a.325_19e_r3_abut_r1_max_coverage
-      why: 'R-3a.325_19e_r3_abut_r1_max_coverage: example 1: expected pass, got fail'
     - rule: 325-19E.325_19e_r3_abut_r1_min_lot_area_footnoted_rows
       why: 'R-3a.325_19e_r3_abut_r1_min_lot_area_footnoted_rows: R-3a.325_19e_r3_abut_r1_min_lot_area_footnoted_rows:
         ''title'' is a one-line label of at most 80 characters; the rule is its quotes and check; R-3b.325_19e_r3_abut_r1_min_lot_area_footnoted_rows:

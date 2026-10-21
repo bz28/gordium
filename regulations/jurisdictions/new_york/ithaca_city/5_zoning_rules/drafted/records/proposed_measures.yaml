@@ -1,6 +1,7 @@
 abuts_r1_district:
   meaning: The lot is in the R-3a or R-3b District and the land directly abuts land in the R-1a or R-1b District.
   needed_by:
+  - R-3a.325_19e_r3_abut_r1_max_coverage
   - R-3a.325_19e_r3_abut_r1_max_height
   - R-3a.325_19e_r3_abut_r1_min_lot_area_other_use
   - R-3a.325_19e_r3_abut_r1_rear_yard

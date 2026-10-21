@@ -1057,8 +1057,7 @@ def test_a_law_piece_that_names_its_districts_gets_rules_only_there(inputs):
                      [({"side_yard_larger": "12", "side_yard_smaller": "10"}, "pass"),
                       ({"side_yard_larger": "8", "side_yard_smaller": "10"}, "fail")],
                      quotes=[{"document": "law", "page": 0, "piece": "325-19E",
-                              "text": "The maximum building height requirement shall be the same as the requirement for "
-                                      "the abutting R-1a or R-1b District."}])
+                              "text": "shall be subject to the following special conditions"}])   # no number in it
     got = drafter.check_answer({"templates": [every], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
                                inputs.columns, inputs.cells, inputs.notes, "test")
     # review round 2: a rule for every district is saved in each scope district's own rulebook, never as a general
@@ -1121,3 +1120,26 @@ def test_text_scope_reads_only_the_pieces_own_districts(inputs, text, scope, unr
     text leaves out makes the scope unreadable: a person decides."""
     got, why = drafter.text_scope(text, inputs.ctx.districts)
     assert got == scope and bool(why) == unread, (got, why)
+
+
+def test_an_exemption_doesnt_quietly_cover_a_building_of_several_dwellings(inputs):
+    """Catching up with measurement-2 (2026-10-21), #20's latest R-3a key found a false pass: §325-19E exempts "a
+    one-family or two-family dwelling", and the drafted rules left out one_family_attached, which §325-3B defines as
+    "A building containing three or more one-family dwellings" (an open question in the key). So they said "doesn't
+    apply" where the key says needs review. Code takes such a use out of the exemption and sends it to review."""
+    from rule_format.rulebook import outcome
+    u = unit(inputs, "325-19E")
+    rule = {"id": "R-3a.x", "kind": "rule", "applies_when": 'abuts_r1_district and use not in ["one_family_detached", "one_family_attached", '
+                                            '"two_family"]', "check": "building_area <= 0.75 * 0.35 * lot_area",
+            "sources": [], "examples": [{"given": {"use": "one_family_attached"}, "expect": "not_applicable"}]}
+    got = drafter.unclear_exemption(rule, u, inputs.law, inputs.ctx)
+    assert got["applies_when"] == 'abuts_r1_district and use not in ["one_family_detached", "two_family"]'
+    assert [r["when"] for r in got["review_when"]] == ['use == "one_family_attached"']
+    assert inputs.ctx.use_rows["one_family_attached"][0] in got["sources"] and got["examples"] == []
+    allowed = inputs.ctx.allowed()
+    attached = {"use": "one_family_attached", "abuts_r1_district": True, "building_area": 1, "lot_area": 10000}
+    assert outcome(got, attached, allowed) == "needs_review"
+    assert outcome(got, attached | {"use": "one_family_detached"}, allowed) == "not_applicable"
+    for d in ("R-3a", "R-3b"):                          # the saved drafts, replayed (no API call)
+        rules = [r for r in cli.load(inputs.drafted / f"{d}.yaml")["rules"] if "325_19e" in r["id"]]
+        assert rules and all(outcome(r, {"use": "one_family_attached"}, allowed) != "not_applicable" for r in rules)

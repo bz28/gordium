@@ -1,6 +1,8 @@
 """A zone with only AI-drafted rules (stage 1 of drafting, 2026-10-20): it is checked with its own drafted rulebook
 and the drafted rules for every district (drafted/general.yaml), and never shows a design as complying because a
 rule was left out."""
+from pathlib import Path
+
 import pytest
 
 from design_checker.check import check_site
@@ -111,7 +113,11 @@ def test_the_zone_is_never_preselected_alphabetically(monkeypatch):
     assert check.options(ITHACA, offer_drafted=True)["default_zone"] is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert "zones[0]" not in rhino and '"zone": default_zone if default_zone in zones else None' in rhino
+    from design_checker import rhino_logic
+    assert "zones[0]" not in rhino and "zones[0]" not in Path(rhino_logic.__file__).read_text(encoding="utf-8")
+    assert "logic.suggested_facts(JURISDICTION, zones, lot_data, building_data, default_zone)" in rhino
+    assert rhino_logic.suggested_facts("j", ["R-1a", "R-1b"], [], [], "R-1b")["zone"] == "R-1b"
+    assert rhino_logic.suggested_facts("j", ["R-1a", "R-1b"], [], [])["zone"] is None      # none: never R-1a
     assert rhino.count('suggested_facts(doc, options["zones"], options.get("default_zone"))') == 4
     assert "zone.SelectedIndex = 0" not in ui and 'logic.preselect_zone(' in ui
     assert "zone_of.get(zone.SelectedValue.Text)" in ui            # the label "(draft)" never reaches the facts
@@ -149,13 +155,15 @@ def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_check
     from design_checker.gaps import drafting_gaps
     from rule_format.rulebook import zone_rules
     r3a = {g["id"]: g for g in drafting_gaps(J, "R-3a", zone_rules(J, "R-3a"))}
-    assert "R-3a.325_19e_r3_abut_r1_max_coverage" in r3a["drafting.325-19E"]["why"]     # its cell is cited elsewhere
+    # §325-19E's 75% coverage is a rule now (its one failing example was the attached-dwelling case, which code
+    # now sends to review); the rest of the unit still lists what isn't checked
+    assert "R-3a.325_19e_r3_abut_r1_max_coverage" in {r["id"] for r in zone_rules(J, "R-3a")}
     assert "325_19e_r3_abut_r1_min_lot_area_footnoted_rows" in r3a["drafting.325-19E"]["why"]
     assert "fraternity_sorority_group_house" in r3a["drafting.325-19E"]["why"]   # a group house next to R-1
     assert "97 sections the AI drafter didn't read" in r3a["drafting.325-20D"]["why"]   # named once, in one item
     # rounds 3-4: the name counts them, in an architect's words ("for length" read as a lot or building dimension)
     assert r3a["drafting.325-20D"]["name"] == "97 linked sections the AI drafter didn't read (too long): check by hand"
-    assert r3a["drafting.325-19E"]["name"] == "4 notes to check by hand"
+    assert r3a["drafting.325-19E"]["name"] == "3 notes to check by hand"
     assert not any("for length" in g["name"] + g["why"] for g in r3a.values())
     for zone in ("R-1a", "R-2a", "RU"):
         items = drafting_gaps(J, zone, zone_rules(J, zone))
