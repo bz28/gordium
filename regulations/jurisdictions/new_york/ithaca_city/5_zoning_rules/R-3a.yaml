@@ -1598,6 +1598,9 @@ rules:
         expect: needs_review
       - given: {use: hospital_or_sanitarium}
         expect: needs_review
+      - given: {use: dormitory}
+        expect: needs_review
+        note: a multiple dwelling by definition; a large one may have more than 25 units
       - given: {use: two_family}
         expect: not_applicable
     notes: >-
