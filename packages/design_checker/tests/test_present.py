@@ -937,3 +937,20 @@ def test_a_limit_waiting_on_the_lot_depth_shows_its_range_and_says_once_why():
     assert items(r["view"])["Rear yard"]["reason"].startswith(
         "Needs 21'-1 5/8\" to 25'-5 1/2\", depending on which lot lines count as side and which as rear "
         "(it sets the lot depth): ask the zoning office")
+
+
+def test_coverage_that_turns_on_the_overhang_question_says_both_ways():
+    """Architect review in Rhino (P2-10): "At worst 28.5% against 25%: does not comply under that reading. the
+    readings give different values; whether parts … count isn't settled yet" said one way, twice. Now both ways in
+    one sentence; complying either way keeps its own words."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    ground = box(12, 30, 40, 70, 0, 10, "a")
+    r = check_site(_plot(ground, box(12, 30, 62, 70, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    assert cov["reason"] == ("If overhangs count (an open question), coverage is 28.5%, over 25%; if not, 16%: "
+                             "ask the zoning office"), cov["reason"]
+    r = check_site(_plot(ground, box(12, 30, 52, 70, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    assert items(r["view"])["Lot coverage"]["reason"].startswith("Complies under every reading")

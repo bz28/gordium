@@ -426,6 +426,23 @@ def _worst_reading(node, measured: dict, values: dict):
     return shown[0], shown[1]
 
 
+def _coverage_either_way(node, measured: dict, values: dict) -> str | None:
+    """Lot coverage when only the overhang question is open, both ways in words: "If overhangs count (an open
+    question), coverage is 28.3%, over 25%; if not, 24.3%." None when the readings aren't those two."""
+    by = {r["reading"]: r["value"] for r in (measured.get("building_area") or {}).get("readings") or []}
+    over, ground = by.get("covered from above"), by.get("at the main grade level")
+    if over is None or ground is None or len(by) != 2 or not values.get("lot_area"):
+        return None
+    shown = {}
+    for key, x in (("over", over), ("ground", ground)):
+        trial = dict(values, building_area=x)
+        text, limit = _display(*_numbers(node, trial, measured, ""))[:2]
+        shown[key] = (text, limit, _evaluate(ast.unparse(node), trial))
+    (a, limit, a_ok), (b, _, b_ok) = shown["over"], shown["ground"]
+    return (f"If overhangs count (an open question), coverage is {a}, {'within' if a_ok else 'over'} {limit}; "
+            f"if not, {b}" + ("" if b_ok else f", also over {limit}") + ": ask the zoning office")
+
+
 def _numbers(node, values: dict, measured: dict, name: str):
     """(proposed, required, margin, unit, sign) for one comparison; coverage as a percentage of lot area."""
     m = node.left.id
@@ -769,7 +786,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     if isinstance(allowed, (int, float)):
                         required = _pct(allowed / values["lot_area"] * 100, _toward(numbers[4], False), 1)
                 worst = _worst_reading(node, measured, values)
-                if worst is not None:                   # say the bad one first: "probably fine" it isn't
+                said = (_coverage_either_way(node, measured, values)          # it fails one way: say both
+                        if node.left.id == "building_area" and worst is not None else None)
+                if said:                                # both ways, in words (architect review P2-10)
+                    why = said
+                elif worst is not None:                 # say the bad one first: "probably fine" it isn't
                     why = (f"At worst {worst[0]} against {worst[1]}: does not comply under that reading. " +
                            (why or ""))
         if node is not None and required == "—" and st in (REVIEW, FAILS):
