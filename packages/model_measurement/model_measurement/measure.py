@@ -256,7 +256,7 @@ def _unit_normal(points) -> tuple:
     return nx / n, ny / n, nz / n
 
 
-def _planes(faces: list[dict]) -> list[list[dict]]:
+def _planes(faces: list[dict], work: dict | None = None) -> list[list[dict]]:
     """The faces grouped into planes. Each group's plane is fitted over every corner of every face in it (least
     squares), not taken from one face: a small triangle's own normal carries its corners' rounding noise (a
     single-precision mesh far from the origin: a tenth of a degree over a 1.4 ft triangle, 0.04 ft across a
@@ -266,10 +266,15 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
     drawn as many triangles (a mesh, with rounding noise) is one roof plane, two separate roofs at the same level
     stay two, and a curved roof isn't one plane. A distance, not an angle: the same tolerance as everywhere else.
 
-    In about n log n: a group keeps its corners' moments (count, sum, sum of outer products), so a joined plane is
-    one 3 x 3 fit; and a bound on how far its corners can be from its plane (grown at each join by how far the
-    plane moved, times the group's reach), so all of its corners are checked again only when that bound passes
-    TOL (and then the exact distance replaces the bound)."""
+    About n log n: a group keeps its corners' moments (count, sum, sum of outer products), so a joined plane is one
+    3 x 3 fit; its corners as a list of blocks, the smaller group's appended to the larger's in place (union by
+    size); and a bound on how far its corners can be from its plane (grown at each join by how far the plane
+    moved, times the group's reach), so all of its corners are gathered and checked again only when that bound
+    passes TOL (and then the exact distance replaces the bound). `work`, if given, counts the corner blocks moved
+    and the corners gathered (for the test that keeps this about n log n)."""
+    work = work if work is not None else {}
+    work.setdefault("blocks_moved", 0)
+    work.setdefault("corners_gathered", 0)
     area = [_plan(f).area for f in faces]
     parent = list(range(len(faces)))
     members = {i: [i] for i in range(len(faces))}
@@ -307,14 +312,15 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
         bound = max(off[big] + float(np.linalg.norm(n - nb)) * reach[big] + abs(float(n @ (cb - c))),
                     float(np.abs((ps - c) @ n).max()))
         far = max(reach[big] + float(np.linalg.norm(cb - c)), float(np.linalg.norm(ps - c, axis=1).max()))
-        kept = chunks[big] + chunks[small]
+        whole = None
         if bound > TOL:                     # the bound can't tell: every corner, exactly
-            allp = np.concatenate(kept)
-            bound = float(np.abs((allp - c) @ n).max())
+            whole = np.concatenate(chunks[big] + chunks[small])
+            work["corners_gathered"] += len(whole)
+            bound = float(np.abs((whole - c) @ n).max())
             if bound > TOL:
                 return None
-            far, kept = float(np.linalg.norm(allp - c, axis=1).max()), [allp]
-        return (k, total, outer), (n, c), far, bound, kept
+            far = float(np.linalg.norm(whole - c, axis=1).max())
+        return (k, total, outer), (n, c), far, bound, whole
 
     def cell(p):
         return tuple(math.floor(c / TOL) for c in p)
@@ -341,11 +347,17 @@ def _planes(faces: list[dict]) -> list[list[dict]]:
             joined = join(big, small)
             if joined is None:              # some corner off the joined plane: it would drift
                 continue
-            moments[big], plane[big], reach[big], off[big], chunks[big] = joined
+            moments[big], plane[big], reach[big], off[big], whole = joined
+            if whole is not None:           # checked exactly: its corners, as one block from now on
+                chunks[big] = [whole]
+                chunks.pop(small)
+            else:                           # in place: the smaller group's corners join the larger's list
+                work["blocks_moved"] += len(chunks[small])
+                chunks[big].extend(chunks.pop(small))
             parent[small] = big
             members[big] += members.pop(small)
             size[big] += size.pop(small)
-            for d in (moments, plane, reach, off, chunks):
+            for d in (moments, plane, reach, off):
                 d.pop(small)
     return [[faces[k] for k in group] for group in members.values()]
 
@@ -695,15 +707,20 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     buildings = _stacks(buildings)
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None))
-    if why_building and site.get("buildings"):
-        # any building object can feed a stories reading (stacked solids are counted, a typed count is only one
-        # reading beside them): whatever stops the other building measurements (a shared id would drop a solid
-        # from the stack) stops it too, whatever was typed. A typed count stands only with no building drawn.
-        out["stories"] = _missing("stories", why_building)
+    why_main = None if main else stop("no_main_building")
+    # One decision for every building measurement: which building, and can it be measured (why_which). Stories
+    # follow the rule of the fact model: a typed count is a stated fact and stands only when nothing drawn could be
+    # counted (no building, or a main building that is one plain solid). Whenever the drawing can produce a count
+    # (floor blocks or stacked solids on any building; or building objects with a problem, which might be either),
+    # the stories come from the drawing, with the typed count as a cross-check reading, and every stop that
+    # applies to the height applies to them identically (the grade is checked inside _stories).
+    why_which = why_building or why_main
+    countable = any(b.get("parts") for b in buildings) or bool(why_building and site.get("buildings"))
+    if countable and why_which:
+        out["stories"] = _missing("stories", why_which)
     elif main is not None and main.get("parts"):
         out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
-    why_main = None if main else stop("no_main_building")
-    why = why_building or why_grade or why_main
+    why = why_which or why_grade
     out["building_height"] = _missing("building_height", why) if why else _height(main, grade)
     others = [b for b in buildings if b is not main]
     if not why and others and (out["building_height"]["value"] is not None or out["building_height"]["readings"]):

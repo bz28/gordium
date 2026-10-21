@@ -962,3 +962,19 @@ def test_nothing_checks_writes_facts_or_opens_a_box_while_one_is_open():
     assert 'not logic.allowed("check", _box_open())' in rhino[rhino.index("def run_check("):]
     assert 'not logic.allowed("save_facts", _box_open())' in rhino[rhino.index("def save_facts("):]
     assert 'not logic.allowed("open_box", _box_open())' in rhino[rhino.index("def confirm("):]
+
+
+def test_a_looked_up_lot_says_how_its_plan_is_turned_and_its_sides_get_true_compass_names():
+    """The lot is drawn turned (its street along the bottom: 106 Ithaca Rd 306.38 degrees from true north): the
+    facts carry plan_north_deg from the frame, so the panel names 106's side yards Northeast and Southwest, not
+    East and West. Picking another lot drops it."""
+    table, facts, saved = sample_model()
+    f, sv, _ = logic.apply_lookup(table, logic.BoxSession(table), looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    assert abs(f["plan_north_deg"] - sv["lookup_frame"]["rotation_deg"]) < 1e-9
+    assert round(f["plan_north_deg"], 2) == 306.38
+    assert "plan_north_deg" not in logic.after_lot_pick(f, "another lot")
+    from design_checker import present
+    sides = {"side_yard_smaller": {"points": [[73.0, 40.0], [61.0, 40.0]]},
+             "side_yard_larger": {"points": [[0.0, 40.0], [12.0, 40.0]]}}
+    assert {present._side_name(k, sides, f["plan_north_deg"]) for k in sides} == \
+        {"Side yard, Northeast", "Side yard, Southwest"}
