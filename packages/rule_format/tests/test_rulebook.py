@@ -648,3 +648,11 @@ def test_a_rule_whose_formula_is_wrong_for_every_value_is_refused(ctx):
     assert any("compare two numbers or two texts" in p
                for p in validate(rulebook(check='(rear_yard >= 20) == (lot_depth > 1)'), ctx))
     assert not any("kind" in p for p in validate(rulebook(), ctx))
+
+
+def test_an_unreadable_formula_needs_review_never_a_crash():
+    """Review round 3 of 0582c65: rulebook.outcome on a formula that can't be read (too long, not the language)
+    is needs review, not an exception."""
+    from rule_format.rulebook import outcome
+    for check in ("rear_yard >= " + " + ".join(["1"] * 300), "rear_yard >= 20 if"):
+        assert outcome({"kind": "rule", "check": check}, {"rear_yard": 30}, {}) == "needs_review"
