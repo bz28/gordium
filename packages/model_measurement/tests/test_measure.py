@@ -583,11 +583,10 @@ def test_a_lower_roof_partly_under_an_overhang_is_open_to_the_sky():
     assert low in _open_to_the_sky([low, slab])
 
 
-def test_a_meshed_building_is_measured_quickly():
-    import time
-    n = 30                                                  # a 30 x 30 grid of triangles on top and bottom
+def _meshed_house(n):
+    """A 25 x 40 ft, 30 ft high house whose top and bottom are each an n x n grid of triangles (as imported)."""
     faces = []
-    for k, z in ((0, 0.0), (1, 30.0)):
+    for z in (0.0, 30.0):
         for i in range(n):
             for j in range(n):
                 x0, y0, x1, y1 = 10 + i * 25 / n, 25 + j * 40 / n, 10 + (i + 1) * 25 / n, 25 + (j + 1) * 40 / n
@@ -595,11 +594,30 @@ def test_a_meshed_building_is_measured_quickly():
                           {"points": [[x0, y0, z], [x1, y1, z], [x0, y1, z]]}]
     walls = box(10, 25, 35, 65, 0, 30)["faces"]
     faces += [f for f in walls if not all(p[2] in (0, 30) for p in f["points"])]
-    measure(site(), FACTS)        # the city's files are read once per run (interpretations.py): not the mesh's time
-    start = time.perf_counter()
-    m = measure(site(RECT, {"id": "house", "faces": faces, "problems": []}), FACTS)
-    assert m["building_height"]["value"] == 30.0
-    assert time.perf_counter() - start < 10
+    return site(RECT, {"id": "house", "faces": faces, "problems": []})
+
+
+def test_a_meshed_building_is_measured_quickly():
+    """Measuring time grows about in step with a mesh's faces, never with their square (an imported house has
+    thousands of faces: a step that compares every face with every other would take minutes). Timed against the
+    same work on a mesh a quarter the size, in the same run and around it, so a slow or busy machine doesn't
+    matter: four times the faces must take under 8 times as long (in step: about 4; every face against every
+    other: about 16). 60 s is only a ceiling for a hang. (A fixed 10 s limit failed on a slow Windows runner.)"""
+    import time
+
+    def clock(n):
+        start = time.perf_counter()
+        m = measure(_meshed_house(n), FACTS)
+        took = time.perf_counter() - start
+        assert m["building_height"]["value"] == 30.0
+        return took
+
+    clock(10)                                               # warm up (imports, first-call caches)
+    before = clock(10)
+    big = clock(20)
+    small = (before + clock(10)) / 2                        # around the big one: the same machine load
+    assert big < 8 * small, f"4x the faces took {big / small:.1f}x as long ({small:.2f}s -> {big:.2f}s)"
+    assert big < 60
 
 
 def meshed_box_top(n, z, x0=10, y0=25, x1=35, y1=65):

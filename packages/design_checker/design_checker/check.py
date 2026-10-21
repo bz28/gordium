@@ -16,8 +16,8 @@ from pathlib import Path
 import yaml
 
 from design_checker import present
+from envelope_builder import start as generator
 from envelope_builder.envelope import MARGIN, envelope
-from envelope_builder.start import largest_legal_building
 from model_measurement.measure import TAX_MAP_TOLERANCE, measure
 from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
@@ -253,6 +253,23 @@ def named_result(rule: dict, measured: dict, allowed: dict) -> dict | None:
         text = "complies to the full outline, whatever reaches past the walls is"    # eaves don't matter here
     text = _eave_text(found, measured) or text
     return {**found, "text": text}
+
+
+def verdict(rule: dict, measured: dict, allowed: dict) -> str:
+    """The checker's own result for one rule, as its rows mark it: outcome(), except that a needs review that fails
+    under every reading (or with the lot as drawn) is a "fail" (the row's "Fails")."""
+    got = outcome(rule, {k: m["value"] for k, m in measured.items()}, allowed)
+    if got == "needs_review":
+        found = every_reading(rule, measured, allowed)
+        if found and found[0] == "fail":
+            return "fail"
+    return got
+
+
+def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], **options) -> dict:
+    """envelope_builder's largest legal building, proven with the checker's own verdict (above) before it is
+    placed: never a building the check that follows shows as not complying (audit P1-3)."""
+    return generator.largest_legal_building(site, facts, measured, rules, verdict=verdict, **options)
 
 
 def summary(rows: list[dict]) -> dict:
