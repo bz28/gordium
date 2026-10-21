@@ -71,6 +71,8 @@ STOPS = {
                      "ft): move it to stand on the one below, or join them",
     "stories_below_blocks": "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), "
                             "which may each be a story: check the count",
+    "part_raised": "part of the building ({what}) starts above the ground: it may be another story: draw its "
+                   "stories as floor blocks, or check the count",
     "basement_part": "part of the building ({what}) is below the ground: whether a basement or cellar counts as a "
                      "story (§325-3) isn't measured yet: an open question for the architects",
     "floors_misaligned": "floors misaligned: a floor block sticks out past the one below it (one floor moved on its "
