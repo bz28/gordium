@@ -226,29 +226,47 @@ def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] 
                              (" and with the lot as drawn (confirm the survey)" if survey else ""))
 
 
-def fails_whatever(rule: dict, measured: dict, allowed: dict) -> str | None:
-    """The every-reading rule for a value that isn't measured at all (decided 2026-10-21): a rule that fails for
-    every value that measurement could take does not comply. Returns the measurement's name, or None.
+def fails_whatever(rule: dict, measured: dict, allowed: dict) -> dict | None:
+    """The every-reading rule for values that aren't measured or given at all (decided 2026-10-21): a rule that
+    fails for every value they could take does not comply. Returns {"names": the unknown measurements, "settings":
+    the values it was proven under}, or None.
 
-    Proven, never sampled: exactly one number the rule needs is unmeasured (no value, no readings); the rule's
-    check is provably truest when that number is 0 (formula.truth_direction -1: only +, -, max/min and positive
-    multiples of it, compared with < <= > >=; the §325-16C height bonus is one), it isn't in the rule's
-    applies_when or review_when, and the rule fails at 0 (measures are never negative). Then it fails at every
-    value. Never the other way: missing data never makes a rule comply (principle 4)."""
+    Proven, never sampled. Each unknown number (no value, no readings) is one the rule's check is provably truest
+    at when it is 0 (formula.truth_direction -1: only +, -, max/min and positive multiples of it, compared with
+    < <= > >=; the §325-16C height bonus is one): it is taken at 0 (measures are never negative). Each unknown
+    yes/no fact is tried both ways. None of them is in the rule's applies_when or review_when. The rule fails
+    under every one of those settings: then it fails whatever they are. Any other unknown (a text, a number not
+    proven), or a pass under any setting, and it is None. Never the other way: missing data never makes a rule
+    comply (principle 4)."""
     if rule.get("kind") != "rule" or not rule.get("check"):
         return None
     side = formula.names(rule["applies_when"]) if rule.get("applies_when") else set()
     for r in rule.get("review_when") or []:
         side |= formula.names(r["when"])
     unknown = sorted(n for n in formula.names(rule["check"]) | side if (measured.get(n) or {}).get("value") is None)
-    if len(unknown) != 1:
+    if not unknown or any(n in side or (measured.get(n) or {}).get("readings") for n in unknown):
         return None
-    name = unknown[0]
-    if (name in side or (measured.get(name) or {}).get("readings") or MEASURE_KINDS.get(name) != "number"
-            or formula.truth_direction(rule["check"], name) != -1):
+    numbers = [n for n in unknown if MEASURE_KINDS.get(n) == "number"]
+    yes_no = [n for n in unknown if MEASURE_KINDS.get(n) == "boolean"]
+    if len(numbers) + len(yes_no) != len(unknown) or any(
+            formula.truth_direction(rule["check"], n) != -1 for n in numbers):
         return None
     values = {k: m["value"] for k, m in measured.items()}
-    return name if outcome(rule, {**values, name: 0}, allowed) == "fail" else None
+    settings = [{**{n: 0 for n in numbers}, **dict(zip(yes_no, ways))}
+                for ways in itertools.product((False, True), repeat=len(yes_no))]
+    if all(outcome(rule, {**values, **s}, allowed) == "fail" for s in settings):
+        return {"names": unknown, "settings": settings}
+    return None
+
+
+def waits_on_interior(row: dict, rule: dict, measured: dict, allowed: dict) -> bool:
+    """Whether a row goes in its own group, "not checked yet: interior": it needs review only because a fact about
+    the inside of the building (INTERIOR) isn't given, and it isn't already proven to fail whatever that fact is
+    (fails_whatever, run first: nothing that fails is ever hidden; #20 review round 2)."""
+    names = formula.names(rule["check"]) if rule.get("check") else set()      # a flag has no check
+    return (row["Error"] == "NEEDS REVIEW"
+            and any((measured.get(n) or {}).get("value") is None for n in names & INTERIOR)
+            and not fails_whatever(rule, measured, allowed))
 
 
 def crossing(rule: dict, measured: dict) -> str | None:
@@ -446,16 +464,16 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}
     every = [_why(dict(zip(COLUMNS, r)), by_id, measured) for r in t["output"]]
-    def checks(rule):                   # a flag has no check
-        return formula.names(rule["check"]) if rule.get("check") else set()
-
-    waiting = [r for r in every if r["Error"] == "NEEDS REVIEW" and any(
-        (measured.get(n) or {}).get("value") is None for n in checks(by_id[r["Rule id"]]) & INTERIOR)]
+    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
+    waiting = [r for r in every if waits_on_interior(r, by_id[r["Rule id"]], measured, allowed)]
+    for r in waiting:                   # the facts each one waits for, so the panel asks for exactly those
+        rule = by_id[r["Rule id"]]
+        r["Needs"] = [n for n in sorted(formula.names(rule["check"]) & INTERIOR)
+                      if (measured.get(n) or {}).get("value") is None]
     rows = [{**r, "Line": _amount(r, by_id[r["Rule id"]], measured)} if r["Error"] == "FAIL" else r
             for r in every if r not in waiting]
     for r in rows:
         r["Short"] = short(r["Requirement"])
-    allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
     for r in rows:
         review = r["Error"] == "NEEDS REVIEW"
         named = named_result(by_id[r["Rule id"]], measured, allowed) if review else None
@@ -474,7 +492,9 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         if r["Fails"] and named and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {named['text']}"
         if r["Fails"] and r["Unknown"] and not r.get("Line"):
-            r["Line"] = f"{short(r['Requirement'])}: does not comply whatever the {plain_name(r['Unknown'])} is"
+            gone = [plain_name(n) for n in r["Unknown"]["names"]]
+            r["Line"] = (f"{short(r['Requirement'])}: does not comply whatever the {' and the '.join(gone)} "
+                         f"{'is' if len(gone) == 1 else 'are'}")
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
         r["Crossing"] = crossing(by_id[r["Rule id"]], measured)
