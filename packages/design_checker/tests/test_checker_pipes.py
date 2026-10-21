@@ -226,24 +226,59 @@ def test_a_floating_panel_is_placed_once_never_on_every_check():
     assert not logic.place_panel_now("docked")
 
 
+def _bad_calls(src: str) -> list:
+    """Every call in `src` to one of its own top-level functions that its definition can't take: bound against a
+    stub with the same signature (positional and keyword arguments, defaults), so a misspelt keyword or a wrong
+    number of arguments is found. Only calls that unpack *args or **kwargs are left out (their arity is unknown)."""
+    import ast
+    import inspect
+    tree = ast.parse(src)
+    stubs = {}
+    for f in (n for n in tree.body if isinstance(n, ast.FunctionDef)):
+        stub = ast.FunctionDef(name=f.name, args=f.args, body=[ast.Pass()], decorator_list=[], returns=None,
+                               type_params=[])
+        stub.args = ast.arguments(posonlyargs=f.args.posonlyargs, args=f.args.args, vararg=f.args.vararg,
+                                  kwonlyargs=f.args.kwonlyargs, kw_defaults=[None if d is None else ast.Constant(0)
+                                                                            for d in f.args.kw_defaults],
+                                  kwarg=f.args.kwarg, defaults=[ast.Constant(0) for _ in f.args.defaults])
+        for a in stub.args.posonlyargs + stub.args.args + stub.args.kwonlyargs:
+            a.annotation = None
+        for a in (stub.args.vararg, stub.args.kwarg):
+            if a is not None:
+                a.annotation = None
+        space = {}
+        exec(compile(ast.fix_missing_locations(ast.Module([stub], [])), "<stub>", "exec"), space)
+        stubs[f.name] = inspect.signature(space[f.name])
+    bad = []
+    for call in (c for c in ast.walk(tree) if isinstance(c, ast.Call) and isinstance(c.func, ast.Name)):
+        sig = stubs.get(call.func.id)
+        if sig is None or any(isinstance(a, ast.Starred) for a in call.args) or any(k.arg is None for k in call.keywords):
+            continue
+        try:
+            sig.bind(*[None] * len(call.args), **{k.arg: None for k in call.keywords})
+        except TypeError as e:
+            bad.append((call.func.id, call.lineno, str(e)))
+    return bad
+
+
+def test_a_call_with_a_misspelt_keyword_or_too_many_arguments_is_found():
+    """enter-needs review round 2: the arity check skipped every call with keywords."""
+    assert _bad_calls("def run_check(doc, report=True):\n    pass\nrun_check(reprt=False)\n")
+    assert _bad_calls("def f(a, *, b=1):\n    pass\nf(1, 2)\n")
+    assert not _bad_calls("def run_check(doc, report=True):\n    pass\nrun_check(1, report=False)\n")
+    assert not _bad_calls("def f(*a, **k):\n    pass\nf(1, 2, x=3)\n")
+
+
 def test_the_plugin_has_no_two_top_level_definitions_with_one_name():
     """enter-needs review round 1: a second `_yes_no(prompt)` replaced the existing `_yes_no(prompt, current)`, so
     Edit site…'s "Corner lot?" prompt raised TypeError. No top-level name is defined twice, and every call to one of
-    the plugin's own top-level functions passes a number of arguments its definition accepts."""
+    the plugin's own top-level functions binds to its definition (positional and keyword arguments)."""
     import ast
     src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     tree = ast.parse(src)
     defs = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
     names = [n.name for n in defs]
     assert len(names) == len(set(names)), sorted(n for n in set(names) if names.count(n) > 1)
-    funcs = {n.name: n for n in defs if isinstance(n, ast.FunctionDef)}
-    bad = []
-    for call in (c for c in ast.walk(tree) if isinstance(c, ast.Call) and isinstance(c.func, ast.Name)):
-        f = funcs.get(call.func.id)
-        if f is None or f.args.vararg or any(isinstance(a, ast.Starred) for a in call.args) or call.keywords:
-            continue
-        most = len(f.args.args)
-        least = most - len(f.args.defaults)
-        if not least <= len(call.args) <= most:
-            bad.append((call.func.id, call.lineno, len(call.args), (least, most)))
-    assert not bad, bad
+    assert not _bad_calls(src), _bad_calls(src)
+
+
