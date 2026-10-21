@@ -1,0 +1,81 @@
+{
+ "claims": {
+  "the Parking row waits for exactly bedrooms and parking spaces": {
+   "ok": true,
+   "detail": {
+    "name": "Parking \u00b7 needs input",
+    "status": "not_checked",
+    "needs": [
+     "sleeping_rooms",
+     "parking_spaces"
+    ],
+    "hint": "Enter bedrooms and parking spaces",
+    "reason": "Needs bedrooms and parking spaces, which the model doesn't show"
+   }
+  },
+  "its detail has one Enter button, named from what it waits for": {
+   "ok": true,
+   "detail": [
+    "Enter bedrooms and parking spaces\u2026"
+   ]
+  },
+  "clicking it asks exactly those, in order": {
+   "ok": true,
+   "detail": [
+    "Bedrooms",
+    "Off-street parking spaces"
+   ]
+  },
+  "the answer is saved; the skipped one stays unset (never 0)": {
+   "ok": true,
+   "detail": {
+    "sleeping_rooms": 3,
+    "parking_spaces": null
+   }
+  },
+  "the row now waits only for parking spaces, and its button says so": {
+   "ok": true,
+   "detail": [
+    [
+     "parking_spaces"
+    ],
+    [
+     "Enter parking spaces\u2026"
+    ]
+   ]
+  },
+  "answering that one asks only it, and the row is checked": {
+   "ok": true,
+   "detail": [
+    [
+     "Off-street parking spaces"
+    ],
+    {
+     "name": "Parking",
+     "status": "complies",
+     "needs": []
+    }
+   ]
+  }
+ },
+ "first": {
+  "name": "Parking \u00b7 needs input",
+  "status": "not_checked",
+  "needs": [
+   "sleeping_rooms",
+   "parking_spaces"
+  ],
+  "hint": "Enter bedrooms and parking spaces",
+  "reason": "Needs bedrooms and parking spaces, which the model doesn't show"
+ },
+ "facts_after_first": {
+  "sleeping_rooms": 3,
+  "parking_spaces": null
+ },
+ "last": {
+  "name": "Parking",
+  "status": "complies",
+  "needs": []
+ },
+ "ok": true
+}

@@ -3,7 +3,7 @@
 import math
 
 import pytest
-from shapely.geometry import LineString, Polygon
+from shapely.geometry import LineString, MultiLineString, Polygon
 
 from model_measurement.measure import measure
 
@@ -1029,15 +1029,22 @@ def _drawing(rnd):
         x0 = 5 + 12 * k
         high, marked = rnd.randint(1, 5), rnd.random() < 0.6
         ids = [f"s{k}b{i}" for i in range(high)]
+        gap = rnd.randrange(1, high - 1) if marked and high > 2 and rnd.random() < 0.2 else None   # a floor deleted
         for i, bid in enumerate(ids):
+            if i == gap:
+                continue
             blocks.append(floor(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid) if marked else
                           box(x0, 25, x0 + 12, 60, z0=i * 10, z1=(i + 1) * 10, id=bid))
+        ids = [b for i, b in enumerate(ids) if i != gap]
         stacks.append({"ids": ids, "countable": marked, "floors": high, "tall": not marked, "below": False,
+                       "gap": gap is not None,
                        "blocks": 0 if marked else high})          # plain solids stacked: each may be a story
     if rnd.random() < 0.35:            # a plain wing behind the first stack: a porch slab, a tall wing, a walk-out
-        z0, z1 = rnd.choice([(0, 3), (0, 6), (0, 7), (0, 8), (0, 12), (0, 32), (-10, 10.5)])
+        z0, z1 = rnd.choice([(0, 3), (0, 6), (0, 7), (0, 8), (0, 12), (0, 32), (-10, 10.5),   # on the ground
+                             (12, 18), (4, 10), (0.05, 6), (-0.5, 6.4), (-3, 0)])      # raised, or below the ground
         blocks.append(box(5, 60, 17, 70, z0, z1, id="wing"))
-        stacks.append({"ids": ["wing"], "countable": False, "floors": 0, "tall": z1 - z0 >= 7,   # R305.1: 7 ft
+        # left out only if it stands on the ground and is under 7 ft (R305.1): it fits inside the first story
+        stacks.append({"ids": ["wing"], "countable": False, "floors": 0, "tall": not (z0 == 0 and z1 - z0 < 7),
                        "below": z0 < 0, "blocks": 0})
     if rnd.random() < 0.2:
         rnd.choice(blocks)["id"] = rnd.choice(blocks)["id"]
@@ -1064,6 +1071,7 @@ def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
             # (§325-18A) whichever part is picked, so its stories are never one part's
             main = next((s for s in stacks if pick in s["ids"]), stacks[0])
             assert main is not None, (seed, stacks, pick, m)       # no main building: never a value
+            assert not any(s.get("gap") for s in stacks), (seed, stacks, m)   # floors over a gap: a question
             for members in ([main], stacks):    # each candidate building: the main one alone, and with every part
                 assert not any(s["below"] for s in members), (seed, stacks, m)     # a basement or cellar: asks
                 most = max((s["floors"] for s in members if s["countable"]), default=None)
@@ -1317,3 +1325,213 @@ def test_adding_a_detached_solid_never_lowers_the_first_candidates_height_or_sto
             assert all(v == b["value"] for v in first), (name, b, a)
             if a["value"] is None and a["readings"]:
                 assert first, (name, b, a)                       # the house's own reading is always listed
+
+
+def test_a_stop_on_the_sites_ground_holds_for_every_candidate_building():
+    """Review round 19, P0: two floor blocks at a survey level (400 to 420 ft) with a wing touching them, on spot
+    grades at 400, and a leftover solid still at 0 to 10 ft elsewhere on the lot: wholly under the ground, not
+    joined under the building (buried_solid). The height waited; the stories took 2 from the house-and-wing
+    candidate, whose own grade ignored that stop. A stop on the site's ground holds for every candidate."""
+    floors_ = [floor(10, 25, 35, 65, z0=400 + 10 * i, z1=410 + 10 * i, id=f"floor {i + 1}") for i in range(2)]
+    wing = box(35, 30, 45, 50, 400, 410, id="wing")
+    leftover = box(15, 75, 25, 85, 0, 10, id="leftover")
+    spots = _ring_points(10, 25, 35, 65, 400) + _ring_points(35, 30, 45, 50, 400)
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "main_building": "floor 1",
+             "grade_points": spots, "stories": 2}
+    m = measure(site(RECT, *floors_, wing, leftover), facts)
+    for name in ("building_height", "stories"):
+        assert m[name]["value"] is None and "under the ground" in (m[name]["reason"] or ""), (name, m[name])
+
+
+def test_each_candidates_own_grade_is_checked_against_its_solids():
+    """Round 19, P0 (the second half): a candidate's own grade plane, found from the spot grades at its walls, is
+    checked against its own solids as the site's is: spot grades at 30 ft around a house and wing that stand at 0
+    to 20 ft put the ground above the building: never a count."""
+    house = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"floor {i + 1}") for i in range(2)]
+    wing = box(35, 30, 45, 50, 0, 10, id="wing")
+    from model_measurement.measure import _assemblies, _candidate_grades, _stacks
+    stacks = _stacks(house + [wing])
+    main = next(b for b in stacks if b.get("parts"))
+    cands = _assemblies(main, [b for b in stacks if b is not main])
+    facts = {"grade_points": _ring_points(10, 25, 35, 65, 30) + _ring_points(35, 30, 45, 50, 30)}
+    (g, why), = _candidate_grades(cands, stacks, facts, 0.0, None)
+    assert why and "doesn't meet the buildings" in why, why
+
+
+def test_two_side_yards_within_the_tie_band_keep_the_smaller_no_larger_than_the_larger():
+    """Review round 19, P2: walls 10.005 ft from the west line and 9.997 ft from the east (on the 50 ft lot): within
+    0.01 ft, so the lines go by position (west first), but the values stay in order: smaller 9.997 <= larger
+    10.005, never the other way round."""
+    m = measure(site(RECT, box(10.005, 25, 40.003, 65)), FACTS)
+    assert m["side_yard_smaller"]["value"] <= m["side_yard_larger"]["value"], (m["side_yard_smaller"]["value"],
+                                                                               m["side_yard_larger"]["value"])
+    assert m["side_yard_smaller"]["points"][0][0] == 0.0          # the west line: by position, whatever the values
+
+
+@pytest.mark.parametrize("z0, z1", [(32.9, 39.4), (33.05, 39.55), (-0.5, 6.4)])
+@pytest.mark.parametrize("typed", [None, 3])
+def test_a_short_part_off_the_ground_is_never_left_out_of_the_stories(z0, z1, typed):
+    """#14 final check (P0): a 6.5 ft room on the roof of three 11 ft floor blocks (0.1 ft into the roof, or 0.05
+    ft above it), or a short part from 0.5 ft below the ground, was dropped as too low to hold a story, so 3 floors
+    counted 3. §325-3's STORY has no least height: only a part on the ground and under 7 ft is left out. The roof
+    room leaves the count to the architect; the part below the ground asks the basement question."""
+    floors = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    part = box(12, 30, 20, 40, z0, z1, id="room") if z0 > 0 else box(35, 25, 45, 45, z0, z1, id="room")
+    m = measure(site(RECT, *floors, part), {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
+    if z0 < 0:
+        assert m["value"] is None and "part of the building (room) is below the ground" in m["reason"]
+    elif z0 > 33:                       # round 6: floating over the roof is a gap, never the typed count alone
+        assert m["value"] is None and "don't stand on each other" in m["reason"]
+    elif z0 > 0:                        # round 6: sunk into the roof asks too, as touching and floating do
+        assert m["value"] is None and "starts partly inside the one below" in m["reason"]
+    elif typed is None:
+        assert m["value"] is None and "part of the building (room) isn't drawn as floor blocks" in m["reason"]
+    else:
+        assert m["value"] == 3
+
+
+@pytest.mark.parametrize("fourth", [False, True])
+def test_a_floor_block_over_a_deleted_floor_is_still_counted_and_asks(fourth):
+    """Stress F10 (P0): floor 2 deleted, floor 1 at 0 to 11 ft 8 in and floor 3 at 23 ft 4 in to 35 ft. Floor 3 was
+    left out as a separate building, so with a 9 ft plain wing and 1 typed, stories complied; with a fourth floor
+    on floor 3 and 2 typed, too. Floor blocks over one another in plan are the building's floors: the gap is a
+    question (a floor not drawn, or a space open to below), never a smaller count."""
+    h = 35 / 3
+    blocks = [floor(10, 25, 35, 65, z0=0, z1=h, id="floor 1"), floor(10, 25, 35, 65, z0=2 * h, z1=3 * h, id="floor 3")]
+    if fourth:
+        blocks.append(floor(10, 25, 35, 65, z0=3 * h, z1=4 * h, id="floor 4"))
+    blocks.append(box(35, 25, 45, 45, 0, 9, id="wing"))
+    m = measure(site(RECT, *blocks), {**FACTS, "stories": 2 if fourth else 1, "main_building": "floor 1"})["stories"]
+    assert m["value"] is None and "parts of the building drawn one over another don't stand on each other" in m["reason"]
+
+
+@pytest.mark.parametrize("shape, typed", [("podium", 1), ("roof room", 3)])
+def test_a_plain_solid_over_or_under_floor_blocks_with_a_gap_asks(shape, typed):
+    """Round 6 (P0): a plain podium (0 to 9 ft) under a floor block (20 to 30 ft), 1 typed, complied with 1; a room
+    0.05 ft above the roof of three floor blocks, 3 typed, complied with 3; touching, both asked. Every solid one
+    over another in plan is one building whatever the gap, and a real gap between its levels asks."""
+    if shape == "podium":
+        blocks = [box(10, 25, 35, 65, 0, 9, id="podium"), floor(10, 25, 35, 65, z0=20, z1=30, id="floor")]
+        main = "podium"                 # (the floor block picked: the ground doesn't meet it, which asks too)
+    else:
+        blocks = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+        blocks.append(box(12, 30, 20, 40, 33.05, 39.55, id="room"))
+        main = "f0"
+    m = measure(site(RECT, *blocks), {**FACTS, "stories": typed, "main_building": main})["stories"]
+    assert m["value"] is None and "don't stand on each other" in m["reason"]
+
+
+def test_an_l_shaped_house_of_two_floor_blocks_at_one_level_is_no_gap():
+    """Round 6 (P2): two one-story floor blocks overlapping in plan at the same level (an L-shaped house) got a
+    floors_apart question. They are one building's floor at one level: 1 typed, 1. (Two-story L-shapes whose
+    blocks touch across the levels are joined by _stacks and asked as misaligned floors, as before.)"""
+    a = floor(10, 25, 30, 65, z0=0, z1=10, id="a")
+    b = floor(25, 25, 45, 40, z0=0, z1=10, id="b")
+    m = measure(site(RECT, a, b), {**FACTS, "stories": 1, "main_building": "a"})["stories"]
+    assert m["value"] == 1, m
+
+
+def _lifted(block, dz):
+    """A copy of a solid moved up (or down) by dz feet."""
+    import copy
+    out = copy.deepcopy(block)
+    for f in out["faces"]:
+        for pt in f["points"]:
+            pt[2] += dz
+        for h in f.get("holes") or []:
+            for pt in h:
+                pt[2] += dz
+    return out
+
+
+def test_a_tenth_of_a_foot_up_or_down_never_changes_one_story_count_into_another():
+    """Metamorphic (round 6): moving any one solid up or down by up to 0.1 ft (touching, a small gap, a small
+    overlap) never turns a story count into a different count: the result is the same, or needs review. Fixed
+    seeds; the drawings of the property test."""
+    import random
+    rnd = random.Random(11)
+    checked = 0
+    for _ in range(200):
+        blocks, stacks, pick, typed = _drawing(rnd)
+        facts = {**FACTS, "stories": typed, "main_building": pick}
+        before = measure(site(RECT, *blocks), facts)["stories"]["value"]
+        if before is None:
+            continue
+        i = rnd.randrange(len(blocks))
+        for dz in rnd.sample([-0.1, -0.05, -0.02, 0.02, 0.05, 0.1], 2):
+            moved = blocks[:i] + [_lifted(blocks[i], dz)] + blocks[i + 1:]
+            after = measure(site(RECT, *moved), facts)["stories"]["value"]
+            checked += 1
+            assert after is None or after == before, (blocks[i]["id"], dz, before, after, stacks, pick, typed)
+    assert checked > 60
+
+
+def test_the_stories_read_each_candidate_building_from_its_own_grade_plane():
+    """#18 round 18's candidate grades, one definition: with spot grades only at the house's walls and a wing of
+    floor blocks beside it, the "with every other solid" candidate's grade plane can't be found, so the stories
+    need review for that reason, as the height does (before, the stories read the house's grade for both)."""
+    house = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"h{i}") for i in range(2)]
+    wing = [floor(40, 75, 48, 90, z0=0, z1=10, id="w0")]
+    facts = {**FACTS, "stories": 2, "main_building": "h0", "ground_is_flat": None, "grade_elevation": None,
+             "grade_points": [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]]}
+    m = measure(site(RECT, *house, *wing), facts)
+    assert m["stories"]["value"] is None and m["stories"]["reason"] == m["building_height"]["reason"]
+    assert "spot grades at their walls too" in m["stories"]["reason"]
+
+
+def test_each_candidate_buildings_ground_is_checked_against_its_own_solids():
+    """#18 round 19 (P0), one definition: the ground is checked against each candidate building, not only the
+    whole site. A house drawn 5 ft above the ground beside a garage standing apart on it (#18: a solid touching
+    the house would be one building with it, §325-18A, whose ground it meets): the site's solids meet the ground,
+    the house alone doesn't, so its stories (2 typed) and height need review, never the typed count."""
+    house = box(10, 25, 35, 65, 5, 30, id="house")
+    wing = box(38, 25, 48, 45, 0, 10, id="wing")
+    m = measure(site(RECT, house, wing), {**FACTS, "stories": 2, "main_building": "house"})
+    for name in ("stories", "building_height"):
+        assert m[name]["value"] is None and "doesn't meet the buildings" in m[name]["reason"], (name, m[name])
+
+
+def _sample_106_site():
+    from design_checker.check import sample_site
+    s = sample_site()
+    return site(lot(s["lot"])), dict(s["facts"])
+
+
+def test_106s_tax_map_outline_is_cleaned_within_a_quarter_foot_before_its_lines_are_read():
+    """Decided 2026-10-21: clean the data, not the law. 106 Ithaca Rd's tax-map outline has 15 lines: a 0.14 ft and
+    a 0.24 ft one at the back corners, a 24 ft piece in line (within 0.006 ft) with the 68 ft east side, and the
+    street in eight pieces. Removing a vertex that moves the outline by no more than 0.25 ft (far inside the 2 ft per
+    line every verdict tries both ways) leaves 9 lines: the tiny lines gone, the east side one line; the 10.2 ft
+    chamfer at the back west corner stays, and its two readings (a side or a rear line) are still read. The lot area
+    is the outline drawn."""
+    from model_measurement.measure import Lot
+    s, facts = _sample_106_site()
+    lt = Lot(s, facts)
+    assert lt.outline_note == "tax-map outline simplified within 0.25 ft: 15 lines → 9"
+    lengths = sorted(round(LineString(e).length, 1) for e in lt.edges)
+    assert min(lengths) > 9 and any(abs(x - 10.3) < 0.1 for x in lengths), lengths   # the chamfer stays (10.3 ft
+    # once the 0.14 ft line at its end is gone)
+    assert max(lengths) > 91.9                                                      # the east side, one line
+    m = measure(s, {**facts, "ground_is_flat": True, "grade_elevation": 0.0})
+    assert m["lot_depth"]["outline"] == lt.outline_note and len(m["lot_depth"]["readings"]) == 3
+    assert m["lot_area"]["value"] is None or abs(m["lot_area"]["readings"][0]["value"] - Polygon(
+        [p for e in s["lot"]["edges"] for p in e["points"][:-1]]).area) < 0.01
+
+
+def test_a_surveyed_outline_is_read_as_drawn_within_a_hundredth_of_a_foot():
+    """On a survey the outline is read as drawn: only lines in line (within 0.01 ft) merge. The same 106 outline
+    surveyed: every corner it drops lies within 0.01 ft of the lines left (in line with them: never a line the
+    survey shows, only the joints between pieces of one line), and the corners more than 0.01 ft off stay."""
+    from model_measurement.measure import Lot
+    from shapely.geometry import Point
+    s, facts = _sample_106_site()
+    lt = Lot(s, {**facts, "lot_surveyed": True})
+    assert lt.outline_note and lt.outline_note.startswith("survey outline simplified within 0.01 ft")
+    left = MultiLineString([LineString(e) for e in lt.edges])
+    original = [tuple(e["points"][0][:2]) for e in s["lot"]["edges"]]
+    assert all(left.distance(Point(p)) <= 0.01 + 1e-9 for p in original)
+    kept = {tuple(e[0]) for e in lt.edges}
+    assert all(p in kept for p in original if MultiLineString(
+        [LineString(e) for e in lt.edges]).distance(Point(p)) > 0.01)
+    rect = Lot(site(), FACTS)
+    assert rect.outline_note is None and len(rect.edges) == 4                       # nothing to clean

@@ -46,6 +46,7 @@ def test_a_lot_that_could_be_big_enough_waits_for_the_units_as_its_own_review_ro
     res, item = _item(50, 130, **facts)
     assert item["status"] == present.REVIEW, item
     assert "Parking" not in item["name"] and "dwelling units" in (item["reason"] or ""), item
-    # until the Rhino panel can ask for them (#15), the row says where to enter them (#20 round 3)
-    assert item["hint"].startswith("Enter the dwelling units") and "facts file for now" in item["hint"], item
+    # the facts it waits for, which the Rhino panel's "Enter …" asks (#15's prompt for a row's needs, landed)
+    missing = [k for k in ("dwelling_units", "rooms_let_for_profit", "conversion") if k not in facts]
+    assert item["needs"] == missing, item
     assert "R-3a.lot_area_multiple_family" not in {r["Rule id"] for r in res["interior"]}

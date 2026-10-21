@@ -302,62 +302,236 @@ def test_known_answers_agree_with_every_substitution_including_ill_typed_atoms_a
 
 
 def _random_formula(rnd, depth, want="bool"):
-    """A random expression over the whole grammar (numbers, text, true/false, lists, every operator, min/max, if,
-    chains, in / not in), grown towards a kind (`want`) but often given operands of a random kind, and every
-    operator tried on every kind (true/false compared, true/false in a list...): so many are well-typed and deep,
-    and many are wrong in every way type_of must refuse."""
+    """A random expression over the whole grammar (numbers, two text measures, true/false, lists and tuples, every
+    operator, min/max of 1 to 4 values, if, ordering, equality and mixed chains, in / not in), grown towards a kind
+    (`want`) but often given operands of a random kind, and every operator tried on every kind: so many are
+    well-typed and deep, and many are wrong in every way type_of must refuse."""
     if rnd.random() < 0.15:
         want = rnd.choice(["number", "text", "bool"])            # an operand of any kind: often ill-typed
 
     def g(kind):
         return _random_formula(rnd, depth - 1, kind)
     if depth == 0 or rnd.random() < 0.15:
-        return rnd.choice({"number": ["a", "b", "0", "1", "2.5", "35"], "text": ["u", '"x"', '"y"'],
-                           "bool": ["(a > 1)", '(u == "x")', "(b <= 2.5)", "y"]}[want])
+        return rnd.choice({"number": ["a", "b", "0", "1", "2.5", "35", "0.25"],
+                           "text": ["u", "v", '"x"', '"y"', '"w"'],
+                           "bool": ["(a > 1)", '(u == "x")', "(b <= 2.5)", '(v != "w")'] + _YES_NO}[want])
     any_kind = rnd.choice(["number", "text", "bool"])
+    chained = rnd.choice(["number", "number", any_kind])
+
+    def seq(kind, low, high):
+        return ", ".join(g(kind) for _ in range(rnd.randint(low, high)))
     shapes = {
         "number": [lambda: f"({g('number')} {rnd.choice('+-*/')} {g('number')})", lambda: f"(-{g('number')})",
-                   lambda: f"{rnd.choice(['min', 'max'])}({g('number')}, {g('number')})",
+                   lambda: f"{rnd.choice(['min', 'max'])}({seq('number', 1, 4)})",
                    lambda: f"({g('number')} if {g('bool')} else {g('number')})"],
         "text": [lambda: f"({g('text')} if {g('bool')} else {g('text')})"],
         "bool": [lambda: f"(not {g('bool')})",
                  lambda: "(" + f" {rnd.choice(['and', 'or'])} ".join(g("bool") for _ in range(rnd.randint(2, 3))) + ")",
-                 lambda: "(" + g("number") + "".join(f" {rnd.choice(['<', '<=', '>', '>='])} {g('number')}"
-                                                      for _ in range(rnd.randint(1, 2))) + ")",
+                 lambda: "(" + g(chained) + "".join(f" {rnd.choice(['<', '<=', '>', '>=', '==', '!='])} {g(chained)}"
+                                                    for _ in range(rnd.randint(1, 3))) + ")",   # mixed chains, any kind
                  lambda: f"({g(any_kind)} {rnd.choice(['==', '!='])} {g(any_kind)})",
-                 lambda: f"({g(any_kind)} {rnd.choice(['in', 'not in'])} "
-                         f"[{', '.join(g(any_kind) for _ in range(rnd.randint(0, 2)))}])",
+                 lambda: f"({g(any_kind)} {rnd.choice(['in', 'not in'])} [{seq(any_kind, 0, 3)}])",
+                 lambda: f"({g(any_kind)} {rnd.choice(['in', 'not in'])} ({seq(any_kind, 2, 3)}))",   # a tuple
                  lambda: f"({g('bool')} if {g('bool')} else {g('bool')})"],
     }
     return rnd.choice(shapes[want])()
 
 
+_YES_NO = ["y"]                 # a yes/no measure (this PR's kind), missing or either value
+_KINDS = {"a": "number", "b": "number", "u": frozenset({"x", "z"}), "v": frozenset({"w", "x"})}
+_TEXT_VALUES = {"u": ["x", "z"], "v": ["w", "x"]}
+
+
+class _Strict:
+    """A value of one kind for the reference evaluator: its operators take only their own kind and raise
+    TypeError on any other (so true/false is never compared, put in a list or used in arithmetic)."""
+
+    def __init__(self, kind, value):
+        self.kind, self.value = kind, value
+
+    def _same(self, other, *kinds):
+        if not isinstance(other, _Strict) or other.kind != self.kind or self.kind not in kinds:
+            raise TypeError(f"{self.kind} with {getattr(other, 'kind', other)}")
+        return other.value
+
+    def __add__(self, o): return _Strict("n", self.value + self._same(o, "n"))
+    def __sub__(self, o): return _Strict("n", self.value - self._same(o, "n"))
+    def __mul__(self, o): return _Strict("n", self.value * self._same(o, "n"))
+    def __truediv__(self, o): return _Strict("n", self.value / self._same(o, "n"))   # ZeroDivisionError at 0
+
+    def __neg__(self):
+        if self.kind != "n":
+            raise TypeError("minus of " + self.kind)
+        return _Strict("n", -self.value)
+
+    def __bool__(self):
+        if self.kind != "b":
+            raise TypeError("a " + self.kind + " as true/false")
+        return self.value
+
+    def __hash__(self):
+        return 0
+
+
+def _close(a, b):
+    """Two numbers within the language's own AT_LIMIT of each other (a millionth, or a billionth of the larger)."""
+    from fractions import Fraction
+    return abs(a - b) <= max(Fraction(1, 10 ** 6), Fraction(1, 10 ** 9) * max(abs(a), abs(b)))
+
+
+def _ref_compare(op, x, y):
+    if op in ("<", "<=", ">", ">="):
+        b, a = x._same(y, "n"), x.value
+        return {"<": a < b and not _close(a, b), "<=": a <= b or _close(a, b),
+                ">": a > b and not _close(a, b), ">=": a >= b or _close(a, b)}[op]
+    if op in ("==", "!="):
+        same = x.value == x._same(y, "n", "t")
+        return same if op == "==" else not same
+    if not isinstance(y, list) or any(i.kind != x.kind for i in y) or x.kind not in ("n", "t"):
+        raise TypeError("in")
+    found = any(i.value == x.value for i in y)
+    return found if op == "in" else not found
+
+
+def _reference(text, values, kinds):
+    """An independent evaluator of complete data (no unknowns), written apart from formula.py: Python's own
+    evaluation over _Strict values (exact Fractions for numbers), with and/or/not, chains, lists, min/max and if
+    rewritten to strict, every-part-evaluated forms. Raises TypeError on any mix of kinds."""
+    import ast
+    from fractions import Fraction
+    names = {}
+    for n, v in values.items():
+        names[n] = _Strict("n", Fraction(repr(v)) if type(v) is float else Fraction(v)) if kinds[n] == "number" \
+            else _Strict("b", v) if kinds[n] == "boolean" else _Strict("t", v)
+
+    def lit(v):
+        return _Strict("t", v) if type(v) is str else _Strict("n", Fraction(repr(v)) if type(v) is float else Fraction(v))
+
+    def every(op, *xs):
+        flags = [bool(x) for x in xs]          # every part checked to be true/false
+        return _Strict("b", all(flags) if op == "and" else any(flags))
+
+    def chain(first, *pairs):
+        operands, ops = [first] + list(pairs[1::2]), pairs[::2]
+        return _Strict("b", all([_ref_compare(o, x, y) for o, x, y in zip(ops, operands, operands[1:])]))
+
+    def extreme(f, *xs):
+        if any(x.kind != "n" for x in xs):
+            raise TypeError("min/max of " + ",".join(x.kind for x in xs))
+        return _Strict("n", f(x.value for x in xs))
+
+    def negate(x):
+        return _Strict("b", not bool(x))
+
+    def pick(test, yes, no):
+        chosen = yes() if bool(test) else no()
+        if chosen.kind not in ("n", "t"):
+            raise TypeError("an if giving " + chosen.kind)
+        return chosen
+
+    def items(*xs):
+        return list(xs)
+    OPS = {ast.Lt: "<", ast.LtE: "<=", ast.Gt: ">", ast.GtE: ">=", ast.Eq: "==", ast.NotEq: "!=",
+           ast.In: "in", ast.NotIn: "not in"}
+
+    class Rewrite(ast.NodeTransformer):
+        def visit_Constant(self, node):
+            return ast.Call(ast.Name("_lit", ast.Load()), [node], [])
+
+        def visit_BoolOp(self, node):
+            self.generic_visit(node)
+            return ast.Call(ast.Name("_every", ast.Load()),
+                            [ast.Constant("and" if isinstance(node.op, ast.And) else "or")] + node.values, [])
+
+        def visit_UnaryOp(self, node):
+            self.generic_visit(node)
+            if isinstance(node.op, ast.Not):
+                return ast.Call(ast.Name("_negate", ast.Load()), [node.operand], [])
+            return node
+
+        def visit_Compare(self, node):
+            self.generic_visit(node)
+            args = [node.left]
+            for op, right in zip(node.ops, node.comparators):
+                args += [ast.Constant(OPS[type(op)]), right]
+            return ast.Call(ast.Name("_chain", ast.Load()), args, [])
+
+        def visit_Call(self, node):
+            self.generic_visit(node)
+            return ast.Call(ast.Name("_extreme", ast.Load()), [ast.Name(node.func.id, ast.Load())] + node.args, [])
+
+        def visit_IfExp(self, node):
+            self.generic_visit(node)
+            lam = lambda body: ast.Lambda(ast.arguments([], [], None, [], [], None, []), body)
+            return ast.Call(ast.Name("_pick", ast.Load()), [node.test, lam(node.body), lam(node.orelse)], [])
+
+        def visit_List(self, node):
+            self.generic_visit(node)
+            return ast.Call(ast.Name("_items", ast.Load()), node.elts, [])
+        visit_Tuple = visit_List
+
+    tree = ast.fix_missing_locations(Rewrite().visit(ast.parse(text, mode="eval")))
+    env = {"_lit": lit, "_every": every, "_chain": chain, "_extreme": extreme, "_negate": negate, "_pick": pick,
+           "_items": items, "min": min, "max": max, "__builtins__": {}} | names
+    out = eval(compile(tree, "<reference>", "eval"), env)
+    return float(out.value) if out.kind == "n" else out.value
+
+
+def _grid(text):
+    """Values for each measure: the formula's own numbers and every number its constant parts work out to, each
+    with values just inside and just outside AT_LIMIT either side, the points between them, and 0."""
+    import ast
+    from fractions import Fraction
+    found = {Fraction(0), Fraction(1)}
+    for node in ast.walk(ast.parse(text, mode="eval")):
+        if isinstance(node, ast.expr) and not any(isinstance(n, ast.Name) and n.id not in ("min", "max")
+                                                  for n in ast.walk(node)):
+            try:
+                v = evaluate(ast.unparse(node), {}, {})
+            except Exception:
+                continue
+            if type(v) in (int, float):
+                found.add(Fraction(repr(float(v))))
+    near = set()
+    for c in sorted(found):
+        near |= {c, c + Fraction(1, 10 ** 7), c - Fraction(1, 10 ** 7), c + Fraction(1, 10 ** 5), c - Fraction(1, 10 ** 5)}
+    ordered = sorted(found)
+    near |= {(x + y) / 2 for x, y in zip(ordered, ordered[1:])}
+    numbers = sorted(float(x) for x in near if x >= 0)
+    if len(numbers) > 7:                       # keep the run short: the thresholds first, then a spread
+        keep = [float(c) for c in ordered if c >= 0][:4]
+        numbers = sorted(set(keep + numbers[::max(1, len(numbers) // 4)]))[:8]
+    grid = {"a": numbers, "b": numbers} | _TEXT_VALUES
+    return grid | {n: [True, False] for n in _YES_NO}
+
+
 def test_the_type_rules_and_three_valued_logic_are_sound_over_the_whole_grammar():
-    """Generative (fixed seeds, thousands of random formulas of depth up to 4, random missing measures):
-    (a) a formula type_of accepts never gives a type error for any complete set of values (only a value's own
-    error, a division by zero, is left); (b) whenever an evaluation with measures missing gives an answer, every
-    way of filling them in (a grid with the formulas' own numbers and values either side) gives that same answer,
-    never an error. And no message ever shows a value as Fraction(...)."""
+    """Generative (fixed seeds, thousands of random formulas of depth up to 4, random missing measures), checked
+    against an independent strict reference evaluator (_reference: not formula.py's code or type table):
+    (a) for every formula type_of accepts and every complete set of values (a grid around the formula's own and
+    derived thresholds, just inside and outside AT_LIMIT), the reference never finds a type error and gives the
+    same answer as evaluate() (a division by zero is an error in both); so a type table that allows too much
+    fails here; (b) whenever an evaluation with measures missing gives an answer, every way of filling them in
+    gives that same answer, never an error. No message ever shows a value as Fraction(...)."""
     import itertools
     import random
     from rule_format.formula import FormulaError, type_of
-    kinds = {"a": "number", "b": "number", "u": frozenset({"x", "z"}), "y": "boolean"}     # y: a yes/no measure
-    grid = {"a": [0, 1, 2.5, 3, 35, 36], "b": [0, 1, 2.5, 35, 36], "u": ["x", "z"], "y": [True, False]}
+    kinds = _KINDS | {n: "boolean" for n in _YES_NO}
 
     def run(text, values):
         try:
             return ("value", evaluate(text, values, kinds))
         except MissingMeasure:
             return ("missing", None)
-        except EvaluationError as e:
+        except (EvaluationError, FormulaError) as e:
             assert "Fraction(" not in str(e), (text, e)
             return ("error", str(e))
 
     accepted = resolved = 0
     for seed in range(4):
         rnd = random.Random(seed)
-        for _ in range(1500):
-            text = _random_formula(rnd, 4, rnd.choice(["bool", "bool", "number"]))
+        for _ in range(1000):
+            text = _random_formula(rnd, rnd.randint(1, 4), rnd.choice(["bool", "bool", "number"]))
             if len(text) > 500:                      # longer than a formula may be (MAX_LENGTH)
                 continue
             try:
@@ -365,11 +539,18 @@ def test_the_type_rules_and_three_valued_logic_are_sound_over_the_whole_grammar(
                 typed = True
             except FormulaError:
                 typed = False
+            grid = _grid(text)
             if typed:
                 accepted += 1
-                for combo in itertools.product(*grid.values()):
-                    got = run(text, dict(zip(grid, combo)))
-                    assert got[0] != "error" or got[1] == "division by zero", (text, combo, got)
+                names = sorted(n for n in grid if n in text)
+                for combo in itertools.product(*(grid[n] for n in names)):
+                    values = {n: grid[n][0] for n in grid} | dict(zip(names, combo))
+                    got = run(text, values)
+                    try:
+                        want = ("value", _reference(text, values, kinds))
+                    except ZeroDivisionError:
+                        want = ("error", "division by zero")
+                    assert got == want, (text, values, got, want)
             for _ in range(2):
                 missing = rnd.sample(sorted(grid), rnd.randint(1, 2))
                 base = {n: rnd.choice(v) for n, v in grid.items()}
@@ -380,3 +561,5 @@ def test_the_type_rules_and_three_valued_logic_are_sound_over_the_whole_grammar(
                 for fill in itertools.product(*(grid[n] for n in missing)):
                     assert run(text, {**base, **dict(zip(missing, fill))}) == got, (text, missing, base, fill, got)
     assert accepted > 300 and resolved > 300, (accepted, resolved)        # the test really exercises both
+
+

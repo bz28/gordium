@@ -4,8 +4,10 @@ code by packages/design_checker/tests/test_quickstart.py). Run in Rhino, not in 
 
 From a fresh document (Rhino's feet template): GordiumStart's flow on the sample lot, then each test's edit made in
 the model, checked as live mode checks it, compared with what the guide says, captured (Top view), and undone.
-Test 14 starts again in a millimeter template and compares every row with the feet run. Writes
-<temp>/gordium_quickstart/out.json (each test: expected, got, match) and frames/NN_*.png; closes its documents.
+Test 14 starts again in a millimeter template and compares every row with the feet run. The sample is 106 Ithaca
+Rd's real tax-map lot (the street along the bottom of Top view: "back" is +y, "left" is -x). Every test must match
+(the run fails loudly otherwise). Writes <temp>/gordium_quickstart/out.json (each test: expected, got, match) and
+frames/NN_*.png; closes its documents.
 Keep another document open while it runs (Rhino keeps the last document's window)."""
 import json
 import os
@@ -30,6 +32,9 @@ log = {"tests": tests}
 
 
 def fresh_module():
+    loaded = sys.modules.get("gordium_rhino")
+    if loaded is not None:                # its hooks, drawing and panel off before it is dropped
+        loaded.off()
     state = sc.sticky.setdefault("gordium_state", {})
     w = state.pop("worker", None)
     if w is not None:
@@ -95,7 +100,7 @@ try:
     doc = docs.open("Large Objects - Feet")
     opened.append(doc)
     g.STATE["on_confirm"] = lambda *a: None
-    g.gordium_check()                                         # GordiumStart's flow on an empty file
+    g.gordium_check()                                         # GordiumStart's flow on an empty file (flat ground)
     ft = 1.0 / g._scale(doc)
     ring = g.STATE["start"]["floors"][0]["outline"]
     log["house"] = ring
@@ -111,57 +116,67 @@ try:
     def undo(targets, t):
         xf(targets, t.TryGetInverse()[1])
 
-    def stretch(targets, axis, at, by):
-        """Move one face: everything at or past `at` (model units, along `axis`) by `by` ft: a scale about the
-        opposite side, as a Gumball drag of that face does to a box."""
+    def stretch(targets, axis, at, by, low=False):
+        """Move one face out by `by` ft (the high side along `axis`, or the low side): a scale about the opposite
+        side, as a Gumball drag of that face does to a box."""
         lo = min(p[axis] for p in ring) * ft
         hi = max(p[axis] for p in ring) * ft
-        plane = rg.Plane(rg.Point3d(lo if axis == 0 else 0, lo if axis == 1 else 0, 0), rg.Vector3d.ZAxis)
+        fixed = hi if low else lo
+        plane = rg.Plane(rg.Point3d(fixed if axis == 0 else 0, fixed if axis == 1 else 0, 0), rg.Vector3d.ZAxis)
         f = (hi - lo + by * ft) / (hi - lo)
         return rg.Transform.Scale(plane, f if axis == 0 else 1, f if axis == 1 else 1, 1)
 
     check(doc, 0, "The starting house", {
-        "Front yard": {"proposed": "27'-0\""}, "Side yard, East": {"proposed": "12'-0\""},
-        "Rear yard": {"proposed": "32'-9\""}, "Lot coverage": {"proposed": "22.6%", "status": "complies"},
-        "Building height": {"proposed": "35'-0\"", "status": "needs_review"}})
-
-    setfacts(doc, grade_is="finished")                         # 1. No regrading near the house, ticked
-    check(doc, 1, "1 No regrading ticked", {"Building height": {"status": "complies", "margin": "at limit"},
-                                            "Stories": {"status": "complies"}})
+        "Front yard": {"proposed": "27'-0 3/4\""}, "Side yard, Southwest": {"proposed": "12'-0 5/8\""},
+        "Side yard, Northeast": {"proposed": "27'-4 1/4\""}, "Rear yard": {"status": "needs_review"},
+        "Lot coverage": {"proposed": "19.1%", "status": "complies"}, "Lot area": {"status": "complies"},
+        "Building height": {"proposed": "35'-0\"", "status": "complies", "margin": "at limit"},   # the bonus's question doesn't matter
+        "Stories": {"status": "complies"}})
+    tests.append({"n": 1, "test": "1 Labels (checked by mvp_checks_in_rhino.py)", "expected": {}, "got": {},
+                  "match": True})
     t = rg.Transform.Translation(north * 5)
     xf(ids, t)
-    check(doc, 2, "2 Move back 5 ft", {"Front yard": {"proposed": "32'-0\""},
-                                       "Rear yard": {"proposed": "27'-9\"", "status": "complies"}})
+    check(doc, 2, "2 Move back 5 ft", {"Front yard": {"proposed": "32'-0 5/8\"", "status": "complies"},
+                                       "Rear yard": {"status": "needs_review"}})
     undo(ids, t)
-    t = rg.Transform.Translation(north * 11)
+    t = rg.Transform.Translation(north * 6)
     xf(ids, t)
-    check(doc, 3, "3 Move back 11 ft", {"Rear yard": {"status": "needs_review", "proposed": "21'-9\"",
-                                                      "required": "22'-6\"", "reason": "at best 23'-9\""}})
+    check(doc, 3, "3 Move back 6 ft", {"Rear yard": {"status": "needs_review", "proposed": "21'-6 1/8\""}})
     undo(ids, t)
-    t = rg.Transform.Translation(north * 14)
+    t = rg.Transform.Translation(north * 7)       # short under some readings only (the depth's ±4'-0"): review
     xf(ids, t)
-    check(doc, 3, "3 Move back 14 ft", {"Rear yard": {"status": "does_not_comply", "proposed": "18'-9\"",
-                                                      "margin": "−3'-9\""}})
+    check(doc, 3, "3 Move back 7 ft", {"Rear yard": {"status": "needs_review", "proposed": "20'-6 1/8\"",
+                                                     "delta": "up to 7'-11 1/4\" short"}})
     undo(ids, t)
-    t = stretch(ids, 1, None, 10)
+    t = rg.Transform.Translation(north * 10)
     xf(ids, t)
-    check(doc, 4, "4 Pull the rear wall 10 ft", {"Lot coverage": {"status": "does_not_comply", "proposed": "30.1%"}})
+    check(doc, 3, "3 Move back 10 ft", {"Rear yard": {"status": "does_not_comply", "proposed": "17'-6 1/8\"",
+                                                      "delta": "at least 0'-7 1/4\" short"}})
+    undo(ids, t)
+    t = stretch(ids, 1, None, 17)
+    xf(ids, t)
+    check(doc, 4, "4 Pull the rear wall 17 ft", {"Lot coverage": {"status": "does_not_comply", "proposed": "27.8%"}})
     undo(ids, t)
     base = g.STATE["start"]["floors"][-1]
     roof = rg.Transform.Scale(rg.Plane(rg.Point3d(0, 0, base["base"] * ft), rg.Vector3d.ZAxis), 1, 1,
                               (base["top"] - base["base"] + 4) / (base["top"] - base["base"]))
     xf(top_floor, roof)
     check(doc, 5, "5 Raise the roof 4 ft", {"Building height": {"status": "does_not_comply", "proposed": "39'-0\"",
-                                                                "reason": "Front yard 27'-0\", needs ≥ 29'-0\""}})
+                                                                "delta": "−4'-0\" short"}})
     undo(top_floor, roof)
-    t = stretch(ids, 0, None, 5)
+    t = stretch(ids, 0, None, 3, low=True)
     xf(ids, t)
-    check(doc, 6, "6 Widen 5 ft to the east", {"Side yard, East": {"status": "does_not_comply", "proposed": "7'-0\"",
-                                                                   "margin": "−3'-0\""},
-                                               "Lot coverage": {"status": "needs_review", "proposed": "24.87%"}})
+    check(doc, 6, "6 The left side wall 3 ft out", {"Side yard, Southwest": {"status": "needs_review", "proposed": "9'-0 5/8\"",
+                                                                         "delta": "up to 2'-11 3/8\" short"}})
     undo(ids, t)
-    check(doc, 7, "7 Undo: back to the start", {"Rear yard": {"proposed": "32'-9\"", "status": "complies"},
-                                                "Lot coverage": {"proposed": "22.6%", "status": "complies"}})
+    t = stretch(ids, 0, None, 5, low=True)
+    xf(ids, t)
+    check(doc, 6, "6 The left side wall 5 ft out", {"Side yard, Southwest": {"status": "does_not_comply",
+                                                                         "proposed": "7'-0 5/8\"",
+                                                                         "delta": "at least 0'-11 1/4\" short"}})
+    undo(ids, t)
+    check(doc, 7, "7 Undo: back to the start", {"Front yard": {"proposed": "27'-0 3/4\""},
+                                                "Lot coverage": {"proposed": "19.1%", "status": "complies"}})
 
     rear = max(p[1] for p in ring)                             # 8. a garage on the Default layer, behind the house
     garage = doc.Objects.AddBrep(rg.Box(rg.Plane(rg.Point3d(40 * ft, (rear + 6) * ft, 0), rg.Vector3d.ZAxis),
@@ -176,35 +191,24 @@ try:
     check(doc, 9, "9 One floor moved on its own", {"Stories": {"status": "needs_review", "reason": "floors misaligned"}})
     undo(floor2, t)
 
-    lo_x, hi_x = min(p[0] for p in ring), max(p[0] for p in ring)   # 10. the height bonus, done right
+    lo_x, hi_x = min(p[0] for p in ring), max(p[0] for p in ring)   # 10. the height bonus: waits for the question
     narrow = rg.Transform.Scale(rg.Plane(rg.Point3d((lo_x + hi_x) / 2 * ft, 0, 0), rg.Vector3d.ZAxis),
                                 (hi_x - lo_x - 6) / (hi_x - lo_x), 1, 1)
     back = rg.Transform.Translation(north * 3)
-    xf(top_floor, roof)
+    roof3 = rg.Transform.Scale(rg.Plane(rg.Point3d(0, 0, base["base"] * ft), rg.Vector3d.ZAxis), 1, 1,
+                               (base["top"] - base["base"] + 3) / (base["top"] - base["base"]))   # the guide's 3 ft
+    xf(top_floor, roof3)
     xf(ids, narrow)
     xf(ids, back)
-    check(doc, 10, "10 The height bonus done right", {"Building height": {"status": "complies", "required": "38'-6\""},
-                                                      "Front yard": {"required": "28'-0\"", "margin": "+2'-0\""},
-                                                      "Side yard, West": {"required": "13'-0\""}})
+    check(doc, 10, "10 The height bonus waits", {"Building height": {"status": "needs_review",
+                                                                     "reason": "side and rear lot lines"}})
     undo(ids, back)
     undo(ids, narrow)
-    undo(top_floor, roof)
-
-    layer = g._layer(doc, g.FINISHED_LAYER)                    # 11. finished spot grades at the walls, then a move
-    a = Rhino.DocObjects.ObjectAttributes()
-    a.LayerIndex = layer
-    spots = [doc.Objects.AddPoint(g._model_point(doc, p), a)
-             for p in ([36.5, 26.5, 0.0], [36.5, 57.75, 0.0], [11.5, 42.1, 0.0], [61.5, 42.1, 0.0])]   # walls y 27..57.25
-    setfacts(doc, grade_from="finished_spots", grade_is="finished", ground_is_flat=None, grade_elevation=None)
-    check(doc, 11, "11 Spot grades at the walls", {"Building height": {"status": "complies"}})
-    t = rg.Transform.Translation(north * 5)
+    undo(top_floor, roof3)
+    t = rg.Transform.Translation(north * 5)                     # 11. Delta in words (test 2's front yard)
     xf(ids, t)
-    check(doc, 11, "11 then the house moves 5 ft",
-          {"Building height": {"status": "needs_review", "reason": "spot grades no longer at the building's walls"}})
+    check(doc, 11, "11 Delta in words", {"Front yard": {"delta": "at least 5'-0 5/8\" to spare"}})
     undo(ids, t)
-    for s in spots:
-        doc.Objects.Delete(s, True)
-    setfacts(doc, grade_from=None, ground_is_flat=True, grade_elevation=0.0)
 
     setfacts(doc, corner_lot=True)                              # 12. a corner lot
     check(doc, 12, "12 Corner lot Yes", {"Front yard": {"status": "needs_review"}})
@@ -220,9 +224,8 @@ try:
     xs = [p[0] for p in start["floors"][0]["outline"]]
     log["survey_width"] = max(xs) - min(xs)
     g.add_floors(doc, start)
-    check(doc, 13, "13 A survey: to the limits", {"Side yard, West": {"proposed": "10'-0\"", "margin": "at limit",
-                                                                      "status": "complies"}})
-    tests[-1]["match"] = tests[-1]["match"] and abs(log["survey_width"] - 53.0) < 1e-6
+    check(doc, 13, "13 A survey: to the limits", {"Side yard, Southwest": {"proposed": "10'-0\"", "status": "complies"}})
+    tests[-1]["match"] = tests[-1]["match"] and round(log["survey_width"] * 12) == 39 * 12 + 10   # 39'-10" wide
 
     # 14. other units: a millimeter template, the same start, the same rows as the feet run's starting house
     doc2 = docs.open("Small Objects - Millimeters")
@@ -237,8 +240,10 @@ try:
                           for name, fields in tests[0]["got"].items()}, "match": same})
     capture(doc2, "14_millimeters")
     log["all_match"] = all(t["match"] for t in tests)
+    assert log["all_match"], [t["test"] for t in tests if not t["match"]]
 except Exception:
     log["trace"] = traceback.format_exc()
+    raise
 finally:
     for d in opened:
         try:

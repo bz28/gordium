@@ -17,7 +17,7 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
                "dwelling_units", "rooms_let_for_profit", "conversion",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
-               "eaves_confirmed", "plan_north_deg"}
+               "eaves_confirmed", "ground_assumed", "plan_north_deg"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 
 
@@ -51,6 +51,8 @@ def fact_problems(facts: dict) -> list[str]:
         problems.append("grade_points must be a list of spot grades, each [x, y, z] in feet")
     if facts.get("grade_from") not in (None, "spot", "terrain", "finished_spots"):
         problems.append("grade_from must be spot, terrain or finished_spots")
+    if facts.get("ground_assumed") not in (None, "flat"):
+        problems.append("ground_assumed must be flat (or not given)")
     if facts.get("grade_is") not in (None, "finished", "existing"):
         problems.append("grade_is must be finished or existing")
     for k in ("street_line", "address_street_line"):
