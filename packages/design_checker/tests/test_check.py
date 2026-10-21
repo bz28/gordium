@@ -399,6 +399,7 @@ def test_the_plugin_takes_only_this_requests_answer_and_never_waits_forever():
     with pytest.raises(logic.CheckerOutOfStep, match="no answer in"):               # a hung check: not forever
         logic.answer_for(lines(), 7, 0.05)
     assert logic.ask_limit("check") >= 60
+    assert logic.ask_limit("start") >= 120          # the largest building takes work in step with the lot's depth
 
 
 def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_checker():

@@ -197,7 +197,7 @@ def suggested_ground(building_bottoms, lot_bottom):
 
 
 ASK_LIMIT_S = 60          # s: the longest the plugin waits for one answer (the first also starts Python, loads rules)
-ASK_LIMITS_S = {}         # s, per command that can take longer
+ASK_LIMITS_S = {"start": 120}   # s, per command that can take longer: the largest building, on a deep lot
 
 
 def ask_limit(cmd):
