@@ -903,3 +903,33 @@ def test_a_starting_house_is_drawn_on_existing_spot_grades_placed_at_the_lot(fac
                         "grade_from": "spot", "grade_is": "existing", "grade_points": spots})
     assert len(got["floors"]) == 3 and any("drawn on the ground as it is" in n for n in got["notes"])
     assert got["floors"][0]["base"] == pytest.approx(2.5, abs=0.01)          # the spots' plane: their average
+
+
+def test_the_panel_header_has_no_code_edition_line_but_the_report_keeps_it(facts, tmp_path):
+    """MVP list (Ben's team): the panel drops "Ch. 325 as amended through Ord. No. … · District Regulations Chart";
+    the report keeps it."""
+    import openpyxl
+    from design_checker import rhino_logic as logic
+    got = check(MODEL, facts, tmp_path / "r.xlsx")
+    head = got["view"]["header"]
+    assert "Ch. 325" in head["code"]
+    lines = logic.panel_header(head)
+    assert not any("Ch. 325" in t or "Ordinance" in t or "Ord. No." in t for t in lines["above"] + lines["below"])
+    assert lines["above"] == [head["place"]] and lines["below"][0] == head["draft"]
+    text = " ".join(str(c) for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
+                    for row in ws.iter_rows(values_only=True) for c in row if c)
+    assert "Ch. 325" in text
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'head.get("code")' not in ui and "logic.panel_header(head)" in ui
+
+
+def test_the_delta_column_is_named_delta_in_the_panel_and_the_report(facts, tmp_path):
+    """MVP list: "Margin" renamed "Delta" everywhere the architect sees it."""
+    import openpyxl
+    from design_checker import rhino_logic as logic
+    check(MODEL, facts, tmp_path / "r.xlsx")
+    cells = [c for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
+             for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
+    assert logic.COLUMN_DELTA == "Delta" and "Delta" in cells and "Margin" not in cells
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert '(logic.COLUMN_DELTA, 62)' in ui and '"Margin"' not in ui

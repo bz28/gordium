@@ -15,11 +15,11 @@ import Rhino.Geometry as rg
 
 import rhino_logic as logic  # plain Python, tested in CI (on the path: gordium_rhino puts it there first)
 
-PANEL_WIDTH = 480          # wide enough that Proposed, Required and Margin never truncate (D4)
+PANEL_WIDTH = 480          # wide enough that Proposed, Required and Delta never truncate (D4)
 # fixed widths that fit the panel: an Item column sized to its text pushed the numbers out of sight (seen in the
 # Rhino window capture). The mark is the first thing in the Item cell: on the Mac the tree's expand arrows take
 # the first column, which hid a column of its own.
-COLUMNS = [("Item", 230), ("Proposed", 84), ("Required", 72), ("Margin", 62)]
+COLUMNS = [("Item", 230), ("Proposed", 84), ("Required", 72), (logic.COLUMN_DELTA, 62)]
 STALE_SECONDS = 0.3        # results older than an edit by this long are shown as out of date (F7, H1)
 
 
@@ -267,8 +267,8 @@ def _header(parts, view, error, out_of_date):
     h.Clear()
     a = parts["actions"]
     head = (view or {}).get("header") or {}
-    h.AddRow(_wide(head.get("place") or "Gordium", bold=True, size=13))
-    h.AddRow(_wide(head.get("code") or "", size=11))
+    lines = logic.panel_header(head)
+    h.AddRow(_wide(lines["above"][0], bold=True, size=13))
     if error is not None:
         h.AddRow(row(_wide("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15),
                      button("Retry", a["retry"])))
@@ -277,9 +277,10 @@ def _header(parts, view, error, out_of_date):
         h.AddRow(_wide("Checking…", bold=True, size=15))
     else:
         h.AddRow(_wide((view or {}).get("summary") or "No check yet", bold=True, size=15))
-    h.AddRow(_wide(head.get("draft") or "Draft rulebook", eto_status_color("needs_review"), size=11))
-    h.AddRow(_wide(head.get("lot") or "", size=11))          # each fact on its line, its buttons below it: a
-    h.AddRow(_wide(head.get("grade") or "", size=11))        # button beside a long line ran off the panel
+    draft, lot, grade = lines["below"]
+    h.AddRow(_wide(draft, eto_status_color("needs_review"), size=11))
+    h.AddRow(_wide(lot, size=11))          # each fact on its line, its buttons below it: a
+    h.AddRow(_wide(grade, size=11))        # button beside a long line ran off the panel
     buttons = [button("Edit site…", a["edit_site"])]
     if "Pick survey lot lines…" in (head.get("actions") or []):
         buttons.append(button("Pick survey lot lines…", a["survey"]))

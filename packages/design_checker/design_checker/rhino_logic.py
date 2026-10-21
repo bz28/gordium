@@ -39,6 +39,18 @@ def classify(full_path, kind, holds_building=False):
     return "a " + kind + " on the Building layer can't be measured yet (explode it or turn it into a solid)"
 
 
+def panel_header(head):
+    """The panel's header lines above the summary and below it, from the check's header: where (place), then the
+    draft notice, the lot and the grade. The code's edition line ("Ch. 325 as amended through Ord. No. …") is the
+    report's, not the panel's (Ben's team, MVP list, 2026-10-20)."""
+    head = head or {}
+    return {"above": [head.get("place") or "Gordium"],
+            "below": [head.get("draft") or "Draft rulebook", head.get("lot") or "", head.get("grade") or ""]}
+
+
+COLUMN_DELTA = "Delta"          # the panel's and the report's column for how far over or under (was "Margin")
+
+
 def missing(facts):
     """The required lot facts not yet given: the confirm dialog shows whenever any is missing."""
     facts = facts or {}

@@ -16,6 +16,7 @@ from pathlib import Path
 import yaml
 
 from design_checker import present
+from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder.envelope import MARGIN, envelope
 from envelope_builder.start import largest_legal_building
 from model_measurement.measure import TAX_MAP_TOLERANCE, measure
@@ -219,7 +220,7 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
                         i.get("reason") or "", i["detail"].get("citation") or "",
                         (i["detail"].get("links") or [""])[0]])
     write_block(ws, len(lines) + 3, [("Group", 22), ("Mark", 6), ("Item", 34), ("Proposed", 12), ("Required", 12),
-                                     ("Margin", 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
+                                     (COLUMN_DELTA, 10), ("Why it needs review", 60), ("Citation", 50), ("Link", 40)], out)
     # written beside it, then moved into place: a write that fails half way never leaves a broken report there
     report_path = Path(report_path)
     part = report_path.with_name("." + report_path.name + ".part")
