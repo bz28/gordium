@@ -29,7 +29,7 @@ COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # Facts about the inside of a building (rooms, parking spaces). This phase checks the outside only: a rule waiting
 # on one of these goes in its own group, "not checked yet: interior", out of the counts. A rule they decide once
 # entered (a FAIL included) is shown like any other: nothing that fails is ever hidden.
-INTERIOR = {"sleeping_rooms", "parking_spaces"}
+INTERIOR = {"sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "conversion"}
 NUMBER = re.compile(r"^([≥≤<>=]) (-?[\d,]+(?:\.\d+)?)$")
 
 

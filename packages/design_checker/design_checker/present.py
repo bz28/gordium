@@ -33,7 +33,7 @@ GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies",
 from model_measurement.measure import TAX_MAP_SLACK, TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
 LOT_LENGTHS = set(TAX_MAP_SLACK)          # every lot-dependent length: the one table in measure.py
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
-INTERIOR = {"sleeping_rooms", "parking_spaces"}
+INTERIOR = {"sleeping_rooms", "parking_spaces", "dwelling_units", "rooms_let_for_profit", "conversion"}
 EIGHTH = 1 / 96                           # 1/8 in, in feet
 PRECISION = ("Measured to 1/8 in.; values are never rounded toward compliance; near a limit they are shown with "
              "one more decimal.")
