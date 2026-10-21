@@ -130,16 +130,16 @@ Every reason the code gives today comes from the table:
   the count". One starting partly inside the one below
   (a floor moved down into it, a room sunk into the roof) asks too: "part of the building ({what}) starts partly
   inside the one below it (from {low} ft to {high} ft): move it to stand on the one below, or join them". So moving
-  a part a tenth of a foot never turns one count into another. Stories are counted only from floor blocks: a part drawn as a plain solid
-  (or plain solids stacked) never has its stories guessed from its height or its blocks. Only a plain part standing
-  on the ground and lower than 7 ft (the lowest ceiling a habitable room may have, NYS Residential Code R305.1: a
-  porch slab or steps) fits inside the first story and is left out; any other (raised, on a roof, reaching below
-  the ground: §325-3's STORY has no least height) is a plain part, and with one the count typed stands for the whole building, and only if no part's floor blocks count more: "the stories typed
-  ({typed}) are fewer than the floor blocks drawn ({drawn}): check the count, or the floors", nor the solids stacked
-  in a plain part: "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), which may
-  each be a story: check the count"; with none typed:
-  "part of the building ({what}) isn't drawn as floor blocks, so its stories can't be counted: enter the number of
-  stories of the whole building". Any part reaching below the ground, whatever was typed: "part of the building
+  a part a tenth of a foot never turns one count into another. Stories are read from the drawing as far as it allows: floor blocks are
+  counted, and a part drawn as a plain solid (or plain solids stacked) h tall can hold at most floor(h / 7 ft)
+  stories (7 ft: the lowest ceiling a habitable room may have, NYS Residential Code R305.1) and at least one. So a
+  12 ft garage holds one, and a 30 ft plain house one to four: then the count is a question ("a 30 ft solid could
+  hold up to 4 stories: draw its floors or enter the count"), and the count entered stands for the whole building
+  only within what the drawing allows: "the stories typed ({typed}) are fewer than the floor blocks drawn
+  ({drawn}): check the count, or the floors"; "the stories typed ({typed}) are more than the drawing could hold
+  ({what}, {height} ft tall: at most {most}, at 7 ft a story, R305.1): check the count, or the drawing". Only a
+  plain part standing on the ground and lower than 7 ft (a porch slab or steps) fits inside the first story and is
+  left out; one raised, on a roof or reaching below the ground (§325-3's STORY has no least height) asks. Any part reaching below the ground, whatever was typed: "part of the building
   ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
   question for the architects".
 - **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the

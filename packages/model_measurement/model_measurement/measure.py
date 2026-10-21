@@ -684,29 +684,43 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
         counts.append(int(got["value"]))
     counted = max(counts) if counts else None
     if not plain:
+        if stated is not None and stated < counted:     # fewer than the floors drawn: refused, never a reading
+            return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
         readings = [("Gordium's floor blocks" + (", the most on any part" if len(counts) > 1 else ""), counted, {})]
         if stated is not None:
             readings.append(("as stated by the architect", stated, {}))
         return _decide("stories", readings, "the floor blocks of the building counted (each story drawn as its own "
                        "solid by Gordium)", ids, "the count typed disagrees with the floors drawn: a question (story)")
-    if stated is None:
-        if len(parts) == 1:             # one building drawn as plain solids: draw its floors, or say how many
-            return _missing("stories", stop("no_stories"))
-        return _missing("stories", stop("stories_plain_part", what=", ".join(b["id"] for b in plain)))
-    for stack in (b for b in plain if b.get("parts")):
-        # plain solids stacked one on another are a plain part too: each block might be a story, so a count typed
-        # below the blocks is a question; never one that must equal them (the count is the whole building's)
-        if stated < len(stack["parts"]):
-            return _missing("stories", stop("stories_below_blocks", typed=f"{stated:g}", what=stack["id"],
-                                            blocks=len(stack["parts"])))
-    if counted is not None and stated < counted:
-        return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
-    if len(parts) == 1:
-        return _record("stories", "count", _r(stated), "stated by the architect (not measured from the model: no floor "
-                       "blocks are drawn)", ids)
-    return _record("stories", "count", _r(stated), "stated by the architect for the whole building (part of it isn't "
-                   "drawn as floor blocks" + (f"; at least the {counted} floor blocks drawn" if counted else "") + ")",
-                   ids)
+    # read from the drawing as far as it allows: a plain part h tall can hold at most floor(h / 7 ft) stories
+    # (the lowest ceiling a habitable room may have, R305.1), and holds at least one if it can hold one; the
+    # building's least is the floors counted (or that one), its most the most any part could hold
+    could = {b["id"]: math.floor((_rise(b) + TOL) / STORY_ROOM) for b in plain}
+    tallest = max(plain, key=_rise)
+    least = max([counted or 0] + [1 for v in could.values() if v >= 1])
+    most = max([counted or 0] + list(could.values()))
+    if most == 0:                       # nothing drawn could hold a story: draw its floors, or say how many
+        return _missing("stories", stop("no_stories"))
+    name = "the building" if len(parts) == 1 else tallest["id"]          # by id only beside other parts
+    holds = (f"{name}, {_r(_rise(tallest)):g} ft tall, could hold up to {could[tallest['id']]} "
+             f"stor{'y' if could[tallest['id']] == 1 else 'ies'} (7 ft a story, R305.1)")
+    if stated is not None:              # the architect's count for the whole building: only within what's drawn
+        if counted is not None and stated < counted:
+            return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
+        if stated > most:
+            return _missing("stories", stop("stories_above_drawn", typed=f"{stated:g}", what=name,
+                                            height=f"{_r(_rise(tallest)):g}", most=most))
+        if stated < least:
+            return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=least))
+        return _record("stories", "count", _r(stated), "stated by the architect for the whole building, within what "
+                       f"the drawing allows ({least} to {most}: {holds})", ids)
+    if least == most:                   # the drawing allows one count only: read, nothing to ask
+        return _record("stories", "count", _r(least), f"read from the drawing: {holds}" +
+                       (f"; {counted} floor blocks drawn" if counted else ""), ids)
+    return _decide("stories", [(f"at least: {'the floor blocks drawn' if counted else 'one story'}", least, {}),
+                               (f"at most: {holds}", most, {})],
+                   "the stories the drawing allows (floor blocks counted; a plain solid at 7 ft a story, R305.1)", ids,
+                   f"a {_r(_rise(tallest)):g} ft solid ({name}) could hold up to {could[tallest['id']]} "
+                   "stories: draw its floors or enter the count (story)")
 
 
 def _footprint(building: dict):
@@ -840,7 +854,8 @@ def _stories_over(assemblies, grade, why_grade, stated) -> dict:
         g, why_g = (c["grade"], c["why"]) if "grade" in c else (grade, why_grade)
         parts = _one_vertical_building(members, everyone)
         parts = parts[:1] + [b for b in parts[1:] if not _fits_in_the_first_story(b, g)]
-        r = _stories_whole(parts, g, why_g, stated)
+        # the count typed is the main building's: another building read as the main one has only its own drawing
+        r = _stories_whole(parts, g, why_g, None if c["kind"] == "as_main" else stated)
         if r["value"] is None and not r["readings"]:
             return r
         found.append((words, r, c["kind"]))
