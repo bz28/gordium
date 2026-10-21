@@ -4,6 +4,7 @@ Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 
 import json
 import queue
+import threading
 
 LAYERS = {"lot": "Site", "building": "Building"}
 ID_KEY = "gordium:id"                   # the same keys as model_measurement.read_3dm (a test keeps them equal)
@@ -637,6 +638,73 @@ def ask_limit(cmd):
 class CheckerOutOfStep(RuntimeError):
     """The checker's next line can't be trusted to be this request's answer: the plugin restarts the checker and
     shows nothing from it."""
+
+
+def pipes(process):
+    """The checker's two pipes, each served by its own thread: (sends, lines). Rhino's thread never reads or writes
+    a pipe, so a checker that stops answering (or stops reading a large request) can never freeze Rhino; the
+    plugin only puts on `sends` and waits on `lines` with a time limit (answer_for). Put None on `sends` to end
+    the writer."""
+    sends, lines = queue.Queue(), queue.Queue()
+    threading.Thread(target=_read_lines, args=(process.stdout, lines), daemon=True).start()
+    threading.Thread(target=_write_lines, args=(process.stdin, sends), daemon=True).start()
+    return sends, lines
+
+
+def _read_lines(stream, lines):
+    """The reader thread: every line the checker writes, then None when it stops."""
+    try:
+        for line in stream:
+            lines.put(line)
+    except (OSError, ValueError):            # the pipe closed under it (the checker was stopped)
+        pass
+    finally:
+        lines.put(None)
+
+
+def _write_lines(stream, sends):
+    """The writer thread: each request, in order, until None or the checker stops reading (then the reader sees
+    it stop, or ask's time limit runs out)."""
+    try:
+        while True:
+            text = sends.get()
+            if text is None:
+                return
+            stream.write(text)
+            stream.flush()
+    except (OSError, ValueError):
+        pass
+
+
+def exchange(sends, lines, request, limit):
+    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for)."""
+    sends.put(json.dumps(request) + "\n")
+    return answer_for(lines, request["id"], limit)
+
+
+def sweep(leftovers):
+    """Undo everything an earlier copy of the plugin left attached to Rhino (event handlers, its drawing, its
+    panel, its checker): `leftovers` maps a name to its undo, kept outside the plugin's state so clearing the
+    state can't lose it. Each undo runs even if another fails; returns how many ran."""
+    n = 0
+    for key in list(leftovers):
+        undo = leftovers.pop(key, None)
+        try:
+            undo()
+            n += 1
+        except Exception:                      # noqa: BLE001  (already gone: nothing to undo)
+            pass
+    return n
+
+
+def current_only(fn, is_current):
+    """fn, run only while is_current() (this copy of the plugin is the loaded one): an older copy's handler that
+    is still attached does nothing, so it can never act on, or wait on, the current copy's checker."""
+    def run(*args):
+        if not is_current():
+            return None
+        return fn(*args)
+    return run
 
 
 def answer_for(lines, request_id, limit):

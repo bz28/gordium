@@ -1,0 +1,86 @@
+{
+ "claims": {
+  "1 one copy attached after two bad reloads (baseline + 1)": {
+   "ok": true,
+   "detail": {
+    "baseline": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    },
+    "after": {
+     "Idle": 1,
+     "AddRhinoObject": 1,
+     "EndOpenDocument": 1
+    }
+   }
+  },
+  "1 the earlier copy is inert": {
+   "ok": true,
+   "detail": null
+  },
+  "2 a silent checker and a 2 MB request: a clear error within the limit": {
+   "ok": true,
+   "detail": {
+    "error": "the Gordium checker gave no answer in 3 s, so it was restarted (see gordium_worker.log in the temp folder)",
+    "seconds": 3.03
+   }
+  },
+  "2 the silent checker was stopped": {
+   "ok": true,
+   "detail": null
+  },
+  "3 a slow checker is still answered": {
+   "ok": true,
+   "detail": {
+    "answer": "late",
+    "seconds": 1.52
+   }
+  },
+  "4 the real checker answers afterwards": {
+   "ok": true,
+   "detail": "ValueError: unknown command 'no_such_command'"
+  },
+  "5 off() leaves nothing attached": {
+   "ok": true,
+   "detail": {
+    "baseline": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    },
+    "after_off": {
+     "Idle": 0,
+     "AddRhinoObject": 0,
+     "EndOpenDocument": 0
+    }
+   }
+  }
+ },
+ "baseline": {
+  "Idle": 0,
+  "AddRhinoObject": 0,
+  "EndOpenDocument": 0
+ },
+ "one_copy": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "two_reloads": {
+  "Idle": 1,
+  "AddRhinoObject": 1,
+  "EndOpenDocument": 1
+ },
+ "after_off": {
+  "Idle": 0,
+  "AddRhinoObject": 0,
+  "EndOpenDocument": 0
+ },
+ "ok": true,
+ "left_attached": {
+  "Idle": 0,
+  "AddRhinoObject": 0,
+  "EndOpenDocument": 0
+ }
+}

@@ -458,12 +458,19 @@ def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
     for path in PLUGIN:
         text = path.read_text(encoding="utf-8")
         guarded_names = set(re.findall(r"^\s*(\w+) = System\.EventHandler[^\n]*\((?:g\.)?logic\.guard\(", text, re.M))
+        # the plugin's own route: _handler(...) guards (checked below), _on(owner, "Event", name) attaches
+        guarded_names |= set(re.findall(r"^\s*(\w+) = _handler\(", text, re.M))
+        for name in re.findall(r"_on\([\w.]+, \"\w+\", (\w+)\)", text):
+            if name not in guarded_names:
+                unguarded.append(f"{path.name}: _on(..., {name}) not made by _handler")
         for n, line in enumerate(text.splitlines(), 1):
             m = re.match(r"\s*[\w.\[\]\"']+\.([A-Z]\w*) \+= (.+)", line)
+            if m and line.strip() == "event += handler" and path.name == "gordium_rhino.py":
+                continue                                   # inside _on: every caller's handler is checked above
             if m and not (re.match(r"(g\.)?logic\.guard\(", m.group(2)) or m.group(2).strip() in guarded_names):
                 unguarded.append(f"{path.name}:{n}: {line.strip()}")
             if "System.EventHandler" in line and "(" in line.split("System.EventHandler", 1)[1] \
-                    and "logic.guard(" not in line:
+                    and "logic.guard(" not in line and "_handler(System.EventHandler" not in line:
                 unguarded.append(f"{path.name}:{n}: {line.strip()}")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     overlay = rhino.split("class Overlay", 1)[1].split("\nclass ", 1)[0].split("\ndef ", 1)[0]
@@ -472,6 +479,8 @@ def test_every_callback_the_plugin_gives_rhino_or_eto_is_guarded():
         if "_conduit(" not in method:
             unguarded.append("Overlay: " + method.splitlines()[0].strip())
     assert unguarded == [], unguarded
+    handler = rhino.split("def _handler(", 1)[1].split("\ndef ", 1)[0]
+    assert "logic.guard(logic.current_only(" in handler
     assert "def _conduit(" in rhino and "logic.guard(" in rhino.split("def _conduit(", 1)[1].split("\ndef ", 1)[0]
     assert "Paint +=" not in "".join(p.read_text(encoding="utf-8") for p in PLUGIN)    # draw once into a bitmap instead
 
@@ -1082,8 +1091,8 @@ def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_
     """The Rhino side can't run in CI: its source must use the tested logic (no bare readline on the pipe)."""
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     ask = src[src.index("def ask("):src.index("\n\n\n", src.index("def ask("))]
-    assert "logic.answer_for(" in ask and "_stop_worker()" in ask and "readline" not in ask
-    assert "threading.Thread(target=_read_lines" in src
+    assert "logic.exchange(" in ask and "_stop_worker()" in ask and "readline" not in ask and "stdin" not in ask
+    assert "logic.pipes(p)" in src                  # the pipes served by threads (test_checker_pipes.py)
 
 
 # ---- the starting building is proven with the checker's own verdict (audit P1-3) -----------------------------

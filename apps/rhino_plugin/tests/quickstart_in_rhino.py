@@ -30,6 +30,9 @@ log = {"tests": tests}
 
 
 def fresh_module():
+    loaded = sys.modules.get("gordium_rhino")
+    if loaded is not None:                # its hooks, drawing and panel off before it is dropped
+        loaded.off()
     state = sc.sticky.setdefault("gordium_state", {})
     w = state.pop("worker", None)
     if w is not None:
