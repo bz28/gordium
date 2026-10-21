@@ -357,3 +357,45 @@ def test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outli
             checked += 1
     assert checked == 2 * len(cases)
 
+
+# ---- F17 (#18): the way the house is drawn never decides whether a building across a line counts ------------------
+
+F17_CASE = ("jog", [{"op": "add_accessory", "kind": "garage", "w": 8.25, "d": 12.5, "h": 13.0, "where": "side",
+                     "face": 2, "fx": 0.79, "fy": 0.75, "gap": 2.0, "listed": False, "frame": None}])
+
+
+def test_F17_a_garage_across_the_lot_line_gives_coverage_the_same_answer_however_the_house_is_drawn():
+    """Stress F17 (P2): one edit on the jog lot, an unlisted 8'-3" x 12'-6" garage at x 59.75..68, y 88..100.6,
+    across the stepped side line x = 62. A building across a lot line makes every rule that measures it not
+    comply (PR 18), and coverage measures every building on the lot, whichever is the main one. With the house as
+    floor blocks (the starting house the main building) coverage did not comply; drawn as one plain solid or
+    meshes (the main building then unpicked) it complied, 12%. Now it does not comply every way."""
+    d = generate.build(*F17_CASE)[0]
+    got = {style: harness.statuses(harness.gordium_file(d, "ft", style))["R-1b.lot_coverage"]
+           for style in ("blocks", "one_solid", "mesh")}
+    assert set(got.values()) == {FAILS}, got
+
+
+def test_drawing_the_house_as_floor_blocks_a_solid_or_a_mesh_never_flips_a_row_between_fails_and_complies():
+    """Metamorphic (F17): the same design written to Rhino with the house as Gordium's floor blocks, as one plain
+    solid, or as meshes may change what can be read (stories from floor blocks, the main building assumed or to
+    pick), so a row may move to or from needs review; but never from does not comply to complies or back. Every
+    lot as drawn, the F17 case, and 15 random architect's edit sequences."""
+    rng = random.Random(17)
+    cases = [(lt, []) for lt in generate.LOTS] + [F17_CASE]
+    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(15))]
+    compared = []
+    for lt, edits in cases:
+        d, _done = generate.build(lt, edits)
+        got = {}
+        for style in ("blocks", "one_solid", "mesh"):
+            try:
+                got[style] = harness.statuses(harness.gordium_file(d, "ft", style))
+            except ValueError as e:         # a house whose floors don't stack on one outline has no one-solid form
+                assert "don't stack" in str(e), e
+        compared.append(len(got))
+        for rule in set().union(*got.values()):
+            seen = {got[style].get(rule) for style in got}
+            assert not {FAILS, COMPLIES} <= seen, (lt, edits, rule, {k: v.get(rule) for k, v in got.items()})
+    assert sum(n >= 2 for n in compared) >= 15, compared
+

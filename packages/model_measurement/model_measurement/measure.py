@@ -1610,7 +1610,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     else:
         out["building_area"] = _coverage(buildings, views, facts, main)
     if crosses:                         # coverage, the height and the accessory count: whatever else follows
-        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached)
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached, buildings)
 
     if why_street:
         return out
@@ -1643,7 +1643,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         for name in ACCESSORY_YARDS:
             out[name] = dict(_missing(name, why_acc_off), objects=unplaced_ids(detached))
     if crosses:
-        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached)
+        _mark_crossings(out, lot, lines, crossed, main, parts_of, detached, buildings)
     return out
 
 
@@ -1656,12 +1656,15 @@ def _crossed(lot: Lot, plan) -> set:
     return {i for i, e in enumerate(lot.edges) if reach.intersection(LineString(e)).length > 4 * TOL}
 
 
-def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict, parts_of: list, detached: list):
+def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict, parts_of: list, detached: list,
+                    buildings: list):
     """A building that crosses a lot line stands partly on another lot: it fails every rule that measures it,
     whatever the readings or answers (the checker does that, check.crossing). Each measurement of a building
     records that building's own crossings, `crossings`: [{"who", "lines": street / side / rear}]: the main
     building's on the main yards, the eaves and the height; each accessory building's on the accessory
-    measurements; every building's on the coverage."""
+    measurements; every building's on the coverage, whichever is the main building, or with none known yet
+    (coverage counts every building on the lot: stress F17, a garage across a line failed coverage with the house
+    drawn as floor blocks and complied with it drawn as one solid, the main building then unpicked)."""
     sides = {i for _w, r in lines["readings"] for g in r["sides"] for i in g} if lines and not isinstance(lines, str) else set()
     rears = {i for _w, r in lines["readings"] for i in r["rear"]} if lines and not isinstance(lines, str) else set()
 
@@ -1680,8 +1683,11 @@ def _mark_crossings(out: dict, lot: Lot, lines: dict, crossed: dict, main: dict,
     for name in ACCESSORY_YARDS + ("accessory_buildings", "accessory_distances_apply"):
         if entries_acc and name in out:
             out[name]["crossings"] = entries_acc
-    if (entries_main or entries_acc) and "building_area" in out:
-        out["building_area"]["crossings"] = entries_main + entries_acc
+    known = {id(b) for b in group + list(detached)}
+    entries_any = [{"who": f'building "{_parts(b)[0]}"', "lines": kinds(crossed[b["id"]])}
+                   for b in buildings if b["id"] in crossed and id(b) not in known]
+    if (entries_main or entries_acc or entries_any) and "building_area" in out:
+        out["building_area"]["crossings"] = entries_main + entries_acc + entries_any
 
 
 def _attached(main: dict, buildings: list[dict]) -> list[dict]:
