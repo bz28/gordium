@@ -1010,3 +1010,78 @@ def test_wording_never_sends_the_architect_to_ask_when_the_answer_cant_change_th
                    {**facts, "lot_surveyed": True, "main_building": "a"})
     cov = items(r["view"])["Lot coverage"]
     assert cov["reason"].startswith("Does not comply either way: coverage is") and "ask" not in cov["reason"], cov
+
+
+def _walls_spots(x0, y0, x1, y1, z):
+    """A spot grade at the middle of each wall of a rectangle, just outside it, at level z."""
+    mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+    return [[mx, y0 - 0.5, z], [mx, y1 + 0.5, z], [x0 - 0.5, my, z], [x1 + 0.5, my, z]]
+
+
+def test_an_assumed_main_building_is_never_kinder_than_picking_the_starting_house():
+    """Round 2 of the main-building fixes (P0): the candidates were read by position, so the "with every other
+    solid" height came from the last other building's own (higher) ground: with the main building assumed, a
+    height complied that picking the starting house fails. Property, over random layouts on the sample lot
+    (a starting house and one or two other buildings, each on its own ground, spot grades at every wall): with
+    the starting house assumed, no row is ever kinder than with it picked."""
+    import random
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    rnd = random.Random(5)
+    compared = 0
+    for _ in range(30):
+        floors, h = rnd.choice([2, 3, 3]), rnd.choice([11, 11.6])        # 3 x 11.6 = 34.8 ft: near the limit
+        house = [floor(12, 30, 36, 60, z0=h * i, z1=h * (i + 1), id=f"f{i}") for i in range(floors)]
+        points = _walls_spots(12, 30, 36, 60, 0)
+        others = []
+        for k in range(rnd.choice([1, 2, 2])):           # two: one on lower ground, one on higher, often
+            x0, y0 = rnd.choice([(40, 30), (14, 66), (40, 66)])
+            if any(o["id"].startswith(f"o{x0}{y0}") for o in others):
+                continue
+            ground, top = rnd.choice([-8, -6, -3, 0, 3, 5, 8]), rnd.choice([8, 12, 20, 30])
+            others.append(box(x0, y0, x0 + 8, y0 + 10, ground, ground + top, f"o{x0}{y0}"))
+            points += _walls_spots(x0, y0, x0 + 8, y0 + 10, ground)
+        base = {**facts, "lot_surveyed": True, "stories": floors, "ground_is_flat": None, "grade_elevation": None,
+                "grade_points": points}
+        site_ = _plot(*house, *others, lot_=lot)
+        assumed = items(check_site(site_, base)["view"])
+        picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])
+        from model_measurement.measure import measure
+        m_a, m_p = measure(site_, base), measure(site_, {**base, "main_building": "f0"})
+        for name in ("building_height", "stories"):     # the pick's every reading is among the assumption's
+            def vals(r):
+                return {round(x["value"], 3) for x in r["readings"]} or ({round(r["value"], 3)} if r["value"] is not None else set())
+            assert vals(m_p[name]) <= vals(m_a[name]) or not vals(m_a[name]), (name, m_p[name], m_a[name])
+        for name, i in picked.items():
+            if name in assumed and i["status"] in present.RANK and assumed[name]["status"] in present.RANK:
+                compared += 1
+                assert present.RANK[assumed[name]["status"]] <= present.RANK[i["status"]], \
+                    (name, assumed[name]["status"], i["status"], assumed[name]["reason"], [o["id"] for o in others])
+    assert compared > 150
+
+
+
+def test_the_with_every_other_solid_height_is_read_from_its_own_grade_not_the_last_buildings():
+    """Round 2 (P0), the reviewer's case: a 34.8 ft starting house on ground 0, a garage on lower ground (-8) and
+    one on higher ground (+5). Read by position, the "with every other solid" height took the last garage's own
+    ground (+5) and the assumed house complied; picking the house reads it from the ground at all their walls
+    (lower) and it doesn't. Assumed, it is never kinder."""
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 60, z0=11.6 * i, z1=11.6 * (i + 1), id=f"f{i}") for i in range(3)]
+    low, high = box(40, 30, 48, 40, -8, 4, "low"), box(40, 66, 48, 76, 5, 15, "high")
+    points = _walls_spots(12, 30, 36, 60, 0) + _walls_spots(40, 30, 48, 40, -8) + _walls_spots(40, 66, 48, 76, 5)
+    base = {**facts, "lot_surveyed": True, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+            "grade_points": points}
+    site_ = _plot(*house, low, high, lot_=lot)
+    from model_measurement.measure import measure
+    def with_others(f):
+        return next(r["value"] for r in measure(site_, f)["building_height"]["readings"]
+                    if r["reading"].startswith("with every other solid"))
+    assert with_others(base) == pytest.approx(with_others({**base, "main_building": "f0"})) == pytest.approx(35.8)
+    picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])["Building height"]
+    assumed = items(check_site(site_, base)["view"])["Building height"]
+    assert picked["status"] != present.COMPLIES, picked
+    assert present.RANK[assumed["status"]] <= present.RANK[picked["status"]], (assumed, picked)
