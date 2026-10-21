@@ -2211,8 +2211,8 @@ rules:
   kind: rule
   topic: dimensions
   title: 'R-3 abutting R-1: height same as abutting R-1 district (325-19E(2))'
-  applies_when: abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
-    "one_family_attached", "two_family"]
+  applies_when: district in ["R-3a", "R-3b"] and (abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line",
+    "one_family_semi_detached", "one_family_attached", "two_family"])
   check: building_height <= abutting_r1_height_limit
   sources:
   - file: chapter_325_zoning_2026-10.pdf
@@ -2224,18 +2224,21 @@ rules:
       R-1b District.
   examples:
   - given:
+      district: R-3a
       abuts_r1_district: true
       use: multiple_family
       abutting_r1_height_limit: 35
       building_height: 35
     expect: pass
   - given:
+      district: R-3a
       abuts_r1_district: true
       use: multiple_family
       abutting_r1_height_limit: 35
       building_height: 36
     expect: fail
   - given:
+      district: R-3a
       abuts_r1_district: true
       use: two_family
       abutting_r1_height_limit: 35
@@ -2260,8 +2263,8 @@ rules:
   kind: flag
   topic: dimensions
   title: 'R-3 abutting R-1: rear yard 150% of chart (needs review)'
-  applies_when: abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
-    "one_family_attached", "two_family"]
+  applies_when: district in ["R-3a", "R-3b"] and (abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line",
+    "one_family_semi_detached", "one_family_attached", "two_family"])
   sources:
   - file: chapter_325_zoning_2026-10.pdf
     page: 51

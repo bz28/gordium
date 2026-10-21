@@ -1007,3 +1007,49 @@ def test_every_drafted_other_use_rule_gets_the_dwelling_review_whatever_the_ai_w
     assert not got["problems"], got["problems"]
     r3a = got["rules"]["R-3a"][0]
     assert outcome(r3a, {"use": "dormitory", "lot_area": 99999}, inputs.ctx.allowed()) == "needs_review"
+
+
+def test_a_law_piece_that_names_its_districts_gets_rules_only_there(inputs):
+    """§325-19E sets conditions for "any permitted use in the R-3a or R-3b Zoning District" (it also names the R-1
+    land it abuts, which isn't its scope). The stage-1 answers filled its templates for every district; code keeps
+    only R-3a and R-3b, and a rule for every district gets `district in [...]`. Synthetic texts: a scope of one
+    district, and a name that is no district (unreadable: for a person)."""
+    from rule_format.rulebook import outcome
+    u = unit(inputs, "325-19E")
+    assert drafter.text_scope(u["text"], inputs.ctx.districts) == ({"R-3a", "R-3b"}, [])
+    context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
+
+    def drafted(text):
+        return drafter.check_answer({"templates": [FRONT], "no_rule_reason": ""}, u | {"text": text}, context,
+                                    inputs.law, inputs.ctx, inputs.columns, inputs.cells, inputs.notes, "test")
+    assert set(drafted(u["text"])["rules"]) == {"R-3a", "R-3b"}
+    assert set(drafted("C. Any lot in the R-2a Zoning District, and land that abuts the R-1a District.")["rules"]) == {"R-2a"}
+    unreadable = drafted("C. Any lot in the R-9z Zoning District.")
+    assert unreadable["rules"] == {} and "can't be read" in unreadable["rejected"][0]["why"]
+    assert drafted("C. Any lot in a residential district.")["rules"].keys() == drafted("x")["rules"].keys()   # no scope
+    every = template("h", "side_yard_larger >= side_yard_smaller", [],
+                     [({"side_yard_larger": "12", "side_yard_smaller": "10"}, "pass"),
+                      ({"side_yard_larger": "8", "side_yard_smaller": "10"}, "fail")],
+                     quotes=[{"document": "law", "page": 0, "piece": "325-19E",
+                              "text": "The maximum building height requirement shall be the same as the requirement for "
+                                      "the abutting R-1a or R-1b District."}])
+    got = drafter.check_answer({"templates": [every], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
+                               inputs.columns, inputs.cells, inputs.notes, "test")
+    assert "general" in got["rules"], got["problems"]
+    g = got["rules"]["general"][0]
+    assert g["applies_when"] == 'district in ["R-3a", "R-3b"]'
+    assert outcome(g, {"district": "R-1b", "side_yard_larger": 1, "side_yard_smaller": 9}, inputs.ctx.allowed()) \
+        == "not_applicable"
+
+
+def test_the_saved_325_19e_rules_apply_only_in_r3a_and_r3b(inputs):
+    """Rebuilt by replay (no API call): no §325-19E rule in any other district's rulebook."""
+    for book in inputs.drafted.glob("*.yaml"):
+        rules = [r for r in cli.load(book)["rules"] if "325_19e" in r["id"]]
+        if book.stem == "general":
+            assert rules and all(r["applies_when"].startswith('district in ["R-3a", "R-3b"]') for r in rules)
+        elif book.stem not in ("R-3a", "R-3b"):
+            assert rules == [], book.name
+    # and nothing is listed for a person in a district the law doesn't reach (R-2c's 3-number cells, RU's footnote)
+    log = cli.load(inputs.records / "drafting_log.yaml")["units"]["325-19E"]
+    assert all(g["rule"].split(".")[0] in ("R-3a", "R-3b", "325-19E") for g in log["unresolved"]), log["unresolved"]
