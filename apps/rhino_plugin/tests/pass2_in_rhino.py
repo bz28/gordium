@@ -11,6 +11,8 @@ own windows by window id after each step (the step writes <temp>/gordium_pass2/r
   building…" button comes right after the reason, on screen without scrolling, and its words aren't repeated.
 - "labels" (4, 5): labels on, every view redrawn: the "Height limit" label is drawn at 13 pt; the status box is drawn
   in the active view only (and every view was drawn).
+- "scale" (Ben, on #23): labels on, Top zoomed out to a 1,500 ft square round the lot: no plan label is drawn and the
+  status box stays; zoomed back to the lot: the labels are back.
 - "box" (6): a new empty file's start box (the real dialog): no "Use my survey…" or "Change…" button; it closes
   itself after 10 s and the file is closed.
 - "close": closes the documents this run opened.
@@ -243,6 +245,50 @@ try:
         claim("5 every view was drawn", len(drawn) >= 4, sorted(drawn))
         claim("5 the status box once, in the active view", [c["view"] for c in status] == [active], log["draws"])
         capture(doc, "Front", "labels_front", frame=False)
+    elif step == "scale":
+        g._actions()["labels"](True)
+        o = g.overlay()
+        top = doc.Views.Find("Top", False)
+        doc.Views.ActiveView = top
+        ft = 1.0 / g._scale(doc)
+        lot = rg.BoundingBox(o.lot_outline)
+        c = lot.Center
+        placed, boxes = [], []
+        put, draw_box = g.ui.label_at, g.ui.draw_text_box
+        rows = list(g._status_rows(o, g.stale(o)))
+
+        def record_label(d, viewport, point, text, *rest, **kw):
+            placed.append(text)
+            return put(d, viewport, point, text, *rest, **kw)
+
+        def record_box(d, rows_, *rest):
+            boxes.append(list(rows_) == rows)
+            return draw_box(d, rows_, *rest)
+
+        def drawn(box, name):
+            del placed[:], boxes[:]
+            top.ActiveViewport.ZoomBoundingBox(box)
+            g.ui.label_at, g.ui.draw_text_box = record_label, record_box
+            try:
+                top.Redraw()
+                Rhino.RhinoApp.Wait()
+            finally:
+                g.ui.label_at, g.ui.draw_text_box = put, draw_box
+            view = top.CaptureToBitmap(System.Drawing.Size(1000, 640))
+            view.Save(OUT + name + "_view.png")
+            return list(placed), sum(boxes)
+
+        half = 750 * ft                                  # the 1,500 ft square of #23's neighbourhood capture
+        far = rg.BoundingBox(rg.Point3d(c.X - half, c.Y - half, 0), rg.Point3d(c.X + half, c.Y + half, 0))
+        out_labels, out_box = drawn(far, "scale_neighbourhood")
+        near = rg.BoundingBox(lot.Min, lot.Max)
+        near.Inflate(lot.Diagonal.Length * 0.15)
+        in_labels, in_box = drawn(near, "scale_lot")
+        log["scale"] = {"neighbourhood": {"labels": out_labels, "status_box": out_box},
+                        "lot": {"labels": in_labels, "status_box": in_box}}
+        claim("7 zoomed out to the 1,500 ft square: no plan labels drawn", out_labels == [], log["scale"])
+        claim("7 the status box stays", out_box == 1 and in_box == 1, log["scale"])
+        claim("7 zoomed to the lot: the labels are back", len(in_labels) >= 4, log["scale"])
     elif step == "box":
         A["box_serial"] = None
         empty = TestDocs("pass2box").open("Large Objects - Feet")

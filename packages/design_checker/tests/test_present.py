@@ -904,8 +904,9 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
     houses on the plain lot, tax map and survey, doing exactly what a row's "To comply" says (that wall pulled in,
     or the roof lowered, by the amount it gives; for the height's two ways, each in turn) makes that row COMPLY.
     On the tax map it says "whatever the survey shows" and gives the as-drawn figure as well; on a survey, one
-    number. (A yard the height bonus raises is the height row's to settle: there the yard's own rule complies and
-    the row says the height's other way needs more.)"""
+    number. A yard the height bonus would raise says what it needs if the building stays that tall too; the test
+    does each: that figure with the height kept, its own with the roof brought down to 35'-0" (review round 1, F4:
+    moving by the yard's own figure alone had left it in review)."""
     import random
     import re
     from design_checker.check import check_site
@@ -916,7 +917,8 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
     one = r"(\d+'-\d+(?: \d/\d)?\")"
     drawn = r"(?: \(" + one + r" as drawn\))?"
     length = one + drawn
-    ways = {"move": re.compile(r"move the building " + one + r" farther from that lot line" + drawn),
+    tall = r"(?:; " + one + r" if it stays \d+'-\d+(?: \d/\d)?\" tall \(the building height rule's other way raises this yard\))?"
+    ways = {"move": re.compile(r"move the building " + one + r" farther from that lot line" + drawn + tall),
             "lower": re.compile(r"lower the building " + length),
             "deeper": re.compile(r"make the (front yard|rear yard|side yard) " + length + r" deeper, keeping the other yards")}
     tried = {True: 0, False: 0}
@@ -939,6 +941,16 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
                 assert m, (k, name, part)
                 yard, gap_t, drawn_t = (m.group(1), m.group(2), m.group(3)) if kind == "deeper" else \
                     (None, m.group(1), m.group(2))
+                if kind == "move" and m.group(3):              # while it stays this tall: its own figure too
+                    tall_gap = _feet(m.group(3))
+                    assert tall_gap > _feet(gap_t), (k, name, hint)
+                    sign, at = pull[name]
+                    c = [x0, y0, x1, y1]
+                    c[at] += sign * _feet(gap_t)
+                    lowered = {j["name"]: j for j in check_site(_plot(box(*c, 0, 35), lot_=plain), facts)["view"]["items"]}
+                    assert lowered[name]["status"] == present.COMPLIES, (k, name, hint, lowered[name]["reason"])
+                    gap_t = m.group(3)                         # and with the height kept: the larger figure
+                    kinds.add(("tall", True))
                 if surveyed:                                   # a survey: one number, said plainly
                     assert head == "To comply" and drawn_t is None, (k, name, hint)
                 if drawn_t:                                    # the as-drawn figure only beside a larger one
@@ -952,15 +964,11 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
                     c[at] += sign * gap
                 r2 = check_site(_plot(box(*c, 0, hh), lot_=plain), facts)
                 after = {j["name"]: j for j in r2["view"]["items"]}[name]
-                if after["status"] != present.COMPLIES and "other way needs" in (after["reason"] or ""):
-                    row = {x["Rule id"]: x for x in r2["rows"]}[after["rule"]]   # the yard's own rule complies
-                    after = {"status": (row.get("Sides") or {}).get(after.get("measure")) or row["Verdict"],
-                             "reason": after["reason"]}
                 assert after["status"] == present.COMPLIES, (k, name, part, after["status"], after["reason"])
                 tried[surveyed] += 1
                 kinds.add((kind, bool(drawn_t)))
     assert tried[True] >= 15 and tried[False] >= 15, tried          # both kinds of lot really exercised
-    assert {("move", True), ("move", False), ("lower", False), ("deeper", False)} <= kinds, kinds
+    assert {("move", True), ("move", False), ("lower", False), ("deeper", False), ("tall", True)} <= kinds, kinds
     # the architect's case, word for word (the coordinator's wording): a west side yard 2'-11 3/8" short as drawn
     words = {}
     for surveyed in (False, True):
@@ -977,3 +985,46 @@ def test_doing_what_to_comply_says_makes_that_row_comply_on_the_tax_map_and_on_a
         "deeper, keeping the other yards.")
     assert words[(True, 36.5, "Building height")] == ("To comply: lower the building 1'-6\", or make the front yard 6'-6\" "
                                                       "deeper, keeping the other yards.")
+    assert words[(False, 36.5, "Front yard")] == (
+        "To comply whatever the survey shows: move the building 7'-0\" farther from that lot line (5'-0\" as drawn); "
+        "8'-6\" if it stays 36'-6\" tall (the building height rule's other way raises this yard).")
+    assert words[(True, 36.5, "Front yard")] == (
+        "To comply: move the building 5'-0\" farther from that lot line; 6'-6\" if it stays 36'-6\" tall (the building "
+        "height rule's other way raises this yard).")
+    # review round 1, F1: a lot's own size is no design change: a tax-map lot that complies as drawn but not at
+    # its smallest reading gets no "increase it by …" (no change to the design, nor any survey, could do it)
+    for w_, d_ in ((51, 118), (50, 125)):
+        r = check_site(_plot(box(10, 26, w_ - 12, 72, 0, 30), lot_=lot_of([(0, 0), (w_, 0), (w_, d_), (0, d_)])),
+                       {**FACTS, "jurisdiction": CITY, "lot_surveyed": False, "street_line": [[[0, 0], [w_, 0]]]})
+        site = {i["name"]: i for i in r["view"]["items"] if i.get("measure") in present.SITE_MEASURES}
+        assert site and all(not (i.get("hint") or "").startswith("To comply") for i in site.values()), \
+            {n: (i["status"], i.get("hint")) for n, i in site.items()}
+        assert any(i["status"] == present.REVIEW for i in site.values())         # the case really arose
+
+
+def test_a_row_that_turns_on_an_open_question_is_never_told_how_to_comply():
+    """Review round 1, F5: the checker never lets a row whose result turns on an open question comply (whether a
+    yard is measured to the wall or to the overhangs), so no move can. Scenario 10 with floor 2 overhanging 7 ft
+    east: the east side yard turns on it, and it gets no "To comply" (it had "move the building 2'-0" …", and
+    after that move it still needed review)."""
+    import copy
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    base = scenarios.load(scenarios.FOLDER / "10_one_floor_moved_on_its_own.yaml")
+    seen = 0
+    for shift in (0, -2, -5):
+        sc = copy.deepcopy(base)
+        b = sc["buildings"][0]
+        b["outline"] = [[x + shift, y] for x, y in b["outline"]]
+        b["move_floor"] = {"floor": 2, "by": [7, 0]}
+        s, f, extras = scenarios.site(sc)
+        r = check_site(s, f, extras=extras)
+        rows = {x["Rule id"]: x for x in r["rows"]}
+        for i in r["view"]["items"]:
+            row = rows.get(i.get("rule")) or {}
+            turns = (row.get("Side turns on") or {}).get(i.get("measure")) if i.get("measure") in (row.get("Sides") or {}) \
+                else row.get("Turns on")
+            if turns:
+                seen += i["name"] == "Side yard, East"
+                assert not (i.get("hint") or "").startswith("To comply"), (shift, i["name"], turns, i.get("hint"))
+    assert seen == 3

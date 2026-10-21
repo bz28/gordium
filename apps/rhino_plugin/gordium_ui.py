@@ -511,8 +511,9 @@ def show_detail(parts):
             buttons.append(button("This is the ground", lambda: a["ground"](i["ground_like"])))
     for b in buttons:
         d.AddRow(row(b))
-    if i.get("hint") and not buttons:
-        d.AddRow(_wide(i["hint"], size=12))
+    words = logic.hint_text(i.get("hint"), [b.Text for b in buttons])
+    if words:
+        d.AddRow(_wide(words, size=12))
     for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):
         if text:
             d.AddRow(_wide(text, size=12))
@@ -788,7 +789,7 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
     beside the line is clear for it on one line, on two (its name, then its numbers: logic.label_lines). Its height
     is 4 + LINE_H per line. The in-Rhino checks measure this very placement."""
     p = viewport.WorldToClient(point)
-    width = len(text) * size * 0.58 + 14
+    width = logic.label_width(text, size)
     if along is not None:
         a, b = (viewport.WorldToClient(q) for q in along)
         own = ((a.X, a.Y), (b.X, b.Y))
@@ -797,7 +798,7 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
         rows = [text]
         two = logic.label_lines(text)
         if not clear and len(two) == 2:          # too long to sit clear beside its line: name, then numbers
-            w2 = max(len(t) for t in two) * size * 0.58 + 14
+            w2 = max(logic.label_width(t, size) for t in two)
             l2, t2, c2 = logic.place_label(own, w2, 4 + 2 * LINE_H, obstacles, taken or [], view=view)
             if c2:
                 left, top, width, clear, rows = l2, t2, w2, True, two

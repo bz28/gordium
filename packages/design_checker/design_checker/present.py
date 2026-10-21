@@ -383,6 +383,46 @@ def _range(measure: str, measured: dict, values: dict, sign: str) -> str | None:
 SURVEY_ONLY = "passes with the lot as drawn (confirm the survey)"     # check.every_reading's words
 
 
+def _raisers(items: list[dict], values: dict) -> dict:
+    """measure -> [(comparison, item)]: for each rule with several ways to comply whose first way the design
+    doesn't meet as drawn (the §325-16C height bonus: over 35'-0" only with every yard 1 ft larger per foot), the
+    comparisons its other ways put on that measure: a yard it would raise."""
+    out = {}
+    for i in items:
+        expr = i.get("_expr")
+        body = ast.parse(expr, mode="eval").body if expr else None
+        if not (isinstance(body, ast.BoolOp) and isinstance(body.op, ast.Or)):
+            continue
+        if _evaluate(ast.unparse(body.values[0]), values) is not False:
+            continue
+        for alt in body.values[1:]:
+            for c in ([alt] if isinstance(alt, ast.Compare) else getattr(alt, "values", [])):
+                if isinstance(c, ast.Compare) and len(c.ops) == 1 and isinstance(c.left, ast.Name) \
+                        and type(c.ops[0]) in SIGNS:
+                    out.setdefault(c.left.id, []).append((c, i))
+    return out
+
+
+def _while_raised(hint, item, node, worst, raisers, values, measured, facts):
+    """A yard's "To comply", with what it needs while the building keeps the height another rule's other way
+    allows only with larger yards (the review, F4: moving by the yard's own shortfall left it in review, the
+    height bonus then raising it): "…; 10'-1 3/4" if it stays 36'-6" tall (the height rule's other way raises
+    this yard)". That figure from the same reading set, its worst reading, rounded up."""
+    if not hint or item.get("measure") is None:
+        return hint
+    more = []
+    for c, src in raisers.get(node.left.id) or []:
+        rs = readings(c, ast.unparse(c), values, measured, facts)
+        low = min((r["margin"] for r in rs), default=None)
+        if low is not None and low < worst - 1e-9:
+            more.append((low, rs[0]["unit"], src))
+    if not more:
+        return hint
+    low, unit, src = min(more, key=lambda x: x[0])
+    return (f"{hint[:-1]}; {_gap(low, unit)} if it stays {src['proposed']} tall "
+            f"(the {src['name'].lower()} rule's other way raises this yard).")
+
+
 def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx: bool) -> str | None:
     """What to change so the row complies, from THE reading set (the verdict's own): the shortfall under its worst
     reading, rounded up, so the advised change makes it comply under every reading, never one that leaves it in
@@ -611,8 +651,12 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
     A wall `x` from the drawn line has margin (margin + x − value) under a reading: short when x < value −
     margin. Red is short under every reading, amber under some (check.plan draws them)."""
     tax = bool((measured.get("lot_area") or {}).get("tolerance")) and not facts.get("lot_surveyed")
+    raisers = _raisers(items, values)
     for i in items:
         node, expr = i.pop("_node", None), i.pop("_expr", None)
+        turns_on = i.pop("_turns_on", None)
+        if turns_on and (i.get("hint") or "").startswith("To comply"):
+            i["hint"] = None             # it turns on an open question: no move makes it comply (the review, F5)
         i.update(delta="", approx=False, colour="none", limits=[])
         i["detail"].setdefault("colours", None)
         if node is None:
@@ -634,9 +678,14 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
             i.update(status=REVIEW, mark=MARK[REVIEW], reason=(
                 f"Complies as drawn, but not under every reading of {_which(lot, open_)} · Pick survey lot lines…"))
         i.update(delta=delta_words(i["status"], span, unit, approx), approx=approx)
-        one_way = not isinstance(ast.parse(expr or ast.unparse(node), mode="eval").body, ast.BoolOp)
-        if span[0] < 0 and one_way and (not i.get("hint") or i["hint"].startswith("To comply")):
-            i["hint"] = comply_hint(i["name"], node, rs, values, measured, approx) or i.get("hint")
+        body = ast.parse(expr or ast.unparse(node), mode="eval").body
+        one_way = not isinstance(body, ast.BoolOp) or (i.get("_raised") and isinstance(body.op, ast.And))
+        if span[0] < 0 and one_way and not turns_on and node.left.id not in SITE_MEASURES \
+                and (not i.get("hint") or i["hint"].startswith("To comply")):
+            # (a lot's own size is no design change: its rows keep the as-drawn words; the review, F1)
+            hint = comply_hint(i["name"], node, rs, values, measured, approx)
+            i["hint"] = _while_raised(hint, i, node, span[0], raisers, values, measured, facts) or i.get("hint")
+        i.pop("_raised", None)
         if approx and i["detail"].get("line"):
             i["detail"]["line"] = (f"{i['proposed']} proposed, {i['required']} required as drawn · with the tax map's "
                                    f"±{feet_inches(TOLERANCE)}: {i['delta']}")
@@ -843,6 +892,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "_node": node,                        # the comparison it was decided on (a raise replaces it); popped
             "_expr": expr,                        # and its whole expression (settle reads both)
             "_checker": checker,                  # the checker's verdict for it: the most it may show (view)
+            # the open questions that verdict turns on: while there are any, no change to the design makes it comply
+            "_turns_on": (side_row if side_row is not None else row).get("Turns on") or [],
             # the stated facts it reads that aren't set (R-3a's lot size: dwelling units…): its own "Enter …" button
             "needs": rhino_logic.needs_of(reading_set.rule_names(rule), values) if st != COMPLIES else [],
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
@@ -1033,6 +1084,7 @@ def _raise_yards(items, measured, values, facts):
                     continue
                 t["required"], t["margin"], t["hint"] = value_text(req, unit, sign, False), margin_text(margin, unit), None
                 t["_node"] = c                           # its Delta and colours are the raised minimum's
+                t["_raised"] = True                      # (and its "To comply": settle)
                 t["_expr"] = f"({t['_expr']}) and ({expr})" if t.get("_expr") else expr
                 if worst is not None:                    # the raised minimum fails at the tax-map worst case
                     w = _display(*_numbers(c, worst, measured, t["name"]))

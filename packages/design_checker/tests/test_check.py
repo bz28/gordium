@@ -1672,7 +1672,16 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
     # 2: reason, then the buttons, then the measuring notes; the hint as text only when there's no button
     assert detail.index('for text in (det.get("line"), i.get("reason")):') < detail.index("for b in buttons:") \
         < detail.index('for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope")):')
-    assert "    if i.get(\"hint\") and not buttons:\n        d.AddRow(_wide(i[\"hint\"], size=12))" in detail
+    assert ("    words = logic.hint_text(i.get(\"hint\"), [b.Text for b in buttons])\n    if words:\n"
+            "        d.AddRow(_wide(words, size=12))") in detail
+    # never a button's words twice, nor "Add to check…" as dead text on a row a left-out solid made cautious (its
+    # button is on the left-out row: review round 1, F2); any other hint shows beside a button (F3)
+    assert logic.hint_text("Pick the main building…", ["Pick the main building…"]) is None
+    assert logic.hint_text("Enter bedrooms…", ["Enter bedrooms…"]) is None
+    assert logic.hint_text("Add to check…", []) is None
+    assert logic.hint_text("To comply: lower the building 1'-6\".", ["Enter bedrooms…"]) == "To comply: lower the building 1'-6\"."
+    assert logic.hint_text("To comply: lower the building 1'-6\".", []) == "To comply: lower the building 1'-6\"."
+    assert logic.hint_text(None, []) is None
     assert 'buttons.append(button("Pick the main building…", a["main"]))' in detail
     # 3
     zoom = rhino[rhino.index("def zoom_to("):rhino.index("def set_labels(")]
@@ -1694,3 +1703,36 @@ def test_the_architects_second_pass_fixes_in_the_panel_and_the_viewport():
     assert lot["street"]["actions"] == [("street", "Change…", True)]
     surveyed = {r["key"]: r for r in logic.box_rows({"lot_area": 5000, "lot_surveyed": True})}
     assert surveyed["lot"]["actions"] == [("lot", "Use my survey…", False)]
+
+
+def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_zoomed_in():
+    """Ben, on #23's zoomed-out capture: with labels on and the view out at the neighbourhood, the lot's edge and
+    yard labels piled into a column with long leaders. A label is drawn only when the lot on screen is at least
+    LABEL_MIN_LOT_PX (120 px) and no smaller than the label, and a lot edge's label only when that edge on screen is
+    at least as long as the label; zoomed in they show again. The status box isn't a plan label: it stays."""
+    from design_checker import rhino_logic as logic
+    edge, yard = "69'-6 1/8\"", "✕ 7'-0\", needs 10'-0\""
+    w_edge, w_yard = logic.label_width(edge, 11), logic.label_width(yard, 11)
+    assert 60 < w_edge < 90 and w_yard > 120
+    # the 1,500 ft square in a ~900 px view: a 70 x 120 ft lot is ~70 px; its edges ~40-70 px
+    assert not logic.label_fits(edge, 11, lot_px=72, line_px=70)
+    assert not logic.label_fits(yard, 11, lot_px=72)
+    # zoomed to the lot: it fills the view; the labels are back (a yard's short line doesn't hide its label)
+    assert logic.label_fits(edge, 11, lot_px=600, line_px=350)
+    assert logic.label_fits(yard, 11, lot_px=600)
+    # the edges: hidden while shorter than the label, shown once longer; the threshold is the lot's
+    assert not logic.label_fits(edge, 11, lot_px=600, line_px=w_edge - 1)
+    assert logic.label_fits(edge, 11, lot_px=600, line_px=w_edge)
+    assert not logic.label_fits(edge, 11, lot_px=logic.LABEL_MIN_LOT_PX - 1, line_px=500)
+    assert logic.label_fits(edge, 11, lot_px=logic.LABEL_MIN_LOT_PX, line_px=500)
+    assert not logic.label_fits(yard, 11, lot_px=w_yard - 1)                  # the lot shorter than the label
+    assert logic.label_fits(yard, 11, lot_px=None)                            # no lot drawn: nothing to judge by
+    # wired in: each yard label and each edge label asks, with the lot's size on screen this frame
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
+    assert '    lot_px = _screen_size(e.Viewport, getattr(o, "lot_outline", None))' in draw
+    assert "if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):" in draw
+    assert ("        if not logic.label_fits(text, 11, lot_px, math.hypot(ends[1].X - ends[0].X, ends[1].Y - ends[0].Y)):\n"
+            "            continue\n        ui.label_at(") in draw
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "    width = logic.label_width(text, size)\n" in ui            # placed at the width it was judged by

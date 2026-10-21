@@ -336,6 +336,36 @@ def beside_line(a, b, w, h, gap=6):
     return max(xa, xb) + gap, (ya + yb) / 2 - h / 2
 
 
+def hint_text(hint, buttons):
+    """The detail pane's hint as words, or None: never the words of a button it already shows ("Pick the main
+    building…", "Enter …"), nor "Add to check…" (a row a left-out solid makes cautious names it in its reason; the
+    one button is on the left-out row itself: the review, F2)."""
+    if not hint or hint in buttons or hint == "Add to check…":
+        return None
+    return hint
+
+
+LABEL_MIN_LOT_PX = 120      # a lot smaller than this on screen (zoomed out to the neighbourhood): no labels on it
+
+
+def label_width(text, size):
+    """A one-line label's width on screen, pixels (its text and its backing box's margins)."""
+    return len(text) * size * 0.58 + 14
+
+
+def label_fits(text, size, lot_px, line_px=None):
+    """Whether a plan label is drawn at this zoom (Ben, on #23's zoomed-out capture: zoomed out to the
+    neighbourhood the lot's labels piled into a column with long leaders). Not when the lot on screen (`lot_px`,
+    its larger side, pixels; None: no lot drawn) is under LABEL_MIN_LOT_PX or shorter than the label; nor when the
+    label's own line (`line_px`: a lot edge's on-screen length) is shorter than the label. A yard's dimension line
+    is short by nature (a 10 ft side yard beside a 150 px label), so a yard label is judged by the lot. Zoomed back
+    in, they show again; the status box always stays."""
+    w = label_width(text, size)
+    if lot_px is not None and lot_px < max(LABEL_MIN_LOT_PX, w):
+        return False
+    return line_px is None or line_px >= w
+
+
 def place_label(line, w, h, obstacles=(), taken=(), gap=6, view=None):
     """Where a w × h label for the dimension `line` ((x1, y1), (x2, y2), screen pixels) goes: (left, top, clear).
     The spots beside its line are tried in turn (a mostly horizontal line: above, below, each centred, then

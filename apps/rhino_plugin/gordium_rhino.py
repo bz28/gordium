@@ -12,6 +12,7 @@ GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts), GordiumOf
 """
 
 import json
+import math
 import os
 import subprocess
 import sys
@@ -475,6 +476,14 @@ def _notice_box(o, viewport, taken):
     return lines, x, y, w, h
 
 
+def _screen_size(viewport, points):
+    """The larger side, in pixels, of the points' box on screen (None without points)."""
+    if not points:
+        return None
+    on = [viewport.WorldToClient(p) for p in points]
+    return max(max(p.X for p in on) - min(p.X for p in on), max(p.Y for p in on) - min(p.Y for p in on))
+
+
 def _in_active_view(e):
     """Whether this frame is the active view's: the status box is drawn there only, not in all four (the
     architect's review, pass 2)."""
@@ -507,6 +516,7 @@ def draw_screen(o, e):
                                                          e.Viewport.WorldToClient(line.To))
                                                         for line in getattr(o, "plan_lines", None) or [])]
     obstacles = on_screen if plan else []
+    lot_px = _screen_size(e.Viewport, getattr(o, "lot_outline", None))   # zoomed out, the labels give way
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
@@ -520,10 +530,13 @@ def draw_screen(o, e):
             d.Draw2dLine(System.Drawing.PointF(p.X - 5, p.Y + 5), System.Drawing.PointF(p.X + 5, p.Y - 5), color, 2)
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
-        if plan and logic.yard_label_shown(labels, status):     # a failing yard's shortfall always shows
+        if plan and logic.yard_label_shown(labels, status) and logic.label_fits(text, 11, lot_px):
             ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
                         along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels else []:   # each edge's length
+        ends = [e.Viewport.WorldToClient(q) for q in (edge.From, edge.To)]
+        if not logic.label_fits(text, 11, lot_px, math.hypot(ends[1].X - ends[0].X, ends[1].Y - ends[0].Y)):
+            continue
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,
                     along=(edge.From, edge.To), obstacles=obstacles)          # beside its edge, off every line
     limit = getattr(o, "height_limit", None)
