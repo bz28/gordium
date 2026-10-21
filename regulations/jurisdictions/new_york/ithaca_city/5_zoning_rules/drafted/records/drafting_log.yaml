@@ -281,156 +281,237 @@ units:
         cell ''16,500 sf [fn9]'' has no drafted rule (a person checks the requirement it sets)'
     problems: []
   chart-p3-minimum_lot_width:
-    rules: []
+    rules:
+    - R-1a.min_lot_width_one_family_detached
+    - R-1a.min_lot_width_other_use
+    - R-1b.min_lot_width_one_family_detached
+    - R-1b.min_lot_width_other_use
+    - R-2a.min_lot_width_one_family_detached
+    - R-2a.min_lot_width_one_family_semi_detached
+    - R-2a.min_lot_width_two_family
+    - R-2a.min_lot_width_other_use
+    - R-2b.min_lot_width_one_family_detached
+    - R-2b.min_lot_width_one_family_semi_detached
+    - R-2b.min_lot_width_two_family
+    - R-2b.min_lot_width_other_use
+    - R-2c.min_lot_width_one_family_detached
+    - R-2c.min_lot_width_one_family_detached_zero_lot_line
+    - R-2c.min_lot_width_one_family_semi_detached
+    - R-2c.min_lot_width_one_family_attached
+    - R-2c.min_lot_width_two_family
+    - R-2c.min_lot_width_other_use
+    - R-3a.min_lot_width_one_family_detached
+    - R-3a.min_lot_width_one_family_semi_detached
+    - R-3a.min_lot_width_one_family_attached
+    - R-3a.min_lot_width_two_family
+    - R-3a.min_lot_width_multiple_family
+    - R-3a.min_lot_width_fraternity_sorority_group_house
+    - R-3a.min_lot_width_other_use
+    - R-3aa.min_lot_width_one_family_detached
+    - R-3aa.min_lot_width_one_family_semi_detached
+    - R-3aa.min_lot_width_one_family_attached
+    - R-3aa.min_lot_width_two_family
+    - R-3aa.min_lot_width_multiple_family
+    - R-3aa.min_lot_width_fraternity_sorority_group_house
+    - R-3aa.min_lot_width_other_use
+    - R-3b.min_lot_width_one_family_detached
+    - R-3b.min_lot_width_one_family_semi_detached
+    - R-3b.min_lot_width_one_family_attached
+    - R-3b.min_lot_width_two_family
+    - R-3b.min_lot_width_multiple_family
+    - R-3b.min_lot_width_fraternity_sorority_group_house
+    - R-3b.min_lot_width_other_use
+    - RU.min_lot_width_one_family_detached
+    - RU.min_lot_width_one_family_semi_detached
+    - RU.min_lot_width_one_family_attached
+    - RU.min_lot_width_two_family
+    - RU.min_lot_width_multiple_family
+    - RU.min_lot_width_fraternity_sorority_group_house
+    - RU.min_lot_width_other_use
     unresolved:
-    - rule: R-1a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-1A cell ''75 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-1b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-1B cell ''50 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-2A cell ''45 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-2B cell ''35 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-2C cell ''40 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-3A cell ''40 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-3AA cell ''50 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the R-3B cell ''30 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached'': the RU cell ''75 ft'' has
-        no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, detached, zero lot line'': the R-2C
-        cell ''40 ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-2A cell ''45
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-2B cell ''35
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-2C cell ''50
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-3A cell ''40
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-3AA cell ''50
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the R-3B cell ''30
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, semi-detached'': the RU cell ''100 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the R-2C cell ''50 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the R-3A cell ''50 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the R-3AA cell ''50 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the R-3B cell ''40 ft''
-        has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''One-family dwelling, attached'': the RU cell ''125 ft'' has
-        no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-2A cell ''45 ft'' has no drafted
-        rule (a person checks the requirement it sets)'
-    - rule: R-2b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-2B cell ''35 ft'' has no drafted
-        rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-2C cell ''50 ft'' has no drafted
-        rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-3A cell ''40 ft'' has no drafted
-        rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-3AA cell ''50 ft'' has no drafted
-        rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the R-3B cell ''30 ft'' has no drafted
-        rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Two-family dwelling'': the RU cell ''100 ft'' has no drafted
-        rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Multiple family dwelling'': the R-3A cell ''50 ft'' has no
-        drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Multiple family dwelling'': the R-3AA cell ''50 ft'' has
-        no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Multiple family dwelling'': the R-3B cell ''40 ft'' has no
-        drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Multiple family dwelling'': the RU cell ''125 ft'' has no
-        drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Fraternity, sorority, or group house'': the R-3A cell ''100
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Fraternity, sorority, or group house'': the R-3AA cell ''50
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Fraternity, sorority, or group house'': the R-3B cell ''100
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Fraternity, sorority, or group house'': the RU cell ''125
-        ft'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-1a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-1A cell ''75 ft'' has no drafted rule
-        (a person checks the requirement it sets)'
-    - rule: R-1b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-1B cell ''60 ft'' has no drafted rule
-        (a person checks the requirement it sets)'
-    - rule: R-2a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-2A cell ''50 ft'' has no drafted rule
-        (a person checks the requirement it sets)'
-    - rule: R-2b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-2B cell ''40 ft'' has no drafted rule
-        (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-2C cell ''40 ft'' has no drafted rule
-        (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-3A cell ''50 ft'' has no drafted rule
-        (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-3AA cell ''50 ft'' has no drafted rule
-        (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the R-3B cell ''40 ft'' has no drafted rule
-        (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_width
-      why: 'chart page 3, ''Minimum Lot Width'', row ''Other use'': the RU cell ''125 ft'' has no drafted rule (a
-        person checks the requirement it sets)'
+    - rule: R-1a.min_lot_width_one_family_detached_zero_lot_line
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, detached, zero lot line
+        - R-1A
+    - rule: R-1b.min_lot_width_one_family_detached_zero_lot_line
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, detached, zero lot line
+        - R-1B
+    - rule: R-2a.min_lot_width_one_family_detached_zero_lot_line
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, detached, zero lot line
+        - R-2A
+    - rule: R-2b.min_lot_width_one_family_detached_zero_lot_line
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, detached, zero lot line
+        - R-2B
+    - rule: R-3a.min_lot_width_one_family_detached_zero_lot_line
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, detached, zero lot line
+        - R-3A
+    - rule: R-3aa.min_lot_width_one_family_detached_zero_lot_line
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, detached, zero lot line
+        - R-3AA
+    - rule: R-3b.min_lot_width_one_family_detached_zero_lot_line
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, detached, zero lot line
+        - R-3B
+    - rule: RU.min_lot_width_one_family_detached_zero_lot_line
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, detached, zero lot line
+        - RU
+    - rule: R-1a.min_lot_width_one_family_semi_detached
+      why: '''One-family dwelling, semi-detached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, semi-detached
+        - R-1A
+    - rule: R-1b.min_lot_width_one_family_semi_detached
+      why: '''One-family dwelling, semi-detached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, semi-detached
+        - R-1B
+    - rule: R-1a.min_lot_width_one_family_attached
+      why: '''One-family dwelling, attached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, attached
+        - R-1A
+    - rule: R-1b.min_lot_width_one_family_attached
+      why: '''One-family dwelling, attached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, attached
+        - R-1B
+    - rule: R-2a.min_lot_width_one_family_attached
+      why: '''One-family dwelling, attached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, attached
+        - R-2A
+    - rule: R-2b.min_lot_width_one_family_attached
+      why: '''One-family dwelling, attached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - One-family dwelling, attached
+        - R-2B
+    - rule: R-1a.min_lot_width_two_family
+      why: '''Two-family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Two-family dwelling
+        - R-1A
+    - rule: R-1b.min_lot_width_two_family
+      why: '''Two-family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Two-family dwelling
+        - R-1B
+    - rule: R-1a.min_lot_width_multiple_family
+      why: '''Multiple family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Multiple family dwelling
+        - R-1A
+    - rule: R-1b.min_lot_width_multiple_family
+      why: '''Multiple family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Multiple family dwelling
+        - R-1B
+    - rule: R-2a.min_lot_width_multiple_family
+      why: '''Multiple family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Multiple family dwelling
+        - R-2A
+    - rule: R-2b.min_lot_width_multiple_family
+      why: '''Multiple family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Multiple family dwelling
+        - R-2B
+    - rule: R-2c.min_lot_width_multiple_family
+      why: '''Multiple family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Multiple family dwelling
+        - R-2C
+    - rule: R-1a.min_lot_width_fraternity_sorority_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Fraternity, sorority, or group house
+        - R-1A
+    - rule: R-1b.min_lot_width_fraternity_sorority_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Fraternity, sorority, or group house
+        - R-1B
+    - rule: R-2a.min_lot_width_fraternity_sorority_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Fraternity, sorority, or group house
+        - R-2A
+    - rule: R-2b.min_lot_width_fraternity_sorority_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Fraternity, sorority, or group house
+        - R-2B
+    - rule: R-2c.min_lot_width_fraternity_sorority_group_house
+      why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
+      cells:
+      - - 3
+        - Minimum Lot Width
+        - Fraternity, sorority, or group house
+        - R-2C
     problems: []
-    reason: 'The Minimum Lot Width rows cannot be drafted as checkable rules from the material given. The chart
-      has no footnote under this section, and the only quotable law text is the LOT WIDTH definition, which is not
-      a piece of the law that may be quoted here. A rule must have at least one quote, and the drafting rules say
-      a chart row is never quoted; its numbers can only be slots. In addition, the use measure ids do not cleanly
-      match several rows: "attached" does not separate conversion from new construction, and "Other use" has no
-      single use id. Lot width is also measured as frontage on a public right-of-way, and the measures list defines
-      lot_width only as the width of the lot, so a reviewer should confirm it equals the frontage the definition
-      requires. These rows should be drafted by hand with cell citations, or the extraction should supply a quotable
-      source.'
   chart-p3-maximum_building_height:
     rules:
     - R-1a.max_stories

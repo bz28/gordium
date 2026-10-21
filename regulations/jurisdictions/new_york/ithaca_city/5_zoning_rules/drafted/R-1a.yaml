@@ -1280,3 +1280,123 @@ rules:
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-1a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: R-1a.min_lot_width_one_family_detached
+  kind: rule
+  topic: dimensions
+  title: Minimum lot width, one-family detached (chart p.3)
+  applies_when: use == "one_family_detached"
+  check: lot_width >= 75
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Width
+      row: One-family dwelling, detached
+      column: R-1A
+  examples:
+  - given:
+      use: one_family_detached
+      lot_width: 75
+    expect: pass
+  - given:
+      use: one_family_detached
+      lot_width: 74
+    expect: fail
+  - given:
+      use: two_family
+      lot_width: 74
+    expect: not_applicable
+  open_questions:
+  - The definition of minimum lot width says frontage is measured on a public right-of-way (width at street line).
+    Is the lot_width measure the width at the street line?
+  - The definition says the width is subject to Column 6 of the District Regulations Chart and Article V. Do any
+    of those provisions change this minimum?
+  research:
+  - question: The definition of minimum lot width says frontage is measured on a public right-of-way (width at street
+      line). Is the lot_width measure the width at the street line?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The definition says the width is subject to Column 6 of the District Regulations Chart and Article
+      V. Do any of those provisions change this minimum?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-1a cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-1a.min_lot_width_other_use
+  kind: rule
+  topic: dimensions
+  title: Minimum lot width, other use (chart p.3)
+  applies_when: use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+    "one_family_attached", "two_family", "multiple_family", "fraternity_sorority_group_house"]
+  check: lot_width >= 75
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Width
+      row: Other use
+      column: R-1A
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines:
+    - 24
+    - 24
+    quote: Adult day care home - - SP SP SP
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines:
+    - 28
+    - 28
+    quote: Bed-and-breakfast inn - - - - -
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines:
+    - 16
+    - 16
+    quote: Dormitory - - - - - • - • •[fn5]
+  examples:
+  - given:
+      use: church
+      lot_width: 75
+    expect: pass
+  - given:
+      use: school
+      lot_width: 74
+    expect: fail
+  - given:
+      use: two_family
+      lot_width: 74
+    expect: not_applicable
+  open_questions:
+  - Is the lot_width measure the width at the street line, as the definition of minimum lot width states?
+  - Does 'Other use' cover every use without its own row, such as dormitory, school and church? Section 325-22A
+    sets its own frontage for motels, so does 'Other use' apply to them as well?
+  research:
+  - question: Is the lot_width measure the width at the street line, as the definition of minimum lot width states?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'Other use' cover every use without its own row, such as dormitory, school and church? Section
+      325-22A sets its own frontage for motels, so does 'Other use' apply to them as well?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-1a cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+  review_when:
+  - when: use == "adult_day_care_home"
+    reason: '§325-3 defines this use as ''A dwelling unit in which adult day care is provided to not more than six
+      adults at one tim'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
+      a dwelling row, with its notes) is unclear: a person decides.'
+  - when: use == "bed_and_breakfast_inn"
+    reason: '§325-3 defines this use as ''An owner-managed, single dwelling unit that provides five to 10 guest
+      rooms, limited to tw'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row
+      or a dwelling row, with its notes) is unclear: a person decides.'
+  - when: use == "dormitory"
+    reason: '§325-3 defines this use as ''A multiple dwelling which provides sleeping accommodations and domestic
+      facilities and ser'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
+      a dwelling row, with its notes) is unclear: a person decides.'
