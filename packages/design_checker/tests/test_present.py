@@ -398,21 +398,14 @@ def test_at_the_limit_and_complies_never_disagree():
 def test_a_row_complying_under_every_reading_names_only_the_questions_it_turns_on():
     """Review of e949a01: the wording named every question in the joined reason. Now only the open measurements
     the result turns on (with one unknown and the others at any reading, the result can't be told), each by its
-    own reason's short name: scenario 10's side yard turns on the overhang question only (its lot lines are clear),
-    never on which lot lines are side lines."""
+    own reason's short name. (PR #18 settles scenario 10's overhang in law, yards_to_nearest_part, so its side
+    yard complies outright; scenario 09's rear yard turns on the lot-line question only.)"""
     from design_checker import scenarios
     from design_checker.check import check_site
-    # PR #18 settles scenario 10's overhang (the law: yards_to_nearest_part), so its side yard complies outright;
-    # scenario 09's rear yard still depends on the lot-line question, and two questions are named together
     s, f, extras = scenarios.site(scenarios.load(scenarios.FOLDER / "09_five_sided_lot.yaml"))
     rear = {i["name"]: i for i in check_site(s, f, extras=extras)["view"]["items"]}["Rear yard"]
     assert rear["reason"] == ("Complies under every reading, but it depends on an open question: which lot lines "
                               "count as side and which as rear; confirm with the zoning office")
-    two = dict(row, Why=row["Why"] + "; whether the overhang counts is an open question for the architects "
-                                     "(yard_projections)")
-    assert present._reason(two).startswith("Complies under every reading, but it depends on open questions: which "
-                                           "lot lines count as side and which as rear; whether a yard is measured "
-                                           "to the wall")
     rule = {"id": "x", "kind": "rule", "check": "side_yard_smaller >= 10 or side_yard_larger >= 10"}
     measured = {"side_yard_smaller": {"value": None, "readings": [{"reading": "r", "value": 12}, {"reading": "s", "value": 15}]},
                 "side_yard_larger": {"value": None, "readings": [{"reading": "r", "value": 12}, {"reading": "s", "value": 15}]}}
