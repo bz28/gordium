@@ -37,13 +37,18 @@ disagreements:
     gordium: complies
     direction: gordium_less_cautious
     finding: >-
-      Investigated 2026-10-20. Gordium measures the rear yard under each reading of which lot lines are side and
-      which rear, and every reading gives 33'-6 3/8" (to the corner where the short back lines meet the side
-      lines) against at most 27'-6" required. Worked by hand for the reading the answer key worried about (the
-      east short line part of the east side line, the west one the rear line): depth (110 + 143.5) / 2 = 126.8 ft,
-      required 31'-8"; the nearest point of the house, its rear corner, is still 33'-6" from that rear line:
-      complies. So the answer doesn't depend on the open question here and Gordium's "complies" stands; the answer
-      key's needs review was more cautious than the code requires.
+      Investigated 2026-10-20, re-checked 2026-10-21 on PR 18 (0cbd813). Both short back lines run 26.6° from the
+      street (rise 15 over 30), within the 30° Gordium reads as "about parallel", and neither touches the street
+      lines, so Gordium reads them as the rear lot line (one reading): depth = the two side lines (110 + 110) / 2 =
+      110 ft (the City's perpendicular method gives the same 110 here), required max(min(27.5, 50), 20) =
+      27'-6"; the house's rear corner (45, 80) is 33'-6 3/8" from the corner (60, 110) where the rear line starts
+      (the foot of the perpendicular falls exactly on that corner: √(15² + 30²) = 33.54 ft): complies. Worked by
+      hand for the readings the answer key worried about, one short line part of a side line: east one a side
+      line, depth (110 + 143.54) / 2 = 126.77 ft, required 31.69 ft (31'-8 5/16"), the rear line (the west short
+      line) still 33.54 ft from the house's other rear corner (15, 80): complies; the west one a side line: the
+      same by symmetry. Both short lines side lines leaves no rear line (no reading). So every reading complies
+      and the answer doesn't depend on the open question; the answer key's needs review was more cautious than
+      the code requires.
     question_for_architects: >-
       On a lot whose back is two lines meeting at a point, is "the rear lot line" both lines (the rear yard
       measured to the nearer one), or does the city use another convention (e.g. a 10 ft line parallel to the
