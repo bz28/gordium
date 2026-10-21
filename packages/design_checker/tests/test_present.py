@@ -301,3 +301,55 @@ def test_the_envelope_height_plane_comes_from_spot_grades_and_never_from_existin
     r = check_site(_plot(house), base)
     assert r["envelope"]["base"] == pytest.approx(2) and r["envelope"]["top"] == pytest.approx(37)
     assert check_site(_plot(house), {**base, "grade_is": "existing"})["envelope"]["top"] is None
+
+
+# ---- E1: a cited chart cell is quoted as exactly that cell --------------------------------------------------
+
+def _expected_cell_text(cell):
+    section = re.sub(r"\s*\[fn[\d,]+\]", "", cell.get("section") or "")
+    row = re.sub(r"\s*\[fn[\d,]+\]", "", cell["row"])
+    return f"{section} · {row} · {cell['column']}: {cell['value']}"
+
+
+def test_every_cited_chart_cell_is_quoted_as_exactly_its_own_cell():
+    """Every cell source in every rulebook (hand-made and drafted): the panel's quote is that cell, found by the
+    same key the rule checks use, never a cell whose row merely starts the same way in another section (a
+    lot-width rule was once quoted as the lot-size cell's 10,000 sf)."""
+    import yaml
+    from rule_format.rulebook import Context, _cell
+    j = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    ctx, documents = Context.for_jurisdiction(j), present._documents(j)
+    seen = 0
+    for path in sorted((j / "5_zoning_rules").rglob("*.yaml")):
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        for rule in (data or {}).get("rules") or []:
+            for s in rule.get("sources") or []:
+                if not isinstance(s.get("cell"), dict) or s.get("lines"):
+                    continue
+                cell = _cell(s, ctx)
+                q = present._quote(s, j, documents, s["cell"].get("column", ""), lambda src: "")
+                want = _expected_cell_text(cell) if cell and str(cell.get("value") or "").strip() else present._cell_words(s)
+                assert q["text"] == want, (path.name, rule["id"], s["cell"], q["text"])
+                seen += 1
+    assert seen > 0
+
+
+def test_two_sections_with_the_same_row_are_never_mixed_up(monkeypatch, tmp_path):
+    """The chart's Minimum Lot Size and Minimum Lot Width sections both have a "One-family dwelling, detached"
+    row: a source citing the width cell is quoted as the width cell, and a cell the chart doesn't have is quoted
+    as its own words, never as a near match."""
+    cells = ({"file": "c.pdf", "page": 3, "section": "Minimum Lot Size", "row": "One-family dwelling, detached",
+              "column": "R-1A", "value": "10,000 sf", "row_lines": [10]},
+             {"file": "c.pdf", "page": 3, "section": "Minimum Lot Width", "row": "One-family dwelling, detached",
+              "column": "R-1A", "value": "75 ft", "row_lines": [20]})
+    monkeypatch.setattr(present, "_chart_cells", lambda j: cells)
+    documents = {"c.pdf": {"title": "Zoning charts"}}
+
+    def quote(section, row):
+        source = {"file": "c.pdf", "page": 3, "cell": {"section": section, "row": row, "column": "R-1A"}}
+        return present._quote(source, tmp_path, documents, "R-1A", lambda s: "")["text"]
+
+    assert quote("Minimum Lot Width", "One-family dwelling, detached") == \
+        "Minimum Lot Width · One-family dwelling, detached · R-1A: 75 ft"
+    assert quote("Minimum Lot Width", "One-family dwelling, detached, by conversion") == \
+        "Minimum Lot Width · One-family dwelling, detached, by conversion · R-1A"

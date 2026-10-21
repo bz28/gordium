@@ -606,7 +606,8 @@ def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict 
     """The city's words for one source, as the panel shows them (E1, E4). A chart row is quoted as its section and
     row label and the district's own cell ("Minimum Lot Size · One-family dwelling, detached · R-1B: "6,000 sf""),
     never the whole row of every district; the bare row of district names (it only says which column) is left
-    out. Law text and footnotes are quoted as they are."""
+    out. Law text and footnotes are quoted as they are. A cell source is quoted as exactly that cell; if the chart
+    has no such cell, as the source's own words (its section, row and column), never a neighbouring cell."""
     text = " ".join(str(source.get("quote", "")).split())
     if _is_chart(source, documents) and not re.match(r"^\(\d+\)", text):
         if text and all(re.fullmatch(r"R-\w+|\[fn\d+\]", w) for w in text.split()):
@@ -615,11 +616,13 @@ def _quote(source: dict, j: Path, documents: dict, district: str, cite) -> dict 
         cell = next((c for c in _chart_cells(j) if c["file"] == source.get("file") and c["page"] == source.get("page")
                      and c["column"].upper() == district.upper() and lines and lines[0] in (c.get("row_lines") or [])),
                     None)
-        if cell is None and source.get("cell"):
+        if cell is None and isinstance(source.get("cell"), dict):
+            # exactly the cell cited, by the key the rule checks use (rule_format.rulebook._cell: page, section,
+            # row stripped, column): never a near match, which once quoted a lot-width rule as the lot-size cell
             want = source["cell"]
-            cell = next((c for c in _chart_cells(j) if c["file"] == source.get("file") and c["page"] == source.get("page")
-                         and c["column"].upper() == str(want.get("column", "")).upper()
-                         and c["row"].startswith(str(want.get("row", ""))[:20])), None)
+            key = (source.get("page"), want.get("section"), str(want.get("row", "")).strip(), want.get("column"))
+            cell = next((c for c in _chart_cells(j) if c["file"] == source.get("file")
+                         and (c["page"], c.get("section"), c["row"].strip(), c["column"]) == key), None)
         if cell is not None and str(cell.get("value") or "").strip():   # a heading row has no value: its own words
             section = re.sub(r"\s*\[fn[\d,]+\]", "", cell.get("section") or "")
             row = re.sub(r"\s*\[fn[\d,]+\]", "", cell["row"])
