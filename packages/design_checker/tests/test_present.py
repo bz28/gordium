@@ -733,6 +733,26 @@ def test_a_side_yard_that_complies_only_under_every_reading_of_an_open_question_
     _never_above_the_checker(r)
 
 
+def test_a_side_yard_says_only_its_own_verdicts_reason_never_the_pairs():
+    """Review round 4: a side the checker passes inherited the pair row's needs-review reason (a green "complies"
+    saying "depends on open questions"). Each side's reason comes from its own verdict: complies, none; needs
+    review, its own open question; fails, its own words."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    for surveyed in (True, False):
+        r = check_site(_plot(box(14, 24.0480, 39.2642, 73.2738, 0, 30), lot_=lot), {**facts, "lot_surveyed": surveyed})
+        rows = {x["Rule id"]: x for x in r["rows"]}
+        sides = [i for i in r["view"]["items"] if i["name"].startswith("Side yard")]
+        assert len(sides) == 2
+        for i in sides:
+            verdict = rows[i["rule"]]["Sides"][i["measure"]]
+            if i["status"] == present.COMPLIES:
+                assert not i["reason"], (surveyed, i["name"], i["reason"])
+            if i["status"] == present.REVIEW and verdict == present.REVIEW:
+                assert i["reason"] and "depends on" in i["reason"] or "tax map" in i["reason"], (surveyed, i["reason"])
+        assert any(i["status"] == present.COMPLIES for i in sides) or not surveyed, [(i["name"], i["status"]) for i in sides]
+
+
 def test_the_guard_only_lowers_it_never_undoes_the_panels_caution():
     """Round 3's guard caps a row at the checker's verdict; it never lifts a row the panel made more cautious. A
     complying house on a surveyed lot with an unmeasured porch touching it: the checker passes the yards (it

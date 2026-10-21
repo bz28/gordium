@@ -518,11 +518,12 @@ def _which(approx: bool, open_: bool) -> str:
 
 
 def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None:
-    """The ONE place each row's final status, Delta, "approx" mark, colours and tax-map detail line are decided:
-    from its readings (`readings`: its expression and the comparison it was decided on, raised if a raise
-    applies), AFTER every other status change. The panel, the notice, the report, the plan's labels and the red
-    and amber all read only these. A row fails only if it fails under every reading, and complies only if it
-    complies under every one (Ben, 2026-10-21): otherwise it needs review.
+    """The ONE place each row's Delta, "approx" mark, colours and tax-map detail line are decided, from its
+    readings (`readings`: THE reading set, on its expression and the comparison it was decided on, raised if a
+    raise applies), AFTER every status change. The status is the checker's (check.row_verdict: the only place a
+    row complies or fails); settle only ever lowers it (a complies with a reading that doesn't becomes needs
+    review), never raises it. The panel, the notice, the report, the plan's labels and the red and amber all read
+    only these.
       delta    the words (delta_words) for its final status;
       approx   whether the tax map's lot lines moved any value it reads;
       colour   a yard's: "red" (fails: short under every reading), "amber" (short under some), or "none";
@@ -636,11 +637,13 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     for node, label in parts:
         st, why = status, reason
         expr = ast.unparse(node) if splits else check
+        side_row = None
         if splits and node is not None and node.left.id in (row.get("Sides") or {}):
-            st = row["Sides"][node.left.id]                 # each side yard: the checker's verdict for it
-            if st == REVIEW:                                # and why, as a row of its own would say it
-                why = _reason({"Verdict": REVIEW, "Provisional": (row.get("Side provisional") or {}).get(node.left.id),
-                               "Why": (measured.get(node.left.id) or {}).get("reason") or row.get("Why")})
+            st = row["Sides"][node.left.id]                 # each side yard: the checker's verdict for it, and
+            side_row = {"Verdict": st, "Provisional": (row.get("Side provisional") or {}).get(node.left.id),
+                        "Why": (measured.get(node.left.id) or {}).get("reason") or row.get("Why")}
+            why = _reason(side_row)                         # why from that verdict alone, never the pair's
+                                                            # (complies: none; review: its open question)
         elif splits and node is not None and status != REVIEW:   # (no checker verdict per side: as drawn)
             holds = _evaluate(expr, values)
             st = COMPLIES if holds is True else FAILS if holds is False else REVIEW
@@ -705,10 +708,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     could = "it could comply the rule's other way if the lines are off in its favour"
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it does not comply, "
                        f"but {could} · Pick survey lot lines…")
-        if st == FAILS and row.get("Provisional") and not row.get("Error") == "FAIL":
+        own = side_row or row                               # a side yard: its own words, never the pair's
+        if st == FAILS and own.get("Provisional") and (side_row or not row.get("Error") == "FAIL"):
             why = ("Does not comply with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…"
-                   if "confirm the survey" in row["Provisional"] else
-                   "Fails under every reading considered (" + _user_text(row["Provisional"]) + ")")
+                   if "confirm the survey" in own["Provisional"] else
+                   "Fails under every reading considered (" + _user_text(own["Provisional"]) + ")")
         line = _detail_line(proposed, required, margin_t, numbers[4] if node is not None else "", margin)
         hint = _hint(label, numbers[4], margin, numbers[3]) if node is not None and margin is not None else None
         if node is not None and node.left.id == "building_area" and margin is not None and margin < 0:

@@ -1,8 +1,12 @@
 """Check a design: measure the model, run the zone's rules, build the envelope, and say it in one line.
 
-Every result comes from the project report (PR 10), which takes them only from the checker's `outcome()` and
-refuses a rulebook that fails the rule checks. This module adds nothing to a result; it only gathers what the
-Rhino panel and the viewport message show: the rows, a short summary, the objects to show in red, the envelope.
+Every result comes from the checker's `outcome()` (the project report, PR 10, refuses a rulebook that fails the
+rule checks). row_verdict decides each row, and each side yard of a pair, over THE reading set (reading_set: the
+open questions' readings, and on a tax-map lot the lines' slack and the lot area's ends): fails if it fails under
+every reading, complies if it passes under every one with nothing it reads open, else needs review. That verdict
+is the single source of truth: the panel (present) shows it or something more cautious, never more favourable.
+This module also gathers what the Rhino panel and the viewport show: the rows, a short summary, the objects to
+show in red, the envelope and the plan.
 """
 
 import ast
