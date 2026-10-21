@@ -782,7 +782,7 @@ def test_only_one_start_box_at_a_time():
     conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
     assert "if not gate.enter():" in conf and "say(logic.BOX_BUSY)" in conf and "gate.leave()" in conf
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'parts["box_buttons"] = buttons' in ui and "logic.grey_for_box(controls, is_open" in ui
+    assert 'parts["box_buttons"] = buttons' in ui and "logic.controls_enabled(is_open, zoom_ok)" in ui
 
 
 def test_the_recovery_message_says_what_it_did():
@@ -836,7 +836,7 @@ def test_while_a_start_box_is_open_no_panel_action_does_anything_but_say_so():
         gated[n]("an argument")
     assert sorted(calls) == sorted(["legend"] + names)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'list(parts.get("greyed") or [])' in ui and "logic.grey_for_box(controls, is_open" in ui
+    assert 'list(parts.get("greyed") or [])' in ui and "logic.controls_enabled(is_open, zoom_ok)" in ui
 
 
 
@@ -878,16 +878,19 @@ class _Control:
         self.Enabled = enabled
 
 
-def test_closing_the_box_puts_each_panel_control_back_as_it_was():
-    """Verification round 3: closing the box turned Zoom to on even with nothing selected. Each control's state is
-    saved when the box opens and restored when it closes."""
-    zoom, report, tick = _Control(False), _Control(True), _Control(True)    # Zoom to off: nothing selected
-    saved = logic.grey_for_box([zoom, report, tick], True)
-    assert [c.Enabled for c in (zoom, report, tick)] == [False, False, False]
-    logic.grey_for_box([zoom, report, tick], False, saved)
-    assert [c.Enabled for c in (zoom, report, tick)] == [False, True, True]
+def test_closing_the_box_works_out_each_panel_control_from_the_panel_as_it_is_now():
+    """Verification rounds 3-4: closing turned Zoom to on with nothing selected; then restoring a saved list put
+    states on the wrong buttons after the header was rebuilt mid-box (a document switch). Now nothing is remembered:
+    on closing, every control is on and Zoom to follows the panel's own rule."""
+    assert logic.controls_enabled(True, True) == (False, False)              # box open: all off
+    assert logic.controls_enabled(False, False) == (True, False)             # nothing selected: Zoom to stays off
+    assert logic.controls_enabled(False, True) == (True, True)
     ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
-    assert 'parts["_was_enabled"] = logic.grey_for_box(controls, is_open, parts.get("_was_enabled"))' in ui
+    body = ui[ui.index("def set_box_open("):ui.index("def show_detail(")]
+    assert "_was_enabled" not in body and "saved" not in body                # nothing remembered by position
+    assert 'zoom_ok = parts.get("selected") in (parts.get("by_id") or {}) and not parts.get("stale")' in body
+    show = ui[ui.index("def show("):ui.index("def _header(")]
+    assert 'parts["zoom_button"].Enabled = parts["selected"] in by_id and not parts["stale"]' in show   # same rule
 
 
 def test_a_box_that_edited_is_checked_once_not_twice():
@@ -898,4 +901,21 @@ def test_a_box_that_edited_is_checked_once_not_twice():
     assert logic.should_recheck(10.0, 11.0, False, False, 0.5)                     # no check yet
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     idle = rhino[rhino.index("def _idle("):rhino.index("def documents(")]
-    assert '(STATE.get("last") or {}).get("at"))' in idle and 'STATE["dirty"] = t = None' in idle
+    assert "logic.last_check_at(STATE.get(\"checked_at\")" in idle and 'STATE["dirty"] = t = None' in idle
+
+
+
+def test_switching_documents_with_a_pending_edit_still_rechecks_the_one_in_front():
+    """Verification round 4: the new document's "no check yet" placeholder carried a time, so the pending re-check
+    of the document now in front was dropped. Only a completed check of that same document counts."""
+    checked_at = {"doc A": 12.0}                         # A was checked after the edit; B, now in front, never
+    assert logic.last_check_at(checked_at, "doc B") is None
+    assert logic.should_recheck(10.0, 13.0, False, False, 0.5, logic.last_check_at(checked_at, "doc B"))
+    assert not logic.should_recheck(10.0, 13.0, False, False, 0.5, logic.last_check_at(checked_at, "doc A"))
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    check = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
+    assert 'STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()' in check
+    assert check.index('"envelope": result.get("envelope"), "at": time.time()}') < check.index('"checked_at"') < \
+        check.index("except Exception")                  # only after a completed check, never on an error
+    new_doc = rhino.index("def _new_document(")
+    assert '"checked_at"' not in rhino[new_doc:rhino.index("\ndef ", new_doc + 10)]

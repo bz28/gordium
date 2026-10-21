@@ -810,17 +810,18 @@ def should_recheck(dirty_at, now, running, box_open, wait, last_at=None):
     return bool(dirty_at) and now - dirty_at >= wait and not running and not box_open
 
 
-def grey_for_box(controls, is_open, saved=None):
-    """While a start box is open its panel controls are off; on closing, each goes back to what it was (Zoom to
-    stays off with nothing selected). Returns what was saved on opening (pass it back on closing)."""
-    if is_open:
-        saved = [c.Enabled for c in controls]
-        for c in controls:
-            c.Enabled = False
-        return saved
-    for c, was in zip(controls, saved or [True] * len(controls)):
-        c.Enabled = was
-    return None
+def controls_enabled(box_open, zoom_ok):
+    """(the panel's controls, Zoom to): all off while a start box is open; on closing, worked out from the panel as
+    it is now, never restored from a list saved when the box opened (the header's buttons may have been rebuilt in
+    between, after a document switch: verification round 4 of PR #19). Zoom to also needs a selected, current item
+    (`zoom_ok`, as gordium_ui.show decides it)."""
+    return (not box_open, (not box_open) and bool(zoom_ok))
+
+
+def last_check_at(checked_at, document):
+    """When the last completed check of THIS document finished (None: none yet). Never a placeholder's time, and
+    never another document's (verification round 4: switching documents dropped the pending re-check)."""
+    return (checked_at or {}).get(document)
 
 
 def gate_actions(actions, box_open, say, open_ok=("legend",)):
