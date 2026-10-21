@@ -520,8 +520,12 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
             r[col["Error"]], r[col["Comparison"]] = word[found[0]]
             r[col["Why it needs review"]] = found[1] if found[0] == present.REVIEW else ""
             items = [i for i in shown[r[col["Rule id"]]] if i.get("proposed")]
-            if len(items) == 1:
+            if len(items) == 1:         # the row as the panel shows it, in one unit: limit, proposed, units
                 r[col["Proposed"]] = items[0]["proposed"]
+                if items[0].get("required") and items[0].get("sign"):
+                    r[col["Table limit"]] = f"{items[0]['sign']} {items[0]['required']}"
+                if "%" in str(items[0]["proposed"]):            # coverage: a share of the lot area, not sf
+                    r[col["Units"]] = "% of lot area"
             elif items:
                 r[col["Proposed"]] = "; ".join(f"{i['name']}: {i['proposed']}" for i in items)
         rows.append(r)
@@ -531,14 +535,15 @@ def _report(t: dict, view: dict, report_path: Path) -> None:
     for r in t["inputs"]:
         r = list(r)
         i = by_measure.get(r[0].lower().replace(" ", "_"))
-        if r[1] is None and i is not None:
+        if r[1] is None and i is not None and "%" not in str(i["proposed"]):     # only in the input's own unit
             r[1], r[3] = i["proposed"], "as drawn (the panel's reading); " + str(r[3])
         inputs.append(r)
     wb = build({**t, "output": rows, "inputs": inputs, "title": view["header"].get("place") or t["title"]})
     ws = wb.create_sheet("Check")
     h = view["header"]
     title(ws, f"GORDIUM | {view['summary']}")
-    lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + (h.get("sources") or [])   # where each fact came from
+    lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + ([h["main"]] if h.get("main") else []) + \
+        (h.get("sources") or [])   # where each fact came from
     note = next((i["detail"]["outline"] for i in view["items"] if (i.get("detail") or {}).get("outline")), None)
     if note:                            # the lot lines read from a cleaned outline: said once, with the lot (PR 18)
         lines.append("Lot lines: " + note)
