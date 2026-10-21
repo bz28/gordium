@@ -26,7 +26,7 @@ def test_read_jsonl_reads_utf8_and_skips_blank_lines(tmp_path):
 def test_jurisdictions_lists_each_place_folder(tmp_path):
     assert REPO / "regulations/jurisdictions/new_york/ithaca_city" in jurisdictions()
     (tmp_path / "regulations/jurisdictions/ny/a").mkdir(parents=True)
-    (tmp_path / "regulations/jurisdictions/ny/README.md").write_text("")
+    (tmp_path / "regulations/jurisdictions/ny/README.md").write_text("", encoding="utf-8")
     assert jurisdictions(tmp_path) == [tmp_path / "regulations/jurisdictions/ny/a"]
 
 
@@ -86,7 +86,7 @@ def test_the_checks_recognise_any_spelling():
 
 
 def test_every_jsonl_file_is_read_by_the_one_reader():
-    found = {p.relative_to(REPO).as_posix(): n for p in CODE if (n := _jsonl_readers(p.read_text()))}
+    found = {p.relative_to(REPO).as_posix(): n for p in CODE if (n := _jsonl_readers(p.read_text(encoding="utf-8")))}
     # the one other: the Rhino worker's requests, read one at a time from a pipe as they arrive (not a file)
     assert found == {"packages/rule_format/rule_format/rulebook.py": 1,
                      "packages/design_checker/design_checker/__main__.py": 1}, f"use rulebook.read_jsonl: {found}"
@@ -94,7 +94,7 @@ def test_every_jsonl_file_is_read_by_the_one_reader():
 
 def test_every_jurisdiction_listing_uses_the_one_helper():
     found = [f"{p.relative_to(REPO)}:{n}" for p in CODE
-             for n, line in enumerate(p.read_text().splitlines(), 1) if LISTING.search(line)]
+             for n, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1) if LISTING.search(line)]
     assert len(found) == 1 and "rulebook.py" in found[0], f"use rulebook.jurisdictions(): {found}"
 
 
@@ -236,15 +236,15 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
     """Approval is deferred (2026-10-19): nothing is approved and the checker uses draft rules. Until something
     is approved (listing a reviewer alone doesn't switch approval on), a document that talks about architects
     approving rules must say approval is deferred, and none may claim the checker waits for approved rules."""
-    if any(re.search(r"^\s*status:\s*approved\b", p.read_text(), re.MULTILINE) for p in REGULATION_YAML):
+    if any(re.search(r"^\s*status:\s*approved\b", p.read_text(encoding="utf-8"), re.MULTILINE) for p in REGULATION_YAML):
         return                                   # approval is switched on once anything is approved
     silent = [str(p.relative_to(REPO)) for p in DOCS + REGULATION_YAML
-              if APPROVAL.search(p.read_text()) and not re.search(r"deferred", p.read_text(), re.IGNORECASE)]
-    false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text())]
+              if APPROVAL.search(p.read_text(encoding="utf-8")) and not re.search(r"deferred", p.read_text(encoding="utf-8"), re.IGNORECASE)]
+    false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text(encoding="utf-8"))]
     # Architects approving, confirming, checking or reviewing drafts is the deferred layer: each sentence that
     # says so must say it's deferred (or describe what happens once it is switched on).
     confirm = [f"{p.relative_to(REPO)}: {line.strip()[:100]}" for p in DOCS + REGULATION_YAML
-               for line in (_yaml_sentences if p.suffix == ".yaml" else _sentences)(p.read_text())
+               for line in (_yaml_sentences if p.suffix == ".yaml" else _sentences)(p.read_text(encoding="utf-8"))
                if _promises_architect_review(line)]
     assert not silent and not false and not confirm, (silent, false, confirm)
 
@@ -258,7 +258,7 @@ def test_discrepancy_4_2_matches_the_rear_yard_arithmetic():
                 "25.015": (90.28 + (99.37 + 10.47)) / 2,  # the jog added to the line it continues
                 "20": (90.28 + 10.47 + 99.37) / 3}        # every line that isn't front or rear
     assert [round(required(d), 3) for d in readings.values()] == [23.706, 25.015, 20]
-    item = next(line for line in (REPO / "docs/discrepancies_with_architects.md").read_text().splitlines()
+    item = next(line for line in (REPO / "docs/discrepancies_with_architects.md").read_text(encoding="utf-8").splitlines()
                 if line.startswith("| 4.2 "))
     assert "any reading" not in item and all(f"{k} ft" in item for k in readings)
     assert "requires more.**" not in item              # the headline may not settle the open question either
@@ -268,7 +268,7 @@ def test_no_doc_claims_a_rear_yard_floor_across_readings():
     """On the 106 Ithaca Rd lot one reading of the side lot lines gives the 20 ft minimum (item 4.2), so no
     document may claim the rear setback needs more 'under any reading' or quote 22.6 ft as a floor."""
     claims = re.compile(r"(rear|setback)[^.\n]*(any reading|at least 22\.6)|22\.6 ft under", re.IGNORECASE)
-    found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in claims.finditer(p.read_text())]
+    found = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in claims.finditer(p.read_text(encoding="utf-8"))]
     assert not found, found
 
 
@@ -281,8 +281,8 @@ def test_the_106_ithaca_rd_areas_are_quoted_as_measured():
     lot = [(395.432, 360.94), (439.51, 419.13), (367.546, 473.642), (326.184, 420.017), (315.713, 420.262)]
     buildable = [(344.641, 411.2), (377.402, 386.822), (409.558, 429.273), (377.381, 453.647)]
     assert (round(area(lot), 1), round(area(buildable), 1)) == (6674.5, 2169.2)
-    site = (REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/README.md").read_text()
+    site = (REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/README.md").read_text(encoding="utf-8")
     assert "6,674.5 sf" in site and "2,169.2 sf" in site
     files = [p for p in REPO.rglob("*") if p.suffix in (".md", ".yaml") and p.is_file()
              and not {".git", ".claude", ".venv"} & set(p.relative_to(REPO).parts)]
-    assert not [p.relative_to(REPO) for p in files if re.search(r"6,?674\.7|2,?169\.5", p.read_text())]
+    assert not [p.relative_to(REPO) for p in files if re.search(r"6,?674\.7|2,?169\.5", p.read_text(encoding="utf-8"))]

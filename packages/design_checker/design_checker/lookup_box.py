@@ -12,6 +12,7 @@ import math
 import sys
 from pathlib import Path
 
+from rule_format.rulebook import utf8_console
 from site_lookup.http import Http
 from site_lookup.lookup import lookup, strictest
 
@@ -141,4 +142,5 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

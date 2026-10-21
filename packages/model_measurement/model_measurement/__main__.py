@@ -13,7 +13,7 @@ from pathlib import Path
 
 import yaml
 
-from rule_format.rulebook import REPO, load
+from rule_format.rulebook import REPO, load, utf8_console
 
 from .project import load_facts, project
 
@@ -45,7 +45,7 @@ def main(argv: list[str]) -> int:
     if args.check:
         failed = 0
         for model, facts, out in pairs():
-            same = out.exists() and out.read_text() == text(model, facts)
+            same = out.exists() and out.read_text(encoding="utf-8") == text(model, facts)
             print(f"{'✓' if same else '✗'} {out.relative_to(REPO)}{'' if same else ': differs from a fresh measurement'}")
             failed += not same
         return 1 if failed else 0
@@ -59,10 +59,11 @@ def main(argv: list[str]) -> int:
     for name, m in yaml.safe_load(out_text)["measurements"].items():
         print(f"{name:18} {str(m['value']):>14}  {m['from']}")
     out = args.model.with_name(args.model.stem + "_measured.yaml")
-    out.write_text(out_text)
+    out.write_text(out_text, encoding="utf-8")
     print(f"wrote {out}")
     return 0
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

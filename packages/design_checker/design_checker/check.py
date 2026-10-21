@@ -262,7 +262,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                "measurements": {k: {"value": m["value"], "from": working(m, model_path.name)} for k, m in measured.items()}}
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "project.yaml"
-        path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True))
+        path.write_text(yaml.safe_dump(project, sort_keys=False, allow_unicode=True), encoding="utf-8")
         t = tables(path)              # refuses a project or rulebook that fails its checks (ValueError)
     rules = load(rulebook_for(REPO / facts["jurisdiction"], facts["zone"]))["rules"]
     by_id = {r["id"]: r for r in rules}

@@ -240,4 +240,4 @@ finally:
             close(d)
         except Exception:
             pass
-    json.dump(log, open(S + "out.json", "w"), default=str, indent=1)
+    json.dump(log, open(S + "out.json", "w", encoding="utf-8"), default=str, indent=1)

@@ -88,11 +88,13 @@ def _worker():
         p = None
     if p is None:
         env = dict(os.environ)
+        env["PYTHONUTF8"] = "1"      # UTF-8 everywhere in the checker, third-party code too (Windows uses cp1252)
         env["PYTHONPATH"] = os.pathsep.join(STATE.get("extra_paths", []) + [
             os.path.join(packages, n) for n in sorted(os.listdir(packages)) if os.path.isdir(os.path.join(packages, n))])
-        log = open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a")
+        log = open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a", encoding="utf-8")
         p = subprocess.Popen([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,
-                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log, universal_newlines=True)
+                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
+                             universal_newlines=True, encoding="utf-8")
         STATE["worker"] = p
         STATE["worker_code"] = now
     return p
@@ -1063,7 +1065,8 @@ def _lookup_start(facts, saved_ui):
         return dict(saved_ui, lookup={"says": "Type the address first, then Look up."})
     out = os.path.join(tempfile.gettempdir(), "gordium_lookup_%d.json" % int(time.time() * 1000))
     packages = os.path.join(REPO, "packages")
-    env = dict(os.environ, PYTHONUTF8="1")             # UTF-8 everywhere, Windows included
+    env = dict(os.environ)
+    env["PYTHONUTF8"] = "1"                             # UTF-8 everywhere, Windows included
     env["PYTHONPATH"] = os.pathsep.join(STATE.get("extra_paths", []) + [
         os.path.join(packages, n) for n in sorted(os.listdir(packages)) if os.path.isdir(os.path.join(packages, n))])
     args = [_python(), "-m", "design_checker.lookup_box", address]
@@ -1654,7 +1657,7 @@ def open_report():
         if os.name == "nt":
             os.startfile(path)
         else:
-            done = subprocess.run(["open", path], capture_output=True, text=True, timeout=20)
+            done = subprocess.run(["open", path], capture_output=True, text=True, timeout=20, encoding="utf-8")
             opened, why = done.returncode == 0, (done.stderr or "").strip()[:160] or None
     except Exception as e:
         opened, why = False, str(e)[:160]

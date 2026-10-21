@@ -268,7 +268,7 @@ def guard(fn, where, fallback=None):
             import traceback
             path = ERROR_LOG or os.path.join(tempfile.gettempdir(), "gordium_errors.log")
             try:
-                with open(path, "a") as log:
+                with open(path, "a", encoding="utf-8") as log:
                     log.write(time.strftime("%Y-%m-%d %H:%M:%S") + " " + where + "\n" + traceback.format_exc() + "\n")
                 if REPORT is not None and where not in _reported:
                     _reported.add(where)

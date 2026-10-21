@@ -89,4 +89,4 @@ try:
     out["house_visible_everywhere"] = bool(runs) and all(all(r["visible"].values()) and r["visible"] for r in runs)
 except Exception:
     out["trace"] = traceback.format_exc()
-json.dump(out, open(OUT + "units_out.json", "w"), indent=1, default=str)
+json.dump(out, open(OUT + "units_out.json", "w", encoding="utf-8"), indent=1, default=str)

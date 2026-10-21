@@ -16,7 +16,7 @@ from pathlib import Path
 import yaml
 
 from design_checker import present
-from rule_format.rulebook import REPO
+from rule_format.rulebook import REPO, utf8_console
 
 FOLDER = REPO / "test_data/test_sites/new_york/ithaca_city/scenarios"
 JURISDICTION = "regulations/jurisdictions/new_york/ithaca_city"
@@ -30,7 +30,7 @@ def paths() -> list[Path]:
 
 
 def load(path) -> dict:
-    return yaml.safe_load(Path(path).read_text())
+    return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
 
 
 def _prism(outline, z0, z1, id_, floor=None) -> dict:
@@ -167,7 +167,7 @@ def main(argv):
                           "facts": facts(sc)}))
         return 0
     if argv[:1] == ["rhino"]:               # the Rhino run's views, judged by the same comparison
-        ran = json.loads(Path(argv[1]).read_text())
+        ran = json.loads(Path(argv[1]).read_text(encoding="utf-8"))
         if ran.get("trace"):
             print(ran["trace"])
         results = {}
@@ -193,4 +193,5 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    utf8_console()
     sys.exit(main(sys.argv[1:]))

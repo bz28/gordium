@@ -51,7 +51,7 @@ def fresh_module():
 
 if sc.sticky.pop("gordium_report_button", None) == "close":
     log["closed"] = [d.Path for d in leftovers() if "report_button" in (d.Path or "") and close(d)]
-    json.dump(log, open(S + "closed.json", "w"), indent=1)
+    json.dump(log, open(S + "closed.json", "w", encoding="utf-8"), indent=1)
 else:
     docs = TestDocs("report_button").__enter__()
     doc = None
@@ -79,5 +79,5 @@ else:
         if doc is not None:
             close(doc)                                       # never left behind on a failure
     finally:
-        json.dump(log, open(S + "out.json", "w"), default=str, indent=1)
-        json.dump({"ready": time.time()}, open(S + "ready.json", "w"))
+        json.dump(log, open(S + "out.json", "w", encoding="utf-8"), default=str, indent=1)
+        json.dump({"ready": time.time()}, open(S + "ready.json", "w", encoding="utf-8"))

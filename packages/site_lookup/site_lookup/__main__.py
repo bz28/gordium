@@ -4,6 +4,8 @@ prints the looked-up site facts (asks the live services)."""
 import json
 import sys
 
+from rule_format.rulebook import utf8_console
+
 from .http import Http
 from .lookup import lookup
 
@@ -44,4 +46,5 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    utf8_console()                     # a ✓ or an en dash in a lookup can't crash a Windows console or pipe
     sys.exit(main(sys.argv[1:]))

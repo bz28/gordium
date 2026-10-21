@@ -59,7 +59,7 @@ def capture(address: str, http) -> dict:
 def main():
     for name, address in ADDRESSES.items():
         fixture = capture(address, Http())
-        (HERE / f"{name}.json").write_text(json.dumps(fixture, indent=1))
+        (HERE / f"{name}.json").write_text(json.dumps(fixture, indent=1), encoding="utf-8")
         print(name, len(fixture["answers"]), "answers saved")
 
 

@@ -24,7 +24,7 @@ from . import geometry as g
 from .http import Offline, ServiceError
 from .sources import ENDPOINTS, Fetcher, normalize_street
 
-AMENDMENTS = yaml.safe_load((Path(__file__).parent / "amendments.yaml").read_text())
+AMENDMENTS = yaml.safe_load((Path(__file__).parent / "amendments.yaml").read_text(encoding="utf-8"))
 CITY_SWIS = "500700"                     # the City of Ithaca (the Town of Ithaca has its own code and SWIS)
 PLACES = {"503089": "Town of Ithaca", "503000": "Town of Ithaca"}   # neighbours named in the refusal
 # EPSG:2261 coordinates are US survey feet (1200/3937 m); Gordium's feet are international feet (0.3048 m).

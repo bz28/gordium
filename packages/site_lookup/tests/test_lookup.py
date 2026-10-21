@@ -29,11 +29,11 @@ STAND_IN_MAP_EDITED = "2025-01-01"         # the zoning map's last edit (before 
 # 106 Ithaca Rd's district from Gordium's own test site (architect-checked, and the May 2026 PDF map), not the
 # City's online layer:
 STAND_IN_ZONE = yaml.safe_load((REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/model_facts.yaml")
-                               .read_text())["lot_facts"]["zone"]
+                               .read_text(encoding="utf-8"))["lot_facts"]["zone"]
 
 
 def load(name: str) -> dict:
-    return json.loads((FIX / f"{name}.json").read_text())
+    return json.loads((FIX / f"{name}.json").read_text(encoding="utf-8"))
 
 
 def key_of(url: str) -> str:
@@ -349,14 +349,14 @@ def test_the_same_answers_give_the_same_snapshot():
 
 
 def test_areas_are_never_read_from_a_service():
-    src = "".join(p.read_text() for p in (Path(__file__).parents[1] / "site_lookup").glob("*.py"))
+    src = "".join(p.read_text(encoding="utf-8") for p in (Path(__file__).parents[1] / "site_lookup").glob("*.py"))
     assert "Shape__Area" not in src and "CALCACRES" not in src
     assert "outSR" in src                                # every geometry is asked for in EPSG:2261
 
 
 def test_fixtures_hold_no_personal_or_city_data():
     for p in FIX.glob("*.json"):
-        text = p.read_text()
+        text = p.read_text(encoding="utf-8")
         for word in ("OWNER", "MAIL_ADDR", "PRIMARY_OWNER"):
             assert word not in text, (p.name, word)
         for a in json.loads(text)["answers"]:
@@ -542,7 +542,7 @@ def test_fixtures_hold_only_what_endpoints_yaml_allows():
     """Fixtures keep answers from store: raw sources and nothing else: no block of values from the City or
     County layers (their stand-ins are synthetic, in this file)."""
     for p in FIX.glob("*.json"):
-        d = json.loads(p.read_text())
+        d = json.loads(p.read_text(encoding="utf-8"))
         assert set(d) <= {"address", "captured", "answers", "live_status", "trimmed"}, (p.name, set(d))
         for a in d["answers"]:
             assert ENDPOINTS[a["source"]]["store"] == "raw", (p.name, a["source"])
@@ -615,8 +615,8 @@ def test_the_snapshot_keeps_nothing_worked_out_from_a_city_or_county_answer():
 
 
 def test_the_docs_describe_what_the_code_does():
-    methods = (REPO / "docs/methods.md").read_text()
-    readme = (Path(__file__).parents[1] / "README.md").read_text()
+    methods = (REPO / "docs/methods.md").read_text(encoding="utf-8")
+    readme = (Path(__file__).parents[1] / "README.md").read_text(encoding="utf-8")
     assert "matched by street name" not in methods and "padded box" in methods
     assert "50 ft assumed, noted" not in readme and "source_keys" in readme and "map_shows_since" in readme
 
