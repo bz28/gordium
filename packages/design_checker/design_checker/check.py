@@ -369,6 +369,8 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         r["Sides"] = {m: row_verdict(rule, measured, allowed, facts, check=c) for m, c in side_checks(rule).items()}
         r["Side provisional"] = {m: (every_reading(dict(rule, check=c), measured, allowed, facts) or (None, None))[1]
                                  for m, c in side_checks(rule).items()}      # each side's words, as a row's
+        r["Side turns on"] = {m: turns_on(dict(rule, check=c), measured, allowed, facts)
+                              for m, c in side_checks(rule).items()}
         r["Fails"] = r["Verdict"] == present.FAILS                          # fails whichever way it goes
         r["Turns on"] = turns_on(rule, measured, allowed, facts)            # the open questions its result needs
         if r["Fails"] and not r.get("Line"):

@@ -110,9 +110,11 @@ def test_the_starting_house_on_the_sample_lot(house):
     said(r"\*\*Rear yard\*\*: which of the short lines at the back count as side lot lines")
     rear, height = items["Rear yard"], items["Building height"]
     assert rear["status"] == present.REVIEW and "confirm with the zoning office" in rear["reason"]
-    tall_at, = said(r"\*\*Building height\*\*: (\d+'-\d+\") is at the limit; the row needs review")
+    tall_at, = said(r"\*\*Building height\*\*: (\d+'-\d+\") is at the limit and complies")
     assert (height["proposed"], height["status"], height["margin"], height["note"]) == (
-        tall_at, present.REVIEW, "at limit", "assuming flat ground")
+        tall_at, present.COMPLIES, "at limit", "assuming flat ground")   # the bonus's open question doesn't matter
+    said("One row needs review from the start")
+    assert [i["name"] for i in items.values() if i["status"] == present.REVIEW and i.get("measure")] == ["Rear yard"]
     stories, = said(r"Stories (\d) complies, at the limit, saying \"assuming flat ground\"")
     assert items["Stories"]["proposed"] == stories and items["Stories"]["status"] == present.COMPLIES
     said("Lot area complies even at the tax map's worst case")

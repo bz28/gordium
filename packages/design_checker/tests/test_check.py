@@ -1085,7 +1085,10 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     assert flat == {"grade_is": "finished", "ground_is_flat": True, "grade_elevation": 2.0, "grade_from": None,
                     "ground_assumed": "flat"}
     assert logic.ground_facts({"ground": {"kind": "spot"}}, 2.0, flat=False)["grade_from"] == "spot"
-    sent = {**facts, **{k: v for k, v in flat.items() if v is not None}}
+    # the check itself at the house's own base (0 here): a ground above it would put part of the house below
+    # grade, which the stories rule rightly asks about (a basement or cellar, §325-3; #14's one stories definition)
+    level = logic.ground_facts({"ground": {"kind": "spot"}, "no_regrading": False}, 0.0)
+    sent = {**facts, **{k: v for k, v in level.items() if v is not None}}
     assert fact_problems(sent) == []
     got = check(MODEL, sent, tmp_path / "r.xlsx")
     rows = {i["name"]: i for i in got["view"]["items"]}
@@ -1095,7 +1098,7 @@ def test_flat_ground_is_assumed_for_the_mvp_behind_one_switch(facts, tmp_path):
     assert "assumed" in got["view"]["header"]["grade"]
     text = " ".join(str(c) for ws in openpyxl.load_workbook(tmp_path / "r.xlsx").worksheets
                     for row in ws.iter_rows(values_only=True) for c in row if c)
-    assert "assuming flat ground" in text and "assumed flat (elevation 2'-0\")" in text      # the lot level here
+    assert "assuming flat ground" in text and "assumed flat (elevation 0'-0\")" in text      # the lot level here
     # round 1: the note is with the item, never under "Why it needs review" on a row that complies
     sheet = openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"]
     head = next(r for r in sheet.iter_rows(values_only=True) if "Why it needs review" in r)

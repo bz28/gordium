@@ -839,16 +839,6 @@ def test_a_margin_that_rounds_to_nothing_is_at_the_limit_never_plus_zero():
                         assert not any(z in text for z in zeros), (low, high, text)
 
 
-def test_a_row_complying_under_every_reading_names_the_open_question_it_depends_on():
-    """The zoning office is told what to answer: "Complies under every reading, but it depends on an open
-    question: which lot lines count as side and which as rear; confirm with the zoning office"."""
-    row = {"Error": "NEEDS REVIEW", "Provisional": "passes under every reading",
-           "Why": "the readings give different values; which lot lines count as side and rear lot lines is an open "
-                  "question for the architects (lot_depth)"}
-    assert present._reason(row) == ("Complies under every reading, but it depends on an open question: which lot "
-                                    "lines count as side and which as rear; confirm with the zoning office")
-
-
 def test_a_row_complying_under_every_reading_names_only_the_questions_it_turns_on():
     """Review of e949a01: the wording named every question in the joined reason. Now only the open measurements
     the result turns on (with one unknown and the others at any reading, the result can't be told), each by its

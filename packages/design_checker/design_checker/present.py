@@ -296,6 +296,20 @@ def _questions_of(record: dict) -> list[str]:
     return out
 
 
+def _depends(row: dict, status: str, measured: dict) -> str | None:
+    """For a row (or one side yard: its own fields) that needs review and gives one answer under every reading:
+    the open questions its result turns on (the checker's: check.turns_on, which also decided the status, so a
+    result turning on none is simply the answer), each by its measurement's own short name; else None."""
+    if not (row.get("Provisional") and not row.get("Survey") and status == REVIEW and row.get("Turns on")):
+        return None
+    asked = list(dict.fromkeys(q for n in row["Turns on"] for q in _questions_of(measured.get(n))))
+    if not asked:
+        return None
+    word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
+    which = "an open question" if len(asked) == 1 else "open questions"
+    return f"{word} under every reading, but it depends on {which}: {'; '.join(asked)}; confirm with the zoning office"
+
+
 def _reason(row: dict) -> str | None:
     if _status(row) != REVIEW:
         return None
@@ -636,17 +650,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         name = "Use"
     site = bool(names) and names <= SITE_MEASURES
     status, reason = _status(row), _reason(row)
-    if row.get("Provisional") and not row.get("Survey") and status == REVIEW and row.get("Turns on") is not None:
-        # name only the open questions the result turns on (the checker's: check.turns_on, which also decided the
-        # status: a result turning on none is simply the answer), from each measurement's own reason
-        turns = row["Turns on"]
-        if turns:
-            asked = list(dict.fromkeys(q for n in turns for q in _questions_of(measured.get(n))))
-            word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
-            if asked:
-                which = "an open question" if len(asked) == 1 else "open questions"
-                reason = (f"{word} under every reading, but it depends on {which}: {'; '.join(asked)}; "
-                          "confirm with the zoning office")
+    reason = _depends(row, status, measured) or reason
     splits = [c for c in compares if c.left.id in ("side_yard_smaller", "side_yard_larger")] if measure in (
         "side_yard_smaller", "side_yard_larger") else []
     # two side yards: always in the same order (by name), so equal yards never swap with the model's units
@@ -668,8 +672,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if splits and node is not None and node.left.id in (row.get("Sides") or {}):
             st = row["Sides"][node.left.id]                 # each side yard: the checker's verdict for it, and
             side_row = {"Verdict": st, "Provisional": (row.get("Side provisional") or {}).get(node.left.id),
+                        "Turns on": (row.get("Side turns on") or {}).get(node.left.id),
                         "Why": (measured.get(node.left.id) or {}).get("reason") or row.get("Why")}
-            why = _reason(side_row)                         # why from that verdict alone, never the pair's
+            why = _depends(side_row, st, measured) or _reason(side_row)   # that verdict alone, never the pair's
                                                             # (complies: none; review: its open question)
         elif splits and node is not None and status != REVIEW:   # (no checker verdict per side: as drawn)
             holds = _evaluate(expr, values)

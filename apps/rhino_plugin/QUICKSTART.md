@@ -340,12 +340,13 @@ lot the tax map allows:
 - side yard, southwest 12'-0 5/8" (needs 10'-0"); northeast, 27'-4 1/4";
 - coverage 19.1% (the limit is 25%).
 
-Two rows need review from the start, and that is Gordium being honest about this lot, not a mistake:
+One row needs review from the start, and that is Gordium being honest about this lot, not a mistake:
 - **Rear yard**: which of the short lines at the back count as side lot lines and which as the rear lot line is an
   open question for the architects (it decides the lot's depth, and so the rear yard's requirement), so the rear
   yard shows two readings and "confirm with the zoning office".
-- **Building height**: 35'-0" is at the limit; the row needs review for the same open question (the height rule
-  reads the rear yard).
+
+**Building height**: 35'-0" is at the limit and complies. The height rule's taller-house bonus reads the rear yard,
+but at 35 ft or under the bonus never comes into it, so the open question doesn't matter.
 
 Stories 3 complies, at the limit, saying "assuming flat ground". Lot area complies even at the tax map's worst case.
 
