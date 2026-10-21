@@ -109,11 +109,19 @@ def covering(hand_rule, drafted, ctx, from_law=None):
         mine = lines(r, quotes_only=r["id"] in from_law)
         if mine & quoted:
             return True
-        # a cell match needs a measure in common; two use rules match on use (R-2c's side yards cite the use rows
-        # as inputs: the permitted-use rule doesn't cover them, so they count as undrafted, never as a pass)
-        same = measured(r) & measured(hand_rule) if measured(hand_rule) else not measured(r) and names(r) & names(hand_rule)
+        # A cell match needs a measure in common when the hand rule measures something (R-2c's side yards cite the
+        # use rows as inputs: the permitted-use rule doesn't cover them). A hand rule that measures nothing (a use
+        # flag: R-3a.parking_dormitory) is covered by any drafted rule on its cell that selects one of its uses, a
+        # numeric one included, so a drafted pass against its needs review still reaches false_pass (round 6).
+        same = measured(r) & measured(hand_rule) if measured(hand_rule) else selected_uses(r) & selected_uses(hand_rule)
         return bool(mine & wanted and same)
     return [r for r in drafted if covers(r)]
+
+
+def selected_uses(rule) -> set[str]:
+    """The uses a rule's formulas name, compared with `use` (use == "dormitory", use in [...])."""
+    from rule_format import formula
+    return {v for t in rule_formulas(rule) for name, v in formula.compared_strings(t) if name == "use"}
 
 
 def rule_formulas(rule):
@@ -576,3 +584,50 @@ def test_a_rule_citing_use_rows_as_inputs_isnt_covered_by_the_permitted_use_rule
     assert covering(hand, [use_rule], ctx, from_law=set()) == []
     hand_use = {"id": "hu", "kind": "flag", "applies_when": 'use in ["one_family_semi_detached"]', "sources": [use_cell]}
     assert covering(hand_use, [use_rule], ctx, from_law=set()) == [use_rule]      # two use rules still match
+
+
+def test_a_hand_flag_is_covered_by_a_numeric_draft_on_its_cell_and_a_wrong_pass_shows(ctx, tmp_path):
+    """Review round 6: a hand rule that measures nothing (a use flag) required the draft to measure nothing too, so a
+    numeric drafted rule on the same cell was filed undrafted, and its pass against the key's needs review never
+    reached false_pass."""
+    import yaml
+    cell = {"file": CHART, "page": 14, "cell": {"section": "Residential", "row": "Dormitory", "column": "R-3A"}}
+    if not any(k[1] == "Residential" and k[2] == "Dormitory" for k in ctx.cells.get(CHART, {})):
+        cell = {"file": CHART, "page": 2, "cell": {"section": "Primary Uses", "row": "Dormitory", "column": "R-3A"}}
+    flag = {"id": "R-3a.k", "kind": "flag", "applies_when": 'use == "dormitory"', "sources": [cell],
+            "examples": [{"given": {"use": "dormitory", "parking_spaces": 9, "persons_housed": 8},
+                          "expect": "needs_review"}]}
+    numeric = {"id": "R-3a.d", "kind": "rule", "applies_when": 'use == "dormitory"',
+               "check": "parking_spaces >= persons_housed / 4", "sources": [cell]}
+    assert covering(flag, [numeric], ctx, from_law=set()) == [numeric]
+    key = tmp_path / "R-3a.yaml"
+    key.write_text(yaml.safe_dump({"district": "R-3a", "rules": [flag]}), encoding="utf-8")
+    g = grade_hand_key(key, ctx, drafted=[numeric])
+    assert len(g["false_pass"]) == 1 and g["false_pass"][0]["got"] == "pass"
+
+
+def test_no_example_counted_undrafted_has_a_draft_on_its_cell_doing_the_same_job(ctx):
+    """Round 6's guard, across every hand key present: an example counted undrafted must have no drafted rule that
+    cites one of its hand rule's cells (by cell) and does the same job: measures the same thing, or, for a hand rule
+    that measures nothing, selects one of its uses. Otherwise the grader is hiding a covered rule from the grade."""
+    from rule_format import formula
+    if not (DRAFTED / "general.yaml").exists():
+        pytest.skip("nothing drafted yet")
+
+    def cells(rule):
+        return {(s["page"], s["cell"]["section"], s["cell"]["row"].strip(), s["cell"]["column"])
+                for s in rule.get("sources") or [] if "cell" in s}
+
+    def measured(rule):
+        return {n for t in rule_formulas(rule) for n in formula.names(t)} - {"district", "use"}
+    for path in hand_keys():
+        g = grade_hand_key(path, ctx)
+        book = {r["id"]: r for r in load(path)["rules"]}
+        drafted = drafted_rules_for(g["district"])
+        for hid in {x["hand"] for x in g["undrafted"]}:
+            h = book[hid]
+            for r in drafted:
+                if not cells(h) & cells(r):
+                    continue
+                job = measured(h) & measured(r) if measured(h) else selected_uses(h) & selected_uses(r)
+                assert not job, (path.name, hid, r["id"])

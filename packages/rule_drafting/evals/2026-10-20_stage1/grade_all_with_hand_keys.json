@@ -2220,9 +2220,15 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2232,9 +2238,15 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2244,9 +2256,15 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2256,9 +2274,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2268,9 +2292,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2280,9 +2310,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2292,9 +2328,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2304,9 +2346,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2316,9 +2364,15 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2328,9 +2382,15 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2340,9 +2400,15 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.use",
@@ -2352,9 +2418,15 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-2a.use"
+     "R-2a.use",
+     "R-2a.min_lot_area_other_use",
+     "R-2a.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2a.lot_area_one_family_detached",
@@ -3844,9 +3916,15 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3856,9 +3934,15 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3868,9 +3952,15 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3880,9 +3970,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3892,9 +3988,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3904,9 +4006,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3916,9 +4024,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3928,9 +4042,15 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3940,9 +4060,15 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3952,9 +4078,15 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3964,9 +4096,15 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.use",
@@ -3976,9 +4114,15 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-2b.use"
+     "R-2b.use",
+     "R-2b.min_lot_area_other_use",
+     "R-2b.min_lot_width_other_use"
     ],
-    "notes": []
+    "notes": [
+     "R-2b.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-2b.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-2b.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give"
+    ]
    },
    {
     "hand": "R-2b.lot_area_one_family_detached",
@@ -8346,9 +8490,32 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-3a.use"
+     "R-3a.use",
+     "R-3a.min_lot_area_other_use",
+     "R-3a.min_lot_width_other_use",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
+     "R-3a.325_19e_r3_abut_r1_max_coverage",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
     ],
-    "notes": []
+    "notes": [
+     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-3a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_coverage given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_coverage needs ['building_area', 'lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+    ]
    },
    {
     "hand": "R-3a.use",
@@ -8358,9 +8525,32 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-3a.use"
+     "R-3a.use",
+     "R-3a.min_lot_area_other_use",
+     "R-3a.min_lot_width_other_use",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
+     "R-3a.325_19e_r3_abut_r1_max_coverage",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
     ],
-    "notes": []
+    "notes": [
+     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-3a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_coverage given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_coverage needs ['building_area', 'lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+    ]
    },
    {
     "hand": "R-3a.use",
@@ -8370,45 +8560,32 @@
     "expect": "needs_review",
     "got": "needs_review",
     "drafted": [
-     "R-3a.use"
+     "R-3a.use",
+     "R-3a.min_lot_area_other_use",
+     "R-3a.min_lot_width_other_use",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
+     "R-3a.325_19e_r3_abut_r1_max_coverage",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
     ],
-    "notes": []
-   },
-   {
-    "hand": "R-3a.use",
-    "given": {
-     "use": "multiple_family"
-    },
-    "expect": "not_applicable",
-    "got": "not_applicable",
-    "drafted": [
-     "R-3a.use"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-3a.use",
-    "given": {
-     "use": "dormitory"
-    },
-    "expect": "not_applicable",
-    "got": "not_applicable",
-    "drafted": [
-     "R-3a.use"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-3a.use",
-    "given": {
-     "use": "nursery_school_or_child_day_care"
-    },
-    "expect": "not_applicable",
-    "got": "not_applicable",
-    "drafted": [
-     "R-3a.use"
-    ],
-    "notes": []
+    "notes": [
+     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-3a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_coverage given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_coverage needs ['building_area', 'lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+    ]
    },
    {
     "hand": "R-3a.lot_area_one_family_detached",
@@ -9737,9 +9914,144 @@
      "R-3a.parking_by_sleeping_rooms given {'multiple_dwelling_units': False} from its own passing example",
      "R-3a.parking_by_sleeping_rooms needs ['parking_spaces', 'sleeping_rooms'], which the hand example doesn't give"
     ]
+   },
+   {
+    "hand": "R-3a.parking_dormitory",
+    "given": {
+     "use": "dormitory"
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_dormitory"
+    ],
+    "notes": [
+     "R-3a.parking_dormitory given {'persons_housed': 8} from its own passing example",
+     "R-3a.parking_dormitory needs ['parking_spaces'], which the hand example doesn't give"
+    ]
+   },
+   {
+    "hand": "R-3a.parking_dormitory",
+    "given": {
+     "use": "multiple_family"
+    },
+    "expect": "not_applicable",
+    "got": "not_applicable",
+    "drafted": [
+     "R-3a.parking_dormitory"
+    ],
+    "notes": [
+     "R-3a.parking_dormitory given {'persons_housed': 8} from its own passing example",
+     "R-3a.parking_dormitory needs ['parking_spaces'], which the hand example doesn't give"
+    ]
    }
   ],
   "disagree": [
+   {
+    "hand": "R-3a.use",
+    "given": {
+     "use": "multiple_family"
+    },
+    "expect": "not_applicable",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.use",
+     "R-3a.min_lot_area_other_use",
+     "R-3a.min_lot_width_other_use",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
+     "R-3a.325_19e_r3_abut_r1_max_coverage",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
+    ],
+    "notes": [
+     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-3a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_coverage given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_coverage needs ['building_area', 'lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+    ]
+   },
+   {
+    "hand": "R-3a.use",
+    "given": {
+     "use": "dormitory"
+    },
+    "expect": "not_applicable",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.use",
+     "R-3a.min_lot_area_other_use",
+     "R-3a.min_lot_width_other_use",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
+     "R-3a.325_19e_r3_abut_r1_max_coverage",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
+    ],
+    "notes": [
+     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-3a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_coverage given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_coverage needs ['building_area', 'lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+    ]
+   },
+   {
+    "hand": "R-3a.use",
+    "given": {
+     "use": "nursery_school_or_child_day_care"
+    },
+    "expect": "not_applicable",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.use",
+     "R-3a.min_lot_area_other_use",
+     "R-3a.min_lot_width_other_use",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use",
+     "R-3a.325_19e_r3_abut_r1_max_height",
+     "R-3a.325_19e_r3_abut_r1_max_coverage",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller",
+     "R-3a.325_19e_r3_abut_r1_rear_yard"
+    ],
+    "notes": [
+     "R-3a.min_lot_area_other_use given {'additional_primary_building': False} from its own passing example",
+     "R-3a.min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.min_lot_width_other_use needs ['lot_width'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_min_lot_area_other_use needs ['lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_height given {'abuts_r1_district': True, 'abutting_r1_height_limit': 35} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_height needs ['building_height'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_max_coverage given {'abuts_r1_district': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_max_coverage needs ['building_area', 'lot_area'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger given {'abuts_r1_district': True, 'larger_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_larger needs ['side_yard_larger'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller given {'abuts_r1_district': True, 'smaller_side_yard_abuts_r1': True} from its own passing example",
+     "R-3a.325_19e_r3_abut_r1_side_yard_smaller needs ['side_yard_smaller'], which the hand example doesn't give",
+     "R-3a.325_19e_r3_abut_r1_rear_yard needs ['abuts_r1_district'], which neither the example nor its own passing example gives"
+    ]
+   },
    {
     "hand": "R-3a.lot_area_other_use",
     "given": {
@@ -10440,20 +10752,6 @@
     "expect": "not_applicable"
    },
    {
-    "hand": "R-3a.parking_dormitory",
-    "given": {
-     "use": "dormitory"
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.parking_dormitory",
-    "given": {
-     "use": "multiple_family"
-    },
-    "expect": "not_applicable"
-   },
-   {
     "hand": "R-3a.parking_other_uses",
     "given": {
      "use": "fraternity_sorority_group_house"
@@ -10499,12 +10797,12 @@
   "false_pass": [],
   "summary": {
    "examples": 141,
-   "agree": 86,
-   "disagree": 15,
-   "undrafted": 40,
+   "agree": 85,
+   "disagree": 18,
+   "undrafted": 38,
    "false_pass": 0,
-   "agree_of_all": "86/141",
-   "agree_of_drafted": "86/101"
+   "agree_of_all": "85/141",
+   "agree_of_drafted": "85/103"
   }
  }
 }
