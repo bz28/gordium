@@ -408,3 +408,36 @@ def test_the_plugin_reads_answers_with_a_time_limit_and_restarts_an_out_of_step_
     ask = src[src.index("def ask("):src.index("\n\n\n", src.index("def ask("))]
     assert "logic.answer_for(" in ask and "_stop_worker()" in ask and "readline" not in ask
     assert "threading.Thread(target=_read_lines" in src
+
+
+# ---- the starting building is proven with the checker's own verdict (audit P1-3) -----------------------------
+
+def _jogged_unsurveyed():
+    import sys
+    sys.path.insert(0, str(REPO / "packages/envelope_builder/tests"))
+    from test_start import FACTS, JOGGED, RULES, lot
+    facts = {**FACTS, "lot_surveyed": False, "street_line": [[[0, 0], [73, 0]]]}
+    return {"units": "ft", "lot": lot(JOGGED), "buildings": [], "problems": []}, facts, RULES
+
+
+def test_the_generators_proof_counts_a_rule_that_fails_with_the_lot_as_drawn():
+    """A 51 x 36 ft house on 106 Ithaca Rd's jogged lot, not yet surveyed: 27.5% of the lot as drawn, over 25%.
+    The check says lot coverage fails with the lot as drawn; plain outcome() says only needs review, so the
+    generator's proof once accepted it."""
+    from design_checker.check import verdict
+    from envelope_builder.start import _failing
+    site, facts, rules = _jogged_unsurveyed()
+    floors = [{"outline": [[11, 28], [62, 28], [62, 64], [11, 64]], "base": 0, "top": 10}]
+    assert _failing(site, facts, floors, rules, None) == []                      # plain outcome(): accepted
+    assert _failing(site, facts, floors, rules, None, verdict) == ["R-1b.lot_coverage"]
+
+
+def test_the_checker_proves_every_starting_building_with_its_own_verdict(monkeypatch):
+    from design_checker import check as checker
+    from envelope_builder import start as generator
+    seen = []
+    real = generator._failing
+    monkeypatch.setattr(generator, "_failing", lambda *a: seen.append(a[-1]) or real(*a))
+    site, facts, rules = _jogged_unsurveyed()
+    out = checker.largest_legal_building(site, facts, checker.measure(site, facts), rules)
+    assert out["floors"] and seen == [checker.verdict]
