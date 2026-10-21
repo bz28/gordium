@@ -10,19 +10,34 @@ then checked against a strict whitelist. Anything not listed here is rejected.
 Allowed: numbers, quoted text, measure names, + - * / (numbers only), comparisons
 (< <= > >= between numbers; == != between anything), `in` / `not in` a [list],
 and / or / not, `a if condition else b`, min() and max() of two or more numbers.
+
+Numbers are worked out exactly, as the decimals they are written as (0.2 * 132 is 26.4, not the binary
+26.400000000000002), and a comparison treats two numbers within AT_LIMIT of each other as equal: a design
+exactly at a limit complies with "at least" / "at most" (and not with "more than" / "less than"), even when
+its measurement carries float noise from the geometry. AT_LIMIT is a millionth of a foot (or a billionth of
+the number, if larger): far below anything measurable, so a real violation always fails.
 """
 
 import ast
 import math
+from fractions import Fraction
 from functools import lru_cache
 
 MAX_LENGTH = 500
 FUNCTIONS = {"min": min, "max": max}
+AT_LIMIT_ABSOLUTE = Fraction(1, 10 ** 6)       # two numbers this close count as equal (ft, sq ft, counts)
+AT_LIMIT_RELATIVE = Fraction(1, 10 ** 9)       # ... or this close relative to the larger, for big numbers
 
 _ARITHMETIC = {ast.Add: lambda a, b: a + b, ast.Sub: lambda a, b: a - b,
                ast.Mult: lambda a, b: a * b, ast.Div: lambda a, b: a / b}
-_ORDERING = {ast.Lt: lambda a, b: a < b, ast.LtE: lambda a, b: a <= b,
-             ast.Gt: lambda a, b: a > b, ast.GtE: lambda a, b: a >= b}
+
+
+def _at_limit(a, b) -> Fraction:
+    return max(AT_LIMIT_ABSOLUTE, AT_LIMIT_RELATIVE * max(abs(a), abs(b)))
+
+
+_ORDERING = {ast.Lt: lambda a, b: b - a > _at_limit(a, b), ast.LtE: lambda a, b: a - b <= _at_limit(a, b),
+             ast.Gt: lambda a, b: a - b > _at_limit(a, b), ast.GtE: lambda a, b: b - a <= _at_limit(a, b)}
 _EQUALITY = {ast.Eq: lambda a, b: a == b, ast.NotEq: lambda a, b: a != b}
 _MEMBERSHIP = {ast.In: lambda a, b: a in b, ast.NotIn: lambda a, b: a not in b}
 _ALLOWED = (ast.Expression, ast.Constant, ast.Name, ast.Load, ast.List, ast.Tuple,
@@ -102,8 +117,36 @@ def evaluate(text: str, values: dict, kinds: dict):
     kinds describes every measure the formula may use: "number" (a non-negative number:
     lengths, areas, counts) or the set of text values allowed (e.g. the city's use names).
     Fails closed: a measure with no description, or a value that doesn't fit, is unusable.
+    Worked out exactly (see the module docstring); a number comes back as a float (an int where plain Python
+    arithmetic would have given one).
     """
-    return _eval(parse(text).body, values, kinds)
+    body = parse(text).body
+    return _plain(_eval(body, values, kinds), _floats_in(body, values))
+
+
+def _exact(x):
+    """A number as the decimal it is written as (a float by its shortest repr: 0.2 -> 1/5), else as it is."""
+    if type(x) is float:
+        return Fraction(repr(x))
+    if type(x) is int:
+        return Fraction(x)
+    return x
+
+
+def _floats_in(body, values) -> bool:
+    """Whether plain Python would have given a float: a float number or measurement, or a division, anywhere."""
+    return any(isinstance(n, ast.Constant) and type(n.value) is float
+               or isinstance(n, ast.BinOp) and isinstance(n.op, ast.Div)
+               or isinstance(n, ast.Name) and type(values.get(n.id)) is float for n in ast.walk(body))
+
+
+def _plain(x, floats: bool):
+    """A result as callers use it: an exact number back to a float, or to an int where plain Python gave one."""
+    if isinstance(x, Fraction):
+        return int(x) if not floats and x.denominator == 1 else float(x)
+    if isinstance(x, list):
+        return [_plain(i, floats) for i in x]
+    return x
 
 
 def _finite(x) -> bool:
@@ -114,7 +157,7 @@ def _finite(x) -> bool:
 
 
 def _number(x):
-    if type(x) not in (int, float):
+    if type(x) not in (int, float, Fraction):
         raise EvaluationError(f"expected a number, got {x!r}")
     if not _finite(x):
         raise EvaluationError(f"not a finite number: {x!r}")
@@ -122,15 +165,15 @@ def _number(x):
 
 
 def _kind(x):
-    return "text" if type(x) is str else "number" if type(x) in (int, float) else None
+    return "text" if type(x) is str else "number" if type(x) in (int, float, Fraction) else None
 
 
 def _measure(name, values, kinds):
     """Usable only if present and fitting its description: a finite, non-negative number,
     or one of the allowed text values. Anything else (including no description) is unusable."""
     v, kind = values.get(name), kinds.get(name)
-    if kind == "number" and _kind(v) == "number" and _finite(v) and v >= 0:
-        return v
+    if kind == "number" and type(v) in (int, float) and _finite(v) and v >= 0:
+        return _exact(v)
     if isinstance(kind, (set, frozenset)) and _kind(v) == "text" and v in kind:
         return v
     raise MissingMeasure(name)
@@ -139,7 +182,7 @@ def _measure(name, values, kinds):
 def _eval(node, values, kinds):
     match node:
         case ast.Constant(value=v):
-            return v
+            return _exact(v)
         case ast.Name(id=name):
             return _measure(name, values, kinds)
         case ast.List(elts=items) | ast.Tuple(elts=items):
@@ -182,3 +225,14 @@ def _boolean(x):
     if type(x) is not bool:
         raise EvaluationError(f"expected true/false, got {x!r}")
     return x
+
+
+def margin(proposed, required, at_least: bool) -> float:
+    """How far a measured value is on the complying side of its limit: proposed − required for "at least"
+    (>=, >), required − proposed for "at most" (<=, <); negative when it falls short. Worked out exactly, as
+    comparisons are, and 0.0 when the two are equal within AT_LIMIT: so a margin shown as "at the limit" and a
+    comparison that says it complies can never disagree."""
+    a, b = _exact(_number(proposed)), _exact(_number(required))
+    if abs(a - b) <= _at_limit(a, b):
+        return 0.0
+    return float(a - b if at_least else b - a)
