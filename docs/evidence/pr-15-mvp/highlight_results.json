@@ -1,0 +1,76 @@
+{
+ "phase": "run",
+ "claims": {
+  "the sample is a tax-map lot, the west side yard 12'-0\" of 10'-0\"": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.side_yards#west",
+    "name": "Side yard, West",
+    "status": "complies",
+    "proposed": "12'-0\"",
+    "required": "10'-0\"",
+    "margin": "+2'-0\"",
+    "reason": null,
+    "group": "building"
+   }
+  },
+  "the start house: nothing red": {
+   "ok": true,
+   "detail": []
+  },
+  "moved: the west side yard 7'-0\", does not comply": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.side_yards#west",
+    "name": "Side yard, West",
+    "status": "does_not_comply",
+    "proposed": "7'-0\"",
+    "required": "10'-0\"",
+    "margin": "\u22123'-0\"",
+    "reason": null,
+    "group": "building"
+   }
+  },
+  "red: 1 ft wide, at the wall": {
+   "ok": true,
+   "detail": [
+    [
+     "does_not_comply",
+     1.0
+    ],
+    [
+     "needs_review",
+     4.0
+    ]
+   ]
+  },
+  "amber: 4 ft wide, beside the red": {
+   "ok": true,
+   "detail": [
+    [
+     "does_not_comply",
+     1.0
+    ],
+    [
+     "needs_review",
+     4.0
+    ]
+   ]
+  },
+  "each colour from the result": {
+   "ok": true,
+   "detail": null
+  }
+ },
+ "regions": [
+  [
+   "does_not_comply",
+   1.0
+  ],
+  [
+   "needs_review",
+   4.0
+  ]
+ ],
+ "ok": true
+}
