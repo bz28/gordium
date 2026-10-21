@@ -849,3 +849,14 @@ def test_a_four_sided_lot_has_one_reading_and_no_words():
     assert m["lot_depth"]["readings"] == [] and "as a rear lot line" not in m["lot_depth"]["how"]
     readings = Lot(site(), FACTS).readings()
     assert len(readings) == 1 and readings[0][0] == ""
+
+
+def test_a_corner_lot_address_with_too_many_lines_stops_the_whole_reading():
+    """Round 9, P1: a corner lot with a chamfered corner (three street lines) and a zigzag back. Read with only the
+    first street as the address, nine lines are left, seven between the two side lines: more than the six that can
+    be listed. Those readings can't be dropped while the other addresses give theirs: the lot depth stops."""
+    pts = [(0, 0), (50, 0), (60, 10), (60, 100), (50, 110), (40, 100), (30, 110), (20, 100), (10, 110), (0, 100)]
+    street = [[[0, 0], [50, 0]], [[50, 0], [60, 10]], [[60, 10], [60, 100]]]
+    m = measure(site(lot(pts), box(15, 30, 40, 70)), {**FACTS, "corner_lot": True, "street_line": street})
+    assert m["lot_depth"]["value"] is None and m["lot_depth"]["readings"] == []
+    assert "too many readings to list" in m["lot_depth"]["reason"]

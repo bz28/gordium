@@ -553,6 +553,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 ", ".join(f"{n} {p}, needs {s} {r}" for n, p, s, r, _ in alt) for alt in alts)
             fixes = [_fix(*alt[0]) for alt in alts if len(alt) == 1]
             hint = "To comply: " + ", or ".join(fixes) + "." if fixes else hint
+        base_calc = None
         if (node is not None and st != COMPLIES and required in ("—", None) and values.get("building_height") is None
                 and "building_height" in formula.names(ast.unparse(node.comparators[0]))):
             # a limit raised by the §325-16C height bonus, while the height can't be measured: show the base
@@ -564,6 +565,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 more = "more if the §325-16C height bonus applies; the height needs " + (
                     "finished grade" if facts.get("grade_is") == "existing" else "to be measured")
                 why = f"{why} ({more})" if why else f"Needs review ({more})"
+                base_text = value_text(base, unit, numbers[4], False)
+                line = f"{proposed} proposed · {required} required before the §325-16C height bonus"
+                base_calc = f"Required: {base_text} before the §325-16C height bonus (the height isn't measured yet)"
         applied = _applied(names, measured)
         if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
             why = f"{why} · {applied['note']}" if why else applied["note"]
@@ -587,7 +591,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 "citation": combined(list(dict.fromkeys(c for c, _ in cited))),
                 "links": list(dict.fromkeys(u for _, u in cited)),
                 "cited": [{"citation": c, "link": u} for c, u in dict.fromkeys(cited)],
-                "calc": _calc(node, values, measured, required),
+                "calc": base_calc or _calc(node, values, measured, required),
                 "scope": _scope(extras, measured),
                 "precision": PRECISION,
                 "at_limit": (f"At the limit: {proposed} exact" if margin_t == "at limit" else None),

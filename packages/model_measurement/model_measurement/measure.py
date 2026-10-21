@@ -1063,11 +1063,13 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                                    "the average length of the two side lot lines", [lot.id], lines["question"],
                                    lines["basis"]["depth"])
 
-    why_yards = why_building or why_main_off or why_plan or why_main or (why_grade if plan_level is None else None)
+    # every other reason the plan can't be trusted, on its own (never read off an `or` chain: review round 9)
+    why_rest = why_building or why_plan or why_main or (why_grade if plan_level is None else None)
+    why_yards = why_building or why_main_off or why_rest
     if why_yards:
         for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
             out[name] = _missing(name, why_yards)
-        if why_yards == why_main_off and not why_acc_off and detached:
+        if why_main_off and not why_rest and not why_acc_off and detached:
             # only the main building is off the lot: an accessory building on it is still measured on its own
             _accessory_yards(out, lot, lines, facts, detached, views)
         return out
@@ -1299,9 +1301,8 @@ def _lot_lines(lot: Lot, facts: dict):
         view = copy.copy(lot)
         view.street = list(address)
         readings = view.readings()
-        if readings is None:
-            problems.append(stop("lines_unclear", limit=MAX_UNCLEAR_EDGES))
-            continue
+        if readings is None:            # too many to list: never fewer readings silently, whatever the others give
+            return stop("lines_unclear", limit=MAX_UNCLEAR_EDGES)
         for words, left, right, rear in readings:
             sides = [g for g in ([i for i in left if i not in streets], [i for i in right if i not in streets]) if g]
             if any(i in streets for i in rear):
@@ -1313,6 +1314,8 @@ def _lot_lines(lot: Lot, facts: dict):
                          f"{', '.join(str(i + 1) for i in address)}") if len(candidates) > 1 else ""
                 found.append((_both(where, words), {"left": left, "right": right, "sides": sides, "rear": rear,
                                                     "address": address}))
+    # a reading the law excludes (its rear on a street, or no side line left) is dropped; if none is left, the
+    # first reason says why. An address with too many lines stopped above (review round 9)
     problem = None if found else (problems[0] if problems else stop("no_rear_line"))
     return {"readings": found, "question": "; ".join(question), "basis": basis, "problem": problem,
             "candidates": candidates}
