@@ -8,7 +8,7 @@ output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper
 (2 ft per line everywhere, carried up in d43e11f); F4 in #12 (the same_id stop, b5a899b); F6, F7 in #18 (ca4f6c3,
-4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). F13, F14 in #18 (1262820). F16 in #18 (44b185d). Open: F15 (the rest).
+4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). F13, F14 in #18 (1262820). F16 in #18 (44b185d). Open: F15 (the rest), F17.
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -402,6 +402,27 @@ def test_the_oracle_on_F16_walls_1400_and_with_both_eaves_1440():
     d, done = generate.build(*F16_CASE)
     assert len(done) == 3
     assert oracle.measure(d)["area"] == (pytest.approx(1440.0), pytest.approx(1400.0))
+
+
+# ---- F17 (P2): a building across a lot line: coverage fails with floor blocks, complies drawn as one solid -------
+
+F17_CASE = ("jog", [{"op": "add_accessory", "kind": "garage", "w": 8.25, "d": 12.5, "h": 13.0, "where": "side",
+                     "face": 2, "fx": 0.79, "fy": 0.75, "gap": 2.0, "listed": False, "frame": None}])
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F17: the crossing rule reaches coverage only when a main building is known (floor blocks)")
+def test_F17_a_garage_across_the_lot_line_gives_coverage_the_same_answer_however_the_house_is_drawn():
+    """One edit on the jog lot: an unlisted 8'-3" x 12'-6" garage at x 59.75..68, y 88..100.6, across the stepped
+    side line x = 62. Gordium's rule (PR 18): a building across a lot line makes every rule that measures it not
+    comply. With the house drawn as floor blocks (the starting house is the main building), coverage does not
+    comply: "garage 4 is not entirely on the lot". The same house drawn as one plain solid (or meshes): "more than
+    one building: pick the main building" on the yards, and coverage complies, 12%, though it measures the same
+    garage across the same line. The drawing must not decide whether the crossing counts."""
+    d = generate.build(*F17_CASE)[0]
+    got = {style: harness.statuses(harness.gordium_file(d, "ft", style))["R-1b.lot_coverage"]
+           for style in ("blocks", "one_solid", "mesh")}
+    assert COMPLIES not in got.values(), got
 
 
 # ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------

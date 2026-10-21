@@ -193,7 +193,17 @@ def _coverage_range_by_order(v):
 
 
 MATCHERS["F16"] = _coverage_range_by_order
-KNOWN = {"F15": _floating_ground_stop}   # F1-F14, F16 fixed: a return of any of them fails CI   # F1-F14 fixed: a return of any of them fails CI
+def _crossing_by_drawing(v):
+    """F17 (open): drawn as one solid or meshes, coverage complies where the floor-block drawing fails it for a
+    building across a lot line."""
+    if not (v["invariant"] == "d" and v["rule"] == "R-1b.lot_coverage" and "instead of floor blocks" in v.get("what", "")
+            and v.get("before") == harness.FAILS and v.get("after") == harness.COMPLIES):
+        return False
+    return any(w == "crossing" for w in oracle.measure(_design(v))["where"].values())
+
+
+MATCHERS["F17"] = _crossing_by_drawing
+KNOWN = {"F15": _floating_ground_stop, "F17": _crossing_by_drawing}   # F1-F14, F16 fixed: a return of any of them fails CI   # F1-F14 fixed: a return of any of them fails CI
 
 
 def known(v):
