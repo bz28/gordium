@@ -773,3 +773,17 @@ def test_plane_grouping_grows_about_in_step_with_the_faces():
     small = (small + clock(40)) / 2
     assert big < 10 * small, f"4x the faces took {big / small:.1f}x as long"
     assert big < 60
+
+
+@pytest.mark.parametrize("blocks", [
+    [box(10, 25, 35, 65, 0, 10, id="b1"), box(10, 25, 35, 65, 10, 20, id="b2"), box(10, 25, 35, 65, 20, 30, id="b3"),
+     box(10, 25, 35, 65, 30, 40, id="b2")],                                                     # plain solids
+    FLOORS + [floor(10, 25, 35, 65, z0=33, z1=44, id="floor 2")],                               # floor blocks
+])
+def test_a_typed_story_count_never_stands_beside_solids_sharing_an_id(blocks):
+    """Review of 0b56ec9 (P0): plain stacked solids, a typed 3 and a shared id: the stacking split the stack and
+    the typed 3 stood with no reason (unique ids correctly said: typed 3, 4 blocks). Whatever was typed, stories
+    needs review, naming the shared id."""
+    m = measure(site(RECT, *blocks), {**FACTS, "stories": 3})
+    shared = blocks[-1]["id"]
+    assert m["stories"]["value"] is None and f"share the id {shared}" in m["stories"]["reason"]

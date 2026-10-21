@@ -614,10 +614,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     buildings = _stacks(buildings)
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if facts.get("main_building") in b.get("parts", [b["id"]])), None))
-    drawn_floors = any(b.get("floor") for b in site.get("buildings") or [])
-    if why_building and (drawn_floors or facts.get("stories") is None):
-        # read from the building objects (floor blocks): whatever stops the other building measurements stops it
-        # too (a shared id would drop a floor from the count); only a typed count with no floors drawn stands
+    if why_building and site.get("buildings"):
+        # any building object can feed a stories reading (stacked solids are counted, a typed count is only one
+        # reading beside them): whatever stops the other building measurements (a shared id would drop a solid
+        # from the stack) stops it too, whatever was typed. A typed count stands only with no building drawn.
         out["stories"] = _missing("stories", why_building)
     elif main is not None and main.get("parts"):
         out["stories"] = _stories(main, grade, why_grade, facts.get("stories"))
