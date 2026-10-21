@@ -107,9 +107,10 @@ Every reason the code gives today comes from the table:
   basement or cellar counts as a story (§325-3) isn't measured yet: an open question for the architects";
   "floors misaligned: a floor block sticks out past the one below it (one floor moved on its own?): move the floors
   together, or draw the overhang as part of its floor". Stories are counted only from floor blocks: a part drawn as a plain solid
-  (or plain solids stacked) never has its stories guessed from its height or its blocks. With one at least 7 ft
-  tall (the lowest ceiling a habitable room may have, NYS Residential Code R305.1; a porch slab or steps is lower),
-  the count typed stands for the whole building, and only if no part's floor blocks count more: "the stories typed
+  (or plain solids stacked) never has its stories guessed from its height or its blocks. Only a plain part standing
+  on the ground and lower than 7 ft (the lowest ceiling a habitable room may have, NYS Residential Code R305.1: a
+  porch slab or steps) fits inside the first story and is left out; any other (raised, on a roof, reaching below
+  the ground: §325-3's STORY has no least height) is a plain part, and with one the count typed stands for the whole building, and only if no part's floor blocks count more: "the stories typed
   ({typed}) are fewer than the floor blocks drawn ({drawn}): check the count, or the floors", nor the solids stacked
   in a plain part: "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), which may
   each be a story: check the count"; with none typed:

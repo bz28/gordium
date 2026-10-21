@@ -843,9 +843,11 @@ def _drawing(rnd):
         stacks.append({"ids": ids, "countable": marked, "floors": high, "tall": not marked, "below": False,
                        "blocks": 0 if marked else high})          # plain solids stacked: each may be a story
     if rnd.random() < 0.35:            # a plain wing behind the first stack: a porch slab, a tall wing, a walk-out
-        z0, z1 = rnd.choice([(0, 3), (0, 6), (0, 7), (0, 8), (0, 12), (0, 32), (-10, 10.5)])
+        z0, z1 = rnd.choice([(0, 3), (0, 6), (0, 7), (0, 8), (0, 12), (0, 32), (-10, 10.5),   # on the ground
+                             (12, 18), (4, 10), (0.05, 6), (-0.5, 6.4), (-3, 0)])      # raised, or below the ground
         blocks.append(box(5, 60, 17, 70, z0, z1, id="wing"))
-        stacks.append({"ids": ["wing"], "countable": False, "floors": 0, "tall": z1 - z0 >= 7,   # R305.1: 7 ft
+        # left out only if it stands on the ground and is under 7 ft (R305.1): it fits inside the first story
+        stacks.append({"ids": ["wing"], "countable": False, "floors": 0, "tall": not (z0 == 0 and z1 - z0 < 7),
                        "below": z0 < 0, "blocks": 0})
     if rnd.random() < 0.2:
         rnd.choice(blocks)["id"] = rnd.choice(blocks)["id"]
@@ -993,3 +995,21 @@ def test_a_wing_of_two_stacked_plain_solids_beside_three_floor_blocks_takes_only
         assert "fewer than the floor blocks drawn (3)" in m["reason"]
     else:
         assert "for the whole building" in m["how"] or any("for the whole building" in r["reading"] for r in m["readings"])
+
+
+@pytest.mark.parametrize("z0, z1", [(32.9, 39.4), (33.05, 39.55), (-0.5, 6.4)])
+@pytest.mark.parametrize("typed", [None, 3])
+def test_a_short_part_off_the_ground_is_never_left_out_of_the_stories(z0, z1, typed):
+    """#14 final check (P0): a 6.5 ft room on the roof of three 11 ft floor blocks (0.1 ft into the roof, or 0.05
+    ft above it), or a short part from 0.5 ft below the ground, was dropped as too low to hold a story, so 3 floors
+    counted 3. §325-3's STORY has no least height: only a part on the ground and under 7 ft is left out. The roof
+    room leaves the count to the architect; the part below the ground asks the basement question."""
+    floors = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    part = box(12, 30, 20, 40, z0, z1, id="room") if z0 > 0 else box(35, 25, 45, 45, z0, z1, id="room")
+    m = measure(site(RECT, *floors, part), {**FACTS, "stories": typed, "main_building": "f0"})["stories"]
+    if z0 < 0:
+        assert m["value"] is None and "part of the building (room) is below the ground" in m["reason"]
+    elif typed is None:
+        assert m["value"] is None and "part of the building (room) isn't drawn as floor blocks" in m["reason"]
+    else:
+        assert m["value"] == 3

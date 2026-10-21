@@ -434,8 +434,10 @@ def _roof_readings(roof: list[dict], top: float, grade: float) -> tuple[list, st
     return readings, PITCHED
 
 
-# A part drawn without floor blocks at least this tall could hold a story: the lowest ceiling a habitable room may
-# have (7 ft, NYS Residential Code R305.1). Lower (a porch slab, steps, a deck) it can't.
+# A plain part standing on the ground and lower than this fits inside the first story every building has, so it
+# can't add one: the lowest ceiling a habitable room may have (7 ft, NYS Residential Code R305.1). A porch slab,
+# steps or a deck. §325-3's STORY has no least height, so anywhere else (raised, on a roof, below the ground) a
+# part of any height might be a story.
 STORY_ROOM = 7.0            # ft
 MAX_COMBINATIONS = 200      # more combinations of roof readings than this: too many to list; left for review
 
@@ -637,14 +639,23 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
                    ids)
 
 
+def _fits_in_the_first_story(part: dict, grade) -> bool:
+    """A plain part standing on the ground (its bottom at the grade) and lower than STORY_ROOM: it can't add a
+    story. Not knowing the grade, or anything else (raised, on a roof, below the ground, stacked), it might."""
+    lo, _ = _extent(part)
+    return (not part.get("parts") and grade is not None and lo is not None and abs(lo - grade) <= TOL
+            and _rise(part) < STORY_ROOM - TOL)
+
+
 def _stories_over(assemblies, grade, why_grade, stated) -> dict:
     """STORY over the same candidate buildings as the height (_assemblies): each one's stories by the one rule
-    (_stories_whole; its parts are the main building and every other part that could hold a story, STORY_ROOM
-    tall, or is stacked: a porch slab or steps can't). A count that can't be read for any of them needs review
-    with its reason; if they differ, it is the accessory question."""
+    (_stories_whole; its parts are the main building and every other part, except a plain one standing on the
+    ground and lower than STORY_ROOM, which fits inside the first story: a porch slab or steps. A part raised off
+    the ground, on a roof or reaching below it stays in, whatever its height). A count that can't be read for any
+    of them needs review with its reason; if they differ, it is the accessory question."""
     found = []
     for words, members in assemblies:
-        parts = members[:1] + [b for b in members[1:] if b.get("parts") or _rise(b) >= STORY_ROOM - TOL]
+        parts = members[:1] + [b for b in members[1:] if not _fits_in_the_first_story(b, grade)]
         r = _stories_whole(parts, grade, why_grade, stated)
         if r["value"] is None and not r["readings"]:
             return r
