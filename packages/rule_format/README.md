@@ -28,6 +28,8 @@ The shape every rule must have, the formula language rules are written in, and t
   notes: 106 Ithaca Rd needs 23.7 ft            # optional explanation; never used to decide a result
   drafted_by: claude
   open_questions: []                             # interpretations for the architects; none allowed once approved
+  research: []                                   # for each open question: what was searched, why it's still open
+  findings: []                                   # what research settled: the law's answer, or a reading to confirm
   answers: []                                    # architects' answers: {question, answer, answered_by, answered_on}
   status: draft                                  # approved also needs approved_by, approved_on, approved_hash
 ```
@@ -63,7 +65,22 @@ The page text and the quote are both split into **tokens** with one rule (`ruleb
 
 A source gives the **exact position** of its quote: the page and the first and last line (`lines: [first, last]`, the line numbers in `2_extracted_text`). The quote must start on the first line and end on the last, so it can't be matched anywhere else on the page. The quote must occur only once on the page, so a citation points at one place: a bare `35 ft` on a chart row is rejected; quote the row label too (`Height in feet 35 ft 35 ft`). One quote is one unbroken passage; cite separate passages as separate sources. To find the lines, run `python -m rule_format cite <state/place> <file> <page> "<quote>"`.
 
-Definitions (`4_term_definitions/definitions.yaml`) have `term`, `measures`, `sources` (the city's whole sentences, no paraphrase), `open_questions`, and once an architect answers a question, `answers`: `{question, answer, answered_by (a reviewer), answered_on}`. The answers are part of the approval fingerprint, so an answer can't change after approval. Use names (`uses.yaml`) have `name` and `sources`.
+**Show your work (research before asking).** Rules, definitions and section labels share these checks
+(`rulebook.research_problems`). Every open question needs exactly one `research` entry:
+`{question (its exact text), searched (piece ids of the law that were read), sources, why_open, readings?, report?}`.
+`searched` may be empty only while `why_open` starts with "pending" (a question raised by a drafting run says
+`pending: ...`, from `rulebook.pending_research`). `readings` lists the readings still in play as
+`{id, reading}` (two or more), for the measurement code to check a design under each. A question research settled
+moves to `findings`: `{id?, question, kind, answer, sources, strength?, confirm_with?, report?}`. Kind `law` must
+quote the code (a source `{file, page, lines, quote}`, verified like a rule's) and is `strong`. Kind `reading` has
+a `strength` no higher than its best source (`strong` = the code, rank 1; `city_practice` = the City's own records,
+rank 2; `moderate` = the NYS Uniform Code, IBC or IRC, rank 3; `weak` = other places' codes, rank 4; other sources
+are `{rank, cite, url?, quote?}`, named and linked for a person since code can't check them) and says who should
+confirm it (`confirm_with`). A question can't be both open and found. `report` names the research report and its
+section ("docs/research/2026-10-20_architect_questions.md §2.1"); the file and the section must exist. Findings
+are part of the approval fingerprint. An architect's or the City's answer (`answers`) outranks a reading.
+
+Definitions (`4_term_definitions/definitions.yaml`) have `term`, `measures`, `sources` (the city's whole sentences, no paraphrase), `open_questions` with their `research`, `findings`, and once an architect answers a question, `answers`: `{question, answer, answered_by (a reviewer), answered_on}`. The answers are part of the approval fingerprint, so an answer can't change after approval. Use names (`uses.yaml`) have `name` and `sources`.
 
 Section labels (`3_section_labels/<document>.yaml`, see `rule_format/labels.py`) are checked the same way: a label from the vocabulary, a known topic, a reason, a quote that is the city's words **inside its piece**, a fingerprint of the piece as labeled (re-cut or new PDF → label again), and the usual draft/approval rules.
 

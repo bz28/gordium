@@ -31,7 +31,9 @@ GROUPS = [("fails", "Does not comply"), ("review", "Needs review"), ("complies",
           ("not_checked", "Not checked"), ("not_covered", "Not covered by this rulebook")]
 
 from model_measurement.measure import TAX_MAP_TOLERANCE as TOLERANCE  # noqa: E402  (lot lines from the tax map: right to within this)
-LOT_LENGTHS = {"lot_width", "lot_depth", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard"}
+LOT_LENGTHS = {"lot_width", "lot_depth", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard",
+               "front_yard_eaves", "side_yard_smaller_eaves", "side_yard_larger_eaves", "rear_yard_eaves",
+               "accessory_front_yard", "accessory_side_yard", "accessory_rear_yard"}
 SITE_MEASURES = {"lot_area", "lot_width", "lot_depth", "use", "district"}
 INTERIOR = {"sleeping_rooms", "parking_spaces"}
 EIGHTH = 1 / 96                           # 1/8 in, in feet
@@ -42,10 +44,15 @@ DRAFT = "Draft rulebook · not yet reviewed by a licensed professional"
 NAMES = {"front_yard": "Front yard", "rear_yard": "Rear yard", "side_yard_smaller": "Side yard",
          "side_yard_larger": "Side yard", "building_area": "Lot coverage", "building_height": "Building height",
          "stories": "Stories", "lot_area": "Lot area", "lot_width": "Lot width", "lot_depth": "Lot depth",
-         "use": "Use", "parking_spaces": "Parking", "sleeping_rooms": "Parking"}
+         "use": "Use", "parking_spaces": "Parking", "sleeping_rooms": "Parking",
+         "front_yard_eaves": "Eaves into front yard", "side_yard_smaller_eaves": "Eaves into side yard",
+         "side_yard_larger_eaves": "Eaves into side yard", "rear_yard_eaves": "Eaves into rear yard",
+         "accessory_front_yard": "Accessory building", "accessory_side_yard": "Accessory building, side",
+         "accessory_rear_yard": "Accessory building, rear", "accessory_buildings": "Accessory building"}
 ZOOM = {"building_height": "front", "stories": "front"}
+YARD_ROWS = {"front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard", "front_yard_eaves",
+             "side_yard_smaller_eaves", "side_yard_larger_eaves", "rear_yard_eaves"}   # the main building's yards
 SIGNS = {ast.GtE: "≥", ast.Gt: ">", ast.LtE: "≤", ast.Lt: "<", ast.Eq: "=", ast.NotEq: "≠"}
-ROOF_NOT_FLAT = "Roof not flat; this roof's height rule isn't checked in this release"
 
 
 # ---- numbers as an architect reads them -----------------------------------------------------------------
@@ -235,12 +242,29 @@ def _user_text(text: str) -> str:
 def _status(row: dict) -> str:
     if row.get("Fails") or row.get("Error") == "FAIL":
         return FAILS
+    if (row.get("Named") or {}).get("result") == "pass":      # complies under every reading research lists
+        return COMPLIES
     return COMPLIES if row.get("Error") == "PASS" else REVIEW
 
 
+def _holds(expr: str, values: dict, row: dict):
+    """True / False / None for a comparison, and under every reading research lists for a row decided that way
+    (check.named_result): True only if it holds under all of them, False only if under none."""
+    combos = (row.get("Named") or {}).get("combos")
+    if not combos:
+        return _evaluate(expr, values)
+    got = {_evaluate(expr, c) for c in combos}
+    return True if got == {True} else False if got == {False} else None
+
+
 def _reason(row: dict) -> str | None:
+    named = row.get("Named")
+    if named and _status(row) == COMPLIES:
+        return _user_text(named["text"][:1].upper() + named["text"][1:])
     if _status(row) != REVIEW:
         return None
+    if named:
+        return _user_text("Needs review: " + named["text"] + " · confirm with the zoning office")
     if row.get("Provisional") and "confirm the survey" in row["Provisional"]:
         word = "Complies" if row["Provisional"].startswith("passes") else "Does not comply"
         return f"{word} with the lot as drawn; the lot lines aren't from a survey · Pick survey lot lines…"
@@ -424,6 +448,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     compares = _compares(check) if check else []
     names = formula.names(check) if check else set()
     primary = compares[0] if compares else None
+    body = formula.parse(check).body if check else None
+    if (_status(row) == FAILS and isinstance(body, ast.BoolOp) and isinstance(body.op, ast.And)
+            and all(isinstance(v, ast.Compare) for v in body.values)):
+        # a rule that is several limits at once (the eaves into every yard): name and show the one that fails
+        primary = next((c for c in compares if _evaluate(ast.unparse(c), values) is False), primary)
     measure = primary.left.id if primary is not None else None
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
@@ -447,7 +476,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         st, why = status, reason
         expr = ast.unparse(node) if splits else check
         if splits and node is not None and status != REVIEW:      # each side yard on its own comparison
-            holds = _evaluate(expr, values)
+            holds = _holds(expr, values, row)
             st = COMPLIES if holds is True else FAILS if holds is False else REVIEW
         raised = []                 # the rule complies another way it allows (the §325-16C height bonus): its
         if node is not None and st == COMPLIES and not splits and _evaluate(ast.unparse(node), values) is False:
@@ -460,11 +489,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if name == "Use":
             proposed = use_names.get(values.get("use"), values.get("use") or "—")
             required = {COMPLIES: "permitted", FAILS: "not permitted"}.get(st, "—")
-        if measure == "building_height" and st != FAILS and (measured.get("building_height") or {}).get("readings"):
-            if any("pitched" in r["reading"] or "mansard" in r["reading"] for r in measured["building_height"]["readings"]):
-                st, why = REVIEW, ROOF_NOT_FLAT
         if st == COMPLIES and not facts.get("lot_surveyed") and names & LOT_LENGTHS:
-            worst = _worst_case(expr, values, names)
+            # the tax-map worst case, under every reading research lists when the row was decided that way
+            worst = next((w for c in (row.get("Named") or {}).get("combos") or [values]
+                          for w in [_worst_case(expr, c, names)] if w is not None), None)
             if worst is not None:
                 bad = next((c for c in ([node] + raised if raised else _compares(expr))     # the way it uses
                             if _evaluate(ast.unparse(c), worst) is False), node)
@@ -525,6 +553,14 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 ", ".join(f"{n} {p}, needs {s} {r}" for n, p, s, r, _ in alt) for alt in alts)
             fixes = [_fix(*alt[0]) for alt in alts if len(alt) == 1]
             hint = "To comply: " + ", or ".join(fixes) + "." if fixes else hint
+        applied = _applied(names, measured)
+        if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
+            why = f"{why} · {applied['note']}" if why else applied["note"]
+        if row.get("Crossing"):                 # a building partly on another lot: fails, whatever else
+            st, why = FAILS, "Does not comply: " + row["Crossing"]
+            hint = "To comply: move it back onto the lot."
+            if node is None or node.left.id not in YARD_ROWS:     # the failing fact is the crossing, not a distance
+                proposed, required, margin_t = "crosses the lot line", "on the lot", ""
         out.append({
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
             "name": label, "group": "site" if site else "building", "status": st, "mark": MARK[st],
@@ -544,10 +580,31 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 "scope": _scope(extras, measured),
                 "precision": PRECISION,
                 "at_limit": (f"At the limit: {proposed} exact" if margin_t == "at limit" else None),
+                "basis": applied["all"],
+                # what might be eaves (each overhang's fingerprint): what a confirmation (eaves_confirmed) names
+                "eave_candidates": list(dict.fromkeys(c for n in sorted(names)
+                                                      for c in (measured.get(n) or {}).get("eave_candidates") or [])),
             }})
         if node is not None and node.left.id == "building_height":
             out[-1]["detail"].update(_height_detail(j, facts, values, node, numbers))
     return out
+
+
+def _applied(names: set, measured: dict) -> dict:
+    """What research settled that a rule's measurements apply (each measurement's `basis`): {"all": each one's
+    words (the law, Gordium's reading, or an answer), "note": the readings to confirm, short, for the reason}."""
+    found = {}
+    for n in sorted(names):
+        for b in (measured.get(n) or {}).get("basis") or []:
+            found.setdefault(b["id"], b)
+    notes = []
+    for b in found.values():
+        if b["kind"] == "reading":
+            first = b["text"].split(": ", 1)[-1].split(". ")[0].rstrip(".")
+            notes.append(f"Gordium's reading · confirm with {b['confirm_with']}: {first}")
+        elif b["kind"] == "answer":
+            notes.append(b["text"])
+    return {"all": [b["text"] for b in found.values()], "note": " · ".join(dict.fromkeys(notes))}
 
 
 def _height_detail(j: Path, facts: dict, values: dict, node, numbers) -> dict:

@@ -32,31 +32,16 @@ expected:
   R-1b.front_yard: {status: complies, working: "30 ≥ 25", cites: "§325-8 chart, R-1b, Front"}
   R-1b.rear_yard: {status: complies, working: "50 ≥ 30", cites: "§325-8 chart, R-1b, Rear"}
 # added after running Gordium (the expected results above are as written before it ran, commit 6d28ce0)
-disagreements:
-  R-1b.side_yards:
-    gordium: needs_review
-    direction: gordium_more_cautious
-    finding: >-
-      Investigated 2026-10-20. Gordium measures the yard two ways: to the overhanging second floor (12'-0") and to
-      the ground-floor wall (15'-0"), because whether an overhang counts is an open question (definitions.yaml
-      yard_projections). Both readings comply, and the panel says "Complies under every reading the law allows;
-      confirm with the zoning office". Not a false pass. The answer key reads "unobstructed from the ground
-      upward" (§325-3) as settling it: the overhang counts, and 12'-0" complies.
-    question_for_architects: >-
-      Does an upper floor that overhangs the floor below count for the side yard (measured to the overhang)? If
-      yes, Gordium can drop the second reading and say complies here.
-  R-1b.lot_coverage:
-    gordium: needs_review
-    direction: gordium_more_cautious
-    finding: >-
-      Same open question for coverage (building_area: whether an overhang counts): 1,320 sf with it, 1,200 sf
-      without; both under 1,800 sf. Gordium: "Complies under every reading"; needs review. Not a false pass.
-    question_for_architects: "Does an upper-floor overhang count in lot coverage (\"area covered ... above ground\", §325-8A p.25)?"
-  R-1b.height:
-    gordium: needs_review
-    direction: gordium_more_cautious
-    finding: >-
-      The height rule (R-1b.height) carries the §325-16C bonus, which names every yard; the checker reads every
-      part of a rule, so the side yard's two readings carry over to it even though the house is 30 ft (≤ 35 ft
-      under every reading). By design (the rule's notes); not a false pass.
-    question_for_architects: "None beyond the side-yard question: once that is settled, the height row follows it."
+fixed:
+  R-1b.side_yards: >-
+    Until 2026-10-20 (PR 18) Gordium read the overhang two ways (to the overhanging second floor, 12'-0", and to
+    the ground-floor wall, 15'-0") and said needs review. Research settled it as the law (definitions.yaml
+    yard_projections, finding yards_to_nearest_part: each yard to the nearest part of the building, cantilevered
+    upper floors included), and the part sticking out here is one of Gordium's own floor blocks, a story, never a
+    bay window: Gordium now says complies at 12'-0", the answer key's result.
+  R-1b.lot_coverage: >-
+    Until PR 18, read with and without the overhang (1,320 / 1,200 sf). Research settled it (building_area,
+    finding coverage_seen_from_above: everything above ground seen from above): 1,320 sf, complies, as the key says.
+  R-1b.height: >-
+    The height rule names every yard (the §325-16C bonus), so it followed the side yard's two readings; with the
+    side yard settled it complies (30 ft), as the key says.

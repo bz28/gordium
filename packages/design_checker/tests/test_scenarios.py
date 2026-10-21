@@ -56,11 +56,13 @@ def test_a_rule_with_two_ways_to_comply_says_how_each_falls_short_and_both_fixes
     assert h["hint"] == "To comply: lower the building 2'-0\", or make the rear yard 2'-0\" deeper, keeping the other yards."
 
 
-def test_when_the_readings_disagree_the_row_keeps_its_side_and_shows_the_span_in_the_limits_unit():
+def test_an_overhanging_floor_block_is_part_of_the_building_for_yards_and_coverage():
     v = _items("10_one_floor_moved_on_its_own.yaml")
-    assert v["Side yard, East"]["proposed"] == "12'-0\" to 15'-0\""   # still named: the shortest reading's line
+    # the second floor block sticks out 3 ft: a story (yards_to_nearest_part), so the yard is to it, 60 − 48 = 12
+    assert (v["Side yard, East"]["proposed"], v["Side yard, East"]["status"]) == ("12'-0\"", present.COMPLIES)
     assert v["Side yard, East"]["points"]
-    assert v["Lot coverage"]["proposed"] == "16.7% to 18.4%"          # 1,200 and 1,320 of 7,200 sf, rounded up
+    # coverage counts the overhanging floor (the coverage_seen_from_above finding): 1,320 of 7,200 sf, rounded up
+    assert v["Lot coverage"]["proposed"] == "18.4%"
     assert v["Lot coverage"]["required"] == "25%"                    # the limit in the same unit, never sf
 
 

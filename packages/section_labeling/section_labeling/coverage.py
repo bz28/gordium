@@ -24,7 +24,7 @@ from pathlib import Path
 
 from document_extraction.sections import piece_keys
 from rule_format.labels import LABEL_KINDS
-from rule_format.rulebook import load, rulebook_paths
+from rule_format.rulebook import TERM_SCHEMAS, load, rulebook_paths
 
 
 def line_problems(rows: list[dict], header: dict, pieces: dict[str, dict]) -> list[str]:
@@ -75,8 +75,10 @@ def cited_by(j: Path, file: str, pieces: dict[str, dict]) -> dict[str, list[str]
     for path in rulebook_paths(rulebooks):     # every rulebook, hand-drafted or in drafted/
         tag = "drafted:" if "drafted" in path.relative_to(rulebooks).parts else ""
         citing += [(tag + r.get("id", "?"), s) for r in (load(path) or {}).get("rules", []) for s in r.get("sources", [])]
-    for path in sorted((j / "4_term_definitions").glob("*.yaml")):
-        citing += [(f"{path.stem}.{key}", s) for key, e in (load(path) or {}).items() for s in e.get("sources", [])]
+    for path in (j / "4_term_definitions" / f"{schema}.yaml" for schema in TERM_SCHEMAS):  # not the term index
+        if not path.exists():
+            continue
+        citing +=[(f"{path.stem}.{key}", s) for key, e in (load(path) or {}).items() for s in e.get("sources", [])]
     out: dict[str, list[str]] = {}
     for who, s in citing:
         lines = s.get("lines") or []

@@ -111,14 +111,18 @@ def test_grade_facts_are_checked_like_any_other():
     assert not fact_problems({"grade_points": [[1, 2, 3]], "grade_from": "terrain", "grade_is": "finished"})
 
 
-def test_a_roof_that_isnt_flat_needs_review_even_if_every_reading_passes():
-    measured = measure(_site([sloped_roof_box(10, 25, 35, 65, 20, 30, "house")]), FACTS)
-    row = {"Rule id": "R-1b.height", "Error": "NEEDS REVIEW", "Provisional": "passes under every reading",
-           "Why": "the readings give different values", "Short": "Building height", "Requirement": "Building height"}
+def test_a_row_waiting_on_readings_that_arent_named_still_needs_review():
+    """A rule whose readings aren't the named readings of an open question (here a lot line that is a side or a
+    rear line) keeps the plain rule: passing every reading still needs review (pitched roofs are now measured:
+    tests/test_every_reading.py)."""
+    row = {"Rule id": "R-1b.rear_yard", "Error": "NEEDS REVIEW", "Provisional": "passes under every reading",
+           "Why": "the readings give different values", "Short": "Rear yard", "Requirement": "Rear yard minimum"}
+    measured = measure(_site([box(10, 25, 35, 65)]), FACTS)
+    measured["rear_yard"] = {**measured["rear_yard"], "value": None,
+                             "readings": [{"reading": "a", "value": 35.0}, {"reading": "b", "value": 40.0}]}
     v = present.view([row], [], RULES, measured, {**FACTS, "jurisdiction": "regulations/jurisdictions/new_york/ithaca_city",
                                                   "zone": "R-1b"})
-    h = items(v)["Building height"]
-    assert h["status"] == present.REVIEW and h["reason"] == present.ROOF_NOT_FLAT
+    assert items(v)["Rear yard"]["status"] == present.REVIEW
 
 
 # ---- C8: what was measured, and what wasn't ----------------------------------------------------------------------
@@ -186,7 +190,7 @@ def test_groups_come_in_order_and_include_what_isnt_checked(tax_map):
     keys = [g["key"] for g in tax_map["view"]["groups"]]
     assert keys == sorted(keys, key=["fails", "review", "complies", "not_checked", "not_covered"].index)
     names = [i["name"] for i in tax_map["view"]["items"]]
-    assert any(n.startswith("Overlays") for n in names) and any("§325-19C" in n for n in names)
+    assert any(n.startswith("Overlays") for n in names) and any("§325-17B" in n for n in names)
 
 
 def test_the_header_names_the_code_edition_the_draft_and_the_sources(tax_map):

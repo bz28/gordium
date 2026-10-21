@@ -105,12 +105,49 @@ MAX_COMBINATIONS = 200     # more combinations of readings than this: not worked
 SURVEY = "lot_area"        # a lot not yet surveyed: its one reading is the lot as drawn
 
 
-def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] | None:
-    """For a rule that needs review only because measurements have readings instead of a value: ("pass", how) if
-    it passes under every combination of their readings (taken independently, which covers every real
-    combination), ("fail", how) if it fails under every one, else None (or when a measurement has no reading, or
-    there are too many). Never a result: the row stays NEEDS REVIEW (only outcome() decides results); this says
-    the design complies, or doesn't, whichever way the open question is answered."""
+MODEL_WORDS = {"model#eave": {"eave": "what reaches past the walls an eave",
+                               "not_eave": "what reaches past the walls not an eave"},
+               "model#projection": {"projection": "what sticks out a projection", "part": "what sticks out a story"}}
+EAVE_YARD_WORDS = {"front_yard": "front yard", "side_yard_smaller": "side yard", "side_yard_larger": "side yard",
+                 "rear_yard": "rear yard"}
+
+
+def _reading_words(tag: str, rid: str) -> str:
+    for model, words in MODEL_WORDS.items():          # measure.EAVE (per solid for the height), measure.PROJ
+        if tag == model or tag.startswith(model + ":"):
+            return words.get(rid, rid)
+    return rid.replace("_", " ")
+
+
+def _eave_text(found: dict, measured: dict) -> str | None:
+    """For a row that needs review only because something might be an eave: what to confirm, in plain words
+    ("confirm the part reaching 1'-6" past the walls toward the front yard is an eave (§325-18B allows up to 2 ft
+    into a required yard)"), or None when the eave question isn't what decides it."""
+    tags = found["tags"]
+    if not any(t == "model#eave" or t.startswith("model#eave:") for t in tags) or found["result"] != "mixed":
+        return None
+    if any(MODEL_WORDS["model#eave"]["eave"] in w for w in found["fails_under"]):
+        return None                         # it fails even with the overhang an eave: not just a confirmation
+    reach = []
+    for name, yard in EAVE_YARD_WORDS.items():
+        m = measured.get(name) or {}
+        by = {r["named"].get("model#eave"): r["value"] for r in m.get("readings") or [] if r.get("named")}
+        if by.get("eave") is not None and by.get("not_eave") is not None and by["eave"] - by["not_eave"] > 1e-6:
+            reach.append(f"{present.feet_inches(by['eave'] - by['not_eave'], 'up')} past the walls toward the {yard}")
+    where = ("the part reaching " + "; ".join(dict.fromkeys(reach))) if reach else "what the roof reaches past the walls"
+    return (f"it complies only if {where} is an eave (§325-18B allows eaves up to 2 ft into a required yard). "
+            "Gordium will ask you to confirm it in the panel in the next release; until then this stays needs review")
+
+
+def readings_of(rule: dict, measured: dict, allowed: dict) -> dict | None:
+    """Every combination of the readings a rule's open measurements have, and the rule's outcome under each:
+    {"result": "pass" | "fail" | "mixed", "named": every reading is one research lists (by question), "tags",
+    "fails_under" / "passes_under": the named readings each way, "combos": the values of each combination}.
+    None when a measurement has no reading, or there are too many.
+
+    Readings research lists are combined question by question: one answer to an open question holds for the
+    whole design (a garage's roof and the house's are read with the same eave). Any other reading (a jog as a
+    side or a rear line, a solid that may be a deck) varies on its own, which covers every real combination."""
     names = set()
     for key in ("applies_when", "check"):
         if rule.get(key):
@@ -118,19 +155,101 @@ def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] 
     for r in rule.get("review_when") or []:
         names |= formula.names(r["when"])
     open_ = sorted(n for n in names if (measured.get(n) or {}).get("value") is None)
-    choices = [[x["value"] for x in (measured.get(n) or {}).get("readings") or []] for n in open_]
-    if not open_ or any(not c for c in choices) or math.prod(len(c) for c in choices) > MAX_COMBINATIONS:
+    readings = {n: (measured.get(n) or {}).get("readings") or [] for n in open_}
+    if not open_ or any(not readings[n] for n in open_):
+        return None
+    tags = sorted({t for n in open_ for r in readings[n] for t in r.get("named") or {}})
+    ids = [sorted({r["named"][t] for n in open_ for r in readings[n] if t in (r.get("named") or {})}) for t in tags]
+    if math.prod(len(i) for i in ids) > MAX_COMBINATIONS:
         return None
     values = {k: m["value"] for k, m in measured.items()}
-    got = {outcome(rule, {**values, **dict(zip(open_, combo))}, allowed) for combo in itertools.product(*choices)}
-    if got not in ({"pass"}, {"fail"}):
+    named, combos, fails, passes, got, total = bool(tags), [], [], [], set(), 0
+    for picked in itertools.product(*ids):
+        answer = dict(zip(tags, picked))
+        choices = []
+        for n in open_:
+            fits = list(dict.fromkeys(r["value"] for r in readings[n]
+                                      if all(answer.get(t) == v for t, v in (r.get("named") or {}).items())))
+            if not fits:
+                return None
+            # named: under each answer the measurement has one value (readings that differ only in other ways but
+            # give the same number leave nothing else open)
+            named &= len(fits) == 1 and all(r.get("named") for r in readings[n])
+            choices.append(fits)
+        total += math.prod(len(c) for c in choices)
+        if total > MAX_COMBINATIONS:
+            return None
+        here = set()
+        for combo in itertools.product(*choices):
+            trial = {**values, **dict(zip(open_, combo))}
+            here.add(outcome(rule, trial, allowed))
+            combos.append(trial)
+        got |= here
+        words = ", ".join(_reading_words(t, v) for t, v in answer.items())
+        if "fail" in here or "needs_review" in here:
+            fails.append(words)
+        if here == {"pass"}:
+            passes.append(words)
+    result = "pass" if got == {"pass"} else "fail" if got == {"fail"} else "mixed"
+    return {"result": result, "named": named, "tags": tags, "fails_under": fails, "passes_under": passes,
+            "combos": combos, "open": open_}
+
+
+def every_reading(rule: dict, measured: dict, allowed: dict) -> tuple[str, str] | None:
+    """For a rule that needs review only because measurements have readings instead of a value: ("pass", how) if
+    it passes under every combination of their readings, ("fail", how) if it fails under every one, else None
+    (or when a measurement has no reading, or there are too many). Results come only from outcome(); this says
+    the design complies, or doesn't, whichever way the open question is answered. Whether that is shown as a
+    result depends on the readings (named_result)."""
+    found = readings_of(rule, measured, allowed)
+    if found is None or found["result"] == "mixed":
         return None
-    word = "passes" if got == {"pass"} else "fails"
-    survey = SURVEY in open_ and len(choices[open_.index(SURVEY)]) == 1
+    word = "passes" if found["result"] == "pass" else "fails"
+    open_ = found["open"]
+    survey = SURVEY in open_ and len((measured.get(SURVEY) or {}).get("readings") or []) == 1
     others = [n for n in open_ if n != SURVEY or not survey]
-    return got.pop(), (f"{word} with the lot as drawn (confirm the survey)" if survey and not others else
-                       f"{word} under every reading" +
-                       (" and with the lot as drawn (confirm the survey)" if survey else ""))
+    return found["result"], (f"{word} with the lot as drawn (confirm the survey)" if survey and not others else
+                             f"{word} under every reading" +
+                             (" and with the lot as drawn (confirm the survey)" if survey else ""))
+
+
+def crossing(rule: dict, measured: dict) -> str | None:
+    """"The main building crosses the side lot line" when a building this rule measures stands partly off the lot
+    (its measurements' `crossings`, each building its own): the rule does not comply whatever the readings or
+    answers. None otherwise."""
+    names = set()
+    for key in ("applies_when", "check"):
+        if rule.get(key):
+            names |= formula.names(rule[key])
+    found = {}
+    for n in sorted(names):
+        for c in (measured.get(n) or {}).get("crossings") or []:
+            found.setdefault(c["who"], set()).update(c["lines"])
+    if not found:
+        return None
+    text = "; ".join(f"{who} crosses the {' and '.join(sorted(lines))} lot line{'s' if len(lines) > 1 else ''}"
+                     for who, lines in found.items())
+    return text[:1].upper() + text[1:]
+
+
+def named_result(rule: dict, measured: dict, allowed: dict) -> dict | None:
+    """The "every reading" rule for open questions research has named readings for: when every reading a
+    rule's open measurements have is one of those (nothing else unknown: no survey waiting, no model question),
+    the rule complies if it passes under all of them, does not comply if it fails under all of them, and needs
+    review otherwise, naming the readings it fails under. {"result", "text", "tags", "fails_under",
+    "passes_under", "combos"}, or None when it doesn't apply (the row keeps the plain rule)."""
+    found = readings_of(rule, measured, allowed)
+    if found is None or not found["named"]:
+        return None
+    every = "; ".join(found["passes_under"] + [w for w in found["fails_under"] if w not in found["passes_under"]])
+    text = {"pass": f"complies under every reading of the open question ({every})",
+            "fail": f"does not comply under any reading of the open question ({every})",
+            "mixed": (f"does not comply if the open question is answered {' or '.join(found['fails_under'])}; "
+                      f"complies if {' or '.join(found['passes_under']) or 'none'}")}[found["result"]]
+    if found["result"] == "pass" and all(t.startswith("model#") for t in found["tags"]):
+        text = "complies to the full outline, whatever reaches past the walls is"    # eaves don't matter here
+    text = _eave_text(found, measured) or text
+    return {**found, "text": text}
 
 
 def summary(rows: list[dict]) -> dict:
@@ -139,8 +258,9 @@ def summary(rows: list[dict]) -> dict:
     with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
     missing fact, not a reading, so it is never shown as complying."""
     fails = [r for r in rows if r.get("Fails") or r["Error"] == "FAIL"]
-    review = [r for r in rows if r["Error"] == "NEEDS REVIEW" and r not in fails]
-    passes = [r for r in rows if r["Error"] == "PASS"]
+    named = [r for r in rows if (r.get("Named") or {}).get("result") == "pass"]   # complies under every reading
+    review = [r for r in rows if r["Error"] == "NEEDS REVIEW" and r not in fails and r not in named]
+    passes = [r for r in rows if r["Error"] == "PASS"] + named
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):
@@ -152,7 +272,8 @@ def summary(rows: list[dict]) -> dict:
                 "lines": [", ".join(names) + ": " + why for why, names in waiting.items()]}
     lines = [r.get("Line") or (_amount(r) if r["Error"] == "FAIL" else f"{short(r['Requirement'])}: {r['Provisional']}")
              for r in fails]
-    lines += [f"{short(r['Requirement'])}: {r.get('Provisional') or r['Why']}" for r in review]
+    lines += [f"{short(r['Requirement'])}: {r.get('Provisional') or (r.get('Named') or {}).get('text') or r['Why']}"
+              for r in review]
     counts = f"{len(passes)} pass" + (f" · {len(fails)} fail" if fails else "") + (
         f" · {len(review)} need review" if review else "")
     return {"state": "fail" if fails else "review", "text": counts, "lines": lines}
@@ -278,12 +399,21 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         r["Short"] = short(r["Requirement"])
     allowed = {"use": Context.for_jurisdiction(REPO / facts["jurisdiction"]).uses}
     for r in rows:
-        found = every_reading(by_id[r["Rule id"]], measured, allowed) if r["Error"] == "NEEDS REVIEW" else None
+        review = r["Error"] == "NEEDS REVIEW"
+        named = named_result(by_id[r["Rule id"]], measured, allowed) if review else None
+        found = every_reading(by_id[r["Rule id"]], measured, allowed) if review and not named else None
+        r["Named"] = named              # every reading research lists: complies / does not comply / needs review
         r["Provisional"] = found[1] if found else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
-        r["Fails"] = r["Error"] == "FAIL" or bool(found and found[0] == "fail")   # fails whichever way it goes
+        r["Fails"] = r["Error"] == "FAIL" or bool(found and found[0] == "fail") or bool(
+            named and named["result"] == "fail")   # fails whichever way it goes
+        if r["Fails"] and named and not r.get("Line"):
+            r["Line"] = f"{short(r['Requirement'])}: {named['text']}"
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
+        r["Crossing"] = crossing(by_id[r["Rule id"]], measured)
+        if r["Crossing"]:            # a building on the neighbour's land: no reading or answer can clear it
+            r["Fails"], r["Line"] = True, f"{short(r['Requirement'])}: {r['Crossing']}"
     lot_id = (site.get("lot") or {}).get("id")
     red = sorted({o for r in rows if r["Fails"]
                   for name in formula.names(by_id[r["Rule id"]]["check"]) for o in measured.get(name, {}).get("objects", [])

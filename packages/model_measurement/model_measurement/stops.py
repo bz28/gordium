@@ -29,8 +29,14 @@ STOPS = {
                   "architects",
     # corner lots (§325-19C)
     "corner_unknown": "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no",
-    "corner_lot": "a corner lot: which yards are front, side and rear yards, and which street's frontage is the lot "
-                  "width (§325-19C), are open questions for the architects",
+    "corner_one_street": "a corner lot, but the street lot lines given run along one street (they never turn more than "
+                         "30°): pick the lot lines on both streets",
+    "address_not_a_street": "the address street given isn't one run of the street lot lines: pick the lot line(s) "
+                            "on the street the address is on again",
+    "rear_on_street": "the lot line opposite the address street is on a street too (a through lot, §325-8A(14)(d)): "
+                      "which yards are rear and front is an open question for the architects",
+    "no_side_line": "every side lot line is on a street (a lot on three streets): which yard is a side yard is an "
+                    "open question for the architects",
     # side and rear lot lines
     "lines_unclear": "the side and rear lot lines can't be told apart (more than {limit} lot lines could be either: "
                      "too many readings to list)",
@@ -67,6 +73,7 @@ STOPS = {
     # the buildings
     "no_building": "no building on the Building layer",
     "no_main_building": "more than one building: pick the main building",
+    "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
     "outside_lot": "a building isn't inside the lot",
     "open_solid": "a building isn't a closed solid",
     "open_mesh": "a building mesh isn't closed",
@@ -75,7 +82,13 @@ STOPS = {
     "single_precision": "a building mesh's points may be single precision, too coarse this far from the origin to "
                         "measure to 0.01 ft (move it nearer the origin, or turn it into a solid)",
     "not_a_solid": "{kind} on the {layer} layer can't be measured yet (explode it or turn it into a solid)",
+    # what research settled and what is still open, read from the city's files (interpretations.py)
+    "law_missing": "the city's files no longer have {what} (answered without naming the reading, or removed): the "
+                   "measuring can't follow it",
+    "reading_unknown": "a reading research lists ({reading}, {entry}) has no measuring code yet",
     # the height
+    "eave_unclear": "no roof plane of the pitched roof's highest section lies over the walls: the wall plate can't "
+                    "be found",
     "no_roof": "the roof's shape can't be read (no faces open to the sky)",
     "other_height": "another solid's height can't be read: {reason}",
     "too_many_roofs": "too many solids with open roof questions to list every reading: pick the main building's "

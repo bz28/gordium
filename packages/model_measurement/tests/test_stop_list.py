@@ -136,6 +136,35 @@ def _walls_only(x0, y0, x1, y1, id="house"):
     return b
 
 
+def _gable_over_no_wall():
+    """A tent: a gable whose roof planes come down to the ground, with no walls under them at all."""
+    faces = [{"points": [[10, 25, 0], [35, 25, 0], [35, 65, 0], [10, 65, 0]]},
+             {"points": [[10, 25, 0], [22.5, 25, 12], [22.5, 65, 12], [10, 65, 0]]},
+             {"points": [[22.5, 25, 12], [35, 25, 0], [35, 65, 0], [22.5, 65, 12]]},
+             {"points": [[10, 25, 0], [35, 25, 0], [22.5, 25, 12]]},
+             {"points": [[10, 65, 0], [35, 65, 0], [22.5, 65, 12]]}]
+    return {"id": "house", "faces": faces, "problems": []}
+
+
+def _a_reading_without_code(tmp_path):
+    """Research lists a reading the measuring code doesn't know yet: the measurement stops, never skips it."""
+    from unittest import mock
+
+    from model_measurement import interpretations
+    real = interpretations.question
+
+    def more(facts, entry, ids):
+        q = real(facts, entry, ids)
+        return {**q, "readings": q["readings"] + ("a_new_reading",)} if entry == "height_of_building" else q
+    with mock.patch.object(interpretations, "question", more):
+        house = box(10, 25, 35, 65, 0, 20)
+        house["faces"] = [f for f in house["faces"] if not all(p[2] == 20 for p in f["points"])]
+        house["faces"] += [{"points": [[10, 25, 20], [35, 25, 20], [35, 45, 30], [10, 45, 30]]},
+                           {"points": [[10, 45, 30], [35, 45, 30], [35, 65, 20], [10, 65, 20]]}]
+        return _plain(buildings=[house])(tmp_path)
+
+
+STREETS3 = [[[0, 0], [50, 0]], [[50, 0], [50, 100]], [[50, 100], [0, 100]]]
 ZIGZAG = lot([(0, 0), (50, 0), (50, 100), (40, 110), (30, 100), (20, 110), (10, 100), (0, 110)])
 SHEDS = [sloped_roof_box(2 + 6 * i, 70, 6 + 6 * i, 74, 20, 30, f"shed {i}") for i in range(8)]
 
@@ -160,14 +189,21 @@ CASES = {
     "all_street": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]], [[50, 100], [0, 100]], [[0, 100], [0, 0]]],
                          corner_lot=False),
     "corner_unknown": _plain(corner_lot=None),
-    "corner_lot": _plain(corner_lot=True),
+    "corner_one_street": _plain(corner_lot=True),
+    "address_not_a_street": _plain(corner_lot=True, street_line=STREETS3[:2], address_street_line=[[[0, 0], [0, 100]]]),
+    "rear_on_street": _plain(corner_lot=True, street_line=STREETS3, address_street_line=STREETS3[:1]),
+    "no_side_line": _plain(corner_lot=True, street_line=STREETS3, address_street_line=STREETS3[1:2]),
+    "law_missing": _plain(jurisdiction="regulations/jurisdictions/nowhere/no_city"),
+    "reading_unknown": _a_reading_without_code,
+    "eave_unclear": _plain(buildings=[_gable_over_no_wall()]),
+    "no_accessory": _plain(),
     "lines_unclear": _plain(ZIGZAG),
     "no_rear_line": _plain(lot([(0, 0), (50, 0), (25, 100)]), buildings=[box(20, 10, 30, 30)]),
     "no_ground": _plain(grade_elevation=None),
     "ground_off_building": _plain(grade_elevation=812),
     "buried_solid": _plain(buildings=[box(10, 25, 25, 65, 812, 842, id="house"), box(26, 25, 35, 65, 0, 45, id="tower")],
                            grade_elevation=812, main_building="house"),
-    "readings_differ": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house")]),
+    "readings_differ": _plain(lot([(0, 0), (50, 0), (50, 90), (8, 90), (0, 96)])),     # a jog: side or rear line
     "no_use": _plain(use=None),
     "no_district": _plain(zone=None),
     "no_stories": _plain(stories=None),
@@ -189,7 +225,7 @@ CASES = {
     "sloped_ground": _plain(ground_is_flat=False),
     "no_building": _plain(buildings=[]),
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
-    "outside_lot": _plain(buildings=[box(40, 25, 60, 65)]),
+    "outside_lot": _plain(buildings=[box(60, 25, 80, 65)]),      # wholly off the lot (crossing it is measured)
     "open_solid": _file(_open_brep),
     "open_mesh": _file(_open_mesh),
     "curved_surface": _file(_cylinder),

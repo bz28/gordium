@@ -56,5 +56,8 @@ def test_our_results_match_theirs_on_every_row(site):
 def test_rules_they_dont_cover_dont_apply_or_pass(site):
     design, _, results = site
     others = {i: r for i, r in results.items() if i not in design["compare"].values()}
+    # their house has no eaves (the yards to the eaves are the yards); the spreadsheet doesn't say whether there
+    # is an accessory building, so that rule waits for it (never a pass)
     assert others == {"R-1b.lot_area_other_use": "not_applicable", "R-1b.lot_width_other_use": "not_applicable",
-                      "R-1b.parking_other_uses": "not_applicable"}
+                      "R-1b.parking_other_uses": "not_applicable", "R-1b.yard_projections": "pass",
+                      "R-1b.accessory_buildings": "needs_review"}

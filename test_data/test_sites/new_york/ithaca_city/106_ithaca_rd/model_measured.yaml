@@ -46,3 +46,30 @@ measurements:
   parking_spaces:
     value: 1
     from: stated by the architect (not measured from the model) (lot facts)
+  front_yard_eaves:
+    value: null
+    from: 'not measured: a building isn''t inside the lot'
+  side_yard_smaller_eaves:
+    value: null
+    from: 'not measured: a building isn''t inside the lot'
+  side_yard_larger_eaves:
+    value: null
+    from: 'not measured: a building isn''t inside the lot'
+  rear_yard_eaves:
+    value: null
+    from: 'not measured: a building isn''t inside the lot'
+  accessory_buildings:
+    value: 0
+    from: 'measured from model.3dm: the solids on the Building layer standing apart from the main building (§325-25)'
+  accessory_front_yard:
+    value: null
+    from: 'not measured: a building isn''t inside the lot'
+  accessory_side_yard:
+    value: null
+    from: 'not measured: a building isn''t inside the lot'
+  accessory_rear_yard:
+    value: null
+    from: 'not measured: a building isn''t inside the lot'
+  accessory_distances_apply:
+    value: null
+    from: 'not measured: no accessory building on the lot (every solid is the main building or touches it)'
