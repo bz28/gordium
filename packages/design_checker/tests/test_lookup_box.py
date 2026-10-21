@@ -1105,3 +1105,36 @@ def test_a_looked_up_district_without_rules_is_never_preselected_or_called_sugge
     facts, saved = logic.lookup_choices(payload | {"facts": {"zone": {"value": "R-1b"}}}, {}, {},
                                         zones=["R-1a", "R-1b", "R-3a"])
     assert facts["zone"] == "R-1b" and saved["zone_source"].startswith("suggested by Gordium")
+
+
+
+def test_a_district_picked_after_a_lookup_without_rules_turns_draw_on():
+    """#19 zone review (P1): after an R-2a lookup the dropdown had no change handler, so picking R-1b and ticking
+    I confirm never turned Draw on. The pick goes through zone_picked, wired to the dropdown's change."""
+    state = {"zone": None, "district_confirmed": True}
+    assert logic.draw_reason(state) == "Pick the district to continue."
+    logic.zone_picked(state, "R-1b", None)
+    assert state["zone"] == "R-1b" and state["zone_source"] == logic.ENTERED and logic.can_draw(state)
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert "zone.SelectedIndexChanged += logic.guard(zone_changed" in ui and "logic.zone_picked(state" in ui
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert '"zone_source": source("zone", logic.ENTERED) if facts.get("zone") else None' in rhino
+
+
+def test_two_zones_one_without_rules_preselect_nothing_and_still_ask():
+    """#19 zone review (P1, P3): the map gave R-2a and R-1b; R-1b was preselected as suggested and R-2a dropped.
+    With any district uncovered nothing is preselected or suggested, the line names it, and the box still asks
+    which zone applies; two uncovered read plainly; no district set shows no past source."""
+    zones = ["R-1a", "R-1b", "R-3a"]
+    facts, saved = logic.lookup_choices({"status": "found", "facts": {"zone": {"value": ["R-2a", "R-1b"]}}},
+                                        {}, {}, zones=zones)
+    assert "zone" not in facts and "zone_source" not in saved and saved["_zones_found"] == ["R-2a", "R-1b"]
+    assert saved["_live"]["zone"].startswith("The City map puts this lot in R-2a and R-1b; Gordium doesn't have "
+                                             "R-2a's rules yet")
+    assert "two zones" in logic._question({"zones_found": saved["_zones_found"], "corner_lot": False})
+    _, saved = logic.lookup_choices({"status": "found", "facts": {"zone": {"value": ["R-2a", "R-3b"]}}},
+                                    {}, {}, zones=zones)
+    assert "doesn't have the rules for R-2a or R-3b yet" in saved["_live"]["zone"]
+    row = next(r for r in logic.box_rows({"zone": None, "zone_source": "suggested by Gordium · City zoning map"})
+               if r["key"] == "zone")
+    assert row["text"] == "— · not set"

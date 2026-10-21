@@ -710,8 +710,9 @@ def box_rows(state, flat=None):
          "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))],
          "tick": None, "matches": look.get("matches") or [],
          "status": LOOKING.format(look["looking"]) if look.get("looking") else None},
-        {"key": "zone", "label": "Zoning district",
-         "text": (state.get("zone") or "—") + " · " + (state.get("zone_source") or ENTERED),
+        {"key": "zone", "label": "Zoning district",       # none set: no source shown (never a past "suggested")
+         "text": (state["zone"] + " · " + (state.get("zone_source") or ENTERED)) if state.get("zone") else
+         "— · not set",
          "actions": [("zone", "Change", True)], "tick": ("I confirm", bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
@@ -749,6 +750,24 @@ def box_rows(state, flat=None):
 #   (storable_ui, the one write boundary).
 
 NO_RULES = "The City map says {zone}; Gordium doesn't have {zone}'s rules yet: pick a district only if you know it applies."
+
+
+def no_rules(said, unknown):
+    """The box's line when the City map's district (or one of its districts) has no rules in Gordium."""
+    if len(said) == 1:
+        return NO_RULES.format(zone=said[0])
+    missing = ("the rules for " + " or ".join(unknown)) if len(unknown) > 1 else unknown[0] + "'s rules"
+    return (f"The City map puts this lot in {' and '.join(said)}; Gordium doesn't have {missing} yet: pick the "
+            "district that applies only if you know it.")
+
+
+def zone_picked(state, zone, first):
+    """The architect picked a district in the box's dropdown: it is set (and theirs, unless it is the one the box
+    opened with), so Draw follows at once (draw_reason)."""
+    state["zone"] = zone
+    if zone != first:
+        state["zone_source"] = ENTERED
+    return state
 LOOKUP_LIMIT_S = 45                               # the whole lookup; the box says so, the Rhino side stops it then
 LOOKING = "Looking up {}… (up to %d s)" % LOOKUP_LIMIT_S
 CHECKABLE = ("lot", "street", "ground")          # what "I checked this" settles (the district has its own tick)
@@ -830,13 +849,18 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     said = zone if isinstance(zone, list) else [zone] if zone else []
     known = [names[z.lower()] for z in said if z.lower() in names] if zones else list(said)
     unknown = [z for z in said if zones and z.lower() not in names]
-    if unknown and not known:
-        # the City map names a district Gordium has no rules for: never a district it didn't give, preselected or
-        # called suggested; none is set until the architect picks one deliberately
+    if unknown:
+        # the City map names a district Gordium has no rules for (alone or beside one it has): never another
+        # district preselected or called suggested in its place; none is set until the architect picks one, and
+        # with two zones the box still asks which applies
         facts.pop("zone", None)
-        saved_ui.pop("_zones_found", None)
         saved_ui.pop("zone_source", None)
-        live["zone"] = _merged(live.get("zone"), NO_RULES.format(zone=" or ".join(unknown)))
+        if len(said) > 1:
+            saved_ui["_zones_found"] = list(said)
+        else:
+            saved_ui.pop("_zones_found", None)
+        live["zone"] = _merged(live.get("zone"), no_rules(said, unknown))
+        known = []
     elif len(known) > 1:                         # two zones: the box asks which applies
         saved_ui["_zones_found"] = known
         facts["zone"] = known[0]

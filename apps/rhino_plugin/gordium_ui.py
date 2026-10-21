@@ -705,6 +705,13 @@ def start_box(state, options, mode):
         reason.Text = logic.draw_reason(state)
 
     confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
+
+    def zone_changed(s, e):           # a district picked: set at once, so Draw and its reason follow (round 1, P1)
+        logic.zone_picked(state, zone.SelectedValue.Text if zone.SelectedValue else None, first_zone)
+        draw.Enabled = logic.can_draw(state) and not looking
+        reason.Text = logic.draw_reason(state)
+
+    zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")
     cancel = button("Cancel", lambda: done(None))
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
