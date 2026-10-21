@@ -594,7 +594,7 @@ def test_a_corner_lot_is_never_guessed_the_box_asks_and_the_yards_wait(facts):
     assert logic.uncertain(_box(corner_lot=False)) is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     suggested = rhino.split("def suggested_facts(", 1)[1].split("\ndef ", 1)[0]
-    assert '"corner_lot": None' in suggested and '"corner_lot": False' not in suggested   # never guessed
+    assert "logic.suggested_facts(" in suggested and "corner_lot" not in suggested   # the tested logic decides
     got = check(MODEL, {k: v for k, v in facts.items() if k != "corner_lot"})          # unanswered
     yards = {i["name"]: i for i in got["view"]["items"]}
     assert yards["Front yard"]["status"] == present.REVIEW
@@ -1031,3 +1031,24 @@ def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
     assert "logic.reaches_into_lot(" in body and ".Center" not in body
+
+
+def test_the_suggested_facts_never_answer_the_corner_lot_question():
+    """eval-integrity P1-5: the guarantee was pinned only by the plugin's source text (setting corner_lot to False
+    in suggested_facts passed). Now the decisions are plain logic, run here on every kind of model."""
+    from design_checker import rhino_logic as logic
+    square = {"id": "lot", "area": 6570.0, "bottom": 0.0,
+              "segments": [((0, 0), (73, 0)), ((73, 0), (73, 90)), ((73, 90), (0, 90)), ((0, 90), (0, 0))]}
+    corner_like = {"id": "corner", "area": 9000.0, "bottom": 0.0,           # two street-facing sides, low on screen
+                   "segments": [((0, 0), (90, 0)), ((90, 0), (90, 100)), ((90, 100), (0, 100)), ((0, 100), (0, 0))]}
+    houses = [{"id": "house", "bottom": 1.0, "volume": 30000.0}, {"id": "shed", "bottom": 0.5, "volume": 900.0}]
+    for lots in ([], [square], [square, corner_like], [{**square, "segments": []}]):
+        for buildings in ([], houses[:1], houses):
+            for zones in ([], ["R-1b"], ["R-1a", "R-1b"]):
+                got = logic.suggested_facts("j", zones, lots, buildings)
+                assert "corner_lot" in got and got["corner_lot"] is None, (lots, buildings, zones)
+                assert got["lot_surveyed"] is False                   # the safe answer: size waits for a survey
+    got = logic.suggested_facts("j", ["R-1b"], [square, corner_like], houses)
+    assert got["lot_id"] == "corner" and got["street_line"] == [[[0, 0], [90, 0]]]
+    assert got["main_building"] == "house" and got["grade_elevation"] == 0.5 and got["zone"] == "R-1b"
+    assert logic.suggested_facts("j", [], [square], [])["grade_elevation"] == 0.0     # no building: the lot's level

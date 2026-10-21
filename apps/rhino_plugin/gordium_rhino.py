@@ -216,24 +216,15 @@ def suggested_facts(doc, zones):
     of the buildings, the lot not from a survey (the safe answer:
     lot size and coverage wait for one), the first zone with rules, a detached one-family house, and the largest
     solid as the main building. Every one is shown in the dialog; nothing is used until the architect says OK.
-    In feet, whatever the model's units."""
-    facts = {"jurisdiction": JURISDICTION, "zone": zones[0] if zones else None, "use": "one_family_detached",
-             "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}   # corner lot: never guessed
+    In feet, whatever the model's units. The decisions are rhino_logic.suggested_facts (tested in CI); this only
+    reads the model."""
     lots, buildings, _ = _sorted_objects(doc)
-    if lots:
-        lot = max(lots, key=lambda o: _area(o.Geometry))
-        facts["lot_id"] = str(lot.Id)
-        a, b = min(_segments(lot.Geometry), key=lambda s: (s[0].Y + s[1].Y) / 2)
-        facts["street_line"] = [[[a.X, a.Y], [b.X, b.Y]]]
+    lot_data = [{"id": str(o.Id), "area": _area(o.Geometry), "bottom": o.Geometry.GetBoundingBox(True).Min.Z,
+                 "segments": [((a.X, a.Y), (b.X, b.Y)) for a, b in _segments(o.Geometry)]} for o in lots]
     boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
-    lot_z = max(lots, key=lambda o: _area(o.Geometry)).Geometry.GetBoundingBox(True).Min.Z if lots else None
-    ground = logic.suggested_ground([b.Min.Z for b in boxes], lot_z)
-    if ground is not None:
-        facts["grade_elevation"] = ground
-    if buildings:
-        if len(buildings) > 1:
-            big = max(zip(buildings, boxes), key=lambda ob: ob[1].Diagonal.X * ob[1].Diagonal.Y * ob[1].Diagonal.Z)
-            facts["main_building"] = str(big[0].Id)
+    building_data = [{"id": str(o.Id), "bottom": b.Min.Z, "volume": b.Diagonal.X * b.Diagonal.Y * b.Diagonal.Z}
+                     for o, b in zip(buildings, boxes)]
+    facts = logic.suggested_facts(JURISDICTION, zones, lot_data, building_data)
     return logic.to_feet(facts, _scale(doc))
 
 

@@ -169,6 +169,31 @@ def after_corner_answer(facts, was_corner):
     return out
 
 
+def suggested_facts(jurisdiction, zones, lots, buildings):
+    """The start box's prefilled lot facts, in the model's units (the plugin converts them to feet), for the
+    architect to confirm. `lots`: the Site layer's closed outlines, each {"id", "area", "bottom" (its lowest
+    level), "segments": [((x, y), (x, y)), ...]}; `buildings`: each {"id", "bottom", "volume" (of its box)}.
+    The largest outline is the lot, its lowest line on screen the street side; the ground is flat at the
+    buildings' lowest point (or the lot's level); the lot is not from a survey; the first zone with rules; a
+    detached one-family house; the largest solid the main building. The corner-lot question is never answered
+    here: always None, so the box asks it and the yards wait for the answer."""
+    facts = {"jurisdiction": jurisdiction, "zone": zones[0] if zones else None, "use": "one_family_detached",
+             "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}
+    lot = max(lots, key=lambda l: l["area"]) if lots else None
+    if lot is not None:
+        facts["lot_id"] = lot["id"]
+        if lot["segments"]:
+            a, b = min(lot["segments"], key=lambda s: (s[0][1] + s[1][1]) / 2)
+            facts["street_line"] = [[[a[0], a[1]], [b[0], b[1]]]]
+    ground = suggested_ground([b["bottom"] for b in buildings], lot["bottom"] if lot is not None else None)
+    if ground is not None:
+        facts["grade_elevation"] = ground
+    if len(buildings) > 1:
+        facts["main_building"] = max(buildings, key=lambda b: b["volume"])["id"]
+    facts["corner_lot"] = None                     # never guessed, whatever came before
+    return facts
+
+
 def suggested_ground(building_bottoms, lot_bottom):
     """The ground level to suggest (feet or model units, as given): the lowest point of the buildings, or with no
     building yet (a new project on the architect's own lot) the lot outline's level. Shown in the dialog, never
