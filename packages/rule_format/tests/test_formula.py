@@ -142,3 +142,15 @@ def test_numbers_come_back_as_plain_python_would_give_them():
     assert type(evaluate("max(a, 2)", {"a": 1}, KINDS)) is int
     assert type(evaluate("max(a, 2)", {"a": 1.0}, KINDS)) is float
     assert evaluate("a / 4", {"a": 2}, KINDS) == 0.5
+
+
+def test_a_margin_at_the_limit_is_zero_exactly_where_the_comparison_complies():
+    from rule_format.formula import margin
+    limit = evaluate("0.2 * lot_depth", {"lot_depth": 132}, KINDS)
+    assert margin(26.4, limit, True) == 0.0 and margin(26.400000000000002, 26.4, False) == 0.0
+    assert margin(26.39, limit, True) == pytest.approx(-0.01) and margin(1750.71, 1750.7, False) == pytest.approx(-0.01)
+    assert margin(30, 27.5, True) == 2.5 and margin(1700, 1750.7, False) == pytest.approx(50.7)
+    for n in range(1, 2001):
+        at = 0.2 * n
+        assert (margin(at, evaluate("0.2 * lot_depth", {"lot_depth": n}, KINDS), True) == 0.0) is \
+            evaluate("rear_yard >= 0.2 * lot_depth", {"rear_yard": at, "lot_depth": n}, KINDS)

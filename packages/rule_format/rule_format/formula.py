@@ -225,3 +225,14 @@ def _boolean(x):
     if type(x) is not bool:
         raise EvaluationError(f"expected true/false, got {x!r}")
     return x
+
+
+def margin(proposed, required, at_least: bool) -> float:
+    """How far a measured value is on the complying side of its limit: proposed − required for "at least"
+    (>=, >), required − proposed for "at most" (<=, <); negative when it falls short. Worked out exactly, as
+    comparisons are, and 0.0 when the two are equal within AT_LIMIT: so a margin shown as "at the limit" and a
+    comparison that says it complies can never disagree."""
+    a, b = _exact(_number(proposed)), _exact(_number(required))
+    if abs(a - b) <= _at_limit(a, b):
+        return 0.0
+    return float(a - b if at_least else b - a)
