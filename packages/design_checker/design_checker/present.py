@@ -242,7 +242,13 @@ def _user_text(text: str) -> str:
     return text
 
 
+RANK = {FAILS: 0, REVIEW: 1, COMPLIES: 2}        # how favourable: the panel never shows a row above the checker
+
+
 def _status(row: dict) -> str:
+    """The checker's verdict for a row (check.row_verdict); for a row without one, its outcome as drawn."""
+    if row.get("Verdict"):
+        return row["Verdict"]
     if row.get("Fails") or row.get("Error") == "FAIL":
         return FAILS
     return COMPLIES if row.get("Error") == "PASS" else REVIEW
@@ -526,7 +532,7 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
     margin. Red is short under every reading, amber under some (check.plan draws them)."""
     tax = bool((measured.get("lot_area") or {}).get("tolerance")) and not facts.get("lot_surveyed")
     for i in items:
-        node, expr, split_open = i.pop("_node", None), i.pop("_expr", None), i.pop("_split_open", False)
+        node, expr = i.pop("_node", None), i.pop("_expr", None)
         i.update(delta="", approx=False, colour="none", limits=[])
         i["detail"].setdefault("colours", None)
         if node is None:
@@ -543,15 +549,8 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
         approx = tax and bool(formula.names(ast.unparse(node)) & (LOT_LENGTHS | {"lot_area"}))  # its own margin's
         open_ = any(values.get(n) is None for n in reads)
         holds = {r["holds"] for r in rs}
-        if split_open and holds in ({False}, {True}):     # the checker failed the pair under every reading:
-            fails = holds == {False}                      # this side, read on its own, fails or holds under all
-            i.update(status=FAILS if fails else COMPLIES, mark=MARK[FAILS if fails else COMPLIES], reason=(
-                f"Does not comply under every reading of {_which(lot, open_)}" if fails else None))
-        elif i["status"] == FAILS and True in holds:          # complies under some reading: never a certain fail
-            i.update(status=REVIEW, mark=MARK[REVIEW], reason=(
-                f"Does not comply as drawn, but complies under some readings of {_which(lot, open_)}: it fails "
-                "only if it fails under every one · Pick survey lot lines…"))
-        elif i["status"] == COMPLIES and holds != {True}:    # short under some reading: never a pass
+        if i["status"] == COMPLIES and holds != {True}:      # short under some reading: never a pass (only
+            # ever more cautious: the checker alone decides a row complies or fails)
             i.update(status=REVIEW, mark=MARK[REVIEW], reason=(
                 f"Complies as drawn, but not under every reading of {_which(lot, open_)} · Pick survey lot lines…"))
         i.update(delta=delta_words(i["status"], span, unit, approx), approx=approx)
@@ -637,13 +636,21 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     for node, label in parts:
         st, why = status, reason
         expr = ast.unparse(node) if splits else check
-        split_open = False
-        if splits and node is not None and status != REVIEW:      # each side yard on its own comparison
+        if splits and node is not None and node.left.id in (row.get("Sides") or {}):
+            st = row["Sides"][node.left.id]                 # each side yard: the checker's verdict for it
+            if st == REVIEW:                                # and why, as a row of its own would say it
+                why = _reason({"Verdict": REVIEW, "Provisional": (row.get("Side provisional") or {}).get(node.left.id),
+                               "Why": (measured.get(node.left.id) or {}).get("reason") or row.get("Why")})
+        elif splits and node is not None and status != REVIEW:   # (no checker verdict per side: as drawn)
             holds = _evaluate(expr, values)
             st = COMPLIES if holds is True else FAILS if holds is False else REVIEW
-            split_open = holds is None and status == FAILS          # a reading per side: settle decides it
+        checker = st                                         # never shown above this (the guard in view)
+        drawn = _evaluate(expr, values) if expr else None    # the row's expression as drawn (a flag has none)
+        clean = row.get("Error") in ("PASS", "FAIL") or bool(splits)    # nothing but the readings undecided
+        tax = not facts.get("lot_surveyed") and bool((measured.get("lot_area") or {}).get("tolerance"))
         raised = []                 # the rule complies another way it allows (the §325-16C height bonus): its
-        if node is not None and st == COMPLIES and not splits and _evaluate(ast.unparse(node), values) is False:
+        if node is not None and drawn is True and st != FAILS and not splits and \
+                _evaluate(ast.unparse(node), values) is False:         # (as drawn: the checker's status stands)
             way = _holding_way(check, values)          # numbers are that way's, and the yards it raises
             if way:
                 node = next((c for c in way if c.left.id == node.left.id), node)
@@ -656,8 +663,8 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if measure == "building_height" and st != FAILS and (measured.get("building_height") or {}).get("readings"):
             if any("pitched" in r["reading"] or "mansard" in r["reading"] for r in measured["building_height"]["readings"]):
                 st, why = REVIEW, ROOF_NOT_FLAT
-        if st == COMPLIES and not facts.get("lot_surveyed") and names & LOT_LENGTHS:
-            worst = _worst_case(expr, values, names, measured, facts)
+        if st in (COMPLIES, REVIEW) and drawn is True and clean and tax and names & LOT_LENGTHS:
+            worst = _worst_case(expr, values, names, measured, facts)   # complies as drawn: say how it may not
             if worst is not None:
                 bad = next((c for c in ([node] + raised if raised else _compares(expr))     # the way it uses
                             if _evaluate(ast.unparse(c), worst) is False), node)
@@ -667,14 +674,18 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst "
                        f"{what}{_display(*w)[0]} against {_display(*w)[1]} · Pick survey lot lines…")
         tol = (measured.get("lot_area") or {}).get("tolerance")
-        survey_only = "lot_area" in names and (measured.get("lot_area") or {}).get("value") is None and all(
-            (measured.get(n) or {}).get("value") is not None for n in names - {"lot_area"} if n in measured)
-        if st == REVIEW and tol and node is not None and not facts.get("lot_surveyed") and survey_only:
-            # waiting only on the survey: decided over the reading set (the lot area at its ends, spec C2)
+        every = set().union(*(formula.names(rule[k]) for k in ("applies_when", "check") if rule.get(k)),
+                            *(formula.names(r["when"]) for r in rule.get("review_when") or []))
+        survey_only = "lot_area" in every and (measured.get("lot_area") or {}).get("value") is None and all(
+            values.get(n) is not None for n in every - {"lot_area"})        # nothing else it reads is open
+        if st == COMPLIES and tol and tax and node is not None and row.get("Provisional") == SURVEY_ONLY:
+            why = (f"Complies even at the tax-map worst case (lot area {_area(tol['low'], 'down')})"
+                   " · Pick survey lot lines…")                        # the checker's verdict, said
+        elif st == REVIEW and tol and tax and node is not None and survey_only:
+            # waiting only on the survey: say why from the reading set (the lot area at its ends, spec C2)
             bad = _worst_case(expr, values, names, measured, facts)
             if bad is None:
-                st, why = COMPLIES, (f"Complies even at the tax-map worst case (lot area {_area(tol['low'], 'down')})"
-                                     " · Pick survey lot lines…")
+                pass
             elif _evaluate(expr, values) is False and _best_case(expr, values, names, measured, facts) is not None:
                 w = _numbers(node, _best_case(expr, values, names, measured, facts), measured, label)
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): as drawn it does not comply, "
@@ -683,12 +694,10 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 w = _numbers(node, bad, measured, label)
                 why = (f"Lot lines are from the tax map (±{feet_inches(TOLERANCE)}): at worst {_display(*w)[0]} "
                        f"against {_display(*w)[1]} · Pick survey lot lines…")
-        if st == FAILS and not facts.get("lot_surveyed") and node is not None and (names & LOT_LENGTHS or tol):
-            # fails as drawn, but the tax-map lines could be off: it fails only if it fails under every reading of
-            # them (each line up to TOLERANCE either way); else it needs review (the same slack as for a pass)
+        if st == REVIEW and drawn is False and clean and tax and node is not None and (names & LOT_LENGTHS or tol):
+            # fails as drawn, but the checker found a reading of the tax-map lines under which it complies: say how
             best = _best_case(expr, values, names, measured, facts)
             if best is not None:
-                st = REVIEW
                 if _evaluate(ast.unparse(node), best) is True:      # its own comparison holds at best: say how
                     w = _numbers(node, best, measured, label)
                     could = f"at best {_display(*w)[0]} against {_display(*w)[1]}"
@@ -741,7 +750,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "proposed": proposed, "required": required, "margin": margin_t if st != REVIEW or margin_t else "",
             "_node": node,                        # the comparison it was decided on (a raise replaces it); popped
             "_expr": expr,                        # and its whole expression (settle reads both)
-            "_split_open": split_open,            # one of two side yards of a rule failing under every reading
+            "_checker": checker,                  # the checker's verdict for it: the most it may show (view)
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
@@ -979,6 +988,10 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
     _cautious_for_left_out(items, left_out, extras.get("touching"))
+    for i in items:                                  # THE guard: never above the checker's verdict (round 3)
+        checker = i.pop("_checker", None)
+        if checker is not None and RANK[i["status"]] > RANK[checker]:
+            i.update(status=checker, mark=MARK[checker])
     settle(items, values, measured, facts)          # Delta, colours, approx: from each row's readings, last
     if facts.get("ground_assumed") == "flat":                 # on the rows the ground decides (MVP, Ben 2026-10-20)
         for i in items:

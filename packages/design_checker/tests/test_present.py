@@ -676,6 +676,102 @@ def test_verdict_delta_and_colour_never_disagree_for_any_design():
                 _shown_agrees(i)
 
 
+def _never_above_the_checker(r):
+    """Review round 3: the checker (check.row_verdict over the reading set) is the only place a row complies or
+    fails; every panel item is its row's verdict (a side yard: its side's) or more cautious, never more
+    favourable."""
+    rows = {x["Rule id"]: x for x in r["rows"]}
+    for i in r["view"]["items"]:
+        row = rows.get(i.get("rule"))
+        if row is None:
+            continue
+        verdict = (row.get("Sides") or {}).get(i.get("measure")) or row["Verdict"]
+        assert present.RANK[i["status"]] <= present.RANK[verdict], (i["name"], i["status"], verdict, i["reason"])
+
+
+def _sample106():
+    from design_checker.check import sample_site
+    from test_measure import lot as lot_of
+    sample = sample_site()
+    return lot_of(sample["lot"]), dict(sample["facts"])
+
+
+def test_an_unmeasured_porch_touching_the_house_keeps_a_side_yard_in_review():
+    """Review round 3 (P0): a side yard whose value is an open question was raised to complies after the left-out
+    caution had run, so a porch touching the house (part of it for yards, §325-18A) no longer mattered."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30), lot_=lot), {**facts, "lot_surveyed": True},
+                   extras={"not_included": ["porch-1"], "touching": ["porch-1"]})
+    side = items(r["view"])["Side yard, Northeast"]
+    assert side["status"] == present.REVIEW, (side["status"], side["reason"])
+    assert "touching" in side["reason"] or "depends on" in side["reason"]
+    _never_above_the_checker(r)
+
+
+def test_an_unknown_use_keeps_the_lot_area_in_review_with_its_reason():
+    """Review round 3 (P1): with the use unknown the checker leaves the lot area needing review ("choose the use");
+    the panel's survey step ignored applies_when and showed complies."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(12, 30, 60, 80, 0, 30), lot_=lot), {**facts, "use": None, "lot_surveyed": False})
+    area = next(i for i in r["view"]["items"] if i["rule"] == "R-1b.lot_area_one_family_detached")
+    assert area["status"] == present.REVIEW and "choose the use" in area["reason"], (area["status"], area["reason"])
+    _never_above_the_checker(r)
+
+
+def test_a_side_yard_that_complies_only_under_every_reading_of_an_open_question_needs_review():
+    """Review round 3 (P2): like every other row that passes under every reading of an open question, the side
+    yard needs review and names the question; it never shows a green "complies" with no reason."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30), lot_=lot), {**facts, "lot_surveyed": True})
+    side = items(r["view"])["Side yard, Northeast"]
+    assert side["status"] == present.REVIEW and (side["reason"] or "").startswith("Complies under every reading, but it depends on"), (
+        side["status"], side["reason"])
+    assert "if confirmed" in side["delta"] and "to spare" not in side["delta"]
+    _never_above_the_checker(r)
+
+
+def test_the_guard_only_lowers_it_never_undoes_the_panels_caution():
+    """Round 3's guard caps a row at the checker's verdict; it never lifts a row the panel made more cautious. A
+    complying house on a surveyed lot with an unmeasured porch touching it: the checker passes the yards (it
+    measures only the house), the panel makes them need review (§325-18A), and that stands."""
+    from design_checker.check import check_site
+    r = check_site(_plot(box(12, 30, 38, 65)), {**FACTS, "jurisdiction": CITY},
+                   extras={"not_included": ["porch"], "touching": ["porch"]})
+    rows = {x["Rule id"]: x for x in r["rows"]}
+    front = items(r["view"])["Front yard"]
+    assert rows[front["rule"]]["Verdict"] == present.COMPLIES
+    assert front["status"] == present.REVIEW and "touching" in front["reason"]
+
+
+def test_the_panel_is_never_above_the_checker_for_any_design():
+    """Review round 3's property: random houses on the plain lot, the real 106 lot (open questions) and a corner
+    lot, on the tax map and on a survey, with unmeasured objects (touching or not) and an unknown use: no panel
+    item is ever more favourable than its row's verdict from the checker."""
+    import random
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    rnd = random.Random(3)
+    lot106, facts106 = _sample106()
+    plain = ({**FACTS, "jurisdiction": CITY}, lot_of([(0, 0), (50, 0), (50, 100), (0, 100)]), (50, 100))
+    lots = [plain, (facts106, lot106, (76, 92)), ({**FACTS, "jurisdiction": CITY, "corner_lot": True}, plain[1], (50, 100))]
+    for k in range(60):
+        facts, lot, (w, d) = lots[k % 3]
+        x0, y0 = rnd.uniform(1, w * 0.4), rnd.uniform(5, d * 0.4)
+        x1, y1 = rnd.uniform(x0 + 8, w - 1), rnd.uniform(y0 + 10, d - 2)
+        extras = rnd.choice([None, {"not_included": ["porch"], "touching": ["porch"]}, {"not_included": ["shed"],
+                                                                                        "touching": []}])
+        over = {"lot_surveyed": k % 2 == 0, **({"use": None} if k % 7 == 0 else {})}
+        r = check_site(_plot(box(x0, y0, x1, y1, 0, rnd.choice((30, 35, 38))), lot_=lot), {**facts, **over},
+                       extras=extras)
+        _never_above_the_checker(r)
+        for i in r["view"]["items"]:
+            if i.get("measure"):
+                _shown_agrees(i)
+
+
 def test_red_with_a_complying_core_is_drawn_without_the_core():
     """Review round 2: a house failing all four yards: its red is a ring round the complying core (a polygon with
     a hole), drawn as the whole footprint (only the outline was kept). Each piece is now hole-free and the red is

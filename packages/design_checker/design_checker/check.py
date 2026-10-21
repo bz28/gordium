@@ -134,6 +134,47 @@ def every_reading(rule: dict, measured: dict, allowed: dict, facts: dict | None 
                        (" and with the lot as drawn (confirm the survey)" if survey else ""))
 
 
+def _names(rule: dict) -> set:
+    names = set()
+    for key in ("applies_when", "check"):
+        if rule.get(key):
+            names |= formula.names(rule[key])
+    for r in rule.get("review_when") or []:
+        names |= formula.names(r["when"])
+    return names
+
+
+def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = None, check: str | None = None) -> str:
+    """THE verdict of a rule (or, with `check`, of one of its comparisons: a side yard of a pair, with the rule's
+    applies_when and review_when) over THE reading set (reading_set.combos): fails if it fails under every reading;
+    complies if it passes under every one and nothing it reads is an open question (the lot area of a tax-map lot
+    is read at its low and high ends, so it counts as known); otherwise needs review. The ONLY place a row is
+    decided: the panel shows this or something more cautious, never more favourable (review round 3)."""
+    rule = dict(rule, check=check) if check else rule
+    names = _names(rule)
+    values = {k: m["value"] for k, m in measured.items()}
+    tax = reading_set.tax_map(measured, facts)
+    every = reading_set.combos(names, values, measured, facts)
+    if not every:                                   # a value unknown, or too many: as drawn, never kinder
+        got = outcome(rule, values, allowed)
+        lot = names & (reading_set.LOT_LENGTHS | {SURVEY})
+        return present.FAILS if got == "fail" and not (tax and lot) else \
+            present.COMPLIES if got == "pass" and not (tax and lot) else present.REVIEW
+    got = {outcome(rule, trial, allowed) for trial, _ in every}
+    if got == {"fail"}:
+        return present.FAILS
+    open_ = {n for n in names if values.get(n) is None} - ({SURVEY} if tax else set())
+    return present.COMPLIES if got == {"pass"} and not open_ else present.REVIEW
+
+
+def side_checks(rule: dict) -> dict:
+    """A rule's comparisons of the two side yards, each as its own check (the panel shows each side as a row)."""
+    if not rule.get("check"):
+        return {}
+    return {c.left.id: ast.unparse(c) for c in present._compares(rule["check"])
+            if c.left.id in ("side_yard_smaller", "side_yard_larger")}
+
+
 def verdict(rule: dict, measured: dict, allowed: dict) -> str:
     """The checker's own result for one rule, as its rows mark it: outcome(), except that a needs review that fails
     under every reading (or with the lot as drawn) is a "fail" (the row's "Fails")."""
@@ -301,7 +342,12 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
         found = every_reading(by_id[r["Rule id"]], measured, allowed, facts) if r["Error"] == "NEEDS REVIEW" else None
         r["Provisional"] = found[1] if found else None
         r["Survey"] = bool(found and "confirm the survey" in found[1])     # waits on a fact, not an interpretation
-        r["Fails"] = r["Error"] == "FAIL" or bool(found and found[0] == "fail")   # fails whichever way it goes
+        rule = by_id[r["Rule id"]]
+        r["Verdict"] = row_verdict(rule, measured, allowed, facts)          # the ONE decision (round 3)
+        r["Sides"] = {m: row_verdict(rule, measured, allowed, facts, check=c) for m, c in side_checks(rule).items()}
+        r["Side provisional"] = {m: (every_reading(dict(rule, check=c), measured, allowed, facts) or (None, None))[1]
+                                 for m, c in side_checks(rule).items()}      # each side's words, as a row's
+        r["Fails"] = r["Verdict"] == present.FAILS                          # fails whichever way it goes
         if r["Fails"] and not r.get("Line"):
             r["Line"] = f"{short(r['Requirement'])}: {r['Provisional']}"
     lot_id = (site.get("lot") or {}).get("id")
