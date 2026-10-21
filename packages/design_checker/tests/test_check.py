@@ -1480,3 +1480,12 @@ def test_the_lot_fact_rounds_its_area_down_like_the_lot_area_row():
     7,033 sf (rounded down, never in the architect's favour). One rounding for both."""
     from design_checker import rhino_logic as logic
     assert logic.lot_size(7033.5) == "7,033 sf" and logic.lot_size(6570.0) == "6,570 sf"
+
+
+def test_the_module_docs_say_how_a_row_is_decided():
+    """check.py's own description of a row's verdict, and the QUICKSTART's, match row_verdict: a row that passes
+    under every reading complies unless its result turns on an open question."""
+    from design_checker import check as checking
+    assert "turns_on" in checking.__doc__ and "nothing it reads open" not in checking.__doc__
+    quick = " ".join((checking.REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8").split())
+    assert "the row simply complies" in quick and "it still needs review, because only the zoning office" not in quick

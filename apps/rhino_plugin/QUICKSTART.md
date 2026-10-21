@@ -299,8 +299,9 @@ usually what fixes it:
 - **The grade isn't set**, or the spot grades aren't at the building's walls any more (after you move it):
   height and stories wait for it.
 - **The code leaves a question open** (for example whether an upper-floor overhang counts in a side yard). Gordium
-  works the design out under every reading. If it complies under all of them it says so, but it still needs
-  review, because only the zoning office can settle the question.
+  works the design out under every reading. If the result doesn't depend on the question (every answer gives
+  the same result), the row simply complies. If it does depend on it, the row needs review and names the question,
+  because only the zoning office can settle it.
 - **Something on the lot isn't measured**: a solid not on the `Building` layer (a shed on Default, an imported
   garage). Lot coverage counts every building on the lot, so it needs review until you **Add to check…**.
 
