@@ -147,7 +147,7 @@ def test_F5_the_west_side_yard_stays_west_whichever_way_the_outlines_run():
 # ---- F4 (P2): two solids with the same id: one is dropped from the story count -----------------------------------
 
 @pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F4: a solid sharing another's id is dropped from the stories count")
+                   reason="F4: the same_id stop (#12) reaches every rule but stories: 4 blocks still count as 3, complies")
 def test_F4_four_floors_with_a_repeated_id_never_comply_as_three_stories():
     """Gordium's starting house on the surveyed sample lot plus a fourth floor block whose id repeats floor 2's (the
     site as check_site takes it; Rhino's exported copies carry unique ids, an API caller or a scenario may not).
