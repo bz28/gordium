@@ -102,28 +102,34 @@ def test_2_move_back_5_ft(house):
     assert items["Rear yard"]["status"] == present.COMPLIES
 
 
-def test_3_move_back_10_ft_the_rear_yard_fails(house):
+def test_3_short_only_under_some_tax_map_readings_needs_review_short_under_all_fails(house):
+    """On a tax-map lot a rule fails only if it fails under every reading of where the lines are (each up to
+    2'-0" either way; Ben, 2026-10-21): 11 ft back is short as drawn but complies at best, so it needs review;
+    14 ft back is short however the lines are off, so it does not comply."""
     got, facts = house
-    dy, proposed, required, margin = said(r"Move it (\d+) ft back instead.\*\* Rear yard " + LEN + " against " + LEN
-                                          + r" required: \*\*does not comply, (−\d+'-\d+\")")
-    items = _check(_moved(got["floors"], dy=float(dy)), facts, grade_is="finished")
-    rear = items["Rear yard"]
-    assert (rear["status"], rear["proposed"], rear["required"], rear["margin"]) == \
-        (present.FAILS, proposed, required, margin)
+    dy, proposed, required, best = said(r"Move it (\d+) ft back instead.\*\* Rear yard " + LEN + " against " + LEN
+                                        + r" required: \*\*needs review\*\*.*?\(at best " + LEN + r"\)")
+    rear = _check(_moved(got["floors"], dy=float(dy)), facts, grade_is="finished")["Rear yard"]
+    assert (rear["status"], rear["proposed"], rear["required"]) == (present.REVIEW, proposed, required)
+    assert f"at best {best}" in rear["reason"]
+    dy, proposed, margin = said(r"Now move it (\d+) ft back:\*\* Rear yard " + LEN
+                                + r": \*\*does not comply, (−\d+'-\d+\")")
+    rear = _check(_moved(got["floors"], dy=float(dy)), facts, grade_is="finished")["Rear yard"]
+    assert (rear["status"], rear["proposed"], rear["margin"]) == (present.FAILS, proposed, margin)
 
 
-def test_4_pull_the_rear_wall_6_ft_coverage_fails(house):
+def test_4_pull_the_rear_wall_back_coverage_fails_on_every_tax_map_lot(house):
     got, facts = house
     floors = copy.deepcopy(got["floors"])
     top = max(p[1] for p in floors[0]["outline"])
-    feet, coverage = said(r"pull the rear wall (\d+) ft back.*?Lot coverage (\d+\.\d%)")
+    feet, coverage = said(r"pull the rear wall (\d+) ft back.*?Lot coverage (\d+\.\d+%)")
     for f in floors:
         f["outline"] = [[x, y + float(feet) if y == top else y] for x, y in f["outline"]]
     items = _check(floors, facts, grade_is="finished")
     assert items["Lot coverage"]["status"] == present.FAILS and items["Lot coverage"]["proposed"] == coverage
 
 
-def test_5_raise_the_roof_3_ft_fails_both_ways(house):
+def test_5_raise_the_roof_past_the_bonus_fails_both_ways(house):
     got, facts = house
     floors = copy.deepcopy(got["floors"])
     feet, height, needs = said(r"raise the roof (\d+) ft\*\* \(the top face of Floor 3\). Building height " + LEN
@@ -134,14 +140,14 @@ def test_5_raise_the_roof_3_ft_fails_both_ways(house):
     assert " ".join(needs.split()) in h["reason"]                 # the guide wraps its lines
 
 
-def test_6_widen_4_ft_to_the_east(house):
+def test_6_widen_to_the_east(house):
     got, facts = house
     floors = copy.deepcopy(got["floors"])
     east = max(p[0] for p in floors[0]["outline"])
     feet, proposed, margin, coverage, worst = said(
         r"widen the house (\d+) ft to the east\*\* \(the east face\). Side yard, East " + LEN
-        + r": \*\*does not comply, (−\d+'-\d+\")\*\*, and lot coverage (\d+\.\d%) needs review: at the tax map's"
-        r" worst case it would be (\d+\.\d%)")
+        + r": \*\*does not comply, (−\d+'-\d+\")\*\*, and lot coverage (\d+\.\d+%) needs review: at the tax map's"
+        r" worst case it would be (\d+\.\d+%)")
     for f in floors:
         f["outline"] = [[x + float(feet) if x == east else x, y] for x, y in f["outline"]]
     items = _check(floors, facts, grade_is="finished")
@@ -240,3 +246,22 @@ def test_the_quickstart_test_reads_the_guide():
             said("rear yard " + LEN + r" \(needs")
     finally:
         GUIDE = real
+
+
+def test_on_a_survey_short_as_drawn_is_short(house):
+    """The tax-map slack is the tax map's: with surveyed lot lines, 11 ft back is simply short."""
+    got, facts = house
+    rear = _check(_moved(got["floors"], dy=11), facts, grade_is="finished", lot_surveyed=True)["Rear yard"]
+    assert rear["status"] == present.FAILS and rear["proposed"] == "21'-9\""
+
+
+def test_coverage_over_only_on_some_tax_map_lots_needs_review(house):
+    """27.1% of the lot as drawn, but 24.55% of the largest lot the tax map allows (every line 2 ft out): it
+    fails only under some readings, so it needs review."""
+    got, facts = house
+    floors = copy.deepcopy(got["floors"])
+    top = max(p[1] for p in floors[0]["outline"])
+    for f in floors:
+        f["outline"] = [[x, y + 6 if y == top else y] for x, y in f["outline"]]
+    cov = _check(floors, facts, grade_is="finished")["Lot coverage"]
+    assert cov["status"] == present.REVIEW and cov["proposed"] == "27.1%" and "at best 24.55%" in cov["reason"]

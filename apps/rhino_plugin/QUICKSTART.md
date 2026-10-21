@@ -336,15 +336,18 @@ Building height shows "? 35'-0"" and Stories "? 3" until you tick **No regrading
 1. **Edit site… → tick No regrading near the house → Draw.** Building height 35'-0" complies, at limit;
    Stories 3 complies.
 2. **Move the house 5 ft back (away from the street).** Front yard 32'-0", rear yard 27'-9": both comply.
-3. **Move it 11 ft back instead.** Rear yard 21'-9" against 22'-6" required: **does not comply, −0'-9"**.
-   A note appears bottom left, and only the strip of the house inside the rear yard turns red.
-4. **Undo, then pull the rear wall 6 ft back** (Cmd+Shift+click the rear face, Gumball 6). Lot coverage 27.1%
-   against 25%: **does not comply**, with "reduce the footprint by at least …".
-5. **Undo, then raise the roof 3 ft** (the top face of Floor 3). Building height 38'-0": **does not comply either
-   way**. Over 35'-0", and the height bonus (§325-16C) would need every yard 3 ft larger: "Front yard 27'-0",
-   needs ≥ 28'-0"". Only the part above 35'-0" turns red.
-6. **Undo, then widen the house 4 ft to the east** (the east face). Side yard, East 8'-0": **does not comply,
-   −2'-0"**, and lot coverage 24.5% needs review: at the tax map's worst case it would be 27.1%.
+3. **Move it 11 ft back instead.** Rear yard 21'-9" against 22'-6" required: **needs review**. It is short as
+   drawn, but the tax map's lines could each be 2 ft off in its favour, and then it would comply (at best
+   23'-9"). **Now move it 14 ft back:** Rear yard 18'-9": **does not comply, −3'-9"**, short however the lines
+   are off. A note appears bottom left, and only the strip of the house inside the rear yard turns red.
+4. **Undo, then pull the rear wall 10 ft back** (Cmd+Shift+click the rear face, Gumball 10). Lot coverage 30.1%
+   against 25%: **does not comply**, even on the largest lot the tax map allows, with "reduce the footprint by at
+   least …".
+5. **Undo, then raise the roof 4 ft** (the top face of Floor 3). Building height 39'-0": **does not comply either
+   way**. Over 35'-0", and over the 38'-6" the height bonus (§325-16C) allows: "Front yard 27'-0",
+   needs ≥ 29'-0"". Only the part above 35'-0" turns red.
+6. **Undo, then widen the house 5 ft to the east** (the east face). Side yard, East 7'-0": **does not comply,
+   −3'-0"**, and lot coverage 24.87% needs review: at the tax map's worst case it would be 27.6%.
 7. **Undo.** Everything is back to the starting results.
 
 ### Harder tests
