@@ -861,7 +861,9 @@ def _drawing(rnd):
                        "below": z0 < 0, "blocks": 0, "raised": z0 > 0, "height": z1 - z0})
     if rnd.random() < 0.2:             # a room over the first stack's roof, or beside its edge, a little apart
         top = 10 * len(stacks[0]["ids"]) + (10 if stacks[0].get("gap") else 0)
-        x = rnd.choice([7, 17.1, 17.0])                    # over the roof, just past its edge, at its edge
+        columns = sum(1 for st in stacks if st["ids"] and st["ids"][0].startswith("s"))
+        # over the roof, just past its edge, at its edge (only with no stack beside: there it would stand on it)
+        x = rnd.choice([7, 17.1, 17.0]) if columns == 1 else 7
         dz = rnd.choice([0.05, 0.5, 3])
         blocks.append(box(x, 30, x + 6, 40, top + dz, top + dz + 7, id="room"))
         stacks.append({"ids": ["room"], "countable": False, "floors": 0, "tall": True, "below": False,
@@ -897,10 +899,11 @@ def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
             for members in ([main], stacks):    # each candidate building: the main one alone, and with every part
                 assert not any(s["below"] for s in members), (seed, stacks, m)     # a basement or cellar: asks
                 counted = [s["floors"] for s in members if s["countable"]]
-                could = [math.floor((s["height"] + 0.01) / 7) for s in members if s["tall"] and not s["countable"]]
-                if could:                       # a plain part: its stories are what 7 ft a story allows (R305.1)
-                    least = max(counted + [1 for c in could if c >= 1] + [0])
-                    most = max(counted + could)
+                could = [math.floor((s["height"] + 0.01) / 7) for s in members
+                         if not s["countable"] and (s["tall"] or s is main)]     # the main one is never left out
+                if could:                       # a plain part: its stories are what 7 ft a story allows (R305.1),
+                    least = max(counted + [1])  # and every building has a first story (§325-3)
+                    most = max(counted + could + [1])
                     if typed is not None:       # the count typed only within what the drawing allows
                         assert m["value"] == typed and least <= typed <= most, (seed, stacks, pick, typed, m)
                     else:                       # none typed: a value only if the drawing allows one count
@@ -1213,3 +1216,20 @@ def test_only_a_possible_principal_building_is_read_as_the_main_one():
     garage = box(38, 70, 48, 90, 0, 10, id="garage")                 # 200 sf, 10 ft: it could be
     m = measure(site(RECT, *house, garage), {**FACTS, "stories": 3})
     assert any("if garage were the main building" in r["reading"] for r in m["building_height"]["readings"])
+
+
+def test_the_stories_bound_names_each_solid_and_says_whether_a_count_can_settle_it():
+    """Stories review round 1: (P2) with the main building only assumed, a building read as the main one ignores
+    the count typed, so entering one can't settle it: count_settles says so, and the other solid is named by its
+    id, never "the building"; (P3) a building under 7 ft still has a first story (§325-3): 1, never a loop; (P3) 0
+    typed is refused as fewer than the first story every building has, not as floor blocks that aren't drawn."""
+    house = [floor(10, 25, 35, 55, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    barn = box(38, 70, 48, 90, 0, 20, id="barn")                   # 20 ft: one to two stories, as the main one
+    m = measure(site(RECT, *house, barn), {**FACTS, "stories": 3})["stories"]
+    assert m["count_settles"] is False and "(barn) could hold up to 2 stories" in m["reason"], m
+    one = measure(site(RECT, box(10, 25, 35, 65, 0, 30, id="house")), {**FACTS, "stories": None})["stories"]
+    assert one["count_settles"] is True and "(the building) could hold up to 4" in one["reason"]
+    low = measure(site(RECT, box(10, 25, 35, 65, 0, 6, id="house")), {**FACTS, "stories": 1})["stories"]
+    assert low["value"] == 1
+    zero = measure(site(RECT, box(10, 25, 35, 65, 0, 30, id="house")), {**FACTS, "stories": 0})["stories"]
+    assert "fewer than one: every building has at least a first story" in zero["reason"]

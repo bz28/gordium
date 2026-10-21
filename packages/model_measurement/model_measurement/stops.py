@@ -58,10 +58,10 @@ STOPS = {
                     "blocks",
     "parts_overlap": "part of the building ({what}) starts partly inside the one below it (from {low} ft to {high} "
                      "ft): move it to stand on the one below, or join them",
-    "parts_overlap": "part of the building ({what}) starts partly inside the one below it (from {low} ft to {high} "
-                     "ft): move it to stand on the one below, or join them",
     "part_raised": "part of the building ({what}) starts above the ground: it may be another story: draw its "
                    "stories as floor blocks, or check the count",
+    "stories_below_one": "the stories typed ({typed}) are fewer than one: every building has at least a first story "
+                         "(§325-3): check the count",
     "stories_above_drawn": "the stories typed ({typed}) are more than the drawing could hold ({what}, {height} ft "
                            "tall: at most {most}, at 7 ft a story, R305.1): check the count, or the drawing",
     "basement_part": "part of the building ({what}) is below the ground: whether a basement or cellar counts as a "
