@@ -126,3 +126,41 @@ def test_the_oracle_on_F3_the_height_is_35_ft():
     d, _ = generate.build(*F3_CASE)
     assert oracle.verdicts(d)["R-1b.height"]["verdict"] == oracle.PASS
     assert oracle.measure(d)["height"] == (pytest.approx(35.0), pytest.approx(35.0))
+
+
+def _turned(value, deg):
+    """Every [x, y(, z)] in a site or facts value turned `deg` (a multiple of 90) about the origin, exactly."""
+    if isinstance(value, dict):
+        return {k: _turned(v, deg) for k, v in value.items()}
+    if isinstance(value, list) and value and all(isinstance(c, (int, float)) for c in value) and len(value) in (2, 3):
+        x, y = value[0], value[1]
+        x, y = {0: (x, y), 90: (-y, x), 180: (-x, -y), 270: (y, -x)}[deg]
+        return [x, y, *value[2:]]
+    if isinstance(value, list):
+        return [_turned(v, deg) for v in value]
+    return value
+
+
+def test_F5_a_side_yard_named_by_compass_only_holds_distances_to_that_line():
+    """Round 8, P2: the whole F5 site (lot, buildings, street) turned 0, 90, 180 and 270 degrees, every outline
+    order. A row named "Side yard, <direction>" must show only distances measured toward that direction, under
+    every reading; where they differ the rows say narrower and wider, never a wrong side."""
+    def facing(pts):
+        dx, dy = pts[0][0] - pts[-1][0], pts[0][1] - pts[-1][1]
+        return ("East" if dx > 0 else "West") if abs(dx) >= abs(dy) else ("North" if dy > 0 else "South")
+    d, _ = generate.build(*F5_CASE)
+    for deg in (0, 90, 180, 270):
+        for order in ("as_drawn", "reversed", "shifted"):
+            res = harness.run_site(_turned(generate.gordium_site(d, order), deg),
+                                   _turned(generate.gordium_facts(d), deg))
+            m = res["measurements"]
+            names = []
+            for i in harness.items_by_rule(res)["R-1b.side_yards"]:
+                names.append(i["name"])
+                direction = i["name"].split(", ")[-1]
+                if direction in ("narrower", "wider"):
+                    continue
+                rec = m[i["measure"]]
+                pts = [r["points"] for r in rec["readings"] if r.get("points")] or [rec["points"]]
+                assert {facing(p) for p in pts} == {direction}, (deg, order, i["name"])
+            assert len(names) == 2, names

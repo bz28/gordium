@@ -94,14 +94,17 @@ def test_a_curved_street_line_gives_two_readings_of_the_width():
     assert m["front_yard"]["value"] == round(LineString(arc).distance(house), 6)
 
 
-def test_a_jog_gives_two_readings_of_the_side_lot_lines():
-    # a 10 ft jog at the back left: is it a side lot line or part of the rear lot line?
+def test_a_jog_gives_every_reading_of_the_side_lot_lines():
+    # a 10 ft jog at the back left: is it a side lot line or part of the rear lot line? And the back line itself
+    # could run on as the east side line (review round 8: every reading the geometry allows, none pruned by angle)
     jog = lot([(0, 0), (50, 0), (50, 90), (8, 90), (0, 96)])
     m = measure(site(jog), FACTS)
     assert m["lot_depth"]["value"] is None
-    assert sorted(r["value"] for r in m["lot_depth"]["readings"]) == [93.0, 98.0]
+    # the jog and the back line the rear: (90 + 96) / 2 = 93; the jog part of the west side: (90 + 106) / 2 = 98;
+    # the back line part of the east side, the jog the rear: (90 + 42 + 96) / 2 = 114
+    assert sorted(r["value"] for r in m["lot_depth"]["readings"]) == [93.0, 98.0, 114.0]
     assert "open question" in m["lot_depth"]["reason"]
-    assert m["rear_yard"]["value"] == 25.0         # the nearest rear line is the same under both readings
+    assert min(r["value"] for r in m["rear_yard"]["readings"]) == 25.0
     assert m["side_yard_smaller"]["value"] == 10.0
 
 
@@ -837,3 +840,12 @@ def test_the_eave_fingerprint_doesnt_depend_on_how_the_outline_is_ordered():
     a = _fingerprint(makers, Polygon(ring))
     assert a == _fingerprint(makers, Polygon(ring[2:] + ring[:2])) == _fingerprint(makers, Polygon(ring[::-1]))
     assert a != _fingerprint(makers, Polygon([(0, 0), (10, 0), (10, 2.5), (0, 2.5)]))
+
+
+def test_a_four_sided_lot_has_one_reading_and_no_words():
+    """Round 8, P3: a rectangle's back line is its rear line, with nothing to say about it."""
+    from model_measurement.measure import Lot
+    m = measure(site(), FACTS)
+    assert m["lot_depth"]["readings"] == [] and "as a rear lot line" not in m["lot_depth"]["how"]
+    readings = Lot(site(), FACTS).readings()
+    assert len(readings) == 1 and readings[0][0] == ""

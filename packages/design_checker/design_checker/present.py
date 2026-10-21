@@ -651,8 +651,13 @@ def _side_name(measure: str, measured: dict) -> str:
         if abs(dx) < 1e-6 and abs(dy) < 1e-6:          # a yard of 0: no direction to name it by
             return None
         return ("East" if dx > 0 else "West") if abs(dx) >= abs(dy) else ("North" if dy > 0 else "South")
-    a = facing((measured.get("side_yard_smaller") or {}).get("points"))
-    b = facing((measured.get("side_yard_larger") or {}).get("points"))
+    def faces(name):
+        """The one direction every reading of a side yard was measured toward, or None if they differ (under one
+        reading the narrower yard is to one side line, under another to the other: no compass name is true)."""
+        m = measured.get(name) or {}
+        found = {facing(r.get("points")) for r in m.get("readings") or []} or {facing(m.get("points"))}
+        return found.pop() if len(found) == 1 else None
+    a, b = faces("side_yard_smaller"), faces("side_yard_larger")
     if a and b and a != b:
         return "Side yard, " + (a if measure == "side_yard_smaller" else b)
     return "Side yard, " + ("narrower" if measure == "side_yard_smaller" else "wider")

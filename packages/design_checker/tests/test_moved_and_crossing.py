@@ -239,3 +239,43 @@ def test_the_eaves_rows_show_their_base_requirement_while_the_height_waits_for_f
     front = next(i for i in eaves if i["name"] == "Eaves into front yard")
     assert front["required"] == "≥ 23'-0\""
     assert "more if the §325-16C height bonus applies; the height needs finished grade" in front["reason"]
+
+
+# ---- review round 8: every lot-line reading the geometry allows ---------------------------------------------------
+
+def test_a_jog_then_a_slanted_line_is_also_read_as_the_side_line_running_on():
+    """Round 8, P0 (a false pass on 77796ee: complies). Lot (0,0) (60,0) (60,100) (70,100) (90,130) (0,130): the east
+    side jogs out 10 ft at 100 ft back, then slants 56° to the back corner. Read with jog and slant running on as
+    the east side line: east side 100 + 10 + 36.06 = 146.06, depth (146.06 + 130) / 2 = 138.03, rear 34.5 ft; the
+    house (10..30 x 30..99) is 31 ft from the rear line: fails. Never complies."""
+    res = run(floors(10, 30, 30, 99, 2), lot=[(0, 0), (60, 0), (60, 100), (70, 100), (90, 130), (0, 130)])
+    depth = res["measurements"]["lot_depth"]
+    assert 138.03 in {round(r["value"], 2) for r in depth["readings"]}
+    assert status(res, "R-1b.rear_yard") != present.COMPLIES
+
+
+def test_a_double_jog_is_also_read_as_one_stepped_side_line():
+    """Round 8: the east side steps out twice (100 -> 106 -> 112); read as one stepped side line it is
+    80 + 6 + 20 + 6 + 30 = 142, depth (142 + 130) / 2 = 136."""
+    res = run(floors(10, 30, 40, 70, 2),
+              lot=[(0, 0), (100, 0), (100, 80), (106, 80), (106, 100), (112, 100), (112, 130), (0, 130)],
+              street_line=[[[0, 0], [100, 0]]])
+    assert 136.0 in {round(r["value"], 2) for r in res["measurements"]["lot_depth"]["readings"]}
+
+
+def test_the_sample_lot_and_scenario_09_keep_their_answers():
+    """106 Ithaca Rd's sample (a 73 x 90 rectangle) is unchanged: one reading, no 'line ... as a rear lot line'
+    words; scenario 09 still needs review on its rear yard, and its moved-4-ft case never complies."""
+    res = run(floors(12, 27, 61, 59, 3), lot=[(0, 0), (73, 0), (73, 90), (0, 90)], street_line=[[[0, 0], [73, 0]]])
+    assert res["measurements"]["lot_depth"]["value"] == 90.0
+    assert status(res, "R-1b.rear_yard") == present.COMPLIES
+
+
+def test_a_main_building_off_the_lot_leaves_an_accessory_building_on_it_measured():
+    """Round 8, P3: the house wholly off the lot (y 150..190 on a 120 ft lot) waits; the listed frame shed on the
+    lot (20..30 x 90..100) is measured on its own: 20 ft from the west line, 20 from the rear: complies."""
+    res = run(floors(15, 150, 45, 190, 2) + [prism(rect(20, 90, 30, 100), 0, 10, "shed")],
+              accessory_buildings=["shed"], accessory_frame=True)
+    assert res["measurements"]["accessory_side_yard"]["value"] == 20.0
+    assert status(res, "R-1b.accessory_buildings") == present.COMPLIES
+    assert status(res, "R-1b.front_yard") == present.REVIEW
