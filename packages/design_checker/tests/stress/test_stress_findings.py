@@ -8,7 +8,7 @@ output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper
 (2 ft per line everywhere, carried up in d43e11f); F4 in #12 (the same_id stop, b5a899b); F6, F7 in #18 (ca4f6c3,
-4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). F13, F14 in #18 (1262820). Open: F15.
+4ce81b3); F8, F9 in #18 (1729590, #14's 7 ft line and walls counted once). F10, F11, F12 (#14's stories, a36ccff; merged a98149b). F13, F14 in #18 (1262820). Open: F15 (the rest), F16.
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -376,6 +376,34 @@ def test_F15_the_yards_of_a_floating_house_do_not_wait_on_the_ground_only_someti
     rank = harness.RANK
     before, after = (harness.statuses(harness.gordium(x))["R-1b.rear_yard"] for x in (raised, back))
     assert rank[after] <= rank[before], (before, after)          # closer to the rear line: never a better result
+
+
+# ---- F16 (P2, for #18): a rotated house's walls-only coverage keeps one eave, by outline order ---------------------
+
+F16_CASE = ("corner", [{"op": "rotate", "deg": -5.3}, {"op": "move_house", "dx": 10.0, "dy": 7.75},
+                       {"op": "add_roof", "kind": "roof", "axis": 1, "over": 0.5, "fascia": 1.0, "inset": 4.75,
+                        "rise": 10.75}])
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F16: the eaves-not-counted coverage of a rotated house keeps one of its two eaves (by order)")
+def test_F16_the_eaves_not_counted_coverage_leaves_out_both_eaves_whichever_way_the_outlines_run():
+    """The corner lot's 40 x 35 house rotated 5.3 degrees, moved 10 ft east and 7'-9" back, a gable roof solid
+    with eaves 6 in. past its two 35 ft side walls. Seen from above: walls 40 x 35 = 1,400 sf, with both eaves
+    1,440 sf. Reading 'eaves not counted' should be 1,400 sf: it is 1,400 with the outlines written the other way
+    round, but 1,420 drawn as given or starting elsewhere (one eave left in). The row shows 17.8% to 18% one way,
+    17.5% to 18% the other."""
+    d = generate.build(*F16_CASE)[0]
+    for order in ("as_drawn", "reversed", "shifted"):
+        m = harness.gordium(d, order)["measurements"]["building_area"]
+        low = {r["named"].get("building_area#1"): r["value"] for r in m["readings"]}["eaves_not_counted"]
+        assert low == pytest.approx(1400.0, abs=0.5), (order, low)
+
+
+def test_the_oracle_on_F16_walls_1400_and_with_both_eaves_1440():
+    d, done = generate.build(*F16_CASE)
+    assert len(done) == 3
+    assert oracle.measure(d)["area"] == (pytest.approx(1440.0), pytest.approx(1400.0))
 
 
 # ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------

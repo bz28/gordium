@@ -183,7 +183,17 @@ def _floating_ground_stop(v):
 
 
 MATCHERS.update(F13=_off_lot_height_no_reason, F14=_geos_crash, F15=_floating_ground_stop)
-KNOWN = {"F15": _floating_ground_stop}   # F1-F14 fixed: a return of any of them fails CI
+def _coverage_range_by_order(v):
+    """F16 (open, for #18): drawn another way, only the coverage row's range changes (a reading's area)."""
+    if not (v["invariant"] == "d" and v["rule"] == "R-1b.lot_coverage" and "outlines drawn" in v.get("what", "")):
+        return False
+    d = _design(v)
+    a, b = harness.comparable(harness.gordium(d)), harness.comparable(harness.gordium(d, v["what"].split()[-1]))
+    return a != b and all({**x, "proposed": None} == {**y, "proposed": None} for x, y in zip(a, b))
+
+
+MATCHERS["F16"] = _coverage_range_by_order
+KNOWN = {"F15": _floating_ground_stop, "F16": _coverage_range_by_order}   # F1-F14 fixed: a return of any of them fails CI
 
 
 def known(v):
