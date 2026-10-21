@@ -363,12 +363,18 @@ def test_F15_the_yards_of_a_floating_house_do_not_wait_on_the_ground_only_someti
     is no longer read, and the yards and coverage are measured (complies) although the house still floats. The
     plan yards don't depend on the ground; either way, the same floating house must get the same yard results.
     (Found as invariant c: with a listed shed in front, shrinking the house turned coverage from needs review to
-    does not comply.)"""
+    does not comply. Seeds 47 and 53: the whole house raised 9 in., then moved 2'-2" toward the rear line: the rear
+    yard went from needs review to complies, the yard smaller but the stop gone.)"""
     d = generate.build(*F15_CASE)[0]
     pulled = generate.apply(d, {"op": "stretch", "face": 2, "amount": -1.94})
     a, b = harness.statuses(harness.gordium(d)), harness.statuses(harness.gordium(pulled))
     for rule in ("R-1b.front_yard", "R-1b.side_yards", "R-1b.rear_yard"):
         assert a[rule] == b[rule], (rule, a[rule], b[rule])
+    raised = generate.build("sloped", [{"op": "shift_floor", "k": 0, "dz": 0.75, "carry": True}])[0]
+    back = generate.apply(raised, {"op": "move_house", "dx": 0.0, "dy": 2.2})
+    rank = harness.RANK
+    before, after = (harness.statuses(harness.gordium(x))["R-1b.rear_yard"] for x in (raised, back))
+    assert rank[after] <= rank[before], (before, after)          # closer to the rear line: never a better result
 
 
 # ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------

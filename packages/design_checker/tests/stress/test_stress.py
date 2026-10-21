@@ -173,13 +173,13 @@ def _geos_crash(v):
 
 
 def _floating_ground_stop(v):
-    """F15 (open): the shrink changes coverage because the 'ground doesn't meet the buildings' stop goes away."""
-    if not (v["invariant"] == "c" and v["rule"] == "R-1b.lot_coverage"):
+    """F15 (open): a move or a shrink changes a yard or the coverage only because the 'ground doesn't meet the
+    buildings' stop goes away (the spot grades no longer at the walls)."""
+    if not (v["invariant"] == "c" and v["rule"] in ("R-1b.lot_coverage", "R-1b.front_yard", "R-1b.side_yards",
+                                                    "R-1b.rear_yard")):
         return False
-    d = _design(v)
-    res = harness.gordium(d)
-    return any("doesn't meet the buildings" in (i["reason"] or "")
-               for i in harness.items_by_rule(res).get("R-1b.lot_coverage", []))
+    res = harness.gordium(_design(v))
+    return any("doesn't meet the buildings" in (i["reason"] or "") for i in harness.items_by_rule(res).get(v["rule"], []))
 
 
 MATCHERS.update(F13=_off_lot_height_no_reason, F14=_geos_crash, F15=_floating_ground_stop)
