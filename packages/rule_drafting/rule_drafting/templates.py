@@ -119,6 +119,11 @@ def template_problems(template: dict) -> list[str]:
           for n in sorted(set(defined) - formula_slots(template))]
     if template["kind"] == "flag" and template.get("check", "").strip():
         p.append("a flag has no check (an architect decides it): leave check empty")
+    if relaxes := (template.get("relaxes") or "").strip():
+        if relaxes not in defined:
+            p.append(f"relaxes {relaxes!r} must be the name of one of this template's slots (the chart row it widens)")
+        if template["kind"] != "rule" or not template.get("applies_when", "").strip():
+            p.append("a rule that relaxes another needs its conditions (applies_when) and its own check")
     p += [f"slot {n!r} is defined twice" for n in sorted({n for n in defined if defined.count(n) > 1})]
     p += [f"slot {s['name']!r}: footnote {f!r} must be the note's number, like \"16\""
           for s in template["slots"] for f in s["footnotes"] if not re.fullmatch(r"\d+", f)]

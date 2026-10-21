@@ -82,7 +82,8 @@ class Inputs:
 
     def system(self) -> str:
         return drafter.system_prompt(self.ctx, self.uses, [district_name(c) for c in self.columns],
-                                     drafter.chart_table(self.chart_sections, self.rows_of), self.notes)
+                                     drafter.chart_table(self.chart_sections, self.rows_of), self.notes,
+                                     frozenset(u for u in self.ctx.uses if drafter.several_units(u, self.law, self.ctx)))
 
     def units(self) -> list[dict]:
         out = [{"id": unit_id, "code": True} for unit_id in CODE_SECTIONS.values()]
@@ -349,7 +350,7 @@ def cmd_draft(args) -> int:
             elif u["id"] == ACCESSORY_UNIT:
                 result = draft_accessory()
             else:
-                context = drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions)
+                context = drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions) | {"drafted": drafted_rules(i)}
                 result = drafter.draft_unit(client, u, context, system, i.law, i.ctx, i.columns, i.cells, i.notes,
                                             record, budget=budget)
             save_result(i, log, u["id"], result)
@@ -407,6 +408,11 @@ def draft_uses(i: Inputs) -> dict:
     return result
 
 
+def drafted_rules(i: Inputs) -> dict[str, list[dict]]:
+    """Each district's drafted rules as saved now (an exception drafted later links to the chart rule it widens)."""
+    return {p.stem: (load(p) or {}).get("rules") or [] for p in sorted(i.drafted.glob("*.yaml")) if p.stem != "general"}
+
+
 def last_recorded_attempts(i: Inputs, unit_id: str) -> list[dict]:
     """The unit's most recent drafting session from the run records: its last attempt 1 and the attempts after it."""
     calls = [c for c in run_records(i) if c.get("unit") == unit_id]
@@ -418,7 +424,7 @@ def replay_unit(i: Inputs, unit: dict, attempts: list[dict]) -> dict:
     """Judge a unit's recorded answers again with today's code, exactly as draft_unit judges them (the first usable
     answer is kept; else the last one with working rules, its rejections for a person; else failed). No API call: a
     change to how rules are built or checked reaches the saved drafts without paying for new answers."""
-    context = drafter.gather_context(unit, i.law, {"notes": i.notes}, i.definitions)
+    context = drafter.gather_context(unit, i.law, {"notes": i.notes}, i.definitions) | {"drafted": drafted_rules(i)}
     why, last = "no recorded answer", None
     for rec in attempts:
         if rec.get("stop_reason") != "end_turn":

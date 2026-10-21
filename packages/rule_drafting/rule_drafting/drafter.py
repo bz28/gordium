@@ -30,7 +30,7 @@ from section_labeling.budget import worst_case
 from section_labeling.labeler import PRICES, cost, find_quote, numbered, sha
 from section_labeling.term_index import related as related_pieces
 
-from .chart_values import FOOTNOTE, NOT_APPLICABLE, footnotes, section_refs
+from .chart_values import FOOTNOTE, NOT_APPLICABLE, footnotes, numbers as cell_numbers, section_refs
 from .templates import (CHART_FILE, fill_template, formula_slots, number_places, template_problems,
                         with_occurrence_nudged)
 
@@ -69,7 +69,7 @@ architect pass, fail or needs review. So:
 3. Draft only this text's own requirements. A requirement or exception that lives in another section of the
    law is drafted when that section is drafted, not folded into this rule. For example, the chart's height row
    is drafted as "building_height <= {height}"; the extra height that section 325-16C allows (with larger
-   yards) is drafted from 325-16C itself.
+   yards) is drafted from 325-16C itself, as a rule that relaxes the chart's (see "relaxes").
 4. For each requirement write one template: the formula, a slot for every chart number, the quotes, every
    number you type with where it is written, and worked examples.
 5. Before answering, check each number you typed against the "numbers" rules, and each example against the
@@ -131,6 +131,22 @@ it has slots) or one rule for every district (when it has none).
   limit it to the chart's dwelling uses, send other uses to §325-20 (review), and for a building of several units
   add up every unit or send it to review; one unit's sleeping rooms don't count them all.
 - Exceptions: draft every part of an exception (every yard it enlarges) for a district, or none.
+- relaxes: an exception that allows more than a chart rule allows (more height when every yard is increased) is
+  one rule: applies_when is every condition of the exception, all of them (every yard it enlarges, with its
+  increase); check is the most the exception allows; relaxes is the name of the slot whose chart row's rule it
+  widens ("height" for the slot of 'Height in feet'). Code links it to that district's chart rule, and the
+  checker passes the chart rule when it passes, or when the exception's conditions all hold and its check passes.
+  A requirement the exception adds on top (the stories may not be exceeded) is its own rule, with no relaxes.
+  relaxes is "" for every other rule.
+- Projections into yards: a limit on how far a feature (eaves, cornices) may project into a required yard is a
+  rule on each yard measured to the outermost part (the *_eaves measures) against that yard's chart minimum less
+  the projection allowed. Where another section enlarges the required yard (the height bonus, for a building over
+  the chart height), send that case to review. "The yard stays open" is what the yard rules and this rule check:
+  it needs no flag of its own.
+- Cell forms: when a row's cells take different forms in different districts (footnotes on some, or several
+  numbers, like '35%/40% /50% [fn12]'), write a template for each form, each with that form's slots and its
+  footnotes applied ("one number per use" is a choice by use in the formula, every number used). Code fills each
+  district from the template its cell fits.
 - Ranges: when the text sets a minimum or a range ("three or more", "at least", "not less than", "between 3 and
   6"), the formula enforces every end of it, even when the ends are in different sentences ("a building
   containing three or more dwellings" and "a maximum of six may be attached" are one rule: quote both sentences
@@ -155,11 +171,12 @@ def output_schema(topics: list[str]) -> dict:
                            "number": {"type": "integer"}, "numbers_in_cell": {"type": "integer"},
                            "percent": {"type": "boolean"}, "footnotes": {"type": "array", "items": text}}}
     template = {"type": "object", "additionalProperties": False,
-                "required": ["id_suffix", "title", "topic", "kind", "applies_when", "check", "slots", "review_when",
-                             "quotes", "numbers", "examples", "open_questions", "new_measures"],
+                "required": ["id_suffix", "title", "topic", "kind", "applies_when", "check", "relaxes", "slots",
+                             "review_when", "quotes", "numbers", "examples", "open_questions", "new_measures"],
                 "properties": {
                     "id_suffix": text, "title": text, "topic": {"type": "string", "enum": topics},
                     "kind": {"type": "string", "enum": ["rule", "flag"]}, "applies_when": text, "check": text,
+                    "relaxes": text,
                     "slots": {"type": "array", "items": slot},
                     "review_when": {"type": "array", "items": {
                         "type": "object", "additionalProperties": False, "required": ["when", "reason"],
@@ -205,13 +222,17 @@ def chart_notes(notes: dict[int, dict]) -> str:
                      for n in by_number.values())
 
 
-def system_prompt(ctx: Context, uses: dict, districts: list[str], table: str, notes: dict[int, dict]) -> str:
-    """The fixed instructions: identical for every unit, so they're cached after the first call."""
+def system_prompt(ctx: Context, uses: dict, districts: list[str], table: str, notes: dict[int, dict],
+                  several: frozenset = frozenset()) -> str:
+    """The fixed instructions: identical for every unit, so they're cached after the first call. several: the uses
+    that are a building of several dwelling units by their definitions (several_units), marked in the use list."""
     measures = yaml.safe_load(MEASURES_FILE.read_text(encoding="utf-8"))
     topics = yaml.safe_load(VOCABULARY_FILE.read_text(encoding="utf-8"))["topics"]
     return (f"{GUIDE_FILE.read_text(encoding="utf-8")}\n{FORMAT}\n## Measures (with units)\n"
             + "\n".join(f"- {n} ({m['unit']}): {m['meaning']}" for n, m in measures.items())
-            + "\n\n## Use ids (for the use measure)\n" + "\n".join(f"- {k}: {v['name']}" for k, v in uses.items())
+            + "\n\n## Use ids (for the use measure)\n" + "\n".join(
+                f"- {k}: {v['name']}" + (" (a building of several dwelling units, by its definition)" if k in several else "")
+                for k, v in uses.items())
             + "\n\n## Residential districts (for the district measure: write them like this)\n"
             + ", ".join(districts)
             + "\n\n## Topics\n" + "\n".join(f"- {k}: {' '.join(v.split())}" for k, v in topics.items())
@@ -355,6 +376,54 @@ def resolve_quotes(template: dict, unit: dict, context: dict, law: dict, ctx: Co
         if source not in sources:
             sources.append(source)
     return sources, p
+
+
+NOTE_AMOUNT = re.compile(r"(\d[\d,]*(?:\.\d+)?)\s*(%|sf\b|square feet|ft\b|feet|foot|units?\b|spaces?\b)", re.IGNORECASE)
+
+
+def note_amounts(text: str) -> list[float]:
+    """The amounts a chart note states, with their unit: "+500 sf for each additional occupant" -> [500];
+    "For the first 1-3 units; +750 sf" -> [3, 750]; "50% of the developable lot area" -> [0.5]. A marker or a
+    pointer ("(4)", "notes 1 - 6", "§325-16") isn't an amount."""
+    out = []
+    for m in NOTE_AMOUNT.finditer(re.sub(r"^\s*\(\d+\)", "", text)):
+        n = float(m[1].replace(",", ""))
+        out.append(n / 100 if m[2] == "%" else n)
+    return out
+
+
+def _typed_numbers(template: dict) -> list[float]:
+    from rule_format import formula
+    texts = [template.get("applies_when", ""), template.get("check", "")] + [r["when"] for r in template.get("review_when") or []]
+    found = []
+    for t in texts:
+        try:
+            found += formula.numbers(re.sub(r"\{[a-z0-9_]+\}", "x", t)) if t.strip() else []
+        except formula.FormulaError:
+            return []                                    # reported with the formula
+    return found
+
+
+def note_amount_problems(template: dict, notes: dict[int, dict], flagged: frozenset = frozenset()) -> list[str]:
+    """Every amount a note on a slot's own cell states is in the rule's formulas (R-2C's '2,500 sf [fn4]': "+500 sf
+    for each additional occupant"; a draft that quoted the note and dropped the 500 passed every larger household),
+    unless a flag of the same answer quotes that note (flagged: (page, note)), for a person to apply. Checked once
+    the template's numbers are known to be backed (_backing), so each problem is reported by its own check."""
+    if template["kind"] != "rule":
+        return []
+    typed = _typed_numbers(template)
+    p = []
+    for slot in template["slots"]:
+        for n in sorted(set(slot["footnotes"]), key=lambda n: (len(n), n)):
+            note = notes.get(slot["page"], {}).get(n)
+            if note is None or (slot["page"], n) in flagged:
+                continue
+            for amount in dict.fromkeys(note_amounts(note["text"])):
+                if not any(abs(amount - x) < 1e-9 for x in typed):
+                    p.append(f"slot {slot['name']}: footnote {n} states {amount:g}, which the rule doesn't apply "
+                             f"(apply it in the formula, or send the note to a person with a flag quoting it): "
+                             f"{note['text']!r}")
+    return p
 
 
 def _footnote_problems(template: dict, sources: list[dict], notes: dict[int, dict]) -> list[str]:
@@ -761,15 +830,67 @@ def all_or_none(answer: dict, unit: dict, out: dict) -> None:
         out["rules"] = {d: rs for d, rs in out["rules"].items() if rs}
 
 
+def link_relaxes(rule: dict, template: dict, column: str | None, unit: dict, drafted: dict) -> tuple[dict | None, str | None]:
+    """Link an exception to the chart rule it widens (`relaxes`, rule_format README): the one rule of this district's
+    drafted rulebook, from another unit, that cites this district's cell of the named slot's row. None found (the
+    chart row isn't drafted there, or two rules cite it) and the exception isn't kept there: the chart rule stays
+    as strict as it is, and a person checks the exception."""
+    name = template["relaxes"].strip()
+    slot = next((x for x in template["slots"] if x["name"] == name), None)
+    if slot is None or column is None:
+        return None, f"relaxes {name!r} must name one of this template's slots"
+    district = district_name(column)
+    cell = {"section": slot["section"], "row": slot["row"].strip(), "column": column}
+    own = f"{district}.{unit.get('prefix', '')}"
+    targets = [r for r in drafted.get(district) or [] if r.get("kind") == "rule" and not r.get("relaxes")
+               and not r["id"].startswith(own) and any(x.get("cell") == cell and x.get("page") == slot["page"]
+                                                       for x in r.get("sources") or [])]
+    if len(targets) != 1:
+        return None, (f"the chart rule it widens ({slot['row'].strip()!r}) is "
+                      + ("not drafted for this district" if not targets else "cited by several rules here")
+                      + ": the chart rule stays as it is and a person checks the exception")
+    head = {k: rule[k] for k in ("id", "kind", "topic", "title")}
+    return head | {"relaxes": targets[0]["id"]} | {k: v for k, v in rule.items() if k not in head}, None
+
+
+def _widened(rule: dict, context: dict) -> list[dict]:
+    """The rule a relaxing rule widens, so a rulebook check of the relaxing rule sees its target."""
+    target = rule.get("relaxes")
+    if not target:
+        return []
+    return [r for r in (context.get("drafted") or {}).get(target.split(".")[0]) or [] if r["id"] == target]
+
+
+def filled_elsewhere(gap: dict, used: dict, cells: dict) -> bool:
+    """A district cell one template couldn't fill (its footnotes or how many numbers it states differ from the other
+    districts': R-2C's '35%/40% /50% [fn12]') isn't a gap when templates written for that form fill it: every number
+    the cell states fills a slot of a rule kept for that district (fn12's three numbers, one per use). A cell only
+    partly used stays a gap."""
+    keys = [tuple(c) for c in gap.get("cells") or []]
+    if not keys:
+        return False
+    for key in keys:
+        cell = cells.get(key)
+        stated = set(range(1, len(cell_numbers(cell["value"])) + 1)) if cell else set()
+        if not stated or not stated <= used.get(key, set()):
+            return False
+    return True
+
+
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
                  cells: dict, notes: dict[int, dict], drafted_by: str) -> dict:
     """Turn an answer into rules, every one checked by the inspector. Returns {rules: {district: [rule]},
     unresolved: [{rule, why}] (districts whose cells don't fit a working template), rejected: [{rule, why}]
     (templates that work nowhere), proposed: {name: measure}, problems: [...] (the rejections, as text)}."""
     out = {"rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}
+    used: dict[tuple, set[int]] = {}           # each district cell's numbers that fill a slot of a kept rule
     # a law piece that names its districts ("in the R-3a or R-3b Zoning District") applies only there, whatever the AI wrote
     scope, unread = text_scope(unit["text"], ctx.districts) if unit.get("piece") else (None, [])
     suffixes = [unit.get("prefix", "") + t["id_suffix"] for t in answer["templates"]]
+    flat = lambda t: " ".join(str(t).split())           # noqa: E731
+    flagged = frozenset((q["page"], n) for t in answer["templates"] if t["kind"] == "flag" for q in t["quotes"]
+                        if q.get("document") == "chart" and flat(q.get("text")).strip()
+                        for n, note in (notes.get(q.get("page")) or {}).items() if flat(q["text"]) in flat(note["text"]))
     for t in answer["templates"]:
         t = t | {"id_suffix": unit.get("prefix", "") + t["id_suffix"]}   # a law piece's rules carry its id
         p = template_problems(t)
@@ -795,6 +916,8 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 if scope is not None and column is not None and district_name(column) not in scope:
                     continue                    # the law doesn't apply in this district: nothing to fill or list
                 rule, why = fill_template(t, column, cells, sources, drafted_by)
+                if why is None and (t.get("relaxes") or "").strip():
+                    rule, why = link_relaxes(rule, t, column, unit, context.get("drafted") or {})
                 if why is None:
                     rule, why = unclear_exemption(unclear_catch_all(rule, law, ctx), unit, law, ctx)
                 if why is None:
@@ -807,12 +930,16 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 elif why is None and scope is not None:
                     placed = in_scope(rule, scope)
                     for r in placed:            # each scope district's own copy, checked in its own rulebook
-                        if problems := validate({"district": r["id"].split(".")[0], "rules": [r]}, ctx):
+                        if problems := [x for x in validate({"district": r["id"].split(".")[0],
+                                                             "rules": [r] + _widened(r, context)}, ctx)
+                                        if x.startswith(r["id"] + ":")]:
                             gaps.append({"rule": r["id"], "why": "; ".join(problems[:3])})
                         else:
                             good.append((column, r))
                     continue                    # outside the scope: the law doesn't apply there, nothing to list
-                if why is None and (problems := validate({"district": rule["id"].split(".")[0], "rules": [rule]}, ctx)):
+                if why is None and (problems := [x for x in validate({"district": rule["id"].split(".")[0],
+                                                                      "rules": [rule] + _widened(rule, context)}, ctx)
+                                                 if x.startswith(rule["id"] + ":")]):
                     why = "; ".join(problems[:3])
                 if why is None:
                     good.append((column, rule))
@@ -822,8 +949,13 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
             if good:
                 if unbacked := _backing(t, valid, good, cells, sources, drafted_by, ctx.allowed()):
                     gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in unbacked], []
+                elif dropped := note_amount_problems(t, notes, flagged):
+                    gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in dropped], []
         finally:
             ctx.proposed = saved
+        for column, _ in good:
+            for sl in t["slots"]:
+                used.setdefault((sl["page"], sl["section"], sl["row"].strip(), column), set()).add(sl["number"])
         good = [rule for _, rule in good]
         if good:                                # the template works: districts that don't fit go to a person
             out["templates"].append(t)
@@ -834,6 +966,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
         else:                                   # it works nowhere: the drafter is told why and tries again
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}",
                                     "why": "; ".join(f"{g['rule']}: {g['why']}" for g in gaps[:3])})
+    out["unresolved"] = [g for g in out["unresolved"] if not filled_elsewhere(g, used, cells)]
     if unit.get("piece"):
         all_or_none(answer, unit, out)
     out["unresolved"] += exemption_gaps(unit, out, ctx)

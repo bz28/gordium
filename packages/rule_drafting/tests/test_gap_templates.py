@@ -1,0 +1,250 @@
+"""The drafting gaps after stage 1 (R-2c's footnoted cells, footnote 7, residential parking, the §325-16C height bonus,
+§325-18B's eaves), fixed in code and instructions before any re-draft: for each, a correct answer written by hand is
+accepted and the known-bad forms are refused or kept for a person. No API call."""
+import sys
+from pathlib import Path
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).parent))
+from test_drafting import bound, cli, drafter, slot, template, unit  # noqa: E402
+
+from rule_format.rulebook import apply_relaxes, outcome  # noqa: E402
+
+COVERAGE = "Maximum lot coverage by buildings"
+HEIGHT = "Maximum Building Height [fn10]"
+YARDS = "Yard Dimensions"
+REAR = "Rear (minimum, % of depth or feet, whichever is less)"
+LOT_SIZE = "Minimum Lot Size [fn3]"
+OPENING = ("C. Height and open space. In any district, any main building may be erected to a height in excess of that "
+           "specified for the district, provided that:")
+YARDS_GROW = ("(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of "
+              "such additional height.")
+TEN_PERCENT = ("(3) In each district, the number of additional feet may not exceed 10% of the maximum building height "
+               "allowed in that district.")
+
+
+@pytest.fixture(scope="module")
+def inputs():
+    return cli.Inputs()
+
+
+def law(text, piece="325-16C"):
+    return {"document": "law", "page": 0, "piece": piece, "text": text}
+
+
+def chart_note(n, text, page=3):
+    return {"document": "chart", "page": page, "piece": f"fn{n}", "text": text}
+
+
+def judge(inputs, uid, templates, drafted=None):
+    u = unit(inputs, uid)
+    context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
+    if drafted is not None:
+        context |= {"drafted": drafted}
+    return drafter.check_answer({"templates": templates, "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
+                                inputs.columns, inputs.cells, inputs.notes, "rule_drafting/test")
+
+
+def coverage(name, number, uses_when, fn=("12",), count=3):
+    return template(name, "building_area <= {pct} * lot_area",
+                    [slot("pct", "Percent of lot area", number, count, True, fn, section=COVERAGE)],
+                    [({"building_area": "{pct} * 1000", "lot_area": "1000", "use": uses_when[1]}, "pass"),
+                     ({"building_area": "{pct} * 1000 + 1", "lot_area": "1000", "use": uses_when[1]}, "fail")],
+                    quotes=[chart_note(12, "(12) The first number applies to one-family detached dwellings, one-family "
+                                           "detached zero lot line dwellings, and other uses; the second number applies "
+                                           "to one-family semi- detached dwelling and two-family dwellings; and the "
+                                           "third number applies to one-family attached dwellings.")] if fn else [],
+                    applies_when=uses_when[0])
+
+
+PLAIN = template("max_coverage", "building_area <= {pct} * lot_area",
+                 [slot("pct", "Percent of lot area", 1, 1, True, section=COVERAGE)],
+                 [({"building_area": "{pct} * 1000", "lot_area": "1000"}, "pass"),
+                  ({"building_area": "{pct} * 1000 + 1", "lot_area": "1000"}, "fail")])
+FIRST = coverage("coverage_first", 1, ('use not in ["one_family_semi_detached", "two_family", "one_family_attached"]',
+                                       "one_family_detached"))
+SECOND = coverage("coverage_second", 2, ('use in ["one_family_semi_detached", "two_family"]', "two_family"))
+THIRD = coverage("coverage_third", 3, ('use == "one_family_attached"', "one_family_attached"))
+
+
+def test_a_cell_filled_by_the_template_for_its_form_is_no_gap_and_a_partly_used_cell_stays_one(inputs):
+    """R-2C's coverage cell '35%/40% /50% [fn12]' doesn't fit the plain template; the three fn12 templates fill it
+    (one number per use). It was still listed for a person ("has 3 numbers, the rule expects 1"), 469 such lines in
+    the log. With a number of the cell unused (no rule for attached houses), it stays a gap: never silent."""
+    got = judge(inputs, "chart-p3-maximum_lot_coverage_by_buildings", [PLAIN, FIRST, SECOND, THIRD])
+    assert len(got["rules"]["R-2c"]) == 3
+    assert not [g for g in got["unresolved"] if g["rule"].startswith("R-2c.")]
+    got = judge(inputs, "chart-p3-maximum_lot_coverage_by_buildings", [PLAIN, FIRST, SECOND])
+    assert [g["rule"] for g in got["unresolved"] if g["rule"].startswith("R-2c.")] == ["R-2c.max_coverage"]
+
+
+def test_the_use_list_says_which_uses_are_buildings_of_several_dwelling_units(inputs):
+    """The residential parking drafts kept passing semi-detached and attached houses (one unit's sleeping rooms
+    can't count a building of several units) across three attempts; the drafter is now told which uses those are,
+    from the same definitions the check reads."""
+    lines = [x for x in inputs.system().splitlines() if x.startswith("- ") and "several dwelling units" in x]
+    assert sorted(x.split(":")[0][2:] for x in lines) == ["multiple_family", "one_family_attached",
+                                                         "one_family_semi_detached", "two_family"]
+
+
+PARKING = "Residential"
+
+
+def test_a_parking_rule_for_one_dwelling_unit_is_kept_and_one_passing_a_building_of_several_is_refused(inputs):
+    rows = ("First three bed or sleeping rooms per dwelling unit", "4-5 bed or sleeping rooms per dwelling unit",
+            "Each additional bed or sleeping room")
+    slots = [slot(n, r, page=14, section=PARKING) for n, r in zip(("first", "second", "extra"), rows)]
+    check = ("parking_spaces >= ({first} if sleeping_rooms <= 3 else {second} if sleeping_rooms <= 5 "
+             "else {second} + {extra} * (sleeping_rooms - 5))")
+    examples = [({"use": "one_family_detached", "sleeping_rooms": "3", "parking_spaces": "{first}"}, "pass"),
+                ({"use": "one_family_detached", "sleeping_rooms": "3", "parking_spaces": "{first} - 1"}, "fail"),
+                ({"use": "one_family_detached", "sleeping_rooms": "5", "parking_spaces": "{second}"}, "pass"),
+                ({"use": "one_family_detached", "sleeping_rooms": "5", "parking_spaces": "{second} - 1"}, "fail"),
+                ({"use": "one_family_detached", "sleeping_rooms": "7", "parking_spaces": "{second} + 2 * {extra}"}, "pass"),
+                ({"use": "one_family_detached", "sleeping_rooms": "7", "parking_spaces": "{second} + 2 * {extra} - 1"}, "fail")]
+    numbers = [bound(3, "slot_row_label", slot="first"), bound(5, "slot_row_label", slot="second")]
+    good = template("parking_one_dwelling_unit", check, slots, examples, numbers=numbers,
+                    applies_when='use in ["one_family_detached", "one_family_detached_zero_lot_line"]')
+    got = judge(inputs, "chart-p14-residential", [good])
+    assert set(got["rules"]) >= {"R-1a", "R-1b", "R-2a", "R-2c"} and got["rejected"] == [], got["problems"][:2]
+    bad = good | {"applies_when": 'use in ["one_family_detached", "one_family_semi_detached"]'}
+    assert "it passes one_family_semi_detached" in " ".join(judge(inputs, "chart-p14-residential", [bad])["problems"])
+
+
+def bonus(applies_when=None, relaxes="height"):
+    grow = "(building_height - {height})"
+    when = applies_when if applies_when is not None else (
+        f"front_yard >= {{front}} + {grow} and side_yard_larger >= {{side_one}} + {grow}"
+        f" and side_yard_smaller >= {{side_other}} + {grow}"
+        f" and rear_yard >= max(min({{pct}} * lot_depth, {{cap}}), 20) + {grow}")
+    big = {"building_height": "{height} + 3", "front_yard": "{front} + 3", "side_yard_larger": "{side_one} + 3",
+           "side_yard_smaller": "{side_other} + 3", "lot_depth": "100", "rear_yard": "max(min({pct} * 100, {cap}), 20) + 3"}
+    return template(
+        "height_bonus", "building_height <= {height} + 0.1 * {height}",
+        [slot("height", "Height in feet", section=HEIGHT), slot("front", "Front (minimum)"),
+         slot("side_one", "Side (one side minimum)"), slot("side_other", "Side (other side minimum)"),
+         slot("pct", REAR, 1, 2, True, ["16"]), slot("cap", REAR, 2, 2, False, ["16"])],
+        [(big, "pass"), ({k: v.replace("+ 3", "+ 5") for k, v in big.items()}, "fail"),     # 5 ft over: past 10%
+         (big | {"front_yard": "{front}"}, "not_applicable"),
+         (big | {"lot_depth": "1000", "rear_yard": "{cap} + 3"}, "pass"),
+         (big | {"lot_depth": "40", "rear_yard": "23"}, "pass")],
+        quotes=[law(OPENING), law(YARDS_GROW), law(TEN_PERCENT), chart_note(10, "See §325-16."),
+                chart_note(16, "But not less than 20 ft.")],
+        numbers=[bound(0.1, "law_quote", quote=2), bound(20, "slot_footnote", slot="cap", footnote="16")],
+        applies_when=when) | {"relaxes": relaxes}
+
+
+def test_the_height_bonus_is_one_rule_that_relaxes_each_districts_chart_height(inputs):
+    """§325-16C allows up to 10% more height when every yard grows by the extra height. Drafted as parts (each
+    'when taller, this yard is larger') the chart's 35 ft still failed a 37 ft house with every yard enlarged, where
+    the law (and every hand key) passes it. As one relaxing rule, linked by code to the district's chart rule."""
+    drafted = cli.drafted_rules(inputs)
+    got = judge(inputs, "325-16C", [bonus()], drafted)
+    assert got["rejected"] == [], got["problems"][:2]
+    r1a = got["rules"]["R-1a"][0]
+    chart = [r for r in drafted["R-1a"] if r["id"] == r1a["relaxes"]]
+    assert len(chart) == 1 and chart[0]["check"] == "building_height <= 35"
+    height = {r["id"]: r for r in apply_relaxes(drafted["R-1a"] + [r1a])}[r1a["relaxes"]]
+    yards = {"front_yard": 25 + 2, "side_yard_larger": 10 + 2, "side_yard_smaller": 10 + 2, "rear_yard": 25 + 2,
+             "lot_depth": 100}
+    assert outcome(height, yards | {"building_height": 37}, inputs.ctx.allowed()) == "pass"
+    assert outcome(height, yards | {"building_height": 37, "front_yard": 26}, inputs.ctx.allowed()) == "fail"
+    assert outcome(height, {"building_height": 37}, inputs.ctx.allowed()) == "needs_review"     # yards unknown
+    assert outcome(height, yards | {"building_height": 39}, inputs.ctx.allowed()) == "fail"     # over 10%
+
+
+def test_a_relaxing_rule_without_its_conditions_or_its_target_is_never_kept(inputs):
+    drafted = cli.drafted_rules(inputs)
+    loose = judge(inputs, "325-16C", [bonus(applies_when="")], drafted)
+    assert loose["rules"] == {} and "needs its conditions" in " ".join(loose["problems"])
+    wrong = judge(inputs, "325-16C", [bonus(relaxes="nothing")], drafted)
+    assert wrong["rules"] == {} and "must be the name of one of this template's slots" in " ".join(wrong["problems"])
+    alone = judge(inputs, "325-16C", [bonus()], {})            # the chart's height rule isn't drafted: nothing widens
+    assert alone["rules"] == {} and "not drafted for this district" in " ".join(alone["problems"])
+
+
+FN4 = ("(4) For the first occupant; +500 sf for each additional occupant. (Could remove notes 1 - 6, if a single "
+       "standard is created for these uses.)")
+FN7 = "(7) For the first 1-3 units; +750 sf for each additional unit; +500 sf per room let for profit."
+OCCUPANTS = {"name": "occupants", "unit": "count", "meaning": "Occupants of the dwelling units on the lot"}
+
+
+def lot_area(name, row, fn, quote, check, examples, numbers, use, new=()):
+    return template(name, check, [slot("area", row, footnotes=[fn], section=LOT_SIZE)], examples,
+                    quotes=[chart_note(fn, quote), chart_note(3, "(3) See §325-8(B)(1).")], numbers=numbers,
+                    applies_when=f'use == "{use}"',
+                    new_measures=new)
+
+
+def test_a_footnoted_lot_size_is_drafted_with_its_note_applied_and_never_with_it_dropped(inputs):
+    """R-2C's '2,500 sf [fn4]' (+500 sf per occupant after the first) and R-3A's '6,000 sf [fn7]' (+750 sf per unit
+    after three, +500 sf per room let) got no rule: the template written for the plain cells can't take a note.
+    A template for the note's form is kept for the districts whose cell carries it; one that quotes the note and
+    leaves out what it adds is refused."""
+    good = lot_area("lot_area_one_family_detached_fn4", "One-family dwelling, detached", "4", FN4,
+                    "lot_area >= {area} + 500 * max(occupants - 1, 0)",
+                    [({"use": "one_family_detached", "occupants": "1", "lot_area": "{area}"}, "pass"),
+                     ({"use": "one_family_detached", "occupants": "3", "lot_area": "{area} + 999"}, "fail"),
+                     ({"use": "one_family_detached", "occupants": "3", "lot_area": "{area} + 1000"}, "pass")],
+                    [bound(500, "slot_footnote", slot="area", footnote="4"),
+                     bound(1, "slot_footnote", slot="area", footnote="4")], "one_family_detached", [OCCUPANTS])
+    got = judge(inputs, "chart-p3-minimum_lot_size", [good])
+    assert got["rejected"] == [] and [r["check"] for r in got["rules"]["R-2c"]] == [
+        "lot_area >= 2500 + 500 * max(occupants - 1, 0)"], got["problems"][:2]
+    dropped = good | {"check": "lot_area >= {area}", "numbers": [], "new_measures": [],
+                      "examples": [{"given": [{"measure": "use", "value": "one_family_detached"},
+                                              {"measure": "lot_area", "value": v}], "expect": e}
+                                   for v, e in (("{area}", "pass"), ("{area} - 1", "fail"))]}
+    assert judge(inputs, "chart-p3-minimum_lot_size", [dropped])["rules"] == {}
+    units = "lot_area >= {area} + 750 * max(dwelling_units - 3, 0) + 500 * rooms_let_for_profit"
+    fn7 = lot_area("lot_area_multiple_family_fn7", "Multiple family dwelling, new construction", "7", FN7, units,
+                   [({"use": "multiple_family", "dwelling_units": "3", "rooms_let_for_profit": "0",
+                      "lot_area": "{area}"}, "pass"),
+                    ({"use": "multiple_family", "dwelling_units": "5", "rooms_let_for_profit": "0",
+                      "lot_area": "{area} + 1499"}, "fail"),
+                    ({"use": "multiple_family", "dwelling_units": "5", "rooms_let_for_profit": "2",
+                      "lot_area": "{area} + 2500"}, "pass"),
+                    ({"use": "multiple_family", "dwelling_units": "5", "rooms_let_for_profit": "2",
+                      "lot_area": "{area} + 2499"}, "fail")],
+                   [bound(750, "slot_footnote", slot="area", footnote="7"),
+                    bound(3, "slot_footnote", slot="area", footnote="7"),
+                    bound(500, "slot_footnote", slot="area", footnote="7")], "multiple_family")
+    got = judge(inputs, "chart-p3-minimum_lot_size", [fn7])
+    assert got["rejected"] == [] and "R-3a" in got["rules"], got["problems"][:2]
+
+
+def test_a_notes_amounts_are_its_numbers_with_units_not_its_markers_or_pointers():
+    assert drafter.note_amounts(FN4) == [500]
+    assert drafter.note_amounts(FN7) == [3, 750, 500]
+    assert drafter.note_amounts("(13) 50% of the developable lot area, after the required setbacks") == [0.5]
+    assert drafter.note_amounts("(3) See §325-8(B)(1).") == [] and drafter.note_amounts("(16) But not less than 20 ft.") == [20]
+
+
+EAVES_TEXT = ("The space in any required yard shall be open and unobstructed except for ordinary projections of "
+              "windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that "
+              "such features shall not project more than two feet into any required yard.")
+
+
+def test_eaves_are_checked_against_each_yard_less_two_feet_and_reviewed_where_the_yard_is_enlarged(inputs):
+    """§325-18B: features may project at most 2 ft into a required yard. Drafted as an always-review flag, every
+    design with eaves needed review (the keys pass or fail them). Checked with the yards measured to the eaves; a
+    building over the chart height (§325-16C enlarges its required yards) goes to review, never a looser pass."""
+    grow = [("front", "Front (minimum)", "front_yard_eaves"),
+            ("side_one", "Side (one side minimum)", "side_yard_larger_eaves"),
+            ("side_other", "Side (other side minimum)", "side_yard_smaller_eaves")]
+    check = " and ".join(f"{m} >= {{{n}}} - 2" for n, _, m in grow)
+    ok = {m: f"{{{n}}} - 2" for n, _, m in grow} | {"building_height": "{height}"}
+    eaves = template("eaves_into_yards", check,
+                     [slot(n, r) for n, r, _ in grow] + [slot("height", "Height in feet", section=HEIGHT)],
+                     [(ok, "pass")] + [(ok | {m: f"{{{n}}} - 2.5"}, "fail") for n, _, m in grow],
+                     quotes=[law(EAVES_TEXT, "325-18B"), chart_note(10, "See §325-16.")],
+                     numbers=[bound(2, "law_quote", quote=0)])
+    eaves["review_when"] = [{"when": "building_height > {height}",
+                             "reason": "§325-16C enlarges the required yards of a building over the chart height"}]
+    got = judge(inputs, "325-18B", [eaves])
+    assert got["rejected"] == [] and "R-1a" in got["rules"], got["problems"][:2]
+    rule = got["rules"]["R-1a"][0]
+    tall = {"front_yard_eaves": 24, "side_yard_larger_eaves": 9, "side_yard_smaller_eaves": 9, "building_height": 37}
+    assert outcome(rule, tall | {"building_height": 30}, inputs.ctx.allowed()) == "pass"
+    assert outcome(rule, tall, inputs.ctx.allowed()) == "needs_review"
