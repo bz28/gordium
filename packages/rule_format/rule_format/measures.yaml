@@ -24,6 +24,7 @@ conversion:           {unit: yes_no, meaning: "The building is a conversion of a
 # Stated by the architect: a lot size that grows with the occupants (R-2c chart notes 4, 5 and 6).
 occupants:            {unit: count,  meaning: "Occupants of all the dwelling units on this lot together, as §325-3B OCCUPANT counts them (in R-2c, every person with the right to occupy, living there yet or not; a unit no one has that right to counts none). The split between units isn't stated: a lot size that depends on it complies only if it is enough with every occupant in one unit"}
 occupants_most_in_one_unit: {unit: count, meaning: "Optional: the most occupants (as counted for occupants) in any one dwelling unit on this lot, 1 or more. Tells how the occupants are split where a lot size depends on it"}
+attached_units_in_building: {unit: count, meaning: "Dwelling units in the whole attached building, every lot it stands on together (§325-3B: three to six), 1 or more; not this lot's units (dwelling_units)"}
 # Yards to the building seen from above, eaves and cornices included: §325-18B lets those project up to 2 ft
 # into a required yard (the yards above are measured to the building, its eaves left out).
 front_yard_eaves:        {unit: ft, meaning: "Depth of the front yard measured to the outermost part of the building, eaves included"}

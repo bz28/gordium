@@ -61,6 +61,9 @@ measurements:
   occupants_most_in_one_unit:
     value: null
     from: 'not measured: optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that depends on how the occupants are split)'
+  attached_units_in_building:
+    value: null
+    from: 'not measured: enter the dwelling units in the whole attached building, every lot it stands on'
   front_yard_eaves:
     value: null
     from: 'not measured: a building isn''t on the lot (is it part of this design?)'

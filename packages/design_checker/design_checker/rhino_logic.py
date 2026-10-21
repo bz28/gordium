@@ -138,16 +138,27 @@ STATED_FACTS = {
                   "right to occupy, living there yet or not)", "count", "occupants"),
     "occupants_most_in_one_unit": ("Most occupants in any one dwelling unit (optional: how they are split)", "count",
                                    "the most occupants in one unit"),
+    "attached_units_in_building": ("Dwelling units in the whole attached building, every lot it stands on (§325-3B: "
+                                   "three to six)", "count", "the units in the whole building"),
 }
-# Facts a row can be decided without: asked only when the row needs review (they could settle it), never otherwise.
-OPTIONAL = {"occupants_most_in_one_unit"}
+# The least whole number each counted fact may be: its own definition's (a unit's most occupants, a building's units:
+# at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
+# accept what the check refuses (#r2 review round 2).
+MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1}
+# Facts a row can be decided without, each with the fact that bounds it from above (the most occupants in one unit
+# is 1 to occupants): asked only where some value in that range would change the row (present.could_settle).
+OPTIONAL = {"occupants_most_in_one_unit": "occupants"}
 
 
-def needs_of(names, values, status=None):
+def minimum(key):
+    return MINIMUM.get(key, 0)
+
+
+def needs_of(names, values, settles=None):
     """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked. An
-    optional one (OPTIONAL) only for a row that needs review (`status`), where it could settle the row."""
+    optional one (OPTIONAL) only where `settles(key)` says entering it could change the row."""
     return [k for k in STATED_FACTS if k in names and (values or {}).get(k) is None
-            and (k not in OPTIONAL or status == "needs_review")]
+            and (k not in OPTIONAL or (settles is not None and settles(k)))]
 
 
 def _and(words):
@@ -169,17 +180,13 @@ def update_counts(facts, answers):
     whether the building is a conversion (yes / no) from the Lot facts prompts. An answer of None means the prompt
     was skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0 or no."""
     out = dict(facts or {})
-    for key in ("sleeping_rooms", "parking_spaces", "stories", "dwelling_units", "rooms_let_for_profit", "occupants"):
+    counts = ["stories"] + [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "count"]
+    for key in counts:
         if answers.get(key) is not None:
             n = int(answers[key])
-            if n < 0 or n != answers[key]:
-                raise ValueError(f"{key} must be a whole number, 0 or more")
+            if n < minimum(key) or n != answers[key]:
+                raise ValueError(f"{key} must be a whole number, {minimum(key)} or more")
             out[key] = n
-    if answers.get("occupants_most_in_one_unit") is not None:
-        n = int(answers["occupants_most_in_one_unit"])
-        if n < 1 or n != answers["occupants_most_in_one_unit"]:
-            raise ValueError("occupants_most_in_one_unit must be a whole number, 1 or more")
-        out["occupants_most_in_one_unit"] = n
     if answers.get("conversion") is not None:
         out["conversion"] = bool(answers["conversion"])
     return out

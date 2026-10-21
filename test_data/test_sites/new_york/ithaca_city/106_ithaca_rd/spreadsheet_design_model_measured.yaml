@@ -61,6 +61,9 @@ measurements:
   occupants_most_in_one_unit:
     value: null
     from: 'not measured: optional: enter the most occupants in any one dwelling unit (R-2c: settles a lot size that depends on how the occupants are split)'
+  attached_units_in_building:
+    value: null
+    from: 'not measured: enter the dwelling units in the whole attached building, every lot it stands on'
   front_yard_eaves:
     value: 30.0
     from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building, eaves included; between (63, 0) and (63, 30)'

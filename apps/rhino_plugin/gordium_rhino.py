@@ -873,11 +873,16 @@ def enter_rooms(needs):
         answers = {}
         for key in needs:
             prompt, kind, _ = logic.STATED_FACTS[key]
-            answers[key] = _count(prompt) if kind == "count" else _ask_yes_no_or_skip(prompt)
+            answers[key] = _count(prompt, logic.minimum(key)) if kind == "count" else _ask_yes_no_or_skip(prompt)
     except Cancelled:
         say("Cancelled: nothing changed.")
         return
-    save_facts(doc, logic.update_counts(facts, answers))
+    try:
+        counted = logic.update_counts(facts, answers)
+    except ValueError as e:             # never an exception out of a button: say what was wrong, change nothing
+        say(f"Nothing changed: {e}.")
+        return
+    save_facts(doc, counted)
     run_check(doc, report=False)
 
 
@@ -1277,12 +1282,13 @@ def _yes_no(prompt, current):
     return bool(rc[1]) if rc[0] == Rhino.Commands.Result.Success else current
 
 
-def _count(prompt):
-    """A whole number the architect types, or None when the prompt is skipped (never a default)."""
+def _count(prompt, least=0):
+    """A whole number the architect types, `least` or more (the fact's own minimum, rhino_logic.minimum), or None
+    when the prompt is skipped (never a default)."""
     gi = Rhino.Input.Custom.GetInteger()
     gi.SetCommandPrompt(prompt + " (Enter to skip)")
     gi.AcceptNothing(True)
-    gi.SetLowerLimit(0, False)
+    gi.SetLowerLimit(least, False)
     got = gi.Get()
     _go_on(got)
     return gi.Number() if got == Rhino.Input.GetResult.Number else None

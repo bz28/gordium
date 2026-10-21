@@ -3,6 +3,7 @@ for even one occupant does not comply before the occupants are entered; a lot th
 them, as a review row of its own asking for the occupants (never a pass); once entered, the row is decided."""
 
 import copy
+from pathlib import Path
 
 import pytest
 
@@ -102,3 +103,47 @@ def test_a_limit_that_depends_on_the_use_is_shown_for_the_stated_use():
     assert items and all(i["required"] not in ("", "—", None) for i in items), items
     cover = _r2c("one_family_detached", 40, 100, "R-2c.lot_coverage", occupants=1)
     assert cover and cover[0]["required"] not in ("", "—", None), cover
+
+
+def test_a_row_house_on_its_own_lot_is_held_to_its_own_unit():
+    """Review round 2 (P1): dwelling_units counts this lot's units, so a row house on its own 20 x 100 = 2,000 sf lot
+    (one unit, one occupant: 1,500 sf) complies; it was held to three units' 4,500 sf. The building's 3 to 6 units
+    are their own row, on their own stated fact."""
+    lot = _r2c("one_family_attached", 20, 100, "R-2c.lot_area_one_family_attached",
+               outline=[[2, 30], [18, 30], [18, 50], [2, 50]], dwelling_units=1, occupants=1)
+    assert [i["status"] for i in lot] == [present.COMPLIES], lot
+    rule = "R-2c.attached_units_per_building"
+    unknown = _r2c("one_family_attached", 20, 100, rule, outline=[[2, 30], [18, 30], [18, 50], [2, 50]])
+    assert [(i["status"], i["needs"]) for i in unknown] == [(present.REVIEW, ["attached_units_in_building"])], unknown
+    for units, status in ((4, present.COMPLIES), (2, present.FAILS), (7, present.FAILS)):
+        got = _r2c("one_family_attached", 20, 100, rule, outline=[[2, 30], [18, 30], [18, 50], [2, 50]],
+                   attached_units_in_building=units)
+        assert [i["status"] for i in got] == [status], (units, got)
+
+
+def test_an_optional_fact_that_cant_settle_the_row_is_neither_asked_nor_given_as_the_reason():
+    """Review round 2 (P2): three units on a semi-detached lot needs review whatever the split, so the row says why
+    (at most two units) and asks for nothing; the unset optional fact used to replace that reason and be asked."""
+    item = _r2c("one_family_semi_detached", 30, 100, "R-2c.lot_area_one_family_semi_detached", occupants=2,
+                dwelling_units=3)
+    assert [(i["status"], i["needs"]) for i in item] == [(present.REVIEW, [])], item
+    assert "at most two dwelling units" in (item[0]["reason"] or ""), item
+
+
+def test_every_counted_facts_prompt_accepts_exactly_what_its_checks_accept():
+    """Review round 2 (P2): the Enter prompt accepted 0 for the most occupants in one unit, which update_counts
+    refused with an exception out of the button. One minimum per fact, used by the prompt, update_counts and the
+    facts check; a refused answer is a message in the panel, never an exception."""
+    from design_checker import rhino_logic as logic
+    from model_measurement.project import FACT_FIELDS, fact_problems
+    counts = [k for k, (_, kind, _) in logic.STATED_FACTS.items() if kind == "count"]
+    for k in counts:
+        least = logic.minimum(k)
+        assert logic.update_counts({}, {k: least}) == {k: least}
+        with pytest.raises(ValueError):
+            logic.update_counts({}, {k: least - 1})
+        assert k in FACT_FIELDS and fact_problems({k: least}) == [] and fact_problems({k: least - 1}), k
+    plugin = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "_count(prompt, logic.minimum(key))" in plugin and "gi.SetLowerLimit(least, False)" in plugin
+    enter = plugin[plugin.index("def enter_rooms("):plugin.index("\ndef ", plugin.index("def enter_rooms(") + 1)]
+    assert "except ValueError" in enter and enter.index("except ValueError") < enter.index("save_facts(")

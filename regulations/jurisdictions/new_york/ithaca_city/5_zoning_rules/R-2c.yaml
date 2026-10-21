@@ -645,21 +645,20 @@ rules:
     title: "Lot size by units and occupants, one-family attached (chart p.3, note 6)"
     applies_when: use == "one_family_attached"
     check: >-
-      lot_area >= 1500 * max(dwelling_units, 3) + 300 * max(occupants - 1, 0) + 500 * max(occupants - 5, 0)
+      lot_area >= 1500 * max(dwelling_units, 1) + 300 * max(occupants - 1, 0) + 500 * max(occupants - 5, 0)
     review_when:
       - when: >-
-          lot_area >= 1500 * max(dwelling_units, 3) + 300 * max(occupants - max(dwelling_units, 3), 0)
-          and lot_area < 1500 * max(dwelling_units, 3) + 300 * max(occupants - 1, 0) + 500 * max(occupants - 5, 0)
+          lot_area >= 1500 * max(dwelling_units, 1) + 300 * max(occupants - max(dwelling_units, 1), 0)
+          + (500 - 300) * max(occupants - 5 * max(dwelling_units, 1), 0)
+          and lot_area < 1500 * max(dwelling_units, 1) + 300 * max(occupants - 1, 0) + 500 * max(occupants - 5, 0)
         reason: >-
-          Enough with the occupants spread over the units, not with them all in one unit (where note 6 also adds
-          500 sf for each occupant past five, instead of the 300 sf or on top of it: this rule's open question).
-          Gordium isn't told how they are split. Worked out by hand per unit.
-      - when: >-
-          (dwelling_units < 3 or dwelling_units > 6)
-          and lot_area >= 1500 * 3 + 300 * max(occupants - 3, 0)
+          Enough with the occupants spread over the units, not with them all in one unit, or not if note 6's 500 sf
+          for each occupant past five in a unit comes on top of the 300 sf (this rule's open question). Gordium isn't
+          told how they are split. Worked out by hand per unit.
+      - when: dwelling_units == 0 and lot_area >= 1500 + 300 * max(occupants - 1, 0)
         reason: >-
-          An attached building has three to six dwelling units (§325-3B); the count stated isn't one. Check it; the
-          lot is held to three units' least until then.
+          No dwelling unit stated: an attached building's lot holds at least one unit (a row house on its own lot).
+          Check the count; the lot is held to one unit's least until then.
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 3
@@ -679,22 +678,42 @@ rules:
         page: 3
         lines: [51, 52]
         quote: "(6) For the first occupant in each dwelling unit; +300 sf for each additional occupant in each dwelling unit; +500 sf for each additional occupant in each dwelling unit in excess of five occupants."
-      - file: chapter_325_zoning_2026-10.pdf
-        page: 8
-        lines: [11, 14]
-        quote: "(4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of which shares one or more party walls or structural elements with the other one-family dwellings in the building and which has direct exterior access from the ground floor. A maximum of six one-family dwelling units may be attached to form a single building."
       - file: chapter_325_zoning_2026-10.pdf     # a dwelling unit is one household's quarters: its first occupant is one
         page: 9
         lines: [10, 10]
         quote: "DWELLING UNIT — One or more rooms designed or used for living quarters by one household"
     examples:
-      # worked by hand from note 6: 1,500 sf for each unit (its first occupant), + 300 sf for each further occupant in
-      # a unit, + 500 sf for each occupant past five in a unit. Passes only if enough with every occupant in one unit
-      # and the 500 sf on top of the 300 sf (the strictest reading); fails only if short with them spread one to
-      # each unit first and no surcharge (the least any split and reading needs)
+      # worked by hand from note 6, lot by lot (dwelling_units: this lot's units, at least one): 1,500 sf for each
+      # unit (its first occupant), + 300 sf for each further occupant in a unit, + 500 sf for each occupant past five
+      # in a unit. Passes only if enough with every occupant in one unit and the 500 sf on top of the 300 sf; fails
+      # only if short with them spread one to each unit first and the 500 sf instead of the 300 sf
+      - given: {use: one_family_attached, lot_area: 1500, dwelling_units: 1, occupants: 1}
+        expect: pass
+        note: a row house on its own lot, one occupant -> 1,500 sf
+      - given: {use: one_family_attached, lot_area: 1499, dwelling_units: 1, occupants: 1}
+        expect: fail
+      - given: {use: one_family_attached, lot_area: 2000, dwelling_units: 1, occupants: 1}
+        expect: pass
+        note: round 2's case, held to three units' 4,500 sf before
+      - given: {use: one_family_attached, lot_area: 2100, dwelling_units: 1, occupants: 3}
+        expect: pass
+        note: one unit, three occupants -> 1,500 + 2 x 300 = 2,100 sf
+      - given: {use: one_family_attached, lot_area: 2099, dwelling_units: 1, occupants: 3}
+        expect: fail
+      - given: {use: one_family_attached, lot_area: 4300, dwelling_units: 1, occupants: 7}
+        expect: pass
+        note: one unit, seven occupants, the 500 sf on top -> 1,500 + 6 x 300 + 2 x 500 = 4,300 sf
+      - given: {use: one_family_attached, lot_area: 4299, dwelling_units: 1, occupants: 7}
+        expect: needs_review
+      - given: {use: one_family_attached, lot_area: 3700, dwelling_units: 1, occupants: 7}
+        expect: needs_review
+        note: the 500 sf instead of the 300 sf -> 1,500 + 4 x 300 + 2 x 500 = 3,700 sf
+      - given: {use: one_family_attached, lot_area: 3699, dwelling_units: 1, occupants: 7}
+        expect: fail
+        note: short under either reading
       - given: {use: one_family_attached, lot_area: 4500, dwelling_units: 3, occupants: 1}
         expect: pass
-        note: three units, one occupant -> 3 x 1,500 = 4,500 sf however it is placed
+        note: the whole building of three units on one lot, one occupant -> 3 x 1,500 = 4,500 sf
       - given: {use: one_family_attached, lot_area: 4499, dwelling_units: 3, occupants: 1}
         expect: fail
       - given: {use: one_family_attached, lot_area: 5100, dwelling_units: 3, occupants: 3}
@@ -707,39 +726,27 @@ rules:
         note: exactly enough one to each unit
       - given: {use: one_family_attached, lot_area: 7300, dwelling_units: 3, occupants: 7}
         expect: pass
-        note: seven all in one unit -> 4,500 + 6 x 300 + 2 x 500 = 7,300 sf (the 500 sf on top of the 300 sf)
-      - given: {use: one_family_attached, lot_area: 7299, dwelling_units: 3, occupants: 7}
-        expect: needs_review
-        note: enough for 7 in one unit if the 500 sf replaces the 300 sf (6,700 sf), not if it comes on top
+        note: seven all in one unit -> 4,500 + 6 x 300 + 2 x 500 = 7,300 sf
       - given: {use: one_family_attached, lot_area: 5700, dwelling_units: 3, occupants: 7}
         expect: needs_review
-        note: exactly enough spread one to each unit first (4,500 + 4 x 300); a 5/1/1 split needs 5,700 sf too, a 6/1/0 more
+        note: exactly enough spread one to each unit first (4,500 + 4 x 300); no unit past five
       - given: {use: one_family_attached, lot_area: 5699, dwelling_units: 3, occupants: 7}
         expect: fail
-        note: under 4,500 + 4 x 300 = 5,700 sf, which every split and reading needs
-      - given: {use: one_family_attached, lot_area: 11000, dwelling_units: 6, occupants: 6}
-        expect: pass
-        note: the most units an attached building may have; six all in one -> 9,000 + 5 x 300 + 500 = 11,000 sf
+        note: under 5,700 sf, which every split and reading needs
       - given: {use: one_family_attached, lot_area: 9000, dwelling_units: 6, occupants: 6}
         expect: needs_review
-        note: one to each unit -> 6 x 1,500 = 9,000 sf
+        note: one to each of six units -> 9,000 sf; all six in one -> 9,000 + 5 x 300 + 500 = 11,000 sf
       - given: {use: one_family_attached, lot_area: 8999, dwelling_units: 6, occupants: 6}
         expect: fail
-      - given: {use: one_family_attached, lot_area: 4499, dwelling_units: 0, occupants: 0}
+      - given: {use: one_family_attached, lot_area: 1499, dwelling_units: 0, occupants: 0}
         expect: fail
-        note: no units stated, but under three units' 4,500 sf whatever the count
-      - given: {use: one_family_attached, lot_area: 4500, dwelling_units: 0, occupants: 0}
+        note: no units stated, but under one unit's 1,500 sf whatever the count
+      - given: {use: one_family_attached, lot_area: 1500, dwelling_units: 0, occupants: 0}
         expect: needs_review
         note: no units stated -> never a pass
-      - given: {use: one_family_attached, lot_area: 20000, dwelling_units: 2, occupants: 2}
-        expect: needs_review
-        note: two units isn't an attached building (three to six)
-      - given: {use: one_family_attached, lot_area: 50000, dwelling_units: 7, occupants: 7}
-        expect: needs_review
-        note: seven units isn't one attached building (six at most)
       - given: {use: one_family_attached, lot_area: 20000, occupants: 3}
         expect: needs_review
-        note: the units not given
+        note: the units on this lot not given
       - given: {use: two_family, lot_area: 1000, occupants: 2}
         expect: not_applicable
     open_questions:
@@ -764,8 +771,8 @@ rules:
       why_open: The note lists both additions with "+" and no "instead"; every occupant past five is also "each
         additional occupant", so the 300 sf can be read to apply to them too. Neither §325-8 nor the OCCUPANT
         definition says which, and no City record was found (web search, 2026-10-21, found no City interpretation of
-        R-2c's notes). Gordium passes only under the stricter reading (500 sf on top), so the answer can only turn
-        some NEEDS REVIEW results into passes.
+        R-2c's notes). Gordium passes only under the stricter reading (500 sf on top) and fails only under the
+        lenient one (500 sf instead), so the answer can only settle some NEEDS REVIEW results.
       readings:
       - id: instead_of_300
         reading: each occupant past five in a unit adds 500 sf instead of 300 sf
@@ -773,13 +780,49 @@ rules:
         reading: each occupant past five in a unit adds 300 sf + 500 sf = 800 sf
     notes: >-
       Both attached rows (by conversion, new construction) are 1,500 sf for R-2C, so conversion doesn't matter here.
-      The per-unit base is the per_dwelling_unit reading (R-2c.lot_area_one_family_semi_detached). The architect
-      states the units on this lot and the occupants of all of them together, not the split, so the rule complies
-      only at the fullest split (all in one unit, the 500 sf on top) and does not comply only below the emptiest
-      (one to each unit first, no surcharge); NEEDS REVIEW between. The most occupants in one unit doesn't settle
-      three or more units (2, 2, 0 and 2, 1, 1 differ), so this rule doesn't read it; the use needs a special permit
-      anyway. A unit count outside an attached building's 3 to
-      6 (§325-3B) is never a pass. The use needs a special permit (R-2c.use).
+      Note 6 is per dwelling unit (the per_dwelling_unit reading, R-2c.lot_area_one_family_semi_detached), and each
+      lot is held to its own units (dwelling_units: this lot's units; a row house on its own lot has one). The
+      architect states the occupants of all of them together, not the split, so the rule complies only at the
+      fullest split (all in one unit, the 500 sf on top) and does not comply only below the emptiest (one to each
+      unit first, the 500 sf instead of the 300 sf); NEEDS REVIEW between. The 3 to 6 units of an attached building
+      count the whole building, every lot it stands on: R-2c.attached_units_per_building. The use needs a special
+      permit (R-2c.use).
+    drafted_by: claude
+    status: draft
+
+  - id: R-2c.attached_units_per_building
+    kind: rule
+    topic: dimensions
+    title: "Attached building: three to six dwelling units (§325-3B)"
+    applies_when: use == "one_family_attached"
+    check: attached_units_in_building >= 3 and attached_units_in_building <= 6
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 8
+        lines: [11, 14]
+        quote: "(4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of which shares one or more party walls or structural elements with the other one-family dwellings in the building and which has direct exterior access from the ground floor. A maximum of six one-family dwelling units may be attached to form a single building."
+        not_limits: {1: "\"one or more party walls\": how the units are joined, not a count of units"}
+    examples:
+      - given: {use: one_family_attached, attached_units_in_building: 3}
+        expect: pass
+        note: the fewest
+      - given: {use: one_family_attached, attached_units_in_building: 6}
+        expect: pass
+        note: the most
+      - given: {use: one_family_attached, attached_units_in_building: 2}
+        expect: fail
+        note: two units joined are a semi-detached building, not an attached one
+      - given: {use: one_family_attached, attached_units_in_building: 7}
+        expect: fail
+      - given: {use: one_family_attached}
+        expect: needs_review
+        note: the building's units not given
+      - given: {use: two_family, attached_units_in_building: 2}
+        expect: not_applicable
+    notes: >-
+      Counted over the whole building, every lot it stands on together (attached_units_in_building), not the units on
+      this lot (dwelling_units): a row house on its own lot is one unit of a building of three to six. Gordium's
+      massing model shows the building on this lot only, so the architect states the count.
     drafted_by: claude
     status: draft
 

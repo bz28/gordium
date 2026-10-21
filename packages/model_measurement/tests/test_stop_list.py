@@ -231,6 +231,7 @@ CASES = {
     "no_units": _plain(),
     "no_occupants": _plain(),
     "no_occupant_split": _plain(),
+    "no_building_units": _plain(),
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),

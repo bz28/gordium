@@ -18,7 +18,7 @@ from pathlib import Path
 
 from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
-from rule_format.rulebook import MEASURE_KINDS, REPO, load, read_jsonl
+from rule_format.rulebook import MEASURE_KINDS, REPO, load, outcome, read_jsonl
 
 from design_checker import reading_set, rhino_logic
 
@@ -145,6 +145,18 @@ def _compares(check: str) -> list[ast.Compare]:
            if isinstance(n, ast.Compare) and len(n.ops) == 1 and isinstance(n.left, ast.Name)
            and type(n.ops[0]) in SIGNS]
     return sorted(out, key=lambda n: (n.lineno, n.col_offset))
+
+
+def could_settle(rule: dict, values: dict, key: str) -> bool:
+    """Would entering an optional stated fact change this rule's result? Only if the rule's outcome differs between the
+    least and the most it can be (the most occupants in one unit: 1 to the occupants). Unknown bounds: no."""
+    hi = (values or {}).get(rhino_logic.OPTIONAL.get(key))
+    if key not in rhino_logic.OPTIONAL or type(hi) is not int or hi < rhino_logic.minimum(key):
+        return False
+    use = values.get("use")
+    allowed = {"use": {use}} if isinstance(use, str) else {"use": set()}
+    known = {k: v for k, v in values.items() if v is not None}
+    return outcome(rule, known | {key: rhino_logic.minimum(key)}, allowed) != outcome(rule, known | {key: hi}, allowed)
 
 
 def _evaluate(text: str, values: dict):
@@ -902,7 +914,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "_expr": expr,                        # and its whole expression (settle reads both)
             "_checker": checker,                  # the checker's verdict for it: the most it may show (view)
             # the stated facts it reads that aren't set (R-3a's lot size: dwelling units…): its own "Enter …" button
-            "needs": rhino_logic.needs_of(reading_set.rule_names(rule), values, st) if st != COMPLIES else [],
+            "needs": rhino_logic.needs_of(reading_set.rule_names(rule), values,
+                                          lambda k: st == REVIEW and could_settle(rule, values, k))
+                     if st != COMPLIES else [],
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
