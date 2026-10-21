@@ -132,7 +132,7 @@ def write_like_the_plugin(path, lookup_payload, payload):
         a = attrs(o["layer"], **{logic.CONTEXT_KEY: o["source"]})
         a.Name = o.get("name") or ""
         pts = [r.Point3d(x, y, 0) for x, y in o["points"]]
-        if o["kind"] == "dot":
+        if o["kind"] in ("dot", "text"):          # (the plugin writes "text" as model text; its words are what count)
             m.Objects.AddTextDot(o.get("text") or "", pts[0], a)
         else:
             m.Objects.AddPolyline(r.Polyline(pts + pts[:1] if o["kind"] == "closed" else pts), a)
@@ -523,12 +523,57 @@ def test_nothing_answering_leaves_the_saved_neighbourhood_alone_and_the_plugin_p
     assert clear.index("if sources is None:") < clear.index("doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)")
 
 
+# ---- the Sources note (PR #23's Rhino screenshots: one long dot ran off the view) ---------------------------------
+
+def test_the_sources_note_is_wrapped_model_text_inside_the_square_clear_of_the_scale_bar():
+    """The note is model text (not a dot, which is drawn at screen size, centred on its point), wrapped to
+    NOTE_WIDTH characters, growing up from the square's bottom-left corner, turned with the square. Its extent,
+    worked out generously (each character 0.7 × the text height wide, each line 1.7 × high), lies inside the square
+    and left of the scale bar. Rhino measures the real text in context_in_rhino.py."""
+    half = 750.0
+    credits = ["Tax parcels: NYS Tax Parcels Public (from Tompkins County Real Property): for planning and general "
+               "use only, not a substitute for a legal parcel survey.", "Street centerlines: NYS Streets (NYS ITS "
+               "Geospatial Services).", "NYS Building Footprints: " + logic.LIVE_ONLY]
+    note = next(o for o in cb.notes(half, credits) if o["name"] == "Sources")
+    lines = note["text"].split("\n")
+    assert note["kind"] == "text" and note["height_ft"] == logic.NOTE_HEIGHT_FT
+    assert all(len(ln) <= logic.NOTE_WIDTH for ln in lines) and len(lines) >= 4
+    assert " ".join(lines).replace("  ", " ") == " ".join(credits)          # every word kept, in order
+    (x, y), h = note["points"][0], note["height_ft"]
+    right, top = x + max(map(len, lines)) * 0.7 * h, y + len(lines) * 1.7 * h
+    bar = next(o for o in cb.notes(half, credits) if o["name"].startswith("Scale bar,"))
+    assert -half < x and -half < y and right < half and top < half
+    assert right < min(px for px, _ in bar["points"])                       # clear of the scale bar
+    payload, p = context_for()
+    placed = next(o for o in payload["objects"] if o["name"] == "Sources")
+    assert placed["kind"] == "text" and placed["rotation_deg"] == p["writes"]["frame"]["rotation_deg"]
+    assert all(len(ln) <= logic.NOTE_WIDTH for ln in placed["text"].split("\n"))
+
+
+def test_a_kept_layers_note_is_wrapped_the_same_way():
+    frame = looked_up()["writes"]["frame"]
+    model, record, _, shown = redraw([], None, fetch_with(frame), frame)
+    _, _, shown_payload, _ = redraw(model, record, fetch_with(frame, down={"state_parcels"}), frame, shown)
+    note = next(o for o in shown_payload["objects"] if o["name"] == "Sources")
+    assert "Tax parcels" in note["text"] and all(len(ln) <= logic.NOTE_WIDTH for ln in note["text"].split("\n"))
+
+
+def test_the_plugin_writes_the_note_as_bottom_left_model_text():
+    body = RHINO[RHINO.index("def _context_text("):RHINO.index("def draw_context(")]
+    assert "rg.TextEntity.Create(" in body and "rg.TextJustification.BottomLeft" in body
+    assert "_model_length(doc, o.get(\"height_ft\")" in body and "rotation_deg" in body
+    draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
+    assert 'elif o["kind"] == "text":' in draw and "doc.Objects.AddText(_context_text(doc, o, pts[0]), attrs)" in draw
+    check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
+    assert "every note lies inside the neighbourhood square" in check
+
+
 # ---- the Rhino side, by its code (it can't run in CI) ------------------------------------------------------------
 
 def test_the_plugin_writes_only_context_objects_and_keeps_guides_on_screen():
     body = RHINO[RHINO.index("def draw_context("):RHINO.index("def _context_visible(")]
     assert "for o in logic.context_objects(payload):" in body
-    assert body.count("doc.Objects.Add") == 2                            # a dot or a curve, per context object
+    assert body.count("doc.Objects.Add") == 3                            # a dot, a text or a curve, per object
     assert 'STATE["context_guides"] = ' in body and "logic.context_guides(payload)" in body
     assert "doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(record))" in body
     assert "plan = logic.context_merge(payload, old, frame," in body

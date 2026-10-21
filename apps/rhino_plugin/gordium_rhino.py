@@ -12,6 +12,7 @@ GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts), GordiumOf
 """
 
 import json
+import math
 import os
 import subprocess
 import sys
@@ -2216,6 +2217,17 @@ def _context_payload(frame):
     return json.loads(lines[-1]) if lines else {"status": "error"}
 
 
+def _context_text(doc, o, anchor):
+    """A context note as model text: its lines from the anchor up (bottom-left justified), along the note's turn
+    (`rotation_deg`, the square's), o["height_ft"] high."""
+    a = math.radians(o.get("rotation_deg") or 0.0)
+    plane = rg.Plane(anchor, rg.Vector3d(math.cos(a), math.sin(a), 0), rg.Vector3d(-math.sin(a), math.cos(a), 0))
+    text = rg.TextEntity.Create(o.get("text") or "", plane, doc.DimStyles.Current, False, 0, 0)
+    text.TextHeight = _model_length(doc, o.get("height_ft") or logic.NOTE_HEIGHT_FT)
+    text.Justification = rg.TextJustification.BottomLeft
+    return text
+
+
 def draw_context(doc, frame):
     """The neighbourhood around the looked-up lot: fetched, then drawn in place of any earlier one. Says what it
     drew (or why it didn't)."""
@@ -2245,6 +2257,8 @@ def draw_context(doc, frame):
         pts = [_model_point(doc, p) for p in o["points"]]
         if o["kind"] == "dot":
             doc.Objects.AddTextDot(o.get("text") or "", pts[0], attrs)
+        elif o["kind"] == "text":          # the sources: wrapped model text from its anchor, turned with the square
+            doc.Objects.AddText(_context_text(doc, o, pts[0]), attrs)
         else:
             doc.Objects.AddCurve(rg.PolylineCurve(pts + [pts[0]] if o["kind"] == "closed" else pts), attrs)
     _lock_context(doc, True)

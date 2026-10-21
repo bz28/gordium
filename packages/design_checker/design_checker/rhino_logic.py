@@ -1176,6 +1176,18 @@ def context_replaces(payload):
 
 
 LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.context's mark on a live-only layer's credit line
+NOTE_WIDTH = 60                          # characters per line of the Sources note (it sits inside the square)
+NOTE_HEIGHT_FT = 12.0                    # its text height: about 450 ft wide at 60 characters, in a 1500 ft square
+
+
+def note_text(credits):
+    """The Sources note: each credit line wrapped to NOTE_WIDTH characters (Rhino job's screenshots, PR #23: one long
+    line ran off the view). One helper for context_box (the first draw) and context_merge (a kept layer's line)."""
+    import textwrap
+    out = []
+    for line in credits or []:
+        out += textwrap.wrap(line, NOTE_WIDTH) or [""]
+    return "\n".join(out)
 
 
 def keeps_live(kept, old_record):
@@ -1220,7 +1232,7 @@ def context_merge(payload, old_record, frame, live_on_screen=False):
     objects = []
     for o in payload.get("objects") or []:
         if o.get("source") == "gordium" and o.get("name") == "Sources":
-            o = dict(o, text="\n".join(credits))
+            o = dict(o, text=note_text(credits))
         objects.append(o)
     note = "Kept the %s drawn earlier (the service didn't answer)." % " and ".join(kept)
     counts = dict(payload.get("counts") or {}, **{n: was[n]["count"] for n in kept if "count" in was[n]})

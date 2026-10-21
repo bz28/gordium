@@ -68,6 +68,34 @@ def context_layers(g, doc):
     return out
 
 
+def notes_inside_square(g, doc):
+    """Every object on the Notes layer, besides the square itself, measured inside the square: the corners of its
+    bounding box in its own plane (a text's plane, turned with the square; the world's for the rest), each tested
+    against the square's curve. A world-aligned box of a turned text would poke past a turned square's edge."""
+    rg = Rhino.Geometry
+    index = next(i for i in g._context_layer_indexes(doc) if doc.Layers[i].FullPath.endswith("::Notes"))
+    objs = list(doc.Objects.FindByLayer(doc.Layers[index]) or [])
+    square = next(o for o in objs if (o.Attributes.Name or "").startswith("Context square"))
+    outside, longest, kind = [], 0, None
+    for o in objs:
+        if o.Id == square.Id:
+            continue
+        geom = o.Geometry
+        plane = geom.Plane if isinstance(geom, rg.TextEntity) else rg.Plane.WorldXY
+        box = geom.GetBoundingBox(plane)
+        for c in list(box.GetCorners())[:4]:
+            pt = plane.PointAt(c.X, c.Y)
+            if square.Geometry.Contains(rg.Point3d(pt.X, pt.Y, 0), rg.Plane.WorldXY,
+                                        doc.ModelAbsoluteTolerance) != rg.PointContainment.Inside:
+                outside.append(o.Attributes.Name or type(geom).__name__)
+                break
+        if (o.Attributes.Name or "") == "Sources":
+            kind = type(geom).__name__
+            text = getattr(geom, "PlainText", None) or getattr(geom, "Text", "") or ""
+            longest = max(len(line) for line in text.splitlines()) if text else 0
+    return {"outside": outside, "longest_line": longest, "sources_kind": kind, "notes": len(objs)}
+
+
 docs = TestDocs("context").__enter__()
 opened = []
 try:
@@ -102,6 +130,10 @@ try:
     notes = " ".join(sub["Notes"]["names"] + sub["Notes"]["texts"]).lower()
     claim("1 the notes: a north arrow, a scale bar and the sources",
           "north" in notes and "scale" in notes and "source" in notes, sub["Notes"])
+    log["notes_inside"] = notes_inside_square(g, doc)
+    claim("1 every note lies inside the neighbourhood square (the sources wrapped, at most 60 characters a line)",
+          not log["notes_inside"]["outside"] and log["notes_inside"]["longest_line"] <= g.logic.NOTE_WIDTH
+          and log["notes_inside"]["sources_kind"] == "TextEntity", log["notes_inside"])
     claim("2 the building footprints are on screen (live: claim 5 checks they are never saved)",
           log["footprints_on_screen"] > 0, {"on_screen": log["footprints_on_screen"]})
     claim("3 the checker never measures the context: one lot", log["checker_sees"]["lot_candidates"] == 1,

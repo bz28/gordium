@@ -18,7 +18,7 @@ from rule_format.rulebook import utf8_console
 from site_lookup.context import HALF_SIZE_FT, context, credits
 from site_lookup.http import Http
 
-from .rhino_logic import is_stored     # one definition of "may be kept in the file" for both sides
+from .rhino_logic import NOTE_HEIGHT_FT, is_stored, note_text     # one definition for both sides
 
 TIMEOUT_S, RETRIES = 6.0, 1          # each request; the Rhino side stops the whole fetch at CONTEXT_LIMIT_S
 ROOT = "Gordium::Context"
@@ -57,9 +57,11 @@ def notes(half: float, credits: list[str]) -> list[dict]:
            {"layer": NOTES, "kind": "open", "points": bar, "name": "Scale bar, %d ft" % SCALE_BAR_FT, "source": GORDIUM},
            {"layer": NOTES, "kind": "dot", "points": [(half - m - SCALE_BAR_FT / 2, bar_y + 16)],
             "text": "%d ft" % SCALE_BAR_FT, "name": "Scale bar", "source": GORDIUM}]
+    # the sources: model-space text, wrapped, growing up from the square's bottom-left corner (it was a dot, drawn at
+    # screen size and centred on its point, so the long line ran off the view: PR #23's Rhino evidence)
     if credits:
-        out.append({"layer": NOTES, "kind": "dot", "points": [(-half + m, -half + m)], "text": "\n".join(credits),
-                    "name": "Sources", "source": GORDIUM})
+        out.append({"layer": NOTES, "kind": "text", "points": [(-half + m, -half + m)], "text": note_text(credits),
+                    "height_ft": NOTE_HEIGHT_FT, "name": "Sources", "source": GORDIUM})
     return out
 
 
@@ -81,7 +83,10 @@ def payload(ctx: dict, frame: dict) -> dict:
     saved_credits = (ctx.get("snapshot") or {}).get("credits") or []
     if any(v["items"] for v in ctx["layers"].values()):
         for o in notes(ctx["half_size_ft"], saved_credits):
-            objects.append(dict(o, points=[place(p) for p in o["points"]]))
+            o = dict(o, points=[place(p) for p in o["points"]])
+            if o["kind"] == "text":              # turned with the square, so it runs along its bottom edge
+                o["rotation_deg"] = frame["rotation_deg"]
+            objects.append(o)
     counts = {n: len(v["items"]) for n, v in ctx["layers"].items()}
     # a layer shown only live carries its source line on screen (the panel's message), never in the file
     live = [line for n, line in credits(ctx).items() if not is_stored(ctx["layers"][n])]
