@@ -557,18 +557,33 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 and "building_height" in formula.names(ast.unparse(node.comparators[0]))):
             # a limit raised by the §325-16C height bonus, while the height can't be measured: show the base
             # requirement (no bonus) and say it may be more; never as complying
-            base = _evaluate(ast.unparse(node.comparators[0]), dict(values, building_height=0.0))
-            if isinstance(base, (int, float)):
-                unit = (measured.get(node.left.id) or {}).get("unit") or ""
-                required = f"{numbers[4]} {value_text(base, unit, numbers[4], False)}".strip()
-                # why the bonus can't be worked out, as it is (review round 10): the ground as it is was measured
-                # but the law measures from finished grade, or the height isn't measured at all
-                waits = ("the height is measured from existing grade only; the bonus needs it from finished grade"
-                         if facts.get("grade_is") == "existing" else "the height isn't measured yet")
-                more = f"more if the §325-16C height bonus applies; {waits}"
+            limit = ast.unparse(node.comparators[0])
+            unit = (measured.get(node.left.id) or {}).get("unit") or ""
+            height = measured.get("building_height") or {}
+            # why the bonus can't be worked out, read from the height's own measurement (review rounds 10-11)
+            as_is = height.get("measured_as_is") is not None or bool(height.get("measured_as_is_readings"))
+            heights = sorted({r["value"] for r in height.get("readings") or [] if r.get("value") is not None})
+            at_each = [_evaluate(limit, dict(values, building_height=v)) for v in heights]
+            if not as_is and len(heights) > 1 and all(isinstance(a, (int, float)) for a in at_each):
+                # measured, but its readings disagree: the limit at each reading's height (the bonus may apply)
+                low, high = (value_text(a, unit, numbers[4], False) for a in (min(at_each), max(at_each)))
+                required = f"{numbers[4]} {low} to {high}"
+                span = f"{value_text(heights[0], 'ft')} to {value_text(heights[-1], 'ft')}"
+                more = f"the requirement depends on the height, whose readings disagree ({span})"
                 why = f"{why} ({more})" if why else f"Needs review ({more})"
-                line = f"{proposed} proposed · {required} required before the §325-16C height bonus"
-                base_calc = f"Required: {required} before the §325-16C height bonus ({waits})"
+                line = f"{proposed} proposed · {required} required, across the height's readings ({span})"
+                base_calc = (f"Required: {required}: {limit} at each reading of the height ({span}; the readings "
+                             f"disagree)")
+            else:
+                base = _evaluate(limit, dict(values, building_height=0.0))
+                if isinstance(base, (int, float)):
+                    required = f"{numbers[4]} {value_text(base, unit, numbers[4], False)}".strip()
+                    waits = ("the height is measured from existing grade only; the bonus needs it from finished grade"
+                             if as_is else "the height isn't measured yet")
+                    more = f"more if the §325-16C height bonus applies; {waits}"
+                    why = f"{why} ({more})" if why else f"Needs review ({more})"
+                    line = f"{proposed} proposed · {required} required before the §325-16C height bonus"
+                    base_calc = f"Required: {required} before the §325-16C height bonus ({waits})"
         applied = _applied(names, measured)
         if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
             why = f"{why} · {applied['note']}" if why else applied["note"]

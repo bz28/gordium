@@ -997,9 +997,12 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     if facts.get("grade_is") == "existing":     # the grade plane is finished ground: existing ground can't decide
         for name in ("building_height", "stories"):
             as_is = out[name].get("value")     # what the ground as it is gives: shown, never decides (no reading)
+            as_is_readings = sorted({r["value"] for r in out[name].get("readings") or [] if r.get("value") is not None})
             out[name] = _missing(name, stop("existing_grade"))
             if as_is is not None:
                 out[name]["measured_as_is"] = as_is
+            elif as_is_readings:               # its readings disagree: kept, so what waits is said as it is
+                out[name]["measured_as_is_readings"] = as_is_readings
 
     # the accessory buildings (§325-25): every solid standing apart from the main building (one touching it, a
     # porch, deck, steps or an attached garage, is part of it). Counted even without a lot outline.

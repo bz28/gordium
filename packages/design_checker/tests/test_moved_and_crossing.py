@@ -260,6 +260,45 @@ def test_the_eaves_rows_say_the_height_isnt_measured_when_there_is_no_ground(hou
     assert "existing grade" not in front["reason"] and "the height isn't measured yet" in front["reason"]
 
 
+GABLE = (15, 26, 45, 66)        # 30 x 40 ft, 26 ft from the street; 3 floors of 10 ft, then the roof
+
+
+def _gable_with_overhang(**facts):
+    """Three 10 ft floor blocks and a gable roof solid on them (base 30, ridge 45), its soffit 2 ft past the side
+    walls with a 1 ft fascia. The height's readings, midway between eave and ridge: (30 + 45) / 2 = 37.5 (lowest
+    eave, or wall plate), (31 + 45) / 2 = 38.0 (the drip edge, the top of the fascia), and 38.82 (the roof edge
+    read with the overhang left out: the slope at the walls, 32.65, (32.65 + 45) / 2)."""
+    from test_every_reading import roof
+    return rows(run(floors(*GABLE, 3) + [roof(*GABLE, 30, 45, 2.0, 1.0)], **facts), "R-1b.yard_projections")
+
+
+def test_the_eaves_rows_show_the_requirement_at_each_height_reading_when_they_disagree():
+    """Round 11, P3: the height IS measured, but its readings disagree (37'-6" to 38'-9 7/8"): over 35 ft, so the
+    bonus certainly applies, and '≥ 23'-0" before the bonus' understated it. The front eaves requirement at each
+    reading, 25 + (h − 35) − 2: 25.5 (25'-6") to 26.82 (26'-10" rounded the strict way); the front eaves are at
+    26'-0", inside that span: needs review, saying the readings disagree, never 'isn't measured'."""
+    front = next(r for r in _gable_with_overhang() if r["name"] == "Eaves into front yard")
+    assert front["status"] == present.REVIEW and front["proposed"] == "26'-0\""
+    assert front["required"] == "≥ 25'-6\" to 26'-10\""
+    for text in (front["reason"], front["detail"]["calc"], front["detail"]["line"]):
+        assert "37'-6\" to 38'-9 7/8\"" in text and "isn't measured" not in text and "before the" not in text, text
+    assert "at each reading of the height" in front["detail"]["calc"]
+
+
+def test_the_eaves_rows_on_existing_grade_say_so_only_when_the_ground_as_it_is_was_measured():
+    """Round 11, P3: existing grade with the ground given: the height was measured on it (its readings disagree
+    there too, so no one value): 'measured from existing grade only'. Existing grade with no ground at all: nothing
+    was measured: 'isn't measured yet'. Both show the base ≥ 23'-0" before the bonus (the legal height is unknown)."""
+    measured = next(r for r in _gable_with_overhang(grade_is="existing") if r["name"] == "Eaves into front yard")
+    nothing = next(r for r in _gable_with_overhang(grade_is="existing", grade_elevation=None, ground_is_flat=None)
+                   if r["name"] == "Eaves into front yard")
+    for row in (measured, nothing):
+        assert row["status"] == present.REVIEW and row["required"] == "≥ 23'-0\""
+    assert "measured from existing grade only; the bonus needs it from finished grade" in measured["detail"]["calc"]
+    assert nothing["detail"]["calc"] == "Required: ≥ 23'-0\" before the §325-16C height bonus (the height isn't measured yet)"
+    assert "the height isn't measured yet" in nothing["reason"] and "existing grade only" not in nothing["reason"]
+
+
 # ---- review round 8: every lot-line reading the geometry allows ---------------------------------------------------
 
 def test_a_jog_then_a_slanted_line_is_also_read_as_the_side_line_running_on():
