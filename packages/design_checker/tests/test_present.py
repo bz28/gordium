@@ -916,3 +916,24 @@ def test_the_report_opens_on_the_check_sheet_and_every_tab_says_what_the_panel_s
     from design_checker import rhino_logic as logic
     assert logic.street_name({"address": "106 Ithaca Rd, Ithaca, NY 14850"}) == "Ithaca Rd"
     assert logic.street_name({}) == "the highlighted line"
+
+
+
+def test_a_limit_waiting_on_the_lot_depth_shows_its_range_and_says_once_why():
+    """Architect review in Rhino (P1-3): on the sample 106 lot the rear yard's detail repeated "the readings give
+    different values … isn't settled yet" two or three times and showed "—" as Required. Now Required is the
+    limit's range over the lot depth's readings, and the reason is one sentence saying what it depends on."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    house = box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30)
+    for surveyed, status in ((False, present.REVIEW), (True, present.FAILS)):
+        r = check_site(_plot(house, lot_=lot), {**facts, "lot_surveyed": surveyed})
+        rear = items(r["view"])["Rear yard"]
+        assert rear["status"] == status and rear["required"] == "21'-1 5/8\" to 25'-5 1/2\"", rear
+        assert rear["reason"].count("which lot lines") == 1, rear["reason"]
+        assert "readings give different values" not in rear["reason"] and "isn't settled" not in rear["reason"]
+    assert rear["reason"].startswith("Does not comply whichever way it is read: needs 21'-1 5/8\"")
+    r = check_site(_plot(house, lot_=lot), {**facts, "lot_surveyed": False})
+    assert items(r["view"])["Rear yard"]["reason"].startswith(
+        "Needs 21'-1 5/8\" to 25'-5 1/2\", depending on which lot lines count as side and which as rear "
+        "(it sets the lot depth): ask the zoning office")

@@ -772,6 +772,35 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                 if worst is not None:                   # say the bad one first: "probably fine" it isn't
                     why = (f"At worst {worst[0]} against {worst[1]}: does not comply under that reading. " +
                            (why or ""))
+        if node is not None and required == "—" and st in (REVIEW, FAILS):
+            # the limit waits on an open measurement (the lot depth, on which lines are side or rear): show the
+            # limit's range over its readings, and say once what it depends on (architect review P1-3)
+            limit_expr = ast.unparse(node.comparators[0])
+            open_ = [n for n in sorted(formula.names(limit_expr))
+                     if values.get(n) is None and (measured.get(n) or {}).get("readings")]
+            got = []
+            if open_:
+                import itertools
+                for combo in itertools.product(*[[r["value"] for r in measured[n]["readings"]] for n in open_]):
+                    x = _evaluate(limit_expr, dict(values, **dict(zip(open_, combo))))
+                    if isinstance(x, (int, float)):
+                        got.append(x)
+            if got:
+                unit = (measured.get(node.left.id) or {}).get("unit") or ""
+                lo, hi = min(got), max(got)
+                required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
+                            f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
+                limit_q = list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
+                rest = list(dict.fromkeys(q for n in sorted(every - set(open_)) if values.get(n) is None
+                                          and (measured.get(n) or {}).get("readings")
+                                          for q in _questions_of(measured[n]) if q not in limit_q))
+                sets = " and ".join(NAMES.get(n, n.replace("_", " ").capitalize()).lower() for n in open_)
+                if limit_q and st == FAILS:
+                    why = (f"Does not comply whichever way it is read: needs {required} (the {sets} depends on "
+                           f"{'; '.join(limit_q)})")
+                elif limit_q:
+                    why = (f"Needs {required}, depending on {'; '.join(limit_q)} (it sets the {sets}): ask the "
+                           "zoning office" + (f"; also open: {'; '.join(rest)}" if rest else ""))
         alts = _alternatives(check, values, measured) if st == FAILS and not why and not splits else []
         if len(alts) > 1 and all(alts):                 # several ways to comply, none met: say each one
             why = "Does not comply either way the rule allows: " + "; or ".join(
