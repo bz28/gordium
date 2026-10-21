@@ -7,7 +7,7 @@ raises=AssertionError: only the finding's own assertion counts as "still reprodu
 output shape.
 
 Fixed (the marks are off; the tests guard the fixes): F1, F3, F5 in PR #18 (77796ee); F2 by the stack-keeper on
-F4 (a repeated id) in #12 (the same_id stop; in measurement-2 at b5a899b). F6 and F7 in #18 (ca4f6c3, 4ce81b3). None is open.
+F4 (a repeated id) in #12 (the same_id stop; in measurement-2 at b5a899b). F6 and F7 in #18 (ca4f6c3, 4ce81b3). Open: F8, F9.
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
@@ -208,6 +208,52 @@ def test_F7_a_side_eave_gable_names_the_same_overhangs_whichever_way_the_outline
     for case in (F7_GABLE, F7_MANSARD):
         texts = _eave_texts(case)
         assert texts[0] == texts[1] == texts[2], case[1][0]["kind"]
+
+
+# ---- F8 (P0, for #18): a plain wing 7 to 8 ft tall, nothing typed: stories complies from the floors alone --------
+
+F8_CASE = ("jog", [{"op": "floor_wing", "heights": [7.5], "face": 0, "depth": 8.5, "below": 0.0, "typed": "none"}])
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F8: a plain part 7 to 8 ft tall doesn't open the story count (the code's line is 8 ft)")
+def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_never_complies():
+    """One edit: the jog lot's starting house (3 floor blocks, 35'-0") with a plain solid wing 7'-6" tall joined to
+    its east wall. The agreed rule (coordinator, 2026-10-21): stories are counted only from floor blocks; a plain
+    part 7 ft or taller may hold a story the drawing doesn't show, so only a typed count of at least the floors
+    counted (and the plain blocks stacked) stands. Nothing is typed: the count is open, never complies. Gordium:
+    Stories 3, complies; its line is 8 ft (ca4f6c3: 'a part 8 ft or taller'). Either the rule's 7 ft or the code's
+    8 ft is to be settled; until then the 7'-6" wing passes on the floors alone."""
+    got, _ = _check(generate.build(*F8_CASE)[0])
+    assert got["R-1b.stories"] != COMPLIES
+
+
+def test_the_oracle_on_F8_a_7_ft_6_plain_wing_opens_the_count():
+    d, done = generate.build(*F8_CASE)
+    assert len(done) == 1
+    assert oracle.verdicts(d)["R-1b.stories"]["verdict"] == oracle.NOT_PASS
+
+
+# ---- F9 (P3, for #18): the spot-grade reason counts the walls differently by outline order -----------------------
+
+F9_CASE = ("sloped", [{"op": "move_floor", "k": 0, "dx": 0.0, "dy": -5.75}, {"op": "rotate", "deg": -0.9},
+                      {"op": "add_roof", "kind": "roof", "axis": 0, "over": 0.0, "fascia": 0.0, "inset": 3.5,
+                       "rise": 7.25}])
+
+
+@pytest.mark.xfail(strict=True, raises=AssertionError,
+                   reason="F9: 'N walls without one' (spot grades) depends on the outline order")
+def test_F9_the_spot_grade_reason_is_the_same_whichever_way_the_outlines_run():
+    """The sloped lot's starting house (on its four spot grades), floor 1 moved 5'-9" toward the street, the house
+    rotated 0.9 degrees, a gable roof solid on top. Height and stories need review either way ("spot grades no
+    longer at the building's walls"), but the reason says "7 walls without one" drawn as given and "9 walls without
+    one" with each outline starting at its next point. The same building has one number of walls."""
+    d = generate.build(*F9_CASE)[0]
+    reasons = []
+    for order in ("as_drawn", "reversed", "shifted"):
+        rows = harness.items_by_rule(harness.gordium(d, order))
+        reasons.append([i["reason"] for r in ("R-1b.height", "R-1b.stories") for i in rows[r]])
+    assert reasons[0] == reasons[1] == reasons[2], reasons
 
 
 # ---- the oracle's side of each finding (plain tests: they must pass, so a broken oracle fails CI) ----------------

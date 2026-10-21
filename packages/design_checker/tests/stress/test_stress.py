@@ -82,7 +82,7 @@ MATCHERS = {"F1": _jog_stepped_line, "F2": _tax_map_area, "F3": _drawing_changes
 def _typed_below_drawn(v):
     """F6 (open, for #14): stories complies on a plain-solid house whose typed count is below its floor blocks."""
     return v["invariant"] == "a" and v["rule"] == "R-1b.stories" and \
-        oracle.measure(_design(v))["stories_below_drawn"]
+        oracle.measure(_design(v))["stories_typed_short"]
 
 
 def _rear_overhang_words(v):
@@ -99,7 +99,32 @@ def _rear_overhang_words(v):
 
 
 MATCHERS["F6"], MATCHERS["F7"] = _typed_below_drawn, _rear_overhang_words
-KNOWN = {}                       # F6 and F7 fixed in #18 (ca4f6c3, 4ce81b3): a return fails CI
+def _plain_part_under_8_ft(v):
+    """F8 (open, for #18): stories complies where the only plain part 7 ft or taller is under 8 ft and nothing that
+    stands is typed."""
+    if not (v["invariant"] == "a" and v["rule"] == "R-1b.stories"):
+        return False
+    d = _design(v)
+    tall = [p["z1"] - p["z0"] for p in d["parts"] if p["kind"] == "solid" and p["z1"] - p["z0"] >= 7 - 1e-6]
+    return bool(tall) and max(tall) < 8 and oracle.measure(d)["stories_typed_short"]
+
+
+def _wall_count_words(v):
+    """F9 (open, for #18): drawn another way, only the number in "N walls without one" changes."""
+    import re
+    if not (v["invariant"] == "d" and "outlines drawn" in v.get("what", "")):
+        return False
+    d = _design(v)
+    a, b = harness.comparable(harness.gordium(d)), harness.comparable(harness.gordium(d, v["what"].split()[-1]))
+    words = re.compile(r"\d+ walls without one")
+
+    def plain(rows):
+        return [{**x, "reason": words.sub("N walls without one", x["reason"] or "")} for x in rows]
+    return a != b and plain(a) == plain(b)
+
+
+MATCHERS["F8"], MATCHERS["F9"] = _plain_part_under_8_ft, _wall_count_words
+KNOWN = {"F8": _plain_part_under_8_ft, "F9": _wall_count_words}   # F6, F7 fixed in #18 (ca4f6c3, 4ce81b3): a return of those fails CI
 
 
 def known(v):

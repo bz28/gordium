@@ -187,3 +187,45 @@ def test_a_porch_left_standing_apart_is_not_the_house():
     _, detached = oracle.main_and_detached(d)
     assert [p["kind"] for g in detached for p in g] == ["porch"]
     assert oracle.verdicts(d)["R-1b.accessory_buildings"]["verdict"] == oracle.UNDECIDED
+
+
+FLOOR_WING = {"op": "floor_wing", "heights": [10.0], "face": 1, "depth": 10, "below": 0.0, "typed": "none"}
+
+
+@pytest.mark.parametrize("wing,verdict", [
+    ({}, oracle.NOT_PASS),                                       # a 10 ft plain wing, nothing typed: open
+    ({"typed": "below"}, oracle.NOT_PASS),                       # 2 typed, 3 floors counted: doesn't stand
+    ({"typed": "equal"}, oracle.PASS),                           # 3 typed: stands, 3 <= 3
+    ({"typed": "above"}, oracle.FAIL),                           # 4 typed: stands, 4 > 3
+    ({"heights": [6.0]}, oracle.PASS),                           # a 6 ft wing can't hold a story: the 3 floors
+    ({"heights": [10.0, 12.0], "typed": "equal"}, oracle.PASS),  # 3 typed >= 3 floors and >= 2 plain blocks
+    ({"below": 4.0, "typed": "equal"}, oracle.NOT_PASS),         # a walk-out: the basement question
+])
+def test_the_agreed_stories_rule_for_a_floor_stack_with_a_plain_wing(wing, verdict):
+    """Gordium's starting house on the surveyed sample lot (3 floor blocks) with a plain wing on its rear wall."""
+    d, done = generate.build("sample_survey", [{**FLOOR_WING, **wing}])
+    assert len(done) == 1
+    assert oracle.verdicts(d)["R-1b.stories"]["verdict"] == verdict
+
+
+def test_a_plain_stack_taller_than_the_count_typed_does_not_stand():
+    """One floor block left (the top two deleted), a wing of two stacked 10 ft plain solids, 1 typed: 1 >= 1 floor
+    counted but < 2 plain blocks stacked: the count doesn't stand."""
+    d, done = generate.build("sample_survey", [{"op": "delete_floor", "which": "top"},
+                                               {"op": "delete_floor", "which": "top"},
+                                               {**FLOOR_WING, "heights": [10.0, 10.0], "typed": "equal"}])
+    assert len(done) == 3 and d["typed_stories"] == 1
+    assert oracle.verdicts(d)["R-1b.stories"]["verdict"] == oracle.NOT_PASS
+
+
+def test_a_garage_an_inch_from_the_house_is_read_both_ways():
+    """Long run seed 17: a listed garage 1 in. behind the house's rear wall (y 56 against 55'-11"). Joined (an
+    attached garage: the chart's rear yard, 11'-3" < 22'-6") or apart (an accessory building, 11'-3" >= 3): the
+    oracle reads it both ways and claims no pass on the rear yard (Gordium reads it as attached: does not comply)."""
+    d, done = generate.build("sample_survey", [{"op": "add_accessory", "kind": "garage", "w": 23.0, "d": 22.75,
+                                                "h": 9.75, "where": "rear", "face": 3, "fx": 0.26, "fy": 0.37,
+                                                "gap": 11.25, "listed": True, "frame": None}])
+    assert len(done) == 1
+    v = oracle.verdicts(d)
+    assert v["R-1b.rear_yard"]["verdict"] == oracle.UNDECIDED
+    assert v["R-1b.accessory_buildings"]["verdict"] == oracle.UNDECIDED
