@@ -661,6 +661,64 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: general.325_3b_one_family_attached_dwelling_attached_units_per_building
+  kind: rule
+  topic: density_and_occupancy
+  title: 'One-family attached: 3 to 6 units per building (325-3B)'
+  applies_when: use == "one_family_attached"
+  check: dwelling_units_in_building >= 3 and dwelling_units_in_building <= 6
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 11
+    - 13
+    quote: ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of which
+      shares one or more party walls or structural elements with the other one-family dwellings in the building
+      and which has direct exterior access from the ground floor.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 8
+    lines:
+    - 14
+    - 14
+    quote: A maximum of six one-family dwelling units may be attached to form a single building.
+  examples:
+  - given:
+      use: one_family_attached
+      dwelling_units_in_building: 4
+    expect: pass
+  - given:
+      use: one_family_attached
+      dwelling_units_in_building: 3
+    expect: pass
+  - given:
+      use: one_family_attached
+      dwelling_units_in_building: 6
+    expect: pass
+  - given:
+      use: one_family_attached
+      dwelling_units_in_building: 7
+    expect: fail
+  - given:
+      use: one_family_attached
+      dwelling_units_in_building: 2
+    expect: fail
+  - given:
+      use: one_family_detached
+      dwelling_units_in_building: 1
+    expect: not_applicable
+  open_questions:
+  - Does a building of fewer than three one-family dwellings sharing party walls count as a different use (e.g.
+    semi-detached or two-family) rather than a violation of this definition?
+  research:
+  - question: Does a building of fewer than three one-family dwellings sharing party walls count as a different
+      use (e.g. semi-detached or two-family) rather than a violation of this definition?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
 - id: general.325_3b_row_house_row_house_module_facade_length
   kind: rule
   topic: form_and_design_standards
@@ -1647,6 +1705,176 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: general.325_25c_frame_accessory_side_setback_r1
+  kind: rule
+  topic: site_features
+  title: 'Accessory buildings: side lot line setback in R-1 (325-25C)'
+  applies_when: accessory_distances_apply and district in ["R-1a", "R-1b"]
+  check: accessory_side_yard >= 6
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines:
+    - 6
+    - 9
+    quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
+      in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet
+      from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this
+      section.
+  examples:
+  - given:
+      accessory_distances_apply: true
+      district: R-1a
+      accessory_side_yard: 6
+    expect: pass
+  - given:
+      accessory_distances_apply: true
+      district: R-1b
+      accessory_side_yard: 5
+    expect: fail
+  - given:
+      accessory_distances_apply: true
+      district: R-2a
+      accessory_side_yard: 3
+    expect: not_applicable
+  - given:
+      accessory_distances_apply: false
+      district: R-1a
+      accessory_side_yard: 2
+    expect: not_applicable
+  open_questions:
+  - The text says 'frame accessory buildings' in the general sentence but 'accessory buildings' in the R-1 exception;
+    does the R-1 six-foot side distance apply to all accessory buildings or only frame ones?
+  - The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the setbacks
+    (e.g., a garage across a common lot line under 325-25D)?
+  - Is the distance to a side lot line measured to the wall or to the eaves?
+  research:
+  - question: The text says 'frame accessory buildings' in the general sentence but 'accessory buildings' in the
+      R-1 exception; does the R-1 six-foot side distance apply to all accessory buildings or only frame ones?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the
+      setbacks (e.g., a garage across a common lot line under 325-25D)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is the distance to a side lot line measured to the wall or to the eaves?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_25c_frame_accessory_side_setback_other
+  kind: rule
+  topic: site_features
+  title: 'Frame accessory buildings: side lot line setback, other districts (325-25C)'
+  applies_when: accessory_distances_apply and district not in ["R-1a", "R-1b"]
+  check: accessory_side_yard >= 3
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines:
+    - 6
+    - 9
+    quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
+      in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet
+      from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this
+      section.
+  examples:
+  - given:
+      accessory_distances_apply: true
+      district: R-2a
+      accessory_side_yard: 3
+    expect: pass
+  - given:
+      accessory_distances_apply: true
+      district: RU
+      accessory_side_yard: 2
+    expect: fail
+  - given:
+      accessory_distances_apply: true
+      district: R-1a
+      accessory_side_yard: 2
+    expect: not_applicable
+  - given:
+      accessory_distances_apply: false
+      district: R-2a
+      accessory_side_yard: 2
+    expect: not_applicable
+  open_questions:
+  - The text says 'frame accessory buildings' but no measure says whether an accessory building is of frame construction;
+    should non-frame accessory buildings be reviewed?
+  - The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the setbacks
+    (e.g., a garage across a common lot line under 325-25D)?
+  - Is the distance to a side lot line measured to the wall or to the eaves?
+  research:
+  - question: The text says 'frame accessory buildings' but no measure says whether an accessory building is of
+      frame construction; should non-frame accessory buildings be reviewed?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the
+      setbacks (e.g., a garage across a common lot line under 325-25D)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is the distance to a side lot line measured to the wall or to the eaves?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_25c_frame_accessory_rear_setback
+  kind: rule
+  topic: site_features
+  title: 'Frame accessory buildings: rear lot line setback (325-25C)'
+  applies_when: accessory_distances_apply
+  check: accessory_rear_yard >= 3
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines:
+    - 6
+    - 9
+    quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
+      in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet
+      from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this
+      section.
+  examples:
+  - given:
+      accessory_distances_apply: true
+      accessory_rear_yard: 3
+    expect: pass
+  - given:
+      accessory_distances_apply: true
+      accessory_rear_yard: 2
+    expect: fail
+  - given:
+      accessory_distances_apply: false
+      accessory_rear_yard: 2
+    expect: not_applicable
+  open_questions:
+  - The text says 'frame accessory buildings' but no measure says whether an accessory building is of frame construction;
+    should non-frame accessory buildings be reviewed?
+  - The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the setback
+    (e.g., a garage across a common lot line under 325-25D)?
+  research:
+  - question: The text says 'frame accessory buildings' but no measure says whether an accessory building is of
+      frame construction; should non-frame accessory buildings be reviewed?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the
+      setback (e.g., a garage across a common lot line under 325-25D)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
 - id: general.325_28c_adu_max_one_per_parcel
   kind: rule
   topic: uses
@@ -1985,234 +2213,6 @@ rules:
   - Which yard is the secondary front yard, and which primary-structure setback applies?
   research:
   - question: Which yard is the secondary front yard, and which primary-structure setback applies?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: general.325_3b_one_family_attached_dwelling_attached_units_per_building
-  kind: rule
-  topic: density_and_occupancy
-  title: 'One-family attached: 3 to 6 units per building (325-3B)'
-  applies_when: use == "one_family_attached"
-  check: dwelling_units_in_building >= 3 and dwelling_units_in_building <= 6
-  sources:
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 8
-    lines:
-    - 11
-    - 13
-    quote: ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of which
-      shares one or more party walls or structural elements with the other one-family dwellings in the building
-      and which has direct exterior access from the ground floor.
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 8
-    lines:
-    - 14
-    - 14
-    quote: A maximum of six one-family dwelling units may be attached to form a single building.
-  examples:
-  - given:
-      use: one_family_attached
-      dwelling_units_in_building: 4
-    expect: pass
-  - given:
-      use: one_family_attached
-      dwelling_units_in_building: 3
-    expect: pass
-  - given:
-      use: one_family_attached
-      dwelling_units_in_building: 6
-    expect: pass
-  - given:
-      use: one_family_attached
-      dwelling_units_in_building: 7
-    expect: fail
-  - given:
-      use: one_family_attached
-      dwelling_units_in_building: 2
-    expect: fail
-  - given:
-      use: one_family_detached
-      dwelling_units_in_building: 1
-    expect: not_applicable
-  open_questions:
-  - Does a building of fewer than three one-family dwellings sharing party walls count as a different use (e.g.
-    semi-detached or two-family) rather than a violation of this definition?
-  research:
-  - question: Does a building of fewer than three one-family dwellings sharing party walls count as a different
-      use (e.g. semi-detached or two-family) rather than a violation of this definition?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: general.325_25c_frame_accessory_side_setback_r1
-  kind: rule
-  topic: site_features
-  title: 'Accessory buildings: side lot line setback in R-1 (325-25C)'
-  applies_when: accessory_distances_apply and district in ["R-1a", "R-1b"]
-  check: accessory_side_yard >= 6
-  sources:
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 67
-    lines:
-    - 6
-    - 9
-    quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
-      in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet
-      from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this
-      section.
-  examples:
-  - given:
-      accessory_distances_apply: true
-      district: R-1a
-      accessory_side_yard: 6
-    expect: pass
-  - given:
-      accessory_distances_apply: true
-      district: R-1b
-      accessory_side_yard: 5
-    expect: fail
-  - given:
-      accessory_distances_apply: true
-      district: R-2a
-      accessory_side_yard: 3
-    expect: not_applicable
-  - given:
-      accessory_distances_apply: false
-      district: R-1a
-      accessory_side_yard: 2
-    expect: not_applicable
-  open_questions:
-  - The text says 'frame accessory buildings' in the general sentence but 'accessory buildings' in the R-1 exception;
-    does the R-1 six-foot side distance apply to all accessory buildings or only frame ones?
-  - The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the setbacks
-    (e.g., a garage across a common lot line under 325-25D)?
-  - Is the distance to a side lot line measured to the wall or to the eaves?
-  research:
-  - question: The text says 'frame accessory buildings' in the general sentence but 'accessory buildings' in the
-      R-1 exception; does the R-1 six-foot side distance apply to all accessory buildings or only frame ones?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the
-      setbacks (e.g., a garage across a common lot line under 325-25D)?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Is the distance to a side lot line measured to the wall or to the eaves?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: general.325_25c_frame_accessory_side_setback_other
-  kind: rule
-  topic: site_features
-  title: 'Frame accessory buildings: side lot line setback, other districts (325-25C)'
-  applies_when: accessory_distances_apply and district not in ["R-1a", "R-1b"]
-  check: accessory_side_yard >= 3
-  sources:
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 67
-    lines:
-    - 6
-    - 9
-    quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
-      in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet
-      from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this
-      section.
-  examples:
-  - given:
-      accessory_distances_apply: true
-      district: R-2a
-      accessory_side_yard: 3
-    expect: pass
-  - given:
-      accessory_distances_apply: true
-      district: RU
-      accessory_side_yard: 2
-    expect: fail
-  - given:
-      accessory_distances_apply: true
-      district: R-1a
-      accessory_side_yard: 2
-    expect: not_applicable
-  - given:
-      accessory_distances_apply: false
-      district: R-2a
-      accessory_side_yard: 2
-    expect: not_applicable
-  open_questions:
-  - The text says 'frame accessory buildings' but no measure says whether an accessory building is of frame construction;
-    should non-frame accessory buildings be reviewed?
-  - The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the setbacks
-    (e.g., a garage across a common lot line under 325-25D)?
-  - Is the distance to a side lot line measured to the wall or to the eaves?
-  research:
-  - question: The text says 'frame accessory buildings' but no measure says whether an accessory building is of
-      frame construction; should non-frame accessory buildings be reviewed?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the
-      setbacks (e.g., a garage across a common lot line under 325-25D)?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Is the distance to a side lot line measured to the wall or to the eaves?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: general.325_25c_frame_accessory_rear_setback
-  kind: rule
-  topic: site_features
-  title: 'Frame accessory buildings: rear lot line setback (325-25C)'
-  applies_when: accessory_distances_apply
-  check: accessory_rear_yard >= 3
-  sources:
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 67
-    lines:
-    - 6
-    - 9
-    quote: Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line
-      in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet
-      from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this
-      section.
-  examples:
-  - given:
-      accessory_distances_apply: true
-      accessory_rear_yard: 3
-    expect: pass
-  - given:
-      accessory_distances_apply: true
-      accessory_rear_yard: 2
-    expect: fail
-  - given:
-      accessory_distances_apply: false
-      accessory_rear_yard: 2
-    expect: not_applicable
-  open_questions:
-  - The text says 'frame accessory buildings' but no measure says whether an accessory building is of frame construction;
-    should non-frame accessory buildings be reviewed?
-  - The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the setback
-    (e.g., a garage across a common lot line under 325-25D)?
-  research:
-  - question: The text says 'frame accessory buildings' but no measure says whether an accessory building is of
-      frame construction; should non-frame accessory buildings be reviewed?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The text is 'subject to further provisions of this section' (325-25A, B, D); how do these change the
-      setback (e.g., a garage across a common lot line under 325-25D)?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'

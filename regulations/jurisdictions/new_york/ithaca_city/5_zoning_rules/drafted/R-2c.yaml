@@ -1,531 +1,5 @@
 district: R-2c
 rules:
-- id: R-2c.max_stories
-  kind: rule
-  topic: dimensions
-  title: Maximum number of stories (chart p.3)
-  check: stories <= 3
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Maximum Building Height [fn10]
-      row: Number of stories
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 56
-    - 56
-    quote: (10) See §325-16.
-  examples:
-  - given:
-      stories: 3
-    expect: pass
-  - given:
-      stories: 4
-    expect: fail
-  open_questions:
-  - The chart's height section points to §325-16 (footnote 10). Section 325-16C lets a main building exceed the
-    height in feet if yards grow, but says the number of stories may not be exceeded. Confirm that this story limit
-    is absolute.
-  - How are stories counted when an attic is finished or has human occupancy? The 'story' definition in §325-3B
-    should be applied to the stories measure.
-  research:
-  - question: The chart's height section points to §325-16 (footnote 10). Section 325-16C lets a main building exceed
-      the height in feet if yards grow, but says the number of stories may not be exceeded. Confirm that this story
-      limit is absolute.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: How are stories counted when an attic is finished or has human occupancy? The 'story' definition in
-      §325-3B should be applied to the stories measure.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.max_height_ft
-  kind: rule
-  topic: dimensions
-  title: Maximum building height in feet (chart p.3)
-  check: building_height <= 35
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Maximum Building Height [fn10]
-      row: Height in feet
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 56
-    - 56
-    quote: (10) See §325-16.
-  examples:
-  - given:
-      building_height: 35
-    expect: pass
-  - given:
-      building_height: 36
-    expect: fail
-  open_questions:
-  - Footnote 10 refers to §325-16. Section 325-16C allows a main building to exceed the height in feet if yards
-    are increased, so a design over this limit may be allowed. That exception is drafted from §325-16C itself; until
-    then a height over the limit fails here.
-  - '''Average height'' of a pitched roof is not defined further in the height-of-building definition. How should
-    it be measured?'
-  research:
-  - question: Footnote 10 refers to §325-16. Section 325-16C allows a main building to exceed the height in feet
-      if yards are increased, so a design over this limit may be allowed. That exception is drafted from §325-16C
-      itself; until then a height over the limit fails here.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: '''Average height'' of a pitched roof is not defined further in the height-of-building definition.
-      How should it be measured?'
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.max_lot_coverage_first
-  kind: rule
-  topic: dimensions
-  title: Max lot coverage, first number, R-2C (chart p.3, fn12)
-  applies_when: use not in ["one_family_semi_detached", "two_family", "one_family_attached"]
-  check: building_area <= 0.35 * lot_area
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Maximum lot coverage by buildings
-      row: Percent of lot area
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 58
-    - 59
-    quote: The first number applies to one-family detached dwellings, one-family detached zero lot line dwellings,
-      and other uses; the second number applies to one-family semi- detached dwelling and two-family dwellings;
-      and the third number applies to one-family attached dwellings.
-  examples:
-  - given:
-      use: one_family_detached
-      lot_area: 1000
-      building_area: 350
-    expect: pass
-  - given:
-      use: one_family_detached
-      lot_area: 1000
-      building_area: 351
-    expect: fail
-  - given:
-      use: two_family
-      lot_area: 1000
-      building_area: 1000
-    expect: not_applicable
-  open_questions:
-  - 'Multiple family and other uses not named in the footnote: is the first number the intended limit for them in
-    R-2C?'
-  research:
-  - question: 'Multiple family and other uses not named in the footnote: is the first number the intended limit
-      for them in R-2C?'
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.max_lot_coverage_second
-  kind: rule
-  topic: dimensions
-  title: Max lot coverage, second number, R-2C (chart p.3, fn12)
-  applies_when: use in ["one_family_semi_detached", "two_family"]
-  check: building_area <= 0.4 * lot_area
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Maximum lot coverage by buildings
-      row: Percent of lot area
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 58
-    - 59
-    quote: The first number applies to one-family detached dwellings, one-family detached zero lot line dwellings,
-      and other uses; the second number applies to one-family semi- detached dwelling and two-family dwellings;
-      and the third number applies to one-family attached dwellings.
-  examples:
-  - given:
-      use: two_family
-      lot_area: 1000
-      building_area: 400
-    expect: pass
-  - given:
-      use: one_family_semi_detached
-      lot_area: 1000
-      building_area: 401
-    expect: fail
-  - given:
-      use: one_family_detached
-      lot_area: 1000
-      building_area: 1000
-    expect: not_applicable
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.max_lot_coverage_third
-  kind: rule
-  topic: dimensions
-  title: Max lot coverage, third number, R-2C (chart p.3, fn12)
-  applies_when: use == "one_family_attached"
-  check: building_area <= 0.5 * lot_area
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Maximum lot coverage by buildings
-      row: Percent of lot area
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 58
-    - 59
-    quote: The first number applies to one-family detached dwellings, one-family detached zero lot line dwellings,
-      and other uses; the second number applies to one-family semi- detached dwelling and two-family dwellings;
-      and the third number applies to one-family attached dwellings.
-  examples:
-  - given:
-      use: one_family_attached
-      lot_area: 1000
-      building_area: 500
-    expect: pass
-  - given:
-      use: one_family_attached
-      lot_area: 1000
-      building_area: 501
-    expect: fail
-  - given:
-      use: two_family
-      lot_area: 1000
-      building_area: 1000
-    expect: not_applicable
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.front_yard_minimum
-  kind: rule
-  topic: dimensions
-  title: Minimum front yard (chart p.3)
-  check: front_yard >= 10
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Yard Dimensions
-      row: Front (minimum)
-      column: R-2C
-  examples:
-  - given:
-      front_yard: 10
-    expect: pass
-  - given:
-      front_yard: 9
-    expect: fail
-  open_questions:
-  - Corner lots are deemed to have two front yards (§325-19C). Is that drafted separately, and which yards does
-    the front_yard measure cover on a corner lot?
-  - Does the front yard minimum depend on §325-45.5F, §325-19B or §325-17A for any lot?
-  research:
-  - question: Corner lots are deemed to have two front yards (§325-19C). Is that drafted separately, and which yards
-      does the front_yard measure cover on a corner lot?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Does the front yard minimum depend on §325-45.5F, §325-19B or §325-17A for any lot?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.rear_yard_minimum
-  kind: rule
-  topic: dimensions
-  title: Minimum rear yard, not less than 20 ft (chart p.3)
-  check: rear_yard >= max(min(0.25 * lot_depth, 50), 20)
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Yard Dimensions
-      row: Rear (minimum, % of depth or feet, whichever is less)
-      column: R-2C
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 66
-    - 66
-    quote: But not less than 20 ft.
-  examples:
-  - given:
-      lot_depth: 100
-      rear_yard: 25
-    expect: pass
-  - given:
-      lot_depth: 100
-      rear_yard: 24
-    expect: fail
-  - given:
-      lot_depth: 40
-      rear_yard: 20
-    expect: pass
-  - given:
-      lot_depth: 40
-      rear_yard: 19
-    expect: fail
-  - given:
-      lot_depth: 1000
-      rear_yard: 50
-    expect: pass
-  - given:
-      lot_depth: 1000
-      rear_yard: 49
-    expect: fail
-  open_questions:
-  - Lot depth on irregular lots is not explained; confirm how lot_depth is measured for the rear yard percentage.
-  - The row label says 'whichever is less' and footnote 16 says 'But not less than 20 ft.' Confirm that the 20 ft
-    floor applies after taking the lesser of the percentage and the feet figure.
-  research:
-  - question: Lot depth on irregular lots is not explained; confirm how lot_depth is measured for the rear yard
-      percentage.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The row label says 'whichever is less' and footnote 16 says 'But not less than 20 ft.' Confirm that
-      the 20 ft floor applies after taking the lesser of the percentage and the feet figure.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.325_19c_corner_lot_street_yards
-  kind: rule
-  topic: dimensions
-  title: 'Corner lot: street-facing yards meet minimum front yard (325-19C)'
-  applies_when: corner_lot
-  check: front_yard >= 10 and corner_lot_other_street_yard >= 10
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Yard Dimensions
-      row: Front (minimum)
-      column: R-2C
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 50
-    lines:
-    - 7
-    - 8
-    quote: On corner lots in residential districts; buildings must be erected so that yards facing public streets
-      shall conform to the minimum front yard requirements of said residential district.
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 50
-    lines:
-    - 9
-    - 9
-    quote: Such lots shall be deemed to have two adjoining front yards.
-  examples:
-  - given:
-      corner_lot: true
-      front_yard: 10
-      corner_lot_other_street_yard: 10
-    expect: pass
-  - given:
-      corner_lot: true
-      front_yard: 10
-      corner_lot_other_street_yard: 9
-    expect: fail
-  - given:
-      corner_lot: true
-      front_yard: 9
-      corner_lot_other_street_yard: 10
-    expect: fail
-  - given:
-      corner_lot: false
-      front_yard: 10
-      corner_lot_other_street_yard: 0
-    expect: not_applicable
-  open_questions:
-  - Which yard is the front yard and which is the other street-facing yard on a corner lot (the text refers to an
-    illustration that is not given)?
-  - Does a lot with frontage on two streets that is not a corner lot (a through-block lot) fall under this rule?
-    The text says only corner lots.
-  - Is the yard depth measured to the main building only, or does it include porches, decks and eaves (see 325-18A
-    and 325-18B)?
-  - Where a district's front yard minimum has special conditions (such as 325-19E or 325-16C), which minimum applies
-    to the second street-facing yard?
-  research:
-  - question: Which yard is the front yard and which is the other street-facing yard on a corner lot (the text refers
-      to an illustration that is not given)?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Does a lot with frontage on two streets that is not a corner lot (a through-block lot) fall under
-      this rule? The text says only corner lots.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Is the yard depth measured to the main building only, or does it include porches, decks and eaves
-      (see 325-18A and 325-18B)?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Where a district's front yard minimum has special conditions (such as 325-19E or 325-16C), which minimum
-      applies to the second street-facing yard?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.325_25a_accessory_not_in_required_front_yard
-  kind: rule
-  topic: site_features
-  title: Accessory structures not in required front yard (325-25A)
-  applies_when: accessory_buildings > 0
-  check: accessory_front_yard >= 10
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Yard Dimensions
-      row: Front (minimum)
-      column: R-2C
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 66
-    lines:
-    - 37
-    - 39
-    quote: Accessory structures which are wholly or partially above finished grade are permitted in any side or
-      rear yard but not in a required front yard, except as permitted under the further provisions of this section.
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 66
-    lines:
-    - 39
-    - 40
-    quote: Corner lots shall be considered to have two front yards.
-  examples:
-  - given:
-      accessory_buildings: 1
-      accessory_front_yard: 10
-    expect: pass
-  - given:
-      accessory_buildings: 1
-      accessory_front_yard: 9
-    expect: fail
-  - given:
-      accessory_buildings: 0
-    expect: not_applicable
-  open_questions:
-  - The text allows exceptions 'under the further provisions of this section' (325-25B to 325-25D, e.g. structures
-    entirely below grade). Those are not drafted here; a design that fails this check may qualify for one of them.
-  - The measure accessory_front_yard is the least distance from a street lot line to an accessory building. Confirm
-    it correctly covers both front yards of a corner lot, which this text treats as having two front yards.
-  - The text covers accessory 'structures' wholly or partially above finished grade; the measure counts accessory
-    buildings. Confirm whether structures that are not buildings (e.g. sheds without floors, pergolas) need to be
-    counted.
-  - The 'required front yard' depth is taken from the chart's front yard minimum for the district; confirm that
-    325-19C corner lot transition and other sections do not change this depth for accessory structures.
-  research:
-  - question: The text allows exceptions 'under the further provisions of this section' (325-25B to 325-25D, e.g.
-      structures entirely below grade). Those are not drafted here; a design that fails this check may qualify for
-      one of them.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The measure accessory_front_yard is the least distance from a street lot line to an accessory building.
-      Confirm it correctly covers both front yards of a corner lot, which this text treats as having two front yards.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The text covers accessory 'structures' wholly or partially above finished grade; the measure counts
-      accessory buildings. Confirm whether structures that are not buildings (e.g. sheds without floors, pergolas)
-      need to be counted.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The 'required front yard' depth is taken from the chart's front yard minimum for the district; confirm
-      that 325-19C corner lot transition and other sections do not change this depth for accessory structures.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: R-2c.325_20e_front_yard_parking_setback
-  kind: rule
-  topic: parking_and_loading
-  title: Front yard parking setback at least chart front yard (chart p.3)
-  applies_when: lot_width_at_street_line > 50
-  check: front_yard_parking_setback >= 10
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Yard Dimensions
-      row: Front (minimum)
-      column: R-2C
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 57
-    lines:
-    - 25
-    - 28
-    quote: (3) In all residential districts, parking in the front yard of lots which have a width at the street
-      line of more than 50 feet shall be restricted to an area not greater than 25% of the total area of the front
-      yard, including turnaround and other vehicle maneuvering areas and driveways leading to garages and parking
-      areas.
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 57
-    lines:
-    - 28
-    - 30
-    quote: The setback for any such parking area must meet the minimum front yard setback dimensions specified in
-      § 325-8, District Regulations Chart,[fn15] for the zoning district in which the parking area is to be constructed.
-  examples:
-  - given:
-      lot_width_at_street_line: 60
-      front_yard_parking_setback: 11
-    expect: pass
-  - given:
-      lot_width_at_street_line: 60
-      front_yard_parking_setback: 9
-    expect: fail
-  - given:
-      lot_width_at_street_line: 50
-      front_yard_parking_setback: 9
-    expect: not_applicable
-  open_questions:
-  - The setback sentence sits in subsection (3), which covers lots wider than 50 feet; does it also apply to lots
-    of 50 feet or less?
-  research:
-  - question: The setback sentence sits in subsection (3), which covers lots wider than 50 feet; does it also apply
-      to lots of 50 feet or less?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
 - id: R-2c.use
   kind: rule
   topic: uses
@@ -1055,3 +529,529 @@ rules:
     reason: '§325-3 defines this use as ''a multiple dwelling: A building used or occupied as a convalescent, old-age
       or nursing hom'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or a dwelling
       row, with its notes) is unclear: a person decides.'
+- id: R-2c.max_stories
+  kind: rule
+  topic: dimensions
+  title: Maximum number of stories (chart p.3)
+  check: stories <= 3
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Number of stories
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 56
+    - 56
+    quote: (10) See §325-16.
+  examples:
+  - given:
+      stories: 3
+    expect: pass
+  - given:
+      stories: 4
+    expect: fail
+  open_questions:
+  - The chart's height section points to §325-16 (footnote 10). Section 325-16C lets a main building exceed the
+    height in feet if yards grow, but says the number of stories may not be exceeded. Confirm that this story limit
+    is absolute.
+  - How are stories counted when an attic is finished or has human occupancy? The 'story' definition in §325-3B
+    should be applied to the stories measure.
+  research:
+  - question: The chart's height section points to §325-16 (footnote 10). Section 325-16C lets a main building exceed
+      the height in feet if yards grow, but says the number of stories may not be exceeded. Confirm that this story
+      limit is absolute.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: How are stories counted when an attic is finished or has human occupancy? The 'story' definition in
+      §325-3B should be applied to the stories measure.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.max_height_ft
+  kind: rule
+  topic: dimensions
+  title: Maximum building height in feet (chart p.3)
+  check: building_height <= 35
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Height in feet
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 56
+    - 56
+    quote: (10) See §325-16.
+  examples:
+  - given:
+      building_height: 35
+    expect: pass
+  - given:
+      building_height: 36
+    expect: fail
+  open_questions:
+  - Footnote 10 refers to §325-16. Section 325-16C allows a main building to exceed the height in feet if yards
+    are increased, so a design over this limit may be allowed. That exception is drafted from §325-16C itself; until
+    then a height over the limit fails here.
+  - '''Average height'' of a pitched roof is not defined further in the height-of-building definition. How should
+    it be measured?'
+  research:
+  - question: Footnote 10 refers to §325-16. Section 325-16C allows a main building to exceed the height in feet
+      if yards are increased, so a design over this limit may be allowed. That exception is drafted from §325-16C
+      itself; until then a height over the limit fails here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: '''Average height'' of a pitched roof is not defined further in the height-of-building definition.
+      How should it be measured?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.max_lot_coverage_first
+  kind: rule
+  topic: dimensions
+  title: Max lot coverage, first number, R-2C (chart p.3, fn12)
+  applies_when: use not in ["one_family_semi_detached", "two_family", "one_family_attached"]
+  check: building_area <= 0.35 * lot_area
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum lot coverage by buildings
+      row: Percent of lot area
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 58
+    - 59
+    quote: The first number applies to one-family detached dwellings, one-family detached zero lot line dwellings,
+      and other uses; the second number applies to one-family semi- detached dwelling and two-family dwellings;
+      and the third number applies to one-family attached dwellings.
+  examples:
+  - given:
+      use: one_family_detached
+      lot_area: 1000
+      building_area: 350
+    expect: pass
+  - given:
+      use: one_family_detached
+      lot_area: 1000
+      building_area: 351
+    expect: fail
+  - given:
+      use: two_family
+      lot_area: 1000
+      building_area: 1000
+    expect: not_applicable
+  open_questions:
+  - 'Multiple family and other uses not named in the footnote: is the first number the intended limit for them in
+    R-2C?'
+  research:
+  - question: 'Multiple family and other uses not named in the footnote: is the first number the intended limit
+      for them in R-2C?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.max_lot_coverage_second
+  kind: rule
+  topic: dimensions
+  title: Max lot coverage, second number, R-2C (chart p.3, fn12)
+  applies_when: use in ["one_family_semi_detached", "two_family"]
+  check: building_area <= 0.4 * lot_area
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum lot coverage by buildings
+      row: Percent of lot area
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 58
+    - 59
+    quote: The first number applies to one-family detached dwellings, one-family detached zero lot line dwellings,
+      and other uses; the second number applies to one-family semi- detached dwelling and two-family dwellings;
+      and the third number applies to one-family attached dwellings.
+  examples:
+  - given:
+      use: two_family
+      lot_area: 1000
+      building_area: 400
+    expect: pass
+  - given:
+      use: one_family_semi_detached
+      lot_area: 1000
+      building_area: 401
+    expect: fail
+  - given:
+      use: one_family_detached
+      lot_area: 1000
+      building_area: 1000
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.max_lot_coverage_third
+  kind: rule
+  topic: dimensions
+  title: Max lot coverage, third number, R-2C (chart p.3, fn12)
+  applies_when: use == "one_family_attached"
+  check: building_area <= 0.5 * lot_area
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum lot coverage by buildings
+      row: Percent of lot area
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 58
+    - 59
+    quote: The first number applies to one-family detached dwellings, one-family detached zero lot line dwellings,
+      and other uses; the second number applies to one-family semi- detached dwelling and two-family dwellings;
+      and the third number applies to one-family attached dwellings.
+  examples:
+  - given:
+      use: one_family_attached
+      lot_area: 1000
+      building_area: 500
+    expect: pass
+  - given:
+      use: one_family_attached
+      lot_area: 1000
+      building_area: 501
+    expect: fail
+  - given:
+      use: two_family
+      lot_area: 1000
+      building_area: 1000
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.front_yard_minimum
+  kind: rule
+  topic: dimensions
+  title: Minimum front yard (chart p.3)
+  check: front_yard >= 10
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Front (minimum)
+      column: R-2C
+  examples:
+  - given:
+      front_yard: 10
+    expect: pass
+  - given:
+      front_yard: 9
+    expect: fail
+  open_questions:
+  - Corner lots are deemed to have two front yards (§325-19C). Is that drafted separately, and which yards does
+    the front_yard measure cover on a corner lot?
+  - Does the front yard minimum depend on §325-45.5F, §325-19B or §325-17A for any lot?
+  research:
+  - question: Corner lots are deemed to have two front yards (§325-19C). Is that drafted separately, and which yards
+      does the front_yard measure cover on a corner lot?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the front yard minimum depend on §325-45.5F, §325-19B or §325-17A for any lot?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.rear_yard_minimum
+  kind: rule
+  topic: dimensions
+  title: Minimum rear yard, not less than 20 ft (chart p.3)
+  check: rear_yard >= max(min(0.25 * lot_depth, 50), 20)
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Rear (minimum, % of depth or feet, whichever is less)
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 66
+    - 66
+    quote: But not less than 20 ft.
+  examples:
+  - given:
+      lot_depth: 100
+      rear_yard: 25
+    expect: pass
+  - given:
+      lot_depth: 100
+      rear_yard: 24
+    expect: fail
+  - given:
+      lot_depth: 40
+      rear_yard: 20
+    expect: pass
+  - given:
+      lot_depth: 40
+      rear_yard: 19
+    expect: fail
+  - given:
+      lot_depth: 1000
+      rear_yard: 50
+    expect: pass
+  - given:
+      lot_depth: 1000
+      rear_yard: 49
+    expect: fail
+  open_questions:
+  - Lot depth on irregular lots is not explained; confirm how lot_depth is measured for the rear yard percentage.
+  - The row label says 'whichever is less' and footnote 16 says 'But not less than 20 ft.' Confirm that the 20 ft
+    floor applies after taking the lesser of the percentage and the feet figure.
+  research:
+  - question: Lot depth on irregular lots is not explained; confirm how lot_depth is measured for the rear yard
+      percentage.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The row label says 'whichever is less' and footnote 16 says 'But not less than 20 ft.' Confirm that
+      the 20 ft floor applies after taking the lesser of the percentage and the feet figure.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.325_19c_corner_lot_street_yards
+  kind: rule
+  topic: dimensions
+  title: 'Corner lot: street-facing yards meet minimum front yard (325-19C)'
+  applies_when: corner_lot
+  check: front_yard >= 10 and corner_lot_other_street_yard >= 10
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Front (minimum)
+      column: R-2C
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 50
+    lines:
+    - 7
+    - 8
+    quote: On corner lots in residential districts; buildings must be erected so that yards facing public streets
+      shall conform to the minimum front yard requirements of said residential district.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 50
+    lines:
+    - 9
+    - 9
+    quote: Such lots shall be deemed to have two adjoining front yards.
+  examples:
+  - given:
+      corner_lot: true
+      front_yard: 10
+      corner_lot_other_street_yard: 10
+    expect: pass
+  - given:
+      corner_lot: true
+      front_yard: 10
+      corner_lot_other_street_yard: 9
+    expect: fail
+  - given:
+      corner_lot: true
+      front_yard: 9
+      corner_lot_other_street_yard: 10
+    expect: fail
+  - given:
+      corner_lot: false
+      front_yard: 10
+      corner_lot_other_street_yard: 0
+    expect: not_applicable
+  open_questions:
+  - Which yard is the front yard and which is the other street-facing yard on a corner lot (the text refers to an
+    illustration that is not given)?
+  - Does a lot with frontage on two streets that is not a corner lot (a through-block lot) fall under this rule?
+    The text says only corner lots.
+  - Is the yard depth measured to the main building only, or does it include porches, decks and eaves (see 325-18A
+    and 325-18B)?
+  - Where a district's front yard minimum has special conditions (such as 325-19E or 325-16C), which minimum applies
+    to the second street-facing yard?
+  research:
+  - question: Which yard is the front yard and which is the other street-facing yard on a corner lot (the text refers
+      to an illustration that is not given)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does a lot with frontage on two streets that is not a corner lot (a through-block lot) fall under
+      this rule? The text says only corner lots.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is the yard depth measured to the main building only, or does it include porches, decks and eaves
+      (see 325-18A and 325-18B)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Where a district's front yard minimum has special conditions (such as 325-19E or 325-16C), which minimum
+      applies to the second street-facing yard?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.325_25a_accessory_not_in_required_front_yard
+  kind: rule
+  topic: site_features
+  title: Accessory structures not in required front yard (325-25A)
+  applies_when: accessory_buildings > 0
+  check: accessory_front_yard >= 10
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Front (minimum)
+      column: R-2C
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 66
+    lines:
+    - 37
+    - 39
+    quote: Accessory structures which are wholly or partially above finished grade are permitted in any side or
+      rear yard but not in a required front yard, except as permitted under the further provisions of this section.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 66
+    lines:
+    - 39
+    - 40
+    quote: Corner lots shall be considered to have two front yards.
+  examples:
+  - given:
+      accessory_buildings: 1
+      accessory_front_yard: 10
+    expect: pass
+  - given:
+      accessory_buildings: 1
+      accessory_front_yard: 9
+    expect: fail
+  - given:
+      accessory_buildings: 0
+    expect: not_applicable
+  open_questions:
+  - The text allows exceptions 'under the further provisions of this section' (325-25B to 325-25D, e.g. structures
+    entirely below grade). Those are not drafted here; a design that fails this check may qualify for one of them.
+  - The measure accessory_front_yard is the least distance from a street lot line to an accessory building. Confirm
+    it correctly covers both front yards of a corner lot, which this text treats as having two front yards.
+  - The text covers accessory 'structures' wholly or partially above finished grade; the measure counts accessory
+    buildings. Confirm whether structures that are not buildings (e.g. sheds without floors, pergolas) need to be
+    counted.
+  - The 'required front yard' depth is taken from the chart's front yard minimum for the district; confirm that
+    325-19C corner lot transition and other sections do not change this depth for accessory structures.
+  research:
+  - question: The text allows exceptions 'under the further provisions of this section' (325-25B to 325-25D, e.g.
+      structures entirely below grade). Those are not drafted here; a design that fails this check may qualify for
+      one of them.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The measure accessory_front_yard is the least distance from a street lot line to an accessory building.
+      Confirm it correctly covers both front yards of a corner lot, which this text treats as having two front yards.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text covers accessory 'structures' wholly or partially above finished grade; the measure counts
+      accessory buildings. Confirm whether structures that are not buildings (e.g. sheds without floors, pergolas)
+      need to be counted.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The 'required front yard' depth is taken from the chart's front yard minimum for the district; confirm
+      that 325-19C corner lot transition and other sections do not change this depth for accessory structures.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.325_20e_front_yard_parking_setback
+  kind: rule
+  topic: parking_and_loading
+  title: Front yard parking setback at least chart front yard (chart p.3)
+  applies_when: lot_width_at_street_line > 50
+  check: front_yard_parking_setback >= 10
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Front (minimum)
+      column: R-2C
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 25
+    - 28
+    quote: (3) In all residential districts, parking in the front yard of lots which have a width at the street
+      line of more than 50 feet shall be restricted to an area not greater than 25% of the total area of the front
+      yard, including turnaround and other vehicle maneuvering areas and driveways leading to garages and parking
+      areas.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 57
+    lines:
+    - 28
+    - 30
+    quote: The setback for any such parking area must meet the minimum front yard setback dimensions specified in
+      § 325-8, District Regulations Chart,[fn15] for the zoning district in which the parking area is to be constructed.
+  examples:
+  - given:
+      lot_width_at_street_line: 60
+      front_yard_parking_setback: 11
+    expect: pass
+  - given:
+      lot_width_at_street_line: 60
+      front_yard_parking_setback: 9
+    expect: fail
+  - given:
+      lot_width_at_street_line: 50
+      front_yard_parking_setback: 9
+    expect: not_applicable
+  open_questions:
+  - The setback sentence sits in subsection (3), which covers lots wider than 50 feet; does it also apply to lots
+    of 50 feet or less?
+  research:
+  - question: The setback sentence sits in subsection (3), which covers lots wider than 50 feet; does it also apply
+      to lots of 50 feet or less?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft

@@ -1266,12 +1266,69 @@ def test_each_old_false_pass_draft_fails_the_new_verifier(inputs, monkeypatch):
     assert drafter.narrowing_problems(OLD_ACCESSORY, inputs.ctx)                              # frame narrows distances
     fixed = OLD_ACCESSORY | {"applies_when": 'accessory_distances_apply and district in ["R-1a", "R-1b"]'}
     assert drafter.narrowing_problems(fixed, inputs.ctx) == []
-    # an exception is all or nothing per district: R-2c's §325-16C kept height, front and rear without its side yards
+    # all or none for an exception's parts: test_an_exceptions_parts_are_all_or_none_even_when_a_part_fails_everywhere
+
+
+def test_replaying_every_recorded_answer_reproduces_the_committed_drafts_byte_for_byte(tmp_path):
+    """Review round 9: the committed drafts had drifted from what the code produces (§325-8B and §325-8E were not
+    replayed after a check changed). Replaying every unit's recorded answers with today's code, in the drafting log's
+    order, must give the committed rulebooks and records exactly, so a change to the checks shows here."""
+    import shutil
+    src = cli.PLACE
+    dst = tmp_path / "ithaca_city"
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("*.pdf", "*.xlsx"))
+    for pdf in src.rglob("*.pdf"):                      # the sources' fingerprints are checked: link, don't copy
+        target = dst / pdf.relative_to(src)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.symlink_to(pdf)
+    i = cli.Inputs(dst)
+    log = cli.read_log(i)
+    cli.replay_units(i, list(log["units"]), log, quiet=True)
+    committed = src / "5_zoning_rules/drafted"
+    files = sorted(p.relative_to(committed) for p in committed.rglob("*.yaml"))
+    assert files
+    for rel in files:
+        assert (dst / "5_zoning_rules/drafted" / rel).read_bytes() == (committed / rel).read_bytes(), str(rel)
+
+
+def test_an_exceptions_parts_are_all_or_none_even_when_a_part_fails_everywhere(inputs):
+    """Review round 9: only a part failing in some districts was seen; a part refused in every district left the other
+    parts saved everywhere (round 8's R-2c false pass, in all nine districts). The parts are the answer's slotted
+    templates sharing one condition; independent templates and a "-" (use not permitted) are not missing parts."""
     u = unit(inputs, "325-16C")
     context = drafter.gather_context(u, inputs.law, {"notes": inputs.notes}, inputs.definitions)
-    side = template("side", "side_yard_larger >= {s}", [slot("s", "Side (one side minimum)")],
-                    [({"side_yard_larger": "{s}"}, "pass"), ({"side_yard_larger": "{s} - 1"}, "fail")])
-    got = drafter.check_answer({"templates": [FRONT, side], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
+    above = "corner_lot"                                   # one shared condition makes them parts of one exception
+    front = template("front", "front_yard >= {f}", [slot("f", "Front (minimum)")],
+                     [({"front_yard": "{f}", "corner_lot": "true"}, "pass"),
+                      ({"front_yard": "{f} - 1", "corner_lot": "true"}, "fail")], applies_when=above)
+    broken = template("side", "side_yard_larger >= {s}", [slot("s", "No such row")],
+                      [({"side_yard_larger": "{s}", "corner_lot": "true"}, "pass")], applies_when=above)
+    got = drafter.check_answer({"templates": [front, broken], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
                                inputs.columns, inputs.cells, inputs.notes, "test")
-    assert "R-2c" not in got["rules"] and "R-1b" in got["rules"] and len(got["rules"]["R-1b"]) == 2
-    assert any(g["rule"].startswith("R-2c.") and "none of its parts is kept" in g["why"] for g in got["unresolved"])
+    assert got["rules"] == {}                                          # the side part failed everywhere: no part kept
+    assert sum("none of its parts is kept" in g["why"] for g in got["unresolved"]) == len(inputs.columns)
+    alone = template("side2", "side_yard_larger >= {s}", [slot("s", "No such row")],
+                     [({"side_yard_larger": "{s}"}, "pass")])                     # no shared condition: independent
+    got = drafter.check_answer({"templates": [FRONT, alone], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
+                               inputs.columns, inputs.cells, inputs.notes, "test")
+    assert len(got["rules"]) == len(inputs.columns)
+    # a "-" (the use isn't permitted in that district) isn't a missing part: R-1A's two-family lot width is "-"
+    width = template("width", "lot_width >= {w}", [slot("w", "Two-family dwelling", section="Minimum Lot Width")],
+                     [({"lot_width": "{w}", "corner_lot": "true"}, "pass"),
+                      ({"lot_width": "{w} - 1", "corner_lot": "true"}, "fail")], applies_when=above)
+    assert inputs.cells[(3, "Minimum Lot Width", "Two-family dwelling", "R-1A")]["value"].strip() == "-"
+    got = drafter.check_answer({"templates": [front, width], "no_rule_reason": ""}, u, context, inputs.law, inputs.ctx,
+                               inputs.columns, inputs.cells, inputs.notes, "test")
+    assert [r["id"] for r in got["rules"]["R-1a"]] == ["R-1a.325_16c_front"]       # its front part is kept
+    # and §325-8B's two per-use templates are independent: R-1a and R-1b keep their one-family rule
+    saved = {r["id"] for d in ("R-1a", "R-1b") for r in cli.load(inputs.drafted / f"{d}.yaml")["rules"]}
+    assert {"R-1a.325_8b_one_family_detached_area_per_primary_building",
+            "R-1b.325_8b_one_family_detached_area_per_primary_building"} <= saved
+
+
+def test_an_overlay_isnt_decided_by_the_base_district(inputs):
+    """Review round 9: the narrowing check read `district` (a text selector) as a fact deciding the South Hill
+    overlay and refused every §325-8E draft. Only a measured yes/no fact decides whether a requirement applies."""
+    rules = {r["id"]: r for r in cli.load(inputs.drafted / "general.yaml")["rules"]}
+    south_hill = [r for i, r in rules.items() if i.startswith("general.325_8e")]
+    assert len(south_hill) == 2 and all(drafter.narrowing_problems(r, inputs.ctx) == [] for r in south_hill)

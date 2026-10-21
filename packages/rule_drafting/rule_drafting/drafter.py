@@ -717,17 +717,48 @@ def narrowing_problems(rule: dict, ctx: Context) -> list[str]:
         return []
     known = (load_yaml(MEASURES_FILE) or {}) if MEASURES_FILE.exists() else {}
     names = formula.names(when)
-    measured = {n: known[n] for n in names if n in known and isinstance(known[n], dict)}
+    # only a measured yes/no fact decides whether something applies; the text selectors district and use never do
+    # (the base district can't decide the South Hill overlay)
+    measured = {n: known[n] for n in names if isinstance(known.get(n), dict) and known[n].get("unit") == "yes_no"}
     out = []
     for n in sorted(names - set(measured)):
         meaning = (ctx.proposed.get(n) or {}).get("meaning", "")
         if not meaning or ctx.kinds().get(n) != "boolean":
             continue
         for m, entry in measured.items():
-            stem = lambda t: {w[:-1] if w.endswith("s") else w for w in _content(t)}       # building(s)
-            if len(stem(meaning) & stem(entry.get("meaning", ""))) >= 2:
+            stem = lambda t: {w[:-1] if w.endswith("s") else w for w in _content(t)} - {"lot", "district", "zoning",
+                                                                                       "city", "apply", "located"}
+            if len(stem(meaning) & stem(entry.get("meaning", ""))) >= 2:          # the same subject (accessory building)
                 out.append(f"{n} narrows {m}, which already decides this; use {m} alone")
     return out
+
+
+def all_or_none(answer: dict, unit: dict, out: dict) -> None:
+    """The parts of one exception go together (§325-16C's extra height: the larger front, side and rear yards): the
+    answer's slotted templates that share one condition (applies_when) are its parts, as the AI wrote them, whether
+    or not they survived. A part refused outright drops the parts in every district; a part that couldn't be filled
+    in a district (a footnote, several numbers: not a "-", which only says the use isn't permitted there) drops the
+    parts in that district. Independent templates (§325-8B's one per use) are not parts of anything. In place."""
+    prefix = unit.get("prefix", "")
+    groups: dict[str, list[str]] = {}
+    for t in answer.get("templates") or []:
+        when = " ".join(str(t.get("applies_when") or "").split())
+        if t.get("slots") and when:
+            groups.setdefault(when, []).append(prefix + t["id_suffix"])
+    rejected = {r["rule"] for r in out["rejected"]}
+    for parts in (g for g in groups.values() if len(g) > 1):
+        whole = any(f"{unit['id']}.{sfx}" in rejected for sfx in parts)
+        short = {g["rule"].split(".")[0] for g in out["unresolved"] if g.get("cells")
+                 and g["rule"].split(".", 1)[-1] in parts and "the chart shows" not in g.get("why", "")}
+        for d in sorted(out["rules"]):
+            if not (whole or d in short):
+                continue
+            gone = [r for r in out["rules"][d] if r["id"].split(".", 1)[1] in parts]
+            out["rules"][d] = [r for r in out["rules"][d] if r not in gone]
+            out["unresolved"] += [{"rule": r["id"], "why": "another part of this exception couldn't be drafted "
+                                                           f"{'at all' if whole else 'for this district'}, so none of its "
+                                                           "parts is kept: a person checks it"} for r in gone]
+        out["rules"] = {d: rs for d, rs in out["rules"].items() if rs}
 
 
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
@@ -803,15 +834,8 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
         else:                                   # it works nowhere: the drafter is told why and tries again
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}",
                                     "why": "; ".join(f"{g['rule']}: {g['why']}" for g in gaps[:3])})
-    if unit.get("piece") and len([t for t in out["templates"] if t["slots"]]) > 1:
-        # an exception drafted as several rules on chart cells is all or nothing per district: a district where one part
-        # couldn't be filled gets none (R-2c's §325-16C kept its height and front and rear parts without the side yards)
-        missing = {g["rule"].split(".")[0] for g in out["unresolved"] if g.get("cells")}
-        for d in sorted(missing & set(out["rules"])):
-            dropped = out["rules"].pop(d)
-            out["unresolved"] += [{"rule": r["id"], "why": "another part of this exception couldn't be drafted for this "
-                                                           "district, so none of its parts is kept: a person checks it"}
-                                  for r in dropped]
+    if unit.get("piece"):
+        all_or_none(answer, unit, out)
     out["unresolved"] += exemption_gaps(unit, out, ctx)
     out["problems"] = [f"{r['rule']}: {r['why']}" for r in out["rejected"]]
     if scope is not None:

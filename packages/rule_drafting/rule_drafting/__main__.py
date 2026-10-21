@@ -443,13 +443,14 @@ def replay_unit(i: Inputs, unit: dict, attempts: list[dict]) -> dict:
     return {"failed": why, "rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}
 
 
-def cmd_replay(args) -> int:
-    i = Inputs()
-    log = read_log(i)
+def replay_units(i: Inputs, unit_ids: list[str], log: dict | None = None, quiet: bool = False) -> dict:
+    """Judge each unit's recorded answers again with today's code and save the result, in the order given. No API
+    call. Returns the log (also written)."""
+    log = read_log(i) if log is None else log
     units = {u["id"]: u for u in i.units()}
-    if missing := sorted(set(args.only) - set(units)):
+    if missing := sorted(set(unit_ids) - set(units)):
         raise SystemExit(f"no such unit: {', '.join(missing)}")
-    for uid in args.only:
+    for uid in unit_ids:
         if owned_rules_approved(i, log, uid):
             print(f"  {uid}: skipped, an architect approved its rules")
             continue
@@ -463,13 +464,19 @@ def cmd_replay(args) -> int:
                 continue
             result = replay_unit(i, u, attempts)
         save_result(i, log, uid, result)
-        print(f"  {uid}: {sum(len(r) for r in result['rules'].values())} rules, "
-              f"{len(result.get('unresolved', []))} for a person (replayed, no API call)"
-              + (f", FAILED: {result['failed']}" if result.get("failed") else ""))
-    refresh_review_list(i)
+        if not quiet:
+            print(f"  {uid}: {sum(len(r) for r in result['rules'].values())} rules, "
+                  f"{len(result.get('unresolved', []))} for a person (replayed, no API call)"
+                  + (f", FAILED: {result['failed']}" if result.get("failed") else ""))
     log["complete"] = all(u in log["units"] for u in units)
-    (i.records / "drafting_log.yaml").write_text(_dump(log),
-                                                 encoding="utf-8")
+    (i.records / "drafting_log.yaml").write_text(_dump(log), encoding="utf-8")
+    return log
+
+
+def cmd_replay(args) -> int:
+    i = Inputs()
+    replay_units(i, list(args.only))
+    refresh_review_list(i)
     return 0
 
 
