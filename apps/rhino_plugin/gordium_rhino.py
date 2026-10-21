@@ -54,9 +54,8 @@ def _conduit(name, o, e):
     and is logged and said once, never raised into Rhino's drawing)."""
     logic.guard(globals().get(name) or (lambda *a: None), CONDUIT_WORDS.get(name, name))(o, e)
 
-# an earlier copy's handlers, drawing, panel and checker: undone, and STATE's handles to them forgotten (live
-# mode, if it was on, is put back at the end of this file)
-logic.sweep(LEFTOVERS, STATE)
+# an earlier copy's handlers, drawing, panel and checker are undone, released and forgotten at the end of this
+# file (logic.sweep, once the functions that release them exist)
 
 
 def _is_current():
@@ -1796,5 +1795,31 @@ def frame_site(doc, facts):
     doc.Views.Redraw()
 
 
+
+def _release(key, value):
+    """Release one handle an earlier copy left in STATE, through this copy's tolerant undo (a copy from before
+    LEFTOVERS registered nothing there): its hooks (old tuple shapes too), its drawing, panel, timer, checker."""
+    if key == "hooks":
+        _unhook()
+    elif key == "doc_hooks":
+        documents(False)
+    elif key == "command_hook":
+        _off(Rhino.Commands.Command, "BeginCommand", value)
+    elif key == "overlay":
+        value.Enabled = False
+    elif key == "panel":                       # an older copy's panel (a form)
+        value.Close()
+    elif key == "panel_parts":                 # this PR's panel: its parts, the form among them
+        value["form"].Close()
+    elif key == "toast_timer":
+        value.Stop()
+    elif key == "worker":
+        _stop_worker()
+    elif key == "worker_sends":
+        value.put(None)
+
+
+# an earlier copy's handlers, drawing, panel and checker: undone (LEFTOVERS), released and forgotten (STATE)
+logic.sweep(LEFTOVERS, STATE, _release)
 if STATE.get("live"):                        # live mode was on before this copy loaded: its hooks back on
     live(True)
