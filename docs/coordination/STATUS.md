@@ -101,3 +101,12 @@ For Ben: see the PR comments on #18, #19, #15 (flagged UX/zoning points, not dec
 | #24 r2-hand | 3892d20 | clean (round 9) |
 | demo | 4c07e6e | built; smoke PENDING (RHINO_QUEUE 9) before Ben tells cofounders to pull |
 Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from cofounders. Ben's decisions: flagged points in the #15/#18/#19/#21 PR comments; relookup (wip/relookup 1099937) is the next feature lane after the demo.
+
+## 2026-10-22 18:00 — cloud coordinator: headless checks done, #19 fixes under review
+- Headless (no-Rhino) checks ran on the demo build dfac7ab: 71 of 73 pass. Scripts and results are in headless/ (README there), and every claim is in the test tracker with what only Rhino can still show.
+- The 2 that failed, both fixed in #19: pass 2 claim 6 was out of date (it now expects LOT_MISSING, #19's empty-file wording), and a real bug where a lookup replacing the sample's lot kept the sample's street source.
+- #19 start-box-lookup, local only, not pushed yet:
+  - 8b8af5e: ported the local Rhino job's 1099937. The two-zones doubt is said once, and the address's street name is kept through Draw.
+  - 7a2ab6b and 87b69b4: fixes for review round 1's two confirmed findings (with the real lookup answer the doubt was still said twice; the kept name was credited to the used-live roads service), plus the two headless fixes. Each fix is revert-checked.
+  - Now running: the full suite and review round 2. Then push and carry into #23.
+- Next: rebuild re-lookup on the new #19 as its own PR, with scenario evals.
