@@ -161,6 +161,85 @@ def test_changing_any_attribute_or_copying_keeps_the_outline_and_only_gordiums_o
     assert kept < clear.index('attrs.SetUserString(logic.EDITED_KEY, "1")') < clear.index("doc.Objects.Delete(o, True)")
 
 
+class _Prop:
+    """A .NET PropertyInfo as pythonnet hands it to the plugin (Name, CanRead, GetIndexParameters, GetValue)."""
+
+    def __init__(self, name, read=None, can_read=True, indexed=False):
+        self.Name, self.CanRead, self._read, self._indexed = name, can_read, read, indexed
+
+    def GetIndexParameters(self):
+        return type("P", (), {"Length": 1 if self._indexed else 0})()
+
+    def GetValue(self, obj, index):
+        assert index is None
+        return self._read(obj)
+
+
+class _NetObject:
+    """A .NET object without its own ToString: str() is its type name, the same on every read."""
+
+    def __str__(self):
+        return "Rhino.Render.Decals"
+
+
+class _Attrs:
+    """ObjectAttributes as the plugin reads them in Rhino: reflection over the real kinds of property (an id, a
+    document flag, an object reference, one Rhino throws on, an indexed one, a write-only one) and Gordium's own keys
+    counted in UserStringCount."""
+
+    def __init__(self, obj_id="5d2c-own", plot_weight=0.0, groups=None):
+        self.obj_id, self.plot_weight, self.groups = obj_id, plot_weight, groups
+        self.strings = {"gordium_context": "state_buildings", "gordium_context_id": "footprint-1"}
+        self.decals = _NetObject()
+
+    def GetType(self):
+        def boom(a):
+            raise RuntimeError("TargetInvocationException: not readable here")
+        props = [_Prop("ObjectId", lambda a: a.obj_id), _Prop("IsDocumentControlled", lambda a: True),
+                 _Prop("PlotWeight", lambda a: a.plot_weight), _Prop("Decals", lambda a: a.decals),
+                 _Prop("UserStringCount", lambda a: len(a.strings)), _Prop("CustomMeshingParameters", boom),
+                 _Prop("Item", lambda a: 1 / 0, indexed=True), _Prop("WriteOnly", lambda a: 1 / 0, can_read=False)]
+        return type("T", (), {"GetProperties": staticmethod(lambda: props)})()
+
+    def GetGroupList(self):
+        return self.groups                       # None when the object is in no group, as RhinoCommon gives it
+
+    def GetUserStrings(self):
+        return type("NV", (), {"AllKeys": list(self.strings)})()
+
+    def GetUserString(self, k):
+        return self.strings.get(k)
+
+
+def test_the_attribute_fingerprint_is_stable_in_rhino_and_sees_print_width_and_groups():
+    """Review of the editable outlines, round 3 (finishing round 2): _attrs_print run as written, over attributes
+    shaped like RhinoCommon's. Reading them again after Gordium writes its own keys (the user-string count grows)
+    gives the same fingerprint, so an untouched outline is Gordium's; a property Rhino throws on, an indexed or a
+    write-only one is left out; a print width or a group is an edit."""
+    src = RHINO[RHINO.index("def _attrs_print("):].split("\ndef ", 1)[0]
+    ns = {"logic": logic}
+    exec(src, ns)
+    attrs_print = ns["_attrs_print"]
+    pts = [(0.0, 0.0, 0.0), (30.0, 0.0, 0.0), (30.0, 40.0, 0.0), (0.0, 0.0, 0.0)]
+    a = _Attrs()
+    key = logic.outline_key(pts, attrs_print(a))                       # as draw_context fingerprints it
+    a.strings.update({logic.GEOM_KEY: key, logic.DRAWN_KEY: "5d2c-own"})   # then writes its own keys
+    first = attrs_print(a)
+    assert set(first) == {"ObjectId", "IsDocumentControlled", "PlotWeight", "Decals", "groups", "user"}
+    assert first["user"] == [] and first["groups"] == [] and first["Decals"] == "Rhino.Render.Decals"
+    assert not logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(a))   # untouched: Gordium's
+    a.plot_weight = 0.35                                                                # a print width set
+    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(a))
+    b = _Attrs(groups=[3])                                                              # grouped with their linework
+    b.strings.update({logic.GEOM_KEY: key, logic.DRAWN_KEY: "5d2c-own"})
+    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(b))
+    c = _Attrs()
+    c.strings["storeys"] = "4"                                                          # their own user text
+    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(c))
+    check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
+    assert "a copy pasted in place and a footprint given a print width are the architect's" in check  # Rhino proves it
+
+
 def test_only_the_very_outline_edited_around_this_lot_is_kept_from_a_redraw():
     """Review of the editable outlines, P2: skipping by id alone hid unedited neighbours. A copy the architect moved
     carries the original's id (Rhino copies user text) but not as its own object id: it never hides the original. An

@@ -223,6 +223,32 @@ try:
     claim("3 an edited footprint stays (the architect's), is not drawn twice; the others are replaced",
           log["edited"]["kept"] == 1 and log["edited"]["kept_is_theirs"] and log["edited"]["after"] == before
           and log["edited"]["lifted_kept_once"] and log["edited"]["unedited_replaced"], log["edited"])
+    # review of the editable outlines, round 2: a copy pasted in place (same points, same attributes, Gordium's keys
+    # too) and a footprint whose print width the architect set are theirs: kept, the width one not drawn twice
+    feet = [o for o in footprints(g, doc) if not o.Attributes.GetUserString(g.logic.EDITED_KEY)]
+    source, widened = feet[0], feet[1]
+    source_id = source.Attributes.GetUserString(g.logic.PIECE_KEY)
+    widened_id = widened.Attributes.GetUserString(g.logic.PIECE_KEY)
+    copy_guid = doc.Objects.AddCurve(source.Geometry.DuplicateCurve(), source.Attributes.Duplicate())
+    wide = widened.Attributes.Duplicate()
+    wide.PlotWeightSource = Rhino.DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
+    wide.PlotWeight = 0.35
+    doc.Objects.ModifyAttributes(widened, wide, True)
+    before = len(footprints(g, doc, every=True))
+    g.draw_context(doc, g._ui_state(doc).get("lookup_frame"))
+    after = footprints(g, doc, every=True)
+    copy = doc.Objects.FindId(copy_guid)
+    log["copy_and_width"] = {
+        "copy_kept_as_theirs": copy is not None and bool(copy.Attributes.GetUserString(g.logic.EDITED_KEY))
+        and not copy.Attributes.GetUserString(g.logic.CONTEXT_KEY),
+        "copied_one_redrawn": len([o for o in after if o.Attributes.GetUserString(g.logic.PIECE_KEY) == source_id]) == 2,
+        "width_kept_once": [o.Attributes.PlotWeight for o in after
+                            if o.Attributes.GetUserString(g.logic.PIECE_KEY) == widened_id] == [0.35],
+        "before": before, "after": len(after)}
+    claim("3 a copy pasted in place and a footprint given a print width are the architect's: kept, never doubled",
+          log["copy_and_width"]["copy_kept_as_theirs"] and log["copy_and_width"]["copied_one_redrawn"]
+          and log["copy_and_width"]["width_kept_once"] and log["copy_and_width"]["after"] == before,
+          log["copy_and_width"])
     # a solid on the neighbourhood layers over the lot: never measured, so said
     lot = g._find(doc, g.current_facts(doc).get("lot_id") or "")
     centre = lot.Geometry.GetBoundingBox(True).Center
