@@ -1,0 +1,123 @@
+[
+ {
+  "id": "check-1",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "The panel has a Check button, first beside Edit site\u2026",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Header buttons: ['Check', 'Edit site\u2026', 'Pick survey lot lines\u2026'].",
+  "rhino_part": "The real Eto panel in Rhino 8: the button and tick on screen, a click, the greyed rows' look."
+ },
+ {
+  "id": "check-2",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "The tick 'Check after every edit' is there and off",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Ticks: ['Check after every edit', 'Show buildable envelope', 'Hide starting house', 'Show on-screen labels', 'Show neighbourhood']; Check after every edit Checked=False.",
+  "rhino_part": "The real Eto panel in Rhino 8: the button and tick on screen, a click, the greyed rows' look."
+ },
+ {
+  "id": "check-3",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "After an edit nothing checks by itself",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Checks run after the edit and an idle 5 s later: 0; the model counts as changed: True.",
+  "rhino_part": "Rhino's own idle and edit events (fired here as Rhino fires them)."
+ },
+ {
+  "id": "check-4",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "The panel says 'Model changed since the last check \u2014 press Check' and the rows are greyed",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Header: ['106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached', 'Model changed since the last check \u2014 press Check', 'Draft rulebook \u00b7 not yet reviewed by a licensed professional']; rows greyed (no marks, '\u2014'): True.",
+  "rhino_part": "The real Eto panel in Rhino 8: the button and tick on screen, a click, the greyed rows' look."
+ },
+ {
+  "id": "check-5",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "The viewport's status box says it too, with no status mark",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Status box: ['Gordium \u00b7 Model changed since the last check \u2014 press Check', 'Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12\\'-0\")'].",
+  "rhino_part": "The status box drawn in the viewport."
+ },
+ {
+  "id": "check-6",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "Pressing Check checks the model as it is now; the rows are current again",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Checks run: 1; header: ['106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached', '4 need review \u00b7 6 comply \u00b7 2 not checked']; greyed: False.",
+  "rhino_part": "The real Eto panel in Rhino 8: the button and tick on screen, a click, the greyed rows' look."
+ },
+ {
+  "id": "check-7",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "Ticked, it is saved in the file and every edit is checked by itself",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Saved auto_check=True; checks run by itself after the edit: 1.",
+  "rhino_part": "The real Eto panel in Rhino 8: the button and tick on screen, a click, the greyed rows' look."
+ },
+ {
+  "id": "check-8",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "The tick is kept with the file and comes back ticked",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Saved copy auto_check=True; reopened tick Checked=True.",
+  "rhino_part": "Rhino's own save and reopen."
+ },
+ {
+  "id": "check-9",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "Cancelling a start box never greys out current results",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Box result None; the model counts as changed: None (was None before the box).",
+  "rhino_part": "Rhino's events during a real box."
+ },
+ {
+  "id": "check-10",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "An edit right after a check, then the tick on: the edit is still checked",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Checks run: 2 (the Check, then the edit's own).",
+  "rhino_part": "Rhino's real idle timing."
+ },
+ {
+  "id": "check-11",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "Switching to another file checks it once, whatever the tick, and never says 'Model changed'",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": false,
+  "evidence": "An empty file in front: header ['Gordium', '\u26a0 Check could not run']; back to the checked file: 0 check(s) ran, header ['Gordium', '\u26a0 Check could not run'].",
+  "rhino_part": "Rhino's real document events."
+ }
+]

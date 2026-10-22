@@ -123,3 +123,15 @@ Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from c
 - Next:
   - carry re-lookup into the demo once Ben merges or asks;
   - the queued feature list (Check button / no auto-check first).
+
+## 2026-10-22 late — cloud coordinator
+- demo is now at e631aae (it fast-forwards). It is a275dad, which is #19 86ddf9d, #23 369f389 and #26 c94fee8 merged onto the morning dry run, plus DEMO.md.
+  - Full suite: 1,989 passed, all 7 CI steps passed.
+  - Headless checks: 36 of 36, 37 of 37, and 46 of 46.
+  - RHINO_QUEUE item 11.
+- #26 re-lookup is at c94fee8, pushed. Building the demo found a bug with #23: looking up the sample's own address drew nothing, so no neighbourhood appeared. Fixed in 21793ea. Review rounds 5 and 6: round 6 was clean. Full suite: 1,549 passed.
+- NEW branch check-button, based on #23 (no PR yet):
+  - The Check button: nothing re-checks by itself after an edit unless "Check after every edit" is ticked.
+  - Review round 1 found 4 issues, all fixed in a8d0b28 plus one test pin.
+  - The headless plugin run passes 11 of 11 (headless/check_button/).
+  - Next: review round 2, the full suite, then open the PR.
