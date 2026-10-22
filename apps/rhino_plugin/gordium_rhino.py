@@ -936,6 +936,11 @@ def enter_rooms(needs):
         return
     save_facts(doc, logic.update_counts(facts, answers))
     run_check(doc, report=False)
+    refused = logic.refused_stories((STATE.get("last") or {}).get("items")) if "stories" in answers else None
+    if refused:                         # fewer stories than the floors drawn: the measuring refuses it, so is it
+        save_facts(doc, facts)
+        run_check(doc, report=False)
+        say(refused)
 
 
 def pick_main_building():

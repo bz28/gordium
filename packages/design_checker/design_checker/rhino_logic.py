@@ -135,12 +135,29 @@ STATED_FACTS = {
                    "whether it is a conversion"),
     "abuts_r1_district": ("Is any R-1a or R-1b land touching this lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it? (§325-19E)",
                           "yes_no", "whether the lot abuts R-1 land"),
+    # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
+    # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
+    "stories": ("Stories of the whole building", "count", "the number of stories"),
 }
+STORIES_ASKED = ("enter the number of stories", "enter the count")      # the measuring's own words when it waits for the count
+
+
+def stories_needed(record):
+    """Whether the stories measurement waits for the architect's count (its reason asks to enter it)."""
+    return any(w in ((record or {}).get("reason") or "") for w in STORIES_ASKED)
+
+
+def refused_stories(items):
+    """The message when a count entered is fewer than the floors drawn (the measuring refuses it), else None."""
+    i = next((i for i in items or [] if i.get("measure") == "stories" or i.get("name") == "Stories"), None)
+    why = (i or {}).get("reason") or ""
+    refused = "fewer than the floor blocks drawn" in why or "more than the drawing could hold" in why
+    return (why[0].upper() + why[1:] + ". The count wasn't kept.") if refused else None
 
 
 def needs_of(names, values):
     """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked."""
-    return [k for k in STATED_FACTS if k in names and (values or {}).get(k) is None]
+    return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None]
 
 
 def _and(words):
