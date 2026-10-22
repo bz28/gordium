@@ -495,12 +495,17 @@ def _step(amount: float, unit: str) -> float:
 
 
 YARD_LINES = {"front_yard": "the front lot line", "rear_yard": "the rear lot line"}
+# the eaves rows (PR 18, §325-18B) are their yards measured to the eaves: the same lot line, the same advice shape
+# (the requirement for every part, eaves included), so the checker confirms what it says (#18 review round 26)
+EAVE_YARD = {"front_yard_eaves": "front_yard", "side_yard_smaller_eaves": "side_yard_smaller",
+             "side_yard_larger_eaves": "side_yard_larger", "rear_yard_eaves": "rear_yard"}
 COMPASS = ("North", "South", "East", "West", "Northeast", "Northwest", "Southeast", "Southwest")
 
 
 def _yard_line(name: str, measure: str) -> str:
     """The lot line a yard is measured from, as an architect says it: "the front lot line", "the west side lot
     line" (a side yard named by its compass side), else "that side lot line"."""
+    measure = EAVE_YARD.get(measure, measure)
     if measure in YARD_LINES:
         return YARD_LINES[measure]
     side = name.split(", ", 1)[1] if ", " in name else ""
@@ -521,7 +526,9 @@ def _yard_advice(head, name, measure, value, need, required, note=""):
     target = _up(value + need)
     return {"head": head, "ways": [{"target": feet_inches(target), "changes": {measure: target - value}}],
             "yard": {"line": _yard_line(name, measure), "now": feet_inches(value, "down"),
-                     "note": note if feet_inches(target) != required else ""}}
+                     "note": note if feet_inches(target) != required else "",
+                     "part": "every part of the building, eaves included," if measure in EAVE_YARD else
+                             "every part of the building"}}
 
 
 def _drawn_advice(hint, node, margin, numbers, values, label="") -> dict | None:
@@ -540,7 +547,7 @@ def _drawn_advice(hint, node, margin, numbers, values, label="") -> dict | None:
         return None
     else:
         change = _step(-margin, numbers[3]) * (1 if sign in ("≥", ">") else -1)
-    if m in YARD_MEASURES and isinstance(values.get(m), (int, float)):
+    if (m in YARD_MEASURES or m in EAVE_YARD) and isinstance(values.get(m), (int, float)):
         required = _evaluate(ast.unparse(node.comparators[0]), values)
         return _yard_advice("To comply", label, m, values[m], -margin,
                             feet_inches(required, "up") if isinstance(required, (int, float)) else "")
@@ -563,12 +570,14 @@ def advice_text(advice: dict | None) -> str | None:
     raise_ = "(the {} rule's other way raises this yard)"
     now = f" — now {yard['now']} at its closest"
     if advice.get("ways"):
-        body = (f"keep every part of the building at least {advice['ways'][0]['target']} from {yard['line']}"
+        body = (f"keep {yard.get('part', 'every part of the building')} at least {advice['ways'][0]['target']} "
+                f"from {yard['line']}"
                 f"{yard['note']}{now}" + "".join(f"; at least {c['target']} if it stays {c['height']} tall "
                                                  + raise_.format(c["src"]) for c in clauses))
     else:
         c = clauses[0]
-        body = (f"if it stays {c['height']} tall, keep every part of the building at least {c['target']} from "
+        body = (f"if it stays {c['height']} tall, keep {yard.get('part', 'every part of the building')} at least "
+                f"{c['target']} from "
                 f"{yard['line']} {raise_.format(c['src'])}{now}")
     return advice["head"] + ": " + body + "."
 
@@ -606,7 +615,8 @@ def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx:
     several = len({round(r["margin"], 9) for r in rs}) > 1
     whatever = "whatever the survey shows" if approx else "under every reading"
     head = "To comply " + whatever if several else "To comply"
-    if m in YARD_MEASURES and name.split(",")[0].endswith("yard") and isinstance(values.get(m), (int, float)):
+    if (m in YARD_MEASURES or m in EAVE_YARD) and name.split(",")[0].endswith("yard") and \
+            isinstance(values.get(m), (int, float)):
         required = _evaluate(ast.unparse(node.comparators[0]), values)
         req = feet_inches(required, "up") if isinstance(required, (int, float)) else ""
         note = (f" as drawn ({req} required, the lot lines ±{feet_inches(TOLERANCE)})" if approx else
@@ -1151,8 +1161,11 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             st, why = FAILS, "Does not comply: " + row["Crossing"]
             # the only advice: move it back (no other "To comply" is shown for it; settle and
             # check.confirm_advice keep it as it is: no measured change can be simulated for it)
-            advice = {"head": "To comply", "ways": [{"text": "move it back onto the lot", "changes": {}}],
-                      "crossing": True}
+            # on a yard row moving back is not enough to meet the yard (#18 review round 26): its first step, never
+            # "To comply"; "To comply" only where the crossing itself is the failing fact
+            first = node is not None and node.left.id in YARD_ROWS
+            advice = {"head": "First" if first else "To comply",
+                      "ways": [{"text": "move it back onto the lot", "changes": {}}], "crossing": True}
             hint = advice_text(advice)
             if node is None or node.left.id not in YARD_ROWS:     # the failing fact is the crossing, not a distance
                 proposed, required, margin_t = "partly off the lot", "on the lot", ""

@@ -82,7 +82,10 @@ def test_a_crossing_building_is_told_only_to_move_back_onto_the_lot_and_the_chec
         assert crossing, rows(res, rule)
         for i in crossing:
             assert i["status"] == present.FAILS
-            assert i["hint"] == "To comply: move it back onto the lot.", i["hint"]
+            # #18 review round 26: on a yard row moving back isn't enough to meet the yard: its first step only
+            want = "First" if i.get("measure") in present.YARD_ROWS or "yard" in i["name"].lower() else "To comply"
+            assert i["hint"] == want + ": move it back onto the lot.", i["hint"]
+            assert not i["hint"].startswith("To comply") or "yard" not in i["name"].lower(), i
         assert not any("_advice" in i for i in res["view"]["items"])      # popped by confirm_advice
 
 
@@ -698,3 +701,17 @@ def test_no_starting_house_is_drawn_from_geometry_the_measuring_couldnt_work_out
     out = start(path, {**sample["facts"], "address": sample["address"], "grade_is": "finished",
                        "ground_is_flat": True, "grade_elevation": 0.0})
     assert out["floors"] == [] and any("geometry couldn't be worked out" in n for n in out["notes"]), out
+
+
+def test_an_eaves_rows_advice_is_its_yards_requirement_eaves_included_never_move_the_building():
+    """#18 review round 26 (P2): after the merge the eaves rows ("Eaves into side yard") were told "move the
+    building 4'-0" farther from that lot line", which the checker 'confirmed' by changing only that one eaves
+    distance; doing it left the row failing (the far side's eaves came closer). An eaves row's advice is now its yard's
+    requirement for every part, eaves included, the one change check.confirm_advice simulates."""
+    res = run(floors(4, 30, 51, 70, 2))
+    eaves = [i for i in res["view"]["items"] if i["name"].startswith("Eaves into") and i.get("hint")]
+    assert eaves, [(i["name"], i["status"], i.get("hint")) for i in res["view"]["items"]]
+    for i in eaves:
+        assert "move the building" not in i["hint"], i["hint"]
+        if i["hint"].startswith("To comply"):
+            assert "every part of the building, eaves included, at least" in i["hint"] and "lot line" in i["hint"]
