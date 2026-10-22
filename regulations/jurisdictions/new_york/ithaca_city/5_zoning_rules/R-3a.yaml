@@ -1327,7 +1327,7 @@ rules:
     title: "Lots abutting R-1a or R-1b land: stricter limits (§325-19E)"
     applies_when: >-
       use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
-      "two_family"]
+      "two_family"] and abuts_r1_district
     sources:
       - file: chapter_325_zoning_2026-10.pdf
         page: 50
@@ -1368,16 +1368,29 @@ rules:
         quote: "(9) For special conditions on development of property in R-3 that directly abuts R-1, § 325-9B(1)."
         not_limits: {1: "district name R-1 and section 325-9B(1), not limits", 3: "the district name R-3, not a number"}
     examples:
+      - given: {use: multiple_family, abuts_r1_district: true}
+        expect: needs_review
+        note: R-1 land across a creek, an alley or a railroad, or touching only at a corner, is a yes (the cautious reading of open question 1)
+      - given: {use: multiple_family, abuts_r1_district: false}
+        expect: not_applicable
+        note: 'the conditions apply only "if the land ... directly abuts land in either the R-1a or R-1b" district'
       - given: {use: multiple_family}
         expect: needs_review
-      - given: {use: church}
+        note: whether the lot abuts R-1 land is not stated yet, so the conditions may apply
+      - given: {use: church, abuts_r1_district: true}
         expect: needs_review
+      - given: {use: church, abuts_r1_district: false}
+        expect: not_applicable
+      - given: {use: two_family, abuts_r1_district: true}
+        expect: not_applicable
+        note: '"except a one-family or two-family dwelling": exempt even on a lot abutting R-1 land'
       - given: {use: two_family}
         expect: not_applicable
-      - given: {use: one_family_attached}
+        note: exempt whether or not the lot abuts R-1 land, so nothing to ask
+      - given: {use: one_family_attached, abuts_r1_district: true}
         expect: needs_review
         note: whether an attached building of 3-6 houses is exempt is the second open question, so it is not exempted
-      - given: {use: one_family_semi_detached}
+      - given: {use: one_family_semi_detached, abuts_r1_district: true}
         expect: not_applicable
     findings:
     - id: one_family_configurations_exempt
@@ -1419,20 +1432,24 @@ rules:
         quote: that directly abuts R-1, § 325-9B(1). [Added 6-6-2012 by Ord. No. 2012-03]
       strength: strong
     open_questions:
-    - '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does land across
-      a street count, or only land sharing a lot line with the R-3a lot?'
+    - '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does only land
+      sharing a lot line with the R-3a lot count, or also land across a street, an alley, a creek or other waterway, a
+      railroad or other right-of-way; and does land touching the lot only at a corner count?'
     - 'A one-family attached dwelling is "a building containing three or more one-family dwellings" (§325-3B), and
       §325-3B also calls a building of three or more dwelling units, a row house or a townhouse a multiple dwelling.
       Is it the "one-family ... dwelling" §325-19E exempts, or a multiple dwelling §325-19E covers?'
     research:
     - question: '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does
-        land across a street count, or only land sharing a lot line with the R-3a lot?'
+        only land sharing a lot line with the R-3a lot count, or also land across a street, an alley, a creek or other
+        waterway, a railroad or other right-of-way; and does land touching the lot only at a corner count?'
       searched:
       - 325-19
       - 325-19A
       - 325-19E
       - 325-6
       - 325-6A
+      - 325-6D
+      - 325-6E
       - 325-9B
       - 325-11B
       - 325-8B
@@ -1450,16 +1467,37 @@ rules:
         lines: [26, 27]
         quote: Where district boundaries are indicated as approximately following the center lines of streets or highways,
           street lines or right-of-way lines, such lines shall be construed to be such boundaries
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 23
+        lines: [33, 34]
+        quote: D. Where the boundary of a district follows a railroad line, such boundary shall be deemed to be located
+          in the middle of the main tracts of said railroad.
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 23
+        lines: [35, 37]
+        quote: E. Where the boundary of a district follows a stream, lake or other body of water under public
+          jurisdiction, said boundary line shall be deemed to be at the limit of the jurisdiction, unless otherwise
+          indicated.
       why_open: The code points both ways. §325-9B(1)(j) says "abutting or across a street", which treats the two as
         different (so "abuts" alone would not reach across a street); but §325-11B says "abuts land, other than a public
         right-of-way", which implies land in a street can be abutting land. Whether R-1 land begins at the street's
         center line or at its far edge depends on the zoning map (§325-6A allows either), and "directly" is not
-        defined. No City record found (searched the City's agenda center and the web, 2026-10-20).
+        defined. No City record found (searched the City's agenda center and the web, 2026-10-20). Until it is
+        answered, the stated fact abuts_r1_district asks it the cautious way (Gordium's reading, to confirm), yes
+        when any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other
+        waterway, railroad or other right-of-way from it (§325-9B(1)(j) names "a street or waterway"; §325-6 treats
+        rail and water boundaries as it does streets), so "no" is right under every reading and the conditions are
+        never left out on a narrower one.
       readings:
       - id: shares_a_lot_line
         reading: only R-1a or R-1b land sharing a lot line with the lot counts
       - id: across_a_street_counts
         reading: R-1a or R-1b land across a street counts too
+      - id: across_any_right_of_way_counts
+        reading: R-1a or R-1b land across an alley, a creek or other waterway, a railroad or other right-of-way counts
+          too
+      - id: touching_at_a_corner_counts
+        reading: R-1a or R-1b land touching the lot only at a corner (a single point) counts
     - question: 'A one-family attached dwelling is "a building containing three or more one-family dwellings" (§325-3B), and
       §325-3B also calls a building of three or more dwelling units, a row house or a townhouse a multiple dwelling.
       Is it the "one-family ... dwelling" §325-19E exempts, or a multiple dwelling §325-19E covers?'
@@ -1498,8 +1536,10 @@ rules:
       - id: attached_is_covered
         reading: it is a multiple dwelling, so §325-19E applies
     notes: >-
-      A flag: Gordium doesn't know the zoning of the land next to the lot, so for every use §325-19E covers it sends the
-      lot to review. Worked by hand for R-3a, if the lot abuts R-1 land: lot size 150% of the chart's (multiple dwelling,
+      A flag: whether the lot abuts R-1a or R-1b land is stated by the architect (abuts_r1_district, asked the cautious
+      way: any R-1a or R-1b land touching the lot, even at a corner, or across a street, alley, creek or other
+      waterway, railroad or other right-of-way from it). Unknown or yes sends the lot to review for every use
+      §325-19E covers; no means §325-19E does not apply. Worked by hand for R-3a, if the lot abuts R-1 land: lot size 150% of the chart's (multiple dwelling,
       new construction, 1-3 units: 1.5 × 6,000 = 9,000 sf; other use 9,000 sf; fraternity 37,500 sf); height R-1a's or
       R-1b's 35 ft instead of 40 ft (both R-1 columns say 35 ft, so the bonus would be 3.5 ft, not 4), and, since the
       chart's "Maximum Building Height" covers both its rows, likely R-1's 3 stories instead of 4; coverage 75% ×

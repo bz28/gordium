@@ -140,6 +140,11 @@ STATED_FACTS = {
                                    "the most occupants in one unit"),
     "attached_units_in_building": ("Dwelling units in the whole attached building, every lot it stands on (§325-3B: "
                                    "three to six)", "count", "the units in the whole building"),
+    "abuts_r1_district": ("Is any R-1a or R-1b land touching this lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it? (§325-19E)",
+                          "yes_no", "whether the lot abuts R-1 land"),
+    # the whole building's count, asked only where the measuring asks for it (a part not drawn as floor blocks):
+    # stories_needed; it stands only if at least the floors drawn (the measuring checks, and refused_stories says)
+    "stories": ("Stories of the whole building", "count", "the number of stories"),
 }
 # The least whole number each counted fact may be: its own definition's (a unit's most occupants, a building's units:
 # at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
@@ -154,10 +159,27 @@ def minimum(key):
     return MINIMUM.get(key, 0)
 
 
+STORIES_ASKED = ("enter the number of stories", "enter the count")      # the measuring's own words when it waits for the count
+
+
+def stories_needed(record):
+    """Whether the stories measurement waits for the architect's count (its reason asks to enter it)."""
+    return any(w in ((record or {}).get("reason") or "") for w in STORIES_ASKED)
+
+
+def refused_stories(items):
+    """The message when a count entered is fewer than the floors drawn (the measuring refuses it), else None."""
+    i = next((i for i in items or [] if i.get("measure") == "stories" or i.get("name") == "Stories"), None)
+    why = (i or {}).get("reason") or ""
+    refused = "fewer than the floor blocks drawn" in why or "more than the drawing could hold" in why
+    return (why[0].upper() + why[1:] + ". The count wasn't kept.") if refused else None
+
+
 def needs_of(names, values, settles=None):
-    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked. An
-    optional one (OPTIONAL) only where `settles(key)` says entering it could change the row."""
-    return [k for k in STATED_FACTS if k in names and (values or {}).get(k) is None
+    """The stated facts a rule reads (`names`) that aren't set yet (`values`), in the order they are asked; never the
+    stories count (asked only where the measuring asks for it: stories_needed). An optional one (OPTIONAL) only where
+    `settles(key)` says entering it could change the row."""
+    return [k for k in STATED_FACTS if k != "stories" and k in names and (values or {}).get(k) is None
             and (k not in OPTIONAL or (settles is not None and settles(k)))]
 
 
@@ -177,18 +199,19 @@ def needs_reason(needs):
 
 def update_counts(facts, answers):
     """Bedrooms, parking spaces, stories, dwelling units and rooms let for profit (whole numbers, 0 or more) and
-    whether the building is a conversion (yes / no) from the Lot facts prompts. An answer of None means the prompt
+    whether the building is a conversion and whether the lot abuts R-1 land (yes / no) from the Lot facts prompts. An answer of None means the prompt
     was skipped: the fact stays as it was (unset stays unset, so its rules stay NEEDS REVIEW), never 0 or no."""
     out = dict(facts or {})
-    counts = ["stories"] + [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "count"]
+    counts = list(dict.fromkeys(["stories"] + [k for k, (_, kind, _) in STATED_FACTS.items() if kind == "count"]))
     for key in counts:
         if answers.get(key) is not None:
             n = int(answers[key])
             if n < minimum(key) or n != answers[key]:
                 raise ValueError(f"{key} must be a whole number, {minimum(key)} or more")
             out[key] = n
-    if answers.get("conversion") is not None:
-        out["conversion"] = bool(answers["conversion"])
+    for key in ("conversion", "abuts_r1_district"):
+        if answers.get(key) is not None:
+            out[key] = bool(answers[key])
     return out
 
 
@@ -632,6 +655,9 @@ def lot_source(surveyed):
     return "your survey" if surveyed else "the tax map (±2 ft, approximate)"
 
 
+NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+
+
 def lot_text(area, surveyed):
     """The Lot row: "6,570 sf · from the tax map (±2 ft, approximate)" or "… · from your survey"."""
     return lot_size(area) + " · from " + lot_source(surveyed)
@@ -649,6 +675,13 @@ def ground_text(ground):
     return what + (", " + span if span else "") + " · " + ("picked by you" if kind == "terrain" else "placed by you")
 
 
+def street_name(state):
+    """The street the highlighted lot line is on, by name, only when that line's street is known (a lookup's
+    street, or the sample's); else the line itself, so the architect checks which line it is (the street line
+    sets the front, side and rear yards: never named from the address alone)."""
+    return state.get("street_name") or "the highlighted line"
+
+
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
     tick (label, checked) or None}. `state`: address, zone, zone_source, district_confirmed, use, use_name,
@@ -661,9 +694,12 @@ def box_rows(state, flat=None):
          "actions": [("zone", "Change", True)], "tick": ("I confirm", bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
-        {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed")),
+        {"key": "lot", "label": "Lot", "text": lot_text(state.get("lot_area"), state.get("lot_surveyed"))
+         if state.get("has_lot") or state.get("lot_area") is not None or state.get("lot_surveyed") else NO_LOT,
          "actions": [("lot", "Use my survey…", not state.get("lot_surveyed"))], "tick": None},
-        {"key": "street", "label": "Street side", "text": state.get("street_name") or "the highlighted line",
+        {"key": "street", "label": "Street side", "text": street_name(state) if (
+            state.get("street_name") or state.get("has_lot") or state.get("lot_area") is not None
+            or state.get("lot_surveyed")) else "set from the lot, once there is one",
          "actions": [("street", "Change…", True)], "tick": None,
          "choice": ("Corner lot?", CORNER_CHOICES, {None: 0, False: 1, True: 2}[state.get("corner_lot")])},
         {"key": "ground", "label": "Ground", "text": ground_text(state.get("ground") or {}),
@@ -799,7 +835,7 @@ def fact_sources(state, today, confirmed):
         "use": fact(state.get("use_name") or state.get("use"), state.get("use_source") or SUGGESTED),
         # the size, then where it came from, once ("Lot: 6,570 sf · the tax map (±2 ft, approximate) · confirmed…")
         "lot": fact(lot_size(state.get("lot_area")), lot_source(state.get("lot_surveyed"))),
-        "street": fact(state.get("street_name") or "the highlighted line",
+        "street": fact(street_name(state),
                        state.get("street_source") or SUGGESTED),
         "corner_lot": fact({None: None, False: "no, one street", True: "yes, two streets"}[state.get("corner_lot")],
                            state.get("corner_source") or SUGGESTED),
@@ -814,6 +850,67 @@ def district_confirmed(mode, zone_fact, zone):
     same district was confirmed at an earlier Draw (its saved source says who confirmed it)."""
     zone_fact = zone_fact or {}
     return mode != "start" and bool(zone_fact.get("confirmed_by")) and zone_fact.get("value") == zone
+
+
+def is_elevation_view(parallel, direction_z, tolerance=0.01):
+    """Whether a viewport is an elevation (Front, Right, Back, Left): a parallel projection looking level, where the
+    height limit is labelled."""
+    return bool(parallel) and abs(direction_z) <= tolerance
+
+
+def north_vector(plan_north_deg):
+    """True north as a direction in the plan (x, y): plan north (+y) when the plan isn't turned; a looked-up lot
+    is drawn turned `plan_north_deg` (lookup_box.frame), and its north arrow turns with it."""
+    import math
+    t = math.radians(plan_north_deg or 0.0)
+    return (-math.sin(t), math.cos(t))
+
+
+def shorten(text, most):
+    """`text` in at most `most` characters, cut at a word and ended "…" when longer (a link can't wrap: the
+    architect's review found one pushing the docked panel's text off its right edge)."""
+    text = text or ""
+    if len(text) <= most:
+        return text
+    cut = text[:max(1, most - 1)].rsplit(" ", 1)[0].rstrip(" ,·;:")
+    return (cut or text[:max(1, most - 1)]) + "…"
+
+
+def building_name(layer, name, grouped):
+    """What the panel calls a building: the starting house Gordium drew (its floors grouped on the massing layer),
+    else the object's name, else its layer ("a solid on Building")."""
+    if layer == MASSING:
+        return "the starting house"
+    if name:
+        return name + (" (and its group)" if grouped else "")
+    return ("a group on " if grouped else "a solid on ") + layer
+
+
+def link_text(citation, most):
+    """A citation link's words in at most `most` characters, keeping what tells it apart: "District Regulations
+    Chart" said "chart", and if still too long its front cut, never its end (district, column, note: review round
+    1, eight links read "Open §325-8, District Regulations Chart…")."""
+    text = "Open " + (citation or "").replace("District Regulations Chart", "chart")
+    if len(text) <= most:
+        return text
+    tail = text[len(text) - (most - 7):]
+    tail = tail.split(" ", 1)[1] if " " in tail[1:] else tail
+    return "Open …" + tail.lstrip(" ,·;")
+
+
+def height_limit_text(checker_top, height):
+    """The height limit's label in an elevation: plain when the checker has the grade plane (its top), else said to
+    be shown from the lot's level, a drawing aid ("height" is the limit as text, 35'-0")."""
+    if checker_top is not None:
+        return "Height limit " + height
+    return "Height limit " + height + " (no grade plane yet: shown from the lot's level)"
+
+
+def prune_hosts(hosts, open_serials):
+    """The docked panel's hosts for documents still open (and the one made without a document, key 0): a closed
+    document's panel is never kept (review: 125 of them after a day of tests)."""
+    keep = set(open_serials) | {0}
+    return {k: v for k, v in (hosts or {}).items() if k in keep}
 
 
 def is_plan_view(parallel, direction_z, tolerance=0.99):

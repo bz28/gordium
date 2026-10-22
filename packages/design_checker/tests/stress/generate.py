@@ -38,15 +38,11 @@ def _rect_lot(name, w, d, surveyed, **extra):
     return lot
 
 
-def _sample_points():
-    from design_checker.check import sample_site
-    return [tuple(map(float, p)) for p in sample_site()["lot"]]
-
-
 @functools.lru_cache(maxsize=None)
 def lot(name: str) -> dict:
-    """The six lots. sample_tax: 106 Ithaca Rd as GordiumStart offers it (73'-0" x 90'-0", from the tax map, not
-    surveyed); sample_survey: the same lot surveyed; narrow: 52 x 130; jog: 70 x 120 with the east line stepping in
+    """The six lots. sample_tax: 106 Ithaca Rd as the architects' spreadsheet model has it (73'-0" x 90'-0", read
+    as from the tax map, not surveyed; GordiumStart now offers the real tax-map outline instead, so the stress
+    cases keep this rectangle as their own lot); sample_survey: the same lot surveyed; narrow: 52 x 130; jog: 70 x 120 with the east line stepping in
     8 ft at 80 ft back (the 8 ft line may be a side or a rear line, and the depth is 100 or 120 by the two readings of
     the perpendicular method); corner: 80 x 100, streets along the south (the address) and the east; sloped: 60 x
     120 with four spot grades of finished ground at the starting house's walls (front 1.0, rear 3.0, sides 2.0)."""

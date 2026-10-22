@@ -414,11 +414,15 @@ def test_a_dormer_on_floor_2_reaching_past_the_front_wall_counts():
 def test_a_bay_window_and_a_balcony_touching_the_house_count():
     """A bay window (a solid from 3 to 12 ft, 2 ft deep) and a balcony slab (10 to 10.5 ft, 3 ft deep) touching
     the front wall: part of the building (§325-18A; the balcony projects more than 2 ft): front 30 − 3 = 27; both
-    counted in coverage: 1,200 + 2 × 8 + 3 × 6 = 1,234 sf."""
+    counted in coverage: 1,200 + 2 × 8 + 3 × 6 = 1,234 sf. They stick out past the walls at the ground, as a bump
+    drawn on the house's own solid would: the same projection question (§325-18B), the same two readings, 27 as
+    part of the building and 30 to the walls at ground level, however it is drawn (one solid or touching ones) and
+    whichever solid is called the main one."""
     bay = prism(rect(18, 28, 26, 30), 3, 12, "bay")
     balcony = prism(rect(32, 27, 38, 30), 10, 10.5, "balcony")
     res = run(floors(*HOUSE, 2) + [roof(*HOUSE, 20, 30, 0.0, 0), bay, balcony])
-    assert res["measurements"]["front_yard"]["value"] == 27.0
+    front = res["measurements"]["front_yard"]
+    assert sorted(r["value"] for r in front["readings"]) == [27.0, 30.0] and "bay window" in front["reason"], front
     assert res["measurements"]["building_area"]["value"] == 1234.0
 
 
@@ -495,7 +499,10 @@ def test_a_roof_drawn_in_one_solid_with_its_walls_never_drops_its_overhang_from_
     walls = prism(rect(12, 30, 42, 70), 0, 20, "house")
     faces = [f for f in walls["faces"] if not all(p[2] == 20 for p in f["points"])]
     faces += [{"points": [[10, 30, 19], [27, 30, 30], [27, 70, 30], [10, 70, 19]]},
-              {"points": [[27, 30, 30], [44, 30, 19], [44, 70, 19], [27, 70, 30]]}]
+              {"points": [[27, 30, 30], [44, 30, 19], [44, 70, 19], [27, 70, 30]]},
+              # the soffits under the overhang, so it is a closed solid (term-index: measure() finds open ones)
+              {"points": [[10, 30, 19], [10, 70, 19], [12, 70, 19], [12, 30, 19]]},
+              {"points": [[42, 30, 19], [42, 70, 19], [44, 70, 19], [44, 30, 19]]}]
     res = run([{"id": "house", "faces": faces, "problems": []}])
     side = res["measurements"]["side_yard_smaller"]
     assert side["value"] is None and sorted(r["value"] for r in side["readings"]) == [10.0, 12.0]

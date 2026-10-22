@@ -370,6 +370,7 @@ class Overlay(Rhino.Display.DisplayConduit):
         self.confirm = None          # (lot curve, street lines, main building) while the dialog is open
         self.message = None          # (state, text, lines)
         self.box = rg.BoundingBox.Empty
+        self.envelope_lines, self.height_limit, self.north, self.unmeasured = None, None, None, []
 
     def ObjectCulling(self, e):
         sys.modules[__name__]._conduit("cull", self, e)
@@ -423,7 +424,14 @@ def draw_scene(o, e):
         d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
     if o.envelope is not None:               # see-through, drawn after the solids so they show through it
         d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
-        d.DrawBrepWires(o.envelope, BLUE, 1)
+        # its outline only, the top dashed (the height limit): its faces' edges and isocurves banded the
+        # elevations (the architect's review, 2026-10-21)
+        bottom, top = getattr(o, "envelope_lines", None) or (None, None)
+        if bottom is not None:
+            d.DrawPolyline(bottom, BLUE, 1)
+            d.DrawPatternedPolyline(top, BLUE, ui.DASHED, 2, False)
+    for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
+        d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
     if not old:                              # after the envelope, so its blue never tints them (F5)
         for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
             name = logic.highlight(status)
@@ -490,6 +498,9 @@ def draw_screen(o, e):
                                                          e.Viewport.WorldToClient(line.To))
                                                         for line in getattr(o, "plan_lines", None) or [])]
     obstacles = on_screen if plan else []
+    north = getattr(o, "north", None)
+    if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
+        taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
     # the notice first (placed off the model and the status box), so no label is drawn under it either
     notice = _notice_box(o, e.Viewport, taken)
     for line, text, status in getattr(o, "yard_dims", None) or []:   # each yard as measured, status-marked (F4)
@@ -506,6 +517,11 @@ def draw_screen(o, e):
     for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels else []:   # each edge's length
         ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,
                     along=(edge.From, edge.To), obstacles=obstacles)          # beside its edge, off every line
+    limit = getattr(o, "height_limit", None)
+    if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
+        corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
+        left = min(corners, key=lambda p: p.X)       # the height limit, labelled at its left end in an elevation
+        ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 24, dark, 11)
     if notice is not None:
         lines, x, y, _, _ = notice
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
@@ -579,6 +595,43 @@ def _drawn_envelope(doc, facts, env):
     return dict(env, base=z, top=z + env["height"])
 
 
+def _envelope_lines(doc, env):
+    """The envelope's outline at its base and at its top (the height limit), in the model's units."""
+    if not env.get("outline") or env.get("top") is None or env.get("base") is None:
+        return None
+    lines = []
+    for z in (env["base"], env["top"]):
+        pts = [_model_point(doc, (x, y), z) for x, y in env["outline"]]
+        lines.append(pts + [pts[0]])
+    return tuple(lines)
+
+
+def _north(doc, facts):
+    """Where the north arrow goes and which way it points: just past the lot's top right corner, true north from
+    the plan's turn (plan_north_deg). None without a lot."""
+    lot = _find(doc, facts.get("lot_id") or "")
+    if lot is None:
+        return None
+    box = lot.Geometry.GetBoundingBox(True)
+    x, y = logic.north_vector(facts.get("plan_north_deg"))
+    pad = _model_length(doc, 12.0)
+    return rg.Point3d(box.Max.X + pad, box.Max.Y - pad, box.Min.Z), rg.Vector3d(x, y, 0)
+
+
+def _unmeasured_outlines(doc, ids):
+    """The plan outline (box) of each object on the lot the check doesn't measure, drawn dashed and light."""
+    out = []
+    for i in ids or []:
+        o = _find(doc, i)
+        if o is None:
+            continue
+        b = o.Geometry.GetBoundingBox(True)
+        z = b.Max.Z
+        out.append([rg.Point3d(b.Min.X, b.Min.Y, z), rg.Point3d(b.Max.X, b.Min.Y, z), rg.Point3d(b.Max.X, b.Max.Y, z),
+                    rg.Point3d(b.Min.X, b.Max.Y, z), rg.Point3d(b.Min.X, b.Min.Y, z)])
+    return out
+
+
 def _envelope_brep(doc, env):
     """The envelope (in feet, from the checker) as a solid in the model's units."""
     if not env or not env.get("outline") or env.get("top") is None or env.get("base") is None:
@@ -631,7 +684,7 @@ def _actions():
             "survey": pick_survey, "grade": set_grade, "enter": enter_rooms, "add": add_to_check,
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
-            "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels}
+            "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building}
 
 
 DOCK_ID = "7c3e9a51-2d84-4b6f-9e17-5a0c8d2f4b63"   # the Gordium panel's id: Rhino remembers where it is docked
@@ -690,8 +743,12 @@ def _emit_dock_type():
 
 
 def _fill_dock(host, serial):
-    """Rhino made the panel for a document window: remember it; it is filled when Gordium shows its results."""
-    sc.sticky.setdefault("gordium_dock_hosts", {})[int(serial)] = host
+    """Rhino made the panel for a document window: remember it (closed documents' panels let go); it is filled when
+    Gordium shows its results."""
+    hosts = logic.prune_hosts(sc.sticky.get("gordium_dock_hosts"),
+                              [d.RuntimeSerialNumber for d in Rhino.RhinoDoc.OpenDocuments()])
+    hosts[int(serial)] = host
+    sc.sticky["gordium_dock_hosts"] = hosts
     host.MinimumSize = ed.Size(ui.PANEL_WIDTH, 420)      # floating, Rhino sizes it by this (not 200 x 200)
     label = ef.Label()
     label.Text = "Gordium: run GordiumStart or GordiumCheck to check this model."
@@ -884,6 +941,32 @@ def enter_rooms(needs):
         return
     save_facts(doc, counted)
     run_check(doc, report=False)
+    refused = logic.refused_stories((STATE.get("last") or {}).get("items")) if "stories" in answers else None
+    if refused:                         # fewer stories than the floors drawn: the measuring refuses it, so is it
+        save_facts(doc, facts)
+        run_check(doc, report=False)
+        say(refused)
+
+
+def pick_main_building():
+    """Pick the main building… (the panel): with several buildings, the one the yards, height and stories are
+    measured to. Click it, or choose one; Enter keeps it."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    facts = current_facts(doc)
+    buildings = _buildings(doc)
+    if len(buildings) < 2:
+        say("There is only one building: it is the main building.")
+        return
+    try:
+        picked = _pick(doc, "Click the main building (a solid on the Building layer), or choose one; Enter keeps it",
+                       buildings, "Building")
+    except Cancelled:
+        say("Cancelled: nothing changed.")
+        return
+    if picked:
+        facts["main_building"] = picked
+        save_facts(doc, facts)
+    run_check(doc, report=False)
 
 
 def add_to_check(ids):
@@ -1035,7 +1118,10 @@ def _extras(doc, facts):
     groups = {i for o in buildings for i in (o.Attributes.GetGroupList() or [])}
     layers = sorted({doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings})
     left_out = _not_included(doc, _find(doc, facts.get("lot_id") or ""))
+    main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     return {"scope": {"groups": len(groups), "solids": len(buildings), "layer": ", ".join(layers)},
+            "main_name": logic.building_name(doc.Layers[main.Attributes.LayerIndex].FullPath, main.Attributes.Name,
+                                             bool(main.Attributes.GetGroupList())) if main else None,
             "not_included": left_out, "touching": _touching(doc, left_out, buildings),
             "ground_like": _ground_like(doc, left_out, _find(doc, facts.get("lot_id") or "")),
             "sources": fact_sources(doc)}
@@ -1127,7 +1213,7 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "zone": facts.get("zone"), "zone_source": source("zone", logic.ENTERED),
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
-            "lot_area": area, "lot_surveyed": bool(facts.get("lot_surveyed")),
+            "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
             "street_name": facts.get("street_name"), "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span},
             "no_regrading": bool(saved_ui.get("no_regrading")), "corner_lot": facts.get("corner_lot"),
@@ -1449,6 +1535,7 @@ def _clear(o):
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
     o.plan_lines = []
     o.confirm, o.labels = None, []
+    o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
     o.doc = None
 
 
@@ -1489,8 +1576,9 @@ def _draw_plan(doc, o, result, facts):
     if lot is not None:
         ok, poly = lot.Geometry.TryGetPolyline()
         o.lot_outline = list(poly) if ok else None
-    approx = "" if facts.get("lot_surveyed") else " (approx.)"
-    o.edge_labels = [(_model_point(doc, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), e["length"] + approx,
+    # the lengths alone: the header and the status box say the tax map's ±2'-0" once (the review: "(approx.)" on
+    # every edge was noise)
+    o.edge_labels = [(_model_point(doc, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), e["length"],
                       rg.Line(_model_point(doc, a), _model_point(doc, b)))         # the edge: labelled beside it
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
     o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
@@ -1543,6 +1631,13 @@ def run_check(doc, report=True):
             if STATE.get("envelope_on", True) else None
         o.envelope = env
         o.box = env.GetBoundingBox(True) if env else rg.BoundingBox.Empty
+        drawn = _drawn_envelope(doc, facts, result.get("envelope")) if env is not None else None
+        o.envelope_lines = _envelope_lines(doc, drawn) if drawn else None
+        o.height_limit = (o.envelope_lines[1], logic.height_limit_text((result.get("envelope") or {}).get("top"),
+                                                                       _ft_text(drawn["top"] - drawn["base"]))) \
+            if o.envelope_lines else None
+        o.north = _north(doc, facts)
+        o.unmeasured = _unmeasured_outlines(doc, extras.get("not_included"))
         _draw_plan(doc, o, result, sent)
         STATE["statuses_by_doc"][doc.RuntimeSerialNumber] = result["statuses"]
         STATE["last"] = {"summary": result["summary"], "view_summary": view["summary"], "state": view["state"],

@@ -221,14 +221,14 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Until you answer:** Today and from a model, a zero-lot-line house in R-3a gets NEEDS REVIEW (it needs a special permit anyway).
 - **Options:** (a) no minimum; (b) the "Other use" rows (6,000 sf, 50 ft); (c) whatever the Planning and Development Board sets with the special permit.
 
-### 5.5 R-3a next to R-1: does land across a street "directly abut"?
+### 5.5 R-3a next to R-1: what land "directly abuts"? Only land sharing a lot line, or also across a street, alley, creek or other waterway, railroad or other right-of-way, or touching only at a corner?
 `[R-3a.abutting_r1#1]`
 
 - **The city's words:** "E. Development in R-3 Districts which abut R-1 Districts. The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling, shall be subject to the following special conditions if the land on which the development occurs directly abuts land in either the R-1a or R-1b Zoning District" (§325-19E, [p.50](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=50)): 150% lot size, R-1's height, 75% coverage, 150% side and rear yards where they abut R-1 land.
 - **What research found:** §325-9B(1)(j) says "abutting or across a street", treating the two as different; §325-11B says "abuts land, other than a public right-of-way", implying street land can abut; a district boundary may follow a street's center line or its edge (§325-6A). "Directly" isn't defined. No City record found.
 - **Why it matters:** an apartment building on an R-3a lot facing R-1 houses across the street is limited to 35 ft instead of 40 ft (and likely 3 stories instead of 4) and 26.25% coverage instead of 35%, or not, depending on the answer.
-- **Until you answer:** Today and from a model, every R-3a use §325-19E covers gets NEEDS REVIEW (R-3a.abutting_r1), since Gordium doesn't know the zoning of the land next to the lot.
-- **Options:** (a) only R-1a or R-1b land sharing a lot line counts; (b) R-1a or R-1b land across a street counts too.
+- **Until you answer:** Today and from a model, Gordium asks you whether the lot abuts R-1 land (abuts_r1_district), worded the cautious way, its reading to confirm: "Is any R-1a or R-1b land touching this lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it?" Not answered yet, or yes: every R-3a use §325-19E covers gets NEEDS REVIEW (R-3a.abutting_r1). No: §325-19E doesn't apply.
+- **Options:** (a) only R-1a or R-1b land sharing a lot line counts; (b) R-1a or R-1b land across a street counts too; (c) across an alley, creek or other waterway, railroad or other right-of-way too; and whether land touching only at a corner counts.
 
 ### 5.6 R-3a next to R-1: is a row of attached houses exempt from §325-19E?
 `[R-3a.abutting_r1#2]`
@@ -236,7 +236,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **The city's words:** §325-19E exempts "a one-family or two-family dwelling" ([p.50](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=50)). §325-3: "A one-family dwelling may be constructed in any of the following configurations", including "ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings"; but also "DWELLING, MULTIPLE … (1) A building containing three or more dwelling units … (5) … row house, townhouse" ([p.7](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=7), [p.8](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=8)).
 - **What research found:** the definitions point both ways, and no City record was found. Semi-detached and zero-lot-line houses (at most two dwellings) are clearly one-family configurations and are exempt.
 - **Why it matters:** a row of five townhouses on an R-3a lot next to R-1 houses may be held to 35 ft and 26.25% coverage, or to R-3a's 40 ft and 35%.
-- **Until you answer:** Today and from a model, attached houses in R-3a get NEEDS REVIEW on §325-19E (R-3a.abutting_r1), as every use it may cover does.
+- **Until you answer:** Today and from a model, attached houses in R-3a get NEEDS REVIEW on §325-19E (R-3a.abutting_r1) when the lot abuts R-1 land or that isn't stated yet (abuts_r1_district, §5.5), as every use it may cover does.
 - **Options:** (a) exempt, as a one-family configuration; (b) covered, as a multiple dwelling.
 
 ### 5.7 R-2c: an attached house with more than five occupants in one unit

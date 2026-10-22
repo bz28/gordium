@@ -10,6 +10,7 @@ strict xfail turns that into a failure, and the mark is taken off (the test then
 
 Each test says what an architect would do, what Gordium says, and what the law says (the oracle's working)."""
 
+import random
 import sys
 from pathlib import Path
 
@@ -200,12 +201,15 @@ def test_F7_a_side_eave_gable_names_the_same_overhangs_whichever_way_the_outline
 F8_CASE = ("jog", [{"op": "floor_wing", "heights": [7.5], "face": 0, "depth": 8.5, "below": 0.0, "typed": "none"}])
 
 
-def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_never_complies():
+def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_is_counted_from_the_drawing():
     """The jog lot's starting house (3 floor blocks) with a plain solid wing 7'-6" tall joined to its east wall,
     nothing typed. A plain part 7 ft or taller (NYS R305.1, #14's one stories definition) may hold a story the
-    drawing doesn't show: the count is open, never complies (it did with the old 8 ft line)."""
-    got, _ = _check(generate.build(*F8_CASE)[0])
-    assert got["R-1b.stories"] != COMPLIES
+    drawing doesn't show (the old 8 ft line missed that). Read from the drawing (term-index a7557f7): 7'-6" holds
+    at most 1 story at 7 ft a story, beside the house's 3 floor blocks, so the building has 3 stories whatever the
+    wing holds: the one count the drawing allows, said with its reason."""
+    d = generate.build(*F8_CASE)[0]
+    m = harness.gordium(d)["measurements"]["stories"]
+    assert m["value"] == 3 and "could hold up to 1 story" in m["how"], m
 
 
 F9_CASE = ("sloped", [{"op": "move_floor", "k": 0, "dx": 0.0, "dy": -5.75}, {"op": "rotate", "deg": -0.9},
@@ -265,3 +269,136 @@ def test_every_row_that_needs_review_says_why_over_a_stress_sample():
         for i in harness.gordium(d)["view"]["items"]:
             if i["status"] == REVIEW:
                 assert (i["reason"] or "").strip(), (case["lot"], case["edits"], i["name"])
+
+
+# ---- F13 (P1) and F14 (P0), stress-tests 3373ba0: pinned as passing in #18 ---------------------------------------
+
+F13_CASE = ("sample_tax", [{"op": "off_lot", "target": "house", "line": 1, "amount": 9.25},
+                           {"op": "add_floor", "h": 10.0}])
+
+
+def test_F13_a_45_ft_house_wholly_off_a_tax_map_lot_does_not_comply_on_height_and_says_why():
+    """The starting house dragged wholly off the tax-map sample lot, then a fourth floor block (45'-0"): 45 ft is
+    over 35 ft and over the 38'-6" the §325-16C bonus can ever reach, whatever the yards or lot lines: does not
+    comply, with its reason (it needed review with no reason at all)."""
+    res = harness.gordium(generate.build(*F13_CASE)[0])
+    h = harness.items_by_rule(res)["R-1b.height"]
+    assert all((i["reason"] or "").strip() or i["status"] == FAILS for i in h), h
+    assert harness.statuses(res)["R-1b.height"] == FAILS
+
+
+F14_CASE = ("sample_survey", [{"op": "rotate", "deg": -8.7},
+                              {"op": "add_roof", "kind": "roof", "axis": 0, "over": 0.0, "fascia": 0.0, "inset": 3.25,
+                               "rise": 13.75}])
+
+
+def test_F14_a_rotated_house_with_a_gable_roof_is_checked_without_crashing():
+    """The surveyed sample lot's starting house rotated 8.7 degrees with a gable roof solid on it: the overlay of
+    its faces raised a GEOS 'side location conflict' and the check gave no answer. The faces are made valid and,
+    if the overlay still fails, unioned on a fine grid; every row has a status, and a needs-review row a reason."""
+    res = harness.gordium(generate.build(*F14_CASE)[0])
+    assert harness.statuses(res)
+    assert all((i["reason"] or "").strip() for i in res["view"]["items"] if i["status"] == REVIEW)
+
+
+# ---- F16 (#18): nothing measured depends on the order the outlines were drawn in -----------------------------------
+
+F16_CASE = ("corner", [{"op": "rotate", "deg": -5.3}, {"op": "move_house", "dx": 10.0, "dy": 7.75},
+                       {"op": "add_roof", "kind": "roof", "axis": 1, "over": 0.5, "fascia": 1.0, "inset": 4.75,
+                        "rise": 10.75}])
+
+
+def test_F16_the_eaves_not_counted_coverage_leaves_out_both_eaves_whichever_way_the_outlines_run():
+    """Stress F16 (P2): the corner lot's 40 x 35 house rotated 5.3 degrees, moved 10 ft east and 7'-9" back, a
+    gable roof solid with eaves 6 in. past its two 35 ft side walls. Seen from above: walls 40 x 35 = 1,400 sf,
+    with both eaves 1,440 sf (independently: the oracle, below). 'Eaves not counted' was 1,420 sf drawn as given
+    or starting elsewhere (one eave strip dropped by a second overlay along nearly the same edges), 1,400 sf
+    reversed. Now 1,400 every way."""
+    d = generate.build(*F16_CASE)[0]
+    for order in ("as_drawn", "reversed", "shifted"):
+        m = harness.gordium(d, order)["measurements"]["building_area"]
+        low = {r["named"].get("building_area#1"): r["value"] for r in m["readings"]}["eaves_not_counted"]
+        assert low == pytest.approx(1400.0, abs=0.5), (order, low)
+
+
+def test_the_oracle_on_F16_walls_1400_and_with_both_eaves_1440():
+    d, done = generate.build(*F16_CASE)
+    assert len(done) == 3
+    assert oracle.measure(d)["area"] == (pytest.approx(1440.0), pytest.approx(1400.0))
+
+
+def _measured(design, order):
+    """Every measurement as order-free facts: its value and each reading's value with its named answers (the
+    reading's words name lot lines by the drawn numbering, which a different start point renumbers)."""
+    from model_measurement.measure import measure
+    out = {}
+    for name, r in measure(generate.gordium_site(design, order), generate.gordium_facts(design)).items():
+        value = round(r["value"], 2) if isinstance(r.get("value"), (int, float)) else r.get("value")
+        readings = sorted((round(x["value"], 2), tuple(sorted((x.get("named") or {}).items())))
+                          for x in r.get("readings") or [])
+        out[name] = (value, readings, r.get("value") is None and not r.get("readings"))
+    return out
+
+
+def test_every_measurement_is_the_same_whichever_way_and_from_wherever_the_outlines_are_drawn():
+    """Metamorphic (F16): the same design drawn with every outline and face the other way round, or starting at
+    its next point, measures the same: every measurement's value, and every reading's value with its named
+    answers. Every lot (the 106 Ithaca Rd sample, on the tax map and on a survey, and the others), as drawn and
+    after random architect's edits (rotations, roofs and eaves, mansards, dormers, porches, wings, accessory
+    buildings, moved lines)."""
+    rng = random.Random(16)
+    cases = [(lt, []) for lt in generate.LOTS] + [F16_CASE]
+    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(40))]
+    checked = 0
+    for lt, edits in cases:
+        d, _done = generate.build(lt, edits)
+        base = _measured(d, "as_drawn")
+        for order in ("reversed", "shifted"):
+            other = _measured(d, order)
+            diff = {n: (base[n], other[n]) for n in base if base[n] != other[n]}
+            assert not diff, (lt, edits, order, diff)
+            checked += 1
+    assert checked == 2 * len(cases)
+
+
+# ---- F17 (#18): the way the house is drawn never decides whether a building across a line counts ------------------
+
+F17_CASE = ("jog", [{"op": "add_accessory", "kind": "garage", "w": 8.25, "d": 12.5, "h": 13.0, "where": "side",
+                     "face": 2, "fx": 0.79, "fy": 0.75, "gap": 2.0, "listed": False, "frame": None}])
+
+
+def test_F17_a_garage_across_the_lot_line_gives_coverage_the_same_answer_however_the_house_is_drawn():
+    """Stress F17 (P2): one edit on the jog lot, an unlisted 8'-3" x 12'-6" garage at x 59.75..68, y 88..100.6,
+    across the stepped side line x = 62. A building across a lot line makes every rule that measures it not
+    comply (PR 18), and coverage measures every building on the lot, whichever is the main one. With the house as
+    floor blocks (the starting house the main building) coverage did not comply; drawn as one plain solid or
+    meshes (the main building then unpicked) it complied, 12%. Now it does not comply every way."""
+    d = generate.build(*F17_CASE)[0]
+    got = {style: harness.statuses(harness.gordium_file(d, "ft", style))["R-1b.lot_coverage"]
+           for style in ("blocks", "one_solid", "mesh")}
+    assert set(got.values()) == {FAILS}, got
+
+
+def test_drawing_the_house_as_floor_blocks_a_solid_or_a_mesh_never_flips_a_row_between_fails_and_complies():
+    """Metamorphic (F17): the same design written to Rhino with the house as Gordium's floor blocks, as one plain
+    solid, or as meshes may change what can be read (stories from floor blocks, the main building assumed or to
+    pick), so a row may move to or from needs review; but never from does not comply to complies or back. Every
+    lot as drawn, the F17 case, and 15 random architect's edit sequences."""
+    rng = random.Random(17)
+    cases = [(lt, []) for lt in generate.LOTS] + [F17_CASE]
+    cases += [(c["lot"], c["edits"]) for c in (generate.random_case(rng) for _ in range(15))]
+    compared = []
+    for lt, edits in cases:
+        d, _done = generate.build(lt, edits)
+        got = {}
+        for style in ("blocks", "one_solid", "mesh"):
+            try:
+                got[style] = harness.statuses(harness.gordium_file(d, "ft", style))
+            except ValueError as e:         # a house whose floors don't stack on one outline has no one-solid form
+                assert "don't stack" in str(e), e
+        compared.append(len(got))
+        for rule in set().union(*got.values()):
+            seen = {got[style].get(rule) for style in got}
+            assert not {FAILS, COMPLIES} <= seen, (lt, edits, rule, {k: v.get(rule) for k, v in got.items()})
+    assert sum(n >= 2 for n in compared) >= 15, compared
+

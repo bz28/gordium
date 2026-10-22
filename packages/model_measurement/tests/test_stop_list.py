@@ -169,6 +169,20 @@ ZIGZAG = lot([(0, 0), (50, 0), (50, 100), (45, 110), (40, 100), (35, 110), (30, 
               (15, 110), (10, 100), (0, 110)])     # nine back lines between the two side lines: too many
 SHEDS = [sloped_roof_box(2 + 6 * i, 70, 6 + 6 * i, 74, 20, 30, f"shed {i}") for i in range(8)]
 
+def _geos_error(tmp_path):
+    """Any shapely / GEOS failure while measuring: a stop with its reason, never a crash (stress F14)."""
+    import shapely
+    from model_measurement import measure as m
+
+    def broken(building):
+        raise shapely.errors.GEOSException("TopologyException: side location conflict at 1 2")
+    real, m._projection_now = m._projection_now, broken
+    try:
+        return _plain()(tmp_path)
+    finally:
+        m._projection_now = real
+
+
 CASES = {
     "unreadable_file": _unreadable_file,
     "units": _units,
@@ -202,14 +216,15 @@ CASES = {
     "no_rear_line": _plain(lot([(0, 0), (50, 0), (25, 100)]), buildings=[box(20, 10, 30, 30)]),
     "no_ground": _plain(grade_elevation=None),
     "ground_off_building": _plain(grade_elevation=812),
+    "ground_unclear": _plain(ground_is_flat=None, grade_elevation=None, buildings=[
+        floor(10, 25, 35, 65, z0=1, z1=12, id="floor 1")], grade_points=[[60, 0, 0], [61, 1, 0.0]]),
     "buried_solid": _plain(buildings=[box(10, 25, 25, 65, 812, 842, id="house"), box(26, 25, 35, 65, 0, 45, id="tower")],
                            grade_elevation=812, main_building="house"),
     "readings_differ": _plain(lot([(0, 0), (50, 0), (50, 90), (8, 90), (0, 96)])),     # a jog: side or rear line
     "no_use": _plain(use=None),
     "no_district": _plain(zone=None),
-    "no_stories": _plain(stories=None),
-    "stories_plain_part": _plain(stories=None, main_building="floor 1", buildings=[
-        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35, 25, 45, 45, 0, 32, id="wing")]),
+    "no_stories": _plain(stories=None, buildings=[box(10, 25, 35, 65, 0, 6)]),          # can't hold a story
+    "stories_above_drawn": _plain(stories=5, buildings=[box(10, 25, 35, 65, 0, 30)]),     # 30 ft: at most 4
     "stories_below_floors": _plain(stories=1, main_building="floor 1", buildings=[
         floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
         box(35, 25, 45, 45, 0, 32, id="wing")]),
@@ -218,8 +233,8 @@ CASES = {
                            main_building="floor 1"),
     "parts_overlap": _plain(stories=2, main_building="floor 1", buildings=[
         floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=10.5, z1=21.5, id="floor 2")]),
-    "stories_below_blocks": _plain(stories=1, buildings=[box(10, 25, 35, 65, 0, 17, id="podium"),
-                                                         box(10, 25, 35, 65, 17, 34, id="upper")]),
+    "part_raised": _plain(stories=3, main_building="floor 1", buildings=[
+        floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35.1, 25, 45, 45, 25, 35, id="room")]),
     "basement_part": _plain(main_building="floor 1", buildings=[
         floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), box(35, 25, 45, 45, -10, 10.5, id="wing")]),
     "floors_misaligned": _plain(stories=None, buildings=[floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"),
@@ -232,6 +247,7 @@ CASES = {
     "no_occupants": _plain(),
     "no_occupant_split": _plain(),
     "no_building_units": _plain(),
+    "no_abuts_r1": _plain(),
     "ground_unknown": _plain(ground_is_flat=None),
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
@@ -243,8 +259,10 @@ CASES = {
                                   grade_points=[[22, 36, 0]]),
     "sloped_ground": _plain(ground_is_flat=False),
     "no_building": _plain(buildings=[]),
+    "geometry_error": _geos_error,
     "same_id": _plain(buildings=[box(10, 25, 35, 65, 0, 10), box(10, 25, 35, 65, 10, 20)]),   # both "house"
     "no_main_building": _plain(buildings=[box(10, 25, 35, 65), box(38, 70, 48, 90, id="shed")]),
+    "empty_building": _plain(buildings=[{"id": "house", "faces": [], "problems": []}]),
     "outside_lot": _plain(buildings=[box(60, 25, 80, 65)]),      # wholly off the lot (crossing it is measured)
     "open_solid": _file(_open_brep),
     "open_mesh": _file(_open_mesh),

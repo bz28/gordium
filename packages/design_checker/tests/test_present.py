@@ -232,9 +232,10 @@ def test_the_report_never_shows_pass_for_a_rule_the_panel_says_needs_review(surv
     result = check(MODEL, {**surveyed, "lot_surveyed": False}, report)
     out = openpyxl.load_workbook(report)["Output"]
     header = [c.value for c in out[2]]
-    rid, err = header.index("Rule id"), header.index("Error")
-    errors = {row[rid]: row[err] for row in out.iter_rows(min_row=3, values_only=True) if row[rid]}
-    assert errors["R-1b.side_yards"] == "NEEDS REVIEW"                       # the panel's side yards need review
+    req, err = header.index("Requirement"), header.index("Error")
+    errors = {row[req]: row[err] for row in out.iter_rows(min_row=3, values_only=True) if row[req]}
+    side = next(k for k in errors if k.startswith("Side yards"))
+    assert errors[side] == "NEEDS REVIEW"                                     # the panel's side yards need review
     check_tab = openpyxl.load_workbook(report)["Check"]
     text = " ".join(str(c.value) for row in check_tab.iter_rows() for c in row if c.value)
     assert "Draft rulebook" in text and "tax map" in text and "Overlays" in text and "§325-8" in text
@@ -895,3 +896,408 @@ def test_side_yards_are_named_by_the_true_compass_on_a_turned_plan():
     assert {"Side yard, Northeast", "Side yard, Southwest"} <= names
     names = {i["name"] for i in check_site(s, f, extras=extras)["view"]["items"]}
     assert {"Side yard, East", "Side yard, West"} <= names
+
+
+
+def test_the_report_opens_on_the_check_sheet_and_every_tab_says_what_the_panel_says(surveyed, tmp_path):
+    """Architect review in Rhino (P1-4): the report opened on Inputs, its Output showed PASS beside "Can't check:
+    lot_area missing" and "not given" beside the panel's 7,033 sf, its title was the model's file name and its code
+    line read "PUDs only". Now it opens on the Check sheet; each Output row's Error, Why and Proposed come from the
+    panel's items; an input the measurement left open shows the panel's reading; the code line names the
+    ordinance and its date only."""
+    import openpyxl
+    report = tmp_path / "r.xlsx"
+    check(MODEL, {**surveyed, "lot_surveyed": False, "address": "106 Ithaca Rd, Ithaca, NY"}, report)
+    wb = openpyxl.load_workbook(report)
+    assert wb.sheetnames[0] == "Check" and wb.active.title == "Check"
+    out = wb["Output"]
+    head = [c.value for c in out[2]]
+    rows = [r for r in out.iter_rows(min_row=3, values_only=True) if r[0] and r[head.index("Error")]]
+    for r in rows:
+        if r[head.index("Error")] == "PASS":
+            assert not r[head.index("Why it needs review")], r
+            assert r[head.index("Proposed")] not in (None, "", "not given", "—"), r
+    assert "106 Ithaca Rd" in str(out["A1"].value)
+    text = " ".join(str(c.value) for c in wb["Check"]["A"] if c.value)
+    assert "PUDs" not in text and "Ord. No." in text
+    from design_checker import rhino_logic as logic
+    # the street line's own street only: the address's street may not be the line highlighted (review of P1-4)
+    assert logic.street_name({"address": "106 Ithaca Rd, Ithaca, NY 14850"}) == "the highlighted line"
+    assert logic.street_name({"street_name": "Ithaca Rd"}) == "Ithaca Rd"
+
+
+
+def test_a_limit_waiting_on_the_lot_depth_shows_its_range_and_says_once_why():
+    """Architect review in Rhino (P1-3): on the sample 106 lot the rear yard's detail repeated "the readings give
+    different values … isn't settled yet" two or three times and showed "—" as Required. Now Required is the
+    limit's range over the lot depth's readings, and the reason is one sentence saying what it depends on."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    house = box(10.2806, 24.0480, 39.2642, 73.2738, 0, 30)
+    # (PR 18: 106's lot lines read from its outline cleaned within 0.25 ft, every reading of which are side and
+    # rear: the limit runs 24'-1 7/8" to 32'-10 1/8"; the rear wall is 19'-6" to 20'-3 1/2" back, short even with
+    # the tax map's lines 2 ft in its favour: does not comply on the tax map too)
+    for surveyed, status in ((False, present.FAILS), (True, present.FAILS)):
+        r = check_site(_plot(house, lot_=lot), {**facts, "lot_surveyed": surveyed})
+        rear = items(r["view"])["Rear yard"]
+        assert rear["status"] == status and rear["required"] == "24'-1 7/8\" to 32'-10 1/8\"", rear
+        assert rear["reason"].count("which lot lines") == 1, rear["reason"]
+        assert "readings give different values" not in rear["reason"] and "isn't settled" not in rear["reason"]
+    assert rear["reason"].startswith("Does not comply whichever way it is read: needs 24'-1 7/8\"")
+
+
+def test_coverage_with_an_upper_floor_overhang_is_read_as_seen_from_above_and_says_the_reading():
+    """Architect review in Rhino (P2-10) asked that coverage turning on the overhang question say it once. PR 18
+    settles that question: research reads coverage as everything above ground seen from above
+    (coverage_seen_from_above), cantilevered upper floors included. So a floor block overhanging the one below
+    counts: 28.5% does not comply, 22.8% complies, each saying the reading it applied (Gordium's reading, to
+    confirm)."""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    ground = box(12, 30, 40, 70, 0, 10, "a")
+    r = check_site(_plot(ground, box(12, 30, 62, 70, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    # (PR 18: research settled it as Gordium's reading coverage_seen_from_above, everything above ground seen from
+    # above, cantilevered upper floors included: 28.5%, over 25%, does not comply, saying the reading it applied)
+    assert cov["status"] == present.FAILS and cov["proposed"] == "28.5%", cov
+    assert "Gordium's reading" in cov["reason"] and "seen from above" in cov["reason"], cov["reason"]
+    r = check_site(_plot(ground, box(12, 30, 52, 70, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    assert cov["status"] == present.COMPLIES and "Gordium's reading" in cov["reason"], cov
+
+
+def test_an_assumed_main_building_is_said_on_the_panel_and_the_check_sheet(tmp_path):
+    """Review of the main-building default (P1): the assumption reached only the report's Inputs tab; height,
+    stories and yards read COMPLIES with no caveat. The header says "Main building: the starting house (assumed)"
+    and every row measured from it carries the note, on the Check sheet too."""
+    import openpyxl
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 70, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(45, 75, 55, 90, 0, 10, "garage")
+    r = check_site(_plot(*house, garage, lot_=lot), {**facts, "lot_surveyed": True, "stories": 3},
+                   report_path=tmp_path / "r.xlsx")
+    assert r["view"]["header"]["main"] == present.ASSUMED_MAIN
+    by = items(r["view"])
+    for name in ("Building height", "Stories", "Front yard"):
+        assert present.ASSUMED_MAIN_NOTE in (by[name].get("note") or ""), (name, by[name])
+    text = " ".join(str(c.value) for row in openpyxl.load_workbook(tmp_path / "r.xlsx")["Check"].iter_rows()
+                    for c in row if c.value)
+    assert present.ASSUMED_MAIN in text and present.ASSUMED_MAIN_NOTE in text
+
+
+
+def test_the_report_keeps_each_rows_units_and_the_panels_words(surveyed, tmp_path):
+    """Review of P1-4 (P2): the coverage item's percentage went into the Building area input and the coverage
+    row, both in sf. A row taken from the panel takes its limit and units with it; an input only in its own unit."""
+    import openpyxl
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    ground = box(12, 30, 40, 70, 0, 10, "a")
+    check_site(_plot(ground, box(12, 30, 62, 70, 10, 20, "b"), lot_=lot),
+               {**facts, "lot_surveyed": True, "main_building": "a"}, report_path=tmp_path / "r.xlsx")
+    wb = openpyxl.load_workbook(tmp_path / "r.xlsx")
+    out, ins = wb["Output"], wb["Inputs"]
+    head = [c.value for c in out[2]]
+    cov = next(r for r in out.iter_rows(min_row=3, values_only=True) if r[0] and "coverage" in r[0].lower())
+    assert "%" in str(cov[head.index("Proposed")]) and "%" in str(cov[head.index("Table limit")])
+    assert cov[head.index("Units")] == "% of lot area"
+    area = next(r for r in ins.iter_rows(min_row=3, values_only=True) if r[0] == "Building area")
+    assert "%" not in str(area[1])
+
+
+def test_wording_never_sends_the_architect_to_ask_when_the_answer_cant_change_the_result():
+    """Review of P1-3 and P2-10: a rear yard complying under every lot-depth reading lost "Complies under every
+    reading" for "Needs … ask the zoning office"; coverage failing both ways still said "an open question … ask".
+    (PR 18: the sample lot's depth readings are 96.62, 131.37 and 101.79 ft, so the limit, 25% of the depth, runs
+    24'-1 7/8" to 32'-10 1/8", as in the rear-yard test above; coverage is read as seen from above, its overhang
+    question settled, so a coverage failing has no question left to ask about.)"""
+    from design_checker.check import check_site
+    lot, facts = _sample106()
+    r = check_site(_plot(box(12, 30, 40, 50, 0, 30), lot_=lot), {**facts, "lot_surveyed": False})
+    rear = items(r["view"])["Rear yard"]
+    assert rear["required"] == "24'-1 7/8\" to 32'-10 1/8\"" and rear["reason"].startswith("Complies under every reading"), rear
+    r = check_site(_plot(box(12, 30, 48, 85, 0, 10, "a"), box(10, 28, 50, 90, 10, 20, "b"), lot_=lot),
+                   {**facts, "lot_surveyed": True, "main_building": "a"})
+    cov = items(r["view"])["Lot coverage"]
+    assert cov["status"] == present.FAILS and "ask" not in cov["reason"], cov
+
+
+
+def _walls_spots(x0, y0, x1, y1, z):
+    """A spot grade at the middle of each wall of a rectangle, just outside it, at level z."""
+    mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+    return [[mx, y0 - 0.5, z], [mx, y1 + 0.5, z], [x0 - 0.5, my, z], [x1 + 0.5, my, z]]
+
+
+def test_an_assumed_main_building_is_never_kinder_than_picking_the_starting_house():
+    """Round 2 of the main-building fixes (P0): the candidates were read by position, so the "with every other
+    solid" height came from the last other building's own (higher) ground: with the main building assumed, a
+    height complied that picking the starting house fails. Property, over random layouts on the sample lot
+    (a starting house and one or two other buildings, each on its own ground, spot grades at every wall): with
+    the starting house assumed, no row is ever kinder than with it picked."""
+    import random
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    rnd = random.Random(5)
+    compared = 0
+    for _ in range(30):
+        floors, h = rnd.choice([2, 3, 3]), rnd.choice([11, 11.6])        # 3 x 11.6 = 34.8 ft: near the limit
+        house = [floor(12, 30, 36, 60, z0=h * i, z1=h * (i + 1), id=f"f{i}") for i in range(floors)]
+        points = _walls_spots(12, 30, 36, 60, 0)
+        others = []
+        for k in range(rnd.choice([1, 2, 2])):           # two: one on lower ground, one on higher, often
+            x0, y0 = rnd.choice([(40, 30), (14, 66), (40, 66)])
+            if any(o["id"].startswith(f"o{x0}{y0}") for o in others):
+                continue
+            ground, top = rnd.choice([-8, -6, -3, 0, 3, 5, 8]), rnd.choice([8, 12, 20, 30])
+            others.append(box(x0, y0, x0 + 8, y0 + 10, ground, ground + top, f"o{x0}{y0}"))
+            points += _walls_spots(x0, y0, x0 + 8, y0 + 10, ground)
+        base = {**facts, "lot_surveyed": True, "stories": floors, "ground_is_flat": None, "grade_elevation": None,
+                "grade_points": points}
+        site_ = _plot(*house, *others, lot_=lot)
+        assumed = items(check_site(site_, base)["view"])
+        picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])
+        from model_measurement.measure import measure
+        m_a, m_p = measure(site_, base), measure(site_, {**base, "main_building": "f0"})
+        for name in ("building_height", "stories"):     # the pick's every reading is among the assumption's
+            def vals(r):
+                return {round(x["value"], 3) for x in r["readings"]} or ({round(r["value"], 3)} if r["value"] is not None else set())
+            assert vals(m_p[name]) <= vals(m_a[name]) or not vals(m_a[name]), (name, m_p[name], m_a[name])
+        for name, i in picked.items():
+            if name in assumed and i["status"] in present.RANK and assumed[name]["status"] in present.RANK:
+                compared += 1
+                assert present.RANK[assumed[name]["status"]] <= present.RANK[i["status"]], \
+                    (name, assumed[name]["status"], i["status"], assumed[name]["reason"], [o["id"] for o in others])
+    assert compared > 150
+
+
+
+def test_the_with_every_other_solid_height_is_read_from_its_own_grade_not_the_last_buildings():
+    """Round 2 (P0), the reviewer's case: a 34.8 ft starting house on ground 0, a garage on lower ground (-8) and
+    one on higher ground (+5). Read by position, the "with every other solid" height took the last garage's own
+    ground (+5) and the assumed house complied; picking the house reads it from the ground at all their walls
+    (lower) and it doesn't. Assumed, it is never kinder."""
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 60, z0=11.6 * i, z1=11.6 * (i + 1), id=f"f{i}") for i in range(3)]
+    low, high = box(40, 30, 48, 40, -8, 4, "low"), box(40, 66, 48, 76, 5, 15, "high")
+    points = _walls_spots(12, 30, 36, 60, 0) + _walls_spots(40, 30, 48, 40, -8) + _walls_spots(40, 66, 48, 76, 5)
+    base = {**facts, "lot_surveyed": True, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+            "grade_points": points}
+    site_ = _plot(*house, low, high, lot_=lot)
+    from model_measurement.measure import measure
+    def with_others(f):
+        return next(r["value"] for r in measure(site_, f)["building_height"]["readings"]
+                    if r["reading"].startswith("with every other solid"))
+    assert with_others(base) == pytest.approx(with_others({**base, "main_building": "f0"})) == pytest.approx(35.8)
+    picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])["Building height"]
+    assumed = items(check_site(site_, base)["view"])["Building height"]
+    assert picked["status"] != present.COMPLIES, picked
+    assert present.RANK[assumed["status"]] <= present.RANK[picked["status"]], (assumed, picked)
+
+
+def test_never_kinder_than_picking_the_starting_house_with_solids_touching_it():
+    """The main-building property (round 2) with #18's touching candidates in it (§325-18A: a solid touching the
+    house is part of it, one main_only candidate). Random layouts on the sample lot: the starting house, and one or
+    two other solids, each on its own ground with spot grades at every wall, often touching the house (on its east
+    or north wall) and often standing apart. Left to Gordium, no row is ever kinder than with the starting house
+    picked, and the pick's every height and story reading is among Gordium's own."""
+    import random
+    from design_checker.check import check_site
+    from model_measurement.measure import measure
+    from test_measure import floor
+    lot, facts = _sample106()
+    rnd = random.Random(18)
+    compared = touching = 0
+    for _ in range(30):
+        floors, h = rnd.choice([2, 3, 3]), rnd.choice([11, 11.6])
+        house = [floor(12, 30, 36, 60, z0=h * i, z1=h * (i + 1), id=f"f{i}") for i in range(floors)]
+        points = _walls_spots(12, 30, 36, 60, 0)
+        others, spots = [], []
+        for _k in range(rnd.choice([1, 2, 2])):
+            x0, y0 = rnd.choice([(36, 30), (36, 48), (14, 60), (26, 60), (40, 30), (14, 66), (40, 66)])
+            if any(not (x0 + 8 <= o[0] or o[0] + 8 <= x0 or y0 + 10 <= o[1] or o[1] + 10 <= y0) for o in spots):
+                continue                                # never overlapping another solid
+            ground, top = (0 if (x0 == 36 or y0 == 60) and rnd.random() < 0.5 else
+                           rnd.choice([-8, -6, -3, 0, 3, 5, 8])), rnd.choice([8, 12, 20, 30, 40])
+            spots.append((x0, y0))
+            touching += x0 == 36 or y0 == 60
+            others.append(box(x0, y0, x0 + 8, y0 + 10, ground, ground + top, f"o{x0}_{y0}"))
+            points += _walls_spots(x0, y0, x0 + 8, y0 + 10, ground)
+        base = {**facts, "lot_surveyed": True, "stories": floors, "ground_is_flat": None, "grade_elevation": None,
+                "grade_points": points}
+        site_ = _plot(*house, *others, lot_=lot)
+        m_a, m_p = measure(site_, base), measure(site_, {**base, "main_building": "f0"})
+        for name in ("building_height", "stories"):
+
+            def vals(r):
+                return {round(x["value"], 3) for x in r["readings"]} or (
+                    {round(r["value"], 3)} if r["value"] is not None else set())
+            assert vals(m_p[name]) <= vals(m_a[name]) or not vals(m_a[name]), (name, m_p[name], m_a[name])
+        assumed = items(check_site(site_, base)["view"])
+        picked = items(check_site(site_, {**base, "main_building": "f0"})["view"])
+        for name, i in picked.items():
+            if name in assumed and i["status"] in present.RANK and assumed[name]["status"] in present.RANK:
+                compared += 1
+                assert present.RANK[assumed[name]["status"]] <= present.RANK[i["status"]], \
+                    (name, assumed[name]["status"], i["status"], assumed[name]["reason"], spots)
+    assert compared > 150 and touching >= 10, (compared, touching)
+
+
+def _degenerate(kind, problem):
+    """A building object as a model can hold one: walls only (an open polysurface), a single face, a face of no
+    area, points in a line, or no faces; with the reading's own problem, or (a defence) without one."""
+    b = box(40, 70, 48, 80, 0, 10, "odd")
+    if kind == "walls":
+        b["faces"] = [f for f in b["faces"] if len({round(p[2], 6) for p in f["points"]}) > 1]
+    elif kind == "one_face":
+        b["faces"] = b["faces"][:1]
+    elif kind == "zero_area":
+        b["faces"] = [{"points": [[40, 70, 0], [40, 70, 0], [40, 70, 0]]}] + b["faces"][1:]
+    elif kind == "collinear":
+        b["faces"] = [{"points": [[40, 70, 0], [44, 70, 0], [48, 70, 0]]}]
+    elif kind == "none":
+        b["faces"] = []
+    if problem:
+        b["problems"] = ["a building isn't a closed solid"]
+    return b
+
+
+@pytest.mark.parametrize("kind", ["walls", "one_face", "zero_area", "collinear", "none"])
+def test_a_degenerate_building_object_never_raises_and_never_passes(kind):
+    """Main-building round 3 (P1): a building object of walls only crashed the ground check (an empty convex
+    hull) when spot grades were set, before its own problem could stop the building measurements. Fuzz: every
+    degenerate object, alone or beside a good house, with or without spot grades and with or without its
+    reading's problem, goes through measure() and check_site without an exception, and with its problem, the
+    building measurements wait with that reason."""
+    from design_checker.check import check_site
+    from model_measurement.measure import measure
+    from test_measure import floor
+    lot, facts = _sample106()
+    for house in (False, True):
+        for spots in (False, True):
+            for problem in (False, True):
+                blds = ([floor(12, 30, 36, 60, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+                        if house else []) + [_degenerate(kind, problem)]
+                f = {**facts, "lot_surveyed": True, "stories": 3}
+                if spots:
+                    f.update(ground_is_flat=None, grade_elevation=None,
+                             grade_points=_walls_spots(12, 30, 36, 60, 0) + _walls_spots(40, 70, 48, 80, 0))
+                m = measure(_plot(*blds, lot_=lot), f)
+                view = check_site(_plot(*blds, lot_=lot), f)["view"]
+                # with or without the reader's problem (round 4: the measuring finds it itself), the degenerate
+                # object stops the building measurements, and no building row complies
+                for name in ("building_height", "front_yard"):
+                    assert m[name]["value"] is None and "isn't a closed solid" in (m[name]["reason"] or "") or \
+                        kind == "none" and "nothing to measure" in (m[name]["reason"] or ""), (name, problem, m[name])
+                built = [i for i in view["items"] if i.get("group") == "building" and i["status"] == present.COMPLIES]
+                assert not built, (kind, house, spots, problem, [i["name"] for i in built])
+
+
+
+def test_the_ground_work_waits_for_buildings_that_can_be_measured(monkeypatch):
+    """Main-building round 4 (P3): the guards keeping the grade plane and the ground check off a building the
+    reading refused were unpinned. With them raising, a problem building's measurement still returns."""
+    import model_measurement.measure as M
+    from test_measure import floor
+
+    def boom(*a, **k):
+        raise AssertionError("ran on a building that can't be measured")
+    monkeypatch.setattr(M, "grade_plane", boom)
+    monkeypatch.setattr(M, "_floating", boom)
+    monkeypatch.setattr(M, "_meets_ground", boom)
+    lot, facts = _sample106()
+    f = {**facts, "lot_surveyed": True, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+         "grade_points": _walls_spots(12, 30, 36, 60, 0)}
+    m = M.measure(_plot(_degenerate("walls", True), lot_=lot), f)
+    assert "isn't a closed solid" in m["building_height"]["reason"]
+
+
+def _slope_house(dx, dy, bottom):
+    """A three-floor house on a lot falling toward the street, and its four spot grades as first placed: front 1.0,
+    rear 3.0, sides 2.0 (stress F15). The house drawn from `bottom`, moved by (dx, dy) from where they were placed."""
+    from test_measure import floor
+    house = [floor(10 + dx, 30 + dy, 35 + dx, 60 + dy, z0=bottom + 10 * i, z1=bottom + 10 * (i + 1), id=f"f{i}")
+             for i in range(3)]
+    spots = [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0]]
+    facts = {**FACTS, "jurisdiction": CITY, "ground_is_flat": None, "grade_elevation": None, "grade_points": spots,
+             "stories": 3, "lot_surveyed": True}
+    return _plot(*house), facts
+
+
+def test_raised_or_moved_the_ground_is_judged_by_one_test():
+    """Stress F15 (the move case): a house raised 9 in. (bottom 2.75) on the slope was stopped by the grade plane's
+    average ("the ground level (2.0 ft) doesn't meet the buildings"); moved 2'-2" back, the spot grades left the
+    walls, the footprint path found the ground under it, and the rear yard went from needs review to complies while
+    getting smaller. One test now, at the footprint: its rear corners stand in the ground (3.0), so it meets it in
+    both places, and the rear yard's verdict doesn't change. Raised 3.25 ft it floats in both places."""
+    from design_checker.check import check_site
+    for bottom, meets in ((2.75, True), (3.25, False)):
+        verdicts = []
+        for dy in (0, 26 / 12):
+            r = check_site(*_slope_house(0, dy, bottom))
+            rear = items(r["view"])["Rear yard"]
+            said = "doesn't meet the buildings" in (rear.get("reason") or "")
+            assert said == (not meets), (bottom, dy, rear)
+            verdicts.append(rear["status"])
+        assert verdicts[0] == verdicts[1] or not meets and present.COMPLIES not in verdicts, (bottom, verdicts)
+
+
+def test_moving_along_the_slope_never_turns_a_ground_stop_into_complies():
+    """Property: moving the house along the contours (sideways: the ground under it doesn't change) in small steps,
+    while its spot grades fall off the side walls, never turns a row stopped by the ground into one that complies:
+    the ground is judged at the footprint, never by whether the points sit at the walls."""
+    from design_checker.check import check_site
+    for bottom in (2.0, 2.75, 3.0, 3.25, 4.0):
+        before = None
+        for step in range(0, 9):
+            r = check_site(*_slope_house(-0.5 * step, 0, bottom))
+            now = {i["name"]: i for i in r["view"]["items"]}
+            if before:
+                for name, i in now.items():
+                    was = before.get(name)
+                    if was and was["status"] == present.REVIEW and "meet the buildings" in (was.get("reason") or ""):
+                        assert i["status"] != present.COMPLIES, (bottom, step, name, was["reason"])
+            before = now
+
+
+def test_the_stories_row_asks_for_the_whole_buildings_count_and_takes_it():
+    """Demo fact-check (2), and Ben: read the geometry before ever asking. A plain solid h tall can hold at most
+    floor(h / 7 ft) stories (R305.1). A 12 ft garage beside the starting house holds one: the Stories row never asks
+    for a count (with the main building picked it complies). A 30 ft plain house could hold one to four in R-1b
+    (3 allowed): the row says why and its own Enter button asks; 3 entered complies; 5 (more than 30 ft could
+    hold) is refused with the measuring's words."""
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    base = {**facts, "lot_surveyed": True}
+    base.pop("stories", None)
+    house = [floor(12, 30, 36, 60, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    garage = box(40, 66, 50, 86, 0, 12, "garage")
+    st = items(check_site(_plot(*house, garage, lot_=lot), base)["view"])["Stories"]
+    assert "stories" not in st["needs"] and "enter the count" not in (st["reason"] or "")
+    st = items(check_site(_plot(*house, garage, lot_=lot), {**base, "main_building": "f0"})["view"])["Stories"]
+    assert st["status"] == present.COMPLIES, st
+    big = box(12, 30, 36, 60, 0, 30, "house")
+    st = items(check_site(_plot(big, lot_=lot), base)["view"])["Stories"]
+    assert st["status"] == present.REVIEW and "stories" in st["needs"]
+    assert st["reason"] == "A 30 ft solid (the building) could hold up to 4 stories: draw its floors or enter the count."
+    assert logic.enter_words(st["needs"]) == "Enter the number of stories"
+    view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 3}))["view"]
+    assert items(view)["Stories"]["status"] == present.COMPLIES and logic.refused_stories(view["items"]) is None
+    view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 5}))["view"]
+    kept = [{k: i.get(k) for k in ("id", "name", "status", "reason")} for i in view["items"]]   # as the plugin keeps
+    said = logic.refused_stories(kept)
+    assert said and "more than the drawing could hold" in said and "at most 4" in said and "wasn't kept" in said
+    view = check_site(_plot(*house, lot_=lot), logic.update_counts(base, {"stories": 2}))["view"]
+    assert "fewer than the floor blocks drawn (3)" in (logic.refused_stories(
+        [{k: i.get(k) for k in ("name", "reason")} for i in view["items"]]) or "")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.refused_stories(" in rhino

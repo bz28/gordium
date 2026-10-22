@@ -15,10 +15,9 @@ design. So `rear_yard >= max(min(0.25 * lot_depth, 50), 20)` counts; the height 
 import ast
 import itertools
 
-from shapely import ops
 from shapely.geometry import LineString, Polygon
 
-from model_measurement.measure import Lot
+from model_measurement.measure import Lot, union
 from rule_format import formula
 from rule_format.rulebook import MEASURE_KINDS
 
@@ -189,7 +188,7 @@ def envelope(site: dict, facts: dict, measured: dict, rules: list[dict], margin:
     for _, left, right, back in readings:
         cut = [push(i, yards["front"]) for i in front] + [push(i, yards["side"]) for i in left + right]
         cut += [push(i, max(yards["side"], yards["rear"]) if not (left or right) else yards["rear"]) for i in back]
-        keep = keep.difference(ops.unary_union(cut))
+        keep = keep.difference(union(cut))          # the one union rule (measure.union)
     if keep.is_empty:
         notes.append("the required yards leave no room to build")
         return out
