@@ -83,7 +83,8 @@ def test_106_fills_the_box_with_suggestions_and_never_confirms_the_district():
     assert facts["lot_surveyed"] is False                  # the tax map: ±2'-0" and the starting-house margin apply
     assert saved["zone_source"] == "suggested by Gordium · City of Ithaca zoning map, used live"
     assert saved["street_name"] == "Ithaca Road" and saved["lot_source"] == "NYS Tax Parcels Public"
-    assert saved["street_source"] == "suggested by Gordium · City of Ithaca roads, used live"
+    assert saved["street_source"] == ("suggested by Gordium · named as in the address (NYS Geocoder), the line from "
+                                      "City of Ithaca roads, used live")
     assert not state.get("district_confirmed") and not logic.can_draw(state)       # I confirm: still the architect's
     rows = {r["key"]: r for r in logic.box_rows(state)}
     # whole square feet rounded down, as the checker's Lot area row says it (the MVP list, #15)
@@ -458,6 +459,16 @@ def test_p2_the_guide_case_offers_draw_my_lot_and_keeps_draw_off_until_there_is_
     assert logic.draw_reason({"zone": "R-1b", "district_confirmed": True, "lot_missing": True}) == "Draw or pick the lot to continue."
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert 'if what == "draw_lot":' in rhino and '"lot_missing": lot is None' in rhino
+
+
+def test_the_in_rhino_pass_asks_for_the_empty_files_lot_row_as_the_box_says_it():
+    """Headless run of the demo (2026-10-22): an empty file's box (the plugin marks it lot_missing) says LOT_MISSING,
+    and pass 2's claim 6 still asked for the sample's NO_LOT, so it could only fail in Rhino. The claim asks for
+    what the box shows."""
+    empty = {r["key"]: r for r in logic.box_rows({"lot_missing": True, "has_lot": False})}
+    assert empty["lot"]["text"] == logic.LOT_MISSING != logic.NO_LOT
+    pass2 = (REPO / "apps/rhino_plugin/tests/pass2_in_rhino.py").read_text(encoding="utf-8")
+    assert 'claim("6 the box was shown with no lot", g.logic.LOT_MISSING in' in pass2
 
 
 def test_p2_after_a_lookup_the_district_must_be_ticked_again():
@@ -1205,23 +1216,47 @@ def test_a_lookup_that_replaces_the_sample_lot_never_keeps_the_samples_street_na
     sample = {"street_name": "Ithaca Rd", "street_source": "the sample project", "from_sample": True}
     facts, saved, state = box(p, facts={"street_line": [[[0, 0], [10, 0]]], "street_ids": ["Ithaca Rd"]}, saved=sample)
     assert "street_name" not in saved and "_street_name" not in saved and state["street_name"] is None
+    # its source goes too (headless check of the demo, 2026-10-22: Draw credited the looked-up lot's street to the
+    # sample's lookup); a street side found without a name is the street service's
+    assert "street_source" not in saved
+    unnamed = looked_up("106_ithaca_rd")
+    side = unnamed["facts"]["street_side"]
+    unnamed["facts"] = {**unnamed["facts"], "street_side": {**side, "value": {**side["value"], "street": None}}}
+    _, saved, _ = box(unnamed, saved=sample)
+    assert saved["street_source"] == logic.SUGGESTED + " · " + unnamed["labels"]["street_side"]
+    assert "street_name" not in saved and "_street_name" not in saved
     named = looked_up("106_ithaca_rd")
     assert (named["facts"].get("street_side") or {}).get("value", {}).get("street")
     _, saved, state = box(named, saved=dict(sample, street_name="Old St"))
     assert state["street_name"] and state["street_name"] != "Old St"
 
 
+def _said_about_two_zones(payload, zones, given):
+    facts, saved = logic.lookup_choices(payload, {}, {}, zones, replaces=False)
+    state = state_of(facts, saved)
+    said = [r["review"] for r in logic.box_rows(state) if r.get("review")] + [logic.uncertain(state) or ""]
+    return sum(t.count("two zones") + t.count(" and ".join(given)) for t in said), said
+
+
 def test_the_two_zones_doubt_is_said_once():
     """Rhino check of 7efb1bd (2026-10-22): with R-2a (no rules) and R-1b, the district row's line named both zones
     and asked, and the amber line asked "This lot is in two zones" again. Said once: the row's line; with both
-    districts covered, the amber question alone (nothing on the row)."""
-    for given, zones in ((["R-2a", "R-1b"], ["R-1a", "R-1b", "R-3a"]), (["R-1b", "R-2a"], ZONES)):
-        facts, saved = logic.lookup_choices({"status": "found", "facts": {"zone": {"value": given}}}, {}, {},
-                                            zones, replaces=False)
-        state = state_of(facts, saved)
-        said = [r["review"] for r in logic.box_rows(state) if r.get("review")] + [logic.uncertain(state) or ""]
-        asks = sum(t.count("two zones") + t.count(" and ".join(given)) for t in said)
-        assert asks == 1, said
+    districts covered, the amber question alone (nothing on the row). Review of 8b8af5e: with the real lookup's
+    answer, whose own two-zones ask is on the zone's details, too (a bare answer hid it)."""
+    a, b = T.Fake(T.load("106_ithaca_rd")).square("R-1b", x1=847668), T.Fake(T.load("106_ithaca_rd")).square(
+        "R-2a", x0=847668)
+    real = looked_up("106_ithaca_rd", zones=[a, b])
+    given = real["facts"]["zone"]["value"]
+    assert sorted(given) == ["R-1b", "R-2a"] and real["details"]["zone"]["reason"] == logic.two_zones_ask(given)
+    for zones in (["R-1a", "R-1b", "R-3a"], ZONES):
+        for payload in (real, {"status": "found", "facts": {"zone": {"value": given}}}):
+            asks, said = _said_about_two_zones(payload, zones, given)
+            assert asks == 1, said
+    # the zone's other doubts stay beside it (only the two-zones ask is the box's to say)
+    other = dict(real, details={"zone": {"status": "ask", "reason": logic.two_zones_ask(given) +
+                                         " Only 80% of this lot is on the City's zoning map: check the district."}})
+    _, saved = logic.lookup_choices(other, {}, {}, ZONES, replaces=False)
+    assert saved["_live"]["zone"] == "Only 80% of this lot is on the City's zoning map: check the district."
 
 
 def test_the_address_streets_name_is_kept_through_draw():
@@ -1233,6 +1268,9 @@ def test_the_address_streets_name_is_kept_through_draw():
     facts, saved, state = box(p)
     kept = logic.storable_ui(saved)                           # what Draw writes into the file
     assert kept["street_name"] == "Ithaca Road" and state["street_name"] == "Ithaca Road"
+    # credited to the address it was named from, never only to the street service (used live): review of 8b8af5e
+    assert kept["street_source"] == (logic.SUGGESTED + " · named as in the address (NYS Geocoder), the line from "
+                                     + p["labels"]["street_side"])
     after = state_of(facts, kept)                             # the box reopened from the file
     assert next(r for r in logic.box_rows(after) if r["key"] == "street")["text"] == "Ithaca Road"
     assert logic.fact_sources(after, "2026-10-22", confirmed=False)["street"]["value"] == "Ithaca Road"

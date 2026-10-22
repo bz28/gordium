@@ -735,6 +735,8 @@ def lot_source(surveyed, source=None):
 
 
 NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+# a file with no lot the box can use (Edit site… in an empty file): its own lot, drawn or picked (never the sample)
+LOT_MISSING = "no lot yet: draw it, or pick a closed outline on the Site layer"
 
 
 def lot_text(area, surveyed, source=None):
@@ -930,7 +932,7 @@ def box_rows(state, flat=None):
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot",
-         "text": ("no lot yet: draw it, or pick a closed outline on the Site layer" if state.get("lot_missing") else
+         "text": (LOT_MISSING if state.get("lot_missing") else
                   lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))
                   if has_lot else NO_LOT),
          "actions": lot_actions, "tick": None},
@@ -981,6 +983,11 @@ def city_day(now=None):
         return first + _dt.timedelta(days=(6 - first.weekday()) % 7 + 7 * (nth - 1))
     summer = sunday(3, 2) + _dt.timedelta(hours=7) <= now < sunday(11, 1) + _dt.timedelta(hours=6)
     return (now - _dt.timedelta(hours=4 if summer else 5)).date().isoformat()
+
+
+def two_zones_ask(zones):
+    """site_lookup's ask when the City map puts a lot in more than one zone, word for word (lookup._zoning)."""
+    return f"This lot is in {' and '.join(zones)}: pick the zone that applies."
 
 
 def no_rules(said, unknown):
@@ -1102,6 +1109,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     zone = value("zone")
     names = {z.lower(): z for z in zones} if zones else {}
     said = zone if isinstance(zone, list) else [zone] if zone else []
+    if len(said) > 1 and live.get("zone"):
+        # site_lookup's own two-zones ask: the box says it once, its own way (no_rules on the row, or the amber
+        # question), so the lookup's words never say it again beside it (review of 8b8af5e, finding 1)
+        live["zone"] = " ".join(live["zone"].replace(two_zones_ask(said), " ").split())
+        if not live["zone"]:
+            live.pop("zone")
     known = [names[z.lower()] for z in said if z.lower() in names] if zones else list(said)
     unknown = [z for z in said if zones and z.lower() not in names]
     if not said:                                 # found, but the zoning map gave no district: never the last
@@ -1145,10 +1158,18 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         street_kept = payload.get("street_storable") or own is not None
         saved_ui.pop("street_name" if not street_kept else "_street_name", None)
         saved_ui["street_name" if street_kept else "_street_name"] = own or side["street"].title()
-        saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
+        # credited to where each part came from: a name in the address's words is the address's (its geocoder),
+        # never the street service's, which is used live only (review of 8b8af5e, finding 2)
+        saved_ui["street_source"] = SUGGESTED + " · " + (
+            f"named as in the address ({label('address', 'address')}), the line from {label('street_side', 'street')}"
+            if own else label("street_side", "street"))
     else:                                        # the replaced lot's street name goes with its street lines (the
-        saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street)
-        saved_ui.pop("_street_name", None)
+        saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street), and so
+        saved_ui.pop("_street_name", None)       # does its source: the street side's own, or none (headless check)
+        if side:
+            saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
+        else:
+            saved_ui.pop("street_source", None)
     corner = value("corner_lot")
     streets = side.get("streets") or {}
     if corner == "no":
