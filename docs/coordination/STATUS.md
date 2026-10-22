@@ -84,3 +84,20 @@ For Ben: see the PR comments on #18, #19, #15 (flagged UX/zoning points, not dec
 - NOT yet smoke-tested in Rhino: RHINO_QUEUE 9 (local side), then Ben tells cofounders to pull.
 - #22 stress-tests c3b2038 PUSHED (F15 now fixed by #15's ground model: xfail → plain test). 
 - In progress: #21 carry 0638a6f (round 13 fixed: zone gaps in Ben's words with specifics kept in the report; chart units cite "Chart p.N") → round 14 + suite; #24 r2-hand carry 3892d20 (suite green) → round 9.
+
+## 2026-10-22 ~19:00 UTC — cloud coordinator: EVERY LANE CLEAN; demo built
+| PR | head | state |
+|---|---|---|
+| #14 start-project | 0122b15 | unchanged, clean |
+| #15 rhino-ui | c37738a | clean (round 11 + arch-fixes-2 round 12); in-Rhino pass2 re-run PENDING (RHINO_QUEUE 8) |
+| #16 site-lookup | 379d258 | carry, green |
+| #17 term-index | 74ea32b | carry, green |
+| #18 measurement-2 | 0668da2 | clean (round 28) |
+| #19 start-box-lookup | aa18f7c | clean (round 4); R-2a box re-run at aa18f7c PENDING |
+| #20 answer-keys | 9d858ab | carry, green |
+| #21 drafting-stage1 | 0638a6f | clean (round 14); stage 2 / spend wait for Ben |
+| #22 stress-tests | c3b2038 | green (F15 fixed) |
+| #23 context-map | 116aa34 | clean (round 10); in-Rhino PENDING (RHINO_QUEUE 7) |
+| #24 r2-hand | 3892d20 | clean (round 9) |
+| demo | 4c07e6e | built; smoke PENDING (RHINO_QUEUE 9) before Ben tells cofounders to pull |
+Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from cofounders. Ben's decisions: flagged points in the #15/#18/#19/#21 PR comments; relookup (wip/relookup 1099937) is the next feature lane after the demo.
