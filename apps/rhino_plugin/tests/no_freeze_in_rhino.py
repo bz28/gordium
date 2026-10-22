@@ -78,8 +78,8 @@ def load_the_bad_way():
 
 def fake_worker(g, code):
     """A stand-in checker as the current one (same code fingerprint, so ask() doesn't replace it)."""
-    p = subprocess.Popen([g._python(), "-c", code], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                         stderr=subprocess.DEVNULL, universal_newlines=True, encoding="utf-8")
+    p = g.ui.spawn([g._python(), "-c", code], stdin=subprocess.PIPE, stdout=subprocess.PIPE,   # (no console)
+                   stderr=subprocess.DEVNULL, universal_newlines=True, encoding="utf-8")
     g.STATE["worker_sends"], g.STATE["worker_lines"] = g.logic.pipes(p)
     g.STATE["worker"] = p
     g.STATE["worker_code"] = g.logic.code_fingerprint(os.path.join(g.REPO, "packages"))
@@ -177,8 +177,8 @@ try:
     old_root = S + "old_9303d10"
     if not os.path.isdir(old_root + "/apps"):
         os.makedirs(old_root, exist_ok=True)
-        tar = subprocess.run(["git", "-C", WT, "archive", "9303d10"], capture_output=True, check=True).stdout
-        subprocess.run(["tar", "-x", "-C", old_root], input=tar, check=True)
+        tar = g.ui.spawn(["git", "-C", WT, "archive", "9303d10"], run=True, capture_output=True, check=True).stdout
+        g.ui.spawn(["tar", "-x", "-C", old_root], run=True, input=tar, check=True)
     venv = os.path.dirname(os.path.dirname(g._python()))      # .venv/bin/python -> .venv
     if os.path.realpath(old_root + "/.venv") != os.path.realpath(venv):
         if os.path.islink(old_root + "/.venv"):

@@ -25,6 +25,12 @@ STOPS = {
     "no_street": "the street side isn't given: pick the lot line on the street",
     "street_not_a_lot_line": "a street line given doesn't match a lot line: pick the street side again",
     "street_lines_apart": "the street lot lines given aren't next to each other",
+    "two_streets": "the street lot lines given are on two streets: a corner lot (§325-19C), so which yards are front, "
+                   "side and rear, and which street's frontage is the lot width, are open questions; answer Corner lot?",
+    "one_street_or_two": "the street lot lines given turn {turn}° in all: do they face one street that bends, or two "
+                         "streets at a corner? Answer Corner lot?, or name the street each lot line is on",
+    "street_names_stale": "the street names saved for the street lot lines no longer match them (the lines were "
+                          "picked again): pick the street side again",
     "all_street": "every lot line is on a street: which yards are front, side and rear is an open question for the "
                   "architects",
     # corner lots (§325-19C)
@@ -68,8 +74,6 @@ STOPS = {
     "no_stories": "no floor blocks are drawn for the building, so its stories aren't drawn: draw each story as its "
                   "own solid standing on the one below (as Gordium's starting building is), or enter the number of "
                   "stories",
-    "stories_plain_part": "part of the building ({what}) isn't drawn as floor blocks, so its stories can't be "
-                          "counted: enter the number of stories of the whole building",
     "stories_below_floors": "the stories typed ({typed}) are fewer than the floor blocks drawn ({drawn}): check the "
                             "count, or the floors",
     "floors_apart": "parts of the building drawn one over another don't stand on each other (from {low} ft to "
@@ -77,10 +81,12 @@ STOPS = {
                     "blocks",
     "parts_overlap": "part of the building ({what}) starts partly inside the one below it (from {low} ft to {high} "
                      "ft): move it to stand on the one below, or join them",
-    "stories_below_blocks": "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), "
-                            "which may each be a story: check the count",
     "part_raised": "part of the building ({what}) starts above the ground: it may be another story: draw its "
                    "stories as floor blocks, or check the count",
+    "stories_below_one": "the stories typed ({typed}) are fewer than one: every building has at least a first story "
+                         "(§325-3): check the count",
+    "stories_above_drawn": "the stories typed ({typed}) are more than the drawing could hold ({what}, {height} ft "
+                           "tall: at most {most}, at 7 ft a story, R305.1): check the count, or the drawing",
     "basement_part": "part of the building ({what}) is below the ground: whether a basement or cellar counts as a "
                      "story (§325-3) isn't measured yet: an open question for the architects",
     "floors_misaligned": "floors misaligned: a floor block sticks out past the one below it (one floor moved on its "
@@ -94,12 +100,10 @@ STOPS = {
                       "for faces meeting at slivers",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
     "empty_building": "a building object has nothing to measure (no faces): check it on the Building layer",
-    "flat_building": "a building covers no area seen from above: {what} (walls only, or faces in a line); check "
-                     "it on the Building layer",
     "no_main_building": "more than one building: pick the main building",
     "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
     "outside_lot": "a building isn't inside the lot: {what}",
-    "open_solid": "a building isn't a closed solid",
+    "open_solid": "a building isn't a closed solid: {what}",
     "open_mesh": "a building mesh isn't closed",
     "curved_surface": "a building has a curved surface (not measured yet)",
     "curved_edge": "a building has a curved edge (not measured yet)",

@@ -223,15 +223,15 @@ def test_F7_a_side_eave_gable_names_the_same_overhangs_whichever_way_the_outline
 F8_CASE = ("jog", [{"op": "floor_wing", "heights": [7.5], "face": 0, "depth": 8.5, "below": 0.0, "typed": "none"}])
 
 
-def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_never_complies():
-    """One edit: the jog lot's starting house (3 floor blocks, 35'-0") with a plain solid wing 7'-6" tall joined to
-    its east wall. The agreed rule (coordinator, 2026-10-21): stories are counted only from floor blocks; a plain
-    part 7 ft or taller may hold a story the drawing doesn't show, so only a typed count of at least the floors
-    counted (and the plain blocks stacked) stands. Nothing is typed: the count is open, never complies. Gordium:
-    Stories 3, complies; #18's line is 8 ft (ca4f6c3). Decided 2026-10-21: 7 ft is right (#14's one definition, cited
-    to NYS R305.1); this passes when #18 swaps its 8 ft copy for #14's definition (arriving via term-index)."""
-    got, _ = _check(generate.build(*F8_CASE)[0])
-    assert got["R-1b.stories"] != COMPLIES
+def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_is_counted_from_the_drawing():
+    """The jog lot's starting house (3 floor blocks) with a plain solid wing 7'-6" tall joined to its east wall,
+    nothing typed. A plain part 7 ft or taller (NYS R305.1, #14's one stories definition) may hold a story the
+    drawing doesn't show (the old 8 ft line missed that). Read from the drawing (term-index a7557f7): 7'-6" holds
+    at most 1 story at 7 ft a story, beside the house's 3 floor blocks, so the building has 3 stories whatever the
+    wing holds: the one count the drawing allows, said with its reason."""
+    d = generate.build(*F8_CASE)[0]
+    m = harness.gordium(d)["measurements"]["stories"]
+    assert m["value"] == 3 and "could hold up to 1 story" in m["how"], m
 
 
 def test_the_oracle_on_F8_a_7_ft_6_plain_wing_opens_the_count():

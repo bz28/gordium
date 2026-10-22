@@ -368,7 +368,7 @@ def test_a_row_with_no_reading_set_never_says_to_spare_unless_it_complies(house,
     got, facts = house
     floors = copy.deepcopy(got["floors"])
     floors[-1]["top"] -= 1.0
-    for over in ({"corner_lot": True}, {"street_line": None}):
+    for over in ({"corner_lot": True}, {"street_line": None, "street_ids": None}):
         r = check_site(_site(floors), {**facts, **over})
         h = next(i for i in r["view"]["items"] if i["name"] == "Building height")
         assert h["status"] == present.REVIEW and "to spare" not in (h.get("delta") or ""), (over, h["delta"])
