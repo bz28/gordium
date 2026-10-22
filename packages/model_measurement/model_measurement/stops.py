@@ -94,7 +94,7 @@ STOPS = {
     "empty_building": "a building object has nothing to measure (no faces): check it on the Building layer",
     "no_main_building": "more than one building: pick the main building",
     "outside_lot": "a building isn't inside the lot: {what}",
-    "open_solid": "a building isn't a closed solid",
+    "open_solid": "a building isn't a closed solid: {what}",
     "open_mesh": "a building mesh isn't closed",
     "curved_surface": "a building has a curved surface (not measured yet)",
     "curved_edge": "a building has a curved edge (not measured yet)",
