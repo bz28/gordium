@@ -212,8 +212,9 @@ def read_site(path: Path, facts: dict, layers: dict = LAYERS) -> dict:
         elif isinstance(g, r.Brep):
             faces, trouble = _brep_faces(g, s)
             if not g.IsSolid:
-                trouble.append(stop("open_solid"))
+                trouble.append(stop("open_solid", what=o.Attributes.Name or _id(o)))
             buildings.append({"id": _id(o), "faces": faces, "problems": trouble,
+                              **({"name": o.Attributes.Name} if o.Attributes.Name else {}),
                               "floor": _floor_height(o.Attributes.GetUserString(FLOOR_KEY))})
         elif isinstance(g, r.Mesh):
             faces, trouble = _mesh_faces(g, s)
