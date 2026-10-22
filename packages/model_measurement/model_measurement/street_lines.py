@@ -79,5 +79,11 @@ def street_verdict(lines, ids=None, tolerance=0.5):
     return "one", turn
 
 
+def same_street(a, b):
+    """Whether two street names name the same street, by the one comparison street_verdict uses (case and dots
+    ignored): the start box keeps a street's own lines by it too (arch-fixes-2 review round 10)."""
+    return bool(a) and bool(b) and _norm(a) == _norm(b)
+
+
 def _norm(name):
     return " ".join(str(name).lower().replace(".", " ").split())

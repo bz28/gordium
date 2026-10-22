@@ -1362,7 +1362,8 @@ def _box_pick(doc, what, facts, saved_ui):
                             if got == Rhino.Input.GetResult.String else None
                     lines = logic.street_lines_after_pick(facts.get("street_line"), picked,
                                                           ids=facts.get("street_ids"))
-                    logic.set_street_lines(facts, lines, [name] * len(lines) if name else None)   # as named
+                    logic.set_street_lines(facts, lines, logic.ids_after_pick(facts.get("street_line"),
+                                           facts.get("street_ids"), lines, name))   # known names kept
                     saved_ui["street_name"] = name
                     saved_ui["street_source"] = logic.ENTERED
         elif what == "lot":                          # Use my survey: the surveyed outline

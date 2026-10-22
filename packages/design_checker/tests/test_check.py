@@ -1777,7 +1777,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     # the name only with its street line (round 3, F6), and the whole street kept when one of its lines is picked
     assert '"street_name": saved_ui.get("street_name") if facts.get("street_line") else None,' in rhino
     assert 'lines = logic.street_lines_after_pick(facts.get("street_line"), picked,' in pick
-    assert "logic.set_street_lines(facts, lines, [name] * len(lines) if name else None)" in pick
+    assert "logic.set_street_lines(facts, lines, logic.ids_after_pick(facts.get(\"street_line\")," in pick
     assert logic.street_lines_after_pick(lines, lines[3]) == [list(map(list, x)) for x in lines]   # round 3, F4
     assert logic.street_lines_after_pick(lines, list(reversed(lines[3]))) == [list(map(list, x)) for x in lines]
     assert logic.street_lines_after_pick(lines, side) == [side]
@@ -2248,3 +2248,24 @@ def test_a_pick_of_one_street_of_two_keeps_that_streets_own_name_and_an_unnamed_
     facts = logic.set_street_lines({}, logic.street_lines_after_pick([a, b, c], c, ids=two),
                                    [logic.street_name_after_pick("A St", [a, b, c], c, ids=two)])
     assert facts == {"street_line": [c], "street_ids": ["B Ave"]}
+
+
+def test_a_name_typed_for_one_line_never_replaces_another_streets_and_one_street_is_one_by_its_spelling():
+    """arch-fixes-2 review round 10: (P1) on a corner known to be two streets, clicking the unnamed line between them
+    and typing "B Ave" wrote B Ave on every line: two streets became one, and lot width would be measured along
+    both (§325-8 col. 7). Every line keeps the street it was known to be on; the typed name goes only where none was.
+    (P2) the box kept a street's own lines by exact spelling while street_verdict ignores case and dots: "a st." was
+    dropped from A St's lines (fewer on a guess)."""
+    from design_checker import rhino_logic as logic
+    a, b, c = [[0, 0], [100, 0]], [[100, 0], [100, 50]], [[100, 50], [100, 150]]
+    ids = ["A St", None, "B Ave"]
+    assert logic.street_verdict([a, b, c], ids)[0] == "two"
+    name = logic.street_name_after_pick("A St", [a, b, c], b, ids=ids)
+    assert name is None                                                          # the architect is asked
+    lines = logic.street_lines_after_pick([a, b, c], b, ids=ids)
+    facts = logic.set_street_lines({}, lines, logic.ids_after_pick([a, b, c], ids, lines, "B Ave"))
+    assert facts["street_ids"] == ["A St", "B Ave", "B Ave"]
+    assert logic.street_verdict(facts["street_line"], facts["street_ids"])[0] == "two"   # never one
+    assert logic.ids_after_pick([a, b], None, [a, b], "A St") == ["A St", "A St"]        # nothing known: as typed
+    assert logic.ids_after_pick([a, b], None, [a, b], None) is None
+    assert logic.street_lines_after_pick([a, b, c], a, ids=["A St", "a st.", "B Ave"]) == [a, b]

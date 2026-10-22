@@ -778,6 +778,29 @@ def street_lines_after_picks(lines, picks, corner):
     return out
 
 
+def ids_after_pick(old_lines, old_ids, lines, name, tolerance=0.5):
+    """The street names for the street lines after a pick (`lines`, from street_lines_after_pick): every line keeps
+    the street it was known to be on, and `name` (found or typed) goes only on a line whose street wasn't known; with
+    no names matching the old lines, `name` on every line (None: unnamed). A name typed for one line never replaces
+    another street's: two streets stay two, and lot width is never measured along both (arch-fixes-2 review round
+    10, P1: [A St, ?, B Ave] with "B Ave" typed for the middle line had become one street)."""
+    def near(p, q):
+        return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
+
+    old = _street_lines().matching_ids(old_lines, old_ids)
+    if old is None:
+        return [name] * len(lines) if name else None
+
+    def known(line):
+        a, b = line[0], line[-1]
+        for k, o in enumerate(old_lines or []):
+            if (near(a, o[0]) and near(b, o[-1])) or (near(a, o[-1]) and near(b, o[0])):
+                return old[k]
+        return None
+    out = [known(line) or name for line in lines]
+    return out if any(out) else None
+
+
 def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
     """The street lines after the architect clicks a lot line as the street side: the whole street as it was when
     the line is one of its own (106's eight: keeping only the one clicked measured the front yard from part of the
@@ -793,8 +816,8 @@ def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
         return [picked]
     ids = _street_lines().matching_ids(lines, ids)        # names that don't match the lines: unnamed (round 8)
     if street_verdict(lines, ids)[0] == "two" and ids[hits[0]]:   # two streets, the clicked line's known: its own
-        mine = ids[hits[0]]
-        return [list(map(list, line)) for k, line in enumerate(lines) if ids[k] == mine]
+        mine = ids[hits[0]]                                # its own lines, by street_verdict's own comparison
+        return [list(map(list, line)) for k, line in enumerate(lines) if _street_lines().same_street(ids[k], mine)]
     return [list(map(list, line)) for line in lines]
 
 
