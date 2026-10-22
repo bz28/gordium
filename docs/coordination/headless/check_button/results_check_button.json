@@ -50,8 +50,8 @@
   "title": "The viewport's status box says it too, with no status mark, and the viewport is redrawn so its marks grey out",
   "needs": "rhino",
   "offline": "partial",
-  "offline_ok": false,
-  "evidence": "Status box: ['Gordium \u00b7 Model changed since the last check \u2014 press Check', 'Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12\\'-0\")']; viewport redraws after the edit: 0; the overlay counts as out of date: True.",
+  "offline_ok": true,
+  "evidence": "Status box: ['Gordium \u00b7 Model changed since the last check \u2014 press Check', 'Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12\\'-0\")']; viewport redraws after the edit: 1; the overlay counts as out of date: True.",
   "rhino_part": "The status box drawn in the viewport, and the marks greyed on screen."
  },
  {
@@ -127,8 +127,8 @@
   "title": "With the panel closed, the viewport still greys after an edit",
   "needs": "rhino",
   "offline": "partial",
-  "offline_ok": false,
-  "evidence": "Redraws after the edit with no panel: 0; out of date: True.",
+  "offline_ok": true,
+  "evidence": "Redraws after the edit with no panel: 1; out of date: True.",
   "rhino_part": "The viewport's look in Rhino."
  },
  {
@@ -141,5 +141,16 @@
   "offline_ok": true,
   "evidence": "Check after every edit: False -> True; edit hooks attached: True.",
   "rhino_part": "The command in Rhino."
+ },
+ {
+  "id": "check-14",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "A session started with Edit site\u2026 still greys the results after an edit",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Edit hooks before: False, after Edit site\u2026's check: True; status box after an edit: ['Gordium \u00b7 Model changed since the last check \u2014 press Check', 'Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12\\'-0\")'].",
+  "rhino_part": "Rhino's real commands and events."
  }
 ]

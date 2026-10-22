@@ -236,6 +236,22 @@ def main():
                    "Check after every edit: %s -> %s; edit hooks attached: %s." % (was, g2._auto(doc),
                                                                                   bool(g2.STATE.get("hooks")))))
     g2.toggle_live()
+    # review round 3, P1: a fresh session whose first command is Edit site… (GordiumFacts): edits are still noticed
+    g3 = fresh_module()
+    Rhino.RhinoDoc.ActiveDoc = doc
+    g3.register_dock = lambda: "dock-id"
+    g3.STATE.update(box_picks=[], on_confirm=lambda *a: None)
+    live_before = bool(g3.STATE.get("live"))
+    g3.edit_facts()                                  # the start box, Draw (scripted), then its own check
+    hooked = bool(g3.STATE.get("hooks"))
+    if hooked:                                       # without the hooks Rhino's edit reaches nothing: a FAIL below
+        edited(g3, doc)
+        idle_after_wait(g3)
+    rows3 = g3._status_rows(g3.overlay(), g3.stale(g3.overlay()))
+    check("check-14", "A session started with Edit site… still greys the results after an edit", "Rhino's real "
+          "commands and events.", lambda: (not live_before and hooked and rows3[0] == "Gordium · " + g3.logic.CHANGED_SINCE,
+                                          "Edit hooks before: %s, after Edit site…'s check: %s; status box after an "
+                                          "edit: %s." % (live_before, hooked, rows3)))
     out = os.path.join(HERE, "results_check_button.json")
     json.dump(RESULTS, open(out, "w"), indent=1)
     print(json.dumps({"claims": len(RESULTS), "passed": sum(r["offline_ok"] for r in RESULTS)}))
