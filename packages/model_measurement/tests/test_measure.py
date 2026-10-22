@@ -1425,3 +1425,45 @@ def test_an_open_object_is_named_and_the_waiting_rows_point_at_it():
     named = dict(sheet, name="Garden shed")
     assert "closed solid: Garden shed" in measure(site(RECT, house, named), {**FACTS, "main_building": "house"})[
         "building_height"]["reason"]
+
+
+
+def test_every_known_shape_is_read_at_the_ground_as_it_should_be_all_at_once():
+    """#15 round 7: rounds 5, 6 and 7 each fixed one shape at the ground and broke another. Every known shape in
+    one table, asserted together, so a change that fixes one and breaks another fails here at once. Expected
+    values worked by hand from each shape's own footprint: (from above, at the main grade level, overhang
+    question?, front yard read to the walls at ground level?)."""
+    flat = {**FACTS}
+    slope = {**FACTS, "ground_is_flat": None, "grade_elevation": None,
+             "grade_points": [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0]]}
+    slab_house = [floor(10, 30, 35, 60, z0=2.75 + 10 * i, z1=2.75 + 10 * (i + 1), id=f"f{i}") for i in range(3)]
+    terrace_spots = [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0], [22.5, 20, 0.0]]
+    cases = {
+        # a 25 x 40 house (1,000 sf) with a 4 x 3 balcony (12 sf) at 10 ft against it, flat ground
+        "balcony, flat": (flat, [box(10, 25, 35, 65, 0, 30, id="house"), box(35, 40, 39, 43, 10, 10.5, id="b")],
+                          "house", (1012, 1000, True)),
+        # the 25 x 30 slab house (750 sf) on its slope, slab at 2.75 above a 2.0 grade plane
+        "slab on a slope": (dict(slope, stories=3), slab_house, None, (750, 750, False)),
+        # the same, with 15 x 4 steps (60 sf) from 1.0 to 2.75 against its front wall: 810 both ways
+        "slab + lower steps": (dict(slope, stories=3), slab_house + [box(15, 26, 30, 30, 1.0, 2.75, id="steps")],
+                               "f0", (810, 810, False)),
+        # a 15 x 8 terrace (120 sf) below the slab house's front, from the ground falling to 0 there up to the
+        # slab (2.75): its bottom below the house's, resting on the ground, cut at the grade plane
+        "terrace below": (dict(slope, stories=3, grade_points=terrace_spots),
+                          slab_house + [box(15, 22, 30, 30, 0.0, 2.75, id="terrace")], "f0", (870, 870, False)),
+        # a detached 10 x 10 shed (100 sf) apart from the house, flat ground
+        "detached shed": (flat, [box(10, 25, 35, 65, 0, 30, id="house"), box(40, 75, 50, 85, 0, 9, id="shed")],
+                          "house", (1100, 1100, False)),
+    }
+    got, want = {}, {}
+    for name, (facts, solids, main, (above, at_ground, question)) in cases.items():
+        m = measure(site(RECT, *solids), dict(facts, **({"main_building": main} if main else {})))
+        ba = m["building_area"]
+        readings = {r["reading"]: round(r["value"]) for r in ba.get("readings") or []}
+        got[name] = (readings.get("covered from above", round(ba["value"]) if ba["value"] is not None else None),
+                     readings.get("at the main grade level", round(ba["value"]) if ba["value"] is not None else None),
+                     "overhangs" in (ba["reason"] or "") and ba["value"] is None,
+                     m["front_yard"]["value"] is not None or any(
+                         r["reading"] == "to its walls at ground level" for r in m["front_yard"]["readings"] or []))
+        want[name] = (above, at_ground, question, True)
+    assert got == want
