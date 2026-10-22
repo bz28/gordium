@@ -1130,7 +1130,7 @@ def _set_source(doc, key, value, source, confirmed_by="you"):
         sources.pop(key, None)
     else:
         sources[key] = {"value": value, "source": source, "confirmed_by": confirmed_by,
-                        "date": time.strftime("%Y-%m-%d")}
+                        "date": logic.city_day()}
     doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
 
 
@@ -1666,7 +1666,7 @@ def _drawn(doc, facts, state, saved_ui, session=None):
         out, ui_state = _apply_box(doc, facts, state, saved_ui)
         _save_ui_state(doc, ui_state)
         sources = fact_sources(doc)        # what the box doesn't set (the ground marking) is kept
-        sources.update(logic.fact_sources(state, time.strftime("%Y-%m-%d"), confirmed=True))
+        sources.update(logic.fact_sources(state, logic.city_day(), confirmed=True))
         doc.Strings.SetString(SECTION, SOURCES_ENTRY, json.dumps(sources))
         return out
 
@@ -2363,7 +2363,7 @@ def gordium_start():
         live(True)
         documents(True)
         return None
-    fact = logic.starting_house_fact(start.get("margin_note"), time.strftime("%Y-%m-%d"))   # Gordium's figure
+    fact = logic.starting_house_fact(start.get("margin_note"), logic.city_day())   # Gordium's figure
     if fact:
         _set_source(doc, "starting_house", fact["value"], fact["source"], fact["confirmed_by"])
     doc.Views.Redraw()

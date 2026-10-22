@@ -1163,3 +1163,35 @@ def test_the_maps_words_are_shown_with_the_lookups_date_and_never_stored():
     assert 'zone_row["source"].Text = logic.zone_row_text(state)' in ui
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert "dict(logic.saved_sources(saved_ui, state)" in rhino and '"zone_said": saved_ui.get("_zone_said")' in rhino
+
+
+
+def test_checked_is_the_citys_own_day_and_draw_saves_the_same():
+    """#19 zone round 3 (P3): the day shown was the lookup's UTC day, so after about 8 pm in Ithaca it said
+    tomorrow. It is the City's own day (America/New_York), the same Draw saves."""
+    import datetime as dt
+    from design_checker.lookup_box import box_payload
+    from site_lookup.lookup import lookup
+    late = dt.datetime(2026, 10, 23, 1, 30, tzinfo=dt.timezone.utc)          # 9:30 pm on the 22nd in Ithaca
+    assert logic.city_day(late) == "2026-10-22"
+    assert logic.city_day(dt.datetime(2026, 12, 23, 4, 30, tzinfo=dt.timezone.utc)) == "2026-12-22"   # UTC-5
+    assert logic.city_day(dt.datetime(2026, 3, 8, 6, 59, tzinfo=dt.timezone.utc)) == "2026-03-08"     # 1:59 am EST
+    assert logic.city_day(dt.datetime(2026, 11, 1, 4, 30, tzinfo=dt.timezone.utc)) == "2026-11-01"    # 12:30 EDT
+    fx = T.load("106_ithaca_rd")
+    payload = box_payload(lookup(fx["address"], T.Fake(fx), late), late)
+    _, saved, state = box(payload)
+    assert logic.zone_row_text(state).endswith("(checked 2026-10-22)")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.fact_sources(state, logic.city_day(), confirmed=True)" in rhino and "time.strftime" not in rhino
+
+
+def test_a_found_lookup_with_no_district_clears_the_last_one():
+    """#19 zone round 3: a found lookup whose zoning layer gave no value kept the previous address's district and
+    its "suggested · City zoning map" source. It clears both and asks for a pick."""
+    _, saved, state = box(looked_up("106_ithaca_rd"))
+    assert state["zone"] == "R-1b"
+    facts, saved = logic.lookup_choices({"status": "found", "facts": {"zone": {"value": None}}},
+                                        {"zone": "R-1b"}, saved, ZONES)
+    assert "zone" not in facts and "zone_source" not in saved and "_zone_said" not in saved
+    assert saved["_live"]["zone"] == logic.NO_DISTRICT
+    assert logic.zone_row_text(state_of(facts, saved)) == "— · not set"

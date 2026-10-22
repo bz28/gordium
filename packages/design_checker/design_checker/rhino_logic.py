@@ -2,6 +2,7 @@
 Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 """
 
+import datetime as _dt
 import json
 import queue
 import threading
@@ -750,6 +751,26 @@ def box_rows(state, flat=None):
 NO_RULES = "The City map says {zone}; Gordium doesn't have {zone}'s rules yet: pick a district only if you know it applies."
 
 
+NO_DISTRICT = "The City zoning map gave no district for this lot: pick one"
+
+
+def city_day(now=None):
+    """The City's own day (Ithaca: America/New_York) at `now` (UTC; default the present), as YYYY-MM-DD: the day a
+    lookup was checked and a Draw is saved, never the UTC day (after about 8 pm in Ithaca that is tomorrow). US
+    Eastern time by the federal rule (15 U.S.C. 260a: from 2 am on the second Sunday of March to 2 am on the
+    first Sunday of November, UTC-4; otherwise UTC-5), so no time-zone database is needed in Rhino's Python."""
+    now = now or _dt.datetime.now(_dt.timezone.utc)
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=_dt.timezone.utc)
+    now = now.astimezone(_dt.timezone.utc).replace(tzinfo=None)
+
+    def sunday(month, nth):              # the nth Sunday of the month in now's year
+        first = _dt.datetime(now.year, month, 1)
+        return first + _dt.timedelta(days=(6 - first.weekday()) % 7 + 7 * (nth - 1))
+    summer = sunday(3, 2) + _dt.timedelta(hours=7) <= now < sunday(11, 1) + _dt.timedelta(hours=6)
+    return (now - _dt.timedelta(hours=4 if summer else 5)).date().isoformat()
+
+
 def no_rules(said, unknown):
     """The box's line when the City map's district (or one of its districts) has no rules in Gordium."""
     if len(said) == 1:
@@ -871,6 +892,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     said = zone if isinstance(zone, list) else [zone] if zone else []
     known = [names[z.lower()] for z in said if z.lower() in names] if zones else list(said)
     unknown = [z for z in said if zones and z.lower() not in names]
+    if not said:                                 # found, but the zoning map gave no district: never the last
+        # address's district and its "suggested" left standing (zone round 3)
+        facts.pop("zone", None)
+        for key in ("zone_source", "_zones_found", "_zone_said"):
+            saved_ui.pop(key, None)
+        live["zone"] = _merged(live.get("zone"), NO_DISTRICT)
     if unknown:
         # the City map names a district Gordium has no rules for (alone or beside one it has): never another
         # district preselected or called suggested in its place; none is set until the architect picks one, and
@@ -892,7 +919,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     saved_ui.pop("_zone_said", None)
     if known:                                    # stored: plain, never a date that goes stale on reopen
         saved_ui["zone_source"] = SUGGESTED + " · " + label("zone", "zone")
-        when = (got.get("zone") or {}).get("date")
+        when = payload.get("checked") or (got.get("zone") or {}).get("date")   # the City's day it was checked
         if len(known) == 1 and when:             # shown this session only ("_"), as the map says it, with its date
             saved_ui["_zone_said"] = {"zone": known[0], "date": str(when)}
     saved_ui["_reconfirm"] = True                # a looked-up district is the architect's only once ticked again
