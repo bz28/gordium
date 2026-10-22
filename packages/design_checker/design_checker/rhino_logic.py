@@ -2016,7 +2016,6 @@ def preview_lookup(answer, facts, saved_ui, zones=()):
             and before.get(k, MISSING) is not after.get(k, MISSING) and before.get(k, MISSING) != after.get(k, MISSING)]
     address = facts.get("address") or answer.get("query")
     saved_ui["_pending"] = {"address": address, "query": answer.get("query"), "answer": answer, "undo": undo}
-    drawn = saved_ui.get("drawn_address")
     if not replaces:
         saved_ui["_lookup"]["says"] = ("Your own lot is kept until you press Draw: the lookup filled in the address "
                                        "and the district.")
