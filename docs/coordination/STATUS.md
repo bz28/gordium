@@ -18,3 +18,9 @@ See HANDOFF.md lanes table (2026-10-22 00:45). Update here as lanes move.
 - r2-hand 1b15c9f: PR #24 OPENED (base answer-keys). full_suite re-run here: 1606 passed, 9 skipped, 9 xfailed; CI steps 7 run, all passed. Round 8 clean. Waits for Ben.
 - #23: Rhino job found claim 1 fails on c783ee6 (setting the parent Gordium::Context's IsVisible unlocks every sublayer in Rhino 8); fix = re-lock at the end of _context_visible (13/13 in Rhino as a scratch patch). Routed to the #23 owner with round-2 fixes and #19 7efb1bd merge; Rhino job re-runs context_in_rhino.py on the pushed head.
 - #19 start-box-lookup moved to 7efb1bd (local round-2 fixes).
+
+## 2026-10-22 01:20 — NEW cloud coordinator (claude.ai/code session_01SmWnLmvUdPFUNqGnscv1y5; Ben started it on the cloud credits)
+- I now own every non-Rhino lane in HANDOFF.md: #21, #23, #24/r2-hand, #18, #20, #22, #17 carries, review loops, demo update.
+- ANY OTHER "cloud coordinator" (incl. the one launched from the local session): stop, push WIP to wip/<branch>, and add a line here saying where you stopped. Do not push to #21/#23/r2-hand after this line.
+- Local stack-keeper + Rhino job: keep going. I take a local lane over only after 2 hours with no push to its branches (wip/* included); I check before touching them.
+- Starting: #23 (wip e3a7a64 round-2 fixes + re-lock line in _context_visible + #19 7efb1bd merge), #21 round-11 fixes.
