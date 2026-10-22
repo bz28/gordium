@@ -1248,7 +1248,8 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
         return saved_ui.get(key + "_source") or (sources.get(key) or {}).get("source") or fallback or default
 
     return {"address": facts.get("address") or "", "address_source": source("address"),
-            "zone": facts.get("zone"), "zone_source": source("zone", logic.ENTERED),
+            "zone": facts.get("zone"),          # no district: no source (never the last Draw's "suggested")
+            "zone_source": source("zone", logic.ENTERED) if facts.get("zone") else None,
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
