@@ -138,7 +138,10 @@ def test_the_plugin_keeps_its_state_true_across_a_reload():
     src = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert "\nlogic.sweep(LEFTOVERS, STATE, _release)\nif STATE.get(\"live\"):" in src   # last: after _release
     assert src.rstrip().endswith('if STATE.get("live"):                        # live mode was on before this copy '
-                                 'loaded: its hooks back on\n    live(True)')
+                                 'loaded: its hooks back on\n    live(True)\n'
+                                 '# Rhino closing: the checker stopped with it (and any an earlier load left: SERVERS)\n'
+                                 '_on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), '
+                                 '"stop the checker"))')       # (after the sweep: an earlier copy's is detached first)
     overlay = src.split("def overlay(", 1)[1].split("\ndef ", 1)[0]
     created = overlay.split("if o is None:", 1)[1].split("\n    o.Enabled = True", 1)[0]
     assert overlay.index('LEFTOVERS["overlay"]') < overlay.index("o.Enabled = True")

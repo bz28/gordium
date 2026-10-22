@@ -103,7 +103,7 @@ def test_every_venv_python_the_plugin_starts_runs_in_utf8_mode():
         assert starts and source.count('env["PYTHONUTF8"] = "1"') == starts, name
     worker = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8").split("def _worker(", 1)[1]
     worker = worker.split("\ndef ", 1)[0]
-    assert worker.index('env["PYTHONUTF8"] = "1"') < worker.index("subprocess.Popen(")
+    assert worker.index('env["PYTHONUTF8"] = "1"') < worker.index("ui.spawn(")    # (no console on Windows)
 
 
 def test_every_command_prints_in_utf8():
