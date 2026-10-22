@@ -310,9 +310,10 @@ def corner_answered(facts, saved_ui, corner):
     facts = dict(facts or {}, corner_lot=corner)
     if corner is None:
         facts.pop("corner_lot")
-    facts = after_corner_answer(facts, was)
     saved_ui = dict(saved_ui or {})
-    if "street_line" not in facts:
+    if was is not None and corner != was:         # a real answer that flips (the first answer, from "Not answered",
+        facts.pop("street_line", None)            # keeps the prefilled line and its name: review round 6, P1)
+        facts.pop("street_ids", None)
         saved_ui.pop("street_name", None)
     return facts, saved_ui
 
@@ -768,50 +769,51 @@ def street_lines_after_picks(lines, picks, corner):
     return out
 
 
-def street_lines_after_pick(lines, picked, tolerance=0.5):
+def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
     """The street lines after the architect clicks a lot line as the street side: the whole street as it was when
-    the line is one of its own (a street of several segments, 106's eight: keeping only the one clicked measured the
-    front yard from part of the street, a false pass: review round 3, F4); else the line clicked."""
+    the line is one of its own (106's eight: keeping only the one clicked measured the front yard from part of the
+    street, a false pass: review round 3, F4); only that street's lines when the lines are known to be on two
+    streets (`ids`); never fewer on a guess from the drawing (a street that bends, or lines nobody named: the
+    measuring asks about them; review round 6, P1); a line not among them: that line."""
     def near(p, q):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
     a, b = picked
-    if any((near(a, c) and near(b, d)) or (near(a, d) and near(b, c)) for c, d in lines or []) and one_street(lines):
-        return [list(map(list, line)) for line in lines]
-    return [picked]                  # (lines across a corner are two streets: only the one clicked; round 5, P0)
+    hits = [k for k, (c, d) in enumerate(lines or []) if (near(a, c) and near(b, d)) or (near(a, d) and near(b, c))]
+    if not hits:
+        return [picked]
+    if street_verdict(lines, ids)[0] == "two":            # known to be two streets: the clicked line's street
+        mine = ids[hits[0]]
+        return [list(map(list, line)) for k, line in enumerate(lines) if ids[k] == mine]
+    return [list(map(list, line)) for line in lines]
 
 
-STREET_TURN_DEG = 30.0       # one street's lot lines turn less than this from one to the next; more is a corner
+_STREETS = {}
 
 
-def one_street(lines, tolerance=0.5):
-    """Whether lot lines are one street: each next to the last (an end shared, within `tolerance` ft) and turning
-    less than STREET_TURN_DEG from it (106's eight curve gently; a corner turns 90°)."""
-    import math
+def _street_lines():
+    """model_measurement/street_lines.py, the one decision of one street or two (the measuring's too), loaded by
+    its path: inside Rhino only this folder is on the path."""
+    if "m" not in _STREETS:
+        import importlib.util
+        import os
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "model_measurement",
+                            "model_measurement", "street_lines.py")
+        spec = importlib.util.spec_from_file_location("gordium_street_lines", os.path.normpath(path))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _STREETS["m"] = module
+    return _STREETS["m"]
 
-    def near(p, q):
-        return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
-    lines = [list(map(tuple, line)) for line in lines or []]
-    for (a, b), (c, d) in zip(lines, lines[1:]):
-        if near(b, c):
-            u, v = (b[0] - a[0], b[1] - a[1]), (d[0] - c[0], d[1] - c[1])
-        elif near(b, d):
-            u, v = (b[0] - a[0], b[1] - a[1]), (c[0] - d[0], c[1] - d[1])
-        elif near(a, c):
-            u, v = (a[0] - b[0], a[1] - b[1]), (d[0] - c[0], d[1] - c[1])
-        elif near(a, d):
-            u, v = (a[0] - b[0], a[1] - b[1]), (c[0] - d[0], c[1] - d[1])
-        else:
-            return False
-        nu, nv = math.hypot(*u), math.hypot(*v)
-        if not nu or not nv:
-            continue
-        cos = max(-1.0, min(1.0, (u[0] * v[0] + u[1] * v[1]) / (nu * nv)))
-        if math.degrees(math.acos(cos)) > STREET_TURN_DEG:
-            return False
-    return True
+def street_verdict(lines, ids=None):
+    """("one" | "two" | "unsure", total swing): street_lines.street_verdict, the measuring's own."""
+    return _street_lines().street_verdict(lines, ids)
 
+
+def one_street(lines, ids=None):
+    """Whether lot lines are one street: named one street, or unnamed and swinging no more than its limit in all."""
+    return street_verdict(lines, ids)[0] == "one"
 
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],

@@ -1304,7 +1304,8 @@ def _box_pick(doc, what, facts, saved_ui):
                 picks.append([_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]])
             if picks:
                 facts["street_line"] = logic.street_lines_after_picks(facts.get("street_line"), picks, True)
-                saved_ui.pop("street_name", None)                    # two streets: no one name for them
+                facts.pop("street_ids", None)                        # two streets: unnamed until named
+                saved_ui.pop("street_name", None)                    # (no one name for them)
                 saved_ui["street_source"] = logic.ENTERED
         elif what == "street":
             lot = _find(doc, facts.get("lot_id") or "")
@@ -1322,7 +1323,12 @@ def _box_pick(doc, what, facts, saved_ui):
                         got = ask.GetLiteralString()
                         name = (ask.StringResult() or "").strip() or None \
                             if got == Rhino.Input.GetResult.String else None
-                    facts["street_line"] = logic.street_lines_after_pick(facts.get("street_line"), picked)
+                    facts["street_line"] = logic.street_lines_after_pick(facts.get("street_line"), picked,
+                                                                         ids=facts.get("street_ids"))
+                    if name:                                 # the street those lines are on, as named
+                        facts["street_ids"] = [name] * len(facts["street_line"])
+                    else:
+                        facts.pop("street_ids", None)
                     saved_ui["street_name"] = name
                     saved_ui["street_source"] = logic.ENTERED
         elif what == "lot":                          # Use my survey: the surveyed outline

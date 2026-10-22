@@ -27,13 +27,13 @@ from shapely.validation import explain_validity
 from rule_format.rulebook import MEASURES_FILE, load
 
 from .stops import stop
+from .street_lines import street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
 
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
 PARALLEL, PERPENDICULAR = 30, 60   # degrees from the street: clearly a rear line / clearly a side line
-STREET_TURN_DEG = 30.0   # one street's lot lines turn less than this from one to the next; more: a corner
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 4     # more lot lines than this of unclear kind: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
@@ -117,25 +117,34 @@ class Lot:
             self.street_problem = stop("street_lines_apart")
         elif len(street) == n:
             self.street_problem = stop("all_street")
-        elif facts.get("corner_lot") is not True and self._turn(street) > STREET_TURN_DEG:
-            # street lines that turn a corner are two streets, whatever the lot was answered: never a width along
-            # both (review round 5, P0: a 40 ft corner lot answered No read 200 ft wide and passed)
-            self.street_problem = stop("street_turns_a_corner", turn=round(self._turn(street)))
+        elif facts.get("corner_lot") is not True:
+            # lot width is frontage on ONE public right-of-way (§325-8, Column 7: street_lines): street lines on two
+            # streets, or of no known street swinging more than TURN_LIMIT_DEG in all (a corner, even rounded into
+            # short pieces), are never measured along both (review rounds 5 and 6, P0); a street that bends is
+            # asked about, never called two
+            verdict, turn = self.street_verdict(facts)
+            if verdict == "two":
+                self.street_problem = stop("two_streets")
+            elif verdict == "unsure":
+                self.street_problem = stop("one_street_or_two", turn=round(turn or 0))
 
-    def _turn(self, idx) -> float:
-        """The sharpest turn, in degrees, from one street lot line to the next, along the street."""
-        n, s = len(self.edges), set(idx)
-        start = next(i for i in idx if (i - 1) % n not in s) if len(s) < n else idx[0]
-        chain = [(start + k) % n for k in range(len(idx))]
-        most = 0.0
-        for i, j in zip(chain, chain[1:]):
-            (ax, ay), (bx, by) = self.edges[i][0], self.edges[i][-1]
-            (cx, cy), (dx, dy) = self.edges[j][0], self.edges[j][-1]
-            u, v = (bx - ax, by - ay), (dx - cx, dy - cy)
-            nu, nv = math.hypot(*u), math.hypot(*v)
-            if nu and nv:
-                most = max(most, math.degrees(math.acos(max(-1.0, min(1.0, (u[0] * v[0] + u[1] * v[1]) / (nu * nv))))))
-        return most
+    def street_verdict(self, facts):
+        """street_lines.street_verdict over the street lot lines in order along the street (each edge's own points:
+        a curved edge's swing counts), each with the street the facts name it on (`street_ids`, one per
+        `street_line`, None where unknown)."""
+        n, s = len(self.edges), set(self.street)
+        start = next(i for i in self.street if (i - 1) % n not in s)
+        order = [(start + k) % n for k in range(len(self.street))]
+        given, ids = facts.get("street_line") or [], facts.get("street_ids") or []
+
+        def named(i):
+            e = self.edges[i]
+            for k, (a, b) in enumerate(given):
+                if (_same_point(e[0], a) and _same_point(e[-1], b)) or (_same_point(e[0], b) and _same_point(e[-1], a)):
+                    return ids[k] if k < len(ids) else None
+            return None
+
+        return street_verdict([self.edges[i] for i in order], [named(i) for i in order])
 
     def _contiguous(self, idx) -> bool:
         n = len(self.edges)

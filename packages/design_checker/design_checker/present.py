@@ -477,7 +477,7 @@ def _yard_advice(head, name, measure, value, need, required, note=""):
                      "note": note if feet_inches(target) != required else ""}}
 
 
-def _drawn_advice(hint, node, margin, numbers, values) -> dict | None:
+def _drawn_advice(hint, node, margin, numbers, values, label="") -> dict | None:
     """The as-drawn "To comply" (_hint: the row's margin as drawn; coverage in sf) as advice, for the checker to
     confirm like any other (review round 3: without it, "lower the building 1'-6"" on a 36'-6" house was dropped,
     though lowering it makes the row comply)."""
@@ -495,7 +495,7 @@ def _drawn_advice(hint, node, margin, numbers, values) -> dict | None:
         change = _step(-margin, numbers[3]) * (1 if sign in ("≥", ">") else -1)
     if m in YARD_MEASURES and isinstance(values.get(m), (int, float)):
         required = _evaluate(ast.unparse(node.comparators[0]), values)
-        return _yard_advice("To comply", hint, m, values[m], -margin,
+        return _yard_advice("To comply", label, m, values[m], -margin,
                             feet_inches(required, "up") if isinstance(required, (int, float)) else "")
     return {"head": "To comply", "ways": [{"text": hint[len("To comply: "):-1], "changes": {m: change}}]}
 
@@ -992,7 +992,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             allowed = _evaluate(ast.unparse(node.comparators[0]), values)
             if isinstance(allowed, (int, float)) and values.get("building_area") is not None:
                 hint = f"To comply: reduce the footprint by at least {_area(values['building_area'] - allowed, 'up')}."
-        advice = _drawn_advice(hint, node, margin, numbers, values)
+        advice = _drawn_advice(hint, node, margin, numbers, values, label)
+        if advice and advice.get("yard"):            # a yard's: its requirement for every part (round 6, P3)
+            hint = advice_text(advice)
         if raised and st == FAILS:               # fails anyway: nothing to raise
             raised = []
         if raised and st == COMPLIES:            # (on a tax-map lot the reason stays the tax map: the yards still rise)

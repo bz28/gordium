@@ -15,7 +15,7 @@ from .read_3dm import read_site
 
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
-               "grade_points", "grade_from", "grade_is", "ground_assumed", "plan_north_deg"}
+               "grade_points", "grade_from", "grade_is", "ground_assumed", "plan_north_deg", "street_ids"}
 
 
 def _number(x) -> bool:
@@ -56,6 +56,10 @@ def fact_problems(facts: dict) -> list[str]:
     if street is not None and not (isinstance(street, list) and street and all(
             isinstance(s, list) and len(s) == 2 and all(_point(p) for p in s) for s in street)):
         problems.append("street_line must be a list of lot lines, each two points [[x, y], [x, y]]")
+    ids = facts.get("street_ids")                # the street each street line is on (None where unknown)
+    if ids is not None and not (isinstance(ids, list) and isinstance(street, list) and len(ids) == len(street) and
+                                all(i is None or isinstance(i, str) for i in ids)):
+        problems.append("street_ids must name the street of each street_line, one each (or null where unknown)")
     return problems
 
 

@@ -1768,7 +1768,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     assert 'street_name=sample.get("street_name"),' in rhino
     # the name only with its street line (round 3, F6), and the whole street kept when one of its lines is picked
     assert '"street_name": saved_ui.get("street_name") if facts.get("street_line") else None,' in rhino
-    assert 'facts["street_line"] = logic.street_lines_after_pick(facts.get("street_line"), picked)' in pick
+    assert 'facts["street_line"] = logic.street_lines_after_pick(facts.get("street_line"), picked,' in pick
     assert logic.street_lines_after_pick(lines, lines[3]) == [list(map(list, x)) for x in lines]   # round 3, F4
     assert logic.street_lines_after_pick(lines, list(reversed(lines[3]))) == [list(map(list, x)) for x in lines]
     assert logic.street_lines_after_pick(lines, side) == [side]
@@ -1781,7 +1781,7 @@ def test_the_sample_names_its_street_from_the_lookup_and_a_new_street_side_keeps
     front = {}
     for street in (lines, logic.street_lines_after_pick(lines, lines[3]), [lines[3]]):
         r = check_site(_plot(box(3, 24.2, 30, 60, 0, 30), lot_=lot_of(sample["lot"])),
-                       {**sample["facts"], "lot_surveyed": True, "street_line": street})
+                       {**sample["facts"], "lot_surveyed": True, "street_line": street, "street_ids": None})
         front[len(street)] = next(i for i in r["view"]["items"] if i["name"] == "Front yard")["status"]
     assert front[len(lines)] == "does_not_comply" and front[1] == "complies", front
 
@@ -1943,9 +1943,10 @@ def test_a_corner_lot_answered_no_never_keeps_both_streets_and_never_reads_its_w
     assert same["street_line"] == [A] and kept["street_name"] == "x"             # the same answer keeps them
     unanswered, _ = logic.corner_answered({"corner_lot": True, "street_line": [A, B]}, {}, None)
     assert "corner_lot" not in unanswered and "street_line" not in unanswered
-    # (b) lines across a corner are two streets: a re-pick keeps only the line clicked; one street's lines (106's
-    # eight, gently curving) all of them
-    assert not logic.one_street([A, B]) and logic.street_lines_after_pick([A, B], A) == [A]
+    # (b) lines across a corner, unnamed: not one street (the measuring asks), and a re-pick never shrinks them on
+    # that guess (round 6, P1); named two streets: only the clicked line's street
+    assert not logic.one_street([A, B]) and logic.street_lines_after_pick([A, B], A) == [A, B]
+    assert logic.street_lines_after_pick([A, B], A, ids=["A St", "B Ave"]) == [A]
     from design_checker.check import sample_site
     lines106 = sample_site()["facts"]["street_line"]
     assert len(lines106) == 8 and logic.one_street(lines106)
@@ -1954,7 +1955,7 @@ def test_a_corner_lot_answered_no_never_keeps_both_streets_and_never_reads_its_w
     got = width([A, B], False)
     assert got["status"] != "complies", (got["status"], got.get("proposed"))
     r = check_site(_plot(box(12, 30, 28, 70, 0, 30), lot_=lot), dict(base, street_line=[A, B], corner_lot=False))
-    assert "turn a corner" in (r["measurements"]["lot_width"].get("reason") or ""), r["measurements"]["lot_width"]
+    assert "one street that bends, or two" in (r["measurements"]["lot_width"].get("reason") or ""), r["measurements"]["lot_width"]
     yards = [i for i in r["view"]["items"] if i.get("measure") in ("front_yard", "side_yard_smaller", "side_yard_larger",
                                                                     "rear_yard")]
     assert yards and all(i["status"] != "complies" for i in yards)
@@ -2013,3 +2014,82 @@ def test_no_process_gordium_starts_from_rhino_opens_a_console_window_on_windows(
     assert '            os.startfile(what)' in opener and "logic.open_command(os.name, target)" in opener
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert "p = ui.spawn([_python()" in rhino and "opened, why = ui.open_target(path)" in rhino
+
+
+def test_one_street_or_two_is_the_streets_identity_and_only_then_the_drawings_whole_swing():
+    """Review round 6. The law first: lot width is the lot's frontage on ONE public right-of-way (§325-8, Column 7:
+    "Lots hereafter used for a permitted use in each use district shall have frontage measured on a public
+    right-of-way equal to or greater than the width specified in this column"), so never a length along two
+    streets. One street or two is the street's identity (street_ids: the lookup's street, the name the architect
+    gives); only when none is known does the drawing decide, by its WHOLE swing, in one shared function the
+    measuring and the box both use (model_measurement/street_lines.py). P0: a corner rounded into four 22.5° pieces,
+    or three 30° steps, never measured along both (it read 195.6 ft and complied); P1: a street that bends, named
+    once, measured normally; 106's eight lines unchanged; the first corner answer (Not answered -> No) keeps the
+    prefilled line and its street's name."""
+    import math
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site, sample_site
+    from model_measurement import street_lines
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    base.pop("street_line", None)
+
+    def rows(ring, street, ids=None, house=(12, 40, 28, 90)):
+        facts = dict(base, street_line=street, **({"street_ids": ids} if ids else {}))
+        r = check_site(_plot(box(*house, 0, 30), lot_=lot_of(ring)), facts)
+        return {i["name"]: i for i in r["view"]["items"]}, r["measurements"]
+
+    # a 40 ft lot whose corner at (40, 0) is rounded (radius 10) in 4 pieces, and one in three 30° steps
+    arc = [(30 + 10 * math.sin(math.radians(a)), 10 - 10 * math.cos(math.radians(a))) for a in (0, 22.5, 45, 67.5, 90)]
+    ring = [(0, 0)] + arc + [(40, 160), (0, 160)]
+    street = [[[0, 0], list(arc[0])]] + [[list(arc[k]), list(arc[k + 1])] for k in range(4)] + [[[40, 10], [40, 160]]]
+    assert street_lines.street_verdict(street)[0] == "unsure" and not logic.one_street(street)
+    items, measured = rows(ring, street)
+    assert items["Lot width"]["status"] != "complies" and "one street that bends, or two" in \
+        (measured["lot_width"].get("reason") or ""), (items["Lot width"]["status"], measured["lot_width"])
+    steps = [(0, 0), (30, 0)]
+    for k in (1, 2, 3):
+        x, y = steps[-1]
+        steps.append((x + 8 * math.cos(math.radians(30 * k)), y + 8 * math.sin(math.radians(30 * k))))
+    lines3 = [[list(a), list(b)] for a, b in zip(steps, steps[1:])]
+    assert street_lines.street_verdict(lines3)[0] == "unsure"                       # 3 x 30°: 90° in all
+    # P1: a street that bends 40°: unnamed, asked (never called two streets, never told to drop a line); named
+    # once, measured along it
+    bend = [(0, 0), (40, 0), (70, 25), (70, 150), (0, 150)]
+    bent = [[[0, 0], [40, 0]], [[40, 0], [70, 25]]]
+    items, measured = rows(bend, bent, house=(20, 30, 50, 70))
+    assert items["Front yard"]["status"] != "complies" and "or two streets" in (measured["front_yard"].get("reason") or "")
+    items, measured = rows(bend, bent, ids=["Bend Rd", "Bend Rd"], house=(20, 30, 50, 70))
+    assert measured["lot_width"]["value"] and measured["lot_width"]["value"] > 40, measured["lot_width"]
+    # named two streets: two, whatever the drawing
+    assert street_lines.street_verdict(bent, ["A St", "B Ave"])[0] == "two"
+    # 106: one street (named, and its eight lines swing about 7.5° in all)
+    sample = sample_site()
+    assert sample["facts"]["street_ids"] == ["Ithaca Rd"] * 8
+    verdict, turn = street_lines.street_verdict(sample["facts"]["street_line"])
+    assert verdict == "one" and turn < 10
+    # the first corner answer keeps the prefilled street line and its name; a real flip drops them
+    prefilled = {"street_line": [[[0, 0], [40, 0]]], "street_ids": ["Ithaca Rd"]}
+    f, ui = logic.corner_answered(prefilled, {"street_name": "Ithaca Rd"}, False)
+    assert f["street_line"] == prefilled["street_line"] and ui["street_name"] == "Ithaca Rd" and f["corner_lot"] is False
+    f, ui = logic.corner_answered(dict(prefilled, corner_lot=False), {"street_name": "Ithaca Rd"}, True)
+    assert "street_line" not in f and "street_ids" not in f and "street_name" not in ui
+
+
+def test_the_as_drawn_yard_advice_names_its_own_side_and_says_the_requirement():
+    """Review round 6, P3: the as-drawn advice (a yard with no reading set to work from) was given the hint's sentence
+    as its row name, so a side yard's line was always "that side lot line", and its words were never the row's (so
+    the checker dropped it). Now it gets the row's name and its sentence is the row's hint."""
+    import ast
+    from design_checker import present
+    node = ast.parse("side_yard_smaller >= 10", mode="eval").body
+    advice = present._drawn_advice("To comply: move the building 3'-0\" farther from that lot line.", node, -3.0,
+                                   (None, None, None, "ft", "≥"), {"side_yard_smaller": 7.0}, "Side yard, West")
+    assert present.advice_text(advice) == ("To comply: keep every part of the building at least 10'-0\" from the west "
+                                           "side lot line — now 7'-0\" at its closest.")
+    src = (REPO / "packages/design_checker/design_checker/present.py").read_text(encoding="utf-8")
+    assert "        advice = _drawn_advice(hint, node, margin, numbers, values, label)\n" in src
+    assert '        if advice and advice.get("yard"):' in src and "            hint = advice_text(advice)" in src

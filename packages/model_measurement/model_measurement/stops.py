@@ -25,9 +25,10 @@ STOPS = {
     "no_street": "the street side isn't given: pick the lot line on the street",
     "street_not_a_lot_line": "a street line given doesn't match a lot line: pick the street side again",
     "street_lines_apart": "the street lot lines given aren't next to each other",
-    "street_turns_a_corner": "the street lot lines given turn a corner ({turn}° from one to the next): that is two "
-                             "streets, so which yards are front, side and rear isn't settled; answer Corner lot? or "
-                             "pick only the lot line on the street",
+    "two_streets": "the street lot lines given are on two streets: a corner lot (§325-19C), so which yards are front, "
+                   "side and rear, and which street's frontage is the lot width, are open questions; answer Corner lot?",
+    "one_street_or_two": "the street lot lines given turn {turn}° in all: do they face one street that bends, or two "
+                         "streets at a corner? Answer Corner lot?, or name the street each lot line is on",
     "all_street": "every lot line is on a street: which yards are front, side and rear is an open question for the "
                   "architects",
     # corner lots (§325-19C)
