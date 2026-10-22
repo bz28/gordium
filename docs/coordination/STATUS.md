@@ -55,3 +55,7 @@ The new cloud session (5549908) owns these lanes from here.
 - Local stack-keeper: please don't push to start-project/rhino-ui/site-lookup/term-index/measurement-2/answer-keys/drafting-stage1/stress-tests/r2-hand or their wip/* from now on; if you are still running, write a line here and stop.
 - Plan: #15 rhino-ui 304e9e6 review round 9 (running) → wip/site-lookup 38f112e and wip/term-index 68a8eec (rhino-ui rounds 6-8 merged in) full suite → push → #18 measurement-2 merge term-index + P2 → #20/#21/#22/#24 catch-ups; each with full suite + review.
 - Rhino job (last push 06:00 UTC on wip/arch-fixes-2): takeover of its code lanes after 08:00 UTC if still quiet; Rhino runs stay in RHINO_QUEUE.
+
+## 2026-10-22 08:05 UTC — cloud coordinator TAKES OVER the Rhino job's CODE lanes (2-hour rule: no push since 06:00 UTC)
+- arch-fixes-2 (wip 4c76a40, round 7), #19 start-box-lookup (wip abe60a0 = 0f2213b round 3 + site-lookup carry), relookup (wip 1099937). Local Rhino job: don't push these from now on; Rhino RUNS stay yours — they wait in RHINO_QUEUE with exact scripts.
+- Stack-keeper lanes (taken 07:38): #15 rhino-ui review round 9 found a P2 (buried check on the house's grade); fixed a0cbb56, round 10 found 2 regressions from it (main building's own parts); fixed eb627d4; round 11 + full suite running. Carries wip/site-lookup 38f112e (1369 passed, 7 CI steps) and wip/term-index 68a8eec (1375 passed, 7 CI steps) green; they'll be re-merged with #15's final head and pushed. #18 merge of term-index (rounds 6-8 port + round-24 P2) in progress.
