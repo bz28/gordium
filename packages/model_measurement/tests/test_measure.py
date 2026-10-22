@@ -1521,3 +1521,24 @@ def test_a_short_shed_on_its_own_lower_ground_is_never_buried_under_the_houses_g
     why = m["building_area"]["reason"] or ""
     assert m["building_area"]["value"] is None and not m["building_area"]["readings"], m["building_area"]
     assert "wholly under the ground" in why or "don't show the ground under the building" in why, why
+
+
+def test_the_main_buildings_own_parts_are_read_against_its_grade_plane_never_their_own_corners():
+    """#15 review round 10 (P2 x2, from round 9's fix): reading each solid on its own ground reached the main
+    building's own parts too. (1) A lower part lying wholly below the grade plane passed the buried check against its
+    own downhill corner, and the height showed a below-zero reading; (2) the ground cut was an average of the house's
+    corners, not the §325-3 grade plane the height uses, so it fell on the wrong floor (500 at grade, a made-up
+    overhang question). The main building and every solid joined to it are read against the grade plane; only a
+    separate building is read on its own ground."""
+    spots = [[22.5, 24.5, -6], [22.5, 65.5, 0], [35.5, 35, -1], [35.5, 55, 0], [9.5, 35, -1], [9.5, 55, 0]]
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "grade_points": spots}
+    under = measure(site(RECT, box(10, 25, 35, 65, -6, -2, id="low"), box(10, 25, 35, 45, -2, 30, id="up")),
+                    {**facts, "main_building": "up"})
+    height = under["building_height"]
+    assert all(r["value"] >= 0 for r in height["readings"]) and (height["value"] is None or height["value"] >= 0)
+    assert "wholly under the ground" in (height["reason"] or ""), height
+    stepped = measure(site(RECT, box(10, 25, 35, 45, -6, -2, id="low"), box(10, 25, 35, 65, -2, 30, id="up")),
+                      {**facts, "main_building": "up"})
+    area = stepped["building_area"]
+    assert area["value"] == pytest.approx(1000.0) or sorted(r["value"] for r in area["readings"]) == [1000.0, 1000.0], area
+    assert "overhangs" not in (area["reason"] or ""), area
