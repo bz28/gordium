@@ -1962,3 +1962,15 @@ def test_a_corner_lot_answered_no_never_keeps_both_streets_and_never_reads_its_w
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert rhino.count("logic.corner_answered(") == 2 and "logic.after_corner_answer(" not in rhino
     assert logic.uncertain({"corner_lot": True}) == "This lot faces two streets: click Change… and pick each lot line on a street"
+
+
+def test_the_envelope_refuses_a_buried_solid_as_the_measuring_does():
+    """#15 round 6 (P3): envelope_grade skipped the measuring's buried-solid refusal."""
+    import sys
+    from design_checker.check import _envelope_facts
+    sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
+    from test_measure import box
+    spots = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]]
+    buried = box(40, 75, 48, 90, -12, -2, id="buried")              # wholly under the ground, not under the house
+    got = _envelope_facts({"buildings": [box(10, 25, 35, 65, 0, 30), buried]}, {"grade_points": spots})
+    assert got["ground_is_flat"] is None
