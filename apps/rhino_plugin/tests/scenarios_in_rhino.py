@@ -65,8 +65,8 @@ def dump(g, path):
     env["PYTHONUTF8"] = "1"                                   # as the plugin's own checker: UTF-8 on Windows too
     env["PYTHONPATH"] = os.pathsep.join(os.path.join(packages, n) for n in sorted(os.listdir(packages))
                                         if os.path.isdir(os.path.join(packages, n)))
-    out = subprocess.check_output([g._python(), "-m", "design_checker.scenarios", "dump", path], cwd=WT, env=env,
-                                  universal_newlines=True, encoding="utf-8")
+    out = g.ui.spawn([g._python(), "-m", "design_checker.scenarios", "dump", path], run=True, cwd=WT, env=env,
+                     stdout=subprocess.PIPE, check=True, universal_newlines=True, encoding="utf-8").stdout
     return json.loads(out)
 
 

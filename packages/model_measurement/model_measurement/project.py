@@ -16,7 +16,7 @@ from .read_3dm import read_site
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
                "grade_points", "grade_from", "grade_is", "unsettled", "ground_assumed", "ground_fall",
-               "plan_north_deg"}
+               "plan_north_deg", "street_ids"}
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).
 UNSETTLED = ("lot", "street", "ground")
@@ -64,6 +64,9 @@ def fact_problems(facts: dict) -> list[str]:
     if street is not None and not (isinstance(street, list) and street and all(
             isinstance(s, list) and len(s) == 2 and all(_point(p) for p in s) for s in street)):
         problems.append("street_line must be a list of lot lines, each two points [[x, y], [x, y]]")
+    # street_ids (the street each street line is on) is never refused here: names that don't match the lines one
+    # for one are set aside by the measuring, which says so (stop street_names_stale); refusing them made the check
+    # fail and saved facts unreadable (review round 7, P1)
     return problems
 
 

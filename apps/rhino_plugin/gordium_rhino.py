@@ -134,15 +134,51 @@ def _worker():
         env["PYTHONPATH"] = os.pathsep.join(STATE.get("extra_paths", []) + [
             os.path.join(packages, n) for n in sorted(os.listdir(packages)) if os.path.isdir(os.path.join(packages, n))])
         log = open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a", encoding="utf-8")
-        p = subprocess.Popen([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,
-                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
-                             universal_newlines=True, encoding="utf-8")
+        p = ui.spawn([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,   # (no console on
+                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,            # Windows: ui.spawn)
+                     universal_newlines=True, encoding="utf-8")
+        SERVERS.started(p.pid)                       # the only one: any other still recorded is stopped
         # its pipes served by threads: Rhino's thread never reads or writes one (rhino_logic.pipes)
         STATE["worker_sends"], STATE["worker_lines"] = logic.pipes(p)
         STATE["worker"] = p
         STATE["worker_code"] = now
         LEFTOVERS["worker"] = _stop_worker               # a later copy of this script stops it, writer too
     return p
+
+
+def _started_at(pid):
+    """When the process with this number started (its own identity: a number is given again to other programs), or
+    None when none is running."""
+    try:
+        p = System.Diagnostics.Process.GetProcessById(int(pid))
+        return None if p.HasExited else str(p.StartTime.ToUniversalTime().Ticks)
+    except Exception:
+        return None
+
+
+def _python_process(pid):
+    """The process with this number if it is still running and is Python, else None."""
+    try:
+        p = System.Diagnostics.Process.GetProcessById(int(pid))
+        return p if not p.HasExited and "python" in (p.ProcessName or "").lower() else None
+    except Exception:
+        return None
+
+
+def _stop_pid(pid):
+    p = _python_process(pid)                   # (ServerBook has matched its start time first)
+    if p is not None:
+        try:
+            p.Kill()
+        except Exception:
+            pass
+
+
+# every checker Gordium started, recorded with this Rhino as its owner: a new one, a reload or Rhino closing stops
+# this Rhino's others (exactly one), never another Rhino's
+_ME = System.Diagnostics.Process.GetCurrentProcess().Id
+SERVERS = logic.ServerBook(os.path.join(tempfile.gettempdir(), "gordium_servers.json"),
+                           {"pid": _ME, "start": _started_at(_ME)}, _started_at, _stop_pid)
 
 
 def _stop_worker():
@@ -155,6 +191,7 @@ def _stop_worker():
     LEFTOVERS.pop("worker", None)
     if p is not None and p.poll() is None:
         p.kill()
+    SERVERS.stop_all()                               # and any an earlier load left running
 
 
 def ask(request):
@@ -485,6 +522,22 @@ def _notice_box(o, viewport, taken):
     return lines, x, y, w, h
 
 
+def _screen_size(viewport, points):
+    """The larger side, in pixels, of the points' box on screen (None without points)."""
+    if not points:
+        return None
+    on = [viewport.WorldToClient(p) for p in points]
+    return max(max(p.X for p in on) - min(p.X for p in on), max(p.Y for p in on) - min(p.Y for p in on))
+
+
+def _in_active_view(e):
+    """Whether this frame is the active view's: the status box is drawn there only, not in all four (the
+    architect's review, pass 2)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    active = doc.Views.ActiveView if doc is not None else None
+    return active is not None and e.Viewport.Id == active.ActiveViewportID
+
+
 def draw_screen(o, e):
     if not _here(o, e):
         return
@@ -499,7 +552,8 @@ def draw_screen(o, e):
     old = stale(o)
     labels = bool(STATE.get("labels_by_doc", {}).get(o.doc))     # Show on-screen labels (off by default)
     taken = []                               # labels drawn this frame: none covers another, nor the status box
-    if o.message and labels:
+    boxed = bool(o.message and labels and _in_active_view(e))   # the status box once, in the view being worked in
+    if boxed:
         taken.append(logic.status_box(e.Viewport.Bounds.Width, _status_rows(o, stale(o))))
     # labels only in a plan view: parallel and looking straight down (Top). In 3D they sat on the massing, and in
     # the Front and Right elevations every plan label piled up on the ground line (Ben's test, 2026-10-20)
@@ -508,6 +562,10 @@ def draw_screen(o, e):
                                                          e.Viewport.WorldToClient(line.To))
                                                         for line in getattr(o, "plan_lines", None) or [])]
     obstacles = on_screen if plan else []
+    # zoomed out to the neighbourhood (the lot under LABEL_MIN_LOT_PX on screen), the lot's plan labels give way
+    # (judged from the lot's edges, which a lot with arcs has too, else its outline: review round 3, F5)
+    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]
+    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, lot_points or getattr(o, "lot_outline", None)))
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
@@ -521,21 +579,22 @@ def draw_screen(o, e):
             d.Draw2dLine(System.Drawing.PointF(p.X - 5, p.Y + 5), System.Drawing.PointF(p.X + 5, p.Y - 5), color, 2)
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
-        if plan and logic.yard_label_shown(labels, status):     # a failing yard's shortfall always shows
+        if plan and logic.yard_label_shown(labels, status) and zoomed_in:
             ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
                         along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
-    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels else []:   # each edge's length
-        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,
-                    along=(edge.From, edge.To), obstacles=obstacles)          # beside its edge, off every line
+    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
+        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
+                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
+        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
         left = min(corners, key=lambda p: p.X)       # the height limit, labelled at its left end in an elevation
-        ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 24, dark, 11)
+        ui.draw_text_box(d, [limit[1]], BLUE, int(left.X), int(left.Y) - 30, dark, 13)
     if notice is not None:
         lines, x, y, _, _ = notice
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
-    if not o.message or not labels:
+    if not boxed:
         return
     state = "stale" if old else o.message[0]
     color = ui.status_color({"does_not_comply": "does_not_comply", "needs_review": "needs_review"}.get(state, "complies"),
@@ -826,6 +885,13 @@ def zoom_to(item):
     view = doc.Views.Find("Front" if item.get("zoom") == "front" else "Top", False) or doc.Views.ActiveView
     doc.Views.ActiveView = view
     view.ActiveViewport.ZoomBoundingBox(box)
+    doc.Objects.UnselectAll()                # and selected, so it's clear what the row is about (the review)
+    picked = [o for o in (_find(doc, i) for i in item.get("objects") or []) if o is not None and o.IsSelectable()]
+    for o in picked:
+        o.Select(True)
+    if picked:
+        say("Zoom to: " + (item.get("name") or "this item") + ": " + str(len(picked)) + " object" +
+            ("s" if len(picked) != 1 else "") + " selected.")
     view.Redraw()
 
 
@@ -1174,7 +1240,7 @@ def _describe(facts, uses):
     ground = facts.get("grade_elevation")
     return ((facts["address"] + "\n" if facts.get("address") else "") +
             CITY + " · zone " + str(facts.get("zone")) + " · " + uses.get(facts.get("use"), str(facts.get("use"))) +
-            "\nStreet side = the highlighted blue line · " +
+            "\n" + logic.STREET_LABEL + " = the highlighted blue line · " +
             ("a corner lot (two streets)" if facts.get("corner_lot") else "not a corner lot") +
             ("\nMain building = the one outlined in blue" if facts.get("main_building") else "") +
             "\nGround: " + ("flat" if facts.get("ground_is_flat") else "sloped") + " at z = " +
@@ -1240,8 +1306,12 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
-            "street_name": saved_ui.get("_street_name") or saved_ui.get("street_name") or facts.get("street_name"),
-            "street_name_saved": None if saved_ui.get("_street_name") else saved_ui.get("street_name"),
+            # the street's name only with its street line (a survey outline or a corner answer drops the line:
+            # review round 3, F6); this session's lookup words first, then the name saved at the last Draw
+            "street_name": (saved_ui.get("_street_name") or saved_ui.get("street_name") or facts.get("street_name"))
+            if facts.get("street_line") else None,
+            "street_name_saved": None if saved_ui.get("_street_name") or not facts.get("street_line")
+            else saved_ui.get("street_name"),
             "street_source": saved_ui.get("street_source") or source("street"),
             "ground": {"kind": kind, "count": len(points), "range": span, "source": ground_source},
             "ground_fall": saved_ui.get("ground_fall"),     # the looked-up ground's fall: said, never used (MVP)
@@ -1265,10 +1335,9 @@ def _ft_text(feet):
 
 def _apply_box(doc, facts, state, saved_ui):
     """The facts (what the checker gets) and the box's own choices, from what the box says."""
-    facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],
-                 lot_surveyed=bool(state.get("lot_surveyed")), corner_lot=state.get("corner_lot"))
-    if facts.get("corner_lot") is None:             # unanswered: the checker says the yards need review
-        facts.pop("corner_lot")
+    facts, saved_ui = logic.corner_answered(facts, saved_ui, state.get("corner_lot"))   # a changed answer: the
+    facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],  # street picked again
+                 lot_surveyed=bool(state.get("lot_surveyed")))
     if not facts.get("address"):
         facts.pop("address")
     facts.pop("grade_points", None)                 # read (or sampled) from the model at every check
@@ -1431,6 +1500,11 @@ def _draw_lot(doc):
     return str(doc.Objects.AddCurve(rg.PolylineCurve(corners + [corners[0]]), attrs))
 
 
+def _get_point(prompt):
+    """A point clicked at the command line (Enter accepted as done): the box's picks, one place to stand in for."""
+    return Rhino.Input.RhinoGet.GetPoint(prompt, True)
+
+
 def _box_pick(doc, what, facts, saved_ui, session):
     """One pick the start box asked for, with the box hidden. Esc or Enter: nothing changes (Esc at any prompt,
     rhino_logic.pick_or_nothing). Every model edit goes through the box's session."""
@@ -1447,22 +1521,47 @@ def _one_pick(doc, what, facts, saved_ui, session):
     elif what == "lookup_done":
         facts, saved_ui = _lookup_done(doc, facts, saved_ui, session)
     else:                                      # the pick's outcome only; rhino_logic.pick_effect decides the rest
-        facts, saved_ui = logic.pick_effect(what, _pick_outcome(doc, what, facts, session), facts, saved_ui)
+        facts, saved_ui = logic.pick_effect(what, _pick_outcome(doc, what, facts, saved_ui, session), facts, saved_ui)
     _highlight(doc, facts)
     return facts, saved_ui
 
 
-def _pick_outcome(doc, what, facts, session):
-    """What one pick gave, or None (Esc, Enter, nothing picked). Drawn objects go through the session."""
+def _pick_outcome(doc, what, facts, saved_ui, session):
+    """What one pick gave, or None (Esc at any prompt, Enter with nothing clicked). Drawn objects go through the
+    session. The street: {"picks": the lot lines clicked, "name": the clicked line's street}; rhino_logic.pick_effect
+    sets the street lines from them (pick_street / street_lines_after_picks, through set_street_lines)."""
     if what == "street":
         lot = _find(doc, facts.get("lot_id") or "")
         if lot is None:
             return None
-        rc, point = Rhino.Input.RhinoGet.GetPoint("Click the lot line on the street", True)
-        if rc != Rhino.Commands.Result.Success:
+        corner = facts.get("corner_lot") is True     # a corner lot: every line on a street, Enter when done
+        picks = []
+        while True:
+            rc, point = _get_point(logic.street_pick_prompt(corner, len(picks)))
+            if rc == Rhino.Commands.Result.Cancel:
+                return None                           # Esc: nothing changes, the lines clicked so far too
+            if rc != Rhino.Commands.Result.Success:   # Enter: done
+                break
+            a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
+            picks.append([_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]])
+            if not corner:
+                break
+        if not picks:
             return None
-        a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
-        return [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
+        if corner:
+            return {"picks": picks, "name": None}     # two streets: unnamed until named
+        picked = picks[0]
+        name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
+                                            picked, ids=facts.get("street_ids"))   # the line's own street?
+        if name is None:                                       # else asked, never guessed
+            ask = Rhino.Input.Custom.GetString()   # literal: a street's name has spaces ("Cayuga St")
+            ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")
+            ask.AcceptNothing(True)
+            got = ask.GetLiteralString()
+            if got == Rhino.Input.GetResult.Cancel:
+                return None                           # Esc: nothing changes
+            name = (ask.StringResult() or "").strip() or None if got == Rhino.Input.GetResult.String else None
+        return {"picks": [picked], "name": name}
     if what == "lot":                            # Use my survey: the surveyed outline
         return _pick(doc, "Click your surveyed lot outline (a closed curve on the Site layer); Enter keeps it",
                      _lot_candidates(doc), "Lot", Rhino.DocObjects.ObjectType.Curve)
@@ -1581,7 +1680,7 @@ def _lookup_start(facts, saved_ui):
         args += ["--fixture", STATE["lookup_fixture"]]
     sink = open(out, "w", encoding="utf-8")             # to a file: a long answer never fills a pipe
     err = open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a", encoding="utf-8")
-    STATE["lookup"] = {"proc": subprocess.Popen(args, cwd=REPO, env=env, stdout=sink, stderr=err),
+    STATE["lookup"] = {"proc": ui.spawn(args, cwd=REPO, env=env, stdout=sink, stderr=err),   # no console window
                        "out": out, "sink": sink, "err": err, "started": time.time(), "query": address}
     return dict(saved_ui, _lookup={"looking": address})
 
@@ -1797,9 +1896,8 @@ def _change_facts(doc, facts, options):
         if picked:
             facts["main_building"] = picked
         _highlight(doc, facts)
-    was_corner = facts.get("corner_lot")
-    facts["corner_lot"] = _yes_no("Corner lot (two streets meet at it)?", was_corner)
-    facts = logic.after_corner_answer(facts, was_corner)
+    facts, _ = logic.corner_answered(facts, {}, _yes_no("Corner lot (two streets meet at it)?",
+                                                        facts.get("corner_lot")))   # the box's own helper
     _highlight(doc, facts)
     lot = _find(doc, facts.get("lot_id") or "")
     if lot is not None:
@@ -1822,7 +1920,7 @@ def _change_facts(doc, facts, options):
             if not facts.get("corner_lot"):
                 break
         if picked:
-            facts["street_line"] = picked
+            logic.set_street_lines(facts, picked)          # unnamed: the lines picked here, never the old names
         _highlight(doc, facts)
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,
@@ -2194,15 +2292,7 @@ def open_report():
             say(logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
                                      ("the report file wasn't written to " + os.path.dirname(path))))
         return
-    opened, why = True, None
-    try:
-        if os.name == "nt":
-            os.startfile(path)
-        else:
-            done = subprocess.run(["open", path], capture_output=True, text=True, timeout=20, encoding="utf-8")
-            opened, why = done.returncode == 0, (done.stderr or "").strip()[:160] or None
-    except Exception as e:
-        opened, why = False, str(e)[:160]
+    opened, why = ui.open_target(path)            # os.startfile on Windows, `open` on macOS
     say(logic.report_message(path, True, opened=opened, open_error=why))
 
 
@@ -2321,7 +2411,9 @@ def gordium_start():
         sample = ask({"cmd": "sample_site"})
         sample_lot = str(_add_lot(doc, sample))
         # its facts are the sample project's; a lookup may replace its lot (never one the architect drew or picked)
-        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True, replaceable_lot=sample_lot))
+        _save_ui_state(doc, dict(_ui_state(doc), from_sample=True, replaceable_lot=sample_lot,
+                                 street_name=sample.get("street_name"),     # its street, as the lookup named it
+                                 street_source=sample.get("street_source")))
         facts = logic.with_suggestions(dict(sample["facts"], address=sample["address"]),
                                        suggested_facts(doc, options["zones"]))
         facts["lot_id"] = str(_lot_candidates(doc)[0].Id)
@@ -2449,3 +2541,5 @@ def _release(key, value):
 logic.sweep(LEFTOVERS, STATE, _release)
 if STATE.get("live"):                        # live mode was on before this copy loaded: its hooks back on
     live(True)
+# Rhino closing: the checker stopped with it (and any an earlier load left: SERVERS)
+_on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), "stop the checker"))

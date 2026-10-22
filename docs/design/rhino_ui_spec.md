@@ -142,13 +142,13 @@ D4 [both] **Columns.**
 - The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Deltas read like "+11'-7"", "−2'-6"", "at limit", "+0.06%". Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns.
 - The value columns are sized to their content and never truncated; only Item truncates. Minimum panel width 320.
 
-D5 [code] **Groups,** in order: Does not comply · Needs review · Complies (Site rows included, labelled "Site · …") · Not checked · Not covered by this rulebook. Section headers aren't selectable.
+D5 [code] **Groups,** in order: Does not comply · Needs review · Complies (Site rows included, labelled "Site · …") · Not checked · Not checked yet (the rules not in Gordium yet). Section headers aren't selectable.
 
 D6 [both] **Side yards** are two rows, "Side yard, West" and "Side yard, East", and the plan shows the same values.
 
 D7 [code] **Not checked.**
 - Rows: "Parking · needs input", "Dwelling units · needs input" (the Enter… buttons live in the lower pane: "Enter bedrooms and parking spaces", "Enter the number of units, including any ADU"), and "Overlays · not in this release" (historic, gorge, flood).
-- **Not covered by this rulebook:** a collapsible group listing the sections not encoded: §325-16A and B height exceptions, §325-18 yard projections, §325-19C corner lots, §325-25 accessory structures, §325-28 ADUs.
+- **Not checked yet** (Ben, 2026-10-21; was "Not covered by this rulebook"): a collapsible group listing the sections not in Gordium yet, each row "Not in Gordium yet — coming in a later version. Check this by hand for now: <section>" (the report's Check sheet the same): §325-16A and B height exceptions, §325-18 yard projections, §325-19C corner lots, §325-25 accessory structures, §325-28 ADUs.
 
 D8 [rhino] **Refresh** keeps the selected item (by item id), the expanded groups and the scroll position.
 
