@@ -9,7 +9,7 @@ use the rule decides about is cited by its own cell, so the inspector's use-row 
 """
 
 
-from rule_format.rulebook import district_name
+from rule_format.rulebook import district_name, pending_research
 
 from .chart_values import FOOTNOTE, footnotes
 
@@ -18,6 +18,9 @@ SECTION = "Primary Uses"
 MARK_QUESTION = ("The chart has no legend for its marks. We read • as permitted and - as not permitted; SP "
                  "matches §325-9B(1)'s list of uses needing a special permit from the Planning and Development "
                  "Board. Confirm.")
+# Research settled it for R-1b (the chart_marks finding in R-1b.yaml); a person carries it over when reviewing a draft.
+MARK_RESEARCH = ("raised by the drafting script; the 2026-10-20 research read the marks this way from the code's "
+                 "own text (finding chart_marks in 5_zoning_rules/R-1b.yaml)")
 
 
 def use_ids(uses: dict) -> dict[str, str]:
@@ -92,6 +95,7 @@ def use_rule(column: str, rows: dict[str, dict[str, dict]], uses: dict, notes: d
     if review:
         rule["review_when"] = review
     rule |= {"sources": sources, "examples": examples, "open_questions": [MARK_QUESTION],
+             "research": [pending_research(MARK_QUESTION, MARK_RESEARCH)],
              "notes": f"Built by code from the {column} column of chart p.2: • uses pass, SP uses and footnoted "
                       "• uses go to review, uses marked - fail.",
              "drafted_by": drafted_by, "status": "draft"}

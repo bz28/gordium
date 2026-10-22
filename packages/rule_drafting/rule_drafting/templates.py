@@ -10,7 +10,9 @@ import ast
 import re
 
 from rule_format import formula
-from rule_format.rulebook import district_name
+from rule_format.rulebook import district_name, pending_research
+
+DRAFTED_QUESTION = "raised by the drafting script (the AI's draft); not searched yet"
 
 from .chart_values import fill, number_text
 
@@ -175,6 +177,7 @@ def fill_template(template: dict, column: str | None, cells: dict, quote_sources
         return None, f"an example value can't be worked out: {e}"
     if template.get("open_questions"):
         rule["open_questions"] = list(template["open_questions"])
+        rule["research"] = [pending_research(q, DRAFTED_QUESTION) for q in rule["open_questions"]]
     rule["notes"] = (f"Drafted by the rule-drafting script; numbers filled by code from the {district} cells."
                      if column else "Drafted by the rule-drafting script.")
     rule |= {"drafted_by": drafted_by, "status": "draft"}

@@ -88,12 +88,69 @@ rules:
         expect: fail
       - given: {use: school}
         expect: needs_review
-    open_questions:
-      - "The chart has no legend for its marks. We read • as permitted and - as not permitted; SP matches §325-9B(1)'s list of uses needing a special permit from the Planning and Development Board. Confirm."
-      - "The chart says \"Public utility structure except office\"; §325-9B(1)(c) says \"Public utility facilities\". Are these the same use?"
-      - "\"Subject to the further regulations in this section and of Article V\": can a use marked • still need review because of those regulations (e.g. occupancy limits, chart p.2 notes)?"
-    notes: >-
-      The check passes uses marked • for R-1B, sends uses marked SP to review, and fails the rest (marked -). What the marks mean is an open question. The chart's columns are R-1A, R-1B, … so R-1b is the second mark in each row.
+    findings:
+    - id: chart_marks
+      question: The chart has no legend for its marks. We read • as permitted and - as not permitted; SP matches §325-9B(1)'s
+        list of uses needing a special permit from the Planning and Development Board. Confirm.
+      kind: reading
+      answer: • = permitted (the uses Column 2 lists, §325-8A(2)); - = not permitted (left out, §325-8B(3)); SP = needs
+        a special permit (the uses §325-9B(1) lists). The chart has no legend; this reads the code's own text.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines:
+        - 15
+        - 15
+        quote: Uses which are permitted in each use district are listed
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines:
+        - 20
+        - 20
+        quote: except where otherwise indicated by specific prohibition or omission
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines:
+        - 22
+        - 23
+        quote: which require a special permit from the Planning and Development Board, are as follows
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-20_architect_questions.md §5.1
+    - id: public_utility_same_use
+      question: The chart says "Public utility structure except office"; §325-9B(1)(c) says "Public utility facilities".
+        Are these the same use?
+      kind: reading
+      answer: 'The same use: the chart''s special-permit rows run in the same order as §325-9B(1) ((b) cemeteries, (c)
+        public utility facilities). Either way it needs a special permit, so the result is NEEDS REVIEW.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines:
+        - 26
+        - 26
+        quote: Public utility facilities
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-20_architect_questions.md §5.2
+    - id: permitted_use_still_has_rules
+      question: '"Subject to the further regulations in this section and of Article V": can a use marked • still need
+        review because of those regulations (e.g. occupancy limits, chart p.2 notes)?'
+      kind: law
+      answer: Yes. Column 2's uses are subject to the rest of §325-8 and to Article V, and every column is subject to
+        Article V's supplementary regulations. Those are rules of their own.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines:
+        - 16
+        - 16
+        quote: subject to the further regulations in this section and of Article V
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §5.3
+    notes: The check passes uses marked • for R-1B, sends uses marked SP to review, and fails the rest (marked -). What
+      the marks mean is Gordium's reading (the chart_marks finding, to confirm with the architects). The chart's columns
+      are R-1A, R-1B, … so R-1b is the second mark in each row.
     drafted_by: claude
     status: draft
 
@@ -274,9 +331,77 @@ rules:
       - given: {building_height: 37, front_yard: 27, side_yard_smaller: 12, side_yard_larger: 12, rear_yard: 21.99, lot_depth: 60}
         expect: fail
     open_questions:
-      - "§325-16C(1): we read \"each required ... yard is increased one foot ... for each one foot of such additional height\" as: each yard must be at least its normal requirement plus the extra height (both side yards included). Confirm."
-      - "Does the bonus apply to accessory buildings too, or only the main building (\"any main building\")?"
-      - "§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height, or allowed on top of the bonus height too?"
+    - '§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height, or allowed
+      on top of the bonus height too?'
+    research:
+    - question: '§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height,
+        or allowed on top of the bonus height too?'
+      searched:
+      - 325-16
+      - 325-16A
+      - 325-16B
+      - 325-16C
+      - 325-3B:height_of_building
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines:
+        - 4
+        - 4
+        quote: cornice for ornament
+      why_open: §325-16B allows an ornamental parapet or cornice up to 5 ft above the height limit, but doesn't say
+        whether that is the chart's limit or the bonus height §325-16C allows, or whether a parapet that guards a roof
+        deck (not "for ornament") qualifies. No City record found.
+      readings:
+      - id: from_chart_limit
+        reading: the 5 ft is measured from the chart's height limit (the stricter reading)
+      - id: from_bonus_height
+        reading: the 5 ft is measured from the bonus height §325-16C allows
+      report: docs/research/2026-10-20_architect_questions.md §4.6
+    findings:
+    - id: height_bonus_every_yard
+      question: '§325-16C(1): we read "each required ... yard is increased one foot ... for each one foot of such additional
+        height" as: each yard must be at least its normal requirement plus the extra height (both side yards included).
+        Confirm.'
+      kind: law
+      answer: 'Confirmed: every required front, side and rear yard grows one foot for each foot of extra height.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines:
+        - 8
+        - 8
+        quote: Each required front, side and rear yard is increased one foot on the ground for each one foot
+      still_open: []
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §4.5
+    - id: height_bonus_main_building_only
+      question: Does the bonus apply to accessory buildings too, or only the main building ("any main building")?
+      kind: law
+      answer: Only the main building ("any main building"). The number of stories still can't be exceeded, and the extra
+        feet are at most 10% of the maximum building height.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines:
+        - 6
+        - 6
+        quote: any main building may be erected to a height in excess of that
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines:
+        - 10
+        - 10
+        quote: the number of stories permitted may not be exceeded
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines:
+        - 11
+        - 12
+        quote: may not exceed 10% of the maximum building height
+      still_open: []
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §4.5
     notes: >-
       Arithmetic for the bonus: 10% of the 35 ft maximum = 3.5 ft, so at most 38.5 ft, with every required yard 1 ft larger per extra foot.
       All yard measurements are needed to check the height rule, even for buildings at or under 35 ft
@@ -311,8 +436,42 @@ rules:
         lines: [9, 10]
         quote: "This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified in this column."
     open_questions:
-      - "See the building_area and lot definitions: whether garages and overhangs count, and what lot area to use."
-      - "\"Above ground\": are parts of a building below grade (e.g. a buried garage under a deck) left out of building_area?"
+    - 'Coverage waits on two questions recorded with the definitions: what lot area to use without a survey (lot), and
+      whether roof eaves count (building_area). Garages count: see building_area''s findings.'
+    research:
+    - question: 'Coverage waits on two questions recorded with the definitions: what lot area to use without a survey
+        (lot), and whether roof eaves count (building_area). Garages count: see building_area''s findings.'
+      searched:
+      - 325-8A
+      - 325-3B:building_area
+      - 325-3B:lot
+      sources: []
+      why_open: It depends on the lot and building_area questions, which are still open; see their research.
+      report: docs/research/2026-10-20_architect_questions.md §3.2
+    findings:
+    - id: below_ground_not_counted
+      question: '"Above ground": are parts of a building below grade (e.g. a buried garage under a deck) left out of
+        building_area?'
+      kind: reading
+      answer: Parts wholly below ground don't count (Column 10 counts what is covered "above ground"; §325-25B lets
+        wholly below-grade accessory structures go anywhere). A deck on top of a buried garage does count.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines:
+        - 6
+        - 7
+        quote: covered by principal and accessory buildings above ground
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines:
+        - 4
+        - 4
+        quote: entirely below the finished grade
+      still_open: []
+      strength: strong
+      confirm_with: the City zoning office
+      report: docs/research/2026-10-20_architect_questions.md §3.2
     examples:
       - given: {building_area: 1500, lot_area: 6674}
         expect: pass
@@ -395,7 +554,24 @@ rules:
       106 Ithaca Rd: side lot lines 90.28 and 99.37 ft → lot depth 94.8 ft → 23.7 ft required; the
       architects' model uses 20 ft (second example fails).
     open_questions:
-      - "Which lines are the two \"side lot lines\" on a lot with more than four sides (106 Ithaca Rd's jog)? See the lot_depth definition."
+    - 'Which lines are the side lot lines on a lot with more than four sides (106 Ithaca Rd''s jog)? See lot_depth:
+      Gordium uses the Zoning Administrator''s perpendicular method, and one detail of it is still open.'
+    research:
+    - question: 'Which lines are the side lot lines on a lot with more than four sides (106 Ithaca Rd''s jog)? See lot_depth:
+        Gordium uses the Zoning Administrator''s perpendicular method, and one detail of it is still open.'
+      searched:
+      - 325-8A
+      - 325-3B:yard
+      - 325-3B:rear_yard
+      sources:
+      - rank: 2
+        cite: 'Zoning Administrator''s affidavit (2019) and staff memo to the BZA, Appeal #3202, 815 S. Aurora St (a
+          five-sided lot), 2019-2022'
+        url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_02012022-2446
+        quote: side lot lines should be drawn at a 90-degree angle perpendicular to the front lot line to determine
+          the average lot depth
+      why_open: It depends on the lot_depth question that is still open; see its research.
+      report: docs/research/2026-10-20_architect_questions.md §1.2
     drafted_by: claude
     status: draft
 
@@ -418,8 +594,21 @@ rules:
         page: 14
         lines: [13, 13]
         quote: "Each additional bed or sleeping room + 1 space per room"
-    open_questions:
-      - "The requirement is per dwelling unit. R-1b allows an accessory dwelling unit (chart p.2): does a house with an ADU need parking for both units? (Not checked yet; ADUs aren't measured.)"
+    findings:
+    - id: adu_needs_no_parking
+      question: 'The requirement is per dwelling unit. R-1b allows an accessory dwelling unit (chart p.2): does a house
+        with an ADU need parking for both units? (Not checked yet; ADUs aren''t measured.)'
+      kind: law
+      answer: 'No: an ADU needs no off-street parking (§325-28C(2)). The house''s own parking is unchanged.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines:
+        - 9
+        - 9
+        quote: There shall be no off-street parking requirement for an ADU
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §5.4
     examples:
       - given: {use: one_family_detached, sleeping_rooms: 3, parking_spaces: 1}
         expect: pass
