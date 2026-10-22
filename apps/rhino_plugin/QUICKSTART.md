@@ -139,6 +139,10 @@ When Ben says there is a new version:
 typed in **PowerShell** (the Windows app where you type commands: click **Start**, type `PowerShell`, press
 **Enter**) instead of Terminal.
 
+**Please confirm one thing:** while Gordium runs in Rhino (GordiumStart, a check, Zoning report…), **no black
+terminal window should appear**. Gordium starts its checker with no window on Windows; if one still pops up, tell
+us which step showed it. Zoning report… should open the report in Excel (or your spreadsheet app).
+
 1. **Get access**, as on the Mac ([step 1](#what-you-need-once): a GitHub account; accept Ben's invitation). You
    don't need a token on Windows: Git asks you to sign in to GitHub in your browser instead.
 2. **Install Rhino 8.**
@@ -238,8 +242,8 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
      where it came from (not the ground: for now it is assumed flat, see **Ground** below). Anything doubtful is amber with the reason: tick **I checked
      this** once you have, or change it; until then the items that depend on it need review. If the lookup
      can't help (offline, not found, outside the City of Ithaca), the box says why and you fill it in by hand.
-   - **Zoning district**: R-1b, R-1a or R-3a: "entered by you", or after Look up "suggested by Gordium · City of Ithaca zoning map,
-     used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
+   - **Zoning district**: R-1b, R-1a or R-3a, "entered by you", or after Look up "suggested by Gordium · City of
+     Ithaca zoning map, used live". Either way, tick **I confirm**: Draw stays off until you do, on every new project and after every
      lookup, because the City's online map is informational: the district is your statement.
    - **Use**: one-family dwelling, detached.
    - **Lot**: its area and where it came from: "7,033 sf · from the tax map (±2 ft, approximate)". Gordium treats
@@ -261,12 +265,12 @@ typed in **PowerShell** (the Windows app where you type commands: click **Start*
      `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
      lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
      on a survey it goes to the limits;
-   - on a looked-up lot, the **neighbourhood** 750 ft around it, like a site context drawing: the neighbouring
-     tax parcels and the street centerlines in grey on the locked `Gordium::Context` layers (kept in the file),
-     a north arrow, a 100 ft scale bar and the sources; and the neighbouring building footprints, drawn on screen
-     only (their source may not be kept in your file yet, so a reopened file shows the parcels and streets but not
-     the footprints: untick and tick **Show neighbourhood** to fetch them again). The check never measures any of
-     it. **Show neighbourhood** in the panel turns it off and on;
+   - on a looked-up lot, the **neighbourhood** 750 ft around it, like a site context drawing, all kept in the file:
+     the neighbouring tax parcels and the street centerlines in grey on locked `Gordium::Context` layers; the
+     neighbouring building footprints as outlines (no heights) on the unlocked `Gordium::Context::Buildings` layer,
+     so you can drag and edit them (an outline you edit is yours: Gordium never removes or redraws it); a north
+     arrow, a 100 ft scale bar and the sources. The check never measures any of it, and says so if a solid on those
+     layers sits over the lot. **Show neighbourhood** in the panel turns it off and on (kept with the file);
    - with **Show on-screen labels** ticked in the panel (off at first): each yard's and lot edge's label, and the
      status box top right ("? 2 need review · 8 comply · 2 not checked"). Off, a failing yard's shortfall still
      shows ("✕ Rear yard 21'-2", needs 22'-6"");
@@ -318,7 +322,8 @@ usually what fixes it:
   garage). Lot coverage counts every building on the lot, so it needs review until you **Add to check…**.
 
 "– not checked" means Gordium doesn't check it yet (parking needs bedroom and parking counts; overlays come in a
-later release). "Not covered by this rulebook" lists code sections still to be checked by hand.
+later release). "Not checked yet" lists the code sections not in Gordium yet (coming in a later version): check
+those by hand for now; each row names its section.
 
 The rules are a **draft**, not yet reviewed by a licensed professional; the panel says so at the top.
 

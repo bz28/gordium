@@ -35,37 +35,39 @@ When Ben says the preview has been updated:
 ```
 cd $HOME\Documents\gordium
 git pull
-.\.venv\Scripts\pip install -e ".[dev]"
 ```
 
-The last line is **needed for this update** (2026-10-21 evening): Gordium now uses one more measuring library,
-`numpy`, to fit roof planes. It ends with `Successfully installed …`.
+No install step this time (2026-10-22): no new Python packages since the last update.
 
 Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
 
-## What's new in this preview (2026-10-21 evening)
+## What's new in this preview (2026-10-22)
 
-The full guide for this version is the PDF Ben sends with it (*Gordium demo guide*): what Gordium knows, what it
-assumes, what it doesn't cover yet, and how it works. The short version:
+Everything in the 2026-10-21 evening preview, plus:
 
-- **Three districts:** R-1a, R-1b and R-3a, each hand-written from the law and checked.
-- **Address lookup** fills in the lot (State tax-parcel map), the street side, corner lot and a *suggested* zoning
-  district (City zoning map); you tick **I confirm**.
-- **The largest legal starting house** is drawn for the lot (2 ft back from every limit on a tax-map lot).
-- **Every reading** where the law or the data allows more than one (tax-map lines ±2 ft, eaves, which line is the
-  rear, which building is the main one): complies only if all pass.
-- **Neighbouring building footprints** shown around the lot, on screen only.
-- **Zoning report…** opens on a *Check* sheet that matches the panel row for row, with citations and links.
-- **Ground is taken as flat** at the lot's level in this version (the panel says so).
+- **"To comply" advice you can trust.** Every "To comply" line is checked by Gordium before it is shown: doing what
+  it says makes that row comply, and no other row gets worse. A yard's advice is the requirement for every part of
+  the building ("keep every part of the building at least 25'-0" from the front lot line — now 22'-0" at its
+  closest"); an eaves row says "eaves included".
+- **"Not checked yet"** for rules Gordium doesn't cover: "Not in Gordium yet — coming in a later version. Check this
+  by hand for now", with the section to check.
+- **Corner lots.** Click **Change…** on the street side and pick every lot line on a street (Enter when done). Lot
+  width is the frontage on ONE street (§325-8, Column 7), never measured along two. If Gordium can't tell whether
+  two lines are one street or two, it asks.
+- **A building partly over a lot line** never complies, and says what to do first: "First: move it back onto the
+  lot."
+- **Uneven ground and separate buildings.** A shed or garage on its own lower ground is read on its own ground; a
+  balcony drawn just off the wall is still part of the house.
+- **The neighbourhood** (parcels, streets, footprints) stays locked where it should, even if you lock the Gordium
+  layer, and anything Gordium can't remove is said, never drawn twice.
+- **Windows:** no black console window when Gordium starts its helpers, and only one checker runs per Rhino.
 
 ## Known limits
 
-- **Look up only addresses in R-1a, R-1b or R-3a for now.** For an address in another district (say R-2a) the
-  zone menu wrongly falls back to R-1a; a fix is coming in the next update.
-- **Stories:** draw buildings with Gordium's floor blocks (the starting house uses them). A building drawn as one
-  plain solid makes the Stories row ask you to enter the number of stories, and there is no box for it yet; a fix
-  is coming in the next update.
-- **Windows is not fully tested yet.** If something looks wrong or a window shows an error, take a screenshot and
-  send it to Ben.
-- **AI-drafted zones are not included** (left out on purpose while they are checked).
+- **Not yet re-checked inside Rhino after today's changes.** Ben's test Rhino will run the scripted checks before
+  he tells you to update; if something looks wrong, take a screenshot and send it to Ben.
+- **Windows:** please confirm that no black console window appears and that Task Manager shows only one
+  `python` checker while Rhino is open.
+- **Ground is taken as flat** at the lot's level (the panel says so).
+- **AI-drafted zones are not included** (left out on purpose while they are checked). Districts: R-1a, R-1b, R-3a.
 - The address lookup needs the internet and works only for addresses in the **City** of Ithaca (not the Town).

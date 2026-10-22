@@ -8,6 +8,8 @@ whole session (gordium_rhino.Overlay explains), so the panel and the dialog are 
 functions, and an update to this file takes effect at once."""
 
 import System
+import os
+
 import Eto.Drawing as ed
 import Eto.Forms as ef
 import Rhino
@@ -539,25 +541,34 @@ def show_detail(parts):
         d.Create()
         return
     det = i["detail"]
-    words = {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
-             "not_checked": "Not checked"}[i["status"]]
+    words = logic.status_words(i)
     d.AddRow(_wide((i["mark"] + " " if i["mark"] else "") + logic.row_name(i) + " · " + words,   # the row's own name, whole
                    eto_status_color(i["status"]), bold=True, size=13))
     if parts.get("stale"):
         d.AddRow(_wide("Out of date: the model changed since this was checked.", size=11))
-    for text in (det.get("line"), i.get("reason"), i.get("hint") if i.get("hint") not in ("Add to check…",) else None,
-                 det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope"),
+    for text in (det.get("line"), i.get("reason")):
+        if text:
+            d.AddRow(_wide(text, size=12))
+    # what to do about it, right under the reason: a button where there is one (never its words twice, nor the
+    # button scrolled out of sight below the measuring notes: the architect's review), else the hint's words
+    buttons = []
+    if i.get("needs"):                    # exactly the stated facts this row waits for, asked in turn
+        buttons.append(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"])))
+    if i.get("hint") == "Pick the main building…":
+        buttons.append(button("Pick the main building…", a["main"]))
+    if i["id"] == "scope.not_included":
+        buttons.append(button("Add to check…", lambda: a["add"](i["objects"])))
+        if i.get("ground_like"):              # only the architect's word leaves it out (never a guess)
+            buttons.append(button("This is the ground", lambda: a["ground"](i["ground_like"])))
+    for b in buttons:
+        d.AddRow(row(b))
+    words = logic.hint_text(i.get("hint"), [b.Text for b in buttons])
+    if words:
+        d.AddRow(_wide(words, size=12))
+    for text in (det.get("at_limit"), det.get("colours"), det.get("calc"), det.get("scope"),
                  det.get("outline")):           # how the lot lines were read from a cleaned outline (PR 18)
         if text:
             d.AddRow(_wide(text, size=12))
-    if i.get("needs"):                    # exactly the stated facts this row waits for, asked in turn
-        d.AddRow(row(button(logic.enter_words(i["needs"]) + "…", lambda: a["enter"](i["needs"]))))
-    if i.get("hint") == "Pick the main building…":
-        d.AddRow(row(button("Pick the main building…", a["main"])))
-    if i["id"] == "scope.not_included":
-        d.AddRow(row(button("Add to check…", lambda: a["add"](i["objects"]))))
-        if i.get("ground_like"):              # only the architect's word leaves it out (never a guess)
-            d.AddRow(row(button("This is the ground", lambda: a["ground"](i["ground_like"]))))
     for t in det.get("definitions") or []:        # E5: the whole definitions an examiner measures height by
         d.AddRow(_wide(t["term"], bold=True, size=12))
         d.AddRow(_wide("“" + t["text"] + "”", size=11))
@@ -635,10 +646,31 @@ def _section(dg):
         return _wide((dg.get("label") or "Diagram") + ": can't be drawn here (" + str(e)[:60] + ")", size=11)
 
 
+def spawn(args, run=False, **kw):
+    """Every process Gordium starts from Rhino, the one place (a test checks there is no other): on Windows with no
+    console window (rhino_logic.spawn_options). `run`: wait for it (subprocess.run), else start it (Popen)."""
+    import subprocess
+    kw.update(logic.spawn_options(os.name, subprocess))
+    return subprocess.run(args, **kw) if run else subprocess.Popen(args, **kw)
+
+
+def open_target(target):
+    """A file or link opened with the computer's own app (Excel, a browser): os.startfile on Windows, `open` on
+    macOS (rhino_logic.open_command). (opened, why not)."""
+    how, what = logic.open_command(os.name, target)
+    try:
+        if how == "startfile":
+            os.startfile(what)
+            return True, None
+        done = spawn(what, run=True, capture_output=True, text=True, timeout=20, encoding="utf-8")
+        return done.returncode == 0, (done.stderr or "").strip()[:160] or None
+    except Exception as e:
+        return False, str(e)[:160]
+
+
 def _open(url):
     try:
-        System.Diagnostics.Process.Start("open", '"' + url + '"')
-        return True
+        return open_target(url)[0]
     except Exception:
         return False
 
@@ -673,8 +705,7 @@ def start_box(state, options, mode):
     for z in options["zones"]:
         zone.Items.Add(z)
     zone.SelectedValue = next((x for x in zone.Items if x.Text == state.get("zone")), None)
-    if zone.SelectedIndex < 0 and zone.Items.Count:
-        zone.SelectedIndex = 0
+    # no district set (the City map named one Gordium has no rules for): none preselected, Draw waits for a pick
     first_zone = zone.SelectedValue.Text if zone.SelectedValue else None
     confirm = ef.CheckBox()
     confirm.Checked = bool(state.get("district_confirmed"))
@@ -737,6 +768,17 @@ def start_box(state, options, mode):
         reason.Text = logic.draw_reason(state)
 
     confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
+
+    zone_row = {}                     # the district row's source label, once laid out
+
+    def zone_changed(s, e):           # a district picked: set at once, so Draw, its reason and the row's source follow
+        logic.zone_picked(state, zone.SelectedValue.Text if zone.SelectedValue else None, first_zone)
+        draw.Enabled = logic.can_draw(state) and not looking
+        reason.Text = logic.draw_reason(state)
+        if "source" in zone_row:
+            zone_row["source"].Text = logic.zone_row_text(state).split(" · ", 1)[-1]
+
+    zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")
     cancel = button("Cancel", lambda: done(None))
     layout = ef.DynamicLayout()
     layout.Spacing = ed.Size(8, 6)
@@ -761,7 +803,8 @@ def start_box(state, options, mode):
                 layout.AddRow(None, row(label(r["status"], size=11)))
         elif key == "zone":
             confirm.Text = r["tick"][0]
-            layout.AddRow(title, row(zone, label(r["text"].split(" · ", 1)[-1], size=11), confirm))
+            zone_row["source"] = label(r["text"].split(" · ", 1)[-1], size=11)
+            layout.AddRow(title, row(zone, zone_row["source"], confirm))
         elif key == "use":
             layout.AddRow(title, use)
         elif key == "ground":
@@ -772,6 +815,8 @@ def start_box(state, options, mode):
         else:                          # lot, street side: what it is, and the one way to change it
             layout.AddRow(title, row(label(r["text"], size=12),
                                      *[button(t, (lambda a=a: pick(a)), on) for a, t, on in r["actions"]]))
+            if r.get("help"):          # what that row is, in a sentence (the front lot line's)
+                layout.AddRow(None, row(label(r["help"], size=11)))
             if r.get("choice"):        # the street side's question: Corner lot?
                 layout.AddRow(None, row(label(r["choice"][0], size=12), corner))
         if r.get("review"):            # a looked-up fact found doubtful: why, in amber, and I checked this
@@ -877,7 +922,7 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
     beside the line is clear for it on one line, on two (its name, then its numbers: logic.label_lines). Its height
     is 4 + LINE_H per line. The in-Rhino checks measure this very placement."""
     p = viewport.WorldToClient(point)
-    width = len(text) * size * 0.58 + 14
+    width = logic.label_width(text, size)
     if along is not None:
         a, b = (viewport.WorldToClient(q) for q in along)
         own = ((a.X, a.Y), (b.X, b.Y))
@@ -886,7 +931,7 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
         rows = [text]
         two = logic.label_lines(text)
         if not clear and len(two) == 2:          # too long to sit clear beside its line: name, then numbers
-            w2 = max(len(t) for t in two) * size * 0.58 + 14
+            w2 = max(logic.label_width(t, size) for t in two)
             l2, t2, c2 = logic.place_label(own, w2, 4 + 2 * LINE_H, obstacles, taken or [], view=view)
             if c2:
                 left, top, width, clear, rows = l2, t2, w2, True, two
@@ -901,16 +946,24 @@ def label_box(viewport, point, text, size=12, taken=None, along=None, obstacles=
     return left, top, width, want, [text]
 
 
-def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=()):
+def label_at(d, viewport, point, text, color, dark, size=12, taken=None, along=None, obstacles=(), leader=False):
     """A screen-size, horizontal label at a model point, on its backing box (F3). With `taken` (the labels
     already drawn this frame), it moves off any it would cover and a short leader points back to its spot. With
-    `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must)."""
+    `along` (a dimension line's two model points), it sits beside that line, never on it (on two lines if it must);
+    with `leader` too, a line shorter on screen than its label gets a short leader from its middle to the label (a
+    lot edge: logic.needs_leader)."""
     p = viewport.WorldToClient(point)
     left, top, width, want, rows = label_box(viewport, point, text, size, taken, along, obstacles)
     h = 4 + LINE_H * len(rows)
     if abs(top - want) > 1:
         d.Draw2dLine(System.Drawing.PointF(p.X, p.Y), System.Drawing.PointF(p.X, top + (h if top < p.Y else 0)),
                      color, 1)
+    if leader and along is not None:
+        a, b = (viewport.WorldToClient(q) for q in along)
+        if logic.needs_leader(((b.X - a.X) ** 2 + (b.Y - a.Y) ** 2) ** 0.5, width):
+            mid = ((a.X + b.X) / 2, (a.Y + b.Y) / 2)
+            end = logic.leader_end(mid, (left, top, width, h))
+            d.Draw2dLine(System.Drawing.PointF(mid[0], mid[1]), System.Drawing.PointF(end[0], end[1]), color, 1)
     d.Draw2dRectangle(System.Drawing.Rectangle(int(left), int(top), int(width), int(h)), color, 1, backing(dark))
     for k, row in enumerate(rows):
         d.Draw2dText(row, color, rg.Point2d(left + 7, top + 3 + LINE_H * k), False, size)

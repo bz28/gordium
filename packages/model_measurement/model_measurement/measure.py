@@ -29,6 +29,7 @@ from rule_format.rulebook import MEASURES_FILE, load
 
 from . import interpretations as law
 from .stops import stop
+from .street_lines import matching_ids, street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
 
@@ -38,9 +39,11 @@ PARALLEL = 30             # degrees: street lines turning more than this between
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count",
-          "dwelling_units": "count", "rooms_let_for_profit": "count", "conversion": "yes_no"}
+          "dwelling_units": "count", "rooms_let_for_profit": "count", "conversion": "yes_no",
+          "abuts_r1_district": "yes_no"}
 ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
-       "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units"}
+       "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
+       "abuts_r1_district": "no_abuts_r1"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",
@@ -153,6 +156,24 @@ class Lot:
             self.street_problem = stop("street_lines_apart")
         elif len(street) == n:
             self.street_problem = stop("all_street")
+        elif facts.get("corner_lot") is not True:
+            # lot width is frontage on ONE public right-of-way (§325-8, Column 7: street_lines): street lines on two
+            # streets, or of no known street swinging more than TURN_LIMIT_DEG in all (a corner, even rounded into
+            # short pieces), are never measured along both (review rounds 5 and 6, P0); a street that bends is
+            # asked about, never called two
+            ids = facts.get("street_ids")
+            stale = ids is not None and matching_ids(facts["street_line"], ids) is None
+            # names that don't match the lines (saved before the lines changed): set aside, never used, and said
+            # (review round 7, P1: they made the whole check fail)
+            verdict, turn = ("stale", None) if stale else self.street_verdict(facts)
+            if verdict == "stale":
+                self.street_problem = stop("street_names_stale")
+            elif verdict == "two":
+                self.street_problem = stop("two_streets")
+            elif verdict == "unsure":
+                self.street_problem = stop("one_street_or_two", turn=round(turn or 0))
+        # the outline cleaned within its accuracy (PR 18) only after every street check above, which reads the
+        # lines as drawn (street_ids are matched to them end to end); a lot with a problem is never cleaned
         self.outline_note = None
         self.drawn, self.pieces = self.edges, None
         if not self.problems and not self.street_problem:
@@ -215,6 +236,24 @@ class Lot:
     def line_of_piece(self, p: int) -> int:
         """The lot line a drawn piece is part of."""
         return next(k for k, run in enumerate(self.pieces) if p in run) if self.pieces else p
+
+    def street_verdict(self, facts):
+        """street_lines.street_verdict over the street lot lines in order along the street (each edge's own points:
+        a curved edge's swing counts), each with the street the facts name it on (`street_ids`, one per
+        `street_line`, None where unknown)."""
+        n, s = len(self.edges), set(self.street)
+        start = next(i for i in self.street if (i - 1) % n not in s)
+        order = [(start + k) % n for k in range(len(self.street))]
+        given, ids = facts.get("street_line") or [], facts.get("street_ids") or []
+
+        def named(i):
+            e = self.edges[i]
+            for k, (a, b) in enumerate(given):
+                if (_same_point(e[0], a) and _same_point(e[-1], b)) or (_same_point(e[0], b) and _same_point(e[-1], a)):
+                    return ids[k] if k < len(ids) else None
+            return None
+
+        return street_verdict([self.edges[i] for i in order], [named(i) for i in order])
 
     def _contiguous(self, idx) -> bool:
         n = len(self.edges)
@@ -299,6 +338,52 @@ def union(parts):
         return shapely.normalize(ops.unary_union(parts).buffer(0))
     except shapely.errors.GEOSException:
         return shapely.normalize(shapely.union_all(parts, grid_size=1e-6).buffer(0))
+
+
+def _at_ground(building: dict, buildings: list[dict], plan_level: float, points, grade_known: bool,
+               home=None) -> object:
+    """The solid read at the ground, decided per SOLID (#15 rounds 7-8). Resting on the ground: cut at the higher
+    of its grade and its own bottom (a slab above grade on a slope is never cut below itself). Its grade: the grade
+    plane for the main building and every solid joined to it (`home`, _grade_home); a separate building with spot
+    grades of its own (a shed on lower ground) at its own §325-3 grade plane (_separate_grade; review rounds 9-10). Raised off it
+    (a balcony): left out (Polygon()), so it counts only from above. Whether it rests: from ITS OWN ground
+    (ground_for: the spot grades at its walls, never another building's) when there is any; else from the grade
+    when the ground is known (flat); else, the ground not known, never from ground data but from the drawing
+    (_raised_by_shape): a solid above the lowest one is not raised for that alone."""
+    if not building.get("faces"):
+        return Polygon()
+    bottom = _bottom(building)
+    others = [b for b in buildings if b is not building]
+    ground = ground_for([building], points, others)[0] if points else None
+    level = plan_level
+    if ground:
+        rests = bottom <= max(ground) + TOL
+        level = _separate_grade(building, buildings, points, home)
+        if level is None:
+            level = plan_level if _is_home(building, home) else sum(ground) / len(ground)
+    elif grade_known:
+        rests = bottom <= plan_level + TOL
+    else:
+        rests = not _raised_by_shape(building, buildings)
+    return _section(building, max(level, bottom) + TOL) if rests else Polygon()
+
+
+def _raised_by_shape(building: dict, buildings: list[dict]) -> bool:
+    """With the ground not known, whether the drawing itself shows a solid raised off the ground: it stands over
+    another solid, or it overhangs (nothing under its footprint while a solid it touches rests lower: a balcony)."""
+    plan, bottom = _projection(building), _bottom(building)
+    others = [b for b in buildings if b is not building and b.get("faces")]
+    under = [b for b in others if _projection(b).intersection(plan).area > TOL and _bottom(b) < bottom - TOL]
+    if any(_extent(b)[1] <= bottom + TOL for b in under):
+        return True                      # on top of another solid
+    group = next((g for g in _connected(buildings) if any(b is building for b in g)), [building])
+    lower = any(_bottom(b) < bottom - TOL for b in group if b is not building)
+    return lower and not under
+
+
+def _bottom(building: dict) -> float:
+    """A building's lowest point."""
+    return min(p[2] for f in building["faces"] for p in f["points"])
 
 
 def _section(building: dict, z: float):
@@ -1043,18 +1128,28 @@ def _with_each_as_main(record: dict, candidates: list[dict], facts: dict) -> dic
     return _decide("building_height", readings, record.get("how") or "", list(dict.fromkeys(objects)), question)
 
 
-def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
+REFUSALS = ("below_floors", "above_drawn", "below_one")   # a count typed the drawing rules out: its stop is
+# stories_<code>, and the record carries the code (stories_refused) so whoever asked rolls the count back by it,
+# never by matching the words
+
+
+def _refused(code: str, reason: str) -> dict:
+    """The stories record for a count typed and refused: needs review with its reason, and the code."""
+    assert code in REFUSALS
+    return dict(_missing("stories", reason), stories_refused=code)
+
+
+def _stories_whole(parts: list[dict], grade, why_grade, stated, called: str | None = None) -> dict:
     """STORY of one building made of parts (the main building first; with #18, the parts touching it, §325-18A),
-    by one rule: stories are counted only from Gordium's floor blocks. A part that isn't floor blocks (one plain
-    solid, or plain solids stacked) is never counted from its height or its blocks: the count typed stands as the
-    architect's statement for the whole building, and only if it is at least the floors counted on any part and
-    the solids stacked in any plain part (each might be a story); else,
-    or with none typed, needs review. A part below the ground is the §325-3 basement question: needs review,
-    whatever was typed. A plain part starting above the ground (beside the roof or over it) may be another
-    story: needs review, whatever its plan relation. Parts one over another in plan with a real gap between them (a floor deleted, a block
-    lifted, a room floating over the roof) are a question: a floor not drawn, or a space open to below. With only floor blocks, the most
-    counted on any part, the count typed a reading beside it
-    (a question if they disagree). Each reason says what is drawn."""
+    read from the drawing as far as it allows. Gordium's floor blocks are counted; a part drawn as a plain solid (or
+    plain solids stacked) h tall holds at most floor(h / 7 ft) stories (the lowest habitable ceiling, R305.1), and
+    every building holds at least a first story (§325-3). The building's least is the floors counted (or one), its
+    most the most any part could hold: equal, it is read; between, it asks (the count entered stands only within
+    them). A part below the ground is the §325-3 basement question; a plain part starting above the ground may be
+    another story; parts one over another in plan with a real gap, or one sunk into another, are a question: each
+    needs review whatever was typed. With only floor blocks, the most counted on any part, a count typed beside it
+    (fewer is refused; more is a question). `called`: how the building is named in the words ("the building"),
+    else by the part's id. Each reason says what is drawn."""
     ids = [i for b in parts for i in _parts(b)]
     if why_grade:
         return _missing("stories", why_grade)
@@ -1081,29 +1176,41 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated) -> dict:
         counts.append(int(got["value"]))
     counted = max(counts) if counts else None
     if not plain:
+        if stated is not None and stated < counted:     # fewer than the floors drawn: refused, never a reading
+            return _refused("below_floors", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
         readings = [("Gordium's floor blocks" + (", the most on any part" if len(counts) > 1 else ""), counted, {})]
         if stated is not None:
             readings.append(("as stated by the architect", stated, {}))
         return _decide("stories", readings, "the floor blocks of the building counted (each story drawn as its own "
                        "solid by Gordium)", ids, "the count typed disagrees with the floors drawn: a question (story)")
-    if stated is None:
-        if len(parts) == 1:             # one building drawn as plain solids: draw its floors, or say how many
-            return _missing("stories", stop("no_stories"))
-        return _missing("stories", stop("stories_plain_part", what=", ".join(b["id"] for b in plain)))
-    for stack in (b for b in plain if b.get("parts")):
-        # plain solids stacked one on another are a plain part too: each block might be a story, so a count typed
-        # below the blocks is a question; never one that must equal them (the count is the whole building's)
-        if stated < len(stack["parts"]):
-            return _missing("stories", stop("stories_below_blocks", typed=f"{stated:g}", what=stack["id"],
-                                            blocks=len(stack["parts"])))
-    if counted is not None and stated < counted:
-        return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
-    if len(parts) == 1:
-        return _record("stories", "count", _r(stated), "stated by the architect (not measured from the model: no floor "
-                       "blocks are drawn)", ids)
-    return _record("stories", "count", _r(stated), "stated by the architect for the whole building (part of it isn't "
-                   "drawn as floor blocks" + (f"; at least the {counted} floor blocks drawn" if counted else "") + ")",
-                   ids)
+    # read from the drawing as far as it allows: a plain part h tall can hold at most floor(h / 7 ft) stories
+    # (the lowest ceiling a habitable room may have, R305.1), and holds at least one if it can hold one; the
+    # building's least is the floors counted (or that one), its most the most any part could hold
+    could = {b["id"]: math.floor((_rise(b) + TOL) / STORY_ROOM) for b in plain}
+    tallest = max(plain, key=_rise)
+    least = max([counted or 0, 1])      # every building has a first story (§325-3: from a floor to the roof)
+    most = max([counted or 0, 1] + list(could.values()))
+    name = called or tallest["id"]      # the building by name, never the main one's words for another solid
+    holds = (f"{name}, {_r(_rise(tallest)):g} ft tall, could hold up to {could[tallest['id']]} "
+             f"stor{'y' if could[tallest['id']] == 1 else 'ies'} (7 ft a story, R305.1)")
+    if stated is not None:              # the architect's count for the whole building: only within what's drawn
+        if counted is not None and stated < counted:
+            return _refused("below_floors", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
+        if stated > most:
+            return _refused("above_drawn", stop("stories_above_drawn", typed=f"{stated:g}", what=name,
+                                            height=f"{_r(_rise(tallest)):g}", most=most))
+        if stated < least:              # (no floor blocks drawn: fewer than the first story every building has)
+            return _refused("below_one", stop("stories_below_one", typed=f"{stated:g}"))
+        return _record("stories", "count", _r(stated), "stated by the architect for the whole building, within what "
+                       f"the drawing allows ({least} to {most}: {holds})", ids)
+    if least == most:                   # the drawing allows one count only: read, nothing to ask
+        return _record("stories", "count", _r(least), f"read from the drawing: {holds}" +
+                       (f"; {counted} floor blocks drawn" if counted else ""), ids)
+    return _decide("stories", [(f"at least: {'the floor blocks drawn' if counted else 'one story'}", least, {}),
+                               (f"at most: {holds}", most, {})],
+                   "the stories the drawing allows (floor blocks counted; a plain solid at 7 ft a story, R305.1)", ids,
+                   f"a {_r(_rise(tallest)):g} ft solid ({name}) could hold up to {could[tallest['id']]} "
+                   "stories: draw its floors or enter the count (story)")
 
 
 def _footprint(building: dict):
@@ -1160,15 +1267,22 @@ def _fits_in_the_first_story(part: dict, grade) -> bool:
             and _rise(part) < STORY_ROOM - TOL)
 
 
-def _ground_against(solids: list[dict], grade) -> str | None:
+def _ground_against(solids: list[dict], grade, off_check: bool = True, points=None, pool=None,
+                    home=None) -> str | None:
     """What is wrong with this ground level against these solids, or None: the ground must meet them, taken
     together (stacked floors, a basement or a tower drawn as its own solid sit above or below it), at or above their
     lowest point and below their top; and a solid wholly under the ground is a basement only if it is joined
     directly under the building. Checked for the whole site, and again for each candidate building at its own
-    grade (_candidate_grades)."""
+    grade (_candidate_grades). With spot grades, whether the ground meets them is _floating's, at the footprint
+    (off_check False): one test, whatever the spot grades' positions. Whether a solid is wholly under the ground:
+    the grade's own building (`home`: the main building or the candidate, and every solid joined to it) against the
+    grade, as its height and stories are; a separate building with spot grades of its own against its own ground
+    (a shed on lower ground is never "under" the house's grade; review rounds 9-10). `pool`: every building on
+    the lot (default: these solids)."""
     zs = [p[2] for b in solids for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
-    off = (lo, hi) if zs and grade is not None and (grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None
+    off = (lo, hi) if off_check and zs and grade is not None and (
+        grade < lo - TOL or hi - lo > TOL and grade >= hi - TOL) else None
     # a solid wholly under the ground is a basement only if it is joined directly under the building: its top
     # meets the bottom of a solid above it (the building, or a basement already joined to it) and it lies within
     # that solid's plan. Any other (left at z = 0 when the rest was moved to a survey level, or a part left at its
@@ -1178,7 +1292,16 @@ def _ground_against(solids: list[dict], grade) -> str | None:
         spans = {b["id"]: (min(p[2] for f in b["faces"] for p in f["points"]),
                            max(p[2] for f in b["faces"] for p in f["points"])) for b in solids if b.get("faces")}
         plans = {b["id"]: _projection(b) for b in solids if b["id"] in spans}
-        joined = {i for i, (lo_, hi_) in spans.items() if hi_ > grade + TOL or hi_ - lo_ <= TOL}   # above, or a slab
+        level = {}                      # a separate building's own ground; the grade's own building: the grade
+        for b in solids:
+            if points and b["id"] in spans and not _is_home(b, home):
+                own = _separate_grade(b, pool or solids, points, home)
+                if own is None:             # its spot grades don't give a grade plane: its lowest ground there
+                    ground, _ = ground_for([b], points, [x for x in (pool or solids) if x is not b])
+                    own = min(ground) if ground else None
+                level[b["id"]] = grade if own is None else own
+        at = lambda i: level.get(i, grade)  # noqa: E731
+        joined = {i for i, (lo_, hi_) in spans.items() if hi_ > at(i) + TOL or hi_ - lo_ <= TOL}   # above, or a slab
         waiting = [i for i in spans if i not in joined]
         while True:                     # from the top down: a sub-basement joins under a joined basement
             found = [i for i in waiting
@@ -1188,11 +1311,11 @@ def _ground_against(solids: list[dict], grade) -> str | None:
                 break
             joined |= set(found)
             waiting = [i for i in waiting if i not in found]
-        buried = spans[waiting[0]] if waiting else None
+        buried = (at(waiting[0]), *spans[waiting[0]]) if waiting else None
     if off:
         return stop("ground_off_building", ground=_r(grade), bottom=_r(off[0]), top=_r(off[1]))
     if buried:
-        return stop("buried_solid", ground=_r(grade), bottom=_r(buried[0]), top=_r(buried[1]))
+        return stop("buried_solid", ground=_r(buried[0]), bottom=_r(buried[1]), top=_r(buried[2]))
     return None
 
 
@@ -1213,7 +1336,11 @@ def _candidate_grades(assemblies, buildings: list[dict], facts: dict, grade, why
             rest = [b for b in buildings if not any(b is m for m in members)]
             g, why = _grade_from_points(members, facts["grade_points"], rest)
             why = stop("grade_with_others") if why else None
-        out.append(dict(c, grade=g, why=why or (_ground_against(members, g) if g is not None else None)))
+        spots = facts.get("grade_points")
+        out.append(dict(c, grade=g, why=why or (_meets_ground(members, spots, buildings) if spots else None) or
+                        (_ground_against(members, g, off_check=not spots, points=spots, pool=buildings,
+                                         home=_joined_ids(members, buildings))
+                         if g is not None else None)))
     return out
 
 
@@ -1233,12 +1360,18 @@ def _stories_over(assemblies, grade, why_grade, stated) -> dict:
         g, why_g = (c["grade"], c["why"]) if "grade" in c else (grade, why_grade)
         parts = _one_vertical_building(members, everyone)
         parts = parts[:1] + [b for b in parts[1:] if not _fits_in_the_first_story(b, g)]
-        r = _stories_whole(parts, g, why_g, stated)
+        # the count typed is the main building's: another building read as the main one has only its own drawing
+        r = _stories_whole(parts, g, why_g, None if c["kind"] == "as_main" else stated,
+                           "the building" if c["kind"] == "main_only" and len(parts) == 1 else None)
         if r["value"] is None and not r["readings"]:
             return r
         found.append((words, r, c["kind"]))
+    # whether a count entered could settle it: only if every candidate still open is one the count is for (never
+    # another building read as the main one: pick the main building first)
+    ranged = [kind for _, r, kind in found if r["value"] is None and "could hold up to" in (r["reason"] or "")]
+    settles = bool(ranged) and "as_main" not in ranged
     if len(found) == 1:
-        return found[0][1]
+        return dict(found[0][1], count_settles=settles)
     readings, questions, objects = [], [], []
     for words, r, _ in found:
         objects += r["objects"]
@@ -1250,8 +1383,8 @@ def _stories_over(assemblies, grade, why_grade, stated) -> dict:
         questions.append(ACCESSORY)
         if any(kind == "as_main" for _, _, kind in found):
             questions.append(MAIN_QUESTION)
-    return _decide("stories", readings, "the stories of the building, read over its candidate buildings",
-                   list(dict.fromkeys(objects)), "; ".join(dict.fromkeys(questions)))
+    return dict(_decide("stories", readings, "the stories of the building, read over its candidate buildings",
+                        list(dict.fromkeys(objects)), "; ".join(dict.fromkeys(questions))), count_settles=settles)
 
 
 # ---- measuring -------------------------------------------------------------------------------------------
@@ -1287,30 +1420,219 @@ def tax_map_lot_area(polygon) -> dict:
 SPOT_REACH = 2.0     # ft: a spot grade this close to a wall (in plan) is the ground level at that wall
 
 
-def _floating(buildings: list[dict], points: list) -> str | None:
-    """ground_off_building when nothing drawn reaches the ground: the ground under the buildings' footprint is below
-    their lowest point everywhere. The ground at each footprint corner is the spot grades' best-fit plane when the
-    points fix one well (three or more, not near a line); else the nearest spot grade's level. Floating only if
-    clear at every corner; touching if clear at one; between, it can't be told: ground_unclear (it asks). Read from
-    the points themselves, so a point drifting off a wall never hides it (stress F15)."""
+def _building_problems(buildings: list[dict]) -> str | None:
+    """Why the buildings can't be measured at all, or None: none drawn; the reader's problems; two objects with
+    one id; an object with no faces; one that encloses nothing (_unenclosed). THE refusal, for the measuring and
+    for the envelope alike."""
+    if not buildings:
+        return stop("no_building")
+    ids = [b["id"] for b in buildings]
+    same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
+    return "; ".join([p for b in buildings for p in b.get("problems") or []]
+                     + [stop("same_id", id=i) for i in same]
+                     + ([stop("empty_building")] if any(not b.get("faces") and not b.get("problems")
+                                                        for b in buildings) else [])
+                     + list(dict.fromkeys(why for b in buildings if b.get("faces") and not b.get("problems")
+                                          for why in [_unenclosed(b)] if why))) or None
+
+
+def envelope_grade(buildings: list[dict], facts: dict) -> tuple:
+    """(grade, None) or (None, reason): the grade plane the envelope may be drawn from, by the measuring's own
+    refusals (THE same functions): buildings it can't measure, a grade plane it can't find, and buildings that
+    don't meet the ground (_meets_ground)."""
+    why = _building_problems(buildings) if buildings else None     # none yet: the spot grades alone
+    if why:
+        return None, why
+    grade, why = grade_plane(buildings, facts)
+    if why:
+        return None, why
+    stacked = _stacks(buildings)
+    # the measuring's own ground test (the same two functions): meeting the ground, and no solid buried under it
+    why = _meets_ground(stacked, facts["grade_points"], stacked) or \
+        (_ground_against(buildings, grade, off_check=False, points=facts["grade_points"],
+                         home=_grade_home(buildings, facts))
+         if buildings and grade is not None else None)
+    return (None, why) if why else (grade, None)
+
+
+def _unenclosed(building: dict) -> str | None:
+    """open_solid when a building object encloses no volume, read from its own faces (the reader also checks it;
+    this never relies on that). Seen along each axis (from above, from the front, from the side), a closed solid's
+    faces cover its outline there at least twice, once on each side: every face counts as it is drawn, so a wall a
+    hair off plumb is never left out. Walls only or faces of no area (nothing seen from above), or a face missing
+    (a wall: seen from the side, covered once), is open. A top missing over walls on a floor is left to no_roof,
+    its own words."""
+    faces = building["faces"]
+
+    def seen(k):                        # along axis k: the faces' outlines there, and their area added up
+        drop = [i for i in range(3) if i != k]
+        shapes = []
+        for f in faces:
+            ring = [(p[drop[0]], p[drop[1]]) for p in f["points"]]
+            holes = [[(p[drop[0]], p[drop[1]]) for p in h] for h in f.get("holes") or []]
+            shapes.append(Polygon(ring, holes).buffer(0) if len(ring) >= 3 else Polygon())
+        return sum(g.area for g in shapes), ops.unary_union(shapes).area if shapes else 0.0
+
+    short = []
+    for k in (2, 0, 1):
+        total, outline = seen(k)
+        if outline <= 1e-6:
+            if k == 2:
+                return stop("open_solid", what=_called(building))
+            continue
+        if total < 2 * outline * (1 - 1e-3):
+            short.append(k)
+    if not short:
+        return None
+    bottom = min(p[2] for f in faces for p in f["points"])
+    level = [f for f in faces if abs(_normal_z(f["points"])) > 0.001]
+    walls = len(level) < len(faces)
+    if short == [2] and walls and all(all(abs(p[2] - bottom) <= TOL for p in f["points"]) for f in level):
+        return None                     # walls on a floor, nothing over them: no_roof says so
+    return stop("open_solid", what=_called(building))
+
+
+def _called(building: dict) -> str:
+    """An object as the architect finds it: its Rhino name, else its id (Zoom to finds it by id)."""
+    return building.get("name") or building["id"]
+
+
+def _open_ids(buildings: list[dict]) -> list:
+    """The objects that aren't closed solids (the reader's word, or the measuring's own _unenclosed)."""
+    shut = stop("open_solid", what="")
+    return [b["id"] for b in buildings if any(str(p).startswith(shut) for p in b.get("problems") or [])
+            or (b.get("faces") and not b.get("problems") and _unenclosed(b))]
+
+
+def _joined_ids(members: list[dict], buildings: list[dict]) -> set:
+    """The ids of these solids and every solid joined to them (_connected): one building for the ground."""
+    ids = {i for m in members for i in _parts(m)}
+    for g in _connected(buildings):
+        if any(i in ids for b in g for i in _parts(b)):
+            ids |= {i for b in g for i in _parts(b)}
+    return ids
+
+
+def _grade_home(buildings: list[dict], facts: dict) -> set | None:
+    """The solids the grade plane is read for (grade_plane: pick_main's main building), with every solid joined to
+    them: one building, read against that grade by every test (height, stories, buried, the cut). None: no main."""
+    main, _ = pick_main(_stacks(buildings), facts)
+    return _joined_ids([main], buildings) if main is not None else None
+
+
+def _is_home(building: dict, home) -> bool:
+    """Whether a solid belongs to the grade's own building (or there is no telling: then it does)."""
+    return home is None or any(i in home for i in _parts(building))
+
+
+def _separate_grade(building: dict, buildings: list[dict], points, home):
+    """A separate building's own grade plane (§325-3, _grade_from_points over its joined group, from its own spot
+    grades), or None: the grade's own building (the grade plane is its), no spot grades, or none to be found."""
+    if not points or _is_home(building, home):
+        return None
+    group = next((g for g in _connected(buildings) if any(b is building for b in g)), [building])
+    rest = [b for b in buildings if not any(b is x for x in group)]
+    grade, why = _grade_from_points(group, points, rest)
+    return None if why else grade
+
+
+def _connected(buildings: list[dict]) -> list[list[dict]]:
+    """The buildings as connected groups: touching in plan (a balcony or a wing against the house's side, within
+    TOUCH: the same distance that makes a solid part of the main building for the yards, _touching; #18 review round
+    25) or one over another (as _stacks and _one_vertical_building join them). One helper, for the ground test."""
+    groups = []
+    for b in buildings:
+        plan = _footprint(b) if b.get("faces") or b.get("plans") else None
+        joined = [g for g in groups if plan is not None and any(
+            (o.get("faces") or o.get("plans")) and _footprint(o).distance(plan) <= TOUCH for o in g)]
+        merged = [b] + [o for g in joined for o in g]
+        groups = [g for g in groups if not any(g is j for j in joined)] + [merged]
+    return groups
+
+
+def _meets_ground(solids: list[dict], points: list, pool: list[dict]) -> str | None:
+    """Whether each building group (_connected: touching in plan or one over another, so a balcony against the
+    house's side is part of it, never a building floating on its own) meets the ground the spot grades describe at
+    its own footprint (_floating), the points at another group's walls being that group's ground: one plane per
+    building, so a terraced lot is never one plane misfitted across it. A raised part inside a group is the
+    stories' own question (part_raised). The first problem, or None. `solids` and `pool` (every building on the
+    lot) as _stacks joined them."""
+    for group in _connected(solids):
+        mine = {i for b in group for i in _parts(b)}
+        rest = [x for x in pool if not set(_parts(x)) & mine]
+        why = _floating(group, points, rest)
+        if why:
+            return why
+    return None
+
+
+def _fits(pts) -> bool:
+    """Whether the spot grades fix a plane well: three or more, not near a line."""
+    xy = pts[:, :2] - pts[:, :2].mean(axis=0)
+    return len(pts) >= 3 and np.linalg.matrix_rank(xy) == 2 and np.linalg.cond(xy) < 30
+
+
+def _ground_at(corners: list, points: list) -> list:
+    """THE ground under each corner from the spot grades (for _floating and the ground cut alike): their best-fit
+    plane when they fix one well, clamped to the levels measured (never extrapolated), else the nearest point's."""
+    pts = np.array([p[:3] for p in points], dtype=float)
+    if _fits(pts):
+        coef, *_ = np.linalg.lstsq(np.c_[pts[:, :2], np.ones(len(pts))], pts[:, 2], rcond=None)
+        lo_z, hi_z = float(pts[:, 2].min()), float(pts[:, 2].max())     # never beyond the levels measured
+        return [min(max(coef[0] * x + coef[1] * y + coef[2], lo_z), hi_z) for x, y in corners]
+    return [float(pts[int(np.argmin(((pts[:, :2] - (x, y)) ** 2).sum(axis=1))), 2]) for x, y in corners]
+
+
+def _own_points(buildings: list[dict], points: list, others: list = ()) -> list:
+    """The spot grades that are these buildings' ground: a point at one of the `others`' walls (and not at these
+    buildings') is that building's ground, never these (THE filter, for the grade plane, _floating and the cut)."""
+    near = [_projection(b) for b in others if b.get("faces")]
+    if not near or not points:
+        return list(points or [])
+    mine = ops.unary_union([_projection(b) for b in buildings if b.get("faces")])
+    theirs = ops.unary_union(near)
+    return [p for p in points if not (theirs.distance(Point(p[:2])) <= SPOT_REACH
+                                      and mine.distance(Point(p[:2])) > SPOT_REACH)]
+
+
+def ground_for(buildings: list[dict], points: list, others: list = ()) -> tuple:
+    """THE ground model: (the ground under each corner of these buildings' footprint, or None when there is none
+    of their own; their own spot grades). From their own spot grades only (_own_points), by _ground_at. _floating,
+    the ground cut (_at_ground) and the envelope (through _meets_ground) all read it."""
+    corners = [p[:2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
+    own = _own_points(buildings, points, others)
+    return (_ground_at(corners, own) if own and corners else None), own
+
+
+def _floating(buildings: list[dict], points: list, others: list = ()) -> str | None:
+    """Whether the buildings meet the ground the spot grades describe, ONE test whatever the points' positions
+    (stress F15): the ground at every corner of their footprint (every face point seen from above), from the
+    points' best-fit plane when they fix one well (three or more, not near a line), else the nearest point's
+    level, clamped to the levels measured (never extrapolated). They meet it if their bottom is at or below the
+    ground at some corner (on a slope the rest stands above it by no more than the ground's own fall across the
+    footprint: an exposed foundation) and their top is above it; otherwise ground_off_building, or ground_unclear
+    when the points can't tell. A point at one of the `others`' walls (and not these buildings') is that
+    building's ground, never these: left out, as for the grade plane."""
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     corners = [p[:2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]    # never empty
     if not zs or not points or not corners:
         return None
-    pts = np.array([p[:3] for p in points], dtype=float)
-    xy = pts[:, :2] - pts[:, :2].mean(axis=0)
-    fits = len(pts) >= 3 and np.linalg.matrix_rank(xy) == 2 and np.linalg.cond(xy) < 30   # not near a line
-    if fits:
-        coef, *_ = np.linalg.lstsq(np.c_[pts[:, :2], np.ones(len(pts))], pts[:, 2], rcond=None)
-        ground = [coef[0] * x + coef[1] * y + coef[2] for x, y in corners]
-    else:                               # too few or in a line: the nearest spot grade at each corner
-        ground = [pts[int(np.argmin(((pts[:, :2] - (x, y)) ** 2).sum(axis=1))), 2] for x, y in corners]
-    lowest = min(zs)
-    if lowest > max(ground) + TOL:
-        return stop("ground_off_building", ground=_r(max(ground)), bottom=_r(lowest), top=_r(max(zs)))
-    if not fits and lowest > min(ground) + TOL:    # above some of the ground, the rest unknown: ask
+    ground, points = ground_for(buildings, points, others)
+    if not points:                      # every point is another building's ground: none for this one
         return stop("ground_unclear")
-    return None
+    pts = np.array([p[:3] for p in points], dtype=float)
+    fits = _fits(pts)
+    bottom, top = min(zs), max(zs)
+    gaps = [bottom - g for g in ground]          # above the ground (+) or below it (-) at each corner
+    meets = min(gaps) <= TOL and top > max(ground) + TOL
+    if meets:
+        return None
+    if not fits:                                # the nearest points only: floating if they are near every corner
+        far = max(float(np.sqrt(((pts[:, :2] - (x, y)) ** 2).sum(axis=1)).min()) for x, y in corners)
+        if far > 5 * SPOT_REACH:
+            return stop("ground_unclear")
+    worst = max(ground)
+    return stop("ground_off_building", ground=_r(worst), bottom=_r(bottom), top=_r(top))
 
 
 def grade_plane(buildings: list[dict], facts: dict) -> tuple:
@@ -1394,6 +1716,13 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
         _PLANES.clear()
         _PLAN_OF.clear()
     assumed = out.pop("_assumed_main", None)
+    shut = stop("open_solid", what="")
+    open_ids = _open_ids(site.get("buildings") or []) if any(
+        shut in (r.get("reason") or "") for r in out.values() if isinstance(r, dict)) else []
+    for name in MEASURES:               # a row waiting on an open object points at it (Zoom to finds it), and
+        r = out[name]                   # still at any building off the lot named beside it (review round 24)
+        if open_ids and r.get("value") is None and shut in (r.get("reason") or ""):
+            out[name] = dict(r, objects=list(dict.fromkeys([*open_ids, *(r.get("objects") or [])])))
     if assumed:                         # every measurement made from the starting house carries the marker
         for name in MEASURES:
             r = out[name]
@@ -1439,14 +1768,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
                        if facts.get("zone") else _record("district", "text", reason=stop("no_district")))
     buildings = site.get("buildings") or []
     grade = facts.get("grade_elevation")
-    # objects are told apart by id below (spans, outlines): two with one id would leave one out silently
-    ids = [b["id"] for b in buildings]
-    same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
-    why_building = (stop("no_building") if not buildings else
-                    "; ".join([p for b in buildings for p in b.get("problems") or []]
-                              + [stop("same_id", id=i) for i in same]
-                              + [stop("empty_building") for b in buildings[:1]
-                                 if any(not b_.get("faces") and not b_.get("problems") for b_ in buildings)]) or None)
+    # objects are told apart by id below (spans, outlines): two with one id are refused (_building_problems)
+    why_building = _building_problems(buildings)
     # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
     # survey elevation typed for a model drawn at z = 0) would give a negative or inflated height, and an empty
@@ -1456,11 +1779,14 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         grade, why_spots = grade_plane(buildings, facts)        # grade plane, once the buildings can be measured
     zs = [p[2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
-    ground_problem = _ground_against(buildings, grade) if grade is not None else None
-    if ground_problem is None and facts.get("grade_points") and not why_building:
-        # whether the buildings reach the ground never depends on the spot grades sitting at their walls: the
-        # ground under their footprint (the spot grades' plane), against their own lowest point (stress F15)
-        ground_problem = _floating(buildings, facts["grade_points"])
+    spots = facts.get("grade_points") if not why_building else None
+    # whether the buildings meet the ground: with spot grades ONE test, at their footprint, whatever the points'
+    # positions (stress F15: the grade plane's average and the footprint judged it differently); else the level
+    stacked = _stacks(buildings) if spots else []
+    home = _grade_home(buildings, facts) if spots else None       # the solids the grade plane is read for
+    ground_problem = (_meets_ground(stacked, spots, stacked) if spots else None) or \
+        (_ground_against(buildings, grade, off_check=not spots, points=spots, home=home)
+         if grade is not None else None)
     why_grade = (why_spots if why_spots else stop("no_ground") if grade is None else
                  ground_problem if ground_problem else
                  None if facts.get("grade_points") else
@@ -1471,7 +1797,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # building's own base, so the plan is still measured; a grade that contradicts the building (off it, a solid
     # buried under it) still stops the plan, since then even the base can't be trusted.
     why_plan = ground_problem
-    plan_level = grade if (grade is not None and not why_grade) else lo
+    grade_known = grade is not None and not why_grade       # a real ground level, not the buildings' own base
+    plan_level = grade if grade_known else lo
     # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
@@ -1567,47 +1894,62 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     else:
         out["lot_width"] = _width(lot, facts, lines)
 
-    views = ({b["id"]: _views(b, plan_level, facts) for b in buildings} if plan_level is not None and not why_building
-             else {})
-    # each building on its own (each stack, each detached building): one wholly off the lot can't be measured
-    # against it (outside_lot, whatever the others do); one that crosses a lot line is measured, and the yard to
-    # its own crossings are recorded (_mark_crossings): it fails every rule that measures it, never a pass
+    # each building as the yards and coverage see it. Its walls at ground level (`ground`): decided per solid,
+    # from the one ground model (_at_ground, #15 rounds 7-8): a solid resting on the ground is cut at the higher of
+    # the grade plane and its own bottom; one raised off it (a balcony) is left out. `buildings` as _stacks joined
+    # them, the list _at_ground reads (each solid's neighbours, its own spot grades)
+    views = ({b["id"]: _views(b, facts, _at_ground(b, buildings, plan_level, spots, grade_known, home))
+              for b in buildings} if plan_level is not None and not why_building else {})
     # one rule for each building on its own (each stack, each detached building), whatever the others are:
     # within the lot: measured as usual; partly outside: every rule that measures it does not comply
     # (_mark_crossings, naming the lines it crosses where they can be told); wholly outside: the rules that would
-    # measure it need review (outside_lot: is it part of this design?)
+    # measure it need review (outside_lot: is it part of this design?). An object covering nothing seen from above
+    # has nowhere to be placed: it is open (_unenclosed), refused with its own name by _building_problems, so it
+    # is never placed here
     place = {}
     for b in buildings:
         p = _projection(b)
-        place[b["id"]] = ("flat" if p.is_empty else          # nothing seen from above: nowhere to place it
-                          "on" if p.within(lot.polygon.buffer(TOL)) else
-                          "off" if p.intersection(lot.polygon).area <= 1e-6 else "partly")
+        if not p.is_empty:
+            place[b["id"]] = ("on" if p.within(lot.polygon.buffer(TOL)) else
+                              "off" if p.intersection(lot.polygon).area <= 1e-6 else "partly")
     crossed = {i: _crossed(lot, _projection(next(b for b in buildings if b["id"] == i)))
                for i, s in place.items() if s == "partly"}
     crosses = bool(crossed)
     group = [main, *parts_of] if main is not None else []
-    def off_named(bs, how="off"):   # which buildings are wholly outside the lot (or flat), by name (term-index's words)
-        off = [b for b in bs if place.get(b["id"]) == how]
+    # an object that isn't a closed solid stops every measurement, by name (_building_problems; measure() points
+    # every row waiting on it at it). When that is the only thing wrong, a building wholly off the lot is still
+    # said beside it, naming its own objects (review round 24): the architect sees both at once
+    opened = set(_open_ids(site.get("buildings") or [])) if why_building else set()
+    only_open = bool(opened) and _building_problems(
+        [b for b in site.get("buildings") or [] if b["id"] not in opened]) is None
+    beside = not why_building or only_open      # whether the placement's own reasons can be said
+
+    def placed(bs):                 # the buildings the placement can speak for (never an open object)
+        return [b for b in bs if not set(_parts(b)) & opened] if beside else []
+
+    def off_named(bs):              # which buildings are wholly outside the lot, by name (term-index's words)
+        off = [b for b in bs if place.get(b["id"]) == "off"]
         main_off = any(b is main for b in off)
         n = len(off) - main_off
         return " and ".join((["the main building" if len(buildings) > 1 else "the building"] if main_off else []) +
                             ([f"{n} other building{'s' if n > 1 else ''}" if main_off or main is not None else
                               f"{n} building{'s' if n > 1 else ''}"] if n else []))
-    def unplaced(bs):               # wholly off the lot, or covering nothing seen from above: the rules wait,
-        # saying every reason that applies, each naming its own buildings (review round 22)
-        return "; ".join([stop("flat_building", what=off_named(bs, "flat"))] * any(place.get(b["id"]) == "flat"
-                                                                                  for b in bs) +
-                         [stop("outside_lot", what=off_named(bs))] * any(place.get(b["id"]) == "off" for b in bs)
-                         ) or None
 
-    def unplaced_ids(bs):           # the objects those reasons are about: the panel shows them
-        return [i for b in bs if place.get(b["id"]) in ("flat", "off") for i in _parts(b)]
+    def unplaced(bs):               # wholly off the lot: the rules that would measure it wait, naming them
+        bs = placed(bs)
+        return stop("outside_lot", what=off_named(bs)) if any(place.get(b["id"]) == "off" for b in bs) else None
+
+    def unplaced_ids(bs):           # the objects that reason is about: the panel shows them
+        return [i for b in placed(bs) if place.get(b["id"]) == "off" for i in _parts(b)]
+
+    def both(*whys):                # every reason that applies, each naming its own buildings (round 22)
+        return "; ".join(w for w in whys if w) or None
     why_main_off = unplaced(group)
     why_acc_off = unplaced(detached)
-    why_inside = why_building or unplaced(buildings)    # coverage
+    why_inside = both(why_building, unplaced(buildings))    # coverage
     if why_inside or why_plan or plan_level is None:
         out["building_area"] = _missing("building_area", why_inside or why_plan or why_grade)
-        if why_inside and unplaced_ids(buildings) and not why_building:     # which ones: the panel shows them
+        if why_inside and unplaced_ids(buildings):     # which ones: the panel shows them
             out["building_area"]["objects"] = unplaced_ids(buildings)
     else:
         out["building_area"] = _coverage(buildings, views, facts, main)
@@ -1626,14 +1968,17 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
 
     # every other reason the plan can't be trusted, on its own (never read off an `or` chain: review round 9)
     why_rest = why_building or why_plan or why_main or (why_grade if plan_level is None else None)
-    why_yards = why_building or why_main_off or why_rest
+    why_yards = both(why_building, why_main_off) if why_building else why_main_off or why_rest
     if why_yards:
         for name in YARDS + EAVE_YARDS + ACCESSORY_YARDS:
             out[name] = _missing(name, why_yards)
-        if why_main_off and not why_building and not why_rest:      # the unplaced buildings named (round 22)
+        if why_main_off and (why_building or not why_rest):      # the unplaced buildings named (round 22)
             for name in YARDS + EAVE_YARDS:
                 out[name]["objects"] = unplaced_ids(group)
-        if why_main_off and not why_building and not why_rest and why_acc_off:
+        if why_building:                # an open object: the accessory rules wait on it, and on their own placement
+            for name in ACCESSORY_YARDS:
+                out[name] = dict(_missing(name, both(why_building, why_acc_off)), objects=unplaced_ids(detached))
+        elif why_main_off and not why_rest and why_acc_off:
             for name in ACCESSORY_YARDS:        # an accessory building unplaced too: its own reason, its own ids
                 out[name] = dict(_missing(name, why_acc_off), objects=unplaced_ids(detached))
         elif why_main_off and not why_rest and detached:
@@ -1763,10 +2108,11 @@ PROJ_QUESTION = ("whether a part below the roof that sticks out past the walls a
 PROJECTION = 2.0          # ft: eaves and similar features may project this far into a required yard (§325-18B)
 
 
-def _views(building: dict, level: float, facts: dict) -> dict:
+def _views(building: dict, facts: dict, ground) -> dict:
     """A building as the yards and coverage see it: `above`, the full outline, everything its solids cover seen
     from above (what every yard and coverage is measured to); `body`, the same without the candidate eaves
-    (_eave_candidate: a suggestion only); `ground`, its walls at ground level; `candidate`, the candidate's
+    (_eave_candidate: a suggestion only); `ground`, its walls at ground level, as given (_at_ground: decided per solid
+    from the one ground model; empty for a solid raised off the ground); `candidate`, the candidate's
     fingerprint (None if there is none); `confirmed`, the architect's confirmation that it is eaves, if any."""
     above = _projection(building)
     candidate = _eave_candidate(building) if building.get("faces") else None
@@ -1776,7 +2122,7 @@ def _views(building: dict, level: float, facts: dict) -> dict:
     if body.is_empty:
         body = above
     has = above.difference(body.buffer(TOL)).area > 1e-6
-    return {"above": above, "body": body, "ground": _section(building, level + TOL),
+    return {"above": above, "body": body, "ground": ground,
             "candidate": candidate["overhang"] if has else None,
             "confirmed": _confirmed(facts, candidate) if has else None}
 
@@ -2065,13 +2411,6 @@ def _accessory_yards(out: dict, lot: Lot, lines: dict, facts: dict, detached: li
     if rule is None:
         for name in ACCESSORY_YARDS:
             out[name] = _missing(name, stop("law_missing", what="§325-25's finding (side_yard)"))
-        return
-    flat = [b for b in detached if views[b["id"]]["above"].is_empty]
-    if flat:                            # nothing to place against the lot lines (_measure says so first: a defence)
-        n = len(flat)
-        for name in ACCESSORY_YARDS:
-            out[name] = dict(_missing(name, stop("flat_building", what=f"{n} other building{'s' if n > 1 else ''}")),
-                             objects=[i for b in flat for i in _parts(b)])
         return
     shape = ops.unary_union([views[b["id"]]["above"] for b in detached])
     objects = [lot.id, *[i for b in detached for i in _parts(b)]]

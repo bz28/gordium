@@ -6,8 +6,9 @@ SHA-256, store policy); no AI. Nothing here is ever measured or checked: it is d
     context(lot_ring, http)    lot_ring: the lot's outline in EPSG:2261 (US survey feet), as the services give it
 
 Each layer comes back with its source and that source's `store` (endpoints.yaml): the Rhino side writes into the
-.3dm only the layers whose store is `raw` (parcels, streets) and shows the others live, never saved (the building
-footprints, until Ben decides: context map plan D1). Coordinates are Gordium's feet from `origin` (the lot's
+.3dm only the layers whose store is `raw` (parcels, streets and, since Ben's decision of 2026-10-21, the building
+footprints, as editable outlines) and shows any other live, never saved (the general path for a source that may not
+be kept). Coordinates are Gordium's feet from `origin` (the lot's
 centroid, as the lookup's lot outline), so the lookup's placement in the model applies to them unchanged.
 """
 
@@ -26,7 +27,8 @@ HALF_SIZE_FT = 750.0                       # half the square's side: 1500 ft × 
 LAYERS = {                                 # name: (endpoints.yaml source, the only fields asked for)
     "parcels": ("state_parcels", "SWIS,PRINT_KEY"),          # never owner, mailing or value fields
     "streets": ("state_streets", "CompleteStreetName"),
-    "buildings": ("state_buildings", "SourceDate"),
+    "buildings": ("state_buildings", "OBJECTID,SourceDate,NYSGeo_Source"),    # the id: an edited outline is known
+                                                                                # on redraw; the source: ODbL is left out
 }
 PARCEL_NOTE = ("Tax parcels: NYS Tax Parcels Public (from Tompkins County Real Property): for planning and general "
                "use only, not a substitute for a legal parcel survey.")
@@ -65,6 +67,13 @@ def context(lot_ring, http, half_size_ft: float = HALF_SIZE_FT, origin=None, now
             continue
         if not complete:
             layer.update(status="partial", message=f"Only the first {len(feats)} of {layer['name']} were drawn.")
+        if name == "buildings":                  # only footprints from a source reviewed for keeping (allow-list)
+            feats, left = cleared(feats)
+            if left:
+                layer["message"] = (layer.get("message", "") + " %d footprint%s left out: %s source (%s) isn't "
+                                    "cleared for keeping in your file." % (
+                                        len(left), "s" if len(left) != 1 else "", "their" if len(left) != 1 else "its",
+                                        ", ".join(sorted(set(left))))).strip()
         try:
             layer["items"] = _items(name, feats, box, centre, feet, lot_id)
         except (KeyError, TypeError, ValueError, IndexError) as e:     # a malformed answer: that layer, not a crash
@@ -80,11 +89,26 @@ def context(lot_ring, http, half_size_ft: float = HALF_SIZE_FT, origin=None, now
         states = {v["status"] for v in out["layers"].values()}
         out.update(status="offline" if states == {"offline"} else "error",
                    message="Couldn't fetch the neighbourhood: the lot is drawn without it.")
-    elif len(found) < len(out["layers"]) or any(v["status"] == "partial" for v in out["layers"].values()):
+    else:                     # every layer's word reaches the architect: a failure, a partial answer, left-out data
         out["message"] = " ".join(v["message"] for v in out["layers"].values() if v.get("message"))
     out["credits"] = list(credits(out).values())
     out["snapshot"] = snapshot(out, f)
     return out
+
+
+def cleared(feats) -> tuple[list, list]:
+    """(footprints kept, the sources of those left out): only footprints whose NYSGeo_Source is in endpoints.yaml's
+    reviewed_sources are kept, any other is left out (review of the editable outlines, P2: an exact "Microsoft" match
+    let "NYS Geospatial Services - previously, Microsoft", still ODbL, through)."""
+    reviewed = {str(s).strip().lower() for s in ENDPOINTS["state_buildings"].get("reviewed_sources") or []}
+    kept, left = [], []
+    for ft in feats:
+        source = str((ft.get("attributes") or {}).get("NYSGeo_Source") or "").strip()
+        if source.lower() in reviewed:
+            kept.append(ft)
+        else:
+            left.append(source or "unknown")
+    return kept, left
 
 
 def _items(name, feats, box, centre, feet, lot_id=None) -> list[dict]:
@@ -96,22 +120,29 @@ def _items(name, feats, box, centre, feet, lot_id=None) -> list[dict]:
             rings = [g.open_ring(r) for r in ft["geometry"]["rings"]]
             if (pid == lot_id) if lot_id else g.inside_any(centre, rings):
                 continue                                     # the lot itself
-            for r in rings:
+            for k, r in enumerate(rings):
                 clipped = g.clip_ring(r, box)
-                if clipped:
-                    items.append({"id": pid, "ring": [feet(p) for p in clipped]})
+                if clipped:                       # each ring its own id (one edited ring never hides its siblings)
+                    items.append({"id": pid if k == 0 else "%s #%d" % (pid, k + 1), "name": pid,
+                                  "ring": [feet(p) for p in clipped]})
     elif name == "streets":
+        seen: dict[str, int] = {}
         for ft in feats:
             street = ((ft.get("attributes") or {}).get("CompleteStreetName") or "").strip()
             for path in ft["geometry"]["paths"]:
                 for piece in g.clip_path([tuple(p[:2]) for p in path], box):
-                    items.append({"name": street, "path": [feet(p) for p in piece]})
+                    seen[street] = seen.get(street, 0) + 1            # an id per piece (an edited one is known on redraw)
+                    items.append({"id": "%s #%d" % (street, seen[street]), "name": street,
+                                  "path": [feet(p) for p in piece]})
     else:
         for ft in feats:
-            for r in ft["geometry"]["rings"]:
+            oid = (ft.get("attributes") or {}).get("OBJECTID")
+            for k, r in enumerate(ft["geometry"]["rings"]):
                 clipped = g.clip_ring(g.open_ring(r), box)
-                if clipped:
-                    items.append({"ring": [feet(p) for p in clipped]})
+                if clipped:                       # each ring its own id (one edited ring never hides its siblings)
+                    base = "footprint-%s" % oid if oid is not None else ""
+                    items.append({"id": base if k == 0 or not base else "%s #%d" % (base, k + 1),
+                                  "ring": [feet(p) for p in clipped]})
     return items
 
 

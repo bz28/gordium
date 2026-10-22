@@ -54,7 +54,7 @@ A6 [rhino] **Removed from the box:**
 - the starting building is always drawn with the envelope (a "Hide starting house" toggle sits in the panel, and hiding it doesn't stop it being checked);
 - floor-to-floor stays 11'-8" in code, editable later through GordiumFacts.
 
-A6b [rhino] **The neighbourhood (context map).** After Draw on a looked-up lot, the 1500 ft × 1500 ft square around it is drawn as a site context drawing: neighbouring parcels and street centerlines (the State's, `store: raw`) as grey curves on locked `Gordium::Context::Parcels` / `::Streets`, the square, a north arrow (the lot is turned so its street runs along the bottom, so north is rarely up), a 100 ft scale bar and the source lines on `::Notes`; the building footprints (`store: none` until Ben decides) only on screen. Never measured (`rhino_logic.classify`). A "Show neighbourhood" tick in the panel; turned on in a reopened file it fetches again. (`design_checker.context_box`, `site_lookup.context`.)
+A6b [rhino] **The neighbourhood (context map).** After Draw on a looked-up lot, the 1500 ft × 1500 ft square around it is drawn as a site context drawing: neighbouring parcels and street centerlines (the State's, `store: raw`) as grey curves on locked `Gordium::Context::Parcels` / `::Streets`, the square, a north arrow (the lot is turned so its street runs along the bottom, so north is rarely up), a 100 ft scale bar and the source lines on `::Notes`; the building footprints (kept, Ben's decision 2026-10-21) as outlines without heights on the unlocked `::Buildings` layer, editable: an outline the architect edits is theirs and Gordium never removes or redraws it. Never measured (`rhino_logic.classify`); a solid on those layers over the lot is said. A "Show neighbourhood" tick in the panel, kept with the file. (`design_checker.context_box`, `site_lookup.context`.)
 
 A7 [rhino] **Look.** System default buttons and checkboxes; no brand accent color.
 
@@ -144,13 +144,13 @@ D4 [both] **Columns.**
 - The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Deltas read like "+11'-7"", "−2'-6"", "at limit", "+0.06%". Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns.
 - The value columns are sized to their content and never truncated; only Item truncates. Minimum panel width 320.
 
-D5 [code] **Groups,** in order: Does not comply · Needs review · Complies (Site rows included, labelled "Site · …") · Not checked · Not covered by this rulebook. Section headers aren't selectable.
+D5 [code] **Groups,** in order: Does not comply · Needs review · Complies (Site rows included, labelled "Site · …") · Not checked · Not checked yet (the rules not in Gordium yet). Section headers aren't selectable.
 
 D6 [both] **Side yards** are two rows, "Side yard, West" and "Side yard, East", and the plan shows the same values.
 
 D7 [code] **Not checked.**
 - Rows: "Parking · needs input", "Dwelling units · needs input" (the Enter… buttons live in the lower pane: "Enter bedrooms and parking spaces", "Enter the number of units, including any ADU"), and "Overlays · not in this release" (historic, gorge, flood).
-- **Not covered by this rulebook:** a collapsible group listing the sections not encoded: §325-16A and B height exceptions, §325-18 yard projections, §325-19C corner lots, §325-25 accessory structures, §325-28 ADUs.
+- **Not checked yet** (Ben, 2026-10-21; was "Not covered by this rulebook"): a collapsible group listing the sections not in Gordium yet, each row "Not in Gordium yet — coming in a later version. Check this by hand for now: <section>" (the report's Check sheet the same): §325-16A and B height exceptions, §325-18 yard projections, §325-19C corner lots, §325-25 accessory structures, §325-28 ADUs.
 
 D8 [rhino] **Refresh** keeps the selected item (by item id), the expanded groups and the scroll position.
 

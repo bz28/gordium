@@ -3,11 +3,12 @@
 
 A fresh document from Rhino's feet template; GordiumStart with 106 Ithaca Rd typed and Look up pressed (recorded
 answers by default, the live services with sc.sticky["gordium_context_live"] = True); then records: the context
-layers (locked, grey, visible), how many objects each holds and every object's source, the live footprints on
-screen, how long the neighbourhood took, the check's summary (it must be what it is without the context), the
-panel tick off and on again, and what a saved copy of the file holds (read back with File3dm: no object, user
-text or document string from a store: none source); then a second address (Edit site…, 109 Ithaca Rd) and what is
-left of the first neighbourhood. Each claim is asserted (the run fails loudly otherwise). Writes
+layers (grey, visible, locked but for the footprints), how many objects each holds and every object's source, the
+footprints as real editable outlines (Ben, 2026-10-21), how long the neighbourhood took, the check's summary (it must
+be what it is without the context), a footprint the architect drags (kept as theirs, never drawn twice), a solid
+on the neighbourhood layers over the lot (said, never measured), the panel tick off and on again, and what a saved
+copy of the file holds (read back with File3dm: the footprints, their credit and date); then a second address
+(Edit site…, 109 Ithaca Rd) and what is left of the first neighbourhood. Each claim is asserted (the run fails loudly otherwise). Writes
 <temp>/gordium_context/out.json and frames/*.png (Top and Perspective); closes its documents (keep another
 document open while it runs)."""
 import json
@@ -79,6 +80,14 @@ def _own_box(geom):
     return box, [geom.Plane.PointAt(c.X, c.Y) for c in list(box.GetCorners())[:4]]
 
 
+def footprints(g, doc, every=False):
+    """The footprint outlines on the Buildings layer: Gordium's (with its source mark), or every one (edited too)."""
+    index = doc.Layers.FindByFullPath(g.logic.CONTEXT + "::Buildings", -1)
+    objs = list(doc.Objects.FindByLayer(doc.Layers[index]) or []) if index >= 0 else []
+    objs = [o for o in objs if isinstance(o.Geometry, Rhino.Geometry.Curve)]
+    return objs if every else [o for o in objs if o.Attributes.GetUserString(g.logic.CONTEXT_KEY)]
+
+
 def notes_inside_square(g, doc):
     """Every object on the Notes layer, besides the square itself, measured inside the square by its own points: a
     text by the corners of its box in its own plane (turned with the square), a curve by its vertices, a dot by its
@@ -147,10 +156,12 @@ try:
     log["layers_after_redraw"] = context_layers(g, doc)
     layers = log["layers"]
     sub = {k.split("::")[-1]: v for k, v in layers.items() if k.count("::") >= 2}
-    claim("1 the neighbourhood is drawn on its own locked, grey layers: parcels, streets, notes",
-          set(sub) >= {"Parcels", "Streets", "Notes"} and all(sub[n]["objects"] > 0 for n in ("Parcels", "Streets", "Notes"))
-          and all(v["locked"] and v["visible"] and v["colour"] == g.CONTEXT_GREYS[n] for n, v in sub.items()
-                  if n in g.CONTEXT_GREYS), sub)
+    claim("1 the neighbourhood is drawn on its own grey layers, locked but for the footprints",
+          set(sub) >= {"Parcels", "Streets", "Buildings", "Notes"}
+          and all(sub[n]["objects"] > 0 for n in ("Parcels", "Streets", "Buildings", "Notes"))
+          and all(v["locked"] == g.logic.context_locked(k) and v["visible"]
+                  and v["colour"] == g.CONTEXT_GREYS[k.split("::")[-1]] for k, v in layers.items()
+                  if k.split("::")[-1] in g.CONTEXT_GREYS), sub)
     notes = " ".join(sub["Notes"]["names"] + sub["Notes"]["texts"]).lower()
     claim("1 the notes: a north arrow, a scale bar and the sources",
           "north" in notes and "scale" in notes and "source" in notes, sub["Notes"])
@@ -164,8 +175,20 @@ try:
           n["dimension_scale"] == 1.0 and n["text_height_ft"] is not None
           and abs(n["text_height_ft"] - g.logic.NOTE_HEIGHT_FT) < 0.01
           and n["line_height_ft"] is not None and 0 < n["line_height_ft"] <= g.logic.NOTE_LINE_FT + 0.01, n)
-    claim("2 the building footprints are on screen (live: claim 5 checks they are never saved)",
-          log["footprints_on_screen"] > 0, {"on_screen": log["footprints_on_screen"]})
+    feet = footprints(g, doc)
+    parent = doc.Layers.FindByFullPath(g.logic.CONTEXT, -1)
+    doc.Objects.UnselectAll()
+    selectable = bool(feet) and doc.Objects.Select(feet[0].Id)       # a locked object (or locked parent) can't be
+    doc.Objects.UnselectAll()
+    log["footprints"] = {"outlines": len(feet), "unlocked": not sub["Buildings"]["locked"],
+                         "parent_unlocked": parent >= 0 and not doc.Layers[parent].IsLocked,
+                         "selectable": selectable,
+                         "curves": all(isinstance(o.Geometry, Rhino.Geometry.Curve) for o in feet)}
+    claim("2 the building footprints are real, editable outlines on the unlocked Buildings layer (Ben, 2026-10-21)",
+          len(feet) > 0 and log["footprints"]["unlocked"] and log["footprints"]["parent_unlocked"]
+          and log["footprints"]["selectable"] and log["footprints"]["curves"]
+          and all(o.Attributes.GetUserString(g.logic.GEOM_KEY) and o.Attributes.GetUserString(g.logic.PIECE_KEY)
+                  and o.Attributes.GetUserString(g.logic.DRAWN_KEY) == str(o.Id) for o in feet), log["footprints"])
     claim("3 the checker never measures the context: one lot", log["checker_sees"]["lot_candidates"] == 1,
           log["checker_sees"])
     with_context = log["summary"]
@@ -180,10 +203,77 @@ try:
           {k: v["objects"] for k, v in context_layers(g, doc).items()} == {k: v["objects"] for k, v in layers.items()},
           {"first": {k: v["objects"] for k, v in layers.items()},
            "again": {k: v["objects"] for k, v in context_layers(g, doc).items()}})
+    # the architect drags one footprint 10 ft; the neighbourhood is drawn again around the same lot
+    feet = footprints(g, doc)
+    moved, other, lifted = feet[0], feet[1], feet[2]
+    moved_id, other_guid = moved.Attributes.GetUserString(g.logic.PIECE_KEY), other.Id
+    lifted_id = lifted.Attributes.GetUserString(g.logic.PIECE_KEY)
+    doc.Objects.Transform(moved, Rhino.Geometry.Transform.Translation(g._model_length(doc, 10.0), 0, 0), True)
+    doc.Objects.Transform(lifted, Rhino.Geometry.Transform.Translation(0, 0, g._model_length(doc, 3.0)), True)  # up
+    before = len(feet)
+    g.draw_context(doc, g._ui_state(doc).get("lookup_frame"))
+    after = footprints(g, doc, every=True)
+    kept = [o for o in after if o.Attributes.GetUserString(g.logic.PIECE_KEY) == moved_id]
+    up = [o for o in after if o.Attributes.GetUserString(g.logic.PIECE_KEY) == lifted_id]
+    log["edited"] = {"before": before, "after": len(after), "kept": len(kept),
+                     "lifted_kept_once": len(up) == 1 and bool(up[0].Attributes.GetUserString(g.logic.EDITED_KEY)),
+                     "kept_is_theirs": bool(kept) and bool(kept[0].Attributes.GetUserString(g.logic.EDITED_KEY))
+                     and not kept[0].Attributes.GetUserString(g.logic.CONTEXT_KEY),
+                     "unedited_replaced": doc.Objects.FindId(other_guid) is None}
+    claim("3 an edited footprint stays (the architect's), is not drawn twice; the others are replaced",
+          log["edited"]["kept"] == 1 and log["edited"]["kept_is_theirs"] and log["edited"]["after"] == before
+          and log["edited"]["lifted_kept_once"] and log["edited"]["unedited_replaced"], log["edited"])
+    # review of the editable outlines, round 2: a copy pasted in place (same points, same attributes, Gordium's keys
+    # too) and a footprint whose print width the architect set are theirs: kept, the width one not drawn twice
+    feet = [o for o in footprints(g, doc) if not o.Attributes.GetUserString(g.logic.EDITED_KEY)]
+    source, widened = feet[0], feet[1]
+    source_id = source.Attributes.GetUserString(g.logic.PIECE_KEY)
+    widened_id = widened.Attributes.GetUserString(g.logic.PIECE_KEY)
+    copy_guid = doc.Objects.AddCurve(source.Geometry.DuplicateCurve(), source.Attributes.Duplicate())
+    wide = widened.Attributes.Duplicate()
+    wide.PlotWeightSource = Rhino.DocObjects.ObjectPlotWeightSource.PlotWeightFromObject
+    wide.PlotWeight = 0.35
+    doc.Objects.ModifyAttributes(widened, wide, True)
+    before = len(footprints(g, doc, every=True))
+    g.draw_context(doc, g._ui_state(doc).get("lookup_frame"))
+    after = footprints(g, doc, every=True)
+    copy = doc.Objects.FindId(copy_guid)
+    log["copy_and_width"] = {
+        "copy_kept_as_theirs": copy is not None and bool(copy.Attributes.GetUserString(g.logic.EDITED_KEY))
+        and not copy.Attributes.GetUserString(g.logic.CONTEXT_KEY),
+        "copied_one_redrawn": len([o for o in after if o.Attributes.GetUserString(g.logic.PIECE_KEY) == source_id]) == 2,
+        "width_kept_once": [o.Attributes.PlotWeight for o in after
+                            if o.Attributes.GetUserString(g.logic.PIECE_KEY) == widened_id] == [0.35],
+        "before": before, "after": len(after)}
+    claim("3 a copy pasted in place and a footprint given a print width are the architect's: kept, never doubled",
+          log["copy_and_width"]["copy_kept_as_theirs"] and log["copy_and_width"]["copied_one_redrawn"]
+          and log["copy_and_width"]["width_kept_once"] and log["copy_and_width"]["after"] == before,
+          log["copy_and_width"])
+    # a solid on the neighbourhood layers over the lot: never measured, so said
+    lot = g._find(doc, g.current_facts(doc).get("lot_id") or "")
+    centre = lot.Geometry.GetBoundingBox(True).Center
+    attrs = Rhino.DocObjects.ObjectAttributes()
+    attrs.LayerIndex = doc.Layers.FindByFullPath(g.logic.CONTEXT + "::Buildings", -1)
+    attrs.Name = "Extruded footprint"
+    k = g._model_length(doc, 5.0)
+    solid = doc.Objects.AddBrep(Rhino.Geometry.Brep.CreateFromBox(Rhino.Geometry.BoundingBox(
+        centre.X - k, centre.Y - k, 0, centre.X + k, centre.Y + k, 2 * k)), attrs)
+    said_before = len(g.STATE.get("said", []))
+    g.run_check(doc, report=False)
+    log["solid_said"] = g.STATE.get("said", [])[said_before:]
+    lots_now, _, _ = g._sorted_objects(doc)
+    last = g.STATE.get("last") or {}
+    row = [i for i in last.get("items", []) if i.get("name") == "Objects on the lot not included"]
+    log["solid_check"] = {"state": last.get("state"), "row": row[0] if row else None}
+    claim("3 a solid on the neighbourhood layers over the lot makes the check need review, and is never measured",
+          last.get("state") == "needs_review" and bool(row) and row[0].get("status") == "needs_review"
+          and "neighbourhood layers" in (row[0].get("reason") or "") and len(lots_now) == 1, log["solid_check"])
+    doc.Objects.Delete(solid, True)
     for name in ("Top", "Perspective"):
         view = doc.Views.Find(name, False) or doc.Views.ActiveView
         doc.Views.ActiveView = view
-        box = guides.get("box")
+        square = [o for o in doc.Objects if (o.Attributes.Name or "").startswith("Context square")]
+        box = square[0].Geometry.GetBoundingBox(True) if square else None     # the whole neighbourhood square
         if name == "Top" and box is not None and box.IsValid:
             view.ActiveViewport.ZoomBoundingBox(box)
         else:
@@ -194,12 +284,36 @@ try:
             bmp.Save(FRAMES + "106_context_%s.png" % name.lower())
     g.show_context(False)
     log["tick_off"] = context_layers(g, doc)
+    log["tick_off_locks"] = {k: v["locked"] for k, v in log["tick_off"].items()}
     g.show_context(True)
     log["tick_on"] = context_layers(g, doc)
-    claim("4 the panel tick hides it and shows it again",
-          all(not v["visible"] for v in log["tick_off"].values()) and all(v["visible"] for v in log["tick_on"].values()),
+    log["tick_on_locks"] = {k: v["locked"] for k, v in log["tick_on"].items()}
+    # review round 4 (the Rhino job): a parent layer's IsVisible gave its sublayers its lock, so all came out unlocked
+    claim("4 the panel tick hides it and shows it again, and only Parcels, Streets and Notes stay locked",
+          all(not v["visible"] for v in log["tick_off"].values()) and all(v["visible"] for v in log["tick_on"].values())
+          and all(locks[k] == g.logic.context_locked(k) for locks in (log["tick_off_locks"], log["tick_on_locks"])
+                  for k in locks),
           {"off": {k: v["visible"] for k, v in log["tick_off"].items()},
-           "on": {k: v["visible"] for k, v in log["tick_on"].items()}})
+           "on": {k: v["visible"] for k, v in log["tick_on"].items()},
+           "off_locks": log["tick_off_locks"], "on_locks": log["tick_on_locks"]})
+    # review round 5: with the architect's "Gordium" layer (and their Gordium::Grade) locked, a redraw must still
+    # delete Gordium's own outlines (not draw a second set beside them) and put both locks back as they were
+    top = doc.Layers.FindByFullPath("Gordium", -1)
+    grade = doc.Layers[g._layer(doc, "Gordium::Grade")]
+    before = len(footprints(g, doc))
+    doc.Layers[top].IsLocked, grade.IsLocked = True, True
+    said_before = len(g.STATE.get("said", []))
+    g.draw_context(doc, g._ui_state(doc).get("lookup_frame"))
+    locks = {k: v["locked"] for k, v in context_layers(g, doc).items()}
+    log["locked_parent"] = {"before": before, "after": len(footprints(g, doc)), "gordium_locked": doc.Layers[top].IsLocked,
+                            "grade_locked": doc.Layers[grade.Index].IsLocked, "locks": locks,
+                            "said": g.STATE.get("said", [])[said_before:]}
+    doc.Layers[top].IsLocked, doc.Layers[grade.Index].IsLocked = False, False
+    lp = log["locked_parent"]
+    claim("4 with the Gordium layer and the architect's Gordium::Grade locked, a redraw replaces (never doubles) and "
+          "puts both locks back", lp["after"] == lp["before"] > 0 and lp["gordium_locked"] and lp["grade_locked"]
+          and all(v == g.logic.context_locked(k) for k, v in locks.items())
+          and not [t for t in lp["said"] if "could not remove" in t], lp)
     path = S + "saved.3dm"
     doc.Export(path)
     f = Rhino.FileIO.File3dm.Read(path)
@@ -209,9 +323,34 @@ try:
     log["saved_sources"] = sorted(set(stored))
     log["saved_strings"] = [f.Strings.GetKey(i) for i in range(f.Strings.Count)]
     blob = json.dumps([f.Strings.GetValue(i) for i in range(f.Strings.Count)])
-    log["saved_has_footprints"] = "state_buildings" in set(stored) or "2014" in blob
-    claim("5 a saved file keeps no live-only (store: none) source", not log["saved_has_footprints"],
-          log["saved_sources"])
+    notes_text = " ".join((getattr(o.Geometry, "PlainText", "") or "") for o in f.Objects
+                          if (o.Attributes.Name or "") == "Sources")
+    log["saved_footprints"] = {"outlines": stored.count("state_buildings"), "credit": "footprints dated 2014" in
+                               " ".join(notes_text.split())}
+    claim("5 a saved file keeps the footprints (Ben, 2026-10-21) with their credit and date on the Sources note",
+          log["saved_footprints"]["outlines"] > 0 and log["saved_footprints"]["credit"]
+          and set(log["saved_sources"]) <= {"", "gordium", "state_parcels", "state_streets", "state_buildings"},
+          log["saved_footprints"])
+    # review of the editable outlines, round 3: the saved file reopened (Gordium deleted its holding layer, made
+    # before the context layers when Look up held the sample lot, so their indexes move down: asserted, round 4): a
+    # clear takes Gordium's untouched outlines, keeps only the architect's (the dragged, lifted, widened ones, the copy)
+    theirs = len([o for o in footprints(g, doc, every=True) if o.Attributes.GetUserString(g.logic.EDITED_KEY)])
+    index_before = doc.Layers.FindByFullPath(g.logic.CONTEXT + "::Buildings", -1)
+    again = Rhino.RhinoDoc.OpenHeadless(path)
+    try:
+        index_after = again.Layers.FindByFullPath(g.logic.CONTEXT + "::Buildings", -1)
+        g._clear_context(again)
+        left = footprints(g, again, every=True)
+        log["reopened"] = {"buildings_index": [index_before, index_after], "theirs_before": theirs,
+                           "left": len(left), "gordiums_left": len([o for o in left if o.Attributes.GetUserString(
+                               g.logic.CONTEXT_KEY)]),
+                           "theirs_left": len([o for o in left if o.Attributes.GetUserString(g.logic.EDITED_KEY)])}
+    finally:
+        again.Dispose()
+    claim("5 a saved and reopened file, a layer deleted before it: a clear removes Gordium's untouched outlines, "
+          "keeps only the architect's", theirs > 0 and index_after < index_before     # the shift happened (round 4)
+          and log["reopened"]["gordiums_left"] == 0
+          and log["reopened"]["left"] == log["reopened"]["theirs_left"] == theirs, log["reopened"])
     # a second address: Edit site…, 109 Ithaca Rd looked up (recorded); the first neighbourhood must go
     first_frame = (g._context_record(doc) or {}).get("frame")
     g.STATE.update(box_picks=["lookup"], box_overrides={"address": "109 Ithaca Rd, Ithaca, NY 14850"},
