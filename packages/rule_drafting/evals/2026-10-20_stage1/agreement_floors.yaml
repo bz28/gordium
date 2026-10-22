@@ -3,11 +3,11 @@
 # false-pass re-draft (Ben approved): the residential parking rules the checks now refuse (they passed churches and
 # two-family houses) went to a person, so their examples count as undrafted and agreement fell from the round-8 count
 # (R-1b 38, R-1a 63, R-2a/R-2b 82, R-2c 88, R-3a 88); that fall is the cost of no false pass. Keys: measurement-2
-# a98149b's R-1b, #20's R-1a and R-3a (2f1535b), r2-hand's R-2a, R-2b, R-2c (1983c47). Every difference is in
+# a98149b's R-1b, #20's R-1a and R-3a (0178c8b, on this branch), r2-hand's R-2a, R-2b, R-2c (1983c47). Every difference is in
 # grade_all_with_hand_keys.json.
-R-1b.yaml: 35       # of 48
-R-1a.yaml: 57       # of 74
-R-2a.yaml: 73       # of 98
-R-2b.yaml: 73       # of 99
-R-2c.yaml: 81       # of 224 (78 before round 9: the attached-units examples were judged with a substituted value)
-R-3a.yaml: 79       # of 141
+R-1b.yaml: 38       # of 48 (35 before the gap fixes: residential parking)
+R-1a.yaml: 64       # of 74 (57 before the gap fixes)
+R-2a.yaml: 84       # of 98 (73 before the gap fixes)
+R-2b.yaml: 84       # of 99 (73 before the gap fixes)
+R-2c.yaml: 85       # of 224 (81 before the gap fixes; its bedroom parking demoted: the key reviews zero-lot-line houses)
+R-3a.yaml: 88       # of 145 (79 of 141 before #20 updated the key and the gap fixes)

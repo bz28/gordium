@@ -987,7 +987,7 @@ rules:
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-3a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-3a.front_yard_minimum
+- id: R-3a.front_yard_min
   kind: rule
   topic: dimensions
   title: Minimum front yard (chart p.3)
@@ -1007,23 +1007,18 @@ rules:
       front_yard: 9
     expect: fail
   open_questions:
-  - Corner lots are deemed to have two front yards (§325-19C). Is that drafted separately, and which yards does
-    the front_yard measure cover on a corner lot?
-  - Does the front yard minimum depend on §325-45.5F, §325-19B or §325-17A for any lot?
+  - §325-19C says corner lots have two adjoining front yards that must each meet the minimum front yard. Which yard
+    does the front_yard measure take on a corner lot?
   research:
-  - question: Corner lots are deemed to have two front yards (§325-19C). Is that drafted separately, and which yards
-      does the front_yard measure cover on a corner lot?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Does the front yard minimum depend on §325-45.5F, §325-19B or §325-17A for any lot?
+  - question: §325-19C says corner lots have two adjoining front yards that must each meet the minimum front yard.
+      Which yard does the front_yard measure take on a corner lot?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-3a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-3a.side_yard_one_side_minimum
+- id: R-3a.side_one_min
   kind: rule
   topic: dimensions
   title: Minimum side yard, one side (chart p.3)
@@ -1043,31 +1038,18 @@ rules:
       side_yard_larger: 9
     expect: fail
   open_questions:
-  - The chart does not say which side is the 'one side' and which is the 'other side'. This rule treats the 'one
-    side' minimum as applying to the wider side yard; please confirm.
-  - R-2C has two numbers and footnote 14 in this cell (10 ft /15 ft by dwelling type), so it gets no rule here and
-    goes to a person.
-  - Accessory structures are exempt from the chart's side yard requirements (§325-25) and are governed separately.
+  - The chart does not say which side is the 'one side' and which is the 'other side'. This draft checks the wider
+    side yard against 'one side minimum' and the narrower against 'other side minimum'. Please confirm.
   research:
-  - question: The chart does not say which side is the 'one side' and which is the 'other side'. This rule treats
-      the 'one side' minimum as applying to the wider side yard; please confirm.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: R-2C has two numbers and footnote 14 in this cell (10 ft /15 ft by dwelling type), so it gets no rule
-      here and goes to a person.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Accessory structures are exempt from the chart's side yard requirements (§325-25) and are governed
-      separately.
+  - question: The chart does not say which side is the 'one side' and which is the 'other side'. This draft checks
+      the wider side yard against 'one side minimum' and the narrower against 'other side minimum'. Please confirm.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-3a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-3a.side_yard_other_side_minimum
+- id: R-3a.side_other_min
   kind: rule
   topic: dimensions
   title: Minimum side yard, other side (chart p.3)
@@ -1087,29 +1069,22 @@ rules:
       side_yard_smaller: 4
     expect: fail
   open_questions:
-  - The chart does not say which side is the 'other side'. This rule treats it as the narrower side yard; please
-    confirm.
-  - R-2C has three numbers and footnote 15 in this cell (0 ft / 5 ft / 10 ft by dwelling type), so it gets no rule
-    here and goes to a person.
+  - The chart does not say which side is the 'one side' and which is the 'other side'. This draft checks the narrower
+    side yard against 'other side minimum'. Please confirm.
   research:
-  - question: The chart does not say which side is the 'other side'. This rule treats it as the narrower side yard;
-      please confirm.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: R-2C has three numbers and footnote 15 in this cell (0 ft / 5 ft / 10 ft by dwelling type), so it
-      gets no rule here and goes to a person.
+  - question: The chart does not say which side is the 'one side' and which is the 'other side'. This draft checks
+      the narrower side yard against 'other side minimum'. Please confirm.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-3a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-3a.rear_yard_minimum
+- id: R-3a.rear_yard_min
   kind: rule
   topic: dimensions
-  title: Minimum rear yard, not less than 20 ft (chart p.3)
-  check: rear_yard >= max(min(0.2 * lot_depth, 50), 20)
+  title: Minimum rear yard, with fn16 (chart p.3)
+  check: rear_yard >= max(20, min(0.2 * lot_depth, 50))
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1125,14 +1100,6 @@ rules:
     quote: But not less than 20 ft.
   examples:
   - given:
-      lot_depth: 100
-      rear_yard: 20
-    expect: pass
-  - given:
-      lot_depth: 100
-      rear_yard: 19
-    expect: fail
-  - given:
       lot_depth: 40
       rear_yard: 20
     expect: pass
@@ -1141,35 +1108,87 @@ rules:
       rear_yard: 19
     expect: fail
   - given:
-      lot_depth: 1000
+      lot_depth: 100
+      rear_yard: 20
+    expect: pass
+  - given:
+      lot_depth: 100
+      rear_yard: 19
+    expect: fail
+  - given:
+      lot_depth: 400
       rear_yard: 50
     expect: pass
   - given:
-      lot_depth: 1000
+      lot_depth: 400
       rear_yard: 49
     expect: fail
   open_questions:
-  - Lot depth on irregular lots is not explained; confirm how lot_depth is measured for the rear yard percentage.
-  - The row label says 'whichever is less' and footnote 16 says 'But not less than 20 ft.' Confirm that the 20 ft
-    floor applies after taking the lesser of the percentage and the feet figure.
+  - How is lot depth measured for irregular lots and for through lots, for the percent of depth?
   research:
-  - question: Lot depth on irregular lots is not explained; confirm how lot_depth is measured for the rear yard
-      percentage.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: The row label says 'whichever is less' and footnote 16 says 'But not less than 20 ft.' Confirm that
-      the 20 ft floor applies after taking the lesser of the percentage and the feet figure.
+  - question: How is lot depth measured for irregular lots and for through lots, for the percent of depth?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-3a cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: R-3a.parking_per_dwelling_unit
+  kind: flag
+  topic: parking_and_loading
+  title: Residential parking per dwelling unit (chart p.14)
+  applies_when: use in ["one_family_detached", "one_family_detached_zero_lot_line"]
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 14
+    cell:
+      section: Residential
+      row: First three bed or sleeping rooms per dwelling unit
+      column: R-3A
+  - file: zoning_charts_2026-04.pdf
+    page: 14
+    cell:
+      section: Residential
+      row: 4-5 bed or sleeping rooms per dwelling unit
+      column: R-3A
+  - file: zoning_charts_2026-04.pdf
+    page: 14
+    cell:
+      section: Residential
+      row: Each additional bed or sleeping room
+      column: R-3A
+  open_questions:
+  - The chart's 'per dwelling unit' rows are drafted only for single-unit detached dwellings. For buildings of several
+    dwelling units, are spaces added up unit by unit? Those buildings are not covered by this rule and need an architect's
+    review.
+  - Does 'Each additional bed or sleeping room' start with the sixth room, after the 4-5 tier of 2 spaces? This
+    draft assumes so.
+  - Other uses go to §325-20.
+  research:
+  - question: The chart's 'per dwelling unit' rows are drafted only for single-unit detached dwellings. For buildings
+      of several dwelling units, are spaces added up unit by unit? Those buildings are not covered by this rule
+      and need an architect's review.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'Each additional bed or sleeping room' start with the sixth room, after the 4-5 tier of 2 spaces?
+      This draft assumes so.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Other uses go to §325-20.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+  notes: 'Demoted until re-drafted: The bedroom rule checks a one-family detached zero-lot-line house, a use that
+    needs a special permit here; the R-3a answer key sends its parking to review: a person checks the parking (gap
+    re-draft, 2026-10-21).'
 - id: R-3a.parking_dormitory
   kind: flag
   topic: parking_and_loading
-  title: Dormitory off-street parking per persons housed (chart p.14)
+  title: Dormitory parking per persons housed (chart p.14)
   applies_when: use == "dormitory"
   sources:
   - file: zoning_charts_2026-04.pdf
@@ -1179,11 +1198,11 @@ rules:
       row: Dormitory
       column: R-3A
   open_questions:
-  - The chart gives '1 space per 4 persons housed' without saying how a fraction of a space is treated. The check
-    compares whole spaces against the exact ratio, so a fraction rounds up.
+  - Is a fractional space required by 1 space per 4 persons rounded up or down? This draft requires the exact ratio,
+    which is the stricter reading.
   research:
-  - question: The chart gives '1 space per 4 persons housed' without saying how a fraction of a space is treated.
-      The check compares whole spaces against the exact ratio, so a fraction rounds up.
+  - question: Is a fractional space required by 1 space per 4 persons rounded up or down? This draft requires the
+      exact ratio, which is the stricter reading.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1192,6 +1211,45 @@ rules:
   notes: 'Demoted until re-drafted: The chart''s 1 space per 4 persons housed depends on how many persons a dormitory
     houses, which Gordium doesn''t count (and the chart doesn''t say how a fraction rounds): a person checks the
     parking (R-3a answer key, 2026-10-21).'
+- id: R-3a.parking_per_dwelling_unit_undecided_uses
+  kind: flag
+  topic: parking_and_loading
+  title: Parking for the uses no drafted rule decides (a person checks)
+  applies_when: use not in ["dormitory", "one_family_detached", "one_family_detached_zero_lot_line"]
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 14
+    cell:
+      section: Residential
+      row: First three bed or sleeping rooms per dwelling unit
+      column: R-3A
+  - file: zoning_charts_2026-04.pdf
+    page: 14
+    cell:
+      section: Residential
+      row: 4-5 bed or sleeping rooms per dwelling unit
+      column: R-3A
+  - file: zoning_charts_2026-04.pdf
+    page: 14
+    cell:
+      section: Residential
+      row: Each additional bed or sleeping room
+      column: R-3A
+  examples:
+  - given:
+      use: multiple_family
+    expect: needs_review
+  - given:
+      use: one_family_attached
+    expect: needs_review
+  - given:
+      use: dormitory
+    expect: not_applicable
+  notes: 'Added by code, not drafted: the chart''s parking applies to every use (per dwelling unit, and for all
+    other uses §325-20), and the drafted rules decide only dormitory, one_family_detached, one_family_detached_zero_lot_line.
+    A building of several dwelling units needs every unit counted; other uses go to §325-20.'
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
 - id: R-3a.325_8b_one_family_detached_area_per_primary_building
   kind: rule
   topic: dimensions

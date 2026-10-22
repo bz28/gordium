@@ -77,6 +77,9 @@ def test_a_cell_filled_by_the_template_for_its_form_is_no_gap_and_a_partly_used_
     assert not [g for g in got["unresolved"] if g["rule"].startswith("R-2c.")]
     got = judge(inputs, "chart-p3-maximum_lot_coverage_by_buildings", [PLAIN, FIRST, SECOND])
     assert [g["rule"] for g in got["unresolved"] if g["rule"].startswith("R-2c.")] == ["R-2c.max_coverage"]
+    every_use = FIRST | {"applies_when": ""}         # every use covered, but the cell's third number used by none
+    got = judge(inputs, "chart-p3-maximum_lot_coverage_by_buildings", [PLAIN, every_use, SECOND])
+    assert [g["rule"] for g in got["unresolved"] if g["rule"].startswith("R-2c.")] == ["R-2c.max_coverage"]
 
 
 def test_the_use_list_says_which_uses_are_buildings_of_several_dwelling_units(inputs):
@@ -108,6 +111,13 @@ def test_a_parking_rule_for_one_dwelling_unit_is_kept_and_one_passing_a_building
                     applies_when='use in ["one_family_detached", "one_family_detached_zero_lot_line"]')
     got = judge(inputs, "chart-p14-residential", [good])
     assert set(got["rules"]) >= {"R-1a", "R-1b", "R-2a", "R-2c"} and got["rejected"] == [], got["problems"][:2]
+    # the uses the rule leaves out (buildings of several units, other uses: §325-20) get a code-made flag, never
+    # silently unchecked: needs review for them, and not applicable where the drafted rule decides
+    flag = next(r for r in got["rules"]["R-2a"] if r["id"].endswith("_undecided_uses"))
+    assert flag["kind"] == "flag" and drafter.validate({"district": "R-2a", "rules": [flag]}, inputs.ctx) == []
+    for use, want in (("two_family", "needs_review"), ("one_family_attached", "needs_review"), ("church", "needs_review"),
+                      ("one_family_detached", "not_applicable")):
+        assert outcome(flag, {"use": use}, inputs.ctx.allowed()) == want, use
     bad = good | {"applies_when": 'use in ["one_family_detached", "one_family_semi_detached"]'}
     assert "it passes one_family_semi_detached" in " ".join(judge(inputs, "chart-p14-residential", [bad])["problems"])
 
@@ -145,9 +155,12 @@ def test_the_height_bonus_is_one_rule_that_relaxes_each_districts_chart_height(i
     r1a = got["rules"]["R-1a"][0]
     chart = [r for r in drafted["R-1a"] if r["id"] == r1a["relaxes"]]
     assert len(chart) == 1 and chart[0]["check"] == "building_height <= 35"
-    height = {r["id"]: r for r in apply_relaxes(drafted["R-1a"] + [r1a])}[r1a["relaxes"]]
     yards = {"front_yard": 25 + 2, "side_yard_larger": 10 + 2, "side_yard_smaller": 10 + 2, "rear_yard": 25 + 2,
              "lot_depth": 100}
+    # as the AI drafted it, the bonus never passes on its own word (round 10): needs review until proven
+    drafted_only = {r["id"]: r for r in apply_relaxes(drafted["R-1a"] + [r1a])}[r1a["relaxes"]]
+    assert outcome(drafted_only, yards | {"building_height": 37}, inputs.ctx.allowed()) == "needs_review"
+    height = {r["id"]: r for r in apply_relaxes(drafted["R-1a"] + [r1a], frozenset({r1a["id"]}))}[r1a["relaxes"]]
     assert outcome(height, yards | {"building_height": 37}, inputs.ctx.allowed()) == "pass"
     assert outcome(height, yards | {"building_height": 37, "front_yard": 26}, inputs.ctx.allowed()) == "fail"
     assert outcome(height, {"building_height": 37}, inputs.ctx.allowed()) == "needs_review"     # yards unknown
@@ -248,3 +261,92 @@ def test_eaves_are_checked_against_each_yard_less_two_feet_and_reviewed_where_th
     tall = {"front_yard_eaves": 24, "side_yard_larger_eaves": 9, "side_yard_smaller_eaves": 9, "building_height": 37}
     assert outcome(rule, tall | {"building_height": 30}, inputs.ctx.allowed()) == "pass"
     assert outcome(rule, tall, inputs.ctx.allowed()) == "needs_review"
+
+
+def test_a_later_session_that_never_answered_does_not_erase_the_last_answered_one(inputs, monkeypatch):
+    """The gap re-draft's lot size: three calls cut off at the output limit (no answer) replaced 33 rules by none.
+    A session with no whole answer says nothing about the law; the last answered session stands, in a replay and
+    in the draft run itself."""
+    old = [{"unit": "u", "attempt": 1, "stop_reason": "end_turn", "answer": "old"}]
+    cut = [{"unit": "u", "attempt": k, "stop_reason": "max_tokens", "answer": ""} for k in (1, 2, 3)]
+    new = [{"unit": "u", "attempt": 1, "stop_reason": "max_tokens"}, {"unit": "u", "attempt": 2, "stop_reason": "end_turn"}]
+    monkeypatch.setattr(cli, "run_records", lambda i: old + cut)
+    assert cli.last_recorded_attempts(inputs, "u") == old
+    monkeypatch.setattr(cli, "run_records", lambda i: old + cut + new)
+    assert cli.last_recorded_attempts(inputs, "u") == new         # answered (on its retry): the newest stands
+    monkeypatch.setattr(cli, "run_records", lambda i: cut)
+    assert cli.last_recorded_attempts(inputs, "u") == cut         # nothing ever answered: the newest, which fails
+
+
+
+def test_a_flag_exempts_a_notes_amount_only_where_it_is_kept_and_cites_the_note_whole(inputs):
+    """Round 10 (P0): the exemption was read from the raw answer and by substring, so a refused flag quoting the
+    fragment 'each additional' let R-2C keep 'lot_area >= 2500' without fn4's +500 sf per extra occupant. Now only
+    a flag kept for that district, citing the note whole, sends the note to a person."""
+    dropped = lot_area("lot_area_one_family_detached_fn4", "One-family dwelling, detached", "4", FN4,
+                       "lot_area >= {area}",
+                       [({"use": "one_family_detached", "lot_area": "{area}"}, "pass"),
+                        ({"use": "one_family_detached", "lot_area": "{area} - 1"}, "fail")], [], "one_family_detached")
+    fragment = template("broken_flag", "", [], [], kind="flag", quotes=[chart_note(4, "each additional")])
+    got = judge(inputs, "chart-p3-minimum_lot_size", [dropped, fragment])
+    assert "R-2c" not in got["rules"]
+    elsewhere = template("fn4_flag_r3a", "", [], [], kind="flag", applies_when='district == "R-3a"',
+                         quotes=[chart_note(4, FN4)])
+    got = judge(inputs, "chart-p3-minimum_lot_size", [dropped, elsewhere])
+    assert not any(r["id"].endswith("_fn4") for r in got["rules"].get("R-2c", []))
+    part = template("fn4_part_flag", "", [], [], kind="flag",
+                    quotes=[chart_note(4, "(Could remove notes 1 - 6, if a single standard is created for these uses.)")])
+    got = judge(inputs, "chart-p3-minimum_lot_size", [dropped, part])          # kept, but cites only part of fn4
+    assert any(r["id"].endswith("part_flag") for r in got["rules"].get("general", []))
+    assert not any(r["id"].endswith("_fn4") for r in got["rules"].get("R-2c", []))
+    whole = template("fn4_flag", "", [], [], kind="flag", quotes=[chart_note(4, FN4)])
+    got = judge(inputs, "chart-p3-minimum_lot_size", [dropped, whole])
+    assert [r["check"] for r in got["rules"]["R-2c"] if r["id"].endswith("_fn4")] == ["lot_area >= 2500"]
+
+
+def test_a_relaxing_rule_missing_a_condition_its_law_names_is_never_kept(inputs):
+    """Round 10 (P0): a bonus whose applies_when has only the front yard was kept in all nine districts and passed a
+    37 ft house with 1 ft side and rear yards. Every yard the quoted law names must be a condition that decides it."""
+    drafted = cli.drafted_rules(inputs)
+    front_only = bonus(applies_when="front_yard >= {front} + (building_height - {height})")
+    front_only["slots"] = [x for x in front_only["slots"] if x["name"] in ("height", "front")]
+    front_only["numbers"] = [front_only["numbers"][0]]
+    front_only["quotes"] = [q for q in front_only["quotes"] if "20 ft" not in q["text"]]
+    front_only["examples"] = [{"given": [g for g in ex["given"] if g["measure"] in ("building_height", "front_yard")],
+                               "expect": ex["expect"]} for ex in front_only["examples"][:3]]
+    got = judge(inputs, "325-16C", [front_only], drafted)
+    assert got["rules"] == {} and "isn't in applies_when" in " ".join(got["problems"]), got["problems"][:1]
+    # named but deciding nothing (any side yard meets it): refused too
+    stub = bonus(applies_when=bonus()["applies_when"].replace(
+        "side_yard_smaller >= {side_other} + (building_height - {height})", "side_yard_smaller >= 0"))
+    stub["slots"] = [x for x in stub["slots"] if x["name"] != "side_other"]
+    stub["examples"] = [{"given": [g | ({"value": "{side_one} + 3"} if g["measure"] == "side_yard_smaller" else {})
+                                   for g in ex["given"]], "expect": ex["expect"]} for ex in stub["examples"]]
+    got = judge(inputs, "325-16C", [stub], drafted)
+    assert got["rules"] == {} and "it still applies" in " ".join(got["problems"]), got["problems"][:1]
+
+
+def test_the_bonus_links_to_the_height_rule_not_another_rule_citing_the_height_cell(inputs):
+    """Round 10 (P2): the eaves rule cites 'Height in feet' too (its review above the chart height); the bonus was
+    then refused everywhere as 'cited by several rules'. It links to the rule limiting building_height."""
+    grow = [("front", "Front (minimum)", "front_yard_eaves")]
+    eaves = template("eaves_into_yards", "front_yard_eaves >= {front} - 2",
+                     [slot("front", "Front (minimum)"), slot("height", "Height in feet", section=HEIGHT)],
+                     [({"front_yard_eaves": "{front} - 2", "building_height": "{height}"}, "pass"),
+                      ({"front_yard_eaves": "{front} - 2.5", "building_height": "{height}"}, "fail")],
+                     quotes=[law(EAVES_TEXT, "325-18B"), chart_note(10, "See §325-16.")],
+                     numbers=[bound(2, "law_quote", quote=0)])
+    eaves["review_when"] = [{"when": "building_height > {height}", "reason": "x"}]
+    drafted = cli.drafted_rules(inputs)
+    for d, rules in judge(inputs, "325-18B", [eaves])["rules"].items():
+        drafted[d] = drafted.get(d, []) + rules
+    got = judge(inputs, "325-16C", [bonus()], drafted)
+    assert got["rejected"] == [] and all(r["relaxes"].endswith(".max_height_ft") for rs in got["rules"].values() for r in rs)
+
+
+def test_a_gap_stays_when_the_kept_rules_dont_cover_every_use_the_failed_template_did(inputs):
+    """Round 10 (P2): with fn12's first number narrowed to one-family detached (the note also gives it to zero lot
+    line and other uses), all three numbers were used and R-2C's gap vanished, leaving those uses unchecked."""
+    narrow = FIRST | {"applies_when": 'use == "one_family_detached"'}
+    got = judge(inputs, "chart-p3-maximum_lot_coverage_by_buildings", [PLAIN, narrow, SECOND, THIRD])
+    assert [g["rule"] for g in got["unresolved"] if g["rule"].startswith("R-2c.")] == ["R-2c.max_coverage"]

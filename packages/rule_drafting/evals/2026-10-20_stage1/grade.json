@@ -562,7 +562,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.front_yard_minimum"
+     "R-1a.front_yard_min"
     ],
     "notes": []
    },
@@ -574,7 +574,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.front_yard_minimum"
+     "R-1a.front_yard_min"
     ],
     "notes": []
    },
@@ -586,7 +586,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.front_yard_minimum"
+     "R-1a.front_yard_min"
     ],
     "notes": []
    },
@@ -599,8 +599,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.side_yard_one_side_minimum",
-     "R-1a.side_yard_other_side_minimum"
+     "R-1a.side_one_min",
+     "R-1a.side_other_min"
     ],
     "notes": []
    },
@@ -613,8 +613,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.side_yard_one_side_minimum",
-     "R-1a.side_yard_other_side_minimum"
+     "R-1a.side_one_min",
+     "R-1a.side_other_min"
     ],
     "notes": []
    },
@@ -627,8 +627,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.side_yard_one_side_minimum",
-     "R-1a.side_yard_other_side_minimum"
+     "R-1a.side_one_min",
+     "R-1a.side_other_min"
     ],
     "notes": []
    },
@@ -641,7 +641,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.rear_yard_minimum"
+     "R-1a.rear_yard_min"
     ],
     "notes": []
    },
@@ -654,7 +654,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.rear_yard_minimum"
+     "R-1a.rear_yard_min"
     ],
     "notes": []
    },
@@ -667,7 +667,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.rear_yard_minimum"
+     "R-1a.rear_yard_min"
     ],
     "notes": []
    },
@@ -680,7 +680,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.rear_yard_minimum"
+     "R-1a.rear_yard_min"
     ],
     "notes": []
    },
@@ -693,7 +693,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.rear_yard_minimum"
+     "R-1a.rear_yard_min"
     ],
     "notes": []
    },
@@ -706,7 +706,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.rear_yard_minimum"
+     "R-1a.rear_yard_min"
     ],
     "notes": []
    },
@@ -833,6 +833,104 @@
      "R-1a.325_25a_accessory_not_in_required_front_yard",
      "general.325_25c_frame_accessory_side_setback_r1",
      "general.325_25c_frame_accessory_rear_setback"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 3,
+     "parking_spaces": 1
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 3,
+     "parking_spaces": 0
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 4,
+     "parking_spaces": 1
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 5,
+     "parking_spaces": 2
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 6,
+     "parking_spaces": 3
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 6,
+     "parking_spaces": 2
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.parking_one_family",
+    "given": {
+     "use": "church",
+     "sleeping_rooms": 0,
+     "parking_spaces": 0
+    },
+    "expect": "not_applicable",
+    "got": "not_applicable",
+    "drafted": [
+     "R-1a.parking_per_dwelling_unit"
     ],
     "notes": []
    }
@@ -1018,80 +1116,16 @@
     ]
    }
   ],
-  "undrafted": [
-   {
-    "hand": "R-1a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 3,
-     "parking_spaces": 1
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-1a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 3,
-     "parking_spaces": 0
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-1a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 4,
-     "parking_spaces": 1
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-1a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 5,
-     "parking_spaces": 2
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-1a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 6,
-     "parking_spaces": 3
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-1a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 6,
-     "parking_spaces": 2
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-1a.parking_one_family",
-    "given": {
-     "use": "church",
-     "sleeping_rooms": 0,
-     "parking_spaces": 0
-    },
-    "expect": "not_applicable"
-   }
-  ],
+  "undrafted": [],
   "false_pass": [],
   "summary": {
    "examples": 74,
-   "agree": 57,
+   "agree": 64,
    "disagree": 10,
-   "undrafted": 7,
+   "undrafted": 0,
    "false_pass": 0,
-   "agree_of_all": "57/74",
-   "agree_of_drafted": "57/67"
+   "agree_of_all": "64/74",
+   "agree_of_drafted": "64/74"
   }
  },
  "R-1b.yaml": {
@@ -1449,7 +1483,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.front_yard_minimum"
+     "R-1b.front_yard_min"
     ],
     "notes": []
    },
@@ -1461,7 +1495,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.front_yard_minimum"
+     "R-1b.front_yard_min"
     ],
     "notes": []
    },
@@ -1474,8 +1508,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.side_yard_one_side_minimum",
-     "R-1b.side_yard_other_side_minimum"
+     "R-1b.side_one_min",
+     "R-1b.side_other_min"
     ],
     "notes": []
    },
@@ -1488,8 +1522,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.side_yard_one_side_minimum",
-     "R-1b.side_yard_other_side_minimum"
+     "R-1b.side_one_min",
+     "R-1b.side_other_min"
     ],
     "notes": []
    },
@@ -1502,7 +1536,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.rear_yard_minimum"
+     "R-1b.rear_yard_min"
     ],
     "notes": []
    },
@@ -1515,7 +1549,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.rear_yard_minimum"
+     "R-1b.rear_yard_min"
     ],
     "notes": []
    },
@@ -1528,7 +1562,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.rear_yard_minimum"
+     "R-1b.rear_yard_min"
     ],
     "notes": []
    },
@@ -1541,7 +1575,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.rear_yard_minimum"
+     "R-1b.rear_yard_min"
     ],
     "notes": []
    },
@@ -1632,6 +1666,48 @@
      "R-1b.325_25a_accessory_not_in_required_front_yard",
      "general.325_25c_frame_accessory_side_setback_r1",
      "general.325_25c_frame_accessory_rear_setback"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 3,
+     "parking_spaces": 1
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1b.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 4,
+     "parking_spaces": 1
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1b.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 6,
+     "parking_spaces": 3
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1b.parking_per_dwelling_unit"
     ],
     "notes": []
    }
@@ -1818,44 +1894,16 @@
     ]
    }
   ],
-  "undrafted": [
-   {
-    "hand": "R-1b.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 3,
-     "parking_spaces": 1
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-1b.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 4,
-     "parking_spaces": 1
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-1b.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 6,
-     "parking_spaces": 3
-    },
-    "expect": "pass"
-   }
-  ],
+  "undrafted": [],
   "false_pass": [],
   "summary": {
    "examples": 48,
-   "agree": 35,
+   "agree": 38,
    "disagree": 10,
-   "undrafted": 3,
+   "undrafted": 0,
    "false_pass": 0,
-   "agree_of_all": "35/48",
-   "agree_of_drafted": "35/45"
+   "agree_of_all": "38/48",
+   "agree_of_drafted": "38/48"
   }
  },
  "R-3a.yaml": {
@@ -2651,7 +2699,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.front_yard_minimum"
+     "R-3a.front_yard_min"
     ],
     "notes": []
    },
@@ -2663,7 +2711,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.front_yard_minimum"
+     "R-3a.front_yard_min"
     ],
     "notes": []
    },
@@ -2675,7 +2723,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.front_yard_minimum"
+     "R-3a.front_yard_min"
     ],
     "notes": []
    },
@@ -2688,8 +2736,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.side_yard_one_side_minimum",
-     "R-3a.side_yard_other_side_minimum"
+     "R-3a.side_one_min",
+     "R-3a.side_other_min"
     ],
     "notes": []
    },
@@ -2702,8 +2750,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_yard_one_side_minimum",
-     "R-3a.side_yard_other_side_minimum"
+     "R-3a.side_one_min",
+     "R-3a.side_other_min"
     ],
     "notes": []
    },
@@ -2716,8 +2764,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_yard_one_side_minimum",
-     "R-3a.side_yard_other_side_minimum"
+     "R-3a.side_one_min",
+     "R-3a.side_other_min"
     ],
     "notes": []
    },
@@ -2730,8 +2778,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_yard_one_side_minimum",
-     "R-3a.side_yard_other_side_minimum"
+     "R-3a.side_one_min",
+     "R-3a.side_other_min"
     ],
     "notes": []
    },
@@ -2744,7 +2792,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.rear_yard_minimum"
+     "R-3a.rear_yard_min"
     ],
     "notes": []
    },
@@ -2757,7 +2805,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.rear_yard_minimum"
+     "R-3a.rear_yard_min"
     ],
     "notes": []
    },
@@ -2770,7 +2818,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.rear_yard_minimum"
+     "R-3a.rear_yard_min"
     ],
     "notes": []
    },
@@ -2783,7 +2831,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.rear_yard_minimum"
+     "R-3a.rear_yard_min"
     ],
     "notes": []
    },
@@ -2796,7 +2844,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.rear_yard_minimum"
+     "R-3a.rear_yard_min"
     ],
     "notes": []
    },
@@ -2809,7 +2857,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.rear_yard_minimum"
+     "R-3a.rear_yard_min"
     ],
     "notes": []
    },
@@ -3165,6 +3213,46 @@
     ]
    },
    {
+    "hand": "R-3a.parking_one_family",
+    "given": {
+     "use": "two_family",
+     "sleeping_rooms": 3,
+     "parking_spaces": 0
+    },
+    "expect": "not_applicable",
+    "got": "not_applicable",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_dwelling_units",
+    "given": {
+     "use": "two_family"
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit",
+     "R-3a.parking_per_dwelling_unit_undecided_uses"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_dwelling_units",
+    "given": {
+     "use": "multiple_family"
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit",
+     "R-3a.parking_per_dwelling_unit_undecided_uses"
+    ],
+    "notes": []
+   },
+   {
     "hand": "R-3a.parking_dormitory",
     "given": {
      "use": "dormitory"
@@ -3185,6 +3273,30 @@
     "got": "not_applicable",
     "drafted": [
      "R-3a.parking_dormitory"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_other_uses",
+    "given": {
+     "use": "fraternity_sorority_group_house"
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit_undecided_uses"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_other_uses",
+    "given": {
+     "use": "one_family_detached"
+    },
+    "expect": "not_applicable",
+    "got": "not_applicable",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit_undecided_uses"
     ],
     "notes": []
    }
@@ -3392,6 +3504,103 @@
      "general.325_25c_frame_accessory_side_setback_other needs ['accessory_distances_apply', 'accessory_side_yard'], which the hand example doesn't give",
      "general.325_25c_frame_accessory_rear_setback needs ['accessory_distances_apply', 'accessory_rear_yard'], which the hand example doesn't give"
     ]
+   },
+   {
+    "hand": "R-3a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 3,
+     "parking_spaces": 1
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 3,
+     "parking_spaces": 0
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 5,
+     "parking_spaces": 2
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 5,
+     "parking_spaces": 1
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 7,
+     "parking_spaces": 4
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_one_family",
+    "given": {
+     "use": "one_family_detached",
+     "sleeping_rooms": 7,
+     "parking_spaces": 3
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.parking_dwelling_units",
+    "given": {
+     "use": "one_family_detached"
+    },
+    "expect": "not_applicable",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.parking_per_dwelling_unit",
+     "R-3a.parking_per_dwelling_unit_undecided_uses"
+    ],
+    "notes": []
    }
   ],
   "undrafted": [
@@ -3750,104 +3959,6 @@
     "expect": "not_applicable"
    },
    {
-    "hand": "R-3a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 3,
-     "parking_spaces": 1
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 3,
-     "parking_spaces": 0
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 5,
-     "parking_spaces": 2
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 5,
-     "parking_spaces": 1
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 7,
-     "parking_spaces": 4
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.parking_one_family",
-    "given": {
-     "use": "one_family_detached",
-     "sleeping_rooms": 7,
-     "parking_spaces": 3
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.parking_one_family",
-    "given": {
-     "use": "two_family",
-     "sleeping_rooms": 3,
-     "parking_spaces": 0
-    },
-    "expect": "not_applicable"
-   },
-   {
-    "hand": "R-3a.parking_dwelling_units",
-    "given": {
-     "use": "two_family"
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.parking_dwelling_units",
-    "given": {
-     "use": "multiple_family"
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.parking_dwelling_units",
-    "given": {
-     "use": "one_family_detached"
-    },
-    "expect": "not_applicable"
-   },
-   {
-    "hand": "R-3a.parking_other_uses",
-    "given": {
-     "use": "fraternity_sorority_group_house"
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.parking_other_uses",
-    "given": {
-     "use": "one_family_detached"
-    },
-    "expect": "not_applicable"
-   },
-   {
     "hand": "R-3a.loading",
     "given": {
      "use": "multiple_family"
@@ -3890,7 +4001,7 @@
      "side_yard_larger": 0.0,
      "side_yard_smaller": 0.0,
      "smaller_side_yard_abuts_r1": false,
-     "use": "multiple_family"
+     "use": "fraternity_sorority_group_house"
     },
     "expect": "needs_review",
     "got": "pass",
@@ -3906,12 +4017,12 @@
   ],
   "summary": {
    "examples": 145,
-   "agree": 83,
-   "disagree": 12,
-   "undrafted": 50,
+   "agree": 88,
+   "disagree": 19,
+   "undrafted": 38,
    "false_pass": 1,
-   "agree_of_all": "83/145",
-   "agree_of_drafted": "83/95"
+   "agree_of_all": "88/145",
+   "agree_of_drafted": "88/107"
   }
  }
 }

@@ -207,7 +207,7 @@ def test_a_chart_cell_no_chart_rule_checks_is_never_silent():
     assert any(n.startswith("Yard Dimensions: Side (one side minimum)") for n in names)
     assert any(n.startswith("Yard Dimensions: Side (other side minimum)") for n in names)
     r2a = zone_rules(J, "R-2a")                                                    # R-2a keeps the whole bonus
-    without = [r for r in r2a if r["id"] != "R-2a.rear_yard_minimum"]         # the bonus still cites the rear cell
+    without = [r for r in r2a if r["id"] != "R-2a.rear_yard_min"]         # the bonus still cites the rear cell
     assert any("325_16c" in r["id"] and "rear" in r["id"] for r in without)
     assert any(n.startswith("Yard Dimensions: Rear") for n in (g["name"] for g in chart_gaps(J, "R-2a", without)))
 

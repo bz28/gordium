@@ -553,49 +553,49 @@ units:
     problems: []
   chart-p3-yard_dimensions:
     rules:
-    - R-1a.front_yard_minimum
-    - R-1a.side_yard_one_side_minimum
-    - R-1a.side_yard_other_side_minimum
-    - R-1a.rear_yard_minimum
-    - R-1b.front_yard_minimum
-    - R-1b.side_yard_one_side_minimum
-    - R-1b.side_yard_other_side_minimum
-    - R-1b.rear_yard_minimum
-    - R-2a.front_yard_minimum
-    - R-2a.side_yard_one_side_minimum
-    - R-2a.side_yard_other_side_minimum
-    - R-2a.rear_yard_minimum
-    - R-2b.front_yard_minimum
-    - R-2b.side_yard_one_side_minimum
-    - R-2b.side_yard_other_side_minimum
-    - R-2b.rear_yard_minimum
-    - R-2c.front_yard_minimum
-    - R-2c.rear_yard_minimum
-    - R-3a.front_yard_minimum
-    - R-3a.side_yard_one_side_minimum
-    - R-3a.side_yard_other_side_minimum
-    - R-3a.rear_yard_minimum
-    - R-3aa.front_yard_minimum
-    - R-3aa.side_yard_one_side_minimum
-    - R-3aa.side_yard_other_side_minimum
-    - R-3aa.rear_yard_minimum
-    - R-3b.front_yard_minimum
-    - R-3b.side_yard_one_side_minimum
-    - R-3b.side_yard_other_side_minimum
-    - R-3b.rear_yard_minimum
-    - RU.front_yard_minimum
-    - RU.side_yard_one_side_minimum
-    - RU.side_yard_other_side_minimum
-    - RU.rear_yard_minimum_fn17
+    - R-1a.front_yard_min
+    - R-1a.side_one_min
+    - R-1a.side_other_min
+    - R-1a.rear_yard_min
+    - R-1b.front_yard_min
+    - R-1b.side_one_min
+    - R-1b.side_other_min
+    - R-1b.rear_yard_min
+    - R-2a.front_yard_min
+    - R-2a.side_one_min
+    - R-2a.side_other_min
+    - R-2a.rear_yard_min
+    - R-2b.front_yard_min
+    - R-2b.side_one_min
+    - R-2b.side_other_min
+    - R-2b.rear_yard_min
+    - R-2c.front_yard_min
+    - R-2c.rear_yard_min
+    - R-3a.front_yard_min
+    - R-3a.side_one_min
+    - R-3a.side_other_min
+    - R-3a.rear_yard_min
+    - R-3aa.front_yard_min
+    - R-3aa.side_one_min
+    - R-3aa.side_other_min
+    - R-3aa.rear_yard_min
+    - R-3b.front_yard_min
+    - R-3b.side_one_min
+    - R-3b.side_other_min
+    - R-3b.rear_yard_min
+    - RU.front_yard_min
+    - RU.side_one_min
+    - RU.side_other_min
+    - RU.rear_yard_min_ru
     unresolved:
-    - rule: R-2c.side_yard_one_side_minimum
+    - rule: R-2c.side_one_min
       why: '''Side (one side minimum)'': the cell ''10 ft /15 ft [fn14]'' has 2 numbers, the rule expects 1'
       cells:
       - - 3
         - Yard Dimensions
         - Side (one side minimum)
         - R-2C
-    - rule: R-2c.side_yard_other_side_minimum
+    - rule: R-2c.side_other_min
       why: '''Side (other side minimum)'': the cell ''0 ft /5 ft / 10 ft [fn15]'' has 3 numbers, the rule expects
         1'
       cells:
@@ -603,12 +603,36 @@ units:
         - Yard Dimensions
         - Side (other side minimum)
         - R-2C
+    - rule: chart-p3-yard_dimensions.side_one_min_r2c_fn14
+      why: 'general.side_one_min_r2c_fn14: general.side_one_min_r2c_fn14: unknown district ''R-2C'' in ''district
+        == "R-2C"''; general.side_one_min_r2c_fn14: example 1: unknown district ''R-2C'''
+    - rule: chart-p3-yard_dimensions.side_other_min_r2c_fn15
+      why: 'general.side_other_min_r2c_fn15: general.side_other_min_r2c_fn15: unknown district ''R-2C'' in ''district
+        == "R-2C"''; general.side_other_min_r2c_fn15: example 1: unknown district ''R-2C'''
     problems: []
   chart-p14-residential:
     rules:
+    - R-1a.parking_per_dwelling_unit
+    - R-1a.parking_per_dwelling_unit_undecided_uses
+    - R-1b.parking_per_dwelling_unit
+    - R-1b.parking_per_dwelling_unit_undecided_uses
+    - R-2a.parking_per_dwelling_unit
+    - R-2a.parking_per_dwelling_unit_undecided_uses
+    - R-2b.parking_per_dwelling_unit
+    - R-2b.parking_per_dwelling_unit_undecided_uses
+    - R-2c.parking_per_dwelling_unit
+    - R-2c.parking_per_dwelling_unit_undecided_uses
+    - R-3a.parking_per_dwelling_unit
     - R-3a.parking_dormitory
+    - R-3a.parking_per_dwelling_unit_undecided_uses
+    - R-3aa.parking_per_dwelling_unit
+    - R-3aa.parking_per_dwelling_unit_undecided_uses
+    - R-3b.parking_per_dwelling_unit
     - R-3b.parking_dormitory
+    - R-3b.parking_per_dwelling_unit_undecided_uses
+    - RU.parking_per_dwelling_unit
     - RU.parking_dormitory
+    - RU.parking_per_dwelling_unit_undecided_uses
     unresolved:
     - rule: R-1a.parking_dormitory
       why: '''Dormitory'': the chart shows ''-'' here'
@@ -676,99 +700,6 @@ units:
         - Residential
         - Dormitory
         - R-3AA
-    - rule: chart-p14-residential.parking_residential_by_sleeping_rooms
-      why: 'R-1a.parking_residential_by_sleeping_rooms: it passes one_family_attached (is a building of several
-        dwelling units: every unit''s requirement is added up); limit applies_when, or send that use to review;
-        it passes one_family_semi_detached (is a building of several dwelling units: every unit''s requirement is
-        added up); limit applies_when, or send that use to review; R-1b.parking_residential_by_sleeping_rooms: it
-        passes one_family_attached (is a building of several dwelling units: every unit''s requirement is added
-        up); limit applies_when, or send that use to review; it passes one_family_semi_detached (is a building of
-        several dwelling units: every unit''s requirement is added up); limit applies_when, or send that use to
-        review; R-2a.parking_residential_by_sleeping_rooms: it passes one_family_attached (is a building of several
-        dwelling units: every unit''s requirement is added up); limit applies_when, or send that use to review;
-        it passes one_family_semi_detached (is a building of several dwelling units: every unit''s requirement is
-        added up); limit applies_when, or send that use to review'
-    - rule: R-1a.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the R-1A
-        cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-1b.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the R-1B
-        cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2a.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the R-2A
-        cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2b.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the R-2B
-        cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the R-2C
-        cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the R-3A
-        cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the R-3AA
-        cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the R-3B
-        cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''First three bed or sleeping rooms per dwelling unit'': the RU
-        cell ''1 space per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-1a.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''4-5 bed or sleeping rooms per dwelling unit'': the R-1A cell ''2
-        spaces per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-1b.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''4-5 bed or sleeping rooms per dwelling unit'': the R-1B cell ''2
-        spaces per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2a.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''4-5 bed or sleeping rooms per dwelling unit'': the R-2A cell ''2
-        spaces per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2b.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''4-5 bed or sleeping rooms per dwelling unit'': the R-2B cell ''2
-        spaces per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''4-5 bed or sleeping rooms per dwelling unit'': the R-2C cell ''2
-        spaces per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''4-5 bed or sleeping rooms per dwelling unit'': the R-3A cell ''2
-        spaces per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''4-5 bed or sleeping rooms per dwelling unit'': the R-3AA cell
-        ''2 spaces per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''4-5 bed or sleeping rooms per dwelling unit'': the R-3B cell ''2
-        spaces per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''4-5 bed or sleeping rooms per dwelling unit'': the RU cell ''2
-        spaces per dwelling unit'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-1a.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''Each additional bed or sleeping room'': the R-1A cell ''+ 1 space
-        per room'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-1b.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''Each additional bed or sleeping room'': the R-1B cell ''+ 1 space
-        per room'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2a.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''Each additional bed or sleeping room'': the R-2A cell ''+ 1 space
-        per room'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2b.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''Each additional bed or sleeping room'': the R-2B cell ''+ 1 space
-        per room'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''Each additional bed or sleeping room'': the R-2C cell ''+ 1 space
-        per room'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''Each additional bed or sleeping room'': the R-3A cell ''+ 1 space
-        per room'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''Each additional bed or sleeping room'': the R-3AA cell ''+ 1 space
-        per room'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''Each additional bed or sleeping room'': the R-3B cell ''+ 1 space
-        per room'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p14-residential
-      why: 'chart page 14, ''Residential'', row ''Each additional bed or sleeping room'': the RU cell ''+ 1 space
-        per room'' has no drafted rule (a person checks the requirement it sets)'
     problems: []
   325-3B:accessory_dwelling_unit:
     rules:

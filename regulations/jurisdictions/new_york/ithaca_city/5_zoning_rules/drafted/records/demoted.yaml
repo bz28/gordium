@@ -10,3 +10,10 @@ R-3b.parking_dormitory: >-
 RU.parking_dormitory: >-
   The chart's 1 space per 4 persons housed depends on how many persons a dormitory houses, which Gordium doesn't count
   (and the chart doesn't say how a fraction rounds): a person checks the parking.
+R-2c.parking_per_dwelling_unit: >-
+  The bedroom rule checks a one-family detached zero-lot-line house, a use that needs a special permit here; the R-2c
+  answer key sends its parking to review (the house is one unit, but its use needs a special permit in R-2c anyway): a
+  person checks the parking (gap re-draft, 2026-10-21).
+R-3a.parking_per_dwelling_unit: >-
+  The bedroom rule checks a one-family detached zero-lot-line house, a use that needs a special permit here; the R-3a
+  answer key sends its parking to review: a person checks the parking (gap re-draft, 2026-10-21).

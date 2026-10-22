@@ -211,9 +211,10 @@ def _numbers_in(rules) -> set[float]:
 def design_points(hand_rule: dict, rules: list[dict], district: str, ctx, limit: int = 4000,
                   uses: frozenset = frozenset()) -> list[dict]:
     """The designs the drafted rules are compared on: every hand example, each input it doesn't give filled in (a
-    yes/no both ways; a number from the examples or a formula's constants), then every input varied one at a time over
-    its values: the examples' numbers and each constant and one either side. Every input has a value, so a "needs
-    review" from a missing input never stands in for a verdict."""
+    yes/no both ways; a number from the examples or a formula's constants), each with every use a formula names (and
+    one it doesn't), then every input varied one at a time over its values: the examples' numbers and each constant
+    and one either side. Every input has a value, so a "needs review" from a missing input never stands in for a
+    verdict."""
     from rule_format import formula
     every = [hand_rule] + rules
     kinds = ctx.kinds()
@@ -243,10 +244,17 @@ def design_points(hand_rule: dict, rules: list[dict], district: str, ctx, limit:
             points.append(point)
     import itertools
     flags = [n for n, v in values.items() if v == [True, False]][:6]          # every yes/no combination as a start
+    # every use a formula names (and one none names) as a start too: varied from one use only, a zero-lot-line
+    # house was only ever tried with no parking spaces, so a bedroom rule passing it where the key asks for review
+    # was never seen (gap re-draft)
+    named = sorted({v for r in every for f in rule_formulas(r) for name, v in formula.compared_strings(f) if name == "use"}
+                   & (set(uses) or set(values.get("use", []))))     # a use the key forbids fails on its use rule
+    starts = ([[u] for u in named + [next((u for u in values["use"] if u not in named), None)] if u is not None]
+              if "use" in values else [[None]])
     for given in [ex["given"] for ex in hand_rule.get("examples") or []] or [{}]:
-        for combo in itertools.product([True, False], repeat=len(flags)):
+        for (use,), combo in itertools.product(starts, itertools.product([True, False], repeat=len(flags))):
             base = {"district": district} | {n: v[0] for n, v in values.items() if v} | dict(zip(flags, combo))
-            base |= given
+            base |= given | ({"use": use} if use is not None else {})
             add(base)
             for n, vs in values.items():
                 for v in vs:
@@ -265,7 +273,9 @@ def grade_mapped(book: dict, entries: dict, drafted: list[dict], ctx) -> dict:
     False pass (review round 8): each judge unit's rules, and the exception parts as their own group, are compared with
     the hand rule as formulas, on every design design_points makes (each input filled in, varied one at a time): a
     false pass wherever the drafted rules pass or don't apply and the hand rule says fail or needs review. Flags are
-    judged one by one, so a flag's permanent "needs review" can't hide another rule; no input is left missing."""
+    judged one by one, so a flag's permanent "needs review" can't hide another rule's pass; no input is left missing.
+    A group that doesn't apply to a design isn't a false pass where another rule of the same question applies and
+    fails it or sends it to review (parking: the bedroom rule for one-family houses, the flag for every other use)."""
     district = book["district"]
     by_id = {r["id"]: r for r in drafted}
     out = {"district": district, "total": 0, "agree": [], "disagree": [], "undrafted": [], "false_pass": []}
@@ -301,6 +311,9 @@ def grade_mapped(book: dict, entries: dict, drafted: list[dict], ctx) -> dict:
                     point = point | {d: point[k] for d, k in same.items() if k in point}
                     key = outcome(h, point, ctx.allowed())
                     got = _judge(group, point, ctx)
+                    if got == "not_applicable" and any(_judge(g, point, ctx) in ("fail", "needs_review")
+                                                       for g in groups if g and g is not group):
+                        continue                # another rule of this question applies here: the checker shows it
                     if kinder(got, key):
                         out["false_pass"].append({"hand": h["id"], "given": point, "expect": key, "got": got,
                                                   "drafted": [r["id"] for r in group],
@@ -868,3 +881,36 @@ def test_a_measure_declared_the_same_is_given_one_value_on_the_keys_own_examples
                           "same_measures": {"dwelling_units_in_building": "attached_units_in_building"}}}
     g = grade_mapped({"district": "R-2c", "rules": [hand]}, entries, [drafted], ctx)
     assert len(g["agree"]) == 3 and g["disagree"] == [] and g["false_pass"] == []
+
+
+def test_a_rule_that_doesnt_apply_is_no_false_pass_where_another_rule_of_the_question_covers_the_design(ctx):
+    """Parking after the gap re-draft: the bedroom rule applies to one-family houses, a code-made flag to every other
+    use. Neither alone answers a church and a one-family house, but together they do; a pass is still never hidden."""
+    hand = {"id": "R-1a.k", "kind": "flag", "applies_when": 'use != "one_family_detached"',
+            "examples": [{"given": {"use": "church"}, "expect": "needs_review"}]}
+    rule = {"id": "R-1a.r", "kind": "rule", "applies_when": 'use == "one_family_detached"', "check": "parking_spaces >= 1",
+            "sources": [], "examples": [{"given": {"use": "one_family_detached", "parking_spaces": 1}, "expect": "pass"}]}
+    flag = {"id": "R-1a.f", "kind": "flag", "applies_when": 'use != "one_family_detached"', "sources": []}
+    entries = {"R-1a.k": {"judge": [["R-1a.r", "R-1a.f"]], "reason": "x"}}
+    assert grade_mapped({"district": "R-1a", "rules": [hand]}, entries, [rule, flag], ctx)["false_pass"] == []
+    alone = {"R-1a.k": {"judge": [["R-1a.r"]], "reason": "x"}}
+    assert grade_mapped({"district": "R-1a", "rules": [hand]}, alone, [rule], ctx)["false_pass"]
+    loose = flag | {"applies_when": 'use != "church"'}         # the flag misses the church: the rule's N/A counts again
+    assert grade_mapped({"district": "R-1a", "rules": [hand]}, entries, [rule, loose], ctx)["false_pass"]
+
+
+def test_the_grid_tries_every_use_a_formula_names_with_its_other_inputs_varied(ctx):
+    """The key flags a zero-lot-line house's parking (needs review); a draft's bedroom rule passes it with enough
+    spaces. Varied from the key's example uses only, the grid tried that house with no spaces, so the pass was never
+    seen."""
+    hand = {"id": "R-2c.k", "kind": "flag", "applies_when": 'use in ["one_family_detached_zero_lot_line", "two_family"]',
+            "examples": [{"given": {"use": "two_family"}, "expect": "needs_review"}]}
+    rule = {"id": "R-2c.r", "kind": "rule", "check": "parking_spaces >= 1", "sources": [],
+            "applies_when": 'use in ["one_family_detached", "one_family_detached_zero_lot_line"]',
+            "examples": [{"given": {"use": "one_family_detached", "parking_spaces": 1}, "expect": "pass"}]}
+    points = design_points(hand, [rule], "R-2c", ctx)
+    assert any(p["use"] == "one_family_detached_zero_lot_line" and p["parking_spaces"] >= 1 for p in points)
+    flag = {"id": "R-2c.f", "kind": "flag", "applies_when": 'use == "two_family"', "sources": []}   # covers two-family
+    got = grade_mapped({"district": "R-2c", "rules": [hand]}, {"R-2c.k": {"judge": [["R-2c.r", "R-2c.f"]], "reason": "x"}},
+                       [rule, flag], ctx)
+    assert [(x["given"]["use"], x["got"]) for x in got["false_pass"]] == [("one_family_detached_zero_lot_line", "pass")]
