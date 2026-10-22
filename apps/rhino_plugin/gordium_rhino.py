@@ -1236,6 +1236,7 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
     return {"address": facts.get("address") or "", "address_source": source("address"),
             "zone": facts.get("zone"),          # no district: no source (never the last Draw's "suggested")
             "zone_source": source("zone", logic.ENTERED) if facts.get("zone") else None,
+            "zone_said": saved_ui.get("_zone_said"),     # the lookup's words, this session only
             "district_confirmed": confirmed, "use": facts.get("use"), "use_source": source("use"),
             "use_name": (options.get("uses") or {}).get(facts.get("use"), facts.get("use")),
             "lot_area": area, "has_lot": lot is not None, "lot_surveyed": bool(facts.get("lot_surveyed")),
@@ -1276,7 +1277,7 @@ def _apply_box(doc, facts, state, saved_ui):
             facts.pop(key, None)
         else:
             facts[key] = value
-    saved_ui = dict(saved_ui, ground_kind=(state.get("ground") or {}).get("kind") or "flat",
+    saved_ui = dict(logic.saved_sources(saved_ui, state), ground_kind=(state.get("ground") or {}).get("kind") or "flat",
                     no_regrading=bool(state.get("no_regrading")), design_buffer=state.get("design_buffer") or "0'-0\"",
                     checked=list(state.get("checked") or []))
     left = logic.unsettled(saved_ui)                # looked-up facts found doubtful, not yet checked or changed
