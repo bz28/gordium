@@ -74,16 +74,16 @@
     "ok": true,
     "detail": {
      "objects": [
-      "6f3730d1-fa98-40a4-8b3d-f02dd5cea06f",
-      "801d3c19-c0e2-40fb-8ec2-7b0d09557892",
-      "e26559dd-d4ec-40a6-823e-07cfc84beb0e",
-      "c424d1eb-8ca8-439a-9ffb-64b65a5ec6bd"
+      "7515ad11-954f-44bf-942a-3ab70ced26da",
+      "6ccec176-5121-4a8d-b3eb-e058a53b5b82",
+      "75c2a320-2596-44c9-aff5-0fefdd1fab67",
+      "f3a56792-8036-49f7-b79f-b728b46912ec"
      ],
      "selected": [
-      "c424d1eb-8ca8-439a-9ffb-64b65a5ec6bd",
-      "e26559dd-d4ec-40a6-823e-07cfc84beb0e",
-      "801d3c19-c0e2-40fb-8ec2-7b0d09557892",
-      "6f3730d1-fa98-40a4-8b3d-f02dd5cea06f"
+      "f3a56792-8036-49f7-b79f-b728b46912ec",
+      "75c2a320-2596-44c9-aff5-0fefdd1fab67",
+      "6ccec176-5121-4a8d-b3eb-e058a53b5b82",
+      "7515ad11-954f-44bf-942a-3ab70ced26da"
      ]
     }
    }
@@ -376,8 +376,8 @@
       ]
      },
      "frames": {
-      "scale_neighbourhood": 3,
-      "scale_lot": 3
+      "scale_neighbourhood": 7,
+      "scale_lot": 7
      }
     }
    },
