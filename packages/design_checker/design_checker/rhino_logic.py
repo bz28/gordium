@@ -2020,7 +2020,7 @@ def preview_lookup(answer, facts, saved_ui, zones=()):
     if not replaces:
         saved_ui["_lookup"]["says"] = ("Your own lot is kept until you press Draw: the lookup filled in the address "
                                        "and the district.")
-    elif drawn is None or not same_address(address, drawn):
+    elif not is_drawn(address, saved_ui):
         saved_ui["_lookup"]["says"] = (GUIDE_PREVIEW if not w.get("lot_ring") and w.get("guide_ring") else
                                        PREVIEW_SAYS.format(address=address))
     return facts, saved_ui, w.get("lot_ring") or w.get("guide_ring")
@@ -2081,6 +2081,14 @@ def own_work(table, facts, saved_ui):
     return out
 
 
+def is_drawn(address, saved_ui):
+    """Whether `address` is the one a lookup drew in this file (its lot, placed on the map): then Draw draws nothing
+    new for it. Never the sample's: looking up 106 Ithaca Rd over the sample draws the looked-up lot in its place,
+    placed on the map, so its neighbourhood can be drawn (#23 never draws one around the sample)."""
+    drawn = (saved_ui or {}).get("drawn_address")
+    return drawn is not None and not (saved_ui or {}).get("from_sample") and same_address(address, drawn)
+
+
 def reset_plan(facts, saved_ui, mine):
     """At Draw: "none" (no answer pending, or the same address as the one drawn: nothing is redrawn), "redraw" (a new
     address over what Gordium drew: cleared and drawn again, no question) or "ask" (the architect's own work, `mine`,
@@ -2088,8 +2096,7 @@ def reset_plan(facts, saved_ui, mine):
     pending = (saved_ui or {}).get("_pending")
     if not pending:
         return "none"
-    drawn = (saved_ui or {}).get("drawn_address")
-    if drawn is not None and same_address(pending.get("address"), drawn):
+    if is_drawn(pending.get("address"), saved_ui):
         return "none"
     return "ask" if mine else "redraw"
 
@@ -2214,8 +2221,7 @@ def draw_button(mode, saved_ui):
     if mode == "start" or (saved_ui or {}).get("_redrawn_for"):
         return "Draw"
     pending = (saved_ui or {}).get("_pending")
-    drawn = (saved_ui or {}).get("drawn_address")
-    return "Draw" if pending and not (drawn is not None and same_address(pending.get("address"), drawn)) else "Check"
+    return "Draw" if pending and not is_drawn(pending.get("address"), saved_ui) else "Check"
 
 
 START_HAS_BUILDING = ("This model already has a building. To start over on another address, use Edit site… in the "

@@ -52,7 +52,9 @@ class Site:
         self.table = FakeTable(objects)
         self.facts = {"lot_id": "lot1", "address": drawn, "zone": "R-1b", "use": "one_family",
                       "lot_surveyed": surveyed, "corner_lot": False, "street_line": [[[0, 0], [60, 0]]]}
-        self.saved = {"replaceable_lot": "lot1" if lot == "sample" else None, "from_sample": lot == "sample",
+        # "sample": the sample project's lot; "looked_up": a lot an earlier lookup drew (Gordium's, on the map);
+        # "theirs": the architect's own
+        self.saved = {"replaceable_lot": None if lot == "theirs" else "lot1", "from_sample": lot == "sample",
                       "zone_source": "entered by you", "lot_source": "your survey" if surveyed else None}
         if drawn is not None:
             self.saved["drawn_address"] = drawn
@@ -68,7 +70,7 @@ class Site:
     def _architects(self):
         """The ids of what is the architect's own at the start (never to go without their yes)."""
         out = set()
-        if self.saved.get("replaceable_lot") != self.facts["lot_id"]:
+        if self.saved.get("replaceable_lot") != self.facts.get("lot_id"):
             out.add(self.facts["lot_id"])
         house = self.table.massing()
         if house and self.table.fingerprint(house) != self.saved.get("house_fingerprint"):
@@ -235,12 +237,27 @@ def test_a_new_address_over_gordiums_drawing_is_drawn_clean_without_a_question()
 
 
 def test_the_same_address_draws_nothing_new_and_its_button_says_check():
-    site = Site()
+    site = Site(lot="looked_up")
     before = site.table.snapshot()
     box = site.box().look_up(answer("106_ithaca_rd"))
     assert box.button() == "Check"
     assert box.draw() == "drawn" and box.asked == []
     assert site.table.snapshot()[0] == before[0]
+
+
+def test_looking_up_the_samples_own_address_draws_the_looked_up_lot_in_its_place():
+    """The demo build (#23 with #26): on the sample, 106 Ithaca Rd looked up was "the same address", so Draw drew
+    nothing, and the neighbourhood (drawn only around a looked-up lot, never the sample) never came. The sample is a
+    stand-in: looking up any address, its own included, draws the looked-up lot on the map in its place."""
+    site = Site(house=None)
+    box = site.box().look_up(answer("106_ithaca_rd"))
+    assert box.button() == "Draw" and "Shown dashed" in (logic.uncertain(box.shown()) or "")
+    assert box.draw() == "drawn" and box.asked == []
+    lot = site.facts["lot_id"]
+    assert lot != "lot1" and "lot1" not in site.table.objects and site.saved["from_sample"] is False
+    assert site.saved["lookup_frame"] and logic.same_address(site.saved["drawn_address"], SAMPLE)
+    again = site.box().look_up(answer("106_ithaca_rd"))          # now it is the looked-up lot: the same address
+    assert again.button() == "Check" and again.draw() == "drawn" and site.facts["lot_id"] == lot
 
 
 def test_cancel_after_the_reset_puts_everything_back():
@@ -369,7 +386,8 @@ def test_same_address(a, b, same):
 
 # ---- every start, every lookup, every answer -------------------------------------------------------------------
 
-STARTS = list(itertools.product(("sample", "theirs"), (None, "gordium", "edited", "no record"), (False, True)))
+STARTS = list(itertools.product(("sample", "looked_up", "theirs"), (None, "gordium", "edited", "no record"),
+                                (False, True)))
 LOOKUPS = {"same": lambda: answer("106_ithaca_rd"), "new": lambda: answer("96_ithaca_rd"),
            "guide": lambda: guide_only("96_ithaca_rd"), "failed": lambda: answer("not_found"),
            "typed": None}
@@ -409,13 +427,13 @@ def test_every_start_lookup_and_answer_keeps_the_promises(start):
         # "…will be removed" / "check it on the new lot")
         assert site.facts.get("lot_id") in left, where         # never a Draw without a lot
         assert not [k for k in site.saved if k.startswith("_")], where
-        if kind in ("same", "failed") or (kind == "typed" and lot == "theirs"):
+        if (kind == "same" and lot != "sample") or kind == "failed" or (kind == "typed" and lot == "theirs"):
             assert site.table.snapshot()[0] == before[0][0], where   # nothing new drawn, nothing removed
-        elif kind in ("new", "guide"):
+        elif kind in ("new", "guide", "same"):                 # the sample's own address too: a real lot drawn
             kept_house = said == "keep" and bool(box.asked) and box.asked[0][2]
             gone = gordiums - ({"floor1", "floor2"} if kept_house else set())
             assert not gone & left, where                      # nothing Gordium drew for the old address stays
-            assert logic.same_address(site.saved["drawn_address"], "96 Ithaca Rd"), where
+            assert logic.same_address(site.saved["drawn_address"], SAMPLE if kind == "same" else "96 Ithaca Rd"), where
 
 
 # ---- the plugin does what the harness does --------------------------------------------------------------------
