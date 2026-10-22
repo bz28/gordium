@@ -82,9 +82,8 @@ def test_a_crossing_building_is_told_only_to_move_back_onto_the_lot_and_the_chec
         assert crossing, rows(res, rule)
         for i in crossing:
             assert i["status"] == present.FAILS
-            # #18 review round 26: on a yard row moving back isn't enough to meet the yard: its first step only
-            want = "First" if i.get("measure") in present.YARD_ROWS or "yard" in i["name"].lower() else "To comply"
-            assert i["hint"] == want + ": move it back onto the lot.", i["hint"]
+            # #18 review rounds 26-27: on a yard row moving back isn't enough to meet the yard: its first step only
+            assert i["hint"] in ("First: move it back onto the lot.", "To comply: move it back onto the lot."), i["hint"]
             assert not i["hint"].startswith("To comply") or "yard" not in i["name"].lower(), i
         assert not any("_advice" in i for i in res["view"]["items"])      # popped by confirm_advice
 
@@ -715,3 +714,21 @@ def test_an_eaves_rows_advice_is_its_yards_requirement_eaves_included_never_move
         assert "move the building" not in i["hint"], i["hint"]
         if i["hint"].startswith("To comply"):
             assert "every part of the building, eaves included, at least" in i["hint"] and "lot line" in i["hint"]
+
+
+def test_to_comply_move_back_is_said_only_where_the_crossing_is_the_rows_only_failing_fact():
+    """#18 review round 27 (P2): "To comply: move it back onto the lot." was still shown on crossing rows where
+    moving back is not enough: a 50 ft, 5-story house's height and stories, coverage of a 63 x 80 footprint, a frame
+    shed's 6 ft side distance. It is "To comply" only where the row complies with the crossing set aside; otherwise
+    "First: …", and such a row keeps its own figure (50'-0", never only "partly off the lot")."""
+    tall = run(floors(50, 30, 65, 70, 5))
+    for name in ("Building height", "Stories"):
+        i = next(x for x in tall["view"]["items"] if x["name"] == name)
+        assert i["status"] == present.FAILS and i["hint"] == "First: move it back onto the lot.", (name, i["hint"])
+        assert i["proposed"] != "partly off the lot", (name, i["proposed"])
+    wide = run(floors(-5, 30, 58, 110, 1))
+    cov = next(x for x in wide["view"]["items"] if x["name"] == "Lot coverage")
+    assert cov["hint"] == "First: move it back onto the lot.", cov["hint"]
+    low = run(floors(50, 30, 65, 70, 2))                      # 2 stories, 20 ft: height complies but for crossing
+    h = next(x for x in low["view"]["items"] if x["name"] == "Building height")
+    assert h["hint"] == "To comply: move it back onto the lot." and h["proposed"] == "partly off the lot", h

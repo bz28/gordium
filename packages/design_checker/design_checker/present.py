@@ -1158,16 +1158,20 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
         if applied["note"]:                     # Gordium's reading, applied: always said, never hidden
             why = f"{why} · {applied['note']}" if why else applied["note"]
         if row.get("Crossing"):                 # a building partly on another lot: fails, whatever else
+            # the row's own verdict, the crossing set aside: its only failing fact? Never on a distance row (a yard,
+            # eaves, an accessory building's yards): moving the building back changes the distance itself
+            distance = node is not None and (node.left.id in YARD_ROWS or node.left.id.endswith("_yard"))
+            was = st
+            alone = was == COMPLIES and not distance
             st, why = FAILS, "Does not comply: " + row["Crossing"]
             # the only advice: move it back (no other "To comply" is shown for it; settle and
-            # check.confirm_advice keep it as it is: no measured change can be simulated for it)
-            # on a yard row moving back is not enough to meet the yard (#18 review round 26): its first step, never
-            # "To comply"; "To comply" only where the crossing itself is the failing fact
-            first = node is not None and node.left.id in YARD_ROWS
-            advice = {"head": "First" if first else "To comply",
+            # check.confirm_advice keep it as it is: no measured change can be simulated for it). "To comply" only
+            # where the crossing is the row's only failing fact; anywhere else moving back is not enough (a yard, a
+            # 50 ft height, a frame shed's 6 ft, coverage): its first step (#18 review rounds 26-27)
+            advice = {"head": "To comply" if alone else "First",
                       "ways": [{"text": "move it back onto the lot", "changes": {}}], "crossing": True}
             hint = advice_text(advice)
-            if node is None or node.left.id not in YARD_ROWS:     # the failing fact is the crossing, not a distance
+            if was == COMPLIES and (node is None or node.left.id not in YARD_ROWS):   # failing fact: the crossing
                 proposed, required, margin_t = "partly off the lot", "on the lot", ""
         out.append({
             "id": rule["id"] + ("#" + label.split(", ")[-1].lower() if splits else ""), "rule": rule["id"],
