@@ -139,6 +139,10 @@ When Ben says there is a new version:
 typed in **PowerShell** (the Windows app where you type commands: click **Start**, type `PowerShell`, press
 **Enter**) instead of Terminal.
 
+**Please confirm one thing:** while Gordium runs in Rhino (GordiumStart, a check, Zoning report…), **no black
+terminal window should appear**. Gordium starts its checker with no window on Windows; if one still pops up, tell
+us which step showed it. Zoning report… should open the report in Excel (or your spreadsheet app).
+
 1. **Get access**, as on the Mac ([step 1](#what-you-need-once): a GitHub account; accept Ben's invitation). You
    don't need a token on Windows: Git asks you to sign in to GitHub in your browser instead.
 2. **Install Rhino 8.**

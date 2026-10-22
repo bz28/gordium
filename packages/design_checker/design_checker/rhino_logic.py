@@ -1174,3 +1174,26 @@ def answer_for(lines, request_id, limit):
         raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
                                "nothing from it is shown")
     return answer
+
+
+# ---- processes started from Rhino: never a console window (Windows) -----------------------------------------------
+CREATE_NO_WINDOW = 0x08000000            # Windows: a console program started from a window program shows no console
+STARTF_USESHOWWINDOW, SW_HIDE = 0x00000001, 0
+
+
+def spawn_options(os_name, subprocess_module):
+    """What every process Gordium starts from Rhino is started with (gordium_ui.spawn): on Windows, no console window
+    (the cofounders saw a terminal pop up while Gordium ran: Python started from Rhino, a window program, opens one
+    unless told not to), and its window hidden too; elsewhere nothing extra."""
+    if os_name != "nt":
+        return {}
+    info = subprocess_module.STARTUPINFO()
+    info.dwFlags |= STARTF_USESHOWWINDOW
+    info.wShowWindow = SW_HIDE
+    return {"creationflags": CREATE_NO_WINDOW, "startupinfo": info}
+
+
+def open_command(os_name, target):
+    """How a file or link is opened with the computer's own app: ("startfile", target) on Windows (os.startfile:
+    `open` is macOS's), ("run", ["open", target]) on macOS."""
+    return ("startfile", target) if os_name == "nt" else ("run", ["open", target])

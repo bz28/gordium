@@ -8,6 +8,8 @@ whole session (gordium_rhino.Overlay explains), so the panel and the dialog are 
 functions, and an update to this file takes effect at once."""
 
 import System
+import os
+
 import Eto.Drawing as ed
 import Eto.Forms as ef
 import Rhino
@@ -593,10 +595,31 @@ def _section(dg):
         return _wide((dg.get("label") or "Diagram") + ": can't be drawn here (" + str(e)[:60] + ")", size=11)
 
 
+def spawn(args, run=False, **kw):
+    """Every process Gordium starts from Rhino, the one place (a test checks there is no other): on Windows with no
+    console window (rhino_logic.spawn_options). `run`: wait for it (subprocess.run), else start it (Popen)."""
+    import subprocess
+    kw.update(logic.spawn_options(os.name, subprocess))
+    return subprocess.run(args, **kw) if run else subprocess.Popen(args, **kw)
+
+
+def open_target(target):
+    """A file or link opened with the computer's own app (Excel, a browser): os.startfile on Windows, `open` on
+    macOS (rhino_logic.open_command). (opened, why not)."""
+    how, what = logic.open_command(os.name, target)
+    try:
+        if how == "startfile":
+            os.startfile(what)
+            return True, None
+        done = spawn(what, run=True, capture_output=True, text=True, timeout=20, encoding="utf-8")
+        return done.returncode == 0, (done.stderr or "").strip()[:160] or None
+    except Exception as e:
+        return False, str(e)[:160]
+
+
 def _open(url):
     try:
-        System.Diagnostics.Process.Start("open", '"' + url + '"')
-        return True
+        return open_target(url)[0]
     except Exception:
         return False
 

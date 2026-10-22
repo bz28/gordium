@@ -134,9 +134,9 @@ def _worker():
         env["PYTHONPATH"] = os.pathsep.join(STATE.get("extra_paths", []) + [
             os.path.join(packages, n) for n in sorted(os.listdir(packages)) if os.path.isdir(os.path.join(packages, n))])
         log = open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a", encoding="utf-8")
-        p = subprocess.Popen([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,
-                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,
-                             universal_newlines=True, encoding="utf-8")
+        p = ui.spawn([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,   # (no console on
+                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,            # Windows: ui.spawn)
+                     universal_newlines=True, encoding="utf-8")
         # its pipes served by threads: Rhino's thread never reads or writes one (rhino_logic.pipes)
         STATE["worker_sends"], STATE["worker_lines"] = logic.pipes(p)
         STATE["worker"] = p
@@ -1908,15 +1908,7 @@ def open_report():
             say(logic.report_message(path, False, (STATE.get("last") or {}).get("error") or
                                      ("the report file wasn't written to " + os.path.dirname(path))))
         return
-    opened, why = True, None
-    try:
-        if os.name == "nt":
-            os.startfile(path)
-        else:
-            done = subprocess.run(["open", path], capture_output=True, text=True, timeout=20, encoding="utf-8")
-            opened, why = done.returncode == 0, (done.stderr or "").strip()[:160] or None
-    except Exception as e:
-        opened, why = False, str(e)[:160]
+    opened, why = ui.open_target(path)            # os.startfile on Windows, `open` on macOS
     say(logic.report_message(path, True, opened=opened, open_error=why))
 
 

@@ -1974,3 +1974,42 @@ def test_the_envelope_refuses_a_buried_solid_as_the_measuring_does():
     buried = box(40, 75, 48, 90, -12, -2, id="buried")              # wholly under the ground, not under the house
     got = _envelope_facts({"buildings": [box(10, 25, 35, 65, 0, 30), buried]}, {"grade_points": spots})
     assert got["ground_is_flat"] is None
+
+
+def test_no_process_gordium_starts_from_rhino_opens_a_console_window_on_windows():
+    """Ben's cofounders, on Windows: a terminal window kept popping up while Gordium ran in Rhino (Python started from
+    a window program opens a console unless told not to). Every process the plugin starts goes through one place,
+    gordium_ui.spawn (nowhere else in apps/ starts one: Popen, run, call, check_output, Process.Start, os.system),
+    which on Windows adds CREATE_NO_WINDOW and a hidden-window STARTUPINFO; files and links open with os.startfile on
+    Windows, `open` on macOS (rhino_logic.open_command)."""
+    import re
+    import types
+    from design_checker import rhino_logic as logic
+    launch = re.compile(r"subprocess\.(Popen|run|call|check_output|check_call)\(|Process\.Start\(|os\.system\(")
+    found = []
+    for path in sorted((REPO / "apps").rglob("*.py")):
+        text = path.read_text(encoding="utf-8")
+        if path.name == "gordium_ui.py":
+            spawn = text[text.index("def spawn("):text.index("def open_target(")]
+            text = text.replace(spawn, "")
+            assert len(launch.findall(spawn)) == 2                     # spawn itself: run, else Popen
+        found += [(path.name, m.group(0)) for m in launch.finditer(text)]
+    assert not found, found
+
+    class STARTUPINFO:                       # Windows' (macOS's subprocess has none)
+        def __init__(self):
+            self.dwFlags, self.wShowWindow = 0, 1
+
+    windows = logic.spawn_options("nt", types.SimpleNamespace(STARTUPINFO=STARTUPINFO))
+    assert windows["creationflags"] == 0x08000000                    # CREATE_NO_WINDOW
+    assert windows["startupinfo"].dwFlags & 0x00000001 and windows["startupinfo"].wShowWindow == 0   # hidden
+    assert logic.spawn_options("posix", None) == {}
+    assert logic.open_command("nt", "C:\\\\r.xlsx") == ("startfile", "C:\\\\r.xlsx")
+    assert logic.open_command("posix", "/r.xlsx") == ("run", ["open", "/r.xlsx"])
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    spawn = ui[ui.index("def spawn("):ui.index("def open_target(")]
+    assert "    kw.update(logic.spawn_options(os.name, subprocess))\n" in spawn
+    opener = ui[ui.index("def open_target("):ui.index("def _open(")]
+    assert '            os.startfile(what)' in opener and "logic.open_command(os.name, target)" in opener
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "p = ui.spawn([_python()" in rhino and "opened, why = ui.open_target(path)" in rhino
