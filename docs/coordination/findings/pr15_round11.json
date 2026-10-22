@@ -1,0 +1,23 @@
+{
+ "round": 11,
+ "mode": "review",
+ "confirmed": [],
+ "refuted": [],
+ "priorStatus": [
+  {
+   "title": "Round-9 'own ground' buried check also applies to the main building's own parts: a part lying wholly below the building's grade plane is no longer stopped, and the height shows a negative reading",
+   "status": "fixed",
+   "reasoning": "measure.py _ground_against (lines ~859-867) now gives an own level only to solids where `not _is_home(b, home)`. Home solids fall through to `at(i) = grade`. Every caller passes `home`: _measure (`home = _grade_home(buildings, facts)`, built from pick_main(_stacks) just as grade_plane picks the main building), envelope_grade (`home=_grade_home(buildings, facts)`) and _candidate_grades (`home=_joined_ids(members, buildings)`, so every candidate member is judged against that candidate's own grade). _joined_ids widens the home set across _connected groups by _parts ids, so the stacked/raw mismatch between _grade_home (stacks) and _ground_against (raw solids) is handled. I re-ran the reported case: envelope_grade([low, up]) now returns the buried_solid stop ('wholly under the ground ... -6.0 to -2.0'), and the pin test passes. home=None (no main) makes every solid home, which is the conservative direction, and grade is None there anyway (no_main_building). The full model_measurement suite passes: 227 tests."
+  },
+  {
+   "title": "The ground cut for the MAIN building is now the average ground at its face corners, not the \u00a7325-3 grade plane",
+   "status": "fixed",
+   "reasoning": "_at_ground now sets `level = _separate_grade(...)`, which returns None for any home solid, and then `plan_level if _is_home(building, home) else mean(ground)`. Both _at_ground call sites in _measure (the building_area cut and the yards' 'walls at ground level' shape) pass `home`. They pass stacked buildings, and _is_home matches them by _parts ids against the home set built from raw ids, so stacks resolve correctly. With spot grades but no grade plane found, plan_level = lo, and a home solid is cut at its own bottom (max(lo, bottom)), which is the documented no-grade fallback. Pin part 2 (stepped case = 1000 sf, no overhang question) passes. I also checked a combined case (house, a separate shed and a deck joined to the shed on lower ground, each with its own spot grades): building_area is 740 at both readings, and envelope_grade is (0.0, None). So the separate-building path through _separate_grade/_connected works for a group too."
+  }
+ ],
+ "stats": {
+  "found": 0,
+  "confirmed": 0,
+  "refuted": 0
+ }
+}

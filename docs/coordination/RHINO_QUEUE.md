@@ -17,3 +17,4 @@ Each entry: branch + commit, the script, what must pass. Newest at the bottom.
 7. context-map (#23) at a6a74ab or later (cloud, review round 5): `apps/rhino_plugin/tests/context_in_rhino.py` — all claims incl. the new
    "4 with the Gordium layer and the architect's Gordium::Grade locked, a redraw replaces (never doubles) and puts both locks back".
    Commit results beside the 955d97f run (docs/evidence/pr-23/context_results_<sha>.json + README section), push to wip/pr23-rhino-<sha>.
+8. rhino-ui (#15) at c37738a (arch-fixes-2 landed; cloud, 2026-10-22): re-run `apps/rhino_plugin/tests/pass2_in_rhino.py` (replaces item 1's 432d1ae run): all claims incl. the corner multi-pick, No drops both streets, exactly one checker process and none left after; plus a single street pick on the sample (Ithaca Rd kept on all 8 lines). Screenshots to docs/evidence/pr-15-mvp/pass2/, commit on wip/rhino-ui-pass2-<sha>.
