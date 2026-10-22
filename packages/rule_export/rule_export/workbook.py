@@ -228,6 +228,7 @@ COLUMNS = {
              Col("Kind", 7, "kind", _get("kind")), Col("Topic", 14, "topic", _get("topic")),
              Col("Check (formula)", 40, "check", _get("check"), every=False),
              Col("Applies when", 26, "applies_when", _get("applies_when"), every=False),
+             Col("Widens rule", 24, "relaxes", _get("relaxes"), every=False),
              Col("Needs review when", 34, "review_when", _get("review_when", lambda v: _bullets(
                  f"{r.get('when')}: {r.get('reason')}" for r in v or [])), every=False),
              Col("Worked examples", 40, "examples", _get("examples", _examples), every=False),

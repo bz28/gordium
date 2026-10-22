@@ -68,14 +68,47 @@ def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
         return "needs_review"         # a formula that can't be read (never frozen so) is never a crash
 
 
-def apply_relaxes(rules: list[dict]) -> list[dict]:
+PROVEN_RELAXERS = "5_zoning_rules/drafted/records/proven_relaxers.yaml"
+
+
+def proven_relaxers(jurisdiction) -> frozenset:
+    """The AI-drafted relaxing rules proven equivalent to a hand-written key rule by the generative test
+    (records/proven_relaxers.yaml: {rule id: the test and key that prove it}); none yet."""
+    path = Path(jurisdiction) / PROVEN_RELAXERS
+    return frozenset((load(path) or {}) if path.exists() else {})
+
+
+def trusted_relaxer(rule: dict, proven: frozenset = frozenset()) -> bool:
+    """A relaxing rule that may turn a fail into a pass: written by hand, approved, or proven (proven_relaxers)."""
+    return (not str(rule.get("drafted_by", "")).startswith("rule_drafting/") or rule.get("status") == "approved"
+            or rule.get("id") in proven)
+
+
+def _flat(op, texts: list[str]) -> list:
+    """Each formula's parts under `op`, a nested and/or of the same kind spread out (one formula shape for every
+    reader: the panel reads each way of an `or` and each comparison of an `and`)."""
+    import ast
+    out = []
+    for t in texts:
+        node = ast.parse(t, mode="eval").body
+        out += node.values if isinstance(node, ast.BoolOp) and isinstance(node.op, op) else [node]
+    return out
+
+
+def apply_relaxes(rules: list[dict], proven: frozenset = frozenset()) -> list[dict]:
     """An exception that widens another rule (`relaxes: <rule id>`: §325-16C's extra height relaxes the chart's height
     limit), applied by composing the relaxed rule, so every verdict path (outcome, the every-reading check) reads it
-    unchanged. The relaxed rule passes if its own check passes, or if a rule relaxing it applies and passes its
-    own check: `base or (when_1 and check_1) or ... or (when_n and check_n)`, worked out in three-valued logic, so an
-    unknown relaxer can only make a failing base need review, never pass. A relaxer's review_when becomes the relaxed
-    rule's, where the relaxation is what decides. A relaxer is never widened by this; it stays its own rule too. Rules
-    with no relaxer are returned as they are (validate checks relaxes: same rulebook, a rule with a condition, no cycle)."""
+    unchanged. The relaxed rule passes if its own check passes, or if a rule relaxing it applies and passes its own
+    check: `base or when_1 and check_1 or ... or when_n and check_n`, one flat formula (as a hand-written rule is
+    written, so the panel finds every way and its comparisons), worked out in three-valued logic, so an unknown
+    relaxer can only make a failing base need review, never pass. A relaxer's review_when becomes the relaxed rule's,
+    where the relaxation is what decides.
+    Only a trusted relaxer widens (trusted_relaxer: hand-written, approved, or proven). An AI-drafted one can leave
+    out a condition the law sets (a bonus with only the front yard passed a 37 ft house with 1 ft side yards), so
+    where only it would pass, the rule needs review ("complies only through ... as drafted"), never passes.
+    A relaxer is never widened by this (no chains: validate refuses them); it stays its own rule too. Rules with no
+    relaxer are returned as they are."""
+    import ast
     by_target: dict[str, list[dict]] = {}
     for r in rules:
         if isinstance(r.get("relaxes"), str):
@@ -85,26 +118,33 @@ def apply_relaxes(rules: list[dict]) -> list[dict]:
     out = []
     for r in rules:
         relaxers = by_target.get(r.get("id"))
-        if not relaxers or r.get("kind") != "rule" or not r.get("check"):
+        if not relaxers or r.get("kind") != "rule" or not r.get("check") or r.get("relaxes"):
             out.append(r)
             continue
-        widen = " or ".join(f"(({x['applies_when']}) and ({x['check']}))" for x in relaxers)
-        review = list(r.get("review_when") or []) + [
-            {"when": f"not ({r['check']}) and ({x['applies_when']}) and ({w['when']})", "reason": w.get("reason", "")}
-            for x in relaxers for w in x.get("review_when") or []]
-        out.append(r | {"check": f"({r['check']}) or ({widen})", "review_when": review,
-                        "relaxed_by": [x["id"] for x in relaxers]})
+        trusted = [x for x in relaxers if trusted_relaxer(x, proven)]
+        review = list(r.get("review_when") or [])
+        review += [{"when": f"not ({r['check']}) and ({x['applies_when']}) and ({w['when']})", "reason": w.get("reason", "")}
+                   for x in trusted for w in x.get("review_when") or []]
+        review += [{"when": f"not ({r['check']}) and ({x['applies_when']}) and ({x['check']})",
+                    "reason": f"complies only through {x.get('title') or x['id']} ({x['id']}) as the AI drafted it: "
+                              "a person confirms its conditions are the law's"} for x in relaxers if x not in trusted]
+        check = r["check"]
+        if trusted:
+            check = ast.unparse(ast.BoolOp(ast.Or(), _flat(ast.Or, [r["check"]]) + [
+                ast.BoolOp(ast.And(), _flat(ast.And, [x["applies_when"], x["check"]])) for x in trusted]))
+        out.append(r | {"check": check, "review_when": review, "relaxed_by": [x["id"] for x in relaxers]})
     return out
 
 
 def _relaxes_problems(rules: list[dict]) -> list[str]:
     """`relaxes` names a rule of the same rulebook (so the same district), from a rule with a condition and a check
-    (an exception holds only when all its conditions are met), never itself, never a flag, and never in a cycle."""
-    ids = {r.get("id"): r for r in rules if isinstance(r, dict)}
+    (an exception holds only when all its conditions are met), never itself, never a flag, never a rule that itself
+    relaxes another (no chains, so no cycles). A `relaxes` that isn't text is reported with the rule's fields."""
+    ids = {r["id"]: r for r in rules if isinstance(r, dict) and isinstance(r.get("id"), str)}
     p = []
     for r in rules:
         target = r.get("relaxes") if isinstance(r, dict) else None
-        if target is None:
+        if not isinstance(target, str):
             continue
         rid = r.get("id")
         if target == rid:
@@ -113,15 +153,10 @@ def _relaxes_problems(rules: list[dict]) -> list[str]:
             p.append(f"{rid}: relaxes {target!r}, which isn't a rule of this rulebook")
         elif ids[target].get("kind") != "rule" or not ids[target].get("check"):
             p.append(f"{rid}: relaxes {target!r}, which has no check to widen")
+        elif ids[target].get("relaxes") is not None:
+            p.append(f"{rid}: relaxes {target!r}, which itself relaxes another rule (no chains)")
         if r.get("kind") != "rule" or not r.get("check") or not r.get("applies_when"):
             p.append(f"{rid}: a relaxing rule needs its condition (applies_when) and its own check")
-        seen, at = {rid}, target
-        while at in ids and isinstance(ids[at].get("relaxes"), str):
-            at = ids[at]["relaxes"]
-            if at in seen:
-                p.append(f"{rid}: relaxes in a cycle")
-                break
-            seen.add(at)
     return p
 
 
@@ -192,7 +227,8 @@ def is_ai_drafted(jurisdiction, zone: str) -> bool:
 
 def zone_rules(jurisdiction, zone: str) -> list[dict]:
     """The rules of every file in `zone_rulebooks`, in that order, each `relaxes` link applied (apply_relaxes)."""
-    return apply_relaxes([r for p in zone_rulebooks(jurisdiction, zone) for r in (load(p) or {}).get("rules") or []])
+    return apply_relaxes([r for p in zone_rulebooks(jurisdiction, zone) for r in (load(p) or {}).get("rules") or []],
+                         proven_relaxers(jurisdiction))
 
 
 def utf8_console() -> None:

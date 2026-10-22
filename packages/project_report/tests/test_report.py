@@ -388,8 +388,8 @@ def test_the_report_reads_every_rule_with_its_relaxes_links_applied(monkeypatch)
     reads the files itself, so it must apply the same composition or it could show FAIL where the checker passes."""
     real = report.apply_relaxes
 
-    def tagged(rules):
-        return [r | {"id": "relaxed:" + r["id"]} for r in real(rules)]
+    def tagged(rules, proven=frozenset()):
+        return [r | {"id": "relaxed:" + r["id"]} for r in real(rules, proven)]
     monkeypatch.setattr(report, "apply_relaxes", tagged)
     t = tables(SITE)
     ids = list(rows_by_id(t))

@@ -85,7 +85,12 @@ def test_relaxes_is_checked_statically():
     assert any("isn't a rule of this rulebook" in p for p in problems(BASE, BONUS | {"relaxes": "R-2a.height"}))
     assert any("relaxes itself" in p for p in problems(BONUS | {"relaxes": BONUS["id"]}))
     loop = BASE | {"relaxes": BONUS["id"], "applies_when": "abuts_r1_district"}
-    assert any("cycle" in p for p in problems(loop, BONUS))
+    assert any("no chains" in p for p in problems(loop, BONUS))                 # a cycle is a chain
+    chain = {"id": "R-1b.y", "kind": "rule", "relaxes": BONUS["id"], "applies_when": "abuts_r1_district",
+             "check": "building_height <= 45"}
+    assert any("no chains" in p for p in problems(BASE, BONUS, chain))
+    listed = BONUS | {"relaxes": [BASE["id"]]}                                  # not text: a problem, not a crash
+    assert validate({"district": "R-1b", "rules": [BASE, listed]}, CTX)
     assert any("needs its condition" in p for p in problems(BASE, {k: v for k, v in BONUS.items() if k != "applies_when"}))
     assert any("no check to widen" in p for p in problems(BASE | {"kind": "flag"}, BONUS))
 
@@ -111,3 +116,63 @@ def test_the_checker_reads_rules_with_their_relaxes_links_applied(tmp_path):
     tall = {"building_height": 37, "front_yard": 27, "side_yard_smaller": 12, "side_yard_larger": 12, "rear_yard": 30,
             "lot_depth": 100}
     assert outcome(got["R-1b.height_chart"], tall, {}) == "pass" and outcome(BASE, tall, {}) == "fail"
+
+
+
+def test_a_relaxer_is_never_widened_itself():
+    chain = {"id": "R-1b.y", "kind": "rule", "relaxes": BONUS["id"], "applies_when": "abuts_r1_district",
+             "check": "building_height <= 45"}
+    got = {r["id"]: r for r in apply_relaxes([BASE, BONUS, chain])}
+    assert got[BONUS["id"]] == BONUS
+
+
+def test_an_ai_drafted_relaxer_never_turns_a_fail_into_a_pass():
+    """Round 10 (P0): a bonus drafted with only some of its conditions (the front yard) passed a 37 ft house with
+    1 ft side and rear yards. Where only an AI-drafted relaxer would pass, the widened rule needs review; a hand-written
+    (or approved, or proven) one widens as written."""
+    partial = BONUS | {"applies_when": "front_yard >= 25 + (building_height - 35)", "drafted_by": "rule_drafting/m"}
+    relaxed = apply_relaxes([BASE, partial])[0]
+    thin = {"building_height": 37, "front_yard": 27, "side_yard_smaller": 1, "side_yard_larger": 1, "rear_yard": 1,
+            "lot_depth": 100}
+    assert outcome(relaxed, thin, {}) == "needs_review"
+    assert outcome(relaxed, thin | {"building_height": 30}, {}) == "pass"        # passing by its own check: unchanged
+    assert outcome(relaxed, thin | {"building_height": 41}, {}) == "fail"
+    for trusted in (partial | {"status": "approved"}, partial | {"drafted_by": "claude"}):
+        assert outcome(apply_relaxes([BASE, trusted])[0], thin, {}) == "pass"
+    assert outcome(apply_relaxes([BASE, partial], frozenset({partial["id"]}))[0], thin, {}) == "pass"   # proven
+
+
+def test_the_composed_check_is_one_flat_formula_the_panel_reads_like_the_hand_rule():
+    """Round 10 (P2): composed as `(base) or ((when) and (check))`, the panel's readers saw only the height in the
+    bonus way, so they never raised the yard rows nor listed the yards in "doesn't comply either way"."""
+    import ast
+    from design_checker import present
+    relaxed = {r["id"]: r for r in apply_relaxes([BASE, BONUS])}["R-1b.height_chart"]
+    by_bonus = 0
+    for values in designs():
+        if len(values) < len(GRID):
+            continue
+        hold = [present._holding_way(f["check"], values) for f in (COMBINED, relaxed)]
+        names = [sorted(c.left.id for c in h) if h else h for h in hold]
+        assert names[0] == names[1], values
+        by_bonus += bool(names[0])
+        alts = [sorted(sorted(x[0] for x in way) for way in present._alternatives(f["check"], values, {}))
+                for f in (COMBINED, relaxed)]
+        assert alts[0] == alts[1], values
+    assert by_bonus                     # designs that pass only by the bonus, with every yard in the way the panel reads
+
+
+
+def test_a_proven_ai_relaxer_widens_where_the_checker_reads_rules(tmp_path):
+    """records/proven_relaxers.yaml lists AI-drafted relaxers the generative test proved equal to a hand key rule."""
+    rules_dir = tmp_path / "5_zoning_rules"
+    (rules_dir / "drafted/records").mkdir(parents=True)
+    ai = BONUS | {"drafted_by": "rule_drafting/m"}
+    (rules_dir / "R-1b.yaml").write_text(yaml.safe_dump({"district": "R-1b", "rules": [BASE, ai]}), encoding="utf-8")
+    tall = {"building_height": 37, "front_yard": 27, "side_yard_smaller": 12, "side_yard_larger": 12, "rear_yard": 30,
+            "lot_depth": 100}
+    height = lambda: {r["id"]: r for r in zone_rules(tmp_path, "R-1b")}["R-1b.height_chart"]   # noqa: E731
+    assert outcome(height(), tall, {}) == "needs_review"
+    (rules_dir / "drafted/records/proven_relaxers.yaml").write_text(
+        yaml.safe_dump({ai["id"]: "test_relaxes: equal to the hand R-1b height"}), encoding="utf-8")
+    assert outcome(height(), tall, {}) == "pass"
