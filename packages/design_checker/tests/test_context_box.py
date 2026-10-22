@@ -497,7 +497,7 @@ def test_a_draw_on_the_same_lot_brings_back_what_a_reopened_file_lost_and_says_e
     assert "draw_context(doc, frame)" in keep and "_clear_context" not in keep    # offline keeps what is saved
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
     assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc, sources)")
-    assert 'say("Neighbourhood removed: it is drawn only around a lot the start box looked up.")' in sync
+    assert 'say(logic.with_not_cleared("Neighbourhood removed: it is drawn only around a lot the start box looked up.",' in sync
     assert "_context_visible(doc, True)" in sync
 
 
@@ -512,7 +512,7 @@ def test_every_draw_of_a_box_brings_the_neighbourhood_in_line_with_the_lot():
     sync = RHINO[RHINO.index("def sync_context("):RHINO.index("def _context_visible(")]
     assert "step = logic.context_step(frame, drawn, on)" in sync
     assert "frame = logic.context_frame(facts, _ui_state(doc))" in sync
-    assert 'say("Neighbourhood not drawn: Show neighbourhood is off' in sync                 # never silently skipped
+    assert 'say(logic.with_not_cleared("Neighbourhood not drawn: Show neighbourhood is off' in sync   # never silent
     show = RHINO[RHINO.index("def show_context("):RHINO.index("def _doc_name(")]
     assert "draw_context(doc, logic.context_frame(facts, _ui_state(doc)))" in show
 
@@ -1068,8 +1068,44 @@ def test_a_clear_under_a_locked_gordium_layer_deletes_on_unlocked_layers_and_put
     assert _locks(doc) == {"Context": False, "Parcels": True, "Streets": True, "Buildings": False, "Notes": True}
     doc.Objects = type("Objects", (), {"FindByLayer": lambda self, layer: find(layer),
                                        "Delete": lambda self, o, quiet: False})()       # Rhino refuses
-    ns["_clear_context"](doc)
-    assert ns["said"] == [logic.context_not_cleared(1)] and "could not remove 1 neighbourhood object " in ns["said"][0]
+    assert ns["_clear_context"](doc) == 1 and ns["said"] == []      # counted for the caller's one line (round 6)
+    assert "could not remove 1 neighbourhood object " in logic.context_not_cleared(1)
     assert logic.outermost_first([(5, "A::B::C"), (2, "A"), (9, "A::B"), (1, "A::D")]) == [2, 1, 9, 5]
+
+
+def test_a_refused_delete_is_in_the_panels_one_line_and_never_beside_neighbourhood_removed():
+    """Review round 6: the panel shows one line, so the "could not remove" warning said inside the clear was
+    overwritten by the caller's next message ("Neighbourhood removed", "Neighbourhood drawn"...). Now the clear returns
+    the count and each caller's one line starts with the warning."""
+    ns = _clear_ns()
+    for name in ("sync_context", "draw_context"):
+        exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)
+    doc = _context_doc()
+    drawn = type("O", (), {"Id": "o1", "Geometry": None, "Attributes": type("A", (), {
+        "GetUserString": lambda self, k: "nys_parcels" if k == logic.CONTEXT_KEY else None})()})()
+    doc.Objects = type("Objects", (), {"FindByLayer": lambda self, layer: [drawn] if layer.FullPath.endswith("Parcels")
+                                       else [], "Delete": lambda self, o, quiet: False})()
+    record = {"frame": {"lot": "an earlier address"}, "layers": {}}
+    ns.update(_context_record=lambda doc: record, _ui_state=lambda doc: {}, _context_on=lambda doc: True)
+    assert logic.context_step(logic.context_frame({}, {}), record["frame"], True) == "clear"
+    ns["sync_context"](doc, {})
+    assert ns["said"] == [logic.with_not_cleared("Neighbourhood removed: it is drawn only around a lot the start box "
+                                                 "looked up.", 1)]
+    assert ns["said"][0].startswith("Gordium could not remove 1 neighbourhood object ")
+    ns["said"].clear()
+    ns["_context_payload"] = lambda frame: None                    # the draw step: the fetch could not start
+    ns["draw_context"](doc, {"lot": "here"}, 2)
+    assert ns["said"] == [logic.context_not_cleared(2) + " " + logic.NO_CONTEXT]
+    assert logic.with_not_cleared("Drawn.", 0) == "Drawn."
+    ns["said"].clear()                                             # sync's draw step: its clear's count reaches the line
+
+    class Logic:                                                   # a new lot the lookup drew: step "draw"
+        def __getattr__(self, name):
+            return getattr(logic, name)
+        context_frame = staticmethod(lambda facts, ui: {"lot": "here"})
+        context_step = staticmethod(lambda frame, drawn, on: "draw")
+    ns["logic"] = Logic()
+    ns["sync_context"](doc, {})
+    assert ns["said"] == [logic.context_not_cleared(1) + " " + logic.NO_CONTEXT]
     check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
     assert '"tick_off_locks"' in check and '"tick_on_locks"' in check                  # Rhino proves it

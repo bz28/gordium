@@ -2494,7 +2494,7 @@ def _clear_context(doc, sources=None):
     for i in touched:                      # a parent before its sublayers: its IsVisible can't lock them again
         doc.Layers[i].IsVisible = True
         doc.Layers[i].IsLocked = False
-    left = 0                               # objects Rhino refused to delete or change: said, never drawn over silently
+    left = 0                               # objects Rhino refused to delete or change: returned, never drawn over silently
     for i in indexes:
         for o in list(doc.Objects.FindByLayer(doc.Layers[i]) or []):
             source = o.Attributes.GetUserString(logic.CONTEXT_KEY)
@@ -2513,8 +2513,7 @@ def _clear_context(doc, sources=None):
     for i, _, locked in was:
         doc.Layers[i].IsLocked = locked
     _lock_context(doc, True)               # the context layers as Gordium keeps them: all but the footprints
-    if left:
-        say(logic.context_not_cleared(left))
+    return left                            # the caller puts it in its one line (review round 6)
     if sources is None:
         if logic.guides_of(STATE.get("context_guides"), doc.RuntimeSerialNumber):
             STATE.pop("context_guides", None)
@@ -2582,15 +2581,16 @@ def _context_text(doc, o, anchor):
     return text
 
 
-def draw_context(doc, frame):
+def draw_context(doc, frame, left=0):
     """The neighbourhood around the looked-up lot: fetched, then drawn in place of any earlier one. Says what it
-    drew (or why it didn't)."""
+    drew (or why it didn't), with any of Gordium's objects Rhino refused to remove first (`left`: an earlier clear's
+    count; the panel shows one line, so the warning goes in it: review round 6)."""
     payload = _context_payload(frame)
     if payload is None:
-        say(logic.NO_CONTEXT)
+        say(logic.with_not_cleared(logic.NO_CONTEXT, left))
         return None
     if payload.get("status") != "found":   # nothing answered: what is saved stays as it is
-        say(logic.context_says(payload))
+        say(logic.with_not_cleared(logic.context_says(payload), left))
         return payload
     old = _context_record(doc)
     held = STATE.get("context_guides") or {}
@@ -2600,7 +2600,7 @@ def draw_context(doc, frame):
     payload, record, sources, keep_guides = plan["payload"], plan["record"], plan["replace"], plan["keep_guides"]
     STATE.pop("context_guides", None)
     dirty = STATE.get("dirty")             # live mode hears every add: the context changes nothing the check reads,
-    _clear_context(doc, sources)           # so the model's "changed since the check" mark is put back after
+    left += _clear_context(doc, sources)   # so the model's "changed since the check" mark is put back after
     _lock_context(doc, False)
     layers = {logic.CONTEXT + "::" + name: _context_layer(doc, name) for name in CONTEXT_GREYS}
     here = logic.frame_key(frame)
@@ -2642,7 +2642,7 @@ def draw_context(doc, frame):
             box.Union(line.BoundingBox)
         STATE["context_guides"] = {"doc": doc.RuntimeSerialNumber, "lines": guides, "box": box}
     doc.Views.Redraw()
-    say(logic.context_says(payload))
+    say(logic.with_not_cleared(logic.context_says(payload), left))
     return payload
 
 
@@ -2660,14 +2660,17 @@ def sync_context(doc, facts):
         # file). draw_context replaces what is drawn only once the fetch has worked, so offline what is saved stays
         draw_context(doc, frame)
         return
+    left = 0                           # Gordium's objects Rhino refused to remove: put in the one line said
     if step in ("clear", "draw", "off"):
-        _clear_context(doc)
+        left = _clear_context(doc)
     if step == "draw":
-        draw_context(doc, frame)       # says what it drew, or why not
+        draw_context(doc, frame, left)     # says what it drew, or why not
     elif step == "off":
-        say("Neighbourhood not drawn: Show neighbourhood is off in the panel (tick it to draw it).")
+        say(logic.with_not_cleared("Neighbourhood not drawn: Show neighbourhood is off in the panel (tick it to draw "
+                                   "it).", left))
     elif step == "clear":
-        say("Neighbourhood removed: it is drawn only around a lot the start box looked up.")
+        say(logic.with_not_cleared("Neighbourhood removed: it is drawn only around a lot the start box looked up.",
+                                   left))
     elif frame and on:
         _context_visible(doc, True)    # as the tick says (a file saved with it off opens hidden)
 

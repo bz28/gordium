@@ -1662,6 +1662,13 @@ def context_not_cleared(count):
             "and show the Gordium layers, then press Draw again, or delete them by hand." % (count, "" if count == 1 else "s"))
 
 
+def with_not_cleared(text, count):
+    """A message with the not-cleared warning first when Rhino refused to remove some of Gordium's objects: the panel
+    shows one line, so a warning said on its own is overwritten by the next message (review round 6); a "removed"
+    line never stands alone while objects are left."""
+    return text if not count else context_not_cleared(count) + " " + text
+
+
 def context_locked(path):
     """Whether a context layer is locked after drawing: the leaf layers but the editable ones (the footprints), never
     an ancestor of an editable one (Gordium::Context itself): in Rhino a locked parent locks its sublayers' objects,
