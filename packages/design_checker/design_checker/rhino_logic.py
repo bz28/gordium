@@ -1150,7 +1150,11 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     if not replaces:                             # the architect's own lot: its lot, street side and ground stay
         return facts, saved_ui
     side = value("street_side") or {}
-    if side.get("street"):
+    # a street's name and source only with the street line this lookup draws (the State's lot): the City's parcels
+    # are a guide only, no line drawn, so nothing is said of a line that isn't there (review round 2 of 8b8af5e)
+    w = payload.get("writes") or {}
+    draws_line = bool(w.get("lot_ring") and w.get("street_line"))
+    if side.get("street") and draws_line:
         # the address's own street is named in the address's words, which are kept: so the name is still there
         # after Draw (it was this session's only, "the highlighted line" on reopen: Rhino check, 2026-10-22);
         # another street's name may be kept only when its source allows
@@ -1166,7 +1170,7 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     else:                                        # the replaced lot's street name goes with its street lines (the
         saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street), and so
         saved_ui.pop("_street_name", None)       # does its source: the street side's own, or none (headless check)
-        if side:
+        if side and draws_line:
             saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
         else:
             saved_ui.pop("street_source", None)

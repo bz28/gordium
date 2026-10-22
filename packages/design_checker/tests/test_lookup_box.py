@@ -697,6 +697,25 @@ def test_the_city_outline_guide_holds_the_sample_lot_until_cancel():
     assert table.snapshot() == before
 
 
+def test_the_city_outline_guide_says_nothing_of_a_street_line_it_never_draws():
+    """Review round 2 of 8b8af5e: with the City's parcels (a guide only) no street line is drawn, yet the street's
+    name and "the line from City of Ithaca roads" were kept and saved at Draw. Named or not, nothing is said of a
+    line that isn't there; the sample's own street name and source go with its lot."""
+    from design_checker.lookup_box import frame
+    for street in ("ITHACA RD", None):
+        table, facts, saved = sample_model()
+        saved = dict(saved, street_name="Ithaca Rd", street_source="the State tax map (the sample's lookup)")
+        p = looked_up("106_ithaca_rd")
+        side = p["facts"]["street_side"]
+        p["facts"] = {**p["facts"], "street_side": {**side, "value": {**side["value"], "street": street}}}
+        p["details"]["lot"]["source_keys"] = ["city_parcels"]
+        p["writes"] = writes({"facts": p["facts"], "details": p["details"]}, frame({"facts": p["facts"]}))
+        f, sv, guide = logic.apply_lookup(table, logic.BoxSession(table), p, facts, saved, ZONES)
+        assert guide and "street_line" not in f
+        kept = logic.storable_ui(sv)
+        assert not {"street_name", "_street_name", "street_source"} & set(sv), (street, kept)
+
+
 def test_cancel_during_a_lookup_never_raises_before_the_rollback():
     """Round 2 (Windows): the output file was removed right after kill(); a PermissionError there skipped the
     rollback. The process is waited for, removal can't raise, the answer is set first, and run_box rolls back in
