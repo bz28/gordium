@@ -26,3 +26,25 @@ Run either one from a checkout of the build being tested:
 
 Each one writes its `results_*.json` next to itself. The R-2a box check uses `lookup_shim.py`, which sets
 the recorded zoning answer to R-2a because no R-2a fixture exists.
+
+## re_lookup/ — the re-lookup branch's plugin code, without Rhino
+
+`re_lookup/headless_re_lookup.py` runs the re-lookup branch's `gordium_rhino.py` unchanged under the same stand-ins,
+extended with RhinoCommon's undo records (`BeginUndoRecord`/`EndUndoRecord`: recorded, not replayed) and blocks.
+
+What it covers:
+- the in-Rhino proof `re_lookup_in_rhino.py`, step for step and claim for claim;
+- a one-street track and Cancel at the question;
+- the City's guide (the box stays open);
+- a surveyed own lot;
+- a retyped address;
+- a garage on a sublayer;
+- blocks;
+- the architect's own answers keeping their sources.
+
+Result at dd6f1c4 (2026-10-22): 46 of 46 checkable pass. 4 can only be checked in Rhino (Undo and Redo themselves).
+Along the way it found two real bugs, both fixed in the branch:
+- the in-Rhino script expected a starting house on a corner lot;
+- a dropped preview lost a district whose own had no rules.
+
+Set `GORDIUM_WT` to a checkout of the branch to run it against another checkout.
