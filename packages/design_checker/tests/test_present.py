@@ -1265,6 +1265,7 @@ def test_a_count_of_0_is_rolled_back_by_its_code_and_enter_stays():
     """#15 round 7 (2): "0" was refused in new words the plugin didn't match, so it was kept and the Enter button
     vanished. The plugin rolls back by the measuring's code, with its own words, and Enter stays on the row."""
     from design_checker.check import check_site
+    from design_checker import rhino_logic as logic
     lot, facts = _sample106()
     base = {**facts, "lot_surveyed": True}
     big = box(12, 30, 36, 60, 0, 30, "house")
