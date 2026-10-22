@@ -1226,7 +1226,9 @@ def test_the_stories_row_asks_for_the_whole_buildings_count_and_takes_it():
     big = box(12, 30, 36, 60, 0, 30, "house")
     st = items(check_site(_plot(big, lot_=lot), base)["view"])["Stories"]
     assert st["status"] == present.REVIEW and "stories" in st["needs"]
-    assert st["reason"] == "A 30 ft solid (the building) could hold up to 4 stories: draw its floors or enter the count."
+    # the bad reading first, then why (stories review round 1, P3)
+    assert st["reason"] == ("At worst 4 against 3: does not comply under that reading. A 30 ft solid (the building) "
+                            "could hold up to 4 stories: draw its floors or enter the count.")
     assert logic.enter_words(st["needs"]) == "Enter the number of stories"
     view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 3}))["view"]
     assert items(view)["Stories"]["status"] == present.COMPLIES and logic.refused_stories(view["items"]) is None
@@ -1239,3 +1241,20 @@ def test_the_stories_row_asks_for_the_whole_buildings_count_and_takes_it():
         [{k: i.get(k) for k in ("name", "reason")} for i in view["items"]]) or "")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert "logic.refused_stories(" in rhino
+
+
+
+def test_with_the_main_building_assumed_the_stories_row_points_to_the_pick_not_to_enter():
+    """Stories review round 1 (P2): with the starting house only assumed, a 20 ft barn read as the main one
+    ignores the count typed, yet the row offered Enter: entering changed nothing (a loop), and only the last
+    question was shown, calling the barn "the building". Now Enter is offered only when a count can settle the
+    row; else it points to Pick the main building…, every open question is kept, and the barn is named."""
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 60, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    barn = box(40, 66, 50, 86, 0, 20, "barn")
+    st = items(check_site(_plot(*house, barn, lot_=lot), {**facts, "lot_surveyed": True, "stories": 3})["view"])[
+        "Stories"]
+    assert "stories" not in st["needs"] and st["hint"] == present.PICK_MAIN, st
+    assert "(barn) could hold up to 2 stories" in st["reason"] and "which building is the main building" in st["reason"]
