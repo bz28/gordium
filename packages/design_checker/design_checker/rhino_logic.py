@@ -749,6 +749,8 @@ def lot_source(surveyed, source=None):
 
 
 NO_LOT = "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)"
+# a file with no lot the box can use (Edit site… in an empty file): its own lot, drawn or picked (never the sample)
+LOT_MISSING = "no lot yet: draw it, or pick a closed outline on the Site layer"
 
 
 def lot_text(area, surveyed, source=None):
@@ -768,6 +770,25 @@ def ground_text(ground):
             "regrade": f"finished ground you set ({ground.get('count', 0)} spot grades)"}[kind]
     return what + (", " + span if span else "") + " · " + (ground.get("source") or
                                                          ("picked by you" if kind == "terrain" else "placed by you"))
+
+
+STREET_WORDS = {"road": "rd", "street": "st", "avenue": "ave", "place": "pl", "drive": "dr", "lane": "ln",
+                "court": "ct", "boulevard": "blvd", "terrace": "ter", "circle": "cir", "parkway": "pkwy",
+                "highway": "hwy", "north": "n", "south": "s", "east": "e", "west": "w"}
+
+
+def address_street(address, street):
+    """The street of `address` in the address's own words ("Ithaca Road" from "106 Ithaca Road, Ithaca, NY"), when
+    it is `street` (a looked-up street name: "ITHACA RD"); else None. Compared word by word with the usual
+    abbreviations (Road = Rd), never by a part of a name."""
+    first = str(address or "").split(",", 1)[0].split()
+    while first and any(ch.isdigit() for ch in first[0]):        # the house number (106, 106A, 106-108)
+        first = first[1:]
+
+    def words(text):
+        return [STREET_WORDS.get(w, w) for w in str(text or "").lower().replace(".", " ").split()]
+
+    return " ".join(first) if first and words(" ".join(first)) == words(street) else None
 
 
 def street_name(state):
@@ -925,7 +946,7 @@ def box_rows(state, flat=None):
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
         {"key": "lot", "label": "Lot",
-         "text": ("no lot yet: draw it, or pick a closed outline on the Site layer" if state.get("lot_missing") else
+         "text": (LOT_MISSING if state.get("lot_missing") else
                   lot_text(state.get("lot_area"), state.get("lot_surveyed"), state.get("lot_source"))
                   if has_lot else NO_LOT),
          "actions": lot_actions, "tick": None},
@@ -976,6 +997,11 @@ def city_day(now=None):
         return first + _dt.timedelta(days=(6 - first.weekday()) % 7 + 7 * (nth - 1))
     summer = sunday(3, 2) + _dt.timedelta(hours=7) <= now < sunday(11, 1) + _dt.timedelta(hours=6)
     return (now - _dt.timedelta(hours=4 if summer else 5)).date().isoformat()
+
+
+def two_zones_ask(zones):
+    """site_lookup's ask when the City map puts a lot in more than one zone, word for word (lookup._zoning)."""
+    return f"This lot is in {' and '.join(zones)}: pick the zone that applies."
 
 
 def no_rules(said, unknown):
@@ -1097,6 +1123,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     zone = value("zone")
     names = {z.lower(): z for z in zones} if zones else {}
     said = zone if isinstance(zone, list) else [zone] if zone else []
+    if len(said) > 1 and live.get("zone"):
+        # site_lookup's own two-zones ask: the box says it once, its own way (no_rules on the row, or the amber
+        # question), so the lookup's words never say it again beside it (review of 8b8af5e, finding 1)
+        live["zone"] = " ".join(live["zone"].replace(two_zones_ask(said), " ").split())
+        if not live["zone"]:
+            live.pop("zone")
     known = [names[z.lower()] for z in said if z.lower() in names] if zones else list(said)
     unknown = [z for z in said if zones and z.lower() not in names]
     if not said:                                 # found, but the zoning map gave no district: never the last
@@ -1107,14 +1139,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         live["zone"] = _merged(live.get("zone"), NO_DISTRICT)
     if unknown:
         # the City map names a district Gordium has no rules for (alone or beside one it has): never another
-        # district preselected or called suggested in its place; none is set until the architect picks one, and
-        # with two zones the box still asks which applies
+        # district preselected or called suggested in its place; none is set until the architect picks one. With
+        # two zones the row's own line names both and asks which applies (no_rules): said once, never again as the
+        # amber question too (Rhino check of 7efb1bd, 2026-10-22)
         facts.pop("zone", None)
         saved_ui.pop("zone_source", None)
-        if len(said) > 1:
-            saved_ui["_zones_found"] = list(said)
-        else:
-            saved_ui.pop("_zones_found", None)
+        saved_ui.pop("_zones_found", None)
         live["zone"] = _merged(live.get("zone"), no_rules(said, unknown))
         known = []
     elif len(known) > 1:                         # two zones: the box asks which applies
@@ -1134,14 +1164,30 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     if not replaces:                             # the architect's own lot: its lot, street side and ground stay
         return facts, saved_ui
     side = value("street_side") or {}
-    if side.get("street"):
-        street_kept = payload.get("street_storable")
+    # a street's name and source only with the street line this lookup draws (the State's lot): the City's parcels
+    # are a guide only, no line drawn, so nothing is said of a line that isn't there (review round 2 of 8b8af5e)
+    w = payload.get("writes") or {}
+    draws_line = bool(w.get("lot_ring") and w.get("street_line"))
+    if side.get("street") and draws_line:
+        # the address's own street is named in the address's words, which are kept: so the name is still there
+        # after Draw (it was this session's only, "the highlighted line" on reopen: Rhino check, 2026-10-22);
+        # another street's name may be kept only when its source allows
+        own = address_street(facts.get("address"), side["street"])
+        street_kept = payload.get("street_storable") or own is not None
         saved_ui.pop("street_name" if not street_kept else "_street_name", None)
-        saved_ui["street_name" if street_kept else "_street_name"] = side["street"].title()
-        saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
+        saved_ui["street_name" if street_kept else "_street_name"] = own or side["street"].title()
+        # credited to where each part came from: a name in the address's words is the address's (its geocoder),
+        # never the street service's, which is used live only (review of 8b8af5e, finding 2)
+        saved_ui["street_source"] = SUGGESTED + " · " + (
+            f"named as in the address ({label('address', 'address')}), the line from {label('street_side', 'street')}"
+            if own else label("street_side", "street"))
     else:                                        # the replaced lot's street name goes with its street lines (the
-        saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street)
-        saved_ui.pop("_street_name", None)
+        saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street), and so
+        saved_ui.pop("_street_name", None)       # does its source: the street side's own, or none (headless check)
+        if side and draws_line:
+            saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
+        else:
+            saved_ui.pop("street_source", None)
     corner = value("corner_lot")
     streets = side.get("streets") or {}
     if corner == "no":
