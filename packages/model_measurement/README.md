@@ -154,7 +154,9 @@ Every reason the code gives today comes from the table:
   doesn't meet the buildings (they run from <bottom> to <top> ft): check the ground level" (at or above the top
   of all the buildings, or under the lowest point of all of them, as when a survey elevation is typed for a model
   drawn at z = 0; stacked solids and a basement drawn as its own solid are measured as usual; with spot grades,
-  read from the ground under the footprint whether or not they sit at the walls); "the spot grades don't show the
+  one test whatever the points' positions: each connected building group (touching in plan or one over another,
+  so a balcony against the house is part of it) meets the ground if its bottom is at or below the ground the
+  points describe at some corner of its footprint, and its top is above it); "the spot grades don't show the
   ground under the building (too few, or in a line): place spot grades around the building"; "a solid lies wholly under the
   ground (<ground> ft; it runs from <bottom> to <top> ft) and isn't joined directly under the building: check the
   ground level and where the solid is" (a basement counts when its top meets the bottom of the solid above it and
@@ -193,7 +195,9 @@ Every reason the code gives today comes from the table:
   inside the one below it (from {low} ft to {high} ft): move it to stand on the one below, or join them". So moving
   a part a tenth of a foot never turns one count into another. Stories are read from the drawing as far as it allows: floor blocks are
   counted, and a part drawn as a plain solid (or plain solids stacked) h tall can hold at most floor(h / 7 ft)
-  stories (7 ft: the lowest ceiling a habitable room may have, NYS Residential Code R305.1) and at least one. So a
+  stories (7 ft: the lowest ceiling a habitable room may have, NYS Residential Code R305.1), and every
+  building at least a first story (§325-3; a count of 0: "the stories typed ({typed}) are fewer than one: every
+  building has at least a first story (§325-3): check the count"). So a
   12 ft garage holds one, and a 30 ft plain house one to four: then the count is a question ("a 30 ft solid could
   hold up to 4 stories: draw its floors or enter the count"), and the count entered stands for the whole building
   only within what the drawing allows: "the stories typed ({typed}) are fewer than the floor blocks drawn
@@ -208,7 +212,7 @@ Every reason the code gives today comes from the table:
   the main building, assumed: every measurement from it carries `main_assumed`, and every other building that
   could be a principal one (enclosed, at least 7 ft tall and 70 sf: NYS Residential Code R305.1, R304.1) is also
   read as if it were the main one, so the assumption never passes what a pick wouldn't); "a building object has
-  nothing to measure (no faces): check it on the Building layer"; "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "a building isn't inside the lot: {what}" (a building wholly off the lot: only the rules that would measure it wait. A building partly off the lot is measured, and every rule that measures it does not comply, whatever the readings or answers; each building is placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  nothing to measure (no faces): check it on the Building layer"; "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "a building isn't inside the lot: {what}" (a building wholly off the lot: only the rules that would measure it wait. A building partly off the lot is measured, and every rule that measures it does not comply, whatever the readings or answers; each building is placed on its own, never changed by another); "a building isn't a closed solid: {what}" (which object: its Rhino name, else its id; every row waiting on it points at it, so Zoom to finds it, and a building wholly off the lot is still named beside it); "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

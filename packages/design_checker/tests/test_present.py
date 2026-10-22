@@ -1288,16 +1288,53 @@ def test_the_stories_row_asks_for_the_whole_buildings_count_and_takes_it():
     big = box(12, 30, 36, 60, 0, 30, "house")
     st = items(check_site(_plot(big, lot_=lot), base)["view"])["Stories"]
     assert st["status"] == present.REVIEW and "stories" in st["needs"]
-    assert st["reason"] == "A 30 ft solid (the building) could hold up to 4 stories: draw its floors or enter the count."
+    # the bad reading first, then why (stories review round 1, P3)
+    assert st["reason"] == ("At worst 4 against 3: does not comply under that reading. A 30 ft solid (the building) "
+                            "could hold up to 4 stories: draw its floors or enter the count.")
     assert logic.enter_words(st["needs"]) == "Enter the number of stories"
     view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 3}))["view"]
     assert items(view)["Stories"]["status"] == present.COMPLIES and logic.refused_stories(view["items"]) is None
     view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 5}))["view"]
-    kept = [{k: i.get(k) for k in ("id", "name", "status", "reason")} for i in view["items"]]   # as the plugin keeps
+    kept = [{k: i.get(k) for k in ("id", "name", "status", "reason", "refused")} for i in view["items"]]
     said = logic.refused_stories(kept)
     assert said and "more than the drawing could hold" in said and "at most 4" in said and "wasn't kept" in said
     view = check_site(_plot(*house, lot_=lot), logic.update_counts(base, {"stories": 2}))["view"]
     assert "fewer than the floor blocks drawn (3)" in (logic.refused_stories(
-        [{k: i.get(k) for k in ("name", "reason")} for i in view["items"]]) or "")
+        [{k: i.get(k) for k in ("name", "reason", "refused")} for i in view["items"]]) or "")
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert "logic.refused_stories(" in rhino
+
+
+
+def test_with_the_main_building_assumed_the_stories_row_points_to_the_pick_not_to_enter():
+    """Stories review round 1 (P2): with the starting house only assumed, a 20 ft barn read as the main one
+    ignores the count typed, yet the row offered Enter: entering changed nothing (a loop), and only the last
+    question was shown, calling the barn "the building". Now Enter is offered only when a count can settle the
+    row; else it points to Pick the main building…, every open question is kept, and the barn is named."""
+    from design_checker.check import check_site
+    from test_measure import floor
+    lot, facts = _sample106()
+    house = [floor(12, 30, 36, 60, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    barn = box(40, 66, 50, 86, 0, 20, "barn")
+    st = items(check_site(_plot(*house, barn, lot_=lot), {**facts, "lot_surveyed": True, "stories": 3})["view"])[
+        "Stories"]
+    assert "stories" not in st["needs"] and st["hint"] == present.PICK_MAIN, st
+    assert "(barn) could hold up to 2 stories" in st["reason"] and "which building is the main building" in st["reason"]
+
+
+
+def test_a_count_of_0_is_rolled_back_by_its_code_and_enter_stays():
+    """#15 round 7 (2): "0" was refused in new words the plugin didn't match, so it was kept and the Enter button
+    vanished. The plugin rolls back by the measuring's code, with its own words, and Enter stays on the row."""
+    from design_checker.check import check_site
+    from design_checker import rhino_logic as logic
+    lot, facts = _sample106()
+    base = {**facts, "lot_surveyed": True}
+    big = box(12, 30, 36, 60, 0, 30, "house")
+    view = check_site(_plot(big, lot_=lot), logic.update_counts(base, {"stories": 0}))["view"]
+    st = items(view)["Stories"]
+    assert st["refused"] == "below_one" and "stories" in st["needs"], st
+    said = logic.refused_stories(view["items"])
+    assert said and "fewer than one" in said and "wasn't kept" in said
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert '"group", "needs", "hint", "refused")' in rhino
