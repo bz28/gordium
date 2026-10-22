@@ -1399,3 +1399,14 @@ def test_the_stories_bound_names_each_solid_and_says_whether_a_count_can_settle_
     assert low["value"] == 1
     zero = measure(site(RECT, box(10, 25, 35, 65, 0, 30, id="house")), {**FACTS, "stories": 0})["stories"]
     assert "fewer than one: every building has at least a first story" in zero["reason"]
+
+
+def test_a_raised_balcony_on_flat_ground_keeps_the_overhang_question():
+    """#15 round 6 (P1): cut at each solid's own bottom, a balcony drawn as its own solid at 10 ft counted at grade
+    (1,012 sf both ways) and the overhang question vanished. Each connected group is cut at the higher of the grade
+    and its lowest bottom: 1,000 sf at the ground, 1,012 sf from above: a question."""
+    house = box(10, 25, 35, 65, 0, 30, id="house")                  # 1,000 sf
+    balcony = box(35, 40, 39, 43, 10, 10.5, id="balcony")           # 12 sf, against the house
+    m = measure(site(RECT, house, balcony), {**FACTS, "main_building": "house"})["building_area"]
+    assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [1000.0, 1012.0], m
+    assert "overhangs" in m["reason"]

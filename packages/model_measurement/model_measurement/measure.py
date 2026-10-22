@@ -182,6 +182,13 @@ def _projection(building: dict):
     return ops.unary_union(parts) if parts else Polygon()
 
 
+def _cut_level(building: dict, buildings: list[dict], plan_level: float) -> float:
+    """The level a building is cut at to read it at the ground: the higher of the grade plane and the lowest bottom
+    of its connected group (_connected, the one grouping), never its own alone."""
+    group = next((g for g in _connected(buildings) if any(b is building for b in g)), [building])
+    return max(plan_level, min(_bottom(b) for b in group if b.get("faces")))
+
+
 def _bottom(building: dict) -> float:
     """A building's lowest point."""
     return min(p[2] for f in building["faces"] for p in f["points"])
@@ -938,7 +945,9 @@ def envelope_grade(buildings: list[dict], facts: dict) -> tuple:
     if why:
         return None, why
     stacked = _stacks(buildings)
-    why = _meets_ground(stacked, facts["grade_points"], stacked)
+    # the measuring's own ground test (the same two functions): meeting the ground, and no solid buried under it
+    why = _meets_ground(stacked, facts["grade_points"], stacked) or \
+        (_ground_against(buildings, grade, off_check=False) if buildings and grade is not None else None)
     return (None, why) if why else (grade, None)
 
 
@@ -1137,9 +1146,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     grade = facts.get("grade_elevation")
     main = (buildings[0] if len(buildings) == 1 else
             next((b for b in buildings if b["id"] == facts.get("main_building")), None))
-    # objects are told apart by id below (spans, outlines): two with one id would leave one out silently
-    ids = [b["id"] for b in buildings]
-    same = sorted({i for i in ids if ids.count(i) > 1}, key=str)
+    # objects are told apart by id below (spans, outlines): two with one id are refused (_building_problems)
     why_building = _building_problems(buildings)
     # the ground must meet the buildings, taken together (stacked floors, a basement or a tower drawn as its own
     # solid sit above or below it): at or above their lowest point and below their top. A level outside that (a
@@ -1272,7 +1279,10 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     else:
         # each cut at its own bottom when the ground plane is below it (a slab above grade on a slope): never an
         # empty cut blamed on overhangs
-        cut = ops.unary_union([_section(b, max(plan_level, _bottom(b)) + TOL) for b in buildings])
+        # each connected group (_connected: a house with its balcony or bay) cut at the higher of the grade plane
+        # and the group's own lowest bottom: a raised balcony is never cut at its own bottom (it would count at
+        # grade and erase the overhang question), a slab above grade on a slope never below itself (0 sf)
+        cut = ops.unary_union([_section(b, _cut_level(b, buildings, plan_level) + TOL) for b in buildings])
         out["building_area"] = _decide(
             "building_area", [("covered from above", everything.area, {}), ("at the main grade level", cut.area, {})],
             "the ground area of every building on the lot, porches and decks included",
@@ -1302,7 +1312,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # (§325-18A) while an accessory building may follow other rules (§325-25): measure to it as well
     shapes = [(w, s) for w, s in (("to the building seen from above", footprints[main["id"]]),
                                   ("to its walls at ground level",
-                                   _section(main, max(plan_level, _bottom(main)) + TOL))) if not s.is_empty]
+                                   _section(main, _cut_level(main, buildings, plan_level) + TOL))) if not s.is_empty]
     shapes += [("to any solid on the Building layer, seen from above", everything)] if len(buildings) > 1 else []
     eaves = ("whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid "
              "is a porch or deck (part of the building, §325-18A) or an accessory building (§325-25), are open "
