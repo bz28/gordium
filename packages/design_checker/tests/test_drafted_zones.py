@@ -248,3 +248,21 @@ def test_a_demotion_whose_cause_is_the_law_holds_in_every_district_the_law_piece
     r3b = {r["id"]: r for r in zone_rules(J, "R-3b")}
     abutting = {"abuts_r1_district": True, "use": "multiple_family", "building_area": 100, "lot_area": 10000}
     assert outcome(r3b["R-3b.325_19e_r3_abut_r1_max_coverage"], abutting, {}) == "needs_review"
+
+
+def test_a_drafted_zones_not_checked_rows_keep_what_to_check_in_the_report_and_cite_a_page(drafts_on, tmp_path):
+    """#21 review round 13: with Ben's "Not checked yet" words as the reason, what exactly is left (the notes, the 97
+    sections the drafter didn't read) moved to a detail line the report's Check sheet never writes; and a chart unit
+    cited its raw id ("chart-p2-primary_uses"). Ben's sentence comes first, the specifics after it; a chart unit cites
+    "Chart p.2: …" like the chart rows."""
+    import openpyxl
+    import re
+    report = tmp_path / "report.xlsx"
+    got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-2a", "accessory_buildings": []},
+                     report_path=report)
+    rows = [[str(c.value or "") for c in row] for row in openpyxl.load_workbook(report)["Check"].iter_rows()]
+    left = next(r for r in rows if r[2].startswith("§325-20D:"))
+    assert "325-20F" in " ".join(left), left                       # the sections to check, in the report
+    for i in got["view"]["items"]:
+        if i["id"].startswith("gap.drafting.chart-"):
+            assert re.match(r"Not in Gordium yet .* for now: Chart p\.\d+: ", i["reason"]), i["reason"]

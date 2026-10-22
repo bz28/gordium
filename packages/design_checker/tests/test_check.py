@@ -1828,8 +1828,10 @@ def test_rules_not_in_gordium_yet_read_not_checked_yet_in_the_panel_and_the_repo
     assert titles["not_covered"] == "Not checked yet"
     for i in grey:
         section = i["detail"]["citation"]
-        assert section and i["reason"] == ("Not in Gordium yet — coming in a later version. Check this by hand for "
-                                           "now: " + section), i["reason"]
+        # Ben's sentence first; a zone's own gap (#21) adds what exactly is left after " · "
+        assert section and (i["reason"] == ("Not in Gordium yet — coming in a later version. Check this by hand for "
+                                            "now: " + section) or i["reason"].startswith(
+            "Not in Gordium yet — coming in a later version. Check this by hand for now: " + section + " · ")), i["reason"]
     ws = openpyxl.load_workbook(report)["Check"]
     rows = [[c.value for c in row] for row in ws.iter_rows()]
     sheet = [row for row in rows if row and row[0] == "Not checked yet"]

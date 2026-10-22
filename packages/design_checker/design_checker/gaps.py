@@ -74,6 +74,13 @@ def chart_gaps(j: Path, zone: str, rules: list[dict]) -> list[dict]:
     return out
 
 
+def chart_section(unit: str) -> str:
+    """A chart drafting unit's id as an architect looks it up, the form chart_gaps uses: "chart-p3-yard_dimensions"
+    -> "Chart p.3: Yard dimensions" (#21 review round 13: the raw id went into "Check this by hand for now: …")."""
+    m = re.match(r"chart-p(\d+)-(.+)$", unit)
+    return f"Chart p.{m.group(1)}: {m.group(2).replace('_', ' ').capitalize()}" if m else unit
+
+
 LEFT_OUT = re.compile(r"^it points to (\S+), which was left out of the drafter's input for length")
 
 
@@ -132,7 +139,7 @@ def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[d
             lines.append(f"It links to {n} section{'s' if n != 1 else ''} the AI drafter didn't read because they were "
                          f"too long; check them by hand: {', '.join(sorted(set(left_out)))}.")
         if lines:
-            out.append({"id": f"drafting.{unit}", "section": unit if chart else f"§{unit}",
+            out.append({"id": f"drafting.{unit}", "section": chart_section(unit) if chart else f"§{unit}",
                         "name": " and ".join(parts) + (": check by hand" if n else " to check by hand"),
                         "why": " · ".join(lines)})
     return out
