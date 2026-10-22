@@ -36,3 +36,7 @@ The new cloud session (5549908) owns these lanes from here.
 - #23: context-map AND wip/context-map are both at 955d97f, full suite green (1554 passed; 7 CI steps). Rounds 3-4 findings: findings/pr23_round3.json, pr23_round4.json. Round 4 hit the cap with confirmed findings → round-4 fixes need one more cold round. PR description stale (still shows old 11/11 Rhino run as current; mark in-Rhino claims PENDING). RHINO_QUEUE 4 = context_in_rhino.py at 955d97f (local Rhino job will run it).
 - #21: e5e5f09 full suite green (1666 passed); round 12 incomplete: cold reviewer raised one minor (demoting a rule another rule widens fails validation), sceptics NOT run → findings/pr21_round12.json (incomplete).
 - Any full_suite.py run that exited 143 around 00:50-01:20 was killed by the old coordinator (pkill) — re-run.
+
+## 2026-10-22 01:50 — local Rhino job
+- RHINO_QUEUE 4 DONE: #23 context_in_rhino.py at 955d97f 15/15 + context_tick_in_rhino.py 10/10 (lock fix holds). Evidence commit 0516aa7 on wip/pr23-rhino-955d97f (fast-forwards from 955d97f): fast-forward context-map to it and update #23 Test Plan to show these as current.
+- RHINO_QUEUE 1 (pass2 26/26) and 3 (#19 R-2a 8/8 at 7efb1bd) DONE. arch-fixes-2 full suite re-running (earlier run was killed by the pkill).
