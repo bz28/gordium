@@ -4,6 +4,7 @@ summary, which objects turn red, the failing distances, and the background JSON 
 import io
 import json
 import math
+import re
 
 import pytest
 
@@ -1833,8 +1834,9 @@ def test_rules_not_in_gordium_yet_read_not_checked_yet_in_the_panel_and_the_repo
     rows = [[c.value for c in row] for row in ws.iter_rows()]
     sheet = [row for row in rows if row and row[0] == "Not checked yet"]
     assert len(sheet) == len(grey), (len(sheet), len(grey))
-    assert all(str(row[6]).startswith("Not in Gordium yet — coming in a later version. Check this by hand for now: §")
-               for row in sheet), sheet[:2]
+    # the section: a law section (§…) or, for a chart row no rule checks yet (#21's chart gaps), its chart page
+    assert all(re.match(r"Not in Gordium yet — coming in a later version\. Check this by hand for now: (§|Chart p\.\d)",
+                        str(row[6])) for row in sheet), sheet[:2]
     assert not any("Not covered by this rulebook" in str(c) for row in rows for c in row if c)
     # the detail's heading: "Not checked yet", the group's name (the other rows keep theirs)
     from design_checker import rhino_logic as logic

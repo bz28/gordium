@@ -1544,12 +1544,14 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                                  "scope": "", "precision": "", "at_limit": None}})
     # what this zone's own rulebook doesn't check (a chart row no rule cites; what the drafting run couldn't draft):
     # listed, never silently absent
+    # Ben (2026-10-21): every row of the "Not checked yet" group reads NOT_YET_WHY with its section; what exactly is
+    # left (a chart row, a unit the drafter couldn't draft) stays in the row's name and its detail line
     for g in zone_gaps(j, facts.get("zone") or "", list(rules_by_id.values())):
         items.append({"id": "gap." + g["id"], "rule": None, "name": f"{g['section']}: {g['name']}",
                       "group": "not_covered", "status": NOT_CHECKED, "mark": "", "proposed": "", "required": "",
                       "margin": "", "sign": "", "zoom": None, "measure": None, "objects": [], "points": None,
-                      "hint": None, "reason": g["why"],
-                      "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
+                      "hint": None, "reason": NOT_YET_WHY.format(g["section"]),
+                      "detail": {"line": g["why"], "quotes": [], "citation": g["section"], "links": [], "calc": None,
                                  "scope": "", "precision": "", "at_limit": None}})
     return {"items": items, "summary": summary(items), "state": state(items),
             "header": header(facts, dict(extras, waiting_main=any(
