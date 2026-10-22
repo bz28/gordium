@@ -65,6 +65,7 @@ def box(payload, facts=None, saved=None, replaces=True):
 def state_of(facts, saved):
     """The box's state as gordium_rhino._box_state builds it from the facts and the box's choices."""
     return {"address": facts.get("address"), "zone": facts.get("zone"), "zone_source": saved.get("zone_source"),
+            "zone_said": saved.get("_zone_said"),
             "corner_lot": facts.get("corner_lot"), "zones_found": saved.get("_zones_found") or [],
             "lookup": saved.get("_lookup") or {}, "doubts": saved.get("doubts") or {}, "live": saved.get("_live") or {},
             "checked": saved.get("checked"), "street_name": saved.get("_street_name") or saved.get("street_name"),
@@ -80,7 +81,7 @@ def test_106_fills_the_box_with_suggestions_and_never_confirms_the_district():
     facts, saved, state = box(p)
     assert p["status"] == "found" and facts["zone"] == "R-1b" and facts["corner_lot"] is False
     assert facts["lot_surveyed"] is False                  # the tax map: ±2'-0" and the starting-house margin apply
-    assert saved["zone_source"] == "suggested by Gordium · City zoning map says R-1b (checked today)"
+    assert saved["zone_source"] == "suggested by Gordium · City of Ithaca zoning map, used live"
     assert saved["_street_name"] == "Ithaca Rd" and saved["lot_source"] == "NYS Tax Parcels Public"
     assert saved["street_source"] == "suggested by Gordium · City of Ithaca roads, used live"
     assert not state.get("district_confirmed") and not logic.can_draw(state)       # I confirm: still the architect's
@@ -1139,3 +1140,27 @@ def test_two_zones_one_without_rules_preselect_nothing_and_still_ask():
     row = next(r for r in logic.box_rows({"zone": None, "zone_source": "suggested by Gordium · City zoning map"})
                if r["key"] == "zone")
     assert row["text"] == "— · not set"
+
+
+
+def test_the_maps_words_are_shown_with_the_lookups_date_and_never_stored():
+    """#19 zone round 2 (P1): "City zoning map says R-1b (checked today)" was stored in the .3dm: "today" went
+    stale on reopen and a district switched by the architect still showed the map's words. The words live only in
+    the session ("_zone_said") with the lookup's own date; the stored source is plain; a picked district is stored
+    as the architect's, so a "suggested" never outranks it on reopen. (P2) the row's source follows a pick."""
+    p = looked_up("106_ithaca_rd")
+    facts, saved, state = box(p)
+    date = p["facts"]["zone"]["date"]
+    assert len(date) == 10 and date[4] == "-"                                 # YYYY-MM-DD, the lookup's own
+    assert logic.zone_row_text(state) == f"R-1b · suggested by Gordium · City zoning map says R-1b (checked {date})"
+    stored = json.dumps(logic.storable_ui(saved))
+    assert "says R-1b" not in stored and "today" not in stored and date not in stored
+    logic.zone_picked(state, "R-1a", "R-1b")
+    assert logic.zone_row_text(state) == "R-1a · entered by you"
+    assert logic.saved_sources(saved, state)["zone_source"] == logic.ENTERED   # theirs on reopen
+    reopened = state_of(facts, {k: v for k, v in logic.saved_sources(saved, state).items() if not k.startswith("_")})
+    assert "says" not in logic.zone_row_text(dict(reopened, zone="R-1a"))
+    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    assert 'zone_row["source"].Text = logic.zone_row_text(state)' in ui
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "dict(logic.saved_sources(saved_ui, state)" in rhino and '"zone_said": saved_ui.get("_zone_said")' in rhino

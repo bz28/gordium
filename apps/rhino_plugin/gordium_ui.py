@@ -736,10 +736,14 @@ def start_box(state, options, mode):
 
     confirm.CheckedChanged += logic.guard(confirmed, "confirm the district")
 
-    def zone_changed(s, e):           # a district picked: set at once, so Draw and its reason follow (round 1, P1)
+    zone_row = {}                     # the district row's source label, once laid out
+
+    def zone_changed(s, e):           # a district picked: set at once, so Draw, its reason and the row's source follow
         logic.zone_picked(state, zone.SelectedValue.Text if zone.SelectedValue else None, first_zone)
         draw.Enabled = logic.can_draw(state) and not looking
         reason.Text = logic.draw_reason(state)
+        if "source" in zone_row:
+            zone_row["source"].Text = logic.zone_row_text(state).split(" · ", 1)[-1]
 
     zone.SelectedIndexChanged += logic.guard(zone_changed, "pick the district")
     cancel = button("Cancel", lambda: done(None))
@@ -766,7 +770,8 @@ def start_box(state, options, mode):
                 layout.AddRow(None, row(label(r["status"], size=11)))
         elif key == "zone":
             confirm.Text = r["tick"][0]
-            layout.AddRow(title, row(zone, label(r["text"].split(" · ", 1)[-1], size=11), confirm))
+            zone_row["source"] = label(r["text"].split(" · ", 1)[-1], size=11)
+            layout.AddRow(title, row(zone, zone_row["source"], confirm))
         elif key == "use":
             layout.AddRow(title, use)
         elif key == "ground":

@@ -721,9 +721,7 @@ def box_rows(state, flat=None):
          "actions": [("lookup", "Looking up…" if look.get("looking") else "Look up", not look.get("looking"))],
          "tick": None, "matches": look.get("matches") or [],
          "status": LOOKING.format(look["looking"]) if look.get("looking") else None},
-        {"key": "zone", "label": "Zoning district",       # none set: no source shown (never a past "suggested")
-         "text": (state["zone"] + " · " + (state.get("zone_source") or ENTERED)) if state.get("zone") else
-         "— · not set",
+        {"key": "zone", "label": "Zoning district", "text": zone_row_text(state),
          "actions": [("zone", "Change", True)], "tick": ("I confirm", bool(state.get("district_confirmed")))},
         {"key": "use", "label": "Use", "text": state.get("use_name") or state.get("use") or "—",
          "actions": [("use", "Change", True)], "tick": None},
@@ -770,6 +768,30 @@ def no_rules(said, unknown):
     missing = ("the rules for " + " or ".join(unknown)) if len(unknown) > 1 else unknown[0] + "'s rules"
     return (f"The City map puts this lot in {' and '.join(said)}; Gordium doesn't have {missing} yet: pick the "
             "district that applies only if you know it.")
+
+
+def zone_row_text(state):
+    """The district row: the district and where it came from. None set: "not set" (never a past "suggested"). The
+    lookup's own words ("City zoning map says R-1b (checked 2026-10-21)") only this session and only for the
+    district it said, still suggested; a district the architect picked is theirs."""
+    zone, source = state.get("zone"), state.get("zone_source") or ENTERED
+    if not zone:
+        return "— · not set"
+    said = state.get("zone_said") or {}
+    if said.get("zone") == zone and source.startswith(SUGGESTED):
+        source = SUGGESTED + " · City zoning map says " + zone + " (checked " + said["date"] + ")"
+    return zone + " · " + source
+
+
+def saved_sources(saved_ui, state):
+    """The box's choices to keep after it: the district's source as the box ends with it (the architect's pick is
+    theirs, so a looked-up "suggested" never outranks it on reopen)."""
+    saved_ui = dict(saved_ui)
+    if state.get("zone") and state.get("zone_source"):
+        saved_ui["zone_source"] = state["zone_source"]
+    elif not state.get("zone"):
+        saved_ui.pop("zone_source", None)
+    return saved_ui
 
 
 def zone_picked(state, zone, first):
@@ -878,10 +900,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     elif known:
         facts["zone"] = known[0]
         saved_ui.pop("_zones_found", None)
-    if known:                                    # as the map says it, and when (Rhino job, 2026-10-21); only the
-        # district it suggests: the City's zoning answer itself may never be stored (store: none)
-        saved_ui["zone_source"] = SUGGESTED + " · City zoning map" + (
-            " says " + known[0] if len(known) == 1 else "") + " (checked today)"
+    saved_ui.pop("_zone_said", None)
+    if known:                                    # stored: plain, never a date that goes stale on reopen
+        saved_ui["zone_source"] = SUGGESTED + " · " + label("zone", "zone")
+        when = (got.get("zone") or {}).get("date")
+        if len(known) == 1 and when:             # shown this session only ("_"), as the map says it, with its date
+            saved_ui["_zone_said"] = {"zone": known[0], "date": str(when)}
     saved_ui["_reconfirm"] = True                # a looked-up district is the architect's only once ticked again
     saved_ui["_live"] = {k: v for k, v in live.items() if k in ("zone", "overlays")}
     if not replaces:                             # the architect's own lot: its lot, street side and ground stay
