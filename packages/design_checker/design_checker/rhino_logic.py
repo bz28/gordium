@@ -732,21 +732,21 @@ def street_name(state):
     return state.get("street_name") or "the highlighted line"
 
 
-def street_name_after_pick(name, lines, picked, tolerance=0.5):
+def street_name_after_pick(name, lines, picked, tolerance=0.5, ids=None):
     """The street's name to keep when the architect picks the street side again (`picked`: the lot line clicked,
-    [[x, y], [x, y]] in feet): `name`, the street's name as found, if the line is one of that street's own `lines`
-    (within `tolerance` ft at each end, either way round); else None, and the architect is asked (a name is never
-    carried to a line it wasn't found on)."""
-    if not name:
-        return None
-
+    [[x, y], [x, y]] in feet): when the lines carry their own street names (`ids` matching them one for one,
+    street_lines.matching_ids), the clicked line's own name (None if it has none: asked); else `name`, the street's
+    name as found, if the line is one of that street's own `lines` (within `tolerance` ft at each end, either way
+    round); else None, and the architect is asked (a name is never carried to a line it wasn't found on: a B Ave
+    line never saved as A St, arch-fixes-2 review round 9)."""
     def near(p, q):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
     a, b = picked
-    for c, d in lines or []:
+    own = _street_lines().matching_ids(lines, ids)
+    for k, (c, d) in enumerate(lines or []):
         if (near(a, c) and near(b, d)) or (near(a, d) and near(b, c)):
-            return name
+            return own[k] if own is not None else (name or None)
     return None
 
 
@@ -792,7 +792,7 @@ def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
     if not hits:
         return [picked]
     ids = _street_lines().matching_ids(lines, ids)        # names that don't match the lines: unnamed (round 8)
-    if street_verdict(lines, ids)[0] == "two":            # known to be two streets: the clicked line's street
+    if street_verdict(lines, ids)[0] == "two" and ids[hits[0]]:   # two streets, the clicked line's known: its own
         mine = ids[hits[0]]
         return [list(map(list, line)) for k, line in enumerate(lines) if ids[k] == mine]
     return [list(map(list, line)) for line in lines]

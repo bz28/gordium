@@ -1352,7 +1352,7 @@ def _box_pick(doc, what, facts, saved_ui):
                     a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
                     picked = [_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]]
                     name = logic.street_name_after_pick(saved_ui.get("street_name"), facts.get("street_line"),
-                                                        picked)            # still the street the lookup named?
+                                                        picked, ids=facts.get("street_ids"))   # the line's own street?
                     if name is None:                                       # else asked, never guessed
                         ask = Rhino.Input.Custom.GetString()   # literal: a street's name has spaces ("Cayuga
                         ask.SetCommandPrompt("Which street is this lot line on? (Enter leaves it unnamed)")   # St")

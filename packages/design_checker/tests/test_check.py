@@ -2230,3 +2230,21 @@ def test_street_names_that_dont_match_the_lines_are_unnamed_at_a_pick_never_a_cr
     assert matching_ids([a, b], ["A St", None]) == ["A St", None]
     assert matching_ids([a, b], ["A St"]) is None and matching_ids([a, b], ["A St", 7]) is None
     assert logic.set_street_lines({}, [a, b], ["A St"]) == {"street_line": [a, b]}           # same rule on write
+
+
+def test_a_pick_of_one_street_of_two_keeps_that_streets_own_name_and_an_unnamed_line_keeps_the_whole_street():
+    """arch-fixes-2 review round 9 (P3): picking one street of two kept the saved name of the whole set, so a B Ave
+    line was saved as "A St"; and clicking a line with no name kept only the unnamed lines (fewer on a guess, the
+    front yard from part of the street: review round 3, F4). The name comes from the clicked line's own entry, and
+    a line of unknown street keeps every line."""
+    from design_checker import rhino_logic as logic
+    a, b, c = [[0, 0], [10, 0]], [[10, 0], [20, 0]], [[20, 0], [30, 0]]
+    two = ["A St", "A St", "B Ave"]
+    assert logic.street_name_after_pick("A St", [a, b, c], c, ids=two) == "B Ave"
+    assert logic.street_name_after_pick("A St", [a, b, c], a, ids=two) == "A St"
+    assert logic.street_name_after_pick("A St", [a, b, c], b, ids=["A St", None, "B Ave"]) is None   # asked
+    assert logic.street_name_after_pick("A St", [a, b, c], c, ids=["A St"]) == "A St"   # no matching names: as found
+    assert logic.street_lines_after_pick([a, b, c], b, ids=["A St", None, "B Ave"]) == [a, b, c]
+    facts = logic.set_street_lines({}, logic.street_lines_after_pick([a, b, c], c, ids=two),
+                                   [logic.street_name_after_pick("A St", [a, b, c], c, ids=two)])
+    assert facts == {"street_line": [c], "street_ids": ["B Ave"]}
