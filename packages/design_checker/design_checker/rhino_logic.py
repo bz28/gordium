@@ -756,6 +756,25 @@ def ground_text(ground):
                                                          ("picked by you" if kind == "terrain" else "placed by you"))
 
 
+STREET_WORDS = {"road": "rd", "street": "st", "avenue": "ave", "place": "pl", "drive": "dr", "lane": "ln",
+                "court": "ct", "boulevard": "blvd", "terrace": "ter", "circle": "cir", "parkway": "pkwy",
+                "highway": "hwy", "north": "n", "south": "s", "east": "e", "west": "w"}
+
+
+def address_street(address, street):
+    """The street of `address` in the address's own words ("Ithaca Road" from "106 Ithaca Road, Ithaca, NY"), when
+    it is `street` (a looked-up street name: "ITHACA RD"); else None. Compared word by word with the usual
+    abbreviations (Road = Rd), never by a part of a name."""
+    first = str(address or "").split(",", 1)[0].split()
+    while first and any(ch.isdigit() for ch in first[0]):        # the house number (106, 106A, 106-108)
+        first = first[1:]
+
+    def words(text):
+        return [STREET_WORDS.get(w, w) for w in str(text or "").lower().replace(".", " ").split()]
+
+    return " ".join(first) if first and words(" ".join(first)) == words(street) else None
+
+
 def street_name(state):
     """The street the highlighted lot line is on, by name, only when that line's street is known (a lookup's
     street, or the sample's); else the line itself, so the architect checks which line it is (the street line
@@ -1093,14 +1112,12 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         live["zone"] = _merged(live.get("zone"), NO_DISTRICT)
     if unknown:
         # the City map names a district Gordium has no rules for (alone or beside one it has): never another
-        # district preselected or called suggested in its place; none is set until the architect picks one, and
-        # with two zones the box still asks which applies
+        # district preselected or called suggested in its place; none is set until the architect picks one. With
+        # two zones the row's own line names both and asks which applies (no_rules): said once, never again as the
+        # amber question too (Rhino check of 7efb1bd, 2026-10-22)
         facts.pop("zone", None)
         saved_ui.pop("zone_source", None)
-        if len(said) > 1:
-            saved_ui["_zones_found"] = list(said)
-        else:
-            saved_ui.pop("_zones_found", None)
+        saved_ui.pop("_zones_found", None)
         live["zone"] = _merged(live.get("zone"), no_rules(said, unknown))
         known = []
     elif len(known) > 1:                         # two zones: the box asks which applies
@@ -1121,9 +1138,13 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
         return facts, saved_ui
     side = value("street_side") or {}
     if side.get("street"):
-        street_kept = payload.get("street_storable")
+        # the address's own street is named in the address's words, which are kept: so the name is still there
+        # after Draw (it was this session's only, "the highlighted line" on reopen: Rhino check, 2026-10-22);
+        # another street's name may be kept only when its source allows
+        own = address_street(facts.get("address"), side["street"])
+        street_kept = payload.get("street_storable") or own is not None
         saved_ui.pop("street_name" if not street_kept else "_street_name", None)
-        saved_ui["street_name" if street_kept else "_street_name"] = side["street"].title()
+        saved_ui["street_name" if street_kept else "_street_name"] = own or side["street"].title()
         saved_ui["street_source"] = SUGGESTED + " · " + label("street_side", "street")
     else:                                        # the replaced lot's street name goes with its street lines (the
         saved_ui.pop("street_name", None)        # sample's Ithaca Rd never named a looked-up lot's street)

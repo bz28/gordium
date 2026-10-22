@@ -82,7 +82,7 @@ def test_106_fills_the_box_with_suggestions_and_never_confirms_the_district():
     assert p["status"] == "found" and facts["zone"] == "R-1b" and facts["corner_lot"] is False
     assert facts["lot_surveyed"] is False                  # the tax map: ±2'-0" and the starting-house margin apply
     assert saved["zone_source"] == "suggested by Gordium · City of Ithaca zoning map, used live"
-    assert saved["_street_name"] == "Ithaca Rd" and saved["lot_source"] == "NYS Tax Parcels Public"
+    assert saved["street_name"] == "Ithaca Road" and saved["lot_source"] == "NYS Tax Parcels Public"
     assert saved["street_source"] == "suggested by Gordium · City of Ithaca roads, used live"
     assert not state.get("district_confirmed") and not logic.can_draw(state)       # I confirm: still the architect's
     rows = {r["key"]: r for r in logic.box_rows(state)}
@@ -1129,10 +1129,9 @@ def test_two_zones_one_without_rules_preselect_nothing_and_still_ask():
     zones = ["R-1a", "R-1b", "R-3a"]
     facts, saved = logic.lookup_choices({"status": "found", "facts": {"zone": {"value": ["R-2a", "R-1b"]}}},
                                         {}, {}, zones=zones)
-    assert "zone" not in facts and "zone_source" not in saved and saved["_zones_found"] == ["R-2a", "R-1b"]
+    assert "zone" not in facts and "zone_source" not in saved
     assert saved["_live"]["zone"].startswith("The City map puts this lot in R-2a and R-1b; Gordium doesn't have "
-                                             "R-2a's rules yet")
-    assert "two zones" in logic._question({"zones_found": saved["_zones_found"], "corner_lot": False})
+                                             "R-2a's rules yet") and "pick the district that applies" in saved["_live"]["zone"]
     _, saved = logic.lookup_choices({"status": "found", "facts": {"zone": {"value": ["R-2a", "R-3b"]}}},
                                     {}, {}, zones=zones)
     assert "doesn't have the rules for R-2a or R-3b yet" in saved["_live"]["zone"]
@@ -1210,3 +1209,40 @@ def test_a_lookup_that_replaces_the_sample_lot_never_keeps_the_samples_street_na
     assert (named["facts"].get("street_side") or {}).get("value", {}).get("street")
     _, saved, state = box(named, saved=dict(sample, street_name="Old St"))
     assert state["street_name"] and state["street_name"] != "Old St"
+
+
+def test_the_two_zones_doubt_is_said_once():
+    """Rhino check of 7efb1bd (2026-10-22): with R-2a (no rules) and R-1b, the district row's line named both zones
+    and asked, and the amber line asked "This lot is in two zones" again. Said once: the row's line; with both
+    districts covered, the amber question alone (nothing on the row)."""
+    for given, zones in ((["R-2a", "R-1b"], ["R-1a", "R-1b", "R-3a"]), (["R-1b", "R-2a"], ZONES)):
+        facts, saved = logic.lookup_choices({"status": "found", "facts": {"zone": {"value": given}}}, {}, {},
+                                            zones, replaces=False)
+        state = state_of(facts, saved)
+        said = [r["review"] for r in logic.box_rows(state) if r.get("review")] + [logic.uncertain(state) or ""]
+        asks = sum(t.count("two zones") + t.count(" and ".join(given)) for t in said)
+        assert asks == 1, said
+
+
+def test_the_address_streets_name_is_kept_through_draw():
+    """Rhino check of 7efb1bd (2026-10-22): the City's street name may not be kept, so after Draw the Street side
+    row read "the highlighted line" where it had read "Ithaca Rd". The address's own street is named in the
+    address's words (kept with the address), so it is the same after Draw; another street stays this session's."""
+    p = looked_up("106_ithaca_rd")
+    assert not p.get("street_storable")                       # the City's roads: never stored
+    facts, saved, state = box(p)
+    kept = logic.storable_ui(saved)                           # what Draw writes into the file
+    assert kept["street_name"] == "Ithaca Road" and state["street_name"] == "Ithaca Road"
+    after = state_of(facts, kept)                             # the box reopened from the file
+    assert next(r for r in logic.box_rows(after) if r["key"] == "street")["text"] == "Ithaca Road"
+    assert logic.fact_sources(after, "2026-10-22", confirmed=False)["street"]["value"] == "Ithaca Road"
+    other = dict(p, facts={**p["facts"], "street_side": {**p["facts"]["street_side"],
+                                                         "value": {**p["facts"]["street_side"]["value"],
+                                                                   "street": "MITCHELL ST"}}})
+    facts, saved, state = box(other)
+    assert saved["_street_name"] == "Mitchell St" and "street_name" not in logic.storable_ui(saved)
+    assert logic.address_street("106 Ithaca Road, Ithaca, NY", "ITHACA RD") == "Ithaca Road"
+    assert logic.address_street("106A Ithaca Rd., Ithaca", "Ithaca Road") == "Ithaca Rd."
+    assert logic.address_street("106 Ithaca Road, Ithaca", "ITHACA") is None          # never a part of a name
+    assert logic.address_street("106 West Ithaca Road", "ITHACA RD") is None
+    assert logic.address_street(None, "ITHACA RD") is None
