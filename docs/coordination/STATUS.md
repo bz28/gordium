@@ -110,3 +110,16 @@ Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from c
   - 7a2ab6b and 87b69b4: fixes for review round 1's two confirmed findings (with the real lookup answer the doubt was still said twice; the kept name was credited to the used-live roads service), plus the two headless fixes. Each fix is revert-checked.
   - Now running: the full suite and review round 2. Then push and carry into #23.
 - Next: rebuild re-lookup on the new #19 as its own PR, with scenario evals.
+
+## 2026-10-22 evening — cloud coordinator
+- #19 start-box-lookup is at 86ddf9d, pushed. Full suite: 1,492 passed, all 7 CI steps passed. Review rounds 1–3: the round-1 and round-2 findings are fixed, and round 3 was clean. PR comment posted.
+- #23 context-map is at 369f389, pushed. It merges #19 86ddf9d. Full suite: 1,606 passed, all 7 CI steps passed. The merge review was clean.
+- NEW PR #26 re-lookup, at 6c38707 (base start-box-lookup):
+  - Look up previews and Draw resets a new address.
+  - Review rounds: round 1 found 6 confirmed, round 2 found 3, round 3 found 2, round 4 found 0.
+  - Full suite: 1,540 passed, all 7 CI steps passed. Headless plugin run: 46 of 46 checkable claims pass.
+  - Ben decides: whether "Keep my building" should keep his own lot too.
+- RHINO_QUEUE: item 5 is rewritten for #26. Item 10 is new: #19's claim 6, plus the R-2a box re-run.
+- Next:
+  - carry re-lookup into the demo once Ben merges or asks;
+  - the queued feature list (Check button / no auto-check first).
