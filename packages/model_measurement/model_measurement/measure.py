@@ -27,6 +27,7 @@ from shapely.validation import explain_validity
 from rule_format.rulebook import MEASURES_FILE, load
 
 from .stops import stop
+from .street_lines import matching_ids, street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
 
@@ -116,6 +117,40 @@ class Lot:
             self.street_problem = stop("street_lines_apart")
         elif len(street) == n:
             self.street_problem = stop("all_street")
+        elif facts.get("corner_lot") is not True:
+            # lot width is frontage on ONE public right-of-way (§325-8, Column 7: street_lines): street lines on two
+            # streets, or of no known street swinging more than TURN_LIMIT_DEG in all (a corner, even rounded into
+            # short pieces), are never measured along both (review rounds 5 and 6, P0); a street that bends is
+            # asked about, never called two
+            ids = facts.get("street_ids")
+            stale = ids is not None and matching_ids(facts["street_line"], ids) is None
+            # names that don't match the lines (saved before the lines changed): set aside, never used, and said
+            # (review round 7, P1: they made the whole check fail)
+            verdict, turn = ("stale", None) if stale else self.street_verdict(facts)
+            if verdict == "stale":
+                self.street_problem = stop("street_names_stale")
+            elif verdict == "two":
+                self.street_problem = stop("two_streets")
+            elif verdict == "unsure":
+                self.street_problem = stop("one_street_or_two", turn=round(turn or 0))
+
+    def street_verdict(self, facts):
+        """street_lines.street_verdict over the street lot lines in order along the street (each edge's own points:
+        a curved edge's swing counts), each with the street the facts name it on (`street_ids`, one per
+        `street_line`, None where unknown)."""
+        n, s = len(self.edges), set(self.street)
+        start = next(i for i in self.street if (i - 1) % n not in s)
+        order = [(start + k) % n for k in range(len(self.street))]
+        given, ids = facts.get("street_line") or [], facts.get("street_ids") or []
+
+        def named(i):
+            e = self.edges[i]
+            for k, (a, b) in enumerate(given):
+                if (_same_point(e[0], a) and _same_point(e[-1], b)) or (_same_point(e[0], b) and _same_point(e[-1], a)):
+                    return ids[k] if k < len(ids) else None
+            return None
+
+        return street_verdict([self.edges[i] for i in order], [named(i) for i in order])
 
     def _contiguous(self, idx) -> bool:
         n = len(self.edges)
