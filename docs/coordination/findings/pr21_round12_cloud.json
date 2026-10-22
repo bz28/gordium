@@ -1,0 +1,37 @@
+{
+ "round": 12,
+ "mode": "review",
+ "confirmed": [],
+ "refuted": [],
+ "priorStatus": [
+  {
+   "title": "\u00a7325-19E drafts demoted in R-3a only; R-3b's identical drafts from the same law piece still pass",
+   "status": "fixed",
+   "reasoning": "records/demoted.yaml now lists all five R-3b.325_19e_* limits: min_lot_area_other_use, max_height, max_coverage, side_yard_larger and side_yard_smaller. Each cites the R-3a key and the shared 'directly abuts' question. The rebuilt drafted/R-3b.yaml has all five as kind: flag, with no check or examples. The sixth piece, *_rear_yard, was already a flag in both districts. The drafting log's 325-19E unit has 12 rules, and every one is now a flag. The proposed measures only the R-3b checks used are gone from proposed_measures.yaml (abutting_r1_height_limit, larger_side_yard_abuts_r1, smaller_side_yard_abuts_r1). The new test test_a_demotion_whose_cause_is_the_law_holds_in_every_district_the_law_piece_covers walks every cause that names a section. It looks up the drafting unit that owns the rule and asserts the same suffix is a flag in every district that unit drafted. It also asserts that an abutting R-3b lot gives needs_review for coverage. The test passes. The replay tests (test_eval_replay) pass and the grade tests (test_eval) pass."
+  },
+  {
+   "title": "`approved` now lets a relaxer widen a rule, but the approval hash leaves out `relaxes`",
+   "status": "fixed",
+   "reasoning": "rulebook.py:43-44 adds 'relaxes' to APPROVED_FIELDS. approval_hash builds its fingerprint as {k: entry.get(k) for k in fields}, so adding, removing or retargeting relaxes changes the hash. Adding the field does change the hash of every existing approved rule (a missing field now counts as relaxes: None). But no YAML in the repo carries approved_hash, so nothing that exists breaks. The test fixtures compute their hashes at runtime. The new test test_an_approval_covers_which_rule_the_approved_rule_widens covers both cases: a link added after approval, and a link retargeted after signing. Both report 'changed since it was approved'. The test passes."
+  },
+  {
+   "title": "demote() keeps `relaxes`, so a demoted relaxer crashes apply_relaxes (KeyError 'check') and fails validation",
+   "status": "fixed",
+   "reasoning": "Both suggested parts are in. demote() (__main__.py:155) now drops 'relaxes' as well as check, review_when, examples and notes. apply_relaxes (rulebook.py:113-114) now counts a rule as a relaxer only if relaxes is text, kind == 'rule', and check and applies_when are both set. A flag or a rule with no check can no longer reach x['check'] or x['applies_when'] at lines 126-135. A relaxer it skips leaves the base unchanged, which can only be stricter, so this never gives a false pass. _relaxes_problems still reports such a relaxer, so it never fails silently. Tests: test_drafting.py::test_a_demoted_relaxer_widens_nothing_and_its_rulebook_stays_valid and test_relaxes.py::test_a_relaxer_with_no_check_widens_nothing_and_never_crashes both pass. A related case remains: a demoted base rule with a still-live relaxer pointing at it. Validation reports that loudly ('has no check to widen'), it can't give a pass, and no drafted rulebook has a relaxes link today, so I am not reporting it as a finding."
+  },
+  {
+   "title": "The code-made undecided-uses parking flag is recorded as drafted by the AI model",
+   "status": "fixed",
+   "reasoning": "drafter.py:986-988 sets drafted_by to 'rule_drafting/chart_code', the same label uses.py and __main__.py:404 use for rules code makes. It adds 'Made from <rule id>.' to notes. The replayed rulebooks show the change for all nine districts (R-1a..RU). The prefix is still 'rule_drafting/', so trusted_relaxer and the not_limits exemption at rulebook.py:502 still treat the flag as drafted. test_gap_templates.py asserts the new drafted_by and the source id in notes, and it passes. 'python -m rule_format' (16 files, 0 problems), 'rule_export --check' and 'project_report --check' all pass on HEAD. git status stays clean after them, so the regenerated workbook and reports match."
+  }
+ ],
+ "stats": {
+  "found": 0,
+  "confirmed": 0,
+  "refuted": 0
+ },
+ "head": "e5e5f09",
+ "base": "origin/answer-keys",
+ "since": "84f4920",
+ "note": "cloud coordinator; supersedes the incomplete local round 12"
+}

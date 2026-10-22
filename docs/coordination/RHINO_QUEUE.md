@@ -14,3 +14,6 @@ Each entry: branch + commit, the script, what must pass. Newest at the bottom.
 5. relookup: sample → Look up preview (model unchanged) → Draw to 96 Ithaca Rd (lot + house redrawn) → Undo.
 6. demo (second update): smoke — GordiumStart empty file → sample → Draw → move house 5 ft → front yard fails →
    Zoning report opens on Check.
+7. context-map (#23) at a6a74ab or later (cloud, review round 5): `apps/rhino_plugin/tests/context_in_rhino.py` — all claims incl. the new
+   "4 with the Gordium layer and the architect's Gordium::Grade locked, a redraw replaces (never doubles) and puts both locks back".
+   Commit results beside the 955d97f run (docs/evidence/pr-23/context_results_<sha>.json + README section), push to wip/pr23-rhino-<sha>.

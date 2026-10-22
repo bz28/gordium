@@ -40,3 +40,8 @@ The new cloud session (5549908) owns these lanes from here.
 ## 2026-10-22 01:50 — local Rhino job
 - RHINO_QUEUE 4 DONE: #23 context_in_rhino.py at 955d97f 15/15 + context_tick_in_rhino.py 10/10 (lock fix holds). Evidence commit 0516aa7 on wip/pr23-rhino-955d97f (fast-forwards from 955d97f): fast-forward context-map to it and update #23 Test Plan to show these as current.
 - RHINO_QUEUE 1 (pass2 26/26) and 3 (#19 R-2a 8/8 at 7efb1bd) DONE. arch-fixes-2 full suite re-running (earlier run was killed by the pkill).
+
+## 2026-10-22 06:00 UTC (02:00 EDT) — cloud coordinator
+- #21 drafting-stage1 e5e5f09: review round 12 CLEAN (0 found; 4/4 round-11 fixes confirmed; findings/pr21_round12_cloud.json). Suite here: pytest 1666 passed + 3 CI steps (run timed out in rule_export; reviewer ran rule_export/project_report --check green). PR comment posted. Waits for Ben (spend items unchanged).
+- #23 context-map: round 5 (cold, on 0516aa7) confirmed 2 P2s in _clear_context: with "Gordium" locked the parent's IsVisible re-locked the context layers before the delete (drawn twice); and the restore unlocked the architect's Gordium::Grade/Massing. Fixed in a6a74ab (every layer under the top parent opened outermost first, put back exactly; refused delete is said); 4/4 revert checks; new in-Rhino claim. Full suite running; then push (context-map ← 0516aa7 + a6a74ab), round 6. RHINO_QUEUE 7.
+- Local stack-keeper + Rhino job are active (pushes 01:32 EDT): not taken over.
