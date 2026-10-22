@@ -1053,11 +1053,14 @@ def _drawing(rnd):
         x = rnd.choice([7, 17.1, 17.0])                    # over the roof, just past its edge, at its edge
         dz = rnd.choice([0.05, 0.5, 3])
         blocks.append(box(x, 30, x + 6, 40, top + dz, top + dz + 7, id="room"))
-        # (#18) past the first stack's edge, with a second stack there, the room is over or inside that stack (its
-        # top may meet one of its blocks, which then stands on it): not known to be raised, so not asserted
-        over_next = x >= 17 and any(s["ids"] and s["ids"][0].startswith("s1b") for s in stacks)
+        # (#18) past the first stack's edge, over a second stack, a room whose top meets the bottom of one of that
+        # stack's blocks has that block standing on it: it is inside the stack (part of its plain solids), not
+        # raised. Any other room (over the first stack, or above or across the second's blocks) is raised.
+        inside = x >= 17 and any(b["id"].startswith("s1b") and
+                                 abs(min(q[2] for f in b["faces"] for q in f["points"]) - (top + dz + 7)) <= 1e-9
+                                 for b in blocks)
         stacks.append({"ids": ["room"], "countable": False, "floors": 0, "tall": True, "below": False,
-                       "blocks": 0, "raised": not over_next, "height": 7})
+                       "blocks": 0, "raised": not inside, "height": 7})
     if rnd.random() < 0.2:
         rnd.choice(blocks)["id"] = rnd.choice(blocks)["id"]
     pick = rnd.choice([None, "stale"] + [b["id"] for b in blocks])
@@ -1240,8 +1243,8 @@ def test_a_plain_solid_joined_to_the_floor_stack_stops_the_story_count():
         m = measure(site(RECT, *stack, wing), {**FACTS, "stories": typed})["stories"]
         assert m["value"] is None and m["reason"], typed
         # (#18: the touching wing is part of the one building, §325-18A, so it is the plain part's own words)
-        assert (("isn't drawn as floor blocks" in m["reason"] or "could hold up to 4 stories" in m["reason"])
-                if typed is None else "fewer than the floor blocks drawn (3)" in m["reason"]), m["reason"]
+        assert ("could hold up to 4 stories" if typed is None else "fewer than the floor blocks drawn (3)") in \
+            m["reason"], m["reason"]
     m = measure(site(RECT, *stack, wing), {**FACTS, "stories": 3})["stories"]
     assert m["value"] == 3 and "stated by the architect for the whole building" in m["how"], m
     porch = measure(site(RECT, *stack, box(35, 30, 45, 70, 0, 6, id="porch")), {**FACTS, "stories": None})
