@@ -1467,3 +1467,22 @@ def test_every_known_shape_is_read_at_the_ground_as_it_should_be_all_at_once():
                          r["reading"] == "to its walls at ground level" for r in m["front_yard"]["readings"] or []))
         want[name] = (above, at_ground, question, True)
     assert got == want
+
+
+
+def test_every_stories_refusal_carries_its_code():
+    """#15 round 7 (2): refusals were found by matching their words, so a reworded one silently stopped being a
+    refusal. Each refusal stop (a count typed: its words name {typed}) is stories_<code>, and the measuring
+    returns the code with it, for every one."""
+    from model_measurement.measure import REFUSALS
+    from model_measurement.stops import STOPS
+    typed = sorted(k[len("stories_"):] for k, v in STOPS.items() if "{typed}" in v)
+    assert typed == sorted(REFUSALS)
+    plain = box(10, 25, 35, 65, 0, 30, id="house")                    # 30 ft: 1 to 4 stories
+    floors = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"f{i}") for i in range(3)]
+    cases = {"below_one": ([plain], 0), "above_drawn": ([plain], 5), "below_floors": (floors, 2)}
+    assert sorted(cases) == typed
+    for code, (solids, count) in cases.items():
+        r = measure(site(RECT, *solids), {**FACTS, "stories": count})["stories"]
+        assert r["value"] is None and r.get("stories_refused") == code, (code, r)
+    assert "stories_refused" not in measure(site(RECT, plain), {**FACTS, "stories": 3})["stories"]

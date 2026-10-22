@@ -665,6 +665,17 @@ def _with_each_as_main(record: dict, candidates: list[dict]) -> dict:
     return _decide("building_height", readings, record.get("how") or "", list(dict.fromkeys(objects)), question)
 
 
+REFUSALS = ("below_floors", "above_drawn", "below_one")   # a count typed the drawing rules out: its stop is
+# stories_<code>, and the record carries the code (stories_refused) so whoever asked rolls the count back by it,
+# never by matching the words
+
+
+def _refused(code: str, reason: str) -> dict:
+    """The stories record for a count typed and refused: needs review with its reason, and the code."""
+    assert code in REFUSALS
+    return dict(_missing("stories", reason), stories_refused=code)
+
+
 def _stories_whole(parts: list[dict], grade, why_grade, stated, called: str | None = None) -> dict:
     """STORY of one building made of parts (the main building first; with #18, the parts touching it, §325-18A),
     read from the drawing as far as it allows. Gordium's floor blocks are counted; a part drawn as a plain solid (or
@@ -703,7 +714,7 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated, called: str | No
     counted = max(counts) if counts else None
     if not plain:
         if stated is not None and stated < counted:     # fewer than the floors drawn: refused, never a reading
-            return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
+            return _refused("below_floors", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
         readings = [("Gordium's floor blocks" + (", the most on any part" if len(counts) > 1 else ""), counted, {})]
         if stated is not None:
             readings.append(("as stated by the architect", stated, {}))
@@ -721,12 +732,12 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated, called: str | No
              f"stor{'y' if could[tallest['id']] == 1 else 'ies'} (7 ft a story, R305.1)")
     if stated is not None:              # the architect's count for the whole building: only within what's drawn
         if counted is not None and stated < counted:
-            return _missing("stories", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
+            return _refused("below_floors", stop("stories_below_floors", typed=f"{stated:g}", drawn=counted))
         if stated > most:
-            return _missing("stories", stop("stories_above_drawn", typed=f"{stated:g}", what=name,
+            return _refused("above_drawn", stop("stories_above_drawn", typed=f"{stated:g}", what=name,
                                             height=f"{_r(_rise(tallest)):g}", most=most))
         if stated < least:              # (no floor blocks drawn: fewer than the first story every building has)
-            return _missing("stories", stop("stories_below_one", typed=f"{stated:g}"))
+            return _refused("below_one", stop("stories_below_one", typed=f"{stated:g}"))
         return _record("stories", "count", _r(stated), "stated by the architect for the whole building, within what "
                        f"the drawing allows ({least} to {most}: {holds})", ids)
     if least == most:                   # the drawing allows one count only: read, nothing to ask
