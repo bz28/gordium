@@ -569,7 +569,10 @@ class FakeTable:
         return "new%d" % self.n
 
     def add_lot(self, ring, name):
-        return self._new("Site", "lot")
+        i = self._new("Site", "lot")
+        if ring:
+            self.objects[i]["area"] = area([list(p) for p in ring])
+        return i
 
     def add_spot(self, p):
         return self._new("Gordium::Grade", "point")
@@ -578,11 +581,11 @@ class FakeTable:
         return [i for i, o in self.objects.items() if o["kind"] == "point"
                 and o["layer"] in ("Gordium::Grade", "Gordium::Grade::Finished")]
 
-    def massing(self):                       # the starting house's floors (Gordium::Massing)
-        return [i for i, o in self.objects.items() if o["layer"] == logic.MASSING]
+    def massing(self):                       # the starting house's floors (Gordium::Massing and its sublayers)
+        return [i for i, o in self.objects.items() if logic.on_layer(o["layer"], logic.MASSING)]
 
-    def buildings(self):                     # what the architect drew on Building
-        return [i for i, o in self.objects.items() if o["layer"] == logic.LAYERS["building"]]
+    def buildings(self):                     # what the architect drew on Building (and its sublayers)
+        return [i for i, o in self.objects.items() if logic.on_layer(o["layer"], logic.LAYERS["building"])]
 
     def fingerprint(self, ids):
         return repr(sorted((i, self.objects[i].get("geom")) for i in ids))

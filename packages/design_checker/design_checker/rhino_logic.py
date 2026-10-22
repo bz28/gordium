@@ -1975,30 +1975,65 @@ def same_address(a, b):
     return bool(words) and words == address_words(b)
 
 
+MISSING = object()
+PREVIEW_SAYS = ("Shown dashed: {address}'s lot. Nothing in the model changes until Draw, which replaces what Gordium "
+                "drew with this lot and a new starting house.")
+NOT_DRAWN_YET = ("{says} Nothing is drawn for {address} until it is found: Look up again, or put back {drawn} to "
+                 "check this lot.")
+
+
 def preview_lookup(answer, facts, saved_ui, zones=()):
-    """(facts, saved_ui, preview ring or None) after a lookup's answer: the box's suggestions only (the address, the
-    district, and for a lot Gordium may replace its street side and size), the answer kept as `_pending` for Draw,
-    and the outline to show dashed on screen. Nothing in the model changes (Ben: Look up only fills the box). An
-    earlier preview goes with a new lookup, whatever its answer."""
+    """(facts, saved_ui, preview ring or None) after a lookup's answer. Look up only fills the box (Ben): the
+    address and the district (a suggestion, ticked again), nothing else, so the lot, street and corner rows keep
+    saying what is drawn; the rest of the answer waits in `_pending` for Draw (apply_reset), its lot shown dashed
+    (the ring returned). An earlier preview's box changes are undone first (drop_pending), so a failed lookup or a
+    new one never leaves another address's district behind (re-lookup review round 1)."""
+    facts, saved_ui = drop_pending(facts, saved_ui)
+    before_f, before_s = dict(facts), dict(saved_ui)
     replaces = lookup_may_replace(facts, saved_ui)
-    facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=replaces)
-    saved_ui.pop("_pending", None)
+    facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=False)
     if (answer or {}).get("status") != "found":
         return facts, saved_ui, None
     w = answer.get("writes") or {}
-    saved_ui["_pending"] = {"address": facts.get("address") or (answer or {}).get("query"),
-                            "query": (answer or {}).get("query"), "answer": answer}
+    undo = [(where, k, before.get(k, MISSING), after.get(k, MISSING))
+            for where, before, after in (("facts", before_f, facts), ("saved", before_s, saved_ui))
+            for k in set(before) | set(after) if k not in ("_lookup", "_pending")
+            and before.get(k, MISSING) is not after.get(k, MISSING) and before.get(k, MISSING) != after.get(k, MISSING)]
+    address = facts.get("address") or answer.get("query")
+    saved_ui["_pending"] = {"address": address, "query": answer.get("query"), "answer": answer, "undo": undo}
+    drawn = saved_ui.get("drawn_address")
     if not replaces:
         saved_ui["_lookup"]["says"] = ("Your own lot is kept until you press Draw: the lookup filled in the address "
                                        "and the district.")
-    elif (saved_ui.get("_lookup") or {}).get("guide"):
-        # the City's outline only: nothing to draw over until Draw has cleared Gordium's old lot (Draw my lot… is
-        # offered then, never over the old lot: a lot drawn now would be taken for the architect's own at Draw)
-        saved_ui["_lookup"] = dict(saved_ui["_lookup"], guide=False)
-        live = dict(saved_ui.get("_live") or {})
-        live["lot"] = GUIDE_PREVIEW + live.get("lot", "").replace(GUIDE, "")
-        saved_ui["_live"] = live
+    elif drawn is None or not same_address(address, drawn):
+        saved_ui["_lookup"]["says"] = (GUIDE_PREVIEW if not w.get("lot_ring") and w.get("guide_ring") else
+                                       PREVIEW_SAYS.format(address=address))
     return facts, saved_ui, w.get("lot_ring") or w.get("guide_ring")
+
+
+def drop_pending(facts, saved_ui):
+    """(facts, saved_ui) with the pending preview gone and the box changes it made undone, each only while it is as
+    the preview left it (an architect's later change stays)."""
+    facts, saved_ui = dict(facts or {}), dict(saved_ui or {})
+    pending = saved_ui.pop("_pending", None) or {}
+    for where, key, old, new in pending.get("undo") or []:
+        target = facts if where == "facts" else saved_ui
+        if target.get(key, MISSING) == new:
+            if old is MISSING:
+                target.pop(key, None)
+            else:
+                target[key] = old
+    return facts, saved_ui
+
+
+def settle_pending(facts, saved_ui, address):
+    """At Draw: the preview stays only while the box's address is still the one looked up (typed or found); an
+    address typed since drops it, its box changes undone (re-lookup review round 1: the preview was drawn under the
+    typed address)."""
+    pending = (saved_ui or {}).get("_pending")
+    if pending and not (same_address(address, pending.get("address")) or same_address(address, pending.get("query"))):
+        return drop_pending(facts, saved_ui)
+    return dict(facts or {}), dict(saved_ui or {})
 
 
 def own_work(table, facts, saved_ui):
@@ -2040,8 +2075,11 @@ def draw_decision(table, facts, saved_ui, address):
     if lookup_first(address, facts, saved_ui):
         look = saved_ui.get("_lookup") or {}
         if look.get("status") not in (None, "found") and same_address(address, look.get("query")):
-            return "unfound", [], UNFOUND.format(address=address.strip(),
-                                                 drawn=saved_ui.get("drawn_address") or "the address drawn")
+            drawn = saved_ui.get("drawn_address") or "the address drawn"
+            if look["status"] == "not_found":
+                return "unfound", [], UNFOUND.format(address=address.strip(), drawn=drawn)
+            return "unfound", [], NOT_DRAWN_YET.format(says=lookup_says(look) or "", address=address.strip(),
+                                                       drawn=drawn)
         return "lookup", [], None
     mine = own_work(table, facts, saved_ui)
     plan = reset_plan(facts, saved_ui, mine)
@@ -2068,6 +2106,33 @@ def _listed(items):
     return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
 
 
+BOX_CHOSEN_FACTS = ("address", "zone", "use")
+BOX_CHOSEN_UI = ("address_source", "zone_source", "_zone_said", "_reconfirm", "_zones_found", "use_source")
+# what of the box's state the reset redraws (the rest is the architect's choices in the box): after_reset_state
+RESET_STATE_KEYS = ("has_lot", "lot_missing", "lot_area", "lot_surveyed", "lot_source", "street_name",
+                    "street_name_saved", "street_source", "corner_lot", "corner_source", "ground", "ground_fall",
+                    "lookup", "live", "doubts", "checked")
+
+
+def after_reset_state(shown, fresh):
+    """The box's state to save at Draw after a reset: the architect's choices as the box showed them (`shown`: the
+    district and its tick, the use, the address, the design buffer, no regrading), the lot, street side, corner
+    and ground as the reset drew them (`fresh`, rebuilt from the model): never the old lot's size, survey or
+    corner answer saved over the new lot (re-lookup review round 1, P0)."""
+    return dict(shown, **{k: fresh.get(k) for k in RESET_STATE_KEYS})
+
+
+def box_facts(facts, saved_ui, state):
+    """(facts, saved_ui) with the box's own answers in them: a changed corner answer (corner_answered), the
+    address, district, use and whether the lot is a survey. The pure part of gordium_rhino._apply_box."""
+    facts, saved_ui = corner_answered(facts, saved_ui, state.get("corner_lot"))
+    facts = dict(facts, address=state.get("address") or None, zone=state.get("zone"), use=state.get("use"),
+                 lot_surveyed=bool(state.get("lot_surveyed")))
+    if not facts.get("address"):
+        facts.pop("address")
+    return facts, saved_ui
+
+
 def apply_reset(table, session, facts, saved_ui, choice, zones=()):
     """(facts, saved_ui, redraw_house, guide) at Draw: the pending answer drawn for good through the session (one
     Cancel, one undo), by apply_lookup itself (only what each source allows is written; the lot drawn and its spot
@@ -2082,7 +2147,17 @@ def apply_reset(table, session, facts, saved_ui, choice, zones=()):
     if not keep:
         for old in list(table.massing()) + list(table.buildings()):
             session.hold(old)
+    # the box's own choices stay as the architect left them (the district they ticked, the use, the address); the
+    # lookup's answer fills only the lot, the street side, the corner and the ground (review round 1)
+    chosen_f = {k: facts.get(k, MISSING) for k in BOX_CHOSEN_FACTS}
+    chosen_s = {k: saved_ui.get(k, MISSING) for k in BOX_CHOSEN_UI}
     facts, saved_ui, guide = apply_lookup(table, session, pending.get("answer") or {}, facts, saved_ui, zones)
+    for target, chosen in ((facts, chosen_f), (saved_ui, chosen_s)):
+        for k, v in chosen.items():
+            if v is MISSING:
+                target.pop(k, None)
+            else:
+                target[k] = v
     saved_ui.update(drawn_address=pending.get("address"), house_fingerprint=None)
     if not keep:
         saved_ui["_redrawn_for"] = pending.get("address")     # Draw now draws (the box's button says so)

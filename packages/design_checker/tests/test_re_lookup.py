@@ -38,18 +38,22 @@ def guide_only(name):
 
 
 class Site:
-    """A Rhino file as Gordium left it: the model (FakeTable), the facts and the box's choices saved in the file."""
+    """A Rhino file as Gordium left it: the model (FakeTable), the facts and the box's choices saved in the file, and
+    the site facts' sources saved at the last Draw."""
 
-    def __init__(self, lot="sample", house="gordium", buildings=False, drawn=SAMPLE):
-        objects = {"lot1": {"layer": "Site", "kind": "lot"}}
+    def __init__(self, lot="sample", house="gordium", buildings=False, drawn=SAMPLE, surveyed=False,
+                 building_layer="Building"):
+        objects = {"lot1": {"layer": "Site", "kind": "lot", "area": 6570.0}}
         if house:
             objects.update({"floor1": {"layer": logic.MASSING, "kind": "brep", "geom": "f1"},
                             "floor2": {"layer": logic.MASSING, "kind": "brep", "geom": "f2"}})
         if buildings:
-            objects["garage"] = {"layer": logic.LAYERS["building"], "kind": "brep"}
+            objects["garage"] = {"layer": building_layer, "kind": "brep"}
         self.table = FakeTable(objects)
-        self.facts = {"lot_id": "lot1", "address": drawn}
-        self.saved = {"replaceable_lot": "lot1" if lot == "sample" else None, "from_sample": lot == "sample"}
+        self.facts = {"lot_id": "lot1", "address": drawn, "zone": "R-1b", "use": "one_family",
+                      "lot_surveyed": surveyed, "corner_lot": False, "street_line": [[[0, 0], [60, 0]]]}
+        self.saved = {"replaceable_lot": "lot1" if lot == "sample" else None, "from_sample": lot == "sample",
+                      "zone_source": "entered by you", "lot_source": "your survey" if surveyed else None}
         if drawn is not None:
             self.saved["drawn_address"] = drawn
         if house == "gordium":                    # as Gordium drew it, its fingerprint saved
@@ -58,6 +62,7 @@ class Site:
             self.saved["house_fingerprint"] = self.table.fingerprint(["floor1", "floor2"])
             self.table.objects["floor2"]["geom"] = "f2 moved"
         # house == "no record": a starting house with no fingerprint saved (a file from before re-lookup)
+        self.sources = {}
         self.mine = self._architects()
 
     def _architects(self):
@@ -79,38 +84,68 @@ class Site:
 
 
 class Box:
-    """Edit site…: one box session over the site (its model edits held until Draw or Cancel)."""
+    """Edit site…: one box session over the site (its model edits held until Draw or Cancel). Like the plugin's box,
+    it has widgets (`typed`: what the architect typed or ticked since the box last showed the facts) over the
+    state it builds from the facts (gordium_rhino._box_state), and every Draw goes through what _draw_prepare and
+    _drawn do: the box's answers into the facts first, the pending preview settled, the decision, the reset, the
+    state rebuilt from the new lot, then the facts and their sources saved from that state."""
 
     def __init__(self, site):
         self.site, self.table = site, site.table
         self.facts, self.saved = dict(site.facts), dict(site.saved)
         self.session = logic.BoxSession(self.table)
-        self.asked, self.preview, self.said, self.open = [], None, [], True
+        self.asked, self.preview, self.said, self.open, self.typed = [], None, [], True, {}
+
+    def shown(self):
+        """The box's state as gordium_rhino._box_state builds it (the parts these scenarios read), the architect's
+        typing and ticks over it."""
+        f, sv = self.facts, self.saved
+        lot = f.get("lot_id")
+        here = bool(lot) and self.table.exists(lot) and self.table.objects[lot]["layer"] == "Site"
+        state = {"address": f.get("address") or "", "zone": f.get("zone"), "use": f.get("use"),
+                 "district_confirmed": True, "lot_surveyed": bool(f.get("lot_surveyed")),
+                 "corner_lot": f.get("corner_lot"), "has_lot": here, "lot_missing": not here,
+                 "lot_area": self.table.objects[lot].get("area") if here else None,
+                 "lot_source": sv.get("lot_source"), "street_name": sv.get("_street_name") or sv.get("street_name"),
+                 "street_source": sv.get("street_source"), "corner_source": sv.get("corner_source"),
+                 "zone_source": sv.get("zone_source"), "address_source": sv.get("address_source"),
+                 "lookup": sv.get("_lookup") or {}, "live": sv.get("_live") or {}, "doubts": sv.get("doubts") or {},
+                 "checked": sv.get("checked") or []}
+        return dict(state, **self.typed)
+
+    def _apply(self):                              # gordium_rhino._apply_box: the box's answers into the facts
+        self.facts, self.saved = logic.box_facts(self.facts, self.saved, self.shown())
+        self.typed = {}
 
     def look_up(self, payload):
-        self.facts["address"] = payload.get("query") or self.facts.get("address")    # the box's typed address
+        self.typed["address"] = payload.get("query") or self.facts.get("address")    # typed, then Look up
+        self._apply()
         self.facts, self.saved, self.preview = logic.preview_lookup(payload, self.facts, self.saved, ZONES)
         return self
 
     def type_address(self, address):
-        self.facts["address"] = address
+        self.typed["address"] = address
         return self
 
     def button(self):
         return logic.draw_button("check", self.saved)
 
     def rows(self):
-        lot = self.facts.get("lot_id")
-        state = {"has_lot": bool(lot), "lot_missing": not lot or not self.table.exists(lot),
-                 "lookup": self.saved.get("_lookup") or {}, "live": self.saved.get("_live") or {},
-                 "doubts": self.saved.get("doubts") or {}, "zone": "R-1b", "district_confirmed": True}
+        state = self.shown()
         return {r["key"]: r for r in logic.box_rows(state)}, state
 
     def draw(self, reply=None):
-        """Draw (gordium_rhino._draw_prepare then _drawn): "lookup" (the typed address looked up first), "asked-cancel"
-        (Cancel at the question: back to the box), "open" (the City's guide: the box stays open for Draw my lot…), or
-        "drawn" (saved, the session committed, the starting house drawn again when it was cleared)."""
-        plan, mine, say = logic.draw_decision(self.table, self.facts, self.saved, self.facts.get("address"))
+        """Draw (gordium_rhino._draw_prepare then _drawn): "lookup" (the typed address looked up first), "unfound",
+        "district-again" (a dropped preview put the district back: ticked again), "asked-cancel" (Cancel at the
+        question: back to the box), "open" (the City's guide: the box stays open for Draw my lot…), or "drawn"
+        (saved, the session committed, the starting house drawn again when it was cleared)."""
+        state = self.shown()
+        self.facts, self.saved = logic.box_facts(self.facts, self.saved, state)
+        self.typed = {}
+        self.facts, self.saved = logic.settle_pending(self.facts, self.saved, state["address"])
+        if self.facts.get("zone") != state["zone"]:
+            return "district-again"
+        plan, mine, say = logic.draw_decision(self.table, self.facts, self.saved, state["address"])
         if say:
             self.said.append(say)
         if plan in ("lookup", "unfound"):
@@ -128,16 +163,20 @@ class Box:
                     return "asked-cancel"
             self.facts, self.saved, redraw, guide = logic.apply_reset(self.table, self.session, self.facts,
                                                                       self.saved, choice, ZONES)
+            state = logic.after_reset_state(state, self.shown())
             if guide and not self.facts.get("lot_id"):
                 self.redraw_after = redraw
                 return "open"
         redraw = redraw or getattr(self, "redraw_after", False)
         if not self.facts.get("lot_id"):
             raise AssertionError("Draw with no lot: the box should have stayed open")
+        # _drawn: the box's state applied once more and saved, with every fact's source
+        self.facts, self.saved = logic.box_facts(self.facts, self.saved, state)
         self.session.commit()
         self.open = False
         site = self.site
         site.facts, site.saved = self.facts, logic.storable_ui(self.saved)
+        site.sources = logic.fact_sources(state, "2026-10-22", confirmed=True)
         if redraw:                                 # edit_facts: the starting house drawn again for the new lot
             ids = [self.table._new(logic.MASSING, "brep") for _ in range(2)]
             for k, i in enumerate(ids):
@@ -146,7 +185,7 @@ class Box:
         return "drawn"
 
     def draw_my_lot(self):
-        new = self.table.add_lot(None, "drawn")
+        new = self.table.add_lot([[0, 0], [50, 0], [50, 100], [0, 100]], "drawn")
         self.session.add([new])
         self.facts, self.saved = logic.pick_effect("draw_lot", new, self.facts, self.saved)
         return new
@@ -171,6 +210,8 @@ def test_look_up_previews_only_and_cancel_leaves_the_file_as_it_was():
     assert box.preview and box.saved["_pending"]["answer"]["status"] == "found"
     assert box.facts["lot_id"] == "lot1" and box.button() == "Draw"
     assert "_pending" not in logic.storable_ui(box.saved)       # a preview is never written into the file
+    for key in ("lot_id", "lot_surveyed", "corner_lot", "street_line"):   # its rows still say what is drawn
+        assert box.facts.get(key) == site.facts.get(key), key
     box.cancel()
     assert site.state() == before
 
@@ -285,9 +326,9 @@ def test_the_city_outline_only_clears_gordiums_drawing_then_waits_for_their_lot(
     site = Site()
     before = site.state()
     box = site.box().look_up(guide_only("96_ithaca_rd"))
-    rows, _ = box.rows()
+    rows, state = box.rows()
     assert not [a for a in rows["lot"]["actions"] if a[0] == "draw_lot"]
-    assert rows["lot"]["review"].startswith("? " + logic.GUIDE_PREVIEW)
+    assert logic.GUIDE_PREVIEW in logic.uncertain(state)
     assert box.draw() == "open" and box.open
     assert {box.table.objects[i]["layer"] for i in ("lot1", "floor1", "floor2")} == {logic.HOLDING_LAYER}
     rows, state = box.rows()
@@ -373,21 +414,110 @@ def test_every_start_lookup_and_answer_keeps_the_promises(start):
 # ---- the plugin does what the harness does --------------------------------------------------------------------
 
 def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
-    """gordium_rhino._draw_prepare acts on rhino_logic.draw_decision with the branches Box.draw drives: a lookup
-    first, unfound said in the box, the question (Cancel: back to the box), the reset in one undo step, and the box
-    kept open on the City's guide; Edit site… closes that undo step on any way out, errors included."""
+    """gordium_rhino._draw_prepare does what Box.draw does, in its order: the box's answers into the facts, the
+    preview settled, the district checked, rhino_logic.draw_decision, the question (Cancel: back to the box), the
+    reset in one undo step, the state rebuilt from the new lot (saved by _drawn), and the box kept open on the City's
+    guide; _box_loop keeps the architect's ticks when Draw stops; _apply_box is rhino_logic.box_facts; Edit site…
+    closes the undo step on any way out, errors included; RhinoTable.buildings is the checker's own buildings."""
     rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     prep = rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
-    for step in ('logic.draw_decision(table, facts, saved_ui, state.get("address"))', 'if plan == "lookup":',
-                 'if plan == "unfound":', 'if plan == "none":', 'if plan == "ask":',
-                 "logic.reset_question(", "if choice is None:\n            return facts, saved_ui, False",
-                 "logic.apply_reset(table, session, facts, saved_ui, choice",
-                 'if guide and not facts.get("lot_id"):'):
-        assert step in prep, step
-    assert prep.index("_begin_undo(") < prep.index("logic.apply_reset(")
+    steps = ("facts, saved_ui = _apply_box(doc, facts, state, saved_ui)",
+             'logic.settle_pending(facts, saved_ui, state.get("address"))',
+             'if facts.get("zone") != state.get("zone"):',
+             'logic.draw_decision(table, facts, saved_ui, state.get("address"))', 'if plan == "lookup":',
+             'if plan == "unfound":', 'if plan == "none":', 'if plan == "ask":', "logic.reset_question(",
+             "if choice is None:\n            return facts, saved_ui, False, state", "_begin_undo(",
+             "logic.apply_reset(table, session, facts, saved_ui, choice",
+             "logic.after_reset_state(state, _box_state(doc, facts, options, saved_ui, mode))",
+             'if guide and not facts.get("lot_id"):', "return facts, saved_ui, True, fresh_state")
+    at = [prep.find(step) for step in steps]
+    assert -1 not in at and at == sorted(at), [st for st, i in zip(steps, at) if i == -1] or at
     loop = rhino[rhino.index("def _box_loop("):rhino.index("def _lookup_start(")]
-    assert loop.count("_draw_prepare(doc, facts, state, saved_ui, session, mode)") == 2   # scripted and real box
+    assert loop.count("_draw_prepare(doc, facts, state, saved_ui, session, mode, options)") == 2
+    assert "return _drawn(doc, facts, drawn_state, saved_ui, session)" in loop      # the rebuilt state is saved
+    draw = loop[loop.index('if what == "draw":'):]
+    assert loop.index("ticked = {k: state[k]") < loop.index('if what == "draw":') and "continue" in draw
+    assert "logic.box_facts(facts, saved_ui, state)" in rhino[rhino.index("def _apply_box("):]
     edit = rhino[rhino.index("def edit_facts("):rhino.index("def report_path(")]
     outer = edit.index("    try:                                # one undo step")
     assert outer < edit.index("facts = confirm(") < edit.index("    finally:\n        STATE.pop(\"redraw_house\"")
     assert edit.rstrip().endswith("run_check(doc, report=False)") and "_end_undo(doc)" in edit
+    table = rhino[rhino.index("class RhinoTable"):]
+    assert "for o in _buildings(self.doc) if str(o.Id) not in house" in table
+
+
+# ---- review round 1: each confirmed finding, as the architect would meet it --------------------------------------
+
+def test_a_reset_saves_the_new_lot_as_drawn_never_the_old_lots_survey_or_size():
+    """P0: Draw saved the box's state from before the reset over the new lot: a surveyed lot's yes and its size
+    went onto the tax-map lot that replaced it (the checker would then take ±2 ft lines as exact)."""
+    site = Site(lot="theirs", house=None, surveyed=True)
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.draw(lambda q: logic.START_FRESH) == "drawn"
+    lot = site.facts["lot_id"]
+    assert site.facts["lot_surveyed"] is False and site.facts.get("street_line")
+    assert site.sources["lot"]["value"] == logic.lot_size(site.table.objects[lot]["area"]) != logic.lot_size(6570.0)
+    assert site.sources["lot"]["source"].startswith("the tax map") and site.saved["lot_source"] != "your survey"
+    assert site.facts["zone"] and site.facts["use"] == "one_family"     # the box's own choices kept
+
+
+def test_an_address_typed_after_look_up_drops_the_preview_and_its_district():
+    """P1: the preview was drawn even after the architect typed the drawn address back (the lot then saved under
+    it); and the other address's district stayed in the box."""
+    site = Site()
+    before = site.state()
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.facts["zone"] != "R-1b" or box.saved.get("zone_source") != "entered by you"   # the preview's
+    assert box.type_address(SAMPLE).draw() in ("drawn", "district-again")
+    if box.open:
+        assert box.facts["zone"] == "R-1b" and box.saved["zone_source"] == "entered by you"
+        assert box.draw() == "drawn"
+    assert site.table.snapshot()[0] == before[0][0] and site.saved["drawn_address"] == SAMPLE
+    assert site.facts["zone"] == "R-1b" and site.saved["zone_source"] == "entered by you"
+
+
+def test_a_failed_lookup_after_a_preview_leaves_nothing_of_it():
+    """P1: a later failed lookup dropped the pending answer but left its facts in the box, saved on the old lot."""
+    site = Site()
+    box = site.box().look_up(answer("109_ithaca_rd")).look_up(answer("not_found"))
+    assert box.facts["zone"] == "R-1b" and box.saved["zone_source"] == "entered by you"
+    assert box.facts["corner_lot"] is False and box.facts["street_line"] == [[[0, 0], [60, 0]]]
+    assert box.type_address(SAMPLE).draw() == "drawn"
+    assert site.facts["zone"] == "R-1b" and site.saved["zone_source"] == "entered by you"
+    assert "lot_area" not in site.saved and not site.saved.get("street_source")
+
+
+def test_buildings_on_a_sublayer_are_asked_about():
+    """P2: own_work found only objects on the exact Building layer: a garage on Building::Garage was never asked
+    about, and removed at a reset."""
+    site = Site(buildings=True, building_layer="Building::Garage")
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.draw() == "asked-cancel" and box.asked[0][0].endswith("The buildings you drew will be removed.")
+
+
+def test_a_lookup_that_failed_offline_says_so_at_draw_never_not_found():
+    """P3: Draw after an offline, timeout or error lookup said the address "wasn't found", over the real reason."""
+    site = Site()
+    box = site.box().look_up({"status": "offline", "query": "96 Ithaca Rd"})
+    assert box.draw() == "unfound"
+    assert box.said[-1].startswith(logic.LOOKUP_SAYS["offline"]) and "wasn't found" not in box.said[-1]
+    box = site.box().look_up(answer("not_found"))
+    assert box.draw() == "unfound" and "wasn't found" in box.said[-1]
+
+
+def test_the_district_the_architect_picked_survives_the_reset():
+    """The reset fills the lot, street side, corner and ground from the lookup, never the district, use or address
+    the architect set in the box (picked over the lookup's suggestion, then ticked)."""
+    site = Site()
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    suggested = box.facts.get("zone")
+    picked = next(z for z in ZONES if z != suggested)
+    box.typed.update(zone=picked, use="two_family")
+    assert box.draw() == "drawn"
+    assert site.facts["zone"] == picked and site.facts["use"] == "two_family"
+    assert logic.same_address(site.facts["address"], "96 Ithaca Rd")
+    # …and when the box stays open on the City's guide after the reset, it still shows their district
+    site = Site()
+    box = site.box().look_up(guide_only("96_ithaca_rd"))
+    box.typed.update(zone=picked)
+    assert box.draw() == "open" and box.shown()["zone"] == picked and box.facts["use"] == "one_family"
