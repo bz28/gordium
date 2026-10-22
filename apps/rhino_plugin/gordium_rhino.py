@@ -2434,13 +2434,23 @@ def _outline_points(geometry):
 
 
 def _attrs_print(attrs):
-    """What of an outline's attributes the architect can change, for its fingerprint: its name, colour, linetype and
-    their own user text (never Gordium's keys, which Gordium itself writes after drawing)."""
+    """An outline's attributes for its fingerprint: EVERY readable ObjectAttributes property (by reflection: a list of
+    them missed print width and colour, material; review round 2; rhino_logic.attribute_counts leaves out only the
+    user-string count, which includes Gordium's own keys), its groups, and the architect's own user text (never
+    Gordium's keys, written after drawing)."""
+    out = {}
+    for prop in attrs.GetType().GetProperties():
+        if not prop.CanRead or prop.GetIndexParameters().Length or not logic.attribute_counts(prop.Name):
+            continue
+        try:
+            out[prop.Name] = logic.attribute_text(prop.GetValue(attrs, None))
+        except Exception:                      # a property Rhino won't read here: not part of the fingerprint
+            continue
+    out["groups"] = sorted(int(g) for g in (attrs.GetGroupList() or []))
     keys = attrs.GetUserStrings()
-    own = sorted((k, attrs.GetUserString(k)) for k in (keys.AllKeys if keys is not None else [])
-                 if k and not str(k).startswith("gordium_"))
-    return {"name": attrs.Name or "", "colour_source": int(attrs.ColorSource), "colour": attrs.ObjectColor.ToArgb(),
-            "linetype_source": int(attrs.LinetypeSource), "linetype": attrs.LinetypeIndex, "user": own}
+    out["user"] = sorted((k, attrs.GetUserString(k)) for k in (keys.AllKeys if keys is not None else [])
+                         if k and not str(k).startswith("gordium_"))
+    return out
 
 
 def _clear_context(doc, sources=None):
@@ -2471,8 +2481,8 @@ def _clear_context(doc, sources=None):
             source = o.Attributes.GetUserString(logic.CONTEXT_KEY)
             if not source or (sources is not None and source not in sources):
                 continue
-            if logic.is_edited(o.Attributes.GetUserString(logic.GEOM_KEY), _outline_points(o.Geometry),
-                               _attrs_print(o.Attributes)):
+            if logic.kept_on_clear(o.Attributes.GetUserString(logic.GEOM_KEY), o.Attributes.GetUserString(
+                    logic.DRAWN_KEY), str(o.Id), _outline_points(o.Geometry), _attrs_print(o.Attributes)):
                 attrs = o.Attributes.Duplicate()          # the architect edited it: theirs now, never removed
                 attrs.SetUserString(logic.CONTEXT_KEY, None)
                 attrs.SetUserString(logic.EDITED_KEY, "1")

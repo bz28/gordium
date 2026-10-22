@@ -126,9 +126,39 @@ def test_an_outline_the_architect_edited_is_known_and_never_drawn_twice():
     assert logic.skip_edited(objects, ["footprint-2", ""]) == [{"id": "footprint-1"}, {"id": ""}, {"name": "North"}]
     show = RHINO[RHINO.index("def _outline_points("):RHINO.index("def _attrs_print(")]
     assert "(q.X, q.Y, q.Z)" in show
+
+
+# every attribute Rhino gives an outline (as _attrs_print reads them by reflection), and the two it adds
+ATTRIBUTES = {"Name": "footprint-1", "ColorSource": "ColorFromLayer", "ObjectColor": "Color [A=255, R=0, G=0, B=0]",
+              "LinetypeSource": "LinetypeFromLayer", "LinetypeIndex": "-1", "PlotColorSource": "PlotColorFromLayer",
+              "PlotColor": "Color [A=255, R=0, G=0, B=0]", "PlotWeightSource": "PlotWeightFromLayer",
+              "PlotWeight": "0.0", "MaterialSource": "MaterialFromLayer", "MaterialIndex": "-1", "Mode": "Normal",
+              "Visible": "True", "WireDensity": "1", "DisplayOrder": "0", "LayerIndex": "7",
+              "ObjectDecoration": "None", "Url": "", "groups": [], "user": []}
+
+
+def test_changing_any_attribute_or_copying_keeps_the_outline_and_only_gordiums_own_go():
+    """Review of the editable outlines, round 2: a listed handful of attributes missed print width and colour,
+    material and groups, and a copy pasted in place (same points, same attributes) was deleted. Now every attribute
+    is fingerprinted, and a clear deletes only an object that is exactly what Gordium drew."""
+    drawn = [(0.0, 0.0, 0.0), (30.0, 0.0, 0.0), (30.0, 40.0, 0.0), (0.0, 0.0, 0.0)]
+    key = logic.outline_key(drawn, ATTRIBUTES)
+    assert not logic.kept_on_clear(key, "A", "A", drawn, dict(ATTRIBUTES))             # untouched: Gordium's, goes
+    for name in ATTRIBUTES:                                                              # any one change: theirs
+        changed = dict(ATTRIBUTES, **{name: [7] if name == "groups" else [["k", "v"]] if name == "user" else "changed"})
+        assert logic.kept_on_clear(key, "A", "A", drawn, changed), name
+    assert logic.kept_on_clear(key, "A", "B", drawn, dict(ATTRIBUTES))                  # a copy pasted in place
+    assert logic.kept_on_clear(key, None, "B", drawn, dict(ATTRIBUTES))                 # no record of being drawn
+    assert not logic.kept_on_clear(None, None, "C", None, {})                           # a note: Gordium's, goes
+    assert not logic.attribute_counts("UserStringCount") and logic.attribute_counts("PlotWeight")
+    assert logic.attribute_text(0.1 + 0.2) == logic.attribute_text(0.3)                 # stable text
     att = RHINO[RHINO.index("def _attrs_print("):].split("\ndef ", 1)[0]
-    assert all(w in att for w in ("attrs.Name", "attrs.ColorSource", "attrs.ObjectColor", "attrs.LinetypeIndex",
-                                  'startswith("gordium_")'))
+    assert "attrs.GetType().GetProperties()" in att and "logic.attribute_counts(prop.Name)" in att
+    assert "attrs.GetGroupList()" in att and 'startswith("gordium_")' in att
+    clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_pieces(")]
+    kept = clear.index("if logic.kept_on_clear(o.Attributes.GetUserString(logic.GEOM_KEY), o.Attributes.GetUserString(")
+    assert "logic.DRAWN_KEY), str(o.Id), _outline_points(o.Geometry), _attrs_print(o.Attributes)):" in clear
+    assert kept < clear.index('attrs.SetUserString(logic.EDITED_KEY, "1")') < clear.index("doc.Objects.Delete(o, True)")
 
 
 def test_only_the_very_outline_edited_around_this_lot_is_kept_from_a_redraw():
@@ -163,8 +193,8 @@ def test_only_the_very_outline_edited_around_this_lot_is_kept_from_a_redraw():
 
 def test_the_plugin_keeps_an_edited_outline_as_the_architects_and_marks_every_outline():
     clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_pieces(")]
-    edited = clear.index("if logic.is_edited(o.Attributes.GetUserString(logic.GEOM_KEY), _outline_points(o.Geometry),")
-    assert "_attrs_print(o.Attributes)" in clear[edited:edited + 200]
+    edited = clear.index("if logic.kept_on_clear(o.Attributes.GetUserString(logic.GEOM_KEY)")
+    assert "_attrs_print(o.Attributes)" in clear[edited:edited + 250]
     assert edited < clear.index("attrs.SetUserString(logic.CONTEXT_KEY, None)") < clear.index("doc.Objects.Delete(o, True)")
     assert 'attrs.SetUserString(logic.EDITED_KEY, "1")' in clear      # theirs now: no later clear touches it
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
@@ -604,6 +634,13 @@ def test_no_reader_text_still_says_the_footprints_are_never_saved():
                   "nothing of them is in any fixture", "its footprints (never saved) fetched again",
                   "the footprints are never saved", "the footprints, never saved", "until Ben decides"):
         assert not [p for p, t in texts.items() if stale in t], stale
+
+
+def test_with_nothing_drawn_for_the_lot_the_tick_fetches_it():
+    """Review of the editable outlines, round 2: after a Draw with the tick off, or a first fetch that failed outright,
+    there is no record; ticking Show neighbourhood said "shown" and drew nothing."""
+    assert logic.needs_refetch(None, None, DOC) and logic.needs_refetch({"doc": DOC, "lines": []}, None, DOC)
+    assert logic.needs_refetch(None, {"frame": {}}, DOC)                    # a record with no layers: the same
 
 
 def test_kept_footprints_in_a_reopened_file_are_not_fetched_again():

@@ -1500,14 +1500,17 @@ def guides_on_screen(held, doc_serial):
 
 
 def needs_refetch(held, record, doc_serial):
-    """Whether the tick or a Draw on the same lot should fetch the neighbourhood again: a live-only layer (a source
-    that may not be kept, shown on screen and never saved) with nothing on screen for this document (a reopened
-    file), or any layer, stored or live-only, whose last fetch failed (the record says so: review round 9, parcels down on the first Draw were never fetched again). A layer
-    kept from an earlier fetch that worked carries that fetch's "found" entry (context_merge), so a kept layer
-    doesn't loop. A fetch that worked and found nothing is not fetched again (review round 8: it was, on every Draw
-    and tick, because "on screen" also meant "something to draw"). guides_on_screen stays the drawing's and the
+    """Whether the tick or a Draw on the same lot should fetch the neighbourhood again: nothing drawn for this lot
+    yet (no record: after a Draw with the tick off, or a first fetch that failed outright; review of the editable
+    outlines, round 2), a live-only layer (a source that may not be kept, shown on screen and never saved) with
+    nothing on screen for this document (a reopened file), or any layer, stored or live-only, whose last fetch
+    failed (review round 9: parcels down on the first Draw were never fetched again). A layer kept from an earlier
+    fetch that worked carries that fetch's "found" entry (context_merge), so a kept layer doesn't loop. A fetch that
+    worked and found nothing is not fetched again (review round 8). guides_on_screen stays the drawing's and the
     merge's question."""
     layers = list(((record or {}).get("layers") or {}).values())
+    if not layers:
+        return True              # nothing drawn for this lot: the tick (or Draw) fetches it
     if any(not is_stored(v) for v in layers) and not guides_of(held, doc_serial):
         return True              # (the footprints are kept since 2026-10-21: a reopened file has them, nothing to fetch)
     return any((v or {}).get("status") not in DREW for v in layers)
@@ -1665,6 +1668,33 @@ def suppressed(edited, current_frame_key):
     [{id, frame, drawn_as, own}]."""
     return sorted(set(e.get("id") for e in edited or [] if e.get("id") and e.get("frame") == current_frame_key
                       and e.get("drawn_as") and e.get("drawn_as") == e.get("own")))
+
+
+SKIPPED_ATTRIBUTES = ("UserStringCount",)   # counts Gordium's own keys, written after the fingerprint
+
+
+def attribute_counts(name):
+    """Whether an ObjectAttributes property goes into an outline's fingerprint: every one Rhino lets the plugin read
+    (review of the editable outlines, round 2: listing them missed print width and colour, material, groups), but the
+    count of user strings, which includes Gordium's own keys (the architect's own user text is fingerprinted apart)."""
+    return bool(name) and name not in SKIPPED_ATTRIBUTES
+
+
+def attribute_text(value):
+    """An attribute's value as stable text for the fingerprint (a number, a flag, a colour, a plane...)."""
+    if isinstance(value, float):
+        return repr(round(value, 9))
+    return str(value)
+
+
+def kept_on_clear(stored_key, drawn_as, own_id, points, attributes):
+    """Whether a clear or redraw keeps an object on the context layers (it is the architect's): any outline that isn't
+    exactly the one Gordium drew. A copy (pasted in place too: same points, same attributes) is never the outline
+    itself, its own id isn't the one it was drawn as; an edited outline no longer matches its fingerprint. Only
+    Gordium's own untouched outlines, and its notes (no fingerprint), are deleted (Ben, 2026-10-21; review round 2)."""
+    if not stored_key:
+        return False
+    return not drawn_as or drawn_as != own_id or is_edited(stored_key, points, attributes)
 
 
 def skip_edited(objects, edited_ids):
