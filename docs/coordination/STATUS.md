@@ -78,3 +78,9 @@ PUSHED (each: full suite + 7 CI steps green; review loop clean where code change
 IN PROGRESS: #21 drafting-stage1 2a27101 and #24 r2-hand 3892d20 carries (suites running). demo-dryrun dfac7ab built (rhino-ui, term-index, measurement-2, start-box-lookup+site-lookup, answer-keys, context-map, stress-tests c3b2038; generated files current; full suite running) → demo commit with DEMO.md (2026-10-22), parent = old demo (fast-forward).
 RHINO (local side): RHINO_QUEUE 7 (#23 116aa34), 8 (#15 pass2 at c37738a), plus #19 R-2a box re-run at aa18f7c, plus demo smoke (item 6) at the new demo head before Ben tells cofounders to pull.
 For Ben: see the PR comments on #18, #19, #15 (flagged UX/zoning points, not decided).
+
+## 2026-10-22 ~17:00 UTC — cloud coordinator: SECOND DEMO UPDATE BUILT
+- demo = 4c07e6e (fast-forward from dfe78d1): tree = demo-dryrun-2026-10-22 dfac7ab (rhino-ui c37738a, term-index 74ea32b, measurement-2 0668da2, start-box-lookup aa18f7c + site-lookup 379d258, answer-keys 9d858ab, context-map 116aa34, stress-tests c3b2038) + DEMO.md (2026-10-22: what's new, no pip step, known limits). Full suite on the tree 1928 passed, 7 CI steps all passed; generated files current. AI zones off (#21 not in demo).
+- NOT yet smoke-tested in Rhino: RHINO_QUEUE 9 (local side), then Ben tells cofounders to pull.
+- #22 stress-tests c3b2038 PUSHED (F15 now fixed by #15's ground model: xfail → plain test). 
+- In progress: #21 carry 0638a6f (round 13 fixed: zone gaps in Ben's words with specifics kept in the report; chart units cite "Chart p.N") → round 14 + suite; #24 r2-hand carry 3892d20 (suite green) → round 9.
