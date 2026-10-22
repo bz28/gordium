@@ -16,7 +16,7 @@ from .read_3dm import read_site
 FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot_surveyed", "street_line", "corner_lot",
                "grade_elevation", "ground_is_flat", "main_building", "stories", "sleeping_rooms", "parking_spaces",
                "grade_points", "grade_from", "grade_is", "address_street_line", "accessory_buildings", "accessory_frame",
-               "eaves_confirmed", "ground_assumed", "plan_north_deg"}
+               "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
 
 
@@ -69,6 +69,9 @@ def fact_problems(facts: dict) -> list[str]:
     listed = facts.get("accessory_buildings")
     if listed is not None and not (isinstance(listed, list) and all(isinstance(i, str) for i in listed)):
         problems.append("accessory_buildings must be a list of object ids (the solids that are accessory buildings)")
+    # street_ids (the street each street line is on) is never refused here: names that don't match the lines one
+    # for one are set aside by the measuring, which says so (stop street_names_stale); refusing them made the check
+    # fail and saved facts unreadable (review round 7, P1)
     return problems
 
 

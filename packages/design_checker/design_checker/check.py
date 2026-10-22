@@ -394,6 +394,97 @@ def row_verdict(rule: dict, measured: dict, allowed: dict, facts: dict | None = 
     return present.COMPLIES if got == {"pass"} and not open_ else present.REVIEW
 
 
+def _changed(measured: dict, changes: dict) -> dict:
+    """The measurements with each named one changed by its amount (its value and every reading of it): the design
+    as a "To comply" would leave it."""
+    out = dict(measured)
+    for m, d in changes.items():
+        rec = dict(measured.get(m) or {})
+        if isinstance(rec.get("value"), (int, float)):
+            rec["value"] = rec["value"] + d
+        rec["readings"] = [dict(r, value=r["value"] + d) if isinstance(r.get("value"), (int, float)) else r
+                           for r in rec.get("readings") or []]
+        out[m] = rec
+    return out
+
+
+def _raised_by(rules: list, values: dict) -> dict:
+    """measure -> [(rule, comparison)]: the yards a rule with several ways to comply raises as the design stands
+    (`values`): its first way not met, another way met, that way's comparison on the yard (the height bonus), as
+    present._raise_yards shows them on the panel."""
+    out = {}
+    for rule in rules:
+        body = formula.parse(rule["check"]).body if rule.get("check") else None
+        if not (isinstance(body, ast.BoolOp) and isinstance(body.op, ast.Or)):
+            continue
+        if present._evaluate(ast.unparse(body.values[0]), values) is not False:
+            continue
+        for alt in body.values[1:]:
+            if present._evaluate(ast.unparse(alt), values) is not True:
+                continue
+            for c in [alt] if isinstance(alt, ast.Compare) else getattr(alt, "values", []):
+                if isinstance(c, ast.Compare) and isinstance(c.left, ast.Name) and c.left.id in present.YARD_MEASURES:
+                    out.setdefault(c.left.id, []).append((rule, ast.unparse(c)))
+            break
+    return out
+
+
+def confirm_advice(items: list[dict], by_id: dict, measured: dict, allowed: dict, facts: dict,
+                   site: dict | None = None) -> None:
+    """Every "To comply" is the checker's to confirm. Each piece (each way, each "…if it stays that tall" clause) is
+    applied to the measurements and every row decided again by row_verdict, a yard with any raise the height bonus
+    then puts on it, as the panel shows it: the piece is kept only if its row then complies, every rule it answers
+    to complies (a clause: the whole height rule), and no other row is worse than it is now (review round 4: a move
+    re-checked against its own row and its opposite yard alone newly failed side yards on a narrowing lot, and a
+    raised rear yard; the "if it stays tall" figure, other raised yards). Pieces only ever change one measurement,
+    one wall pulled back, so the re-decision is exact. Nothing left: no hint. A "To comply" with no change the
+    checker can try is dropped (the architect's review, pass 2; round 2, R1: 106's rear yard told to move)."""
+    rules = [by_id[i["rule"]] for i in items if by_id.get(i.get("rule"))]
+    rules = list({r["id"]: r for r in rules}.values())
+
+    def statuses(changes):
+        changed = _changed(measured, changes)
+        raised = _raised_by(rules, {k: m.get("value") for k, m in changed.items()})
+        out = {}
+        for it in items:
+            rule = by_id.get(it.get("rule"))
+            if rule is None:
+                continue
+            m = it.get("measure")
+            st = row_verdict(rule, changed, allowed, facts, check=side_checks(rule).get(m))
+            for r, e in raised.get(m) or []:
+                got = row_verdict(r, changed, allowed, facts, check=e)
+                st = got if present.RANK[got] < present.RANK[st] else st
+            out[it["id"]] = st
+        return out
+
+    before = None
+    for i in items:
+        advice = i.pop("_advice", None)
+        if not (i.get("hint") or "").startswith("To comply"):
+            continue
+        if advice is None or by_id.get(i.get("rule")) is None:
+            i["hint"] = None
+            continue
+        if advice.get("crossing"):       # a building partly off the lot: "move it back onto the lot" is the one
+            continue                     # advice, a fact no measured change can simulate (kept as said: PR 18)
+        before = before or statuses({})
+
+        def holds(part):
+            if not part["changes"]:
+                return False
+            after = statuses(part["changes"])
+            changed = _changed(measured, part["changes"])
+            return after.get(i["id"]) == present.COMPLIES \
+                and all(row_verdict(by_id[r], changed, allowed, facts, check=e) == present.COMPLIES
+                        for r, e in part.get("also") or [] if r in by_id) \
+                and all(present.RANK[after[k]] >= present.RANK[v] for k, v in before.items() if k in after)
+
+        ways = [w for w in advice["ways"] if holds(w)]
+        clauses = [c for c in advice.get("clauses") or [] if holds(c)]
+        i["hint"] = present.advice_text(dict(advice, ways=ways, clauses=clauses))
+
+
 def side_lines(site: dict, facts: dict) -> list[str] | None:
     """The true compass names of the lot's two side lines, each from the lot's middle to the line: what a side yard
     is called when it couldn't be measured. Only when the measuring itself knows which lines are sides: the lot not
@@ -662,6 +753,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
     extras = {**(extras or {}), "side_lines": side_lines(site, facts)}   # compass names when a side isn't measured
     v = present.view(rows, waiting, by_id, measured, facts, extras)
+    confirm_advice(v["items"], by_id, measured, allowed, facts, site)   # each "To comply" the checker's, or none
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
@@ -991,13 +1083,20 @@ def sample_site() -> dict:
     outline = load(SAMPLE_OUTLINE)
     facts = {**load_facts(SAMPLE / "spreadsheet_design_model_facts.yaml"), "lot_surveyed": False,
              "street_line": outline["street_line"], "corner_lot": bool(outline.get("corner_lot")),
-             "plan_north_deg": outline["frame"]["rotation_deg"]}     # the plan's turn from true north: compass names
+             "plan_north_deg": outline["frame"]["rotation_deg"],     # the plan's turn from true north: compass names
+             # each street line's street, as the lookup found it: one street (Ithaca Rd), however it curves
+             "street_ids": [" ".join(w.capitalize() for w in str(outline.get("street") or "").split()) or None]
+             * len(outline["street_line"])}
     keep = {"jurisdiction", "zone", "use", "street_line", "corner_lot", "ground_is_flat", "grade_elevation",
-            "lot_surveyed", "plan_north_deg"}
+            "lot_surveyed", "plan_north_deg", "street_ids"}
     return {"address": "106 Ithaca Rd, Ithaca, NY", "lot": [list(p) for p in outline["ring"]],
             "lot_name": "Lot · 106 Ithaca Rd · from the State tax map (parcel " + outline["source"]["print_key"]
                         + "), each line ±2'-0\", not a survey",
             "frame": outline["frame"],
+            # the street its street line is on, as the lookup found it on the State tax map ("ITHACA RD"): the
+            # box's, like a looked-up street (not a checker fact)
+            "street_name": " ".join(w.capitalize() for w in str(outline.get("street") or "").split()) or None,
+            "street_source": "the State tax map (the sample's lookup)",
             "facts": {k: v for k, v in facts.items() if k in keep}}
 
 

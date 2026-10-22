@@ -70,6 +70,22 @@ def test_a_building_crossing_the_street_line_does_not_comply_in_front():
     assert front["status"] == present.FAILS and "crosses the street lot line" in front["reason"]
 
 
+def test_a_crossing_building_is_told_only_to_move_back_onto_the_lot_and_the_checker_keeps_it():
+    """PR 18 with the arch-fixes-2 batch (#15): a building partly off the lot fails whatever else, and its one advice
+    is "To comply: move it back onto the lot." Every row of a rule the crossing fails shows that advice and no
+    other (never the yard's own "keep every part … at least" figure, which settle would otherwise work out from the
+    negative margin), and check.confirm_advice keeps it (no measured change can simulate it; a dropped hint would
+    leave the architect with no way out). Both the side line (yard rows) and the street line (front yard)."""
+    for res, rule in ((run(floors(50, 30, 65, 70, 2)), "R-1b.side_yards"),
+                      (run(floors(15, -5, 45, 30, 2)), "R-1b.front_yard")):
+        crossing = [i for i in rows(res, rule) if "crosses" in (i["reason"] or "")]
+        assert crossing, rows(res, rule)
+        for i in crossing:
+            assert i["status"] == present.FAILS
+            assert i["hint"] == "To comply: move it back onto the lot.", i["hint"]
+        assert not any("_advice" in i for i in res["view"]["items"])      # popped by confirm_advice
+
+
 def test_a_building_wholly_off_the_lot_still_waits():
     """Wholly outside (no part on the lot): it can't be measured against the lot: needs review, as before."""
     res = run([prism(rect(70, 30, 90, 70), 0, 20, "house")])
