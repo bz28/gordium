@@ -201,12 +201,15 @@ def test_F7_a_side_eave_gable_names_the_same_overhangs_whichever_way_the_outline
 F8_CASE = ("jog", [{"op": "floor_wing", "heights": [7.5], "face": 0, "depth": 8.5, "below": 0.0, "typed": "none"}])
 
 
-def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_never_complies():
+def test_F8_a_7_ft_6_plain_wing_with_nothing_typed_is_counted_from_the_drawing():
     """The jog lot's starting house (3 floor blocks) with a plain solid wing 7'-6" tall joined to its east wall,
     nothing typed. A plain part 7 ft or taller (NYS R305.1, #14's one stories definition) may hold a story the
-    drawing doesn't show: the count is open, never complies (it did with the old 8 ft line)."""
-    got, _ = _check(generate.build(*F8_CASE)[0])
-    assert got["R-1b.stories"] != COMPLIES
+    drawing doesn't show (the old 8 ft line missed that). Read from the drawing (term-index a7557f7): 7'-6" holds
+    at most 1 story at 7 ft a story, beside the house's 3 floor blocks, so the building has 3 stories whatever the
+    wing holds: the one count the drawing allows, said with its reason."""
+    d = generate.build(*F8_CASE)[0]
+    m = harness.gordium(d)["measurements"]["stories"]
+    assert m["value"] == 3 and "could hold up to 1 story" in m["how"], m
 
 
 F9_CASE = ("sloped", [{"op": "move_floor", "k": 0, "dx": 0.0, "dy": -5.75}, {"op": "rotate", "deg": -0.9},

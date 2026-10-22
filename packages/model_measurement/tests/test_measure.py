@@ -1053,8 +1053,11 @@ def _drawing(rnd):
         x = rnd.choice([7, 17.1, 17.0])                    # over the roof, just past its edge, at its edge
         dz = rnd.choice([0.05, 0.5, 3])
         blocks.append(box(x, 30, x + 6, 40, top + dz, top + dz + 7, id="room"))
+        # (#18) past the first stack's edge, with a second stack there, the room is over or inside that stack (its
+        # top may meet one of its blocks, which then stands on it): not known to be raised, so not asserted
+        over_next = x >= 17 and any(s["ids"] and s["ids"][0].startswith("s1b") for s in stacks)
         stacks.append({"ids": ["room"], "countable": False, "floors": 0, "tall": True, "below": False,
-                       "blocks": 0, "raised": True, "height": 7})
+                       "blocks": 0, "raised": not over_next, "height": 7})
     if rnd.random() < 0.2:
         rnd.choice(blocks)["id"] = rnd.choice(blocks)["id"]
     pick = rnd.choice([None, "stale"] + [b["id"] for b in blocks])
@@ -1082,7 +1085,7 @@ def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
             assert main is not None, (seed, stacks, pick, m)       # no main building: never a value
             assert not any(s.get("gap") for s in stacks), (seed, stacks, m)   # floors over a gap: a question
             assert not any(s.get("raised") for s in stacks), (seed, stacks, m)  # a raised plain part: a question
-            for members in ([main], stacks):    # each candidate building: the main one alone, and with every part
+            for members in (stacks,):           # (#18) one candidate building: every part, all touching
                 assert not any(s["below"] for s in members), (seed, stacks, m)     # a basement or cellar: asks
                 counted = [s["floors"] for s in members if s["countable"]]
                 could = [math.floor((s["height"] + 0.01) / 7) for s in members if s["tall"] and not s["countable"]]
@@ -1271,14 +1274,15 @@ def test_a_plain_stacked_garage_beside_the_floor_blocks_is_a_plain_part():
     """Review round 17, P2: three 10 ft floor blocks and a garage drawn as two plain solids stacked (9 ft each)
     touching them. The garage is a plain part: its two blocks may be stories, but the count typed is the whole
     building's, never one that must equal the garage's blocks. Typed 3: 3, as stated (at least the 3 floors and
-    the 2 blocks). Nothing typed: the plain-part reason (not 'one solid with no floors'). Typed 1: below both:
-    a question."""
+    the 2 blocks). Nothing typed: read from the drawing (term-index): the 18 ft garage could hold up to 2 stories
+    (7 ft a story), beside 3 floor blocks, so the drawing allows one count, 3 (never 'one solid with no floors').
+    Typed 1: below both: a question."""
     floors_ = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"floor {i + 1}") for i in range(3)]
     garage = [box(35, 25, 45, 45, 0, 9, id="garage 1"), box(35, 25, 45, 45, 9, 18, id="garage 2")]
     got = {t: measure(site(RECT, *floors_, *garage), {**FACTS, "stories": t})["stories"] for t in (3, None, 1)}
     assert got[3]["value"] == 3 and "for the whole building" in got[3]["how"], got[3]
-    assert got[None]["value"] is None and "isn't drawn as floor blocks" in got[None]["reason"], got[None]
-    assert "one solid with no floors" not in got[None]["reason"]
+    assert got[None]["value"] == 3 and "could hold up to 2 stories" in got[None]["how"], got[None]
+    assert "one solid with no floors" not in got[None]["how"]
     assert got[1]["value"] is None and "fewer than" in got[1]["reason"], got[1]
 
 
