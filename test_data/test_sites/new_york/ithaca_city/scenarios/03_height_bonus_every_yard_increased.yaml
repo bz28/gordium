@@ -1,0 +1,36 @@
+title: 37 ft house with every yard increased 2 ft (§325-16C)
+what: >-
+  A three-story house 37 ft tall: 2 ft over the 35 ft limit, inside the 10% bonus (at most 38'-6"), with each
+  required yard increased by the same 2 ft: front 27, sides 12 and 12, rear 32. §325-16C allows it.
+lot: {points: [[0, 0], [60, 0], [60, 120], [0, 120]], surveyed: true}
+buildings:
+  - id: house
+    outline: [[12, 27], [48, 27], [48, 88], [38, 88], [38, 47], [12, 47]]
+    base: 0
+    floors: [12.3333, 12.3333, 12.3334]
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: {status: complies, working: "7,200 sf ≥ 6,000 sf", cites: "§325-8 chart, R-1b, Lot area"}
+  R-1b.lot_width_one_family_detached: {status: complies, working: "60 ft ≥ 50 ft", cites: "§325-8 chart, R-1b, Lot width"}
+  R-1b.stories: {status: complies, working: "3 stories ≤ 3 (the 3-story limit has no bonus; 3 is allowed)", cites: "§325-8 chart, R-1b, Number of stories; §325-16C(2)"}
+  R-1b.height:
+    status: complies
+    working: >-
+      37 ft > 35 ft, so the §325-16C bonus is needed. Extra height 2 ft ≤ 10% × 35 = 3.5 ft (≤ 38'-6"). Each
+      required yard + 2 ft: front 27 ≥ 25 + 2 ✓; side 12 ≥ 10 + 2 ✓ (both); rear 120 − 88 = 32 ≥ 30 + 2 ✓.
+    cites: "§325-16C(1) and (3) (p.47); §325-8 chart, R-1b, Height in feet: 35 ft, note 10"
+    note: >-
+      The current rulebook writes the limit and its bonus as one rule (R-1b.height), so a design that uses the
+      bonus complies. The known "relaxes" gap (docs/methods.md, AI drafting) is that the AI-drafted rulebooks write
+      them as two rules that must both pass, which would give a false "does not comply" here; that rulebook isn't
+      the one the checker uses. Our reading of §325-16C(1) (each yard ≥ its minimum + the extra height, both
+      side yards included) is an open question for the architects (R-1b.height open_questions).
+  R-1b.lot_coverage:
+    status: complies
+    working: "36 × 20 + 10 × 41 = 720 + 410 = 1,130 sf ≤ 1,800 sf (15.69%)"
+    cites: "§325-8 chart, R-1b, Percent of lot area"
+  R-1b.front_yard: {status: complies, working: "27 ft ≥ 25 ft", cites: "§325-8 chart, R-1b, Front"}
+  R-1b.side_yards: {status: complies, working: "12 and 12 ft ≥ 10 ft", cites: "§325-8 chart, R-1b, Side"}
+  R-1b.rear_yard: {status: complies, working: "32 ft ≥ 30 ft", cites: "§325-8 chart, R-1b, Rear, note 16"}
+plan:
+  encroach: 0

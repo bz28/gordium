@@ -1,0 +1,117 @@
+{
+ "what": "prompt A's final run (runs/prompt_a_final_...jsonl) replayed through the chart-row coverage check added by the cleanup audit (no API calls): district cells that state something and no saved rule cites",
+ "rules_saved": 202,
+ "cells_for_a_person": 22,
+ "cells": [
+  {
+   "unit": "chart-p14-residential",
+   "rule": "R-3a.chart-p14-residential",
+   "why": "chart page 14, 'Residential', row 'Dormitory': the R-3A cell '1 space per 4 persons housed' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p14-residential",
+   "rule": "R-3b.chart-p14-residential",
+   "why": "chart page 14, 'Residential', row 'Dormitory': the R-3B cell '1 space per 4 persons housed' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p14-residential",
+   "rule": "RU.chart-p14-residential",
+   "why": "chart page 14, 'Residential', row 'Dormitory': the RU cell '1 space per 4 persons housed' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-2c.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, detached, zero lot line': the R-2C cell '2,500 sf [fn4]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-2c.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, by conversion': the R-2C cell '1,500 sf [fn6]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3a.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, by conversion': the R-3A cell '7,000 sf [fn7]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3aa.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, by conversion': the R-3AA cell '7,000 sf [fn7]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3b.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, by conversion': the R-3B cell '4,000 sf [fn8]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "RU.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, by conversion': the RU cell '16,500 sf [fn9]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-2c.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, new construction': the R-2C cell '1,500 sf [fn6]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3a.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, new construction': the R-3A cell '6,000 sf [fn7]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3aa.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, new construction': the R-3AA cell '6,000 sf [fn7]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3b.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, new construction': the R-3B cell '3,500 sf [fn8]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "RU.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'One-family dwelling, attached, new construction': the RU cell '16,500 sf [fn9]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3a.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'Multiple family dwelling, by conversion': the R-3A cell '7,000 sf [fn7]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3aa.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'Multiple family dwelling, by conversion': the R-3AA cell '7,000 sf [fn7]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3b.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'Multiple family dwelling, by conversion': the R-3B cell '4,000 sf [fn8]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "RU.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'Multiple family dwelling, by conversion': the RU cell '16,500 sf [fn9]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3a.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'Multiple family dwelling, new construction': the R-3A cell '6,000 sf [fn7]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3aa.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'Multiple family dwelling, new construction': the R-3AA cell '6,000 sf [fn7]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "R-3b.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'Multiple family dwelling, new construction': the R-3B cell '3,500 sf [fn8]' has no drafted rule (a person checks the requirement it sets)"
+  },
+  {
+   "unit": "chart-p3-minimum_lot_size",
+   "rule": "RU.chart-p3-minimum_lot_size",
+   "why": "chart page 3, 'Minimum Lot Size [fn3]', row 'Multiple family dwelling, new construction': the RU cell '16,500 sf [fn9]' has no drafted rule (a person checks the requirement it sets)"
+  }
+ ]
+}
