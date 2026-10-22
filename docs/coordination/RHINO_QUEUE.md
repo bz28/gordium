@@ -1,0 +1,16 @@
+# Rhino queue (run on Ben's Mac only; one job in Rhino at a time)
+
+Each entry: branch + commit, the script, what must pass. Newest at the bottom.
+
+1. arch-fixes-2 (after the corner root fix): `apps/rhino_plugin/tests/pass2_in_rhino.py` — all claims, incl.
+   corner answer No drops both streets; screenshots to docs/evidence/pr-15-mvp/pass2/.
+2. Windows console fix: cannot be run on Mac; ask Ben's cofounders to confirm no console window appears and only
+   one design_checker process runs (Task Manager).
+3. start-box-lookup (#19) after round-2 fixes: R-2a lookup (fixture) → pick R-1b → tick → Draw enabled; label
+   refreshes; reopen the file next day shows no "checked today".
+4. context-map (#23) after round-2 fixes: `apps/rhino_plugin/tests/context_in_rhino.py` — parent unlocked,
+   footprint selectable, dragged/lifted kept, solid on Buildings layer → needs review row, saved file keeps
+   footprints with "dated 2014".
+5. relookup: sample → Look up preview (model unchanged) → Draw to 96 Ithaca Rd (lot + house redrawn) → Undo.
+6. demo (second update): smoke — GordiumStart empty file → sample → Draw → move house 5 ft → front yard fails →
+   Zoning report opens on Check.
