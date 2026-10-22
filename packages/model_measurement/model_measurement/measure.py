@@ -184,7 +184,9 @@ def _projection(building: dict):
 
 def _at_ground(building: dict, buildings: list[dict], plan_level: float, points, grade_known: bool) -> object:
     """The solid read at the ground, decided per SOLID (#15 rounds 7-8). Resting on the ground: cut at the higher
-    of the grade plane and its own bottom (a slab above grade on a slope is never cut below itself). Raised off it
+    of its grade (from its own spot grades when it has any, ground_for; else the grade plane) and its own bottom (a
+    slab above grade on a slope is never cut below itself; a shed on its own lower ground is cut at its ground,
+    review round 9). Raised off it
     (a balcony): left out (Polygon()), so it counts only from above. Whether it rests: from ITS OWN ground
     (ground_for: the spot grades at its walls, never another building's) when there is any; else from the grade
     when the ground is known (flat); else, the ground not known, never from ground data but from the drawing
@@ -194,13 +196,15 @@ def _at_ground(building: dict, buildings: list[dict], plan_level: float, points,
     bottom = _bottom(building)
     others = [b for b in buildings if b is not building]
     ground = ground_for([building], points, others)[0] if points else None
+    level = plan_level
     if ground:
         rests = bottom <= max(ground) + TOL
+        level = sum(ground) / len(ground)   # its own grade (its walls' ground), never another building's (round 9)
     elif grade_known:
         rests = bottom <= plan_level + TOL
     else:
         rests = not _raised_by_shape(building, buildings)
-    return _section(building, max(plan_level, bottom) + TOL) if rests else Polygon()
+    return _section(building, max(level, bottom) + TOL) if rests else Polygon()
 
 
 def _raised_by_shape(building: dict, buildings: list[dict]) -> bool:
@@ -824,13 +828,16 @@ def _fits_in_the_first_story(part: dict, grade) -> bool:
             and _rise(part) < STORY_ROOM - TOL)
 
 
-def _ground_against(solids: list[dict], grade, off_check: bool = True) -> str | None:
+def _ground_against(solids: list[dict], grade, off_check: bool = True, points=None, pool=None) -> str | None:
     """What is wrong with this ground level against these solids, or None: the ground must meet them, taken
     together (stacked floors, a basement or a tower drawn as its own solid sit above or below it), at or above their
     lowest point and below their top; and a solid wholly under the ground is a basement only if it is joined
     directly under the building. Checked for the whole site, and again for each candidate building at its own
     grade (_candidate_grades). With spot grades, whether the ground meets them is _floating's, at the footprint
-    (off_check False): one test, whatever the spot grades' positions."""
+    (off_check False): one test, whatever the spot grades' positions; and whether a solid is wholly under the
+    ground is read on ITS OWN ground (ground_for, the one ground model: a shed on lower ground, its own spot grades
+    at its walls, is never "under" the house's grade; #15 review round 9). `pool`: every building on the lot, for
+    which spot grades are another building's (default: these solids)."""
     zs = [p[2] for b in solids for f in b.get("faces") or [] for p in f["points"]]
     lo, hi = (min(zs), max(zs)) if zs else (None, None)
     off = (lo, hi) if off_check and zs and grade is not None and (
@@ -844,7 +851,13 @@ def _ground_against(solids: list[dict], grade, off_check: bool = True) -> str | 
         spans = {b["id"]: (min(p[2] for f in b["faces"] for p in f["points"]),
                            max(p[2] for f in b["faces"] for p in f["points"])) for b in solids if b.get("faces")}
         plans = {b["id"]: _projection(b) for b in solids if b["id"] in spans}
-        joined = {i for i, (lo_, hi_) in spans.items() if hi_ > grade + TOL or hi_ - lo_ <= TOL}   # above, or a slab
+        level = {}                      # each solid's own ground (its lowest corner), else the grade given
+        for b in solids:
+            if points and b["id"] in spans:
+                ground, _ = ground_for([b], points, [x for x in (pool or solids) if x is not b])
+                level[b["id"]] = min(ground) if ground else grade
+        at = lambda i: level.get(i, grade)  # noqa: E731
+        joined = {i for i, (lo_, hi_) in spans.items() if hi_ > at(i) + TOL or hi_ - lo_ <= TOL}   # above, or a slab
         waiting = [i for i in spans if i not in joined]
         while True:                     # from the top down: a sub-basement joins under a joined basement
             found = [i for i in waiting
@@ -854,11 +867,11 @@ def _ground_against(solids: list[dict], grade, off_check: bool = True) -> str | 
                 break
             joined |= set(found)
             waiting = [i for i in waiting if i not in found]
-        buried = spans[waiting[0]] if waiting else None
+        buried = (at(waiting[0]), *spans[waiting[0]]) if waiting else None
     if off:
         return stop("ground_off_building", ground=_r(grade), bottom=_r(off[0]), top=_r(off[1]))
     if buried:
-        return stop("buried_solid", ground=_r(grade), bottom=_r(buried[0]), top=_r(buried[1]))
+        return stop("buried_solid", ground=_r(buried[0]), bottom=_r(buried[1]), top=_r(buried[2]))
     return None
 
 
@@ -881,7 +894,8 @@ def _candidate_grades(assemblies, buildings: list[dict], facts: dict, grade, why
             why = stop("grade_with_others") if why else None
         spots = facts.get("grade_points")
         out.append(dict(c, grade=g, why=why or (_meets_ground(members, spots, buildings) if spots else None) or
-                        (_ground_against(members, g, off_check=not spots) if g is not None else None)))
+                        (_ground_against(members, g, off_check=not spots, points=spots, pool=buildings)
+                         if g is not None else None)))
     return out
 
 
@@ -985,7 +999,8 @@ def envelope_grade(buildings: list[dict], facts: dict) -> tuple:
     stacked = _stacks(buildings)
     # the measuring's own ground test (the same two functions): meeting the ground, and no solid buried under it
     why = _meets_ground(stacked, facts["grade_points"], stacked) or \
-        (_ground_against(buildings, grade, off_check=False) if buildings and grade is not None else None)
+        (_ground_against(buildings, grade, off_check=False, points=facts["grade_points"])
+         if buildings and grade is not None else None)
     return (None, why) if why else (grade, None)
 
 
@@ -1245,7 +1260,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # positions (stress F15: the grade plane's average and the footprint judged it differently); else the level
     stacked = _stacks(buildings) if spots else []
     ground_problem = (_meets_ground(stacked, spots, stacked) if spots else None) or \
-        (_ground_against(buildings, grade, off_check=not spots) if grade is not None else None)
+        (_ground_against(buildings, grade, off_check=not spots, points=spots) if grade is not None else None)
     why_grade = (why_spots if why_spots else stop("no_ground") if grade is None else
                  ground_problem if ground_problem else
                  None if facts.get("grade_points") else

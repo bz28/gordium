@@ -1499,3 +1499,25 @@ def test_every_stories_refusal_carries_its_code():
         r = measure(site(RECT, *solids), {**FACTS, "stories": count})["stories"]
         assert r["value"] is None and r.get("stories_refused") == code, (code, r)
     assert "stories_refused" not in measure(site(RECT, plain), {**FACTS, "stories": 3})["stories"]
+
+
+def test_a_short_shed_on_its_own_lower_ground_is_never_buried_under_the_houses_grade():
+    """#15 review round 9 (P2): "wholly under the ground" still judged every solid against the main house's grade
+    plane. A 5 ft shed on ground 6 ft lower, with its own spot grades at its walls, was "buried" (-6 to -1 under 0):
+    the building area, the yards, the height and the envelope all stopped, in the wrong words. It is read on its own
+    ground (ground_for). A solid with no spot grade of its own below the house is still refused as buried."""
+    from model_measurement.measure import envelope_grade
+    spots = [[22.5, 39.5, 0], [22.5, 60.5, 0], [9.5, 50, 0], [35.5, 50, 0],               # the house's walls
+             [22.5, 19.5, -6], [14.5, 26, -6], [30.5, 26, -6]]                            # the shed's
+    house, shed = box(10, 40, 35, 60, 0, 30, id="house"), box(15, 20, 30, 32, -6, -1, id="shed")
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "grade_points": spots, "main_building": "house"}
+    m = measure(site(RECT, house, shed), facts)
+    assert not [n for n, r in m.items() if "wholly under the ground" in (r.get("reason") or "")], m["building_area"]
+    assert sorted(r["value"] for r in m["building_area"]["readings"]) == [680.0, 680.0] or \
+        m["building_area"]["value"] == pytest.approx(680.0), m["building_area"]
+    assert envelope_grade([house, shed], facts)[1] is None
+    lost = box(15, 20, 30, 32, -6, -1, id="lost")                   # no spot grade of its own: never measured as if
+    m = measure(site(RECT, house, lost), {**facts, "grade_points": spots[:4]})        # on the ground
+    why = m["building_area"]["reason"] or ""
+    assert m["building_area"]["value"] is None and not m["building_area"]["readings"], m["building_area"]
+    assert "wholly under the ground" in why or "don't show the ground under the building" in why, why
