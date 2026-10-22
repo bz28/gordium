@@ -1153,6 +1153,8 @@ def _extras(doc, facts):
     groups = {i for o in buildings for i in (o.Attributes.GetGroupList() or [])}
     layers = sorted({doc.Layers[o.Attributes.LayerIndex].FullPath for o in buildings})
     left_out = _not_included(doc, _find(doc, facts.get("lot_id") or ""))
+    logic.guard(_note_context_solids, "look for solids on the neighbourhood layers")(
+        doc, _find(doc, facts.get("lot_id") or ""))
     main = _find(doc, facts.get("main_building") or "") if facts.get("main_building") else None
     return {"scope": {"groups": len(groups), "solids": len(buildings), "layer": ", ".join(layers)},
             "main_name": logic.building_name(doc.Layers[main.Attributes.LayerIndex].FullPath, main.Attributes.Name,
@@ -1160,6 +1162,30 @@ def _extras(doc, facts):
             "not_included": left_out, "touching": _touching(doc, left_out, buildings),
             "ground_like": _ground_like(doc, left_out, _find(doc, facts.get("lot_id") or "")),
             "sources": fact_sources(doc)}
+
+
+def _note_context_solids(doc, lot):
+    """A solid on the neighbourhood's layers over the lot (an extruded footprint, a building put there) is never
+    measured: say so (rhino_logic.context_solids_says), once each time the set of them changes (live mode checks
+    after every edit; the same notice isn't repeated)."""
+    if lot is None:
+        return
+    box = lot.Geometry.GetBoundingBox(True)
+    found = []
+    for i in _context_layer_indexes(doc):
+        for o in doc.Objects.FindByLayer(doc.Layers[i]) or []:
+            if type(o.Geometry).__name__ not in logic.SOLID_KINDS:
+                continue
+            c = o.Geometry.GetBoundingBox(True).Center
+            if box.Min.X <= c.X <= box.Max.X and box.Min.Y <= c.Y <= box.Max.Y:
+                found.append((str(o.Id), o.Attributes.Name or type(o.Geometry).__name__))
+    seen = STATE.setdefault("context_solids", {})
+    key = sorted(i for i, _ in found)
+    if seen.get(doc.RuntimeSerialNumber) != key:
+        seen[doc.RuntimeSerialNumber] = key
+        said = logic.context_solids_says([n for _, n in found])
+        if said:
+            say(said)
 
 
 def _touching(doc, ids, buildings):
@@ -2397,7 +2423,8 @@ def gordium_start():
 # is raw: the State's parcels and streets, and Gordium's own frame, north arrow, scale bar and credits); the
 # building footprints (store: none) are only drawn on screen by the overlay, never saved.
 
-CONTEXT_GREYS = {"Parcels": (150, 150, 150), "Streets": (120, 120, 120), "Notes": (110, 110, 110)}
+CONTEXT_GREYS = {"Parcels": (150, 150, 150), "Streets": (120, 120, 120), "Buildings": (135, 135, 135),
+                 "Notes": (110, 110, 110)}
 
 
 def _context_layer(doc, name):
@@ -2414,8 +2441,17 @@ def _context_layer_indexes(doc):
 
 
 def _lock_context(doc, locked):
+    """Unlock every context layer, or lock them again: all but the editable footprints (rhino_logic.context_locked)."""
     for i in _context_layer_indexes(doc):
-        doc.Layers[i].IsLocked = locked
+        doc.Layers[i].IsLocked = bool(locked) and logic.context_locked(doc.Layers[i].FullPath)
+
+
+def _outline_points(geometry):
+    """An outline's points as Rhino holds them (x, y, model units), or None for anything that isn't a polyline."""
+    if not isinstance(geometry, rg.Curve):
+        return None
+    ok, polyline = geometry.TryGetPolyline()
+    return [(q.X, q.Y) for q in polyline] if ok else None
 
 
 def _clear_context(doc, sources=None):
@@ -2444,11 +2480,18 @@ def _clear_context(doc, sources=None):
     for i in indexes:
         for o in list(doc.Objects.FindByLayer(doc.Layers[i]) or []):
             source = o.Attributes.GetUserString(logic.CONTEXT_KEY)
-            if source and (sources is None or source in sources):
+            if not source or (sources is not None and source not in sources):
+                continue
+            if logic.is_edited(o.Attributes.GetUserString(logic.GEOM_KEY), _outline_points(o.Geometry)):
+                attrs = o.Attributes.Duplicate()          # the architect edited it: theirs now, never removed
+                attrs.SetUserString(logic.CONTEXT_KEY, None)
+                attrs.SetUserString(logic.EDITED_KEY, "1")
+                doc.Objects.ModifyAttributes(o, attrs, True)
+            else:
                 doc.Objects.Delete(o, True)
     for i, was in shown:
         doc.Layers[i].IsVisible = was
-        doc.Layers[i].IsLocked = True
+        doc.Layers[i].IsLocked = logic.context_locked(doc.Layers[i].FullPath)
     for k, was_visible, was_locked in parents:
         doc.Layers[k].IsVisible = was_visible
         doc.Layers[k].IsLocked = was_locked
@@ -2457,6 +2500,16 @@ def _clear_context(doc, sources=None):
             STATE.pop("context_guides", None)
         doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)
     STATE["dirty"] = dirty
+
+
+def _edited_ids(doc):
+    """The parcels, street pieces and footprints the architect has edited (kept on the context layers as theirs)."""
+    out = []
+    for i in _context_layer_indexes(doc):
+        for o in doc.Objects.FindByLayer(doc.Layers[i]) or []:
+            if o.Attributes.GetUserString(logic.EDITED_KEY):
+                out.append(o.Attributes.GetUserString(logic.PIECE_KEY) or "")
+    return out
 
 
 def _context_record(doc):
@@ -2527,7 +2580,8 @@ def draw_context(doc, frame):
     _clear_context(doc, sources)           # so the model's "changed since the check" mark is put back after
     _lock_context(doc, False)
     layers = {logic.CONTEXT + "::" + name: _context_layer(doc, name) for name in CONTEXT_GREYS}
-    for o in logic.context_objects(payload):
+    edited = _edited_ids(doc) if sources is not None else []   # around the same lot: the architect's own stay
+    for o in logic.skip_edited(logic.context_objects(payload), edited):
         attrs = Rhino.DocObjects.ObjectAttributes()
         attrs.LayerIndex = layers.get(o["layer"]) if o["layer"] in layers else _layer(doc, o["layer"])
         attrs.Name = o.get("name") or ""
@@ -2538,7 +2592,11 @@ def draw_context(doc, frame):
         elif o["kind"] == "text":          # the sources: wrapped model text from its anchor, turned with the square
             doc.Objects.AddText(_context_text(doc, o, pts[0]), attrs)
         else:
-            doc.Objects.AddCurve(rg.PolylineCurve(pts + [pts[0]] if o["kind"] == "closed" else pts), attrs)
+            curve = rg.PolylineCurve(pts + [pts[0]] if o["kind"] == "closed" else pts)
+            attrs.SetUserString(logic.GEOM_KEY, logic.outline_key(_outline_points(curve)))   # an edit is seen later
+            if o.get("id"):
+                attrs.SetUserString(logic.PIECE_KEY, o["id"])
+            doc.Objects.AddCurve(curve, attrs)
     _lock_context(doc, True)
     STATE["dirty"] = dirty
     _context_visible(doc, _context_on(doc))

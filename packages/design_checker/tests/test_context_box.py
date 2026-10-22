@@ -78,16 +78,79 @@ def test_north_points_where_the_lookup_turned_north():
 
 # ---- what may be kept -----------------------------------------------------------------------------------------
 
-def test_only_storable_sources_become_objects_and_the_footprints_are_guides():
+@pytest.fixture
+def live_footprints(monkeypatch):
+    """The footprints as a source that may not be kept (store: none), as they were until Ben's decision of 2026-10-21
+    (now kept, as editable outlines). The live-only machinery stays for any such source: these tests pin it."""
+    monkeypatch.setitem(ENDPOINTS["state_buildings"], "store", "none")
+
+
+def test_the_footprints_are_kept_as_editable_outlines_on_their_own_layer():
+    """Ben, 2026-10-21: the footprints are always drawn as real outlines (curves, no invented heights) on an
+    unlocked Gordium::Context::Buildings layer, each with its id; none is a guide."""
     payload, _ = context_for()
-    assert payload["counts"] == {"parcels": 229, "streets": 38, "buildings": 212}
+    assert payload["counts"] == {"parcels": 229, "streets": 38, "buildings": 322}
+    feet = [o for o in logic.context_objects(payload) if o["source"] == "state_buildings"]
+    assert len(feet) == 322 and logic.context_guides(payload) == []
+    assert all(o["layer"] == cb.LAYER_OF["buildings"] == logic.CONTEXT + "::Buildings" and o["kind"] == "closed"
+               and o["id"].startswith("footprint-") for o in feet)
+    assert not logic.context_locked(cb.LAYER_OF["buildings"])                  # left unlocked: drag and edit them
+    assert all(logic.context_locked(cb.LAYER_OF[n]) for n in ("parcels", "streets")) and logic.context_locked(cb.NOTES)
+
+
+def test_an_outline_the_architect_edited_is_known_and_never_drawn_twice():
+    """Ben, 2026-10-21: Gordium's redraw or clear removes only outlines it drew that the architect hasn't edited. Each
+    outline carries the fingerprint of its points as drawn: moved or reshaped, it no longer matches."""
+    drawn = [(0.0, 0.0), (30.0, 0.0), (30.0, 40.0), (0.0, 40.0), (0.0, 0.0)]
+    key = logic.outline_key(drawn)
+    assert not logic.is_edited(key, drawn) and not logic.is_edited(key, [(x + 1e-9, y) for x, y in drawn])
+    assert logic.is_edited(key, [(x + 2.0, y) for x, y in drawn])                       # dragged 2 units
+    assert logic.is_edited(key, drawn[:2] + [(30.0, 45.0)] + drawn[3:])                  # one corner moved
+    assert not logic.is_edited(None, [(5.0, 5.0)]) and not logic.is_edited("", drawn)   # not one Gordium drew
+    objects = [{"id": "footprint-1"}, {"id": "footprint-2"}, {"id": ""}, {"name": "North"}]
+    assert logic.skip_edited(objects, ["footprint-2", ""]) == [{"id": "footprint-1"}, {"id": ""}, {"name": "North"}]
+
+
+def test_the_plugin_keeps_an_edited_outline_as_the_architects_and_marks_every_outline():
+    clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_ids(")]
+    edited = clear.index("if logic.is_edited(o.Attributes.GetUserString(logic.GEOM_KEY), _outline_points(o.Geometry)):")
+    assert edited < clear.index("attrs.SetUserString(logic.CONTEXT_KEY, None)") < clear.index("doc.Objects.Delete(o, True)")
+    assert 'attrs.SetUserString(logic.EDITED_KEY, "1")' in clear      # theirs now: no later clear touches it
+    draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
+    assert "edited = _edited_ids(doc) if sources is not None else []" in draw       # around the same lot only
+    assert "attrs.SetUserString(logic.GEOM_KEY, logic.outline_key(_outline_points(curve)))" in draw
+    assert 'attrs.SetUserString(logic.PIECE_KEY, o["id"])' in draw
+    lock = RHINO[RHINO.index("def _lock_context("):RHINO.index("def _outline_points(")]
+    assert "logic.context_locked(doc.Layers[i].FullPath)" in lock
+    assert '"Buildings": (135, 135, 135)' in RHINO
+
+
+def test_a_solid_on_the_neighbourhood_layers_over_the_lot_is_said_never_silently_skipped():
+    """Ben, 2026-10-21: the checker never measures the neighbourhood, so a solid there over the lot (an extruded
+    footprint, a building put on that layer) is said, once each time the set of them changes."""
+    assert logic.context_solids_says([]) is None and logic.context_solids_says(None) is None
+    said = logic.context_solids_says(["Extrusion", "Extrusion", "My house"])
+    assert said.startswith("Not checked: 2 solids on the neighbourhood layers over the lot")
+    assert "Building layer" in said and logic.context_solids_says(["x"]).startswith("Not checked: 1 solid on")
+    assert set(logic.SOLID_KINDS) == {"Brep", "Extrusion", "Mesh", "SubD"}
+    note = RHINO[RHINO.index("def _note_context_solids("):RHINO.index("def _touching(")]
+    assert "if seen.get(doc.RuntimeSerialNumber) != key:" in note and "say(said)" in note
+    extras = RHINO[RHINO.index("def _extras("):RHINO.index("def _note_context_solids(")]
+    assert 'logic.guard(_note_context_solids, "look for solids on the neighbourhood layers")(' in extras
+    for kind in logic.SOLID_KINDS:                                         # and the checker still never measures it
+        assert logic.classify(logic.CONTEXT + "::Buildings", kind) is None
+
+
+def test_only_storable_sources_become_objects_and_the_footprints_are_guides(live_footprints):
+    payload, _ = context_for()
+    assert payload["counts"] == {"parcels": 229, "streets": 38, "buildings": 322}
     sources = {o["source"] for o in logic.context_objects(payload)}
     assert sources == {"state_parcels", "state_streets", "gordium"}
     assert all(ENDPOINTS[s]["store"] == "raw" for s in sources - {"gordium"})
-    assert len(logic.context_guides(payload)) == 212 and not any(o["source"] == "state_buildings" for o in payload["objects"])
+    assert len(logic.context_guides(payload)) == 322 and not any(o["source"] == "state_buildings" for o in payload["objects"])
 
 
-def test_an_object_from_a_live_only_source_is_never_written_whatever_the_payload_says():
+def test_an_object_from_a_live_only_source_is_never_written_whatever_the_payload_says(live_footprints):
     payload, _ = context_for()
     bad = dict(payload, objects=payload["objects"] + [
         {"layer": cb.LAYER_OF["buildings"], "kind": "closed", "points": [[0, 0], [1, 0], [1, 1]], "source": "state_buildings"},
@@ -141,7 +204,7 @@ def write_like_the_plugin(path, lookup_payload, payload):
     return path
 
 
-def test_the_saved_file_holds_nothing_from_a_live_only_source(tmp_path):
+def test_the_saved_file_holds_nothing_from_a_live_only_source(tmp_path, live_footprints):
     """Read back from the .3dm: every object's source and user text, every point, every document string. Nothing of
     the footprints (store: none) is in it: no footprint corner, no footprint date, no object drawn from them."""
     payload, p = context_for()
@@ -154,7 +217,7 @@ def test_the_saved_file_holds_nothing_from_a_live_only_source(tmp_path):
     for o in m.Objects:
         a = o.Attributes
         text = json.dumps(list(a.GetUserStrings() or ())) + (a.Name or "")
-        assert T.STAND_IN_BUILDINGS_DATE not in text
+        assert "footprints dated" not in text
         if logic.on_layer(names[a.LayerIndex], logic.CONTEXT):
             seen += 1
             assert a.GetUserString(logic.CONTEXT_KEY) in raw | {"gordium"}, a.GetUserString(logic.CONTEXT_KEY)
@@ -164,12 +227,12 @@ def test_the_saved_file_holds_nothing_from_a_live_only_source(tmp_path):
             assert pts is not None, type(g).__name__
             assert not ({(round(x, 2), round(y, 2)) for x, y in pts} & footprint_corners)
             if isinstance(g, r.TextDot):
-                assert T.STAND_IN_BUILDINGS_DATE not in g.Text
+                assert "footprints dated" not in g.Text
     assert seen == len(logic.context_objects(payload)) == 229 + 38 + 6
     strings = [m.Strings[i] for i in range(len(m.Strings))]
     assert [k for k, _ in strings] == ["Gordium\\" + logic.CONTEXT_ENTRY]
     blob = json.dumps(strings)
-    assert T.STAND_IN_BUILDINGS_DATE not in blob and '"ring"' not in blob and '"path"' not in blob
+    assert "footprints dated" not in blob and '"ring"' not in blob and '"path"' not in blob
     numbers = {round(float(v), 2) for v in re.findall(r"-?\d+\.\d+", blob)}
     assert footprint_corners and not any(x in numbers and y in numbers for x, y in footprint_corners)
 
@@ -284,17 +347,27 @@ def test_what_a_draw_does_to_the_neighbourhood():
     assert rec["frame"] == p["writes"]["frame"] and rec["fingerprint"] == payload["snapshot"]["fingerprint"]
 
 
-def test_the_footprints_are_credited_on_the_drawing_and_their_date_said_on_screen_only():
+def test_live_only_footprints_are_credited_on_the_drawing_and_their_date_said_on_screen_only(live_footprints):
     """Architect review of PR #23: the panel's line listed agencies and storage rules. Who made the footprints is on
-    the drawing's Sources note (Gordium's own attribution text, endpoints.yaml: it may be kept); their date is said in
-    the panel's short line only, never in the file (it is the live source's data: store none)."""
+    the drawing's Sources note (Gordium's own attribution text, endpoints.yaml: it may be kept); a live-only source's
+    date is said in the panel's short line only, never in the file (it is that source's data: store none)."""
     payload, _ = context_for()
     note = " ".join(next(o for o in payload["objects"] if o["name"] == "Sources")["text"].split("\n"))
     assert "%s: %s" % (ENDPOINTS["state_buildings"]["attribution"], logic.LIVE_ONLY) in note
-    assert T.STAND_IN_BUILDINGS_DATE not in note                         # the date never reaches the saved note
+    assert "footprints dated" not in note and "2014" not in note           # the date never reaches the saved note
     said = logic.context_says(payload)
     assert "NYSERDA" not in said and "Geospatial" not in said and "kept in this file" not in said
-    assert "(footprints from %s, shown only)" % T.STAND_IN_BUILDINGS_DATE in said
+    assert "(footprints from 2014, shown only)" in said
+
+
+def test_kept_footprints_carry_their_date_on_the_drawing():
+    """Kept since Ben's decision: who made them and their date are on the Sources note; the line says the date
+    without "shown only"."""
+    payload, _ = context_for()
+    note = " ".join(next(o for o in payload["objects"] if o["name"] == "Sources")["text"].split("\n"))
+    assert ENDPOINTS["state_buildings"]["attribution"] in note and "footprints dated 2014" in note
+    assert logic.LIVE_ONLY not in note
+    assert logic.context_says(payload).endswith("322 buildings (footprints from 2014).")
 
 
 def test_clearing_reaches_hidden_and_locked_context_layers_and_only_gordiums_objects():
@@ -303,8 +376,9 @@ def test_clearing_reaches_hidden_and_locked_context_layers_and_only_gordiums_obj
     body = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _context_payload(")]
     show, unlock, delete = (body.index(s) for s in ("IsVisible = True", "IsLocked = False", "doc.Objects.Delete("))
     assert show < delete and unlock < delete
-    assert body.index("IsVisible = was") > delete and body.index("IsLocked = True") > delete
-    assert "if source and (sources is None or source in sources):" in body            # never the architect's own
+    assert body.index("IsVisible = was") > delete
+    assert body.index("IsLocked = logic.context_locked(doc.Layers[i].FullPath)") > delete   # all but the footprints
+    assert "if not source or (sources is not None and source not in sources):" in body   # never the architect's own
     assert "doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)" in body and 'STATE.pop("context_guides"' in body
     vis = RHINO[RHINO.index("def _context_visible("):RHINO.index("def show_context(")]
     assert "for i in indexes:" in vis                                                    # every sublayer too
@@ -340,10 +414,10 @@ def test_the_tick_is_kept_per_file_like_the_labels_tick():
     assert "5 the tick is kept in the file" in check and "g.logic.context_shown(g._ui_state(doc))" in check
 
 
-def test_the_quickstart_says_how_footprints_come_back_after_reopening():
+def test_the_quickstart_says_the_footprints_are_kept_and_editable():
     guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8")
-    assert "fetched again when you reopen" not in guide
-    assert "untick and tick **Show neighbourhood** to fetch them again" in guide
+    assert "drawn on screen only" not in guide and "to fetch them again" not in guide     # no longer live-only
+    assert "unlocked `Gordium::Context::Buildings` layer" in guide and "an outline you edit is yours" in guide
 
 
 def test_clearing_also_opens_a_locked_or_hidden_parent_layer_and_says_before_waiting():
@@ -417,7 +491,7 @@ def test_one_service_down_keeps_that_layer_and_replaces_the_others():
     assert "229 parcels" in said and "Kept the parcels drawn earlier" in said
 
 
-def test_footprints_down_in_a_reopened_file_are_never_said_or_recorded_as_kept():
+def test_footprints_down_in_a_reopened_file_are_never_said_or_recorded_as_kept(live_footprints):
     """Review round 6: with no footprints on screen (a reopened file) and their service down, the panel said "Kept the
     buildings drawn earlier" and the record still said "found". One decision now: a live-only layer is kept only
     when its guides are on screen."""
@@ -450,7 +524,7 @@ def test_kept_from_names_only_the_layers_kept_in_this_fetch():
     assert record["layers"]["parcels"]["status"] == "found" and len([1 for s, _ in model if s == "state_parcels"]) == 229
 
 
-def test_a_failed_footprint_fetch_is_not_on_screen_so_the_next_tick_fetches_again():
+def test_a_failed_footprint_fetch_is_not_on_screen_so_the_next_tick_fetches_again(live_footprints):
     """Review round 7: after a footprint fetch that failed, the plugin holds an empty entry for the document, and the
     tick and Draw took the document match alone as "loaded": the footprints could never be fetched again. One
     definition now (guides_on_screen): held for this document AND something to draw."""
@@ -461,7 +535,7 @@ def test_a_failed_footprint_fetch_is_not_on_screen_so_the_next_tick_fetches_agai
     assert not logic.guides_on_screen({"doc": DOC + 1, "lines": [[0, 0]]}, DOC) and not logic.guides_on_screen(None, DOC)
     # so the next tick (or Draw on the same lot) fetches, and this time the footprints come
     model, record, _, shown = redraw(model, record, fetch_with(frame), frame, shown)
-    assert len(shown) == 212 and logic.guides_on_screen({"doc": DOC, "lines": shown}, DOC)
+    assert len(shown) == 322 and logic.guides_on_screen({"doc": DOC, "lines": shown}, DOC)
 
 
 def test_a_fetch_that_worked_but_found_no_footprints_is_not_fetched_again_and_a_failed_one_is():
@@ -490,7 +564,7 @@ def test_a_fetch_that_worked_but_found_no_footprints_is_not_fetched_again_and_a_
     assert logic.needs_refetch({"doc": DOC + 1, "lines": shown}, record, DOC)   # another document's
 
 
-def test_a_stored_layer_that_failed_is_fetched_again_but_one_kept_from_a_good_fetch_is_not():
+def test_a_stored_layer_that_failed_is_fetched_again_but_one_kept_from_a_good_fetch_is_not(live_footprints):
     """Review round 9: needs_refetch retried only live-only layers, so parcels down on the first Draw (footprints
     answering) stayed at "0 neighbouring parcels" for good."""
     frame = looked_up()["writes"]["frame"]
@@ -546,8 +620,8 @@ def test_nothing_answering_leaves_the_saved_neighbourhood_alone_and_the_plugin_p
     assert 'payload, record, sources, keep_guides = plan["payload"], plan["record"], plan["replace"], plan["keep_guides"]' in draw
     assert "_clear_context(doc, sources)" in draw and "json.dumps(record)" in draw
     assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc, sources)")
-    clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _context_record(")]
-    assert "if source and (sources is None or source in sources):" in clear
+    clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_ids(")]
+    assert "if not source or (sources is not None and source not in sources):" in clear
     assert clear.index("if sources is None:") < clear.index("doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)")
 
 
@@ -620,7 +694,7 @@ def test_the_plugin_writes_the_note_as_bottom_left_model_text():
 
 def test_the_plugin_writes_only_context_objects_and_keeps_guides_on_screen():
     body = RHINO[RHINO.index("def draw_context("):RHINO.index("def _context_visible(")]
-    assert "for o in logic.context_objects(payload):" in body
+    assert "for o in logic.skip_edited(logic.context_objects(payload), edited):" in body
     assert body.count("doc.Objects.Add") == 3                            # a dot, a text or a curve, per object
     assert 'STATE["context_guides"] = ' in body and "logic.context_guides(payload)" in body
     assert "doc.Strings.SetString(SECTION, logic.CONTEXT_ENTRY, json.dumps(record))" in body
@@ -651,8 +725,8 @@ def test_the_plugin_draws_the_context_after_a_box_draw_guarded_and_has_a_tick():
 def test_the_panel_says_what_was_drawn():
     payload, _ = context_for()
     said = logic.context_says(payload)
-    assert said == "Neighbourhood drawn: 229 parcels, 38 streets, 212 buildings (footprints from %s, shown only)." \
-        % T.STAND_IN_BUILDINGS_DATE                                       # what an architect needs, nothing more
+    assert said == "Neighbourhood drawn: 229 parcels, 38 streets, 322 buildings (footprints from 2014)."
+    # (what an architect needs, nothing more)
     assert len(said) < 100
     assert logic.context_says({"status": "offline", "message": "Couldn't fetch the neighbourhood: x"}).endswith(": x")
     assert logic.context_says(None).startswith("Couldn't fetch")
@@ -663,7 +737,7 @@ def test_context_box_runs_as_its_own_process_on_the_recorded_answers():
     args = logic.context_command(sys.executable, frame, "106_ithaca_rd")
     out = subprocess.run(args, cwd=REPO, capture_output=True, text=True, encoding="utf-8", timeout=120)
     p = json.loads(out.stdout.strip().splitlines()[-1])
-    assert p["status"] == "found" and p["counts"] == {"parcels": 229, "streets": 38, "buildings": 212}
+    assert p["status"] == "found" and p["counts"] == {"parcels": 229, "streets": 38, "buildings": 322}
 
 
 def test_context_box_never_prints_a_traceback():

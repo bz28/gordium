@@ -60,8 +60,8 @@ CONTEXT = {"106_ithaca_rd_context": "106 Ithaca Rd, Ithaca, NY 14850"}
 
 
 def capture_context(address: str, http) -> dict:
-    """The context map's storable answers (the State's parcels and streets in the square around the lot). The
-    building footprints (store: none) pass through unrecorded: the tests' stand-ins for them are synthetic."""
+    """The context map's storable answers: the State's parcels, streets and building footprints in the square around
+    the lot (all store: raw; the footprints since Ben's decision, 2026-10-21)."""
     from site_lookup.context import context
     from site_lookup.lookup import US_SURVEY_FT
     lot = lookup(address, http)["facts"]["lot"]["value"]

@@ -1586,6 +1586,53 @@ def context_merge(payload, old_record, frame, live_on_screen=False):
     return plan
 
 
+CONTEXT_EDITABLE = (CONTEXT + "::Buildings",)   # left unlocked: the architect drags and edits the footprints (Ben)
+GEOM_KEY = "gordium_context_geom"       # on each outline Gordium draws: the fingerprint of its points as drawn
+PIECE_KEY = "gordium_context_id"        # on each outline: the parcel, street piece or footprint it is
+EDITED_KEY = "gordium_context_edited"   # on an outline the architect edited: it is theirs (Gordium never removes it)
+
+
+def context_locked(path):
+    """Whether a context layer is locked after drawing: all of them but the editable ones (the footprints)."""
+    return on_layer(path, CONTEXT) and not any(on_layer(path, e) for e in CONTEXT_EDITABLE)
+
+
+def outline_key(points):
+    """The fingerprint of an outline's points (x, y, to a millionth of a model unit), as Rhino reads them back."""
+    import hashlib
+    import json
+    flat = [[round(float(p[0]), 6), round(float(p[1]), 6)] for p in points or []]
+    return hashlib.sha1(json.dumps(flat).encode("utf-8")).hexdigest()[:20]
+
+
+def is_edited(stored_key, points):
+    """Whether an outline Gordium drew has been edited since (moved, reshaped): its points no longer match the
+    fingerprint written when it was drawn (Ben, 2026-10-21: Gordium's redraw or clear removes only outlines it drew
+    that the architect hasn't edited; an edited one is the architect's and stays). No fingerprint: not one of these."""
+    return bool(stored_key) and outline_key(points) != stored_key
+
+
+def skip_edited(objects, edited_ids):
+    """The objects to draw, less those the architect has edited and kept (by their parcel, street piece or footprint
+    id): an edited outline is not drawn a second time beside it."""
+    edited = set(i for i in edited_ids or [] if i)
+    return [o for o in objects or [] if not o.get("id") or o["id"] not in edited]
+
+
+SOLID_KINDS = ("Brep", "Extrusion", "Mesh", "SubD")
+
+
+def context_solids_says(names):
+    """The notice for solids on the neighbourhood's layers over the lot (an extruded footprint, a building put there):
+    never measured, so the architect is told, never silently (Ben, 2026-10-21). None when there are none."""
+    names = sorted(set(n or "a solid" for n in names or []))
+    if not names:
+        return None
+    return ("Not checked: %d solid%s on the neighbourhood layers over the lot (%s). Gordium checks only the Building "
+            "layer: move it there if it is part of your design."
+            % (len(names), "s" if len(names) != 1 else "", ", ".join(names[:3]) + ("…" if len(names) > 3 else "")))
+
+
 def context_objects(payload):
     """What may be written into the .3dm: objects from a source whose store is raw (the payload's layers say which),
     and Gordium's own marks (frame, north arrow, scale bar, credits). Anything else is never written, whatever the
@@ -1603,18 +1650,19 @@ def context_guides(payload):
 
 def context_says(payload):
     """The line after the neighbourhood is drawn (or why it isn't): what an architect needs, as "Neighbourhood drawn:
-    229 parcels, 38 streets, 212 buildings (footprints from 2014, shown only)." (architect review of PR #23: the
-    line listed agencies and storage rules). Who made the data is on the drawing's Sources note; what a failed
-    service left out follows (the payload's message)."""
+    229 parcels, 38 streets, 322 buildings (footprints from 2014)." (architect review of PR #23: the line listed
+    agencies and storage rules). "shown only" is added only for footprints from a source that may not be kept. Who
+    made the data is on the drawing's Sources note; what a failed service left out follows (the payload's message)."""
     payload = payload or {}
     if payload.get("status") not in ("found",):
         return payload.get("message") or "Couldn't fetch the neighbourhood: the lot is drawn without it."
     n = payload.get("counts") or {}
     said = "%d parcels, %d streets" % (n.get("parcels", 0), n.get("streets", 0))
     if n.get("buildings"):
-        dates = ", ".join(((payload.get("layers") or {}).get("buildings") or {}).get("dates") or [])
-        said += ", %d buildings (footprints %s, shown only)" % (n["buildings"], "from " + dates if dates else
-                                                                 "of unknown date")
+        layer = (payload.get("layers") or {}).get("buildings") or {}
+        dates = ", ".join(layer.get("dates") or [])
+        said += ", %d buildings (footprints %s%s)" % (n["buildings"], "from " + dates if dates else "of unknown date",
+                                                       "" if is_stored(layer) else ", shown only")
     return "Neighbourhood drawn: " + said + "." + (" " + payload["message"] if payload.get("message") else "")
 
 

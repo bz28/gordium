@@ -105,7 +105,7 @@ measured or checked.
 |---|---|---|---|
 | Neighbouring parcels (the lot's own left out) | NYS Tax Parcels Public (only SWIS and print key asked for: never owner, mailing or value fields) | raw | yes, as locked curves |
 | Street centerlines | NYS Streets | raw | yes, as locked curves |
-| Building footprints | NYS Building Footprints (in Ithaca: Tompkins County ITS GIS Division, 2014) | **none** (until Ben decides; context map plan D1) | **no**: shown live on screen only |
+| Building footprints (each with its id; Microsoft's, under the ODbL, left out) | NYS Building Footprints (in Ithaca: Tompkins County ITS GIS Division, 2014) | raw (Ben's decision, 2026-10-21) | yes, as editable outlines (no heights), with their credit and date |
 
 Each layer is asked on its own (one service down leaves the others), page by page (`resultOffset`, OBJECTID order,
 a 5,000-feature cap that says so), and clipped to the square. Coordinates are Gordium's feet from the lot's origin,
@@ -114,10 +114,10 @@ its count only if the source may be kept), and for every request the URL, date a
 live-only source is only named.
 
 106 Ithaca Rd (live, 2026-10-20): 229 neighbouring parcels, 38 street pieces, 322 footprints, 3 requests,
-about 1 s, 160 KB. In CI: `tests/fixtures/106_ithaca_rd_context.json` (the State's parcels and streets, 67 KB, made
-by `capture.py`) and synthetic stand-in footprints (a 30 × 40 ft rectangle per parcel, dated 1999): nothing from
-the footprint layer is recorded. Tests: `tests/test_context.py`; the Rhino side's in
-`design_checker/tests/test_context_box.py`.
+about 1 s, 160 KB. In CI: `tests/fixtures/106_ithaca_rd_context.json` (the State's parcels, streets and footprints,
+175 KB, recorded 2026-10-21 by `capture.py`). The live-only machinery (a source that may not be kept, shown on screen
+and never saved) stays for any such source; its tests switch the footprints back to store: none. Tests:
+`tests/test_context.py`; the Rhino side's in `design_checker/tests/test_context_box.py`.
 
 ## Not yet
 

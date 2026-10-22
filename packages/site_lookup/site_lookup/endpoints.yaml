@@ -78,13 +78,15 @@ state_buildings:
   owner: NYS ITS Geospatial Services (in the City of Ithaca from NYSERDA/CIESIN, from Tompkins County ITS GIS Division, 2014)
   url: https://nysgeohub.ny.gov/arcgis/rest/services/Basemap/NYS_Building_Footprints/FeatureServer/1/query
   terms: >-
-    State: "as is", no warranty, no redistribution limit stated. In Ithaca every footprint's source is Tompkins County
-    ITS GIS Division, 2014 (CUGIR: "Use Restrictions: None"; "City of Ithaca data originally produced by NYSEG and
-    subsequently updated by the City of Ithaca Planning Department"). Whether customers may keep them in their files
-    is Ben's decision (context map plan, D1): until then shown live in Rhino only, never saved.
+    State (licenseInfo, read 2026-10-21): "makes no representations or warranties ... The User accepts the Data
+    provided "as is"": a disclaimer only, no licence, no redistribution limit, no attribution required. In Ithaca every
+    footprint's source is Tompkins County ITS GIS Division, 2014 (CUGIR record: "Access Restrictions: None", "Use
+    Restrictions: None"). Kept in the customer's file as editable outlines: Ben's decision, 2026-10-21 (context map
+    plan D1). Microsoft footprints (ODbL, share-alike) fill gaps elsewhere in the State, not in Ithaca: check each
+    footprint's NYSGeo_Source before another city.
   attribution: >-
     Building footprints: NYS ITS Geospatial Services (NYSERDA/CIESIN; Tompkins County ITS GIS Division)
-  store: none
+  store: raw
 
 elevation:
   name: USGS 3DEP elevation (1 m where available; here the 2020 LiDAR)

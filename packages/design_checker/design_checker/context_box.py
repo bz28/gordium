@@ -76,8 +76,8 @@ def payload(ctx: dict, frame: dict) -> dict:
             pts = item.get("ring") or item.get("path")
             if is_stored(layer):
                 objects.append({"layer": LAYER_OF[name], "kind": "closed" if "ring" in item else "open",
-                                "points": [place(p) for p in pts], "name": item.get("id") or item.get("name") or "",
-                                "source": layer["source"]})
+                                "points": [place(p) for p in pts], "name": item.get("name") or item.get("id") or "",
+                                "id": item.get("id") or "", "source": layer["source"]})
             else:
                 guides.append({"layer": name, "source": layer["source"], "points": [place(p) for p in pts]})
     saved_credits = (ctx.get("snapshot") or {}).get("credits") or []

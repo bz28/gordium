@@ -46,8 +46,10 @@ def test_106_ithaca_rd_context():
     assert len({i["id"] for i in p["items"]}) == 229 and "500700-84.-2-6" not in {i["id"] for i in p["items"]}
     assert all(i["id"].startswith("500700-") for i in p["items"])      # all City of Ithaca here
     assert len(s["items"]) == 38 and {"Ithaca Road", "Mitchell Street"} <= {i["name"] for i in s["items"]}
-    # one stand-in house per recorded parcel (230); the 18 centred outside the square are clipped away
-    assert len(b["items"]) == 212 and b["dates"] == [T.STAND_IN_BUILDINGS_DATE]
+    # the State's footprints (recorded 2026-10-21): 322 in the square, all the County's 2014 outlines, each with its id
+    assert len(b["items"]) == 322 and b["dates"] == ["2014"]
+    assert len({i["id"] for i in b["items"]}) == 322 and all(i["id"].startswith("footprint-") for i in b["items"])
+    assert len({i["id"] for i in s["items"]}) == 38                      # each street piece its own id
     assert http.asked.count("state_parcels") >= 1 and http.asked.count("state_buildings") == 1
 
 
@@ -140,7 +142,14 @@ def test_a_malformed_answer_is_an_error_for_that_layer_not_a_crash():
     assert c["layers"]["streets"]["status"] == "error" and c["layers"]["parcels"]["status"] == "found"
 
 
-def test_the_snapshot_keeps_records_and_counts_never_a_live_sources_data():
+@pytest.fixture
+def live_footprints(monkeypatch):
+    """The footprints as a source that may not be kept (store: none), as they were until Ben's decision of 2026-10-21:
+    the live-only machinery stays for any such source, so its tests switch the footprints back."""
+    monkeypatch.setitem(ENDPOINTS["state_buildings"], "store", "none")
+
+
+def test_the_snapshot_keeps_records_and_counts_never_a_live_sources_data(live_footprints):
     c, http = run()
     s = c["snapshot"]
     assert len(s["sources"]) == len(http.asked) and all(len(r["sha256"]) == 64 and "body" not in r for r in s["sources"])
@@ -148,7 +157,7 @@ def test_the_snapshot_keeps_records_and_counts_never_a_live_sources_data():
     assert s["layers"]["buildings"] == {"source": "state_buildings", "status": "found", "store": "none"}
     assert s["layers"]["parcels"]["count"] == 229 and s["layers"]["streets"]["count"] == 38
     text = json.dumps(s)
-    assert T.STAND_IN_BUILDINGS_DATE not in text      # the footprints' own data (their date) isn't kept
+    assert "footprints dated" not in text            # the footprints' own data (their date) isn't kept
     assert ENDPOINTS["state_buildings"]["attribution"] + ": " + LIVE_ONLY in s["credits"]   # who made them: kept
     assert "ring" not in text and "path" not in text   # no geometry at all: the drawn objects are the record
     assert len(s["fingerprint"]) == 64
@@ -156,19 +165,41 @@ def test_the_snapshot_keeps_records_and_counts_never_a_live_sources_data():
     assert a["snapshot"]["fingerprint"] == s["fingerprint"]
 
 
-def test_the_footprints_are_never_storable_until_ben_decides():
-    """Context map plan, D1: until Ben decides, the footprints are shown live and never kept."""
-    assert ENDPOINTS["state_buildings"]["store"] == "none"
+def test_the_footprints_are_kept_by_bens_decision_and_credited_with_their_date():
+    """Context map plan, D1, decided by Ben 2026-10-21: the footprints are kept in the customer's file as editable
+    outlines (store raw), credited on the drawing with their date."""
+    assert ENDPOINTS["state_buildings"]["store"] == "raw"
+    assert "Ben's decision, 2026-10-21" in ENDPOINTS["state_buildings"]["terms"]
     assert ENDPOINTS["state_parcels"]["store"] == "raw" and ENDPOINTS["state_streets"]["store"] == "raw"
+    c, _ = run()
+    s = c["snapshot"]
+    assert s["layers"]["buildings"]["count"] == 322
+    assert any(line.startswith(ENDPOINTS["state_buildings"]["attribution"]) and "footprints dated 2014" in line
+               for line in s["credits"])
+
+
+def test_microsoft_footprints_under_the_odbl_are_left_out_and_said():
+    """Microsoft's footprints (ODbL, share-alike) fill gaps elsewhere in the State, not in Ithaca: never kept."""
+    class WithMicrosoft(T.Fake):
+        def post(self, url, params):
+            body, raw = super().post(url, params)
+            if T.key_of(url) == "state_buildings":
+                body = json.loads(json.dumps(body))
+                body["features"][0]["attributes"]["NYSGeo_Source"] = "Microsoft"
+            return body, raw
+    c, _ = run(WithMicrosoft(T.load("106_ithaca_rd"), context=T.load("106_ithaca_rd_context")))
+    b = c["layers"]["buildings"]
+    assert len(b["items"]) == 321 and "1 Microsoft footprints (ODbL licence) were left out." in b["message"]
 
 
 def test_the_context_fixture_holds_only_storable_answers():
     d = T.load("106_ithaca_rd_context")
-    assert {a["source"] for a in d["answers"]} == {"state_parcels", "state_streets"}
+    assert {a["source"] for a in d["answers"]} == {"state_parcels", "state_streets", "state_buildings"}
     for a in d["answers"]:
         assert ENDPOINTS[a["source"]]["store"] == "raw"
         for f in a["body"]["features"]:
-            assert set(f["attributes"]) <= {"SWIS", "PRINT_KEY", "CompleteStreetName", "OBJECTID"}
+            assert set(f["attributes"]) <= {"SWIS", "PRINT_KEY", "CompleteStreetName", "OBJECTID", "SourceDate",
+                                            "NYSGeo_Source"}
 
 
 def test_capture_context_records_what_context_asks():

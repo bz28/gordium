@@ -26,8 +26,10 @@ HALF_SIZE_FT = 750.0                       # half the square's side: 1500 ft × 
 LAYERS = {                                 # name: (endpoints.yaml source, the only fields asked for)
     "parcels": ("state_parcels", "SWIS,PRINT_KEY"),          # never owner, mailing or value fields
     "streets": ("state_streets", "CompleteStreetName"),
-    "buildings": ("state_buildings", "SourceDate"),
+    "buildings": ("state_buildings", "OBJECTID,SourceDate,NYSGeo_Source"),    # the id: an edited outline is known
+                                                                                # on redraw; the source: ODbL is left out
 }
+ODBL_SOURCES = ("microsoft",)    # footprint sources under the ODbL (share-alike): left out (context map plan, D2)
 PARCEL_NOTE = ("Tax parcels: NYS Tax Parcels Public (from Tompkins County Real Property): for planning and general "
                "use only, not a substitute for a legal parcel survey.")
 
@@ -65,6 +67,12 @@ def context(lot_ring, http, half_size_ft: float = HALF_SIZE_FT, origin=None, now
             continue
         if not complete:
             layer.update(status="partial", message=f"Only the first {len(feats)} of {layer['name']} were drawn.")
+        if name == "buildings":
+            odbl = sum(1 for ft in feats if str((ft.get("attributes") or {}).get("NYSGeo_Source") or "").strip().lower()
+                       in ODBL_SOURCES)
+            if odbl:
+                layer["message"] = (layer.get("message", "") + " %d Microsoft footprints (ODbL licence) were left out."
+                                    % odbl).strip()
         try:
             layer["items"] = _items(name, feats, box, centre, feet, lot_id)
         except (KeyError, TypeError, ValueError, IndexError) as e:     # a malformed answer: that layer, not a crash
@@ -101,17 +109,23 @@ def _items(name, feats, box, centre, feet, lot_id=None) -> list[dict]:
                 if clipped:
                     items.append({"id": pid, "ring": [feet(p) for p in clipped]})
     elif name == "streets":
+        seen: dict[str, int] = {}
         for ft in feats:
             street = ((ft.get("attributes") or {}).get("CompleteStreetName") or "").strip()
             for path in ft["geometry"]["paths"]:
                 for piece in g.clip_path([tuple(p[:2]) for p in path], box):
-                    items.append({"name": street, "path": [feet(p) for p in piece]})
+                    seen[street] = seen.get(street, 0) + 1            # an id per piece (an edited one is known on redraw)
+                    items.append({"id": "%s #%d" % (street, seen[street]), "name": street,
+                                  "path": [feet(p) for p in piece]})
     else:
         for ft in feats:
+            if str((ft.get("attributes") or {}).get("NYSGeo_Source") or "").strip().lower() in ODBL_SOURCES:
+                continue        # Microsoft's footprints are ODbL (share-alike): never kept in a customer's file
             for r in ft["geometry"]["rings"]:
                 clipped = g.clip_ring(g.open_ring(r), box)
                 if clipped:
-                    items.append({"ring": [feet(p) for p in clipped]})
+                    oid = (ft.get("attributes") or {}).get("OBJECTID")
+                    items.append({"id": "footprint-%s" % oid if oid is not None else "", "ring": [feet(p) for p in clipped]})
     return items
 
 
