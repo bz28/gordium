@@ -676,10 +676,7 @@ keys:
         rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
       R-3a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-3a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
-    known_false_passes:
-      R-3a.abutting_r1: 'where the lot doesn''t abut R-1 land the draft says §325-19E doesn''t apply, as the law says; the
-        key''s flag always reviews because adjacency isn''t measured. Not demoted: the question is with the key''s owner (2026-10-21);
-        in the product abuts_r1_district isn''t measured, so these rules show needs review'
+    known_false_passes: {}
 general_unmatched:
   general.325_16a_commercial_and_electric_towers_permit: '§325-16A height exceptions (rooftop features, towers): not in the
     keys'

@@ -711,10 +711,13 @@ def _envelope_facts(site: dict, facts: dict) -> dict:
     the grade the code measures from), so then only the buildable area is drawn."""
     if facts.get("grade_is") == "existing":
         return {**facts, "ground_is_flat": None}
-    if facts.get("grade_points"):
-        from model_measurement.measure import grade_plane
-        grade, why = grade_plane(site.get("buildings") or [], facts)
+    buildings = site.get("buildings") or []
+    if facts.get("grade_points") and not any(b.get("problems") or not b.get("faces") for b in buildings):
+        from model_measurement.measure import grade_plane      # as the measuring: never for buildings it refuses
+        grade, why = grade_plane(buildings, facts)
         return {**facts, "ground_is_flat": True, "grade_elevation": grade} if why is None else {**facts, "ground_is_flat": None}
+    if facts.get("grade_points"):
+        return {**facts, "ground_is_flat": None}
     return facts
 
 

@@ -499,7 +499,10 @@ def test_a_roof_drawn_in_one_solid_with_its_walls_never_drops_its_overhang_from_
     walls = prism(rect(12, 30, 42, 70), 0, 20, "house")
     faces = [f for f in walls["faces"] if not all(p[2] == 20 for p in f["points"])]
     faces += [{"points": [[10, 30, 19], [27, 30, 30], [27, 70, 30], [10, 70, 19]]},
-              {"points": [[27, 30, 30], [44, 30, 19], [44, 70, 19], [27, 70, 30]]}]
+              {"points": [[27, 30, 30], [44, 30, 19], [44, 70, 19], [27, 70, 30]]},
+              # the soffits under the overhang, so it is a closed solid (term-index: measure() finds open ones)
+              {"points": [[10, 30, 19], [10, 70, 19], [12, 70, 19], [12, 30, 19]]},
+              {"points": [[42, 30, 19], [42, 70, 19], [44, 70, 19], [44, 30, 19]]}]
     res = run([{"id": "house", "faces": faces, "problems": []}])
     side = res["measurements"]["side_yard_smaller"]
     assert side["value"] is None and sorted(r["value"] for r in side["readings"]) == [10.0, 12.0]

@@ -27,7 +27,7 @@ measurements:
     from: 'measured from model.3dm: from the ground level (grade plane) to the top of the roof (a flat roof, to its highest level)'
   stories:
     value: 3.0
-    from: 'stated by the architect (not measured from the model: no floor blocks are drawn) (lot facts)'
+    from: 'stated by the architect for the whole building, within what the drawing allows (1 to 5: the building, 35 ft tall, could hold up to 5 stories (7 ft a story, R305.1)) (lot facts)'
   front_yard:
     value: null
     from: 'not measured: a building isn''t inside the lot: the building'
@@ -57,7 +57,7 @@ measurements:
     from: 'not measured: enter the dwelling units, the rooms let for profit, and whether it is a conversion'
   abuts_r1_district:
     value: null
-    from: 'not measured: say whether the lot abuts R-1a or R-1b land, sharing a lot line or across a street (§325-19E)'
+    from: 'not measured: say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)'
   front_yard_eaves:
     value: null
     from: 'not measured: a building isn''t inside the lot: the building'

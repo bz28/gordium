@@ -1,7 +1,6 @@
 abutting_r1_height_limit:
   meaning: Maximum building height in feet in the chart for the R-1a or R-1b District that the land abuts.
   needed_by:
-  - R-3a.325_19e_r3_abut_r1_max_height
   - R-3b.325_19e_r3_abut_r1_max_height
   unit: ft
 additional_primary_building:
@@ -285,7 +284,6 @@ is_adu:
 larger_side_yard_abuts_r1:
   meaning: The wider side yard abuts land in the R-1a or R-1b District.
   needed_by:
-  - R-3a.325_19e_r3_abut_r1_side_yard_larger
   - R-3b.325_19e_r3_abut_r1_side_yard_larger
   unit: yes_no
 lot_width_at_street_line:
@@ -399,7 +397,6 @@ row_house_modules:
 smaller_side_yard_abuts_r1:
   meaning: The narrower side yard abuts land in the R-1a or R-1b District.
   needed_by:
-  - R-3a.325_19e_r3_abut_r1_side_yard_smaller
   - R-3b.325_19e_r3_abut_r1_side_yard_smaller
   unit: yes_no
 terrace_or_patio_above_grade_in_required_yard:

@@ -174,7 +174,7 @@ Every reason the code gives today comes from the table:
   finished ground" (height and stories).
 - **Facts a massing model doesn't show,** until they are entered: "choose the use"; "enter the lot's zoning district (zone)"; "no floor blocks
   are drawn for the building, so its stories aren't drawn: draw each story as its own solid standing on the one
-  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces"; "enter the dwelling units, the rooms let for profit, and whether it is a conversion" (R-3a chart note 7: the lot size grows with them); "say whether the lot abuts R-1a or R-1b land, sharing a lot line or across a street (§325-19E)" (R-3a.abutting_r1: no, and the stricter limits don't apply).
+  below (as Gordium's starting building is), or enter the number of stories"; "enter bedrooms / parking spaces"; "enter the dwelling units, the rooms let for profit, and whether it is a conversion" (R-3a chart note 7: the lot size grows with them); "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)" (R-3a.abutting_r1: no, and the stricter limits don't apply).
 - **Stories, from the shape:** solids stacked one on another are one building. Its stories are the floor blocks
   Gordium drew (each marked as one story, `gordium:floor`) counted; anything else stacked on them (a podium, a bulkhead, a
   roof solid: how many stories it holds can't be told from its height) and any typed count are readings, and if
@@ -191,16 +191,16 @@ Every reason the code gives today comes from the table:
   the count". One starting partly inside the one below
   (a floor moved down into it, a room sunk into the roof) asks too: "part of the building ({what}) starts partly
   inside the one below it (from {low} ft to {high} ft): move it to stand on the one below, or join them". So moving
-  a part a tenth of a foot never turns one count into another. Stories are counted only from floor blocks: a part drawn as a plain solid
-  (or plain solids stacked) never has its stories guessed from its height or its blocks. Only a plain part standing
-  on the ground and lower than 7 ft (the lowest ceiling a habitable room may have, NYS Residential Code R305.1: a
-  porch slab or steps) fits inside the first story and is left out; any other (raised, on a roof, reaching below
-  the ground: §325-3's STORY has no least height) is a plain part, and with one the count typed stands for the whole building, and only if no part's floor blocks count more: "the stories typed
-  ({typed}) are fewer than the floor blocks drawn ({drawn}): check the count, or the floors", nor the solids stacked
-  in a plain part: "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), which may
-  each be a story: check the count"; with none typed:
-  "part of the building ({what}) isn't drawn as floor blocks, so its stories can't be counted: enter the number of
-  stories of the whole building". Any part reaching below the ground, whatever was typed: "part of the building
+  a part a tenth of a foot never turns one count into another. Stories are read from the drawing as far as it allows: floor blocks are
+  counted, and a part drawn as a plain solid (or plain solids stacked) h tall can hold at most floor(h / 7 ft)
+  stories (7 ft: the lowest ceiling a habitable room may have, NYS Residential Code R305.1) and at least one. So a
+  12 ft garage holds one, and a 30 ft plain house one to four: then the count is a question ("a 30 ft solid could
+  hold up to 4 stories: draw its floors or enter the count"), and the count entered stands for the whole building
+  only within what the drawing allows: "the stories typed ({typed}) are fewer than the floor blocks drawn
+  ({drawn}): check the count, or the floors"; "the stories typed ({typed}) are more than the drawing could hold
+  ({what}, {height} ft tall: at most {most}, at 7 ft a story, R305.1): check the count, or the drawing". Only a
+  plain part standing on the ground and lower than 7 ft (a porch slab or steps) fits inside the first story and is
+  left out; one raised, on a roof or reaching below the ground (§325-3's STORY has no least height) asks. Any part reaching below the ground, whatever was typed: "part of the building
   ({what}) is below the ground: whether a basement or cellar counts as a story (§325-3) isn't measured yet: an open
   question for the architects".
 - **The buildings:** "no building on the Building layer"; "two building objects share the id {id}: one would be left out of the
@@ -208,9 +208,7 @@ Every reason the code gives today comes from the table:
   the main building, assumed: every measurement from it carries `main_assumed`, and every other building that
   could be a principal one (enclosed, at least 7 ft tall and 70 sf: NYS Residential Code R305.1, R304.1) is also
   read as if it were the main one, so the assumption never passes what a pick wouldn't); "a building object has
-  nothing to measure (no faces): check it on the Building layer"; "a building covers no area seen from above: {what} (walls only, or faces in a line); check
-  it on the Building layer" (which one; it can't be placed on the lot: the rules that would measure it wait, as for one
-  off the lot, and with one off the lot too, both reasons are said, each naming its own buildings); "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "a building isn't inside the lot: {what}" (a building wholly off the lot: only the rules that would measure it wait. A building partly off the lot is measured, and every rule that measures it does not comply, whatever the readings or answers; each building is placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  nothing to measure (no faces): check it on the Building layer"; "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines for faces meeting at slivers" (any geometry failure while measuring: every measurement waits, saying why, never a crash; the architect's stated facts still stand); "a building isn't inside the lot: {what}" (a building wholly off the lot: only the rules that would measure it wait. A building partly off the lot is measured, and every rule that measures it does not comply, whatever the readings or answers; each building is placed on its own, never changed by another); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

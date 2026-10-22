@@ -68,8 +68,6 @@ STOPS = {
     "no_stories": "no floor blocks are drawn for the building, so its stories aren't drawn: draw each story as its "
                   "own solid standing on the one below (as Gordium's starting building is), or enter the number of "
                   "stories",
-    "stories_plain_part": "part of the building ({what}) isn't drawn as floor blocks, so its stories can't be "
-                          "counted: enter the number of stories of the whole building",
     "stories_below_floors": "the stories typed ({typed}) are fewer than the floor blocks drawn ({drawn}): check the "
                             "count, or the floors",
     "floors_apart": "parts of the building drawn one over another don't stand on each other (from {low} ft to "
@@ -77,10 +75,12 @@ STOPS = {
                     "blocks",
     "parts_overlap": "part of the building ({what}) starts partly inside the one below it (from {low} ft to {high} "
                      "ft): move it to stand on the one below, or join them",
-    "stories_below_blocks": "the stories typed ({typed}) are fewer than the solids stacked on {what} ({blocks}), "
-                            "which may each be a story: check the count",
+    "parts_overlap": "part of the building ({what}) starts partly inside the one below it (from {low} ft to {high} "
+                     "ft): move it to stand on the one below, or join them",
     "part_raised": "part of the building ({what}) starts above the ground: it may be another story: draw its "
                    "stories as floor blocks, or check the count",
+    "stories_above_drawn": "the stories typed ({typed}) are more than the drawing could hold ({what}, {height} ft "
+                           "tall: at most {most}, at 7 ft a story, R305.1): check the count, or the drawing",
     "basement_part": "part of the building ({what}) is below the ground: whether a basement or cellar counts as a "
                      "story (§325-3) isn't measured yet: an open question for the architects",
     "floors_misaligned": "floors misaligned: a floor block sticks out past the one below it (one floor moved on its "
@@ -89,15 +89,13 @@ STOPS = {
                       "measured yet: an open question for the architects",
     "no_rooms": "enter bedrooms / parking spaces",
     "no_units": "enter the dwelling units, the rooms let for profit, and whether it is a conversion",
-    "no_abuts_r1": "say whether the lot abuts R-1a or R-1b land, sharing a lot line or across a street (§325-19E)",
+    "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
     "no_building": "no building on the Building layer",
     "geometry_error": "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines "
                       "for faces meeting at slivers",
     "same_id": "two building objects share the id {id}: one would be left out of the measurements",
     "empty_building": "a building object has nothing to measure (no faces): check it on the Building layer",
-    "flat_building": "a building covers no area seen from above: {what} (walls only, or faces in a line); check "
-                     "it on the Building layer",
     "no_main_building": "more than one building: pick the main building",
     "no_accessory": "no accessory building on the lot (every solid is the main building or touches it)",
     "outside_lot": "a building isn't inside the lot: {what}",

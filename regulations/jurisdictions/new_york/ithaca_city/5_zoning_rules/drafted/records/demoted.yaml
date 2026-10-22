@@ -17,3 +17,18 @@ R-2c.parking_per_dwelling_unit: >-
 R-3a.parking_per_dwelling_unit: >-
   The bedroom rule checks a one-family detached zero-lot-line house, a use that needs a special permit here; the R-3a
   answer key sends its parking to review: a person checks the parking (gap re-draft, 2026-10-21).
+R-3a.325_19e_r3_abut_r1_min_lot_area_other_use: >-
+  §325-19E's stricter limit for a lot abutting R-1 land: the R-3a answer key (answer-keys 67cc73a) sends an
+  abutting lot to review, since what 'directly abuts' reaches is an open question: a person checks it.
+R-3a.325_19e_r3_abut_r1_max_height: >-
+  §325-19E's stricter limit for a lot abutting R-1 land: the R-3a answer key (answer-keys 67cc73a) sends an
+  abutting lot to review, since what 'directly abuts' reaches is an open question: a person checks it.
+R-3a.325_19e_r3_abut_r1_max_coverage: >-
+  §325-19E's stricter limit for a lot abutting R-1 land: the R-3a answer key (answer-keys 67cc73a) sends an
+  abutting lot to review, since what 'directly abuts' reaches is an open question: a person checks it.
+R-3a.325_19e_r3_abut_r1_side_yard_larger: >-
+  §325-19E's stricter limit for a lot abutting R-1 land: the R-3a answer key (answer-keys 67cc73a) sends an
+  abutting lot to review, since what 'directly abuts' reaches is an open question: a person checks it.
+R-3a.325_19e_r3_abut_r1_side_yard_smaller: >-
+  §325-19E's stricter limit for a lot abutting R-1 land: the R-3a answer key (answer-keys 67cc73a) sends an
+  abutting lot to review, since what 'directly abuts' reaches is an open question: a person checks it.
