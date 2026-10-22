@@ -45,3 +45,8 @@ The new cloud session (5549908) owns these lanes from here.
 - #21 drafting-stage1 e5e5f09: review round 12 CLEAN (0 found; 4/4 round-11 fixes confirmed; findings/pr21_round12_cloud.json). Suite here: pytest 1666 passed + 3 CI steps (run timed out in rule_export; reviewer ran rule_export/project_report --check green). PR comment posted. Waits for Ben (spend items unchanged).
 - #23 context-map: round 5 (cold, on 0516aa7) confirmed 2 P2s in _clear_context: with "Gordium" locked the parent's IsVisible re-locked the context layers before the delete (drawn twice); and the restore unlocked the architect's Gordium::Grade/Massing. Fixed in a6a74ab (every layer under the top parent opened outermost first, put back exactly; refused delete is said); 4/4 revert checks; new in-Rhino claim. Full suite running; then push (context-map ← 0516aa7 + a6a74ab), round 6. RHINO_QUEUE 7.
 - Local stack-keeper + Rhino job are active (pushes 01:32 EDT): not taken over.
+
+## 2026-10-22 06:40 UTC — cloud coordinator
+- #23 context-map PUSHED 5298ef4 (= 955d97f + 0516aa7 Rhino evidence + rounds 5-7 fixes). Review round 8 CLEAN. Full suite (cloud): 1557 passed, 7 CI steps all passed. PR body Test Plan rewritten (current state first; b908e99 run superseded). In-Rhino: RHINO_QUEUE 7 (one new claim) PENDING. Next: merge #19 once it settles (beaf9c5 now; wip abe60a0).
+- Lesson logged: never run the full suite in a checkout you are editing (two cloud runs were thrown away); suites now run in /home/user/wt/suite_*.
+- Local lanes still active (Rhino job 06:00 UTC on wip/arch-fixes-2 round 7; stack-keeper 05:32 UTC). Takeover check for stack-keeper at ~07:32 UTC.

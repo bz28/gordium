@@ -1,0 +1,18 @@
+{
+ "round": 8,
+ "mode": "review",
+ "confirmed": [],
+ "refuted": [],
+ "priorStatus": [
+  {
+   "title": "Round-6 fix put `return left` in the middle of _clear_context: the record delete, live-guide pop and dirty restore below it are now unreachable",
+   "status": "fixed",
+   "reasoning": "In 5298ef4 (apps/rhino_plugin/gordium_rhino.py, _clear_context around line 2516-2521), `return left` is the function's last statement again, after `if sources is None: ... STATE.pop(\"context_guides\") ... doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)` and `STATE[\"dirty\"] = dirty`. The fix covers the whole pattern, not just this one spot: an AST scan of apps/rhino_plugin/*.py and packages/**/*.py found no other statement after a return/raise/continue/break in any block. Both callers still work: draw_context (`left += _clear_context(doc, sources)`) and sync_context (`left = _clear_context(doc)`) use the int it returns. The pin, test_a_full_clear_still_drops_the_record_the_footprints_held_and_puts_the_changed_mark_back, runs the clear itself rather than searching the source. It checks that a refused delete is counted, the record is deleted, context_guides is popped and dirty is put back to 5 after the delete set it to 9. With only some sources cleared, it checks the record and guides are kept. I checked it really fails when the fix is undone: in a separate worktree I put back 9674ca4's gordium_rhino.py, and the test failed (1 failed, 97 passed). On HEAD all 98 tests in test_context_box.py pass. Nothing else changed in 9674ca4..HEAD besides moving that one line and adding the test, so no new defect could come from two fixes combining."
+  }
+ ],
+ "stats": {
+  "found": 0,
+  "confirmed": 0,
+  "refuted": 0
+ }
+}

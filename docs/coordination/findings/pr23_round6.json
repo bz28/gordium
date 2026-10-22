@@ -1,0 +1,40 @@
+{
+ "round": 6,
+ "mode": "review",
+ "uncommitted": false,
+ "confirmed": [
+  {
+   "file": "apps/rhino_plugin/gordium_rhino.py",
+   "line": "2516-2517 (_clear_context), 2627 (draw_context), 2664-2671 (sync_context)",
+   "severity": "P2",
+   "category": "silent-failure",
+   "title": "The new 'could not remove N neighbourhood objects' warning is overwritten in the panel by every caller's next say(); sync_context then says 'Neighbourhood removed' although objects were left",
+   "detail": "Round 5 counts objects Rhino refused to delete/mark and calls say(logic.context_not_cleared(left)) inside _clear_context. But the panel shows only one line (gordium_ui.say sets parts['message'].Text = text), and every caller of _clear_context says something right after: draw_context ends with say(logic.context_says(payload)) (e.g. 'Neighbourhood drawn...'), and sync_context's 'clear' step says 'Neighbourhood removed: it is drawn only around a lot the start box looked up.', its 'off' step 'Neighbourhood not drawn: Show neighbourhood is off...'. So in the panel the architect never sees the warning (only the Rhino command history keeps it), and in the clear path is told the neighbourhood was removed when some of Gordium's objects are still there (or, after a redraw, a second set sits beside the first). The fix's claim 'a refused Delete/ModifyAttributes is ... said, never drawn over silently' holds only for the command line.",
+   "evidence": "_clear_context: `if left:\\n        say(logic.context_not_cleared(left))`; gordium_ui.py:327 `def say(parts, text): ... parts[\"message\"].Text = text or \"\"`; draw_context: `_clear_context(doc, sources)` ... `say(logic.context_says(payload))` at the end; sync_context: `if step in (\"clear\", \"draw\", \"off\"):\\n        _clear_context(doc)` ... `elif step == \"clear\":\\n        say(\"Neighbourhood removed: it is drawn only around a lot the start box looked up.\")`",
+   "pin": "New test in packages/design_checker/tests/test_context_box.py: exec sync_context/draw_context with a fake doc whose Objects.Delete returns False and one Gordium-drawn object; assert the LAST entry of STATE['said'] (what the panel shows) contains 'could not remove 1 neighbourhood object' and that no 'Neighbourhood removed' line follows it. Fails today because the caller's message is said after.",
+   "suggested_fix": "Have _clear_context return `left` (no say inside), and let each caller fold it into its single final message: draw_context appends logic.context_not_cleared(left) to logic.context_says(payload); sync_context says context_not_cleared(left) instead of 'Neighbourhood removed' / 'not drawn' when left > 0 (or joins both).",
+   "skeptics": [
+    "I could not refute this finding. All of the cited code is new in this PR: `git diff origin/start-box-lookup...HEAD` adds both the `context_not_cleared` call and the \"Neighbourhood removed\" message.\n\n1. The panel shows only the last message. gordium_rhino.py:2187 `say()` writes to the command line, appends to STATE[\"said\"], and calls `ui.say`. gordium_ui.py:327-330 replaces the text with `parts[\"message\"].Text = text or \"\"` and does not add to it. Its docstring confirms this: \"One line under the list: what the last button did\".\n\n2. The warning is said inside `_clear_context`, at gordium_rhino.py:2516-2517 (`if left: say(logic.context_not_cleared(left))`). Every caller then says something else straight after:\n   - `draw_context` calls `_clear_context(doc, sources)` at line 2603 and ends with `say(logic.context_says(payload))` at about line 2645. That overwrites the warning.\n   - `sync_context` (about lines 2664-2671) calls `_clear_context(doc)` for clear, draw and off, then says the step's own message:\n     - \"Neighbourhood removed: it is drawn only around a lot the start box looked up.\" for clear\n     - \"Neighbourhood not drawn: Show neighbourhood is off...\" for off\n     - for draw, `draw_context` runs, which first shows \"Fetching the neighbourhood...\" from `_context_payload` and then `context_says`.\n\n3. No upstream guarantee makes `left > 0` impossible. `left` counts `doc.Objects.Delete` and `ModifyAttributes` calls that returned false, and the `context_not_cleared` text in packages/design_checker/design_checker/rhino_logic.py:1658 openly expects that case (\"a locked or hidden layer?\").\n\nSo in the panel the warning is always replaced. On the clear path the architect is told the neighbourhood was \"removed\" even though `left` objects remain. The warning survives only in the Rhino command history and in STATE[\"said\"]. The finding is real, as described.",
+    "I could not refute this finding. The code works exactly as the reviewer describes, and the lines in question are new on this branch: the diff against origin/start-box-lookup adds `left = 0` and the warning call.\n\nWhat I read:\n- **gordium_rhino.py:2187-2192.** `say()` writes the text to the Rhino command line and to STATE[\"said\"], then calls `ui.say(panel_parts, text)`.\n- **gordium_ui.py:327-330.** `ui.say` replaces the panel's single message line (`parts[\"message\"].Text = text`). It does not add a line.\n- **gordium_rhino.py:2516-2517.** `_clear_context` calls `say(logic.context_not_cleared(left))` when `left` is above zero.\n- **draw_context (2603 and 2645).** After `_clear_context(doc, sources)` it always ends with `say(logic.context_says(payload))`.\n- **sync_context (2663-2671).** For the steps clear, draw and off it calls `_clear_context(doc)`, then a message for that step: draw_context's own message, \"Neighbourhood not drawn: \u2026\", or \"Neighbourhood removed: it is drawn only around a lot the start box looked up.\"\n\nSo whenever Rhino refuses a Delete or ModifyAttributes, the panel replaces the \"could not remove N objects\" warning with the caller's next message straight away. Only the command history and STATE[\"said\"] keep it. On the clear step the panel ends up saying \"Neighbourhood removed\" while some of Gordium's objects are still in the model.\n\nNothing upstream stops this. `_clear_context` shows and unlocks the layers before deleting, which makes `left > 0` rare. But the code expects it can still happen: it counts refusals for that reason, and the help text in rhino_logic.py:1658 mentions \"a locked or hidden layer?\". When it does happen, the panel hides the warning, as the finding says."
+   ]
+  }
+ ],
+ "refuted": [],
+ "priorStatus": [
+  {
+   "title": "_clear_context unlocks the context layers before the parent 'Gordium', so with 'Gordium' locked the parent's IsVisible call locks them again and every delete fails silently",
+   "status": "fixed",
+   "reasoning": "_clear_context now collects every non-deleted layer under each context layer's top ancestor, orders them with logic.outermost_first (depth by '::' count, then index), and for each sets IsVisible=True then IsLocked=False, so a parent is unlocked before any sublayer's IsVisible/IsLocked set and can no longer re-lock them. The fake _Layer in test_context_box.py models the Rhino 8 propagation (IsVisible passes the layer's lock to every sublayer); I reverted gordium_rhino.py to 0516aa7 and the pin test_a_clear_under_a_locked_gordium_layer_... failed (context layers read locked), and passes at a6a74ab (96/96 in test_context_box.py). Refused Delete/ModifyAttributes are counted (`left += not ...`); the panel display of that warning is a separate new finding. The in-Rhino claim 4 is still pending."
+  },
+  {
+   "title": "Each _clear_context unlocks the architect's other Gordium sublayers (Grade, Grade::Finished, Massing)",
+   "status": "fixed",
+   "reasoning": "Every layer under the root is recorded in `was` (visible, locked) before opening and restored: all visibilities first, outermost first (at that point every layer is unlocked, so each IsVisible passes 'unlocked' down harmlessly), then all locks outermost first, then _lock_context resets only the Gordium::Context layers. The pin asserts Gordium and Gordium::Grade are locked after the clear; with the 0516aa7 code it fails."
+  }
+ ],
+ "stats": {
+  "found": 1,
+  "confirmed": 1,
+  "refuted": 0
+ }
+}
