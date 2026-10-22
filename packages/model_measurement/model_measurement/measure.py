@@ -38,8 +38,12 @@ SAME = 1e-6               # ft: readings closer than this give the same value
 PARALLEL = 30             # degrees: street lines turning more than this between them turn a corner
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 6     # more lot lines than this that could be side or rear: too many readings to list
-STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
-ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms"}
+STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count",
+          "dwelling_units": "count", "rooms_let_for_profit": "count", "conversion": "yes_no",
+          "abuts_r1_district": "yes_no"}
+ASK = {"use": "no_use", "stories": "no_stories", "sleeping_rooms": "no_rooms", "parking_spaces": "no_rooms",
+       "dwelling_units": "no_units", "rooms_let_for_profit": "no_units", "conversion": "no_units",
+       "abuts_r1_district": "no_abuts_r1"}
 UNITS = {"lot_area": "sf", "lot_width": "ft", "lot_depth": "ft", "building_area": "sf", "building_height": "ft",
          "front_yard": "ft", "side_yard_smaller": "ft", "side_yard_larger": "ft", "rear_yard": "ft",
          "front_yard_eaves": "ft", "side_yard_smaller_eaves": "ft", "side_yard_larger_eaves": "ft",

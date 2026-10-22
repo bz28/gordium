@@ -94,6 +94,8 @@ STOPS = {
     "basement_story": "a floor block below the ground: whether a basement or cellar counts as a story (§325-3) isn't "
                       "measured yet: an open question for the architects",
     "no_rooms": "enter bedrooms / parking spaces",
+    "no_units": "enter the dwelling units, the rooms let for profit, and whether it is a conversion",
+    "no_abuts_r1": "say whether any R-1a or R-1b land is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other right-of-way from it (§325-19E)",
     # the buildings
     "no_building": "no building on the Building layer",
     "geometry_error": "the drawing's geometry couldn't be worked out ({what}): check the building and lot outlines "

@@ -138,7 +138,14 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
     assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail"
-    assert replies[3]["result"]["zones"] == ["R-1b"]
+    assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-3a"]   # every hand-drafted rulebook
+
+
+def test_the_quickstart_names_every_district_the_start_box_offers(facts):
+    """The guide's opening line says which districts are checked; it must name every zone the start box offers."""
+    from design_checker.check import options
+    opening = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8").split("\n\n")[2]
+    assert all(zone in opening for zone in options(facts["jurisdiction"])["zones"]), opening
 
 
 def test_bad_lot_facts_are_a_plain_refusal(facts):
