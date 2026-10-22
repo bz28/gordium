@@ -31,3 +31,8 @@ It turned out to run locally, not in the cloud. What it left (all unreviewed —
 - #23 wip/context-map 955d97f (on 7a1b1e1, merge of start-box-lookup): its rounds 3–4 incl. the Rhino job lock fix (context layers stay locked after any show/hide). Not on context-map yet. Next: full CI, push, review, then RHINO_QUEUE 4 re-run.
 - #24 opened (R-2 hand rulebooks).
 The new cloud session (5549908) owns these lanes from here.
+
+## 2026-10-22 01:35 — correction to the line above
+- #23: context-map AND wip/context-map are both at 955d97f, full suite green (1554 passed; 7 CI steps). Rounds 3-4 findings: findings/pr23_round3.json, pr23_round4.json. Round 4 hit the cap with confirmed findings → round-4 fixes need one more cold round. PR description stale (still shows old 11/11 Rhino run as current; mark in-Rhino claims PENDING). RHINO_QUEUE 4 = context_in_rhino.py at 955d97f (local Rhino job will run it).
+- #21: e5e5f09 full suite green (1666 passed); round 12 incomplete: cold reviewer raised one minor (demoting a rule another rule widens fails validation), sceptics NOT run → findings/pr21_round12.json (incomplete).
+- Any full_suite.py run that exited 143 around 00:50-01:20 was killed by the old coordinator (pkill) — re-run.

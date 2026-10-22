@@ -1,0 +1,53 @@
+{
+ "round": 4,
+ "base": "7efb1bd (origin/start-box-lookup, merged in at 93bf076)",
+ "head_reviewed": "7a1b1e1",
+ "since": "375b72d",
+ "prior_status": [
+  {"finding": "r2 P1 needs_refetch with no record", "status": "fixed"},
+  {"finding": "r2 P2 edit detection / copies", "status": "fixed"},
+  {"finding": "r2 P2 in-Rhino evidence", "status": "pending (acceptable as PENDING); Rhino job reruns context_in_rhino.py on the pushed head"},
+  {"finding": "r3 P2 LayerIndex / reflection fingerprint", "status": "fixed in code; Rhino claim strengthened in 955d97f"},
+  {"finding": "r3 P3 outline_key docstring", "status": "fixed"}
+ ],
+ "findings": [
+  {
+   "severity": "P2", "source": "the Rhino job (in-Rhino run of context_in_rhino.py at c783ee6, claim 1 failed; probes lock_probe3/4)",
+   "file": "apps/rhino_plugin/gordium_rhino.py", "line": "_context_visible",
+   "title": "Every context layer comes out unlocked after GordiumStart: _context_visible sets the parent Gordium::Context's IsVisible, which in Rhino 8 gives sublayers the parent's (unlocked) lock",
+   "status": "confirmed (reproduced in Rhino by the Rhino job; a local patch re-locking passed 13/13 claims)",
+   "fix": "955d97f: _context_visible re-locks (_lock_context(doc, True)) after any visibility change; _clear_context re-locks after restoring the parent 'Gordium'",
+   "pin": "test_showing_or_hiding_the_neighbourhood_keeps_its_layers_locked_in_rhino_8 (revert either re-lock: fails)",
+   "skeptics": ["Not sent to text sceptics: confirmed by an in-Rhino run and probes (stronger than code reading). Code path verified in-session: draw_context calls _lock_context(doc, True) then _context_visible(doc, ...), which set IsVisible on every _context_layer_indexes layer including Gordium::Context itself."]
+  },
+  {
+   "severity": "P2", "file": "apps/rhino_plugin/tests/context_in_rhino.py", "line": 313,
+   "title": "Claim 5 (reopen) never forces or asserts the layer-index shift",
+   "status": "refuted (one sceptic refuted: the sample lot is held on the holding layer at Look up and the layer deleted at Draw, so the shift does happen); hardened anyway in 955d97f by asserting index_after < index_before",
+   "skeptics": [
+    "VERDICT: refuted. gordium_check on an empty model calls gordium_start, which draws the sample lot with _add_lot directly (not via BoxSession), saved as replaceable_lot; Look up -> apply_lookup -> lookup_may_replace -> session.hold(old) moves it to HOLDING_LAYER (creating it); Draw -> commit deletes it and remove_layer_if_empty deletes the layer; only then draw_context creates the Context layers. So the shift is set up; the only fair point is index_before != index_after is logged but not asserted.",
+    "VERDICT: confirmed. In an empty file apply_lookup holds None, so no holding layer is made and no layer is deleted; the claim never asserts index_after < index_before, so it would not distinguish the raw LayerIndex code."
+   ]
+  },
+  {
+   "severity": "P3", "file": "packages/design_checker/design_checker/rhino_logic.py", "line": 1704,
+   "title": "FINGERPRINT_ATTRIBUTES omits Rhino 8's LinetypePatternScale though its comment claims every attribute an architect can change in Rhino 7 and 8",
+   "status": "confirmed", "fix": "955d97f: added (skipped where Rhino lacks it)", "pin": "test_the_attribute_fingerprint_is_stable_in_rhino_and_sees_print_width_and_groups: a linetype scale 1.0 -> 2.0 is an edit (revert: fails)",
+   "skeptics": [
+    "VERDICT: confirmed. RhinoCommon.xml in /Applications/Rhino 8.app lists P:Rhino.DocObjects.ObjectAttributes.LinetypePatternScale 'Per object linetype scale', since 8.0; missing from the list added in this diff; _attrs_print reads only listed names; adding is safe on Rhino 7 (getattr caught).",
+    "VERDICT: confirmed. Same XML evidence; the edit is missed and the outline deleted on clear; no other curve-relevant property missing (hatch, clipping plane, meshing, decals are not for curves; RenderMaterial/MaterialRefs overlap the material id)."
+   ]
+  },
+  {
+   "severity": "P3", "file": "PR #23 description", "line": "Test Plan",
+   "title": "Body says the context-map code is unchanged since b908e99 and shows the 11/11 Rhino run as current; no PENDING line",
+   "status": "confirmed", "fix": "PR body Test Plan updated after the push",
+   "skeptics": [
+    "VERDICT: confirmed. gordium_rhino.py changed +461/-84 since b908e99 (493db79, a66fe49...); the 11/11 list includes 'saved file holds no footprints', now the opposite; no explicit PENDING line.",
+    "VERDICT: confirmed. The sentence sits under the head commit's heading; the 11/11 bullet doesn't say it predates the editable footprints; the re-run notes are buried."
+   ]
+  }
+ ],
+ "confirmed": 3,
+ "note": "Round 4 is the cap. Its 3 confirmed findings are fixed in 955d97f (pinned, revert-checked) but have not had a further cold-review round."
+}

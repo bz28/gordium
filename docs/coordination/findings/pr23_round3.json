@@ -1,0 +1,42 @@
+{
+ "round": 3,
+ "base": "origin/start-box-lookup (5937781 at review time; 7efb1bd merged in afterwards)",
+ "head_reviewed": "375b72d",
+ "since": "c783ee6",
+ "prior_status": [
+  {"finding": "r2 P1 needs_refetch returned False with no record", "status": "fixed"},
+  {"finding": "r2 P2 edit detection missed attributes; copies deleted", "status": "fixed, but the reflection fix introduced r3 P2 (LayerIndex)"},
+  {"finding": "r2 P2 in-Rhino evidence", "status": "unfixed: pending a Rhino run (queued)"}
+ ],
+ "findings": [
+  {
+   "severity": "P2",
+   "file": "apps/rhino_plugin/gordium_rhino.py",
+   "line": 2442,
+   "title": "Reflection fingerprint includes LayerIndex (a table position) and any property a Rhino version adds: after save/reopen with an earlier layer deleted (Gordium deletes its own holding layer), every untouched outline looks edited and is kept forever; a second address no longer clears the first neighbourhood",
+   "evidence": "for prop in attrs.GetType().GetProperties(): ... SKIPPED_ATTRIBUTES = (\"UserStringCount\",) ... test fixture ATTRIBUTES {... \"LayerIndex\": \"7\" ...}",
+   "status": "confirmed",
+   "fix": "7a1b1e1: fixed allow-list rhino_logic.FINGERPRINT_ATTRIBUTES (each in Rhino 7 and 8); layer, linetype, material and groups by their ids (_table_id); a colour by its ARGB number",
+   "pin": "test_the_attribute_fingerprint_is_stable_in_rhino_and_sees_print_width_and_groups: a reopened file whose Buildings layer index moved 2 -> 1 is still Gordium's (revert to the raw index: fails at that assertion)",
+   "rhino_check": "context_in_rhino.py claim '5 a saved and reopened file, a layer deleted before it: a clear removes Gordium's untouched outlines, keeps only the architect's' (pending)",
+   "skeptics": [
+    "VERDICT: confirmed. _attrs_print (added by this PR) reads every property by reflection; only UserStringCount is skipped, so LayerIndex is fingerprinted (the test fixture even lists it). BoxSession.commit calls remove_layer_if_empty(HOLDING_LAYER) -> doc.Layers.Delete (gordium_rhino.py:1393); cancel/rollback and recover_held delete layers too. The holding layer is made before the Gordium::Context::* layers. Deleted layers are not written to the .3dm and the table is renumbered on reopen (from knowledge, not run), so every outline's LayerIndex drops; is_edited -> True, kept_on_clear -> True, _clear_context strips CONTEXT_KEY and sets EDITED_KEY: the whole old neighbourhood stays forever. The new-Rhino-property point holds at lower weight.",
+    "VERDICT: confirmed. GEOM_KEY is saved in the file (gordium_rhino.py:2606-2609) and compared on every later _clear_context, including the second-address clear in sync_context. Gordium deletes layers itself (remove_layer_if_empty; cancel; recover_held). A deleted layer keeps its slot for the session; layers made later sit at higher indices; renumbered on read. The consequence follows from _clear_context 2485-2490, then _edited_pieces / skip_edited stop those pieces being drawn fresh. A new readable ObjectAttributes property in a later Rhino has the same effect. Fix: layer by Id/FullPath, material/linetype by Id. (Rhino not run.)"
+   ]
+  },
+  {
+   "severity": "P3",
+   "file": "packages/design_checker/design_checker/rhino_logic.py",
+   "line": 1638,
+   "title": "outline_key docstring still lists the old short attribute set (name, colour, linetype, user text)",
+   "status": "confirmed",
+   "fix": "7a1b1e1: docstring names FINGERPRINT_ATTRIBUTES, the tables by their ids, groups, user text",
+   "pin": "same test asserts the docstring (revert to the old text: fails)",
+   "skeptics": [
+    "VERDICT: confirmed. The colon makes the bracketed list read as the full set _attrs_print covers; the code reflects every property plus groups; the text is added in this diff (not at 7efb1bd). P3 docs only; no README repeats it.",
+    "VERDICT: confirmed. The bracketed text names the exact set as what _attrs_print produces, with no 'e.g.'; it is an added line in git diff 7efb1bd...HEAD. Comment only, no behaviour change."
+   ]
+  }
+ ],
+ "confirmed": 2
+}

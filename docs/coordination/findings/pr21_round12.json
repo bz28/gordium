@@ -1,0 +1,27 @@
+{
+ "round": 12,
+ "base": "origin/measurement-2",
+ "head": "e5e5f09a67661ae477f194a911eff03bd6b1e4ba",
+ "since": "84f4920",
+ "status": "INCOMPLETE: cold reviewer done; sceptics NOT run (stopped by coordinator order). The finding below is unconfirmed.",
+ "prior": [
+  {"n": 1, "title": "325-19E demoted in R-3a only", "status": "fixed"},
+  {"n": 2, "title": "relaxes missing from APPROVED_FIELDS", "status": "fixed"},
+  {"n": 3, "title": "demote() kept relaxes; apply_relaxes KeyError", "status": "fixed (one edge on the target side: finding 1)"},
+  {"n": 4, "title": "undecided_uses flag drafted_by the model", "status": "fixed"}
+ ],
+ "findings": [
+  {
+   "file": "packages/rule_drafting/rule_drafting/__main__.py",
+   "line": 151,
+   "severity": "P3",
+   "category": "correctness/edge cases",
+   "title": "Demoting the rule an exception widens leaves the exception pointing at a flag, so the drafted rulebook fails validation",
+   "detail": "demote() on a relax TARGET makes it a flag with no check; the relaxer naming it keeps `relaxes`, so _relaxes_problems reports \"which has no check to widen\" and CI would fail on the next save. Not a false pass (the target is a flag). Latent: no drafted rule carries relaxes today.",
+   "evidence": "reviewer/r12_target.py: _relaxes_problems([demote(base), relaxer]) -> [\"R-1b.height_bonus: relaxes 'R-1b.height_chart', which has no check to widen\"]",
+   "suggested_fix": "In save_result, after demotions, demote (or drop relaxes from) any relaxer whose target is now a flag, with the cause in notes.",
+   "pin": "save_result with demoted.yaml naming the target; _relaxes_problems(saved) == []",
+   "skeptics": []
+  }
+ ]
+}
