@@ -1,5 +1,5 @@
 #! python3
-"""GordiumOff: stop live mode and clear Gordium's drawing."""
+"""GordiumOff: stop Gordium noticing edits and clear its drawing."""
 import os
 import sys
 

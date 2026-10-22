@@ -167,3 +167,23 @@ def test_the_architects_docs_say_press_check():
         assert logic.CHANGED_SINCE in flat and logic.AUTO_CHECK_LABEL in flat, name
         assert "Half a second after you stop, Gordium re-checks" not in flat, name
         assert "With live mode on (the default), it re-checks after every edit" not in flat, name
+
+
+# ---- review round 3 -------------------------------------------------------------------------------------------
+
+def test_edits_are_noticed_whichever_command_drew_the_results():
+    """P1: only GordiumCheck and GordiumStart turned edit noticing on; after GordiumFacts / Edit site… an edit never
+    greyed the results (old marks shown as current) and the tick did nothing."""
+    run = body(RHINO, "def run_check(", "\ndef _toast(")
+    at = run.index('STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()')
+    assert run.index('if not STATE.get("live"):', at) < run.index("live(True)", at) < run.index("ui.show(panel(), view)")
+    assert 'if not STATE.get("live"):' in body(RHINO, "def set_auto_check(", "\ndef ")
+
+
+def test_no_command_text_still_promises_live_re_checking():
+    """P3: install.py, gordium_check.py, gordium_off.py and docs/methods.md still said live re-checking."""
+    for path in ("apps/rhino_plugin/install.py", "apps/rhino_plugin/gordium_check.py",
+                 "apps/rhino_plugin/gordium_off.py", "docs/methods.md"):
+        text = (REPO / path).read_text(encoding="utf-8")
+        assert "live re-checking" not in text and "turn on live mode" not in text and "stop live mode" not in text, path
+        assert "Live checking is on" not in text, path

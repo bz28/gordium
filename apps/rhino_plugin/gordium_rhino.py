@@ -942,6 +942,8 @@ def set_auto_check(on):
     if doc is None:
         say(logic.NO_DOCUMENT)
         return
+    if not STATE.get("live"):           # the tick needs edits noticed to act on them
+        live(True)
     _save_ui_state(doc, dict(_ui_state(doc), auto_check=bool(on)))
     STATE.setdefault("auto_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
     ui.set_auto_tick(STATE.get("panel_parts"), on)
@@ -2149,6 +2151,8 @@ def run_check(doc, report=True):
                          "encroach": len(o.encroach), "plan_encroach": len((result.get("plan") or {}).get("encroach") or []),
                          "envelope": result.get("envelope"), "at": time.time()}
         STATE.setdefault("checked_at", {})[doc.RuntimeSerialNumber] = time.time()     # a real check, of this document
+        if not STATE.get("live"):   # results on screen: edits are noticed from now on, whichever command drew them
+            live(True)              # (Edit site…, GordiumFacts, Check: review round 3 of the Check button)
         if result.get("notice"):
             STATE.setdefault("toasts", []).append([result["notice"]])
             if not STATE.get("headless"):
@@ -2315,8 +2319,8 @@ def _unhook():
 
 
 def live(on):
-    """Re-check after each edit: objects added, deleted, moved or changed, a layer change or hiding one
-    (attributes)."""
+    """Notice each edit (objects added, deleted, moved or changed, a layer change or hiding one): the results grey
+    out until a check; the idle handler checks by itself only with Check after every edit ticked."""
     _unhook()
     STATE["live"] = on
     if not on:
