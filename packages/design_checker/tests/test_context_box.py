@@ -1073,6 +1073,32 @@ def test_a_clear_under_a_locked_gordium_layer_deletes_on_unlocked_layers_and_put
     assert logic.outermost_first([(5, "A::B::C"), (2, "A"), (9, "A::B"), (1, "A::D")]) == [2, 1, 9, 5]
 
 
+def test_a_full_clear_still_drops_the_record_the_footprints_held_and_puts_the_changed_mark_back():
+    """Review round 7: round 6's `return left` sat above the clear's tail, so a full clear no longer deleted the
+    record, dropped the footprints held on screen or put the "changed since the check" mark back (the panel said
+    "Neighbourhood removed" on every later Draw; the tick fetched nothing for a new lot). Run, not searched."""
+    ns = _clear_ns()
+    doc = _context_doc()
+    deleted = []
+    doc.Strings = type("Strings", (), {"Delete": lambda self, section, key: deleted.append((section, key))})()
+    drawn = type("O", (), {"Id": "o1", "Geometry": None, "Attributes": type("A", (), {
+        "GetUserString": lambda self, k: "nys_parcels" if k == logic.CONTEXT_KEY else None})()})()
+
+    def delete(o, quiet):
+        ns["STATE"]["dirty"] = 9                                   # live mode hears the delete
+        return False
+    doc.Objects = type("Objects", (), {"FindByLayer": lambda self, layer: [drawn] if layer.FullPath.endswith("Parcels")
+                                       else [], "Delete": lambda self, o, quiet: delete(o, quiet)})()
+    ns["STATE"].update(context_guides={"doc": DOC, "lines": [1]}, dirty=5)
+    assert ns["_clear_context"](doc) == 1                          # one refused: counted for the caller
+    assert ("gordium", logic.CONTEXT_ENTRY) in deleted and "context_guides" not in ns["STATE"]
+    assert ns["STATE"]["dirty"] == 5
+    deleted.clear()
+    ns["STATE"].update(context_guides={"doc": DOC, "lines": [1]}, dirty=5)
+    assert ns["_clear_context"](doc, {"nys_parcels"}) == 1         # some sources only: the caller rewrites the record
+    assert deleted == [] and "context_guides" in ns["STATE"] and ns["STATE"]["dirty"] == 5
+
+
 def test_a_refused_delete_is_in_the_panels_one_line_and_never_beside_neighbourhood_removed():
     """Review round 6: the panel shows one line, so the "could not remove" warning said inside the clear was
     overwritten by the caller's next message ("Neighbourhood removed", "Neighbourhood drawn"...). Now the clear returns

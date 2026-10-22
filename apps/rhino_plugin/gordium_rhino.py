@@ -2513,12 +2513,12 @@ def _clear_context(doc, sources=None):
     for i, _, locked in was:
         doc.Layers[i].IsLocked = locked
     _lock_context(doc, True)               # the context layers as Gordium keeps them: all but the footprints
-    return left                            # the caller puts it in its one line (review round 6)
     if sources is None:
         if logic.guides_of(STATE.get("context_guides"), doc.RuntimeSerialNumber):
             STATE.pop("context_guides", None)
         doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)
     STATE["dirty"] = dirty
+    return left                            # the caller puts it in its one line (review round 6)
 
 
 def _edited_pieces(doc):
