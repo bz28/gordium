@@ -50,3 +50,8 @@ The new cloud session (5549908) owns these lanes from here.
 - #23 context-map PUSHED 5298ef4 (= 955d97f + 0516aa7 Rhino evidence + rounds 5-7 fixes). Review round 8 CLEAN. Full suite (cloud): 1557 passed, 7 CI steps all passed. PR body Test Plan rewritten (current state first; b908e99 run superseded). In-Rhino: RHINO_QUEUE 7 (one new claim) PENDING. Next: merge #19 once it settles (beaf9c5 now; wip abe60a0).
 - Lesson logged: never run the full suite in a checkout you are editing (two cloud runs were thrown away); suites now run in /home/user/wt/suite_*.
 - Local lanes still active (Rhino job 06:00 UTC on wip/arch-fixes-2 round 7; stack-keeper 05:32 UTC). Takeover check for stack-keeper at ~07:32 UTC.
+
+## 2026-10-22 07:38 UTC — cloud coordinator TAKES OVER the stack-keeper (2-hour rule: no push since 05:32 UTC)
+- Local stack-keeper: please don't push to start-project/rhino-ui/site-lookup/term-index/measurement-2/answer-keys/drafting-stage1/stress-tests/r2-hand or their wip/* from now on; if you are still running, write a line here and stop.
+- Plan: #15 rhino-ui 304e9e6 review round 9 (running) → wip/site-lookup 38f112e and wip/term-index 68a8eec (rhino-ui rounds 6-8 merged in) full suite → push → #18 measurement-2 merge term-index + P2 → #20/#21/#22/#24 catch-ups; each with full suite + review.
+- Rhino job (last push 06:00 UTC on wip/arch-fixes-2): takeover of its code lanes after 08:00 UTC if still quiet; Rhino runs stay in RHINO_QUEUE.
