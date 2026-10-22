@@ -856,9 +856,13 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "_checker": checker,                  # the checker's verdict for it: the most it may show (view)
             # the stated facts it reads that aren't set (R-3a's lot size: dwelling units…): its own "Enter …" button
             "needs": (rhino_logic.needs_of(reading_set.rule_names(rule), values) + (
-                ["stories"] if "stories" in reading_set.rule_names(rule)
-                and rhino_logic.stories_needed(measured.get("stories"))
-                and (measured.get("stories") or {}).get("count_settles", True) else [])) if st != COMPLIES else [],
+                ["stories"] if "stories" in reading_set.rule_names(rule) and (
+                    (measured.get("stories") or {}).get("stories_refused") or     # refused: Enter again, always
+                    rhino_logic.stories_needed(measured.get("stories"))
+                    and (measured.get("stories") or {}).get("count_settles", True)) else [])) if st != COMPLIES else [],
+            # the count typed was refused (the measuring's code): the plugin rolls it back by this, never by words
+            "refused": ((measured.get("stories") or {}).get("stories_refused")
+                        if "stories" in reading_set.rule_names(rule) else None),
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
