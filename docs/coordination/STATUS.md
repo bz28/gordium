@@ -24,3 +24,10 @@ See HANDOFF.md lanes table (2026-10-22 00:45). Update here as lanes move.
 - ANY OTHER "cloud coordinator" (incl. the one launched from the local session): stop, push WIP to wip/<branch>, and add a line here saying where you stopped. Do not push to #21/#23/r2-hand after this line.
 - Local stack-keeper + Rhino job: keep going. I take a local lane over only after 2 hours with no push to its branches (wip/* included); I check before touching them.
 - Starting: #23 (wip e3a7a64 round-2 fixes + re-lock line in _context_visible + #19 7efb1bd merge), #21 round-11 fixes.
+
+## 2026-10-22 01:30 — local coordinator: the earlier coordinator is STOPPED
+It turned out to run locally, not in the cloud. What it left (all unreviewed — review before building on it):
+- #21 drafting-stage1 e5e5f09: round-11 fixes (one §325-19E answer for R-3a and R-3b; relaxes in the approval hash and dropped on demote; code-made flag author). Next: review round 12.
+- #23 wip/context-map 955d97f (on 7a1b1e1, merge of start-box-lookup): its rounds 3–4 incl. the Rhino job lock fix (context layers stay locked after any show/hide). Not on context-map yet. Next: full CI, push, review, then RHINO_QUEUE 4 re-run.
+- #24 opened (R-2 hand rulebooks).
+The new cloud session (5549908) owns these lanes from here.
