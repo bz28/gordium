@@ -1528,3 +1528,136 @@ def answer_for(lines, request_id, limit):
         raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
                                "nothing from it is shown")
     return answer
+
+
+# ---- re-lookup on a drawn site (Ben, 2026-10-21): Look up previews, Draw resets ------------------------------------
+# Look up only fills the box: the answer is kept as a preview (its lot shown dashed on screen, no objects), nothing in
+# the model changes. Draw with an address other than the one drawn starts clean: everything Gordium drew is cleared
+# (the lot it drew, the starting house as Gordium drew it, the lookup's spot grades) and the new lot and starting
+# house drawn, in one undo step. The architect's own work (a lot they drew, picked or surveyed; an edited starting
+# house; buildings they drew) is never removed without asking once. The same address and Draw: no reset.
+
+KEEP_MINE = "keep"
+START_FRESH = "fresh"
+OWN_LOT_LABEL = "Address saved as a label: your lot and your building are unchanged."
+
+
+def same_address(a, b):
+    """Two addresses the same lot's, as typed or found: case, commas, spaces and the city/state tail aside, and
+    "Rd"/"Road" (the forms the lookup gives back) alike."""
+    import re
+
+    def norm(s):
+        s = re.sub(r"[,.]", " ", (s or "").lower())
+        s = re.sub(r"\b(ithaca|ny|new york|\d{5})\b", " ", s)
+        for long_, short in (("road", "rd"), ("street", "st"), ("avenue", "ave"), ("place", "pl"), ("drive", "dr"),
+                             ("lane", "ln"), ("court", "ct"), ("boulevard", "blvd")):
+            s = re.sub(r"\b" + long_ + r"\b", short, s)
+        return " ".join(s.split())
+    return bool(norm(a)) and norm(a) == norm(b)
+
+
+def preview_lookup(answer, facts, saved_ui, zones=()):
+    """(facts, saved_ui, preview ring or None) after a lookup's answer: the box's suggestions only (the address, the
+    district, and for a lot Gordium may replace its street side and size), the answer kept as `_pending` for Draw,
+    and the outline to show dashed on screen. Nothing in the model changes (Ben: Look up only fills the box)."""
+    replaces = lookup_may_replace(facts, saved_ui)
+    facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=replaces)
+    saved_ui.pop("_pending", None)
+    if (answer or {}).get("status") != "found":
+        return facts, saved_ui, None
+    w = answer.get("writes") or {}
+    saved_ui["_pending"] = {"address": facts.get("address") or (answer or {}).get("query"),
+                            "query": (answer or {}).get("query"), "answer": answer}
+    if not replaces:
+        saved_ui["_lookup"]["says"] = ("Your own lot is kept until you press Draw: the lookup filled in the address "
+                                       "and the district.")
+    return facts, saved_ui, w.get("lot_ring") or w.get("guide_ring")
+
+
+def own_work(table, facts, saved_ui):
+    """What of the architect's own a reset would remove, in words (empty: everything drawn is Gordium's): a lot they
+    drew, picked or surveyed; the starting house if it was edited since Gordium drew it; buildings they drew."""
+    out = []
+    lot = (facts or {}).get("lot_id")
+    if lot and lot != (saved_ui or {}).get("replaceable_lot"):
+        out.append("your lot")
+    house = table.massing()
+    if house and table.fingerprint(house) != (saved_ui or {}).get("house_fingerprint"):
+        out.append("your changes to the starting house")
+    if table.buildings():
+        out.append("the buildings you drew")
+    return out
+
+
+def reset_plan(facts, saved_ui, mine):
+    """At Draw: "none" (no answer pending, or the same address as the one drawn: nothing is redrawn), "redraw" (a new
+    address over what Gordium drew: cleared and drawn again, no question) or "ask" (the architect's own work, `mine`,
+    would be lost: asked once)."""
+    pending = (saved_ui or {}).get("_pending")
+    if not pending:
+        return "none"
+    drawn = (saved_ui or {}).get("drawn_address")
+    if drawn is not None and same_address(pending.get("address"), drawn):
+        return "none"
+    return "ask" if mine else "redraw"
+
+
+def reset_question(address, mine):
+    """The one question when the architect's own work would go: (the question, the two answers)."""
+    return ("Start fresh for " + (address or "this address") + "? " + _listed(mine)[0].upper() + _listed(mine)[1:] +
+            " will be removed.",
+            ("Start fresh", START_FRESH), ("Keep my building and check it on the new lot", KEEP_MINE))
+
+
+def _listed(items):
+    items = list(items)
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def apply_reset(table, session, facts, saved_ui, choice, zones=()):
+    """(facts, saved_ui, redraw_house) at Draw: the pending answer drawn for good through the session (one Cancel, one
+    undo), by apply_lookup itself (only what each source allows is written; the lot drawn and its spot grades held),
+    the lot drawn now replaceable whoever drew it (they chose: own_work asked). Unless they keep their building
+    (`choice` KEEP_MINE), the starting house and every building on the lot are held too. `redraw_house`: the starting
+    house is to be drawn again for the new lot."""
+    pending = (saved_ui or {}).get("_pending") or {}
+    saved_ui = dict(saved_ui, replaceable_lot=(facts or {}).get("lot_id"))
+    saved_ui.pop("_pending", None)
+    keep = choice == KEEP_MINE
+    if not keep:
+        for old in list(table.massing()) + list(table.buildings()):
+            session.hold(old)
+    facts, saved_ui, _ = apply_lookup(table, session, pending.get("answer") or {}, facts, saved_ui, zones)
+    saved_ui.update(drawn_address=pending.get("address"), house_fingerprint=None)
+    return facts, saved_ui, not keep and bool(facts.get("lot_id"))
+
+
+def lookup_first(address, facts, saved_ui):
+    """Whether Draw must look the typed address up first (and show the box again for review) rather than draw: it
+    differs from the address drawn and from the one last looked up, and the lot is one Gordium may replace (on the
+    architect's own lot a typed address is a label: OWN_LOT_LABEL)."""
+    if not (address or "").strip():
+        return False
+    pending = (saved_ui or {}).get("_pending") or {}
+    if same_address(address, pending.get("address")) or same_address(address, pending.get("query")):
+        return False
+    drawn = (saved_ui or {}).get("drawn_address")
+    if drawn is not None and same_address(address, drawn):
+        return False
+    return lookup_may_replace(facts, saved_ui)
+
+
+def draw_button(mode, saved_ui):
+    """The box's last button, as what it does: "Draw" when pressing it draws (a new project; a new address that
+    will be drawn), "Check" when it only checks what is there."""
+    if mode == "start":
+        return "Draw"
+    pending = (saved_ui or {}).get("_pending")
+    drawn = (saved_ui or {}).get("drawn_address")
+    return "Draw" if pending and not (drawn is not None and same_address(pending.get("address"), drawn)) else "Check"
+
+
+START_HAS_BUILDING = ("This model already has a building. To start over on another address, use Edit site… in the "
+                      "Gordium panel: Look up the new address and press Draw (the lot and starting house are drawn "
+                      "again for it). To check the building you have, use GordiumCheck.")

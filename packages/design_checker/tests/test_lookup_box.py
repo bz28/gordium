@@ -219,7 +219,10 @@ def test_only_what_each_source_allows_is_written_into_the_model():
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     body = rhino[rhino.index("def _lookup_done("):rhino.index("def _drawn(")]
     assert 'answer["facts"]' not in body and "answer.get(\"facts\")" not in body     # geometry only from writes
-    assert 'STATE["lookup_guide"]' in body and "logic.apply_lookup(RhinoTable(doc), session" in body and "AddCurve" not in body
+    # Look up previews (logic.preview_lookup: nothing in the model); Draw writes through logic.apply_reset, which
+    # draws by apply_lookup (Ben, 2026-10-21: re-lookup)
+    assert 'STATE["lookup_guide"]' in body and "logic.preview_lookup(answer, facts, saved_ui" in body and \
+        "logic.apply_reset(table, session, facts, saved_ui, choice" in body and "AddCurve" not in body
 
 
 def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
@@ -481,7 +484,7 @@ def test_p3_the_lookups_files_are_closed_one_time_limit_and_no_silent_failure():
     poll = rhino[rhino.index("def _lookup_poll("):rhino.index("def _lookup_files_done(")]
     assert poll.count("_lookup_files_done(run)") == 2 and "_lookup_files_done(run)" in \
         rhino[rhino.index("def _lookup_stop("):rhino.index("def _lookup_done(")]
-    assert "LOOKUP_LIMIT_S = " not in rhino and 'logic.guard(frame_site, "frame the looked-up lot")' in rhino
+    assert "LOOKUP_LIMIT_S = " not in rhino and 'logic.guard(_frame_points, "frame the looked-up lot")' in rhino
     assert "frame_site_box" not in rhino
     assert "LOOKUP_LIMIT_S = " not in (REPO / "packages/design_checker/design_checker/lookup_box.py").read_text(
         encoding="utf-8")
@@ -562,6 +565,15 @@ class FakeTable:
     def ground_points(self):
         return [i for i, o in self.objects.items() if o["kind"] == "point"
                 and o["layer"] in ("Gordium::Grade", "Gordium::Grade::Finished")]
+
+    def massing(self):                       # the starting house's floors (Gordium::Massing)
+        return [i for i, o in self.objects.items() if o["layer"] == logic.MASSING]
+
+    def buildings(self):                     # what the architect drew on Building
+        return [i for i, o in self.objects.items() if o["layer"] == logic.LAYERS["building"]]
+
+    def fingerprint(self, ids):
+        return repr(sorted((i, self.objects[i].get("geom")) for i in ids))
 
     def snapshot(self):
         return {i: (o["layer"], o["kind"]) for i, o in self.objects.items()}, sorted(self.layers), self.views
@@ -1105,3 +1117,89 @@ def test_a_looked_up_district_without_rules_is_never_preselected_or_called_sugge
     facts, saved = logic.lookup_choices(payload | {"facts": {"zone": {"value": "R-1b"}}}, {}, {},
                                         zones=["R-1a", "R-1b", "R-3a"])
     assert facts["zone"] == "R-1b" and saved["zone_source"].startswith("suggested by Gordium")
+
+
+def drawn_sample():
+    """The sample as GordiumStart leaves it: its lot (106, Gordium's), the starting house's two floors as Gordium drew
+    them (their fingerprint saved), drawn for 106 Ithaca Rd."""
+    table = FakeTable({"sample": {"layer": "Site", "kind": "lot"},
+                       "floor1": {"layer": logic.MASSING, "kind": "brep", "geom": "f1"},
+                       "floor2": {"layer": logic.MASSING, "kind": "brep", "geom": "f2"}})
+    saved = {"from_sample": True, "replaceable_lot": "sample", "drawn_address": "106 Ithaca Rd, Ithaca, NY",
+             "house_fingerprint": table.fingerprint(["floor1", "floor2"])}
+    return table, {"lot_id": "sample", "address": "106 Ithaca Rd, Ithaca, NY"}, saved
+
+
+@pytest.mark.usefixtures("ground_from_the_lookup")
+def test_look_up_only_previews_and_draw_with_a_new_address_starts_clean():
+    """Ben (2026-10-21): Look up fills the box and nothing in the model changes (its lot is a preview); Draw with an
+    address other than the one drawn clears everything Gordium drew and draws the new lot, the starting house to be
+    drawn again for it, no question asked when all of it is Gordium's; one session, so Cancel puts it all back."""
+    table, facts, saved = drawn_sample()
+    before = table.snapshot()
+    f, sv, preview = logic.preview_lookup(looked_up("96_ithaca_rd"), facts, saved, ZONES)
+    assert table.snapshot() == before                                  # the model untouched
+    assert preview and sv["_pending"]["answer"]["status"] == "found" and f["lot_id"] == "sample"
+    assert logic.draw_button("check", sv) == "Draw"                    # pressing it draws
+    mine = logic.own_work(table, f, sv)
+    assert mine == [] and logic.reset_plan(f, sv, mine) == "redraw"
+    session = logic.BoxSession(table)
+    f2, sv2, redraw = logic.apply_reset(table, session, f, sv, logic.START_FRESH, ZONES)
+    assert redraw and f2["lot_id"] != "sample" and "_pending" not in sv2
+    assert {table.objects[i]["layer"] for i in ("sample", "floor1", "floor2")} == {logic.HOLDING_LAYER}
+    assert logic.same_address(sv2["drawn_address"], "96 Ithaca Rd")
+    session.rollback()                                                 # Cancel: as it was
+    assert table.snapshot() == before
+    session = logic.BoxSession(table)
+    f3, sv3, _ = logic.apply_reset(table, session, f, sv, logic.START_FRESH, ZONES)
+    session.commit()                                                   # Draw: the old ones gone for good
+    assert not {"sample", "floor1", "floor2"} & set(table.objects) and f3["lot_id"] in table.objects
+
+
+@pytest.mark.usefixtures("ground_from_the_lookup")
+def test_the_same_address_draws_nothing_new_and_a_typed_one_is_looked_up_first():
+    table, facts, saved = drawn_sample()
+    f, sv, _ = logic.preview_lookup(looked_up("106_ithaca_rd"), facts, saved, ZONES)
+    assert logic.reset_plan(f, sv, logic.own_work(table, f, sv)) == "none"
+    assert logic.draw_button("check", sv) == "Check" and logic.draw_button("start", sv) == "Draw"
+    # typed, not looked up: Draw looks it up first (Gordium's lot); the address drawn, or the one just looked up: no
+    assert logic.lookup_first("96 Ithaca Rd", facts, saved)
+    assert not logic.lookup_first("106 Ithaca Road", facts, saved)
+    assert not logic.lookup_first("106 ithaca rd, Ithaca NY 14850", facts, saved)
+    _, sv96, _ = logic.preview_lookup(looked_up("96_ithaca_rd"), facts, saved, ZONES)
+    assert not logic.lookup_first("96 Ithaca Rd", facts, sv96)
+    # the architect's own lot: a typed address is a label, never looked up over it
+    own = dict(saved, replaceable_lot=None)
+    assert not logic.lookup_first("96 Ithaca Rd", facts, own)
+    assert logic.OWN_LOT_LABEL == "Address saved as a label: your lot and your building are unchanged."
+    assert logic.same_address("109 Ithaca Road, Ithaca, NY 14850", "109 ithaca rd")
+    assert not logic.same_address("109 Ithaca Rd", "106 Ithaca Rd") and not logic.same_address("", "")
+
+
+@pytest.mark.usefixtures("ground_from_the_lookup")
+def test_the_architects_own_work_is_never_removed_without_asking_once():
+    """Ben: an edited starting house, buildings they drew, or a lot they drew, picked or surveyed: asked once, "Start
+    fresh for 96 Ithaca Rd? … will be removed" or "Keep my building and check it on the new lot"."""
+    table, facts, saved = drawn_sample()
+    table.objects["floor2"]["geom"] = "f2 moved"                       # the house edited
+    table.objects["garage"] = {"layer": "Building", "kind": "brep", "held_from": None}
+    f, sv, _ = logic.preview_lookup(looked_up("96_ithaca_rd"), facts, saved, ZONES)
+    mine = logic.own_work(table, f, sv)
+    assert mine == ["your changes to the starting house", "the buildings you drew"]
+    assert logic.reset_plan(f, sv, mine) == "ask"
+    question, fresh, keep = logic.reset_question(sv["_pending"]["address"], mine)
+    assert question.startswith("Start fresh for 96 Ithaca") and question.endswith(
+        "Your changes to the starting house and the buildings you drew will be removed.")
+    assert fresh == ("Start fresh", logic.START_FRESH)
+    assert keep == ("Keep my building and check it on the new lot", logic.KEEP_MINE)
+    session = logic.BoxSession(table)
+    f2, sv2, redraw = logic.apply_reset(table, session, f, sv, logic.KEEP_MINE, ZONES)
+    assert not redraw and {table.objects[i]["layer"] for i in ("floor1", "floor2", "garage")} == \
+        {logic.MASSING, "Building"}                                     # kept, checked on the new lot
+    assert table.objects["sample"]["layer"] == logic.HOLDING_LAYER and f2["lot_id"] != "sample"
+    session.rollback()
+    # a lot they picked: theirs too
+    picked = dict(saved, replaceable_lot=None)
+    f, sv, _ = logic.preview_lookup(looked_up("96_ithaca_rd"), facts, picked, ZONES)
+    assert "your lot" in logic.own_work(table, f, sv) and logic.reset_plan(f, sv, ["your lot"]) == "ask"
+    assert facts["lot_id"] == "sample" and table.objects["sample"]["layer"] == "Site"   # nothing until they answer
