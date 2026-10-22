@@ -1675,3 +1675,15 @@ def test_the_envelope_never_uses_a_grade_the_measuring_refused():
     assert got["ground_is_flat"] is None
     good = _envelope_facts({"buildings": [box(10, 25, 35, 65, 0, 30)]}, {"grade_points": spots})
     assert good["ground_is_flat"] is True and good["grade_elevation"] == pytest.approx(0.0)
+
+
+def test_the_envelope_refuses_a_buried_solid_as_the_measuring_does():
+    """#15 round 6 (P3): envelope_grade skipped the measuring's buried-solid refusal."""
+    import sys
+    from design_checker.check import _envelope_facts
+    sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
+    from test_measure import box
+    spots = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]]
+    buried = box(40, 75, 48, 90, -12, -2, id="buried")              # wholly under the ground, not under the house
+    got = _envelope_facts({"buildings": [box(10, 25, 35, 65, 0, 30), buried]}, {"grade_points": spots})
+    assert got["ground_is_flat"] is None

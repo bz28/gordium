@@ -69,10 +69,10 @@ STOPS = {
                     "blocks",
     "parts_overlap": "part of the building ({what}) starts partly inside the one below it (from {low} ft to {high} "
                      "ft): move it to stand on the one below, or join them",
-    "parts_overlap": "part of the building ({what}) starts partly inside the one below it (from {low} ft to {high} "
-                     "ft): move it to stand on the one below, or join them",
     "part_raised": "part of the building ({what}) starts above the ground: it may be another story: draw its "
                    "stories as floor blocks, or check the count",
+    "stories_below_one": "the stories typed ({typed}) are fewer than one: every building has at least a first story "
+                         "(§325-3): check the count",
     "stories_above_drawn": "the stories typed ({typed}) are more than the drawing could hold ({what}, {height} ft "
                            "tall: at most {most}, at 7 ft a story, R305.1): check the count, or the drawing",
     "basement_part": "part of the building ({what}) is below the ground: whether a basement or cellar counts as a "
@@ -88,7 +88,7 @@ STOPS = {
     "empty_building": "a building object has nothing to measure (no faces): check it on the Building layer",
     "no_main_building": "more than one building: pick the main building",
     "outside_lot": "a building isn't inside the lot: {what}",
-    "open_solid": "a building isn't a closed solid",
+    "open_solid": "a building isn't a closed solid: {what}",
     "open_mesh": "a building mesh isn't closed",
     "curved_surface": "a building has a curved surface (not measured yet)",
     "curved_edge": "a building has a curved edge (not measured yet)",

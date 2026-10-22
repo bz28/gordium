@@ -146,11 +146,14 @@ def stories_needed(record):
 
 
 def refused_stories(items):
-    """The message when a count entered is fewer than the floors drawn (the measuring refuses it), else None."""
-    i = next((i for i in items or [] if i.get("measure") == "stories" or i.get("name") == "Stories"), None)
-    why = (i or {}).get("reason") or ""
-    refused = "fewer than the floor blocks drawn" in why or "more than the drawing could hold" in why
-    return (why[0].upper() + why[1:] + ". The count wasn't kept.") if refused else None
+    """The message when the count entered was refused by the measuring (its code, stories_refused, on the row:
+    never its words, which may be reworded), else None."""
+    i = next((i for i in items or [] if i.get("refused")), None)
+    if i is None:
+        return None
+    why = i.get("reason") or ""
+    i_said = why.split(": does not comply under that reading. ")[-1].rstrip(".")
+    return (i_said[0].upper() + i_said[1:] if i_said else "The count") + ". The count wasn't kept."
 
 
 def needs_of(names, values):
