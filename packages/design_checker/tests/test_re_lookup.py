@@ -521,3 +521,17 @@ def test_the_district_the_architect_picked_survives_the_reset():
     box = site.box().look_up(guide_only("96_ithaca_rd"))
     box.typed.update(zone=picked)
     assert box.draw() == "open" and box.shown()["zone"] == picked and box.facts["use"] == "one_family"
+
+
+def test_a_preview_whose_district_has_no_rules_gives_the_district_back_when_the_address_is_retyped():
+    """Headless run of the plugin at ea7963b: 96 looked up where the City map says a district Gordium has no rules
+    for (the box then shows no district), the drawn address typed back: the sample's district must come back (the
+    box writes "no district" as None, and the preview's undo matched only "no value": R-1b was lost at Draw)."""
+    p = answer("96_ithaca_rd")
+    p["facts"] = {**p["facts"], "zone": {**p["facts"]["zone"], "value": "R-3b"}}
+    site = Site()
+    box = site.box().look_up(p)
+    assert not box.facts.get("zone")                           # no rules for R-3b: no district set
+    assert box.type_address(SAMPLE).draw() == "district-again" # put back, shown, ticked again
+    assert box.facts["zone"] == "R-1b" and box.saved["zone_source"] == "entered by you"
+    assert box.draw() == "drawn" and site.facts["zone"] == "R-1b"

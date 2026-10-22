@@ -2016,9 +2016,12 @@ def drop_pending(facts, saved_ui):
     the preview left it (an architect's later change stays)."""
     facts, saved_ui = dict(facts or {}), dict(saved_ui or {})
     pending = saved_ui.pop("_pending", None) or {}
+    def same(a, b):                    # None and no value are the same (the box writes "no district" as None)
+        return (MISSING if a is None else a) == (MISSING if b is None else b)
+
     for where, key, old, new in pending.get("undo") or []:
         target = facts if where == "facts" else saved_ui
-        if target.get(key, MISSING) == new:
+        if same(target.get(key, MISSING), new):
             if old is MISSING:
                 target.pop(key, None)
             else:
