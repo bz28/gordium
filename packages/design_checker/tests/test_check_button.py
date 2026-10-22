@@ -123,3 +123,47 @@ def test_every_new_or_refilled_panel_shows_the_documents_tick():
     """P3: a rebuilt panel and the check-error path left the tick off for a document that has it on."""
     assert body(RHINO, "def panel(", "\ndef ").count("ui.set_auto_tick(p, _auto(doc))") == 2
     assert 'ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))' in body(RHINO, "def run_check(", "\ndef _toast(")
+
+
+# ---- review round 2 -------------------------------------------------------------------------------------------
+
+def _idle_tree():
+    import ast
+    src = body(RHINO, "def _idle(", "\ndef ")
+    return ast.parse(src).body[0]
+
+
+def test_the_viewport_greys_after_an_edit_whether_or_not_the_panel_is_open():
+    """P0: round 1's document-switch block ended in a return that made the stale branch's redraw unreachable, so
+    after an edit the viewport kept the old marks (✓ on a yard just broken) as if current. The viewport works out
+    "out of date" as it draws: the stale branch must redraw, and not only when the panel is open."""
+    import ast
+    fn = _idle_tree()
+    for node in ast.walk(fn):                       # nothing ever follows a return in a block
+        for field in ("body", "orelse"):
+            block = getattr(node, field, None)
+            if isinstance(block, list):
+                for k, st in enumerate(block[:-1]):
+                    assert not isinstance(st, ast.Return), ast.unparse(block[k + 1])
+    stale = next(n for n in ast.walk(fn) if isinstance(n, ast.If)
+                 and any("stale_shown" in ast.unparse(s) for s in n.body))
+    assert "Visible" not in ast.unparse(stale.test)          # greying never waits for the panel
+    last = stale.body[-1]
+    assert isinstance(last, ast.Expr) and ast.unparse(last) == "_redraw()"
+
+
+def test_gordiumlive_turns_the_tick_never_the_edit_hooks_off():
+    """Round 2: GordiumLive turned the edit hooks off, so edits went unnoticed and old marks stayed as if current.
+    It now flips Check after every edit; edits are always noticed."""
+    toggle = body(RHINO, "def toggle_live(", "\ndef ")
+    assert "set_auto_check(not _auto(doc))" in toggle and "live(not" not in toggle and "live(False)" not in toggle
+
+
+def test_the_architects_docs_say_press_check():
+    """P2: QUICKSTART and README still said Gordium re-checks by itself half a second after every edit."""
+    for name in ("QUICKSTART.md", "README.md"):
+        text = (REPO / "apps/rhino_plugin" / name).read_text(encoding="utf-8")
+        flat = " ".join(text.split())
+        assert logic.CHANGED_SINCE in flat and logic.AUTO_CHECK_LABEL in flat, name
+        assert "Half a second after you stop, Gordium re-checks" not in flat, name
+        assert "With live mode on (the default), it re-checks after every edit" not in flat, name

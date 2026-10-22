@@ -1,6 +1,7 @@
 #! python3
 """Gordium in Rhino 8: GordiumCheck checks the open model against its zone's rules, shows the largest legal
-building (the envelope), and re-checks after every edit (live mode).
+building (the envelope). After an edit the results grey out until the panel's Check (or, with Check after every
+edit ticked, Gordium checks again by itself).
 
 This script only talks to Rhino. All measuring and checking is Gordium's own Python (the repo's packages, run
 by its .venv in the background; docs/decisions/2026-10-20_rhino_talks_to_python.md): the lot and building
@@ -8,7 +9,7 @@ objects are copied into a small temporary .3dm, sent with the lot facts, and the
 the model is changed: highlights, the envelope and the message are drawn on top (a display conduit).
 
 Commands (set up by install.py): GordiumStart (a new project: the lot and the largest legal starting building),
-GordiumCheck, GordiumLive (on/off), GordiumFacts (edit the lot facts), GordiumOff (stop and clear the drawing).
+GordiumCheck, GordiumLive (Check after every edit, on/off), GordiumFacts (edit the lot facts), GordiumOff (stop and clear the drawing).
 """
 
 import json
@@ -2254,19 +2255,20 @@ def _idle(sender, e):
     if t and last_at is not None and last_at >= t and not _box_open():   # a check since the edit covered it
         STATE["dirty"] = t = None
     p = STATE.get("panel_parts")
-    if t and time.time() - t >= ui.STALE_SECONDS and STATE.get("stale_shown") != t and p is not None \
-            and p["form"].Visible:          # out of date: no marks until the re-check, or until Check (H1, F7)
+    if t and time.time() - t >= ui.STALE_SECONDS and STATE.get("stale_shown") != t:
+        # out of date: no marks until the re-check, or until Check (H1, F7): the viewport greys whether or not the
+        # panel is open (it works "out of date" out as it draws, so it is redrawn now; review round 2, P0)
         STATE["stale_shown"] = t
-        ui.set_auto_tick(p, _auto(front))
-        p["checked_before"] = last_at is not None
-        ui.show(p, None, checking=True)
+        if p is not None and p["form"].Visible:
+            ui.set_auto_tick(p, _auto(front))
+            p["checked_before"] = last_at is not None
+            ui.show(p, None, checking=True)
+        _redraw()
     if logic.should_check_front(STATE.get("check_front"), STATE.get("running"), _box_open()):
         STATE["check_front"] = False
         if front is not None and front.Strings.GetValue(SECTION, ENTRY):   # it has lot facts: checked once
             run_check(front, report=False)
-        return
-        _redraw()
-    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS, last_at,
+    elif logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS, last_at,
                             auto=_auto(front)):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc
@@ -2333,8 +2335,13 @@ def live(on):
 
 
 def toggle_live():
-    live(not STATE.get("live"))
-    Rhino.RhinoApp.WriteLine("Gordium live mode " + ("on" if STATE["live"] else "off"))
+    """GordiumLive: Check after every edit on or off for this file (the panel's tick). Edits are always noticed (the
+    results grey out until checked): turning the edit hooks off would leave old marks showing as current after an
+    edit (review round 2 of the Check button)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if not STATE.get("live"):
+        live(True)
+    set_auto_check(not _auto(doc))
 
 
 def toggle_envelope():
