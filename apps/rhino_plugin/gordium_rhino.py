@@ -137,12 +137,37 @@ def _worker():
         p = ui.spawn([_python(), "-u", "-m", "design_checker", "serve"], cwd=REPO, env=env,   # (no console on
                      stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log,            # Windows: ui.spawn)
                      universal_newlines=True, encoding="utf-8")
+        SERVERS.started(p.pid)                       # the only one: any other still recorded is stopped
         # its pipes served by threads: Rhino's thread never reads or writes one (rhino_logic.pipes)
         STATE["worker_sends"], STATE["worker_lines"] = logic.pipes(p)
         STATE["worker"] = p
         STATE["worker_code"] = now
         LEFTOVERS["worker"] = _stop_worker               # a later copy of this script stops it, writer too
     return p
+
+
+def _python_process(pid):
+    """The process with this number if it is still running and is Python (a number the system has since given to
+    another program is never touched), else None."""
+    try:
+        p = System.Diagnostics.Process.GetProcessById(int(pid))
+        return p if not p.HasExited and "python" in (p.ProcessName or "").lower() else None
+    except Exception:
+        return None
+
+
+def _stop_pid(pid):
+    p = _python_process(pid)
+    if p is not None:
+        try:
+            p.Kill()
+        except Exception:
+            pass
+
+
+# every checker Gordium started, recorded: a new one, a reload or Rhino closing stops the others (exactly one)
+SERVERS = logic.ServerBook(os.path.join(tempfile.gettempdir(), "gordium_servers.json"),
+                           lambda pid: _python_process(pid) is not None, _stop_pid)
 
 
 def _stop_worker():
@@ -155,6 +180,7 @@ def _stop_worker():
     LEFTOVERS.pop("worker", None)
     if p is not None and p.poll() is None:
         p.kill()
+    SERVERS.stop_all()                               # and any an earlier load left running
 
 
 def ask(request):
@@ -2160,3 +2186,5 @@ def _release(key, value):
 logic.sweep(LEFTOVERS, STATE, _release)
 if STATE.get("live"):                        # live mode was on before this copy loaded: its hooks back on
     live(True)
+# Rhino closing: the checker stopped with it (and any an earlier load left: SERVERS)
+_on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), "stop the checker"))

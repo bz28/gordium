@@ -2093,3 +2093,37 @@ def test_the_as_drawn_yard_advice_names_its_own_side_and_says_the_requirement():
     src = (REPO / "packages/design_checker/design_checker/present.py").read_text(encoding="utf-8")
     assert "        advice = _drawn_advice(hint, node, margin, numbers, values, label)\n" in src
     assert '        if advice and advice.get("yard"):' in src and "            hint = advice_text(advice)" in src
+
+
+def test_the_plugin_keeps_exactly_one_checker_process(tmp_path):
+    """The coordinator found 30 orphaned `python -u -m design_checker serve` children of Rhino, one per plugin load
+    (on Windows each would be a console window too). Every checker started is recorded (rhino_logic.ServerBook, a
+    small file in the temp folder): starting one stops every earlier one still running, as does stopping the
+    checker, and Rhino closing stops it. A recorded number is stopped only while it is still Python (never a
+    program the system has since given that number)."""
+    from design_checker import rhino_logic as logic
+    running, stopped = {101, 202, 303}, []
+
+    def stop(pid):
+        stopped.append(pid)
+        running.discard(pid)
+
+    book = logic.ServerBook(str(tmp_path / "servers.json"), lambda pid: pid in running, stop)
+    book.started(101)                                       # the plugin loaded: its checker
+    book.started(202)                                       # loaded again (a reload, a test script): one server
+    assert stopped == [101] and book.pids() == [202]
+    running.discard(202)                                    # it ended by itself: nothing to stop, just forgotten
+    book.started(303)
+    assert stopped == [101] and book.pids() == [303]
+    book.stop_all()                                         # stopped (Rhino closing, the checker stopped)
+    assert stopped == [101, 303] and book.pids() == []
+    assert logic.ServerBook(str(tmp_path / "missing" / "x.json"), lambda p: True, stop).pids() == []   # no record
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    worker = rhino[rhino.index("def _worker("):rhino.index("def _stop_worker(")]
+    assert "        SERVERS.started(p.pid)" in worker
+    stop_fn = rhino[rhino.index("def _stop_worker("):rhino.index("def ask(")]
+    assert "    SERVERS.stop_all()" in stop_fn
+    assert '_on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), "stop the checker"))' \
+        in rhino
+    alive = rhino[rhino.index("def _python_process("):rhino.index("def _stop_pid(")]
+    assert 'not p.HasExited and "python" in (p.ProcessName or "").lower()' in alive and "os.kill" not in alive

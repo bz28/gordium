@@ -1199,3 +1199,38 @@ def open_command(os_name, target):
     """How a file or link is opened with the computer's own app: ("startfile", target) on Windows (os.startfile:
     `open` is macOS's), ("run", ["open", target]) on macOS."""
     return ("startfile", target) if os_name == "nt" else ("run", ["open", target])
+
+
+class ServerBook:
+    """The checker processes Gordium started from Rhino, kept in a small file (`path`) so a later load, a reload,
+    or Rhino closing stops every one still running: exactly one server at a time (the coordinator found 30 orphaned
+    `design_checker serve` children of Rhino, one per plugin load; on Windows each a console window too).
+    `alive(pid)` and `stop(pid)` are the operating system's (gordium_rhino), stand-ins in CI."""
+
+    def __init__(self, path, alive, stop):
+        self.path, self.alive, self.stop = path, alive, stop
+
+    def pids(self):
+        try:
+            with open(self.path, encoding="utf-8") as f:
+                return [int(p) for p in json.load(f)]
+        except (OSError, ValueError, TypeError):
+            return []
+
+    def _write(self, pids):
+        try:
+            with open(self.path, "w", encoding="utf-8") as f:
+                json.dump(sorted(set(pids)), f)
+        except OSError:
+            pass
+
+    def stop_all(self, keep=None):
+        """Stop every recorded server still running (but `keep`); the record then lists only `keep`."""
+        for pid in self.pids():
+            if pid != keep and self.alive(pid):
+                self.stop(pid)
+        self._write([keep] if keep else [])
+
+    def started(self, pid):
+        """A new server: every earlier one stopped, this one the only one recorded."""
+        self.stop_all(keep=pid)

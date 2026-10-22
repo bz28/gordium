@@ -456,6 +456,20 @@ try:
         ready["title"] = None                            # already written (the box is gone by now)
     elif step == "close":
         log["closed"] = [str(d.Path) for d in leftovers() if "pass2" in os.path.basename(d.Path or "") and close(d)]
+
+        def servers():                                   # design_checker processes that are Rhino's children
+            out = g.ui.spawn(["ps", "-A", "-o", "pid=,ppid=,command="], run=True, capture_output=True, text=True).stdout
+            return [l.split(None, 2)[0] for l in out.splitlines() if len(l.split(None, 2)) == 3
+                    and l.split(None, 2)[1] == str(os.getpid()) and "design_checker serve" in l]
+        try:
+            log["servers"] = {"after the runs": servers()}
+            claim("13 after every step, exactly one checker process is Rhino's", len(log["servers"]["after the runs"]) == 1,
+                  log["servers"])
+        finally:
+            g._stop_worker()                             # a test script leaves no server behind
+            time.sleep(0.5)
+        log["servers"]["after stopping"] = servers()
+        claim("13 stopped when the script ends: none left", log["servers"]["after stopping"] == [], log["servers"])
     log["ok"] = True
 except Exception:
     log["trace"] = traceback.format_exc()
