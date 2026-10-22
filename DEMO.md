@@ -37,11 +37,28 @@ cd $HOME\Documents\gordium
 git pull
 ```
 
-No install step this time (2026-10-22): no new Python packages since the last update.
+No install step this time (2026-10-22, evening): no new Python packages since the last update.
 
 Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
 
-## What's new in this preview (2026-10-22)
+## What's new in this preview (2026-10-22, evening)
+
+Everything in the morning preview below, plus:
+
+- **Look up shows before it draws.** In **Edit site…**, typing an address and pressing **Look up** fills in the
+  address and the district and shows the new lot as a **dashed outline**. Nothing in your model changes yet.
+- **Draw with a new address starts clean.** Gordium clears what it drew for the old address (its lot, the starting
+  house as it drew it) and draws the new lot and a new starting house. One **Undo** puts it all back.
+- **Your own work is never removed without asking.** If you moved the starting house, drew buildings, or drew or
+  picked your own lot, Gordium asks once: **Start fresh**, **Keep my building and check it on the new lot** (when
+  you have one), or **Cancel**.
+- The last button says **Draw** when pressing it will draw something, and **Check** when it only checks.
+- **An address that isn't found** (or a lookup that couldn't reach the map) is said in the box. Draw draws nothing
+  for it.
+- **Fewer repeated questions.** A lot in two zones is asked about once. The street's name from your address stays
+  after Draw.
+
+## What was new this morning (2026-10-22)
 
 Everything in the 2026-10-21 evening preview, plus:
 
@@ -64,6 +81,8 @@ Everything in the 2026-10-21 evening preview, plus:
 
 ## Known limits
 
+- **Corner lots get no starting house** (which yard is the front is still an open question for the architects):
+  after a lookup of a corner lot, draw your building yourself.
 - **Not yet re-checked inside Rhino after today's changes.** Ben's test Rhino will run the scripted checks before
   he tells you to update; if something looks wrong, take a screenshot and send it to Ben.
 - **Windows:** please confirm that no black console window appears and that Task Manager shows only one
