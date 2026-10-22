@@ -910,7 +910,8 @@ def test_live_mode_never_rechecks_under_an_open_start_box():
     save = rhino[rhino.index("def save_facts("):rhino.index("def _save_facts(")]
     assert 'if not logic.allowed("save_facts", _box_open()):' in save and "_save_facts(doc, facts)" in save
     conf = rhino[rhino.index("def confirm("):rhino.index("def _confirm(")]
-    assert conf.index("gate.leave()") < conf.index('STATE["dirty"] = time.time() - IDLE_SECONDS')
+    # the box's changes settled once it is closed (never moved earlier in time: the Check button, review round 1)
+    assert conf.index("gate.leave()") < conf.index("logic.changed_after_box(") and "time.time() - IDLE_SECONDS" not in conf
 
 
 def test_the_legend_stays_usable_while_a_box_is_open():
