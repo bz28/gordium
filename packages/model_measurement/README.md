@@ -82,6 +82,14 @@ Every reason the code gives today comes from the table:
   architects)".
 - **The street side:** "the street side isn't given: pick the lot line on the street"; "a street line given
   doesn't match a lot line: pick the street side again"; "the street lot lines given aren't next to each other";
+  "the street lot lines given are on two streets: a corner lot (§325-19C), so which yards are front, side and rear,
+  and which street's frontage is the lot width, are open questions; answer Corner lot?"; "the street lot lines given
+  turn 90° in all: do they face one street that bends, or two streets at a corner? Answer Corner lot?, or name the
+  street each lot line is on" (lot width is frontage on one public right-of-way, §325-8 Column 7: never measured
+  along two streets; one street or two is the street's identity first, the drawing's total swing only when none is
+  known: street_lines.py); "the street names saved for the street lot lines no longer match them (the lines were
+  picked again): pick the street side again" (names saved before the lines changed are set aside, never used:
+  the lot facts are still read and checked);
   "every lot line is on a street: which yards are front, side and rear is an open question for the architects".
 - **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
   lot yes or no"; "a corner lot: which yards are front, side and rear yards, and which street's frontage is the
