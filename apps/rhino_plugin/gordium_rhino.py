@@ -236,16 +236,21 @@ def _holds_building(definition, depth=0):
     return False
 
 
-def _sorted_objects(doc):
-    """(lot candidates, buildings, problems) for the whole model."""
-    lots, buildings, problems = [], [], []
+def _classified_objects(doc):
+    """Every object in the model, hidden and locked ones too, as (object, layer full path, geometry type name,
+    whether it is a block holding a building): the one walk the checker's sorting and a reset's questions share."""
     every = Rhino.DocObjects.ObjectEnumeratorSettings()
     every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # hidden still counts
     every.IdefObjects = False
     for o in doc.Objects.GetObjectList(every):
-        layer = doc.Layers[o.Attributes.LayerIndex].FullPath
-        kind = type(o.Geometry).__name__
-        holds = isinstance(o, Rhino.DocObjects.InstanceObject) and _holds_building(o.InstanceDefinition)
+        yield (o, doc.Layers[o.Attributes.LayerIndex].FullPath, type(o.Geometry).__name__,
+               isinstance(o, Rhino.DocObjects.InstanceObject) and _holds_building(o.InstanceDefinition))
+
+
+def _sorted_objects(doc):
+    """(lot candidates, buildings, problems) for the whole model."""
+    lots, buildings, problems = [], [], []
+    for o, layer, kind, holds in _classified_objects(doc):
         what = logic.classify(layer, kind, holds)
         if what == "lot" and o.Geometry.IsClosed:
             lots.append(o)
@@ -1463,26 +1468,18 @@ class RhinoTable:
 
     def _on(self, path):
         """Every object on a layer or its sublayers, hidden and locked ones too."""
-        every = Rhino.DocObjects.ObjectEnumeratorSettings()
-        every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True
-        every.IdefObjects = False
-        return [str(o.Id) for o in self.doc.Objects.GetObjectList(every)
-                if logic.on_layer(self.doc.Layers[o.Attributes.LayerIndex].FullPath, path)]
+        return [str(o.Id) for o, layer, _, _ in _classified_objects(self.doc) if logic.on_layer(layer, path)]
 
     def massing(self):
         """The starting house's floors (Gordium::Massing and its sublayers)."""
         return self._on(logic.MASSING)
 
     def buildings(self):
-        """The architect's buildings as the checker sees them (rhino_logic.own_buildings: Building and its sublayers,
-        what it can't measure there too, blocks holding one), never the starting house or what a box holds."""
-        every = Rhino.DocObjects.ObjectEnumeratorSettings()
-        every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True
-        every.IdefObjects = False
-        return logic.own_buildings(
-            (str(o.Id), self.doc.Layers[o.Attributes.LayerIndex].FullPath, type(o.Geometry).__name__,
-             isinstance(o, Rhino.DocObjects.InstanceObject) and _holds_building(o.InstanceDefinition))
-            for o in self.doc.Objects.GetObjectList(every))
+        """The architect's buildings as the checker sees them (rhino_logic.own_buildings over the checker's own walk:
+        Building and its sublayers, what it can't measure there too, blocks holding one), never the starting house
+        or what a box holds."""
+        return logic.own_buildings((str(o.Id), layer, kind, holds) for o, layer, kind, holds in
+                                   _classified_objects(self.doc))
 
     def fingerprint(self, ids):
         """The objects' shapes, to tell a starting house as Gordium drew it from one the architect edited."""

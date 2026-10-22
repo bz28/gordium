@@ -451,6 +451,11 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
     assert edit.rstrip().endswith("run_check(doc, report=False)") and "_end_undo(doc)" in edit
     table = rhino[rhino.index("class RhinoTable"):]
     assert "return logic.own_buildings(" in table[table.index("def buildings("):]
+    # one walk of the model for the checker's sorting and a reset's questions (round 3)
+    sort = rhino[rhino.index("def _sorted_objects("):rhino.index("def _lot_candidates(")]
+    assert "_classified_objects(doc)" in sort and "ObjectEnumeratorSettings" not in sort
+    walks = table[table.index("    def _on("):table.index("def fingerprint(")]
+    assert walks.count("_classified_objects(self.doc)") == 2 and "ObjectEnumeratorSettings" not in walks
 
 
 # ---- review round 1: each confirmed finding, as the architect would meet it --------------------------------------
@@ -477,6 +482,12 @@ def test_an_address_typed_after_look_up_drops_the_preview_and_its_district():
     assert box.facts["zone"] != "R-1b" or box.saved.get("zone_source") != "entered by you"   # the preview's
     assert box.type_address(SAMPLE).draw() == "box-again"
     assert box.facts["zone"] == "R-1b" and box.saved["zone_source"] == "entered by you"
+    said = logic.uncertain(box.shown()) or ""                 # its line went with it (round 3)
+    assert "Shown dashed" not in said and said.startswith("The lookup of 96 Ithaca")
+    assert box.button() == "Check" and not box.saved["_lookup"]["asks"]
+    assert box.type_address("96 Ithaca Rd").draw() == "lookup"   # typed again: looked up again, never "not found"
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.type_address(SAMPLE).draw() == "box-again"
     assert box.draw() == "drawn"
     assert site.table.snapshot()[0] == before[0][0] and site.saved["drawn_address"] == SAMPLE
     assert site.facts["zone"] == "R-1b" and site.saved["zone_source"] == "entered by you"

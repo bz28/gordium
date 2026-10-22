@@ -1993,6 +1993,7 @@ def same_address(a, b):
 MISSING = object()
 PREVIEW_SAYS = ("Shown dashed: {address}'s lot. Nothing in the model changes until Draw, which replaces what Gordium "
                 "drew with this lot and a new starting house.")
+SET_ASIDE = "The lookup of {address} was set aside (the address was changed): Look up to preview another address."
 NOT_DRAWN_YET = "{says} Nothing is drawn for {address}: put back {drawn} to check this lot."
 
 
@@ -2056,7 +2057,11 @@ def settle_pending(facts, saved_ui, address):
     typed address)."""
     pending = (saved_ui or {}).get("_pending")
     if pending and not (same_address(address, pending.get("address")) or same_address(address, pending.get("query"))):
-        return drop_pending(facts, saved_ui)
+        facts, saved_ui = drop_pending(facts, saved_ui)
+        # its line goes with it: the box never says another address's lot is shown or will be drawn (round 3)
+        saved_ui["_lookup"] = {"status": "set_aside", "query": pending.get("query"), "asks": [], "matches": [],
+                               "says": SET_ASIDE.format(address=pending.get("address") or pending.get("query"))}
+        return facts, saved_ui
     return dict(facts or {}), dict(saved_ui or {})
 
 
@@ -2098,7 +2103,7 @@ def draw_decision(table, facts, saved_ui, address):
     saved_ui = saved_ui or {}
     if lookup_first(address, facts, saved_ui):
         look = saved_ui.get("_lookup") or {}
-        if look.get("status") not in (None, "found") and same_address(address, look.get("query")):
+        if look.get("status") in LOOKUP_SAYS and same_address(address, look.get("query")):   # a lookup that failed
             drawn = saved_ui.get("drawn_address") or "the address drawn"
             if look["status"] == "not_found":
                 return "unfound", [], UNFOUND.format(address=address.strip(), drawn=drawn)
