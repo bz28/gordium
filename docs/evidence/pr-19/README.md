@@ -19,3 +19,14 @@ makes and fails loudly otherwise; each closes the documents it opens.
 | `2_city_outline_guide_only.png` | Top view when the State's parcels didn't answer: the City's outline as a dashed guide only, no lot written. |
 | `mvp_lookup_results.json` | `apps/rhino_plugin/tests/mvp_lookup_in_rhino.py` on e5fb0be (this PR merged with #15's MVP), 7 claims, all true: after Look up "106 Ithaca Rd" and Draw, the box has no Ground row (flat ground); the lookup's tax-map lot carries its turn from north (plan_north_deg 306.38), so the side yards read Southwest and Northeast; the panel is Rhino's docked panel; the header says "Ground: assumed flat"; every Delta is in words and never kinder than its row. Its "controls off while the box is open" claim held vacuously (no panel yet in a fresh document); the script now opens the panel first and needs a non-empty, all-off list (to be re-run; `pr19_checks_results.json` proves it with a panel). Run by the Rhino job, 2026-10-21. |
 | `mvp_lookup_106_after_lookup_top.png` | Top view after that lookup and Draw. |
+
+### The district box after a lookup with no rules (zone review rounds 1 and 2)
+
+Recorded 2026-10-22 in Rhino 8 (macOS) on start-box-lookup at 7efb1bd by the Rhino job: the real start box driven
+through its own controls (address typed, Look up, the dropdown, I confirm, Draw, Edit site… to reopen), never the
+scripted path; recorded lookup answers (106 Ithaca Rd) with the City map's district set per case.
+
+| File | What it proves |
+|---|---|
+| `r2a/r2a_results.json` | 8 of 8 claims true, with what each box showed at each stage. The map says R-2a (no rules in Gordium): nothing preselected, the row reads "not set", the line says "The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.", Draw off with "Pick the district to continue."; picking R-1b turns the source into "entered by you" at once; ticking turns Draw on; reopened after Draw: "R-1b · entered by you". The map says R-2a and R-1b: nothing preselected, the box asks which zone applies. The map says R-1b: "suggested by Gordium · City zoning map says R-1b (checked 2026-10-20)", the dated words gone on reopen. |
+| `r2a/1_r2a_after_lookup.png` … `r2a/7_reopened_suggested.png` | The box at each of those stages. |
