@@ -217,7 +217,7 @@ def set_street_lines(facts, lines, ids=None):
         facts["street_line"] = lines
     else:
         facts.pop("street_line", None)
-    if lines and isinstance(ids, list) and len(ids) == len(lines):
+    if lines and _street_lines().matching_ids(lines, ids) is not None:
         facts["street_ids"] = list(ids)
     else:
         facts.pop("street_ids", None)
@@ -788,6 +788,7 @@ def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
     hits = [k for k, (c, d) in enumerate(lines or []) if (near(a, c) and near(b, d)) or (near(a, d) and near(b, c))]
     if not hits:
         return [picked]
+    ids = _street_lines().matching_ids(lines, ids)        # names that don't match the lines: unnamed (round 8)
     if street_verdict(lines, ids)[0] == "two":            # known to be two streets: the clicked line's street
         mine = ids[hits[0]]
         return [list(map(list, line)) for k, line in enumerate(lines) if ids[k] == mine]

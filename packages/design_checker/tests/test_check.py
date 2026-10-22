@@ -2216,3 +2216,17 @@ def test_street_names_go_with_their_street_lines_on_every_path_and_never_stop_th
     width = r["measurements"]["lot_width"]
     assert width.get("status") != "complies" and "no longer match" in (width.get("reason") or ""), width
 
+
+
+def test_street_names_that_dont_match_the_lines_are_unnamed_at_a_pick_never_a_crash():
+    """arch-fixes-2 review round 8 (P3): the measuring set aside street names that don't match the street lines one
+    for one, but the start box's pick helper indexed them by line and crashed (IndexError) on saved or hand-written
+    facts with fewer names than lines. One rule (street_lines.matching_ids) for both: a mismatch is unnamed there."""
+    from design_checker import rhino_logic as logic
+    from model_measurement.street_lines import matching_ids
+    a, b, c = [[0, 0], [10, 0]], [[10, 0], [20, 0]], [[20, 0], [30, 0]]
+    assert logic.street_lines_after_pick([a, b, c], c, ids=["A St", "B Ave"]) == [a, b, c]     # unnamed: the whole
+    assert logic.street_lines_after_pick([a, b, c], c, ids=["A St", "A St", "B Ave"]) == [c]   # matching: its street
+    assert matching_ids([a, b], ["A St", None]) == ["A St", None]
+    assert matching_ids([a, b], ["A St"]) is None and matching_ids([a, b], ["A St", 7]) is None
+    assert logic.set_street_lines({}, [a, b], ["A St"]) == {"street_line": [a, b]}           # same rule on write

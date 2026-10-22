@@ -55,6 +55,15 @@ def heading_change(lines, tolerance=0.5):
     return high - low
 
 
+def matching_ids(lines, ids):
+    """The street names `ids` when they match the street lines one for one (a list as long as `lines`, each a name
+    or None), else None: THE validity rule for street_ids, for the measuring (a mismatch is stale, set aside) and the
+    start box (a mismatch is unnamed, never indexed past its end; arch-fixes-2 review round 8)."""
+    if isinstance(ids, list) and len(ids) == len(lines or []) and all(i is None or isinstance(i, str) for i in ids):
+        return ids
+    return None
+
+
 def street_verdict(lines, ids=None, tolerance=0.5):
     """("one" | "two" | "unsure", the heading change or None): "two" when the lines name two different streets
     (`ids`, one per line, None where unknown); "one" when they all name one street, or, none named, they swing no

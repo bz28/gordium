@@ -27,7 +27,7 @@ from shapely.validation import explain_validity
 from rule_format.rulebook import MEASURES_FILE, load
 
 from .stops import stop
-from .street_lines import street_verdict
+from .street_lines import matching_ids, street_verdict
 
 MEASURES = list(load(MEASURES_FILE))
 
@@ -123,8 +123,7 @@ class Lot:
             # short pieces), are never measured along both (review rounds 5 and 6, P0); a street that bends is
             # asked about, never called two
             ids = facts.get("street_ids")
-            stale = ids is not None and not (isinstance(ids, list) and len(ids) == len(facts["street_line"]) and
-                                             all(i is None or isinstance(i, str) for i in ids))
+            stale = ids is not None and matching_ids(facts["street_line"], ids) is None
             # names that don't match the lines (saved before the lines changed): set aside, never used, and said
             # (review round 7, P1: they made the whole check fail)
             verdict, turn = ("stale", None) if stale else self.street_verdict(facts)
