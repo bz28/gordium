@@ -95,6 +95,30 @@ the fixtures. A test checks every fixture and snapshot against `endpoints.yaml`.
   fixtures contain no owner or mailing fields and only storable sources.
 - A live check: `GORDIUM_LIVE=1 pytest packages/site_lookup`.
 
+## The context map (the neighbourhood around the lot)
+
+`site_lookup.context.context(lot_ring, http, half_size_ft=750)` asks for everything in a 1500 ft × 1500 ft square
+centred on the lot, the way an architect's site context drawing shows it. Drawing only: nothing in it is ever
+measured or checked.
+
+| Layer | Source | Store | In the customer's file? |
+|---|---|---|---|
+| Neighbouring parcels (the lot's own left out) | NYS Tax Parcels Public (only SWIS and print key asked for: never owner, mailing or value fields) | raw | yes, as locked curves |
+| Street centerlines | NYS Streets | raw | yes, as locked curves |
+| Building footprints (each with its id; Microsoft's, under the ODbL, left out) | NYS Building Footprints (in Ithaca: Tompkins County ITS GIS Division, 2014) | raw (Ben's decision, 2026-10-21) | yes, as editable outlines (no heights), with their credit and date |
+
+Each layer is asked on its own (one service down leaves the others), page by page (`resultOffset`, OBJECTID order,
+a 5,000-feature cap that says so), and clipped to the square. Coordinates are Gordium's feet from the lot's origin,
+so the lookup's placement in the model applies unchanged. The `snapshot` keeps, per layer, its source and status (and
+its count only if the source may be kept), and for every request the URL, date and SHA-256, never an answer; a
+live-only source is only named.
+
+106 Ithaca Rd (live, 2026-10-20): 229 neighbouring parcels, 38 street pieces, 322 footprints, 3 requests,
+about 1 s, 160 KB. In CI: `tests/fixtures/106_ithaca_rd_context.json` (the State's parcels, streets and footprints,
+175 KB, recorded 2026-10-21 by `capture.py`). The live-only machinery (a source that may not be kept, shown on screen
+and never saved) stays for any such source; its tests switch the footprints back to store: none. Tests:
+`tests/test_context.py`; the Rhino side's in `design_checker/tests/test_context_box.py`.
+
 ## Not yet
 
 Wiring into the Rhino start box (after the start box PR lands); confirming the zone suggestion against the

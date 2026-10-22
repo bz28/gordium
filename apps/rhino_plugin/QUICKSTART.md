@@ -265,6 +265,12 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
      `Gordium::Massing` layer. **Hide starting house** in the panel hides it (it is still checked). On a
      lot from the tax map it keeps 2'-0" back from every limit, so it complies even if the tax map is 2 ft off;
      on a survey it goes to the limits;
+   - on a looked-up lot, the **neighbourhood** 750 ft around it, like a site context drawing, all kept in the file:
+     the neighbouring tax parcels and the street centerlines in grey on locked `Gordium::Context` layers; the
+     neighbouring building footprints as outlines (no heights) on the unlocked `Gordium::Context::Buildings` layer,
+     so you can drag and edit them (an outline you edit is yours: Gordium never removes or redraws it); a north
+     arrow, a 100 ft scale bar and the sources. The check never measures any of it, and says so if a solid on those
+     layers sits over the lot. **Show neighbourhood** in the panel turns it off and on (kept with the file);
    - with **Show on-screen labels** ticked in the panel (off at first): each yard's and lot edge's label, and the
      status box top right ("? 2 need review · 8 comply · 2 not checked"). Off, a failing yard's shortfall still
      shows ("✕ Rear yard 21'-2", needs 22'-6"");

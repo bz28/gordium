@@ -44,14 +44,16 @@ class Fake:
     """Answers like the services would. Recorded answers for the public sources (matched on the exact
     request); stand-ins for the City and County layers; any piece can be overridden per test."""
 
-    def __init__(self, fixture: dict, zones=None, historic=(), county=None, offline=False, city_parcels=None):
+    def __init__(self, fixture: dict, zones=None, historic=(), county=None, offline=False, city_parcels=None,
+                 context=None):
         self.fx, self.offline = fixture, offline
         self.zones, self.historic, self.county, self.city_parcels = zones, list(historic), county, city_parcels
+        self.context = context or {"answers": []}        # the context map's recorded answers (<name>_context.json)
         self.asked: list[str] = []
 
     def _recorded(self, key, params):
         want = json.dumps(params, sort_keys=True)
-        for a in self.fx["answers"]:
+        for a in self.fx["answers"] + self.context["answers"]:
             if a["source"] == key and json.dumps(a["params"], sort_keys=True) == want:
                 return a["body"]
         if key == "state_parcels":                   # a point the capture didn't ask about: no parcel there
