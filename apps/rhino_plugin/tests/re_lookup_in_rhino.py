@@ -3,11 +3,13 @@
 in CI; the logic is tested in CI (packages/design_checker/tests/test_re_lookup.py). A fresh feet document:
 1. GordiumStart on the empty file: the sample (106 Ithaca Rd), its lot and starting house.
 2. Edit site…, "96 Ithaca Rd" typed, Look up (recorded answers): while the box is open nothing in the model has
-   changed, the looked-up lot is shown dashed; Draw: the sample's lot and house gone, 96's lot and a new starting
-   house drawn, no question asked (all of it was Gordium's). One Undo puts the sample back exactly; Redo again.
-3. The starting house edited (one floor moved), Edit site…, Look up 109 Ithaca Rd: asked once, "Start fresh for
-   109 …? Your changes to the starting house will be removed."; Keep my building: the floors kept, the lot is 109's.
-4. Edit site…, Look up 109 again: no question, nothing in the model changes.
+   changed, the looked-up lot is shown dashed; Draw: the sample's lot and house gone, 96's lot drawn, no question
+   asked (all of it was Gordium's). 96 is a corner lot, so no starting house is drawn on it (by design: which yards
+   are front is the architects' open question). One Undo puts the sample back exactly; Redo again.
+3. A new file: the sample's starting house edited (one floor moved), Edit site…, Look up 96: asked once, "Start
+   fresh for 96 …? Your changes to the starting house will be removed."; Keep my building: the floors kept, the
+   lot is 96's.
+4. Edit site…, Look up 96 again: no question, nothing in the model changes.
 Writes <temp>/gordium_re_lookup/out.json and Top captures; closes its document."""
 import json
 import os
@@ -116,11 +118,14 @@ try:
     claim("2 96's lot is drawn on Site", lot is not None and "96" in (lot.Attributes.Name or "") and
           doc.Layers[lot.Attributes.LayerIndex].FullPath == g.LAYERS["lot"],
           lot.Attributes.Name if lot else None)
-    claim("2 a new starting house is drawn for it", len(new_house) >= 2 and not set(new_house) & set(house),
-          new_house)
-    claim("2 the file says what is drawn: 96, its house as Gordium drew it",
-          g.logic.same_address(ui_state.get("drawn_address"), "96 Ithaca Rd") and ui_state.get("house_fingerprint")
-          == g.RhinoTable(doc).fingerprint(new_house), {k: ui_state.get(k) for k in ("drawn_address",)})
+    # 96 Ithaca Rd is a corner lot (Ithaca Rd and Mitchell St): no starting house is drawn on one, by design (which
+    # yards are front, side and rear is the architects' open question, §325-19C; envelope.py says so)
+    claim("2 no starting house on 96, a corner lot (the architects' open question)", new_house == [] and
+          any("corner lot" in n for n in (g.STATE.get("start") or {}).get("notes") or []),
+          (g.STATE.get("start") or {}).get("notes"))
+    claim("2 the file says what is drawn: 96, and no house of Gordium's",
+          g.logic.same_address(ui_state.get("drawn_address"), "96 Ithaca Rd") and not ui_state.get("house_fingerprint"),
+          {k: ui_state.get(k) for k in ("drawn_address", "house_fingerprint")})
     capture(doc, "2_drawn_96")
     doc.Undo()
     undone = objects(doc)
@@ -129,26 +134,31 @@ try:
     doc.Redo()
     claim("2 Redo draws 96 again", objects(doc) == after, len(objects(doc)))
 
-    # 3. the starting house edited: asked once; keep it
-    floor = g._find(doc, new_house[-1])
+    # 3. a new file: the sample's starting house edited, then 96 looked up: asked once; keep it
+    close(doc)
+    g = fresh_module()
+    doc = docs.open("Large Objects - Feet")
+    g.gordium_check()
+    house = g.RhinoTable(doc).massing()
+    floor = g._find(doc, house[-1])
     moved = str(doc.Objects.Transform(floor, Rhino.Geometry.Transform.Translation(3, 0, 0), True))
-    new_house = new_house[:-1] + [moved]          # (the same id when Rhino replaces it in place)
-    seen = edit_site(g, doc, "109 Ithaca Rd, Ithaca, NY 14850", "109_ithaca_rd", lambda fresh, keep: keep[1])
+    house = house[:-1] + [moved]                   # (the same id when Rhino replaces it in place)
+    seen = edit_site(g, doc, "96 Ithaca Rd, Ithaca, NY 14850", "96_ithaca_rd", lambda fresh, keep: keep[1])
     log["step3"] = {k: v for k, v in seen.items() if k != "objects"}
     asked = seen["asked"]
-    claim("3 asked once, naming the edited house", len(asked) == 1 and asked[0][0].startswith("Start fresh for 109")
+    claim("3 asked once, naming the edited house", len(asked) == 1 and asked[0][0].startswith("Start fresh for 96")
           and asked[0][0].endswith("Your changes to the starting house will be removed.") and asked[0][2],
           asked)
     facts = g.current_facts(doc)
     lot = g._find(doc, facts.get("lot_id") or "")
     kept = g.RhinoTable(doc).massing()
-    claim("3 Keep my building: the floors kept, the lot is 109's", sorted(kept) == sorted(new_house) and
-          lot is not None and "109" in (lot.Attributes.Name or ""), {"kept": kept})
-    capture(doc, "3_kept_on_109")
+    claim("3 Keep my building: the floors kept, the lot is 96's", sorted(kept) == sorted(house) and
+          lot is not None and "96" in (lot.Attributes.Name or ""), {"kept": kept})
+    capture(doc, "3_kept_on_96")
 
     # 4. the same address again: nothing changes
     before = objects(doc)
-    seen = edit_site(g, doc, "109 Ithaca Rd, Ithaca, NY 14850", "109_ithaca_rd")
+    seen = edit_site(g, doc, "96 Ithaca Rd, Ithaca, NY 14850", "96_ithaca_rd")
     log["step4"] = {k: v for k, v in seen.items() if k != "objects"}
     claim("4 the same address: no question and nothing in the model changes",
           seen["asked"] == [] and objects(doc) == before, seen["asked"])
