@@ -152,7 +152,7 @@ Every reason the code gives today comes from the table:
   could be a principal one (enclosed, at least 7 ft tall and 70 sf: NYS Residential Code R305.1, R304.1) is also
   read as if it were the main one, so the assumption never passes what a pick wouldn't); "a building object has
   nothing to measure (no faces): check it on the Building layer"; "a
-  building isn't inside the lot: {what}" (which one; the yards wait only if it is the main building); "a building isn't a closed solid"; "a building mesh isn't closed"; "a building
+  building isn't inside the lot: {what}" (which one; the yards wait only if it is the main building); "a building isn't a closed solid: {what}" (which object: its Rhino name, else its id; the rows waiting on it point at it, so Zoom to finds it); "a building mesh isn't closed"; "a building
   has a curved surface (not measured yet)"; "a building has a curved edge (not measured yet)"; "a building mesh's
   points may be single precision, too coarse this far from the origin to measure to 0.01 ft (move it nearer the
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it

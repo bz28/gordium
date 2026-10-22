@@ -974,7 +974,7 @@ def _unenclosed(building: dict) -> str | None:
         total, outline = seen(k)
         if outline <= 1e-6:
             if k == 2:
-                return stop("open_solid")
+                return stop("open_solid", what=_called(building))
             continue
         if total < 2 * outline * (1 - 1e-3):
             short.append(k)
@@ -985,7 +985,19 @@ def _unenclosed(building: dict) -> str | None:
     walls = len(level) < len(faces)
     if short == [2] and walls and all(all(abs(p[2] - bottom) <= TOL for p in f["points"]) for f in level):
         return None                     # walls on a floor, nothing over them: no_roof says so
-    return stop("open_solid")
+    return stop("open_solid", what=_called(building))
+
+
+def _called(building: dict) -> str:
+    """An object as the architect finds it: its Rhino name, else its id (Zoom to finds it by id)."""
+    return building.get("name") or building["id"]
+
+
+def _open_ids(buildings: list[dict]) -> list:
+    """The objects that aren't closed solids (the reader's word, or the measuring's own _unenclosed)."""
+    shut = stop("open_solid", what="")
+    return [b["id"] for b in buildings if any(str(p).startswith(shut) for p in b.get("problems") or [])
+            or (b.get("faces") and not b.get("problems") and _unenclosed(b))]
 
 
 def _connected(buildings: list[dict]) -> list[list[dict]]:
@@ -1110,6 +1122,13 @@ def measure(site: dict, facts: dict) -> dict[str, dict]:
     """Every measurement in measures.yaml, in its order, each with its working, for one site and its lot facts."""
     out = _measure(site, facts)
     assumed = out.pop("_assumed_main", None)
+    shut = stop("open_solid", what="")
+    open_ids = _open_ids(site.get("buildings") or []) if any(
+        shut in (r.get("reason") or "") for r in out.values() if isinstance(r, dict)) else []
+    for name in MEASURES:               # a row waiting on an open object points at it (Zoom to finds it)
+        r = out[name]
+        if open_ids and r.get("value") is None and shut in (r.get("reason") or ""):
+            out[name] = dict(r, objects=open_ids)
     if assumed:                         # every measurement made from the starting house carries the marker
         for name in MEASURES:
             r = out[name]

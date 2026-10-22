@@ -285,7 +285,7 @@ def test_another_solid_whose_height_cant_be_read_is_never_dropped():
     flat_slab = {"id": "slab", "faces": [{"points": [[30, 75, 0], [45, 75, 0], [45, 90, 0]]}], "problems": []}
     m = measure(site(RECT, house, flat_slab), {**FACTS, "main_building": "house"})
     # a single face encloses nothing: found by the measuring itself, never a dropped height (main-building round 4)
-    assert m["building_height"]["value"] is None and m["building_height"]["reason"] == "a building isn't a closed solid"
+    assert m["building_height"]["value"] is None and m["building_height"]["reason"] == "a building isn't a closed solid: slab"
     wing = sloped_roof_box(10, 65, 20, 75, 44.8, 45, "wing")            # a 45 ft wing with a drainage slope
     m = measure(site(RECT, house, wing), {**FACTS, "main_building": "house"})
     assert m["building_height"]["value"] is None
@@ -1410,3 +1410,18 @@ def test_a_raised_balcony_on_flat_ground_keeps_the_overhang_question():
     m = measure(site(RECT, house, balcony), {**FACTS, "main_building": "house"})["building_area"]
     assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [1000.0, 1012.0], m
     assert "overhangs" in m["reason"]
+
+
+def test_an_open_object_is_named_and_the_waiting_rows_point_at_it():
+    """Coordinator: "a building isn't a closed solid" didn't say which object, so the architect couldn't find the
+    open shed. The words name it (its Rhino name, else its id) and every row waiting on it lists it as its object,
+    so Zoom to finds it."""
+    house = box(10, 25, 35, 65, 0, 30)
+    sheet = {"id": "shed-7", "faces": [{"points": [[30, 75, 0], [45, 75, 0], [45, 90, 0]]}], "problems": []}
+    m = measure(site(RECT, house, sheet), {**FACTS, "main_building": "house"})
+    waiting = [n for n, r in m.items() if "isn't a closed solid" in (r.get("reason") or "")]
+    assert "building_height" in waiting and "building_area" in waiting
+    assert all("closed solid: shed-7" in m[n]["reason"] and m[n]["objects"] == ["shed-7"] for n in waiting)
+    named = dict(sheet, name="Garden shed")
+    assert "closed solid: Garden shed" in measure(site(RECT, house, named), {**FACTS, "main_building": "house"})[
+        "building_height"]["reason"]
