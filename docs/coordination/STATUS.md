@@ -135,3 +135,8 @@ Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from c
   - Review round 1 found 4 issues, all fixed in a8d0b28 plus one test pin.
   - The headless plugin run passes 11 of 11 (headless/check_button/).
   - Next: review round 2, the full suite, then open the PR.
+- PR #27 check-button opened (base context-map #23), at 2974913.
+  - Review rounds: round 1 found 4 confirmed, round 2 found 2 (one a P0: the viewport kept old marks after an edit, fixed), round 3 found 2, round 4 found 0.
+  - Full suite: 1,672 passed, all 7 CI steps passed. Headless plugin run: 14 of 14.
+  - RHINO_QUEUE item 12.
+- Next feature from the queue: highlight only the offending part, then drawing-style dimensions.
