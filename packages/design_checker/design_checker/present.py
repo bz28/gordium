@@ -802,9 +802,15 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
                     why = (f"At worst {worst[0]} against {worst[1]}: does not comply under that reading. " +
                            (why or ""))
         bound = ((measured.get("stories") or {}).get("reason") or "") if measure == "stories" else ""
-        if st == REVIEW and "could hold up to" in bound:     # the drawing allows a range: say why, once, plainly
-            q = bound.split("; ")[-1].replace(" (story)", "")
-            why = q[0].upper() + q[1:] + "."
+        if st == REVIEW and "could hold up to" in bound:     # the drawing allows a range: say why, plainly,
+            # every open question kept (the main building's, the accessory one), the bad reading first
+            qs = [_user_text(q.replace(" (story)", "")) for q in bound.split("; ")[1:] if q.strip()]
+            worst = why.split(": does not comply under that reading.")[0] + ": does not comply under that reading. " \
+                if (why or "").startswith("At worst") else ""
+            said = "; ".join(dict.fromkeys(q[0].upper() + q[1:] if i == 0 else q for i, q in enumerate(qs)))
+            why = worst + said + "."
+            if not (measured.get("stories") or {}).get("count_settles") and PICK_MAIN_WHY not in why:
+                hint = PICK_MAIN if (measured.get("stories") or {}).get("main_assumed") else hint
         if node is not None and required == "—" and st in (REVIEW, FAILS):
             # the limit waits on an open measurement (the lot depth, on which lines are side or rear): show the
             # limit's range over its readings, and say once what it depends on (architect review P1-3)
@@ -850,8 +856,13 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             "_checker": checker,                  # the checker's verdict for it: the most it may show (view)
             # the stated facts it reads that aren't set (R-3a's lot size: dwelling units…): its own "Enter …" button
             "needs": (rhino_logic.needs_of(reading_set.rule_names(rule), values) + (
-                ["stories"] if "stories" in reading_set.rule_names(rule)
-                and rhino_logic.stories_needed(measured.get("stories")) else [])) if st != COMPLIES else [],
+                ["stories"] if "stories" in reading_set.rule_names(rule) and (
+                    (measured.get("stories") or {}).get("stories_refused") or     # refused: Enter again, always
+                    rhino_logic.stories_needed(measured.get("stories"))
+                    and (measured.get("stories") or {}).get("count_settles", True)) else [])) if st != COMPLIES else [],
+            # the count typed was refused (the measuring's code): the plugin rolls it back by this, never by words
+            "refused": ((measured.get("stories") or {}).get("stories_refused")
+                        if "stories" in reading_set.rule_names(rule) else None),
             "sign": numbers[4] if node is not None else "", "reason": why, "hint": hint,
             "_raises": list(raised),              # the comparisons themselves (worst cases need them); popped
             "zoom": ZOOM.get(measure, "top"), "measure": node.left.id if node is not None else None,
