@@ -778,27 +778,29 @@ def street_lines_after_picks(lines, picks, corner):
     return out
 
 
-def ids_after_pick(old_lines, old_ids, lines, name, tolerance=0.5):
-    """The street names for the street lines after a pick (`lines`, from street_lines_after_pick): every line keeps
-    the street it was known to be on, and `name` (found or typed) goes only on a line whose street wasn't known; with
-    no names matching the old lines, `name` on every line (None: unnamed). A name typed for one line never replaces
-    another street's: two streets stay two, and lot width is never measured along both (arch-fixes-2 review round
-    10, P1: [A St, ?, B Ave] with "B Ave" typed for the middle line had become one street)."""
+def pick_street(old_lines, old_ids, picked, name, tolerance=0.5):
+    """(street lines, their street names) after the architect clicks a lot line as the street side (`picked`) and
+    names its street (`name`, found or typed; None: unnamed). THE one order of steps (arch-fixes-2 review rounds
+    9-11, where a name given for one line kept landing on other lines and two streets, or "one street or two?",
+    became one): the name goes on the clicked line ONLY; every other line keeps the street it was known to be on,
+    or none; then the street lines follow from those names (street_lines_after_pick: the clicked line's own street
+    when the lines are known to be two streets, else every line). A line nobody named stays unnamed, so the
+    measuring still reads it from the drawing (a corner: one street or two?, needs review)."""
     def near(p, q):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
-    old = _street_lines().matching_ids(old_lines, old_ids)
-    if old is None:
-        return [name] * len(lines) if name else None
-
-    def known(line):
-        a, b = line[0], line[-1]
-        for k, o in enumerate(old_lines or []):
-            if (near(a, o[0]) and near(b, o[-1])) or (near(a, o[-1]) and near(b, o[0])):
-                return old[k]
-        return None
-    out = [known(line) or name for line in lines]
-    return out if any(out) else None
+    a, b = picked
+    lines = [list(map(list, line)) for line in old_lines or []]
+    hits = [k for k, line in enumerate(lines)
+            if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
+    if not hits:                                           # a line not among them: that line alone
+        return [list(map(list, picked))], ([name] if name else None)
+    ids = list(_street_lines().matching_ids(lines, old_ids) or [None] * len(lines))
+    if name:
+        ids[hits[0]] = name
+    kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
+    out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
+    return kept, (out if any(out) else None)
 
 
 def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
