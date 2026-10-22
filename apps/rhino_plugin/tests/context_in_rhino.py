@@ -176,12 +176,19 @@ try:
           and abs(n["text_height_ft"] - g.logic.NOTE_HEIGHT_FT) < 0.01
           and n["line_height_ft"] is not None and 0 < n["line_height_ft"] <= g.logic.NOTE_LINE_FT + 0.01, n)
     feet = footprints(g, doc)
+    parent = doc.Layers.FindByFullPath(g.logic.CONTEXT, -1)
+    doc.Objects.UnselectAll()
+    selectable = bool(feet) and doc.Objects.Select(feet[0].Id)       # a locked object (or locked parent) can't be
+    doc.Objects.UnselectAll()
     log["footprints"] = {"outlines": len(feet), "unlocked": not sub["Buildings"]["locked"],
+                         "parent_unlocked": parent >= 0 and not doc.Layers[parent].IsLocked,
+                         "selectable": selectable,
                          "curves": all(isinstance(o.Geometry, Rhino.Geometry.Curve) for o in feet)}
     claim("2 the building footprints are real, editable outlines on the unlocked Buildings layer (Ben, 2026-10-21)",
-          len(feet) > 0 and log["footprints"]["unlocked"] and log["footprints"]["curves"]
+          len(feet) > 0 and log["footprints"]["unlocked"] and log["footprints"]["parent_unlocked"]
+          and log["footprints"]["selectable"] and log["footprints"]["curves"]
           and all(o.Attributes.GetUserString(g.logic.GEOM_KEY) and o.Attributes.GetUserString(g.logic.PIECE_KEY)
-                  for o in feet), log["footprints"])
+                  and o.Attributes.GetUserString(g.logic.DRAWN_KEY) == str(o.Id) for o in feet), log["footprints"])
     claim("3 the checker never measures the context: one lot", log["checker_sees"]["lot_candidates"] == 1,
           log["checker_sees"])
     with_context = log["summary"]
@@ -198,20 +205,24 @@ try:
            "again": {k: v["objects"] for k, v in context_layers(g, doc).items()}})
     # the architect drags one footprint 10 ft; the neighbourhood is drawn again around the same lot
     feet = footprints(g, doc)
-    moved, other = feet[0], feet[1]
+    moved, other, lifted = feet[0], feet[1], feet[2]
     moved_id, other_guid = moved.Attributes.GetUserString(g.logic.PIECE_KEY), other.Id
+    lifted_id = lifted.Attributes.GetUserString(g.logic.PIECE_KEY)
     doc.Objects.Transform(moved, Rhino.Geometry.Transform.Translation(g._model_length(doc, 10.0), 0, 0), True)
+    doc.Objects.Transform(lifted, Rhino.Geometry.Transform.Translation(0, 0, g._model_length(doc, 3.0)), True)  # up
     before = len(feet)
     g.draw_context(doc, g._ui_state(doc).get("lookup_frame"))
     after = footprints(g, doc, every=True)
     kept = [o for o in after if o.Attributes.GetUserString(g.logic.PIECE_KEY) == moved_id]
+    up = [o for o in after if o.Attributes.GetUserString(g.logic.PIECE_KEY) == lifted_id]
     log["edited"] = {"before": before, "after": len(after), "kept": len(kept),
+                     "lifted_kept_once": len(up) == 1 and bool(up[0].Attributes.GetUserString(g.logic.EDITED_KEY)),
                      "kept_is_theirs": bool(kept) and bool(kept[0].Attributes.GetUserString(g.logic.EDITED_KEY))
                      and not kept[0].Attributes.GetUserString(g.logic.CONTEXT_KEY),
                      "unedited_replaced": doc.Objects.FindId(other_guid) is None}
     claim("3 an edited footprint stays (the architect's), is not drawn twice; the others are replaced",
           log["edited"]["kept"] == 1 and log["edited"]["kept_is_theirs"] and log["edited"]["after"] == before
-          and log["edited"]["unedited_replaced"], log["edited"])
+          and log["edited"]["lifted_kept_once"] and log["edited"]["unedited_replaced"], log["edited"])
     # a solid on the neighbourhood layers over the lot: never measured, so said
     lot = g._find(doc, g.current_facts(doc).get("lot_id") or "")
     centre = lot.Geometry.GetBoundingBox(True).Center
@@ -225,9 +236,12 @@ try:
     g.run_check(doc, report=False)
     log["solid_said"] = g.STATE.get("said", [])[said_before:]
     lots_now, _, _ = g._sorted_objects(doc)
-    claim("3 a solid on the neighbourhood layers over the lot is said, and never measured",
-          any(s.startswith("Not checked: 1 solid on the neighbourhood layers over the lot") for s in log["solid_said"])
-          and len(lots_now) == 1, log["solid_said"])
+    last = g.STATE.get("last") or {}
+    row = [i for i in last.get("items", []) if i.get("name") == "Objects on the lot not included"]
+    log["solid_check"] = {"state": last.get("state"), "row": row[0] if row else None}
+    claim("3 a solid on the neighbourhood layers over the lot makes the check need review, and is never measured",
+          last.get("state") == "needs_review" and bool(row) and row[0].get("status") == "needs_review"
+          and "neighbourhood layers" in (row[0].get("reason") or "") and len(lots_now) == 1, log["solid_check"])
     doc.Objects.Delete(solid, True)
     for name in ("Top", "Perspective"):
         view = doc.Views.Find(name, False) or doc.Views.ActiveView

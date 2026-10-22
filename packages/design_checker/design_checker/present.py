@@ -1119,6 +1119,13 @@ def _cautious_for_unsettled(items, unsettled, rules_by_id=None):
                             "confirm it (I checked this) or change it in Edit site…")
 
 
+def _on_context(extras):
+    """The left-out objects on the neighbourhood's layers (PR #23: its footprints are editable), said on the row."""
+    k = len((extras or {}).get("context_left_out") or [])
+    return (f" · {k} on the neighbourhood layers (Gordium::Context): move {'them' if k != 1 else 'it'} to the "
+            "Building layer if part of your design") if k else ""
+
+
 def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction=None) -> dict:
     """Every item, grouped; the summary; the header. `extras` is what the Rhino command adds: what it sent
     (scope), objects on the lot it didn't include, and the grade and lot sources."""
@@ -1165,7 +1172,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "points": None, "hint": "Add to check…",
                       "ground_like": [o for o in extras.get("ground_like") or [] if o in left_out],
                       "reason": f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t "
-                                "measured (not on the Building layer) · Add to check…" + (
+                                "measured (not on the Building layer) · Add to check…" + _on_context(extras) + (
                                     f" (" + str(len(extras.get("ground_like") or [])) + " looks like the ground: if it is, "
                                     "This is the ground)" if extras.get("ground_like") else ""),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,

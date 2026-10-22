@@ -1474,16 +1474,17 @@ def guides_on_screen(held, doc_serial):
 
 
 def needs_refetch(held, record, doc_serial):
-    """Whether the tick or a Draw on the same lot should fetch the neighbourhood again: nothing held for this
-    document (a reopened file: the footprints are never saved), or any layer, stored or live-only, whose last fetch
-    failed (the record says so: review round 9, parcels down on the first Draw were never fetched again). A layer
+    """Whether the tick or a Draw on the same lot should fetch the neighbourhood again: a live-only layer (a source
+    that may not be kept, shown on screen and never saved) with nothing on screen for this document (a reopened
+    file), or any layer, stored or live-only, whose last fetch failed (the record says so: review round 9, parcels down on the first Draw were never fetched again). A layer
     kept from an earlier fetch that worked carries that fetch's "found" entry (context_merge), so a kept layer
     doesn't loop. A fetch that worked and found nothing is not fetched again (review round 8: it was, on every Draw
     and tick, because "on screen" also meant "something to draw"). guides_on_screen stays the drawing's and the
     merge's question."""
-    if not guides_of(held, doc_serial):
-        return True
-    return any((v or {}).get("status") not in DREW for v in ((record or {}).get("layers") or {}).values())
+    layers = list(((record or {}).get("layers") or {}).values())
+    if any(not is_stored(v) for v in layers) and not guides_of(held, doc_serial):
+        return True              # (the footprints are kept since 2026-10-21: a reopened file has them, nothing to fetch)
+    return any((v or {}).get("status") not in DREW for v in layers)
 
 
 def context_step(frame, drawn, on):
@@ -1547,7 +1548,7 @@ def context_merge(payload, old_record, frame, live_on_screen=False):
     whose objects go: rhino_logic.context_replaces around the same frame; None, every one, around another),
     keep_guides (the footprints on screen stay).
     Around the same frame, each layer whose service failed and that is still there is kept: a stored layer is in
-    the file; a live-only one (the footprints, never saved) only when its guides are on screen for this document
+    the file; a live-only one (a source that may not be kept) only when its guides are on screen for this document
     (`live_on_screen`, from guides_on_screen). A kept layer's record entries (the layer, its requests, its credit
     line, when it was fetched) are carried over and the Sources dot still lists it. Around another frame (or none
     saved) nothing is carried over: the earlier address's go."""
@@ -1590,26 +1591,54 @@ CONTEXT_EDITABLE = (CONTEXT + "::Buildings",)   # left unlocked: the architect d
 GEOM_KEY = "gordium_context_geom"       # on each outline Gordium draws: the fingerprint of its points as drawn
 PIECE_KEY = "gordium_context_id"        # on each outline: the parcel, street piece or footprint it is
 EDITED_KEY = "gordium_context_edited"   # on an outline the architect edited: it is theirs (Gordium never removes it)
+FRAME_KEY = "gordium_context_frame"     # on each outline: the lot (lookup frame) it was drawn around
+DRAWN_KEY = "gordium_context_drawn_as"  # on each outline: its own object id when drawn (a copy keeps it, but not as its
+                                        # own id: a copy is never the outline itself)
 
 
 def context_locked(path):
-    """Whether a context layer is locked after drawing: all of them but the editable ones (the footprints)."""
-    return on_layer(path, CONTEXT) and not any(on_layer(path, e) for e in CONTEXT_EDITABLE)
+    """Whether a context layer is locked after drawing: the leaf layers but the editable ones (the footprints), never
+    an ancestor of an editable one (Gordium::Context itself): in Rhino a locked parent locks its sublayers' objects,
+    so the footprints couldn't be dragged (review of the editable outlines, P1)."""
+    if not on_layer(path, CONTEXT) or any(on_layer(path, e) for e in CONTEXT_EDITABLE):
+        return False
+    return not any(on_layer(e, path) for e in CONTEXT_EDITABLE)
 
 
-def outline_key(points):
-    """The fingerprint of an outline's points (x, y, to a millionth of a model unit), as Rhino reads them back."""
+def outline_key(points, attributes=None):
+    """The fingerprint of an outline as Rhino holds it: every coordinate of its points, Z included (to a millionth of
+    a model unit), and the attributes an architect can change (name, colour, linetype, their own user text: the
+    plugin's _attrs_print). Review of the editable outlines, P1: a footprint moved up to the terrain, renamed or
+    recoloured was taken as unedited, deleted and drawn again at z = 0."""
     import hashlib
     import json
-    flat = [[round(float(p[0]), 6), round(float(p[1]), 6)] for p in points or []]
-    return hashlib.sha1(json.dumps(flat).encode("utf-8")).hexdigest()[:20]
+    flat = [[round(float(c), 6) for c in p] for p in points or []]
+    return hashlib.sha1(json.dumps([flat, attributes or {}], sort_keys=True).encode("utf-8")).hexdigest()[:20]
 
 
-def is_edited(stored_key, points):
-    """Whether an outline Gordium drew has been edited since (moved, reshaped): its points no longer match the
-    fingerprint written when it was drawn (Ben, 2026-10-21: Gordium's redraw or clear removes only outlines it drew
-    that the architect hasn't edited; an edited one is the architect's and stays). No fingerprint: not one of these."""
-    return bool(stored_key) and outline_key(points) != stored_key
+def is_edited(stored_key, points, attributes=None):
+    """Whether an outline Gordium drew has been edited since (moved in any direction, reshaped, renamed, recoloured):
+    it no longer matches the fingerprint written when it was drawn (Ben, 2026-10-21: Gordium's redraw or clear removes
+    only outlines it drew that the architect hasn't edited; an edited one is the architect's and stays). No
+    fingerprint: not one of these."""
+    return bool(stored_key) and outline_key(points, attributes) != stored_key
+
+
+def frame_key(frame):
+    """A short fingerprint of a lookup frame (which lot, placed how): an outline remembers the lot it was drawn for."""
+    import hashlib
+    import json
+    return hashlib.sha1(json.dumps(frame or {}, sort_keys=True, default=str).encode("utf-8")).hexdigest()[:16]
+
+
+def suppressed(edited, current_frame_key):
+    """The ids not to draw again: those of outlines the architect edited that are the very outline Gordium drew (its
+    own id is the one it was drawn as: not a copy, which carries the original's user text under a new id) and were
+    drawn around this same lot (not one kept from another address, whose ids belong to another square). Review of the
+    editable outlines, P2: a copy, or an outline kept from another address, hid an unedited neighbour. `edited`:
+    [{id, frame, drawn_as, own}]."""
+    return sorted(set(e.get("id") for e in edited or [] if e.get("id") and e.get("frame") == current_frame_key
+                      and e.get("drawn_as") and e.get("drawn_as") == e.get("own")))
 
 
 def skip_edited(objects, edited_ids):
@@ -1619,18 +1648,19 @@ def skip_edited(objects, edited_ids):
     return [o for o in objects or [] if not o.get("id") or o["id"] not in edited]
 
 
-SOLID_KINDS = ("Brep", "Extrusion", "Mesh", "SubD")
+def left_out_candidate(layer_path):
+    """Whether a solid on this layer that reaches into the lot is one the check must say it left out (review row:
+    "Objects on the lot not included"): every layer but the Building layer and Gordium's own, except the
+    neighbourhood's (Gordium::Context), whose footprints the architect may extrude or put a building on (editable
+    since Ben's decision, 2026-10-21). Review of the editable outlines, P0: a solid there was never measured and
+    never made the check need review."""
+    return not on_layer(layer_path, "Gordium") or on_layer(layer_path, CONTEXT)
 
 
-def context_solids_says(names):
-    """The notice for solids on the neighbourhood's layers over the lot (an extruded footprint, a building put there):
-    never measured, so the architect is told, never silently (Ben, 2026-10-21). None when there are none."""
-    names = sorted(set(n or "a solid" for n in names or []))
-    if not names:
-        return None
-    return ("Not checked: %d solid%s on the neighbourhood layers over the lot (%s). Gordium checks only the Building "
-            "layer: move it there if it is part of your design."
-            % (len(names), "s" if len(names) != 1 else "", ", ".join(names[:3]) + ("…" if len(names) > 3 else "")))
+def context_left_out(layers_by_id):
+    """Of the left-out objects (id: its layer), those on the neighbourhood's layers: the review row tells the
+    architect to move them to the Building layer."""
+    return sorted(i for i, layer in (layers_by_id or {}).items() if on_layer(layer or "", CONTEXT))
 
 
 def context_objects(payload):

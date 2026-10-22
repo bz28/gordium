@@ -85,6 +85,14 @@ def live_footprints(monkeypatch):
     monkeypatch.setitem(ENDPOINTS["state_buildings"], "store", "none")
 
 
+def test_the_footprints_layer_is_really_unlocked_its_parent_too():
+    """Review of the editable outlines, P1: the parent Gordium::Context was locked, and in Rhino a locked parent locks
+    its sublayers' objects: the footprints couldn't be dragged. Only the leaf layers are locked now."""
+    assert not logic.context_locked(logic.CONTEXT) and not logic.context_locked(logic.CONTEXT + "::Buildings")
+    assert all(logic.context_locked(logic.CONTEXT + "::" + n) for n in ("Parcels", "Streets", "Notes"))
+    assert not logic.context_locked("Gordium") and not logic.context_locked("Site")
+
+
 def test_the_footprints_are_kept_as_editable_outlines_on_their_own_layer():
     """Ben, 2026-10-21: the footprints are always drawn as real outlines (curves, no invented heights) on an
     unlocked Gordium::Context::Buildings layer, each with its id; none is a guide."""
@@ -100,44 +108,91 @@ def test_the_footprints_are_kept_as_editable_outlines_on_their_own_layer():
 
 def test_an_outline_the_architect_edited_is_known_and_never_drawn_twice():
     """Ben, 2026-10-21: Gordium's redraw or clear removes only outlines it drew that the architect hasn't edited. Each
-    outline carries the fingerprint of its points as drawn: moved or reshaped, it no longer matches."""
-    drawn = [(0.0, 0.0), (30.0, 0.0), (30.0, 40.0), (0.0, 40.0), (0.0, 0.0)]
-    key = logic.outline_key(drawn)
-    assert not logic.is_edited(key, drawn) and not logic.is_edited(key, [(x + 1e-9, y) for x, y in drawn])
-    assert logic.is_edited(key, [(x + 2.0, y) for x, y in drawn])                       # dragged 2 units
-    assert logic.is_edited(key, drawn[:2] + [(30.0, 45.0)] + drawn[3:])                  # one corner moved
-    assert not logic.is_edited(None, [(5.0, 5.0)]) and not logic.is_edited("", drawn)   # not one Gordium drew
+    outline carries the fingerprint of its points (Z too) and of the attributes an architect can change: moved in any
+    direction, reshaped, renamed or recoloured, it no longer matches (review of the editable outlines, P1)."""
+    drawn = [(0.0, 0.0, 0.0), (30.0, 0.0, 0.0), (30.0, 40.0, 0.0), (0.0, 40.0, 0.0), (0.0, 0.0, 0.0)]
+    attrs = {"name": "footprint-1", "colour_source": 0, "colour": -16777216, "linetype_source": 0, "linetype": -1,
+             "user": []}
+    key = logic.outline_key(drawn, attrs)
+    assert not logic.is_edited(key, drawn, attrs) and not logic.is_edited(key, [(x + 1e-9, y, z) for x, y, z in drawn], attrs)
+    assert logic.is_edited(key, [(x + 2.0, y, z) for x, y, z in drawn], attrs)            # dragged 2 units
+    assert logic.is_edited(key, drawn[:2] + [(30.0, 45.0, 0.0)] + drawn[3:], attrs)      # one corner moved
+    assert logic.is_edited(key, [(x, y, z + 3.0) for x, y, z in drawn], attrs)            # moved up to the terrain
+    assert logic.is_edited(key, drawn, dict(attrs, name="4 storeys"))                     # renamed
+    assert logic.is_edited(key, drawn, dict(attrs, colour_source=1, colour=-65536))       # recoloured
+    assert logic.is_edited(key, drawn, dict(attrs, user=[["storeys", "4"]]))              # their own note
+    assert not logic.is_edited(None, [(5.0, 5.0, 0.0)]) and not logic.is_edited("", drawn)   # not one Gordium drew
     objects = [{"id": "footprint-1"}, {"id": "footprint-2"}, {"id": ""}, {"name": "North"}]
     assert logic.skip_edited(objects, ["footprint-2", ""]) == [{"id": "footprint-1"}, {"id": ""}, {"name": "North"}]
+    show = RHINO[RHINO.index("def _outline_points("):RHINO.index("def _attrs_print(")]
+    assert "(q.X, q.Y, q.Z)" in show
+    att = RHINO[RHINO.index("def _attrs_print("):].split("\ndef ", 1)[0]
+    assert all(w in att for w in ("attrs.Name", "attrs.ColorSource", "attrs.ObjectColor", "attrs.LinetypeIndex",
+                                  'startswith("gordium_")'))
+
+
+def test_only_the_very_outline_edited_around_this_lot_is_kept_from_a_redraw():
+    """Review of the editable outlines, P2: skipping by id alone hid unedited neighbours. A copy the architect moved
+    carries the original's id (Rhino copies user text) but not as its own object id: it never hides the original. An
+    outline kept from another address was drawn for another lot: it never hides this square's footprint. And each
+    ring has its own id, so one edited ring never hides its siblings."""
+    here, there = logic.frame_key({"origin": [1, 2]}), logic.frame_key({"origin": [3, 4]})
+    assert here != there and here == logic.frame_key({"origin": [1, 2]})
+    moved = {"id": "footprint-1", "frame": here, "drawn_as": "A", "own": "A"}           # the outline itself, moved
+    copy = {"id": "footprint-2", "frame": here, "drawn_as": "B", "own": "C"}            # a copy of footprint-2
+    elsewhere = {"id": "footprint-3", "frame": there, "drawn_as": "D", "own": "D"}      # kept from another address
+    assert logic.suppressed([moved, copy, elsewhere], here) == ["footprint-1"]
+    objects = [{"id": "footprint-1"}, {"id": "footprint-2"}, {"id": "footprint-3"}]
+    assert logic.skip_edited(objects, logic.suppressed([moved, copy, elsewhere], here)) == objects[1:]
+    draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
+    assert "edited = logic.suppressed(_edited_pieces(doc), here)" in draw
+    assert "attrs.SetUserString(logic.FRAME_KEY, here)" in draw
+    assert "marked.SetUserString(logic.DRAWN_KEY, str(added.Id))" in draw
+    pieces = RHINO[RHINO.index("def _edited_pieces("):RHINO.index("def _context_record(")]
+    assert '"own": str(o.Id)' in pieces and "logic.DRAWN_KEY" in pieces and "logic.FRAME_KEY" in pieces
+    from site_lookup import context as site_context                      # each ring its own id
+    feet = lambda p: [round(p[0], 2), round(p[1], 2)]                    # noqa: E731
+    two = [{"attributes": {"OBJECTID": 7}, "geometry": {"rings": [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]],
+                                                                  [[20, 0], [30, 0], [30, 10], [20, 10], [20, 0]]]}}]
+    ids = [i["id"] for i in site_context._items("buildings", two, (-100, -100, 100, 100), (0, 0), feet)]
+    assert ids == ["footprint-7", "footprint-7 #2"]
+    parcel = [{"attributes": {"SWIS": "500700", "PRINT_KEY": "1"}, "geometry": two[0]["geometry"]}]
+    pids = [i["id"] for i in site_context._items("parcels", parcel, (-100, -100, 100, 100), (50, 50), feet, "x")]
+    assert pids == ["500700-1", "500700-1 #2"]
 
 
 def test_the_plugin_keeps_an_edited_outline_as_the_architects_and_marks_every_outline():
-    clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_ids(")]
-    edited = clear.index("if logic.is_edited(o.Attributes.GetUserString(logic.GEOM_KEY), _outline_points(o.Geometry)):")
+    clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_pieces(")]
+    edited = clear.index("if logic.is_edited(o.Attributes.GetUserString(logic.GEOM_KEY), _outline_points(o.Geometry),")
+    assert "_attrs_print(o.Attributes)" in clear[edited:edited + 200]
     assert edited < clear.index("attrs.SetUserString(logic.CONTEXT_KEY, None)") < clear.index("doc.Objects.Delete(o, True)")
     assert 'attrs.SetUserString(logic.EDITED_KEY, "1")' in clear      # theirs now: no later clear touches it
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
-    assert "edited = _edited_ids(doc) if sources is not None else []" in draw       # around the same lot only
-    assert "attrs.SetUserString(logic.GEOM_KEY, logic.outline_key(_outline_points(curve)))" in draw
+    # fingerprinted after it is added, as Rhino holds it (points, Z, attributes)
+    added = draw.index("added = doc.Objects.FindId(doc.Objects.AddCurve(curve, attrs))")
+    assert added < draw.index("marked.SetUserString(logic.GEOM_KEY, logic.outline_key(_outline_points(added.Geometry),")
     assert 'attrs.SetUserString(logic.PIECE_KEY, o["id"])' in draw
     lock = RHINO[RHINO.index("def _lock_context("):RHINO.index("def _outline_points(")]
     assert "logic.context_locked(doc.Layers[i].FullPath)" in lock
     assert '"Buildings": (135, 135, 135)' in RHINO
 
 
-def test_a_solid_on_the_neighbourhood_layers_over_the_lot_is_said_never_silently_skipped():
-    """Ben, 2026-10-21: the checker never measures the neighbourhood, so a solid there over the lot (an extruded
-    footprint, a building put on that layer) is said, once each time the set of them changes."""
-    assert logic.context_solids_says([]) is None and logic.context_solids_says(None) is None
-    said = logic.context_solids_says(["Extrusion", "Extrusion", "My house"])
-    assert said.startswith("Not checked: 2 solids on the neighbourhood layers over the lot")
-    assert "Building layer" in said and logic.context_solids_says(["x"]).startswith("Not checked: 1 solid on")
-    assert set(logic.SOLID_KINDS) == {"Brep", "Extrusion", "Mesh", "SubD"}
-    note = RHINO[RHINO.index("def _note_context_solids("):RHINO.index("def _touching(")]
-    assert "if seen.get(doc.RuntimeSerialNumber) != key:" in note and "say(said)" in note
-    extras = RHINO[RHINO.index("def _extras("):RHINO.index("def _note_context_solids(")]
-    assert 'logic.guard(_note_context_solids, "look for solids on the neighbourhood layers")(' in extras
-    for kind in logic.SOLID_KINDS:                                         # and the checker still never measures it
+def test_a_solid_on_the_neighbourhood_layers_over_the_lot_makes_the_check_need_review():
+    """Review of the editable outlines, P0: a solid on the (now unlocked) footprints' layer over the lot was never
+    measured and only said once; the check could still say comply. Now it is a left-out object like any other
+    (found with reaches_into_lot, every kind blocks included): the review row stays until it is moved."""
+    assert logic.left_out_candidate(logic.CONTEXT + "::Buildings") and logic.left_out_candidate(logic.CONTEXT)
+    assert logic.left_out_candidate("Default") and logic.left_out_candidate("Site::Sheds")
+    assert not logic.left_out_candidate(logic.MASSING) and not logic.left_out_candidate(logic.HOLDING_LAYER)
+    assert not logic.left_out_candidate("Gordium::Grade")
+    assert logic.context_left_out({"a": logic.CONTEXT + "::Buildings", "b": "Default", "c": None}) == ["a"]
+    body = RHINO[RHINO.index("def _not_included("):].split("\ndef ", 1)[0]
+    assert "or not logic.left_out_candidate(layer):" in body and 'logic.on_layer(layer, "Gordium")' not in body
+    assert "logic.reaches_into_lot(ring, _plan_points(g), reach, box)" in body           # the lot's outline, not a centre
+    extras = RHINO[RHINO.index("def _extras("):].split("\ndef ", 1)[0]
+    assert '"context_left_out": logic.context_left_out(' in extras
+    assert "_note_context_solids" not in RHINO and not hasattr(logic, "context_solids_says")
+    for kind in ("Brep", "Extrusion", "Mesh", "SubD"):                     # and the checker still never measures it
         assert logic.classify(logic.CONTEXT + "::Buildings", kind) is None
 
 
@@ -538,7 +593,30 @@ def test_a_failed_footprint_fetch_is_not_on_screen_so_the_next_tick_fetches_agai
     assert len(shown) == 322 and logic.guides_on_screen({"doc": DOC, "lines": shown}, DOC)
 
 
-def test_a_fetch_that_worked_but_found_no_footprints_is_not_fetched_again_and_a_failed_one_is():
+def test_no_reader_text_still_says_the_footprints_are_never_saved():
+    """Review of the editable outlines, P3: after the switch to store raw, docstrings and comments still said the
+    footprints were shown only on screen and never saved, and the fixture docstring said nothing of them was recorded."""
+    texts = {p: (REPO / p).read_text(encoding="utf-8") for p in (
+        "apps/rhino_plugin/gordium_rhino.py", "packages/site_lookup/site_lookup/context.py",
+        "packages/design_checker/design_checker/context_box.py", "packages/design_checker/design_checker/rhino_logic.py",
+        "packages/site_lookup/tests/test_context.py")}
+    for stale in ("only drawn on screen by the overlay, never saved", "the building footprints, never saved",
+                  "nothing of them is in any fixture", "its footprints (never saved) fetched again",
+                  "the footprints are never saved", "the footprints, never saved", "until Ben decides"):
+        assert not [p for p, t in texts.items() if stale in t], stale
+
+
+def test_kept_footprints_in_a_reopened_file_are_not_fetched_again():
+    """Since the footprints are kept, a reopened file has them: nothing held on screen is no reason to fetch again
+    (review of the editable outlines, P3)."""
+    frame = looked_up()["writes"]["frame"]
+    _, record, _, shown = redraw([], None, fetch_with(frame), frame)
+    assert shown == [] and not logic.needs_refetch(None, record, DOC)
+    _, record, _, _ = redraw([], None, fetch_with(frame, down={"state_parcels"}), frame)
+    assert logic.needs_refetch(None, record, DOC)                          # a failed layer still is
+
+
+def test_a_fetch_that_worked_but_found_no_footprints_is_not_fetched_again_and_a_failed_one_is(live_footprints):
     """Review round 8: "on screen" (something to draw) also decided "fetch again", so a fetch that worked and found no
     footprints was fetched again (a wait of up to 20 s and a redraw) on every Draw and tick. needs_refetch is its
     own question: nothing held for this document, or any layer whose last fetch failed (stored ones too since
@@ -620,7 +698,7 @@ def test_nothing_answering_leaves_the_saved_neighbourhood_alone_and_the_plugin_p
     assert 'payload, record, sources, keep_guides = plan["payload"], plan["record"], plan["replace"], plan["keep_guides"]' in draw
     assert "_clear_context(doc, sources)" in draw and "json.dumps(record)" in draw
     assert draw.index('if payload.get("status") != "found":') < draw.index("_clear_context(doc, sources)")
-    clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_ids(")]
+    clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_pieces(")]
     assert "if not source or (sources is not None and source not in sources):" in clear
     assert clear.index("if sources is None:") < clear.index("doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)")
 

@@ -7,8 +7,9 @@ X Y: the looked-up lot's origin (EPSG:2261, US survey feet), R and SX SY: how th
 model (lookup_box.frame: turned by R degrees, then moved by -SX, -SY), ID: its parcel (left out of the map), all
 saved in the box's `lookup_frame`.
 Prints one JSON line: `objects`, exactly what the Rhino side may write into the .3dm (only layers whose source's
-store is `raw`: the State's parcels and streets, plus Gordium's own frame, north arrow, scale bar and credits), and
-`guides`, what it may only show on screen (store `none`: the building footprints, never saved). No AI."""
+store is `raw`: the State's parcels, streets and building footprints, plus Gordium's own frame, north arrow, scale
+bar and credits), and `guides`, what it may only show on screen (a source whose store is `none`: none of today's,
+the general path for one that may not be kept). No AI."""
 import json
 import math
 import sys

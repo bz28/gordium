@@ -82,8 +82,10 @@ state_buildings:
     provided "as is"": a disclaimer only, no licence, no redistribution limit, no attribution required. In Ithaca every
     footprint's source is Tompkins County ITS GIS Division, 2014 (CUGIR record: "Access Restrictions: None", "Use
     Restrictions: None"). Kept in the customer's file as editable outlines: Ben's decision, 2026-10-21 (context map
-    plan D1). Microsoft footprints (ODbL, share-alike) fill gaps elsewhere in the State, not in Ithaca: check each
-    footprint's NYSGeo_Source before another city.
+    plan D1). Only footprints whose NYSGeo_Source is in reviewed_sources are kept; any other is left out and named.
+    The State's values (read 2026-10-21) include "Microsoft" and "NYS Geospatial Services - previously, Microsoft"
+    (ODbL, share-alike: never kept) and others not yet reviewed; in Ithaca all 322 are NYSERDA.
+  reviewed_sources: [NYSERDA]       # NYSGeo_Source values whose terms were reviewed for keeping (above)
   attribution: >-
     Building footprints: NYS ITS Geospatial Services (NYSERDA/CIESIN; Tompkins County ITS GIS Division)
   store: raw

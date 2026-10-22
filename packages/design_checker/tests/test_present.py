@@ -135,6 +135,18 @@ def test_each_item_says_what_was_measured_and_objects_left_out_need_review(surve
     assert "review" in r["view"]["summary"]
 
 
+def test_a_solid_on_the_neighbourhood_layers_makes_the_check_need_review_and_says_where(surveyed):
+    """PR #23 (review of the editable outlines, P0): a solid on Gordium::Context over the lot is left out like any
+    other; the row says it is on the neighbourhood layers and how to fix it; the check is never "comply"."""
+    r = check(MODEL, surveyed, extras={"not_included": ["ctx"], "context_left_out": ["ctx"]})
+    left = items(r["view"])["Objects on the lot not included"]
+    assert left["status"] == present.REVIEW and left["objects"] == ["ctx"]
+    assert "1 on the neighbourhood layers (Gordium::Context): move it to the Building layer" in left["reason"]
+    assert "review" in r["view"]["summary"]
+    plain = items(check(MODEL, surveyed, extras={"not_included": ["shed"]})["view"])["Objects on the lot not included"]
+    assert "neighbourhood" not in plain["reason"]
+
+
 # ---- C9: never rounded toward compliance -------------------------------------------------------------------------
 
 def test_values_are_never_rounded_toward_compliance():

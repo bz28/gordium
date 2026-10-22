@@ -1,6 +1,6 @@
 """The context map, offline: the State's parcels and streets around 106 Ithaca Rd as recorded from the live
-services (fixtures/106_ithaca_rd_context.json, made by capture.py), and synthetic stand-ins for the building
-footprints, whose source may not be kept yet (store: none: nothing of them is in any fixture)."""
+services (fixtures/106_ithaca_rd_context.json, made by capture.py): the parcels, streets and building footprints,
+all storable (the footprints since Ben's decision, 2026-10-21)."""
 
 import importlib.util
 import json
@@ -178,18 +178,37 @@ def test_the_footprints_are_kept_by_bens_decision_and_credited_with_their_date()
                for line in s["credits"])
 
 
-def test_microsoft_footprints_under_the_odbl_are_left_out_and_said():
-    """Microsoft's footprints (ODbL, share-alike) fill gaps elsewhere in the State, not in Ithaca: never kept."""
-    class WithMicrosoft(T.Fake):
+def with_sources(*sources, date="2019"):
+    """The recorded answers with the first footprints' NYSGeo_Source (and date) changed."""
+    class Changed(T.Fake):
         def post(self, url, params):
             body, raw = super().post(url, params)
             if T.key_of(url) == "state_buildings":
                 body = json.loads(json.dumps(body))
-                body["features"][0]["attributes"]["NYSGeo_Source"] = "Microsoft"
+                for f, source in zip(body["features"], sources):
+                    f["attributes"].update(NYSGeo_Source=source, SourceDate=date)
             return body, raw
-    c, _ = run(WithMicrosoft(T.load("106_ithaca_rd"), context=T.load("106_ithaca_rd_context")))
+    return Changed(T.load("106_ithaca_rd"), context=T.load("106_ithaca_rd_context"))
+
+
+def test_only_footprints_from_a_reviewed_source_are_kept_and_the_rest_are_said():
+    """Review of the editable outlines, P2: an exact "Microsoft" match let "NYS Geospatial Services - previously,
+    Microsoft" (still ODbL) through, the message never reached the architect when every service answered, and the
+    left-out footprints' dates went into the credit. Now an allow-list (endpoints.yaml reviewed_sources)."""
+    from site_lookup.context import cleared
+    assert ENDPOINTS["state_buildings"]["reviewed_sources"] == ["NYSERDA"]
+    c, _ = run(with_sources("Microsoft", "NYS Geospatial Services - previously, Microsoft", "Personal Work"))
     b = c["layers"]["buildings"]
-    assert len(b["items"]) == 321 and "1 Microsoft footprints (ODbL licence) were left out." in b["message"]
+    assert len(b["items"]) == 319
+    said = "3 footprints left out: their source (Microsoft, NYS Geospatial Services - previously, Microsoft, " \
+           "Personal Work) isn't cleared for keeping in your file."
+    assert said in b["message"] and said in c["message"]                       # it reaches the architect
+    assert b["dates"] == ["2014"]                                               # the left-out ones' 2019: not credited
+    assert not any("2019" in line for line in c["credits"])
+    kept, left = cleared([{"attributes": {"NYSGeo_Source": " nyserda "}}, {"attributes": {}}])
+    assert len(kept) == 1 and left == ["unknown"]                              # no source: not kept
+    one, _ = run(with_sources("Microsoft"))
+    assert "1 footprint left out: its source (Microsoft) isn't cleared" in one["message"]
 
 
 def test_the_context_fixture_holds_only_storable_answers():
