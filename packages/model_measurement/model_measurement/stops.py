@@ -29,6 +29,8 @@ STOPS = {
                    "side and rear, and which street's frontage is the lot width, are open questions; answer Corner lot?",
     "one_street_or_two": "the street lot lines given turn {turn}° in all: do they face one street that bends, or two "
                          "streets at a corner? Answer Corner lot?, or name the street each lot line is on",
+    "street_names_stale": "the street names saved for the street lot lines no longer match them (the lines were "
+                          "picked again): pick the street side again",
     "all_street": "every lot line is on a street: which yards are front, side and rear is an open question for the "
                   "architects",
     # corner lots (§325-19C)

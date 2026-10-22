@@ -122,8 +122,15 @@ class Lot:
             # streets, or of no known street swinging more than TURN_LIMIT_DEG in all (a corner, even rounded into
             # short pieces), are never measured along both (review rounds 5 and 6, P0); a street that bends is
             # asked about, never called two
-            verdict, turn = self.street_verdict(facts)
-            if verdict == "two":
+            ids = facts.get("street_ids")
+            stale = ids is not None and not (isinstance(ids, list) and len(ids) == len(facts["street_line"]) and
+                                             all(i is None or isinstance(i, str) for i in ids))
+            # names that don't match the lines (saved before the lines changed): set aside, never used, and said
+            # (review round 7, P1: they made the whole check fail)
+            verdict, turn = ("stale", None) if stale else self.street_verdict(facts)
+            if verdict == "stale":
+                self.street_problem = stop("street_names_stale")
+            elif verdict == "two":
                 self.street_problem = stop("two_streets")
             elif verdict == "unsure":
                 self.street_problem = stop("one_street_or_two", turn=round(turn or 0))

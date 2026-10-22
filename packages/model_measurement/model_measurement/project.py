@@ -56,10 +56,9 @@ def fact_problems(facts: dict) -> list[str]:
     if street is not None and not (isinstance(street, list) and street and all(
             isinstance(s, list) and len(s) == 2 and all(_point(p) for p in s) for s in street)):
         problems.append("street_line must be a list of lot lines, each two points [[x, y], [x, y]]")
-    ids = facts.get("street_ids")                # the street each street line is on (None where unknown)
-    if ids is not None and not (isinstance(ids, list) and isinstance(street, list) and len(ids) == len(street) and
-                                all(i is None or isinstance(i, str) for i in ids)):
-        problems.append("street_ids must name the street of each street_line, one each (or null where unknown)")
+    # street_ids (the street each street line is on) is never refused here: names that don't match the lines one
+    # for one are set aside by the measuring, which says so (stop street_names_stale); refusing them made the check
+    # fail and saved facts unreadable (review round 7, P1)
     return problems
 
 

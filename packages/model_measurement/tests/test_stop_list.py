@@ -160,6 +160,7 @@ CASES = {
     "two_streets": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]]], street_ids=["A St", "B Ave"],
                           corner_lot=False),
     "one_street_or_two": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]]], corner_lot=False),
+    "street_names_stale": _plain(street_line=[[[0, 0], [50, 0]]], street_ids=["A St", "A St"], corner_lot=False),
     "all_street": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]], [[50, 100], [0, 100]], [[0, 100], [0, 0]]],
                          corner_lot=False),
     "corner_unknown": _plain(corner_lot=None),

@@ -146,9 +146,18 @@ def _worker():
     return p
 
 
+def _started_at(pid):
+    """When the process with this number started (its own identity: a number is given again to other programs), or
+    None when none is running."""
+    try:
+        p = System.Diagnostics.Process.GetProcessById(int(pid))
+        return None if p.HasExited else str(p.StartTime.ToUniversalTime().Ticks)
+    except Exception:
+        return None
+
+
 def _python_process(pid):
-    """The process with this number if it is still running and is Python (a number the system has since given to
-    another program is never touched), else None."""
+    """The process with this number if it is still running and is Python, else None."""
     try:
         p = System.Diagnostics.Process.GetProcessById(int(pid))
         return p if not p.HasExited and "python" in (p.ProcessName or "").lower() else None
@@ -157,7 +166,7 @@ def _python_process(pid):
 
 
 def _stop_pid(pid):
-    p = _python_process(pid)
+    p = _python_process(pid)                   # (ServerBook has matched its start time first)
     if p is not None:
         try:
             p.Kill()
@@ -165,9 +174,11 @@ def _stop_pid(pid):
             pass
 
 
-# every checker Gordium started, recorded: a new one, a reload or Rhino closing stops the others (exactly one)
+# every checker Gordium started, recorded with this Rhino as its owner: a new one, a reload or Rhino closing stops
+# this Rhino's others (exactly one), never another Rhino's
+_ME = System.Diagnostics.Process.GetCurrentProcess().Id
 SERVERS = logic.ServerBook(os.path.join(tempfile.gettempdir(), "gordium_servers.json"),
-                           lambda pid: _python_process(pid) is not None, _stop_pid)
+                           {"pid": _ME, "start": _started_at(_ME)}, _started_at, _stop_pid)
 
 
 def _stop_worker():
@@ -1329,8 +1340,8 @@ def _box_pick(doc, what, facts, saved_ui):
                 a, b = min(_segments(lot.Geometry), key=lambda s: rg.Line(s[0], s[1]).DistanceTo(point, True))
                 picks.append([_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]])
             if picks:
-                facts["street_line"] = logic.street_lines_after_picks(facts.get("street_line"), picks, True)
-                facts.pop("street_ids", None)                        # two streets: unnamed until named
+                logic.set_street_lines(facts, logic.street_lines_after_picks(facts.get("street_line"), picks, True))
+                # (two streets: unnamed until named)
                 saved_ui.pop("street_name", None)                    # (no one name for them)
                 saved_ui["street_source"] = logic.ENTERED
         elif what == "street":
@@ -1349,12 +1360,9 @@ def _box_pick(doc, what, facts, saved_ui):
                         got = ask.GetLiteralString()
                         name = (ask.StringResult() or "").strip() or None \
                             if got == Rhino.Input.GetResult.String else None
-                    facts["street_line"] = logic.street_lines_after_pick(facts.get("street_line"), picked,
-                                                                         ids=facts.get("street_ids"))
-                    if name:                                 # the street those lines are on, as named
-                        facts["street_ids"] = [name] * len(facts["street_line"])
-                    else:
-                        facts.pop("street_ids", None)
+                    lines = logic.street_lines_after_pick(facts.get("street_line"), picked,
+                                                          ids=facts.get("street_ids"))
+                    logic.set_street_lines(facts, lines, [name] * len(lines) if name else None)   # as named
                     saved_ui["street_name"] = name
                     saved_ui["street_source"] = logic.ENTERED
         elif what == "lot":                          # Use my survey: the surveyed outline
@@ -1575,7 +1583,7 @@ def _change_facts(doc, facts, options):
             if not facts.get("corner_lot"):
                 break
         if picked:
-            facts["street_line"] = picked
+            logic.set_street_lines(facts, picked)          # unnamed: the lines picked here, never the old names
         _highlight(doc, facts)
     facts["ground_is_flat"] = _yes_no("Is the ground flat?", facts.get("ground_is_flat"))
     ground = Rhino.Input.RhinoGet.GetNumber("Ground level (z, in model units)", True,

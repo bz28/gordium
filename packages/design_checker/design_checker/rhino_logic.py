@@ -208,13 +208,29 @@ def to_feet(facts, scale):
     return out
 
 
+def set_street_lines(facts, lines, ids=None):
+    """`facts` (changed in place, and returned) with the street lot lines `lines` and the street each is on (`ids`,
+    one per line, None where unknown): both set, or both dropped. The one way the street lines change (review round
+    7, P1: a lot re-picked kept the old lines' street names, and the lot facts were refused, saved ones unreadable);
+    names that don't match the lines one for one are left out (unnamed, never misnamed)."""
+    if lines:
+        facts["street_line"] = lines
+    else:
+        facts.pop("street_line", None)
+    if lines and isinstance(ids, list) and len(ids) == len(lines):
+        facts["street_ids"] = list(ids)
+    else:
+        facts.pop("street_ids", None)
+    return facts
+
+
 def drop_stale(facts, lot_ids, building_ids):
     """The saved facts without a lot or main building that is no longer in the model (redrawn, joined, deleted):
     the lot's street lines go with it, so the confirm dialog asks again instead of keeping an id nothing has."""
     out = dict(facts or {})
     if out.get("lot_id") and out["lot_id"] not in lot_ids:
         out.pop("lot_id")
-        out.pop("street_line", None)
+        set_street_lines(out, None)
     if out.get("main_building") and out["main_building"] not in building_ids:
         out.pop("main_building")
     return out
@@ -283,22 +299,13 @@ def after_lot_pick(facts, picked_lot):
     out = dict(facts)
     if picked_lot and picked_lot != out.get("lot_id"):
         out["lot_id"] = picked_lot
-        out.pop("street_line", None)
+        set_street_lines(out, None)
     return out
 
 
 def street_enter_keeps(facts):
     """Whether Enter at the first street-line prompt keeps the street lines saved for this lot."""
     return bool(facts.get("street_line"))
-
-
-def after_corner_answer(facts, was_corner):
-    """The facts after the corner-lot answer: a changed answer drops the street lines (a corner lot has two
-    streets, any other lot one), so they are picked again and Enter can't keep the old ones."""
-    out = dict(facts)
-    if out.get("corner_lot") != was_corner:
-        out.pop("street_line", None)
-    return out
 
 
 def corner_answered(facts, saved_ui, corner):
@@ -312,8 +319,7 @@ def corner_answered(facts, saved_ui, corner):
         facts.pop("corner_lot")
     saved_ui = dict(saved_ui or {})
     if was is not None and corner != was:         # a real answer that flips (the first answer, from "Not answered",
-        facts.pop("street_line", None)            # keeps the prefilled line and its name: review round 6, P1)
-        facts.pop("street_ids", None)
+        set_street_lines(facts, None)             # keeps the prefilled line and its name: review round 6, P1)
         saved_ui.pop("street_name", None)
     return facts, saved_ui
 
@@ -333,7 +339,7 @@ def suggested_facts(jurisdiction, zones, lots, buildings):
         facts["lot_id"] = lot["id"]
         if lot["segments"]:
             a, b = min(lot["segments"], key=lambda s: (s[0][1] + s[1][1]) / 2)
-            facts["street_line"] = [[[a[0], a[1]], [b[0], b[1]]]]
+            set_street_lines(facts, [[[a[0], a[1]], [b[0], b[1]]]])
     ground = suggested_ground([b["bottom"] for b in buildings], lot["bottom"] if lot is not None else None)
     if ground is not None:
         facts["grade_elevation"] = ground
@@ -811,9 +817,6 @@ def street_verdict(lines, ids=None):
     return _street_lines().street_verdict(lines, ids)
 
 
-def one_street(lines, ids=None):
-    """Whether lot lines are one street: named one street, or unnamed and swinging no more than its limit in all."""
-    return street_verdict(lines, ids)[0] == "one"
 
 def box_rows(state, flat=None):
     """The start box, top to bottom: one dict per row {key, label, text, actions [(action, label, enabled)],
@@ -1203,34 +1206,58 @@ def open_command(os_name, target):
 
 class ServerBook:
     """The checker processes Gordium started from Rhino, kept in a small file (`path`) so a later load, a reload,
-    or Rhino closing stops every one still running: exactly one server at a time (the coordinator found 30 orphaned
-    `design_checker serve` children of Rhino, one per plugin load; on Windows each a console window too).
-    `alive(pid)` and `stop(pid)` are the operating system's (gordium_rhino), stand-ins in CI."""
+    or Rhino closing stops the earlier ones still running: exactly one server per Rhino (the coordinator found 30
+    orphaned `design_checker serve` children of Rhino, one per plugin load; on Windows each a console window too).
+    Each entry: the checker's process number and start time, and the Rhino that started it (`me`: its number and
+    start time). A Rhino stops only its own checkers, and those of a Rhino no longer running (a crash); another
+    Rhino's are left alone (review round 7, P1: one file for every Rhino, so two open models stopped each other's
+    checker). A process is stopped only while it is the one recorded: the same number AND start time (round 7, P2:
+    a number the system gave again to another program is never touched). `started_at(pid)`: that process's start
+    time, None when it isn't running; `stop(pid)`: the operating system's (gordium_rhino), stand-ins in CI."""
 
-    def __init__(self, path, alive, stop):
-        self.path, self.alive, self.stop = path, alive, stop
+    def __init__(self, path, me, started_at, stop):
+        self.path, self.me, self.started_at, self.stop = path, dict(me), started_at, stop
 
-    def pids(self):
+    def entries(self):
+        """The record's entries; anything unreadable (an older format: bare numbers) is left out, never stopped."""
         try:
             with open(self.path, encoding="utf-8") as f:
-                return [int(p) for p in json.load(f)]
+                got = json.load(f)
         except (OSError, ValueError, TypeError):
             return []
+        keys = ("pid", "start", "owner", "owner_start")
+        return [e for e in got if isinstance(e, dict) and all(k in e for k in keys)] if isinstance(got, list) else []
 
-    def _write(self, pids):
+    def pids(self):
+        return [e["pid"] for e in self.entries()]
+
+    def _write(self, entries):
         try:
             with open(self.path, "w", encoding="utf-8") as f:
-                json.dump(sorted(set(pids)), f)
+                json.dump(entries, f)
         except OSError:
             pass
 
+    def _mine_or_orphaned(self, e):
+        mine = e["owner"] == self.me["pid"] and e["owner_start"] == self.me["start"]
+        return mine or self.started_at(e["owner"]) != e["owner_start"]       # its Rhino is gone
+
     def stop_all(self, keep=None):
-        """Stop every recorded server still running (but `keep`); the record then lists only `keep`."""
-        for pid in self.pids():
-            if pid != keep and self.alive(pid):
-                self.stop(pid)
-        self._write([keep] if keep else [])
+        """Stop this Rhino's recorded checkers (and orphans) still running, but `keep` (an entry); every other
+        Rhino's entries stay recorded, as they are."""
+        left = []
+        for e in self.entries():
+            if keep is not None and e["pid"] == keep["pid"] and e["start"] == keep["start"]:
+                continue
+            running = self.started_at(e["pid"]) == e["start"]                # the same process, not its number reused
+            if self._mine_or_orphaned(e):
+                if running:
+                    self.stop(e["pid"])
+            elif running:
+                left.append(e)
+        self._write(left + ([keep] if keep is not None else []))
 
     def started(self, pid):
-        """A new server: every earlier one stopped, this one the only one recorded."""
-        self.stop_all(keep=pid)
+        """A new checker of this Rhino: its earlier ones stopped, this one recorded (another Rhino's untouched)."""
+        self.stop_all(keep={"pid": pid, "start": self.started_at(pid), "owner": self.me["pid"],
+                            "owner_start": self.me["start"]})
