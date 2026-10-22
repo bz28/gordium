@@ -13,3 +13,8 @@ See HANDOFF.md lanes table (2026-10-22 00:45). Update here as lanes move.
 - #18 measurement-2 ecd820b / #20 answer-keys c342d10: waiting for #15's f1b51a6 to reach term-index (only rhino-ui has it now).
 - #22 stress-tests a460e4e: waiting for measurement-2 to move.
 - Local lanes (stack-keeper; Rhino job arch-fixes-2, wip 770a1c0): moving; not touched.
+
+## 2026-10-22 01:10 — cloud coordinator
+- r2-hand 1b15c9f: PR #24 OPENED (base answer-keys). full_suite re-run here: 1606 passed, 9 skipped, 9 xfailed; CI steps 7 run, all passed. Round 8 clean. Waits for Ben.
+- #23: Rhino job found claim 1 fails on c783ee6 (setting the parent Gordium::Context's IsVisible unlocks every sublayer in Rhino 8); fix = re-lock at the end of _context_visible (13/13 in Rhino as a scratch patch). Routed to the #23 owner with round-2 fixes and #19 7efb1bd merge; Rhino job re-runs context_in_rhino.py on the pushed head.
+- #19 start-box-lookup moved to 7efb1bd (local round-2 fixes).
