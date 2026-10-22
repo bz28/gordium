@@ -15,7 +15,8 @@ import math
 
 from model_measurement.measure import TAX_MAP_SLACK
 
-LOT_LENGTHS = {"lot_width", "lot_depth", "front_yard", "side_yard_smaller", "side_yard_larger", "rear_yard"}
+LOT_LENGTHS = set(TAX_MAP_SLACK)      # every lot-dependent length, the yards to the eaves and an accessory
+# building's distances too: the one table in measure.py (PR 18)
 MAX_READINGS = 20000          # more combinations than this: not worked out (left for review, never a result)
 
 

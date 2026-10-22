@@ -491,11 +491,19 @@ rules:
         page: 3
         lines: [37, 37]
         quote: "Front (minimum) 25 ft 25 ft 25 ft 10 ft"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 50
+        lines: [7, 9]
+        quote: "C. Corner lot transition. On corner lots in residential districts; buildings must be erected so that yards facing public streets shall conform to the minimum front yard requirements of said residential district. Such lots shall be deemed to have two adjoining front yards."
+        not_limits: {2: "two adjoining front yards: which yards are front yards on a corner lot (measured to every street line), not a limit"}
     examples:
       - given: {front_yard: 30}
         expect: pass
       - given: {front_yard: 24}
         expect: fail
+    notes: >-
+      On a corner lot every yard facing a street is a front yard (§325-19C; the corner_lot_two_front_yards finding):
+      front_yard is the least distance from any street lot line, so each street-facing yard must be 25 ft.
     drafted_by: claude
     status: draft
 
@@ -518,6 +526,10 @@ rules:
         expect: pass
       - given: {side_yard_smaller: 9.5, side_yard_larger: 12}
         expect: fail
+    notes: >-
+      On a corner lot one side yard is left; the City checks it against Column 13 and uses Column 12 for the second
+      front yard (the corner_lot_side_yard_column_13 finding, Gordium's reading): both side measures are then that
+      one yard. In R-1b both columns are 10 ft, so the check is the same either way.
     drafted_by: claude
     status: draft
 
@@ -572,6 +584,131 @@ rules:
           the average lot depth
       why_open: It depends on the lot_depth question that is still open; see its research.
       report: docs/research/2026-10-20_architect_questions.md §1.2
+    drafted_by: claude
+    status: draft
+
+  - id: R-1b.yard_projections
+    kind: rule
+    topic: dimensions
+    title: "Eaves into required yards, at most 2 ft (§325-18B)"
+    check: >-
+      front_yard_eaves >= 25 + max(building_height - 35, 0) - 2
+      and side_yard_smaller_eaves >= 10 + max(building_height - 35, 0) - 2
+      and side_yard_larger_eaves >= 10 + max(building_height - 35, 0) - 2
+      and rear_yard_eaves >= max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 49
+        lines: [13, 16]
+        quote: "B. Projecting architectural features. The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that such features shall not project more than two feet into any required yard."
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (one side minimum), column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (other side minimum), column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-1B}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [66, 66]
+        quote: "(16) But not less than 20 ft."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [8, 9]
+        quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [31, 31]
+        quote: "Height in feet 35 ft 35 ft 35 ft"
+    examples:
+      - given: {front_yard_eaves: 30, side_yard_smaller_eaves: 10, side_yard_larger_eaves: 12, rear_yard_eaves: 48, lot_depth: 100, building_height: 30}
+        expect: pass
+        note: eaves clear of every required yard
+      - given: {front_yard_eaves: 23, side_yard_smaller_eaves: 8, side_yard_larger_eaves: 12, rear_yard_eaves: 23, lot_depth: 100, building_height: 30}
+        expect: pass
+        note: eaves exactly 2 ft into the front (25 − 2), one side (10 − 2) and the rear (25% of 100 = 25, − 2) yards
+      - given: {front_yard_eaves: 23, side_yard_smaller_eaves: 7.5, side_yard_larger_eaves: 12, rear_yard_eaves: 30, lot_depth: 100, building_height: 30}
+        expect: fail
+        note: an eave 2.5 ft into the 10 ft side yard (more than 2 ft)
+      - given: {front_yard_eaves: 30, side_yard_smaller_eaves: 10, side_yard_larger_eaves: 12, rear_yard_eaves: 18, lot_depth: 60, building_height: 30}
+        expect: pass
+        note: a 60 ft deep lot, 25% = 15 ft, so the rear yard floor of 20 ft applies; eaves 2 ft into it (20 − 2 = 18)
+      - given: {front_yard_eaves: 30, side_yard_smaller_eaves: 10, side_yard_larger_eaves: 12, rear_yard_eaves: 17.5, lot_depth: 60, building_height: 30}
+        expect: fail
+        note: the same lot, the eave 2.5 ft into the 20 ft rear yard
+      - given: {front_yard_eaves: 25, side_yard_smaller_eaves: 10, side_yard_larger_eaves: 10, rear_yard_eaves: 27, lot_depth: 100, building_height: 37}
+        expect: pass
+        note: with the height bonus every required yard grows 2 ft (§325-16C), so an eave may reach 2 ft into the larger yards
+      - given: {front_yard_eaves: 24, side_yard_smaller_eaves: 10, side_yard_larger_eaves: 10, rear_yard_eaves: 27, lot_depth: 100, building_height: 37}
+        expect: fail
+        note: the 27 ft front yard the bonus requires, less 2 ft, is 25
+    notes: >-
+      The yards themselves (R-1b.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
+      its eaves left out (the yards_to_nearest_part finding, §325-3 YARD, §325-18A); this rule measures the same
+      yards to the outermost part, eaves included, and lets that be up to 2 ft less. A massing model shows eaves,
+      not windowsills, belt courses or cornices: those are for the architect to check. On a corner lot every yard
+      facing a street is a front yard (§325-19C). Whether a bay window in a residential district is a projection
+      isn't settled (yard_projections#1 in definitions.yaml).
+    drafted_by: claude
+    status: draft
+
+  - id: R-1b.accessory_buildings
+    kind: rule
+    topic: dimensions
+    title: "Accessory buildings: not in the front yard; 6 ft side, 3 ft rear (§325-25)"
+    applies_when: accessory_buildings > 0
+    check: >-
+      accessory_front_yard >= 25
+      and (not accessory_distances_apply or accessory_side_yard >= 6 and accessory_rear_yard >= 3)
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [34, 36]
+        quote: "Accessory structures, including private garages, storage sheds, toolhouses, garden houses, playhouses or similar structures, shall be exempt from side yard requirements contained in the District Regulations Chart in § 325-8[fn22] and shall be governed by the requirements below:"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [37, 40]
+        quote: "A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or partially above finished grade are permitted in any side or rear yard but not in a required front yard, except as permitted under the further provisions of this section. Corner lots shall be considered to have two front yards."
+        not_limits: {2: "two front yards on a corner lot: which yards are front yards (the accessory front yard is measured to every street line), not a limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [6, 9]
+        quote: "C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this section."
+        not_limits: {1: "the district name R-1, not a number of feet"}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-1B}
+    examples:
+      - given: {accessory_buildings: 1, accessory_front_yard: 90, accessory_distances_apply: true, accessory_side_yard: 6, accessory_rear_yard: 3}
+        expect: pass
+      - given: {accessory_buildings: 1, accessory_front_yard: 90, accessory_distances_apply: true, accessory_side_yard: 4, accessory_rear_yard: 3}
+        expect: fail
+      - given: {accessory_buildings: 1, accessory_front_yard: 20, accessory_distances_apply: true, accessory_side_yard: 6, accessory_rear_yard: 3}
+        expect: fail
+        note: in the required front yard
+      - given: {accessory_buildings: 1, accessory_front_yard: 25, accessory_distances_apply: true, accessory_side_yard: 6, accessory_rear_yard: 3}
+        expect: pass
+        note: at the edge of the required front yard (25 ft)
+      - given: {accessory_buildings: 1, accessory_front_yard: 90, accessory_distances_apply: false, accessory_side_yard: 1, accessory_rear_yard: 1}
+        expect: pass
+        note: under the reading that only "not in a required front yard" applies to a building that isn't frame
+      - given: {accessory_buildings: 0}
+        expect: not_applicable
+    notes: >-
+      Every solid on the Building layer standing apart from the main building is measured as an accessory building
+      (one touching it, a porch, steps or an attached garage, is part of the main building). Whether the distances
+      apply to an accessory building that isn't frame (masonry, metal) isn't settled (325-25C#1, in the section
+      labels):
+      accessory_distances_apply is measured under every reading it lists, and the rule complies only if it passes
+      under all of them. A frame building (stated, accessory_frame) has them by law. Below-grade accessory
+      structures (§325-25B) and garages on a common lot line by agreement (§325-25D) aren't checked; §325-25 sets
+      no height limit (X2 in the research).
     drafted_by: claude
     status: draft
 

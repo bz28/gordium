@@ -92,8 +92,10 @@ def load_project(path: Path) -> dict:
         elif not (isinstance(m["from"], str) and m["from"].strip()):
             problems.append(f"measurement {name!r} needs where it comes from ('from'), as text")
         elif not (m["value"] is None or type(m["value"]) in (int, str)
-                  or type(m["value"]) is float and math.isfinite(m["value"])):
-            problems.append(f"measurement {name!r} value must be a number or text (a finite number; or empty: not measured yet)")
+                  or type(m["value"]) is float and math.isfinite(m["value"])
+                  or type(m["value"]) is bool and MEASURE_KINDS.get(name) == "boolean"):
+            problems.append(f"measurement {name!r} value must be a number or text (a finite number; yes/no for a yes/no "
+                            "measure; or empty: not measured yet)")
     if not problems:                             # a real jurisdiction inside the repo, with its source list
         j = (REPO / project["jurisdiction"]).resolve()
         places = (REPO / "regulations/jurisdictions").resolve()

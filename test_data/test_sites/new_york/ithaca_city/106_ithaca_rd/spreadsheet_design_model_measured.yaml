@@ -21,7 +21,7 @@ measurements:
     from: 'measured from spreadsheet_design_model.3dm: the average length of the two side lot lines'
   building_area:
     value: 1855.0
-    from: 'measured from spreadsheet_design_model.3dm: the ground area of every building on the lot, porches and decks included [readings: covered from above = 1,855; at the main grade level = 1,855]'
+    from: 'measured from spreadsheet_design_model.3dm: the area of every building on the lot seen from above, principal and accessory, porches and decks included'
   building_height:
     value: 35.0
     from: 'measured from spreadsheet_design_model.3dm: from the ground level (grade plane) to the top of the roof (a flat roof, to its highest level)'
@@ -30,19 +30,46 @@ measurements:
     from: 'stated by the architect for the whole building, within what the drawing allows (1 to 5: the building, 35 ft tall, could hold up to 5 stories (7 ft a story, R305.1)) (lot facts)'
   front_yard:
     value: 30.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line to the main building; between (63, 0) and (63, 30) [readings: to the building seen from above = 30; to its walls at ground level = 30]'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building; between (10, 0) and (10, 30)'
   side_yard_smaller:
     value: 10.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the nearer side lot line to the building; between (0, 65) and (10, 65) [readings: to the building seen from above = 10; to its walls at ground level = 10]'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the nearer side lot line to the building; between (0, 30) and (10, 30)'
   side_yard_larger:
     value: 10.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the farther side lot line to the building; between (73, 65) and (63, 65) [readings: to the building seen from above = 10; to its walls at ground level = 10]'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the farther side lot line to the building; between (73, 65) and (63, 65)'
   rear_yard:
     value: 25.0
-    from: 'measured from spreadsheet_design_model.3dm: the least distance from the rear lot line to the main building; between (10, 90) and (10, 65) [readings: to the building seen from above = 25; to its walls at ground level = 25]'
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the rear lot line to the main building; between (10, 90) and (10, 65)'
   sleeping_rooms:
     value: 3
     from: stated by the architect (not measured from the model) (lot facts)
   parking_spaces:
     value: 1
     from: stated by the architect (not measured from the model) (lot facts)
+  front_yard_eaves:
+    value: 30.0
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the street lot line(s) to the main building, eaves included; between (10, 0) and (10, 30)'
+  side_yard_smaller_eaves:
+    value: 10.0
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the nearer side lot line to the building, eaves included; between (0, 30) and (10, 30)'
+  side_yard_larger_eaves:
+    value: 10.0
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the farther side lot line to the building, eaves included; between (73, 65) and (63, 65)'
+  rear_yard_eaves:
+    value: 25.0
+    from: 'measured from spreadsheet_design_model.3dm: the least distance from the rear lot line to the main building, eaves included; between (10, 90) and (10, 65)'
+  accessory_buildings:
+    value: 0
+    from: 'measured from spreadsheet_design_model.3dm: the solids on the Building layer standing apart from the main building (§325-25)'
+  accessory_front_yard:
+    value: null
+    from: 'not measured: no accessory building on the lot (every solid is the main building or touches it)'
+  accessory_side_yard:
+    value: null
+    from: 'not measured: no accessory building on the lot (every solid is the main building or touches it)'
+  accessory_rear_yard:
+    value: null
+    from: 'not measured: no accessory building on the lot (every solid is the main building or touches it)'
+  accessory_distances_apply:
+    value: null
+    from: 'not measured: no accessory building on the lot (every solid is the main building or touches it)'
