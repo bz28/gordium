@@ -285,7 +285,7 @@ def test_another_solid_whose_height_cant_be_read_is_never_dropped():
     flat_slab = {"id": "slab", "faces": [{"points": [[30, 75, 0], [45, 75, 0], [45, 90, 0]]}], "problems": []}
     m = measure(site(RECT, house, flat_slab), {**FACTS, "main_building": "house"})
     # a single face encloses nothing: found by the measuring itself, never a dropped height (main-building round 4)
-    assert m["building_height"]["value"] is None and m["building_height"]["reason"] == "a building isn't a closed solid"
+    assert m["building_height"]["value"] is None and m["building_height"]["reason"] == "a building isn't a closed solid: slab"
     wing = sloped_roof_box(10, 65, 20, 75, 44.8, 45, "wing")            # a 45 ft wing with a drainage slope
     m = measure(site(RECT, house, wing), {**FACTS, "main_building": "house"})
     assert m["building_height"]["value"] is None
@@ -746,7 +746,8 @@ def test_the_grade_plane_is_the_main_buildings_own_walls_never_a_detached_garage
     assert h["value"] is None                                    # the readings differ: never a pass at 35
     # spots only at the house: the reading with the garage as part of the building has no ground at its walls
     h = measure(site(RECT, house, garage), {**facts, "grade_points": at_house})["building_height"]
-    assert h["value"] is None and h["reason"].startswith("with the other solids as part of the building")
+    # (round 5: the garage has no spot grade of its own, so the ground under it can't be told: it asks)
+    assert h["value"] is None and h["reason"].startswith("the spot grades don't show the ground under the building")
 
 
 def test_a_wing_on_lower_ground_lowers_the_grade_plane_of_the_reading_that_includes_it():
@@ -923,7 +924,9 @@ def _drawing(rnd):
                        "below": z0 < 0, "blocks": 0, "raised": z0 > 0, "height": z1 - z0})
     if rnd.random() < 0.2:             # a room over the first stack's roof, or beside its edge, a little apart
         top = 10 * len(stacks[0]["ids"]) + (10 if stacks[0].get("gap") else 0)
-        x = rnd.choice([7, 17.1, 17.0])                    # over the roof, just past its edge, at its edge
+        columns = sum(1 for st in stacks if st["ids"] and st["ids"][0].startswith("s"))
+        # over the roof, just past its edge, at its edge (only with no stack beside: there it would stand on it)
+        x = rnd.choice([7, 17.1, 17.0]) if columns == 1 else 7
         dz = rnd.choice([0.05, 0.5, 3])
         blocks.append(box(x, 30, x + 6, 40, top + dz, top + dz + 7, id="room"))
         stacks.append({"ids": ["room"], "countable": False, "floors": 0, "tall": True, "below": False,
@@ -959,10 +962,11 @@ def test_stories_never_take_a_value_below_any_candidate_buildings_floors():
             for members in ([main], stacks):    # each candidate building: the main one alone, and with every part
                 assert not any(s["below"] for s in members), (seed, stacks, m)     # a basement or cellar: asks
                 counted = [s["floors"] for s in members if s["countable"]]
-                could = [math.floor((s["height"] + 0.01) / 7) for s in members if s["tall"] and not s["countable"]]
-                if could:                       # a plain part: its stories are what 7 ft a story allows (R305.1)
-                    least = max(counted + [1 for c in could if c >= 1] + [0])
-                    most = max(counted + could)
+                could = [math.floor((s["height"] + 0.01) / 7) for s in members
+                         if not s["countable"] and (s["tall"] or s is main)]     # the main one is never left out
+                if could:                       # a plain part: its stories are what 7 ft a story allows (R305.1),
+                    least = max(counted + [1])  # and every building has a first story (§325-3)
+                    most = max(counted + could + [1])
                     if typed is not None:       # the count typed only within what the drawing allows
                         assert m["value"] == typed and least <= typed <= most, (seed, stacks, pick, typed, m)
                     else:                       # none typed: a value only if the drawing allows one count
@@ -1207,7 +1211,7 @@ def test_the_stories_read_each_candidate_building_from_its_own_grade_plane():
     house = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"h{i}") for i in range(2)]
     wing = [floor(40, 75, 48, 90, z0=0, z1=10, id="w0")]
     facts = {**FACTS, "stories": 2, "main_building": "h0", "ground_is_flat": None, "grade_elevation": None,
-             "grade_points": [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]]}
+             "grade_points": [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [44, 74.5, 0]]}   # one at the wing
     m = measure(site(RECT, *house, *wing), facts)
     assert m["stories"]["value"] is None and m["stories"]["reason"] == m["building_height"]["reason"]
     assert "spot grades at their walls too" in m["stories"]["reason"]
@@ -1336,3 +1340,205 @@ def test_a_floating_house_is_found_however_few_or_lined_up_the_spot_grades(point
     m = measure(site(RECT, *house), facts)
     assert m["front_yard"]["value"] is None and ("doesn't meet the buildings" in m["front_yard"]["reason"] or
                                                  "don't show the ground under the building" in m["front_yard"]["reason"])
+
+
+@pytest.mark.parametrize("at", [26, 50])                  # near a spot grade, and 15 ft further along the wall
+def test_a_balcony_against_the_house_is_part_of_it_for_the_ground_wherever_the_spot_grades_are(at):
+    """#15 round 5 (P2): a balcony drawn as its own solid against the house's side, at 10 ft, was judged by itself:
+    it "floated" (every yard stopped) when a spot grade happened to be near it, and passed 15 ft along the wall.
+    Buildings touching in plan are one group for the ground: the house meets the ground, so the balcony does."""
+    house = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    balcony = box(35, at, 40, at + 8, 10, 10.5, id="balcony")
+    spots = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [36, 27, 0]]
+    m = measure(site(RECT, *house, balcony), {**FACTS, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+                                               "grade_points": spots})
+    assert m["front_yard"]["value"] is not None or m["front_yard"]["readings"], m["front_yard"]
+    assert "doesn't meet the buildings" not in (m["front_yard"]["reason"] or "")
+
+
+def test_a_slab_above_the_grade_plane_on_a_slope_is_cut_at_its_own_bottom():
+    """Round 5 (P2): a house whose slab sits above the average of its wall grades (2.75 against 2.0) was cut below
+    its own bottom: building area 0 sf "at the main grade level" and a made-up overhang question. Each building is
+    cut at the higher of the grade plane and its own bottom."""
+    house = [floor(10, 30, 35, 60, z0=2.75 + 10 * i, z1=2.75 + 10 * (i + 1), id=f"f{i}") for i in range(3)]
+    spots = [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0]]
+    m = measure(site(RECT, *house), {**FACTS, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
+                                     "grade_points": spots})
+    assert m["building_area"]["value"] == pytest.approx(750.0), m["building_area"]
+    assert any(r["reading"] == "to its walls at ground level" for r in m["front_yard"]["readings"]) or \
+        m["front_yard"]["value"] is not None
+
+
+def test_a_closed_solid_a_hair_off_plumb_is_closed_and_one_missing_a_wall_is_open():
+    """Round 5 (P3): a wall leaning by a few hundredths of a foot was left out of the coverage, so a closed solid
+    read as open; a box missing a wall read as closed. Every face counts as drawn, seen along each axis."""
+    from model_measurement.measure import _unenclosed
+    lean = box(10, 25, 35, 65, 0, 30, id="house")
+    for f in lean["faces"]:
+        for p in f["points"]:
+            if p[0] == 35 and p[2] == 30:
+                p[0] = 35.02                    # the east wall's top 0.02 ft out (and the roof with it)
+    assert _unenclosed(lean) is None
+    missing = box(10, 25, 35, 65, 0, 30, id="house")
+    missing["faces"] = [f for f in missing["faces"] if not all(p[0] == 35 for p in f["points"])]
+    assert _unenclosed(missing) is not None
+
+
+def test_the_stories_bound_names_each_solid_and_says_whether_a_count_can_settle_it():
+    """Stories review round 1: (P2) with the main building only assumed, a building read as the main one ignores
+    the count typed, so entering one can't settle it: count_settles says so, and the other solid is named by its
+    id, never "the building"; (P3) a building under 7 ft still has a first story (§325-3): 1, never a loop; (P3) 0
+    typed is refused as fewer than the first story every building has, not as floor blocks that aren't drawn."""
+    house = [floor(10, 25, 35, 55, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
+    barn = box(38, 70, 48, 90, 0, 20, id="barn")                   # 20 ft: one to two stories, as the main one
+    m = measure(site(RECT, *house, barn), {**FACTS, "stories": 3})["stories"]
+    assert m["count_settles"] is False and "(barn) could hold up to 2 stories" in m["reason"], m
+    one = measure(site(RECT, box(10, 25, 35, 65, 0, 30, id="house")), {**FACTS, "stories": None})["stories"]
+    assert one["count_settles"] is True and "(the building) could hold up to 4" in one["reason"]
+    low = measure(site(RECT, box(10, 25, 35, 65, 0, 6, id="house")), {**FACTS, "stories": 1})["stories"]
+    assert low["value"] == 1
+    zero = measure(site(RECT, box(10, 25, 35, 65, 0, 30, id="house")), {**FACTS, "stories": 0})["stories"]
+    assert "fewer than one: every building has at least a first story" in zero["reason"]
+
+
+def test_a_raised_balcony_on_flat_ground_keeps_the_overhang_question():
+    """#15 round 6 (P1): cut at each solid's own bottom, a balcony drawn as its own solid at 10 ft counted at grade
+    (1,012 sf both ways) and the overhang question vanished. Each connected group is cut at the higher of the grade
+    and its lowest bottom: 1,000 sf at the ground, 1,012 sf from above: a question."""
+    house = box(10, 25, 35, 65, 0, 30, id="house")                  # 1,000 sf
+    balcony = box(35, 40, 39, 43, 10, 10.5, id="balcony")           # 12 sf, against the house
+    m = measure(site(RECT, house, balcony), {**FACTS, "main_building": "house"})["building_area"]
+    assert m["value"] is None and sorted(r["value"] for r in m["readings"]) == [1000.0, 1012.0], m
+    assert "overhangs" in m["reason"]
+
+
+def test_an_open_object_is_named_and_the_waiting_rows_point_at_it():
+    """Coordinator: "a building isn't a closed solid" didn't say which object, so the architect couldn't find the
+    open shed. The words name it (its Rhino name, else its id) and every row waiting on it lists it as its object,
+    so Zoom to finds it."""
+    house = box(10, 25, 35, 65, 0, 30)
+    sheet = {"id": "shed-7", "faces": [{"points": [[30, 75, 0], [45, 75, 0], [45, 90, 0]]}], "problems": []}
+    m = measure(site(RECT, house, sheet), {**FACTS, "main_building": "house"})
+    waiting = [n for n, r in m.items() if "isn't a closed solid" in (r.get("reason") or "")]
+    assert "building_height" in waiting and "building_area" in waiting
+    assert all("closed solid: shed-7" in m[n]["reason"] and m[n]["objects"] == ["shed-7"] for n in waiting)
+    named = dict(sheet, name="Garden shed")
+    assert "closed solid: Garden shed" in measure(site(RECT, house, named), {**FACTS, "main_building": "house"})[
+        "building_height"]["reason"]
+
+
+
+def test_every_known_shape_is_read_at_the_ground_as_it_should_be_all_at_once():
+    """#15 round 7: rounds 5, 6 and 7 each fixed one shape at the ground and broke another. Every known shape in
+    one table, asserted together, so a change that fixes one and breaks another fails here at once. Expected
+    values worked by hand from each shape's own footprint: (from above, at the main grade level, overhang
+    question?, front yard read to the walls at ground level?)."""
+    flat = {**FACTS}
+    slope = {**FACTS, "ground_is_flat": None, "grade_elevation": None,
+             "grade_points": [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0]]}
+    slab_house = [floor(10, 30, 35, 60, z0=2.75 + 10 * i, z1=2.75 + 10 * (i + 1), id=f"f{i}") for i in range(3)]
+    terrace_spots = [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0], [22.5, 20, 0.0]]
+    unknown = {**FACTS, "ground_is_flat": None, "grade_elevation": None}
+    ridge_spots = [[22.5, 39.5, 0], [22.5, 60.5, 0], [9.5, 50, 0], [35.5, 50, 0],          # the house's walls
+                   [22.5, 19.5, -6], [14.5, 26, -6], [30.5, 26, -6],                       # the shed's
+                   [20, 95.5, -6], [9.5, 85, -6], [30.5, 85, -6]]                          # the garage's
+    higher = [box(10, 25, 35, 65, 3, 33, id="house"), box(40, 75, 50, 85, 0, 9, id="shed")]
+    cases = {
+        # a 25 x 40 house (1,000 sf) with a 4 x 3 balcony (12 sf) at 10 ft against it, flat ground
+        "balcony, flat": (flat, [box(10, 25, 35, 65, 0, 30, id="house"), box(35, 40, 39, 43, 10, 10.5, id="b")],
+                          "house", (1012, 1000, True)),
+        # the 25 x 30 slab house (750 sf) on its slope, slab at 2.75 above a 2.0 grade plane
+        "slab on a slope": (dict(slope, stories=3), slab_house, None, (750, 750, False)),
+        # the same, with 15 x 4 steps (60 sf) from 1.0 to 2.75 against its front wall: 810 both ways
+        "slab + lower steps": (dict(slope, stories=3), slab_house + [box(15, 26, 30, 30, 1.0, 2.75, id="steps")],
+                               "f0", (810, 810, False)),
+        # a 15 x 8 terrace (120 sf) below the slab house's front, from the ground falling to 0 there up to the
+        # slab (2.75): its bottom below the house's, resting on the ground, cut at the grade plane
+        "terrace below": (dict(slope, stories=3, grade_points=terrace_spots),
+                          slab_house + [box(15, 22, 30, 30, 0.0, 2.75, id="terrace")], "f0", (870, 870, False)),
+        # a detached 10 x 10 shed (100 sf) apart from the house, flat ground
+        "detached shed": (flat, [box(10, 25, 35, 65, 0, 30, id="house"), box(40, 75, 50, 85, 0, 9, id="shed")],
+                          "house", (1100, 1100, False)),
+        # round 8: a 25 x 20 house (500 sf) on a ridge at 0, a 15 x 12 shed (180) and a 20 x 20 garage (400) 6 ft
+        # lower, each with spot grades at its own walls: each read on its own ground
+        "ridge, outbuildings lower": (dict(unknown, grade_points=ridge_spots),
+                                      [box(10, 40, 35, 60, 0, 30, id="house"), box(15, 20, 30, 32, -6, 4, id="shed"),
+                                       box(10, 75, 30, 95, -6, 4, id="garage")], "house", (1080, 1080, False)),
+        # round 8: the house 3 ft above a detached shed, no spot grades, the ground not known / sloped
+        "higher house, ground unknown": (unknown, higher, "house", (1100, 1100, False)),
+        "higher house, sloped": (dict(unknown, ground_is_flat=False), higher, "house", (1100, 1100, False)),
+    }
+    got, want = {}, {}
+    for name, (facts, solids, main, (above, at_ground, question)) in cases.items():
+        m = measure(site(RECT, *solids), dict(facts, **({"main_building": main} if main else {})))
+        ba = m["building_area"]
+        readings = {r["reading"]: round(r["value"]) for r in ba.get("readings") or []}
+        got[name] = (readings.get("covered from above", round(ba["value"]) if ba["value"] is not None else None),
+                     readings.get("at the main grade level", round(ba["value"]) if ba["value"] is not None else None),
+                     "overhangs" in (ba["reason"] or "") and ba["value"] is None,
+                     m["front_yard"]["value"] is not None or any(
+                         r["reading"] == "to its walls at ground level" for r in m["front_yard"]["readings"] or []))
+        want[name] = (above, at_ground, question, True)
+    assert got == want
+
+
+
+def test_every_stories_refusal_carries_its_code():
+    """#15 round 7 (2): refusals were found by matching their words, so a reworded one silently stopped being a
+    refusal. Each refusal stop (a count typed: its words name {typed}) is stories_<code>, and the measuring
+    returns the code with it, for every one."""
+    from model_measurement.measure import REFUSALS
+    from model_measurement.stops import STOPS
+    typed = sorted(k[len("stories_"):] for k, v in STOPS.items() if "{typed}" in v)
+    assert typed == sorted(REFUSALS)
+    plain = box(10, 25, 35, 65, 0, 30, id="house")                    # 30 ft: 1 to 4 stories
+    floors = [floor(10, 25, 35, 65, z0=10 * i, z1=10 * (i + 1), id=f"f{i}") for i in range(3)]
+    cases = {"below_one": ([plain], 0), "above_drawn": ([plain], 5), "below_floors": (floors, 2)}
+    assert sorted(cases) == typed
+    for code, (solids, count) in cases.items():
+        r = measure(site(RECT, *solids), {**FACTS, "stories": count})["stories"]
+        assert r["value"] is None and r.get("stories_refused") == code, (code, r)
+    assert "stories_refused" not in measure(site(RECT, plain), {**FACTS, "stories": 3})["stories"]
+
+
+def test_a_short_shed_on_its_own_lower_ground_is_never_buried_under_the_houses_grade():
+    """#15 review round 9 (P2): "wholly under the ground" still judged every solid against the main house's grade
+    plane. A 5 ft shed on ground 6 ft lower, with its own spot grades at its walls, was "buried" (-6 to -1 under 0):
+    the building area, the yards, the height and the envelope all stopped, in the wrong words. It is read on its own
+    ground (ground_for). A solid with no spot grade of its own below the house is still refused as buried."""
+    from model_measurement.measure import envelope_grade
+    spots = [[22.5, 39.5, 0], [22.5, 60.5, 0], [9.5, 50, 0], [35.5, 50, 0],               # the house's walls
+             [22.5, 19.5, -6], [14.5, 26, -6], [30.5, 26, -6]]                            # the shed's
+    house, shed = box(10, 40, 35, 60, 0, 30, id="house"), box(15, 20, 30, 32, -6, -1, id="shed")
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "grade_points": spots, "main_building": "house"}
+    m = measure(site(RECT, house, shed), facts)
+    assert not [n for n, r in m.items() if "wholly under the ground" in (r.get("reason") or "")], m["building_area"]
+    assert sorted(r["value"] for r in m["building_area"]["readings"]) == [680.0, 680.0] or \
+        m["building_area"]["value"] == pytest.approx(680.0), m["building_area"]
+    assert envelope_grade([house, shed], facts)[1] is None
+    lost = box(15, 20, 30, 32, -6, -1, id="lost")                   # no spot grade of its own: never measured as if
+    m = measure(site(RECT, house, lost), {**facts, "grade_points": spots[:4]})        # on the ground
+    why = m["building_area"]["reason"] or ""
+    assert m["building_area"]["value"] is None and not m["building_area"]["readings"], m["building_area"]
+    assert "wholly under the ground" in why or "don't show the ground under the building" in why, why
+
+
+def test_the_main_buildings_own_parts_are_read_against_its_grade_plane_never_their_own_corners():
+    """#15 review round 10 (P2 x2, from round 9's fix): reading each solid on its own ground reached the main
+    building's own parts too. (1) A lower part lying wholly below the grade plane passed the buried check against its
+    own downhill corner, and the height showed a below-zero reading; (2) the ground cut was an average of the house's
+    corners, not the §325-3 grade plane the height uses, so it fell on the wrong floor (500 at grade, a made-up
+    overhang question). The main building and every solid joined to it are read against the grade plane; only a
+    separate building is read on its own ground."""
+    spots = [[22.5, 24.5, -6], [22.5, 65.5, 0], [35.5, 35, -1], [35.5, 55, 0], [9.5, 35, -1], [9.5, 55, 0]]
+    facts = {**FACTS, "ground_is_flat": None, "grade_elevation": None, "grade_points": spots}
+    under = measure(site(RECT, box(10, 25, 35, 65, -6, -2, id="low"), box(10, 25, 35, 45, -2, 30, id="up")),
+                    {**facts, "main_building": "up"})
+    height = under["building_height"]
+    assert all(r["value"] >= 0 for r in height["readings"]) and (height["value"] is None or height["value"] >= 0)
+    assert "wholly under the ground" in (height["reason"] or ""), height
+    stepped = measure(site(RECT, box(10, 25, 35, 45, -6, -2, id="low"), box(10, 25, 35, 65, -2, 30, id="up")),
+                      {**facts, "main_building": "up"})
+    area = stepped["building_area"]
+    assert area["value"] == pytest.approx(1000.0) or sorted(r["value"] for r in area["readings"]) == [1000.0, 1000.0], area
+    assert "overhangs" not in (area["reason"] or ""), area

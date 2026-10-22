@@ -115,7 +115,7 @@ def test_a_lot_on_two_streets_asks_for_the_front(name):
     p = looked_up(name)
     facts, saved, state = box(p)
     assert p["facts"]["corner_lot"]["value"] == "ask" and facts["corner_lot"] is True
-    assert logic.uncertain(state) == "This lot faces two streets: pick the front"
+    assert logic.uncertain(state) == "This lot faces two streets: click Change… and pick each lot line on a street"
     placed = frame({"facts": p["facts"]})
     assert max(pt[1] for seg in placed["street_line"] for pt in seg) < 2.0          # the address street at the bottom
 
@@ -387,7 +387,7 @@ def test_p1_esc_on_place_spot_grades_settles_nothing():
     placed = logic.after_ground_pick({**saved, "doubts": {"ground": "x"}}, "spot", 3)
     assert "ground" not in logic.unsettled(placed) and "ground_source" not in placed
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "logic.pick_effect(what, _pick_outcome(doc, what, facts, session), facts, saved_ui)" in rhino
+    assert "logic.pick_effect(what, _pick_outcome(doc, what, facts, saved_ui, session), facts, saved_ui)" in rhino
     assert "        return placed" in rhino                       # the points placed are the pick's outcome
 
 
@@ -953,13 +953,13 @@ def test_esc_at_any_pick_changes_nothing_and_keeps_every_doubt(what):
     pick's effect is decided in rhino_logic from what the pick gave; Esc, Enter or nothing picked changes nothing."""
     facts, saved, _ = box(_doubtful_106())
     saved = dict(saved, doubts={"lot": "x", "street": "y", "ground": "z"}, checked=[])
-    for nothing in (None, [], ""):
+    for nothing in (None, [], "") + (({"picks": [], "name": "A St"},) if what == "street" else ()):
         f2, s2 = logic.pick_effect(what, nothing, facts, saved)
         assert (f2, s2) == (facts, saved)
         assert logic.unsettled(s2) == {"lot": "x", "street": "y", "ground": "z"}
 
 
-@pytest.mark.parametrize("what, outcome, row", [("street", [[0, 0], [10, 0]], "street"), ("lot", "survey-id", "lot"),
+@pytest.mark.parametrize("what, outcome, row", [("street", {"picks": [[[0, 0], [10, 0]]], "name": None}, "street"), ("lot", "survey-id", "lot"),
                                                  ("draw_lot", "drawn-id", "lot"), ("terrain", "terrain-id", "ground"),
                                                  ("spot", ["p1", "p2"], "ground"), ("regrade", ["p1"], "ground")])
 @pytest.mark.usefixtures("ground_from_the_lookup")
@@ -973,7 +973,7 @@ def test_a_real_pick_settles_only_its_own_row(what, outcome, row):
         assert facts["lot_surveyed"] is False and after["lot_source"] == "drawn by you"
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     pick = rhino[rhino.index("def _one_pick("):rhino.index("def confirm(")]
-    assert "logic.pick_effect(what, _pick_outcome(doc, what, facts, session), facts, saved_ui)" in pick
+    assert "logic.pick_effect(what, _pick_outcome(doc, what, facts, saved_ui, session), facts, saved_ui)" in pick
     assert "logic.settle(" not in pick and "logic.after_ground_pick(" not in pick      # decided only in rhino_logic
 
 
@@ -1164,3 +1164,50 @@ def test_the_maps_words_are_shown_with_the_lookups_date_and_never_stored():
     assert 'zone_row["source"].Text = logic.zone_row_text(state)' in ui
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     assert "dict(logic.saved_sources(saved_ui, state)" in rhino and '"zone_said": saved_ui.get("_zone_said")' in rhino
+
+
+
+def test_checked_is_the_citys_own_day_and_draw_saves_the_same():
+    """#19 zone round 3 (P3): the day shown was the lookup's UTC day, so after about 8 pm in Ithaca it said
+    tomorrow. It is the City's own day (America/New_York), the same Draw saves."""
+    import datetime as dt
+    from design_checker.lookup_box import box_payload
+    from site_lookup.lookup import lookup
+    late = dt.datetime(2026, 10, 23, 1, 30, tzinfo=dt.timezone.utc)          # 9:30 pm on the 22nd in Ithaca
+    assert logic.city_day(late) == "2026-10-22"
+    assert logic.city_day(dt.datetime(2026, 12, 23, 4, 30, tzinfo=dt.timezone.utc)) == "2026-12-22"   # UTC-5
+    assert logic.city_day(dt.datetime(2026, 3, 8, 6, 59, tzinfo=dt.timezone.utc)) == "2026-03-08"     # 1:59 am EST
+    assert logic.city_day(dt.datetime(2026, 11, 1, 4, 30, tzinfo=dt.timezone.utc)) == "2026-11-01"    # 12:30 EDT
+    fx = T.load("106_ithaca_rd")
+    payload = box_payload(lookup(fx["address"], T.Fake(fx), late), late)
+    _, saved, state = box(payload)
+    assert logic.zone_row_text(state).endswith("(checked 2026-10-22)")
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.fact_sources(state, logic.city_day(), confirmed=True)" in rhino and "time.strftime" not in rhino
+
+
+def test_a_found_lookup_with_no_district_clears_the_last_one():
+    """#19 zone round 3: a found lookup whose zoning layer gave no value kept the previous address's district and
+    its "suggested · City zoning map" source. It clears both and asks for a pick."""
+    _, saved, state = box(looked_up("106_ithaca_rd"))
+    assert state["zone"] == "R-1b"
+    facts, saved = logic.lookup_choices({"status": "found", "facts": {"zone": {"value": None}}},
+                                        {"zone": "R-1b"}, saved, ZONES)
+    assert "zone" not in facts and "zone_source" not in saved and "_zone_said" not in saved
+    assert saved["_live"]["zone"] == logic.NO_DISTRICT
+    assert logic.zone_row_text(state_of(facts, saved)) == "— · not set"
+
+
+def test_a_lookup_that_replaces_the_sample_lot_never_keeps_the_samples_street_name():
+    """Merge of #15 (arch-fixes-2) into #19: the sample now saves its street's name (Ithaca Rd, as its lookup named
+    it), so a lookup that replaces the sample's lot and names no street must drop it with the old street lines (the
+    box would otherwise call the looked-up lot's street Ithaca Rd); one that names its street uses that name."""
+    p = looked_up("106_ithaca_rd")
+    p["facts"] = {k: v for k, v in p["facts"].items() if k != "street_side"}
+    sample = {"street_name": "Ithaca Rd", "street_source": "the sample project", "from_sample": True}
+    facts, saved, state = box(p, facts={"street_line": [[[0, 0], [10, 0]]], "street_ids": ["Ithaca Rd"]}, saved=sample)
+    assert "street_name" not in saved and "_street_name" not in saved and state["street_name"] is None
+    named = looked_up("106_ithaca_rd")
+    assert (named["facts"].get("street_side") or {}).get("value", {}).get("street")
+    _, saved, state = box(named, saved=dict(sample, street_name="Old St"))
+    assert state["street_name"] and state["street_name"] != "Old St"

@@ -7,6 +7,7 @@ the checker worker, which answers one request at a time: a lookup given up on wo
 prints one JSON line: site_lookup's result, where the lot lands in the model (`frame`), and exactly what the
 Rhino side may write into the .3dm (`writes`, by each source's store policy in site_lookup/endpoints.yaml).
 No AI; the map services' own answers, worked out by plain code."""
+import datetime as dt
 import json
 import math
 import re
@@ -24,6 +25,8 @@ OWN_SOURCE = {                     # which of a fact's sources is its own (the o
     "street_side": ("city_roads", "state_streets"), "corner_lot": ("city_roads", "state_streets"),
     "ground": ("elevation",), "zone": ("city_zoning",),
 }
+
+from design_checker.rhino_logic import city_day
 
 
 def _rotate(p, c, s):
@@ -127,8 +130,8 @@ def kept_reasons(result: dict) -> dict:
     return {k: d.get("reason") for k, d in details.items() if d.get("reason")}
 
 
-def box_payload(result: dict) -> dict:
-    """Everything the start box needs from one lookup."""
+def box_payload(result: dict, now=None) -> dict:
+    """Everything the start box needs from one lookup; `now` (UTC): when it ran, said as the City's own day."""
     placed = frame(result) if result.get("status") == "found" else None
     side = (result.get("details") or {}).get("street_side") or {}
     return {"status": result.get("status"), "message": result.get("message") or "", "asks": result.get("asks") or [],
@@ -136,7 +139,7 @@ def box_payload(result: dict) -> dict:
             "facts": result.get("facts") or {}, "details": result.get("details") or {},
             "labels": labels(result), "kept_reasons": kept_reasons(result),
             "street_storable": bool(side.get("source_keys")) and strictest(side["source_keys"]) == "raw",
-            "writes": writes(result, placed)}
+            "writes": writes(result, placed), **({"checked": city_day(now)} if now else {})}
 
 
 def _fixture_http(name: str):
@@ -161,10 +164,10 @@ def main(argv: list[str]) -> int:
     try:
         if fixture:
             http, now = _fixture_http(fixture)
-            result = lookup(args[0], http, now)
         else:
-            result = lookup(args[0], Http(timeout=TIMEOUT_S, retries=RETRIES))
-        print(json.dumps(box_payload(result), default=str))
+            http, now = Http(timeout=TIMEOUT_S, retries=RETRIES), dt.datetime.now(dt.timezone.utc)
+        result = lookup(args[0], http, now)
+        print(json.dumps(box_payload(result, now), default=str))
     except Exception as e:                # never a traceback for the box: a plain state it can say
         print(json.dumps({"status": "error", "message": "The lookup failed: enter the site by hand.",
                           "detail": f"{type(e).__name__}: {e}", "asks": [], "matches": [], "facts": {}, "details": {},

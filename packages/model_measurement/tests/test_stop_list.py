@@ -157,6 +157,10 @@ CASES = {
     "no_street": _plain(street_line=[]),
     "street_not_a_lot_line": _plain(street_line=[[[0, 5], [50, 5]]]),
     "street_lines_apart": _plain(street_line=[[[0, 0], [50, 0]], [[50, 100], [0, 100]]], corner_lot=False),
+    "two_streets": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]]], street_ids=["A St", "B Ave"],
+                          corner_lot=False),
+    "one_street_or_two": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]]], corner_lot=False),
+    "street_names_stale": _plain(street_line=[[[0, 0], [50, 0]]], street_ids=["A St", "A St"], corner_lot=False),
     "all_street": _plain(street_line=[[[0, 0], [50, 0]], [[50, 0], [50, 100]], [[50, 100], [0, 100]], [[0, 100], [0, 0]]],
                          corner_lot=False),
     "corner_unknown": _plain(corner_lot=None),
@@ -172,7 +176,8 @@ CASES = {
     "readings_differ": _plain(buildings=[sloped_roof_box(10, 25, 35, 65, 20, 30, "house")]),
     "no_use": _plain(use=None),
     "no_district": _plain(zone=None),
-    "no_stories": _plain(stories=None, buildings=[box(10, 25, 35, 65, 0, 6)]),          # can't hold a story
+    "no_stories": _plain(stories=None, buildings=[]),              # nothing drawn: the count isn't known
+    "stories_below_one": _plain(stories=0, buildings=[box(10, 25, 35, 65, 0, 30)]),
     "stories_above_drawn": _plain(stories=5, buildings=[box(10, 25, 35, 65, 0, 30)]),     # 30 ft: at most 4
     "stories_below_floors": _plain(stories=1, main_building="floor 1", buildings=[
         floor(10, 25, 35, 65, z0=0, z1=11, id="floor 1"), floor(10, 25, 35, 65, z0=11, z1=22, id="floor 2"),
@@ -196,7 +201,8 @@ CASES = {
     "grade_off_walls": _plain(grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [60, 45, 0]]),
     "existing_grade": _plain(grade_is="existing"),
     "grade_with_others": _plain(buildings=[box(10, 25, 35, 65, id="house"), box(40, 75, 48, 90, 0, 12, id="shed")],
-                                grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0]], main_building="house",
+                                grade_points=[[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [44, 74.5, 0]],
+                                main_building="house",          # one spot grade at the shed: not at all its walls
                                 ground_is_flat=None, grade_elevation=None),
     "grade_walls_unclear": _plain(buildings=[prism([(22 + 8 * math.cos(k * math.pi / 32), 45 + 8 * math.sin(k * math.pi / 32))
                                                     for k in range(64)], 0, 30)],      # a round tower: 0.8 ft sides
