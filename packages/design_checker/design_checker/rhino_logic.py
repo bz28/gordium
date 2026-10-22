@@ -1660,9 +1660,10 @@ def context_locked(path):
 
 def outline_key(points, attributes=None):
     """The fingerprint of an outline as Rhino holds it: every coordinate of its points, Z included (to a millionth of
-    a model unit), and the attributes an architect can change (name, colour, linetype, their own user text: the
-    plugin's _attrs_print). Review of the editable outlines, P1: a footprint moved up to the terrain, renamed or
-    recoloured was taken as unedited, deleted and drawn again at z = 0."""
+    a model unit), and its attributes as the plugin's _attrs_print reads them (each of FINGERPRINT_ATTRIBUTES, the
+    layer, linetype and material by their ids, the groups, the architect's own user text). Review of the editable
+    outlines, P1: a footprint moved up to the terrain, renamed or recoloured was taken as unedited, deleted and drawn
+    again at z = 0."""
     import hashlib
     import json
     flat = [[round(float(c), 6) for c in p] for p in points or []]
@@ -1694,18 +1695,23 @@ def suppressed(edited, current_frame_key):
                       and e.get("drawn_as") and e.get("drawn_as") == e.get("own")))
 
 
-SKIPPED_ATTRIBUTES = ("UserStringCount",)   # counts Gordium's own keys, written after the fingerprint
-
-
-def attribute_counts(name):
-    """Whether an ObjectAttributes property goes into an outline's fingerprint: every one Rhino lets the plugin read
-    (review of the editable outlines, round 2: listing them missed print width and colour, material, groups), but the
-    count of user strings, which includes Gordium's own keys (the architect's own user text is fingerprinted apart)."""
-    return bool(name) and name not in SKIPPED_ATTRIBUTES
+# The attributes of an outline in its fingerprint (the plugin's _attrs_print), by name: each one an architect can
+# change on an outline in Rhino 7 and 8 (review of the editable outlines, round 2: a short list missed print width and
+# colour, material, groups). A fixed list, not every property by reflection (round 3): a property one Rhino version
+# adds would make every outline drawn under the last one look edited. Table positions are never fingerprinted (the
+# layer, linetype and material go by their ids, the groups by theirs: _attrs_print): a deleted layer isn't saved, so
+# on reopening a file the later layers' indexes move down, and every untouched outline looked edited, kept forever.
+FINGERPRINT_ATTRIBUTES = ("Name", "Url", "Mode", "Visible", "Space", "ViewportId", "DisplayOrder", "WireDensity",
+                          "ObjectDecoration", "ColorSource", "ObjectColor", "LinetypeSource", "PlotColorSource",
+                          "PlotColor", "PlotWeightSource", "PlotWeight", "MaterialSource", "CastsShadows",
+                          "ReceivesShadows")
 
 
 def attribute_text(value):
-    """An attribute's value as stable text for the fingerprint (a number, a flag, a colour, a plane...)."""
+    """An attribute's value as stable text for the fingerprint (a number, a flag, an enum's name, an id; a colour by
+    its ARGB number, never its name, which a colour read back from a file doesn't keep)."""
+    if hasattr(value, "ToArgb"):
+        return str(int(value.ToArgb()))
     if isinstance(value, float):
         return repr(round(value, 9))
     return str(value)

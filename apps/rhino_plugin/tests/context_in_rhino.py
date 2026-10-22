@@ -307,6 +307,25 @@ try:
           log["saved_footprints"]["outlines"] > 0 and log["saved_footprints"]["credit"]
           and set(log["saved_sources"]) <= {"", "gordium", "state_parcels", "state_streets", "state_buildings"},
           log["saved_footprints"])
+    # review of the editable outlines, round 3: the saved file reopened (Gordium deleted its holding layer, made
+    # before the context layers, so their indexes move down): a clear takes Gordium's untouched outlines, keeps only
+    # the architect's (the dragged, lifted, widened ones and the copy)
+    theirs = len([o for o in footprints(g, doc, every=True) if o.Attributes.GetUserString(g.logic.EDITED_KEY)])
+    index_before = doc.Layers.FindByFullPath(g.logic.CONTEXT + "::Buildings", -1)
+    again = Rhino.RhinoDoc.OpenHeadless(path)
+    try:
+        index_after = again.Layers.FindByFullPath(g.logic.CONTEXT + "::Buildings", -1)
+        g._clear_context(again)
+        left = footprints(g, again, every=True)
+        log["reopened"] = {"buildings_index": [index_before, index_after], "theirs_before": theirs,
+                           "left": len(left), "gordiums_left": len([o for o in left if o.Attributes.GetUserString(
+                               g.logic.CONTEXT_KEY)]),
+                           "theirs_left": len([o for o in left if o.Attributes.GetUserString(g.logic.EDITED_KEY)])}
+    finally:
+        again.Dispose()
+    claim("5 a saved and reopened file, a layer deleted before it: a clear removes Gordium's untouched outlines, "
+          "keeps only the architect's", theirs > 0 and log["reopened"]["gordiums_left"] == 0
+          and log["reopened"]["left"] == log["reopened"]["theirs_left"] == theirs, log["reopened"])
     # a second address: Edit site…, 109 Ithaca Rd looked up (recorded); the first neighbourhood must go
     first_frame = (g._context_record(doc) or {}).get("frame")
     g.STATE.update(box_picks=["lookup"], box_overrides={"address": "109 Ithaca Rd, Ithaca, NY 14850"},

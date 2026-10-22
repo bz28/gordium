@@ -2434,24 +2434,37 @@ def _outline_points(geometry):
     return [(q.X, q.Y, q.Z) for q in polyline] if ok else None
 
 
-def _attrs_print(attrs):
-    """An outline's attributes for its fingerprint: EVERY readable ObjectAttributes property (by reflection: a list of
-    them missed print width and colour, material; review round 2; rhino_logic.attribute_counts leaves out only the
-    user-string count, which includes Gordium's own keys), its groups, and the architect's own user text (never
-    Gordium's keys, written after drawing)."""
+def _attrs_print(attrs, doc):
+    """An outline's attributes for its fingerprint: each of rhino_logic.FINGERPRINT_ATTRIBUTES (one this Rhino lacks or
+    won't read is left out, the same on every read), the layer, linetype and material by their ids and the groups by
+    theirs (never a table position, which moves when a deleted layer isn't saved: review round 3), and the
+    architect's own user text (never Gordium's keys, written after drawing)."""
     out = {}
-    for prop in attrs.GetType().GetProperties():
-        if not prop.CanRead or prop.GetIndexParameters().Length or not logic.attribute_counts(prop.Name):
-            continue
+    for name in logic.FINGERPRINT_ATTRIBUTES:
         try:
-            out[prop.Name] = logic.attribute_text(prop.GetValue(attrs, None))
-        except Exception:                      # a property Rhino won't read here: not part of the fingerprint
+            out[name] = logic.attribute_text(getattr(attrs, name))
+        except Exception:                      # not in this Rhino, or not readable here: not part of the fingerprint
             continue
-    out["groups"] = sorted(int(g) for g in (attrs.GetGroupList() or []))
+    for name, table, index in (("layer", doc.Layers, attrs.LayerIndex), ("linetype", doc.Linetypes, attrs.LinetypeIndex),
+                               ("material", doc.Materials, attrs.MaterialIndex)):
+        out[name] = _table_id(table, index)
+    out["groups"] = sorted(_table_id(doc.Groups, g) for g in (attrs.GetGroupList() or []))
     keys = attrs.GetUserStrings()
     out["user"] = sorted((k, attrs.GetUserString(k)) for k in (keys.AllKeys if keys is not None else [])
                          if k and not str(k).startswith("gordium_"))
     return out
+
+
+def _table_id(table, index):
+    """The id of a layer, linetype, material or group by its index ("" for none, -1: from the layer or the default)."""
+    try:
+        index = int(index)
+        if index < 0:
+            return ""
+        item = table.FindIndex(index) if hasattr(table, "FindIndex") else table[index]
+        return str(item.Id) if item is not None else "#%d" % index
+    except Exception:
+        return "#%s" % index
 
 
 def _clear_context(doc, sources=None):
@@ -2483,7 +2496,7 @@ def _clear_context(doc, sources=None):
             if not source or (sources is not None and source not in sources):
                 continue
             if logic.kept_on_clear(o.Attributes.GetUserString(logic.GEOM_KEY), o.Attributes.GetUserString(
-                    logic.DRAWN_KEY), str(o.Id), _outline_points(o.Geometry), _attrs_print(o.Attributes)):
+                    logic.DRAWN_KEY), str(o.Id), _outline_points(o.Geometry), _attrs_print(o.Attributes, doc)):
                 attrs = o.Attributes.Duplicate()          # the architect edited it: theirs now, never removed
                 attrs.SetUserString(logic.CONTEXT_KEY, None)
                 attrs.SetUserString(logic.EDITED_KEY, "1")
@@ -2605,7 +2618,7 @@ def draw_context(doc, frame):
             if added is not None:          # fingerprinted as Rhino holds it (points, Z, attributes): an edit is seen later
                 marked = added.Attributes.Duplicate()
                 marked.SetUserString(logic.GEOM_KEY, logic.outline_key(_outline_points(added.Geometry),
-                                                                       _attrs_print(added.Attributes)))
+                                                                       _attrs_print(added.Attributes, doc)))
                 marked.SetUserString(logic.DRAWN_KEY, str(added.Id))
                 doc.Objects.ModifyAttributes(added, marked, True)
     _lock_context(doc, True)

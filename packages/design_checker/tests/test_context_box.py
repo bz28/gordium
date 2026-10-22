@@ -128,13 +128,14 @@ def test_an_outline_the_architect_edited_is_known_and_never_drawn_twice():
     assert "(q.X, q.Y, q.Z)" in show
 
 
-# every attribute Rhino gives an outline (as _attrs_print reads them by reflection), and the two it adds
-ATTRIBUTES = {"Name": "footprint-1", "ColorSource": "ColorFromLayer", "ObjectColor": "Color [A=255, R=0, G=0, B=0]",
-              "LinetypeSource": "LinetypeFromLayer", "LinetypeIndex": "-1", "PlotColorSource": "PlotColorFromLayer",
-              "PlotColor": "Color [A=255, R=0, G=0, B=0]", "PlotWeightSource": "PlotWeightFromLayer",
-              "PlotWeight": "0.0", "MaterialSource": "MaterialFromLayer", "MaterialIndex": "-1", "Mode": "Normal",
-              "Visible": "True", "WireDensity": "1", "DisplayOrder": "0", "LayerIndex": "7",
-              "ObjectDecoration": "None", "Url": "", "groups": [], "user": []}
+# an outline's attributes as _attrs_print reads them: each of FINGERPRINT_ATTRIBUTES, the tables' ids, groups, user text
+ATTRIBUTES = {"Name": "footprint-1", "Url": "", "Mode": "Normal", "Visible": "True", "Space": "ModelSpace",
+              "ViewportId": "00000000-0000-0000-0000-000000000000", "DisplayOrder": "0", "WireDensity": "1",
+              "ObjectDecoration": "None", "ColorSource": "ColorFromLayer", "ObjectColor": "-16777216",
+              "LinetypeSource": "LinetypeFromLayer", "PlotColorSource": "PlotColorFromLayer", "PlotColor": "-16777216",
+              "PlotWeightSource": "PlotWeightFromLayer", "PlotWeight": "0.0", "MaterialSource": "MaterialFromLayer",
+              "CastsShadows": "True", "ReceivesShadows": "True", "layer": "9f1e-buildings", "linetype": "",
+              "material": "", "groups": [], "user": []}
 
 
 def test_changing_any_attribute_or_copying_keeps_the_outline_and_only_gordiums_own_go():
@@ -150,56 +151,54 @@ def test_changing_any_attribute_or_copying_keeps_the_outline_and_only_gordiums_o
     assert logic.kept_on_clear(key, "A", "B", drawn, dict(ATTRIBUTES))                  # a copy pasted in place
     assert logic.kept_on_clear(key, None, "B", drawn, dict(ATTRIBUTES))                 # no record of being drawn
     assert not logic.kept_on_clear(None, None, "C", None, {})                           # a note: Gordium's, goes
-    assert not logic.attribute_counts("UserStringCount") and logic.attribute_counts("PlotWeight")
+    assert set(ATTRIBUTES) == set(logic.FINGERPRINT_ATTRIBUTES) | {"layer", "linetype", "material", "groups", "user"}
+    assert not any(n.endswith("Index") or n.endswith("Count") for n in logic.FINGERPRINT_ATTRIBUTES)  # no positions
     assert logic.attribute_text(0.1 + 0.2) == logic.attribute_text(0.3)                 # stable text
     att = RHINO[RHINO.index("def _attrs_print("):].split("\ndef ", 1)[0]
-    assert "attrs.GetType().GetProperties()" in att and "logic.attribute_counts(prop.Name)" in att
+    assert "for name in logic.FINGERPRINT_ATTRIBUTES:" in att and "GetProperties" not in att
     assert "attrs.GetGroupList()" in att and 'startswith("gordium_")' in att
     clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_pieces(")]
     kept = clear.index("if logic.kept_on_clear(o.Attributes.GetUserString(logic.GEOM_KEY), o.Attributes.GetUserString(")
-    assert "logic.DRAWN_KEY), str(o.Id), _outline_points(o.Geometry), _attrs_print(o.Attributes)):" in clear
+    assert "logic.DRAWN_KEY), str(o.Id), _outline_points(o.Geometry), _attrs_print(o.Attributes, doc)):" in clear
     assert kept < clear.index('attrs.SetUserString(logic.EDITED_KEY, "1")') < clear.index("doc.Objects.Delete(o, True)")
 
 
-class _Prop:
-    """A .NET PropertyInfo as pythonnet hands it to the plugin (Name, CanRead, GetIndexParameters, GetValue)."""
+class _Colour:
+    """A System.Drawing.Color: its text has its name when made from one, never when read back from a file."""
 
-    def __init__(self, name, read=None, can_read=True, indexed=False):
-        self.Name, self.CanRead, self._read, self._indexed = name, can_read, read, indexed
+    def __init__(self, argb, named=False):
+        self.argb, self.named = argb, named
 
-    def GetIndexParameters(self):
-        return type("P", (), {"Length": 1 if self._indexed else 0})()
-
-    def GetValue(self, obj, index):
-        assert index is None
-        return self._read(obj)
-
-
-class _NetObject:
-    """A .NET object without its own ToString: str() is its type name, the same on every read."""
+    def ToArgb(self):
+        return self.argb
 
     def __str__(self):
-        return "Rhino.Render.Decals"
+        return "Color [Black]" if self.named else "Color [A=255, R=0, G=0, B=0]"
+
+
+class _Table:
+    """A layer, linetype, material or group table: items by index, each with its id."""
+
+    def __init__(self, ids):
+        self.ids = ids
+
+    def FindIndex(self, i):
+        return type("Item", (), {"Id": self.ids[i]})() if 0 <= i < len(self.ids) else None
 
 
 class _Attrs:
-    """ObjectAttributes as the plugin reads them in Rhino: reflection over the real kinds of property (an id, a
-    document flag, an object reference, one Rhino throws on, an indexed one, a write-only one) and Gordium's own keys
-    counted in UserStringCount."""
+    """ObjectAttributes as the plugin reads them in Rhino: table positions (layer, linetype, material, groups), a
+    colour, a property this Rhino throws on, and Gordium's own keys in the user strings."""
 
-    def __init__(self, obj_id="5d2c-own", plot_weight=0.0, groups=None):
-        self.obj_id, self.plot_weight, self.groups = obj_id, plot_weight, groups
+    def __init__(self, layer_index=1, plot_weight=0.0, groups=None, named=False):
+        self.Name, self.Url, self.Mode, self.Visible, self.DisplayOrder = "footprint-1", "", "Normal", True, 0
+        self.LayerIndex, self.LinetypeIndex, self.MaterialIndex = layer_index, -1, -1
+        self.ObjectColor, self.PlotWeight, self.groups = _Colour(-16777216, named), plot_weight, groups
         self.strings = {"gordium_context": "state_buildings", "gordium_context_id": "footprint-1"}
-        self.decals = _NetObject()
 
-    def GetType(self):
-        def boom(a):
-            raise RuntimeError("TargetInvocationException: not readable here")
-        props = [_Prop("ObjectId", lambda a: a.obj_id), _Prop("IsDocumentControlled", lambda a: True),
-                 _Prop("PlotWeight", lambda a: a.plot_weight), _Prop("Decals", lambda a: a.decals),
-                 _Prop("UserStringCount", lambda a: len(a.strings)), _Prop("CustomMeshingParameters", boom),
-                 _Prop("Item", lambda a: 1 / 0, indexed=True), _Prop("WriteOnly", lambda a: 1 / 0, can_read=False)]
-        return type("T", (), {"GetProperties": staticmethod(lambda: props)})()
+    @property
+    def CastsShadows(self):
+        raise RuntimeError("TargetInvocationException: not readable here")
 
     def GetGroupList(self):
         return self.groups                       # None when the object is in no group, as RhinoCommon gives it
@@ -211,33 +210,49 @@ class _Attrs:
         return self.strings.get(k)
 
 
+class _Doc:
+    def __init__(self, layers):
+        self.Layers, self.Linetypes = _Table(layers), _Table(["lt-dashed"])
+        self.Materials, self.Groups = _Table([]), _Table(["g-0", "g-1", "g-2", "g-their-linework"])
+
+
 def test_the_attribute_fingerprint_is_stable_in_rhino_and_sees_print_width_and_groups():
-    """Review of the editable outlines, round 3 (finishing round 2): _attrs_print run as written, over attributes
-    shaped like RhinoCommon's. Reading them again after Gordium writes its own keys (the user-string count grows)
-    gives the same fingerprint, so an untouched outline is Gordium's; a property Rhino throws on, an indexed or a
-    write-only one is left out; a print width or a group is an edit."""
-    src = RHINO[RHINO.index("def _attrs_print("):].split("\ndef ", 1)[0]
+    """Review of the editable outlines, rounds 2 and 3: _attrs_print run as written, over attributes shaped like
+    RhinoCommon's. Read again after Gordium writes its own keys, and after a save and reopen in which a deleted layer
+    before the context layers moved their indexes down (Gordium deletes its holding layer itself), an untouched
+    outline has the same fingerprint, so it is Gordium's and is cleared; a print width, a group or the architect's
+    own user text is an edit."""
+    src = RHINO[RHINO.index("def _attrs_print("):RHINO.index("def _clear_context(")]
     ns = {"logic": logic}
     exec(src, ns)
     attrs_print = ns["_attrs_print"]
     pts = [(0.0, 0.0, 0.0), (30.0, 0.0, 0.0), (30.0, 40.0, 0.0), (0.0, 0.0, 0.0)]
-    a = _Attrs()
-    key = logic.outline_key(pts, attrs_print(a))                       # as draw_context fingerprints it
+    drawn_doc = _Doc(["default", "gordium-holding", "9f1e-buildings"])    # holding layer deleted later, still a slot
+    a = _Attrs(layer_index=2, named=True)
+    key = logic.outline_key(pts, attrs_print(a, drawn_doc))              # as draw_context fingerprints it
     a.strings.update({logic.GEOM_KEY: key, logic.DRAWN_KEY: "5d2c-own"})   # then writes its own keys
-    first = attrs_print(a)
-    assert set(first) == {"ObjectId", "IsDocumentControlled", "PlotWeight", "Decals", "groups", "user"}
-    assert first["user"] == [] and first["groups"] == [] and first["Decals"] == "Rhino.Render.Decals"
-    assert not logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(a))   # untouched: Gordium's
-    a.plot_weight = 0.35                                                                # a print width set
-    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(a))
-    b = _Attrs(groups=[3])                                                              # grouped with their linework
-    b.strings.update({logic.GEOM_KEY: key, logic.DRAWN_KEY: "5d2c-own"})
-    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(b))
-    c = _Attrs()
+    first = attrs_print(a, drawn_doc)
+    assert first["user"] == [] and first["groups"] == [] and first["ObjectColor"] == "-16777216"
+    assert not logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, first)            # untouched: Gordium's
+    reopened = _Attrs(layer_index=1)                       # saved and reopened: the deleted layer gone, index 2 -> 1
+    reopened.strings.update(a.strings)
+    assert not logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(reopened, _Doc(["default", "9f1e-buildings"])))
+    assert first["layer"] == "9f1e-buildings" and first["linetype"] == "" and "CastsShadows" not in first
+    a.PlotWeight = 0.35                                                                 # a print width set
+    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(a, drawn_doc))
+    b = _Attrs(layer_index=2, groups=[3])                                               # grouped with their linework
+    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(b, drawn_doc))
+    c = _Attrs(layer_index=2)
     c.strings["storeys"] = "4"                                                          # their own user text
-    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(c))
+    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(c, drawn_doc))
+    d = _Attrs(layer_index=2)
+    d.LinetypeIndex = 0                                                                 # a dashed linetype
+    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(d, drawn_doc))
     check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
     assert "a copy pasted in place and a footprint given a print width are the architect's" in check  # Rhino proves it
+    assert "a saved and reopened file, a layer deleted before it" in check
+    doc = " ".join(logic.outline_key.__doc__.split())                  # its docstring says what is fingerprinted
+    assert "FINGERPRINT_ATTRIBUTES" in doc and "by their ids" in doc and "name, colour, linetype, their own" not in doc
 
 
 def test_only_the_very_outline_edited_around_this_lot_is_kept_from_a_redraw():
@@ -273,7 +288,7 @@ def test_only_the_very_outline_edited_around_this_lot_is_kept_from_a_redraw():
 def test_the_plugin_keeps_an_edited_outline_as_the_architects_and_marks_every_outline():
     clear = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _edited_pieces(")]
     edited = clear.index("if logic.kept_on_clear(o.Attributes.GetUserString(logic.GEOM_KEY)")
-    assert "_attrs_print(o.Attributes)" in clear[edited:edited + 250]
+    assert "_attrs_print(o.Attributes, doc)" in clear[edited:edited + 250]
     assert edited < clear.index("attrs.SetUserString(logic.CONTEXT_KEY, None)") < clear.index("doc.Objects.Delete(o, True)")
     assert 'attrs.SetUserString(logic.EDITED_KEY, "1")' in clear      # theirs now: no later clear touches it
     draw = RHINO[RHINO.index("def draw_context("):RHINO.index("def sync_context(")]
