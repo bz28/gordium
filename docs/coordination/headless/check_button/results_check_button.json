@@ -47,12 +47,12 @@
   "id": "check-5",
   "group": "check_button",
   "where": "check_button_in_rhino",
-  "title": "The viewport's status box says it too, with no status mark",
+  "title": "The viewport's status box says it too, with no status mark, and the viewport is redrawn so its marks grey out",
   "needs": "rhino",
   "offline": "partial",
-  "offline_ok": true,
-  "evidence": "Status box: ['Gordium \u00b7 Model changed since the last check \u2014 press Check', 'Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12\\'-0\")'].",
-  "rhino_part": "The status box drawn in the viewport."
+  "offline_ok": false,
+  "evidence": "Status box: ['Gordium \u00b7 Model changed since the last check \u2014 press Check', 'Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12\\'-0\")']; viewport redraws after the edit: 0; the overlay counts as out of date: True.",
+  "rhino_part": "The status box drawn in the viewport, and the marks greyed on screen."
  },
  {
   "id": "check-6",
@@ -116,8 +116,30 @@
   "title": "Switching to another file checks it once, whatever the tick, and never says 'Model changed'",
   "needs": "rhino",
   "offline": "partial",
-  "offline_ok": false,
-  "evidence": "An empty file in front: header ['Gordium', '\u26a0 Check could not run']; back to the checked file: 0 check(s) ran, header ['Gordium', '\u26a0 Check could not run'].",
+  "offline_ok": true,
+  "evidence": "An empty file in front: header ['Gordium', '\u26a0 Check could not run']; back to the checked file: 1 check(s) ran, header ['106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached', '4 need review \u00b7 6 comply \u00b7 2 not checked'].",
   "rhino_part": "Rhino's real document events."
+ },
+ {
+  "id": "check-12",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "With the panel closed, the viewport still greys after an edit",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": false,
+  "evidence": "Redraws after the edit with no panel: 0; out of date: True.",
+  "rhino_part": "The viewport's look in Rhino."
+ },
+ {
+  "id": "check-13",
+  "group": "check_button",
+  "where": "check_button_in_rhino",
+  "title": "GordiumLive flips Check after every edit, and edits are still noticed",
+  "needs": "rhino",
+  "offline": "partial",
+  "offline_ok": true,
+  "evidence": "Check after every edit: False -> True; edit hooks attached: True.",
+  "rhino_part": "The command in Rhino."
  }
 ]

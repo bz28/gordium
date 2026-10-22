@@ -111,6 +111,9 @@ def main():
         runs.append(a)
         return real_run(*a, **k)
     g.run_check = counted
+    redraws = []
+    real_redraw = g._redraw
+    g._redraw = lambda: (redraws.append(1), real_redraw())[1]
     edited(g, doc)
     idle_after_wait(g)
     head = texts(parts["header"].rows)
@@ -122,8 +125,11 @@ def main():
     check("check-4", "The panel says 'Model changed since the last check — press Check' and the rows are greyed",
           RP_PANEL, lambda: (g.logic.CHANGED_SINCE in head and parts.get("stale") is True,
                              "Header: %s; rows greyed (no marks, '—'): %s." % (head[:3], parts.get("stale"))))
-    check("check-5", "The viewport's status box says it too, with no status mark", "The status box drawn in the "
-          "viewport.", lambda: (rows[0] == "Gordium · " + g.logic.CHANGED_SINCE, "Status box: %s." % rows))
+    check("check-5", "The viewport's status box says it too, with no status mark, and the viewport is redrawn so its "
+          "marks grey out", "The status box drawn in the viewport, and the marks greyed on screen.",
+          lambda: (rows[0] == "Gordium · " + g.logic.CHANGED_SINCE and len(redraws) >= 1 and g.stale(g.overlay()),
+                   "Status box: %s; viewport redraws after the edit: %d; the overlay counts as out of date: %s." % (
+                       rows, len(redraws), g.stale(g.overlay()))))
     buttons[0].Click.fire(buttons[0], None)          # Check
     second = checked_at(g, doc)
     runs_after_check = len(runs)
@@ -205,6 +211,31 @@ def main():
               and any("press Check" in t for t in head_other),
               "An empty file in front: header %s; back to the checked file: %d check(s) ran, header %s." % (
                   head_other[:2], len(runs2) - before_switch, head_back[:2])))
+    # review round 2: the viewport greys even with the panel closed; GordiumLive flips the tick, never the hooks
+    import gordium_ui as gui
+    real_show = gui.show
+    gui.show = lambda *a, **k: None                  # the panel closed: nothing of it is refreshed
+    p2 = g2.STATE.get("panel_parts") or {}
+    form = p2.get("form")
+    g2.STATE["panel_parts"] = None
+    drawn = []
+    real_redraw2 = g2._redraw
+    g2._redraw = lambda: (drawn.append(1), real_redraw2())[1]
+    g2.check_now()
+    edited(g2, doc)
+    idle_after_wait(g2)
+    g2.STATE["panel_parts"] = p2
+    gui.show = real_show
+    check("check-12", "With the panel closed, the viewport still greys after an edit", "The viewport's look in Rhino.",
+          lambda: (len(drawn) >= 1 and g2.stale(g2.overlay()), "Redraws after the edit with no panel: %d; out of "
+                   "date: %s." % (len(drawn), g2.stale(g2.overlay()))))
+    was = g2._auto(doc)
+    g2.toggle_live()
+    check("check-13", "GordiumLive flips Check after every edit, and edits are still noticed", "The command in Rhino.",
+          lambda: (g2._auto(doc) is (not was) and bool(g2.STATE.get("hooks")),
+                   "Check after every edit: %s -> %s; edit hooks attached: %s." % (was, g2._auto(doc),
+                                                                                  bool(g2.STATE.get("hooks")))))
+    g2.toggle_live()
     out = os.path.join(HERE, "results_check_button.json")
     json.dump(RESULTS, open(out, "w"), indent=1)
     print(json.dumps({"claims": len(RESULTS), "passed": sum(r["offline_ok"] for r in RESULTS)}))
