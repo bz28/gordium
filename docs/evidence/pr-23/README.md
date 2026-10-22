@@ -53,3 +53,38 @@ What the first run's screenshots showed, and what came of it:
   and fixed in the next runs);
 - in Top view the lot's edge-length labels pile up in a column: the label placement this branch inherits from
   #15/#19; the MVP branch's `place_label` puts each beside its own line and reaches this PR when #15 carries it.
+
+## Re-run at 955d97f (2026-10-22): the context layers stay locked
+
+**What changed since the run above:** at c783ee6 the run failed its first claim: every neighbourhood layer came out
+unlocked. The cause was found in Rhino 8. Setting a parent layer's visibility (`IsVisible`, even to "shown" when it
+is already shown) gives each sublayer the parent's lock setting. `Gordium::Context` is left unlocked on purpose, so
+the footprints can be dragged, and it is shown at the end of every draw. So Parcels, Streets and Notes were
+unlocked too. At 955d97f the layers are locked again after any show or hide.
+
+The test as run: 955d97f's own `apps/rhino_plugin/tests/context_in_rhino.py`, with recorded answers for 106 Ithaca
+Rd (no live calls). **15 of 15 claims true** (`context_results_955d97f.json`). GordiumStart with the neighbourhood
+took 9.5 s; drawing it again took 2.6 s.
+
+| Claim | Result |
+|---|---|
+| 1 Its own grey layers, locked but for the footprints | Parcels (229), Streets (38) and Notes (6) locked; Buildings (322 footprints) unlocked; `Gordium::Context` itself unlocked (a locked parent would lock the footprints) |
+| 1 The notes; every note inside the square; the sources note small | All true |
+| 2 The footprints are real outlines on the unlocked Buildings layer | 322 outlines, editable |
+| 3 The checker never measures the context; the check is the same with or without it | One lot; the same summary |
+| 3 Drawn again it replaces, never doubles | 322 before, 322 after |
+| 3 An edited footprint stays the architect's | The lifted one kept once; the untouched ones replaced |
+| 3 A copy pasted in place, and a footprint given a print width, are the architect's | Both kept once, never doubled (323 before, 323 after) |
+| 3 A solid on the neighbourhood layers over the lot | "Objects on the lot not included": needs review; never measured |
+| 4 The panel tick hides it and shows it again, and only Parcels, Streets and Notes stay locked | Locks the same after hiding and after showing |
+| 5 A saved file keeps the footprints, with their credit and date | 319 outlines; "footprints dated 2014" on the Sources note |
+| 5 A saved, reopened file with a layer deleted before it: a clear keeps only the architect's | 4 of theirs before, 4 left; none of Gordium's left |
+| 6 A second address clears the first neighbourhood | Frame changed; nothing of 106's left |
+
+The panel tick, clicked (`context_tick_in_rhino.py` at 955d97f): **10 of 10 claims true**
+(`context_tick_results_955d97f.json`).
+
+| File | What it shows |
+|---|---|
+| `106_context_top_955d97f.png` | Top view at 955d97f |
+| `106_context_perspective_955d97f.png` | The same in 3D |
