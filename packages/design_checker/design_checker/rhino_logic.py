@@ -1630,14 +1630,43 @@ def recover_held(table, live=None):
     return len(removed), len(back)
 
 
-def should_recheck(dirty_at, now, running, box_open, wait, last_at=None):
-    """Live mode's re-check after an edit: only once the model has been still for `wait` seconds, no check is running,
-    no start box is open (its own edits mark the model changed; the check waits for the box to close, then runs:
-    verification round of PR #19), and no check has finished since that edit (`last_at`: GordiumStart's own check
-    after its box already covers the box's edits)."""
+def should_recheck(dirty_at, now, running, box_open, wait, last_at=None, auto=True):
+    """Live mode's re-check after an edit: only when the architect asked for it (`auto`: Check after every edit,
+    off by default; otherwise the Check button checks), once the model has been still for `wait` seconds, no check
+    is running, no start box is open (its own edits mark the model changed; the check waits for the box to close,
+    then runs: verification round of PR #19), and no check has finished since that edit (`last_at`: GordiumStart's
+    own check after its box already covers the box's edits)."""
+    if not auto:
+        return False
     if last_at is not None and dirty_at and last_at >= dirty_at:
         return False
     return bool(dirty_at) and now - dirty_at >= wait and not running and not box_open
+
+
+# ---- the Check button (Ben, 2026-10-21): no check after every edit unless asked ---------------------------------
+CHANGED_SINCE = "Model changed since the last check — press Check"
+AUTO_CHECK_LABEL = "Check after every edit"
+AUTO_CHECK_TIP = "Off: the results grey out after an edit until you press Check. On: Gordium checks again by itself."
+
+
+def changed_after_box(before, now, drawn):
+    """When the model counts as changed after a start box closes (STATE["dirty"]): Cancel rolled the box's own edits
+    back, so the model is as it was when the box opened (`before`: changed then, or not); Draw's edits are checked
+    by Draw's own check, and any change left counts (`now`)."""
+    return now if drawn else before
+
+
+def auto_check(ui_state):
+    """Whether this document checks again by itself after every edit: off unless the architect ticked Check after
+    every edit in it (saved with the file)."""
+    return bool((ui_state or {}).get("auto_check", False))
+
+
+def out_of_date_line(auto):
+    """What the panel's header and the viewport's status box say while the results are older than the model: a
+    check is on its way ("Checking…") only when one will run by itself; otherwise the architect is told to press
+    Check (the results stay greyed, never shown as if current)."""
+    return "Checking… (the model changed)" if auto else CHANGED_SINCE
 
 
 def controls_enabled(box_open, zoom_ok):

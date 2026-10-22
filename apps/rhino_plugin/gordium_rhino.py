@@ -618,8 +618,8 @@ def draw_screen(o, e):
 def _status_rows(o, old):
     """The status box's lines: the summary, then up to 3 notes (never ✓ (D3); "–" means not checked)."""
     state, text, lines = o.message
-    if old:                                  # out of date: neutral, no status (F7)
-        state, text, lines = "stale", "Checking… (the model changed)", lines[:1]
+    if old:                                  # out of date: neutral, no status (F7); press Check, or checking
+        state, text, lines = "stale", logic.out_of_date_line(_auto(Rhino.RhinoDoc.ActiveDoc)), lines[:1]
     mark = {"does_not_comply": "✕", "needs_review": "?"}.get(state, "")
     return ["Gordium · " + (mark + " " if mark else "") + text] + list(lines)[:3]
 
@@ -770,7 +770,7 @@ def PANEL_ACTIONS():
             "legend": lambda: ui.legend(((STATE.get("last") or {}).get("header") or {}).get("code")),
             "retry": lambda: run_check(Rhino.RhinoDoc.ActiveDoc, report=False), "ground": this_is_the_ground,
             "massing": hide_massing, "not_ground": not_the_ground, "labels": set_labels, "main": pick_main_building,
-            "context": show_context}
+            "context": show_context, "check": check_now, "auto_check": set_auto_check}
 
 
 DOCK_ID = "7c3e9a51-2d84-4b6f-9e17-5a0c8d2f4b63"   # the Gordium panel's id: Rhino remembers where it is docked
@@ -917,6 +917,45 @@ def set_labels(on):
     _save_ui_state(doc, state)
     STATE.setdefault("labels_by_doc", {})[doc.RuntimeSerialNumber] = logic.labels_on(state)
     doc.Views.Redraw()
+
+
+def _auto(doc):
+    """This document's Check after every edit (rhino_logic.auto_check), read once from its settings and kept per
+    document (the idle handler asks often)."""
+    if doc is None:
+        return False
+    known = STATE.setdefault("auto_by_doc", {})
+    if doc.RuntimeSerialNumber not in known:
+        known[doc.RuntimeSerialNumber] = logic.auto_check(_ui_state(doc))
+    return known[doc.RuntimeSerialNumber]
+
+
+def set_auto_check(on):
+    """Check after every edit, on or off, saved in this document. Turned on with the results out of date: checks
+    now (it would have)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:
+        say(logic.NO_DOCUMENT)
+        return
+    _save_ui_state(doc, dict(_ui_state(doc), auto_check=bool(on)))
+    STATE.setdefault("auto_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
+    ui.set_auto_tick(STATE.get("panel_parts"), on)
+    if on and STATE.get("dirty"):
+        STATE["dirty"] = time.time() - IDLE_SECONDS      # the next idle checks
+    elif not on and STATE.get("dirty") and STATE.get("panel_parts") is not None:
+        ui.show(STATE["panel_parts"], None, checking=True)     # the header: press Check
+    say("Checks after every edit: " + ("on" if on else "off (press Check after you edit)"))
+    doc.Views.Redraw()
+
+
+def check_now():
+    """The panel's Check: the model as it is now, checked (the results no longer greyed)."""
+    doc = Rhino.RhinoDoc.ActiveDoc
+    if doc is None:
+        say(logic.NO_DOCUMENT)
+        return None
+    STATE["dirty"] = None
+    return run_check(doc, report=False)
 
 
 def set_envelope(on):
@@ -1607,13 +1646,17 @@ def confirm(doc, facts, options, mode="check"):
         say(logic.BOX_BUSY)
         return None
     result = None
+    changed_before = STATE.get("dirty")
     try:
         ui.set_box_open(STATE.get("panel_parts"), True)
         result = _confirm(doc, facts, options, mode)
     finally:
         gate.leave()
         ui.set_box_open(STATE.get("panel_parts"), False)
-        if STATE.get("dirty"):          # edits made while the box was open: live mode checks them at the next idle
+        # Cancel put the model back: it is as changed (or not) as it was when the box opened, so current results
+        # never grey out for the box's own rolled-back edits (the Check button: nothing re-checks them)
+        STATE["dirty"] = logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None)
+        if STATE.get("dirty"):          # edits left: live mode (Check after every edit) checks at the next idle
             STATE["dirty"] = time.time() - IDLE_SECONDS
     if result is not None:              # Draw (GordiumStart or Edit site…): the neighbourhood follows the lot
         logic.guard(sync_context, "draw the neighbourhood")(doc, result)
@@ -2110,6 +2153,7 @@ def run_check(doc, report=True):
         if not STATE.get("headless"):
             ui.show(panel(), view)
             ui.set_labels_tick(STATE.get("panel_parts"), shown)
+            ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))
             ui.set_context_tick(STATE.get("panel_parts"), _context_on(doc))
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
@@ -2203,11 +2247,13 @@ def _idle(sender, e):
         STATE["dirty"] = t = None
     p = STATE.get("panel_parts")
     if t and time.time() - t >= ui.STALE_SECONDS and STATE.get("stale_shown") != t and p is not None \
-            and p["form"].Visible:          # out of date: no marks until the re-check (H1, F7)
+            and p["form"].Visible:          # out of date: no marks until the re-check, or until Check (H1, F7)
         STATE["stale_shown"] = t
+        ui.set_auto_tick(p, _auto(front))
         ui.show(p, None, checking=True)
         _redraw()
-    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS, last_at):
+    if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS, last_at,
+                            auto=_auto(front)):
         STATE["dirty"] = None
         doc = Rhino.RhinoDoc.ActiveDoc
         if doc is not None and doc.Strings.GetValue(SECTION, ENTRY):    # checked before: run_check says why
