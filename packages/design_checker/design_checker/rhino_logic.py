@@ -1649,6 +1649,19 @@ DRAWN_KEY = "gordium_context_drawn_as"  # on each outline: its own object id whe
                                         # own id: a copy is never the outline itself)
 
 
+def outermost_first(layers):
+    """Layer indexes (from (index, full path) pairs) ordered parent before sublayer, so setting a parent's state can
+    never undo a sublayer's set after it (Rhino 8: a parent's IsVisible gives its sublayers its lock; review round 5)."""
+    return [i for i, path in sorted(layers, key=lambda x: (x[1].count("::"), x[0]))]
+
+
+def context_not_cleared(count):
+    """What the architect is told when Rhino refused to delete or mark some of Gordium's neighbourhood objects (a
+    layer still locked or hidden): never drawn over silently (review round 5)."""
+    return ("Gordium could not remove %d neighbourhood object%s it drew earlier (a locked or hidden layer?). Unlock "
+            "and show the Gordium layers, then press Draw again, or delete them by hand." % (count, "" if count == 1 else "s"))
+
+
 def context_locked(path):
     """Whether a context layer is locked after drawing: the leaf layers but the editable ones (the footprints), never
     an ancestor of an editable one (Gordium::Context itself): in Rhino a locked parent locks its sublayers' objects,

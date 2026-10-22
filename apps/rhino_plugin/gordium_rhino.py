@@ -2476,20 +2476,25 @@ def _clear_context(doc, sources=None):
     footprints: a layer whose service failed keeps what was saved."""
     dirty = STATE.get("dirty")             # deleting the context changes nothing the check reads (see draw_context)
     indexes = _context_layer_indexes(doc)
-    parents = []                           # a locked or hidden parent ("Gordium") holds its sublayers' objects too
+    roots = []                             # a locked or hidden parent ("Gordium") holds its sublayers' objects too
     for i in indexes:                      # (review round 4): shown and unlocked for the delete, then put back
-        parent = doc.Layers[i].ParentLayerId
+        top, parent = doc.Layers[i], doc.Layers[i].ParentLayerId
         while parent != System.Guid.Empty:
             j = doc.Layers.FindId(parent)
             if j is None:
                 break
-            if j.Index not in indexes and j.Index not in [k for k, _, _ in parents]:
-                parents.append((j.Index, j.IsVisible, j.IsLocked))
-            parent = j.ParentLayerId
-    shown = [(i, doc.Layers[i].IsVisible) for i in indexes]
-    for i in indexes + [k for k, _, _ in parents]:
+            top, parent = j, j.ParentLayerId
+        if top.FullPath not in roots:
+            roots.append(top.FullPath)
+    # Every layer a parent's IsVisible can reach (in Rhino 8 it gives each sublayer the parent's lock: review round
+    # 5), the architect's own Gordium::Grade and Massing too, outermost first; each is put back exactly as it was.
+    touched = logic.outermost_first([(i, layer.FullPath) for i, layer in enumerate(doc.Layers) if not layer.IsDeleted
+                                     and any(logic.on_layer(layer.FullPath, r) for r in roots)])
+    was = [(i, doc.Layers[i].IsVisible, doc.Layers[i].IsLocked) for i in touched]
+    for i in touched:                      # a parent before its sublayers: its IsVisible can't lock them again
         doc.Layers[i].IsVisible = True
         doc.Layers[i].IsLocked = False
+    left = 0                               # objects Rhino refused to delete or change: said, never drawn over silently
     for i in indexes:
         for o in list(doc.Objects.FindByLayer(doc.Layers[i]) or []):
             source = o.Attributes.GetUserString(logic.CONTEXT_KEY)
@@ -2500,16 +2505,16 @@ def _clear_context(doc, sources=None):
                 attrs = o.Attributes.Duplicate()          # the architect edited it: theirs now, never removed
                 attrs.SetUserString(logic.CONTEXT_KEY, None)
                 attrs.SetUserString(logic.EDITED_KEY, "1")
-                doc.Objects.ModifyAttributes(o, attrs, True)
+                left += not doc.Objects.ModifyAttributes(o, attrs, True)
             else:
-                doc.Objects.Delete(o, True)
-    for i, was in shown:
-        doc.Layers[i].IsVisible = was
-        doc.Layers[i].IsLocked = logic.context_locked(doc.Layers[i].FullPath)
-    for k, was_visible, was_locked in parents:
-        doc.Layers[k].IsVisible = was_visible
-        doc.Layers[k].IsLocked = was_locked
-    _lock_context(doc, True)               # a parent's IsVisible just gave its sublayers its lock (Rhino 8): again
+                left += not doc.Objects.Delete(o, True)
+    for i, visible, _ in was:              # every visibility first (each passes its lock down), then every lock
+        doc.Layers[i].IsVisible = visible
+    for i, _, locked in was:
+        doc.Layers[i].IsLocked = locked
+    _lock_context(doc, True)               # the context layers as Gordium keeps them: all but the footprints
+    if left:
+        say(logic.context_not_cleared(left))
     if sources is None:
         if logic.guides_of(STATE.get("context_guides"), doc.RuntimeSerialNumber):
             STATE.pop("context_guides", None)

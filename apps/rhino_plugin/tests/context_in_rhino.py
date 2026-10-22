@@ -296,6 +296,24 @@ try:
           {"off": {k: v["visible"] for k, v in log["tick_off"].items()},
            "on": {k: v["visible"] for k, v in log["tick_on"].items()},
            "off_locks": log["tick_off_locks"], "on_locks": log["tick_on_locks"]})
+    # review round 5: with the architect's "Gordium" layer (and their Gordium::Grade) locked, a redraw must still
+    # delete Gordium's own outlines (not draw a second set beside them) and put both locks back as they were
+    top = doc.Layers.FindByFullPath("Gordium", -1)
+    grade = doc.Layers[g._layer(doc, "Gordium::Grade")]
+    before = len(footprints(g, doc))
+    doc.Layers[top].IsLocked, grade.IsLocked = True, True
+    said_before = len(g.STATE.get("said", []))
+    g.draw_context(doc, g._ui_state(doc).get("lookup_frame"))
+    locks = {k: v["locked"] for k, v in context_layers(g, doc).items()}
+    log["locked_parent"] = {"before": before, "after": len(footprints(g, doc)), "gordium_locked": doc.Layers[top].IsLocked,
+                            "grade_locked": doc.Layers[grade.Index].IsLocked, "locks": locks,
+                            "said": g.STATE.get("said", [])[said_before:]}
+    doc.Layers[top].IsLocked, doc.Layers[grade.Index].IsLocked = False, False
+    lp = log["locked_parent"]
+    claim("4 with the Gordium layer and the architect's Gordium::Grade locked, a redraw replaces (never doubles) and "
+          "puts both locks back", lp["after"] == lp["before"] > 0 and lp["gordium_locked"] and lp["grade_locked"]
+          and all(v == g.logic.context_locked(k) for k, v in locks.items())
+          and not [t for t in lp["said"] if "could not remove" in t], lp)
     path = S + "saved.3dm"
     doc.Export(path)
     f = Rhino.FileIO.File3dm.Read(path)

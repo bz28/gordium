@@ -560,8 +560,8 @@ def test_clearing_reaches_hidden_and_locked_context_layers_and_only_gordiums_obj
     body = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _context_payload(")]
     show, unlock, delete = (body.index(s) for s in ("IsVisible = True", "IsLocked = False", "doc.Objects.Delete("))
     assert show < delete and unlock < delete
-    assert body.index("IsVisible = was") > delete
-    assert body.index("IsLocked = logic.context_locked(doc.Layers[i].FullPath)") > delete   # all but the footprints
+    assert body.index("doc.Layers[i].IsVisible = visible") > delete                       # put back as it was
+    assert body.rindex("_lock_context(doc, True)") > delete                              # all but the footprints
     assert "if not source or (sources is not None and source not in sources):" in body   # never the architect's own
     assert "doc.Strings.Delete(SECTION, logic.CONTEXT_ENTRY)" in body and 'STATE.pop("context_guides"' in body
     vis = RHINO[RHINO.index("def _context_visible("):RHINO.index("def show_context(")]
@@ -608,9 +608,9 @@ def test_clearing_also_opens_a_locked_or_hidden_parent_layer_and_says_before_wai
     """Review round 4: a locked or hidden "Gordium" layer holds its sublayers' objects too (the delete skipped them,
     and the neighbourhood was drawn twice); and Rhino waited for the fetch without a word."""
     body = RHINO[RHINO.index("def _clear_context("):RHINO.index("def _context_payload(")]
-    assert "ParentLayerId" in body and "for i in indexes + [k for k, _, _ in parents]:" in body
-    assert body.index("for i in indexes + [k for k, _, _ in parents]:") < body.index("doc.Objects.Delete(")
-    assert body.index("doc.Objects.Delete(") < body.index("doc.Layers[k].IsLocked = was_locked")
+    assert "ParentLayerId" in body and "for i in touched:" in body
+    assert body.index("for i in touched:") < body.index("doc.Objects.Delete(")
+    assert body.index("doc.Objects.Delete(") < body.index("doc.Layers[i].IsLocked = locked")
     fetch = RHINO[RHINO.index("def _context_payload("):RHINO.index("def draw_context(")]
     assert fetch.index('say("Fetching the neighbourhood') < fetch.index("subprocess.run(")
 
@@ -1028,5 +1028,48 @@ def test_showing_or_hiding_the_neighbourhood_keeps_its_layers_locked_in_rhino_8(
         assert _locks(doc) == want, on
     ns["_clear_context"](doc)                                    # the parent "Gordium" put back as it was
     assert _locks(doc) == want
+
+
+def _clear_ns():
+    ns = {"logic": logic, "STATE": {}, "SECTION": "gordium", "said": [],
+          "System": type("System", (), {"Guid": type("Guid", (), {"Empty": _NO_ID})})}
+    ns["say"] = ns["said"].append
+    ns["_outline_points"], ns["_attrs_print"] = (lambda geometry: None), (lambda attrs, doc: {})
+    for name in ("_context_layer_indexes", "_lock_context", "_context_visible", "_clear_context"):
+        exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)
+    return ns
+
+
+def test_a_clear_under_a_locked_gordium_layer_deletes_on_unlocked_layers_and_puts_every_layer_back():
+    """Review round 5: the clear showed the context layers before the parent "Gordium", so with "Gordium" locked its
+    IsVisible (Rhino 8) locked them all again and every delete failed silently (the neighbourhood drawn twice); and
+    the parent's IsVisible unlocked the architect's own Gordium::Grade. Now every layer under "Gordium" is opened
+    parent first and put back exactly as it was; a delete Rhino refuses is said."""
+    ns = _clear_ns()
+    doc = _context_doc()
+    grade = _Layer(doc.Layers, "Gordium::Grade", doc.Layers[0])
+    doc.Layers.append(grade)
+    ns["_lock_context"](doc, True)
+    doc.Layers[0].IsLocked, grade.IsLocked = True, True            # the architect locked "Gordium" and their grades
+    seen = []
+    drawn = type("O", (), {"Id": "o1", "Geometry": None, "Attributes": type("A", (), {
+        "GetUserString": lambda self, k: "nys_parcels" if k == logic.CONTEXT_KEY else None})()})()
+
+    def find(layer):
+        seen.append((layer.FullPath, layer.IsLocked, layer.IsVisible))
+        return [drawn] if layer.FullPath.endswith("::Parcels") else []
+    deleted = []
+    doc.Objects = type("Objects", (), {"FindByLayer": lambda self, layer: find(layer),
+                                       "Delete": lambda self, o, quiet: deleted.append(o.Id) or True})()
+    ns["_clear_context"](doc)
+    assert seen and all(not locked and visible for _, locked, visible in seen), seen   # open when read
+    assert deleted == ["o1"] and ns["said"] == []
+    assert doc.Layers[0].IsLocked and grade.IsLocked                                    # put back as they were
+    assert _locks(doc) == {"Context": False, "Parcels": True, "Streets": True, "Buildings": False, "Notes": True}
+    doc.Objects = type("Objects", (), {"FindByLayer": lambda self, layer: find(layer),
+                                       "Delete": lambda self, o, quiet: False})()       # Rhino refuses
+    ns["_clear_context"](doc)
+    assert ns["said"] == [logic.context_not_cleared(1)] and "could not remove 1 neighbourhood object " in ns["said"][0]
+    assert logic.outermost_first([(5, "A::B::C"), (2, "A"), (9, "A::B"), (1, "A::D")]) == [2, 1, 9, 5]
     check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
     assert '"tick_off_locks"' in check and '"tick_on_locks"' in check                  # Rhino proves it
