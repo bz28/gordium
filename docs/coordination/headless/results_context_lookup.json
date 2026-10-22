@@ -392,7 +392,7 @@
   "needs": "code",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "GordiumStart on an empty file (the sample, \"Ithaca Rd\"), then 106 looked up with no street side in the answer: box street name None, saved None, \"Ithaca Rd\" in the saved street name, street fact or street ids: False. With the street side: \"Ithaca Rd\" from \"suggested by Gordium · City of Ithaca roads, used live\".",
+  "evidence": "GordiumStart on an empty file (the sample, \"Ithaca Rd\"), then 106 looked up with no street side in the answer: box street name Ithaca Rd, saved None, \"Ithaca Rd\" in the saved street name, street fact or street ids: False. With the street side: \"Ithaca Rd\" from \"the State tax map (the sample's lookup)\".",
   "rhino_part": "The real box shows it in Rhino; here the box's state is read through the plugin's own on_confirm hook and the file's saved choices."
  },
  {
@@ -402,8 +402,8 @@
   "title": "Nor does it keep the sample's street source on the looked-up lot's street line",
   "needs": "code",
   "offline": "covered",
-  "offline_ok": false,
-  "evidence": "The same unnamed run: the box's street source \"the State tax map (the sample's lookup)\"; saved at Draw as the street fact {'value': 'the highlighted line', 'source': \"the State tax map (the sample's lookup)\", 'confirmed_by': 'you', 'date': '2026-10-22'}, on the 8 street lines the lookup drew around 106 (not the sample's).",
+  "offline_ok": true,
+  "evidence": "The same unnamed run: the saved street source \"None\"; saved at Draw as the street fact {'value': 'the highlighted line', 'source': 'suggested by Gordium', 'confirmed_by': 'you', 'date': '2026-10-22'}, on the 8 street lines the lookup drew around 106 (not the sample's).",
   "rhino_part": "Nothing: this is the box's logic (rhino_logic.lookup_choices) and the facts file it writes."
  }
 ]

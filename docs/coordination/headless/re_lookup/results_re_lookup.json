@@ -161,7 +161,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "GordiumStart on an empty feet document drew the sample lot 6800390b-b68c-4562-b5af-ec3eeca09614 (\"Lot · 106 Ithaca Rd · from the State tax map (parcel 84.-2-6), each line ±2'-0\", not a survey\", on Site) and a starting house of 3 floors on Gordium::Massing; the file's drawn_address: \"106 Ithaca Rd, Ithaca, NY\".",
+  "evidence": "GordiumStart on an empty feet document drew the sample lot 9d2c1701-990e-4a5c-ade7-f10b22c7b30c (\"Lot · 106 Ithaca Rd · from the State tax map (parcel 84.-2-6), each line ±2'-0\", not a survey\", on Site) and a starting house of 3 floors on Gordium::Massing; the file's drawn_address: \"106 Ithaca Rd, Ithaca, NY\".",
   "rhino_part": "Real RhinoCommon object and layer behaviour (Delete, ModifyAttributes onto the hidden holding layer, Transform keeping the id) is MODELLED by fakerhino.py, not proven. That the lot and floors are really drawn and framed in Rhino's views."
  },
  {
@@ -216,7 +216,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "The saved lot_id 4403b634-373b-41d8-83c0-17ca1f81d774: \"Lot · 96 Ithaca Road, Ithaca, NY, 14850\" on layer Site (LAYERS[\"lot\"] = Site).",
+  "evidence": "The saved lot_id eb43635a-b06c-4841-970a-9404ccca4ebf: \"Lot · 96 Ithaca Road, Ithaca, NY, 14850\" on layer Site (LAYERS[\"lot\"] = Site).",
   "rhino_part": "Real RhinoCommon object and layer behaviour (Delete, ModifyAttributes onto the hidden holding layer, Transform keeping the id) is MODELLED by fakerhino.py, not proven."
  },
  {

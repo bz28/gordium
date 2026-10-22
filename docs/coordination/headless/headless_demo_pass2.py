@@ -74,7 +74,8 @@ def guarded_errors():
 # ---- the plugin's own functions, exec'd as written --------------------------------------------------------------
 
 def source_of(name):
-    start = RHINO_SRC.index("\ndef %s(" % name) + 1
+    at = RHINO_SRC.find("\ndef %s(" % name)
+    start = (at if at >= 0 else RHINO_SRC.index("\nclass %s" % name)) + 1     # a function, or a class
     lines = RHINO_SRC[start:].split("\n")
     out = [lines[0]]
     for line in lines[1:]:
@@ -85,7 +86,7 @@ def source_of(name):
 
 
 PLUGIN_FUNCTIONS = [
-    "_scale", "_sorted_objects", "_lot_candidates", "_buildings", "_segments", "_area", "_find", "suggested_facts",
+    "_scale", "_classified_objects", "_sorted_objects", "_lot_candidates", "_buildings", "_segments", "_area", "_find", "suggested_facts",
     "load_facts", "current_facts", "save_facts", "_save_facts", "export", "_model_point", "_model_length",
     "_feet_point", "_feet_length", "_feet_area", "street_curve", "_here", "stale", "_model_on_screen", "_notice_box",
     "_screen_size", "_in_active_view", "draw_screen", "_status_rows", "_drawn_envelope", "_envelope_lines", "_north",
@@ -94,6 +95,8 @@ PLUGIN_FUNCTIONS = [
     "_drawn", "report_path", "check_facts", "_plan_edges", "_draw_plan", "say", "open_report", "gordium_check",
     "gordium_start", "_doc_name", "_context_layer_indexes", "_lock_context", "_context_visible", "show_context",
     "_context_on", "_worker", "_stop_worker", "ask", "_actions", "PANEL_ACTIONS", "_describe",
+    # re-lookup (#26)
+    "_begin_undo", "_end_undo", "_draw_prepare", "_ask_reset", "_draw_starting_house", "_frame_points",
 ]
 
 
@@ -147,6 +150,26 @@ class Table:
         if o is not None:
             self.doc.Objects.Delete(o)
 
+    # re-lookup (#26): what a reset asks about, through the plugin's own walk of the model (_classified_objects,
+    # exec'd as written into the plugin's globals, set by plugin())
+    def _on(self, path):
+        return [str(o.Id) for o, layer, _, _ in self.walk(self.doc) if logic.on_layer(layer, path)]
+
+    def massing(self):
+        return self._on(logic.MASSING)
+
+    def buildings(self):
+        return logic.own_buildings((str(o.Id), layer, kind, holds) for o, layer, kind, holds in self.walk(self.doc))
+
+    def fingerprint(self, ids):
+        out = []
+        for i in sorted(ids):
+            o = self.doc.Objects.FindId(i)
+            if o is not None:
+                b = o.Geometry.GetBoundingBox(True)
+                out.append((i, tuple(round(v, 4) for v in (b.Min.X, b.Min.Y, b.Min.Z, b.Max.X, b.Max.Y, b.Max.Z))))
+        return repr(out)
+
 
 def plugin():
     """One copy of the plugin: its functions, constants and STATE, as `import gordium_rhino` gives in Rhino."""
@@ -174,6 +197,7 @@ def plugin():
     g["sync_context"] = lambda doc, facts: None     # the neighbourhood fetch (no lookup was made: nothing to draw)
     g["_context_record"] = lambda doc: None
     g["draw_context"] = lambda doc, frame, left=0: g["say"]("(draw_context: not run headless)")
+    Table.walk = staticmethod(g["_classified_objects"])
     g["RhinoTable"] = Table
     g["_add_lot"] = lambda doc, sample: doc.add(r.PolylineCurve([r.Point3d(x, y, 0) for x, y in sample["lot"] + sample["lot"][:1]]),
                                                 logic.LAYERS["lot"], sample["lot_name"]).Id
@@ -1125,16 +1149,13 @@ step(pass2_box)
 
 
 @claim("pr15_box_6_shown_with_no_lot", "pr15", "pass2 step box",
-       "A new empty file's start box shows 'no lot yet: … Draw puts down the sample lot (106 Ithaca Rd)'", "rhino",
-       "partial", "The real Eto dialog on screen.")
+       "A new empty file's start box shows 'no lot yet: draw it, or pick a closed outline on the Site layer' "
+       "(LOT_MISSING, pass 2's claim 6 since #19 86ddf9d)", "rhino", "partial", "The real Eto dialog on screen.")
 def _():
     seen = A["box"][0]
-    lot_text = next((t for t in seen.get("labels") or [] if t.startswith("no lot yet")), None)
-    return (logic.NO_LOT in (seen.get("labels") or [])), (
-        "pass2 wants the box's Lot row to read logic.NO_LOT %r; the box (gordium_ui.start_box from _box_state on an empty "
-        "file) reads %r instead: _box_state sets lot_missing = (no lot), and box_rows shows its own 'no lot yet: draw "
-        "it, or pick…' text whenever lot_missing is set, so NO_LOT is never shown from the plugin (with a 'Draw my "
-        "lot…' button). Buttons: %s." % (logic.NO_LOT, lot_text, seen.get("buttons")))
+    return (logic.LOT_MISSING in (seen.get("labels") or [])), (
+        "The empty file's box (gordium_ui.start_box from _box_state) labels: %s; buttons: %s." % (
+            [t for t in seen.get("labels") or [] if t.startswith("no lot yet")], seen.get("buttons")))
 
 
 @claim("pr15_box_6_no_survey_or_change_buttons", "pr15", "pass2 step box",

@@ -10,7 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import fakerhino  # noqa: E402
 
-WT = "/home/user/wt/dryrun"
+WT = __import__("os").environ.get("GORDIUM_WT", "/home/user/wt/dryrun")
 VENV = "/home/user/venv/bin/python"
 fakerhino.install()
 import Rhino  # noqa: E402

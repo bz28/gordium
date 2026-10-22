@@ -820,8 +820,10 @@ def part_streets():
     guarded("pr19-street-5", "pr19", W, "A lookup that replaces the sample lot never keeps the sample's \"Ithaca Rd\"",
             "code", "partial", "The real box shows it in Rhino; here the box's state is read through the plugin's own "
             "on_confirm hook and the file's saved choices.",
-            lambda: (u.get("street_name") is None and u.get("saved_name") is None and not u.get("file")
-                     and bool(n.get("street_name")) and n.get("street_source") != "the State tax map (the sample's lookup)",
+            # since re-lookup (#26) Look up only previews: the open box still shows what is drawn (the sample's
+            # street) until Draw, by design; the claim is about what the looked-up lot is saved with at Draw
+            lambda: (u.get("saved_name") is None and not u.get("file")
+                     and bool(n.get("saved_name")) and (n.get("fact") or {}).get("source") != "the State tax map (the sample's lookup)",
                      "GordiumStart on an empty file (the sample, \"Ithaca Rd\"), then 106 looked up with no street side in "
                      "the answer: box street name %s, saved %s, \"Ithaca Rd\" in the saved street name, street fact "
                      "or street ids: %s. With the street side: \"%s\" from \"%s\"." % (
@@ -831,10 +833,10 @@ def part_streets():
     guarded("pr19-street-6", "pr19", W, "Nor does it keep the sample's street source on the looked-up lot's street "
             "line", "code", "covered", "Nothing: this is the box's logic (rhino_logic.lookup_choices) and the facts "
             "file it writes.",
-            lambda: (u.get("street_source") != sample_source and (u.get("fact") or {}).get("source") != sample_source,
-                     "The same unnamed run: the box's street source \"%s\"; saved at Draw as the street fact %s, on "
+            lambda: (u.get("saved_source") != sample_source and (u.get("fact") or {}).get("source") != sample_source,
+                     "The same unnamed run: the saved street source \"%s\"; saved at Draw as the street fact %s, on "
                      "the 8 street lines the lookup drew around 106 (not the sample's)." % (
-                         u.get("street_source"), u.get("fact")), out))
+                         u.get("saved_source"), u.get("fact")), out))
 
 
 def main():

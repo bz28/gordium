@@ -40,7 +40,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "open_report() ran a fresh check that wrote demo_smoke_gordium_report.xlsx and asked the OS to open it (['/tmp/claude-0/-home-user-gordium/c0e8fd50-767a-520e-a568-7847576b5cea/scratchpad/headless/tmp/demo_smoke_gordium_report.xlsx']); openpyxl reads sheets ['Check', 'Inputs', 'Output', '…'], the active one 'Check', only ['Check'] selected; its title 'GORDIUM | 1 does not comply · 3 need review · 7 comply · 2 not checked'; the Front yard line ['Does not comply', '✕', 'Front yard', '22\\'-0 7/8\"', '25\\'-0\"', 'at least 0\\'-11\" short']; the Output sheet's Front yard row ('Front yard minimum (chart p.3)', '22\\'-0 7/8\"', 'FAIL'). The open command is open on the Mac and os.startfile on Windows; the panel said ['Report saved to /tmp/claude-0/-home-user-gordium/c0e8fd50-767a-520e-a568-7847576b5cea/scratchpad/headless/tmp/demo_smoke_gordium_report.xlsx (opened).'].",
+  "evidence": "open_report() ran a fresh check that wrote demo_smoke_gordium_report.xlsx and asked the OS to open it (['/home/user/wt/coordination/docs/coordination/headless/tmp/demo_smoke_gordium_report.xlsx']); openpyxl reads sheets ['Check', 'Inputs', 'Output', '…'], the active one 'Check', only ['Check'] selected; its title 'GORDIUM | 1 does not comply · 3 need review · 7 comply · 2 not checked'; the Front yard line ['Does not comply', '✕', 'Front yard', '22\\'-0 7/8\"', '25\\'-0\"', 'at least 0\\'-11\" short']; the Output sheet's Front yard row ('Front yard minimum (chart p.3)', '22\\'-0 7/8\"', 'FAIL'). The open command is open on the Mac and os.startfile on Windows; the panel said ['Report saved to /home/user/wt/coordination/docs/coordination/headless/tmp/demo_smoke_gordium_report.xlsx (opened).'].",
   "rhino_part": "Excel or Numbers actually opening the file on Ben's Mac / the cofounders' Windows, on the Check tab."
  },
  {
@@ -333,11 +333,11 @@
   "id": "pr15_box_6_shown_with_no_lot",
   "group": "pr15",
   "where": "pass2 step box",
-  "title": "A new empty file's start box shows 'no lot yet: … Draw puts down the sample lot (106 Ithaca Rd)'",
+  "title": "A new empty file's start box shows 'no lot yet: draw it, or pick a closed outline on the Site layer' (LOT_MISSING, pass 2's claim 6 since #19 86ddf9d)",
   "needs": "rhino",
   "offline": "partial",
-  "offline_ok": false,
-  "evidence": "pass2 wants the box's Lot row to read logic.NO_LOT 'no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)'; the box (gordium_ui.start_box from _box_state on an empty file) reads 'no lot yet: draw it, or pick a closed outline on the Site layer' instead: _box_state sets lot_missing = (no lot), and box_rows shows its own 'no lot yet: draw it, or pick…' text whenever lot_missing is set, so NO_LOT is never shown from the plugin (with a 'Draw my lot…' button). Buttons: ['Look up', 'Draw my lot…', 'Cancel', 'Draw'].",
+  "offline_ok": true,
+  "evidence": "The empty file's box (gordium_ui.start_box from _box_state) labels: ['no lot yet: draw it, or pick a closed outline on the Site layer']; buttons: ['Look up', 'Draw my lot…', 'Cancel', 'Draw'].",
   "rhino_part": "The real Eto dialog on screen."
  },
  {
@@ -381,7 +381,7 @@
   "needs": "rhino",
   "offline": "partial",
   "offline_ok": true,
-  "evidence": "design_checker serve children of this process (standing in for Rhino): after the demo's and pass 2's runs (two copies of the plugin, one ServerBook) ['1822']; after a plugin reload's first request ['1857'] (ServerBook stopped the earlier one).",
+  "evidence": "design_checker serve children of this process (standing in for Rhino): after the demo's and pass 2's runs (two copies of the plugin, one ServerBook) ['28936']; after a plugin reload's first request ['28947'] (ServerBook stopped the earlier one).",
   "rhino_part": "Rhino's real child processes on macOS, and on Windows Task Manager showing one python (item 2). Here: the plugin's own _worker/ServerBook on Linux, with this Python process standing in for Rhino."
  },
  {

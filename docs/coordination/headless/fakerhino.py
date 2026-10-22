@@ -631,8 +631,84 @@ class RhinoObject:
         return self.doc.Objects.Select(self.Id, on)
 
 
+class InstanceReferenceGeometry(GeometryBase):
+    """A block placement (RhinoCommon Rhino.Geometry.InstanceReferenceGeometry: ParentIdefId, Xform). Its box is
+    the definition's objects' boxes, placed (modelled). The definition is shared, never copied with the geometry."""
+
+    def __init__(self, idef, xform):
+        self.ParentIdefId, self._idef, self._xforms = idef.Id, idef, [xform]
+
+    def __deepcopy__(self, memo):
+        g = InstanceReferenceGeometry(self._idef, self._xforms[0])
+        g._xforms = list(self._xforms)
+        return g
+
+    def _place(self, p):
+        for xf in self._xforms:
+            p = xf.apply(p)
+        return p
+
+    def GetBoundingBox(self, accurate=True):
+        pts = [self._place(c) for o in self._idef.GetObjects() for c in o.Geometry.GetBoundingBox(True).GetCorners()]
+        return BoundingBox(pts) if pts else BoundingBox()
+
+    def Transform(self, xf):
+        self._xforms.append(xf)
+        return True
+
+
+class InstanceDefinition:
+    """RhinoCommon's InstanceDefinition: Name, Id, Index, GetObjects() (its objects, each with its own layer)."""
+
+    def __init__(self, table, name, objects):
+        self.table, self.Name, self.Id, self.objects = table, name, str(uuid.uuid4()), objects
+        self.IsDeleted = False
+
+    @property
+    def Index(self):
+        return self.table.index(self)
+
+    def GetObjects(self):
+        return list(self.objects)
+
+
+class InstanceDefinitionTable(list):
+    """doc.InstanceDefinitions: Add(name, description, basePoint, geometry, attributes) -> its index (-1 on failure),
+    as RhinoCommon's overload taking IEnumerable<GeometryBase> and IEnumerable<ObjectAttributes>."""
+
+    def __init__(self, doc):
+        super().__init__()
+        self.doc = doc
+
+    def Add(self, name, description, base_point, geometry, attributes=None):
+        geometry = list(geometry)
+        attributes = list(attributes) if attributes is not None else [ObjectAttributes() for _ in geometry]
+        if not geometry or len(attributes) != len(geometry) or self.Find(name) is not None:
+            return -1
+        back = Transform.Translation(-base_point.X, -base_point.Y, -base_point.Z)
+        objs = []
+        for g, a in zip(geometry, attributes):
+            g = g.Duplicate()
+            g.Transform(back)
+            a = a.Duplicate()
+            a.ObjectId = str(uuid.uuid4())
+            objs.append(RhinoObject(None, a.ObjectId, g, a))     # idef objects: not in doc.Objects
+        self.append(InstanceDefinition(self, name, objs))
+        return len(self) - 1
+
+    def Find(self, name):
+        return next((d for d in self if d.Name == name and not d.IsDeleted), None)
+
+    def FindId(self, idef_id):
+        return next((d for d in self if d.Id == idef_id), None)
+
+
 class InstanceObject(RhinoObject):
-    pass
+    """A block placed in the model: its Geometry an InstanceReferenceGeometry, its InstanceDefinition the doc's."""
+
+    @property
+    def InstanceDefinition(self):
+        return self.doc.InstanceDefinitions.FindId(self.Geometry.ParentIdefId)
 
 
 class ObjectEnumeratorSettings:
@@ -661,7 +737,9 @@ class ObjectTable:
         a = (attrs or ObjectAttributes()).Duplicate()
         oid = oid or str(uuid.uuid4())
         a.ObjectId = oid
-        self.by_id[oid] = RhinoObject(self.doc, oid, geometry, a)
+        cls = InstanceObject if isinstance(geometry, InstanceReferenceGeometry) else RhinoObject
+        self.by_id[oid] = cls(self.doc, oid, geometry, a)
+        self.doc._note("add", oid)
         return oid
 
     def AddCurve(self, curve, attrs=None):
@@ -679,6 +757,14 @@ class ObjectTable:
     def AddPoint(self, point, attrs=None):
         return self._add(Point(point), attrs)
 
+    def AddInstanceObject(self, instance_definition_index, instance_xform, attributes=None):
+        """RhinoCommon: Guid AddInstanceObject(int instanceDefinitionIndex, Transform instanceXform[,
+        ObjectAttributes attributes]); Guid.Empty for an index that names no definition."""
+        idefs = self.doc.InstanceDefinitions
+        if not 0 <= instance_definition_index < len(idefs) or idefs[instance_definition_index].IsDeleted:
+            return EMPTY_GUID
+        return self._add(InstanceReferenceGeometry(idefs[instance_definition_index], instance_xform), attributes)
+
     def _id(self, x):
         return x.Id if isinstance(x, RhinoObject) else str(x)
 
@@ -691,6 +777,7 @@ class ObjectTable:
         if ok:
             del self.by_id[o.Id]
             self.selected.discard(o.Id)
+            self.doc._note("delete", o.Id)
         self.log.append(("delete", self._id(x), ok))
         return ok
 
@@ -701,6 +788,7 @@ class ObjectTable:
             a = attrs.Duplicate()
             a.ObjectId = o.Id
             o.Attributes = a
+            self.doc._note("modify", o.Id)
         self.log.append(("modify", self._id(x), ok))
         return ok
 
@@ -712,6 +800,7 @@ class ObjectTable:
         g.Transform(xf)
         if delete_original:
             o.Geometry = g                  # Rhino replaces the object, keeping its id (modelled)
+            self.doc._note("replace", o.Id)
             return o.Id
         return self._add(g, o.Attributes)
 
@@ -774,6 +863,7 @@ class Groups(list):
 
 class Doc:
     serial = 100
+    undo_serial = 0
 
     def __init__(self, dim_scale=12.0):
         Doc.serial += 1
@@ -782,6 +872,7 @@ class Doc:
         self.Objects = ObjectTable(self)
         self.Strings = Strings()
         self.Groups = Groups()
+        self.InstanceDefinitions = InstanceDefinitionTable(self)
         self.Linetypes, self.Materials = Groups(), Groups()
         self.Linetypes.Add("Continuous")
         self.ModelUnitSystem = "Feet"
@@ -791,6 +882,7 @@ class Doc:
         self.DimStyles = types.SimpleNamespace(Current=types.SimpleNamespace(DimensionScale=dim_scale))
         self.Views = Auto()
         self.Path, self.Name = None, None
+        self.journal, self.undo_open = [], []   # every model change and undo record, in order (recorded)
         d = Layer()
         d.Name = "Default"
         self.Layers.Add(d)
@@ -798,6 +890,31 @@ class Doc:
     def Export(self, path):
         save_3dm(self, path)
         return True
+
+    # ---- undo records (RhinoCommon: uint BeginUndoRecord(string description), bool EndUndoRecord(uint
+    # undoRecordSerialNumber), bool UndoRecordingIsActive). RECORDED only: what Undo would put back is not modelled
+    # (Undo / Redo are left out on purpose, so a script calling them fails loudly instead of passing).
+    def BeginUndoRecord(self, description):
+        assert isinstance(description, str), description
+        Doc.undo_serial += 1
+        serial = Doc.undo_serial
+        self.undo_open.append(serial)
+        self.journal.append(("begin_undo", serial, str(description)))
+        return serial
+
+    def EndUndoRecord(self, undo_record_serial_number):
+        ok = bool(self.undo_open) and self.undo_open[-1] == undo_record_serial_number
+        if ok:
+            self.undo_open.pop()
+        self.journal.append(("end_undo", undo_record_serial_number, ok))
+        return ok
+
+    @property
+    def UndoRecordingIsActive(self):
+        return bool(self.undo_open)
+
+    def _note(self, action, oid):
+        self.journal.append((action, str(oid), self.undo_open[-1] if self.undo_open else None))
 
     def Dispose(self):
         pass
@@ -964,9 +1081,10 @@ def install():
                  LineCurve=LineCurve, Polyline=Polyline, Brep=Brep, Mesh=Mesh, Extrusion=Extrusion, SubD=SubD,
                  Point=Point, TextDot=TextDot, TextEntity=TextEntity, TextJustification=TextJustification,
                  AreaMassProperties=AreaMassProperties, PointContainment=PointContainment,
-                 GeometryBase=GeometryBase)
+                 GeometryBase=GeometryBase, InstanceReferenceGeometry=InstanceReferenceGeometry)
     dobj = _module("Rhino.DocObjects", AutoModule, ObjectAttributes=ObjectAttributes, Layer=Layer,
                    ObjectEnumeratorSettings=ObjectEnumeratorSettings, InstanceObject=InstanceObject,
+                   InstanceDefinition=InstanceDefinition,
                    RhinoObject=RhinoObject, ObjectPlotWeightSource=ObjectPlotWeightSource)
     fileio = _module("Rhino.FileIO", AutoModule, File3dm=File3dm)
 
