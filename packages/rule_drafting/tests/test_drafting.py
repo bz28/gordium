@@ -1332,3 +1332,16 @@ def test_an_overlay_isnt_decided_by_the_base_district(inputs):
     rules = {r["id"]: r for r in cli.load(inputs.drafted / "general.yaml")["rules"]}
     south_hill = [r for i, r in rules.items() if i.startswith("general.325_8e")]
     assert len(south_hill) == 2 and all(drafter.narrowing_problems(r, inputs.ctx) == [] for r in south_hill)
+
+
+def test_a_demoted_relaxer_widens_nothing_and_its_rulebook_stays_valid():
+    """Review round 11: demote() kept `relaxes`, so a demoted AI relaxer (a flag, no check) crashed apply_relaxes
+    (KeyError 'check') and failed validation. A flag widens nothing: demoting drops the link."""
+    from rule_format.rulebook import _relaxes_problems, apply_relaxes
+    base = {"id": "R-1b.height_chart", "kind": "rule", "check": "building_height <= 35"}
+    relaxer = {"id": "R-1b.height_bonus", "kind": "rule", "relaxes": base["id"], "applies_when": "front_yard >= 26",
+               "check": "building_height <= 38.5", "drafted_by": "rule_drafting/m", "status": "draft"}
+    demoted = cli.demote(relaxer, "a key shows it passing where it shouldn't")
+    assert demoted["kind"] == "flag" and "relaxes" not in demoted
+    assert apply_relaxes([base, demoted]) == [base, demoted]
+    assert _relaxes_problems([base, demoted]) == []

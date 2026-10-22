@@ -175,8 +175,8 @@ def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_check
     from design_checker.gaps import drafting_gaps
     from rule_format.rulebook import zone_rules
     r3a = {g["id"]: g for g in drafting_gaps(J, "R-3b", zone_rules(J, "R-3b"))}      # R-3b: drafted only (#20 adds R-3a)
-    # §325-19E's 75% coverage is a rule now (its one failing example was the attached-dwelling case, which code
-    # now sends to review); the rest of the unit still lists what isn't checked
+    # §325-19E's 75% coverage is drafted (its one failing example was the attached-dwelling case, which code now
+    # sends to review; it is demoted to a flag since round 11); the rest of the unit still lists what isn't checked
     assert "R-3b.325_19e_r3_abut_r1_max_coverage" in {r["id"] for r in zone_rules(J, "R-3b")}
     assert "325_19e_r3_abut_r1_min_lot_area_footnoted_rows" in r3a["drafting.325-19E"]["why"]
     assert "fraternity_sorority_group_house" in r3a["drafting.325-19E"]["why"]   # a group house next to R-1
@@ -223,3 +223,28 @@ def test_a_demoted_draft_shows_needs_review_in_the_checker_never_a_pass(drafts_o
     got = check_site(site(box(10, 25, 35, 65)), {**FACTS, "zone": "R-3a", "use": "dormitory", "accessory_buildings": []})
     row = next(r for r in got["rows"] if r["Rule id"] == "R-3a.parking_dormitory")
     assert row["Error"] == "NEEDS REVIEW"
+
+
+def test_a_demotion_whose_cause_is_the_law_holds_in_every_district_the_law_piece_covers():
+    """Review round 11: §325-19E's stricter limits were demoted in R-3a (its key reviews an abutting lot, since what
+    'directly abuts' reaches is open) but R-3b's same drafts from the same law piece still passed. A cause naming a
+    section is about the law, not the district: the same rule is a flag in every district the piece drafted it for."""
+    from rule_format.rulebook import load, outcome, zone_rules
+    drafted = J / "5_zoning_rules/drafted"
+    causes = load(drafted / "records/demoted.yaml")
+    units = load(drafted / "records/drafting_log.yaml")["units"]
+    rules = {r["id"]: r for p in drafted.glob("*.yaml") for r in load(p)["rules"]}
+    checked = 0
+    for rid, cause in causes.items():
+        if "§" not in cause:
+            continue
+        suffix = rid.split(".", 1)[1]
+        unit = next(u for u in units.values() if rid in u.get("rules", []))
+        for other in unit["rules"]:
+            if other.split(".", 1)[1] == suffix:
+                assert rules[other]["kind"] == "flag", (rid, other)
+                checked += 1
+    assert checked >= 10                                    # R-3a's and R-3b's five §325-19E limits
+    r3b = {r["id"]: r for r in zone_rules(J, "R-3b")}
+    abutting = {"abuts_r1_district": True, "use": "multiple_family", "building_area": 100, "lot_area": 10000}
+    assert outcome(r3b["R-3b.325_19e_r3_abut_r1_max_coverage"], abutting, {}) == "needs_review"

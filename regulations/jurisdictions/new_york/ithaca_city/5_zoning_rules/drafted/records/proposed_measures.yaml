@@ -1,8 +1,3 @@
-abutting_r1_height_limit:
-  meaning: Maximum building height in feet in the chart for the R-1a or R-1b District that the land abuts.
-  needed_by:
-  - R-3b.325_19e_r3_abut_r1_max_height
-  unit: ft
 additional_primary_building:
   meaning: The lot has an additional primary use in a separate building besides the initial primary use (§325-8B(1))
   needed_by:
@@ -281,11 +276,6 @@ is_adu:
   - general.325_3b_accessory_dwelling_unit_adu_residential_building_code
   - general.325_3b_accessory_dwelling_unit_adu_separate_entrance
   unit: yes_no
-larger_side_yard_abuts_r1:
-  meaning: The wider side yard abuts land in the R-1a or R-1b District.
-  needed_by:
-  - R-3b.325_19e_r3_abut_r1_side_yard_larger
-  unit: yes_no
 lot_width_at_street_line:
   meaning: Width of the lot at the street line
   needed_by:
@@ -394,11 +384,6 @@ row_house_modules:
   - general.325_3b_row_house_row_house_module_facade_length
   - general.325_3b_row_house_row_house_module_street_entry
   unit: count
-smaller_side_yard_abuts_r1:
-  meaning: The narrower side yard abuts land in the R-1a or R-1b District.
-  needed_by:
-  - R-3b.325_19e_r3_abut_r1_side_yard_smaller
-  unit: yes_no
 terrace_or_patio_above_grade_in_required_yard:
   meaning: A terrace or patio that is above grade is located in a required front, side or rear yard
   needed_by:

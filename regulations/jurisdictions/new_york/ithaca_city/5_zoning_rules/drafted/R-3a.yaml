@@ -1247,8 +1247,8 @@ rules:
     expect: not_applicable
   notes: 'Added by code, not drafted: the chart''s parking applies to every use (per dwelling unit, and for all
     other uses §325-20), and the drafted rules decide only dormitory, one_family_detached, one_family_detached_zero_lot_line.
-    A building of several dwelling units needs every unit counted; other uses go to §325-20.'
-  drafted_by: rule_drafting/claude-sonnet-5-5
+    A building of several dwelling units needs every unit counted; other uses go to §325-20. Made from R-3a.parking_per_dwelling_unit.'
+  drafted_by: rule_drafting/chart_code
   status: draft
 - id: R-3a.325_8b_one_family_detached_area_per_primary_building
   kind: rule

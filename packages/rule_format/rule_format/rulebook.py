@@ -41,7 +41,7 @@ ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "l
                "examples": {"given", "expect", "note"}}
 CELL_FIELDS = {"section", "row", "column"}   # a chart cell source: {file, page, cell: {section, row, column}}
 APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "findings",
-                   "answers")
+                   "answers", "relaxes")      # relaxes: an approval covers which rule the approved rule widens
 UNIT_KINDS = {"text": "text", "yes_no": "boolean"}       # every other unit (ft, sf, count) is a number
 MEASURE_KINDS = {name: UNIT_KINDS.get(m["unit"], "number") for name, m in yaml.safe_load(MEASURES_FILE.read_text(encoding="utf-8")).items()}
 # Measures a draft asked for that aren't in measures.yaml yet: listed for engineers, never used silently.
@@ -110,8 +110,8 @@ def apply_relaxes(rules: list[dict], proven: frozenset = frozenset()) -> list[di
     relaxer are returned as they are."""
     import ast
     by_target: dict[str, list[dict]] = {}
-    for r in rules:
-        if isinstance(r.get("relaxes"), str):
+    for r in rules:                 # only a rule with its condition and check widens (a flag, or a demoted rule, never)
+        if isinstance(r.get("relaxes"), str) and r.get("kind") == "rule" and r.get("check") and r.get("applies_when"):
             by_target.setdefault(r["relaxes"], []).append(r)
     if not by_target:
         return rules

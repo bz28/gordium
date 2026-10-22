@@ -150,8 +150,9 @@ def demoted(i: Inputs) -> dict[str, str]:
 
 def demote(rule: dict, cause: str) -> dict:
     """The rule as a flag: the checker shows NEEDS REVIEW, with the cause, wherever it applies; never a pass. Its
-    conditions are kept, its check and worked examples dropped (a flag has none)."""
-    keep = {k: v for k, v in rule.items() if k not in ("check", "review_when", "examples", "notes")}
+    conditions are kept, its check and worked examples dropped (a flag has none), and so is any `relaxes` (a flag
+    widens nothing)."""
+    keep = {k: v for k, v in rule.items() if k not in ("check", "review_when", "examples", "notes", "relaxes")}
     return keep | {"kind": "flag", "notes": f"Demoted until re-drafted: {cause}"}
 
 

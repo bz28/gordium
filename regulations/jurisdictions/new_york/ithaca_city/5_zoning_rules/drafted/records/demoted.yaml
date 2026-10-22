@@ -1,6 +1,8 @@
 # Drafted rules that pass where a hand-written answer key says fail or needs review (tests/test_eval.py finds them),
 # demoted by code until they are re-drafted: each is saved as a flag, so the checker shows NEEDS REVIEW with this cause
 # where it would have passed. Never a false pass in the product. Remove an entry only with a re-draft the grade clears.
+# A cause about the law itself (it names the section) holds in every district that law piece covers: the same rule
+# is demoted in each of them, keyed or not (test_drafted_zones.py checks this).
 R-3a.parking_dormitory: >-
   The chart's 1 space per 4 persons housed depends on how many persons a dormitory houses, which Gordium doesn't count
   (and the chart doesn't say how a fraction rounds): a person checks the parking (R-3a answer key, 2026-10-21).
@@ -32,3 +34,23 @@ R-3a.325_19e_r3_abut_r1_side_yard_larger: >-
 R-3a.325_19e_r3_abut_r1_side_yard_smaller: >-
   §325-19E's stricter limit for a lot abutting R-1 land: the R-3a answer key (answer-keys 67cc73a) sends an
   abutting lot to review, since what 'directly abuts' reaches is an open question: a person checks it.
+R-3b.325_19e_r3_abut_r1_min_lot_area_other_use: >-
+  §325-19E's stricter limit for a lot abutting R-1 land (the same law piece as R-3a's): the R-3a answer key
+  (answer-keys 67cc73a) sends an abutting lot to review, since what 'directly abuts' reaches is an open question; it
+  is the same question in R-3b: a person checks it.
+R-3b.325_19e_r3_abut_r1_max_height: >-
+  §325-19E's stricter limit for a lot abutting R-1 land (the same law piece as R-3a's): the R-3a answer key
+  (answer-keys 67cc73a) sends an abutting lot to review, since what 'directly abuts' reaches is an open question; it
+  is the same question in R-3b: a person checks it.
+R-3b.325_19e_r3_abut_r1_max_coverage: >-
+  §325-19E's stricter limit for a lot abutting R-1 land (the same law piece as R-3a's): the R-3a answer key
+  (answer-keys 67cc73a) sends an abutting lot to review, since what 'directly abuts' reaches is an open question; it
+  is the same question in R-3b: a person checks it.
+R-3b.325_19e_r3_abut_r1_side_yard_larger: >-
+  §325-19E's stricter limit for a lot abutting R-1 land (the same law piece as R-3a's): the R-3a answer key
+  (answer-keys 67cc73a) sends an abutting lot to review, since what 'directly abuts' reaches is an open question; it
+  is the same question in R-3b: a person checks it.
+R-3b.325_19e_r3_abut_r1_side_yard_smaller: >-
+  §325-19E's stricter limit for a lot abutting R-1 land (the same law piece as R-3a's): the R-3a answer key
+  (answer-keys 67cc73a) sends an abutting lot to review, since what 'directly abuts' reaches is an open question; it
+  is the same question in R-3b: a person checks it.

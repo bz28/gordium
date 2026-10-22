@@ -1283,8 +1283,8 @@ rules:
     expect: not_applicable
   notes: 'Added by code, not drafted: the chart''s parking applies to every use (per dwelling unit, and for all
     other uses §325-20), and the drafted rules decide only dormitory, one_family_detached, one_family_detached_zero_lot_line.
-    A building of several dwelling units needs every unit counted; other uses go to §325-20.'
-  drafted_by: rule_drafting/claude-sonnet-5-5
+    A building of several dwelling units needs every unit counted; other uses go to §325-20. Made from R-3b.parking_per_dwelling_unit.'
+  drafted_by: rule_drafting/chart_code
   status: draft
 - id: R-3b.325_8b_one_family_detached_area_per_primary_building
   kind: rule
@@ -1918,12 +1918,11 @@ rules:
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
 - id: R-3b.325_19e_r3_abut_r1_min_lot_area_other_use
-  kind: rule
+  kind: flag
   topic: dimensions
   title: 'R-3 abutting R-1: min lot area 150% of chart, other use (325-19E(1))'
   applies_when: abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
     "two_family", "multiple_family", "fraternity_sorority_group_house"]
-  check: lot_area >= 1.5 * 4000
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -1982,22 +1981,6 @@ rules:
     quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
       which shares one or more party walls or structural elements with the other one-family dwellings in the building
       and which has direct exterior access from the ground floor.
-  examples:
-  - given:
-      abuts_r1_district: true
-      use: neighborhood_commercial_facility
-      lot_area: 6000
-    expect: pass
-  - given:
-      abuts_r1_district: true
-      use: neighborhood_commercial_facility
-      lot_area: 5999
-    expect: fail
-  - given:
-      abuts_r1_district: false
-      use: neighborhood_commercial_facility
-      lot_area: 1
-    expect: not_applicable
   open_questions:
   - Chart footnote 3 on the Minimum Lot Size heading says 'See §325-8(B)(1)'. Does it change the lot size required
     here?
@@ -2019,37 +2002,17 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-3b cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-  review_when:
-  - when: use == "adult_day_care_home"
-    reason: '§325-3 defines this use as ''A dwelling unit in which adult day care is provided to not more than six
-      adults at one tim'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
-      a dwelling row, with its notes) is unclear: a person decides.'
-  - when: use == "bed_and_breakfast_inn"
-    reason: '§325-3 defines this use as ''An owner-managed, single dwelling unit that provides five to 10 guest
-      rooms, limited to tw'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row
-      or a dwelling row, with its notes) is unclear: a person decides.'
-  - when: use == "dormitory"
-    reason: '§325-3 defines this use as ''A multiple dwelling which provides sleeping accommodations and domestic
-      facilities and ser'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
-      a dwelling row, with its notes) is unclear: a person decides.'
-  - when: use == "nursing_home"
-    reason: '§325-3 defines this use as ''a multiple dwelling: A building used or occupied as a convalescent, old-age
-      or nursing hom'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or a dwelling
-      row, with its notes) is unclear: a person decides.'
-  - when: use == "one_family_attached"
-    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
-      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
-      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
+  notes: 'Demoted until re-drafted: §325-19E''s stricter limit for a lot abutting R-1 land (the same law piece as
+    R-3a''s): the R-3a answer key (answer-keys 67cc73a) sends an abutting lot to review, since what ''directly abuts''
+    reaches is an open question; it is the same question in R-3b: a person checks it.'
 - id: R-3b.325_19e_r3_abut_r1_max_height
-  kind: rule
+  kind: flag
   topic: dimensions
   title: 'R-3 abutting R-1: height same as abutting R-1 district (325-19E(2))'
   applies_when: abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
     "two_family"]
-  check: building_height <= abutting_r1_height_limit
   sources:
   - file: chapter_325_zoning_2026-10.pdf
     page: 50
@@ -2072,25 +2035,6 @@ rules:
     quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
       which shares one or more party walls or structural elements with the other one-family dwellings in the building
       and which has direct exterior access from the ground floor.
-  examples:
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      abutting_r1_height_limit: 35
-      building_height: 35
-    expect: pass
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      abutting_r1_height_limit: 35
-      building_height: 36
-    expect: fail
-  - given:
-      abuts_r1_district: true
-      use: two_family
-      abutting_r1_height_limit: 35
-      building_height: 50
-    expect: not_applicable
   open_questions:
   - If the land abuts both R-1a and R-1b, or R-1 land with different limits, which district's height governs?
   - Does the 'height requirement' include the story limit as well as the height in feet?
@@ -2103,21 +2047,17 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-  review_when:
-  - when: use == "one_family_attached"
-    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
-      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
-      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
+  notes: 'Demoted until re-drafted: §325-19E''s stricter limit for a lot abutting R-1 land (the same law piece as
+    R-3a''s): the R-3a answer key (answer-keys 67cc73a) sends an abutting lot to review, since what ''directly abuts''
+    reaches is an open question; it is the same question in R-3b: a person checks it.'
 - id: R-3b.325_19e_r3_abut_r1_max_coverage
-  kind: rule
+  kind: flag
   topic: dimensions
   title: 'R-3 abutting R-1: max lot coverage 75% of chart (325-19E(3))'
   applies_when: abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
     "two_family"]
-  check: building_area <= 0.75 * 0.4 * lot_area
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -2146,25 +2086,6 @@ rules:
     quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
       which shares one or more party walls or structural elements with the other one-family dwellings in the building
       and which has direct exterior access from the ground floor.
-  examples:
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      lot_area: 10000
-      building_area: 3000
-    expect: pass
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      lot_area: 10000
-      building_area: 3001
-    expect: fail
-  - given:
-      abuts_r1_district: true
-      use: two_family
-      lot_area: 10000
-      building_area: 10000
-    expect: not_applicable
   open_questions:
   - The quoted sentence begins on the previous page (lead-in 'The maximum percent of lot coverage by'); only the
     part after the page break can be quoted.
@@ -2174,21 +2095,17 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-3b cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-  review_when:
-  - when: use == "one_family_attached"
-    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
-      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
-      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
+  notes: 'Demoted until re-drafted: §325-19E''s stricter limit for a lot abutting R-1 land (the same law piece as
+    R-3a''s): the R-3a answer key (answer-keys 67cc73a) sends an abutting lot to review, since what ''directly abuts''
+    reaches is an open question; it is the same question in R-3b: a person checks it.'
 - id: R-3b.325_19e_r3_abut_r1_side_yard_larger
-  kind: rule
+  kind: flag
   topic: dimensions
   title: 'R-3 abutting R-1: side yard 150% of chart, one side (325-19E(4))'
   applies_when: abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
     "two_family"]
-  check: not larger_side_yard_abuts_r1 or side_yard_larger >= 1.5 * 10
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -2217,31 +2134,6 @@ rules:
     quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
       which shares one or more party walls or structural elements with the other one-family dwellings in the building
       and which has direct exterior access from the ground floor.
-  examples:
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      larger_side_yard_abuts_r1: true
-      side_yard_larger: 15
-    expect: pass
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      larger_side_yard_abuts_r1: true
-      side_yard_larger: 14
-    expect: fail
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      larger_side_yard_abuts_r1: false
-      side_yard_larger: 10
-    expect: pass
-  - given:
-      abuts_r1_district: false
-      use: multiple_family
-      larger_side_yard_abuts_r1: false
-      side_yard_larger: 0
-    expect: not_applicable
   open_questions:
   - Is the chart's 'one side' minimum the wider side yard (side_yard_larger) and 'other side' the narrower?
   research:
@@ -2249,21 +2141,17 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-3b cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-  review_when:
-  - when: use == "one_family_attached"
-    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
-      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
-      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
+  notes: 'Demoted until re-drafted: §325-19E''s stricter limit for a lot abutting R-1 land (the same law piece as
+    R-3a''s): the R-3a answer key (answer-keys 67cc73a) sends an abutting lot to review, since what ''directly abuts''
+    reaches is an open question; it is the same question in R-3b: a person checks it.'
 - id: R-3b.325_19e_r3_abut_r1_side_yard_smaller
-  kind: rule
+  kind: flag
   topic: dimensions
   title: 'R-3 abutting R-1: side yard 150% of chart, other side (325-19E(4))'
   applies_when: abuts_r1_district and use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
     "two_family"]
-  check: not smaller_side_yard_abuts_r1 or side_yard_smaller >= 1.5 * 5
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -2292,31 +2180,6 @@ rules:
     quote: (4) ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings, each of
       which shares one or more party walls or structural elements with the other one-family dwellings in the building
       and which has direct exterior access from the ground floor.
-  examples:
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      smaller_side_yard_abuts_r1: true
-      side_yard_smaller: 7.5
-    expect: pass
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      smaller_side_yard_abuts_r1: true
-      side_yard_smaller: 6.5
-    expect: fail
-  - given:
-      abuts_r1_district: true
-      use: multiple_family
-      smaller_side_yard_abuts_r1: false
-      side_yard_smaller: 5
-    expect: pass
-  - given:
-      abuts_r1_district: false
-      use: multiple_family
-      smaller_side_yard_abuts_r1: false
-      side_yard_smaller: 0
-    expect: not_applicable
   open_questions:
   - Is the chart's 'other side' minimum the narrower side yard (side_yard_smaller)?
   research:
@@ -2324,14 +2187,11 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the R-3b cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-  review_when:
-  - when: use == "one_family_attached"
-    reason: '§325-3B defines ONE-FAMILY ATTACHED DWELLING as ''(4) ONE-FAMILY ATTACHED DWELLING — A building containing
-      three or more one-family dwellings, each of which shares one or more party walls or structural elements'':
-      whether the exemption (''except a one-family or two-family dwelling'') covers it is unclear. A person decides.'
+  notes: 'Demoted until re-drafted: §325-19E''s stricter limit for a lot abutting R-1 land (the same law piece as
+    R-3a''s): the R-3a answer key (answer-keys 67cc73a) sends an abutting lot to review, since what ''directly abuts''
+    reaches is an open question; it is the same question in R-3b: a person checks it.'
 - id: R-3b.325_19e_r3_abut_r1_rear_yard
   kind: flag
   topic: dimensions

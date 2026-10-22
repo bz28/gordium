@@ -115,6 +115,9 @@ def test_a_parking_rule_for_one_dwelling_unit_is_kept_and_one_passing_a_building
     # silently unchecked: needs review for them, and not applicable where the drafted rule decides
     flag = next(r for r in got["rules"]["R-2a"] if r["id"].endswith("_undecided_uses"))
     assert flag["kind"] == "flag" and drafter.validate({"district": "R-2a", "rules": [flag]}, inputs.ctx) == []
+    # review round 11: code made it, so it says so (not the model's name), and names the drafted rule it came from
+    assert flag["drafted_by"] == "rule_drafting/chart_code"
+    assert "Made from R-2a." in flag["notes"]
     for use, want in (("two_family", "needs_review"), ("one_family_attached", "needs_review"), ("church", "needs_review"),
                       ("one_family_detached", "not_applicable")):
         assert outcome(flag, {"use": use}, inputs.ctx.allowed()) == want, use

@@ -176,3 +176,31 @@ def test_a_proven_ai_relaxer_widens_where_the_checker_reads_rules(tmp_path):
     (rules_dir / "drafted/records/proven_relaxers.yaml").write_text(
         yaml.safe_dump({ai["id"]: "test_relaxes: equal to the hand R-1b height"}), encoding="utf-8")
     assert outcome(height(), tall, {}) == "pass"
+
+
+def test_an_approval_covers_which_rule_the_approved_rule_widens():
+    """Review round 11: an approved relaxer widens as written (trusted_relaxer), so `relaxes` is part of what is
+    approved: adding or retargeting it afterwards needs re-approval."""
+    from rule_format.rulebook import approval_hash
+    from test_rulebook import APPROVED
+    target = RULE | {"id": "R-1b.rear_yard_other"}
+
+    def changed(rule):
+        return [p for p in validate({"district": "R-1b", "rules": [target, rule]}, CTX)
+                if p.startswith(rule["id"] + ":") and "changed since it was approved" in p]
+    assert changed(RULE | APPROVED) == []
+    assert changed(RULE | APPROVED | {"relaxes": target["id"]})                       # a link added after approval
+    linked = RULE | {"relaxes": target["id"]}
+    signed = linked | APPROVED | {"approved_hash": approval_hash(linked, CTX)}
+    assert changed(signed) == []
+    assert changed(signed | {"relaxes": "R-1b.elsewhere"})                            # retargeted after approval
+
+
+def test_a_relaxer_with_no_check_widens_nothing_and_never_crashes():
+    """Review round 11: a flag (a demoted relaxer, or a hand edit) still carrying `relaxes` crashed apply_relaxes
+    (KeyError 'check'). Only a rule with its condition and its check widens; the base is left as it is."""
+    ai = BONUS | {"drafted_by": "rule_drafting/m"}
+    no_check = {k: v for k, v in ai.items() if k != "check"}
+    for broken in (no_check | {"kind": "flag"}, ai | {"kind": "flag"}, no_check,
+                   {k: v for k, v in BONUS.items() if k != "check"}):
+        assert apply_relaxes([BASE, broken])[0] == BASE, broken

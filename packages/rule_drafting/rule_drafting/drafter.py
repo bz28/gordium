@@ -984,8 +984,8 @@ def undecided_uses_flag(out: dict, law: dict, ctx: Context) -> None:
                       "notes": "Added by code, not drafted: the chart's parking applies to every use (per dwelling unit, "
                                "and for all other uses §325-20), and the drafted rules decide only "
                                + ", ".join(decided) + ". A building of several dwelling units needs every unit counted; "
-                               "other uses go to §325-20.",
-                      "drafted_by": mine[0]["drafted_by"], "status": "draft"})
+                               "other uses go to §325-20. Made from " + mine[0]["id"] + ".",
+                      "drafted_by": "rule_drafting/chart_code", "status": "draft"})
 
 
 def _could_apply(applies_when: str, use: str, ctx: Context) -> bool:
