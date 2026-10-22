@@ -584,8 +584,10 @@ class FakeTable:
     def massing(self):                       # the starting house's floors (Gordium::Massing and its sublayers)
         return [i for i, o in self.objects.items() if logic.on_layer(o["layer"], logic.MASSING)]
 
-    def buildings(self):                     # what the architect drew on Building (and its sublayers)
-        return [i for i, o in self.objects.items() if logic.on_layer(o["layer"], logic.LAYERS["building"])]
+    def buildings(self):                     # the architect's buildings, as the plugin's RhinoTable finds them
+        kinds = {"brep": "Brep", "lot": "PolylineCurve", "point": "Point"}
+        return logic.own_buildings((i, o["layer"], o.get("type") or kinds.get(o["kind"], o["kind"]), o.get("holds"))
+                                   for i, o in self.objects.items())
 
     def fingerprint(self, ids):
         return repr(sorted((i, self.objects[i].get("geom")) for i in ids))

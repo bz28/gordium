@@ -70,6 +70,16 @@ def classify(full_path, kind, holds_building=False):
     return "a " + kind + " on the Building layer can't be measured yet (explode it or turn it into a solid)"
 
 
+def own_buildings(objects):
+    """The ids of the architect's buildings among `objects` ((id, layer full path, geometry type name, whether it is
+    a block holding a building)), as the checker sees them (classify): solids on Building and its sublayers, and
+    everything there it can't measure (a block, a surface: each a problem the check names), and a block holding a
+    building wherever it is placed; never the starting house (Gordium::Massing) or what a start box holds. What a
+    reset asks about and clears (re-lookup review round 2: blocks and surfaces on Building were left behind)."""
+    return [i for i, layer, kind, holds in objects
+            if not on_layer(layer, MASSING) and classify(layer, kind, holds) not in (None, "lot")]
+
+
 def panel_header(head):
     """The panel's header lines above the summary and below it, from the check's header: where (place), then the
     draft notice, the lot and the grade. The code's edition line ("Ch. 325 as amended through Ord. No. …") is the
@@ -1020,6 +1030,11 @@ def saved_sources(saved_ui, state):
         saved_ui["zone_source"] = state["zone_source"]
     elif not state.get("zone"):
         saved_ui.pop("zone_source", None)
+    # the architect's own answers stay theirs once the box has them, whatever the box's ticks do next (a Draw that
+    # stopped, a lookup started, a pick: re-lookup review round 2, the use saved under the sample's source)
+    for key in ("address_source", "use_source", "corner_source"):
+        if state.get(key) == ENTERED:
+            saved_ui[key] = ENTERED
     return saved_ui
 
 
@@ -1978,8 +1993,7 @@ def same_address(a, b):
 MISSING = object()
 PREVIEW_SAYS = ("Shown dashed: {address}'s lot. Nothing in the model changes until Draw, which replaces what Gordium "
                 "drew with this lot and a new starting house.")
-NOT_DRAWN_YET = ("{says} Nothing is drawn for {address} until it is found: Look up again, or put back {drawn} to "
-                 "check this lot.")
+NOT_DRAWN_YET = "{says} Nothing is drawn for {address}: put back {drawn} to check this lot."
 
 
 def preview_lookup(answer, facts, saved_ui, zones=()):
@@ -2027,6 +2041,13 @@ def drop_pending(facts, saved_ui):
             else:
                 target[key] = old
     return facts, saved_ui
+
+
+def lookup_after_unfound(look, say):
+    """The box's lookup line after Draw stopped on an address not found (draw_decision's `say`), the lookup's own
+    reason kept beside it so a second Draw says it once more, never wrapped twice."""
+    look = dict(look or {})
+    return dict(look, reason=look.get("reason") or look.get("says"), says=say)
 
 
 def settle_pending(facts, saved_ui, address):
@@ -2081,8 +2102,8 @@ def draw_decision(table, facts, saved_ui, address):
             drawn = saved_ui.get("drawn_address") or "the address drawn"
             if look["status"] == "not_found":
                 return "unfound", [], UNFOUND.format(address=address.strip(), drawn=drawn)
-            return "unfound", [], NOT_DRAWN_YET.format(says=lookup_says(look) or "", address=address.strip(),
-                                                       drawn=drawn)
+            return "unfound", [], NOT_DRAWN_YET.format(says=look.get("reason") or look.get("says") or "",
+                                                       address=address.strip(), drawn=drawn)
         return "lookup", [], None
     mine = own_work(table, facts, saved_ui)
     plan = reset_plan(facts, saved_ui, mine)

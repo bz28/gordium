@@ -1474,11 +1474,15 @@ class RhinoTable:
         return self._on(logic.MASSING)
 
     def buildings(self):
-        """The buildings the architect drew, as the checker finds them (_buildings: the Building layer and its
-        sublayers, blocks holding one; never one a start box holds), the starting house aside (re-lookup review
-        round 1: a garage on Building::Garage was never asked about)."""
-        house = set(self.massing())
-        return [str(o.Id) for o in _buildings(self.doc) if str(o.Id) not in house]
+        """The architect's buildings as the checker sees them (rhino_logic.own_buildings: Building and its sublayers,
+        what it can't measure there too, blocks holding one), never the starting house or what a box holds."""
+        every = Rhino.DocObjects.ObjectEnumeratorSettings()
+        every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True
+        every.IdefObjects = False
+        return logic.own_buildings(
+            (str(o.Id), self.doc.Layers[o.Attributes.LayerIndex].FullPath, type(o.Geometry).__name__,
+             isinstance(o, Rhino.DocObjects.InstanceObject) and _holds_building(o.InstanceDefinition))
+            for o in self.doc.Objects.GetObjectList(every))
 
     def fingerprint(self, ids):
         """The objects' shapes, to tell a starting house as Gordium drew it from one the architect edited."""
@@ -1666,7 +1670,7 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             STATE["on_confirm"](doc, facts, _describe(facts, options["uses"]), state)
         state = dict(state, district_confirmed=True, **(STATE.get("box_overrides") or {}))
         facts, saved_ui, go, state = _draw_prepare(doc, facts, state, saved_ui, session, mode, options)
-        return _drawn(doc, facts, state, saved_ui, session) if go else None
+        return _drawn(doc, facts, state, saved_ui, session) if go and state is not None else None
     ticked = {}                       # this box session's ticks and changed sources, kept across picks
     while True:
         state = dict(_box_state(doc, facts, options, saved_ui, mode), **ticked)
@@ -1683,8 +1687,9 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             if go:
                 return _drawn(doc, facts, drawn_state, saved_ui, session)
             # Draw stopped (a question cancelled, an address not found, the City's guide): the box again, with the
-            # architect's ticks and choices kept; a lookup started or the district put back asks for the tick again
-            if (saved_ui.get("_lookup") or {}).get("looking") or facts.get("zone") != state.get("zone"):
+            # architect's ticks and choices kept; a lookup started or a preview dropped asks for the tick again (their
+            # own answers' sources are kept in saved_ui: rhino_logic.saved_sources)
+            if drawn_state is None or (saved_ui.get("_lookup") or {}).get("looking"):
                 ticked = {}
             elif drawn_state is not state:            # after the reset (the guide): its lot rows are the model's
                 ticked = {k: v for k, v in ticked.items() if k in ("district_confirmed", "zone_source",
@@ -1831,7 +1836,8 @@ def _ask_reset(question, fresh, keep):
 def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
     """Draw, before anything is saved (rhino_logic.box_facts / settle_pending / draw_decision / reset_question /
     apply_reset / after_reset_state, tested in CI): (facts, saved_ui, go, state to save). The box's answers first;
-    a preview for an address since retyped is dropped (its district put back: ticked again); a typed address that
+    a preview for an address since retyped is dropped and the box shown again as it was put back (state None: its
+    district ticked again, never saved from the state the box showed before); a typed address that
     wasn't looked up is looked up first and the box shown again (go False); a new address over what Gordium drew
     is drawn clean, the starting house drawn again after (one undo step), and the box's state rebuilt from the new
     lot (never the old lot's size, survey or corner saved over it); the architect's own work is asked about once
@@ -1839,15 +1845,16 @@ def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
     the guide shown, for Draw my lot… (go False; Cancel still puts everything back). The same address: as it is."""
     table = RhinoTable(doc)
     facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
+    previewed = saved_ui.get("_pending") is not None
     facts, saved_ui = logic.settle_pending(facts, saved_ui, state.get("address"))
-    if facts.get("zone") != state.get("zone"):            # the preview's district undone: shown, ticked again
-        STATE.pop("lookup_guide", None)
-        return facts, saved_ui, False, state
+    if previewed and saved_ui.get("_pending") is None:    # the preview dropped (address retyped): the box again,
+        STATE.pop("lookup_guide", None)                   # as it was put back, ticked again (state None)
+        return facts, saved_ui, False, None
     plan, mine, say_first = logic.draw_decision(table, facts, saved_ui, state.get("address"))
     if plan == "lookup":
         return facts, _lookup_start(facts, saved_ui), False, state
     if plan == "unfound":                                 # just looked up, not found: said in the box, not again
-        saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, says=say_first)
+        saved_ui["_lookup"] = logic.lookup_after_unfound(saved_ui.get("_lookup"), say_first)
         return facts, saved_ui, False, state
     if say_first:
         say(say_first)
