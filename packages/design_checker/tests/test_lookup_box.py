@@ -80,7 +80,7 @@ def test_106_fills_the_box_with_suggestions_and_never_confirms_the_district():
     facts, saved, state = box(p)
     assert p["status"] == "found" and facts["zone"] == "R-1b" and facts["corner_lot"] is False
     assert facts["lot_surveyed"] is False                  # the tax map: ±2'-0" and the starting-house margin apply
-    assert saved["zone_source"] == "suggested by Gordium · City of Ithaca zoning map, used live"
+    assert saved["zone_source"] == "suggested by Gordium · City zoning map says R-1b (checked today)"
     assert saved["_street_name"] == "Ithaca Rd" and saved["lot_source"] == "NYS Tax Parcels Public"
     assert saved["street_source"] == "suggested by Gordium · City of Ithaca roads, used live"
     assert not state.get("district_confirmed") and not logic.can_draw(state)       # I confirm: still the architect's

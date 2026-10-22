@@ -867,8 +867,10 @@ def lookup_choices(payload, facts, saved_ui, zones=(), replaces=True):
     elif known:
         facts["zone"] = known[0]
         saved_ui.pop("_zones_found", None)
-    if known:
-        saved_ui["zone_source"] = SUGGESTED + " · " + label("zone", "zone")
+    if known:                                    # as the map says it, and when (Rhino job, 2026-10-21); only the
+        # district it suggests: the City's zoning answer itself may never be stored (store: none)
+        saved_ui["zone_source"] = SUGGESTED + " · City zoning map" + (
+            " says " + known[0] if len(known) == 1 else "") + " (checked today)"
     saved_ui["_reconfirm"] = True                # a looked-up district is the architect's only once ticked again
     saved_ui["_live"] = {k: v for k, v in live.items() if k in ("zone", "overlays")}
     if not replaces:                             # the architect's own lot: its lot, street side and ground stay
