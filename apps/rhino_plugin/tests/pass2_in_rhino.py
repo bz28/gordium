@@ -281,8 +281,8 @@ try:
         facts = dict(g.current_facts(doc), corner_lot=True)
         saved = dict(g._ui_state(doc))
         g._get_point = click
-        try:
-            g._box_pick(doc, "street", facts, saved)
+        try:                                            # (the box's own session: the pick draws nothing)
+            facts, saved = g._box_pick(doc, "street", facts, saved, g.logic.BoxSession(g.RhinoTable(doc)))
         finally:
             g._get_point = real
         log["corner"] = {"prompts": prompts, "lines": facts.get("street_line"), "name": saved.get("street_name")}

@@ -4,7 +4,7 @@
 not_in_this_release:
   - id: overlays
     name: Overlays (historic, gorge, flood)
-    why: Overlay districts change which rules apply; this release doesn't look them up or check them.
+    why: Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).
 not_covered:
   - id: height_exceptions
     section: "§325-16A, §325-16B"
