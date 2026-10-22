@@ -619,7 +619,9 @@ def _status_rows(o, old):
     """The status box's lines: the summary, then up to 3 notes (never ✓ (D3); "–" means not checked)."""
     state, text, lines = o.message
     if old:                                  # out of date: neutral, no status (F7); press Check, or checking
-        state, text, lines = "stale", logic.out_of_date_line(_auto(Rhino.RhinoDoc.ActiveDoc)), lines[:1]
+        front = Rhino.RhinoDoc.ActiveDoc
+        never = logic.last_check_at(STATE.get("checked_at"), front.RuntimeSerialNumber if front else None) is None
+        state, text, lines = "stale", logic.out_of_date_line(_auto(front), not never), lines[:1]
     mark = {"does_not_comply": "✕", "needs_review": "?"}.get(state, "")
     return ["Gordium · " + (mark + " " if mark else "") + text] + list(lines)[:3]
 
@@ -858,6 +860,7 @@ def panel():
         if host is not None:
             if p is None or getattr(p["form"], "host", None) is not host or not p["form"].Visible:
                 p = ui.make_panel(_actions(), ui.DockHost(dock, host), context_on=_context_on(doc))
+                ui.set_auto_tick(p, _auto(doc))
                 STATE["panel_parts"] = p
                 LEFTOVERS["panel"] = p["form"].Close
             if logic.place_panel_now(p.get("placed")):          # once: then where the architect puts it
@@ -865,6 +868,7 @@ def panel():
             return p
     if p is None or not p["form"].Visible:
         p = ui.make_panel(_actions(), context_on=_context_on(doc))
+        ui.set_auto_tick(p, _auto(doc))
         STATE["panel_parts"] = p
         LEFTOVERS["panel"] = p["form"].Close
         p["form"].Show()
@@ -940,10 +944,10 @@ def set_auto_check(on):
     _save_ui_state(doc, dict(_ui_state(doc), auto_check=bool(on)))
     STATE.setdefault("auto_by_doc", {})[doc.RuntimeSerialNumber] = bool(on)
     ui.set_auto_tick(STATE.get("panel_parts"), on)
-    if on and STATE.get("dirty"):
-        STATE["dirty"] = time.time() - IDLE_SECONDS      # the next idle checks
-    elif not on and STATE.get("dirty") and STATE.get("panel_parts") is not None:
-        ui.show(STATE["panel_parts"], None, checking=True)     # the header: press Check
+    # the edit's own time is kept (never moved earlier: a check from before it would then count as covering it,
+    # review round 1, P1): turned on, the next idle checks it (it is already older than IDLE_SECONDS, or soon)
+    if STATE.get("dirty") and STATE.get("panel_parts") is not None:
+        ui.show(STATE["panel_parts"], None, checking=True)     # the header: checking, or press Check
     say("Checks after every edit: " + ("on" if on else "off (press Check after you edit)"))
     doc.Views.Redraw()
 
@@ -1655,9 +1659,9 @@ def confirm(doc, facts, options, mode="check"):
         ui.set_box_open(STATE.get("panel_parts"), False)
         # Cancel put the model back: it is as changed (or not) as it was when the box opened, so current results
         # never grey out for the box's own rolled-back edits (the Check button: nothing re-checks them)
+        # (the edit's own time kept: never moved earlier, which could let a check from before it count as covering
+        # it; with Check after every edit on, the next idle past IDLE_SECONDS checks: review round 1, P1)
         STATE["dirty"] = logic.changed_after_box(changed_before, STATE.get("dirty"), result is not None)
-        if STATE.get("dirty"):          # edits left: live mode (Check after every edit) checks at the next idle
-            STATE["dirty"] = time.time() - IDLE_SECONDS
     if result is not None:              # Draw (GordiumStart or Edit site…): the neighbourhood follows the lot
         logic.guard(sync_context, "draw the neighbourhood")(doc, result)
     return result
@@ -2166,6 +2170,7 @@ def run_check(doc, report=True):
         STATE["last"] = {"error": str(e), "at": time.time()}
         if not STATE.get("headless"):
             ui.show(panel(), None, error=str(e)[:300])
+            ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))
         return None
     finally:
         STATE["running"] = False
@@ -2227,8 +2232,11 @@ def _new_document(sender, e):
     p = STATE.get("panel_parts")
     if p is not None and p["form"].Visible:
         p["view"] = None
-        ui.show(p, None, error="no check yet for this document (run GordiumCheck)")
-    STATE["dirty"] = time.time()        # re-check the document now in front, if it has lot facts
+        ui.set_auto_tick(p, _auto(Rhino.RhinoDoc.ActiveDoc))      # this document's own setting
+        ui.show(p, None, error="no check yet for this document (press Check)")
+    STATE["dirty"] = None               # the last document's edits are not this one's (it is checked below)
+    STATE["check_front"] = True         # check the document now in front once, if it has lot facts (not an edit:
+    #                                     whatever Check after every edit says: review round 1 of the Check button)
 
 
 def _opened(sender, e):
@@ -2250,7 +2258,13 @@ def _idle(sender, e):
             and p["form"].Visible:          # out of date: no marks until the re-check, or until Check (H1, F7)
         STATE["stale_shown"] = t
         ui.set_auto_tick(p, _auto(front))
+        p["checked_before"] = last_at is not None
         ui.show(p, None, checking=True)
+    if logic.should_check_front(STATE.get("check_front"), STATE.get("running"), _box_open()):
+        STATE["check_front"] = False
+        if front is not None and front.Strings.GetValue(SECTION, ENTRY):   # it has lot facts: checked once
+            run_check(front, report=False)
+        return
         _redraw()
     if logic.should_recheck(t, time.time(), STATE.get("running"), _box_open(), IDLE_SECONDS, last_at,
                             auto=_auto(front)):
@@ -2400,7 +2414,7 @@ def gordium_check():
             return None
         save_facts(doc, facts)
     result = run_check(doc, report=True)
-    live(True)                                      # live mode is on by default
+    live(True)                                      # edits noticed (checked at Check, or each edit if ticked)
     if result is not None:
         Rhino.RhinoApp.WriteLine("Gordium: " + result["view"]["summary"])     # the panel's own words (D3)
     if not STATE.get("headless"):       # the command brings the panel forward (a live re-check never does)
@@ -2506,8 +2520,8 @@ def gordium_start():
     for note in start.get("notes") or []:
         Rhino.RhinoApp.WriteLine("Gordium: " + note)
     if not start.get("floors"):
-        Rhino.RhinoApp.WriteLine("Gordium: no starting building could be drawn")
-        live(True)                   # the architect draws one; it is checked as they go
+        Rhino.RhinoApp.WriteLine("Gordium: no starting building could be drawn; " + logic.draw_one_hint(_auto(doc)))
+        live(True)                   # the architect draws one: checked at Check (or after each edit, if ticked)
         documents(True)
         return None
     if Rhino.RhinoDoc.ActiveDoc is None or Rhino.RhinoDoc.ActiveDoc.RuntimeSerialNumber != doc.RuntimeSerialNumber:
@@ -2516,7 +2530,7 @@ def gordium_start():
         return None
     Rhino.RhinoApp.WriteLine("Gordium: drawing in " + _doc_name(doc))
     if add_floors(doc, start) is None:
-        Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; draw one and Gordium will check it")
+        Rhino.RhinoApp.WriteLine("Gordium: the starting building couldn't be drawn; " + logic.draw_one_hint(_auto(doc)))
         live(True)
         documents(True)
         return None

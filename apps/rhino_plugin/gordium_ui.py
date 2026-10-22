@@ -515,7 +515,8 @@ def _header(parts, view, error, out_of_date):
                      button("Retry", a["retry"])))
         h.AddRow(_wide(error, size=11))
     elif out_of_date:                      # greyed rows below; a check on its way, or press Check
-        h.AddRow(_wide(logic.out_of_date_line(parts.get("auto_check")), bold=True, size=15))
+        h.AddRow(_wide(logic.out_of_date_line(parts.get("auto_check"), parts.get("checked_before", True)), bold=True,
+                       size=15))
     else:
         h.AddRow(_wide((view or {}).get("summary") or "No check yet", bold=True, size=15))
     draft, lot, grade = lines["below"]

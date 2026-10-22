@@ -1662,11 +1662,28 @@ def auto_check(ui_state):
     return bool((ui_state or {}).get("auto_check", False))
 
 
-def out_of_date_line(auto):
+NEVER_CHECKED = "No check yet for this model — press Check"
+
+
+def out_of_date_line(auto, checked_before=True):
     """What the panel's header and the viewport's status box say while the results are older than the model: a
     check is on its way ("Checking…") only when one will run by itself; otherwise the architect is told to press
-    Check (the results stay greyed, never shown as if current)."""
-    return "Checking… (the model changed)" if auto else CHANGED_SINCE
+    Check (the results stay greyed, never shown as if current); "since the last check" only when there was one."""
+    if auto:
+        return "Checking… (the model changed)"
+    return CHANGED_SINCE if checked_before else NEVER_CHECKED
+
+
+def draw_one_hint(auto):
+    """GordiumStart's line when no starting house could be drawn: who checks the one the architect draws."""
+    return ("draw one and Gordium will check it" if auto else
+            "draw one, then press Check in the Gordium panel")
+
+
+def should_check_front(front_pending, running, box_open):
+    """A document come to the front (new, opened, switched to): checked once, whatever Check after every edit says
+    (it is not an edit, and nothing of it is on screen yet), when no check is running and no start box is open."""
+    return bool(front_pending) and not running and not box_open
 
 
 def controls_enabled(box_open, zoom_ok):

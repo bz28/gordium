@@ -57,7 +57,8 @@ def test_cancelling_a_start_box_never_greys_out_current_results(before, now, dra
 def test_the_panel_has_the_check_button_first_and_the_tick_off():
     header = body(UI, "def _header(", "\ndef ")
     assert 'buttons = [button("Check", a["check"]), button("Edit site…", a["edit_site"])]' in header
-    assert 'logic.out_of_date_line(parts.get("auto_check"))' in header and '"Checking…"' not in header
+    assert 'logic.out_of_date_line(parts.get("auto_check"), parts.get("checked_before", True))' in header
+    assert '"Checking…"' not in header
     tick = body(UI, "def _auto_box(", "\ndef ")
     assert "logic.AUTO_CHECK_LABEL" in tick and "box.Checked = False" in tick and 'actions["auto_check"]' in tick
     panel = body(UI, "def make_panel(", "\ndef ")
@@ -69,7 +70,7 @@ def test_the_plugin_checks_by_itself_only_when_asked_and_says_press_check_otherw
     idle = body(RHINO, "def _idle(", "\ndef ")
     assert "auto=_auto(front))" in idle and "ui.set_auto_tick(p, _auto(front))" in idle
     rows = body(RHINO, "def _status_rows(", "\ndef ")
-    assert "logic.out_of_date_line(_auto(Rhino.RhinoDoc.ActiveDoc))" in rows
+    assert "logic.out_of_date_line(_auto(front), not never)" in rows
     check = body(RHINO, "def check_now(", "\ndef ")
     assert "run_check(doc, report=False)" in check
     run = body(RHINO, "def run_check(", "\ndef _toast(")
@@ -79,3 +80,46 @@ def test_the_plugin_checks_by_itself_only_when_asked_and_says_press_check_otherw
     assert confirm.index('changed_before = STATE.get("dirty")') < confirm.index("_confirm(doc, facts, options, mode)")
     saved = body(RHINO, "def set_auto_check(", "\ndef ")
     assert "auto_check=bool(on)" in saved and "_save_ui_state(doc" in saved
+
+
+# ---- review round 1 -------------------------------------------------------------------------------------------
+
+def test_an_edits_time_is_never_moved_earlier():
+    """P1: ticking Check after every edit (and closing a start box) moved the edit's time back by IDLE_SECONDS, so a
+    check that finished just before the edit counted as covering it and the old marks showed as current."""
+    for name, until in (("def set_auto_check(", "\ndef "), ("def confirm(", "\ndef _confirm(")):
+        assert "time.time() - IDLE_SECONDS" not in body(RHINO, name, until), name
+    # with the edit's own time kept, a check from before it never covers it
+    assert logic.should_recheck(10.1, 10.7, False, False, 0.5, last_at=10.0, auto=True) is True
+
+
+def test_a_document_come_to_the_front_is_checked_once_whatever_the_tick():
+    """P2: switching to (or opening) a document set the edit mark, so with the tick off it was never checked and
+    the panel said "Model changed since the last check"."""
+    assert logic.should_check_front(True, False, False) is True
+    assert logic.should_check_front(True, True, False) is False and logic.should_check_front(True, False, True) is False
+    assert logic.should_check_front(False, False, False) is False
+    new = body(RHINO, "def _new_document(", "\ndef ")
+    assert 'STATE["check_front"] = True' in new and 'STATE["dirty"] = None' in new
+    assert "ui.set_auto_tick(p, _auto(Rhino.RhinoDoc.ActiveDoc))" in new
+    idle = body(RHINO, "def _idle(", "\ndef ")
+    assert 'logic.should_check_front(STATE.get("check_front"), STATE.get("running"), _box_open())' in idle
+
+
+def test_never_checked_says_so_not_since_the_last_check():
+    assert logic.out_of_date_line(False, checked_before=False) == logic.NEVER_CHECKED
+    assert logic.out_of_date_line(False, checked_before=True) == logic.CHANGED_SINCE
+    assert logic.out_of_date_line(True, checked_before=False) == "Checking… (the model changed)"
+
+
+def test_gordium_start_says_who_checks_the_building_they_draw():
+    """P2: "draw one and Gordium will check it" was false with the tick off."""
+    assert logic.draw_one_hint(False) == "draw one, then press Check in the Gordium panel"
+    assert logic.draw_one_hint(True) == "draw one and Gordium will check it"
+    assert "Gordium will check it\")" not in RHINO and RHINO.count("logic.draw_one_hint(_auto(doc))") == 2
+
+
+def test_every_new_or_refilled_panel_shows_the_documents_tick():
+    """P3: a rebuilt panel and the check-error path left the tick off for a document that has it on."""
+    assert body(RHINO, "def panel(", "\ndef ").count("ui.set_auto_tick(p, _auto(doc))") == 2
+    assert 'ui.set_auto_tick(STATE.get("panel_parts"), _auto(doc))' in body(RHINO, "def run_check(", "\ndef _toast(")
