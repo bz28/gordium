@@ -1,0 +1,393 @@
+"""Re-lookup on a drawn site (Ben, 2026-10-21), as scenarios: Look up previews (the model untouched), Draw with a
+new address starts clean, the architect's own work is never removed without asking once, the same address draws
+nothing new, and Cancel (or Esc) at any point leaves the model and the file exactly as they were.
+
+The harness (`Site`, `Box`) does what the plugin's Edit site… does (gordium_rhino._box_loop, _draw_prepare,
+edit_facts), step for step, through the same rhino_logic calls: preview_lookup, draw_decision, reset_question,
+apply_reset, pick_effect, the box session's commit and rollback, storable_ui. What only Rhino shows (the dashed
+preview drawn, the question's dialog, one undo step) is in apps/rhino_plugin/tests/re_lookup_in_rhino.py.
+
+The last test runs every start (whose lot, whose house, buildings or not) against every lookup and every answer,
+and holds the promises for all of them."""
+import itertools
+import os
+import sys
+from pathlib import Path
+
+import pytest
+
+sys.path.insert(0, os.path.dirname(__file__))
+from test_lookup_box import ZONES, FakeTable, looked_up  # noqa: E402
+
+from design_checker import rhino_logic as logic  # noqa: E402
+from design_checker.lookup_box import frame, writes  # noqa: E402
+
+SAMPLE = "106 Ithaca Rd, Ithaca, NY"
+
+
+def answer(name):
+    return looked_up(name)
+
+
+def guide_only(name):
+    """The State's parcels didn't answer: the City's outline is a guide only (no lot curve may be written)."""
+    p = looked_up(name)
+    p["details"]["lot"]["source_keys"] = ["city_parcels"]
+    p["writes"] = writes({"facts": p["facts"], "details": p["details"]}, frame({"facts": p["facts"]}))
+    return p
+
+
+class Site:
+    """A Rhino file as Gordium left it: the model (FakeTable), the facts and the box's choices saved in the file."""
+
+    def __init__(self, lot="sample", house="gordium", buildings=False, drawn=SAMPLE):
+        objects = {"lot1": {"layer": "Site", "kind": "lot"}}
+        if house:
+            objects.update({"floor1": {"layer": logic.MASSING, "kind": "brep", "geom": "f1"},
+                            "floor2": {"layer": logic.MASSING, "kind": "brep", "geom": "f2"}})
+        if buildings:
+            objects["garage"] = {"layer": logic.LAYERS["building"], "kind": "brep"}
+        self.table = FakeTable(objects)
+        self.facts = {"lot_id": "lot1", "address": drawn}
+        self.saved = {"replaceable_lot": "lot1" if lot == "sample" else None, "from_sample": lot == "sample"}
+        if drawn is not None:
+            self.saved["drawn_address"] = drawn
+        if house == "gordium":                    # as Gordium drew it, its fingerprint saved
+            self.saved["house_fingerprint"] = self.table.fingerprint(["floor1", "floor2"])
+        elif house == "edited":                   # drawn by Gordium, then moved by the architect
+            self.saved["house_fingerprint"] = self.table.fingerprint(["floor1", "floor2"])
+            self.table.objects["floor2"]["geom"] = "f2 moved"
+        # house == "no record": a starting house with no fingerprint saved (a file from before re-lookup)
+        self.mine = self._architects()
+
+    def _architects(self):
+        """The ids of what is the architect's own at the start (never to go without their yes)."""
+        out = set()
+        if self.saved.get("replaceable_lot") != self.facts["lot_id"]:
+            out.add(self.facts["lot_id"])
+        house = self.table.massing()
+        if house and self.table.fingerprint(house) != self.saved.get("house_fingerprint"):
+            out |= set(house)
+        out |= set(self.table.buildings())
+        return out
+
+    def state(self):
+        return self.table.snapshot(), dict(self.facts), logic.storable_ui(self.saved)
+
+    def box(self):
+        return Box(self)
+
+
+class Box:
+    """Edit site…: one box session over the site (its model edits held until Draw or Cancel)."""
+
+    def __init__(self, site):
+        self.site, self.table = site, site.table
+        self.facts, self.saved = dict(site.facts), dict(site.saved)
+        self.session = logic.BoxSession(self.table)
+        self.asked, self.preview, self.said, self.open = [], None, [], True
+
+    def look_up(self, payload):
+        self.facts["address"] = payload.get("query") or self.facts.get("address")    # the box's typed address
+        self.facts, self.saved, self.preview = logic.preview_lookup(payload, self.facts, self.saved, ZONES)
+        return self
+
+    def type_address(self, address):
+        self.facts["address"] = address
+        return self
+
+    def button(self):
+        return logic.draw_button("check", self.saved)
+
+    def rows(self):
+        lot = self.facts.get("lot_id")
+        state = {"has_lot": bool(lot), "lot_missing": not lot or not self.table.exists(lot),
+                 "lookup": self.saved.get("_lookup") or {}, "live": self.saved.get("_live") or {},
+                 "doubts": self.saved.get("doubts") or {}, "zone": "R-1b", "district_confirmed": True}
+        return {r["key"]: r for r in logic.box_rows(state)}, state
+
+    def draw(self, reply=None):
+        """Draw (gordium_rhino._draw_prepare then _drawn): "lookup" (the typed address looked up first), "asked-cancel"
+        (Cancel at the question: back to the box), "open" (the City's guide: the box stays open for Draw my lot…), or
+        "drawn" (saved, the session committed, the starting house drawn again when it was cleared)."""
+        plan, mine, say = logic.draw_decision(self.table, self.facts, self.saved, self.facts.get("address"))
+        if say:
+            self.said.append(say)
+        if plan in ("lookup", "unfound"):
+            return plan
+        redraw = False
+        if plan == "none":
+            self.saved.pop("_pending", None)
+        else:
+            choice = logic.START_FRESH
+            if plan == "ask":
+                question = logic.reset_question(self.saved["_pending"].get("address"), mine)
+                self.asked.append(question)
+                choice = reply(question) if reply else None
+                if choice is None:
+                    return "asked-cancel"
+            self.facts, self.saved, redraw, guide = logic.apply_reset(self.table, self.session, self.facts,
+                                                                      self.saved, choice, ZONES)
+            if guide and not self.facts.get("lot_id"):
+                self.redraw_after = redraw
+                return "open"
+        redraw = redraw or getattr(self, "redraw_after", False)
+        if not self.facts.get("lot_id"):
+            raise AssertionError("Draw with no lot: the box should have stayed open")
+        self.session.commit()
+        self.open = False
+        site = self.site
+        site.facts, site.saved = self.facts, logic.storable_ui(self.saved)
+        if redraw:                                 # edit_facts: the starting house drawn again for the new lot
+            ids = [self.table._new(logic.MASSING, "brep") for _ in range(2)]
+            for k, i in enumerate(ids):
+                self.table.objects[i]["geom"] = "new f%d" % (k + 1)
+            site.saved.update(house_fingerprint=self.table.fingerprint(ids), drawn_address=self.facts.get("address"))
+        return "drawn"
+
+    def draw_my_lot(self):
+        new = self.table.add_lot(None, "drawn")
+        self.session.add([new])
+        self.facts, self.saved = logic.pick_effect("draw_lot", new, self.facts, self.saved)
+        return new
+
+    def cancel(self):
+        self.session.rollback()
+        self.open = False
+
+
+@pytest.fixture
+def ground_on(monkeypatch):
+    monkeypatch.setattr(logic, "FLAT_GROUND", False)
+
+
+# ---- the scenarios ---------------------------------------------------------------------------------------------
+
+def test_look_up_previews_only_and_cancel_leaves_the_file_as_it_was():
+    site = Site()
+    before = site.state()
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert site.table.snapshot() == before[0]                  # the model untouched: nothing drawn, nothing held
+    assert box.preview and box.saved["_pending"]["answer"]["status"] == "found"
+    assert box.facts["lot_id"] == "lot1" and box.button() == "Draw"
+    assert "_pending" not in logic.storable_ui(box.saved)       # a preview is never written into the file
+    box.cancel()
+    assert site.state() == before
+
+
+@pytest.mark.usefixtures("ground_on")
+def test_a_new_address_over_gordiums_drawing_is_drawn_clean_without_a_question():
+    site = Site()
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.draw() == "drawn" and box.asked == []
+    assert not {"lot1", "floor1", "floor2"} & set(site.table.objects)       # Gordium's old drawing gone for good
+    lot = site.facts["lot_id"]
+    assert site.table.objects[lot]["layer"] == "Site" and site.saved["replaceable_lot"] == lot
+    assert len(site.table.massing()) == 2 and site.table.ground_points()   # the house drawn again, the new ground
+    assert logic.same_address(site.saved["drawn_address"], "96 Ithaca Rd")
+    assert not [k for k in site.saved if k.startswith("_")]                # nothing of the session in the file
+
+
+def test_the_same_address_draws_nothing_new_and_its_button_says_check():
+    site = Site()
+    before = site.table.snapshot()
+    box = site.box().look_up(answer("106_ithaca_rd"))
+    assert box.button() == "Check"
+    assert box.draw() == "drawn" and box.asked == []
+    assert site.table.snapshot()[0] == before[0]
+
+
+def test_cancel_after_the_reset_puts_everything_back():
+    site = Site()
+    before = site.state()
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    plan, mine, _ = logic.draw_decision(box.table, box.facts, box.saved, box.facts["address"])
+    assert (plan, mine) == ("redraw", [])
+    box.facts, box.saved, redraw, guide = logic.apply_reset(box.table, box.session, box.facts, box.saved,
+                                                            logic.START_FRESH, ZONES)
+    assert redraw and guide is None
+    assert {box.table.objects[i]["layer"] for i in ("lot1", "floor1", "floor2")} == {logic.HOLDING_LAYER}
+    box.cancel()                                     # an error or Esc after the reset: run_box rolls back
+    assert site.state() == before
+
+
+def test_an_edited_house_is_asked_about_once_and_keep_checks_it_on_the_new_lot():
+    site = Site(house="edited")
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.draw() == "asked-cancel"                       # Cancel at the question: back to the box
+    question, fresh, keep = box.asked[0]
+    assert question.startswith("Start fresh for 96 Ithaca") and question.endswith(
+        "Your changes to the starting house will be removed.")
+    assert fresh == ("Start fresh", logic.START_FRESH)
+    assert keep == ("Keep my building and check it on the new lot", logic.KEEP_MINE)
+    assert box.table.objects["lot1"]["layer"] == "Site"      # nothing done until they answer
+    assert box.draw(lambda q: logic.KEEP_MINE) == "drawn"
+    assert {"floor1", "floor2"} <= set(site.table.objects) and "lot1" not in site.table.objects
+    assert site.saved["house_fingerprint"] is None           # kept: theirs from now on
+    again = site.box().look_up(answer("109_ithaca_rd"))       # so the next new address asks again
+    assert again.draw() == "asked-cancel" and "your changes to the starting house" in again.asked[0][0].lower()
+
+
+def test_start_fresh_over_the_architects_buildings_removes_them_only_after_the_question():
+    site = Site(buildings=True)
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.draw(lambda q: logic.START_FRESH) == "drawn"
+    assert box.asked[0][0].endswith("The buildings you drew will be removed.")
+    assert "garage" not in site.table.objects and len(site.table.massing()) == 2
+
+
+def test_their_lot_alone_offers_start_fresh_or_cancel_never_keep_my_building():
+    site = Site(lot="theirs", house=None)
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.draw() == "asked-cancel"
+    question, fresh, keep = box.asked[0]
+    assert question.endswith("Your lot will be removed.") and keep is None
+    assert box.draw(lambda q: logic.START_FRESH) == "drawn" and "lot1" not in site.table.objects
+
+
+def test_a_typed_address_is_looked_up_first_and_on_their_own_lot_is_a_label():
+    site = Site()
+    before = site.state()
+    box = site.box().type_address("96 Ithaca Rd")
+    assert box.draw() == "lookup" and site.table.snapshot() == before[0]    # looked up first, the box again
+    own = Site(lot="theirs")
+    box = own.box().type_address("96 Ithaca Rd")
+    assert box.draw() == "drawn" and box.said == [logic.OWN_LOT_LABEL]
+    assert own.table.exists("lot1") and own.facts["address"] == "96 Ithaca Rd"
+
+
+def test_the_last_look_up_is_the_one_drawn_and_a_failed_one_drops_the_preview():
+    site = Site()
+    box = site.box().look_up(answer("96_ithaca_rd")).look_up(answer("109_ithaca_rd"))
+    assert logic.same_address(box.saved["_pending"]["address"], "109 Ithaca Rd")
+    failed = answer("not_found")
+    box.look_up(failed)
+    assert "_pending" not in box.saved and box.button() == "Check"
+    before = site.table.snapshot()
+    # Draw with the address just not found: nothing drawn, said once, never the same lookup again and again
+    assert box.draw() == "unfound" and site.table.snapshot() == before
+    plan, _, say = logic.draw_decision(box.table, box.facts, box.saved, box.facts["address"])
+    assert say == logic.UNFOUND.format(address=failed["query"], drawn=SAMPLE)
+    assert box.type_address("106 Ithaca Road").draw() == "drawn"            # the drawn address put back
+    assert site.table.snapshot()[0] == before[0]
+
+
+def test_a_file_with_no_record_of_its_house_never_loses_it_silently():
+    site = Site(house="no record", drawn=None)
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.draw() == "asked-cancel" and "starting house" in box.asked[0][0]
+
+
+def test_the_city_outline_only_clears_gordiums_drawing_then_waits_for_their_lot():
+    """The State's tax map didn't answer: nothing to draw the new lot from. The preview offers no Draw my lot… (a
+    lot drawn over the old one would be taken for theirs); Draw clears Gordium's old drawing and the box stays open
+    on the guide, Draw off until they draw their lot; then Draw keeps it as theirs. Cancel at any point: as it was."""
+    site = Site()
+    before = site.state()
+    box = site.box().look_up(guide_only("96_ithaca_rd"))
+    rows, _ = box.rows()
+    assert not [a for a in rows["lot"]["actions"] if a[0] == "draw_lot"]
+    assert rows["lot"]["review"].startswith("? " + logic.GUIDE_PREVIEW)
+    assert box.draw() == "open" and box.open
+    assert {box.table.objects[i]["layer"] for i in ("lot1", "floor1", "floor2")} == {logic.HOLDING_LAYER}
+    rows, state = box.rows()
+    assert ("draw_lot", "Draw my lot…", True) in rows["lot"]["actions"] and not logic.can_draw(state)
+    assert box.button() == "Draw"
+    lot = box.draw_my_lot()
+    assert box.draw() == "drawn" and box.asked == []
+    assert site.table.exists(lot) and not {"lot1", "floor1", "floor2"} & set(site.table.objects)
+    assert site.saved["replaceable_lot"] is None and len(site.table.massing()) == 2   # their lot; the house again
+    cancelled = Site()
+    box = cancelled.box().look_up(guide_only("96_ithaca_rd"))
+    assert box.draw() == "open"
+    box.draw_my_lot()
+    box.cancel()
+    assert cancelled.state() == before
+
+
+@pytest.mark.parametrize("a, b, same", [
+    ("109 Ithaca Road, Ithaca, NY 14850", "109 ithaca rd", True),
+    ("106 ithaca rd, Ithaca NY 14850", "106 Ithaca Road", True),
+    ("106 Ithaca Rd Ithaca NY 14850", "106 Ithaca Rd", True),
+    ("106 N. Aurora St.", "106 North Aurora Street", True),
+    ("106 Ithaca Rd", "106 Rd", False),                 # the street's own name is never the city's tail
+    ("109 Ithaca Rd", "106 Ithaca Rd", False),
+    ("106 Ithaca Rd", "106 Ithaca St", False),
+    ("100 New York Ave", "100 Ave", False),
+    ("", "", False),
+    (None, "106 Ithaca Rd", False),
+])
+def test_same_address(a, b, same):
+    assert logic.same_address(a, b) is same
+
+
+# ---- every start, every lookup, every answer -------------------------------------------------------------------
+
+STARTS = list(itertools.product(("sample", "theirs"), (None, "gordium", "edited", "no record"), (False, True)))
+LOOKUPS = {"same": lambda: answer("106_ithaca_rd"), "new": lambda: answer("96_ithaca_rd"),
+           "guide": lambda: guide_only("96_ithaca_rd"), "failed": lambda: answer("not_found"),
+           "typed": None}
+REPLIES = {"fresh": lambda q: logic.START_FRESH, "keep": lambda q: q[2] and logic.KEEP_MINE, "cancel": lambda q: None}
+
+
+@pytest.mark.parametrize("start", STARTS, ids=lambda s: "-".join(map(str, s)))
+def test_every_start_lookup_and_answer_keeps_the_promises(start):
+    """For every start × lookup × answer: the architect's own building is never removed unless they were asked and
+    said Start fresh, and their lot never unless they were asked (the question says it goes); Draw never ends without a lot; a new address drawn fresh leaves nothing Gordium drew for the old
+    one; the same address or a failed lookup changes nothing; Cancel leaves the file exactly as it was; nothing of
+    the session is ever written into the file."""
+    lot, house, buildings = start
+    for (kind, lookup), (said, reply) in itertools.product(LOOKUPS.items(), REPLIES.items()):
+        site = Site(lot=lot, house=house, buildings=buildings)
+        before, mine = site.state(), set(site.mine)
+        gordiums = set(site.table.objects) - mine
+        box = site.box()
+        box = box.type_address("96 Ithaca Rd") if lookup is None else box.look_up(lookup())
+        outcome = box.draw(reply)
+        if outcome == "open":                                  # the guide: their lot drawn over it, then Draw
+            box.draw_my_lot()
+            outcome = box.draw(reply)
+        where = (kind, said, outcome, box.asked)
+        if outcome in ("lookup", "unfound", "asked-cancel"):
+            box.cancel()
+            assert site.state() == before, where
+            continue
+        assert outcome == "drawn", where
+        left = set(site.table.objects)
+        fresh = bool(box.asked) and said == "fresh"
+        their_lot = {i for i in mine if i == before[1]["lot_id"]}
+        assert mine - their_lot <= left or fresh, where        # their building: gone only on Start fresh
+        assert their_lot <= left or box.asked, where           # their lot: only once asked (both answers say so:
+        # "…will be removed" / "check it on the new lot")
+        assert site.facts.get("lot_id") in left, where         # never a Draw without a lot
+        assert not [k for k in site.saved if k.startswith("_")], where
+        if kind in ("same", "failed") or (kind == "typed" and lot == "theirs"):
+            assert site.table.snapshot()[0] == before[0][0], where   # nothing new drawn, nothing removed
+        elif kind in ("new", "guide"):
+            kept_house = said == "keep" and bool(box.asked) and box.asked[0][2]
+            gone = gordiums - ({"floor1", "floor2"} if kept_house else set())
+            assert not gone & left, where                      # nothing Gordium drew for the old address stays
+            assert logic.same_address(site.saved["drawn_address"], "96 Ithaca Rd"), where
+
+
+# ---- the plugin does what the harness does --------------------------------------------------------------------
+
+def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
+    """gordium_rhino._draw_prepare acts on rhino_logic.draw_decision with the branches Box.draw drives: a lookup
+    first, unfound said in the box, the question (Cancel: back to the box), the reset in one undo step, and the box
+    kept open on the City's guide; Edit site… closes that undo step on any way out, errors included."""
+    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    prep = rhino[rhino.index("def _draw_prepare("):rhino.index("def _begin_undo(")]
+    for step in ('logic.draw_decision(table, facts, saved_ui, state.get("address"))', 'if plan == "lookup":',
+                 'if plan == "unfound":', 'if plan == "none":', 'if plan == "ask":',
+                 "logic.reset_question(", "if choice is None:\n            return facts, saved_ui, False",
+                 "logic.apply_reset(table, session, facts, saved_ui, choice",
+                 'if guide and not facts.get("lot_id"):'):
+        assert step in prep, step
+    assert prep.index("_begin_undo(") < prep.index("logic.apply_reset(")
+    loop = rhino[rhino.index("def _box_loop("):rhino.index("def _lookup_start(")]
+    assert loop.count("_draw_prepare(doc, facts, state, saved_ui, session, mode)") == 2   # scripted and real box
+    edit = rhino[rhino.index("def edit_facts("):rhino.index("def report_path(")]
+    outer = edit.index("    try:                                # one undo step")
+    assert outer < edit.index("facts = confirm(") < edit.index("    finally:\n        STATE.pop(\"redraw_house\"")
+    assert edit.rstrip().endswith("run_check(doc, report=False)") and "_end_undo(doc)" in edit

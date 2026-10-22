@@ -1795,7 +1795,7 @@ def _frame_points(doc, pts):
 
 def _ask_reset(question, fresh, keep):
     """The one question when the architect's own work would go (rhino_logic.reset_question): the answer's key, or
-    None (Cancel: back to the box)."""
+    None (Cancel: back to the box). `keep` None: their lot alone would go, so only Start fresh or Cancel."""
     import Eto.Forms as ef
     answer_with = STATE.get("on_reset_question")     # the in-Rhino test answers it
     if answer_with is not None:
@@ -1810,28 +1810,33 @@ def _ask_reset(question, fresh, keep):
     layout = ef.DynamicLayout()
     layout.Padding = ui.ed.Padding(14) if hasattr(ui, "ed") else 14
     layout.AddRow(ui.label(question, size=12))
-    layout.AddRow(ui.row(ui.button(fresh[0], lambda: pick(fresh[1])), ui.button(keep[0], lambda: pick(keep[1])),
-                         ui.button("Cancel", lambda: pick(None))))
+    buttons = [ui.button(fresh[0], lambda: pick(fresh[1]))]
+    if keep is not None:
+        buttons.append(ui.button(keep[0], lambda: pick(keep[1])))
+    buttons.append(ui.button("Cancel", lambda: pick(None)))
+    layout.AddRow(ui.row(*buttons))
     dialog.Content = layout
     dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     return chosen["v"]
 
 
 def _draw_prepare(doc, facts, state, saved_ui, session, mode):
-    """Draw, before anything is saved (rhino_logic.lookup_first / own_work / reset_plan / apply_reset, tested in CI):
+    """Draw, before anything is saved (rhino_logic.draw_decision / reset_question / apply_reset, tested in CI):
     (facts, saved_ui, go). A typed address that wasn't looked up is looked up first and the box shown again (go
     False); a new address over what Gordium drew is drawn clean, with the starting house drawn again after (one
-    undo step); the architect's own work is asked about once (Cancel: back to the box). The same address: as it
-    is."""
+    undo step); the architect's own work is asked about once (Cancel: back to the box). When the answer had only
+    the City's outline, the box stays open after the reset, the guide shown, for Draw my lot… (go False; Cancel
+    still puts everything back). The same address: as it is."""
     table = RhinoTable(doc)
-    if logic.lookup_first(state.get("address"), facts, saved_ui):
+    plan, mine, say_first = logic.draw_decision(table, facts, saved_ui, state.get("address"))
+    if plan == "lookup":
         facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
         return facts, _lookup_start(facts, saved_ui), False
-    if not saved_ui.get("_pending") and not logic.lookup_may_replace(facts, saved_ui) and \
-            saved_ui.get("drawn_address") and not logic.same_address(state.get("address"), saved_ui["drawn_address"]):
-        say(logic.OWN_LOT_LABEL)
-    mine = logic.own_work(table, facts, saved_ui)
-    plan = logic.reset_plan(facts, saved_ui, mine)
+    if plan == "unfound":                                 # just looked up, not found: said in the box, not again
+        saved_ui["_lookup"] = dict(saved_ui.get("_lookup") or {}, says=say_first)
+        return facts, saved_ui, False
+    if say_first:
+        say(say_first)
     if plan == "none":
         saved_ui.pop("_pending", None)
         return facts, saved_ui, True
@@ -1842,9 +1847,14 @@ def _draw_prepare(doc, facts, state, saved_ui, session, mode):
         if choice is None:
             return facts, saved_ui, False
     _begin_undo(doc, "Gordium: start fresh for " + (saved_ui["_pending"].get("address") or "a new address"))
-    facts, saved_ui, redraw = logic.apply_reset(table, session, facts, saved_ui, choice, STATE.get("zones") or [])
-    STATE.pop("lookup_guide", None)
+    facts, saved_ui, redraw, guide = logic.apply_reset(table, session, facts, saved_ui, choice,
+                                                       STATE.get("zones") or [])
     STATE["redraw_house"] = redraw and mode == "check"     # (GordiumStart draws its house itself)
+    STATE.pop("lookup_guide", None)
+    if guide and not facts.get("lot_id"):                 # the City's outline only: their lot drawn over it first
+        pts = [_model_point(doc, p) for p in guide]
+        STATE["lookup_guide"] = pts + [pts[0]]
+        return facts, saved_ui, False
     return facts, saved_ui, True
 
 
@@ -2043,13 +2053,14 @@ def edit_facts():
         saved = current_facts(doc)
     except ValueError:                  # unreadable: start again from the suggestions
         saved = {}
-    try:
-        facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options, "check")
-    finally:                            # the editing outline and names never stay on screen
-        o = overlay()
-        o.confirm, o.labels = None, []
-        doc.Views.Redraw()
-    try:
+    try:                                # one undo step from Draw's reset to the starting house, closed on any way out
+        try:
+            facts = confirm(doc, logic.with_suggestions(saved, suggested_facts(doc, options["zones"])), options,
+                            "check")
+        finally:                        # the editing outline and names never stay on screen
+            o = overlay()
+            o.confirm, o.labels = None, []
+            doc.Views.Redraw()
         if facts is not None:
             save_facts(doc, facts)
             if STATE.pop("redraw_house", False):        # a new address drawn clean: its starting house too
