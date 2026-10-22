@@ -715,7 +715,8 @@ def start_box(state, options, mode):
         keep()
         done("pick:" + what)
 
-    draw = button("Draw" if mode == "start" else "Check", lambda: (keep(), done("draw")))
+    draw = button(state.get("_draw_label") or ("Draw" if mode == "start" else "Check"),   # as what it does
+                  lambda: (keep(), done("draw")))
     reason = label(logic.draw_reason(state), size=11)
     looking = bool((state.get("lookup") or {}).get("looking"))
     draw.Enabled = logic.can_draw(state) and not looking
