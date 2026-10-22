@@ -1829,13 +1829,16 @@ def test_a_walls_only_shed_has_one_reason_and_one_off_the_lot_is_still_named():
         assert "isn't inside the lot" in r["reason"], (name, r["reason"])
 
 
+@pytest.mark.parametrize("gap", [0.0, 0.05])           # against the wall, and drawn 0.05 ft off it (#18 round 25)
 @pytest.mark.parametrize("at", [26, 50])                  # near a spot grade, and 15 ft further along the wall
-def test_a_balcony_against_the_house_is_part_of_it_for_the_ground_wherever_the_spot_grades_are(at):
+def test_a_balcony_against_the_house_is_part_of_it_for_the_ground_wherever_the_spot_grades_are(at, gap):
     """#15 round 5 (P2): a balcony drawn as its own solid against the house's side, at 10 ft, was judged by itself:
     it "floated" (every yard stopped) when a spot grade happened to be near it, and passed 15 ft along the wall.
-    Buildings touching in plan are one group for the ground: the house meets the ground, so the balcony does."""
+    Buildings touching in plan are one group for the ground: the house meets the ground, so the balcony does. #18
+    review round 25: "touching" is #18's TOUCH (0.1 ft, a solid that close is part of the main building for the
+    yards), not 0.01 ft: a balcony drawn 0.05 ft off the wall stopped every yard with "doesn't meet the buildings"."""
     house = [floor(10, 25, 35, 65, z0=11 * i, z1=11 * (i + 1), id=f"f{i}") for i in range(3)]
-    balcony = box(35, at, 40, at + 8, 10, 10.5, id="balcony")
+    balcony = box(35 + gap, at, 40, at + 8, 10, 10.5, id="balcony")
     spots = [[22, 24, 0], [22, 66, 0], [9, 45, 0], [36, 45, 0], [36, 27, 0]]
     m = measure(site(RECT, *house, balcony), {**FACTS, "stories": 3, "ground_is_flat": None, "grade_elevation": None,
                                                "grade_points": spots})
@@ -2068,3 +2071,6 @@ def test_the_main_buildings_own_parts_are_read_against_its_grade_plane_never_the
     area = stepped["building_area"]
     assert area["value"] == pytest.approx(1000.0) or sorted(r["value"] for r in area["readings"]) == [1000.0, 1000.0], area
     assert "overhangs" not in (area["reason"] or ""), area
+    # #18 review round 25: under #18 the cut shows in the yards' walls reading, not in coverage (from above)
+    assert _walls_reading(stepped, "rear_yard") is None and stepped["rear_yard"]["value"] == pytest.approx(35.0), \
+        stepped["rear_yard"]

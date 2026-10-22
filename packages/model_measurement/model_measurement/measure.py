@@ -1496,13 +1496,14 @@ def _separate_grade(building: dict, buildings: list[dict], points, home):
 
 
 def _connected(buildings: list[dict]) -> list[list[dict]]:
-    """The buildings as connected groups: touching in plan (a balcony or a wing against the house's side) or one
-    over another (as _stacks and _one_vertical_building join them). One helper, for the ground test."""
+    """The buildings as connected groups: touching in plan (a balcony or a wing against the house's side, within
+    TOUCH: the same distance that makes a solid part of the main building for the yards, _touching; #18 review round
+    25) or one over another (as _stacks and _one_vertical_building join them). One helper, for the ground test."""
     groups = []
     for b in buildings:
         plan = _footprint(b) if b.get("faces") or b.get("plans") else None
         joined = [g for g in groups if plan is not None and any(
-            (o.get("faces") or o.get("plans")) and _footprint(o).distance(plan) <= TOL for o in g)]
+            (o.get("faces") or o.get("plans")) and _footprint(o).distance(plan) <= TOUCH for o in g)]
         merged = [b] + [o for g in joined for o in g]
         groups = [g for g in groups if not any(g is j for j in joined)] + [merged]
     return groups
