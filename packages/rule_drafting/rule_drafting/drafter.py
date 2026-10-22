@@ -404,26 +404,89 @@ def _typed_numbers(template: dict) -> list[float]:
     return found
 
 
-def note_amount_problems(template: dict, notes: dict[int, dict], flagged: frozenset = frozenset()) -> list[str]:
-    """Every amount a note on a slot's own cell states is in the rule's formulas (R-2C's '2,500 sf [fn4]': "+500 sf
-    for each additional occupant"; a draft that quoted the note and dropped the 500 passed every larger household),
-    unless a flag of the same answer quotes that note (flagged: (page, note)), for a person to apply. Checked once
-    the template's numbers are known to be backed (_backing), so each problem is reported by its own check."""
+def dropped_amounts(template: dict, notes: dict[int, dict]) -> dict[tuple, list[str]]:
+    """{(page, note): why} for each note on a slot's own cell that states an amount the rule's formulas don't use
+    (R-2C's '2,500 sf [fn4]': "+500 sf for each additional occupant"; a draft that quoted the note and dropped the
+    500 passed every larger household). Settled per district by settle_dropped_amounts: only a flag kept there that
+    cites the note sends it to a person; otherwise the rule isn't kept there."""
     if template["kind"] != "rule":
-        return []
+        return {}
     typed = _typed_numbers(template)
-    p = []
+    out: dict[tuple, list[str]] = {}
     for slot in template["slots"]:
         for n in sorted(set(slot["footnotes"]), key=lambda n: (len(n), n)):
             note = notes.get(slot["page"], {}).get(n)
-            if note is None or (slot["page"], n) in flagged:
+            if note is None:
                 continue
             for amount in dict.fromkeys(note_amounts(note["text"])):
                 if not any(abs(amount - x) < 1e-9 for x in typed):
-                    p.append(f"slot {slot['name']}: footnote {n} states {amount:g}, which the rule doesn't apply "
-                             f"(apply it in the formula, or send the note to a person with a flag quoting it): "
-                             f"{note['text']!r}")
-    return p
+                    out.setdefault((slot["page"], n), []).append(
+                        f"slot {slot['name']}: footnote {n} states {amount:g}, which the rule doesn't apply (apply it "
+                        f"in the formula, or send the note to a person with a flag quoting it): {note['text']!r}")
+    return out
+
+
+def flagged_notes(rules: list[dict], notes: dict[int, dict]) -> set[tuple]:
+    """The notes a kept flag cites whole: a resolved chart source on the note's page that covers every line of
+    the note (never a quote that merely contains a few of its words)."""
+    out = set()
+    for r in rules:
+        if r.get("kind") != "flag":
+            continue
+        for x in r.get("sources") or []:
+            if x.get("file") != CHART_FILE or "lines" not in x:
+                continue
+            for n, note in (notes.get(x["page"]) or {}).items():
+                words = lambda t: " ".join(re.sub(r"^\s*\(\d+\)", "", str(t)).split())   # noqa: E731
+                if x["lines"][0] <= note["lines"][0] and note["lines"][1] <= x["lines"][1] \
+                        and words(note["text"]) in words(x.get("quote", "")):       # the whole note, not a part of it
+                    out.add((x["page"], n))
+    return out
+
+
+def settle_dropped_amounts(pending: list, out: dict, notes: dict[int, dict], unit: dict, ctx: Context) -> None:
+    """Round 10 (P0): a rule that leaves out a note's amount is kept in a district only where a flag kept for that
+    district (or for every district) cites the note whole. Decided from what was kept, after every template is
+    checked: a refused flag, one kept only elsewhere, or one quoting a fragment exempts nothing."""
+    for t, dropped in pending:
+        kept_anywhere = False
+        for district in sorted(out["rules"]):
+            mine = [r for r in out["rules"][district] if r["id"] == f"{district}.{t['id_suffix']}"]
+            if not mine:
+                continue
+            everywhere = [r for r in out["rules"].get("general", []) if not r.get("applies_when") or outcome(
+                {"kind": "flag", "applies_when": r["applies_when"]}, {"district": district}, ctx.allowed()) != "not_applicable"]
+            covered = flagged_notes(out["rules"][district] + everywhere, notes)   # a general flag that applies here
+            whys = [w for key, ws in dropped.items() if key not in covered for w in ws]
+            if not whys:
+                kept_anywhere = True
+                continue
+            out["rules"][district] = [r for r in out["rules"][district] if r not in mine]
+            out["unresolved"] += [{"rule": r["id"], "why": "; ".join(whys[:2]),
+                                   "cells": [[x["page"], x["cell"]["section"], x["cell"]["row"], x["cell"]["column"]]
+                                             for x in r["sources"] if isinstance(x.get("cell"), dict)]} for r in mine]
+        if not kept_anywhere:
+            out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}",
+                                    "why": "; ".join(w for ws in dropped.values() for w in ws)[:600]})
+            out["templates"] = [x for x in out["templates"] if x is not t]
+    out["rules"] = {d: rs for d, rs in out["rules"].items() if rs}
+
+
+def cells_used(out: dict) -> dict[tuple, set[int]]:
+    """Each district cell's numbers that fill a slot of a rule kept in the end."""
+    templates = {t["id_suffix"]: t for t in out["templates"]}
+    used: dict[tuple, set[int]] = {}
+    for rules in out["rules"].values():
+        for r in rules:
+            t = templates.get(r["id"].split(".", 1)[1])
+            for x in r.get("sources") or [] if t else []:
+                c = x.get("cell")
+                if not isinstance(c, dict):
+                    continue
+                for sl in t["slots"]:
+                    if (sl["page"], sl["section"], sl["row"].strip()) == (x["page"], c["section"], c["row"]):
+                        used.setdefault((x["page"], c["section"], c["row"], c["column"]), set()).add(sl["number"])
+    return used
 
 
 def _footnote_problems(template: dict, sources: list[dict], notes: dict[int, dict]) -> list[str]:
@@ -842,15 +905,46 @@ def link_relaxes(rule: dict, template: dict, column: str | None, unit: dict, dra
     district = district_name(column)
     cell = {"section": slot["section"], "row": slot["row"].strip(), "column": column}
     own = f"{district}.{unit.get('prefix', '')}"
+    from rule_format import formula
+    widened = formula.names(rule["check"]) - {"use", "district"}
     targets = [r for r in drafted.get(district) or [] if r.get("kind") == "rule" and not r.get("relaxes")
                and not r["id"].startswith(own) and any(x.get("cell") == cell and x.get("page") == slot["page"]
-                                                       for x in r.get("sources") or [])]
+                                                       for x in r.get("sources") or [])
+               and formula.names(r["check"]) & widened]          # it limits what the exception allows more of
+    if missing := missing_conditions(rule, ctx_kinds=None):
+        return None, missing
     if len(targets) != 1:
         return None, (f"the chart rule it widens ({slot['row'].strip()!r}) is "
                       + ("not drafted for this district" if not targets else "cited by several rules here")
                       + ": the chart rule stays as it is and a person checks the exception")
     head = {k: rule[k] for k in ("id", "kind", "topic", "title")}
     return head | {"relaxes": targets[0]["id"]} | {k: v for k, v in rule.items() if k not in head}, None
+
+
+CONDITION_WORDS = {"front": ["front_yard"], "side": ["side_yard_smaller", "side_yard_larger"], "rear": ["rear_yard"],
+                   "stories": ["stories"]}
+
+
+def missing_conditions(rule: dict, ctx_kinds=None) -> str | None:
+    """Round 10 (P0): a relaxing rule passes the rule it widens when its conditions hold, so a condition left out is a
+    false pass (a bonus with only the front yard passed 1 ft side yards). Every yard (or the stories) its quoted law
+    names must be in its applies_when, and must decide it: with that measure at 0, the exception doesn't apply."""
+    from rule_format import formula
+    law = " ".join(str(x.get("quote", "")) for x in rule.get("sources") or [] if x.get("file") != CHART_FILE).lower()
+    named = [m for w, ms in CONDITION_WORDS.items() if re.search(rf"\b{w}\b", law) for m in ms]
+    have = formula.names(rule.get("applies_when") or "")
+    if absent := [m for m in named if m not in have]:
+        return (f"a rule that relaxes another must carry every condition its law sets: {', '.join(absent)} "
+                "(named in its quotes) isn't in applies_when; the chart rule stays as it is and a person checks it")
+    passing = next((ex["given"] for ex in rule.get("examples") or [] if ex.get("expect") == "pass"), None)
+    if passing is None:
+        return "a rule that relaxes another needs a passing example (with every condition met)"
+    from rule_format.rulebook import outcome as _outcome
+    loose = [m for m in named if _outcome(rule, passing | {m: 0}, {}) != "not_applicable"]
+    if loose:
+        return (f"a rule that relaxes another must apply only when every condition holds: with {', '.join(loose)} at 0 "
+                "it still applies; the chart rule stays as it is and a person checks it")
+    return None
 
 
 def _widened(rule: dict, context: dict) -> list[dict]:
@@ -861,11 +955,50 @@ def _widened(rule: dict, context: dict) -> list[dict]:
     return [r for r in (context.get("drafted") or {}).get(target.split(".")[0]) or [] if r["id"] == target]
 
 
-def filled_elsewhere(gap: dict, used: dict, cells: dict) -> bool:
+def undecided_uses_flag(out: dict, law: dict, ctx: Context) -> None:
+    """The chart's residential parking ("... per dwelling unit", and "For all other uses see §325-20") sets a
+    requirement for every use. A drafted rule limited to the dwellings it can count (one unit's sleeping rooms: the
+    one-family houses) leaves the buildings of several units, and every other use, with no rule: their parking was
+    unchecked without a word (stage 1's gap re-draft; the hand keys flag them). Code adds, in each district, one
+    flag for every use no rule of the unit decides (needs review; it never passes), citing the same cells."""
+    import json as _json
+    for district, rules in sorted(out["rules"].items()):
+        mine = [r for r in rules if any(isinstance(x.get("cell"), dict) and x["cell"].get("section", "").startswith("Residential")
+                                        and "per dwelling unit" in x["cell"].get("row", "") for x in r.get("sources") or [])]
+        if not mine or any(not r.get("applies_when") for r in rules):
+            continue
+        decided = sorted(u for u in ctx.uses if any(
+            outcome({"kind": "flag", "applies_when": r["applies_when"]}, {"use": u}, ctx.allowed()) != "not_applicable"
+            for r in rules))
+        left = sorted(set(ctx.uses) - set(decided))
+        if not left:
+            continue
+        cells = [x for r in mine for x in r["sources"] if isinstance(x.get("cell"), dict)]
+        several = [u for u in left if "dwelling" in use_label(u, ctx).lower()]
+        rules.append({"id": f"{district}.{mine[0]['id'].split('.', 1)[1]}_undecided_uses", "kind": "flag",
+                      "topic": mine[0]["topic"], "title": "Parking for the uses no drafted rule decides (a person checks)",
+                      "applies_when": f"use not in {_json.dumps(decided)}",
+                      "sources": [dict(c) for i, c in enumerate(cells) if c not in cells[:i]],
+                      "examples": [{"given": {"use": u}, "expect": "needs_review"} for u in (several or left)[:2]]
+                      + [{"given": {"use": decided[0]}, "expect": "not_applicable"}],
+                      "notes": "Added by code, not drafted: the chart's parking applies to every use (per dwelling unit, "
+                               "and for all other uses §325-20), and the drafted rules decide only "
+                               + ", ".join(decided) + ". A building of several dwelling units needs every unit counted; "
+                               "other uses go to §325-20.",
+                      "drafted_by": mine[0]["drafted_by"], "status": "draft"})
+
+
+def _could_apply(applies_when: str, use: str, ctx: Context) -> bool:
+    return not applies_when or outcome({"kind": "flag", "applies_when": applies_when}, {"use": use},
+                                       ctx.allowed()) != "not_applicable"
+
+
+def filled_elsewhere(gap: dict, used: dict, cells: dict, templates: dict, out: dict, ctx: Context) -> bool:
     """A district cell one template couldn't fill (its footnotes or how many numbers it states differ from the other
     districts': R-2C's '35%/40% /50% [fn12]') isn't a gap when templates written for that form fill it: every number
-    the cell states fills a slot of a rule kept for that district (fn12's three numbers, one per use). A cell only
-    partly used stays a gap."""
+    the cell states fills a slot of a rule kept for that district (fn12's three numbers, one per use), and for every
+    use the failed template could apply to, some kept rule citing the cell applies too (a 'first number' narrowed to
+    one use would leave the others unchecked). A cell only partly used, or partly covered, stays a gap."""
     keys = [tuple(c) for c in gap.get("cells") or []]
     if not keys:
         return False
@@ -874,7 +1007,16 @@ def filled_elsewhere(gap: dict, used: dict, cells: dict) -> bool:
         stated = set(range(1, len(cell_numbers(cell["value"])) + 1)) if cell else set()
         if not stated or not stated <= used.get(key, set()):
             return False
-    return True
+    district, suffix = gap["rule"].split(".", 1)
+    failed = templates.get(suffix)
+    when = (failed or {}).get("applies_when", "") or ""
+    if failed is None or "{" in when:
+        return False
+    citing = [r for r in out["rules"].get(district, []) if any(
+        isinstance(x.get("cell"), dict) and (x["page"], x["cell"]["section"], x["cell"]["row"], x["cell"]["column"]) in keys
+        for x in r.get("sources") or [])]
+    return all(any(_could_apply(r.get("applies_when", ""), u, ctx) for r in citing)
+               for u in sorted(ctx.uses) if _could_apply(when, u, ctx))
 
 
 def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
@@ -883,14 +1025,10 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
     unresolved: [{rule, why}] (districts whose cells don't fit a working template), rejected: [{rule, why}]
     (templates that work nowhere), proposed: {name: measure}, problems: [...] (the rejections, as text)}."""
     out = {"rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}
-    used: dict[tuple, set[int]] = {}           # each district cell's numbers that fill a slot of a kept rule
     # a law piece that names its districts ("in the R-3a or R-3b Zoning District") applies only there, whatever the AI wrote
     scope, unread = text_scope(unit["text"], ctx.districts) if unit.get("piece") else (None, [])
     suffixes = [unit.get("prefix", "") + t["id_suffix"] for t in answer["templates"]]
-    flat = lambda t: " ".join(str(t).split())           # noqa: E731
-    flagged = frozenset((q["page"], n) for t in answer["templates"] if t["kind"] == "flag" for q in t["quotes"]
-                        if q.get("document") == "chart" and flat(q.get("text")).strip()
-                        for n, note in (notes.get(q.get("page")) or {}).items() if flat(q["text"]) in flat(note["text"]))
+    pending = []                               # (template, its dropped note amounts): settled from the kept flags
     for t in answer["templates"]:
         t = t | {"id_suffix": unit.get("prefix", "") + t["id_suffix"]}   # a law piece's rules carry its id
         p = template_problems(t)
@@ -949,13 +1087,10 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
             if good:
                 if unbacked := _backing(t, valid, good, cells, sources, drafted_by, ctx.allowed()):
                     gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in unbacked], []
-                elif dropped := note_amount_problems(t, notes, flagged):
-                    gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in dropped], []
+                elif dropped := dropped_amounts(t, notes):
+                    pending.append((t, dropped))
         finally:
             ctx.proposed = saved
-        for column, _ in good:
-            for sl in t["slots"]:
-                used.setdefault((sl["page"], sl["section"], sl["row"].strip(), column), set()).add(sl["number"])
         good = [rule for _, rule in good]
         if good:                                # the template works: districts that don't fit go to a person
             out["templates"].append(t)
@@ -966,7 +1101,11 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
         else:                                   # it works nowhere: the drafter is told why and tries again
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}",
                                     "why": "; ".join(f"{g['rule']}: {g['why']}" for g in gaps[:3])})
-    out["unresolved"] = [g for g in out["unresolved"] if not filled_elsewhere(g, used, cells)]
+    settle_dropped_amounts(pending, out, notes, unit, ctx)
+    used = cells_used(out)
+    templates = {unit.get("prefix", "") + t["id_suffix"]: t for t in answer["templates"]}
+    out["unresolved"] = [g for g in out["unresolved"] if not filled_elsewhere(g, used, cells, templates, out, ctx)]
+    undecided_uses_flag(out, law, ctx)
     if unit.get("piece"):
         all_or_none(answer, unit, out)
     out["unresolved"] += exemption_gaps(unit, out, ctx)

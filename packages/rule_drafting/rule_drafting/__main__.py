@@ -353,6 +353,10 @@ def cmd_draft(args) -> int:
                 context = drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions) | {"drafted": drafted_rules(i)}
                 result = drafter.draft_unit(client, u, context, system, i.law, i.ctx, i.columns, i.cells, i.notes,
                                             record, budget=budget)
+                if result.get("failed") and (stands := last_recorded_attempts(i, u["id"])) and answered(stands) \
+                        and not answered(recorded_sessions(i, u["id"])[-1]):
+                    print(f"  {u['id']}: no answer this time ({result['failed']}): its last answered session stands")
+                    result = replay_unit(i, u, stands)
             save_result(i, log, u["id"], result)
             saved = True
             print(f"  {u['id']}: {sum(len(r) for r in result['rules'].values())} rules, "
@@ -413,11 +417,24 @@ def drafted_rules(i: Inputs) -> dict[str, list[dict]]:
     return {p.stem: (load(p) or {}).get("rules") or [] for p in sorted(i.drafted.glob("*.yaml")) if p.stem != "general"}
 
 
-def last_recorded_attempts(i: Inputs, unit_id: str) -> list[dict]:
-    """The unit's most recent drafting session from the run records: its last attempt 1 and the attempts after it."""
+def recorded_sessions(i: Inputs, unit_id: str) -> list[list[dict]]:
+    """The unit's drafting sessions from the run records, oldest first: each an attempt 1 and the attempts after it."""
     calls = [c for c in run_records(i) if c.get("unit") == unit_id]
     starts = [k for k, c in enumerate(calls) if c.get("attempt") == 1]
-    return calls[starts[-1]:] if starts else []
+    return [calls[a:b] for a, b in zip(starts, starts[1:] + [len(calls)])]
+
+
+def answered(session: list[dict]) -> bool:
+    """A session in which the AI gave at least one whole answer (one cut off at the output limit is no answer)."""
+    return any(rec.get("stop_reason") == "end_turn" for rec in session)
+
+
+def last_recorded_attempts(i: Inputs, unit_id: str) -> list[dict]:
+    """The session whose answers stand for the unit: its most recent session that answered. A later session in
+    which every call was cut off (stage 2's lot size: three answers stopped at the output limit) gave no answer,
+    so it doesn't erase the rules of the last one that did; with none answered, the most recent session."""
+    sessions = recorded_sessions(i, unit_id)
+    return next((x for x in reversed(sessions) if answered(x)), sessions[-1] if sessions else [])
 
 
 def replay_unit(i: Inputs, unit: dict, attempts: list[dict]) -> dict:
