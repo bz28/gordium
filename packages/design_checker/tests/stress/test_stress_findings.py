@@ -363,9 +363,8 @@ def test_F14_a_rotated_house_with_a_gable_roof_is_checked_without_crashing():
 F15_CASE = ("sloped", [{"op": "shift_floor", "k": 3, "dz": 3.25, "carry": False}])
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError,
-                   reason="F15 (rest, after #15 acc21a7): with the spot grades at the walls the ground stop still "
-                          "compares with their average (2.0 ft), not the ground under the footprint (1.0 to 3.0 ft)")
+# F15 (rest) fixed by #15 rounds 7-10 (one ground model, ground_for: the ground under the footprint, read the same
+# whatever the spot grades' positions), carried here via #18 0668da2: the strict xfail passed, so it is a plain test now
 def test_F15_the_yards_of_a_floating_house_do_not_wait_on_the_ground_only_sometimes():
     """The sloped lot's starting house (on its four spot grades, ground 2.0 ft) with floor 1 raised 3'-3" on its
     own: nothing reaches the ground (5'-3" to 37'-0"). Gordium stops every yard and the coverage ("the ground level
