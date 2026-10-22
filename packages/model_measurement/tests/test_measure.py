@@ -1438,6 +1438,11 @@ def test_every_known_shape_is_read_at_the_ground_as_it_should_be_all_at_once():
              "grade_points": [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0]]}
     slab_house = [floor(10, 30, 35, 60, z0=2.75 + 10 * i, z1=2.75 + 10 * (i + 1), id=f"f{i}") for i in range(3)]
     terrace_spots = [[22.5, 29.5, 1.0], [22.5, 60.5, 3.0], [9.5, 45, 2.0], [35.5, 45, 2.0], [22.5, 20, 0.0]]
+    unknown = {**FACTS, "ground_is_flat": None, "grade_elevation": None}
+    ridge_spots = [[22.5, 39.5, 0], [22.5, 60.5, 0], [9.5, 50, 0], [35.5, 50, 0],          # the house's walls
+                   [22.5, 19.5, -6], [14.5, 26, -6], [30.5, 26, -6],                       # the shed's
+                   [20, 95.5, -6], [9.5, 85, -6], [30.5, 85, -6]]                          # the garage's
+    higher = [box(10, 25, 35, 65, 3, 33, id="house"), box(40, 75, 50, 85, 0, 9, id="shed")]
     cases = {
         # a 25 x 40 house (1,000 sf) with a 4 x 3 balcony (12 sf) at 10 ft against it, flat ground
         "balcony, flat": (flat, [box(10, 25, 35, 65, 0, 30, id="house"), box(35, 40, 39, 43, 10, 10.5, id="b")],
@@ -1454,6 +1459,14 @@ def test_every_known_shape_is_read_at_the_ground_as_it_should_be_all_at_once():
         # a detached 10 x 10 shed (100 sf) apart from the house, flat ground
         "detached shed": (flat, [box(10, 25, 35, 65, 0, 30, id="house"), box(40, 75, 50, 85, 0, 9, id="shed")],
                           "house", (1100, 1100, False)),
+        # round 8: a 25 x 20 house (500 sf) on a ridge at 0, a 15 x 12 shed (180) and a 20 x 20 garage (400) 6 ft
+        # lower, each with spot grades at its own walls: each read on its own ground
+        "ridge, outbuildings lower": (dict(unknown, grade_points=ridge_spots),
+                                      [box(10, 40, 35, 60, 0, 30, id="house"), box(15, 20, 30, 32, -6, 4, id="shed"),
+                                       box(10, 75, 30, 95, -6, 4, id="garage")], "house", (1080, 1080, False)),
+        # round 8: the house 3 ft above a detached shed, no spot grades, the ground not known / sloped
+        "higher house, ground unknown": (unknown, higher, "house", (1100, 1100, False)),
+        "higher house, sloped": (dict(unknown, ground_is_flat=False), higher, "house", (1100, 1100, False)),
     }
     got, want = {}, {}
     for name, (facts, solids, main, (above, at_ground, question)) in cases.items():

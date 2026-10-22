@@ -182,18 +182,38 @@ def _projection(building: dict):
     return ops.unary_union(parts) if parts else Polygon()
 
 
-def _at_ground(building: dict, plan_level: float, points) -> object:
-    """The solid read at the ground (#15 round 7: decided per SOLID, never per group, so no shape's fix breaks
-    another's): one resting on the ground (its bottom at or below the ground under its own footprint: the ground
-    _floating reads from the spot grades at its corners, or, with none, the grade plane) is cut at the higher of the
-    grade plane and its own bottom (a slab above grade on a slope is never cut below itself); one raised off the
-    ground (a balcony) is left out (Polygon()): only from above does it count."""
+def _at_ground(building: dict, buildings: list[dict], plan_level: float, points, grade_known: bool) -> object:
+    """The solid read at the ground, decided per SOLID (#15 rounds 7-8). Resting on the ground: cut at the higher
+    of the grade plane and its own bottom (a slab above grade on a slope is never cut below itself). Raised off it
+    (a balcony): left out (Polygon()), so it counts only from above. Whether it rests: from ITS OWN ground
+    (ground_for: the spot grades at its walls, never another building's) when there is any; else from the grade
+    when the ground is known (flat); else, the ground not known, never from ground data but from the drawing
+    (_raised_by_shape): a solid above the lowest one is not raised for that alone."""
     if not building.get("faces"):
         return Polygon()
     bottom = _bottom(building)
-    ground = _ground_at([p[:2] for f in building["faces"] for p in f["points"]], points) if points else None
-    rests = bottom <= (max(ground) if ground else plan_level) + TOL
+    others = [b for b in buildings if b is not building]
+    ground = ground_for([building], points, others)[0] if points else None
+    if ground:
+        rests = bottom <= max(ground) + TOL
+    elif grade_known:
+        rests = bottom <= plan_level + TOL
+    else:
+        rests = not _raised_by_shape(building, buildings)
     return _section(building, max(plan_level, bottom) + TOL) if rests else Polygon()
+
+
+def _raised_by_shape(building: dict, buildings: list[dict]) -> bool:
+    """With the ground not known, whether the drawing itself shows a solid raised off the ground: it stands over
+    another solid, or it overhangs (nothing under its footprint while a solid it touches rests lower: a balcony)."""
+    plan, bottom = _projection(building), _bottom(building)
+    others = [b for b in buildings if b is not building and b.get("faces")]
+    under = [b for b in others if _projection(b).intersection(plan).area > TOL and _bottom(b) < bottom - TOL]
+    if any(_extent(b)[1] <= bottom + TOL for b in under):
+        return True                      # on top of another solid
+    group = next((g for g in _connected(buildings) if any(b is building for b in g)), [building])
+    lower = any(_bottom(b) < bottom - TOL for b in group if b is not building)
+    return lower and not under
 
 
 def _bottom(building: dict) -> float:
@@ -1064,6 +1084,27 @@ def _ground_at(corners: list, points: list) -> list:
     return [float(pts[int(np.argmin(((pts[:, :2] - (x, y)) ** 2).sum(axis=1))), 2]) for x, y in corners]
 
 
+def _own_points(buildings: list[dict], points: list, others: list = ()) -> list:
+    """The spot grades that are these buildings' ground: a point at one of the `others`' walls (and not at these
+    buildings') is that building's ground, never these (THE filter, for the grade plane, _floating and the cut)."""
+    near = [_projection(b) for b in others if b.get("faces")]
+    if not near or not points:
+        return list(points or [])
+    mine = ops.unary_union([_projection(b) for b in buildings if b.get("faces")])
+    theirs = ops.unary_union(near)
+    return [p for p in points if not (theirs.distance(Point(p[:2])) <= SPOT_REACH
+                                      and mine.distance(Point(p[:2])) > SPOT_REACH)]
+
+
+def ground_for(buildings: list[dict], points: list, others: list = ()) -> tuple:
+    """THE ground model: (the ground under each corner of these buildings' footprint, or None when there is none
+    of their own; their own spot grades). From their own spot grades only (_own_points), by _ground_at. _floating,
+    the ground cut (_at_ground) and the envelope (through _meets_ground) all read it."""
+    corners = [p[:2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]
+    own = _own_points(buildings, points, others)
+    return (_ground_at(corners, own) if own and corners else None), own
+
+
 def _floating(buildings: list[dict], points: list, others: list = ()) -> str | None:
     """Whether the buildings meet the ground the spot grades describe, ONE test whatever the points' positions
     (stress F15): the ground at every corner of their footprint (every face point seen from above), from the
@@ -1077,19 +1118,11 @@ def _floating(buildings: list[dict], points: list, others: list = ()) -> str | N
     corners = [p[:2] for b in buildings for f in b.get("faces") or [] for p in f["points"]]    # never empty
     if not zs or not points or not corners:
         return None
-    near = [_projection(b) for b in others if b.get("faces")]
-    if near:
-        mine = ops.unary_union([_projection(b) for b in buildings if b.get("faces")])
-        theirs = ops.unary_union(near)
-        points = [p for p in points if not (theirs.distance(Point(p[:2])) <= SPOT_REACH
-                                            and mine.distance(Point(p[:2])) > SPOT_REACH)]
-        if not points:                  # every point is another building's ground: none for this one
-            return stop("ground_unclear")
-    if not points:
-        return None
+    ground, points = ground_for(buildings, points, others)
+    if not points:                      # every point is another building's ground: none for this one
+        return stop("ground_unclear")
     pts = np.array([p[:3] for p in points], dtype=float)
     fits = _fits(pts)
-    ground = _ground_at(corners, points)
     bottom, top = min(zs), max(zs)
     gaps = [bottom - g for g in ground]          # above the ground (+) or below it (-) at each corner
     meets = min(gaps) <= TOL and top > max(ground) + TOL
@@ -1223,7 +1256,8 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # building's own base, so the plan is still measured; a grade that contradicts the building (off it, a solid
     # buried under it) still stops the plan, since then even the base can't be trusted.
     why_plan = ground_problem
-    plan_level = grade if (grade is not None and not why_grade) else lo
+    grade_known = grade is not None and not why_grade       # a real ground level, not the buildings' own base
+    plan_level = grade if grade_known else lo
     # stacked floor blocks (each story its own solid, standing on the one below, as Gordium's starting building is
     # drawn) are one building, and its stories are counted from them: read from the shape, never typed
     buildings = _stacks(buildings)
@@ -1331,7 +1365,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
         # empty cut blamed on overhangs
         # each solid on its own (_at_ground): resting on the ground, cut at the higher of the grade plane and its
         # own bottom; raised off it (a balcony), left out: only from above does it count (the overhang question)
-        cut = ops.unary_union([_at_ground(b, plan_level, spots) for b in buildings])
+        cut = ops.unary_union([_at_ground(b, buildings, plan_level, spots, grade_known) for b in buildings])
         out["building_area"] = _decide(
             "building_area", [("covered from above", everything.area, {}), ("at the main grade level", cut.area, {})],
             "the ground area of every building on the lot, porches and decks included",
@@ -1361,7 +1395,7 @@ def _measure(site: dict, facts: dict) -> dict[str, dict]:
     # (§325-18A) while an accessory building may follow other rules (§325-25): measure to it as well
     shapes = [(w, s) for w, s in (("to the building seen from above", footprints[main["id"]]),
                                   ("to its walls at ground level",
-                                   _at_ground(main, plan_level, spots))) if not s.is_empty]
+                                   _at_ground(main, buildings, plan_level, spots, grade_known))) if not s.is_empty]
     shapes += [("to any solid on the Building layer, seen from above", everything)] if len(buildings) > 1 else []
     eaves = ("whether a yard is measured to the wall or to overhangs (eaves, cornices), and whether another solid "
              "is a porch or deck (part of the building, §325-18A) or an accessory building (§325-25), are open "
