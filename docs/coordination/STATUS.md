@@ -66,3 +66,15 @@ The new cloud session (5549908) owns these lanes from here.
 - #18 measurement-2: merges 20e0e89 (term-index with #15 rounds 5-8 ported into #18's coverage/yards; round-24 P2 done; 'flat' branches removed) + fc2cfd8 (rounds 9-10): suite 1531 passed, 7 CI steps; review round 25 running. Not pushed yet. Then carry 74ea32b.
 - For Ben/architects (flagged, not decided): (1) a stray solid with no spot grades now says "place spot grades around it" instead of "under the ground"; (2) an upper floor drawn as a plain separate solid (not Gordium floor blocks) gets #18's upper-floor-or-bay-window question (two readings); (3) once lookups name each street line, should an unnamed line between two named streets be part of the front or asked?
 - Next: #19 (wip abe60a0: round-3 fix 0f2213b + carry) review + suite; #20/#21/#22/#24 catch-ups after #18; #23 carry of #19; demo update.
+
+## 2026-10-22 ~15:30 UTC — cloud coordinator
+PUSHED (each: full suite + 7 CI steps green; review loop clean where code changed):
+- #15 rhino-ui c37738a (arch-fixes-2 landed) · #16 site-lookup 379d258 · #17 term-index 74ea32b (carries)
+- #18 measurement-2 0668da2: merges of term-index (rounds 5-10, arch-fixes-2) ported into #18's coverage/yards/advice; rounds 25-28 (one TOUCH for yards+ground; eaves advice = yard requirement eaves included; "To comply: move it back onto the lot" only where the crossing is the row's only failing fact, else "First: …"); round 28 CLEAN; 1562 passed.
+- #19 start-box-lookup aa18f7c: round 4 CLEAN (round-3 fixes 0f2213b confirmed); merge with arch-fixes-2 (pick split _pick_outcome/pick_effect; lookup via set_street_lines; replaced sample never keeps "Ithaca Rd"; lookup worker via ui.spawn); 1488 passed.
+- #23 context-map 116aa34: #19 carried; round 9 found the fetch's subprocess.run (console on Windows) → ui.spawn; round 10 CLEAN; 1602 passed.
+- #20 answer-keys 9d858ab (carry, 1599 passed).
+- #22 stress-tests: a609f05 was pushed by mistake with 1 failing test (F15's strict xfail now XPASSes: fixed by #15's ground model). Fixed in c3b2038 (plain test); its full suite running; then push. Pushes now go through a guarded helper that refuses unless the suite log says all passed.
+IN PROGRESS: #21 drafting-stage1 2a27101 and #24 r2-hand 3892d20 carries (suites running). demo-dryrun dfac7ab built (rhino-ui, term-index, measurement-2, start-box-lookup+site-lookup, answer-keys, context-map, stress-tests c3b2038; generated files current; full suite running) → demo commit with DEMO.md (2026-10-22), parent = old demo (fast-forward).
+RHINO (local side): RHINO_QUEUE 7 (#23 116aa34), 8 (#15 pass2 at c37738a), plus #19 R-2a box re-run at aa18f7c, plus demo smoke (item 6) at the new demo head before Ben tells cofounders to pull.
+For Ben: see the PR comments on #18, #19, #15 (flagged UX/zoning points, not decided).
