@@ -175,3 +175,7 @@ def test_more_units_on_the_lot_than_in_the_building_is_never_a_pass_and_the_pane
     assert [i["reason"] for i in note if str(i["id"]).startswith("facts.conflict")] == [
         "4 dwelling units on this lot but 3 in the attached building: part of another building may be on this lot, "
         "or one of the counts is off"]
+    # round 6: the row offers the same "Enter …" button for the two counts, not a hint with nothing behind it
+    conflict = next(i for i in note if str(i["id"]).startswith("facts.conflict"))
+    assert conflict["needs"] == ["dwelling_units", "attached_units_in_building"], conflict
+    assert conflict["hint"] == "Enter dwelling units and the units in the whole building", conflict

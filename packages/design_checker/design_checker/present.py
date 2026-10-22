@@ -148,6 +148,10 @@ def _compares(check: str) -> list[ast.Compare]:
     return sorted(out, key=lambda n: (n.lineno, n.col_offset))
 
 
+# The stated facts a "Lot facts disagree" row offers to re-enter (r2 round 6): the two counts that disagree.
+CONFLICT_NEEDS = ("dwelling_units", "attached_units_in_building")
+
+
 def could_settle(rule: dict, values: dict, key: str) -> bool:
     """Would entering an optional stated fact change this rule's result? Only if the rule's outcome differs between the
     least and the most it can be (the most occupants in one unit: 1 to the occupants). Unknown bounds: no."""
@@ -1193,8 +1197,9 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     for k, conflict in enumerate(fact_conflicts(facts)):     # facts that disagree (r2 round 5): said, not hidden
         items.append({"id": f"facts.conflict#{k + 1}", "rule": None, "name": "Lot facts disagree", "group": "site",
                       "status": REVIEW, "mark": MARK[REVIEW], "proposed": "", "required": "", "margin": "", "sign": "",
-                      "zoom": None, "measure": None, "objects": [], "points": None, "hint": "Lot facts…",
-                      "reason": conflict, "needs": [],
+                      "zoom": None, "measure": None, "objects": [], "points": None,
+                      # the same "Enter …" button as a row waiting on these counts, to correct either one
+                      "hint": rhino_logic.enter_words(CONFLICT_NEEDS), "reason": conflict, "needs": list(CONFLICT_NEEDS),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
                                  "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     if left_out:
