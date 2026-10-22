@@ -632,7 +632,7 @@ def test_the_box_has_only_the_approved_rows_with_their_sources():
 def test_the_amber_line_names_what_to_do():
     from design_checker import rhino_logic as logic
     assert logic.uncertain(_box(corner_lot=False)) is None               # answered: no amber line
-    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: pick the front"
+    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: click Change… and pick each lot line on a street"
     assert logic.uncertain(_box(corner_lot=False, zones_found=["R-1b", "R-2a"])) == \
         "This lot is in two zones: pick the zone that applies"
 
@@ -691,7 +691,7 @@ def test_a_corner_lot_is_never_guessed_the_box_asks_and_the_yards_wait(facts):
     street = {r["key"]: r for r in logic.box_rows(unanswered)}["street"]
     assert street["choice"] == ("Corner lot?", ["Not answered", "No: one street", "Yes: two streets"], 0)
     assert logic.uncertain(unanswered) == "Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)"
-    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: pick the front"
+    assert logic.uncertain(_box(corner_lot=True)) == "This lot faces two streets: click Change… and pick each lot line on a street"
     assert logic.uncertain(_box(corner_lot=False)) is None
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     suggested = rhino.split("def suggested_facts(", 1)[1].split("\ndef ", 1)[0]
@@ -1905,3 +1905,60 @@ def test_the_envelope_never_uses_a_grade_the_measuring_refused():
     assert got["ground_is_flat"] is None
     good = _envelope_facts({"buildings": [box(10, 25, 35, 65, 0, 30)]}, {"grade_points": spots})
     assert good["ground_is_flat"] is True and good["grade_elevation"] == pytest.approx(0.0)
+
+
+def test_a_corner_lot_answered_no_never_keeps_both_streets_and_never_reads_its_width_along_both():
+    """Review round 5, P0 (a false pass): on a 40 x 160 ft corner lot the box took both streets' lines; answering
+    Corner lot? No kept them, and a re-pick of the real street kept the whole old set, so the lot read 200 ft wide and
+    passed. Three layers, each pinned: (a) a changed answer drops the street lines and their name, the box and the
+    command line through one helper (logic.corner_answered); (b) "the whole street" only over lines that are one
+    street, never across a corner (logic.one_street); (c) the measuring itself: a lot not answered as a corner whose
+    street lines turn a corner is set aside (needs review, said plainly), never measured along both."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    A, B = [[0, 0], [40, 0]], [[40, 0], [40, 160]]
+    lot = lot_of([(0, 0), (40, 0), (40, 160), (0, 160)])
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True}
+    base.pop("street_line", None)
+
+    def width(street, corner):
+        r = check_site(_plot(box(12, 30, 28, 70, 0, 30), lot_=lot), dict(base, street_line=street, corner_lot=corner))
+        return next(i for i in r["view"]["items"] if i["name"] == "Lot width")
+
+    assert width([A], False)["status"] == "does_not_comply"                       # the lot as it is: 40'-0"
+    # the box, as the architect goes: corner Yes, both streets clicked; then No; then the real street picked again
+    facts, saved = {"corner_lot": True, "street_line": None}, {"street_name": "Ithaca Rd"}
+    facts["street_line"] = logic.street_lines_after_picks(facts["street_line"], [A, B], True)
+    assert facts["street_line"] == [A, B]
+    facts, saved = logic.corner_answered(facts, saved, False)                     # (a)
+    assert "street_line" not in facts and "street_name" not in saved and facts["corner_lot"] is False
+    facts["street_line"] = logic.street_lines_after_pick(facts.get("street_line"), A)
+    assert facts["street_line"] == [A]
+    assert width(facts["street_line"], False)["status"] == "does_not_comply"
+    same, kept = logic.corner_answered({"corner_lot": False, "street_line": [A]}, {"street_name": "x"}, False)
+    assert same["street_line"] == [A] and kept["street_name"] == "x"             # the same answer keeps them
+    unanswered, _ = logic.corner_answered({"corner_lot": True, "street_line": [A, B]}, {}, None)
+    assert "corner_lot" not in unanswered and "street_line" not in unanswered
+    # (b) lines across a corner are two streets: a re-pick keeps only the line clicked; one street's lines (106's
+    # eight, gently curving) all of them
+    assert not logic.one_street([A, B]) and logic.street_lines_after_pick([A, B], A) == [A]
+    from design_checker.check import sample_site
+    lines106 = sample_site()["facts"]["street_line"]
+    assert len(lines106) == 8 and logic.one_street(lines106)
+    assert logic.street_lines_after_pick(lines106, lines106[3]) == [list(map(list, x)) for x in lines106]
+    # (c) the measuring: both streets given on a lot answered No: set aside, needs review, never 200'-0" complies
+    got = width([A, B], False)
+    assert got["status"] != "complies", (got["status"], got.get("proposed"))
+    r = check_site(_plot(box(12, 30, 28, 70, 0, 30), lot_=lot), dict(base, street_line=[A, B], corner_lot=False))
+    assert "turn a corner" in (r["measurements"]["lot_width"].get("reason") or ""), r["measurements"]["lot_width"]
+    yards = [i for i in r["view"]["items"] if i.get("measure") in ("front_yard", "side_yard_smaller", "side_yard_larger",
+                                                                    "rear_yard")]
+    assert yards and all(i["status"] != "complies" for i in yards)
+    # the box and the command line call the one helper
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert rhino.count("logic.corner_answered(") == 2 and "logic.after_corner_answer(" not in rhino
+    assert logic.uncertain({"corner_lot": True}) == "This lot faces two streets: click Change… and pick each lot line on a street"

@@ -7,8 +7,9 @@ own windows by window id after each step (the step writes <temp>/gordium_pass2/r
   the tax map.
 - "side_yard" (1): the house moved toward a side lot line until that yard is 3'-0" short as drawn; the row's
   "To comply" says "whatever the survey shows" and gives the move under every reading, the as-drawn one after it.
-- "apply_move" (1): that side wall pulled back by exactly what it said ("this yard needs … more — e.g. pull the side
-  wall back that far; other yards unchanged"): that row complies and no other row is worse.
+- "apply_move" (1): every part of the house at least what it said from that side lot line ("keep every part of the
+  building at least 12'-0" from the … side lot line as drawn (10'-0" required, …) — now 9'-0" at its closest"): the
+  near side wall pulled in to it; that row complies and no other row is worse.
 - "zoom" (3): Zoom to on that row selects its objects.
 - "button" (2): the row waiting on stated facts (Parking): its "Enter …" button comes right after the reason, on
   screen without scrolling, and its words aren't repeated as text (with the merged measuring the one starting house
@@ -123,7 +124,7 @@ def move_house(g, doc, vector):
 
 def pull_wall(g, doc, out, gap):
     """The house's wall nearest a lot line pulled back `gap` ft along `out` (away from that line), its far side kept:
-    the house scaled along `out` only, anchored at its far side, what "pull the side wall back that far" means.
+    the house scaled along `out` only, anchored at its far side: every part at least the target from that line.
     With out None, the last pull undone."""
     if out is None:
         plane, s = A.pop("pull")
@@ -207,13 +208,14 @@ try:
         A.update(side=side["name"], out=[out.X, out.Y, out.Z], have=have, need=need)
         select(g, now)
         hint = now.get("hint") or ""
-        m = re.fullmatch(r"To comply whatever the survey shows: this yard needs (\S+(?: \d/\d)?\") more "
-                         r"\((\S+(?: \d/\d)?\") as drawn\) — e\.g\. pull the side wall back that far"
-                         r"(?: at its closest point)?; other yards unchanged\.", hint)
+        m = re.fullmatch(r"To comply whatever the survey shows: keep every part of the building at least "
+                         r"(\S+(?: \d/\d)?\") from the \w+ side lot line as drawn \((\S+(?: \d/\d)?\") required, the "
+                         r"lot lines ±2'-0\"\) — now (\S+(?: \d/\d)?\") at its closest\.", hint)
         log["row"] = {"name": now["name"], "status": now["status"], "hint": hint, "reason": now.get("reason")}
-        claim("1 on the tax map: the move under every reading, then the as-drawn one", m is not None and
-              abs(feet(m.group(2)) - 3.0) < 0.02 and feet(m.group(1)) > feet(m.group(2)), log["row"])
-        A["gap"] = feet(m.group(1))
+        claim("1 on the tax map: every part at least the requirement plus the 2'-0\" margin, as drawn; now 3'-0\" short",
+              m is not None and abs(feet(m.group(1)) - feet(m.group(2)) - 2.0) < 0.02 and
+              abs(feet(m.group(2)) - feet(m.group(3)) - 3.0) < 0.02, log["row"])
+        A["gap"] = feet(m.group(1)) - feet(m.group(3))     # that side wall pulled in to the target
         shown = [lab.Text for lab in labels_in(g.STATE["panel_parts"]["detail"])]
         claim("1 the panel shows it", hint in shown, shown[:12])
         capture(doc, "Top", "side_yard")
@@ -287,6 +289,12 @@ try:
         claim("10 a corner lot's street side takes every line clicked, Enter when done",
               len(facts.get("street_line") or []) == 2 and prompts[0].startswith("Click each lot line on a street")
               and "(2 picked); Enter when done" in prompts[-1], log["corner"])
+        options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
+        state = dict(g._box_state(doc, facts, options, saved, "check"), corner_lot=False)   # the box: No
+        after, after_ui = g._apply_box(doc, facts, state, saved)
+        log["corner_no"] = {"street_line": after.get("street_line"), "corner_lot": after.get("corner_lot")}
+        claim("12 answering No in the box drops both streets' lines (picked again: review round 5, P0)",
+              not after.get("street_line") and after.get("corner_lot") is False, log["corner_no"])
     elif step == "grey":
         grey = next(i for i in g.STATE["panel_parts"]["view"]["items"] if i["group"] == "not_covered")
         p = g.STATE["panel_parts"]

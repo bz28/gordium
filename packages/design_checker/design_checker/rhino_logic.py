@@ -301,6 +301,22 @@ def after_corner_answer(facts, was_corner):
     return out
 
 
+def corner_answered(facts, saved_ui, corner):
+    """(facts, saved_ui) with the Corner lot? answer `corner` (None: unanswered), the one helper the start box and
+    the command line both use: a changed answer drops the street lines and their street's name (a corner lot has
+    two streets, any other one: picked again; review round 5, P0: the box kept both streets' lines on a lot answered
+    No, and a 40 ft lot read 200 ft wide)."""
+    was = (facts or {}).get("corner_lot")
+    facts = dict(facts or {}, corner_lot=corner)
+    if corner is None:
+        facts.pop("corner_lot")
+    facts = after_corner_answer(facts, was)
+    saved_ui = dict(saved_ui or {})
+    if "street_line" not in facts:
+        saved_ui.pop("street_name", None)
+    return facts, saved_ui
+
+
 def suggested_facts(jurisdiction, zones, lots, buildings):
     """The start box's prefilled lot facts, in the model's units (the plugin converts them to feet), for the
     architect to confirm. `lots`: the Site layer's closed outlines, each {"id", "area", "bottom" (its lowest
@@ -760,9 +776,41 @@ def street_lines_after_pick(lines, picked, tolerance=0.5):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
     a, b = picked
-    if any((near(a, c) and near(b, d)) or (near(a, d) and near(b, c)) for c, d in lines or []):
+    if any((near(a, c) and near(b, d)) or (near(a, d) and near(b, c)) for c, d in lines or []) and one_street(lines):
         return [list(map(list, line)) for line in lines]
-    return [picked]
+    return [picked]                  # (lines across a corner are two streets: only the one clicked; round 5, P0)
+
+
+STREET_TURN_DEG = 30.0       # one street's lot lines turn less than this from one to the next; more is a corner
+
+
+def one_street(lines, tolerance=0.5):
+    """Whether lot lines are one street: each next to the last (an end shared, within `tolerance` ft) and turning
+    less than STREET_TURN_DEG from it (106's eight curve gently; a corner turns 90°)."""
+    import math
+
+    def near(p, q):
+        return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
+
+    lines = [list(map(tuple, line)) for line in lines or []]
+    for (a, b), (c, d) in zip(lines, lines[1:]):
+        if near(b, c):
+            u, v = (b[0] - a[0], b[1] - a[1]), (d[0] - c[0], d[1] - c[1])
+        elif near(b, d):
+            u, v = (b[0] - a[0], b[1] - a[1]), (c[0] - d[0], c[1] - d[1])
+        elif near(a, c):
+            u, v = (a[0] - b[0], a[1] - b[1]), (d[0] - c[0], d[1] - c[1])
+        elif near(a, d):
+            u, v = (a[0] - b[0], a[1] - b[1]), (c[0] - d[0], c[1] - d[1])
+        else:
+            return False
+        nu, nv = math.hypot(*u), math.hypot(*v)
+        if not nu or not nv:
+            continue
+        cos = max(-1.0, min(1.0, (u[0] * v[0] + u[1] * v[1]) / (nu * nv)))
+        if math.degrees(math.acos(cos)) > STREET_TURN_DEG:
+            return False
+    return True
 
 
 def box_rows(state, flat=None):
@@ -868,7 +916,7 @@ def uncertain(state):
     if state.get("corner_lot") is None:          # never guessed: unanswered, the yards wait for it (§325-19C)
         return "Does this lot face two streets? Answer Corner lot? under " + STREET_LABEL
     if state.get("corner_lot"):
-        return "This lot faces two streets: pick the front"
+        return "This lot faces two streets: click Change… and pick each lot line on a street"
     if len(state.get("zones_found") or []) > 1:
         return "This lot is in two zones: pick the zone that applies"
     return None

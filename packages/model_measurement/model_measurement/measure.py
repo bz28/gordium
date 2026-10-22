@@ -33,6 +33,7 @@ MEASURES = list(load(MEASURES_FILE))
 TOL = 0.01                # ft: two points closer than this are the same point
 SAME = 1e-6               # ft: readings closer than this give the same value
 PARALLEL, PERPENDICULAR = 30, 60   # degrees from the street: clearly a rear line / clearly a side line
+STREET_TURN_DEG = 30.0   # one street's lot lines turn less than this from one to the next; more: a corner
 FLAT = math.cos(math.radians(2.39))   # a roof face flatter than 1/2 inch per foot (a drainage slope) is level
 MAX_UNCLEAR_EDGES = 4     # more lot lines than this of unclear kind: too many readings to list
 STATED = {"use": "text", "stories": "count", "sleeping_rooms": "count", "parking_spaces": "count"}
@@ -116,6 +117,25 @@ class Lot:
             self.street_problem = stop("street_lines_apart")
         elif len(street) == n:
             self.street_problem = stop("all_street")
+        elif facts.get("corner_lot") is not True and self._turn(street) > STREET_TURN_DEG:
+            # street lines that turn a corner are two streets, whatever the lot was answered: never a width along
+            # both (review round 5, P0: a 40 ft corner lot answered No read 200 ft wide and passed)
+            self.street_problem = stop("street_turns_a_corner", turn=round(self._turn(street)))
+
+    def _turn(self, idx) -> float:
+        """The sharpest turn, in degrees, from one street lot line to the next, along the street."""
+        n, s = len(self.edges), set(idx)
+        start = next(i for i in idx if (i - 1) % n not in s) if len(s) < n else idx[0]
+        chain = [(start + k) % n for k in range(len(idx))]
+        most = 0.0
+        for i, j in zip(chain, chain[1:]):
+            (ax, ay), (bx, by) = self.edges[i][0], self.edges[i][-1]
+            (cx, cy), (dx, dy) = self.edges[j][0], self.edges[j][-1]
+            u, v = (bx - ax, by - ay), (dx - cx, dy - cy)
+            nu, nv = math.hypot(*u), math.hypot(*v)
+            if nu and nv:
+                most = max(most, math.degrees(math.acos(max(-1.0, min(1.0, (u[0] * v[0] + u[1] * v[1]) / (nu * nv))))))
+        return most
 
     def _contiguous(self, idx) -> bool:
         n = len(self.edges)

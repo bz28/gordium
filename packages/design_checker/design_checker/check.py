@@ -214,37 +214,6 @@ def _raised_by(rules: list, values: dict) -> dict:
     return out
 
 
-def _at_closest(site: dict | None, points) -> bool:
-    """Whether a yard's wall isn't parallel to the lot line it is measured to, so pulling it back by the figure is
-    said "at its closest point" to stay exact (the coordinator, review round 4): the measured wall point on no wall
-    edge parallel to a lot edge through the lot-line point. Without the geometry, the exact wording (True)."""
-    if not site or not points or len(points) < 2:
-        return True
-    p, w = points[0][:2], points[1][:2]
-
-    def on(q, a, b):
-        ax, ay, bx, by = a[0], a[1], b[0], b[1]
-        L2 = (bx - ax) ** 2 + (by - ay) ** 2
-        t = 0 if L2 == 0 else max(0.0, min(1.0, ((q[0] - ax) * (bx - ax) + (q[1] - ay) * (by - ay)) / L2))
-        return ((q[0] - ax - t * (bx - ax)) ** 2 + (q[1] - ay - t * (by - ay)) ** 2) ** 0.5 < 1e-3
-
-    def unit(a, b):
-        n = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
-        return ((b[0] - a[0]) / n, (b[1] - a[1]) / n) if n else None
-
-    lot = [unit(*e["points"][k:k + 2]) for e in (site.get("lot") or {}).get("edges") or []
-           for k in range(len(e["points"]) - 1) if on(p, *e["points"][k:k + 2])]
-    walls = []
-    for b in site.get("buildings") or []:
-        faces = [f["points"] for f in b.get("faces") or [] if f.get("points")]
-        low = min((q[2] for f in faces for q in f), default=None)
-        for f in faces:
-            if low is not None and all(abs(q[2] - low) < 1e-6 for q in f):          # its footprint
-                ring = [q[:2] for q in f] + [f[0][:2]]
-                walls += [unit(ring[k], ring[k + 1]) for k in range(len(ring) - 1) if on(w, ring[k], ring[k + 1])]
-    return not any(u and v and abs(u[0] * v[1] - u[1] * v[0]) < 0.0087 for u in lot for v in walls)   # 0.5°
-
-
 def confirm_advice(items: list[dict], by_id: dict, measured: dict, allowed: dict, facts: dict,
                    site: dict | None = None) -> None:
     """Every "To comply" is the checker's to confirm. Each piece (each way, each "…if it stays that tall" clause) is
@@ -296,9 +265,6 @@ def confirm_advice(items: list[dict], by_id: dict, measured: dict, allowed: dict
 
         ways = [w for w in advice["ways"] if holds(w)]
         clauses = [c for c in advice.get("clauses") or [] if holds(c)]
-        if advice.get("action"):
-            advice["action"] = dict(advice["action"],
-                                    closest=_at_closest(site, (measured.get(i.get("measure")) or {}).get("points")))
         i["hint"] = present.advice_text(dict(advice, ways=ways, clauses=clauses))
 
 

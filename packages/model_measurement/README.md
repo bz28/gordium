@@ -82,6 +82,8 @@ Every reason the code gives today comes from the table:
   architects)".
 - **The street side:** "the street side isn't given: pick the lot line on the street"; "a street line given
   doesn't match a lot line: pick the street side again"; "the street lot lines given aren't next to each other";
+  "the street lot lines given turn a corner (90° from one to the next): that is two streets, so which yards are
+  front, side and rear isn't settled; answer Corner lot? or pick only the lot line on the street";
   "every lot line is on a street: which yards are front, side and rear is an open question for the architects".
 - **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
   lot yes or no"; "a corner lot: which yards are front, side and rear yards, and which street's frontage is the

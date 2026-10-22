@@ -418,11 +418,11 @@ def _raisers(items: list[dict], values: dict) -> dict:
 
 def _while_raised(item, node, worst, raisers, values, measured, facts):
     """What a yard needs while the building keeps the height another rule's other way allows only with larger yards
-    (the height bonus: "…; 10'-1 3/4" if it stays 36'-6" tall (the building height rule's other way raises this
-    yard)"), from the same reading set, its worst reading, rounded up. As a clause ({"text", "changes", "also"}) the
-    checker shows only when that rule then complies outright, every yard it raises with it (review round 4, G3:
-    confirmed against this yard's raise alone, following it put the other yards in review), or None."""
-    if item.get("measure") is None:
+    (the height bonus: "…; at least 33'-6" if it stays 36'-6" tall (the building height rule's other way raises
+    this yard)"), from the same reading set, its worst reading, rounded up. As a clause ({"target", "height", "src",
+    "changes", "also"}) the checker shows only when that rule then complies outright, every yard it raises with it
+    (review round 4, G3), or None."""
+    if item.get("measure") is None or not isinstance(values.get(node.left.id), (int, float)):
         return None
     more = []
     for c, src in raisers.get(node.left.id) or []:
@@ -433,8 +433,10 @@ def _while_raised(item, node, worst, raisers, values, measured, facts):
     if not more:
         return None
     low, unit, src = min(more, key=lambda x: x[0])
-    return {"text": f"{_gap(low, unit)} if it stays {src['proposed']} tall (the {src['name'].lower()} rule's other "
-                    "way raises this yard)", "changes": {node.left.id: _step(-low, unit)},
+    v = values[node.left.id]
+    target = _up(v - low)                    # the distance it needs, rounded up once
+    return {"target": feet_inches(target), "height": src["proposed"],
+            "src": src["name"].lower(), "changes": {node.left.id: target - v},
             "also": [[src["rule"], None]]}           # the whole height rule: it complies, every raise held
 
 
@@ -445,15 +447,34 @@ def _step(amount: float, unit: str) -> float:
     return math.ceil(amount * k - 1e-9) / k
 
 
-WALLS = {"front_yard": "front", "rear_yard": "rear", "side_yard_smaller": "side", "side_yard_larger": "side"}
+YARD_LINES = {"front_yard": "the front lot line", "rear_yard": "the rear lot line"}
+COMPASS = ("North", "South", "East", "West", "Northeast", "Northwest", "Southeast", "Southwest")
 
 
-def _yard_way(need_text: str, drawn_text: str | None = None) -> str:
-    """A yard's requirement first (the coordinator's wording, review round 4): "this yard needs 4'-11 3/8" more
-    (2'-11 3/8" as drawn)". The drawing action follows the sentence (advice_text): one wall pulled back, the other
-    yards unchanged, the only change the checker can confirm exactly (moving the whole building changes yards it
-    can't re-measure: review round 4, G1, G2)."""
-    return f"this yard needs {need_text} more" + (f" ({drawn_text} as drawn)" if drawn_text else "")
+def _yard_line(name: str, measure: str) -> str:
+    """The lot line a yard is measured from, as an architect says it: "the front lot line", "the west side lot
+    line" (a side yard named by its compass side), else "that side lot line"."""
+    if measure in YARD_LINES:
+        return YARD_LINES[measure]
+    side = name.split(", ", 1)[1] if ", " in name else ""
+    return f"the {side.lower()} side lot line" if side in COMPASS else "that side lot line"
+
+
+def _up(feet: float) -> float:
+    """A distance rounded up to 1/8 in."""
+    return math.ceil(feet * 96 - 1e-6) / 96
+
+
+def _yard_advice(head, name, measure, value, need, required, note=""):
+    """A yard's advice as its requirement, never one wall's move (review round 5, P2: on a stepped front, pulling
+    back the nearest wall left the next one short): "keep every part of the building at least 25'-0" from the front
+    lot line — now 22'-0 7/8" at its closest". Following it puts the building's closest part at the target, exactly
+    what check.confirm_advice simulates. `need`: the exact shortfall (the target is the distance plus it, rounded up
+    once: on a survey the requirement itself)."""
+    target = _up(value + need)
+    return {"head": head, "ways": [{"target": feet_inches(target), "changes": {measure: target - value}}],
+            "yard": {"line": _yard_line(name, measure), "now": feet_inches(value, "down"),
+                     "note": note if feet_inches(target) != required else ""}}
 
 
 def _drawn_advice(hint, node, margin, numbers, values) -> dict | None:
@@ -472,28 +493,36 @@ def _drawn_advice(hint, node, margin, numbers, values) -> dict | None:
         return None
     else:
         change = _step(-margin, numbers[3]) * (1 if sign in ("≥", ">") else -1)
-    if m in WALLS:
-        return {"head": "To comply", "ways": [{"text": _yard_way(_gap(margin, numbers[3])), "changes": {m: change}}],
-                "action": {"wall": WALLS[m]}}
+    if m in YARD_MEASURES and isinstance(values.get(m), (int, float)):
+        required = _evaluate(ast.unparse(node.comparators[0]), values)
+        return _yard_advice("To comply", hint, m, values[m], -margin,
+                            feet_inches(required, "up") if isinstance(required, (int, float)) else "")
     return {"head": "To comply", "ways": [{"text": hint[len("To comply: "):-1], "changes": {m: change}}]}
 
 
 def advice_text(advice: dict | None) -> str | None:
-    """A "To comply" sentence from its advice: "<head>: <way>, or <way>; <clause>[ — e.g. pull the front wall back
-    that far[ at its closest point]; other yards unchanged]." A yard's clause alone (its own figure not enough while
-    the building stays that tall) reads "this yard needs 8'-6" more if it stays 36'-6" tall (…)". None without
-    either."""
+    """A "To comply" sentence from its advice: "<head>: <way>, or <way>; <clause>." A yard's: "<head>: keep every part
+    of the building at least <target> from <line>[ as drawn (<required> required, …)] — now <now> at its closest[;
+    at least <target> if it stays <height> tall (…)]", or, its own figure not enough while the building stays that
+    tall, "<head>: if it stays <height> tall, keep every part of the building at least <target> from <line> (…) —
+    now <now> at its closest". None without either."""
     if not advice or not (advice.get("ways") or advice.get("clauses")):
         return None
     clauses = advice.get("clauses") or []
-    if advice.get("ways"):
+    yard = advice.get("yard")
+    if yard is None:
         body = ", or ".join(w["text"] for w in advice["ways"]) + "".join("; " + c["text"] for c in clauses)
+        return advice["head"] + ": " + body + "."
+    raise_ = "(the {} rule's other way raises this yard)"
+    now = f" — now {yard['now']} at its closest"
+    if advice.get("ways"):
+        body = (f"keep every part of the building at least {advice['ways'][0]['target']} from {yard['line']}"
+                f"{yard['note']}{now}" + "".join(f"; at least {c['target']} if it stays {c['height']} tall "
+                                                 + raise_.format(c["src"]) for c in clauses))
     else:
-        body = "this yard needs " + clauses[0]["text"].replace(" if it stays", " more if it stays", 1)
-    action = advice.get("action")
-    if action:
-        body += (f" — e.g. pull the {action['wall']} wall back that far"
-                 f"{' at its closest point' if action.get('closest') else ''}; other yards unchanged")
+        c = clauses[0]
+        body = (f"if it stays {c['height']} tall, keep every part of the building at least {c['target']} from "
+                f"{yard['line']} {raise_.format(c['src'])}{now}")
     return advice["head"] + ": " + body + "."
 
 
@@ -501,9 +530,9 @@ def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx:
     """What to change so the row complies, from THE reading set (the verdict's own): the shortfall under its worst
     reading, rounded up, so the advised change makes it comply under every reading, never one that leaves it in
     review (the architect's review: "move 2'-11 3/8"" left a tax-map side yard needing review). On a tax-map lot
-    it says so and gives the as-drawn figure too; on a survey, the one number. As advice: {"head", "ways": [{"text",
-    "changes": {measure: signed change}}], "action"} (advice_text says it; check.confirm_advice keeps only what the
-    checker finds makes the row comply and no other row worse)."""
+    it says so and gives the requirement too; on a survey, the one number. As advice: {"head", "ways": [{"text" or
+    "target", "changes": {measure: signed change}}], "yard"} (advice_text says it; check.confirm_advice keeps only
+    what the checker finds makes the row comply and no other row worse)."""
     sign = SIGNS[type(node.ops[0])]
     m = node.left.id
     worst = min(r["margin"] for r in rs)
@@ -529,11 +558,14 @@ def comply_hint(name: str, node, rs: list, values: dict, measured: dict, approx:
             verb = lambda x: f"{'increase' if sign in ('≥', '>') else 'reduce'} it by {amount(x)}"   # noqa: E731
     several = len({round(r["margin"], 9) for r in rs}) > 1
     whatever = "whatever the survey shows" if approx else "under every reading"
-    shown = several and as_drawn and as_drawn > 0 and amount(as_drawn) != amount(need)
     head = "To comply " + whatever if several else "To comply"
-    if m in WALLS and name.split(",")[0].endswith("yard"):
-        return {"head": head, "ways": [{"text": _yard_way(amount(need), amount(as_drawn) if shown else None),
-                                        "changes": {m: change}}], "action": {"wall": WALLS[m]}}
+    if m in YARD_MEASURES and name.split(",")[0].endswith("yard") and isinstance(values.get(m), (int, float)):
+        required = _evaluate(ast.unparse(node.comparators[0]), values)
+        req = feet_inches(required, "up") if isinstance(required, (int, float)) else ""
+        note = (f" as drawn ({req} required, the lot lines ±{feet_inches(TOLERANCE)})" if approx else
+                f" ({req} required, under every reading)") if several and req else ""
+        return _yard_advice(head, name, m, values[m], need, req, note)
+    shown = several and as_drawn and as_drawn > 0 and amount(as_drawn) != amount(need)
     drawn_part = f" ({amount(as_drawn)} as drawn)" if shown else ""
     return {"head": head, "ways": [{"text": verb(need) + drawn_part, "changes": {m: change}}]}
 

@@ -1257,10 +1257,9 @@ def _ft_text(feet):
 
 def _apply_box(doc, facts, state, saved_ui):
     """The facts (what the checker gets) and the box's own choices, from what the box says."""
-    facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],
-                 lot_surveyed=bool(state.get("lot_surveyed")), corner_lot=state.get("corner_lot"))
-    if facts.get("corner_lot") is None:             # unanswered: the checker says the yards need review
-        facts.pop("corner_lot")
+    facts, saved_ui = logic.corner_answered(facts, saved_ui, state.get("corner_lot"))   # a changed answer: the
+    facts = dict(facts, address=state["address"] or None, zone=state["zone"], use=state["use"],  # street picked again
+                 lot_surveyed=bool(state.get("lot_surveyed")))
     if not facts.get("address"):
         facts.pop("address")
     facts.pop("grade_points", None)                 # read (or sampled) from the model at every check
@@ -1520,9 +1519,8 @@ def _change_facts(doc, facts, options):
         if picked:
             facts["main_building"] = picked
         _highlight(doc, facts)
-    was_corner = facts.get("corner_lot")
-    facts["corner_lot"] = _yes_no("Corner lot (two streets meet at it)?", was_corner)
-    facts = logic.after_corner_answer(facts, was_corner)
+    facts, _ = logic.corner_answered(facts, {}, _yes_no("Corner lot (two streets meet at it)?",
+                                                        facts.get("corner_lot")))   # the box's own helper
     _highlight(doc, facts)
     lot = _find(doc, facts.get("lot_id") or "")
     if lot is not None:
