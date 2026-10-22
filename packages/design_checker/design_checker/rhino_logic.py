@@ -1696,7 +1696,7 @@ def suppressed(edited, current_frame_key):
 
 
 # The attributes of an outline in its fingerprint (the plugin's _attrs_print), by name: each one an architect can
-# change on an outline in Rhino 7 and 8 (review of the editable outlines, round 2: a short list missed print width and
+# change on an outline in Rhino 7 or 8, one that Rhino lacks left out by _attrs_print (review of the editable outlines, round 2: a short list missed print width and
 # colour, material, groups). A fixed list, not every property by reflection (round 3): a property one Rhino version
 # adds would make every outline drawn under the last one look edited. Table positions are never fingerprinted (the
 # layer, linetype and material go by their ids, the groups by theirs: _attrs_print): a deleted layer isn't saved, so
@@ -1704,7 +1704,7 @@ def suppressed(edited, current_frame_key):
 FINGERPRINT_ATTRIBUTES = ("Name", "Url", "Mode", "Visible", "Space", "ViewportId", "DisplayOrder", "WireDensity",
                           "ObjectDecoration", "ColorSource", "ObjectColor", "LinetypeSource", "PlotColorSource",
                           "PlotColor", "PlotWeightSource", "PlotWeight", "MaterialSource", "CastsShadows",
-                          "ReceivesShadows")
+                          "ReceivesShadows", "LinetypePatternScale")   # the last: Rhino 8 only (round 4)
 
 
 def attribute_text(value):

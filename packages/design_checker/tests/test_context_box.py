@@ -134,7 +134,8 @@ ATTRIBUTES = {"Name": "footprint-1", "Url": "", "Mode": "Normal", "Visible": "Tr
               "ObjectDecoration": "None", "ColorSource": "ColorFromLayer", "ObjectColor": "-16777216",
               "LinetypeSource": "LinetypeFromLayer", "PlotColorSource": "PlotColorFromLayer", "PlotColor": "-16777216",
               "PlotWeightSource": "PlotWeightFromLayer", "PlotWeight": "0.0", "MaterialSource": "MaterialFromLayer",
-              "CastsShadows": "True", "ReceivesShadows": "True", "layer": "9f1e-buildings", "linetype": "",
+              "CastsShadows": "True", "ReceivesShadows": "True", "LinetypePatternScale": "1.0",
+              "layer": "9f1e-buildings", "linetype": "",
               "material": "", "groups": [], "user": []}
 
 
@@ -194,6 +195,7 @@ class _Attrs:
         self.Name, self.Url, self.Mode, self.Visible, self.DisplayOrder = "footprint-1", "", "Normal", True, 0
         self.LayerIndex, self.LinetypeIndex, self.MaterialIndex = layer_index, -1, -1
         self.ObjectColor, self.PlotWeight, self.groups = _Colour(-16777216, named), plot_weight, groups
+        self.LinetypePatternScale = 1.0          # Rhino 8's per-object linetype scale
         self.strings = {"gordium_context": "state_buildings", "gordium_context_id": "footprint-1"}
 
     @property
@@ -248,6 +250,9 @@ def test_the_attribute_fingerprint_is_stable_in_rhino_and_sees_print_width_and_g
     d = _Attrs(layer_index=2)
     d.LinetypeIndex = 0                                                                 # a dashed linetype
     assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(d, drawn_doc))
+    e = _Attrs(layer_index=2)
+    e.LinetypePatternScale = 2.0                                                        # its linetype scale (Rhino 8)
+    assert logic.kept_on_clear(key, "5d2c-own", "5d2c-own", pts, attrs_print(e, drawn_doc))
     check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
     assert "a copy pasted in place and a footprint given a print width are the architect's" in check  # Rhino proves it
     assert "a saved and reopened file, a layer deleted before it" in check
@@ -955,3 +960,73 @@ def test_context_box_never_prints_a_traceback():
                          text=True, encoding="utf-8", timeout=120)
     p = json.loads(out.stdout.strip().splitlines()[-1])
     assert p["status"] == "error" and p["objects"] == [] and "Traceback" not in out.stdout
+
+
+_NO_ID = "00000000-empty"
+
+
+class _Layer:
+    """A Rhino 8 layer as the Rhino job found it (context_in_rhino.py at c783ee6, review round 4): setting a layer's
+    IsVisible, even to what it was, gives every sublayer the layer's own lock."""
+
+    def __init__(self, table, path, parent):
+        self.table, self.FullPath, self.Id, self.IsDeleted = table, path, "id-" + path, False
+        self.ParentLayerId = parent.Id if parent is not None else _NO_ID
+        self._visible, self.IsLocked = True, False
+
+    @property
+    def Index(self):
+        return self.table.index(self)
+
+    @property
+    def IsVisible(self):
+        return self._visible
+
+    @IsVisible.setter
+    def IsVisible(self, on):
+        self._visible = on
+        for sub in self.table:
+            if sub.FullPath.startswith(self.FullPath + "::"):
+                sub.IsLocked = self.IsLocked
+
+
+class _Layers(list):
+    def FindId(self, layer_id):
+        return next((x for x in self if x.Id == layer_id), None)
+
+
+def _context_doc():
+    layers = _Layers()
+    for path in ("Gordium", logic.CONTEXT, logic.CONTEXT + "::Parcels", logic.CONTEXT + "::Streets",
+                 logic.CONTEXT + "::Buildings", logic.CONTEXT + "::Notes"):
+        parent = next((x for x in layers if path.rsplit("::", 1)[0] == x.FullPath and "::" in path), None)
+        layers.append(_Layer(layers, path, parent))
+    objects = type("Objects", (), {"FindByLayer": lambda self, layer: []})()
+    strings = type("Strings", (), {"Delete": lambda self, section, key: None})()
+    return type("Doc", (), {"Layers": layers, "Objects": objects, "Strings": strings, "RuntimeSerialNumber": DOC})()
+
+
+def _locks(doc):
+    return {x.FullPath.split("::")[-1]: x.IsLocked for x in doc.Layers if logic.on_layer(x.FullPath, logic.CONTEXT)}
+
+
+def test_showing_or_hiding_the_neighbourhood_keeps_its_layers_locked_in_rhino_8():
+    """The Rhino job, review round 4: every context layer came out unlocked after GordiumStart. Showing the layers
+    set the parent Gordium::Context's IsVisible, which in Rhino 8 gives the sublayers the parent's lock (unlocked, so
+    the footprints can be dragged). After the tick off and on, and after a clear, only Parcels, Streets and Notes are
+    locked; the parent and Buildings never."""
+    ns = {"logic": logic, "STATE": {}, "SECTION": "gordium",
+          "System": type("System", (), {"Guid": type("Guid", (), {"Empty": _NO_ID})})}
+    for name in ("_context_layer_indexes", "_lock_context", "_context_visible", "_clear_context"):
+        exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)
+    want = {"Context": False, "Parcels": True, "Streets": True, "Buildings": False, "Notes": True}
+    doc = _context_doc()
+    ns["_lock_context"](doc, True)
+    assert _locks(doc) == want                                   # as draw_context leaves them
+    for on in (True, False, True):                               # draw_context's last step, then the tick off, on
+        ns["_context_visible"](doc, on)
+        assert _locks(doc) == want, on
+    ns["_clear_context"](doc)                                    # the parent "Gordium" put back as it was
+    assert _locks(doc) == want
+    check = (REPO / "apps/rhino_plugin/tests/context_in_rhino.py").read_text(encoding="utf-8")
+    assert '"tick_off_locks"' in check and '"tick_on_locks"' in check                  # Rhino proves it

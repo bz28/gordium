@@ -284,12 +284,18 @@ try:
             bmp.Save(FRAMES + "106_context_%s.png" % name.lower())
     g.show_context(False)
     log["tick_off"] = context_layers(g, doc)
+    log["tick_off_locks"] = {k: v["locked"] for k, v in log["tick_off"].items()}
     g.show_context(True)
     log["tick_on"] = context_layers(g, doc)
-    claim("4 the panel tick hides it and shows it again",
-          all(not v["visible"] for v in log["tick_off"].values()) and all(v["visible"] for v in log["tick_on"].values()),
+    log["tick_on_locks"] = {k: v["locked"] for k, v in log["tick_on"].items()}
+    # review round 4 (the Rhino job): a parent layer's IsVisible gave its sublayers its lock, so all came out unlocked
+    claim("4 the panel tick hides it and shows it again, and only Parcels, Streets and Notes stay locked",
+          all(not v["visible"] for v in log["tick_off"].values()) and all(v["visible"] for v in log["tick_on"].values())
+          and all(locks[k] == g.logic.context_locked(k) for locks in (log["tick_off_locks"], log["tick_on_locks"])
+                  for k in locks),
           {"off": {k: v["visible"] for k, v in log["tick_off"].items()},
-           "on": {k: v["visible"] for k, v in log["tick_on"].items()}})
+           "on": {k: v["visible"] for k, v in log["tick_on"].items()},
+           "off_locks": log["tick_off_locks"], "on_locks": log["tick_on_locks"]})
     path = S + "saved.3dm"
     doc.Export(path)
     f = Rhino.FileIO.File3dm.Read(path)
@@ -308,8 +314,8 @@ try:
           and set(log["saved_sources"]) <= {"", "gordium", "state_parcels", "state_streets", "state_buildings"},
           log["saved_footprints"])
     # review of the editable outlines, round 3: the saved file reopened (Gordium deleted its holding layer, made
-    # before the context layers, so their indexes move down): a clear takes Gordium's untouched outlines, keeps only
-    # the architect's (the dragged, lifted, widened ones and the copy)
+    # before the context layers when Look up held the sample lot, so their indexes move down: asserted, round 4): a
+    # clear takes Gordium's untouched outlines, keeps only the architect's (the dragged, lifted, widened ones, the copy)
     theirs = len([o for o in footprints(g, doc, every=True) if o.Attributes.GetUserString(g.logic.EDITED_KEY)])
     index_before = doc.Layers.FindByFullPath(g.logic.CONTEXT + "::Buildings", -1)
     again = Rhino.RhinoDoc.OpenHeadless(path)
@@ -324,7 +330,8 @@ try:
     finally:
         again.Dispose()
     claim("5 a saved and reopened file, a layer deleted before it: a clear removes Gordium's untouched outlines, "
-          "keeps only the architect's", theirs > 0 and log["reopened"]["gordiums_left"] == 0
+          "keeps only the architect's", theirs > 0 and index_after < index_before     # the shift happened (round 4)
+          and log["reopened"]["gordiums_left"] == 0
           and log["reopened"]["left"] == log["reopened"]["theirs_left"] == theirs, log["reopened"])
     # a second address: Edit site…, 109 Ithaca Rd looked up (recorded); the first neighbourhood must go
     first_frame = (g._context_record(doc) or {}).get("frame")

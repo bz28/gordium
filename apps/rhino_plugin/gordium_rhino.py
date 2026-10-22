@@ -2509,6 +2509,7 @@ def _clear_context(doc, sources=None):
     for k, was_visible, was_locked in parents:
         doc.Layers[k].IsVisible = was_visible
         doc.Layers[k].IsLocked = was_locked
+    _lock_context(doc, True)               # a parent's IsVisible just gave its sublayers its lock (Rhino 8): again
     if sources is None:
         if logic.guides_of(STATE.get("context_guides"), doc.RuntimeSerialNumber):
             STATE.pop("context_guides", None)
@@ -2677,10 +2678,14 @@ def _context_on(doc):
 
 
 def _context_visible(doc, on):
-    """Every context layer on or off (a sublayer hidden in the Layers panel too). Whether there is one."""
+    """Every context layer on or off (a sublayer hidden in the Layers panel too), then locked again: in Rhino 8,
+    setting a parent layer's IsVisible (even to what it was) gives its sublayers the parent's lock, and the parent
+    (Gordium::Context) is unlocked so the footprints can be dragged, so every context layer came out unlocked (found
+    by the Rhino job running context_in_rhino.py at c783ee6, review round 4). Whether there is one."""
     indexes = _context_layer_indexes(doc)
     for i in indexes:
         doc.Layers[i].IsVisible = bool(on)
+    _lock_context(doc, True)               # after any visibility change, never before it
     return bool(indexes)
 
 
