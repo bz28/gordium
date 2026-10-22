@@ -612,7 +612,7 @@ def test_clearing_also_opens_a_locked_or_hidden_parent_layer_and_says_before_wai
     assert body.index("for i in touched:") < body.index("doc.Objects.Delete(")
     assert body.index("doc.Objects.Delete(") < body.index("doc.Layers[i].IsLocked = locked")
     fetch = RHINO[RHINO.index("def _context_payload("):RHINO.index("def draw_context(")]
-    assert fetch.index('say("Fetching the neighbourhood') < fetch.index("subprocess.run(")
+    assert fetch.index('say("Fetching the neighbourhood') < fetch.index("ui.spawn(args, run=True")
 
 
 # ---- review of PR #23 (coordinator's round): one service down must not delete the other layers -------------------

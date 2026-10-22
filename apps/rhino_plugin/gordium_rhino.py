@@ -2649,8 +2649,8 @@ def _context_payload(frame):
         os.path.join(packages, n) for n in sorted(os.listdir(packages)) if os.path.isdir(os.path.join(packages, n))])
     with open(os.path.join(tempfile.gettempdir(), "gordium_worker.log"), "a", encoding="utf-8") as err:
         try:
-            done = subprocess.run(args, cwd=REPO, env=env, stdout=subprocess.PIPE, stderr=err,
-                                  timeout=logic.CONTEXT_LIMIT_S, encoding="utf-8")
+            done = ui.spawn(args, run=True, cwd=REPO, env=env, stdout=subprocess.PIPE, stderr=err,   # no console
+                            timeout=logic.CONTEXT_LIMIT_S, encoding="utf-8")                   # on Windows
         except subprocess.TimeoutExpired:
             return {"status": "timeout", "message": "The neighbourhood took longer than %d s: the lot is drawn "
                     "without it (Show neighbourhood tries again)." % logic.CONTEXT_LIMIT_S}
