@@ -70,6 +70,24 @@ def test_a_building_crossing_the_street_line_does_not_comply_in_front():
     assert front["status"] == present.FAILS and "crosses the street lot line" in front["reason"]
 
 
+def test_a_crossing_building_is_told_only_to_move_back_onto_the_lot_and_the_checker_keeps_it():
+    """PR 18 with the arch-fixes-2 batch (#15): a building partly off the lot fails whatever else, and its one advice
+    is "To comply: move it back onto the lot." Every row of a rule the crossing fails shows that advice and no
+    other (never the yard's own "keep every part … at least" figure, which settle would otherwise work out from the
+    negative margin), and check.confirm_advice keeps it (no measured change can simulate it; a dropped hint would
+    leave the architect with no way out). Both the side line (yard rows) and the street line (front yard)."""
+    for res, rule in ((run(floors(50, 30, 65, 70, 2)), "R-1b.side_yards"),
+                      (run(floors(15, -5, 45, 30, 2)), "R-1b.front_yard")):
+        crossing = [i for i in rows(res, rule) if "crosses" in (i["reason"] or "")]
+        assert crossing, rows(res, rule)
+        for i in crossing:
+            assert i["status"] == present.FAILS
+            # #18 review rounds 26-27: on a yard row moving back isn't enough to meet the yard: its first step only
+            assert i["hint"] in ("First: move it back onto the lot.", "To comply: move it back onto the lot."), i["hint"]
+            assert not i["hint"].startswith("To comply") or "yard" not in i["name"].lower(), i
+        assert not any("_advice" in i for i in res["view"]["items"])      # popped by confirm_advice
+
+
 def test_a_building_wholly_off_the_lot_still_waits():
     """Wholly outside (no part on the lot): it can't be measured against the lot: needs review, as before."""
     res = run([prism(rect(70, 30, 90, 70), 0, 20, "house")])
@@ -682,3 +700,35 @@ def test_no_starting_house_is_drawn_from_geometry_the_measuring_couldnt_work_out
     out = start(path, {**sample["facts"], "address": sample["address"], "grade_is": "finished",
                        "ground_is_flat": True, "grade_elevation": 0.0})
     assert out["floors"] == [] and any("geometry couldn't be worked out" in n for n in out["notes"]), out
+
+
+def test_an_eaves_rows_advice_is_its_yards_requirement_eaves_included_never_move_the_building():
+    """#18 review round 26 (P2): after the merge the eaves rows ("Eaves into side yard") were told "move the
+    building 4'-0" farther from that lot line", which the checker 'confirmed' by changing only that one eaves
+    distance; doing it left the row failing (the far side's eaves came closer). An eaves row's advice is now its yard's
+    requirement for every part, eaves included, the one change check.confirm_advice simulates."""
+    res = run(floors(4, 30, 51, 70, 2))
+    eaves = [i for i in res["view"]["items"] if i["name"].startswith("Eaves into") and i.get("hint")]
+    assert eaves, [(i["name"], i["status"], i.get("hint")) for i in res["view"]["items"]]
+    for i in eaves:
+        assert "move the building" not in i["hint"], i["hint"]
+        if i["hint"].startswith("To comply"):
+            assert "every part of the building, eaves included, at least" in i["hint"] and "lot line" in i["hint"]
+
+
+def test_to_comply_move_back_is_said_only_where_the_crossing_is_the_rows_only_failing_fact():
+    """#18 review round 27 (P2): "To comply: move it back onto the lot." was still shown on crossing rows where
+    moving back is not enough: a 50 ft, 5-story house's height and stories, coverage of a 63 x 80 footprint, a frame
+    shed's 6 ft side distance. It is "To comply" only where the row complies with the crossing set aside; otherwise
+    "First: …", and such a row keeps its own figure (50'-0", never only "partly off the lot")."""
+    tall = run(floors(50, 30, 65, 70, 5))
+    for name in ("Building height", "Stories"):
+        i = next(x for x in tall["view"]["items"] if x["name"] == name)
+        assert i["status"] == present.FAILS and i["hint"] == "First: move it back onto the lot.", (name, i["hint"])
+        assert i["proposed"] != "partly off the lot", (name, i["proposed"])
+    wide = run(floors(-5, 30, 58, 110, 1))
+    cov = next(x for x in wide["view"]["items"] if x["name"] == "Lot coverage")
+    assert cov["hint"] == "First: move it back onto the lot.", cov["hint"]
+    low = run(floors(50, 30, 65, 70, 2))                      # 2 stories, 20 ft: height complies but for crossing
+    h = next(x for x in low["view"]["items"] if x["name"] == "Building height")
+    assert h["hint"] == "To comply: move it back onto the lot." and h["proposed"] == "partly off the lot", h
