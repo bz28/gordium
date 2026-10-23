@@ -252,6 +252,29 @@ def main():
           "commands and events.", lambda: (not live_before and hooked and rows3[0] == "Gordium · " + g3.logic.CHANGED_SINCE,
                                           "Edit hooks before: %s, after Edit site…'s check: %s; status box after an "
                                           "edit: %s." % (live_before, hooked, rows3)))
+    # demo review (#26 with #27): a box that ends in an error (its rollback stopped partway) leaves the model
+    # counted as changed, so the results grey out, never shown as current
+    g3.check_now()
+    real_confirm = g3._confirm
+
+    def broken(*a, **k):
+        g3._changed(None, None)                      # the box changed the model...
+        raise RuntimeError("rollback stopped partway")   # ...then failed
+    g3._confirm = broken
+    try:
+        g3.confirm(doc, g3.current_facts(doc), g3.ask({"cmd": "options", "jurisdiction": g3.JURISDICTION}), "check")
+        raised = False
+    except RuntimeError:
+        raised = True
+    finally:
+        g3._confirm = real_confirm
+    idle_after_wait(g3)
+    rows4 = g3._status_rows(g3.overlay(), g3.stale(g3.overlay()))
+    check("check-15", "A start box that ends in an error leaves the results greyed, never shown as current",
+          "A real Rhino error inside the box.", lambda: (raised and bool(g3.STATE.get("dirty")) and
+                                                        rows4[0] == "Gordium · " + g3.logic.CHANGED_SINCE,
+                                                        "Raised: %s; changed mark: %s; status box: %s." % (
+                                                            raised, bool(g3.STATE.get("dirty")), rows4)))
     out = os.path.join(HERE, "results_check_button.json")
     json.dump(RESULTS, open(out, "w"), indent=1)
     print(json.dumps({"claims": len(RESULTS), "passed": sum(r["offline_ok"] for r in RESULTS)}))
