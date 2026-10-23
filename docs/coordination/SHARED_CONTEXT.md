@@ -113,3 +113,12 @@ scratchpad/full_suite.py (no extra args) runs pytest, then every `python -m ...`
 
 ## 2026-10-21 19:05 — stale .pyc hazard in revert-checks
 Python can keep using a cached .pyc when a file is restored to the same size within the same second, so a revert-check can make the suite run the reverted code. full_suite.py now deletes __pycache__ under packages/ and apps/ and sets PYTHONDONTWRITEBYTECODE=1. In your own revert scripts, clear __pycache__ (or run with PYTHONDONTWRITEBYTECODE=1) after each restore.
+
+## 2026-10-23 — demo rule (Ben agreed)
+Every PR goes into the demo the same day its review loop returns zero confirmed and its full suite is green; don't wait to be asked. How:
+1. Rebuild the demo dry run from the pushed PR heads, in stack order (`--no-ff` merges). Never hand-edit the demo.
+2. Any conflict between PRs is resolved in the dry-run merge, then reviewed: a cold round on the merge, about how the features interact. Note the resolution on both PRs, because the same one is needed when they reach main.
+3. The combined build must pass the full suite and every headless check (coordination headless/).
+4. The demo commit is the dry-run tree plus DEMO.md, with the old demo as a parent, so pulls fast-forward. Update DEMO.md's "What's new" and RHINO_QUEUE with the new demo head.
+5. Cofounders pull only when Ben says, after his Rhino run.
+If Ben rejects a PR, rebuild the demo without it.
