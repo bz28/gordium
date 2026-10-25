@@ -677,7 +677,9 @@ def required_lines(points: list, item: dict, edges: list) -> tuple[list, str | N
     limits = [item["limit_ft"]] if isinstance(item.get("limit_ft"), (int, float)) else (
         sorted(set(lo_hi)) if lo_hi else [])
     lines = [x for x in (required_line(points, limit, edges) for limit in limits) if x]
-    why = None if lines else ("its limit is not a length in feet" if not limits else "the dimension has no length")
+    why = None if lines else ("its limit is not a length in feet" if not limits else
+                              "the minimum is 0 ft (on the lot line)" if all(x <= 0 for x in limits) else
+                              "the dimension has no length")
     return lines, why
 
 
@@ -703,6 +705,7 @@ def required_line(points: list, limit, edges: list) -> list | None:
 
 
 DIM_NEAR_FT = 0.02    # a wall run's "nearest part": within this (1/4") of the yard as measured
+STRAIGHT_FT = 1e-3    # a footprint point this close to the line through its neighbours lies on a straight wall
 BEND_SLACK_FT = 0.5   # at a bend in the lot line in front of the wall: a square dimension at most this much longer
 
 
@@ -722,7 +725,9 @@ def _wall_runs(footprint) -> list:
                 a, b, c = pts[k - 1], pts[k], pts[(k + 1) % n]
                 cross = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0])
                 dot = (b[0] - a[0]) * (c[0] - b[0]) + (b[1] - a[1]) * (c[1] - b[1])
-                return abs(cross) <= 1e-9 * math.dist(a, b) * math.dist(b, c) and dot > 0
+                # off the line from a to c by under STRAIGHT_FT (feet, not an angle: a model's single-precision
+                # points sit 1e-6 ft off a straight wall; review round 4, F1)
+                return abs(cross) / max(math.dist(a, c), 1e-12) <= STRAIGHT_FT and dot > 0
             corners = [k for k in range(n) if not straight(k)]
             for j, k in enumerate(corners):
                 out.append((pts[k], pts[corners[(j + 1) % len(corners)]]))

@@ -271,3 +271,24 @@ def test_the_drawn_start_is_never_more_than_a_quarter_inch_past_the_yard_as_meas
     """Review round 3, F5: within 1/4" (0.02 ft) the drawing can't look like room the label doesn't give."""
     from design_checker.check import DIM_NEAR_FT
     assert DIM_NEAR_FT <= 0.021
+
+
+def test_a_turned_gable_read_in_single_precision_is_still_four_walls():
+    """Review round 4, F1: a model's mesh points are single precision, so a turned gable's mid-wall point sits about
+    1e-6 ft off its wall; an angle test (1e-9) split the wall again. Straightness is judged in feet."""
+    import math
+    import struct
+    from shapely.geometry import Polygon
+    from design_checker.check import _wall_runs
+    f32 = lambda v: struct.unpack("f", struct.pack("f", v))[0]          # noqa: E731
+    a = math.radians(17)
+    pts = [(12, 27), (25, 27), (38, 27), (38, 65), (25, 65), (12, 65)]
+    turned = [(f32(400 + x * math.cos(a) - y * math.sin(a)), f32(300 + x * math.sin(a) + y * math.cos(a)))
+              for x, y in pts]
+    assert len(_wall_runs(Polygon(turned))) == 4
+
+
+def test_a_zero_minimum_says_so_not_that_the_dimension_has_no_length():
+    from design_checker.check import required_lines
+    lines, why = required_lines([[0, 40], [6, 40]], {"limit_ft": 0.0}, RECT["edges"])
+    assert lines == [] and why == "the minimum is 0 ft (on the lot line)"

@@ -1087,9 +1087,10 @@ def test_with_labels_off_a_failing_yards_shortfall_still_shows():
     assert logic.yard_label_shown(False, "does_not_comply") and logic.yard_label_shown(True, "complies")
     assert not logic.yard_label_shown(False, "complies") and not logic.yard_label_shown(False, "needs_review")
     items = [{"points": [[0, 0], [0, 21.17]], "status": "does_not_comply", "mark": "✕", "name": "Rear yard",
-              "proposed": "21'-2\"", "required": "22'-6\"", "measure": "rear_yard", "reason": ""},
+              "proposed": "21'-2\"", "required": "22'-6\"", "measure": "rear_yard", "reason": "", "limit_ft": 22.5},
              {"points": [[0, 0], [12, 0]], "status": "complies", "mark": "✓", "name": "Side yard, West",
-              "proposed": "12'-0\"", "required": "10'-0\"", "measure": "side_yard_smaller", "reason": ""}]
+              "proposed": "12'-0\"", "required": "10'-0\"", "measure": "side_yard_smaller", "reason": "",
+              "limit_ft": 10.0}]
     got = plan({"lot": {"edges": []}, "buildings": []}, {"outline": [], "holes": []}, {"items": items}, {})
     labels = [y["label"] for y in got["yards"]]
     assert "✕ Rear yard 21'-2\", needs 22'-6\"" in labels and "✓ Side yard, West 12'-0\"" in labels
