@@ -544,6 +544,37 @@ def test_the_reason_says_what_to_do_for_each_failed_lookup(status, words):
         assert "or clear it" in logic.LOOKUP_SAYS[status]
 
 
+def test_another_towns_address_is_never_taken_for_the_lots_own():
+    """Round 2 (P2): the gate compared only the street words, so "106 Ithaca Rd, Dryden" was the lot's own."""
+    known = {"known_addresses": [SAMPLE]}
+    assert logic.address_reason(dict(known, address="106 Ithaca Rd, Dryden, NY 13053")) == \
+        "Press Look up to find 106 Ithaca Rd, Dryden, NY 13053 first."
+    assert logic.address_reason(dict(known, address="106 Ithaca Rd, Lansing")) != ""
+    for same in ("106 Ithaca Road", "106 ithaca rd, Ithaca NY 14850", "106 Ithaca Rd, Ithaca, NY, 14850-1234"):
+        assert logic.address_reason(dict(known, address=same)) == "", same
+
+
+def test_while_a_lookup_runs_the_reason_never_says_to_press_look_up():
+    """Round 2 (P2): while the lookup of the address ran, the reason said "Press Look up to find it first"."""
+    site = Site()
+    box = site.box().type_address("96 Ithaca Rd")
+    box._apply()
+    box.saved["_lookup"] = {"looking": "96 Ithaca Rd"}
+    assert logic.address_reason(box.shown()) == ""
+
+
+def test_a_loose_query_typed_back_is_saved_as_found():
+    """Round 2 (P3): after a misspelt "96 Ithica Rd" was found as 96 Ithaca Road, typing the query back and drawing
+    saved the misspelling, not the address found."""
+    site = Site()
+    p = answer("96_ithaca_rd")
+    p["query"] = "96 Ithica Rd"
+    box = site.box().look_up(p)
+    box.type_address("96 Ithica Rd")
+    assert box.draw() == "drawn" and logic.same_address(site.facts["address"], "96 Ithaca Road")
+    assert site.facts["address"] == site.saved["drawn_address"]
+
+
 def test_the_box_turns_draw_off_and_on_as_the_address_is_typed():
     """Ben (2026-10-25): the box's Draw follows the address field as it is typed (off, with its reason, for an
     address not looked up; on again when the lot's own is typed back), not only after a pick; the box opens

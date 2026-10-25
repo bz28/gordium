@@ -14,8 +14,9 @@ in CI; the logic is tested in CI (packages/design_checker/tests/test_re_lookup.p
    check it on 96 …'s lot"; Keep my building: the floors kept, the lot is 96's.
 4. Edit site…, Look up 96 again: no question, nothing in the model changes. Then Edit site… with another address
    typed and not looked up (Ben, 2026-10-25): Draw does nothing and says "Press Look up to find 109 Ithaca Rd, …
-   first."; the model and the file are as they were (never a label saved on 96's lot). Typing 96's address back:
-   Draw checks the model as it is.
+   first."; the model and the file are as they were (never a label saved on 96's lot). Edit site… again on 96's own
+   address: Draw goes through and checks the model as it is (typing an address and then the original back in one
+   box is proven in CI: test_re_lookup.py).
 5. A new file: the sample's lot made the architect's survey (as Use my survey… leaves it) and its starting house
    edited; Look up 96: a new address is a new site (Ben, 2026-10-25), so even Keep my building replaces their lot,
    and both the question ("Your surveyed lot will be replaced by 96 …'s lot.") and the Keep answer ("… (your
@@ -322,7 +323,7 @@ def main():
                                              "strings": differs(saved(g, doc), said_before)})
         own = g.current_facts(doc).get("address")
         said, ran = type_only(g, doc, own)
-        claim("4 typed back to the lot's own address: Draw goes through and checks it as it is",
+        claim("4 the lot's own address (the box opened again on it): Draw goes through and checks it as it is",
               ran and not [t for t in said if "Look up" in t] and objects(doc) == before and
               g.logic.same_address(g.current_facts(doc).get("address"), own), {"said": said, "ran": ran, "own": own})
 

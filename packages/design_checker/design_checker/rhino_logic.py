@@ -2089,15 +2089,37 @@ def known_addresses(saved_ui):
                         pending.get("query")) if a]
 
 
+ITHACA_PLACE = {"ithaca", "14850", "14851", "14852", "14853"}
+
+
+def address_place(address):
+    """The town or ZIP an address names after its first comma, as words (state and country aside), or None when it
+    names none; the City's own name and ZIP codes count as none (the lot is in the City of Ithaca)."""
+    tail = str(address or "").split(",", 1)[1:] if "," in str(address or "") else []
+    words = [w for w in (tail[0] if tail else "").lower().replace(",", " ").replace(".", " ").split()
+             if w not in ("ny", "new", "york", "usa", "us")]
+    words = [w[:5] if w[:5].isdigit() else w for w in words]
+    places = [w for w in words if w not in ITHACA_PLACE]
+    return " ".join(places) or None
+
+
+def same_site_address(a, b):
+    """same_address, and not another town's (the Draw gate, review round 2 of the typed-address rule: "106 Ithaca
+    Rd, Dryden" was taken for the lot's own "106 Ithaca Rd, Ithaca")."""
+    return same_address(a, b) and address_place(a) == address_place(b)
+
+
 def address_reason(state):
     """Why Draw is off because of the address (Ben, 2026-10-25): an address typed that is neither the lot's own nor
     the one last looked up and found must be looked up first, so a new address never ends up as a label on the old
     lot. "" when the address is blank or known (`known_addresses`, in the box's state; absent: no address rule)."""
     address = (state.get("address") or "").strip()
     known = state.get("known_addresses")
-    if not address or known is None or any(same_address(address, k) for k in known):
+    if not address or known is None or any(same_site_address(address, k) for k in known):
         return ""
     look = state.get("lookup") or {}
+    if look.get("looking"):                               # a lookup running: its row says so; nothing to press yet
+        return ""
     status = look.get("status")
     if status in LOOKUP_SAYS and same_address(address, look.get("query")):    # looked up, no lot came back
         if status == "multiple":
@@ -2208,14 +2230,15 @@ BOX_CHOSEN_UI = ("address_source", "zone_source", "_zone_said", "_reconfirm", "_
 # what of the box's state the reset redraws (the rest is the architect's choices in the box): after_reset_state
 RESET_STATE_KEYS = ("has_lot", "lot_missing", "lot_area", "lot_surveyed", "lot_source", "street_name",
                     "street_name_saved", "street_source", "corner_lot", "corner_source", "ground", "ground_fall",
-                    "lookup", "live", "doubts", "checked")
+                    "lookup", "live", "doubts", "checked", "address")
 
 
 def after_reset_state(shown, fresh):
     """The box's state to save at Draw after a reset: the architect's choices as the box showed them (`shown`: the
-    district and its tick, the use, the address, the design buffer, no regrading), the lot, street side, corner
-    and ground as the reset drew them (`fresh`, rebuilt from the model): never the old lot's size, survey or
-    corner answer saved over the new lot (re-lookup review round 1, P0)."""
+    district and its tick, the use, the design buffer, no regrading), the lot, street side, corner and ground as
+    the reset drew them (`fresh`, rebuilt from the model): never the old lot's size, survey or corner answer saved
+    over the new lot (re-lookup review round 1, P0). The address too: apply_reset kept the box's, or the address as
+    found for a loose query typed back (typed-address rule, review round 2)."""
     return dict(shown, **{k: fresh.get(k) for k in RESET_STATE_KEYS})
 
 
@@ -2259,6 +2282,9 @@ def apply_reset(table, session, facts, saved_ui, choice, zones=()):
     # the lot is the new address's now: the address the box opened with is no longer this lot's (typed back, it is
     # a new address, to be looked up: review round 1 of the typed-address rule, P1)
     saved_ui.update(drawn_address=pending.get("address"), house_fingerprint=None, _box_address=pending.get("address"))
+    if (pending.get("address") and same_address(facts.get("address"), pending.get("query"))
+            and not same_address(facts.get("address"), pending.get("address"))):
+        facts["address"] = pending["address"]   # the address as found, never a loose query typed back (round 2)
     if not keep:
         saved_ui["_redrawn_for"] = pending.get("address")     # Draw now draws (the box's button says so)
     return facts, saved_ui, not keep, guide

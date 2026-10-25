@@ -170,7 +170,8 @@ def test_an_unsettled_lot_makes_every_item_measured_from_it_need_review_never_co
 # ---- what can't be filled in: the box keeps working and says why ---------------------------------------------
 
 @pytest.mark.parametrize("name, kw, says", [
-    ("106_ithaca_rd", {"offline": True}, logic.LOOKUP_SAYS["offline"]),
+    ("106_ithaca_rd", {"offline": True}, "Couldn't reach the map services (offline?): Look up again later, or put "
+                                         "back the lot's own address (or clear it)"),
     ("not_found", {}, "No City of Ithaca address found for"),
     ("953_danby_rd_town", {}, "not the City of Ithaca"),
 ])
