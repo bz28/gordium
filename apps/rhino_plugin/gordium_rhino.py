@@ -565,19 +565,21 @@ def _dimension(d, viewport, line, color):
 
 def _required(d, viewport, line, tag, dark):
     """A yard's required line: a clear dashed mid-grey across its dimension, with a small "min 25'-0\"" tag at its
-    end (Rhino check of #29: the faint line barely registered)."""
+    end (Rhino check of #29: the faint line barely registered). Returns the tag's box on screen (None: no tag)."""
     r, g, b = logic.REQUIRED_RGB[1 if dark else 0]
     grey = System.Drawing.Color.FromArgb(r, g, b)
     d.DrawPatternedLine(line.From, line.To, grey, ui.DASHED, 1)
-    if tag:
-        q = viewport.WorldToClient(line.To)
-        d.Draw2dText(tag, grey, rg.Point2d(q.X + 4, q.Y - 6), False, 10)
+    if not tag:
+        return None
+    q = viewport.WorldToClient(line.To)
+    d.Draw2dText(tag, grey, rg.Point2d(q.X + 4, q.Y - 6), False, 10)
+    return (q.X + 4, q.Y - 8, logic.label_width(tag, 10), 16)          # its box on screen
 
 
-def _dim_label(d, viewport, quad, text, color, dark, line, kind):
+def _dim_label(d, viewport, o, quad, text, color, dark, line, kind):
     """A dimension's label in its place (logic.place_dimension): its backing and outline, and its words written
     along the dimension (readable: logic.text_angle), in the plan's own plane; past the line's end, a leader."""
-    plane_z = (getattr(overlay(), "lot_outline", None) or [rg.Point3d(0, 0, 0)])[0].Z
+    plane_z = (getattr(o, "lot_outline", None) or [rg.Point3d(0, 0, 0)])[0].Z   # (o: never overlay() mid-draw)
 
     def model(p):
         ray = viewport.ClientToWorld(rg.Point2d(p[0], p[1]))
@@ -592,11 +594,14 @@ def _dim_label(d, viewport, quad, text, color, dark, line, kind):
     angle = math.radians(logic.text_angle(a, b))
     cx, cy = sum(p[0] for p in quad) / 4, sum(p[1] for p in quad) / 4
     centre, ahead = model((cx, cy)), model((cx + math.cos(angle) * 10, cy + math.sin(angle) * 10))
+    up, below = model((cx, cy - 10)), model((cx, cy + 11))
+    if None in (centre, ahead, up, below):                  # a view the plan's plane can't be found in: no words
+        return
     xaxis = ahead - centre
     plane = rg.Plane(centre, xaxis, rg.Vector3d.CrossProduct(rg.Vector3d.ZAxis, xaxis))
-    if plane.YAxis * (model((cx, cy - 10)) - centre) < 0:     # screen y runs down: keep the words upright
+    if plane.YAxis * (up - centre) < 0:                     # screen y runs down: keep the words upright
         plane = rg.Plane(centre, xaxis, -plane.YAxis)
-    height = centre.DistanceTo(model((cx, cy + 11)))
+    height = centre.DistanceTo(below)
     words = Rhino.Display.Text3d(text, plane, height)
     words.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center
     words.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle
@@ -652,10 +657,6 @@ def draw_screen(o, e):
     o.placed = {}
     footprint = [[(q.X, q.Y) for q in (e.Viewport.WorldToClient(p) for p in ring)]
                  for ring in getattr(o, "footprint", None) or []]
-    away = None
-    if footprint:
-        pts = [p for ring in footprint for p in ring]
-        away = (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
     for k, (line, text, status) in enumerate((getattr(o, "yard_dims", None) or []) if shown else []):
         color = ui.dim_color("complies" if old else status, dark)
         options = (getattr(o, "yard_options", None) or {}).get(k) or [(line, [])]
@@ -667,14 +668,17 @@ def draw_screen(o, e):
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
             width = logic.label_width(text, 11)
         blocks = [logic.rect_quad(box) for box in taken]
-        index, quad, kind = logic.place_dimension(on_screen, width, blocks, footprint[0] if footprint else None, away)
+        _, away = logic.nearest_outline(on_screen[0][1], footprint)     # away from the building it measures from
+        index, quad, kind = logic.place_dimension(on_screen, width, blocks, footprint, away)
         chosen, required = options[index]
-        o.placed[k] = (index, quad, kind)
+        o.placed[k] = (index, quad, kind, chosen, required)   # what is drawn (the in-Rhino checks read it)
         for r, tag in zip(required, ((getattr(o, "yard_tags", None) or {}).get(k) or []) + [None] * len(required)):
-            _required(d, e.Viewport, r, tag, dark)
+            box = _required(d, e.Viewport, r, tag, dark)
+            if box is not None:                       # a "min" tag: no later label covers it (round 6, F7)
+                taken.append(box)
         _dimension(d, e.Viewport, chosen, color)
         if quad is not None:
-            _dim_label(d, e.Viewport, quad, text, color, dark, on_screen[index], kind)
+            _dim_label(d, e.Viewport, o, quad, text, color, dark, on_screen[index], kind)
             xs, ys = [p[0] for p in quad], [p[1] for p in quad]
             taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
     height = getattr(o, "height_dim", None)

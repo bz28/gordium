@@ -862,17 +862,22 @@ def dim_candidates(points: list, measure: str, shape, footprint, edges: list, wo
     # never at the corners themselves; a complying yard's kept off the last twentieth of the wall (room for the
     # neighbouring yard's), a short one where it is shortest, however near the corner that is
     inner = range(1, steps) if worst else range(steps // 20, steps - steps // 20 + 1)
+    # a short yard: where it is shortest, its corner too before any slack (review round 6, F1: a house turned
+    # against its lot is shortest at a corner); then the bend slack
+    ends = range(steps + 1)
+    tries = ([(inner, DIM_NEAR_FT), (ends, DIM_NEAR_FT), (inner, BEND_SLACK_FT), (ends, BEND_SLACK_FT)] if worst
+             else [(inner, BEND_SLACK_FT), (ends, BEND_SLACK_FT)])
     found = []
-    for slack in ((DIM_NEAR_FT, BEND_SLACK_FT) if worst else (BEND_SLACK_FT,)):
-        found = [(k, d) for k, d in ((k, square(k, slack)) for k in inner) if d]
+    for ks, slack in tries:
+        found = [(k, d) for k, d in ((k, square(k, slack)) for k in ks) if d]
         if found:
             break
-    if not found:                                   # a short wall: its own ends too
-        found = [(k, d) for k, d in ((k, square(k, BEND_SLACK_FT)) for k in range(steps + 1)) if d]
     if len(found) > DIM_CANDIDATES:                 # spread evenly along the run, both ways from the best
         spread = max(1, -(-(found[-1][0] - found[0][0]) // (DIM_CANDIDATES - 1)))
         best = min(found, key=lambda kd: abs(kd[0] - middle))[0]
         found = [(k, d) for k, d in found if (k - best) % spread == 0]
+    if worst:                                       # the shortest first, then nearest the middle
+        return [d for k, d in sorted(found, key=lambda kd: (round(math.dist(*kd[1]), 4), abs(kd[0] - middle)))]
     return [d for k, d in sorted(found, key=lambda kd: abs(kd[0] - middle))]
 
 

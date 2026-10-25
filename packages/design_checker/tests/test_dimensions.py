@@ -344,7 +344,9 @@ def test_a_label_sits_on_its_line_aligned_centred_and_outside_the_building():
     assert max(xs) <= 100 - logic.DIM_LABEL_GAP_PX + 1e-9        # beside the line, on the side away from the house
     assert max(ys) - min(ys) == pytest.approx(80) and max(xs) - min(xs) == pytest.approx(logic.DIM_LABEL_H_PX)
     assert (min(ys) + max(ys)) / 2 == pytest.approx(250)         # centred on the line (aligned: its long side along it)
-    assert logic.text_angle(a, b) == pytest.approx(90) and logic.text_angle(b, a) == pytest.approx(90)
+    # an upright line reads bottom to top, from the right, whichever way it was given (review round 6, F4)
+    assert logic.text_angle(a, b) == pytest.approx(-90) and logic.text_angle(b, a) == pytest.approx(-90)
+    assert logic.text_angle((0, 0), (10, 0)) == pytest.approx(0) and logic.text_angle((10, 0), (0, 0)) == pytest.approx(0)
 
 
 def test_a_dimension_slides_along_its_wall_to_a_clear_spot_else_its_label_goes_past_its_end_with_a_leader():
@@ -397,3 +399,36 @@ def test_each_required_line_has_its_min_tag():
     assert tags["Front yard"] == ["min 25'-0\""] and tags["Side yard,"] == ["min 10'-0\""] * 1
     for y in r["plan"]["yards"]:
         assert len(y["required_tags"]) == len(y["required_lines"]) == len(y["candidates"][0]["required_lines"])
+
+
+
+def test_a_house_turned_against_its_lot_is_dimensioned_at_its_shortest_point_never_longer():
+    """Review round 6, F1: a 40 ft wall turned 10° to the street is shortest at its corner; the corner was skipped
+    and the first position offered was about 6" longer than the label. A short yard's every position is within
+    1/4" of the yard as measured, the shortest first."""
+    import math
+    from shapely.geometry import Point, Polygon
+    from design_checker.check import DIM_NEAR_FT, dim_candidates
+    from model_measurement.measure import Lot
+    t = math.radians(10)
+    corner = (5.0, 20.0)
+    house = Polygon([corner, (corner[0] + 40 * math.cos(t), corner[1] + 40 * math.sin(t)),
+                     (corner[0] + 40 * math.cos(t) - 20 * math.sin(t), corner[1] + 40 * math.sin(t) + 20 * math.cos(t)),
+                     (corner[0] - 20 * math.sin(t), corner[1] + 20 * math.cos(t))])
+    measured = min(house.exterior.distance(Point(x, 0)) for x in range(0, 51))
+    found = dim_candidates([[5, 0], list(corner)], "front_yard", Lot(_plot(box(12, 27, 38, 65)), FACTS), house,
+                           RECT["edges"], worst=True)
+    assert found and all(math.dist(*c) <= 20 + DIM_NEAR_FT + 1e-6 for c in found), [math.dist(*c) for c in found]
+    assert math.dist(*found[0]) == pytest.approx(min(math.dist(*c) for c in found)) and measured <= 20 + 1e-6
+
+
+def test_with_two_buildings_a_label_never_sits_inside_either_and_turns_away_from_its_own():
+    """Review round 6, F2: only the first building's outline was checked, and the label's side was taken from all
+    buildings' middle."""
+    house = logic.rect_quad((200, 200, 200, 150))
+    garage = logic.rect_quad((130, 200, 40, 60))                 # just beside the dimension, on its outer side
+    owner, middle = logic.nearest_outline((200, 270), [garage, house])
+    assert owner == house and middle == (300, 275)
+    cands = [((120, 270), (200, 270))]                          # a west yard: from the house out to the lot line
+    i, q, kind = logic.place_dimension(cands, 60, [], [house, garage], middle)
+    assert q is not None and not logic.shapes_hit(q, garage) and not logic.shapes_hit(q, house)

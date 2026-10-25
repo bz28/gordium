@@ -556,14 +556,33 @@ def label_at_end(a, b, w, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
 
 
 def text_angle(a, b):
-    """The angle (degrees) a label along a to b is written at, kept readable: within (-90, 90]."""
+    """The angle (degrees, screen: y runs down) a label along a to b is written at, kept readable: within
+    [-90, 90)."""
     import math
     t = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
-    while t > 90:
-        t -= 180
-    while t <= -90:
+    while t >= 90:                                  # within [-90, 90): an upright line reads bottom to top, from
+        t -= 180                                    # the right (drafting's convention; review round 6, F4)
+    while t < -90:
         t += 180
     return t
+
+
+def nearest_outline(point, outlines):
+    """Of the buildings' outlines on screen, the one nearest `point` (a dimension's building end) and its middle:
+    the label goes on the side away from THAT building (review round 6, F2: two buildings)."""
+    def gap(poly):
+        return min(_point_segment(point, poly[k - 1], poly[k]) for k in range(len(poly)))
+    if not outlines:
+        return None, None
+    best = min(outlines, key=gap)
+    return best, (sum(p[0] for p in best) / len(best), sum(p[1] for p in best) / len(best))
+
+
+def _point_segment(p, a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    n = dx * dx + dy * dy
+    t = 0.0 if n <= 1e-12 else max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / n))
+    return ((p[0] - a[0] - t * dx) ** 2 + (p[1] - a[1] - t * dy) ** 2) ** 0.5
 
 
 def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
@@ -571,12 +590,15 @@ def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_L
     | "end" | "none"). `candidates` are the positions check.plan offers along the wall run, best first, each
     (lot end, building end) on screen; `w` the label's width (None: no label shown, only the line placed);
     `obstacles` the screen polygons nothing may cover (the status box, the notice, the lot edges' length labels,
-    the labels placed before); `footprint` the building's outline on screen (a label never sits inside it).
+    the labels placed before); `footprint` the buildings' outlines on screen (one outline, or a list of them: a
+    label never sits inside any).
     The first position whose line and label (on the line) are clear; else the first whose line is clear with its
     label past its outer end (a leader); else the best position, its label past its end."""
+    houses = [] if not footprint else ([footprint] if isinstance(footprint[0][0], (int, float)) else footprint)
+
     def clear(shape, solid=True):
         return not any(shapes_hit(shape, o) for o in obstacles) and \
-            not (solid and footprint and shapes_hit(shape, footprint))
+            not (solid and any(shapes_hit(shape, f) for f in houses))
 
     def line_box(a, b):                            # the line itself, 2 px wide (it starts at the wall: no footprint)
         (ux, uy), _ = _along(a, b)

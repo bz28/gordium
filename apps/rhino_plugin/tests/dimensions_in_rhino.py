@@ -5,7 +5,7 @@ Rhino can show is what the conduit draws in each view. A fresh feet document, Go
 Rd), Show on-screen labels on, then the house moved 5 ft to the left (seen from the street): the left side yard
 fails. What the screen draws is recorded by wrapping the plugin's own _dimension (each drawn dimension) while each
 view redraws.
-1. Top: one dimension per measured yard, each with its faint required line (two where the limit is read two
+1. Top: one dimension per measured yard, each drawn with its dashed required line (two where the limit is read two
    ways), no two starting at the same point; the left side yard's red; its required line 10'-0" from the lot line;
    each yard's dimension square to the lot-line piece it ends on (within 0.1°).
    A complying yard's dimension neutral grey; every label shown clear of the status box, the house and the other
@@ -105,9 +105,12 @@ try:
     log["top"] = [(str(a), str(b), c) for a, b, c in calls]
     claim("1 Top: one dimension per measured yard", len(calls) == len(o.yard_dims) == len(yards) >= 4,
           {"drawn": len(calls), "dims": len(o.yard_dims), "yards": len(yards)})
-    claim("1 every yard dimension has its faint required line (two where the limit is read two ways)",
-          len(o.yard_required) >= len(o.yard_dims), {"required": len(o.yard_required), "dims": len(o.yard_dims)})
-    starts = [(round(line.To.X, 4), round(line.To.Y, 4)) for line, _, _ in o.yard_dims]
+    # what is drawn: the position each dimension took (o.placed: index, label, kind, the line, its required lines)
+    drawn_lines = {k: placed[3] for k, placed in o.placed.items()}
+    claim("1 every yard dimension drawn has its dashed required line (two where the limit is read two ways)",
+          len(o.placed) == len(o.yard_dims) and all(placed[4] for placed in o.placed.values()),
+          {k: len(placed[4]) for k, placed in o.placed.items()})
+    starts = [(round(line.To.X, 4), round(line.To.Y, 4)) for line in drawn_lines.values()]
     claim("1 no two yard dimensions start at the same point", len(set(starts)) == len(starts), starts)
     red = g.ui.dim_color("does_not_comply", g.ui.viewport_dark()).ToArgb()
     claim("1 the failing side yard's dimension is red", any(c == red for _, _, c in calls), log["top"])
@@ -118,9 +121,9 @@ try:
     vp = top.ActiveViewport
     status = g.logic.rect_quad(g.logic.status_box(vp.Bounds.Width, g._status_rows(o, False)))
     house = [[(q.X, q.Y) for q in (vp.WorldToClient(p) for p in ring)] for ring in o.footprint]
-    labels = [(k, quad) for k, (_, quad, _) in sorted(o.placed.items()) if quad is not None]
+    labels = [(k, placed[1]) for k, placed in sorted(o.placed.items()) if placed[1] is not None]
     hits = [(k, j) for k, q in labels for j, r in labels if k < j and g.logic.shapes_hit(q, r)]
-    log["placed"] = {k: (i, [tuple(round(v) for v in p) for p in (q or [])], kind) for k, (i, q, kind) in o.placed.items()}
+    log["placed"] = {k: (pl[0], [tuple(round(v) for v in p) for p in (pl[1] or [])], pl[2]) for k, pl in o.placed.items()}
     claim("1 every label shown sits on screen clear of the status box, the house and the other labels",
           len(labels) == len(o.yard_dims) and not hits and
           not any(g.logic.shapes_hit(q, status) or (house and g.logic.shapes_hit(q, house[0])) for _, q in labels),
@@ -133,15 +136,16 @@ try:
         t = max(0.0, min(1.0, ((p[0] - ax) * (bx - ax) + (p[1] - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2)))
         return math.dist(p, (ax + t * (bx - ax), ay + t * (by - ay)))
     ft = lambda pt: (pt.X / k, pt.Y / k)                 # noqa: E731
-    wline = next(line for line, text, _ in o.yard_dims if "Side yard, Southwest" in text)
-    req = next(line for line, st in o.yard_required if st == "does_not_comply")
+    west = next(k for k, (_, text, _) in enumerate(o.yard_dims) if "Side yard, Southwest" in text)
+    wline, req = o.placed[west][3], o.placed[west][4][0]
     mid = ft((req.From + req.To) / 2)
     left = min(edges, key=lambda e: min(to_edge(ft(wline.From), e), to_edge(ft(wline.To), e)))   # its lot line
     log["required_from_line_ft"] = round(to_edge(mid, left), 3)
     claim("1 the side yard's required line is 10'-0\" from its lot line", abs(to_edge(mid, left) - 10) <= 0.05,
           log["required_from_line_ft"])
     turns = []
-    for line, text, _ in o.yard_dims:
+    for k, (_, text, _) in enumerate(o.yard_dims):
+        line = o.placed[k][3]
         a, b = ft(line.From), ft(line.To)              # its lot end, then its building end
         e = min(edges, key=lambda e: to_edge(a, e))     # the lot-line piece its lot end lies on
         u = (b[0] - a[0], b[1] - a[1])
