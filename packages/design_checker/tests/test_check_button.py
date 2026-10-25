@@ -187,3 +187,19 @@ def test_no_command_text_still_promises_live_re_checking():
         text = (REPO / path).read_text(encoding="utf-8")
         assert "live re-checking" not in text and "turn on live mode" not in text and "stop live mode" not in text, path
         assert "Live checking is on" not in text, path
+
+
+def test_the_rhino_check_runs_its_idle_steps_across_real_idle():
+    """The Rhino job at ea88c18 (docs/evidence/pr-27/rhino-ea88c18/): Rhino never raises its Idle event while a script
+    runs, so check_button_in_rhino.py's wait (a loop on RhinoApp.Wait() inside the script) never let the plugin's idle
+    handler grey the panel or check by itself, and claim 2 failed on a correct plugin. Now the script only starts the
+    run: each step runs from a timer once no command is running, steps 2 and 4 only after Rhino's own Idle event has
+    been seen 3 s past the edit, and a wait that never sees it fails (never hangs)."""
+    script = (REPO / "apps/rhino_plugin/tests/check_button_in_rhino.py").read_text(encoding="utf-8")
+    assert "RhinoApp.Wait()" not in script.split('"""', 2)[2]                 # (the docstring says why)
+    assert "Rhino.RhinoApp.Idle += idle_handler" in script and "ef.UITimer()" in script
+    tick = body(script, "def tick(", "\ndef ")
+    assert "Command.InCommand()" in tick and "idle_enough()" in tick and "PHASE_LIMIT_S" in tick
+    enough = body(script, "def idle_enough(", "\ndef ")
+    assert 'run["idle_at"]' in enough and "IDLE_WAIT_S" in enough
+    assert (REPO / "docs/evidence/pr-27/rhino-ea88c18/phased_run_claims.json").exists()
