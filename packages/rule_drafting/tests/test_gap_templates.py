@@ -353,3 +353,41 @@ def test_a_gap_stays_when_the_kept_rules_dont_cover_every_use_the_failed_templat
     narrow = FIRST | {"applies_when": 'use == "one_family_detached"'}
     got = judge(inputs, "chart-p3-maximum_lot_coverage_by_buildings", [PLAIN, narrow, SECOND, THIRD])
     assert [g["rule"] for g in got["unresolved"] if g["rule"].startswith("R-2c.")] == ["R-2c.max_coverage"]
+
+
+
+def _recorded(inputs, uid):
+    import json
+    return json.loads(cli.last_recorded_attempts(inputs, uid)[-1]["answer"])
+
+
+def test_the_height_bonus_drafted_in_parts_is_refused_and_one_relaxing_rule_is_kept(inputs):
+    """Stage 1's §325-16C answer drafted the bonus as parts ("when taller than the chart's height: this yard is
+    larger", "the extra feet at most 10%"): the chart rule still failed a 37 ft house with every yard enlarged.
+    The parts that limit the measure above the chart's limit are refused; the stories part (a different measure)
+    stays; the one relaxing rule is kept."""
+    old = _recorded(inputs, "325-16C")
+    parts = [x for x in old["templates"] if drafter.ABOVE_SLOT.search(x.get("applies_when") or "")]
+    assert parts
+    refused = {x["id_suffix"] for x in parts if drafter.exception_in_parts(x)}
+    assert {"extra_height_limit", "extra_height_front_yard", "extra_height_side_yards", "extra_height_rear_yard"} <= refused
+    assert "extra_height_stories" not in refused
+    assert drafter.exception_in_parts(bonus()) == []
+
+
+def test_an_always_on_flag_restating_a_rule_of_the_same_answer_is_refused(inputs):
+    """Stage 1's §325-18B answer: the projection rule, and an always-on flag quoting the same sentence (every design
+    with eaves needed review)."""
+    old = _recorded(inputs, "325-18B")
+    flag = next(x for x in old["templates"] if x["kind"] == "flag")
+    assert drafter.restating_flag(flag, old["templates"])
+    assert drafter.restating_flag(flag | {"applies_when": "accessory_buildings > 0"}, old["templates"]) == []
+    assert drafter.restating_flag(flag, [flag]) == []          # alone, it is the only answer to the sentence
+
+
+def test_the_guards_refuse_the_recorded_stage1_answers_in_check_answer(inputs):
+    """Judged by check_answer, as replay judges them: stage 1's parts and its always-on flag are refused."""
+    bonus_parts = judge(inputs, "325-16C", _recorded(inputs, "325-16C")["templates"], cli.drafted_rules(inputs))
+    assert any("relaxes it" in p for p in bonus_parts["problems"])
+    eaves = judge(inputs, "325-18B", _recorded(inputs, "325-18B")["templates"])
+    assert any("makes every design need review" in p for p in eaves["problems"])

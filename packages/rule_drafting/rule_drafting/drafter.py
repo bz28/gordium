@@ -893,6 +893,39 @@ def all_or_none(answer: dict, unit: dict, out: dict) -> None:
         out["rules"] = {d: rs for d, rs in out["rules"].items() if rs}
 
 
+ABOVE_SLOT = re.compile(r"\b([a-z_][a-z0-9_]*)\s*>=?\s*\{([a-z0-9_]+)\}")
+
+
+def exception_in_parts(template: dict) -> list[str]:
+    """An exception that allows more than a chart limit, drafted as separate parts ("when building_height >
+    {height}: building_height - {height} <= 0.1 * {height}", "when taller: front_yard >= ..."), leaves the chart rule
+    failing what the exception allows (a 37 ft house with every yard enlarged): it must be one rule that relaxes the
+    chart rule. A requirement the exception adds on top of a different measure (stories) is fine as its own rule."""
+    if (template.get("relaxes") or "").strip() or template["kind"] != "rule":
+        return []
+    for measure, slot in ABOVE_SLOT.findall(template.get("applies_when") or ""):
+        if re.search(rf"\b{re.escape(measure)}\b", template.get("check") or ""):
+            return [f"it applies above the chart's {{{slot}}} and limits {measure} there: an exception that allows more "
+                    f"than a chart rule is one rule that relaxes it (relaxes: \"{slot}\"), with every condition of the "
+                    "exception in applies_when and the most it allows in check"]
+    return []
+
+
+def restating_flag(template: dict, templates: list[dict]) -> list[str]:
+    """A flag with no condition that quotes only what a rule of the same answer checks (§325-18B: "the space in any
+    required yard shall be open ... except for ... eaves ...", drafted as the projection rule and again as an
+    always-on flag) sends every design to review and decides nothing the rule doesn't."""
+    if template["kind"] != "flag" or (template.get("applies_when") or "").strip():
+        return []
+    flat = lambda t: " ".join(str(t).split())       # noqa: E731
+    mine = {flat(q.get("text")) for q in template.get("quotes") or []}
+    ruled = {flat(q.get("text")) for t in templates if t is not template and t["kind"] == "rule" for q in t.get("quotes") or []}
+    if mine and mine <= ruled:
+        return ["a flag with no condition that quotes only what a rule of this answer checks makes every design need "
+                "review: leave it out, or give it the condition under which a person must judge"]
+    return []
+
+
 def link_relaxes(rule: dict, template: dict, column: str | None, unit: dict, drafted: dict) -> tuple[dict | None, str | None]:
     """Link an exception to the chart rule it widens (`relaxes`, rule_format README): the one rule of this district's
     drafted rulebook, from another unit, that cites this district's cell of the named slot's row. None found (the
@@ -1044,6 +1077,8 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
         p += quote_problems + (_footnote_problems(t, sources, notes) if not quote_problems else [])
         binding_problems, valid = _binding_items(t, notes, unit.get("piece"))
         p += binding_problems
+        if unit.get("piece"):
+            p += exception_in_parts(t) + restating_flag(t, answer["templates"])
         if p:
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
             continue
