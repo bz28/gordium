@@ -974,9 +974,11 @@ class _Layer:
       out unlocked (grade_lock_probe.json at e997f0e, no Gordium code);
     - a sublayer of a locked layer stays locked whatever IsLocked is set to, and setting it records no own lock (the
       probe at e631aae: the old redraw set IsLocked, and every context layer's GetPersistentLocking read off);
-    - SetPersistentLocking records a sublayer's own lock only while a layer above it is locked (the probe at e997f0e:
-      set while its parent is unlocked it records nothing; first_draw_locked.json: set under a locked "Gordium", it
-      is what each layer comes back as when "Gordium" is unlocked).
+    - SetPersistentLocking under a locked parent records a sublayer's own lock: what it comes back as when the parent
+      is unlocked (first_draw_locked.json at e997f0e). Set while the parent is unlocked, then IsLocked set, no own
+      lock is left (grade_lock_probe.py's second case); whether SetPersistentLocking alone records nothing or the
+      IsLocked after it cleared it, that probe can't tell (lock_probe_in_rhino.py case 3 asks): the fake takes
+      "records nothing", and Gordium never calls it with the parent unlocked.
     Whether locking a parent also clears a sublayer's recorded own lock is not known (both fit the probes): with
     RESETS, it does, and every pin below holds either way (the rhino_model fixture)."""
 
