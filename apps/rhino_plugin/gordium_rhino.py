@@ -466,6 +466,8 @@ def draw_scene(o, e):
     d = e.Display
     dark = ui.viewport_dark()
     old = stale(o)
+    # Gordium's lines: over everything in plan, depth-tested (hidden behind solids) in every other view
+    on_top = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
         if isinstance(g, rg.Mesh):
             d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
@@ -479,10 +481,14 @@ def draw_scene(o, e):
         # elevations (the architect's review, 2026-10-21)
         bottom, top = getattr(o, "envelope_lines", None) or (None, None)
         if bottom is not None:
+            _on_top(d, on_top)
             d.DrawPolyline(bottom, BLUE, 1)
             d.DrawPatternedPolyline(top, BLUE, ui.DASHED, 2, False)
+            _on_top(d, False)
+    _on_top(d, on_top)
     for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
         d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
+    _on_top(d, False)
     if not old:                              # after the envelope, so its blue never tints them (F5)
         for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
             name = logic.highlight(status)
@@ -491,9 +497,12 @@ def draw_scene(o, e):
             d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
     for pt in getattr(o, "grade_points", None) or []:           # spot grades
         d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
+    _on_top(d, on_top)
     if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
         pts = o.lot_outline
         d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
+    if not on_top:                                   # the dimensions, in the model: hidden behind the solids
+        _scene_dims(o, e, d, dark, old)
     context = STATE.get("context_guides") or {}
     if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
             and (STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True):
@@ -502,6 +511,7 @@ def draw_scene(o, e):
     guide = STATE.get("lookup_guide")
     if guide is not None and getattr(o, "confirm", None) is not None:    # only while the start box is open
         d.DrawPatternedPolyline(guide, ui.status_color("needs_review", ui.viewport_dark()), ui.DASHED, 2, True)
+    _on_top(d, False)                                # depth testing back as Rhino set it, for what follows
     if o.confirm is not None:
         lot, lines, main = o.confirm
         if lot is not None:
@@ -512,6 +522,49 @@ def draw_scene(o, e):
             d.DrawBrepWires(main, BLUE, 3)
         elif isinstance(main, rg.Mesh):
             d.DrawMeshWires(main, BLUE, 3)
+
+
+def _on_top(d, on):
+    """Draw what follows over everything (on) or depth-tested as Rhino draws the model (off: the default, and
+    always where a drawing step ends)."""
+    d.EnableDepthTesting(not on)
+
+
+def _zoomed_in(o, viewport):
+    """Whether the lot is at working zoom on screen (logic.labels_shown): judged from the lot's edges, which a lot
+    with arcs has too, else its outline (review round 3, F5)."""
+    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]
+    return logic.labels_shown(_screen_size(viewport, lot_points or getattr(o, "lot_outline", None)))
+
+
+def _model_dimension(d, doc, line, color):
+    """A dimension drawn in the model (depth-tested): its line and its ticks (logic.model_ticks, 1 ft long)."""
+    d.DrawLine(line, color, 2)
+    a, b = line.From, line.To
+    for p, q in logic.model_ticks((a.X, a.Y, a.Z), (b.X, b.Y, b.Z), _model_length(doc, 1.0)):
+        d.DrawLine(rg.Line(rg.Point3d(*p), rg.Point3d(*q)), color, 2)
+
+
+def _scene_dims(o, e, d, dark, old):
+    """The dimensions in a view that isn't plan (perspective, elevations), in the model so that the solids in
+    front of them hide them: each yard's with its faint required line (not in an elevation, where they would lie
+    on the ground line), and in an elevation the height's with its faint limit. Their words stay on screen
+    (draw_screen). Nothing zoomed out to the neighbourhood."""
+    zoomed_in = _zoomed_in(o, e.Viewport)
+    elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+    if logic.dims_shown(zoomed_in, elevation):
+        for line, status in getattr(o, "yard_required", None) or []:
+            d.DrawLine(line, ui.faint(ui.status_color("complies" if old else status, dark)), 1)
+        for line, _, status in getattr(o, "yard_dims", None) or []:
+            _model_dimension(d, e.RhinoDoc, line, ui.status_color("complies" if old else status, dark))
+    height = getattr(o, "height_dim", None)
+    if height is not None and elevation and zoomed_in:
+        line, _, status, limit = height
+        _model_dimension(d, e.RhinoDoc, line, ui.status_color("complies" if old else status, dark))
+        if limit is not None:                        # the limit, faint, across it (seen in Front and Right alike)
+            k = _model_length(e.RhinoDoc, 1.5)
+            d.DrawLine(rg.Line(limit + rg.Vector3d(-k, k, 0), limit + rg.Vector3d(k, -k, 0)),
+                       ui.faint(ui.status_color("complies" if old else status, dark)), 1)
 
 
 def _model_on_screen(o, viewport):
@@ -584,8 +637,7 @@ def draw_screen(o, e):
     obstacles = on_screen if plan else []
     # zoomed out to the neighbourhood (the lot under LABEL_MIN_LOT_PX on screen), the lot's plan labels give way
     # (judged from the lot's edges, which a lot with arcs has too, else its outline: review round 3, F5)
-    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]
-    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, lot_points or getattr(o, "lot_outline", None)))
+    zoomed_in = _zoomed_in(o, e.Viewport)
     north = getattr(o, "north", None)
     if plan and north is not None:           # a small north arrow by the lot, true north (the plan may be turned);
         taken.append(ui.north_arrow(d, e.Viewport, north[0], north[1], ui.status_color("complies", dark)))   # no label on it
@@ -593,13 +645,16 @@ def draw_screen(o, e):
     notice = _notice_box(o, e.Viewport, taken)
     elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     shown = logic.dims_shown(zoomed_in, elevation)     # drawing-style dimensions: none zoomed out, none flat in elevation
-    for line, status in (getattr(o, "yard_required", None) or []) if shown else []:   # the required line, faint
+    # the lines on screen (over everything) in plan only; elsewhere draw_scene draws them depth-tested
+    flat = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+    for line, status in (getattr(o, "yard_required", None) or []) if shown and flat else []:   # the required line
         color = ui.faint(ui.status_color("complies" if old else status, dark))
         a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
         d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 1)
     for line, text, status in (getattr(o, "yard_dims", None) or []) if shown else []:   # each yard as measured (F4)
         color = ui.status_color("complies" if old else status, dark)
-        _dimension(d, e.Viewport, line, color)
+        if flat:
+            _dimension(d, e.Viewport, line, color)
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
@@ -607,13 +662,8 @@ def draw_screen(o, e):
                         along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
     height = getattr(o, "height_dim", None)
     if height is not None and elevation and zoomed_in:       # the height, dimensioned up from the grade plane
-        line, text, status, limit = height
+        line, text, status, limit = height       # (its line, ticks and limit: draw_scene, depth-tested)
         color = ui.status_color("complies" if old else status, dark)
-        _dimension(d, e.Viewport, line, color)
-        if limit is not None:                                # the limit: faint, across the dimension
-            q = e.Viewport.WorldToClient(limit)
-            d.Draw2dLine(System.Drawing.PointF(q.X - 14, q.Y), System.Drawing.PointF(q.X + 14, q.Y),
-                         ui.faint(ui.status_color("complies" if old else status, dark)), 1)
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
         if logic.yard_label_shown(labels, status):
