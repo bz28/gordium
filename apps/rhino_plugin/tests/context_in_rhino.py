@@ -299,13 +299,17 @@ try:
     # drawn while "Gordium" was unlocked: the architect locks and unlocks it, no redraw (each context layer's own
     # lock recorded under a moment's lock of Gordium::Context; Rhino keeps it: lock_probe_994012d.json)
     gordium = doc.Layers.FindByFullPath("Gordium", -1)
+    start = {"gordium_locked": bool(doc.Layers[gordium].IsLocked),
+             "own": {k: bool(doc.Layers[doc.Layers.FindByFullPath(k, -1)].GetPersistentLocking())
+                     for k in context_layers(g, doc)}}
     doc.Layers[gordium].IsLocked = True
     held = {k: v["locked"] for k, v in context_layers(g, doc).items()}
     doc.Layers[gordium].IsLocked = False
     back = {k: v["locked"] for k, v in context_layers(g, doc).items()}
-    log["lock_unlock_no_redraw"] = {"while_locked": held, "after_unlock": back}
+    log["lock_unlock_no_redraw"] = {"start": start, "while_locked": held, "after_unlock": back}
     claim("4 drawn with Gordium unlocked, then Gordium locked and unlocked (no redraw): Parcels, Streets and Notes "
-          "still locked, Buildings not", all(held.values()) and all(v == g.logic.context_locked(k) for k, v in back.items())
+          "still locked, Buildings not", not start["gordium_locked"]
+          and all(v == g.logic.context_locked(k) for k, v in start["own"].items()) and all(held.values()) and all(v == g.logic.context_locked(k) for k, v in back.items())
           and all(back[g.logic.CONTEXT + "::" + n] for n in ("Parcels", "Streets", "Notes"))
           and not back[g.logic.CONTEXT + "::Buildings"], log["lock_unlock_no_redraw"])
     # review round 5: with the architect's "Gordium" layer (and their Gordium::Grade) locked, a redraw must still

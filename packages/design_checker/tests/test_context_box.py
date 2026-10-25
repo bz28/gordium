@@ -1015,6 +1015,9 @@ class _Layer:
         if self._held():                       # Rhino holds a sublayer of a locked layer locked
             self._locked = True
             return
+        current = getattr(self.table, "current", None)
+        if locked and current and (current == self.FullPath or current.startswith(self.FullPath + "::")):
+            return                             # Rhino never locks the current layer, nor a layer above it
         was, self._locked = self._locked, bool(locked)
         if was == self._locked:
             return
@@ -1033,6 +1036,8 @@ class _Layer:
 
 
 class _Layers(list):
+    current = None                             # the current layer's full path (the architect's working layer)
+
     def FindByFullPath(self, path, default):
         return next((i for i, x in enumerate(self) if x.FullPath == path), default)
 
@@ -1378,7 +1383,7 @@ def _probe_on_fake(case):
     top = _Layer(layers, "LockProbe_" + case, None)
     layers.append(top)
     mid = None
-    if case.startswith("nested"):
+    if case.startswith(("nested", "mid")):
         mid = _Layer(layers, top.FullPath + "::Mid", top)
         layers.append(mid)
     sub = _Layer(layers, (mid or top).FullPath + "::Sub", mid or top)
@@ -1397,7 +1402,15 @@ def _probe_on_fake(case):
     elif case == "persistent_alone":
         sub.SetPersistentLocking(True)
     rows = [["sub set", state()]]
-    if case.endswith("relock"):
+    if case == "mid_relock":
+        mid.IsLocked = True
+        if not sub.IsLocked:
+            sub.IsLocked = True
+        sub.SetPersistentLocking(True)
+        rows.append(["mid locked, sub's own lock set", state()])
+        mid.IsLocked = False
+        rows.append(["mid unlocked", state()])
+    if case in ("relock", "nested_relock"):
         top.IsLocked = True
         if not sub.IsLocked:
             sub.IsLocked = True
@@ -1420,7 +1433,7 @@ def test_the_fake_layers_do_what_rhino_did():
     probe = json.loads((REPO / "docs/evidence/pr-23/lock_probe_994012d.json").read_text(encoding="utf-8"))
     cases = [k for k in probe if k not in ("done", "case", "trace")]
     assert sorted(cases) == sorted(["is_locked", "persistent_then_is_locked", "persistent_alone", "relock",
-                                    "nested_is_locked", "nested_relock"])
+                                    "nested_is_locked", "nested_relock"])    # mid_relock: next run (Gordium's route)
     for case in cases:
         assert _probe_on_fake(case) == probe[case], case
     assert probe["relock"][-1][1] == {"sub_locked": True, "sub_own": True}          # kept
@@ -1447,3 +1460,29 @@ def test_drawn_with_gordium_unlocked_the_neighbourhood_stays_locked_when_the_arc
     assert _locks(doc) == _WANT, _locks(doc)
     ns["_lock_context"](doc, False)                                # opened to add: every own lock off, all unlocked
     assert not any(_locks(doc).values()) and not any(_own_locks(doc).values())
+
+
+def test_with_the_footprints_layer_current_the_locks_stand_and_nothing_breaks():
+    """Review of the moment's lock (P3): Rhino never locks the current layer or a layer above it, so with the
+    architect working on Gordium::Context::Buildings the moment's lock of Gordium::Context is refused. The locks set
+    stand (Parcels, Streets, Notes locked; Buildings, Context not), no own lock is half written, nothing raises; once
+    another layer is current, the next lock records them."""
+    ns = _clear_ns()
+    doc, grade = _locked_gordium_doc()
+    doc.Layers.current = logic.CONTEXT + "::Buildings"
+    ns["_lock_context"](doc, True)
+    assert _locks(doc) == _WANT and not any(_own_locks(doc).values())
+    doc.Layers.current = "Gordium::Grade"
+    ns["_lock_context"](doc, True)
+    assert _locks(doc) == _WANT and _own_locks(doc) == dict(_WANT, Context=False)
+
+
+def test_the_lock_probe_on_the_fake_is_the_probe_in_rhino():
+    """The replay follows lock_probe_in_rhino.py's own steps (its case list, and Gordium's route, mid_relock, which
+    the fake expects kept: the own lock recorded under a moment's lock of Mid survives the top's lock and unlock)."""
+    probe = (REPO / "apps/rhino_plugin/tests/lock_probe_in_rhino.py").read_text(encoding="utf-8")
+    cases = eval(probe.split("CASES = ", 1)[1].split(")", 1)[0] + ")")             # noqa: S307  (a tuple literal)
+    assert set(cases) == {"is_locked", "persistent_then_is_locked", "persistent_alone", "relock", "nested_is_locked",
+                          "nested_relock", "mid_relock"}
+    rows = _probe_on_fake("mid_relock")
+    assert rows[-1][1]["sub_locked"] and rows[-1][1]["sub_own"], rows
