@@ -22,8 +22,8 @@ Rules stay marked **draft**: architect approval is deferred for now (decided 202
   column mix-up); R-2a and R-2b are the two-family districts (semi-detached and two-family houses, R-2b's unequal
   side yards); R-2c has stacked chart cells (one figure per use) and lot sizes that grow with the occupants (chart
   notes 4 to 6); R-3a is a multi-family district (it catches single-family assumptions); R-3aa is R-3a's look-alike
-  (every lot 50 ft wide, no dormitories, at most 3 and at least 2 stories, a footprint cap); R-3b has the smallest
-  lots and its own lot-size note (note 8); RU has large lots, a 30 ft rear-yard floor (note 17), a green-space rule
+  (every lot 50 ft wide, no dormitories, at most 3 and at least 2 stories, a footprint cap); R-3b has the narrowest
+  lots (30 ft), the smallest of the R-3 districts, and its own lot-size note (note 8); RU has large lots, a 30 ft rear-yard floor (note 17), a green-space rule
   and limits on primary buildings (chart p.2 notes 3 and 5). Each chart number is checked against the chart
   reader's cells for its own column (`packages/document_extraction/tests/test_r1b_matches_chart.py`). A hand
   rulebook is the one the checker uses for its zone (`rulebook.rulebook_for`).

@@ -241,8 +241,12 @@ def test_each_chart_value_is_exactly_where_the_rule_turns_from_pass_to_fail(dist
                 past = bound + step if kind == "max" else bound - step
                 at = outcome(rule, base | fixed | {measure: bound}, uses)
                 beyond = outcome(rule, base | fixed | {measure: past}, uses)
-                # not binding here: passes on both sides (or, for a side Gordium can't identify, reviews on both)
-                idle = {("pass", "pass")} | ({("needs_review", "needs_review")} if expected else set())
+                # not binding here: passes on both sides (or, for a side Gordium can't identify, reviews on both); or a
+                # row cited as an input for another use (R-3b's other-use rule cites the multiple-family row for its
+                # reading's least, so for a multiple dwelling it doesn't apply): that row is enforced by its own rule,
+                # which the `tried` check below still requires
+                idle = {("pass", "pass"), ("not_applicable", "not_applicable")} | (
+                    {("needs_review", "needs_review")} if expected else set())
                 assert (at, beyond) in {exact} | idle, \
                     f"{rule['id']}: chart {c['value']!r} for {c['row']!r} → {measure} {kind} {bound}; got {at} at it, {beyond} past it"
                 if (at, beyond) == exact:
@@ -335,6 +339,29 @@ def test_every_numbered_cell_is_cited_by_a_rule_and_has_a_meaning(district):
     by_rules = {(c["page"], c["section"], c["row"]) for rule in rules if rule["kind"] == "rule"
                 for c in cited_rows(rule, cells)}
     assert not by_rules & FLAG_ONLY                       # a figure no measurement can check is never in a formula
+
+
+# Hand rulebooks written before this check whose headers don't name p.14's "Allowed by variance" row (to fix in their
+# own PR): R-1b's header lists no loading at all.
+UNNAMED_TEXT_CELLS = {"R-1B"}
+
+
+def test_every_worded_cell_is_cited_or_named_as_not_covered(district):
+    """A cell that states a requirement in words, not a number (p.14's "Allowed by variance [fn2]" for nonresidential
+    loading, "See §325-21"), is either cited by a rule or flag, or named in the rulebook's header as not covered yet,
+    so the gap is never silent (#r3-hand review round 1: R-3aa's and RU's headers had dropped it)."""
+    rules, cells = district
+    column = cells[0]["column"]
+    if column in UNNAMED_TEXT_CELLS:
+        pytest.skip(f"{column}: known gap, fixed in its own PR")
+    name = next(k for k, v in DISTRICTS.items() if v == column)
+    header = "".join(line for line in (ITHACA / f"5_zoning_rules/{name}.yaml").read_text(encoding="utf-8")
+                     .splitlines(keepends=True) if line.startswith("#"))
+    cited = {id(c) for rule in rules for c in cited_rows(rule, cells)}
+    worded = [c for c in cells if c["page"] != 2 and not numbers(c["value"]) and c["value"].strip() not in ("", "-")]
+    missing = [(c["row"], c["value"]) for c in worded if id(c) not in cited
+               and re.sub(r"\s*\[fn[^\]]*\]", "", c["value"]).strip() not in header]
+    assert missing == []
 
 
 def test_use_list_matches_the_chart_marks(district):

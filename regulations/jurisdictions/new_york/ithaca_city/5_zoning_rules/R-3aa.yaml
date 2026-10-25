@@ -24,7 +24,8 @@
 # Draft (approval deferred, decided 2026-10-19). Not covered yet, as in R-3a (later rules or flags): ornamental
 # parapets and cornices above the height limit (§325-16B), accessory uses and structures (p.2), accessory dwelling
 # units (§325-28), occupancy limits (p.2 note 4, §325-3B DWELLING, ONE-FAMILY), height exceptions for chimneys and
-# similar (§325-16A, applied when measuring height), more than one main building on a lot (§325-8B(1)). R-3aa is
+# similar (§325-16A, applied when measuring height), more than one main building on a lot (§325-8B(1)), the loading
+# rule for nonresidential uses ("Allowed by variance", p.14). R-3aa is
 # not one of the districts §325-11B(1) allows cluster subdivisions in. Parking is written as in R-3a and stays "not
 # checked yet: interior". Parts of R-3aa were rezoned to the Southside form districts by Ord. No. 2025-12
 # (sources.yaml); a lot's district is looked up, not assumed.

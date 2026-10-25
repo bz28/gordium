@@ -5,9 +5,10 @@
 # model of the format.
 #
 # Why R-3b: the densest multi-family district (the chart's eighth column). It has R-3a's uses, height (4 stories,
-# 40 ft) and yards, but the smallest lots on the chart (3,000 sf, 30 ft wide), its own lot-size note for attached
-# and multiple dwellings (note 8: +500 sf per unit past three, +300 sf per room let, not note 7's 750 and 500), and
-# the highest coverage (40%). A drafter that copies R-3a's lot sizes, or reads note 7 for R-3B, fails here.
+# 40 ft) and yards, but the narrowest lots on the chart (30 ft) and the smallest and most covered of the R-3
+# districts (3,000 sf, 40%; only R-2C's occupant-based lots are smaller and its attached houses' 50% higher), and
+# its own lot-size note for attached and multiple dwellings (note 8: +500 sf per unit past three, +300 sf per room
+# let, not note 7's 750 and 500). A drafter that copies R-3a's lot sizes, or reads note 7 for R-3B, fails here.
 #
 # Every chart number was read two ways and agrees: the chart's text line (quoted), and the chart reader's R-3B cell
 # (cited); R-3B is the eighth value in each row (the fourth of the four in the fraternity rows). Coverage and the
@@ -520,16 +521,20 @@ rules:
       "one_family_attached", "two_family", "multiple_family", "fraternity_sorority_group_house"]
     check: lot_area >= 4000
     review_when:
-      - when: use in ["dormitory", "nursing_home"]
+      - when: use in ["dormitory", "nursing_home"] and lot_area >= 3500
         reason: >-
           A dormitory and a nursing home are multiple dwellings by §325-3's definitions, so the multiple-family row and
           its note 8 (3,500 sf new or 4,000 sf by conversion for 1-3 units, +500 sf per unit over 3, +300 sf per room
-          let for profit) may apply instead of "Other use" (4,000 sf): the open question on this rule. The two
-          readings give different minimums on both sides of 4,000 sf, so neither a pass nor a fail is sure.
+          let for profit) may apply instead of "Other use" (4,000 sf): the open question on this rule. From 3,500 sf
+          (the least the multiple-family reading can ask) the two readings can disagree either way, so neither a pass
+          nor a fail is sure; under 3,500 sf both fail.
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 3
         cell: {section: "Minimum Lot Size [fn3]", row: "Other use", column: R-3B}
+      - file: zoning_charts_2026-04.pdf             # the multiple-family reading's least: an input, for the review
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Multiple family dwelling, new construction", column: R-3B}
       - file: zoning_charts_2026-04.pdf
         page: 3
         lines: [19, 19]
@@ -551,6 +556,12 @@ rules:
       - given: {use: school, lot_area: 3000}
         expect: fail
         note: enough for a house in R-3b, not for another use
+      - given: {use: dormitory, lot_area: 3499}
+        expect: fail
+        note: 'under 3,500 sf both readings fail: "Other use" asks 4,000 sf, a multiple dwelling at least 3,500 sf'
+      - given: {use: nursing_home, lot_area: 3500}
+        expect: needs_review
+        note: the least the multiple-family reading asks (3 units, new, no rooms let); "Other use" fails it
       - given: {use: dormitory, lot_area: 3600}
         expect: needs_review
         note: under "Other use" it fails; as a new multiple dwelling of 3 units it would pass (3,500 sf)
@@ -586,7 +597,7 @@ rules:
         multiple dwelling, §325-3B (5)) its own lot-size row, which suggests a use with no row of its own is an "Other
         use". Neither the code nor a City record (none found) says which. In R-3b the readings differ both ways (a new
         three-unit dormitory needs 3,500 sf under one, 4,000 sf under the other; a large one more under the first), so
-        every dormitory or nursing-home lot needs review.
+        every dormitory or nursing-home lot of 3,500 sf or more needs review; a smaller one fails under both.
       readings:
       - id: multiple_family_row
         reading: the multiple-family row applies (3,500 sf new or 4,000 sf by conversion for 1-3 units, +500 sf each

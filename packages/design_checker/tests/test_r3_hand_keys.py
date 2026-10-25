@@ -27,6 +27,10 @@ LAW = [
                                         "rooms_let_for_profit": 0, "conversion": False}, "pass"),       # 6,000 + 1,500
     ("R-3aa.lot_area_multiple_family", {"use": "multiple_family", "lot_area": 7499, "dwelling_units": 5,
                                         "rooms_let_for_profit": 0, "conversion": False}, "fail"),
+    ("R-3aa.lot_area_multiple_family", {"use": "multiple_family", "lot_area": 11000, "dwelling_units": 7,
+                                        "rooms_let_for_profit": 2, "conversion": True}, "pass"),  # 7,000+3,000+1,000
+    ("R-3aa.lot_area_multiple_family", {"use": "multiple_family", "lot_area": 10999, "dwelling_units": 7,
+                                        "rooms_let_for_profit": 2, "conversion": True}, "fail"),
     ("R-3aa.lot_width_two_family", {"use": "two_family", "lot_width": 49.9}, "fail"),            # 50 ft (R-3a: 40)
     ("R-3aa.lot_width_fraternity", {"use": "fraternity_sorority_group_house", "lot_width": 50}, "pass"),
     ("R-3aa.use", {"use": "dormitory"}, "fail"),                                              # "-" for R-3AA
@@ -47,6 +51,10 @@ LAW = [
                                        "rooms_let_for_profit": 2, "conversion": True}, "pass"),  # 4,000+2,000+600
     ("R-3b.lot_area_multiple_family", {"use": "multiple_family", "lot_area": 6599, "dwelling_units": 7,
                                        "rooms_let_for_profit": 2, "conversion": True}, "fail"),
+    # a dormitory or nursing home: "Other use" (4,000 sf) or the multiple-family row (at least 3,500 sf): under
+    # 3,500 sf both readings fail (review round 1)
+    ("R-3b.lot_area_other_use", {"use": "dormitory", "lot_area": 3400}, "fail"),
+    ("R-3b.lot_area_other_use", {"use": "nursing_home", "lot_area": 3700}, "needs_review"),
     ("R-3b.lot_area_two_family", {"use": "two_family", "lot_area": 3000}, "pass"),
     ("R-3b.lot_width_two_family", {"use": "two_family", "lot_width": 30}, "pass"),
     ("R-3b.lot_coverage", {"building_area": 2000, "lot_area": 5000}, "pass"),                 # 40%
@@ -59,6 +67,9 @@ LAW = [
     ("RU.lot_area_multiple_family", {"use": "multiple_family", "lot_area": 22499, "dwelling_units": 7,
                                      "conversion": True}, "fail"),
     ("RU.lot_area_two_family", {"use": "two_family", "lot_area": 14999}, "fail"),               # 15,000 sf
+    # a dormitory: "Other use" (30,000 sf) or the multiple-family row (at least 16,500 sf) (review round 1)
+    ("RU.lot_area_other_use", {"use": "dormitory", "lot_area": 12000}, "fail"),
+    ("RU.lot_area_other_use", {"use": "dormitory", "lot_area": 25000}, "needs_review"),
     ("RU.lot_width_one_family_semi_detached", {"use": "one_family_semi_detached", "lot_width": 100}, "pass"),
     ("RU.use", {"use": "hospital_or_sanitarium"}, "fail"),                                    # "-" for RU
     ("RU.use", {"use": "nursery_school_or_child_day_care"}, "needs_review"),                  # SP, §325-9B(1)(e)

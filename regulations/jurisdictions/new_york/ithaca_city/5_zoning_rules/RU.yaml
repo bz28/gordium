@@ -20,7 +20,8 @@
 # Draft (approval deferred, decided 2026-10-19). Not covered yet, as in R-1b (later rules or flags): ornamental
 # parapets and cornices above the height limit (§325-16B), accessory uses and structures (p.2), accessory dwelling
 # units (§325-28; RU's accessory-dwelling-unit cell on p.2 is blank, neither • nor -), occupancy limits (p.2 note
-# 4), height exceptions for chimneys and similar (§325-16A, applied when measuring height). RU is not an R-3
+# 4), height exceptions for chimneys and similar (§325-16A, applied when measuring height), the loading rule for
+# nonresidential uses ("Allowed by variance", p.14). RU is not an R-3
 # district, so §325-19E doesn't apply, and §325-11B(1) doesn't allow cluster subdivisions in it. Parking is written
 # as in R-3a and stays "not checked yet: interior".
 #
@@ -505,16 +506,19 @@ rules:
       "multiple_family", "fraternity_sorority_group_house"]
     check: lot_area >= 30000
     review_when:
-      - when: use == "dormitory"
+      - when: use == "dormitory" and lot_area >= 16500
         reason: >-
           A dormitory is a multiple dwelling by §325-3's definition, so the multiple-family row and its note 9 (16,500
           sf for 1-3 units, +1,500 sf per unit over 3) may apply instead of "Other use" (30,000 sf): the open question on
-          this rule. The two readings give different minimums on both sides of 30,000 sf, so neither a pass nor a fail
-          is sure.
+          this rule. From 16,500 sf (the least the multiple-family reading can ask) the two readings can disagree either
+          way, so neither a pass nor a fail is sure; under 16,500 sf both fail.
     sources:
       - file: zoning_charts_2026-04.pdf
         page: 3
         cell: {section: "Minimum Lot Size [fn3]", row: "Other use", column: RU}
+      - file: zoning_charts_2026-04.pdf             # the multiple-family reading's least: an input, for the review
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Multiple family dwelling, new construction", column: RU}
       - file: zoning_charts_2026-04.pdf
         page: 3
         lines: [19, 19]
@@ -531,6 +535,12 @@ rules:
       - given: {use: church, lot_area: 10000}
         expect: fail
         note: enough for a house in RU, not for another use
+      - given: {use: dormitory, lot_area: 16499}
+        expect: fail
+        note: 'under 16,500 sf both readings fail: "Other use" asks 30,000 sf, a multiple dwelling at least 16,500 sf'
+      - given: {use: dormitory, lot_area: 16500}
+        expect: needs_review
+        note: the least the multiple-family reading asks (3 units); "Other use" fails it
       - given: {use: dormitory, lot_area: 20000}
         expect: needs_review
         note: under "Other use" it fails; as a new multiple dwelling of 5 units (19,500 sf) it would pass
@@ -562,7 +572,7 @@ rules:
         fraternity house (also a multiple dwelling, §325-3B (5)) its own lot-size row, which suggests a use with no row
         of its own is an "Other use". Neither the code nor a City record (none found) says which. In RU the readings
         differ both ways (a small dormitory needs less under the multiple-family row, a large one more), so every
-        dormitory lot needs review. (A nursing home, the other use the question covers in R-3, is not permitted in RU.)
+        dormitory lot of 16,500 sf or more needs review; a smaller one fails under both. (A nursing home, the other use the question covers in R-3, is not permitted in RU.)
       readings:
       - id: multiple_family_row
         reading: the multiple-family row applies (16,500 sf for 1-3 units, +1,500 sf each further unit)
