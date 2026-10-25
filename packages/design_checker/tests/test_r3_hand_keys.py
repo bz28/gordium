@@ -125,12 +125,35 @@ def test_what_gordium_cant_measure_is_a_review_row_on_every_design(zone, use, ru
     assert items[rule]["status"] == present.REVIEW, items[rule]
 
 
-@pytest.mark.parametrize("facts, status", [({}, present.REVIEW), ({"conversion": False}, present.REVIEW)])
-def test_rus_500_ft_spacing_is_a_review_row_for_new_construction(facts, status):
+@pytest.mark.parametrize("facts", [{}, {"conversion": False}])
+def test_rus_500_ft_spacing_is_a_review_row_for_new_construction(facts):
     """RU p.2 note 5 ("for new construction"): needs review unless the building is stated as a conversion."""
     items = _view("RU", "multiple_family", **facts)
-    assert items["RU.spacing_500_ft"]["status"] == status, items["RU.spacing_500_ft"]
+    assert items["RU.spacing_500_ft"]["status"] == present.REVIEW, items["RU.spacing_500_ft"]
     assert "RU.spacing_500_ft" not in _view("RU", "multiple_family", conversion=True)
+
+
+def test_the_dormitory_question_offers_each_districts_own_figures():
+    """§5.3 asks one question for R-3a, R-3aa, R-3b and RU; its Options must give, for every district tagged there,
+    that district's own "Other use" figure, read from the chart reader's cell (review round 2: they gave R-3a's
+    6,000 sf and note 7 only, wrong for R-3b's 4,000 sf / note 8 and RU's 30,000 sf / note 9)."""
+    import json
+    import re
+    doc = (REPO / "docs/questions_for_architects.md").read_text(encoding="utf-8")
+    section = doc.split("\n### 5.3 ", 1)[1].split("\n### ", 1)[0]
+    options = next(line for line in section.splitlines() if line.startswith("- **Options:**"))
+    districts = re.findall(r"`\[([A-Za-z0-9-]+)\.lot_area_other_use#1\]`", section)
+    assert sorted(districts) == ["R-3a", "R-3aa", "R-3b", "RU"]
+    cells = [json.loads(line) for line in (ITHACA / "2_extracted_text/zoning_charts_2026-04.cells.jsonl")
+             .open(encoding="utf-8")][1:]
+    for d in districts:
+        column = d.upper() if d != "RU" else "RU"
+        other = next(c["value"] for c in cells if c.get("page") == 3 and c.get("row") == "Other use"
+                     and c.get("section") == "Minimum Lot Size [fn3]" and c.get("column") == column)
+        new = next(c["value"] for c in cells if c.get("page") == 3 and c.get("column") == column
+                   and c.get("row") == "Multiple family dwelling, new construction")
+        note = re.search(r"\[fn(\d+)\]", new)[1]
+        assert other.split(" [")[0] in options and f"note {note}" in options, (d, other, note, options)
 
 
 def test_a_dormitory_in_r3aa_does_not_comply_on_use():
