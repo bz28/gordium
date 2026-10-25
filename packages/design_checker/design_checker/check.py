@@ -635,15 +635,30 @@ def _clip_above(points: list, z: float) -> list:
     return out
 
 
+WALL_TILT = 1e-3      # a face whose plan is under this share of its own area is a wall (plumb, or within a hair)
+
+
+def _is_wall(points: list) -> bool:
+    """Whether a face stands upright: its plan (seen from above) is under WALL_TILT of its own area (Newell's
+    method), so a wall a hair out of plumb is a wall too (review of the #28 fix, L1)."""
+    nx = ny = nz = 0.0
+    for k, p in enumerate(points):
+        q = points[(k + 1) % len(points)]
+        nx += (p[1] - q[1]) * (p[2] + q[2])
+        ny += (p[2] - q[2]) * (p[0] + q[0])
+        nz += (p[0] - q[0]) * (p[1] + q[1])
+    full = (nx * nx + ny * ny + nz * nz) ** 0.5
+    return full <= 1e-12 or abs(nz) <= WALL_TILT * full
+
+
 def walls_beyond(building: dict, z: float, region) -> bool:
     """Whether a wall (a face seen edge-on from above) rises over height z somewhere `region` (what above() sees)
     doesn't cover: its plan, 0.05 ft each side, not inside the region."""
-    from shapely.geometry import LineString, Polygon
+    from shapely.geometry import LineString
     for f in building.get("faces") or []:
         if not any(p[2] > z + 1e-6 for p in f["points"]):
             continue
-        flat = [p[:2] for p in f["points"]]
-        if len(flat) >= 3 and Polygon(flat).buffer(0).area > 1e-9:
+        if not _is_wall(f["points"]):
             continue                                    # not a wall: above() already sees it
         clipped = [p[:2] for p in _clip_above(f["points"], z)]
         trace = LineString(clipped) if len(clipped) >= 2 else None
@@ -659,8 +674,8 @@ def above(building: dict, z: float):
     from shapely.ops import unary_union
     parts = []
     for f in building.get("faces") or []:
-        if not any(p[2] > z + 1e-6 for p in f["points"]):
-            continue
+        if not any(p[2] > z + 1e-6 for p in f["points"]) or _is_wall(f["points"]):
+            continue                                    # (a wall's sliver of plan adds nothing: walls_beyond)
         shell = _clip_above(f["points"], z)
         if len(shell) < 3:
             continue

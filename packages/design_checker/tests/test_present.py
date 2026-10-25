@@ -468,6 +468,14 @@ def test_a_vault_read_as_walls_beside_a_flat_roof_over_the_limit_is_coloured_too
     tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": present.FAILS}]},
                             {})["encroach"] if e["why"] == "height"]
     assert sum(Polygon(t["outline"]).area for t in tops) == pytest.approx(1000)        # the vault's 600 sf too
+    for f in vault["faces"]:                     # the same vault, its walls' tops 1e-4 ft out of plumb
+        for p in f["points"]:
+            if p[2] == 38:
+                p[0] += 1e-4
+    house = {"id": "house", "faces": flat["faces"] + vault["faces"], "problems": []}
+    tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": present.FAILS}]},
+                            {})["encroach"] if e["why"] == "height"]
+    assert sum(Polygon(t["outline"]).area for t in tops) == pytest.approx(1000, abs=0.1)
     gable = plan(_plot(sloped_roof_box(10, 25, 35, 65, 30, 40, "house")), env,
                  {"items": [{"measure": "building_height", "status": present.FAILS}]}, {})["encroach"]
     assert Polygon(gable[0]["outline"]).area == pytest.approx(500, abs=0.01)           # a roof's walls: still its ridge
