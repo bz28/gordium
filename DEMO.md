@@ -53,9 +53,9 @@ Everything in the 2026-10-22 evening preview below, plus three fixes found by te
 - **Undo and Redo of a new-address Draw are exact.** **Undo** brings back the old address and its drawing, with
   nothing of the new address left on screen (no leftover lot outline or dashed lookup outline). **Redo** brings the
   new address back as it was drawn. After either one Gordium checks the model again, so the panel matches what you see.
-- **The neighbourhood stays locked when you unlock Gordium.** Neighbouring parcels, streets, notes and ground are on
-  their own locked layers under the Gordium layer. Locking and then unlocking the Gordium layer no longer unlocks
-  them, so you can't move the City's lines by accident.
+- **The neighbourhood stays locked when you unlock Gordium.** The neighbourhood's parcels, streets and notes stay
+  locked when you lock and then unlock the Gordium layer, so you can't move the City's lines by accident. Your own
+  layers behave as Rhino normally does.
 
 ## What was new on 2026-10-22, evening
 
