@@ -773,9 +773,10 @@ def _offending(doc, e):
     found = _find(doc, e.get("building") or "")
     solid = _drawable(found.Geometry) if found is not None else None
     pieces = None
-    if isinstance(solid, rg.Brep) and solid.IsSolid:
-        pieces = rg.Brep.CreateBooleanIntersection(solid, _proud(doc, block.DuplicateBrep()),
-                                                   doc.ModelAbsoluteTolerance)
+    if isinstance(solid, rg.Brep) and solid.IsSolid:       # a boolean that raises colours the block, never stops the check
+        pieces = logic.guard(lambda: rg.Brep.CreateBooleanIntersection(
+            solid, _proud(doc, block.DuplicateBrep()), doc.ModelAbsoluteTolerance),
+            "cut the colour to the building's own shape: its whole block is coloured instead")()
     return logic.offending_pieces(pieces, block)
 
 
