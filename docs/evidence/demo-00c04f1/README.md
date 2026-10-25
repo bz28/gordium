@@ -12,7 +12,7 @@ Rhino was restarted first. Every run used an extracted copy of 00c04f1 with reco
 | 1 Smoke: empty file → GordiumStart → the sample → Draw → house moved 5 ft → front yard fails → Check → Zoning report… opens on the Check sheet (`1_smoke/`) | **PASS, 7 of 7** |
 | 2 Corner-lot street pick: Change…, both lines, Enter → lot width on one street (`2_corner/`) | **PASS** (pass2's claims 10 and 12; Lot width reads one street at a time, "9'-9 5/8" to 67'-10 7/8"", never both lines' 77'-8"), with a concern below |
 | 3 The neighbourhood tick, hide and show (`3_tick/`) | **PASS, 10 of 10**; the locks are step 6 |
-| 4 re_lookup_in_rhino.py | **BLOCKED**: in this restarted Rhino, Undo does nothing at all, with or without Gordium (below) |
+| 4 re_lookup_in_rhino.py (`4_re_lookup/`) | **PASS, 39 of 39** after the window fix (first blocked: Undo did nothing while Rhino had no front window; see the end) |
 | 5 pass2 claim 6, the empty file's box (`5_pass2/`) | **PASS** (pass2 at this head: 26 of 26) |
 | 6 context_in_rhino.py claim 4 (`6_context/`) | **PASS on substance**: Parcels, Streets and Notes keep their own locks and stay locked after Gordium is unlocked; Buildings and Context don't; the redraw replaces 319 with 319. The claim still asks Grade to stay locked, which plain Rhino doesn't do, so it reads as a fail (15 of 16). |
 
@@ -50,3 +50,14 @@ Rhino was restarted first. Every run used an extracted copy of 00c04f1 with reco
   installed. It had closed by itself before the Undo checks.
 - During step 2's first try, something typed into Rhino's command line ("…cumentProperties", with GridSnap turned
   on) and stopped the script. It was cleared with Esc, and pass2 was run again from the start (26 of 26).
+
+## Re-run after the window was fixed (2026-10-25, 16:15)
+
+The Undo block came from the desktop, not from Gordium. Another Claude session was driving Chrome, full screen on
+its own desktop, so Rhino's windows had no front window. That session also typed the stray "do" into Rhino's
+command line. Once it stopped, Rhino was quit and relaunched, one empty document was opened and brought to the
+front (seen on screen), and Rhino's update reminder was deferred (nothing installed). Then:
+- the undo probe with no Gordium code: **8 of 8** (`undo_probe_after_window_fix.json`);
+- `re_lookup_in_rhino.py` at this head: **all claims pass** (`re_lookup_results_after_window_fix.json`,
+  `re_lookup_results_full.json`).
+- Demo step 4 (re-lookup at 00c04f1): **39 of 39, PASS.** So DEMO.md's "Keep my building" and "Undo and Redo of a new-address Draw" sentences are true on screen.
