@@ -1,0 +1,101 @@
+{
+ "phase": "run",
+ "claims": {
+  "0 Gordium loaded from the demo copy": {
+   "ok": true,
+   "detail": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_00c04f1/apps/rhino_plugin/gordium_rhino.py"
+  },
+  "1 the file starts empty": {
+   "ok": true,
+   "detail": 0
+  },
+  "2 Draw puts down the sample lot and the starting house": {
+   "ok": true,
+   "detail": {
+    "objects": 4,
+    "house_parts": 3,
+    "floors": 3
+   }
+  },
+  "2 the panel lists the rows": {
+   "ok": true,
+   "detail": [
+    "Building height",
+    "Eaves into front yard",
+    "Front yard",
+    "Lot area",
+    "Lot coverage",
+    "Lot width",
+    "Overlays \u00b7 not in this release",
+    "Parking \u00b7 needs input",
+    "Rear yard",
+    "Side yard, Northeast",
+    "Side yard, Southwest",
+    "Stories"
+   ]
+  },
+  "3 moved 5 ft toward the street, the front yard fails": {
+   "ok": true,
+   "detail": {
+    "before": "complies",
+    "after": "does_not_comply",
+    "reason": null,
+    "hint": "To comply whatever the survey shows: keep every part of the building at least 27'-0\" from the front lot line as drawn (25'-0\" required, the lot lines \u00b12'-0\") \u2014 now 22'-0 7/8\" at its closest.",
+    "proposed": "22'-0 7/8\"",
+    "required": "25'-0\""
+   }
+  },
+  "4 Zoning report\u2026 writes the workbook and opens it": {
+   "ok": true,
+   "detail": {
+    "opened": [
+     "/var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_test_docs/demo_smoke_Large_Objects_-_Feet_gordium_report.xlsx"
+    ],
+    "said": [
+     "Report saved to /var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_test_docs/demo_smoke_Large_Objects_-_Feet_gordium_report.xlsx (opened)."
+    ],
+    "sheets": [
+     "Check",
+     "Inputs",
+     "Output",
+     "Rule trace"
+    ],
+    "active": "Check"
+   }
+  },
+  "4 it opens on the Check sheet": {
+   "ok": true,
+   "detail": "Check"
+  }
+ },
+ "loaded_from": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_00c04f1/apps/rhino_plugin/gordium_rhino.py",
+ "after_draw": {
+  "objects": 4,
+  "house_parts": 3,
+  "floors": 3
+ },
+ "front": {
+  "before": "complies",
+  "after": "does_not_comply",
+  "reason": null,
+  "hint": "To comply whatever the survey shows: keep every part of the building at least 27'-0\" from the front lot line as drawn (25'-0\" required, the lot lines \u00b12'-0\") \u2014 now 22'-0 7/8\" at its closest.",
+  "proposed": "22'-0 7/8\"",
+  "required": "25'-0\""
+ },
+ "report": {
+  "opened": [
+   "/var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_test_docs/demo_smoke_Large_Objects_-_Feet_gordium_report.xlsx"
+  ],
+  "said": [
+   "Report saved to /var/folders/v8/d2m6h2cn6s79xn6mrv2d8cr80000gn/T/gordium_test_docs/demo_smoke_Large_Objects_-_Feet_gordium_report.xlsx (opened)."
+  ],
+  "sheets": [
+   "Check",
+   "Inputs",
+   "Output",
+   "Rule trace"
+  ],
+  "active": "Check"
+ },
+ "ok": true
+}

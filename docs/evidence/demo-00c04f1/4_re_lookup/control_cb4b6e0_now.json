@@ -1,0 +1,201 @@
+{
+ "claims": {
+  "1 the sample: its lot and a starting house": {
+   "ok": true,
+   "detail": {
+    "lot": "fdea14b0-ddfd-4aaf-bd72-85eb8ea5cf28",
+    "house": [
+     "088328b8-0499-4be2-99e1-c910461dd82d",
+     "3038e744-d759-4e16-befc-feeb5135f72b",
+     "0b72f787-4c99-4648-a398-67573720fcb5"
+    ]
+   }
+  },
+  "2 Look up changed nothing in the model while the box was open": {
+   "ok": true,
+   "detail": {
+    "before": 4,
+    "during": 4
+   }
+  },
+  "2 the looked-up lot was shown dashed while the box was open": {
+   "ok": true,
+   "detail": {
+    "asked": [],
+    "objects": {
+     "088328b8-0499-4be2-99e1-c910461dd82d": "Gordium::Massing",
+     "3038e744-d759-4e16-befc-feeb5135f72b": "Gordium::Massing",
+     "0b72f787-4c99-4648-a398-67573720fcb5": "Gordium::Massing",
+     "fdea14b0-ddfd-4aaf-bd72-85eb8ea5cf28": "Site"
+    },
+    "guide_shown": true
+   }
+  },
+  "2 Draw asked nothing (all of it was Gordium's)": {
+   "ok": true,
+   "detail": []
+  },
+  "2 the sample's lot and house are gone": {
+   "ok": true,
+   "detail": []
+  },
+  "2 96's lot is drawn on Site": {
+   "ok": true,
+   "detail": "Lot \u00b7 96 Ithaca Road, Ithaca, NY, 14850"
+  },
+  "2 no starting house on 96, a corner lot (the architects' open question)": {
+   "ok": true,
+   "detail": [
+    "a corner lot: which yards are front, side and rear is an open question; no envelope drawn",
+    "no buildable area to start from"
+   ]
+  },
+  "2 the file says what is drawn: 96, and no house of Gordium's": {
+   "ok": true,
+   "detail": {
+    "drawn_address": "96 Ithaca Road, Ithaca, NY, 14850",
+    "house_fingerprint": null
+   }
+  },
+  "2 one Undo puts the sample back exactly": {
+   "ok": false,
+   "detail": {
+    "ran": true,
+    "missing": [
+     "088328b8-0499-4be2-99e1-c910461dd82d",
+     "0b72f787-4c99-4648-a398-67573720fcb5",
+     "3038e744-d759-4e16-befc-feeb5135f72b",
+     "fdea14b0-ddfd-4aaf-bd72-85eb8ea5cf28"
+    ],
+    "extra": [
+     "3266fb2b-7b26-4664-aca0-43b61ea3d26a"
+    ]
+   }
+  }
+ },
+ "undo_events": [
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 12,
+   "at": null
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 12,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 12,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 12,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 12,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 13,
+   "at": null
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 13,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 13,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 13,
+   "at": null
+  }
+ ],
+ "undo_records": [
+  {
+   "words": "Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850",
+   "serial": 13,
+   "in_command": false,
+   "at": null
+  }
+ ],
+ "step2": {
+  "asked": [],
+  "guide_shown": true
+ },
+ "at": "2 undo",
+ "command_at": 1792957858.456453,
+ "commands": [
+  [
+   "2 undo",
+   "Undo",
+   true
+  ]
+ ],
+ "ok": false,
+ "trace": "Traceback (most recent call last):\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_cb4b6e0/apps/rhino_plugin/tests/re_lookup_in_rhino.py\", line 219, in main\n  File \"file:///private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_cb4b6e0/apps/rhino_plugin/tests/re_lookup_in_rhino.py\", line 54, in claim\nAssertionError: 2 one Undo puts the sample back exactly: {'ran': True, 'missing': ['088328b8-0499-4be2-99e1-c910461dd82d', '0b72f787-4c99-4648-a398-67573720fcb5', '3038e744-d759-4e16-befc-feeb5135f72b', 'fdea14b0-ddfd-4aaf-bd72-85eb8ea5cf28'], 'extra': ['3266fb2b-7b26-4664-aca0-43b61ea3d26a']}\n",
+ "done": true
+}

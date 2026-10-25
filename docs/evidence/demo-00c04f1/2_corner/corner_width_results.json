@@ -1,0 +1,93 @@
+{
+ "head": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_00c04f1",
+ "claims": {
+  "1 the corner lot's street side takes both lines clicked": {
+   "ok": true,
+   "detail": [
+    [
+     [
+      76.916,
+      0.2317
+     ],
+     [
+      67.113,
+      0.1516
+     ]
+    ],
+    [
+     [
+      76.1328,
+      68.1429
+     ],
+     [
+      76.916,
+      0.2317
+     ]
+    ]
+   ]
+  },
+  "2 Lot width is never measured along both streets' lines (one street's frontage, or needs review)": {
+   "ok": true,
+   "detail": {
+    "id": "R-1b.lot_width_one_family_detached",
+    "name": "Lot width",
+    "status": "needs_review",
+    "proposed": "9'-9 5/8\" to 67'-10 7/8\"",
+    "required": "50'-0\"",
+    "margin": "",
+    "delta": "up to 44'-2 3/8\" short",
+    "approx": true,
+    "colour": "none",
+    "note": null,
+    "points": null,
+    "reason": "At worst 9'-9 5/8\" against 50'-0\": does not comply under that reading. the readings give different values; whether frontage on a curved street is measured along the curve or straight across isn't settled yet: confirm with the zoning office; which street's frontage is the lot width of a corner lot isn't settled",
+    "group": "site",
+    "needs": [],
+    "hint": null,
+    "refused": null
+   }
+  }
+ },
+ "picked": [
+  [
+   [
+    76.916,
+    0.2317
+   ],
+   [
+    67.113,
+    0.1516
+   ]
+  ],
+  [
+   [
+    76.1328,
+    68.1429
+   ],
+   [
+    76.916,
+    0.2317
+   ]
+  ]
+ ],
+ "lot_width": {
+  "id": "R-1b.lot_width_one_family_detached",
+  "name": "Lot width",
+  "status": "needs_review",
+  "proposed": "9'-9 5/8\" to 67'-10 7/8\"",
+  "required": "50'-0\"",
+  "margin": "",
+  "delta": "up to 44'-2 3/8\" short",
+  "approx": true,
+  "colour": "none",
+  "note": null,
+  "points": null,
+  "reason": "At worst 9'-9 5/8\" against 50'-0\": does not comply under that reading. the readings give different values; whether frontage on a curved street is measured along the curve or straight across isn't settled yet: confirm with the zoning office; which street's frontage is the lot width of a corner lot isn't settled",
+  "group": "site",
+  "needs": [],
+  "hint": null,
+  "refused": null
+ },
+ "both_lines_ft": 77.71904329987643,
+ "done": true
+}
