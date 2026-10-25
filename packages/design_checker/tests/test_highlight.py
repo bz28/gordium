@@ -16,6 +16,18 @@ def test_a_failed_intersection_still_colours_the_block_never_nothing():
         assert logic.offending_pieces(pieces, "the block") == ["the block"]
 
 
+def test_rhinos_boolean_runs_only_under_the_guard_so_a_failed_cut_never_stops_the_check():
+    """A RhinoCommon error in the cut colours the whole block (offending_pieces' fallback); unguarded it would end
+    the check's drawing before its results are kept (review round 2)."""
+    import re
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    calls = [m.start() for m in re.finditer(r"CreateBooleanIntersection", src)]
+    assert calls, "the cut is gone: update this pin"
+    for at in calls:
+        assert "logic.guard(lambda: rg.Brep." in src[max(0, at - 40):at], src[at - 80:at + 40]
+
+
 def test_the_legend_says_red_is_every_reading_amber_some_and_nothing_where_it_complies():
     text = logic.legend_text()
     assert "only the offending part" in text
