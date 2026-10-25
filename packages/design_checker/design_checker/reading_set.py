@@ -40,6 +40,19 @@ def lot_reading(words: str | None) -> str | None:
     return first if " lot line" in first else None
 
 
+def _key(reading: dict):
+    """What a reading is kept together by, with the readings of other measurements: (its lot reading, its side
+    pairing), or None when it depends on neither. A pairing (measure._eaves_by_wall_side: walls equally far from both
+    side lines, so either side may be the narrower) holds for both side yards to the eaves at once: the narrower's
+    reading under one pairing is never set against the wider's under the other (both to the same lot line)."""
+    lot, pairing = lot_reading(reading.get("reading")), reading.get("pairing")
+    return None if lot is None and pairing is None else (lot, pairing)
+
+
+def _fits(key, group) -> bool:
+    return key is None or all(k is None or k == g for k, g in zip(key, group))
+
+
 def tax_map(measured: dict, facts: dict | None) -> bool:
     """Whether the tax map's slack applies: facts given, the lot not surveyed, and a lot area with a tolerance."""
     return facts is not None and not facts.get("lot_surveyed") and \
@@ -60,7 +73,7 @@ def choices(n: str, values: dict, measured: dict, facts: dict | None) -> list[tu
         base = [(values[n], tuple(map(tuple, rec.get("points") or [])) or None, None)]
     else:
         base = list(dict.fromkeys((r["value"], tuple(map(tuple, r.get("points") or rec.get("points") or [])) or None,
-                                   lot_reading(r.get("reading")))
+                                   _key(r))
                                   for r in rec.get("readings") or [] if r.get("value") is not None))
     if n in LOT_LENGTHS and tax:            # never below 0: a wall within the slack of its line is at most on it
         return [(v, p, k, max(0.0, v + d * TAX_MAP_SLACK[n]), max(0.0, -(v + d * TAX_MAP_SLACK[n])))
@@ -76,8 +89,10 @@ def combos(names, values: dict, measured: dict, facts: dict | None = None):
     per = [choices(n, values, measured, facts) for n in names]
     if any(not c for c in per):
         return []
-    keys = sorted({c[2] for cs in per for c in cs if c[2] is not None}) or [None]
-    groups = [g for g in ([[c for c in cs if c[2] in (None, key)] for cs in per] for key in keys) if all(g)]
+    lots = sorted({c[2][0] for cs in per for c in cs if c[2] and c[2][0] is not None}) or [None]
+    pairings = sorted({c[2][1] for cs in per for c in cs if c[2] and c[2][1] is not None}) or [None]
+    groups = [g for g in ([[c for c in cs if _fits(c[2], key)] for cs in per]
+                          for key in itertools.product(lots, pairings)) if all(g)]
     if sum(math.prod(len(o) for o in g) for g in groups) > MAX_READINGS:
         return None
     out = []
