@@ -120,6 +120,14 @@ def highlight(status):
     return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
 
 
+def offending_pieces(pieces, block):
+    """What a coloured block draws: the building's own part inside it (Rhino's boolean intersection, `pieces`), or
+    the block itself when the intersection gave nothing (it failed, or the building is a block instance or a
+    mesh): a failing part is never left uncoloured because a boolean failed."""
+    kept = [p for p in pieces or [] if p is not None]
+    return kept or [block]
+
+
 def labels_on(ui_state):
     """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
     unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the
@@ -145,12 +153,14 @@ def legend_text(code=None):
     (the code-edition line, no longer in the panel's header)."""
     text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
             "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard's "
-            "measured distance. Red marks only the part of the building inside a required yard or above the height "
-            "limit. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "measured distance. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
-            "In the model: RED is the part of the building that does not comply (under every reading); AMBER is the "
-            "part a rule that needs review is about (for example inside the 2'-0\" tax-map caution zone of a yard). "
-            "The buildable envelope is only a see-through guide: colours come from the rules' results.")
+            "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
+            "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
+            "ridge, not its eaves). RED: it fails there under every reading. AMBER: it fails there under some "
+            "readings only (for example within the tax map's 2'-0\" of a lot line, which a survey settles). "
+            "Nothing where it complies. The buildable envelope is only a see-through guide: colours come from the "
+            "rules' results.")
     return text + ("\n\nChecked against: " + code if code else "")
 
 

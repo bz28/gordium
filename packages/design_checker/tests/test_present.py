@@ -418,6 +418,45 @@ def test_a_height_that_needs_review_is_amber_above_the_limit():
     assert plan(site, env, {"items": [{"measure": "building_height", "status": present.COMPLIES}]}, {})["encroach"] == []
 
 
+def test_only_what_rises_above_the_height_limit_is_coloured_a_roofs_ridge_not_its_eaves():
+    """A roof sloping from 30 ft (at y 25) to 40 ft (at y 65) under a 35 ft limit: only the half of the plan where
+    the roof is above 35 ft (y 45 to 65, 25 × 20 = 500 sf) is coloured, never the whole 1,000 sf footprint."""
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    from test_measure import sloped_roof_box
+    site = _plot(sloped_roof_box(10, 25, 35, 65, 30, 40, "house"))
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    (top,) = plan(site, env, {"items": [{"measure": "building_height", "status": present.FAILS}]}, {})["encroach"]
+    assert Polygon(top["outline"]).area == pytest.approx(500, abs=0.01)
+    assert min(p[1] for p in top["outline"]) == pytest.approx(45)
+    assert (top["base"], top["top"], top["building"]) == (35, 40, "house")
+
+
+def test_only_the_buildings_that_rise_above_the_limit_are_coloured_each_to_its_own_top():
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    site = _plot(box(10, 25, 35, 65, 0, 38, "house"), box(36, 70, 46, 80, 0, 12, "garage"))
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    tops = plan(site, env, {"items": [{"measure": "building_height", "status": present.FAILS}]}, {})["encroach"]
+    assert [(t["base"], t["top"], round(Polygon(t["outline"]).area, 3)) for t in tops] == [(35, 38, 1000)]
+    assert tops[0]["building"] == "house"                                     # the low garage: nothing
+
+
+def test_a_yard_strip_is_cut_per_building_each_from_its_own_bottom_to_its_own_top():
+    """A 30 ft house and a separate 10 ft wing both 2 ft from the west line, short of it under every reading by
+    4 ft: each building gets its own strip, the wing's only up to the wing's own 10 ft (never the house's 30)."""
+    from design_checker.check import plan
+    site = _plot(box(2, 25, 20, 65, 0, 30, "house"), box(2, 68, 10, 80, 1, 10, "wing"))
+    env = {"outline": [[10, 25], [40, 25], [40, 65], [10, 65]], "top": 35, "base": 0}
+    item = {"measure": "side_yard_smaller", "status": present.FAILS, "colour": "red",
+            "limits": [{"points": [[0, 40], [2, 40]], "near": 4, "far": 4}]}
+    strips = plan(site, env, {"items": [item]}, {}, FACTS)["encroach"]
+    assert sorted((e["base"], e["top"]) for e in strips) == [(0, 30), (1, 10)]     # the wing never to 30 ft
+    got = sorted((e["building"], e["status"], e["base"], e["top"], round(max(p[0] for p in e["outline"]), 3))
+                 for e in strips)
+    assert got == [("house", present.FAILS, 0, 30, 4.0), ("wing", present.FAILS, 1, 10, 4.0)]
+
+
 def test_the_colour_comes_from_the_result_only():
     """rhino_logic.highlight: the one place a result becomes a colour (the conduit draws only what it names)."""
     sys.path.insert(0, str(REPO / "packages/design_checker/design_checker"))

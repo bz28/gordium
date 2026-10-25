@@ -281,8 +281,9 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    after you stop (kept with the file). After a check:
    - when something newly stops complying, a short note appears bottom left ("✕ Rear yard no longer complies ·
      29'-6" proposed · 30'-0" required · −0'-6""). It goes by itself;
-   - only the part of the building inside a required yard, or above the height limit, turns red. The rest stays
-     neutral;
+   - only the offending part of the building is coloured: the part inside a required yard, or above the height
+     limit. Red where it fails under every reading; amber where it fails only under some (for example within the
+     tax map's 2'-0" of a lot line). The rest stays neutral;
    - in Top view each yard is drawn as measured, marked ✓ ? or ✕.
 6. **Read the panel.** Click any row. The bottom half shows the city's exact words, the examiner-style citation
    ("§325-8, District Regulations Chart, R-1b, Rear yard column, note 16") with links to the page, how it was

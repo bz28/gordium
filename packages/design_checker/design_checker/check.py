@@ -622,6 +622,41 @@ def _yard_lines(lot, measure: str, point):
     return lot.line(hit) if hit else None
 
 
+def _clip_above(points: list, z: float) -> list:
+    """A face's points clipped to the part at height z or above (Sutherland-Hodgman against one level)."""
+    out = []
+    for k, p in enumerate(points):
+        q = points[(k + 1) % len(points)]
+        if p[2] >= z:
+            out.append(list(p))
+        if (p[2] >= z) != (q[2] >= z):               # the edge crosses the level: where it does
+            t = (z - p[2]) / (q[2] - p[2])
+            out.append([p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1]), z])
+    return out
+
+
+def above(building: dict, z: float):
+    """The building seen from above where it rises above height z: each face clipped to z and above, projected
+    flat (a pitched roof's strip along its ridge, a flat roof's whole outline; vertical faces add nothing)."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    parts = []
+    for f in building.get("faces") or []:
+        if not any(p[2] > z + 1e-6 for p in f["points"]):
+            continue
+        shell = _clip_above(f["points"], z)
+        if len(shell) < 3:
+            continue
+        poly = Polygon([p[:2] for p in shell]).buffer(0)
+        for h in f.get("holes") or []:
+            hole = _clip_above(h, z)
+            if len(hole) >= 3:
+                poly = poly.difference(Polygon([p[:2] for p in hole]).buffer(0))
+        if poly.area > 1e-9:
+            parts.append(poly)
+    return unary_union(parts) if parts else Polygon()
+
+
 def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = None) -> dict:
     """What the viewport draws in plan (feet): each lot edge with its length, the yard lines measured (each with
     its item's status), and where the building breaks a limit: the strip of its footprint inside a required yard,
@@ -640,9 +675,9 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
               (" (approx.)" if i.get("approx") else "")}
              for i in v["items"] if i.get("points") and i.get("measure") in YARD_MEASURES]
     encroach = []
-    plans = [_projection(b) for b in site.get("buildings") or [] if b.get("faces")]
-    footprint = unary_union(plans) if plans else None
-    tops = [p[2] for b in site.get("buildings") or [] for f in b.get("faces") or [] for p in f["points"]]
+    solids = [(b, _projection(b)) for b in site.get("buildings") or [] if b.get("faces")]
+    footprint = unary_union([p for _, p in solids]) if solids else None
+    tops = [p[2] for b, _ in solids for f in b["faces"] for p in f["points"]]
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
     if footprint is not None and not footprint.is_empty and env and env.get("outline") and tops:
         shape = Lot(site, facts or {}) if lot.get("edges") and facts and facts.get("street_line") else None
@@ -668,19 +703,29 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
         doubt = unary_union(ambers) if ambers else None
         if doubt is not None and red is not None:
             doubt = doubt.difference(red)
-        # outlines simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude;
-        # without a grade the strip stands on the building's own base, never at 0
-        base = env["base"] if env.get("base") is not None else min(tops)
+        # per building: only the part of THAT building in the yard, from its own bottom to its own top (a garage
+        # in a side yard is never coloured up to the house's ridge). The viewport then cuts each building by its
+        # block (Rhino's boolean), so a cantilever over a yard is coloured, not the air under it. Outlines
+        # simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude.
         for region, status in ((red, present.FAILS), (doubt, present.REVIEW)):
-            for g in hole_free(region):
-                if g.area > 1e-3:
-                    encroach.append({"outline": _ring(g), "base": base, "top": max(tops), "why": "yard",
-                                     "status": status})
+            if region is None or region.is_empty:
+                continue
+            for b, own in solids:
+                zs = [p[2] for f in b["faces"] for p in f["points"]]
+                for g in hole_free(region.intersection(own)):
+                    if g.area > 1e-3:
+                        encroach.append({"outline": _ring(g), "base": min(zs), "top": max(zs), "why": "yard",
+                                         "status": status, "building": b.get("id")})
         height = statuses.get("building_height")
-        if height in (present.FAILS, present.REVIEW) and env.get("top") is not None and max(tops) > env["top"]:
-            for g in getattr(footprint, "geoms", [footprint]):
-                encroach.append({"outline": _ring(g), "base": env["top"], "top": max(tops), "why": "height",
-                                 "status": height})
+        if height in (present.FAILS, present.REVIEW) and env.get("top") is not None:
+            for b, _ in solids:                         # only what rises above the limit: a roof's ridge, not its eaves
+                top = max(p[2] for f in b["faces"] for p in f["points"])
+                if top <= env["top"] + 1e-6:
+                    continue
+                for g in hole_free(above(b, env["top"])):
+                    if g.area > 1e-3:
+                        encroach.append({"outline": _ring(g), "base": env["top"], "top": top, "why": "height",
+                                         "status": height, "building": b.get("id")})
     return {"edges": edges, "yards": yards, "encroach": encroach,
             "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
 

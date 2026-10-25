@@ -114,7 +114,8 @@ try:
         amber_b = [b for b, st in g.overlay().encroach if st == "needs_review"]
         log["bands"] = {"yard": round(yard, 3), "red": [span(b) for b in red_b], "amber": [span(b) for b in amber_b]}
         e = 0.05                                            # proud by scaling about the box centre: a slanted corner moves a bit more
-        claim("red: from the wall to 8 ft from the lot line (over even if the line is 2 ft out)", len(red_b) == 1 and
+        floors = len(g._buildings(doc))                     # each floor of the starting house: its own red piece
+        claim("red: from the wall to 8 ft from the lot line (over even if the line is 2 ft out)", len(red_b) == floors and
               all(yard - e <= lo and hi <= 8 + e and hi >= 8 - e for lo, hi in log["bands"]["red"]), log["bands"])
         corners = sorted(round(d, 3) for b in amber_b for d in dists(b))
         log["bands"]["amber_corners"] = corners

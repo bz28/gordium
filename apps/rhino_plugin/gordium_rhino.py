@@ -761,6 +761,24 @@ def _prism(doc, outline, base, top):
     return brep
 
 
+def _offending(doc, e):
+    """The part of its building inside one coloured block (check.plan: a yard strip from the building's bottom to
+    its top, or what rises above the height limit): Rhino's intersection of the building with the block, so a
+    cantilever over a yard is coloured and not the air under it, a roof's ridge and not the sky over its slopes.
+    The block is cut a hair larger (_proud) so none of its faces lies on the building's own. The block itself when
+    Rhino can't intersect (a block instance, a mesh, a boolean that fails): never nothing (logic.offending_pieces)."""
+    block = _prism(doc, e["outline"], e["base"], e["top"])
+    if block is None:
+        return []
+    found = _find(doc, e.get("building") or "")
+    solid = _drawable(found.Geometry) if found is not None else None
+    pieces = None
+    if isinstance(solid, rg.Brep) and solid.IsSolid:
+        pieces = rg.Brep.CreateBooleanIntersection(solid, _proud(doc, block.DuplicateBrep()),
+                                                   doc.ModelAbsoluteTolerance)
+    return logic.offending_pieces(pieces, block)
+
+
 def _actions():
     """What the panel's buttons do (gordium_ui.make_panel): each one gated, so while a start box is open none of them
     touches the model (rhino_logic.gate_actions)."""
@@ -2080,9 +2098,9 @@ def _draw_plan(doc, o, result, facts):
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
     o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
-    o.encroach = [(_proud(doc, b), status) for b, status in ((_prism(doc, e["outline"], e["base"], e["top"]),
-                                                 e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
-                  if b is not None and logic.highlight(status)]          # coloured from the rule's result only
+    o.encroach = [(_proud(doc, piece), status)                           # coloured from the rule's result only
+                  for e, status in ((e, e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
+                  if logic.highlight(status) for piece in _offending(doc, e)]
     # every line a label must stay off (model space): the yard dimensions, the lot's edges, the house's edges
     pts = o.lot_outline or []
     o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
