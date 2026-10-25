@@ -109,6 +109,11 @@ def saved(g, doc):
     return {k: doc.Strings.GetValue(g.SECTION, k) for k in (g.ENTRY, g.UI_ENTRY, g.SOURCES_ENTRY)}
 
 
+def differs(now, expected):
+    """Each saved entry that differs: what it says now and what it should say."""
+    return {k: {"now": v, "expected": expected.get(k)} for k, v in now.items() if v != expected.get(k)}
+
+
 def recheck_owed(g, doc):
     """After Rhino's Undo or Redo, the model is checked again: a re-check is still owed at the next idle
     (rhino_logic.should_recheck, as live mode's _idle asks it), or one has finished since the command began. Never
@@ -213,7 +218,7 @@ def main():
         claim("2 one Undo puts the sample back exactly", ran and undone == before,
               {"ran": ran, "missing": sorted(set(before) - set(undone)), "extra": sorted(set(undone) - set(before))})
         claim("2 after Undo the file says the sample again (facts, choices, sources)", saved(g, doc) == said_before,
-              {k: v != said_before.get(k) for k, v in saved(g, doc).items()})
+              differs(saved(g, doc), said_before))
         clean, shown = nothing_stale(g)
         claim("2 after Undo nothing of 96 is left on screen", clean, shown)
         owed, why = recheck_owed(g, doc)
@@ -224,7 +229,7 @@ def main():
               {"ran": ran, "missing": sorted(set(after) - set(redone)), "extra": sorted(set(redone) - set(after))})
         capture(doc, "2_after_redo")
         claim("2 after Redo the file says 96 again (facts, choices, sources)", saved(g, doc) == said_after,
-              {k: v != said_after.get(k) for k, v in saved(g, doc).items()})
+              differs(saved(g, doc), said_after))
         clean, shown = nothing_stale(g)
         claim("2 after Redo nothing of the sample is left on screen", clean, shown)
         owed, why = recheck_owed(g, doc)
@@ -287,6 +292,7 @@ def main():
         moved = str(doc.Objects.Transform(floor, Rhino.Geometry.Transform.Translation(3, 0, 0), True))
         house = house[:-1] + [moved]
         before = objects(doc)
+        said_before = saved(g, doc)              # after the survey and the edit: what Undo must give back
         seen = edit_site(g, doc, "96 Ithaca Rd, Ithaca, NY 14850", "96_ithaca_rd", lambda fresh, keep: keep[1])
         log["step5"] = {k: v for k, v in seen.items() if k != "objects"}
         asked = seen["asked"]
@@ -301,6 +307,7 @@ def main():
         facts = g.current_facts(doc)
         lot = g._find(doc, facts.get("lot_id") or "")
         after = objects(doc)
+        said_after = saved(g, doc)
         claim("5 Keep my building: the floors kept, the surveyed lot replaced by 96's tax-map lot",
               sorted(g.RhinoTable(doc).massing()) == sorted(house) and survey_lot not in after and lot is not None and
               "96" in (lot.Attributes.Name or "") and facts.get("lot_surveyed") is False,
@@ -311,12 +318,22 @@ def main():
         undone = objects(doc)
         claim("5 one Undo puts the surveyed lot and the edited house back exactly", ran and undone == before,
               {"ran": ran, "missing": sorted(set(before) - set(undone)), "extra": sorted(set(undone) - set(before))})
+        claim("5 after Undo the file says the surveyed lot again (facts, choices, sources)",
+              saved(g, doc) == said_before, differs(saved(g, doc), said_before))
+        clean, shown = nothing_stale(g)
+        claim("5 after Undo nothing of 96 is left on screen", clean, shown)
+        owed, why = recheck_owed(g, doc)
+        claim("5 after Undo the surveyed lot is checked again (live mode)", owed, why)
         ran = rhino("Redo", "5 redo")
         redone = objects(doc)
         claim("5 Redo draws 96's lot again with the kept house, the surveyed lot gone", ran and redone == after,
               {"ran": ran, "missing": sorted(set(after) - set(redone)), "extra": sorted(set(redone) - set(after))})
+        claim("5 after Redo the file says 96 again (facts, choices, sources)", saved(g, doc) == said_after,
+              differs(saved(g, doc), said_after))
         clean, shown = nothing_stale(g)
         claim("5 after Redo nothing of the surveyed lot is left on screen", clean, shown)
+        owed, why = recheck_owed(g, doc)
+        claim("5 after Redo 96 is checked again (live mode)", owed, why)
         log["ok"] = all(c["ok"] for c in log["claims"].values())
     except Exception:
         log["ok"] = False

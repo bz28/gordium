@@ -45,8 +45,11 @@ def curve(doc, x=0.0, layer=None):
     return doc.Objects.AddCurve(rg.LineCurve(rg.Point3d(x, 0, 0), rg.Point3d(x + 10, 0, 0)), attrs)
 
 
+WRITTEN = "{\"lot\": 1}"                          # the document string a case writes inside its record
+
+
 def strings(doc):
-    doc.Strings.SetString("gordium_probe", "facts", "{\"lot\": 1}")
+    doc.Strings.SetString("gordium_probe", "facts", WRITTEN)
 
 
 def user_strings(doc):
@@ -118,22 +121,26 @@ def one(docs, name, extra):
         undo = bool(Rhino.RhinoApp.RunScript("_Undo", False))
         gone = doc.Objects.FindId(added) is None
         held_back = doc.Objects.FindId(kept_id) is not None        # Undo brings the held object back
-        string_undone = doc.Strings.GetValue("gordium_probe", "facts") is None
+        string_after_undo = doc.Strings.GetValue("gordium_probe", "facts")
+        string_undone = not string_after_undo                    # gone, or emptied
         redo = bool(Rhino.RhinoApp.RunScript("_Redo", False))
         back = doc.Objects.FindId(added) is not None
         held_gone = doc.Objects.FindId(kept_id) is None            # and Redo deletes it again
-        string_redone = doc.Strings.GetValue("gordium_probe", "facts") is not None
-        ok = gone and back and (not held or (held_back and held_gone)) and (
+        string_after_redo = doc.Strings.GetValue("gordium_probe", "facts")
+        string_redone = string_after_redo == WRITTEN             # exactly what was written
+        steps = log.pop("held", None) or {}
+        hold_made = bool(steps.get("moved") and steps.get("layer_deleted"))   # the hidden-layer hold really happened
+        ok = gone and back and (not held or (hold_made and held_back and held_gone)) and (
             not wrote or (string_undone and string_redone))
         log["cases"][name] = {"ok": ok, "serial": int(serial), "ended": bool(ended),
                               "in_command": in_command, "undo_ran": undo, "undone": gone, "redo_ran": redo,
                               "redone": back, "held_back_on_undo": held_back if held else None,
                               "held_gone_on_redo": held_gone if held else None,
-                              "held_steps": log.pop("held", None) if held else None,
-                              "string_undone": string_undone if wrote else None,
-                              "string_redone": string_redone if wrote else None}
+                              "held_steps": steps if held else None,
+                              "string_after_undo": string_after_undo if wrote else None,
+                              "string_after_redo": string_after_redo if wrote else None}
     except Exception:
-        log["cases"][name] = {"ok": False, "trace": traceback.format_exc()}
+        log["cases"][name] = {"ok": False, "trace": traceback.format_exc(), "held_steps": log.pop("held", None)}
     finally:
         close(doc)
 
