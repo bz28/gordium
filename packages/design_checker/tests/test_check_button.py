@@ -208,6 +208,9 @@ def test_the_rhino_check_runs_its_idle_steps_across_real_idle():
     stop = script[start:script.index('os.remove(S + "out.json")')]                 # before this run's out.json
     assert all(s in stop for s in ('earlier["finished"] = True', 'earlier["timer"].Stop()',
                                    'Rhino.RhinoApp.Idle -= earlier["idle"]'))
+    step_b = body(script, "def step_b(", "\ndef ")                 # counted after the tick, before the edit
+    assert (step_b.index('auto_box").Checked = True') < step_b.index('run["checks_at_tick"] = len(runs)')
+            < step_b.rindex("move_top_floor("))
     step_c = body(script, "def step_c(", "\ndef ")
     assert 'run["checks_at_tick"] == 1' in step_c and "len(runs) == 2" in step_c   # the edit's own check
     enough = body(script, "def idle_enough(", "\ndef ")
