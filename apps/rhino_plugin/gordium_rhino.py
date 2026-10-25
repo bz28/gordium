@@ -295,7 +295,7 @@ def suggested_facts(doc, zones):
     boxes = [o.Geometry.GetBoundingBox(True) for o in buildings]
     building_data = [{"id": str(o.Id), "bottom": b.Min.Z, "volume": b.Diagonal.X * b.Diagonal.Y * b.Diagonal.Z}
                      for o, b in zip(buildings, boxes)]
-    facts = logic.suggested_facts(JURISDICTION, zones, lot_data, building_data)
+    facts = logic.suggested_facts(JURISDICTION, zones, lot_data, building_data, _scale(doc))  # (decided in feet)
     return logic.to_feet(facts, _scale(doc))
 
 

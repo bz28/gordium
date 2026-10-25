@@ -2626,3 +2626,42 @@ def test_a_piece_too_short_to_have_a_direction_is_never_a_street_a_corner_or_a_t
     arc = [[[10 * math.cos(math.radians(a)), 10 * math.sin(math.radians(a))],
             [10 * math.cos(math.radians(a + 2)), 10 * math.sin(math.radians(a + 2))]] for a in range(0, 90, 2)]
     assert street_lines.heading_change(arc) == pytest.approx(88.0, abs=3.0)        # 0.35 ft pieces: 90° in all
+
+
+def test_a_curve_drawn_in_short_pieces_is_asked_and_the_suggestion_is_decided_in_feet():
+    """Street-run review round 6: (F1, a Front yard false pass) a street curving 40° in ten 0.4 ft pieces had them
+    all passed through as direction-less, so the curve read as one sharp 40° joint, a sure corner, and the street
+    was cut short unasked; short pieces are passed through only up to SHORT_PIECE_FT in all, past that read piece
+    by piece. (F2) the suggestion was decided in model units: in a millimetre model a 0.02 ft slip was 6 "units"
+    long, a real line, and the whole street; it is decided in feet."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    pts, (x, y, h) = [(0, 0), (50, 0)], (50, 0, 0)
+    for _ in range(10):
+        h += 4
+        x, y = x + 0.4 * math.cos(math.radians(h)), y + 0.4 * math.sin(math.radians(h))
+        pts.append((x, y))
+    x, y = x + 50 * math.cos(math.radians(h)), y + 50 * math.sin(math.radians(h))
+    pts += [(x, y), (x - 20, y + 100), (-20, 100)]
+    outline = _ring(pts)
+    asked = []
+    run, said = logic.street_pick(outline, outline[0], ask=lambda q: asked.append(q) or None)
+    assert asked and run == list(range(12)), (run, asked)                # asked, and not answered: kept
+    r = check_site(_plot(box(80, 31, 84, 35, 0, 25), lot_=lot_of(pts)), dict(base, street_line=[outline[k] for k in run]))
+    front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+    assert front["status"] != "complies", front
+    # (F2) the round-5 slip lot drawn in millimetres: the real street, never the 6 mm slip
+    corners = [(0, 0), (0.012, -0.016), (20, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)]
+    for per_foot in (304.8, 12.0, 1.0):                                 # millimetres, inches, feet
+        segs = [tuple(map(tuple, x)) for x in _ring([(a * per_foot, b * per_foot) for a, b in corners])]
+        got = logic.to_feet(logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0,
+                                                                    "segments": segs}], [], 1 / per_foot), 1 / per_foot)
+        assert [[[round(c, 6) for c in p] for p in line] for line in got["street_line"]] == \
+            [list(map(list, x)) for x in _ring(corners)[1:5]], (per_foot, got["street_line"])
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "logic.suggested_facts(JURISDICTION, zones, lot_data, building_data, _scale(doc))" in rhino

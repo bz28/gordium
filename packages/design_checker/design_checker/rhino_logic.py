@@ -327,24 +327,27 @@ def corner_answered(facts, saved_ui, corner):
     return facts, saved_ui
 
 
-def suggested_facts(jurisdiction, zones, lots, buildings):
+def suggested_facts(jurisdiction, zones, lots, buildings, scale=1.0):
     """The start box's prefilled lot facts, in the model's units (the plugin converts them to feet), for the
     architect to confirm. `lots`: the Site layer's closed outlines, each {"id", "area", "bottom" (its lowest
     level), "segments": [((x, y), (x, y)), ...]}; `buildings`: each {"id", "bottom", "volume" (of its box)}.
     The largest outline is the lot, its lowest line on screen the street side; the ground is flat at the
     buildings' lowest point (or the lot's level); the lot is not from a survey; the first zone with rules; a
     detached one-family house; the largest solid the main building. The corner-lot question is never answered
-    here: always None, so the box asks it and the yards wait for the answer."""
+    here: always None, so the box asks it and the yards wait for the answer. `scale`: feet per model unit, for
+    the street's lengths and turns (decided in feet, as everywhere: review round 6, F2, a 6 mm slip in a
+    millimetre model read as a 6 ft line)."""
     facts = {"jurisdiction": jurisdiction, "zone": zones[0] if zones else None, "use": "one_family_detached",
              "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}
     lot = max(lots, key=lambda l: l["area"]) if lots else None
     if lot is not None:
         facts["lot_id"] = lot["id"]
         if lot["segments"]:
-            real = [s for s in lot["segments"] if not is_tiny(s)] or lot["segments"]   # (never a point drawn
-            a, b = min(real, key=lambda s: (s[0][1] + s[1][1]) / 2)                      # twice: round 4, F1)
             outline = [[[p[0], p[1]], [q[0], q[1]]] for p, q in lot["segments"]]
-            run = street_run(outline, [[a[0], a[1]], [b[0], b[1]]], tolerance=0.0)
+            feet = [[[c * scale for c in p] for p in line] for line in outline]
+            real = [k for k in range(len(feet)) if not is_tiny(feet[k])] or list(range(len(feet)))   # (never a
+            low = min(real, key=lambda k: (outline[k][0][1] + outline[k][1][1]) / 2)      # point drawn twice: r4)
+            run = street_run(feet, feet[low], tolerance=0.0)
             # the whole street it is on (review round 1, F1: a tax-map street suggested as one piece), only when
             # both its ends are sure; else no suggestion, so the box asks for the click and the click asks the
             # question (round 3, F1: a curving street suggested as its first 30°, the front yard from part of it)
@@ -929,19 +932,33 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
     if tiny[hit]:                              # a point clicked, not a line: no street of it (round 4, F1)
         return None
 
+    passed = set()                             # the short pieces passed through: no direction of their own
+
     def step(k, at, seen):
-        """(the one real piece other than k, and those in `seen`, that meets k's end `at`; its far end; the tiny
-        pieces passed on the way, in order); None when none, or more than one (an outline that doesn't run end to
-        end there: a lot the measuring refuses). A piece no longer than JOINT is passed through, never a stop
-        (review round 3, F2: a repeated corner point ended the street there, unasked)."""
-        via, points = [], [at]
+        """(the next piece along from k's end `at`, other than those in `seen`; its far end; the short pieces passed
+        on the way, in order); None when there is none, or more than one (an outline that doesn't run end to end:
+        a lot the measuring refuses). Short pieces (is_tiny) are passed through, no direction of their own (a
+        corner point drawn twice or a slip of the pen, review rounds 3 to 5), but only up to SHORT_PIECE_FT of them
+        in all: past that they are the lot line's own shape (a curve drawn in short pieces), read piece by piece,
+        never folded into one sharp joint (round 6, F1)."""
+        via, points, length = [], [at], 0.0
         while True:
-            more = [j for j in range(n) if j != k and tiny[j] and j not in via and j not in seen
-                    and any(near(pieces[j][0], p) or near(pieces[j][1], p) for p in points)]
-            if not more:
+            touching = [j for j in range(n) if j != k and j not in via and j not in seen
+                        and any(near(pieces[j][0], p) or near(pieces[j][1], p) for p in points)]
+            short = [j for j in touching if tiny[j]]
+            budget = [j for j in short if length + math.dist(*pieces[j]) < SHORT_PIECE_FT]
+            if not short:
                 break
-            for j in more:
+            if len(budget) != len(short):              # past the allowance: the short piece is a lot line itself
+                found = [j for j in touching if j not in budget] if not budget else []
+                if len(found) != 1:
+                    return None
+                j = found[0]
+                start = any(near(pieces[j][0], p) for p in points)
+                return j, (pieces[j][1] if start else pieces[j][0]), via
+            for j in short:
                 via.append(j)
+                length += math.dist(*pieces[j])
                 points += pieces[j]
         found = [j for j in range(n) if j != k and not tiny[j] and j not in via
                  and any(near(pieces[j][0], p) or near(pieces[j][1], p) for p in points)]
@@ -951,7 +968,7 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
         start = any(near(pieces[j][0], p) for p in points)
         return j, (pieces[j][1] if start else pieces[j][0]), via
 
-    def directions(order):
+    def directions(order, skip=()):
         """Each piece's direction along `order` (pieces that meet end to end), the short ones left out (they have
         no direction of their own: round 5); None if they don't run end to end."""
         vecs, end = [], None
@@ -965,12 +982,12 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
             elif not near(a, end):
                 return None
             end = b
-            if not tiny[q]:
+            if q not in passed and q not in skip:
                 vecs.append((b[0] - a[0], b[1] - a[1]))
         return vecs
 
-    def swing_of(order):                 # how far the direction swings along `order`, in degrees (None: apart)
-        vecs = directions(order)
+    def swing_of(order, skip=()):        # how far the direction swings along `order`, in degrees (None: apart)
+        vecs = directions(order, skip)
         if vecs is None:
             return None
         run_, low, high = 0.0, 0.0, 0.0
@@ -980,7 +997,7 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
         return high - low
 
     def turn(a, b, via=()):              # the joint from a to b, over the short pieces between them
-        got = swing_of([a, *via, b])
+        got = swing_of([a, *via, b], via)
         return float("inf") if got is None else got
 
     def free_end(k, inner):
@@ -1001,6 +1018,7 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
             if nxt is None or nxt[0] in taken or set(nxt[2]) & taken:
                 break
             j, far, via = nxt
+            passed.update(via)
             if own and names[j]:                               # both named: the street's identity decides
                 if not sl.same_street(own, names[j]):
                     break
@@ -1019,9 +1037,10 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
                         nx = step(k, end, set(run) | set(more) | set(maybe[0]))
                         if (nx is None or nx[0] in taken or set(nx[2]) & taken or t > PIECE_TURN_DEG or turn(k, nx[0], nx[2]) > PIECE_TURN_DEG
                                 or (names[nx[0]] and not (own and sl.same_street(own, names[nx[0]])))
-                                or (swing_of([last] + more + nx[2] + [nx[0]]) or 0.0) > sl.TURN_LIMIT_DEG):
+                                or (swing_of([last] + more + nx[2] + [nx[0]], nx[2]) or 0.0) > sl.TURN_LIMIT_DEG):
                             break
                         more += nx[2]
+                        passed.update(nx[2])
                         k, end = nx[0], nx[1]
                     maybe[side] = more
                     swings[side] = swing_of([last] + more)
