@@ -42,6 +42,12 @@ HIGHLIGHT_EDGE = {"red": 3, "amber": 1}
 HIGHLIGHT_PROUD_FT = 0.02    # each block stands this far proud of the house, so their shared faces never fight
 
 
+def dim_color(status, dark):
+    """A dimension's colour (logic.dim_rgb): red fails, amber needs review, neutral grey complies."""
+    r, g, b = logic.dim_rgb(status, dark)
+    return System.Drawing.Color.FromArgb(r, g, b)
+
+
 def halo(dark):
     """The thin halo under a dimension: near-black on a light viewport, near-white on a dark one."""
     return System.Drawing.Color.FromArgb(220, 245, 245, 245) if dark else System.Drawing.Color.FromArgb(220, 25, 25, 25)

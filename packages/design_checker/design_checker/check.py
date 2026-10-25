@@ -683,6 +683,15 @@ def required_lines(points: list, item: dict, edges: list) -> tuple[list, str | N
     return lines, why
 
 
+def required_tags(item: dict) -> list:
+    """The small tag at each required line's end, in the order of required_lines: "min 25'-0\"" (feet-inches, as
+    the panel's Required column rounds a minimum: up)."""
+    lo_hi = item.get("limit_span_ft")
+    limits = [item["limit_ft"]] if isinstance(item.get("limit_ft"), (int, float)) else (
+        sorted(set(lo_hi)) if lo_hi else [])
+    return ["min " + present.value_text(x, "ft", "≥", False) for x in limits if x > 0]
+
+
 def required_line(points: list, limit, edges: list) -> list | None:
     """Where the yard's required line crosses its dimension (plan, feet): a short line square to the dimension,
     `limit` from the lot line along it, REQUIRED_HALF_FT either side, drawn faint. The dimension's lot-line end is
@@ -730,22 +739,54 @@ def _wall_runs(footprint) -> list:
                 return abs(cross) / max(math.dist(a, c), 1e-12) <= STRAIGHT_FT and dot > 0
             corners = [k for k in range(n) if not straight(k)]
             for j, k in enumerate(corners):
-                out.append((pts[k], pts[corners[(j + 1) % len(corners)]]))
+                end = corners[(j + 1) % len(corners)]
+                chain = [pts[(k + i) % n] for i in range(((end - k) % n or n) + 1)]
+                out += _straight_runs(chain)
     return out
 
 
-def dim_points(points: list, measure: str, shape, footprint, edges: list) -> list:
-    """Where a yard's dimension is drawn (plan, feet): [its lot-line end, its building end], as a drawing would
-    place it (Rhino check of #29). The measurement gives the nearest pair, often a corner of the house that the
-    neighbouring yard's dimension shares, and on a lot line drawn as short pieces its lot end can be a joint, off
-    square. So: the building end is the middle of the part of the wall run that is nearest the lot line (within
-    DIM_NEAR_FT of the yard as measured: a wall parallel to the line, its whole length; a wall at an angle, its
-    near end); the lot end is that point's square projection onto the lot-line piece it falls on (0° by
-    construction). The label stays the yard as measured. The measurement's own points when there is no lot shape
-    or footprint to work from."""
+def _straight_runs(chain: list) -> list:
+    """A chain of points joined into runs that each stay within STRAIGHT_FT of their own end-to-end line
+    (Douglas-Peucker): a wall drawn as many short pieces along a curve is many runs, never one chord in front of
+    it (independent review of #29, round 5)."""
+    a, b = chain[0], chain[-1]
+    length = math.dist(a, b)
+    far, at = 0.0, None
+    for k, p in enumerate(chain[1:-1], 1):
+        off = (abs((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) / length if length > 1e-12
+               else math.dist(a, p))
+        if off > far:
+            far, at = off, k
+    if at is None or far <= STRAIGHT_FT:
+        return [(a, b)] if length > 1e-9 else []
+    return _straight_runs(chain[:at + 1]) + _straight_runs(chain[at:])
+
+
+DIM_CANDIDATES = 15   # positions offered along a wall run for the viewport to place a yard's dimension clear
+
+
+def dim_points(points: list, measure: str, shape, footprint, edges: list, worst: bool = True) -> list:
+    """Where a yard's dimension is drawn by preference (plan, feet): [its lot-line end, its building end]; the first
+    of dim_candidates, or the measurement's own pair when there is none."""
+    found = dim_candidates(points, measure, shape, footprint, edges, worst)
+    return found[0] if found else points
+
+
+def dim_candidates(points: list, measure: str, shape, footprint, edges: list, worst: bool = True) -> list:
+    """Where a yard's dimension may be drawn (plan, feet), best first: pairs [its lot-line end, its building end],
+    as a drawing would place it (Rhino checks of #29). The building end lies on the wall run facing the yard's lot
+    line, never a corner the next yard's dimension shares; the lot end is its square projection onto the lot-line
+    piece it falls on (0° by construction). Best is nearest the middle of the run; the viewport takes the first
+    whose label sits clear on screen (rhino_logic.place_dimension).
+    How far along the run it may go: a yard that fails or needs review (`worst`) is dimensioned where it is
+    shortest, within DIM_NEAR_FT of the yard as measured (the drawing never shows more room than the label);
+    a complying yard anywhere its dimension is within BEND_SLACK_FT of it (a lot line a fraction of a degree off
+    the wall: anywhere along it). At a bend in the lot line right in front of the wall the nearest square position
+    within BEND_SLACK_FT. The label is always the yard as measured, its closest point. None (an empty list) when
+    there is no lot shape or footprint to work from."""
     from shapely.geometry import LineString, Point
     if not points or len(points) < 2 or shape is None or footprint is None or footprint.is_empty:
-        return points
+        return []
     a, b = [tuple(p[:2]) for p in points[:2]]
     if edges:
         ring = LineString([tuple(p[:2]) for e in edges for p in e["points"]])
@@ -753,14 +794,14 @@ def dim_points(points: list, measure: str, shape, footprint, edges: list) -> lis
             a, b = b, a
     lines = _yard_lines(shape, measure, a)
     if lines is None:
-        return points
+        return []
     pieces = [(q[k], q[k + 1]) for g in getattr(lines, "geoms", [lines]) for q in [list(g.coords)]
               for k in range(len(q) - 1) if math.dist(q[k], q[k + 1]) > 1e-9]
     near = Point(b)
     measured = lines.distance(near)
     runs = [r for r in _wall_runs(footprint) if LineString(r).distance(near) < 1e-6]
     if not runs or not pieces:
-        return points
+        return []
     facing = min(pieces, key=lambda s: LineString(s).distance(near))
 
     def turn(run):                                 # how far the run is from parallel to the lot-line piece
@@ -770,38 +811,37 @@ def dim_points(points: list, measure: str, shape, footprint, edges: list) -> lis
     p, q = min(runs, key=turn)
     steps = 200
     at = [(p[0] + (q[0] - p[0]) * t / steps, p[1] + (q[1] - p[1]) * t / steps) for t in range(steps + 1)]
-    close = [k for k, x in enumerate(at) if lines.distance(Point(x)) <= measured + DIM_NEAR_FT]
-    if not close:
-        return points
-    nearest = min(range(len(at)), key=lambda k: math.dist(at[k], b))
-    lo = hi = nearest if nearest in close else close[0]
-    while lo - 1 in close:
-        lo -= 1
-    while hi + 1 in close:
-        hi += 1
-    mid = (lo + hi) // 2
 
     def onto(start, piece):                        # square projection onto a piece, if it falls on it
         (u, w) = piece
         dx, dy = w[0] - u[0], w[1] - u[1]
         t = ((start[0] - u[0]) * dx + (start[1] - u[1]) * dy) / (dx * dx + dy * dy)
         return (u[0] + t * dx, u[1] + t * dy) if -1e-9 <= t <= 1 + 1e-9 else None
-    # the middle of the near part, or the nearest point of it to the middle that lands square on a piece (a bend in
-    # the lot line straight in front of the middle: review round 3, F3); never a foot farther than the yard as
-    # measured allows (F4: a piece beyond the one measured to)
-    # the lot line bends right in front of the wall (its nearest point a joint): the nearest point of the wall to
-    # the middle that has a square foot, the dimension then a little longer than the yard (at most BEND_SLACK_FT;
-    # the label is the yard as measured, its closest point)
-    tries = [(sorted(range(lo, hi + 1), key=lambda k: abs(k - mid)), DIM_NEAR_FT),
-             (sorted(range(len(at)), key=lambda k: abs(k - mid)), BEND_SLACK_FT)]
-    for order, slack in tries:
-        for k in order:
-            feet = [x for x in (onto(at[k], piece) for piece in pieces) if x is not None]
-            if feet:
-                end = min(feet, key=lambda x: math.dist(x, at[k]))
-                if math.dist(end, at[k]) <= measured + slack + 1e-6:
-                    return [list(end), list(at[k])]
-    return points
+
+    def square(k, slack):                          # the dimension from at[k], if square and short enough
+        feet = [x for x in (onto(at[k], piece) for piece in pieces) if x is not None]
+        if not feet:
+            return None
+        foot = min(feet, key=lambda x: math.dist(x, at[k]))
+        if footprint.boundary.distance(Point(at[k])) > 1e-6:      # a start never off the wall (backstop)
+            return None
+        return [list(foot), list(at[k])] if math.dist(foot, at[k]) <= measured + slack + 1e-6 else None
+    middle = steps // 2
+    # never at the corners themselves; a complying yard's kept off the last twentieth of the wall (room for the
+    # neighbouring yard's), a short one where it is shortest, however near the corner that is
+    inner = range(1, steps) if worst else range(steps // 20, steps - steps // 20 + 1)
+    found = []
+    for slack in ((DIM_NEAR_FT, BEND_SLACK_FT) if worst else (BEND_SLACK_FT,)):
+        found = [(k, d) for k, d in ((k, square(k, slack)) for k in inner) if d]
+        if found:
+            break
+    if not found:                                   # a short wall: its own ends too
+        found = [(k, d) for k, d in ((k, square(k, BEND_SLACK_FT)) for k in range(steps + 1)) if d]
+    if len(found) > DIM_CANDIDATES:                 # spread evenly along the run, both ways from the best
+        spread = max(1, -(-(found[-1][0] - found[0][0]) // (DIM_CANDIDATES - 1)))
+        best = min(found, key=lambda kd: abs(kd[0] - middle))[0]
+        found = [(k, d) for k, d in found if (k - best) % spread == 0]
+    return [d for k, d in sorted(found, key=lambda kd: abs(kd[0] - middle))]
 
 
 def height_dim(site: dict, env: dict, v: dict, measured: dict) -> dict | None:
@@ -844,12 +884,18 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
     for i in v["items"]:
         if not (i.get("points") and i.get("measure") in YARD_MEASURES):
             continue
-        at = dim_points(i["points"], i["measure"], shape, footprint, lot.get("edges") or [])
-        lines, why = required_lines(at, i, lot.get("edges") or [])
+        worst = i["status"] in (present.FAILS, present.REVIEW)
+        options = dim_candidates(i["points"], i["measure"], shape, footprint, lot.get("edges") or [], worst) or \
+            [i["points"]]
+        candidates = []
+        for at in options:
+            lines, why = required_lines(at, i, lot.get("edges") or [])
+            candidates.append({"points": at, "required_lines": lines})
         # a yard with no required line says why, on its label (review round 3, F2)
-        yards.append({"points": at, "measured_points": i["points"], "status": i["status"],
+        yards.append({"points": candidates[0]["points"], "measured_points": i["points"], "status": i["status"],
                       "label": _dim_label(i) + (f" · no required line: {why}" if why else ""),
-                      "required_lines": lines, "required_why": why})
+                      "required_lines": candidates[0]["required_lines"], "required_why": why,
+                      "required_tags": required_tags(i), "candidates": candidates})
     encroach = []
     tops = [p[2] for b, _ in solids for f in b["faces"] for p in f["points"]]
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
@@ -910,6 +956,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                                          "status": height, "building": b.get("id"),
                                          "measure": "building_height", "row": "Building height"})
     return {"edges": edges, "yards": yards, "encroach": encroach, "height": height_dim(site, env, v, measured),
+            "footprint": [_ring(g) for g in getattr(footprint, "geoms", [footprint])
+                          if footprint is not None and not footprint.is_empty and g.geom_type == "Polygon"],
             "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
 
 

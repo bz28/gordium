@@ -563,6 +563,50 @@ def _dimension(d, viewport, line, color):
             d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), ink, width)
 
 
+def _required(d, viewport, line, tag, dark):
+    """A yard's required line: a clear dashed mid-grey across its dimension, with a small "min 25'-0\"" tag at its
+    end (Rhino check of #29: the faint line barely registered)."""
+    r, g, b = logic.REQUIRED_RGB[1 if dark else 0]
+    grey = System.Drawing.Color.FromArgb(r, g, b)
+    d.DrawPatternedLine(line.From, line.To, grey, ui.DASHED, 1)
+    if tag:
+        q = viewport.WorldToClient(line.To)
+        d.Draw2dText(tag, grey, rg.Point2d(q.X + 4, q.Y - 6), False, 10)
+
+
+def _dim_label(d, viewport, quad, text, color, dark, line, kind):
+    """A dimension's label in its place (logic.place_dimension): its backing and outline, and its words written
+    along the dimension (readable: logic.text_angle), in the plan's own plane; past the line's end, a leader."""
+    plane_z = (getattr(overlay(), "lot_outline", None) or [rg.Point3d(0, 0, 0)])[0].Z
+
+    def model(p):
+        ray = viewport.ClientToWorld(rg.Point2d(p[0], p[1]))
+        ok, t = rg.Intersect.Intersection.LinePlane(ray, rg.Plane(rg.Point3d(0, 0, plane_z), rg.Vector3d.ZAxis))
+        return ray.PointAt(t) if ok else None
+    corners = [model(p) for p in quad]
+    if any(c is None for c in corners):
+        return
+    d.DrawPolygon(corners, ui.backing(dark), True)
+    d.DrawPolygon(corners, color, False)
+    a, b = line
+    angle = math.radians(logic.text_angle(a, b))
+    cx, cy = sum(p[0] for p in quad) / 4, sum(p[1] for p in quad) / 4
+    centre, ahead = model((cx, cy)), model((cx + math.cos(angle) * 10, cy + math.sin(angle) * 10))
+    xaxis = ahead - centre
+    plane = rg.Plane(centre, xaxis, rg.Vector3d.CrossProduct(rg.Vector3d.ZAxis, xaxis))
+    if plane.YAxis * (model((cx, cy - 10)) - centre) < 0:     # screen y runs down: keep the words upright
+        plane = rg.Plane(centre, xaxis, -plane.YAxis)
+    height = centre.DistanceTo(model((cx, cy + 11)))
+    words = Rhino.Display.Text3d(text, plane, height)
+    words.HorizontalAlignment = Rhino.DocObjects.TextHorizontalAlignment.Center
+    words.VerticalAlignment = Rhino.DocObjects.TextVerticalAlignment.Middle
+    d.Draw3dText(words, color)
+    words.Dispose()
+    if kind == "end":                                       # a leader from the line's outer end to the label
+        near = min(quad, key=lambda p: (p[0] - a[0]) ** 2 + (p[1] - a[1]) ** 2)
+        d.Draw2dLine(System.Drawing.PointF(a[0], a[1]), System.Drawing.PointF(near[0], near[1]), color, 1)
+
+
 def draw_screen(o, e):
     if not _here(o, e):
         return
@@ -598,22 +642,45 @@ def draw_screen(o, e):
     notice = _notice_box(o, e.Viewport, taken)
     elevation = logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
     shown = logic.dims_shown(zoomed_in, elevation)     # drawing-style dimensions: none zoomed out, none flat in elevation
-    for line, status in (getattr(o, "yard_required", None) or []) if shown else []:   # the required line, faint
-        color = ui.faint(ui.status_color("complies" if old else status, dark))
-        a, b = e.Viewport.WorldToClient(line.From), e.Viewport.WorldToClient(line.To)
-        d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 1)
-    for line, text, status in (getattr(o, "yard_dims", None) or []) if shown else []:   # each yard as measured (F4)
-        color = ui.status_color("complies" if old else status, dark)
-        _dimension(d, e.Viewport, line, color)
+    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
+        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
+                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
+        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
+    # each yard: its dimension placed where it and its label sit clear (logic.place_dimension: the status box, the
+    # notice, the edges' length labels, the labels before it, never inside the house), its required line dashed
+    # grey with its "min" tag, its label on the line (Rhino checks of #29)
+    o.placed = {}
+    footprint = [[(q.X, q.Y) for q in (e.Viewport.WorldToClient(p) for p in ring)]
+                 for ring in getattr(o, "footprint", None) or []]
+    away = None
+    if footprint:
+        pts = [p for ring in footprint for p in ring]
+        away = (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
+    for k, (line, text, status) in enumerate((getattr(o, "yard_dims", None) or []) if shown else []):
+        color = ui.dim_color("complies" if old else status, dark)
+        options = (getattr(o, "yard_options", None) or {}).get(k) or [(line, [])]
+        on_screen = [((a.X, a.Y), (b.X, b.Y)) for a, b in ((e.Viewport.WorldToClient(c.From),
+                                                             e.Viewport.WorldToClient(c.To)) for c, _ in options)]
         if old:
             text = text.split(" ", 1)[1] if text[:1] in ("?", "✕", "✓") else text
+        width = None                         # no words: only the line is placed
         if plan and logic.yard_label_shown(labels, status) and zoomed_in:
-            ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
-                        along=(line.From, line.To), obstacles=obstacles)   # beside its line, off every other
+            width = logic.label_width(text, 11)
+        blocks = [logic.rect_quad(box) for box in taken]
+        index, quad, kind = logic.place_dimension(on_screen, width, blocks, footprint[0] if footprint else None, away)
+        chosen, required = options[index]
+        o.placed[k] = (index, quad, kind)
+        for r, tag in zip(required, ((getattr(o, "yard_tags", None) or {}).get(k) or []) + [None] * len(required)):
+            _required(d, e.Viewport, r, tag, dark)
+        _dimension(d, e.Viewport, chosen, color)
+        if quad is not None:
+            _dim_label(d, e.Viewport, quad, text, color, dark, on_screen[index], kind)
+            xs, ys = [p[0] for p in quad], [p[1] for p in quad]
+            taken.append((min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)))
     height = getattr(o, "height_dim", None)
     if height is not None and elevation and zoomed_in:       # the height, dimensioned up from the grade plane
         line, text, status, limit = height
-        color = ui.status_color("complies" if old else status, dark)
+        color = ui.dim_color("complies" if old else status, dark)
         _dimension(d, e.Viewport, line, color)
         if limit is not None:                                # the limit: faint, across the dimension
             q = e.Viewport.WorldToClient(limit)
@@ -624,10 +691,6 @@ def draw_screen(o, e):
         if logic.yard_label_shown(labels, status):
             ui.label_at(d, e.Viewport, (line.From + line.To) / 2, text, color, dark, 11, taken,
                         along=(line.From, line.To))
-    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:
-        ui.label_at(d, e.Viewport, point, text, ui.status_color("complies", dark), dark, 11, taken,   # each edge's
-                    along=(edge.From, edge.To), obstacles=obstacles, leader=True)   # length, beside it, off every
-        # line; an edge shorter than its label gets a leader back to it (logic.needs_leader)
     limit = getattr(o, "height_limit", None)
     if limit is not None and logic.is_elevation_view(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z):
         corners = [e.Viewport.WorldToClient(p) for p in limit[0]]
@@ -2079,7 +2142,7 @@ def _clear(o):
     """Nothing from an earlier check is left on screen."""
     o.red, o.red_ids, o.dims, o.envelope, o.box = [], set(), [], None, rg.BoundingBox.Empty
     o.encroach, o.yard_dims, o.edge_labels, o.lot_outline, o.yards_zone, o.grade_points = [], [], [], None, None, []
-    o.yard_required, o.height_dim = [], None
+    o.yard_required, o.height_dim, o.yard_options, o.yard_tags, o.footprint, o.placed = [], None, {}, {}, [], {}
     o.plan_lines = []
     o.confirm, o.labels = None, []
     o.envelope_lines, o.height_limit, o.north, o.unmeasured = None, None, None, []
@@ -2133,6 +2196,16 @@ def _draw_plan(doc, o, result, facts):
     # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
     o.yard_required = [(rg.Line(_model_point(doc, r[0], 0.1), _model_point(doc, r[1], 0.1)), y["status"])
                        for y in plan.get("yards") or [] if y.get("points") for r in y.get("required_lines") or []]
+    # every position check.plan offers for each yard's dimension, with its required lines; the "min" tags; the
+    # buildings' outline (a label never sits inside it)
+    o.yard_options = {k: [(rg.Line(_model_point(doc, c["points"][0], 0.1), _model_point(doc, c["points"][1], 0.1)),
+                           [rg.Line(_model_point(doc, r[0], 0.1), _model_point(doc, r[1], 0.1))
+                            for r in c.get("required_lines") or []])
+                          for c in y.get("candidates") or []]
+                      for k, y in enumerate(y for y in plan.get("yards") or [] if y.get("points"))}
+    o.yard_tags = {k: y.get("required_tags") or [] for k, y in enumerate(y for y in plan.get("yards") or []
+                                                                           if y.get("points"))}
+    o.footprint = [[_model_point(doc, p, 0.1) for p in ring] for ring in plan.get("footprint") or []]
     h = plan.get("height")
     o.height_dim = (rg.Line(_model_point(doc, h["at"], h["base"]), _model_point(doc, h["at"], h["top"])), h["label"],
                     h["status"], _model_point(doc, h["at"], h["limit"]) if h.get("limit") is not None else None) \

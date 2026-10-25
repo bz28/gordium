@@ -8,6 +8,8 @@ view redraws.
 1. Top: one dimension per measured yard, each with its faint required line (two where the limit is read two
    ways), no two starting at the same point; the left side yard's red; its required line 10'-0" from the lot line;
    each yard's dimension square to the lot-line piece it ends on (within 0.1°).
+   A complying yard's dimension neutral grey; every label shown clear of the status box, the house and the other
+   labels (placed by logic.place_dimension: on its line, sliding along the wall to a clear spot).
 2. Front: only the height's dimension (no yard dimension lies flat on the ground line), vertical, from the grade
    plane up the measured height, beside the house, coloured as the height row.
 3. Zoomed out to the neighbourhood (the lot under 120 px): no dimension at all in Top.
@@ -107,8 +109,22 @@ try:
           len(o.yard_required) >= len(o.yard_dims), {"required": len(o.yard_required), "dims": len(o.yard_dims)})
     starts = [(round(line.To.X, 4), round(line.To.Y, 4)) for line, _, _ in o.yard_dims]
     claim("1 no two yard dimensions start at the same point", len(set(starts)) == len(starts), starts)
-    red = g.ui.status_color("does_not_comply", g.ui.viewport_dark()).ToArgb()
+    red = g.ui.dim_color("does_not_comply", g.ui.viewport_dark()).ToArgb()
     claim("1 the failing side yard's dimension is red", any(c == red for _, _, c in calls), log["top"])
+    grey = g.ui.dim_color("complies", g.ui.viewport_dark()).ToArgb()
+    complying = [st for _, _, st in o.yard_dims if st == "complies"]
+    claim("1 a complying yard's dimension is neutral grey (colour only what's wrong)",
+          not complying or sum(c == grey for _, _, c in calls) == len(complying), log["top"])
+    vp = top.ActiveViewport
+    status = g.logic.rect_quad(g.logic.status_box(vp.Bounds.Width, g._status_rows(o, False)))
+    house = [[(q.X, q.Y) for q in (vp.WorldToClient(p) for p in ring)] for ring in o.footprint]
+    labels = [(k, quad) for k, (_, quad, _) in sorted(o.placed.items()) if quad is not None]
+    hits = [(k, j) for k, q in labels for j, r in labels if k < j and g.logic.shapes_hit(q, r)]
+    log["placed"] = {k: (i, [tuple(round(v) for v in p) for p in (q or [])], kind) for k, (i, q, kind) in o.placed.items()}
+    claim("1 every label shown sits on screen clear of the status box, the house and the other labels",
+          len(labels) == len(o.yard_dims) and not hits and
+          not any(g.logic.shapes_hit(q, status) or (house and g.logic.shapes_hit(q, house[0])) for _, q in labels),
+          {"placed": log["placed"], "overlaps": hits})
     ring = g.ask({"cmd": "sample_site"})["lot"]
     edges = [(ring[i], ring[(i + 1) % len(ring)]) for i in range(len(ring))]
 
@@ -153,7 +169,7 @@ try:
     for x in g._buildings(doc):
         box.Union(x.Geometry.GetBoundingBox(True))
     claim("2 it stands beside the house, not in it", a.X > box.Max.X and a.Y < box.Min.Y, str(a))
-    claim("2 coloured as the height row", front[0][2] == g.ui.status_color(height["status"], g.ui.viewport_dark()).ToArgb(),
+    claim("2 coloured as the height row", front[0][2] == g.ui.dim_color(height["status"], g.ui.viewport_dark()).ToArgb(),
           height["status"])
 
     g.set_labels(False)

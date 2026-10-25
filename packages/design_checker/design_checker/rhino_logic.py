@@ -160,10 +160,12 @@ def legend_text(code=None):
     (the code-edition line, no longer in the panel's header)."""
     text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
             "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard "
-            "dimensioned square to its lot line from the middle of the wall that comes nearest it, in its row's "
-            "colour, labelled with the yard as measured (its closest point), with the required line faint across it "
-            "(two where the limit depends on an open measurement), and in the elevations the height, dimensioned up from the grade plane, with the "
-            "limit faint. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
+            "dimensioned square to its lot line from the wall facing it, where it and its label sit clear: red where "
+            "it fails, amber where it needs review, complying ones neutral grey (colour only what's wrong); labelled "
+            "on its line with the yard as measured (its closest point), the required line dashed grey across it with "
+            "its \"min\" (two where the limit depends on an open measurement); in the elevations the height, "
+            "dimensioned up from the grade plane, with the limit faint. Values are measured to 1/8 in. and never "
+            "rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
@@ -468,6 +470,134 @@ def label_width(text, size):
 DIM_TICK_PX = 10        # a dimension's architectural tick: this long on screen, at 45° to its line
 HALO_PX = 1           # a dimension's halo: this many pixels each side of its line
 FAINT_ALPHA = 110       # the required line, faint: the status colour at this opacity (of 255)
+
+
+# a yard's dimension and its label, placed on screen as a drawing would (Rhino checks of #29, 2026-10-25)
+DIM_RGB = {"complies": ((92, 96, 100), (176, 180, 184)),          # (light viewport, dark viewport): neutral grey,
+           "needs_review": ((138, 88, 0), (233, 180, 76)),          # amber, red: colour only what's wrong
+           "does_not_comply": ((184, 55, 31), (240, 122, 112))}
+REQUIRED_RGB = ((128, 128, 128), (150, 150, 150))   # the required line: a clear dashed mid-grey, with its "min" tag
+DIM_LABEL_H_PX = 18     # a dimension's label: its height on screen
+DIM_LABEL_GAP_PX = 4    # and its gap from the dimension line (and past the line's outer end)
+
+
+def dim_rgb(status, dark):
+    """A dimension's colour (r, g, b): red fails, amber needs review, a neutral dark grey (light on a dark viewport)
+    complies: drafting's convention, and Ben's "colour only what's wrong"."""
+    return DIM_RGB.get(status, DIM_RGB["complies"])[1 if dark else 0]
+
+
+def rect_quad(box):
+    """An (x, y, w, h) screen box as its four corners."""
+    x, y, w, h = box
+    return [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+
+
+def _segments_cross(p, q, r, s_):
+    def side(a, b, c):
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    d1, d2, d3, d4 = side(r, s_, p), side(r, s_, q), side(p, q, r), side(p, q, s_)
+    return (d1 > 0) != (d2 > 0) and (d3 > 0) != (d4 > 0)
+
+
+def _inside(pt, poly):
+    x, y = pt
+    hit = False
+    for k in range(len(poly)):
+        (x0, y0), (x1, y1) = poly[k - 1], poly[k]
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0):
+            hit = not hit
+    return hit
+
+
+def shapes_hit(a, b):
+    """Whether two screen polygons (lists of corners) overlap: an edge of one crosses the other's, or one lies
+    inside the other."""
+    for k in range(len(a)):
+        for j in range(len(b)):
+            if _segments_cross(a[k - 1], a[k], b[j - 1], b[j]):
+                return True
+    return bool(a and b) and (_inside(a[0], b) or _inside(b[0], a))
+
+
+def _along(a, b):
+    n = ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) ** 0.5
+    return ((b[0] - a[0]) / n, (b[1] - a[1]) / n), n
+
+
+def label_on_line(a, b, w, h=DIM_LABEL_H_PX, away=None, gap=DIM_LABEL_GAP_PX):
+    """A dimension's label ON its line (screen): aligned with the line a (lot end) to b (building end), centred on
+    its middle (a line shorter than its words: from the wall end outward, running on past the lot line), its near
+    edge `gap` px off the line, on the side away from `away` (the building's middle on screen: the label sits
+    outside the building). Its four corners."""
+    (ux, uy), length = _along(a, b)
+    nx, ny = -uy, ux
+    mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+    if length < w + 2 * gap:                       # shorter than its words: from the wall end outward, past the lot
+        mx, my = b[0] - ux * (gap + w / 2), b[1] - uy * (gap + w / 2)       # line (never back over the house)
+    if away is not None and (away[0] - mx) * nx + (away[1] - my) * ny > 0:
+        nx, ny = -nx, -ny
+    cx, cy = mx + nx * (gap + h / 2), my + ny * (gap + h / 2)
+    return [(cx + sx * ux * w / 2 + sy * nx * h / 2, cy + sx * uy * w / 2 + sy * ny * h / 2)
+            for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+
+
+def label_at_end(a, b, w, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
+    """A dimension's label past the line's outer end (beyond the lot line), aligned with it and centred on it,
+    `gap` px past the end (a leader joins them): for a dimension too short for its label, or with no clear spot
+    beside it. Its four corners."""
+    (ux, uy), _ = _along(b, a)                     # outward: from the building past the lot line
+    nx, ny = -uy, ux
+    near = (a[0] + ux * gap, a[1] + uy * gap)
+    return [(near[0] + ux * dx + nx * dy, near[1] + uy * dx + ny * dy)
+            for dx, dy in ((0, -h / 2), (w, -h / 2), (w, h / 2), (0, h / 2))]
+
+
+def text_angle(a, b):
+    """The angle (degrees) a label along a to b is written at, kept readable: within (-90, 90]."""
+    import math
+    t = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+    while t > 90:
+        t -= 180
+    while t <= -90:
+        t += 180
+    return t
+
+
+def place_dimension(candidates, w, obstacles, footprint=None, away=None, h=DIM_LABEL_H_PX, gap=DIM_LABEL_GAP_PX):
+    """Which of a yard's dimension positions to draw, and its label (screen): (index, label corners or None, "on"
+    | "end" | "none"). `candidates` are the positions check.plan offers along the wall run, best first, each
+    (lot end, building end) on screen; `w` the label's width (None: no label shown, only the line placed);
+    `obstacles` the screen polygons nothing may cover (the status box, the notice, the lot edges' length labels,
+    the labels placed before); `footprint` the building's outline on screen (a label never sits inside it).
+    The first position whose line and label (on the line) are clear; else the first whose line is clear with its
+    label past its outer end (a leader); else the best position, its label past its end."""
+    def clear(shape, solid=True):
+        return not any(shapes_hit(shape, o) for o in obstacles) and \
+            not (solid and footprint and shapes_hit(shape, footprint))
+
+    def line_box(a, b):                            # the line itself, 2 px wide (it starts at the wall: no footprint)
+        (ux, uy), _ = _along(a, b)
+        return [(a[0] - uy, a[1] + ux), (b[0] - uy, b[1] + ux), (b[0] + uy, b[1] - ux), (a[0] + uy, a[1] - ux)]
+    usable = [(i, a, b) for i, (a, b) in enumerate(candidates) if _along(a, b)[1] > 1e-6]
+    if not usable:
+        return 0, None, "none"
+    for i, a, b in usable:
+        if not clear(line_box(a, b), solid=False):
+            continue
+        if w is None:
+            return i, None, "none"
+        q = label_on_line(a, b, w, h, away, gap)
+        if clear(q):
+            return i, q, "on"
+    if w is None:
+        return usable[0][0], None, "none"
+    for i, a, b in usable:
+        q = label_at_end(a, b, w, h, gap)
+        if clear(line_box(a, b), solid=False) and clear(q):
+            return i, q, "end"
+    i, a, b = usable[0]
+    return i, label_at_end(a, b, w, h, gap), "end"
 
 
 def dim_ticks(a, b, size=DIM_TICK_PX):
