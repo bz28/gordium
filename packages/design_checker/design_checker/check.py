@@ -635,6 +635,38 @@ def _clip_above(points: list, z: float) -> list:
     return out
 
 
+WALL_TILT = 1e-3      # a face whose plan is under this share of its own area is a wall (plumb, or within a hair)
+
+
+def _is_wall(points: list) -> bool:
+    """Whether a face stands upright: its plan (seen from above) is under WALL_TILT of its own area (Newell's
+    method), so a wall a hair out of plumb is a wall too (review of the #28 fix, L1)."""
+    nx = ny = nz = 0.0
+    for k, p in enumerate(points):
+        q = points[(k + 1) % len(points)]
+        nx += (p[1] - q[1]) * (p[2] + q[2])
+        ny += (p[2] - q[2]) * (p[0] + q[0])
+        nz += (p[0] - q[0]) * (p[1] + q[1])
+    full = (nx * nx + ny * ny + nz * nz) ** 0.5
+    return full <= 1e-12 or abs(nz) <= WALL_TILT * full
+
+
+def walls_beyond(building: dict, z: float, region) -> bool:
+    """Whether a wall (a face seen edge-on from above) rises over height z somewhere `region` (what above() sees)
+    doesn't cover: its plan, 0.05 ft each side, not inside the region."""
+    from shapely.geometry import LineString
+    for f in building.get("faces") or []:
+        if not any(p[2] > z + 1e-6 for p in f["points"]):
+            continue
+        if not _is_wall(f["points"]):
+            continue                                    # not a wall: above() already sees it
+        clipped = [p[:2] for p in _clip_above(f["points"], z)]
+        trace = LineString(clipped) if len(clipped) >= 2 else None
+        if trace is not None and trace.length > 1e-6 and not region.buffer(0.05).contains(trace):
+            return True
+    return False
+
+
 def above(building: dict, z: float):
     """The building seen from above where it rises above height z: each face clipped to z and above, projected
     flat (a pitched roof's strip along its ridge, a flat roof's whole outline; vertical faces add nothing)."""
@@ -642,8 +674,8 @@ def above(building: dict, z: float):
     from shapely.ops import unary_union
     parts = []
     for f in building.get("faces") or []:
-        if not any(p[2] > z + 1e-6 for p in f["points"]):
-            continue
+        if not any(p[2] > z + 1e-6 for p in f["points"]) or _is_wall(f["points"]):
+            continue                                    # (a wall's sliver of plan adds nothing: walls_beyond)
         shell = _clip_above(f["points"], z)
         if len(shell) < 3:
             continue
@@ -946,11 +978,16 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                                          "row": i.get("name")})
         height = statuses.get("building_height")
         if height in (present.FAILS, present.REVIEW) and env.get("top") is not None:
-            for b, _ in solids:                         # only what rises above the limit: a roof's ridge, not its eaves
+            for b, own in solids:                       # only what rises above the limit: a roof's ridge, not its eaves
                 top = max(p[2] for f in b["faces"] for p in f["points"])
                 if top <= env["top"] + 1e-6:
                     continue
-                for g in hole_free(above(b, env["top"])):
+                region = above(b, env["top"])
+                # nothing above it seen from above, or a wall rising over the limit outside what is (a vault read as
+                # walls, alone or beside a flat roof): its own plan, never less (independent review of #28, P1, L1)
+                if region.is_empty or region.area <= 1e-3 or walls_beyond(b, env["top"], region):
+                    region = own
+                for g in hole_free(region):
                     if g.area > 1e-3:
                         encroach.append({"outline": _ring(g), "base": env["top"], "top": top, "why": "height",
                                          "status": height, "building": b.get("id"),

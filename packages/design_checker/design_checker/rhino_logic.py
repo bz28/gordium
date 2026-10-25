@@ -129,8 +129,9 @@ def coloured_info(entry):
 
 def offending_pieces(pieces, block):
     """What a coloured block draws: the building's own part inside it (Rhino's boolean intersection, `pieces`), or
-    the block itself when the intersection gave nothing (it failed, or the building is a block instance or a
-    mesh): a failing part is never left uncoloured because a boolean failed."""
+    the block itself when the intersection gave nothing (it failed, or the building is a mesh or a solid Rhino
+    can't cut; a block instance is never measured: it is a setup problem, "explode it"), so a failing part is never
+    left uncoloured because a boolean failed."""
     kept = [p for p in pieces or [] if p is not None]
     return kept or [block]
 
@@ -169,7 +170,8 @@ def legend_text(code=None):
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
-            "ridge, not its eaves; a mesh or a block instance is coloured over its whole strip instead). RED: it "
+            "ridge, not its eaves; a mesh, or a solid Rhino can't cut, is coloured over its whole strip instead; a "
+            "block isn't measured until it is exploded). RED: it "
             "fails there under every reading. AMBER: it fails there under some readings only (for example within the tax map's 2'-0\" of a lot line, which a survey settles). "
             "Nothing where it complies. The buildable envelope is only a see-through guide: colours come from the "
             "rules' results.")
