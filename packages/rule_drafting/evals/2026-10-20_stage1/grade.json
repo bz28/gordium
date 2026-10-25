@@ -111,7 +111,7 @@
      "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -126,7 +126,7 @@
      "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -141,7 +141,7 @@
      "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -156,7 +156,7 @@
      "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -171,7 +171,7 @@
      "R-1a.min_lot_size_detached"
     ],
     "notes": [
-     "R-1a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -186,7 +186,7 @@
      "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -201,7 +201,7 @@
      "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -216,7 +216,7 @@
      "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -231,7 +231,7 @@
      "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -246,7 +246,7 @@
      "R-1a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -368,7 +368,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.max_height_ft"
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -385,7 +386,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft"
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -402,7 +404,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft"
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -419,7 +422,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft"
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -436,7 +440,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft"
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -453,7 +458,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft"
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -554,8 +560,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.side_one_min",
-     "R-1a.side_other_min"
+     "R-1a.side_one_side_min",
+     "R-1a.side_other_side_min"
     ],
     "notes": []
    },
@@ -568,8 +574,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.side_one_min",
-     "R-1a.side_other_min"
+     "R-1a.side_one_side_min",
+     "R-1a.side_other_side_min"
     ],
     "notes": []
    },
@@ -582,8 +588,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.side_one_min",
-     "R-1a.side_other_min"
+     "R-1a.side_one_side_min",
+     "R-1a.side_other_side_min"
     ],
     "notes": []
    },
@@ -596,7 +602,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.rear_yard_min"
+     "R-1a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -609,7 +615,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.rear_yard_min"
+     "R-1a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -622,7 +628,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.rear_yard_min"
+     "R-1a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -635,7 +641,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.rear_yard_min"
+     "R-1a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -648,7 +654,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.rear_yard_min"
+     "R-1a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -661,7 +667,107 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.rear_yard_min"
+     "R-1a.rear_yard_min_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.yard_projections",
+    "given": {
+     "front_yard_eaves": 30,
+     "side_yard_smaller_eaves": 10,
+     "side_yard_larger_eaves": 12,
+     "rear_yard_eaves": 48,
+     "lot_depth": 130,
+     "building_height": 30
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1a.325_18b_projection_front_yard",
+     "R-1a.325_18b_projection_side_yard_larger",
+     "R-1a.325_18b_projection_side_yard_smaller",
+     "R-1a.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.yard_projections",
+    "given": {
+     "front_yard_eaves": 23,
+     "side_yard_smaller_eaves": 8,
+     "side_yard_larger_eaves": 8,
+     "rear_yard_eaves": 30.5,
+     "lot_depth": 130,
+     "building_height": 30
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1a.325_18b_projection_front_yard",
+     "R-1a.325_18b_projection_side_yard_larger",
+     "R-1a.325_18b_projection_side_yard_smaller",
+     "R-1a.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.yard_projections",
+    "given": {
+     "front_yard_eaves": 22.99,
+     "side_yard_smaller_eaves": 8,
+     "side_yard_larger_eaves": 8,
+     "rear_yard_eaves": 30.5,
+     "lot_depth": 130,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1a.325_18b_projection_front_yard",
+     "R-1a.325_18b_projection_side_yard_larger",
+     "R-1a.325_18b_projection_side_yard_smaller",
+     "R-1a.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.yard_projections",
+    "given": {
+     "front_yard_eaves": 23,
+     "side_yard_smaller_eaves": 7.5,
+     "side_yard_larger_eaves": 12,
+     "rear_yard_eaves": 31,
+     "lot_depth": 130,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1a.325_18b_projection_front_yard",
+     "R-1a.325_18b_projection_side_yard_larger",
+     "R-1a.325_18b_projection_side_yard_smaller",
+     "R-1a.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1a.yard_projections",
+    "given": {
+     "front_yard_eaves": 23,
+     "side_yard_smaller_eaves": 8,
+     "side_yard_larger_eaves": 8,
+     "rear_yard_eaves": 30.49,
+     "lot_depth": 130,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1a.325_18b_projection_front_yard",
+     "R-1a.325_18b_projection_side_yard_larger",
+     "R-1a.325_18b_projection_side_yard_smaller",
+     "R-1a.325_18b_projection_rear_yard_fn16"
     ],
     "notes": []
    },
@@ -934,7 +1040,8 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft"
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -951,92 +1058,8 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1a.yard_projections",
-    "given": {
-     "front_yard_eaves": 30,
-     "side_yard_smaller_eaves": 10,
-     "side_yard_larger_eaves": 12,
-     "rear_yard_eaves": 48,
-     "lot_depth": 130,
-     "building_height": 30
-    },
-    "expect": "pass",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1a.yard_projections",
-    "given": {
-     "front_yard_eaves": 23,
-     "side_yard_smaller_eaves": 8,
-     "side_yard_larger_eaves": 8,
-     "rear_yard_eaves": 30.5,
-     "lot_depth": 130,
-     "building_height": 30
-    },
-    "expect": "pass",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1a.yard_projections",
-    "given": {
-     "front_yard_eaves": 22.99,
-     "side_yard_smaller_eaves": 8,
-     "side_yard_larger_eaves": 8,
-     "rear_yard_eaves": 30.5,
-     "lot_depth": 130,
-     "building_height": 30
-    },
-    "expect": "fail",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1a.yard_projections",
-    "given": {
-     "front_yard_eaves": 23,
-     "side_yard_smaller_eaves": 7.5,
-     "side_yard_larger_eaves": 12,
-     "rear_yard_eaves": 31,
-     "lot_depth": 130,
-     "building_height": 30
-    },
-    "expect": "fail",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1a.yard_projections",
-    "given": {
-     "front_yard_eaves": 23,
-     "side_yard_smaller_eaves": 8,
-     "side_yard_larger_eaves": 8,
-     "rear_yard_eaves": 30.49,
-     "lot_depth": 130,
-     "building_height": 30
-    },
-    "expect": "fail",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-1a.max_height_ft",
+     "R-1a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -1053,7 +1076,10 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-1a.325_18b_projection_front_yard",
+     "R-1a.325_18b_projection_side_yard_larger",
+     "R-1a.325_18b_projection_side_yard_smaller",
+     "R-1a.325_18b_projection_rear_yard_fn16"
     ],
     "notes": []
    },
@@ -1070,7 +1096,10 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-1a.325_18b_projection_front_yard",
+     "R-1a.325_18b_projection_side_yard_larger",
+     "R-1a.325_18b_projection_side_yard_smaller",
+     "R-1a.325_18b_projection_rear_yard_fn16"
     ],
     "notes": []
    },
@@ -1097,12 +1126,12 @@
   "false_pass": [],
   "summary": {
    "examples": 74,
-   "agree": 62,
-   "disagree": 12,
+   "agree": 67,
+   "disagree": 7,
    "undrafted": 0,
    "false_pass": 0,
-   "agree_of_all": "62/74",
-   "agree_of_drafted": "62/74"
+   "agree_of_all": "67/74",
+   "agree_of_drafted": "67/74"
   }
  },
  "R-1b.yaml": {
@@ -1157,7 +1186,7 @@
      "R-1b.min_lot_size_detached"
     ],
     "notes": [
-     "R-1b.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1b.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -1172,7 +1201,7 @@
      "R-1b.min_lot_size_detached"
     ],
     "notes": [
-     "R-1b.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1b.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -1187,7 +1216,7 @@
      "R-1b.min_lot_size_detached"
     ],
     "notes": [
-     "R-1b.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1b.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -1202,7 +1231,7 @@
      "R-1b.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1b.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1b.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -1217,7 +1246,7 @@
      "R-1b.min_lot_size_other_use"
     ],
     "notes": [
-     "R-1b.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-1b.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -1300,7 +1329,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.max_height_ft"
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -1318,7 +1348,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft"
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -1336,7 +1367,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft"
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -1354,7 +1386,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft"
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -1372,7 +1405,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft"
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -1389,7 +1423,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft"
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -1452,8 +1487,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.side_one_min",
-     "R-1b.side_other_min"
+     "R-1b.side_one_side_min",
+     "R-1b.side_other_side_min"
     ],
     "notes": []
    },
@@ -1466,8 +1501,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.side_one_min",
-     "R-1b.side_other_min"
+     "R-1b.side_one_side_min",
+     "R-1b.side_other_side_min"
     ],
     "notes": []
    },
@@ -1480,7 +1515,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.rear_yard_min"
+     "R-1b.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -1493,7 +1528,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.rear_yard_min"
+     "R-1b.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -1506,7 +1541,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.rear_yard_min"
+     "R-1b.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -1519,7 +1554,107 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.rear_yard_min"
+     "R-1b.rear_yard_min_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.yard_projections",
+    "given": {
+     "front_yard_eaves": 30,
+     "side_yard_smaller_eaves": 10,
+     "side_yard_larger_eaves": 12,
+     "rear_yard_eaves": 48,
+     "lot_depth": 100,
+     "building_height": 30
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1b.325_18b_projection_front_yard",
+     "R-1b.325_18b_projection_side_yard_larger",
+     "R-1b.325_18b_projection_side_yard_smaller",
+     "R-1b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.yard_projections",
+    "given": {
+     "front_yard_eaves": 23,
+     "side_yard_smaller_eaves": 8,
+     "side_yard_larger_eaves": 12,
+     "rear_yard_eaves": 23,
+     "lot_depth": 100,
+     "building_height": 30
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1b.325_18b_projection_front_yard",
+     "R-1b.325_18b_projection_side_yard_larger",
+     "R-1b.325_18b_projection_side_yard_smaller",
+     "R-1b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.yard_projections",
+    "given": {
+     "front_yard_eaves": 23,
+     "side_yard_smaller_eaves": 7.5,
+     "side_yard_larger_eaves": 12,
+     "rear_yard_eaves": 30,
+     "lot_depth": 100,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1b.325_18b_projection_front_yard",
+     "R-1b.325_18b_projection_side_yard_larger",
+     "R-1b.325_18b_projection_side_yard_smaller",
+     "R-1b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.yard_projections",
+    "given": {
+     "front_yard_eaves": 30,
+     "side_yard_smaller_eaves": 10,
+     "side_yard_larger_eaves": 12,
+     "rear_yard_eaves": 18,
+     "lot_depth": 60,
+     "building_height": 30
+    },
+    "expect": "pass",
+    "got": "pass",
+    "drafted": [
+     "R-1b.325_18b_projection_front_yard",
+     "R-1b.325_18b_projection_side_yard_larger",
+     "R-1b.325_18b_projection_side_yard_smaller",
+     "R-1b.325_18b_projection_rear_yard_fn16"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-1b.yard_projections",
+    "given": {
+     "front_yard_eaves": 30,
+     "side_yard_smaller_eaves": 10,
+     "side_yard_larger_eaves": 12,
+     "rear_yard_eaves": 17.5,
+     "lot_depth": 60,
+     "building_height": 30
+    },
+    "expect": "fail",
+    "got": "fail",
+    "drafted": [
+     "R-1b.325_18b_projection_front_yard",
+     "R-1b.325_18b_projection_side_yard_larger",
+     "R-1b.325_18b_projection_side_yard_smaller",
+     "R-1b.325_18b_projection_rear_yard_fn16"
     ],
     "notes": []
    },
@@ -1686,7 +1821,8 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft"
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -1703,92 +1839,8 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1b.yard_projections",
-    "given": {
-     "front_yard_eaves": 30,
-     "side_yard_smaller_eaves": 10,
-     "side_yard_larger_eaves": 12,
-     "rear_yard_eaves": 48,
-     "lot_depth": 100,
-     "building_height": 30
-    },
-    "expect": "pass",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1b.yard_projections",
-    "given": {
-     "front_yard_eaves": 23,
-     "side_yard_smaller_eaves": 8,
-     "side_yard_larger_eaves": 12,
-     "rear_yard_eaves": 23,
-     "lot_depth": 100,
-     "building_height": 30
-    },
-    "expect": "pass",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1b.yard_projections",
-    "given": {
-     "front_yard_eaves": 23,
-     "side_yard_smaller_eaves": 7.5,
-     "side_yard_larger_eaves": 12,
-     "rear_yard_eaves": 30,
-     "lot_depth": 100,
-     "building_height": 30
-    },
-    "expect": "fail",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1b.yard_projections",
-    "given": {
-     "front_yard_eaves": 30,
-     "side_yard_smaller_eaves": 10,
-     "side_yard_larger_eaves": 12,
-     "rear_yard_eaves": 18,
-     "lot_depth": 60,
-     "building_height": 30
-    },
-    "expect": "pass",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
-    ],
-    "notes": []
-   },
-   {
-    "hand": "R-1b.yard_projections",
-    "given": {
-     "front_yard_eaves": 30,
-     "side_yard_smaller_eaves": 10,
-     "side_yard_larger_eaves": 12,
-     "rear_yard_eaves": 17.5,
-     "lot_depth": 60,
-     "building_height": 30
-    },
-    "expect": "fail",
-    "got": "needs_review",
-    "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-1b.max_height_ft",
+     "R-1b.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -1805,7 +1857,10 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-1b.325_18b_projection_front_yard",
+     "R-1b.325_18b_projection_side_yard_larger",
+     "R-1b.325_18b_projection_side_yard_smaller",
+     "R-1b.325_18b_projection_rear_yard_fn16"
     ],
     "notes": []
    },
@@ -1822,7 +1877,10 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-1b.325_18b_projection_front_yard",
+     "R-1b.325_18b_projection_side_yard_larger",
+     "R-1b.325_18b_projection_side_yard_smaller",
+     "R-1b.325_18b_projection_rear_yard_fn16"
     ],
     "notes": []
    },
@@ -1849,12 +1907,12 @@
   "false_pass": [],
   "summary": {
    "examples": 48,
-   "agree": 37,
-   "disagree": 11,
+   "agree": 42,
+   "disagree": 6,
    "undrafted": 0,
    "false_pass": 0,
-   "agree_of_all": "37/48",
-   "agree_of_drafted": "37/48"
+   "agree_of_all": "42/48",
+   "agree_of_drafted": "42/48"
   }
  },
  "R-3a.yaml": {
@@ -1945,7 +2003,7 @@
      "R-3a.min_lot_size_detached"
     ],
     "notes": [
-     "R-3a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -1960,7 +2018,7 @@
      "R-3a.min_lot_size_detached"
     ],
     "notes": [
-     "R-3a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -1975,7 +2033,7 @@
      "R-3a.min_lot_size_detached"
     ],
     "notes": [
-     "R-3a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -1990,7 +2048,7 @@
      "R-3a.min_lot_size_detached"
     ],
     "notes": [
-     "R-3a.min_lot_size_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2005,7 +2063,7 @@
      "R-3a.min_lot_size_semi_detached"
     ],
     "notes": [
-     "R-3a.min_lot_size_semi_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_semi_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2020,7 +2078,7 @@
      "R-3a.min_lot_size_semi_detached"
     ],
     "notes": [
-     "R-3a.min_lot_size_semi_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_semi_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2035,7 +2093,7 @@
      "R-3a.min_lot_size_semi_detached"
     ],
     "notes": [
-     "R-3a.min_lot_size_semi_detached given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_semi_detached given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2050,7 +2108,7 @@
      "R-3a.min_lot_size_two_family"
     ],
     "notes": [
-     "R-3a.min_lot_size_two_family given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_two_family given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2065,7 +2123,7 @@
      "R-3a.min_lot_size_two_family"
     ],
     "notes": [
-     "R-3a.min_lot_size_two_family given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_two_family given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2080,7 +2138,143 @@
      "R-3a.min_lot_size_two_family"
     ],
     "notes": [
-     "R-3a.min_lot_size_two_family given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_two_family given {'additional_primary_buildings': 0} from its own passing example"
+    ]
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 20000,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 20000,
+     "dwelling_units": 3,
+     "conversion": false
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 20000,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": [
+     "R-3a.min_lot_size_attached_conv_fn7 needs ['conversion'], which the hand example doesn't give",
+     "R-3a.min_lot_size_attached_new_fn7 needs ['conversion'], which the hand example doesn't give"
+    ]
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "two_family",
+     "lot_area": 1000
+    },
+    "expect": "not_applicable",
+    "got": "not_applicable",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": [
+     "R-3a.min_lot_size_attached_conv_fn7 needs ['conversion'], which the hand example doesn't give",
+     "R-3a.min_lot_size_attached_new_fn7 needs ['conversion'], which the hand example doesn't give"
+    ]
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 20000,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 20000,
+     "dwelling_units": 3,
+     "conversion": false
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 20000,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": [
+     "R-3a.min_lot_size_multiple_conv_fn7 needs ['conversion'], which the hand example doesn't give",
+     "R-3a.min_lot_size_multiple_new_fn7 needs ['conversion'], which the hand example doesn't give"
+    ]
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "two_family",
+     "lot_area": 1000
+    },
+    "expect": "not_applicable",
+    "got": "not_applicable",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": [
+     "R-3a.min_lot_size_multiple_conv_fn7 needs ['conversion'], which the hand example doesn't give",
+     "R-3a.min_lot_size_multiple_new_fn7 needs ['conversion'], which the hand example doesn't give"
     ]
    },
    {
@@ -2095,7 +2289,7 @@
      "R-3a.min_lot_size_group_house"
     ],
     "notes": [
-     "R-3a.min_lot_size_group_house given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_group_house given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2110,7 +2304,7 @@
      "R-3a.min_lot_size_group_house"
     ],
     "notes": [
-     "R-3a.min_lot_size_group_house given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_group_house given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2125,7 +2319,7 @@
      "R-3a.min_lot_size_group_house"
     ],
     "notes": [
-     "R-3a.min_lot_size_group_house given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_group_house given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2140,7 +2334,7 @@
      "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2155,7 +2349,7 @@
      "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2170,7 +2364,7 @@
      "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2185,7 +2379,7 @@
      "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2200,7 +2394,7 @@
      "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -2439,7 +2633,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.max_height_ft"
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -2456,7 +2651,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft"
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -2473,7 +2669,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft"
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -2490,7 +2687,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.max_height_ft"
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -2507,7 +2705,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft"
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -2524,7 +2723,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft"
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -2541,7 +2741,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft"
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -2558,7 +2759,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft"
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -2646,8 +2848,8 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.side_one_min",
-     "R-3a.side_other_min"
+     "R-3a.side_one_side_min",
+     "R-3a.side_other_side_min"
     ],
     "notes": []
    },
@@ -2660,8 +2862,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_one_min",
-     "R-3a.side_other_min"
+     "R-3a.side_one_side_min",
+     "R-3a.side_other_side_min"
     ],
     "notes": []
    },
@@ -2674,8 +2876,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_one_min",
-     "R-3a.side_other_min"
+     "R-3a.side_one_side_min",
+     "R-3a.side_other_side_min"
     ],
     "notes": []
    },
@@ -2688,8 +2890,8 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.side_one_min",
-     "R-3a.side_other_min"
+     "R-3a.side_one_side_min",
+     "R-3a.side_other_side_min"
     ],
     "notes": []
    },
@@ -2702,7 +2904,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.rear_yard_min"
+     "R-3a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -2715,7 +2917,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.rear_yard_min"
+     "R-3a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -2728,7 +2930,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.rear_yard_min"
+     "R-3a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -2741,7 +2943,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.rear_yard_min"
+     "R-3a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -2754,7 +2956,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.rear_yard_min"
+     "R-3a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -2767,7 +2969,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.rear_yard_min"
+     "R-3a.rear_yard_min_fn16"
     ],
     "notes": []
    },
@@ -3140,9 +3342,477 @@
      "R-3a.parking_per_dwelling_unit_undecided_uses"
     ],
     "notes": []
+   },
+   {
+    "hand": "R-3a.loading",
+    "given": {
+     "use": "multiple_family"
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "general.loading_neighborhood_commercial",
+     "general.loading_nonresidential_variance",
+     "R-3a.loading_multiple_dwelling_25_units",
+     "R-3a.loading_nursing_home_hospital"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.loading",
+    "given": {
+     "use": "hospital_or_sanitarium"
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "general.loading_neighborhood_commercial",
+     "general.loading_nonresidential_variance",
+     "R-3a.loading_multiple_dwelling_25_units",
+     "R-3a.loading_nursing_home_hospital"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.loading",
+    "given": {
+     "use": "dormitory"
+    },
+    "expect": "needs_review",
+    "got": "needs_review",
+    "drafted": [
+     "general.loading_neighborhood_commercial",
+     "general.loading_nonresidential_variance",
+     "R-3a.loading_multiple_dwelling_25_units",
+     "R-3a.loading_nursing_home_hospital"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.loading",
+    "given": {
+     "use": "two_family"
+    },
+    "expect": "not_applicable",
+    "got": "not_applicable",
+    "drafted": [
+     "general.loading_neighborhood_commercial",
+     "general.loading_nonresidential_variance",
+     "R-3a.loading_multiple_dwelling_25_units",
+     "R-3a.loading_nursing_home_hospital"
+    ],
+    "notes": []
    }
   ],
   "disagree": [
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 6000,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 5999,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 6750,
+     "dwelling_units": 4,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 6749,
+     "dwelling_units": 4,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 9750,
+     "dwelling_units": 8,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 9749,
+     "dwelling_units": 8,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 6500,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 1,
+     "conversion": false
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 6499,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 1,
+     "conversion": false
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 7000,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0,
+     "conversion": true
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 6999,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0,
+     "conversion": true
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 8750,
+     "dwelling_units": 4,
+     "rooms_let_for_profit": 2,
+     "conversion": true
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_one_family_attached",
+    "given": {
+     "use": "one_family_attached",
+     "lot_area": 8749,
+     "dwelling_units": 4,
+     "rooms_let_for_profit": 2,
+     "conversion": true
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_attached_conv_fn7",
+     "R-3a.min_lot_size_attached_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 6000,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 5999,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 6750,
+     "dwelling_units": 4,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 6749,
+     "dwelling_units": 4,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 9750,
+     "dwelling_units": 8,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 9749,
+     "dwelling_units": 8,
+     "rooms_let_for_profit": 0,
+     "conversion": false
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 6500,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 1,
+     "conversion": false
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 6499,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 1,
+     "conversion": false
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 7000,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0,
+     "conversion": true
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 6999,
+     "dwelling_units": 3,
+     "rooms_let_for_profit": 0,
+     "conversion": true
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 8750,
+     "dwelling_units": 4,
+     "rooms_let_for_profit": 2,
+     "conversion": true
+    },
+    "expect": "pass",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
+   {
+    "hand": "R-3a.lot_area_multiple_family",
+    "given": {
+     "use": "multiple_family",
+     "lot_area": 8749,
+     "dwelling_units": 4,
+     "rooms_let_for_profit": 2,
+     "conversion": true
+    },
+    "expect": "fail",
+    "got": "needs_review",
+    "drafted": [
+     "R-3a.min_lot_size_multiple_conv_fn7",
+     "R-3a.min_lot_size_multiple_new_fn7"
+    ],
+    "notes": []
+   },
    {
     "hand": "R-3a.lot_area_other_use",
     "given": {
@@ -3155,7 +3825,7 @@
      "R-3a.min_lot_size_other_use"
     ],
     "notes": [
-     "R-3a.min_lot_size_other_use given {'multiple_primary_buildings': False} from its own passing example"
+     "R-3a.min_lot_size_other_use given {'additional_primary_buildings': 0} from its own passing example"
     ]
    },
    {
@@ -3199,7 +3869,8 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft"
+     "R-3a.max_height_ft",
+     "R-3a.325_16c_height_exception_extra_height"
     ],
     "notes": []
    },
@@ -3216,7 +3887,9 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-3a.325_18b_projection_front_yard",
+     "R-3a.325_18b_projection_side_yard_larger",
+     "R-3a.325_18b_projection_side_yard_smaller"
     ],
     "notes": []
    },
@@ -3233,7 +3906,9 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-3a.325_18b_projection_front_yard",
+     "R-3a.325_18b_projection_side_yard_larger",
+     "R-3a.325_18b_projection_side_yard_smaller"
     ],
     "notes": []
    },
@@ -3250,7 +3925,9 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-3a.325_18b_projection_front_yard",
+     "R-3a.325_18b_projection_side_yard_larger",
+     "R-3a.325_18b_projection_side_yard_smaller"
     ],
     "notes": []
    },
@@ -3267,7 +3944,9 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-3a.325_18b_projection_front_yard",
+     "R-3a.325_18b_projection_side_yard_larger",
+     "R-3a.325_18b_projection_side_yard_smaller"
     ],
     "notes": []
    },
@@ -3284,7 +3963,9 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-3a.325_18b_projection_front_yard",
+     "R-3a.325_18b_projection_side_yard_larger",
+     "R-3a.325_18b_projection_side_yard_smaller"
     ],
     "notes": []
    },
@@ -3301,7 +3982,9 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-3a.325_18b_projection_front_yard",
+     "R-3a.325_18b_projection_side_yard_larger",
+     "R-3a.325_18b_projection_side_yard_smaller"
     ],
     "notes": []
    },
@@ -3318,7 +4001,9 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-3a.325_18b_projection_front_yard",
+     "R-3a.325_18b_projection_side_yard_larger",
+     "R-3a.325_18b_projection_side_yard_smaller"
     ],
     "notes": []
    },
@@ -3335,7 +4020,9 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_architectural_feature_projection_limit"
+     "R-3a.325_18b_projection_front_yard",
+     "R-3a.325_18b_projection_side_yard_larger",
+     "R-3a.325_18b_projection_side_yard_smaller"
     ],
     "notes": []
    },
@@ -3457,346 +4144,6 @@
   ],
   "undrafted": [
    {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 6000,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 5999,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 6750,
-     "dwelling_units": 4,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 6749,
-     "dwelling_units": 4,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 9750,
-     "dwelling_units": 8,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 9749,
-     "dwelling_units": 8,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 6500,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 1,
-     "conversion": false
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 6499,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 1,
-     "conversion": false
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 7000,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0,
-     "conversion": true
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 6999,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0,
-     "conversion": true
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 8750,
-     "dwelling_units": 4,
-     "rooms_let_for_profit": 2,
-     "conversion": true
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 8749,
-     "dwelling_units": 4,
-     "rooms_let_for_profit": 2,
-     "conversion": true
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 20000,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 20000,
-     "dwelling_units": 3,
-     "conversion": false
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "one_family_attached",
-     "lot_area": 20000,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.lot_area_one_family_attached",
-    "given": {
-     "use": "two_family",
-     "lot_area": 1000
-    },
-    "expect": "not_applicable"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 6000,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 5999,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 6750,
-     "dwelling_units": 4,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 6749,
-     "dwelling_units": 4,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 9750,
-     "dwelling_units": 8,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 9749,
-     "dwelling_units": 8,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 6500,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 1,
-     "conversion": false
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 6499,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 1,
-     "conversion": false
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 7000,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0,
-     "conversion": true
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 6999,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0,
-     "conversion": true
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 8750,
-     "dwelling_units": 4,
-     "rooms_let_for_profit": 2,
-     "conversion": true
-    },
-    "expect": "pass"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 8749,
-     "dwelling_units": 4,
-     "rooms_let_for_profit": 2,
-     "conversion": true
-    },
-    "expect": "fail"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 20000,
-     "rooms_let_for_profit": 0,
-     "conversion": false
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 20000,
-     "dwelling_units": 3,
-     "conversion": false
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "multiple_family",
-     "lot_area": 20000,
-     "dwelling_units": 3,
-     "rooms_let_for_profit": 0
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.lot_area_multiple_family",
-    "given": {
-     "use": "two_family",
-     "lot_area": 1000
-    },
-    "expect": "not_applicable"
-   },
-   {
     "hand": "R-3a.lot_size_zero_lot_line",
     "given": {
      "use": "one_family_detached_zero_lot_line"
@@ -3809,45 +4156,17 @@
      "use": "one_family_detached"
     },
     "expect": "not_applicable"
-   },
-   {
-    "hand": "R-3a.loading",
-    "given": {
-     "use": "multiple_family"
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.loading",
-    "given": {
-     "use": "hospital_or_sanitarium"
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.loading",
-    "given": {
-     "use": "dormitory"
-    },
-    "expect": "needs_review"
-   },
-   {
-    "hand": "R-3a.loading",
-    "given": {
-     "use": "two_family"
-    },
-    "expect": "not_applicable"
    }
   ],
   "false_pass": [],
   "summary": {
    "examples": 145,
-   "agree": 87,
-   "disagree": 20,
-   "undrafted": 38,
+   "agree": 99,
+   "disagree": 44,
+   "undrafted": 2,
    "false_pass": 0,
-   "agree_of_all": "87/145",
-   "agree_of_drafted": "87/107"
+   "agree_of_all": "99/145",
+   "agree_of_drafted": "99/143"
   }
  }
 }

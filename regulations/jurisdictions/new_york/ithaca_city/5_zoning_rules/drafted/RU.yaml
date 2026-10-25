@@ -163,10 +163,9 @@ rules:
   applies_when: use == "one_family_detached"
   check: lot_area >= 10000
   review_when:
-  - when: multiple_primary_buildings
-    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
-      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
-      is not decided here.
+  - when: additional_primary_buildings > 0
+    reason: 'Chart note 3 (see §325-8(B)(1)): the area requirement applies separately to each additional primary
+      use in a separate building.'
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -180,44 +179,33 @@ rules:
     - 48
     - 48
     quote: See §325-8(B)(1).
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 26
-    lines:
-    - 11
-    - 16
-    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
-      districts, each square-footage requirement applies separately to the initial permitted primary use and to
-      each additional permitted primary use located in a separate building on the property in question (e.g., in
-      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
-      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
-      on the property).
   examples:
   - given:
       use: one_family_detached
       lot_area: 10000
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: pass
   - given:
       use: one_family_detached
       lot_area: 9999
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: fail
   - given:
       use: one_family_detached
       lot_area: 10000
-      multiple_primary_buildings: true
+      additional_primary_buildings: 1
     expect: needs_review
   - given:
       use: two_family
       lot_area: 1
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: not_applicable
   open_questions:
-  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
-    lot holds several primary buildings of different uses?'
+  - 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to be totaled
+    and measured?'
   research:
-  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
-      when a lot holds several primary buildings of different uses?'
+  - question: 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to
+      be totaled and measured?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -231,10 +219,9 @@ rules:
   applies_when: use == "one_family_semi_detached"
   check: lot_area >= 15000
   review_when:
-  - when: multiple_primary_buildings
-    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
-      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
-      is not decided here.
+  - when: additional_primary_buildings > 0
+    reason: 'Chart note 3 (see §325-8(B)(1)): the area requirement applies separately to each additional primary
+      use in a separate building.'
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -248,44 +235,33 @@ rules:
     - 48
     - 48
     quote: See §325-8(B)(1).
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 26
-    lines:
-    - 11
-    - 16
-    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
-      districts, each square-footage requirement applies separately to the initial permitted primary use and to
-      each additional permitted primary use located in a separate building on the property in question (e.g., in
-      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
-      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
-      on the property).
   examples:
   - given:
       use: one_family_semi_detached
       lot_area: 15000
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: pass
   - given:
       use: one_family_semi_detached
       lot_area: 14999
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: fail
   - given:
       use: one_family_semi_detached
       lot_area: 15000
-      multiple_primary_buildings: true
+      additional_primary_buildings: 1
     expect: needs_review
   - given:
       use: two_family
       lot_area: 1
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: not_applicable
   open_questions:
-  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
-    lot holds several primary buildings of different uses?'
+  - 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to be totaled
+    and measured?'
   research:
-  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
-      when a lot holds several primary buildings of different uses?'
+  - question: 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to
+      be totaled and measured?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -299,10 +275,9 @@ rules:
   applies_when: use == "two_family"
   check: lot_area >= 15000
   review_when:
-  - when: multiple_primary_buildings
-    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
-      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
-      is not decided here.
+  - when: additional_primary_buildings > 0
+    reason: 'Chart note 3 (see §325-8(B)(1)): the area requirement applies separately to each additional primary
+      use in a separate building.'
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -316,44 +291,33 @@ rules:
     - 48
     - 48
     quote: See §325-8(B)(1).
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 26
-    lines:
-    - 11
-    - 16
-    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
-      districts, each square-footage requirement applies separately to the initial permitted primary use and to
-      each additional permitted primary use located in a separate building on the property in question (e.g., in
-      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
-      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
-      on the property).
   examples:
   - given:
       use: two_family
       lot_area: 15000
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: pass
   - given:
       use: two_family
       lot_area: 14999
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: fail
   - given:
       use: two_family
       lot_area: 15000
-      multiple_primary_buildings: true
+      additional_primary_buildings: 1
     expect: needs_review
   - given:
       use: one_family_detached
       lot_area: 1
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: not_applicable
   open_questions:
-  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
-    lot holds several primary buildings of different uses?'
+  - 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to be totaled
+    and measured?'
   research:
-  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
-      when a lot holds several primary buildings of different uses?'
+  - question: 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to
+      be totaled and measured?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -367,10 +331,9 @@ rules:
   applies_when: use == "fraternity_sorority_group_house"
   check: lot_area >= 30000
   review_when:
-  - when: multiple_primary_buildings
-    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
-      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
-      is not decided here.
+  - when: additional_primary_buildings > 0
+    reason: 'Chart note 3 (see §325-8(B)(1)): the area requirement applies separately to each additional primary
+      use in a separate building.'
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -384,44 +347,33 @@ rules:
     - 48
     - 48
     quote: See §325-8(B)(1).
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 26
-    lines:
-    - 11
-    - 16
-    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
-      districts, each square-footage requirement applies separately to the initial permitted primary use and to
-      each additional permitted primary use located in a separate building on the property in question (e.g., in
-      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
-      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
-      on the property).
   examples:
   - given:
       use: fraternity_sorority_group_house
       lot_area: 30000
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: pass
   - given:
       use: fraternity_sorority_group_house
       lot_area: 29999
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: fail
   - given:
       use: fraternity_sorority_group_house
       lot_area: 30000
-      multiple_primary_buildings: true
+      additional_primary_buildings: 1
     expect: needs_review
   - given:
-      use: one_family_detached
+      use: two_family
       lot_area: 1
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: not_applicable
   open_questions:
-  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
-    lot holds several primary buildings of different uses?'
+  - 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to be totaled
+    and measured?'
   research:
-  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
-      when a lot holds several primary buildings of different uses?'
+  - question: 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to
+      be totaled and measured?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -436,10 +388,9 @@ rules:
     "one_family_attached", "two_family", "multiple_family", "fraternity_sorority_group_house"]
   check: lot_area >= 30000
   review_when:
-  - when: multiple_primary_buildings
-    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
-      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
-      is not decided here.
+  - when: additional_primary_buildings > 0
+    reason: 'Chart note 3 (see §325-8(B)(1)): the area requirement applies separately to each additional primary
+      use in a separate building.'
   - when: use == "adult_day_care_home"
     reason: '§325-3 defines this use as ''A dwelling unit in which adult day care is provided to not more than six
       adults at one tim'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
@@ -469,17 +420,6 @@ rules:
     - 48
     - 48
     quote: See §325-8(B)(1).
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 26
-    lines:
-    - 11
-    - 16
-    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
-      districts, each square-footage requirement applies separately to the initial permitted primary use and to
-      each additional permitted primary use located in a separate building on the property in question (e.g., in
-      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
-      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
-      on the property).
   - file: zoning_charts_2026-04.pdf
     page: 2
     lines:
@@ -508,34 +448,188 @@ rules:
   - given:
       use: school
       lot_area: 30000
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: pass
   - given:
       use: school
       lot_area: 29999
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: fail
   - given:
       use: school
       lot_area: 30000
-      multiple_primary_buildings: true
+      additional_primary_buildings: 1
     expect: needs_review
   - given:
       use: two_family
       lot_area: 1
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: not_applicable
   open_questions:
-  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
-    lot holds several primary buildings of different uses?'
-  - Does 'Other use' cover every use without its own row, including dormitory and nonresidential uses?
+  - 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to be totaled
+    and measured?'
+  - Does 'Other use' cover every use not named in the chart's rows, including dormitory and the other uses in the
+    use list?
   research:
-  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
-      when a lot holds several primary buildings of different uses?'
+  - question: 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to
+      be totaled and measured?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Does 'Other use' cover every use without its own row, including dormitory and nonresidential uses?
+  - question: Does 'Other use' cover every use not named in the chart's rows, including dormitory and the other
+      uses in the use list?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: RU.min_lot_size_attached_conv_fn9
+  kind: flag
+  topic: dimensions
+  title: Min lot size, attached by conversion, note 9 (chart p.3)
+  applies_when: use == "one_family_attached" and conversion
+  review_when:
+  - when: lot_area >= 16500
+    reason: Note 9 adds area for each additional unit; an architect decides the total.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: One-family dwelling, attached, by conversion
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 55
+    - 55
+    quote: For the first 1-3 units; +1,500 sf for each additional unit.
+  examples: []
+  open_questions:
+  - The area grows with the number of units; an architect must decide the total.
+  research:
+  - question: The area grows with the number of units; an architect must decide the total.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: RU.min_lot_size_attached_new_fn9
+  kind: flag
+  topic: dimensions
+  title: Min lot size, attached new construction, note 9 (chart p.3)
+  applies_when: use == "one_family_attached" and not conversion
+  review_when:
+  - when: lot_area >= 16500
+    reason: Note 9 adds area for each additional unit; an architect decides the total.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: One-family dwelling, attached, new construction
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 55
+    - 55
+    quote: For the first 1-3 units; +1,500 sf for each additional unit.
+  examples: []
+  open_questions:
+  - The area grows with the number of units; an architect must decide the total.
+  research:
+  - question: The area grows with the number of units; an architect must decide the total.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: RU.min_lot_size_multiple_conv_fn9
+  kind: flag
+  topic: dimensions
+  title: Min lot size, multiple family by conversion, note 9 (chart p.3)
+  applies_when: use == "multiple_family" and conversion
+  review_when:
+  - when: lot_area >= 16500
+    reason: Note 9 adds area for each additional unit; an architect decides the total.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: Multiple family dwelling, by conversion
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 55
+    - 55
+    quote: For the first 1-3 units; +1,500 sf for each additional unit.
+  examples: []
+  open_questions:
+  - The area grows with the number of units; an architect must decide the total.
+  research:
+  - question: The area grows with the number of units; an architect must decide the total.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: RU.min_lot_size_multiple_new_fn9
+  kind: flag
+  topic: dimensions
+  title: Min lot size, multiple family new construction, note 9 (chart p.3)
+  applies_when: use == "multiple_family" and not conversion
+  review_when:
+  - when: lot_area >= 16500
+    reason: Note 9 adds area for each additional unit; an architect decides the total.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: Multiple family dwelling, new construction
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 55
+    - 55
+    quote: For the first 1-3 units; +1,500 sf for each additional unit.
+  examples: []
+  open_questions:
+  - The area grows with the number of units; an architect must decide the total.
+  research:
+  - question: The area grows with the number of units; an architect must decide the total.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1028,18 +1122,25 @@ rules:
       front_yard: 24
     expect: fail
   open_questions:
-  - §325-19C says corner lots have two adjoining front yards that must each meet the minimum front yard. Which yard
-    does the front_yard measure take on a corner lot?
+  - §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's front_yard
+    measure cover both street-facing yards?
+  - §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted separately
+    from the *_eaves measures?
   research:
-  - question: §325-19C says corner lots have two adjoining front yards that must each meet the minimum front yard.
-      Which yard does the front_yard measure take on a corner lot?
+  - question: §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's
+      front_yard measure cover both street-facing yards?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted
+      separately from the *_eaves measures?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: RU.side_one_min
+- id: RU.side_one_side_min
   kind: rule
   topic: dimensions
   title: Minimum side yard, one side (chart p.3)
@@ -1059,18 +1160,29 @@ rules:
       side_yard_larger: 9
     expect: fail
   open_questions:
-  - The chart does not say which side is the 'one side' and which is the 'other side'. This draft checks the wider
-    side yard against 'one side minimum' and the narrower against 'other side minimum'. Please confirm.
+  - The chart does not say which side is the 'one side' and which the 'other side'. This rule reads the 'one side'
+    minimum as applying to the wider side yard (side_yard_larger) and the 'other side' minimum to the narrower one.
+    Please confirm.
+  - 'The R-2C cell (''10 ft /15 ft [fn14]'', by use, with footnote 14) is not drafted here and goes to a person:
+    the first number applies to most uses and the second to one-family detached zero lot line dwellings, and the
+    first applies to unattached sides only of semi-detached and attached dwellings.'
   research:
-  - question: The chart does not say which side is the 'one side' and which is the 'other side'. This draft checks
-      the wider side yard against 'one side minimum' and the narrower against 'other side minimum'. Please confirm.
+  - question: The chart does not say which side is the 'one side' and which the 'other side'. This rule reads the
+      'one side' minimum as applying to the wider side yard (side_yard_larger) and the 'other side' minimum to the
+      narrower one. Please confirm.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'The R-2C cell (''10 ft /15 ft [fn14]'', by use, with footnote 14) is not drafted here and goes to
+      a person: the first number applies to most uses and the second to one-family detached zero lot line dwellings,
+      and the first applies to unattached sides only of semi-detached and attached dwellings.'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: RU.side_other_min
+- id: RU.side_other_side_min
   kind: rule
   topic: dimensions
   title: Minimum side yard, other side (chart p.3)
@@ -1090,64 +1202,18 @@ rules:
       side_yard_smaller: 9
     expect: fail
   open_questions:
-  - The chart does not say which side is the 'one side' and which is the 'other side'. This draft checks the narrower
-    side yard against 'other side minimum'. Please confirm.
+  - The chart does not say which side is the 'other side'. This rule reads it as the narrower side yard (side_yard_smaller).
+    Please confirm.
+  - The R-2C cell ('0 ft /5 ft / 10 ft [fn15]', three numbers chosen by use and by which side abuts what) is not
+    drafted here and goes to a person.
   research:
-  - question: The chart does not say which side is the 'one side' and which is the 'other side'. This draft checks
-      the narrower side yard against 'other side minimum'. Please confirm.
+  - question: The chart does not say which side is the 'other side'. This rule reads it as the narrower side yard
+      (side_yard_smaller). Please confirm.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-- id: RU.rear_yard_min_ru
-  kind: rule
-  topic: dimensions
-  title: Minimum rear yard, RU form with fn17 (chart p.3)
-  check: rear_yard >= max(30, min(0.25 * lot_depth, 50))
-  sources:
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    cell:
-      section: Yard Dimensions
-      row: Rear (minimum, % of depth or feet, whichever is less)
-      column: RU
-  - file: zoning_charts_2026-04.pdf
-    page: 3
-    lines:
-    - 67
-    - 67
-    quote: But not less than 30 ft.
-  examples:
-  - given:
-      lot_depth: 40
-      rear_yard: 30
-    expect: pass
-  - given:
-      lot_depth: 40
-      rear_yard: 29
-    expect: fail
-  - given:
-      lot_depth: 200
-      rear_yard: 50
-    expect: pass
-  - given:
-      lot_depth: 200
-      rear_yard: 49
-    expect: fail
-  - given:
-      lot_depth: 400
-      rear_yard: 50
-    expect: pass
-  - given:
-      lot_depth: 400
-      rear_yard: 49
-    expect: fail
-  open_questions:
-  - How is lot depth measured for irregular lots and for through lots, for the percent of depth?
-  research:
-  - question: How is lot depth measured for irregular lots and for through lots, for the percent of depth?
+  - question: The R-2C cell ('0 ft /5 ft / 10 ft [fn15]', three numbers chosen by use and by which side abuts what)
+      is not drafted here and goes to a person.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1435,7 +1501,7 @@ rules:
 - id: RU.325_16c_height_exception_stories_not_exceeded
   kind: rule
   topic: dimensions
-  title: 'Extra height: stories may not be exceeded (§325-16C(2))'
+  title: Stories not exceeded with extra height (§325-16C(2))
   applies_when: building_height > 35
   check: stories <= 3
   sources:
@@ -1456,14 +1522,7 @@ rules:
     lines:
     - 10
     - 10
-    quote: In all districts, the number of stories permitted may not be exceeded.
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 6
-    - 7
-    quote: 'In any district, any main building may be erected to a height in excess of that specified for the district,
-      provided that:'
+    quote: (2) In all districts, the number of stories permitted may not be exceeded.
   - file: zoning_charts_2026-04.pdf
     page: 3
     lines:
@@ -1472,11 +1531,11 @@ rules:
     quote: See §325-16.
   examples:
   - given:
-      building_height: 37
+      building_height: 36
       stories: 3
     expect: pass
   - given:
-      building_height: 37
+      building_height: 36
       stories: 4
     expect: fail
   - given:
@@ -1484,15 +1543,275 @@ rules:
       stories: 4
     expect: not_applicable
   open_questions:
-  - §325-16C(2) applies only to a main building and not in the U-1 Zone (§325-16C(4)); confirm main-building scope.
-  - Stories are counted as §325-3B STORY defines them (basement, attic, mezzanine rules).
+  - Does 'the number of stories permitted' mean the chart's story maximum for the district (also stated in §325-16C(2)
+    for all districts)?
   research:
-  - question: §325-16C(2) applies only to a main building and not in the U-1 Zone (§325-16C(4)); confirm main-building
-      scope.
+  - question: Does 'the number of stories permitted' mean the chart's story maximum for the district (also stated
+      in §325-16C(2) for all districts)?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Stories are counted as §325-3B STORY defines them (basement, attic, mezzanine rules).
+  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: RU.325_18b_projection_front_yard
+  kind: rule
+  topic: dimensions
+  title: Projection into required front yard, 2 ft max (law 325-18B)
+  check: front_yard_eaves >= 25 - 2
+  review_when:
+  - when: building_height > 35
+    reason: Chart height note 10 sends to 325-16, where yards may be enlarged for a building over the chart height,
+      so the required front yard may be larger.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Front (minimum)
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Height in feet
+      column: RU
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 13
+    - 16
+    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
+      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
+      not project more than two feet into any required yard.
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 56
+    - 56
+    quote: See §325-16.
+  examples:
+  - given:
+      front_yard_eaves: 23
+      building_height: 30
+    expect: pass
+  - given:
+      front_yard_eaves: 22
+      building_height: 30
+    expect: fail
+  - given:
+      front_yard_eaves: 25
+      building_height: 40
+    expect: needs_review
+  open_questions:
+  - Is a feature such as a porch, deck or balcony projecting more than two feet part of the building under 325-18A,
+    so that it is judged against the yard itself rather than this two-foot allowance?
+  - Does 'any required yard' on a corner lot include both front yards (325-19C)?
+  research:
+  - question: Is a feature such as a porch, deck or balcony projecting more than two feet part of the building under
+      325-18A, so that it is judged against the yard itself rather than this two-foot allowance?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'any required yard' on a corner lot include both front yards (325-19C)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: RU.325_18b_projection_side_yard_smaller
+  kind: rule
+  topic: dimensions
+  title: Projection into narrower required side yard, 2 ft max (law 325-18B)
+  check: side_yard_smaller_eaves >= 10 - 2
+  review_when:
+  - when: building_height > 35
+    reason: Chart height note 10 sends to 325-16, where yards may be enlarged for a building over the chart height,
+      so the required side yard may be larger.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Side (other side minimum)
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Height in feet
+      column: RU
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 13
+    - 16
+    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
+      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
+      not project more than two feet into any required yard.
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 56
+    - 56
+    quote: See §325-16.
+  examples:
+  - given:
+      side_yard_smaller_eaves: 8
+      building_height: 30
+    expect: pass
+  - given:
+      side_yard_smaller_eaves: 7
+      building_height: 30
+    expect: fail
+  - given:
+      side_yard_smaller_eaves: 10
+      building_height: 40
+    expect: needs_review
+  open_questions:
+  - The narrower side yard is compared with the chart's 'Side (other side minimum)' and the wider with 'Side (one
+    side minimum)'. Is this the right pairing?
+  research:
+  - question: The narrower side yard is compared with the chart's 'Side (other side minimum)' and the wider with
+      'Side (one side minimum)'. Is this the right pairing?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: RU.325_18b_projection_side_yard_larger
+  kind: rule
+  topic: dimensions
+  title: Projection into wider required side yard, 2 ft max (law 325-18B)
+  check: side_yard_larger_eaves >= 10 - 2
+  review_when:
+  - when: building_height > 35
+    reason: Chart height note 10 sends to 325-16, where yards may be enlarged for a building over the chart height,
+      so the required side yard may be larger.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Side (one side minimum)
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Height in feet
+      column: RU
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 13
+    - 16
+    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
+      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
+      not project more than two feet into any required yard.
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 56
+    - 56
+    quote: See §325-16.
+  examples:
+  - given:
+      side_yard_larger_eaves: 8
+      building_height: 30
+    expect: pass
+  - given:
+      side_yard_larger_eaves: 7
+      building_height: 30
+    expect: fail
+  - given:
+      side_yard_larger_eaves: 10
+      building_height: 40
+    expect: needs_review
+  open_questions:
+  - Is the pairing of the wider side yard with the chart's 'Side (one side minimum)' correct?
+  research:
+  - question: Is the pairing of the wider side yard with the chart's 'Side (one side minimum)' correct?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: RU.325_18b_projection_rear_yard_fn17
+  kind: rule
+  topic: dimensions
+  title: Projection into required rear yard in RU, 2 ft max (law 325-18B)
+  check: rear_yard_eaves >= max(30, min(0.25 * lot_depth, 50)) - 2
+  review_when:
+  - when: building_height > 35
+    reason: Chart height note 10 sends to 325-16, where yards may be enlarged for a building over the chart height,
+      so the required rear yard may be larger.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Rear (minimum, % of depth or feet, whichever is less)
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Height in feet
+      column: RU
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 13
+    - 16
+    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
+      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
+      not project more than two feet into any required yard.
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 67
+    - 67
+    quote: But not less than 30 ft.
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 56
+    - 56
+    quote: See §325-16.
+  examples:
+  - given:
+      rear_yard_eaves: 48
+      lot_depth: 1000
+      building_height: 30
+    expect: pass
+  - given:
+      rear_yard_eaves: 47
+      lot_depth: 1000
+      building_height: 30
+    expect: fail
+  - given:
+      rear_yard_eaves: 28
+      lot_depth: 100
+      building_height: 30
+    expect: pass
+  - given:
+      rear_yard_eaves: 27
+      lot_depth: 100
+      building_height: 30
+    expect: fail
+  - given:
+      rear_yard_eaves: 40
+      lot_depth: 200
+      building_height: 40
+    expect: needs_review
+  open_questions:
+  - Is the rear yard's 25% of 'depth' the lot depth?
+  research:
+  - question: Is the rear yard's 25% of 'depth' the lot depth?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -1707,3 +2026,48 @@ rules:
   notes: Drafted by the rule-drafting script; numbers filled by code from the RU cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: RU.loading_multiple_dwelling_25_units
+  kind: flag
+  topic: parking_and_loading
+  title: 'Loading: multiple dwelling with 25+ units (chart p.14)'
+  applies_when: use == "multiple_family"
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 14
+    cell:
+      section: Minimum Loading Requirement
+      row: Multiple dweling with 25 + units
+      column: RU
+  - file: zoning_charts_2026-04.pdf
+    page: 14
+    lines:
+    - 26
+    - 26
+    quote: Plus 1 space for each additional 15,000 sf of floor space or major fraction thereof.
+  open_questions:
+  - What does 'major fraction thereof' mean (more than half of 15,000 sf)?
+  - Does the chart's '25 +' mean 25 or more units, or more than 25 (§325-21B says more than 25)?
+  - Does the maximum of four spaces in §325-21B(1) apply to this row?
+  - Is floor space counted for the whole building (a single occupancy)?
+  research:
+  - question: What does 'major fraction thereof' mean (more than half of 15,000 sf)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the chart's '25 +' mean 25 or more units, or more than 25 (§325-21B says more than 25)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the maximum of four spaces in §325-21B(1) apply to this row?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is floor space counted for the whole building (a single occupancy)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+  notes: 'Demoted until re-drafted: The chart''s row is "Multiple dwelling with 25 + units"; the draft turned the
+    rate (1 space / 10,000 sf) into a floor-space threshold, so a 30-unit building under 10,000 sf had no loading
+    check (2026-10-25): a person checks the loading of every multiple dwelling.'

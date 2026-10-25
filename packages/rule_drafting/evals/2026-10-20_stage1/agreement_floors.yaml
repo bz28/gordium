@@ -5,9 +5,9 @@
 # (R-1b 38, R-1a 63, R-2a/R-2b 82, R-2c 88, R-3a 88); that fall is the cost of no false pass. Keys: measurement-2
 # a98149b's R-1b, #20's R-1a and R-3a (answer-keys c342d10, on this branch), r2-hand's R-2a, R-2b, R-2c (46b8de2, final). Every difference is in
 # grade_all_with_hand_keys.json.
-R-1b.yaml: 37       # of 48 (2026-10-25: §325-16C's stories limit (above the chart height) is now drafted; the key's stories examples give no height, so it needs review there: cautious, never a pass)
-R-1a.yaml: 62       # of 74 (2026-10-25: §325-16C's stories limit (above the chart height) is now drafted; the key's stories examples give no height, so it needs review there: cautious, never a pass)
-R-2a.yaml: 82       # of 98 (2026-10-25: §325-16C's stories limit (above the chart height) is now drafted; the key's stories examples give no height, so it needs review there: cautious, never a pass)
-R-2b.yaml: 82       # of 99 (2026-10-25: §325-16C's stories limit (above the chart height) is now drafted; the key's stories examples give no height, so it needs review there: cautious, never a pass)
-R-2c.yaml: 84       # of 229 (2026-10-25: §325-16C's stories limit (above the chart height) is now drafted; the key's stories examples give no height, so it needs review there: cautious, never a pass)
-R-3a.yaml: 87       # of 145 (2026-10-25: §325-16C's stories limit (above the chart height) is now drafted; the key's stories examples give no height, so it needs review there: cautious, never a pass)
+R-1b.yaml: 42       # of 48 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
+R-1a.yaml: 67       # of 74 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
+R-2a.yaml: 90       # of 98 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
+R-2b.yaml: 90       # of 99 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
+R-2c.yaml: 122       # of 229 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)
+R-3a.yaml: 99       # of 145 (after stage 2 (2026-10-25, Ben approved): the footnoted lot sizes, eaves, loading and every law piece drafted)

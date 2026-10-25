@@ -146,10 +146,9 @@ rules:
     "one_family_attached", "two_family", "multiple_family", "fraternity_sorority_group_house"]
   check: lot_area >= 4000
   review_when:
-  - when: multiple_primary_buildings
-    reason: Each square-footage requirement applies separately to the initial primary use and to each additional
-      primary use in a separate building (chart note 3, §325-8B(1)); the lot area needed for several primary buildings
-      is not decided here.
+  - when: additional_primary_buildings > 0
+    reason: 'Chart note 3 (see §325-8(B)(1)): the area requirement applies separately to each additional primary
+      use in a separate building.'
   - when: use == "adult_day_care_home"
     reason: '§325-3 defines this use as ''A dwelling unit in which adult day care is provided to not more than six
       adults at one tim'', a kind of dwelling, so which row of the chart applies to it (this "Other use" row or
@@ -179,17 +178,6 @@ rules:
     - 48
     - 48
     quote: See §325-8(B)(1).
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 26
-    lines:
-    - 11
-    - 16
-    quote: (1) For minimum lot size requirements stated in Column 6, Area in Square Feet, for all residential use
-      districts, each square-footage requirement applies separately to the initial permitted primary use and to
-      each additional permitted primary use located in a separate building on the property in question (e.g., in
-      R-2b Districts, an area of 3,000 square feet is required for a one family house or a two-family house, and
-      an additional area of 3,000 square feet is required for each additional one-family house or two-family house
-      on the property).
   - file: zoning_charts_2026-04.pdf
     page: 2
     lines:
@@ -218,34 +206,282 @@ rules:
   - given:
       use: school
       lot_area: 4000
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: pass
   - given:
       use: school
       lot_area: 3999
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: fail
   - given:
       use: school
       lot_area: 4000
-      multiple_primary_buildings: true
+      additional_primary_buildings: 1
     expect: needs_review
   - given:
       use: two_family
       lot_area: 1
-      multiple_primary_buildings: false
+      additional_primary_buildings: 0
     expect: not_applicable
   open_questions:
-  - 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total when a
-    lot holds several primary buildings of different uses?'
-  - Does 'Other use' cover every use without its own row, including dormitory and nonresidential uses?
+  - 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to be totaled
+    and measured?'
+  - Does 'Other use' cover every use not named in the chart's rows, including dormitory and the other uses in the
+    use list?
   research:
-  - question: 'Chart note 3 sends multiple primary buildings to §325-8B(1): how much lot area is required in total
-      when a lot holds several primary buildings of different uses?'
+  - question: 'Chart note 3 points to §325-8(B)(1): how is the area for several primary buildings on one lot to
+      be totaled and measured?'
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Does 'Other use' cover every use without its own row, including dormitory and nonresidential uses?
+  - question: Does 'Other use' cover every use not named in the chart's rows, including dormitory and the other
+      uses in the use list?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.min_lot_size_detached_fn4
+  kind: flag
+  topic: dimensions
+  title: Min lot size, one-family detached, note 4 (chart p.3)
+  applies_when: use == "one_family_detached"
+  review_when:
+  - when: lot_area >= 2500
+    reason: Note 4 adds area for each additional occupant; occupants are not measured, so an architect decides.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: One-family dwelling, detached
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 49
+    - 49
+    quote: For the first occupant; +500 sf for each additional occupant. (Could remove notes 1 - 6, if a single
+      standard is created for these uses.)
+  examples: []
+  open_questions:
+  - The area depends on the number of occupants; no occupant count is measured, so an architect must decide it.
+  research:
+  - question: The area depends on the number of occupants; no occupant count is measured, so an architect must decide
+      it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.min_lot_size_zero_lot_line_fn4
+  kind: flag
+  topic: dimensions
+  title: Min lot size, detached zero lot line, note 4 (chart p.3)
+  applies_when: use == "one_family_detached_zero_lot_line"
+  review_when:
+  - when: lot_area >= 2500
+    reason: Note 4 adds area for each additional occupant; occupants are not measured, so an architect decides.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: One-family dwelling, detached, zero lot line
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 49
+    - 49
+    quote: For the first occupant; +500 sf for each additional occupant. (Could remove notes 1 - 6, if a single
+      standard is created for these uses.)
+  examples: []
+  open_questions:
+  - The area depends on the number of occupants; no occupant count is measured, so an architect must decide it.
+  research:
+  - question: The area depends on the number of occupants; no occupant count is measured, so an architect must decide
+      it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.min_lot_size_semi_detached_fn5
+  kind: flag
+  topic: dimensions
+  title: Min lot size, one-family semi-detached, note 5 (chart p.3)
+  applies_when: use == "one_family_semi_detached"
+  review_when:
+  - when: lot_area >= 2000
+    reason: Note 5 adds area for each additional occupant in each dwelling unit; occupants are not measured, so
+      an architect decides.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: One-family dwelling, semi-detached
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 50
+    - 50
+    quote: For the first occupant in each dwelling unit; +400 sf for each additional occupant in each dwelling unit.
+  examples: []
+  open_questions:
+  - The area depends on occupants in each dwelling unit; no occupant count is measured, so an architect must decide
+    it.
+  research:
+  - question: The area depends on occupants in each dwelling unit; no occupant count is measured, so an architect
+      must decide it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.min_lot_size_two_family_fn5
+  kind: flag
+  topic: dimensions
+  title: Min lot size, two-family dwelling, note 5 (chart p.3)
+  applies_when: use == "two_family"
+  review_when:
+  - when: lot_area >= 2000
+    reason: Note 5 adds area for each additional occupant in each dwelling unit; occupants are not measured, so
+      an architect decides.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: Two-family dwelling
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 50
+    - 50
+    quote: For the first occupant in each dwelling unit; +400 sf for each additional occupant in each dwelling unit.
+  examples: []
+  open_questions:
+  - The area depends on occupants in each dwelling unit; no occupant count is measured, so an architect must decide
+    it.
+  research:
+  - question: The area depends on occupants in each dwelling unit; no occupant count is measured, so an architect
+      must decide it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.min_lot_size_attached_conv_fn6
+  kind: flag
+  topic: dimensions
+  title: Min lot size, attached by conversion, note 6 (chart p.3)
+  applies_when: use == "one_family_attached" and conversion
+  review_when:
+  - when: lot_area >= 1500
+    reason: Note 6 adds area for each additional occupant in each dwelling unit; occupants are not measured, so
+      an architect decides.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: One-family dwelling, attached, by conversion
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 51
+    - 52
+    quote: For the first occupant in each dwelling unit; +300 sf for each additional occupant in each dwelling unit;
+      +500 sf for each additional occupant in each dwelling unit in excess of five occupants.
+  examples: []
+  open_questions:
+  - The area depends on occupants in each dwelling unit; no occupant count is measured, so an architect must decide
+    it.
+  research:
+  - question: The area depends on occupants in each dwelling unit; no occupant count is measured, so an architect
+      must decide it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.min_lot_size_attached_new_fn6
+  kind: flag
+  topic: dimensions
+  title: Min lot size, attached new construction, note 6 (chart p.3)
+  applies_when: use == "one_family_attached" and not conversion
+  review_when:
+  - when: lot_area >= 1500
+    reason: Note 6 adds area for each additional occupant in each dwelling unit; occupants are not measured, so
+      an architect decides.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Minimum Lot Size [fn3]
+      row: One-family dwelling, attached, new construction
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 48
+    - 48
+    quote: See §325-8(B)(1).
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 51
+    - 52
+    quote: For the first occupant in each dwelling unit; +300 sf for each additional occupant in each dwelling unit;
+      +500 sf for each additional occupant in each dwelling unit in excess of five occupants.
+  examples: []
+  open_questions:
+  - The area depends on occupants in each dwelling unit; no occupant count is measured, so an architect must decide
+    it.
+  research:
+  - question: The area depends on occupants in each dwelling unit; no occupant count is measured, so an architect
+      must decide it.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -777,22 +1013,29 @@ rules:
       front_yard: 9
     expect: fail
   open_questions:
-  - §325-19C says corner lots have two adjoining front yards that must each meet the minimum front yard. Which yard
-    does the front_yard measure take on a corner lot?
+  - §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's front_yard
+    measure cover both street-facing yards?
+  - §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted separately
+    from the *_eaves measures?
   research:
-  - question: §325-19C says corner lots have two adjoining front yards that must each meet the minimum front yard.
-      Which yard does the front_yard measure take on a corner lot?
+  - question: §325-19C gives a corner lot two front yards, each held to the minimum front yard. Does the architect's
+      front_yard measure cover both street-facing yards?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: §325-18B lets eaves and similar features project up to two feet into a required yard. Is that drafted
+      separately from the *_eaves measures?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: R-2c.rear_yard_min
+- id: R-2c.rear_yard_min_fn16
   kind: rule
   topic: dimensions
-  title: Minimum rear yard, with fn16 (chart p.3)
-  check: rear_yard >= max(20, min(0.25 * lot_depth, 50))
+  title: Minimum rear yard, % of depth or ft, not under 20 ft (chart p.3)
+  check: rear_yard >= min(max(20, 0.25 * lot_depth), max(20, 50))
   sources:
   - file: zoning_charts_2026-04.pdf
     page: 3
@@ -808,12 +1051,12 @@ rules:
     quote: But not less than 20 ft.
   examples:
   - given:
-      lot_depth: 40
-      rear_yard: 20
+      lot_depth: 200
+      rear_yard: 50
     expect: pass
   - given:
-      lot_depth: 40
-      rear_yard: 19
+      lot_depth: 200
+      rear_yard: 49
     expect: fail
   - given:
       lot_depth: 100
@@ -824,17 +1067,26 @@ rules:
       rear_yard: 24
     expect: fail
   - given:
-      lot_depth: 400
-      rear_yard: 50
+      lot_depth: 40
+      rear_yard: 20
     expect: pass
   - given:
-      lot_depth: 400
-      rear_yard: 49
+      lot_depth: 40
+      rear_yard: 19
     expect: fail
   open_questions:
-  - How is lot depth measured for irregular lots and for through lots, for the percent of depth?
+  - The row reads 'whichever is less' of the percent of depth and the feet; the rule takes the lesser, then applies
+    the footnote's 20 ft floor (written as min(max(20, a), max(20, b)), which equals max(20, min(a, b))). Please
+    confirm the floor applies after taking the lesser.
+  - The RU cell ('25% / 50 ft [fn17]', not less than 30 ft) is not drafted here and goes to a person.
   research:
-  - question: How is lot depth measured for irregular lots and for through lots, for the percent of depth?
+  - question: The row reads 'whichever is less' of the percent of depth and the feet; the rule takes the lesser,
+      then applies the footnote's 20 ft floor (written as min(max(20, a), max(20, b)), which equals max(20, min(a,
+      b))). Please confirm the floor applies after taking the lesser.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The RU cell ('25% / 50 ft [fn17]', not less than 30 ft) is not drafted here and goes to a person.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
@@ -935,7 +1187,7 @@ rules:
 - id: R-2c.325_16c_height_exception_stories_not_exceeded
   kind: rule
   topic: dimensions
-  title: 'Extra height: stories may not be exceeded (§325-16C(2))'
+  title: Stories not exceeded with extra height (§325-16C(2))
   applies_when: building_height > 35
   check: stories <= 3
   sources:
@@ -956,14 +1208,7 @@ rules:
     lines:
     - 10
     - 10
-    quote: In all districts, the number of stories permitted may not be exceeded.
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 47
-    lines:
-    - 6
-    - 7
-    quote: 'In any district, any main building may be erected to a height in excess of that specified for the district,
-      provided that:'
+    quote: (2) In all districts, the number of stories permitted may not be exceeded.
   - file: zoning_charts_2026-04.pdf
     page: 3
     lines:
@@ -972,11 +1217,11 @@ rules:
     quote: See §325-16.
   examples:
   - given:
-      building_height: 37
+      building_height: 36
       stories: 3
     expect: pass
   - given:
-      building_height: 37
+      building_height: 36
       stories: 4
     expect: fail
   - given:
@@ -984,21 +1229,116 @@ rules:
       stories: 4
     expect: not_applicable
   open_questions:
-  - §325-16C(2) applies only to a main building and not in the U-1 Zone (§325-16C(4)); confirm main-building scope.
-  - Stories are counted as §325-3B STORY defines them (basement, attic, mezzanine rules).
+  - Does 'the number of stories permitted' mean the chart's story maximum for the district (also stated in §325-16C(2)
+    for all districts)?
   research:
-  - question: §325-16C(2) applies only to a main building and not in the U-1 Zone (§325-16C(4)); confirm main-building
-      scope.
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Stories are counted as §325-3B STORY defines them (basement, attic, mezzanine rules).
+  - question: Does 'the number of stories permitted' mean the chart's story maximum for the district (also stated
+      in §325-16C(2) for all districts)?
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: R-2c.325_18b_projection_front_yard
+  kind: flag
+  topic: dimensions
+  title: Projection into required front yard, 2 ft max (law 325-18B)
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Front (minimum)
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Height in feet
+      column: R-2C
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 13
+    - 16
+    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
+      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
+      not project more than two feet into any required yard.
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 56
+    - 56
+    quote: See §325-16.
+  open_questions:
+  - Is a feature such as a porch, deck or balcony projecting more than two feet part of the building under 325-18A,
+    so that it is judged against the yard itself rather than this two-foot allowance?
+  - Does 'any required yard' on a corner lot include both front yards (325-19C)?
+  research:
+  - question: Is a feature such as a porch, deck or balcony projecting more than two feet part of the building under
+      325-18A, so that it is judged against the yard itself rather than this two-foot allowance?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'any required yard' on a corner lot include both front yards (325-19C)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+  notes: 'Demoted until re-drafted: §325-18B''s eaves are drafted yard by yard, and this district''s side yard larger
+    and side yard smaller rule couldn''t be drafted (its chart cell took another form): the yards it has pass eaves
+    the answer keys fail or review (2026-10-25): a person checks the eaves.'
+- id: R-2c.325_18b_projection_rear_yard_fn16
+  kind: flag
+  topic: dimensions
+  title: Projection into required rear yard, 2 ft max (law 325-18B)
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Yard Dimensions
+      row: Rear (minimum, % of depth or feet, whichever is less)
+      column: R-2C
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    cell:
+      section: Maximum Building Height [fn10]
+      row: Height in feet
+      column: R-2C
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 13
+    - 16
+    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
+      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
+      not project more than two feet into any required yard.
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 66
+    - 66
+    quote: But not less than 20 ft.
+  - file: zoning_charts_2026-04.pdf
+    page: 3
+    lines:
+    - 56
+    - 56
+    quote: See §325-16.
+  open_questions:
+  - Is the rear yard's 25% of 'depth' the lot depth?
+  research:
+  - question: Is the rear yard's 25% of 'depth' the lot depth?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+  notes: 'Demoted until re-drafted: §325-18B''s eaves are drafted yard by yard, and this district''s side yard larger
+    and side yard smaller rule couldn''t be drafted (its chart cell took another form): the yards it has pass eaves
+    the answer keys fail or review (2026-10-25): a person checks the eaves.'
 - id: R-2c.325_19c_corner_lot_street_yards
   kind: rule
   topic: dimensions
@@ -1205,5 +1545,73 @@ rules:
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
   notes: Drafted by the rule-drafting script; numbers filled by code from the R-2c cells.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: R-2c.325_11b_cluster_front_yard
+  kind: rule
+  topic: dimensions
+  title: Cluster subdivision minimum front yard (325-11B(3)(e))
+  applies_when: cluster_subdivision
+  check: front_yard >= (25 if district in ["R-1a", "R-1b", "R-2a"] else 10)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 39
+    lines:
+    - 13
+    - 18
+    quote: '(e) Front, side and rear yard dimensions, provided that all buildings in a cluster subdivision shall
+      have a front yard of at least 25 feet in the R-1a, R-1b, and R-2a Zones and 10 feet in the R-2b, R-3a and
+      R-3b Zones, and further provided that all buildings in a cluster subdivision shall be at least the following
+      number of feet from the boundary of a cluster subdivision where it abuts land, other than a public right-of-way,
+      that is not part of the cluster subdivision:'
+  examples:
+  - given:
+      cluster_subdivision: true
+      district: R-1a
+      front_yard: 25
+    expect: pass
+  - given:
+      cluster_subdivision: true
+      district: R-1a
+      front_yard: 20
+    expect: fail
+  - given:
+      cluster_subdivision: true
+      district: R-2b
+      front_yard: 10
+    expect: pass
+  - given:
+      cluster_subdivision: true
+      district: R-2b
+      front_yard: 9
+    expect: fail
+  - given:
+      cluster_subdivision: false
+      district: R-2b
+      front_yard: 9
+    expect: not_applicable
+  open_questions:
+  - Does the cluster front yard minimum apply to every building or only to buildings on lots fronting a street?
+    The text says all buildings.
+  - The rest of 325-11B(3)(e) (boundary distances of 40 ft in R-1 and 20 ft in R-2 and R-3 Districts), the side
+    and rear yard deviations, the total land coverage table in (3)(d), the dwelling unit cap in (4) and the open
+    space reservation in (5) and (6) need cluster-wide measures (distance to the cluster boundary, total coverage
+    of all buildings, conventional yield, land reserved) that are not available per lot, so they are not drafted
+    here.
+  research:
+  - question: Does the cluster front yard minimum apply to every building or only to buildings on lots fronting
+      a street? The text says all buildings.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The rest of 325-11B(3)(e) (boundary distances of 40 ft in R-1 and 20 ft in R-2 and R-3 Districts),
+      the side and rear yard deviations, the total land coverage table in (3)(d), the dwelling unit cap in (4) and
+      the open space reservation in (5) and (6) need cluster-wide measures (distance to the cluster boundary, total
+      coverage of all buildings, conventional yield, land reserved) that are not available per lot, so they are
+      not drafted here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft

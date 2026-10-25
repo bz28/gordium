@@ -58,3 +58,60 @@ general.325_18b_architectural_feature_projection_limit: >-
   §325-18B's 2 ft limit drafted on a measure the AI proposed (how far a feature projects) instead of each yard
   measured to the eaves; alone it passes eaves the answer keys fail (an eave 2.5 ft into the side yard): a person
   checks the eaves until §325-18B is re-drafted (2026-10-25).
+R-2c.325_18b_projection_front_yard: >-
+  §325-18B's eaves are drafted yard by yard, and this district's side yard larger and side yard smaller rule couldn't be drafted (its chart cell
+  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
+R-2c.325_18b_projection_rear_yard_fn16: >-
+  §325-18B's eaves are drafted yard by yard, and this district's side yard larger and side yard smaller rule couldn't be drafted (its chart cell
+  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
+R-3a.325_18b_projection_front_yard: >-
+  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
+  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
+R-3a.325_18b_projection_side_yard_larger: >-
+  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
+  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
+R-3a.325_18b_projection_side_yard_smaller: >-
+  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
+  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
+R-3b.325_18b_projection_front_yard: >-
+  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
+  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
+R-3b.325_18b_projection_side_yard_larger: >-
+  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
+  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
+R-3b.325_18b_projection_side_yard_smaller: >-
+  §325-18B's eaves are drafted yard by yard, and this district's rear yard rule couldn't be drafted (its chart cell
+  took another form): the yards it has pass eaves the answer keys fail or review (2026-10-25): a person checks the eaves.
+R-3a.loading_multiple_dwelling_25_units:
+  cause: >-
+    The chart's row is "Multiple dwelling with 25 + units"; the draft turned the rate (1 space / 10,000 sf) into a
+    floor-space threshold, so a 30-unit building under 10,000 sf had no loading check (2026-10-25): a person
+    checks the loading of every multiple dwelling.
+  applies_when: use == "multiple_family"
+R-3aa.loading_multiple_dwelling_25_units:
+  cause: >-
+    The chart's row is "Multiple dwelling with 25 + units"; the draft turned the rate (1 space / 10,000 sf) into a
+    floor-space threshold, so a 30-unit building under 10,000 sf had no loading check (2026-10-25): a person
+    checks the loading of every multiple dwelling.
+  applies_when: use == "multiple_family"
+R-3b.loading_multiple_dwelling_25_units:
+  cause: >-
+    The chart's row is "Multiple dwelling with 25 + units"; the draft turned the rate (1 space / 10,000 sf) into a
+    floor-space threshold, so a 30-unit building under 10,000 sf had no loading check (2026-10-25): a person
+    checks the loading of every multiple dwelling.
+  applies_when: use == "multiple_family"
+RU.loading_multiple_dwelling_25_units:
+  cause: >-
+    The chart's row is "Multiple dwelling with 25 + units"; the draft turned the rate (1 space / 10,000 sf) into a
+    floor-space threshold, so a 30-unit building under 10,000 sf had no loading check (2026-10-25): a person
+    checks the loading of every multiple dwelling.
+  applies_when: use == "multiple_family"
+R-3a.loading_nursing_home_hospital: >-
+  The chart's 1 loading space for a nursing home, hospital or sanitarium; the R-3a answer key sends
+  loading to review (§325-21 also applies): a person checks it (2026-10-25).
+R-3aa.loading_nursing_home_hospital: >-
+  The chart's 1 loading space for a nursing home, hospital or sanitarium; the R-3a answer key sends
+  loading to review (§325-21 also applies): a person checks it (2026-10-25).
+R-3b.loading_nursing_home_hospital: >-
+  The chart's 1 loading space for a nursing home, hospital or sanitarium; the R-3a answer key sends
+  loading to review (§325-21 also applies): a person checks it (2026-10-25).

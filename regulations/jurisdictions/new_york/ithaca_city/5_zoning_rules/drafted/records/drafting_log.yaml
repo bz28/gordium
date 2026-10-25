@@ -119,31 +119,45 @@ units:
     - R-3a.min_lot_size_two_family
     - R-3a.min_lot_size_group_house
     - R-3a.min_lot_size_other_use
+    - R-3a.min_lot_size_attached_conv_fn7
+    - R-3a.min_lot_size_attached_new_fn7
+    - R-3a.min_lot_size_multiple_conv_fn7
+    - R-3a.min_lot_size_multiple_new_fn7
     - R-3aa.min_lot_size_detached
     - R-3aa.min_lot_size_semi_detached
     - R-3aa.min_lot_size_two_family
     - R-3aa.min_lot_size_group_house
     - R-3aa.min_lot_size_other_use
+    - R-3aa.min_lot_size_attached_conv_fn7
+    - R-3aa.min_lot_size_attached_new_fn7
+    - R-3aa.min_lot_size_multiple_conv_fn7
+    - R-3aa.min_lot_size_multiple_new_fn7
     - R-3b.min_lot_size_detached
     - R-3b.min_lot_size_semi_detached
     - R-3b.min_lot_size_two_family
     - R-3b.min_lot_size_group_house
     - R-3b.min_lot_size_other_use
+    - R-3b.min_lot_size_attached_conv_fn8
+    - R-3b.min_lot_size_attached_new_fn8
+    - R-3b.min_lot_size_multiple_conv_fn8
+    - R-3b.min_lot_size_multiple_new_fn8
     - RU.min_lot_size_detached
     - RU.min_lot_size_semi_detached
     - RU.min_lot_size_two_family
     - RU.min_lot_size_group_house
     - RU.min_lot_size_other_use
+    - RU.min_lot_size_attached_conv_fn9
+    - RU.min_lot_size_attached_new_fn9
+    - RU.min_lot_size_multiple_conv_fn9
+    - RU.min_lot_size_multiple_new_fn9
     - R-2c.min_lot_size_other_use
+    - R-2c.min_lot_size_detached_fn4
+    - R-2c.min_lot_size_zero_lot_line_fn4
+    - R-2c.min_lot_size_semi_detached_fn5
+    - R-2c.min_lot_size_two_family_fn5
+    - R-2c.min_lot_size_attached_conv_fn6
+    - R-2c.min_lot_size_attached_new_fn6
     unresolved:
-    - rule: R-2c.min_lot_size_detached
-      why: '''One-family dwelling, detached'': the cell ''2,500 sf [fn4]'' has footnotes [''4''], the rule expects
-        none'
-      cells:
-      - - 3
-        - Minimum Lot Size [fn3]
-        - One-family dwelling, detached
-        - R-2C
     - rule: R-1a.min_lot_size_semi_detached
       why: '''One-family dwelling, semi-detached'': the chart shows ''-'' here'
       cells:
@@ -158,14 +172,6 @@ units:
         - Minimum Lot Size [fn3]
         - One-family dwelling, semi-detached
         - R-1B
-    - rule: R-2c.min_lot_size_semi_detached
-      why: '''One-family dwelling, semi-detached'': the cell ''2,000 sf [fn5]'' has footnotes [''5''], the rule
-        expects none'
-      cells:
-      - - 3
-        - Minimum Lot Size [fn3]
-        - One-family dwelling, semi-detached
-        - R-2C
     - rule: R-1a.min_lot_size_two_family
       why: '''Two-family dwelling'': the chart shows ''-'' here'
       cells:
@@ -180,13 +186,6 @@ units:
         - Minimum Lot Size [fn3]
         - Two-family dwelling
         - R-1B
-    - rule: R-2c.min_lot_size_two_family
-      why: '''Two-family dwelling'': the cell ''2,000 sf [fn5]'' has footnotes [''5''], the rule expects none'
-      cells:
-      - - 3
-        - Minimum Lot Size [fn3]
-        - Two-family dwelling
-        - R-2C
     - rule: R-1a.min_lot_size_group_house
       why: '''Fraternity, sorority, or group house'': the chart shows ''nothing'' here'
       cells:
@@ -222,63 +221,524 @@ units:
         - Minimum Lot Size [fn3]
         - Fraternity, sorority, or group house
         - R-2C
-    - rule: R-2c.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, detached, zero lot line'': the
-        R-2C cell ''2,500 sf [fn4]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
-        R-2C cell ''1,500 sf [fn6]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
-        R-3A cell ''7,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
-        R-3AA cell ''7,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
-        R-3B cell ''4,000 sf [fn8]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, by conversion'': the
-        RU cell ''16,500 sf [fn9]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-2c.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
-        R-2C cell ''1,500 sf [fn6]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
-        R-3A cell ''6,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
-        R-3AA cell ''6,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
-        R-3B cell ''3,500 sf [fn8]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''One-family dwelling, attached, new construction'': the
-        RU cell ''16,500 sf [fn9]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, by conversion'': the R-3A
-        cell ''7,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, by conversion'': the R-3AA
-        cell ''7,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, by conversion'': the R-3B
-        cell ''4,000 sf [fn8]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, by conversion'': the RU cell
-        ''16,500 sf [fn9]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3a.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, new construction'': the R-3A
-        cell ''6,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3aa.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, new construction'': the R-3AA
-        cell ''6,000 sf [fn7]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: R-3b.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, new construction'': the R-3B
-        cell ''3,500 sf [fn8]'' has no drafted rule (a person checks the requirement it sets)'
-    - rule: RU.chart-p3-minimum_lot_size
-      why: 'chart page 3, ''Minimum Lot Size [fn3]'', row ''Multiple family dwelling, new construction'': the RU
-        cell ''16,500 sf [fn9]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-1a.min_lot_size_zero_lot_line_fn4
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached, zero lot line
+        - R-1A
+    - rule: R-1b.min_lot_size_zero_lot_line_fn4
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached, zero lot line
+        - R-1B
+    - rule: R-2a.min_lot_size_zero_lot_line_fn4
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached, zero lot line
+        - R-2A
+    - rule: R-2b.min_lot_size_zero_lot_line_fn4
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached, zero lot line
+        - R-2B
+    - rule: R-3a.min_lot_size_zero_lot_line_fn4
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached, zero lot line
+        - R-3A
+    - rule: R-3aa.min_lot_size_zero_lot_line_fn4
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached, zero lot line
+        - R-3AA
+    - rule: R-3b.min_lot_size_zero_lot_line_fn4
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached, zero lot line
+        - R-3B
+    - rule: RU.min_lot_size_zero_lot_line_fn4
+      why: '''One-family dwelling, detached, zero lot line'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, detached, zero lot line
+        - RU
+    - rule: R-1a.min_lot_size_semi_detached_fn5
+      why: '''One-family dwelling, semi-detached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, semi-detached
+        - R-1A
+    - rule: R-1b.min_lot_size_semi_detached_fn5
+      why: '''One-family dwelling, semi-detached'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, semi-detached
+        - R-1B
+    - rule: R-1a.min_lot_size_two_family_fn5
+      why: '''Two-family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Two-family dwelling
+        - R-1A
+    - rule: R-1b.min_lot_size_two_family_fn5
+      why: '''Two-family dwelling'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Two-family dwelling
+        - R-1B
+    - rule: R-1a.min_lot_size_attached_conv_fn6
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-1A
+    - rule: R-1b.min_lot_size_attached_conv_fn6
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-1B
+    - rule: R-2a.min_lot_size_attached_conv_fn6
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-2A
+    - rule: R-2b.min_lot_size_attached_conv_fn6
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-2B
+    - rule: R-1a.min_lot_size_attached_conv_fn7
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-1A
+    - rule: R-1b.min_lot_size_attached_conv_fn7
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-1B
+    - rule: R-2a.min_lot_size_attached_conv_fn7
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-2A
+    - rule: R-2b.min_lot_size_attached_conv_fn7
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-2B
+    - rule: R-1a.min_lot_size_attached_conv_fn8
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-1A
+    - rule: R-1b.min_lot_size_attached_conv_fn8
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-1B
+    - rule: R-2a.min_lot_size_attached_conv_fn8
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-2A
+    - rule: R-2b.min_lot_size_attached_conv_fn8
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-2B
+    - rule: R-1a.min_lot_size_attached_conv_fn9
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-1A
+    - rule: R-1b.min_lot_size_attached_conv_fn9
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-1B
+    - rule: R-2a.min_lot_size_attached_conv_fn9
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-2A
+    - rule: R-2b.min_lot_size_attached_conv_fn9
+      why: '''One-family dwelling, attached, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, by conversion
+        - R-2B
+    - rule: R-1a.min_lot_size_attached_new_fn6
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-1A
+    - rule: R-1b.min_lot_size_attached_new_fn6
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-1B
+    - rule: R-2a.min_lot_size_attached_new_fn6
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-2A
+    - rule: R-2b.min_lot_size_attached_new_fn6
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-2B
+    - rule: R-1a.min_lot_size_attached_new_fn7
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-1A
+    - rule: R-1b.min_lot_size_attached_new_fn7
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-1B
+    - rule: R-2a.min_lot_size_attached_new_fn7
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-2A
+    - rule: R-2b.min_lot_size_attached_new_fn7
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-2B
+    - rule: R-1a.min_lot_size_attached_new_fn8
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-1A
+    - rule: R-1b.min_lot_size_attached_new_fn8
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-1B
+    - rule: R-2a.min_lot_size_attached_new_fn8
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-2A
+    - rule: R-2b.min_lot_size_attached_new_fn8
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-2B
+    - rule: R-1a.min_lot_size_attached_new_fn9
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-1A
+    - rule: R-1b.min_lot_size_attached_new_fn9
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-1B
+    - rule: R-2a.min_lot_size_attached_new_fn9
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-2A
+    - rule: R-2b.min_lot_size_attached_new_fn9
+      why: '''One-family dwelling, attached, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - One-family dwelling, attached, new construction
+        - R-2B
+    - rule: R-1a.min_lot_size_multiple_conv_fn7
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-1A
+    - rule: R-1b.min_lot_size_multiple_conv_fn7
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-1B
+    - rule: R-2a.min_lot_size_multiple_conv_fn7
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-2A
+    - rule: R-2b.min_lot_size_multiple_conv_fn7
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-2B
+    - rule: R-2c.min_lot_size_multiple_conv_fn7
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-2C
+    - rule: R-1a.min_lot_size_multiple_conv_fn8
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-1A
+    - rule: R-1b.min_lot_size_multiple_conv_fn8
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-1B
+    - rule: R-2a.min_lot_size_multiple_conv_fn8
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-2A
+    - rule: R-2b.min_lot_size_multiple_conv_fn8
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-2B
+    - rule: R-2c.min_lot_size_multiple_conv_fn8
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-2C
+    - rule: R-1a.min_lot_size_multiple_conv_fn9
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-1A
+    - rule: R-1b.min_lot_size_multiple_conv_fn9
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-1B
+    - rule: R-2a.min_lot_size_multiple_conv_fn9
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-2A
+    - rule: R-2b.min_lot_size_multiple_conv_fn9
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-2B
+    - rule: R-2c.min_lot_size_multiple_conv_fn9
+      why: '''Multiple family dwelling, by conversion'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, by conversion
+        - R-2C
+    - rule: R-1a.min_lot_size_multiple_new_fn7
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-1A
+    - rule: R-1b.min_lot_size_multiple_new_fn7
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-1B
+    - rule: R-2a.min_lot_size_multiple_new_fn7
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-2A
+    - rule: R-2b.min_lot_size_multiple_new_fn7
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-2B
+    - rule: R-2c.min_lot_size_multiple_new_fn7
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-2C
+    - rule: R-1a.min_lot_size_multiple_new_fn8
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-1A
+    - rule: R-1b.min_lot_size_multiple_new_fn8
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-1B
+    - rule: R-2a.min_lot_size_multiple_new_fn8
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-2A
+    - rule: R-2b.min_lot_size_multiple_new_fn8
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-2B
+    - rule: R-2c.min_lot_size_multiple_new_fn8
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-2C
+    - rule: R-1a.min_lot_size_multiple_new_fn9
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-1A
+    - rule: R-1b.min_lot_size_multiple_new_fn9
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-1B
+    - rule: R-2a.min_lot_size_multiple_new_fn9
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-2A
+    - rule: R-2b.min_lot_size_multiple_new_fn9
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-2B
+    - rule: R-2c.min_lot_size_multiple_new_fn9
+      why: '''Multiple family dwelling, new construction'': the chart shows ''-'' here'
+      cells:
+      - - 3
+        - Minimum Lot Size [fn3]
+        - Multiple family dwelling, new construction
+        - R-2C
     problems: []
   chart-p3-minimum_lot_width:
     rules:
@@ -554,48 +1014,47 @@ units:
   chart-p3-yard_dimensions:
     rules:
     - R-1a.front_yard_min
-    - R-1a.side_one_min
-    - R-1a.side_other_min
-    - R-1a.rear_yard_min
+    - R-1a.side_one_side_min
+    - R-1a.side_other_side_min
+    - R-1a.rear_yard_min_fn16
     - R-1b.front_yard_min
-    - R-1b.side_one_min
-    - R-1b.side_other_min
-    - R-1b.rear_yard_min
+    - R-1b.side_one_side_min
+    - R-1b.side_other_side_min
+    - R-1b.rear_yard_min_fn16
     - R-2a.front_yard_min
-    - R-2a.side_one_min
-    - R-2a.side_other_min
-    - R-2a.rear_yard_min
+    - R-2a.side_one_side_min
+    - R-2a.side_other_side_min
+    - R-2a.rear_yard_min_fn16
     - R-2b.front_yard_min
-    - R-2b.side_one_min
-    - R-2b.side_other_min
-    - R-2b.rear_yard_min
+    - R-2b.side_one_side_min
+    - R-2b.side_other_side_min
+    - R-2b.rear_yard_min_fn16
     - R-2c.front_yard_min
-    - R-2c.rear_yard_min
+    - R-2c.rear_yard_min_fn16
     - R-3a.front_yard_min
-    - R-3a.side_one_min
-    - R-3a.side_other_min
-    - R-3a.rear_yard_min
+    - R-3a.side_one_side_min
+    - R-3a.side_other_side_min
+    - R-3a.rear_yard_min_fn16
     - R-3aa.front_yard_min
-    - R-3aa.side_one_min
-    - R-3aa.side_other_min
-    - R-3aa.rear_yard_min
+    - R-3aa.side_one_side_min
+    - R-3aa.side_other_side_min
+    - R-3aa.rear_yard_min_fn16
     - R-3b.front_yard_min
-    - R-3b.side_one_min
-    - R-3b.side_other_min
-    - R-3b.rear_yard_min
+    - R-3b.side_one_side_min
+    - R-3b.side_other_side_min
+    - R-3b.rear_yard_min_fn16
     - RU.front_yard_min
-    - RU.side_one_min
-    - RU.side_other_min
-    - RU.rear_yard_min_ru
+    - RU.side_one_side_min
+    - RU.side_other_side_min
     unresolved:
-    - rule: R-2c.side_one_min
+    - rule: R-2c.side_one_side_min
       why: '''Side (one side minimum)'': the cell ''10 ft /15 ft [fn14]'' has 2 numbers, the rule expects 1'
       cells:
       - - 3
         - Yard Dimensions
         - Side (one side minimum)
         - R-2C
-    - rule: R-2c.side_other_min
+    - rule: R-2c.side_other_side_min
       why: '''Side (other side minimum)'': the cell ''0 ft /5 ft / 10 ft [fn15]'' has 3 numbers, the rule expects
         1'
       cells:
@@ -603,12 +1062,18 @@ units:
         - Yard Dimensions
         - Side (other side minimum)
         - R-2C
-    - rule: chart-p3-yard_dimensions.side_one_min_r2c_fn14
-      why: 'general.side_one_min_r2c_fn14: general.side_one_min_r2c_fn14: unknown district ''R-2C'' in ''district
-        == "R-2C"''; general.side_one_min_r2c_fn14: example 1: unknown district ''R-2C'''
-    - rule: chart-p3-yard_dimensions.side_other_min_r2c_fn15
-      why: 'general.side_other_min_r2c_fn15: general.side_other_min_r2c_fn15: unknown district ''R-2C'' in ''district
-        == "R-2C"''; general.side_other_min_r2c_fn15: example 1: unknown district ''R-2C'''
+    - rule: RU.rear_yard_min_fn16
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25% / 50 ft [fn17]'' has footnotes
+        [''17''], the rule expects [''16'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - RU
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - RU
     problems: []
   chart-p14-residential:
     rules:
@@ -825,16 +1290,78 @@ units:
     problems: []
   325-16C:
     rules:
+    - R-1a.325_16c_height_exception_extra_height
     - R-1a.325_16c_height_exception_stories_not_exceeded
+    - R-1b.325_16c_height_exception_extra_height
     - R-1b.325_16c_height_exception_stories_not_exceeded
+    - R-2a.325_16c_height_exception_extra_height
     - R-2a.325_16c_height_exception_stories_not_exceeded
+    - R-2b.325_16c_height_exception_extra_height
     - R-2b.325_16c_height_exception_stories_not_exceeded
-    - R-2c.325_16c_height_exception_stories_not_exceeded
+    - R-3a.325_16c_height_exception_extra_height
     - R-3a.325_16c_height_exception_stories_not_exceeded
+    - R-3aa.325_16c_height_exception_extra_height
+    - R-3aa.325_16c_height_exception_stories_not_exceeded_max_min
+    - R-3b.325_16c_height_exception_extra_height
     - R-3b.325_16c_height_exception_stories_not_exceeded
+    - R-2c.325_16c_height_exception_stories_not_exceeded
     - RU.325_16c_height_exception_stories_not_exceeded
-    - R-3aa.325_16c_height_exception_stories_not_exceeded_fn11
     unresolved:
+    - rule: R-2c.325_16c_height_exception_extra_height
+      why: '''Side (one side minimum)'': the cell ''10 ft /15 ft [fn14]'' has 2 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-2C
+      - - 3
+        - Yard Dimensions
+        - Front (minimum)
+        - R-2C
+      - - 3
+        - Yard Dimensions
+        - Side (one side minimum)
+        - R-2C
+      - - 3
+        - Yard Dimensions
+        - Side (other side minimum)
+        - R-2C
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-2C
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-2C
+    - rule: RU.325_16c_height_exception_extra_height
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25% / 50 ft [fn17]'' has footnotes
+        [''17''], the rule expects [''16'']'
+      cells:
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - RU
+      - - 3
+        - Yard Dimensions
+        - Front (minimum)
+        - RU
+      - - 3
+        - Yard Dimensions
+        - Side (one side minimum)
+        - RU
+      - - 3
+        - Yard Dimensions
+        - Side (other side minimum)
+        - RU
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - RU
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - RU
     - rule: R-3aa.325_16c_height_exception_stories_not_exceeded
       why: '''Number of stories'': the cell ''3/2 [fn11]'' has 2 numbers, the rule expects 1'
       cells:
@@ -846,7 +1373,7 @@ units:
         - Maximum Building Height [fn10]
         - Number of stories
         - R-3AA
-    - rule: R-1a.325_16c_height_exception_stories_not_exceeded_fn11
+    - rule: R-1a.325_16c_height_exception_stories_not_exceeded_max_min
       why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
       cells:
       - - 3
@@ -857,7 +1384,7 @@ units:
         - Maximum Building Height [fn10]
         - Number of stories
         - R-1A
-    - rule: R-1b.325_16c_height_exception_stories_not_exceeded_fn11
+    - rule: R-1b.325_16c_height_exception_stories_not_exceeded_max_min
       why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
       cells:
       - - 3
@@ -868,7 +1395,7 @@ units:
         - Maximum Building Height [fn10]
         - Number of stories
         - R-1B
-    - rule: R-2a.325_16c_height_exception_stories_not_exceeded_fn11
+    - rule: R-2a.325_16c_height_exception_stories_not_exceeded_max_min
       why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
       cells:
       - - 3
@@ -879,7 +1406,7 @@ units:
         - Maximum Building Height [fn10]
         - Number of stories
         - R-2A
-    - rule: R-2b.325_16c_height_exception_stories_not_exceeded_fn11
+    - rule: R-2b.325_16c_height_exception_stories_not_exceeded_max_min
       why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
       cells:
       - - 3
@@ -890,7 +1417,7 @@ units:
         - Maximum Building Height [fn10]
         - Number of stories
         - R-2B
-    - rule: R-2c.325_16c_height_exception_stories_not_exceeded_fn11
+    - rule: R-2c.325_16c_height_exception_stories_not_exceeded_max_min
       why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
       cells:
       - - 3
@@ -901,7 +1428,7 @@ units:
         - Maximum Building Height [fn10]
         - Number of stories
         - R-2C
-    - rule: R-3a.325_16c_height_exception_stories_not_exceeded_fn11
+    - rule: R-3a.325_16c_height_exception_stories_not_exceeded_max_min
       why: '''Number of stories'': the cell ''4'' has 1 numbers, the rule expects 2'
       cells:
       - - 3
@@ -912,7 +1439,7 @@ units:
         - Maximum Building Height [fn10]
         - Number of stories
         - R-3A
-    - rule: R-3b.325_16c_height_exception_stories_not_exceeded_fn11
+    - rule: R-3b.325_16c_height_exception_stories_not_exceeded_max_min
       why: '''Number of stories'': the cell ''4'' has 1 numbers, the rule expects 2'
       cells:
       - - 3
@@ -923,7 +1450,7 @@ units:
         - Maximum Building Height [fn10]
         - Number of stories
         - R-3B
-    - rule: RU.325_16c_height_exception_stories_not_exceeded_fn11
+    - rule: RU.325_16c_height_exception_stories_not_exceeded_max_min
       why: '''Number of stories'': the cell ''3'' has 1 numbers, the rule expects 2'
       cells:
       - - 3
@@ -934,14 +1461,6 @@ units:
         - Maximum Building Height [fn10]
         - Number of stories
         - RU
-    - rule: 325-16C.325_16c_height_exception_yards_increased
-      why: '325-16C.325_16c_height_exception_yards_increased: number 20 in ''building_height > {height} and front_yard
-        >= {front} + (building_height - {height}) and side_yard_smaller >= min({side_one}, {side_other}) + (building_height
-        - {height}) and side_yard_larger >= max({side_one}, {side_other}) + (building_height - {height}) and rear_yard
-        >= max(min({rear_pct} * lot_depth, {rear_ft}), 20) + (building_height - {height})'' isn''t backed where
-        it stands: bind it to a sentence of the text being drafted, or to the own-cell footnote or the row label
-        of a slot it stands with (the same arithmetic, or the condition that picks the slot''s value) where that
-        slot decides something; a chart number must be a slot'
     problems: []
   325-18A:
     rules:
@@ -950,11 +1469,124 @@ units:
     problems: []
   325-18B:
     rules:
-    - general.325_18b_architectural_feature_projection_limit
+    - R-1a.325_18b_projection_front_yard
+    - R-1a.325_18b_projection_side_yard_smaller
+    - R-1a.325_18b_projection_side_yard_larger
+    - R-1a.325_18b_projection_rear_yard_fn16
+    - R-1b.325_18b_projection_front_yard
+    - R-1b.325_18b_projection_side_yard_smaller
+    - R-1b.325_18b_projection_side_yard_larger
+    - R-1b.325_18b_projection_rear_yard_fn16
+    - R-2a.325_18b_projection_front_yard
+    - R-2a.325_18b_projection_side_yard_smaller
+    - R-2a.325_18b_projection_side_yard_larger
+    - R-2a.325_18b_projection_rear_yard_fn16
+    - R-2b.325_18b_projection_front_yard
+    - R-2b.325_18b_projection_side_yard_smaller
+    - R-2b.325_18b_projection_side_yard_larger
+    - R-2b.325_18b_projection_rear_yard_fn16
+    - R-2c.325_18b_projection_front_yard
+    - R-2c.325_18b_projection_rear_yard_fn16
+    - R-3a.325_18b_projection_front_yard
+    - R-3a.325_18b_projection_side_yard_smaller
+    - R-3a.325_18b_projection_side_yard_larger
+    - R-3aa.325_18b_projection_front_yard
+    - R-3aa.325_18b_projection_side_yard_smaller
+    - R-3aa.325_18b_projection_side_yard_larger
+    - R-3aa.325_18b_projection_rear_yard_fn16
+    - R-3b.325_18b_projection_front_yard
+    - R-3b.325_18b_projection_side_yard_smaller
+    - R-3b.325_18b_projection_side_yard_larger
+    - RU.325_18b_projection_front_yard
+    - RU.325_18b_projection_side_yard_smaller
+    - RU.325_18b_projection_side_yard_larger
+    - RU.325_18b_projection_rear_yard_fn17
     unresolved:
-    - rule: general.325_18b_required_yard_open_unobstructed
-      why: 'set aside: a flag with no condition that quotes only what a kept rule with no condition checks would
-        send every design to review'
+    - rule: R-2c.325_18b_projection_side_yard_smaller
+      why: '''Side (other side minimum)'': the cell ''0 ft /5 ft / 10 ft [fn15]'' has 3 numbers, the rule expects
+        1'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Side (other side minimum)
+        - R-2C
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-2C
+    - rule: R-2c.325_18b_projection_side_yard_larger
+      why: '''Side (one side minimum)'': the cell ''10 ft /15 ft [fn14]'' has 2 numbers, the rule expects 1'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Side (one side minimum)
+        - R-2C
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-2C
+    - rule: R-3a.325_18b_projection_rear_yard_fn16
+      why: 'R-3a.325_18b_projection_rear_yard_fn16: example 2: expected fail, got pass'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3A
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3A
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-3A
+    - rule: R-3b.325_18b_projection_rear_yard_fn16
+      why: 'R-3b.325_18b_projection_rear_yard_fn16: example 2: expected fail, got pass'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3B
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3B
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-3B
+    - rule: R-3a.325_18b_projection_rear_yard_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''20%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3A
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3A
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-3A
+    - rule: R-3b.325_18b_projection_rear_yard_fn17
+      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''20%/ 50 ft [fn16]'' has footnotes
+        [''16''], the rule expects [''17'']'
+      cells:
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3B
+      - - 3
+        - Yard Dimensions
+        - Rear (minimum, % of depth or feet, whichever is less)
+        - R-3B
+      - - 3
+        - Maximum Building Height [fn10]
+        - Height in feet
+        - R-3B
     problems: []
   325-19C:
     rules:
@@ -1487,4 +2119,1976 @@ units:
     - general.325_28c_adu_new_secondary_front_flag
     unresolved: []
     problems: []
+  chart-p14-minimum_loading_requirement:
+    rules:
+    - R-3a.loading_nursing_home_hospital
+    - R-3a.loading_multiple_dwelling_25_units
+    - R-3aa.loading_nursing_home_hospital
+    - R-3aa.loading_multiple_dwelling_25_units
+    - R-3b.loading_nursing_home_hospital
+    - R-3b.loading_multiple_dwelling_25_units
+    - RU.loading_multiple_dwelling_25_units
+    - general.loading_nonresidential_variance
+    - general.loading_neighborhood_commercial
+    unresolved:
+    - rule: R-1a.loading_nursing_home_hospital
+      why: '''Nursing home, hospital, or sanitarium'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Nursing home, hospital, or sanitarium
+        - R-1A
+    - rule: R-1b.loading_nursing_home_hospital
+      why: '''Nursing home, hospital, or sanitarium'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Nursing home, hospital, or sanitarium
+        - R-1B
+    - rule: R-2a.loading_nursing_home_hospital
+      why: '''Nursing home, hospital, or sanitarium'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Nursing home, hospital, or sanitarium
+        - R-2A
+    - rule: R-2b.loading_nursing_home_hospital
+      why: '''Nursing home, hospital, or sanitarium'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Nursing home, hospital, or sanitarium
+        - R-2B
+    - rule: R-2c.loading_nursing_home_hospital
+      why: '''Nursing home, hospital, or sanitarium'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Nursing home, hospital, or sanitarium
+        - R-2C
+    - rule: RU.loading_nursing_home_hospital
+      why: '''Nursing home, hospital, or sanitarium'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Nursing home, hospital, or sanitarium
+        - RU
+    - rule: R-1a.loading_multiple_dwelling_25_units
+      why: '''Multiple dweling with 25 + units'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Multiple dweling with 25 + units
+        - R-1A
+    - rule: R-1b.loading_multiple_dwelling_25_units
+      why: '''Multiple dweling with 25 + units'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Multiple dweling with 25 + units
+        - R-1B
+    - rule: R-2a.loading_multiple_dwelling_25_units
+      why: '''Multiple dweling with 25 + units'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Multiple dweling with 25 + units
+        - R-2A
+    - rule: R-2b.loading_multiple_dwelling_25_units
+      why: '''Multiple dweling with 25 + units'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Multiple dweling with 25 + units
+        - R-2B
+    - rule: R-2c.loading_multiple_dwelling_25_units
+      why: '''Multiple dweling with 25 + units'': the chart shows ''-'' here'
+      cells:
+      - - 14
+        - Minimum Loading Requirement
+        - Multiple dweling with 25 + units
+        - R-2C
+    - rule: R-1a.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Nonresidential use'': the R-1A cell ''Allowed
+        by variance [fn2]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-1b.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Nonresidential use'': the R-1B cell ''Allowed
+        by variance [fn2]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2a.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Nonresidential use'': the R-2A cell ''Allowed
+        by variance [fn2]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2b.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Nonresidential use'': the R-2B cell ''Allowed
+        by variance [fn2]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Nonresidential use'': the R-2C cell ''Allowed
+        by variance [fn2]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Nonresidential use'': the R-3A cell ''Allowed
+        by variance [fn2]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Nonresidential use'': the R-3AA cell ''Allowed
+        by variance [fn2]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Nonresidential use'': the R-3B cell ''Allowed
+        by variance [fn2]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: RU.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Nonresidential use'': the RU cell ''Allowed by
+        variance [fn2]'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2a.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Neighborhood commercial facility'': the R-2A cell
+        ''See §325-21'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2b.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Neighborhood commercial facility'': the R-2B cell
+        ''See §325-21'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-2c.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Neighborhood commercial facility'': the R-2C cell
+        ''See §325-21'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3a.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Neighborhood commercial facility'': the R-3A cell
+        ''See §325-21'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3aa.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Neighborhood commercial facility'': the R-3AA
+        cell ''See §325-21'' has no drafted rule (a person checks the requirement it sets)'
+    - rule: R-3b.chart-p14-minimum_loading_requirement
+      why: 'chart page 14, ''Minimum Loading Requirement'', row ''Neighborhood commercial facility'': the R-3B cell
+        ''See §325-21'' has no drafted rule (a person checks the requirement it sets)'
+    problems: []
+  325-3B:home_occupation:
+    rules:
+    - general.325_3b_home_occupation_home_occupation_nonresident_persons
+    - general.325_3b_home_occupation_home_occupation_area_cap
+    - general.325_3b_home_occupation_home_occupation_no_exterior_storage
+    - general.325_3b_home_occupation_home_occupation_marked_vehicles
+    - general.325_3b_home_occupation_home_occupation_qualitative_conditions
+    unresolved:
+    - rule: 325-3B:home_occupation
+      why: it points to 325-20D, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-3B:home_occupation
+      why: it points to 325-20H, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-3B:home_occupation
+      why: it points to 325-20J, which was left out of the drafter's input for length (a person checks it)
+    problems: []
+  325-9B:
+    rules: []
+    unresolved:
+    - rule: 325-9B.requirement_p30_l37
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Home occupations
+        in all residential districts, unless the home occupation meets all of the following criteria:'''
+    - rule: 325-9B
+      why: it points to 325-10C, which was left out of the drafter's input for length (a person checks it)
+    problems: []
+    reason: 325-9B(1) lists which uses need a special permit (cemeteries, schools, hospitals, home occupations,
+      towers and so on) and sets criteria for exempting home occupations and antennas. It does not limit a design
+      through the available measures. Whether a use needs a special permit is a procedural trigger, not a dimension,
+      and the home-occupation criteria (stock of merchandise, traffic, exterior display, noise) and the antenna
+      conditions (diameter, 10 ft height, front yard, screening) cannot be decided from the listed measures. Subsection
+      (2) sends signage to Chapter 272 and (3) sends additional conditions to §325-10, and both are drafted from
+      those sections. Making rules from this text would need new measures and judgment calls on undefined words
+      such as 'incidental', 'objectionable effects' and 'visible'. Those are not set out in 325-9B itself, so I
+      did not draft any template.
+  325-3B:cooperative_household:
+    rules: []
+    unresolved:
+    - rule: 325-3B:cooperative_household.requirement_p6_l30
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Any dwelling
+        unit occupied by a cooperative household shall be considered a multiple dwelling.'''
+    problems: []
+    reason: This piece is a definition. Its sentence 'Any dwelling unit occupied by a cooperative household shall
+      be considered a multiple dwelling' classifies the use. It sets no limit, minimum, prohibition or condition
+      on a design that code can check with the listed measures. We have no measure for whether a household is a
+      cooperative household, and the classification feeds into the use-type rules (multiple_family chart rows) rather
+      than being a requirement itself. The last sentence, which excludes supervised residential care facilities
+      such as halfway houses, hostels or group homes, limits the definition's scope. It is not a design requirement,
+      and it would need an architect's judgment about the use. The occupancy rules (four or more unrelated persons)
+      are drafted from the occupancy sections of the law, not from here.
+  325-3B:functional_family_unit:
+    rules: []
+    unresolved:
+    - rule: 325-3B:functional_family_unit.requirement_p10_l15
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''the following
+        criteria must be present'''
+    problems: []
+    reason: This is a definition of "functional family unit". Its requirements are about who occupies a dwelling
+      unit (the shared unit, household stability, college students, unrelated adults, minor dependent children),
+      and none of the listed measures can decide them. The listed measures cover lot size, yards, height, parking
+      and unit counts, not occupants. The stability criteria in (1)(b) need judgment. The presumptions in (2) and
+      (3) can be rebutted by evidence under (4). The text sets no dimensional or design requirement on a building.
+      Occupancy limits are drafted where the chart or the law sets them (chart footnote 1 on page 2 and the occupancy
+      restrictions in §325-3), not from this definition.
+  325-3B:occupant:
+    rules: []
+    unresolved:
+    - rule: 325-3B:occupant.requirement_p16_l15
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The number
+        of such occupants that are permitted to legally occupy a dwelling unit or building is based on the amount
+        of habitable space in the dwelling unit or building and on the basis of lot size.'''
+    problems: []
+    reason: 'The OCCUPANT definition is for R-2c only, and its requirements can''t be decided from the listed measures.
+      There is no measure for occupants, habitable square footage, sleeping-room area or kitchen area, and the text
+      doesn''t say what ''appropriate lot size requirements'' are. A formula would need guesses, which risks a false
+      pass. Subsection (1) is a definition and subsection (4) is an exclusion from it; neither sets a limit on a
+      design. Subsection (2)''s table and subsection (3)''s limit on sleeping more persons need new measures and
+      answers from the architects. These questions are open: how habitable space is measured, and which lot size
+      requirements (the chart''s per-occupant minimum lot size in footnotes 4-6) apply. The R-2c chart footnotes
+      4-6 on page 3 set the lot-size-by-occupant rules and belong to the chart rows, not to this piece.'
+  325-3B:trailer_or_travel_trailer:
+    rules: []
+    unresolved:
+    - rule: 325-3B:trailer_or_travel_trailer.requirement_p19_l36
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''is limited
+        in width to eight feet in length to 32 feet and is designed to be principally used as a temporary dwelling'''
+    problems: []
+    reason: This text is a definition of a TRAILER OR TRAVEL TRAILER, not a requirement on a building design. The
+      phrase 'limited in width to eight feet in length to 32 feet' describes the kind of portable unit the term
+      covers (together with being towable and designed as a temporary dwelling). It does not limit anything an architect
+      designs on a lot. The measures available (use, lot, yards, building height and so on) cannot describe a trailer's
+      width or length, and none of the listed use ids is a trailer. The wording is also garbled ('eight feet in
+      length to 32 feet'), so any formula would need an interpretation, which belongs in an open question and not
+      in a check. The residential districts get no rule from this piece. It needs to be handled as a definition,
+      and any use or parking restriction on trailers should be drafted from the section of the law that sets it.
+  325-8D:
+    rules: []
+    unresolved:
+    - rule: 325-8D.requirement_p29_l4
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''All properties
+        located in the CBD district that contain a storefront that fronts on the Primary Commons must contain an
+        active use on the street level for that portion of the building that fronts onto the Primary Commons.'''
+    problems: []
+    reason: 'Piece 325-8D sets requirements only for the CBD districts: the CBD-50 historic review, the stepback
+      in the CBD-85 District on the 100 block of West Green Street, and the active-use requirement on storefronts
+      fronting the Primary Commons or the mapped street-level active use zone. None of these apply to the residential
+      districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). The CBD district is not one of the
+      residential districts, and the active-use condition also depends on a map and on use categories we don''t
+      have as measures. So no rule can be drafted for the residential districts.'
+  325-10C:
+    rules: []
+    unresolved:
+    - rule: 325-10C.requirement_p35_l31
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Gardening
+        activity on individual plots must be confined to the hours of 7:00 a.m. to 10:00 p.m., except that power
+        machinery shall not be operated before 8:00 a.m. or after 8:00 p.m.'''
+    problems: []
+    reason: 'Piece 325-10C sets conditions on special permits that the available measures cannot decide. Most are
+      operational or judgment-based: hours of operation, machinery size, refuse handling, nuisance, compatibility,
+      owner-management, board discretion, and annual review. The neighborhood garden provisions that look measurable
+      (the 64 sf structure caps, the 8 ft right-of-way, one parking space per 15 plots) depend on facts that are
+      not in the measure list: garden plot counts, shelter floor area and right-of-way width. The garden parking
+      and structure rules are also not draftable from the existing measures without inventing interpretations. The
+      use list has no neighborhood garden use id, and the bed-and-breakfast conditions need facts such as owner-management
+      and exterior alterations that no measure covers. I have not drafted rules that would need new measures and
+      a use id that cannot be verified, to avoid a false pass.'
+  325-11B:
+    rules:
+    - R-1a.325_11b_cluster_front_yard
+    - R-1b.325_11b_cluster_front_yard
+    - R-2a.325_11b_cluster_front_yard
+    - R-2b.325_11b_cluster_front_yard
+    - R-2c.325_11b_cluster_front_yard
+    - R-3a.325_11b_cluster_front_yard
+    - R-3aa.325_11b_cluster_front_yard
+    - R-3b.325_11b_cluster_front_yard
+    unresolved:
+    - rule: 325-11B.requirement_p39_l21
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The maximum
+        number of dwelling units permitted in a cluster subdivision shall not exceed the number of dwelling units
+        that would be permitted on the site in a conventional subdivision'''
+    problems: []
+    scope:
+    - R-1a
+    - R-1b
+    - R-2a
+    - R-2b
+    - R-2c
+    - R-3a
+    - R-3aa
+    - R-3b
+  325-11C:
+    rules: []
+    unresolved:
+    - rule: 325-11C.requirement_p40_l30
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''That the development
+        is found to be compatible in terms of appearance, character and overall density with both the existing and
+        potential development in the surrounding area.'''
+    problems: []
+    reason: Piece 325-11C (cluster subdivision approval) sets only procedure and Board findings, with no measurable
+      limit on a design. (1) Board consideration and Chapter 290 procedure, (2) the plans and information to submit,
+      and (3) site-plan conformance and modification approval are procedural. (4) The findings (compatibility in
+      appearance, character and overall density; no unreasonable burden on roads or utilities; open-space preservation;
+      public welfare; no undue adverse impact on the critical area; compliance with the Street Plan and Master Plan)
+      need the Board's judgment. None can be decided from the available measures, and the text gives no numbers
+      except the 500-foot area-plan radius, which is a submission requirement. No template is drafted, so no rule
+      or flag is produced. The cluster option is not among the listed uses or measures.
+  325-15C:
+    rules:
+    - general.325_15c_open_storage_refuse
+    unresolved: []
+    problems: []
+  325-15D:
+    rules:
+    - general.325_15d_garage_sale_days_per_month
+    - general.325_15d_garage_sale_open_storage
+    unresolved: []
+    problems: []
+  325-17C:
+    rules:
+    - general.325_17c_obstruction_dangerous_to_traffic_flag
+    unresolved: []
+    problems: []
+  325-18C:
+    rules: []
+    unresolved:
+    - rule: 325-18C.requirement_p49_l19
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''said building
+        shall be set back from any adjacent public road which separates the U-1 Zone from a residential zone, a
+        distance equal to at least the required front yard setback established for buildings in such adjacent residential
+        zone.'''
+    problems: []
+    reason: 'Section 325-18C applies only to buildings in the U-1 Zone that lie within 100 feet of a residential
+      zone. U-1 is not one of the residential districts listed (R-1a through RU), so it sets no requirement for
+      those districts. Its test also depends on facts the available measures cannot express: the building''s own
+      zone, its distance to a residential zone, a public road separating the two zones, and the date the building
+      was constructed. The setback it requires is a distance equal to the residential zone''s front yard, which
+      this rule format has no measure for. Drafting it would risk a false pass, so no template is written.'
+  325-21B:
+    rules: []
+    unresolved:
+    - rule: 325-21B.requirement_p64_l5
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''One space
+        shall be made available for each use having 3,000 to 10,000 feet of floor space, plus one additional space
+        for each additional 15,000 square feet or major fraction thereof of floor space in a single occupancy over
+        and above 10,000 square feet.'''
+    problems: []
+    reason: The loading-space count in 325-21B(1) depends on floor space per use and per single occupancy, but the
+      available measures have no floor-area or loading-space measure. It applies to business and industrial uses
+      and to multiple dwelling structures with more than 25 units. Drafting it would require new measures such as
+      floor space, loading spaces provided, and CBD status, and the 'major fraction' rounding and 'single occupancy'
+      are unsettled. The provision is also not a chart slot we can fill. No safe rule can be written from the existing
+      measures, so it is left for a person.
+  325-22C:
+    rules:
+    - general.325_22c_paving_hard_surface
+    unresolved: []
+    problems: []
+  325-27D:
+    rules: []
+    unresolved:
+    - rule: 325-27D.requirement_p68_l27
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Short-term
+        rentals are only permitted in:'''
+    problems: []
+    reason: 'Every requirement in 325-27D depends on facts that are not among the available measures: whether the
+      use is a short-term rental, whether the host''s primary residence is on the property, whether the unit is
+      owner-occupied, the dwelling or building type, whether the host is a natural person, whether a permit is held,
+      and whether there is written owner authorization. With none of these measurable, code could not decide any
+      of them. The text sets no chart numbers, and the only measures that come close are dwelling_units and the
+      use ids. The use measure has no short-term rental value and cannot tell a single-family unit from a unit inside
+      a multiple dwelling or mixed-use building. Drafting a rule on those measures would settle the unclear points
+      in the formula, which risks a false pass. The text also sets no dimensional limit on a design. Subsection
+      (1), permission only in zones where residential uses are allowed, depends on the use tables of other sections.
+      The permit (4), natural-person (5) and authorization (2)(b) requirements are procedures and applicant eligibility,
+      not requirements on a building design. Subsection (6), no limit on rental days, is a permission and sets no
+      requirement. Subsection (3) restricts the dwelling types in which short-term rentals are allowed, and would
+      need new measures for short-term rental use, owner-occupancy and the building type. It also depends on §325-28
+      and the ADU definition for what counts as an ADU.'
+  325-27F:
+    rules: []
+    unresolved:
+    - rule: 325-27F.requirement_p69_l33
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Occupancy
+        of a short-term rental shall never exceed the maximum occupancy stated on the certificate of compliance.'''
+    problems: []
+    reason: 'Every requirement in 325-27F is about the operation or administration of a short-term rental: permit
+      and certificate upkeep, tax remittance, posting notices, listing the permit number, and naming a local contact.
+      Maximum occupancy is also stated, but it is set by the certificate of compliance rather than by a number in
+      the text, and no listed measure holds the certificate''s occupancy or the number of occupants. Each of these
+      items depends on facts such as permit status, certificate occupancy, postings, listings and contact presence,
+      and none of these is among the available design measures. They cannot be tested against a building design
+      with the measures available, and no check could avoid guessing. Without a measure or a worked example to tie
+      them to, a rule or flag here would add nothing and could produce a false pass.'
+  325-29.1D:
+    rules: []
+    unresolved:
+    - rule: 325-29.1D.requirement_p76_l8
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Adult uses
+        may only be located within the Adult Use Overlay Zone, as shown on the Official City Zoning Map.'''
+    problems: []
+    reason: 'The measures available cannot decide any requirement in 325-29.1D, so no template can be drafted from
+      them. The piece covers adult uses, and none of the listed use ids is an adult use. The requirements are: location
+      only within the Adult Use Overlay Zone, and distances of 350 feet or 200 feet from residential district boundaries,
+      day-care facilities, religious or educational structures, waterfronts, parks, farmers'' markets, gymnastic
+      centers, libraries, museums and Marine Commercial Districts. They need measures for the overlay zone and for
+      distances to those features, and the measure list has none. A rule would need a measure that does not exist,
+      and a rule on a non-existent adult use cannot be checked. Also, the piece is not a limit on the design of
+      residential lots. It concerns where adult uses may open and is tied to the Adult Use Overlay Zone, and the
+      listed residential districts do not allow adult uses. The distances are measured from the boundary of residential
+      zoning districts, so they restrict adult-use siting, not residential development.'
+  325-29.3C:
+    rules: []
+    unresolved:
+    - rule: 325-29.3C.requirement_p78_l4
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No dumpster
+        may be placed or allowed to remain on any properties in the R-1 or R-2 Zoning'''
+    problems: []
+    reason: Piece 325-29.3C sets requirements about dumpsters (placement, screening, covers, signage, gates), but
+      none can be checked with the measures Gordium has. There is no measure for dumpsters, public view, screening
+      height, enclosure clearance or gate clearance. The variance and Board of Zoning Appeals conditions are procedural.
+      The parts about out-of-public-view placement, maintenance and cleanliness need an architect's judgment. Writing
+      these as rules would mean inventing measures and settling open points in a formula, which risks a false pass.
+      They are left for the engineers to add measures for and for the architects to review.
+    scope:
+    - R-1a
+    - R-1b
+    - R-2a
+    - R-2b
+    - R-2c
+    - R-3a
+    - R-3aa
+    - R-3b
+    - RU
+  325-29.8A:
+    rules: []
+    unresolved:
+    - rule: 325-29.8A.requirement_p90_l7
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''A PWSF shall
+        be located at one of the following opportunity sites:'''
+    problems: []
+    reason: 325-29.8A sets siting requirements for personal wireless service facilities (opportunity sites, order
+      of location preference, avoidance areas, special interest area guidelines). None of them can be decided from
+      the available building measures (lot, yard, height, use, parking). A PWSF is not among the listed use ids.
+      Whether a site is an opportunity site or avoidance area depends on city maps, aerial photographs and officials'
+      determinations (L64-L66), and the Landmarks Commission must approve any PWSF in an avoidance area under A(3)(b)
+      (L70-L72). The 15 ft equipment height and 20 ft alley setback apply only in special interest areas, which
+      have no measure here. A rule would need new measures and a facility type that the engineers have not defined,
+      so no template is drafted.
+  325-29.12B:
+    rules: []
+    unresolved:
+    - rule: 325-29.12B.requirement_p103_l10
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''(b) Whether
+        or not the proposed installation will, or will not, inflict a significant adverse aesthetic impact upon
+        adjacent or nearby properties or surrounding neighborhood or community, specifically:'''
+    problems: []
+    reason: '325-29.12B tells the Board of Zoning Appeals what its written decisions on wireless facility (PWSF)
+      applications must specify: whether there is a significant coverage gap, whether the installation is the least
+      intrusive means, aesthetic impact, fall zone, alternatives, and consistency with legislative intent. These
+      are findings the Board makes on evidence, and they are decision procedure, not dimensional requirements on
+      a building design. None of the available measures (lot area, yards, height, use ids, parking and the like)
+      covers a wireless facility, and no use id covers wireless facilities. The measurable elements named in the
+      text (drive test data, minimum necessary height, fall zone) set no number and need judgment about evidence,
+      so code can''t decide them. Any flag would have no check and would apply to no residential-district design
+      measure. The text sets no requirement that code can check for the residential districts listed, so I return
+      no templates.'
+  325-32A:
+    rules: []
+    unresolved:
+    - rule: 325-32A.requirement_p112_l11
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''may continue
+        so long as the nonconformity remains otherwise lawful and complies with this section'''
+    problems: []
+    reason: 'Piece 325-32A sets no limit that code can check against the measurements we have. It lets a lawfully
+      established nonconforming use, building or lot continue "so long as the nonconformity remains otherwise lawful
+      and complies with this section". Whether a nonconformity is "otherwise lawful" is a legal judgment with no
+      listed measure. "This section" refers to the rest of §325-32 and to related sections (325-35A permits, 325-20C
+      parking, 325-32C), which are drafted from their own text. Folding them in here would settle in a formula what
+      belongs to those sections. A rule with check "" would be a flag, but a flag with no check adds nothing the
+      other sections'' rules don''t already give. The second sentence, that rights run with the property and are
+      not affected by changes in tenancy or ownership, is a statement of legal effect. It sets no requirement on
+      a building design. Open questions for the architects: what "otherwise lawful" covers, and which later provisions
+      of §325-32 "complies with this section" brings in.'
+  325-44B:
+    rules: []
+    unresolved:
+    - rule: 325-44B.requirement_p126_l36
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''shall pay
+        particular attention to the visual effect of such work on the character of the area and adjacent residential
+        zones'''
+    problems: []
+    reason: Piece 325-44B applies only to the C-SU Zone, which is not one of the residential districts listed (R-1a,
+      R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). It sets design review and approval sequencing (Planning and
+      Development Board review under Chapter 160, Landmarks Preservation Commission recommendation before final
+      action on demolition, and prior approval as a prerequisite for the Director and Board of Zoning Appeals).
+      Those are procedures and judgments, not measurable requirements on a design in a residential district, so
+      no rule or flag applies to the residential districts.
+  325-45.1C:
+    rules: []
+    unresolved:
+    - rule: 325-45.1C.requirement_p128_l23
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No building
+        or part thereof within any district of the Collegetown Area Form Districts shall be erected, moved, or altered
+        on its exterior unless in conformity with the regulations herein specified for the district in which it
+        is located.'''
+    problems: []
+    reason: Piece 325-45.1C applies only to the Collegetown Area Form Districts, which are not among the residential
+      districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). Subsection (1) only requires conformity
+      with the regulations 'herein specified for the district', which are set in other sections, so it adds no measurable
+      limit of its own. Subsection (2) is a precedence rule for conflicts, and subsection (3) is a cross-reference
+      to Article VI on nonconforming uses, buildings and lots. None of these sets a requirement that code can check
+      against a design in the listed residential districts.
+  325-45.2B:
+    rules: []
+    unresolved:
+    - rule: 325-45.2B.requirement_p130_l21
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The shortest
+        dimension of any rectangular area of blank wall shall not exceed the maximum length for the district (eight
+        feet in all Collegetown Residential Districts and 12 feet in both Mixed Use Districts).'''
+    - rule: 325-45.2B
+      why: it points to 325-3B:functional_family_unit, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:green_area, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:green_space, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:habitable_space, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:health_care_facility, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:heavy_industrial, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:height_of_building, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:home_occupation, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:hotel, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:human_service_agency, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:infestation, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:junkyard, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:kitchen, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:landmark, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:landmark_district, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:large_beverage_producer, which was left out of the drafter's input for length (a
+        person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:light_industrial, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:long_term_rental, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:lot, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:lot_building, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:lumberyard, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:mezzanine, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:mixed_occupancy, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:mixed_use, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:mobile_home, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:mobile_home_park, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:motel_or_boatel, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:municipality_or_city, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:neighborhood_commercial_facility, which was left out of the drafter's input for length
+        (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:neighborhood_garden, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:neighborhood_house_or_center, which was left out of the drafter's input for length
+        (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:nonconforming_building_structure_or_lot, which was left out of the drafter's input
+        for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:nonconforming_use, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:nonhabitable_space, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:nursery_school, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:occupant, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:occupiable_space, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:owner, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:parking_area, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:parking_garage, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:parking_space, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:pedestrianway, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:pergola, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:plumbing_system, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:porch, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:potable_water, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:premises, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:previously_developed_vacant_lot_or_parcel, which was left out of the drafter's input
+        for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:primary_residence, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:primary_structure, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:public_space, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:redemption_center, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:rooming_house, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:rooming_unit, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:row_house, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:school, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:service_area, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:sewage, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:short_term_rental, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:short_term_rental_advertisement, which was left out of the drafter's input for length
+        (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:sign_advertising, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:special_permit, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:standard_canopy, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:standard_awning, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:story, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:structure, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:tavern, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:terrace_or_patio, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:theater, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:toilet_room, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:townhouse, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:trailer_camp, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:trailer_or_travel_trailer, which was left out of the drafter's input for length (a
+        person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:transfer_station_for_recyclable_materials, which was left out of the drafter's input
+        for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:urban_beverage_producer, which was left out of the drafter's input for length (a
+        person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:use, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:variance, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:ventilation, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:ventilation_mechanical, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:ventilation_natural, which was left out of the drafter's input for length (a person
+        checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:water_dependent_activity, which was left out of the drafter's input for length (a
+        person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:water_dependent_facilities, which was left out of the drafter's input for length
+        (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:yard, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:front_yard, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:side_yard, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:rear_yard, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-3B:zoning_permit, which was left out of the drafter's input for length (a person checks
+        it)
+    - rule: 325-45.2B
+      why: it points to 325-8B, which was left out of the drafter's input for length (a person checks it)
+    problems: []
+    reason: Every measurable requirement in 325-45.2B is stated for the Collegetown Residential (CR-1, CR-2, CR-3)
+      or Mixed Use (MU) districts. These include the 8 ft and 12 ft blank wall limits, the 10 ft vegetative buffer,
+      the front porch and stoop dimensions, the top story limitation, and the 2 ft and 5 ft projections. None of
+      the residential districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU) is covered. The only
+      general parts are the lead-in, which says § 325-3 definitions control, and the parking setback line, the entrance
+      requirement and the utilities and mechanical equipment screening, all of which have no measurable limit or
+      measure available. That makes them district-neutral wording a person would check, not a rule for these residential
+      districts. The measures and district list available here also have no CR or MU values, so no rule can be written
+      for them without a false pass or an invented condition.
+  325-45.2E:
+    rules: []
+    unresolved:
+    - rule: 325-45.2E.requirement_p135_l11
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''All three
+        districts have a maximum building height of three stories, provided that the third story is completely contained
+        within the required pitched roof.'''
+    - rule: 325-45.2E
+      why: it points to 325-45.2B, which was left out of the drafter's input for length (a person checks it)
+    problems: []
+    reason: Piece 325-45.2E sets requirements only for the CR-1, CR-2 and CR-3 districts. None of these are among
+      the residential districts Gordium checks (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU), so no template
+      can be drafted for them.
+  325-45.2F:
+    rules: []
+    unresolved:
+    - rule: 325-45.2F.requirement_p148_l7
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Maximum lot
+        coverage by buildings is greater than in the Collegetown Residential Districts 1-3 but not as high as allowed
+        in the Mixed Use Districts.'''
+    problems: []
+    reason: Piece 325-45.2F sets requirements only for the Collegetown Residential 4 (CR-4) district. CR-4 is not
+      one of the residential districts this drafting covers (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU).
+      The text sets no requirement for any of those districts, so there is nothing to draft.
+  325-45.2G:
+    rules: []
+    unresolved:
+    - rule: 325-45.2G.requirement_p153_l6
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''A building
+        cannot exceed either requirement.'''
+    problems: []
+    reason: 325-45.2G sets limits only for the Mixed Use districts (MU-1, MU-2). None of the residential districts
+      we draft for (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU) is covered. The district measure also has
+      no MU value, so no rule could be written that applies correctly to them. No template applies to these districts.
+  325-45.5A:
+    rules: []
+    unresolved:
+    - rule: 325-45.5A.requirement_p162_l20
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''A. Permitted
+        uses.'''
+    - rule: 325-45.5A.requirement_p162_l20
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''A. Permitted
+        uses. (1) Primary uses. (a) One-family detached, semidetached or attached dwelling or two-family dwelling.
+        (b) Multiple dwelling. (c) Dormitory. (d) Church and related building. (e) Public park or playground.'''
+    - rule: 325-45.5A.requirement_p163_l3
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''(f) Library,
+        fire station. (g) Nursery school, child day-care center, or group adult day care. (h) Public, private or
+        parochial school. (i) Retail store or service commercial facility. (j) Restaurant, tavern. (k) Club, lodge,
+        private social center. (l) Confectionery, millinery, dressmaking, or other activities involving light-hand
+        fabrication and sales. (m) Theatre, bowling alley, auditorium or similar assembly space. (n) Hotel, motel.
+        (o) Business or professional office. (2) By special permit. (a) Bed-and-breakfast homes and inns. (b) Wood
+        shop, metal shop, maker space, other light manufacturing activity. (c) Public utility structure except office.
+        (3) Accessory uses. (a) Parking for uses on the property. (b) Storage buildings not to exceed 200 square
+        feet.'''
+    problems: []
+    reason: Piece 325-45.5A lists permitted, special-permit and accessory uses, but it governs the Collegetown commercial
+      district (§325-45.5), not the residential districts listed (R-1a through RU). Its use list sets no requirement
+      for those districts, so I drafted no templates. The only measurable item, the 200 sf storage-building limit,
+      has no matching measure and applies only to that other district.
+  325-45.5B:
+    rules: []
+    unresolved:
+    - rule: 325-45.5B.requirement_p163_l24
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''[1] One space
+        for first three bedrooms per dwelling unit.'''
+    - rule: 325-45.5B
+      why: it points to 325-20E, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.5B
+      why: it points to 325-20F, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.5B
+      why: it points to 325-20G, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.5B
+      why: it points to 325-20H, which was left out of the drafter's input for length (a person checks it)
+    - rule: 325-45.5B
+      why: it points to 325-20J, which was left out of the drafter's input for length (a person checks it)
+    problems: []
+    reason: Piece 325-45.5B is part of §325-45.5, a separate special-district section of the law (§325-45.x). The
+      text names no residential district (R-1a through RU), and nothing in it ties these parking counts to the residential
+      districts listed. A rule drafted from it would be applied to every residential district, which could give
+      a wrong pass or fail. The chart's own parking rows (page 14) and §325-20 already set the residential parking
+      counts. The loading line, "One space", also names no use or district. A person should confirm which district
+      this section covers before any rule is drafted from it.
+  325-9D:
+    rules: []
+    unresolved:
+    - rule: 325-9D.requirement_p33_l11
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The location
+        and size of the use, the size of the site in relation to it, and the location of the site with respect to
+        the existing or future streets giving access to it shall be such that the use will be in harmony with the
+        existing or intended character of the neighborhood'''
+    problems: []
+    reason: Piece 325-9D sets only discretionary permit review criteria for special permits (harmony with neighborhood
+      character, no more objectionable operations than permitted uses, no significant negative impact, mitigation
+      of adverse effects). It sets no numeric limit or measurable condition on a building design. The Planning and
+      Development Board decides each of these, so code cannot check them from the available measures. The sentences
+      about conditions, board discretion and plan submission are procedure. Sub-section (2) only points to § 325-10,
+      which is drafted separately.
+  325-3B:green_space:
+    rules:
+    - general.325_3b_green_space_green_space_softscape_share
+    - general.325_3b_green_space_green_space_maintained
+    unresolved: []
+    problems: []
+  325-3B:large_beverage_producer:
+    rules: []
+    unresolved:
+    - rule: 325-3B:large_beverage_producer.requirement_p14_l18
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Any silos
+        for storage of raw materials must be no more than 25 feet in height, including any supporting structures,
+        for areas where there is no fire department ladder truck access, and a maximum of 40 feet in height'''
+    problems: []
+    reason: Large beverage producer is not a use the residential districts allow. The use list for these districts
+      has no such use, and the zoning chart rows for them never mention it. The limits in this definition are 75,000
+      barrels or 250,000 gallons of annual production, silos at most 25 ft or 40 ft high depending on fire department
+      ladder truck access, and silo filtration. They apply only to that establishment, and there is no use id to
+      scope them to. The measures a check would need (production volume, silo height, ladder truck access, silo
+      filtration) are not available. A rule drafted for every residential district would test a use those districts
+      do not permit, so it could give a wrong result. Any use of this definition in a residential district should
+      go to a person.
+  325-3B:neighborhood_commercial_facility:
+    rules:
+    - general.325_3b_neighborhood_commercial_facility_neighborhood_commercial_facility_limited_goods_services
+    unresolved: []
+    problems: []
+  325-3B:rooming_house:
+    rules: []
+    unresolved:
+    - rule: 325-3B:rooming_house.requirement_p18_l7
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''ROOMING HOUSE
+        — One or more rooms designed or used for living quarters by one household, which may or may not include
+        separate sanitary facilities and which must include either complete kitchen facilities or a separate entrance
+        from the outside of the building or through a common hall.'''
+    problems: []
+    reason: This text is a definition of ROOMING HOUSE, not a limit on a design in the residential districts. The
+      'must include either complete kitchen facilities or a separate entrance' clause says what counts as a rooming
+      house. It does not set a requirement for any permitted use. Gordium has no measures for kitchen facilities
+      or separate entrances, and the definition does not say which use or district it governs. A rule would therefore
+      either invent measures or guess at scope. Where the definition applies, it is handled as a definition (the
+      city's own sentences), not as a rule template.
+  325-3B:rooming_unit:
+    rules: []
+    unresolved:
+    - rule: 325-3B:rooming_unit.requirement_p18_l11
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''ROOMING UNIT
+        — One or more rooms designed or used for living quarters by one household,'''
+    problems: []
+    reason: ROOMING UNIT is a definition. Its requirement that a unit include either complete kitchen facilities
+      or a separate entrance (from outside or through a common hall) describes what counts as a rooming unit. It
+      sets no limit on a building design in the residential districts. Gordium has no measures for kitchen facilities
+      or separate entrances, so code cannot decide it. It sets no number, dimension or use restriction. Where a
+      rooming unit exists, the chart's own rows (rooms let for profit, parking by sleeping rooms) apply, and those
+      are drafted from the chart.
+  325-3B:standard_canopy:
+    rules:
+    - general.325_3b_standard_canopy_standard_canopy_projection
+    - general.325_3b_standard_canopy_standard_canopy_height
+    - general.325_3b_standard_canopy_standard_canopy_clearance
+    - general.325_3b_standard_canopy_standard_canopy_valance
+    - general.325_3b_standard_canopy_standard_canopy_not_retractable
+    unresolved: []
+    problems: []
+  325-3B:standard_awning:
+    rules: []
+    unresolved:
+    - rule: 325-3B:standard_awning.requirement_p19_l9
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The standard
+        awning must be mounted on the face of the structure to provide for an unobstructed clearance below the rigid
+        frame of the standard awning of seven feet above the sidewalk below.'''
+    problems: []
+    reason: The measures available (lot, yard, height, stories, parking, units) do not include any awning measure,
+      and the standard awning definition sets no requirement for any residential district that the existing measures
+      can decide. Its limits (retract to within one foot, project no more than four feet, no taller than four feet,
+      seven feet of clearance above the sidewalk, valance no more than one foot) describe the dimensions of a defined
+      fixture, and the text gives no condition tied to a district or a lot. It also does not say that a feature
+      failing the definition is prohibited, only that it is not a standard awning. Drafting these as rules would
+      need new awning measures plus an interpretation of what happens to a non-conforming awning, which the text
+      leaves open. Any related yard rule for projections belongs to §325-18B and §325-45.2B, which are drafted separately.
+  325-3B:urban_beverage_producer:
+    rules:
+    - general.325_3b_urban_beverage_producer_urban_beverage_producer_production_cap
+    - general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_height
+    - general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_filtration
+    - general.325_3b_urban_beverage_producer_urban_beverage_producer_on_site_consumption
+    unresolved: []
+    problems: []
+  325-7A:
+    rules: []
+    unresolved:
+    - rule: 325-7A.requirement_p24_l5
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No building
+        or land shall hereafter be used or occupied and no building or part thereof shall be erected, moved or altered
+        unless in conformity with the regulations herein specified for the district in which it is located.'''
+    problems: []
+    reason: 'Section 325-7A is a general compliance clause: it requires conformity with the regulations specified
+      for the district, and it sets no limit, minimum, prohibition or condition of its own. Each district regulation
+      is drafted from the chart or the law section that states it. A rule here would duplicate those rules or would
+      need a placeholder test, which is not allowed.'
+  325-8C:
+    rules: []
+    unresolved:
+    - rule: 325-8C.requirement_p27_l20
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''no building
+        may be constructed that is greater than one story in height'''
+    problems: []
+    reason: Section 325-8C sets no requirement that code can decide for the residential districts listed (R-1a,
+      R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). It applies only to the West End/Waterfront, Cherry Street,
+      Market and Newman Districts, to WF-1, and to Inlet Island and the flood control channel. None of these is
+      a residential district on the list, and the measures needed (distance from the northern tip of Inlet Island,
+      distance from the top of the flood channel bank, waterfront frontage, building length) do not exist. The district
+      measure never takes the values these provisions need, so every rule would be not_applicable for the listed
+      districts. Subsection (5), on tree lawn and sidewalk, applies only to new construction in those four non-residential
+      districts.
+  325-12C:
+    rules:
+    - general.325_12c_pud_rezoning_review_standard
+    unresolved: []
+    problems: []
+  325-12D:
+    rules: []
+    unresolved:
+    - rule: 325-12D.requirement_p41_l40
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''In a PUD,
+        buildings and land may be used for any lawful purpose permitted in the zone where'''
+    problems: []
+    reason: 325-12D sets no requirement that code can decide from the listed measures for the residential districts.
+      Subsection (1) permits PUD land to be used for any lawful purpose permitted in the zone where it is located,
+      plus any other uses the Common Council may authorize. Whether a use is permitted in the underlying zone depends
+      on the use chart, which is drafted elsewhere. The measures also do not say whether a lot is in a PUD or whether
+      the Council has authorized a use. Subsection (2) defers yard size, height, building coverage and lot size
+      to the rezoning legislation for each PUD and lets the Common Council impose conditions. That legislation is
+      not in the documents given, so no number can be drawn from it. Both subsections are discretionary or defer
+      to other documents, and any rule would need a guess, which risks a false pass. The PUD requirements should
+      be handled through the PUD rezoning legislation, or as a flag raised when a design is in a PUD.
+  325-12E:
+    rules:
+    - general.325_12e_pud_site_plan_approval
+    unresolved: []
+    problems: []
+  325-12F:
+    rules:
+    - general.325_12f_pud_council_criteria
+    unresolved: []
+    problems: []
+  325-12H:
+    rules: []
+    unresolved:
+    - rule: 325-12H.requirement_p43_l41
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''the Common
+        Council may impose such conditions or limitations'''
+    problems: []
+    reason: 325-12H lets the Common Council impose conditions on a PUD rezoning in its legislative discretion, such
+      as limiting uses, locations and sizes of buildings, providing open space and recreation areas, and requiring
+      bonds or assurances for infrastructure. It sets no limit, minimum, prohibition or condition that a design
+      can be measured against. Any condition arises only when the Council imposes it in a particular rezoning, so
+      there is nothing for code to check. The text is also a procedure-like grant of discretion, and it applies
+      to PUD rezonings, not to the listed residential districts' chart requirements. Any flag would be a placeholder
+      with no measurable content, so no templates are drafted.
+  325-15A:
+    rules: []
+    unresolved:
+    - rule: 325-15A.requirement_p45_l18
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No lot grading
+        or tree removal in connection with the construction of a building shall be undertaken until a building permit
+        for such construction shall have been obtained.'''
+    problems: []
+    reason: Piece 325-15A sets only requirements that the available measures cannot decide. The measures cover lot
+      size, yards, height, coverage and parking. None of them records whether topsoil is removed, whether grading
+      or tree removal has started, whether a building permit has been issued, or whether a watercourse is altered.
+      The topsoil rule turns on judgment (erosion or flooding risk, whether the remaining topsoil is adequate for
+      typical vegetation), and the remainder needs approval from the Director of Planning and Development or the
+      City Engineer. These are permit and procedure prerequisites, not dimensions of a building design, so they
+      can't be turned into a pass/fail check without inventing measures. I did not draft a flag template because
+      a flag needs a quote and an applies_when, and none of this belongs to the residential chart rows; the topsoil,
+      grading and watercourse requirements are better handled as construction-phase permit conditions.
+  325-15B:
+    rules: []
+    unresolved:
+    - rule: 325-15B.requirement_p45_l22
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Mobile homes
+        and mobile home parks shall be in conformity with Article II of Chapter 210, Housing Standards, of this
+        Code.'''
+    problems: []
+    reason: Section 325-15B only requires mobile homes and mobile home parks to conform to Article II of Chapter
+      210 (Housing Standards). That article is not given here, so the text sets no limit that code can check against
+      the available measures (no listed measure or use id covers mobile homes). It cannot be drafted as a rule from
+      this text alone, and no flag is warranted for the residential districts listed.
+  325-15E:
+    rules: []
+    unresolved:
+    - rule: 325-15E.requirement_p45_l40
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Such fence
+        shall be at least eight feet high and no nearer than 25 feet to any public highway right-of-way line.'''
+    problems: []
+    reason: Section 325-15E sets requirements (an enclosing fence at least eight feet high, set back 25 feet from
+      a public highway right-of-way line, and no storage outside the fence) for areas used to store junk, but none
+      of the available measures can check them. There are no measures for fence height, fence setback, outside storage,
+      or a junkyard use. The use ids list no junkyard or salvage yard use, and the residential-district uses do
+      not include one. Writing rules would need new measures and a use that the system does not have. The six-month
+      compliance deadline is a transition provision, not a design requirement. Leaving the text undrafted avoids
+      a false pass, and a person should review it if a junkyard appears on a residential lot.
+  325-15F:
+    rules: []
+    unresolved:
+    - rule: 325-15F.requirement_p46_l5
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The Director
+        of Planning and Development or designee shall refer all applications for permits to construct or alter gasoline
+        service stations to the Fire Chief, the Chief of Police and the City Traffic Engineer for analysis of fire,
+        traffic and other possible hazards.'''
+    - rule: 325-15F.requirement_p46_l7
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The Director
+        of Planning and Development or designee shall review their comments on the proposed new or altered facility
+        and may require modification of the site plan to lessen potential fire, traffic and other hazards.'''
+    problems: []
+    reason: '325-15F sets only a procedure: the Director refers permit applications for gasoline service stations
+      to the Fire Chief, Chief of Police and City Traffic Engineer, reviews their comments, and may require site
+      plan changes to lessen hazards. It sets no measurable limit, minimum, prohibition or condition on a design,
+      and gasoline service stations are not among the listed residential uses. The discretionary power to require
+      changes cannot be decided by code from measurements, so no rule or flag applies to the residential districts.'
+  325-16D:
+    rules: []
+    unresolved:
+    - rule: 325-16D.requirement_p47_l19
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No building
+        shall be erected that is greater than 50 feet in height in any of the areas designated "Gorge Protection
+        Area B (fifty-foot-height area)"'''
+    problems: []
+    reason: 325-16D applies only in the U-1 District (Gorge Protection Areas A, B and C), which is not one of the
+      residential districts we draft (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). Its limits also depend
+      on a mapped area, and no measure exists for that area. So the text sets nothing for the listed residential
+      districts.
+  325-16F:
+    rules: []
+    unresolved:
+    - rule: 325-16F.requirement_p47_l35
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No building
+        shall be erected that is less than two stories or greater than five stories in any of the areas designated
+        "WEDZ-1a"'''
+    problems: []
+    reason: Piece 325-16F applies only in the WEDZ-1 District (areas WEDZ-1a and WEDZ-1b), which is not one of the
+      residential districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). A template is filled per
+      residential district, so it would be checked against lots where the text does not apply. There is also no
+      measure for 'within a WEDZ-1a or WEDZ-1b area' (set by a map on file with the City Clerk), so no rule can
+      be drafted for the listed districts.
+  325-16G:
+    rules: []
+    unresolved:
+    - rule: 325-16G.requirement_p48_l14
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''no primary
+        use building shall be erected that is less than two stories in any of these zones'''
+    problems: []
+    reason: Piece 325-16G applies only to the CBD-60, CBD-85, CBD-100, CBD-120, CBD-140, B-1a, B-1b, B-2c and B-2d
+      districts. None of the residential districts (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU) is named,
+      so it sets no requirement for them.
+  325-17D:
+    rules:
+    - general.325_17d_fence_wall_height_interference
+    unresolved: []
+    problems: []
+  325-19D:
+    rules: []
+    unresolved:
+    - rule: 325-19D.requirement_p50_l10
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''the transition
+        regulations as provided for in this section shall not apply in the B-2d District.'''
+    problems: []
+    reason: 325-19D only says the transition regulations do not apply in the B-2d District. B-2d is not one of the
+      residential districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU), so the text sets no requirement
+      on a design in those districts. It is an exclusion of another district from the transition regulations, not
+      a limit, minimum, prohibition or condition on a residential lot.
+  325-20C:
+    rules: []
+    unresolved:
+    - rule: 325-20C.requirement_p51_l27
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''the amount
+        of off-street parking permitted on a property containing a nonconforming use shall not exceed the amount
+        of parking determined to have existed on said property at the time it became a nonconforming use'''
+    problems: []
+    reason: 'The only measurable limit, parking on a nonconforming use not exceeding what existed when the use became
+      nonconforming, needs measures we don''t have: the baseline parking count at the time the use became nonconforming,
+      the amount of parking now, and whether it was extended onto or relocated to a different part of the lot. The
+      piece also says a use variance can lift the limit. The measures listed (parking_spaces, use, etc.) don''t
+      say whether a use is nonconforming, so no formula can be checked from them without inventing a baseline. Open
+      questions for the architects: how is the baseline determined (who determines the amount of parking that existed,
+      and from what record); what counts as extended or relocated to a different part of the lot; and whether a
+      use variance for the additional parking has been granted. Gordium is better off leaving this to a person than
+      guessing.'
+  325-20H:
+    rules: []
+    unresolved:
+    - rule: 325-20H.requirement_p61_l34
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''If parking
+        and sidewalk are separated by a low wall, the wall must be no less than three feet and no greater than four
+        feet high.'''
+    problems: []
+    reason: Piece 325-20H applies only in the WEDZ-1a and WEDZ-1b districts, which are not among the residential
+      districts listed (R-1a through RU). Its requirements are also about a wall or hedge, tree lawn and sidewalk
+      widths, and setbacks of parking areas. None of the available measures cover those features (wall height, hedge
+      height, tree lawn width, sidewalk width, or the distance from parking to the sidewalk). So no rule can be
+      drafted for the residential districts.
+  325-20I:
+    rules: []
+    unresolved:
+    - rule: 325-20I.requirement_p61_l38
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Parking areas
+        are not permitted in the first 100 feet measured from the nearest curb of a public street'''
+    problems: []
+    reason: 325-20I applies only to parking in the Southwest Area Zoning Districts (SW-1, SW-2, SW-3). It sets nothing
+      for the residential districts R-1a through RU. The 100-foot parking setback is measured from the nearest curb
+      of a public street, and no listed measure captures the distance from a parking area to that curb. The sole
+      exception depends on §325-29.2B, which is itself Southwest-only. So no template can be drafted for the listed
+      residential districts.
+  325-20J:
+    rules: []
+    unresolved:
+    - rule: 325-20J.requirement_p62_l7
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''One parking
+        space for each seven undergraduate students'''
+    problems: []
+    reason: Section 325-20J sets parking requirements only for the U-1 Zoning District (Cornell University), counted
+      from undergraduate students, graduate students and employees on the main campus, with TDM credits, reporting
+      and procedural duties. U-1 is not one of the residential districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a,
+      R-3aa, R-3b, RU). The required measures (student and employee counts, TDM participation) are not available.
+      Nothing in the text sets a requirement for a design in those residential districts.
+  325-21A:
+    rules: []
+    unresolved:
+    - rule: 325-21A.requirement_p63_l41
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''An off-street
+        loading space shall have a minimum of 450 square feet plus necessary additional space for entrance, exit
+        and aisle space.'''
+    problems: []
+    reason: The only measurable requirement is a minimum of 450 square feet per off-street loading space plus unquantified
+      'necessary additional space for entrance, exit and aisle space'. The available measures include no loading-space
+      area or aisle area (only lot, building and yard measures, and parking_spaces), so code cannot decide it. Drafting
+      it would need a new measure for loading space area, and the 'necessary additional space' part is left to judgment.
+      The chart's loading rows are drafted from their own cells, and this section sets nothing else for the residential
+      districts.
+  325-21C:
+    rules: []
+    unresolved:
+    - rule: 325-21C.requirement_p64_l9
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''There shall
+        be no off-street loading requirement for any properties located in any CBD zoning district.'''
+    problems: []
+    reason: 325-21C exempts properties in CBD zoning districts from any off-street loading requirement. CBD is not
+      one of the residential districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU), so the sentence
+      sets no requirement on a design in those districts. It is an exemption for other districts and does not relax
+      any residential chart rule.
+  325-22A:
+    rules: []
+    unresolved:
+    - rule: 325-22A.requirement_p64_l12
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Motels shall
+        maintain a minimum lot size of 20,000 square feet and a minimum frontage of 100 feet on a public right-of-way.'''
+    problems: []
+    reason: 325-22A sets lot size and frontage minimums only for motels. Motel is not among the use ids available
+      for the residential districts (R-1a through RU), and the chart does not list motels as a use there. No requirement
+      in this text applies to a residential-district use, so no template can be drafted without inventing a use
+      or measure.
+  325-22B:
+    rules:
+    - general.325_22b_parking_one_space_per_sleeping_unit
+    unresolved: []
+    problems: []
+  325-22D:
+    rules: []
+    unresolved:
+    - rule: 325-22D.requirement_p64_l17
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''A minimum
+        width of 22 feet for a driveway shall be provided for two-way traffic movement or two driveways of 12 feet
+        minimum width each shall be provided for one-way traffic into and out from the guest parking area.'''
+    problems: []
+    reason: '325-22D sets a driveway width (22 ft for two-way traffic, or two 12 ft driveways for one-way traffic)
+      into and out of a guest parking area. None of the listed measures can decide it: there is no measure for driveway
+      width, number of driveways, traffic direction, or the presence of a guest parking area. The text never says
+      which uses or districts have a guest parking area, and an unlisted measure cannot be used without an engineer
+      adding it first. Any rule drafted here would need several unlisted measures and an applicability test the
+      text does not state, so it cannot be decided from the listed measurements. The text is also not tied to the
+      chart or to the residential districts listed. I am not drafting a rule rather than guessing. For the architects:
+      (1) is ''guest parking area'' defined anywhere, and does 325-22D apply to residential lots? (2) does the 22
+      ft width apply to each driveway, and is the 12 ft width per driveway? (3) how does this interact with 325-20E(2)''s
+      12 ft maximum driveway width through a front yard on lots 50 ft wide or less?'
+  325-22E:
+    rules:
+    - general.325_22e_curb_cuts_major_arterial
+    unresolved: []
+    problems: []
+  325-22F:
+    rules:
+    - general.325_22f_landscaping_rear_yard_planting
+    - general.325_22f_landscaping_side_yard_smaller_planting
+    - general.325_22f_landscaping_side_yard_larger_planting
+    unresolved: []
+    problems: []
+  325-22G:
+    rules:
+    - general.325_22g_driveway_illumination_flag
+    - general.325_22g_lighting_no_glare_flag
+    unresolved: []
+    problems: []
+  325-22H:
+    rules: []
+    unresolved:
+    - rule: 325-22H.requirement_p64_l25
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Motels constructed
+        must be limited to guest accommodation and management offices and uses accessory thereto.'''
+    problems: []
+    reason: 325-22H limits motels to guest accommodation, management offices and accessory uses, but no listed use
+      id is a motel, so no measure can say a lot has a motel and no rule can be decided. The text also sets no requirement
+      on a design in the residential districts listed. Motel is not among the permitted residential-district uses,
+      and the piece governs the content of a motel, not a dimension or use that code can test.
+  325-23A:
+    rules:
+    - general.325_23a_performance_standards_flag
+    unresolved: []
+    problems: []
+  325-24B:
+    rules: []
+    unresolved:
+    - rule: 325-24B.requirement_p65_l25
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Storage of
+        waste products must be completely enclosed within a building or storage shed.'''
+    problems: []
+    reason: 'Every requirement in 325-24B needs a fact that is not among the measures we have: whether the use produces
+      or processes materials, what is stored, whether a barrier or screen exists, and how waste is stored. The standards
+      in L1-L5, ''not injurious or offensive'', and in L8-L13, ''effectively screened'', depend on human judgment.
+      The measures listed (lot dimensions, yards, height, parking and so on) can''t decide any of them. The text
+      sets no number. The rule lives in the use and operation of a site, not in the building''s dimensions. A rule
+      here would need new measures such as waste_storage_enclosed, and it would not apply to every lot, only to
+      uses where 325-24B is referenced. The residential-district chart does not say that any residential district
+      refers to this section. These requirements are better left for an architect''s review than drafted as rules
+      that could give a false pass.'
+  325-24C:
+    rules: []
+    unresolved:
+    - rule: 325-24C.requirement_p65_l29
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): "Sound levels
+        shall be measured with a sound-level meter and associated octave-band filter, and they shall not exceed
+        standards prescribed by the American Standards Association at any point along the sound-producer''s lot
+        line."'
+    problems: []
+    reason: '325-24C sets no requirement that code can decide from the available measures. Its first sentence limits
+      sound levels at the lot line to "standards prescribed by the American Standards Association". It gives no
+      numeric limit and the ASA standard is not in the law text, and no sound-level measure exists, so the design
+      cannot be checked against it. The second sentence (objectionable noises from intermittence, beat frequency
+      or shrillness shall be muffled so as not to become a nuisance to adjacent uses) needs an architect''s judgment
+      and cannot be measured. Open questions for the architects: which ASA standard and edition applies, and what
+      the limit is. How does 325-24C relate to the overlapping noise provision in 325-23A(1)? What counts as "muffled"
+      and "nuisance to adjacent uses"? Neither point can be settled in a formula.'
+  325-24D:
+    rules: []
+    unresolved:
+    - rule: 325-24D.requirement_p65_l33
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No use or
+        associated activity shall be operated so that ground vibration is perceptible without instruments at any
+        point along the lot lines of such use.'''
+    problems: []
+    reason: 325-24D prohibits ground vibration that is "perceptible without instruments" at any point along the
+      lot lines. Whether vibration is perceptible without instruments is a human judgment, not something code can
+      compute from any measure we have. A flag template could only record that judgment and decide nothing, and
+      it would apply to every use and district. The reviewed label already marks the text as a flag for an architect's
+      judgment, so I drafted no template.
+  325-24E:
+    rules: []
+    unresolved:
+    - rule: 325-24E.requirement_p65_l35
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No smoke shall
+        be emitted in violation of this Code.'''
+    problems: []
+    reason: Piece 325-24E sets no requirement that code can decide from the measures available for the residential
+      districts. 'No smoke shall be emitted in violation of this Code' points to an emission standard elsewhere,
+      and none is given here. There is no smoke or emission measure, and no number or test in this text. The monitoring
+      sentence applies to industries when the County Health Department finds it necessary. That is an administrative
+      and enforcement duty and sets no limit on a building design. Turning either sentence into a check would mean
+      inventing a standard the text does not state.
+  325-24F:
+    rules:
+    - general.325_24f_air_emissions_flag
+    unresolved: []
+    problems: []
+  325-24G:
+    rules:
+    - general.325_24g_fire_and_safety_building_code_national_fire_code
+    unresolved: []
+    problems: []
+  325-24H:
+    rules: []
+    unresolved:
+    - rule: 325-24H.requirement_p66_l10
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Glare or heat
+        resulting from the day-to-day operation of the industry or from exterior signs, building materials or other
+        objects situated on the lot shall not be detectable beyond the lot line of that land use.'''
+    problems: []
+    reason: '325-24H says glare or heat from the day-to-day operation of the industry, or from exterior signs, building
+      materials or other objects on the lot, shall not be detectable beyond the lot line. Gordium has no measure
+      for glare or heat detectability, and it can''t be decided from lot dimensions, yards, height, coverage or
+      parking. This is a performance standard that needs a person''s judgment, and no formula could settle it without
+      an invented measure. A flag has no check and no numbers, so it would add nothing to the result. The text sets
+      no chart number and no measurable limit for the residential districts. Open questions for the architects:
+      what counts as detectable (by what instrument or observer), and how this relates to the near-identical 325-23A(5),
+      which covers glare and heat from any source.'
+  325-24I:
+    rules: []
+    unresolved:
+    - rule: 325-24I.requirement_p66_l13
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Every use
+        shall be so operated as to prevent the discharge into any public sewer, stream, river, lake or the ground
+        of waste or other matter in amounts which will exceed the maximum standards of the Tompkins County Health
+        Department and the New York State Department of Environmental Conservation.'''
+    problems: []
+    reason: '325-24I sets operating and discharge standards (waste discharge limits set by outside agencies, and
+      a ban on hazardous or obstructing materials in sewer connections). None of them can be decided from the building-design
+      measures Gordium has: no measure for discharge amounts, Tompkins County Health Department or NYS DEC standards,
+      or sewer contents. A rule would need new measures with no figures in the text, and a flag would only restate
+      the sentences. These are operational and enforcement requirements, not requirements on a building design,
+      so no template is drafted.'
+  325-26:
+    rules:
+    - general.325_26_stream_inlet_setback_review
+    - general.325_26_stream_inlet_setback_exempt_districts_review
+    unresolved: []
+    problems: []
+  325-29:
+    rules:
+    - general.325_29_landmark_changes_in_appearance
+    unresolved:
+    - rule: 325-29.requirement_p73_l8
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The Director
+        of Planning and Development or designee shall further refer such application, together with all necessary
+        drawings and written material necessary for a full description of the work proposed, to the City Landmarks
+        Preservation Commission for review and report prior to issuing any such permit.'''
+    problems: []
+  325-29.1E:
+    rules: []
+    unresolved:
+    - rule: 325-29.1E.requirement_p76_l20
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Lighting throughout
+        an adult use establishment shall be sufficient to illuminate every place to which patrons are permitted
+        access.'''
+    problems: []
+    reason: 'Section 325-29.1E governs adult use establishments (lighting and open public view of private viewing
+      booths). None of the listed measures can decide it: there is no lighting, booth, door or curtain measure,
+      and no adult use appears among the use ids for the residential districts. Its requirements apply to a use
+      the residential districts listed do not allow, so it sets nothing code can check there.'
+  325-29.1F:
+    rules: []
+    unresolved:
+    - rule: 325-29.1F.requirement_p76_l29
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The sale and/or
+        consumption of alcohol is prohibited within the designated adult use zone.'''
+    problems: []
+    reason: The piece prohibits the sale and/or consumption of alcohol only within the 'designated adult use zone',
+      which is not one of the residential districts listed (R-1a through RU). It also restricts an activity (selling
+      or consuming alcohol), not a building's dimensions, and none of the available measures or use ids describe
+      it. It sets no requirement on a residential design, so no rule or flag applies.
+  325-29.1G:
+    rules: []
+    unresolved:
+    - rule: 325-29.1G.requirement_p76_l35
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''shall be subject
+        to appropriate landscaping as determined in the site plan review process'''
+    problems: []
+    reason: Piece 325-29.1G sets no measurable requirement on a design in the residential districts. Paragraph (1)
+      only subjects adult use establishments to Chapter 272 (Signs), and paragraph (2) only subjects them to Chapter
+      276 (Site Plan Review) and to landscaping 'as determined in the site plan review process'. These are cross-references
+      to other chapters and a discretionary board determination, so no number, formula or measure applies. Any sign
+      or site plan standards are drafted from those chapters. Adult use establishments are also not among the listed
+      residential use ids, and none of the available measures can express this.
+  325-29.2A:
+    rules: []
+    unresolved:
+    - rule: 325-29.2A.requirement_p77_l4
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Any and all
+        development projects within the SW-1 District and Sub-districts SW-2 and SW-3 shall be subject to the guidelines
+        set forth in the Design Guidelines for the Southwest Area, Meadow Street, and Elmira Road Corridor.'''
+    problems: []
+    reason: 'This piece applies only to the SW-1, SW-2 and SW-3 districts, which are not among the residential districts
+      listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). Its other sentences cover procedure: the Planning
+      Board applies the design guidelines during site plan review, and no building permit issues before final site
+      plan approval. Procedures are not requirements on a design, so no residential-district rule or flag results.'
+  325-29.2B:
+    rules: []
+    unresolved:
+    - rule: 325-29.2B.requirement_p77_l11
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): "A minimum of
+        60% of a lot''s street frontage must be occupied by a building or buildings with a maximum setback of 30
+        feet from the curb."'
+    problems: []
+    reason: Section 325-29.2B sets setbacks only for the Southwest Zoning Districts (SW-1, SW-2, SW-3) and an alternative
+      setback for all Southwest Zoning Districts. None of these is among the residential districts listed (R-1a,
+      R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU), so the text sets nothing for them. The measures also lack
+      street frontage occupied by buildings, setback from the curb and the SW district, so no rule could be decided
+      from them.
+  325-29.2C:
+    rules: []
+    unresolved:
+    - rule: 325-29.2C.requirement_p77_l24
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Retail store
+        size must be a minimum of 5,000 square feet, with the exception of'''
+    problems: []
+    reason: Section 325-29.2C sets a minimum retail store size only for the SW-1, SW-2 and SW-3 Southwest zoning
+      districts. None of these is among the residential districts to draft (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a,
+      R-3aa, R-3b, RU). The text sets no requirement for any of them. The store floor area is also not among the
+      available measures.
+  325-29.3D:
+    rules:
+    - general.325_29_3d_dumpster_board_considerations
+    unresolved: []
+    problems: []
+  325-29.3E:
+    rules: []
+    unresolved:
+    - rule: 325-29.3E.requirement_p80_l8
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''make a determination
+        as to whether the dumpster will be out of the public view, require the dumpster to be screened as provided
+        in Subsection C(7) hereof if it will not be out of the public view'''
+    problems: []
+    reason: Section 325-29.3E directs the Board of Zoning Appeals on how to act when granting a variance (specify
+      the dumpster's exact location, decide whether it is out of public view, require screening under C(7), and
+      impose other requirements). That is a procedural duty of the Board, not a measurable requirement on a building
+      design. Whether a dumpster is out of public view is a judgment call, and no listed measure covers dumpsters
+      or screening. The screening standard itself is set in Subsection C(7) and would be drafted from that section.
+  325-29.6D:
+    rules:
+    - general.325_29_6d_collocation_host_unpermitted_equipment
+    - general.325_29_6d_collocation_applicant_unpermitted_pwsf
+    unresolved: []
+    problems: []
+  325-29.6F:
+    rules: []
+    unresolved:
+    - rule: 325-29.6F.requirement_p88_l40
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''such\ninstallations
+        are not governed by the zoning requirements of this article.'''
+    problems: []
+    reason: 325-29.6F only exempts underground or cable-based broadband installations from the article's zoning
+      requirements. It sets no limit, minimum, prohibition or condition on a building design in the residential
+      districts. No listed measure describes a broadband installation, so code cannot decide the exemption. Drafting
+      it as a rule would need a new measure and would only loosen other rules, which risks a false pass. It is a
+      scope statement, not a requirement.
+  325-29.7B:
+    rules: []
+    unresolved:
+    - rule: 325-29.7B.requirement_p89_l8
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''(a) Place
+        PWSFs on existing utility poles (telephone poles, utility distribution poles, streetlights, and traffic
+        signal stanchions); or'''
+    problems: []
+    reason: '325-29.7B sets classification tiers for personal wireless service facilities (PWSFs) that decide who
+      approves an application (the Director or the Board) and which review it gets. It sets no dimensional or numeric
+      limit on a building design. None of the measures Gordium has (lot, yard, height, parking, use) can decide
+      the tiers: utility poles, concealment in approved features, guyed towers and public controversy all need facts
+      we do not measure, and the tier criteria mostly rest on City or Director judgment. The location, siting, design
+      and safety standards the tiers refer to are drafted from their own sections. The notice requirement is procedural
+      and lives in 325-29.15. The text has no chart row or number for the residential districts, so no rule or flag
+      template is written.'
+  325-29.8B:
+    rules:
+    - general.325_29_8b_pwsf_tree_antenna_height
+    - general.325_29_8b_pwsf_roof_projection
+    - general.325_29_8b_pwsf_side_mount_projection
+    - general.325_29_8b_pwsf_spacing
+    - general.325_29_8b_pwsf_concealment_alignment_frontage
+    unresolved: []
+    problems: []
+  325-29.8C:
+    rules: []
+    unresolved:
+    - rule: 325-29.8C.requirement_p93_l5
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''shall be no
+        closer than 250 feet from any adjacent residence, school, or day care facility'''
+    problems: []
+    reason: 'Nothing here can be checked with the measures Gordium has. The text sets requirements on personal wireless
+      service facilities (PWSFs): a 250 ft distance from any adjacent residence, school or day care facility, antenna
+      mounting limits of twice and three times the pole diameter, and a 1.5 inch limit on horizontal flat spaces
+      on equipment cabinets. None of those facility dimensions or distances is a listed measure, and none applies
+      to a building design in a residential district''s chart. The color, compatibility, concealment and discouraged-equipment
+      parts need judgment. The setback also applies only to facilities ''near or within view of residences'', which
+      the measures cannot decide, and it is paired with an either/or choice between underground vaults and enclosed
+      structures that code cannot settle. Drafting these as rules would risk a false pass, so none is drafted.'
+  325-29.9A:
+    rules:
+    - general.325_29_9a_small_cell_fall_zone
+    - general.325_29_9a_small_cell_distance_from_sensitive_uses
+    - general.325_29_9a_small_cell_distance_from_other_facilities
+    unresolved: []
+    problems: []
+  325-29.9B:
+    rules: []
+    unresolved:
+    - rule: 325-29.9B.requirement_p93_l42
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No habitable
+        structure or outdoor area where people congregate shall be within a fall zone'''
+    problems: []
+    reason: Every requirement in 325-29.9B needs facts our measures cannot supply. Fall-zone clearances (120% of
+      PWSF height, a radius equal to the height) need PWSF height and distances to habitable structures, congregation
+      areas and property lines. Antenna-array projection (five feet) and the building-line rule need the PWSF's
+      location and attachment geometry. None of these are measures we have, and the text sets no chart-based limit
+      of its own. The setback requirements (2a, 2c) only point to the district chart and the yard-projection section,
+      which are drafted from their own texts. Because no template could be checked reliably with the listed measures,
+      no rule is drafted and a person must review these.
+  325-29.11A:
+    rules: []
+    unresolved:
+    - rule: 325-29.11A.requirement_p101_l26
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The alternatives
+        should contain measurable differences, such as:'''
+    problems: []
+    reason: Piece 325-29.11A sets no measurable requirement on a building design in the residential districts. It
+      describes what alternatives to a proposed PWSF (personal wireless service facility) in an application review
+      should contain. The alternatives "need not be totally different" and "should contain measurable differences,
+      such as" height, number, location, siting and design. Each of these is a permissive example ("can be", "could
+      be"), and "should" is guidance for what an applicant submits. It does not limit a lot, a yard, a height or
+      a use, and none of the listed measures (lot, yards, height, stories, parking, units) can test it. The text
+      also has no number of its own to type. It is procedural content for the application review, so it gives no
+      rule template, and no flag is needed for the districts listed.
+  325-29.11C:
+    rules: []
+    unresolved:
+    - rule: 325-29.11C.requirement_p101_l40
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Change in
+        community scale, as exhibited in relative height, mass or proportion of the PWSF within its proposed surroundings.'''
+    problems: []
+    reason: 'Piece 325-29.11C sets no requirement a design can be checked against. It directs Planning and Development
+      staff to compare a proposed PWSF with the two required alternatives on eight criteria: change in community
+      scale, new visible elements on contrasting backgrounds, colors and textures, foreign materials, conservation
+      of community scale, landscaping and vegetation, view corridors, and continuation of existing colors, textures
+      and materials. This is a procedure for staff, and each criterion calls for human judgment. None sets a limit,
+      minimum, prohibition or condition, and none can be measured with the available measures. The text also names
+      no residential district and sets no number. The listed measures (lot dimensions, yards, height, stories, parking
+      and so on) do not cover any of the criteria. The only candidate is relative height, mass or proportion in
+      item (1), which gives no number or comparison threshold. Drafting a rule or flag would invent a standard the
+      law does not state.'
+  325-29.17E:
+    rules: []
+    unresolved:
+    - rule: 325-29.17E.requirement_p106_l20
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Collocation
+        of facilities is generally preferred over new support structures if it can be accomplished in a way that
+        better compliments the character of the surrounding area.'''
+    problems: []
+    reason: '325-29.17E sets an order of preference and a collocation requirement for personal wireless service
+      facilities (PWSFs). Its tests are judgment calls, not measurements: whether collocation better complements
+      the character of the surrounding area, whether an existing facility or support structure can potentially accommodate
+      collocation, whether collocation would remedy a significant gap in coverage, and whether the owner is unwilling
+      and cannot be required to cooperate. The measures available (lot size, yards, height, stories, coverage, parking,
+      dwelling units) cover none of these, and the text sets no number. It also sets no requirement on a residential
+      building design, so it can''t be decided by code. Nothing in it can be turned into a rule or a flag that Gordium
+      can check. It is left for architect or planning-board judgment, with related findings in 325-29.12B.'
+  325-29.18B:
+    rules: []
+    unresolved:
+    - rule: 325-29.18B.requirement_p107_l8
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Every pole
+        or structure in the public rights of way that holds a 5G antenna be labeled indicating RF radiation being
+        emitted above.'''
+    problems: []
+    reason: 'Piece 325-29.18B sets requirements on 5G antenna poles or structures in the public rights of way: labeling
+      at eye level, legible from nine feet, and IEEE-format warning signs. These are not requirements on a building
+      design in the residential districts. The lot and building measures available (lot_area, building_height, yards,
+      parking and the like) cannot decide any of them. No available measure tells whether a pole or structure carries
+      a 5G antenna, whether it is labeled, or at what height the label sits or from what distance it can be read.
+      Most of the remaining language is guidance: ''should be used'', ''should incorporate'', ''should be located
+      prominently''. That wording is a recommendation and not a measurable requirement, and the nine-foot legibility
+      figure belongs to a label on a public right-of-way pole, not to a lot. I therefore draft no rule or flag for
+      the residential districts.'
+  325-29.18F:
+    rules:
+    - general.325_29_18f_pwsf_engineer_review
+    - general.325_29_18f_pwsf_nesc_compliance
+    unresolved: []
+    problems: []
+  325-29.20:
+    rules:
+    - general.325_29_20_pwsf_noise_flag
+    unresolved: []
+    problems: []
+  325-29.21A:
+    rules: []
+    unresolved:
+    - rule: 325-29.21A.requirement_p109_l15
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''A PWSF shall
+        not be artificially lighted, except for:'''
+    problems: []
+    reason: 'Piece 325-29.21A governs artificial lighting of a PWSF (personal wireless service facility). None of
+      the measures available to Gordium describes lighting, shielding, light direction, or light color, so code
+      cannot decide the prohibition. Nor can it decide the exceptions: shielded and downward-directed security lighting
+      of equipment buildings, lighting required by the FCC or FAA, and the red-only requirement. The text sets no
+      dimension, use or chart number for the residential districts. Drafting it as a rule would need new measures
+      that don''t exist yet, and the ''minimize impacts on adjacent residences'' language needs an architect''s
+      judgment. I therefore return no templates rather than guess.'
+  325-29.21B:
+    rules: []
+    unresolved:
+    - rule: 325-29.21B.requirement_p109_l24
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''The security
+        barrier shall be maintained by the operator of the PWSF or mount for the life of the installation.'''
+    problems: []
+    reason: '325-29.21B sets nothing that code can decide with the listed measures, and it names no residential
+      district. Each sentence fails for a specific reason. (1) ''A security barrier ... may be required around the
+      perimeter of mount(s) or equipment structure, and any anchor points'' is permissive (may be required), so
+      it sets no fixed requirement. It also refers to the ''City of Ithaca Zoning Ordinance'' for the barrier standard,
+      and that standard is not in the text given. (2) ''In the case of a roof-mounted PWSF, the security barrier
+      may need only be around the antenna'' is a permitted reduction, not a measurable limit. (3) ''The security
+      barrier shall be maintained by the operator of the PWSF or mount for the life of the installation'' is an
+      ongoing maintenance duty owed by the operator. It cannot be tested against a building design''s measurements.
+      (4) ''No security barrier is needed around side-mounted PWSF''s'' is an exemption. It would only relax a barrier
+      rule, and there is no barrier requirement here to relax. Its tie to ''distances from windows and balconies
+      should conform to Subsection C(2)'' is advisory (''should'') and depends on another subsection, which is not
+      given. There are also no listed measures for PWSFs, mounts, barriers, windows or balconies. The layout facts
+      the label mentions are not measurable with the given measures. Gordium has no measures for these facts, and
+      drafting from them would force an interpretation in the formula. Open questions for the architects: what barrier
+      standard does the Zoning Ordinance set, and is the maintenance duty to be tracked as a flag?'
+  325-29.21C:
+    rules: []
+    unresolved:
+    - rule: 325-29.21C.requirement_p109_l28
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): "The security
+        barriers around all PWSF''s shall be reviewed by the Planning and Development Board and found to be acceptable
+        for"'
+    problems: []
+    reason: Piece 325-29.21C sets requirements for personal wireless service facilities (PWSF), which are not among
+      the residential uses or measures available. Its two requirements cannot be decided from the listed measures.
+      First, security barriers must be reviewed by the Planning and Development Board and found acceptable for the
+      controlled and general populations. That is a discretionary board judgment and a procedure, not a measurement
+      on a building design. Second, the general population should not be allowed within 10 meters of any antenna.
+      That is a separation to an antenna, and no listed measure (such as distance to an antenna or the presence
+      of a PWSF) captures it. The wording is also 'should', not a mandatory 'shall'. The listed use ids include
+      no PWSF use, so a rule here could not be tied to a use. Any rule would require inventing measures and settling
+      open interpretations, so no template is drafted.
+  325-29.22:
+    rules: []
+    unresolved:
+    - rule: 325-29.22.requirement_p109_l36
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''No signage
+        shall be permitted on any PWSF other than that required for public safety purposes or by the FCC or FAA'''
+    problems: []
+    reason: Section 325-29.22 governs signs and identification plaques on a PWSF (personal wireless service facility).
+      Its requirements are no signage other than what public safety, the FCC or the FAA requires, and a weatherproof
+      plaque mounted at eye level that identifies the carrier, frequency and permit approval date. None of the available
+      measures covers a PWSF, its signage or its plaque. The rule is not a limit on a residential building design,
+      the available use list has no PWSF use, and the plaque's content and placement can't be decided from the listed
+      measures. Code can't decide the signage or plaque requirements, and drafting them as a flag or rule would
+      need measures that don't exist and would not apply to the residential building checks.
+  325-29.23A:
+    rules:
+    - general.325_29_23a_natural_vegetation_undisturbed
+    unresolved: []
+    problems: []
+  325-29.23B:
+    rules: []
+    unresolved:
+    - rule: 325-29.23B.requirement_p110_l7
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''At least one
+        row of evergreen shrubs capable of forming a continuous hedge at least five feet in height within two years
+        of planting shall be spaced not more than five feet apart within 15 feet of the site boundary'''
+    problems: []
+    reason: 'Section 325-29.23B sets landscaping, screening and planting requirements for a personal wireless service
+      facility (PWSF) site: hedge rows, tree rows, guy-wire barrier screening and plant species. None of these can
+      be checked with the measures Gordium has (lot, yard, height, coverage, parking and similar), because the site
+      plan facts they depend on are not among the listed measures, and PWSF is not a residential-district use in
+      the use list. The rules would need new measures for the PWSF site boundary, shrub and tree spacing, planting
+      height and tree caliper. The piece also gives the Planning and Development Board discretion to accept substitutes,
+      which is a judgment and not a measurement. Nothing here sets a requirement on a residential building design
+      that can be decided with the available measures, so I return no templates.'
+  325-29.24A:
+    rules: []
+    unresolved:
+    - rule: 325-29.24A.requirement_p110_l27
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Areas sufficient
+        for the temporary off-street parking of at least two vehicles shall be provided for mounts.'''
+    problems: []
+    reason: Piece 325-29.24A is the parking paragraph for a special district ("for mounts" and the Planning and
+      Development Board approval point to a non-residential or special zone), not the residential districts R-1a
+      through RU. Its two-vehicle minimum cannot be tied to any listed residential district or use, and none of
+      the listed measures represents temporary parking for "mounts". Drafting it as a general rule for residential
+      districts would risk a false pass or fail. The type-and-configuration approval is a board judgment, not something
+      code can decide. Residential parking is set by the chart (page 14) and by 325-20 and 325-45.5B, which are
+      drafted from those sections.
+  325-32C:
+    rules: []
+    unresolved:
+    - rule: 325-32C.requirement_p112_l19
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''the provisions
+        of this article shall apply to any nonconforming uses or structures created.'''
+    problems: []
+    reason: §325-32C only says that the article's nonconforming-use provisions apply to nonconforming uses or structures
+      created when a district boundary or district regulation changes. It sets no limit, minimum, prohibition or
+      condition on a design, and it has no number. It sends a lot to the other nonconforming sections (§325-32,
+      §325-35), which are drafted from their own text. Whether a use or structure is nonconforming because of a
+      map or regulation change depends on its history, which the available measures cannot show. Drafting it here
+      would repeat those sections or guess.
+  325-33A:
+    rules: []
+    unresolved:
+    - rule: 325-33A.requirement_p112_l22
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''A nonconforming
+        use may not be expanded in area or increased in intensity, except by means of a'''
+    problems: []
+    reason: Section 325-33A limits expansion or intensification of a nonconforming use, but Gordium has no measure
+      for an existing nonconforming use, its area, or its intensity (only building_area for lot coverage and use
+      for the proposed use). It also depends on whether a use variance was granted, which is a procedural fact that
+      cannot be decided from the design measurements. A formula would have to guess these facts, so the piece is
+      not drafted as a rule.
+  325-33B:
+    rules:
+    - general.325_33b_nonconforming_use_structure_alterations
+    unresolved: []
+    problems: []
+  325-33C:
+    rules:
+    - general.325_33c_nonconforming_use_change_flag
+    - general.325_33c_no_reversion_to_nonconforming_flag
+    unresolved: []
+    problems: []
+  325-33D:
+    rules:
+    - general.325_33d_nonconforming_use_discontinuance
+    unresolved: []
+    problems: []
+  325-33E:
+    rules:
+    - general.325_33e_nonconforming_use_reestablishment_review
+    unresolved: []
+    problems: []
+  325-34A:
+    rules:
+    - general.325_34a_nonconforming_alteration_conditions
+    unresolved:
+    - rule: 325-34A.requirement_p113_l7
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''(3) The alteration
+        conforms to the provisions of this chapter and does not exacerbate the existing deficiency or create a new
+        nonconformity.'''
+    problems: []
+  325-34B:
+    rules: []
+    unresolved:
+    - rule: 325-34B.requirement_p113_l15
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''In the event
+        that a building permit is not obtained within one year of said date, the structure must be repaired or rebuilt
+        in conformance with all applicable requirements of this chapter.'''
+    problems: []
+    reason: '325-34B sets no requirement checkable against a building design with the listed measures. It is a procedural
+      and timing provision: a nonconforming building used in its entirety for a conforming use that is damaged by
+      a cause outside the owner''s control may be rebuilt to its previous condition. A building permit must be granted
+      within one year of the damage, otherwise the structure must conform to all applicable requirements of the
+      chapter. The measures include no damage date, permit date, cause of damage or previous condition. The conformance
+      requirement only points to other sections, and those are drafted from their own text.'
+  325-35A:
+    rules: []
+    unresolved:
+    - rule: 325-35A.requirement_p113_l20
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Zoning permits
+        shall be available for the following area deficiencies:'''
+    problems: []
+    reason: 'Section 325-35A only says the Director may issue a zoning permit for certain deficiencies on existing
+      nonconforming buildings, structures or lots. It sets the conditions for obtaining a permit, not requirements
+      on a design in the residential districts, so I drafted no rules. Several of its items are also not decidable
+      with the listed measures. The existing yard and lot coverage values, accessibility improvements, replacement
+      of accessory structures, extension of an existing deficiency and the 30-day duration of a temporary deficiency
+      are not measures. The yard and coverage numbers (50% of the yard provided, 5% coverage increase, 5% over the
+      district maximum) depend on those measures, which are not listed, so I did not write a check that could give
+      a false pass. The permit pathway is better handled as a procedure or review matter. Open question for the
+      architects: does ''at least 50% of the yard is provided'' mean 50% of the chart''s required yard depth or
+      width? It also depends on how ''total lot coverage is increased by 5% or less'' is measured, in percentage
+      points or relative to existing coverage.'
+  325-41B:
+    rules: []
+    unresolved:
+    - rule: 325-41B.requirement_p123_l37
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''impactful
+        to nearby property by reason of noise, fumes, increased vehicular traffic or parking'''
+    problems: []
+    reason: 'Piece 325-41B sets only discretionary approval criteria for a zoning permit: harmony with neighborhood
+      character, no discouragement of adjacent development, no significantly more impactful use (noise, fumes, traffic,
+      parking demand, vibration, flashing lights), and no negative impacts on traffic, congestion, environment,
+      property values, municipal services or the general plan. Each is a judgment about impacts and character, not
+      a measurement of the design, and none uses a measure or number Gordium has. It sets no dimensional limit,
+      count, use prohibition or other test that code can decide. It also drafts nothing as a flag, because a flag
+      would be a rule template for a requirement on the design, and these criteria are the permit decision itself
+      (the Director''s procedure), not a requirement the design must meet.'
+  325-44A:
+    rules: []
+    unresolved:
+    - rule: 325-44A.requirement_p126_l27
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''shall be subject
+        to strict review and approval by the Planning and Development Board and the Ithaca Landmarks Preservation
+        Commission within their respective areas of responsibility.'''
+    problems: []
+    reason: 'Piece 325-44A applies only within the C-SU Zone, which is not one of the residential districts listed
+      (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). It sets no measurable requirement for those districts.
+      It is only a procedural requirement: board review and approval, and referral of demolition proposals to the
+      Landmarks Preservation Commission. Procedures are not requirements on a design, so no rule or flag is drafted.'
+  325-45.1D:
+    rules: []
+    unresolved:
+    - rule: 325-45.1D.requirement_p128_l30
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''All new construction
+        (including parking lot construction or expansion) is subject to the design review process set forth in Chapter
+        160, Design Review, of the City Municipal Code.'''
+    problems: []
+    reason: 'Piece 325-45.1D sets only a process requirement: design review approval under Chapter 160 before a
+      building permit, construction, or exterior alteration. It sets no limit, minimum, prohibition or allowed use
+      that code can check against the measurements we have (lot size, yards, height, coverage, parking). The review
+      standards are in Chapter 160 and need board judgment. Whether a project has design review approval is not
+      an available measure, and the drafting rules treat procedures as not being requirements on a design.'
+  325-45.1E:
+    rules: []
+    unresolved:
+    - rule: 325-45.1E.requirement_p128_l35
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''all new construction
+        (including additions) within a designated local historic district or on the same tax parcel as an'''
+    problems: []
+    reason: 'Piece 325-45.1E only requires that new construction (including additions) in a designated local historic
+      district or on the same tax parcel as an individually designated local landmark be reviewed and approved by
+      the Ithaca Landmarks Preservation Commission for compliance with § 228-5B and C of the City Municipal Code.
+      It sets no measurable limit and uses no chart number. Approval and compliance turn on the commission''s judgment
+      against standards in another chapter, which is not in the text given here. The measures include no historic-district
+      or landmark-parcel fact, so code cannot decide whether the review applies. A rule here would either guess
+      or restate a procedure, so no template is drafted. Reviewers should treat the piece as a flag: any new construction
+      or addition in a local historic district or on a landmark parcel needs the commission''s approval, and the
+      standards in § 228-5B and C are an open question.'
+  325-45.2D:
+    rules: []
+    unresolved:
+    - rule: 325-45.2D.requirement_p134_l16
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''A habitable
+        third story in CR-1, CR-2, and CR-3 Districts must be fully contained within a pitched roof.'''
+    problems: []
+    reason: Piece 325-45.2D sets story and foot limits only for the CR and MU districts (CR-1 to CR-4, MU-1, MU-2),
+      and none of them are among the residential districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b,
+      RU). The top-story requirement for a habitable third story in a pitched roof also covers only CR-1, CR-2 and
+      CR-3. The text sets nothing for the listed residential districts, so there is no rule to draft here.
+  325-45.3B:
+    rules: []
+    unresolved:
+    - rule: 325-45.3B.requirement_p160_l12
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Within the
+        MU-2 District, street-level active uses are required for the street-facing portions of'''
+    problems: []
+    reason: Section 325-45.3B applies only within the MU-2 District (Collegetown), which is not one of the residential
+      districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). The street-level active use requirement
+      and the Planning Board special approval in subsection (3) set nothing for a residential-district design, so
+      there is nothing to draft.
+  325-45.5C:
+    rules: []
+    unresolved:
+    - rule: 325-45.5C.requirement_p163_l32
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''(1) Area in
+        square feet: 4,000.'''
+    problems: []
+    reason: Piece 325-45.5C sets its minimums (4,000 sf area, 40 ft width at street line) for a district that is
+      not among the residential districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU). Its neighbours
+      325-45.5E and 325-45.2E show it belongs to a separate Collegetown-type district. A template with no slots
+      applies to a district only through a `district` test, and none of the listed districts can be named for this
+      piece, so no template can be drafted without guessing.
+  325-45.5D:
+    rules: []
+    unresolved:
+    - rule: 325-45.5D.requirement_p164_l5
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Four stories
+        and 40 feet.'''
+    problems: []
+    reason: Piece 325-45.5D sets a four-story, 40-foot maximum building height, but it belongs to the 325-45.5 district
+      family. The residential districts listed (R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b, RU) are governed
+      by the chart's own height rows. The piece's text names no residential district and no condition tying it to
+      one, so a rule drafted from it could not be applied to any listed district without guessing.
+  325-45.5E:
+    rules: []
+    unresolved:
+    - rule: 325-45.5E.requirement_p164_l6
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Maximum percentage
+        of lot coverage by buildings: 35%.'''
+    problems: []
+    reason: Piece 325-45.5E gives a 35% maximum lot coverage by buildings, but it sits in section 325-45.5, a separate
+      district section. Its sibling 325-45.5C sets a 4,000 sf minimum lot size that matches none of the chart's
+      residential district rows. The text does not name R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b or RU, so
+      it sets nothing for the residential districts listed. The 35% limit for those districts is drafted from the
+      chart's lot coverage row, not from this piece. A district test cannot be written for a district outside the
+      listed set.
+  325-45.5F:
+    rules: []
+    unresolved:
+    - rule: 325-45.5F.requirement_p164_l8
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''Required minimum
+        front yard: zero feet to property line for existing buildings; 10 feet to property line for new construction.'''
+    problems: []
+    reason: Piece 325-45.5F sets yard minimums (front 0 ft for existing buildings and 10 ft for new construction,
+      side 10 ft, other side 5 ft, rear 15 ft), but the text does not name the district it governs. The numbers
+      do not match any residential district's chart row. Nothing in the text or the related sections ties it to
+      R-1a through RU, and it reads as the yard standard for a separate special district. A rule written for the
+      residential districts would put these numbers on lots they do not govern. That could wrongly fail or pass
+      designs, so I drafted none.
+  325-45.5G:
+    rules: []
+    unresolved:
+    - rule: 325-45.5G.requirement_p164_l13
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''G. Minimum
+        building height: none.'''
+    problems: []
+    reason: 'Piece 325-45.5G says only "Minimum building height: none." It sets no minimum, so it puts no requirement
+      on a design. There is nothing to check, and a rule here would only be a test that always passes. The piece
+      also belongs to the 325-45.5 district standards, not to the residential districts listed (R-1a through RU),
+      so it sets nothing for them. The maximum height (325-45.5D) is drafted from its own piece.'
 complete: false

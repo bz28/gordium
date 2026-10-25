@@ -20,11 +20,13 @@ keys:
       R-1b.lot_area_one_family_detached:
         judge:
         - - R-1b.min_lot_size_detached
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-1b.lot_area_other_use:
         judge:
         - - R-1b.min_lot_size_other_use
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-1b.lot_width_one_family_detached:
         judge:
         - - R-1b.min_lot_width_one_family_detached
@@ -41,10 +43,10 @@ keys:
       R-1b.height:
         judge:
         - - R-1b.max_height_ft
+        - - R-1b.325_16c_height_exception_extra_height
         parts: []
-        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
-          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
-          passes it, and a person checks §325-16C'
+        reason: the chart's height row, and §325-16C's extra height drafted as one rule relaxing it (2026-10-25), judged on
+          its own so a condition it leaves out shows
       R-1b.lot_coverage:
         judge:
         - - R-1b.max_lot_coverage
@@ -55,19 +57,21 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-1b.side_yards:
         judge:
-        - - R-1b.side_one_min
-          - R-1b.side_other_min
+        - - R-1b.side_one_side_min
+          - R-1b.side_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-1b.rear_yard:
         judge:
-        - - R-1b.rear_yard_min
+        - - R-1b.rear_yard_min_fn16
         reason: 'the chart''s rear yard row: the same question'
       R-1b.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
-          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
-          every design with eaves to review; compared'
+        - - R-1b.325_18b_projection_front_yard
+          - R-1b.325_18b_projection_side_yard_larger
+          - R-1b.325_18b_projection_side_yard_smaller
+          - R-1b.325_18b_projection_rear_yard_fn16
+        reason: '§325-18B: eaves up to 2 ft into each required yard, drafted yard by yard on the eave measures (2026-10-25):
+          the same question, judged together'
       R-1b.accessory_buildings:
         judge:
         - - R-1b.325_25a_accessory_not_in_required_front_yard
@@ -89,6 +93,9 @@ keys:
         no key rule asks it'
       R-1b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-1b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-1b.325_11b_cluster_front_yard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+        PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+        facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
     known_false_passes: {}
   R-1a.yaml:
     district: R-1a
@@ -100,11 +107,13 @@ keys:
       R-1a.lot_area_one_family_detached:
         judge:
         - - R-1a.min_lot_size_detached
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-1a.lot_area_other_use:
         judge:
         - - R-1a.min_lot_size_other_use
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-1a.lot_width_one_family_detached:
         judge:
         - - R-1a.min_lot_width_one_family_detached
@@ -121,10 +130,10 @@ keys:
       R-1a.height:
         judge:
         - - R-1a.max_height_ft
+        - - R-1a.325_16c_height_exception_extra_height
         parts: []
-        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
-          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
-          passes it, and a person checks §325-16C'
+        reason: the chart's height row, and §325-16C's extra height drafted as one rule relaxing it (2026-10-25), judged on
+          its own so a condition it leaves out shows
       R-1a.lot_coverage:
         judge:
         - - R-1a.max_lot_coverage
@@ -135,19 +144,21 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-1a.side_yards:
         judge:
-        - - R-1a.side_one_min
-          - R-1a.side_other_min
+        - - R-1a.side_one_side_min
+          - R-1a.side_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-1a.rear_yard:
         judge:
-        - - R-1a.rear_yard_min
+        - - R-1a.rear_yard_min_fn16
         reason: 'the chart''s rear yard row: the same question'
       R-1a.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
-          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
-          every design with eaves to review; compared'
+        - - R-1a.325_18b_projection_front_yard
+          - R-1a.325_18b_projection_side_yard_larger
+          - R-1a.325_18b_projection_side_yard_smaller
+          - R-1a.325_18b_projection_rear_yard_fn16
+        reason: '§325-18B: eaves up to 2 ft into each required yard, drafted yard by yard on the eave measures (2026-10-25):
+          the same question, judged together'
       R-1a.accessory_buildings:
         judge:
         - - R-1a.325_25a_accessory_not_in_required_front_yard
@@ -169,6 +180,9 @@ keys:
         no key rule asks it'
       R-1a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-1a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-1a.325_11b_cluster_front_yard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+        PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+        facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
     known_false_passes: {}
   R-2a.yaml:
     district: R-2a
@@ -180,19 +194,23 @@ keys:
       R-2a.lot_area_one_family_detached:
         judge:
         - - R-2a.min_lot_size_detached
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2a.lot_area_one_family_semi_detached:
         judge:
         - - R-2a.min_lot_size_semi_detached
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2a.lot_area_two_family:
         judge:
         - - R-2a.min_lot_size_two_family
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2a.lot_area_other_use:
         judge:
         - - R-2a.min_lot_size_other_use
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2a.lot_width_one_family_detached:
         judge:
         - - R-2a.min_lot_width_one_family_detached
@@ -217,10 +235,10 @@ keys:
       R-2a.height:
         judge:
         - - R-2a.max_height_ft
+        - - R-2a.325_16c_height_exception_extra_height
         parts: []
-        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
-          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
-          passes it, and a person checks §325-16C'
+        reason: the chart's height row, and §325-16C's extra height drafted as one rule relaxing it (2026-10-25), judged on
+          its own so a condition it leaves out shows
       R-2a.lot_coverage:
         judge:
         - - R-2a.max_lot_coverage
@@ -231,19 +249,21 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-2a.side_yards:
         judge:
-        - - R-2a.side_one_min
-          - R-2a.side_other_min
+        - - R-2a.side_one_side_min
+          - R-2a.side_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-2a.rear_yard:
         judge:
-        - - R-2a.rear_yard_min
+        - - R-2a.rear_yard_min_fn16
         reason: 'the chart''s rear yard row: the same question'
       R-2a.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
-          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
-          every design with eaves to review; compared'
+        - - R-2a.325_18b_projection_front_yard
+          - R-2a.325_18b_projection_side_yard_larger
+          - R-2a.325_18b_projection_side_yard_smaller
+          - R-2a.325_18b_projection_rear_yard_fn16
+        reason: '§325-18B: eaves up to 2 ft into each required yard, drafted yard by yard on the eave measures (2026-10-25):
+          the same question, judged together'
       R-2a.accessory_buildings:
         judge:
         - - R-2a.325_25a_accessory_not_in_required_front_yard
@@ -267,8 +287,10 @@ keys:
         reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
           other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
       R-2a.loading:
-        judge: []
-        reason: 'not drafted: loading is not in stage 1'
+        judge:
+        - - general.loading_neighborhood_commercial
+          - general.loading_nonresidential_variance
+        reason: 'the chart''s loading rows (p.14), drafted in stage 2 as flags: the same question'
     unmatched:
       R-2a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
@@ -276,6 +298,9 @@ keys:
         key rule asks it'
       R-2a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-2a.325_11b_cluster_front_yard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+        PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+        facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
     known_false_passes: {}
   R-2b.yaml:
     district: R-2b
@@ -287,19 +312,23 @@ keys:
       R-2b.lot_area_one_family_detached:
         judge:
         - - R-2b.min_lot_size_detached
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2b.lot_area_one_family_semi_detached:
         judge:
         - - R-2b.min_lot_size_semi_detached
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2b.lot_area_two_family:
         judge:
         - - R-2b.min_lot_size_two_family
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2b.lot_area_other_use:
         judge:
         - - R-2b.min_lot_size_other_use
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2b.lot_width_one_family_detached:
         judge:
         - - R-2b.min_lot_width_one_family_detached
@@ -324,10 +353,10 @@ keys:
       R-2b.height:
         judge:
         - - R-2b.max_height_ft
+        - - R-2b.325_16c_height_exception_extra_height
         parts: []
-        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
-          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
-          passes it, and a person checks §325-16C'
+        reason: the chart's height row, and §325-16C's extra height drafted as one rule relaxing it (2026-10-25), judged on
+          its own so a condition it leaves out shows
       R-2b.lot_coverage:
         judge:
         - - R-2b.max_lot_coverage
@@ -338,19 +367,21 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-2b.side_yards:
         judge:
-        - - R-2b.side_one_min
-          - R-2b.side_other_min
+        - - R-2b.side_one_side_min
+          - R-2b.side_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-2b.rear_yard:
         judge:
-        - - R-2b.rear_yard_min
+        - - R-2b.rear_yard_min_fn16
         reason: 'the chart''s rear yard row: the same question'
       R-2b.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
-          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
-          every design with eaves to review; compared'
+        - - R-2b.325_18b_projection_front_yard
+          - R-2b.325_18b_projection_side_yard_larger
+          - R-2b.325_18b_projection_side_yard_smaller
+          - R-2b.325_18b_projection_rear_yard_fn16
+        reason: '§325-18B: eaves up to 2 ft into each required yard, drafted yard by yard on the eave measures (2026-10-25):
+          the same question, judged together'
       R-2b.accessory_buildings:
         judge:
         - - R-2b.325_25a_accessory_not_in_required_front_yard
@@ -374,8 +405,10 @@ keys:
         reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
           other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
       R-2b.loading:
-        judge: []
-        reason: 'not drafted: loading is not in stage 1'
+        judge:
+        - - general.loading_neighborhood_commercial
+          - general.loading_nonresidential_variance
+        reason: 'the chart''s loading rows (p.14), drafted in stage 2 as flags: the same question'
     unmatched:
       R-2b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
@@ -383,6 +416,9 @@ keys:
         key rule asks it'
       R-2b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-2b.325_11b_cluster_front_yard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+        PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+        facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
     known_false_passes: {}
   R-2c.yaml:
     district: R-2c
@@ -392,25 +428,31 @@ keys:
         - - R-2c.use
         reason: 'the chart''s permitted-use marks (p.2) for this district: the same question'
       R-2c.lot_area_one_family_detached:
-        judge: []
-        reason: 'not drafted: the lot area cell for this use didn''t fit a template (a footnote or several numbers in the
-          cell); it is listed as not checked'
+        judge:
+        - - R-2c.min_lot_size_detached_fn4
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2c.lot_area_zero_lot_line:
-        judge: []
-        reason: 'not drafted: the lot area cell for this use didn''t fit a template (a footnote or several numbers in the
-          cell); it is listed as not checked'
+        judge:
+        - - R-2c.min_lot_size_zero_lot_line_fn4
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2c.lot_area_one_family_semi_detached:
-        judge: []
-        reason: 'not drafted: the lot area cell for this use didn''t fit a template (a footnote or several numbers in the
-          cell); it is listed as not checked'
+        judge:
+        - - R-2c.min_lot_size_semi_detached_fn5
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2c.lot_area_two_family:
-        judge: []
-        reason: 'not drafted: the lot area cell for this use didn''t fit a template (a footnote or several numbers in the
-          cell); it is listed as not checked'
+        judge:
+        - - R-2c.min_lot_size_two_family_fn5
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2c.lot_area_one_family_attached:
-        judge: []
-        reason: 'not drafted: the lot area cell for this use didn''t fit a template (a footnote or several numbers in the
-          cell); it is listed as not checked'
+        judge:
+        - - R-2c.min_lot_size_attached_conv_fn6
+          - R-2c.min_lot_size_attached_new_fn6
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2c.attached_units_per_building:
         judge:
         - - general.325_3b_one_family_attached_dwelling_attached_units_per_building
@@ -420,7 +462,8 @@ keys:
       R-2c.lot_area_other_use:
         judge:
         - - R-2c.min_lot_size_other_use
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-2c.lot_width_one_family_detached:
         judge:
         - - R-2c.min_lot_width_one_family_detached
@@ -473,14 +516,14 @@ keys:
           listed as not checked'
       R-2c.rear_yard:
         judge:
-        - - R-2c.rear_yard_min
+        - - R-2c.rear_yard_min_fn16
         reason: 'the chart''s rear yard row: the same question'
       R-2c.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
-          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
-          every design with eaves to review; compared'
+        - - R-2c.325_18b_projection_front_yard
+          - R-2c.325_18b_projection_rear_yard_fn16
+        reason: '§325-18B: eaves up to 2 ft into each required yard, drafted yard by yard on the eave measures (2026-10-25):
+          the same question, judged together'
       R-2c.accessory_buildings:
         judge:
         - - R-2c.325_25a_accessory_not_in_required_front_yard
@@ -504,11 +547,16 @@ keys:
         reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
           other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
       R-2c.loading:
-        judge: []
-        reason: 'not drafted: loading is not in stage 1'
+        judge:
+        - - general.loading_neighborhood_commercial
+          - general.loading_nonresidential_variance
+        reason: 'the chart''s loading rows (p.14), drafted in stage 2 as flags: the same question'
     unmatched:
       R-2c.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2c.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-2c.325_11b_cluster_front_yard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+        PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+        facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
     known_false_passes: {}
   R-3a.yaml:
     district: R-3a
@@ -520,31 +568,40 @@ keys:
       R-3a.lot_area_one_family_detached:
         judge:
         - - R-3a.min_lot_size_detached
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-3a.lot_area_one_family_semi_detached:
         judge:
         - - R-3a.min_lot_size_semi_detached
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-3a.lot_area_two_family:
         judge:
         - - R-3a.min_lot_size_two_family
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-3a.lot_area_one_family_attached:
-        judge: []
-        reason: 'not drafted: the lot area cell for this use didn''t fit a template (a footnote or several numbers in the
-          cell); it is listed as not checked'
+        judge:
+        - - R-3a.min_lot_size_attached_conv_fn7
+          - R-3a.min_lot_size_attached_new_fn7
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-3a.lot_area_multiple_family:
-        judge: []
-        reason: 'not drafted: the lot area cell for this use didn''t fit a template (a footnote or several numbers in the
-          cell); it is listed as not checked'
+        judge:
+        - - R-3a.min_lot_size_multiple_conv_fn7
+          - R-3a.min_lot_size_multiple_new_fn7
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-3a.lot_area_fraternity:
         judge:
         - - R-3a.min_lot_size_group_house
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-3a.lot_area_other_use:
         judge:
         - - R-3a.min_lot_size_other_use
-        reason: 'the chart''s lot area row for this use: the same question'
+        reason: 'the chart''s lot area row for this use, in each form its cells take (a footnoted form drafted as a flag needs
+          review): the same question'
       R-3a.lot_size_zero_lot_line:
         judge: []
         reason: 'not drafted: no drafted rule sets a zero-lot-line lot size'
@@ -586,10 +643,10 @@ keys:
       R-3a.height:
         judge:
         - - R-3a.max_height_ft
+        - - R-3a.325_16c_height_exception_extra_height
         parts: []
-        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
-          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
-          passes it, and a person checks §325-16C'
+        reason: the chart's height row, and §325-16C's extra height drafted as one rule relaxing it (2026-10-25), judged on
+          its own so a condition it leaves out shows
       R-3a.lot_coverage:
         judge:
         - - R-3a.max_lot_coverage
@@ -600,19 +657,20 @@ keys:
         reason: 'the chart''s front yard row: the same question'
       R-3a.side_yards:
         judge:
-        - - R-3a.side_one_min
-          - R-3a.side_other_min
+        - - R-3a.side_one_side_min
+          - R-3a.side_other_side_min
         reason: 'the chart''s two side-yard rows, each a half of the question: judged together'
       R-3a.rear_yard:
         judge:
-        - - R-3a.rear_yard_min
+        - - R-3a.rear_yard_min_fn16
         reason: 'the chart''s rear yard row: the same question'
       R-3a.yard_projections:
         judge:
-        - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
-          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
-          every design with eaves to review; compared'
+        - - R-3a.325_18b_projection_front_yard
+          - R-3a.325_18b_projection_side_yard_larger
+          - R-3a.325_18b_projection_side_yard_smaller
+        reason: '§325-18B: eaves up to 2 ft into each required yard, drafted yard by yard on the eave measures (2026-10-25):
+          the same question, judged together'
       R-3a.accessory_buildings:
         judge:
         - - R-3a.325_25a_accessory_not_in_required_front_yard
@@ -649,8 +707,12 @@ keys:
         reason: 'the chart sends other uses to §325-20; the draft''s bedroom rule is limited to one-family houses, so for
           other uses it doesn''t apply: compared, so a ''doesn''t apply'' where the key asks for review counts'
       R-3a.loading:
-        judge: []
-        reason: 'not drafted: loading is not in stage 1'
+        judge:
+        - - general.loading_neighborhood_commercial
+          - general.loading_nonresidential_variance
+          - R-3a.loading_multiple_dwelling_25_units
+          - R-3a.loading_nursing_home_hospital
+        reason: 'the chart''s loading rows (p.14), drafted in stage 2 as flags: the same question'
     unmatched:
       R-3a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
@@ -658,8 +720,29 @@ keys:
         key rule asks it'
       R-3a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-3a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
+      R-3a.325_11b_cluster_front_yard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+        PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+        facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
     known_false_passes: {}
 general_unmatched:
+  general.325_12c_pud_rezoning_review_standard: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_12e_pud_site_plan_approval: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_12f_pud_council_criteria: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+    PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless facilities,
+    nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_15c_open_storage_refuse: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+    PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless facilities,
+    nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_15d_garage_sale_days_per_month: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_15d_garage_sale_open_storage: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
   general.325_16a_commercial_and_electric_towers_permit: '§325-16A height exceptions (rooftop features, towers): not in the
     keys'
   general.325_16a_rooftop_feature_area_limit: '§325-16A height exceptions (rooftop features, towers): not in the keys'
@@ -667,6 +750,12 @@ general_unmatched:
   general.325_16b_ornamental_parapet_cornice_extension: '§325-16B ornamental features: not in the keys'
   general.325_17a_reduced_lot_area_yards: '§325-17A reduced lot area: not in the keys'
   general.325_17b_corner_visibility_triangle: '§325-17B corner visibility triangle: not in the keys'
+  general.325_17c_obstruction_dangerous_to_traffic_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
+    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
+    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_17d_fence_wall_height_interference: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
   general.325_18a_porches_structures_counted_in_yards_coverage: '§325-18A porches and decks count as building (a measuring
     matter): not in the keys'
   general.325_20d_driveway_aisle_width: '§325-20D parking space and driveway sizes: not in the keys'
@@ -681,7 +770,46 @@ general_unmatched:
   general.325_20e_front_yard_parking_driveway_narrow_lot: '§325-20E front-yard parking: not in the keys'
   general.325_20e_front_yard_parking_orientation_15ft: '§325-20E front-yard parking: not in the keys'
   general.325_20e_parking_on_lot_without_building: '§325-20E front-yard parking: not in the keys'
+  general.325_22b_parking_one_space_per_sleeping_unit: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
+    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
+    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_22c_paving_hard_surface: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+    PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless facilities,
+    nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_22e_curb_cuts_major_arterial: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_22f_landscaping_rear_yard_planting: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_22f_landscaping_side_yard_larger_planting: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
+    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
+    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_22f_landscaping_side_yard_smaller_planting: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
+    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
+    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_22g_driveway_illumination_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_22g_lighting_no_glare_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_23a_performance_standards_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_24f_air_emissions_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+    PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless facilities,
+    nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_24g_fire_and_safety_building_code_national_fire_code: 'stage 2 (2026-10-25): a law piece no question these keys
+    ask (home occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks,
+    dumpsters, wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
   general.325_25b_below_grade_accessory_light_air: '§325-25B accessory structures below grade: not in the keys'
+  general.325_26_stream_inlet_setback_exempt_districts_review: 'stage 2 (2026-10-25): a law piece no question these keys ask
+    (home occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks,
+    dumpsters, wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_26_stream_inlet_setback_review: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
   general.325_28c_adu_attached_setback_flag: '§325-28C accessory dwelling units: not in the keys'
   general.325_28c_adu_attached_size: '§325-28C accessory dwelling units: not in the keys'
   general.325_28c_adu_existing_accessory_size_flag: '§325-28C accessory dwelling units: not in the keys'
@@ -695,6 +823,72 @@ general_unmatched:
   general.325_28c_adu_no_subdivision: '§325-28C accessory dwelling units: not in the keys'
   general.325_28c_adu_not_in_primary_front_yard: '§325-28C accessory dwelling units: not in the keys'
   general.325_28c_adu_not_sold_separately: '§325-28C accessory dwelling units: not in the keys'
+  general.325_29_18f_pwsf_engineer_review: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_18f_pwsf_nesc_compliance: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_20_pwsf_noise_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+    PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless facilities,
+    nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_23a_natural_vegetation_undisturbed: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_3d_dumpster_board_considerations: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_6d_collocation_applicant_unpermitted_pwsf: 'stage 2 (2026-10-25): a law piece no question these keys ask
+    (home occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks,
+    dumpsters, wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_6d_collocation_host_unpermitted_equipment: 'stage 2 (2026-10-25): a law piece no question these keys ask
+    (home occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks,
+    dumpsters, wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_8b_pwsf_concealment_alignment_frontage: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
+    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
+    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_8b_pwsf_roof_projection: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_8b_pwsf_side_mount_projection: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_8b_pwsf_spacing: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations, canopies,
+    PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless facilities,
+    nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_8b_pwsf_tree_antenna_height: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_9a_small_cell_distance_from_other_facilities: 'stage 2 (2026-10-25): a law piece no question these keys ask
+    (home occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks,
+    dumpsters, wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_9a_small_cell_distance_from_sensitive_uses: 'stage 2 (2026-10-25): a law piece no question these keys ask
+    (home occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks,
+    dumpsters, wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_9a_small_cell_fall_zone: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_29_landmark_changes_in_appearance: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_33b_nonconforming_use_structure_alterations: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
+    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
+    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_33c_no_reversion_to_nonconforming_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
+    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
+    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_33c_nonconforming_use_change_flag: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_33d_nonconforming_use_discontinuance: 'stage 2 (2026-10-25): a law piece no question these keys ask (home occupations,
+    canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters, wireless
+    facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_33e_nonconforming_use_reestablishment_review: 'stage 2 (2026-10-25): a law piece no question these keys ask
+    (home occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks,
+    dumpsters, wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
+  general.325_34a_nonconforming_alteration_conditions: 'stage 2 (2026-10-25): a law piece no question these keys ask (home
+    occupations, canopies, PUDs, garage sales, landscaping, lighting, performance standards, stream setbacks, landmarks, dumpsters,
+    wireless facilities, nonconforming uses, cluster subdivisions); reviewed one by one in the list of new rules'
   general.325_3b_accessory_dwelling_unit_adu_required_facilities: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
     row houses, terraces, stories): not in the keys'
   general.325_3b_accessory_dwelling_unit_adu_residential_building_code: '§325-3B definitions drafted as rules (ADUs, attached
@@ -705,13 +899,47 @@ general_unmatched:
     dwellings, row houses, terraces, stories): not in the keys'
   general.325_3b_dwelling_one_family_one_family_occupancy_unrelated_individuals: '§325-3B definitions drafted as rules (ADUs,
     attached dwellings, row houses, terraces, stories): not in the keys'
+  general.325_3b_green_space_green_space_maintained: '§325-3B definitions drafted as rules (ADUs, attached dwellings, row
+    houses, terraces, stories): not in the keys'
+  general.325_3b_green_space_green_space_softscape_share: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
+    row houses, terraces, stories): not in the keys'
+  general.325_3b_home_occupation_home_occupation_area_cap: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
+    row houses, terraces, stories): not in the keys'
+  general.325_3b_home_occupation_home_occupation_marked_vehicles: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
+    row houses, terraces, stories): not in the keys'
+  general.325_3b_home_occupation_home_occupation_no_exterior_storage: '§325-3B definitions drafted as rules (ADUs, attached
+    dwellings, row houses, terraces, stories): not in the keys'
+  general.325_3b_home_occupation_home_occupation_nonresident_persons: '§325-3B definitions drafted as rules (ADUs, attached
+    dwellings, row houses, terraces, stories): not in the keys'
+  general.325_3b_home_occupation_home_occupation_qualitative_conditions: '§325-3B definitions drafted as rules (ADUs, attached
+    dwellings, row houses, terraces, stories): not in the keys'
+  general.325_3b_neighborhood_commercial_facility_neighborhood_commercial_facility_limited_goods_services: '§325-3B definitions
+    drafted as rules (ADUs, attached dwellings, row houses, terraces, stories): not in the keys'
   general.325_3b_row_house_row_house_module_facade_length: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
     row houses, terraces, stories): not in the keys'
   general.325_3b_row_house_row_house_module_street_entry: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
     row houses, terraces, stories): not in the keys'
+  general.325_3b_standard_canopy_standard_canopy_clearance: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
+    row houses, terraces, stories): not in the keys'
+  general.325_3b_standard_canopy_standard_canopy_height: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
+    row houses, terraces, stories): not in the keys'
+  general.325_3b_standard_canopy_standard_canopy_not_retractable: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
+    row houses, terraces, stories): not in the keys'
+  general.325_3b_standard_canopy_standard_canopy_projection: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
+    row houses, terraces, stories): not in the keys'
+  general.325_3b_standard_canopy_standard_canopy_valance: '§325-3B definitions drafted as rules (ADUs, attached dwellings,
+    row houses, terraces, stories): not in the keys'
   general.325_3b_story_basement_counts_as_story: '§325-3B definitions drafted as rules (ADUs, attached dwellings, row houses,
     terraces, stories): not in the keys'
   general.325_3b_terrace_or_patio_terrace_patio_above_grade_no_required_yard: '§325-3B definitions drafted as rules (ADUs,
+    attached dwellings, row houses, terraces, stories): not in the keys'
+  general.325_3b_urban_beverage_producer_urban_beverage_producer_on_site_consumption: '§325-3B definitions drafted as rules
+    (ADUs, attached dwellings, row houses, terraces, stories): not in the keys'
+  general.325_3b_urban_beverage_producer_urban_beverage_producer_production_cap: '§325-3B definitions drafted as rules (ADUs,
+    attached dwellings, row houses, terraces, stories): not in the keys'
+  general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_filtration: '§325-3B definitions drafted as rules (ADUs,
+    attached dwellings, row houses, terraces, stories): not in the keys'
+  general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_height: '§325-3B definitions drafted as rules (ADUs,
     attached dwellings, row houses, terraces, stories): not in the keys'
   general.325_7b_yard_not_shared_between_buildings: '§325-7B a yard counted once: not in the keys'
   general.325_8e_south_hill_no_added_primary_on_built_parcel: '§325-8E South Hill Overlay: not in the keys'

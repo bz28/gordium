@@ -1,3 +1,40 @@
+additional_primary_buildings:
+  meaning: Additional permitted primary uses in separate buildings on the property, besides the initial one (§325-8B(1))
+  needed_by:
+  - R-1a.min_lot_size_detached
+  - R-1a.min_lot_size_other_use
+  - R-1b.min_lot_size_detached
+  - R-1b.min_lot_size_other_use
+  - R-2a.min_lot_size_detached
+  - R-2a.min_lot_size_other_use
+  - R-2a.min_lot_size_semi_detached
+  - R-2a.min_lot_size_two_family
+  - R-2b.min_lot_size_detached
+  - R-2b.min_lot_size_other_use
+  - R-2b.min_lot_size_semi_detached
+  - R-2b.min_lot_size_two_family
+  - R-2c.min_lot_size_other_use
+  - R-3a.min_lot_size_detached
+  - R-3a.min_lot_size_group_house
+  - R-3a.min_lot_size_other_use
+  - R-3a.min_lot_size_semi_detached
+  - R-3a.min_lot_size_two_family
+  - R-3aa.min_lot_size_detached
+  - R-3aa.min_lot_size_group_house
+  - R-3aa.min_lot_size_other_use
+  - R-3aa.min_lot_size_semi_detached
+  - R-3aa.min_lot_size_two_family
+  - R-3b.min_lot_size_detached
+  - R-3b.min_lot_size_group_house
+  - R-3b.min_lot_size_other_use
+  - R-3b.min_lot_size_semi_detached
+  - R-3b.min_lot_size_two_family
+  - RU.min_lot_size_detached
+  - RU.min_lot_size_group_house
+  - RU.min_lot_size_other_use
+  - RU.min_lot_size_semi_detached
+  - RU.min_lot_size_two_family
+  unit: count
 adu_attached:
   meaning: The ADU is an attached ADU
   needed_by:
@@ -94,11 +131,53 @@ alters_existing_primary_structure:
   - general.325_8e_south_hill_no_added_primary_on_built_parcel
   - general.325_8e_south_hill_one_primary_on_empty_parcel
   unit: yes_no
+annual_beer_barrels:
+  meaning: Barrels of beer produced annually at the location
+  needed_by:
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_production_cap
+  unit: count
+annual_other_beverage_gallons:
+  meaning: Gallons of wine, cider and other beverages produced annually at the location
+  needed_by:
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_production_cap
+  unit: count
 building_ground_floor_area:
   meaning: Total ground floor area of the building on which the feature is located
   needed_by:
   - general.325_16a_rooftop_feature_area_limit
   unit: sf
+canopy_clearance:
+  meaning: Unobstructed clearance between the sidewalk and the underside of the canopy's rigid frame
+  needed_by:
+  - general.325_3b_standard_canopy_standard_canopy_clearance
+  unit: ft
+canopy_height:
+  meaning: Height of the standard canopy from its lowest to its highest part
+  needed_by:
+  - general.325_3b_standard_canopy_standard_canopy_height
+  unit: ft
+canopy_projection:
+  meaning: Greatest distance the standard canopy projects from the face of the structure it is mounted on
+  needed_by:
+  - general.325_3b_standard_canopy_standard_canopy_projection
+  unit: ft
+canopy_retractable:
+  meaning: The canopy can be retracted
+  needed_by:
+  - general.325_3b_standard_canopy_standard_canopy_not_retractable
+  unit: yes_no
+cluster_subdivision:
+  meaning: The lot is part of a cluster subdivision approved under 325-11B
+  needed_by:
+  - R-1a.325_11b_cluster_front_yard
+  - R-1b.325_11b_cluster_front_yard
+  - R-2a.325_11b_cluster_front_yard
+  - R-2b.325_11b_cluster_front_yard
+  - R-2c.325_11b_cluster_front_yard
+  - R-3a.325_11b_cluster_front_yard
+  - R-3aa.325_11b_cluster_front_yard
+  - R-3b.325_11b_cluster_front_yard
+  unit: yes_no
 corner_lot:
   meaning: The lot is a corner lot, with yards facing two public streets
   needed_by:
@@ -131,6 +210,27 @@ corner_lot_with_multiple_front_yards:
   needed_by:
   - general.325_20e_corner_lot_front_yard_parking
   unit: yes_no
+curb_cuts_major_arterial:
+  meaning: Number of curb cuts the site has on a major arterial street or highway
+  needed_by:
+  - general.325_22e_curb_cuts_major_arterial
+  unit: count
+curb_cuts_major_arterial_unclear:
+  meaning: It is unclear whether the street or highway the site fronts is a major arterial street or highway, or
+    how its curb cuts are counted
+  needed_by:
+  - general.325_22e_curb_cuts_major_arterial
+  unit: yes_no
+distance_to_inlet_wall_or_stream_bank:
+  meaning: Least distance from the new structure to an inlet wall or to the bank of an inlet channel or stream
+  needed_by:
+  - general.325_26_stream_inlet_setback_review
+  unit: ft
+distance_to_inlet_wall_or_stream_bank_at_average_water_level:
+  meaning: The distance was measured at an average water level
+  needed_by:
+  - general.325_26_stream_inlet_setback_review
+  unit: yes_no
 driveway_aisle_two_way:
   meaning: The driveway aisle carries two-way traffic
   needed_by:
@@ -152,6 +252,11 @@ driveway_width:
   needed_by:
   - general.325_20d_driveway_min_width
   unit: ft
+dwelling_unit_area:
+  meaning: Floor area of the dwelling unit
+  needed_by:
+  - general.325_3b_home_occupation_home_occupation_area_cap
+  unit: sf
 dwelling_units_in_building:
   meaning: Number of one-family dwelling units attached to form a single building
   needed_by:
@@ -163,6 +268,16 @@ existing_primary_structures:
   - general.325_8e_south_hill_no_added_primary_on_built_parcel
   - general.325_8e_south_hill_one_primary_on_empty_parcel
   unit: count
+exterior_storage_of_materials:
+  meaning: Materials are stored outside any building for the home occupation
+  needed_by:
+  - general.325_3b_home_occupation_home_occupation_no_exterior_storage
+  unit: yes_no
+fire_ladder_truck_access:
+  meaning: The silo location has fire department ladder truck access
+  needed_by:
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_height
+  unit: yes_no
 front_yard_area:
   meaning: Total area of the front yard
   needed_by:
@@ -219,6 +334,32 @@ has_exempt_height_feature:
   needed_by:
   - general.325_16a_rooftop_feature_area_limit
   unit: yes_no
+has_silos:
+  meaning: The site has silos for storage of raw materials
+  needed_by:
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_filtration
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_height
+  unit: yes_no
+home_occupation:
+  meaning: The use is a home occupation as defined in §325-3B
+  needed_by:
+  - general.325_3b_home_occupation_home_occupation_area_cap
+  - general.325_3b_home_occupation_home_occupation_marked_vehicles
+  - general.325_3b_home_occupation_home_occupation_no_exterior_storage
+  - general.325_3b_home_occupation_home_occupation_nonresident_persons
+  - general.325_3b_home_occupation_home_occupation_qualitative_conditions
+  unit: yes_no
+home_occupation_area:
+  meaning: Indoor floor area occupied by the home occupation, including accessory structures
+  needed_by:
+  - general.325_3b_home_occupation_home_occupation_area_cap
+  unit: sf
+home_occupation_nonresident_persons:
+  meaning: Persons who are not residents of the household employed or participating in the home occupation at the
+    residence
+  needed_by:
+  - general.325_3b_home_occupation_home_occupation_nonresident_persons
+  unit: count
 in_south_hill_overlay:
   meaning: The lot is located within the South Hill Overlay District
   needed_by:
@@ -232,6 +373,11 @@ is_adu:
   - general.325_3b_accessory_dwelling_unit_adu_required_facilities
   - general.325_3b_accessory_dwelling_unit_adu_residential_building_code
   - general.325_3b_accessory_dwelling_unit_adu_separate_entrance
+  unit: yes_no
+is_nonconforming_use:
+  meaning: The use of the lot is a nonconforming use under the city's zoning law
+  needed_by:
+  - general.325_33d_nonconforming_use_discontinuance
   unit: yes_no
 lot_width_at_street_line:
   meaning: Width of the lot at the street line
@@ -249,49 +395,28 @@ lot_width_at_street_line:
   - general.325_20e_front_yard_parking_area_cap
   - general.325_20e_front_yard_parking_driveway_narrow_lot
   unit: ft
-multiple_primary_buildings:
-  meaning: The lot holds more than one primary use in separate buildings (§325-8B(1))
-  needed_by:
-  - R-1a.min_lot_size_detached
-  - R-1a.min_lot_size_other_use
-  - R-1b.min_lot_size_detached
-  - R-1b.min_lot_size_other_use
-  - R-2a.min_lot_size_detached
-  - R-2a.min_lot_size_other_use
-  - R-2a.min_lot_size_semi_detached
-  - R-2a.min_lot_size_two_family
-  - R-2b.min_lot_size_detached
-  - R-2b.min_lot_size_other_use
-  - R-2b.min_lot_size_semi_detached
-  - R-2b.min_lot_size_two_family
-  - R-2c.min_lot_size_other_use
-  - R-3a.min_lot_size_detached
-  - R-3a.min_lot_size_group_house
-  - R-3a.min_lot_size_other_use
-  - R-3a.min_lot_size_semi_detached
-  - R-3a.min_lot_size_two_family
-  - R-3aa.min_lot_size_detached
-  - R-3aa.min_lot_size_group_house
-  - R-3aa.min_lot_size_other_use
-  - R-3aa.min_lot_size_semi_detached
-  - R-3aa.min_lot_size_two_family
-  - R-3b.min_lot_size_detached
-  - R-3b.min_lot_size_group_house
-  - R-3b.min_lot_size_other_use
-  - R-3b.min_lot_size_semi_detached
-  - R-3b.min_lot_size_two_family
-  - RU.min_lot_size_detached
-  - RU.min_lot_size_group_house
-  - RU.min_lot_size_other_use
-  - RU.min_lot_size_semi_detached
-  - RU.min_lot_size_two_family
-  unit: yes_no
 new_primary_structures:
   meaning: Number of primary structures the design proposes to construct on the parcel
   needed_by:
   - general.325_8e_south_hill_no_added_primary_on_built_parcel
   - general.325_8e_south_hill_one_primary_on_empty_parcel
   unit: count
+new_structure_near_stream_or_inlet:
+  meaning: The lot has a new structure that could lie within reach of an inlet wall or the bank of an inlet channel
+    or stream
+  needed_by:
+  - general.325_26_stream_inlet_setback_review
+  unit: yes_no
+nonconforming_use_months_ceased:
+  meaning: Number of successive months the nonconforming use has ceased to operate
+  needed_by:
+  - general.325_33d_nonconforming_use_discontinuance
+  unit: count
+offers_on_site_consumption:
+  meaning: The establishment offers on-site consumption
+  needed_by:
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_on_site_consumption
+  unit: yes_no
 ornamental_extension_above_height_limit:
   meaning: Distance the ornamental parapet wall or cornice extends above the building height limit.
   needed_by:
@@ -302,6 +427,11 @@ ornamental_parapet_or_cornice:
   needed_by:
   - general.325_16b_ornamental_parapet_cornice_extension
   unit: yes_no
+outdoor_marked_vehicles:
+  meaning: Marked or signed vehicles used by or advertising the home occupation that are not stored in a building
+  needed_by:
+  - general.325_3b_home_occupation_home_occupation_marked_vehicles
+  unit: count
 parking_area_spaces:
   meaning: Number of parking spaces in the parking area
   needed_by:
@@ -321,6 +451,14 @@ pergola_in_required_yard:
   meaning: Any part of a pergola is located in a required front, side or rear yard
   needed_by:
   - general.325_3b_building_area_pergola_terrace_patio_not_in_required_yard
+  unit: yes_no
+planting_meets_description:
+  meaning: The planting in the rear and side yards is dense shrubbery or a combination of a decorative fence and
+    shrubbery, as §325-22F describes
+  needed_by:
+  - general.325_22f_landscaping_rear_yard_planting
+  - general.325_22f_landscaping_side_yard_larger_planting
+  - general.325_22f_landscaping_side_yard_smaller_planting
   unit: yes_no
 primary_building_count:
   meaning: Number of permitted primary uses, each in a separate building, on the property, counting the initial
@@ -346,6 +484,53 @@ primary_floor_area:
   needed_by:
   - general.325_28c_adu_attached_size
   unit: sf
+pwsf_antenna_height_above_tree_average:
+  meaning: How far the highest antenna extends above the average tree height within 300 horizontal feet measured
+    along the ground
+  needed_by:
+  - general.325_29_8b_pwsf_tree_antenna_height
+  unit: ft
+pwsf_distance_to_nearest_pwsf:
+  meaning: Linear distance between center points of the new PWSF and the nearest proposed or existing PWSF
+  needed_by:
+  - general.325_29_8b_pwsf_spacing
+  unit: ft
+pwsf_in_trees:
+  meaning: The personal wireless service facility is placed within trees
+  needed_by:
+  - general.325_29_8b_pwsf_tree_antenna_height
+  unit: yes_no
+pwsf_on_same_pole_as_another:
+  meaning: The new PWSF is placed on the same pole as another PWSF
+  needed_by:
+  - general.325_29_8b_pwsf_spacing
+  unit: yes_no
+pwsf_roof_mounted:
+  meaning: The personal wireless service facility is roof-mounted
+  needed_by:
+  - general.325_29_8b_pwsf_roof_projection
+  unit: yes_no
+pwsf_roof_projection_above_building_height:
+  meaning: How far the roof-mounted PWSF projects above the height of the building
+  needed_by:
+  - general.325_29_8b_pwsf_roof_projection
+  unit: ft
+pwsf_side_mount_projection_inches:
+  meaning: Inches the side-mounted PWSF projects from the face of the mounting structure
+  needed_by:
+  - general.325_29_8b_pwsf_side_mount_projection
+  unit: count
+pwsf_side_mounted:
+  meaning: The personal wireless service facility is side-mounted
+  needed_by:
+  - general.325_29_8b_pwsf_side_mount_projection
+  unit: yes_no
+rear_yard_planted_width:
+  meaning: Least width of the planted strip (dense shrubbery, or a decorative fence with shrubbery) along the rear
+    yard
+  needed_by:
+  - general.325_22f_landscaping_rear_yard_planting
+  unit: ft
 roof_plane_area:
   meaning: Area of the roof plane on which the feature is located
   needed_by:
@@ -378,6 +563,70 @@ row_house_modules:
   - general.325_3b_row_house_row_house_module_facade_length
   - general.325_3b_row_house_row_house_module_street_entry
   unit: count
+side_yard_larger_planted_width:
+  meaning: Least width of the planted strip (dense shrubbery, or a decorative fence with shrubbery) along the wider
+    side yard
+  needed_by:
+  - general.325_22f_landscaping_side_yard_larger_planting
+  unit: ft
+side_yard_smaller_planted_width:
+  meaning: Least width of the planted strip (dense shrubbery, or a decorative fence with shrubbery) along the narrower
+    side yard
+  needed_by:
+  - general.325_22f_landscaping_side_yard_smaller_planting
+  unit: ft
+silo_has_filtration:
+  meaning: Every silo has filtration to keep grain or dust from escaping when filled or emptied
+  needed_by:
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_filtration
+  unit: yes_no
+silo_height:
+  meaning: Height of the tallest silo including any supporting structures
+  needed_by:
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_height
+  unit: ft
+small_cell_distance_to_other_small_cell:
+  meaning: Least distance from the small cell wireless facility to any other small cell wireless facility proposed
+    or installed
+  needed_by:
+  - general.325_29_9a_small_cell_distance_from_other_facilities
+  unit: ft
+small_cell_distance_to_residence_school_daycare:
+  meaning: Least distance from the small cell wireless facility to any residence, school, or day-care facility
+  needed_by:
+  - general.325_29_9a_small_cell_distance_from_sensitive_uses
+  unit: ft
+small_cell_fall_zone:
+  meaning: Fall zone provided around the support structure of the small cell wireless facility, as a distance
+  needed_by:
+  - general.325_29_9a_small_cell_fall_zone
+  unit: ft
+small_cell_support_height:
+  meaning: Height of the support structure of the small cell wireless facility
+  needed_by:
+  - general.325_29_9a_small_cell_fall_zone
+  unit: ft
+small_cell_wireless_facility:
+  meaning: The proposal is a small cell wireless facility
+  needed_by:
+  - general.325_29_9a_small_cell_distance_from_other_facilities
+  - general.325_29_9a_small_cell_distance_from_sensitive_uses
+  - general.325_29_9a_small_cell_fall_zone
+  unit: yes_no
+standard_canopy_present:
+  meaning: The design has a standard canopy (§325-3B STANDARD CANOPY)
+  needed_by:
+  - general.325_3b_standard_canopy_standard_canopy_clearance
+  - general.325_3b_standard_canopy_standard_canopy_height
+  - general.325_3b_standard_canopy_standard_canopy_not_retractable
+  - general.325_3b_standard_canopy_standard_canopy_projection
+  - general.325_3b_standard_canopy_standard_canopy_valance
+  unit: yes_no
+structure_connected_with_marine_or_recreation_activity:
+  meaning: The structure is directly connected with marine or public or commercial recreation activities
+  needed_by:
+  - general.325_26_stream_inlet_setback_review
+  unit: yes_no
 terrace_or_patio_above_grade_in_required_yard:
   meaning: A terrace or patio that is above grade is located in a required front, side or rear yard
   needed_by:
@@ -392,4 +641,12 @@ terrace_patio_in_required_yard:
   meaning: Any part of a terrace or patio that is above grade lies within a required yard
   needed_by:
   - general.325_3b_terrace_or_patio_terrace_patio_above_grade_no_required_yard
+  unit: yes_no
+urban_beverage_producer:
+  meaning: The use is an urban beverage producer (§325-3B)
+  needed_by:
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_on_site_consumption
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_production_cap
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_filtration
+  - general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_height
   unit: yes_no

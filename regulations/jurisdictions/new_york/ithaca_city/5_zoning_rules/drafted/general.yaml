@@ -523,47 +523,6 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: general.325_18b_architectural_feature_projection_limit
-  kind: flag
-  topic: dimensions
-  title: 'Architectural features: projection into required yard (325-18B)'
-  sources:
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 49
-    lines:
-    - 13
-    - 16
-    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
-      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
-      not project more than two feet into any required yard.
-  open_questions:
-  - The text does not define which features are 'ordinary projections' or 'other architectural features'. Should
-    porches, decks, balconies and ramps be excluded here because 325-18A treats them as part of the building?
-  - Does the two-foot limit apply to every required yard (front, side and rear), measured from the building wall
-    or from the yard line?
-  - 'How are eaves counted: does the 2 ft limit apply to the eave projection alone, or to the eave''s distance into
-    the yard? The eaves-included yard measures may be relevant.'
-  research:
-  - question: The text does not define which features are 'ordinary projections' or 'other architectural features'.
-      Should porches, decks, balconies and ramps be excluded here because 325-18A treats them as part of the building?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: Does the two-foot limit apply to every required yard (front, side and rear), measured from the building
-      wall or from the yard line?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  - question: 'How are eaves counted: does the 2 ft limit apply to the eave projection alone, or to the eave''s
-      distance into the yard? The eaves-included yard measures may be relevant.'
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
-  notes: 'Demoted until re-drafted: §325-18B''s 2 ft limit drafted on a measure the AI proposed (how far a feature
-    projects) instead of each yard measured to the eaves; alone it passes eaves the answer keys fail (an eave 2.5
-    ft into the side yard): a person checks the eaves until §325-18B is re-drafted (2026-10-25).'
 - id: general.325_3b_dwelling_one_family_one_family_occupancy_unrelated_individuals
   kind: flag
   topic: density_and_occupancy
@@ -2176,6 +2135,2498 @@ rules:
   - Which yard is the secondary front yard, and which primary-structure setback applies?
   research:
   - question: Which yard is the secondary front yard, and which primary-structure setback applies?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.loading_nonresidential_variance
+  kind: flag
+  topic: parking_and_loading
+  title: 'Loading: nonresidential use allowed by variance (chart p.14)'
+  applies_when: use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+    "one_family_attached", "two_family", "multiple_family"]
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 14
+    lines:
+    - 25
+    - 25
+    quote: See §325-21.
+  examples: []
+  open_questions:
+  - Which uses count as 'nonresidential use' for this row (e.g. church, school, dormitory)?
+  research:
+  - question: Which uses count as 'nonresidential use' for this row (e.g. church, school, dormitory)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.loading_neighborhood_commercial
+  kind: flag
+  topic: parking_and_loading
+  title: 'Loading: neighborhood commercial facility (chart p.14)'
+  applies_when: use == "neighborhood_commercial_facility"
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 63
+    lines:
+    - 40
+    - 40
+    quote: § 325-21. Off-street loading.
+  examples: []
+  open_questions:
+  - The chart only says 'See §325-21'; confirm the §325-21B space requirement is applied to this use.
+  research:
+  - question: The chart only says 'See §325-21'; confirm the §325-21B space requirement is applied to this use.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_home_occupation_home_occupation_nonresident_persons
+  kind: rule
+  topic: density_and_occupancy
+  title: 'Home occupation: non-resident persons at most two (§325-3B)'
+  applies_when: home_occupation
+  check: home_occupation_nonresident_persons <= 2
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 13
+    lines:
+    - 8
+    - 9
+    quote: (b) Not more than two persons who are not residents of the household are employed or participate in the
+      occupation at the residence.
+  examples:
+  - given:
+      home_occupation: true
+      home_occupation_nonresident_persons: 2
+    expect: pass
+  - given:
+      home_occupation: true
+      home_occupation_nonresident_persons: 3
+    expect: fail
+  - given:
+      home_occupation: false
+      home_occupation_nonresident_persons: 3
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_home_occupation_home_occupation_area_cap
+  kind: rule
+  topic: density_and_occupancy
+  title: 'Home occupation: at most 25% of dwelling unit and 500 sf (§325-3B)'
+  applies_when: home_occupation
+  check: home_occupation_area <= 0.25 * dwelling_unit_area and home_occupation_area <= 500
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 13
+    lines:
+    - 18
+    - 19
+    quote: (f) The occupation occupies no more than 25% of the dwelling unit and no more than a total of 500 indoor
+      square feet, including accessory structures.
+  examples:
+  - given:
+      home_occupation: true
+      home_occupation_area: 200
+      dwelling_unit_area: 1000
+    expect: pass
+  - given:
+      home_occupation: true
+      home_occupation_area: 300
+      dwelling_unit_area: 1000
+    expect: fail
+  - given:
+      home_occupation: true
+      home_occupation_area: 600
+      dwelling_unit_area: 3000
+    expect: fail
+  - given:
+      home_occupation: false
+      home_occupation_area: 600
+      dwelling_unit_area: 1000
+    expect: not_applicable
+  open_questions:
+  - Is the 25% measured against the floor area of the dwelling unit only, or does it include accessory structures
+    in the base?
+  - Is the 500 square feet a total across the dwelling unit and accessory structures (the text says 'a total ...
+    including accessory structures')?
+  research:
+  - question: Is the 25% measured against the floor area of the dwelling unit only, or does it include accessory
+      structures in the base?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is the 500 square feet a total across the dwelling unit and accessory structures (the text says 'a
+      total ... including accessory structures')?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_home_occupation_home_occupation_no_exterior_storage
+  kind: rule
+  topic: site_features
+  title: 'Home occupation: no exterior storage of materials (§325-3B)'
+  applies_when: home_occupation
+  check: not exterior_storage_of_materials
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 13
+    lines:
+    - 20
+    - 25
+    quote: (g) There is no exterior storage of materials nor, in an R-1 Zone, more than a single marked or signed
+      vehicle used by or advertising the occupation that is not stored in a building and similarly no more than
+      two such vehicles in R-2 Zones and in R-3 and in all other zones no more than three such vehicles; and there
+      is no other exterior indication of the home occupation or variation from the residential character of the
+      lot or of the surrounding neighborhood.
+  examples:
+  - given:
+      home_occupation: true
+      exterior_storage_of_materials: false
+    expect: pass
+  - given:
+      home_occupation: true
+      exterior_storage_of_materials: true
+    expect: fail
+  open_questions:
+  - What counts as 'other exterior indication' or 'variation from the residential character'? Needs an architect's
+    judgment.
+  research:
+  - question: What counts as 'other exterior indication' or 'variation from the residential character'? Needs an
+      architect's judgment.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_home_occupation_home_occupation_marked_vehicles
+  kind: rule
+  topic: site_features
+  title: 'Home occupation: marked vehicles stored outdoors by zone (§325-3B)'
+  applies_when: home_occupation
+  check: (district in ["R-1a", "R-1b"] and outdoor_marked_vehicles < 2) or (district in ["R-2a", "R-2b", "R-2c"]
+    and outdoor_marked_vehicles <= 2) or (district not in ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c"] and outdoor_marked_vehicles
+    <= 3)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 13
+    lines:
+    - 20
+    - 25
+    quote: (g) There is no exterior storage of materials nor, in an R-1 Zone, more than a single marked or signed
+      vehicle used by or advertising the occupation that is not stored in a building and similarly no more than
+      two such vehicles in R-2 Zones and in R-3 and in all other zones no more than three such vehicles; and there
+      is no other exterior indication of the home occupation or variation from the residential character of the
+      lot or of the surrounding neighborhood.
+  examples:
+  - given:
+      home_occupation: true
+      district: R-1a
+      outdoor_marked_vehicles: 1
+    expect: pass
+  - given:
+      home_occupation: true
+      district: R-1b
+      outdoor_marked_vehicles: 2
+    expect: fail
+  - given:
+      home_occupation: true
+      district: R-2a
+      outdoor_marked_vehicles: 2
+    expect: pass
+  - given:
+      home_occupation: true
+      district: R-2b
+      outdoor_marked_vehicles: 3
+    expect: fail
+  - given:
+      home_occupation: true
+      district: R-3a
+      outdoor_marked_vehicles: 3
+    expect: pass
+  - given:
+      home_occupation: true
+      district: RU
+      outdoor_marked_vehicles: 4
+    expect: fail
+  open_questions:
+  - 'RU is not R-1, R-2 or R-3: it is read here as ''all other zones'' (three vehicles). Confirm.'
+  - The law counts 'marked or signed' vehicles used by or advertising the occupation and not stored in a building;
+    confirm how the architect counts them.
+  research:
+  - question: 'RU is not R-1, R-2 or R-3: it is read here as ''all other zones'' (three vehicles). Confirm.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The law counts 'marked or signed' vehicles used by or advertising the occupation and not stored in
+      a building; confirm how the architect counts them.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_home_occupation_home_occupation_qualitative_conditions
+  kind: flag
+  topic: uses
+  title: 'Home occupation: signs, nuisances, traffic, retail (§325-3B)'
+  applies_when: home_occupation
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 13
+    lines:
+    - 10
+    - 11
+    quote: (c) There are no exterior displays or signs, including those on vehicles parked outdoors, except as permitted
+      under Chapter 272, Signs, of this Code.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 13
+    lines:
+    - 12
+    - 12
+    quote: (d) No offensive odor, noise, vibration, smoke, dust, heat or glare is produced.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 13
+    lines:
+    - 33
+    - 34
+    quote: (3) The term "home occupation" shall not be construed to authorize retail uses in any residential zoning
+      district.
+  examples: []
+  open_questions:
+  - Conditions (a), (c), (d), (e) and (3) (activity wholly within buildings, no signs, no nuisances, traffic and
+    off-street parking per §325-20, no retail) need an architect's judgment and cannot be decided from measurements.
+  - Condition (e) depends on §325-20 and Chapter 272 (not drafted here).
+  research:
+  - question: Conditions (a), (c), (d), (e) and (3) (activity wholly within buildings, no signs, no nuisances, traffic
+      and off-street parking per §325-20, no retail) need an architect's judgment and cannot be decided from measurements.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Condition (e) depends on §325-20 and Chapter 272 (not drafted here).
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_15c_open_storage_refuse
+  kind: flag
+  topic: site_features
+  title: No open storage of refuse that is a menace or detrimental (325-15C)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 45
+    lines:
+    - 24
+    - 27
+    quote: C. Unsightly or unsanitary storage. No manure, rubbish, salvage materials or miscellaneous refuse may
+      be stored in the open within any district where the same may be construed by proper authority to be a menace
+      to the public health or safety or may be held to have a detrimental influence upon adjacent properties or
+      upon the neighborhood at large.
+  examples: []
+  open_questions:
+  - Who is the 'proper authority' that construes open storage to be a menace to public health or safety or a detrimental
+    influence?
+  - What standard decides that stored manure, rubbish, salvage materials or miscellaneous refuse has a 'detrimental
+    influence upon adjacent properties or upon the neighborhood at large'?
+  - Does 'stored in the open' include storage in a screened or fenced area, or in covered containers?
+  research:
+  - question: Who is the 'proper authority' that construes open storage to be a menace to public health or safety
+      or a detrimental influence?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What standard decides that stored manure, rubbish, salvage materials or miscellaneous refuse has a
+      'detrimental influence upon adjacent properties or upon the neighborhood at large'?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'stored in the open' include storage in a screened or fenced area, or in covered containers?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_15d_garage_sale_days_per_month
+  kind: flag
+  topic: site_features
+  title: Garage sale days per calendar month (325-15D)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 45
+    lines:
+    - 31
+    - 34
+    quote: Household, garage, porch or yard sales shall not be held on a property for more than seven days (including
+      weekends) in a calendar month, nor shall such sales be held on a property during the weekend for more than
+      two consecutive weekends or for more than two weekends in any month.
+  examples: []
+  open_questions:
+  - Garage sale frequency (days per calendar month, weekends held) is an operating schedule, not a measure of a
+    building design. Gordium has no measure for it, so it is flagged for the architect rather than checked by code.
+  - The text says no more than two consecutive weekends and no more than two weekends in any month. Do these two
+    limits differ in practice? Is a weekend counted when a sale is held on only Saturday or only Sunday (the law
+    defines weekend as Saturday and/or Sunday)?
+  - Does 'on a property' mean per lot, per dwelling unit, or per seller?
+  research:
+  - question: Garage sale frequency (days per calendar month, weekends held) is an operating schedule, not a measure
+      of a building design. Gordium has no measure for it, so it is flagged for the architect rather than checked
+      by code.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text says no more than two consecutive weekends and no more than two weekends in any month. Do
+      these two limits differ in practice? Is a weekend counted when a sale is held on only Saturday or only Sunday
+      (the law defines weekend as Saturday and/or Sunday)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'on a property' mean per lot, per dwelling unit, or per seller?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_15d_garage_sale_open_storage
+  kind: flag
+  topic: site_features
+  title: Items stored or displayed in the open (325-15D)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 45
+    lines:
+    - 28
+    - 31
+    quote: D. Garage sales. No household, garage, porch or yard items for sale may be stored in the open or continually
+      displayed within any district where the same may be construed by proper authority to be a menace to the public
+      health or safety or may be held to have a detrimental influence upon adjacent properties or upon the neighborhood
+      at large.
+  examples: []
+  open_questions:
+  - Whether open storage or continual display is a menace or a detrimental influence is for the 'proper authority'
+    to judge. What authority is meant, and what standard applies?
+  research:
+  - question: Whether open storage or continual display is a menace or a detrimental influence is for the 'proper
+      authority' to judge. What authority is meant, and what standard applies?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_17c_obstruction_dangerous_to_traffic_flag
+  kind: flag
+  topic: site_features
+  title: Obstructions dangerous to traffic (§325-17C)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 48
+    lines:
+    - 28
+    - 28
+    quote: C. Obstructions dangerous to traffic. In all districts, no fence, wall, grading, hedge, sign, assembly
+      or
+  examples: []
+  open_questions:
+  - Which fences, walls, grading, hedges, signs, assemblies or other structures or plantings 'will or may obscure
+    the view and therefore cause danger to traffic on a public street'? The law gives no sight-triangle or height
+    limit, so this needs an architect's judgment for each design.
+  - What does 'assembly' mean in the list 'fence, wall, grading, hedge, sign, assembly or other structure or planting'?
+  research:
+  - question: Which fences, walls, grading, hedges, signs, assemblies or other structures or plantings 'will or
+      may obscure the view and therefore cause danger to traffic on a public street'? The law gives no sight-triangle
+      or height limit, so this needs an architect's judgment for each design.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What does 'assembly' mean in the list 'fence, wall, grading, hedge, sign, assembly or other structure
+      or planting'?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_22c_paving_hard_surface
+  kind: flag
+  topic: parking_and_loading
+  title: Driveways and parking areas hard-surface paved and drained (325-22C)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines:
+    - 15
+    - 16
+    quote: Driveways and parking areas must be paved with hard-surface material and properly drained so as to control
+      surface runoff water.
+  examples: []
+  open_questions:
+  - The measures list has no paving material or drainage fact, so code cannot decide this requirement; it is drafted
+    as a flag for an architect's judgment.
+  - What counts as 'hard-surface material' (asphalt, concrete, brick, pavers, permeable pavers, gravel with binder)?
+    The text does not define it.
+  - What counts as 'properly drained so as to control surface runoff water'? The text sets no standard; §325-20G(2)
+    sets drainage standards only for parking areas on nonresidential lots, so it is unclear whether any of it applies
+    here.
+  - Does this section apply to every driveway and parking area in the residential districts, including those for
+    one- and two-family dwellings? Related sections 325-22D and 325-22G may set the surrounding driveway conditions.
+  research:
+  - question: The measures list has no paving material or drainage fact, so code cannot decide this requirement;
+      it is drafted as a flag for an architect's judgment.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What counts as 'hard-surface material' (asphalt, concrete, brick, pavers, permeable pavers, gravel
+      with binder)? The text does not define it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What counts as 'properly drained so as to control surface runoff water'? The text sets no standard;
+      §325-20G(2) sets drainage standards only for parking areas on nonresidential lots, so it is unclear whether
+      any of it applies here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does this section apply to every driveway and parking area in the residential districts, including
+      those for one- and two-family dwellings? Related sections 325-22D and 325-22G may set the surrounding driveway
+      conditions.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_green_space_green_space_softscape_share
+  kind: flag
+  topic: site_features
+  title: 'Green space: at least 75% softscape (§325-3B)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 12
+    lines:
+    - 4
+    - 6
+    quote: Where a minimum green space requirement applies, at least 75% of the required area shall be softscape
+      including trees, shrubs, natural plantings, garden areas, lawns, and other live vegetative coverings.
+  examples: []
+  open_questions:
+  - Gordium has no measure for the required green space area or its softscape share. Should the architect confirm
+    by hand that at least 75% of the required green space is softscape (trees, shrubs, natural plantings, garden
+    areas, lawns, other live vegetative coverings)?
+  - Chart footnote 13 sets a green space requirement only in RU (50% of developable lot area after setbacks). Does
+    any other residential district have a minimum green space requirement that triggers this 75% softscape rule?
+  - Does 'the required area' mean the whole required green space area, so that the remaining 25% (pedestrian amenities
+    such as sidewalks or patios) is counted within it?
+  research:
+  - question: Gordium has no measure for the required green space area or its softscape share. Should the architect
+      confirm by hand that at least 75% of the required green space is softscape (trees, shrubs, natural plantings,
+      garden areas, lawns, other live vegetative coverings)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Chart footnote 13 sets a green space requirement only in RU (50% of developable lot area after setbacks).
+      Does any other residential district have a minimum green space requirement that triggers this 75% softscape
+      rule?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'the required area' mean the whole required green space area, so that the remaining 25% (pedestrian
+      amenities such as sidewalks or patios) is counted within it?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_green_space_green_space_maintained
+  kind: flag
+  topic: site_features
+  title: 'Green space: permanently maintained healthy (§325-3B)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 12
+    lines:
+    - 7
+    - 8
+    quote: Required green space must be permanently maintained in a healthy growing condition at all times.
+  examples: []
+  open_questions:
+  - This is an ongoing maintenance obligation that a design cannot show. Should it be treated as an enforcement
+    matter rather than a design check?
+  research:
+  - question: This is an ongoing maintenance obligation that a design cannot show. Should it be treated as an enforcement
+      matter rather than a design check?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_neighborhood_commercial_facility_neighborhood_commercial_facility_limited_goods_services
+  kind: flag
+  topic: uses
+  title: Neighborhood commercial facility limited to goods and services
+  applies_when: use == "neighborhood_commercial_facility"
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 15
+    lines:
+    - 28
+    - 30
+    quote: Such facility shall be limited to the retail sale of convenience goods, such as groceries, pharmaceuticals
+      and sundries, and to personal service facilities, such as barber- and beauty shops, self-service laundromats
+      and dry-cleaning establishments.
+  examples: []
+  open_questions:
+  - The code does not define the full list of 'convenience goods' or 'personal service facilities' (the examples
+    are introduced by 'such as'). Which other goods or services qualify?
+  - Does 'catering to the day-to-day commercial needs of the surrounding neighborhood' set any limit on size or
+    customer area beyond the goods and services list?
+  research:
+  - question: The code does not define the full list of 'convenience goods' or 'personal service facilities' (the
+      examples are introduced by 'such as'). Which other goods or services qualify?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'catering to the day-to-day commercial needs of the surrounding neighborhood' set any limit on
+      size or customer area beyond the goods and services list?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_standard_canopy_standard_canopy_projection
+  kind: rule
+  topic: form_and_design_standards
+  title: Standard canopy projection, max four feet (§325-3B)
+  applies_when: standard_canopy_present
+  check: canopy_projection <= 4
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 18
+    lines:
+    - 43
+    - 44
+    quote: Such standard canopy may only project from the face of the structure upon which it is mounted four feet
+      from the face of the structure and be no taller than four feet.
+  examples:
+  - given:
+      standard_canopy_present: true
+      canopy_projection: 4
+    expect: pass
+  - given:
+      standard_canopy_present: true
+      canopy_projection: 5
+    expect: fail
+  open_questions:
+  - Is the projection measured horizontally from the face of the structure to the outermost part of the canopy,
+    valance included?
+  research:
+  - question: Is the projection measured horizontally from the face of the structure to the outermost part of the
+      canopy, valance included?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_standard_canopy_standard_canopy_height
+  kind: rule
+  topic: form_and_design_standards
+  title: Standard canopy height, max four feet (§325-3B)
+  applies_when: standard_canopy_present
+  check: canopy_height <= 4
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 18
+    lines:
+    - 43
+    - 44
+    quote: Such standard canopy may only project from the face of the structure upon which it is mounted four feet
+      from the face of the structure and be no taller than four feet.
+  examples:
+  - given:
+      standard_canopy_present: true
+      canopy_height: 4
+    expect: pass
+  - given:
+      standard_canopy_present: true
+      canopy_height: 4.5
+    expect: fail
+  open_questions:
+  - Is the canopy's height measured vertically over the rigid frame only, or including the valance?
+  research:
+  - question: Is the canopy's height measured vertically over the rigid frame only, or including the valance?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_standard_canopy_standard_canopy_clearance
+  kind: rule
+  topic: form_and_design_standards
+  title: Standard canopy clearance, min eight feet (§325-3B)
+  applies_when: standard_canopy_present
+  check: canopy_clearance >= 8
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 18
+    lines:
+    - 44
+    - 46
+    quote: The standard canopy must be mounted on the face of the structure to provide for an unobstructed clearance
+      below the rigid frame of the standard canopy of eight feet above the sidewalk below.
+  examples:
+  - given:
+      standard_canopy_present: true
+      canopy_clearance: 8
+    expect: pass
+  - given:
+      standard_canopy_present: true
+      canopy_clearance: 7
+    expect: fail
+  open_questions:
+  - What applies where there is no sidewalk below the canopy?
+  research:
+  - question: What applies where there is no sidewalk below the canopy?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_standard_canopy_standard_canopy_valance
+  kind: flag
+  topic: form_and_design_standards
+  title: Standard canopy nonrigid valance limit (§325-3B)
+  applies_when: standard_canopy_present
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 18
+    lines:
+    - 46
+    - 46
+    quote: A nonrigid valance may hang
+  examples: []
+  open_questions:
+  - The sentence 'A nonrigid valance may hang no greater than one foot below the rigid frame.' runs across a page
+    break, so it could not be quoted whole. Confirm the valance may hang no more than one foot below the rigid frame;
+    the architect checks the valance drop.
+  - Does the eight-foot clearance apply below the rigid frame only, so that a valance may hang into it?
+  research:
+  - question: The sentence 'A nonrigid valance may hang no greater than one foot below the rigid frame.' runs across
+      a page break, so it could not be quoted whole. Confirm the valance may hang no more than one foot below the
+      rigid frame; the architect checks the valance drop.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the eight-foot clearance apply below the rigid frame only, so that a valance may hang into it?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_standard_canopy_standard_canopy_not_retractable
+  kind: rule
+  topic: form_and_design_standards
+  title: Standard canopy must not be retractable (§325-3B)
+  applies_when: standard_canopy_present
+  check: not canopy_retractable
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 18
+    lines:
+    - 42
+    - 43
+    quote: A standard canopy is one that is constructed so that it cannot be retracted.
+  examples:
+  - given:
+      standard_canopy_present: true
+      canopy_retractable: false
+    expect: pass
+  - given:
+      standard_canopy_present: true
+      canopy_retractable: true
+    expect: fail
+  open_questions:
+  - Is a retractable awning a different thing from a standard canopy, rather than a violation of this definition?
+  research:
+  - question: Is a retractable awning a different thing from a standard canopy, rather than a violation of this
+      definition?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_urban_beverage_producer_urban_beverage_producer_production_cap
+  kind: rule
+  topic: uses
+  title: Urban beverage producer annual production cap
+  applies_when: urban_beverage_producer
+  check: annual_beer_barrels <= 5000 and annual_other_beverage_gallons <= 75000
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 19
+    lines:
+    - 44
+    - 46
+    quote: An urban beverage manufacturer may not produce more than 5,000 barrels (beer) or 75,000 gallons (wine,
+      cider, other beverages) of alcoholic beverages annually at any location.
+  examples:
+  - given:
+      urban_beverage_producer: true
+      annual_beer_barrels: 5000
+      annual_other_beverage_gallons: 75000
+    expect: pass
+  - given:
+      urban_beverage_producer: true
+      annual_beer_barrels: 5001
+      annual_other_beverage_gallons: 1000
+    expect: fail
+  - given:
+      urban_beverage_producer: true
+      annual_beer_barrels: 1000
+      annual_other_beverage_gallons: 75001
+    expect: fail
+  - given:
+      urban_beverage_producer: false
+    expect: not_applicable
+  open_questions:
+  - The text says 'urban beverage manufacturer' in the cap sentence and 'urban beverage producer' elsewhere; confirm
+    they mean the same. How is a mix of beer and other beverages counted against the two caps?
+  - Is an urban beverage producer allowed in any residential district? The use list has no such use; see the use
+    sections of the law.
+  research:
+  - question: The text says 'urban beverage manufacturer' in the cap sentence and 'urban beverage producer' elsewhere;
+      confirm they mean the same. How is a mix of beer and other beverages counted against the two caps?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is an urban beverage producer allowed in any residential district? The use list has no such use; see
+      the use sections of the law.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_height
+  kind: rule
+  topic: site_features
+  title: Urban beverage producer silo height by ladder truck access
+  applies_when: urban_beverage_producer and has_silos
+  check: silo_height <= (40 if fire_ladder_truck_access else 25)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 20
+    lines:
+    - 4
+    - 7
+    quote: Any silos for storage of raw materials may not exceed 25 feet in height (including any supporting structures)
+      in areas where there is no fire department ladder truck access, and may not exceed 40 feet in height (including
+      any supporting structures) in areas where there is fire department ladder truck access.
+  examples:
+  - given:
+      urban_beverage_producer: true
+      has_silos: true
+      fire_ladder_truck_access: true
+      silo_height: 40
+    expect: pass
+  - given:
+      urban_beverage_producer: true
+      has_silos: true
+      fire_ladder_truck_access: true
+      silo_height: 41
+    expect: fail
+  - given:
+      urban_beverage_producer: true
+      has_silos: true
+      fire_ladder_truck_access: false
+      silo_height: 25
+    expect: pass
+  - given:
+      urban_beverage_producer: true
+      has_silos: true
+      fire_ladder_truck_access: false
+      silo_height: 26
+    expect: fail
+  - given:
+      urban_beverage_producer: true
+      has_silos: false
+    expect: not_applicable
+  open_questions:
+  - What counts as 'fire department ladder truck access' and who determines it?
+  - Silo height includes supporting structures; confirm it is measured from grade.
+  research:
+  - question: What counts as 'fire department ladder truck access' and who determines it?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Silo height includes supporting structures; confirm it is measured from grade.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_urban_beverage_producer_urban_beverage_producer_silo_filtration
+  kind: rule
+  topic: site_features
+  title: Urban beverage producer silo filtration
+  applies_when: urban_beverage_producer and has_silos
+  check: silo_has_filtration
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 20
+    lines:
+    - 7
+    - 8
+    quote: In addition, silos must contain some sort of filtration to prevent grain or dust from escaping when the
+      silo is being filled or emptied.
+  examples:
+  - given:
+      urban_beverage_producer: true
+      has_silos: true
+      silo_has_filtration: true
+    expect: pass
+  - given:
+      urban_beverage_producer: true
+      has_silos: true
+      silo_has_filtration: false
+    expect: fail
+  - given:
+      urban_beverage_producer: true
+      has_silos: false
+    expect: not_applicable
+  open_questions:
+  - What kind of filtration is 'some sort of filtration' enough to prevent grain or dust escaping?
+  research:
+  - question: What kind of filtration is 'some sort of filtration' enough to prevent grain or dust escaping?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_3b_urban_beverage_producer_urban_beverage_producer_on_site_consumption
+  kind: rule
+  topic: uses
+  title: Urban beverage producer must offer on-site consumption
+  applies_when: urban_beverage_producer
+  check: offers_on_site_consumption
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 19
+    lines:
+    - 46
+    - 46
+    quote: An urban beverage producer must offer on-site consumption, but may also
+  examples:
+  - given:
+      urban_beverage_producer: true
+      offers_on_site_consumption: true
+    expect: pass
+  - given:
+      urban_beverage_producer: true
+      offers_on_site_consumption: false
+    expect: fail
+  - given:
+      urban_beverage_producer: false
+    expect: not_applicable
+  open_questions:
+  - The sentence runs across a page break, so only its first part is quoted; it continues 'produce beverages for
+    off-site sale.'
+  - The definition also requires a New York State license and beverages under 16% alcohol; these are not checked
+    from a design.
+  research:
+  - question: The sentence runs across a page break, so only its first part is quoted; it continues 'produce beverages
+      for off-site sale.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The definition also requires a New York State license and beverages under 16% alcohol; these are not
+      checked from a design.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_12c_pud_rezoning_review_standard
+  kind: flag
+  topic: procedures
+  title: 'PUD rezoning: no significant adverse effects on surroundings (§325-12C)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 41
+    lines:
+    - 34
+    - 36
+    quote: The creation of a PUD must entail sufficient review to assure the uses within the zone will have negligible
+      or no significant adverse effects upon properties surrounding the zone.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 41
+    lines:
+    - 36
+    - 38
+    quote: In reaching its decision on whether to rezone to a PUD, the Common Council shall consider the general
+      criteria set forth in this chapter, the most current Comprehensive Plan for the City, and this statement of
+      purpose.
+  examples: []
+  open_questions:
+  - What counts as 'negligible or no significant adverse effects' on surrounding properties, and who decides it?
+  - Which 'general criteria set forth in this chapter' must the Common Council consider, and how is the 'most current
+    Comprehensive Plan' identified?
+  - Does this rezoning review standard apply to a building design check at all, or only to the Council's rezoning
+    decision?
+  research:
+  - question: What counts as 'negligible or no significant adverse effects' on surrounding properties, and who decides
+      it?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Which 'general criteria set forth in this chapter' must the Common Council consider, and how is the
+      'most current Comprehensive Plan' identified?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does this rezoning review standard apply to a building design check at all, or only to the Council's
+      rezoning decision?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_12e_pud_site_plan_approval
+  kind: flag
+  topic: procedures
+  title: PUD structure or use needs approved site plan (§325-12E)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 42
+    lines:
+    - 9
+    - 12
+    quote: No structure shall be erected or placed within a PUD, no building permit shall be issued for a building
+      or structure within a PUD, and no existing building, structure, or use in a PUD shall be changed, unless the
+      proposed building and/or use is in accordance with a site plan approved pursuant to the provisions of Chapter
+      276 of the City of Ithaca Code.
+  examples: []
+  open_questions:
+  - Is the lot within a PUD (planned unit development)? Gordium has no measure for PUD membership or for site plan
+    approval status under Chapter 276, so an architect must confirm that the proposed building and/or use follows
+    an approved site plan.
+  research:
+  - question: Is the lot within a PUD (planned unit development)? Gordium has no measure for PUD membership or for
+      site plan approval status under Chapter 276, so an architect must confirm that the proposed building and/or
+      use follows an approved site plan.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_12f_pud_council_criteria
+  kind: flag
+  topic: procedures
+  title: 'PUD criteria: welfare, Comprehensive Plan, community benefit (325-12F)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 42
+    lines:
+    - 13
+    - 14
+    quote: 'The Common Council will consider an application for any PUD on the following criteria,
+
+      among others:'
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 42
+    lines:
+    - 15
+    - 15
+    quote: (1) Does the project further the health and welfare of the community?
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 42
+    lines:
+    - 16
+    - 16
+    quote: (2) Is the project in accordance with the City Comprehensive Plan?
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 42
+    lines:
+    - 17
+    - 17
+    quote: (3) Does the project create at least one long-term significant community benefit?
+  examples: []
+  open_questions:
+  - 'The criteria are listed ''among others'': what other criteria does the Common Council apply to a PUD application?'
+  - What counts as a 'long-term significant community benefit', and how is it shown?
+  - Which provisions of the City Comprehensive Plan must a PUD accord with?
+  research:
+  - question: 'The criteria are listed ''among others'': what other criteria does the Common Council apply to a
+      PUD application?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What counts as a 'long-term significant community benefit', and how is it shown?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Which provisions of the City Comprehensive Plan must a PUD accord with?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_17d_fence_wall_height_interference
+  kind: flag
+  topic: site_features
+  title: Fence or wall height must not interfere with light, air or view (325-17D)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines:
+    - 5
+    - 7
+    quote: No fence or wall other than a building may be built to a height that will interfere with the light, air
+      or view of any neighboring property, except as required for screening of parking and storage areas.
+  examples: []
+  open_questions:
+  - 'Whether a fence or wall ''will interfere with the light, air or view of any neighboring property'' is a judgment,
+    not a measurement: the text sets no maximum height in feet. Who decides, and by what test?'
+  - What counts as 'neighboring property' (adjoining lots only, or also lots across a street)?
+  - The exception 'as required for screening of parking and storage areas' refers to screening requirements elsewhere
+    in the law (e.g. parking section 325-20). Which screening requirements apply, and what height do they require?
+  - Gordium has no measure for fence or wall height, so this cannot be checked by code; it is a flag for the architect
+    or plan examiner.
+  research:
+  - question: 'Whether a fence or wall ''will interfere with the light, air or view of any neighboring property''
+      is a judgment, not a measurement: the text sets no maximum height in feet. Who decides, and by what test?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What counts as 'neighboring property' (adjoining lots only, or also lots across a street)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The exception 'as required for screening of parking and storage areas' refers to screening requirements
+      elsewhere in the law (e.g. parking section 325-20). Which screening requirements apply, and what height do
+      they require?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Gordium has no measure for fence or wall height, so this cannot be checked by code; it is a flag for
+      the architect or plan examiner.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_22b_parking_one_space_per_sleeping_unit
+  kind: flag
+  topic: parking_and_loading
+  title: 'Parking: one car space per sleeping unit (§325-22B)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines:
+    - 14
+    - 14
+    quote: One car space per sleeping unit shall be provided.
+  examples: []
+  open_questions:
+  - Which use or uses does §325-22 cover? The text of B alone does not name a use, so it is not clear which residential
+    uses must provide one space per sleeping unit.
+  - '"Sleeping unit" is not defined here. Is it the same as the chart''s "bed or sleeping room" (the sleeping_rooms
+    measure), or something else, such as a rented room?'
+  - Does this requirement replace the chart's page 14 residential parking rows, or apply in addition to them (the
+    chart asks for 1 space for the first three sleeping rooms, 2 for 4-5, and +1 per additional room)?
+  - Does one "car space" mean one off-street space, and may it be tandem or on a shared drive?
+  research:
+  - question: Which use or uses does §325-22 cover? The text of B alone does not name a use, so it is not clear
+      which residential uses must provide one space per sleeping unit.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: '"Sleeping unit" is not defined here. Is it the same as the chart''s "bed or sleeping room" (the sleeping_rooms
+      measure), or something else, such as a rented room?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does this requirement replace the chart's page 14 residential parking rows, or apply in addition to
+      them (the chart asks for 1 space for the first three sleeping rooms, 2 for 4-5, and +1 per additional room)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does one "car space" mean one off-street space, and may it be tandem or on a shared drive?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_22e_curb_cuts_major_arterial
+  kind: rule
+  topic: parking_and_loading
+  title: Curb cuts on major arterial street or highway (§325-22E)
+  check: curb_cuts_major_arterial <= 2
+  review_when:
+  - when: curb_cuts_major_arterial_unclear
+    reason: The law does not define 'major arterial street or highway' or say whether the limit is per lot or per
+      frontage; the site's street classification must be confirmed.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines:
+    - 20
+    - 20
+    quote: No more than two curb cuts on a major arterial street or highway shall be permitted.
+  examples:
+  - given:
+      curb_cuts_major_arterial: 2
+      curb_cuts_major_arterial_unclear: false
+    expect: pass
+  - given:
+      curb_cuts_major_arterial: 3
+      curb_cuts_major_arterial_unclear: false
+    expect: fail
+  - given:
+      curb_cuts_major_arterial: 1
+      curb_cuts_major_arterial_unclear: true
+    expect: needs_review
+  open_questions:
+  - What is a 'major arterial street or highway'? The law does not define it; which classification map applies?
+  - Is the limit of two curb cuts per lot, per street frontage, or per street or highway as a whole?
+  research:
+  - question: What is a 'major arterial street or highway'? The law does not define it; which classification map
+      applies?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is the limit of two curb cuts per lot, per street frontage, or per street or highway as a whole?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_22f_landscaping_rear_yard_planting
+  kind: rule
+  topic: site_features
+  title: Rear yard planted width, 2 ft min (§325-22F)
+  check: rear_yard_planted_width >= 2
+  review_when:
+  - when: not planting_meets_description
+    reason: The text requires dense shrubbery, or a combination of a decorative fence and shrubbery. Whether the
+      planting is dense, or the fence decorative, is a judgment the code can't make.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines:
+    - 21
+    - 22
+    quote: All rear and side yards must be planted to a minimum of two feet in width with dense shrubbery or a combination
+      of a decorative fence and shrubbery.
+  examples:
+  - given:
+      rear_yard_planted_width: 2
+      planting_meets_description: true
+    expect: pass
+  - given:
+      rear_yard_planted_width: 1
+      planting_meets_description: true
+    expect: fail
+  - given:
+      rear_yard_planted_width: 3
+      planting_meets_description: false
+    expect: needs_review
+  open_questions:
+  - What counts as 'dense' shrubbery, and what makes a fence 'decorative'? Neither is defined.
+  - In a combination of fence and shrubbery, does the fence's footprint count toward the two-foot planted width?
+  - Does this apply to a rear yard that exceeds the required depth, or only to the required rear yard? The text
+    says 'all rear and side yards'.
+  - Does it apply on corner lots, where the yard facing a street is treated as a front yard (§325-19C)?
+  research:
+  - question: What counts as 'dense' shrubbery, and what makes a fence 'decorative'? Neither is defined.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: In a combination of fence and shrubbery, does the fence's footprint count toward the two-foot planted
+      width?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does this apply to a rear yard that exceeds the required depth, or only to the required rear yard?
+      The text says 'all rear and side yards'.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does it apply on corner lots, where the yard facing a street is treated as a front yard (§325-19C)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_22f_landscaping_side_yard_smaller_planting
+  kind: rule
+  topic: site_features
+  title: Narrower side yard planted width, 2 ft min (§325-22F)
+  check: side_yard_smaller_planted_width >= 2
+  review_when:
+  - when: not planting_meets_description
+    reason: The text requires dense shrubbery, or a combination of a decorative fence and shrubbery. Whether the
+      planting is dense, or the fence decorative, is a judgment the code can't make.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines:
+    - 21
+    - 22
+    quote: All rear and side yards must be planted to a minimum of two feet in width with dense shrubbery or a combination
+      of a decorative fence and shrubbery.
+  examples:
+  - given:
+      side_yard_smaller_planted_width: 2
+      planting_meets_description: true
+    expect: pass
+  - given:
+      side_yard_smaller_planted_width: 1
+      planting_meets_description: true
+    expect: fail
+  - given:
+      side_yard_smaller_planted_width: 3
+      planting_meets_description: false
+    expect: needs_review
+  open_questions:
+  - What counts as 'dense' shrubbery, and what makes a fence 'decorative'? Neither is defined.
+  - In a combination of fence and shrubbery, does the fence's footprint count toward the two-foot planted width?
+  - If a side yard is zero width (a zero lot line or attached side), can it be planted at all? Does this rule apply
+    there?
+  research:
+  - question: What counts as 'dense' shrubbery, and what makes a fence 'decorative'? Neither is defined.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: In a combination of fence and shrubbery, does the fence's footprint count toward the two-foot planted
+      width?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: If a side yard is zero width (a zero lot line or attached side), can it be planted at all? Does this
+      rule apply there?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_22f_landscaping_side_yard_larger_planting
+  kind: rule
+  topic: site_features
+  title: Wider side yard planted width, 2 ft min (§325-22F)
+  check: side_yard_larger_planted_width >= 2
+  review_when:
+  - when: not planting_meets_description
+    reason: The text requires dense shrubbery, or a combination of a decorative fence and shrubbery. Whether the
+      planting is dense, or the fence decorative, is a judgment the code can't make.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines:
+    - 21
+    - 22
+    quote: All rear and side yards must be planted to a minimum of two feet in width with dense shrubbery or a combination
+      of a decorative fence and shrubbery.
+  examples:
+  - given:
+      side_yard_larger_planted_width: 2
+      planting_meets_description: true
+    expect: pass
+  - given:
+      side_yard_larger_planted_width: 1
+      planting_meets_description: true
+    expect: fail
+  - given:
+      side_yard_larger_planted_width: 3
+      planting_meets_description: false
+    expect: needs_review
+  open_questions:
+  - What counts as 'dense' shrubbery, and what makes a fence 'decorative'? Neither is defined.
+  - In a combination of fence and shrubbery, does the fence's footprint count toward the two-foot planted width?
+  - If a side yard is zero width (a zero lot line or attached side), can it be planted at all? Does this rule apply
+    there?
+  research:
+  - question: What counts as 'dense' shrubbery, and what makes a fence 'decorative'? Neither is defined.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: In a combination of fence and shrubbery, does the fence's footprint count toward the two-foot planted
+      width?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: If a side yard is zero width (a zero lot line or attached side), can it be planted at all? Does this
+      rule apply there?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_22g_driveway_illumination_flag
+  kind: flag
+  topic: site_features
+  title: Driveway lighting adequate for safe access and egress (325-22G)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines:
+    - 23
+    - 23
+    quote: Driveways must be adequately lighted so as to provide safe access and egress.
+  examples: []
+  open_questions:
+  - What lighting level or fixture layout counts as 'adequately lighted' for safe access and egress?
+  - Which driveways does this apply to (every driveway, or only driveways serving parking areas)? No measure for
+    driveway lighting exists in Gordium; an architect must judge it.
+  research:
+  - question: What lighting level or fixture layout counts as 'adequately lighted' for safe access and egress?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Which driveways does this apply to (every driveway, or only driveways serving parking areas)? No measure
+      for driveway lighting exists in Gordium; an architect must judge it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_22g_lighting_no_glare_flag
+  kind: flag
+  topic: site_features
+  title: Lighting placed to produce no glare (325-22G)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines:
+    - 23
+    - 24
+    quote: 'Lighting
+
+      shall be placed so as to produce no glare to passing motorists or adjacent property.'
+  examples: []
+  open_questions:
+  - What measurable standard defines 'no glare' to passing motorists or adjacent property (footcandles at the lot
+    line, shielding, cutoff)?
+  - Does 'Lighting' mean only driveway lighting or all site lighting on the lot?
+  research:
+  - question: What measurable standard defines 'no glare' to passing motorists or adjacent property (footcandles
+      at the lot line, shielding, cutoff)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'Lighting' mean only driveway lighting or all site lighting on the lot?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_23a_performance_standards_flag
+  kind: flag
+  topic: site_features
+  title: 'Performance standards: noise, glare, vibration (325-23A)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines:
+    - 30
+    - 30
+    quote: (1) Noise. Noise levels at any point along the lot line of any land use shall not exceed intensities
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 65
+    lines:
+    - 10
+    - 10
+    quote: (7) Vibration. No use shall be operated so that ground vibration is perceptible without instruments
+  examples: []
+  open_questions:
+  - 'Noise (1): What intensities does the American Standards Association consider acceptable, and which ASA standard
+    and measurement method applies? A design''s lot-line noise level cannot be checked from the given measures.'
+  - 'Glare and heat (5): how is ''detectable beyond the lot lines'' to be judged for a design? The glare and heat
+    requirement can only be judged by an architect.'
+  - 'Vibration (7): how is ''perceptible without instruments'' to be judged at the lot lines for a design?'
+  - Smoke (2), odor (3) and ash, dust and dirt (4) depend on 'any provisions of this Code' with no specific limit
+    given. Which provisions are meant?
+  - Pollution (6) concerns sewer connections and what wastes are conveyed. Is it checked in design review or at
+    plumbing permit?
+  - Section 325-23A says all uses must conform to the current New York State Board of Health requirements. Which
+    requirements apply to a design?
+  - Related sections 325-24C (noise) and 325-24D (vibration) set similar standards for other districts. Do they
+    affect how this text applies to residential districts?
+  research:
+  - question: 'Noise (1): What intensities does the American Standards Association consider acceptable, and which
+      ASA standard and measurement method applies? A design''s lot-line noise level cannot be checked from the given
+      measures.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'Glare and heat (5): how is ''detectable beyond the lot lines'' to be judged for a design? The glare
+      and heat requirement can only be judged by an architect.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'Vibration (7): how is ''perceptible without instruments'' to be judged at the lot lines for a design?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Smoke (2), odor (3) and ash, dust and dirt (4) depend on 'any provisions of this Code' with no specific
+      limit given. Which provisions are meant?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Pollution (6) concerns sewer connections and what wastes are conveyed. Is it checked in design review
+      or at plumbing permit?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Section 325-23A says all uses must conform to the current New York State Board of Health requirements.
+      Which requirements apply to a design?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Related sections 325-24C (noise) and 325-24D (vibration) set similar standards for other districts.
+      Do they affect how this text applies to residential districts?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_24f_air_emissions_flag
+  kind: flag
+  topic: site_features
+  title: Dust, dirt, odor, fumes emissions (325-24F)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 65
+    lines:
+    - 38
+    - 38
+    quote: No amount of dust, dirt, soot, cinders, odors or fumes shall be emitted in
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 66
+    lines:
+    - 5
+    - 5
+    quote: No objectionable, noxious, toxic or corrosive fumes or gases shall be emitted.
+  examples: []
+  open_questions:
+  - Which New York State Board of Health maximum standards for dust, other solid matter, odors or fumes apply, and
+    what measurements show compliance?
+  - Who decides when a fume or gas is 'objectionable', 'noxious', 'toxic' or 'corrosive'?
+  - 'How is ''in violation of this Code'' to be read in the first sentence: which other sections set emission limits?'
+  - Is an odor 'otherwise affects the breathing process' measurable, and at which point (lot line or elsewhere)
+    is it perceived?
+  research:
+  - question: Which New York State Board of Health maximum standards for dust, other solid matter, odors or fumes
+      apply, and what measurements show compliance?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Who decides when a fume or gas is 'objectionable', 'noxious', 'toxic' or 'corrosive'?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'How is ''in violation of this Code'' to be read in the first sentence: which other sections set emission
+      limits?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is an odor 'otherwise affects the breathing process' measurable, and at which point (lot line or elsewhere)
+      is it perceived?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_24g_fire_and_safety_building_code_national_fire_code
+  kind: flag
+  topic: site_features
+  title: 'Fire and safety: Building Code and National Fire Code (§325-24G)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 66
+    lines:
+    - 8
+    - 9
+    quote: All uses must conform to Building Code[fn19] standards and shall operate so as to minimize the danger
+      of fire or explosion by conforming to the requirements of the National Fire Code.
+  examples: []
+  open_questions:
+  - Which edition and which specific provisions of the Building Code and of the National Fire Code apply? The text
+    names no measurable limit, so Gordium's measures cannot decide conformity.
+  - Footnote 19 on 'Building Code' is not given here. What does it say, and does it change the standard that applies?
+  - What counts as 'minimize the danger of fire or explosion' for a residential use, and who certifies conformity
+    with the National Fire Code (fire marshal, code enforcement officer, or the architect)?
+  research:
+  - question: Which edition and which specific provisions of the Building Code and of the National Fire Code apply?
+      The text names no measurable limit, so Gordium's measures cannot decide conformity.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Footnote 19 on 'Building Code' is not given here. What does it say, and does it change the standard
+      that applies?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What counts as 'minimize the danger of fire or explosion' for a residential use, and who certifies
+      conformity with the National Fire Code (fire marshal, code enforcement officer, or the architect)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_26_stream_inlet_setback_review
+  kind: rule
+  topic: site_features
+  title: New structure setback from inlet wall or stream bank (§325-26)
+  applies_when: new_structure_near_stream_or_inlet
+  check: distance_to_inlet_wall_or_stream_bank >= 20
+  review_when:
+  - when: structure_connected_with_marine_or_recreation_activity
+    reason: The law excepts structures directly connected with marine or public or commercial recreation activities;
+      whether a structure qualifies needs an architect's judgment.
+  - when: not distance_to_inlet_wall_or_stream_bank_at_average_water_level
+    reason: The distance must be measured at an average water level; the design's measurement basis must be confirmed.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines:
+    - 15
+    - 17
+    quote: No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel
+      or stream, measured at an average water level, except for those structures directly connected with marine
+      or public or commercial recreation activities.
+  examples:
+  - given:
+      new_structure_near_stream_or_inlet: true
+      distance_to_inlet_wall_or_stream_bank: 25
+      structure_connected_with_marine_or_recreation_activity: false
+      distance_to_inlet_wall_or_stream_bank_at_average_water_level: true
+    expect: pass
+  - given:
+      new_structure_near_stream_or_inlet: true
+      distance_to_inlet_wall_or_stream_bank: 15
+      structure_connected_with_marine_or_recreation_activity: false
+      distance_to_inlet_wall_or_stream_bank_at_average_water_level: true
+    expect: fail
+  - given:
+      new_structure_near_stream_or_inlet: true
+      distance_to_inlet_wall_or_stream_bank: 15
+      structure_connected_with_marine_or_recreation_activity: true
+      distance_to_inlet_wall_or_stream_bank_at_average_water_level: true
+    expect: needs_review
+  open_questions:
+  - Which structures count as 'directly connected with marine or public or commercial recreation activities'?
+  - How is 'average water level' determined for a given inlet or stream?
+  - Does the 20 ft apply to a new structure only, or also to additions to existing structures?
+  research:
+  - question: Which structures count as 'directly connected with marine or public or commercial recreation activities'?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: How is 'average water level' determined for a given inlet or stream?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the 20 ft apply to a new structure only, or also to additions to existing structures?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_26_stream_inlet_setback_exempt_districts_review
+  kind: flag
+  topic: site_features
+  title: Stream/inlet setback exemption for named districts (§325-26)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines:
+    - 17
+    - 19
+    quote: Properties located within the Cherry Street District, the Market District, the Newman District, and the
+      West End/Waterfront District are exempt from this requirement.
+  examples: []
+  open_questions:
+  - The Cherry Street, Market, Newman and West End/Waterfront Districts are not in the residential district list;
+    confirm whether any residential-zoned lot lies within them and is exempt.
+  research:
+  - question: The Cherry Street, Market, Newman and West End/Waterfront Districts are not in the residential district
+      list; confirm whether any residential-zoned lot lies within them and is exempt.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_landmark_changes_in_appearance
+  kind: flag
+  topic: overlays
+  title: 'Landmarks: changes in appearance governed by Ch. 228 (§325-29)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 73
+    lines:
+    - 4
+    - 5
+    quote: Officially designated landmarks or landmark districts of the City shall be governed by the provisions
+      of Chapter 228, Landmarks Preservation, of this Code with respect to changes in appearance.
+  examples: []
+  open_questions:
+  - Is the lot, or a structure on it, an officially designated landmark or in a landmark district? Gordium has no
+    measure for this, so an architect must confirm it and apply Chapter 228 to any change in appearance.
+  - Chapter 228 is not part of the documents given, so its requirements are not drafted here.
+  research:
+  - question: Is the lot, or a structure on it, an officially designated landmark or in a landmark district? Gordium
+      has no measure for this, so an architect must confirm it and apply Chapter 228 to any change in appearance.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Chapter 228 is not part of the documents given, so its requirements are not drafted here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_3d_dumpster_board_considerations
+  kind: flag
+  topic: site_features
+  title: 'Dumpster: Board of Zoning Appeals discretionary factors (325-29.3D)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 79
+    lines:
+    - 37
+    - 39
+    quote: 'D. In making any determination with respect to any proposed dumpster, the Board of Zoning Appeals shall
+      be guided by the general purpose of this section, as stated in § 325-29.3A, and shall also consider the following:'
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 79
+    lines:
+    - 40
+    - 41
+    quote: '(1) Need for the dumpster: the number of tenants to be serviced by the dumpster and the availability
+      of alternative methods of solid waste storage and disposal.'
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 79
+    lines:
+    - 42
+    - 43
+    quote: '(2) Proximity to neighbors: the proximity of the proposed dumpster to neighboring properties and residences.'
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 79
+    lines:
+    - 44
+    - 44
+    quote: '(3) Other dumpsters: other dumpsters in the vicinity of the proposed dumpster.'
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 80
+    lines:
+    - 3
+    - 6
+    quote: '(4) The character of the neighborhood: The proposed use shall not be detrimental to the general amenity
+      or neighborhood character so as to cause a devaluation of neighboring property values or material inconvenience
+      to neighboring inhabitants or material interference with the use and enjoyment by the inhabitants of the neighboring
+      property.'
+  examples: []
+  open_questions:
+  - Items (1) to (4) are discretionary factors for the Board of Zoning Appeals (need, proximity to neighbors, other
+    dumpsters nearby, neighborhood character), with no measurable limit. Should a proposed dumpster always be sent
+    to the Board, and how is 'detrimental' judged?
+  research:
+  - question: Items (1) to (4) are discretionary factors for the Board of Zoning Appeals (need, proximity to neighbors,
+      other dumpsters nearby, neighborhood character), with no measurable limit. Should a proposed dumpster always
+      be sent to the Board, and how is 'detrimental' judged?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_6d_collocation_host_unpermitted_equipment
+  kind: flag
+  topic: uses
+  title: Collocation on host site with unpermitted equipment (§325-29.6D(1))
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 88
+    lines:
+    - 30
+    - 30
+    quote: (1) No permit shall be issued under this article for a request to collocate, attach or share an existing
+  examples: []
+  open_questions:
+  - Who confirms that the existing PWSF site, mount or facility has all building, electrical and other City permits,
+    and what evidence is required?
+  - Does the prohibition reach permits required by the City for structures that are not PWSF-related, as the words
+    'any other permits required by the City of Ithaca' suggest?
+  research:
+  - question: Who confirms that the existing PWSF site, mount or facility has all building, electrical and other
+      City permits, and what evidence is required?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the prohibition reach permits required by the City for structures that are not PWSF-related,
+      as the words 'any other permits required by the City of Ithaca' suggest?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_6d_collocation_applicant_unpermitted_pwsf
+  kind: flag
+  topic: uses
+  title: Application by carrier/owner with unpermitted PWSF (§325-29.6D(2))
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 88
+    lines:
+    - 34
+    - 34
+    quote: (2) Any application by a wireless carrier or other entity shall not be approved by the City of Ithaca
+  examples: []
+  open_questions:
+  - How is it established whether the applicant carrier has a preexisting PWSF, or the entity owns a mount, rooftop
+    or tower, with any unpermitted PWSF, and who verifies it?
+  - Does the bar apply to applications for any site in the City, or only for sites where the unpermitted PWSF is
+    located?
+  research:
+  - question: How is it established whether the applicant carrier has a preexisting PWSF, or the entity owns a mount,
+      rooftop or tower, with any unpermitted PWSF, and who verifies it?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the bar apply to applications for any site in the City, or only for sites where the unpermitted
+      PWSF is located?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_8b_pwsf_tree_antenna_height
+  kind: rule
+  topic: site_features
+  title: PWSF antenna height above average tree height (§325-29.8B(1)(b))
+  applies_when: pwsf_in_trees
+  check: pwsf_antenna_height_above_tree_average <= 10
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 92
+    lines:
+    - 5
+    - 7
+    quote: Placement within trees shall be encouraged, but no antennas shall extend higher than 10 feet above the
+      average tree height (within 300 horizontal feet when measured along the ground).
+  examples:
+  - given:
+      pwsf_in_trees: true
+      pwsf_antenna_height_above_tree_average: 10
+    expect: pass
+  - given:
+      pwsf_in_trees: true
+      pwsf_antenna_height_above_tree_average: 11
+    expect: fail
+  - given:
+      pwsf_in_trees: false
+    expect: not_applicable
+  open_questions:
+  - 'How is the ''average tree height (within 300 horizontal feet when measured along the ground)'' measured: from
+    which point, and which trees count?'
+  - Does this limit apply to PWSFs placed on trees only, or to any PWSF near trees?
+  research:
+  - question: 'How is the ''average tree height (within 300 horizontal feet when measured along the ground)'' measured:
+      from which point, and which trees count?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does this limit apply to PWSFs placed on trees only, or to any PWSF near trees?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_8b_pwsf_roof_projection
+  kind: rule
+  topic: site_features
+  title: Roof-mounted PWSF projection above building height (§325-29.8B(1)(d))
+  applies_when: pwsf_roof_mounted
+  check: pwsf_roof_projection_above_building_height <= 10
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 92
+    lines:
+    - 11
+    - 12
+    quote: Roof-mounted PWSFs shall not project more than 10 additional feet above the height of a building.
+  examples:
+  - given:
+      pwsf_roof_mounted: true
+      pwsf_roof_projection_above_building_height: 10
+    expect: pass
+  - given:
+      pwsf_roof_mounted: true
+      pwsf_roof_projection_above_building_height: 11
+    expect: fail
+  - given:
+      pwsf_roof_mounted: false
+    expect: not_applicable
+  open_questions:
+  - '''The height of a building'' is measured how, given the city''s HEIGHT OF BUILDING definition (average height
+    of a pitched roof)? Is the projection measured from the building height as defined or from the roof surface?'
+  - The next sentence says PWSFs projecting above the height limit 'may be appropriately screened'. Does this relax
+    the 10-foot limit or only require screening?
+  research:
+  - question: '''The height of a building'' is measured how, given the city''s HEIGHT OF BUILDING definition (average
+      height of a pitched roof)? Is the projection measured from the building height as defined or from the roof
+      surface?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The next sentence says PWSFs projecting above the height limit 'may be appropriately screened'. Does
+      this relax the 10-foot limit or only require screening?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_8b_pwsf_side_mount_projection
+  kind: rule
+  topic: site_features
+  title: Side-mounted PWSF projection from mounting face (§325-29.8B(1)(e))
+  applies_when: pwsf_side_mounted
+  check: pwsf_side_mount_projection_inches <= 20
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 92
+    lines:
+    - 14
+    - 15
+    quote: Side-mounted PWSFs shall not project more than 20 inches from the face of the mounting structure.
+  examples:
+  - given:
+      pwsf_side_mounted: true
+      pwsf_side_mount_projection_inches: 20
+    expect: pass
+  - given:
+      pwsf_side_mounted: true
+      pwsf_side_mount_projection_inches: 21
+    expect: fail
+  - given:
+      pwsf_side_mounted: false
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_8b_pwsf_spacing
+  kind: rule
+  topic: site_features
+  title: Minimum spacing between PWSFs (§325-29.8B(1)(h))
+  applies_when: not pwsf_on_same_pole_as_another
+  check: pwsf_distance_to_nearest_pwsf >= 1500
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 92
+    lines:
+    - 26
+    - 28
+    quote: No new PWSF shall be placed closer than 1,500 feet from the nearest PWSF (whether proposed or existing
+      unless the PWSF is placed on the same pole as another PWSF), regardless of carrier.
+  examples:
+  - given:
+      pwsf_on_same_pole_as_another: false
+      pwsf_distance_to_nearest_pwsf: 1500
+    expect: pass
+  - given:
+      pwsf_on_same_pole_as_another: false
+      pwsf_distance_to_nearest_pwsf: 1499
+    expect: fail
+  - given:
+      pwsf_on_same_pole_as_another: true
+    expect: not_applicable
+  open_questions:
+  - Distance is measured linearly between the two facilities' center points; the text says 'should', so confirm
+    it is mandatory.
+  research:
+  - question: Distance is measured linearly between the two facilities' center points; the text says 'should', so
+      confirm it is mandatory.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_8b_pwsf_concealment_alignment_frontage
+  kind: flag
+  topic: site_features
+  title: PWSF concealment, placement, alignment, frontage (judgment)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 92
+    lines:
+    - 3
+    - 4
+    quote: To the greatest extent possible, PWSFs shall be concealed within existing structures or where the PWSF
+      will be camouflaged, or on inconspicuous mounts.
+  examples: []
+  open_questions:
+  - 'Concealment ''to the greatest extent possible'', favoring roofs over ground-mounted PWSFs (c), alignment (f)
+    and frontage (g: at or near extension of property lines, not in front of a building entrance) need an architect''s
+    judgment.'
+  - Subsection (2) says these standards apply regardless of RF engineering considerations.
+  research:
+  - question: 'Concealment ''to the greatest extent possible'', favoring roofs over ground-mounted PWSFs (c), alignment
+      (f) and frontage (g: at or near extension of property lines, not in front of a building entrance) need an
+      architect''s judgment.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Subsection (2) says these standards apply regardless of RF engineering considerations.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_9a_small_cell_fall_zone
+  kind: rule
+  topic: site_features
+  title: Small cell support structure fall zone (§325-29.9A)
+  applies_when: small_cell_wireless_facility
+  check: small_cell_fall_zone >= 1.1 * small_cell_support_height
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 93
+    lines:
+    - 34
+    - 37
+    quote: The support structure of a proposed small cell wireless facility shall have a fall zone of no less than
+      110% of the height of the support structure to minimize the possibility of damage or injury resulting from
+      facility or pole collapse or failure, ice fall or debris fall, and to avoid or minimize all other impacts
+      upon adjoining properties.
+  examples:
+  - given:
+      small_cell_wireless_facility: true
+      small_cell_support_height: 100
+      small_cell_fall_zone: 120
+    expect: pass
+  - given:
+      small_cell_wireless_facility: true
+      small_cell_support_height: 100
+      small_cell_fall_zone: 100
+    expect: fail
+  - given:
+      small_cell_wireless_facility: false
+    expect: not_applicable
+  open_questions:
+  - How is the fall zone measured (radius from the base of the support structure, or another shape)? Does the support
+    structure's height include the antennas and other equipment on top?
+  - The sentence also requires the design to 'avoid or minimize all other impacts upon adjoining properties'; this
+    is a judgment and is not checked by the formula.
+  research:
+  - question: How is the fall zone measured (radius from the base of the support structure, or another shape)? Does
+      the support structure's height include the antennas and other equipment on top?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The sentence also requires the design to 'avoid or minimize all other impacts upon adjoining properties';
+      this is a judgment and is not checked by the formula.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_9a_small_cell_distance_from_sensitive_uses
+  kind: rule
+  topic: site_features
+  title: Small cell distance from residence, school, day-care (§325-29.9A)
+  applies_when: small_cell_wireless_facility
+  check: small_cell_distance_to_residence_school_daycare >= 250
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 93
+    lines:
+    - 37
+    - 39
+    quote: Any small cell wireless facility shall be 250 feet or more from any residence, school, or day-care facility,
+      and 1,500 feet or more from any other small cell wireless facility proposed or installed.
+  examples:
+  - given:
+      small_cell_wireless_facility: true
+      small_cell_distance_to_residence_school_daycare: 300
+    expect: pass
+  - given:
+      small_cell_wireless_facility: true
+      small_cell_distance_to_residence_school_daycare: 200
+    expect: fail
+  - given:
+      small_cell_wireless_facility: false
+    expect: not_applicable
+  open_questions:
+  - From what point on the facility, and to what point on the residence, school or day-care facility, is the 250
+    feet measured (lot line or building)?
+  - Does 'residence' include a residence on the same lot, or in a different zoning district?
+  research:
+  - question: From what point on the facility, and to what point on the residence, school or day-care facility,
+      is the 250 feet measured (lot line or building)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does 'residence' include a residence on the same lot, or in a different zoning district?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_9a_small_cell_distance_from_other_facilities
+  kind: rule
+  topic: site_features
+  title: Small cell distance from other small cell facilities (§325-29.9A)
+  applies_when: small_cell_wireless_facility
+  check: small_cell_distance_to_other_small_cell >= 1500
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 93
+    lines:
+    - 37
+    - 39
+    quote: Any small cell wireless facility shall be 250 feet or more from any residence, school, or day-care facility,
+      and 1,500 feet or more from any other small cell wireless facility proposed or installed.
+  examples:
+  - given:
+      small_cell_wireless_facility: true
+      small_cell_distance_to_other_small_cell: 2000
+    expect: pass
+  - given:
+      small_cell_wireless_facility: true
+      small_cell_distance_to_other_small_cell: 1000
+    expect: fail
+  - given:
+      small_cell_wireless_facility: false
+    expect: not_applicable
+  open_questions:
+  - Which other small cell facilities count as 'proposed' (applications pending, approved, or only those on file)?
+    If there is none, enter a very large distance.
+  - From what points is the 1,500 feet measured, and does it include facilities in other districts or outside the
+    City?
+  research:
+  - question: Which other small cell facilities count as 'proposed' (applications pending, approved, or only those
+      on file)? If there is none, enter a very large distance.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: From what points is the 1,500 feet measured, and does it include facilities in other districts or
+      outside the City?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_18f_pwsf_engineer_review
+  kind: flag
+  topic: site_features
+  title: PWSF attachment engineer review and stamped calcs (§325-29.18F(1))
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 108
+    lines:
+    - 11
+    - 12
+    quote: Be reviewed and approved by a licensed professional structural engineer in the State of New York, which
+      shall include review of any structures and foundations.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 108
+    lines:
+    - 12
+    - 14
+    quote: All pertinent calculations shall be stamped by a professional engineer and submitted to the City as part
+      of the permit application and review process.
+  examples: []
+  open_questions:
+  - Is a PWSF or small wireless facility attachment a use or structure that can occur in the residential districts,
+    and is a stamped engineer review a design-submission item to be verified by the examiner?
+  research:
+  - question: Is a PWSF or small wireless facility attachment a use or structure that can occur in the residential
+      districts, and is a stamped engineer review a design-submission item to be verified by the examiner?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_18f_pwsf_nesc_compliance
+  kind: flag
+  topic: site_features
+  title: PWSF installations meet NESC standards (§325-29.18F(2))
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 108
+    lines:
+    - 15
+    - 16
+    quote: All installations shall meet or exceed all applicable structural standards, clearance standards, and
+      provisions of the latest National Electrical Safety Code (NESC).
+  examples: []
+  open_questions:
+  - Which edition is the 'latest' NESC, and which provisions are 'applicable' to a given installation? An architect
+    or engineer must confirm compliance.
+  research:
+  - question: Which edition is the 'latest' NESC, and which provisions are 'applicable' to a given installation?
+      An architect or engineer must confirm compliance.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_20_pwsf_noise_flag
+  kind: flag
+  topic: site_features
+  title: PWSF equipment noise within City Noise Ordinance standards (§325-29.20)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 109
+    lines:
+    - 12
+    - 13
+    quote: No equipment shall be operated at a PWSF so as to produce noise in excess of the applicable noise standards
+      under the City of Ithaca Noise Ordinance.[fn27]
+  examples: []
+  open_questions:
+  - The noise limits are in the City of Ithaca Noise Ordinance, which is not given here. Which standards apply to
+    equipment at a PWSF, and where are they measured? Gordium has no measure for noise levels, so an architect must
+    check this.
+  research:
+  - question: The noise limits are in the City of Ithaca Noise Ordinance, which is not given here. Which standards
+      apply to equipment at a PWSF, and where are they measured? Gordium has no measure for noise levels, so an
+      architect must check this.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_29_23a_natural_vegetation_undisturbed
+  kind: flag
+  topic: site_features
+  title: Natural vegetation undisturbed to greatest extent practicable (§325-29.23A)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 110
+    lines:
+    - 4
+    - 4
+    quote: Existing natural vegetation shall be undisturbed to the greatest extent practicable.
+  examples: []
+  open_questions:
+  - What counts as 'natural vegetation' (for example, does it include trees, shrubs, ground cover, or lawn)?
+  - What makes disturbance 'practicable', and who decides when the greatest extent practicable has been reached?
+  - Does this apply to every lot in the residential districts, or only to certain development or site-plan applications?
+  research:
+  - question: What counts as 'natural vegetation' (for example, does it include trees, shrubs, ground cover, or
+      lawn)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What makes disturbance 'practicable', and who decides when the greatest extent practicable has been
+      reached?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does this apply to every lot in the residential districts, or only to certain development or site-plan
+      applications?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_33b_nonconforming_use_structure_alterations
+  kind: flag
+  topic: nonconforming
+  title: Alterations to structure with nonconforming use (§325-33B)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 112
+    lines:
+    - 24
+    - 25
+    quote: 'B. The structure containing the nonconforming use may be altered only if the alterations constitute
+
+      ordinary repairs or maintenance or are designed to eliminate a nonconformity.'
+  examples: []
+  open_questions:
+  - Which alterations count as "ordinary repairs or maintenance"? The law does not define the term.
+  - 'What does "designed to eliminate a nonconformity" require: must the alterations eliminate every nonconformity
+    of the structure, or only the one being altered, and does the design intent suffice or must the result be shown?'
+  - Does "nonconformity" here cover only the nonconforming use, or also nonconforming dimensions of the structure?
+  research:
+  - question: Which alterations count as "ordinary repairs or maintenance"? The law does not define the term.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'What does "designed to eliminate a nonconformity" require: must the alterations eliminate every nonconformity
+      of the structure, or only the one being altered, and does the design intent suffice or must the result be
+      shown?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does "nonconformity" here cover only the nonconforming use, or also nonconforming dimensions of the
+      structure?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_33c_nonconforming_use_change_flag
+  kind: flag
+  topic: nonconforming
+  title: Change of nonconforming use only to permitted use (325-33C)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 112
+    lines:
+    - 26
+    - 26
+    quote: A nonconforming use may only be changed to a use permitted in the district in which it is located.
+  examples: []
+  open_questions:
+  - Gordium has no measure for whether a lot's existing use is nonconforming, nor a list of permitted uses per district
+    (the use chart is drafted elsewhere). Should this be decided by code once the use chart is encoded, or stay
+    a flag for an architect's judgment?
+  - Does a change from one nonconforming use to another nonconforming use ever qualify, or is any proposed use not
+    permitted in the district a failure? The text says 'may only be changed to a use permitted'.
+  research:
+  - question: Gordium has no measure for whether a lot's existing use is nonconforming, nor a list of permitted
+      uses per district (the use chart is drafted elsewhere). Should this be decided by code once the use chart
+      is encoded, or stay a flag for an architect's judgment?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does a change from one nonconforming use to another nonconforming use ever qualify, or is any proposed
+      use not permitted in the district a failure? The text says 'may only be changed to a use permitted'.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_33c_no_reversion_to_nonconforming_flag
+  kind: flag
+  topic: nonconforming
+  title: No reversion to nonconforming use (325-33C)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 112
+    lines:
+    - 27
+    - 28
+    quote: 'Once changed to a conforming use, no building or lot shall be permitted to revert to a nonconforming
+
+      use.'
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 112
+    lines:
+    - 29
+    - 30
+    quote: '(1) A change of use is deemed to occur when an existing nonconforming use has been terminated
+
+      and another use has commenced.'
+  examples: []
+  open_questions:
+  - Code cannot know a building's or lot's prior use history, so reversion cannot be checked from the listed measures.
+    Should a measure for the previous use be added, or should this remain an architect's judgment flag?
+  - Is the 'termination' of a nonconforming use in (1) a matter of fact (use has ceased) with no time period stated?
+    The text gives no duration.
+  research:
+  - question: Code cannot know a building's or lot's prior use history, so reversion cannot be checked from the
+      listed measures. Should a measure for the previous use be added, or should this remain an architect's judgment
+      flag?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Is the 'termination' of a nonconforming use in (1) a matter of fact (use has ceased) with no time
+      period stated? The text gives no duration.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_33d_nonconforming_use_discontinuance
+  kind: rule
+  topic: nonconforming
+  title: Nonconforming use ceased 12 successive months (325-33D)
+  applies_when: is_nonconforming_use
+  check: nonconforming_use_months_ceased < 12
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 112
+    lines:
+    - 31
+    - 32
+    quote: Should the nonconforming use cease to operate for a period of 12 successive months or more, the right
+      to operate the nonconforming use shall be terminated.
+  examples:
+  - given:
+      is_nonconforming_use: true
+      nonconforming_use_months_ceased: 11
+    expect: pass
+  - given:
+      is_nonconforming_use: true
+      nonconforming_use_months_ceased: 12
+    expect: fail
+  - given:
+      is_nonconforming_use: false
+      nonconforming_use_months_ceased: 0
+    expect: not_applicable
+  open_questions:
+  - What counts as 'cease to operate' (e.g., seasonal operation, partial operation, vacancy with ongoing marketing)?
+  - Does a period of 12 successive months need to be continuous with no interruption by any occupancy, however brief,
+    and how is it measured (calendar months or 365 days)?
+  research:
+  - question: What counts as 'cease to operate' (e.g., seasonal operation, partial operation, vacancy with ongoing
+      marketing)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does a period of 12 successive months need to be continuous with no interruption by any occupancy,
+      however brief, and how is it measured (calendar months or 365 days)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_33e_nonconforming_use_reestablishment_review
+  kind: flag
+  topic: nonconforming
+  title: Reestablishing nonconforming use after damage (§325-33E)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 112
+    lines:
+    - 33
+    - 35
+    quote: When a structure containing a nonconforming use is damaged or destroyed by fire or other cause of damage
+      that is not within the control of the owner, the nonconforming use may be reestablished provided that no new
+      nonconformities are created and the previous nonconformity is not exacerbated.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 112
+    lines:
+    - 36
+    - 37
+    quote: A building permit for repairs or reconstruction must be granted within one year of the date of damage
+      or destruction.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 112
+    lines:
+    - 37
+    - 38
+    quote: In the event that a building permit is not obtained within one year of said date, the nonconforming use
+      may not be reestablished.
+  examples: []
+  open_questions:
+  - Which causes of damage are 'not within the control of the owner'?
+  - What counts as a 'new nonconformity' and as 'exacerbated' for the previous nonconformity (for example, any increase
+    in a yard shortfall, height, coverage or use intensity)?
+  - Must the permit be granted (issued) within one year, or only applied for within one year? The first sentence
+    says 'granted', the second says 'obtained'.
+  - Gordium has no measures for the date of damage or the permit date, so the one-year limit cannot be checked by
+    code; confirm that an architect should judge it.
+  research:
+  - question: Which causes of damage are 'not within the control of the owner'?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: What counts as a 'new nonconformity' and as 'exacerbated' for the previous nonconformity (for example,
+      any increase in a yard shortfall, height, coverage or use intensity)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Must the permit be granted (issued) within one year, or only applied for within one year? The first
+      sentence says 'granted', the second says 'obtained'.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Gordium has no measures for the date of damage or the permit date, so the one-year limit cannot be
+      checked by code; confirm that an architect should judge it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.325_34a_nonconforming_alteration_conditions
+  kind: flag
+  topic: nonconforming
+  title: Alteration of nonconforming building or structure (§325-34A)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 112
+    lines:
+    - 40
+    - 40
+    quote: 'A. A nonconforming building or structure may be altered in the following circumstances:'
+  examples: []
+  open_questions:
+  - Whether an alteration meets one of the four circumstances (required by law or ordered safety restoration, routine
+    repair or maintenance or elimination of a nonconformity, conformity without exacerbating the deficiency or creating
+    a new nonconformity, or a zoning permit or area variance granted) depends on the nature of the work, an order,
+    or a permit, none of which are design measures. What counts as exacerbating an existing deficiency or creating
+    a new nonconformity is not defined. An architect must judge each alteration.
+  research:
+  - question: Whether an alteration meets one of the four circumstances (required by law or ordered safety restoration,
+      routine repair or maintenance or elimination of a nonconformity, conformity without exacerbating the deficiency
+      or creating a new nonconformity, or a zoning permit or area variance granted) depends on the nature of the
+      work, an order, or a permit, none of which are design measures. What counts as exacerbating an existing deficiency
+      or creating a new nonconformity is not defined. An architect must judge each alteration.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
