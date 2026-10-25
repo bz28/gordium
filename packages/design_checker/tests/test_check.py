@@ -138,7 +138,8 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
     assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail"
-    assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a"]   # every hand-drafted rulebook
+    assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
+                                             "RU"]   # every hand-drafted rulebook
 
 
 def test_the_quickstart_names_every_district_the_start_box_offers(facts):

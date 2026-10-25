@@ -1,0 +1,1917 @@
+# R-3aa (City of Ithaca): rules drafted by Claude by hand, by reading the zoning charts (April 2026) and Chapter 325,
+# the same way R-1b.yaml, R-1a.yaml, R-2a.yaml to R-2c.yaml and R-3a.yaml were. An ANSWER KEY for grading the
+# drafting script: written without looking at anything the script drafted or recorded, from the City's documents
+# only (2_extracted_text/, the chart read cell by cell, the section labels, the definitions), with R-3a.yaml as the
+# model of the format.
+#
+# Why R-3aa: the multi-family district that looks like R-3a and isn't. Its lot sizes are R-3a's, but every lot width
+# is 50 ft, dormitories are not allowed, the height is R-1's (35 ft) with a MINIMUM as well as a maximum number of
+# stories ("3/2", note 11: at most 3, at least 2), the rear yard is 25% of the lot depth, a new building's footprint
+# is capped by its neighbours' (note 2), and §325-19E names R-3a and R-3b but not R-3aa. A drafter that copies the
+# R-3A column, or reads "3/2" as one number, fails here.
+#
+# Every chart number was read two ways and agrees: the chart's text line (quoted), and the chart reader's R-3AA cell
+# (cited); R-3AA is the seventh value in each row (the second of the four in the fraternity rows).
+# test_r1b_matches_chart.py checks the rules against the R-3AA cells, both numbers of "3/2" included.
+#
+# Where R-3aa differs from R-3a (chart p.2, p.3, column R-3AA): dormitories "-" (not permitted); lot width 50 ft for
+# every use (R-3a: 40 ft for detached, semi-detached and two-family houses, 100 ft for a fraternity house); 3
+# stories at most and 2 at least (§325-8A(15)'s 500 sf footprint exemption is an open question), 35 ft (bonus to
+# 38.5 ft); rear yard 25% of the lot depth (50 ft cap, 20 ft floor); note 2's footprint cap. The same as R-3a: lot
+# sizes (5,000 sf; note 7 for attached and multiple dwellings; 25,000 sf fraternity; 6,000 sf other), coverage 35%,
+# front 10 ft, sides 10 ft and 5 ft, accessory buildings 3 ft from side and rear lot lines, parking and loading.
+#
+# Draft (approval deferred, decided 2026-10-19). Not covered yet, as in R-3a (later rules or flags): ornamental
+# parapets and cornices above the height limit (§325-16B), accessory uses and structures (p.2), accessory dwelling
+# units (§325-28), occupancy limits (p.2 note 4, §325-3B DWELLING, ONE-FAMILY), height exceptions for chimneys and
+# similar (§325-16A, applied when measuring height), more than one main building on a lot (§325-8B(1)). R-3aa is
+# not one of the districts §325-11B(1) allows cluster subdivisions in. Parking is written as in R-3a and stays "not
+# checked yet: interior". Parts of R-3aa were rezoned to the Southside form districts by Ord. No. 2025-12
+# (sources.yaml); a lot's district is looked up, not assumed.
+#
+# Not checked yet, each a flag that always needs review, with the section to check by hand: note 2's footprint cap
+# (R-3aa.footprint_block_front: Gordium doesn't measure the neighbouring buildings' footprints), §325-19E where the
+# lot may abut R-1 land (R-3aa.abutting_r1), parking for several units, dormitories and other uses, loading.
+#
+# Known gap (as in R-3a, not fixable in this file): on a corner lot one side yard is left, and the City checks it
+# against Column 13 (5 ft in R-3aa; the corner_lot_side_yard_column_13 finding). The measurements give that one yard
+# as both side measures, and the rule language has no corner-lot measure, so R-3aa.side_yards asks 10 ft of it: a
+# stricter answer than the City's practice (a false fail, never a false pass) until a corner_lot measure exists.
+
+district: R-3aa
+rules:
+
+  - id: R-3aa.use
+    kind: rule
+    topic: uses
+    title: "Permitted primary uses (chart p.2)"
+    check: >-
+      use in ["one_family_detached", "one_family_semi_detached", "one_family_attached", "two_family",
+      "multiple_family", "fraternity_sorority_group_house", "church", "public_park_or_playground",
+      "library_or_fire_station", "nursery_school_or_child_day_care", "adult_day_care_home", "nursing_home"]
+    review_when:
+      - when: >-
+          use in ["one_family_detached_zero_lot_line", "cemetery", "public_utility_structure", "school",
+          "neighborhood_commercial_facility", "hospital_or_sanitarium", "bed_and_breakfast_inn"]
+        reason: >-
+          Marked SP for R-3AA on the zoning chart (p.2). §325-9B(1) lists cemeteries and public utility facilities in
+          all districts, schools in all residential districts, neighborhood commercial facilities and hospitals in R-3,
+          and bed-and-breakfast inns in all districts as requiring a special permit from the Planning and Development
+          Board (the zero-lot-line house: the chart's SP, see the finding).
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [7, 7]
+        quote: "R-1A R-1B R-2A R-2B R-2C R-3A R-3AA R-3B"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [15, 16]
+        quote: "(2) Column 2: Permitted Primary Uses. Uses which are permitted in each use district are listed, subject to the further regulations in this section and of Article V."
+      # marked • for R-3AA
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "One-family dwelling, detached [fn4]", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "One-family dwelling, semi-detached [fn4]", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "One-family dwelling, attached [fn4]", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Two-family dwelling [fn4]", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Multiple family dwelling [fn4]", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Fraternity, sorority, or group house", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Church or related building", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Public park or playground", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Library or fire station", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Nursery school, child day care center", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Adult day care home", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Nursing, convalescent or rest home", column: R-3AA}
+      # marked SP for R-3AA
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "One-family dwelling, detached, zero lot line [fn4]", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Cemetery or related building", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Public utility structure except office", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "School and related buildings", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Neighborhood commercial facility", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Hospital or sanitarium", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Bed-and-breakfast inn", column: R-3AA}
+      # marked - for R-3AA (not permitted): the one use R-3A and R-3B allow and R-3AA doesn't
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Dormitory", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        lines: [16, 16]
+        quote: "Dormitory - - - - - • - • •[fn5]"
+      # the special permits
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [22, 23]
+        quote: "(1) The uses listed under the district regulations in § 325-8, District regulations, which require a special permit from the Planning and Development Board, are as follows:"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [25, 25]
+        quote: "(b) Cemeteries in all districts."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [26, 26]
+        quote: "(c) Public utility facilities in all districts."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [27, 27]
+        quote: "(d) Schools and related uses in all residential districts."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [29, 30]
+        quote: "(f) Neighborhood retail or service commercial facilities in R-2, R-3, CR-2, CR-3, and CR-4 Districts."
+        not_limits: {2: "district names (R-2, CR-2), not numbers", 3: "district names (R-3, CR-3), not numbers", 4: "a district name (CR-4), not a number"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [31, 31]
+        quote: "(g) Hospitals or sanatoriums in R-3, CR-3, and CR-4 Districts."
+        not_limits: {3: "district names (R-3, CR-3), not numbers", 4: "a district name (CR-4), not a number"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 31
+        lines: [36, 36]
+        quote: "(p) Bed-and-breakfast inns in all districts."
+    examples:
+      - given: {use: one_family_detached}
+        expect: pass
+      - given: {use: multiple_family}
+        expect: pass
+      - given: {use: fraternity_sorority_group_house}
+        expect: pass
+      - given: {use: nursing_home}
+        expect: pass
+        note: marked • for R-3AA (- in R-1, R-2 and RU)
+      - given: {use: dormitory}
+        expect: fail
+        note: marked - for R-3AA (• in R-3A, R-3B and RU)
+      - given: {use: school}
+        expect: needs_review
+      - given: {use: hospital_or_sanitarium}
+        expect: needs_review
+      - given: {use: neighborhood_commercial_facility}
+        expect: needs_review
+      - given: {use: one_family_detached_zero_lot_line}
+        expect: needs_review
+      - given: {use: bed_and_breakfast_inn}
+        expect: needs_review
+    findings:
+    - id: chart_marks
+      question: The chart has no legend for its marks. We read • as permitted and - as not permitted; SP matches §325-9B(1)'s
+        list of uses needing a special permit from the Planning and Development Board. Confirm.
+      kind: reading
+      answer: • = permitted (the uses Column 2 lists, §325-8A(2)); - = not permitted (left out, §325-8B(3)); SP = needs
+        a special permit (the uses §325-9B(1) lists). The chart has no legend; this reads the code's own text.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [15, 15]
+        quote: Uses which are permitted in each use district are listed
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [20, 20]
+        quote: except where otherwise indicated by specific prohibition or omission
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [22, 23]
+        quote: which require a special permit from the Planning and Development Board, are as follows
+      strength: strong
+      confirm_with: the architects
+      report: docs/research/2026-10-20_architect_questions.md §5.1
+    - id: zero_lot_line_sp_not_in_325_9
+      question: The chart marks a one-family detached zero-lot-line dwelling SP in R-3AA, but §325-9B(1)'s list of
+        special-permit uses has no zero-lot-line item. Does it need a special permit?
+      kind: reading
+      answer: 'Treated as needing one: the chart is part of the law (§325-8A: "made a part of this chapter") and its
+        SP mark is the more specific statement. Either way Gordium can''t pass it, so the result is NEEDS REVIEW.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [12, 12]
+        quote: The District Regulations Chart is hereby made a part of this chapter
+      strength: strong
+      confirm_with: the City zoning office
+    - id: permitted_use_still_has_rules
+      question: '"Subject to the further regulations in this section and of Article V": can a use marked • still need
+        review because of those regulations (e.g. occupancy limits, chart p.2 notes)?'
+      kind: law
+      answer: Yes. Column 2's uses are subject to the rest of §325-8 and to Article V, and every column is subject to
+        Article V's supplementary regulations. Those are rules of their own.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [16, 16]
+        quote: subject to the further regulations in this section and of Article V
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §5.3
+    notes: >-
+      R-3AA is the seventh mark in each row of page 2 (R-1A, R-1B, R-2A, R-2B, R-2C, R-3A, R-3AA, R-3B, RU). Its marks,
+      row by row against the chart reader's R-3AA cells: • one-family detached, semi-detached and attached dwellings,
+      two-family and multiple dwellings, fraternity houses, church, park, library or fire station, nursery school,
+      adult day care home, nursing home; SP the zero-lot-line house, cemetery, public utility, school, neighborhood
+      commercial facility, hospital, bed-and-breakfast inn; - dormitory, the only use R-3AA marks "-" (the row reads
+      "- - - - - • - • •[fn5]": R-3A •, R-3AA -, R-3B •, RU •). What the marks mean is Gordium's reading (the
+      chart_marks finding).
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_area_one_family_detached
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot size, one-family dwelling, detached (chart p.3)"
+    applies_when: use == "one_family_detached"
+    check: lot_area >= 5000
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, detached", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [10, 10]
+        quote: "One-family dwelling, detached 10,000 sf 6,000 sf 5,000 sf 3,000 sf 2,500 sf [fn4] 5,000 sf 5,000 sf 3,000 sf 10,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [48, 48]
+        quote: "(3) See §325-8(B)(1)."
+    examples:
+      - given: {use: one_family_detached, lot_area: 6600}
+        expect: pass
+      - given: {use: one_family_detached, lot_area: 5000}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: one_family_detached, lot_area: 4999}
+        expect: fail
+      - given: {use: one_family_detached, lot_area: 3000}
+        expect: fail
+        note: R-3B's 3,000 sf is not enough in R-3aa
+      - given: {use: two_family, lot_area: 4000}
+        expect: not_applicable
+    notes: >-
+      The seventh value of the row is R-3AA's (the second 5,000 sf, after R-3A's; R-3B's 3,000 sf follows). Chart note
+      3 points to §325-8B(1): the minimum applies to each main building on the lot.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_area_one_family_semi_detached
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot size, one-family dwelling, semi-detached (chart p.3)"
+    applies_when: use == "one_family_semi_detached"
+    check: lot_area >= 5000
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, semi-detached", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [12, 12]
+        quote: "One-family dwelling, semi-detached - - 5,000 sf 3,000 sf 2,000 sf [fn5] 5,000 sf 5,000 sf 3,000 sf 15,000 sf"
+    examples:
+      - given: {use: one_family_semi_detached, lot_area: 5000}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: one_family_semi_detached, lot_area: 4999}
+        expect: fail
+      - given: {use: one_family_detached, lot_area: 4000}
+        expect: not_applicable
+    notes: >-
+      A semi-detached dwelling is one building holding two one-family dwellings that share a party wall (§325-3B).
+      The chart's figure is for the lot as cited; §325-8B(1) adds the figure again for each further main building on
+      the lot. R-3aa's side yards (10 ft and 5 ft) leave no 0 ft side for a party wall on a lot line.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_area_two_family
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot size, two-family dwelling (chart p.3)"
+    applies_when: use == "two_family"
+    check: lot_area >= 5000
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Two-family dwelling", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [15, 15]
+        quote: "Two-family dwelling - - 5,000 sf 3,000 sf 2,000 sf [fn5] 5,000 sf 5,000 sf 3,000 sf 15,000 sf"
+    examples:
+      - given: {use: two_family, lot_area: 6600}
+        expect: pass
+      - given: {use: two_family, lot_area: 5000}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: two_family, lot_area: 4999}
+        expect: fail
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_area_one_family_attached
+    kind: rule
+    topic: dimensions
+    title: "Lot size by units and rooms let, one-family attached (chart p.3, note 7)"
+    applies_when: use == "one_family_attached"
+    check: lot_area >= (7000 if conversion else 6000) + 750 * max(dwelling_units - 3, 0) + 500 * rooms_let_for_profit
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, attached, new construction", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, attached, by conversion", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [14, 14]
+        quote: "One-family dwelling, attached, new construction - - - - 1,500 sf [fn6] 6,000 sf [fn7] 6,000 sf [fn7] 3,500 sf [fn8] 16,500 sf [fn9]"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [13, 13]
+        quote: "One-family dwelling, attached, by conversion - - - - 1,500 sf [fn6] 7,000 sf [fn7] 7,000 sf [fn7] 4,000 sf [fn8] 16,500 sf [fn9]"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [53, 53]
+        quote: "(7) For the first 1-3 units; +750 sf for each additional unit; +500 sf per room let for profit."
+        not_limits: {1: "the first 1-3 units: the base lot area covers units one to three; the formula adds 750 sf only past 3"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 6
+        lines: [26, 27]
+        quote: "CONVERSION — The changing of use or occupancy by alteration, addition or by other reorganization."
+    examples:
+      # worked by hand from note 7: base 6,000 sf new / 7,000 sf by conversion for the first 1-3 units,
+      # + 750 sf for each unit past 3, + 500 sf per room let for profit; each step on both sides
+      - given: {use: one_family_attached, lot_area: 6000, dwelling_units: 3, rooms_let_for_profit: 0, conversion: false}
+        expect: pass
+        note: new, 3 units, no rooms let -> 6,000 sf; at the limit
+      - given: {use: one_family_attached, lot_area: 5999, dwelling_units: 3, rooms_let_for_profit: 0, conversion: false}
+        expect: fail
+      - given: {use: one_family_attached, lot_area: 8250, dwelling_units: 6, rooms_let_for_profit: 0, conversion: false}
+        expect: pass
+        note: new, 6 units (the most an attached building holds, §325-3B) -> 6,000 + 3 x 750 = 8,250 sf
+      - given: {use: one_family_attached, lot_area: 8249, dwelling_units: 6, rooms_let_for_profit: 0, conversion: false}
+        expect: fail
+      - given: {use: one_family_attached, lot_area: 7000, dwelling_units: 3, rooms_let_for_profit: 2, conversion: false}
+        expect: pass
+        note: new, 3 units, 2 rooms let -> 6,000 + 2 x 500 = 7,000 sf
+      - given: {use: one_family_attached, lot_area: 6999, dwelling_units: 3, rooms_let_for_profit: 2, conversion: false}
+        expect: fail
+      - given: {use: one_family_attached, lot_area: 7000, dwelling_units: 3, rooms_let_for_profit: 0, conversion: true}
+        expect: pass
+        note: by conversion, 3 units -> 7,000 sf
+      - given: {use: one_family_attached, lot_area: 6999, dwelling_units: 3, rooms_let_for_profit: 0, conversion: true}
+        expect: fail
+        note: enough for new construction (6,000 sf), not by conversion
+      - given: {use: one_family_attached, lot_area: 8250, dwelling_units: 4, rooms_let_for_profit: 1, conversion: true}
+        expect: pass
+        note: by conversion, 4 units, 1 room let -> 7,000 + 750 + 500 = 8,250 sf
+      - given: {use: one_family_attached, lot_area: 8249, dwelling_units: 4, rooms_let_for_profit: 1, conversion: true}
+        expect: fail
+      - given: {use: one_family_attached, lot_area: 4000, dwelling_units: 4, rooms_let_for_profit: 0, conversion: false}
+        expect: fail
+        note: R-3b's note 8 (3,500 + 500 = 4,000 sf) is not enough in R-3aa (6,750 sf)
+      - given: {use: one_family_attached, lot_area: 20000, rooms_let_for_profit: 0, conversion: false}
+        expect: needs_review
+        note: the units not given -> never a pass, however large the lot
+      - given: {use: one_family_attached, lot_area: 20000, dwelling_units: 3, conversion: false}
+        expect: needs_review
+        note: the rooms let not given
+      - given: {use: one_family_attached, lot_area: 20000, dwelling_units: 3, rooms_let_for_profit: 0}
+        expect: needs_review
+        note: new construction or conversion not given
+      - given: {use: two_family, lot_area: 1000}
+        expect: not_applicable
+    notes: >-
+      R-3AA's cells are R-3A's ("6,000 sf [fn7]" new, "7,000 sf [fn7]" by conversion: the seventh values). Note 7 in
+      full, encoded as R-3a does: the chart's base for the first 1-3 units, + 750 sf for each unit past 3, + 500 sf
+      per room let for profit. The units, the rooms let and whether it is a conversion are stated by the architect
+      (dwelling_units, rooms_let_for_profit, conversion); any of them not given and the rule needs review, never a
+      pass.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_area_multiple_family
+    kind: rule
+    topic: dimensions
+    title: "Lot size by units and rooms let, multiple dwelling (chart p.3, note 7)"
+    applies_when: use == "multiple_family"
+    check: lot_area >= (7000 if conversion else 6000) + 750 * max(dwelling_units - 3, 0) + 500 * rooms_let_for_profit
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Multiple family dwelling, new construction", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Multiple family dwelling, by conversion", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [17, 17]
+        quote: "Multiple family dwelling, new construction - - - - - 6,000 sf [fn7] 6,000 sf [fn7] 3,500 sf [fn8] 16,500 sf [fn9]"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [16, 16]
+        quote: "Multiple family dwelling, by conversion - - - - - 7,000 sf [fn7] 7,000 sf [fn7] 4,000 sf [fn8] 16,500 sf [fn9]"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [53, 53]
+        quote: "(7) For the first 1-3 units; +750 sf for each additional unit; +500 sf per room let for profit."
+        not_limits: {1: "the first 1-3 units: the base lot area covers units one to three; the formula adds 750 sf only past 3"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 6
+        lines: [26, 27]
+        quote: "CONVERSION — The changing of use or occupancy by alteration, addition or by other reorganization."
+    examples:
+      - given: {use: multiple_family, lot_area: 6000, dwelling_units: 3, rooms_let_for_profit: 0, conversion: false}
+        expect: pass
+        note: new, 3 units, no rooms let -> 6,000 sf; at the limit
+      - given: {use: multiple_family, lot_area: 5999, dwelling_units: 3, rooms_let_for_profit: 0, conversion: false}
+        expect: fail
+      - given: {use: multiple_family, lot_area: 6750, dwelling_units: 4, rooms_let_for_profit: 0, conversion: false}
+        expect: pass
+        note: new, 4 units -> 6,000 + 750 = 6,750 sf
+      - given: {use: multiple_family, lot_area: 6749, dwelling_units: 4, rooms_let_for_profit: 0, conversion: false}
+        expect: fail
+      - given: {use: multiple_family, lot_area: 11250, dwelling_units: 10, rooms_let_for_profit: 0, conversion: false}
+        expect: pass
+        note: new, 10 units -> 6,000 + 7 x 750 = 11,250 sf
+      - given: {use: multiple_family, lot_area: 11249, dwelling_units: 10, rooms_let_for_profit: 0, conversion: false}
+        expect: fail
+      - given: {use: multiple_family, lot_area: 6500, dwelling_units: 3, rooms_let_for_profit: 1, conversion: false}
+        expect: pass
+        note: new, 3 units, 1 room let -> 6,000 + 500 = 6,500 sf
+      - given: {use: multiple_family, lot_area: 6499, dwelling_units: 3, rooms_let_for_profit: 1, conversion: false}
+        expect: fail
+      - given: {use: multiple_family, lot_area: 7000, dwelling_units: 3, rooms_let_for_profit: 0, conversion: true}
+        expect: pass
+        note: by conversion, 3 units -> 7,000 sf
+      - given: {use: multiple_family, lot_area: 6999, dwelling_units: 3, rooms_let_for_profit: 0, conversion: true}
+        expect: fail
+      - given: {use: multiple_family, lot_area: 9000, dwelling_units: 5, rooms_let_for_profit: 1, conversion: true}
+        expect: pass
+        note: by conversion, 5 units, 1 room let -> 7,000 + 2 x 750 + 500 = 9,000 sf; at the limit
+      - given: {use: multiple_family, lot_area: 8999, dwelling_units: 5, rooms_let_for_profit: 1, conversion: true}
+        expect: fail
+        note: 1 sf short of 9,000 sf
+      - given: {use: multiple_family, lot_area: 20000, rooms_let_for_profit: 0, conversion: false}
+        expect: needs_review
+        note: the units not given -> never a pass, however large the lot
+      - given: {use: multiple_family, lot_area: 20000, dwelling_units: 3, conversion: false}
+        expect: needs_review
+        note: the rooms let not given
+      - given: {use: multiple_family, lot_area: 20000, dwelling_units: 3, rooms_let_for_profit: 0}
+        expect: needs_review
+        note: new construction or conversion not given
+      - given: {use: two_family, lot_area: 1000}
+        expect: not_applicable
+    notes: >-
+      Note 7 in full, encoded (as R-3a): 6,000 sf new construction or 7,000 sf by conversion for the first 1-3 units,
+      + 750 sf for each unit past 3, + 500 sf per room let for profit. The units, rooms let and conversion are stated
+      by the architect; any of them not given and the rule needs review, never a pass.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_area_fraternity
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot size, fraternity, sorority, or group house (chart p.3)"
+    applies_when: use == "fraternity_sorority_group_house"
+    check: lot_area >= 25000
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Fraternity, sorority, or group house", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [18, 18]
+        quote: "Fraternity, sorority, or group house 25,000 sf 25,000 sf 25,000 sf 30,000 sf"
+    examples:
+      - given: {use: fraternity_sorority_group_house, lot_area: 25000}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: fraternity_sorority_group_house, lot_area: 24999}
+        expect: fail
+    notes: >-
+      The row has only four values, under R-3A, R-3AA, R-3B and RU; R-3AA's is the second, 25,000 sf.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_area_other_use
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot size, other use (chart p.3)"
+    applies_when: >-
+      use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+      "one_family_attached", "two_family", "multiple_family", "fraternity_sorority_group_house"]
+    check: lot_area >= 6000
+    review_when:
+      - when: use in ["dormitory", "nursing_home"] and lot_area >= 6000
+        reason: >-
+          A dormitory and a nursing home are multiple dwellings by §325-3's definitions, so the multiple-family row and
+          its note 7 (+750 sf per unit over 3, +500 sf per room let for profit) may apply instead of "Other use": the
+          open question on this rule. (A dormitory is not permitted in R-3aa at all: R-3aa.use.)
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "Other use", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [19, 19]
+        quote: "Other use 10,000 sf 7,500 sf 6,000 sf 4,000 sf 4,000 sf 6,000 sf 6,000 sf 4,000 sf 30,000 sf"
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: Dormitory, column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "Nursing, convalescent or rest home", column: R-3AA}
+    examples:
+      - given: {use: church, lot_area: 6000}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: church, lot_area: 5999}
+        expect: fail
+      - given: {use: nursing_home, lot_area: 5999}
+        expect: fail
+        note: under 6,000 sf under either reading
+      - given: {use: nursing_home, lot_area: 6000}
+        expect: needs_review
+      - given: {use: nursing_home, lot_area: 20000}
+        expect: needs_review
+      - given: {use: two_family, lot_area: 1000}
+        expect: not_applicable
+    open_questions:
+    - 'A dormitory and a nursing home have their own rows on chart p.2 but none on p.3, and §325-3 defines both as
+      multiple dwellings. Is their minimum lot size the "Multiple family dwelling" row (6,000 sf plus note 7''s per-unit
+      additions) or "Other use" (6,000 sf)?'
+    research:
+    - question: 'A dormitory and a nursing home have their own rows on chart p.2 but none on p.3, and §325-3 defines
+        both as multiple dwellings. Is their minimum lot size the "Multiple family dwelling" row (6,000 sf plus note 7''s
+        per-unit additions) or "Other use" (6,000 sf)?'
+      searched:
+      - 325-3B:dormitory
+      - 325-3B:dwelling_multiple_or_multiple_residence
+      - 325-8A
+      - 325-8B
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [16, 16]
+        quote: DORMITORY — A multiple dwelling
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [30, 30]
+        quote: (4) A building used or occupied as a convalescent, old-age or nursing home
+      why_open: The same question as R-3a's (§5.3 on the questions page), with the same figures (R-3AA's lot sizes are
+        R-3A's). The definitions make both multiple dwellings, but the chart lists them as uses of their own and gives
+        the fraternity house its own lot-size row, which suggests a use with no row of its own is an "Other use".
+        Neither the code nor a City record (none found) says which. Both readings need 6,000 sf; they differ only in
+        note 7's additions, so the rule fails a smaller lot and sends a larger one to review. In R-3aa it matters for a
+        nursing home (a dormitory is not permitted).
+      readings:
+      - id: multiple_family_row
+        reading: the multiple-family row applies (6,000 sf for 1-3 units, +750 sf each further unit, +500 sf per room let)
+      - id: other_use_row
+        reading: '"Other use" applies (6,000 sf)'
+    notes: >-
+      Other uses in R-3aa: church, park, library or fire station, cemetery, public utility, school, nursery school,
+      adult day care home, neighborhood commercial facility, nursing home, hospital, bed-and-breakfast inn (and a
+      dormitory, which fails R-3aa.use). The zero-lot-line house has its own row ("-" in R-3AA): see
+      R-3aa.lot_size_zero_lot_line.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_size_zero_lot_line
+    kind: flag
+    topic: dimensions
+    title: "Lot size and width, zero-lot-line house: chart shows \"-\" (chart p.3)"
+    applies_when: use == "one_family_detached_zero_lot_line"
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Minimum Lot Size [fn3]", row: "One-family dwelling, detached, zero lot line", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "One-family dwelling, detached, zero lot line", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 2
+        cell: {section: Primary Uses, row: "One-family dwelling, detached, zero lot line [fn4]", column: R-3AA}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [22, 25]
+        quote: "(4) Where a variance or special permit is required or where special conditions apply to allow in one district a use which is permitted by right in another district, the regulations applying to such use shall be those of whichever district has the stricter regulations, unless otherwise determined by the Board of Zoning Appeals."
+        not_limits: {1: "\"in one district\": not a number"}
+    examples:
+      - given: {use: one_family_detached_zero_lot_line}
+        expect: needs_review
+      - given: {use: one_family_detached}
+        expect: not_applicable
+    open_questions:
+    - 'R-3AA allows a zero-lot-line house by special permit (chart p.2), but its lot-size and lot-width cells are "-"
+      (chart p.3). What minimum lot size and width apply: none, the "Other use" rows (6,000 sf, 50 ft), or whatever the
+      Planning and Development Board sets with the special permit?'
+    research:
+    - question: 'R-3AA allows a zero-lot-line house by special permit (chart p.2), but its lot-size and lot-width cells
+        are "-" (chart p.3). What minimum lot size and width apply: none, the "Other use" rows (6,000 sf, 50 ft), or
+        whatever the Planning and Development Board sets with the special permit?'
+      searched:
+      - 325-8A
+      - 325-8B
+      - 325-9B
+      - 325-3B:one_family_detached_dwelling_zero_lot_line
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [23, 23]
+        quote: which is permitted by right in another district
+      why_open: The same question as R-3a's (§5.4 on the questions page). Elsewhere on the chart "-" means "not
+        allowed", which can't be meant here, since p.2 allows the use by special permit. §325-8B(4) would borrow the
+        stricter regulations of a district where the use is permitted by right, but no residential district permits it
+        by right (R-2C, R-3A, R-3AA and R-3B mark it SP; R-1, R-2A, R-2B and RU mark it -). §325-9B(1) doesn't list it
+        either. No City record found.
+      readings:
+      - id: no_minimum
+        reading: no minimum lot size or width
+      - id: other_use_rows
+        reading: the "Other use" rows apply (6,000 sf, 50 ft)
+      - id: set_by_special_permit
+        reading: the Planning and Development Board sets them with the special permit
+    notes: The use needs a special permit anyway (R-3aa.use), so the result is NEEDS REVIEW whatever the answer.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_width_one_family_detached
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, one-family dwelling, detached (chart p.3)"
+    applies_when: use == "one_family_detached"
+    check: lot_width >= 50
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "One-family dwelling, detached", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [21, 21]
+        quote: "One-family dwelling, detached 75 ft 50 ft 45 ft 35 ft 40 ft 40 ft 50 ft 30 ft 75 ft"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 24
+        lines: [31, 33]
+        quote: "(7) Column 7: Minimum Lot Size, Width in Feet at Street Line. Lots hereafter used for a permitted use in each use district shall have frontage measured on a public right-of-way equal to or greater than the width specified in this column"
+    examples:
+      - given: {use: one_family_detached, lot_width: 60}
+        expect: pass
+      - given: {use: one_family_detached, lot_width: 50}
+        expect: pass
+        note: exactly at the minimum
+      - given: {use: one_family_detached, lot_width: 49.99}
+        expect: fail
+      - given: {use: one_family_detached, lot_width: 40}
+        expect: fail
+        note: R-3A's 40 ft (the column before) is not enough in R-3aa
+    notes: R-3AA's value is the seventh (50 ft); R-3A's, before it, is 40 ft.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_width_one_family_semi_detached
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, one-family dwelling, semi-detached (chart p.3)"
+    applies_when: use == "one_family_semi_detached"
+    check: lot_width >= 50
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "One-family dwelling, semi-detached", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [23, 23]
+        quote: "One-family dwelling, semi-detached - - 45 ft 35 ft 50 ft 40 ft 50 ft 30 ft 100 ft"
+    examples:
+      - given: {use: one_family_semi_detached, lot_width: 50}
+        expect: pass
+      - given: {use: one_family_semi_detached, lot_width: 49.99}
+        expect: fail
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_width_one_family_attached
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, one-family dwelling, attached (chart p.3)"
+    applies_when: use == "one_family_attached"
+    check: lot_width >= 50
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "One-family dwelling, attached", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [24, 24]
+        quote: "One-family dwelling, attached - - - - 50 ft 50 ft 50 ft 40 ft 125 ft"
+    examples:
+      - given: {use: one_family_attached, lot_width: 50}
+        expect: pass
+      - given: {use: one_family_attached, lot_width: 49.99}
+        expect: fail
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_width_two_family
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, two-family dwelling (chart p.3)"
+    applies_when: use == "two_family"
+    check: lot_width >= 50
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "Two-family dwelling", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [25, 25]
+        quote: "Two-family dwelling - - 45 ft 35 ft 50 ft 40 ft 50 ft 30 ft 100 ft"
+    examples:
+      - given: {use: two_family, lot_width: 50}
+        expect: pass
+      - given: {use: two_family, lot_width: 49.99}
+        expect: fail
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_width_multiple_family
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, multiple family dwelling (chart p.3)"
+    applies_when: use == "multiple_family"
+    check: lot_width >= 50
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "Multiple family dwelling", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [26, 26]
+        quote: "Multiple family dwelling - - - - - 50 ft 50 ft 40 ft 125 ft"
+    examples:
+      - given: {use: multiple_family, lot_width: 50}
+        expect: pass
+      - given: {use: multiple_family, lot_width: 49.99}
+        expect: fail
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_width_fraternity
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, fraternity, sorority, or group house (chart p.3)"
+    applies_when: use == "fraternity_sorority_group_house"
+    check: lot_width >= 50
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: "Fraternity, sorority, or group house", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [27, 27]
+        quote: "Fraternity, sorority, or group house 100 ft 50 ft 100 ft 125 ft"
+    examples:
+      - given: {use: fraternity_sorority_group_house, lot_width: 50}
+        expect: pass
+        note: R-3A and R-3B ask 100 ft; R-3AA, the second of the four values, 50 ft
+      - given: {use: fraternity_sorority_group_house, lot_width: 49.99}
+        expect: fail
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_width_other_use
+    kind: rule
+    topic: dimensions
+    title: "Minimum lot width, other use (chart p.3)"
+    applies_when: >-
+      use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+      "one_family_attached", "two_family", "multiple_family", "fraternity_sorority_group_house"]
+    check: lot_width >= 50
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Minimum Lot Width, row: Other use, column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [28, 28]
+        quote: "Other use 75 ft 60 ft 50 ft 40 ft 40 ft 50 ft 50 ft 40 ft 125 ft"
+    examples:
+      - given: {use: church, lot_width: 50}
+        expect: pass
+      - given: {use: church, lot_width: 49.99}
+        expect: fail
+      - given: {use: nursing_home, lot_width: 50}
+        expect: pass
+        note: the multiple-family row says 50 ft too, so the lot-size question doesn't matter for width
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.stories
+    kind: rule
+    topic: dimensions
+    title: "Number of stories: at most 3, at least 2 (chart p.3, note 11)"
+    check: stories >= 2 and stories <= 3
+    review_when:
+      - when: stories < 2 and building_area <= 500
+        reason: >-
+          §325-8A(15) exempts development of a footprint of 500 sf or less from minimum height requirements, and
+          §325-8B(10) points the chart's minimum height regulations to it. Whether that covers note 11's minimum
+          stories is the open question on this rule; this lot's buildings cover 500 sf or less.
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Maximum Building Height [fn10]", row: Number of stories, column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [30, 30]
+        quote: "Number of stories 3 3 3 3 3 4 3/2 [fn11] 4 3"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [57, 57]
+        quote: "(11) The first number refers to the maximum building stories allowed, the second number refers to the minimum building stories required."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [10, 10]
+        quote: "(2) In all districts, the number of stories permitted may not be exceeded."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [4, 8]
+        quote: "(15) Column 16: Minimum Height of Building, Height in Feet. Buildings hereafter erected shall have a minimum height as specified herein; provided, however, that the requirements of this column shall not apply to development, including additions and/or expansions of existing development where the new development or addition or expansion of the existing development does not exceed a footprint of 500 square feet."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 27
+        lines: [11, 11]
+        quote: "(10) See § 325-8A(15) for applicability of minimum height regulations."
+    examples:
+      - given: {stories: 2, building_area: 1200}
+        expect: pass
+        note: exactly at the minimum
+      - given: {stories: 3, building_area: 1200}
+        expect: pass
+        note: exactly at the maximum
+      - given: {stories: 4, building_area: 1200}
+        expect: fail
+        note: R-3A's and R-3B's 4 stories are too many in R-3aa
+      - given: {stories: 1, building_area: 1200}
+        expect: fail
+        note: 'one story, a building of more than 500 sf: under the minimum of 2 (note 11)'
+      - given: {stories: 1, building_area: 400}
+        expect: needs_review
+        note: one story, but the lot's buildings cover 400 sf; §325-8A(15)'s exemption may apply (the open question)
+      - given: {stories: 1}
+        expect: needs_review
+        note: how much the buildings cover is not known, so the exemption may apply
+      - given: {stories: 3, building_area: 400}
+        expect: pass
+        note: a small building of 3 stories complies whichever way the exemption question is answered
+      - given: {stories: 4, building_area: 400}
+        expect: fail
+        note: the exemption is for minimum height only; the maximum still binds
+    open_questions:
+    - 'R-3AA''s "3/2" (chart p.3, note 11) requires at least 2 stories. §325-8A(15) says minimum-height requirements
+      don''t apply to development (including additions) whose footprint is 500 sf or less, and §325-8B(10) points the
+      chart''s minimum height regulations to §325-8A(15). Does that exemption cover R-3AA''s minimum stories, so a
+      one-story building of 500 sf or less (or a one-story addition of 500 sf or less) complies?'
+    research:
+    - question: 'R-3AA''s "3/2" (chart p.3, note 11) requires at least 2 stories. §325-8A(15) says minimum-height
+        requirements don''t apply to development (including additions) whose footprint is 500 sf or less, and
+        §325-8B(10) points the chart''s minimum height regulations to §325-8A(15). Does that exemption cover R-3AA''s
+        minimum stories, so a one-story building of 500 sf or less (or a one-story addition of 500 sf or less)
+        complies?'
+      searched:
+      - 325-8A
+      - 325-8B
+      - 325-16
+      - 325-16C
+      - 325-3B:story
+      - 325-3B:height_of_building
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [4, 4]
+        quote: 'Column 16: Minimum Height of Building, Height in Feet. Buildings hereafter erected shall have'
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 26
+        lines: [7, 8]
+        quote: does not exceed a footprint of 500 square feet
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 27
+        lines: [11, 11]
+        quote: for applicability of minimum height regulations
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [57, 57]
+        quote: the second number refers to the minimum building stories required
+      why_open: >-
+        §325-8A(15) was written for a "Column 16" giving a minimum height "in Feet", which today's chart no
+        longer has; the only minimum-height figure on the residential chart is R-3AA's minimum number of stories (note
+        11). §325-8B(10) (added 2012) sends the chart's "minimum height regulations" to §325-8A(15), which points to
+        the exemption covering R-3AA's minimum stories, but neither says so in words, and "development ... footprint"
+        isn't one building's footprint. No City record found. Until it is answered, a one-story design whose
+        buildings cover 500 sf or less needs review; a larger one-story design does not comply. (Gordium checks the
+        building as drawn: a one-story addition of 500 sf or less to an existing one-story building, which the
+        exemption names, shows as does not comply when the whole building covers more than 500 sf, a stricter answer,
+        never a false pass; check §325-8A(15) by hand.)
+      readings:
+      - id: exemption_applies
+        reading: the 500 sf exemption covers R-3AA's minimum stories (a one-story building or addition of 500 sf or
+          less complies)
+      - id: exemption_does_not_apply
+        reading: every building in R-3AA needs at least 2 stories, whatever its footprint
+    notes: >-
+      R-3AA's cell is "3/2 [fn11]", the seventh value of the line; note 11: the first number is the most stories, the
+      second the fewest. No bonus: the 3-story maximum still applies when the height bonus (R-3aa.height) is used.
+      Stories are counted at the main entrance side (§325-8A(8)). The minimum is for "buildings hereafter erected"
+      (§325-8A(15)); building_area is everything the lot's buildings cover, so 500 sf or less there means the main
+      building's footprint is 500 sf or less too.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.height
+    kind: rule
+    topic: dimensions
+    title: "Maximum building height, with the §325-16C bonus"
+    check: >-
+      building_height <= 35 or building_height <= 35 + 0.1 * 35
+      and front_yard >= 10 + (building_height - 35)
+      and side_yard_smaller >= 5 + (building_height - 35)
+      and side_yard_larger >= 10 + (building_height - 35)
+      and rear_yard >= max(min(0.25 * lot_depth, 50), 20) + (building_height - 35)
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [31, 31]
+        quote: "Height in feet 35 ft 35 ft 35 ft 35 ft 35 ft 40 ft 35 ft 40 ft 35 ft"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [56, 56]
+        quote: "(10) See §325-16."
+      - file: zoning_charts_2026-04.pdf             # the yard minimums the bonus increases
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (one side minimum), column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (other side minimum), column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [66, 66]
+        quote: "(16) But not less than 20 ft."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [6, 7]
+        quote: "In any district, any main building may be erected to a height in excess of that specified for the district, provided that:"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [8, 9]
+        quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [11, 12]
+        quote: "(3) In each district, the number of additional feet may not exceed 10% of the maximum building height allowed in that district."
+    examples:
+      - given: {building_height: 35, front_yard: 10, side_yard_smaller: 5, side_yard_larger: 10, rear_yard: 30, lot_depth: 120}
+        expect: pass
+        note: exactly at 35 ft with every yard at its minimum (rear 25% of 120 = 30)
+      - given: {building_height: 35.01, front_yard: 10, side_yard_smaller: 5, side_yard_larger: 10, rear_yard: 30, lot_depth: 120}
+        expect: fail
+        note: over 35 ft, so every yard must grow by the extra height
+      - given: {building_height: 38.5, front_yard: 13.5, side_yard_smaller: 8.5, side_yard_larger: 13.5, rear_yard: 33.5, lot_depth: 120}
+        expect: pass
+        note: the most the bonus allows (10% of 35 = 3.5 ft), each yard 3.5 ft larger
+      - given: {building_height: 38.51, front_yard: 30, side_yard_smaller: 20, side_yard_larger: 20, rear_yard: 50, lot_depth: 120}
+        expect: fail
+        note: past 38.5 ft, however large the yards
+      - given: {building_height: 40, front_yard: 30, side_yard_smaller: 20, side_yard_larger: 20, rear_yard: 50, lot_depth: 120}
+        expect: fail
+        note: R-3A's 40 ft is over R-3aa's limit even with the bonus
+      - given: {building_height: 37, front_yard: 11.99, side_yard_smaller: 7, side_yard_larger: 12, rear_yard: 32, lot_depth: 120}
+        expect: fail
+        note: the front yard must be 10 + 2 = 12
+      - given: {building_height: 37, front_yard: 12, side_yard_smaller: 6.99, side_yard_larger: 12, rear_yard: 32, lot_depth: 120}
+        expect: fail
+        note: the narrower side yard must be 5 + 2 = 7
+      - given: {building_height: 37, front_yard: 12, side_yard_smaller: 7, side_yard_larger: 11.99, rear_yard: 32, lot_depth: 120}
+        expect: fail
+        note: the wider side yard must be 10 + 2 = 12
+      - given: {building_height: 37, front_yard: 12, side_yard_smaller: 7, side_yard_larger: 12, rear_yard: 31.99, lot_depth: 120}
+        expect: fail
+        note: the rear yard must be 30 + 2 = 32
+    open_questions:
+    - '§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height, or allowed
+      on top of the bonus height too?'
+    research:
+    - question: '§325-16B: is an ornamental parapet or cornice (up to 5 ft above the limit) left out of building height,
+        or allowed on top of the bonus height too?'
+      searched:
+      - 325-16
+      - 325-16A
+      - 325-16B
+      - 325-16C
+      - 325-3B:height_of_building
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [4, 4]
+        quote: cornice for ornament
+      why_open: §325-16B allows an ornamental parapet or cornice up to 5 ft above the height limit, but doesn't say
+        whether that is the chart's limit or the bonus height §325-16C allows, or whether a parapet that guards a roof
+        deck (not "for ornament") qualifies. No City record found. (The same question as R-1b.height's, since the words
+        are the same in every district.)
+      readings:
+      - id: from_chart_limit
+        reading: the 5 ft is measured from the chart's height limit (the stricter reading)
+      - id: from_bonus_height
+        reading: the 5 ft is measured from the bonus height §325-16C allows
+      report: docs/research/2026-10-20_architect_questions.md §4.6
+    findings:
+    - id: height_bonus_every_yard
+      question: '§325-16C(1): we read "each required ... yard is increased one foot ... for each one foot of such additional
+        height" as: each yard must be at least its normal requirement plus the extra height (both side yards included).
+        Confirm.'
+      kind: law
+      answer: 'Confirmed: every required front, side and rear yard grows one foot for each foot of extra height.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [8, 8]
+        quote: Each required front, side and rear yard is increased one foot on the ground for each one foot
+      still_open: []
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §4.5
+    - id: height_bonus_main_building_only
+      question: Does the bonus apply to accessory buildings too, or only the main building ("any main building")?
+      kind: law
+      answer: Only the main building ("any main building"). The number of stories still can't be exceeded, and the extra
+        feet are at most 10% of the maximum building height.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [6, 6]
+        quote: any main building may be erected to a height in excess of that
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [10, 10]
+        quote: the number of stories permitted may not be exceeded
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [11, 12]
+        quote: may not exceed 10% of the maximum building height
+      still_open: []
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §4.5
+    notes: >-
+      R-3AA's 35 ft is the seventh value of the line (between R-3A's and R-3B's 40 ft). Arithmetic for the bonus: 10%
+      of the 35 ft maximum = 3.5 ft, so at most 38.5 ft, with every required yard 1 ft larger per extra foot (R-3AA's
+      yards: front 10, sides 10 and 5, rear 25% of the lot depth, at most 50 ft, at least 20 ft).
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.lot_coverage
+    kind: rule
+    topic: dimensions
+    title: "Maximum lot coverage by buildings (chart p.3, §325-8A(10))"
+    check: building_area <= 0.35 * lot_area
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Maximum lot coverage by buildings, row: Percent of lot area, column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [34, 34]
+        quote: "Percent of lot area 20% 25% 30% 35% 35% 35% 40% 25% [fn13]"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [5, 7]
+        quote: "On a lot hereafter used, no greater percentage of total lot area may be covered by principal and accessory buildings above ground."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [7, 9]
+        quote: "For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings."
+        not_limits: {2: "what building_area counts (balconies projecting more than two feet): a measuring rule, not this formula's limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [9, 10]
+        quote: "This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified in this column."
+    open_questions:
+    - 'Coverage waits on two questions recorded with the definitions: what lot area to use without a survey (lot), and
+      whether roof eaves count (building_area). Garages count: see building_area''s findings.'
+    research:
+    - question: 'Coverage waits on two questions recorded with the definitions: what lot area to use without a survey
+        (lot), and whether roof eaves count (building_area). Garages count: see building_area''s findings.'
+      searched:
+      - 325-8A
+      - 325-3B:building_area
+      - 325-3B:lot
+      sources: []
+      why_open: It depends on the lot and building_area questions, which are still open; see their research.
+      report: docs/research/2026-10-20_architect_questions.md §3.2
+    findings:
+    - id: below_ground_not_counted
+      question: '"Above ground": are parts of a building below grade (e.g. a buried garage under a deck) left out of
+        building_area?'
+      kind: reading
+      answer: Parts wholly below ground don't count (Column 10 counts what is covered "above ground"; §325-25B lets
+        wholly below-grade accessory structures go anywhere). A deck on top of a buried garage does count.
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [6, 7]
+        quote: covered by principal and accessory buildings above ground
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [4, 4]
+        quote: entirely below the finished grade
+      still_open: []
+      strength: strong
+      confirm_with: the City zoning office
+      report: docs/research/2026-10-20_architect_questions.md §3.2
+    examples:
+      - given: {building_area: 2310, lot_area: 6600}
+        expect: pass
+        note: exactly 35% of 6,600 sf
+      - given: {building_area: 2311, lot_area: 6600}
+        expect: fail
+      - given: {building_area: 2640, lot_area: 6600}
+        expect: fail
+        note: 40% (R-3B's limit) is too much in R-3aa
+    notes: >-
+      The chart line reads "20% 25% 30% 35% 35% 35% 40% 25% [fn13]": eight values, because R-2C's stacked cell is
+      printed on the lines above and below. So the values are R-1A 20, R-1B 25, R-2A 30, R-2B 35, R-3A 35, R-3AA 35,
+      R-3B 40, RU 25; the chart reader's R-3AA cell agrees (35%). Note 2's footprint cap is a separate limit
+      (R-3aa.footprint_block_front).
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.footprint_block_front
+    kind: flag
+    topic: dimensions
+    title: "New building footprint at most 120% of the block front's average (note 2)"
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [8, 8]
+        quote: "R-1A R-1B R-2A R-2B R-2C R-3A R-3AA [fn2] R-3B"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [45, 47]
+        quote: "(2) No new construction of a primary structure in the R-3aa zone shall contain a footprint that is larger than 120% of the average footprint of the existing buildings along the entire block front in which the building is located. If one or more such surrounding buildings have been demolished, then the calculation for maximum building footprint shall use the footprint of the primary structure that most recently stood on any lot where a demolition had occurred."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 17
+        lines: [39, 40]
+        quote: "PRIMARY STRUCTURE — A single structure (located on a parcel) containing a use permitted in the zoning district in which it is located."
+    examples:
+      - given: {use: multiple_family}
+        expect: needs_review
+      - given: {use: one_family_detached}
+        expect: needs_review
+        note: every use's new primary structure; note 2 names no use
+    notes: >-
+      Not checked yet: Gordium doesn't measure the footprints of the other buildings along the block front, so this
+      always needs review; check it by hand under chart p.3 note 2. Worked by hand: a block front whose existing
+      buildings' footprints are 1,000, 1,200 and 1,400 sf averages 1,200 sf, so a new primary structure's footprint may
+      be at most 1.2 × 1,200 = 1,440 sf; where a building on the block was demolished, the footprint of the primary
+      structure that last stood there is used in the average. The cap is for "new construction of a primary
+      structure" (§325-3B PRIMARY STRUCTURE): an alteration of an existing building is not new construction, which the
+      reviewer judges. The chart puts the note on the R-3AA heading itself ("R-3AA [fn2]").
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.front_yard
+    kind: rule
+    topic: dimensions
+    title: "Front yard minimum (chart p.3)"
+    check: front_yard >= 10
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [37, 37]
+        quote: "Front (minimum) 25 ft 25 ft 25 ft 10 ft 10 ft 10 ft 10 ft 10 ft 25 ft"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 50
+        lines: [7, 9]
+        quote: "C. Corner lot transition. On corner lots in residential districts; buildings must be erected so that yards facing public streets shall conform to the minimum front yard requirements of said residential district. Such lots shall be deemed to have two adjoining front yards."
+        not_limits: {2: "two adjoining front yards: which yards are front yards on a corner lot (measured to every street line), not a limit"}
+    examples:
+      - given: {front_yard: 15}
+        expect: pass
+      - given: {front_yard: 10}
+        expect: pass
+        note: exactly at the minimum (RU's is 25 ft)
+      - given: {front_yard: 9.99}
+        expect: fail
+    notes: >-
+      R-3AA's is the seventh value (10 ft). On a corner lot every yard facing a street is a front yard (§325-19C): each
+      street-facing yard must be 10 ft.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.side_yards
+    kind: rule
+    topic: dimensions
+    title: "Side yards minimum: one side 10 ft, the other 5 ft (chart p.3)"
+    check: side_yard_smaller >= 5 and side_yard_larger >= 10
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (one side minimum), column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (other side minimum), column: R-3AA}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [15, 17]
+        quote: "(12) Column 12: Yard Dimensions, Side, One Side at Least. Buildings hereafter altered or erected in each district must be located so that one side yard will be at least as wide as specified in this column, subject to the further regulations of Column 13."
+        not_limits: {1: "one side yard: which yard this column's number is for, not a limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [18, 20]
+        quote: "(13) Column 13: Yard Dimensions, Side, Other at Least. Buildings hereafter erected in each use district must have two side yards as specified in this column and Column 12. One side yard shall be at least as wide as specified in this column, subject to the further regulations of Column 12."
+        not_limits: {1: "one side yard: which yard this column's number is for, not a limit", 2: "two side yards: how many side yards there are, not a limit"}
+    examples:
+      - given: {side_yard_smaller: 5, side_yard_larger: 10}
+        expect: pass
+        note: both exactly at their minimums
+      - given: {side_yard_smaller: 4.99, side_yard_larger: 20}
+        expect: fail
+      - given: {side_yard_smaller: 7, side_yard_larger: 9.99}
+        expect: fail
+        note: neither side yard is 10 ft
+      - given: {side_yard_smaller: 6, side_yard_larger: 6}
+        expect: fail
+        note: two 6 ft yards don't do; one must be 10 ft
+    notes: >-
+      Column 12 (one side at least 10 ft) and Column 13 (the other at least 5 ft) together mean: the wider side yard at
+      least 10 ft and the narrower at least 5 ft. The chart reader's R-3AA cells read 10 ft and 5 ft. Corner lots: see
+      the known gap in this file's header.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.rear_yard
+    kind: rule
+    topic: dimensions
+    title: "Rear yard minimum (chart p.3, note 16; lot depth §325-8A(14))"
+    check: rear_yard >= max(min(0.25 * lot_depth, 50), 20)
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [42, 43]
+        quote: "Rear (minimum, % of depth or feet, 25%/ 25%/ 25%/ 25%/ 25%/ 20%/ 25%/ 20%/ 25% / whichever is less) 50 ft [fn16] 50 ft [fn16]"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [66, 66]
+        quote: "(16) But not less than 20 ft."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 25
+        lines: [24, 26]
+        quote: "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths."
+        not_limits: {2: "the two side lot lines: how lot depth is measured (measures.yaml lot_depth), not a limit"}
+    examples:
+      - given: {rear_yard: 30, lot_depth: 120}
+        expect: pass
+        note: exactly 25% of 120
+      - given: {rear_yard: 29.99, lot_depth: 120}
+        expect: fail
+      - given: {rear_yard: 24, lot_depth: 120}
+        expect: fail
+        note: R-3A's 20% (24 ft) is not enough in R-3aa
+      - given: {rear_yard: 50, lot_depth: 240}
+        expect: pass
+        note: 25% would be 60 ft; the chart caps it at 50 ft
+      - given: {rear_yard: 49.99, lot_depth: 240}
+        expect: fail
+      - given: {rear_yard: 20, lot_depth: 60}
+        expect: pass
+        note: 25% would be 15 ft; note 16 sets the floor at 20 ft
+      - given: {rear_yard: 19.99, lot_depth: 60}
+        expect: fail
+    notes: >-
+      R-3AA's cell is "25%/ 50 ft [fn16]", the seventh value (between R-3A's and R-3B's 20%). The percentage governs
+      for lot depths from 80 ft (25% = 20 ft) to 200 ft (25% = 50 ft). Lot depth is the average of the two side lot
+      lines if they differ (§325-8A(14)(a)).
+    open_questions:
+    - 'Which lines are the side lot lines on a lot with more than four sides? See lot_depth: Gordium uses the Zoning
+      Administrator''s perpendicular method, and one detail of it is still open.'
+    research:
+    - question: 'Which lines are the side lot lines on a lot with more than four sides? See lot_depth: Gordium uses the
+        Zoning Administrator''s perpendicular method, and one detail of it is still open.'
+      searched:
+      - 325-8A
+      - 325-3B:yard
+      - 325-3B:rear_yard
+      sources:
+      - rank: 2
+        cite: 'Zoning Administrator''s affidavit (2019) and staff memo to the BZA, Appeal #3202, 815 S. Aurora St (a
+          five-sided lot), 2019-2022'
+        url: https://www.cityofithacany.gov/AgendaCenter/ViewFile/Agenda/_02012022-2446
+        quote: side lot lines should be drawn at a 90-degree angle perpendicular to the front lot line to determine
+          the average lot depth
+      why_open: It depends on the lot_depth question that is still open; see its research.
+      report: docs/research/2026-10-20_architect_questions.md §1.2
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.yard_projections
+    kind: rule
+    topic: dimensions
+    title: "Eaves into required yards, at most 2 ft (§325-18B)"
+    check: >-
+      front_yard_eaves >= 10 + max(building_height - 35, 0) - 2
+      and side_yard_smaller_eaves >= 5 + max(building_height - 35, 0) - 2
+      and side_yard_larger_eaves >= 10 + max(building_height - 35, 0) - 2
+      and rear_yard_eaves >= max(min(0.25 * lot_depth, 50), 20) + max(building_height - 35, 0) - 2
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 49
+        lines: [13, 16]
+        quote: "B. Projecting architectural features. The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that such features shall not project more than two feet into any required yard."
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (one side minimum), column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Side (other side minimum), column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: "Rear (minimum, % of depth or feet, whichever is less)", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [66, 66]
+        quote: "(16) But not less than 20 ft."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 47
+        lines: [8, 9]
+        quote: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height."
+        not_limits: {1: "one foot per foot: the formula adds (building_height - 35) to each yard, one to one"}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: "Maximum Building Height [fn10]", row: Height in feet, column: R-3AA}
+    examples:
+      - given: {front_yard_eaves: 12, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 48, lot_depth: 120, building_height: 30}
+        expect: pass
+        note: eaves clear of every required yard
+      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+        expect: pass
+        note: eaves exactly 2 ft into the front (10 − 2), narrower side (5 − 2), wider side (10 − 2) and rear (25% of 120 = 30, − 2) yards
+      - given: {front_yard_eaves: 7.99, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+        expect: fail
+      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 2.99, side_yard_larger_eaves: 8, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+        expect: fail
+        note: an eave just over 2 ft into the 5 ft side yard
+      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 7.99, rear_yard_eaves: 28, lot_depth: 120, building_height: 30}
+        expect: fail
+      - given: {front_yard_eaves: 8, side_yard_smaller_eaves: 3, side_yard_larger_eaves: 8, rear_yard_eaves: 27.99, lot_depth: 120, building_height: 30}
+        expect: fail
+        note: R-3A's 20% rear yard (24 − 2 = 22) would pass this; R-3aa's 25% asks 28
+      - given: {front_yard_eaves: 11, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 31, lot_depth: 120, building_height: 38}
+        expect: pass
+        note: with the height bonus every required yard grows 3 ft (§325-16C), and an eave may reach 2 ft into each
+      - given: {front_yard_eaves: 10.99, side_yard_smaller_eaves: 6, side_yard_larger_eaves: 11, rear_yard_eaves: 31, lot_depth: 120, building_height: 38}
+        expect: fail
+        note: the 13 ft front yard the bonus requires, less 2 ft, is 11
+    notes: >-
+      The yards themselves (R-3aa.front_yard, side_yards, rear_yard) are measured to the nearest part of the building,
+      its eaves left out; this rule measures the same yards to the outermost part, eaves included, and lets that be up
+      to 2 ft less. A massing model shows eaves, not windowsills, belt courses or cornices: those are for the architect
+      to check. On a corner lot every yard facing a street is a front yard (§325-19C).
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.accessory_buildings
+    kind: rule
+    topic: dimensions
+    title: "Accessory buildings: not in the front yard; 3 ft side and rear (§325-25)"
+    applies_when: accessory_buildings > 0
+    check: >-
+      accessory_front_yard >= 10
+      and (not accessory_distances_apply or accessory_side_yard >= 3 and accessory_rear_yard >= 3)
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [34, 36]
+        quote: "Accessory structures, including private garages, storage sheds, toolhouses, garden houses, playhouses or similar structures, shall be exempt from side yard requirements contained in the District Regulations Chart in § 325-8[fn22] and shall be governed by the requirements below:"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 66
+        lines: [37, 40]
+        quote: "A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or partially above finished grade are permitted in any side or rear yard but not in a required front yard, except as permitted under the further provisions of this section. Corner lots shall be considered to have two front yards."
+        not_limits: {2: "two front yards on a corner lot: which yards are front yards (the accessory front yard is measured to every street line), not a limit"}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 67
+        lines: [6, 9]
+        quote: "C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this section."
+        not_limits: {1: "the district name R-1, not a number of feet", 6: "six feet applies in R-1 districts only; in R-3aa it is three feet (accessory_side_yard >= 3)"}
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        cell: {section: Yard Dimensions, row: Front (minimum), column: R-3AA}
+    examples:
+      - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 3}
+        expect: pass
+        note: exactly 3 ft from the side and rear lot lines (6 ft would be needed in R-1)
+      - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 2.99, accessory_rear_yard: 3}
+        expect: fail
+      - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 2.99}
+        expect: fail
+      - given: {accessory_buildings: 1, accessory_front_yard: 9.99, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 3}
+        expect: fail
+        note: in the required front yard
+      - given: {accessory_buildings: 1, accessory_front_yard: 10, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 3}
+        expect: pass
+        note: at the edge of the required front yard (10 ft)
+      - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: false, accessory_side_yard: 1, accessory_rear_yard: 1}
+        expect: pass
+        note: an accessory building that isn't frame, under the readings that give it no side or rear distance
+      - given: {accessory_buildings: 0}
+        expect: not_applicable
+    notes: >-
+      R-3aa is not an R-1 District, so §325-25C's first sentence applies: frame accessory buildings 3 ft from any side
+      or rear lot line (the "six feet" is R-1's only). Whether the distances apply to an accessory building that isn't
+      frame is §325-25C's open question (325-25C#1): accessory_distances_apply is measured under every reading, and
+      outside R-1 its readings differ for a building not stated as frame, so that gives NEEDS REVIEW until the
+      architect says the building is frame (accessory_frame). An accessory building is not a primary structure, so
+      note 2's footprint cap and the 2-story minimum's question are about the main building.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.abutting_r1
+    kind: flag
+    topic: dimensions
+    title: "Lots abutting R-1a or R-1b land: does §325-19E reach R-3aa?"
+    applies_when: >-
+      use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+      "two_family"] and abuts_r1_district
+    sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 50
+        lines: [12, 15]
+        quote: "E. Development in R-3 Districts which abut R-1 Districts. The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling, shall be subject to the following special conditions if the land on which the development occurs directly abuts land in either the R-1a or R-1b Zoning District:"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 50
+        lines: [16, 18]
+        quote: "(1) Minimum lot size (area in square feet): The required area in square feet needed to satisfy the minimum lot size requirement shall be 150% of the requirement shown on the District Regulations Chart for the R-3a or R-3b District."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 50
+        lines: [19, 20]
+        quote: "(2) Maximum building height: The maximum building height requirement shall be the same as the requirement for the abutting R-1a or R-1b District."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 50
+        lines: [21, 21]
+        quote: "(3) Maximum percent of lot coverage by buildings: The maximum percent of lot coverage by"
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 51
+        lines: [3, 4]
+        quote: "buildings shall be 75% of the requirement shown on the District Regulations Chart for the R-3a or R-3b District."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 51
+        lines: [5, 7]
+        quote: "(4) Yard dimensions, side or rear yards: The minimum required side or rear yard requirement shall be 150% of the requirement shown on the District Regulations Chart for the R-3a or R-3b District if the side or rear yard abuts land in the R-1a or R-1b District."
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [6, 6]
+        quote: "R-1 R-2 R-3 [fn1]"
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [44, 44]
+        quote: "NOTES: (1) For special conditions on development of property in R-3 that directly abuts R-1, see §325-9."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 27
+        lines: [9, 9]
+        quote: "(9) For special conditions on development of property in R-3 that directly abuts R-1, § 325-9B(1)."
+    examples:
+      - given: {use: multiple_family, abuts_r1_district: true}
+        expect: needs_review
+        note: whether §325-19E reaches R-3aa at all is open question 1, so it is not left out
+      - given: {use: multiple_family, abuts_r1_district: false}
+        expect: not_applicable
+        note: no R-1 land near the lot, so §325-19E can't apply under any reading
+      - given: {use: multiple_family}
+        expect: needs_review
+        note: whether the lot abuts R-1 land is not stated yet
+      - given: {use: fraternity_sorority_group_house, abuts_r1_district: true}
+        expect: needs_review
+      - given: {use: two_family, abuts_r1_district: true}
+        expect: not_applicable
+        note: '"except a one-family or two-family dwelling": exempt under every reading'
+      - given: {use: one_family_attached, abuts_r1_district: true}
+        expect: needs_review
+        note: whether an attached building of 3-6 houses is exempt is open question 3, so it is not exempted
+      - given: {use: one_family_semi_detached, abuts_r1_district: true}
+        expect: not_applicable
+    findings:
+    - id: one_family_configurations_exempt
+      question: '§325-19E exempts "a one-family or two-family dwelling". Does that include the semi-detached and
+        zero-lot-line configurations, which the chart lists as uses of their own?'
+      kind: reading
+      answer: 'Yes: §325-3B defines a one-family dwelling and lists detached, zero lot line and semidetached (a building
+        of at most two one-family dwellings) among its configurations, so they are exempt with the two-family dwelling.
+        The attached configuration (3 to 6 dwellings) is the third open question, still open.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [40, 41]
+        quote: A one-family dwelling may be constructed in any of the following configurations, as permitted in specific
+          zoning districts
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 8
+        lines: [7, 7]
+        quote: ONE-FAMILY SEMIDETACHED DWELLING — A building containing not more than two
+      still_open:
+      - R-3a.abutting_r1#2
+      - R-3aa.abutting_r1#3
+      - R-3b.abutting_r1#2
+      strength: strong
+      confirm_with: the City zoning office
+    open_questions:
+    - '§325-19E ("Development in R-3 Districts which abut R-1 Districts") names "the R-3a or R-3b Zoning District" and
+      sets its limits as percentages of "the requirement shown on the District Regulations Chart for the R-3a or R-3b
+      District", while chart note 1 ("property in R-3 that directly abuts R-1") sits on the chart''s R-3 heading, which
+      covers R-3A, R-3AA and R-3B. Does §325-19E apply to an R-3aa lot that abuts R-1a or R-1b land?'
+    - '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does only land
+      sharing a lot line with the R-3aa lot count, or also land across a street, an alley, a creek or other waterway, a
+      railroad or other right-of-way; and does land touching the lot only at a corner count?'
+    - 'A one-family attached dwelling is "a building containing three or more one-family dwellings" (§325-3B), and
+      §325-3B also calls a building of three or more dwelling units, a row house or a townhouse a multiple dwelling.
+      Is it the "one-family ... dwelling" §325-19E exempts, or a multiple dwelling §325-19E covers?'
+    research:
+    - question: '§325-19E ("Development in R-3 Districts which abut R-1 Districts") names "the R-3a or R-3b Zoning
+        District" and sets its limits as percentages of "the requirement shown on the District Regulations Chart for
+        the R-3a or R-3b District", while chart note 1 ("property in R-3 that directly abuts R-1") sits on the chart''s
+        R-3 heading, which covers R-3A, R-3AA and R-3B. Does §325-19E apply to an R-3aa lot that abuts R-1a or R-1b
+        land?'
+      searched:
+      - 325-19
+      - 325-19E
+      - 325-4
+      - 325-8B
+      - 325-9B
+      - 325-11B
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 50
+        lines: [12, 13]
+        quote: The development of any permitted use in the R-3a or R-3b Zoning District
+      - file: zoning_charts_2026-04.pdf
+        page: 3
+        lines: [44, 44]
+        quote: For special conditions on development of property in R-3 that directly abuts R-1
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 22
+        lines: [17, 19]
+        quote: R-3a Residential R-3aa Residential R-3b Residential
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 38
+        lines: [26, 27]
+        quote: Cluster subdivisions may only be permitted in the R-1a, R-1b, R-2a, R-2b, R-3a and R-3b Zoning Districts.
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 30
+        lines: [31, 31]
+        quote: (g) Hospitals or sanatoriums in R-3, CR-3, and CR-4 Districts.
+      - rank: 4
+        cite: 'Coalition letter to the Ithaca Common Council on the proposed Cornell Heights rezoning to R-3aa
+          (2014-01-31): it quotes R-3aa''s note 2 footprint cap, so R-3aa existed before §325-19E was added in 2019'
+        url: https://toxicstargeting.com/letters/2014/1/31/letter-to-ith-common-council
+        quote: No new construction of a primary structure in the R-3aa zone shall contain a footprint that is larger
+          than 120%
+      why_open: >-
+        The code points both ways. §325-19E's own words name only R-3a and R-3b, twice, and its limits are
+        figured from "the District Regulations Chart for the R-3a or R-3b District"; §325-4 lists R-3aa as a district
+        of its own, and §325-11B(1) shows the code naming R-3 districts one by one where it means some of them. R-3aa
+        existed when §325-19E was adopted (2019; a 2014 letter already quotes its note 2), so leaving it out may have
+        been deliberate. But §325-19E's heading and chart note 1 speak of "R-3" and "property in R-3", the chart's R-3
+        heading spans R-3AA, and elsewhere "R-3" means all three (§325-9B(1)(g)). No City record or BZA decision was
+        found (searched the City's agenda center and the web, 2026-10-25). Until it is answered, Gordium doesn't leave
+        §325-19E out of R-3aa (never a false pass): where the lot may abut R-1 land, the uses §325-19E covers need
+        review.
+      readings:
+      - id: applies_to_r3aa
+        reading: §325-19E applies in R-3aa as in R-3a and R-3b (the heading and chart note 1's "R-3")
+      - id: r3a_and_r3b_only
+        reading: §325-19E applies only in R-3a and R-3b, the districts it names
+    - question: '§325-19E applies where the lot "directly abuts land in either the R-1a or R-1b Zoning District". Does
+        only land sharing a lot line with the R-3aa lot count, or also land across a street, an alley, a creek or other
+        waterway, a railroad or other right-of-way; and does land touching the lot only at a corner count?'
+      searched:
+      - 325-19
+      - 325-19A
+      - 325-19E
+      - 325-6
+      - 325-6A
+      - 325-6D
+      - 325-6E
+      - 325-9B
+      - 325-11B
+      - 325-8B
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 31
+        lines: [26, 26]
+        quote: on a lot abutting or across a street or waterway from
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 39
+        lines: [17, 17]
+        quote: where it abuts land, other than a public right-of-way
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 23
+        lines: [26, 27]
+        quote: Where district boundaries are indicated as approximately following the center lines of streets or highways,
+          street lines or right-of-way lines, such lines shall be construed to be such boundaries
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 23
+        lines: [33, 34]
+        quote: D. Where the boundary of a district follows a railroad line, such boundary shall be deemed to be located
+          in the middle of the main tracts of said railroad.
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 23
+        lines: [35, 37]
+        quote: E. Where the boundary of a district follows a stream, lake or other body of water under public
+          jurisdiction, said boundary line shall be deemed to be at the limit of the jurisdiction, unless otherwise
+          indicated.
+      why_open: The same question as R-3a's (§5.5 on the questions page), if §325-19E reaches R-3aa (question 1). The
+        code points both ways. §325-9B(1)(j) says "abutting or across a street", which treats the two as different;
+        but §325-11B says "abuts land, other than a public right-of-way", which implies land in a street can be
+        abutting land. Whether R-1 land begins at the street's center line or at its far edge depends on the zoning map
+        (§325-6A allows either), and "directly" is not defined. No City record found. Until it is answered, the stated
+        fact abuts_r1_district asks it the cautious way (Gordium's reading, to confirm), yes when any R-1a or R-1b land
+        is touching the lot (even at a corner), or across a street, alley, creek or other waterway, railroad or other
+        right-of-way from it, so "no" is right under every reading.
+      readings:
+      - id: shares_a_lot_line
+        reading: only R-1a or R-1b land sharing a lot line with the lot counts
+      - id: across_a_street_counts
+        reading: R-1a or R-1b land across a street counts too
+      - id: across_any_right_of_way_counts
+        reading: R-1a or R-1b land across an alley, a creek or other waterway, a railroad or other right-of-way counts
+          too
+      - id: touching_at_a_corner_counts
+        reading: R-1a or R-1b land touching the lot only at a corner (a single point) counts
+    - question: 'A one-family attached dwelling is "a building containing three or more one-family dwellings" (§325-3B), and
+      §325-3B also calls a building of three or more dwelling units, a row house or a townhouse a multiple dwelling.
+      Is it the "one-family ... dwelling" §325-19E exempts, or a multiple dwelling §325-19E covers?'
+      searched:
+      - 325-19E
+      - 325-3B:dwelling_one_family
+      - 325-3B:one_family_attached_dwelling
+      - 325-3B:dwelling_multiple_or_multiple_residence
+      - 325-3B:row_house
+      - 325-3B:townhouse
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [40, 41]
+        quote: A one-family dwelling may be constructed in any of the following configurations, as permitted in specific
+          zoning districts
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 8
+        lines: [11, 12]
+        quote: ONE-FAMILY ATTACHED DWELLING — A building containing three or more one-family dwellings
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [24, 24]
+        quote: (1) A building containing three or more dwelling units.
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 7
+        lines: [33, 33]
+        quote: row house, townhouse, or garden apartment housing as defined in this section
+      why_open: The same question as R-3a's (§5.6 on the questions page), if §325-19E reaches R-3aa. The one-family
+        definition lists "attached" as one of its configurations, which points to exempt; but the same building of 3
+        to 6 dwellings is a multiple dwelling under definitions (1) and (5). The code reads both ways and no City
+        record was found, so Gordium doesn't exempt it (never a false pass).
+      readings:
+      - id: attached_is_exempt
+        reading: an attached building of one-family dwellings is exempt, as a one-family configuration
+      - id: attached_is_covered
+        reading: it is a multiple dwelling, so §325-19E applies
+    notes: >-
+      A flag, not checked yet: Gordium can't apply §325-19E's limits by itself, and whether they reach R-3aa is open.
+      Whether the lot abuts R-1a or R-1b land is stated by the architect (abuts_r1_district, asked the cautious way).
+      Unknown or yes sends the lot to review for every use §325-19E would cover; no means it can't apply. Worked by
+      hand for R-3aa, if §325-19E applies and the lot abuts R-1 land: lot size 150% of the chart's (multiple dwelling,
+      new construction, 1-3 units: 1.5 × 6,000 = 9,000 sf; other use 9,000 sf; fraternity 37,500 sf); height R-1's 35
+      ft, the same as R-3aa's own; coverage 75% × 35% = 26.25%; a side or rear yard that abuts R-1 land 150% of the
+      chart's: side 15 ft and 7.5 ft, rear 150% of 25% of the lot depth (at most 50, at least 20 ft) — 45 ft on a 120 ft
+      deep lot. The front yard is unchanged.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.parking_one_family
+    kind: rule
+    topic: parking_and_loading
+    title: "Minimum off-street parking, one-family detached (chart p.14)"
+    applies_when: use in ["one_family_detached", "one_family_detached_zero_lot_line"]
+    check: parking_spaces >= (1 if sleeping_rooms <= 3 else 2 + 1 * max(sleeping_rooms - 5, 0))
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [9, 10]
+        quote: "First three bed or sleeping rooms per dwelling 1 space per dwelling unit"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [12, 12]
+        quote: "4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [13, 13]
+        quote: "Each additional bed or sleeping room + 1 space per room"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Residential, row: First three bed or sleeping rooms per dwelling unit, column: R-3AA}
+    examples:
+      - given: {use: one_family_detached, sleeping_rooms: 3, parking_spaces: 1}
+        expect: pass
+      - given: {use: one_family_detached, sleeping_rooms: 3, parking_spaces: 0}
+        expect: fail
+      - given: {use: one_family_detached, sleeping_rooms: 4, parking_spaces: 2}
+        expect: pass
+      - given: {use: one_family_detached, sleeping_rooms: 4, parking_spaces: 1}
+        expect: fail
+      - given: {use: one_family_detached, sleeping_rooms: 6, parking_spaces: 3}
+        expect: pass
+      - given: {use: one_family_detached, sleeping_rooms: 6, parking_spaces: 2}
+        expect: fail
+      - given: {use: one_family_detached_zero_lot_line, sleeping_rooms: 4, parking_spaces: 2}
+        expect: pass
+        note: one dwelling unit too (§325-3B), so the same bedroom table
+      - given: {use: one_family_detached_zero_lot_line, sleeping_rooms: 4, parking_spaces: 1}
+        expect: fail
+      - given: {use: two_family, sleeping_rooms: 3, parking_spaces: 0}
+        expect: not_applicable
+        note: two dwelling units, see R-3aa.parking_dwelling_units
+    findings:
+    - id: adu_needs_no_parking
+      question: 'The requirement is per dwelling unit. R-3aa allows an accessory dwelling unit (chart p.2): does a house
+        with an ADU need parking for both units? (Not checked yet; ADUs aren''t measured.)'
+      kind: law
+      answer: 'No: an ADU needs no off-street parking (§325-28C(2)). The house''s own parking is unchanged.'
+      sources:
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 72
+        lines: [9, 9]
+        quote: There shall be no off-street parking requirement for an ADU
+      strength: strong
+      report: docs/research/2026-10-20_architect_questions.md §5.4
+    notes: >-
+      The residential parking rows span every residential district's column, so the numbers are R-1b's. The
+      sleeping_rooms measure counts one dwelling unit's rooms, so this rule is for the uses with exactly one
+      dwelling unit: a one-family detached house, and the zero-lot-line house, which §325-3B also calls a building of
+      "not more than one dwelling unit". Bedrooms and parking spaces are inside the building, so the panel lists this row as "not checked
+      yet: interior" until both are entered (parking is on hold).
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.parking_dwelling_units
+    kind: flag
+    topic: parking_and_loading
+    title: "Parking per dwelling unit for buildings of several units (chart p.14)"
+    applies_when: >-
+      use in ["one_family_semi_detached", "one_family_attached", "two_family", "multiple_family"]
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [9, 10]
+        quote: "First three bed or sleeping rooms per dwelling 1 space per dwelling unit"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [12, 12]
+        quote: "4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [13, 13]
+        quote: "Each additional bed or sleeping room + 1 space per room"
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Residential, row: First three bed or sleeping rooms per dwelling unit, column: R-3AA}
+    examples:
+      - given: {use: two_family}
+        expect: needs_review
+      - given: {use: multiple_family}
+        expect: needs_review
+      - given: {use: one_family_detached}
+        expect: not_applicable
+    notes: >-
+      The requirement is worked out for each dwelling unit and added up: worked by hand, a two-family house with a
+      2-bedroom and a 4-bedroom unit needs 1 + 2 = 3 spaces; six 2-bedroom apartments need 6. Gordium measures the
+      sleeping rooms of one dwelling unit only (sleeping_rooms), so it can't add them up yet: NEEDS REVIEW, added up by
+      hand.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.parking_other_uses
+    kind: flag
+    topic: parking_and_loading
+    title: "Parking for other uses: §325-20, an architect's judgment call"
+    applies_when: >-
+      use not in ["one_family_detached", "one_family_detached_zero_lot_line", "one_family_semi_detached",
+      "one_family_attached", "two_family", "multiple_family"]
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [24, 24]
+        quote: "NOTES: (1) For all other uses see §325-20."
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Residential, row: Dormitory, column: R-3AA}
+    examples:
+      - given: {use: fraternity_sorority_group_house}
+        expect: needs_review
+      - given: {use: one_family_detached}
+        expect: not_applicable
+    notes: >-
+      R-3AA's dormitory parking cell is "-" (a dormitory is not permitted in R-3aa, R-3aa.use), so a dormitory falls
+      here with the other uses: never a pass.
+    drafted_by: claude
+    status: draft
+
+  - id: R-3aa.loading
+    kind: flag
+    topic: parking_and_loading
+    title: "Off-street loading (chart p.14, §325-21)"
+    applies_when: >-
+      use in ["multiple_family", "dormitory", "fraternity_sorority_group_house", "nursing_home",
+      "hospital_or_sanitarium", "neighborhood_commercial_facility"]
+    sources:
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Minimum Loading Requirement, row: "Multiple dweling with 25 + units", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        lines: [26, 26]
+        quote: "(3) Plus 1 space for each additional 15,000 sf of floor space or major fraction thereof."
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Minimum Loading Requirement, row: "Nursing home, hospital, or sanitarium", column: R-3AA}
+      - file: zoning_charts_2026-04.pdf
+        page: 14
+        cell: {section: Minimum Loading Requirement, row: Neighborhood commercial facility, column: R-3AA}
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 63
+        lines: [41, 42]
+        quote: "A. Size requirements. An off-street loading space shall have a minimum of 450 square feet plus necessary additional space for entrance, exit and aisle space."
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 64
+        lines: [3, 4]
+        quote: "and industrial land uses and multiple dwelling structures having more than 25 units, except for properties located in any CBD district:"
+    examples:
+      - given: {use: multiple_family}
+        expect: needs_review
+      - given: {use: nursing_home}
+        expect: needs_review
+      - given: {use: two_family}
+        expect: not_applicable
+    notes: >-
+      The R-3A, R-3AA and R-3B columns share one cell per row. Multiple dwelling with 25+ units: 1 space per 10,000 sf
+      of floor space, plus 1 for each additional 15,000 sf or major fraction (note 3); nursing home, hospital or
+      sanitarium: 1 space; neighborhood commercial facility: see §325-21. Each space at least 450 sf (§325-21A).
+      Gordium counts neither units nor floor space, so these are NEEDS REVIEW, worked out by hand. (A dormitory is not
+      permitted in R-3aa; it is kept here so a dormitory design is never passed on loading either.)
+    drafted_by: claude
+    status: draft
