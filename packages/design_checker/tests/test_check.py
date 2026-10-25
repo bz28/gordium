@@ -2287,3 +2287,52 @@ def test_a_name_names_only_the_line_clicked_so_one_street_or_two_stays_a_questio
     assert logic.pick_street(s106, ["Ithaca Rd"] * 3, s106[1], "Ithaca Rd") == (s106, ["Ithaca Rd"] * 3)
     side = [[0, 0], [0, 50]]
     assert logic.pick_street(s106, None, side, "Mitchell St") == ([side], ["Mitchell St"])   # a line not among them
+
+
+def _plugin_functions(names, **extra):
+    """The plugin's own functions, run against stand-ins for Rhino (each from gordium_rhino.py as written)."""
+    import time as time_
+    from design_checker import rhino_logic as logic_
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    view = type("View", (), {"ActiveViewportID": "vp"})()
+    doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})()})()
+    ui_ = type("UI", (), {"STALE_SECONDS": 0.3, "text_box_size": staticmethod(lambda lines, size: (100, 20)),
+                          "show": staticmethod(lambda *a, **k: None)})
+    ns = {"time": time_, "logic": logic_, "ui": ui_, "STATE": {},
+          "Rhino": type("Rhino", (), {"RhinoDoc": type("RhinoDoc", (), {"ActiveDoc": doc})}),
+          "rg": type("rg", (), {"BoundingBox": type("BoundingBox", (), {"Empty": None})}),
+          "_model_on_screen": lambda o, viewport: None}
+    ns.update(extra)
+    for name in names:
+        exec(src[src.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
+    return ns
+
+
+def test_no_notice_outlives_the_model_it_was_about():
+    """The Rhino job at #28 92cf742: the red "Side yard, Southwest no longer complies …" notice of one scene stayed on
+    screen over the next house, back on its original footprint (a check that found nothing newly failing left the
+    earlier notice up for its 6 s). No verdict on screen may outlive its model: the notice goes with every new
+    check's clear, with another document, and is never drawn over a model changed since its check (as the rows
+    show no marks then)."""
+    ns = _plugin_functions(["_notice_box", "_clear", "_new_document", "stale"])
+    viewport = type("Viewport", (), {"Id": "vp", "Bounds": type("B", (), {"Width": 1000, "Height": 640})()})()
+    o = type("O", (), {})()
+    o.toast = (["Side yard, Southwest no longer complies"], ns["time"].time() + 6)
+    assert ns["_notice_box"](o, viewport, [], False)[0] == ["✕ Side yard, Southwest no longer complies"]
+    assert ns["_notice_box"](o, viewport, [], True) is None              # the model changed since: not drawn
+    ns["_clear"](o)                                                      # every check clears before it draws
+    assert o.toast is None and ns["_notice_box"](o, viewport, [], False) is None
+    o.toast = (["Rear yard no longer complies"], ns["time"].time() + 6)
+    ns["STATE"]["overlay"] = o
+    ns["_new_document"](None, None)                                      # another document in front
+    assert o.toast is None
+    now = ns["time"].time()                                              # stale: an edit after the check on screen
+    ns["STATE"].update(dirty=now - 1, last={"at": now - 2})
+    assert ns["stale"](o) is True
+    ns["STATE"].update(last={"at": now})
+    assert ns["stale"](o) is False
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    check = src[src.index("def run_check("):src.index("def _toast(")]
+    assert check.index("_clear(o)") < check.index('if result.get("notice"):')   # cleared, then the new notice
+    draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert "old = stale(o)" in draw and "_notice_box(o, e.Viewport, taken, old)" in draw
