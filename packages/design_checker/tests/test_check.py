@@ -2547,3 +2547,41 @@ def test_a_street_is_never_cut_short_unasked_by_a_curve_or_a_repeated_corner_poi
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     ask = rhino[rhino.index("def _ask_street_more(question):"):rhino.index("def _outline(doc, lot):")]
     assert "if go.Get() != Rhino.Input.GetResult.Option:\n        return None" in ask
+
+
+def test_a_corner_point_drawn_twice_is_never_a_street_of_its_own():
+    """Street-run review round 4, F1 (a Front yard false pass): a lot whose first corner is drawn twice has a
+    0.005 ft piece at the street; the suggestion (the lowest piece, a tie) or a click on it kept that piece alone as
+    the street, so the front yard was read from one corner point and complied 62 ft away. Now a piece no longer
+    than JOINT is never the suggestion, never clicked (the plugin takes the nearest real piece), and a click on one
+    changes nothing."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    corners = [(0, 0), (0.005, 0), (20, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)]
+    outline = _ring(corners)
+    segs = [tuple(map(tuple, x)) for x in outline]
+    got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
+    assert got["street_line"] == [list(map(list, x)) for x in outline[1:5]], got["street_line"]   # the real street
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    r = check_site(_plot(box(62, 5, 76, 45, 0, 25), lot_=lot_of(corners)), dict(base, street_line=got["street_line"]))
+    front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+    assert front["status"] != "complies", front
+    assert logic.street_run(outline, outline[0]) is None
+    assert logic.street_pick(outline, outline[0]) == ([], "that is a corner point drawn twice, not a lot line: click "
+                                                         "the lot line beside it")
+    runs, said = logic.add_street_pick([], outline, outline[0])
+    assert runs == [] and said.startswith("that is a corner point drawn twice")
+    old = [list(map(list, x)) for x in outline[1:5]]
+    assert logic.pick_street(old, None, outline[0], None, outline=outline) == (old, None)      # nothing changes
+    assert logic.pick_street(None, None, outline[0], None, outline=outline) == ([], None)
+    # a click on a short real piece beside a tiny one is that piece, not the tiny one (exact match first)
+    short_a, short_b = [[0, 0], [0.3, 0]], [[0.3, 0], [0.31, 0]]          # both within 0.5 ft of each other's ends
+    assert logic._piece_at([short_b, short_a], short_a, 0.5) == 1 and logic._piece_at([short_b], short_a, 0.5) == 0
+    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "if not logic.is_tiny([_feet_point(doc, s[0])[:2], _feet_point(doc, s[1])[:2]])]" in rhino
+    assert rhino.count("a, b = _clicked_piece(doc, lot, point)") == 3 and "min(_segments(lot.Geometry)" not in \
+        rhino.replace("return min(real or _segments(lot.Geometry)", "")

@@ -341,7 +341,8 @@ def suggested_facts(jurisdiction, zones, lots, buildings):
     if lot is not None:
         facts["lot_id"] = lot["id"]
         if lot["segments"]:
-            a, b = min(lot["segments"], key=lambda s: (s[0][1] + s[1][1]) / 2)
+            real = [s for s in lot["segments"] if not is_tiny(s)] or lot["segments"]   # (never a point drawn
+            a, b = min(real, key=lambda s: (s[0][1] + s[1][1]) / 2)                      # twice: round 4, F1)
             outline = [[[p[0], p[1]], [q[0], q[1]]] for p, q in lot["segments"]]
             run = street_run(outline, [[a[0], a[1]], [b[0], b[1]]], tolerance=0.0)
             # the whole street it is on (review round 1, F1: a tax-map street suggested as one piece), only when
@@ -801,9 +802,11 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
     lines = [list(map(list, line)) for line in old_lines or []]
     hits = [k for k, line in enumerate(lines)
             if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
+    if is_tiny(picked):
+        return lines, (list(old_ids) if _street_lines().matching_ids(lines, old_ids) else None)  # a point: no change
     if not hits:                                           # a line not among them: the street it is on
         names = outline_names(outline, lines, old_ids, tolerance)
-        at = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tolerance)), None)
+        at = _piece_at(outline, picked, tolerance)
         if at is not None:
             names[at] = name or None                       # the name on the clicked line only
             run, _ = street_pick(outline, picked, names, (), ask, name or "This street", tolerance)
@@ -814,7 +817,7 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, a
         ids[hits[0]] = name
     kept = street_lines_after_pick(lines, picked, tolerance, ids=ids)
     out = [ids[next(k for k, line in enumerate(lines) if line == q)] for q in kept]
-    at = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tolerance)), None)
+    at = _piece_at(outline, picked, tolerance)
     if at is not None:     # and the rest of the street it is on (a suggested one-piece street, clicked: round 1, F1)
         names = outline_names(outline, lines, ids, tolerance)
         run, _ = street_pick(outline, picked, names, (), ask, name or ids[hits[0]] or "This street", tolerance)
@@ -855,10 +858,27 @@ JOINT = 0.01      # ft: two pieces of one outline meet where they share an end (
                   # 106's 0.24 ft piece has both ends within 0.5 ft of its neighbours' ends)
 
 
+def is_tiny(line):
+    """A lot-line piece no longer than JOINT: a corner point drawn twice (or float noise), never a line of its
+    own (a street of it alone would be 0'-0" of frontage; street-run review rounds 3 and 4)."""
+    import math
+    return math.dist(line[0][:2], line[-1][:2]) <= JOINT
+
+
 def _same_piece(line, picked, tolerance):
     (a, b), (c, d) = (line[0], line[-1]), (picked[0], picked[-1])
     near = lambda p, q: abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance   # noqa: E731
     return (near(a, c) and near(b, d)) or (near(a, d) and near(b, c))
+
+
+def _piece_at(outline, picked, tolerance):
+    """The outline piece a click names: the one it is exactly (within JOINT), else the first within `tolerance`
+    (a short piece beside another short one is never mistaken for it)."""
+    for tol in (JOINT, tolerance):
+        k = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tol)), None)
+        if k is not None:
+            return k
+    return None
 
 
 def outline_names(outline, lines, ids, tolerance=0.5):
@@ -893,7 +913,7 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
     sl = _street_lines()
     pieces = [[list(line[0][:2]), list(line[-1][:2])] for line in outline or [] if len(line) >= 2]
     n = len(pieces)
-    hit = next((k for k, line in enumerate(pieces) if _same_piece(line, picked, tolerance)), None)
+    hit = _piece_at(pieces, picked, tolerance)
     taken = set(taken)
     if hit is None or hit in taken:
         return None
@@ -901,8 +921,9 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
     own = names[hit]
     near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
 
-    import math
-    tiny = [math.dist(a, b) <= JOINT for a, b in pieces]   # a repeated corner point (or float noise): no piece
+    tiny = [is_tiny(line) for line in pieces]   # a repeated corner point (or float noise): no piece
+    if tiny[hit]:                              # a point clicked, not a line: no street of it (round 4, F1)
+        return None
 
     def step(k, at, seen):
         """(the one real piece other than k, and those in `seen`, that meets k's end `at`; its far end; the tiny
@@ -1057,9 +1078,11 @@ def street_pick(outline, picked, names=None, taken=(), ask=None, label="This str
     ([], words) when the click is on a street already kept (`taken`); None when it isn't a piece of the outline."""
     found = street_run(outline, picked, names, taken, tolerance)
     if found is None:
-        hit = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tolerance)), None)
+        hit = _piece_at(outline, picked, tolerance)
         if hit is not None and hit in set(taken):
             return [], "that lot line is on a street already kept"
+        if hit is not None and is_tiny(outline[hit]):
+            return [], "that is a corner point drawn twice, not a lot line: click the lot line beside it"
         return None
     run, closed, skipped = list(found["pieces"]), set(), False
     while True:            # each unclear stretch asked in turn; a Yes grows the street on from there, a No ends it
@@ -1088,7 +1111,7 @@ def add_street_pick(runs, outline, picked, names=None, ask=None, tolerance=0.5):
     """A corner lot's street side, one click at a time: (`runs` with the clicked street's run added, what to say).
     Each click keeps the whole street it is on (street_pick), never one already kept; the street is called by its
     known name, else "Street 1", "Street 2"... in click order."""
-    hit = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tolerance)), None)
+    hit = _piece_at(outline, picked, tolerance)
     own = names[hit] if hit is not None and isinstance(names, list) and len(names) == len(outline) else None
     label = own or f"Street {len(runs) + 1}"
     got = street_pick(outline, picked, names, {k for run in runs for k in run}, ask, label, tolerance)
