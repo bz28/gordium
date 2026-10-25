@@ -2565,9 +2565,9 @@ def _lock_context(doc, locked):
     top = doc.Layers.FindByFullPath(logic.CONTEXT, -1)
     if top < 0 or doc.Layers[top].IsLocked or _parent_locked(doc, doc.Layers[top]):
         return                              # under a locked "Gordium" each own lock is already recorded
-    doc.Layers[top].IsLocked = True         # a moment: its sublayers can record their own locks
-    if not doc.Layers[top].IsLocked:        # refused (Rhino never locks the current layer or one above it: the
-        return                              # architect working on Buildings): the locks stand as set above
+    doc.Layers[top].IsLocked = True         # a moment: its sublayers can record their own locks (refused when the
+    #                                         architect's current layer is under it: nothing is recorded, the locks
+    #                                         set above stand)
     for i in indexes:
         if i != top:
             doc.Layers[i].SetPersistentLocking(bool(locked) and logic.context_locked(doc.Layers[i].FullPath))

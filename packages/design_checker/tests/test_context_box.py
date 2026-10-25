@@ -1403,6 +1403,7 @@ def _probe_on_fake(case):
         sub.SetPersistentLocking(True)
     rows = [["sub set", state()]]
     if case == "mid_relock":
+        sub.IsLocked = True
         mid.IsLocked = True
         if not sub.IsLocked:
             sub.IsLocked = True
@@ -1463,10 +1464,12 @@ def test_drawn_with_gordium_unlocked_the_neighbourhood_stays_locked_when_the_arc
 
 
 def test_with_the_footprints_layer_current_the_locks_stand_and_nothing_breaks():
-    """Review of the moment's lock (P3): Rhino never locks the current layer or a layer above it, so with the
-    architect working on Gordium::Context::Buildings the moment's lock of Gordium::Context is refused. The locks set
-    stand (Parcels, Streets, Notes locked; Buildings, Context not), no own lock is half written, nothing raises; once
-    another layer is current, the next lock records them."""
+    """Review of the moment's lock (P3), the situation pinned: Rhino never locks the current layer or a layer above it
+    (general Rhino behaviour, modelled by the fake's current layer; not yet probed), so with the architect working on
+    Gordium::Context::Buildings the moment's lock of Gordium::Context is refused. Nothing is recorded (as
+    SetPersistentLocking with the parent unlocked: lock_probe_994012d.json), the locks set stand (Parcels, Streets,
+    Notes locked; Buildings, Context not), nothing raises; once another layer is current, the next lock records
+    them."""
     ns = _clear_ns()
     doc, grade = _locked_gordium_doc()
     doc.Layers.current = logic.CONTEXT + "::Buildings"

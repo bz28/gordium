@@ -15,7 +15,8 @@ Sub's (and Mid's) IsLocked and own lock (GetPersistentLocking) after every step.
    _set_own_lock does), the top unlocked (Sub locked?), then
    locked and unlocked again: does locking a parent clear a recorded own lock? (At 994012d: no, it is kept.)
 5. nested_is_locked, nested_relock: cases 1 and 4 with Mid between the top and Sub.
-5b. mid_relock: Gordium's own route (gordium_rhino._lock_context): Mid locked for a moment, Sub given its own lock
+5b. mid_relock: Gordium's own route (gordium_rhino._lock_context): Sub locked, Mid locked for a moment, Sub given
+   its own lock
    (locked if it isn't, then SetPersistentLocking(True)), Mid unlocked; then the top locked and unlocked: is Sub's
    own lock, recorded under Mid, kept through the top's lock and unlock?
 6. Manual only, never in a scripted run (CASES leaves them out: a scripted -_Layer waits at the command line):
@@ -89,6 +90,7 @@ def probe(case):
         doc.Layers[sub].SetPersistentLocking(True)
     rows.append(["sub set", state(sub, mid)])
     if case == "mid_relock":
+        doc.Layers[sub].IsLocked = True             # as _lock_context's first pass, then the moment's lock
         doc.Layers[mid].IsLocked = True
         if not doc.Layers[sub].IsLocked:
             doc.Layers[sub].IsLocked = True
