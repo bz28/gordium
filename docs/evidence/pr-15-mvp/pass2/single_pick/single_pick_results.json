@@ -1,0 +1,76 @@
+{
+ "head": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/bdb07cc0-1635-44d8-9b5a-34b881c6c09f/scratchpad/rhino_ui/extract_c37738a",
+ "claims": {
+  "0 the sample: 8 street lines, each on Ithaca Rd": {
+   "ok": true,
+   "detail": {
+    "lines": 8,
+    "ids": [
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd"
+    ],
+    "street_name": "Ithaca Rd"
+   }
+  },
+  "1 the clicked line's street is known (no question on the command line)": {
+   "ok": true,
+   "detail": "Ithaca Rd"
+  },
+  "2 one line clicked: the whole street kept, Ithaca Rd on all 8 lines": {
+   "ok": true,
+   "detail": {
+    "lines": 8,
+    "ids": [
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd",
+     "Ithaca Rd"
+    ],
+    "street_name": "Ithaca Rd"
+   }
+  },
+  "3 the Street side row still reads Ithaca Rd": {
+   "ok": true,
+   "detail": "Ithaca Rd"
+  }
+ },
+ "before": {
+  "lines": 8,
+  "ids": [
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd"
+  ],
+  "street_name": "Ithaca Rd"
+ },
+ "after": {
+  "lines": 8,
+  "ids": [
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd",
+   "Ithaca Rd"
+  ],
+  "street_name": "Ithaca Rd"
+ },
+ "ok": true
+}
