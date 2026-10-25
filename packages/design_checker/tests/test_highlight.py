@@ -49,3 +49,16 @@ def test_the_scenarios_count_regions_as_the_plan_shows_them_not_blocks_per_floor
     assert len(regions(apart)) == 2                                  # two strips apart: two regions
     beside = floors[:1] + [dict(floors[0], outline=[[4, 0], [8, 0], [8, 10], [4, 10]], status="needs_review")]
     assert sorted(r["status"] for r in regions(beside)) == ["does_not_comply", "needs_review"]   # each colour
+
+
+def test_the_drawn_list_carries_what_each_piece_is_for_so_the_checks_read_what_is_drawn():
+    """The Rhino check of #28 read the rear yard's amber strip as the side yard's (the claims and the screen seemed
+    to disagree). Each drawn piece now carries its row, why and building (one list: drawn and read)."""
+    from rule_format.rulebook import REPO
+    entry = {"outline": [], "why": "yard", "measure": "rear_yard", "row": "Rear yard", "building": "house",
+             "status": "needs_review", "base": 0, "top": 20}
+    assert logic.coloured_info(entry) == {"why": "yard", "measure": "rear_yard", "row": "Rear yard",
+                                          "building": "house"}
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    assert "o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))" in src
+    assert 'for g, status, _ in getattr(o, "encroach", None) or []:' in src           # draw_scene draws that list

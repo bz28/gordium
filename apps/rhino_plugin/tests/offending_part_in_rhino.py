@@ -1,21 +1,28 @@
 #! python3
-"""Only the offending part is coloured (Ben, 2026-10-21), in Rhino 8, each claim asserted (the run fails loudly
-otherwise). Run in Rhino, not in CI: the blocks are tested in CI (packages/design_checker/tests/test_present.py,
-test_highlight.py); what only Rhino can show is the cut of the solid itself (Rhino's boolean intersection).
+"""Only the offending part is coloured (Ben, 2026-10-21), in Rhino 8. Every claim is recorded (the run goes on past
+a failing one) and the run fails at the end if any did. Run in Rhino, not in CI: the blocks are tested in CI
+(packages/design_checker/tests/test_present.py, test_highlight.py); what only Rhino can show is the cut of the solid
+itself (Rhino's boolean intersection). The claims read the drawn list itself, overlay().encroach: each piece with
+its status and what it is for (its row, why, building: rhino_logic.coloured_info), so the rear yard's strip is never
+taken for the side yard's.
 A fresh feet document, GordiumStart on the sample (106 Ithaca Rd, tax-map lot: lines ±2'-0"), then the starting
-house replaced by one solid of the architect's:
-1. A cantilever. A 20 ft house where the starting house stood, its upper half (10 to 20 ft) reaching 6 ft out
-   toward the left lot line (one closed solid, L-shaped in section). The left side yard is measured to the
-   cantilever and does not comply. Claims: the side yard fails; every red and amber piece is the cantilever's
-   own (each piece's bottom at 10 ft, never the ground under it: the uncut block would start at 0); red and amber
-   both drawn; nothing coloured past the cantilever (each piece inside the solid's own box).
-2. A gable roof over the height limit. The same footprint, walls to 30 ft, the ridge at 46 ft (average 38 ft,
-   over the 35 ft limit). Claims: the height row is coloured (red or amber, its status's colour); every piece
-   starts at the limit (35 ft above the lot); the pieces' volume is the roof's wedge above the limit (half the
-   block's: the uncut block is twice it), within 5 %; the eaves (wall tops at 30 ft) are not coloured.
+house replaced by one solid of the architect's. Points are placed by their distance from the left lot line (the
+real lot's line is slanted) and tested inside or outside the coloured pieces:
+1. A cantilever, amber. A 20 ft house where the starting house stood (its wall 12'-0 5/8" from the left line), its
+   upper half (10 to 20 ft) reaching 6 ft out toward that line. The left side yard needs review (to the wall it
+   complies, to the cantilever it doesn't): amber. Claims: the row needs review; its pieces amber only; a point in
+   the cantilever (11 ft from the line, 15 ft up) is coloured; the point under it (11 ft, 5 ft up) is not.
+2. A cantilever, red. The same house moved 5 ft toward the line (its wall 7'-0 5/8" from it), its cantilever 4 ft:
+   short under every reading. Claims: the row does not comply; red and amber both drawn for it; in the
+   cantilever (5 ft from the line, 15 ft up) red; under it (5 ft, 5 ft up) nothing; the house's own wall strip
+   7.5 ft from the line, 5 ft up, red (within 8 ft: short however the line lies); 10 ft from it, amber.
+3. A gable over the height limit. Walls to 30 ft, ridge 46 ft. Claims: the height row coloured in its colour; a
+   point near the ridge (42 ft up) coloured by a height piece; a point at the eaves (31 ft up) not; the height
+   pieces' volume is the wedge above the limit, within 5 % (the uncut block would be twice it).
 Captures Perspective and Front for each. Writes <temp>/gordium_offending/out.json and frames/*.png; closes its
 document."""
 import json
+import math
 import os
 import sys
 import tempfile
@@ -33,11 +40,12 @@ S = os.path.join(tempfile.gettempdir(), "gordium_offending") + "/"
 WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 os.makedirs(S + "frames", exist_ok=True)
 log = {"claims": {}}
+SIDE = "Side yard, Southwest"          # the sample's left side yard, seen from the street
 
 
 def claim(name, ok, detail=None):
+    """Recorded, never stopping the run (the Rhino check of #28 asked for every claim)."""
     log["claims"][name] = {"ok": bool(ok), "detail": detail}
-    assert ok, "%s: %s" % (name, detail)
 
 
 def fresh_module():
@@ -69,7 +77,7 @@ def capture(doc, view_name, name):
 
 
 def section_solid(doc, profile, y0, y1):
-    """A closed solid: `profile` (x, z points, feet, closed) in the plane y = y0, swept to y1."""
+    """A closed solid: `profile` (x, z points, model units, closed) in the plane y = y0, swept to y1."""
     pts = [rg.Point3d(x, y0, z) for x, z in profile]
     pts.append(pts[0])
     srf = rg.Surface.CreateExtrusion(rg.PolylineCurve(pts), rg.Vector3d(0, y1 - y0, 0))
@@ -80,7 +88,7 @@ def section_solid(doc, profile, y0, y1):
 
 
 def replace_house(g, doc, brep):
-    """The architect's own solid, on the starting house's layer, in place of every Gordium floor."""
+    """The architect's own solid, on the starting house's layer, in place of every building there."""
     olds = list(g._buildings(doc))
     attrs = Rhino.DocObjects.ObjectAttributes()
     attrs.LayerIndex = olds[0].Attributes.LayerIndex
@@ -90,79 +98,125 @@ def replace_house(g, doc, brep):
     return doc.Objects.AddBrep(brep, attrs)
 
 
-def pieces(g):
-    return [(b, s) for b, s in g.overlay().encroach]
+def colour_at(g, doc, point, why=None, row=None):
+    """The statuses of the drawn pieces containing `point` (only pieces for `why` / `row` when given)."""
+    tol = doc.ModelAbsoluteTolerance
+    return sorted({s for b, s, info in g.overlay().encroach
+                   if (why is None or info.get("why") == why) and (row is None or info.get("row") == row)
+                   and b.IsPointInside(point, tol, False)})
 
 
 doc = None
 try:
     g = fresh_module()
-    tests = TestDocs("offending")
-    doc = tests.__enter__().open("Large Objects - Feet")
+    doc = TestDocs("offending").__enter__().open("Large Objects - Feet")
     g.gordium_check()                                    # GordiumStart's flow on the sample
     k = 1.0 / g._scale(doc)                              # feet -> model units (1 in a feet file)
     box = rg.BoundingBox.Empty
     for o in g._buildings(doc):
         box.Union(o.Geometry.GetBoundingBox(True))
     x0, x1, y0, y1, z0 = box.Min.X, box.Max.X, box.Min.Y, box.Max.Y, box.Min.Z
+    ym = (y0 + y1) / 2
     log["house_box_ft"] = [x0 / k, x1 / k, y0 / k, y1 / k, z0 / k]
+    ring = g.ask({"cmd": "sample_site"})["lot"]
+    edges = [(ring[i], ring[(i + 1) % len(ring)]) for i in range(len(ring))]
+    left = min((e for e in edges if math.dist(e[0], e[1]) > 50), key=lambda e: e[0][0] + e[1][0])
 
-    # 1. the cantilever
+    def from_line(x, y):
+        """Feet from the left lot line to the model point (x, y)."""
+        (ax, ay), (bx, by) = left
+        px, py = x / k, y / k
+        t = max(0.0, min(1.0, ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / ((bx - ax) ** 2 + (by - ay) ** 2)))
+        return math.dist((px, py), (ax + t * (bx - ax), ay + t * (by - ay)))
+
+    def at(feet, z_ft, xs=None):
+        """A model point at mid-depth of the house, `feet` from the left line, `z_ft` above the house's base."""
+        x = xs if xs is not None else x1
+        while x > x0 - 20 * k and from_line(x, ym) > feet:
+            x -= 0.01 * k
+        return rg.Point3d(x, ym, z0 + z_ft * k)
+
+    def scene(name, profile, dx=0.0):
+        solid = section_solid(doc, profile, y0, y1)
+        if dx:
+            solid.Translate(rg.Vector3d(dx, 0, 0))
+        claim(name + " the house is one closed solid", solid.IsSolid, solid.IsValid)
+        replace_house(g, doc, solid)
+        g.run_check(doc, report=False)
+        items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
+        log[name] = {"pieces": [(s, info) for _, s, info in g.overlay().encroach]}
+        return items
+
+    # 1. the cantilever, amber (needs review)
     out = 6 * k
-    profile = [(x0, z0), (x1, z0), (x1, z0 + 20 * k), (x0 - out, z0 + 20 * k), (x0 - out, z0 + 10 * k), (x0, z0 + 10 * k)]
-    solid = section_solid(doc, profile, y0, y1)
-    claim("1 the cantilevered house is one closed solid", solid.IsSolid, solid.IsValid)
-    replace_house(g, doc, solid)
-    g.run_check(doc, report=False)
-    items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
-    west = items.get("Side yard, Southwest") or {}
-    claim("1 the left side yard is measured to the cantilever and does not comply",
-          west.get("status") == "does_not_comply", west)
-    got = pieces(g)
-    log["cantilever"] = [(s, [round(v / k, 3) for v in (b.GetBoundingBox(True).Min.X, b.GetBoundingBox(True).Min.Z,
-                                                        b.GetBoundingBox(True).Max.X, b.GetBoundingBox(True).Max.Z)])
-                         for b, s in got]
-    claim("1 red and amber both drawn", {s for _, s in got} == {"does_not_comply", "needs_review"}, log["cantilever"])
-    proud = 0.1 * k
-    claim("1 every coloured piece is the cantilever's own: its bottom at 10 ft, never the ground under it",
-          got and all(b.GetBoundingBox(True).Min.Z >= z0 + 10 * k - proud for b, _ in got), log["cantilever"])
-    claim("1 nothing coloured outside the solid", all(
-        b.GetBoundingBox(True).Min.X >= x0 - out - proud and b.GetBoundingBox(True).Max.Z <= z0 + 20 * k + proud
-        for b, _ in got), log["cantilever"])
-    capture(doc, "Perspective", "1_cantilever_perspective")
-    capture(doc, "Front", "1_cantilever_front")
+    items = scene("1", [(x0, z0), (x1, z0), (x1, z0 + 20 * k), (x0 - out, z0 + 20 * k), (x0 - out, z0 + 10 * k),
+                        (x0, z0 + 10 * k)])
+    side = items.get(SIDE) or {}
+    claim("1 the left side yard needs review (to the wall it complies, to the cantilever not)",
+          side.get("status") == "needs_review", side)
+    mine = {s for _, s, info in g.overlay().encroach if info.get("row") == SIDE}
+    claim("1 its pieces are amber only", mine == {"needs_review"}, sorted(mine))
+    wall = from_line(x0, ym)                             # the wall at mid-depth (the line is slanted)
+    inside, under = at(wall - 1, 15), at(wall - 1, 5)
+    log["1"].update(wall_ft=wall, inside=str(inside), under=str(under))
+    claim("1 the cantilever is coloured (1 ft out from the wall, 15 ft up)",
+          colour_at(g, doc, inside, row=SIDE) == ["needs_review"], colour_at(g, doc, inside))
+    claim("1 the air under it is not (1 ft out from the wall, 5 ft up)", colour_at(g, doc, under) == [],
+          colour_at(g, doc, under))
+    capture(doc, "Perspective", "1_cantilever_amber_perspective")
+    capture(doc, "Front", "1_cantilever_amber_front")
 
-    # 2. the gable roof over the height limit
+    # 2. the cantilever, red (does not comply): the house 5 ft nearer the line, a 4 ft cantilever
+    out = 4 * k
+    items = scene("2", [(x0, z0), (x1, z0), (x1, z0 + 20 * k), (x0 - out, z0 + 20 * k), (x0 - out, z0 + 10 * k),
+                        (x0, z0 + 10 * k)], dx=-5 * k)
+    side = items.get(SIDE) or {}
+    claim("2 the left side yard does not comply", side.get("status") == "does_not_comply", side)
+    mine = {s for _, s, info in g.overlay().encroach if info.get("row") == SIDE}
+    claim("2 red and amber both drawn for it", mine == {"does_not_comply", "needs_review"}, sorted(mine))
+    start = x1 - 5 * k
+    wall = from_line(x0 - 5 * k, ym)                     # the moved wall at mid-depth
+    log["2"]["wall_ft"] = wall
+    checks = {"in the cantilever (2 ft out from the wall, 15 ft up): red": (at(wall - 2, 15, start), ["does_not_comply"]),
+              "under the cantilever (2 ft out, 5 ft up): nothing": (at(wall - 2, 5, start), []),
+              "the house's own strip within 8 ft of the line (5 ft up): red": (at((wall + 8) / 2, 5, start),
+                                                                               ["does_not_comply"]),
+              "past 8 ft (10 ft from the line, 5 ft up): amber": (at(10, 5, start), ["needs_review"])}
+    for what, (point, want) in checks.items():
+        got = colour_at(g, doc, point, row=SIDE) if want else colour_at(g, doc, point)
+        claim("2 " + what, got == want, {"point": str(point), "from_line_ft": round(from_line(point.X, point.Y), 3),
+                                         "got": got})
+    capture(doc, "Perspective", "2_cantilever_red_perspective")
+    capture(doc, "Front", "2_cantilever_red_front")
+
+    # 3. the gable over the height limit (back where the starting house stood)
     mid = (x0 + x1) / 2
-    profile = [(x0, z0), (x1, z0), (x1, z0 + 30 * k), (mid, z0 + 46 * k), (x0, z0 + 30 * k)]
-    replace_house(g, doc, section_solid(doc, profile, y0, y1))
-    g.run_check(doc, report=False)
-    items = {i["name"]: i for i in (g.STATE.get("last") or {}).get("items", [])}
+    items = scene("3", [(x0, z0), (x1, z0), (x1, z0 + 30 * k), (mid, z0 + 46 * k), (x0, z0 + 30 * k)])
     height = items.get("Building height") or {}
-    env = (g.STATE.get("last") or {}).get("envelope") or {}
-    limit = env.get("top")
-    log["height"] = {"row": height, "limit_ft": limit}
-    claim("2 the height row needs colour (it does not comply, or needs review)",
-          height.get("status") in ("does_not_comply", "needs_review"), height)
-    got = [(b, s) for b, s in pieces(g) if s == height.get("status")]
-    claim("2 the roof is coloured in the height row's colour", bool(got), [s for _, s in pieces(g)])
-    claim("2 every piece starts at the height limit, never at the eaves (30 ft)",
-          limit is not None and all(b.GetBoundingBox(True).Min.Z >= limit * k - proud for b, _ in got),
-          [round(b.GetBoundingBox(True).Min.Z / k, 3) for b, _ in got])
-    volume = sum(rg.VolumeMassProperties.Compute(b).Volume for b, _ in got) / k ** 3
-    rise = 46 - (limit - z0 / k) if limit is not None else None          # ft of roof above the limit
-    width = (x1 - x0) / k * rise / 16 if rise else None                   # the roof's width at the limit
-    wedge = 0.5 * width * rise * (y1 - y0) / k if rise else None
-    log["height"].update(volume=volume, wedge=wedge)
-    claim("2 the coloured volume is the roof's wedge above the limit (within 5 %; the uncut block is twice it)",
-          wedge and abs(volume - wedge) <= 0.05 * wedge, {"volume": volume, "wedge": wedge})
-    capture(doc, "Perspective", "2_gable_perspective")
-    capture(doc, "Front", "2_gable_front")
-    log["ok"] = all(c["ok"] for c in log["claims"].values())
+    limit = ((g.STATE.get("last") or {}).get("envelope") or {}).get("top")
+    claim("3 the height row needs colour", height.get("status") in ("does_not_comply", "needs_review"), height)
+    tops = [(b, s) for b, s, info in g.overlay().encroach if info.get("why") == "height"]
+    claim("3 its pieces in its colour", tops and {s for _, s in tops} == {height.get("status")},
+          [s for _, s in tops])
+    ridge, eaves = rg.Point3d(mid, ym, z0 + 42 * k), rg.Point3d(x0 + 0.5 * k, ym, z0 + 31 * k)
+    claim("3 near the ridge (42 ft up) coloured", colour_at(g, doc, ridge, why="height") == [height.get("status")],
+          colour_at(g, doc, ridge))
+    claim("3 at the eaves (31 ft up) not", colour_at(g, doc, eaves, why="height") == [], colour_at(g, doc, eaves))
+    volume = sum(rg.VolumeMassProperties.Compute(b).Volume for b, _ in tops) / k ** 3
+    rise = 46 - (limit - z0 / k) if limit is not None else None
+    wedge = 0.5 * ((x1 - x0) / k * rise / 16) * rise * (y1 - y0) / k if rise else None
+    claim("3 the height pieces' volume is the wedge above the limit (within 5 %)",
+          wedge and abs(volume - wedge) <= 0.05 * wedge, {"volume": volume, "wedge": wedge, "limit": limit})
+    capture(doc, "Perspective", "3_gable_perspective")
+    capture(doc, "Front", "3_gable_front")
 except Exception:
     log["trace"] = traceback.format_exc()
-    raise
 finally:
+    log["passed"] = sum(c["ok"] for c in log["claims"].values())
+    log["ok"] = bool(log["claims"]) and log["passed"] == len(log["claims"]) and "trace" not in log
     json.dump(log, open(S + "out.json", "w", encoding="utf-8"), default=str, indent=1)
     if doc is not None:
         close(doc)
+print("offending_part_in_rhino: %d of %d claims pass%s" % (log["passed"], len(log["claims"]),
+                                                          "" if "trace" not in log else " (stopped: see trace)"))
+assert log["ok"], [n for n, c in log["claims"].items() if not c["ok"]] or log.get("trace")

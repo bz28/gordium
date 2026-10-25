@@ -120,6 +120,13 @@ def highlight(status):
     return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
 
 
+def coloured_info(entry):
+    """What a coloured piece is, kept with it in the drawn list: why (yard or height), the row it is for (its
+    measure and name) and its building, from the plan's block (check.plan). The in-Rhino checks read exactly the
+    list that is drawn, so a claim can't mistake the rear yard's strip for the side yard's (Rhino check of #28)."""
+    return {k: entry.get(k) for k in ("why", "measure", "row", "building")}
+
+
 def offending_pieces(pieces, block):
     """What a coloured block draws: the building's own part inside it (Rhino's boolean intersection, `pieces`), or
     the block itself when the intersection gave nothing (it failed, or the building is a block instance or a

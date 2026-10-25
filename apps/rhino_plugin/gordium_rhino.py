@@ -484,7 +484,7 @@ def draw_scene(o, e):
     for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
         d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
     if not old:                              # after the envelope, so its blue never tints them (F5)
-        for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
+        for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
             name = logic.highlight(status)
             colour = ui.HIGHLIGHT[name]
             d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
@@ -2099,7 +2099,9 @@ def _draw_plan(doc, o, result, facts):
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
     o.yard_dims =[(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
-    o.encroach = [(_proud(doc, piece), status)                           # coloured from the rule's result only
+    # what is drawn, each piece with its rule and building: the one list draw_scene draws and the in-Rhino checks
+    # read (logic.coloured_info)
+    o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
                   for e, status in ((e, e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
                   if logic.highlight(status) for piece in _offending(doc, e)]
     # every line a label must stay off (model space): the yard dimensions, the lot's edges, the house's edges
