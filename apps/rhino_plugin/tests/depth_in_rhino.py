@@ -33,8 +33,8 @@ log = {"claims": {}}
 
 
 def claim(name, ok, detail=None):
+    """Recorded, never stopping the run (every claim is reported; the run fails at the end if any did)."""
     log["claims"][name] = {"ok": bool(ok), "detail": detail}
-    assert ok, "%s: %s" % (name, detail)
 
 
 def fresh_module():
@@ -163,11 +163,14 @@ try:
     log["height_pixels"] = hits
     claim("4 the see-through envelope never hides it: most of its length shows in its colour (Shaded Front)",
           hits and sum(hits) >= 0.8 * len(hits), hits)
-    log["ok"] = all(c["ok"] for c in log["claims"].values())
 except Exception:
     log["trace"] = traceback.format_exc()
-    raise
 finally:
+    log["passed"] = sum(c["ok"] for c in log["claims"].values())
+    log["ok"] = bool(log["claims"]) and log["passed"] == len(log["claims"]) and "trace" not in log
     json.dump(log, open(S + "out.json", "w", encoding="utf-8"), default=str, indent=1)
     if doc is not None:
         close(doc)
+print("depth_in_rhino: %d of %d claims pass%s" % (log["passed"], len(log["claims"]),
+                                                 "" if "trace" not in log else " (stopped: see trace)"))
+assert log["ok"], [n for n, c in log["claims"].items() if not c["ok"]] or log.get("trace")
