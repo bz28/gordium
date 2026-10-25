@@ -160,8 +160,9 @@ def legend_text(code=None):
     (the code-edition line, no longer in the panel's header)."""
     text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
             "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard "
-            "dimensioned from the building's nearest point to its lot line in its row's colour, with the required "
-            "line faint across it, and in the elevations the height, dimensioned up from the grade plane, with the "
+            "dimensioned square to its lot line from the middle of the wall that comes nearest it, in its row's "
+            "colour, labelled with the yard as measured (its closest point), with the required line faint across it "
+            "(two where the limit depends on an open measurement), and in the elevations the height, dimensioned up from the grade plane, with the "
             "limit faint. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
@@ -465,6 +466,7 @@ def label_width(text, size):
 
 
 DIM_TICK_PX = 10        # a dimension's architectural tick: this long on screen, at 45° to its line
+HALO_PX = 1           # a dimension's halo: this many pixels each side of its line
 FAINT_ALPHA = 110       # the required line, faint: the status colour at this opacity (of 255)
 
 

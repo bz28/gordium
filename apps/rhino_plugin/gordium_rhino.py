@@ -551,11 +551,16 @@ def _in_active_view(e):
 
 
 def _dimension(d, viewport, line, color):
-    """A drawing-style dimension on screen: its line and an architectural tick at 45° across each end."""
+    """A drawing-style dimension on screen: its line and an architectural tick at 45° across each end, each on a
+    thin halo (dark on a light viewport, light on a dark one) so it reads over the red and amber it often crosses
+    (the failing yard's dimension, the one that matters most: Rhino check of #29). Drawn on screen after the model
+    (DrawForeground), so always above the highlight."""
     a, b = viewport.WorldToClient(line.From), viewport.WorldToClient(line.To)
-    d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 2)
-    for (x0, y0), (x1, y1) in logic.dim_ticks((a.X, a.Y), (b.X, b.Y)):
-        d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), color, 2)
+    strokes = [((a.X, a.Y), (b.X, b.Y))] + logic.dim_ticks((a.X, a.Y), (b.X, b.Y))
+    halo = ui.halo(ui.viewport_dark())
+    for ink, width in ((halo, 2 + 2 * logic.HALO_PX), (color, 2)):          # the halo under, the line over it
+        for (x0, y0), (x1, y1) in strokes:
+            d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), ink, width)
 
 
 def draw_screen(o, e):
@@ -2126,8 +2131,8 @@ def _draw_plan(doc, o, result, facts):
     o.yard_dims = [(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
     # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
-    o.yard_required = [(rg.Line(_model_point(doc, y["required_line"][0], 0.1), _model_point(doc, y["required_line"][1], 0.1)),
-                        y["status"]) for y in plan.get("yards") or [] if y.get("points") and y.get("required_line")]
+    o.yard_required = [(rg.Line(_model_point(doc, r[0], 0.1), _model_point(doc, r[1], 0.1)), y["status"])
+                       for y in plan.get("yards") or [] if y.get("points") for r in y.get("required_lines") or []]
     h = plan.get("height")
     o.height_dim = (rg.Line(_model_point(doc, h["at"], h["base"]), _model_point(doc, h["at"], h["top"])), h["label"],
                     h["status"], _model_point(doc, h["at"], h["limit"]) if h.get("limit") is not None else None) \

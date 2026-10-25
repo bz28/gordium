@@ -284,8 +284,10 @@ us which step showed it. Zoning report… should open the report in Excel (or yo
    - only the offending part of the building is coloured: the part inside a required yard, or above the height
      limit. Red where it fails under every reading; amber where it fails only under some (for example within the
      tax map's 2'-0" of a lot line). The rest stays neutral;
-   - in Top view each yard is dimensioned as a drawing would be: from the building's nearest point to its lot line,
-     in the yard's colour, labelled with the measured distance, the required line faint across it; in the Front
+   - in Top view each yard is dimensioned as a drawing would be: from the middle of the wall that comes nearest
+     its lot line, square to that line, in the yard's colour on a thin halo, labelled with the yard as measured
+     (its closest point), the required line faint across it (two where the limit depends on an open
+     measurement, at each end of its range); in the Front
      and Right views the height is dimensioned up from the grade plane, the limit faint. Zoomed out to the
      neighbourhood the dimensions give way.
 6. **Read the panel.** Click any row. The bottom half shows the city's exact words, the examiner-style citation
