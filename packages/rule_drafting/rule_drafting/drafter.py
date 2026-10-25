@@ -865,11 +865,22 @@ def narrowing_problems(rule: dict, ctx: Context) -> list[str]:
     return out
 
 
+def _rule_shape(template: dict) -> tuple:
+    """What makes two templates one rule written for different cell forms: the chart rows they read, and their check
+    with each slot named by its row ('stories <= {Number of stories}' for the '3' and the '3/2 [fn11]' forms). A part
+    of an exception with a check of its own is another rule, whatever rows it reads (review round 20)."""
+    row = {x["name"]: x["row"].strip() for x in template["slots"]}
+    rows = frozenset((x["page"], x["section"], x["row"].strip()) for x in template["slots"])
+    check = SLOT_NAME.sub(lambda m: "{" + row.get(m[1], m[1]) + "}", " ".join(str(template.get("check") or "").split()))
+    return rows, check, template["kind"]
+
+
 def all_or_none(answer: dict, unit: dict, out: dict) -> None:
     """The parts of one exception go together (§325-16C's extra height: the larger front, side and rear yards): the
     answer's slotted templates that share one condition (applies_when) are its parts, as the AI wrote them, whether
     or not they survived. Templates filled from the same chart rows are one part written for different cell forms
-    (the stories limit for '3' and for '3/2 [fn11]'): a part is missing only where none of its forms is kept. A part
+    (the stories limit for '3' and for '3/2 [fn11]': the same check, slot for slot): a part is missing only where none
+    of its forms is kept; a part with a check of its own is a part, whatever rows it reads. A part
     refused outright (every form) drops the parts in every district; a part none of whose forms could be filled in a
     district (a footnote, several numbers: not a "-", which only says the use isn't permitted there) drops the parts
     in that district. Independent templates (§325-8B's one per use) are not parts of anything. In place."""
@@ -878,8 +889,7 @@ def all_or_none(answer: dict, unit: dict, out: dict) -> None:
     for t in answer.get("templates") or []:
         when = " ".join(str(t.get("applies_when") or "").split())
         if t.get("slots") and when:
-            rows = frozenset((x["page"], x["section"], x["row"].strip()) for x in t["slots"])
-            groups.setdefault(when, {}).setdefault(rows, []).append(prefix + t["id_suffix"])
+            groups.setdefault(when, {}).setdefault(_rule_shape(t), []).append(prefix + t["id_suffix"])
     rejected = {r["rule"] for r in out["rejected"]}
     for forms in groups.values():
         if len(forms) < 2:

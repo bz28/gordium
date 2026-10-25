@@ -947,13 +947,18 @@ def test_an_other_use_row_sends_a_use_the_law_calls_a_dwelling_to_review(inputs)
 
 
 def test_the_saved_r3a_other_use_lot_size_never_passes_a_dormitory(inputs):
-    """The saved draft, rebuilt from its recorded answer by `python -m rule_drafting replay` (no API call)."""
+    """The saved draft, rebuilt from its recorded answer by `python -m rule_drafting replay` (no API call). Every other
+    fact its review asks is given as no, read from the rule itself (round 20: a renamed measure left unknown made
+    every use need review, so the dormitory guard wasn't what the test saw); a church on the same lot passes."""
+    from rule_format import formula
     from rule_format.rulebook import outcome
     rules = cli.load(inputs.drafted / "R-3a.yaml")["rules"]
-    rule = next(r for r in rules if r["id"].startswith("R-3a.min_lot_") and r["id"].endswith("_other_use"))   # its id per answer
+    rule = next(r for r in rules if r["id"].startswith("R-3a.min_lot_") and r["id"].endswith("_other_use"))
+    asked = set().union(*(formula.names(w["when"]) for w in rule.get("review_when") or [])) - {"use", "district", "lot_area"}
+    facts = {n: False for n in asked}
+    assert outcome(rule, facts | {"use": "church", "lot_area": 20000}, inputs.ctx.allowed()) == "pass"
     for area in (6000, 20000):
-        assert outcome(rule, {"use": "dormitory", "lot_area": area, "additional_primary_building": False},
-                       inputs.ctx.allowed()) == "needs_review"
+        assert outcome(rule, facts | {"use": "dormitory", "lot_area": area}, inputs.ctx.allowed()) == "needs_review"
 
 
 def test_replay_judges_the_last_recorded_session_like_a_draft_and_calls_nothing(inputs, monkeypatch):

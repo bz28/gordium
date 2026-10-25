@@ -517,3 +517,14 @@ def test_versions_of_one_rule_for_different_cell_forms_are_not_parts_of_each_oth
     assert kept["R-3aa"] == ["325_16c_height_exception_stories_not_exceeded_fn11"]
     # real parts still go together: stage 1's parts (four refused) keep nothing
     assert judge(inputs, "325-16C", _stage1(inputs, "325-16C")["templates"], cli.drafted_rules(inputs))["rules"] == {}
+
+
+
+def test_a_part_reading_the_same_rows_as_another_is_still_a_part(inputs):
+    """Review round 20: parts were told apart from cell forms by the rows they read alone, so a refused part reading
+    the same rows as the bonus no longer dropped it. A part with a check of its own is a part."""
+    import copy
+    part = copy.deepcopy(bonus()) | {"id_suffix": "bonus_part_rear", "relaxes": "", "check": "rear_yard >= 999"}
+    got = judge(inputs, "325-16C", [bonus(), part], cli.drafted_rules(inputs))
+    assert any(r["rule"].endswith("bonus_part_rear") for r in got["rejected"])
+    assert got["rules"] == {}
