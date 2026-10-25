@@ -1,7 +1,6 @@
 # Re-lookup (#26) at cb4b6e0: checked in Rhino 8 (Mac), 2026-10-25
 
-**Purpose:** whether Redo works after a re-lookup's Draw (it did nothing at the demo's e631aae), and the rest of
-the re-lookup flow.\
+**Purpose:** whether Redo works after a re-lookup's Draw (it did nothing at the demo's e631aae), and the rest of the re-lookup flow.\
 **For:** the coordinator, the #26 job, reviewers.\
 **Kept current by:** never changed (a dated record).
 
