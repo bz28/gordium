@@ -2659,9 +2659,77 @@ def test_a_curve_drawn_in_short_pieces_is_asked_and_the_suggestion_is_decided_in
     corners = [(0, 0), (0.012, -0.016), (20, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)]
     for per_foot in (304.8, 12.0, 1.0):                                 # millimetres, inches, feet
         segs = [tuple(map(tuple, x)) for x in _ring([(a * per_foot, b * per_foot) for a, b in corners])]
+        feet = [tuple(tuple(c / per_foot for c in p) for p in x) for x in segs]
         got = logic.to_feet(logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0,
-                                                                    "segments": segs}], [], 1 / per_foot), 1 / per_foot)
+                                                                    "segments": segs, "segments_ft": feet}], []),
+                            1 / per_foot)
         assert [[[round(c, 6) for c in p] for p in line] for line in got["street_line"]] == \
             [list(map(list, x)) for x in _ring(corners)[1:5]], (per_foot, got["street_line"])
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-    assert "logic.suggested_facts(JURISDICTION, zones, lot_data, building_data, _scale(doc))" in rhino
+    assert '"segments_ft": [(_feet_point(doc, a)[:2], _feet_point(doc, b)[:2]) for a, b in _segments(o.Geometry)]}' \
+        in rhino
+
+
+def _plugin_functions(names, **extra):
+    """The plugin's own functions, run against stand-ins for Rhino (each from gordium_rhino.py as written)."""
+    import time as time_
+    from design_checker import rhino_logic as logic_
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    view = type("View", (), {"ActiveViewportID": "vp"})()
+    doc = type("Doc", (), {"Views": type("Views", (), {"ActiveView": view})()})()
+    ui_ = type("UI", (), {"STALE_SECONDS": 0.3, "text_box_size": staticmethod(lambda lines, size: (100, 20)),
+                          "show": staticmethod(lambda *a, **k: None)})
+    ns = {"time": time_, "logic": logic_, "ui": ui_, "STATE": {},
+          "Rhino": type("Rhino", (), {"RhinoDoc": type("RhinoDoc", (), {"ActiveDoc": doc})}),
+          "rg": type("rg", (), {"BoundingBox": type("BoundingBox", (), {"Empty": None})}),
+          "_model_on_screen": lambda o, viewport: None}
+    ns.update(extra)
+    for name in names:
+        exec(src[src.index("def %s(" % name):].split("\ndef ", 1)[0], ns)     # noqa: S102
+    return ns
+
+
+def test_no_notice_outlives_the_model_it_was_about():
+    """The Rhino job at #28 92cf742: the red "Side yard, Southwest no longer complies …" notice of one scene stayed on
+    screen over the next house, back on its original footprint (a check that found nothing newly failing left the
+    earlier notice up for its 6 s). No verdict on screen may outlive its model: the notice goes with every new
+    check's clear, with another document, and is never drawn over a model changed since its check (as the rows
+    show no marks then)."""
+    ns = _plugin_functions(["_notice_box", "_clear", "_new_document", "stale"])
+    viewport = type("Viewport", (), {"Id": "vp", "Bounds": type("B", (), {"Width": 1000, "Height": 640})()})()
+    o = type("O", (), {})()
+    o.toast = (["Side yard, Southwest no longer complies"], ns["time"].time() + 6)
+    assert ns["_notice_box"](o, viewport, [], False)[0] == ["✕ Side yard, Southwest no longer complies"]
+    assert ns["_notice_box"](o, viewport, [], True) is None              # the model changed since: not drawn
+    ns["_clear"](o)                                                      # every check clears before it draws
+    assert o.toast is None and ns["_notice_box"](o, viewport, [], False) is None
+    o.toast = (["Rear yard no longer complies"], ns["time"].time() + 6)
+    ns["STATE"]["overlay"] = o
+    ns["_new_document"](None, None)                                      # another document in front
+    assert o.toast is None
+    now = ns["time"].time()                                              # stale: an edit after the check on screen
+    ns["STATE"].update(dirty=now - 1, last={"at": now - 2})
+    assert ns["stale"](o) is True
+    ns["STATE"].update(last={"at": now})
+    assert ns["stale"](o) is False
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    check = src[src.index("def run_check("):src.index("def _toast(")]
+    assert check.index("_clear(o)") < check.index('if result.get("notice"):')   # cleared, then the new notice
+    draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert "old = stale(o)" in draw and "_notice_box(o, e.Viewport, taken, old)" in draw
+
+
+def test_the_notice_timer_stops_once_a_check_cleared_the_notice():
+    """Review round 1 of the notice fix: a check's _clear drops the notice, and the notice's timer then ticked every
+    0.5 s with nothing to time until another notice expired. Now its next tick stops it."""
+    stopped = []
+    timer = type("Timer", (), {"Stop": lambda self: stopped.append(1)})()
+    ns = _plugin_functions(["_toast_tick"], _clear_toast=lambda: stopped.append("cleared"))
+    o = type("O", (), {"toast": None})()
+    ns["STATE"].update(overlay=o, toast_timer=timer)
+    ns["_toast_tick"]()
+    assert stopped == [1]
+    o.toast = (["Rear yard no longer complies"], ns["time"].time() + 6)
+    stopped.clear()
+    ns["_toast_tick"]()                                                  # still showing: left running
+    assert stopped == []

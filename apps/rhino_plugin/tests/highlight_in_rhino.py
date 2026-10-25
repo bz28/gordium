@@ -148,7 +148,7 @@ try:
         for labels_on in (False, True):
             taken = [g.logic.status_box(top_vp.Bounds.Width, g._status_rows(g.overlay(), False))] if labels_on else []
             status = list(taken)
-            box = g._notice_box(g.overlay(), top_vp, taken)
+            box = g._notice_box(g.overlay(), top_vp, taken, g.stale(g.overlay()))
             claim("1b the notice covers neither the model nor the status box (labels %s)" % ("on" if labels_on else "off"),
                   box is not None and not any(min(box[1] + box[3], a + c) > max(box[1], a) and
                                               min(box[2] + box[4], b + e) > max(box[2], b)

@@ -327,16 +327,16 @@ def corner_answered(facts, saved_ui, corner):
     return facts, saved_ui
 
 
-def suggested_facts(jurisdiction, zones, lots, buildings, scale=1.0):
+def suggested_facts(jurisdiction, zones, lots, buildings):
     """The start box's prefilled lot facts, in the model's units (the plugin converts them to feet), for the
     architect to confirm. `lots`: the Site layer's closed outlines, each {"id", "area", "bottom" (its lowest
     level), "segments": [((x, y), (x, y)), ...]}; `buildings`: each {"id", "bottom", "volume" (of its box)}.
     The largest outline is the lot, its lowest line on screen the street side; the ground is flat at the
     buildings' lowest point (or the lot's level); the lot is not from a survey; the first zone with rules; a
     detached one-family house; the largest solid the main building. The corner-lot question is never answered
-    here: always None, so the box asks it and the yards wait for the answer. `scale`: feet per model unit, for
-    the street's lengths and turns (decided in feet, as everywhere: review round 6, F2, a 6 mm slip in a
-    millimetre model read as a 6 ft line)."""
+    here: always None, so the box asks it and the yards wait for the answer. A lot's "segments_ft" (the same
+    segments in feet, when given) decide the street's lengths and turns, in feet as everywhere (review round 6,
+    F2: a 6 mm slip in a millimetre model read as a 6 ft line)."""
     facts = {"jurisdiction": jurisdiction, "zone": zones[0] if zones else None, "use": "one_family_detached",
              "corner_lot": None, "ground_is_flat": True, "lot_surveyed": False}
     lot = max(lots, key=lambda l: l["area"]) if lots else None
@@ -344,7 +344,7 @@ def suggested_facts(jurisdiction, zones, lots, buildings, scale=1.0):
         facts["lot_id"] = lot["id"]
         if lot["segments"]:
             outline = [[[p[0], p[1]], [q[0], q[1]]] for p, q in lot["segments"]]
-            feet = [[[c * scale for c in p] for p in line] for line in outline]
+            feet = [[list(p[:2]) for p in line] for line in lot.get("segments_ft") or outline]
             real = [k for k in range(len(feet)) if not is_tiny(feet[k])] or list(range(len(feet)))   # (never a
             low = min(real, key=lambda k: (outline[k][0][1] + outline[k][1][1]) / 2)      # point drawn twice: r4)
             run = street_run(feet, feet[low], tolerance=0.0)
