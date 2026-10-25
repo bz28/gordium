@@ -199,8 +199,9 @@ def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_check
 
 def test_a_chart_cell_no_chart_rule_checks_is_never_silent():
     """The blind R-2 keys (2026-10-21): R-2c's side yards ("10 ft /15 ft [fn14]", "0 ft /5 ft / 10 ft [fn15]", use-
-    dependent) got no drafted rule. They must show as not checked, and a law piece's rule citing a cell only as an
-    input (§325-16C's height bonus cites the yard minimums it enlarges) must never count as checking it."""
+    dependent) got no drafted rule: nothing cites them, and they show as not checked. A law piece's rule citing a cell
+    only as an input (as §325-16C's height bonus cited the yard minimums it enlarges) must never count as checking it:
+    pinned with a law piece's own rule made to cite R-2a's rear-yard cell (the bonus isn't drafted any more)."""
     from design_checker.gaps import chart_gaps
     from rule_format.rulebook import zone_rules
     rules = zone_rules(J, "R-2c")
@@ -210,9 +211,9 @@ def test_a_chart_cell_no_chart_rule_checks_is_never_silent():
     from design_checker.gaps import law_rule_ids
     r2a = zone_rules(J, "R-2a")
     rear = next(x for r in r2a if r["id"] == "R-2a.rear_yard_min" for x in r["sources"] if isinstance(x.get("cell"), dict))
-    law = sorted(law_rule_ids(J, "R-2a") & {r["id"] for r in r2a})[0]      # a law piece's own rule, citing the rear cell
+    law = sorted(law_rule_ids(J, "R-2a") & {r["id"] for r in r2a})[0]      # a law piece's own rule, made to cite it
     without = [r | {"sources": r["sources"] + [rear]} if r["id"] == law else r for r in r2a if r["id"] != "R-2a.rear_yard_min"]
-    assert any(rear in r["sources"] for r in without)
+    assert not any(rear in r["sources"] for r in without if r["id"] != law)    # nothing else cites the rear cell
     assert any(n.startswith("Yard Dimensions: Rear") for n in (g["name"] for g in chart_gaps(J, "R-2a", without)))
 
 
