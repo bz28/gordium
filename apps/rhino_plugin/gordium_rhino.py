@@ -1325,6 +1325,7 @@ def _box_state(doc, facts, options, saved_ui, mode="check"):
             "zones_found": saved_ui.get("_zones_found") or [],
             "design_buffer": saved_ui.get("design_buffer") or "0'-0\"",
             "lot_source": saved_ui.get("lot_source"), "lookup": saved_ui.get("_lookup") or {},
+            "known_addresses": logic.known_addresses(saved_ui),     # Draw is off for any other (address_reason)
             "doubts": saved_ui.get("doubts") or {}, "live": saved_ui.get("_live") or {},
             "checked": list(saved_ui.get("checked") or []), "lot_missing": lot is None,
             "_poll": _lookup_poll if (saved_ui.get("_lookup") or {}).get("looking") else None}
@@ -1634,7 +1635,7 @@ def _confirm(doc, facts, options, mode):
     o.message = None
     _highlight(doc, facts)
     _recover(doc)                       # anything an unfinished earlier box set aside, back first
-    saved_ui = _ui_state(doc)
+    saved_ui = logic.box_opened(_ui_state(doc), facts)   # the lot's own address, this session only
     session = logic.BoxSession(RhinoTable(doc))     # this box's model edits, owned here, never copied
     try:
         return logic.run_box(session, lambda: _box_loop(doc, facts, options, mode, saved_ui, session))
@@ -1832,29 +1833,28 @@ def _ask_reset(question, fresh, keep):
 
 def _draw_prepare(doc, facts, state, saved_ui, session, mode, options):
     """Draw, before anything is saved (rhino_logic.box_facts / settle_pending / draw_decision / reset_question /
-    apply_reset / after_reset_state, tested in CI): (facts, saved_ui, go, state to save). The box's answers first;
+    apply_reset / after_reset_state, tested in CI): (facts, saved_ui, go, state to save). An address typed that
+    wasn't looked up draws nothing (address_reason: Draw is off in the box, and any other way in, the scripted one
+    too, says "Press Look up to find … first."; Ben, 2026-10-25). Then the box's answers;
     a preview for an address since retyped is dropped and the box shown again as it was put back (state None: its
-    district ticked again, never saved from the state the box showed before); a typed address that
-    wasn't looked up is looked up first and the box shown again (go False); a new address over what Gordium drew
+    district ticked again, never saved from the state the box showed before); a new address over what Gordium drew
     is drawn clean, the starting house drawn again after (one undo step), and the box's state rebuilt from the new
     lot (never the old lot's size, survey or corner saved over it); the architect's own work is asked about once
     (Cancel: back to the box). When the answer had only the City's outline, the box stays open after the reset,
     the guide shown, for Draw my lot… (go False; Cancel still puts everything back). The same address: as it is."""
     table = RhinoTable(doc)
+    unlooked = logic.address_reason(dict(state, known_addresses=logic.known_addresses(saved_ui),
+                                         lookup=saved_ui.get("_lookup") or {}))
+    if unlooked:                                          # Draw is off in the box; any other way in says why
+        say(unlooked)
+        return facts, saved_ui, False, state
     facts, saved_ui = _apply_box(doc, facts, state, saved_ui)
     previewed = saved_ui.get("_pending") is not None
     facts, saved_ui = logic.settle_pending(facts, saved_ui, state.get("address"))
     if previewed and saved_ui.get("_pending") is None:    # the preview dropped (address retyped): the box again,
         STATE.pop("lookup_guide", None)                   # as it was put back, ticked again (state None)
         return facts, saved_ui, False, None
-    plan, mine, say_first = logic.draw_decision(table, facts, saved_ui, state.get("address"))
-    if plan == "lookup":
-        return facts, _lookup_start(facts, saved_ui), False, state
-    if plan == "unfound":                                 # just looked up, not found: said in the box, not again
-        saved_ui["_lookup"] = logic.lookup_after_unfound(saved_ui.get("_lookup"), say_first)
-        return facts, saved_ui, False, state
-    if say_first:
-        say(say_first)
+    plan, mine = logic.draw_decision(table, facts, saved_ui)
     if plan == "none":
         saved_ui.pop("_pending", None)
         return facts, saved_ui, True, state

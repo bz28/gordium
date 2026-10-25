@@ -1050,11 +1050,15 @@ LOOKING = "Looking up {}… (up to %d s)" % LOOKUP_LIMIT_S
 CHECKABLE = ("lot", "street", "ground")          # what "I checked this" settles (the district has its own tick)
 DOUBT_KEPT = "The lookup found this doubtful (its reason came from a source that can't be kept): check it."
 LOOKUP_SAYS = {                                   # the box's line when a lookup couldn't fill it in
-    "not_found": "No City of Ithaca address found for {query}: check the spelling, or draw the lot.",
+    "not_found": "No City of Ithaca address found for {query}: check the spelling and Look up again, or put back "
+                 "the lot's own address (or clear it) and draw the lot.",
     "outside_city": "{message}",
-    "offline": "Couldn't reach the map services (offline?): enter the site by hand.",
-    "error": "A map service answered with an error: enter the site by hand.",
-    "timeout": "The lookup took too long: enter the site by hand, or try again.",
+    "offline": "Couldn't reach the map services (offline?): Look up again later, or put back the lot's own address "
+               "(or clear it) and enter the site by hand.",
+    "error": "A map service answered with an error: Look up again, or put back the lot's own address (or clear it) "
+             "and enter the site by hand.",
+    "timeout": "The lookup took too long: try Look up again, or put back the lot's own address (or clear it) and "
+               "enter the site by hand.",
     "multiple": "{message} Pick one under Address, then Look up again.",
 }
 ROW_OF = {"address": "lot", "parcel": "lot", "lot": "lot", "street_side": "street", "corner_lot": "street",
@@ -1359,6 +1363,9 @@ BUFFER_UNREAD = "Design buffer not understood: type it like 1'-6\" or 6\""
 
 def draw_reason(state):
     """Why Draw is off, in one line; "" when it is on."""
+    unlooked = address_reason(state)
+    if unlooked:
+        return unlooked
     if not state.get("zone"):
         return "Pick the district to continue."
     if not state.get("district_confirmed"):
@@ -1371,8 +1378,8 @@ def draw_reason(state):
 
 
 def can_draw(state):
-    """Draw is on only once the district is confirmed (a looked-up district is only a suggestion), the design
-    buffer, if typed, can be read, and there is a lot."""
+    """Draw is on only once the address typed is one already found (address_reason), the district is confirmed (a
+    looked-up district is only a suggestion), the design buffer, if typed, can be read, and there is a lot."""
     return draw_reason(state) == ""
 
 
@@ -1989,11 +1996,12 @@ class ServerBook:
 
 KEEP_MINE = "keep"
 START_FRESH = "fresh"
-OWN_LOT_LABEL = "Address saved as a label: your lot and your building are unchanged."
+LOOK_UP_FIRST = "Press Look up to find {address} first."
+NOT_FOUND_YET = "No lot found for {address} (the line above says why): correct the address and press Look up, or {back}."
+NOT_ANSWERED = "The lookup of {address} didn't finish (the line above says why): press Look up again, or {back}."
+PICK_A_MATCH = "Pick one of the matches under Address, then press Look up."
 GUIDE_PREVIEW = ("The State's tax map didn't answer; the City's outline is shown as a dashed guide only (it can't be "
                  "kept). Draw clears what Gordium drew for the old address; then Draw my lot… over the guide.")
-UNFOUND = ("{address} wasn't found, so nothing is drawn for it: correct the address and Look up, or put back "
-           "{drawn} to check this lot.")
 CITY_TAIL = {"ithaca", "ny", "new", "york", "usa"}
 
 
@@ -2018,7 +2026,6 @@ MISSING = object()
 PREVIEW_SAYS = ("Shown dashed: {address}'s lot. Nothing in the model changes until Draw, which replaces what Gordium "
                 "drew with this lot and a new starting house.")
 SET_ASIDE = "The lookup of {address} was set aside (the address was changed): Look up to preview another address."
-NOT_DRAWN_YET = "{says} Nothing is drawn for {address}: put back {drawn} to check this lot."
 
 
 def preview_lookup(answer, facts, saved_ui, zones=()):
@@ -2067,11 +2074,38 @@ def drop_pending(facts, saved_ui):
     return facts, saved_ui
 
 
-def lookup_after_unfound(look, say):
-    """The box's lookup line after Draw stopped on an address not found (draw_decision's `say`), the lookup's own
-    reason kept beside it so a second Draw says it once more, never wrapped twice."""
-    look = dict(look or {})
-    return dict(look, reason=look.get("reason") or look.get("says"), says=say)
+def box_opened(saved_ui, facts):
+    """The box's choices as a box opens over `facts`: the address the lot had then kept for this session
+    (`_box_address`, never saved), so typing it back is never a new address (Ben, 2026-10-25)."""
+    return dict(saved_ui or {}, _box_address=(facts or {}).get("address"))
+
+
+def known_addresses(saved_ui):
+    """The addresses Draw takes as they are, never as a new one to look up: the lot's own when the box opened, the
+    one drawn, and the one last looked up and found (as found and as typed)."""
+    saved_ui = saved_ui or {}
+    pending = saved_ui.get("_pending") or {}
+    return [a for a in (saved_ui.get("_box_address"), saved_ui.get("drawn_address"), pending.get("address"),
+                        pending.get("query")) if a]
+
+
+def address_reason(state):
+    """Why Draw is off because of the address (Ben, 2026-10-25): an address typed that is neither the lot's own nor
+    the one last looked up and found must be looked up first, so a new address never ends up as a label on the old
+    lot. "" when the address is blank or known (`known_addresses`, in the box's state; absent: no address rule)."""
+    address = (state.get("address") or "").strip()
+    known = state.get("known_addresses")
+    if not address or known is None or any(same_address(address, k) for k in known):
+        return ""
+    look = state.get("lookup") or {}
+    status = look.get("status")
+    if status in LOOKUP_SAYS and same_address(address, look.get("query")):    # looked up, no lot came back
+        if status == "multiple":
+            return PICK_A_MATCH
+        back = ("put back " + known[0].split(",")[0]) if known else "clear the address"   # blank: Draw without one
+        return (NOT_ANSWERED if status in ("offline", "error", "timeout") else NOT_FOUND_YET).format(
+            address=address, back=back)
+    return LOOK_UP_FIRST.format(address=address)
 
 
 def settle_pending(facts, saved_ui, address):
@@ -2129,28 +2163,12 @@ def reset_plan(facts, saved_ui, mine):
     return "ask" if mine else "redraw"
 
 
-def draw_decision(table, facts, saved_ui, address):
-    """What Draw does first, as gordium_rhino._draw_prepare acts on it: (plan, mine, say). plan: "lookup" (a typed
-    address not looked up: looked up first, the box shown again), "unfound" (that address was just looked up and
-    not found: nothing drawn, the box says so, never the same lookup again and again), or reset_plan's "none" /
-    "redraw" / "ask" (`mine`: what of the architect's would go). `say`: the box's line for "unfound"; OWN_LOT_LABEL
-    when a new address on the architect's own lot is kept as a label only."""
-    saved_ui = saved_ui or {}
-    if lookup_first(address, facts, saved_ui):
-        look = saved_ui.get("_lookup") or {}
-        if look.get("status") in LOOKUP_SAYS and same_address(address, look.get("query")):   # a lookup that failed
-            drawn = saved_ui.get("drawn_address") or "the address drawn"
-            if look["status"] == "not_found":
-                return "unfound", [], UNFOUND.format(address=address.strip(), drawn=drawn)
-            return "unfound", [], NOT_DRAWN_YET.format(says=look.get("reason") or look.get("says") or "",
-                                                       address=address.strip(), drawn=drawn)
-        return "lookup", [], None
-    mine = own_work(table, facts, saved_ui)
-    plan = reset_plan(facts, saved_ui, mine)
-    drawn = saved_ui.get("drawn_address")
-    say = OWN_LOT_LABEL if (plan == "none" and not saved_ui.get("_pending") and drawn and
-                            not lookup_may_replace(facts, saved_ui) and not same_address(address, drawn)) else None
-    return plan, mine, say
+def draw_decision(table, facts, saved_ui):
+    """What Draw does first, as gordium_rhino._draw_prepare acts on it once the address is known (address_reason
+    keeps Draw off before): (plan, mine). plan: reset_plan's "none" / "redraw" / "ask"; `mine`: what of the
+    architect's would go."""
+    mine = own_work(table, facts, saved_ui or {})
+    return reset_plan(facts, saved_ui or {}, mine), mine
 
 
 def reset_question(address, mine, answer=None):
@@ -2238,25 +2256,12 @@ def apply_reset(table, session, facts, saved_ui, choice, zones=()):
                 target.pop(k, None)
             else:
                 target[k] = v
-    saved_ui.update(drawn_address=pending.get("address"), house_fingerprint=None)
+    # the lot is the new address's now: the address the box opened with is no longer this lot's (typed back, it is
+    # a new address, to be looked up: review round 1 of the typed-address rule, P1)
+    saved_ui.update(drawn_address=pending.get("address"), house_fingerprint=None, _box_address=pending.get("address"))
     if not keep:
         saved_ui["_redrawn_for"] = pending.get("address")     # Draw now draws (the box's button says so)
     return facts, saved_ui, not keep, guide
-
-
-def lookup_first(address, facts, saved_ui):
-    """Whether Draw must look the typed address up first (and show the box again for review) rather than draw: it
-    differs from the address drawn and from the one last looked up, and the lot is one Gordium may replace (on the
-    architect's own lot a typed address is a label: OWN_LOT_LABEL)."""
-    if not (address or "").strip():
-        return False
-    pending = (saved_ui or {}).get("_pending") or {}
-    if same_address(address, pending.get("address")) or same_address(address, pending.get("query")):
-        return False
-    drawn = (saved_ui or {}).get("drawn_address")
-    if drawn is not None and same_address(address, drawn):
-        return False
-    return lookup_may_replace(facts, saved_ui)
 
 
 def draw_button(mode, saved_ui):
