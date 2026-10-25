@@ -17,7 +17,8 @@ real lot's line is slanted) and tested inside or outside the coloured pieces:
    cantilever (5 ft from the line, 15 ft up) red; under it (5 ft, 5 ft up) nothing; the house's own wall strip
    7.5 ft from the line, 5 ft up, red (within 8 ft: short however the line lies); 10 ft from it, amber.
 3. A gable over the height limit. Walls to 30 ft, ridge 46 ft. Claims: the height row coloured in its colour; a
-   point near the ridge (42 ft up) coloured by a height piece; a point at the eaves (31 ft up) not; the height
+   point near the ridge (42 ft up) coloured by a height piece; the sky over the slope (44 ft up where the roof is
+   38 ft, inside the uncut block) not; the height
    pieces' volume is the wedge above the limit, within 5 % (the uncut block would be twice it).
 Captures Perspective and Front for each. Writes <temp>/gordium_offending/out.json and frames/*.png; closes its
 document."""
@@ -198,10 +199,13 @@ try:
     tops = [(b, s) for b, s, info in g.overlay().encroach if info.get("why") == "height"]
     claim("3 its pieces in its colour", tops and {s for _, s in tops} == {height.get("status")},
           [s for _, s in tops])
-    ridge, eaves = rg.Point3d(mid, ym, z0 + 42 * k), rg.Point3d(x0 + 0.5 * k, ym, z0 + 31 * k)
+    # the sky over the slope where the roof is 38 ft high (a quarter across): inside the uncut block (35 to 46 ft
+    # over the strip where the roof is above the limit), outside the roof: coloured only if the cut failed
+    ridge, sky = rg.Point3d(mid, ym, z0 + 42 * k), rg.Point3d(x0 + (x1 - x0) / 4, ym, z0 + 44 * k)
     claim("3 near the ridge (42 ft up) coloured", colour_at(g, doc, ridge, why="height") == [height.get("status")],
           colour_at(g, doc, ridge))
-    claim("3 at the eaves (31 ft up) not", colour_at(g, doc, eaves, why="height") == [], colour_at(g, doc, eaves))
+    claim("3 the sky over the slope (44 ft up where the roof is 38 ft) not", colour_at(g, doc, sky) == [],
+          colour_at(g, doc, sky))
     volume = sum(rg.VolumeMassProperties.Compute(b).Volume for b, _ in tops) / k ** 3
     rise = 46 - (limit - z0 / k) if limit is not None else None
     wedge = 0.5 * ((x1 - x0) / k * rise / 16) * rise * (y1 - y0) / k if rise else None
