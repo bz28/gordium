@@ -90,10 +90,14 @@ def notice(g, doc):
     o = g.overlay()
     held = list(o.toast[0]) if getattr(o, "toast", None) else None
     view = top(doc)
+    g.STATE.get("drawn", {}).pop(str(view.ActiveViewport.Id), None)     # never an earlier frame's record
     view.Redraw()
     rec = g.STATE.get("drawn", {}).get(str(view.ActiveViewport.Id)) or {}
+    rec = rec if rec.get("complete") else {}                              # the whole frame drawn
+    room = bool(rec and held) and g.logic.notice_place(rec["size"][0], rec["size"][1], ["✕ " + t for t in held],
+                                                       rec.get("model"), rec.get("taken") or []) is not None
     return {"held": held, "drawn": rec.get("notice") is not None, "stale": g.stale(o), "box": rec.get("notice"),
-            "model": rec.get("model"), "view": rec.get("size")}
+            "model": rec.get("model"), "view": rec.get("size"), "room": room, "complete": bool(rec)}
 
 
 def clear_of(box, model):
@@ -118,7 +122,7 @@ try:
           and n1["drawn"] and n1["box"][2] <= n1["view"][0] * g.logic.NOTICE_SHARES[0] + 1
           and clear_of(n1["box"], n1["model"]), n1)
     view = top(doc)                                      # 1b zoomed in tight on the house: never a bar over it
-    view.ActiveViewport.PushViewProjection()             # step 1's framing, put back after
+    framing = Rhino.DocObjects.ViewportInfo(view.ActiveViewport)    # step 1's framing, put back after
     box = rg.BoundingBox.Empty
     for o in g._buildings(doc):
         box.Union(o.Geometry.GetBoundingBox(True))
@@ -130,16 +134,17 @@ try:
     capture(doc, "1b_zoomed_in")
     log["1b"] = {"notice": tight, "model": model, "view": [vp.Bounds.Width, vp.Bounds.Height], "panel": message}
     claim("1b zoomed in tight: the notice is compact and covers none of the model, or isn't drawn (the panel says it)",
-          (tight is None or (tight[2] <= vp.Bounds.Width * g.logic.NOTICE_SHARES[0] + 1 and clear_of(tight, model)))
+          n1b["complete"] and ((tight is None and not n1b["room"]) or (
+              tight is not None and tight[2] <= vp.Bounds.Width * g.logic.NOTICE_SHARES[0] + 1 and clear_of(tight, model)))
           and bool(message) and "no longer complies" in message, log["1b"])
-    view.ActiveViewport.PopViewProjection()              # back to step 1's framing (the Rhino job at 27c8e5d: after
-    #                                                      ZoomExtents the lot filled the view: no corner for step 3)
+    view.ActiveViewport.SetViewProjection(framing, True)  # back to step 1's framing (the Rhino job at 27c8e5d:
+    #                                                      after ZoomExtents the lot filled the view: no corner for step 3)
     move(g, doc, 5)
     g.run_check(doc, report=False)
     n2 = log["2"] = notice(g, doc)
     capture(doc, "2_back_no_notice")
-    claim("2 moved back and checked: no notice left of the earlier model", n2["held"] is None and n2["drawn"] is None,
-          n2)
+    claim("2 moved back and checked: no notice left of the earlier model", n2["complete"] and n2["held"] is None
+          and not n2["drawn"], n2)
     move(g, doc, -5)
     g.run_check(doc, report=False)
     again = notice(g, doc)
@@ -148,7 +153,9 @@ try:
     n3 = log["3"] = dict(notice(g, doc), before_edit=again)
     capture(doc, "3_changed_no_notice")
     claim("3 the model changed since the check: the notice isn't drawn over it",
-          again["drawn"] and n3["stale"] and n3["drawn"] is None, n3)
+          again["drawn"] and n3["complete"] and n3["stale"] and not n3["drawn"]
+          and again["view"] == n1["view"] and again["model"] and n1["model"]
+          and max(abs(p - q) for p, q in zip(again["model"], n1["model"])) < 2, n3)    # step 1's framing back
     move(g, doc, 6)                                      # 4: a fresh notice of its own (step 3's edit ended its
     g.run_check(doc, report=False)                       # notice: a changed model's notice is never shown)
     move(g, doc, -5)

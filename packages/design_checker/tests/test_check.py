@@ -965,7 +965,7 @@ def test_a_report_that_cant_be_written_keeps_the_check_and_says_why(facts, tmp_p
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     # round 11: said by run_check, so GordiumCheck (which asks for the report too) is never silent about it
     body = rhino[rhino.index("def run_check("):rhino.index("def _toast(")]
-    assert 'if report and result.get("report_error"):' in body and "say(logic.report_message(path, False" in body
+    assert 'if report and result.get("report_error"):' in body and "say(first + logic.report_message(path, False" in body
     # round 12: "out of date" only for a report that was there before this check, not one its own write left
     assert body.index("had_report = bool(report) and os.path.exists(report_path(doc))") < body.index("result = ask(")
     assert 'result["report_error"], stale=had_report))' in body
@@ -2456,3 +2456,22 @@ def test_the_in_rhino_checks_read_the_drawings_own_placement():
         script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
         assert 'STATE.get("drawn", {})' in script and "_notice_box(" not in script, name
         assert "label_box(" not in script, name
+
+
+def test_the_draw_record_is_whole_and_the_notice_survives_a_report_error():
+    """Review round 2 of the placement: the record was kept before the frame finished (a label raising midway left
+    a notice in it that was never drawn), and the scripts could read an earlier frame's; and a report that couldn't
+    be written overwrote the panel line holding the notice. Now the record is marked complete only once every label
+    and the notice are drawn, each script drops the view's record before redrawing and requires it complete, and the
+    report error keeps the notice first in the line."""
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
+    assert draw.index("ui.draw_text_box(d, lines, ui.status_color(\"does_not_comply\"") < \
+        draw.index('drawn["complete"] = True') < draw.index("if not boxed:")
+    assert draw.count('drawn["complete"]') == 1
+    check = src[src.index("def run_check("):src.index("def _toast(")]
+    assert 'say(first + logic.report_message(path, False, result["report_error"], stale=had_report))' in check
+    assert 'first = "✕ " + result["notice"] + " · " if result.get("notice") else ""' in check
+    for name in ("highlight_in_rhino.py", "notice_in_rhino.py"):
+        script = (REPO / "apps/rhino_plugin/tests" / name).read_text(encoding="utf-8")
+        assert '.pop(str(' in script and 'get("complete")' in script and "logic.notice_place(" in script, name

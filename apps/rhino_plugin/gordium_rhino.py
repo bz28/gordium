@@ -602,6 +602,7 @@ def draw_screen(o, e):
     if notice is not None:
         lines, x, y, _, _ = notice
         ui.draw_text_box(d, lines, ui.status_color("does_not_comply", dark), int(x), int(y), dark, 13)
+    drawn["complete"] = True                 # every label and the notice really drawn this frame (review round 2)
     if not boxed:
         return
     state = "stale" if old else o.message[0]
@@ -1776,7 +1777,8 @@ def run_check(doc, report=True):
                 ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])   # draws it (notice_spot)
         if report and result.get("report_error"):   # every caller that asked for a report hears it wasn't written
             path = report_path(doc)
-            say(logic.report_message(path, False, result["report_error"], stale=had_report))
+            first = "✕ " + result["notice"] + " · " if result.get("notice") else ""   # the notice kept in the line
+            say(first + logic.report_message(path, False, result["report_error"], stale=had_report))
         return result
     except Exception as e:
         _clear(o)

@@ -151,30 +151,39 @@ try:
 
         def what_drew(labels_on):
             g.set_labels(labels_on)
+            g.STATE.get("drawn", {}).pop(str(top_vp.Id), None)          # never an earlier frame's record
             top_view.Redraw()
-            return g.STATE.get("drawn", {}).get(str(top_vp.Id))
+            rec = g.STATE.get("drawn", {}).get(str(top_vp.Id))
+            return rec if rec and rec.get("complete") else None         # the whole frame drawn
 
         def over(box, other):                          # two (x, y, w, h) boxes overlap
             return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
                 min(box[1] + box[3], other[1] + other[3]) > max(box[1], other[1])
         message = lambda: str(g.STATE["panel_parts"]["message"].Text) if g.STATE.get("panel_parts") else ""  # noqa
+        held = ["✕ " + t for t in (getattr(g.overlay(), "toast", None) or [[]])[0]]
         for labels_on in (False, True):
             rec = what_drew(labels_on) or {}
             box, m = rec.get("notice"), rec.get("model")
             model_box = (m[0], m[1], m[2] - m[0], m[3] - m[1]) if m else None
-            claim("1b the notice covers neither the model nor the status box (labels %s): drawn clear of both, or not "
-                  "drawn and said in the panel" % ("on" if labels_on else "off"),
-                  bool(rec) and ((box is not None and not (model_box and over(box, model_box))
-                                  and not any(over(box, t) for t in rec.get("taken") or []))
-                                 or (box is None and "no longer complies" in message())),
-                  {"notice": box, "model": m, "taken": rec.get("taken"), "view": rec.get("size"), "panel": message()})
+            # not drawn only when the placement itself finds no corner for this frame (never just "said in the panel")
+            room = bool(rec and held) and g.logic.notice_place(rec["size"][0], rec["size"][1], held, m,
+                                                                rec.get("taken") or []) is not None
+            claim("1b the notice covers neither the model nor the status box (labels %s): drawn clear of both when a "
+                  "corner has room, else not drawn and said in the panel" % ("on" if labels_on else "off"),
+                  bool(rec) and bool(held) and ((box is not None and not (model_box and over(box, model_box))
+                                                 and not any(over(box, t) for t in rec.get("taken") or []))
+                                                or (box is None and not room and "no longer complies" in message())),
+                  {"notice": box, "room": room, "model": m, "taken": rec.get("taken"), "view": rec.get("size"),
+                   "panel": message()})
         rec = what_drew(True)                          # every label on, as the architect turns them on
         lines = [tuple(map(tuple, s_)) for s_ in rec["lines"]]
         m = rec["model"]
-        for text, (left, top, w, h, want), _, own in rec["labels"]:
+        boxes = list(rec.get("taken") or []) + ([rec["notice"]] if rec.get("notice") else [])
+        for k, (text, (left, top, w, h, want), _, own) in enumerate(rec["labels"]):
             own = tuple(map(tuple, own))
             hits = [s_ for s_ in lines if s_ != own and g.logic.crosses(s_, left, top, w, h)]
-            others = [b_ for b_ in rec["labels"] if b_[0] != text and over((left, top, w, h), b_[1][:4])]
+            others = [b_ for j, b_ in enumerate(rec["labels"]) if j != k and over((left, top, w, h), b_[1][:4])] + \
+                [b_ for b_ in boxes if over((left, top, w, h), b_)]      # nor the notice, status box, north arrow
             inside = 0 <= left and left + w <= rec["size"][0] and 0 <= top and top + h <= rec["size"][1]
             (ax, ay), (bx, by) = own                   # next to its own line: the gap between them
             near = min(((max(left - x, 0, x - left - w) ** 2 + max(top - y, 0, y - top - h) ** 2) ** 0.5)
