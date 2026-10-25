@@ -2319,10 +2319,11 @@ def test_one_click_on_a_street_drawn_in_pieces_keeps_the_whole_street_and_stops_
             assert sorted(map(str, lines)) == sorted(map(str, street)), (k, lines)
             assert said == ("Ithaca Rd" if known else "Street 1") + ": 8 lot-line pieces, 75'-10\" of frontage", said
             assert ids == (["Ithaca Rd"] * 8 if known else None)
-        # the other street, clicked next: its own pieces only (the 0.24 ft piece too), never Ithaca Rd's again
+        # the other street, clicked next: its own pieces only, never Ithaca Rd's again (the 0.24 ft piece at its
+        # far corner has no direction of its own: not taken onto the street, rhino_logic.SHORT_PIECE_FT)
         runs, _ = logic.add_street_pick([], outline, outline[3], known, asked.append)
         runs, said = logic.add_street_pick(runs, outline, list(reversed(outline[14])), known, asked.append)
-        assert runs[1] == [12, 13, 14] and said == "Street 2: 3 lot-line pieces, 92'-1 3/8\" of frontage", (runs, said)
+        assert runs[1] == [13, 14] and said == "Street 2: 2 lot-line pieces, 91'-10 3/8\" of frontage", (runs, said)
         again, said = logic.add_street_pick(runs, outline, outline[5], known, asked.append)   # already kept
         assert again == runs and said == "that lot line is on a street already kept"
     assert not asked                                   # every end of both streets is a sure corner: nothing asked
@@ -2571,10 +2572,10 @@ def test_a_corner_point_drawn_twice_is_never_a_street_of_its_own():
     front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
     assert front["status"] != "complies", front
     assert logic.street_run(outline, outline[0]) is None
-    assert logic.street_pick(outline, outline[0]) == ([], "that is a corner point drawn twice, not a lot line: click "
-                                                         "the lot line beside it")
+    assert logic.street_pick(outline, outline[0]) == ([], "that piece is under 6 in long (a corner point drawn "
+                                                         "twice?), not a street line: click the lot line beside it")
     runs, said = logic.add_street_pick([], outline, outline[0])
-    assert runs == [] and said.startswith("that is a corner point drawn twice")
+    assert runs == [] and said.startswith("that piece is under 6 in long")
     old = [list(map(list, x)) for x in outline[1:5]]
     assert logic.pick_street(old, None, outline[0], None, outline=outline) == (old, None)      # nothing changes
     assert logic.pick_street(None, None, outline[0], None, outline=outline) == ([], None)
@@ -2585,3 +2586,43 @@ def test_a_corner_point_drawn_twice_is_never_a_street_of_its_own():
     assert "if not logic.is_tiny([_feet_point(doc, s[0])[:2], _feet_point(doc, s[1])[:2]])]" in rhino
     assert rhino.count("a, b = _clicked_piece(doc, lot, point)") == 3 and "min(_segments(lot.Geometry)" not in \
         rhino.replace("return min(real or _segments(lot.Geometry)", "")
+
+
+def test_a_piece_too_short_to_have_a_direction_is_never_a_street_a_corner_or_a_turn():
+    """Street-run review round 5: (F1, a Front yard false pass) a 0.02 ft slip at the corner, just longer than the
+    0.01 ft of round 4, was still suggested or kept on a click as the whole street, both its joints read as sure
+    corners; (F2) a 0.005 ft noise piece inside a straight street read as a 53° turn ("one street or two?"). A
+    piece shorter than rhino_logic.SHORT_PIECE_FT (6 in) has no direction: never a street of its own, never a
+    corner, never a turn; and the measuring reads no direction from a stretch under street_lines.NOISE_FT."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from model_measurement import street_lines
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+    corners = [(0, 0), (0.012, -0.016), (20, 0), (40, 0), (60, 0), (80, 0), (80, 100), (0, 100)]   # (F1)
+    outline = _ring(corners)
+    segs = [tuple(map(tuple, x)) for x in outline]
+    got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 1.0, "bottom": 0.0, "segments": segs}], [])
+    assert got["street_line"] == [list(map(list, x)) for x in outline[1:5]], got["street_line"]
+    assert logic.street_run(outline, outline[0]) is None and logic.street_pick(outline, outline[0])[0] == []
+    r = check_site(_plot(box(62, 5, 76, 45, 0, 25), lot_=lot_of(corners)), dict(base, street_line=got["street_line"]))
+    front = next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+    assert front["status"] != "complies", front
+    corners = [(0, 0), (20, 0), (20.003, 0.004), (40, 0), (80, 0), (80, 100), (0, 100)]           # (F2)
+    outline = _ring(corners)
+    run, said = logic.street_pick(outline, outline[0])
+    assert run == [0, 1, 2, 3] and said == "This street: 4 lot-line pieces, 80'-0\" of frontage", (run, said)
+    assert street_lines.heading_change(outline[:4]) == pytest.approx(0.0, abs=0.01)
+    r = check_site(_plot(box(30, 30, 50, 60, 0, 25), lot_=lot_of(corners)),
+                   dict(base, street_line=[outline[k] for k in run]))
+    assert "turn" not in (r["measurements"]["lot_width"].get("reason") or ""), r["measurements"]["lot_width"]
+    # a real turn between longer stretches is all still there, and a curve drawn in short pieces still swings
+    assert street_lines.heading_change([[[0, 0], [10, 0]], [[10, 0], [10.2, 0.1]], [[10.2, 0.1], [10.2, 10]]]) \
+        == pytest.approx(90.0, abs=2.0)
+    import math
+    arc = [[[10 * math.cos(math.radians(a)), 10 * math.sin(math.radians(a))],
+            [10 * math.cos(math.radians(a + 2)), 10 * math.sin(math.radians(a + 2))]] for a in range(0, 90, 2)]
+    assert street_lines.heading_change(arc) == pytest.approx(88.0, abs=3.0)        # 0.35 ft pieces: 90° in all

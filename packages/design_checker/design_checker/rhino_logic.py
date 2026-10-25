@@ -854,15 +854,18 @@ def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
 # two); in between, or a run of small joints that swings past that limit in all, is unclear, and the architect is
 # asked (demo 00c04f1: one click on one of the 8 pieces kept that 9.8 ft piece as the whole street).
 PIECE_TURN_DEG = 15.0
+SHORT_PIECE_FT = 0.5   # a piece shorter than this (6 in) has no direction of its own (is_tiny)
 JOINT = 0.01      # ft: two pieces of one outline meet where they share an end (a click is matched within `tolerance`:
                   # 106's 0.24 ft piece has both ends within 0.5 ft of its neighbours' ends)
 
 
 def is_tiny(line):
-    """A lot-line piece no longer than JOINT: a corner point drawn twice (or float noise), never a line of its
-    own (a street of it alone would be 0'-0" of frontage; street-run review rounds 3 and 4)."""
+    """A lot-line piece shorter than SHORT_PIECE_FT (6 in): a corner point drawn twice, a slip of the
+    pen or float noise, with no direction of its own: never a street of its own (it would be 0'-0" of frontage,
+    the front yard read from a point), never a corner or a bend (street-run review rounds 3 to 5); passed through
+    inside a street."""
     import math
-    return math.dist(line[0][:2], line[-1][:2]) <= JOINT
+    return math.dist(line[0][:2], line[-1][:2]) < SHORT_PIECE_FT
 
 
 def _same_piece(line, picked, tolerance):
@@ -921,6 +924,7 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
     own = names[hit]
     near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
 
+    import math
     tiny = [is_tiny(line) for line in pieces]   # a repeated corner point (or float noise): no piece
     if tiny[hit]:                              # a point clicked, not a line: no street of it (round 4, F1)
         return None
@@ -947,11 +951,37 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
         start = any(near(pieces[j][0], p) for p in points)
         return j, (pieces[j][1] if start else pieces[j][0]), via
 
-    def swing_of(order):
-        return sl.heading_change([pieces[q] for q in order if not tiny[q]], JOINT)
+    def directions(order):
+        """Each piece's direction along `order` (pieces that meet end to end), the short ones left out (they have
+        no direction of their own: round 5); None if they don't run end to end."""
+        vecs, end = [], None
+        for i, q in enumerate(order):
+            a, b = pieces[q]
+            if i == 0:
+                if len(order) > 1 and (near(a, pieces[order[1]][0]) or near(a, pieces[order[1]][1])):
+                    a, b = b, a
+            elif near(b, end):
+                a, b = b, a
+            elif not near(a, end):
+                return None
+            end = b
+            if not tiny[q]:
+                vecs.append((b[0] - a[0], b[1] - a[1]))
+        return vecs
 
-    def turn(a, b):
-        return sl.heading_change([pieces[a], pieces[b]], JOINT) or 0.0
+    def swing_of(order):                 # how far the direction swings along `order`, in degrees (None: apart)
+        vecs = directions(order)
+        if vecs is None:
+            return None
+        run_, low, high = 0.0, 0.0, 0.0
+        for u, v in zip(vecs, vecs[1:]):
+            run_ += math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1]))
+            low, high = min(low, run_), max(high, run_)
+        return high - low
+
+    def turn(a, b, via=()):              # the joint from a to b, over the short pieces between them
+        got = swing_of([a, *via, b])
+        return float("inf") if got is None else got
 
     def free_end(k, inner):
         """The end of piece k that doesn't meet piece `inner` (k's own start when there is no inner piece)."""
@@ -975,10 +1005,10 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
                 if not sl.same_street(own, names[j]):
                     break
             else:
-                t = turn(last, j)
+                t = turn(last, j, via)
                 if t > sl.TURN_LIMIT_DEG:                         # a corner
                     break
-                swing = swing_of([j] + run if side == 0 else run + [j])
+                swing = swing_of([j] + via[::-1] + run if side == 0 else run + via + [j])
                 if t > PIECE_TURN_DEG or swing is None or swing > sl.TURN_LIMIT_DEG:
                     # unclear: the next stretch, asked about. A joint past PIECE_TURN_DEG is a bend of its own: that
                     # piece alone (a rounded corner is asked piece by piece, so the straight street past it is a
@@ -987,9 +1017,9 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
                     while True:
                         more.append(k)
                         nx = step(k, end, set(run) | set(more) | set(maybe[0]))
-                        if (nx is None or nx[0] in taken or set(nx[2]) & taken or t > PIECE_TURN_DEG or turn(k, nx[0]) > PIECE_TURN_DEG
+                        if (nx is None or nx[0] in taken or set(nx[2]) & taken or t > PIECE_TURN_DEG or turn(k, nx[0], nx[2]) > PIECE_TURN_DEG
                                 or (names[nx[0]] and not (own and sl.same_street(own, names[nx[0]])))
-                                or (swing_of([last] + more + [nx[0]]) or 0.0) > sl.TURN_LIMIT_DEG):
+                                or (swing_of([last] + more + nx[2] + [nx[0]]) or 0.0) > sl.TURN_LIMIT_DEG):
                             break
                         more += nx[2]
                         k, end = nx[0], nx[1]
@@ -1082,7 +1112,7 @@ def street_pick(outline, picked, names=None, taken=(), ask=None, label="This str
         if hit is not None and hit in set(taken):
             return [], "that lot line is on a street already kept"
         if hit is not None and is_tiny(outline[hit]):
-            return [], "that is a corner point drawn twice, not a lot line: click the lot line beside it"
+            return [], "that piece is under 6 in long (a corner point drawn twice?), not a street line: click the lot line beside it"
         return None
     run, closed, skipped = list(found["pieces"]), set(), False
     while True:            # each unclear stretch asked in turn; a Yes grows the street on from there, a No ends it
