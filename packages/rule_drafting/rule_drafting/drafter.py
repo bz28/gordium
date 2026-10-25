@@ -902,16 +902,24 @@ def _applies(when: str, values: dict) -> bool:
 
 
 def _caps(measure: str, slot: dict, drafted: dict | None) -> bool:
-    """Whether the slot's chart row is a MAXIMUM of the measure in some district's drafted chart rule (`building_height
-    <= 35` from 'Height in feet'): what an exception can widen. A minimum (lot area) is never widened. Without the
-    drafted rules (a template judged alone), assumed so."""
-    if drafted is None:
-        return True
+    """Whether the slot's chart row is a MAXIMUM of the measure (`building_height <= 35` from 'Height in feet'): what an
+    exception can widen. Judged by what the drafted chart rules citing that row do, not how they are written (review
+    round 17: `35 >= building_height` read as no maximum): passes with the measure at 0 and fails far above. Only a
+    row a drafted rule shows to be a minimum (lot area: fails at 0, passes far above) is not one; with no drafted
+    rule citing the row, or none whose verdict the measure alone decides, a maximum is assumed (refusing errs safe)."""
     row = (slot["page"], slot["section"], slot["row"].strip())
-    cap = re.compile(rf"^\s*{re.escape(measure)}\s*<=?")
-    return any(r.get("kind") == "rule" and cap.match(r.get("check") or "") and any(
-        isinstance(x.get("cell"), dict) and (x.get("page"), x["cell"].get("section"), x["cell"].get("row")) == row
-        for x in r.get("sources") or []) for rules in drafted.values() for r in rules)
+    citing = [r for rules in (drafted or {}).values() for r in rules if r.get("kind") == "rule" and r.get("check")
+              and any(isinstance(x.get("cell"), dict) and (x.get("page"), x["cell"].get("section"), x["cell"].get("row")) == row
+                      for x in r.get("sources") or [])]
+    shown = []
+    for r in citing:
+        bare = {"kind": "rule", "check": r["check"]}
+        low, high = outcome(bare, {measure: 0}, {}), outcome(bare, {measure: 1e6}, {})
+        if (low, high) == ("pass", "fail"):
+            return True
+        if (low, high) == ("fail", "pass"):
+            shown.append(r)
+    return not shown
 
 
 def exception_in_parts(template: dict, drafted: dict | None = None) -> list[str]:
@@ -940,9 +948,11 @@ def exception_in_parts(template: dict, drafted: dict | None = None) -> list[str]
         for measure in sorted(measures - {"use", "district"}):
             if not _caps(measure, slots[slot], drafted):
                 continue
-            for rest in (0, 1000):                  # the condition's other slots and measures, low and high
-                filled = SLOT_NAME.sub(lambda m: "35" if m[1] == slot else str(rest), when)
-                others = {n: rest for n in named - {measure, "use", "district"}}
+            # the condition's other slots low or high, crossed with its other measures unknown, low or high (review
+            # round 17: one shared value made 'lot_area > {min_lot}' false in every probe)
+            for slot_rest, measure_rest in [(a, b) for a in (0, 1000) for b in (None, 0, 1000)]:
+                filled = SLOT_NAME.sub(lambda m: "35" if m[1] == slot else str(slot_rest), when)
+                others = {} if measure_rest is None else {n: measure_rest for n in named - {measure, "use", "district"}}
                 try:
                     above = (not _applies(filled, others | {measure: 34})) and _applies(filled, others | {measure: 36})
                 except Exception:                   # noqa: BLE001 - a condition code can't read is reported elsewhere
@@ -954,12 +964,14 @@ def exception_in_parts(template: dict, drafted: dict | None = None) -> list[str]
     return []
 
 
-def restating_flags(out: dict) -> None:
+def restating_flags(out: dict, notes: dict[int, dict]) -> None:
     """A flag with no condition that quotes only what a KEPT rule with no condition checks (§325-18B: "the space in
     any required yard shall be open ... except for ... eaves ...", drafted as the projection rule and again as an
     always-on flag) sends every design to review and decides nothing that rule doesn't: it is set aside, listed for
     a person with why. Judged after every template is checked (review round 16): a refused rule, or one narrowed by
-    a condition (two-family houses only), never takes a flag's place, so the flag stays."""
+    a condition (two-family houses only), never takes a flag's place, so the flag stays. A flag that cites a chart note
+    whole is never set aside (review round 17): it may be what sends a note a kept rule leaves out to a person
+    (settle_dropped_amounts kept the rule because of it)."""
     flat = lambda t: " ".join(str(t).split())       # noqa: E731
     kept = {t["id_suffix"]: t for t in out["templates"]}
     ruled = {flat(q.get("text")) for t in kept.values() if t["kind"] == "rule" and not (t.get("applies_when") or "").strip()
@@ -967,7 +979,7 @@ def restating_flags(out: dict) -> None:
     for district in sorted(out["rules"]):
         for r in list(out["rules"][district]):
             t = kept.get(r["id"].split(".", 1)[1])
-            if t is None or t["kind"] != "flag" or (t.get("applies_when") or "").strip():
+            if t is None or t["kind"] != "flag" or (t.get("applies_when") or "").strip() or flagged_notes([r], notes):
                 continue
             mine = {flat(q.get("text")) for q in t.get("quotes") or []}
             if mine and mine <= ruled:
@@ -1194,7 +1206,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
     undecided_uses_flag(out, law, ctx)
     if unit.get("piece"):
         all_or_none(answer, unit, out)
-        restating_flags(out)
+        restating_flags(out, notes)
     out["unresolved"] += exemption_gaps(unit, out, ctx)
     out["problems"] = [f"{r['rule']}: {r['why']}" for r in out["rejected"]]
     if scope is not None:

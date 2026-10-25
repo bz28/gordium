@@ -447,3 +447,51 @@ def test_a_size_tier_keyed_to_a_minimum_is_not_an_exception_in_parts(inputs):
     old = _recorded(inputs, "325-16C")
     limit = next(x for x in old["templates"] if x["id_suffix"] == "extra_height_limit")
     assert drafter.exception_in_parts(limit, drafted)
+
+
+
+def test_a_flag_that_sends_a_dropped_note_to_a_person_is_never_set_aside(inputs):
+    """Review round 17 (P0): a rule leaving out fn16's "not less than 20 ft" was kept because a flag cites fn16 whole,
+    then that flag was set aside as 'restating' the rule (the rule quotes fn16 too): the rule passed a 10 ft rear
+    yard on a 40 ft lot with nothing sending fn16 to a person. The flag stays."""
+    rule = template("rear_min", "rear_yard >= min({pct} * lot_depth, {cap})",
+                    [slot("pct", REAR, 1, 2, True, ["16"]), slot("cap", REAR, 2, 2, False, ["16"])],
+                    [({"rear_yard": "{pct} * 100", "lot_depth": "100"}, "pass"),
+                     ({"rear_yard": "{pct} * 100 - 1", "lot_depth": "100"}, "fail"),
+                     ({"rear_yard": "{cap}", "lot_depth": "1000"}, "pass")],
+                    quotes=[law(OPENING), law(YARDS_GROW), chart_note(16, "But not less than 20 ft.")])
+    flag = template("fn16_flag", "", [], [], kind="flag", quotes=[chart_note(16, "But not less than 20 ft.")])
+    got = judge(inputs, "325-16C", [rule, flag], cli.drafted_rules(inputs))
+    kept = [r for rs in got["rules"].values() for r in rs]
+    assert any(r["id"].endswith("rear_min") for r in kept), got["problems"][:2]        # kept because of the flag
+    assert any(r["id"].endswith("fn16_flag") for r in kept), [g["rule"] for g in got["unresolved"]][:4]
+
+
+
+def test_a_chart_maximum_is_known_by_what_its_rule_does_and_assumed_when_nothing_shows_otherwise(inputs):
+    """Review round 17: the chart maximum was found by spelling ('^building_height <='), so '35 >= building_height',
+    '(building_height <= 35)' or no drafted chart rule yet ({}) switched the parts guard off."""
+    import copy
+    limit = next(x for x in _recorded(inputs, "325-16C")["templates"] if x["id_suffix"] == "extra_height_limit")
+    drafted = cli.drafted_rules(inputs)
+    flipped = copy.deepcopy(drafted)
+    import re as _re
+    for rules in flipped.values():                  # every height maximum written the other way round
+        for r in rules:
+            if m := _re.fullmatch(r"building_height <= (\d+)", r.get("check") or ""):
+                r["check"] = f"{m[1]} >= building_height"
+    assert not any((r.get("check") or "").startswith("building_height <=") for rules in flipped.values() for r in rules)
+    for d in (drafted, flipped, {}, None):
+        assert drafter.exception_in_parts(limit, d), d and sorted(d)[:2]
+
+
+
+@pytest.mark.parametrize("condition", ["building_height > {height_ft} and lot_area > {min_lot}",
+                                       "building_height > {height_ft} and lot_area >= 5000",
+                                       "building_height > {height_ft} and lot_width > 2000"])
+def test_the_parts_guard_sees_a_condition_whose_other_part_needs_a_value_no_single_probe_gives(inputs, condition):
+    """Review round 17: the other measures at exactly 0 or 1000 made these conditions false in every probe."""
+    limit = next(x for x in _recorded(inputs, "325-16C")["templates"] if x["id_suffix"] == "extra_height_limit")
+    with_slot = limit | {"applies_when": condition,
+                         "slots": limit["slots"] + [slot("min_lot", "One-family dwelling, detached", section=LOT_SIZE)]}
+    assert drafter.exception_in_parts(with_slot, cli.drafted_rules(inputs))
