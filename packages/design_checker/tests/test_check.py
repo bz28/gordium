@@ -2357,36 +2357,49 @@ def test_the_notice_timer_stops_once_a_check_cleared_the_notice():
 
 def test_the_notice_is_compact_and_never_over_the_model_being_judged():
     """The architect's eye on #28 at 92cf742: zoomed in tight, the "no longer complies" notice was one long line, a
-    bar across the whole plan over the drawing being judged. Now it is wrapped to a compact box (at most
-    NOTICE_SHARE of the view's width, never under NOTICE_MIN_CHARS a line), put in a corner clear of the model, and
-    when no corner is clear it is not drawn at all (the panel's message line says it)."""
+    bar across the whole plan over the drawing being judged. Now it is at most NOTICE_SHARES[0] of the view's width,
+    wrapped between its " · " parts only (never inside a measurement), in the first corner clear of the model and of
+    the status box (a narrower box tried when the wider fits no corner); when none fits, it is not drawn (the panel's
+    message line says it). The side yard's notice is still drawn in the default framed view (review round 1)."""
     from design_checker import rhino_logic as logic_
-    long = ("✕ Side yard, Southwest no longer complies · 3'-0 5/8\" to 7'-0 5/8\" proposed, 10'-0\" required "
-            "(the lot line may be 2'-0\" either way)")
-    for view_w in (1000, 600, 300):
-        lines = logic_.notice_lines([long], view_w)
-        width = max(len(t) for t in lines) * 13 * 0.6 + 22                   # gordium_ui.text_box_size's measure
-        chars = max(logic_.NOTICE_MIN_CHARS, int((view_w * logic_.NOTICE_SHARE - 22) / 7.8))
-        assert all(len(t) <= chars for t in lines), (view_w, lines)
-        assert view_w < 400 or width <= view_w * logic_.NOTICE_SHARE, (view_w, width)
-        assert " ".join(t.strip() for t in lines) == long                     # every word kept, in order
-    assert logic_.notice_lines(["✕ Rear yard no longer complies"], 1000) == ["✕ Rear yard no longer complies"]
-    # zoomed in tight: the model fills the view, no corner is clear of it: not drawn
-    assert logic_.notice_spot(1000, 640, 380, 54, (5, 5, 995, 635)) is None
-    # the model in the middle: a corner clear of it, the first such
-    x, y = logic_.notice_spot(1000, 640, 380, 54, (420, 200, 580, 440))
-    assert (x, y) == (12, 34)
-    # the model's left half fills the view's height: a right corner
-    x, y = logic_.notice_spot(1000, 640, 380, 54, (5, 5, 500, 635))
-    assert x == 1000 - 380 - 12
-    # the plugin: no spot, no notice box (never drawn over the model)
+    side = "✕ Side yard, Southwest no longer complies · 7'-0 5/8\" proposed · 10'-0\" required · −2'-11 3/8\" short"
+    for view_w in (1000, 700, 400):
+        for share in logic_.NOTICE_SHARES:
+            lines = logic_.notice_lines([side], view_w, share)
+            assert " · ".join(t.strip() for t in lines) == side                # every part kept, in order
+            assert all("'-" not in t.split()[-1] or t.split()[-1].endswith(('"', "'")) for t in lines), lines
+            assert not any(t.strip().startswith(('1/', '3/', '5/', '7/')) for t in lines), lines  # 7'-0 5/8" whole
+            chars = max(logic_.NOTICE_MIN_CHARS, int((view_w * share - 22) / 7.8))
+            assert all(len(t) <= chars for t in lines if " · " in t.strip()), (view_w, share, lines)
+    def over(x, y, w, h, box):                                           # (x0, y0, x1, y1)
+        return min(x + w, box[2]) > max(x, box[0]) and min(y + h, box[3]) > max(y, box[1])
+    # the default framed Top view (1000 x 640, the lot from 324,102 to 676,538): drawn, top left, compact
+    lot = (324, 102, 676, 538)
+    lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot)
+    assert (x, y) == (12, 34) and w <= 1000 * logic_.NOTICE_SHARES[0] and not over(x, y, w, h, lot)
+    # ...with the status box top right: still clear of both
+    status = (518, 12, 467, 56)
+    lines, (x, y), w, h = logic_.notice_place(1000, 640, [side], lot, [status])
+    assert not over(x, y, w, h, lot) and not over(x, y, w, h, (518, 12, 985, 68))
+    # a smaller view where only the narrowest box fits a corner: the narrower box, never over the model
+    placed = logic_.notice_place(700, 450, [side], (380, 60, 560, 400))
+    assert placed is not None and len(placed[0]) > 1 and not over(*placed[1], placed[2], placed[3], (380, 60, 560, 400))
+    # zoomed in tight: the model fills the view: not drawn
+    assert logic_.notice_place(1000, 640, [side], (5, 5, 995, 635)) is None
+    # every corner taken by other boxes: not drawn (never over the status box)
+    corners = [(0, 0, 500, 320), (500, 0, 500, 320), (0, 320, 500, 320), (500, 320, 500, 320)]
+    assert logic_.notice_spot(1000, 640, 300, 50, None, corners) is None
+    # the plugin: no place, no notice box; a place, that box
     ns = _plugin_functions(["_notice_box"], _model_on_screen=lambda o, viewport: (5, 5, 995, 635))
     viewport = type("Viewport", (), {"Id": "vp", "Bounds": type("B", (), {"Width": 1000, "Height": 640})()})()
-    o = type("O", (), {"toast": ([long[2:]], ns["time"].time() + 6)})()
+    o = type("O", (), {"toast": ([side[2:]], ns["time"].time() + 6)})()
     assert ns["_notice_box"](o, viewport, [], False) is None
-    ns["_model_on_screen"] = lambda o, viewport: (420, 200, 580, 440)
+    ns["_model_on_screen"] = lambda o, viewport: lot
     lines, x, y, w, h = ns["_notice_box"](o, viewport, [], False)
-    assert len(lines) > 1 and w <= 1000 * logic_.NOTICE_SHARE and (x, y) == (12, 34)
+    assert (x, y) == (12, 34) and not over(x, y, w, h, lot) and lines[0].startswith("✕ Side yard, Southwest")
     src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     check = src[src.index("def run_check("):src.index("def _toast(")]
     assert 'ui.say(STATE.get("panel_parts"), "✕ " + result["notice"])' in check     # the panel says it
+    report = src[src.index("def open_report("):].split("\ndef ", 1)[0]
+    assert report.count("say(first + logic.report_message(") == 2                    # kept in the report's line too
+    assert 'first = "✕ " + notice + " · " if notice else ""' in report

@@ -469,38 +469,64 @@ def label_lines(text):
     return [text] if k is None else [" ".join(words[:k]), " ".join(words[k:])]
 
 
-NOTICE_SHARE = 0.4        # the notice is at most this share of the view's width (compact, a corner's, never a bar)
-NOTICE_MIN_CHARS = 24     # ...but never narrower than this many characters a line
+NOTICE_SHARES = (0.6, 0.5, 0.4)   # the notice's widest box, then narrower ones: a share of the view's width each
+NOTICE_MIN_CHARS = 24             # ...never narrower than this many characters a line
 
 
-def notice_lines(lines, view_w, size=13):
-    """The notice's lines wrapped to a compact box: at most NOTICE_SHARE of the view's width (gordium_ui
-    text_box_size's measure: size * 0.6 pixels a character, 22 of margin), never under NOTICE_MIN_CHARS a line,
-    broken between words; a wrapped line's rest indented under its first. Zoomed in tight, one long line was a bar
-    across the whole plan, over the drawing being judged (architect's eye, #28 at 92cf742)."""
-    import textwrap
-    chars = max(NOTICE_MIN_CHARS, int((view_w * NOTICE_SHARE - 22) / (size * 0.6)))
+def notice_lines(lines, view_w, share=NOTICE_SHARES[0], size=13):
+    """The notice's lines wrapped to at most `share` of the view's width (gordium_ui text_box_size's measure: size *
+    0.6 pixels a character, 22 of margin), never under NOTICE_MIN_CHARS a line. Broken only between its " · " parts,
+    never inside one (a measurement like 7'-0 5/8" stays on one line: review round 1); a part longer than the line
+    stays whole; a wrapped line's rest indented under its first. Zoomed in tight, one long line was a bar across the
+    whole plan, over the drawing being judged (architect's eye, #28 at 92cf742)."""
+    chars = max(NOTICE_MIN_CHARS, int((view_w * share - 22) / (size * 0.6)))
     out = []
     for line in lines:
-        out += textwrap.wrap(line, chars, subsequent_indent="  ", break_on_hyphens=False) or [""]
+        parts, row = line.split(" · "), ""
+        for part in parts:
+            if row and len(row) + 3 + len(part) > chars:
+                out.append(row)
+                row = "  " + part
+            else:
+                row = row + " · " + part if row else part
+        out.append(row)
     return out
 
 
+def notice_box(lines, size=13):
+    """The (width, height) the notice's box takes on screen: gordium_ui.text_box_size's measure."""
+    return max(len(t) for t in lines) * (size * 0.6) + 22, len(lines) * (size + 9) + 10
+
+
+def notice_place(view_w, view_h, lines, model, taken=(), size=13):
+    """The notice as drawn in a view: (lines, (left, top), width, height), or None. Its widest box first (at most
+    NOTICE_SHARES[0] of the view's width), then narrower ones, each in the first corner clear of the model and of
+    every box in `taken` (notice_spot); None when no box fits a clear corner: then it is not drawn over the model,
+    and the panel's message line says it (review round 1: one narrow box alone hid the side yard's notice in the
+    default framed view)."""
+    for share in NOTICE_SHARES:
+        wrapped = notice_lines(lines, view_w, share, size)
+        w, h = notice_box(wrapped, size)
+        spot = notice_spot(view_w, view_h, w, h, model, taken)
+        if spot is not None:
+            return wrapped, spot, w, h
+    return None
+
+
 def notice_spot(view_w, view_h, w, h, model, taken=(), gap=12):
-    """Where the "no longer complies" notice (w × h) goes in a view (screen pixels): (left, top), or None. The
-    corners are tried in turn (top left under the view's name, bottom left above the axes, top right, bottom
-    right); the first that covers none of the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no
-    box in `taken` (the status box) is used. If every corner covers some of the model, None: the notice is never
-    drawn over the building or lot being judged (it is said in the panel instead; architect's review, 2026-10-21:
-    bottom left, it hid the lot's lower edge and dimensions; #28 at 92cf742: zoomed in tight, a bar across the
-    plan)."""
+    """Where a w × h notice goes in a view (screen pixels): (left, top), or None. The corners are tried in turn (top
+    left under the view's name, bottom left above the axes, top right, bottom right); the first that covers none of
+    the model (`model`: its on-screen box, x0, y0, x1, y1, or None) and no box in `taken` (the status box) is used;
+    None when there is none: the notice is never drawn over the building or lot being judged, nor over the status box
+    (architect's review, 2026-10-21: bottom left, it hid the lot's lower edge and dimensions; #28 at 92cf742: zoomed
+    in tight, a bar across the plan)."""
     spots = [(gap, 34), (gap, view_h - h - 64), (view_w - w - gap, 34), (view_w - w - gap, view_h - h - 40)]
 
     def overlap(x, y, box):
         a, b, c, e = box
         return max(0.0, min(x + w, c) - max(x, a)) * max(0.0, min(y + h, e) - max(y, b))
-    free = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)] or spots
-    clear = [s for s in free if not (model and overlap(s[0], s[1], model))]
+    clear = [(x, y) for x, y in spots if not any(overlap(x, y, (a, b, a + c, b + e)) for a, b, c, e in taken)
+             and not (model and overlap(x, y, model))]
     return clear[0] if clear else None
 
 
