@@ -2000,6 +2000,7 @@ LOOK_UP_FIRST = "Press Look up to find {address} first."
 NOT_FOUND_YET = "No lot found for {address} (the line above says why): correct the address and press Look up, or {back}."
 NOT_ANSWERED = "The lookup of {address} didn't finish (the line above says why): press Look up again, or {back}."
 PICK_A_MATCH = "Pick one of the matches under Address, then press Look up."
+WAIT_LOOKUP = "Looking up {address}: Draw once the answer is in."
 GUIDE_PREVIEW = ("The State's tax map didn't answer; the City's outline is shown as a dashed guide only (it can't be "
                  "kept). Draw clears what Gordium drew for the old address; then Draw my lot… over the guide.")
 CITY_TAIL = {"ithaca", "ny", "new", "york", "usa"}
@@ -2096,8 +2097,9 @@ def address_place(address):
     """The town or ZIP an address names after its first comma, as words (state and country aside), or None when it
     names none; the City's own name and ZIP codes count as none (the lot is in the City of Ithaca)."""
     tail = str(address or "").split(",", 1)[1:] if "," in str(address or "") else []
-    words = [w for w in (tail[0] if tail else "").lower().replace(",", " ").replace(".", " ").split()
-             if w not in ("ny", "new", "york", "usa", "us")]
+    text = (tail[0] if tail else "").lower().replace(",", " ").replace(".", "")
+    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("united states", "")
+    words = [w for w in text.split() if w not in ("ny", "new", "york", "usa", "us")]
     words = [w[:5] if w[:5].isdigit() else w for w in words]
     places = [w for w in words if w not in ITHACA_PLACE]
     return " ".join(places) or None
@@ -2118,10 +2120,10 @@ def address_reason(state):
     if not address or known is None or any(same_site_address(address, k) for k in known):
         return ""
     look = state.get("lookup") or {}
-    if look.get("looking"):                               # a lookup running: its row says so; nothing to press yet
-        return ""
+    if look.get("looking"):                               # a lookup running: Draw still off, nothing to press yet
+        return WAIT_LOOKUP.format(address=address)
     status = look.get("status")
-    if status in LOOKUP_SAYS and same_address(address, look.get("query")):    # looked up, no lot came back
+    if status in LOOKUP_SAYS and same_site_address(address, look.get("query")):    # looked up, no lot came back
         if status == "multiple":
             return PICK_A_MATCH
         back = ("put back " + known[0].split(",")[0]) if known else "clear the address"   # blank: Draw without one
@@ -2230,7 +2232,7 @@ BOX_CHOSEN_UI = ("address_source", "zone_source", "_zone_said", "_reconfirm", "_
 # what of the box's state the reset redraws (the rest is the architect's choices in the box): after_reset_state
 RESET_STATE_KEYS = ("has_lot", "lot_missing", "lot_area", "lot_surveyed", "lot_source", "street_name",
                     "street_name_saved", "street_source", "corner_lot", "corner_source", "ground", "ground_fall",
-                    "lookup", "live", "doubts", "checked", "address")
+                    "lookup", "live", "doubts", "checked", "address", "address_source")
 
 
 def after_reset_state(shown, fresh):
@@ -2273,6 +2275,7 @@ def apply_reset(table, session, facts, saved_ui, choice, zones=()):
     chosen_f = {k: facts.get(k, MISSING) for k in BOX_CHOSEN_FACTS}
     chosen_s = {k: saved_ui.get(k, MISSING) for k in BOX_CHOSEN_UI}
     facts, saved_ui, guide = apply_lookup(table, session, pending.get("answer") or {}, facts, saved_ui, zones)
+    found_source = saved_ui.get("address_source")          # the lookup's, for the address as found
     for target, chosen in ((facts, chosen_f), (saved_ui, chosen_s)):
         for k, v in chosen.items():
             if v is MISSING:
@@ -2284,7 +2287,9 @@ def apply_reset(table, session, facts, saved_ui, choice, zones=()):
     saved_ui.update(drawn_address=pending.get("address"), house_fingerprint=None, _box_address=pending.get("address"))
     if (pending.get("address") and same_address(facts.get("address"), pending.get("query"))
             and not same_address(facts.get("address"), pending.get("address"))):
-        facts["address"] = pending["address"]   # the address as found, never a loose query typed back (round 2)
+        facts["address"] = pending["address"]   # the address as found, never a loose query typed back (round 2),
+        if found_source:                        # with the lookup's source: value and source agree (round 3)
+            saved_ui["address_source"] = found_source
     if not keep:
         saved_ui["_redrawn_for"] = pending.get("address")     # Draw now draws (the box's button says so)
     return facts, saved_ui, not keep, guide

@@ -550,8 +550,13 @@ def test_another_towns_address_is_never_taken_for_the_lots_own():
     assert logic.address_reason(dict(known, address="106 Ithaca Rd, Dryden, NY 13053")) == \
         "Press Look up to find 106 Ithaca Rd, Dryden, NY 13053 first."
     assert logic.address_reason(dict(known, address="106 Ithaca Rd, Lansing")) != ""
-    for same in ("106 Ithaca Road", "106 ithaca rd, Ithaca NY 14850", "106 Ithaca Rd, Ithaca, NY, 14850-1234"):
+    for same in ("106 Ithaca Road", "106 ithaca rd, Ithaca NY 14850", "106 Ithaca Rd, Ithaca, NY, 14850-1234",
+                 "106 Ithaca Rd, City of Ithaca, NY", "106 Ithaca Rd, Ithaca, United States", "106 Ithaca Rd, Ithaca, N.Y."):
         assert logic.address_reason(dict(known, address=same)) == "", same
+    assert logic.address_reason(dict(known, address="106 Ithaca Rd, Town of Ithaca")) != ""   # another municipality
+    failed = {"status": "not_found", "query": "500 Elm St"}            # its failure is never another town's
+    assert logic.address_reason(dict(known, address="500 Elm St, Dryden", lookup=failed)) == \
+        logic.LOOK_UP_FIRST.format(address="500 Elm St, Dryden")
 
 
 def test_while_a_lookup_runs_the_reason_never_says_to_press_look_up():
@@ -560,7 +565,9 @@ def test_while_a_lookup_runs_the_reason_never_says_to_press_look_up():
     box = site.box().type_address("96 Ithaca Rd")
     box._apply()
     box.saved["_lookup"] = {"looking": "96 Ithaca Rd"}
-    assert logic.address_reason(box.shown()) == ""
+    assert logic.address_reason(box.shown()) == "Looking up 96 Ithaca Rd: Draw once the answer is in."
+    before = site.state()
+    assert box.draw() == "off" and site.state() == before    # the gate stays on (round 3): never a label saved
 
 
 def test_a_loose_query_typed_back_is_saved_as_found():
@@ -571,8 +578,10 @@ def test_a_loose_query_typed_back_is_saved_as_found():
     p["query"] = "96 Ithica Rd"
     box = site.box().look_up(p)
     box.type_address("96 Ithica Rd")
+    box.typed["address_source"] = logic.ENTERED           # as the box marks a field the architect typed in
     assert box.draw() == "drawn" and logic.same_address(site.facts["address"], "96 Ithaca Road")
     assert site.facts["address"] == site.saved["drawn_address"]
+    assert site.sources["address"]["source"] != logic.ENTERED      # the lookup's address with the lookup's source
 
 
 def test_the_box_turns_draw_off_and_on_as_the_address_is_typed():
