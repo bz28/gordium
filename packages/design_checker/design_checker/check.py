@@ -635,6 +635,23 @@ def _clip_above(points: list, z: float) -> list:
     return out
 
 
+def walls_beyond(building: dict, z: float, region) -> bool:
+    """Whether a wall (a face seen edge-on from above) rises over height z somewhere `region` (what above() sees)
+    doesn't cover: its plan, 0.05 ft each side, not inside the region."""
+    from shapely.geometry import LineString, Polygon
+    for f in building.get("faces") or []:
+        if not any(p[2] > z + 1e-6 for p in f["points"]):
+            continue
+        flat = [p[:2] for p in f["points"]]
+        if len(flat) >= 3 and Polygon(flat).buffer(0).area > 1e-9:
+            continue                                    # not a wall: above() already sees it
+        clipped = [p[:2] for p in _clip_above(f["points"], z)]
+        trace = LineString(clipped) if len(clipped) >= 2 else None
+        if trace is not None and trace.length > 1e-6 and not region.buffer(0.05).contains(trace):
+            return True
+    return False
+
+
 def above(building: dict, z: float):
     """The building seen from above where it rises above height z: each face clipped to z and above, projected
     flat (a pitched roof's strip along its ridge, a flat roof's whole outline; vertical faces add nothing)."""
@@ -732,9 +749,11 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                 if top <= env["top"] + 1e-6:
                     continue
                 region = above(b, env["top"])
-                if region.is_empty or region.area <= 1e-3:   # nothing above it seen from above (only walls rise
-                    region = own                             # over the limit: a vault read as walls): its own plan,
-                for g in hole_free(region):                  # never less (independent review of #28, P1)
+                # nothing above it seen from above, or a wall rising over the limit outside what is (a vault read as
+                # walls, alone or beside a flat roof): its own plan, never less (independent review of #28, P1, L1)
+                if region.is_empty or region.area <= 1e-3 or walls_beyond(b, env["top"], region):
+                    region = own
+                for g in hole_free(region):
                     if g.area > 1e-3:
                         encroach.append({"outline": _ring(g), "base": env["top"], "top": top, "why": "height",
                                          "status": height, "building": b.get("id"),
