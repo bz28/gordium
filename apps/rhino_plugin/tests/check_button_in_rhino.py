@@ -187,18 +187,26 @@ def finish():
 
 def tick(sender, e):
     """Each timer tick (on Rhino's UI thread, between its idle events): the next step once no command is running
-    and, for steps 2 and 4, once Rhino has been idle long enough after the edit."""
+    and, for steps 2 and 4, once Rhino has been idle long enough after the edit. Any wait (for a command to end, or
+    for Rhino to go idle) longer than PHASE_LIMIT_S fails the run: out.json is always written, never a hang."""
+    if run.get("finished") or run.get("busy"):
+        return
+    run["busy"] = True
     try:
-        if run.get("finished") or run.get("busy") or Rhino.Commands.Command.InCommand():
-            return
-        run["busy"] = True
         phase = run["phase"]
+        step = {"start": "1", "b": "2", "c": "4"}.get(phase, phase)
+        late = time.time() - run["since"] > PHASE_LIMIT_S
+        if Rhino.Commands.Command.InCommand():
+            if late:
+                claim("no command left running before step %s" % step, False,
+                      {"waited_s": round(time.time() - run["since"], 1)})
+            return
         if phase == "start":
             step_a()
         elif phase in ("b", "c"):
             if not idle_enough():
-                if time.time() - run["since"] > PHASE_LIMIT_S:
-                    claim("Rhino went idle after the edit (step %s)" % ("2" if phase == "b" else "4"), False,
+                if late:
+                    claim("Rhino went idle after the edit (step %s)" % step, False,
                           {"idle_events": len(run["idle_at"]), "waited_s": round(time.time() - run["since"], 1)})
                 return
             (step_b if phase == "b" else step_c)()
@@ -216,6 +224,17 @@ def idle_seen(sender, e):
     run["idle_at"].append(time.time())
 
 
+earlier = sc.sticky.get("gordium_check_button_run")
+if earlier is not None and not earlier.get("finished"):     # an earlier run still waiting: stopped, never two runs
+    earlier["finished"] = True                              # driving the plugin or writing out.json
+    try:
+        earlier["timer"].Stop()
+    except Exception:
+        pass
+    try:
+        Rhino.RhinoApp.Idle -= earlier["idle"]
+    except Exception:
+        pass
 if os.path.exists(S + "out.json"):              # never an earlier run's result read as this one's
     os.remove(S + "out.json")
 sc.sticky["gordium_check_button_run"] = run     # the timer and handlers outlive this script's own run

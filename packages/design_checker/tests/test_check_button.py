@@ -200,6 +200,8 @@ def test_the_rhino_check_runs_its_idle_steps_across_real_idle():
     assert "Rhino.RhinoApp.Idle += idle_handler" in script and "ef.UITimer()" in script
     tick = body(script, "def tick(", "\ndef ")
     assert "Command.InCommand()" in tick and "idle_enough()" in tick and "PHASE_LIMIT_S" in tick
+    assert tick.index("late = ") < tick.index("InCommand()")      # a command left running fails too (review round 1)
+    assert 'earlier["timer"].Stop()' in script                    # an earlier waiting run stopped first
     enough = body(script, "def idle_enough(", "\ndef ")
     assert 'run["idle_at"]' in enough and "IDLE_WAIT_S" in enough
     assert (REPO / "docs/evidence/pr-27/rhino-ea88c18/phased_run_claims.json").exists()
