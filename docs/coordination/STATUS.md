@@ -140,3 +140,4 @@ Next (local side): RHINO_QUEUE 7, 8, 9 (+ #19 box), Windows confirmations from c
   - Full suite: 1,672 passed, all 7 CI steps passed. Headless plugin run: 14 of 14.
   - RHINO_QUEUE item 12.
 - Next feature from the queue: highlight only the offending part, then drawing-style dimensions.
+- 2026-10-25 #26 re-lookup at 8c5e664, pushed: Keep my building replaces the architect's own lot too (question and answer say so); after Undo/Redo the drawing clears and the model is re-checked; in-Rhino proof now runs outside a command with Rhino's _Undo/_Redo, plus undo_redo_probe_in_rhino.py to find what kills Redo (cause not proven yet). Full suite 1,562 passed, 7 CI steps passed; headless 52/52; review rounds 0/3/4/3 confirmed, all fixed (cap reached). Next: Rhino runs RHINO_QUEUE 5 again; Ben: typed (not looked-up) address on own lot, new site too?
