@@ -130,3 +130,14 @@ hand first, which the Rhino job doesn't do (no interactive commands).
   its own lock is kept. Rhino **keeps** an own lock through a later lock and unlock of the parent; it doesn't
   reset it.
 - **5: nested** (an unlocked Mid between the top and the sublayer, as `Gordium::Context` sits): the same as 1 and 4.
+
+## Re-run at 917a4e8 (2026-10-25): 18 of 18, and the lock probe 1–5b
+
+The test as run: 917a4e8's own `context_in_rhino.py`, in a copy that records every claim
+(`context_results_917a4e8.json`): **18 of 18**. That includes the new case: drawn with "Gordium" unlocked, then
+"Gordium" locked and unlocked with no redraw, Parcels, Streets and Notes are still locked and Buildings isn't. Both
+Grade orders pass too.
+
+`lock_probe_in_rhino.py`, cases 1–5b, without the two manual `-_Layer` cases (`lock_probe_917a4e8.json`): as at
+994012d for cases 1–5. The new **mid_relock**: the sublayer's own lock set while only Mid is locked survives Mid
+being unlocked, and the top then being locked and unlocked (the sublayer stays locked, its own lock kept).

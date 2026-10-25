@@ -1,0 +1,1478 @@
+{
+ "live": false,
+ "claims": {
+  "1 the neighbourhood is drawn on its own grey layers, locked but for the footprints": {
+   "ok": true,
+   "detail": {
+    "Parcels": {
+     "locked": true,
+     "visible": true,
+     "objects": 229,
+     "colour": [
+      150,
+      150,
+      150
+     ],
+     "names": [
+      "500700-66.-1-10",
+      "500700-66.-1-11",
+      "500700-66.-1-12",
+      "500700-66.-1-13",
+      "500700-66.-1-7",
+      "500700-66.-1-8",
+      "500700-66.-11-1",
+      "500700-66.-11-3",
+      "500700-66.-11-5",
+      "500700-66.-12-1",
+      "500700-66.-12-2",
+      "500700-66.-12-3"
+     ],
+     "texts": [
+      ""
+     ],
+     "sources": [
+      "state_parcels"
+     ]
+    },
+    "Streets": {
+     "locked": true,
+     "visible": true,
+     "objects": 38,
+     "colour": [
+      120,
+      120,
+      120
+     ],
+     "names": [
+      "Bool Street",
+      "Brandon Place",
+      "Bryant Avenue",
+      "Delaware Avenue",
+      "Dunmore Place",
+      "East State Street",
+      "Elmwood Avenue",
+      "Fairmount Avenue",
+      "Irving Place",
+      "Ithaca Road",
+      "Linden Avenue",
+      "Mitchell Street"
+     ],
+     "texts": [
+      ""
+     ],
+     "sources": [
+      "state_streets"
+     ]
+    },
+    "Buildings": {
+     "locked": false,
+     "visible": true,
+     "objects": 322,
+     "colour": [
+      135,
+      135,
+      135
+     ],
+     "names": [
+      "footprint-2069380",
+      "footprint-2069398",
+      "footprint-2069401",
+      "footprint-2069403",
+      "footprint-2069405",
+      "footprint-2069409",
+      "footprint-2069412",
+      "footprint-2069414",
+      "footprint-2069415",
+      "footprint-2069417",
+      "footprint-2069419",
+      "footprint-2069420"
+     ],
+     "texts": [
+      ""
+     ],
+     "sources": [
+      "state_buildings"
+     ]
+    },
+    "Notes": {
+     "locked": true,
+     "visible": true,
+     "objects": 6,
+     "colour": [
+      110,
+      110,
+      110
+     ],
+     "names": [
+      "Context square, 1500 ft \u00d7 1500 ft",
+      "North",
+      "North (grid north)",
+      "Scale bar",
+      "Scale bar, 100 ft",
+      "Sources"
+     ],
+     "texts": [
+      "",
+      "100 ft",
+      "N",
+      "Tax parcels: NYS Tax Parcels Public (from Tompkins County\r\nReal Property): for planning and general use only, not a\r\nsubstitute for a legal parcel survey.\r\nStreet centerlines: NYS Streets (NYS ITS Geospatial\r\nServices).\r\nBuilding footprints: NYS ITS Geospatial Services\r\n (NYSERDA/CIESIN; Tompkins County ITS GIS Division);\r\nfootprints dated 2014."
+     ],
+     "sources": [
+      "gordium"
+     ]
+    }
+   }
+  },
+  "1 the notes: a north arrow, a scale bar and the sources": {
+   "ok": true,
+   "detail": {
+    "locked": true,
+    "visible": true,
+    "objects": 6,
+    "colour": [
+     110,
+     110,
+     110
+    ],
+    "names": [
+     "Context square, 1500 ft \u00d7 1500 ft",
+     "North",
+     "North (grid north)",
+     "Scale bar",
+     "Scale bar, 100 ft",
+     "Sources"
+    ],
+    "texts": [
+     "",
+     "100 ft",
+     "N",
+     "Tax parcels: NYS Tax Parcels Public (from Tompkins County\r\nReal Property): for planning and general use only, not a\r\nsubstitute for a legal parcel survey.\r\nStreet centerlines: NYS Streets (NYS ITS Geospatial\r\nServices).\r\nBuilding footprints: NYS ITS Geospatial Services\r\n (NYSERDA/CIESIN; Tompkins County ITS GIS Division);\r\nfootprints dated 2014."
+    ],
+    "sources": [
+     "gordium"
+    ]
+   }
+  },
+  "1 every note lies inside the neighbourhood square (the sources wrapped, at most 60 characters a line)": {
+   "ok": true,
+   "detail": {
+    "outside": [],
+    "longest_line": 57,
+    "sources_kind": "TextEntity",
+    "line_height_ft": 3.91,
+    "dimension_scale": 1.0,
+    "text_height_ft": 2.5,
+    "notes": 6
+   }
+  },
+  "1 the sources note is small: its own scale 1, 2.5 ft text, at most 4.25 ft a line as displayed": {
+   "ok": true,
+   "detail": {
+    "outside": [],
+    "longest_line": 57,
+    "sources_kind": "TextEntity",
+    "line_height_ft": 3.91,
+    "dimension_scale": 1.0,
+    "text_height_ft": 2.5,
+    "notes": 6
+   }
+  },
+  "2 the building footprints are real, editable outlines on the unlocked Buildings layer (Ben, 2026-10-21)": {
+   "ok": true,
+   "detail": {
+    "outlines": 322,
+    "unlocked": true,
+    "parent_unlocked": true,
+    "selectable": true,
+    "curves": true
+   }
+  },
+  "3 the checker never measures the context: one lot": {
+   "ok": true,
+   "detail": {
+    "lot_candidates": 1,
+    "buildings": 3,
+    "problems": []
+   }
+  },
+  "3 the check is the same with and without the neighbourhood": {
+   "ok": true,
+   "detail": {
+    "with": "1 needs review \u00b7 9 comply \u00b7 2 not checked",
+    "without": "1 needs review \u00b7 9 comply \u00b7 2 not checked"
+   }
+  },
+  "3 drawn again it replaces, never doubles": {
+   "ok": true,
+   "detail": {
+    "first": {
+     "Gordium::Context": 0,
+     "Gordium::Context::Parcels": 229,
+     "Gordium::Context::Streets": 38,
+     "Gordium::Context::Buildings": 322,
+     "Gordium::Context::Notes": 6
+    },
+    "again": {
+     "Gordium::Context": 0,
+     "Gordium::Context::Parcels": 229,
+     "Gordium::Context::Streets": 38,
+     "Gordium::Context::Buildings": 322,
+     "Gordium::Context::Notes": 6
+    }
+   }
+  },
+  "3 an edited footprint stays (the architect's), is not drawn twice; the others are replaced": {
+   "ok": true,
+   "detail": {
+    "before": 322,
+    "after": 322,
+    "kept": 1,
+    "lifted_kept_once": true,
+    "kept_is_theirs": true,
+    "unedited_replaced": true
+   }
+  },
+  "3 a copy pasted in place and a footprint given a print width are the architect's: kept, never doubled": {
+   "ok": true,
+   "detail": {
+    "copy_kept_as_theirs": true,
+    "copied_one_redrawn": true,
+    "width_kept_once": true,
+    "before": 323,
+    "after": 323
+   }
+  },
+  "3 a solid on the neighbourhood layers over the lot makes the check need review, and is never measured": {
+   "ok": true,
+   "detail": {
+    "state": "needs_review",
+    "row": {
+     "id": "scope.not_included",
+     "name": "Objects on the lot not included",
+     "status": "needs_review",
+     "proposed": "1",
+     "required": "0",
+     "margin": "",
+     "delta": null,
+     "approx": null,
+     "colour": null,
+     "note": null,
+     "points": null,
+     "reason": "1 object on the lot isn't measured (not on the Building layer) \u00b7 Add to check\u2026 \u00b7 1 on the neighbourhood layers (Gordium::Context): move it to the Building layer if part of your design",
+     "group": "building",
+     "needs": null,
+     "hint": "Add to check\u2026",
+     "refused": null
+    }
+   }
+  },
+  "4 the panel tick hides it and shows it again, and only Parcels, Streets and Notes stay locked": {
+   "ok": true,
+   "detail": {
+    "off": {
+     "Gordium::Context": false,
+     "Gordium::Context::Parcels": false,
+     "Gordium::Context::Streets": false,
+     "Gordium::Context::Buildings": false,
+     "Gordium::Context::Notes": false
+    },
+    "on": {
+     "Gordium::Context": true,
+     "Gordium::Context::Parcels": true,
+     "Gordium::Context::Streets": true,
+     "Gordium::Context::Buildings": true,
+     "Gordium::Context::Notes": true
+    },
+    "off_locks": {
+     "Gordium::Context": false,
+     "Gordium::Context::Parcels": true,
+     "Gordium::Context::Streets": true,
+     "Gordium::Context::Buildings": false,
+     "Gordium::Context::Notes": true
+    },
+    "on_locks": {
+     "Gordium::Context": false,
+     "Gordium::Context::Parcels": true,
+     "Gordium::Context::Streets": true,
+     "Gordium::Context::Buildings": false,
+     "Gordium::Context::Notes": true
+    }
+   }
+  },
+  "4 drawn with Gordium unlocked, then Gordium locked and unlocked (no redraw): Parcels, Streets and Notes still locked, Buildings not": {
+   "ok": true,
+   "detail": {
+    "start": {
+     "gordium_locked": false,
+     "own": {
+      "Gordium::Context": false,
+      "Gordium::Context::Parcels": true,
+      "Gordium::Context::Streets": true,
+      "Gordium::Context::Buildings": false,
+      "Gordium::Context::Notes": true
+     }
+    },
+    "while_locked": {
+     "Gordium::Context": true,
+     "Gordium::Context::Parcels": true,
+     "Gordium::Context::Streets": true,
+     "Gordium::Context::Buildings": true,
+     "Gordium::Context::Notes": true
+    },
+    "after_unlock": {
+     "Gordium::Context": false,
+     "Gordium::Context::Parcels": true,
+     "Gordium::Context::Streets": true,
+     "Gordium::Context::Buildings": false,
+     "Gordium::Context::Notes": true
+    }
+   }
+  },
+  "4 with the Gordium layer and the architect's Gordium::Grade locked (Grade before Gordium), a redraw replaces (never doubles); unlocking Gordium leaves Parcels, Streets and Notes locked, Buildings not, and Grade exactly as plain Rhino leaves it": {
+   "ok": true,
+   "detail": {
+    "before": 319,
+    "after": 319,
+    "gordium_locked": true,
+    "own_locks": {
+     "Gordium::Context": false,
+     "Gordium::Context::Parcels": true,
+     "Gordium::Context::Streets": true,
+     "Gordium::Context::Buildings": false,
+     "Gordium::Context::Notes": true
+    },
+    "said": [
+     "Fetching the neighbourhood (up to 20 s)\u2026",
+     "Neighbourhood drawn: 229 parcels, 38 streets, 322 buildings (footprints from 2014)."
+    ],
+    "grade_before_redraw": [
+     true,
+     false
+    ],
+    "probe_before_redraw": [
+     true,
+     false
+    ],
+    "grade_after_redraw": [
+     true,
+     false
+    ],
+    "probe_after_redraw": [
+     true,
+     false
+    ],
+    "grade_after_unlock": [
+     false,
+     false
+    ],
+    "probe_after_unlock": [
+     false,
+     false
+    ],
+    "locks_after_parent_unlocked": {
+     "Gordium::Context": false,
+     "Gordium::Context::Parcels": true,
+     "Gordium::Context::Streets": true,
+     "Gordium::Context::Buildings": false,
+     "Gordium::Context::Notes": true
+    }
+   }
+  },
+  "4 with the Gordium layer and the architect's Gordium::Grade locked (Grade after Gordium), a redraw replaces (never doubles); unlocking Gordium leaves Parcels, Streets and Notes locked, Buildings not, and Grade exactly as plain Rhino leaves it (locked)": {
+   "ok": true,
+   "detail": {
+    "before": 319,
+    "after": 319,
+    "gordium_locked": true,
+    "own_locks": {
+     "Gordium::Context": false,
+     "Gordium::Context::Parcels": true,
+     "Gordium::Context::Streets": true,
+     "Gordium::Context::Buildings": false,
+     "Gordium::Context::Notes": true
+    },
+    "said": [
+     "Fetching the neighbourhood (up to 20 s)\u2026",
+     "Neighbourhood drawn: 229 parcels, 38 streets, 322 buildings (footprints from 2014)."
+    ],
+    "grade_before_redraw": [
+     true,
+     true
+    ],
+    "probe_before_redraw": [
+     true,
+     true
+    ],
+    "grade_after_redraw": [
+     true,
+     true
+    ],
+    "probe_after_redraw": [
+     true,
+     true
+    ],
+    "grade_after_unlock": [
+     true,
+     true
+    ],
+    "probe_after_unlock": [
+     true,
+     true
+    ],
+    "locks_after_parent_unlocked": {
+     "Gordium::Context": false,
+     "Gordium::Context::Parcels": true,
+     "Gordium::Context::Streets": true,
+     "Gordium::Context::Buildings": false,
+     "Gordium::Context::Notes": true
+    }
+   }
+  },
+  "5 a saved file keeps the footprints (Ben, 2026-10-21) with their credit and date on the Sources note": {
+   "ok": true,
+   "detail": {
+    "outlines": 319,
+    "credit": true
+   }
+  },
+  "5 a saved and reopened file, a layer deleted before it: a clear removes Gordium's untouched outlines, keeps only the architect's": {
+   "ok": true,
+   "detail": {
+    "buildings_index": [
+     12,
+     11
+    ],
+    "theirs_before": 4,
+    "left": 4,
+    "gordiums_left": 0,
+    "theirs_left": 4
+   }
+  },
+  "6 a second address clears the first neighbourhood": {
+   "ok": true,
+   "detail": {
+    "frame_changed": true,
+    "layers": {
+     "Gordium::Context": {
+      "locked": false,
+      "visible": true,
+      "objects": 0,
+      "colour": [
+       0,
+       0,
+       0
+      ],
+      "names": [],
+      "texts": [],
+      "sources": []
+     },
+     "Gordium::Context::Parcels": {
+      "locked": true,
+      "visible": true,
+      "objects": 0,
+      "colour": [
+       150,
+       150,
+       150
+      ],
+      "names": [],
+      "texts": [],
+      "sources": []
+     },
+     "Gordium::Context::Streets": {
+      "locked": true,
+      "visible": true,
+      "objects": 0,
+      "colour": [
+       120,
+       120,
+       120
+      ],
+      "names": [],
+      "texts": [],
+      "sources": []
+     },
+     "Gordium::Context::Buildings": {
+      "locked": false,
+      "visible": true,
+      "objects": 4,
+      "colour": [
+       135,
+       135,
+       135
+      ],
+      "names": [
+       "footprint-2074283",
+       "footprint-2074443",
+       "footprint-2074444",
+       "footprint-2074461"
+      ],
+      "texts": [
+       ""
+      ],
+      "sources": [
+       ""
+      ]
+     },
+     "Gordium::Context::Notes": {
+      "locked": true,
+      "visible": true,
+      "objects": 0,
+      "colour": [
+       110,
+       110,
+       110
+      ],
+      "names": [],
+      "texts": [],
+      "sources": []
+     }
+    },
+    "said": [
+     "Fetching the neighbourhood (up to 20 s)\u2026",
+     "Neighbourhood drawn: 229 parcels, 38 streets, 322 buildings (footprints from 2014).",
+     "Fetching the neighbourhood (up to 20 s)\u2026",
+     "Couldn't fetch the neighbourhood: the lot is drawn without it."
+    ]
+   }
+  }
+ },
+ "start_seconds": 6.89,
+ "said": [
+  "Fetching the neighbourhood (up to 20 s)\u2026",
+  "Neighbourhood drawn: 229 parcels, 38 streets, 322 buildings (footprints from 2014)."
+ ],
+ "layers": {
+  "Gordium::Context": {
+   "locked": false,
+   "visible": true,
+   "objects": 0,
+   "colour": [
+    0,
+    0,
+    0
+   ],
+   "names": [],
+   "texts": [],
+   "sources": []
+  },
+  "Gordium::Context::Parcels": {
+   "locked": true,
+   "visible": true,
+   "objects": 229,
+   "colour": [
+    150,
+    150,
+    150
+   ],
+   "names": [
+    "500700-66.-1-10",
+    "500700-66.-1-11",
+    "500700-66.-1-12",
+    "500700-66.-1-13",
+    "500700-66.-1-7",
+    "500700-66.-1-8",
+    "500700-66.-11-1",
+    "500700-66.-11-3",
+    "500700-66.-11-5",
+    "500700-66.-12-1",
+    "500700-66.-12-2",
+    "500700-66.-12-3"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_parcels"
+   ]
+  },
+  "Gordium::Context::Streets": {
+   "locked": true,
+   "visible": true,
+   "objects": 38,
+   "colour": [
+    120,
+    120,
+    120
+   ],
+   "names": [
+    "Bool Street",
+    "Brandon Place",
+    "Bryant Avenue",
+    "Delaware Avenue",
+    "Dunmore Place",
+    "East State Street",
+    "Elmwood Avenue",
+    "Fairmount Avenue",
+    "Irving Place",
+    "Ithaca Road",
+    "Linden Avenue",
+    "Mitchell Street"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_streets"
+   ]
+  },
+  "Gordium::Context::Buildings": {
+   "locked": false,
+   "visible": true,
+   "objects": 322,
+   "colour": [
+    135,
+    135,
+    135
+   ],
+   "names": [
+    "footprint-2069380",
+    "footprint-2069398",
+    "footprint-2069401",
+    "footprint-2069403",
+    "footprint-2069405",
+    "footprint-2069409",
+    "footprint-2069412",
+    "footprint-2069414",
+    "footprint-2069415",
+    "footprint-2069417",
+    "footprint-2069419",
+    "footprint-2069420"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_buildings"
+   ]
+  },
+  "Gordium::Context::Notes": {
+   "locked": true,
+   "visible": true,
+   "objects": 6,
+   "colour": [
+    110,
+    110,
+    110
+   ],
+   "names": [
+    "Context square, 1500 ft \u00d7 1500 ft",
+    "North",
+    "North (grid north)",
+    "Scale bar",
+    "Scale bar, 100 ft",
+    "Sources"
+   ],
+   "texts": [
+    "",
+    "100 ft",
+    "N",
+    "Tax parcels: NYS Tax Parcels Public (from Tompkins County\r\nReal Property): for planning and general use only, not a\r\nsubstitute for a legal parcel survey.\r\nStreet centerlines: NYS Streets (NYS ITS Geospatial\r\nServices).\r\nBuilding footprints: NYS ITS Geospatial Services\r\n (NYSERDA/CIESIN; Tompkins County ITS GIS Division);\r\nfootprints dated 2014."
+   ],
+   "sources": [
+    "gordium"
+   ]
+  }
+ },
+ "footprints_on_screen": 0,
+ "summary": "1 needs review \u00b7 9 comply \u00b7 2 not checked",
+ "items": [
+  [
+   "Use",
+   "complies",
+   "One-family dwelling, detached"
+  ],
+  [
+   "Lot area",
+   "complies",
+   "7,033 sf"
+  ],
+  [
+   "Lot width",
+   "complies",
+   "75'-10\""
+  ],
+  [
+   "Stories",
+   "complies",
+   "3"
+  ],
+  [
+   "Building height",
+   "complies",
+   "35'-0\""
+  ],
+  [
+   "Lot coverage",
+   "complies",
+   "19.1%"
+  ],
+  [
+   "Front yard",
+   "complies",
+   "27'-0 3/4\""
+  ],
+  [
+   "Side yard, Northeast",
+   "complies",
+   "27'-4 1/4\""
+  ],
+  [
+   "Side yard, Southwest",
+   "complies",
+   "12'-0 5/8\""
+  ],
+  [
+   "Rear yard",
+   "needs_review",
+   "27'-5 3/4\" to 27'-6 1/8\""
+  ],
+  [
+   "Parking \u00b7 needs input",
+   "not_checked",
+   ""
+  ],
+  [
+   "Overlays \u00b7 not in this release",
+   "not_checked",
+   ""
+  ],
+  [
+   "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+   "not_checked",
+   ""
+  ],
+  [
+   "\u00a7325-18 Projections into yards (porches, decks, eaves)",
+   "not_checked",
+   ""
+  ],
+  [
+   "\u00a7325-19C Corner lots",
+   "not_checked",
+   ""
+  ],
+  [
+   "\u00a7325-25 Accessory structures (garages, sheds)",
+   "not_checked",
+   ""
+  ],
+  [
+   "\u00a7325-28 Accessory dwelling units",
+   "not_checked",
+   ""
+  ]
+ ],
+ "checker_sees": {
+  "lot_candidates": 1,
+  "buildings": 3,
+  "problems": []
+ },
+ "redraw_seconds": 1.16,
+ "counts": {
+  "parcels": 229,
+  "streets": 38,
+  "buildings": 322
+ },
+ "layers_after_redraw": {
+  "Gordium::Context": {
+   "locked": false,
+   "visible": true,
+   "objects": 0,
+   "colour": [
+    0,
+    0,
+    0
+   ],
+   "names": [],
+   "texts": [],
+   "sources": []
+  },
+  "Gordium::Context::Parcels": {
+   "locked": true,
+   "visible": true,
+   "objects": 229,
+   "colour": [
+    150,
+    150,
+    150
+   ],
+   "names": [
+    "500700-66.-1-10",
+    "500700-66.-1-11",
+    "500700-66.-1-12",
+    "500700-66.-1-13",
+    "500700-66.-1-7",
+    "500700-66.-1-8",
+    "500700-66.-11-1",
+    "500700-66.-11-3",
+    "500700-66.-11-5",
+    "500700-66.-12-1",
+    "500700-66.-12-2",
+    "500700-66.-12-3"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_parcels"
+   ]
+  },
+  "Gordium::Context::Streets": {
+   "locked": true,
+   "visible": true,
+   "objects": 38,
+   "colour": [
+    120,
+    120,
+    120
+   ],
+   "names": [
+    "Bool Street",
+    "Brandon Place",
+    "Bryant Avenue",
+    "Delaware Avenue",
+    "Dunmore Place",
+    "East State Street",
+    "Elmwood Avenue",
+    "Fairmount Avenue",
+    "Irving Place",
+    "Ithaca Road",
+    "Linden Avenue",
+    "Mitchell Street"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_streets"
+   ]
+  },
+  "Gordium::Context::Buildings": {
+   "locked": false,
+   "visible": true,
+   "objects": 322,
+   "colour": [
+    135,
+    135,
+    135
+   ],
+   "names": [
+    "footprint-2069380",
+    "footprint-2069398",
+    "footprint-2069401",
+    "footprint-2069403",
+    "footprint-2069405",
+    "footprint-2069409",
+    "footprint-2069412",
+    "footprint-2069414",
+    "footprint-2069415",
+    "footprint-2069417",
+    "footprint-2069419",
+    "footprint-2069420"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_buildings"
+   ]
+  },
+  "Gordium::Context::Notes": {
+   "locked": true,
+   "visible": true,
+   "objects": 6,
+   "colour": [
+    110,
+    110,
+    110
+   ],
+   "names": [
+    "Context square, 1500 ft \u00d7 1500 ft",
+    "North",
+    "North (grid north)",
+    "Scale bar",
+    "Scale bar, 100 ft",
+    "Sources"
+   ],
+   "texts": [
+    "",
+    "100 ft",
+    "N",
+    "Tax parcels: NYS Tax Parcels Public (from Tompkins County\r\nReal Property): for planning and general use only, not a\r\nsubstitute for a legal parcel survey.\r\nStreet centerlines: NYS Streets (NYS ITS Geospatial\r\nServices).\r\nBuilding footprints: NYS ITS Geospatial Services\r\n (NYSERDA/CIESIN; Tompkins County ITS GIS Division);\r\nfootprints dated 2014."
+   ],
+   "sources": [
+    "gordium"
+   ]
+  }
+ },
+ "notes_inside": {
+  "outside": [],
+  "longest_line": 57,
+  "sources_kind": "TextEntity",
+  "line_height_ft": 3.91,
+  "dimension_scale": 1.0,
+  "text_height_ft": 2.5,
+  "notes": 6
+ },
+ "footprints": {
+  "outlines": 322,
+  "unlocked": true,
+  "parent_unlocked": true,
+  "selectable": true,
+  "curves": true
+ },
+ "summary_without_context": "1 needs review \u00b7 9 comply \u00b7 2 not checked",
+ "edited": {
+  "before": 322,
+  "after": 322,
+  "kept": 1,
+  "lifted_kept_once": true,
+  "kept_is_theirs": true,
+  "unedited_replaced": true
+ },
+ "copy_and_width": {
+  "copy_kept_as_theirs": true,
+  "copied_one_redrawn": true,
+  "width_kept_once": true,
+  "before": 323,
+  "after": 323
+ },
+ "solid_said": [],
+ "solid_check": {
+  "state": "needs_review",
+  "row": {
+   "id": "scope.not_included",
+   "name": "Objects on the lot not included",
+   "status": "needs_review",
+   "proposed": "1",
+   "required": "0",
+   "margin": "",
+   "delta": null,
+   "approx": null,
+   "colour": null,
+   "note": null,
+   "points": null,
+   "reason": "1 object on the lot isn't measured (not on the Building layer) \u00b7 Add to check\u2026 \u00b7 1 on the neighbourhood layers (Gordium::Context): move it to the Building layer if part of your design",
+   "group": "building",
+   "needs": null,
+   "hint": "Add to check\u2026",
+   "refused": null
+  }
+ },
+ "tick_off": {
+  "Gordium::Context": {
+   "locked": false,
+   "visible": false,
+   "objects": 0,
+   "colour": [
+    0,
+    0,
+    0
+   ],
+   "names": [],
+   "texts": [],
+   "sources": []
+  },
+  "Gordium::Context::Parcels": {
+   "locked": true,
+   "visible": false,
+   "objects": 229,
+   "colour": [
+    150,
+    150,
+    150
+   ],
+   "names": [
+    "500700-66.-1-10",
+    "500700-66.-1-11",
+    "500700-66.-1-12",
+    "500700-66.-1-13",
+    "500700-66.-1-7",
+    "500700-66.-1-8",
+    "500700-66.-11-1",
+    "500700-66.-11-3",
+    "500700-66.-11-5",
+    "500700-66.-12-1",
+    "500700-66.-12-2",
+    "500700-66.-12-3"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_parcels"
+   ]
+  },
+  "Gordium::Context::Streets": {
+   "locked": true,
+   "visible": false,
+   "objects": 38,
+   "colour": [
+    120,
+    120,
+    120
+   ],
+   "names": [
+    "Bool Street",
+    "Brandon Place",
+    "Bryant Avenue",
+    "Delaware Avenue",
+    "Dunmore Place",
+    "East State Street",
+    "Elmwood Avenue",
+    "Fairmount Avenue",
+    "Irving Place",
+    "Ithaca Road",
+    "Linden Avenue",
+    "Mitchell Street"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_streets"
+   ]
+  },
+  "Gordium::Context::Buildings": {
+   "locked": false,
+   "visible": false,
+   "objects": 323,
+   "colour": [
+    135,
+    135,
+    135
+   ],
+   "names": [
+    "footprint-2069380",
+    "footprint-2069398",
+    "footprint-2069401",
+    "footprint-2069403",
+    "footprint-2069405",
+    "footprint-2069409",
+    "footprint-2069412",
+    "footprint-2069414",
+    "footprint-2069415",
+    "footprint-2069417",
+    "footprint-2069419",
+    "footprint-2069420"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "",
+    "state_buildings"
+   ]
+  },
+  "Gordium::Context::Notes": {
+   "locked": true,
+   "visible": false,
+   "objects": 6,
+   "colour": [
+    110,
+    110,
+    110
+   ],
+   "names": [
+    "Context square, 1500 ft \u00d7 1500 ft",
+    "North",
+    "North (grid north)",
+    "Scale bar",
+    "Scale bar, 100 ft",
+    "Sources"
+   ],
+   "texts": [
+    "",
+    "100 ft",
+    "N",
+    "Tax parcels: NYS Tax Parcels Public (from Tompkins County\r\nReal Property): for planning and general use only, not a\r\nsubstitute for a legal parcel survey.\r\nStreet centerlines: NYS Streets (NYS ITS Geospatial\r\nServices).\r\nBuilding footprints: NYS ITS Geospatial Services\r\n (NYSERDA/CIESIN; Tompkins County ITS GIS Division);\r\nfootprints dated 2014."
+   ],
+   "sources": [
+    "gordium"
+   ]
+  }
+ },
+ "tick_off_locks": {
+  "Gordium::Context": false,
+  "Gordium::Context::Parcels": true,
+  "Gordium::Context::Streets": true,
+  "Gordium::Context::Buildings": false,
+  "Gordium::Context::Notes": true
+ },
+ "tick_on": {
+  "Gordium::Context": {
+   "locked": false,
+   "visible": true,
+   "objects": 0,
+   "colour": [
+    0,
+    0,
+    0
+   ],
+   "names": [],
+   "texts": [],
+   "sources": []
+  },
+  "Gordium::Context::Parcels": {
+   "locked": true,
+   "visible": true,
+   "objects": 229,
+   "colour": [
+    150,
+    150,
+    150
+   ],
+   "names": [
+    "500700-66.-1-10",
+    "500700-66.-1-11",
+    "500700-66.-1-12",
+    "500700-66.-1-13",
+    "500700-66.-1-7",
+    "500700-66.-1-8",
+    "500700-66.-11-1",
+    "500700-66.-11-3",
+    "500700-66.-11-5",
+    "500700-66.-12-1",
+    "500700-66.-12-2",
+    "500700-66.-12-3"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_parcels"
+   ]
+  },
+  "Gordium::Context::Streets": {
+   "locked": true,
+   "visible": true,
+   "objects": 38,
+   "colour": [
+    120,
+    120,
+    120
+   ],
+   "names": [
+    "Bool Street",
+    "Brandon Place",
+    "Bryant Avenue",
+    "Delaware Avenue",
+    "Dunmore Place",
+    "East State Street",
+    "Elmwood Avenue",
+    "Fairmount Avenue",
+    "Irving Place",
+    "Ithaca Road",
+    "Linden Avenue",
+    "Mitchell Street"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "state_streets"
+   ]
+  },
+  "Gordium::Context::Buildings": {
+   "locked": false,
+   "visible": true,
+   "objects": 323,
+   "colour": [
+    135,
+    135,
+    135
+   ],
+   "names": [
+    "footprint-2069380",
+    "footprint-2069398",
+    "footprint-2069401",
+    "footprint-2069403",
+    "footprint-2069405",
+    "footprint-2069409",
+    "footprint-2069412",
+    "footprint-2069414",
+    "footprint-2069415",
+    "footprint-2069417",
+    "footprint-2069419",
+    "footprint-2069420"
+   ],
+   "texts": [
+    ""
+   ],
+   "sources": [
+    "",
+    "state_buildings"
+   ]
+  },
+  "Gordium::Context::Notes": {
+   "locked": true,
+   "visible": true,
+   "objects": 6,
+   "colour": [
+    110,
+    110,
+    110
+   ],
+   "names": [
+    "Context square, 1500 ft \u00d7 1500 ft",
+    "North",
+    "North (grid north)",
+    "Scale bar",
+    "Scale bar, 100 ft",
+    "Sources"
+   ],
+   "texts": [
+    "",
+    "100 ft",
+    "N",
+    "Tax parcels: NYS Tax Parcels Public (from Tompkins County\r\nReal Property): for planning and general use only, not a\r\nsubstitute for a legal parcel survey.\r\nStreet centerlines: NYS Streets (NYS ITS Geospatial\r\nServices).\r\nBuilding footprints: NYS ITS Geospatial Services\r\n (NYSERDA/CIESIN; Tompkins County ITS GIS Division);\r\nfootprints dated 2014."
+   ],
+   "sources": [
+    "gordium"
+   ]
+  }
+ },
+ "tick_on_locks": {
+  "Gordium::Context": false,
+  "Gordium::Context::Parcels": true,
+  "Gordium::Context::Streets": true,
+  "Gordium::Context::Buildings": false,
+  "Gordium::Context::Notes": true
+ },
+ "lock_unlock_no_redraw": {
+  "start": {
+   "gordium_locked": false,
+   "own": {
+    "Gordium::Context": false,
+    "Gordium::Context::Parcels": true,
+    "Gordium::Context::Streets": true,
+    "Gordium::Context::Buildings": false,
+    "Gordium::Context::Notes": true
+   }
+  },
+  "while_locked": {
+   "Gordium::Context": true,
+   "Gordium::Context::Parcels": true,
+   "Gordium::Context::Streets": true,
+   "Gordium::Context::Buildings": true,
+   "Gordium::Context::Notes": true
+  },
+  "after_unlock": {
+   "Gordium::Context": false,
+   "Gordium::Context::Parcels": true,
+   "Gordium::Context::Streets": true,
+   "Gordium::Context::Buildings": false,
+   "Gordium::Context::Notes": true
+  }
+ },
+ "locked_parent": {
+  "before": {
+   "before": 319,
+   "after": 319,
+   "gordium_locked": true,
+   "own_locks": {
+    "Gordium::Context": false,
+    "Gordium::Context::Parcels": true,
+    "Gordium::Context::Streets": true,
+    "Gordium::Context::Buildings": false,
+    "Gordium::Context::Notes": true
+   },
+   "said": [
+    "Fetching the neighbourhood (up to 20 s)\u2026",
+    "Neighbourhood drawn: 229 parcels, 38 streets, 322 buildings (footprints from 2014)."
+   ],
+   "grade_before_redraw": [
+    true,
+    false
+   ],
+   "probe_before_redraw": [
+    true,
+    false
+   ],
+   "grade_after_redraw": [
+    true,
+    false
+   ],
+   "probe_after_redraw": [
+    true,
+    false
+   ],
+   "grade_after_unlock": [
+    false,
+    false
+   ],
+   "probe_after_unlock": [
+    false,
+    false
+   ],
+   "locks_after_parent_unlocked": {
+    "Gordium::Context": false,
+    "Gordium::Context::Parcels": true,
+    "Gordium::Context::Streets": true,
+    "Gordium::Context::Buildings": false,
+    "Gordium::Context::Notes": true
+   }
+  },
+  "after": {
+   "before": 319,
+   "after": 319,
+   "gordium_locked": true,
+   "own_locks": {
+    "Gordium::Context": false,
+    "Gordium::Context::Parcels": true,
+    "Gordium::Context::Streets": true,
+    "Gordium::Context::Buildings": false,
+    "Gordium::Context::Notes": true
+   },
+   "said": [
+    "Fetching the neighbourhood (up to 20 s)\u2026",
+    "Neighbourhood drawn: 229 parcels, 38 streets, 322 buildings (footprints from 2014)."
+   ],
+   "grade_before_redraw": [
+    true,
+    true
+   ],
+   "probe_before_redraw": [
+    true,
+    true
+   ],
+   "grade_after_redraw": [
+    true,
+    true
+   ],
+   "probe_after_redraw": [
+    true,
+    true
+   ],
+   "grade_after_unlock": [
+    true,
+    true
+   ],
+   "probe_after_unlock": [
+    true,
+    true
+   ],
+   "locks_after_parent_unlocked": {
+    "Gordium::Context": false,
+    "Gordium::Context::Parcels": true,
+    "Gordium::Context::Streets": true,
+    "Gordium::Context::Buildings": false,
+    "Gordium::Context::Notes": true
+   }
+  }
+ },
+ "saved_sources": [
+  "",
+  "gordium",
+  "state_buildings",
+  "state_parcels",
+  "state_streets"
+ ],
+ "saved_strings": [
+  "Gordium\\ui",
+  "Gordium\\fact_sources",
+  "Gordium\\lot_facts",
+  "Gordium\\context"
+ ],
+ "saved_footprints": {
+  "outlines": 319,
+  "credit": true
+ },
+ "reopened": {
+  "buildings_index": [
+   12,
+   11
+  ],
+  "theirs_before": 4,
+  "left": 4,
+  "gordiums_left": 0,
+  "theirs_left": 4
+ },
+ "after_second": {
+  "frame_changed": true,
+  "layers": {
+   "Gordium::Context": {
+    "locked": false,
+    "visible": true,
+    "objects": 0,
+    "colour": [
+     0,
+     0,
+     0
+    ],
+    "names": [],
+    "texts": [],
+    "sources": []
+   },
+   "Gordium::Context::Parcels": {
+    "locked": true,
+    "visible": true,
+    "objects": 0,
+    "colour": [
+     150,
+     150,
+     150
+    ],
+    "names": [],
+    "texts": [],
+    "sources": []
+   },
+   "Gordium::Context::Streets": {
+    "locked": true,
+    "visible": true,
+    "objects": 0,
+    "colour": [
+     120,
+     120,
+     120
+    ],
+    "names": [],
+    "texts": [],
+    "sources": []
+   },
+   "Gordium::Context::Buildings": {
+    "locked": false,
+    "visible": true,
+    "objects": 4,
+    "colour": [
+     135,
+     135,
+     135
+    ],
+    "names": [
+     "footprint-2074283",
+     "footprint-2074443",
+     "footprint-2074444",
+     "footprint-2074461"
+    ],
+    "texts": [
+     ""
+    ],
+    "sources": [
+     ""
+    ]
+   },
+   "Gordium::Context::Notes": {
+    "locked": true,
+    "visible": true,
+    "objects": 0,
+    "colour": [
+     110,
+     110,
+     110
+    ],
+    "names": [],
+    "texts": [],
+    "sources": []
+   }
+  },
+  "said": [
+   "Fetching the neighbourhood (up to 20 s)\u2026",
+   "Neighbourhood drawn: 229 parcels, 38 streets, 322 buildings (footprints from 2014).",
+   "Fetching the neighbourhood (up to 20 s)\u2026",
+   "Couldn't fetch the neighbourhood: the lot is drawn without it."
+  ]
+ },
+ "ok": true
+}
