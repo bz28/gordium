@@ -364,25 +364,40 @@ def _recorded(inputs, uid):
 def test_the_height_bonus_drafted_in_parts_is_refused_and_one_relaxing_rule_is_kept(inputs):
     """Stage 1's §325-16C answer drafted the bonus as parts ("when taller than the chart's height: this yard is
     larger", "the extra feet at most 10%"): the chart rule still failed a 37 ft house with every yard enlarged.
-    The parts that limit the measure above the chart's limit are refused; the stories part (a different measure)
-    stays; the one relaxing rule is kept."""
+    The guard refuses the parts that limit the measure above the chart's limit, not the stories part (a different
+    measure). In check_answer the stories part shares the refused parts' condition, so all-or-none drops it with
+    them: none of stage 1's answer is kept, and a person checks §325-16C. A single relaxing rule is not refused."""
     old = _recorded(inputs, "325-16C")
     parts = [x for x in old["templates"] if "{height_ft}" in (x.get("applies_when") or "")]
     assert len(parts) == 5
     refused = {x["id_suffix"] for x in parts if drafter.exception_in_parts(x)}
-    assert {"extra_height_limit", "extra_height_front_yard", "extra_height_side_yards", "extra_height_rear_yard"} <= refused
-    assert "extra_height_stories" not in refused
+    assert refused == {"extra_height_limit", "extra_height_front_yard", "extra_height_side_yards", "extra_height_rear_yard"}
+    got = judge(inputs, "325-16C", old["templates"], cli.drafted_rules(inputs))
+    assert got["rules"] == {}
+    assert any(g["rule"].endswith("extra_height_stories") and "none of its parts is kept" in g["why"]
+               for g in got["unresolved"])
     assert drafter.exception_in_parts(bonus()) == []
 
 
-def test_an_always_on_flag_restating_a_rule_of_the_same_answer_is_refused(inputs):
+def test_an_always_on_flag_restating_a_kept_rule_is_set_aside_but_never_for_a_narrower_or_refused_rule(inputs):
     """Stage 1's §325-18B answer: the projection rule, and an always-on flag quoting the same sentence (every design
-    with eaves needed review)."""
+    with eaves needed review): the flag is set aside, listed for a person. Review round 16: a rule narrowed by a
+    condition (two-family only) or refused never takes the flag's place: the flag stays."""
     old = _recorded(inputs, "325-18B")
+    rule = next(x for x in old["templates"] if x["kind"] == "rule")
     flag = next(x for x in old["templates"] if x["kind"] == "flag")
-    assert drafter.restating_flag(flag, old["templates"])
-    assert drafter.restating_flag(flag | {"applies_when": "accessory_buildings > 0"}, old["templates"]) == []
-    assert drafter.restating_flag(flag, [flag]) == []          # alone, it is the only answer to the sentence
+    got = judge(inputs, "325-18B", [rule, flag])
+    assert [r["id"] for rs in got["rules"].values() for r in rs] == ["general.325_18b_architectural_feature_projection_limit"]
+    assert any(g["rule"].endswith("required_yard_open_unobstructed") and "set aside" in g["why"] for g in got["unresolved"])
+    narrow = rule | {"applies_when": 'use == "two_family"',
+                     "examples": [{"given": ex["given"] + [{"measure": "use", "value": "two_family"}], "expect": ex["expect"]}
+                                  for ex in rule["examples"]]}
+    got = judge(inputs, "325-18B", [narrow, flag])
+    kept = {r["id"] for rs in got["rules"].values() for r in rs}
+    assert "general.325_18b_required_yard_open_unobstructed" in kept, got["problems"][:2]
+    refused = rule | {"check": "architectural_feature_projection <= 1"}       # 1 isn't backed: the rule is refused
+    got = judge(inputs, "325-18B", [refused, flag])
+    assert "general.325_18b_required_yard_open_unobstructed" in {r["id"] for rs in got["rules"].values() for r in rs}
 
 
 def test_the_guards_refuse_the_recorded_stage1_answers_in_check_answer(inputs):
@@ -390,18 +405,45 @@ def test_the_guards_refuse_the_recorded_stage1_answers_in_check_answer(inputs):
     bonus_parts = judge(inputs, "325-16C", _recorded(inputs, "325-16C")["templates"], cli.drafted_rules(inputs))
     assert any("relaxes it" in p for p in bonus_parts["problems"])
     eaves = judge(inputs, "325-18B", _recorded(inputs, "325-18B")["templates"])
-    assert any("makes every design need review" in p for p in eaves["problems"])
+    assert any("set aside" in g["why"] for g in eaves["unresolved"]) and not eaves["problems"]
 
 
 
 @pytest.mark.parametrize("condition", ["building_height > {height_ft}", "building_height >= {height_ft}",
                                        "{height_ft} < building_height", "not (building_height <= {height_ft})",
-                                       "building_height - {height_ft} > 0", "(building_height > {height_ft})"])
+                                       "building_height - {height_ft} > 0", "(building_height > {height_ft})",
+                                       "building_height > {height_ft} or stories > {stories_max}",
+                                       "stories > {stories_max} or building_height > {height_ft}"])
 def test_the_parts_form_is_refused_however_its_condition_is_written(inputs, condition):
     """Review round 15: only `measure > {slot}` was recognised; `{height_ft} < building_height` let stage 1's parts
     through in six districts. Judged by what the condition does, every spelling is refused, in check_answer too."""
     old = _recorded(inputs, "325-16C")
-    rewritten = [x | {"applies_when": condition} if "{height_ft}" in (x.get("applies_when") or "") else x
-                 for x in old["templates"]]
+    stories = next(sl for x in old["templates"] for sl in x["slots"] if sl["name"] == "stories_max")
+
+    def rewrite(x):          # the condition as written, the slots it names defined, its examples consistent with it
+        if "{height_ft}" not in (x.get("applies_when") or ""):
+            return x
+        out = x | {"applies_when": condition}
+        if "{stories_max}" in condition and all(sl["name"] != "stories_max" for sl in x["slots"]):
+            out["slots"] = x["slots"] + [stories]
+            out["examples"] = [ex | {"given": ex["given"] + [{"measure": "stories", "value": "{stories_max}"}]}
+                               if all(g["measure"] != "stories" for g in ex["given"]) else ex for ex in x["examples"]]
+        return out
+    rewritten = [rewrite(x) for x in old["templates"]]
     got = judge(inputs, "325-16C", rewritten, cli.drafted_rules(inputs))
-    assert got["rules"] == {} and sum("relaxes it" in p for p in got["problems"]) == 4, got["problems"][:2]
+    assert got["rules"] == {} and sum("relaxes it" in p for p in got["problems"]) >= 4, got["problems"][:2]
+
+
+
+def test_a_size_tier_keyed_to_a_minimum_is_not_an_exception_in_parts(inputs):
+    """Review round 16: 'names the measure' was taken for 'widens a limit on it', so a tier keyed to the chart's
+    minimum lot area ('when lot_area > {min_lot}: building_area <= 0.3 * lot_area') was refused as a bonus in parts.
+    Only a chart MAXIMUM (the height) is widened by an exception; with the drafted chart rules known, the tier passes
+    this guard and the height parts are still refused."""
+    drafted = cli.drafted_rules(inputs)
+    tier = {"kind": "rule", "relaxes": "", "applies_when": "lot_area > {min_lot}", "check": "building_area <= 0.3 * lot_area",
+            "slots": [slot("min_lot", "One-family dwelling, detached", section=LOT_SIZE)]}
+    assert drafter.exception_in_parts(tier, drafted) == []
+    old = _recorded(inputs, "325-16C")
+    limit = next(x for x in old["templates"] if x["id_suffix"] == "extra_height_limit")
+    assert drafter.exception_in_parts(limit, drafted)

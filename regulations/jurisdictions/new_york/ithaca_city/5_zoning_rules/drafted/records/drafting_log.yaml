@@ -848,9 +848,9 @@ units:
     rules:
     - general.325_18b_architectural_feature_projection_limit
     unresolved:
-    - rule: 325-18B.325_18b_required_yard_open_unobstructed
-      why: 'a flag with no condition that quotes only what a rule of this answer checks makes every design need
-        review: leave it out, or give it the condition under which a person must judge'
+    - rule: general.325_18b_required_yard_open_unobstructed
+      why: 'set aside: a flag with no condition that quotes only what a kept rule with no condition checks would
+        send every design to review'
     problems: []
   325-19C:
     rules:

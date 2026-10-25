@@ -901,53 +901,80 @@ def _applies(when: str, values: dict) -> bool:
     return outcome({"kind": "flag", "applies_when": when}, values, {}) != "not_applicable"
 
 
-def exception_in_parts(template: dict) -> list[str]:
+def _caps(measure: str, slot: dict, drafted: dict | None) -> bool:
+    """Whether the slot's chart row is a MAXIMUM of the measure in some district's drafted chart rule (`building_height
+    <= 35` from 'Height in feet'): what an exception can widen. A minimum (lot area) is never widened. Without the
+    drafted rules (a template judged alone), assumed so."""
+    if drafted is None:
+        return True
+    row = (slot["page"], slot["section"], slot["row"].strip())
+    cap = re.compile(rf"^\s*{re.escape(measure)}\s*<=?")
+    return any(r.get("kind") == "rule" and cap.match(r.get("check") or "") and any(
+        isinstance(x.get("cell"), dict) and (x.get("page"), x["cell"].get("section"), x["cell"].get("row")) == row
+        for x in r.get("sources") or []) for rules in drafted.values() for r in rules)
+
+
+def exception_in_parts(template: dict, drafted: dict | None = None) -> list[str]:
     """An exception that allows more than a chart limit, drafted as separate parts ("when building_height >
     {height}: building_height - {height} <= 0.1 * {height}", "when taller: front_yard >= ..."), leaves the chart rule
     failing what the exception allows (a 37 ft house with every yard enlarged): it must be one rule that relaxes the
     chart rule. Found by what the condition does, however it is written (`{height} < building_height`, `not
-    (building_height <= {height})`, `building_height - {height} > 0`): with the slot at a value, it doesn't apply one
-    below it and applies one above, and the check limits that same measure. A requirement the exception adds on top
-    of a different measure (stories) is fine as its own rule."""
+    (building_height <= {height})`, `building_height - {height} > 0`, `... or stories > {stories}`): with the slot at
+    a value and the condition's other slots and measures at low or at high values, it doesn't apply one below the
+    slot and applies one above, and the check names that same measure; and the slot's chart row is a maximum of that
+    measure in a drafted chart rule (a size tier keyed to a minimum, such as lot area, widens nothing). A requirement
+    the exception adds on top of a different measure (stories) is not found here."""
     from rule_format import formula
     if (template.get("relaxes") or "").strip() or template["kind"] != "rule":
         return []
     when, check = template.get("applies_when") or "", template.get("check") or ""
     if not when.strip():
         return []
-    slots = [x["name"] for x in template.get("slots") or []]
+    slots = {x["name"]: x for x in template.get("slots") or []}
     try:
-        limited = formula.names(SLOT_NAME.sub("0", check))
-        measures = formula.names(SLOT_NAME.sub("0", when)) & limited
+        named = formula.names(SLOT_NAME.sub("0", when))
+        measures = named & formula.names(SLOT_NAME.sub("0", check))
     except formula.FormulaError:
         return []                                   # reported with the formula
     for slot in slots:
-        filled = SLOT_NAME.sub(lambda m: "35" if m[1] == slot else "0", when)
         for measure in sorted(measures - {"use", "district"}):
-            try:
-                above = not _applies(filled, {measure: 34}) and _applies(filled, {measure: 36})
-            except Exception:                       # noqa: BLE001 - a condition code can't read is reported elsewhere
-                above = False
-            if above:
-                return [f"it applies above the chart's {{{slot}}} and limits {measure} there: an exception that allows "
-                        f"more than a chart rule is one rule that relaxes it (relaxes: \"{slot}\"), with every condition "
-                        "of the exception in applies_when and the most it allows in check"]
+            if not _caps(measure, slots[slot], drafted):
+                continue
+            for rest in (0, 1000):                  # the condition's other slots and measures, low and high
+                filled = SLOT_NAME.sub(lambda m: "35" if m[1] == slot else str(rest), when)
+                others = {n: rest for n in named - {measure, "use", "district"}}
+                try:
+                    above = (not _applies(filled, others | {measure: 34})) and _applies(filled, others | {measure: 36})
+                except Exception:                   # noqa: BLE001 - a condition code can't read is reported elsewhere
+                    above = False
+                if above:
+                    return [f"it applies above the chart's {{{slot}}} and limits {measure} there: an exception that "
+                            f"allows more than a chart rule is one rule that relaxes it (relaxes: \"{slot}\"), with every "
+                            "condition of the exception in applies_when and the most it allows in check"]
     return []
 
 
-def restating_flag(template: dict, templates: list[dict]) -> list[str]:
-    """A flag with no condition that quotes only what a rule of the same answer checks (§325-18B: "the space in any
-    required yard shall be open ... except for ... eaves ...", drafted as the projection rule and again as an
-    always-on flag) sends every design to review and decides nothing the rule doesn't."""
-    if template["kind"] != "flag" or (template.get("applies_when") or "").strip():
-        return []
+def restating_flags(out: dict) -> None:
+    """A flag with no condition that quotes only what a KEPT rule with no condition checks (§325-18B: "the space in
+    any required yard shall be open ... except for ... eaves ...", drafted as the projection rule and again as an
+    always-on flag) sends every design to review and decides nothing that rule doesn't: it is set aside, listed for
+    a person with why. Judged after every template is checked (review round 16): a refused rule, or one narrowed by
+    a condition (two-family houses only), never takes a flag's place, so the flag stays."""
     flat = lambda t: " ".join(str(t).split())       # noqa: E731
-    mine = {flat(q.get("text")) for q in template.get("quotes") or []}
-    ruled = {flat(q.get("text")) for t in templates if t is not template and t["kind"] == "rule" for q in t.get("quotes") or []}
-    if mine and mine <= ruled:
-        return ["a flag with no condition that quotes only what a rule of this answer checks makes every design need "
-                "review: leave it out, or give it the condition under which a person must judge"]
-    return []
+    kept = {t["id_suffix"]: t for t in out["templates"]}
+    ruled = {flat(q.get("text")) for t in kept.values() if t["kind"] == "rule" and not (t.get("applies_when") or "").strip()
+             for q in t.get("quotes") or []}
+    for district in sorted(out["rules"]):
+        for r in list(out["rules"][district]):
+            t = kept.get(r["id"].split(".", 1)[1])
+            if t is None or t["kind"] != "flag" or (t.get("applies_when") or "").strip():
+                continue
+            mine = {flat(q.get("text")) for q in t.get("quotes") or []}
+            if mine and mine <= ruled:
+                out["rules"][district].remove(r)
+                out["unresolved"].append({"rule": r["id"], "why": "set aside: a flag with no condition that quotes only "
+                                          "what a kept rule with no condition checks would send every design to review"})
+    out["rules"] = {d: rs for d, rs in out["rules"].items() if rs}
 
 
 def link_relaxes(rule: dict, template: dict, column: str | None, unit: dict, drafted: dict) -> tuple[dict | None, str | None]:
@@ -1102,7 +1129,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
         binding_problems, valid = _binding_items(t, notes, unit.get("piece"))
         p += binding_problems
         if unit.get("piece"):
-            p += exception_in_parts(t) + restating_flag(t, answer["templates"])
+            p += exception_in_parts(t, context.get("drafted"))
         if p:
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
             continue
@@ -1167,6 +1194,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
     undecided_uses_flag(out, law, ctx)
     if unit.get("piece"):
         all_or_none(answer, unit, out)
+        restating_flags(out)
     out["unresolved"] += exemption_gaps(unit, out, ctx)
     out["problems"] = [f"{r['rule']}: {r['why']}" for r in out["rejected"]]
     if scope is not None:
