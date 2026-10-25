@@ -2538,8 +2538,12 @@ def _set_own_lock(doc, layer, locked):
     """Give a layer its own lock: under a locked parent as its persistent lock (Rhino keeps it locked until the
     parent is unlocked, then puts this back), otherwise as its lock. Setting only IsLocked under a locked parent left
     every context layer's persistent lock off, so unlocking "Gordium" unlocked Parcels, Streets and Notes (the Rhino
-    job, context_in_rhino.py claim 4 at e631aae)."""
+    job, context_in_rhino.py claim 4 at e631aae). A layer added under a locked parent (the first draw in a file whose
+    "Gordium" is locked) may never have been locked by Rhino: it is locked like every other sublayer there, then
+    given its own lock (review round 1 of the fix)."""
     if _parent_locked(doc, layer):
+        if not layer.IsLocked:
+            layer.IsLocked = True
         layer.SetPersistentLocking(bool(locked))
     else:
         layer.IsLocked = bool(locked)

@@ -1174,7 +1174,7 @@ def test_a_redraw_under_a_locked_gordium_layer_keeps_each_layers_own_lock():
 
 
 def test_drawing_clearing_or_showing_under_a_locked_gordium_layer_keeps_each_layers_own_lock():
-    """Every path that changes the context layers' locks or visibility (the first draw onto new layers, a clear, the
+    """Every path that changes the context layers' locks or visibility (draw_context's lock after adding, a clear, the
     panel tick) with "Gordium" locked: each layer's own lock is Gordium's (Parcels, Streets, Notes locked; Buildings and
     Context not), so unlocking "Gordium" gives exactly that."""
     ns = _redraw_ns()
@@ -1196,6 +1196,31 @@ def test_drawing_clearing_or_showing_under_a_locked_gordium_layer_keeps_each_lay
         assert _own_locks(doc) == _WANT and grade.GetPersistentLocking(), (step, _own_locks(doc))
         doc.Layers[0].IsLocked = False
         assert _locks(doc) == _WANT and grade.IsLocked, (step, _locks(doc))
+
+
+def test_the_first_draw_onto_layers_added_under_a_locked_gordium_layer_locks_them():
+    """Review round 1 of the fix: a context layer added under an already-locked "Gordium" (the first lookup in a file
+    whose Gordium layer holds only the architect's Grade) may never have been locked by Rhino, and giving it only its
+    persistent lock left Parcels, Streets and Notes editable while "Gordium" stayed locked. Now every one is locked
+    while "Gordium" is, with its own lock kept for when "Gordium" is unlocked."""
+    ns = _redraw_ns()
+    doc, grade = _locked_gordium_doc()
+    del doc.Layers[1:-1]                                           # no context layers yet: "Gordium" and Grade only
+    assert [x.FullPath for x in doc.Layers] == ["Gordium", "Gordium::Grade"]
+    grade.IsLocked, doc.Layers[0].IsLocked = True, True
+
+    def add(doc, name):                                            # _layer: each missing layer added, parent first
+        for path in (logic.CONTEXT, logic.CONTEXT + "::" + name):
+            if not any(x.FullPath == path for x in doc.Layers):
+                doc.Layers.append(_Layer(doc.Layers, path, next(x for x in doc.Layers
+                                                                if x.FullPath == path.rsplit("::", 1)[0])))
+        return doc.Layers.index(next(x for x in doc.Layers if x.FullPath == logic.CONTEXT + "::" + name))
+    ns["_context_layer"] = add
+    ns["draw_context"](doc, {"lot": "here"})
+    assert len(_locks(doc)) == 5 and all(_locks(doc).values()), _locks(doc)   # all held while "Gordium" is locked
+    assert _own_locks(doc) == _WANT, _own_locks(doc)
+    doc.Layers[0].IsLocked = False
+    assert _locks(doc) == _WANT and grade.IsLocked, _locks(doc)
 
 
 def test_a_clear_puts_an_unlocked_grade_back_unlocked_under_a_locked_gordium_layer():

@@ -322,7 +322,8 @@ try:
     lp = log["locked_parent"]
     claim("4 with the Gordium layer and the architect's Gordium::Grade locked, a redraw replaces (never doubles) and "
           "puts both locks back; unlocking Gordium leaves Parcels, Streets, Notes and Grade locked, Buildings not",
-          lp["after"] == lp["before"] > 0 and lp["gordium_locked"] and lp["grade_locked"] and lp["grade_own_lock"]
+          lp["after"] == lp["before"] > 0 and lp["gordium_locked"] and lp["grade_locked"] and lp["grade_own_lock_before"]
+          and lp["grade_own_lock"]
           and all(v == g.logic.context_locked(k) for k, v in own.items())
           and all(v == g.logic.context_locked(k) for k, v in after.items())
           and all(after[g.logic.CONTEXT + "::" + n] for n in ("Parcels", "Streets", "Notes"))
