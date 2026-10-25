@@ -97,6 +97,9 @@ Everything in the 2026-10-21 evening preview, plus:
 
 ## Known limits
 
+- **R-3a lots: check side-yard eaves by hand for now.** When the two side yards differ (one under 10 ft), Gordium
+  can say an eave complies when it projects too far into the side yard that must be 10 ft. A fix is coming in the
+  next update.
 - **Corner lots get no starting house** (which yard is the front is still an open question for the architects):
   after a lookup of a corner lot, draw your building yourself.
 - **Corner lots:** when you pick the street side with **Change…**, click every piece of the street edge — the
