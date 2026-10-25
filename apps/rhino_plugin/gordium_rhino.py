@@ -1903,7 +1903,7 @@ def _undo_redo(sender, e):
     if o is not None:
         _clear(o)
     STATE.pop("lookup_guide", None)
-    STATE["dirty"] = time.time() - IDLE_SECONDS     # re-checked at the next idle when live mode is on
+    STATE["dirty"] = logic.dirty_after_undo(STATE.get("dirty"), time.time())   # re-checked at the next idle (live)
 
 
 def _drawn(doc, facts, state, saved_ui, session=None):

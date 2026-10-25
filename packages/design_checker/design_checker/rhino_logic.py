@@ -1695,6 +1695,14 @@ def after_undo_redo(is_end_undo, is_end_redo):
     return bool(is_end_undo or is_end_redo)
 
 
+def dirty_after_undo(dirty_at, now):
+    """When the model last changed, once Rhino's Undo or Redo ended at `now`: never earlier than an edit already
+    noted (its object events, gordium_rhino._changed) and never earlier than now, so a check that finished just
+    before the Undo can never count as covering it (should_recheck: last_at >= dirty_at; review round 2, P1: an Undo
+    within 0.5 s of a check left the screen cleared and the panel showing the model as it was before)."""
+    return max(dirty_at or 0, now)
+
+
 def draw_then_commit(session, save):
     """Draw: everything that can fail first (the facts, the box's choices, the sources: `save`), the session's
     commit last, so a failure leaves the session to be rolled back (run_box) with nothing lost."""

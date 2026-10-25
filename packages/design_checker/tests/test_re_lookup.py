@@ -688,6 +688,17 @@ def test_what_was_drawn_is_cleared_when_an_undo_or_redo_ends(end_undo, end_redo,
     assert logic.after_undo_redo(end_undo, end_redo) is clears
 
 
+def test_an_undo_right_after_a_check_is_still_checked_again():
+    """Review round 2 (P1): the handler set dirty to 0.5 s before the Undo ended, so a check that had finished in
+    those 0.5 s (a Draw's own, or the re-check after an Undo just before) counted as covering it: no re-check, the
+    screen cleared and the panel showing the model before the Undo."""
+    checked, undone = 100.0, 100.3
+    dirty = logic.dirty_after_undo(None, undone)
+    assert logic.should_recheck(dirty, undone + 1.0, False, False, 0.5, last_at=checked)
+    assert logic.dirty_after_undo(100.4, undone) == 100.4         # a later edit's time is kept
+    assert logic.dirty_after_undo(99.0, undone) == undone
+
+
 def test_the_plugin_clears_its_drawing_on_undo_and_redo_and_never_changes_the_document_then():
     """After Undo (or Redo) the last check's drawing (the 96 lot outline, its marks) and any dashed lookup outline
     were of a model no longer there: _undo_redo clears them and asks for a re-check, attached to Rhino's own undo
@@ -697,7 +708,8 @@ def test_the_plugin_clears_its_drawing_on_undo_and_redo_and_never_changes_the_do
     body = rhino[rhino.index("def _undo_redo("):].split("\n\n\n", 1)[0]
     code = "\n".join(line for line in body.split('"""')[2].splitlines())       # the code, not its docstring
     assert "logic.after_undo_redo(e.IsEndUndo, e.IsEndRedo)" in code and "_clear(o)" in code
-    assert 'STATE.pop("lookup_guide", None)' in code and 'STATE["dirty"]' in code
+    assert 'STATE.pop("lookup_guide", None)' in code
+    assert 'STATE["dirty"] = logic.dirty_after_undo(STATE.get("dirty"), time.time())' in code
     for change in ("doc", "Objects.", "Strings.", "Layers.", "RunScript", "run_check(", "save"):
         assert change not in code, change
     assert '_on(Rhino.Commands.Command, "UndoRedo", _handler(System.EventHandler[Rhino.Commands.UndoRedoEventArgs], ' \

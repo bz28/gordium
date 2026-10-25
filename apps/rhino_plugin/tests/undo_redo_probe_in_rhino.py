@@ -63,8 +63,8 @@ def layer_added_then_deleted(doc):
     doc.Layers.Delete(index, True)
 
 
-def held_then_deleted(doc):
-    keep = doc.Objects.FindId(curve(doc, 40))        # as if the sample's lot: made before the record in the plugin
+def held_then_deleted(doc, keep):
+    """`keep` made before the record began, as the sample's lot and house are before a Draw's record."""
     layer = Rhino.DocObjects.Layer()
     layer.Name = "Gordium probe held"
     index = doc.Layers.Add(layer)
@@ -87,17 +87,28 @@ def command_inside(doc):
 CASES = [("baseline", None), ("document strings", strings), ("attribute user strings", user_strings),
          ("layer added then deleted", layer_added_then_deleted), ("held then deleted", held_then_deleted),
          ("layer visibility set", visibility), ("a command inside the record", command_inside),
-         ("all of them", lambda doc: [f(doc) for f in (strings, user_strings, layer_added_then_deleted,
-                                                       held_then_deleted, visibility, command_inside)])]
+         ("all of them", None)]
+
+
+def all_of_them(doc, keep):
+    for f in (strings, user_strings, layer_added_then_deleted, visibility, command_inside):
+        f(doc)
+    held_then_deleted(doc, keep)
 
 
 def one(docs, name, extra):
     log["case"] = name
     doc = docs.open("Large Objects - Feet")
     try:
+        before = doc.Objects.FindId(curve(doc, 40))   # an object that exists before the record (the sample's lot)
+        in_command = bool(Rhino.Commands.Command.InCommand())
         serial = doc.BeginUndoRecord("Gordium probe: " + name)
         added = curve(doc)
-        if extra is not None:
+        if name == "all of them":
+            all_of_them(doc, before)
+        elif extra is held_then_deleted:
+            extra(doc, before)
+        elif extra is not None:
             extra(doc)
         ended = doc.EndUndoRecord(serial)
         undo = bool(Rhino.RhinoApp.RunScript("_Undo", False))
@@ -105,7 +116,7 @@ def one(docs, name, extra):
         redo = bool(Rhino.RhinoApp.RunScript("_Redo", False))
         back = doc.Objects.FindId(added) is not None
         log["cases"][name] = {"ok": gone and back, "serial": int(serial), "ended": bool(ended),
-                              "in_command": bool(Rhino.Commands.Command.InCommand()), "undo_ran": undo,
+                              "in_command": in_command, "undo_ran": undo,
                               "undone": gone, "redo_ran": redo, "redone": back}
     except Exception:
         log["cases"][name] = {"ok": False, "trace": traceback.format_exc()}

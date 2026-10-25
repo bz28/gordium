@@ -204,7 +204,8 @@ def main():
         again = objects(doc)
         claim("2 a second Undo puts the sample back again", ran and again == before,
               {"ran": ran, "missing": sorted(set(before) - set(again)), "extra": sorted(set(again) - set(before))})
-        rhino("Redo", "2 redo again")                    # 96 drawn, as step 2 left it, before the file is closed
+        ran = rhino("Redo", "2 redo again")              # 96 drawn, as step 2 left it, before the file is closed
+        claim("2 a second Redo draws 96's lot again", ran and objects(doc) == after, len(objects(doc)))
 
         # 3. a new file: the sample's starting house edited, then 96 looked up: asked once; keep it
         close(doc)
@@ -287,6 +288,7 @@ def main():
         claim("5 after Redo nothing of the surveyed lot is left on screen", clean, shown)
         log["ok"] = all(c["ok"] for c in log["claims"].values())
     except Exception:
+        log["ok"] = False
         log["trace"] = traceback.format_exc()
         raise                               # a failed claim fails the run loudly (the standing rule)
     finally:
