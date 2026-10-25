@@ -73,8 +73,8 @@ try:
         claim("the sample is 106's tax-map lot, the left side yard 12'-0 5/8\" of 10'-0\"",
               items["Side yard, Southwest"]["proposed"] == "12'-0 5/8\"" and items["Side yard, Southwest"]["required"] == "10'-0\"",
               items["Side yard, Southwest"])
-        claim("the start house: nothing red", not any(s == "does_not_comply" for _, s in g.overlay().encroach),
-              [s for _, s in g.overlay().encroach])
+        claim("the start house: nothing red", not any(s == "does_not_comply" for _, s, _ in g.overlay().encroach),
+              [s for _, s, _ in g.overlay().encroach])
         ft = 1.0 / g._scale(doc)
         for o in g._buildings(doc):
             doc.Objects.Transform(o.Id, rg.Transform.Translation(-5 * ft, 0, 0), True)
@@ -86,7 +86,7 @@ try:
         import math
         yard = math.dist(west["points"][0][:2], west["points"][-1][:2])   # the measured yard, feet
         log["yard_ft"] = round(yard, 4)
-        regions = [(s, b.GetBoundingBox(True)) for b, s in g.overlay().encroach]
+        regions = [(s, b.GetBoundingBox(True)) for b, s, _ in g.overlay().encroach]
         log["regions"] = [(s, round((bb.Max.X - bb.Min.X) * g._scale(doc), 3)) for s, bb in regions]
         red = [bb for s, bb in regions if s == "does_not_comply"]
         amber = [bb for s, bb in regions if s == "needs_review"]
@@ -110,8 +110,9 @@ try:
         def span(brep):
             d = dists(brep)
             return round(min(d), 3), round(max(d), 3)
-        red_b = [b for b, st in g.overlay().encroach if st == "does_not_comply"]
-        amber_b = [b for b, st in g.overlay().encroach if st == "needs_review"]
+        side = lambda info: info.get("row") == "Side yard, Southwest"     # noqa: E731  (that row's pieces only)
+        red_b = [b for b, st, info in g.overlay().encroach if st == "does_not_comply" and side(info)]
+        amber_b = [b for b, st, info in g.overlay().encroach if st == "needs_review" and side(info)]
         log["bands"] = {"yard": round(yard, 3), "red": [span(b) for b in red_b], "amber": [span(b) for b in amber_b]}
         e = 0.05                                            # proud by scaling about the box centre: a slanted corner moves a bit more
         floors = len(g._buildings(doc))                     # each floor of the starting house: its own red piece

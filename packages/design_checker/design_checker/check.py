@@ -733,7 +733,7 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
     if footprint is not None and not footprint.is_empty and env and env.get("outline") and tops:
         shape = Lot(site, facts or {}) if lot.get("edges") and facts and facts.get("street_line") else None
-        reds, ambers = [], []
+        rows = []                                  # (the row, its red region or None, its amber regions)
         for i in v["items"]:
             if i.get("colour") not in ("red", "amber") or shape is None:
                 continue
@@ -745,29 +745,38 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                 strip = (lambda d: footprint.intersection(lines.buffer(d, quad_segs=32)) if d > 0 else None)
                 near.append(strip(limit["near"]))
                 far.append(strip(limit["far"]))
+            red = None
             if i["colour"] == "red" and near and all(g is not None for g in near):
                 red = near[0]
                 for g in near[1:]:                          # short under EVERY reading: where every one says so
                     red = red.intersection(g)
-                reds.append(red)
-            ambers += [g for g in far if g is not None]
-        red = unary_union(reds) if reds else None
-        doubt = unary_union(ambers) if ambers else None
-        if doubt is not None and red is not None:
-            doubt = doubt.difference(red)
+            rows.append((i, red, [g for g in far if g is not None]))
+        reds = [r for _, r, _ in rows if r is not None]
+        red_all = unary_union(reds) if reds else None
+        # each region is its own row's (the side yard's, the rear yard's…), named on it, and coloured once: where
+        # two rows' strips overlap (a corner), the first row's; amber never where any row is red
+        taken = {present.FAILS: None, present.REVIEW: red_all}
+        regions = []
+        for i, red, ambers in rows:
+            for region, status in ((red, present.FAILS), (unary_union(ambers) if ambers else None, present.REVIEW)):
+                if region is None or region.is_empty:
+                    continue
+                if taken[status] is not None:
+                    region = region.difference(taken[status])
+                taken[status] = region if taken[status] is None else unary_union([taken[status], region])
+                regions.append((region, status, i))
         # per building: only the part of THAT building in the yard, from its own bottom to its own top (a garage
         # in a side yard is never coloured up to the house's ridge). The viewport then cuts each building by its
         # block (Rhino's boolean), so a cantilever over a yard is coloured, not the air under it. Outlines
         # simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude.
-        for region, status in ((red, present.FAILS), (doubt, present.REVIEW)):
-            if region is None or region.is_empty:
-                continue
+        for region, status, i in regions:
             for b, own in solids:
                 zs = [p[2] for f in b["faces"] for p in f["points"]]
                 for g in hole_free(region.intersection(own)):
                     if g.area > 1e-3:
                         encroach.append({"outline": _ring(g), "base": min(zs), "top": max(zs), "why": "yard",
-                                         "status": status, "building": b.get("id")})
+                                         "status": status, "building": b.get("id"), "measure": i.get("measure"),
+                                         "row": i.get("name")})
         height = statuses.get("building_height")
         if height in (present.FAILS, present.REVIEW) and env.get("top") is not None:
             for b, _ in solids:                         # only what rises above the limit: a roof's ridge, not its eaves
@@ -777,7 +786,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                 for g in hole_free(above(b, env["top"])):
                     if g.area > 1e-3:
                         encroach.append({"outline": _ring(g), "base": env["top"], "top": top, "why": "height",
-                                         "status": height, "building": b.get("id")})
+                                         "status": height, "building": b.get("id"),
+                                         "measure": "building_height", "row": "Building height"})
     return {"edges": edges, "yards": yards, "encroach": encroach, "height": height_dim(site, env, v, measured),
             "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
 
