@@ -2454,6 +2454,11 @@ def test_the_suggested_street_and_a_click_on_it_keep_the_whole_street_so_the_fro
         assert front(lines)["status"] == "does_not_comply" and front(lines)["proposed"] == "10'-0\"", front(lines)
     lines, ids = logic.pick_street([outline[0]], ["A St"], outline[0], "A St", outline=outline)
     assert len(lines) == 5 and ids == ["A St", None, None, None, None]       # the name on the clicked line only
+    # round 2: a click on a middle piece already saved appends the rest after it; what is said still reads the
+    # street end to end, as the measuring does (it said "not surely one street" for a straight street)
+    for k in range(5):
+        lines, ids = logic.pick_street([outline[k]], None, outline[k], None, outline=outline)
+        assert logic.street_words("This street", lines, ids) == "This street: 5 lot-line pieces, 100'-0\" of frontage"
     two = [outline[0], outline[1]]                                          # known two streets: its own, and on
     lines, ids = logic.pick_street(two, ["A St", "B Ave"], outline[0], "A St", outline=outline)
     assert lines == [outline[0]] and ids == ["A St"], (lines, ids)          # never onto B Ave's piece

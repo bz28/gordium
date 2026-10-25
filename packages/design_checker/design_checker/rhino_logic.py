@@ -980,13 +980,40 @@ def _length(lines):
     return sum(math.dist(line[0][:2], line[-1][:2]) for line in lines)
 
 
+def _end_to_end(lines, ids=None):
+    """(lines, ids) in order end to end along the street, as the measuring reads them (measure.Lot puts the street
+    lines in outline order before its street_verdict): a click on a street line appends the rest of its street
+    after the old lines (street-run review round 2). Lines that don't run end to end: as they were."""
+    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
+    n = len(lines)
+    ids = list(ids) if isinstance(ids, list) and len(ids) == n else None
+    ends = [(line[0], line[-1]) for line in lines]
+
+    def touches(k, p):
+        return [j for j in range(n) if j != k and (near(ends[j][0], p) or near(ends[j][1], p))]
+
+    starts = [k for k in range(n) if not touches(k, ends[k][0]) or not touches(k, ends[k][1])]
+    if not starts:
+        return lines, ids
+    order, k = [starts[0]], starts[0]
+    at = ends[k][1] if not touches(k, ends[k][0]) else ends[k][0]
+    while len(order) < n:
+        nxt = [j for j in touches(k, at) if j not in order]
+        if len(nxt) != 1:
+            return lines, ids
+        k = nxt[0]
+        at = ends[k][1] if near(ends[k][0], at) else ends[k][0]
+        order.append(k)
+    return [lines[k] for k in order], ([ids[k] for k in order] if ids is not None else None)
+
+
 def street_words(label, lines, ids=False):
     """What the command line says a click kept: "Ithaca Rd: 8 lot-line pieces, 75'-10" of frontage". With `ids`
     given (the lines' street names, or None: unnamed), lines that aren't surely one street (street_verdict) say so
     instead of one frontage: the measuring asks one street or two."""
     n = len(lines)
     pieces = f"{label}: {n} lot-line piece{'s' if n != 1 else ''}"
-    if ids is not False and n > 1 and street_verdict(lines, ids)[0] != "one":
+    if ids is not False and n > 1 and street_verdict(*_end_to_end(lines, ids))[0] != "one":
         return pieces + ", not surely one street: Gordium asks one street or two before measuring along them"
     return pieces + f", {feet_words(_length(lines))} of frontage"
 
