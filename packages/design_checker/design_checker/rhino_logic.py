@@ -1695,6 +1695,28 @@ def recovery_message(removed, back):
     return " and ".join(parts) or None
 
 
+def undo_record_to_end(held, doc_serial):
+    """Whether the plugin ends the Draw's undo record `held` ((document serial, record serial) from
+    BeginUndoRecord, or None) in the document `doc_serial`: only a record it began (serial above 0: 0 means a
+    command is already recording, or undo is off, and the record is Rhino's to end, RhinoCommon), in the same
+    document."""
+    return bool(held) and bool(held[1]) and doc_serial is not None and held[0] == doc_serial
+
+
+def after_undo_redo(is_end_undo, is_end_redo):
+    """Whether Rhino's undo event is an Undo or a Redo just finished: then what the last check drew is cleared and
+    the model checked again (gordium_rhino._undo_redo). Never on its start, a record begun or ended, or a purge."""
+    return bool(is_end_undo or is_end_redo)
+
+
+def dirty_after_undo(dirty_at, now):
+    """When the model last changed, once Rhino's Undo or Redo ended at `now`: never earlier than an edit already
+    noted (its object events, gordium_rhino._changed) and never earlier than now, so a check that finished just
+    before the Undo can never count as covering it (should_recheck: last_at >= dirty_at; review round 2, P1: an Undo
+    within 0.5 s of a check left the screen cleared and the panel showing the model as it was before)."""
+    return max(dirty_at or 0, now)
+
+
 def draw_then_commit(session, save):
     """Draw: everything that can fail first (the facts, the box's choices, the sources: `save`), the session's
     commit last, so a failure leaves the session to be rolled back (run_box) with nothing lost."""
@@ -2311,7 +2333,9 @@ class ServerBook:
 # the model changes. Draw with an address other than the one drawn starts clean: everything Gordium drew is cleared
 # (the lot it drew, the starting house as Gordium drew it, the lookup's spot grades) and the new lot and starting
 # house drawn, in one undo step. The architect's own work (a lot they drew, picked or surveyed; an edited starting
-# house; buildings they drew) is never removed without asking once. The same address and Draw: no reset.
+# house; buildings they drew) is never removed without asking once. A new address is a new site (Ben, 2026-10-25):
+# its lot replaces the one in the model whichever they answer, their own lot too; "Keep my building" keeps only their
+# buildings, checked on the new lot. The same address and Draw: no reset.
 
 KEEP_MINE = "keep"
 START_FRESH = "fresh"
@@ -2414,16 +2438,21 @@ def settle_pending(facts, saved_ui, address):
     return dict(facts or {}), dict(saved_ui or {})
 
 
+OWN_LOTS = ("your surveyed lot", "the lot you drew", "your lot")
+
+
 def own_work(table, facts, saved_ui):
     """What of the architect's own a reset would remove, in words (empty: everything drawn is Gordium's): a lot they
-    drew, picked or surveyed; the starting house if it was edited since Gordium drew it (or Gordium has no record of
-    drawing it: never assumed to be its own); buildings they drew."""
+    drew, picked or surveyed (named as theirs: OWN_LOTS); the starting house if it was edited since Gordium drew it
+    (or Gordium has no record of drawing it: never assumed to be its own); buildings they drew."""
     out = []
-    lot = (facts or {}).get("lot_id")
-    if lot and lot != (saved_ui or {}).get("replaceable_lot"):
-        out.append("your lot")
+    facts, saved_ui = facts or {}, saved_ui or {}
+    lot = facts.get("lot_id")
+    if lot and lot != saved_ui.get("replaceable_lot"):
+        out.append(OWN_LOTS[0] if facts.get("lot_surveyed") else
+                   OWN_LOTS[1] if saved_ui.get("lot_source") == "drawn by you" else OWN_LOTS[2])
     house = table.massing()
-    if house and table.fingerprint(house) != (saved_ui or {}).get("house_fingerprint"):
+    if house and table.fingerprint(house) != saved_ui.get("house_fingerprint"):
         out.append("your changes to the starting house")
     if table.buildings():
         out.append("the buildings you drew")
@@ -2474,16 +2503,31 @@ def draw_decision(table, facts, saved_ui, address):
     return plan, mine, say
 
 
-def reset_question(address, mine):
+def reset_question(address, mine, answer=None):
     """The one question when the architect's own work would go: (the question, Start fresh, Keep my building or
-    None). Keeping their building is offered only when there is one of theirs (their lot alone: start fresh or
-    Cancel)."""
-    building = [m for m in mine if m != "your lot"]
-    listed = _listed(mine)
-    return ("Start fresh for " + (address or "this address") + "? " + listed[0].upper() + listed[1:] +
-            " will be removed.",
+    None). A new address is a new site (Ben, 2026-10-25): its lot replaces the one in the model whichever they
+    answer, their own lot too (a lot they surveyed, drew or picked), so the question and the Keep answer both say
+    so; only their buildings can be kept, checked on the new address's lot. Keeping is offered only when there is a
+    building of theirs (their lot alone: Start fresh or Cancel). `answer`: the lookup's, pending; when it had only
+    the City's outline (no lot the State's tax map gives), the new lot is the one they draw over it."""
+    place = str(address or "").split(",", 1)[0].strip() or "this address"
+    lot = [m for m in mine if m in OWN_LOTS]
+    building = [m for m in mine if m not in OWN_LOTS]
+    w = (answer or {}).get("writes") or {}
+    by = (" (you draw " + place + "'s lot over the City's outline)" if not w.get("lot_ring") and w.get("guide_ring")
+          else " by " + place + "'s lot")
+    said = []
+    if building:
+        listed = _listed(building)
+        said.append(listed[0].upper() + listed[1:] + " will be removed.")
+    if lot:
+        said.append(lot[0][0].upper() + lot[0][1:] + " will be replaced" + by + ".")
+    keep = "Keep my building and check it on " + place + "'s lot"
+    if lot:
+        keep += " (" + lot[0] + " will be replaced)"
+    return ("Start fresh for " + place + "? " + " ".join(said),
             ("Start fresh", START_FRESH),
-            ("Keep my building and check it on the new lot", KEEP_MINE) if building else None)
+            (keep, KEEP_MINE) if building else None)
 
 
 def _listed(items):
@@ -2521,7 +2565,8 @@ def box_facts(facts, saved_ui, state):
 def apply_reset(table, session, facts, saved_ui, choice, zones=()):
     """(facts, saved_ui, redraw_house, guide) at Draw: the pending answer drawn for good through the session (one
     Cancel, one undo), by apply_lookup itself (only what each source allows is written; the lot drawn and its spot
-    grades held), the lot drawn now replaceable whoever drew it (they chose: own_work asked). Unless they keep their
+    grades held), the lot drawn now replaceable whoever drew it (they chose: own_work asked). A new address is a new
+    site (Ben, 2026-10-25): the lot is replaced whichever they answer, their own lot too. Unless they keep their
     building (`choice` KEEP_MINE), the starting house and every building on the lot are held too. `redraw_house`:
     the starting house is to be drawn again for the new lot. `guide`: the City's outline when that is all the
     answer had (no lot drawn: the architect draws it over the guide, the box still open, then Draw)."""

@@ -163,7 +163,8 @@ class Box:
         else:
             choice = logic.START_FRESH
             if plan == "ask":
-                question = logic.reset_question(self.saved["_pending"].get("address"), mine)
+                question = logic.reset_question(self.saved["_pending"].get("address"), mine,
+                                                self.saved["_pending"].get("answer"))
                 self.asked.append(question)
                 choice = reply(question) if reply else None
                 if choice is None:
@@ -279,10 +280,9 @@ def test_an_edited_house_is_asked_about_once_and_keep_checks_it_on_the_new_lot()
     box = site.box().look_up(answer("96_ithaca_rd"))
     assert box.draw() == "asked-cancel"                       # Cancel at the question: back to the box
     question, fresh, keep = box.asked[0]
-    assert question.startswith("Start fresh for 96 Ithaca") and question.endswith(
-        "Your changes to the starting house will be removed.")
+    assert question == "Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed."
     assert fresh == ("Start fresh", logic.START_FRESH)
-    assert keep == ("Keep my building and check it on the new lot", logic.KEEP_MINE)
+    assert keep == ("Keep my building and check it on 96 Ithaca Road's lot", logic.KEEP_MINE)
     assert box.table.objects["lot1"]["layer"] == "Site"      # nothing done until they answer
     assert box.draw(lambda q: logic.KEEP_MINE) == "drawn"
     assert {"floor1", "floor2"} <= set(site.table.objects) and "lot1" not in site.table.objects
@@ -304,8 +304,55 @@ def test_their_lot_alone_offers_start_fresh_or_cancel_never_keep_my_building():
     box = site.box().look_up(answer("96_ithaca_rd"))
     assert box.draw() == "asked-cancel"
     question, fresh, keep = box.asked[0]
-    assert question.endswith("Your lot will be removed.") and keep is None
+    assert question == "Start fresh for 96 Ithaca Road? Your lot will be replaced by 96 Ithaca Road's lot." and keep is None
     assert box.draw(lambda q: logic.START_FRESH) == "drawn" and "lot1" not in site.table.objects
+
+
+def test_keep_my_building_on_their_surveyed_lot_replaces_the_lot_and_keeps_the_building():
+    """Ben (2026-10-25): a new address is a new site. Keep my building keeps only the architect's buildings, checked
+    on the new address's lot; their own lot (surveyed here) is replaced too, and both the question and the Keep
+    answer say so plainly. All of it in one box session (one undo): Cancel after the reset puts it all back."""
+    site = Site(lot="theirs", house="edited", buildings=True, surveyed=True)
+    before = site.state()
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.draw() == "asked-cancel"
+    question, fresh, keep = box.asked[0]
+    assert question == ("Start fresh for 96 Ithaca Road? Your changes to the starting house and the buildings you "
+                        "drew will be removed. Your surveyed lot will be replaced by 96 Ithaca Road's lot.")
+    assert keep == ("Keep my building and check it on 96 Ithaca Road's lot (your surveyed lot will be replaced)",
+                    logic.KEEP_MINE)
+    assert site.state() == before                            # nothing done until they answer
+    box.facts, box.saved, redraw, _ = logic.apply_reset(box.table, box.session, box.facts, box.saved,
+                                                        logic.KEEP_MINE, ZONES)
+    assert not redraw and box.table.objects["lot1"]["layer"] == logic.HOLDING_LAYER   # held, in the one session
+    box.cancel()
+    assert site.state() == before                            # Cancel after the reset: as it was
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    assert box.draw(lambda q: logic.KEEP_MINE) == "drawn"
+    assert {"floor1", "floor2", "garage"} <= set(site.table.objects)       # their building kept
+    assert "lot1" not in site.table.objects                                # their surveyed lot replaced
+    lot = site.facts["lot_id"]
+    assert site.table.objects[lot]["layer"] == "Site" and site.saved["replaceable_lot"] == lot
+    assert site.facts["lot_surveyed"] is False               # the tax map's lot: never carried as their survey
+    assert site.saved.get("lot_source") != "your survey"
+    assert logic.same_address(site.saved["drawn_address"], "96 Ithaca Rd")
+
+
+@pytest.mark.parametrize("source, words", [("drawn by you", "the lot you drew"), (None, "your lot")])
+def test_the_question_names_their_lot_as_it_came(source, words):
+    """Their lot named as it came: surveyed (above), drawn by them, or picked; on the City's outline only, the new
+    lot is the one they draw over it."""
+    site = Site(lot="theirs", house="edited")
+    site.saved["lot_source"] = source
+    box = site.box().look_up(answer("96_ithaca_rd"))
+    box.draw()
+    question, _, keep = box.asked[0]
+    assert question.endswith(words[0].upper() + words[1:] + " will be replaced by 96 Ithaca Road's lot.")
+    assert keep[0].endswith("(" + words + " will be replaced)")
+    guide = Site(lot="theirs", house="edited").box().look_up(guide_only("96_ithaca_rd"))
+    guide.draw()
+    assert guide.asked[0][0].endswith("Your lot will be replaced (you draw 96 Ithaca Road's lot over the City's "
+                                      "outline).")
 
 
 def test_a_typed_address_is_looked_up_first_and_on_their_own_lot_is_a_label():
@@ -424,7 +471,12 @@ def test_every_start_lookup_and_answer_keeps_the_promises(start):
         their_lot = {i for i in mine if i == before[1]["lot_id"]}
         assert mine - their_lot <= left or fresh, where        # their building: gone only on Start fresh
         assert their_lot <= left or box.asked, where           # their lot: only once asked (both answers say so:
-        # "…will be removed" / "check it on the new lot")
+        # "…will be replaced by 96 Ithaca Road's lot" / "(your lot will be replaced)")
+        if box.asked and kind in ("new", "guide"):             # a new address is a new site (Ben, 2026-10-25):
+            assert not their_lot & left, where                 # their lot replaced whichever they answered
+            if their_lot:
+                assert "will be replaced" in box.asked[0][0] and (
+                    box.asked[0][2] is None or "will be replaced)" in box.asked[0][2][0]), where
         assert site.facts.get("lot_id") in left, where         # never a Draw without a lot
         assert not [k for k in site.saved if k.startswith("_")], where
         if (kind == "same" and lot != "sample") or kind == "failed" or (kind == "typed" and lot == "theirs"):
@@ -450,7 +502,10 @@ def test_the_plugins_draw_takes_the_same_branches_as_the_harness():
              'logic.settle_pending(facts, saved_ui, state.get("address"))',
              'if previewed and saved_ui.get("_pending") is None:',
              'logic.draw_decision(table, facts, saved_ui, state.get("address"))', 'if plan == "lookup":',
-             'if plan == "unfound":', 'if plan == "none":', 'if plan == "ask":', "logic.reset_question(",
+             'if plan == "unfound":', 'if plan == "none":', 'if plan == "ask":',
+             # the question is told the pending answer (the City's outline only: "you draw … over the City's outline")
+             'logic.reset_question(saved_ui["_pending"].get("address"), mine,\n'
+             '                                                     saved_ui["_pending"].get("answer"))',
              "if choice is None:\n            return facts, saved_ui, False, state", "_begin_undo(",
              "logic.apply_reset(table, session, facts, saved_ui, choice",
              "logic.after_reset_state(state, _box_state(doc, facts, options, saved_ui, mode))",
@@ -614,3 +669,50 @@ def test_draw_after_an_outside_city_or_ambiguous_lookup_keeps_its_own_words():
     many = "2 addresses match: 106 Ithaca Rd, 106 Ithaca St."
     box = site.box().look_up({"status": "multiple", "query": "106 Ithaca", "message": many})
     assert box.draw() == "unfound" and many in box.said[-1]
+
+
+# ---- Undo and Redo of a Draw (the Rhino job at demo e631aae: Redo did nothing, 96's outline stayed on screen) ----
+
+@pytest.mark.parametrize("held, doc, ends", [
+    ((7, 12), 7, True),                 # a record this plugin began, in this document
+    ((7, 0), 7, False),                 # 0: Rhino said a command was already recording (its record, not ours)
+    ((7, 12), 8, False),                # another document's record
+    (None, 7, False), ((7, 12), None, False)])
+def test_only_an_undo_record_the_plugin_began_is_ended_by_it(held, doc, ends):
+    assert logic.undo_record_to_end(held, doc) is ends
+
+
+@pytest.mark.parametrize("end_undo, end_redo, clears", [(True, False, True), (False, True, True),
+                                                         (False, False, False)])
+def test_what_was_drawn_is_cleared_when_an_undo_or_redo_ends(end_undo, end_redo, clears):
+    assert logic.after_undo_redo(end_undo, end_redo) is clears
+
+
+def test_an_undo_right_after_a_check_is_still_checked_again():
+    """Review round 2 (P1): the handler set dirty to 0.5 s before the Undo ended, so a check that had finished in
+    those 0.5 s (a Draw's own, or the re-check after an Undo just before) counted as covering it: no re-check, the
+    screen cleared and the panel showing the model before the Undo."""
+    checked, undone = 100.0, 100.3
+    dirty = logic.dirty_after_undo(None, undone)
+    assert logic.should_recheck(dirty, undone + 1.0, False, False, 0.5, last_at=checked)
+    assert logic.dirty_after_undo(100.4, undone) == 100.4         # a later edit's time is kept
+    assert logic.dirty_after_undo(99.0, undone) == undone
+
+
+def test_the_plugin_clears_its_drawing_on_undo_and_redo_and_never_changes_the_document_then():
+    """After Undo (or Redo) the last check's drawing (the 96 lot outline, its marks) and any dashed lookup outline
+    were of a model no longer there: _undo_redo clears them and asks for a re-check, attached to Rhino's own undo
+    event when the plugin loads. It never changes the document (a change while Rhino undoes or redoes breaks the
+    Undo/Redo chain); the Draw's record is ended only when the plugin began it."""
+    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = rhino[rhino.index("def _undo_redo("):].split("\n\n\n", 1)[0]
+    code = "\n".join(line for line in body.split('"""')[2].splitlines())       # the code, not its docstring
+    assert "logic.after_undo_redo(e.IsEndUndo, e.IsEndRedo)" in code and "_clear(o)" in code
+    assert 'STATE.pop("lookup_guide", None)' in code
+    assert 'STATE["dirty"] = logic.dirty_after_undo(STATE.get("dirty"), time.time())' in code
+    for change in ("doc", "Objects.", "Strings.", "Layers.", "RunScript", "run_check(", "save"):
+        assert change not in code, change
+    assert '_on(Rhino.Commands.Command, "UndoRedo", _handler(System.EventHandler[Rhino.Commands.UndoRedoEventArgs], ' \
+           "_undo_redo," in rhino
+    end = rhino[rhino.index("def _end_undo("):].split("\n\n\n", 1)[0]
+    assert "if logic.undo_record_to_end(held, " in end and end.index("undo_record_to_end") < end.index("EndUndoRecord")
