@@ -131,12 +131,6 @@ alters_existing_primary_structure:
   - general.325_8e_south_hill_no_added_primary_on_built_parcel
   - general.325_8e_south_hill_one_primary_on_empty_parcel
   unit: yes_no
-architectural_feature_projection:
-  meaning: Greatest distance that any windowsill, belt course, cornice, eave or other architectural feature projects
-    into any required yard
-  needed_by:
-  - general.325_18b_architectural_feature_projection_limit
-  unit: ft
 building_ground_floor_area:
   meaning: Total ground floor area of the building on which the feature is located
   needed_by:

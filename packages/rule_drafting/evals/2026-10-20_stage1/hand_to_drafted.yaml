@@ -40,11 +40,7 @@ keys:
       R-1b.height:
         judge:
         - - R-1b.max_height_ft
-        parts:
-        - R-1b.325_16c_extra_height_limit
-        - R-1b.325_16c_extra_height_front_yard
-        - R-1b.325_16c_extra_height_side_yards
-        - R-1b.325_16c_extra_height_rear_yard
+        parts: []
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
           rules: parts of the answer, compared with the hand rule as their own group'
       R-1b.lot_coverage:
@@ -66,10 +62,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-1b.yard_projections:
         judge:
-        - - general.325_18b_required_yard_open_unobstructed
+        - - general.325_18b_architectural_feature_projection_limit
         reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
-          different question)'
+          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
+          question by another measure, so it is compared too'
       R-1b.accessory_buildings:
         judge:
         - - R-1b.325_25a_accessory_not_in_required_front_yard
@@ -89,8 +85,6 @@ keys:
     unmatched:
       R-1b.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
-      R-1b.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
-        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
       R-1b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-1b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
     known_false_passes: {}
@@ -124,11 +118,7 @@ keys:
       R-1a.height:
         judge:
         - - R-1a.max_height_ft
-        parts:
-        - R-1a.325_16c_extra_height_limit
-        - R-1a.325_16c_extra_height_front_yard
-        - R-1a.325_16c_extra_height_side_yards
-        - R-1a.325_16c_extra_height_rear_yard
+        parts: []
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
           rules: parts of the answer, compared with the hand rule as their own group'
       R-1a.lot_coverage:
@@ -150,10 +140,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-1a.yard_projections:
         judge:
-        - - general.325_18b_required_yard_open_unobstructed
+        - - general.325_18b_architectural_feature_projection_limit
         reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
-          different question)'
+          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
+          question by another measure, so it is compared too'
       R-1a.accessory_buildings:
         judge:
         - - R-1a.325_25a_accessory_not_in_required_front_yard
@@ -173,8 +163,6 @@ keys:
     unmatched:
       R-1a.325_8b_one_family_detached_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building;
         no key rule asks it'
-      R-1a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
-        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
       R-1a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-1a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
     known_false_passes: {}
@@ -224,11 +212,7 @@ keys:
       R-2a.height:
         judge:
         - - R-2a.max_height_ft
-        parts:
-        - R-2a.325_16c_extra_height_limit
-        - R-2a.325_16c_extra_height_front_yard
-        - R-2a.325_16c_extra_height_side_yards
-        - R-2a.325_16c_extra_height_rear_yard
+        parts: []
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
           rules: parts of the answer, compared with the hand rule as their own group'
       R-2a.lot_coverage:
@@ -250,10 +234,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-2a.yard_projections:
         judge:
-        - - general.325_18b_required_yard_open_unobstructed
+        - - general.325_18b_architectural_feature_projection_limit
         reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
-          different question)'
+          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
+          question by another measure, so it is compared too'
       R-2a.accessory_buildings:
         judge:
         - - R-2a.325_25a_accessory_not_in_required_front_yard
@@ -284,8 +268,6 @@ keys:
         no key rule asks it'
       R-2a.325_8b_two_family_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building; no
         key rule asks it'
-      R-2a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
-        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
       R-2a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
     known_false_passes: {}
@@ -335,11 +317,7 @@ keys:
       R-2b.height:
         judge:
         - - R-2b.max_height_ft
-        parts:
-        - R-2b.325_16c_extra_height_limit
-        - R-2b.325_16c_extra_height_front_yard
-        - R-2b.325_16c_extra_height_side_yards
-        - R-2b.325_16c_extra_height_rear_yard
+        parts: []
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
           rules: parts of the answer, compared with the hand rule as their own group'
       R-2b.lot_coverage:
@@ -361,10 +339,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-2b.yard_projections:
         judge:
-        - - general.325_18b_required_yard_open_unobstructed
+        - - general.325_18b_architectural_feature_projection_limit
         reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
-          different question)'
+          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
+          question by another measure, so it is compared too'
       R-2b.accessory_buildings:
         judge:
         - - R-2b.325_25a_accessory_not_in_required_front_yard
@@ -395,8 +373,6 @@ keys:
         no key rule asks it'
       R-2b.325_8b_two_family_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building; no
         key rule asks it'
-      R-2b.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
-        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
       R-2b.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-2b.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
     known_false_passes: {}
@@ -491,10 +467,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-2c.yard_projections:
         judge:
-        - - general.325_18b_required_yard_open_unobstructed
+        - - general.325_18b_architectural_feature_projection_limit
         reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
-          different question)'
+          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
+          question by another measure, so it is compared too'
       R-2c.accessory_buildings:
         judge:
         - - R-2c.325_25a_accessory_not_in_required_front_yard
@@ -599,11 +575,7 @@ keys:
       R-3a.height:
         judge:
         - - R-3a.max_height_ft
-        parts:
-        - R-3a.325_16c_extra_height_limit
-        - R-3a.325_16c_extra_height_front_yard
-        - R-3a.325_16c_extra_height_side_yards
-        - R-3a.325_16c_extra_height_rear_yard
+        parts: []
         reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
           rules: parts of the answer, compared with the hand rule as their own group'
       R-3a.lot_coverage:
@@ -625,10 +597,10 @@ keys:
         reason: 'the chart''s rear yard row: the same question'
       R-3a.yard_projections:
         judge:
-        - - general.325_18b_required_yard_open_unobstructed
+        - - general.325_18b_architectural_feature_projection_limit
         reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review (its projection limit measures how far a feature projects, not the eave''s distance to the lot line: a
-          different question)'
+          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
+          question by another measure, so it is compared too'
       R-3a.accessory_buildings:
         judge:
         - - R-3a.325_25a_accessory_not_in_required_front_yard
@@ -672,8 +644,6 @@ keys:
         no key rule asks it'
       R-3a.325_8b_two_family_area_per_primary_building: '§325-8B(1): the lot area for each additional primary building; no
         key rule asks it'
-      R-3a.325_16c_extra_height_stories: '§325-16C(2)''s stories, applying only above the height limit: the key''s height
-        rule doesn''t limit stories and its stories rule is answered by the chart''s stories limit'
       R-3a.325_19c_corner_lot_street_yards: '§325-19C: corner lots'' second street yard; the keys have no corner-lot rule'
       R-3a.325_20e_front_yard_parking_setback: '§325-20E: parking in the front yard; not in the keys'
     known_false_passes: {}
@@ -687,8 +657,6 @@ general_unmatched:
   general.325_17b_corner_visibility_triangle: '§325-17B corner visibility triangle: not in the keys'
   general.325_18a_porches_structures_counted_in_yards_coverage: '§325-18A porches and decks count as building (a measuring
     matter): not in the keys'
-  general.325_18b_architectural_feature_projection_limit: §325-18B's projection limit measures how far a feature projects;
-    the keys measure eaves' distances to the lot lines
   general.325_20d_driveway_aisle_width: '§325-20D parking space and driveway sizes: not in the keys'
   general.325_20d_driveway_entry_grade: '§325-20D parking space and driveway sizes: not in the keys'
   general.325_20d_driveway_min_width: '§325-20D parking space and driveway sizes: not in the keys'

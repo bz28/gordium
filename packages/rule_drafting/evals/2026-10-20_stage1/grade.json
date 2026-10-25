@@ -389,11 +389,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_extra_height_limit",
-     "R-1a.325_16c_extra_height_front_yard",
-     "R-1a.325_16c_extra_height_side_yards",
-     "R-1a.325_16c_extra_height_rear_yard"
+     "R-1a.max_height_ft"
     ],
     "notes": []
    },
@@ -410,11 +406,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_extra_height_limit",
-     "R-1a.325_16c_extra_height_front_yard",
-     "R-1a.325_16c_extra_height_side_yards",
-     "R-1a.325_16c_extra_height_rear_yard"
+     "R-1a.max_height_ft"
     ],
     "notes": []
    },
@@ -431,11 +423,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_extra_height_limit",
-     "R-1a.325_16c_extra_height_front_yard",
-     "R-1a.325_16c_extra_height_side_yards",
-     "R-1a.325_16c_extra_height_rear_yard"
+     "R-1a.max_height_ft"
     ],
     "notes": []
    },
@@ -452,11 +440,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_extra_height_limit",
-     "R-1a.325_16c_extra_height_front_yard",
-     "R-1a.325_16c_extra_height_side_yards",
-     "R-1a.325_16c_extra_height_rear_yard"
+     "R-1a.max_height_ft"
     ],
     "notes": []
    },
@@ -473,11 +457,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_extra_height_limit",
-     "R-1a.325_16c_extra_height_front_yard",
-     "R-1a.325_16c_extra_height_side_yards",
-     "R-1a.325_16c_extra_height_rear_yard"
+     "R-1a.max_height_ft"
     ],
     "notes": []
    },
@@ -494,11 +474,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_extra_height_limit",
-     "R-1a.325_16c_extra_height_front_yard",
-     "R-1a.325_16c_extra_height_side_yards",
-     "R-1a.325_16c_extra_height_rear_yard"
+     "R-1a.max_height_ft"
     ],
     "notes": []
    },
@@ -949,11 +925,7 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_extra_height_limit",
-     "R-1a.325_16c_extra_height_front_yard",
-     "R-1a.325_16c_extra_height_side_yards",
-     "R-1a.325_16c_extra_height_rear_yard"
+     "R-1a.max_height_ft"
     ],
     "notes": []
    },
@@ -970,11 +942,7 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-1a.max_height_ft",
-     "R-1a.325_16c_extra_height_limit",
-     "R-1a.325_16c_extra_height_front_yard",
-     "R-1a.325_16c_extra_height_side_yards",
-     "R-1a.325_16c_extra_height_rear_yard"
+     "R-1a.max_height_ft"
     ],
     "notes": []
    },
@@ -991,7 +959,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1008,7 +976,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1025,7 +993,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1042,7 +1010,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1059,7 +1027,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1076,7 +1044,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1093,7 +1061,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1332,11 +1300,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit",
-     "R-1b.325_16c_extra_height_front_yard",
-     "R-1b.325_16c_extra_height_side_yards",
-     "R-1b.325_16c_extra_height_rear_yard"
+     "R-1b.max_height_ft"
     ],
     "notes": []
    },
@@ -1354,11 +1318,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit",
-     "R-1b.325_16c_extra_height_front_yard",
-     "R-1b.325_16c_extra_height_side_yards",
-     "R-1b.325_16c_extra_height_rear_yard"
+     "R-1b.max_height_ft"
     ],
     "notes": []
    },
@@ -1376,11 +1336,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit",
-     "R-1b.325_16c_extra_height_front_yard",
-     "R-1b.325_16c_extra_height_side_yards",
-     "R-1b.325_16c_extra_height_rear_yard"
+     "R-1b.max_height_ft"
     ],
     "notes": []
    },
@@ -1398,11 +1354,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit",
-     "R-1b.325_16c_extra_height_front_yard",
-     "R-1b.325_16c_extra_height_side_yards",
-     "R-1b.325_16c_extra_height_rear_yard"
+     "R-1b.max_height_ft"
     ],
     "notes": []
    },
@@ -1420,11 +1372,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit",
-     "R-1b.325_16c_extra_height_front_yard",
-     "R-1b.325_16c_extra_height_side_yards",
-     "R-1b.325_16c_extra_height_rear_yard"
+     "R-1b.max_height_ft"
     ],
     "notes": []
    },
@@ -1441,11 +1389,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit",
-     "R-1b.325_16c_extra_height_front_yard",
-     "R-1b.325_16c_extra_height_side_yards",
-     "R-1b.325_16c_extra_height_rear_yard"
+     "R-1b.max_height_ft"
     ],
     "notes": []
    },
@@ -1727,11 +1671,7 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit",
-     "R-1b.325_16c_extra_height_front_yard",
-     "R-1b.325_16c_extra_height_side_yards",
-     "R-1b.325_16c_extra_height_rear_yard"
+     "R-1b.max_height_ft"
     ],
     "notes": []
    },
@@ -1748,11 +1688,7 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-1b.max_height_ft",
-     "R-1b.325_16c_extra_height_limit",
-     "R-1b.325_16c_extra_height_front_yard",
-     "R-1b.325_16c_extra_height_side_yards",
-     "R-1b.325_16c_extra_height_rear_yard"
+     "R-1b.max_height_ft"
     ],
     "notes": []
    },
@@ -1769,7 +1705,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1786,7 +1722,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1803,7 +1739,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1820,7 +1756,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1837,7 +1773,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1854,7 +1790,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -1871,7 +1807,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -2497,11 +2433,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_extra_height_limit",
-     "R-3a.325_16c_extra_height_front_yard",
-     "R-3a.325_16c_extra_height_side_yards",
-     "R-3a.325_16c_extra_height_rear_yard"
+     "R-3a.max_height_ft"
     ],
     "notes": []
    },
@@ -2518,11 +2450,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_extra_height_limit",
-     "R-3a.325_16c_extra_height_front_yard",
-     "R-3a.325_16c_extra_height_side_yards",
-     "R-3a.325_16c_extra_height_rear_yard"
+     "R-3a.max_height_ft"
     ],
     "notes": []
    },
@@ -2539,11 +2467,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_extra_height_limit",
-     "R-3a.325_16c_extra_height_front_yard",
-     "R-3a.325_16c_extra_height_side_yards",
-     "R-3a.325_16c_extra_height_rear_yard"
+     "R-3a.max_height_ft"
     ],
     "notes": []
    },
@@ -2560,11 +2484,7 @@
     "expect": "pass",
     "got": "pass",
     "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_extra_height_limit",
-     "R-3a.325_16c_extra_height_front_yard",
-     "R-3a.325_16c_extra_height_side_yards",
-     "R-3a.325_16c_extra_height_rear_yard"
+     "R-3a.max_height_ft"
     ],
     "notes": []
    },
@@ -2581,11 +2501,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_extra_height_limit",
-     "R-3a.325_16c_extra_height_front_yard",
-     "R-3a.325_16c_extra_height_side_yards",
-     "R-3a.325_16c_extra_height_rear_yard"
+     "R-3a.max_height_ft"
     ],
     "notes": []
    },
@@ -2602,11 +2518,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_extra_height_limit",
-     "R-3a.325_16c_extra_height_front_yard",
-     "R-3a.325_16c_extra_height_side_yards",
-     "R-3a.325_16c_extra_height_rear_yard"
+     "R-3a.max_height_ft"
     ],
     "notes": []
    },
@@ -2623,11 +2535,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_extra_height_limit",
-     "R-3a.325_16c_extra_height_front_yard",
-     "R-3a.325_16c_extra_height_side_yards",
-     "R-3a.325_16c_extra_height_rear_yard"
+     "R-3a.max_height_ft"
     ],
     "notes": []
    },
@@ -2644,11 +2552,7 @@
     "expect": "fail",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_extra_height_limit",
-     "R-3a.325_16c_extra_height_front_yard",
-     "R-3a.325_16c_extra_height_side_yards",
-     "R-3a.325_16c_extra_height_rear_yard"
+     "R-3a.max_height_ft"
     ],
     "notes": []
    },
@@ -3274,11 +3178,7 @@
     "expect": "pass",
     "got": "fail",
     "drafted": [
-     "R-3a.max_height_ft",
-     "R-3a.325_16c_extra_height_limit",
-     "R-3a.325_16c_extra_height_front_yard",
-     "R-3a.325_16c_extra_height_side_yards",
-     "R-3a.325_16c_extra_height_rear_yard"
+     "R-3a.max_height_ft"
     ],
     "notes": []
    },
@@ -3295,7 +3195,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -3312,7 +3212,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -3329,7 +3229,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -3346,7 +3246,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -3363,7 +3263,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -3380,7 +3280,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -3397,7 +3297,7 @@
     "expect": "pass",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },
@@ -3414,7 +3314,7 @@
     "expect": "fail",
     "got": "needs_review",
     "drafted": [
-     "general.325_18b_required_yard_open_unobstructed"
+     "general.325_18b_architectural_feature_projection_limit"
     ],
     "notes": []
    },

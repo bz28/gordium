@@ -13,6 +13,12 @@ max_tokens: 8192          # a section's templates can run to a few thousand toke
 # quarters went to thinking. Each call's worst case, which the budget reserves before sending, uses this limit.
 max_tokens_by_unit:
   325-19E: 32000
+  # chart lot size: one template per form of its cells (footnotes 4 to 9), three answers stopped at 8,192 (2026-10-21).
+  # 16,000, not 32,000: a call's worst case at 32,000 output tokens is more than the run's $0.30 cap.
+  chart-p3-minimum_lot_size: 16000
+  325-18B: 4096           # one sentence: a short answer; a small worst case to reserve
+  # §325-16C as one relaxing rule: both answers stopped at 8,192 output tokens (2026-10-25, $0.228, no answer)
+  325-16C: 16000
 max_attempts: 3           # the first answer plus up to 2 retries when code rejects it
 # A hard cap on total spending across all drafting runs, in US dollars, separate from labeling's. Kept in
 # ~/.config/gordium/rule_drafting_ledger.json (shared by every checkout), never taken as less than the

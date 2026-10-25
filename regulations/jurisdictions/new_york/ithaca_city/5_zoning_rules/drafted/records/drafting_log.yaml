@@ -824,117 +824,21 @@ units:
     unresolved: []
     problems: []
   325-16C:
-    rules:
-    - R-1a.325_16c_extra_height_limit
-    - R-1a.325_16c_extra_height_stories
-    - R-1a.325_16c_extra_height_front_yard
-    - R-1a.325_16c_extra_height_side_yards
-    - R-1a.325_16c_extra_height_rear_yard
-    - R-1b.325_16c_extra_height_limit
-    - R-1b.325_16c_extra_height_stories
-    - R-1b.325_16c_extra_height_front_yard
-    - R-1b.325_16c_extra_height_side_yards
-    - R-1b.325_16c_extra_height_rear_yard
-    - R-2a.325_16c_extra_height_limit
-    - R-2a.325_16c_extra_height_stories
-    - R-2a.325_16c_extra_height_front_yard
-    - R-2a.325_16c_extra_height_side_yards
-    - R-2a.325_16c_extra_height_rear_yard
-    - R-2b.325_16c_extra_height_limit
-    - R-2b.325_16c_extra_height_stories
-    - R-2b.325_16c_extra_height_front_yard
-    - R-2b.325_16c_extra_height_side_yards
-    - R-2b.325_16c_extra_height_rear_yard
-    - R-3a.325_16c_extra_height_limit
-    - R-3a.325_16c_extra_height_stories
-    - R-3a.325_16c_extra_height_front_yard
-    - R-3a.325_16c_extra_height_side_yards
-    - R-3a.325_16c_extra_height_rear_yard
-    - R-3b.325_16c_extra_height_limit
-    - R-3b.325_16c_extra_height_stories
-    - R-3b.325_16c_extra_height_front_yard
-    - R-3b.325_16c_extra_height_side_yards
-    - R-3b.325_16c_extra_height_rear_yard
-    unresolved:
-    - rule: R-3aa.325_16c_extra_height_stories
-      why: '''Number of stories'': the cell ''3/2 [fn11]'' has 2 numbers, the rule expects 1'
-      cells:
-      - - 3
-        - Maximum Building Height [fn10]
-        - Height in feet
-        - R-3AA
-      - - 3
-        - Maximum Building Height [fn10]
-        - Number of stories
-        - R-3AA
-    - rule: R-2c.325_16c_extra_height_side_yards
-      why: '''Side (one side minimum)'': the cell ''10 ft /15 ft [fn14]'' has 2 numbers, the rule expects 1'
-      cells:
-      - - 3
-        - Maximum Building Height [fn10]
-        - Height in feet
-        - R-2C
-      - - 3
-        - Yard Dimensions
-        - Side (one side minimum)
-        - R-2C
-      - - 3
-        - Yard Dimensions
-        - Side (other side minimum)
-        - R-2C
-    - rule: RU.325_16c_extra_height_rear_yard
-      why: '''Rear (minimum, % of depth or feet, whichever is less)'': the cell ''25% / 50 ft [fn17]'' has footnotes
-        [''17''], the rule expects [''16'']'
-      cells:
-      - - 3
-        - Maximum Building Height [fn10]
-        - Height in feet
-        - RU
-      - - 3
-        - Yard Dimensions
-        - Rear (minimum, % of depth or feet, whichever is less)
-        - RU
-      - - 3
-        - Yard Dimensions
-        - Rear (minimum, % of depth or feet, whichever is less)
-        - RU
-    - rule: R-2c.325_16c_extra_height_limit
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: R-2c.325_16c_extra_height_stories
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: R-2c.325_16c_extra_height_front_yard
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: R-2c.325_16c_extra_height_rear_yard
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: R-3aa.325_16c_extra_height_limit
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: R-3aa.325_16c_extra_height_front_yard
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: R-3aa.325_16c_extra_height_side_yards
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: R-3aa.325_16c_extra_height_rear_yard
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: RU.325_16c_extra_height_limit
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: RU.325_16c_extra_height_stories
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: RU.325_16c_extra_height_front_yard
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
-    - rule: RU.325_16c_extra_height_side_yards
-      why: 'another part of this exception couldn''t be drafted for this district, so none of its parts is kept:
-        a person checks it'
+    rules: []
+    unresolved: []
     problems: []
+    failed: '325-16C.325_16c_extra_height_limit: it applies above the chart''s {height_ft} and limits building_height
+      there: an exception that allows more than a chart rule is one rule that relaxes it (relaxes: "height_ft"),
+      with every condition of the exception in applies_when and the most it allows in check; 325-16C.325_16c_extra_height_front_yard:
+      it applies above the chart''s {height_ft} and limits building_height there: an exception that allows more
+      than a chart rule is one rule that relaxes it (relaxes: "height_ft"), with every condition of the exception
+      in applies_when and the most it allows in check; 325-16C.325_16c_extra_height_side_yards: it applies above
+      the chart''s {height_ft} and limits building_height there: an exception that allows more than a chart rule
+      is one rule that relaxes it (relaxes: "height_ft"), with every condition of the exception in applies_when
+      and the most it allows in check; 325-16C.325_16c_extra_height_rear_yard: it applies above the chart''s {height_ft}
+      and limits building_height there: an exception that allows more than a chart rule is one rule that relaxes
+      it (relaxes: "height_ft"), with every condition of the exception in applies_when and the most it allows in
+      check'
   325-18A:
     rules:
     - general.325_18a_porches_structures_counted_in_yards_coverage
@@ -943,8 +847,10 @@ units:
   325-18B:
     rules:
     - general.325_18b_architectural_feature_projection_limit
-    - general.325_18b_required_yard_open_unobstructed
-    unresolved: []
+    unresolved:
+    - rule: 325-18B.325_18b_required_yard_open_unobstructed
+      why: 'a flag with no condition that quotes only what a rule of this answer checks makes every design need
+        review: leave it out, or give it the condition under which a person must judge'
     problems: []
   325-19C:
     rules:

@@ -524,10 +524,9 @@ rules:
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
 - id: general.325_18b_architectural_feature_projection_limit
-  kind: rule
+  kind: flag
   topic: dimensions
   title: 'Architectural features: projection into required yard (325-18B)'
-  check: architectural_feature_projection <= 2
   sources:
   - file: chapter_325_zoning_2026-10.pdf
     page: 49
@@ -537,16 +536,6 @@ rules:
     quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
       belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
       not project more than two feet into any required yard.
-  examples:
-  - given:
-      architectural_feature_projection: 1.5
-    expect: pass
-  - given:
-      architectural_feature_projection: 2
-    expect: pass
-  - given:
-      architectural_feature_projection: 3
-    expect: fail
   open_questions:
   - The text does not define which features are 'ordinary projections' or 'other architectural features'. Should
     porches, decks, balconies and ramps be excluded here because 325-18A treats them as part of the building?
@@ -570,37 +559,11 @@ rules:
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
-- id: general.325_18b_required_yard_open_unobstructed
-  kind: flag
-  topic: dimensions
-  title: Required yard open and unobstructed (325-18B)
-  sources:
-  - file: chapter_325_zoning_2026-10.pdf
-    page: 49
-    lines:
-    - 13
-    - 16
-    quote: The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills,
-      belt courses, cornices, eaves and other architectural features; provided, however, that such features shall
-      not project more than two feet into any required yard.
-  examples: []
-  open_questions:
-  - Whether anything other than ordinary architectural projections (for example structures, accessory buildings,
-    or items allowed elsewhere in the code) obstructs a required yard needs an architect's judgment. Which other
-    sections allow items in a required yard?
-  research:
-  - question: Whether anything other than ordinary architectural projections (for example structures, accessory
-      buildings, or items allowed elsewhere in the code) obstructs a required yard needs an architect's judgment.
-      Which other sections allow items in a required yard?
-    searched: []
-    sources: []
-    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
-  notes: Drafted by the rule-drafting script.
-  drafted_by: rule_drafting/claude-sonnet-5-5
-  status: draft
+  notes: 'Demoted until re-drafted: §325-18B''s 2 ft limit drafted on a measure the AI proposed (how far a feature
+    projects) instead of each yard measured to the eaves; alone it passes eaves the answer keys fail (an eave 2.5
+    ft into the side yard): a person checks the eaves until §325-18B is re-drafted (2026-10-25).'
 - id: general.325_3b_dwelling_one_family_one_family_occupancy_unrelated_individuals
   kind: flag
   topic: density_and_occupancy
