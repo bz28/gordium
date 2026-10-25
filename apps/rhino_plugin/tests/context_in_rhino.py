@@ -301,18 +301,33 @@ try:
     top = doc.Layers.FindByFullPath("Gordium", -1)
     grade = doc.Layers[g._layer(doc, "Gordium::Grade")]
     before = len(footprints(g, doc))
-    doc.Layers[top].IsLocked, grade.IsLocked = True, True
+    grade.IsLocked = True                        # the architect locks their grades, then "Gordium" (locking a
+    doc.Layers[top].IsLocked = True              # sublayer of a locked layer wouldn't change its own lock)
+    grade_own_before = doc.Layers[grade.Index].GetPersistentLocking()
     said_before = len(g.STATE.get("said", []))
     g.draw_context(doc, g._ui_state(doc).get("lookup_frame"))
-    locks = {k: v["locked"] for k, v in context_layers(g, doc).items()}
+    # each layer's own lock (GetPersistentLocking): under a locked parent IsLocked reads True for every sublayer,
+    # Buildings included, so it can't show the redraw kept their own locks (the Rhino job's probe at e631aae)
+    own = {k: doc.Layers[doc.Layers.FindByFullPath(k, -1)].GetPersistentLocking() for k in context_layers(g, doc)}
     log["locked_parent"] = {"before": before, "after": len(footprints(g, doc)), "gordium_locked": doc.Layers[top].IsLocked,
-                            "grade_locked": doc.Layers[grade.Index].IsLocked, "locks": locks,
+                            "grade_locked": doc.Layers[grade.Index].IsLocked,
+                            "grade_own_lock_before": grade_own_before,
+                            "grade_own_lock": doc.Layers[grade.Index].GetPersistentLocking(), "own_locks": own,
                             "said": g.STATE.get("said", [])[said_before:]}
-    doc.Layers[top].IsLocked, doc.Layers[grade.Index].IsLocked = False, False
+    doc.Layers[top].IsLocked = False             # the architect unlocks "Gordium": each layer as its own lock says
+    after = {k: v["locked"] for k, v in context_layers(g, doc).items()}
+    log["locked_parent"].update(locks_after_parent_unlocked=after,
+                                grade_after_parent_unlocked=doc.Layers[grade.Index].IsLocked)
+    doc.Layers[grade.Index].IsLocked = False
     lp = log["locked_parent"]
     claim("4 with the Gordium layer and the architect's Gordium::Grade locked, a redraw replaces (never doubles) and "
-          "puts both locks back", lp["after"] == lp["before"] > 0 and lp["gordium_locked"] and lp["grade_locked"]
-          and all(v == g.logic.context_locked(k) for k, v in locks.items())
+          "puts both locks back; unlocking Gordium leaves Parcels, Streets, Notes and Grade locked, Buildings not",
+          lp["after"] == lp["before"] > 0 and lp["gordium_locked"] and lp["grade_locked"] and lp["grade_own_lock_before"]
+          and lp["grade_own_lock"]
+          and all(v == g.logic.context_locked(k) for k, v in own.items())
+          and all(v == g.logic.context_locked(k) for k, v in after.items())
+          and all(after[g.logic.CONTEXT + "::" + n] for n in ("Parcels", "Streets", "Notes"))
+          and not after[g.logic.CONTEXT + "::Buildings"] and lp["grade_after_parent_unlocked"]
           and not [t for t in lp["said"] if "could not remove" in t], lp)
     path = S + "saved.3dm"
     doc.Export(path)
