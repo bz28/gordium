@@ -1328,14 +1328,17 @@ def _get_point(prompt):
 
 
 def _ask_street_more(question):
-    """Yes only when the architect says so: Enter or Esc is No (the street stops where it surely ends; never a
-    guess, and the box's pick goes on)."""
+    """True (Yes), False (No), or None when not answered (Enter or Esc): only the architect's No leaves the bend
+    out; not answered, it is kept as street, the cautious way (street-run review round 3, F3), and the box's pick
+    goes on."""
     go = Rhino.Input.Custom.GetOption()
     go.SetCommandPrompt(question)
     yes = go.AddOption("Yes")
-    go.AddOption("No")
+    no = go.AddOption("No")
     go.AcceptNothing(True)
-    return go.Get() == Rhino.Input.GetResult.Option and go.OptionIndex() == yes
+    if go.Get() != Rhino.Input.GetResult.Option:
+        return None
+    return True if go.OptionIndex() == yes else False if go.OptionIndex() == no else None
 
 
 def _outline(doc, lot):

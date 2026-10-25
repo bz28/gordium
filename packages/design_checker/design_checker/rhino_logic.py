@@ -343,9 +343,12 @@ def suggested_facts(jurisdiction, zones, lots, buildings):
         if lot["segments"]:
             a, b = min(lot["segments"], key=lambda s: (s[0][1] + s[1][1]) / 2)
             outline = [[[p[0], p[1]], [q[0], q[1]]] for p, q in lot["segments"]]
-            run = street_run(outline, [[a[0], a[1]], [b[0], b[1]]], tolerance=0.0)   # the whole street it is on,
-            set_street_lines(facts, [outline[k] for k in run["pieces"]] if run else [[[a[0], a[1]], [b[0], b[1]]]])
-            # surely (never asked here; review round 1, F1: a tax-map street suggested as one piece)
+            run = street_run(outline, [[a[0], a[1]], [b[0], b[1]]], tolerance=0.0)
+            # the whole street it is on (review round 1, F1: a tax-map street suggested as one piece), only when
+            # both its ends are sure; else no suggestion, so the box asks for the click and the click asks the
+            # question (round 3, F1: a curving street suggested as its first 30°, the front yard from part of it)
+            if run and run["maybe"] == [[], []]:
+                set_street_lines(facts, [outline[k] for k in run["pieces"]])
     ground = suggested_ground([b["bottom"] for b in buildings], lot["bottom"] if lot is not None else None)
     if ground is not None:
         facts["grade_elevation"] = ground
@@ -898,14 +901,33 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
     own = names[hit]
     near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
 
+    import math
+    tiny = [math.dist(a, b) <= JOINT for a, b in pieces]   # a repeated corner point (or float noise): no piece
+
     def step(k, at, seen):
-        """The one piece other than k (and those in `seen`) that meets k's end `at`, and its far end; None when
-        none, or more than one (an outline that doesn't run end to end there: no guess)."""
-        found = [j for j in range(n) if j != k and (near(pieces[j][0], at) or near(pieces[j][1], at))]
+        """(the one real piece other than k, and those in `seen`, that meets k's end `at`; its far end; the tiny
+        pieces passed on the way, in order); None when none, or more than one (an outline that doesn't run end to
+        end there: a lot the measuring refuses). A piece no longer than JOINT is passed through, never a stop
+        (review round 3, F2: a repeated corner point ended the street there, unasked)."""
+        via, points = [], [at]
+        while True:
+            more = [j for j in range(n) if j != k and tiny[j] and j not in via and j not in seen
+                    and any(near(pieces[j][0], p) or near(pieces[j][1], p) for p in points)]
+            if not more:
+                break
+            for j in more:
+                via.append(j)
+                points += pieces[j]
+        found = [j for j in range(n) if j != k and not tiny[j] and j not in via
+                 and any(near(pieces[j][0], p) or near(pieces[j][1], p) for p in points)]
         if len(found) != 1 or found[0] in seen:
             return None
         j = found[0]
-        return j, (pieces[j][1] if near(pieces[j][0], at) else pieces[j][0])
+        start = any(near(pieces[j][0], p) for p in points)
+        return j, (pieces[j][1] if start else pieces[j][0]), via
+
+    def swing_of(order):
+        return sl.heading_change([pieces[q] for q in order if not tiny[q]], JOINT)
 
     def turn(a, b):
         return sl.heading_change([pieces[a], pieces[b]], JOINT) or 0.0
@@ -925,9 +947,9 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
         last = run[0] if side == 0 else run[-1]
         while True:
             nxt = step(last, at, set(run) | set(maybe[0]))
-            if nxt is None or nxt[0] in taken:
+            if nxt is None or nxt[0] in taken or set(nxt[2]) & taken:
                 break
-            j, far = nxt
+            j, far, via = nxt
             if own and names[j]:                               # both named: the street's identity decides
                 if not sl.same_street(own, names[j]):
                     break
@@ -935,29 +957,28 @@ def street_run(outline, picked, names=None, taken=(), tolerance=0.5, seed=None):
                 t = turn(last, j)
                 if t > sl.TURN_LIMIT_DEG:                         # a corner
                     break
-                order = [j] + run if side == 0 else run + [j]
-                swing = sl.heading_change([pieces[k] for k in order], JOINT)
+                swing = swing_of([j] + run if side == 0 else run + [j])
                 if t > PIECE_TURN_DEG or swing is None or swing > sl.TURN_LIMIT_DEG:
                     # unclear: the next stretch, asked about. A joint past PIECE_TURN_DEG is a bend of its own: that
                     # piece alone (a rounded corner is asked piece by piece, so the straight street past it is a
                     # question of its own); else on over small joints while it swings no more than TURN_LIMIT_DEG
-                    more, end, k = [], far, j
+                    more, end, k = list(via), far, j
                     while True:
                         more.append(k)
                         nx = step(k, end, set(run) | set(more) | set(maybe[0]))
-                        if (nx is None or nx[0] in taken or t > PIECE_TURN_DEG or turn(k, nx[0]) > PIECE_TURN_DEG
+                        if (nx is None or nx[0] in taken or set(nx[2]) & taken or t > PIECE_TURN_DEG or turn(k, nx[0]) > PIECE_TURN_DEG
                                 or (names[nx[0]] and not (own and sl.same_street(own, names[nx[0]])))
-                                or (sl.heading_change([pieces[q] for q in [last] + more + [nx[0]]], JOINT) or 0.0)
-                                > sl.TURN_LIMIT_DEG):
+                                or (swing_of([last] + more + [nx[0]]) or 0.0) > sl.TURN_LIMIT_DEG):
                             break
-                        k, end = nx
+                        more += nx[2]
+                        k, end = nx[0], nx[1]
                     maybe[side] = more
-                    swings[side] = sl.heading_change([pieces[k] for k in [last] + more], JOINT)
+                    swings[side] = swing_of([last] + more)
                     break
             if side == 0:
-                run.insert(0, j)
+                run[:0] = [j] + via[::-1]
             else:
-                run.append(j)
+                run += via + [j]
             last, at = j, far
     return {"pieces": run, "maybe": maybe, "turn": swings}
 
@@ -1023,38 +1044,44 @@ def street_more_question(label, outline, more, swing):
     lines = [outline[k] for k in more]
     n = len(lines)
     return (f"Past there the lot line bends {round(swing or 0)}° with no clear corner ({n} more lot-line "
-            f"piece{'s' if n != 1 else ''}, {feet_words(_length(lines))}). Is that on {label} too?")
+            f"piece{'s' if n != 1 else ''}, {feet_words(_length(lines))}). Is that on {label} too? (Enter keeps it, "
+            f"to be safe)")
 
 
 def street_pick(outline, picked, names=None, taken=(), ask=None, label="This street", tolerance=0.5):
     """One click on the street side, the whole street it is on: (piece numbers in order along it, what to say);
-    street_run's run, with each unclear stretch past an end added only when the architect says Yes (`ask`: question
-    -> True/False; None or anything but True: not added, never a guess). ([], words) when the click is on a street
-    already kept (`taken`); None when it isn't a piece of the outline."""
+    street_run's run, with each unclear stretch past an end asked (`ask`: question -> True Yes, False No, None not
+    answered) and left out only on the architect's No: a question skipped (Enter, Esc, or no one to ask) keeps it,
+    the cautious way (a street line read as a side line would let the front yard pass from part of the street:
+    review round 3, F3; kept, a street that bends past TURN_LIMIT_DEG is asked one street or two by the measuring).
+    ([], words) when the click is on a street already kept (`taken`); None when it isn't a piece of the outline."""
     found = street_run(outline, picked, names, taken, tolerance)
     if found is None:
         hit = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tolerance)), None)
         if hit is not None and hit in set(taken):
             return [], "that lot line is on a street already kept"
         return None
-    run, closed = list(found["pieces"]), set()
+    run, closed, skipped = list(found["pieces"]), set(), False
     while True:            # each unclear stretch asked in turn; a Yes grows the street on from there, a No ends it
         grew = False
         for side in (0, 1):
             more = found["maybe"][side]
             if not more or side in closed:
                 continue
-            if ask is not None and ask(street_more_question(label, outline, more, found["turn"][side])) is True:
-                run, grew = (list(reversed(more)) + run if side == 0 else run + more), True
-            else:
+            said = ask(street_more_question(label, outline, more, found["turn"][side])) if ask is not None else None
+            if said is False:                              # the architect's No: the street ends there
                 closed.add(side)
+            else:
+                run, grew = (list(reversed(more)) + run if side == 0 else run + more), True
+                skipped = skipped or said is not True
         if not grew:
             break
         found = street_run(outline, picked, names, taken, tolerance, seed=run)
         run = list(found["pieces"])
     # what it says checks the street as the measuring will (a Yes past a bend: not surely one street)
     known = list(names) if isinstance(names, list) and len(names) == len(outline) else [None] * len(outline)
-    return run, street_words(label, [outline[k] for k in run], [known[k] for k in run])
+    words = street_words(label, [outline[k] for k in run], [known[k] for k in run])
+    return run, words + ("; a bend not answered is kept as street (answer No to leave it out)" if skipped else "")
 
 
 def add_street_pick(runs, outline, picked, names=None, ask=None, tolerance=0.5):
