@@ -279,16 +279,36 @@ try:
             return clicks.pop(0)
 
         facts = dict(g.current_facts(doc), corner_lot=True)
+        ithaca = [[list(p) for p in line] for line in facts.get("street_line") or []]     # the sample's 8 pieces
         saved = dict(g._ui_state(doc))
+        asked, real_ask = [], g._ask_street_more
+        said = len(g.STATE.get("said") or [])
         g._get_point = click
+        g._ask_street_more = lambda q: asked.append(q) or False    # (both streets end at sure corners: never asked)
         try:
             g._box_pick(doc, "street", facts, saved)
         finally:
             g._get_point = real
-        log["corner"] = {"prompts": prompts, "lines": facts.get("street_line"), "name": saved.get("street_name")}
-        claim("10 a corner lot's street side takes every line clicked, Enter when done",
-              len(facts.get("street_line") or []) == 2 and prompts[0].startswith("Click each lot line on a street")
-              and "(2 picked); Enter when done" in prompts[-1], log["corner"])
+            g._ask_street_more = real_ask
+        told = (g.STATE.get("said") or [])[said:]
+        log["corner"] = {"prompts": prompts, "lines": facts.get("street_line"), "ids": facts.get("street_ids"),
+                         "name": saved.get("street_name"), "said": told, "asked": asked}
+        claim("10 a corner lot's street side takes every street clicked, Enter when done",
+              prompts[0].startswith("Click each lot line on a street") and "(2 picked); Enter when done" in prompts[-1],
+              log["corner"])
+
+        def same(p, q):
+            return all(abs(p[i][j] - q[i][j]) < 0.01 for i in (0, 1) for j in (0, 1))
+
+        kept = facts.get("street_line") or []
+        # demo 00c04f1: one click on one of Ithaca Rd's 8 tax-map pieces kept only that 9.8 ft piece (frontage
+        # 9'-9 5/8"); the whole street is kept now, said, and the side street's own 3 pieces, never round a corner
+        claim("10 one click on one piece keeps the whole street, and says so: Ithaca Rd's 8 pieces, 75'-10\"",
+              len(ithaca) == 8 and all(any(same(p, q) or same(p, q[::-1]) for q in kept) for p in ithaca)
+              and "Ithaca Rd: 8 lot-line pieces, 75'-10\" of frontage" in told, log["corner"])
+        claim("10 the other street is its own 3 pieces (92'-1 3/8\"), and neither runs round a corner",
+              len(kept) == 11 and "Street 2: 3 lot-line pieces, 92'-1 3/8\" of frontage" in told and not asked
+              and facts.get("street_ids") == ["Ithaca Rd"] * 8 + [None] * 3, log["corner"])
         options = g.ask({"cmd": "options", "jurisdiction": g.JURISDICTION})
         state = dict(g._box_state(doc, facts, options, saved, "check"), corner_lot=False)   # the box: No
         after, after_ui = g._apply_box(doc, facts, state, saved)

@@ -778,14 +778,16 @@ def street_lines_after_picks(lines, picks, corner):
     return out
 
 
-def pick_street(old_lines, old_ids, picked, name, tolerance=0.5):
+def pick_street(old_lines, old_ids, picked, name, tolerance=0.5, outline=None, ask=None):
     """(street lines, their street names) after the architect clicks a lot line as the street side (`picked`) and
     names its street (`name`, found or typed; None: unnamed). THE one order of steps (arch-fixes-2 review rounds
     9-11, where a name given for one line kept landing on other lines and two streets, or "one street or two?",
     became one): the name goes on the clicked line ONLY; every other line keeps the street it was known to be on,
     or none; then the street lines follow from those names (street_lines_after_pick: the clicked line's own street
     when the lines are known to be two streets, else every line). A line nobody named stays unnamed, so the
-    measuring still reads it from the drawing (a corner: one street or two?, needs review)."""
+    measuring still reads it from the drawing (a corner: one street or two?, needs review). A line not among them:
+    the whole street it is on along the lot `outline` (street_pick: never round a corner; an unclear end asked with
+    `ask`), else that line alone."""
     def near(p, q):
         return abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance
 
@@ -793,7 +795,13 @@ def pick_street(old_lines, old_ids, picked, name, tolerance=0.5):
     lines = [list(map(list, line)) for line in old_lines or []]
     hits = [k for k, line in enumerate(lines)
             if (near(a, line[0]) and near(b, line[-1])) or (near(a, line[-1]) and near(b, line[0]))]
-    if not hits:                                           # a line not among them: that line alone
+    if not hits:                                           # a line not among them: the street it is on
+        names = outline_names(outline, lines, old_ids, tolerance)
+        at = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tolerance)), None)
+        if at is not None:
+            names[at] = name or None                       # the name on the clicked line only
+            run, _ = street_pick(outline, picked, names, (), ask, name or "This street", tolerance)
+            return street_lines_of(outline, [run], names)
         return [list(map(list, picked))], ([name] if name else None)
     ids = list(_street_lines().matching_ids(lines, old_ids) or [None] * len(lines))
     if name:
@@ -821,6 +829,197 @@ def street_lines_after_pick(lines, picked, tolerance=0.5, ids=None):
         mine = ids[hits[0]]                                # its own lines, by street_verdict's own comparison
         return [list(map(list, line)) for k, line in enumerate(lines) if _street_lines().same_street(ids[k], mine)]
     return [list(map(list, line)) for line in lines]
+
+
+# A joint between two lot-line pieces that turns no more than this is the same street's wobble: a tax-map outline
+# draws a straight street in short pieces (106 Ithaca Rd: 8 pieces of about 10 ft, joints turning up to 7.5°). A
+# joint turning more than street_lines.TURN_LIMIT_DEG is a corner (the measuring's own limit for one street or
+# two); in between, or a run of small joints that swings past that limit in all, is unclear, and the architect is
+# asked (demo 00c04f1: one click on one of the 8 pieces kept that 9.8 ft piece as the whole street).
+PIECE_TURN_DEG = 15.0
+JOINT = 0.01      # ft: two pieces of one outline meet where they share an end (a click is matched within `tolerance`:
+                  # 106's 0.24 ft piece has both ends within 0.5 ft of its neighbours' ends)
+
+
+def _same_piece(line, picked, tolerance):
+    (a, b), (c, d) = (line[0], line[-1]), (picked[0], picked[-1])
+    near = lambda p, q: abs(p[0] - q[0]) <= tolerance and abs(p[1] - q[1]) <= tolerance   # noqa: E731
+    return (near(a, c) and near(b, d)) or (near(a, d) and near(b, c))
+
+
+def outline_names(outline, lines, ids, tolerance=0.5):
+    """The street each piece of the lot outline is known to be on (one per piece, None where unknown): a piece that
+    is one of the street lines `lines` takes that line's own name (`ids`, only when they match the lines one for one:
+    street_lines.matching_ids); every other piece None."""
+    own = _street_lines().matching_ids(lines or [], ids)
+    out = []
+    for piece in outline or []:
+        k = next((k for k, line in enumerate(lines or []) if _same_piece(line, piece, tolerance)), None)
+        out.append(own[k] if own is not None and k is not None else None)
+    return out
+
+
+def street_run(outline, picked, names=None, taken=(), tolerance=0.5):
+    """Where the street of the lot line the architect clicked (`picked`, [[x, y], [x, y]] in feet) runs along the lot
+    outline (`outline`: its pieces, each [[x, y], [x, y]], in any order): the clicked piece and its neighbours, end to
+    end both ways, for as long as they are surely on the same street. A neighbour joins when it is named the same
+    street as the clicked piece (`names`, one per piece, None where unknown: the street's identity first, however
+    it bends), or, when either is unnamed, when the joint turns no more than PIECE_TURN_DEG and the run then swings
+    no more than TURN_LIMIT_DEG in all. The run stops for sure at a piece named another street, at a joint turning
+    more than TURN_LIMIT_DEG (a corner: it never wraps round onto the other street), at a piece already `taken` (an
+    earlier click's street) and where the outline doesn't run end to end. Anywhere else it is unclear where this
+    street ends (a 20° joint, a rounded corner, a street that bends): those pieces, up to the next sure stop, are
+    returned apart, never added on a guess, so the architect is asked.
+
+    {"pieces": the run's piece numbers in order along it, "maybe": [before, after] (the unclear pieces past each
+    end, nearest first; [] where the end is sure), "turn": [the swing of each unclear stretch from the run's end, in
+    degrees, or None]}; None when `picked` isn't a piece of the outline (or is already taken)."""
+    sl = _street_lines()
+    pieces = [[list(line[0][:2]), list(line[-1][:2])] for line in outline or [] if len(line) >= 2]
+    n = len(pieces)
+    hit = next((k for k, line in enumerate(pieces) if _same_piece(line, picked, tolerance)), None)
+    taken = set(taken)
+    if hit is None or hit in taken:
+        return None
+    names = list(names) if isinstance(names, list) and len(names) == n else [None] * n
+    own = names[hit]
+    near = lambda p, q: abs(p[0] - q[0]) <= JOINT and abs(p[1] - q[1]) <= JOINT   # noqa: E731
+
+    def step(k, at, seen):
+        """The one piece other than k (and those in `seen`) that meets k's end `at`, and its far end; None when
+        none, or more than one (an outline that doesn't run end to end there: no guess)."""
+        found = [j for j in range(n) if j != k and (near(pieces[j][0], at) or near(pieces[j][1], at))]
+        if len(found) != 1 or found[0] in seen:
+            return None
+        j = found[0]
+        return j, (pieces[j][1] if near(pieces[j][0], at) else pieces[j][0])
+
+    def turn(a, b):
+        return sl.heading_change([pieces[a], pieces[b]], JOINT) or 0.0
+
+    run = [hit]
+    maybe, swings = [[], []], [None, None]
+    for side, at in ((0, pieces[hit][0]), (1, pieces[hit][1])):
+        last = hit
+        while True:
+            nxt = step(last, at, set(run) | set(maybe[0]))
+            if nxt is None or nxt[0] in taken:
+                break
+            j, far = nxt
+            if own and names[j]:                               # both named: the street's identity decides
+                if not sl.same_street(own, names[j]):
+                    break
+            else:
+                t = turn(last, j)
+                if t > sl.TURN_LIMIT_DEG:                         # a corner
+                    break
+                order = [j] + run if side == 0 else run + [j]
+                swing = sl.heading_change([pieces[k] for k in order], JOINT)
+                if t > PIECE_TURN_DEG or swing is None or swing > sl.TURN_LIMIT_DEG:
+                    more, end, k = [], far, j                     # unclear: every piece up to the next sure stop
+                    while True:
+                        more.append(k)
+                        nx = step(k, end, set(run) | set(more) | set(maybe[0]))
+                        if (nx is None or nx[0] in taken or turn(k, nx[0]) > sl.TURN_LIMIT_DEG
+                                or (names[nx[0]] and not (own and sl.same_street(own, names[nx[0]])))):
+                            break
+                        k, end = nx
+                    maybe[side] = more
+                    swings[side] = sl.heading_change([pieces[k] for k in [last] + more], JOINT)
+                    break
+            if side == 0:
+                run.insert(0, j)
+            else:
+                run.append(j)
+            last, at = j, far
+    return {"pieces": run, "maybe": maybe, "turn": swings}
+
+
+def feet_words(feet):
+    """A length for the command line, rounded DOWN to the nearest 1/8 in (never in the architect's favour):
+    75.83 -> 75'-9 7/8"."""
+    import math
+    eighths = int(math.floor(feet * 96 + 1e-6))
+    ft, rest = divmod(eighths, 96)
+    inch, frac = divmod(rest, 8)
+    if frac:
+        g = math.gcd(frac, 8)
+        return f"{ft}'-{inch} {frac // g}/{8 // g}\""
+    return f"{ft}'-{inch}\""
+
+
+def _length(lines):
+    import math
+    return sum(math.dist(line[0][:2], line[-1][:2]) for line in lines)
+
+
+def street_words(label, lines, ids=False):
+    """What the command line says a click kept: "Ithaca Rd: 8 lot-line pieces, 75'-10" of frontage". With `ids`
+    given (the lines' street names, or None: unnamed), lines that aren't surely one street (street_verdict) say so
+    instead of one frontage: the measuring asks one street or two."""
+    n = len(lines)
+    pieces = f"{label}: {n} lot-line piece{'s' if n != 1 else ''}"
+    if ids is not False and n > 1 and street_verdict(lines, ids)[0] != "one":
+        return pieces + ", not surely one street: Gordium asks one street or two before measuring along them"
+    return pieces + f", {feet_words(_length(lines))} of frontage"
+
+
+def street_more_question(label, outline, more, swing):
+    """The question when it isn't clear where a street ends (street_run's "maybe" pieces past one end)."""
+    lines = [outline[k] for k in more]
+    n = len(lines)
+    return (f"Past there the lot line bends {round(swing or 0)}° with no clear corner ({n} more lot-line "
+            f"piece{'s' if n != 1 else ''}, {feet_words(_length(lines))}). Is that on {label} too?")
+
+
+def street_pick(outline, picked, names=None, taken=(), ask=None, label="This street", tolerance=0.5):
+    """One click on the street side, the whole street it is on: (piece numbers in order along it, what to say);
+    street_run's run, with each unclear stretch past an end added only when the architect says Yes (`ask`: question
+    -> True/False; None or anything but True: not added, never a guess). ([], words) when the click is on a street
+    already kept (`taken`); None when it isn't a piece of the outline."""
+    found = street_run(outline, picked, names, taken, tolerance)
+    if found is None:
+        hit = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tolerance)), None)
+        if hit is not None and hit in set(taken):
+            return [], "that lot line is on a street already kept"
+        return None
+    run = list(found["pieces"])
+    for side in (0, 1):
+        more = found["maybe"][side]
+        if more and ask is not None and ask(street_more_question(label, outline, more, found["turn"][side])) is True:
+            run = list(reversed(more)) + run if side == 0 else run + more
+    return run, street_words(label, [outline[k] for k in run])
+
+
+def add_street_pick(runs, outline, picked, names=None, ask=None, tolerance=0.5):
+    """A corner lot's street side, one click at a time: (`runs` with the clicked street's run added, what to say).
+    Each click keeps the whole street it is on (street_pick), never one already kept; the street is called by its
+    known name, else "Street 1", "Street 2"... in click order."""
+    hit = next((k for k, line in enumerate(outline or []) if _same_piece(line, picked, tolerance)), None)
+    own = names[hit] if hit is not None and isinstance(names, list) and len(names) == len(outline) else None
+    label = own or f"Street {len(runs) + 1}"
+    got = street_pick(outline, picked, names, {k for run in runs for k in run}, ask, label, tolerance)
+    if got is None:
+        return runs, "that isn't one of the lot's lines"
+    run, words = got
+    return (runs + [run] if run else runs), words
+
+
+def street_lines_of(outline, runs, names=None, clicks=None):
+    """(street lines, their street names or None) from the runs kept (piece numbers), in click order, each piece
+    once; a piece's name is the one it was known by (`names`), never another's. No run (no click was a piece of
+    the outline): the lines clicked (`clicks`), each once (street_lines_after_picks), unnamed."""
+    if not any(runs) and clicks:
+        return street_lines_after_picks(None, clicks, True), None
+    names = list(names) if isinstance(names, list) and len(names) == len(outline or []) else [None] * len(outline or [])
+    seen, lines, ids = set(), [], []
+    for run in runs:
+        for k in run:
+            if k not in seen:
+                seen.add(k)
+                lines.append([list(outline[k][0][:2]), list(outline[k][-1][:2])])
+                ids.append(names[k])
+    return lines, (ids if any(ids) else None)
 
 
 _STREETS = {}
