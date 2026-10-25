@@ -2553,14 +2553,23 @@ def _set_own_lock(doc, layer, locked):
 def _lock_context(doc, locked):
     """Unlock every context layer, or lock them again: all but the editable footprints (rhino_logic.context_locked).
     Each layer's own lock, so a redraw or a first draw under a locked "Gordium" keeps them (the Rhino job at
-    e997f0e); a parent before its sublayers, so a parent's change can't undo a sublayer's set before it. Not yet
-    covered: drawn while "Gordium" is unlocked, a layer locked by IsLocked records no own lock (grade_lock_probe.json),
-    so if the architect then locks and unlocks "Gordium" with no redraw, Rhino may unlock Parcels, Streets and Notes.
-    lock_probe_in_rhino.py asks whether SetPersistentLocking would record one there, whether Rhino's own -_Layer
-    command does the same, and whether a recorded own lock survives the parent being locked again."""
+    e997f0e); a parent before its sublayers, so a parent's change can't undo a sublayer's set before it. Drawn while
+    "Gordium" is unlocked, a layer locked by IsLocked records no own lock, so the architect locking and unlocking
+    "Gordium" afterwards unlocked Parcels, Streets and Notes (grade_lock_probe.json): so Gordium::Context, Gordium's
+    own layer, is locked for a moment while each sublayer is given its own lock, which only a locked layer above lets
+    it record, and Rhino keeps it through later locks and unlocks of "Gordium" (lock_probe_994012d.json: relock,
+    nested_relock)."""
     indexes = _context_layer_indexes(doc)
     for i in logic.outermost_first([(i, doc.Layers[i].FullPath) for i in indexes]):
         _set_own_lock(doc, doc.Layers[i], bool(locked) and logic.context_locked(doc.Layers[i].FullPath))
+    top = doc.Layers.FindByFullPath(logic.CONTEXT, -1)
+    if top < 0 or doc.Layers[top].IsLocked or _parent_locked(doc, doc.Layers[top]):
+        return                              # under a locked "Gordium" each own lock is already recorded
+    doc.Layers[top].IsLocked = True         # a moment: its sublayers can record their own locks
+    for i in indexes:
+        if i != top:
+            doc.Layers[i].SetPersistentLocking(bool(locked) and logic.context_locked(doc.Layers[i].FullPath))
+    doc.Layers[top].IsLocked = False        # each sublayer back as its own lock says
 
 
 def _outline_points(geometry):
