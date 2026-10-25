@@ -461,84 +461,81 @@ def stale(o):
 
 
 def draw_scene(o, e):
-    """The model-space drawing. Whatever happens in it (a step that raises is caught by the conduit's guard),
-    depth testing and depth writing are put back as Rhino set them (review round 1 of depth-lines, F3)."""
+    """The model-space drawing. Whatever happens in it (a step that raises is caught by the conduit's guard), depth
+    testing and depth writing are back on at the end (Rhino's own setting for this pass; review round 1 of
+    depth-lines, F3)."""
     try:
-        _scene(o, e)
+        if not _here(o, e):
+            return
+        d = e.Display
+        dark = ui.viewport_dark()
+        old = stale(o)
+        # Gordium's lines: over everything in plan, depth-tested (hidden behind solids) in every other view
+        on_top = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
+        for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
+            if isinstance(g, rg.Mesh):
+                d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
+            else:
+                d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+        # the see-through fills never hide what is behind them: they write no depth, so a line behind the envelope or
+        # a coloured part still shows (review round 1 of depth-lines, F2); the solids in front still hide them
+        _see_through(d, True)
+        if getattr(o, "yards_zone", None) is not None:          # the required yards, lightly shaded
+            d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
+        if o.envelope is not None:               # see-through, drawn after the solids so they show through it
+            d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
+        _see_through(d, False)
+        if o.envelope is not None:
+            # its outline only, the top dashed (the height limit): its faces' edges and isocurves banded the
+            # elevations (the architect's review, 2026-10-21)
+            bottom, top = getattr(o, "envelope_lines", None) or (None, None)
+            if bottom is not None:
+                _on_top(d, on_top)
+                d.DrawPolyline(bottom, BLUE, 1)
+                d.DrawPatternedPolyline(top, BLUE, ui.DASHED, 2, False)
+                _on_top(d, False)
+        _on_top(d, on_top)
+        for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
+            d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
+        _on_top(d, False)
+        if not old:                              # after the envelope, so its blue never tints them (F5)
+            for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
+                name = logic.highlight(status)
+                colour = ui.HIGHLIGHT[name]
+                _see_through(d, True)
+                d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
+                _see_through(d, False)
+                d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
+        for pt in getattr(o, "grade_points", None) or []:           # spot grades
+            d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
+        _on_top(d, on_top)
+        if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
+            pts = o.lot_outline
+            d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
+        if not on_top:                                   # the dimensions, in the model: hidden behind the solids
+            _scene_dims(o, e, d, dark, old)
+        context = STATE.get("context_guides") or {}
+        if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
+                and (STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True):
+            for line in context.get("lines") or []:          # the neighbouring footprints: live only, never in the file
+                d.DrawPolyline(line, CONTEXT_GUIDE, 1)
+        guide = STATE.get("lookup_guide")
+        if guide is not None and getattr(o, "confirm", None) is not None:    # only while the start box is open
+            d.DrawPatternedPolyline(guide, ui.status_color("needs_review", ui.viewport_dark()), ui.DASHED, 2, True)
+        _on_top(d, False)                                # depth testing back as Rhino set it, for what follows
+        if o.confirm is not None:
+            lot, lines, main = o.confirm
+            if lot is not None:
+                d.DrawCurve(lot, GREEN, 4)
+            for line in lines:
+                d.DrawLine(line, BLUE, 7)
+            if isinstance(main, rg.Brep):
+                d.DrawBrepWires(main, BLUE, 3)
+            elif isinstance(main, rg.Mesh):
+                d.DrawMeshWires(main, BLUE, 3)
     finally:
         _on_top(e.Display, False)
         _see_through(e.Display, False)
-
-
-def _scene(o, e):
-    if not _here(o, e):
-        return
-    d = e.Display
-    dark = ui.viewport_dark()
-    old = stale(o)
-    # Gordium's lines: over everything in plan, depth-tested (hidden behind solids) in every other view
-    on_top = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)
-    for g in o.red:                          # a failing solid the plan can't show a part of (kept for blocks, SubD)
-        if isinstance(g, rg.Mesh):
-            d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
-        else:
-            d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
-    # the see-through fills never hide what is behind them: they write no depth, so a line behind the envelope or
-    # a coloured part still shows (review round 1 of depth-lines, F2); the solids in front still hide them
-    _see_through(d, True)
-    if getattr(o, "yards_zone", None) is not None:          # the required yards, lightly shaded
-        d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
-    if o.envelope is not None:               # see-through, drawn after the solids so they show through it
-        d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
-    _see_through(d, False)
-    if o.envelope is not None:
-        # its outline only, the top dashed (the height limit): its faces' edges and isocurves banded the
-        # elevations (the architect's review, 2026-10-21)
-        bottom, top = getattr(o, "envelope_lines", None) or (None, None)
-        if bottom is not None:
-            _on_top(d, on_top)
-            d.DrawPolyline(bottom, BLUE, 1)
-            d.DrawPatternedPolyline(top, BLUE, ui.DASHED, 2, False)
-            _on_top(d, False)
-    _on_top(d, on_top)
-    for pts in getattr(o, "unmeasured", None) or []:     # objects on the lot the check doesn't measure: dashed, light
-        d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
-    _on_top(d, False)
-    if not old:                              # after the envelope, so its blue never tints them (F5)
-        for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
-            name = logic.highlight(status)
-            colour = ui.HIGHLIGHT[name]
-            _see_through(d, True)
-            d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
-            _see_through(d, False)
-            d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
-    for pt in getattr(o, "grade_points", None) or []:           # spot grades
-        d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
-    _on_top(d, on_top)
-    if getattr(o, "lot_outline", None) is not None:              # the property line: phantom (F2)
-        pts = o.lot_outline
-        d.DrawPatternedPolyline(pts, ui.status_color("complies", dark), ui.PHANTOM, 2, True)
-    if not on_top:                                   # the dimensions, in the model: hidden behind the solids
-        _scene_dims(o, e, d, dark, old)
-    context = STATE.get("context_guides") or {}
-    if logic.guides_on_screen(context, e.RhinoDoc.RuntimeSerialNumber) \
-            and (STATE.get("context_by_doc") or {}).get(e.RhinoDoc.RuntimeSerialNumber, True):
-        for line in context.get("lines") or []:          # the neighbouring footprints: live only, never in the file
-            d.DrawPolyline(line, CONTEXT_GUIDE, 1)
-    guide = STATE.get("lookup_guide")
-    if guide is not None and getattr(o, "confirm", None) is not None:    # only while the start box is open
-        d.DrawPatternedPolyline(guide, ui.status_color("needs_review", ui.viewport_dark()), ui.DASHED, 2, True)
-    _on_top(d, False)                                # depth testing back as Rhino set it, for what follows
-    if o.confirm is not None:
-        lot, lines, main = o.confirm
-        if lot is not None:
-            d.DrawCurve(lot, GREEN, 4)
-        for line in lines:
-            d.DrawLine(line, BLUE, 7)
-        if isinstance(main, rg.Brep):
-            d.DrawBrepWires(main, BLUE, 3)
-        elif isinstance(main, rg.Mesh):
-            d.DrawMeshWires(main, BLUE, 3)
 
 
 def _see_through(d, on):
@@ -2197,7 +2194,7 @@ def _draw_plan(doc, o, result, facts):
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
     # at the lot's own level, a hair above it: off plan they are depth-tested, and at z 0 a lot drawn higher (or the
     # ground under it) hid them (review round 1 of depth-lines, F1)
-    z = logic.dim_level(_feet_length(doc, lot.Geometry.GetBoundingBox(True).Min.Z) if lot is not None else None)
+    z = logic.dim_level(_lot_level(doc, facts))
     o.yard_dims = [(rg.Line(_model_point(doc, y["points"][0], z), _model_point(doc, y["points"][1], z)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
     # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
