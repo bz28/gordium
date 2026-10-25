@@ -9,9 +9,9 @@ held (moved onto the hidden layer, that layer deleted), back on its own layer af
 document string empty or missing after Undo and exactly as written after Redo. The extras are what a re-lookup's
 Draw does inside its one record (gordium_rhino._draw_prepare to edit_facts): document strings written (the
 facts, the box's choices, the sources), an object's attribute user strings set, a layer added then deleted (the
-hidden holding layer), an object moved onto a hidden layer then deleted (held, then gone at commit), a layer's visibility set directly, and a
-Rhino command run inside the record (frame_site's _-Zoom). Rhino's undo events are recorded for each.
-Writes <temp>/gordium_undo_probe/out.json ("done": true at the end)."""
+hidden holding layer), an object moved onto a hidden layer then deleted (held, then gone at commit), a layer's
+visibility set directly, and a Rhino command run inside the record (frame_site's _-Zoom). Rhino's undo events are
+recorded for each. Writes <temp>/gordium_undo_probe/out.json ("done": true at the end)."""
 import json
 import os
 import sys
