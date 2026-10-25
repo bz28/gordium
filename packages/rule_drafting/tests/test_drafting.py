@@ -1023,7 +1023,7 @@ def test_a_unit_with_its_own_output_limit_is_called_reserved_and_estimated_with_
     assert getattr(client, "streamed", 0) == 1          # streamed: the SDK refused it as a plain request (stage 1 re-run)
     assert records[0]["request_id"] == "req_stream"     # review round 1: the streamed records had request_id None
     small = worst_case(10, drafter.SETTINGS, drafter.PRICES)
-    assert reserved[0] > small + (32000 - 8192) * 10 / 1e6 * 0.99          # the output part at 32,000 tokens
+    assert reserved[0] > small + (32000 - drafter.SETTINGS["max_tokens"]) * 10 / 1e6 * 0.99   # the output part at 32,000
     e = cli.estimate(inputs, [unit(inputs, "325-19E")], drafter.SETTINGS["model"])
     assert e["usage"]["output_tokens"] == 32000
 
@@ -1360,3 +1360,24 @@ def test_an_answer_cut_off_at_its_output_limit_is_not_retried_with_the_same_limi
     result, records = run(inputs, client)
     assert len(client.requests) == 1 and len(records) == 1
     assert result["rules"] == {} and "max_tokens" in result["failed"]
+
+
+def test_a_unit_on_hold_is_never_drafted_whatever_is_asked(inputs, monkeypatch):
+    """Ben put parking on hold (2026-10-25): §325-20F and G are never drafted (not with --all, nor --only), so the
+    checker shows them as not checked yet."""
+    import argparse
+    log = cli.read_log(inputs)
+    assert {"325-20F", "325-20G"} <= set(cli.on_hold())
+    every = cli.select(inputs, log, argparse.Namespace(kind="all", only=None, limit=None))
+    asked = cli.select(inputs, log, argparse.Namespace(kind="all", only=["325-20F", "325-9B"], limit=None))
+    assert not {u["id"] for u in every + asked} & {"325-20F", "325-20G"}
+    assert [u["id"] for u in asked] == ["325-9B"]
+
+
+def test_a_chart_unit_lists_its_rows_with_footnoted_or_several_number_forms(inputs):
+    """Stage 1 and the retry drafted only the plain lot sizes; the unit now names each row's forms and districts."""
+    u = next(x for x in inputs.units() if x["id"] == "chart-p3-minimum_lot_size")
+    hint = u["text"][u["text"].index("Rows whose cells carry footnotes"):]
+    assert "row 'One-family dwelling, detached': no footnote, 1 number (R-1A" in hint and "footnote 4, 1 number (R-2C)" in hint
+    assert "row 'One-family dwelling, detached, zero lot line': footnote 4, 1 number (R-2C)" in hint
+    assert "Other use" not in hint                       # one plain form everywhere: nothing to say

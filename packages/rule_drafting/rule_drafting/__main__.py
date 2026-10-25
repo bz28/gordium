@@ -50,6 +50,27 @@ def slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", re.sub(r"\[fn[^\]]*\]", "", text).lower()).strip("_")
 
 
+def cell_forms(rows: dict) -> list[str]:
+    """For each chart row whose district cells take more than one form (the footnotes they carry, how many numbers
+    they state), the forms and their districts: "row 'One-family dwelling, detached': no footnote, 1 number (R-1A,
+    R-1B, ...); footnote 4, 1 number (R-2C)". Stage 1 and the 2026-10-25 retry drafted only the plain form of the lot
+    size rows (footnotes 4 to 9 went to a person) though the instructions asked for every form."""
+    out = []
+    for label, cells in rows.items():
+        forms: dict[tuple, list[str]] = {}
+        for col, c in cells.items():
+            value = c["value"].strip()
+            if chart_values.FOOTNOTE.sub("", value).strip() in chart_values.NOT_APPLICABLE:
+                continue
+            key = (tuple(sorted(chart_values.footnotes(value), key=lambda n: (len(n), n))), len(chart_values.numbers(value)))
+            forms.setdefault(key, []).append(col)
+        if len(forms) > 1 or any(fn or n > 1 for fn, n in forms):
+            out.append(f"- row {label!r}: " + "; ".join(
+                f"{'footnote' + ('s ' if len(fn) > 1 else ' ') + ', '.join(fn) if fn else 'no footnote'}, "
+                f"{n} number{'s' if n != 1 else ''} ({', '.join(cols)})" for (fn, n), cols in forms.items()))
+    return out
+
+
 class Inputs:
     """Everything drafting reads, for one jurisdiction."""
 
@@ -94,6 +115,10 @@ class Inputs:
                 f"- row {label!r} (chart page {page}, line{'s' if len(next(iter(cells.values()))['row_lines']) > 1 else ''} "
                 f"{', '.join(map(str, next(iter(cells.values()))['row_lines']))}): "
                 + " | ".join(f"{col}: {c['value']}" for col, c in cells.items()) for label, cells in rows.items()])
+            if forms := cell_forms(rows):
+                text += ("\n\nRows whose cells carry footnotes or several numbers, or take more than one form (a template's slot fits one form, so write a template "
+                         "for each form, with its footnotes applied; a district no template fits goes to a person):\n"
+                         + "\n".join(forms))
             out.append({"id": f"chart-p{page}-{slug(section)}", "page": page, "section": section, "prefix": "",
                         "intro": (f"Zoning chart page {page}, section {section!r}. Draft templates for the requirements "
                                   "these rows set for the residential districts. Every number from a row is a slot."),
@@ -233,10 +258,20 @@ def _measured_output(i: Inputs, model: str) -> float | None:
     return sum(c["usage"]["output_tokens"] for c in calls) / len(calls) if calls else None
 
 
+def on_hold() -> dict[str, str]:
+    """Units Ben has put on hold (settings.yaml on_hold: {unit: why}): never drafted, so the checker shows them as
+    not checked yet (2026-10-25: the parking sections, §325-20F and G)."""
+    return dict(drafter.SETTINGS.get("on_hold") or {})
+
+
 def select(i: Inputs, log: dict, args) -> list[dict]:
-    units = [u for u in i.units() if args.kind == "all" or (args.kind == "chart") == u["id"].startswith("chart-")]
+    held = on_hold()
+    for uid in sorted(held):
+        print(f"  {uid}: on hold, not drafted ({held[uid]})")
+    units = [u for u in i.units() if (args.kind == "all" or (args.kind == "chart") == u["id"].startswith("chart-"))
+             and u["id"] not in held]
     if args.only:
-        missing = sorted(set(args.only) - {u["id"] for u in units})
+        missing = sorted(set(args.only) - {u["id"] for u in units} - set(held))
         if missing:
             raise SystemExit(f"no such unit: {', '.join(missing)} (see `python -m rule_drafting status`)")
         return [u for u in units if u["id"] in args.only]

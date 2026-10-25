@@ -7,7 +7,7 @@
 #   not bit-for-bit repeatable. Repeatability comes from recording every call (prompt, input, answer).
 model: claude-sonnet-5-5
 effort: medium
-max_tokens: 8192          # a section's templates can run to a few thousand tokens; the rest is thinking room
+max_tokens: 16000         # 8,192 cut off answers that went over it (lot size, §325-16C: 2026-10-21/25); a section's templates can run to a few thousand tokens; the rest is thinking room
 # A larger limit for a unit that needs it (thinking counts as output). §325-19E's three stage-1 answers all stopped
 # at exactly 8,192 output tokens (stop_reason max_tokens) with only ~8-9.5k characters of visible answer: about three
 # quarters went to thinking. Each call's worst case, which the budget reserves before sending, uses this limit.
@@ -16,9 +16,13 @@ max_tokens_by_unit:
   # chart lot size: one template per form of its cells (footnotes 4 to 9), three answers stopped at 8,192 (2026-10-21).
   # 16,000, not 32,000: a call's worst case at 32,000 output tokens is more than the run's $0.30 cap.
   chart-p3-minimum_lot_size: 16000
-  325-18B: 4096           # one sentence: a short answer; a small worst case to reserve
+  325-18B: 16000          # 4,096 cut off all three answers (2026-10-25, $0.195): thinking counts as output
   # §325-16C as one relaxing rule: both answers stopped at 8,192 output tokens (2026-10-25, $0.228, no answer)
   325-16C: 16000
+# Units on hold (Ben, 2026-10-25: parking is on hold): never drafted, so the checker shows them as not checked yet.
+on_hold:
+  325-20F: parking is on hold (Ben, 2026-10-25)
+  325-20G: parking is on hold (Ben, 2026-10-25)
 max_attempts: 3           # the first answer plus up to 2 retries when code rejects it
 # A hard cap on total spending across all drafting runs, in US dollars, separate from labeling's. Kept in
 # ~/.config/gordium/rule_drafting_ledger.json (shared by every checkout), never taken as less than the
