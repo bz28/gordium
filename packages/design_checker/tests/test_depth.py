@@ -109,3 +109,12 @@ def test_the_legend_and_the_guide_say_where_the_lines_hide():
     assert "in every other view they hide behind the solids" in logic.legend_text()
     guide = (REPO / "apps/rhino_plugin/QUICKSTART.md").read_text(encoding="utf-8")
     assert "in Perspective and the elevations they hide behind your solids" in guide
+
+
+def test_off_plan_a_dimension_has_the_same_halo_as_on_screen():
+    """The Rhino check of #29 asked for a halo so a dimension reads over the red and amber; off plan they are drawn
+    in the model (after the colours: _scene_dims comes after the coloured parts in draw_scene), on the same halo."""
+    body = _body("_model_dimension")
+    assert "for ink, width in ((halo, 2 + 2 * logic.HALO_PX), (color, 2)):" in body
+    scene = _body("draw_scene")
+    assert scene.index("d.DrawBrepShaded(g, Rhino.Display") < scene.index("_scene_dims(o, e, d, dark, old)")

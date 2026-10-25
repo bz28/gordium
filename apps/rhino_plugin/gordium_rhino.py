@@ -557,11 +557,15 @@ def _zoomed_in(o, viewport):
 
 
 def _model_dimension(d, doc, line, color):
-    """A dimension drawn in the model (depth-tested): its line and its ticks (logic.model_ticks, 1 ft long)."""
-    d.DrawLine(line, color, 2)
+    """A dimension drawn in the model (depth-tested): its line and its ticks (logic.model_ticks, 1 ft long), each
+    on the same thin halo as on screen (_dimension), so it reads over the red and amber off plan too."""
     a, b = line.From, line.To
-    for p, q in logic.model_ticks((a.X, a.Y, a.Z), (b.X, b.Y, b.Z), _model_length(doc, 1.0)):
-        d.DrawLine(rg.Line(rg.Point3d(*p), rg.Point3d(*q)), color, 2)
+    strokes = [line] + [rg.Line(rg.Point3d(*p), rg.Point3d(*q))
+                        for p, q in logic.model_ticks((a.X, a.Y, a.Z), (b.X, b.Y, b.Z), _model_length(doc, 1.0))]
+    halo = ui.halo(ui.viewport_dark())
+    for ink, width in ((halo, 2 + 2 * logic.HALO_PX), (color, 2)):          # the halo under, the line over it
+        for stroke in strokes:
+            d.DrawLine(stroke, ink, width)
 
 
 def _scene_dims(o, e, d, dark, old):
