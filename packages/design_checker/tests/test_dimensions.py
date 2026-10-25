@@ -223,3 +223,51 @@ def test_the_yard_labels_keep_off_each_other_the_status_box_and_the_notice():
         taken.append(box)
         placed.append(box)
     assert len(placed) == 4
+
+
+def test_a_gables_footprint_point_mid_wall_never_moves_the_dimension_off_the_walls_middle():
+    """Review round 3, F1: a gable's footprint (its roof planes seen from above) keeps a point under the ridge in
+    the middle of each gable wall; the dimension started at a quarter point. Straight runs are one wall now."""
+    from design_checker.check import dim_points
+    from model_measurement.measure import Lot
+    from shapely.geometry import Polygon
+    shape = Lot(_plot(box(12, 27, 38, 65)), FACTS)
+    gable = Polygon([(12, 27), (25, 27), (38, 27), (38, 65), (25, 65), (12, 65)])
+    end, start = dim_points([[38, 0], [38, 27]], "front_yard", shape, gable, RECT["edges"])
+    assert start == [pytest.approx(25), pytest.approx(27)] and end == [pytest.approx(25), pytest.approx(0)]
+
+
+def test_a_bend_in_the_lot_line_in_front_of_the_wall_still_gets_a_square_dimension():
+    """Review round 3, F3: the street bends at (25, 1) straight in front of the wall's middle; the square foot
+    misses both pieces there, so the start moves along the wall's near part until one lands square on a piece."""
+    import math
+    from design_checker.check import check_site
+    from test_measure import lot
+    street = [(0, 0), (25, 1), (50, 0)]
+    lot_ = lot(street + [(50, 100), (0, 100)])
+    facts = {**FACTS, "street_line": [[list(street[0]), list(street[1])], [list(street[1]), list(street[2])]]}
+    r = check_site({"units": "ft", "lot": lot_, "buildings": [box(12, 27, 38, 65)], "problems": []},
+                   {**facts, "jurisdiction": CITY})
+    front = next(y for y in r["plan"]["yards"] if "Front yard" in y["label"])
+    end, start = front["points"]
+    on = [pc for pc in zip(street, street[1:])
+          if abs(math.dist(pc[0], end) + math.dist(end, pc[1]) - math.dist(*pc)) < 1e-6]
+    square = [abs((start[0] - end[0]) * (w[0] - u[0]) + (start[1] - end[1]) * (w[1] - u[1]))
+              / (math.dist(start, end) * math.dist(u, w)) < 1e-6 for u, w in on]
+    assert any(square), (end, start)                                 # square to the piece it ends on
+    assert math.dist(start, end) <= 26 + 0.5                         # a little longer than the yard at most
+
+
+def test_a_yard_with_no_required_line_says_why_on_its_label():
+    """Review round 3, F2: the reason lived only in the data."""
+    from design_checker.check import plan
+    items = [{"points": [[0, 40], [6, 40]], "status": "needs_review", "mark": "?", "name": "Side yard, West",
+              "proposed": "6'-0\"", "required": "—", "measure": "side_yard_smaller", "limit_ft": None}]
+    (y,) = plan({"lot": RECT, "buildings": []}, {"outline": [], "holes": []}, {"items": items}, {})["yards"]
+    assert y["required_lines"] == [] and y["label"].endswith(" · no required line: its limit is not a length in feet")
+
+
+def test_the_drawn_start_is_never_more_than_a_quarter_inch_past_the_yard_as_measured():
+    """Review round 3, F5: within 1/4" (0.02 ft) the drawing can't look like room the label doesn't give."""
+    from design_checker.check import DIM_NEAR_FT
+    assert DIM_NEAR_FT <= 0.021

@@ -702,7 +702,31 @@ def required_line(points: list, limit, edges: list) -> list | None:
     return [[cx - uy * REQUIRED_HALF_FT, cy + ux * REQUIRED_HALF_FT], [cx + uy * REQUIRED_HALF_FT, cy - ux * REQUIRED_HALF_FT]]
 
 
-DIM_NEAR_FT = 0.1     # a wall run's "nearest part": within this of the yard as measured
+DIM_NEAR_FT = 0.02    # a wall run's "nearest part": within this (1/4") of the yard as measured
+BEND_SLACK_FT = 0.5   # at a bend in the lot line in front of the wall: a square dimension at most this much longer
+
+
+def _wall_runs(footprint) -> list:
+    """The footprint's outline as wall runs: its pieces, those that carry straight on joined (a gable's footprint
+    keeps a point mid-wall under the ridge: review round 3 of #29, F1)."""
+    out = []
+    for g in getattr(footprint, "geoms", [footprint]):
+        for ring_ in [g.exterior, *g.interiors]:
+            pts = [p for p in list(ring_.coords)[:-1]]
+            pts = [p for k, p in enumerate(pts) if math.dist(p, pts[k - 1]) > 1e-9]
+            n = len(pts)
+            if n < 3:
+                continue
+
+            def straight(k):                      # pts[k] lies on a straight line from pts[k-1] to pts[k+1]
+                a, b, c = pts[k - 1], pts[k], pts[(k + 1) % n]
+                cross = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0])
+                dot = (b[0] - a[0]) * (c[0] - b[0]) + (b[1] - a[1]) * (c[1] - b[1])
+                return abs(cross) <= 1e-9 * math.dist(a, b) * math.dist(b, c) and dot > 0
+            corners = [k for k in range(n) if not straight(k)]
+            for j, k in enumerate(corners):
+                out.append((pts[k], pts[corners[(j + 1) % len(corners)]]))
+    return out
 
 
 def dim_points(points: list, measure: str, shape, footprint, edges: list) -> list:
@@ -729,9 +753,7 @@ def dim_points(points: list, measure: str, shape, footprint, edges: list) -> lis
               for k in range(len(q) - 1) if math.dist(q[k], q[k + 1]) > 1e-9]
     near = Point(b)
     measured = lines.distance(near)
-    runs = [(r[k], r[k + 1]) for g in getattr(footprint, "geoms", [footprint])
-            for ring_ in [g.exterior, *g.interiors] for r in [list(ring_.coords)] for k in range(len(r) - 1)
-            if LineString([r[k], r[k + 1]]).distance(near) < 1e-6 and math.dist(r[k], r[k + 1]) > 1e-9]
+    runs = [r for r in _wall_runs(footprint) if LineString(r).distance(near) < 1e-6]
     if not runs or not pieces:
         return points
     facing = min(pieces, key=lambda s: LineString(s).distance(near))
@@ -752,18 +774,29 @@ def dim_points(points: list, measure: str, shape, footprint, edges: list) -> lis
         lo -= 1
     while hi + 1 in close:
         hi += 1
-    start = at[(lo + hi) // 2]
+    mid = (lo + hi) // 2
 
-    def onto(piece):                               # square projection onto a piece, if it falls on it
+    def onto(start, piece):                        # square projection onto a piece, if it falls on it
         (u, w) = piece
         dx, dy = w[0] - u[0], w[1] - u[1]
         t = ((start[0] - u[0]) * dx + (start[1] - u[1]) * dy) / (dx * dx + dy * dy)
         return (u[0] + t * dx, u[1] + t * dy) if -1e-9 <= t <= 1 + 1e-9 else None
-    feet = [x for x in (onto(piece) for piece in pieces) if x is not None]
-    if not feet:
-        return points
-    end = min(feet, key=lambda x: math.dist(x, start))
-    return [list(end), list(start)]
+    # the middle of the near part, or the nearest point of it to the middle that lands square on a piece (a bend in
+    # the lot line straight in front of the middle: review round 3, F3); never a foot farther than the yard as
+    # measured allows (F4: a piece beyond the one measured to)
+    # the lot line bends right in front of the wall (its nearest point a joint): the nearest point of the wall to
+    # the middle that has a square foot, the dimension then a little longer than the yard (at most BEND_SLACK_FT;
+    # the label is the yard as measured, its closest point)
+    tries = [(sorted(range(lo, hi + 1), key=lambda k: abs(k - mid)), DIM_NEAR_FT),
+             (sorted(range(len(at)), key=lambda k: abs(k - mid)), BEND_SLACK_FT)]
+    for order, slack in tries:
+        for k in order:
+            feet = [x for x in (onto(at[k], piece) for piece in pieces) if x is not None]
+            if feet:
+                end = min(feet, key=lambda x: math.dist(x, at[k]))
+                if math.dist(end, at[k]) <= measured + slack + 1e-6:
+                    return [list(end), list(at[k])]
+    return points
 
 
 def height_dim(site: dict, env: dict, v: dict, measured: dict) -> dict | None:
@@ -808,7 +841,9 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
             continue
         at = dim_points(i["points"], i["measure"], shape, footprint, lot.get("edges") or [])
         lines, why = required_lines(at, i, lot.get("edges") or [])
-        yards.append({"points": at, "measured_points": i["points"], "status": i["status"], "label": _dim_label(i),
+        # a yard with no required line says why, on its label (review round 3, F2)
+        yards.append({"points": at, "measured_points": i["points"], "status": i["status"],
+                      "label": _dim_label(i) + (f" · no required line: {why}" if why else ""),
                       "required_lines": lines, "required_why": why})
     encroach = []
     tops = [p[2] for b, _ in solids for f in b["faces"] for p in f["points"]]
