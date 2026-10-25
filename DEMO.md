@@ -99,6 +99,9 @@ Everything in the 2026-10-21 evening preview, plus:
 
 - **Corner lots get no starting house** (which yard is the front is still an open question for the architects):
   after a lookup of a corner lot, draw your building yourself.
+- **Corner lots:** when you pick the street side with **Change…**, click every piece of the street edge — the
+  sample's street edge is 8 short tax-map pieces, and a single click keeps only that piece (fix coming in the next
+  update).
 - **Not yet re-checked inside Rhino after today's changes.** Ben's test Rhino will run the scripted checks before
   he tells you to update; if something looks wrong, take a screenshot and send it to Ben.
 - **Windows:** please confirm that no black console window appears and that Task Manager shows only one
