@@ -239,10 +239,22 @@ def main():
         again = objects(doc)
         claim("2 a second Undo puts the sample back again", ran and again == before,
               {"ran": ran, "missing": sorted(set(before) - set(again)), "extra": sorted(set(again) - set(before))})
+        claim("2 after the second Undo the file says the sample again", saved(g, doc) == said_before,
+              differs(saved(g, doc), said_before))
+        clean, shown = nothing_stale(g)
+        claim("2 after the second Undo nothing of 96 is left on screen", clean, shown)
+        owed, why = recheck_owed(g, doc)
+        claim("2 after the second Undo the sample is checked again (live mode)", owed, why)
         ran = rhino("Redo", "2 redo again")              # 96 drawn, as step 2 left it, before the file is closed
         again = objects(doc)
         claim("2 a second Redo draws 96's lot again", ran and again == after,
               {"ran": ran, "missing": sorted(set(after) - set(again)), "extra": sorted(set(again) - set(after))})
+        claim("2 after the second Redo the file says 96 again", saved(g, doc) == said_after,
+              differs(saved(g, doc), said_after))
+        clean, shown = nothing_stale(g)
+        claim("2 after the second Redo nothing of the sample is left on screen", clean, shown)
+        owed, why = recheck_owed(g, doc)
+        claim("2 after the second Redo 96 is checked again (live mode)", owed, why)
 
         # 3. a new file: the sample's starting house edited, then 96 looked up: asked once; keep it
         close(doc)
