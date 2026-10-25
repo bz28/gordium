@@ -2137,7 +2137,9 @@ def _draw_plan(doc, o, result, facts):
                   if logic.highlight(status) for piece in _offending(doc, e)]
     # every line a label must stay off (model space): the yard dimensions, the lot's edges, the house's edges
     pts = o.lot_outline or []
-    o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
+    # (the faint required lines too: a yard's words never cover one, review round 1, F3)
+    o.plan_lines = [line for line, _, _ in o.yard_dims] + [line for line, _ in o.yard_required] + \
+        [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \
         [line for b in _buildings(doc) for line in _plan_edges(b.Geometry)]
     o.yards_zone = None
     if lot is not None and plan.get("buildable"):

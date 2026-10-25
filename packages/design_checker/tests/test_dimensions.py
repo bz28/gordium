@@ -97,3 +97,29 @@ def test_the_plugin_draws_the_dimensions_by_these_rules():
     assert "if shown else []" in screen and screen.count("_dimension(d, e.Viewport,") == 2
     assert "if height is not None and elevation and zoomed_in:" in screen
     assert "logic.dim_ticks(" in src[src.index("def _dimension("):src.index("def draw_screen(")]
+
+
+def test_a_yard_raised_by_the_height_bonus_draws_its_required_line_at_the_raised_minimum():
+    """Scenario 03 (the §325-16C bonus raises every yard): each row says the raised minimum (front 27'-0", sides
+    12'-0", rear 32'-0"), and the faint line sits there, never at the un-raised 25/10/30 (review round 1, F1)."""
+    from shapely.geometry import LineString, Point
+    from design_checker import scenarios
+    from design_checker.check import check_site
+    sc = scenarios.load(scenarios.FOLDER / "03_height_bonus_every_yard_increased.yaml")
+    s, f, extras = scenarios.site(sc)
+    r = check_site(s, f, extras=extras)
+    ring = LineString([tuple(p[:2]) for e in s["lot"]["edges"] for p in e["points"]])
+    got = {}
+    for y in r["plan"]["yards"]:
+        name = " ".join(y["label"][2:].split(" ")[:2]).rstrip(",")
+        mid = [(y["required_line"][0][k] + y["required_line"][1][k]) / 2 for k in (0, 1)]
+        on_line = min(y["points"], key=lambda p: ring.distance(Point(p[:2])))      # the dimension's lot-line end
+        got.setdefault(name, []).append(round(Point(on_line[:2]).distance(Point(mid)), 3))
+    assert got == {"Front yard": [27.0], "Side yard": [12.0, 12.0], "Rear yard": [32.0]}, got
+
+
+def test_a_yards_words_keep_off_the_faint_required_lines():
+    from rule_format.rulebook import REPO
+    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    lines = src[src.index("    o.plan_lines = [line for line, _, _ in o.yard_dims]"):][:300]
+    assert "[line for line, _ in o.yard_required]" in lines        # an obstacle every label keeps off (F3)
