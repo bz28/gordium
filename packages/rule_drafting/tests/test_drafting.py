@@ -1415,7 +1415,7 @@ def test_a_rule_for_a_subject_no_residential_design_has_is_withdrawn_with_its_ca
 def test_a_subsection_unit_names_the_section_it_belongs_to(inputs):
     """Review round 22: §325-22B to G were drafted for every lot; their unit never said §325-22 is 'Motels'."""
     u = next(x for x in inputs.units() if x["id"] == "325-22F")
-    assert "It is part of §325-22: " in u["intro"] and "Motel" in u["intro"]
+    assert "It is part of §325-22: Motels. It was labeled" in u["intro"] and ".." not in u["intro"]
     assert next(x for x in inputs.units() if x["id"] == "325-16C")["intro"].count("It is part of §325-16") == 1
 
 

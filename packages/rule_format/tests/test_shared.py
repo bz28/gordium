@@ -104,7 +104,7 @@ REGULATION_YAML = [p for p in (REPO / "regulations").rglob("*.yaml") if "runs" n
 assert REGULATION_YAML
 APPROVAL = re.compile(r"\barchitect\w*\b[^.\n]{0,80}?\bapprov|\bapprov\w*\b[^.\n]{0,80}?\barchitect", re.IGNORECASE)
 # A city body's approval named in the law (stage 2's §325-12E: "site plan approval status under Chapter 276").
-CITY_APPROVAL = re.compile(r"site plan|board|council|planning|permit", re.IGNORECASE)
+CITY_APPROVAL = re.compile(r"\bsite plan\b|\bboard\b|\bcouncil\b|\bplanning\b|\bpermit\b", re.IGNORECASE)   # whole words
 # Claims that are false while approval is deferred, however a document is worded around them.
 FALSE_CLAIMS = re.compile(r"until (an )?architects? (approves?|answers)|only approved rules|approved rulebook"
                           r"|\|\s*architects approve\s*\||\(architects approve\)|architects? confirm each rule|compares the new draft with the approved"
@@ -259,7 +259,8 @@ def test_docs_dont_promise_approval_while_it_is_deferred():
     def about_rules(p):              # in an AI-drafted rulebook, a city's approval (site plan, a board) is the law's text
         text = p.read_text(encoding="utf-8")
         hits = [text[max(0, m.start() - 40):m.end()] for m in APPROVAL.finditer(text)]   # with the words just before
-        return [h for h in hits if not (_ai_drafted(p) and CITY_APPROVAL.search(h))]
+        rulebook = _ai_drafted(p) and p.parent.name == "drafted"      # the AI's words; never the records a person writes
+        return [h for h in hits if not (rulebook and CITY_APPROVAL.search(h))]
     silent = [str(p.relative_to(REPO)) for p in DOCS + REGULATION_YAML
               if about_rules(p) and not re.search(r"deferred", p.read_text(encoding="utf-8"), re.IGNORECASE)]
     false = [f"{p.relative_to(REPO)}: {m.group(0)}" for p in DOCS for m in FALSE_CLAIMS.finditer(p.read_text(encoding="utf-8"))]
@@ -311,3 +312,12 @@ def test_the_106_ithaca_rd_areas_are_quoted_as_measured():
     files = [p for p in REPO.rglob("*") if p.suffix in (".md", ".yaml") and p.is_file()
              and not {".git", ".claude", ".venv"} & set(p.relative_to(REPO).parts)]
     assert not [p.relative_to(REPO) for p in files if re.search(r"6,?674\.7|2,?169\.5", p.read_text(encoding="utf-8"))]
+
+
+def test_a_citys_approval_is_exempt_but_a_promise_to_approve_rules_never_is():
+    """Review round 23: the exemption for the law's own approvals ('site plan approval') matched 'permitted' too."""
+    city = "Gordium has no measure for site plan approval status, so an architect must confirm it."
+    promise = "Gordium marks this permitted use as checked once the architects approve the rule."
+    assert APPROVAL.search(city) and CITY_APPROVAL.search(city[:APPROVAL.search(city).end()])
+    hit = APPROVAL.search(promise)
+    assert hit and not CITY_APPROVAL.search(promise[max(0, hit.start() - 40):hit.end()])

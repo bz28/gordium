@@ -140,8 +140,8 @@ def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[d
             lines.append(f"It links to {n} section{'s' if n != 1 else ''} the AI drafter didn't read because they were "
                          f"too long; check them by hand: {', '.join(sorted(set(left_out)))}.")
         if bare:
-            # stage 2: ~100 sections the drafter found set nothing a design can be checked against (other districts,
-            # procedures); one item names them all, each with its reason, so the list stays readable, none silent
+            # stage 2: ~100 sections with no drafted rule (other districts, procedures, and requirements Gordium can't
+            # measure yet); one item names them all, each with its reason, so the list stays readable, none silent
             no_rule.append(f"§{unit}: " + " ; ".join(lines))
             continue
         if lines:
@@ -149,9 +149,10 @@ def drafting_gaps(j: Path, zone: str, rules: list[dict] | None = None) -> list[d
                         "name": " and ".join(parts) + (": check by hand" if n else " to check by hand"),
                         "why": " · ".join(lines)})
     if no_rule:
-        out.append({"id": "drafting.no_rule", "section": "Zoning law",
-                    "name": f"{len(no_rule)} section{'s' if len(no_rule) != 1 else ''} the AI drafter found set no rule a "
-                            "design can be checked against: check by hand",
+        # named for what it is (review round 23): some of these set requirements Gordium can't measure yet
+        out.append({"id": "drafting.no_rule", "section": "Sections with no drafted rule",
+                    "name": f"{len(no_rule)} section{'s' if len(no_rule) != 1 else ''} with no drafted rule, some setting "
+                            "requirements Gordium can't measure yet: check each by hand (the reason is given for each)",
                     "why": " · ".join(no_rule)})
     return out
 

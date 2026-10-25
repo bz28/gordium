@@ -113,7 +113,7 @@ class Inputs:
         parent = m[1] if m else None
         if not parent or parent == pid or parent not in self.law["pieces"]:
             return ""
-        return f"It is part of §{parent}: {' '.join(str(self.law['pieces'][parent]['title']).split())}. "
+        return f"It is part of §{parent}: {' '.join(str(self.law['pieces'][parent]['title']).split()).rstrip('.')}. "
 
     def units(self) -> list[dict]:
         out = [{"id": unit_id, "code": True} for unit_id in CODE_SECTIONS.values()]

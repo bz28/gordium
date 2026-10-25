@@ -488,7 +488,7 @@ def test_a_chart_maximum_is_known_by_what_its_rule_does_and_assumed_when_nothing
         for r in rules:
             if m := _re.fullmatch(r"building_height <= (\d+)", r.get("check") or ""):
                 r["check"] = f"{m[1]} >= building_height"
-    assert not any(_re.fullmatch(r"building_height <= (\\d+)", r.get("check") or "") for rules in flipped.values() for r in rules)
+    assert not any(_re.fullmatch(r"building_height <= (\d+)", r.get("check") or "") for rules in flipped.values() for r in rules)
     for d in (drafted, flipped, {}, None):
         assert drafter.exception_in_parts(limit, d), d and sorted(d)[:2]
 

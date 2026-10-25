@@ -108,7 +108,8 @@ def test_a_missing_rule_shows_as_a_not_checked_item_on_the_panel(drafts_on):
     assert loading and all(i["status"] == "not_checked" and i["group"] == "not_covered" for i in loading)
     # a law piece the drafting run gave no rule: listed, with the others like it, in one item (stage 2: ~100 of them)
     assert "§325-19A: " in items["gap.drafting.no_rule"]["reason"]
-    assert items["gap.drafting.no_rule"]["name"].endswith("set no rule a design can be checked against: check by hand")
+    name = items["gap.drafting.no_rule"]["name"]      # never claims they set nothing (review round 23)
+    assert "with no drafted rule" in name and "can't measure yet" in name and "set no rule" not in name
     # round 4: the section and what is counted are set apart, never run together ("§325-20D 97 sections...")
     assert items["gap.drafting.325-20D"]["name"] == ("§325-20D: 97 linked sections the AI drafter didn't read (too long): "
                                                     "check by hand")
