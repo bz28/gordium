@@ -439,10 +439,15 @@ def exception_false_passes(hand, drafted, ctx, from_law=None):
     the chart limit it relaxes (35 ft) are separate rules, and today the limit's FAIL hides an incomplete
     exception. Once an exception can relax a limit, an exception that leaves out a requirement (one of the
     yards) would let an illegal design pass. Judged alone, it shows now."""
+    from rule_format import formula
     from_law = law_unit_rules() if from_law is None else from_law
     found = []
     for h in hand:
-        rules = [r for r in covering(h, drafted, ctx, from_law) if r["id"] in from_law]
+        limited = formula.names(h["check"]) if h.get("check") else set()
+        # a law rule answers this question only if its check limits something the hand rule's check does (§325-16C's
+        # stories limit quotes the same sentence as the height bonus, but limits stories, not the height)
+        rules = [r for r in covering(h, drafted, ctx, from_law) if r["id"] in from_law
+                 and r.get("check") and formula.names(r["check"]) & limited]
         for ex in h["examples"] if rules else []:
             if ex["expect"] == "fail" and judge_r1b_example(rules, ex["given"], ctx)[0] == "pass":
                 found.append(f"{h['id']} {ex['given']}: the hand key fails it; "
@@ -857,7 +862,8 @@ def test_a_dropped_special_permit_use_is_a_false_pass_whatever_else_cites_the_us
     use = next(r for r in load(DRAFTED / "R-3a.yaml")["rules"] if r["id"] == "R-3a.use")
     dropped = use | {"applies_when": use["applies_when"].replace('"school", ', "").replace(', "school"', "")}
     assert '"school"' not in dropped["applies_when"]
-    lot = next(r for r in load(DRAFTED / "R-3a.yaml")["rules"] if r["id"] == "R-3a.min_lot_area_other_use")
+    lot = next(r for r in load(DRAFTED / "R-3a.yaml")["rules"]
+               if r["id"].startswith("R-3a.min_lot_") and r["id"].endswith("_other_use"))     # its id per answer
     entries = {"R-3a.use": {"judge": [["R-3a.use"]], "reason": "x"}}
     g = grade_mapped({"district": "R-3a", "rules": [hand_flag]}, entries, [dropped, lot], ctx)
     assert [x["got"] for x in g["false_pass"]] == ["not_applicable"]
@@ -932,3 +938,17 @@ def test_every_mapping_reason_describes_the_drafts_there_are():
                 if rid not in have:
                     stale.append((name, hid, rid))
     assert stale == []
+
+
+def test_a_law_rule_limiting_another_measure_doesnt_answer_the_height_question(ctx):
+    """2026-10-25: §325-16C's stories limit ('above the chart height, stories <= the chart stories') quotes the
+    bonus's sentence, so it was judged as the height bonus and 'passed' a 37 ft house the key fails; the chart's
+    height rule fails that house. A law rule answers a hand rule only where its check limits what the hand rule's does;
+    a law rule on the height itself still does."""
+    hand = [h for h in load(ITHACA / "5_zoning_rules/R-1b.yaml")["rules"] if h["id"] == "R-1b.height"]
+    quote = next(s for s in hand[0]["sources"] if s.get("quote", "").startswith("(1) Each required"))
+    stories = {"id": "R-1b.x_stories", "kind": "rule", "sources": [quote], "applies_when": "building_height > 35",
+               "check": "stories <= 3", "examples": []}
+    assert exception_false_passes(hand, [stories], ctx, from_law={stories["id"]}) == []
+    height = stories | {"id": "R-1b.x_limit", "check": "building_height <= 35 + 0.1 * 35"}
+    assert exception_false_passes(hand, [height], ctx, from_law={height["id"]}) != []

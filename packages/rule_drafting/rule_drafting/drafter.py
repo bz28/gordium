@@ -868,22 +868,30 @@ def narrowing_problems(rule: dict, ctx: Context) -> list[str]:
 def all_or_none(answer: dict, unit: dict, out: dict) -> None:
     """The parts of one exception go together (§325-16C's extra height: the larger front, side and rear yards): the
     answer's slotted templates that share one condition (applies_when) are its parts, as the AI wrote them, whether
-    or not they survived. A part refused outright drops the parts in every district; a part that couldn't be filled
-    in a district (a footnote, several numbers: not a "-", which only says the use isn't permitted there) drops the
-    parts in that district. Independent templates (§325-8B's one per use) are not parts of anything. In place."""
+    or not they survived. Templates filled from the same chart rows are one part written for different cell forms
+    (the stories limit for '3' and for '3/2 [fn11]'): a part is missing only where none of its forms is kept. A part
+    refused outright (every form) drops the parts in every district; a part none of whose forms could be filled in a
+    district (a footnote, several numbers: not a "-", which only says the use isn't permitted there) drops the parts
+    in that district. Independent templates (§325-8B's one per use) are not parts of anything. In place."""
     prefix = unit.get("prefix", "")
-    groups: dict[str, list[str]] = {}
+    groups: dict[str, dict[frozenset, list[str]]] = {}
     for t in answer.get("templates") or []:
         when = " ".join(str(t.get("applies_when") or "").split())
         if t.get("slots") and when:
-            groups.setdefault(when, []).append(prefix + t["id_suffix"])
+            rows = frozenset((x["page"], x["section"], x["row"].strip()) for x in t["slots"])
+            groups.setdefault(when, {}).setdefault(rows, []).append(prefix + t["id_suffix"])
     rejected = {r["rule"] for r in out["rejected"]}
-    for parts in (g for g in groups.values() if len(g) > 1):
-        whole = any(f"{unit['id']}.{sfx}" in rejected for sfx in parts)
-        short = {g["rule"].split(".")[0] for g in out["unresolved"] if g.get("cells")
-                 and g["rule"].split(".", 1)[-1] in parts and "the chart shows" not in g.get("why", "")}
+    for forms in groups.values():
+        if len(forms) < 2:
+            continue                                # one part (in one or more forms): nothing to keep together
+        parts = [sfx for fs in forms.values() for sfx in fs]
+        whole = any(all(f"{unit['id']}.{sfx}" in rejected for sfx in fs) for fs in forms.values())
+        gapped = {(g["rule"].split(".")[0], g["rule"].split(".", 1)[-1]) for g in out["unresolved"] if g.get("cells")
+                  and g["rule"].split(".", 1)[-1] in parts and "the chart shows" not in g.get("why", "")}
         for d in sorted(out["rules"]):
-            if not (whole or d in short):
+            kept = {r["id"].split(".", 1)[1] for r in out["rules"][d]}
+            short = any(not (set(fs) & kept) and any((d, sfx) in gapped for sfx in fs) for fs in forms.values())
+            if not (whole or short):
                 continue
             gone = [r for r in out["rules"][d] if r["id"].split(".", 1)[1] in parts]
             out["rules"][d] = [r for r in out["rules"][d] if r not in gone]
@@ -1509,8 +1517,9 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
             raise crash
         if why is None:
             return keep(result, unit, cells, columns, context)
-        if response.stop_reason == "refusal":
-            break
+        if response.stop_reason in ("refusal", "max_tokens"):
+            break           # cut off at its output limit: the same request would be cut off again (2026-10-25: three
+            #                 §325-18B calls stopped at 4,096, $0.195 for no answer); raise max_tokens_by_unit instead
         if response.stop_reason == "end_turn":
             messages += [{"role": "assistant", "content": response.content},
                          {"role": "user", "content": f"That answer can't be used: {why}. Answer again for the same "

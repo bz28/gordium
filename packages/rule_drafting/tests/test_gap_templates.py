@@ -361,13 +361,20 @@ def _recorded(inputs, uid):
     return json.loads(cli.last_recorded_attempts(inputs, uid)[-1]["answer"])
 
 
+def _stage1(inputs, uid):
+    """The unit's last answer before the 2026-10-25 re-drafts: stage 1's (the known-bad forms these tests pin)."""
+    import json
+    session = [x for x in cli.recorded_sessions(inputs, uid) if cli.answered(x) and str(x[0].get("date")) < "2026-10-25"][-1]
+    return json.loads(session[-1]["answer"])
+
+
 def test_the_height_bonus_drafted_in_parts_is_refused_and_one_relaxing_rule_is_kept(inputs):
     """Stage 1's §325-16C answer drafted the bonus as parts ("when taller than the chart's height: this yard is
     larger", "the extra feet at most 10%"): the chart rule still failed a 37 ft house with every yard enlarged.
     The guard refuses the parts that limit the measure above the chart's limit, not the stories part (a different
     measure). In check_answer the stories part shares the refused parts' condition, so all-or-none drops it with
     them: none of stage 1's answer is kept, and a person checks §325-16C. A single relaxing rule is not refused."""
-    old = _recorded(inputs, "325-16C")
+    old = _stage1(inputs, "325-16C")
     parts = [x for x in old["templates"] if "{height_ft}" in (x.get("applies_when") or "")]
     assert len(parts) == 5
     refused = {x["id_suffix"] for x in parts if drafter.exception_in_parts(x)}
@@ -383,7 +390,7 @@ def test_an_always_on_flag_restating_a_kept_rule_is_set_aside_but_never_for_a_na
     """Stage 1's §325-18B answer: the projection rule, and an always-on flag quoting the same sentence (every design
     with eaves needed review): the flag is set aside, listed for a person. Review round 16: a rule narrowed by a
     condition (two-family only) or refused never takes the flag's place: the flag stays."""
-    old = _recorded(inputs, "325-18B")
+    old = _stage1(inputs, "325-18B")
     rule = next(x for x in old["templates"] if x["kind"] == "rule")
     flag = next(x for x in old["templates"] if x["kind"] == "flag")
     got = judge(inputs, "325-18B", [rule, flag])
@@ -402,9 +409,9 @@ def test_an_always_on_flag_restating_a_kept_rule_is_set_aside_but_never_for_a_na
 
 def test_the_guards_refuse_the_recorded_stage1_answers_in_check_answer(inputs):
     """Judged by check_answer, as replay judges them: stage 1's parts and its always-on flag are refused."""
-    bonus_parts = judge(inputs, "325-16C", _recorded(inputs, "325-16C")["templates"], cli.drafted_rules(inputs))
+    bonus_parts = judge(inputs, "325-16C", _stage1(inputs, "325-16C")["templates"], cli.drafted_rules(inputs))
     assert any("relaxes it" in p for p in bonus_parts["problems"])
-    eaves = judge(inputs, "325-18B", _recorded(inputs, "325-18B")["templates"])
+    eaves = judge(inputs, "325-18B", _stage1(inputs, "325-18B")["templates"])
     assert any("set aside" in g["why"] for g in eaves["unresolved"]) and not eaves["problems"]
 
 
@@ -417,7 +424,7 @@ def test_the_guards_refuse_the_recorded_stage1_answers_in_check_answer(inputs):
 def test_the_parts_form_is_refused_however_its_condition_is_written(inputs, condition):
     """Review round 15: only `measure > {slot}` was recognised; `{height_ft} < building_height` let stage 1's parts
     through in six districts. Judged by what the condition does, every spelling is refused, in check_answer too."""
-    old = _recorded(inputs, "325-16C")
+    old = _stage1(inputs, "325-16C")
     stories = next(sl for x in old["templates"] for sl in x["slots"] if sl["name"] == "stories_max")
 
     def rewrite(x):          # the condition as written, the slots it names defined, its examples consistent with it
@@ -444,7 +451,7 @@ def test_a_size_tier_keyed_to_a_minimum_is_not_an_exception_in_parts(inputs):
     tier = {"kind": "rule", "relaxes": "", "applies_when": "lot_area > {min_lot}", "check": "building_area <= 0.3 * lot_area",
             "slots": [slot("min_lot", "One-family dwelling, detached", section=LOT_SIZE)]}
     assert drafter.exception_in_parts(tier, drafted) == []
-    old = _recorded(inputs, "325-16C")
+    old = _stage1(inputs, "325-16C")
     limit = next(x for x in old["templates"] if x["id_suffix"] == "extra_height_limit")
     assert drafter.exception_in_parts(limit, drafted)
 
@@ -472,7 +479,7 @@ def test_a_chart_maximum_is_known_by_what_its_rule_does_and_assumed_when_nothing
     """Review round 17: the chart maximum was found by spelling ('^building_height <='), so '35 >= building_height',
     '(building_height <= 35)' or no drafted chart rule yet ({}) switched the parts guard off."""
     import copy
-    limit = next(x for x in _recorded(inputs, "325-16C")["templates"] if x["id_suffix"] == "extra_height_limit")
+    limit = next(x for x in _stage1(inputs, "325-16C")["templates"] if x["id_suffix"] == "extra_height_limit")
     drafted = cli.drafted_rules(inputs)
     flipped = copy.deepcopy(drafted)
     import re as _re
@@ -491,7 +498,22 @@ def test_a_chart_maximum_is_known_by_what_its_rule_does_and_assumed_when_nothing
                                        "building_height > {height_ft} and lot_width > 2000"])
 def test_the_parts_guard_sees_a_condition_whose_other_part_needs_a_value_no_single_probe_gives(inputs, condition):
     """Review round 17: the other measures at exactly 0 or 1000 made these conditions false in every probe."""
-    limit = next(x for x in _recorded(inputs, "325-16C")["templates"] if x["id_suffix"] == "extra_height_limit")
+    limit = next(x for x in _stage1(inputs, "325-16C")["templates"] if x["id_suffix"] == "extra_height_limit")
     with_slot = limit | {"applies_when": condition,
                          "slots": limit["slots"] + [slot("min_lot", "One-family dwelling, detached", section=LOT_SIZE)]}
     assert drafter.exception_in_parts(with_slot, cli.drafted_rules(inputs))
+
+
+
+def test_versions_of_one_rule_for_different_cell_forms_are_not_parts_of_each_other(inputs):
+    """2026-10-25 §325-16C answer: the stories limit for '3' and for R-3AA's '3/2 [fn11]' share their condition, and
+    all-or-none took them for two parts of one exception: every district missed one of them, so both were dropped
+    everywhere. Filled from the same chart rows, they are one part in two forms: each district keeps the one it fits."""
+    stories = [x for x in _recorded(inputs, "325-16C")["templates"] if "stories_not_exceeded" in x["id_suffix"]]
+    assert len(stories) == 2
+    got = judge(inputs, "325-16C", stories, cli.drafted_rules(inputs))
+    kept = {d: [r["id"].split(".", 1)[1] for r in rs] for d, rs in got["rules"].items()}
+    assert kept["R-1a"] == ["325_16c_height_exception_stories_not_exceeded"]
+    assert kept["R-3aa"] == ["325_16c_height_exception_stories_not_exceeded_fn11"]
+    # real parts still go together: stage 1's parts (four refused) keep nothing
+    assert judge(inputs, "325-16C", _stage1(inputs, "325-16C")["templates"], cli.drafted_rules(inputs))["rules"] == {}

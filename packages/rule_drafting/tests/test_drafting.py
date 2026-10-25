@@ -950,7 +950,7 @@ def test_the_saved_r3a_other_use_lot_size_never_passes_a_dormitory(inputs):
     """The saved draft, rebuilt from its recorded answer by `python -m rule_drafting replay` (no API call)."""
     from rule_format.rulebook import outcome
     rules = cli.load(inputs.drafted / "R-3a.yaml")["rules"]
-    rule = next(r for r in rules if r["id"] == "R-3a.min_lot_area_other_use")
+    rule = next(r for r in rules if r["id"].startswith("R-3a.min_lot_") and r["id"].endswith("_other_use"))   # its id per answer
     for area in (6000, 20000):
         assert outcome(rule, {"use": "dormitory", "lot_area": area, "additional_primary_building": False},
                        inputs.ctx.allowed()) == "needs_review"
@@ -1345,3 +1345,13 @@ def test_a_demoted_relaxer_widens_nothing_and_its_rulebook_stays_valid():
     assert demoted["kind"] == "flag" and "relaxes" not in demoted
     assert apply_relaxes([base, demoted]) == [base, demoted]
     assert _relaxes_problems([base, demoted]) == []
+
+
+def test_an_answer_cut_off_at_its_output_limit_is_not_retried_with_the_same_limit(inputs):
+    """2026-10-25: §325-18B's three calls all stopped at 4,096 output tokens ($0.195, no answer): the same request is
+    cut off again. One call, then the unit stops (its last answered session stands); raise max_tokens_by_unit."""
+    answer = {"templates": [FRONT], "no_rule_reason": ""}
+    client = FakeClient(answer, answer, answer, stop="max_tokens")
+    result, records = run(inputs, client)
+    assert len(client.requests) == 1 and len(records) == 1
+    assert result["rules"] == {} and "max_tokens" in result["failed"]
