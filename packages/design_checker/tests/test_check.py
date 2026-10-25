@@ -2336,3 +2336,19 @@ def test_no_notice_outlives_the_model_it_was_about():
     assert check.index("_clear(o)") < check.index('if result.get("notice"):')   # cleared, then the new notice
     draw = src[src.index("def draw_screen("):].split("\ndef ", 1)[0]
     assert "old = stale(o)" in draw and "_notice_box(o, e.Viewport, taken, old)" in draw
+
+
+def test_the_notice_timer_stops_once_a_check_cleared_the_notice():
+    """Review round 1 of the notice fix: a check's _clear drops the notice, and the notice's timer then ticked every
+    0.5 s with nothing to time until another notice expired. Now its next tick stops it."""
+    stopped = []
+    timer = type("Timer", (), {"Stop": lambda self: stopped.append(1)})()
+    ns = _plugin_functions(["_toast_tick"], _clear_toast=lambda: stopped.append("cleared"))
+    o = type("O", (), {"toast": None})()
+    ns["STATE"].update(overlay=o, toast_timer=timer)
+    ns["_toast_tick"]()
+    assert stopped == [1]
+    o.toast = (["Rear yard no longer complies"], ns["time"].time() + 6)
+    stopped.clear()
+    ns["_toast_tick"]()                                                  # still showing: left running
+    assert stopped == []

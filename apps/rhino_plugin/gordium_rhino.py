@@ -1799,6 +1799,8 @@ def _toast_tick():
     o = STATE.get("overlay")
     if getattr(o, "toast", None) and time.time() >= o.toast[1]:
         _clear_toast()
+    elif not getattr(o, "toast", None) and STATE.get("toast_timer"):    # cleared with a check's results (_clear):
+        STATE["toast_timer"].Stop()                                     # nothing left to time
 
 
 def _clear_toast():
