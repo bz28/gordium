@@ -595,7 +595,10 @@ def idle_chart_numbers(rules, chart, cells, ctx):
     minimums), which is exactly where a cell's number could sit idle without the exact-limit test noticing."""
     idle = []
     for rule in rules:
-        if rule["kind"] == "rule":
+        # a rule relaxing another never passes on its own until proven equal to a hand-written key rule over the
+        # generative grid (rule_format apply_relaxes, records/proven_relaxers.yaml): that proof tests its numbers, finer
+        # than one example per number ('35 + 0.1 * 35': a tenth of a foot)
+        if rule["kind"] == "rule" and not rule.get("relaxes"):
             idle += chart.idle_numbers(rule, [c for c in chart.cited_rows(rule, cells) if c["page"] != 2], ctx.allowed())
     return idle
 

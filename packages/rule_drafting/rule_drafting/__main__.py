@@ -167,18 +167,23 @@ def _dump(data, **kw) -> str:
     return yaml.dump(data, Dumper=_NoAliases, sort_keys=False, allow_unicode=True, width=110, **kw)
 
 
-def demoted(i: Inputs) -> dict[str, str]:
-    """{rule id: cause} of the drafted rules demoted until re-drafted (records/demoted.yaml)."""
+def demoted(i: Inputs) -> dict[str, str | dict]:
+    """{rule id: cause} of the drafted rules demoted until re-drafted (records/demoted.yaml). An entry may instead be
+    {cause, applies_when}: a condition written by a person that replaces the drafted one, where the drafted condition
+    is itself the mistake (the loading chart's "25 + units" drafted as floor space >= 10,000 sf, 2026-10-25)."""
     path = i.records / "demoted.yaml"
     return (load(path) or {}) if path.exists() else {}
 
 
-def demote(rule: dict, cause: str) -> dict:
+def demote(rule: dict, cause: str | dict) -> dict:
     """The rule as a flag: the checker shows NEEDS REVIEW, with the cause, wherever it applies; never a pass. Its
-    conditions are kept, its check and worked examples dropped (a flag has none), and so is any `relaxes` (a flag
-    widens nothing)."""
+    conditions are kept (or replaced by the entry's applies_when, a person's), its check and worked examples dropped
+    (a flag has none), and so is any `relaxes` (a flag widens nothing)."""
+    entry = cause if isinstance(cause, dict) else {"cause": cause}
     keep = {k: v for k, v in rule.items() if k not in ("check", "review_when", "examples", "notes", "relaxes")}
-    return keep | {"kind": "flag", "notes": f"Demoted until re-drafted: {cause}"}
+    if entry.get("applies_when"):
+        keep["applies_when"] = entry["applies_when"]
+    return keep | {"kind": "flag", "notes": f"Demoted until re-drafted: {' '.join(str(entry['cause']).split())}"}
 
 
 def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
@@ -202,7 +207,8 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
     i.drafted.mkdir(parents=True, exist_ok=True)
     causes = demoted(i)
     for book in books.values():                 # every save applies the demotions, to every rulebook
-        book["rules"] = [demote(r, causes[r["id"]]) if r["id"] in causes and r.get("kind") != "flag" else r
+        book["rules"] = [demote(r, causes[r["id"]]) if r["id"] in causes and (r.get("kind") != "flag" or (
+                             isinstance(causes[r["id"]], dict) and causes[r["id"]].get("applies_when"))) else r
                          for r in book["rules"]]
     for district, book in books.items():
         path = rulebook_path(i, district)

@@ -1381,3 +1381,19 @@ def test_a_chart_unit_lists_its_rows_with_footnoted_or_several_number_forms(inpu
     assert "row 'One-family dwelling, detached': no footnote, 1 number (R-1A" in hint and "footnote 4, 1 number (R-2C)" in hint
     assert "row 'One-family dwelling, detached, zero lot line': footnote 4, 1 number (R-2C)" in hint
     assert "Other use" not in hint                       # one plain form everywhere: nothing to say
+
+
+def test_a_demotion_can_replace_a_drafted_condition_that_is_itself_the_mistake():
+    """2026-10-25: the loading chart's "Multiple dwelling with 25 + units" was drafted as floor_space >= 10000 (a flag
+    already), so a 30-unit building under 10,000 sf had no loading check; demoting it kept the wrong condition. A
+    demotion may give a person's condition instead, and it applies to a flag too."""
+    rule = {"id": "R-3a.loading_multiple_dwelling_25_units", "kind": "flag", "topic": "parking_and_loading",
+            "title": "x", "applies_when": 'use == "multiple_family" and floor_space >= 10000', "sources": []}
+    entry = {"cause": "the 25 units were drafted as floor space", "applies_when": 'use == "multiple_family"'}
+    got = cli.demote(rule, entry)
+    assert got["applies_when"] == 'use == "multiple_family"' and got["kind"] == "flag"
+    assert "the 25 units were drafted as floor space" in got["notes"]
+    assert cli.demote(rule, "a plain cause")["applies_when"] == rule["applies_when"]      # a plain cause keeps it
+    saved = cli.load(cli.Inputs().drafted / "R-3a.yaml")["rules"]
+    held = next(r for r in saved if r["id"] == "R-3a.loading_multiple_dwelling_25_units")
+    assert held["applies_when"] == 'use == "multiple_family"'

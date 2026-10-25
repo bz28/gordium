@@ -15,7 +15,7 @@ max_tokens_by_unit:
   325-19E: 32000
   # chart lot size: one template per form of its cells (footnotes 4 to 9), three answers stopped at 8,192 (2026-10-21).
   # 16,000, not 32,000: a call's worst case at 32,000 output tokens is more than the run's $0.30 cap.
-  chart-p3-minimum_lot_size: 16000
+  chart-p3-minimum_lot_size: 32000   # 16,000 cut off its answer once the forms are listed (2026-10-25)
   325-18B: 16000          # 4,096 cut off all three answers (2026-10-25, $0.195): thinking counts as output
   # §325-16C as one relaxing rule: both answers stopped at 8,192 output tokens (2026-10-25, $0.228, no answer)
   325-16C: 16000
