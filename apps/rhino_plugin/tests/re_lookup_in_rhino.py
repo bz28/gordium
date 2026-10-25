@@ -6,8 +6,9 @@ in CI; the logic is tested in CI (packages/design_checker/tests/test_re_lookup.p
    changed, the looked-up lot is shown dashed; Draw: the sample's lot and house gone, 96's lot drawn, no question
    asked (all of it was Gordium's). 96 is a corner lot, so no starting house is drawn on it (by design: which yards
    are front is the architects' open question). Rhino's Undo puts the sample back exactly; Redo draws 96's lot
-   again; a second Undo, the sample again; after each, nothing of the other model is left drawn on screen (no
-   dashed lookup outline, no lot outline or marks of the last check).
+   again; a second Undo, the sample again, a second Redo, 96. After each: the file's saved facts, box choices and
+   sources are those of the model on screen, nothing of the other model is left drawn (no dashed lookup outline, no
+   lot outline or marks of the last check), and the model is checked again (live mode).
 3. A new file: the sample's starting house edited (one floor moved), Edit site…, Look up 96: asked once, "Start
    fresh for 96 …? Your changes to the starting house will be removed.", the Keep answer "Keep my building and
    check it on 96 …'s lot"; Keep my building: the floors kept, the lot is 96's.
@@ -17,7 +18,7 @@ in CI; the logic is tested in CI (packages/design_checker/tests/test_re_lookup.p
    and both the question ("Your surveyed lot will be replaced by 96 …'s lot.") and the Keep answer ("… (your
    surveyed lot will be replaced)") say so. Keep: the floors kept, the surveyed lot gone, 96's tax-map lot drawn
    (not marked as a survey). Undo puts the surveyed lot and the edited house back exactly; Redo, 96's lot and the
-   kept house again.
+   kept house again; after each, the file's saved strings follow, nothing stale is drawn, and a re-check is owed.
 It runs as the architect works: outside any command (started from the Script Editor or RunPythonScript, it waits
 for that command to end, then runs at the next idle, as the panel's Edit site… button runs), Undo and Redo as
 Rhino's own _Undo and _Redo commands. Rhino's undo events during the run and each Draw's undo record (its serial,

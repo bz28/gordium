@@ -4,7 +4,9 @@ re-lookup's Draw did nothing at demo e631aae). Run in Rhino 8, not in CI; Gordiu
 
 Each case, in a fresh copy of Rhino's feet template and outside any command (as the panel's Edit site… runs):
 BeginUndoRecord, one curve added plus the case's extra change, EndUndoRecord, Rhino's _Undo, then _Redo. A case
-passes when Undo removes the curve and Redo brings it back. The extras are what a re-lookup's Draw does inside its
+passes when Undo removes the curve and Redo brings it back, and its own change follows too: the held object really
+held (moved onto the hidden layer, that layer deleted), back on its own layer after Undo and gone after Redo; the
+document string empty or missing after Undo and exactly as written after Redo. The extras are what a re-lookup's Draw does inside its
 one record (gordium_rhino._draw_prepare to edit_facts): document strings written (the facts, the box's choices,
 the sources), an object's attribute user strings set, a layer added then deleted (the hidden holding layer), an
 object moved onto a hidden layer then deleted (held, then gone at commit), a layer's visibility set directly, and a
@@ -105,6 +107,7 @@ def one(docs, name, extra):
     doc = docs.open("Large Objects - Feet")
     try:
         before = doc.Objects.FindId(curve(doc, 40))   # an object that exists before the record (the sample's lot)
+        before_layer = before.Attributes.LayerIndex
         in_command = bool(Rhino.Commands.Command.InCommand())
         serial = doc.BeginUndoRecord("Gordium probe: " + name)
         added = curve(doc)
@@ -118,9 +121,11 @@ def one(docs, name, extra):
         held = name in ("held then deleted", "all of them")    # the object made before the record is deleted
         wrote = name in ("document strings", "all of them")       # the document string written in the record
         kept_id = before.Id
+        kept_layer = before_layer
         undo = bool(Rhino.RhinoApp.RunScript("_Undo", False))
         gone = doc.Objects.FindId(added) is None
-        held_back = doc.Objects.FindId(kept_id) is not None        # Undo brings the held object back
+        back_obj = doc.Objects.FindId(kept_id)
+        held_back = back_obj is not None and back_obj.Attributes.LayerIndex == kept_layer   # back, on its own layer
         string_after_undo = doc.Strings.GetValue("gordium_probe", "facts")
         string_undone = not string_after_undo                    # gone, or emptied
         redo = bool(Rhino.RhinoApp.RunScript("_Redo", False))
