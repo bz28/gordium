@@ -669,6 +669,20 @@ def _dim_label(i: dict) -> str:
             (" (approx.)" if i.get("approx") else ""))
 
 
+def required_lines(points: list, item: dict, edges: list) -> tuple[list, str | None]:
+    """The yard's required line(s) across its dimension, and why there is none: one at its limit (`limit_ft`), or,
+    when the limit depends on an open measurement (the lot depth, on the tax map), one at each end of its range
+    (`limit_span_ft`), so every dimensioned yard shows where its minimum lies (Rhino check of #29)."""
+    lo_hi = item.get("limit_span_ft")
+    limits = [item["limit_ft"]] if isinstance(item.get("limit_ft"), (int, float)) else (
+        sorted(set(lo_hi)) if lo_hi else [])
+    lines = [x for x in (required_line(points, limit, edges) for limit in limits) if x]
+    why = None if lines else ("its limit is not a length in feet" if not limits else
+                              "the minimum is 0 ft (on the lot line)" if all(x <= 0 for x in limits) else
+                              "the dimension has no length")
+    return lines, why
+
+
 def required_line(points: list, limit, edges: list) -> list | None:
     """Where the yard's required line crosses its dimension (plan, feet): a short line square to the dimension,
     `limit` from the lot line along it, REQUIRED_HALF_FT either side, drawn faint. The dimension's lot-line end is
@@ -688,6 +702,106 @@ def required_line(points: list, limit, edges: list) -> list | None:
     ux, uy = (b[0] - a[0]) / length, (b[1] - a[1]) / length
     cx, cy = a[0] + ux * limit, a[1] + uy * limit
     return [[cx - uy * REQUIRED_HALF_FT, cy + ux * REQUIRED_HALF_FT], [cx + uy * REQUIRED_HALF_FT, cy - ux * REQUIRED_HALF_FT]]
+
+
+DIM_NEAR_FT = 0.02    # a wall run's "nearest part": within this (1/4") of the yard as measured
+STRAIGHT_FT = 1e-3    # a footprint point this close to the line through its neighbours lies on a straight wall
+BEND_SLACK_FT = 0.5   # at a bend in the lot line in front of the wall: a square dimension at most this much longer
+
+
+def _wall_runs(footprint) -> list:
+    """The footprint's outline as wall runs: its pieces, those that carry straight on joined (a gable's footprint
+    keeps a point mid-wall under the ridge: review round 3 of #29, F1)."""
+    out = []
+    for g in getattr(footprint, "geoms", [footprint]):
+        for ring_ in [g.exterior, *g.interiors]:
+            pts = [p for p in list(ring_.coords)[:-1]]
+            pts = [p for k, p in enumerate(pts) if math.dist(p, pts[k - 1]) > 1e-9]
+            n = len(pts)
+            if n < 3:
+                continue
+
+            def straight(k):                      # pts[k] lies on a straight line from pts[k-1] to pts[k+1]
+                a, b, c = pts[k - 1], pts[k], pts[(k + 1) % n]
+                cross = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0])
+                dot = (b[0] - a[0]) * (c[0] - b[0]) + (b[1] - a[1]) * (c[1] - b[1])
+                # off the line from a to c by under STRAIGHT_FT (feet, not an angle: a model's single-precision
+                # points sit 1e-6 ft off a straight wall; review round 4, F1)
+                return abs(cross) / max(math.dist(a, c), 1e-12) <= STRAIGHT_FT and dot > 0
+            corners = [k for k in range(n) if not straight(k)]
+            for j, k in enumerate(corners):
+                out.append((pts[k], pts[corners[(j + 1) % len(corners)]]))
+    return out
+
+
+def dim_points(points: list, measure: str, shape, footprint, edges: list) -> list:
+    """Where a yard's dimension is drawn (plan, feet): [its lot-line end, its building end], as a drawing would
+    place it (Rhino check of #29). The measurement gives the nearest pair, often a corner of the house that the
+    neighbouring yard's dimension shares, and on a lot line drawn as short pieces its lot end can be a joint, off
+    square. So: the building end is the middle of the part of the wall run that is nearest the lot line (within
+    DIM_NEAR_FT of the yard as measured: a wall parallel to the line, its whole length; a wall at an angle, its
+    near end); the lot end is that point's square projection onto the lot-line piece it falls on (0° by
+    construction). The label stays the yard as measured. The measurement's own points when there is no lot shape
+    or footprint to work from."""
+    from shapely.geometry import LineString, Point
+    if not points or len(points) < 2 or shape is None or footprint is None or footprint.is_empty:
+        return points
+    a, b = [tuple(p[:2]) for p in points[:2]]
+    if edges:
+        ring = LineString([tuple(p[:2]) for e in edges for p in e["points"]])
+        if ring.distance(Point(b)) < ring.distance(Point(a)):
+            a, b = b, a
+    lines = _yard_lines(shape, measure, a)
+    if lines is None:
+        return points
+    pieces = [(q[k], q[k + 1]) for g in getattr(lines, "geoms", [lines]) for q in [list(g.coords)]
+              for k in range(len(q) - 1) if math.dist(q[k], q[k + 1]) > 1e-9]
+    near = Point(b)
+    measured = lines.distance(near)
+    runs = [r for r in _wall_runs(footprint) if LineString(r).distance(near) < 1e-6]
+    if not runs or not pieces:
+        return points
+    facing = min(pieces, key=lambda s: LineString(s).distance(near))
+
+    def turn(run):                                 # how far the run is from parallel to the lot-line piece
+        (p, q), (u, w) = run, facing
+        cross = (q[0] - p[0]) * (w[1] - u[1]) - (q[1] - p[1]) * (w[0] - u[0])
+        return abs(cross) / (math.dist(p, q) * math.dist(u, w))
+    p, q = min(runs, key=turn)
+    steps = 200
+    at = [(p[0] + (q[0] - p[0]) * t / steps, p[1] + (q[1] - p[1]) * t / steps) for t in range(steps + 1)]
+    close = [k for k, x in enumerate(at) if lines.distance(Point(x)) <= measured + DIM_NEAR_FT]
+    if not close:
+        return points
+    nearest = min(range(len(at)), key=lambda k: math.dist(at[k], b))
+    lo = hi = nearest if nearest in close else close[0]
+    while lo - 1 in close:
+        lo -= 1
+    while hi + 1 in close:
+        hi += 1
+    mid = (lo + hi) // 2
+
+    def onto(start, piece):                        # square projection onto a piece, if it falls on it
+        (u, w) = piece
+        dx, dy = w[0] - u[0], w[1] - u[1]
+        t = ((start[0] - u[0]) * dx + (start[1] - u[1]) * dy) / (dx * dx + dy * dy)
+        return (u[0] + t * dx, u[1] + t * dy) if -1e-9 <= t <= 1 + 1e-9 else None
+    # the middle of the near part, or the nearest point of it to the middle that lands square on a piece (a bend in
+    # the lot line straight in front of the middle: review round 3, F3); never a foot farther than the yard as
+    # measured allows (F4: a piece beyond the one measured to)
+    # the lot line bends right in front of the wall (its nearest point a joint): the nearest point of the wall to
+    # the middle that has a square foot, the dimension then a little longer than the yard (at most BEND_SLACK_FT;
+    # the label is the yard as measured, its closest point)
+    tries = [(sorted(range(lo, hi + 1), key=lambda k: abs(k - mid)), DIM_NEAR_FT),
+             (sorted(range(len(at)), key=lambda k: abs(k - mid)), BEND_SLACK_FT)]
+    for order, slack in tries:
+        for k in order:
+            feet = [x for x in (onto(at[k], piece) for piece in pieces) if x is not None]
+            if feet:
+                end = min(feet, key=lambda x: math.dist(x, at[k]))
+                if math.dist(end, at[k]) <= measured + slack + 1e-6:
+                    return [list(end), list(at[k])]
+    return points
 
 
 def height_dim(site: dict, env: dict, v: dict, measured: dict) -> dict | None:
@@ -723,17 +837,24 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
     edges = [{"points": [list(r[0][:2]), list(r[-1][:2])], "length": present.feet_inches(length)}
              for r, length in edge_runs(lot.get("edges") or [])
              if length >= SHORTEST_LABELLED_EDGE]   # a tax-map sliver (0'-1 5/8"): no label, it only clutters
-    yards = [{"points": i["points"], "status": i["status"], "label": _dim_label(i),
-              "required_line": required_line(i["points"], i.get("limit_ft"), lot.get("edges") or [])}
-             for i in v["items"] if i.get("points") and i.get("measure") in YARD_MEASURES]
-    encroach = []
     solids = [(b, _projection(b)) for b in site.get("buildings") or [] if b.get("faces")]
     footprint = unary_union([p for _, p in solids]) if solids else None
+    shape = Lot(site, facts or {}) if lot.get("edges") and facts and facts.get("street_line") else None
+    yards = []
+    for i in v["items"]:
+        if not (i.get("points") and i.get("measure") in YARD_MEASURES):
+            continue
+        at = dim_points(i["points"], i["measure"], shape, footprint, lot.get("edges") or [])
+        lines, why = required_lines(at, i, lot.get("edges") or [])
+        # a yard with no required line says why, on its label (review round 3, F2)
+        yards.append({"points": at, "measured_points": i["points"], "status": i["status"],
+                      "label": _dim_label(i) + (f" · no required line: {why}" if why else ""),
+                      "required_lines": lines, "required_why": why})
+    encroach = []
     tops = [p[2] for b, _ in solids for f in b["faces"] for p in f["points"]]
     statuses = {i["measure"]: i["status"] for i in v["items"] if i.get("measure")}
     if footprint is not None and not footprint.is_empty and env and env.get("outline") and tops:
-        shape = Lot(site, facts or {}) if lot.get("edges") and facts and facts.get("street_line") else None
-        reds, ambers = [], []
+        rows = []                                  # (the row, its red region or None, its amber regions)
         for i in v["items"]:
             if i.get("colour") not in ("red", "amber") or shape is None:
                 continue
@@ -745,29 +866,38 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                 strip = (lambda d: footprint.intersection(lines.buffer(d, quad_segs=32)) if d > 0 else None)
                 near.append(strip(limit["near"]))
                 far.append(strip(limit["far"]))
+            red = None
             if i["colour"] == "red" and near and all(g is not None for g in near):
                 red = near[0]
                 for g in near[1:]:                          # short under EVERY reading: where every one says so
                     red = red.intersection(g)
-                reds.append(red)
-            ambers += [g for g in far if g is not None]
-        red = unary_union(reds) if reds else None
-        doubt = unary_union(ambers) if ambers else None
-        if doubt is not None and red is not None:
-            doubt = doubt.difference(red)
+            rows.append((i, red, [g for g in far if g is not None]))
+        reds = [r for _, r, _ in rows if r is not None]
+        red_all = unary_union(reds) if reds else None
+        # each region is its own row's (the side yard's, the rear yard's…), named on it, and coloured once: where
+        # two rows' strips overlap (a corner), the first row's; amber never where any row is red
+        taken = {present.FAILS: None, present.REVIEW: red_all}
+        regions = []
+        for i, red, ambers in rows:
+            for region, status in ((red, present.FAILS), (unary_union(ambers) if ambers else None, present.REVIEW)):
+                if region is None or region.is_empty:
+                    continue
+                if taken[status] is not None:
+                    region = region.difference(taken[status])
+                taken[status] = region if taken[status] is None else unary_union([taken[status], region])
+                regions.append((region, status, i))
         # per building: only the part of THAT building in the yard, from its own bottom to its own top (a garage
         # in a side yard is never coloured up to the house's ridge). The viewport then cuts each building by its
         # block (Rhino's boolean), so a cantilever over a yard is coloured, not the air under it. Outlines
         # simplified to 0.001 ft: the subtraction leaves edges 1e-14 ft long, which Rhino can't extrude.
-        for region, status in ((red, present.FAILS), (doubt, present.REVIEW)):
-            if region is None or region.is_empty:
-                continue
+        for region, status, i in regions:
             for b, own in solids:
                 zs = [p[2] for f in b["faces"] for p in f["points"]]
                 for g in hole_free(region.intersection(own)):
                     if g.area > 1e-3:
                         encroach.append({"outline": _ring(g), "base": min(zs), "top": max(zs), "why": "yard",
-                                         "status": status, "building": b.get("id")})
+                                         "status": status, "building": b.get("id"), "measure": i.get("measure"),
+                                         "row": i.get("name")})
         height = statuses.get("building_height")
         if height in (present.FAILS, present.REVIEW) and env.get("top") is not None:
             for b, _ in solids:                         # only what rises above the limit: a roof's ridge, not its eaves
@@ -777,7 +907,8 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                 for g in hole_free(above(b, env["top"])):
                     if g.area > 1e-3:
                         encroach.append({"outline": _ring(g), "base": env["top"], "top": top, "why": "height",
-                                         "status": height, "building": b.get("id")})
+                                         "status": height, "building": b.get("id"),
+                                         "measure": "building_height", "row": "Building height"})
     return {"edges": edges, "yards": yards, "encroach": encroach, "height": height_dim(site, env, v, measured),
             "buildable": env.get("outline") if env else None, "height_plane": env.get("top") if env else None}
 

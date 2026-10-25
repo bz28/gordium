@@ -5,8 +5,9 @@ Rhino can show is what the conduit draws in each view. A fresh feet document, Go
 Rd), Show on-screen labels on, then the house moved 5 ft to the left (seen from the street): the left side yard
 fails. What the screen draws is recorded by wrapping the plugin's own _dimension (each drawn dimension) while each
 view redraws.
-1. Top: one dimension per measured yard, each with its faint required line; the left side yard's red; its required
-   line 10'-0" from the lot line; each yard's dimension square to its lot line (within 2°).
+1. Top: one dimension per measured yard, each with its faint required line (two where the limit is read two
+   ways), no two starting at the same point; the left side yard's red; its required line 10'-0" from the lot line;
+   each yard's dimension square to the lot-line piece it ends on (within 0.1°).
 2. Front: only the height's dimension (no yard dimension lies flat on the ground line), vertical, from the grade
    plane up the measured height, beside the house, coloured as the height row.
 3. Zoomed out to the neighbourhood (the lot under 120 px): no dimension at all in Top.
@@ -35,8 +36,8 @@ log = {"claims": {}}
 
 
 def claim(name, ok, detail=None):
+    """Recorded, never stopping the run (the Rhino check of #28/#29 asked for every claim)."""
     log["claims"][name] = {"ok": bool(ok), "detail": detail}
-    assert ok, "%s: %s" % (name, detail)
 
 
 def fresh_module():
@@ -96,13 +97,16 @@ try:
     top = doc.Views.Find("Top", False)
     top.ActiveViewport.ZoomBoundingBox(o.box if o.box.IsValid else doc.Objects.BoundingBox)
     calls = drawn(g, doc, "Top", "1_top_labels_on")
-    yards = [i for i in items.values() if i.get("measure") in ("front_yard", "side_yard_smaller", "side_yard_larger",
-                                                                "rear_yard") and i.get("points")]
+    # (the panel's items carry no measure key: a yard is named "Front yard", "Side yard, …", "Rear yard")
+    yards = [i for i in items.values() if i["name"].split(",")[0] in ("Front yard", "Side yard", "Rear yard")
+             and i.get("points")]
     log["top"] = [(str(a), str(b), c) for a, b, c in calls]
     claim("1 Top: one dimension per measured yard", len(calls) == len(o.yard_dims) == len(yards) >= 4,
           {"drawn": len(calls), "dims": len(o.yard_dims), "yards": len(yards)})
-    claim("1 each yard dimension has its faint required line", len(o.yard_required) == len(o.yard_dims),
-          {"required": len(o.yard_required)})
+    claim("1 every yard dimension has its faint required line (two where the limit is read two ways)",
+          len(o.yard_required) >= len(o.yard_dims), {"required": len(o.yard_required), "dims": len(o.yard_dims)})
+    starts = [(round(line.To.X, 4), round(line.To.Y, 4)) for line, _, _ in o.yard_dims]
+    claim("1 no two yard dimensions start at the same point", len(set(starts)) == len(starts), starts)
     red = g.ui.status_color("does_not_comply", g.ui.viewport_dark()).ToArgb()
     claim("1 the failing side yard's dimension is red", any(c == red for _, _, c in calls), log["top"])
     ring = g.ask({"cmd": "sample_site"})["lot"]
@@ -122,14 +126,15 @@ try:
           log["required_from_line_ft"])
     turns = []
     for line, text, _ in o.yard_dims:
-        a, b = ft(line.From), ft(line.To)
-        e = min(edges, key=lambda e: min(to_edge(a, e), to_edge(b, e)))
+        a, b = ft(line.From), ft(line.To)              # its lot end, then its building end
+        e = min(edges, key=lambda e: to_edge(a, e))     # the lot-line piece its lot end lies on
         u = (b[0] - a[0], b[1] - a[1])
         v = (e[1][0] - e[0][0], e[1][1] - e[0][1])
         cos = abs(u[0] * v[0] + u[1] * v[1]) / (math.hypot(*u) * math.hypot(*v))
         turns.append((text, round(90 - math.degrees(math.acos(min(1.0, cos))), 2)))
     log["square"] = turns
-    claim("1 each yard's dimension is square to its lot line (within 2°)", all(abs(t) <= 2 for _, t in turns), turns)
+    claim("1 each yard's dimension is square to the lot-line piece it ends on (within 0.1°)",
+          all(abs(t) <= 0.1 for _, t in turns), turns)
 
     front = drawn(g, doc, "Front", "2_front")
     log["front"] = [(str(a), str(b), c) for a, b, c in front]
@@ -158,11 +163,14 @@ try:
     top.ActiveViewport.ZoomBoundingBox(rg.BoundingBox(rg.Point3d(-3000 * k, -3000 * k, 0), rg.Point3d(3000 * k, 3000 * k, 0)))
     far = drawn(g, doc, "Top", "3_top_zoomed_out")
     claim("3 zoomed out to the neighbourhood: no dimension", far == [], len(far))
-    log["ok"] = all(c["ok"] for c in log["claims"].values())
 except Exception:
     log["trace"] = traceback.format_exc()
-    raise
 finally:
+    log["passed"] = sum(c["ok"] for c in log["claims"].values())
+    log["ok"] = bool(log["claims"]) and log["passed"] == len(log["claims"]) and "trace" not in log
     json.dump(log, open(S + "out.json", "w", encoding="utf-8"), default=str, indent=1)
     if doc is not None:
         close(doc)
+print("dimensions_in_rhino: %d of %d claims pass%s" % (log["passed"], len(log["claims"]),
+                                                      "" if "trace" not in log else " (stopped: see trace)"))
+assert log["ok"], [n for n, c in log["claims"].items() if not c["ok"]] or log.get("trace")

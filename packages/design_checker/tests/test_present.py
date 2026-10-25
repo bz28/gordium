@@ -326,7 +326,14 @@ def test_amber_follows_every_yard_in_doubt():
     from design_checker.check import check_site
     tax = check_site(_plot(box(11, 25, 35, 65)), {**FACTS, "jurisdiction": CITY, "lot_surveyed": False})
     assert items(tax["view"])["Front yard"]["status"] == present.REVIEW
-    assert _regions(tax) == [(present.REVIEW, 11, 35, pytest.approx(86, abs=1.5))]
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    blocks = tax["plan"]["encroach"]
+    assert {e["status"] for e in blocks} == {present.REVIEW}
+    assert {e["row"] for e in blocks} == {"Front yard", "Side yard, West"}      # each strip named for its own row
+    joined = unary_union([Polygon(e["outline"]) for e in blocks])
+    assert joined.area == pytest.approx(86, abs=1.5) and joined.bounds[0] == pytest.approx(11)
+    assert sum(Polygon(e["outline"]).area for e in blocks) == pytest.approx(joined.area, abs=0.01)   # never twice
 
 
 def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():

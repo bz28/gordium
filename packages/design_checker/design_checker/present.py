@@ -1032,6 +1032,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             why = worst + said + "."
             if not (measured.get("stories") or {}).get("count_settles") and PICK_MAIN_WHY not in why:
                 hint = PICK_MAIN if (measured.get("stories") or {}).get("main_assumed") else hint
+        span_ft = None                   # a limit read two ways (the lot depth open), in feet: its range
         if node is not None and required == "—" and st in (REVIEW, FAILS):
             # the limit waits on an open measurement (the lot depth, on which lines are side or rear): show the
             # limit's range over its readings, and say once what it depends on (architect review P1-3)
@@ -1048,6 +1049,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             if got:
                 unit = (measured.get(node.left.id) or {}).get("unit") or ""
                 lo, hi = min(got), max(got)
+                span_ft = [lo, hi] if unit == "ft" else None
                 required = (value_text(lo, unit, numbers[4], False) if hi - lo < 1e-9 else
                             f"{value_text(lo, unit, numbers[4], False)} to {value_text(hi, unit, numbers[4], False)}")
                 limit_q = list(dict.fromkeys(q for n in open_ for q in _questions_of(measured[n])))
@@ -1099,6 +1101,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             # the limit as drawn, in feet, for the plan's faint required line (a yard, the height); None otherwise
             "limit_ft": (numbers[1] if node is not None and numbers[3] == "ft" and isinstance(numbers[1], (int, float))
                          else None),
+            "limit_span_ft": span_ft,
             "detail": {
                 "line": line,
                 "quotes": quotes,

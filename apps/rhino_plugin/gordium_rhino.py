@@ -499,7 +499,7 @@ def draw_scene(o, e):
             d.DrawPatternedPolyline(pts, System.Drawing.Color.FromArgb(150, 150, 150), ui.DASHED, 1, True)
         _on_top(d, False)
         if not old:                              # after the envelope, so its blue never tints them (F5)
-            for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
+            for g, status, _ in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
                 name = logic.highlight(status)
                 colour = ui.HIGHLIGHT[name]
                 _see_through(d, True)
@@ -623,11 +623,16 @@ def _in_active_view(e):
 
 
 def _dimension(d, viewport, line, color):
-    """A drawing-style dimension on screen: its line and an architectural tick at 45° across each end."""
+    """A drawing-style dimension on screen: its line and an architectural tick at 45° across each end, each on a
+    thin halo (dark on a light viewport, light on a dark one) so it reads over the red and amber it often crosses
+    (the failing yard's dimension, the one that matters most: Rhino check of #29). Drawn on screen after the model
+    (DrawForeground), so always above the highlight."""
     a, b = viewport.WorldToClient(line.From), viewport.WorldToClient(line.To)
-    d.Draw2dLine(System.Drawing.PointF(a.X, a.Y), System.Drawing.PointF(b.X, b.Y), color, 2)
-    for (x0, y0), (x1, y1) in logic.dim_ticks((a.X, a.Y), (b.X, b.Y)):
-        d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), color, 2)
+    strokes = [((a.X, a.Y), (b.X, b.Y))] + logic.dim_ticks((a.X, a.Y), (b.X, b.Y))
+    halo = ui.halo(ui.viewport_dark())
+    for ink, width in ((halo, 2 + 2 * logic.HALO_PX), (color, 2)):          # the halo under, the line over it
+        for (x0, y0), (x1, y1) in strokes:
+            d.Draw2dLine(System.Drawing.PointF(x0, y0), System.Drawing.PointF(x1, y1), ink, width)
 
 
 def draw_screen(o, e):
@@ -2198,13 +2203,15 @@ def _draw_plan(doc, o, result, facts):
     o.yard_dims = [(rg.Line(_model_point(doc, y["points"][0], z), _model_point(doc, y["points"][1], z)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
     # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
-    o.yard_required = [(rg.Line(_model_point(doc, y["required_line"][0], z), _model_point(doc, y["required_line"][1], z)),
-                        y["status"]) for y in plan.get("yards") or [] if y.get("points") and y.get("required_line")]
+    o.yard_required = [(rg.Line(_model_point(doc, r[0], z), _model_point(doc, r[1], z)), y["status"])
+                       for y in plan.get("yards") or [] if y.get("points") for r in y.get("required_lines") or []]
     h = plan.get("height")
     o.height_dim = (rg.Line(_model_point(doc, h["at"], h["base"]), _model_point(doc, h["at"], h["top"])), h["label"],
                     h["status"], _model_point(doc, h["at"], h["limit"]) if h.get("limit") is not None else None) \
         if h else None
-    o.encroach = [(_proud(doc, piece), status)                           # coloured from the rule's result only
+    # what is drawn, each piece with its rule and building: the one list draw_scene draws and the in-Rhino checks
+    # read (logic.coloured_info)
+    o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
                   for e, status in ((e, e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
                   if logic.highlight(status) for piece in _offending(doc, e)]
     # every line a label must stay off (model space): the yard dimensions, the lot's edges, the house's edges
