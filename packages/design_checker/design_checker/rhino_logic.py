@@ -157,8 +157,8 @@ def legend_text(code=None):
             "Delta: how far over or under each limit (+ to spare, − short).\n\n"
             "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
             "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
-            "ridge, not its eaves). RED: it fails there under every reading. AMBER: it fails there under some "
-            "readings only (for example within the tax map's 2'-0\" of a lot line, which a survey settles). "
+            "ridge, not its eaves; a mesh or a block instance is coloured over its whole strip instead). RED: it "
+            "fails there under every reading. AMBER: it fails there under some readings only (for example within the tax map's 2'-0\" of a lot line, which a survey settles). "
             "Nothing where it complies. The buildable envelope is only a see-through guide: colours come from the "
             "rules' results.")
     return text + ("\n\nChecked against: " + code if code else "")

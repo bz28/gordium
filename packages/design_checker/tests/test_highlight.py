@@ -23,6 +23,8 @@ def test_the_legend_says_red_is_every_reading_amber_some_and_nothing_where_it_co
     assert "AMBER: it fails there under some readings only" in text and "2'-0\"" in text
     assert "Nothing where it complies" in text
     assert "a roof's ridge, not its eaves" in text and "a cantilever, not the ground under it" in text
+    # only solids are cut (gordium_rhino._offending): the legend says so (review round 1, H2)
+    assert "a mesh or a block instance is coloured over its whole strip instead" in text
 
 
 def test_the_scenarios_count_regions_as_the_plan_shows_them_not_blocks_per_floor():
