@@ -1,0 +1,67 @@
+{
+ "claims": {
+  "1 Check first beside Edit site\u2026, and Check after every edit unticked": {
+   "ok": true,
+   "detail": {
+    "buttons": [
+     "Check",
+     "Edit site\u2026",
+     "Pick survey lot lines\u2026"
+    ],
+    "auto": false
+   }
+  },
+  "2 an edit, then idle: no check ran": {
+   "ok": true,
+   "detail": 0
+  },
+  "2 the header says press Check and the rows are greyed": {
+   "ok": true,
+   "detail": {
+    "header": [
+     "106 Ithaca Rd, Ithaca, NY \u00b7 R-1b \u00b7 One-family dwelling, detached",
+     "Model changed since the last check \u2014 press Check",
+     "Draft rulebook \u00b7 not yet reviewed by a licensed professional",
+     "Lot lines: tax map, approximate (\u00b12'-0\")",
+     "Ground: assumed flat (elevation 0'-0\")",
+     "Check",
+     "Edit site\u2026",
+     "Pick survey lot lines\u2026"
+    ],
+    "stale": true
+   }
+  },
+  "2 the status box says it too": {
+   "ok": true,
+   "detail": [
+    "Gordium \u00b7 Model changed since the last check \u2014 press Check",
+    "Draft rulebook \u00b7 Lot lines: tax map, approximate (\u00b12'-0\")"
+   ]
+  },
+  "3 Check: one check, the rows current again": {
+   "ok": true,
+   "detail": 1
+  },
+  "4 ticked: saved, and an edit is checked by itself": {
+   "ok": true,
+   "detail": {
+    "saved": true,
+    "checks_at_tick": 1,
+    "checks": 2
+   }
+  }
+ },
+ "idle": {
+  "2": {
+   "events": 33,
+   "waited_s": 3.2,
+   "stale_shown": 1792971426.4671612
+  },
+  "4": {
+   "events": 6,
+   "waited_s": 3.4
+  }
+ },
+ "ok": true,
+ "done": true
+}
