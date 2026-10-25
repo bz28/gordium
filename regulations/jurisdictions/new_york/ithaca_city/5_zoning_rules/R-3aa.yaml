@@ -1617,17 +1617,20 @@ rules:
         page: 30
         lines: [31, 31]
         quote: (g) Hospitals or sanatoriums in R-3, CR-3, and CR-4 Districts.
-      - rank: 4
-        cite: 'Coalition letter to the Ithaca Common Council on the proposed Cornell Heights rezoning to R-3aa
-          (2014-01-31): it quotes R-3aa''s note 2 footprint cap, so R-3aa existed before §325-19E was added in 2019'
-        url: https://toxicstargeting.com/letters/2014/1/31/letter-to-ith-common-council
-        quote: No new construction of a primary structure in the R-3aa zone shall contain a footprint that is larger
-          than 120%
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 22
+        lines: [10, 10]
+        quote: 8-2-2017 by Ord. No. 2017-10; 11-1-2017 by Ord. No. 2017-14]
+      - file: chapter_325_zoning_2026-10.pdf
+        page: 50
+        lines: [15, 15]
+        quote: '[Added 7-3-2019 by Ord. No. 2019-12]'
       why_open: >-
         The code points both ways. §325-19E's own words name only R-3a and R-3b, twice, and its limits are
         figured from "the District Regulations Chart for the R-3a or R-3b District"; §325-4 lists R-3aa as a district
         of its own, and §325-11B(1) shows the code naming R-3 districts one by one where it means some of them. R-3aa
-        existed when §325-19E was adopted (2019; a 2014 letter already quotes its note 2), so leaving it out may have
+        existed when §325-19E was adopted (§325-19E was added 7-3-2019; §325-4, which lists R-3aa, was last amended
+        11-1-2017), so leaving it out may have
         been deliberate. But §325-19E's heading and chart note 1 speak of "R-3" and "property in R-3", the chart's R-3
         heading spans R-3AA, and elsewhere "R-3" means all three (§325-9B(1)(g)). No City record or BZA decision was
         found (searched the City's agenda center and the web, 2026-10-25). Until it is answered, Gordium doesn't leave

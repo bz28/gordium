@@ -133,27 +133,72 @@ def test_rus_500_ft_spacing_is_a_review_row_for_new_construction(facts):
     assert "RU.spacing_500_ft" not in _view("RU", "multiple_family", conversion=True)
 
 
-def test_the_dormitory_question_offers_each_districts_own_figures():
-    """§5.3 asks one question for R-3a, R-3aa, R-3b and RU; its Options must give, for every district tagged there,
-    that district's own "Other use" figure, read from the chart reader's cell (review round 2: they gave R-3a's
-    6,000 sf and note 7 only, wrong for R-3b's 4,000 sf / note 8 and RU's 30,000 sf / note 9)."""
+def _cell(column, section, row):
     import json
-    import re
-    doc = (REPO / "docs/questions_for_architects.md").read_text(encoding="utf-8")
-    section = doc.split("\n### 5.3 ", 1)[1].split("\n### ", 1)[0]
-    options = next(line for line in section.splitlines() if line.startswith("- **Options:**"))
-    districts = re.findall(r"`\[([A-Za-z0-9-]+)\.lot_area_other_use#1\]`", section)
-    assert sorted(districts) == ["R-3a", "R-3aa", "R-3b", "RU"]
     cells = [json.loads(line) for line in (ITHACA / "2_extracted_text/zoning_charts_2026-04.cells.jsonl")
              .open(encoding="utf-8")][1:]
+    return next(c["value"] for c in cells if c.get("page") == 3 and c.get("column") == column
+                and c.get("section") == section and c.get("row") == row)
+
+
+def _options(number, tag):
+    """The section's districts (from its tags) and its Options line cut at its "(a)", "(b)", "(c)" options."""
+    import re
+    doc = (REPO / "docs/questions_for_architects.md").read_text(encoding="utf-8")
+    section = doc.split(f"\n### {number} ", 1)[1].split("\n### ", 1)[0]
+    line = next(x for x in section.splitlines() if x.startswith("- **Options:**"))
+    parts = dict(re.findall(r"\(([abc])\) (.*?)(?= \([abc]\) |$)", line))
+    return re.findall(rf"`\[([A-Za-z0-9-]+)\.{tag}#1\]`", section), parts
+
+
+def _clause(text, district):
+    """The ";"-separated clause of an option that names this district (R-3a never matches inside R-3aa)."""
+    import re
+    found = [c for c in text.split(";") if re.search(rf"(?<![\w-]){re.escape(district)}(?![\w-])", c)]
+    assert len(found) == 1, (district, text)
+    return found[0]
+
+
+def test_the_dormitory_question_offers_each_districts_own_figures():
+    """§5.3 asks one question for R-3a, R-3aa, R-3b and RU; each option must give, in the clause naming the district,
+    that district's own figure, read from the chart reader's cells: (a) the multiple-family row's note, (b) "Other
+    use" (review round 2: they gave R-3a's 6,000 sf and note 7 only; round 3: checked clause by clause, since the same
+    figures occur in both options)."""
+    import re
+    districts, parts = _options("5.3", "lot_area_other_use")
+    assert sorted(districts) == ["R-3a", "R-3aa", "R-3b", "RU"]
     for d in districts:
         column = d.upper() if d != "RU" else "RU"
-        other = next(c["value"] for c in cells if c.get("page") == 3 and c.get("row") == "Other use"
-                     and c.get("section") == "Minimum Lot Size [fn3]" and c.get("column") == column)
-        new = next(c["value"] for c in cells if c.get("page") == 3 and c.get("column") == column
-                   and c.get("row") == "Multiple family dwelling, new construction")
-        note = re.search(r"\[fn(\d+)\]", new)[1]
-        assert other.split(" [")[0] in options and f"note {note}" in options, (d, other, note, options)
+        other = _cell(column, "Minimum Lot Size [fn3]", "Other use").split(" [")[0]
+        note = re.search(r"\[fn(\d+)\]", _cell(column, "Minimum Lot Size [fn3]",
+                                                  "Multiple family dwelling, new construction"))[1]
+        assert other in _clause(parts["b"], d), (d, other, parts["b"])
+        assert f"note {note}" in _clause(parts["a"], d), (d, note, parts["a"])
+
+
+def test_the_zero_lot_line_question_offers_each_districts_own_figures():
+    """§5.4's option (b) gives, for each district tagged there, its own "Other use" lot size and width (round 3)."""
+    districts, parts = _options("5.4", "lot_size_zero_lot_line")
+    assert sorted(districts) == ["R-3a", "R-3aa", "R-3b"]
+    for d in districts:
+        column = d.upper()
+        size = _cell(column, "Minimum Lot Size [fn3]", "Other use").split(" [")[0]
+        width = _cell(column, "Minimum Lot Width", "Other use").split(" [")[0]
+        clause = _clause(parts["b"], d)
+        assert size in clause and width in clause, (d, size, width, parts["b"])
+
+
+def test_the_new_rulebooks_research_rests_on_ithacas_own_records():
+    """Research ranks (rule_format SOURCE_RANKS): 4 is other places' codes, and none of these keys' questions rests on
+    one. R-3aa's question on §325-19E dates R-3aa from the code itself: §325-4's last amendment (2017) against
+    §325-19E's adoption (2019) (round 3: it had cited a citizen's letter as rank 4)."""
+    for rule in RULES.values():
+        for r in rule.get("research", []):
+            assert all(s.get("rank") in (None, 2) for s in r["sources"]), (rule["id"], r["question"][:60])
+    first = RULES["R-3aa.abutting_r1"]["research"][0]["sources"]
+    quotes = {(s.get("page"), s.get("quote")) for s in first}
+    assert (22, "8-2-2017 by Ord. No. 2017-10; 11-1-2017 by Ord. No. 2017-14]") in quotes
+    assert (50, "[Added 7-3-2019 by Ord. No. 2019-12]") in quotes
 
 
 def test_a_dormitory_in_r3aa_does_not_comply_on_use():
