@@ -188,7 +188,8 @@ def test_every_drafting_entry_for_a_person_about_the_zone_is_listed_as_not_check
     for zone in ("R-1a", "R-2a", "RU"):
         items = drafting_gaps(J, zone, zone_rules(J, zone))
         ids = [g["id"] for g in items]
-        assert len(ids) == len(set(ids)) <= 15, (zone, len(ids))                 # one item per unit
+        assert len(ids) == len(set(ids)) <= 16, (zone, len(ids))                 # one item per unit (16: §325-16C
+        #                                                  is listed for a person since its stage-1 parts are refused)
         assert "drafting.325-19E" not in ids                                      # §325-19E doesn't reach it
         assert not any("max_lot_coverage_first" in g["why"] for g in items)        # a sibling checks that cell
     assert drafting_gaps(J, "R-1b", zone_rules(J, "R-1b")) == []          # the hand R-1b: not the drafting log's
@@ -206,9 +207,12 @@ def test_a_chart_cell_no_chart_rule_checks_is_never_silent():
     names = [g["name"] for g in chart_gaps(J, "R-2c", rules)]
     assert any(n.startswith("Yard Dimensions: Side (one side minimum)") for n in names)
     assert any(n.startswith("Yard Dimensions: Side (other side minimum)") for n in names)
-    r2a = zone_rules(J, "R-2a")                                                    # R-2a keeps the whole bonus
-    without = [r for r in r2a if r["id"] != "R-2a.rear_yard_min"]         # the bonus still cites the rear cell
-    assert any("325_16c" in r["id"] and "rear" in r["id"] for r in without)
+    from design_checker.gaps import law_rule_ids
+    r2a = zone_rules(J, "R-2a")
+    rear = next(x for r in r2a if r["id"] == "R-2a.rear_yard_min" for x in r["sources"] if isinstance(x.get("cell"), dict))
+    law = sorted(law_rule_ids(J, "R-2a") & {r["id"] for r in r2a})[0]      # a law piece's own rule, citing the rear cell
+    without = [r | {"sources": r["sources"] + [rear]} if r["id"] == law else r for r in r2a if r["id"] != "R-2a.rear_yard_min"]
+    assert any(rear in r["sources"] for r in without)
     assert any(n.startswith("Yard Dimensions: Rear") for n in (g["name"] for g in chart_gaps(J, "R-2a", without)))
 
 
