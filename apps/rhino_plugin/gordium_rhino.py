@@ -2514,9 +2514,10 @@ def _context_layer_indexes(doc):
 
 def _parent_locked(doc, layer):
     """Whether any layer above this one is locked. Rhino then holds the layer locked whatever its own lock says:
-    locking a parent gives each sublayer the lock and saves the sublayer's own one as its persistent lock, which
-    unlocking the parent puts back (Layer.GetPersistentLocking). Under a locked parent IsLocked reads True for every
-    sublayer and says nothing about its own lock (the Rhino job's probe at e631aae)."""
+    locking a parent locks each sublayer, and unlocking it gives each sublayer its persistent lock
+    (Layer.GetPersistentLocking), which only SetPersistentLocking under a locked parent records: a sublayer locked
+    before its parent comes out unlocked, in plain Rhino too (grade_lock_probe.json at e997f0e). Under a locked parent
+    IsLocked reads True for every sublayer and says nothing about its own lock (the Rhino job's probe at e631aae)."""
     parent = layer.ParentLayerId
     while parent != System.Guid.Empty:
         above = doc.Layers.FindId(parent)
@@ -2644,7 +2645,7 @@ def _clear_context(doc, sources=None):
                 left += not doc.Objects.Delete(o, True)
     for i, visible, _, _ in was:           # every visibility first (each passes its lock down), then every lock,
         doc.Layers[i].IsVisible = visible
-    for i, _, locked, _ in was:            # a parent before its sublayers (locking it saves theirs as it finds them),
+    for i, _, locked, _ in was:            # a parent before its sublayers (locking it locks them all),
         doc.Layers[i].IsLocked = locked
     for i, _, _, own in was:               # then each layer's own lock, once every lock above it is back
         _set_own_lock(doc, doc.Layers[i], own)

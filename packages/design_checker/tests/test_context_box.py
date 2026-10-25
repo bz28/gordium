@@ -966,12 +966,21 @@ _NO_ID = "00000000-empty"
 
 
 class _Layer:
-    """A Rhino 8 layer as the Rhino job found it. Setting a layer's IsVisible, even to what it was, gives every
-    sublayer the layer's own lock (context_in_rhino.py at c783ee6, review round 4). Locking a layer saves each
-    sublayer's lock as its persistent lock and locks it; unlocking the layer gives each sublayer its persistent lock
-    back; a sublayer of a locked layer stays locked whatever it is set to, and setting it never changes its
-    persistent lock (the probe at e631aae: with "Gordium" locked, every context layer read locked while its
-    GetPersistentLocking was off, and unlocking "Gordium" unlocked Parcels, Streets and Notes)."""
+    """A Rhino 8 layer as the Rhino job found it, set through RhinoCommon:
+    - setting a layer's IsVisible, even to what it was, gives every sublayer the layer's own lock (context_in_rhino.py
+      at c783ee6, review round 4);
+    - locking a layer locks its sublayers without recording their own locks; unlocking it gives each sublayer its
+      persistent lock (GetPersistentLocking), off when none was set, so a sublayer locked before its parent comes
+      out unlocked (grade_lock_probe.json at e997f0e, no Gordium code);
+    - a sublayer of a locked layer stays locked whatever IsLocked is set to, and setting it records no own lock (the
+      probe at e631aae: the old redraw set IsLocked, and every context layer's GetPersistentLocking read off);
+    - SetPersistentLocking records a sublayer's own lock only while a layer above it is locked (the probe at e997f0e:
+      set while its parent is unlocked it records nothing; first_draw_locked.json: set under a locked "Gordium", it
+      is what each layer comes back as when "Gordium" is unlocked).
+    Whether locking a parent also clears a sublayer's recorded own lock is not known (both fit the probes): with
+    RESETS, it does, and every pin below holds either way (the rhino_model fixture)."""
+
+    RESETS = False
 
     def __init__(self, table, path, parent):
         self.table, self.FullPath, self.Id, self.IsDeleted = table, path, "id-" + path, False
@@ -1013,15 +1022,26 @@ class _Layer:
             return
         for sub in sorted(self._subs(), key=lambda x: x.FullPath.count("::")):
             if self._locked:
-                sub._persistent, sub._locked = sub._locked, True
+                sub._locked = True
+                if _Layer.RESETS:
+                    sub._persistent = None
             elif not sub._held():
                 sub._locked = sub.GetPersistentLocking()
 
     def GetPersistentLocking(self):
-        return self._persistent if self.ParentLayerId != _NO_ID and self._persistent is not None else self._locked
+        return bool(self._persistent)
 
     def SetPersistentLocking(self, locked):
-        self._persistent = bool(locked)
+        if self._held():
+            self._persistent = bool(locked)
+
+
+@pytest.fixture(params=["keeps", "resets"])
+def rhino_model(request):
+    """Each lock pin under both readings of Rhino: locking a parent keeps, or clears, a sublayer's own lock."""
+    _Layer.RESETS = request.param == "resets"
+    yield request.param
+    _Layer.RESETS = False
 
 
 class _Layers(list):
@@ -1044,7 +1064,7 @@ def _locks(doc):
     return {x.FullPath.split("::")[-1]: x.IsLocked for x in doc.Layers if logic.on_layer(x.FullPath, logic.CONTEXT)}
 
 
-def test_showing_or_hiding_the_neighbourhood_keeps_its_layers_locked_in_rhino_8():
+def test_showing_or_hiding_the_neighbourhood_keeps_its_layers_locked_in_rhino_8(rhino_model):
     """The Rhino job, review round 4: every context layer came out unlocked after GordiumStart. Showing the layers
     set the parent Gordium::Context's IsVisible, which in Rhino 8 gives the sublayers the parent's lock (unlocked, so
     the footprints can be dragged). After the tick off and on, and after a clear, only Parcels, Streets and Notes are
@@ -1076,7 +1096,7 @@ def _clear_ns():
     return ns
 
 
-def test_a_clear_under_a_locked_gordium_layer_deletes_on_unlocked_layers_and_puts_every_layer_back():
+def test_a_clear_under_a_locked_gordium_layer_deletes_on_unlocked_layers_and_puts_every_layer_back(rhino_model):
     """Review round 5: the clear showed the context layers before the parent "Gordium", so with "Gordium" locked its
     IsVisible (Rhino 8) locked them all again and every delete failed silently (the neighbourhood drawn twice); and
     the parent's IsVisible unlocked the architect's own Gordium::Grade. Now every layer under "Gordium" is opened
@@ -1153,34 +1173,66 @@ def _locked_gordium_doc():
     return doc, grade
 
 
-def test_a_redraw_under_a_locked_gordium_layer_keeps_each_layers_own_lock():
+def _with_probe(doc):
+    """A "Probe" layer with its own Grade beside "Gordium", which no Gordium code touches: the architect's layer as
+    plain Rhino leaves it, for Gordium::Grade to be compared with (the Rhino job's probe at e997f0e)."""
+    probe = _Layer(doc.Layers, "Probe", None)
+    doc.Layers.append(probe)
+    doc.Layers.append(_Layer(doc.Layers, "Probe::Grade", probe))
+    return probe, doc.Layers[-1]
+
+
+def _architect_locks(parent, grade, order):
+    """The architect locks their grades before or after the parent layer: before, by its lock; after (the parent
+    already locked), by the lock it is to have once the parent is unlocked (SetPersistentLocking)."""
+    if order == "before":
+        grade.IsLocked, parent.IsLocked = True, True
+    else:
+        parent.IsLocked = True
+        grade.SetPersistentLocking(True)
+
+
+def _state(layer):
+    return layer.IsLocked, layer.GetPersistentLocking()
+
+
+@pytest.mark.parametrize("order", ["before", "after"])
+def test_a_redraw_under_a_locked_gordium_layer_keeps_each_layers_own_lock(order, rhino_model):
     """The Rhino job at e631aae (context_in_rhino.py claim 4): with the architect's "Gordium" layer and Gordium::Grade
     locked, a redraw replaced the neighbourhood and every layer read locked, but each one's own (persistent) lock was
-    off, so unlocking "Gordium" unlocked Parcels, Streets and Notes (and the architect's Grade). The redraw read
-    IsLocked under the locked parent, where it says nothing about a sublayer's own lock. Now each layer's own lock is
-    kept: after "Gordium" is unlocked, Parcels, Streets, Notes and Grade are locked, Buildings and Context not."""
+    off, so unlocking "Gordium" unlocked Parcels, Streets and Notes. The redraw read IsLocked under the locked parent,
+    where it says nothing about a sublayer's own lock. Now each context layer's own lock is set: after "Gordium" is
+    unlocked, Parcels, Streets and Notes are locked, Buildings and Context not. The architect's Grade is left exactly
+    as plain Rhino leaves it (at e997f0e: locked before "Gordium", Rhino itself unlocks it with "Gordium"; locked
+    after, it stays locked)."""
     ns = _redraw_ns()
     doc, grade = _locked_gordium_doc()
+    probe, probe_grade = _with_probe(doc)
     ns["_lock_context"](doc, True)                                 # the first draw, "Gordium" unlocked
     assert _locks(doc) == _WANT
-    grade.IsLocked, doc.Layers[0].IsLocked = True, True            # the architect locks their grades, then "Gordium"
-    assert _own_locks(doc) == _WANT and grade.GetPersistentLocking()
+    _architect_locks(doc.Layers[0], grade, order)
+    _architect_locks(probe, probe_grade, order)
+    assert _state(grade) == _state(probe_grade)
     ns["draw_context"](doc, {"lot": "here"})                       # the redraw (Draw again, the tick, a re-lookup)
     assert ns["said"] == ["Neighbourhood drawn."]
-    assert doc.Layers[0].IsLocked and grade.IsLocked               # both locks back
-    assert _own_locks(doc) == _WANT and grade.GetPersistentLocking(), _own_locks(doc)
-    doc.Layers[0].IsLocked = False                                 # the architect unlocks "Gordium"
-    assert _locks(doc) == _WANT and grade.IsLocked, _locks(doc)
+    assert doc.Layers[0].IsLocked and _state(grade) == _state(probe_grade)
+    assert _own_locks(doc) == _WANT, _own_locks(doc)
+    doc.Layers[0].IsLocked, probe.IsLocked = False, False          # the architect unlocks "Gordium"
+    assert _locks(doc) == _WANT, _locks(doc)
+    assert _state(grade) == _state(probe_grade) and grade.IsLocked == (order == "after"), (_state(grade), order)
 
 
-def test_drawing_clearing_or_showing_under_a_locked_gordium_layer_keeps_each_layers_own_lock():
+@pytest.mark.parametrize("order", ["before", "after"])
+def test_drawing_clearing_or_showing_under_a_locked_gordium_layer_keeps_each_layers_own_lock(order, rhino_model):
     """Every path that changes the context layers' locks or visibility (draw_context's lock after adding, a clear, the
     panel tick) with "Gordium" locked: each layer's own lock is Gordium's (Parcels, Streets, Notes locked; Buildings and
-    Context not), so unlocking "Gordium" gives exactly that."""
+    Context not), so unlocking "Gordium" gives exactly that; Grade is as plain Rhino leaves it."""
     ns = _redraw_ns()
     for step in ("lock", "clear", "tick off", "tick on", "unlock and relock"):
         doc, grade = _locked_gordium_doc()
-        grade.IsLocked, doc.Layers[0].IsLocked = True, True        # locked before any context lock was set
+        probe, probe_grade = _with_probe(doc)
+        _architect_locks(doc.Layers[0], grade, order)              # locked before any context lock was set
+        _architect_locks(probe, probe_grade, order)
         if step == "lock":
             ns["_lock_context"](doc, True)                         # draw_context's lock after adding the objects
         elif step == "clear":
@@ -1192,22 +1244,26 @@ def test_drawing_clearing_or_showing_under_a_locked_gordium_layer_keeps_each_lay
         else:
             ns["_lock_context"](doc, False)                        # draw_context opens them to add, then locks
             ns["_lock_context"](doc, True)
-        assert doc.Layers[0].IsLocked and grade.IsLocked, step
-        assert _own_locks(doc) == _WANT and grade.GetPersistentLocking(), (step, _own_locks(doc))
-        doc.Layers[0].IsLocked = False
-        assert _locks(doc) == _WANT and grade.IsLocked, (step, _locks(doc))
+        assert doc.Layers[0].IsLocked and _state(grade) == _state(probe_grade), step
+        assert _own_locks(doc) == _WANT, (step, _own_locks(doc))
+        doc.Layers[0].IsLocked, probe.IsLocked = False, False
+        assert _locks(doc) == _WANT, (step, _locks(doc))
+        assert _state(grade) == _state(probe_grade) and grade.IsLocked == (order == "after"), step
 
 
-def test_the_first_draw_onto_layers_added_under_a_locked_gordium_layer_locks_them():
+def test_the_first_draw_onto_layers_added_under_a_locked_gordium_layer_locks_them(rhino_model):
     """Review round 1 of the fix: a context layer added under an already-locked "Gordium" (the first lookup in a file
     whose Gordium layer holds only the architect's Grade) may never have been locked by Rhino, and giving it only its
     persistent lock left Parcels, Streets and Notes editable while "Gordium" stayed locked. Now every one is locked
-    while "Gordium" is, with its own lock kept for when "Gordium" is unlocked."""
+    while "Gordium" is, with its own lock kept for when "Gordium" is unlocked (Rhino at e997f0e:
+    first_draw_locked.json)."""
     ns = _redraw_ns()
     doc, grade = _locked_gordium_doc()
     del doc.Layers[1:-1]                                           # no context layers yet: "Gordium" and Grade only
     assert [x.FullPath for x in doc.Layers] == ["Gordium", "Gordium::Grade"]
-    grade.IsLocked, doc.Layers[0].IsLocked = True, True
+    probe, probe_grade = _with_probe(doc)
+    _architect_locks(doc.Layers[0], grade, "after")
+    _architect_locks(probe, probe_grade, "after")
 
     def add(doc, name):                                            # _layer: each missing layer added, parent first
         for path in (logic.CONTEXT, logic.CONTEXT + "::" + name):
@@ -1219,11 +1275,36 @@ def test_the_first_draw_onto_layers_added_under_a_locked_gordium_layer_locks_the
     ns["draw_context"](doc, {"lot": "here"})
     assert len(_locks(doc)) == 5 and all(_locks(doc).values()), _locks(doc)   # all held while "Gordium" is locked
     assert _own_locks(doc) == _WANT, _own_locks(doc)
-    doc.Layers[0].IsLocked = False
-    assert _locks(doc) == _WANT and grade.IsLocked, _locks(doc)
+    doc.Layers[0].IsLocked, probe.IsLocked = False, False
+    assert _locks(doc) == _WANT and grade.IsLocked and _state(grade) == _state(probe_grade), _locks(doc)
 
 
-def test_a_clear_puts_an_unlocked_grade_back_unlocked_under_a_locked_gordium_layer():
+def test_the_fake_layers_do_what_rhino_did_without_gordium(rhino_model):
+    """The fake layer table against the Rhino job's probe at e997f0e (grade_lock_probe.json, no Gordium code): a
+    sublayer locked (by IsLocked, or SetPersistentLocking) while its parent is unlocked records no own lock, reads
+    locked under its locked parent and comes out unlocked when the parent is unlocked."""
+    for how in ("IsLocked", "SetPersistentLocking"):
+        layers = _Layers()
+        parent = _Layer(layers, "P", None)
+        layers.append(parent)
+        sub = _Layer(layers, "P::S", parent)
+        layers.append(sub)
+        if how == "IsLocked":
+            sub.IsLocked = True
+        else:
+            sub.SetPersistentLocking(True)
+            sub.IsLocked = True
+        assert not sub.GetPersistentLocking() and sub.IsLocked                 # own_after_lock, locked_after_lock
+        parent.IsLocked = True
+        assert not sub.GetPersistentLocking() and sub.IsLocked                 # own_under_locked_parent
+        parent.IsLocked = False
+        assert not sub.IsLocked                                                # locked_after_parent_unlocked
+    probe = json.loads((REPO / "docs/evidence/pr-23/grade_lock_probe.json").read_text(encoding="utf-8"))
+    assert all(v == {"own_after_lock": False, "locked_after_lock": True, "own_under_locked_parent": False,
+                     "locked_after_parent_unlocked": False} for k, v in probe.items() if k != "done")
+
+
+def test_a_clear_puts_an_unlocked_grade_back_unlocked_under_a_locked_gordium_layer(rhino_model):
     """The other way round: a layer the architect left unlocked under a locked "Gordium" comes back unlocked once
     "Gordium" is unlocked (its own lock kept, never Rhino's inherited one)."""
     ns = _redraw_ns()
