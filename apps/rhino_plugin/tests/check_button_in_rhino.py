@@ -139,6 +139,7 @@ def step_b():
 
     parts.get("auto_box").Checked = True
     run["saved"] = g._ui_state(doc).get("auto_check")
+    run["checks_at_tick"] = len(runs)              # the check after the edit counted alone (review round 2)
     move_top_floor(g, doc)
     edited("c")
 
@@ -146,8 +147,8 @@ def step_b():
 def step_c():
     g, runs = run["g"], run["runs"]
     log["idle"]["4"] = {"events": len(run["idle_at"]), "waited_s": round(time.time() - run["since"], 1)}
-    claim("4 ticked: saved, and an edit is checked by itself", run["saved"] is True and len(runs) == 2,
-          {"saved": run["saved"], "checks": len(runs)})
+    claim("4 ticked: saved, and an edit is checked by itself", run["saved"] is True and run["checks_at_tick"] == 1
+          and len(runs) == 2, {"saved": run["saved"], "checks_at_tick": run["checks_at_tick"], "checks": len(runs)})
     capture(run["doc"], "4_checked_by_itself")
     run["parts"].get("auto_box").Checked = False
     log["ok"] = all(c["ok"] for c in log["claims"].values())

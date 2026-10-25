@@ -201,7 +201,15 @@ def test_the_rhino_check_runs_its_idle_steps_across_real_idle():
     tick = body(script, "def tick(", "\ndef ")
     assert "Command.InCommand()" in tick and "idle_enough()" in tick and "PHASE_LIMIT_S" in tick
     assert tick.index("late = ") < tick.index("InCommand()")      # a command left running fails too (review round 1)
-    assert 'earlier["timer"].Stop()' in script                    # an earlier waiting run stopped first
+    in_command = tick[tick.index("InCommand()"):]
+    in_command = in_command[:in_command.index("return")]
+    assert "if late:" in in_command and 'claim("no command left running' in in_command
+    start = script.index('earlier = sc.sticky.get("gordium_check_button_run")')   # an earlier waiting run stopped
+    stop = script[start:script.index('os.remove(S + "out.json")')]                 # before this run's out.json
+    assert all(s in stop for s in ('earlier["finished"] = True', 'earlier["timer"].Stop()',
+                                   'Rhino.RhinoApp.Idle -= earlier["idle"]'))
+    step_c = body(script, "def step_c(", "\ndef ")
+    assert 'run["checks_at_tick"] == 1' in step_c and "len(runs) == 2" in step_c   # the edit's own check
     enough = body(script, "def idle_enough(", "\ndef ")
     assert 'run["idle_at"]' in enough and "IDLE_WAIT_S" in enough
     assert (REPO / "docs/evidence/pr-27/rhino-ea88c18/phased_run_claims.json").exists()
