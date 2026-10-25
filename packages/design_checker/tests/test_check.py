@@ -1743,9 +1743,11 @@ def test_zoomed_out_to_the_neighbourhood_the_plan_labels_give_way_and_come_back_
     assert logic.leader_end((0, 0), (10, 40, 80, 20)) == (10, 40)     # its corner
     rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
     draw = rhino[rhino.index("def draw_screen("):rhino.index("def _status_rows(")]
-    assert ('    zoomed_in = logic.labels_shown(_screen_size(e.Viewport, lot_points or getattr(o, "lot_outline", None)))'
-            in draw)                                  # judged from the lot's edges: a lot with arcs too (round 3, F5)
-    assert '    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]' in draw
+    zoom = rhino[rhino.index("def _zoomed_in("):rhino.index("def _model_dimension(")]   # (one place, scene and screen)
+    assert "    zoomed_in = _zoomed_in(o, e.Viewport)" in draw
+    assert ('    return logic.labels_shown(_screen_size(viewport, lot_points or getattr(o, "lot_outline", None)))'
+            in zoom)                                  # judged from the lot's edges: a lot with arcs too (round 3, F5)
+    assert '    lot_points = [q for _, _, edge in getattr(o, "edge_labels", None) or [] for q in (edge.From, edge.To)]' in zoom
     assert "        if plan and logic.yard_label_shown(labels, status) and zoomed_in:" in draw
     assert ('    for point, text, edge in (getattr(o, "edge_labels", None) or []) if plan and labels and zoomed_in else []:'
             in draw)

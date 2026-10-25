@@ -461,6 +461,16 @@ def stale(o):
 
 
 def draw_scene(o, e):
+    """The model-space drawing. Whatever happens in it (a step that raises is caught by the conduit's guard),
+    depth testing and depth writing are put back as Rhino set them (review round 1 of depth-lines, F3)."""
+    try:
+        _scene(o, e)
+    finally:
+        _on_top(e.Display, False)
+        _see_through(e.Display, False)
+
+
+def _scene(o, e):
     if not _here(o, e):
         return
     d = e.Display
@@ -473,10 +483,15 @@ def draw_scene(o, e):
             d.DrawMeshWires(g, ui.status_color("does_not_comply", dark))
         else:
             d.DrawBrepWires(g, ui.status_color("does_not_comply", dark), 2)
+    # the see-through fills never hide what is behind them: they write no depth, so a line behind the envelope or
+    # a coloured part still shows (review round 1 of depth-lines, F2); the solids in front still hide them
+    _see_through(d, True)
     if getattr(o, "yards_zone", None) is not None:          # the required yards, lightly shaded
         d.DrawBrepShaded(o.yards_zone, Rhino.Display.DisplayMaterial(BLUE, 0.9))
     if o.envelope is not None:               # see-through, drawn after the solids so they show through it
         d.DrawBrepShaded(o.envelope, Rhino.Display.DisplayMaterial(BLUE, 0.88))
+    _see_through(d, False)
+    if o.envelope is not None:
         # its outline only, the top dashed (the height limit): its faces' edges and isocurves banded the
         # elevations (the architect's review, 2026-10-21)
         bottom, top = getattr(o, "envelope_lines", None) or (None, None)
@@ -493,7 +508,9 @@ def draw_scene(o, e):
         for g, status in getattr(o, "encroach", None) or []:   # only the part over: red fails, amber review
             name = logic.highlight(status)
             colour = ui.HIGHLIGHT[name]
+            _see_through(d, True)
             d.DrawBrepShaded(g, Rhino.Display.DisplayMaterial(colour, ui.HIGHLIGHT_TRANSPARENCY))
+            _see_through(d, False)
             d.DrawBrepWires(g, colour, ui.HIGHLIGHT_EDGE[name])
     for pt in getattr(o, "grade_points", None) or []:           # spot grades
         d.DrawPoint(pt, Rhino.Display.PointStyle.X, 5, ui.status_color("complies", dark))
@@ -522,6 +539,11 @@ def draw_scene(o, e):
             d.DrawBrepWires(main, BLUE, 3)
         elif isinstance(main, rg.Mesh):
             d.DrawMeshWires(main, BLUE, 3)
+
+
+def _see_through(d, on):
+    """A see-through fill (on): drawn depth-tested but writing no depth, so it never hides what lies behind it."""
+    d.EnableDepthWriting(not on)
 
 
 def _on_top(d, on):
@@ -2173,10 +2195,13 @@ def _draw_plan(doc, o, result, facts):
     o.edge_labels = [(_model_point(doc, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)), e["length"],
                       rg.Line(_model_point(doc, a), _model_point(doc, b)))         # the edge: labelled beside it
                      for e in plan.get("edges") or [] for a, b in [e["points"]]]
-    o.yard_dims = [(rg.Line(_model_point(doc, y["points"][0], 0.1), _model_point(doc, y["points"][1], 0.1)),
+    # at the lot's own level, a hair above it: off plan they are depth-tested, and at z 0 a lot drawn higher (or the
+    # ground under it) hid them (review round 1 of depth-lines, F1)
+    z = logic.dim_level(_feet_length(doc, lot.Geometry.GetBoundingBox(True).Min.Z) if lot is not None else None)
+    o.yard_dims = [(rg.Line(_model_point(doc, y["points"][0], z), _model_point(doc, y["points"][1], z)),
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
     # each yard's required line, faint, square across its dimension; the height's vertical dimension (elevations)
-    o.yard_required = [(rg.Line(_model_point(doc, y["required_line"][0], 0.1), _model_point(doc, y["required_line"][1], 0.1)),
+    o.yard_required = [(rg.Line(_model_point(doc, y["required_line"][0], z), _model_point(doc, y["required_line"][1], z)),
                         y["status"]) for y in plan.get("yards") or [] if y.get("points") and y.get("required_line")]
     h = plan.get("height")
     o.height_dim = (rg.Line(_model_point(doc, h["at"], h["base"]), _model_point(doc, h["at"], h["top"])), h["label"],

@@ -9,7 +9,8 @@ Ithaca Rd), Show on-screen labels on.
 3. The pixels say so: along the rear yard's dimension (behind the house from the street), every sample the house
    hides (a ray from the camera hits the house first) is not the dimension's colour, and of the samples nothing
    hides at least half are (within 60 in each channel).
-4. Front (elevation): the height's dimension drawn in the model, depth-tested.
+4. Front (elevation, Shaded): the height's dimension drawn in the model, depth-tested; the see-through envelope
+   in front of it never hides it (at least 80 % of its pixels in its colour).
 Captures Top and Perspective (Shaded). Writes <temp>/gordium_depth/out.json and frames/*.png; closes its document."""
 import json
 import os
@@ -95,6 +96,9 @@ try:
     o = g.overlay()
     claim("the sample is drawn with its yard dimensions", len(o.yard_dims) >= 4, len(o.yard_dims))
 
+    frame = o.box if o.box.IsValid else doc.Objects.BoundingBox
+    for name in ("Top", "Front"):                        # at working zoom: dimensions give way zoomed out
+        doc.Views.Find(name, False).ActiveViewport.ZoomBoundingBox(frame)
     seen, _ = redraw_spied(g, doc, "Top", "1_top")
     log["top"] = seen
     claim("1 Top: the lines go on top", True in seen["on_top"], seen)
@@ -142,10 +146,23 @@ try:
           log["pixels"])
     claim("3 where nothing hides it, it shows", not open_ or sum(open_) >= len(open_) / 2.0, log["pixels"])
 
-    seen, _ = redraw_spied(g, doc, "Front", "4_front")
+    front_vp = doc.Views.Find("Front", False).ActiveViewport
+    front_vp.DisplayMode = Rhino.Display.DisplayModeDescription.FindByName("Shaded")
+    seen, bitmap = redraw_spied(g, doc, "Front", "4_front_shaded")
     log["front"] = seen
     claim("4 Front: the height's dimension drawn in the model, depth-tested",
           seen["model"] == 1 and seen["screen"] == 0 and True not in seen["on_top"], seen)
+    line, _, hstatus, _ = o.height_dim
+    want = g.ui.status_color(hstatus, g.ui.viewport_dark())
+    hits = []
+    for k in range(2, 39):
+        q = front_vp.WorldToClient(line.PointAt(k / 40.0))
+        if 0 <= q.X < bitmap.Width and 0 <= q.Y < bitmap.Height:
+            c = bitmap.GetPixel(int(q.X), int(q.Y))
+            hits.append(max(abs(c.R - want.R), abs(c.G - want.G), abs(c.B - want.B)) <= 60)
+    log["height_pixels"] = hits
+    claim("4 the see-through envelope never hides it: most of its length shows in its colour (Shaded Front)",
+          hits and sum(hits) >= 0.8 * len(hits), hits)
     log["ok"] = all(c["ok"] for c in log["claims"].values())
 except Exception:
     log["trace"] = traceback.format_exc()

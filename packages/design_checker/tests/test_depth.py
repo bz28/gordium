@@ -47,7 +47,7 @@ def test_an_upright_dimensions_ticks_show_in_the_front_and_the_right_views_alike
 
 
 def test_the_plugin_draws_its_lines_on_top_only_in_plan_and_puts_depth_testing_back():
-    scene = _body("draw_scene")
+    scene = _body("_scene")
     assert "on_top = logic.lines_on_top(e.Viewport.IsParallelProjection, e.Viewport.CameraDirection.Z)" in scene
     # each line group that goes on top is followed by putting depth testing back before anything else is drawn
     ups = [i for i in range(len(scene)) if scene.startswith("_on_top(d, on_top)", i)]
@@ -57,6 +57,39 @@ def test_the_plugin_draws_its_lines_on_top_only_in_plan_and_puts_depth_testing_b
     assert scene.rstrip().endswith("d.DrawMeshWires(main, BLUE, 3)") and downs[-1] < scene.index("if o.confirm is not None")
     assert "if not on_top:" in scene and "_scene_dims(o, e, d, dark, old)" in scene
     assert "d.EnableDepthTesting(not on)" in _body("_on_top")
+
+
+def test_whatever_a_frame_does_depth_testing_and_writing_are_put_back():
+    """A step that raises is caught by the conduit's guard; without the finally, depth testing stayed off for the
+    rest of Rhino's frame (review round 1, F3)."""
+    tree = ast.parse(_body("draw_scene"))
+    (fn,) = tree.body
+    (t,) = [n for n in fn.body if isinstance(n, ast.Try)]
+    done = ast.unparse(t.finalbody)
+    assert "_on_top(e.Display, False)" in done and "_see_through(e.Display, False)" in done
+    assert "_scene(o, e)" in ast.unparse(t.body)
+
+
+def test_the_see_through_fills_write_no_depth_so_lines_behind_them_still_show():
+    """The envelope, the yards' fill and the coloured parts are see-through: drawn without writing depth, so a
+    dimension behind them is not hidden (review round 1, F2); depth writing is back on after each."""
+    scene = _body("_scene")
+    assert "d.EnableDepthWriting(not on)" in _body("_see_through")
+    for fill in ("d.DrawBrepShaded(o.yards_zone", "d.DrawBrepShaded(o.envelope", "d.DrawBrepShaded(g, Rhino.Display"):
+        at = scene.index(fill)
+        before, after = scene[:at], scene[at:]
+        assert before.rindex("_see_through(d, True)") > before.rfind("_see_through(d, False)"), fill
+        lines = [i for i in (after.find(k) for k in ("d.DrawBrepWires", "d.DrawPolyline", "d.DrawPatterned",
+                                                       "d.DrawLine", "d.DrawPoint")) if i > 0]
+        assert after.index("_see_through(d, False)") < min(lines), fill      # back on before any line is drawn
+
+
+def test_the_yard_dimensions_stand_just_above_the_lots_own_level():
+    """Off plan they are depth-tested: at z 0 a lot drawn higher, or the ground under it, hid them (round 1, F1)."""
+    assert logic.dim_level(412.0) == pytest.approx(412.1) and logic.dim_level(None) == pytest.approx(0.1)
+    plan = _body("_draw_plan")
+    assert "z = logic.dim_level(_feet_length(doc, lot.Geometry.GetBoundingBox(True).Min.Z)" in plan
+    assert plan.count(", z), _model_point(doc,") == 2 and ", 0.1)" not in plan
 
 
 def test_off_plan_the_dimensions_are_drawn_in_the_model_and_not_over_the_solids():

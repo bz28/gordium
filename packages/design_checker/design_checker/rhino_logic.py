@@ -1579,6 +1579,16 @@ def is_plan_view(parallel, direction_z, tolerance=0.99):
     return bool(parallel) and direction_z <= -tolerance
 
 
+DIM_LIFT_FT = 0.1       # the yard dimensions stand this far above the lot's level (never in it, never under it)
+
+
+def dim_level(lot_level_ft):
+    """The height (feet) the yard dimensions are drawn at: just above the lot's own level (its outline's lowest
+    point), so the ground and a lot drawn above z 0 never hide them where they are depth-tested; 0 + lift
+    without a lot."""
+    return (lot_level_ft or 0.0) + DIM_LIFT_FT
+
+
 def lines_on_top(parallel, direction_z):
     """Whether Gordium's lines (the lot line, the envelope's outline, the dimensions, the neighbourhood) are drawn
     over everything in this view: in plan yes, so a line under the roof (the buildable outline, a dimension to the
