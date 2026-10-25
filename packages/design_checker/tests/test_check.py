@@ -2421,3 +2421,68 @@ def test_a_street_picked_in_pieces_never_reads_the_lot_wider_than_its_street():
     a, b = [[0, 0], [40, 0]], [[40, 0], [40, 100]]
     assert logic.street_words("A St", [a, b], None).endswith("Gordium asks one street or two before measuring along them")
     assert logic.street_words("A St", [a], None) == "A St: 1 lot-line piece, 40'-0\" of frontage"
+
+
+def test_the_suggested_street_and_a_click_on_it_keep_the_whole_street_so_the_front_yard_is_never_read_from_part():
+    """Street-run review round 1, F1 (a false pass on the Front yard): a drawn lot's suggested street was its lowest
+    single piece, and clicking that highlighted piece kept it alone (pick_street extended only a line not among the
+    street lines), so a house 10 ft from the street's other pieces read its front yard from the one piece, 46 ft
+    away, and complied. Now the suggestion is the whole street that piece is surely on, and a click on a street
+    line also grows to the rest of its street."""
+    import sys
+    sys.path[:0] = [str(REPO / "packages/design_checker/tests"), str(REPO / "packages/model_measurement/tests")]
+    from design_checker import rhino_logic as logic
+    from design_checker.check import check_site
+    from test_measure import lot as lot_of
+    from test_present import _plot, box, FACTS, CITY
+    corners = [(0, 0), (20, 0), (40, 0), (60, 0), (80, 0), (100, 0), (100, 160), (0, 160)]
+    outline = _ring(corners)
+    whole = [list(map(list, x)) for x in outline[:5]]
+    got = logic.suggested_facts("j", ["R-1b"], [{"id": "lot", "area": 16000, "bottom": 0.0,
+                                                 "segments": [tuple(map(tuple, x)) for x in outline]}], [])
+    assert sorted(map(str, got["street_line"])) == sorted(map(str, whole)), got["street_line"]
+    base = {**FACTS, "jurisdiction": CITY, "lot_surveyed": True, "corner_lot": False}
+
+    def front(street):
+        r = check_site(_plot(box(65, 10, 85, 50, 0, 30), lot_=lot_of(corners)), dict(base, street_line=street))
+        return next(i for i in r["view"]["items"] if i.get("measure") == "front_yard")
+
+    assert front([outline[0]])["status"] == "complies"                   # the one piece alone: the false pass
+    for old in ([outline[0]], whole):
+        lines, ids = logic.pick_street(old, None, outline[0], None, outline=outline)
+        assert sorted(map(str, lines)) == sorted(map(str, whole)) and ids is None, (old, lines)
+        assert front(lines)["status"] == "does_not_comply" and front(lines)["proposed"] == "10'-0\"", front(lines)
+    lines, ids = logic.pick_street([outline[0]], ["A St"], outline[0], "A St", outline=outline)
+    assert len(lines) == 5 and ids == ["A St", None, None, None, None]       # the name on the clicked line only
+    two = [outline[0], outline[1]]                                          # known two streets: its own, and on
+    lines, ids = logic.pick_street(two, ["A St", "B Ave"], outline[0], "A St", outline=outline)
+    assert lines == [outline[0]] and ids == ["A St"], (lines, ids)          # never onto B Ave's piece
+
+
+def test_an_unclear_stretch_never_takes_in_the_street_past_a_bend():
+    """Street-run review round 1, F2: an unclear stretch ran on past a rounded corner along the whole other street,
+    so one Yes kept both streets as one (and the other street could no longer be its own click). Now a joint past
+    PIECE_TURN_DEG is a question of its own, a Yes grows the street on and asks again, and the straight street past
+    the bend is its own question: answered No, it stays clickable as Street 2."""
+    from design_checker import rhino_logic as logic
+
+    def walk(start, headings, length=10.0):
+        pts, (x, y) = [start], start
+        for h in headings:
+            x, y = x + length * math.cos(math.radians(h)), y + length * math.sin(math.radians(h))
+            pts.append((round(x, 9), round(y, 9)))
+        return pts
+
+    pts = walk((0, 10), [0, 0, 0, 20, 40, 60, 80, 90, 90, 90, 90, 90])     # 0..11; 12 the rear; 13, 14 the sides
+    lot = _ring(pts + [(-50, pts[-1][1]), (-50, 0), (0, 0)])
+    got = logic.street_run(lot, lot[0])
+    assert got["pieces"] == [0, 1, 2] and got["maybe"] == [[], [3]], got
+    asked = []
+    answers = iter([True, True, True, True])                                # the bend, piece by piece: Yes
+    run, said = logic.street_pick(lot, lot[0], ask=lambda q: asked.append(q) or next(answers, False))
+    assert run == [0, 1, 2, 3, 4, 5, 6] and len(asked) == 5, (run, asked)  # the 5th: the straight street, No
+    assert asked[-1] == ("Past there the lot line bends 10° with no clear corner (5 more lot-line pieces, 50'-0\"). "
+                         "Is that on This street too?"), asked[-1]
+    assert said.endswith("not surely one street: Gordium asks one street or two before measuring along them"), said
+    runs, _ = logic.add_street_pick([[0, 1, 2, 3, 4, 5, 6]], lot, lot[9], None, lambda q: False)
+    assert runs[1] == [7, 8, 9, 10, 11], runs
