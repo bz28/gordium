@@ -1,0 +1,144 @@
+{
+ "case": "two",
+ "zone_given": [
+  "R-2a",
+  "R-1b"
+ ],
+ "head": "86ddf9d",
+ "claims": {
+  "8 two zones (R-2a, R-1b): nothing preselected, and the box asks which, once": {
+   "ok": true,
+   "detail": {
+    "title": "New zoning check",
+    "zone_selected": null,
+    "zone_items": [
+     "R-1b"
+    ],
+    "source": "not set",
+    "reason": "Pick the district to continue.",
+    "amber": "",
+    "confirm": false,
+    "draw_enabled": false,
+    "labels": [
+     "Address",
+     "Zoning district",
+     "not set",
+     "? The City map puts this lot in R-2a and R-1b; Gordium doesn't have R-2a's rules yet: pick the district that applies only if you know it.",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+     "Front lot line (on the street)",
+     "Ithaca Road",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Pick the district to continue."
+    ],
+    "stage": "after lookup"
+   }
+  }
+ },
+ "shows": [
+  {
+   "title": "New zoning check",
+   "zone_selected": null,
+   "zone_items": [
+    "R-1b"
+   ],
+   "source": "not set",
+   "reason": "Pick the district to continue.",
+   "amber": "",
+   "confirm": false,
+   "draw_enabled": false,
+   "labels": [
+    "Address",
+    "Zoning district",
+    "not set",
+    "? The City map puts this lot in R-2a and R-1b; Gordium doesn't have R-2a's rules yet: pick the district that applies only if you know it.",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+    "Front lot line (on the street)",
+    "Ithaca Road",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Pick the district to continue."
+   ],
+   "stage": "after lookup"
+  }
+ ],
+ "at_shown": [
+  {
+   "n": 1,
+   "phase": "start",
+   "zone_index": 0,
+   "source": "entered by you",
+   "address": "106 Ithaca Rd, Ithaca, NY",
+   "buttons": [
+    "Look up",
+    "Use my survey\u2026",
+    "Change\u2026",
+    "Cancel",
+    "Draw"
+   ]
+  },
+  {
+   "n": 2,
+   "phase": "lookup",
+   "zone_index": 0,
+   "source": "entered by you",
+   "address": "106 Ithaca Rd, Ithaca, NY 14850",
+   "buttons": [
+    "Looking up\u2026",
+    "Use my survey\u2026",
+    "Change\u2026",
+    "Cancel",
+    "Draw"
+   ]
+  },
+  {
+   "n": 3,
+   "phase": "lookup",
+   "zone_index": -1,
+   "source": "not set",
+   "address": "106 Ithaca Road, Ithaca, NY, 14850",
+   "buttons": [
+    "Look up",
+    "Use my survey\u2026",
+    "Change\u2026",
+    "Cancel",
+    "Draw"
+   ]
+  }
+ ],
+ "poll": [
+  {
+   "zone_before": {
+    "value": [
+     "R-2a",
+     "R-1b"
+    ],
+    "source": "suggested by Gordium",
+    "confirmed_by": null,
+    "date": "2026-10-20"
+   }
+  },
+  {
+   "zone_after": {
+    "value": [
+     "R-2a",
+     "R-1b"
+    ],
+    "source": "suggested by Gordium",
+    "confirmed_by": null,
+    "date": "2026-10-20"
+   }
+  }
+ ],
+ "facts_after_start": null,
+ "saved_ui_after_start": {},
+ "ok": true
+}

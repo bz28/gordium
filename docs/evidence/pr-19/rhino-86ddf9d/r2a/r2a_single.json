@@ -1,0 +1,368 @@
+{
+ "case": "single",
+ "zone_given": "R-2a",
+ "head": "86ddf9d",
+ "claims": {
+  "2 no district preselected; the zone row reads not set": {
+   "ok": true,
+   "detail": {
+    "title": "New zoning check",
+    "zone_selected": null,
+    "zone_items": [
+     "R-1b"
+    ],
+    "source": "not set",
+    "reason": "Pick the district to continue.",
+    "amber": "",
+    "confirm": false,
+    "draw_enabled": false,
+    "labels": [
+     "Address",
+     "Zoning district",
+     "not set",
+     "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+     "Front lot line (on the street)",
+     "Ithaca Road",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Pick the district to continue."
+    ],
+    "stage": "after lookup"
+   }
+  },
+  "3 the amber line reads the City map says R-2a, no rules yet": {
+   "ok": true,
+   "detail": ""
+  },
+  "4 Draw is off, with Pick the district to continue.": {
+   "ok": true,
+   "detail": {
+    "title": "New zoning check",
+    "zone_selected": null,
+    "zone_items": [
+     "R-1b"
+    ],
+    "source": "not set",
+    "reason": "Pick the district to continue.",
+    "amber": "",
+    "confirm": false,
+    "draw_enabled": false,
+    "labels": [
+     "Address",
+     "Zoning district",
+     "not set",
+     "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+     "Front lot line (on the street)",
+     "Ithaca Road",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Pick the district to continue."
+    ],
+    "stage": "after lookup"
+   }
+  },
+  "5 picking R-1b sets its source at once: entered by you": {
+   "ok": true,
+   "detail": {
+    "title": "New zoning check",
+    "zone_selected": "R-1b",
+    "zone_items": [
+     "R-1b"
+    ],
+    "source": "entered by you",
+    "reason": "Confirm the district to continue.",
+    "amber": "",
+    "confirm": false,
+    "draw_enabled": false,
+    "labels": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+     "Front lot line (on the street)",
+     "Ithaca Road",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     "Confirm the district to continue."
+    ],
+    "stage": "R-1b picked"
+   }
+  },
+  "6 ticking I confirm turns Draw on at once, with an empty reason line": {
+   "ok": true,
+   "detail": {
+    "title": "New zoning check",
+    "zone_selected": "R-1b",
+    "zone_items": [
+     "R-1b"
+    ],
+    "source": "entered by you",
+    "reason": "",
+    "amber": "",
+    "confirm": true,
+    "draw_enabled": true,
+    "labels": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+     "Front lot line (on the street)",
+     "Ithaca Road",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     ""
+    ],
+    "stage": "ticked"
+   }
+  },
+  "7 after Draw, reopened: R-1b, still entered by you": {
+   "ok": true,
+   "detail": {
+    "title": "Zoning check \u00b7 site",
+    "zone_selected": "R-1b",
+    "zone_items": [
+     "R-1b"
+    ],
+    "source": "entered by you",
+    "reason": "",
+    "amber": "",
+    "confirm": true,
+    "draw_enabled": true,
+    "labels": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+     "Front lot line (on the street)",
+     "Ithaca Road",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "",
+     ""
+    ],
+    "stage": "reopened"
+   }
+  }
+ },
+ "shows": [
+  {
+   "title": "New zoning check",
+   "zone_selected": null,
+   "zone_items": [
+    "R-1b"
+   ],
+   "source": "not set",
+   "reason": "Pick the district to continue.",
+   "amber": "",
+   "confirm": false,
+   "draw_enabled": false,
+   "labels": [
+    "Address",
+    "Zoning district",
+    "not set",
+    "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+    "Front lot line (on the street)",
+    "Ithaca Road",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Pick the district to continue."
+   ],
+   "stage": "after lookup"
+  },
+  {
+   "title": "New zoning check",
+   "zone_selected": "R-1b",
+   "zone_items": [
+    "R-1b"
+   ],
+   "source": "entered by you",
+   "reason": "Confirm the district to continue.",
+   "amber": "",
+   "confirm": false,
+   "draw_enabled": false,
+   "labels": [
+    "Address",
+    "Zoning district",
+    "entered by you",
+    "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+    "Front lot line (on the street)",
+    "Ithaca Road",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    "Confirm the district to continue."
+   ],
+   "stage": "R-1b picked"
+  },
+  {
+   "title": "New zoning check",
+   "zone_selected": "R-1b",
+   "zone_items": [
+    "R-1b"
+   ],
+   "source": "entered by you",
+   "reason": "",
+   "amber": "",
+   "confirm": true,
+   "draw_enabled": true,
+   "labels": [
+    "Address",
+    "Zoning district",
+    "entered by you",
+    "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+    "Front lot line (on the street)",
+    "Ithaca Road",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    ""
+   ],
+   "stage": "ticked"
+  },
+  {
+   "title": "Zoning check \u00b7 site",
+   "zone_selected": "R-1b",
+   "zone_items": [
+    "R-1b"
+   ],
+   "source": "entered by you",
+   "reason": "",
+   "amber": "",
+   "confirm": true,
+   "draw_enabled": true,
+   "labels": [
+    "Address",
+    "Zoning district",
+    "entered by you",
+    "Use",
+    "Lot",
+    "7,033 sf \u00b7 from the tax map (\u00b12 ft, approximate) \u00b7 NYS Tax Parcels Public",
+    "Front lot line (on the street)",
+    "Ithaca Road",
+    "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+    "Corner lot?",
+    "Not checked yet: overlays (historic, gorge, flood)",
+    "",
+    ""
+   ],
+   "stage": "reopened"
+  }
+ ],
+ "at_shown": [
+  {
+   "n": 1,
+   "phase": "start",
+   "zone_index": 0,
+   "source": "entered by you",
+   "address": "106 Ithaca Rd, Ithaca, NY",
+   "buttons": [
+    "Look up",
+    "Use my survey\u2026",
+    "Change\u2026",
+    "Cancel",
+    "Draw"
+   ]
+  },
+  {
+   "n": 2,
+   "phase": "lookup",
+   "zone_index": 0,
+   "source": "entered by you",
+   "address": "106 Ithaca Rd, Ithaca, NY 14850",
+   "buttons": [
+    "Looking up\u2026",
+    "Use my survey\u2026",
+    "Change\u2026",
+    "Cancel",
+    "Draw"
+   ]
+  },
+  {
+   "n": 3,
+   "phase": "lookup",
+   "zone_index": -1,
+   "source": "not set",
+   "address": "106 Ithaca Road, Ithaca, NY, 14850",
+   "buttons": [
+    "Look up",
+    "Use my survey\u2026",
+    "Change\u2026",
+    "Cancel",
+    "Draw"
+   ]
+  },
+  {
+   "n": 4,
+   "phase": "reopen",
+   "zone_index": 0,
+   "source": "entered by you",
+   "address": "106 Ithaca Road, Ithaca, NY, 14850",
+   "buttons": [
+    "Look up",
+    "Use my survey\u2026",
+    "Change\u2026",
+    "Cancel",
+    "Check"
+   ]
+  }
+ ],
+ "poll": [
+  {
+   "zone_before": {
+    "value": "R-2a",
+    "source": "suggested by Gordium",
+    "confirmed_by": null,
+    "date": "2026-10-20"
+   }
+  },
+  {
+   "zone_after": {
+    "value": "R-2a",
+    "source": "suggested by Gordium",
+    "confirmed_by": null,
+    "date": "2026-10-20"
+   }
+  }
+ ],
+ "facts_after_start": null,
+ "saved_ui_after_start": {
+  "zone_source": "entered by you"
+ },
+ "ok": true
+}
