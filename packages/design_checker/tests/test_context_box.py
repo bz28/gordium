@@ -966,17 +966,28 @@ _NO_ID = "00000000-empty"
 
 
 class _Layer:
-    """A Rhino 8 layer as the Rhino job found it (context_in_rhino.py at c783ee6, review round 4): setting a layer's
-    IsVisible, even to what it was, gives every sublayer the layer's own lock."""
+    """A Rhino 8 layer as the Rhino job found it. Setting a layer's IsVisible, even to what it was, gives every
+    sublayer the layer's own lock (context_in_rhino.py at c783ee6, review round 4). Locking a layer saves each
+    sublayer's lock as its persistent lock and locks it; unlocking the layer gives each sublayer its persistent lock
+    back; a sublayer of a locked layer stays locked whatever it is set to, and setting it never changes its
+    persistent lock (the probe at e631aae: with "Gordium" locked, every context layer read locked while its
+    GetPersistentLocking was off, and unlocking "Gordium" unlocked Parcels, Streets and Notes)."""
 
     def __init__(self, table, path, parent):
         self.table, self.FullPath, self.Id, self.IsDeleted = table, path, "id-" + path, False
         self.ParentLayerId = parent.Id if parent is not None else _NO_ID
-        self._visible, self.IsLocked = True, False
+        self._visible, self._locked, self._persistent = True, False, None
 
     @property
     def Index(self):
         return self.table.index(self)
+
+    def _subs(self):
+        return [x for x in self.table if x.FullPath.startswith(self.FullPath + "::")]
+
+    def _held(self):
+        """Whether a layer above this one is locked."""
+        return any(x._locked for x in self.table if self.FullPath.startswith(x.FullPath + "::"))
 
     @property
     def IsVisible(self):
@@ -985,9 +996,32 @@ class _Layer:
     @IsVisible.setter
     def IsVisible(self, on):
         self._visible = on
-        for sub in self.table:
-            if sub.FullPath.startswith(self.FullPath + "::"):
-                sub.IsLocked = self.IsLocked
+        for sub in self._subs():
+            sub._locked = self._locked
+
+    @property
+    def IsLocked(self):
+        return self._locked
+
+    @IsLocked.setter
+    def IsLocked(self, locked):
+        if self._held():                       # Rhino holds a sublayer of a locked layer locked
+            self._locked = True
+            return
+        was, self._locked = self._locked, bool(locked)
+        if was == self._locked:
+            return
+        for sub in sorted(self._subs(), key=lambda x: x.FullPath.count("::")):
+            if self._locked:
+                sub._persistent, sub._locked = sub._locked, True
+            elif not sub._held():
+                sub._locked = sub.GetPersistentLocking()
+
+    def GetPersistentLocking(self):
+        return self._persistent if self.ParentLayerId != _NO_ID and self._persistent is not None else self._locked
+
+    def SetPersistentLocking(self, locked):
+        self._persistent = bool(locked)
 
 
 class _Layers(list):
@@ -1017,7 +1051,8 @@ def test_showing_or_hiding_the_neighbourhood_keeps_its_layers_locked_in_rhino_8(
     locked; the parent and Buildings never."""
     ns = {"logic": logic, "STATE": {}, "SECTION": "gordium",
           "System": type("System", (), {"Guid": type("Guid", (), {"Empty": _NO_ID})})}
-    for name in ("_context_layer_indexes", "_lock_context", "_context_visible", "_clear_context"):
+    for name in ("_parent_locked", "_own_lock", "_set_own_lock", "_context_layer_indexes", "_lock_context",
+                 "_context_visible", "_clear_context"):
         exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)
     want = {"Context": False, "Parcels": True, "Streets": True, "Buildings": False, "Notes": True}
     doc = _context_doc()
@@ -1035,7 +1070,8 @@ def _clear_ns():
           "System": type("System", (), {"Guid": type("Guid", (), {"Empty": _NO_ID})})}
     ns["say"] = ns["said"].append
     ns["_outline_points"], ns["_attrs_print"] = (lambda geometry: None), (lambda attrs, doc: {})
-    for name in ("_context_layer_indexes", "_lock_context", "_context_visible", "_clear_context"):
+    for name in ("_parent_locked", "_own_lock", "_set_own_lock", "_context_layer_indexes", "_lock_context",
+                 "_context_visible", "_clear_context"):
         exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)
     return ns
 
@@ -1050,7 +1086,7 @@ def test_a_clear_under_a_locked_gordium_layer_deletes_on_unlocked_layers_and_put
     grade = _Layer(doc.Layers, "Gordium::Grade", doc.Layers[0])
     doc.Layers.append(grade)
     ns["_lock_context"](doc, True)
-    doc.Layers[0].IsLocked, grade.IsLocked = True, True            # the architect locked "Gordium" and their grades
+    grade.IsLocked, doc.Layers[0].IsLocked = True, True            # the architect locked their grades and "Gordium"
     seen = []
     drawn = type("O", (), {"Id": "o1", "Geometry": None, "Attributes": type("A", (), {
         "GetUserString": lambda self, k: "nys_parcels" if k == logic.CONTEXT_KEY else None})()})()
@@ -1065,12 +1101,139 @@ def test_a_clear_under_a_locked_gordium_layer_deletes_on_unlocked_layers_and_put
     assert seen and all(not locked and visible for _, locked, visible in seen), seen   # open when read
     assert deleted == ["o1"] and ns["said"] == []
     assert doc.Layers[0].IsLocked and grade.IsLocked                                    # put back as they were
-    assert _locks(doc) == {"Context": False, "Parcels": True, "Streets": True, "Buildings": False, "Notes": True}
+    assert _own_locks(doc) == _WANT   # each own lock (under a locked parent Rhino reads every sublayer locked)
     doc.Objects = type("Objects", (), {"FindByLayer": lambda self, layer: find(layer),
                                        "Delete": lambda self, o, quiet: False})()       # Rhino refuses
     assert ns["_clear_context"](doc) == 1 and ns["said"] == []      # counted for the caller's one line (round 6)
     assert "could not remove 1 neighbourhood object " in logic.context_not_cleared(1)
     assert logic.outermost_first([(5, "A::B::C"), (2, "A"), (9, "A::B"), (1, "A::D")]) == [2, 1, 9, 5]
+
+
+_WANT = {"Context": False, "Parcels": True, "Streets": True, "Buildings": False, "Notes": True}
+
+
+def _own_locks(doc):
+    """Each context layer's own lock, as GetPersistentLocking reads it (what it is once "Gordium" is unlocked)."""
+    return {x.FullPath.split("::")[-1]: x.GetPersistentLocking() for x in doc.Layers
+            if logic.on_layer(x.FullPath, logic.CONTEXT)}
+
+
+def _redraw_ns():
+    """draw_context run for real on the fake layers: a found neighbourhood with nothing new to add."""
+    ns = _clear_ns()
+    for name in ("draw_context",):
+        exec(RHINO[RHINO.index("def %s(" % name):].split("\ndef ", 1)[0], ns)
+
+    class Logic:
+        def __getattr__(self, name):
+            return getattr(logic, name)
+        context_merge = staticmethod(lambda payload, old, frame, live_on_screen: {
+            "payload": payload, "record": {"frame": frame}, "replace": None, "keep_guides": True})
+        context_objects = staticmethod(lambda payload: [])
+        context_says = staticmethod(lambda payload: "Neighbourhood drawn.")
+    ns["logic"] = Logic()
+    ns["_context_payload"] = lambda frame: {"status": "found"}
+    ns["_context_record"] = lambda doc: None
+    ns["_edited_pieces"] = lambda doc: []
+    ns["_context_on"] = lambda doc: True
+    ns["CONTEXT_GREYS"] = {"Parcels": 0, "Streets": 0, "Buildings": 0, "Notes": 0}
+    ns["json"] = json
+    ns["_context_layer"] = lambda doc, name: doc.Layers.index(next(
+        x for x in doc.Layers if x.FullPath == logic.CONTEXT + "::" + name))
+    return ns
+
+
+def _locked_gordium_doc():
+    doc = _context_doc()
+    grade = _Layer(doc.Layers, "Gordium::Grade", doc.Layers[0])
+    doc.Layers.append(grade)
+    doc.Strings = type("Strings", (), {"Delete": lambda self, section, key: None,
+                                       "SetString": lambda self, section, key, value: None})()
+    doc.Views = type("Views", (), {"Redraw": lambda self: None})()
+    return doc, grade
+
+
+def test_a_redraw_under_a_locked_gordium_layer_keeps_each_layers_own_lock():
+    """The Rhino job at e631aae (context_in_rhino.py claim 4): with the architect's "Gordium" layer and Gordium::Grade
+    locked, a redraw replaced the neighbourhood and every layer read locked, but each one's own (persistent) lock was
+    off, so unlocking "Gordium" unlocked Parcels, Streets and Notes (and the architect's Grade). The redraw read
+    IsLocked under the locked parent, where it says nothing about a sublayer's own lock. Now each layer's own lock is
+    kept: after "Gordium" is unlocked, Parcels, Streets, Notes and Grade are locked, Buildings and Context not."""
+    ns = _redraw_ns()
+    doc, grade = _locked_gordium_doc()
+    ns["_lock_context"](doc, True)                                 # the first draw, "Gordium" unlocked
+    assert _locks(doc) == _WANT
+    grade.IsLocked, doc.Layers[0].IsLocked = True, True            # the architect locks their grades, then "Gordium"
+    assert _own_locks(doc) == _WANT and grade.GetPersistentLocking()
+    ns["draw_context"](doc, {"lot": "here"})                       # the redraw (Draw again, the tick, a re-lookup)
+    assert ns["said"] == ["Neighbourhood drawn."]
+    assert doc.Layers[0].IsLocked and grade.IsLocked               # both locks back
+    assert _own_locks(doc) == _WANT and grade.GetPersistentLocking(), _own_locks(doc)
+    doc.Layers[0].IsLocked = False                                 # the architect unlocks "Gordium"
+    assert _locks(doc) == _WANT and grade.IsLocked, _locks(doc)
+
+
+def test_drawing_clearing_or_showing_under_a_locked_gordium_layer_keeps_each_layers_own_lock():
+    """Every path that changes the context layers' locks or visibility (draw_context's lock after adding, a clear, the
+    panel tick) with "Gordium" locked: each layer's own lock is Gordium's (Parcels, Streets, Notes locked; Buildings and
+    Context not), so unlocking "Gordium" gives exactly that."""
+    ns = _redraw_ns()
+    for step in ("lock", "clear", "tick off", "tick on", "unlock and relock"):
+        doc, grade = _locked_gordium_doc()
+        grade.IsLocked, doc.Layers[0].IsLocked = True, True        # locked before any context lock was set
+        if step == "lock":
+            ns["_lock_context"](doc, True)                         # draw_context's lock after adding the objects
+        elif step == "clear":
+            ns["_lock_context"](doc, True)
+            ns["_clear_context"](doc)
+        elif step.startswith("tick"):
+            ns["_lock_context"](doc, True)
+            ns["_context_visible"](doc, step == "tick on")
+        else:
+            ns["_lock_context"](doc, False)                        # draw_context opens them to add, then locks
+            ns["_lock_context"](doc, True)
+        assert doc.Layers[0].IsLocked and grade.IsLocked, step
+        assert _own_locks(doc) == _WANT and grade.GetPersistentLocking(), (step, _own_locks(doc))
+        doc.Layers[0].IsLocked = False
+        assert _locks(doc) == _WANT and grade.IsLocked, (step, _locks(doc))
+
+
+def test_the_first_draw_onto_layers_added_under_a_locked_gordium_layer_locks_them():
+    """Review round 1 of the fix: a context layer added under an already-locked "Gordium" (the first lookup in a file
+    whose Gordium layer holds only the architect's Grade) may never have been locked by Rhino, and giving it only its
+    persistent lock left Parcels, Streets and Notes editable while "Gordium" stayed locked. Now every one is locked
+    while "Gordium" is, with its own lock kept for when "Gordium" is unlocked."""
+    ns = _redraw_ns()
+    doc, grade = _locked_gordium_doc()
+    del doc.Layers[1:-1]                                           # no context layers yet: "Gordium" and Grade only
+    assert [x.FullPath for x in doc.Layers] == ["Gordium", "Gordium::Grade"]
+    grade.IsLocked, doc.Layers[0].IsLocked = True, True
+
+    def add(doc, name):                                            # _layer: each missing layer added, parent first
+        for path in (logic.CONTEXT, logic.CONTEXT + "::" + name):
+            if not any(x.FullPath == path for x in doc.Layers):
+                doc.Layers.append(_Layer(doc.Layers, path, next(x for x in doc.Layers
+                                                                if x.FullPath == path.rsplit("::", 1)[0])))
+        return doc.Layers.index(next(x for x in doc.Layers if x.FullPath == logic.CONTEXT + "::" + name))
+    ns["_context_layer"] = add
+    ns["draw_context"](doc, {"lot": "here"})
+    assert len(_locks(doc)) == 5 and all(_locks(doc).values()), _locks(doc)   # all held while "Gordium" is locked
+    assert _own_locks(doc) == _WANT, _own_locks(doc)
+    doc.Layers[0].IsLocked = False
+    assert _locks(doc) == _WANT and grade.IsLocked, _locks(doc)
+
+
+def test_a_clear_puts_an_unlocked_grade_back_unlocked_under_a_locked_gordium_layer():
+    """The other way round: a layer the architect left unlocked under a locked "Gordium" comes back unlocked once
+    "Gordium" is unlocked (its own lock kept, never Rhino's inherited one)."""
+    ns = _redraw_ns()
+    doc, grade = _locked_gordium_doc()
+    ns["_lock_context"](doc, True)
+    doc.Layers[0].IsLocked = True                                  # "Gordium" locked, Grade itself not
+    ns["_clear_context"](doc)
+    assert grade.IsLocked and not grade.GetPersistentLocking()
+    doc.Layers[0].IsLocked = False
+    assert not grade.IsLocked and _locks(doc) == _WANT
 
 
 def test_a_full_clear_still_drops_the_record_the_footprints_held_and_puts_the_changed_mark_back():
