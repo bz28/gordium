@@ -37,11 +37,27 @@ cd $HOME\Documents\gordium
 git pull
 ```
 
-No install step this time (2026-10-22, evening): no new Python packages since the last update.
+No install step this time (2026-10-25): no new Python packages since the last update.
 
 Then **quit Rhino completely and open it again** (Rhino keeps the old Gordium loaded until it restarts).
 
-## What's new in this preview (2026-10-22, evening)
+## What's new in this preview (2026-10-25)
+
+Everything in the 2026-10-22 evening preview below, plus three fixes found by testing it in Rhino:
+
+- **"Keep my building" says plainly that your lot is replaced.** When you Draw with a new address after working on
+  the old one, the question now names your lot as it came (your surveyed lot, the lot you drew, or your lot) and the
+  Keep answer names the new address, for example: **Keep my building and check it on 96 Ithaca Road's lot (your
+  surveyed lot will be replaced)**. A new address is a new site: the lot is always replaced, whichever answer you
+  pick; Keep keeps only your buildings and checks them on the new lot. (This is what it already did; now it says so.)
+- **Undo and Redo of a new-address Draw are exact.** **Undo** brings back the old address and its drawing, with
+  nothing of the new address left on screen (no leftover lot outline or dashed lookup outline). **Redo** brings the
+  new address back as it was drawn. After either one Gordium checks the model again, so the panel matches what you see.
+- **The neighbourhood stays locked when you unlock Gordium.** Neighbouring parcels, streets, notes and ground are on
+  their own locked layers under the Gordium layer. Locking and then unlocking the Gordium layer no longer unlocks
+  them, so you can't move the City's lines by accident.
+
+## What was new on 2026-10-22, evening
 
 Everything in the morning preview below, plus:
 
