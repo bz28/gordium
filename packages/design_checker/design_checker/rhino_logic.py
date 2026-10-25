@@ -2098,7 +2098,8 @@ def address_place(address):
     names none; the City's own name and ZIP codes count as none (the lot is in the City of Ithaca)."""
     tail = str(address or "").split(",", 1)[1:] if "," in str(address or "") else []
     text = (tail[0] if tail else "").lower().replace(",", " ").replace(".", "")
-    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("united states", "")
+    text = " ".join(text.split()).replace("city of ithaca", "ithaca").replace("ithaca city", "ithaca")
+    text = text.replace("united states of america", "").replace("united states", "")
     words = [w for w in text.split() if w not in ("ny", "new", "york", "usa", "us")]
     words = [w[:5] if w[:5].isdigit() else w for w in words]
     places = [w for w in words if w not in ITHACA_PLACE]
@@ -2117,11 +2118,11 @@ def address_reason(state):
     lot. "" when the address is blank or known (`known_addresses`, in the box's state; absent: no address rule)."""
     address = (state.get("address") or "").strip()
     known = state.get("known_addresses")
+    look = state.get("lookup") or {}
+    if known is not None and look.get("looking"):         # a lookup running: Draw off, its own address named
+        return WAIT_LOOKUP.format(address=look["looking"])
     if not address or known is None or any(same_site_address(address, k) for k in known):
         return ""
-    look = state.get("lookup") or {}
-    if look.get("looking"):                               # a lookup running: Draw still off, nothing to press yet
-        return WAIT_LOOKUP.format(address=address)
     status = look.get("status")
     if status in LOOKUP_SAYS and same_site_address(address, look.get("query")):    # looked up, no lot came back
         if status == "multiple":

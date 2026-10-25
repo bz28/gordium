@@ -551,7 +551,8 @@ def test_another_towns_address_is_never_taken_for_the_lots_own():
         "Press Look up to find 106 Ithaca Rd, Dryden, NY 13053 first."
     assert logic.address_reason(dict(known, address="106 Ithaca Rd, Lansing")) != ""
     for same in ("106 Ithaca Road", "106 ithaca rd, Ithaca NY 14850", "106 Ithaca Rd, Ithaca, NY, 14850-1234",
-                 "106 Ithaca Rd, City of Ithaca, NY", "106 Ithaca Rd, Ithaca, United States", "106 Ithaca Rd, Ithaca, N.Y."):
+                 "106 Ithaca Rd, City of Ithaca, NY", "106 Ithaca Rd, Ithaca, United States", "106 Ithaca Rd, Ithaca, N.Y.",
+                 "106 Ithaca Rd, Ithaca, New York, United States of America", "106 Ithaca Rd, Ithaca City"):
         assert logic.address_reason(dict(known, address=same)) == "", same
     assert logic.address_reason(dict(known, address="106 Ithaca Rd, Town of Ithaca")) != ""   # another municipality
     failed = {"status": "not_found", "query": "500 Elm St"}            # its failure is never another town's
@@ -566,6 +567,11 @@ def test_while_a_lookup_runs_the_reason_never_says_to_press_look_up():
     box._apply()
     box.saved["_lookup"] = {"looking": "96 Ithaca Rd"}
     assert logic.address_reason(box.shown()) == "Looking up 96 Ithaca Rd: Draw once the answer is in."
+    box.type_address(SAMPLE)                                 # the lot's own typed back meanwhile: still waits
+    assert logic.address_reason(box.shown()) == "Looking up 96 Ithaca Rd: Draw once the answer is in."
+    box.type_address("500 Elm St")                           # another typed: the line names the lookup's address
+    assert logic.address_reason(box.shown()) == "Looking up 96 Ithaca Rd: Draw once the answer is in."
+    box.type_address("96 Ithaca Rd")
     before = site.state()
     assert box.draw() == "off" and site.state() == before    # the gate stays on (round 3): never a label saved
 
@@ -582,6 +588,27 @@ def test_a_loose_query_typed_back_is_saved_as_found():
     assert box.draw() == "drawn" and logic.same_address(site.facts["address"], "96 Ithaca Road")
     assert site.facts["address"] == site.saved["drawn_address"]
     assert site.sources["address"]["source"] != logic.ENTERED      # the lookup's address with the lookup's source
+
+
+def test_after_the_guide_reset_the_found_address_keeps_the_lookups_source():
+    """Round 4 (P2): on the City-guide path the box's loop carried the old box's ticks back, address_source
+    ("entered by you") among them, over the address as found; it was saved as the architect's."""
+    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    keeps = eval(rhino.split("\nGUIDE_KEEPS = ", 1)[1].split("\n", 1)[0])       # noqa: S307 (the file's own tuple)
+    assert "address_source" not in keeps
+    assert "if k in GUIDE_KEEPS}" in rhino[rhino.index("def _box_loop("):]
+    site = Site()
+    p = guide_only("96_ithaca_rd")
+    p["query"] = "96 Ithica Rd"
+    box = site.box().look_up(p)
+    box.type_address("96 Ithica Rd")
+    box.typed["address_source"] = logic.ENTERED
+    ticked = {k: box.shown()[k] for k in ("district_confirmed", "zone_source", "address_source", "use_source")}
+    assert box.draw() == "open"
+    box.typed.update({k: v for k, v in ticked.items() if k in keeps})   # as the plugin's loop carries them
+    box.draw_my_lot()
+    assert box.draw() == "drawn" and logic.same_address(site.facts["address"], "96 Ithaca Road")
+    assert site.sources["address"]["source"] != logic.ENTERED
 
 
 def test_the_box_turns_draw_off_and_on_as_the_address_is_typed():

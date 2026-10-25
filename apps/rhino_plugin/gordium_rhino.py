@@ -1647,6 +1647,11 @@ def _confirm(doc, facts, options, mode):
         doc.Views.Redraw()
 
 
+# what of the architect's ticks stays after the City-guide reset (the box open again on the new lot): never the
+# address's source, which is the reset's (the address as found keeps the lookup's: typed-address rule, round 4)
+GUIDE_KEEPS = ("district_confirmed", "zone_source", "use_source")
+
+
 def _box_loop(doc, facts, options, mode, saved_ui, session):
     """The box until Draw (the facts) or Cancel (None); rhino_logic.run_box rolls the session back on any way out
     but Draw's, Esc and errors included."""
@@ -1690,8 +1695,7 @@ def _box_loop(doc, facts, options, mode, saved_ui, session):
             if drawn_state is None or (saved_ui.get("_lookup") or {}).get("looking"):
                 ticked = {}
             elif drawn_state is not state:            # after the reset (the guide): its lot rows are the model's
-                ticked = {k: v for k, v in ticked.items() if k in ("district_confirmed", "zone_source",
-                                                                    "address_source", "use_source")}
+                ticked = {k: v for k, v in ticked.items() if k in GUIDE_KEEPS}
             continue
         if what in ("pick:lookup", "pick:lookup_done"):   # the lookup's answer replaces them (and the district
             ticked = {}                                   # must be confirmed again)
