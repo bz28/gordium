@@ -88,3 +88,26 @@ The panel tick, clicked (`context_tick_in_rhino.py` at 955d97f): **10 of 10 clai
 |---|---|
 | `106_context_top_955d97f.png` | Top view at 955d97f |
 | `106_context_perspective_955d97f.png` | The same in 3D |
+
+## Re-run at 369f389 (2026-10-25): 15 of 16, the locked-parent claim fails
+
+The test as run: 369f389's own `context_in_rhino.py`, in a copy that records every claim rather than stopping at
+the first failure (`context_results_369f389.json`), with recorded answers for 106 Ithaca Rd. GordiumStart with the
+neighbourhood took 6.7 s. Every claim of the 955d97f run still holds, and three newer claims pass: the copy pasted
+in place and the print-width footprint are kept; a saved, reopened file keeps only the architect's outlines.
+
+**Fails: "4 with the Gordium layer and the architect's Gordium::Grade locked, a redraw replaces (never doubles) and
+puts both locks back".** The redraw does replace (319 outlines before and after), and both locks are put back. But
+a probe (`context_lock_probe_e631aae.json`, the same code in the demo at e631aae) shows:
+- While "Gordium" is locked, every neighbourhood layer's own lock (`GetPersistentLocking`) is off. They read locked
+  only because their parent is.
+- Once "Gordium" is unlocked, Parcels, Streets and Notes are unlocked. They should stay locked. This is a product
+  bug: each layer's own lock has to be set while its parent is locked.
+- The claim also reads the locks while the parent is still locked. Rhino then reports every sublayer locked, so
+  "Buildings unlocked" can never hold at that moment. The claim should read each layer's own lock, or read the
+  locks after the parent is unlocked.
+
+| File | What it shows |
+|---|---|
+| `106_context_top_369f389.png` | Top view at 369f389 |
+| `106_context_perspective_369f389.png` | The same in 3D |
