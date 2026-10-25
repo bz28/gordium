@@ -914,3 +914,21 @@ def test_the_grid_tries_every_use_a_formula_names_with_its_other_inputs_varied(c
     got = grade_mapped({"district": "R-2c", "rules": [hand]}, {"R-2c.k": {"judge": [["R-2c.r", "R-2c.f"]], "reason": "x"}},
                        [rule, flag], ctx)
     assert [(x["given"]["use"], x["got"]) for x in got["false_pass"]] == [("one_family_detached_zero_lot_line", "pass")]
+
+
+def test_every_mapping_reason_describes_the_drafts_there_are():
+    """Review round 15: after §325-16C's parts were refused, the height reasons still said the bonus was "drafted as
+    separate rules: parts of the answer", and the eaves reasons named a flag no longer drafted. A reason that
+    claims parts has parts, and a drafted rule id a reason names is drafted."""
+    import re as _re
+    m = mapping()
+    stale = []
+    for name, k in m["keys"].items():
+        have = {r["id"] for r in drafted_rules_for(k["district"])}
+        for hid, e in k["rules"].items():
+            if "parts of the answer" in e["reason"] and not e.get("parts"):
+                stale.append((name, hid, "claims parts"))
+            for rid in _re.findall(r"\b(?:general|R-\w+)\.[a-z0-9_]+\b", e["reason"]):
+                if rid not in have:
+                    stale.append((name, hid, rid))
+    assert stale == []

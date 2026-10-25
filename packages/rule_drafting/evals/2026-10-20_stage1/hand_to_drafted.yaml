@@ -41,8 +41,9 @@ keys:
         judge:
         - - R-1b.max_height_ft
         parts: []
-        reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, compared with the hand rule as their own group'
+        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
+          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
+          passes it, and a person checks §325-16C'
       R-1b.lot_coverage:
         judge:
         - - R-1b.max_lot_coverage
@@ -63,9 +64,9 @@ keys:
       R-1b.yard_projections:
         judge:
         - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
-          question by another measure, so it is compared too'
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
+          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
+          every design with eaves to review; compared'
       R-1b.accessory_buildings:
         judge:
         - - R-1b.325_25a_accessory_not_in_required_front_yard
@@ -119,8 +120,9 @@ keys:
         judge:
         - - R-1a.max_height_ft
         parts: []
-        reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, compared with the hand rule as their own group'
+        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
+          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
+          passes it, and a person checks §325-16C'
       R-1a.lot_coverage:
         judge:
         - - R-1a.max_lot_coverage
@@ -141,9 +143,9 @@ keys:
       R-1a.yard_projections:
         judge:
         - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
-          question by another measure, so it is compared too'
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
+          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
+          every design with eaves to review; compared'
       R-1a.accessory_buildings:
         judge:
         - - R-1a.325_25a_accessory_not_in_required_front_yard
@@ -213,8 +215,9 @@ keys:
         judge:
         - - R-2a.max_height_ft
         parts: []
-        reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, compared with the hand rule as their own group'
+        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
+          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
+          passes it, and a person checks §325-16C'
       R-2a.lot_coverage:
         judge:
         - - R-2a.max_lot_coverage
@@ -235,9 +238,9 @@ keys:
       R-2a.yard_projections:
         judge:
         - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
-          question by another measure, so it is compared too'
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
+          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
+          every design with eaves to review; compared'
       R-2a.accessory_buildings:
         judge:
         - - R-2a.325_25a_accessory_not_in_required_front_yard
@@ -318,8 +321,9 @@ keys:
         judge:
         - - R-2b.max_height_ft
         parts: []
-        reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, compared with the hand rule as their own group'
+        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
+          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
+          passes it, and a person checks §325-16C'
       R-2b.lot_coverage:
         judge:
         - - R-2b.max_lot_coverage
@@ -340,9 +344,9 @@ keys:
       R-2b.yard_projections:
         judge:
         - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
-          question by another measure, so it is compared too'
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
+          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
+          every design with eaves to review; compared'
       R-2b.accessory_buildings:
         judge:
         - - R-2b.325_25a_accessory_not_in_required_front_yard
@@ -445,8 +449,9 @@ keys:
         judge:
         - - R-2c.max_height_ft
         parts: []
-        reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, compared with the hand rule as their own group'
+        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
+          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
+          passes it, and a person checks §325-16C'
       R-2c.lot_coverage:
         judge:
         - - R-2c.max_lot_coverage_first
@@ -468,9 +473,9 @@ keys:
       R-2c.yard_projections:
         judge:
         - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
-          question by another measure, so it is compared too'
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
+          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
+          every design with eaves to review; compared'
       R-2c.accessory_buildings:
         judge:
         - - R-2c.325_25a_accessory_not_in_required_front_yard
@@ -576,8 +581,9 @@ keys:
         judge:
         - - R-3a.max_height_ft
         parts: []
-        reason: 'the chart''s height row; §325-16C''s extra height (with larger yards) is an exception drafted as separate
-          rules: parts of the answer, compared with the hand rule as their own group'
+        reason: 'the chart''s height row alone: §325-16C''s extra height isn''t drafted (stage 1''s parts are refused: an
+          exception is one relaxing rule; its re-draft is pending), so a taller house with larger yards fails where the key
+          passes it, and a person checks §325-16C'
       R-3a.lot_coverage:
         judge:
         - - R-3a.max_lot_coverage
@@ -598,9 +604,9 @@ keys:
       R-3a.yard_projections:
         judge:
         - - general.325_18b_architectural_feature_projection_limit
-        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s open-yard flag sends every design
-          to review; its projection limit (a measure the AI proposed, demoted: records/demoted.yaml) answers the same eaves
-          question by another measure, so it is compared too'
+        reason: '§325-18B: required yards stay open but for eaves up to 2 ft; the draft''s projection limit (on a measure
+          the AI proposed, not the eave''s distance to the lot line) is demoted to a flag (records/demoted.yaml), so it sends
+          every design with eaves to review; compared'
       R-3a.accessory_buildings:
         judge:
         - - R-3a.325_25a_accessory_not_in_required_front_yard

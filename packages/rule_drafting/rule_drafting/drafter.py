@@ -893,21 +893,45 @@ def all_or_none(answer: dict, unit: dict, out: dict) -> None:
         out["rules"] = {d: rs for d, rs in out["rules"].items() if rs}
 
 
-ABOVE_SLOT = re.compile(r"\b([a-z_][a-z0-9_]*)\s*>=?\s*\{([a-z0-9_]+)\}")
+SLOT_NAME = re.compile(r"\{([a-z0-9_]+)\}")
+
+
+def _applies(when: str, values: dict) -> bool:
+    """Whether a condition can hold (true, or unknown for the measures not given): not 'not applicable'."""
+    return outcome({"kind": "flag", "applies_when": when}, values, {}) != "not_applicable"
 
 
 def exception_in_parts(template: dict) -> list[str]:
     """An exception that allows more than a chart limit, drafted as separate parts ("when building_height >
     {height}: building_height - {height} <= 0.1 * {height}", "when taller: front_yard >= ..."), leaves the chart rule
     failing what the exception allows (a 37 ft house with every yard enlarged): it must be one rule that relaxes the
-    chart rule. A requirement the exception adds on top of a different measure (stories) is fine as its own rule."""
+    chart rule. Found by what the condition does, however it is written (`{height} < building_height`, `not
+    (building_height <= {height})`, `building_height - {height} > 0`): with the slot at a value, it doesn't apply one
+    below it and applies one above, and the check limits that same measure. A requirement the exception adds on top
+    of a different measure (stories) is fine as its own rule."""
+    from rule_format import formula
     if (template.get("relaxes") or "").strip() or template["kind"] != "rule":
         return []
-    for measure, slot in ABOVE_SLOT.findall(template.get("applies_when") or ""):
-        if re.search(rf"\b{re.escape(measure)}\b", template.get("check") or ""):
-            return [f"it applies above the chart's {{{slot}}} and limits {measure} there: an exception that allows more "
-                    f"than a chart rule is one rule that relaxes it (relaxes: \"{slot}\"), with every condition of the "
-                    "exception in applies_when and the most it allows in check"]
+    when, check = template.get("applies_when") or "", template.get("check") or ""
+    if not when.strip():
+        return []
+    slots = [x["name"] for x in template.get("slots") or []]
+    try:
+        limited = formula.names(SLOT_NAME.sub("0", check))
+        measures = formula.names(SLOT_NAME.sub("0", when)) & limited
+    except formula.FormulaError:
+        return []                                   # reported with the formula
+    for slot in slots:
+        filled = SLOT_NAME.sub(lambda m: "35" if m[1] == slot else "0", when)
+        for measure in sorted(measures - {"use", "district"}):
+            try:
+                above = not _applies(filled, {measure: 34}) and _applies(filled, {measure: 36})
+            except Exception:                       # noqa: BLE001 - a condition code can't read is reported elsewhere
+                above = False
+            if above:
+                return [f"it applies above the chart's {{{slot}}} and limits {measure} there: an exception that allows "
+                        f"more than a chart rule is one rule that relaxes it (relaxes: \"{slot}\"), with every condition "
+                        "of the exception in applies_when and the most it allows in check"]
     return []
 
 

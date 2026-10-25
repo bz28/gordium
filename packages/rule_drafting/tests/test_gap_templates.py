@@ -367,8 +367,8 @@ def test_the_height_bonus_drafted_in_parts_is_refused_and_one_relaxing_rule_is_k
     The parts that limit the measure above the chart's limit are refused; the stories part (a different measure)
     stays; the one relaxing rule is kept."""
     old = _recorded(inputs, "325-16C")
-    parts = [x for x in old["templates"] if drafter.ABOVE_SLOT.search(x.get("applies_when") or "")]
-    assert parts
+    parts = [x for x in old["templates"] if "{height_ft}" in (x.get("applies_when") or "")]
+    assert len(parts) == 5
     refused = {x["id_suffix"] for x in parts if drafter.exception_in_parts(x)}
     assert {"extra_height_limit", "extra_height_front_yard", "extra_height_side_yards", "extra_height_rear_yard"} <= refused
     assert "extra_height_stories" not in refused
@@ -391,3 +391,17 @@ def test_the_guards_refuse_the_recorded_stage1_answers_in_check_answer(inputs):
     assert any("relaxes it" in p for p in bonus_parts["problems"])
     eaves = judge(inputs, "325-18B", _recorded(inputs, "325-18B")["templates"])
     assert any("makes every design need review" in p for p in eaves["problems"])
+
+
+
+@pytest.mark.parametrize("condition", ["building_height > {height_ft}", "building_height >= {height_ft}",
+                                       "{height_ft} < building_height", "not (building_height <= {height_ft})",
+                                       "building_height - {height_ft} > 0", "(building_height > {height_ft})"])
+def test_the_parts_form_is_refused_however_its_condition_is_written(inputs, condition):
+    """Review round 15: only `measure > {slot}` was recognised; `{height_ft} < building_height` let stage 1's parts
+    through in six districts. Judged by what the condition does, every spelling is refused, in check_answer too."""
+    old = _recorded(inputs, "325-16C")
+    rewritten = [x | {"applies_when": condition} if "{height_ft}" in (x.get("applies_when") or "") else x
+                 for x in old["templates"]]
+    got = judge(inputs, "325-16C", rewritten, cli.drafted_rules(inputs))
+    assert got["rules"] == {} and sum("relaxes it" in p for p in got["problems"]) == 4, got["problems"][:2]
