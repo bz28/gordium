@@ -761,17 +761,30 @@ def _prism(doc, outline, base, top):
     return brep
 
 
-def _offending(doc, e):
+def _solids_for(doc, entries):
+    """Each coloured block's building as a solid Rhino can cut, made once per building per check (a Brep copy, an
+    extrusion or SubD converted; None for a mesh or anything else): the blocks of one building share it
+    (independent review of #28, P3)."""
+    out = {}
+    for e in entries:
+        key = e.get("building") or ""
+        if key not in out:
+            found = _find(doc, key)
+            out[key] = _drawable(found.Geometry) if found is not None else None
+    return out
+
+
+def _offending(doc, e, solids=None):
     """The part of its building inside one coloured block (check.plan: a yard strip from the building's bottom to
     its top, or what rises above the height limit): Rhino's intersection of the building with the block, so a
     cantilever over a yard is coloured and not the air under it, a roof's ridge and not the sky over its slopes.
     The block is cut a hair larger (_proud) so none of its faces lies on the building's own. The block itself when
-    Rhino can't intersect (a block instance, a mesh, a boolean that fails): never nothing (logic.offending_pieces)."""
+    Rhino can't intersect (a mesh, a boolean that fails): never nothing (logic.offending_pieces). `solids`: the
+    buildings made once for the check (_solids_for); without it, this block's own."""
     block = _prism(doc, e["outline"], e["base"], e["top"])
     if block is None:
         return []
-    found = _find(doc, e.get("building") or "")
-    solid = _drawable(found.Geometry) if found is not None else None
+    solid = (solids if solids is not None else _solids_for(doc, [e])).get(e.get("building") or "")
     pieces = None
     if isinstance(solid, rg.Brep) and solid.IsSolid:       # a boolean that raises colours the block, never stops the check
         pieces = logic.guard(lambda: rg.Brep.CreateBooleanIntersection(
@@ -2101,9 +2114,11 @@ def _draw_plan(doc, o, result, facts):
                     y["label"], y["status"]) for y in plan.get("yards") or [] if y.get("points")]
     # what is drawn, each piece with its rule and building: the one list draw_scene draws and the in-Rhino checks
     # read (logic.coloured_info)
+    blocks = plan.get("encroach") or []
+    made = _solids_for(doc, blocks)                  # each building made once, whatever its number of blocks
     o.encroach = [(_proud(doc, piece), status, logic.coloured_info(e))   # coloured from the rule's result only
-                  for e, status in ((e, e.get("status") or "does_not_comply") for e in plan.get("encroach") or [])
-                  if logic.highlight(status) for piece in _offending(doc, e)]
+                  for e, status in ((e, e.get("status") or "does_not_comply") for e in blocks)
+                  if logic.highlight(status) for piece in _offending(doc, e, made)]
     # every line a label must stay off (model space): the yard dimensions, the lot's edges, the house's edges
     pts = o.lot_outline or []
     o.plan_lines = [line for line, _, _ in o.yard_dims] + [rg.Line(p, q) for p, q in zip(pts, pts[1:])] + \

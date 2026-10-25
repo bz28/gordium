@@ -439,6 +439,21 @@ def test_only_what_rises_above_the_height_limit_is_coloured_a_roofs_ridge_not_it
     assert (top["base"], top["top"], top["building"]) == (35, 40, "house")
 
 
+def test_a_building_over_the_limit_with_only_walls_above_it_is_still_coloured_over_its_own_plan():
+    """Independent review of #28, P1: a vault or dome read as walls (its curved roof faces left out) rises over the
+    limit with nothing above it seen from above; it was coloured nowhere. Never less than its own plan."""
+    from shapely.geometry import Polygon
+    from design_checker.check import plan
+    house = box(10, 25, 35, 65, 0, 38)
+    house["faces"] = [f for f in house["faces"] if not all(p[2] == 38 for p in f["points"])]   # its top left out
+    env = {"outline": [[0, 0], [50, 0], [50, 100], [0, 100]], "top": 35, "base": 0}
+    for status in (present.FAILS, present.REVIEW):
+        tops = [e for e in plan(_plot(house), env, {"items": [{"measure": "building_height", "status": status}]},
+                                {})["encroach"] if e["why"] == "height"]
+        assert [(t["base"], t["top"], t["status"]) for t in tops] == [(35, 38, status)]
+        assert Polygon(tops[0]["outline"]).area == pytest.approx(1000)
+
+
 def test_only_the_buildings_that_rise_above_the_limit_are_coloured_each_to_its_own_top():
     from shapely.geometry import Polygon
     from design_checker.check import plan

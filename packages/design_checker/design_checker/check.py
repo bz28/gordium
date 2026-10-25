@@ -727,11 +727,14 @@ def plan(site: dict, env: dict, v: dict, measured: dict, facts: dict | None = No
                                          "row": i.get("name")})
         height = statuses.get("building_height")
         if height in (present.FAILS, present.REVIEW) and env.get("top") is not None:
-            for b, _ in solids:                         # only what rises above the limit: a roof's ridge, not its eaves
+            for b, own in solids:                       # only what rises above the limit: a roof's ridge, not its eaves
                 top = max(p[2] for f in b["faces"] for p in f["points"])
                 if top <= env["top"] + 1e-6:
                     continue
-                for g in hole_free(above(b, env["top"])):
+                region = above(b, env["top"])
+                if region.is_empty or region.area <= 1e-3:   # nothing above it seen from above (only walls rise
+                    region = own                             # over the limit: a vault read as walls): its own plan,
+                for g in hole_free(region):                  # never less (independent review of #28, P1)
                     if g.area > 1e-3:
                         encroach.append({"outline": _ring(g), "base": env["top"], "top": top, "why": "height",
                                          "status": height, "building": b.get("id"),
