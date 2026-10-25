@@ -1482,7 +1482,9 @@ def test_with_the_footprints_layer_current_the_locks_stand_and_nothing_breaks():
 
 def test_the_lock_probe_on_the_fake_is_the_probe_in_rhino():
     """The replay follows lock_probe_in_rhino.py's own steps (its case list, and Gordium's route, mid_relock, which
-    the fake expects kept: the own lock recorded under a moment's lock of Mid survives the top's lock and unlock)."""
+    the fake expects kept: the own lock recorded under a moment's lock of Mid survives the top's lock and unlock).
+    mid_relock's first step (Sub locked before Mid) changes nothing on the fake, so it is unpinned here until the next
+    Rhino run puts mid_relock in the evidence and test_the_fake_layers_do_what_rhino_did replays it."""
     probe = (REPO / "apps/rhino_plugin/tests/lock_probe_in_rhino.py").read_text(encoding="utf-8")
     cases = eval(probe.split("CASES = ", 1)[1].split(")", 1)[0] + ")")             # noqa: S307  (a tuple literal)
     assert set(cases) == {"is_locked", "persistent_then_is_locked", "persistent_alone", "relock", "nested_is_locked",
