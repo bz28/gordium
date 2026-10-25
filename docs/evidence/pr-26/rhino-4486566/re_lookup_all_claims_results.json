@@ -1,0 +1,789 @@
+{
+ "claims": {
+  "1 the sample: its lot and a starting house": {
+   "ok": true,
+   "detail": {
+    "lot": "782b93e4-d1d6-49b2-a0eb-7d98210940f6",
+    "house": [
+     "35089842-6844-46ac-bcd0-8fea90842ac4",
+     "57ac40c7-e315-477a-b914-4fffa97e24ed",
+     "f8e459b5-f48a-4774-a20d-7c09447c6486"
+    ]
+   }
+  },
+  "2 Look up changed nothing in the model while the box was open": {
+   "ok": true,
+   "detail": {
+    "before": 4,
+    "during": 4
+   }
+  },
+  "2 the looked-up lot was shown dashed while the box was open": {
+   "ok": true,
+   "detail": {
+    "asked": [],
+    "objects": {
+     "35089842-6844-46ac-bcd0-8fea90842ac4": "Gordium::Massing",
+     "57ac40c7-e315-477a-b914-4fffa97e24ed": "Gordium::Massing",
+     "f8e459b5-f48a-4774-a20d-7c09447c6486": "Gordium::Massing",
+     "782b93e4-d1d6-49b2-a0eb-7d98210940f6": "Site"
+    },
+    "guide_shown": true
+   }
+  },
+  "2 Draw asked nothing (all of it was Gordium's)": {
+   "ok": true,
+   "detail": []
+  },
+  "2 the sample's lot and house are gone": {
+   "ok": true,
+   "detail": []
+  },
+  "2 96's lot is drawn on Site": {
+   "ok": true,
+   "detail": "Lot \u00b7 96 Ithaca Road, Ithaca, NY, 14850"
+  },
+  "2 no starting house on 96, a corner lot (the architects' open question)": {
+   "ok": true,
+   "detail": [
+    "a corner lot: which yards are front, side and rear is an open question; no envelope drawn",
+    "no buildable area to start from"
+   ]
+  },
+  "2 the file says what is drawn: 96, and no house of Gordium's": {
+   "ok": true,
+   "detail": {
+    "drawn_address": "96 Ithaca Road, Ithaca, NY, 14850",
+    "house_fingerprint": null
+   }
+  },
+  "2 one Undo puts the sample back exactly": {
+   "ok": false,
+   "detail": {
+    "ran": true,
+    "missing": [
+     "35089842-6844-46ac-bcd0-8fea90842ac4",
+     "57ac40c7-e315-477a-b914-4fffa97e24ed",
+     "782b93e4-d1d6-49b2-a0eb-7d98210940f6",
+     "f8e459b5-f48a-4774-a20d-7c09447c6486"
+    ],
+    "extra": [
+     "4f50a9f6-2b7c-4e8e-b26b-8cbe04ec780d"
+    ]
+   }
+  },
+  "2 after Undo the file says the sample again (facts, choices, sources)": {
+   "ok": false,
+   "detail": {
+    "lot_facts": {
+     "now": "{\"jurisdiction\": \"regulations/jurisdictions/new_york/ithaca_city\", \"zone\": \"R-1b\", \"use\": \"one_family_detached\", \"corner_lot\": true, \"ground_is_flat\": true, \"lot_surveyed\": false, \"grade_elevation\": 0.0, \"main_building\": \"57ac40c7-e315-477a-b914-4fffa97e24ed\", \"address\": \"96 Ithaca Rd, Ithaca, NY 14850\", \"grade_is\": \"finished\", \"ground_assumed\": \"flat\", \"lot_id\": \"4f50a9f6-2b7c-4e8e-b26b-8cbe04ec780d\", \"street_line\": [[[122.7539, 0.0], [0.0, 0.0]]], \"plan_north_deg\": 261.7709, \"ground_fall\": 7.8, \"unsettled\": {\"street\": \"The lookup found this doubtful (its reason came from a source that can't be kept): check it.\"}}",
+     "expected": "{\"jurisdiction\": \"regulations/jurisdictions/new_york/ithaca_city\", \"zone\": \"R-1b\", \"use\": \"one_family_detached\", \"corner_lot\": false, \"ground_is_flat\": true, \"lot_surveyed\": false, \"lot_id\": \"782b93e4-d1d6-49b2-a0eb-7d98210940f6\", \"street_line\": [[[76.916, 0.2317], [67.113, 0.1516]], [[67.113, 0.1516], [59.09, 0.3022]], [[59.09, 0.3022], [49.525, 0.0]], [[49.525, 0.0], [38.7471, 0.5182]], [[38.7471, 0.5182], [30.5456, 0.1523]], [[30.5456, 0.1523], [20.3655, 0.1794]], [[20.3655, 0.1794], [10.7167, 0.8339]], [[10.7167, 0.8339], [1.1492, 0.2317]]], \"grade_elevation\": 0.0, \"plan_north_deg\": 306.3799, \"street_ids\": [\"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\"], \"address\": \"106 Ithaca Rd, Ithaca, NY\", \"grade_is\": \"finished\", \"ground_assumed\": \"flat\"}"
+    },
+    "ui": {
+     "now": "{\"from_sample\": false, \"replaceable_lot\": \"4f50a9f6-2b7c-4e8e-b26b-8cbe04ec780d\", \"street_name\": \"Ithaca Road\", \"street_source\": \"suggested by Gordium \\u00b7 named as in the address (NYS Geocoder), the line from City of Ithaca roads, used live\", \"drawn_address\": \"96 Ithaca Road, Ithaca, NY, 14850\", \"zone_source\": \"suggested by Gordium \\u00b7 City of Ithaca zoning map, used live\", \"ground_kind\": \"flat\", \"no_regrading\": false, \"design_buffer\": \"0'-0\\\"\", \"checked\": [], \"house_fingerprint\": null, \"address_source\": \"suggested by Gordium \\u00b7 NYS Geocoder\", \"corner_source\": \"suggested by Gordium \\u00b7 City of Ithaca roads, used live\", \"lot_source\": \"NYS Tax Parcels Public\", \"lot_area\": 6152.2, \"ground_fall\": 7.8, \"doubts\": {\"street\": \"The lookup found this doubtful (its reason came from a source that can't be kept): check it.\"}, \"lookup_frame\": {\"origin_epsg2261_us_survey_ft\": [847579.89, 887995.38], \"rotation_deg\": 261.7709, \"datum_ft\": 714.91}, \"lookup_spots\": [], \"lookup_snapshot\": {\"query\": \"96 Ithaca Rd, Ithaca, NY 14850\", \"status\": \"found\", \"facts\": {\"address\": {\"value\": \"96 Ithaca Road, Ithaca, NY, 14850\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"parcel\": {\"value\": \"500700-84.-5-7\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"lot\": {\"value\": {\"outline_ft\": [[33.63, -59.15], [-15.86, -63.9], [-33.41, 61.16], [16.06, 62.34]], \"area_sf\": 6152.2, \"edge_lengths_ft\": [49.72, 126.29, 49.49, 122.75], \"origin_epsg2261_us_survey_ft\": [847579.89, 887995.38], \"tolerance_ft\": 2.0}, \"source\": \"from tax map\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"street_side\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"corner_lot\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"ground\": {\"value\": {\"points\": [{\"x\": 33.63, \"y\": -59.15, \"ft\": 718.17}, {\"x\": -15.86, \"y\": -63.9, \"ft\": 714.91}, {\"x\": -33.41, \"y\": 61.16, \"ft\": 720.33}, {\"x\": 16.06, \"y\": 62.34, \"ft\": 722.71}, {\"x\": -0.0, \"y\": -0.0, \"ft\": 720.82}], \"min_ft\": 714.91, \"max_ft\": 722.71, \"kind\": \"existing\"}, \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"zone\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"overlays\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}}, \"details\": {\"address\": {\"status\": \"suggested\", \"source_url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates\", \"source_keys\": [\"geocoder\"], \"source_detail\": \"NYS Geocoder (address points)\"}, \"parcel\": {\"status\": \"suggested\", \"source_url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query\", \"source_keys\": [\"state_parcels\"], \"source_detail\": \"NYS Tax Parcels Public\"}, \"lot\": {\"status\": \"suggested\", \"source_url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query\", \"source_keys\": [\"state_parcels\"], \"source_detail\": \"NYS Tax Parcels Public (tax map, approximate \\u00b12 ft)\", \"note\": \"outline_ft: international feet from the centroid (EPSG:2261 US survey feet \\u00d7 1.0000020). Terms: https://gis.ny.gov/parcels\"}, \"street_side\": {\"status\": \"ask\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query\", \"source_keys\": [\"city_roads\", \"state_parcels\"], \"source_detail\": \"City of Ithaca roads (centerlines with right-of-way width) + NYS Tax Parcels Public\"}, \"corner_lot\": {\"status\": \"ask\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query\", \"source_keys\": [\"city_roads\", \"state_parcels\"], \"source_detail\": \"City of Ithaca roads (centerlines with right-of-way width) + NYS Tax Parcels Public\"}, \"ground\": {\"status\": \"suggested\", \"source_url\": \"https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples\", \"source_keys\": [\"elevation\", \"state_parcels\"], \"source_detail\": \"USGS 3DEP elevation (1 m where available; here the 2020 LiDAR) \\u00b7 today's ground (existing), an estimate\", \"note\": \"Elevations in feet above NAVD88. Finished ground after construction is set in the start box.\"}, \"zone\": {\"status\": \"suggested\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query\", \"source_keys\": [\"city_zoning\", \"state_parcels\"], \"source_detail\": \"City of Ithaca zoning map (online, informational) + NYS Tax Parcels Public\"}, \"overlays\": {\"status\": \"suggested\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query\", \"source_keys\": [\"historic_districts\", \"gorge_zones\", \"city_parcels\", \"state_parcels\"], \"source_detail\": \"City of Ithaca historic districts + City of Ithaca gorge protection zones + City of Ithaca tax parcels + NYS Tax Parcels Public\"}}, \"sources\": [{\"source\": \"geocoder\", \"name\": \"NYS Geocoder (address points)\", \"url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"af4f620875276c572207aa53eb1c6c6dc6f5b3a0bd83801f13f1067d1f840a88\", \"store\": \"raw\"}, {\"source\": \"address_points\", \"name\": \"Tompkins County address points (TCAddress)\", \"url\": \"https://services.arcgis.com/oJbAAWNInLrxvF0A/arcgis/rest/services/TCAddress/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"3603cc39eff36eb955b095f0318f3e7daef74e6ac8f74e15dead1eceb3d773c7\", \"store\": \"none\"}, {\"source\": \"state_parcels\", \"name\": \"NYS Tax Parcels Public\", \"url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"0df7131af83cef0d83552984dae944f463415c893feea543e5a499d622e21b50\", \"store\": \"raw\"}, {\"source\": \"city_parcels\", \"name\": \"City of Ithaca tax parcels\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Tax_Parcels/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"01d8569263f3d140cedb7c65dd0a014ad077d4c682050d7661af66b823f6626d\", \"store\": \"derived\"}, {\"source\": \"city_roads\", \"name\": \"City of Ithaca roads (centerlines with right-of-way width)\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"a33c1726348ed5a5742401beedc03748bd804fb8530b52b5440a8f9992236739\", \"store\": \"none\"}, {\"source\": \"elevation\", \"name\": \"USGS 3DEP elevation (1 m where available; here the 2020 LiDAR)\", \"url\": \"https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"d240a7646fcf89e7db8cdac324e1bad88b4dece541bf0c43bc0707f7d470fb4e\", \"store\": \"raw\"}, {\"source\": \"city_zoning\", \"name\": \"City of Ithaca zoning map (online, informational)\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"fa1ef27f0ba700969af2dce053c0a31a4191a0f66c7d34b120d3bfac21a041f9\", \"store\": \"none\"}, {\"source\": \"city_zoning\", \"name\": \"City of Ithaca zoning map (online, informational)\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"bd7437632b4d4a6632c097f6456947620d11824d61333bd50a73ced08a04b57b\", \"store\": \"none\"}, {\"source\": \"historic_districts\", \"name\": \"City of Ithaca historic districts\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Historic_Districts/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"3603cc39eff36eb955b095f0318f3e7daef74e6ac8f74e15dead1eceb3d773c7\", \"store\": \"none\"}, {\"source\": \"gorge_zones\", \"name\": \"City of Ithaca gorge protection zones\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Gorge_Protection_Zones/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"3603cc39eff36eb955b095f0318f3e7daef74e6ac8f74e15dead1eceb3d773c7\", \"store\": \"none\"}], \"fetched\": \"2026-10-20T18:00:00+00:00\", \"fingerprint\": \"f218304ca340f161c0a0d8ef64ae5ab36b8b2198a71dee66c19c7c4b710a9fd9\"}}",
+     "expected": "{\"from_sample\": true, \"replaceable_lot\": \"782b93e4-d1d6-49b2-a0eb-7d98210940f6\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\", \"drawn_address\": \"106 Ithaca Rd, Ithaca, NY\", \"zone_source\": \"entered by you\", \"ground_kind\": \"flat\", \"no_regrading\": false, \"design_buffer\": \"0'-0\\\"\", \"checked\": [], \"house_fingerprint\": \"[('35089842-6844-46ac-bcd0-8fea90842ac4', (12.8917, 27.8192, 23.3333, 48.8084, 65.1526, 35.0)), ('57ac40c7-e315-477a-b914-4fffa97e24ed', (12.8917, 27.8192, 11.6667, 48.8084, 65.1526, 23.3333)), ('f8e459b5-f48a-4774-a20d-7c09447c6486', (12.8917, 27.8192, 0.0, 48.8084, 65.1526, 11.6667))]\"}"
+    },
+    "fact_sources": {
+     "now": "{\"address\": {\"value\": \"96 Ithaca Rd, Ithaca, NY 14850\", \"source\": \"suggested by Gordium \\u00b7 NYS Geocoder\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"zone\": {\"value\": \"R-1b\", \"source\": \"suggested by Gordium \\u00b7 City of Ithaca zoning map, used live\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"use\": {\"value\": \"One-family dwelling, detached\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"lot\": {\"value\": \"6,151 sf\", \"source\": \"the tax map (\\u00b12 ft, approximate) \\u00b7 NYS Tax Parcels Public\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"street\": {\"value\": \"Ithaca Road\", \"source\": \"suggested by Gordium \\u00b7 named as in the address (NYS Geocoder), the line from City of Ithaca roads, used live\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"corner_lot\": {\"value\": \"yes, two streets\", \"source\": \"suggested by Gordium \\u00b7 City of Ithaca roads, used live\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"ground\": {\"value\": \"assumed flat (the looked-up ground falls about 7.8 ft across the lot; height is checked as if flat)\", \"source\": \"assumed (flat ground, the MVP's rule)\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}}",
+     "expected": "{\"address\": {\"value\": \"106 Ithaca Rd, Ithaca, NY\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"zone\": {\"value\": \"R-1b\", \"source\": \"entered by you\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"use\": {\"value\": \"One-family dwelling, detached\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"lot\": {\"value\": \"7,033 sf\", \"source\": \"the tax map (\\u00b12 ft, approximate)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"street\": {\"value\": \"Ithaca Rd\", \"source\": \"the State tax map (the sample's lookup)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"corner_lot\": {\"value\": \"no, one street\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"ground\": {\"value\": \"assumed flat\", \"source\": \"assumed (flat ground, the MVP's rule)\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}, \"starting_house\": {\"value\": \"as first drawn, it keeps 2'-0\\\" back from each limit because the lot is from the tax map; use a survey for the full area.\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}}"
+    }
+   }
+  },
+  "2 after Undo nothing of 96 is left on screen": {
+   "ok": false,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": true,
+    "check_marks": true
+   }
+  },
+  "2 after Undo the sample is checked again (live mode)": {
+   "ok": false,
+   "detail": {
+    "dirty": 1792958070.405343,
+    "last_check": 1792958071.295037,
+    "live": true,
+    "owed": false,
+    "done": false
+   }
+  },
+  "2 Redo draws 96's lot again (and no house: a corner lot), the sample gone": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "missing": [],
+    "extra": []
+   }
+  },
+  "2 after Redo the file says 96 again (facts, choices, sources)": {
+   "ok": true,
+   "detail": {}
+  },
+  "2 after Redo nothing of the sample is left on screen": {
+   "ok": false,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": true,
+    "check_marks": true
+   }
+  },
+  "2 after Redo 96 is checked again (live mode)": {
+   "ok": false,
+   "detail": {
+    "dirty": 1792958070.405343,
+    "last_check": 1792958071.295037,
+    "live": true,
+    "owed": false,
+    "done": false
+   }
+  },
+  "2 a second Undo puts the sample back again": {
+   "ok": false,
+   "detail": {
+    "ran": true,
+    "missing": [
+     "35089842-6844-46ac-bcd0-8fea90842ac4",
+     "57ac40c7-e315-477a-b914-4fffa97e24ed",
+     "782b93e4-d1d6-49b2-a0eb-7d98210940f6",
+     "f8e459b5-f48a-4774-a20d-7c09447c6486"
+    ],
+    "extra": [
+     "4f50a9f6-2b7c-4e8e-b26b-8cbe04ec780d"
+    ]
+   }
+  },
+  "2 after the second Undo the file says the sample again": {
+   "ok": false,
+   "detail": {
+    "lot_facts": {
+     "now": "{\"jurisdiction\": \"regulations/jurisdictions/new_york/ithaca_city\", \"zone\": \"R-1b\", \"use\": \"one_family_detached\", \"corner_lot\": true, \"ground_is_flat\": true, \"lot_surveyed\": false, \"grade_elevation\": 0.0, \"main_building\": \"57ac40c7-e315-477a-b914-4fffa97e24ed\", \"address\": \"96 Ithaca Rd, Ithaca, NY 14850\", \"grade_is\": \"finished\", \"ground_assumed\": \"flat\", \"lot_id\": \"4f50a9f6-2b7c-4e8e-b26b-8cbe04ec780d\", \"street_line\": [[[122.7539, 0.0], [0.0, 0.0]]], \"plan_north_deg\": 261.7709, \"ground_fall\": 7.8, \"unsettled\": {\"street\": \"The lookup found this doubtful (its reason came from a source that can't be kept): check it.\"}}",
+     "expected": "{\"jurisdiction\": \"regulations/jurisdictions/new_york/ithaca_city\", \"zone\": \"R-1b\", \"use\": \"one_family_detached\", \"corner_lot\": false, \"ground_is_flat\": true, \"lot_surveyed\": false, \"lot_id\": \"782b93e4-d1d6-49b2-a0eb-7d98210940f6\", \"street_line\": [[[76.916, 0.2317], [67.113, 0.1516]], [[67.113, 0.1516], [59.09, 0.3022]], [[59.09, 0.3022], [49.525, 0.0]], [[49.525, 0.0], [38.7471, 0.5182]], [[38.7471, 0.5182], [30.5456, 0.1523]], [[30.5456, 0.1523], [20.3655, 0.1794]], [[20.3655, 0.1794], [10.7167, 0.8339]], [[10.7167, 0.8339], [1.1492, 0.2317]]], \"grade_elevation\": 0.0, \"plan_north_deg\": 306.3799, \"street_ids\": [\"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\"], \"address\": \"106 Ithaca Rd, Ithaca, NY\", \"grade_is\": \"finished\", \"ground_assumed\": \"flat\"}"
+    },
+    "ui": {
+     "now": "{\"from_sample\": false, \"replaceable_lot\": \"4f50a9f6-2b7c-4e8e-b26b-8cbe04ec780d\", \"street_name\": \"Ithaca Road\", \"street_source\": \"suggested by Gordium \\u00b7 named as in the address (NYS Geocoder), the line from City of Ithaca roads, used live\", \"drawn_address\": \"96 Ithaca Road, Ithaca, NY, 14850\", \"zone_source\": \"suggested by Gordium \\u00b7 City of Ithaca zoning map, used live\", \"ground_kind\": \"flat\", \"no_regrading\": false, \"design_buffer\": \"0'-0\\\"\", \"checked\": [], \"house_fingerprint\": null, \"address_source\": \"suggested by Gordium \\u00b7 NYS Geocoder\", \"corner_source\": \"suggested by Gordium \\u00b7 City of Ithaca roads, used live\", \"lot_source\": \"NYS Tax Parcels Public\", \"lot_area\": 6152.2, \"ground_fall\": 7.8, \"doubts\": {\"street\": \"The lookup found this doubtful (its reason came from a source that can't be kept): check it.\"}, \"lookup_frame\": {\"origin_epsg2261_us_survey_ft\": [847579.89, 887995.38], \"rotation_deg\": 261.7709, \"datum_ft\": 714.91}, \"lookup_spots\": [], \"lookup_snapshot\": {\"query\": \"96 Ithaca Rd, Ithaca, NY 14850\", \"status\": \"found\", \"facts\": {\"address\": {\"value\": \"96 Ithaca Road, Ithaca, NY, 14850\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"parcel\": {\"value\": \"500700-84.-5-7\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"lot\": {\"value\": {\"outline_ft\": [[33.63, -59.15], [-15.86, -63.9], [-33.41, 61.16], [16.06, 62.34]], \"area_sf\": 6152.2, \"edge_lengths_ft\": [49.72, 126.29, 49.49, 122.75], \"origin_epsg2261_us_survey_ft\": [847579.89, 887995.38], \"tolerance_ft\": 2.0}, \"source\": \"from tax map\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"street_side\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"corner_lot\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"ground\": {\"value\": {\"points\": [{\"x\": 33.63, \"y\": -59.15, \"ft\": 718.17}, {\"x\": -15.86, \"y\": -63.9, \"ft\": 714.91}, {\"x\": -33.41, \"y\": 61.16, \"ft\": 720.33}, {\"x\": 16.06, \"y\": 62.34, \"ft\": 722.71}, {\"x\": -0.0, \"y\": -0.0, \"ft\": 720.82}], \"min_ft\": 714.91, \"max_ft\": 722.71, \"kind\": \"existing\"}, \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"zone\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"overlays\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}}, \"details\": {\"address\": {\"status\": \"suggested\", \"source_url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates\", \"source_keys\": [\"geocoder\"], \"source_detail\": \"NYS Geocoder (address points)\"}, \"parcel\": {\"status\": \"suggested\", \"source_url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query\", \"source_keys\": [\"state_parcels\"], \"source_detail\": \"NYS Tax Parcels Public\"}, \"lot\": {\"status\": \"suggested\", \"source_url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query\", \"source_keys\": [\"state_parcels\"], \"source_detail\": \"NYS Tax Parcels Public (tax map, approximate \\u00b12 ft)\", \"note\": \"outline_ft: international feet from the centroid (EPSG:2261 US survey feet \\u00d7 1.0000020). Terms: https://gis.ny.gov/parcels\"}, \"street_side\": {\"status\": \"ask\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query\", \"source_keys\": [\"city_roads\", \"state_parcels\"], \"source_detail\": \"City of Ithaca roads (centerlines with right-of-way width) + NYS Tax Parcels Public\"}, \"corner_lot\": {\"status\": \"ask\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query\", \"source_keys\": [\"city_roads\", \"state_parcels\"], \"source_detail\": \"City of Ithaca roads (centerlines with right-of-way width) + NYS Tax Parcels Public\"}, \"ground\": {\"status\": \"suggested\", \"source_url\": \"https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples\", \"source_keys\": [\"elevation\", \"state_parcels\"], \"source_detail\": \"USGS 3DEP elevation (1 m where available; here the 2020 LiDAR) \\u00b7 today's ground (existing), an estimate\", \"note\": \"Elevations in feet above NAVD88. Finished ground after construction is set in the start box.\"}, \"zone\": {\"status\": \"suggested\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query\", \"source_keys\": [\"city_zoning\", \"state_parcels\"], \"source_detail\": \"City of Ithaca zoning map (online, informational) + NYS Tax Parcels Public\"}, \"overlays\": {\"status\": \"suggested\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query\", \"source_keys\": [\"historic_districts\", \"gorge_zones\", \"city_parcels\", \"state_parcels\"], \"source_detail\": \"City of Ithaca historic districts + City of Ithaca gorge protection zones + City of Ithaca tax parcels + NYS Tax Parcels Public\"}}, \"sources\": [{\"source\": \"geocoder\", \"name\": \"NYS Geocoder (address points)\", \"url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"af4f620875276c572207aa53eb1c6c6dc6f5b3a0bd83801f13f1067d1f840a88\", \"store\": \"raw\"}, {\"source\": \"address_points\", \"name\": \"Tompkins County address points (TCAddress)\", \"url\": \"https://services.arcgis.com/oJbAAWNInLrxvF0A/arcgis/rest/services/TCAddress/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"3603cc39eff36eb955b095f0318f3e7daef74e6ac8f74e15dead1eceb3d773c7\", \"store\": \"none\"}, {\"source\": \"state_parcels\", \"name\": \"NYS Tax Parcels Public\", \"url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"0df7131af83cef0d83552984dae944f463415c893feea543e5a499d622e21b50\", \"store\": \"raw\"}, {\"source\": \"city_parcels\", \"name\": \"City of Ithaca tax parcels\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Tax_Parcels/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"01d8569263f3d140cedb7c65dd0a014ad077d4c682050d7661af66b823f6626d\", \"store\": \"derived\"}, {\"source\": \"city_roads\", \"name\": \"City of Ithaca roads (centerlines with right-of-way width)\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"a33c1726348ed5a5742401beedc03748bd804fb8530b52b5440a8f9992236739\", \"store\": \"none\"}, {\"source\": \"elevation\", \"name\": \"USGS 3DEP elevation (1 m where available; here the 2020 LiDAR)\", \"url\": \"https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"d240a7646fcf89e7db8cdac324e1bad88b4dece541bf0c43bc0707f7d470fb4e\", \"store\": \"raw\"}, {\"source\": \"city_zoning\", \"name\": \"City of Ithaca zoning map (online, informational)\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"fa1ef27f0ba700969af2dce053c0a31a4191a0f66c7d34b120d3bfac21a041f9\", \"store\": \"none\"}, {\"source\": \"city_zoning\", \"name\": \"City of Ithaca zoning map (online, informational)\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"bd7437632b4d4a6632c097f6456947620d11824d61333bd50a73ced08a04b57b\", \"store\": \"none\"}, {\"source\": \"historic_districts\", \"name\": \"City of Ithaca historic districts\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Historic_Districts/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"3603cc39eff36eb955b095f0318f3e7daef74e6ac8f74e15dead1eceb3d773c7\", \"store\": \"none\"}, {\"source\": \"gorge_zones\", \"name\": \"City of Ithaca gorge protection zones\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Gorge_Protection_Zones/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"3603cc39eff36eb955b095f0318f3e7daef74e6ac8f74e15dead1eceb3d773c7\", \"store\": \"none\"}], \"fetched\": \"2026-10-20T18:00:00+00:00\", \"fingerprint\": \"f218304ca340f161c0a0d8ef64ae5ab36b8b2198a71dee66c19c7c4b710a9fd9\"}}",
+     "expected": "{\"from_sample\": true, \"replaceable_lot\": \"782b93e4-d1d6-49b2-a0eb-7d98210940f6\", \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\", \"drawn_address\": \"106 Ithaca Rd, Ithaca, NY\", \"zone_source\": \"entered by you\", \"ground_kind\": \"flat\", \"no_regrading\": false, \"design_buffer\": \"0'-0\\\"\", \"checked\": [], \"house_fingerprint\": \"[('35089842-6844-46ac-bcd0-8fea90842ac4', (12.8917, 27.8192, 23.3333, 48.8084, 65.1526, 35.0)), ('57ac40c7-e315-477a-b914-4fffa97e24ed', (12.8917, 27.8192, 11.6667, 48.8084, 65.1526, 23.3333)), ('f8e459b5-f48a-4774-a20d-7c09447c6486', (12.8917, 27.8192, 0.0, 48.8084, 65.1526, 11.6667))]\"}"
+    },
+    "fact_sources": {
+     "now": "{\"address\": {\"value\": \"96 Ithaca Rd, Ithaca, NY 14850\", \"source\": \"suggested by Gordium \\u00b7 NYS Geocoder\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"zone\": {\"value\": \"R-1b\", \"source\": \"suggested by Gordium \\u00b7 City of Ithaca zoning map, used live\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"use\": {\"value\": \"One-family dwelling, detached\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"lot\": {\"value\": \"6,151 sf\", \"source\": \"the tax map (\\u00b12 ft, approximate) \\u00b7 NYS Tax Parcels Public\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"street\": {\"value\": \"Ithaca Road\", \"source\": \"suggested by Gordium \\u00b7 named as in the address (NYS Geocoder), the line from City of Ithaca roads, used live\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"corner_lot\": {\"value\": \"yes, two streets\", \"source\": \"suggested by Gordium \\u00b7 City of Ithaca roads, used live\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"ground\": {\"value\": \"assumed flat (the looked-up ground falls about 7.8 ft across the lot; height is checked as if flat)\", \"source\": \"assumed (flat ground, the MVP's rule)\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}}",
+     "expected": "{\"address\": {\"value\": \"106 Ithaca Rd, Ithaca, NY\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"zone\": {\"value\": \"R-1b\", \"source\": \"entered by you\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"use\": {\"value\": \"One-family dwelling, detached\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"lot\": {\"value\": \"7,033 sf\", \"source\": \"the tax map (\\u00b12 ft, approximate)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"street\": {\"value\": \"Ithaca Rd\", \"source\": \"the State tax map (the sample's lookup)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"corner_lot\": {\"value\": \"no, one street\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"ground\": {\"value\": \"assumed flat\", \"source\": \"assumed (flat ground, the MVP's rule)\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}, \"starting_house\": {\"value\": \"as first drawn, it keeps 2'-0\\\" back from each limit because the lot is from the tax map; use a survey for the full area.\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}}"
+    }
+   }
+  },
+  "2 after the second Undo nothing of 96 is left on screen": {
+   "ok": false,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": true,
+    "check_marks": true
+   }
+  },
+  "2 after the second Undo the sample is checked again (live mode)": {
+   "ok": false,
+   "detail": {
+    "dirty": 1792958070.405343,
+    "last_check": 1792958071.295037,
+    "live": true,
+    "owed": false,
+    "done": false
+   }
+  },
+  "2 a second Redo draws 96's lot again": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "missing": [],
+    "extra": []
+   }
+  },
+  "2 after the second Redo the file says 96 again": {
+   "ok": true,
+   "detail": {}
+  },
+  "2 after the second Redo nothing of the sample is left on screen": {
+   "ok": false,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": true,
+    "check_marks": true
+   }
+  },
+  "2 after the second Redo 96 is checked again (live mode)": {
+   "ok": false,
+   "detail": {
+    "dirty": 1792958070.405343,
+    "last_check": 1792958071.295037,
+    "live": true,
+    "owed": false,
+    "done": false
+   }
+  },
+  "3 asked once, naming the edited house": {
+   "ok": true,
+   "detail": [
+    [
+     "Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed.",
+     [
+      "Start fresh",
+      "fresh"
+     ],
+     [
+      "Keep my building and check it on 96 Ithaca Road's lot",
+      "keep"
+     ]
+    ]
+   ]
+  },
+  "3 the Keep answer names 96's lot (the sample's lot was Gordium's: nothing of theirs replaced)": {
+   "ok": true,
+   "detail": [
+    "Keep my building and check it on 96 Ithaca Road's lot",
+    "keep"
+   ]
+  },
+  "3 Keep my building: the floors kept, the lot is 96's": {
+   "ok": true,
+   "detail": {
+    "kept": [
+     "e8f6db2d-9f5b-423b-bc2f-8a394ac5047d",
+     "4940d4ba-e74b-4336-8eb5-f170294995af",
+     "9472ef1d-b21c-4bdd-b02d-57f57321530d"
+    ]
+   }
+  },
+  "4 the same address: no question and nothing in the model changes": {
+   "ok": true,
+   "detail": []
+  },
+  "4 an address typed and not looked up: Draw says to look it up first, nothing changes": {
+   "ok": true,
+   "detail": {
+    "said": [
+     "Press Look up to find 109 Ithaca Rd, Ithaca, NY 14850 first."
+    ],
+    "ran": false,
+    "strings": {}
+   }
+  },
+  "4 the lot's own address (the box opened again on it): Draw goes through and checks it as it is": {
+   "ok": true,
+   "detail": {
+    "said": [],
+    "ran": true,
+    "own": "96 Ithaca Rd, Ithaca, NY 14850"
+   }
+  },
+  "5 asked once; the question says their surveyed lot will be replaced by 96's": {
+   "ok": true,
+   "detail": [
+    [
+     "Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed. Your surveyed lot will be replaced by 96 Ithaca Road's lot.",
+     [
+      "Start fresh",
+      "fresh"
+     ],
+     [
+      "Keep my building and check it on 96 Ithaca Road's lot (your surveyed lot will be replaced)",
+      "keep"
+     ]
+    ]
+   ]
+  },
+  "5 the Keep answer says their surveyed lot will be replaced": {
+   "ok": true,
+   "detail": [
+    "Keep my building and check it on 96 Ithaca Road's lot (your surveyed lot will be replaced)",
+    "keep"
+   ]
+  },
+  "5 Keep my building: the floors kept, the surveyed lot replaced by 96's tax-map lot": {
+   "ok": true,
+   "detail": {
+    "kept": [
+     "e6f0dc20-5d93-45f9-ba27-f6a59b7b392c",
+     "3bf8828f-850a-41c0-8615-063752e9664a",
+     "18f7dcc1-8a44-47a4-a4e4-e1b17ac76518"
+    ],
+    "lot": "Lot \u00b7 96 Ithaca Road, Ithaca, NY, 14850",
+    "surveyed": false
+   }
+  },
+  "5 one Undo puts the surveyed lot and the edited house back exactly": {
+   "ok": false,
+   "detail": {
+    "ran": true,
+    "missing": [
+     "d56c478b-3629-4623-9a28-ea52ea30d6ae"
+    ],
+    "extra": [
+     "93597525-f189-45e4-b45d-c275e0b5fb28"
+    ]
+   }
+  },
+  "5 after Undo the file says the surveyed lot again (facts, choices, sources)": {
+   "ok": false,
+   "detail": {
+    "lot_facts": {
+     "now": "{\"jurisdiction\": \"regulations/jurisdictions/new_york/ithaca_city\", \"zone\": \"R-1b\", \"use\": \"one_family_detached\", \"corner_lot\": true, \"ground_is_flat\": true, \"lot_surveyed\": false, \"grade_elevation\": 0.0, \"main_building\": \"18f7dcc1-8a44-47a4-a4e4-e1b17ac76518\", \"address\": \"96 Ithaca Rd, Ithaca, NY 14850\", \"grade_is\": \"finished\", \"ground_assumed\": \"flat\", \"lot_id\": \"93597525-f189-45e4-b45d-c275e0b5fb28\", \"street_line\": [[[122.7539, 0.0], [0.0, 0.0]]], \"plan_north_deg\": 261.7709, \"ground_fall\": 7.8, \"unsettled\": {\"street\": \"The lookup found this doubtful (its reason came from a source that can't be kept): check it.\"}}",
+     "expected": "{\"jurisdiction\": \"regulations/jurisdictions/new_york/ithaca_city\", \"zone\": \"R-1b\", \"use\": \"one_family_detached\", \"corner_lot\": false, \"ground_is_flat\": true, \"lot_surveyed\": true, \"lot_id\": \"d56c478b-3629-4623-9a28-ea52ea30d6ae\", \"street_line\": [[[76.916, 0.2317], [67.113, 0.1516]], [[67.113, 0.1516], [59.09, 0.3022]], [[59.09, 0.3022], [49.525, 0.0]], [[49.525, 0.0], [38.7471, 0.5182]], [[38.7471, 0.5182], [30.5456, 0.1523]], [[30.5456, 0.1523], [20.3655, 0.1794]], [[20.3655, 0.1794], [10.7167, 0.8339]], [[10.7167, 0.8339], [1.1492, 0.2317]]], \"grade_elevation\": 0.0, \"plan_north_deg\": 306.3799, \"street_ids\": [\"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\", \"Ithaca Rd\"], \"address\": \"106 Ithaca Rd, Ithaca, NY\", \"grade_is\": \"finished\", \"ground_assumed\": \"flat\"}"
+    },
+    "ui": {
+     "now": "{\"from_sample\": false, \"replaceable_lot\": \"93597525-f189-45e4-b45d-c275e0b5fb28\", \"street_name\": \"Ithaca Road\", \"street_source\": \"suggested by Gordium \\u00b7 named as in the address (NYS Geocoder), the line from City of Ithaca roads, used live\", \"drawn_address\": \"96 Ithaca Road, Ithaca, NY, 14850\", \"zone_source\": \"suggested by Gordium \\u00b7 City of Ithaca zoning map, used live\", \"ground_kind\": \"flat\", \"no_regrading\": false, \"design_buffer\": \"0'-0\\\"\", \"checked\": [], \"house_fingerprint\": null, \"doubts\": {\"street\": \"The lookup found this doubtful (its reason came from a source that can't be kept): check it.\"}, \"address_source\": \"suggested by Gordium \\u00b7 NYS Geocoder\", \"corner_source\": \"suggested by Gordium \\u00b7 City of Ithaca roads, used live\", \"lot_source\": \"NYS Tax Parcels Public\", \"lot_area\": 6152.2, \"ground_fall\": 7.8, \"lookup_frame\": {\"origin_epsg2261_us_survey_ft\": [847579.89, 887995.38], \"rotation_deg\": 261.7709, \"datum_ft\": 714.91}, \"lookup_spots\": [], \"lookup_snapshot\": {\"query\": \"96 Ithaca Rd, Ithaca, NY 14850\", \"status\": \"found\", \"facts\": {\"address\": {\"value\": \"96 Ithaca Road, Ithaca, NY, 14850\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"parcel\": {\"value\": \"500700-84.-5-7\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"lot\": {\"value\": {\"outline_ft\": [[33.63, -59.15], [-15.86, -63.9], [-33.41, 61.16], [16.06, 62.34]], \"area_sf\": 6152.2, \"edge_lengths_ft\": [49.72, 126.29, 49.49, 122.75], \"origin_epsg2261_us_survey_ft\": [847579.89, 887995.38], \"tolerance_ft\": 2.0}, \"source\": \"from tax map\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"street_side\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"corner_lot\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"ground\": {\"value\": {\"points\": [{\"x\": 33.63, \"y\": -59.15, \"ft\": 718.17}, {\"x\": -15.86, \"y\": -63.9, \"ft\": 714.91}, {\"x\": -33.41, \"y\": 61.16, \"ft\": 720.33}, {\"x\": 16.06, \"y\": 62.34, \"ft\": 722.71}, {\"x\": -0.0, \"y\": -0.0, \"ft\": 720.82}], \"min_ft\": 714.91, \"max_ft\": 722.71, \"kind\": \"existing\"}, \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"zone\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}, \"overlays\": {\"value\": \"(used live, not stored)\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-20\"}}, \"details\": {\"address\": {\"status\": \"suggested\", \"source_url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates\", \"source_keys\": [\"geocoder\"], \"source_detail\": \"NYS Geocoder (address points)\"}, \"parcel\": {\"status\": \"suggested\", \"source_url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query\", \"source_keys\": [\"state_parcels\"], \"source_detail\": \"NYS Tax Parcels Public\"}, \"lot\": {\"status\": \"suggested\", \"source_url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query\", \"source_keys\": [\"state_parcels\"], \"source_detail\": \"NYS Tax Parcels Public (tax map, approximate \\u00b12 ft)\", \"note\": \"outline_ft: international feet from the centroid (EPSG:2261 US survey feet \\u00d7 1.0000020). Terms: https://gis.ny.gov/parcels\"}, \"street_side\": {\"status\": \"ask\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query\", \"source_keys\": [\"city_roads\", \"state_parcels\"], \"source_detail\": \"City of Ithaca roads (centerlines with right-of-way width) + NYS Tax Parcels Public\"}, \"corner_lot\": {\"status\": \"ask\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query\", \"source_keys\": [\"city_roads\", \"state_parcels\"], \"source_detail\": \"City of Ithaca roads (centerlines with right-of-way width) + NYS Tax Parcels Public\"}, \"ground\": {\"status\": \"suggested\", \"source_url\": \"https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples\", \"source_keys\": [\"elevation\", \"state_parcels\"], \"source_detail\": \"USGS 3DEP elevation (1 m where available; here the 2020 LiDAR) \\u00b7 today's ground (existing), an estimate\", \"note\": \"Elevations in feet above NAVD88. Finished ground after construction is set in the start box.\"}, \"zone\": {\"status\": \"suggested\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query\", \"source_keys\": [\"city_zoning\", \"state_parcels\"], \"source_detail\": \"City of Ithaca zoning map (online, informational) + NYS Tax Parcels Public\"}, \"overlays\": {\"status\": \"suggested\", \"source_url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query\", \"source_keys\": [\"historic_districts\", \"gorge_zones\", \"city_parcels\", \"state_parcels\"], \"source_detail\": \"City of Ithaca historic districts + City of Ithaca gorge protection zones + City of Ithaca tax parcels + NYS Tax Parcels Public\"}}, \"sources\": [{\"source\": \"geocoder\", \"name\": \"NYS Geocoder (address points)\", \"url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Geocoder/NYS_Geocoder/GeocodeServer/findAddressCandidates\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"af4f620875276c572207aa53eb1c6c6dc6f5b3a0bd83801f13f1067d1f840a88\", \"store\": \"raw\"}, {\"source\": \"address_points\", \"name\": \"Tompkins County address points (TCAddress)\", \"url\": \"https://services.arcgis.com/oJbAAWNInLrxvF0A/arcgis/rest/services/TCAddress/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"3603cc39eff36eb955b095f0318f3e7daef74e6ac8f74e15dead1eceb3d773c7\", \"store\": \"none\"}, {\"source\": \"state_parcels\", \"name\": \"NYS Tax Parcels Public\", \"url\": \"https://nysgeohub.ny.gov/arcgis/rest/services/Parcels/NYS_Tax_Parcels_Public/FeatureServer/1/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"0df7131af83cef0d83552984dae944f463415c893feea543e5a499d622e21b50\", \"store\": \"raw\"}, {\"source\": \"city_parcels\", \"name\": \"City of Ithaca tax parcels\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Tax_Parcels/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"01d8569263f3d140cedb7c65dd0a014ad077d4c682050d7661af66b823f6626d\", \"store\": \"derived\"}, {\"source\": \"city_roads\", \"name\": \"City of Ithaca roads (centerlines with right-of-way width)\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Roads/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"a33c1726348ed5a5742401beedc03748bd804fb8530b52b5440a8f9992236739\", \"store\": \"none\"}, {\"source\": \"elevation\", \"name\": \"USGS 3DEP elevation (1 m where available; here the 2020 LiDAR)\", \"url\": \"https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"d240a7646fcf89e7db8cdac324e1bad88b4dece541bf0c43bc0707f7d470fb4e\", \"store\": \"raw\"}, {\"source\": \"city_zoning\", \"name\": \"City of Ithaca zoning map (online, informational)\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"fa1ef27f0ba700969af2dce053c0a31a4191a0f66c7d34b120d3bfac21a041f9\", \"store\": \"none\"}, {\"source\": \"city_zoning\", \"name\": \"City of Ithaca zoning map (online, informational)\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/City_Zoning/FeatureServer/0\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"bd7437632b4d4a6632c097f6456947620d11824d61333bd50a73ced08a04b57b\", \"store\": \"none\"}, {\"source\": \"historic_districts\", \"name\": \"City of Ithaca historic districts\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Historic_Districts/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"3603cc39eff36eb955b095f0318f3e7daef74e6ac8f74e15dead1eceb3d773c7\", \"store\": \"none\"}, {\"source\": \"gorge_zones\", \"name\": \"City of Ithaca gorge protection zones\", \"url\": \"https://services5.arcgis.com/R1JbITZvSQHJsl5r/arcgis/rest/services/Gorge_Protection_Zones/FeatureServer/0/query\", \"fetched\": \"2026-10-20T18:00:00+00:00\", \"sha256\": \"3603cc39eff36eb955b095f0318f3e7daef74e6ac8f74e15dead1eceb3d773c7\", \"store\": \"none\"}], \"fetched\": \"2026-10-20T18:00:00+00:00\", \"fingerprint\": \"f218304ca340f161c0a0d8ef64ae5ab36b8b2198a71dee66c19c7c4b710a9fd9\"}}",
+     "expected": "{\"from_sample\": true, \"replaceable_lot\": null, \"street_name\": \"Ithaca Rd\", \"street_source\": \"the State tax map (the sample's lookup)\", \"drawn_address\": \"106 Ithaca Rd, Ithaca, NY\", \"zone_source\": \"entered by you\", \"ground_kind\": \"flat\", \"no_regrading\": false, \"design_buffer\": \"0'-0\\\"\", \"checked\": [], \"house_fingerprint\": \"[('18f7dcc1-8a44-47a4-a4e4-e1b17ac76518', (12.8917, 27.8192, 11.6667, 48.8084, 65.1526, 23.3333)), ('3bf8828f-850a-41c0-8615-063752e9664a', (12.8917, 27.8192, 23.3333, 48.8084, 65.1526, 35.0)), ('e6f0dc20-5d93-45f9-ba27-f6a59b7b392c', (12.8917, 27.8192, 0.0, 48.8084, 65.1526, 11.6667))]\", \"doubts\": {}}"
+    },
+    "fact_sources": {
+     "now": "{\"address\": {\"value\": \"96 Ithaca Rd, Ithaca, NY 14850\", \"source\": \"suggested by Gordium \\u00b7 NYS Geocoder\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"zone\": {\"value\": \"R-1b\", \"source\": \"suggested by Gordium \\u00b7 City of Ithaca zoning map, used live\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"use\": {\"value\": \"One-family dwelling, detached\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"lot\": {\"value\": \"6,151 sf\", \"source\": \"the tax map (\\u00b12 ft, approximate) \\u00b7 NYS Tax Parcels Public\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"street\": {\"value\": \"Ithaca Road\", \"source\": \"suggested by Gordium \\u00b7 named as in the address (NYS Geocoder), the line from City of Ithaca roads, used live\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"corner_lot\": {\"value\": \"yes, two streets\", \"source\": \"suggested by Gordium \\u00b7 City of Ithaca roads, used live\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"ground\": {\"value\": \"assumed flat (the looked-up ground falls about 7.8 ft across the lot; height is checked as if flat)\", \"source\": \"assumed (flat ground, the MVP's rule)\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}, \"starting_house\": {\"value\": \"as first drawn, it keeps 2'-0\\\" back from each limit because the lot is from the tax map; use a survey for the full area.\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}}",
+     "expected": "{\"address\": {\"value\": \"106 Ithaca Rd, Ithaca, NY\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"zone\": {\"value\": \"R-1b\", \"source\": \"entered by you\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"use\": {\"value\": \"One-family dwelling, detached\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"lot\": {\"value\": \"7,033 sf\", \"source\": \"the tax map (\\u00b12 ft, approximate)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"street\": {\"value\": \"Ithaca Rd\", \"source\": \"the State tax map (the sample's lookup)\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"corner_lot\": {\"value\": \"no, one street\", \"source\": \"the sample project\", \"confirmed_by\": \"you\", \"date\": \"2026-10-25\"}, \"ground\": {\"value\": \"assumed flat\", \"source\": \"assumed (flat ground, the MVP's rule)\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}, \"starting_house\": {\"value\": \"as first drawn, it keeps 2'-0\\\" back from each limit because the lot is from the tax map; use a survey for the full area.\", \"source\": \"suggested by Gordium\", \"confirmed_by\": null, \"date\": \"2026-10-25\"}}"
+    }
+   }
+  },
+  "5 after Undo nothing of 96 is left on screen": {
+   "ok": false,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": true,
+    "check_marks": true
+   }
+  },
+  "5 after Undo the surveyed lot is checked again (live mode)": {
+   "ok": false,
+   "detail": {
+    "dirty": 1792958079.974643,
+    "last_check": 1792958080.8531241,
+    "live": true,
+    "owed": false,
+    "done": false
+   }
+  },
+  "5 Redo draws 96's lot again with the kept house, the surveyed lot gone": {
+   "ok": true,
+   "detail": {
+    "ran": true,
+    "missing": [],
+    "extra": []
+   }
+  },
+  "5 after Redo the file says 96 again (facts, choices, sources)": {
+   "ok": true,
+   "detail": {}
+  },
+  "5 after Redo nothing of the surveyed lot is left on screen": {
+   "ok": false,
+   "detail": {
+    "lookup_guide": false,
+    "editing_outline": false,
+    "check_lot_outline": true,
+    "check_marks": true
+   }
+  },
+  "5 after Redo 96 is checked again (live mode)": {
+   "ok": false,
+   "detail": {
+    "dirty": 1792958079.974643,
+    "last_check": 1792958080.8531241,
+    "live": true,
+    "owed": false,
+    "done": false
+   }
+  }
+ },
+ "undo_events": [
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 32,
+   "at": null
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 32,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 32,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 32,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 32,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 33,
+   "at": null
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 33,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 33,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 33,
+   "at": null
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 34,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 34,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 34,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 34,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 34,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 35,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 35,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 35,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 35,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 36,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 36,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 36,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 36,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": true,
+   "serial": 36,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 37,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": true,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 37,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": false,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 37,
+   "at": "2 redo again"
+  },
+  {
+   "IsBeginRecording": false,
+   "IsEndRecording": true,
+   "IsBeginUndo": false,
+   "IsEndUndo": false,
+   "IsBeginRedo": false,
+   "IsEndRedo": false,
+   "IsPurgeRecord": false,
+   "serial": 37,
+   "at": "2 redo again"
+  }
+ ],
+ "undo_records": [
+  {
+   "words": "Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850",
+   "serial": 33,
+   "in_command": false,
+   "at": null
+  },
+  {
+   "words": "Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850",
+   "serial": 35,
+   "in_command": false,
+   "at": "2 redo again"
+  },
+  {
+   "words": "Gordium: start fresh for 96 Ithaca Road, Ithaca, NY, 14850",
+   "serial": 37,
+   "in_command": false,
+   "at": "2 redo again"
+  }
+ ],
+ "step2": {
+  "asked": [],
+  "guide_shown": true
+ },
+ "at": "5 redo",
+ "command_at": 1792958080.896873,
+ "commands": [
+  [
+   "2 undo",
+   "Undo",
+   true
+  ],
+  [
+   "2 redo",
+   "Redo",
+   true
+  ],
+  [
+   "2 undo again",
+   "Undo",
+   true
+  ],
+  [
+   "2 redo again",
+   "Redo",
+   true
+  ],
+  [
+   "5 undo",
+   "Undo",
+   true
+  ],
+  [
+   "5 redo",
+   "Redo",
+   true
+  ]
+ ],
+ "step3": {
+  "asked": [
+   [
+    "Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed.",
+    [
+     "Start fresh",
+     "fresh"
+    ],
+    [
+     "Keep my building and check it on 96 Ithaca Road's lot",
+     "keep"
+    ]
+   ]
+  ],
+  "guide_shown": true
+ },
+ "step4": {
+  "asked": [],
+  "guide_shown": true
+ },
+ "step5": {
+  "asked": [
+   [
+    "Start fresh for 96 Ithaca Road? Your changes to the starting house will be removed. Your surveyed lot will be replaced by 96 Ithaca Road's lot.",
+    [
+     "Start fresh",
+     "fresh"
+    ],
+    [
+     "Keep my building and check it on 96 Ithaca Road's lot (your surveyed lot will be replaced)",
+     "keep"
+    ]
+   ]
+  ],
+  "guide_shown": true
+ },
+ "ok": false,
+ "done": true
+}
