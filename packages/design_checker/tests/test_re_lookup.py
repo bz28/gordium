@@ -669,3 +669,38 @@ def test_draw_after_an_outside_city_or_ambiguous_lookup_keeps_its_own_words():
     many = "2 addresses match: 106 Ithaca Rd, 106 Ithaca St."
     box = site.box().look_up({"status": "multiple", "query": "106 Ithaca", "message": many})
     assert box.draw() == "unfound" and many in box.said[-1]
+
+
+# ---- Undo and Redo of a Draw (the Rhino job at demo e631aae: Redo did nothing, 96's outline stayed on screen) ----
+
+@pytest.mark.parametrize("held, doc, ends", [
+    ((7, 12), 7, True),                 # a record this plugin began, in this document
+    ((7, 0), 7, False),                 # 0: Rhino said a command was already recording (its record, not ours)
+    ((7, 12), 8, False),                # another document's record
+    (None, 7, False), ((7, 12), None, False)])
+def test_only_an_undo_record_the_plugin_began_is_ended_by_it(held, doc, ends):
+    assert logic.undo_record_to_end(held, doc) is ends
+
+
+@pytest.mark.parametrize("end_undo, end_redo, clears", [(True, False, True), (False, True, True),
+                                                         (False, False, False)])
+def test_what_was_drawn_is_cleared_when_an_undo_or_redo_ends(end_undo, end_redo, clears):
+    assert logic.after_undo_redo(end_undo, end_redo) is clears
+
+
+def test_the_plugin_clears_its_drawing_on_undo_and_redo_and_never_changes_the_document_then():
+    """After Undo (or Redo) the last check's drawing (the 96 lot outline, its marks) and any dashed lookup outline
+    were of a model no longer there: _undo_redo clears them and asks for a re-check, attached to Rhino's own undo
+    event when the plugin loads. It never changes the document (a change while Rhino undoes or redoes breaks the
+    Undo/Redo chain); the Draw's record is ended only when the plugin began it."""
+    rhino = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    body = rhino[rhino.index("def _undo_redo("):].split("\n\n\n", 1)[0]
+    code = "\n".join(line for line in body.split('"""')[2].splitlines())       # the code, not its docstring
+    assert "logic.after_undo_redo(e.IsEndUndo, e.IsEndRedo)" in code and "_clear(o)" in code
+    assert 'STATE.pop("lookup_guide", None)' in code and 'STATE["dirty"]' in code
+    for change in ("doc", "Objects.", "Strings.", "Layers.", "RunScript", "run_check(", "save"):
+        assert change not in code, change
+    assert '_on(Rhino.Commands.Command, "UndoRedo", _handler(System.EventHandler[Rhino.Commands.UndoRedoEventArgs], ' \
+           "_undo_redo," in rhino
+    end = rhino[rhino.index("def _end_undo("):].split("\n\n\n", 1)[0]
+    assert "if logic.undo_record_to_end(held, " in end and end.index("undo_record_to_end") < end.index("EndUndoRecord")

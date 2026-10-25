@@ -1885,9 +1885,25 @@ def _begin_undo(doc, words):
 
 
 def _end_undo(doc):
+    """Ends the Draw's undo record, only one this script began (rhino_logic.undo_record_to_end: serial 0 is Rhino
+    saying a command is already recording, whose record is Rhino's own to end)."""
     held = STATE.pop("undo", None)
-    if held is not None and doc is not None and held[0] == doc.RuntimeSerialNumber:
+    if logic.undo_record_to_end(held, doc.RuntimeSerialNumber if doc is not None else None):
         doc.EndUndoRecord(held[1])
+
+
+def _undo_redo(sender, e):
+    """Rhino's Undo or Redo, finished: what the last check drew (the lot outline, yards, marks) and any dashed
+    lookup outline are of a model that is no longer there, so they are cleared (rhino_logic.after_undo_redo) and
+    the model is checked again at the next idle (live mode). Nothing in the document is changed here: a change made
+    while Rhino undoes or redoes breaks its Undo/Redo chain (RhinoCommon's undo event rule)."""
+    if not logic.after_undo_redo(e.IsEndUndo, e.IsEndRedo):
+        return
+    o = STATE.get("overlay")
+    if o is not None:
+        _clear(o)
+    STATE.pop("lookup_guide", None)
+    STATE["dirty"] = time.time() - IDLE_SECONDS     # re-checked at the next idle when live mode is on
 
 
 def _drawn(doc, facts, state, saved_ui, session=None):
@@ -2699,3 +2715,6 @@ if STATE.get("live"):                        # live mode was on before this copy
     live(True)
 # Rhino closing: the checker stopped with it (and any an earlier load left: SERVERS)
 _on(Rhino.RhinoApp, "Closing", _handler(System.EventHandler, lambda s, e: _stop_worker(), "stop the checker"))
+# Undo / Redo: what was drawn for the model before it is cleared, never left on screen (the Rhino job, demo e631aae)
+_on(Rhino.Commands.Command, "UndoRedo", _handler(System.EventHandler[Rhino.Commands.UndoRedoEventArgs], _undo_redo,
+                                                 "clear the drawing after Undo or Redo"))

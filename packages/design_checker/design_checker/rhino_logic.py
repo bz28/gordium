@@ -1681,6 +1681,20 @@ def recovery_message(removed, back):
     return " and ".join(parts) or None
 
 
+def undo_record_to_end(held, doc_serial):
+    """Whether the plugin ends the Draw's undo record `held` ((document serial, record serial) from
+    BeginUndoRecord, or None) in the document `doc_serial`: only a record it began (serial above 0: 0 means a
+    command is already recording, or undo is off, and the record is Rhino's to end, RhinoCommon), in the same
+    document."""
+    return bool(held) and bool(held[1]) and doc_serial is not None and held[0] == doc_serial
+
+
+def after_undo_redo(is_end_undo, is_end_redo):
+    """Whether Rhino's undo event is an Undo or a Redo just finished: then what the last check drew is cleared and
+    the model checked again (gordium_rhino._undo_redo). Never on its start, a record begun or ended, or a purge."""
+    return bool(is_end_undo or is_end_redo)
+
+
 def draw_then_commit(session, save):
     """Draw: everything that can fail first (the facts, the box's choices, the sources: `save`), the session's
     commit last, so a failure leaves the session to be rolled back (run_box) with nothing lost."""
